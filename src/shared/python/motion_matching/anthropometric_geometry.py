@@ -61,6 +61,7 @@ from src.shared.python.motion_matching.club_models import (
     apply_club,
 )
 from src.shared.python.motion_matching.grip_fit import grip_rotation
+from src.shared.python.motion_matching.arm_mirror import native_limits
 from src.shared.python.motion_matching.range_of_motion import UPPER_RANGES_DEG
 
 Array = NDArray[np.float64]
@@ -85,7 +86,8 @@ NECK_JOINT = "GolfSwing3D_Kinetic/Neck Joint"
 
 # Anatomical ranges in this document's conventions come from the shared
 # range-of-motion table; ball-joint Euler components stay unbounded.
-COORDINATE_RANGES_DEG: dict[str, tuple[float, float]] = dict(UPPER_RANGES_DEG)
+# The build tables are native; ``mirror_document_arm`` flips the right-arm limits.
+COORDINATE_RANGES_DEG: dict[str, tuple[float, float]] = native_limits(UPPER_RANGES_DEG)
 # Shoulder gimbal base: the upper arm points forward at zero pose so that the
 # middle (Ry) rotation stays far from its +-90 deg singularity during a swing,
 # where the arms hang forward-down at address and rise to about 45 deg above

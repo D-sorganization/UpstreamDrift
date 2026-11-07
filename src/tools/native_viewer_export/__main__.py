@@ -2,9 +2,29 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 import sys
 
-from src.tools.native_viewer_export.cli import main
+_VENDOR_SRC = Path(__file__).resolve().parents[3] / "vendor" / "ud-tools" / "src"
+
+
+def _run() -> int:
+    from src.tools.native_viewer_export._bootstrap import (
+        ensure_native_viewer_export_imports,
+        shared_shadow_message,
+    )
+
+    ensure_native_viewer_export_imports()
+    try:
+        from src.tools.native_viewer_export.cli import main
+    except ModuleNotFoundError as exc:
+        shared = sys.modules.get("shared")
+        message = shared_shadow_message(_VENDOR_SRC, getattr(shared, "__file__", None))
+        if message is None:
+            raise
+        raise SystemExit(f"{exc}\n{message}") from exc
+    return main()
+
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(_run())

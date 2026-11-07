@@ -1,4 +1,4 @@
-"""Cached, versioned Monte-Carlo dispersion tables (SHOW-B3, #14567).
+"""Cached, versioned Monte-Carlo dispersion tables (SHOW-B3/B3b, #14567/#14610).
 
 Per ``(skill, club, lie, wind, slope)`` cell: mean / sd / correlation of the
 aim-frame landing offset (yards) from an injected landing simulator. Every cell
@@ -55,9 +55,11 @@ WIND_BINS: dict[str, tuple[float, float]] = {
     "cross_15": (0.0, 15.0),
 }
 DEFAULT_WINDS = ("calm", "head_5", "tail_5", "cross_5")  # the original B3 bins
-SLOPES = ("flat",)  # default slope; other bins come from ``slope_wind_bins`` (B6)
+DEFAULT_SLOPES = (
+    "flat",
+)  # default slope; other bins come from ``slope_wind_bins`` (B6)
 CONVERGENCE_TOL = 0.02
-# Real-pipeline worst n-vs-n/2 change: n=2000 5.4%, 8000 2.2%, 20000 1.3%.
+# Real pipeline with runout: n=12000 worst skill ~1.7% vs n/2 at seed 0 (B3b).
 DEFAULT_N = 12000
 SCHEMA = 1
 
@@ -125,6 +127,13 @@ class DispersionTable:
     def table_hash(self) -> str:
         return str(self.provenance["table_hash"])
 
+    def club_label(self, skill: str | None) -> str | None:
+        """The club label recorded for ``skill``, else the skill name itself.
+
+        Law of Demeter: callers ask the table rather than reach into ``provenance``.
+        """
+        return self.provenance.get("clubs", {}).get(skill, skill)
+
     def lookup(
         self, skill: str, club: str, lie: str, wind: str, slope: str
     ) -> DispersionCell:
@@ -178,7 +187,7 @@ class TableGrid:
     skills: tuple[str, ...] | None = None
     lies: tuple[str, ...] = ("fairway",)
     winds: tuple[str, ...] = DEFAULT_WINDS
-    slopes: tuple[str, ...] = SLOPES
+    slopes: tuple[str, ...] = DEFAULT_SLOPES
     clubs: dict[str, str] | None = None  # skill -> club label; None = the skill name
 
 
@@ -225,7 +234,7 @@ def build_grid_table(
     winds = grid.winds
     require(set(winds) <= set(WIND_BINS), f"unknown wind bins; have {tuple(WIND_BINS)}")
     require(
-        grid.slopes == SLOPES or slope_modifier is not None,
+        grid.slopes == DEFAULT_SLOPES or slope_modifier is not None,
         "slope bins need a slope_modifier",
     )
     clubs = grid.clubs
@@ -241,8 +250,9 @@ def build_grid_table(
             for slope in grid.slopes:
                 sloped = imp if slope_modifier is None else slope_modifier(slope)(imp)
                 for wind in winds:
-                    land = np.asarray(
-                        simulate(sloped, skill, WIND_BINS[wind]), dtype=float
+                    land: np.ndarray = np.asarray(
+                        simulate(sloped, skill, WIND_BINS[wind]),
+                        dtype=float,
                     )
                     if ground is not None:
                         require(land.ndim == 2 and len(land) == n, "landing states")
@@ -308,7 +318,7 @@ def check_convergence(
     require(n >= 4, "n must be >= 4", n)
     z = standard_normals(seed, n)
     imp = _impacts(family.skills[skill].distribution, z)
-    full = np.asarray(simulate(imp, skill, WIND_BINS["calm"]), dtype=float)
+    full: np.ndarray = np.asarray(simulate(imp, skill, WIND_BINS["calm"]), dtype=float)
     if ground is not None:
         full = np.asarray(ground(full, "fairway", "flat", skill), dtype=float)
     half = full[: n // 2]

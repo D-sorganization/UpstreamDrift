@@ -1,10 +1,11 @@
-"""Set a committed full-body spec document's fitted hand rotation (#12221).
+"""Set a committed full-body spec document's fitted hand rotation (#12221, #14751).
 
 The hand-to-club rotation of each wrist depends on the capture, so it is
 refitted per capture (``evidence/anthropometry/fit_grip_rotation.py``, one
-invocation per capture with its own ``--receipt``). ``apply`` reads the
-receipt's ``sides.lead.total_deg`` and ``sides.trail.total_deg`` and sets the
-document's ``subject.grip_rotation_deg`` (``L``, ``R``) and the wrist
+invocation per capture with its own ``--receipt``), or derived from canonical
+neutral grip optimization (option ``(b15)`` via ``solve_neutral_grip.py``, #14751).
+``apply`` reads the receipt's ``sides.lead.total_deg`` and ``sides.trail.total_deg``
+and sets the document's ``subject.grip_rotation_deg`` (``L``, ``R``) and the wrist
 ``child_to_follower`` to them, idempotently, appending a provenance note.
 Committed documents carry hand-tuned contact parameters, so they are not
 rebuilt.

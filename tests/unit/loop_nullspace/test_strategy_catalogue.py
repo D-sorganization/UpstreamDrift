@@ -76,6 +76,14 @@ def test_s10_is_unavailable_on_rigid_clubs_and_s6_is_not_implemented() -> None:
     assert CATALOGUE[StrategyId.S6].availability is Availability.NOT_IMPLEMENTED
 
 
+def test_s6_reason_names_the_missing_arm_not_the_existing_ucm_split() -> None:
+    # NSX-97 put ``variability_ucm.ucm_decompose`` on main (#12724 audit);
+    # what S6 lacks is an arm that turns that split into a strategy and cost.
+    rigid = CATALOGUE[StrategyId.S6].representations[0]
+    assert "no UCM computation exists" not in rigid.reason
+    assert "ucm_decompose" in rigid.reason
+
+
 def test_s2_has_both_a_rigid_and_a_muscle_representation() -> None:
     s2 = CATALOGUE[StrategyId.S2]
     by_class = {r.model_class: r for r in s2.representations}

@@ -18,6 +18,84 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#13158 · OSL-19 Scoping: Grip Closure Tests and OpenSim Receipt Hook
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13158
+- **Branch:** cursor/osl19-scoping-contracts-13158-94df
+- **PR:** #14802
+- **Paths:** see #14802
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`9569ef7e`; collated from changes/13158-osl-19-scoping-grip-closure-tests-and-op.md)
+- **Summary:** OSL-19 scoping: grip closure tests and OpenSim receipt hook
+- **Next step:** Rebase after OSL stack merges; add OpenSim receipt to bundles.
+
+### DL-#13131 · OSL-17 Scoping: Rack + Lead-In Bundle Provenance Tests
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13131
+- **Branch:** cursor/osl17-scoping-contracts-13131-94df
+- **PR:** #14802
+- **Paths:** see #14802
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`9569ef7e`; collated from changes/13131-osl-17-scoping-rack-lead-in-bundle-prove.md)
+- **Summary:** OSL-17 scoping: rack + lead-in bundle provenance tests
+- **Next step:** Merge after OSL-14/15 stack; extend lead-in to clear xfail.
+
+### DL-#13093 · OSL-15 Scoping: Load Balance IK Provenance Contract and Tests
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13093
+- **Branch:** cursor/osl15-scoping-contracts-13093-94df
+- **PR:** #14802
+- **Paths:** see #14802
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`9569ef7e`; collated from changes/13093-osl-15-scoping-load-balance-ik-provenanc.md)
+- **Summary:** OSL-15 scoping: load balance IK provenance contract and tests
+- **Next step:** Merge PR; regenerate deadlift/clean bundles to clear xfails.
+
+### DL-#11746 · LIFT-6 OpenSim Lift Composition/Kinetics Contracts
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11746
+- **Branch:** cursor/lift6-epic-contract-11746-94df
+- **PR:** #14805
+- **Paths:** see #14805
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`07c00681`; collated from changes/11746-lift-6-opensim-lift-composition-kinetics.md)
+- **Summary:** LIFT-6 OpenSim lift composition/kinetics contracts
+- **Next step:** CI on OpenSim lane; arm when green.
+
+### DL-#11745 · LIFT-5 Epic Evidence Contract (Bundles + Parity JSON)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11745
+- **Branch:** cursor/lift5-epic-contract-11745-94df
+- **PR:** #14805
+- **Paths:** see #14805
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`07c00681`; collated from changes/11745-lift-5-epic-evidence-contract-bundles-pa.md)
+- **Summary:** LIFT-5 epic evidence contract (bundles + parity JSON)
+- **Next step:** Optional parity lanes for all lifts; CI green then arm.
+
+### DL-#13991 · Docs: ADR-0060 OpenSim Scaling and Fit Plan (#13991)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13991
+- **Branch:** cursor/opensim-scaling-panel-plan-13991-94df
+- **PR:** #14803
+- **Paths:** see #14803
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`320872fc`; collated from changes/13991-docs-adr-0060-opensim-scaling-and-fit-pl.md)
+- **Summary:** docs: ADR-0060 OpenSim scaling and fit plan (#13991)
+- **Next step:** Panel records dissent on issue; promote ADR to Accepted when agreed.
+
 ### DL-#14419 · Avoid Merge_Group Changed-Paths Checkout Hang and Sync Admission Publisher
 
 - **State:** in_review
@@ -742,16 +820,484 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#12983 · Reload Pinocchio in OpenSim Dynamics Parity When Unit Mocks Left Stubs in Sys.Modules
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12983
+- **Branch:** merged via #14843
+- **PR:** #14843
+- **Paths:** see #14843
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`1c58d8d3`; collated from changes/12983-reload-pinocchio-in-opensim-dynamics-par.md)
+- **Summary:** Reload pinocchio in OpenSim dynamics parity when unit mocks left stubs in sys.modules
+- **Next step:** Shipped in PR #14843.
+
+### DL-#14743 · TableShotModel Reads the Dispersion Cell for the Shot's Lie and the Conditions' Wind/Slope Bins (CourseConditions Gains Wind/Slope, Default Calm/Flat); Absent Wind/Slope Bins Are Rejected Instead of Silently Using Calm/Flat.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14743
+- **Branch:** merged via #14784
+- **PR:** #14784
+- **Paths:** see #14784
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`b85eb218`; collated from changes/14743-tableshotmodel-reads-the-dispersion-cell.md)
+- **Summary:** TableShotModel reads the dispersion cell for the shot's lie and the conditions' wind/slope bins (CourseConditions gains wind/slope, default calm/flat); absent wind/slope bins are rejected instead of silently using calm/flat.
+- **Next step:** Shipped in PR #14784.
+
+### DL-#14816 · SHOW-B3b: Omit Ground_Model From Carry-Only Dispersion Tables and Deduplicate Runout Entry Points
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14816
+- **Branch:** merged via #14833
+- **PR:** #14833
+- **Paths:** see #14833
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`a425584c`; collated from changes/14816-carry-table-provenance.md)
+- **Summary:** SHOW-B3b: omit ground_model from carry-only dispersion tables and deduplicate runout entry points
+- **Next step:** Shipped in PR #14833.
+
+### DL-#14501 · NP-08: Offline SVD-Direction Ablation vs High-Frequency Jitter Benchmark (#14501)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14501
+- **Branch:** merged via #14823
+- **PR:** #14823
+- **Paths:** see #14823
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`d4e3a4eb`; collated from changes/14501-np08-svd-jitter-ablation.md)
+- **Summary:** NP-08: offline SVD-direction ablation vs high-frequency jitter benchmark (#14501)
+- **Next step:** Shipped in PR #14823.
+
+### DL-#14423 · Map X-Factor Variants to Literature Families and Add Publish Payload + Unit Tests (GM-1B).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14423
+- **Branch:** merged via #14818
+- **PR:** #14818
+- **Paths:** see #14818
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`f0cfeb27`; collated from changes/14423-map-x-factor-variants-to-literature-fami.md)
+- **Summary:** Map X-factor variants to literature families and add publish payload + unit tests (GM-1b).
+- **Next step:** Shipped in PR #14818.
+
+### DL-#13884 · Controller Synergy Audit Slice 1: ControllerAuditSpec, #13837 Trace Adapter and ControllerAuditReport (UCM, TNC Fail-Closed Below 30 Trials, Null-Space Gain Norm) With an Analytic Lyapunov Golden
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13884
+- **Branch:** merged via #14768
+- **PR:** #14768
+- **Paths:** see #14768
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`190cae5c`; collated from changes/13884-controller-synergy-audit-slice-1-control.md)
+- **Summary:** Controller synergy audit slice 1: ControllerAuditSpec, #13837 trace adapter and ControllerAuditReport (UCM, TNC fail-closed below 30 trials, null-space gain norm) with an analytic Lyapunov golden
+- **Next step:** Shipped in PR #14768.
+
+### DL-#14812 · Rewrite Pose_Studio Test_Widgets Against Real Qt Widgets With Qapp Fixture (#14812)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14812
+- **Branch:** merged via #14815
+- **PR:** #14815
+- **Paths:** see #14815
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`5d662cbb`; collated from changes/14812-pose-studio-test-widgets.md)
+- **Summary:** rewrite pose_studio test_widgets against real Qt widgets with qapp fixture (#14812)
+- **Next step:** Shipped in PR #14815.
+
+### DL-#14810 · Pose_Studio Test_Gui Requests a Real QApplication via an Autouse Qapp Fixture, so It No Longer Crashes an Xdist Worker When No QApplication Exists Yet
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14810
+- **Branch:** merged via #14811
+- **PR:** #14811
+- **Paths:** see #14811
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`02450ff9`; collated from changes/14810-pose-studio-test-gui-requests-a-real-qap.md)
+- **Summary:** pose_studio test_gui requests a real QApplication via an autouse qapp fixture, so it no longer crashes an xdist worker when no QApplication exists yet
+- **Next step:** Shipped in PR #14811.
+
+### DL-#14807 · Drake UI Abort Regression Tests Request Qapp via an Autouse Fixture, so They No Longer Crash an Xdist Worker When No QApplication Exists Yet
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14807
+- **Branch:** merged via #14808
+- **PR:** #14808
+- **Paths:** see #14808
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`26bb158a`; collated from changes/14807-drake-ui-abort-regression-tests-request.md)
+- **Summary:** Drake UI abort regression tests request qapp via an autouse fixture, so they no longer crash an xdist worker when no QApplication exists yet
+- **Next step:** Shipped in PR #14808.
+
+### DL-#14767 · Leaderboard Freshness Gate Moved to Scripts/Ci/check_leaderboard_freshness.py; a PR That Changes No Motion_Matching Solver Input Passes Despite a Squash-Orphaned Git_Head, Solver Changes Still Need a Rerun.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14767
+- **Branch:** merged via #14783
+- **PR:** #14783
+- **Paths:** see #14783
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`7031b228`; collated from changes/14767-leaderboard-freshness-gate-moved-to-scri.md)
+- **Summary:** Leaderboard freshness gate moved to scripts/ci/check_leaderboard_freshness.py; a PR that changes no motion_matching solver input passes despite a squash-orphaned git_head, solver changes still need a rerun.
+- **Next step:** Shipped in PR #14783.
+
+### DL-#14756 · P5: Parity Report Candidate Resolution Fails Closed; Canonical Checksum/Schema/Manifest Failures Never Fall Through to Legacy Loading, Legacy Numeric Archives Detected Explicitly, No Allow_Pickle=True
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14756
+- **Branch:** merged via #14770
+- **PR:** #14770
+- **Paths:** see #14770
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`3e727f85`; collated from changes/14756-p5-parity-report-candidate-resolution-fa.md)
+- **Summary:** P5: parity report candidate resolution fails closed; canonical checksum/schema/manifest failures never fall through to legacy loading, legacy numeric archives detected explicitly, no allow_pickle=True
+- **Next step:** Shipped in PR #14770.
+
+### DL-#14744 · Strategy CLI: --Shot-Table / --Shot-Model Inject the Selected Shot Model Into the Personal Solve and Report Its Provenance in Text and HTML
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14744
+- **Branch:** merged via #14793
+- **PR:** #14793
+- **Paths:** see #14793
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`87681255`; collated from changes/14744-strategy-cli-shot-table-shot-model-injec.md)
+- **Summary:** strategy CLI: --shot-table / --shot-model inject the selected shot model into the personal solve and report its provenance in text and HTML
+- **Next step:** Shipped in PR #14793.
+
+### DL-#14727 · Commit the V1 Source Spec of the Trunk_Visuals Driver V2 Bundle and Pin the Generator Against the Committed Rollout on Its True Inputs (Step 1)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14727
+- **Branch:** merged via #14785
+- **PR:** #14785
+- **Paths:** see #14785
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`13e87336`; collated from changes/14727-commit-the-v1-source-spec-of-the-trunk-v.md)
+- **Summary:** Commit the v1 source spec of the trunk_visuals driver v2 bundle and pin the generator against the committed rollout on its true inputs (step 1)
+- **Next step:** Shipped in PR #14785.
+
+### DL-#14633 · Re-Base HX Grip Alpha to Face-On Zero at Flagship Address; Preserve Fitted Euler Triples.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14633
+- **Branch:** merged via #14639
+- **PR:** #14639
+- **Paths:** see #14639
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`25a0c0a6`; collated from changes/14633-re-base-hx-grip-alpha-to-face-on-zero-at.md)
+- **Summary:** Re-base HX grip alpha to face-on zero at flagship address; preserve fitted Euler triples.
+- **Next step:** Shipped in PR #14639.
+
+### DL-#14621 · Flight Model Validity: Launch Spin Cap, Trajectory Guard, Pipeline Metadata
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14621
+- **Branch:** merged via #14641
+- **PR:** #14641
+- **Paths:** see #14641
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`74f43930`; collated from changes/14621-flight-model-validity-launch-spin-cap-tr.md)
+- **Summary:** Flight model validity: launch spin cap, trajectory guard, pipeline metadata
+- **Next step:** Shipped in PR #14641.
+
+### DL-#14503 · NP-10 Offline Weight Inspector and Lexical CI Guardrail (#14503)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14503
+- **Branch:** merged via #14817
+- **PR:** #14817
+- **Paths:** see #14817
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`c0739cf2`; collated from changes/14503-np10-weight-inspector.md)
+- **Summary:** NP-10 offline weight inspector and lexical CI guardrail (#14503)
+- **Next step:** Shipped in PR #14817.
+
+### DL-#14405 · Bump PR Body Lint Caller Pin to the Post-RM#2697 Reusable Workflow (RM#2427)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14405
+- **Branch:** merged via #14791
+- **PR:** #14791
+- **Paths:** see #14791
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`2c971605`; collated from changes/14405-bump-pr-body-lint-caller-pin-to-the-post.md)
+- **Summary:** Bump PR Body Lint caller pin to the post-RM#2697 reusable workflow (RM#2427)
+- **Next step:** Shipped in PR #14791.
+
+### DL-#12583 · NSX-55: Document DV-12583 as Present on Main, Add Catalog Regression Test, Fix Publication_Gate Checklist
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12583
+- **Branch:** merged via #14806
+- **PR:** #14806
+- **Paths:** see #14806
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`c32c76dc`; collated from changes/12583-nsx55-dv-catalog-gate-and-publication-checklis.md)
+- **Summary:** NSX-55: document DV-12583 as present on main, add catalog regression test, fix publication_gate checklist
+- **Next step:** Shipped in PR #14806.
+
+### DL-#14771 · Ground-Support Segment-Scale Tie-Break, Receipt Canonical Compare (#14771)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14771
+- **Branch:** merged via #14777
+- **PR:** #14777
+- **Paths:** see #14777
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`d0705fe6`; collated from changes/14771-ground-support-segment-scale-tie-break-r.md)
+- **Summary:** Ground-support segment-scale tie-break, receipt canonical compare (#14771)
+- **Next step:** Shipped in PR #14777.
+
+### DL-#14757 · NSX-13 Spatial-Fixture Test Double Builds the R11 Shaft Springs Like NativePinocchioModel (Rigid Club), so Test_Snapshot_vs_Spatial_Fixture Is Green Again
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14757
+- **Branch:** merged via #14759
+- **PR:** #14759
+- **Paths:** see #14759
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`a2cba942`; collated from changes/14757-nsx-13-spatial-fixture-test-double-build.md)
+- **Summary:** NSX-13 spatial-fixture test double builds the R11 shaft springs like NativePinocchioModel (rigid club), so test_snapshot_vs_spatial_fixture is green again
+- **Next step:** Shipped in PR #14759.
+
+### DL-#14746 · SHOW-G1: Mirror the Right-Arm Joint Axes in Driver V1/V2 (R Scapula, Shoulder, Forearm, Wrist) so Positive L and R Coordinates Give Mirrored Motion
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14746
+- **Branch:** merged via #14762
+- **PR:** #14762
+- **Paths:** see #14762
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`a4765a14`; collated from changes/14746-show-g1-mirror-the-right-arm-joint-axes.md)
+- **Summary:** SHOW-G1: mirror the right-arm joint axes in driver v1/v2 (R scapula, shoulder, forearm, wrist) so positive L and R coordinates give mirrored motion
+- **Next step:** Shipped in PR #14762.
+
+### DL-#14741 · Add PR Size Gate Workflow and Git Numstat Checker (500-Line Cap, Exemptions).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14741
+- **Branch:** merged via #14774
+- **PR:** #14774, #14820
+- **Paths:** see #14774
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`f46eba70`; collated from changes/14741-pr-size-advisory-bdb9.md)
+- **Summary:** Add PR size gate workflow and git numstat checker (500-line cap, exemptions).
+- **Next step:** Shipped in PR #14774.
+
+### DL-#14478 · NP-03/04 Toy MLP Rank-1 Edit and LoRA Comparator (#14478 #14479)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14478
+- **Branch:** merged via #14778
+- **PR:** #14778
+- **Paths:** see #14778
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`716ce0bc`; collated from changes/14478-np-03-04-toy-mlp-rank-1-edit-and-lora-co.md)
+- **Summary:** NP-03/04 toy MLP rank-1 edit and LoRA comparator (#14478 #14479)
+- **Next step:** Shipped in PR #14778.
+
+### DL-#14422 · Add Pydantic Golf Metric-Definitions Registry Schema (GM-1a) With Filter Descriptor.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14422
+- **Branch:** merged via #14776
+- **PR:** #14776
+- **Paths:** see #14776
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`78676865`; collated from changes/14422-add-pydantic-golf-metric-definitions-reg.md)
+- **Summary:** Add Pydantic golf metric-definitions registry schema (GM-1a) with filter descriptor.
+- **Next step:** Shipped in PR #14776.
+
+### DL-#12724 · S6 Catalogue Reason Now Names the Missing Arm on the NSX-97 UCM Split
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12724
+- **Branch:** merged via #14761
+- **PR:** #14761
+- **Paths:** see #14761
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`104a43b6`; collated from changes/12724-s6-catalogue-reason-now-names-the-missin.md)
+- **Summary:** S6 catalogue reason now names the missing arm on the NSX-97 UCM split
+- **Next step:** Shipped in PR #14761.
+
+### DL-#12721 · Xfail Placeholder for Anthro Noise-Aware Receipt (#12721)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12721
+- **Branch:** merged via #14779
+- **PR:** #14779
+- **Paths:** see #14779
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`7bf79325`; collated from changes/12721-xfail-placeholder-for-anthro-noise-aware.md)
+- **Summary:** xfail placeholder for anthro noise-aware receipt (#12721)
+- **Next step:** Shipped in PR #14779.
+
+### DL-#12719 · Event_Outcome_Rows Refuses a Near-Grazing Impact (Transversality Below GRAZING_TRANSVERSALITY) Instead of Returning Unreliable Linear Rows
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12719
+- **Branch:** merged via #14782
+- **PR:** #14782
+- **Paths:** see #14782
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`05fb6000`; collated from changes/12719-event-outcome-rows-refuses-a-near-grazin.md)
+- **Summary:** event_outcome_rows refuses a near-grazing impact (transversality below GRAZING_TRANSVERSALITY) instead of returning unreliable linear rows
+- **Next step:** Shipped in PR #14782.
+
+### DL-#14748 · Native_Viewer_Export CLI Explains a Foreign Shared Package Shadowing the Vendored Tools Tree
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14748
+- **Branch:** merged via #14769
+- **PR:** #14769, #14809
+- **Paths:** see #14769
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-07 (`f111638e`; collated from changes/14748-native-viewer-export-bootstrap-imports-a.md)
+- **Summary:** native_viewer_export CLI explains a foreign shared package shadowing the vendored Tools tree
+- **Next step:** Shipped in PR #14769.
+
+### DL-#14739 · Simscape Grip Docs State the SHOW-A7 Grip Zero (#14731); a MATLAB Test Checks the Gs3dx Topology Frames; the R2025b Address-Roll Check Is Cataloged as Deferred
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14739
+- **Branch:** merged via #14772
+- **PR:** #14772
+- **Paths:** see #14772
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`90c8e841`; collated from changes/14739-simscape-grip-docs-state-the-show-a7-gri.md)
+- **Summary:** Simscape grip docs state the SHOW-A7 grip zero (#14731); a MATLAB test checks the gs3dx topology frames; the R2025b address-roll check is cataloged as deferred
+- **Next step:** Shipped in PR #14772.
+
+### DL-#12737 · SPN-0B data_extraction.md: DOIs and Full Author Lists for Pearcy 1984, Fujii 2007, Wilke 1999 and Wu 2002 From Crossref; No Verified_From_Primary Flag Changed
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12737
+- **Branch:** merged via #14760
+- **PR:** #14760
+- **Paths:** see #14760
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`ef54ca58`; collated from changes/12737-spn-0b-data-extraction-md-dois-and-full.md)
+- **Summary:** SPN-0b data_extraction.md: DOIs and full author lists for Pearcy 1984, Fujii 2007, Wilke 1999 and Wu 2002 from Crossref; no verified_from_primary flag changed
+- **Next step:** Shipped in PR #14760.
+
+### DL-#12684 · Pin the R4 Capture-Mode Address Knee on the Canonical Receipts and Record Their Marker RMS Before/After (Acceptance 6)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12684
+- **Branch:** merged via #14758
+- **PR:** #14758
+- **Paths:** see #14758
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`410d9f58`; collated from changes/12684-pin-the-r4-capture-mode-address-knee-on.md)
+- **Summary:** Pin the R4 capture-mode address knee on the canonical receipts and record their marker RMS before/after (acceptance 6)
+- **Next step:** Shipped in PR #14758.
+
+### DL-#13044 · OSL-7 Predictive Deadlift Receipt Now Records the Tracked Comparison as Unavailable (Non-Converged Solve) via a No-Solve --Refresh-Comparison Mode; lift_models.tex Notes the Exploratory Status.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13044
+- **Branch:** merged via #14766
+- **PR:** #14766
+- **Paths:** see #14766
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`8065fb0f`; collated from changes/13044-osl-7-predictive-deadlift-receipt-now-re.md)
+- **Summary:** OSL-7 predictive deadlift receipt now records the tracked comparison as unavailable (non-converged solve) via a no-solve --refresh-comparison mode; lift_models.tex notes the exploratory status.
+- **Next step:** Shipped in PR #14766.
+
+### DL-#14749 · Fix Lod-Quality-Gate Regression: TableShotModel Asks DispersionTable.Club_Label Instead of Reaching Into Provenance (Law of Demeter)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14749
+- **Branch:** merged via #14752
+- **PR:** #14752
+- **Paths:** see #14752
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`5a89fb4d`; collated from changes/14749-fix-lod-quality-gate-regression-tablesho.md)
+- **Summary:** Fix lod-quality-gate regression: TableShotModel asks DispersionTable.club_label instead of reaching into provenance (Law of Demeter)
+- **Next step:** Shipped in PR #14752.
+
+### DL-#14703 · Putting Studio: Exact Imperial Ft Factor, a Parity Test for the Core Green Edge Clamp, and Locked Slope Sliders That Read the Core Green's Slope at the Ball
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14703
+- **Branch:** merged via #14709
+- **PR:** #14709
+- **Paths:** see #14709
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`c179ec77`; collated from changes/14703-putting-studio-exact-imperial-ft-factor.md)
+- **Summary:** Putting studio: exact imperial ft factor, a parity test for the core green edge clamp, and locked slope sliders that read the core green's slope at the ball
+- **Next step:** Shipped in PR #14709.
+
+### DL-#13779 · Knot_Gradient_Optimiser: Lbfgs_Minimise Records a Per-Evaluation Objective Versus Gradient Timing Split and the Projected-Gradient Norm (Per Evaluation and at SciPy's Final Point) so a Max_Iterations Stop Is Diagnosable; Results Are Pinned Bit-for-Bit
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13779
+- **Branch:** merged via #14723
+- **PR:** #14723, #14775
+- **Paths:** see #14723
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`3d68d51d`; collated from changes/13779-mjx-l-bfgs-parameter-scale-scipy-ftol-gt.md)
+- **Summary:** knot_gradient_optimiser: lbfgs_minimise records a per-evaluation objective versus gradient timing split and the projected-gradient norm (per evaluation and at SciPy's final point) so a max_iterations stop is diagnosable; results are pinned bit-for-bit
+- **Next step:** Shipped in PR #14723.
+
+### DL-#13057 · Lifting: The Four Strict Residual-Gate Xfails (Deadlift, Bench Press, Snatch, Clean and Jerk) Now Cite #13057, the Hip and Pelvis Rebuild That Owns the Residual Excess, Instead Of #13041
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13057
+- **Branch:** merged via #14730
+- **PR:** #14730, #14802
+- **Paths:** see #14730
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`9569ef7e`; collated from changes/13057-osl-14-scoping-osl-scoping-osl14-fixture.md)
+- **Summary:** lifting: the four strict residual-gate xfails (deadlift, bench press, snatch, clean and jerk) now cite #13057, the hip and pelvis rebuild that owns the residual excess, instead of #13041
+- **Next step:** Shipped in PR #14730.
+
 ### DL-#14698 · Add the Lighthouse Mobile Baseline Receipt (Loopback Fixture Server and Egress Proxy, Report Validator, CI Steps on the Fleet Runner) as the Follow-Up to #14270; Scores Informational, No Threshold.
 
 - **State:** shipped
 - **Owner:** unassigned
 - **Issue:** #14698
 - **Branch:** merged via #14717
-- **PR:** #14717
+- **PR:** #14717, #14813
 - **Paths:** see #14717
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`c91cd7cf`; collated from changes/14698-add-the-lighthouse-mobile-baseline-recei.md)
+- **Last verified:** 2026-11-06 (`a5fb78f4`; collated from changes/14698-ci-lighthouse-mobile-baseline-runs-in-it.md)
 - **Summary:** Add the Lighthouse mobile baseline receipt (loopback fixture server and egress proxy, report validator, CI steps on the fleet runner) as the follow-up to #14270; scores informational, no threshold.
 - **Next step:** Shipped in PR #14717.
 
@@ -761,10 +1307,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14610
 - **Branch:** merged via #14708
-- **PR:** #14708
+- **PR:** #14708, #14726, #14642
 - **Paths:** see #14708
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`987bd4ec`; collated from changes/14610-show-b3b-ground-runout.md)
+- **Last verified:** 2026-11-06 (`ac859070`; collated from changes/14610-show-b3b-dispersion-ground-runout.md)
 - **Summary:** SHOW-B3b: bounce/roll rest positions (sg_runout_v1) on the B6 slope bins, CRN lie modifier for dispersion tables
 - **Next step:** Shipped in PR #14708.
 
@@ -813,10 +1359,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12691
 - **Branch:** merged via #14692
-- **PR:** #14692
+- **PR:** #14692, #14773
 - **Paths:** see #14692
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`75d52d8c`; collated from changes/12691-r11-per-engine-chain-shaft-impact-window.md)
+- **Last verified:** 2026-11-06 (`7e843383`; collated from changes/12691-manual-ch-67-quotes-the-five-engine-r11.md)
 - **Summary:** R11: per-engine chain-shaft impact-window receipt and overlay now cover drake and pinocchio, with an engine-free gate
 - **Next step:** Shipped in PR #14692.
 
@@ -865,10 +1411,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12553
 - **Branch:** merged via #14684
-- **PR:** #14684, #14690, #14696, #14704, #14713
+- **PR:** #14684, #14690, #14696, #14704, #14713, #14725, #14787
 - **Paths:** see #14684
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`46589575`; collated from changes/12553-shoulder-declared-rom-deg-per-side-cited.md)
+- **Last verified:** 2026-11-06 (`53335482`; collated from changes/12553-document-anderson-2007-table-3-scope-for.md)
 - **Summary:** NSX-04 slice 1: verified subtalar inversion/eversion and MTP flexion torque capacities (da Fonseca 2025, Saeki 2021); hip and MTP-extension slots keep ASSUMED with stated reasons
 - **Next step:** Shipped in PR #14684.
 
@@ -1574,7 +2120,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Golden ZTCF/ZVCF contract tests: drift + control = total with gravity counted once, on the analytical and MuJoCo double pendulum
 - **Next step:** Shipped in PR #14508.
 
-### DL-#14473 · Putting: PyQt6 Tile Readouts and Panel Style Move Out of gui.py Into _Scene_Text and _Style (No Behaviour Change; Keeps gui.py Under the Monolith Threshold)
+### DL-#14473 · Putting: PyQt6 Tile Readouts and Panel Style Move Out of gui.py Into \_Scene_Text and \_Style (No Behaviour Change; Keeps gui.py Under the Monolith Threshold)
 
 - **State:** shipped
 - **Owner:** unassigned
@@ -1584,7 +2130,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** see #14533
 - **Started:** 2026-11-04
 - **Last verified:** 2026-11-04 (`c641ff70`; collated from changes/14473-putting-playback-desktop.md)
-- **Summary:** Putting: PyQt6 tile readouts and panel style move out of gui.py into _scene_text and _style (no behaviour change; keeps gui.py under the monolith threshold)
+- **Summary:** Putting: PyQt6 tile readouts and panel style move out of gui.py into \_scene_text and \_style (no behaviour change; keeps gui.py under the monolith threshold)
 - **Next step:** Shipped in PR #14533.
 
 ### DL-#14467 · Putting Analytics: Player-Specific Bellman Expected Putts on the Caller's Green (Optimal Pace per Distance, Shared Skill Roll Model) and One Putt's Strokes Gained Against It, on /Tools/Putting-Analytics/Strokes-Gained
@@ -1951,7 +2497,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Add theme tokens codemod tool, unit tests, CI ratchet in colorGuard.test.ts, and migrate Settings page to semantic tokens
 - **Next step:** Shipped in PR #14371.
 
-### DL-#14385 · Tests: Remove the Preload_Engines Workaround From the Hand-Consistency and Palm-Thumb Pad Parity Integration Suites; #14382's _Protect_Engine_Modules Fix Makes It Redundant.
+### DL-#14385 · Tests: Remove the Preload_Engines Workaround From the Hand-Consistency and Palm-Thumb Pad Parity Integration Suites; #14382's \_Protect_Engine_Modules Fix Makes It Redundant.
 
 - **State:** shipped
 - **Owner:** unassigned
@@ -1961,10 +2507,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** see #14386
 - **Started:** 2026-11-03
 - **Last verified:** 2026-11-03 (`1152a0ce`; collated from changes/14385-remove-engine-preload.md)
-- **Summary:** tests: remove the preload_engines workaround from the hand-consistency and palm-thumb pad parity integration suites; #14382's _protect_engine_modules fix makes it redundant.
+- **Summary:** tests: remove the preload_engines workaround from the hand-consistency and palm-thumb pad parity integration suites; #14382's \_protect_engine_modules fix makes it redundant.
 - **Next step:** Shipped in PR #14386.
 
-### DL-#14381 · Tests: _Protect_Engine_Modules Keeps Genuine Pinocchio/Pydrake Modules First Imported During a Test (Their Native Extensions Cannot Be Re-Imported Once Discarded); Stubs and Src.Engines Additions Are Still Discarded and Replaced Modules Restored.
+### DL-#14381 · Tests: \_Protect_Engine_Modules Keeps Genuine Pinocchio/Pydrake Modules First Imported During a Test (Their Native Extensions Cannot Be Re-Imported Once Discarded); Stubs and Src.Engines Additions Are Still Discarded and Replaced Modules Restored.
 
 - **State:** shipped
 - **Owner:** unassigned
@@ -1974,7 +2520,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** see #14382
 - **Started:** 2026-11-03
 - **Last verified:** 2026-11-03 (`2bb19026`; collated from changes/14381-engine-module-reimport.md)
-- **Summary:** tests: _protect_engine_modules keeps genuine pinocchio/pydrake modules first imported during a test (their native extensions cannot be re-imported once discarded); stubs and src.engines additions are still discarded and replaced modules restored.
+- **Summary:** tests: \_protect_engine_modules keeps genuine pinocchio/pydrake modules first imported during a test (their native extensions cannot be re-imported once discarded); stubs and src.engines additions are still discarded and replaced modules restored.
 - **Next step:** Shipped in PR #14382.
 
 ### DL-#13997 · Grip Hand Mesh Gains a Dorsum (Metacarpal Block) Riding on the Palm Out Past the Knuckles, Clear of the Grip; OpenSim Hand STLs and the GS3DX Grip Topology Regenerated (Slice 1 Of 3)
@@ -2555,10 +3101,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13560
 - **Branch:** merged via #14185
-- **PR:** #14185, #14351, #14354
+- **PR:** #14185, #14351, #14354, #14711
 - **Paths:** see #14185
 - **Started:** 2026-11-01
-- **Last verified:** 2026-11-05 (`c2433dd1`; collated from changes/13560-opensim-overlap-hold-moment-lever.md)
+- **Last verified:** 2026-11-06 (`0a47ddd8`; collated from changes/13560-opensim-grip-net-moment-com-restore-simb.md)
 - **Summary:** MuJoCo grip samples read zero-slip pairs frictionless, matching the shared law's zero friction at rest; the ten_finger hold net_moment_com xfail is removed
 - **Next step:** Shipped in PR #14185.
 

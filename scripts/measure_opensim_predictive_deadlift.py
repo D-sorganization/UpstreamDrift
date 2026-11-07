@@ -39,6 +39,7 @@ if str(ROOT) not in sys.path:
 
 from src.engines.physics_engines.opensim.python.msk_lift_predictive import (  # noqa: E402
     PredictiveDeadliftConfig,
+    build_comparison_table,
     build_predictive_deadlift_study,
     compute_bundle_metrics,
     format_predictive_receipt,
@@ -527,6 +528,33 @@ def run_measurement(
     return receipt
 
 
+def refresh_comparison(out_dir: Path) -> dict[str, Any]:
+    """Rebuild the comparison table of an existing receipt without re-solving.
+
+    The solve record is kept as measured; only ``comparison_table`` is
+    recomputed with the current comparison code, and the commit that did it
+    is recorded as ``comparison_refresh_commit``.
+    """
+    receipt_path = out_dir / "receipts.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    config = PredictiveDeadliftConfig(
+        bar_mass_kg=receipt["bar_mass_kg"],
+        body_mass_kg=receipt["body_mass_kg"],
+        height_m=receipt["height_m"],
+    )
+    solve = {
+        key: receipt[key]
+        for key in ("converged", "constraint_violation", "solver_status")
+    }
+    table = build_comparison_table(solve, config, bundle_path=BUNDLE_PATH)
+    # Repository-relative, so the receipt carries no machine path.
+    table["bundle_kinematics"]["source"] = str(BUNDLE_PATH.relative_to(ROOT))
+    receipt["comparison_table"] = table
+    receipt["comparison_refresh_commit"] = _git("rev-parse", "HEAD")
+    _write_receipt_artifacts(out_dir, receipt)
+    return receipt
+
+
 def reproduction_command(argv: list[str]) -> str:
     """Shell command that reruns this measurement with the same arguments."""
     return shlex.join(
@@ -583,6 +611,11 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="Warm-start stage 1 from a saved .sto trajectory",
     )
+    parser.add_argument(
+        "--refresh-comparison",
+        action="store_true",
+        help="Rebuild the comparison table of the existing receipt; no solve",
+    )
     args = parser.parse_args(argv)
 
     out_dir = args.out_dir
@@ -592,6 +625,9 @@ def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(
         level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
     )
+    if args.refresh_comparison:
+        refresh_comparison(out_dir)
+        return 0
     run_measurement(
         out_dir=out_dir,
         log_dir=args.log_dir,
