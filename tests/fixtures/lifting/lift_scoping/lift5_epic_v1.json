@@ -1,0 +1,14 @@
+{
+  "schema_version": "ud.lift_scoping.lift5.v1",
+  "issue": {
+    "id": 11745
+  },
+  "parity": {
+    "record_relative_path": "docs/development/lifting/evidence/back_squat/bar_path_parity.json",
+    "required_engines": [
+      "mujoco",
+      "drake",
+      "pinocchio"
+    ]
+  }
+}

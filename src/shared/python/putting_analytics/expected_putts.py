@@ -127,3 +127,36 @@ def solve_expected_putts(
         for d, s in ((d, distance_seed(seed, i)) for i, d in enumerate(grid))
     ]
     return curve_from_transitions(grid, np.array(rows))
+
+
+@dataclass(frozen=True)
+class ExpectedPuttsTable:
+    """Published expected-putts reference table with citation and provenance."""
+
+    source_id: str
+    citation: str
+    population: str
+    distances_ft: tuple[float, ...]
+    values: tuple[float, ...]
+
+    def __post_init__(self) -> None:
+        require(bool(self.source_id.strip()), "source_id must not be blank")
+        require(bool(self.citation.strip()), "citation must not be blank")
+        require(len(self.distances_ft) == len(self.values) > 0, "length mismatch")
+        require(
+            bool(np.all(np.diff(np.asarray(self.distances_ft)) > 0)),
+            "distances must increase",
+        )
+        require(
+            bool(np.all(np.asarray(self.values) >= 1.0 - _VALUE_TOLERANCE)),
+            "expected putts must be >= 1",
+        )
+
+
+BROADIE_2014_TOUR_EXPECTED_PUTTS = ExpectedPuttsTable(
+    source_id="broadie_2014",
+    citation="Broadie, M. (2014). Every Shot Counts. Gotham Books. Appendix Table A.5.",
+    population="pga_tour",
+    distances_ft=(3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 15.0, 20.0, 30.0),
+    values=(1.05, 1.14, 1.24, 1.34, 1.50, 1.61, 1.78, 1.87, 2.00),
+)

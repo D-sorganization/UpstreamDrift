@@ -42,6 +42,11 @@ from src.shared.python.physics.ball_launch_conditions import (
     LaunchConditions,
     TrajectoryPoint,
 )
+from src.shared.python.physics.ball_flight_validity import (
+    FlightValidityVerdict,
+    assess_trajectory_validity,
+    clamp_launch_spin_rate,
+)
 from src.shared.python.physics.ball_properties import BallProperties
 from src.shared.python.physics.impact_model import (
     ImpactModelType,
@@ -291,6 +296,7 @@ class SwingBallFlightPipeline:
         max_flight_time: float = 10.0,
         flight_dt: float = 0.01,
         flight_simulator: FlightSimulatorProtocol | None = None,
+        clamp_launch_spin: bool = True,
     ) -> None:
         require(
             max_flight_time > 0,
@@ -318,6 +324,7 @@ class SwingBallFlightPipeline:
         # Accept injected simulator for testability; production code passes None
         # to defer construction until first use (lazy Rust-kernel check).
         self._flight_simulator = flight_simulator
+        self._clamp_launch_spin = clamp_launch_spin
 
         logger.debug(
             "swing_ball_flight_pipeline_created model_type=%s max_flight_time=%s",
@@ -377,12 +384,21 @@ class SwingBallFlightPipeline:
         # Step 3: Derive launch conditions
         launch = self._deriver.derive(post)
         self._validate_launch_conditions(launch)
+        pre_clamp_launch = launch
+        launch, spin_clamped = self._maybe_clamp_launch_spin(launch)
 
         # Step 4: Run ball flight simulation
         trajectory = self._run_flight_simulation(launch)
 
         # Step 5: Extract metrics
-        result = self._build_result(swing, post, launch, trajectory)
+        result = self._build_result(
+            swing,
+            post,
+            launch,
+            trajectory,
+            spin_clamped=spin_clamped,
+            pre_clamp_launch=pre_clamp_launch if spin_clamped else None,
+        )
         self._validate_result_sanity(result)
 
         ensure(
@@ -449,14 +465,38 @@ class SwingBallFlightPipeline:
 
         return BallFlightSimulator(ball=self._ball, env=self._environment)
 
+    def _maybe_clamp_launch_spin(
+        self, launch: LaunchConditions
+    ) -> tuple[LaunchConditions, bool]:
+        if not self._clamp_launch_spin:
+            return launch, False
+        return clamp_launch_spin_rate(launch)
+
     def _build_result(
         self,
         swing: SwingState,
         post: PostImpactState,
         launch: LaunchConditions,
         trajectory: list[TrajectoryPoint],
+        *,
+        spin_clamped: bool = False,
+        pre_clamp_launch: LaunchConditions | None = None,
     ) -> PipelineResult:
         """Assemble the final ``PipelineResult``."""
+        path = np.array([p.position for p in trajectory], dtype=float)
+        validity: FlightValidityVerdict = assess_trajectory_validity(path)
+        metadata: dict[str, Any] = {
+            "engine": swing.engine_name,
+            "flight_valid": validity.valid,
+            "flight_invalid_reason": validity.invalid_reason,
+            **swing.metadata,
+        }
+        if spin_clamped:
+            metadata["launch_spin_clamped"] = True
+            if pre_clamp_launch is not None:
+                metadata["pre_clamp_launch_spin_rpm"] = float(
+                    pre_clamp_launch.spin_rate
+                )
         return PipelineResult(
             swing_state=swing,
             impact_state=post,
@@ -468,7 +508,7 @@ class SwingBallFlightPipeline:
             landing_angle_deg=self._metrics.landing_angle_deg(trajectory),
             impact_params=self._impact_params,
             environment=self._environment,
-            metadata={"engine": swing.engine_name, **swing.metadata},
+            metadata=metadata,
         )
 
     @staticmethod

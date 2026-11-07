@@ -20,6 +20,7 @@ from typing import Any
 import numpy as np
 from defusedxml import ElementTree as ET
 
+from src.shared.python.motion_matching.arm_mirror import mirror_document_arm
 from src.shared.python.motion_matching.anthropometric_geometry import (
     GRIP_ROTATION_DEG,
     LEG_VISUAL_RADIUS_M,
@@ -664,8 +665,15 @@ def _write_outputs(
     return spec_path, receipt_path
 
 
-def _annotate_document(document: dict[str, Any], upper: dict[str, Any]) -> None:
-    """Copy the subject, anthropometry, ranges and visual hints into ``document``."""
+def _annotate_document(
+    document: dict[str, Any], upper: dict[str, Any], mirror_arm: bool = True
+) -> None:
+    """Copy the subject, anthropometry, ranges and visual hints into ``document``.
+
+    The build tables are native; ``mirror_arm`` (G1 #14746) mirrors the right-arm
+    axes and limits, ``False`` keeps the native convention for consumers whose
+    stored joint angles still use it (lifting).
+    """
     document["subject"] = upper["subject"]
     document["de_leva_table_sha256"] = de_leva_table_sha256()
     document["anthropometry"] = {
@@ -689,6 +697,8 @@ def _annotate_document(document: dict[str, Any], upper: dict[str, Any]) -> None:
             for side in ("r", "l")
         }
     )
+    if mirror_arm:
+        mirror_document_arm(document)
 
 
 def with_shaft_model(
@@ -825,7 +835,7 @@ def compose_anthropometric_document(
             "marker offsets are anatomical seeds to be calibrated" + club_note
         ),
     )
-    _annotate_document(document, upper)
+    _annotate_document(document, upper, kwargs.get("mirror_arm", True))
     document = with_shaft_model(document, club, kwargs.get("shaft_model"))
     document = _apply_kwarg_tibial_torsion(document, kwargs)
     return AnthropometricDocument(

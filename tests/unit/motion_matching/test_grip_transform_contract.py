@@ -12,6 +12,7 @@ from scipy.spatial.transform import Rotation
 from src.shared.python.motion_matching.anthropometric_geometry import (
     GRIP_ULNAR_OFFSET_DEG,
 )
+from src.shared.python.motion_matching.arm_mirror import native_wrist_rotation
 from src.shared.python.motion_matching.grip_contract import (
     NEUTRAL_EULER_BY_SIDE_DEG,
     follower_rotation,
@@ -34,7 +35,9 @@ NATIVE = (
 
 def _wrist_rotations(doc: dict) -> dict[str, np.ndarray]:
     return {
-        side: np.asarray(joint["child_to_follower"], dtype=float)[:3, :3]
+        side: native_wrist_rotation(
+            doc, np.asarray(joint["child_to_follower"], dtype=float)[:3, :3], side
+        )
         for joint in doc["joints"]
         for side, suffix in HAND_BODY_SUFFIX.items()
         if joint["child"].endswith(suffix)

@@ -1,0 +1,15 @@
+{
+  "schema_version": "ud.osl_scoping.osl17.v1",
+  "issue": {
+    "id": 13131,
+    "slug": "OSL-17"
+  },
+  "rack_contract": {
+    "rack_name": "high_bar",
+    "landmark": "BackTop"
+  },
+  "lead_in_contract": {
+    "min_duration_s": 0.25
+  },
+  "notes": "Lead-in is 0.1 s today; raising the minimum to 0.25 s is a red anchor for a longer settle (issue #13131)."
+}
