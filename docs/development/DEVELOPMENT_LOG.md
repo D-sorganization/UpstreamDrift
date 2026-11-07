@@ -820,6 +820,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14796 · SHOW-A20: Refit Capture Club Pose per Trail-Grip Option Removing Copy-Grip Bias
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14796
+- **Branch:** merged via #14883
+- **PR:** #14883
+- **Paths:** see #14883
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`3ee20382`; collated from changes/14796-show-a20-refit-club-pose.md)
+- **Summary:** SHOW-A20: refit capture club pose per trail-grip option removing copy-grip bias
+- **Next step:** Shipped in PR #14883.
+
 ### DL-#14797 · SHOW-A21: Evidence-Based Grip Guards (Dorsal Separation >= 90 Deg and Trail V-Offset Bound in [-75, 75] Deg Grounded in Biomechanical Literature and Tour Data)
 
 - **State:** shipped
