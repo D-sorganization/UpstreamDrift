@@ -820,6 +820,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14428 · Add GM-5 Posture, Translation, Club-at-Impact, and Han Et Al. (2019) GRF Pivoting Moment Metrics.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14428
+- **Branch:** merged via #14832
+- **PR:** #14832
+- **Paths:** see #14832
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`56341fdd`; collated from changes/14428-gm5-posture-impact-metrics.md)
+- **Summary:** Add GM-5 posture, translation, club-at-impact, and Han et al. (2019) GRF pivoting moment metrics.
+- **Next step:** Shipped in PR #14832.
+
 ### DL-#14424 · Split Address-Relative and Target-Line/Lab-Frame Shoulder and Hip Turn Conventions With Declared Segment Proxies and Chu 2010 Event Reporting (GM-1C).
 
 - **State:** shipped
