@@ -2133,7 +2133,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Golden ZTCF/ZVCF contract tests: drift + control = total with gravity counted once, on the analytical and MuJoCo double pendulum
 - **Next step:** Shipped in PR #14508.
 
-### DL-#14473 · Putting: PyQt6 Tile Readouts and Panel Style Move Out of gui.py Into _Scene_Text and _Style (No Behaviour Change; Keeps gui.py Under the Monolith Threshold)
+### DL-#14473 · Putting: PyQt6 Tile Readouts and Panel Style Move Out of gui.py Into \_Scene_Text and \_Style (No Behaviour Change; Keeps gui.py Under the Monolith Threshold)
 
 - **State:** shipped
 - **Owner:** unassigned
@@ -2143,7 +2143,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** see #14533
 - **Started:** 2026-11-04
 - **Last verified:** 2026-11-04 (`c641ff70`; collated from changes/14473-putting-playback-desktop.md)
-- **Summary:** Putting: PyQt6 tile readouts and panel style move out of gui.py into _scene_text and _style (no behaviour change; keeps gui.py under the monolith threshold)
+- **Summary:** Putting: PyQt6 tile readouts and panel style move out of gui.py into \_scene_text and \_style (no behaviour change; keeps gui.py under the monolith threshold)
 - **Next step:** Shipped in PR #14533.
 
 ### DL-#14467 · Putting Analytics: Player-Specific Bellman Expected Putts on the Caller's Green (Optimal Pace per Distance, Shared Skill Roll Model) and One Putt's Strokes Gained Against It, on /Tools/Putting-Analytics/Strokes-Gained
@@ -2510,7 +2510,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Add theme tokens codemod tool, unit tests, CI ratchet in colorGuard.test.ts, and migrate Settings page to semantic tokens
 - **Next step:** Shipped in PR #14371.
 
-### DL-#14385 · Tests: Remove the Preload_Engines Workaround From the Hand-Consistency and Palm-Thumb Pad Parity Integration Suites; #14382's _Protect_Engine_Modules Fix Makes It Redundant.
+### DL-#14385 · Tests: Remove the Preload_Engines Workaround From the Hand-Consistency and Palm-Thumb Pad Parity Integration Suites; #14382's \_Protect_Engine_Modules Fix Makes It Redundant.
 
 - **State:** shipped
 - **Owner:** unassigned
@@ -2520,10 +2520,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** see #14386
 - **Started:** 2026-11-03
 - **Last verified:** 2026-11-03 (`1152a0ce`; collated from changes/14385-remove-engine-preload.md)
-- **Summary:** tests: remove the preload_engines workaround from the hand-consistency and palm-thumb pad parity integration suites; #14382's _protect_engine_modules fix makes it redundant.
+- **Summary:** tests: remove the preload_engines workaround from the hand-consistency and palm-thumb pad parity integration suites; #14382's \_protect_engine_modules fix makes it redundant.
 - **Next step:** Shipped in PR #14386.
 
-### DL-#14381 · Tests: _Protect_Engine_Modules Keeps Genuine Pinocchio/Pydrake Modules First Imported During a Test (Their Native Extensions Cannot Be Re-Imported Once Discarded); Stubs and Src.Engines Additions Are Still Discarded and Replaced Modules Restored.
+### DL-#14381 · Tests: \_Protect_Engine_Modules Keeps Genuine Pinocchio/Pydrake Modules First Imported During a Test (Their Native Extensions Cannot Be Re-Imported Once Discarded); Stubs and Src.Engines Additions Are Still Discarded and Replaced Modules Restored.
 
 - **State:** shipped
 - **Owner:** unassigned
@@ -2533,7 +2533,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** see #14382
 - **Started:** 2026-11-03
 - **Last verified:** 2026-11-03 (`2bb19026`; collated from changes/14381-engine-module-reimport.md)
-- **Summary:** tests: _protect_engine_modules keeps genuine pinocchio/pydrake modules first imported during a test (their native extensions cannot be re-imported once discarded); stubs and src.engines additions are still discarded and replaced modules restored.
+- **Summary:** tests: \_protect_engine_modules keeps genuine pinocchio/pydrake modules first imported during a test (their native extensions cannot be re-imported once discarded); stubs and src.engines additions are still discarded and replaced modules restored.
 - **Next step:** Shipped in PR #14382.
 
 ### DL-#13997 · Grip Hand Mesh Gains a Dorsum (Metacarpal Block) Riding on the Palm Out Past the Knuckles, Clear of the Grip; OpenSim Hand STLs and the GS3DX Grip Topology Regenerated (Slice 1 Of 3)
