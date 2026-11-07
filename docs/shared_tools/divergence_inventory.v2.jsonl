@@ -286,6 +286,7 @@
 {"path": "biomechanics/shallowing/__init__.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/shallowing/hand_path_plane.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/shallowing/passive_squaring.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
+{"path": "biomechanics/shoulder_hip_turn_conventions.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/swing_comparison.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/swing_plane_analysis.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/swing_plane_visualization.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
