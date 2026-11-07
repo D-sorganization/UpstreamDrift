@@ -820,6 +820,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14747 · Orient the Drawn Grip Hands From the Wrist Follower Frames: The Drawn Dorsum Shell Now Lies on the Wrist Dorsal Axis (Was 35 Deg Lead / 75 Deg Trail Off)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14747
+- **Branch:** merged via #14858
+- **PR:** #14858
+- **Paths:** see #14858
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`e14357ac`; collated from changes/14747-orient-the-drawn-grip-hands-from-the-wri.md)
+- **Summary:** Orient the drawn grip hands from the wrist follower frames: the drawn dorsum shell now lies on the wrist dorsal axis (was 35 deg lead / 75 deg trail off)
+- **Next step:** Shipped in PR #14858.
+
 ### DL-#14732 · SHOW-A8: V2 Lumbar+Thoracic Trunk Into Best-Match Mujoco_Driver Model With Styled Render
 
 - **State:** shipped
