@@ -820,6 +820,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14732 · SHOW-A8: V2 Lumbar+Thoracic Trunk Into Best-Match Mujoco_Driver Model With Styled Render
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14732
+- **Branch:** merged via #14855
+- **PR:** #14855
+- **Paths:** see #14855
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`6392e761`; collated from changes/14732-show-a8-v2-trunk-best-match.md)
+- **Summary:** SHOW-A8: v2 lumbar+thoracic trunk into best-match mujoco_driver model with styled render
+- **Next step:** Shipped in PR #14855.
+
 ### DL-#13882 · Catalog Exact Existing Regression Nodes and Merged Provenance for Six Resolved Board Findings
 
 - **State:** shipped
@@ -917,10 +930,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13884
 - **Branch:** merged via #14768
-- **PR:** #14768
+- **PR:** #14768, #14856
 - **Paths:** see #14768
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`190cae5c`; collated from changes/13884-controller-synergy-audit-slice-1-control.md)
+- **Last verified:** 2026-11-07 (`2f7dab23`; collated from changes/13884-controller-synergy-audit-slice-2-minimum.md)
 - **Summary:** Controller synergy audit slice 1: ControllerAuditSpec, #13837 trace adapter and ControllerAuditReport (UCM, TNC fail-closed below 30 trials, null-space gain norm) with an analytic Lyapunov golden
 - **Next step:** Shipped in PR #14768.
 
