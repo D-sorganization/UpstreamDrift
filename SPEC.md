@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-07 | #14832 | Add GM-5 posture, translation, club-at-impact, and Han et al. (2019) GRF pivoting moment metrics. |
 | 2026-11-07 | #14863 | Split address-relative and target-line/lab-frame shoulder and hip turn conventions with declared segment proxies and Chu 2010 event reporting (GM-1c). |
 | 2026-11-07 | #14865 | Re-zero grip roll to the owner's A7 convention: wrists on top of shaft, + CCW toward target |
 | 2026-11-07 | #14788 | Optional-stack CI runs loop_nullspace snapshot vs spatial fixture with real pinocchio |
