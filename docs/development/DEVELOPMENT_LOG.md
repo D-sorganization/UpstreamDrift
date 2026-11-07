@@ -820,6 +820,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14732 · SHOW-A8: V2 Lumbar+Thoracic Trunk Into Best-Match Mujoco_Driver Model With Styled Render
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14732
+- **Branch:** merged via #14855
+- **PR:** #14855
+- **Paths:** see #14855
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`6392e761`; collated from changes/14732-show-a8-v2-trunk-best-match.md)
+- **Summary:** SHOW-A8: v2 lumbar+thoracic trunk into best-match mujoco_driver model with styled render
+- **Next step:** Shipped in PR #14855.
+
+### DL-#13882 · Catalog Exact Existing Regression Nodes and Merged Provenance for Six Resolved Board Findings
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13882
+- **Branch:** merged via #14842
+- **PR:** #14842
+- **Paths:** see #14842
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`f46f90ed`; collated from changes/13882-regression-catalog.md)
+- **Summary:** Catalog exact existing regression nodes and merged provenance for six resolved board findings
+- **Next step:** Shipped in PR #14842.
+
 ### DL-#14751 · G2: Trail-Hand Grip Option (B15) With Explicit 15 Deg Alpha and Widened Trail V-Offset Bound
 
 - **State:** shipped
@@ -904,10 +930,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13884
 - **Branch:** merged via #14768
-- **PR:** #14768
+- **PR:** #14768, #14856
 - **Paths:** see #14768
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`190cae5c`; collated from changes/13884-controller-synergy-audit-slice-1-control.md)
+- **Last verified:** 2026-11-07 (`2f7dab23`; collated from changes/13884-controller-synergy-audit-slice-2-minimum.md)
 - **Summary:** Controller synergy audit slice 1: ControllerAuditSpec, #13837 trace adapter and ControllerAuditReport (UCM, TNC fail-closed below 30 trials, null-space gain norm) with an analytic Lyapunov golden
 - **Next step:** Shipped in PR #14768.
 
@@ -1749,10 +1775,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** fleet-orchestrator
 - **Issue:** #14569
 - **Branch:** desk/show-neck/14569-lie-interaction
-- **PR:** #14613
+- **PR:** #14613, #14852
 - **Paths:** see #14613
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`728cea86`; collated from changes/14569-show-b5-lie-interaction.md)
+- **Last verified:** 2026-11-07 (`684daf6b`; collated from changes/14569-b5-the-lie-spin-factor-now-reaches-the-b.md)
 - **Summary:** SHOW-B5: parametric lie/rough impact-condition modifier (physics/lie_interaction.py) with labelled assumptions
 - **Next step:** Shipped in PR #14613.
 
@@ -2133,7 +2159,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Golden ZTCF/ZVCF contract tests: drift + control = total with gravity counted once, on the analytical and MuJoCo double pendulum
 - **Next step:** Shipped in PR #14508.
 
-### DL-#14473 · Putting: PyQt6 Tile Readouts and Panel Style Move Out of gui.py Into _Scene_Text and _Style (No Behaviour Change; Keeps gui.py Under the Monolith Threshold)
+### DL-#14473 · Putting: PyQt6 Tile Readouts and Panel Style Move Out of gui.py Into \_Scene_Text and \_Style (No Behaviour Change; Keeps gui.py Under the Monolith Threshold)
 
 - **State:** shipped
 - **Owner:** unassigned
@@ -2143,7 +2169,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** see #14533
 - **Started:** 2026-11-04
 - **Last verified:** 2026-11-04 (`c641ff70`; collated from changes/14473-putting-playback-desktop.md)
-- **Summary:** Putting: PyQt6 tile readouts and panel style move out of gui.py into _scene_text and _style (no behaviour change; keeps gui.py under the monolith threshold)
+- **Summary:** Putting: PyQt6 tile readouts and panel style move out of gui.py into \_scene_text and \_style (no behaviour change; keeps gui.py under the monolith threshold)
 - **Next step:** Shipped in PR #14533.
 
 ### DL-#14467 · Putting Analytics: Player-Specific Bellman Expected Putts on the Caller's Green (Optimal Pace per Distance, Shared Skill Roll Model) and One Putt's Strokes Gained Against It, on /Tools/Putting-Analytics/Strokes-Gained
@@ -2510,7 +2536,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Add theme tokens codemod tool, unit tests, CI ratchet in colorGuard.test.ts, and migrate Settings page to semantic tokens
 - **Next step:** Shipped in PR #14371.
 
-### DL-#14385 · Tests: Remove the Preload_Engines Workaround From the Hand-Consistency and Palm-Thumb Pad Parity Integration Suites; #14382's _Protect_Engine_Modules Fix Makes It Redundant.
+### DL-#14385 · Tests: Remove the Preload_Engines Workaround From the Hand-Consistency and Palm-Thumb Pad Parity Integration Suites; #14382's \_Protect_Engine_Modules Fix Makes It Redundant.
 
 - **State:** shipped
 - **Owner:** unassigned
@@ -2520,10 +2546,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** see #14386
 - **Started:** 2026-11-03
 - **Last verified:** 2026-11-03 (`1152a0ce`; collated from changes/14385-remove-engine-preload.md)
-- **Summary:** tests: remove the preload_engines workaround from the hand-consistency and palm-thumb pad parity integration suites; #14382's _protect_engine_modules fix makes it redundant.
+- **Summary:** tests: remove the preload_engines workaround from the hand-consistency and palm-thumb pad parity integration suites; #14382's \_protect_engine_modules fix makes it redundant.
 - **Next step:** Shipped in PR #14386.
 
-### DL-#14381 · Tests: _Protect_Engine_Modules Keeps Genuine Pinocchio/Pydrake Modules First Imported During a Test (Their Native Extensions Cannot Be Re-Imported Once Discarded); Stubs and Src.Engines Additions Are Still Discarded and Replaced Modules Restored.
+### DL-#14381 · Tests: \_Protect_Engine_Modules Keeps Genuine Pinocchio/Pydrake Modules First Imported During a Test (Their Native Extensions Cannot Be Re-Imported Once Discarded); Stubs and Src.Engines Additions Are Still Discarded and Replaced Modules Restored.
 
 - **State:** shipped
 - **Owner:** unassigned
@@ -2533,7 +2559,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** see #14382
 - **Started:** 2026-11-03
 - **Last verified:** 2026-11-03 (`2bb19026`; collated from changes/14381-engine-module-reimport.md)
-- **Summary:** tests: _protect_engine_modules keeps genuine pinocchio/pydrake modules first imported during a test (their native extensions cannot be re-imported once discarded); stubs and src.engines additions are still discarded and replaced modules restored.
+- **Summary:** tests: \_protect_engine_modules keeps genuine pinocchio/pydrake modules first imported during a test (their native extensions cannot be re-imported once discarded); stubs and src.engines additions are still discarded and replaced modules restored.
 - **Next step:** Shipped in PR #14382.
 
 ### DL-#13997 · Grip Hand Mesh Gains a Dorsum (Metacarpal Block) Riding on the Palm Out Past the Knuckles, Clear of the Grip; OpenSim Hand STLs and the GS3DX Grip Topology Regenerated (Slice 1 Of 3)

@@ -89,3 +89,17 @@ def test_render_summary_reports_fit_and_hides_private_paths(tmp_path: Path) -> N
     assert "<bundle>" in render_summary(_target("mujoco_driver"), entry, {}, {}, "x")
     with pytest.raises(ValueError, match="mujoco"):
         load_ledger_entry(ledger, "mujoco")
+
+
+def test_mujoco_best_match_migrates_to_the_v2_trunk_but_opensim_does_not() -> None:
+    assert _target("mujoco_driver").trunk_v2 is True
+    assert _target("opensim_os9").trunk_v2 is False
+
+
+def test_v2_summary_labels_the_migration_a_replay_not_a_refit() -> None:
+    entry = {**ENTRY, "engine": "mujoco"}
+    text = render_summary(_target("mujoco_driver"), entry, {}, {}, "x")
+    assert "replay, not a refit" in text and "lumbar" in text
+    assert "replay, not a refit" not in render_summary(
+        _target("opensim_os9"), ENTRY, {}, {}, "x"
+    )

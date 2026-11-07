@@ -1033,6 +1033,7 @@
 {"path": "humanoid_character_builder/validation/physics_validator.py", "classification": "diverged", "package": "humanoid_character_builder", "spelling_only": true}
 {"path": "humanoid_robotics/__init__.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
 {"path": "humanoid_robotics/option_a/__init__.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
+{"path": "humanoid_robotics/option_a/audit_controllers.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
 {"path": "humanoid_robotics/option_a/fixture.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
 {"path": "humanoid_robotics/option_a/plant.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
 {"path": "humanoid_robotics/option_a/trace_contract.py", "classification": "ud-only", "package": "humanoid_robotics", "spelling_only": false}
@@ -1425,6 +1426,7 @@
 {"path": "motion_matching/api_contracts.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/arm_mirror.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/bernstein_controls.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/best_match_v2.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/body_skeleton.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/body_target.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/bounded_candidate_search.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
