@@ -820,6 +820,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14743 · TableShotModel Reads the Dispersion Cell for the Shot's Lie and the Conditions' Wind/Slope Bins (CourseConditions Gains Wind/Slope, Default Calm/Flat); Absent Wind/Slope Bins Are Rejected Instead of Silently Using Calm/Flat.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14743
+- **Branch:** merged via #14784
+- **PR:** #14784
+- **Paths:** see #14784
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`b85eb218`; collated from changes/14743-tableshotmodel-reads-the-dispersion-cell.md)
+- **Summary:** TableShotModel reads the dispersion cell for the shot's lie and the conditions' wind/slope bins (CourseConditions gains wind/slope, default calm/flat); absent wind/slope bins are rejected instead of silently using calm/flat.
+- **Next step:** Shipped in PR #14784.
+
 ### DL-#14816 · SHOW-B3b: Omit Ground_Model From Carry-Only Dispersion Tables and Deduplicate Runout Entry Points
 
 - **State:** shipped
@@ -1151,10 +1164,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14748
 - **Branch:** merged via #14769
-- **PR:** #14769
+- **PR:** #14769, #14809
 - **Paths:** see #14769
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`543ded69`; collated from changes/14748-native-viewer-export-cli-explains-a-fore.md)
+- **Last verified:** 2026-11-07 (`f111638e`; collated from changes/14748-native-viewer-export-bootstrap-imports-a.md)
 - **Summary:** native_viewer_export CLI explains a foreign shared package shadowing the vendored Tools tree
 - **Next step:** Shipped in PR #14769.
 
