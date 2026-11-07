@@ -2754,6 +2754,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-07 | #14819 | G2: trail-hand grip option (b15) with explicit 15 deg alpha and widened trail V-offset bound |
+| 2026-11-07 | #14827 | Calibrate tour, scratch, 10, and 20 handicap putting skill presets against published reference make-rate tables and validate tour make rates and expected putts against Broadie (2014) |
 | 2026-11-07 | #14843 | Reload pinocchio in OpenSim dynamics parity when unit mocks left stubs in sys.modules |
 | 2026-11-07 | #14809 | Native viewer export: bootstrap imports and lazy modules so --help works without matplotlib in minimal envs. |
 | 2026-11-07 | #14784 | TableShotModel reads the dispersion cell for the shot's lie and the conditions' wind/slope bins (CourseConditions gains wind/slope, default calm/flat); absent wind/slope bins are rejected instead of silently using calm/flat. |
