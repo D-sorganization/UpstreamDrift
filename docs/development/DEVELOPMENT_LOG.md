@@ -820,6 +820,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13882 · Catalog Exact Existing Regression Nodes and Merged Provenance for Six Resolved Board Findings
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13882
+- **Branch:** merged via #14842
+- **PR:** #14842
+- **Paths:** see #14842
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`f46f90ed`; collated from changes/13882-regression-catalog.md)
+- **Summary:** Catalog exact existing regression nodes and merged provenance for six resolved board findings
+- **Next step:** Shipped in PR #14842.
+
 ### DL-#14751 · G2: Trail-Hand Grip Option (B15) With Explicit 15 Deg Alpha and Widened Trail V-Offset Bound
 
 - **State:** shipped
