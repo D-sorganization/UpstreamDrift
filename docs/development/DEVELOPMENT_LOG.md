@@ -1749,10 +1749,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** fleet-orchestrator
 - **Issue:** #14569
 - **Branch:** desk/show-neck/14569-lie-interaction
-- **PR:** #14613
+- **PR:** #14613, #14852
 - **Paths:** see #14613
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-05 (`728cea86`; collated from changes/14569-show-b5-lie-interaction.md)
+- **Last verified:** 2026-11-07 (`684daf6b`; collated from changes/14569-b5-the-lie-spin-factor-now-reaches-the-b.md)
 - **Summary:** SHOW-B5: parametric lie/rough impact-condition modifier (physics/lie_interaction.py) with labelled assumptions
 - **Next step:** Shipped in PR #14613.
 
