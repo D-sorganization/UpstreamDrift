@@ -375,10 +375,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14176
 - **Branch:** claude/putting-validation-14176
-- **PR:** #14198, #14232
+- **PR:** #14198, #14232, #14827
 - **Paths:** see #14198
 - **Started:** 2026-11-01
-- **Last verified:** 2026-11-02 (`2d2257a7`; collated from changes/14176-project-steward-status-2026-11-01.md)
+- **Last verified:** 2026-11-07 (`4ef29833`; collated from changes/14176-putting-make-rate-calibration.md)
 - **Summary:** Add Putting Reference Data and Validation Harness
 - **Next step:** Calibrate presets once the batch roll and skill sampler merge
 
@@ -819,6 +819,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#14751 · G2: Trail-Hand Grip Option (B15) With Explicit 15 Deg Alpha and Widened Trail V-Offset Bound
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14751
+- **Branch:** merged via #14819
+- **PR:** #14819
+- **Paths:** see #14819
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`832f01c9`; collated from changes/14751-g2-trail-hand-grip-option-b15-with-expli.md)
+- **Summary:** G2: trail-hand grip option (b15) with explicit 15 deg alpha and widened trail V-offset bound
+- **Next step:** Shipped in PR #14819.
 
 ### DL-#12983 · Reload Pinocchio in OpenSim Dynamics Parity When Unit Mocks Left Stubs in Sys.Modules
 

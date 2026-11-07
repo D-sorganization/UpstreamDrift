@@ -13,6 +13,7 @@ to flat, other bins come from an injected ``slope_modifier`` (B6); ``club`` repe
 from __future__ import annotations
 
 import hashlib
+import inspect
 import json
 import time
 from collections.abc import Callable
@@ -29,8 +30,11 @@ from src.shared.python.sg_optimizer.shot_model.skill_family import (
     SkillFamily,
 )
 
-# (impacts (n, 6), skill, (headwind_mph, crosswind_mph)) -> landing (n, 2) yards
-LandingSimulator = Callable[[NDArray[np.float64], str, tuple[float, float]], Any]
+# (impacts, skill, wind mph pair, slope bin, lie) -> rest position (n, 2) yards;
+# a simulator with a ``spin_factor`` (n,) parameter also gets the lie spin
+# (#14569); one without it models no spin and gets the rows alone.
+LandingSimulator = Callable[..., Any]
+# (impacts, lie) -> impacts; a modifier with ``with_spin`` also returns spin.
 LieModifier = Callable[[NDArray[np.float64], str], NDArray[np.float64]]
 
 
@@ -97,7 +101,7 @@ class DispersionCell:
 def _cell_stats(land: NDArray[np.float64]) -> tuple[Any, Any, float]:
     mean, sd = land.mean(axis=0), land.std(axis=0, ddof=1)
     denom = float(sd[0] * sd[1])
-    corr = float(np.corrcoef(land.T)[0, 1]) if denom > 0 else 0.0
+    corr = float(np.asarray(np.corrcoef(land.T))[0, 1]) if denom > 0 else 0.0
     return (
         (float(mean[0]), float(mean[1])),
         (float(sd[0]), float(sd[1])),
@@ -212,6 +216,75 @@ def build_table(
     )
 
 
+def _lie_rows(
+    modifier: LieModifier | None, rows: NDArray[np.float64], lie: str
+) -> tuple[NDArray[np.float64], NDArray[np.float64] | None]:
+    """Lie-modified rows and the per-shot spin factor, None when it is identity."""
+    if modifier is None:
+        return rows, None
+    with_spin = getattr(modifier, "with_spin", None)
+    if with_spin is None:
+        return modifier(rows, lie), None
+    out, spin = with_spin(rows, lie)
+    spin = np.asarray(spin, dtype=float)
+    return out, None if bool(np.all(spin == 1.0)) else spin
+
+
+def _simulator_flags(simulate: LandingSimulator) -> tuple[bool, bool]:
+    """Simulator capability flags: (takes_spin, takes_slope_lie)."""
+    sig = inspect.signature(simulate)
+    takes_spin = "spin_factor" in sig.parameters or any(
+        p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values()
+    )
+    takes_slope_lie = (
+        any(p.kind == inspect.Parameter.VAR_POSITIONAL for p in sig.parameters.values())
+        or ("slope" in sig.parameters and "lie" in sig.parameters)
+        or len(
+            [
+                p
+                for p in sig.parameters.values()
+                if p.kind
+                in (
+                    inspect.Parameter.POSITIONAL_ONLY,
+                    inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                )
+            ]
+        )
+        >= 5
+    )
+    return takes_spin, takes_slope_lie
+
+
+def _build_meta(
+    family: SkillFamily,
+    names: tuple[str, ...],
+    clubs: dict[str, str] | None,
+    seed: int,
+    n: int,
+    ground: GroundModel | None,
+    lie_modifier: LieModifier | None,
+) -> dict[str, Any]:
+    meta: dict[str, Any] = {
+        "family": family.name,
+        "family_version": family.provenance.version,
+        "seed": seed,
+        "n": n,
+    }
+    if clubs is not None:
+        meta["clubs"] = {k: clubs[k] for k in names}
+    for part in (
+        ground.provenance if ground is not None else {},
+        getattr(lie_modifier, "provenance", {}),
+    ):
+        require(
+            not (set(part) & set(meta)),
+            "provenance key collision",
+            set(part) & set(meta),
+        )
+        meta.update(part)
+    return meta
+
+
 def build_grid_table(
     family: SkillFamily,
     simulate: LandingSimulator,
@@ -242,18 +315,22 @@ def build_grid_table(
         clubs is None or set(names) <= set(clubs),
         "club mapping must cover every skill in the grid",
     )
+    takes_spin, takes_slope_lie = _simulator_flags(simulate)
     t0, z, cells = time.perf_counter(), standard_normals(seed, n), []
     for skill in names:
         base = _impacts(family.skills[skill].distribution, z)
         for lie in grid.lies:
-            imp = lie_modifier(base, lie) if lie_modifier is not None else base
+            imp, spin = _lie_rows(lie_modifier, base, lie)
+            extra = {"spin_factor": spin} if takes_spin and spin is not None else {}
             for slope in grid.slopes:
                 sloped = imp if slope_modifier is None else slope_modifier(slope)(imp)
                 for wind in winds:
-                    land: np.ndarray = np.asarray(
-                        simulate(sloped, skill, WIND_BINS[wind]),
-                        dtype=float,
+                    args: tuple[Any, ...] = (
+                        (sloped, skill, WIND_BINS[wind], slope, lie)
+                        if takes_slope_lie
+                        else (sloped, skill, WIND_BINS[wind])
                     )
+                    land = np.asarray(simulate(*args, **extra), dtype=float)
                     if ground is not None:
                         require(land.ndim == 2 and len(land) == n, "landing states")
                         land = np.asarray(ground(land, lie, slope, skill), dtype=float)
@@ -275,24 +352,7 @@ def build_grid_table(
                             n,
                         )
                     )
-    meta = {
-        "family": family.name,
-        "family_version": family.provenance.version,
-        "seed": seed,
-        "n": n,
-    }
-    if clubs is not None:
-        meta["clubs"] = {k: clubs[k] for k in names}
-    for part in (
-        ground.provenance if ground is not None else {},
-        getattr(lie_modifier, "provenance", {}),
-    ):
-        require(
-            not (set(part) & set(meta)),
-            "provenance key collision",
-            set(part) & set(meta),
-        )
-        meta.update(part)
+    meta = _build_meta(family, names, clubs, seed, n, ground, lie_modifier)
     table = DispersionTable(
         tuple(cells),
         {**meta, "table_hash": _hash(tuple(cells), meta)},
@@ -318,7 +378,13 @@ def check_convergence(
     require(n >= 4, "n must be >= 4", n)
     z = standard_normals(seed, n)
     imp = _impacts(family.skills[skill].distribution, z)
-    full: np.ndarray = np.asarray(simulate(imp, skill, WIND_BINS["calm"]), dtype=float)
+    _, takes_slope_lie = _simulator_flags(simulate)
+    args: tuple[Any, ...] = (
+        (imp, skill, WIND_BINS["calm"], "flat", "fairway")
+        if takes_slope_lie
+        else (imp, skill, WIND_BINS["calm"])
+    )
+    full = np.asarray(simulate(*args), dtype=float)
     if ground is not None:
         full = np.asarray(ground(full, "fairway", "flat", skill), dtype=float)
     half = full[: n // 2]
