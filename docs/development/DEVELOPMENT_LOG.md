@@ -76,10 +76,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #11745
 - **Branch:** cursor/lift5-epic-contract-11745-94df
-- **PR:** #14805
+- **PR:** #14805, #14877
 - **Paths:** see #14805
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`07c00681`; collated from changes/11745-lift-5-epic-evidence-contract-bundles-pa.md)
+- **Last verified:** 2026-11-07 (`9504c22e`; collated from changes/11745-refs-11745-add-reproducible-back-squat-t.md)
 - **Summary:** LIFT-5 epic evidence contract (bundles + parity JSON)
 - **Next step:** Optional parity lanes for all lifts; CI green then arm.
 

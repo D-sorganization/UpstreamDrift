@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-07 | #14877 | Refs #11745: Add reproducible back-squat trajectory metrics and sourced comparison limits |
 | 2026-11-07 | #14882 | SHOW-A21: evidence-based grip guards (dorsal separation >= 90 deg and trail V-offset bound in [-75, 75] deg grounded in biomechanical literature and tour data) |
 | 2026-11-07 | #14880 | Key-frame PNG writer and grip-clock inset helper for styled renders (SHOW-A10) |
 | 2026-11-07 | #14878 | SHOW-A9: Refit best-match MuJoCo driver on A7 grip + A8 trunk spec; record candidate receipt and baseline comparison |
