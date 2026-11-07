@@ -820,6 +820,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14738 · Fleet Grip Guard: PR-Tier Test That Every Model and Binding Reads 15° ± 1° Under A7 Convention (SHOW-A13, #14738)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14738
+- **Branch:** merged via #14875
+- **PR:** #14875
+- **Paths:** see #14875
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`62a43192`; collated from changes/14738-show-a13-fleet-grip-guard.md)
+- **Summary:** Fleet grip guard: PR-tier test that every model and binding reads 15° ± 1° under A7 convention (SHOW-A13, #14738)
+- **Next step:** Shipped in PR #14875.
+
 ### DL-#14737 · Apply A7 Grip Roll Zero to Drake, Pinocchio, OpenSim and MyoSuite via the Shared Metric
 
 - **State:** shipped

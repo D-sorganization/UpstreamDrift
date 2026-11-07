@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-07 | #14875 | Fleet grip guard: PR-tier test that every model and binding reads 15° ± 1° under A7 convention (SHOW-A13, #14738) |
 | 2026-11-07 | #14873 | Apply A7 grip roll zero to Drake, Pinocchio, OpenSim and MyoSuite via the shared metric |
 | 2026-11-07 | #14869 | SHOW-A11: Validate active MuJoCo spec and grip bindings against A7 grip roll convention (+15 deg neutral) |
 | 2026-11-07 | #14832 | Add GM-5 posture, translation, club-at-impact, and Han et al. (2019) GRF pivoting moment metrics. |
