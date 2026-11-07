@@ -169,8 +169,6 @@ class NativeMujocoFullBodyModel:
                 "radius": radius,
             }
 
-        self._errors: tuple[np.ndarray, np.ndarray] | None = None
-
     def _init_neck_limits(self, enabled: bool) -> None:
         """Set the dof indices and radian ``(lower, upper)`` of the limited neck.
 
