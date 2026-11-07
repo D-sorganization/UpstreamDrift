@@ -46,7 +46,7 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation
 
-from src.shared.python.contracts import require
+from src.shared.python.contracts import ensure, require
 from src.shared.python.core.handedness import (
     DEFAULT_HANDEDNESS,
     Handedness,
@@ -231,6 +231,41 @@ def mirror_grip_euler(euler_deg: Sequence[float] | Array) -> Euler:
     return _canonical_euler_deg(
         Rotation.from_matrix(g_mirrored).as_euler("xyz", degrees=True)
     )
+
+
+#: Trail (right) hand grip strength ``alpha`` in degrees, one named choice (#14751).
+#: It is the right hand's own HX angle, not the lead's: copying the lead's rotation
+#: put both wrist backs 0.00 deg apart on the driver specs.
+TRAIL_ALPHA_DEG: Final[float] = 15.0
+
+
+def trail_grip_euler(
+    lead_euler_deg: Sequence[float] | Array, trail_alpha_deg: float = TRAIL_ALPHA_DEG
+) -> Euler:
+    """Right-hand extrinsic x-y-z triple for a lead (left) hand grip, never a copy of it.
+
+    The right hand is the sagittal mirror (:func:`mirror_grip_euler`) of a left
+    hand with the lead's ``psi`` and ``gamma`` and the trail's own ``alpha``.
+    ``ValueError`` for a lead that is not a valid triple.  Postcondition: the
+    result is a different rotation from ``lead_euler_deg``.
+    """
+    lead = hand_from_euler(lead_euler_deg)
+    left_equivalent = hand_to_euler(
+        HandAngles(float(trail_alpha_deg), lead.psi_deg, lead.gamma_deg)
+    )
+    trail = mirror_grip_euler(left_equivalent)
+    ensure(
+        not bool(
+            np.allclose(
+                _euler_to_offset_matrix(trail),
+                _euler_to_offset_matrix(lead_euler_deg),
+                atol=1e-6,
+            )
+        ),
+        "trail grip must differ from the lead grip",
+        trail,
+    )
+    return trail
 
 
 #: Mirrored neutral transform for the right/trail hand: ``M_{0,R} = R_x(-50 deg) R_z(180 deg)``.

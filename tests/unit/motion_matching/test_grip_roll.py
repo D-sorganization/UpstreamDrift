@@ -138,6 +138,7 @@ SPEC = (
     Path(__file__).resolve().parents[3]
     / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
 )
+SPEC_V2 = SPEC.with_name("full_body_spec_anthro_driver_v2.json")
 # Native club frame at the flagship driver address, from the solved MuJoCo pose
 # (hipcal-scaled spec, IK frame 0; columns are the club x, y (shaft), z axes).
 FLAGSHIP_CLUB_ROTATION = Rotation.from_matrix(
@@ -161,12 +162,24 @@ IK = EVIDENCE / "address_frame_neutral.npz"
 
 
 def test_flagship_driver_grip_is_neutral_15_degrees_face_on() -> None:
-    """After A2 both hands read 15 +- 3 deg at the unchanged club pose."""
+    """Option (b15): lead hand reads 15 deg face-on, trail hand reads -143.5 deg."""
     spec = json.loads(SPEC.read_text(encoding="utf-8"))
     state = grip_pose_state_from_spec(spec, FLAGSHIP_CLUB_ROTATION)
     lead, trail = address_grip_roll_deg(state)
     assert lead == pytest.approx(15.0, abs=3.0)
-    assert trail == pytest.approx(15.0, abs=3.0)
+    assert trail == pytest.approx(-143.5, abs=3.0)
+
+
+@pytest.mark.parametrize("spec_path", [SPEC, SPEC_V2], ids=["v1", "v2"])
+def test_driver_trail_hand_is_not_a_copy_of_the_lead_hand(spec_path: Path) -> None:
+    """Option (b15), #14751 comment 6689879332: trail = lead psi/gamma at alpha 15."""
+    from src.shared.python.motion_matching.grip_contract import trail_grip_euler
+
+    totals = json.loads(spec_path.read_text(encoding="utf-8"))["subject"][
+        "grip_rotation_deg"
+    ]
+    assert totals["L"] != totals["R"]
+    assert np.allclose(totals["R"], trail_grip_euler(totals["L"]), atol=1e-3)
 
 
 def test_before_receipt_pins_the_owner_observed_90_degree_grip() -> None:
@@ -197,7 +210,7 @@ def test_resolved_address_pose_reads_15_degrees_and_keeps_the_club_pose() -> Non
     spec = json.loads(SPEC.read_text(encoding="utf-8"))
     lead, trail = address_grip_roll_deg(grip_pose_state_from_spec(spec, rot))
     assert lead == pytest.approx(15.0, abs=3.0)
-    assert trail == pytest.approx(15.0, abs=3.0)
+    assert trail == pytest.approx(-143.5, abs=3.0)
     # the club is where it was before the grip change (shaft and face unchanged)
     assert rot == pytest.approx(FLAGSHIP_CLUB_ROTATION, abs=1e-3)
 

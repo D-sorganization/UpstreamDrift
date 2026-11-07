@@ -66,6 +66,10 @@ ALPHA_RANGE_DEG: tuple[float, float] = (-60.0, 60.0)
 LEAD_V_AZIMUTH_MIN_DEG: float = NEUTRAL_V_AZIMUTH_DEG + ALPHA_RANGE_DEG[0]
 LEAD_V_AZIMUTH_MAX_DEG: float = 90.0
 
+#: Half-width of the trail V offset range (deg). The trail hand sits at HX alpha 15
+#: (D102, #14751 comment 6689879332), 64.1 deg from the lead V; the old +/-30 rejected it.
+TRAIL_V_OFFSET_BOUND_DEG: float = 65.0
+
 #: Nominal point of the hand body (metres, hand frame) that sits on the grip:
 #: about 6 cm distal to the wrist origin along the hand's ``-y``.  The OSV-9
 #: Rajagopal models do not use it: their hand grip frames come from the
@@ -198,7 +202,11 @@ class GripPose:
                 ("lead_below_butt_m", 0.0, 0.1),
                 ("hand_spacing_m", 0.0, 0.2),
                 ("lead_v_azimuth_deg", LEAD_V_AZIMUTH_MIN_DEG, LEAD_V_AZIMUTH_MAX_DEG),
-                ("trail_v_offset_deg", -30.0, 30.0),
+                (
+                    "trail_v_offset_deg",
+                    -TRAIL_V_OFFSET_BOUND_DEG,
+                    TRAIL_V_OFFSET_BOUND_DEG,
+                ),
                 ("lead_thumb_offset_deg", 0.0, 45.0),
                 ("palm_diagonal_deg", 0.0, 90.0),
                 ("grip_strength_deg", -30.0, 30.0),

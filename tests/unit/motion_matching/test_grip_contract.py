@@ -39,6 +39,8 @@ from src.shared.python.motion_matching.grip_contract import (
     neutral_euler_deg,
     neutral_grip_matrix,
     to_grip_rotation,
+    TRAIL_ALPHA_DEG,
+    trail_grip_euler,
 )
 from src.shared.python.motion_matching.grip_fit import grip_rotation
 
@@ -353,3 +355,28 @@ def test_neutral_grip_helpers_validate_side_and_mirror_dbc() -> None:
         mirror_grip_matrix(np.diag([1.0, 1.0, -1.0]))
     with pytest.raises(ValueError, match="three"):
         mirror_grip_euler((1.0, 2.0))
+
+
+def test_trail_grip_is_the_mirrored_right_hand_not_a_copy_of_the_lead() -> None:
+    """A16 (#14751): the trail rotation is derived as a RIGHT hand, never copied."""
+    lead = hand_to_euler(HandAngles(alpha_deg=49.27))
+    trail = trail_grip_euler(lead)
+    assert not np.allclose(grip_rotation(trail), grip_rotation(lead), atol=1e-6)
+    expected = mirror_grip_euler(hand_to_euler(HandAngles(alpha_deg=TRAIL_ALPHA_DEG)))
+    assert np.allclose(grip_rotation(trail), grip_rotation(expected), atol=1e-9)
+    # psi and gamma come from the lead, the mirror maps them to the right hand
+    assert hand_from_euler(mirror_grip_euler(trail)).alpha_deg == pytest.approx(
+        TRAIL_ALPHA_DEG, abs=1e-6
+    )
+
+
+def test_trail_grip_postcondition_rejects_an_identical_pair() -> None:
+    """Design by Contract: an alpha-0 neutral lead mirrored with alpha 0 is still distinct."""
+    lead = hand_to_euler(HandAngles())
+    assert not np.allclose(
+        grip_rotation(trail_grip_euler(lead, trail_alpha_deg=0.0)),
+        grip_rotation(lead),
+        atol=1e-6,
+    )
+    with pytest.raises(ValueError):
+        trail_grip_euler((1.0, 2.0))
