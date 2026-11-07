@@ -68,6 +68,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0058](0058-one-shared-putting-core.md)                                 | One Shared Putting Physics Core                                                   | Accepted                                 | 2026-11-01 |
 | [0059](0059-trunk-lumbar-thoracic-coupled-by-default.md)                | Lumbar and Thoracic Trunk DOFs Are Coupled by Default                             | Accepted                                 | 2026-11-04 |
 | [0060](0060-opensim-humanoid-scaling-and-fit-fidelity.md)              | OpenSim Humanoid Scaling and Fit Fidelity — Panel Plan and TDD Slices              | Proposed                                 | 2026-11-06 |
+| [0061](0061-hrg-hx6-hand-data-and-asset-licensing.md)                   | HRG-HX6 Hand Data and Asset Licensing                                             | Proposed                                 | 2026-11-07 |
 
 Note: ADR 0013 was amended on 2026-05-31 to document the CC-32
 canonical-core app-shell registry reuse of the embeddable-tool contract.
