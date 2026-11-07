@@ -88,10 +88,7 @@ PALM_PRESETS_DEG: dict[str, float] = {"fingers": 25.0, "neutral": 40.0, "palm": 
 _DEFAULT_THUMB_DEG = GripPose().lead_thumb_offset_deg
 #: Singularity guard: the Y-X-Z middle angle ``psi - 90`` may not reach +-90.
 _SINGULAR_TOL = 1e-9
-_ALPHA_RANGE = (
-    ALPHA_RANGE_DEG[0],
-    90.0,
-)  # widened for A7 face-on neutral alpha ~75 deg (#14736)
+_ALPHA_RANGE = ALPHA_RANGE_DEG
 _PSI_RANGE = (5.0, 85.0)
 _GAMMA_RANGE = (-180.0, 180.0)
 #: Flagship driver address: native ``R_y(0)`` at ``psi=40``, ``gamma=0`` reads

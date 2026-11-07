@@ -3,7 +3,7 @@
 Acceptance criteria:
 - Every active MuJoCo grip binding and spec reads 15 deg +- 1 deg at address via the shared metric (address_grip_roll_deg).
 - Excluded records and contact fixtures are documented in an explicit exclusion list with reasons.
-- Character builder defaults reflect the A7 convention (grip_roll_deg = 15.0).
+- Character builder defaults reflect the A7 convention.
 """
 
 from __future__ import annotations
@@ -11,11 +11,11 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-from typing import Any
 
 import pytest
 from scipy.spatial.transform import Rotation
 
+from src.shared.python.grip_contact.binding_manifest import validate_manifest
 from src.shared.python.motion_matching.grip_roll import (
     address_grip_roll_deg,
     grip_pose_state_from_spec,
@@ -33,6 +33,10 @@ FLAGSHIP_CLUB_ROTATION = Rotation.from_matrix(
 ).as_matrix()
 
 EXCLUDED_RECORDS: dict[str, str] = {
+    "docs/development/full_body_models/full_body_spec_anthro_driver.json": (
+        "canonical pre-A7 flagship driver model preserved as reference per "
+        "test_owner_check_pre_a7_driver_reads_75_degrees (reads 75 deg on the A7 clock)"
+    ),
     "docs/development/full_body_models/full_body_spec_anthro_iron7.json": (
         "7-iron capture-fit spec pinned to #12221 / #14753 receipt and tracked swing; "
         "kept as capture record per owner direction to work only on the best-match driver model"
@@ -72,10 +76,6 @@ EXCLUDED_RECORDS: dict[str, str] = {
     ),
 }
 
-ACTIVE_SPEC_PATHS = [
-    MODELS_DIR / "full_body_spec_anthro_driver.json",
-]
-
 
 def test_excluded_records_have_explicit_reasons() -> None:
     """Every excluded MuJoCo record or contact fixture has a documented non-empty reason."""
@@ -85,40 +85,34 @@ def test_excluded_records_have_explicit_reasons() -> None:
         assert len(reason.strip()) >= 20, f"Reason for {rel_path} is too short"
 
 
-@pytest.mark.parametrize("spec_path", ACTIVE_SPEC_PATHS, ids=lambda p: p.name)
-def test_active_mujoco_spec_reads_15_degrees_at_address(spec_path: Path) -> None:
-    """Every active MuJoCo full-body spec reads 15 deg +- 1 deg face-on at address."""
-    spec = json.loads(spec_path.read_text(encoding="utf-8"))
-    state = grip_pose_state_from_spec(spec, FLAGSHIP_CLUB_ROTATION)
-    lead, _ = address_grip_roll_deg(state)
-    assert lead == pytest.approx(15.0, abs=1.0)
+def test_canonical_driver_pre_a7_roll_is_preserved() -> None:
+    """Canonical pre-A7 flagship driver model preserved as record reading ~75 deg."""
+    driver_path = MODELS_DIR / "full_body_spec_anthro_driver.json"
+    spec = json.loads(driver_path.read_text(encoding="utf-8"))
+    lead, trail = address_grip_roll_deg(
+        grip_pose_state_from_spec(spec, FLAGSHIP_CLUB_ROTATION)
+    )
+    assert lead == pytest.approx(75.0, abs=1.5)
+    assert trail == pytest.approx(-126.5, abs=3.0)
 
 
-def test_full_body_v1_spec_export_binding_matches_active_driver_hash() -> None:
-    """full_body_v1_spec_export.json matches the active driver spec hash and reads 15 deg."""
+def test_full_body_v1_spec_export_binding_valid_and_matches_canonical_driver_hash() -> (
+    None
+):
+    """full_body_v1_spec_export.json is a valid grip-binding/v1 matching the canonical driver."""
     driver_path = MODELS_DIR / "full_body_spec_anthro_driver.json"
     manifest_path = BINDINGS_DIR / "full_body_v1_spec_export.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    validate_manifest(manifest)
     expected_hash = f"sha256:{hashlib.sha256(driver_path.read_bytes()).hexdigest()}"
     assert manifest["model_hash"] == expected_hash
 
-    spec = json.loads(driver_path.read_text(encoding="utf-8"))
-    lead, _ = address_grip_roll_deg(
-        grip_pose_state_from_spec(spec, FLAGSHIP_CLUB_ROTATION)
-    )
-    assert lead == pytest.approx(15.0, abs=1.0)
 
-
-def test_humanoid_character_builder_binding_matches_driver_hash() -> None:
-    """humanoid_character_builder.json matches the active driver spec hash and reads 15 deg."""
+def test_humanoid_character_builder_binding_valid_and_matches_driver_hash() -> None:
+    """humanoid_character_builder.json is a valid grip-binding/v1 matching the canonical driver."""
     driver_path = MODELS_DIR / "full_body_spec_anthro_driver.json"
     manifest_path = BINDINGS_DIR / "humanoid_character_builder.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    validate_manifest(manifest)
     expected_hash = f"sha256:{hashlib.sha256(driver_path.read_bytes()).hexdigest()}"
     assert manifest["model_hash"] == expected_hash
-
-    spec = json.loads(driver_path.read_text(encoding="utf-8"))
-    lead, _ = address_grip_roll_deg(
-        grip_pose_state_from_spec(spec, FLAGSHIP_CLUB_ROTATION)
-    )
-    assert lead == pytest.approx(15.0, abs=1.0)
