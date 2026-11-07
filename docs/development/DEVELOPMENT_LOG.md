@@ -820,6 +820,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14731 · Re-Zero Grip Roll to the Owner's A7 Convention: Wrists on Top of Shaft, + CCW Toward Target
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14731
+- **Branch:** merged via #14865
+- **PR:** #14865
+- **Paths:** see #14865
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`f01bfcee`; collated from changes/14731-grip-roll-zero-a7-convention.md)
+- **Summary:** Re-zero grip roll to the owner's A7 convention: wrists on top of shaft, + CCW toward target
+- **Next step:** Shipped in PR #14865.
+
 ### DL-#14786 · Optional-Stack CI Runs Loop_Nullspace Snapshot vs Spatial Fixture With Real Pinocchio
 
 - **State:** shipped
