@@ -820,6 +820,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14786 · Optional-Stack CI Runs Loop_Nullspace Snapshot vs Spatial Fixture With Real Pinocchio
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14786
+- **Branch:** merged via #14788
+- **PR:** #14788
+- **Paths:** see #14788
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`f88d28a2`; collated from changes/14786-optional-stack-ci-runs-loop-nullspace-sn.md)
+- **Summary:** Optional-stack CI runs loop_nullspace snapshot vs spatial fixture with real pinocchio
+- **Next step:** Shipped in PR #14788.
+
 ### DL-#14753 · SHOW-A17: Mirror the Right Arm in Full_Body_Spec_Anthro_Iron7 and Regenerate Its Two Ground-Support Receipts
 
 - **State:** shipped
