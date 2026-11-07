@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Final
+from typing import Any, Final
 
 import numpy as np
 import pytest
@@ -56,7 +56,7 @@ PRE_A2_TRAIL_WRIST_BOUNDS_DEG: Final[dict[str, tuple[float, float]]] = {
 }
 
 # G2 trail-hand candidates (#14751) and their trail wrist ROM outcomes:
-G2_TRAIL_OPTIONS: Final[dict[str, dict[str, float | str]]] = {
+G2_TRAIL_OPTIONS: Final[dict[str, dict[str, Any]]] = {
     "copy": {
         "description": "A2 copy grip: L == R, dorsal sep 0.00 deg",
         "dorsal_separation_deg": 0.00,
