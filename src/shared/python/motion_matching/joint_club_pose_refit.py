@@ -113,6 +113,38 @@ def get_arm_joint_indices_and_bounds(
     return idx, idx_names, lb, ub
 
 
+def _resolve_trail_euler(
+    grip_option: str, trail_euler_deg: Sequence[float] | None
+) -> tuple[float, float, float]:
+    """Return the explicit trail Euler angles or the canonical ones for the option."""
+    if trail_euler_deg is not None:
+        return tuple(float(v) for v in trail_euler_deg)  # type: ignore[return-value]
+    if grip_option not in OPTION_TRAIL_EULER_DEG:
+        raise ValueError(
+            f"Unknown grip_option {grip_option!r}, must be one of "
+            f"{sorted(OPTION_TRAIL_EULER_DEG)}"
+        )
+    return OPTION_TRAIL_EULER_DEG[grip_option]
+
+
+def _record_limit_hits(
+    x: NDArray[np.float64],
+    idx_names: Sequence[str],
+    ranges: Mapping[str, Sequence[float]],
+    joint_violations: dict[str, int],
+) -> bool:
+    """Count joints within 0.1 deg of a range limit; return True if any hit."""
+    deg = np.degrees(x)
+    hit_any = False
+    for i, n in enumerate(idx_names):
+        if n in ranges:
+            lo, hi = ranges[n]
+            if deg[i] <= lo + 0.1 or deg[i] >= hi - 0.1:
+                joint_violations[n] += 1
+                hit_any = True
+    return hit_any
+
+
 def refit_joint_club_pose(
     spec: Mapping[str, Any],
     grip_option: str,
@@ -126,14 +158,7 @@ def refit_joint_club_pose(
 ) -> RefitSummary:
     """Refit club pose and bilateral arm postures jointly for ``grip_option``."""
     t0 = time.time()
-    if trail_euler_deg is None:
-        if grip_option not in OPTION_TRAIL_EULER_DEG:
-            raise ValueError(
-                f"Unknown grip_option {grip_option!r}, must be one of {sorted(OPTION_TRAIL_EULER_DEG)}"
-            )
-        target_euler = OPTION_TRAIL_EULER_DEG[grip_option]
-    else:
-        target_euler = tuple(float(v) for v in trail_euler_deg)  # type: ignore[assignment]
+    target_euler = _resolve_trail_euler(grip_option, trail_euler_deg)
 
     old_rig = Rig(json.dumps(spec).encode())
     new_spec, _ = apply_grip_rotation(spec, {"R": target_euler})
@@ -191,15 +216,7 @@ def refit_joint_club_pose(
             np.linalg.norm(Rot.from_matrix(rR.T @ R).as_rotvec())
         )
 
-        deg = np.degrees(sol.x)
-        hit_any = False
-        for i, n in enumerate(idx_names):
-            if n in ranges:
-                lo, hi = ranges[n]
-                if deg[i] <= lo + 0.1 or deg[i] >= hi - 0.1:
-                    joint_violations[n] += 1
-                    hit_any = True
-        if hit_any:
+        if _record_limit_hits(sol.x, idx_names, ranges, joint_violations):
             frames_at_limit += 1
 
     t1 = time.time()
