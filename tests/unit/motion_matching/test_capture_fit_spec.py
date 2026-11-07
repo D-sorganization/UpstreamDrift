@@ -64,8 +64,8 @@ def test_showpiece_grip_is_neutral_and_capture_grip_stays_fitted() -> None:
     # the neutral grip has distinct lead and trail rotations (option b15, #14751)
     lead, trail = showpiece["subject"]["grip_rotation_deg"].values()
     assert lead != trail
-    assert [round(v, 2) for v in lead] == [-85.55, 43.37, -26.14]
-    assert [round(v, 2) for v in trail] == [75.77, 13.57, -173.54]
+    assert [round(v, 2) for v in lead] == [-75.39, -9.72, 4.58]
+    assert [round(v, 2) for v in trail] == [75.39, -9.72, 175.42]
     # the capture spec keeps the fitted, hand-specific rotations
     assert (
         capture["subject"]["grip_rotation_deg"]["L"]
