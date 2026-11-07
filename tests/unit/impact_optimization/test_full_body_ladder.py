@@ -99,6 +99,25 @@ def test_band_accepts_a_physical_baseline_and_rejects_the_rest() -> None:
             require_physical_baseline(bad, band)
 
 
+def test_face_free_band_skips_only_the_face_check() -> None:
+    band = BaselineBand(max_abs_face_deg=None)
+    require_physical_baseline(_Impact(-58.6, 3.0, 2.0, 110.0), band)
+    require_physical_baseline(_Impact(None, 3.0, 2.0, 110.0), band)
+    for bad in (
+        _Impact(10.0, 3.0, 2.0, 80.0),  # speed is still checked
+        _Impact(10.0, -142.0, 2.0, 110.0),  # path is still checked
+        _Impact(10.0, None, 2.0, 110.0),  # path stays required
+    ):
+        with pytest.raises(ContractViolationError):
+            require_physical_baseline(bad, band)
+
+
+def test_the_default_band_still_checks_the_face() -> None:
+    assert BaselineBand().max_abs_face_deg == 25.0
+    with pytest.raises(ContractViolationError):
+        require_physical_baseline(_Impact(-58.6, 3.0, 2.0, 110.0), BaselineBand())
+
+
 def test_band_validates_its_own_bounds() -> None:
     with pytest.raises(ContractViolationError):
         BaselineBand(speed_mph_min=120.0, speed_mph_max=100.0)
