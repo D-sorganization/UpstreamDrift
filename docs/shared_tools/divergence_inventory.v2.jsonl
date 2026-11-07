@@ -281,6 +281,7 @@
 {"path": "biomechanics/myoconverter_integration.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/myosuite_adapter.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/plot_traces.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
+{"path": "biomechanics/posture_impact_metrics.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/rust_muscle.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/shallowing/__init__.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/shallowing/hand_path_plane.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
