@@ -331,7 +331,7 @@ def test_a_fit_outside_the_golf_ranges_needs_a_full_pick() -> None:
         DRIVER,
         {
             "L": [-69.7694757, -17.6044419, 17.5745601],
-            "R": [-68.3997304, 45.0257475, -15.0145382],
+            "R": [-72.8842499, 53.6070875, -22.6605507],
         },
     )
     with pytest.raises(ValueError, match="not a golf grip"):
