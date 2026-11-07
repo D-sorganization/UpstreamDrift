@@ -1506,6 +1506,7 @@
 {"path": "motion_matching/diagnostics/reference_pose.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/distributed_feedback.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/dynamics_filter.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/engine_grip_roll.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/engine_init_profiler.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/equality_least_squares.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/evidence_integrity.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
