@@ -140,7 +140,9 @@ def _dorsum_azimuth_rad(hand: Hand, pose: GripPose) -> float:
     Measured from the mesh itself (centroid of the dorsum shell, as the tests
     read it), so it follows the V azimuth the hand is baked at (about -35 deg
     lead, +75 deg trail) and no copy of that number lives here (#14747). It is
-    independent of the grip radius and hand scale.
+    independent of the grip radius and hand scale (baking at
+    ``GRIP_BUTT_RADIUS_M`` vs tapered radius is checked within 2° by
+    ``test_grip_hand_dorsum_follows_wrist.py``).
     """
     baked = build_grip_hand_mesh(hand, grip_radius_m=GRIP_BUTT_RADIUS_M, pose=pose)
     dorsum = next(c for c in baked.components if c.finger == "dorsum")
