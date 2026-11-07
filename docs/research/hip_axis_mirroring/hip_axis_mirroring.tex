@@ -372,7 +372,7 @@ fix it moved the ankle 0.148~m anterior. The left knee gives 0.147~m
 posterior. The zero pose is unchanged to $10^{-12}$.
 
 \subsection{Evidence}
-All runs were made on ControlTower (\texttt{ud-sim}). A control at the
+All runs were made on <host> (\texttt{ud-sim}). A control at the
 parent commit \texttt{80450f267a} reproduced the previous calibrated driver
 receipt exactly.
 
@@ -535,7 +535,7 @@ records \texttt{hip\_zero\_twist\_mode} and the measured twist
 (\texttt{hip\_zero\_twist\_measured\_deg}) next to the applied one. No bound
 or tolerance changes.
 
-\paragraph{Evidence.} MuJoCo, ControlTower \texttt{ud-sim}, canonical
+\paragraph{Evidence.} MuJoCo, <host> \texttt{ud-sim}, canonical
 commands (driver \texttt{--static-seeds}, 7-iron \texttt{--static-seeds
 --zmp-filter}), same commit. The same-commit baselines reproduce the canonical
 receipts exactly. Turn errors are model minus markers (top / impact, degrees).

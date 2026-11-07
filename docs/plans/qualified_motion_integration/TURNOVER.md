@@ -85,15 +85,15 @@ are local conveniences; reproducible repository pins remain authoritative.
 
 | Runtime                                    | Local Location                                            | Verified Use                                     |
 | ------------------------------------------ | --------------------------------------------------------- | ------------------------------------------------ |
-| Pinocchio 3.8 / Pink 4.4                   | `/home/dieterolson/.venvs/upstream-motion-10254`          | IK and native derivative tests                   |
-| Crocoddyl 3.2.1 / Pinocchio 4.1 / Pink 4.4 | `/home/dieterolson/.venvs/upstream-crocoddyl-conda-10254` | Crocoddyl and QP probes                          |
-| Gepetto / Pinocchio 3.8                    | `/home/dieterolson/.venvs/upstream-gepetto-10254`         | Corrupt Prefix; Repair Before Live Qualification |
+| Pinocchio 3.8 / Pink 4.4                   | `<owner-home>/.venvs/upstream-motion-10254`          | IK and native derivative tests                   |
+| Crocoddyl 3.2.1 / Pinocchio 4.1 / Pink 4.4 | `<owner-home>/.venvs/upstream-crocoddyl-conda-10254` | Crocoddyl and QP probes                          |
+| Gepetto / Pinocchio 3.8                    | `<owner-home>/.venvs/upstream-gepetto-10254`         | Corrupt Prefix; Repair Before Live Qualification |
 
 After #10268 is present in the selected checkout, run from that checkout in WSL:
 
 ```bash
-/home/dieterolson/.local/bin/micromamba run \
-  -p /home/dieterolson/.venvs/upstream-crocoddyl-conda-10254 \
+<owner-home>/.local/bin/micromamba run \
+  -p <owner-home>/.venvs/upstream-crocoddyl-conda-10254 \
   python3 scripts/ci/check_motion_runtime.py --receipt /tmp/motion-runtime.json
 ```
 
