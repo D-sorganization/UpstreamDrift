@@ -2754,6 +2754,50 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-07 | #14819 | G2: trail-hand grip option (b15) with explicit 15 deg alpha and widened trail V-offset bound |
+| 2026-11-07 | #14827 | Calibrate tour, scratch, 10, and 20 handicap putting skill presets against published reference make-rate tables and validate tour make rates and expected putts against Broadie (2014) |
+| 2026-11-07 | #14843 | Reload pinocchio in OpenSim dynamics parity when unit mocks left stubs in sys.modules |
+| 2026-11-07 | #14809 | Native viewer export: bootstrap imports and lazy modules so --help works without matplotlib in minimal envs. |
+| 2026-11-07 | #14784 | TableShotModel reads the dispersion cell for the shot's lie and the conditions' wind/slope bins (CourseConditions gains wind/slope, default calm/flat); absent wind/slope bins are rejected instead of silently using calm/flat. |
+| 2026-11-06 | #14833 | SHOW-B3b: omit ground_model from carry-only dispersion tables and deduplicate runout entry points |
+| 2026-11-06 | #14820 | PR changed-line count is advisory-only in CI: warnings, optional size:large label, allowlist; --strict for optional enforcement (RD #4118 parity) |
+| 2026-11-06 | #14813 | CI: Lighthouse mobile baseline runs in its own lighthouse-mobile job on d-sorg-fleet-docker (fork-PR guarded, informational) |
+| 2026-11-06 | #14823 | NP-08: offline SVD-direction ablation vs high-frequency jitter benchmark (#14501) |
+| 2026-11-06 | #14818 | Map X-factor variants to literature families and add publish payload + unit tests (GM-1b). |
+| 2026-11-06 | #14768 | Controller synergy audit slice 1: ControllerAuditSpec, #13837 trace adapter and ControllerAuditReport (UCM, TNC fail-closed below 30 trials, null-space gain norm) with an analytic Lyapunov golden |
+| 2026-11-06 | #14802 | OSL-14 scoping: osl_scoping.osl14 fixture and lift-body contract tests; OSL-15 scoping: load balance IK provenance contract and tests; OSL-17 scoping: rack + lead-in bundle provenance tests; OSL-19 scoping: grip closure tests and OpenSim receipt hook |
+| 2026-11-06 | #14805 | LIFT-5 epic evidence contract (bundles + parity JSON); LIFT-6 OpenSim lift composition/kinetics contracts |
+| 2026-11-06 | #14815 | rewrite pose_studio test_widgets against real Qt widgets with qapp fixture (#14812) |
+| 2026-11-06 | #14811 | pose_studio test_gui requests a real QApplication via an autouse qapp fixture, so it no longer crashes an xdist worker when no QApplication exists yet |
+| 2026-11-06 | #14808 | Drake UI abort regression tests request qapp via an autouse fixture, so they no longer crash an xdist worker when no QApplication exists yet |
+| 2026-11-06 | #14783 | Leaderboard freshness gate moved to scripts/ci/check_leaderboard_freshness.py; a PR that changes no motion_matching solver input passes despite a squash-orphaned git_head, solver changes still need a rerun. |
+| 2026-11-06 | #14770 | P5: parity report candidate resolution fails closed; canonical checksum/schema/manifest failures never fall through to legacy loading, legacy numeric archives detected explicitly, no allow_pickle=True |
+| 2026-11-06 | #14793 | strategy CLI: --shot-table / --shot-model inject the selected shot model into the personal solve and report its provenance in text and HTML |
+| 2026-11-06 | #14785 | Commit the v1 source spec of the trunk_visuals driver v2 bundle and pin the generator against the committed rollout on its true inputs (step 1) |
+| 2026-11-06 | #14639 | Re-base HX grip alpha to face-on zero at flagship address; preserve fitted Euler triples. |
+| 2026-11-06 | #14641 | Flight model validity: launch spin cap, trajectory guard, pipeline metadata |
+| 2026-11-06 | #14817 | NP-10 offline weight inspector and lexical CI guardrail (#14503) |
+| 2026-11-06 | #14791 | Bump PR Body Lint caller pin to the post-RM#2697 reusable workflow (RM#2427) |
+| 2026-11-06 | #14803 | docs: ADR-0060 OpenSim scaling and fit plan (#13991) |
+| 2026-11-06 | #14775 | MJX L-BFGS: parameter scale, SciPy ftol/gtol/pgtol, receipt stop_reason and gradient norm (#13779) |
+| 2026-11-06 | #14806 | NSX-55: document DV-12583 as present on main, add catalog regression test, fix publication_gate checklist |
+| 2026-11-06 | #14787 | Document Anderson 2007 Table 3 scope for hip adduction/rotation torque slots and extend UNVERIFIED notes |
+| 2026-11-06 | #14777 | Ground-support segment-scale tie-break, receipt canonical compare (#14771) |
+| 2026-11-06 | #14759 | NSX-13 spatial-fixture test double builds the R11 shaft springs like NativePinocchioModel (rigid club), so test_snapshot_vs_spatial_fixture is green again |
+| 2026-11-06 | #14762 | SHOW-G1: mirror the right-arm joint axes in driver v1/v2 (R scapula, shoulder, forearm, wrist) so positive L and R coordinates give mirrored motion |
+| 2026-11-06 | #14774 | Add PR size gate workflow and git numstat checker (500-line cap, exemptions). |
+| 2026-11-06 | #14642 | SHOW-B3b: bounce/roll ground model, slope bins, lie modifier, club column on dispersion tables |
+| 2026-11-06 | #14778 | NP-03/04 toy MLP rank-1 edit and LoRA comparator (#14478 #14479) |
+| 2026-11-06 | #14776 | Add Pydantic golf metric-definitions registry schema (GM-1a) with filter descriptor. |
+| 2026-11-06 | #14761 | S6 catalogue reason now names the missing arm on the NSX-97 UCM split |
+| 2026-11-06 | #14779 | xfail placeholder for anthro noise-aware receipt (#12721) |
+| 2026-11-06 | #14782 | event_outcome_rows refuses a near-grazing impact (transversality below GRAZING_TRANSVERSALITY) instead of returning unreliable linear rows |
+| 2026-11-06 | #14773 | Manual ch. 67 quotes the five-engine R11 chain receipt; previous run keeps its engine block |
+| 2026-11-06 | #14769 | native_viewer_export CLI explains a foreign shared package shadowing the vendored Tools tree |
+| 2026-11-06 | #14772 | Simscape grip docs state the SHOW-A7 grip zero (#14731); a MATLAB test checks the gs3dx topology frames; the R2025b address-roll check is cataloged as deferred |
+| 2026-11-06 | #14711 | OpenSim grip net_moment_com: restore Simbody patch torque (drop #14354 lever), derive static friction by least-squares fit of the Hollars curve to the shared law, run the slow OpenSim parity tests in CI, integrate swings at accuracy 5e-10 and holds at 5e-8 (chosen by motion) so all six net-moment cases pass with the xfails removed |
+| 2026-11-06 | #14760 | SPN-0b data_extraction.md: DOIs and full author lists for Pearcy 1984, Fujii 2007, Wilke 1999 and Wu 2002 from Crossref; no verified_from_primary flag changed |
+| 2026-11-06 | #14758 | Pin the R4 capture-mode address knee on the canonical receipts and record their marker RMS before/after (acceptance 6) |
 | 2026-11-06 | #14766 | OSL-7 predictive deadlift receipt now records the tracked comparison as unavailable (non-converged solve) via a no-solve --refresh-comparison mode; lift_models.tex notes the exploratory status. |
 | 2026-11-06 | #14752 | Fix lod-quality-gate regression: TableShotModel asks DispersionTable.club_label instead of reaching into provenance (Law of Demeter) |
 | 2026-11-06 | #14709 | Putting studio: exact imperial ft factor, a parity test for the core green edge clamp, and locked slope sliders that read the core green's slope at the ball |

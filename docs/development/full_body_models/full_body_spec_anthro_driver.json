@@ -826,7 +826,7 @@
     "NeckInputZ": [-80.0, 80.0],
     "REInput": [-150.0, 5.0],
     "RFInput": [-90.0, 90.0],
-    "RScapInputX": [-30.0, 10.0],
+    "RScapInputX": [-10.0, 30.0],
     "RScapInputY": [-40.0, 40.0],
     "RWInputX": [-40.0, 25.0],
     "RWInputY": [-70.0, 70.0],
@@ -1255,15 +1255,15 @@
       "child": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
       "child_to_follower": [
         [
-          0.35399503156834705, -0.7164406812251919, 0.6011657574334291,
+          0.3539950315683471, -0.716440681225192, 0.6011657574334294,
           -0.02501411692651008
         ],
         [
-          -1.3413465925107291e-8, 0.6427880111678381, 0.7660441062359894,
+          -1.3413465938985079e-8, 0.6427880111678381, 0.7660441062359896,
           -1.1239999999999999
         ],
         [
-          -0.9352473029230961, -0.27117581563347165, 0.22754375269516103,
+          -0.9352473029230967, -0.2711758156334719, 0.22754375269516128,
           0.05908933628725997
         ],
         [0.0, 0.0, 0.0, 1.0]
@@ -1293,17 +1293,17 @@
     {
       "child": "solid_reference:GolfSwing3D_Kinetic/HubtoRS",
       "child_to_follower": [
-        [1.0, 0.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0, 0.0],
         [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, -1.0, 0.0],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "name": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
       "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod",
       "parent_to_base": [
-        [1.0, 0.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0, 0.0],
         [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.42261093595634686],
+        [0.0, 0.0, -1.0, 0.42261093595634686],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "primitives": [
@@ -1320,17 +1320,17 @@
     {
       "child": "solid_reference:GolfSwing3D_Kinetic/RUpperArm",
       "child_to_follower": [
-        [1.0, 0.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0, 0.0],
         [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, -1.0, 0.0],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "name": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
       "parent": "solid_reference:GolfSwing3D_Kinetic/HubtoRS",
       "parent_to_base": [
-        [0.0, 0.0, -1.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
         [0.0, 1.0, 0.0, -0.19494],
-        [1.0, 0.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0, 0.0],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "primitives": [
@@ -1375,16 +1375,16 @@
       "child": "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm",
       "child_to_follower": [
         [1.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0],
+        [0.0, -1.0, 0.0, 0.0],
+        [0.0, 0.0, -1.0, 0.0],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "name": "GolfSwing3D_Kinetic/Right Forearm/Revolute Joint/Kinetically Driven Revolute",
       "parent": "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1",
       "parent_to_base": [
         [1.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, -0.14526160252728315],
+        [0.0, -1.0, 0.0, 0.0],
+        [0.0, 0.0, -1.0, -0.14526160252728315],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "primitives": [
@@ -1397,18 +1397,18 @@
     {
       "child": "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff",
       "child_to_follower": [
-        [-1.3413465925107291e-8, 0.642788011167838, 0.7660441062359892, 0.0],
-        [0.9825093870374131, 0.14264742696404328, -0.11969551354961236, 0.0],
-        [-0.18621306179580221, 0.7526455236560128, -0.6315452567609066, 0.0127],
+        [-1.3413466179782993e-8, 0.6427880111678375, -0.766044106235989, 0.0],
+        [-0.9825046195152171, -0.14266669523218917, -0.11971168156359897, 0.0],
+        [-0.18623821474460792, 0.7526418715235165, 0.631542192255054, 0.0127],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "name": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
       "parent": "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm",
       "parent_to_base": [
-        [1.2246063538223773e-16, -2.220446049250313e-16, 1.0, 0.0],
-        [-1.0, 1.2246063538223773e-16, 1.2246063538223775e-16, 0.0],
+        [1.2246063538223773e-16, 2.220446049250313e-16, -1.0, 0.0],
+        [-1.0, -1.2246063538223773e-16, -1.2246063538223775e-16, 0.0],
         [
-          -1.2246063538223775e-16, -1.0, -2.220446049250313e-16,
+          -1.2246063538223775e-16, 1.0, 2.220446049250313e-16,
           -0.14526160252728315
         ],
         [0.0, 0.0, 0.0, 1.0]
@@ -1905,7 +1905,7 @@
       "offset_m": [0.02, -0.15, 0.08]
     }
   },
-  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from driver.json (#12210); static external tibial-torsion offset 10 deg per ankle (#12789); de Leva table derived from whole Table 4 rows, trunk length kept by rescaling trunk_scale and upper-trunk solid rebuilt (#13037); neutral address grip, HX-canonical alpha -10.73 / psi 40 / gamma 0 for both hands, 15 deg face-on (docs/development/full_body_models/evidence/grip_roll/neutral_grip.json, #14551); the grip fitted to the capture is kept in full_body_spec_anthro_driver_capture.json; head and trunk-part CM measured from the cranial de Leva row origin (#13037)",
+  "provenance": "anthropometric full-body candidate v1 at 1.710 m, 78.0 kg (build_anthropometric_spec.py; AN-1 #10099); upper body unqualified; marker offsets are anatomical seeds to be calibrated; left hip axes mirrored to the OpenSim convention (OSV-6 #11737); right knee axis mirrored to the OpenSim flexion-negative convention (#12057); club markers from driver.json (#12210); static external tibial-torsion offset 10 deg per ankle (#12789); de Leva table derived from whole Table 4 rows, trunk length kept by rescaling trunk_scale and upper-trunk solid rebuilt (#13037); neutral address grip, HX-canonical alpha -10.73 / psi 40 / gamma 0 for both hands, 15 deg face-on (docs/development/full_body_models/evidence/grip_roll/neutral_grip.json, #14551); the grip fitted to the capture is kept in full_body_spec_anthro_driver_capture.json; grip rotation refitted per capture from docs/development/full_body_models/evidence/grip_roll/neutral_grip.json (#12221); head and trunk-part CM measured from the cranial de Leva row origin (#13037)",
   "qualification": "full-body extension of native-derived geometry; dynamics unqualified",
   "schema_version": "full-body-v1",
   "subject": {
@@ -1914,7 +1914,7 @@
     "grip_roll_deg": 0.0,
     "grip_rotation_deg": {
       "L": [-75.3894, -9.7161, 4.5795],
-      "R": [-75.3894, -9.7161, 4.5795]
+      "R": [75.38950769366701, -9.71742514286749, 175.41986192012564]
     },
     "mass_kg": 78.0,
     "shoulder_scale": 1.0,

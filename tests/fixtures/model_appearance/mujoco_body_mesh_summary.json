@@ -111,8 +111,8 @@
         "label": "trail_hand",
         "material": "mat_skin_2",
         "n_vertices": 6210,
-        "bbox_min": [-0.025662, -0.031432, 0.030097],
-        "bbox_max": [0.046685, 0.075133, 0.118208]
+        "bbox_min": [-0.037057, -0.019272, 0.01363],
+        "bbox_max": [0.039208, 0.070697, 0.123309]
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": [

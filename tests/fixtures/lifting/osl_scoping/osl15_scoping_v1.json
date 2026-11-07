@@ -1,0 +1,12 @@
+{
+  "schema_version": "ud.osl_scoping.osl15.v1",
+  "issue": {
+    "id": 13093,
+    "slug": "OSL-15"
+  },
+  "load_balance_contract": {
+    "method_keyword": "mid-foot",
+    "barbell_load_kg_min": 99.0
+  },
+  "notes": "Extend `assert_ik_records_load_balance` to deadlift and clean bundles once regenerated with bar-in-IK balance (#13093)."
+}

@@ -80,6 +80,9 @@ def compose_lift_body_document() -> dict[str, Any]:
         LIFT_BODY_MASS_KG,
         "driver",
         match_subject_mass=True,
+        # Lifting bundles store right-arm angles in the native axis convention
+        # (follow-up to #14746: migrate them, then drop this).
+        mirror_arm=False,
     )
     return dict(built.document)
 

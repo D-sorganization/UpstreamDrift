@@ -19,7 +19,7 @@ from src.shared.python.force_overlay.palette import label_variant_hex
 from src.shared.python.force_overlay.ellipsoid_validation import (
     validate_oriented_ellipsoid_fields,
 )
-from src.shared.python.plot_style import FORCE_KIND_PALETTE
+from src.shared.python.force_overlay.palette import FORCE_KIND_PALETTE
 
 __all__ = [
     "ArrowGlyph",

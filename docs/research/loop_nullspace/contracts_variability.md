@@ -74,8 +74,10 @@ Modules (all under `src/shared/python/loop_nullspace/`):
   step), `augment_persistent` (per-trial parameter states),
   `euler_dynamics` (`A = I + dt F`, `B = dt G`, any tangent dimension),
   `step_covariances` (from `DisturbanceSpec`, timestep consistent) and
-  `event_outcome_rows` (`C Π`, NSX-83). `LinearizedDynamics` is reused from
-  `estimation/mosaic/local_policy.py`.
+  `event_outcome_rows` (`C Π`, NSX-83; it refuses a near-grazing impact,
+  transversality below `GRAZING_TRANSVERSALITY`, with `ValueError`, the gate
+  the outcome map flags `UNRELIABLE_LINEAR_ESTIMATE`). `LinearizedDynamics`
+  is reused from `estimation/mosaic/local_policy.py`.
 - `nonlinearity_gate.py`: `assess_nonlinearity(rollout, directions, *,
   amplitude, gate_threshold)`. **`gate_threshold` has no default**: NSX-80
   specifies a gate but no number, so the caller supplies it.
@@ -271,7 +273,7 @@ Catalogue status.
 | S3  | Distal stabilization        | implemented     | NSX-93 impedance window ending at impact             |
 | S4  | Proximal-distal effort      | not implemented | no per-joint effort-share parameterisation           |
 | S5  | Grip / hand-split preload   | implemented     | NSX-92, M2 (geometric preload) channel only          |
-| S6  | Kinematic redundancy (UCM)  | not implemented | no UCM computation exists in the repository          |
+| S6  | Kinematic redundancy (UCM)  | not implemented | no S6 arm on the NSX-97 `ucm_decompose` split        |
 | S7  | Delayed feedback            | implemented     | NSX-93 delayed feedback and frozen delay margin      |
 | S8  | Speed-accuracy              | implemented     | NSX-92 `chs_variance_front`                          |
 | S9  | Biarticular coupling        | not implemented | no biarticular comparison on the NSX-94 frame        |

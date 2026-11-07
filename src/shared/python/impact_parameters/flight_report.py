@@ -23,6 +23,10 @@ from dataclasses import dataclass
 import numpy as np
 
 from src.shared.python.contracts import ensure, require
+from src.shared.python.physics.ball_flight_validity import (
+    MAX_DRIVER_LAUNCH_SPIN_RPM,
+    assess_trajectory_validity,
+)
 from src.shared.python.physics.swing_ball_flight_pipeline import (
     SwingBallFlightPipeline,
     SwingState,
@@ -33,9 +37,6 @@ from .conditions import ImpactConditions
 from .target_frame import TargetFrame
 
 _MPS_TO_MPH = 2.2369362920544
-# A real driver flight lands well inside this; the margin keeps platform
-# floating-point differences from flipping a verdict near the edge.
-_MAX_LANDING_AZIMUTH_DEG = 45.0
 TOTAL_UNAVAILABLE = "no bounce/roll model in the repository (carry only)"
 
 
@@ -59,21 +60,8 @@ class FlightSummary:
 
 
 def _invalid_reason(path: np.ndarray) -> str:
-    """Why the flight is outside the model's validity ('' when valid).
-
-    The default simulator has no spin decay, so an extreme sidespin turns the
-    ball through more than 90 degrees; down-range then reverses.  That is a
-    model artefact, not a result, and is flagged instead of presented.
-    """
-    if float(np.min(np.diff(path[:, 0]))) < -1e-6:
-        return "down-range reverses (outside the flight model's validity)"
-    azimuth = math.degrees(math.atan2(abs(path[-1, 1]), path[-1, 0]))
-    if path[-1, 0] <= 0.0 or azimuth > _MAX_LANDING_AZIMUTH_DEG:
-        return (
-            f"ball lands {azimuth:.0f} deg off the target line "
-            f"(limit {_MAX_LANDING_AZIMUTH_DEG:.0f}; outside the flight model's validity)"
-        )
-    return ""
+    """Delegate to :func:`~physics.ball_flight_validity.assess_trajectory_validity`."""
+    return assess_trajectory_validity(path).invalid_reason
 
 
 def swing_state_from_series(
@@ -109,7 +97,20 @@ def flight_for_impact(
     )
     path = np.array([p.position for p in result.trajectory], dtype=float)
     launch = result.launch_conditions
-    reason = _invalid_reason(path)
+    meta = result.metadata
+    if not bool(meta.get("flight_valid", True)):
+        reason = str(meta.get("flight_invalid_reason", "") or "")
+    else:
+        reason = _invalid_reason(path)
+        if not reason and meta.get("launch_spin_clamped"):
+            pre_clamp_rpm = float(
+                meta.get("pre_clamp_launch_spin_rpm", launch.spin_rate)
+            )
+            if pre_clamp_rpm > MAX_DRIVER_LAUNCH_SPIN_RPM + 1.0:
+                reason = (
+                    "impact spin exceeds the driver validity envelope "
+                    f"({pre_clamp_rpm:.0f} rpm); trajectory after capping is not presented (SHOW-C7 / #14621)"
+                )
     summary = FlightSummary(
         carry_m=float(result.carry_m),
         lateral_m=-float(path[-1, 1]),
