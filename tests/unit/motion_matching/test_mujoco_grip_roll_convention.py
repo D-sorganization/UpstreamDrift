@@ -116,3 +116,14 @@ def test_humanoid_character_builder_binding_valid_and_matches_driver_hash() -> N
     validate_manifest(manifest)
     expected_hash = f"sha256:{hashlib.sha256(driver_path.read_bytes()).hexdigest()}"
     assert manifest["model_hash"] == expected_hash
+
+
+def test_a7_neutral_grip_receipt_roundtrips_through_grip_contract() -> None:
+    """The A7 neutral grip receipt (15 deg on the A7 clock, alpha ~75 deg) round-trips cleanly."""
+    from src.shared.python.motion_matching.grip_contract import hand_from_euler
+
+    receipt_path = MODELS_DIR / "evidence" / "grip_roll" / "neutral_grip.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    lead_total = receipt["sides"]["lead"]["total_deg"]
+    angles = hand_from_euler(lead_total)
+    assert angles.alpha_deg == pytest.approx(75.0, abs=1.0)
