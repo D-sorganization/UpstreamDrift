@@ -24,7 +24,8 @@ osim = require_opensim()
 # the real SDK is an on-disk module.
 if not isinstance(getattr(osim, "__file__", None), str) or not hasattr(osim, "Model"):
     pytest.skip("real opensim is unavailable", allow_module_level=True)
-mujoco = pytest.importorskip("mujoco"); _s = __import__("sys"); _s.modules.pop("pinocchio", None); _s.modules.pop("pinocchio.casadi", None); pinocchio = pytest.importorskip("pinocchio")  # noqa: E501
+mujoco = pytest.importorskip("mujoco")
+pinocchio = pytest.importorskip("pinocchio")
 
 from src.engines.physics_engines.opensim.python import (  # noqa: E402
     opensim_physics_engine as engine_module,
