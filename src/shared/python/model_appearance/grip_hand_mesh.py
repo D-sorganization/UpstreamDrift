@@ -32,9 +32,8 @@ thumb azimuth.
 
 Shells (#13997)
 ---------------
-The palm is swept from the V to the knuckles (MCP) on the grip side. A dorsum
-(metacarpal block) rides on the palm block, out past the knuckles; it never
-rests on the grip.
+Palm strip to MCP; dorsum off-grip past knuckles; thumb-web patch on the palm
+clearance band from index MCP toward the thumb.
 
 Linked fingers (overlap, interlock) take the trail little finger off the grip
 and over (or between) the lead index and middle fingers; it is then flagged
@@ -167,7 +166,7 @@ class HandComponent:
     """One closed shell of the hand mesh (hand-grip frame)."""
 
     name: str
-    finger: str  # FINGER_NAMES, "thumb", "palm" or "dorsum"
+    finger: str  # FINGER_NAMES, "thumb", "palm", "dorsum" or "thumb_web"
     mesh: Mesh
     on_grip: bool
 
@@ -429,6 +428,7 @@ def build_grip_hand_mesh(
     thumb_azimuth_deg = placement.thumb_offset_deg + roll_deg
     thumb_azimuth = math.radians(thumb_azimuth_deg)
     parts += _thumb(radius, thumb_azimuth, params)
+    parts += _thumb_web(radius, thumb_azimuth, (v, mcp), (z_lo, z_hi), params)
 
     on_grip_vertices = np.vstack([p.mesh.vertices for p in parts if p.on_grip])
     gap = float(np.min(np.hypot(on_grip_vertices[:, 0], on_grip_vertices[:, 1])))
@@ -590,6 +590,33 @@ def _solve_topology_finger(
     angle0 = math.atan2(c_final[1], c_final[0])
     mcp = target_azimuth - angle0
     return d, mcp, target_z, on_grip
+
+
+def _thumb_web(
+    grip_radius: float,
+    thumb_azimuth: float,
+    palm_theta: tuple[float, float],
+    z: tuple[float, float],
+    params: HandMeshParams,
+) -> list[HandComponent]:
+    """Curved palm-clearance patch along the shortest arc index MCP → thumb."""
+    k = params.scale
+    _, mcp = palm_theta
+    delta = (thumb_azimuth - mcp + math.pi) % (2.0 * math.pi) - math.pi
+    min_span = math.radians(14.0)
+    if abs(delta) < min_span:
+        delta = math.copysign(min_span, delta if delta != 0.0 else 1.0)
+    theta_end = mcp + delta
+    tw_lo, tw_hi = sorted((mcp, theta_end))
+    palm_inner = grip_radius + params.palm_clearance_m
+    web = _rounded_block(
+        palm_inner,
+        0.52 * k * params.palm_thickness_m,
+        (tw_lo, tw_hi),
+        z,
+        params.sides,
+    )
+    return [HandComponent("thumb_web", "thumb_web", web, True)]
 
 
 def _thumb(
