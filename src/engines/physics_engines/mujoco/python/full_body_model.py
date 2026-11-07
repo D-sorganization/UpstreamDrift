@@ -130,7 +130,11 @@ class NativeMujocoFullBodyModel:
         self._spec_for_partition = spec
         self._solid_groups: dict[str, RigidInertia] | None = None
 
-        # Contact setup
+        self._init_contact_model(spec)
+        self._errors: tuple[np.ndarray, np.ndarray] | None = None
+
+    def _init_contact_model(self, spec: dict[str, Any]) -> None:
+        """Initialize ground planes, support surfaces, and contact spheres."""
         contact_cfg = spec["contact"]
         self.contact_parameters = ContactParameters(**contact_cfg["parameters"])
         ground_cfg = contact_cfg["ground"]
