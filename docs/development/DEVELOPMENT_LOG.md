@@ -820,6 +820,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14424 · Split Address-Relative and Target-Line/Lab-Frame Shoulder and Hip Turn Conventions With Declared Segment Proxies and Chu 2010 Event Reporting (GM-1C).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14424
+- **Branch:** merged via #14863
+- **PR:** #14863
+- **Paths:** see #14863
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`19999b17`; collated from changes/14424-gm1c-shoulder-hip-turn-conventions.md)
+- **Summary:** Split address-relative and target-line/lab-frame shoulder and hip turn conventions with declared segment proxies and Chu 2010 event reporting (GM-1c).
+- **Next step:** Shipped in PR #14863.
+
 ### DL-#14731 · Re-Zero Grip Roll to the Owner's A7 Convention: Wrists on Top of Shaft, + CCW Toward Target
 
 - **State:** shipped
