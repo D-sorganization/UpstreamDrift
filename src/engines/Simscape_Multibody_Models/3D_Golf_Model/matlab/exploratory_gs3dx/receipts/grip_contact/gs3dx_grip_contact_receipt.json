@@ -3,7 +3,7 @@
   "matlab_release": "2025b",
   "model_name": "GS3DX_GripContact",
   "model_sha256": "b27f2a0ccdd098a889f1618c57330d76266b62594ce36edc7e0907e5f8a621da",
-  "input_sha256": "efed442acf24c5769fedf8fb0e4b6bcaf665651897b43ee4652bde3688cce7a2",
+  "input_sha256": "a691e5d32680e9f5e5afbbb96474ee8156af9168ffcb3a1e367fb2d1d4eb3d53",
   "kernel_sha256": "b268b6148701818e26d37519bd9c4977580e715b77b781490115445d9996bdc2",
   "solver": {
     "solver_name": "ode15s",
