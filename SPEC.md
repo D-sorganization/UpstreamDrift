@@ -2754,6 +2754,20 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-08 | #14908 | Preserve #14733 proposal durable change-history evidence across normal change-fragment collation and log archival |
+| 2026-11-08 | #14901 | Point driver motion-matching smoke to canonical capture-fit spec (full_body_spec_anthro_driver_capture.json) and align anthro_driver receipt base_spec_file metadata |
+| 2026-11-08 | #14890 | SHOW-A19: re-characterise wrist and scapula ROM from evidence and evaluate option (c) address reachability |
+| 2026-11-08 | #14900 | SHOW-A10: styled full-swing render evidence and summary comparing improved model against baseline |
+| 2026-11-08 | #14888 | Proposal (write-up only): #13560 OpenSim net-moment gap - recorder inconsistency finding, conditioning math, options |
+| 2026-11-08 | #14898 | Build the D51 reference from the Drake IK q_track migrated onto the v2 spec, keeping the observed face at impact and the hand closure inside the 5 mm gate (step 2) |
+| 2026-11-08 | #14824 | NP-07 loop-constraint projection of policy output (grip loop, diagnostic) (#14500) |
+| 2026-11-08 | #14839 | NP-02 demonstration fixture and behavior-cloned 64x64 MLP baseline (#14477) |
+| 2026-11-08 | #14899 | physics_spec_sha256 and the saved-comparison receipts compare floats at a canonical precision (12 significant digits, 1e-12 absolute) so BLAS/libm last-bit drift cannot move them (owner option A) |
+| 2026-11-08 | #14902 | Grip Contact: verify MuJoCo and OpenSim net-moment parity gap closure and remove strict xfails |
+| 2026-11-08 | #14907 | OSL-19: grip closure contracts and OpenSim reach hook on back-squat bundles |
+| 2026-11-08 | #14903 | OSL-17: put back-squat bar on BackTop high-bar rack, verify lead-in settle and whole-window OpenSim Hicks and marker gates |
+| 2026-11-08 | #14904 | OSL-15: verify bar-load balance in IK provenance (combined CoM over mid-foot) on back squat barbell and source bundles |
+| 2026-11-08 | #14909 | LIFT-5: four-engine bar path parity contract and tests covering MuJoCo, Drake, Pinocchio, and OpenSim |
 | 2026-11-07 | #14886 | SHOW-A18: ROM diagnostic decomposing A2 trail-wrist excursions against pre-A2 capture and G2 options |
 | 2026-11-07 | #14883 | SHOW-A20: refit capture club pose per trail-grip option removing copy-grip bias |
 | 2026-11-07 | #14877 | Refs #11745: Add reproducible back-squat trajectory metrics and sourced comparison limits |
