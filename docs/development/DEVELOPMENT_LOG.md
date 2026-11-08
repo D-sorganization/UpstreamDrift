@@ -31,18 +31,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** OSL-19 scoping: grip closure tests and OpenSim receipt hook
 - **Next step:** Rebase after OSL stack merges; add OpenSim receipt to bundles.
 
-### DL-#13131 · OSL-17 Scoping: Rack + Lead-In Bundle Provenance Tests
+### DL-#13131 · OSL-17: Back-Squat Bar Rack and Rest Window
 
-- **State:** in_review
-- **Owner:** unassigned
+- **State:** in_progress
+- **Owner:** fleet-orchestrator
 - **Issue:** #13131
-- **Branch:** cursor/osl17-scoping-contracts-13131-94df
+- **Branch:** agy/13131-osl17-bar-rack-rest
 - **PR:** #14802
-- **Paths:** see #14802
+- **Paths:** src/shared/python/lifting/back_rack.py, src/shared/python/osl_scoping/osl17.py, tests/unit/lifting/test_back_rack.py, tests/unit/lifting/osl_scoping/test_osl17_scoping_contract.py, docs/development/lifting/evidence/opensim_ik_id/receipts.json
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`9569ef7e`; collated from changes/13131-osl-17-scoping-rack-lead-in-bundle-prove.md)
-- **Summary:** OSL-17 scoping: rack + lead-in bundle provenance tests
-- **Next step:** Merge after OSL-14/15 stack; extend lead-in to clear xfail.
+- **Last verified:** 2026-11-08 (`df2d7034`; branch agy/13131-osl17-bar-rack-rest)
+- **Summary:** OSL-17: put back-squat bar on BackTop high-bar rack, verify lead-in settle and whole-window OpenSim Hicks and marker gates
+- **Next step:** Open PR from agy/13131-osl17-bar-rack-rest; resolve floating-base regulation for re-track bound.
 
 ### DL-#13093 · OSL-15 Scoping: Load Balance IK Provenance Contract and Tests
 

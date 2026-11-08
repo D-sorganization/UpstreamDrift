@@ -52,6 +52,23 @@ FIXTURE_SCHEMA: dict[str, Any] = {
                 },
             },
         },
+        "receipt_contract": {
+            "type": "object",
+            "required": [
+                "max_marker_rms_m",
+                "max_marker_peak_m",
+                "require_forces_within",
+                "require_moments_within",
+                "allow_excluded_states",
+            ],
+            "properties": {
+                "max_marker_rms_m": {"type": "number", "exclusiveMinimum": 0},
+                "max_marker_peak_m": {"type": "number", "exclusiveMinimum": 0},
+                "require_forces_within": {"type": "boolean"},
+                "require_moments_within": {"type": "boolean"},
+                "allow_excluded_states": {"type": "boolean"},
+            },
+        },
     },
 }
 
@@ -118,3 +135,37 @@ def assert_lead_in_duration(bundle_path: Path, *, fixture: Mapping[str, Any]) ->
     assert isinstance(lead, dict), lead
     need = float(fixture["lead_in_contract"]["min_duration_s"])
     assert float(lead["duration_s"]) >= need
+
+
+def assert_opensim_squat_receipt(
+    receipts_path: Path, *, fixture: Mapping[str, Any] | None = None
+) -> dict[str, Any]:
+    """Committed OpenSim squat receipt satisfies marker gate and whole-window Hicks residual gate."""
+    import json
+
+    if fixture is not None:
+        validate_payload(fixture, FIXTURE_SCHEMA)
+    data = json.loads(receipts_path.read_text(encoding="utf-8"))
+    squat = data["lifts"]["squat"]["ik_id"]
+    assert squat.get("status") == "complete", f"Squat status not complete: {squat}"
+
+    markers = squat["ik"]["marker_error"]
+    rc: Mapping[str, Any] = (
+        fixture["receipt_contract"] if fixture and "receipt_contract" in fixture else {}
+    )
+    max_rms = float(rc.get("max_marker_rms_m", 0.02))
+    max_peak = float(rc.get("max_marker_peak_m", 0.04))
+    assert float(markers["rms_m"]) < max_rms, (
+        f"Marker RMS {markers['rms_m']} >= {max_rms}"
+    )
+    assert float(markers["max_m"]) < max_peak, (
+        f"Marker peak {markers['max_m']} >= {max_peak}"
+    )
+
+    gate = squat["id"]["residual_gate"]
+    assert gate.get("forces_within") is True, f"Forces not within gate: {gate}"
+    assert gate.get("moments_within") is True, f"Moments not within gate: {gate}"
+    assert squat["ik"]["frames"] == squat["bundle"]["frames"], (
+        "States excluded from gate"
+    )
+    return squat
