@@ -1,7 +1,7 @@
 {
   "schema": "grip-binding/v1",
   "model_id": "full_body_v1_spec_export",
-  "model_hash": "sha256:757511a7ff67deb67a697ce681b13dd799b1421ebdec1d639ca14f959b5f2a87",
+  "model_hash": "sha256:fd72d8be7a6c5c557a10886a7d2717a4eb4619805a24cc1be644215eea21dcb3",
   "handedness": "right",
   "side_roles": {
     "left": "lead",

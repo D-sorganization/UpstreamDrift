@@ -325,10 +325,14 @@ def test_precedence_pick_then_document_then_default() -> None:
 
 def test_a_fit_outside_the_golf_ranges_needs_a_full_pick() -> None:
     # The shipped driver grip is the neutral golf grip (SHOW-A2, #14551), so a
-    # partial pick is accepted; the pre-A2 fitted triple (gamma ~ 94 deg) is not.
+    # partial pick is accepted; a fitted triple outside the trail-offset range is not (#14751).
     apply_grip_selection(DRIVER, GripOverrides(lead_palm_diagonal=45.0))
     fitted, _ = apply_grip_rotation(
-        DRIVER, {"L": [-36.864, 57.315, 70.926], "R": [9.769, 52.918, 83.914]}
+        DRIVER,
+        {
+            "L": [-69.7694757, -17.6044419, 17.5745601],
+            "R": [-72.8842499, 53.6070875, -22.6605507],
+        },
     )
     with pytest.raises(ValueError, match="not a golf grip"):
         apply_grip_selection(fitted, GripOverrides(lead_palm_diagonal=45.0))

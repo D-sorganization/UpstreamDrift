@@ -118,6 +118,7 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
             coordinate_order=tuple(adapter.coordinate_order),
             labels=tuple(attachments),
         )
+        self.arm_mirrored = bool(adapter.arm_mirrored)
         mj: Any = adapter._mj
         self._mj = mj
         self.adapter = adapter

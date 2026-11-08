@@ -1,5 +1,8 @@
 """NSX-13: ``snapshot_from_adapter`` equals the NSX-12 spatial fixture (#12558).
 
+The optional-stack workflow collects and runs this module under a real Pinocchio
+install (#14786).
+
 The fixture (``spatial_fixture``) builds its snapshot with frame Jacobians and
 classical accelerations on a hand-built Pinocchio chain.  Here the *same*
 Pinocchio model is driven through the real ``PinocchioForceAdapter`` methods

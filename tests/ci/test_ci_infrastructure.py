@@ -1079,7 +1079,14 @@ class TestCIEnvironmentCompatibility:
         jobs = workflow["jobs"]
         gate = jobs["quality-gate"]
         aggregated = set(gate["needs"])
-        not_gating = {"quality-gate", "matlab-tests", "arduino-build", "parity-smoke"}
+        # lighthouse-mobile: informational scores, PR-only (#14698).
+        not_gating = {
+            "quality-gate",
+            "matlab-tests",
+            "arduino-build",
+            "parity-smoke",
+            "lighthouse-mobile",
+        }
 
         missing = sorted(set(jobs) - aggregated - not_gating)
         assert not missing, (

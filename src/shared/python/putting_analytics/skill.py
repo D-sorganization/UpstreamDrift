@@ -120,3 +120,16 @@ class PuttingSkillProfile:
         return replace(
             self, stroke=replace(self.stroke, **stroke), read=replace(self.read, **read)
         )
+
+
+def get_calibrated_preset(tier: str) -> PuttingSkillProfile:
+    """Return the calibrated PuttingSkillProfile for 'tour', 'scratch', '10', or '20'."""
+    from src.shared.python.putting_analytics.calibration import CALIBRATED_PRESETS
+
+    normalized = tier.strip().lower().removeprefix("hcp_").removeprefix("hcp-")
+    key = "tour" if normalized in ("tour", "pga_tour", "pga") else normalized
+    require(
+        key in CALIBRATED_PRESETS,
+        f"unknown skill tier {tier!r}; choose from {tuple(CALIBRATED_PRESETS)}",
+    )
+    return CALIBRATED_PRESETS[key].profile
