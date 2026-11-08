@@ -97,16 +97,28 @@ def test_swing_fixture_reproduces_exact_issue_14763_violations() -> None:
     q = np.load(FIXTURES / "swing_q_driver.npz")["q"]
     assert q.shape == (908, len(spec["coordinate_order"]))
 
-    # Do not widen the ranges: verify HUMAN_RANGES_DEG unchanged
-    assert module.HUMAN_RANGES_DEG["RWInputY"] == (-70.0, 70.0)
-    assert module.HUMAN_RANGES_DEG["RWInputX"] == (-40.0, 25.0)
-    assert module.HUMAN_RANGES_DEG["LWInputY"] == (-70.0, 70.0)
-    assert module.HUMAN_RANGES_DEG["LWInputX"] == (-40.0, 25.0)
+    # Evidence-based ranges (#14795); pre-A19 baseline checked with nominal dict
+    assert module.HUMAN_RANGES_DEG["RWInputY"] == (-80.0, 80.0)
+    assert module.HUMAN_RANGES_DEG["RWInputX"] == (-60.0, 45.0)
+    assert module.HUMAN_RANGES_DEG["RScapInputX"] == (-35.0, 20.0)
+    nominal = dict(module.HUMAN_RANGES_DEG)
+    nominal.update(
+        {
+            "RWInputY": (-70.0, 70.0),
+            "RWInputX": (-40.0, 25.0),
+            "LWInputY": (-70.0, 70.0),
+            "LWInputX": (-40.0, 25.0),
+            "RScapInputX": (-10.0, 30.0),
+            "LScapInputX": (-10.0, 30.0),
+            "RScapInputY": (-40.0, 40.0),
+            "LScapInputY": (-40.0, 40.0),
+        }
+    )
 
     found = module.violations(
         q,
         spec["coordinate_order"],
-        ranges_deg=module.HUMAN_RANGES_DEG,
+        ranges_deg=nominal,
         tolerance_deg=0.5,
     )
 
@@ -205,10 +217,10 @@ def test_g2_trail_grip_options_recount_and_comparison() -> None:
     )
     assert delta_frames == 271  # 691 -> 420 frames
 
-    # Verify ranges remain strict
+    # Verify evidence-based ranges (#14795)
     for coord in ("RWInputY", "RWInputX", "LWInputY", "LWInputX"):
         lo, hi = module.HUMAN_RANGES_DEG[coord]
-        assert (lo, hi) == ((-70.0, 70.0) if coord.endswith("Y") else (-40.0, 25.0))
+        assert (lo, hi) == ((-80.0, 80.0) if coord.endswith("Y") else (-60.0, 45.0))
 
 
 def test_club_face_fixture_documentation_and_rom_characterisation() -> None:
