@@ -31,6 +31,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** physics_spec_sha256 and the saved-comparison receipts compare floats at a canonical precision (12 significant digits, 1e-12 absolute) so BLAS/libm last-bit drift cannot move them (owner option A)
 - **Next step:** Merge the PR.
 
+### DL-#14894 · Research Artifacts: Checksum-Bound Storage Contracts
+
+- **State:** in_review
+- **Owner:** fleet-orchestrator
+- **Issue:** #14894
+- **Branch:** agy/14894-research-artifact-storage
+- **PR:** #14911
+- **Paths:** scripts/research/shot_pattern_analysis/fetch_release_assets.py, tests/unit/research/test_fetch_release_assets.py, docs/development/evidence/RESEARCH_ARTIFACT_STORAGE_POLICY.md
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`c3813358`; branch agy/14894-research-artifact-storage)
+- **Summary:** Research artifacts: checksum-bound durable storage, fail-closed offline/integrity verification, and evidence preservation policy
+- **Next step:** Open PR from agy/14894-research-artifact-storage; arm auto-merge.
+
 ### DL-#13158 · OSL-19: Grip Closure and OpenSim Reach Receipt
 
 - **State:** in_review
