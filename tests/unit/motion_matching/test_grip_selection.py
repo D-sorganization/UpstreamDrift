@@ -217,10 +217,7 @@ def test_resolver_and_cli_match_the_fixture(case: dict[str, Any]) -> None:
         _spec_builder_overrides(case["picks"]),
     ):
         document, grip = apply_grip_selection(DRIVER, overrides)
-        allowed_driver_shas = {expected["driver_physics_spec_sha256"]}
-        if "driver_physics_spec_sha256_win" in expected:
-            allowed_driver_shas.add(expected["driver_physics_spec_sha256_win"])
-        assert physics_spec_sha256(document) in allowed_driver_shas
+        assert physics_spec_sha256(document) == expected["driver_physics_spec_sha256"]
         if expected["grip"] is not None:
             assert grip is not None
             assert grip_spec_to_physical(grip) == expected["grip"]
@@ -242,11 +239,9 @@ def test_desktop_and_web_api_match_the_fixture(case: dict[str, Any]) -> None:
     summary = grip_revision_summary(
         CharacterBuilderModel().compile(), GripOverrides.from_picks(case["picks"])
     )
-    allowed_char_shas = {expected["character_physics_spec_sha256"]}
-    if "character_physics_spec_sha256_win" in expected:
-        allowed_char_shas.add(expected["character_physics_spec_sha256_win"])
-    assert physics_spec_sha256(compiled.document) in allowed_char_shas
-    assert summary["physics_spec_sha256"] in allowed_char_shas
+    char_sha = expected["character_physics_spec_sha256"]
+    assert physics_spec_sha256(compiled.document) == char_sha
+    assert summary["physics_spec_sha256"] == char_sha
     assert summary["spec_sha256"] == compiled.sha256
     assert summary["refit_required"] == expected["refit_required"]
     if expected["grip"] is not None:
