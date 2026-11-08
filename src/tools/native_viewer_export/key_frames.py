@@ -231,7 +231,7 @@ def render_a10_summary(
 ) -> str:
     """Render SUMMARY.md for SHOW-A10 evidence deliverable."""
     lines = [
-        f"# Best-Match Styled Render: {model_id} (SHOW-A10)",
+        f"# Best-Match Styled Render: `{model_id}` (SHOW-A10)",
         "",
         f"- Model id: `{model_id}`",
         f"- Source commit: `{source_commit}`",
