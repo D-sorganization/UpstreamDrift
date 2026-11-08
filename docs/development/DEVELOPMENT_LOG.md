@@ -37,10 +37,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** fleet-orchestrator
 - **Issue:** #14896
 - **Branch:** agy/14896-ci-checkout-depth-contracts
-- **PR:** #14915
+- **PR:** #14915, #14916
 - **Paths:** scripts/ci/qualify_checkout_depth.py, tests/ci/test_qualify_checkout_depth.py, docs/development/evidence/CI_CHECKOUT_DEPTH_AND_TRANSFER_BUDGET_POLICY.md
 - **Started:** 2026-11-08
-- **Last verified:** 2026-11-08 (`c6375e53`; branch agy/14896-ci-checkout-depth-contracts)
+- **Last verified:** 2026-11-08 (`0ec24365`; collated from changes/14896-ci-checkout-depth-contracts.md)
 - **Summary:** Qualify job-specific CI checkout depth, transfer bandwidth budgets, and sparse-state regression contracts
 - **Next step:** Open PR from agy/14896-ci-checkout-depth-contracts; arm auto-merge.
 
