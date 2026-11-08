@@ -31,9 +31,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** physics_spec_sha256 and the saved-comparison receipts compare floats at a canonical precision (12 significant digits, 1e-12 absolute) so BLAS/libm last-bit drift cannot move them (owner option A)
 - **Next step:** Merge the PR.
 
-### DL-#14894 · Research Artifacts: Checksum-Bound Storage Contracts
+### DL-#14895 · Source Asset Selective LFS Policy and Inventory Contracts
 
 - **State:** in_review
+- **Owner:** fleet-orchestrator
+- **Issue:** #14895
+- **Branch:** agy/14895-source-asset-lfs-policy
+- **PR:** #14914
+- **Paths:** scripts/assets/source_asset_inventory.py, tests/unit/assets/test_source_asset_inventory.py, docs/development/evidence/SOURCE_ASSET_LFS_POLICY.md
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`293532ba`; branch agy/14895-source-asset-lfs-policy)
+- **Summary:** Selective Git LFS policy, source asset inventory contracts, and fail-closed hydration verification
+- **Next step:** Open PR from agy/14895-source-asset-lfs-policy; arm auto-merge.
+
+### DL-#14894 · Research Artifacts: Checksum-Bound Storage Contracts
+
+- **State:** shipped
 - **Owner:** fleet-orchestrator
 - **Issue:** #14894
 - **Branch:** agy/14894-research-artifact-storage
@@ -42,7 +55,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-08
 - **Last verified:** 2026-11-08 (`781dcc0b`; collated from changes/14894-research-artifact-storage-contracts.md)
 - **Summary:** Research artifacts: checksum-bound durable storage, fail-closed offline/integrity verification, and evidence preservation policy
-- **Next step:** Open PR from agy/14894-research-artifact-storage; arm auto-merge.
+- **Next step:** Shipped.
 
 ### DL-#13158 · OSL-19: Grip Closure and OpenSim Reach Receipt
 
