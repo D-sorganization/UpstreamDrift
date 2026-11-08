@@ -9,6 +9,7 @@ import pytest
 
 from src.shared.python.osl_scoping.osl19 import (
     assert_bundle_carries_opensim_reach_receipt,
+    assert_bundle_rack_grip_geometry,
     assert_mujoco_grip_closure_passes,
     asset_gated_followups_block,
     validate_osl19_fixture,
@@ -20,6 +21,9 @@ _ROOT = Path(__file__).resolve().parents[4]
 _FIXTURE = _ROOT / "tests/fixtures/lifting/osl_scoping/osl19_scoping_v1.json"
 _SQUAT_BB = (
     _ROOT / "docs/development/lifting/evidence/back_squat/back_squat_barbell_bundle.npz"
+)
+_SQUAT_SOURCE = (
+    _ROOT / "docs/development/lifting/evidence/back_squat/back_squat_bundle.npz"
 )
 
 
@@ -33,6 +37,21 @@ def test_back_squat_barbell_bundle_mujoco_grip_under_1mm() -> None:
     assert_mujoco_grip_closure_passes(_SQUAT_BB, fixture=fixture)
 
 
+def test_back_squat_source_bundle_mujoco_grip_under_1mm() -> None:
+    fixture = json.loads(_FIXTURE.read_bytes())
+    assert_mujoco_grip_closure_passes(_SQUAT_SOURCE, fixture=fixture)
+
+
+def test_back_squat_barbell_bundle_grip_geometry() -> None:
+    fixture = json.loads(_FIXTURE.read_bytes())
+    assert_bundle_rack_grip_geometry(_SQUAT_BB, fixture=fixture)
+
+
+def test_back_squat_source_bundle_grip_geometry() -> None:
+    fixture = json.loads(_FIXTURE.read_bytes())
+    assert_bundle_rack_grip_geometry(_SQUAT_SOURCE, fixture=fixture)
+
+
 @pytest.mark.xfail(
     strict=True,
     reason=(
@@ -42,6 +61,17 @@ def test_back_squat_barbell_bundle_mujoco_grip_under_1mm() -> None:
 )
 def test_back_squat_barbell_bundle_has_opensim_reach_receipt() -> None:
     assert_bundle_carries_opensim_reach_receipt(_SQUAT_BB)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "OSL-19 (#13158): OpenSim bar-reach receipt absent from source bundle provenance "
+        "until the OpenSim solve matches MuJoCo grips (add opensim_bar_reach_receipt_v1)."
+    ),
+)
+def test_back_squat_source_bundle_has_opensim_reach_receipt() -> None:
+    assert_bundle_carries_opensim_reach_receipt(_SQUAT_SOURCE)
 
 
 def test_asset_gated_followups_call_out_os_reach() -> None:
