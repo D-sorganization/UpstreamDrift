@@ -18,16 +18,29 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14397 · Canonical Float Rounding Before Hashing for Ubuntu 26.04
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14397
+- **Branch:** agy/14397-ubuntu-2604-hash-drift
+- **PR:** #14899
+- **Paths:** see #14899
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`604503f6`; collated from changes/14397-ubuntu-2604-hash-drift.md)
+- **Summary:** physics_spec_sha256 and the saved-comparison receipts compare floats at a canonical precision (12 significant digits, 1e-12 absolute) so BLAS/libm last-bit drift cannot move them (owner option A)
+- **Next step:** Merge the PR.
+
 ### DL-#13158 · OSL-19: Grip Closure and OpenSim Reach Receipt
 
 - **State:** in_review
 - **Owner:** fleet-orchestrator
 - **Issue:** #13158
 - **Branch:** agy/13158-osl19-grip-closure-reach
-- **PR:** #14802
+- **PR:** #14802, #14907
 - **Paths:** src/shared/python/osl_scoping/osl19.py, tests/fixtures/lifting/osl_scoping/osl19_scoping_v1.json, tests/unit/lifting/osl_scoping/test_osl19_scoping_contract.py
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-08 (`7b629286`; branch agy/13158-osl19-grip-closure-reach)
+- **Last verified:** 2026-11-08 (`9e90db40`; collated from changes/13158-osl-19-grip-closure-reach.md)
 - **Summary:** OSL-19: grip closure contracts and OpenSim reach hook for back-squat bundles
 - **Next step:** Open PR from agy/13158-osl19-grip-closure-reach; resolve right-hand reach solve under cited arm ranges.
 
@@ -37,10 +50,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** fleet-orchestrator
 - **Issue:** #13131
 - **Branch:** agy/13131-osl17-bar-rack-rest
-- **PR:** #14802
+- **PR:** #14802, #14903
 - **Paths:** src/shared/python/lifting/back_rack.py, src/shared/python/osl_scoping/osl17.py, tests/unit/lifting/test_back_rack.py, tests/unit/lifting/osl_scoping/test_osl17_scoping_contract.py, docs/development/lifting/evidence/opensim_ik_id/receipts.json
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-08 (`df2d7034`; branch agy/13131-osl17-bar-rack-rest)
+- **Last verified:** 2026-11-08 (`ccd72956`; collated from changes/13131-osl-17-back-squat-bar-rack-and-rest.md)
 - **Summary:** OSL-17: put back-squat bar on BackTop high-bar rack, verify lead-in settle and whole-window OpenSim Hicks and marker gates
 - **Next step:** Open PR from agy/13131-osl17-bar-rack-rest; resolve floating-base regulation for re-track bound.
 
@@ -53,7 +66,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #14904
 - **Paths:** src/shared/python/osl_scoping/osl15.py, tests/fixtures/lifting/osl_scoping/osl15_scoping_v1.json, tests/unit/lifting/osl_scoping/test_osl15_scoping_contract.py
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-08 (`5cdcca9e`; branch agy/13093-osl15-load-balance-squat)
+- **Last verified:** 2026-11-08 (`7b629286`; collated from changes/13093-osl-15-load-balance-squat.md)
 - **Summary:** OSL-15: verify bar-load balance in IK provenance (combined CoM constrained over mid-foot) on back-squat barbell and source bundles
 - **Next step:** Merge PR #14904; regenerate deadlift/clean bundles to clear xfails.
 
@@ -76,10 +89,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** fleet-orchestrator
 - **Issue:** #11745
 - **Branch:** agy/11745-lift5-four-engine-bar-path-parity
-- **PR:** #14805, #14877
+- **PR:** #14805, #14877, #14909
 - **Paths:** src/shared/python/lift_scoping/lift5.py, tests/fixtures/lifting/lift_scoping/lift5_epic_v1.json, tests/unit/lifting/lift_scoping/test_lift5_epic_contract.py
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-08 (`a89dd7dd`; branch agy/11745-lift5-four-engine-bar-path-parity)
+- **Last verified:** 2026-11-08 (`960d2084`; collated from changes/11745-lift-5-four-engine-bar-path-parity.md)
 - **Summary:** LIFT-5: four-engine bar path parity contract and tests covering MuJoCo, Drake, Pinocchio, and OpenSim
 - **Next step:** Open PR from agy/11745-lift5-four-engine-bar-path-parity; optional parity lanes for remaining lifts.
 
@@ -820,6 +833,84 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14905 · Preserve #14733 Proposal Durable Change-History Evidence Across Normal Change-Fragment Collation and Log Archival
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14905
+- **Branch:** merged via #14908
+- **PR:** #14908
+- **Paths:** see #14908
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`a89dd7dd`; collated from changes/14905-preserve-proposal-collation-evidence.md)
+- **Summary:** Preserve #14733 proposal durable change-history evidence across normal change-fragment collation and log archival
+- **Next step:** Shipped in PR #14908.
+
+### DL-#14897 · Point Driver Motion-Matching Smoke to Canonical Capture-Fit Spec (Full_Body_Spec_Anthro_Driver_Capture.Json) and Align Anthro_Driver Receipt Base_Spec_File Metadata
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14897
+- **Branch:** merged via #14901
+- **PR:** #14901
+- **Paths:** see #14901
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`1c3126cd`; collated from changes/14897-motion-matching-smoke-driver-spec.md)
+- **Summary:** Point driver motion-matching smoke to canonical capture-fit spec (full_body_spec_anthro_driver_capture.json) and align anthro_driver receipt base_spec_file metadata
+- **Next step:** Shipped in PR #14901.
+
+### DL-#14795 · SHOW-A19: Re-Characterise Wrist and Scapula ROM From Evidence and Evaluate Option (C) Address Reachability
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14795
+- **Branch:** merged via #14890
+- **PR:** #14890
+- **Paths:** see #14890
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`632c36c9`; collated from changes/14795-show-a19-wrist-scapula-rom.md)
+- **Summary:** SHOW-A19: re-characterise wrist and scapula ROM from evidence and evaluate option (c) address reachability
+- **Next step:** Shipped in PR #14890.
+
+### DL-#14733 · Proposal (Write-Up Only): #13560 OpenSim Net-Moment Gap - Recorder Inconsistency Finding, Conditioning Math, Options
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14733
+- **Branch:** merged via #14888
+- **PR:** #14888
+- **Paths:** see #14888
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`36155e93`; collated from changes/14733-opensim-net-moment-gap-proposal.md)
+- **Summary:** Proposal (write-up only): #13560 OpenSim net-moment gap - recorder inconsistency finding, conditioning math, options
+- **Next step:** Shipped in PR #14888.
+
+### DL-#14500 · NP-07 Loop-Constraint Projection of Policy Output (Grip Loop, Diagnostic) (#14500)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14500
+- **Branch:** merged via #14824
+- **PR:** #14824
+- **Paths:** see #14824
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`884bf8f5`; collated from changes/14500-np07-loop-projection.md)
+- **Summary:** NP-07 loop-constraint projection of policy output (grip loop, diagnostic) (#14500)
+- **Next step:** Shipped in PR #14824.
+
+### DL-#14477 · NP-02 Demonstration Fixture and Behavior-Cloned 64X64 MLP Baseline (#14477)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14477
+- **Branch:** merged via #14839
+- **PR:** #14839
+- **Paths:** see #14839
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`e01522fd`; collated from changes/14477-np02-bc-mlp-baseline.md)
+- **Summary:** NP-02 demonstration fixture and behavior-cloned 64x64 MLP baseline (#14477)
+- **Next step:** Shipped in PR #14839.
+
 ### DL-#14763 · SHOW-A18: ROM Diagnostic Decomposing A2 Trail-Wrist Excursions Against Pre-A2 Capture and G2 Options
 
 - **State:** shipped
@@ -865,10 +956,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14735
 - **Branch:** merged via #14880
-- **PR:** #14880
+- **PR:** #14880, #14900
 - **Paths:** see #14880
 - **Started:** 2026-11-07
-- **Last verified:** 2026-11-07 (`dd694317`; collated from changes/14735-show-a10-styled-render.md)
+- **Last verified:** 2026-11-08 (`df2d7034`; collated from changes/14735-show-a10-evidence.md)
 - **Summary:** Key-frame PNG writer and grip-clock inset helper for styled renders (SHOW-A10)
 - **Next step:** Shipped in PR #14880.
 
@@ -1203,10 +1294,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14727
 - **Branch:** merged via #14785
-- **PR:** #14785
+- **PR:** #14785, #14898
 - **Paths:** see #14785
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`13e87336`; collated from changes/14727-commit-the-v1-source-spec-of-the-trunk-v.md)
+- **Last verified:** 2026-11-08 (`4bd0ae50`; collated from changes/14727-drake-v2-reference.md)
 - **Summary:** Commit the v1 source spec of the trunk_visuals driver v2 bundle and pin the generator against the committed rollout on its true inputs (step 1)
 - **Next step:** Shipped in PR #14785.
 
@@ -2620,10 +2711,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #13560
 - **Branch:** merged via #14185
-- **PR:** #14185, #14351, #14354, #14711
+- **PR:** #14185, #14351, #14354, #14711, #14902
 - **Paths:** see #14185
 - **Started:** 2026-11-01
-- **Last verified:** 2026-11-06 (`0a47ddd8`; collated from changes/13560-opensim-grip-net-moment-com-restore-simb.md)
+- **Last verified:** 2026-11-08 (`79dc26d9`; collated from changes/13560-grip-contact-preload-parity.md)
 - **Summary:** MuJoCo grip samples read zero-slip pairs frictionless, matching the shared law's zero friction at rest; the ten_finger hold net_moment_com xfail is removed
 - **Next step:** Shipped in PR #14185.
 
