@@ -7,7 +7,6 @@ recorder fix options, and governance constraints.
 
 from __future__ import annotations
 
-import re
 from pathlib import Path
 
 import pytest
