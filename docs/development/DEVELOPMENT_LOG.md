@@ -31,6 +31,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** physics_spec_sha256 and the saved-comparison receipts compare floats at a canonical precision (12 significant digits, 1e-12 absolute) so BLAS/libm last-bit drift cannot move them (owner option A)
 - **Next step:** Merge the PR.
 
+### DL-#14896 · CI Checkout Depth Qualification and Transfer Budget Policy
+
+- **State:** in_review
+- **Owner:** fleet-orchestrator
+- **Issue:** #14896
+- **Branch:** agy/14896-ci-checkout-depth-contracts
+- **PR:** #14915
+- **Paths:** scripts/ci/qualify_checkout_depth.py, tests/ci/test_qualify_checkout_depth.py, docs/development/evidence/CI_CHECKOUT_DEPTH_AND_TRANSFER_BUDGET_POLICY.md
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`c6375e53`; branch agy/14896-ci-checkout-depth-contracts)
+- **Summary:** Qualify job-specific CI checkout depth, transfer bandwidth budgets, and sparse-state regression contracts
+- **Next step:** Open PR from agy/14896-ci-checkout-depth-contracts; arm auto-merge.
+
 ### DL-#14895 · Source Asset Selective LFS Policy and Inventory Contracts
 
 - **State:** in_review
