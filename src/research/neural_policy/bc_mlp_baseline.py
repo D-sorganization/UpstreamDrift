@@ -191,7 +191,7 @@ def evaluate_baseline_seeds(
 
     rmses = [r.tracking_rmse for r in seed_results]
     speed_errs = [r.clubhead_speed_error for r in seed_results]
-    manifest = {
+    manifest: dict[str, str | int | float | list[int]] = {
         "manifest_version": "v1",
         "issue": 14477,
         "run_record": "#14436/manifest_v1",
