@@ -9,7 +9,9 @@ import pytest
 
 from src.shared.python.lift_scoping.lift6 import (
     assert_evaluate_kinetics_contract,
+    assert_opensim_all_five_lifts_supported,
     assert_opensim_lift_composition_counts,
+    assert_opensim_lift_static_hold_contract,
     host_gated_followups_block,
     validate_lift6_fixture,
 )
@@ -42,6 +44,11 @@ def _require_lifting_opensim_import_stack() -> None:
     pytest.importorskip("matplotlib")
 
 
+def test_all_five_standard_lift_specs_supported() -> None:
+    fixture = json.loads(_FIXTURE.read_bytes())
+    assert_opensim_all_five_lifts_supported(fixture=fixture)
+
+
 @pytest.mark.requires_opensim
 def test_squat_composition_muscle_count_matches_rajgagopal_fixture() -> None:
     _require_lifting_opensim_import_stack()
@@ -54,3 +61,10 @@ def test_evaluate_kinetics_requires_trajectory() -> None:
     _require_lifting_opensim_import_stack()
     fixture = json.loads(_FIXTURE.read_bytes())
     assert_evaluate_kinetics_contract(fixture=fixture)
+
+
+@pytest.mark.requires_opensim
+def test_squat_static_hold_bar_held_contract() -> None:
+    _require_lifting_opensim_import_stack()
+    fixture = json.loads(_FIXTURE.read_bytes())
+    assert_opensim_lift_static_hold_contract(fixture=fixture)

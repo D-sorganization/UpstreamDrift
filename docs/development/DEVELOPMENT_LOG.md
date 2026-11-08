@@ -70,18 +70,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** OSL-15: verify bar-load balance in IK provenance (combined CoM constrained over mid-foot) on back-squat barbell and source bundles
 - **Next step:** Merge PR #14904; regenerate deadlift/clean bundles to clear xfails.
 
-### DL-#11746 · LIFT-6 OpenSim Lift Composition/Kinetics Contracts
+### DL-#11746 · LIFT-6: OpenSim Lift Composition and Static Hold Contracts
 
 - **State:** in_review
-- **Owner:** unassigned
+- **Owner:** fleet-orchestrator
 - **Issue:** #11746
-- **Branch:** cursor/lift6-epic-contract-11746-94df
+- **Branch:** agy/11746-lift6-composition-static-hold
 - **PR:** #14805
-- **Paths:** see #14805
+- **Paths:** src/shared/python/lift_scoping/lift6.py, tests/fixtures/lifting/lift_scoping/lift6_epic_v1.json, tests/unit/lifting/lift_scoping/test_lift6_epic_contract.py
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`07c00681`; collated from changes/11746-lift-6-opensim-lift-composition-kinetics.md)
-- **Summary:** LIFT-6 OpenSim lift composition/kinetics contracts
-- **Next step:** CI on OpenSim lane; arm when green.
+- **Last verified:** 2026-11-08 (`960d2084`; branch agy/11746-lift6-composition-static-hold)
+- **Summary:** LIFT-6: OpenSim full-body lift composition, 80-muscle count, static hold, and kinetics qualification contracts
+- **Next step:** Open PR from agy/11746-lift6-composition-static-hold; complete remaining host evidence gates.
 
 ### DL-#11745 · LIFT-5: Four-Engine Bar Path Parity Contract
 
