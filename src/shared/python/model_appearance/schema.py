@@ -23,10 +23,7 @@ from pathlib import Path
 from typing import Any, cast
 
 from src.shared.python.core.canonical_floats import canonical_floats
-from src.shared.python.core.handedness import (
-    DEFAULT_HANDEDNESS,
-    HANDEDNESS_CHOICES,
-)
+from src.shared.python.core.handedness import DEFAULT_HANDEDNESS
 from src.shared.python.model_appearance.defaults import default_fields
 
 SCHEMA_VERSION = "appearance-v1"

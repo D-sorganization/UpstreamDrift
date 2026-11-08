@@ -9,14 +9,14 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.unit
-
 from src.shared.python.core.canonical_floats import (
     CANONICAL_ABSOLUTE_RESOLUTION,
     CANONICAL_SIGNIFICANT_DIGITS,
     canonical_floats,
 )
 from src.shared.python.model_appearance.schema import physics_spec_sha256
+
+pytestmark = pytest.mark.unit
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _SPEC = _REPO_ROOT / "docs/development/full_body_models/full_body_spec_v1.json"
