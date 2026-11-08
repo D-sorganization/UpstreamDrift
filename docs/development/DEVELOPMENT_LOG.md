@@ -44,18 +44,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** OSL-17: put back-squat bar on BackTop high-bar rack, verify lead-in settle and whole-window OpenSim Hicks and marker gates
 - **Next step:** Open PR from agy/13131-osl17-bar-rack-rest; resolve floating-base regulation for re-track bound.
 
-### DL-#13093 · OSL-15 Scoping: Load Balance IK Provenance Contract and Tests
+### DL-#13093 · OSL-15: Regenerate Source Back Squat With Bar Load
 
 - **State:** in_review
-- **Owner:** unassigned
+- **Owner:** fleet-orchestrator
 - **Issue:** #13093
-- **Branch:** cursor/osl15-scoping-contracts-13093-94df
-- **PR:** #14802
-- **Paths:** see #14802
+- **Branch:** agy/13093-osl15-load-balance-squat
+- **PR:** #14904
+- **Paths:** src/shared/python/osl_scoping/osl15.py, tests/fixtures/lifting/osl_scoping/osl15_scoping_v1.json, tests/unit/lifting/osl_scoping/test_osl15_scoping_contract.py
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`9569ef7e`; collated from changes/13093-osl-15-scoping-load-balance-ik-provenanc.md)
-- **Summary:** OSL-15 scoping: load balance IK provenance contract and tests
-- **Next step:** Merge PR; regenerate deadlift/clean bundles to clear xfails.
+- **Last verified:** 2026-11-08 (`5cdcca9e`; branch agy/13093-osl15-load-balance-squat)
+- **Summary:** OSL-15: verify bar-load balance in IK provenance (combined CoM constrained over mid-foot) on back-squat barbell and source bundles
+- **Next step:** Merge PR #14904; regenerate deadlift/clean bundles to clear xfails.
 
 ### DL-#11746 · LIFT-6 OpenSim Lift Composition/Kinetics Contracts
 
