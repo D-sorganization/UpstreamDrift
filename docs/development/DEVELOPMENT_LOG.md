@@ -18,18 +18,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#13158 · OSL-19 Scoping: Grip Closure Tests and OpenSim Receipt Hook
+### DL-#13158 · OSL-19: Grip Closure and OpenSim Reach Receipt
 
 - **State:** in_review
-- **Owner:** unassigned
+- **Owner:** fleet-orchestrator
 - **Issue:** #13158
-- **Branch:** cursor/osl19-scoping-contracts-13158-94df
+- **Branch:** agy/13158-osl19-grip-closure-reach
 - **PR:** #14802
-- **Paths:** see #14802
+- **Paths:** src/shared/python/osl_scoping/osl19.py, tests/fixtures/lifting/osl_scoping/osl19_scoping_v1.json, tests/unit/lifting/osl_scoping/test_osl19_scoping_contract.py
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`9569ef7e`; collated from changes/13158-osl-19-scoping-grip-closure-tests-and-op.md)
-- **Summary:** OSL-19 scoping: grip closure tests and OpenSim receipt hook
-- **Next step:** Rebase after OSL stack merges; add OpenSim receipt to bundles.
+- **Last verified:** 2026-11-08 (`7b629286`; branch agy/13158-osl19-grip-closure-reach)
+- **Summary:** OSL-19: grip closure contracts and OpenSim reach hook for back-squat bundles
+- **Next step:** Open PR from agy/13158-osl19-grip-closure-reach; resolve right-hand reach solve under cited arm ranges.
 
 ### DL-#13131 · OSL-17: Back-Squat Bar Rack and Rest Window
 

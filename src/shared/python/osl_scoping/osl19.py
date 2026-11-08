@@ -44,6 +44,14 @@ FIXTURE_SCHEMA: dict[str, Any] = {
                     "type": "number",
                     "exclusiveMinimum": 0,
                 },
+                "target_grip_width_m": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                },
+                "reach_bound_m": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                },
             },
         },
     },
@@ -88,6 +96,32 @@ def assert_mujoco_grip_closure_passes(
     else:
         limit = GRIP_CLOSURE_PASS_M
     assert ik_max_grip_closure_m(bundle_path) <= limit
+
+
+def assert_bundle_rack_grip_geometry(
+    bundle_path: Path, *, fixture: Mapping[str, Any] | None = None
+) -> None:
+    """Assert the bundle records high-bar rack grip geometry."""
+    bundle = InputBundle.load(bundle_path)
+    ik = bundle.provenance.get("ik")
+    assert isinstance(ik, dict), ik
+    back_bar = ik.get("back_bar")
+    assert isinstance(back_bar, dict), back_bar
+    geom = back_bar.get("geometry")
+    assert isinstance(geom, dict), geom
+    rack = geom.get("rack")
+    assert isinstance(rack, dict), rack
+    assert rack.get("landmark") == "BackTop", rack
+    assert rack.get("name") == "high_bar", rack
+    if fixture is not None:
+        validate_payload(fixture, FIXTURE_SCHEMA)
+        reach_spec = fixture.get("reach", {})
+        if "target_grip_width_m" in reach_spec:
+            target_width = float(reach_spec["target_grip_width_m"])
+            assert float(geom.get("grip_width_m", 0.0)) == target_width, (
+                geom.get("grip_width_m"),
+                target_width,
+            )
 
 
 def assert_bundle_carries_opensim_reach_receipt(bundle_path: Path) -> None:
