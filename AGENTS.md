@@ -667,3 +667,15 @@ For Runner_Dashboard changes merged to main, do not list per-node redeploy or SS
 Full rule: [fleet-rules/runner-dashboard-rollout-handoff.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/runner-dashboard-rollout-handoff.md) (synced from Repository_Management; edit the source there).
 
 <!-- END FLEET-MANAGED: runner-dashboard-rollout-handoff -->
+
+---
+
+<!-- BEGIN FLEET-MANAGED: lane-rules-v2 -->
+
+### Lane Rules v2
+
+Skip drained/hold repos, any-agent open-PR conflicts, and claims under 4h; else claim before code. One issue/PR, ≤500 lines (incl. generated/locks), max 2 CI-fix tries, stop on usage limits; branch prefix = lane id.
+
+Full rule: [fleet-rules/lane-rules-v2.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/lane-rules-v2.md) (synced from Repository_Management; edit the source there).
+
+<!-- END FLEET-MANAGED: lane-rules-v2 -->
