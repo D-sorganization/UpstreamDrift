@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-08 | #14914 | Assets: selective LFS policy, source-asset inventory contracts, and fail-closed hydration verification |
 | 2026-11-08 | #14912 | Research artifacts: checksum-bound durable storage contracts and evidence policy |
 | 2026-11-08 | #14910 | LIFT-6: OpenSim lift composition, 80-muscle count, and static hold contracts |
 | 2026-11-08 | #14908 | Preserve #14733 proposal durable change-history evidence across normal change-fragment collation and log archival |
