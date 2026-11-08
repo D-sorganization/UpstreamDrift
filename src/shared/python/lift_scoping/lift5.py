@@ -31,7 +31,12 @@ BACK_SQUAT_BAR_PATH_PARITY: Final[Path] = (
 )
 
 # See :data:`~src.shared.python.lifting.bar_path_parity.REQUIRED_ENGINES`.
-REQUIRED_PARITY_ENGINES: Final[tuple[str, ...]] = ("mujoco", "drake", "pinocchio")
+REQUIRED_PARITY_ENGINES: Final[tuple[str, ...]] = (
+    "mujoco",
+    "drake",
+    "pinocchio",
+    "opensim",
+)
 
 FIXTURE_SCHEMA: dict[str, Any] = {
     "type": "object",

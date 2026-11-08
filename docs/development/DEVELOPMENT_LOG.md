@@ -70,18 +70,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** LIFT-6 OpenSim lift composition/kinetics contracts
 - **Next step:** CI on OpenSim lane; arm when green.
 
-### DL-#11745 · LIFT-5 Epic Evidence Contract (Bundles + Parity JSON)
+### DL-#11745 · LIFT-5: Four-Engine Bar Path Parity Contract
 
 - **State:** in_review
-- **Owner:** unassigned
+- **Owner:** fleet-orchestrator
 - **Issue:** #11745
-- **Branch:** cursor/lift5-epic-contract-11745-94df
+- **Branch:** agy/11745-lift5-four-engine-bar-path-parity
 - **PR:** #14805, #14877
-- **Paths:** see #14805
+- **Paths:** src/shared/python/lift_scoping/lift5.py, tests/fixtures/lifting/lift_scoping/lift5_epic_v1.json, tests/unit/lifting/lift_scoping/test_lift5_epic_contract.py
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-07 (`9504c22e`; collated from changes/11745-refs-11745-add-reproducible-back-squat-t.md)
-- **Summary:** LIFT-5 epic evidence contract (bundles + parity JSON)
-- **Next step:** Optional parity lanes for all lifts; CI green then arm.
+- **Last verified:** 2026-11-08 (`a89dd7dd`; branch agy/11745-lift5-four-engine-bar-path-parity)
+- **Summary:** LIFT-5: four-engine bar path parity contract and tests covering MuJoCo, Drake, Pinocchio, and OpenSim
+- **Next step:** Open PR from agy/11745-lift5-four-engine-bar-path-parity; optional parity lanes for remaining lifts.
 
 ### DL-#13991 · Docs: ADR-0060 OpenSim Scaling and Fit Plan (#13991)
 
