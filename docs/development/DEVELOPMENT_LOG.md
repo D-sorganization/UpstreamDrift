@@ -37,10 +37,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** fleet-orchestrator
 - **Issue:** #14894
 - **Branch:** agy/14894-research-artifact-storage
-- **PR:** #14911
+- **PR:** #14911, #14912
 - **Paths:** scripts/research/shot_pattern_analysis/fetch_release_assets.py, tests/unit/research/test_fetch_release_assets.py, docs/development/evidence/RESEARCH_ARTIFACT_STORAGE_POLICY.md
 - **Started:** 2026-11-08
-- **Last verified:** 2026-11-08 (`c3813358`; branch agy/14894-research-artifact-storage)
+- **Last verified:** 2026-11-08 (`781dcc0b`; collated from changes/14894-research-artifact-storage-contracts.md)
 - **Summary:** Research artifacts: checksum-bound durable storage, fail-closed offline/integrity verification, and evidence preservation policy
 - **Next step:** Open PR from agy/14894-research-artifact-storage; arm auto-merge.
 
