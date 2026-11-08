@@ -40,7 +40,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** #14914
 - **Paths:** scripts/assets/source_asset_inventory.py, tests/unit/assets/test_source_asset_inventory.py, docs/development/evidence/SOURCE_ASSET_LFS_POLICY.md
 - **Started:** 2026-11-08
-- **Last verified:** 2026-11-08 (`293532ba`; branch agy/14895-source-asset-lfs-policy)
+- **Last verified:** 2026-11-08 (`c6375e53`; collated from changes/14895-source-asset-lfs-policy.md)
 - **Summary:** Selective Git LFS policy, source asset inventory contracts, and fail-closed hydration verification
 - **Next step:** Open PR from agy/14895-source-asset-lfs-policy; arm auto-merge.
 
