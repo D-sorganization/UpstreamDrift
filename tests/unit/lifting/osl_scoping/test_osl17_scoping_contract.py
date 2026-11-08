@@ -11,6 +11,7 @@ from src.shared.python.osl_scoping.osl17 import (
     assert_high_bar_rack_in_ik,
     assert_lead_in_duration,
     assert_lead_in_record_present,
+    assert_opensim_squat_receipt,
     asset_gated_followups_block,
     validate_osl17_fixture,
 )
@@ -22,6 +23,10 @@ _FIXTURE = _ROOT / "tests/fixtures/lifting/osl_scoping/osl17_scoping_v1.json"
 _SQUAT_BB = (
     _ROOT / "docs/development/lifting/evidence/back_squat/back_squat_barbell_bundle.npz"
 )
+_SQUAT_BUNDLE = (
+    _ROOT / "docs/development/lifting/evidence/back_squat/back_squat_bundle.npz"
+)
+_RECEIPTS = _ROOT / "docs/development/lifting/evidence/opensim_ik_id/receipts.json"
 
 
 def test_osl17_fixture_schema() -> None:
@@ -32,6 +37,17 @@ def test_osl17_fixture_schema() -> None:
 def test_back_squat_barbell_records_high_bar_rack() -> None:
     fixture = json.loads(_FIXTURE.read_bytes())
     assert_high_bar_rack_in_ik(_SQUAT_BB, fixture=fixture)
+
+
+def test_back_squat_source_records_high_bar_rack() -> None:
+    fixture = json.loads(_FIXTURE.read_bytes())
+    assert_high_bar_rack_in_ik(_SQUAT_BUNDLE, fixture=fixture)
+
+
+def test_opensim_squat_receipt_meets_hicks_and_marker_gates() -> None:
+    fixture = json.loads(_FIXTURE.read_bytes())
+    receipt = assert_opensim_squat_receipt(_RECEIPTS, fixture=fixture)
+    assert receipt["status"] == "complete"
 
 
 def test_back_squat_barbell_has_lead_in_provenance() -> None:
