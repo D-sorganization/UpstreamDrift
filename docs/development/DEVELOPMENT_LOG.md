@@ -76,10 +76,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** fleet-orchestrator
 - **Issue:** #11746
 - **Branch:** agy/11746-lift6-composition-static-hold
-- **PR:** #14805
+- **PR:** #14805, #14910
 - **Paths:** src/shared/python/lift_scoping/lift6.py, tests/fixtures/lifting/lift_scoping/lift6_epic_v1.json, tests/unit/lifting/lift_scoping/test_lift6_epic_contract.py
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-08 (`960d2084`; branch agy/11746-lift6-composition-static-hold)
+- **Last verified:** 2026-11-08 (`c3813358`; collated from changes/11746-lift-6-composition-static-hold.md)
 - **Summary:** LIFT-6: OpenSim full-body lift composition, 80-muscle count, static hold, and kinetics qualification contracts
 - **Next step:** Open PR from agy/11746-lift6-composition-static-hold; complete remaining host evidence gates.
 
