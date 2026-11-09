@@ -228,20 +228,15 @@ def render_a10_summary(
     output_hashes: Mapping[str, str],
     lead_roll_deg: float = 15.0,
     trail_roll_deg: float = -165.0,
-    *,
-    receipt_model_id: str | None = None,
-    source_still_hashes: Mapping[str, str] | None = None,
 ) -> str:
     """Render SUMMARY.md for SHOW-A10 evidence deliverable."""
-    id_line = f" (candidate receipt `{receipt_model_id}`)" if receipt_model_id else ""
     lines = [
         f"# Best-Match Styled Render: `{model_id}` (SHOW-A10)",
         "",
-        f"- Model id: `{model_id}`{id_line}",
+        f"- Model id: `{model_id}`",
         f"- Source commit: `{source_commit}`",
         f"- Receipt verdict: {receipt_verdict}",
-        f"- Clock overlay angles (illustrative target, not measured from rendered frames): lead {lead_roll_deg:+.1f}°, trail {trail_roll_deg:+.2f}° (SHOW-A7 15° CCW convention)",
-        "- Rendered-frame hand roll measurement: unavailable (SHOW-A8 stills with fixed clock overlay)",
+        f"- Address grip roll: lead {lead_roll_deg:+.1f}°, trail {trail_roll_deg:+.1f}° (SHOW-A7 15° CCW convention)",
         "- Trunk: 6-DOF lumbar + thoracic segments (SHOW-A8, `full_body_spec_anthro_driver_v2.json`)",
         "- Shading: axial tension/compression segment shading enabled",
         "- Force vectors & torque arcs: enabled",
@@ -265,19 +260,6 @@ def render_a10_summary(
     )
     for name, digest in sorted(input_hashes.items()):
         lines.append(f"| `{name}` | `{digest}` |")
-
-    if source_still_hashes:
-        lines.extend(
-            [
-                "",
-                "## Source Stills Consumed (SHA-256)",
-                "",
-                "| Source Still | SHA-256 |",
-                "|---|---|",
-            ]
-        )
-        for name, digest in sorted(source_still_hashes.items()):
-            lines.append(f"| `{name}` | `{digest}` |")
 
     lines.append("")
     return "\n".join(lines)

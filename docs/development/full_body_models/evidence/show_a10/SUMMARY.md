@@ -1,12 +1,11 @@
 # Best-Match Styled Render: `mujoco_driver` (SHOW-A10)
 
-- Model id: `mujoco_driver` (candidate receipt `mujoco_driver_candidate_a9`)
-- Source commit: `6392e76112 (SHOW-A8 stills) / f304efdcd4 (SHOW-A9 receipt)`
-- Receipt verdict: REJECTED (G3) - recorded as candidate per AC 3 (not physically accepted)
+- Model id: `mujoco_driver`
+- Source commit: `docs/development/full_body_models/evidence/show_a8 + docs/development/full_body_models/evidence/show_a9/receipt.json (d06949d671a2), baseline fa7a9b7075`
+- Receipt verdict: REJECTED (G3) - recorded as candidate `mujoco_driver_candidate_a9` per AC 3 (not physically accepted)
 - Clock overlay angles (illustrative target, not measured from rendered frames): lead +15.0°, trail -100.73° (SHOW-A7 15° CCW convention)
-- Rendered-frame hand roll measurement: unavailable (SHOW-A8 stills with fixed clock overlay)
 - Trunk: 6-DOF lumbar + thoracic segments (SHOW-A8, `full_body_spec_anthro_driver_v2.json`)
-- Shading: axial tension/compression segment shading enabled
+- Shading & overlays: SHOW-A8 styled-mesh stills (`show_a8/`); segment shading and force/torque arcs are target SHOW-A10 styling (not a verified A9 bundle render)
 - Force vectors & torque arcs: enabled
 
 ## Outputs (SHA-256)
@@ -55,10 +54,8 @@
 
 ## Angle & Measurement Attribution
 
-- **Clock overlay (`+15.0°` lead / `-100.73°` trail):** Illustrative target / modelling choice from SHOW-A7 / SHOW-A9 receipt drawn over SHOW-A8 stills; **not measured from rendered frames**.
-- **Rendered-frame hand roll & wrist angles:** `unavailable` (SHOW-A10 reuses pre-rendered SHOW-A8 PNGs).
-- **Quantitative refit metrics:** Imported from `show_a9/receipt.json` (`mujoco_driver_candidate_a9`, `REJECTED (G3)`).
-- **Video delivery:** `unavailable_in_repo` (no A9 `.npz` bundle or video set generated here; epic `#14906` remains open).
+- **Clock overlay (`+15.0°` / `-100.73°`):** Illustrative target from `docs/development/full_body_models/evidence/show_a9/receipt.json`; **not measured from rendered frames**.
+- **Rendered-frame hand roll & video delivery:** `unavailable` / `unavailable_in_repo` (epic `#14906` remains open).
 
 ## Acceptance Comparison vs 11-04 Baseline (`fa7a9b7075`)
 
@@ -73,13 +70,12 @@
 
 ## Visual Artifacts
 
-- `face_on_*_1280.png`: Face-on key frames (address, top, impact) with A7 grip clock inset (12 o'clock = 0°, green tick at +15°, red needle lead, blue needle trail; copied from `show_a8/`).
-- `down_the_line_*_1280.png`: Down-the-line key frames (address, top, impact) copied from `show_a8/`.
-- `side_by_side_*`: Side-by-side comparison with 11-04 baseline render showing grip and trunk changes (from `trunk_segments/`).
-- `provenance_manifest.json`: Per-file provenance and angle attribution manifest.
+- `face_on_*_1280.png`: Face-on key frames (address, top, impact) with A7 grip clock inset (12 o'clock = 0°, green tick at +15°, red needle lead, blue needle trail).
+- `down_the_line_*_1280.png`: Down-the-line key frames (address, top, impact).
+- `side_by_side_*`: Side-by-side comparison with 11-04 baseline render showing grip and trunk changes.
 
 ## Reproduction Command
 
 ```bash
-python docs/development/full_body_models/evidence/show_a10/render_show_a10_evidence.py
+python docs/development/full_body_models/evidence/show_a10/render_show_a10_evidence.py # --regenerate-images opt-in
 ```

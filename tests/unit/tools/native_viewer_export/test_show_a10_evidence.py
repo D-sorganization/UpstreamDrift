@@ -1,4 +1,4 @@
-"""Tests for SHOW-A10 evidence, provenance manifest, and summary deliverable (#14735 / #14906)."""
+"""Tests for SHOW-A10 evidence and summary deliverable (#14735)."""
 
 from __future__ import annotations
 
@@ -14,9 +14,14 @@ import pytest
 from src.tools.native_viewer_export.key_frames import COLORS, GREEN_TARGET
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
+
 EVIDENCE_DIR = (
     Path(__file__).resolve().parents[4]
-    / "docs/development/full_body_models/evidence/show_a10"
+    / "docs"
+    / "development"
+    / "full_body_models"
+    / "evidence"
+    / "show_a10"
 )
 
 
@@ -26,24 +31,23 @@ def _sha256(path: Path) -> str:
 
 
 def test_show_a10_summary_structure() -> None:
-    content = (EVIDENCE_DIR / "SUMMARY.md").read_text(encoding="utf-8")
-    for token in (
-        "SHOW-A10",
-        "mujoco_driver",
-        "mujoco_driver_candidate_a9",
-        "REJECTED (G3)",
-        "fa7a9b7075",
-        "## Outputs (SHA-256)",
-        "## Inputs (SHA-256)",
-        "## Source Stills Consumed (SHA-256)",
-        "## Angle & Measurement Attribution",
-        "## Acceptance Comparison vs 11-04 Baseline (`fa7a9b7075`)",
-        "## Visual Artifacts",
-        "## Reproduction Command",
-        "show_a8",
-        "trunk_segments",
-    ):
-        assert token in content
+    summary_path = EVIDENCE_DIR / "SUMMARY.md"
+    assert summary_path.is_file(), f"SUMMARY.md missing at {summary_path}"
+    content = summary_path.read_text(encoding="utf-8")
+
+    assert "SHOW-A10" in content
+    assert "mujoco_driver" in content
+    assert "mujoco_driver_candidate_a9" in content
+    assert "REJECTED (G3)" in content
+    assert "fa7a9b7075" in content
+    assert "## Outputs (SHA-256)" in content
+    assert "## Inputs (SHA-256)" in content
+    assert "## Source Stills Consumed (SHA-256)" in content
+    assert "## Angle & Measurement Attribution" in content
+    assert "## Acceptance Comparison vs 11-04 Baseline (`fa7a9b7075`)" in content
+    assert "## Visual Artifacts" in content
+    assert "## Reproduction Command" in content
+    assert "--regenerate-images" in content
     assert "<A9 bundle>" not in content
     assert "not measured from rendered frames" in content.lower()
 
@@ -95,22 +99,18 @@ def test_show_a10_synthetic_fixture_rejects_false_attribution(tmp_path: Path) ->
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
-    syn_a8 = tmp_path / "show_a8"
-    syn_trunk = tmp_path / "trunk_segments"
-    syn_a9 = tmp_path / "show_a9"
-    syn_out = tmp_path / "show_a10"
+    syn_a8, syn_trunk = tmp_path / "show_a8", tmp_path / "trunk_segments"
+    syn_a9, syn_out = tmp_path / "show_a9", tmp_path / "show_a10"
     for d in (syn_a8, syn_trunk, syn_a9, syn_out):
         d.mkdir()
-
     for name in mod.FACE_ON_NAMES + mod.DTL_NAMES:
         Image.new("RGB", (64, 64), (10, 20, 30)).save(syn_a8 / name, format="PNG")
         Image.new("RGB", (64, 64), (70, 80, 90)).save(syn_out / name, format="PNG")
-
     for out_name, suffix in mod.SBS_SPECS:
-        b_img = syn_trunk / f"before_v1_rigid_{suffix}.png"
-        a_img = syn_trunk / f"after_v2_segmented_{suffix}.png"
-        Image.new("RGB", (32, 32), (40, 50, 60)).save(b_img, format="PNG")
-        Image.new("RGB", (32, 32), (45, 55, 65)).save(a_img, format="PNG")
+        for prefix in ("before_v1_rigid_", "after_v2_segmented_"):
+            Image.new("RGB", (32, 32), (40, 50, 60)).save(
+                syn_trunk / f"{prefix}{suffix}.png", format="PNG"
+            )
         Image.new("RGB", (64, 64), (70, 80, 90)).save(syn_out / out_name, format="PNG")
 
     receipt_file = syn_a9 / "receipt.json"
@@ -120,12 +120,12 @@ def test_show_a10_synthetic_fixture_rejects_false_attribution(tmp_path: Path) ->
         "input_hashes": {"capture_sha256": "1" * 64, "baseline_commit": "abc1234567"},
         "address_grip": {
             "target_deg": 15.0,
-            "lead_roll_deg": 15.0,
-            "trail_roll_deg": -100.73,
+            "lead_roll_deg": 12.5,
+            "trail_roll_deg": -98.0,
         },
         "comparison_with_baseline": {
-            "marker_rms_mm": {"baseline": 50.9, "candidate": 55.3},
-            "closure_residual_mm": {"baseline": 62.2, "candidate": 76.8},
+            "marker_rms_mm": {"baseline": 48.0, "candidate": 59.5},
+            "closure_residual_mm": {"baseline": 60.0, "candidate": 81.2},
         },
         "acceptance_gates": {
             "horizon": "G3",
@@ -135,28 +135,56 @@ def test_show_a10_synthetic_fixture_rejects_false_attribution(tmp_path: Path) ->
     }
     receipt_file.write_text(json.dumps(receipt_data), encoding="utf-8")
 
-    manifest = mod.build_provenance_manifest(
-        syn_out, syn_a8, syn_trunk, receipt_file, tmp_path
+    manifest = mod.write_summary(
+        mod.EvidencePaths(syn_out, syn_a8, syn_trunk, receipt_file, tmp_path)
     )
-    quant = manifest["quantitative_refit_metrics"]
-    assert quant["receipt_model_id"] == "synthetic_candidate_a9"
+    assert (
+        manifest["quantitative_refit_metrics"]["receipt_model_id"]
+        == "synthetic_candidate_a9"
+    )
     assert manifest["receipt_inputs"]["show_a9_receipt_sha256"] == _sha256(receipt_file)
 
-    bad_frame = json.loads(json.dumps(manifest))
-    bad_frame["visual_frame_attribution"]["is_verified_a9_bundle_render"] = True
-    with pytest.raises(ValueError, match="verified_a9_bundle_render"):
-        mod.validate_provenance_manifest(bad_frame)
+    syn_summary = (syn_out / "SUMMARY.md").read_text(encoding="utf-8")
+    for expected in (
+        "synthetic_candidate_a9",
+        "abc1234567",
+        "| Marker RMS | 48.0 mm | 59.5 mm | +11.5 mm |",
+        "| Closure Residual | 60.0 mm | 81.2 mm | +21.2 mm |",
+    ):
+        assert expected in syn_summary
+    for leaked in ("6392e76112", "f304efdcd4", "fa7a9b7075", "50.9 mm", "55.3 mm"):
+        assert leaked not in syn_summary
 
-    bad_angle = json.loads(json.dumps(manifest))
-    overlay = bad_angle["angle_attribution"]["clock_overlay_values_deg"]
-    overlay["is_measured_from_rendered_frames"] = True
-    with pytest.raises(ValueError, match="measured_from_rendered_frames"):
-        mod.validate_provenance_manifest(bad_angle)
-
-    bad_verdict = json.loads(json.dumps(manifest))
-    bad_verdict["quantitative_refit_metrics"]["is_physically_accepted"] = True
-    with pytest.raises(ValueError, match="physically_accepted"):
-        mod.validate_provenance_manifest(bad_verdict)
+    still0 = next(iter(manifest["source_stills"]))
+    for key_path, val, pat in (
+        ("visual_frame_attribution|is_verified_a9_bundle_render", True, "verified_a9"),
+        (
+            "angle_attribution|clock_overlay_values_deg|is_measured_from_rendered_frames",
+            True,
+            "measured_from",
+        ),
+        ("quantitative_refit_metrics|is_physically_accepted", True, "physically"),
+        (
+            "angle_attribution|rendered_frame_hand_measurements|lead_roll_deg",
+            15.0,
+            "rendered_frame_hand",
+        ),
+        (
+            "output_artifacts|face_on_address_1280.png|source_stills",
+            ["missing.png"],
+            "source_stills",
+        ),
+        (f"source_stills|{still0}", "bad-sha", "sha256"),
+        ("tracking_issues|epic_status", "CLOSED", "epic_status"),
+    ):
+        bad = json.loads(json.dumps(manifest))
+        keys = key_path.split("|")
+        cur: dict[str, object] = bad
+        for k in keys[:-1]:
+            cur = cur[k]  # type: ignore[assignment]
+        cur[keys[-1]] = val
+        with pytest.raises(ValueError, match=pat):
+            mod.validate_provenance_manifest(bad)
 
 
 def test_show_a10_output_pngs_valid_and_hashes_match() -> None:
@@ -188,8 +216,7 @@ def test_show_a10_output_pngs_valid_and_hashes_match() -> None:
 
         # Verify hash matches SUMMARY.md
         digest = _sha256(png_path)
-        expected_entry = f"`{fname}` | `{digest}`"
-        assert expected_entry in summary_content
+        assert f"`{fname}` | `{digest}`" in summary_content
 
 
 def test_show_a10_face_on_has_grip_clock_inset() -> None:
