@@ -5,7 +5,7 @@ needs an **owner decision** in the scheduled
 [CI Optional Stack](https://github.com/D-sorganization/UpstreamDrift/blob/main/.github/workflows/ci-optional-stack.yml)
 lane.
 
-## Slice 1 — Pinocchio Gravity Matches the Shared Constant (mechanical, on main)
+## Slice 1 — Pinocchio Gravity Matches the Shared Constant (Mechanical, on Main)
 
 Issue [#13799](https://github.com/D-sorganization/UpstreamDrift/pull/13799) moved
 the CasADi swing model to the repository gravity constant
@@ -28,7 +28,7 @@ CI contract tests in `tests/ci/test_optional_stack_gravity_contract_14227.py`
 assert that this runbook, the builder, the constant, and the regression test
 stay wired.
 
-## Slice 2 — Manufactured Authority Regeneration (owner-blocked)
+## Slice 2 — Manufactured Authority Regeneration (Owner-Blocked)
 
 Optional Stack jobs `articulated-manufactured-authority` and
 `articulated-manufactured-rolling` still fail when the publication authority
@@ -46,7 +46,7 @@ fabricate or silently re-commit authority artifacts** to turn CI green.
 Until the owner lands that regeneration, Slice 2 remains red and is **not** a
 mechanical lane fix.
 
-## Related — Multiple-Shooting Dynamics Premise (#14227 item 3)
+## Related — Multiple-Shooting Dynamics Premise (#14227 Item 3)
 
 `test_multiple_shooting_satisfies_its_own_dynamics` may still fail because the
 reference swing is no longer "intentionally unresolved" after the gravity
