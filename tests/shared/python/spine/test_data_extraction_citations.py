@@ -8,6 +8,7 @@ have none.
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -53,3 +54,20 @@ def test_no_author_list_is_from_memory() -> None:
         s for s, (citation, _) in _source_index().items() if "et al." in citation
     ]
     assert not truncated, f"author lists cut to 'et al.': {truncated}"
+
+
+def _extraction_block(table_id: str) -> dict:
+    text = EXTRACTION.read_text(encoding="utf-8")
+    for raw in re.findall(r"```json\s*(.*?)```", text, flags=re.DOTALL):
+        block = json.loads(raw)
+        if block.get("table_id") == table_id:
+            return block
+    raise AssertionError(f"no JSON block for table_id={table_id!r}")
+
+
+def test_bruno_b2_supplement_is_explicitly_unverified_with_empty_rows() -> None:
+    """#12737: Bruno Supplemental Table 2 stays unverified until owner supplies PDF."""
+    block = _extraction_block("B2_per_joint_coupling_supplemental_table_2")
+    assert block["source_id"] == "bruno2015"
+    assert block["verified_from_primary"] is False
+    assert block["rows"] == []
