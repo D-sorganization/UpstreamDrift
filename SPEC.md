@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-09 | #14920 | Correct SHOW-A10 evidence provenance manifest and summary attribution without regenerating artifacts |
 | 2026-11-08 | #14916 | CI: qualify job-specific checkout depth, transfer budgets, and sparse-state regression contracts |
 | 2026-11-08 | #14914 | Assets: selective LFS policy, source-asset inventory contracts, and fail-closed hydration verification |
 | 2026-11-08 | #14912 | Research artifacts: checksum-bound durable storage contracts and evidence policy |
