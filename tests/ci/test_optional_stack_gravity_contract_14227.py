@@ -26,7 +26,7 @@ def test_optional_stack_14227_runbook_exists() -> None:
         "test_pinocchio_model_uses_the_shared_gravity_constant",
         "model_provider.py",
         "Slice 2",
-        "owner-blocked",
+        "Owner-Blocked",
         "must not",
     ],
 )
