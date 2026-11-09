@@ -1,9 +1,10 @@
 # Best-Match Styled Render: `mujoco_driver` (SHOW-A10)
 
-- Model id: `mujoco_driver`
-- Source commit: `4bd0ae5099bca6f51c26e7bd0b356d2a6176b0c7`
-- Receipt verdict: REJECTED (G3) - recorded as candidate per AC 3
-- Address grip roll: lead +15.0°, trail -100.7° (SHOW-A7 15° CCW convention)
+- Model id: `mujoco_driver` (candidate receipt `mujoco_driver_candidate_a9`)
+- Source commit: `6392e76112 (SHOW-A8 stills) / f304efdcd4 (SHOW-A9 receipt)`
+- Receipt verdict: REJECTED (G3) - recorded as candidate per AC 3 (not physically accepted)
+- Clock overlay angles (illustrative target, not measured from rendered frames): lead +15.0°, trail -100.73° (SHOW-A7 15° CCW convention)
+- Rendered-frame hand roll measurement: unavailable (SHOW-A8 stills with fixed clock overlay)
 - Trunk: 6-DOF lumbar + thoracic segments (SHOW-A8, `full_body_spec_anthro_driver_v2.json`)
 - Shading: axial tension/compression segment shading enabled
 - Force vectors & torque arcs: enabled
@@ -33,6 +34,32 @@
 | `v1_spec_sha256` | `fd72d8be7a6c5c557a10886a7d2717a4eb4619805a24cc1be644215eea21dcb3` |
 | `v2_spec_sha256` | `323c2182ed1592552de700c02ab0f297e620660f2ac5a9c7f0f01e6af8f25b8c` |
 
+## Source Stills Consumed (SHA-256)
+
+| Source Still | SHA-256 |
+|---|---|
+| `docs/development/full_body_models/evidence/show_a8/down_the_line_address_1280.png` | `a84d0e3bb6fe2659a5e8cda292916b88b234cc28d3c4e1db3ae5b29b0c30a55b` |
+| `docs/development/full_body_models/evidence/show_a8/down_the_line_impact_1280.png` | `04a2cdcf509687630eb9aa8328fe503b6a15e77e1aabbd3f446b53a241a3868c` |
+| `docs/development/full_body_models/evidence/show_a8/down_the_line_top_1280.png` | `94e1b10f5f66638449ca0fc0b6f03fa232633e5edfda14386c906fd0d022606a` |
+| `docs/development/full_body_models/evidence/show_a8/face_on_address_1280.png` | `8091537d51e275318ca8fc37f71b770f34d4c7e533648e3d933a5455d7dc6a5a` |
+| `docs/development/full_body_models/evidence/show_a8/face_on_impact_1280.png` | `378bde6b7e894391c3d2186248740ab30081a081b7690c85f0fe61c3d8ad268d` |
+| `docs/development/full_body_models/evidence/show_a8/face_on_top_1280.png` | `5d3e404d19c760a5c8c83d76831980ec7acbe929f2378425b09ed334bcc4cd4d` |
+| `docs/development/full_body_models/evidence/trunk_segments/after_v2_segmented_address_dtl.png` | `021db3583098997fdceed7b07f0f6da82223701c782abcf0aeffd1fad3303f93` |
+| `docs/development/full_body_models/evidence/trunk_segments/after_v2_segmented_address_face_on.png` | `51410c46304198d61bd897fa193434572308ae5b4a5f58a81edda29428fa4332` |
+| `docs/development/full_body_models/evidence/trunk_segments/after_v2_segmented_top_dtl.png` | `baf7798669377cd92b558066eaa3b50a62788a6eb5935b48f9f54085f8edd2af` |
+| `docs/development/full_body_models/evidence/trunk_segments/after_v2_segmented_top_face_on.png` | `1a7a5ff8921bfb2af85fc1ce49b69bf781ce005b250943cf6bebd62256a81f1f` |
+| `docs/development/full_body_models/evidence/trunk_segments/before_v1_rigid_address_dtl.png` | `5e1fd4598f220359d50a4d38d1f6cbd8c82da7f331f4c1422329db934249ec55` |
+| `docs/development/full_body_models/evidence/trunk_segments/before_v1_rigid_address_face_on.png` | `9a4fdbd2d713d4f98db604c40a4000bd457c6bfb48dcfb03994abfa71fd24757` |
+| `docs/development/full_body_models/evidence/trunk_segments/before_v1_rigid_top_dtl.png` | `4db0325c100a0113523383f9ae9bb80e4c08f04c6433ecb95cb128c1c9c0e397` |
+| `docs/development/full_body_models/evidence/trunk_segments/before_v1_rigid_top_face_on.png` | `01804d31c0fae5ccaffe030788983197911254d3c5510819268d4756a7ca6877` |
+
+## Angle & Measurement Attribution
+
+- **Clock overlay (`+15.0°` lead / `-100.73°` trail):** Illustrative target / modelling choice from SHOW-A7 / SHOW-A9 receipt drawn over SHOW-A8 stills; **not measured from rendered frames**.
+- **Rendered-frame hand roll & wrist angles:** `unavailable` (SHOW-A10 reuses pre-rendered SHOW-A8 PNGs).
+- **Quantitative refit metrics:** Imported from `show_a9/receipt.json` (`mujoco_driver_candidate_a9`, `REJECTED (G3)`).
+- **Video delivery:** `unavailable_in_repo` (no A9 `.npz` bundle or video set generated here; epic `#14906` remains open).
+
 ## Acceptance Comparison vs 11-04 Baseline (`fa7a9b7075`)
 
 | Metric | 11-04 Baseline (fa7a9b7075) | A9 Candidate Refit | Delta |
@@ -46,12 +73,13 @@
 
 ## Visual Artifacts
 
-- `face_on_*_1280.png`: Face-on key frames (address, top, impact) with A7 grip clock inset (12 o'clock = 0°, green tick at +15°, red needle lead, blue needle trail).
-- `down_the_line_*_1280.png`: Down-the-line key frames (address, top, impact).
-- `side_by_side_*`: Side-by-side comparison with 11-04 baseline render showing grip and trunk changes.
+- `face_on_*_1280.png`: Face-on key frames (address, top, impact) with A7 grip clock inset (12 o'clock = 0°, green tick at +15°, red needle lead, blue needle trail; copied from `show_a8/`).
+- `down_the_line_*_1280.png`: Down-the-line key frames (address, top, impact) copied from `show_a8/`.
+- `side_by_side_*`: Side-by-side comparison with 11-04 baseline render showing grip and trunk changes (from `trunk_segments/`).
+- `provenance_manifest.json`: Per-file provenance and angle attribution manifest.
 
 ## Reproduction Command
 
 ```bash
-python -m src.tools.native_viewer_export --bundle <A9 bundle> --swing driver --club Driver --engines mujoco --speeds 1,0.5 --segment-shading
+python docs/development/full_body_models/evidence/show_a10/render_show_a10_evidence.py
 ```
