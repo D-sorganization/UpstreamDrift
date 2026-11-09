@@ -71,3 +71,19 @@ def test_bruno_b2_supplement_is_explicitly_unverified_with_empty_rows() -> None:
     assert block["source_id"] == "bruno2015"
     assert block["verified_from_primary"] is False
     assert block["rows"] == []
+
+
+def test_pearcy_p1_primary_table_stays_unverified_with_empty_rows() -> None:
+    """#12737: Pearcy 1984 per-level table is not transcribed without primary access."""
+    block = _extraction_block("P1_axial_rotation_coupled_bend")
+    assert block["source_id"] == "pearcy1984"
+    assert block["verified_from_primary"] is False
+    assert block["rows"] == []
+
+
+def test_hosea_g1_loads_are_secondary_citation_only() -> None:
+    """#12737: Hosea 1990 numbers stay flagged until the chapter is read from primary."""
+    block = _extraction_block("G1_L3L4_loads")
+    assert block["source_id"] == "hosea1990"
+    assert block["verified_from_primary"] is False
+    assert block["rows"], "secondary-citation rows must remain explicit, not primary-verified"

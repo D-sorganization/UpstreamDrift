@@ -1,4 +1,4 @@
 ---
 issue: 12737
-summary: "Contract test: Bruno B2 supplement stays unverified with empty rows"
+summary: "Contract tests: Bruno B2, Pearcy P1, Hosea G1 provenance flags (#12737)"
 ---
