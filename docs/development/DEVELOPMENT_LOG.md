@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14906 · Correct SHOW-A10 Evidence Provenance Manifest and Summary Attribution Without Regenerating Artifacts
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14906
+- **Branch:** agy/ct/14906-show-a10-provenance-correction
+- **PR:** #14920
+- **Paths:** see #14920
+- **Started:** 2026-11-09
+- **Last verified:** 2026-11-09 (`94f794b0`; collated from changes/14906-show-a10-provenance-correction.md)
+- **Summary:** Correct SHOW-A10 evidence provenance manifest and summary attribution without regenerating artifacts
+- **Next step:** Merge the A10 provenance correction slice while keeping epic #14906 open.
+
 ### DL-#14397 · Canonical Float Rounding Before Hashing for Ubuntu 26.04
 
 - **State:** in_review
