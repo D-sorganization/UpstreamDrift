@@ -86,4 +86,6 @@ def test_hosea_g1_loads_are_secondary_citation_only() -> None:
     block = _extraction_block("G1_L3L4_loads")
     assert block["source_id"] == "hosea1990"
     assert block["verified_from_primary"] is False
-    assert block["rows"], "secondary-citation rows must remain explicit, not primary-verified"
+    assert block["rows"], (
+        "secondary-citation rows must remain explicit, not primary-verified"
+    )
