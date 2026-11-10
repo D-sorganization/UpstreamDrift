@@ -5,6 +5,7 @@ This module provides unified management of different physics engines
 including MuJoCo, Drake, Pinocchio, OpenSim, MATLAB models, and pendulum models.
 """
 
+import threading
 from collections.abc import Callable
 from functools import partial
 from pathlib import Path
@@ -204,8 +205,20 @@ class EngineManager(ContractChecker):
         self.provider_engine_paths = self._discover_provider_engine_paths()
         self._discover_engines()
 
+        self._lock = threading.RLock()
         self._pendulum_model_dir: Path | None = None
         self._loaded_engines: dict[EngineType, PhysicsEngine] = {}
+        self._last_engine_errors: dict[EngineType, str] = {}
+
+    def _transition(self, engine_type: EngineType, target: EngineStatus) -> None:
+        """Execute a state transition for an engine under lock."""
+        with self._lock:
+            self.engine_status[engine_type] = target
+
+    def get_last_error(self, engine_type: EngineType) -> str | None:
+        """Return the last error message recorded for an engine, if any."""
+        with self._lock:
+            return self._last_engine_errors.get(engine_type)
 
     def get_active_physics_engine(
         self, engine_type: EngineType | None = None
@@ -237,19 +250,39 @@ class EngineManager(ContractChecker):
             logger.error(f"Unknown engine type: {engine_type}")
             return False
 
-        if self.engine_status[engine_type] != EngineStatus.AVAILABLE:
-            logger.error(f"Engine {engine_type} is not available")
-            return False
+        with self._lock:
+            status = self.engine_status[engine_type]
+            if status == EngineStatus.LOADED:
+                cached = self._loaded_engines.get(engine_type)
+                if cached is None:
+                    logger.error(
+                        "Engine %s marked loaded but instance missing", engine_type
+                    )
+                    self._transition(engine_type, EngineStatus.AVAILABLE)
+                    return False
+                self.active_physics_engine = cached
+                self.current_engine = engine_type
+                self._last_engine_errors.pop(engine_type, None)
+                logger.info("Reactivated loaded engine: %s", engine_type.value)
+                return True
 
-        try:
-            self._load_engine(engine_type)
-            self.current_engine = engine_type
-            logger.info(f"Successfully switched to engine: {engine_type.value}")
-            return True
-        except GolfModelingError as e:
-            logger.error(f"Failed to switch to engine {engine_type}: {e}")
-            self.engine_status[engine_type] = EngineStatus.ERROR
-            return False
+            if status not in (EngineStatus.AVAILABLE, EngineStatus.ERROR):
+                logger.error(
+                    f"Engine {engine_type} is not available (status={status.value})"
+                )
+                return False
+
+            try:
+                self._load_engine(engine_type)
+                self.current_engine = engine_type
+                self._last_engine_errors.pop(engine_type, None)
+                logger.info(f"Successfully switched to engine: {engine_type.value}")
+                return True
+            except GolfModelingError as e:
+                logger.error(f"Failed to switch to engine {engine_type}: {e}")
+                self._transition(engine_type, EngineStatus.ERROR)
+                self._last_engine_errors[engine_type] = str(e)
+                return False
 
     @staticmethod
     def _runtime_ready(engine_type: EngineType) -> bool:
@@ -363,55 +396,91 @@ class EngineManager(ContractChecker):
             raise ValueError("engine_type must be provided")
         logger.info("engine_loading_started engine=%s", engine_type.value)
         self._ensure_runtime_importable(engine_type)
-        self.engine_status[engine_type] = EngineStatus.LOADING
-        self.active_physics_engine = None
+        with self._lock:
+            self._transition(engine_type, EngineStatus.LOADING)
+            self.active_physics_engine = None
 
-        try:
-            registry = get_registry()
-            registration = registry.get(engine_type)
-            if not registration:
-                raise GolfModelingError(f"No registration found for {engine_type}")
+            try:
+                registry = get_registry()
+                registration = registry.get(engine_type)
+                if not registration:
+                    raise GolfModelingError(f"No registration found for {engine_type}")
 
-            engine = registration.factory()
-            self.active_physics_engine = engine
-            self._loaded_engines[engine_type] = engine
+                engine = registration.factory()
+                self.active_physics_engine = engine
+                self._loaded_engines[engine_type] = engine
 
-            self.engine_status[engine_type] = EngineStatus.LOADED
-            logger.info(
-                "engine_loaded_successfully engine=%s status=loaded",
-                engine_type.value,
-            )
-            return engine
+                self._transition(engine_type, EngineStatus.LOADED)
+                self._last_engine_errors.pop(engine_type, None)
+                logger.info(
+                    "engine_loaded_successfully engine=%s status=loaded",
+                    engine_type.value,
+                )
+                return engine
 
-        except GolfModelingError:
-            self.engine_status[engine_type] = EngineStatus.ERROR
-            raise
-        except (ImportError, OSError, RuntimeError, ValueError, TypeError) as e:
-            self.engine_status[engine_type] = EngineStatus.ERROR
-            logger.error(
-                "engine_load_failed engine=%s error=%s",
-                engine_type.value,
-                e,
-                exc_info=True,
-            )
-            raise EngineLaunchError(engine_type.value, reason=str(e)) from e
+            except GolfModelingError as e:
+                self._transition(engine_type, EngineStatus.ERROR)
+                self._last_engine_errors[engine_type] = str(e)
+                raise
+            except (ImportError, OSError, RuntimeError, ValueError, TypeError) as e:
+                self._transition(engine_type, EngineStatus.ERROR)
+                self._last_engine_errors[engine_type] = str(e)
+                logger.error(
+                    "engine_load_failed engine=%s error=%s",
+                    engine_type.value,
+                    e,
+                    exc_info=True,
+                )
+                raise EngineLaunchError(engine_type.value, reason=str(e)) from e
 
     def cleanup(self) -> None:
         """Clean up loaded engines."""
-        active_engine = self.active_physics_engine
-        close = getattr(active_engine, "close", None)
-        if callable(close):
-            try:
-                close()
-                logger.info("active_engine_shutdown status=success")
-            except (RuntimeError, OSError) as e:
-                logger.warning(
-                    "active_engine_shutdown_failed error=%s", e, exc_info=True
-                )
+        with self._lock:
+            closed_ids: set[int] = set()
+            for engine_type, engine in list(self._loaded_engines.items()):
+                close = getattr(engine, "close", None)
+                if callable(close):
+                    try:
+                        close()
+                        logger.info(
+                            "engine_shutdown status=success engine=%s",
+                            engine_type.value,
+                        )
+                    except (RuntimeError, OSError) as e:
+                        logger.warning(
+                            "engine_shutdown_failed engine=%s error=%s",
+                            engine_type.value,
+                            e,
+                            exc_info=True,
+                        )
+                closed_ids.add(id(engine))
+                if self.engine_status.get(engine_type) == EngineStatus.LOADED:
+                    self._transition(engine_type, EngineStatus.AVAILABLE)
 
-        self.active_physics_engine = None
-        self.current_engine = None
-        logger.info("engine_cleanup_complete")
+            self._loaded_engines.clear()
+
+            active = self.active_physics_engine
+            if active is not None and id(active) not in closed_ids:
+                close = getattr(active, "close", None)
+                if callable(close):
+                    try:
+                        close()
+                        logger.info("active_engine_shutdown status=success")
+                    except (RuntimeError, OSError) as e:
+                        logger.warning(
+                            "active_engine_shutdown_failed error=%s", e, exc_info=True
+                        )
+                closed_ids.add(id(active))
+
+            if (
+                self.current_engine is not None
+                and self.engine_status.get(self.current_engine) == EngineStatus.LOADED
+            ):
+                self._transition(self.current_engine, EngineStatus.AVAILABLE)
+
+            self.active_physics_engine = None
+            self.current_engine = None
+            logger.info("engine_cleanup_complete")
 
     def get_current_engine(self) -> EngineType | None:
         """Return the currently active engine type."""
