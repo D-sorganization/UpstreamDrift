@@ -21,7 +21,10 @@ from src.shared.python.engine_core.velocity_conventions import (
     FloatingBaseConvention,
     VelocityRepresentation,
 )
-from src.shared.python.pose_interchange.canonical_state import CanonicalState
+from src.shared.python.pose_interchange.canonical_state import (
+    CONVENTION_TAG_V2,
+    CanonicalState,
+)
 from src.shared.python.simulation_backends.protocol import Trace
 
 
@@ -139,6 +142,7 @@ class JaxSimBackend:
             base_linear_velocity=v_arr[3:6],
             joint_velocities=v_arr[6:],
         )
+        self._canonical_acceleration = None
 
     def set_control(self, u: np.ndarray) -> None:
         """Store joint generalized forces for the next forward/step call."""
@@ -169,6 +173,10 @@ class JaxSimBackend:
         """Import ADR-0026 ``canonical-v2`` dynamic state (#14936)."""
 
         self._require_loaded()
+        if state.convention != CONVENTION_TAG_V2:
+            raise ValueError(
+                f"convention must be {CONVENTION_TAG_V2!r}, got {state.convention!r}"
+            )
         q_arr, v_arr = self._validate_canonical_v2_qv_shapes(state.q, state.v)
         a_arr = np.asarray(state.a, dtype=np.float64)
         if a_arr.shape != v_arr.shape:
@@ -237,6 +245,7 @@ class JaxSimBackend:
                 self._model = model.replace(time_step=step_dt)
                 self._data = apis.model.step(self._model, data, **kwargs)
         self._time += step_dt
+        self._canonical_acceleration = None
 
     def rollout(
         self,
