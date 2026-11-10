@@ -995,10 +995,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14944
 - **Branch:** merged via #14953
-- **PR:** #14953
+- **PR:** #14953, #14979
 - **Paths:** see #14953
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`7625298e`; collated from changes/14944-ztcf-multibody-guard.md)
+- **Last verified:** 2026-11-10 (`975141a2`; collated from changes/14944-ztcf-rnea-contract.md)
 - **Summary:** ZTCF: guard multi-body misuse of compute_ztcf_forces; double-pendulum regression (#14944, Part of #14934)
 - **Next step:** Shipped in PR #14953.
 
