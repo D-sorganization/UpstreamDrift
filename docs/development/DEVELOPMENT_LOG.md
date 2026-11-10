@@ -898,6 +898,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14951 · Tauri BackendState Supervisor With Ephemeral Port and Stderr Tail (Part Of #14951).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14951
+- **Branch:** merged via #14988
+- **PR:** #14988
+- **Paths:** see #14988
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`82785f09`; collated from changes/14951-tauri-backendstate-supervisor-with-ephem.md)
+- **Summary:** Tauri BackendState supervisor with ephemeral port and stderr tail (Part of #14951).
+- **Next step:** Shipped in PR #14988.
+
 ### DL-#14948 · Enforce Required Physics Engine Execution, JUnit Floor Checks, and JaxSim Heavy Test Lane
 
 - **State:** shipped

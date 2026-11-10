@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-10 | #14988 | Tauri BackendState supervisor with ephemeral port and stderr tail (Part of #14951). |
 | 2026-11-10 | #14985 | Add per-repo stdlib lifecycle transition kernel and contract tests |
 | 2026-11-10 | #14979 | Implement ZTCF RNEA joint reaction contract and honest scope docs |
 | 2026-11-10 | #14977 | Enforce required physics engine execution, JUnit floor checks, and JaxSim heavy test lane |
