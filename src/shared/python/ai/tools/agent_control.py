@@ -37,7 +37,7 @@ def _not_implemented_agent_action(
     **metadata: Any,
 ) -> AgentActionResult:
     """Honest refusal for agent-control capabilities with no backend yet."""
-    from src.shared.python.core.not_implemented_payload import (
+    from src.shared.python.ai.not_implemented_payload import (
         NOT_IMPLEMENTED_STATUS,
         build_not_implemented_payload,
     )

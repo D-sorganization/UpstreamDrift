@@ -99,6 +99,12 @@
       "status": "pending-cleanup",
       "rationale": "Tools' contracts.py is newer (2026-08-20) and the finder already aliases src.shared.python.contracts to it; UD-only _contracts_*.py helpers are unrelated and stay."
     },
+    "core": {
+      "ruling": "split",
+      "status": "pending-cleanup",
+      "rationale": "UpstreamDrift `core/` holds UD-only contracts/helpers and engine integration; Tools `core/` supplies shared primitives. The packages overlap only where both trees carry the same relative path.",
+      "follow_up": "D-sorganization/UpstreamDrift#9406"
+    },
     "cors.py": {
       "ruling": "tools-canonical",
       "status": "cleaned",
