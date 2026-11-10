@@ -36,12 +36,12 @@ def assert_drift_control_superposition(
 
 
 def stamped_drift(engine: _SuperpositionEngine) -> object:
-    return wrap_counterfactual(CounterfactualKind.DRIFT, engine.compute_drift_acceleration())
+    return wrap_counterfactual(
+        CounterfactualKind.DRIFT, engine.compute_drift_acceleration()
+    )
 
 
-def stamped_control(
-    engine: _SuperpositionEngine, tau: np.ndarray
-) -> object:
+def stamped_control(engine: _SuperpositionEngine, tau: np.ndarray) -> object:
     return wrap_counterfactual(
         CounterfactualKind.CONTROL, engine.compute_control_acceleration(tau)
     )

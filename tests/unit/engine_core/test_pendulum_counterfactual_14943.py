@@ -44,5 +44,7 @@ def test_pendulum_stamped_kinds_and_zvcf_shim(pendulum: PendulumPhysicsEngine) -
     assert any(isinstance(w.message, DeprecationWarning) for w in caught)
     gravity_only = pendulum.compute_gravity_only_acceleration(q)
     np.testing.assert_allclose(legacy, gravity_only)
-    zvcf_control = pendulum.compute_control_acceleration_at_state(q, np.array([0.3, 0.0]))
+    zvcf_control = pendulum.compute_control_acceleration_at_state(
+        q, np.array([0.3, 0.0])
+    )
     assert zvcf_control.shape == (2,)
