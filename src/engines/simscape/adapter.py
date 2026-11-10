@@ -769,21 +769,38 @@ class SimscapeAdapter:
     # CounterfactualComputable
     # ------------------------------------------------------------------
 
-    def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:
-        from src.shared.python.engine_core.counterfactual_defaults import (
-            default_gravity_only_acceleration,
+    @precondition(
+        lambda self, q: isinstance(q, np.ndarray) and q.ndim == 1,
+        "q must be a 1-D numpy array",
+    )
+    def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:  # noqa: ARG002
+        """Legacy gravity-only diagnostic at ``v = u = 0`` (#14943)."""
+        self._lifecycle.require(
+            AdapterState.LOADED,
+            AdapterState.RUNNING,
+            operation="compute_gravity_only_acceleration",
         )
+        return self._deferred_array("compute_gravity_only_acceleration")
 
-        return default_gravity_only_acceleration(self, q)
-
-    def compute_control_acceleration_at_state(
+    @precondition(
+        lambda self, q, tau: (
+            isinstance(q, np.ndarray)
+            and isinstance(tau, np.ndarray)
+            and q.ndim == 1
+            and tau.ndim == 1
+        ),
+        "q and tau must be 1-D numpy arrays",
+    )
+    def compute_control_acceleration_at_state(  # noqa: ARG002
         self, q: np.ndarray, tau: np.ndarray
     ) -> np.ndarray:
-        from src.shared.python.engine_core.counterfactual_defaults import (
-            default_control_acceleration_at_state,
+        """Control-induced acceleration at configuration ``q`` (#14943)."""
+        self._lifecycle.require(
+            AdapterState.LOADED,
+            AdapterState.RUNNING,
+            operation="compute_control_acceleration_at_state",
         )
-
-        return default_control_acceleration_at_state(self, q, tau)
+        return self._deferred_array("compute_control_acceleration_at_state")
 
     @precondition(
         lambda self, q, v: (

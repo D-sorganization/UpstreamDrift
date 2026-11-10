@@ -225,6 +225,14 @@ class SharedPuttingEngine(BasePhysicsEngine):
             raise ValueError("tau must be provided")
         return np.asarray(tau, dtype=float) / self.ball_mass
 
+    def compute_control_acceleration_at_state(
+        self, q: np.ndarray, tau: np.ndarray
+    ) -> np.ndarray:
+        """Control-induced acceleration at configuration ``q`` (#14943)."""
+        if q is None:
+            raise ValueError("q must be provided")
+        return self.compute_control_acceleration(tau)
+
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         """Zero-torque counterfactual: drift acceleration at ``(q, v)``."""
         if q is None or v is None:
