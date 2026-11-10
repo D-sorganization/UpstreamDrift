@@ -197,8 +197,20 @@ export function useSimulation(engineType: string) {
         try {
           const data = JSON.parse(event.data);
 
+          if (data.error !== undefined && data.error !== null) {
+            const message =
+              typeof data.error === "string"
+                ? data.error
+                : JSON.stringify(data.error);
+            setWsError(message);
+            setIsRunning(false);
+            setIsPaused(false);
+            return;
+          }
+
           if (data.status === "complete" || data.status === "stopped") {
             setIsRunning(false);
+            setIsPaused(false);
             return;
           }
           if (data.status === "paused") {
@@ -236,6 +248,7 @@ export function useSimulation(engineType: string) {
         if (!isMountedRef.current) return;
         logger.warn(reason);
         setConnectionStatus("lost");
+        setIsPaused(false);
         setWsError(
           "Connection lost — the simulation cannot resume. Restart to run again.",
         );
@@ -245,6 +258,7 @@ export function useSimulation(engineType: string) {
         if (!isMountedRef.current) return;
 
         setIsRunning(false);
+        setIsPaused(false);
 
         // Clean close (code 1000) or user-initiated stop — nothing to recover.
         if (event.wasClean || event.code === 1000) {
@@ -336,6 +350,7 @@ export function useSimulation(engineType: string) {
       wsRef.current = null;
     }
     setConnectionStatus("disconnected");
+    setIsPaused(false);
   }, []);
 
   const pause = useCallback(() => {
