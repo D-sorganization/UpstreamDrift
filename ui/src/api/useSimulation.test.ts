@@ -82,6 +82,12 @@ class MockWebSocket {
   }
 }
 
+/** Open socket and acknowledge server `running` (#14950 reducer). */
+function simulateRunStarted(ws: MockWebSocket) {
+  ws.simulateOpen();
+  ws.simulateMessage({ status: 'running' });
+}
+
 // Install mock before tests
 beforeEach(() => {
   MockWebSocket.reset();
@@ -163,7 +169,7 @@ describe('useSimulation hook', () => {
       expect(result.current.connectionStatus).toBe('connecting');
     });
 
-    it('sets isRunning to true when connection opens', async () => {
+    it('sets isRunning after server running acknowledgement', async () => {
       const { result } = renderHook(() => useSimulation('mujoco'));
 
       act(() => {
@@ -174,9 +180,15 @@ describe('useSimulation hook', () => {
       act(() => {
         ws.simulateOpen();
       });
-
-      expect(result.current.isRunning).toBe(true);
+      expect(result.current.isRunning).toBe(false);
       expect(result.current.connectionStatus).toBe('connected');
+      expect(result.current.phase).toBe('starting');
+
+      act(() => {
+        ws.simulateMessage({ status: 'running' });
+      });
+      expect(result.current.isRunning).toBe(true);
+      expect(result.current.phase).toBe('running');
     });
 
     it('sends start action with config on open', () => {
@@ -350,7 +362,7 @@ describe('useSimulation hook', () => {
 
       const ws = MockWebSocket.getLastInstance()!;
       act(() => {
-        ws.simulateOpen();
+        simulateRunStarted(ws);
       });
 
       act(() => {
@@ -383,7 +395,8 @@ describe('useSimulation hook', () => {
         ws.close(1000, 'done');
       });
 
-      expect(result.current.connectionStatus).toBe('disconnected');
+      expect(result.current.connectionStatus).toBe('failed');
+      expect(result.current.phase).toBe('failed');
     });
 
     it('handles malformed JSON gracefully', () => {
@@ -396,7 +409,7 @@ describe('useSimulation hook', () => {
 
       const ws = MockWebSocket.getLastInstance()!;
       act(() => {
-        ws.simulateOpen();
+        simulateRunStarted(ws);
       });
 
       // Send invalid JSON
@@ -410,6 +423,42 @@ describe('useSimulation hook', () => {
       expect(result.current.isRunning).toBe(true); // Should not crash
       consoleSpy.mockRestore();
     });
+
+    it('ignores stale socket onclose after a newer start (#14950)', () => {
+      const { result } = renderHook(() => useSimulation('mujoco'));
+
+      act(() => {
+        result.current.start();
+      });
+      const first = MockWebSocket.getLastInstance()!;
+
+      act(() => {
+        simulateRunStarted(first);
+      });
+      expect(result.current.runId).toBe(1);
+
+      act(() => {
+        result.current.stop();
+      });
+
+      act(() => {
+        result.current.start();
+      });
+      const second = MockWebSocket.getLastInstance()!;
+      act(() => {
+        simulateRunStarted(second);
+      });
+      expect(result.current.runId).toBe(2);
+      expect(result.current.connectionStatus).toBe('connected');
+
+      act(() => {
+        first.simulateUncleanClose(1006);
+      });
+
+      expect(result.current.runId).toBe(2);
+      expect(result.current.connectionStatus).toBe('connected');
+      expect(result.current.isRunning).toBe(true);
+    });
   });
 
   describe('pause and resume', () => {
@@ -422,7 +471,7 @@ describe('useSimulation hook', () => {
 
       const ws = MockWebSocket.getLastInstance()!;
       act(() => {
-        ws.simulateOpen();
+        simulateRunStarted(ws);
       });
 
       // Clear messages after start
@@ -450,7 +499,7 @@ describe('useSimulation hook', () => {
 
       const ws = MockWebSocket.getLastInstance()!;
       act(() => {
-        ws.simulateOpen();
+        simulateRunStarted(ws);
       });
 
       act(() => {
@@ -479,7 +528,7 @@ describe('useSimulation hook', () => {
 
       const ws = MockWebSocket.getLastInstance()!;
       act(() => {
-        ws.simulateOpen();
+        simulateRunStarted(ws);
       });
 
       act(() => {
@@ -871,7 +920,16 @@ describe('useSimulation hook', () => {
         result.current.start();
       });
 
+      const ws = MockWebSocket.getLastInstance()!;
+      act(() => {
+        simulateRunStarted(ws);
+      });
+
       expect(MockWebSocket.lastUrl).toContain('mujoco');
+
+      act(() => {
+        result.current.stop();
+      });
 
       // Rerender with different engine
       rerender({ engine: 'drake' });

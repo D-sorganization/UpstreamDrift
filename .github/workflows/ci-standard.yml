@@ -1300,6 +1300,7 @@ jobs:
           UNIT_GATE_QUARANTINE: "1"
           REQUIRE_VENDORED_FALLBACK: "1"
           CI_TIER: ${{ needs.changed-paths.outputs.tier }}
+          UD_WRITE_SELECTABILITY_SUMMARY: "GITHUB_STEP_SUMMARY"
         run: |
           set +e
           pytest_targets=()
@@ -1809,6 +1810,7 @@ jobs:
             echo "- docs-governance changes: \`$DOCS_CHANGED\`"
             echo "- publication authority changes: \`$PUBLICATION_CHANGED\`"
             echo "- coverage: not measured"
+            echo "- test reach (selected/total): monitored in unit-test-gate"
             echo ""
             echo "| Job | Result |"
             echo "| --- | ------ |"
