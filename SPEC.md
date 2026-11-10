@@ -2754,6 +2754,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-10 | #14992 | Enforce Tauri Cargo.toml version parity, correct production readiness doc, and add frontend dynamic port resolution |
+| 2026-11-10 | #14990 | Typed non-finite failure for syngas water router and canonical lifecycle vocabulary gate |
 | 2026-11-10 | #14993 | Wire engine lane guards into nightly, enforce MuJoCo in CI, and remove dead MATLAB job |
 | 2026-11-10 | #14986 | Enable UD_AUTO_MARK_BY_DIRECTORY in unit-test-gate and enforce suite marker reach gate in CI |
 | 2026-11-10 | #14988 | Tauri BackendState supervisor with ephemeral port and stderr tail (Part of #14951). |
