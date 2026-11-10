@@ -360,6 +360,32 @@ describe('useSimulation hook', () => {
       expect(result.current.isPaused).toBe(true);
     });
 
+    it('surfaces error payload then clean close (#14950)', () => {
+      const { result } = renderHook(() => useSimulation('mujoco'));
+
+      act(() => {
+        result.current.start();
+      });
+
+      const ws = MockWebSocket.getLastInstance()!;
+      act(() => {
+        ws.simulateOpen();
+      });
+
+      act(() => {
+        ws.simulateMessage({ error: 'engine refused run' });
+      });
+
+      expect(result.current.wsError).toBe('engine refused run');
+      expect(result.current.isRunning).toBe(false);
+
+      act(() => {
+        ws.close(1000, 'done');
+      });
+
+      expect(result.current.connectionStatus).toBe('disconnected');
+    });
+
     it('handles malformed JSON gracefully', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
       const { result } = renderHook(() => useSimulation('mujoco'));
@@ -441,6 +467,40 @@ describe('useSimulation hook', () => {
       );
       expect(resumeMessage).toBeDefined();
       expect(JSON.parse(resumeMessage!).action).toBe('resume');
+      expect(result.current.isPaused).toBe(false);
+    });
+
+    it('clears isPaused after stop before a new start (#14950)', () => {
+      const { result } = renderHook(() => useSimulation('mujoco'));
+
+      act(() => {
+        result.current.start();
+      });
+
+      const ws = MockWebSocket.getLastInstance()!;
+      act(() => {
+        ws.simulateOpen();
+      });
+
+      act(() => {
+        result.current.pause();
+      });
+      expect(result.current.isPaused).toBe(true);
+
+      act(() => {
+        result.current.stop();
+      });
+      expect(result.current.isPaused).toBe(false);
+
+      act(() => {
+        result.current.start();
+      });
+
+      const ws2 = MockWebSocket.getLastInstance()!;
+      act(() => {
+        ws2.simulateOpen();
+      });
+
       expect(result.current.isPaused).toBe(false);
     });
 
