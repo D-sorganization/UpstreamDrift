@@ -421,23 +421,26 @@ class EngineManager(ContractChecker):
 
     def cleanup(self) -> None:
         """Clean up loaded engines."""
-        active_engine = self.active_physics_engine
-        close = getattr(active_engine, "close", None)
-        if callable(close):
-            try:
-                close()
-                logger.info("active_engine_shutdown status=success")
-            except (RuntimeError, OSError) as e:
-                logger.warning(
-                    "active_engine_shutdown_failed error=%s", e, exc_info=True
-                )
+        for engine_type, engine in list(self._loaded_engines.items()):
+            close = getattr(engine, "close", None)
+            if callable(close):
+                try:
+                    close()
+                    logger.info(
+                        "engine_shutdown status=success engine=%s",
+                        engine_type.value,
+                    )
+                except (RuntimeError, OSError) as e:
+                    logger.warning(
+                        "engine_shutdown_failed engine=%s error=%s",
+                        engine_type.value,
+                        e,
+                        exc_info=True,
+                    )
+            if self.engine_status.get(engine_type) == EngineStatus.LOADED:
+                self.engine_status[engine_type] = EngineStatus.AVAILABLE
 
-        unloaded_type = self.current_engine
-        if unloaded_type is not None:
-            self._loaded_engines.pop(unloaded_type, None)
-            if self.engine_status.get(unloaded_type) == EngineStatus.LOADED:
-                self.engine_status[unloaded_type] = EngineStatus.AVAILABLE
-
+        self._loaded_engines.clear()
         self.active_physics_engine = None
         self.current_engine = None
         logger.info("engine_cleanup_complete")

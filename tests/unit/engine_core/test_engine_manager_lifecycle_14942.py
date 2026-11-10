@@ -88,6 +88,31 @@ def test_load_sequence_a_b_a_succeeds(manager: EngineManager) -> None:
     assert mock_load.call_count == 2
 
 
+def test_cleanup_closes_all_cached_engines_after_switch(
+    manager: EngineManager,
+) -> None:
+    engine_a = MagicMock(name="engine_a")
+    engine_b = MagicMock(name="engine_b")
+    engine_a.close = MagicMock()
+    engine_b.close = MagicMock()
+    manager._loaded_engines[EngineType.MUJOCO] = engine_a
+    manager._loaded_engines[EngineType.DRAKE] = engine_b
+    manager.engine_status[EngineType.MUJOCO] = EngineStatus.LOADED
+    manager.engine_status[EngineType.DRAKE] = EngineStatus.LOADED
+    manager.current_engine = EngineType.DRAKE
+    manager.active_physics_engine = engine_b
+
+    manager.cleanup()
+
+    engine_a.close.assert_called_once_with()
+    engine_b.close.assert_called_once_with()
+    assert manager._loaded_engines == {}
+    assert manager.engine_status[EngineType.MUJOCO] == EngineStatus.AVAILABLE
+    assert manager.engine_status[EngineType.DRAKE] == EngineStatus.AVAILABLE
+    assert manager.current_engine is None
+    assert manager.active_physics_engine is None
+
+
 def test_cleanup_returns_loaded_engine_to_available(manager: EngineManager) -> None:
     active = MagicMock(name="active_engine")
     active.close = MagicMock()
