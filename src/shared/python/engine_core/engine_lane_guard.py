@@ -37,6 +37,25 @@ class EngineFloorReport:
     success: bool
     message: str
 
+    @property
+    def engine(self) -> str:
+        return self.lane
+
+    @property
+    def p(self) -> int:
+        return self.passed
+
+    @property
+    def s(self) -> int:
+        return self.skipped
+
+    @property
+    def f(self) -> int:
+        return self.failed
+
+
+EngineFloorResult = EngineFloorReport
+
 
 def parse_required_engines(raw: str | None) -> set[str]:
     """Parse comma-separated engine names. Raises ValueError on unknown engine."""
@@ -74,45 +93,160 @@ def is_valid_declared_skip(item: Any) -> bool:
     )
 
 
-def enforce_required_engine_skip_guard(
-    item: Any, report: Any, required_engines: set[str] | None = None
+def _match_engine_from_markers_or_node(
+    item: Any, node_lower: str, required: set[str]
+) -> str | None:
+    """Identify which required engine is exercised by item markers or nodeid."""
+    if item is not None:
+        markers = getattr(
+            item, "iter_markers", lambda: getattr(item, "own_markers", [])
+        )()
+        for m in markers:
+            name = getattr(m, "name", "").lower()
+            if name.startswith("requires_"):
+                eng = name[len("requires_") :]
+                if eng in required:
+                    return eng
+    for eng in required:
+        if (
+            f"requires_{eng}" in node_lower
+            or f"test_{eng}" in node_lower
+            or f"_{eng}_" in node_lower
+            or f"_{eng}." in node_lower
+            or f"/{eng}/" in node_lower
+            or f"\\{eng}\\" in node_lower
+            or f"::{eng}" in node_lower
+            or f"::test_{eng}" in node_lower
+        ):
+            return eng
+    return None
+
+
+def enforce_required_engines_on_report(
+    report: Any, nodeid: str = "", item: Any = None
 ) -> None:
-    """Turn an engine-test skip into failure when that engine is required."""
+    """Turn a skipped engine test into failure when that engine is required."""
+    if item is None and hasattr(nodeid, "skipped"):
+        item, report, nodeid = report, nodeid, getattr(report, "nodeid", "")
     if not getattr(report, "skipped", False) or getattr(report, "wasxfail", None):
         return
-    if required_engines is None:
-        required_engines = parse_required_engines(os.environ.get("UD_REQUIRE_ENGINES"))
-    if not required_engines:
+    required = parse_required_engines(os.environ.get("UD_REQUIRE_ENGINES"))
+    if not required:
         return
-
-    markers = getattr(item, "iter_markers", lambda: getattr(item, "own_markers", []))()
-    item_engine = next(
-        (
-            getattr(m, "name", "")[len("requires_") :].lower()
-            for m in markers
-            if getattr(m, "name", "").startswith("requires_")
-            and getattr(m, "name", "")[len("requires_") :].lower() in required_engines
-        ),
-        None,
-    )
-    if item_engine is None or is_valid_declared_skip(item):
+    node = nodeid or getattr(item, "nodeid", str(item or ""))
+    if item is not None and is_valid_declared_skip(item):
+        return
+    matched = _match_engine_from_markers_or_node(item, node.lower(), required)
+    if matched is None:
         return
 
     report.outcome = "failed"
-    report.skipped, report.failed = False, True
-    nodeid = getattr(item, "nodeid", str(item))
+    try:
+        report.skipped = False
+        report.failed = True
+    except AttributeError:
+        pass
+
     report.longrepr = (
-        f"Engine lane guard (UD_REQUIRE_ENGINES): test '{nodeid}' marked "
-        f"requires_{item_engine} was skipped in a lane that requires '{item_engine}'. "
+        f"Engine lane guard (UD_REQUIRE_ENGINES): test '{node}' exercising "
+        f"engine '{matched}' was skipped in a lane that requires '{matched}'. "
         f"Install the engine or use @pytest.mark.declared_skip(issue='#NNNN', reason='...')."
     )
 
 
-def verify_junit_engine_floor(
-    junit_xml_path: Path, floor_config_path: Path, lane: str
-) -> EngineFloorReport:
-    """Validate JUnit results against min_executed and max_skipped floors."""
-    config = json.loads(floor_config_path.read_text(encoding="utf-8"))
+enforce_required_engine_skip_guard = enforce_required_engines_on_report
+
+
+def _matches_engine_token(
+    tc: ET.Element, suite_name: str, engine: str, file_stem: str = ""
+) -> bool:
+    """Check if a JUnit testcase matches the given engine token."""
+    eng = engine.lower()
+    for val in [tc.get("classname", ""), tc.get("name", ""), tc.get("file", "")]:
+        low = val.lower()
+        if (
+            low == eng
+            or f"requires_{eng}" in low
+            or f"test_{eng}" in low
+            or f"_{eng}_" in low
+            or f"_{eng}." in low
+            or f"/{eng}/" in low
+            or f"\\{eng}\\" in low
+            or f"::{eng}" in low
+        ):
+            return True
+    for val in [suite_name, file_stem]:
+        low = val.lower()
+        if (
+            low == eng
+            or f"requires_{eng}" in low
+            or f"test_{eng}" in low
+            or f"_{eng}_" in low
+            or f"_{eng}." in low
+            or f"-{eng}" in low
+            or f"{eng}-" in low
+        ):
+            return True
+    return False
+
+
+def _classify_testcase(tc: ET.Element) -> tuple[int, int, int, int, int]:
+    """Classify testcase into (passed, failed, errors, skipped, xfailed)."""
+    fail, err, skip = tc.find("failure"), tc.find("error"), tc.find("skipped")
+    if fail is not None:
+        return 0, 1, 0, 0, 0
+    if err is not None:
+        return 0, 0, 1, 0, 0
+    if skip is not None:
+        info = ((skip.get("type") or "") + " " + (skip.get("message") or "")).lower()
+        return (0, 0, 0, 0, 1) if "xfail" in info else (0, 0, 0, 1, 0)
+    return 1, 0, 0, 0, 0
+
+
+def _collect_xml_files(junit_path: Path) -> list[Path]:
+    """Collect xml file(s) from a file or directory path."""
+    if junit_path.is_file():
+        return [junit_path]
+    if junit_path.is_dir():
+        return sorted(junit_path.glob("*.xml"))
+    return []
+
+
+def _accumulate_xml_engine_counts(
+    xml_path: Path, engine: str
+) -> tuple[int, int, int, int, int]:
+    """Accumulate (passed, failed, errors, skipped, xfailed) for an engine."""
+    p, f, err, sk, xf = 0, 0, 0, 0, 0
+    root = ET.parse(xml_path).getroot()
+    file_stem = xml_path.stem
+    suites = list(root.iter("testsuite"))
+    if suites:
+        for suite in suites:
+            suite_name = suite.get("name", "")
+            for tc in suite.iter("testcase"):
+                if _matches_engine_token(tc, suite_name, engine, file_stem):
+                    dp, df, de, ds, dx = _classify_testcase(tc)
+                    p += dp
+                    f += df
+                    err += de
+                    sk += ds
+                    xf += dx
+    else:
+        suite_name = root.get("name", "")
+        for tc in root.iter("testcase"):
+            if _matches_engine_token(tc, suite_name, engine, file_stem):
+                dp, df, de, ds, dx = _classify_testcase(tc)
+                p += dp
+                f += df
+                err += de
+                sk += ds
+                xf += dx
+    return p, f, err, sk, xf
+
+
+def _validate_lane_config(config_path: Path, lane: str) -> tuple[int, int]:
+    """Validate lane in config and return (min_passed, max_skipped)."""
+    config = json.loads(config_path.read_text(encoding="utf-8"))
     not_covered = {
         **config.get("not_covered", {}),
         **config.get("not_covered_engines", {}),
@@ -120,17 +254,27 @@ def verify_junit_engine_floor(
     if lane in not_covered:
         info = not_covered[lane]
         raise ValueError(
-            f"Lane '{lane}' is declared not_covered: {info.get('reason')} (issue {info.get('issue')})"
+            f"Lane '{lane}' is declared not_covered: {info.get('reason')} "
+            f"(issue {info.get('issue')})"
         )
-    if lane not in config.get("lanes", {}):
+    lanes = config.get("lanes", {})
+    if lane not in lanes:
         raise ValueError(
-            f"Unknown lane '{lane}'. Configured: {', '.join(sorted(config.get('lanes', {})))}"
+            f"Unknown lane '{lane}'. Configured: {', '.join(sorted(lanes))}"
         )
+    lane_floor = lanes[lane]
+    min_passed = int(lane_floor.get("min_passed", lane_floor.get("min_executed", 1)))
+    max_skipped = int(lane_floor.get("max_skipped", 0))
+    return min_passed, max_skipped
 
-    lane_floor = config["lanes"][lane]
-    min_exec = int(lane_floor.get("min_executed", 1))
-    max_skip = int(lane_floor.get("max_skipped", 0))
-    if not junit_xml_path.is_file():
+
+def verify_junit_engine_floor(
+    junit_xml_path: Path, floor_config_path: Path, lane: str
+) -> EngineFloorReport:
+    """Validate JUnit results against min_passed and max_skipped floors."""
+    min_passed, max_skipped = _validate_lane_config(floor_config_path, lane)
+    files = _collect_xml_files(junit_xml_path)
+    if not files:
         return EngineFloorReport(
             lane,
             0,
@@ -144,43 +288,32 @@ def verify_junit_engine_floor(
             f"JUnit XML file not found: {junit_xml_path}",
         )
 
-    p, f, err, sk, xf, xp_strict = 0, 0, 0, 0, 0, 0
-    for tc in ET.parse(junit_xml_path).getroot().iter("testcase"):
-        fail, error, skip = tc.find("failure"), tc.find("error"), tc.find("skipped")
-        if fail is not None:
-            f += 1
-            xp_strict += int(
-                any(
-                    k in ((fail.get("message") or "") + (fail.text or "")).lower()
-                    for k in ("xpass", "strict")
-                )
-            )
-        elif error is not None:
-            err += 1
-        elif skip is not None:
-            info = (
-                (skip.get("type") or "") + " " + (skip.get("message") or "")
-            ).lower()
-            xf, sk = (xf + 1, sk) if "xfail" in info else (xf, sk + 1)
-        else:
-            p += 1
+    p, f, err, s, xf = 0, 0, 0, 0, 0
+    for file in files:
+        dp, df, de, ds, dx = _accumulate_xml_engine_counts(file, lane)
+        p += dp
+        f += df
+        err += de
+        s += ds
+        xf += dx
 
     executed = p + f + err + xf
-    failures = [
-        f"executed {executed} < min_executed {min_exec}" if executed < min_exec else "",
-        (
-            f"0 tests passed in lane '{lane}' (all tests skipped or 0 collected)"
-            if not (p or f or err)
-            else ""
-        ),
-        f"skipped {sk} > max_skipped {max_skip}" if sk > max_skip else "",
-        f"xpassed_strict {xp_strict} > 0" if xp_strict > 0 else "",
-    ]
-    failures = [msg for msg in failures if msg]
-    success = not failures
-    msg = (
-        f"Lane '{lane}' passed floor check: {executed} executed (passed={p}, failed={f}, errors={err}, xfailed={xf}), {sk} skipped."
-        if success
-        else f"Lane '{lane}' failed floor check: {'; '.join(failures)}."
-    )
-    return EngineFloorReport(lane, executed, sk, xf, xp_strict, p, f, err, success, msg)
+    failed_total = f + err
+
+    if failed_total > 0:
+        msg = f"Engine '{lane}' had {failed_total} failed/errored test(s) (passed={p}, skipped={s})."
+        return EngineFloorReport(
+            lane, executed, s, xf, 0, p, failed_total, err, False, msg
+        )
+    if p == 0 and s > 0:
+        msg = f"All {s} test(s) for engine '{lane}' were skipped (0 passed; min_passed={min_passed})."
+        return EngineFloorReport(lane, executed, s, xf, 0, p, 0, 0, False, msg)
+    if p < min_passed:
+        msg = f"Engine '{lane}' passed {p} test(s), below floor min_passed={min_passed} (skipped={s})."
+        return EngineFloorReport(lane, executed, s, xf, 0, p, 0, 0, False, msg)
+    if s > max_skipped:
+        msg = f"Engine '{lane}' had {s} skipped test(s), exceeding max_skipped={max_skipped}."
+        return EngineFloorReport(lane, executed, s, xf, 0, p, 0, 0, False, msg)
+
+    msg = f"Lane '{lane}' passed floor check: {executed} executed (passed={p}, failed={failed_total}, skipped={s})."
+    return EngineFloorReport(lane, executed, s, xf, 0, p, 0, 0, True, msg)
