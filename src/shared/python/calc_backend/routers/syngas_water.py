@@ -34,24 +34,21 @@ def calculate_syngas_water(request: SyngasWaterRequest) -> SyngasWaterResponse:
     """Calculate water content and condensation risk in syngas."""
     try:
         try:
-            from src.shared.python.sidekick.process_calculators.syngas_water_calculator import (
-                SyngasWaterCalculator,
-                estimate_condensation_risk,
+            from src.shared.python.sidekick.process_calculators import (
+                syngas_water_calculator as _swc,
             )
 
-            calculator = SyngasWaterCalculator()
+            calculator = _swc.SyngasWaterCalculator()
             result = calculator.calculate_water_content(
                 request.temperature_c,
                 request.pressure_bar,
                 request.composition_key,
                 request.method,
             )
-
-            risk = estimate_condensation_risk(
+            risk = _swc.estimate_condensation_risk(
                 request.temperature_c, request.pressure_bar
             )
         except ImportError:
-            # Fallback: basic calculation without the full calculator
             return _fallback_calculate(request)
 
         _s = _sanitize
