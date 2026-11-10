@@ -968,20 +968,6 @@ class TestCIEnvironmentCompatibility:
             f"Standard aggregate alone, but found: {publishers}"
         )
 
-    def test_helper_workflows_use_pr_scoped_concurrency(self) -> None:
-        """Helper checks must not cancel another PR's current check status."""
-        workflows = [
-            "Jules-Redundant-PR-Closer.yml",
-        ]
-
-        for workflow_name in workflows:
-            workflow = (REPO_ROOT / ".github" / "workflows" / workflow_name).read_text(
-                encoding="utf-8"
-            )
-            assert (
-                "${{ github.event.pull_request.number || github.run_id }}" in workflow
-            )
-
     def test_ci_standard_runner_guard_invokes_real_audit(self) -> None:
         """The required local-only status must not be a no-op."""
         workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(

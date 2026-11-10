@@ -71,8 +71,8 @@ def test_caller_uses_local_callee_with_explicit_pins_and_existing_secrets() -> N
         "trusted_bundle_sha256": manifest["provider_bundle_sha256"],
     }
     assert job["secrets"] == {
-        "provider_app_id": "${{ secrets.JULES_APP_ID }}",
-        "provider_app_private_key": "${{ secrets.JULES_APP_PRIVATE_KEY }}",
+        "provider_app_id": "${{ secrets.FLEET_GENERAL_AGENT_APP_ID }}",
+        "provider_app_private_key": "${{ secrets.FLEET_GENERAL_AGENT_APP_PRIVATE_KEY }}",
     }
     assert "conclusion == 'success'" in job["if"]
     assert "event == 'push'" in job["if"]
