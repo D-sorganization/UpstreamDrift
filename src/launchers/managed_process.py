@@ -77,6 +77,7 @@ class ManagedProcess:
 
     @property
     def last_stderr_tail(self) -> str:
+        """Recent stderr lines only (stdout is never mixed into this tail)."""
         return "\n".join(self._stderr_tail)
 
     def record_output_line(self, line: str) -> None:
@@ -84,8 +85,6 @@ class ManagedProcess:
             self._stderr_tail.append(line.removeprefix("STDERR: "))
         elif line.startswith("STDERR:"):
             self._stderr_tail.append(line.removeprefix("STDERR:").lstrip())
-        elif line and not line.startswith("["):
-            self._stderr_tail.append(line)
 
     def to_public_dict(self) -> dict[str, Any]:
         poll = self.process.poll()

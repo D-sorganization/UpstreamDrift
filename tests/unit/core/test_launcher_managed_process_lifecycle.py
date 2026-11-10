@@ -34,6 +34,41 @@ def manager(repo_root: Path, monkeypatch: pytest.MonkeyPatch) -> ProcessManager:
     return ProcessManager(repo_root=repo_root, use_separate_terminals=False)
 
 
+def test_stdout_does_not_pollute_last_stderr_tail(
+    manager: ProcessManager, repo_root: Path
+) -> None:
+    script = _fixture_script(
+        repo_root,
+        "mixed_streams.py",
+        """
+        import sys
+        print("stdout-only")
+        sys.stdout.flush()
+        sys.stderr.write("stderr-only\\n")
+        sys.stderr.flush()
+        """,
+    )
+
+    process = manager.launch_script(
+        name="mixed-streams",
+        script_path=script,
+        cwd=repo_root,
+    )
+    assert process is not None
+
+    deadline = time.monotonic() + 2.0
+    while time.monotonic() < deadline:
+        rows = manager.list_processes()
+        if rows and rows[0]["exit_code"] == 0:
+            break
+        time.sleep(0.05)
+
+    managed = manager.list_processes()[0]
+    tail = managed["last_stderr_tail"]
+    assert "stderr-only" in tail
+    assert "stdout-only" not in tail
+
+
 def test_fast_failing_child_is_crashed_not_running(
     manager: ProcessManager, repo_root: Path
 ) -> None:
