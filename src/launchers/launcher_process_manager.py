@@ -45,6 +45,7 @@ from src.launchers.managed_process import (
     ProcessState,
     RunningProcessesView,
     new_managed_id,
+    reap_declined_child_spawn,
 )
 
 if TYPE_CHECKING:
@@ -488,17 +489,6 @@ class ProcessManager:
             if managed.key == key and managed.process.poll() is None
         ]
 
-    def _reap_declined_spawn(self, process: subprocess.Popen[bytes]) -> None:
-        """Terminate a child whose registration was declined (duplicate policy)."""
-        try:
-            if process.poll() is None:
-                if not kill_process_tree(process.pid):
-                    process.terminate()
-                with contextlib.suppress(subprocess.TimeoutExpired):
-                    process.wait(timeout=5)
-        except (OSError, ValueError) as exc:
-            logger.debug("reap declined spawn failed: %s", exc)
-
     def _allocate_slot_name(self, key: str) -> str | None:
         active = self._active_slots_for_key(key)
         if not active:
@@ -656,7 +646,7 @@ class ProcessManager:
             raise ValueError("name must be provided")
         managed = self._register_process(name, process, kind=ProcessKind.DOCKER)
         if managed is None:
-            self._reap_declined_spawn(process)
+            reap_declined_child_spawn(process)
             return
         self._start_output_stream_thread(managed.slot_name, process, managed.id)
 
@@ -800,7 +790,7 @@ class ProcessManager:
                 )
             managed = self._register_process(name, process, kind=ProcessKind.LOCAL)
             if managed is None:
-                self._reap_declined_spawn(process)
+                reap_declined_child_spawn(process)
                 return None
         else:
             process = secure_popen(
@@ -815,7 +805,7 @@ class ProcessManager:
             )
             managed = self._register_process(name, process, kind=ProcessKind.LOCAL)
             if managed is None:
-                self._reap_declined_spawn(process)
+                reap_declined_child_spawn(process)
                 return None
             self._start_output_stream_thread(managed.slot_name, process, managed.id)
 

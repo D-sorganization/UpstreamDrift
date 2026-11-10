@@ -9,6 +9,7 @@ Convention (per-repo, launcher scope):
 
 from __future__ import annotations
 
+import contextlib
 from collections import deque
 from collections.abc import Callable, Iterator, MutableMapping
 from dataclasses import dataclass, field
@@ -16,6 +17,8 @@ from enum import Enum
 import threading
 import uuid
 from typing import TYPE_CHECKING, Any
+
+from src.shared.python.security.subprocess_utils import kill_process_tree
 
 if TYPE_CHECKING:
     from subprocess import Popen
@@ -165,3 +168,17 @@ class RunningProcessesView(MutableMapping[str, "Popen[bytes]"]):
 
 def new_managed_id() -> str:
     return uuid.uuid4().hex
+
+
+def reap_declined_child_spawn(process: Popen[bytes]) -> None:
+    """Terminate a child whose registration was declined (duplicate policy)."""
+    import subprocess
+
+    try:
+        if process.poll() is None:
+            if not kill_process_tree(process.pid):
+                process.terminate()
+            with contextlib.suppress(subprocess.TimeoutExpired):
+                process.wait(timeout=5)
+    except (OSError, ValueError):
+        pass
