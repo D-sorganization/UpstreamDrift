@@ -79,10 +79,7 @@ class LauncherService:
         """
         list_processes = getattr(self.process_manager, "list_processes", None)
         if callable(list_processes):
-            return {
-                row["slot_name"]: row
-                for row in list_processes()
-            }
+            return {row["slot_name"]: row for row in list_processes()}
         running = self.process_manager.running_processes
         processes: dict[str, dict[str, Any]] = {}
         for name, proc in running.items():
