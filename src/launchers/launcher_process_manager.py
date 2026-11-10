@@ -462,7 +462,9 @@ class ProcessManager:
     def list_processes(self) -> list[dict[str, object]]:
         """Return public metadata for all tracked processes (Sidekick/actions)."""
         with self._process_lock:
-            return [managed.to_public_dict() for managed in self._process_registry.values()]
+            return [
+                managed.to_public_dict() for managed in self._process_registry.values()
+            ]
 
     def get_managed_process(self, slot_name: str) -> ManagedProcess | None:
         with self._process_lock:
@@ -644,9 +646,7 @@ class ProcessManager:
         managed = self._register_process(name, process, kind=ProcessKind.DOCKER)
         if managed is None:
             return
-        self._start_output_stream_thread(
-            managed.slot_name, process, managed.id
-        )
+        self._start_output_stream_thread(managed.slot_name, process, managed.id)
 
     def _start_output_stream_thread(
         self,
@@ -800,9 +800,7 @@ class ProcessManager:
             managed = self._register_process(name, process, kind=ProcessKind.LOCAL)
             if managed is None:
                 return process
-            self._start_output_stream_thread(
-                managed.slot_name, process, managed.id
-            )
+            self._start_output_stream_thread(managed.slot_name, process, managed.id)
 
         _assign_to_job(process)
         logger.info(f"Launched {name} (PID: {process.pid})")
@@ -1101,9 +1099,7 @@ class ProcessManager:
                     try:
                         managed.process.wait(timeout=5)
                     except subprocess.TimeoutExpired:
-                        logger.warning(
-                            "Force killing process: %s", managed.slot_name
-                        )
+                        logger.warning("Force killing process: %s", managed.slot_name)
                         managed.process.terminate()
                         try:
                             managed.process.wait(timeout=5)
@@ -1135,10 +1131,10 @@ class ProcessManager:
             if name not in self.running_processes:
                 return False
             return self.running_processes[name].poll() is None
-        return (
-            managed.process.poll() is None
-            and managed.state in {ProcessState.STARTING, ProcessState.RUNNING}
-        )
+        return managed.process.poll() is None and managed.state in {
+            ProcessState.STARTING,
+            ProcessState.RUNNING,
+        }
 
 
 def is_vcxsrv_running() -> bool:
