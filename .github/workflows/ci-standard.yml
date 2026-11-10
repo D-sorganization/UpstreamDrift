@@ -1590,6 +1590,8 @@ jobs:
         # smoke: core dependencies, the `src.*` suite modules, and one
         # spec-resolution import per shared Tools alias root.
         run: python scripts/ci/verify_installation.py
+      - name: Validate committed evidence invariants (#14935)
+        run: python scripts/ci/validate_committed_evidence.py
       - name: Run smoke and contract tests
         env:
           QT_QPA_PLATFORM: offscreen
@@ -1599,6 +1601,7 @@ jobs:
             tests/smoke/test_e2e_tool_registry_and_chat.py \
             tests/smoke/test_smoke_suite_contract.py \
             tests/shared_contracts/ \
+            tests/unit/motion_matching/test_committed_evidence_validator.py \
             -p no:cacheprovider \
             --no-cov \
             --tb=short
