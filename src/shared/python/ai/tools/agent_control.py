@@ -29,47 +29,28 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-_NOT_IMPLEMENTED_STATUS = "not_implemented"
-
-
 def _not_implemented_agent_action(
     *,
     capability: str,
     message: str,
     **metadata: Any,
 ) -> AgentActionResult:
-    """Honest refusal for agent-control capabilities with no backend yet.
-
-    Mirrors the contract of ``sample_tools._not_implemented_tool_result``
-    (#7391, #8322, #14939) without importing ``sample_tools`` (circular).
-    """
-    from src.shared.python.contracts import ensure, require
-
-    reserved = frozenset({"success", "error", "status"})
-    require(
-        not reserved.intersection(metadata),
-        "Placeholder metadata may not override verdict keys.",
+    """Honest refusal for agent-control capabilities with no backend yet."""
+    from src.shared.python.ai.not_implemented_payload import (
+        NOT_IMPLEMENTED_STATUS,
+        build_not_implemented_payload,
     )
-    payload: dict[str, Any] = {
-        "success": False,
-        "error": _NOT_IMPLEMENTED_STATUS,
-        "status": _NOT_IMPLEMENTED_STATUS,
-        "capability": capability,
-        "message": message,
+
+    payload = build_not_implemented_payload(
+        capability=capability,
+        message=message,
         **metadata,
-    }
-    ensure(
-        payload["success"] is False
-        and payload["status"] == _NOT_IMPLEMENTED_STATUS
-        and payload["error"] == _NOT_IMPLEMENTED_STATUS,
-        "A placeholder agent action must report an honest failure.",
-        value=payload,
     )
     return AgentActionResult(
         success=False,
         message=message,
         data=payload,
-        error=_NOT_IMPLEMENTED_STATUS,
+        error=NOT_IMPLEMENTED_STATUS,
     )
 
 
