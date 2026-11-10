@@ -59,6 +59,7 @@ class JaxSimBackend:
         self._model_name = ""
         self._control: NDArray[np.float64] = np.zeros(0, dtype=np.float64)
         self._time = 0.0
+        self._canonical_acceleration: NDArray[np.float64] | None = None
 
     @property
     def model_name(self) -> str:
@@ -158,7 +159,10 @@ class JaxSimBackend:
 
         self._require_loaded()
         q, v = self._canonical_v2_qv_from_data()
-        a = np.zeros_like(v)
+        if self._canonical_acceleration is None:
+            a = np.zeros_like(v)
+        else:
+            a = self._canonical_acceleration.copy()
         return CanonicalState(q=q, v=v, a=a, t=self.get_time())
 
     def set_canonical_state(self, state: CanonicalState) -> None:
@@ -166,6 +170,12 @@ class JaxSimBackend:
 
         self._require_loaded()
         q_arr, v_arr = self._validate_canonical_v2_qv_shapes(state.q, state.v)
+        a_arr = np.asarray(state.a, dtype=np.float64)
+        if a_arr.shape != v_arr.shape:
+            raise ValueError(
+                f"a must have shape ({v_arr.shape[0]},); got {a_arr.shape!r}"
+            )
+        self._canonical_acceleration = a_arr.copy()
         self._data = self._build_data(
             base_position=q_arr[:3],
             base_quaternion=q_arr[3:7],
@@ -200,6 +210,7 @@ class JaxSimBackend:
         )
         self._control = np.zeros(self._dofs(), dtype=np.float64)
         self._time = 0.0
+        self._canonical_acceleration = None
 
     def forward(self) -> None:
         """Refresh JaxSim forward-kinematics caches without advancing time."""

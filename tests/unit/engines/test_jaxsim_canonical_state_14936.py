@@ -27,7 +27,8 @@ def test_jaxsim_canonical_state_roundtrip_spinning_translating_base() -> None:
     )
     from src.shared.python.pose_interchange.canonical_state import CanonicalState
 
-    seed = CanonicalState(q=q, v=v, a=np.zeros_like(v), t=0.5)
+    a = rng.normal(size=v.shape[0]) * 0.75
+    seed = CanonicalState(q=q, v=v, a=a, t=0.5)
     assert seed.convention == CONVENTION_TAG_V2
 
     backend.set_canonical_state(seed)
@@ -35,4 +36,5 @@ def test_jaxsim_canonical_state_roundtrip_spinning_translating_base() -> None:
 
     np.testing.assert_allclose(recovered.q, seed.q, atol=1.0e-12)
     np.testing.assert_allclose(recovered.v, seed.v, atol=1.0e-12)
+    np.testing.assert_allclose(recovered.a, seed.a, atol=1.0e-12)
     assert recovered.t == pytest.approx(seed.t)
