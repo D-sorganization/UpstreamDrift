@@ -167,9 +167,9 @@ def apply_canonical_state(
             v=np.asarray(state.v, dtype=np.float64),
             a=np.asarray(state.a, dtype=np.float64),
         )
-        pin_native = PinocchioReferenceAdapter(_NullPinocchioBackend()).from_canonical_v2(
-            pin_v2
-        )
+        pin_native = PinocchioReferenceAdapter(
+            _NullPinocchioBackend()
+        ).from_canonical_v2(pin_v2)
         engine.set_state(pin_native.q, pin_native.v)
         if hasattr(engine, "a"):
             engine.a = np.asarray(pin_native.a, dtype=np.float64).copy()
