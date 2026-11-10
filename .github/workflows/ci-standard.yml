@@ -2282,6 +2282,7 @@ jobs:
           PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
           QT_QPA_PLATFORM: offscreen
           QT_API: pyqt6
+          UD_REQUIRE_ENGINES: "mujoco"
         run: |
           export COVERAGE_FILE="$RUNNER_TEMP/.coverage"
           # Machine-readable failure record. `-ra` alone is not enough:
@@ -3266,46 +3267,6 @@ jobs:
           path: .lighthouseci/baseline-receipt.json
           if-no-files-found: error
           retention-days: 30
-
-  # =============================================================================
-  # MATLAB TESTS - DISABLED BY DEFAULT
-  # =============================================================================
-  # This job requires a MATLAB license which is NOT available in GitHub CI.
-  # DO NOT enable (remove 'if: false') unless you have configured MATLAB licensing.
-  # To enable: set 'if: true' and configure matlab-actions.
-  # Users with local MATLAB can run: matlab/run_all.m for equivalent tests.
-  # =============================================================================
-  matlab-tests:
-    needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
-    timeout-minutes: 30
-    # DISABLED - Requires MATLAB license not available in CI
-    # Fork PRs never run on the self-hosted fleet (RM#1989).
-    if: >-
-      (!github.event.pull_request ||
-      github.event.pull_request.head.repo.full_name == github.repository) &&
-      (false)
-    continue-on-error: true
-    steps:
-      - name: Clean corrupt git objects
-        shell: bash
-        run: |
-          if [ -d .git ]; then
-            if find .git/objects -type f -empty | grep -q .; then
-              echo "Found empty/corrupt git objects, purging .git..."
-              rm -rf .git
-            elif ! git fsck --quick >/dev/null 2>&1; then
-              echo "git fsck failed, purging .git..."
-              rm -rf .git
-            fi
-          fi
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - uses: matlab-actions/setup-matlab@f9e43010f1ae678f7cfa0542fe2a4f60f7d1ad8d
-      - uses: matlab-actions/run-command@bfa857648f4895aa98a446fe41c85e0788421ed5
-        with:
-          command: |
-            addpath('matlab');
-            run_all
 
   # =============================================================================
   # ARDUINO BUILD - DISABLED BY DEFAULT
