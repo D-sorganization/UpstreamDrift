@@ -12,6 +12,12 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any
 
+from .errors import (
+    AIP_METHOD_NOT_IMPLEMENTED,
+    AIP_NOT_IMPLEMENTED_CODE,
+    AIPMethodNotImplemented,
+)
+
 # JSON-RPC 2.0 error codes
 PARSE_ERROR = -32700
 INVALID_REQUEST = -32600
@@ -238,5 +244,12 @@ async def dispatch(  # noqa: C901
             ),
             request_id=request_id,
         )
+    except AIPMethodNotImplemented as exc:
+        err = make_error(
+            AIP_METHOD_NOT_IMPLEMENTED,
+            exc.message,
+            data={"code": AIP_NOT_IMPLEMENTED_CODE, "method": exc.method},
+        )
+        return make_response(error=err, request_id=request_id)
 
     return make_response(result=result, request_id=request_id)
