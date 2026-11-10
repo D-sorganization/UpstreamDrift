@@ -24,10 +24,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14934
 - **Branch:** agy/6004-syngas-water-router-pair
-- **PR:** #14976, #14985
+- **PR:** #14976, #14985, #14990
 - **Paths:** see #14976
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`94d9cd0c`; collated from changes/14934-lifecycle-kernel.md)
+- **Last verified:** 2026-11-10 (`91dabc7d`; collated from changes/14934-syngas-nonfinite-and-vocabulary.md)
 - **Summary:** Fix syngas water unit conversions and router fallback on 60F_14.696psia basis (paired with Tools#6009)
 - **Next step:** Merge the PR.
 
@@ -904,10 +904,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14951
 - **Branch:** merged via #14988
-- **PR:** #14988
+- **PR:** #14988, #14992
 - **Paths:** see #14988
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`82785f09`; collated from changes/14951-tauri-backendstate-supervisor-with-ephem.md)
+- **Last verified:** 2026-11-10 (`1d08a591`; collated from changes/14951-tauri-version-consistency-and-dynamic-port.md)
 - **Summary:** Tauri BackendState supervisor with ephemeral port and stderr tail (Part of #14951).
 - **Next step:** Shipped in PR #14988.
 
