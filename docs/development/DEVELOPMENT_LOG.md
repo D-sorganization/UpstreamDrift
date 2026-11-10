@@ -885,6 +885,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14946 · Make Coverage Truth Explicit in CI Summary and Remove Dead Cov-Fail-Under Flags
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14946
+- **Branch:** merged via #14972
+- **PR:** #14972
+- **Paths:** see #14972
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`57b4ffa7`; collated from changes/14946-coverage-truth-in-summary.md)
+- **Summary:** Make coverage truth explicit in CI summary and remove dead cov-fail-under flags
+- **Next step:** Shipped in PR #14972.
+
 ### DL-#14950 · Simulation WS Error Frame Handling and isPaused Reset on Stop (Part Of #14950).
 
 - **State:** shipped
