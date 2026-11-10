@@ -31,6 +31,7 @@ class WaterContentOut(BaseModel):
     water_content_lb_per_mmscf: float
     vapor_pressure_bar: float
     dew_point_c: float
+    standard_basis: str = "60F_14.696psia"
 
 
 class CondensationRiskOut(BaseModel):
