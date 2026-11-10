@@ -2754,6 +2754,9 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-10 | #14967 | Simulation lifecycle reducer with runId and stale-socket guard; Simulation WS error frame handling and isPaused reset on stop (Part of #14950). |
+| 2026-11-10 | #14981 | Add sharded coverage collection, combination, and per-package ratchet gate |
+| 2026-11-10 | #14976 | Fix syngas water unit conversions and router fallback on 60F_14.696psia basis (paired with Tools#6009) |
 | 2026-11-10 | #14980 | Add directory-based suite marker inference, opt-out marker, gate selectability summary, and audit utility (Part of #14947, Part of #14934) |
 | 2026-11-10 | #14963 | Workspace synchronous optimization returns explicit synthetic placeholder; RECEIPT registration refused for synthetic results |
 | 2026-11-10 | #14974 | \ Marker IK exposes convergence status,reports NO_MARKERS and NaN RMS for empty frames,and routes LM with finite bounds to TRF\ |
