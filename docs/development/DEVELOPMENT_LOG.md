@@ -885,6 +885,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14860 · Redact Fleet Host and Home Literals Batch 4 Recovery
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14860
+- **Branch:** merged via #14933
+- **PR:** #14933
+- **Paths:** see #14933
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`1cc97639`; collated from changes/14860-host-redact-04.md)
+- **Summary:** Redact fleet host and home literals batch 4 recovery
+- **Next step:** Shipped in PR #14933.
+
 ### DL-#14820 · UD Docs and CI Contract Tests Reaffirm PR Size Is Advisory Only (Dieter 2026-11-06)
 
 - **State:** shipped
