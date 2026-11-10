@@ -77,8 +77,14 @@ class LauncherService:
         Returns:
             Dictionary mapping process name to status info.
         """
+        list_processes = getattr(self.process_manager, "list_processes", None)
+        if callable(list_processes):
+            return {
+                row["slot_name"]: row
+                for row in list_processes()
+            }
         running = self.process_manager.running_processes
-        processes = {}
+        processes: dict[str, dict[str, Any]] = {}
         for name, proc in running.items():
             poll = proc.poll()
             processes[name] = {

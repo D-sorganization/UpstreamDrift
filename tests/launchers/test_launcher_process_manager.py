@@ -342,7 +342,8 @@ def test_cleanup_processes(mock_kill, manager) -> None:
     mock_proc2 = MagicMock()
     mock_proc2.poll.return_value = 0  # Not running
 
-    manager.running_processes = {"proc1": mock_proc1, "proc2": mock_proc2}
+    manager.running_processes["proc1"] = mock_proc1
+    manager.running_processes["proc2"] = mock_proc2
 
     mock_kill.return_value = True  # kill successful
 
