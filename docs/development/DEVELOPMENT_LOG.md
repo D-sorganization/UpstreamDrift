@@ -885,6 +885,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14941 · Workspace Synchronous Optimization Returns Explicit Synthetic Placeholder; RECEIPT Registration Refused for Synthetic Results
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14941
+- **Branch:** merged via #14963
+- **PR:** #14963
+- **Paths:** see #14963
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`2da54750`; collated from changes/14941-workspace-synchronous-optimization-retur.md)
+- **Summary:** Workspace synchronous optimization returns explicit synthetic placeholder; RECEIPT registration refused for synthetic results
+- **Next step:** Shipped in PR #14963.
+
 ### DL-#14938 · \ Marker IK Exposes Convergence Status,Reports NO_MARKERS and NaN RMS for Empty Frames,and Routes LM With Finite Bounds to TRF\
 
 - **State:** shipped
