@@ -57,6 +57,10 @@ def _write_project(root: Path, *, version: str) -> None:
         f'{{"productName": "UpstreamDrift", "version": "{version}"}}\n',
         encoding="utf-8",
     )
+    (root / "ui" / "src-tauri" / "Cargo.toml").write_text(
+        f'[package]\nname = "golf-modeling-suite"\nversion = "{version}"\n',
+        encoding="utf-8",
+    )
     (root / "ui" / "package-lock.json").write_text(
         json.dumps(
             {
@@ -150,6 +154,20 @@ def test_check_versions_reports_tauri_conf_drift(tmp_path: Path) -> None:
 
     assert report.ok is False
     assert any("ui/src-tauri/tauri.conf.json" in error for error in report.errors)
+
+
+def test_check_versions_reports_tauri_cargo_drift(tmp_path: Path) -> None:
+    module = _load_script_module()
+    _write_project(tmp_path, version="2.1.1")
+    (tmp_path / "ui" / "src-tauri" / "Cargo.toml").write_text(
+        '[package]\nname = "golf-modeling-suite"\nversion = "2.1.0"\n',
+        encoding="utf-8",
+    )
+
+    report = module.check_versions(tmp_path, tag_reader=lambda _root: ("v2.1.0",))
+
+    assert report.ok is False
+    assert any("ui/src-tauri/Cargo.toml" in error for error in report.errors)
 
 
 def test_check_versions_reports_version_file_drift(tmp_path: Path) -> None:
@@ -317,3 +335,9 @@ def test_main_set_cli_updates_and_verifies(tmp_path: Path) -> None:
     )
     assert report.ok is True
     assert report.canonical_version == "2.1.5"
+
+
+def test_real_repo_version_consistency_passes() -> None:
+    module = _load_script_module()
+    report = module.check_versions(_REPO_ROOT)
+    assert report.ok is True, f"Real repo version check failed: {report.errors}"
