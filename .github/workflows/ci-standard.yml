@@ -51,7 +51,7 @@ env:
 
 jobs:
   local-only-workflows:
-    name: Reject hosted runner routing
+    name: Enforce local-only workflow routing
     needs: changed-paths
     # Fork PRs never run on the self-hosted fleet (RM#1989).
     if: >-
