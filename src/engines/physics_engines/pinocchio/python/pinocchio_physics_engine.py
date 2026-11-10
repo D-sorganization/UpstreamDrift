@@ -655,14 +655,11 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
     @postcondition(check_finite, "ZVCF acceleration must contain finite values")
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Deprecated shim → :meth:`compute_gravity_only_acceleration` (#14943)."""
-        import warnings
-
-        warnings.warn(
-            "compute_zvcf(q) is legacy; use compute_control_acceleration_at_state or compute_gravity_only_acceleration",
-            DeprecationWarning,
-            stacklevel=2,
+        from src.shared.python.engine_core.counterfactual_defaults import (
+            deprecated_compute_zvcf_shim,
         )
-        return self.compute_gravity_only_acceleration(q)
+
+        return deprecated_compute_zvcf_shim(self, q)
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Affine drift must contain finite values")
