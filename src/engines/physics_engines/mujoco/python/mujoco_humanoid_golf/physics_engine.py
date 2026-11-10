@@ -832,56 +832,56 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
             self.data.ctrl[:] = saved_ctrl
             mujoco.mj_forward(self.model, self.data)
 
-    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
-
-        Compute acceleration at fixed configuration with joint velocities and
-        declared applied control set to zero.
-
-        **Purpose**: Answer "What acceleration would occur if motion FROZE
-        instantaneously?"
-
-        **Physics**: With v=0, acceleration has no velocity-dependent terms:
-            q̈_ZVCF = M(q)⁻¹ · (J^T·λ₀₀ - g(q))
-            (λ₀₀: constraint reactions recomputed under v = 0, τ = 0)
-
-        Args:
-            q: Joint positions (n_q,) [rad or m]
-
-        Returns:
-            q̈_ZVCF: Acceleration with v=0 and u=0 (n_v,) [rad/s² or m/s²]
-        """
+    def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:
+        """Legacy gravity-only diagnostic at ``v = u = 0`` (not SPEC §4 ZVCF)."""
         if q is None:
             raise ValueError("q must be provided")
         if self.model is None or self.data is None:
             return np.array([])
 
-        # Save current state
         saved_qpos = self.data.qpos.copy()
         saved_qvel = self.data.qvel.copy()
         saved_ctrl = self.data.ctrl.copy()
 
         try:
-            # Set to counterfactual configuration with v=0
             self.data.qpos[:] = q
-            self.data.qvel[:] = 0  # ZVCF: zero velocity
-            self.data.ctrl[:] = 0  # ZVCF: zero declared applied control
-
-            # Compute forward dynamics with zero velocity
+            self.data.qvel[:] = 0
+            self.data.ctrl[:] = 0
             mujoco.mj_forward(self.model, self.data)
-            self.data.qvel[:] = 0  # #7979
-
-            # Extract acceleration
-            a_zvcf = self.data.qacc.copy()
-
-            return cast(np.ndarray, a_zvcf)
-
+            self.data.qvel[:] = 0
+            return cast(np.ndarray, self.data.qacc.copy())
         finally:
-            # Restore original state
             self.data.qpos[:] = saved_qpos
             self.data.qvel[:] = saved_qvel
             self.data.ctrl[:] = saved_ctrl
             mujoco.mj_forward(self.model, self.data)
+
+    def compute_control_acceleration_at_state(
+        self, q: np.ndarray, tau: np.ndarray
+    ) -> np.ndarray:
+        """SPEC §4 ZVCF control component via MuJoCo counterfactual kernel (#14943)."""
+        if q is None or tau is None:
+            raise ValueError("q and tau must be provided")
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.counterfactuals import (
+            CounterfactualAnalyzer,
+        )
+
+        ctrl = np.asarray(tau, dtype=float).reshape(-1)
+        if ctrl.size != self.model.nu:
+            return self.compute_control_acceleration(ctrl)
+        analyzer = CounterfactualAnalyzer(self.model)
+        return analyzer.control_component_at(q, ctrl)
+
+    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
+        """Deprecated shim → :meth:`compute_gravity_only_acceleration` (#14943)."""
+        from src.shared.python.engine_core.counterfactual_defaults import (
+            deprecated_compute_zvcf_shim,
+        )
+
+        return deprecated_compute_zvcf_shim(self, q)
 
     # -------- Section B5: Flexible Beam Shaft --------
 

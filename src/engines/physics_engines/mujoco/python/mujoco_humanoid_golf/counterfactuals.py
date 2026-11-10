@@ -18,6 +18,9 @@ from typing import Literal
 import mujoco
 import numpy as np
 
+from src.shared.python.engine_core.counterfactual_contract import (
+    COUNTERFACTUAL_DEFINITION_VERSION,
+)
 from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -52,6 +55,7 @@ class CounterfactualResult:
     delta_position: np.ndarray | None
     torque_attributed_effect: np.ndarray | None
     velocity_attributed_effect: np.ndarray | None
+    definition_version: str = COUNTERFACTUAL_DEFINITION_VERSION
 
 
 class CounterfactualAnalyzer:
@@ -215,6 +219,16 @@ class CounterfactualAnalyzer:
             delta_position=delta_qpos,
             torque_attributed_effect=delta_qacc,  # ZTCF attributes to torques
             velocity_attributed_effect=None,
+        )
+
+    def control_component_at(
+        self, qpos: np.ndarray, ctrl: np.ndarray
+    ) -> np.ndarray:
+        """SPEC §4 ZVCF control acceleration ``M(q)⁻¹ τ`` at ``q`` (#14943)."""
+        if qpos is None or ctrl is None:
+            raise ValueError("qpos and ctrl must be provided")
+        return self._control_acceleration(
+            self._data_counterfactual, qpos, np.asarray(ctrl, dtype=float)
         )
 
     def _control_acceleration(

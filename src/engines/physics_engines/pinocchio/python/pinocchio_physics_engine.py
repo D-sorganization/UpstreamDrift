@@ -609,36 +609,44 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
 
         return cast(np.ndarray, a_full - a_drift)
 
-    @precondition(lambda self, q: self.is_initialized, "Engine must be initialized")
-    @postcondition(check_finite, "ZVCF acceleration must contain finite values")
-    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
-
-        Compute acceleration with joint velocities and declared applied
-        control set to zero.
-
-        Args:
-            q: Joint positions (n_q,) [rad or m]
-
-        Returns:
-            q_ddot_ZVCF: Acceleration with v=0 and u=0 (n_v,)
-        """
-
+    def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:
+        """Legacy gravity-only diagnostic at ``v = u = 0`` (not SPEC §4 ZVCF)."""
         if not (q is not None):
             raise ValueError("q must be provided")
         if self.model is None or self.data is None:
             return np.array([])
-
         q_arr = self._require_vector("q", q, self.model.nq)
-
         v_zero = np.zeros(self.model.nv)
-
-        # Canonical ZVCF zeros the declared applied-control channel.
         tau = np.zeros(self.model.nv)
+        return cast(np.ndarray, pin.aba(self.model, self.data, q_arr, v_zero, tau))
 
-        a_zvcf = pin.aba(self.model, self.data, q_arr, v_zero, tau)
+    def compute_control_acceleration_at_state(
+        self, q: np.ndarray, tau: np.ndarray
+    ) -> np.ndarray:
+        """SPEC §4 ZVCF control term at fixed ``q`` with zero velocity (#14943)."""
+        if not (q is not None and tau is not None):
+            raise ValueError("q and tau must be provided")
+        if self.model is None or self.data is None:
+            return np.array([])
+        q_arr = self._require_vector("q", q, self.model.nq)
+        tau_arr = self._require_vector("tau", tau, self.model.nv)
+        q_save, v_save = self.q.copy(), self.v.copy()
+        try:
+            self.q = q_arr
+            self.v = np.zeros(self.model.nv)
+            return self.compute_control_acceleration(tau_arr)
+        finally:
+            self.q, self.v = q_save, v_save
 
-        return cast(np.ndarray, a_zvcf)
+    @precondition(lambda self, q: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "ZVCF acceleration must contain finite values")
+    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
+        """Deprecated shim → :meth:`compute_gravity_only_acceleration` (#14943)."""
+        from src.shared.python.engine_core.counterfactual_defaults import (
+            deprecated_compute_zvcf_shim,
+        )
+
+        return deprecated_compute_zvcf_shim(self, q)
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Affine drift must contain finite values")
