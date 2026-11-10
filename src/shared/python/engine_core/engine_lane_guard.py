@@ -190,17 +190,18 @@ def _matches_engine_token(
     return False
 
 
-def _classify_testcase(tc: ET.Element) -> tuple[int, int, int, int, int]:
-    """Classify testcase into (passed, failed, errors, skipped, xfailed)."""
+def _classify_testcase(tc: ET.Element) -> tuple[int, int, int, int, int, int]:
+    """Classify testcase into (passed, failed, errors, skipped, xfailed, xpassed_strict)."""
     fail, err, skip = tc.find("failure"), tc.find("error"), tc.find("skipped")
     if fail is not None:
-        return 0, 1, 0, 0, 0
+        xp = 1 if "xpass(strict)" in (fail.get("message") or "").lower() else 0
+        return 0, 1, 0, 0, 0, xp
     if err is not None:
-        return 0, 0, 1, 0, 0
+        return 0, 0, 1, 0, 0, 0
     if skip is not None:
         info = ((skip.get("type") or "") + " " + (skip.get("message") or "")).lower()
-        return (0, 0, 0, 0, 1) if "xfail" in info else (0, 0, 0, 1, 0)
-    return 1, 0, 0, 0, 0
+        return (0, 0, 0, 0, 1, 0) if "xfail" in info else (0, 0, 0, 1, 0, 0)
+    return 1, 0, 0, 0, 0, 0
 
 
 def _collect_xml_files(junit_path: Path) -> list[Path]:
@@ -214,23 +215,37 @@ def _collect_xml_files(junit_path: Path) -> list[Path]:
 
 def _accumulate_xml_engine_counts(
     xml_path: Path, engine: str
-) -> tuple[int, int, int, int, int]:
-    """Accumulate (passed, failed, errors, skipped, xfailed) for an engine."""
-    p, f, err, sk, xf = 0, 0, 0, 0, 0
+) -> tuple[int, int, int, int, int, int]:
+    """Accumulate (passed, failed, errors, skipped, xfailed, xpassed_strict)."""
+    p, f, err, sk, xf, xp = 0, 0, 0, 0, 0, 0
     root = ET.parse(xml_path).getroot()
     file_stem = xml_path.stem
     suites = list(root.iter("testsuite")) or [root]
-    for suite in suites:
-        suite_name = suite.get("name", "")
-        for tc in suite.iter("testcase"):
-            if _matches_engine_token(tc, suite_name, engine, file_stem):
-                dp, df, de, ds, dx = _classify_testcase(tc)
-                p += dp
-                f += df
-                err += de
-                sk += ds
-                xf += dx
-    return p, f, err, sk, xf
+    all_tcs = [
+        (tc, s.get("name", "")) for s in suites for tc in s.iter("testcase")
+    ]
+    matched = [
+        tc
+        for tc, sname in all_tcs
+        if _matches_engine_token(tc, sname, engine, file_stem)
+    ]
+    has_other_engine = any(
+        _matches_engine_token(tc, sname, other, file_stem)
+        for tc, sname in all_tcs
+        for other in KNOWN_ENGINES - {engine.lower()}
+    )
+    target_tcs = matched if (matched or has_other_engine) else [tc for tc, _ in all_tcs]
+    for tc in target_tcs:
+        dp, df, de, ds, dx, dxp = _classify_testcase(tc)
+        p, f, err, sk, xf, xp = (
+            p + dp,
+            f + df,
+            err + de,
+            sk + ds,
+            xf + dx,
+            xp + dxp,
+        )
+    return p, f, err, sk, xf, xp
 
 
 def _validate_lane_config(config_path: Path, lane: str) -> tuple[int, int]:
@@ -277,14 +292,17 @@ def verify_junit_engine_floor(
             f"JUnit XML file not found: {junit_xml_path}",
         )
 
-    p, f, err, s, xf = 0, 0, 0, 0, 0
+    p, f, err, s, xf, xp = 0, 0, 0, 0, 0, 0
     for file in files:
-        dp, df, de, ds, dx = _accumulate_xml_engine_counts(file, lane)
-        p += dp
-        f += df
-        err += de
-        s += ds
-        xf += dx
+        dp, df, de, ds, dx, dxp = _accumulate_xml_engine_counts(file, lane)
+        p, f, err, s, xf, xp = (
+            p + dp,
+            f + df,
+            err + de,
+            s + ds,
+            xf + dx,
+            xp + dxp,
+        )
 
     executed = p + f + err + xf
     failed_total = f + err
@@ -292,17 +310,17 @@ def verify_junit_engine_floor(
     if failed_total > 0:
         msg = f"Engine '{lane}' had {failed_total} failed/errored test(s) (passed={p}, skipped={s})."
         return EngineFloorReport(
-            lane, executed, s, xf, 0, p, failed_total, err, False, msg
+            lane, executed, s, xf, xp, p, failed_total, err, False, msg
         )
     if p == 0 and s > 0:
         msg = f"All {s} test(s) for engine '{lane}' were skipped (0 passed; min_passed={min_passed})."
-        return EngineFloorReport(lane, executed, s, xf, 0, p, 0, 0, False, msg)
+        return EngineFloorReport(lane, executed, s, xf, xp, p, 0, 0, False, msg)
     if p < min_passed:
         msg = f"Engine '{lane}' passed {p} test(s), below floor min_passed={min_passed} (skipped={s})."
-        return EngineFloorReport(lane, executed, s, xf, 0, p, 0, 0, False, msg)
+        return EngineFloorReport(lane, executed, s, xf, xp, p, 0, 0, False, msg)
     if s > max_skipped:
         msg = f"Engine '{lane}' had {s} skipped test(s), exceeding max_skipped={max_skipped}."
-        return EngineFloorReport(lane, executed, s, xf, 0, p, 0, 0, False, msg)
+        return EngineFloorReport(lane, executed, s, xf, xp, p, 0, 0, False, msg)
 
     msg = f"Lane '{lane}' passed floor check: {executed} executed (passed={p}, failed={failed_total}, skipped={s})."
-    return EngineFloorReport(lane, executed, s, xf, 0, p, 0, 0, True, msg)
+    return EngineFloorReport(lane, executed, s, xf, xp, p, 0, 0, True, msg)
