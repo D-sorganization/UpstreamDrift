@@ -6,23 +6,6 @@ from typing import Any
 
 NOT_IMPLEMENTED_STATUS = "not_implemented"
 _RESERVED_VERDICT_KEYS = frozenset({"success", "error", "status"})
-_METADATA_RESERVED_KEYS_ERROR = (
-    "Placeholder metadata may not override the verdict keys {reserved}; got {overlap}."
-)
-
-
-def _reject_reserved_metadata_keys(metadata: dict[str, Any]) -> None:
-    """Reject metadata that tries to override honest-refusal verdict keys."""
-    from src.shared.python.contracts import require
-
-    overlap = _RESERVED_VERDICT_KEYS.intersection(metadata)
-    require(
-        not overlap,
-        _METADATA_RESERVED_KEYS_ERROR.format(
-            reserved=sorted(_RESERVED_VERDICT_KEYS),
-            overlap=sorted(overlap),
-        ),
-    )
 
 
 def build_not_implemented_payload(
@@ -32,9 +15,14 @@ def build_not_implemented_payload(
     **metadata: Any,
 ) -> dict[str, Any]:
     """Build the canonical honest refusal dict for a missing capability."""
-    from src.shared.python.contracts import ensure
+    from src.shared.python.contracts import ensure, require
 
-    _reject_reserved_metadata_keys(metadata)
+    require(
+        not _RESERVED_VERDICT_KEYS.intersection(metadata),
+        "Placeholder metadata may not override the verdict keys "
+        f"{sorted(_RESERVED_VERDICT_KEYS)}; got "
+        f"{sorted(_RESERVED_VERDICT_KEYS.intersection(metadata))}.",
+    )
     payload: dict[str, Any] = {
         "success": False,
         "error": NOT_IMPLEMENTED_STATUS,
