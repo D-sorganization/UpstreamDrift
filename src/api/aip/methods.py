@@ -3,17 +3,26 @@
 Defines all JSON-RPC methods available through the AIP server.
 Methods are grouped by namespace: simulation, model, analysis.
 
-See issue #763
+See issue #763, honesty slice #14940.
 """
 
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from typing import Any
 
-from .dispatcher import MethodRegistry
+from .dispatcher import MethodRegistry as MethodRegistry
+from .errors import AIPMethodNotImplemented
 
 _logger = logging.getLogger(__name__)
+
+
+def _not_implemented(method: str, detail: str) -> AIPMethodNotImplemented:
+    return AIPMethodNotImplemented(
+        method,
+        f"{method} is not implemented: {detail}",
+    )
 
 
 def create_registry() -> MethodRegistry:
@@ -100,6 +109,29 @@ def create_registry() -> MethodRegistry:
     return registry
 
 
+_SELF_CHECK_HANDLERS: dict[str, Callable[[Callable[..., Any]], None]] = {
+    "system.ping": lambda handler: handler(),
+    "model.list": lambda handler: handler(),
+}
+
+
+def methods_passing_self_check(registry: MethodRegistry) -> list[str]:
+    """Return method names that are safe to advertise in capabilities (#14940)."""
+    supported: list[str] = []
+    for name in registry.list_methods():
+        if name == "system.capabilities":
+            supported.append(name)
+        elif (probe := _SELF_CHECK_HANDLERS.get(name)) and (
+            h := registry.get_method(name)
+        ):
+            try:
+                probe(h)
+                supported.append(name)
+            except (AIPMethodNotImplemented, RuntimeError, ValueError, OSError):
+                pass
+    return sorted(supported)
+
+
 # ── Simulation method handlers ──────────────────────────────
 
 
@@ -125,25 +157,10 @@ def _simulation_start(
     """
     if not (engine_type is not None):
         raise ValueError("engine_type must be provided")
-    engine_manager = _get_engine_manager(_context)
-
-    # Try to load the engine
-    try:
-        if engine_manager and hasattr(engine_manager, "load_engine"):
-            engine_manager.load_engine(engine_type)
-    except (RuntimeError, ValueError, OSError) as exc:
-        return {
-            "status": "error",
-            "message": f"Failed to load engine: {str(exc)}",
-        }
-
-    return {
-        "status": "started",
-        "engine_type": engine_type,
-        "duration": duration,
-        "timestep": timestep,
-        "model_path": model_path,
-    }
+    raise _not_implemented(
+        "simulation.start",
+        "no SimulationService run was created",
+    )
 
 
 def _simulation_stop(
@@ -158,7 +175,10 @@ def _simulation_stop(
     Returns:
         Status dict.
     """
-    return {"status": "stopped"}
+    raise _not_implemented(
+        "simulation.stop",
+        "no SimulationService run exists",
+    )
 
 
 def _simulation_step(
@@ -177,25 +197,10 @@ def _simulation_step(
     """
     if not (n_steps is not None):
         raise ValueError("n_steps must be provided")
-    engine_manager = _get_engine_manager(_context)
-    state: dict[str, Any] = {}
-
-    if engine_manager:
-        try:
-            engine = engine_manager.get_active_engine()
-            if engine and hasattr(engine, "step"):
-                for _ in range(n_steps):
-                    engine.step()
-            if engine and hasattr(engine, "get_state"):
-                state = engine.get_state()
-        except (ValueError, RuntimeError, AttributeError) as exc:
-            return {"status": "error", "message": str(exc)}
-
-    return {
-        "status": "ok",
-        "n_steps": n_steps,
-        "state": state,
-    }
+    raise _not_implemented(
+        "simulation.step",
+        "no active simulation run to advance",
+    )
 
 
 def _simulation_status(
@@ -210,23 +215,10 @@ def _simulation_status(
     Returns:
         Status information.
     """
-    engine_manager = _get_engine_manager(_context)
-
-    if engine_manager:
-        try:
-            engine = engine_manager.get_active_engine()
-            if engine:
-                state = engine.get_state() if hasattr(engine, "get_state") else {}
-                return {
-                    "running": True,
-                    "engine": str(getattr(engine, "engine_type", "unknown")),
-                    "sim_time": state.get("time", 0.0),
-                    "state_keys": list(state.keys()),
-                }
-        except (ValueError, RuntimeError, AttributeError) as exc:
-            _logger.warning("simulation.status: engine query failed: %s", exc)
-
-    return {"running": False, "engine": None, "sim_time": 0.0}
+    raise _not_implemented(
+        "simulation.status",
+        "no active simulation run exists",
+    )
 
 
 def _simulation_set_control(
@@ -247,27 +239,10 @@ def _simulation_set_control(
     """
     if not (actuator_index is not None):
         raise ValueError("actuator_index must be provided")
-    engine_manager = _get_engine_manager(_context)
-
-    if engine_manager:
-        try:
-            engine = engine_manager.get_active_engine()
-            if engine and hasattr(engine, "set_control"):
-                engine.set_control(actuator_index, value)
-                return {
-                    "status": "ok",
-                    "actuator_index": actuator_index,
-                    "applied_value": value,
-                }
-        except (ValueError, RuntimeError, AttributeError) as exc:
-            return {"status": "error", "message": str(exc)}
-
-    return {
-        "status": "ok",
-        "actuator_index": actuator_index,
-        "applied_value": value,
-        "note": "No active engine; command buffered.",
-    }
+    raise _not_implemented(
+        "simulation.set_control",
+        "no active simulation run to control",
+    )
 
 
 # ── Model method handlers ───────────────────────────────────
@@ -291,12 +266,10 @@ def _model_load(
         raise ValueError("path must be provided")
     if not path:
         return {"status": "error", "message": "path is required"}
-
-    return {
-        "status": "loaded",
-        "path": path,
-        "format": "urdf" if path.endswith(".urdf") else "mjcf",
-    }
+    raise _not_implemented(
+        "model.load",
+        "no model was loaded into an engine",
+    )
 
 
 def _model_query(
@@ -315,22 +288,10 @@ def _model_query(
     """
     if not (property_name is not None):
         raise ValueError("property_name must be provided")
-    engine_manager = _get_engine_manager(_context)
-
-    if engine_manager:
-        try:
-            engine = engine_manager.get_active_engine()
-            if engine:
-                if property_name == "joints" and hasattr(engine, "joint_names"):
-                    return {"joints": list(engine.joint_names)}
-                if property_name == "joints" and hasattr(engine, "get_joint_names"):
-                    return {"joints": list(engine.get_joint_names())}
-        except (ValueError, RuntimeError, AttributeError) as exc:
-            _logger.warning(
-                "model.get_property(%r): engine query failed: %s", property_name, exc
-            )
-
-    return {"property": property_name, "data": None, "note": "No active model"}
+    raise _not_implemented(
+        "model.query",
+        "no loaded model is available to query",
+    )
 
 
 def _model_list(
@@ -369,23 +330,10 @@ def _analysis_metrics(
     Returns:
         Current metrics data.
     """
-    engine_manager = _get_engine_manager(_context)
-
-    if engine_manager:
-        try:
-            engine = engine_manager.get_active_engine()
-            if engine and hasattr(engine, "get_state"):
-                state = engine.get_state()
-                return {
-                    "sim_time": state.get("time", 0.0),
-                    "positions": state.get("positions", []),
-                    "velocities": state.get("velocities", []),
-                    "torques": state.get("torques", []),
-                }
-        except (ValueError, RuntimeError, AttributeError) as exc:
-            _logger.warning("analysis.get_metrics: engine query failed: %s", exc)
-
-    return {"sim_time": 0.0, "note": "No active simulation"}
+    raise _not_implemented(
+        "analysis.metrics",
+        "no metrics were read from a simulation recorder",
+    )
 
 
 def _analysis_export(
@@ -402,11 +350,10 @@ def _analysis_export(
     Returns:
         Export status.
     """
-    return {
-        "status": "ok",
-        "format": format,
-        "note": "Export queued. Use analysis.metrics for current data.",
-    }
+    raise _not_implemented(
+        "analysis.export",
+        "no export job was enqueued or written",
+    )
 
 
 def _analysis_time_series(
@@ -425,12 +372,10 @@ def _analysis_time_series(
     Returns:
         Time series data.
     """
-    return {
-        "metrics": metrics or ["positions", "velocities"],
-        "window": window,
-        "data": {},
-        "note": "Time series requires active simulation with recording enabled.",
-    }
+    raise _not_implemented(
+        "analysis.time_series",
+        "no time-series recorder is attached to an active run",
+    )
 
 
 # ── System method handlers ──────────────────────────────────
@@ -449,21 +394,19 @@ def _system_capabilities(
         Capabilities descriptor.
     """
     registry = create_registry()
-    namespaces = registry.list_by_namespace()
-
-    capabilities = []
-    capabilities.extend(
-        [
-            {"name": ns, "version": "1.0", "methods": methods}
-            for (ns, methods) in namespaces.items()
-        ]
-    )
+    supported = methods_passing_self_check(registry)
+    ns_map: dict[str, list[str]] = {}
+    for n in supported:
+        ns_map.setdefault(n.split(".", 1)[0] if "." in n else "root", []).append(n)
 
     return {
         "server_name": "UpstreamDrift AIP Server",
         "protocol_version": "2.0",
-        "capabilities": capabilities,
-        "supported_methods": registry.list_methods(),
+        "capabilities": [
+            {"name": k, "version": "1.0", "methods": v}
+            for k, v in sorted(ns_map.items())
+        ],
+        "supported_methods": supported,
     }
 
 
