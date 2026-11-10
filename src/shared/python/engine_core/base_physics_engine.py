@@ -38,7 +38,16 @@ from src.shared.python.core.contracts import (
     require_state,
 )
 from src.shared.python.core.error_decorators import ErrorContext, log_errors
+from src.shared.python.engine_core.canonical_state_io import (
+    apply_canonical_state,
+    engine_supports_canonical_state,
+    read_canonical_state,
+)
 from src.shared.python.engine_core.checkpoint import StateCheckpoint
+from src.shared.python.pose_interchange.canonical_state import (
+    CONVENTION_TAG_V2,
+    CanonicalState,
+)
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.security_utils import validate_path
@@ -349,6 +358,31 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
                 f"set_state expects EngineState or (q, v), got {len(args)} args"
             )
 
+    @property
+    def engine_type(self) -> str:
+        """Checkpoint engine identifier (short name, e.g. ``mujoco``).
+
+        Concrete engines should override this property; the default is the
+        lowercased class name with a trailing ``physicsengine`` suffix removed.
+        """
+        name = type(self).__name__
+        name = name.removesuffix("PhysicsEngine")
+        return name.lower()
+
+    def supports_canonical_state(self) -> bool:
+        """Whether :meth:`get_canonical_state` / :meth:`set_canonical_state` are wired."""
+        return engine_supports_canonical_state(self.engine_type)
+
+    @require_state(lambda self: self._is_initialized, "initialized")
+    def get_canonical_state(self) -> CanonicalState:
+        """Return engine state in the ADR-0026 ``canonical-v2`` convention."""
+        return read_canonical_state(self)
+
+    @require_state(lambda self: self._is_initialized, "initialized")
+    def set_canonical_state(self, state: CanonicalState) -> None:
+        """Restore engine state from a ``canonical-v2`` value."""
+        apply_canonical_state(self, state)
+
     def get_time(self) -> float:
         """Get current simulation time.
 
@@ -408,12 +442,17 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
         if extra:
             engine_state_dict.update(extra)
 
+        metadata: dict[str, Any] = {}
+        if self.supports_canonical_state():
+            metadata["state_convention"] = CONVENTION_TAG_V2
+
         return StateCheckpoint.create(
-            engine_type=self.__class__.__name__,
+            engine_type=self.engine_type,
             engine_state=engine_state_dict,
             q=q,
             v=v,
             timestamp=timestamp,
+            metadata=metadata,
         )
 
     def _get_extra_checkpoint_state(self) -> dict[str, Any]:
@@ -439,6 +478,11 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
         """
         if checkpoint is None:
             raise ValueError("checkpoint must be provided")
+        if checkpoint.engine_type != self.engine_type:
+            raise ValueError(
+                f"checkpoint engine_type {checkpoint.engine_type!r} does not match "
+                f"engine {self.engine_type!r}"
+            )
         if not checkpoint.engine_state:
             return
 
