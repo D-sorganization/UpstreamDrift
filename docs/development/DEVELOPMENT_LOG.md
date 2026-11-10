@@ -885,6 +885,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14820 · UD Docs and CI Contract Tests Reaffirm PR Size Is Advisory Only (Dieter 2026-11-06)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14820
+- **Branch:** merged via #14926
+- **PR:** #14926
+- **Paths:** see #14926
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`ee388e1a`; collated from changes/14820-ud-pr-size-advisory-review-contract.md)
+- **Summary:** UD docs and CI contract tests reaffirm PR size is advisory only (Dieter 2026-11-06)
+- **Next step:** Shipped in PR #14926.
+
 ### DL-#14928 · Align Realtime Shadow-Ledger Sunset_Date With Q4 Baseline and Validate Against UTC Date (#14928, #12046)
 
 - **State:** shipped
@@ -1801,10 +1814,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12553
 - **Branch:** merged via #14684
-- **PR:** #14684, #14690, #14696, #14704, #14713, #14725, #14787
+- **PR:** #14684, #14690, #14696, #14704, #14713, #14725, #14787, #14925
 - **Paths:** see #14684
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-06 (`53335482`; collated from changes/12553-document-anderson-2007-table-3-scope-for.md)
+- **Last verified:** 2026-11-10 (`448c4a2c`; collated from changes/12553-nsx04-verification-status-inventory.md)
 - **Summary:** NSX-04 slice 1: verified subtalar inversion/eversion and MTP flexion torque capacities (da Fonseca 2025, Saeki 2021); hip and MTP-extension slots keep ASSUMED with stated reasons
 - **Next step:** Shipped in PR #14684.
 

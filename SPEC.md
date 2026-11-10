@@ -2754,6 +2754,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-10 | #14926 | UD docs and CI contract tests reaffirm PR size is advisory only (Dieter 2026-11-06) |
+| 2026-11-10 | #14925 | NSX-04 verification status doc plus registry inventory contract test |
 | 2026-11-10 | #14931 | Align realtime shadow-ledger sunset_date with Q4 baseline and validate against UTC date (#14928, #12046) |
 | 2026-11-10 | #14921 | Explorer contract: engine-tagged playback archives and per-engine MP4 distinctness test (#12878 workstream C) |
 | 2026-11-09 | #14920 | Correct SHOW-A10 evidence provenance manifest and summary attribution without regenerating artifacts |
