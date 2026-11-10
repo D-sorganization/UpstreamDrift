@@ -885,6 +885,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14945 · Make Architecture and File-Size Budget Expiry Evaluation Deterministic
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14945
+- **Branch:** merged via #14954
+- **PR:** #14954
+- **Paths:** see #14954
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`268f76ed`; collated from changes/14945-deterministic-budget-expiry.md)
+- **Summary:** Make architecture and file-size budget expiry evaluation deterministic
+- **Next step:** Shipped in PR #14954.
+
 ### DL-#14944 · ZTCF: Guard Multi-Body Misuse of Compute_Ztcf_Forces; Double-Pendulum Regression (#14944, Part Of #14934)
 
 - **State:** shipped

@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-10 | #14954 | Make architecture and file-size budget expiry evaluation deterministic |
 | 2026-11-10 | #14953 | ZTCF: guard multi-body misuse of compute_ztcf_forces; double-pendulum regression (#14944, Part of #14934) |
 | 2026-11-10 | #14923 | Document CI Optional Stack slice 1 (Pinocchio gravity) and add runbook contract tests |
 | 2026-11-10 | #14924 | Contract tests: Bruno B2, Pearcy P1, Hosea G1 provenance flags (#12737) |
