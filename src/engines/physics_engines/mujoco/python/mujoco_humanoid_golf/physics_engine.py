@@ -257,6 +257,17 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
             return np.array([]), np.array([])
         return self.data.qpos.copy(), self.data.qvel.copy()
 
+    def get_canonical_state(self):
+        """Export ADR-0026 ``canonical-v2`` state (#14936)."""
+        from src.shared.python.pose_interchange.canonical_state import CanonicalState
+
+        state: CanonicalState = super().get_canonical_state()
+        return state
+
+    def set_canonical_state(self, state) -> None:
+        """Import ADR-0026 ``canonical-v2`` state (#14936)."""
+        super().set_canonical_state(state)
+
     def get_link_transforms(self) -> dict[str, np.ndarray]:
         """Return body link poses without advancing the simulation."""
         self.require_initialized("get_link_transforms")

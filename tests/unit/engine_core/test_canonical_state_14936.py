@@ -27,7 +27,9 @@ _skip_no_pinocchio = pytest.mark.skipif(
 pytestmark = pytest.mark.unit
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
-_FLOATING_MJCF = _REPO_ROOT / "tests/fixtures/feedback_controls/native_floating_muscle_11958.xml"
+_FLOATING_MJCF = (
+    _REPO_ROOT / "tests/fixtures/feedback_controls/native_floating_muscle_11958.xml"
+)
 
 _MINIMAL_FLOATING_URDF = """<?xml version="1.0"?>
 <robot name="float_hinge">
@@ -134,7 +136,10 @@ def test_mujoco_checkpoint_restore_on_pinocchio_raises() -> None:
 
 
 def test_checkpoint_manager_raises_on_checksum_failure() -> None:
-    from src.shared.python.engine_core.checkpoint import CheckpointManager, StateCheckpoint
+    from src.shared.python.engine_core.checkpoint import (
+        CheckpointManager,
+        StateCheckpoint,
+    )
 
     class _StubEngine:
         engine_type = "stub"

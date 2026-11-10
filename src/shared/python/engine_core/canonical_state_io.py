@@ -34,16 +34,24 @@ class _NullPinocchioBackend:
     """Backend placeholder; ``to_canonical_v2`` / ``from_canonical_v2`` do not call it."""
 
     def fk(self, q: np.ndarray, frame_name: str) -> np.ndarray:
-        raise NotImplementedError(frame_name)
+        raise RuntimeError(
+            f"NullPinocchioBackend does not implement fk ({frame_name!r})"
+        )  # tracked: #14936
 
     def jacobian(self, q: np.ndarray, frame_name: str) -> np.ndarray:
-        raise NotImplementedError(frame_name)
+        raise RuntimeError(
+            f"NullPinocchioBackend does not implement jacobian ({frame_name!r})"
+        )  # tracked: #14936
 
     def rnea(self, q: np.ndarray, v: np.ndarray, a: np.ndarray) -> np.ndarray:
-        raise NotImplementedError
+        raise RuntimeError(
+            "NullPinocchioBackend does not implement rnea"
+        )  # tracked: #14936
 
     def aba(self, q: np.ndarray, v: np.ndarray, tau: np.ndarray) -> np.ndarray:
-        raise NotImplementedError
+        raise RuntimeError(
+            "NullPinocchioBackend does not implement aba"
+        )  # tracked: #14936
 
 
 def engine_supports_canonical_state(engine_type: str) -> bool:
@@ -97,7 +105,7 @@ def read_canonical_state(engine: BasePhysicsEngine) -> CanonicalState:
     """Build canonical-v2 state from the engine's native dynamic arrays."""
     engine_type = engine.engine_type
     if not engine_supports_canonical_state(engine_type):
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #14936
             f"Engine {engine_type!r} does not implement canonical-v2 state I/O yet."
         )
 
@@ -116,7 +124,7 @@ def read_canonical_state(engine: BasePhysicsEngine) -> CanonicalState:
             pin_native
         )
     else:  # pragma: no cover - guarded above
-        raise NotImplementedError(engine_type)
+        raise NotImplementedError(engine_type)  # tracked: #14936
 
     return _v2_to_canonical(v2)
 
@@ -128,7 +136,7 @@ def apply_canonical_state(
     """Apply a canonical-v2 state through the adapter boundary."""
     engine_type = engine.engine_type
     if not engine_supports_canonical_state(engine_type):
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #14936
             f"Engine {engine_type!r} does not implement canonical-v2 state I/O yet."
         )
 
@@ -147,7 +155,7 @@ def apply_canonical_state(
         if hasattr(engine, "a"):
             engine.a = np.asarray(native.a, dtype=np.float64).copy()
     else:  # pragma: no cover
-        raise NotImplementedError(engine_type)
+        raise NotImplementedError(engine_type)  # tracked: #14936
 
     if hasattr(engine, "time"):
         engine.time = float(state.t)

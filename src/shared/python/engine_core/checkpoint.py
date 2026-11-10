@@ -401,9 +401,7 @@ class CheckpointManager(ContractChecker):
             raise ValueError(f"Checkpoint not found: {checkpoint_id}")
 
         if not checkpoint.verify_checksum():
-            raise ValueError(
-                f"Checkpoint {checkpoint_id} failed integrity check"
-            )
+            raise ValueError(f"Checkpoint {checkpoint_id} failed integrity check")
 
         engine.restore_checkpoint(checkpoint)
         self._total_restores += 1
