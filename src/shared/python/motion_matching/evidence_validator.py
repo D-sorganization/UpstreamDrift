@@ -23,7 +23,9 @@ __all__ = [
 ]
 
 _HOST_ABSOLUTE_RE = re.compile(
-    r"(^/home/|^/Users/|^[A-Za-z]:\\|^candidate:/home/|^candidate:/Users/)"
+    r"(^/home/|^/Users/|^/mnt/"
+    r"|^[A-Za-z]:[\\/]"
+    r"|^candidate:/home/|^candidate:/Users/)"
 )
 
 
@@ -87,23 +89,39 @@ def validate_candidate_package(
                 ),
             )
         )
+    true_count = sum(1 for value in gates.values() if value is True)
     passed_text = data.get("gates_passed")
-    if isinstance(passed_text, str):
-        parsed = _parse_gates_passed(passed_text)
-        if parsed is not None:
-            passed_count, total = parsed
-            true_count = sum(1 for value in gates.values() if value is True)
-            if passed_count != true_count or total != len(gates):
-                issues.append(
-                    EvidenceIssue(
-                        rule="accepted_gates_consistency",
-                        path=rel_path,
-                        message=(
-                            f"gates_passed={passed_text!r} disagrees with "
-                            f"{true_count}/{len(gates)} gate booleans"
-                        ),
-                    )
-                )
+    if not isinstance(passed_text, str) or not passed_text.strip():
+        issues.append(
+            EvidenceIssue(
+                rule="accepted_gates_consistency",
+                path=rel_path,
+                message="accepted=true but gates_passed is missing or empty",
+            )
+        )
+        return issues
+    parsed = _parse_gates_passed(passed_text.strip())
+    if parsed is None:
+        issues.append(
+            EvidenceIssue(
+                rule="accepted_gates_consistency",
+                path=rel_path,
+                message=f"gates_passed={passed_text!r} is not a valid N/M count",
+            )
+        )
+        return issues
+    passed_count, total = parsed
+    if passed_count != true_count or total != len(gates):
+        issues.append(
+            EvidenceIssue(
+                rule="accepted_gates_consistency",
+                path=rel_path,
+                message=(
+                    f"gates_passed={passed_text!r} disagrees with "
+                    f"{true_count}/{len(gates)} gate booleans"
+                ),
+            )
+        )
     return issues
 
 
@@ -230,6 +248,23 @@ def validate_ledger_unclassified_rows(
     return issues
 
 
+def _valid_waiver_entry(entry: Mapping[str, Any]) -> bool:
+    waiver_id = entry.get("id")
+    rule = entry.get("rule")
+    expires = entry.get("expires")
+    if not isinstance(waiver_id, str) or not waiver_id.strip():
+        return False
+    if not isinstance(rule, str) or not rule.strip():
+        return False
+    if not isinstance(expires, str) or not expires.strip():
+        return False
+    try:
+        date.fromisoformat(expires.strip())
+    except ValueError:
+        return False
+    return True
+
+
 def load_waivers(path: Path) -> list[dict[str, Any]]:
     if not path.is_file():
         return []
@@ -237,7 +272,11 @@ def load_waivers(path: Path) -> list[dict[str, Any]]:
     waivers = payload.get("waivers")
     if not isinstance(waivers, list):
         return []
-    return [entry for entry in waivers if isinstance(entry, dict)]
+    return [
+        dict(entry)
+        for entry in waivers
+        if isinstance(entry, dict) and _valid_waiver_entry(entry)
+    ]
 
 
 def _waiver_matches(
@@ -249,12 +288,13 @@ def _waiver_matches(
     if isinstance(waiver_path, str) and waiver_path != issue.path:
         return False
     expires = waiver.get("expires")
-    if isinstance(expires, str):
-        try:
-            if date.fromisoformat(expires) < today:
-                return False
-        except ValueError:
+    if not isinstance(expires, str) or not expires.strip():
+        return False
+    try:
+        if date.fromisoformat(expires.strip()) < today:
             return False
+    except ValueError:
+        return False
     return True
 
 

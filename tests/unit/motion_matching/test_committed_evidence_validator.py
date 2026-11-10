@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from src.shared.python.motion_matching.evidence_validator import (
+    load_waivers,
     validate_candidate_package,
     validate_committed_evidence,
     validate_receipt_paths,
@@ -54,6 +55,51 @@ def test_committed_scan_fails_without_waivers(tmp_path: Path) -> None:
     rules = {issue.rule for issue in report.issues}
     assert "accepted_gates_consistency" in rules
     assert "host_absolute_provenance" in rules
+
+
+def test_accepted_package_rejects_malformed_gates_passed() -> None:
+    data = {
+        "accepted": True,
+        "gates": {"a": True, "b": False},
+        "gates_passed": "unknown",
+    }
+    issues = validate_candidate_package("candidates/test.json", data)
+    assert any("not a valid N/M count" in issue.message for issue in issues)
+
+
+def test_receipt_flags_forward_slash_windows_and_wsl_paths() -> None:
+    for sample in ("C:/Users/x/out.json", "/mnt/c/Users/x/out.json"):
+        issues = validate_receipt_paths(
+            "evidence/matched/sample/receipt.json",
+            {"warm_start_source": sample},
+        )
+        assert issues
+        assert issues[0].rule == "host_absolute_provenance"
+
+
+def test_malformed_waiver_entries_are_ignored(tmp_path: Path) -> None:
+    waivers_path = tmp_path / "waivers.json"
+    waivers_path.write_text(
+        json.dumps(
+            {
+                "waivers": [
+                    {
+                        "id": "no-expiry",
+                        "rule": "accepted_gates_consistency",
+                        "path": "candidates/candidate_ms_080s_seeded_package.json",
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert load_waivers(waivers_path) == []
+    report = validate_committed_evidence(
+        REPO_ROOT,
+        waivers_path=waivers_path,
+        today=date(2026, 11, 10),
+    )
+    assert report.failed
 
 
 def test_loads_committed_ledger_and_reports_unclassified() -> None:
