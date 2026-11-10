@@ -9,6 +9,11 @@ from typing import Any
 import pytest
 
 from scripts.ci.audit_suite_marker_reach import audit_suite_markers, main as audit_main
+from scripts.ci.check_suite_marker_reach import (
+    check_directory_reach,
+    check_suite_marker_reach,
+    main as check_main,
+)
 from tests.helpers.suite_marker_reach import (
     OPT_OUT_MARKER,
     apply_directory_suite_auto_markers,
@@ -158,3 +163,63 @@ def test_audit_suite_marker_reach_cli_json(
     assert audit_main(["--tests-root", str(tests_dir.parent), "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
     assert "baseline" in data and data["census"]["total_tests"] == 1
+
+
+def test_check_suite_marker_reach_synthetic(tmp_path: Path) -> None:
+    tests_dir = tmp_path / "tests"
+    (tests_dir / "unit").mkdir(parents=True)
+    (tests_dir / "unit" / "test_u.py").write_text(
+        "def test_ok(): pass\n", encoding="utf-8"
+    )
+    dir_res = check_directory_reach(tests_dir, floor_pct=95.0)
+    assert dir_res["passed"] is True
+    assert dir_res["unit_pct"] == 100.0
+
+    ok, msg = check_suite_marker_reach(
+        tests_dir,
+        baseline_path=tmp_path / "empty.json",
+        selectability_floor=50.0,
+    )
+    assert ok is True
+    assert "PASSED" in msg
+
+
+def test_directory_auto_marking_reach_floor() -> None:
+    repo_tests = Path(__file__).resolve().parents[3] / "tests"
+    res = check_directory_reach(repo_tests, floor_pct=95.0)
+    assert res["passed"] is True
+    assert res["unit_pct"] == 100.0
+    assert res["integration_pct"] == 100.0
+
+
+def test_ci_workflow_enables_auto_mark_and_gate_check() -> None:
+    repo_root = Path(__file__).resolve().parents[3]
+    wf_path = repo_root / ".github" / "workflows" / "ci-standard.yml"
+    assert wf_path.exists()
+    content = wf_path.read_text(encoding="utf-8")
+    assert 'UD_AUTO_MARK_BY_DIRECTORY: "1"' in content
+    assert "scripts/ci/check_suite_marker_reach.py" in content
+    assert "name: Enforce local-only workflow routing" in content
+
+
+def test_check_suite_marker_reach_cli(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    tests_dir = tmp_path / "tests"
+    (tests_dir / "unit").mkdir(parents=True)
+    (tests_dir / "unit" / "test_1.py").write_text(
+        "def test_1(): pass\n", encoding="utf-8"
+    )
+    ret = check_main(
+        [
+            "--tests-root",
+            str(tests_dir),
+            "--baseline",
+            str(tmp_path / "none.json"),
+            "--selectability-floor",
+            "50.0",
+        ]
+    )
+    assert ret == 0
+    out = capsys.readouterr().out
+    assert "PASSED" in out
