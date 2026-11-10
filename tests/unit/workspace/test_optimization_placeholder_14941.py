@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import os
-
 import pytest
 
 from src.shared.python.workspace.optimization_training_workspace import (
@@ -47,17 +45,26 @@ def test_success_true_without_backend_invoked_raises() -> None:
         )
 
 
-def test_pytest_fixture_may_construct_verified_result_when_flagged() -> None:
-    os.environ["PYTEST_ALLOW_SYNTHETIC_OPTIMIZATION_RESULT"] = "1"
-    try:
+def test_verified_result_requires_backend_and_non_placeholder_metrics() -> None:
+    OptimizationResult(
+        job_id="fixture",
+        success=True,
+        optimal_speed=45.0,
+        optimal_carry=180.0,
+        objective_value=2.5,
+        provenance={"backend_invoked": True},
+        metrics={"objective_value": 2.5, "iterations": 28.0},
+    )
+
+
+def test_placeholder_metrics_rejected_even_with_backend_invoked() -> None:
+    with pytest.raises(InvalidOptimizationConfigError):
         OptimizationResult(
-            job_id="fixture",
+            job_id="bad",
             success=True,
             optimal_speed=45.0,
             optimal_carry=180.0,
             objective_value=0.0012,
-            provenance={"backend_invoked": "test-fixture"},
+            provenance={"backend_invoked": True},
             metrics={"objective_value": 0.0012, "iterations": 14.0},
         )
-    finally:
-        os.environ.pop("PYTEST_ALLOW_SYNTHETIC_OPTIMIZATION_RESULT", None)

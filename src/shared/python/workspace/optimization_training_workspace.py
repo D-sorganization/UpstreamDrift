@@ -14,7 +14,6 @@ from datetime import datetime, timezone
 from enum import Enum
 import hashlib
 import json
-import os
 from pathlib import Path
 from typing import Any
 import uuid
@@ -169,8 +168,6 @@ _PLACEHOLDER_LITERAL_METRICS: frozenset[tuple[str, float]] = frozenset(
 
 def _optimization_result_guard(self: OptimizationResult) -> None:
     """Refuse verified-looking literals unless a backend actually ran (#14941)."""
-    if os.environ.get("PYTEST_ALLOW_SYNTHETIC_OPTIMIZATION_RESULT") == "1":
-        return
     if self.provenance.get("synthetic"):
         if self.success:
             raise InvalidOptimizationConfigError(
