@@ -116,6 +116,36 @@ def test_pinocchio_canonical_roundtrip_identity() -> None:
 
 
 @pytest.mark.requires_mujoco
+def test_mujoco_checkpoint_roundtrip_preserves_acceleration() -> None:
+    pytest.importorskip("mujoco")
+    if not _FLOATING_MJCF.is_file():
+        pytest.skip(f"fixture missing: {_FLOATING_MJCF}")
+
+    engine = MuJoCoPhysicsEngine()
+    engine.load_from_path(str(_FLOATING_MJCF))
+    _random_canonical_on_engine(engine)
+    before = engine.get_canonical_state()
+    non_zero = np.any(np.abs(before.a) > 1.0e-9)
+    assert non_zero, "test requires nonzero canonical acceleration"
+
+    checkpoint = engine.save_checkpoint()
+    assert checkpoint.metadata.get("state_convention") == CONVENTION_TAG_V2
+    assert "a" in checkpoint.engine_state
+
+    q0, v0 = engine.get_state()
+    engine.set_state(np.zeros_like(q0), np.zeros_like(v0))
+    if hasattr(engine, "a"):
+        engine.a = np.zeros_like(v0)
+
+    engine.restore_checkpoint(checkpoint)
+    after = engine.get_canonical_state()
+
+    np.testing.assert_allclose(after.q, before.q, atol=1.0e-12)
+    np.testing.assert_allclose(after.v, before.v, atol=1.0e-12)
+    np.testing.assert_allclose(after.a, before.a, atol=1.0e-12)
+
+
+@pytest.mark.requires_mujoco
 @pytest.mark.requires_pinocchio
 @_skip_no_pinocchio
 def test_mujoco_checkpoint_restore_on_pinocchio_raises() -> None:

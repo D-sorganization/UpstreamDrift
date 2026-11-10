@@ -421,6 +421,17 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
                 "tau": self.state.tau.copy(),
                 "t": self.state.time,
             }
+        elif self.supports_canonical_state():
+            canonical = self.get_canonical_state()
+            timestamp = float(canonical.t)
+            q = np.asarray(canonical.q).copy()
+            v = np.asarray(canonical.v).copy()
+            engine_state_dict = {
+                "q": q,
+                "v": v,
+                "a": np.asarray(canonical.a).copy(),
+                "t": timestamp,
+            }
         else:
             # Protocol-compatible path: use get_state() and get_time()
             try:
@@ -509,6 +520,18 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
                     new_state.tau = np.array(data["tau"])
 
                 self.set_state(new_state)
+            elif (
+                self.supports_canonical_state()
+                and checkpoint.metadata.get("state_convention") == CONVENTION_TAG_V2
+                and "a" in data
+            ):
+                canonical = CanonicalState(
+                    q=q_arr,
+                    v=v_arr,
+                    a=np.asarray(data["a"], dtype=np.float64),
+                    t=float(data.get("t", checkpoint.timestamp)),
+                )
+                self.set_canonical_state(canonical)
             else:
                 # Protocol-compatible path: use set_state(q, v)
                 self.set_state(q_arr, v_arr)
