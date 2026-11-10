@@ -2,9 +2,10 @@ name: Local-Only Workflow Runner Guard
 
 # Enforces that every workflow in this repo routes its jobs to the d-sorg
 # self-hosted fleet. The guard runs on ubuntu-latest because it is the canary
-# that must remain operable when the fleet itself is down. The job is named
-# "Reject hosted runner routing" — together with the workflow name above, these
-# are the only two names allowlisted to run on hosted runners across the org.
+# that must remain operable when the fleet itself is down.
+# The required status check name ``Reject hosted runner routing`` is published
+# only from ``ci-standard.yml`` (``local-only-workflows``); this workflow uses a
+# distinct job display name so fleet policy sees a single required-check producer.
 
 on:
   pull_request:
@@ -25,7 +26,7 @@ permissions:
 
 jobs:
   reject-hosted-runner-routing:
-    name: Reject hosted runner routing
+    name: Local-only workflow runner guard
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -73,6 +74,7 @@ jobs:
           # human-facing names every repo's CI standard refers to.
           ALLOWLIST_JOB_NAMES = {
               "Reject hosted runner routing",
+              "Local-only workflow runner guard",
               "Local-Only Workflow Runner Guard",
           }
           HOSTED = re.compile(r"^(ubuntu|macos|windows)(-latest|-\d+)?$")
@@ -152,7 +154,8 @@ jobs:
               print(f"{len(violations)} workflow(s) leak to hosted runners.")
               print(
                   "Allowed: local-only-runner-guard.yml, runner-health-alert.yml, "
-                  "and jobs literally named 'Reject hosted runner routing'."
+                  "and jobs literally named 'Reject hosted runner routing' "
+                  "(ci-standard) or 'Local-only workflow runner guard' (this file)."
               )
               sys.exit(1)
 
