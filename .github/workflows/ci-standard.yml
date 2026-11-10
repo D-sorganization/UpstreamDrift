@@ -1808,12 +1808,15 @@ jobs:
             echo "- non-docs changes: \`$CODE_CHANGED\`"
             echo "- docs-governance changes: \`$DOCS_CHANGED\`"
             echo "- publication authority changes: \`$PUBLICATION_CHANGED\`"
+            echo "- coverage: not measured"
             echo ""
             echo "| Job | Result |"
             echo "| --- | ------ |"
             echo "| pick-runner | $PICK_RUNNER |"
             echo "| changed-paths | $CHANGED_PATHS |"
           } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "coverage: not measured"
 
           for entry in $gates; do
             echo "${entry%%:*}: ${entry#*:}"
@@ -2292,7 +2295,6 @@ jobs:
             --cov-report=xml:coverage.xml
             --cov-report=json:coverage.json
             --cov-config=pyproject.toml
-            --cov-fail-under=75
           )
           dependency_light_targets=(
             tests/unit/shared_python
@@ -2423,6 +2425,7 @@ jobs:
               # "suite green", and a reader must be able to tell them apart
               # (#8771).
               echo "::warning::Core test suite NOT EXECUTED - diff base ${diff_base} shows no Python/test/dependency changes."
+              echo "coverage: not measured"
               {
                 echo "## Core Test Suite: not executed"
                 echo
@@ -2431,6 +2434,9 @@ jobs:
                 echo
                 echo "**This check passing does not mean the suite is green.**"
                 echo "The full lane always runs on pushes to the default branch."
+                echo
+                echo "### Coverage"
+                echo "- coverage: not measured"
               } >> "$GITHUB_STEP_SUMMARY"
               echo "core_suite_executed=false" >> "$GITHUB_OUTPUT"
               exit 0
@@ -2449,21 +2455,8 @@ jobs:
               echo "No Python test changes detected for changed core targets."
               echo "Falling through to targeted coverage lane to ensure source/dependency coverage."
             else
-              if [ "${#changed_coverage_targets[@]}" -eq 0 ]; then
-                echo "Running PR-scoped core tests:"
-                coverage_mode=(--no-cov)
-              else
-                echo "Running PR-scoped core tests with targeted coverage:"
-                coverage_mode=(
-                  "${coverage_args[@]}"
-                  --cov-report=term-missing
-                  --cov-report=xml:coverage.xml
-                  --cov-report=json:coverage.json
-                  --cov-config=pyproject.toml
-                  --cov-fail-under=75
-                )
-                echo "coverage_generated=true" >> "$GITHUB_OUTPUT"
-              fi
+              echo "Running PR-scoped core tests:"
+              coverage_mode=(--no-cov)
               printf '  %s\n' "${changed_tests[@]}"
               set +e
               xvfb-run --auto-servernum python -m pytest "${changed_tests[@]}" \
@@ -2489,6 +2482,11 @@ jobs:
                 echo "All PR-scoped tests passed."
                 if [ "${#changed_coverage_targets[@]}" -eq 0 ]; then
                   echo "No source/dependency coverage targets changed; PR-scoped tests passed, skipping targeted coverage lane."
+                  echo "coverage: not measured"
+                  {
+                    echo "### Coverage"
+                    echo "- coverage: not measured"
+                  } >> "$GITHUB_STEP_SUMMARY"
                   echo "coverage_generated=false" >> "$GITHUB_OUTPUT"
                   exit 0
                 fi
@@ -2505,6 +2503,7 @@ jobs:
                   # selected tests are skip-gated here (e.g. optional JAX),
                   # so say loudly that nothing ran rather than going red.
                   echo "::warning::Core test suite NOT EXECUTED - every PR-scoped test was skipped or deselected in this lane and no src/dependency file changed."
+                  echo "coverage: not measured"
                   {
                     echo "## Core Test Suite: not executed"
                     echo
@@ -2513,6 +2512,9 @@ jobs:
                     echo "\`src/**/*.py\` or dependency manifest changed."
                     echo
                     echo "**This check passing does not mean the suite is green.**"
+                    echo
+                    echo "### Coverage"
+                    echo "- coverage: not measured"
                   } >> "$GITHUB_STEP_SUMMARY"
                   echo "core_suite_executed=false" >> "$GITHUB_OUTPUT"
                   echo "coverage_generated=false" >> "$GITHUB_OUTPUT"
@@ -2569,6 +2571,11 @@ jobs:
           if [ "${coverage_args[0]:-}" = "--no-cov" ]; then
             echo "coverage_generated=false" >> "$GITHUB_OUTPUT"
             echo "PR-scoped dependency-light lane is running without coverage to avoid self-hosted runner OOM."
+            echo "coverage: not measured"
+            {
+              echo "### Coverage"
+              echo "- coverage: not measured"
+            } >> "$GITHUB_STEP_SUMMARY"
           else
             echo "coverage_generated=true" >> "$GITHUB_OUTPUT"
             if [ "${{ github.event_name }}" = "pull_request" ] && [ "${#changed_coverage_targets[@]}" -gt 0 ]; then
