@@ -885,6 +885,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14938 · \ Marker IK Exposes Convergence Status,Reports NO_MARKERS and NaN RMS for Empty Frames,and Routes LM With Finite Bounds to TRF\
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14938
+- **Branch:** agy/14938-marker-ik-convergence
+- **PR:** #14974
+- **Paths:** see #14974
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`bb977b68`; collated from changes/14938-marker-ik-convergence.md)
+- **Summary:** \ Marker IK exposes convergence status,reports NO_MARKERS and NaN RMS for empty frames,and routes LM with finite bounds to TRF\
+- **Next step:** Shipped in PR #14974.
+
 ### DL-#14946 · Make Coverage Truth Explicit in CI Summary and Remove Dead Cov-Fail-Under Flags
 
 - **State:** shipped
