@@ -131,7 +131,7 @@ does not replace the authoritative QMD engineering design manual.
 The original numerical producer is
 `00b7d9846bd2fb2572b7c84f03cfc6c9699323cb`. Tiger V17 and Hogan V14 matched
 31/33-coordinate arms remain nonconverged, rejected research results despite
-passing the five finite research targets. The separately delivered ControlTower
+passing the five finite research targets. The separately delivered <host>
 packages contain 129 paired-shape/repeatability files and 27 report/repeatability
 files, with remote byte-hash verification. Hogan's full shaded-video heuristic
 failed; no full shaded-video qualification is implied. The new row-time software
