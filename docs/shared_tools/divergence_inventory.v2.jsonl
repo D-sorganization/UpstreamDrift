@@ -601,6 +601,9 @@
 {"path": "engine_core/base_physics_engine.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/capabilities.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/checkpoint.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
+{"path": "engine_core/counterfactual_conformance.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
+{"path": "engine_core/counterfactual_contract.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
+{"path": "engine_core/counterfactual_defaults.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/cross_engine_validator.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/engine_availability.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/engine_loaders.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
