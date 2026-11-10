@@ -488,6 +488,17 @@ class ProcessManager:
             if managed.key == key and managed.process.poll() is None
         ]
 
+    def _reap_declined_spawn(self, process: subprocess.Popen[bytes]) -> None:
+        """Terminate a child whose registration was declined (duplicate policy)."""
+        try:
+            if process.poll() is None:
+                if not kill_process_tree(process.pid):
+                    process.terminate()
+                with contextlib.suppress(subprocess.TimeoutExpired):
+                    process.wait(timeout=5)
+        except (OSError, ValueError) as exc:
+            logger.debug("reap declined spawn failed: %s", exc)
+
     def _allocate_slot_name(self, key: str) -> str | None:
         active = self._active_slots_for_key(key)
         if not active:
@@ -645,6 +656,7 @@ class ProcessManager:
             raise ValueError("name must be provided")
         managed = self._register_process(name, process, kind=ProcessKind.DOCKER)
         if managed is None:
+            self._reap_declined_spawn(process)
             return
         self._start_output_stream_thread(managed.slot_name, process, managed.id)
 
@@ -754,8 +766,11 @@ class ProcessManager:
         cwd: Path,
         process_env: dict[str, str],
         keep_terminal_open: bool,
-    ) -> subprocess.Popen[bytes]:
+    ) -> subprocess.Popen[bytes] | None:
         """Spawn subprocess and track it in running processes and job object."""
+        if self._allocate_slot_name(name) is None:
+            logger.info("Declined duplicate launch for %s (focus existing)", name)
+            return None
         logger.info(
             "Launching %s: cmd=%s, cwd=%s, PYTHONPATH=%s",
             name,
@@ -785,7 +800,8 @@ class ProcessManager:
                 )
             managed = self._register_process(name, process, kind=ProcessKind.LOCAL)
             if managed is None:
-                return process
+                self._reap_declined_spawn(process)
+                return None
         else:
             process = secure_popen(
                 cmd_args,
@@ -799,7 +815,8 @@ class ProcessManager:
             )
             managed = self._register_process(name, process, kind=ProcessKind.LOCAL)
             if managed is None:
-                return process
+                self._reap_declined_spawn(process)
+                return None
             self._start_output_stream_thread(managed.slot_name, process, managed.id)
 
         _assign_to_job(process)

@@ -19,6 +19,13 @@ from src.launchers.launcher_process_manager import (  # noqa: E402
     is_vcxsrv_running,
     start_vcxsrv,
 )
+from src.launchers.managed_process import (  # noqa: E402
+    DuplicateKeyPolicy,
+    ManagedProcess,
+    ProcessKind,
+    ProcessState,
+    new_managed_id,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -767,6 +774,29 @@ def test_launch_module_separate_terminals(
         )
         cmd_arg = mock_secure_popen.call_args[0][0]
         assert cmd_arg[1] == "-m"
+
+
+@patch(_SECURE_POPEN)
+def test_focus_existing_declines_second_spawn(mock_secure_popen, manager) -> None:
+    manager.duplicate_key_policy = DuplicateKeyPolicy.FOCUS_EXISTING
+    manager.use_separate_terminals = False
+    live = MagicMock()
+    live.poll.return_value = None
+    existing = ManagedProcess(
+        id=new_managed_id(),
+        key="App",
+        slot_name="App",
+        kind=ProcessKind.LOCAL,
+        state=ProcessState.RUNNING,
+        process=live,
+    )
+    manager._process_registry[existing.id] = existing
+
+    result = manager.launch_module("App", "my_module", PureWindowsPath("."))
+
+    mock_secure_popen.assert_not_called()
+    assert result is None
+    live.terminate.assert_not_called()
 
 
 @patch("src.launchers.launcher_process_manager.is_vcxsrv_running", return_value=False)
