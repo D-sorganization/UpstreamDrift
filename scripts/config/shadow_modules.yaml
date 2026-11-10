@@ -112,6 +112,8 @@ shadows:
   # migration visible; this entry does not claim the overlap is resolved.
   # #8942 closed and the 2026-10-09 sunset expired with the facade still in
   # place; the resolution (port or ADR split ruling) is tracked in #12046.
+  # #12046 was reopened after premature auto-close by #12048, and #14928 restored
+  # green CI on 2026-11-10 UTC by aligning sunset_date with the Q4 baseline.
   realtime:
     tracking_issue: 12046
     sunset_date: "2026-12-10"

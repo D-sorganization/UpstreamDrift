@@ -28,7 +28,7 @@ from __future__ import annotations
 import json
 import os
 import sys
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -127,10 +127,13 @@ def _load_ledger(path: Path | None = None) -> dict[str, dict[str, Any]]:
             ) from exc
         # Enforce that the sunset date has not yet passed. Once it does the
         # entry must be removed (shadow resolved) or renegotiated with a new
-        # tracking issue. Fixes UD issue #5627.
-        assert parsed_sunset >= date.today(), (
+        # tracking issue. Compare against UTC date so UTC midnight rollovers
+        # are caught identically on local developer machines and UTC CI runners
+        # (regression #14928). Fixes UD issue #5627.
+        current_utc_date = datetime.now(timezone.utc).date()
+        assert parsed_sunset >= current_utc_date, (
             f"shadow_modules.yaml entry {name!r}: 'sunset_date' {sunset!r} "
-            f"has passed (today is {date.today().isoformat()}). The shadow "
+            f"has passed (today is {current_utc_date.isoformat()} UTC). The shadow "
             f"must be resolved — remove the UD-side copy, or update the entry "
             f"with a new sunset_date and tracking_issue."
         )
@@ -225,6 +228,23 @@ def test_realtime_shadow_ledger_stays_tied_to_issue_12046() -> None:
     entry = _load_ledger()["realtime"]
     assert entry["tracking_issue"] == 12046
     assert date.fromisoformat(entry["sunset_date"]) >= date.today()
+
+
+def test_load_ledger_succeeds_against_utc_and_local_dates() -> None:
+    """Regression #14928: _load_ledger() succeeds against both UTC date and local date."""
+    shadows = _load_ledger()
+    today_utc = datetime.now(timezone.utc).date()
+    today_local = date.today()
+    for name, entry in shadows.items():
+        parsed_sunset = date.fromisoformat(entry["sunset_date"])
+        assert parsed_sunset >= today_utc, (
+            f"shadow_modules.yaml entry {name!r}: 'sunset_date' "
+            f"{entry['sunset_date']!r} expired in UTC ({parsed_sunset} < {today_utc})"
+        )
+        assert parsed_sunset >= today_local, (
+            f"shadow_modules.yaml entry {name!r}: 'sunset_date' "
+            f"{entry['sunset_date']!r} expired locally ({parsed_sunset} < {today_local})"
+        )
 
 
 def test_load_ledger_rejects_expired_sunset_date(tmp_path: Path) -> None:
