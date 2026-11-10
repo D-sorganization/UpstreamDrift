@@ -112,25 +112,31 @@ class JaxSimBackend:
         v = np.concatenate([base_angular, base_linear, joint_velocities])
         return q, v
 
+    def _validate_canonical_v2_qv_shapes(
+        self, q: np.ndarray, v: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
+        q_arr = np.asarray(q, dtype=np.float64)
+        v_arr = np.asarray(v, dtype=np.float64)
+        expected_q = 7 + self._dofs()
+        expected_v = 6 + self._dofs()
+        if q_arr.shape != (expected_q,):
+            raise ValueError(f"q must have shape ({expected_q},)")
+        if v_arr.shape != (expected_v,):
+            raise ValueError(f"v must have shape ({expected_v},)")
+        return q_arr, v_arr
+
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
         """Set generalized position and canonical generalized velocity."""
 
         self._require_loaded()
-        q = np.asarray(q, dtype=np.float64)
-        v = np.asarray(v, dtype=np.float64)
-        expected_q = 7 + self._dofs()
-        expected_v = 6 + self._dofs()
-        if q.shape != (expected_q,):
-            raise ValueError(f"q must have shape ({expected_q},)")
-        if v.shape != (expected_v,):
-            raise ValueError(f"v must have shape ({expected_v},)")
+        q_arr, v_arr = self._validate_canonical_v2_qv_shapes(q, v)
         self._data = self._build_data(
-            base_position=q[:3],
-            base_quaternion=q[3:7],
-            joint_positions=q[7:],
-            base_angular_velocity=v[:3],
-            base_linear_velocity=v[3:6],
-            joint_velocities=v[6:],
+            base_position=q_arr[:3],
+            base_quaternion=q_arr[3:7],
+            joint_positions=q_arr[7:],
+            base_angular_velocity=v_arr[:3],
+            base_linear_velocity=v_arr[3:6],
+            joint_velocities=v_arr[6:],
         )
 
     def set_control(self, u: np.ndarray) -> None:
@@ -159,21 +165,14 @@ class JaxSimBackend:
         """Import ADR-0026 ``canonical-v2`` dynamic state (#14936)."""
 
         self._require_loaded()
-        q = np.asarray(state.q, dtype=np.float64)
-        v = np.asarray(state.v, dtype=np.float64)
-        expected_q = 7 + self._dofs()
-        expected_v = 6 + self._dofs()
-        if q.shape != (expected_q,):
-            raise ValueError(f"q must have shape ({expected_q},)")
-        if v.shape != (expected_v,):
-            raise ValueError(f"v must have shape ({expected_v},)")
+        q_arr, v_arr = self._validate_canonical_v2_qv_shapes(state.q, state.v)
         self._data = self._build_data(
-            base_position=q[:3],
-            base_quaternion=q[3:7],
-            joint_positions=q[7:],
-            base_linear_velocity=v[:3],
-            base_angular_velocity=v[3:6],
-            joint_velocities=v[6:],
+            base_position=q_arr[:3],
+            base_quaternion=q_arr[3:7],
+            joint_positions=q_arr[7:],
+            base_linear_velocity=v_arr[:3],
+            base_angular_velocity=v_arr[3:6],
+            joint_velocities=v_arr[6:],
         )
         self._time = float(state.t)
 

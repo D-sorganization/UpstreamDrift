@@ -258,9 +258,7 @@ def test_jaxsim_backend_satisfies_core_sub_protocols() -> None:
     assert isinstance(backend, Queryable)
     assert isinstance(backend, DynamicsComputable)
     assert isinstance(backend, SupportsParameterGradients)
-    assert (
-        backend.convention.velocity_representation is SPATIAL_WRENCH_REPRESENTATION
-    )
+    assert backend.convention.velocity_representation is SPATIAL_WRENCH_REPRESENTATION
 
 
 def test_jaxsim_backend_state_round_trips_in_canonical_order() -> None:
