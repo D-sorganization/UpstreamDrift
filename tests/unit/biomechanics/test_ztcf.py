@@ -214,6 +214,7 @@ class TestComputeZTCFForces:
             segment_masses=np.array([1.0, 1.0]),
             segment_lengths=np.array([1.0, 1.0]),
             gravity_acceleration=9.80665,
+            allow_simplified=True,
         )
         assert isinstance(result, ZTCFResult)
         assert result.n_joints == 2
@@ -229,6 +230,7 @@ class TestComputeZTCFForces:
             segment_masses=np.array([1.0, 1.0]),
             segment_lengths=np.array([1.0, 1.0]),
             gravity_acceleration=0.0,
+            allow_simplified=True,
         )
         np.testing.assert_allclose(result.joint_forces, 0.0, atol=1e-10)
 
@@ -243,6 +245,7 @@ class TestComputeZTCFForces:
             segment_masses=np.array([5.0, 3.0]),
             segment_lengths=np.array([0.4, 0.35]),
             gravity_acceleration=9.80665,
+            allow_simplified=True,
         )
         assert np.all(np.isfinite(result.joint_forces))
         assert np.all(np.isfinite(result.joint_accelerations))
@@ -291,6 +294,44 @@ class TestComputeZTCFForces:
 
         # Normal (y) component is the gravity reaction +m*g (g_vec = -g in y).
         assert result.joint_forces[0, 1] == pytest.approx(m * g, rel=1e-9)
+
+    def test_multibody_rejected_without_allow_simplified(self) -> None:
+        """Part of #14944: multi-segment calls must opt into the legacy placeholder."""
+        with pytest.raises(PreconditionError, match="single-pendulum tangential"):
+            compute_ztcf_forces(
+                mass_matrix=np.eye(2),
+                coriolis_vector=np.zeros(2),
+                gravity_vector=np.zeros(2),
+                friction_vector=np.zeros(2),
+                joint_positions=np.array([[0.0, 0.0], [1.0, 0.0]]),
+                segment_masses=np.array([1.0, 1.0]),
+                segment_lengths=np.array([1.0, 0.8]),
+                gravity_acceleration=9.80665,
+            )
+
+    def test_double_pendulum_placeholder_ignores_distal_inertia_on_proximal(
+        self,
+    ) -> None:
+        """Part of #14944: only distal qddot — placeholder leaves proximal tangential force at 0."""
+        m1, m2 = 1.0, 1.0
+        l1, l2 = 1.0, 0.8
+        mass_matrix = np.diag([m1 * l1**2, m2 * l2**2])
+        qddot = np.array([0.0, 2.5])
+        gravity_vector = -(mass_matrix @ qddot)
+        result = compute_ztcf_forces(
+            mass_matrix=mass_matrix,
+            coriolis_vector=np.zeros(2),
+            gravity_vector=gravity_vector,
+            friction_vector=np.zeros(2),
+            joint_positions=np.array([[0.0, 0.0], [l1, 0.0]]),
+            segment_masses=np.array([m1, m2]),
+            segment_lengths=np.array([l1, l2]),
+            gravity_acceleration=9.80665,
+            allow_simplified=True,
+        )
+        np.testing.assert_allclose(result.joint_accelerations, qddot, rtol=1e-9)
+        assert result.joint_forces[0, 0] == pytest.approx(0.0, abs=1e-12)
+        assert result.joint_forces[1, 0] == pytest.approx(m2 * qddot[1] * l2, rel=1e-9)
 
 
 # ============================================================================

@@ -24,7 +24,9 @@ DRY
 ---
 Delegates linear algebra to numpy.  The ZTCF equation is solved in
 exactly one place (compute_ztcf_accelerations).  Force computation
-from accelerations is in compute_ztcf_forces.
+from accelerations is in :func:`compute_ztcf_forces`, which applies a
+**single-pendulum tangential** mapping (validated in #7054).  Multi-body
+chains must use each engine's recursive Newton–Euler path, not this helper.
 """
 
 from __future__ import annotations
@@ -158,13 +160,17 @@ def compute_ztcf_forces(
     segment_masses: np.ndarray,
     segment_lengths: np.ndarray,
     gravity_acceleration: float = 9.80665,
+    allow_simplified: bool = False,
 ) -> ZTCFResult:
     """Compute ZTCF joint forces from dynamics matrices and kinematics.
 
-    This is the main entry point.  It:
+    This is the main entry point for the **single-DOF tangential** helper.  It:
     1. Solves for zero-torque accelerations via ``compute_ztcf_accelerations``.
-    2. Computes joint forces from the resulting accelerations using
-       Newton-Euler: ``F_joint = m * a_joint − m * g``.
+    2. Maps each segment's generalized acceleration to an approximate tangential
+       linear acceleration and returns ``m * (a - g)`` per joint row.
+
+    For more than one kinematic segment, call only with ``allow_simplified=True``
+    (legacy regression) or use the hosting engine's full Newton–Euler ZTCF path.
 
     Parameters
     ----------
@@ -185,6 +191,16 @@ def compute_ztcf_forces(
         Container with joint forces and accelerations.
     """
     _validate_force_inputs(joint_positions, segment_masses, segment_lengths)
+
+    n_joints = int(np.asarray(joint_positions).shape[0])
+    if n_joints > 1 and not allow_simplified:
+        raise PreconditionError(
+            "compute_ztcf_forces is a single-pendulum tangential helper; "
+            "multi-body chains need the engine recursive Newton–Euler route. "
+            "Pass allow_simplified=True only for explicit legacy regression.",
+            function_name="compute_ztcf_forces",
+            parameter="joint_positions",
+        )
 
     qddot = compute_ztcf_accelerations(
         mass_matrix=mass_matrix,
@@ -391,16 +407,12 @@ def _forces_from_accelerations(
     n_joints: int,
     n_dims: int,
 ) -> np.ndarray:
-    """Compute joint forces from generalized accelerations via Newton-Euler.
+    """Map generalized accelerations to tangential ``m*(a-g)`` rows (simplified).
 
-    For each joint, the constraint force required to produce the
-    zero-torque acceleration is:
-
-        F_joint_i = m_i * a_linear_i − m_i * g_vector
-
-    where the tangential linear acceleration of segment ``i`` is mapped from
-    the generalized acceleration as ``a_t = qddot_i * L_i`` (segment length
-    as the moment arm) and gravity acts along −y.
+    For each joint row, the tangential linear acceleration is approximated as
+    ``a_t = qddot_{dof_idx} * L_i`` with ``dof_idx = min(i, n_dof-1)`` and
+    gravity along −y.  This is exact for the single revolute pendulum (#7054)
+    but **not** full recursive Newton–Euler for multi-body chains (#14944).
 
     Validation (#7054). For a single revolute pendulum (mass ``m``, length
     ``L``, angle ``theta`` from vertical) the zero-torque dynamics give the
