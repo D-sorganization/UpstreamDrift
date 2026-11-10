@@ -1,4 +1,12 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useReducer } from "react";
+import {
+  deriveIsPaused,
+  deriveIsRunning,
+  initialSimulationLifecycle,
+  simulationLifecycleReducer,
+  type SimulationLifecycleAction,
+  type SimulationPhase,
+} from "./simulationLifecycle";
 import { getApiBase } from "./backend";
 import { apiFetch } from "./fetch";
 import {
@@ -81,6 +89,37 @@ export type ConnectionStatus =
   // silently doing that we surface this state and require an explicit restart.
   | "lost";
 
+export type { SimulationPhase };
+
+function deriveConnectionStatus(phase: SimulationPhase): ConnectionStatus {
+  switch (phase) {
+    case "idle":
+    case "completed":
+    case "stopped":
+      return "disconnected";
+    case "connecting":
+      return "connecting";
+    case "starting":
+    case "running":
+      return "connected";
+    case "failed":
+      return "failed";
+    case "lost":
+      return "lost";
+    default: {
+      const _exhaustive: never = phase;
+      return _exhaustive;
+    }
+  }
+}
+
+function detachWebSocketHandlers(ws: WebSocket): void {
+  ws.onopen = null;
+  ws.onmessage = null;
+  ws.onerror = null;
+  ws.onclose = null;
+}
+
 export async function fetchEngines(): Promise<EngineStatus[]> {
   // Compile-time contract from the generated types; the runtime shape check
   // below stays because the backend ships separately (see ui/README.md).
@@ -97,16 +136,19 @@ export async function fetchEngines(): Promise<EngineStatus[]> {
 }
 
 export function useSimulation(engineType: string) {
-  const [isRunning, setIsRunning] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
+  const [lifecycle, dispatchLifecycle] = useReducer(
+    simulationLifecycleReducer,
+    initialSimulationLifecycle,
+  );
   const [currentFrame, setCurrentFrame] = useState<SimulationFrame | null>(
     null,
   );
   const [frames, setFrames] = useState<SimulationFrame[]>([]);
-  const [connectionStatus, setConnectionStatus] =
-    useState<ConnectionStatus>("disconnected");
-  const [wsError, setWsError] = useState<string | null>(null);
+  const [transportError, setTransportError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const runIdSeqRef = useRef(0);
+  const lifecycleRef = useRef(lifecycle);
+  lifecycleRef.current = lifecycle;
   // Track if component is mounted to prevent state updates after unmount
   const isMountedRef = useRef(true);
   // #8077: guards the one-shot re-handshake after a launcher-guard rejection.
@@ -135,14 +177,23 @@ export function useSimulation(engineType: string) {
       // when it reaches setConnectionStatus('connecting') below.
       if (!isMountedRef.current) return;
 
+      const runId = ++runIdSeqRef.current;
+      dispatchLifecycle({ type: "begin_connect", runId });
+
       // Close any existing WebSocket connection before creating a new one
       if (wsRef.current) {
+        detachWebSocketHandlers(wsRef.current);
         wsRef.current.close();
         wsRef.current = null;
       }
 
-      setConnectionStatus("connecting");
       lastConfigRef.current = config;
+      const emit = (action: SimulationLifecycleAction) => {
+        if (action.runId !== runId) {
+          return;
+        }
+        dispatchLifecycle(action);
+      };
 
       // Build WS URL: use the API base to handle Tauri vs. browser mode (issue #6637)
       const apiBase = getApiBase();
@@ -167,12 +218,12 @@ export function useSimulation(engineType: string) {
       wsRef.current = ws;
 
       ws.onopen = () => {
+        if (runId !== runIdSeqRef.current) return;
         handshakeCompleted = true;
         if (!isMountedRef.current) return;
 
-        setConnectionStatus("connected");
-        setWsError(null);
-        setIsRunning(true);
+        emit({ type: "socket_open", runId });
+        setTransportError(null);
         // A fresh connection always begins a new run from t=0 (the server has no
         // resume protocol), so clearing the timeline here is correct — this path
         // is only reached on an explicit start(), never on a silent reconnect.
@@ -193,6 +244,7 @@ export function useSimulation(engineType: string) {
       };
 
       ws.onmessage = (event) => {
+        if (runId !== runIdSeqRef.current) return;
         if (!isMountedRef.current) return;
         try {
           const data = JSON.parse(event.data);
@@ -202,19 +254,25 @@ export function useSimulation(engineType: string) {
               typeof data.error === "string"
                 ? data.error
                 : JSON.stringify(data.error);
-            setWsError(message);
-            setIsRunning(false);
-            setIsPaused(false);
+            emit({ type: "server_error", runId, message });
             return;
           }
 
-          if (data.status === "complete" || data.status === "stopped") {
-            setIsRunning(false);
-            setIsPaused(false);
+          if (data.status === "running") {
+            emit({ type: "server_running", runId });
+            return;
+          }
+
+          if (data.status === "complete") {
+            emit({ type: "server_complete", runId });
+            return;
+          }
+          if (data.status === "stopped") {
+            emit({ type: "server_stopped", runId });
             return;
           }
           if (data.status === "paused") {
-            setIsPaused(true);
+            emit({ type: "server_paused", runId });
             return;
           }
 
@@ -235,9 +293,10 @@ export function useSimulation(engineType: string) {
       };
 
       ws.onerror = () => {
+        if (runId !== runIdSeqRef.current) return;
         logger.error("WebSocket error occurred");
         if (isMountedRef.current) {
-          setWsError("WebSocket connection error — check server status");
+          setTransportError("WebSocket connection error — check server status");
         }
       };
 
@@ -245,24 +304,22 @@ export function useSimulation(engineType: string) {
       // launcher-guard retry that could not obtain a token. Never leaves the UI
       // sitting on 'connecting' — an indefinite spinner is its own defect.
       const markConnectionLost = (reason: string) => {
+        if (runId !== runIdSeqRef.current) return;
         if (!isMountedRef.current) return;
         logger.warn(reason);
-        setConnectionStatus("lost");
-        setIsPaused(false);
-        setWsError(
-          "Connection lost — the simulation cannot resume. Restart to run again.",
-        );
+        const message =
+          "Connection lost — the simulation cannot resume. Restart to run again.";
+        emit({ type: "socket_lost", runId, message });
+        setTransportError(message);
       };
 
       ws.onclose = (event) => {
+        if (runId !== runIdSeqRef.current) return;
         if (!isMountedRef.current) return;
-
-        setIsRunning(false);
-        setIsPaused(false);
 
         // Clean close (code 1000) or user-initiated stop — nothing to recover.
         if (event.wasClean || event.code === 1000) {
-          setConnectionStatus("disconnected");
+          emit({ type: "socket_clean_close", runId });
           return;
         }
 
@@ -330,6 +387,13 @@ export function useSimulation(engineType: string) {
 
   const start = useCallback(
     (config: SimulationConfig = {}) => {
+      const phase = lifecycleRef.current.phase;
+      if (phase === "connecting" || phase === "starting") {
+        return;
+      }
+      if (wsRef.current?.readyState === WebSocket.CONNECTING) {
+        return;
+      }
       // A new user-initiated run gets a fresh retry budget.
       guardRetryUsedRef.current = false;
       // Explicit user restart: open a fresh connection. onopen clears the
@@ -340,32 +404,35 @@ export function useSimulation(engineType: string) {
   );
 
   const stop = useCallback(() => {
+    const runId = lifecycleRef.current.runId;
     const ws = wsRef.current;
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ action: "stop" }));
     }
     // Close the WebSocket connection after sending stop
     if (ws) {
+      detachWebSocketHandlers(ws);
       ws.close(1000, "User stopped simulation");
       wsRef.current = null;
     }
-    setConnectionStatus("disconnected");
-    setIsPaused(false);
+    dispatchLifecycle({ type: "server_stopped", runId });
   }, []);
 
   const pause = useCallback(() => {
+    const runId = lifecycleRef.current.runId;
     const ws = wsRef.current;
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ action: "pause" }));
-      setIsPaused(true);
+      dispatchLifecycle({ type: "server_paused", runId });
     }
   }, []);
 
   const resume = useCallback(() => {
+    const runId = lifecycleRef.current.runId;
     const ws = wsRef.current;
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ action: "resume" }));
-      setIsPaused(false);
+      dispatchLifecycle({ type: "server_resumed", runId });
     }
   }, []);
 
@@ -398,21 +465,30 @@ export function useSimulation(engineType: string) {
     return () => {
       isMountedRef.current = false;
       if (wsRef.current) {
+        detachWebSocketHandlers(wsRef.current);
         wsRef.current.close(1000, "Component unmounted");
         wsRef.current = null;
       }
       // #7435: a 'lost' status must not survive navigation. Reset it on unmount
       // so a remounted hook never inherits a stale "connection lost" banner.
-      // (Safe even after isMountedRef flips false — React drops updates to an
-      // unmounted component; the value matters only if this same hook instance
-      // is reused.)
-      setConnectionStatus("disconnected");
+      dispatchLifecycle({
+        type: "user_reset",
+        runId: lifecycleRef.current.runId,
+      });
     };
   }, []);
+
+  const connectionStatus = deriveConnectionStatus(lifecycle.phase);
+  const isRunning = deriveIsRunning(lifecycle.phase);
+  const isPaused = deriveIsPaused(lifecycle.phase, lifecycle.paused);
+  const wsError = lifecycle.failureMessage ?? transportError;
+  const phase = lifecycle.phase;
 
   return {
     isRunning,
     isPaused,
+    phase,
+    runId: lifecycle.runId,
     currentFrame,
     frames,
     connectionStatus,
