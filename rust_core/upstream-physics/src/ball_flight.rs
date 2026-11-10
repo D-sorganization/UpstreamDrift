@@ -179,12 +179,9 @@ fn integrated_forces_at_state(
     ];
     let drag = [forces.drag.x, forces.drag.y, forces.drag.z];
     let magnus = [forces.magnus.x, forces.magnus.y, forces.magnus.z];
-    let ax = gravity_v.x
-        + (forces.drag.x + forces.magnus.x + forces.lift.x) / ball.mass;
-    let ay = gravity_v.y
-        + (forces.drag.y + forces.magnus.y + forces.lift.y) / ball.mass;
-    let az = gravity_v.z
-        + (forces.drag.z + forces.magnus.z + forces.lift.z) / ball.mass;
+    let ax = gravity_v.x + (forces.drag.x + forces.magnus.x + forces.lift.x) / ball.mass;
+    let ay = gravity_v.y + (forces.drag.y + forces.magnus.y + forces.lift.y) / ball.mass;
+    let az = gravity_v.z + (forces.drag.z + forces.magnus.z + forces.lift.z) / ball.mass;
     IntegratedStepForces {
         gravity,
         drag,
