@@ -885,6 +885,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14944 · ZTCF: Guard Multi-Body Misuse of Compute_Ztcf_Forces; Double-Pendulum Regression (#14944, Part Of #14934)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14944
+- **Branch:** merged via #14953
+- **PR:** #14953
+- **Paths:** see #14953
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`7625298e`; collated from changes/14944-ztcf-multibody-guard.md)
+- **Summary:** ZTCF: guard multi-body misuse of compute_ztcf_forces; double-pendulum regression (#14944, Part of #14934)
+- **Next step:** Shipped in PR #14953.
+
+### DL-#14227 · Document CI Optional Stack Slice 1 (Pinocchio Gravity) and Add Runbook Contract Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14227
+- **Branch:** merged via #14923
+- **PR:** #14923
+- **Paths:** see #14923
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`e946eb78`; collated from changes/14227-document-ci-optional-stack-slice-1-pinoc.md)
+- **Summary:** Document CI Optional Stack slice 1 (Pinocchio gravity) and add runbook contract tests
+- **Next step:** Shipped in PR #14923.
+
 ### DL-#13604 · NSX Salvage Tracker: Unit Receipts for Merged NSX-22/NSX-24 Rows on Main (#13604)
 
 - **State:** shipped
@@ -1632,10 +1658,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12737
 - **Branch:** merged via #14760
-- **PR:** #14760
+- **PR:** #14760, #14924
 - **Paths:** see #14760
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`ef54ca58`; collated from changes/12737-spn-0b-data-extraction-md-dois-and-full.md)
+- **Last verified:** 2026-11-10 (`ee2d7b2c`; collated from changes/12737-contract-test-bruno-b2-supplement-stays.md)
 - **Summary:** SPN-0b data_extraction.md: DOIs and full author lists for Pearcy 1984, Fujii 2007, Wilke 1999 and Wu 2002 from Crossref; no verified_from_primary flag changed
 - **Next step:** Shipped in PR #14760.
 
