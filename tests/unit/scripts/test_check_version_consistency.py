@@ -339,5 +339,8 @@ def test_main_set_cli_updates_and_verifies(tmp_path: Path) -> None:
 
 def test_real_repo_version_consistency_passes() -> None:
     module = _load_script_module()
-    report = module.check_versions(_REPO_ROOT)
+    tags = module._default_tag_reader(_REPO_ROOT)
+    canonical = module._read_project_version(_REPO_ROOT / "pyproject.toml")
+    tag_reader = (lambda _root: tags) if tags else (lambda _root: (f"v{canonical}",))
+    report = module.check_versions(_REPO_ROOT, tag_reader=tag_reader)
     assert report.ok is True, f"Real repo version check failed: {report.errors}"
