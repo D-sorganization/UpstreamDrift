@@ -1,4 +1,4 @@
-{"schema_version": 2, "tools_pin": "5e85cc21fe0761d519a3cae6ac1504b78b1b1f96", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
+{"schema_version": 2, "tools_pin": "c59570acc90e65690fe171e3b66828dcf97798de", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
 {"path": "README.md", "classification": "tools-only", "package": "README.md", "spelling_only": false}
 {"path": "README_PACKAGE.md", "classification": "ud-only", "package": "README_PACKAGE.md", "spelling_only": false}
 {"path": "__init__.py", "classification": "diverged", "package": "__init__.py", "spelling_only": false}
@@ -372,7 +372,7 @@
 {"path": "calc_backend/routers/rotation_converter.py", "classification": "diverged", "package": "calc_backend", "spelling_only": true}
 {"path": "calc_backend/routers/scrubber.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/routers/symbolic_solver.py", "classification": "diverged", "package": "calc_backend", "spelling_only": false}
-{"path": "calc_backend/routers/syngas_water.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
+{"path": "calc_backend/routers/syngas_water.py", "classification": "diverged", "package": "calc_backend", "spelling_only": true}
 {"path": "calc_backend/routers/thermal_profile.py", "classification": "diverged", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/routers/wgs_reactor.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/tests/__init__.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
@@ -1575,6 +1575,7 @@
 {"path": "motion_matching/historical_fit/spline_restriction.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/hybrid.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/identifiability.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/ik_types.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/impact_force.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/inverse/__init__.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/inverse/basis_time.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -2677,7 +2678,7 @@
 {"path": "sidekick/process_calculators/syngas_compression_engine.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/syngas_compression_tabs_mixin.py", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/syngas_compression_worker.py", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/process_calculators/syngas_water_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/process_calculators/syngas_water_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
 {"path": "sidekick/process_calculators/thermal_profile_predictor.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/water_vapor_pressure.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/water_vapor_pressure_calculator.py", "classification": "identical", "package": "sidekick", "spelling_only": false}

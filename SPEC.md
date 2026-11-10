@@ -2754,6 +2754,9 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-10 | #14963 | Workspace synchronous optimization returns explicit synthetic placeholder; RECEIPT registration refused for synthetic results |
+| 2026-11-10 | #14974 | \ Marker IK exposes convergence status,reports NO_MARKERS and NaN RMS for empty frames,and routes LM with finite bounds to TRF\ |
+| 2026-11-10 | #14972 | Make coverage truth explicit in CI summary and remove dead cov-fail-under flags |
 | 2026-11-10 | #14958 | Simulation WS error frame handling and isPaused reset on stop (Part of #14950). |
 | 2026-11-10 | #14954 | Make architecture and file-size budget expiry evaluation deterministic |
 | 2026-11-10 | #14953 | ZTCF: guard multi-body misuse of compute_ztcf_forces; double-pendulum regression (#14944, Part of #14934) |

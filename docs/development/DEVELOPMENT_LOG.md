@@ -885,6 +885,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14941 · Workspace Synchronous Optimization Returns Explicit Synthetic Placeholder; RECEIPT Registration Refused for Synthetic Results
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14941
+- **Branch:** merged via #14963
+- **PR:** #14963
+- **Paths:** see #14963
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`2da54750`; collated from changes/14941-workspace-synchronous-optimization-retur.md)
+- **Summary:** Workspace synchronous optimization returns explicit synthetic placeholder; RECEIPT registration refused for synthetic results
+- **Next step:** Shipped in PR #14963.
+
+### DL-#14938 · \ Marker IK Exposes Convergence Status,Reports NO_MARKERS and NaN RMS for Empty Frames,and Routes LM With Finite Bounds to TRF\
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14938
+- **Branch:** agy/14938-marker-ik-convergence
+- **PR:** #14974
+- **Paths:** see #14974
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`bb977b68`; collated from changes/14938-marker-ik-convergence.md)
+- **Summary:** \ Marker IK exposes convergence status,reports NO_MARKERS and NaN RMS for empty frames,and routes LM with finite bounds to TRF\
+- **Next step:** Shipped in PR #14974.
+
+### DL-#14946 · Make Coverage Truth Explicit in CI Summary and Remove Dead Cov-Fail-Under Flags
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14946
+- **Branch:** merged via #14972
+- **PR:** #14972
+- **Paths:** see #14972
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`57b4ffa7`; collated from changes/14946-coverage-truth-in-summary.md)
+- **Summary:** Make coverage truth explicit in CI summary and remove dead cov-fail-under flags
+- **Next step:** Shipped in PR #14972.
+
 ### DL-#14950 · Simulation WS Error Frame Handling and isPaused Reset on Stop (Part Of #14950).
 
 - **State:** shipped
