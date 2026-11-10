@@ -185,12 +185,19 @@ jobs:
             pip install -e ".[drake]"
           fi
 
+      - name: Install JaxSim extra (jaxsim leg only)
+        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine) && matrix.engine == 'jaxsim' }}
+        run: |
+          pip install -e ".[jaxsim]"
+
       - name: Verify heavy dependencies
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
         run: |
           python -c "
           import sys
           deps = ['mujoco', 'pinocchio', 'mediapipe', 'pyvista', 'trimesh', 'scipy', 'sympy', 'ezc3d', 'ezdxf']
+          if '${{ matrix.engine }}' == 'jaxsim':
+              deps.append('jaxsim')
           failures = []
           for pkg in deps:
               try:
@@ -207,6 +214,8 @@ jobs:
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
         timeout-minutes: 60
         shell: bash
+        env:
+          UD_REQUIRE_ENGINES: ${{ matrix.engine }}
         run: |
           set -o pipefail
           xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \
@@ -261,6 +270,19 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           tail -40 "heavy_test_output_${{ matrix.engine }}.log" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
           echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check test results
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
+        run: |
+          if [ -f "heavy_test_results_${{ matrix.engine }}.xml" ]; then
+            python3 scripts/ci/check_engine_test_floor.py \
+              --junit "heavy_test_results_${{ matrix.engine }}.xml" \
+              --config "scripts/config/engine_test_floor.json" \
+              --lane "${{ matrix.engine }}"
+          else
+            echo "::error::heavy_test_results_${{ matrix.engine }}.xml missing"
+            exit 1
+          fi
 
       - name: Upload heavy test artifacts
         if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine) }}

@@ -631,7 +631,7 @@ def pytest_configure(config: pytest.Config) -> None:
         )
         config.addinivalue_line(
             "markers",
-            "no_auto_suite_mark: explicit opt-out from directory-based suite auto-marking (#14947)",
+            "declared_skip(reason, issue): Declared skip for required engine lanes with issue citation",
         )
     mode = config.getoption("--tools-mode")
     root_dir = Path(__file__).resolve().parent.parent
@@ -1504,6 +1504,14 @@ def pytest_runtest_makereport(
     """
     outcome = yield
     report = outcome.get_result()
+    if not report.skipped:
+        return
+
+    from src.shared.python.engine_core.engine_lane_guard import (
+        enforce_required_engine_skip_guard,
+    )
+
+    enforce_required_engine_skip_guard(item, report)
     if not report.skipped:
         return
 
