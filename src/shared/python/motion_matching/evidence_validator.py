@@ -121,7 +121,12 @@ def _walk_strings(
             )
     elif isinstance(value, Mapping):
         for key, nested in value.items():
-            _walk_strings(nested, field_path=f"{field_path}.{key}", issues=issues, rel_path=rel_path)
+            _walk_strings(
+                nested,
+                field_path=f"{field_path}.{key}",
+                issues=issues,
+                rel_path=rel_path,
+            )
     elif isinstance(value, list):
         for index, nested in enumerate(value):
             _walk_strings(
@@ -235,7 +240,9 @@ def load_waivers(path: Path) -> list[dict[str, Any]]:
     return [entry for entry in waivers if isinstance(entry, dict)]
 
 
-def _waiver_matches(issue: EvidenceIssue, waiver: Mapping[str, Any], today: date) -> bool:
+def _waiver_matches(
+    issue: EvidenceIssue, waiver: Mapping[str, Any], today: date
+) -> bool:
     if waiver.get("rule") != issue.rule:
         return False
     waiver_path = waiver.get("path")
@@ -314,7 +321,5 @@ def validate_committed_evidence(
 
 def ledger_unclassified_count(ledger_rows: Sequence[Mapping[str, Any]]) -> int:
     return sum(
-        1
-        for row in ledger_rows
-        if str(row.get("lane", "")).lower() == "unclassified"
+        1 for row in ledger_rows if str(row.get("lane", "")).lower() == "unclassified"
     )

@@ -28,7 +28,9 @@ def test_seeded_candidate_flags_accepted_gate_mismatch() -> None:
 
 
 def test_receipt_host_paths_flagged() -> None:
-    path = REPO_ROOT / "evidence" / "matched" / "driver_g1_crocoddyl_rk45" / "receipt.json"
+    path = (
+        REPO_ROOT / "evidence" / "matched" / "driver_g1_crocoddyl_rk45" / "receipt.json"
+    )
     data = json.loads(path.read_text(encoding="utf-8"))
     issues = validate_receipt_paths(path.relative_to(REPO_ROOT).as_posix(), data)
     assert any(issue.rule == "host_absolute_provenance" for issue in issues)
