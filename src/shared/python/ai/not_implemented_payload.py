@@ -7,8 +7,7 @@ from typing import Any
 NOT_IMPLEMENTED_STATUS = "not_implemented"
 _RESERVED_VERDICT_KEYS = frozenset({"success", "error", "status"})
 _METADATA_RESERVED_KEYS_ERROR = (
-    "Placeholder metadata may not override the verdict keys "
-    "{reserved}; got {overlap}."
+    "Placeholder metadata may not override the verdict keys {reserved}; got {overlap}."
 )
 
 
