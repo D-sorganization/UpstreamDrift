@@ -2754,6 +2754,8 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-10 | #14979 | Implement ZTCF RNEA joint reaction contract and honest scope docs |
+| 2026-11-10 | #14977 | Enforce required physics engine execution, JUnit floor checks, and JaxSim heavy test lane |
 | 2026-11-10 | #14967 | Simulation lifecycle reducer with runId and stale-socket guard; Simulation WS error frame handling and isPaused reset on stop (Part of #14950). |
 | 2026-11-10 | #14981 | Add sharded coverage collection, combination, and per-package ratchet gate |
 | 2026-11-10 | #14976 | Fix syngas water unit conversions and router fallback on 60F_14.696psia basis (paired with Tools#6009) |
