@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import os
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import pytest
+if TYPE_CHECKING:
+    import pytest
 
 from tests.support.suite_markers import item_has_suite_marker
 
@@ -44,6 +45,8 @@ def apply_directory_suite_auto_markers(
     """Apply inferred suite markers to unmarked items in mapped directories."""
     if not _is_auto_mark_enabled(enabled):
         return 0
+
+    import pytest
 
     count = 0
     for item in items:
