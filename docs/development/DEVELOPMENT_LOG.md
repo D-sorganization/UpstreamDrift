@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14934 · Fix Syngas Water Unit Conversions and Router Fallback on 60F_14.696Psia Basis (Paired With Tools#6009)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14934
+- **Branch:** agy/6004-syngas-water-router-pair
+- **PR:** #14976
+- **Paths:** see #14976
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`abce96db`; collated from changes/14934-syngas-water-router-pair.md)
+- **Summary:** Fix syngas water unit conversions and router fallback on 60F_14.696psia basis (paired with Tools#6009)
+- **Next step:** Merge the PR.
+
 ### DL-#14906 · Correct SHOW-A10 Evidence Provenance Manifest and Summary Attribution Without Regenerating Artifacts
 
 - **State:** in_review
@@ -885,6 +898,110 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14947 · Add Directory-Based Suite Marker Inference, Opt-Out Marker, Gate Selectability Summary, and Audit Utility (Part of #14947, Part Of #14934)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14947
+- **Branch:** agy/14947-suite-marker-reach
+- **PR:** #14980
+- **Paths:** see #14980
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`a002ed00`; collated from changes/14947-suite-marker-reach.md)
+- **Summary:** Add directory-based suite marker inference, opt-out marker, gate selectability summary, and audit utility (Part of #14947, Part of #14934)
+- **Next step:** Shipped in PR #14980.
+
+### DL-#14941 · Workspace Synchronous Optimization Returns Explicit Synthetic Placeholder; RECEIPT Registration Refused for Synthetic Results
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14941
+- **Branch:** merged via #14963
+- **PR:** #14963
+- **Paths:** see #14963
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`2da54750`; collated from changes/14941-workspace-synchronous-optimization-retur.md)
+- **Summary:** Workspace synchronous optimization returns explicit synthetic placeholder; RECEIPT registration refused for synthetic results
+- **Next step:** Shipped in PR #14963.
+
+### DL-#14938 · \ Marker IK Exposes Convergence Status,Reports NO_MARKERS and NaN RMS for Empty Frames,and Routes LM With Finite Bounds to TRF\
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14938
+- **Branch:** agy/14938-marker-ik-convergence
+- **PR:** #14974
+- **Paths:** see #14974
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`bb977b68`; collated from changes/14938-marker-ik-convergence.md)
+- **Summary:** \ Marker IK exposes convergence status,reports NO_MARKERS and NaN RMS for empty frames,and routes LM with finite bounds to TRF\
+- **Next step:** Shipped in PR #14974.
+
+### DL-#14946 · Make Coverage Truth Explicit in CI Summary and Remove Dead Cov-Fail-Under Flags
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14946
+- **Branch:** merged via #14972
+- **PR:** #14972, #14981
+- **Paths:** see #14972
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`be9e042d`; collated from changes/14946-sharded-coverage-ratchet.md)
+- **Summary:** Make coverage truth explicit in CI summary and remove dead cov-fail-under flags
+- **Next step:** Shipped in PR #14972.
+
+### DL-#14950 · Simulation WS Error Frame Handling and isPaused Reset on Stop (Part Of #14950).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14950
+- **Branch:** merged via #14958
+- **PR:** #14958, #14967
+- **Paths:** see #14958
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`ee8519a3`; collated from changes/14950-simulation-ws-error-frame-handling-and-i.md)
+- **Summary:** Simulation WS error frame handling and isPaused reset on stop (Part of #14950).
+- **Next step:** Shipped in PR #14958.
+
+### DL-#14945 · Make Architecture and File-Size Budget Expiry Evaluation Deterministic
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14945
+- **Branch:** merged via #14954
+- **PR:** #14954
+- **Paths:** see #14954
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`268f76ed`; collated from changes/14945-deterministic-budget-expiry.md)
+- **Summary:** Make architecture and file-size budget expiry evaluation deterministic
+- **Next step:** Shipped in PR #14954.
+
+### DL-#14944 · ZTCF: Guard Multi-Body Misuse of Compute_Ztcf_Forces; Double-Pendulum Regression (#14944, Part Of #14934)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14944
+- **Branch:** merged via #14953
+- **PR:** #14953
+- **Paths:** see #14953
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`7625298e`; collated from changes/14944-ztcf-multibody-guard.md)
+- **Summary:** ZTCF: guard multi-body misuse of compute_ztcf_forces; double-pendulum regression (#14944, Part of #14934)
+- **Next step:** Shipped in PR #14953.
+
+### DL-#14227 · Document CI Optional Stack Slice 1 (Pinocchio Gravity) and Add Runbook Contract Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14227
+- **Branch:** merged via #14923
+- **PR:** #14923
+- **Paths:** see #14923
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`e946eb78`; collated from changes/14227-document-ci-optional-stack-slice-1-pinoc.md)
+- **Summary:** Document CI Optional Stack slice 1 (Pinocchio gravity) and add runbook contract tests
+- **Next step:** Shipped in PR #14923.
+
 ### DL-#13604 · NSX Salvage Tracker: Unit Receipts for Merged NSX-22/NSX-24 Rows on Main (#13604)
 
 - **State:** shipped
@@ -1632,10 +1749,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12737
 - **Branch:** merged via #14760
-- **PR:** #14760
+- **PR:** #14760, #14924
 - **Paths:** see #14760
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`ef54ca58`; collated from changes/12737-spn-0b-data-extraction-md-dois-and-full.md)
+- **Last verified:** 2026-11-10 (`ee2d7b2c`; collated from changes/12737-contract-test-bruno-b2-supplement-stays.md)
 - **Summary:** SPN-0b data_extraction.md: DOIs and full author lists for Pearcy 1984, Fujii 2007, Wilke 1999 and Wu 2002 from Crossref; no verified_from_primary flag changed
 - **Next step:** Shipped in PR #14760.
 
