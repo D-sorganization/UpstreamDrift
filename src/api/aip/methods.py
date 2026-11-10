@@ -128,7 +128,7 @@ def methods_passing_self_check(registry: MethodRegistry) -> list[str]:
                 probe(h)
                 supported.append(name)
             except (AIPMethodNotImplemented, RuntimeError, ValueError, OSError):
-                pass
+                logger.debug("Self-check skipped %s", name)
     return sorted(supported)
 
 
