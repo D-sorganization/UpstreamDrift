@@ -10,9 +10,13 @@ export type SimulationPhase =
   | "connecting"
   | "starting"
   | "running"
+  | "paused"
+  | "stopping"
   | "completed"
   | "stopped"
   | "failed"
+  | "faulted"
+  | "disconnected"
   | "lost";
 
 export interface SimulationLifecycleState {
@@ -21,6 +25,8 @@ export interface SimulationLifecycleState {
   paused: boolean;
   failureMessage: string | null;
 }
+
+export type SimulationRunLifecycle = SimulationLifecycleState;
 
 export const initialSimulationLifecycle: SimulationLifecycleState = {
   runId: 0,
@@ -38,8 +44,11 @@ export type SimulationLifecycleAction =
   | { type: "server_complete"; runId: number }
   | { type: "server_stopped"; runId: number }
   | { type: "server_error"; runId: number; message: string }
+  | { type: "server_fault"; runId: number; message: string }
   | { type: "socket_lost"; runId: number; message: string }
+  | { type: "socket_disconnected"; runId: number }
   | { type: "socket_clean_close"; runId: number }
+  | { type: "user_stopping"; runId: number }
   | { type: "user_reset"; runId: number };
 
 function isCurrentRun(
@@ -75,15 +84,17 @@ export function simulationLifecycleReducer(
     case "server_running":
       return { ...state, phase: "running", paused: false };
     case "server_paused":
-      if (state.phase !== "running") {
+      if (state.phase !== "running" && state.phase !== "paused") {
         return state;
       }
-      return { ...state, paused: true };
+      return { ...state, phase: "paused", paused: true };
     case "server_resumed":
-      if (state.phase !== "running") {
+      if (state.phase !== "running" && state.phase !== "paused") {
         return state;
       }
-      return { ...state, paused: false };
+      return { ...state, phase: "running", paused: false };
+    case "user_stopping":
+      return { ...state, phase: "stopping" };
     case "server_complete":
       return { ...state, phase: "completed", paused: false };
     case "server_stopped":
@@ -95,6 +106,13 @@ export function simulationLifecycleReducer(
         paused: false,
         failureMessage: action.message,
       };
+    case "server_fault":
+      return {
+        ...state,
+        phase: "faulted",
+        paused: false,
+        failureMessage: action.message,
+      };
     case "socket_lost":
       return {
         ...state,
@@ -102,13 +120,26 @@ export function simulationLifecycleReducer(
         paused: false,
         failureMessage: action.message,
       };
+    case "socket_disconnected":
+      return {
+        ...state,
+        phase: "disconnected",
+        paused: false,
+      };
     case "socket_clean_close":
-      if (state.phase === "failed" || state.phase === "lost") {
+      if (
+        state.phase === "failed" ||
+        state.phase === "lost" ||
+        state.phase === "faulted"
+      ) {
         return state;
       }
       return {
         ...state,
-        phase: state.phase === "running" ? "stopped" : "idle",
+        phase:
+          state.phase === "running" || state.phase === "paused"
+            ? "stopped"
+            : "idle",
         paused: false,
       };
     case "user_reset":
@@ -118,13 +149,15 @@ export function simulationLifecycleReducer(
   }
 }
 
+export const reduceSimLifecycle = simulationLifecycleReducer;
+
 export function deriveIsRunning(phase: SimulationPhase): boolean {
-  return phase === "running";
+  return phase === "running" || phase === "paused";
 }
 
 export function deriveIsPaused(
   phase: SimulationPhase,
   paused: boolean,
 ): boolean {
-  return phase === "running" && paused;
+  return phase === "paused" || (phase === "running" && paused);
 }

@@ -608,8 +608,12 @@ describe('useSimulation hook', () => {
         .mocked(global.fetch)
         .mock.calls.find(([url]) => url === '/api/simulation/speed');
       expect((speedCall?.[1] as RequestInit).signal).toBeInstanceOf(AbortSignal);
-      expect(ws.sentMessages).toHaveLength(1);
+      expect(ws.sentMessages).toHaveLength(2);
       expect(JSON.parse(ws.sentMessages[0]).action).toBe('start');
+      expect(JSON.parse(ws.sentMessages[1])).toEqual({
+        action: 'set_speed',
+        speed_factor: 2.5,
+      });
     });
   });
 
