@@ -29,6 +29,49 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
+_NOT_IMPLEMENTED_STATUS = "not_implemented"
+
+
+def _not_implemented_agent_action(
+    *,
+    capability: str,
+    message: str,
+    **metadata: Any,
+) -> AgentActionResult:
+    """Honest refusal for agent-control capabilities with no backend yet.
+
+    Mirrors the contract of ``sample_tools._not_implemented_tool_result``
+    (#7391, #8322, #14939) without importing ``sample_tools`` (circular).
+    """
+    from src.shared.python.contracts import ensure, require
+
+    reserved = frozenset({"success", "error", "status"})
+    require(
+        not reserved.intersection(metadata),
+        "Placeholder metadata may not override verdict keys.",
+    )
+    payload: dict[str, Any] = {
+        "success": False,
+        "error": _NOT_IMPLEMENTED_STATUS,
+        "status": _NOT_IMPLEMENTED_STATUS,
+        "capability": capability,
+        "message": message,
+        **metadata,
+    }
+    ensure(
+        payload["success"] is False
+        and payload["status"] == _NOT_IMPLEMENTED_STATUS
+        and payload["error"] == _NOT_IMPLEMENTED_STATUS,
+        "A placeholder agent action must report an honest failure.",
+        value=payload,
+    )
+    return AgentActionResult(
+        success=False,
+        message=message,
+        data=payload,
+        error=_NOT_IMPLEMENTED_STATUS,
+    )
+
 
 @dataclass
 class EngineStatus:
@@ -250,37 +293,14 @@ class AgentController:
         Returns:
             AgentActionResult with load outcome.
         """
-        # Find target engine
-        target_engine = engine
-        if not target_engine:
-            for name, status in self._running_engines.items():
-                if status.running:
-                    target_engine = name
-                    break
-
-        if not target_engine:
-            return AgentActionResult(
-                success=False,
-                error="No engine running. Start an engine first.",
-            )
-
-        # Check model exists
-        model_path = self._find_model(model_name)
-        if not model_path:
-            return AgentActionResult(
-                success=False,
-                error=f"Model '{model_name}' not found",
-            )
-
-        self._loaded_models.append(model_name)
-        return AgentActionResult(
-            success=True,
-            message=f"Loaded model '{model_name}' into {target_engine}",
-            data={
-                "model": model_name,
-                "engine": target_engine,
-                "path": str(model_path),
-            },
+        return _not_implemented_agent_action(
+            capability="load_model",
+            message=(
+                "Model loading through agent control is not implemented; "
+                "no model was loaded into a physics engine."
+            ),
+            model=model_name,
+            engine=engine,
         )
 
     def unload_model(self, model_name: str) -> AgentActionResult:
@@ -406,23 +426,14 @@ class AgentController:
                 error=f"File not found: {file_path}",
             )
 
-        # Auto-detect type from extension
-        if not file_type:
-            ext_map = {
-                ".urdf": "urdf",
-                ".xml": "mjcf",
-                ".mjcf": "mjcf",
-                ".sdf": "sdf",
-                ".c3d": "c3d",
-                ".mot": "motion",
-                ".trc": "motion",
-            }
-            file_type = ext_map.get(path.suffix.lower(), "unknown")
-
-        return AgentActionResult(
-            success=True,
-            message=f"Imported {file_type} file: {file_path}",
-            data={"path": str(path), "type": file_type},
+        return _not_implemented_agent_action(
+            capability="import_file",
+            message=(
+                "File import through agent control is not implemented; "
+                "nothing was ingested into the application."
+            ),
+            path=str(path),
+            file_type=file_type,
         )
 
     def export_model(
@@ -438,16 +449,15 @@ class AgentController:
         Returns:
             AgentActionResult with export outcome.
         """
-        if model_name not in self._loaded_models:
-            return AgentActionResult(
-                success=False,
-                error=f"Model '{model_name}' is not loaded",
-            )
-
-        return AgentActionResult(
-            success=True,
-            message=f"Exported {model_name} to {output_path} as {format}",
-            data={"model": model_name, "output": output_path, "format": format},
+        return _not_implemented_agent_action(
+            capability="export_model",
+            message=(
+                "Model export through agent control is not implemented; "
+                "no file was written."
+            ),
+            model=model_name,
+            output=output_path,
+            format=format,
         )
 
     # =========================================================================
@@ -466,16 +476,14 @@ class AgentController:
         Returns:
             AgentActionResult with start outcome.
         """
-        if model_name not in self._loaded_models:
-            return AgentActionResult(
-                success=False,
-                error=f"Model '{model_name}' is not loaded",
-            )
-
-        return AgentActionResult(
-            success=True,
-            message=f"Started simulation of {model_name} for {duration}s",
-            data={"model": model_name, "duration": duration},
+        return _not_implemented_agent_action(
+            capability="start_simulation",
+            message=(
+                "Simulation start through agent control is not implemented; "
+                "no simulation was started."
+            ),
+            model=model_name,
+            duration=duration,
         )
 
     def stop_simulation(self) -> AgentActionResult:
@@ -484,9 +492,12 @@ class AgentController:
         Returns:
             AgentActionResult with stop outcome.
         """
-        return AgentActionResult(
-            success=True,
-            message="Simulation stopped",
+        return _not_implemented_agent_action(
+            capability="stop_simulation",
+            message=(
+                "Simulation stop through agent control is not implemented; "
+                "no running simulation was halted."
+            ),
         )
 
     def pause_simulation(self) -> AgentActionResult:
@@ -495,9 +506,12 @@ class AgentController:
         Returns:
             AgentActionResult with pause outcome.
         """
-        return AgentActionResult(
-            success=True,
-            message="Simulation paused",
+        return _not_implemented_agent_action(
+            capability="pause_simulation",
+            message=(
+                "Simulation pause through agent control is not implemented; "
+                "no simulation state was changed."
+            ),
         )
 
     def resume_simulation(self) -> AgentActionResult:
@@ -506,9 +520,12 @@ class AgentController:
         Returns:
             AgentActionResult with resume outcome.
         """
-        return AgentActionResult(
-            success=True,
-            message="Simulation resumed",
+        return _not_implemented_agent_action(
+            capability="resume_simulation",
+            message=(
+                "Simulation resume through agent control is not implemented; "
+                "no simulation state was changed."
+            ),
         )
 
     # =========================================================================
@@ -550,10 +567,13 @@ class AgentController:
         Returns:
             AgentActionResult with update outcome.
         """
-        return AgentActionResult(
-            success=True,
-            message=f"Updated settings: {settings}",
-            data=settings,
+        return _not_implemented_agent_action(
+            capability="set_settings",
+            message=(
+                "Settings persistence through agent control is not implemented; "
+                "no settings were saved."
+            ),
+            requested=settings,
         )
 
     # =========================================================================
