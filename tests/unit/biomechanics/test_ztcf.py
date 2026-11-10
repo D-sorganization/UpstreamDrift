@@ -23,6 +23,8 @@ from src.shared.python.core.contracts.exceptions import (
     PreconditionError,
 )
 
+pytestmark = pytest.mark.unit
+
 # ============================================================================
 # ZTCFResult dataclass
 # ============================================================================
