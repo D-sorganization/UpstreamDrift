@@ -2,7 +2,7 @@
   "title": "Cross-Engine Parity Diagnosis & Verification Receipt (Candidate 100)",
   "timestamp": "2026-09-15T16:50:00Z",
   "reference_environment": {
-    "node": "DeskComputer",
+    "node": "<host>",
     "os": "Windows",
     "matlab_release": "R2025b Update 5",
     "matlab_version": "25.2.0.3177638 (R2025b) Update 5"
