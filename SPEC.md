@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-10 | #15001 | Replace simulation boolean soup with lifecycle reducer, stale-socket identity guard, and ordered speed control |
 | 2026-11-10 | #14998 | CounterfactualKind/Result, simscape/putting defaults, conformance (#14943 slices 1–4) |
 | 2026-11-10 | #14992 | Enforce Tauri Cargo.toml version parity, correct production readiness doc, and add frontend dynamic port resolution |
 | 2026-11-10 | #14990 | Typed non-finite failure for syngas water router and canonical lifecycle vocabulary gate |
