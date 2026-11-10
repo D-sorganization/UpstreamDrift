@@ -6,7 +6,5 @@ summary: "CounterfactualKind/Result, simscape/putting defaults, conformance (#14
 ## Handoff
 
 - Slices 1–4 of #14943 (Part of #14934, supersedes #14965):
-  - Added typed CounterfactualKind/CounterfactualResult and conformance helpers
-  - Added compute_control_acceleration_at_state and compute_gravity_only_acceleration
-  - Deprecated legacy compute_zvcf with one-release shims
-  - Updated divergence inventory and added unit tests
+  - Typed CounterfactualKind/Result and state-aware default hooks
+  - SPEC §4 ZVCF doc alignment and legacy compute_zvcf shims

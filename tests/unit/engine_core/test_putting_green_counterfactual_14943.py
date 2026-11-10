@@ -1,5 +1,3 @@
-"""Putting-green engine counterfactual naming (#14943 slice 4)."""
-
 from __future__ import annotations
 
 import warnings

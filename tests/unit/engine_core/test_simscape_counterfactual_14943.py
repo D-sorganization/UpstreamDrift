@@ -1,5 +1,3 @@
-"""Simscape skeleton satisfies extended DynamicsInterface (#14943 slice 3)."""
-
 from __future__ import annotations
 
 import pytest

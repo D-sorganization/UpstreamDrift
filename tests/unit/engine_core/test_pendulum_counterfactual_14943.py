@@ -1,5 +1,3 @@
-"""Pendulum engine conformance for counterfactual contract (issue #14943 slice 2)."""
-
 from __future__ import annotations
 
 import warnings
@@ -28,22 +26,22 @@ def pendulum() -> PendulumPhysicsEngine:
 
 
 def test_pendulum_drift_control_superposition(pendulum: PendulumPhysicsEngine) -> None:
-    tau = np.array([1.2, -0.4])
-    assert_drift_control_superposition(pendulum, tau)
+    assert_drift_control_superposition(pendulum, np.array([1.2, -0.4]))
 
 
 def test_pendulum_stamped_kinds_and_zvcf_shim(pendulum: PendulumPhysicsEngine) -> None:
     drift = stamped_drift(pendulum)
     control = stamped_control(pendulum, np.array([0.2, 0.1]))
-    assert drift.kind == CounterfactualKind.DRIFT
-    assert control.kind == CounterfactualKind.CONTROL
+    assert (
+        drift.kind == CounterfactualKind.DRIFT
+        and control.kind == CounterfactualKind.CONTROL
+    )
     q = np.array([0.2, -0.15])
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always", DeprecationWarning)
         legacy = pendulum.compute_zvcf(q)
     assert any(isinstance(w.message, DeprecationWarning) for w in caught)
-    gravity_only = pendulum.compute_gravity_only_acceleration(q)
-    np.testing.assert_allclose(legacy, gravity_only)
+    np.testing.assert_allclose(legacy, pendulum.compute_gravity_only_acceleration(q))
     zvcf_control = pendulum.compute_control_acceleration_at_state(
         q, np.array([0.3, 0.0])
     )
