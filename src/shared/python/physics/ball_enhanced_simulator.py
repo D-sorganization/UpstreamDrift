@@ -230,9 +230,10 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
             total_force = aero_total + gravity_force
             forces = {
                 "gravity": gravity_force,
-                "drag": aero_total,
+                "drag": np.zeros(3, dtype=float),
                 "lift": np.zeros(3, dtype=float),
                 "magnus": np.zeros(3, dtype=float),
+                "total": aero_total,
             }
         else:
             aero_forces = self._aero_engine.compute_forces(

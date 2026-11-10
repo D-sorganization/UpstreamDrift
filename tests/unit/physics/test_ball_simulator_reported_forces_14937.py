@@ -34,12 +34,15 @@ def _driver_launch() -> LaunchConditions:
 
 def _newton_residual(point: object, mass: float) -> float:
     forces = point.forces
-    total = (
-        forces["gravity"]
-        + forces["drag"]
-        + forces.get("magnus", np.zeros(3))
-        + forces.get("lift", np.zeros(3))
-    )
+    if "total" in forces:
+        aero = np.asarray(forces["total"], dtype=float)
+    else:
+        aero = (
+            forces["drag"]
+            + forces.get("magnus", np.zeros(3))
+            + forces.get("lift", np.zeros(3))
+        )
+    total = forces["gravity"] + aero
     return float(np.linalg.norm(mass * point.acceleration - total))
 
 
@@ -85,3 +88,5 @@ def test_enhanced_custom_force_provider_is_newton_consistent() -> None:
     assert traj[0].forces_model == "custom_force_provider"
     for point in traj:
         assert _newton_residual(point, sim.ball.mass) < 1e-9
+        assert np.allclose(point.forces["drag"], 0.0)
+        np.testing.assert_allclose(point.forces["total"], np.array([0.0, 0.0, 2.5]))
