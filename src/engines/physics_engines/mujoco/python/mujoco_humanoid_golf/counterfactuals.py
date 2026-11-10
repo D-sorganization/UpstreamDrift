@@ -221,9 +221,7 @@ class CounterfactualAnalyzer:
             velocity_attributed_effect=None,
         )
 
-    def control_component_at(
-        self, qpos: np.ndarray, ctrl: np.ndarray
-    ) -> np.ndarray:
+    def control_component_at(self, qpos: np.ndarray, ctrl: np.ndarray) -> np.ndarray:
         """SPEC §4 ZVCF control acceleration ``M(q)⁻¹ τ`` at ``q`` (#14943)."""
         if qpos is None or ctrl is None:
             raise ValueError("qpos and ctrl must be provided")
