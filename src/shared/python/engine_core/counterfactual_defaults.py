@@ -14,6 +14,9 @@ if TYPE_CHECKING:
         def compute_gravity_forces(self) -> np.ndarray: ...
         def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray: ...
 
+    class _ZvcfShimEngine(Protocol):
+        def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray: ...
+
 
 def default_gravity_only_acceleration(
     engine: _MassGravityEngine, q: np.ndarray
@@ -35,9 +38,9 @@ def default_control_acceleration_at_state(
 
 
 def deprecated_compute_zvcf_shim(
-    engine: _MassGravityEngine, q: np.ndarray
+    engine: _ZvcfShimEngine, q: np.ndarray
 ) -> np.ndarray:
-    """One-release shim: old compute_zvcf → gravity-only diagnostic."""
+    """One-release shim: old compute_zvcf → gravity-only diagnostic at ``q``."""
     warnings.warn(
         "compute_zvcf(q) names a legacy gravity-only diagnostic; "
         "SPEC §4 ZVCF is the control component M(q)⁻¹τ — use "
@@ -46,4 +49,4 @@ def deprecated_compute_zvcf_shim(
         DeprecationWarning,
         stacklevel=3,
     )
-    return default_gravity_only_acceleration(engine, q)
+    return engine.compute_gravity_only_acceleration(q)
