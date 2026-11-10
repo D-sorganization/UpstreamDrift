@@ -178,8 +178,8 @@ class DynamicsInterface(Protocol):
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
         """Compute control-attributed acceleration from applied torques/forces only.
 
-        Section F Requirement: Control component = acceleration due solely to actuator torques,
-        excluding passive dynamics.
+        SPEC §4 ZVCF (control component): acceleration due solely to actuator torques,
+        excluding passive dynamics (see :meth:`compute_gravity_only_acceleration`).
 
         Mathematically: q̈_control = M(q)⁻¹ · τ
 
@@ -207,6 +207,24 @@ class DynamicsInterface(Protocol):
             For muscle-driven models, tau represents muscle-generated joint torques.
         """
         ...
+
+    def compute_control_acceleration_at_state(
+        self, q: np.ndarray, tau: np.ndarray
+    ) -> np.ndarray:
+        """ZVCF control component at configuration ``q`` (SPEC §4)."""
+        from src.shared.python.engine_core.counterfactual_defaults import (
+            default_control_acceleration_at_state,
+        )
+
+        return default_control_acceleration_at_state(self, q, tau)
+
+    def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:
+        """Legacy gravity-only diagnostic at fixed ``q`` (not SPEC §4 ZVCF)."""
+        from src.shared.python.engine_core.counterfactual_defaults import (
+            default_gravity_only_acceleration,
+        )
+
+        return default_gravity_only_acceleration(self, q)
 
     # -------- Section G: Counterfactual Experiments (Mandatory) --------
 
@@ -265,7 +283,7 @@ class DynamicsInterface(Protocol):
 
     @abstractmethod
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
+        """Deprecated shim (#14943): Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
 
         Compute instantaneous acceleration at fixed configuration/internal
         state with velocity and declared applied control set to zero.
