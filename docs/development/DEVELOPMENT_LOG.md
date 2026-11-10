@@ -995,10 +995,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14950
 - **Branch:** merged via #14958
-- **PR:** #14958, #14967
+- **PR:** #14958, #14967, #15001
 - **Paths:** see #14958
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`ee8519a3`; collated from changes/14950-simulation-ws-error-frame-handling-and-i.md)
+- **Last verified:** 2026-11-10 (`6a566a98`; collated from changes/14950-sim-run-lifecycle-reducer.md)
 - **Summary:** Simulation WS error frame handling and isPaused reset on stop (Part of #14950).
 - **Next step:** Shipped in PR #14958.
 
