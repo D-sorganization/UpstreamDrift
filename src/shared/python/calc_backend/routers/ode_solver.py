@@ -3,7 +3,6 @@
 from __future__ import annotations  # noqa: E402, F404
 
 import math  # noqa: E402
-from typing import Any  # noqa: E402
 
 from fastapi import APIRouter, HTTPException  # noqa: E402
 
@@ -110,7 +109,7 @@ def _rk4_solve(
     y0 = [initial[v] for v in var_names]
     t_eval = np.linspace(t_start, t_end, num_points)
 
-    sol: Any = solver.solve((t_start, t_end), y0, t_eval=t_eval)
+    sol = solver.solve((t_start, t_end), y0, t_eval=t_eval)
     if not sol.success:
         raise ValueError(f"ODE solver failed: {sol.message}")
     if not np.all(np.isfinite(sol.y)):

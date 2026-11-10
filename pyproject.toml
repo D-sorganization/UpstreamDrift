@@ -708,6 +708,13 @@ warn_return_any = true
 
 [[tool.mypy.overrides]]
 module = [
+    "shared.python.sidekick.*",
+    "src.shared.python.sidekick.*",
+]
+follow_imports = "skip"
+
+[[tool.mypy.overrides]]
+module = [
     "tifffile",
     "tifffile.*",
 ]
