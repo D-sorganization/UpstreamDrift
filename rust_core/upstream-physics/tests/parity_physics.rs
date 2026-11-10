@@ -87,6 +87,7 @@ fn ball_flight_matches_python_reference_fixture() {
         &AeroBallProperties::default(),
         &AirProperties::default(),
         &config,
+        false,
     )
     .expect("simulate_ball_trajectory should succeed");
 
