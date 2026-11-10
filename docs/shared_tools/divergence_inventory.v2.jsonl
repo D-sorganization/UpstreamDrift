@@ -110,6 +110,7 @@
 {"path": "ai/mcp/widgets/integrations_health_dashboard_widget.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/mcp/widgets/mcp_servers_prefs_widget.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/memory_manager.py", "classification": "diverged", "package": "ai", "spelling_only": true}
+{"path": "ai/not_implemented_payload.py", "classification": "tools-only", "package": "ai", "spelling_only": false}
 {"path": "ai/peer_review/__init__.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/peer_review/_audit.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/peer_review/_llm.py", "classification": "identical", "package": "ai", "spelling_only": false}
@@ -347,13 +348,13 @@
 {"path": "calc_backend/contracts/financial.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/contracts/flare.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/contracts/flow_rate.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
-{"path": "calc_backend/contracts/ode_solver.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
+{"path": "calc_backend/contracts/ode_solver.py", "classification": "diverged", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/contracts/pressure_drop.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/contracts/pressure_drop_v2.py", "classification": "diverged", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/contracts/rotation_converter.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/contracts/scrubber.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/contracts/symbolic_solver.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
-{"path": "calc_backend/contracts/syngas_water.py", "classification": "diverged", "package": "calc_backend", "spelling_only": false}
+{"path": "calc_backend/contracts/syngas_water.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/contracts/thermal_profile.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/contracts/wgs_reactor.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/health.py", "classification": "diverged", "package": "calc_backend", "spelling_only": false}
@@ -366,13 +367,13 @@
 {"path": "calc_backend/routers/financial.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/routers/flare.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/routers/flow_rate.py", "classification": "diverged", "package": "calc_backend", "spelling_only": true}
-{"path": "calc_backend/routers/ode_solver.py", "classification": "diverged", "package": "calc_backend", "spelling_only": true}
+{"path": "calc_backend/routers/ode_solver.py", "classification": "diverged", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/routers/pressure_drop.py", "classification": "diverged", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/routers/pressure_drop_v2.py", "classification": "diverged", "package": "calc_backend", "spelling_only": true}
 {"path": "calc_backend/routers/rotation_converter.py", "classification": "diverged", "package": "calc_backend", "spelling_only": true}
 {"path": "calc_backend/routers/scrubber.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/routers/symbolic_solver.py", "classification": "diverged", "package": "calc_backend", "spelling_only": false}
-{"path": "calc_backend/routers/syngas_water.py", "classification": "diverged", "package": "calc_backend", "spelling_only": false}
+{"path": "calc_backend/routers/syngas_water.py", "classification": "diverged", "package": "calc_backend", "spelling_only": true}
 {"path": "calc_backend/routers/thermal_profile.py", "classification": "diverged", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/routers/wgs_reactor.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/tests/__init__.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
@@ -1120,7 +1121,7 @@
 {"path": "launcher_embed/registry.py", "classification": "ud-only", "package": "launcher_embed", "spelling_only": false}
 {"path": "launcher_factory.py", "classification": "ud-only", "package": "launcher_factory.py", "spelling_only": false}
 {"path": "lazy_package_export.py", "classification": "ud-only", "package": "lazy_package_export.py", "spelling_only": false}
-{"path": "lifecycle.py", "classification": "ud-only", "package": "lifecycle.py", "spelling_only": false}
+{"path": "lifecycle.py", "classification": "identical", "package": "lifecycle.py", "spelling_only": false}
 {"path": "lift_scoping/__init__.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
 {"path": "lift_scoping/_json_validate.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
 {"path": "lift_scoping/lift5.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
@@ -2682,7 +2683,7 @@
 {"path": "sidekick/process_calculators/syngas_compression_engine.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/syngas_compression_tabs_mixin.py", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/syngas_compression_worker.py", "classification": "ud-only", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/process_calculators/syngas_water_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
+{"path": "sidekick/process_calculators/syngas_water_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/thermal_profile_predictor.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/water_vapor_pressure.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/water_vapor_pressure_calculator.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
