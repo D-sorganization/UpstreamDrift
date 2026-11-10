@@ -27,6 +27,8 @@ AUTO_MARK_INCLUDE_BASELINE_ENV_VAR: str = "UD_AUTO_MARK_INCLUDE_BASELINE"
 def infer_directory_suite_marker(nodeid_or_path: str) -> str | None:
     """Infer suite marker ('unit' or 'integration') from normalized path."""
     norm = str(nodeid_or_path).replace("\\", "/")
+    if norm.startswith("src/"):
+        return None
     for prefix, marker in DIRECTORY_SUITE_MARKERS:
         if norm.startswith(prefix) or f"/{prefix}" in norm or prefix in norm:
             return marker
