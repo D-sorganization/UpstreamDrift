@@ -37,9 +37,7 @@ def default_control_acceleration_at_state(
     return engine.compute_control_acceleration(tau_v)
 
 
-def deprecated_compute_zvcf_shim(
-    engine: _ZvcfShimEngine, q: np.ndarray
-) -> np.ndarray:
+def deprecated_compute_zvcf_shim(engine: _ZvcfShimEngine, q: np.ndarray) -> np.ndarray:
     """One-release shim: old compute_zvcf → gravity-only diagnostic at ``q``."""
     warnings.warn(
         "compute_zvcf(q) names a legacy gravity-only diagnostic; "
