@@ -898,6 +898,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14943 · CounterfactualKind/Result, Simscape/Putting Defaults, Conformance (#14943 Slices 1–4)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14943
+- **Branch:** merged via #14998
+- **PR:** #14998
+- **Paths:** see #14998
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`b73da6dd`; collated from changes/14943-counterfactualkind-result-spec-aligned-z.md)
+- **Summary:** CounterfactualKind/Result, simscape/putting defaults, conformance (#14943 slices 1–4)
+- **Next step:** Shipped in PR #14998.
+
 ### DL-#14951 · Tauri BackendState Supervisor With Ephemeral Port and Stderr Tail (Part Of #14951).
 
 - **State:** shipped
