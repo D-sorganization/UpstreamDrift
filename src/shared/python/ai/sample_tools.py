@@ -30,9 +30,12 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-
 # The verdict keys a placeholder result must carry. Metadata may not set them:
 # they are the whole point of the payload.
+_NOT_IMPLEMENTED_STATUS = "not_implemented"
+_RESERVED_VERDICT_KEYS = frozenset({"success", "error", "status"})
+
+
 def _not_implemented_tool_result(
     *,
     capability: str,
@@ -64,15 +67,30 @@ def _not_implemented_tool_result(
         PreconditionError: If ``metadata`` tries to set a verdict key.
         PostconditionError: If the assembled payload is not an honest refusal.
     """
-    from src.shared.python.ai.not_implemented_payload import (
-        build_not_implemented_payload,
+    require(
+        not _RESERVED_VERDICT_KEYS.intersection(metadata),
+        "Placeholder metadata may not override the verdict keys "
+        f"{sorted(_RESERVED_VERDICT_KEYS)}; got "
+        f"{sorted(_RESERVED_VERDICT_KEYS.intersection(metadata))}.",
     )
 
-    return build_not_implemented_payload(
-        capability=capability,
-        message=message,
+    payload: dict[str, Any] = {
+        "success": False,
+        "error": _NOT_IMPLEMENTED_STATUS,
+        "status": _NOT_IMPLEMENTED_STATUS,
+        "capability": capability,
+        "message": message,
         **metadata,
+    }
+
+    ensure(
+        payload["success"] is False
+        and payload["status"] == _NOT_IMPLEMENTED_STATUS
+        and payload["error"] == _NOT_IMPLEMENTED_STATUS,
+        "A placeholder tool result must report an honest failure.",
+        value=payload,
     )
+    return payload
 
 
 @functools.lru_cache(maxsize=1)

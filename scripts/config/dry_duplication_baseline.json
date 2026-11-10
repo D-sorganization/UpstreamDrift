@@ -1190,6 +1190,12 @@
     "37adcb0db3175185b8934e483777bbc1673f98a29431b1448454b9282dc33d44": 2,
     "37b23d9d49dadfdbebcd9b5a54b8d99b9397d04e2d93e766a13cbdfb1843986b": 2,
     "37c3ffaf4aa092426d17aa7ab8ca51a883d9d017a339214425b7d50ab9cc5a00": 2,
+    "37d5ac138b5f0dc79a53ac0beb4a7c05aa193d8f9e8d78c5a77f2820cdec63e2": {
+      "issue": "#14939",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Tools child-copy blocks editing sample_tools; agent_control uses core.not_implemented_payload"
+    },
     "37def1ce08fc1996151bd919341f434a18acaed6b4b58e28119e6fd2d5149425": 2,
     "37e15114f1fa6b6724303773befebccf25627bb41f5f5cebb0a2cfdcc870345f": 2,
     "37e69d2a4517428acc2c5b333d6b05c85a8169e5ecc175431adc11af2984d353": 2,
