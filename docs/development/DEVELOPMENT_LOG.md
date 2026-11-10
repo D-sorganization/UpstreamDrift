@@ -24,10 +24,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14934
 - **Branch:** agy/6004-syngas-water-router-pair
-- **PR:** #14976
+- **PR:** #14976, #14985
 - **Paths:** see #14976
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`abce96db`; collated from changes/14934-syngas-water-router-pair.md)
+- **Last verified:** 2026-11-10 (`94d9cd0c`; collated from changes/14934-lifecycle-kernel.md)
 - **Summary:** Fix syngas water unit conversions and router fallback on 60F_14.696psia basis (paired with Tools#6009)
 - **Next step:** Merge the PR.
 
