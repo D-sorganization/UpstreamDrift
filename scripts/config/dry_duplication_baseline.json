@@ -1194,7 +1194,13 @@
       "issue": "#14939",
       "max_occurrences": 2,
       "owner": "@core",
-      "reason": "Tools child-copy blocks editing sample_tools; converged ai/not_implemented_payload vs sample_tools require() window"
+      "reason": "Tools child-copy blocks editing sample_tools; converged ai/not_implemented_payload vs sample_tools require() window (tokenize on Python 3.12)"
+    },
+    "9b7512b7095389171aa6018f695576fc91d877a39a3075002e0a473211a888f2": {
+      "issue": "#14939",
+      "max_occurrences": 2,
+      "owner": "@core",
+      "reason": "Same require() window as above; CI repo-structure-gates runs on Python 3.11 tokenize"
     },
     "37def1ce08fc1996151bd919341f434a18acaed6b4b58e28119e6fd2d5149425": 2,
     "37e15114f1fa6b6724303773befebccf25627bb41f5f5cebb0a2cfdcc870345f": 2,
