@@ -219,21 +219,10 @@ def _accumulate_xml_engine_counts(
     p, f, err, sk, xf = 0, 0, 0, 0, 0
     root = ET.parse(xml_path).getroot()
     file_stem = xml_path.stem
-    suites = list(root.iter("testsuite"))
-    if suites:
-        for suite in suites:
-            suite_name = suite.get("name", "")
-            for tc in suite.iter("testcase"):
-                if _matches_engine_token(tc, suite_name, engine, file_stem):
-                    dp, df, de, ds, dx = _classify_testcase(tc)
-                    p += dp
-                    f += df
-                    err += de
-                    sk += ds
-                    xf += dx
-    else:
-        suite_name = root.get("name", "")
-        for tc in root.iter("testcase"):
+    suites = list(root.iter("testsuite")) or [root]
+    for suite in suites:
+        suite_name = suite.get("name", "")
+        for tc in suite.iter("testcase"):
             if _matches_engine_token(tc, suite_name, engine, file_stem):
                 dp, df, de, ds, dx = _classify_testcase(tc)
                 p += dp
