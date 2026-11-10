@@ -29,6 +29,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
+
 def _not_implemented_agent_action(
     *,
     capability: str,

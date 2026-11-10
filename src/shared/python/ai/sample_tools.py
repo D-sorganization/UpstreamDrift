@@ -30,6 +30,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
+
 # The verdict keys a placeholder result must carry. Metadata may not set them:
 # they are the whole point of the payload.
 def _not_implemented_tool_result(
@@ -63,7 +64,9 @@ def _not_implemented_tool_result(
         PreconditionError: If ``metadata`` tries to set a verdict key.
         PostconditionError: If the assembled payload is not an honest refusal.
     """
-    from src.shared.python.ai.not_implemented_payload import build_not_implemented_payload
+    from src.shared.python.ai.not_implemented_payload import (
+        build_not_implemented_payload,
+    )
 
     return build_not_implemented_payload(
         capability=capability,
