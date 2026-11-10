@@ -441,10 +441,8 @@ jobs:
         run: |
           pip install --upgrade pip && pip install pytest pytest-cov coverage && pip install -e . --no-deps || true
           mkdir -p .coverage_shards
-          cov_flags=""
-          for p in ${{ matrix.path }}; do cov_flags="$cov_flags --cov=$p"; done
-          COVERAGE_FILE=.coverage_shards/.coverage.${{ matrix.shard }} \
-            python -m pytest $cov_flags ${{ matrix.tests }} -q || true
+          COVERAGE_FILE=".coverage_shards/.coverage.${{ matrix.shard }}" \
+            python -m pytest "--cov=${{ matrix.path }}" "${{ matrix.tests }}" -q || true
       - name: Upload coverage shard
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
