@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#14934 · Fix Syngas Water Unit Conversions and Router Fallback on 60F_14.696Psia Basis (Paired With Tools#6009)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #14934
+- **Branch:** agy/6004-syngas-water-router-pair
+- **PR:** #14976
+- **Paths:** see #14976
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`abce96db`; collated from changes/14934-syngas-water-router-pair.md)
+- **Summary:** Fix syngas water unit conversions and router fallback on 60F_14.696psia basis (paired with Tools#6009)
+- **Next step:** Merge the PR.
+
 ### DL-#14906 · Correct SHOW-A10 Evidence Provenance Manifest and Summary Attribution Without Regenerating Artifacts
 
 - **State:** in_review
@@ -930,10 +943,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14946
 - **Branch:** merged via #14972
-- **PR:** #14972
+- **PR:** #14972, #14981
 - **Paths:** see #14972
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`57b4ffa7`; collated from changes/14946-coverage-truth-in-summary.md)
+- **Last verified:** 2026-11-10 (`be9e042d`; collated from changes/14946-sharded-coverage-ratchet.md)
 - **Summary:** Make coverage truth explicit in CI summary and remove dead cov-fail-under flags
 - **Next step:** Shipped in PR #14972.
 
@@ -943,10 +956,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14950
 - **Branch:** merged via #14958
-- **PR:** #14958
+- **PR:** #14958, #14967
 - **Paths:** see #14958
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`8053f6e4`; collated from changes/14950-simulation-ws-error-frame-handling-and-i.md)
+- **Last verified:** 2026-11-10 (`ee8519a3`; collated from changes/14950-simulation-ws-error-frame-handling-and-i.md)
 - **Summary:** Simulation WS error frame handling and isPaused reset on stop (Part of #14950).
 - **Next step:** Shipped in PR #14958.
 
