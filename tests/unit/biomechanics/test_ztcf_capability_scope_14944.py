@@ -8,7 +8,9 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-SCOPE = Path(__file__).resolve().parents[3] / "docs/architecture/ztcf_force_helper_scope.md"
+SCOPE = (
+    Path(__file__).resolve().parents[3] / "docs/architecture/ztcf_force_helper_scope.md"
+)
 
 
 def test_ztcf_scope_doc_states_single_pendulum_restriction() -> None:

@@ -89,6 +89,15 @@ class ZTCFResult:
         return float(np.max(self.magnitudes()))
 
 
+@dataclass(frozen=True)
+class ZTCFSegmentKinematics:
+    """Per-segment kinematic inputs for :func:`compute_ztcf_forces`."""
+
+    joint_positions: np.ndarray
+    segment_masses: np.ndarray
+    segment_lengths: np.ndarray
+
+
 # ============================================================================
 # Core ZTCF computation
 # ============================================================================
@@ -156,9 +165,7 @@ def compute_ztcf_forces(
     coriolis_vector: np.ndarray,
     gravity_vector: np.ndarray,
     friction_vector: np.ndarray | None = None,
-    joint_positions: np.ndarray,
-    segment_masses: np.ndarray,
-    segment_lengths: np.ndarray,
+    kinematics: ZTCFSegmentKinematics,
     gravity_acceleration: float = 9.80665,
     allow_simplified: bool = False,
 ) -> ZTCFResult:
@@ -176,12 +183,8 @@ def compute_ztcf_forces(
     ----------
     mass_matrix, coriolis_vector, gravity_vector, friction_vector
         Dynamics terms (see ``compute_ztcf_accelerations``).
-    joint_positions : np.ndarray
-        World-frame joint positions, shape ``(n_joints, n_dims)``.
-    segment_masses : np.ndarray
-        Mass of each body segment, shape ``(n_joints,)``.
-    segment_lengths : np.ndarray
-        Length of each segment, shape ``(n_joints,)``.
+    kinematics : ZTCFSegmentKinematics
+        Joint positions, segment masses, and segment lengths (one row per joint).
     gravity_acceleration : float
         Scalar gravitational acceleration (default 9.80665 m/s²).
 
@@ -190,6 +193,9 @@ def compute_ztcf_forces(
     ZTCFResult
         Container with joint forces and accelerations.
     """
+    joint_positions = kinematics.joint_positions
+    segment_masses = kinematics.segment_masses
+    segment_lengths = kinematics.segment_lengths
     _validate_force_inputs(joint_positions, segment_masses, segment_lengths)
 
     n_joints = int(np.asarray(joint_positions).shape[0])

@@ -14,6 +14,7 @@ import numpy as np
 import pytest
 from src.shared.python.biomechanics.ztcf import (
     ZTCFResult,
+    ZTCFSegmentKinematics,
     compute_force_delta,
     compute_ztcf_accelerations,
     compute_ztcf_forces,
@@ -210,9 +211,11 @@ class TestComputeZTCFForces:
             coriolis_vector=np.zeros(2),
             gravity_vector=np.zeros(2),
             friction_vector=np.zeros(2),
-            joint_positions=np.array([[0.0, 0.0], [1.0, 0.0]]),
-            segment_masses=np.array([1.0, 1.0]),
-            segment_lengths=np.array([1.0, 1.0]),
+            kinematics=ZTCFSegmentKinematics(
+                joint_positions=np.array([[0.0, 0.0], [1.0, 0.0]]),
+                segment_masses=np.array([1.0, 1.0]),
+                segment_lengths=np.array([1.0, 1.0]),
+            ),
             gravity_acceleration=9.80665,
             allow_simplified=True,
         )
@@ -226,9 +229,11 @@ class TestComputeZTCFForces:
             coriolis_vector=np.zeros(2),
             gravity_vector=np.zeros(2),
             friction_vector=np.zeros(2),
-            joint_positions=np.array([[0.0, 0.0], [1.0, 0.0]]),
-            segment_masses=np.array([1.0, 1.0]),
-            segment_lengths=np.array([1.0, 1.0]),
+            kinematics=ZTCFSegmentKinematics(
+                joint_positions=np.array([[0.0, 0.0], [1.0, 0.0]]),
+                segment_masses=np.array([1.0, 1.0]),
+                segment_lengths=np.array([1.0, 1.0]),
+            ),
             gravity_acceleration=0.0,
             allow_simplified=True,
         )
@@ -241,9 +246,11 @@ class TestComputeZTCFForces:
             coriolis_vector=np.array([0.5, 0.3]),
             gravity_vector=np.array([9.80665, 4.9]),
             friction_vector=np.array([0.1, 0.1]),
-            joint_positions=np.array([[0.0, 0.0], [1.0, 0.0]]),
-            segment_masses=np.array([5.0, 3.0]),
-            segment_lengths=np.array([0.4, 0.35]),
+            kinematics=ZTCFSegmentKinematics(
+                joint_positions=np.array([[0.0, 0.0], [1.0, 0.0]]),
+                segment_masses=np.array([5.0, 3.0]),
+                segment_lengths=np.array([0.4, 0.35]),
+            ),
             gravity_acceleration=9.80665,
             allow_simplified=True,
         )
@@ -275,11 +282,13 @@ class TestComputeZTCFForces:
             coriolis_vector=np.zeros(1),
             gravity_vector=gravity_vector,
             friction_vector=np.zeros(1),
-            joint_positions=np.array(
-                [[length * np.sin(theta), -length * np.cos(theta)]]
+            kinematics=ZTCFSegmentKinematics(
+                joint_positions=np.array(
+                    [[length * np.sin(theta), -length * np.cos(theta)]]
+                ),
+                segment_masses=np.array([m]),
+                segment_lengths=np.array([length]),
             ),
-            segment_masses=np.array([m]),
-            segment_lengths=np.array([length]),
             gravity_acceleration=g,
         )
 
@@ -303,9 +312,11 @@ class TestComputeZTCFForces:
                 coriolis_vector=np.zeros(2),
                 gravity_vector=np.zeros(2),
                 friction_vector=np.zeros(2),
-                joint_positions=np.array([[0.0, 0.0], [1.0, 0.0]]),
-                segment_masses=np.array([1.0, 1.0]),
-                segment_lengths=np.array([1.0, 0.8]),
+                kinematics=ZTCFSegmentKinematics(
+                    joint_positions=np.array([[0.0, 0.0], [1.0, 0.0]]),
+                    segment_masses=np.array([1.0, 1.0]),
+                    segment_lengths=np.array([1.0, 0.8]),
+                ),
                 gravity_acceleration=9.80665,
             )
 
@@ -323,9 +334,11 @@ class TestComputeZTCFForces:
             coriolis_vector=np.zeros(2),
             gravity_vector=gravity_vector,
             friction_vector=np.zeros(2),
-            joint_positions=np.array([[0.0, 0.0], [l1, 0.0]]),
-            segment_masses=np.array([m1, m2]),
-            segment_lengths=np.array([l1, l2]),
+            kinematics=ZTCFSegmentKinematics(
+                joint_positions=np.array([[0.0, 0.0], [l1, 0.0]]),
+                segment_masses=np.array([m1, m2]),
+                segment_lengths=np.array([l1, l2]),
+            ),
             gravity_acceleration=9.80665,
             allow_simplified=True,
         )
