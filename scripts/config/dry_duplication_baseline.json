@@ -1194,7 +1194,7 @@
       "issue": "#14939",
       "max_occurrences": 2,
       "owner": "@core",
-      "reason": "Tools child-copy blocks editing sample_tools; agent_control uses ai.not_implemented_payload"
+      "reason": "Tools child-copy blocks editing sample_tools; shared require() window at ai/not_implemented_payload.py:20-25 and ai/sample_tools.py:70-75 after move from core/"
     },
     "37def1ce08fc1996151bd919341f434a18acaed6b4b58e28119e6fd2d5149425": 2,
     "37e15114f1fa6b6724303773befebccf25627bb41f5f5cebb0a2cfdcc870345f": 2,
