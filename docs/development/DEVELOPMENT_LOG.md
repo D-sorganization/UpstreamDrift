@@ -885,6 +885,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14928 · Align Realtime Shadow-Ledger Sunset_Date With Q4 Baseline and Validate Against UTC Date (#14928, #12046)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14928
+- **Branch:** merged via #14931
+- **PR:** #14931
+- **Paths:** see #14931
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`a3e2f0f1`; collated from changes/14928-realtime-shadow-sunset.md)
+- **Summary:** Align realtime shadow-ledger sunset_date with Q4 baseline and validate against UTC date (#14928, #12046)
+- **Next step:** Shipped in PR #14931.
+
+### DL-#12878 · Explorer Contract: Engine-Tagged Playback Archives and Per-Engine MP4 Distinctness Test (#12878 Workstream C)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12878
+- **Branch:** merged via #14921
+- **PR:** #14921
+- **Paths:** see #14921
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`f6c43790`; collated from changes/12878-explorer-contract-engine-tagged-playback.md)
+- **Summary:** Explorer contract: engine-tagged playback archives and per-engine MP4 distinctness test (#12878 workstream C)
+- **Next step:** Shipped in PR #14921.
+
 ### DL-#14905 · Preserve #14733 Proposal Durable Change-History Evidence Across Normal Change-Fragment Collation and Log Archival
 
 - **State:** shipped
