@@ -192,7 +192,8 @@ describe('useSimulation connection status (#7435)', () => {
     }
 
     static last(): ControllableMockWebSocket {
-      return ControllableMockWebSocket.instances.at(-1)!;
+      const instances = ControllableMockWebSocket.instances;
+      return instances[instances.length - 1];
     }
   }
 
