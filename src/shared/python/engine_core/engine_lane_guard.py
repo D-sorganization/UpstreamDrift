@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import json
 import os
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+import defusedxml.ElementTree as ET  # type: ignore[import-untyped]
 
 KNOWN_ENGINES = frozenset(
     {
