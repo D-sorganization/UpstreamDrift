@@ -9,6 +9,7 @@ if not hasattr(subprocess, "CREATE_NO_WINDOW"):
 
 import os  # noqa: E402  # noqa: E402
 from pathlib import Path, PureWindowsPath  # noqa: E402
+from typing import Any  # noqa: E402
 from unittest.mock import MagicMock, mock_open, patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -30,6 +31,15 @@ _VALIDATE_SCRIPT = "src.launchers.launcher_process_manager.validate_script_path"
 def manager() -> ProcessManager:
     with patch.object(Path, "mkdir"), patch.object(Path, "exists", return_value=False):
         return ProcessManager(repo_root=PureWindowsPath("/fake/repo"))  # type: ignore[arg-type]
+
+
+@pytest.fixture(autouse=True)
+def _suppress_managed_exit_waiters() -> Any:
+    with (
+        patch.object(ProcessManager, "_start_exit_waiter"),
+        patch.object(ProcessManager, "_schedule_running_confirmation"),
+    ):
+        yield
 
 
 def test_init_log_file_truncates_if_large() -> None:
@@ -553,14 +563,14 @@ def test_launch_module_in_wsl_oserror(mock_popen, manager) -> None:
 def test_cleanup_processes_fallback(mock_kill, manager) -> None:
     mock_proc = MagicMock()
     mock_proc.poll.return_value = None
-    mock_proc.wait.side_effect = __import__("subprocess").TimeoutExpired(
-        cmd="", timeout=5
-    )
+    timeout = __import__("subprocess").TimeoutExpired(cmd="", timeout=5)
+    mock_proc.wait.side_effect = [timeout, timeout, 0]
 
-    manager.running_processes = {"proc": mock_proc}
+    manager.running_processes["proc"] = mock_proc
     mock_kill.return_value = False  # Trigger fallback
 
     manager.cleanup_processes()
+    mock_kill.assert_called_once_with(mock_proc.pid)
     mock_proc.terminate.assert_called_once()
     mock_proc.kill.assert_called_once()
     assert len(manager.running_processes) == 0

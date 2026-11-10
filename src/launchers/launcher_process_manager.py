@@ -588,7 +588,12 @@ class ProcessManager:
 
     def _start_exit_waiter(self, managed: ManagedProcess) -> None:
         def _wait() -> None:
-            return_code = managed.process.wait()
+            poll = managed.process.poll()
+            if isinstance(poll, int):
+                return_code = poll
+            else:
+                waited = managed.process.wait()
+                return_code = waited if isinstance(waited, int) else 1
             with self._process_lock:
                 current = self._process_registry.get(managed.id)
                 if current is None:
@@ -684,8 +689,9 @@ class ProcessManager:
         except (RuntimeError, ValueError, OSError) as e:
             logger.debug("Output stream ended for %s: %s", name, e)
 
-        return_code = process.poll()
-        if return_code is not None:
+        poll = process.poll()
+        return_code = poll if isinstance(poll, int) else process.wait()
+        if isinstance(return_code, int):
             self._emit_output(name, f"[exited with code {return_code}]")
 
     def launch_script_with_args(
