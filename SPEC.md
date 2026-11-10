@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-10 | #14930 | NSX salvage tracker: unit receipts for merged NSX-22/NSX-24 rows on main (#13604) |
 | 2026-11-10 | #14933 | Redact fleet host and home literals batch 4 recovery |
 | 2026-11-10 | #14926 | UD docs and CI contract tests reaffirm PR size is advisory only (Dieter 2026-11-06) |
 | 2026-11-10 | #14925 | NSX-04 verification status doc plus registry inventory contract test |

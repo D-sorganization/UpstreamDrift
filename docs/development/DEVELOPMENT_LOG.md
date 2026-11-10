@@ -885,6 +885,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#13604 · NSX Salvage Tracker: Unit Receipts for Merged NSX-22/NSX-24 Rows on Main (#13604)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13604
+- **Branch:** merged via #14930
+- **PR:** #14930
+- **Paths:** see #14930
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`2d4fde75`; collated from changes/13604-nsx-salvage-tracker-receipts.md)
+- **Summary:** NSX salvage tracker: unit receipts for merged NSX-22/NSX-24 rows on main (#13604)
+- **Next step:** Shipped in PR #14930.
+
 ### DL-#14860 · Redact Fleet Host and Home Literals Batch 4 Recovery
 
 - **State:** shipped
