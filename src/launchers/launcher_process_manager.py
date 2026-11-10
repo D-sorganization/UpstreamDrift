@@ -644,13 +644,23 @@ class ProcessManager:
         managed = self._register_process(name, process, kind=ProcessKind.DOCKER)
         if managed is None:
             return
-        t = threading.Thread(
+        self._start_output_stream_thread(
+            managed.slot_name, process, managed.id
+        )
+
+    def _start_output_stream_thread(
+        self,
+        slot_name: str,
+        process: subprocess.Popen[bytes],
+        managed_id: str,
+    ) -> None:
+        thread = threading.Thread(
             target=self._stream_output,
-            args=(managed.slot_name, process, managed.id),
+            args=(slot_name, process, managed_id),
             daemon=True,
         )
-        t.start()
-        self._output_threads[managed.slot_name] = t
+        thread.start()
+        self._output_threads[slot_name] = thread
 
     def _stream_output(
         self, name: str, process: subprocess.Popen[bytes], managed_id: str | None = None
@@ -790,13 +800,9 @@ class ProcessManager:
             managed = self._register_process(name, process, kind=ProcessKind.LOCAL)
             if managed is None:
                 return process
-            t = threading.Thread(
-                target=self._stream_output,
-                args=(managed.slot_name, process, managed.id),
-                daemon=True,
+            self._start_output_stream_thread(
+                managed.slot_name, process, managed.id
             )
-            t.start()
-            self._output_threads[managed.slot_name] = t
 
         _assign_to_job(process)
         logger.info(f"Launched {name} (PID: {process.pid})")
