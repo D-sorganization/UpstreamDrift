@@ -148,7 +148,9 @@ export function useSimulation(engineType: string) {
   const wsRef = useRef<WebSocket | null>(null);
   const runIdSeqRef = useRef(0);
   const lifecycleRef = useRef(lifecycle);
-  lifecycleRef.current = lifecycle;
+  useEffect(() => {
+    lifecycleRef.current = lifecycle;
+  }, [lifecycle]);
   // Track if component is mounted to prevent state updates after unmount
   const isMountedRef = useRef(true);
   // #8077: guards the one-shot re-handshake after a launcher-guard rejection.
