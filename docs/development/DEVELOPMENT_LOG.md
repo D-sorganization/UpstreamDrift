@@ -885,6 +885,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14947 · Add Directory-Based Suite Marker Inference, Opt-Out Marker, Gate Selectability Summary, and Audit Utility (Part of #14947, Part Of #14934)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14947
+- **Branch:** agy/14947-suite-marker-reach
+- **PR:** #14980
+- **Paths:** see #14980
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`a002ed00`; collated from changes/14947-suite-marker-reach.md)
+- **Summary:** Add directory-based suite marker inference, opt-out marker, gate selectability summary, and audit utility (Part of #14947, Part of #14934)
+- **Next step:** Shipped in PR #14980.
+
 ### DL-#14941 · Workspace Synchronous Optimization Returns Explicit Synthetic Placeholder; RECEIPT Registration Refused for Synthetic Results
 
 - **State:** shipped
