@@ -12,7 +12,7 @@ Features:
     - Simulation control
 
 Example:
-    >>> from src.shared.python.ai.tools.agent_control import AgentController
+    >>> from shared.python.ai.tools.agent_control import AgentController
     >>> controller = AgentController()
     >>> controller.start_engine("mujoco")
     >>> controller.load_model("humanoid_golf")
