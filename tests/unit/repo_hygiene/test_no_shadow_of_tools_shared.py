@@ -220,6 +220,13 @@ def test_ledger_is_well_formed() -> None:
     _load_ledger()
 
 
+def test_realtime_shadow_ledger_stays_tied_to_issue_12046() -> None:
+    """Interim #12046: extend sunset while publish/subscribe APIs remain UD-only."""
+    entry = _load_ledger()["realtime"]
+    assert entry["tracking_issue"] == 12046
+    assert date.fromisoformat(entry["sunset_date"]) >= date.today()
+
+
 def test_load_ledger_rejects_expired_sunset_date(tmp_path: Path) -> None:
     """Regression UD#5627: an expired sunset_date must fail, not pass silently.
 

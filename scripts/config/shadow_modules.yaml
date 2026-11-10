@@ -114,7 +114,7 @@ shadows:
   # place; the resolution (port or ADR split ruling) is tracked in #12046.
   realtime:
     tracking_issue: 12046
-    sunset_date: "2026-11-09"
+    sunset_date: "2026-12-10"
 
   # ── ADR-0046 Stage 1 canonical launch-monitor layer — CLEARED 2026-09-02 ──
   #
