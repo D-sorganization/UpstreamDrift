@@ -1059,6 +1059,9 @@ jobs:
       - name: Suite Marker Ratchet
         run: python3 scripts/ci/check_suite_marker_ratchet.py
 
+      - name: Suite Marker Reach Gate (issue #14947)
+        run: python3 scripts/ci/check_suite_marker_reach.py
+
       - name: Rust Parity / Wheel Import Gate Ratchet
         run: python3 scripts/ci/check_rust_parity_wheel_gates.py
 
@@ -1301,6 +1304,7 @@ jobs:
           REQUIRE_VENDORED_FALLBACK: "1"
           CI_TIER: ${{ needs.changed-paths.outputs.tier }}
           UD_WRITE_SELECTABILITY_SUMMARY: "GITHUB_STEP_SUMMARY"
+          UD_AUTO_MARK_BY_DIRECTORY: "1"
         run: |
           set +e
           pytest_targets=()
@@ -1351,6 +1355,9 @@ jobs:
             exit 0
           fi
           exit "$pytest_exit_code"
+      - name: Suite Marker Reach Summary (issue #14947)
+        if: always()
+        run: python3 scripts/ci/check_suite_marker_reach.py >> "$GITHUB_STEP_SUMMARY"
 
   publication-quality:
     name: publication-quality
