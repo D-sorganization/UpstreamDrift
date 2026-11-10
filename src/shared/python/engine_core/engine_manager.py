@@ -206,6 +206,7 @@ class EngineManager(ContractChecker):
 
         self._pendulum_model_dir: Path | None = None
         self._loaded_engines: dict[EngineType, PhysicsEngine] = {}
+        self._last_engine_errors: dict[EngineType, str] = {}
 
     def get_active_physics_engine(
         self, engine_type: EngineType | None = None
@@ -237,18 +238,37 @@ class EngineManager(ContractChecker):
             logger.error(f"Unknown engine type: {engine_type}")
             return False
 
-        if self.engine_status[engine_type] != EngineStatus.AVAILABLE:
-            logger.error(f"Engine {engine_type} is not available")
+        status = self.engine_status[engine_type]
+        if status == EngineStatus.LOADED:
+            cached = self._loaded_engines.get(engine_type)
+            if cached is None:
+                logger.error(
+                    "Engine %s marked loaded but instance missing", engine_type
+                )
+                self.engine_status[engine_type] = EngineStatus.AVAILABLE
+                return False
+            self.active_physics_engine = cached
+            self.current_engine = engine_type
+            self._last_engine_errors.pop(engine_type, None)
+            logger.info("Reactivated loaded engine: %s", engine_type.value)
+            return True
+
+        if status not in (EngineStatus.AVAILABLE, EngineStatus.ERROR):
+            logger.error(
+                f"Engine {engine_type} is not available (status={status.value})"
+            )
             return False
 
         try:
             self._load_engine(engine_type)
             self.current_engine = engine_type
+            self._last_engine_errors.pop(engine_type, None)
             logger.info(f"Successfully switched to engine: {engine_type.value}")
             return True
         except GolfModelingError as e:
             logger.error(f"Failed to switch to engine {engine_type}: {e}")
             self.engine_status[engine_type] = EngineStatus.ERROR
+            self._last_engine_errors[engine_type] = str(e)
             return False
 
     @staticmethod
@@ -377,17 +397,20 @@ class EngineManager(ContractChecker):
             self._loaded_engines[engine_type] = engine
 
             self.engine_status[engine_type] = EngineStatus.LOADED
+            self._last_engine_errors.pop(engine_type, None)
             logger.info(
                 "engine_loaded_successfully engine=%s status=loaded",
                 engine_type.value,
             )
             return engine
 
-        except GolfModelingError:
+        except GolfModelingError as e:
             self.engine_status[engine_type] = EngineStatus.ERROR
+            self._last_engine_errors[engine_type] = str(e)
             raise
         except (ImportError, OSError, RuntimeError, ValueError, TypeError) as e:
             self.engine_status[engine_type] = EngineStatus.ERROR
+            self._last_engine_errors[engine_type] = str(e)
             logger.error(
                 "engine_load_failed engine=%s error=%s",
                 engine_type.value,
@@ -408,6 +431,12 @@ class EngineManager(ContractChecker):
                 logger.warning(
                     "active_engine_shutdown_failed error=%s", e, exc_info=True
                 )
+
+        unloaded_type = self.current_engine
+        if unloaded_type is not None:
+            self._loaded_engines.pop(unloaded_type, None)
+            if self.engine_status.get(unloaded_type) == EngineStatus.LOADED:
+                self.engine_status[unloaded_type] = EngineStatus.AVAILABLE
 
         self.active_physics_engine = None
         self.current_engine = None
