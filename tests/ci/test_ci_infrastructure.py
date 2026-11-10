@@ -1082,7 +1082,6 @@ class TestCIEnvironmentCompatibility:
         # lighthouse-mobile: informational scores, PR-only (#14698).
         not_gating = {
             "quality-gate",
-            "matlab-tests",
             "arduino-build",
             "parity-smoke",
             "lighthouse-mobile",
