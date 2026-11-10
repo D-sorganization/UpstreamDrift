@@ -28,7 +28,12 @@ if not isinstance(getattr(osim, "__file__", None), str) or not hasattr(osim, "Mo
 mujoco = pytest.importorskip("mujoco")
 sys.modules.pop("pinocchio", None)
 sys.modules.pop("pinocchio.casadi", None)
-pinocchio = pytest.importorskip("pinocchio")
+try:
+    import pinocchio  # noqa: PLC0415
+except (ImportError, ModuleNotFoundError, NameError) as exc:
+    # A broken partial import leaves pinocchio_pywrap_default undefined; skip
+    # instead of aborting adapter-core collection (#14973).
+    pytest.skip(f"pinocchio unavailable: {exc}", allow_module_level=True)
 
 from src.engines.physics_engines.opensim.python import (  # noqa: E402
     opensim_physics_engine as engine_module,
