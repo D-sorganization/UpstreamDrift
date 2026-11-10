@@ -333,6 +333,7 @@ def test_checked_in_architecture_budget_baseline_matches_repository() -> None:
     )
 
 
+@pytest.mark.unit
 def test_resolve_reference_date_precedence(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -348,6 +349,7 @@ def test_resolve_reference_date_precedence(
     )
 
 
+@pytest.mark.unit
 def test_architecture_deterministic_expiry_and_pre_expiry_report() -> None:
     """Evaluation uses reference_date to determine active vs expired and pre-expiry window."""
     cfg = {
@@ -395,6 +397,7 @@ def test_architecture_deterministic_expiry_and_pre_expiry_report() -> None:
     )
 
 
+@pytest.mark.unit
 def test_main_with_as_of_and_expiring_within_days(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:

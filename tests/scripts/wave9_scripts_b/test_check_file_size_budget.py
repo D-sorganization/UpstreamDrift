@@ -266,6 +266,7 @@ def test_main_respects_configured_exception_limit(
     assert mod.main() == 0
 
 
+@pytest.mark.unit
 def test_file_size_deterministic_expiry_and_pre_expiry_report() -> None:
     """Evaluation uses reference_date to determine active vs expired and pre-expiry window."""
     cfg = {
@@ -304,6 +305,7 @@ def test_file_size_deterministic_expiry_and_pre_expiry_report() -> None:
     )
 
 
+@pytest.mark.unit
 def test_main_with_as_of_and_expiring_file_size(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
