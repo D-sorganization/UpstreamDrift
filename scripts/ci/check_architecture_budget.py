@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import inspect
 import json
 import logging
 import os
@@ -295,6 +296,24 @@ def _exception_is_active(
     return ref <= date.fromisoformat(str(expires_on))
 
 
+def _evaluate_exception_is_active(fn: Any, exc: dict[str, Any], ref_date: date) -> bool:
+    """Evaluate whether an exception is active, honoring legacy 1-arg patches."""
+    try:
+        sig = inspect.signature(fn)
+        if "reference_date" in sig.parameters or any(
+            p.kind in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD)
+            for p in sig.parameters.values()
+        ):
+            return bool(fn(exc, reference_date=ref_date))
+        return bool(fn(exc))
+    except (TypeError, ValueError):
+        pass
+    try:
+        return bool(fn(exc, reference_date=ref_date))
+    except TypeError:
+        return bool(fn(exc))
+
+
 def _exception_key(exc: dict[str, Any]) -> tuple[str, str, str]:
     return (
         str(exc.get("path", "")).strip(),
@@ -333,7 +352,7 @@ def _collect_active_exceptions(
             invalid.append(f"Exception missing linked issue in reason: {path}:{symbol}")
             continue
         try:
-            if _exception_is_active(raw_exc, reference_date=ref_date):
+            if _evaluate_exception_is_active(_exception_is_active, raw_exc, ref_date):
                 active.add((path, symbol, rule))
             else:
                 invalid.append(

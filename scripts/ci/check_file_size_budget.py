@@ -17,6 +17,7 @@ if str(_REPO_ROOT) not in sys.path:
 
 from scripts.ci.check_architecture_budget import (  # noqa: E402
     ExpiringBudgetException as ExpiringFileSizeException,
+    _evaluate_exception_is_active,
     collect_expiring_exceptions,
     resolve_reference_date,
 )
@@ -134,7 +135,7 @@ def _collect_active_exceptions(
             )
             continue
         try:
-            if _exception_is_active(exc, reference_date=ref_date):
+            if _evaluate_exception_is_active(_exception_is_active, exc, ref_date):
                 active_exceptions[path] = exc
             else:
                 invalid_exceptions.append(
