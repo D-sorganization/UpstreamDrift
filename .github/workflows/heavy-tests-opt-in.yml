@@ -25,6 +25,7 @@ on:
             "mujoco",
             "local_embeddings",
             "coverage",
+            "auto-mark-dry-run",
           ]
       python_version:
         description: "Python version to test with"
@@ -478,3 +479,30 @@ jobs:
           name: coverage-report-${{ github.run_id }}
           path: coverage.json
           retention-days: 14
+
+  suite-marker-auto-mark-dry-run:
+    needs: pick-runner
+    if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && (inputs.engine == 'all' || inputs.engine == 'auto-mark-dry-run')) }}
+    name: Suite Marker Auto-Mark Full Migration Dry-Run (issue #14947)
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 30
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - name: Run full auto-marked dry-run
+        shell: bash
+        env:
+          UD_AUTO_MARK_BY_DIRECTORY: "1"
+          UD_AUTO_MARK_INCLUDE_BASELINE: "1"
+        run: |
+          set +e
+          python -m pytest tests/unit -m unit --continue-on-collection-errors || true
+      - name: Generate Failure Rollup Summary
+        if: always()
+        shell: bash
+        run: |
+          echo "## Suite Marker Auto-Mark Migration Dry-Run Rollup" >> "$GITHUB_STEP_SUMMARY"
+          python3 scripts/ci/check_suite_marker_reach.py >> "$GITHUB_STEP_SUMMARY" 2>&1 || true

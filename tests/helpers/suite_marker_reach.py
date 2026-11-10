@@ -8,7 +8,11 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     import pytest
 
-from tests.support.suite_markers import item_has_suite_marker
+from tests.support.suite_markers import (
+    item_has_suite_marker,
+    load_baseline_nodeids,
+    normalize_nodeid,
+)
 
 DIRECTORY_SUITE_MARKERS: tuple[tuple[str, str], ...] = (
     ("tests/unit/", "unit"),
@@ -17,6 +21,7 @@ DIRECTORY_SUITE_MARKERS: tuple[tuple[str, str], ...] = (
 
 OPT_OUT_MARKER: str = "no_auto_suite_mark"
 AUTO_MARK_ENV_VAR: str = "UD_AUTO_MARK_BY_DIRECTORY"
+AUTO_MARK_INCLUDE_BASELINE_ENV_VAR: str = "UD_AUTO_MARK_INCLUDE_BASELINE"
 
 
 def infer_directory_suite_marker(nodeid_or_path: str) -> str | None:
@@ -31,7 +36,23 @@ def infer_directory_suite_marker(nodeid_or_path: str) -> str | None:
 def _is_auto_mark_enabled(enabled: bool | None = None) -> bool:
     if enabled is not None:
         return enabled
-    return os.environ.get(AUTO_MARK_ENV_VAR, "").strip().lower() in {
+    val = os.environ.get(AUTO_MARK_ENV_VAR, "").strip().lower()
+    return val in {
+        "1",
+        "true",
+        "yes",
+        "on",
+        "new",
+    }
+
+
+def _should_include_baseline(include_baseline: bool | None = None) -> bool:
+    if include_baseline is not None:
+        return include_baseline
+    mode = os.environ.get(AUTO_MARK_ENV_VAR, "").strip().lower()
+    if mode == "new":
+        return False
+    return os.environ.get(AUTO_MARK_INCLUDE_BASELINE_ENV_VAR, "").strip().lower() in {
         "1",
         "true",
         "yes",
@@ -40,11 +61,33 @@ def _is_auto_mark_enabled(enabled: bool | None = None) -> bool:
 
 
 def apply_directory_suite_auto_markers(
-    items: list[Any], *, enabled: bool | None = None
+    items: list[Any],
+    *,
+    enabled: bool | None = None,
+    include_baseline: bool | None = None,
+    baseline_nodeids: frozenset[str] | None = None,
 ) -> int:
-    """Apply inferred suite markers to unmarked items in mapped directories."""
+    """Apply inferred suite markers to unmarked items in mapped directories.
+
+    When include_baseline is False (the default when UD_AUTO_MARK_INCLUDE_BASELINE
+    is unset or UD_AUTO_MARK_BY_DIRECTORY="new"), items recorded in
+    scripts/config/suite_marker_baseline.json are skipped. This ensures that
+    newly added unmarked tests are immediately auto-marked and run in CI, while
+    legacy unmarked debt does not fail CI.
+    """
     if not _is_auto_mark_enabled(enabled):
         return 0
+
+    inc_baseline = _should_include_baseline(include_baseline)
+    baseline: frozenset[str] = frozenset()
+    if not inc_baseline:
+        if baseline_nodeids is not None:
+            baseline = baseline_nodeids
+        else:
+            try:
+                baseline = load_baseline_nodeids()
+            except (OSError, ValueError):
+                baseline = frozenset()
 
     import pytest
 
@@ -58,6 +101,8 @@ def apply_directory_suite_auto_markers(
         ):
             continue
         nodeid = getattr(item, "nodeid", str(item))
+        if not inc_baseline and normalize_nodeid(nodeid) in baseline:
+            continue
         inferred = infer_directory_suite_marker(nodeid)
         if inferred is not None:
             marker = getattr(pytest.mark, inferred)

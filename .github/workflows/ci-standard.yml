@@ -1355,6 +1355,9 @@ jobs:
             exit 0
           fi
           exit "$pytest_exit_code"
+      - name: Suite Marker Reach Summary (issue #14947)
+        if: always()
+        run: python3 scripts/ci/check_suite_marker_reach.py >> "$GITHUB_STEP_SUMMARY"
 
   publication-quality:
     name: publication-quality

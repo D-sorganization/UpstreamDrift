@@ -88,6 +88,48 @@ def test_apply_directory_suite_auto_markers_disabled(
     assert any(m.name == "unit" for m in item.iter_markers())
 
 
+def test_apply_directory_suite_auto_markers_baseline_exclusion(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    legacy_item = _MockItem("tests/unit/legacy.py::test_legacy")
+    fresh_item = _MockItem("tests/unit/fresh.py::test_fresh")
+    fake_baseline = frozenset({"tests/unit/legacy.py::test_legacy"})
+
+    monkeypatch.setenv("UD_AUTO_MARK_BY_DIRECTORY", "1")
+    monkeypatch.delenv("UD_AUTO_MARK_INCLUDE_BASELINE", raising=False)
+
+    c = apply_directory_suite_auto_markers(
+        [legacy_item, fresh_item],
+        baseline_nodeids=fake_baseline,
+    )
+    assert c == 1
+    assert not any(m.name == "unit" for m in legacy_item.iter_markers())
+    assert any(m.name == "unit" for m in fresh_item.iter_markers())
+
+    legacy_item_2 = _MockItem("tests/unit/legacy.py::test_legacy")
+    fresh_item_2 = _MockItem("tests/unit/fresh.py::test_fresh")
+    monkeypatch.setenv("UD_AUTO_MARK_INCLUDE_BASELINE", "1")
+    c2 = apply_directory_suite_auto_markers(
+        [legacy_item_2, fresh_item_2],
+        baseline_nodeids=fake_baseline,
+    )
+    assert c2 == 2
+    assert any(m.name == "unit" for m in legacy_item_2.iter_markers())
+    assert any(m.name == "unit" for m in fresh_item_2.iter_markers())
+
+    legacy_item_3 = _MockItem("tests/unit/legacy.py::test_legacy")
+    fresh_item_3 = _MockItem("tests/unit/fresh.py::test_fresh")
+    monkeypatch.setenv("UD_AUTO_MARK_BY_DIRECTORY", "new")
+    monkeypatch.delenv("UD_AUTO_MARK_INCLUDE_BASELINE", raising=False)
+    c3 = apply_directory_suite_auto_markers(
+        [legacy_item_3, fresh_item_3],
+        baseline_nodeids=fake_baseline,
+    )
+    assert c3 == 1
+    assert not any(m.name == "unit" for m in legacy_item_3.iter_markers())
+    assert any(m.name == "unit" for m in fresh_item_3.iter_markers())
+
+
 def test_summarize_gate_selectability() -> None:
     s = summarize_gate_selectability(100, 75)
     assert (s["selected"], s["total"], s["deselected"], s["selected_pct"]) == (
@@ -199,7 +241,13 @@ def test_ci_workflow_enables_auto_mark_and_gate_check() -> None:
     content = wf_path.read_text(encoding="utf-8")
     assert 'UD_AUTO_MARK_BY_DIRECTORY: "1"' in content
     assert "scripts/ci/check_suite_marker_reach.py" in content
+    assert "Suite Marker Reach Summary (issue #14947)" in content
     assert "name: Enforce local-only workflow routing" in content
+
+    heavy_path = repo_root / ".github" / "workflows" / "heavy-tests-opt-in.yml"
+    assert heavy_path.exists()
+    heavy_content = heavy_path.read_text(encoding="utf-8")
+    assert "suite-marker-auto-mark-dry-run" in heavy_content
 
 
 def test_check_suite_marker_reach_cli(
