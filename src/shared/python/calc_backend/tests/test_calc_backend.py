@@ -80,16 +80,17 @@ class TestAppStartup:
         self,
         client: TestClient,
     ) -> Any:
-        original_routes = list(client.app.routes)
+        app: Any = client.app
+        original_routes = list(app.routes)
         try:
-            client.app.router.routes[:] = [
+            app.router.routes[:] = [
                 route
-                for route in client.app.routes
+                for route in app.routes
                 if getattr(route, "path", None) != "/api/calc/flare"
             ]
             assert not any(
                 getattr(route, "path", None) == "/api/calc/flare"
-                for route in client.app.routes
+                for route in app.routes
             )
 
             r = client.get("/api/calc/endpoints")
@@ -99,7 +100,7 @@ class TestAppStartup:
             assert "POST /api/calc/flare" in calc_list
             assert ("POST", "/api/calc/flare") in _registered_calculator_routes(client)
         finally:
-            client.app.router.routes[:] = original_routes
+            app.router.routes[:] = original_routes
 
     def test_openapi_schema_reachable(self, client: TestClient) -> Any:
         r = client.get("/openapi.json")
@@ -1019,11 +1020,15 @@ class TestSyngasWaterSanitize:
     """Direct unit tests for _sanitize and _fallback helper in syngas_water."""
 
     def test_sanitize_nan(self) -> Any:
+        from calc_backend.contracts.syngas_water import SyngasNumericalFailureError
         from calc_backend.routers.syngas_water import _sanitize
 
-        assert _sanitize(float("nan")) == 0.0
-        assert _sanitize(float("inf")) == 0.0
-        assert _sanitize(float("-inf")) == 0.0
+        with pytest.raises(SyngasNumericalFailureError):
+            _sanitize(float("nan"))
+        with pytest.raises(SyngasNumericalFailureError):
+            _sanitize(float("inf"))
+        with pytest.raises(SyngasNumericalFailureError):
+            _sanitize(float("-inf"))
         assert _sanitize(1.5) == pytest.approx(1.5)
         assert _sanitize(0) == 0.0
 

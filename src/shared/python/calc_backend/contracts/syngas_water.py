@@ -3,7 +3,36 @@
 
 from __future__ import annotations
 
+from enum import StrEnum
+
 from pydantic import BaseModel, Field
+
+
+class SyngasCalculationStatus(StrEnum):
+    """Status for syngas water calculation."""
+
+    SUCCEEDED = "SUCCEEDED"
+    NUMERICAL_FAILURE = "NUMERICAL_FAILURE"
+
+
+class SyngasNumericalFailureError(ValueError):
+    """Raised when a syngas calculation produces a non-finite numerical result."""
+
+    def __init__(
+        self,
+        field_name: str = "",
+        value: float = float("nan"),
+        message: str | None = None,
+    ) -> None:
+        self.status = SyngasCalculationStatus.NUMERICAL_FAILURE
+        self.field_name = field_name
+        self.value = value
+        default_msg = (
+            f"Calculated {field_name} is non-finite: {value}"
+            if field_name
+            else f"Non-finite value: {value}"
+        )
+        super().__init__(message or default_msg)
 
 
 class SyngasWaterRequest(BaseModel):
@@ -45,5 +74,6 @@ class CondensationRiskOut(BaseModel):
 class SyngasWaterResponse(BaseModel):
     """Response model for syngas water calculation."""
 
+    status: SyngasCalculationStatus = SyngasCalculationStatus.SUCCEEDED
     water_content: WaterContentOut
     risk_assessment: CondensationRiskOut

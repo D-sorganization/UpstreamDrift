@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import math
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from ..contracts.syngas_water import (
     CondensationRiskOut,
+    SyngasCalculationStatus,
+    SyngasNumericalFailureError,
     SyngasWaterRequest,
     SyngasWaterResponse,
     WaterContentOut,
@@ -16,53 +18,83 @@ from ..contracts.syngas_water import (
 router = APIRouter(prefix="/api/calc/syngas-water", tags=["syngas-water"])
 
 
-def _sanitize(v: float) -> float:
-    """Replace NaN / Inf with 0.0 to avoid JSON serialization errors."""
-    if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
-        return 0.0
+def _require_finite(v: float, field_name: str = "") -> float:
+    """Validate that a value is finite, raising SyngasNumericalFailureError if not."""
+    if not isinstance(v, (int, float)) or math.isnan(v) or math.isinf(v):
+        val = float(v) if isinstance(v, (int, float)) else float("nan")
+        raise SyngasNumericalFailureError(field_name, val)
     return float(v)
+
+
+_sanitize = _require_finite
 
 
 @router.post("", response_model=SyngasWaterResponse)
 def calculate_syngas_water(request: SyngasWaterRequest) -> SyngasWaterResponse:
     """Calculate water content and condensation risk in syngas."""
     try:
-        from src.shared.python.sidekick.process_calculators.syngas_water_calculator import (
-            SyngasWaterCalculator,
-            estimate_condensation_risk,
-        )
+        try:
+            from src.shared.python.sidekick.process_calculators.syngas_water_calculator import (
+                SyngasWaterCalculator,
+                estimate_condensation_risk,
+            )
 
-        calculator = SyngasWaterCalculator()
-        result = calculator.calculate_water_content(
-            request.temperature_c,
-            request.pressure_bar,
-            request.composition_key,
-            request.method,
-        )
+            calculator = SyngasWaterCalculator()
+            result = calculator.calculate_water_content(
+                request.temperature_c,
+                request.pressure_bar,
+                request.composition_key,
+                request.method,
+            )
 
-        risk = estimate_condensation_risk(request.temperature_c, request.pressure_bar)
-    except ImportError:
-        # Fallback: basic calculation without the full calculator
-        return _fallback_calculate(request)
-    return SyngasWaterResponse(
-        water_content=WaterContentOut(
-            mole_fraction_water=_sanitize(result.mole_fraction_water),
-            water_content_mg_per_nm3=_sanitize(result.water_content_mg_per_nm3),
-            water_content_ppmv=_sanitize(result.water_content_ppmv),
-            water_content_g_per_m3=_sanitize(result.water_content_g_per_m3),
-            water_content_lb_per_mmscf=_sanitize(result.water_content_lb_per_mmscf),
-            vapor_pressure_bar=_sanitize(result.vapor_pressure_bar),
-            dew_point_c=_sanitize(result.dew_point_c),
-            standard_basis=getattr(result, "standard_basis", "60F_14.696psia"),
-        ),
-        risk_assessment=CondensationRiskOut(
-            temperature_margin_c=_sanitize(float(risk["temperature_margin_c"])),
-            condensation_risk=str(risk["condensation_risk"]),
-            recommended_temperature_c=_sanitize(
-                float(risk["recommended_temperature_c"])
+            risk = estimate_condensation_risk(
+                request.temperature_c, request.pressure_bar
+            )
+        except ImportError:
+            # Fallback: basic calculation without the full calculator
+            return _fallback_calculate(request)
+
+        _s = _sanitize
+        r = result
+        return SyngasWaterResponse(
+            status=SyngasCalculationStatus.SUCCEEDED,
+            water_content=WaterContentOut(
+                mole_fraction_water=_s(r.mole_fraction_water, "mole_fraction_water"),
+                water_content_mg_per_nm3=_s(
+                    r.water_content_mg_per_nm3, "water_content_mg_per_nm3"
+                ),
+                water_content_ppmv=_s(r.water_content_ppmv, "water_content_ppmv"),
+                water_content_g_per_m3=_s(
+                    r.water_content_g_per_m3, "water_content_g_per_m3"
+                ),
+                water_content_lb_per_mmscf=_s(
+                    r.water_content_lb_per_mmscf, "water_content_lb_per_mmscf"
+                ),
+                vapor_pressure_bar=_s(r.vapor_pressure_bar, "vapor_pressure_bar"),
+                dew_point_c=_s(r.dew_point_c, "dew_point_c"),
+                standard_basis=getattr(r, "standard_basis", "60F_14.696psia"),
             ),
-        ),
-    )
+            risk_assessment=CondensationRiskOut(
+                temperature_margin_c=_s(
+                    float(risk["temperature_margin_c"]), "temperature_margin_c"
+                ),
+                condensation_risk=str(risk["condensation_risk"]),
+                recommended_temperature_c=_s(
+                    float(risk["recommended_temperature_c"]),
+                    "recommended_temperature_c",
+                ),
+            ),
+        )
+    except SyngasNumericalFailureError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "status": exc.status.value,
+                "code": "NON_FINITE_OUTPUT",
+                "field": exc.field_name,
+                "message": str(exc),
+            },
+        ) from exc
 
 
 def _fallback_calculate(request: SyngasWaterRequest) -> SyngasWaterResponse:
@@ -128,20 +160,22 @@ def _fallback_calculate(request: SyngasWaterRequest) -> SyngasWaterResponse:
     else:
         risk_str = "Low"
 
+    _s = _sanitize
     return SyngasWaterResponse(
+        status=SyngasCalculationStatus.SUCCEEDED,
         water_content=WaterContentOut(
-            mole_fraction_water=mole_frac,
-            water_content_mg_per_nm3=units.mg_nm3,
-            water_content_ppmv=units.ppmv,
-            water_content_g_per_m3=units.g_m3,
-            water_content_lb_per_mmscf=units.lb_mmscf,
-            vapor_pressure_bar=vp_bar,
-            dew_point_c=dew_c,
+            mole_fraction_water=_s(mole_frac, "mole_fraction_water"),
+            water_content_mg_per_nm3=_s(units.mg_nm3, "water_content_mg_per_nm3"),
+            water_content_ppmv=_s(units.ppmv, "water_content_ppmv"),
+            water_content_g_per_m3=_s(units.g_m3, "water_content_g_per_m3"),
+            water_content_lb_per_mmscf=_s(units.lb_mmscf, "water_content_lb_per_mmscf"),
+            vapor_pressure_bar=_s(vp_bar, "vapor_pressure_bar"),
+            dew_point_c=_s(dew_c, "dew_point_c"),
             standard_basis=units.standard_basis,
         ),
         risk_assessment=CondensationRiskOut(
-            temperature_margin_c=margin,
+            temperature_margin_c=_s(margin, "temperature_margin_c"),
             condensation_risk=risk_str,
-            recommended_temperature_c=dew_c + 15,
+            recommended_temperature_c=_s(dew_c + 15, "recommended_temperature_c"),
         ),
     )
