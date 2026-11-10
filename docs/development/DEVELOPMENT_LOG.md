@@ -898,6 +898,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14948 · Enforce Required Physics Engine Execution, JUnit Floor Checks, and JaxSim Heavy Test Lane
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14948
+- **Branch:** merged via #14977
+- **PR:** #14977
+- **Paths:** see #14977
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`b2715106`; collated from changes/14948-engine-lane-guard.md)
+- **Summary:** Enforce required physics engine execution, JUnit floor checks, and JaxSim heavy test lane
+- **Next step:** Shipped in PR #14977.
+
 ### DL-#14947 · Add Directory-Based Suite Marker Inference, Opt-Out Marker, Gate Selectability Summary, and Audit Utility (Part of #14947, Part Of #14934)
 
 - **State:** shipped
