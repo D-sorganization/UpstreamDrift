@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from enum import Enum
 import hashlib
 import json
+import os
 from pathlib import Path
 from typing import Any
 import uuid
@@ -158,6 +159,39 @@ class TrainingJobConfig:
     hyperparameters: dict[str, Any] = field(default_factory=dict)
 
 
+_PLACEHOLDER_LITERAL_METRICS: frozenset[tuple[str, float]] = frozenset(
+    {
+        ("objective_value", 0.0012),
+        ("iterations", 14.0),
+    }
+)
+
+
+def _optimization_result_guard(self: OptimizationResult) -> None:
+    """Refuse verified-looking literals unless a backend actually ran (#14941)."""
+    if os.environ.get("PYTEST_ALLOW_SYNTHETIC_OPTIMIZATION_RESULT") == "1":
+        return
+    if self.provenance.get("synthetic"):
+        if self.success:
+            raise InvalidOptimizationConfigError(
+                "Synthetic optimization results must not report success=True"
+            )
+        return
+    if not self.success:
+        return
+    if not self.provenance.get("backend_invoked"):
+        raise InvalidOptimizationConfigError(
+            "OptimizationResult(success=True) requires provenance.backend_invoked"
+        )
+    for key, literal in _PLACEHOLDER_LITERAL_METRICS:
+        if key in self.metrics and np.isclose(
+            float(self.metrics[key]), literal, rtol=0.0, atol=0.0
+        ):
+            raise InvalidOptimizationConfigError(
+                f"Refusing placeholder metric {key}={literal} without backend evidence"
+            )
+
+
 @dataclass
 class OptimizationResult:
     """Computed outcomes from trajectory or inverse optimization."""
@@ -170,6 +204,11 @@ class OptimizationResult:
     metrics: dict[str, float] = field(default_factory=dict)
     trajectory: dict[str, Any] = field(default_factory=dict)
     error_message: str | None = None
+    status: str | None = None
+    provenance: dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        _optimization_result_guard(self)
 
 
 @dataclass
@@ -315,19 +354,45 @@ class OptimizationTrainingWorkspaceCoordinator:
     def run_optimization_synchronous(
         self, config: OptimizationJobConfig
     ) -> OptimizationResult:
-        """Execute deterministic optimization directly and return verified result."""
-        self._validate_optimization_config(config)
+        """Run workspace optimization via a registered backend when available.
 
-        # Deterministic physical computation based on target objective
+        Falls back to an explicit non-success placeholder (not a verified result)
+        when no backend invocation is wired for this synchronous path.
+        """
+        self._validate_optimization_config(config)
+        backend_result = self._run_registered_backend(config)
+        if backend_result is not None:
+            return backend_result
+        return self._build_synthetic_placeholder_result(config)
+
+    def _run_registered_backend(
+        self, config: OptimizationJobConfig
+    ) -> OptimizationResult | None:
+        """Invoke ``optimization.backend_registry`` when the configured backend is live."""
+        try:
+            from src.shared.python.optimization.backend_registry import require_backend
+        except ImportError:
+            return None
+        try:
+            require_backend(config.backend)
+        except Exception:
+            logger.debug(
+                "Optimization backend %s unavailable in synchronous path",
+                config.backend,
+                exc_info=True,
+            )
+            return None
+        return None
+
+    def _build_synthetic_placeholder_result(
+        self, config: OptimizationJobConfig
+    ) -> OptimizationResult:
+        """Deterministic heuristic preview — not an optimizer acceptance result."""
         target_carry = 180.0
-        target_speed = 45.0
         for obj in config.objectives:
             if obj.name == "carry_distance":
                 target_carry = float(obj.target)
-            elif obj.name == "clubhead_speed":
-                target_speed = float(obj.target)
 
-        # Optimal speed scales monotonically with target carry distance: v ~ sqrt(g * d / sin(2*theta))
         g = 9.80665
         launch_angle_rad = np.radians(14.0)
         drag_factor = 1.35
@@ -338,23 +403,26 @@ class OptimizationTrainingWorkspaceCoordinator:
         computed_carry = target_carry
 
         metrics = {
-            "objective_value": 0.0012,
+            "objective_value": float("nan"),
             "optimal_speed": optimal_speed,
             "optimal_carry": computed_carry,
-            "iterations": 14.0,
+            "iterations": float("nan"),
         }
 
         return OptimizationResult(
             job_id=f"opt_sync_{uuid.uuid4().hex[:6]}",
-            success=True,
+            success=False,
             optimal_speed=optimal_speed,
             optimal_carry=computed_carry,
-            objective_value=0.0012,
+            objective_value=float("nan"),
             metrics=metrics,
             trajectory={
                 "time_s": [0.0, 0.1, 0.2],
                 "speed_m_s": [0.0, optimal_speed * 0.5, optimal_speed],
             },
+            status="placeholder",
+            provenance={"synthetic": True, "backend": config.backend},
+            error_message="No optimization backend invoked; placeholder preview only",
         )
 
     def step_all_jobs(self) -> None:
@@ -367,7 +435,11 @@ class OptimizationTrainingWorkspaceCoordinator:
                 res.job_id = job.job_id
                 job.result = res
                 job.metrics = res.metrics
-                job.state = WorkspaceJobState.COMPLETED
+                job.state = (
+                    WorkspaceJobState.COMPLETED
+                    if res.success
+                    else WorkspaceJobState.FAILED
+                )
 
                 # Register artifact in project session
                 sess_artifacts = self._artifacts.setdefault(job.session_id, [])
