@@ -16,6 +16,7 @@ from src.shared.python.pose_interchange.adapters.mujoco import (
     MujocoNativeState,
 )
 from src.shared.python.pose_interchange.adapters.pinocchio_reference import (
+    CanonicalV2State as PinocchioCanonicalV2State,
     PinocchioNativeState,
     PinocchioReferenceAdapter,
 )
@@ -109,7 +110,12 @@ def read_canonical_state(engine: BasePhysicsEngine) -> CanonicalState:
             f"Engine {engine_type!r} does not implement canonical-v2 state I/O yet."
         )
 
-    q, v = engine.get_state()
+    raw_state = engine.get_state()
+    if raw_state is None or not isinstance(raw_state, tuple):
+        raise TypeError(
+            f"{engine_type!r} get_state() must return (q, v); got {type(raw_state)!r}"
+        )
+    q, v = raw_state
     q_arr = np.asarray(q, dtype=np.float64)
     v_arr = np.asarray(v, dtype=np.float64)
     a_arr = _native_acceleration(engine, v_arr)
@@ -117,16 +123,19 @@ def read_canonical_state(engine: BasePhysicsEngine) -> CanonicalState:
 
     if engine_type == "mujoco":
         native = MujocoNativeState(qpos=q_arr, qvel=v_arr, qacc=a_arr, time=t)
-        v2 = MujocoAdapter().to_canonical_v2(native)
-    elif engine_type == "pinocchio":
+        return _v2_to_canonical(MujocoAdapter().to_canonical_v2(native))
+    if engine_type == "pinocchio":
         pin_native = PinocchioNativeState(q=q_arr, v=v_arr, a=a_arr)
-        v2 = PinocchioReferenceAdapter(_NullPinocchioBackend()).to_canonical_v2(
+        pin_v2 = PinocchioReferenceAdapter(_NullPinocchioBackend()).to_canonical_v2(
             pin_native
         )
-    else:  # pragma: no cover - guarded above
-        raise NotImplementedError(engine_type)  # tracked: #14936
-
-    return _v2_to_canonical(v2)
+        return CanonicalState(
+            q=pin_v2.q,
+            v=pin_v2.v,
+            a=pin_v2.a,
+            t=t,
+        )
+    raise NotImplementedError(engine_type)  # tracked: #14936  # pragma: no cover
 
 
 def apply_canonical_state(
@@ -140,20 +149,30 @@ def apply_canonical_state(
             f"Engine {engine_type!r} does not implement canonical-v2 state I/O yet."
         )
 
-    v2 = _canonical_to_v2(state)
     if engine_type == "mujoco":
-        native = MujocoAdapter().from_canonical_v2(v2)
-        engine.set_state(native.qpos, native.qvel)
+        mj_v2 = _canonical_to_v2(state)
+        mj_native = MujocoAdapter().from_canonical_v2(mj_v2)
+        engine.set_state(mj_native.qpos, mj_native.qvel)
         data = getattr(engine, "data", None)
         if data is not None and hasattr(data, "qacc"):
-            data.qacc[:] = native.qacc
+            data.qacc[:] = mj_native.qacc
     elif engine_type == "pinocchio":
-        native = PinocchioReferenceAdapter(_NullPinocchioBackend()).from_canonical_v2(
-            v2
+        if state.convention != CONVENTION_TAG_V2:
+            raise ValueError(
+                f"CanonicalState convention must be {CONVENTION_TAG_V2!r}, "
+                f"got {state.convention!r}"
+            )
+        pin_v2 = PinocchioCanonicalV2State(
+            q=np.asarray(state.q, dtype=np.float64),
+            v=np.asarray(state.v, dtype=np.float64),
+            a=np.asarray(state.a, dtype=np.float64),
         )
-        engine.set_state(native.q, native.v)
+        pin_native = PinocchioReferenceAdapter(_NullPinocchioBackend()).from_canonical_v2(
+            pin_v2
+        )
+        engine.set_state(pin_native.q, pin_native.v)
         if hasattr(engine, "a"):
-            engine.a = np.asarray(native.a, dtype=np.float64).copy()
+            engine.a = np.asarray(pin_native.a, dtype=np.float64).copy()
     else:  # pragma: no cover
         raise NotImplementedError(engine_type)  # tracked: #14936
 
