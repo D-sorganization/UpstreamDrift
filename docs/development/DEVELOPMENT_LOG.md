@@ -917,10 +917,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14948
 - **Branch:** merged via #14977
-- **PR:** #14977
+- **PR:** #14977, #14993
 - **Paths:** see #14977
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`b2715106`; collated from changes/14948-engine-lane-guard.md)
+- **Last verified:** 2026-11-10 (`84913b7f`; collated from changes/14948-engine-lane-coverage-and-matlab.md)
 - **Summary:** Enforce required physics engine execution, JUnit floor checks, and JaxSim heavy test lane
 - **Next step:** Shipped in PR #14977.
 
@@ -930,10 +930,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14947
 - **Branch:** agy/14947-suite-marker-reach
-- **PR:** #14980
+- **PR:** #14980, #14986
 - **Paths:** see #14980
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`a002ed00`; collated from changes/14947-suite-marker-reach.md)
+- **Last verified:** 2026-11-10 (`b5be04e6`; collated from changes/14947-enable-auto-mark-ci.md)
 - **Summary:** Add directory-based suite marker inference, opt-out marker, gate selectability summary, and audit utility (Part of #14947, Part of #14934)
 - **Next step:** Shipped in PR #14980.
 
