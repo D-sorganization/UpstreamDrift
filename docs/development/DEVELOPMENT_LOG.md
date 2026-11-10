@@ -885,6 +885,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14950 · Simulation WS Error Frame Handling and isPaused Reset on Stop (Part Of #14950).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14950
+- **Branch:** merged via #14958
+- **PR:** #14958
+- **Paths:** see #14958
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`8053f6e4`; collated from changes/14950-simulation-ws-error-frame-handling-and-i.md)
+- **Summary:** Simulation WS error frame handling and isPaused reset on stop (Part of #14950).
+- **Next step:** Shipped in PR #14958.
+
 ### DL-#14945 · Make Architecture and File-Size Budget Expiry Evaluation Deterministic
 
 - **State:** shipped
