@@ -6,10 +6,10 @@
  * only -- no reads of a shared mutable global.
  *
  * Alignment vs. the Gemini source: friction uses the USGA law
- * mu = v_release^2/(2 g S); the roll ODE drops the source's "(5/7) g"
- * factor for both friction and slope, matching solver._derivative()
- * (plain g for both), so a 1.83 m/s release rolls exactly S*0.3048 m
- * flat (Stimpmeter definition); restitution is 0.78 (PUTTER_FACE_COR);
+ * mu = v_release^2/(2 g S); rolling mode applies (5/7) g along the slope
+ * (solid-sphere inertia, #15010) while sliding keeps full g, matching
+ * putting_dynamics.solver._derivative; a 1.83 m/s release rolls exactly
+ * S*0.3048 m flat (Stimpmeter definition); restitution is 0.78 (PUTTER_FACE_COR);
  * the launch ratio uses the Python off-centre effective-mass model
  * instead of a Gaussian heuristic; capture uses
  * captureSpeedMps(entryOffsetM), a chord generalisation of
@@ -253,6 +253,56 @@
   }
 
   /**
+   * Ground ODE right-hand side for one integration substep (mode held fixed).
+   * @returns {{dx:number, dy:number, dvx:number, dvy:number}}
+   */
+  function _groundDeriv(
+    x, y, vx, vy, mode, mu, holeX, upPct, crossPct, coreGreen, roughnessMm, trialSeed
+  ) {
+    const speed = Math.hypot(vx, vy);
+    const grad = evalGreen(x, y, holeX, upPct, crossPct, coreGreen);
+    const chatter = sampleTurfMicroRoughness(x, y, speed, roughnessMm, trialSeed);
+    const rollG = mode === "rolling" ? 5.0 / 7.0 : 1.0;
+    const slopeScale = -rollG * GRAVITY_M_S2;
+    let ax = slopeScale * grad.dz_dx + chatter.ax;
+    let ay = slopeScale * grad.dz_dy + chatter.ay;
+    if (speed > 1e-12) {
+      const drag = -mu * GRAVITY_M_S2 / speed;
+      ax += drag * vx;
+      ay += drag * vy;
+    }
+    return { dx: vx, dy: vy, dvx: ax, dvy: ay };
+  }
+
+  /** One RK4 step at fixed ground mode (puts putting_dynamics.solver._rk4_step). */
+  function _groundRk4Step(state, dt, mode, mu, holeX, upPct, crossPct, coreGreen, roughnessMm, trialSeed) {
+    const [x, y, vx, vy] = state;
+    const k1 = _groundDeriv(x, y, vx, vy, mode, mu, holeX, upPct, crossPct, coreGreen, roughnessMm, trialSeed);
+    const k2 = _groundDeriv(
+      x + 0.5 * dt * k1.dx, y + 0.5 * dt * k1.dy,
+      vx + 0.5 * dt * k1.dvx, vy + 0.5 * dt * k1.dvy,
+      mode, mu, holeX, upPct, crossPct, coreGreen, roughnessMm, trialSeed
+    );
+    const k3 = _groundDeriv(
+      x + 0.5 * dt * k2.dx, y + 0.5 * dt * k2.dy,
+      vx + 0.5 * dt * k2.dvx, vy + 0.5 * dt * k2.dvy,
+      mode, mu, holeX, upPct, crossPct, coreGreen, roughnessMm, trialSeed
+    );
+    const k4 = _groundDeriv(
+      x + dt * k3.dx, y + dt * k3.dy,
+      vx + dt * k3.dvx, vy + dt * k3.dvy,
+      mode, mu, holeX, upPct, crossPct, coreGreen, roughnessMm, trialSeed
+    );
+    const w = dt / 6.0;
+    return [
+      x + w * (k1.dx + 2.0 * k2.dx + 2.0 * k3.dx + k4.dx),
+      y + w * (k1.dy + 2.0 * k2.dy + 2.0 * k3.dy + k4.dy),
+      vx + w * (k1.dvx + 2.0 * k2.dvx + 2.0 * k3.dvx + k4.dvx),
+      vy + w * (k1.dvy + 2.0 * k2.dvy + 2.0 * k3.dvy + k4.dvy),
+    ];
+  }
+
+  /**
    * Integrate one putt with classic RK4 from strike (or stimp-ramp
    * release) to rest, capture or lip-out; see the destructured
    * defaults below for the full option list.
@@ -295,7 +345,7 @@
     let x = 0.0, y = 0.0;
     let vx = v0 * Math.cos(launchRad), vy = v0 * Math.sin(launchRad);
     const muRoll = stimpToRollingMu(stimpFt);
-    const dt = 0.012;
+    const dt = 0.002;
     const pts = [{ x: 0, y: 0, t: 0, mode: isStimpRamp ? "rolling" : "sliding" }];
     let t = 0.0, skidDist = 0.0, holed = false, lippedOut = false;
     const targetSkidDist = isStimpRamp ? 0.0 : coreSkidDistanceM(skidTable, v0);
@@ -303,7 +353,7 @@
     let skidEnded = isStimpRamp;
     while (t < 7.5) {
       let speed = Math.hypot(vx, vy);
-      if (speed < 0.012) break;
+      if (speed < 0.005) break;
       const distMoved = Math.hypot(x, y);
       const mode = !isStimpRamp && distMoved < targetSkidDist ? "sliding" : "rolling";
       if (mode === "rolling" && !skidEnded) {
@@ -311,16 +361,15 @@
         skidEnded = true;
         vx *= rollStartSpeed / speed; vy *= rollStartSpeed / speed;
         speed = rollStartSpeed;
-        if (speed < 0.012) break;
+        if (speed < 0.005) break;
       }
       const mu = mode === "sliding" ? muRoll * _SKID_MU_MULTIPLIER : muRoll;
-      const grad = evalGreen(x, y, holeX, upPct, crossPct, coreGreen);
-      const chatter = sampleTurfMicroRoughness(x, y, speed, roughnessMm, trialSeed);
-      const ax = -mu * GRAVITY_M_S2 * (vx / speed) - GRAVITY_M_S2 * grad.dz_dx + chatter.ax;
-      const ay = -mu * GRAVITY_M_S2 * (vy / speed) - GRAVITY_M_S2 * grad.dz_dy + chatter.ay;
-      const nx = x + vx * dt + 0.5 * ax * dt * dt, ny = y + vy * dt + 0.5 * ay * dt * dt;
-      if (mode === "sliding") skidDist += Math.hypot(nx - x, ny - y);
-      x = nx; y = ny; vx += ax * dt; vy += ay * dt; t += dt;
+      const prevX = x, prevY = y;
+      [x, y, vx, vy] = _groundRk4Step(
+        [x, y, vx, vy], dt, mode, mu, holeX, upPct, crossPct, coreGreen, roughnessMm, trialSeed
+      );
+      if (mode === "sliding") skidDist += Math.hypot(x - prevX, y - prevY);
+      t += dt;
       if (!isStimpRamp && withHole) {
         const rx = x - holeX, ry = y - holeY;
         const dHole = Math.hypot(rx, ry);
@@ -397,8 +446,16 @@
     // Left offset where the path reaches the hole's distance (else at rest).
     const miss = (heading) => {
       const [r, speed] = pace(heading, holeX + pastHoleM);
-      const pt = r.pts.find((p) => p.x >= holeX);
-      return [pt ? pt.y : r.finalY, speed];
+      const ux = Math.cos(heading), uy = Math.sin(heading);
+      let px = r.finalX, py = r.finalY;
+      for (const p of r.pts) {
+        if (p.x * ux + p.y * uy >= holeX) {
+          px = p.x;
+          py = p.y;
+          break;
+        }
+      }
+      return [py * ux - (px - holeX) * uy, speed];
     };
     let heading = 0.0, prev = null;
     let [curMiss, speed] = miss(heading);
