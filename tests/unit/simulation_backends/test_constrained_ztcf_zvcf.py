@@ -106,6 +106,41 @@ def test_control_split_and_control_preserved_variant(planar) -> None:
     assert _scaled(kept - ref, np.max(np.abs(ref))) < TOL
 
 
+class _VelocityKeyedClosureProvider:
+    """Synthetic provider: stick (one row) at ``v=0``, slide (two rows) when moving."""
+
+    def __init__(self) -> None:
+        self._v = np.zeros(2, dtype=np.float64)
+
+    def mass_matrix(self, q: np.ndarray) -> np.ndarray:
+        return np.eye(2)
+
+    def bias_forces(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        self._v = np.asarray(v, dtype=np.float64).reshape(-1)
+        return np.zeros(2)
+
+    def closure_jacobian(self, q: np.ndarray) -> np.ndarray:
+        if np.linalg.norm(self._v) < 1e-12:
+            return np.array([[1.0, 0.0]])
+        return np.array([[1.0, 0.0], [0.0, 1.0]])
+
+    def closure_drift(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        self._v = np.asarray(v, dtype=np.float64).reshape(-1)
+        rows = self.closure_jacobian(q).shape[0]
+        return np.zeros(rows)
+
+
+def test_per_actuator_columns_sum_to_control_at_measured_velocity() -> None:
+    """Per-actuator split uses the same ``(q, v)`` as ``control_total`` (#15041)."""
+    provider = _VelocityKeyedClosureProvider()
+    q = np.zeros(2)
+    v = np.array([0.5, 0.2])
+    tau = np.array([1.0, -0.7])
+    report = constrained_counterfactual_report(provider, q, v, tau)
+    scale = max(1.0, float(np.max(np.abs(report.control_total))))
+    assert _scaled(report.per_actuator.sum(axis=1) - report.control_total, scale) < TOL
+
+
 def test_measured_acceleration_is_ztcf_plus_control_total(planar) -> None:
     case = planar_golfer_snapshot()
     s, golden = case.snapshot, case.golden

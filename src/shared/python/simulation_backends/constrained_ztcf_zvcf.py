@@ -216,10 +216,10 @@ def constrained_counterfactual_report(
     full, _ = constrained_acceleration_at(provider, q_arr, v_arr, tau_arr)
     control_total = full - ztcf
     columns = [
-        constrained_acceleration_at(provider, q_arr, zeros, tau_arr[i] * np.eye(n)[i])[
+        constrained_acceleration_at(provider, q_arr, v_arr, tau_arr[i] * np.eye(n)[i])[
             0
         ]
-        - zvcf
+        - ztcf
         for i in range(n)
     ]
     dependence = {
