@@ -1079,6 +1079,7 @@
 {"path": "impact_parameters/tools_gateway.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "import_aliases.py", "classification": "diverged", "package": "import_aliases.py", "spelling_only": false}
 {"path": "injury/__init__.py", "classification": "ud-only", "package": "injury", "spelling_only": false}
+{"path": "injury/heuristic_disclaimers.py", "classification": "ud-only", "package": "injury", "spelling_only": false}
 {"path": "injury/injury_risk.py", "classification": "ud-only", "package": "injury", "spelling_only": false}
 {"path": "injury/joint_stress.py", "classification": "ud-only", "package": "injury", "spelling_only": false}
 {"path": "injury/spinal_load_analysis.py", "classification": "ud-only", "package": "injury", "spelling_only": false}
