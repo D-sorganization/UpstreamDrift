@@ -34,6 +34,10 @@ from anthropometrics.estimators import (
     DempsterEstimator,
     ZatsiorskyEstimator,
 )
+from anthropometrics.estimators._base import SegmentRatios
+from anthropometrics.estimators._humanoid_expansion import (
+    expand_coarse_table_to_humanoid,
+)
 from humanoid_character_builder.core.anthropometry import (
     DE_LEVA_DATA,
     _SEGMENT_NAME_MAP,
@@ -67,10 +71,8 @@ class _PublishedRatios:
     gyration_longitudinal: float
 
 
-def _load_json_published(
-    path: Path,
-) -> tuple[dict[str, _PublishedRatios], dict[str, str]]:
-    """Return ``(class_id -> ratios, anatomical -> class_id)`` from a JSON file."""
+def _load_json_coarse_only(path: Path) -> dict[str, _PublishedRatios]:
+    """Return coarse published class ratios (pre-humanoid expansion)."""
     with path.open("r", encoding="utf-8") as fh:
         data = json.load(fh)
     classes: dict[str, _PublishedRatios] = {}
@@ -84,8 +86,43 @@ def _load_json_published(
             gyration_transverse=float(gyr["transverse"]),
             gyration_longitudinal=float(gyr["longitudinal"]),
         )
-    name_map = {str(k): str(v) for k, v in data["segment_name_map"].items()}
-    return classes, name_map
+    return classes
+
+
+def _segment_ratios_to_published(
+    classes: dict[str, SegmentRatios],
+) -> dict[str, _PublishedRatios]:
+    return {
+        class_id: _PublishedRatios(
+            mass_ratio=ratios.mass_ratio,
+            length_ratio=ratios.length_ratio,
+            com_proximal_ratio=ratios.com_proximal_ratio,
+            gyration_sagittal=ratios.gyration_sagittal,
+            gyration_transverse=ratios.gyration_transverse,
+            gyration_longitudinal=ratios.gyration_longitudinal,
+        )
+        for class_id, ratios in classes.items()
+    }
+
+
+def _load_json_published(
+    path: Path,
+) -> tuple[dict[str, _PublishedRatios], dict[str, str]]:
+    """Return expanded humanoid ratios derived from a coarse JSON table."""
+    coarse = _load_json_coarse_only(path)
+    coarse_sr = {
+        class_id: SegmentRatios(
+            mass_ratio=ratios.mass_ratio,
+            length_ratio=ratios.length_ratio,
+            com_proximal_ratio=ratios.com_proximal_ratio,
+            gyration_sagittal=ratios.gyration_sagittal,
+            gyration_transverse=ratios.gyration_transverse,
+            gyration_longitudinal=ratios.gyration_longitudinal,
+        )
+        for class_id, ratios in coarse.items()
+    }
+    expanded_sr, name_map = expand_coarse_table_to_humanoid(coarse_sr)
+    return _segment_ratios_to_published(expanded_sr), name_map
 
 
 def _de_leva_published(sex: str) -> tuple[dict[str, _PublishedRatios], dict[str, str]]:

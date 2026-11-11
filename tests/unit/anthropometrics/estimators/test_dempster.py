@@ -44,6 +44,22 @@ def test_published_thigh_mass_ratio(dempster_table: dict) -> None:
     )
 
 
+def test_dempster_thigh_mass_matches_published_table() -> None:
+    """Dempster (1955) thigh is 10 % of body mass per side (#15014)."""
+    # de Leva (1996) male reference cohort.
+    height_m = 1.741
+    mass_kg = 73.0
+    subject = DempsterEstimator().estimate(
+        subject_id="dempster-thigh",
+        height_m=height_m,
+        mass_kg=mass_kg,
+    )
+    by_name = dict(subject.segments)
+    thigh = by_name["left_thigh"]
+    assert thigh.mass_kg == pytest.approx(mass_kg * 0.10, abs=PUBLISHED_TOL)
+    assert thigh.length_m == pytest.approx(height_m * 0.245, abs=PUBLISHED_TOL)
+
+
 def test_published_forearm_com_proximal_ratio(dempster_table: dict) -> None:
     """Dempster forearm CoM proximal ratio is 0.430."""
     assert dempster_table["segments"]["forearm"]["com_proximal_ratio"] == pytest.approx(

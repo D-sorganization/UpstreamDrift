@@ -44,6 +44,18 @@ def test_published_trunk_mass_ratio(zatsiorsky_table: dict) -> None:
     )
 
 
+def test_zatsiorsky_thigh_mass_matches_published_table() -> None:
+    """Zatsiorsky-Seluyanov (1985) thigh is 14.16 % of body mass per side."""
+    mass_kg = 73.0
+    subject = ZatsiorskyEstimator().estimate(
+        subject_id="zat-thigh",
+        height_m=1.741,
+        mass_kg=mass_kg,
+    )
+    thigh = dict(subject.segments)["left_thigh"]
+    assert thigh.mass_kg == pytest.approx(mass_kg * 0.1416, abs=PUBLISHED_TOL)
+
+
 def test_published_head_mass_ratio(zatsiorsky_table: dict) -> None:
     """Zatsiorsky-Seluyanov head mass ratio is 0.0694."""
     assert zatsiorsky_table["segments"]["head"]["mass_ratio"] == pytest.approx(
