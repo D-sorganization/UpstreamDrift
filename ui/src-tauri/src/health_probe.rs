@@ -22,10 +22,7 @@ fn remaining_budget(start: Instant, budget: Duration) -> Option<Duration> {
     budget.checked_sub(start.elapsed())
 }
 
-fn set_timeouts(
-    stream: &TcpStream,
-    remaining: Duration,
-) -> Result<(), std::io::Error> {
+fn set_timeouts(stream: &TcpStream, remaining: Duration) -> Result<(), std::io::Error> {
     stream.set_read_timeout(Some(remaining))?;
     stream.set_write_timeout(Some(remaining))?;
     Ok(())
@@ -167,9 +164,7 @@ mod tests {
         write_body: impl FnOnce(u16, &mut TcpStream) + Send + 'static,
     ) -> Result<u16, String> {
         let listener = TcpListener::bind("127.0.0.1:0").map_err(|e| e.to_string())?;
-        listener
-            .set_nonblocking(true)
-            .map_err(|e| e.to_string())?;
+        listener.set_nonblocking(true).map_err(|e| e.to_string())?;
         let port = listener.local_addr().map_err(|e| e.to_string())?.port();
         let (tx, rx) = mpsc::channel();
         thread::spawn(move || {
@@ -210,18 +205,13 @@ mod tests {
             let _ = stream.write_all(response.as_bytes());
         })
         .expect("server");
-        assert_eq!(
-            probe_backend_health(port),
-            HealthProbeResult::NotReady
-        );
+        assert_eq!(probe_backend_health(port), HealthProbeResult::NotReady);
     }
 
     #[test]
     fn accepts_body_that_arrives_after_headers() {
         let port = spawn_stub_server(|port, stream| {
-            let body = format!(
-                r#"{{"status":"healthy","mode":"local","bind_port":{port}}}"#
-            );
+            let body = format!(r#"{{"status":"healthy","mode":"local","bind_port":{port}}}"#);
             let headers = format!(
                 "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
                 body.len()
@@ -237,9 +227,7 @@ mod tests {
     #[test]
     fn rejects_slow_peer_beyond_probe_budget() {
         let port = spawn_stub_server(|port, stream| {
-            let body = format!(
-                r#"{{"status":"healthy","mode":"local","bind_port":{port}}}"#
-            );
+            let body = format!(r#"{{"status":"healthy","mode":"local","bind_port":{port}}}"#);
             thread::sleep(Duration::from_millis(800));
             let response = format!(
                 "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
@@ -265,9 +253,6 @@ mod tests {
             let _ = stream.write_all(response.as_bytes());
         })
         .expect("server");
-        assert_eq!(
-            probe_backend_health(port),
-            HealthProbeResult::NotReady
-        );
+        assert_eq!(probe_backend_health(port), HealthProbeResult::NotReady);
     }
 }
