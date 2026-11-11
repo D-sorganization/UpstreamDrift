@@ -204,7 +204,10 @@ jobs:
         env:
           UPSTREAM_DRIFT_WHEEL: dist/${{ needs.build-wheel.outputs.wheel_filename }}
         run: |
-          python3 -m venv .smoke-venv
+          # setup-python provides pip; some self-hosted 3.12 builds lack working
+          # ``python3 -m venv`` ensurepip (runner exit 127 in smoke-test-wheel).
+          python3 -m pip install --disable-pip-version-check 'virtualenv>=20.29.0'
+          python3 -m virtualenv .smoke-venv
           .smoke-venv/bin/pip install "$UPSTREAM_DRIFT_WHEEL"
 
       - name: sidekick --help
