@@ -80,12 +80,12 @@ def test_add_task_and_duplicate_rejected() -> None:
         wbc.add_task(_task("a"))
 
 
-def test_add_task_sorts_by_priority_desc() -> None:
+def test_add_task_sorts_by_priority_ascending() -> None:
     wbc = WholeBodyController(FakeEngine())
     wbc.add_task(_task("low", priority=4))
     wbc.add_task(_task("high", priority=0))
     wbc.add_task(_task("mid", priority=2))
-    assert [t.name for t in wbc.tasks] == ["low", "mid", "high"]
+    assert [t.name for t in wbc.tasks] == ["high", "mid", "low"]
 
 
 def test_remove_task_returns_bool() -> None:
@@ -187,7 +187,7 @@ def test_solve_with_acceleration_limits() -> None:
 
 
 def test_solve_with_contact_jacobians_3x() -> None:
-    cfg = WBCConfig(use_hierarchical=False)
+    cfg = WBCConfig(use_hierarchical=False, floating_base_dofs=0)
     wbc = WholeBodyController(FakeEngine(), config=cfg, solver=NullspaceQPSolver())
     wbc.add_task(_task("a"))
     wbc.set_contact_jacobians([np.zeros((3, N_V))])
@@ -196,7 +196,7 @@ def test_solve_with_contact_jacobians_3x() -> None:
 
 
 def test_solve_with_contact_jacobians_6x_reduced_to_3() -> None:
-    cfg = WBCConfig(use_hierarchical=False)
+    cfg = WBCConfig(use_hierarchical=False, floating_base_dofs=0)
     wbc = WholeBodyController(FakeEngine(), config=cfg, solver=NullspaceQPSolver())
     wbc.add_task(_task("a"))
     wbc.set_contact_jacobians([np.zeros((6, N_V))])
