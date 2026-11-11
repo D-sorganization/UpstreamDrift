@@ -389,6 +389,16 @@ class TestLocalServerDiagnostics:
         assert "status" in data
         assert "ui_available" in data
 
+    def test_health_endpoint_reports_bind_port_identity(
+        self, client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Tauri health probes match ``bind_port`` to the supervised child (#14964)."""
+        monkeypatch.setenv("GOLF_PORT", "38427")
+        response = client.get("/api/health")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["bind_port"] == 38427
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

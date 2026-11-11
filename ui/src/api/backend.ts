@@ -5,15 +5,14 @@
  * retrieve diagnostic information when running inside Tauri.
  * Falls back gracefully when running in a regular browser (Vite dev).
  *
- * The canonical backend port (8000) must match:
- *   - `BACKEND_PORT` in `ui/src-tauri/src/lib.rs`
- *   - `DEFAULT_SERVER_PORT` in `src/shared/python/config/typed_settings.py`
- * See issue #6637.
+ * The default dev proxy port (8000) must match `DEFAULT_SERVER_PORT` in
+ * `src/shared/python/config/typed_settings.py` (issue #6637). In Tauri the
+ * supervised child may bind an ephemeral port; see `getBackendPort()`.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-/** Single source of truth for the Python backend port (issue #6637). */
+/** Default Python backend port for dev proxy and fallbacks (issue #6637). */
 export const BACKEND_PORT = 8000;
 
 /** Default backend base URL fallback (issue #14951). */
@@ -24,17 +23,41 @@ export const DEFAULT_BACKEND_URL =
     ? String(import.meta.env.VITE_API_BASE_URL)
     : `http://127.0.0.1:${BACKEND_PORT}`;
 
+/** Port reported by the Tauri backend supervisor after start (`null` until synced). */
+let tauriSupervisedPort: number | null = null;
+
+/** Active backend port in Tauri (supervised) or the canonical default elsewhere. */
+export function getBackendPort(): number {
+  return tauriSupervisedPort ?? BACKEND_PORT;
+}
+
+/** Apply the port from a `BackendStatus` / diagnostics payload (#14964). */
+export function applyBackendStatusPort(status: Pick<BackendStatus, 'port'>): void {
+  if (!isTauri()) {
+    return;
+  }
+  const port = status.port;
+  if (typeof port === 'number' && Number.isInteger(port) && port > 0 && port <= 65535) {
+    tauriSupervisedPort = port;
+  }
+}
+
+/** Reset supervised port — for unit tests only. */
+export function resetTauriSupervisedPortForTests(): void {
+  tauriSupervisedPort = null;
+}
+
 /**
  * Returns the base URL for the Python API.
  *
  * - In Tauri mode the UI and backend are on different origins, so we
- *   return `http://localhost:BACKEND_PORT`.
+ *   return `http://localhost:<supervised-port>`.
  * - In browser/Vite mode the dev-server proxies `/api` so we return
  *   an empty string (relative URLs work fine).
  */
 export function getApiBase(): string {
   if (isTauri()) {
-    return `http://localhost:${BACKEND_PORT}`;
+    return `http://localhost:${getBackendPort()}`;
   }
   return '';
 }
@@ -42,22 +65,31 @@ export function getApiBase(): string {
 export interface BackendStatus {
   running: boolean;
   pid: number | null;
-  port: number | null;
+  port: number;
   error: string | null;
   state?: string;
   healthy?: boolean;
   managed?: boolean;
-  stderr_tail?: string[];
+  /** Tail of supervised child stderr (`null` when none). */
+  stderr_tail?: string | null;
   last_error?: string | null;
 }
 
 /**
  * Resolves the backend base URL given an optional BackendStatus snapshot.
- *
- * If a valid positive port is present in the status, returns `http://127.0.0.1:${status.port}`.
- * Otherwise falls back to DEFAULT_BACKEND_URL.
  */
 export function resolveBackendBaseUrl(status?: Partial<BackendStatus> | null): string {
+  if (
+    status &&
+    typeof status.port === 'number' &&
+    Number.isFinite(status.port) &&
+    status.port > 0
+  ) {
+    applyBackendStatusPort({ port: status.port });
+  }
+  if (isTauri()) {
+    return getApiBase();
+  }
   if (
     status &&
     typeof status.port === 'number' &&
@@ -71,9 +103,6 @@ export function resolveBackendBaseUrl(status?: Partial<BackendStatus> | null): s
 
 /**
  * Probe /api/health against the resolved backend base URL.
- *
- * Resolves the target base URL using `resolveBackendBaseUrl(status)` (or accepts
- * an explicit URL string), and returns true if the endpoint returns HTTP 200 OK.
  */
 export async function checkHealth(
   statusOrUrl?: Partial<BackendStatus> | string | null,
@@ -105,9 +134,7 @@ export interface UseBackendAutoStartResult {
   refresh: () => Promise<void>;
 }
 
-/**
- * React hook to auto-start the backend and monitor health with dynamic port resolution.
- */
+/** React hook to auto-start the backend and monitor health with dynamic port resolution. */
 export function useBackendAutoStart(): UseBackendAutoStartResult {
   const [status, setStatus] = useState<BackendStatus | null>(null);
   const [healthy, setHealthy] = useState<boolean>(false);
@@ -154,9 +181,13 @@ export function isTauri(): boolean {
 }
 
 async function invoke<T>(cmd: string): Promise<T> {
-  // Dynamically import Tauri API only when available
   const { invoke: tauriInvoke } = await import('@tauri-apps/api/core');
   return tauriInvoke<T>(cmd);
+}
+
+function syncPortFromStatus(status: BackendStatus): BackendStatus {
+  applyBackendStatusPort(status);
+  return status;
 }
 
 /** Start the Python backend server (Tauri only). */
@@ -164,7 +195,7 @@ export async function startBackend(): Promise<BackendStatus> {
   if (!isTauri()) {
     return { running: false, pid: null, port: BACKEND_PORT, error: 'Not running in Tauri' };
   }
-  return invoke<BackendStatus>('start_backend');
+  return syncPortFromStatus(await invoke<BackendStatus>('start_backend'));
 }
 
 /** Stop the Python backend server (Tauri only). */
@@ -172,7 +203,7 @@ export async function stopBackend(): Promise<BackendStatus> {
   if (!isTauri()) {
     return { running: false, pid: null, port: BACKEND_PORT, error: 'Not running in Tauri' };
   }
-  return invoke<BackendStatus>('stop_backend');
+  return syncPortFromStatus(await invoke<BackendStatus>('stop_backend'));
 }
 
 /** Get current backend status (Tauri only). */
@@ -180,16 +211,12 @@ export async function getBackendStatus(): Promise<BackendStatus> {
   if (!isTauri()) {
     return { running: false, pid: null, port: BACKEND_PORT, error: null };
   }
-  return invoke<BackendStatus>('backend_status');
+  return syncPortFromStatus(await invoke<BackendStatus>('backend_status'));
 }
 
 /** Get comprehensive diagnostic info (Tauri only). */
 export async function getDiagnostics(): Promise<DiagnosticInfo> {
   if (!isTauri()) {
-    // In browser mode, call the backend API endpoint.
-    // NOTE: cannot use apiFetch here — fetch.ts imports getApiBase from this
-    // module, so importing apiFetch back would create a circular dependency.
-    // We build the URL via getApiBase() directly to stay Tauri-safe (#6897).
     try {
       const response = await fetch(`${getApiBase()}/api/diagnostics`);
       if (!response.ok) {
@@ -197,7 +224,6 @@ export async function getDiagnostics(): Promise<DiagnosticInfo> {
       }
       return await response.json();
     } catch (error) {
-      // Fallback if backend is not available
       return {
         backend: {
           running: false,
@@ -212,7 +238,7 @@ export async function getDiagnostics(): Promise<DiagnosticInfo> {
       };
     }
   }
-  return invoke<DiagnosticInfo>('get_diagnostics');
+  const info = await invoke<DiagnosticInfo>('get_diagnostics');
+  applyBackendStatusPort(info.backend);
+  return info;
 }
-
-

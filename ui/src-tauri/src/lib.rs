@@ -5,8 +5,10 @@ use std::time::Duration;
 use tauri::{Manager, State};
 
 mod backend_supervisor;
+mod health_probe;
 
 use backend_supervisor::{BackendState, BackendSupervisor};
+use health_probe::probe_backend_health;
 
 /// Managed state holding the Python backend server process.
 struct BackendProcess(Mutex<BackendSupervisor>);
@@ -141,45 +143,90 @@ fn find_python() -> Option<(String, String)> {
     None
 }
 
+fn lock_supervisor(
+    process: &BackendProcess,
+) -> Result<std::sync::MutexGuard<'_, BackendSupervisor>, String> {
+    process
+        .0
+        .lock()
+        .map_err(|e| e.to_string())
+}
+
+/// Poll child state while holding the mutex briefly; run HTTP health probes outside it.
+fn supervisor_refresh(process: &BackendProcess) -> Result<(), String> {
+    let probe_port = {
+        let mut guard = lock_supervisor(process)?;
+        guard.poll();
+        if matches!(guard.state, BackendState::Ready { .. }) {
+            return Ok(());
+        }
+        guard.starting_port()
+    };
+    let Some(port) = probe_port else {
+        return Ok(());
+    };
+    let probe = probe_backend_health(port);
+    let mut guard = lock_supervisor(process)?;
+    guard.apply_health_probe(probe);
+    guard.poll();
+    Ok(())
+}
+
+fn backend_is_ready(process: &BackendProcess) -> Result<bool, String> {
+    supervisor_refresh(process)?;
+    let guard = lock_supervisor(process)?;
+    Ok(matches!(guard.state, BackendState::Ready { .. }))
+}
+
+fn snapshot_backend_status(process: &BackendProcess) -> Result<BackendStatus, String> {
+    let guard = lock_supervisor(process)?;
+    Ok(backend_status_from(&guard))
+}
+
 /// Start the Python backend server.
 #[tauri::command]
 fn start_backend(state: State<'_, BackendProcess>) -> Result<BackendStatus, String> {
-    let mut guard = state.0.lock().map_err(|e| e.to_string())?;
-    guard.poll();
-    if matches!(
-        guard.state,
-        BackendState::Ready { .. } | BackendState::Starting { .. }
-    ) {
-        return Ok(backend_status_from(&guard));
-    }
-
-    let repo_root = find_repo_root().ok_or("Could not find repository root")?;
-    let (python_cmd, _) = find_python().ok_or("Python not found on PATH")?;
-    let script_path = repo_root.join("src").join("api").join("local_server.py");
-    if !script_path.exists() {
-        return Err(format!(
-            "Server script not found: {}",
-            script_path.display()
-        ));
-    }
-
-    log::info!(
-        "Starting backend: {} {} (cwd: {})",
-        python_cmd,
-        script_path.display(),
-        repo_root.display()
-    );
-
-    guard.start(&python_cmd, &script_path, &repo_root)?;
-    for _ in 0..25 {
+    {
+        let mut guard = lock_supervisor(&state)?;
         guard.poll();
-        if matches!(guard.state, BackendState::Ready { .. }) {
+        let already_running = matches!(
+            guard.state,
+            BackendState::Ready { .. } | BackendState::Starting { .. }
+        );
+        if already_running {
+            drop(guard);
+            supervisor_refresh(&state)?;
+            return snapshot_backend_status(&state);
+        }
+
+        let repo_root = find_repo_root().ok_or("Could not find repository root")?;
+        let (python_cmd, _) = find_python().ok_or("Python not found on PATH")?;
+        let script_path = repo_root.join("src").join("api").join("local_server.py");
+        if !script_path.exists() {
+            return Err(format!(
+                "Server script not found: {}",
+                script_path.display()
+            ));
+        }
+
+        log::info!(
+            "Starting backend: {} {} (cwd: {})",
+            python_cmd,
+            script_path.display(),
+            repo_root.display()
+        );
+
+        guard.start(&python_cmd, &script_path, &repo_root)?;
+    }
+
+    for _ in 0..25 {
+        if backend_is_ready(&state)? {
             break;
         }
         std::thread::sleep(Duration::from_millis(200));
     }
-    guard.poll();
-    Ok(backend_status_from(&guard))
+    supervisor_refresh(&state)?;
+    snapshot_backend_status(&state)
 }
 
 /// Kill the managed backend child if one is running. Shared by the
@@ -199,22 +246,21 @@ fn kill_backend(process: &BackendProcess) {
 #[tauri::command]
 fn stop_backend(state: State<'_, BackendProcess>) -> Result<BackendStatus, String> {
     kill_backend(&state);
-    let guard = state.0.lock().map_err(|e| e.to_string())?;
-    Ok(backend_status_from(&guard))
+    snapshot_backend_status(&state)
 }
 
 /// Get current backend status.
 #[tauri::command]
 fn backend_status(state: State<'_, BackendProcess>) -> Result<BackendStatus, String> {
-    let mut guard = state.0.lock().map_err(|e| e.to_string())?;
-    guard.poll();
-    Ok(backend_status_from(&guard))
+    supervisor_refresh(&state)?;
+    snapshot_backend_status(&state)
 }
 
 /// Get comprehensive diagnostic information.
 #[tauri::command]
 fn get_diagnostics(state: State<'_, BackendProcess>) -> Result<DiagnosticInfo, String> {
-    let backend = backend_status(state)?;
+    supervisor_refresh(&state)?;
+    let backend = snapshot_backend_status(&state)?;
     let python_info = find_python();
     let repo_root = find_repo_root();
 
