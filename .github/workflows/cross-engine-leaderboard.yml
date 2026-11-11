@@ -121,10 +121,12 @@ jobs:
           if git diff --quiet -- motion_matching/results/CROSS_ENGINE_LEADERBOARD.md; then
             echo "No changes to CROSS_ENGINE_LEADERBOARD.md"
           else
-            echo "## Cross-engine leaderboard diff" >> "$GITHUB_STEP_SUMMARY"
-            echo '```diff' >> "$GITHUB_STEP_SUMMARY"
-            git diff -- motion_matching/results/CROSS_ENGINE_LEADERBOARD.md >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            {
+              echo "## Cross-engine leaderboard diff"
+              echo '```diff'
+              git diff -- motion_matching/results/CROSS_ENGINE_LEADERBOARD.md
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload leaderboard artifact
