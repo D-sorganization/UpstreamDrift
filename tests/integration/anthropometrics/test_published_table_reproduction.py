@@ -28,6 +28,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.integration
+
 from anthropometrics import SubjectAnthropometrics
 from anthropometrics.estimators import (
     DeLevaEstimator,

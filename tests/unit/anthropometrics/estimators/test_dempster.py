@@ -13,6 +13,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from anthropometrics import Estimator, SubjectAnthropometrics
 from anthropometrics.estimators import DempsterEstimator
 from anthropometrics.estimators.from_dempster import _DEFAULT_RATIO_FILE
