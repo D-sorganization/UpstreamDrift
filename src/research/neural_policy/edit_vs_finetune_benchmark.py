@@ -96,7 +96,9 @@ def evaluate_variant(
     elif variant == "rank1_edit":
         u = np.zeros(w.shape[0])
         u[0] = 1.0
-        w_edit, _ = apply_low_rank_weight_edit(w, u, alpha=0.15, mask_rows=(0,))
+        w_edit, _ = apply_low_rank_weight_edit(
+            w, u, alpha=0.15, mask_rows=np.array([0], dtype=np.intp)
+        )
         y_eval, y_eval_h = w_edit @ train_x.T, w_edit @ heldout_x.T
         delta = np.abs(w_edit - w)
         locality = float(np.sum(delta[0, :]) / (np.sum(delta) + 1e-12))
