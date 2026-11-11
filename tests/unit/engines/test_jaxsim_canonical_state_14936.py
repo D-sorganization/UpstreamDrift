@@ -58,9 +58,7 @@ def test_set_state_clears_cached_canonical_acceleration() -> None:
     backend = _backend()
     seed = _seed_with_nonzero_acceleration()
     backend.set_canonical_state(seed)
-    np.testing.assert_allclose(
-        backend.get_canonical_state().a, seed.a, atol=1.0e-12
-    )
+    np.testing.assert_allclose(backend.get_canonical_state().a, seed.a, atol=1.0e-12)
 
     q_new = seed.q.copy()
     q_new[0] += 0.05
@@ -77,9 +75,7 @@ def test_step_clears_cached_canonical_acceleration() -> None:
     backend = _backend()
     seed = _seed_with_nonzero_acceleration()
     backend.set_canonical_state(seed)
-    np.testing.assert_allclose(
-        backend.get_canonical_state().a, seed.a, atol=1.0e-12
-    )
+    np.testing.assert_allclose(backend.get_canonical_state().a, seed.a, atol=1.0e-12)
 
     backend.step(dt=0.01)
 
