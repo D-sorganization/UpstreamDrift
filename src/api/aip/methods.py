@@ -113,9 +113,7 @@ def _probe_model_list(handler: Callable[..., Any]) -> None:
     """Self-check ``model.list``: discovery errors are returned, not raised."""
     result = handler()
     if not isinstance(result, dict):
-        raise ValueError(
-            f"model.list returned {type(result).__name__}, expected dict"
-        )
+        raise ValueError(f"model.list returned {type(result).__name__}, expected dict")
     error = result.get("error")
     if error:
         raise RuntimeError(str(error))
