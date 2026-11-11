@@ -113,6 +113,44 @@ def is_coarse_published_table(
     return _COARSE_CLASS_IDS.issubset(segment_classes.keys())
 
 
+def _partition_trunk_masses(trunk: SegmentRatios) -> tuple[float, float, float]:
+    """Return thorax/lumbar/pelvis masses carved from published trunk fraction."""
+    thorax_mass = _trunk_piece_mass(trunk.mass_ratio, "thorax")
+    lumbar_mass = _trunk_piece_mass(trunk.mass_ratio, "lumbar")
+    pelvis_mass = _trunk_piece_mass(trunk.mass_ratio, "pelvis")
+    shoulder_mass = _virtual_mass_total("shoulder")
+    hip_mass = _virtual_mass_total("hip")
+    thorax_mass -= shoulder_mass
+    pelvis_mass -= hip_mass
+    if thorax_mass <= 0 or pelvis_mass <= 0:
+        raise ValueError(
+            "trunk partition masses must stay positive after virtual carve"
+        )
+    return thorax_mass, lumbar_mass, pelvis_mass
+
+
+def _limb_class_ratios(
+    coarse_classes: Mapping[str, SegmentRatios],
+) -> dict[str, SegmentRatios]:
+    """Map published limb classes onto humanoid geometry length ratios."""
+    mapping = (
+        ("upper_arm", "upper_arm"),
+        ("forearm", "forearm"),
+        ("hand", "hand"),
+        ("thigh", "thigh"),
+        ("shin", "shank"),
+        ("foot", "foot"),
+    )
+    return {
+        humanoid_key: _scaled_ratios(
+            coarse_classes[coarse_key],
+            mass_ratio=coarse_classes[coarse_key].mass_ratio,
+            length_ratio=_GEOM[humanoid_key][0],
+        )
+        for humanoid_key, coarse_key in mapping
+    }
+
+
 def resolve_humanoid_segment_table(
     segment_classes: Mapping[str, SegmentRatios],
     segment_name_map: Mapping[str, str],
@@ -166,18 +204,7 @@ def expand_coarse_table_to_humanoid(
     if head_mass <= 0:
         raise ValueError("head mass after neck carve must stay positive")
 
-    thorax_mass = _trunk_piece_mass(trunk.mass_ratio, "thorax")
-    lumbar_mass = _trunk_piece_mass(trunk.mass_ratio, "lumbar")
-    pelvis_mass = _trunk_piece_mass(trunk.mass_ratio, "pelvis")
-
-    shoulder_mass = _virtual_mass_total("shoulder")
-    hip_mass = _virtual_mass_total("hip")
-    thorax_mass -= shoulder_mass
-    pelvis_mass -= hip_mass
-    if thorax_mass <= 0 or pelvis_mass <= 0:
-        raise ValueError(
-            "trunk partition masses must stay positive after virtual carve"
-        )
+    thorax_mass, lumbar_mass, pelvis_mass = _partition_trunk_masses(trunk)
 
     expanded: dict[str, SegmentRatios] = {
         "head": _scaled_ratios(
@@ -203,36 +230,7 @@ def expand_coarse_table_to_humanoid(
         ),
         "shoulder": _virtual_ratios("shoulder"),
         "hip": _virtual_ratios("hip"),
-        "upper_arm": _scaled_ratios(
-            coarse_classes["upper_arm"],
-            mass_ratio=coarse_classes["upper_arm"].mass_ratio,
-            length_ratio=_GEOM["upper_arm"][0],
-        ),
-        "forearm": _scaled_ratios(
-            coarse_classes["forearm"],
-            mass_ratio=coarse_classes["forearm"].mass_ratio,
-            length_ratio=_GEOM["forearm"][0],
-        ),
-        "hand": _scaled_ratios(
-            coarse_classes["hand"],
-            mass_ratio=coarse_classes["hand"].mass_ratio,
-            length_ratio=_GEOM["hand"][0],
-        ),
-        "thigh": _scaled_ratios(
-            coarse_classes["thigh"],
-            mass_ratio=coarse_classes["thigh"].mass_ratio,
-            length_ratio=_GEOM["thigh"][0],
-        ),
-        "shin": _scaled_ratios(
-            coarse_classes["shank"],
-            mass_ratio=coarse_classes["shank"].mass_ratio,
-            length_ratio=_GEOM["shin"][0],
-        ),
-        "foot": _scaled_ratios(
-            coarse_classes["foot"],
-            mass_ratio=coarse_classes["foot"].mass_ratio,
-            length_ratio=_GEOM["foot"][0],
-        ),
     }
+    expanded.update(_limb_class_ratios(coarse_classes))
 
     return expanded, dict(_SEGMENT_NAME_MAP)
