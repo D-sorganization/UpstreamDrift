@@ -44,6 +44,10 @@
   const _TYPICAL_PUTTER_HEAD_MASS_KG = 0.36;
   const _TYPICAL_PUTTER_MOI_KG_M2 = 4.5e-4;
   const _CATALOGUE_MOI_G_CM2_PER_KG_M2 = 1.0e7;
+  const _ROLLING_CAP = 2.0 / 7.0;
+  const _GROUND_RESTITUTION = 0.78;
+  const _SETTLE_APEX_M = 0.001;
+  const _TYPICAL_LOFT_DEG = 3.0;
   function assertFinite(value, name) {
     if (typeof value !== "number" || !Number.isFinite(value)) {
       throw new TypeError(name + " must be a finite number");
@@ -274,6 +278,42 @@
     return { dx: vx, dy: vy, dvx: ax, dvy: ay };
   }
 
+  function coreLoftedStrikeLaunch(vClubMps, headMassKg, ballMassKg, cor, loftDeg) {
+    const delta = (loftDeg * Math.PI) / 180.0;
+    const mRed = headMassKg * ballMassKg / (headMassKg + ballMassKg);
+    const vNormalRel = vClubMps * Math.cos(delta);
+    const impulseN = (1.0 + cor) * mRed * vNormalRel;
+    const ballNormal = impulseN / ballMassKg;
+    const uTangential = vClubMps * Math.sin(delta);
+    const ballTangential = _ROLLING_CAP * uTangential;
+    const vertical = ballNormal * Math.sin(delta) - ballTangential * Math.cos(delta);
+    return Math.max(vertical, 0.0);
+  }
+
+  function _airborneSettle(x, y, vx, vy, vz, t0, holeX, upPct, crossPct, coreGreen, pts) {
+    const dt = 0.002;
+    let t = t0;
+    let zAbs = evalGreen(x, y, holeX, upPct, crossPct, coreGreen).z;
+    while (t < 7.5) {
+      vz -= GRAVITY_M_S2 * dt;
+      x += vx * dt;
+      y += vy * dt;
+      zAbs += vz * dt;
+      t += dt;
+      if (pts) pts.push({ x, y, t, mode: "airborne" });
+      const surf = evalGreen(x, y, holeX, upPct, crossPct, coreGreen);
+      const floorVz = surf.dz_dx * vx + surf.dz_dy * vy;
+      const relVz = vz - floorVz;
+      if (zAbs <= surf.z && relVz < 0.0) {
+        const bounced = -_GROUND_RESTITUTION * relVz;
+        vz = floorVz + bounced;
+        zAbs = surf.z;
+        if ((bounced * bounced) / (2.0 * GRAVITY_M_S2) < _SETTLE_APEX_M) break;
+      }
+    }
+    return { x, y, vx, vy, t };
+  }
+
   /** One RK4 step at fixed ground mode (puts putting_dynamics.solver._rk4_step). */
   function _groundRk4Step(state, dt, mode, mu, holeX, upPct, crossPct, coreGreen, roughnessMm, trialSeed) {
     const [x, y, vx, vy] = state;
@@ -327,6 +367,21 @@
     assertRange(distFt, 0.5, 200.0, "distFt");
     assertRange(roughnessMm, 0.0, 5.0, "roughnessMm");
     const holeX = distFt * _FEET_TO_METERS, holeY = 0.0, holeR = HOLE_RADIUS_M;
+    const centred =
+      !isStimpRamp && strikeMm === 0.0 && pathErrDeg === 0.0 && faceErrDeg === 0.0;
+    const startGrad =
+      coreGreen && centred ? evalGreen(0.0, 0.0, holeX, upPct, crossPct, coreGreen) : null;
+    const useCoreHop =
+      Boolean(coreGreen) &&
+      centred &&
+      distFt >= 35.0 &&
+      startGrad !== null &&
+      startGrad.dz_dx < -0.005;
+    let vzLaunch = 0.0;
+    if (useCoreHop) {
+      const mEff = effectiveHeadMass({ headMassKg, moiKgM2, impactOffsetM: 0.0 });
+      vzLaunch = coreLoftedStrikeLaunch(vClubMps, mEff, ballMassKg, cor, _TYPICAL_LOFT_DEG);
+    }
     const v0 = isStimpRamp
       ? vClubMps
       : vClubMps *
@@ -345,9 +400,19 @@
     let x = 0.0, y = 0.0;
     let vx = v0 * Math.cos(launchRad), vy = v0 * Math.sin(launchRad);
     const muRoll = stimpToRollingMu(stimpFt);
-    const dt = 0.002;
-    const pts = [{ x: 0, y: 0, t: 0, mode: isStimpRamp ? "rolling" : "sliding" }];
+    const useCoreIntegrator = Boolean(coreGreen);
+    const dt = useCoreIntegrator ? 0.002 : 0.012;
+    const pts = [{
+      x: 0, y: 0, t: 0,
+      mode: isStimpRamp ? "rolling" : vzLaunch > 0.0 ? "airborne" : "sliding",
+    }];
     let t = 0.0, skidDist = 0.0, holed = false, lippedOut = false;
+    if (vzLaunch > 0.0) {
+      ({ x, y, vx, vy, t } = _airborneSettle(
+        x, y, vx, vy, vzLaunch, t, holeX, upPct, crossPct, coreGreen, pts
+      ));
+      pts.push({ x, y, t, mode: "sliding" });
+    }
     const targetSkidDist = isStimpRamp ? 0.0 : coreSkidDistanceM(skidTable, v0);
     const rollStartSpeed = isStimpRamp ? 0.0 : coreRollStartSpeedMps(skidTable, v0);
     let skidEnded = isStimpRamp;
@@ -365,9 +430,27 @@
       }
       const mu = mode === "sliding" ? muRoll * _SKID_MU_MULTIPLIER : muRoll;
       const prevX = x, prevY = y;
-      [x, y, vx, vy] = _groundRk4Step(
-        [x, y, vx, vy], dt, mode, mu, holeX, upPct, crossPct, coreGreen, roughnessMm, trialSeed
-      );
+      if (useCoreIntegrator) {
+        [x, y, vx, vy] = _groundRk4Step(
+          [x, y, vx, vy], dt, mode, mu, holeX, upPct, crossPct, coreGreen, roughnessMm, trialSeed
+        );
+      } else {
+        const grad = evalGreen(x, y, holeX, upPct, crossPct, coreGreen);
+        const chatter = sampleTurfMicroRoughness(x, y, speed, roughnessMm, trialSeed);
+        const rollG = mode === "rolling" ? 5.0 / 7.0 : 1.0;
+        const ax =
+          -mu * GRAVITY_M_S2 * (vx / speed) -
+          rollG * GRAVITY_M_S2 * grad.dz_dx +
+          chatter.ax;
+        const ay =
+          -mu * GRAVITY_M_S2 * (vy / speed) -
+          rollG * GRAVITY_M_S2 * grad.dz_dy +
+          chatter.ay;
+        x += vx * dt + 0.5 * ax * dt * dt;
+        y += vy * dt + 0.5 * ay * dt * dt;
+        vx += ax * dt;
+        vy += ay * dt;
+      }
       if (mode === "sliding") skidDist += Math.hypot(x - prevX, y - prevY);
       t += dt;
       if (!isStimpRamp && withHole) {
@@ -443,19 +526,20 @@
       }
       return [r, speed];
     };
-    // Left offset where the path reaches the hole's distance (else at rest).
+    // Signed left offset at the hole plane (start->hole line), like lateral_at_hole.
     const miss = (heading) => {
       const [r, speed] = pace(heading, holeX + pastHoleM);
-      const ux = Math.cos(heading), uy = Math.sin(heading);
+      const dirUx = 1.0, dirUy = 0.0;
+      const holeDist = holeX;
       let px = r.finalX, py = r.finalY;
       for (const p of r.pts) {
-        if (p.x * ux + p.y * uy >= holeX) {
+        if (p.x * dirUx + p.y * dirUy >= holeDist) {
           px = p.x;
           py = p.y;
           break;
         }
       }
-      return [py * ux - (px - holeX) * uy, speed];
+      return [(py - 0.0) * dirUx - (px - holeX) * dirUy, speed];
     };
     let heading = 0.0, prev = null;
     let [curMiss, speed] = miss(heading);

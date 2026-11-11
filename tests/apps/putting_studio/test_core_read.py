@@ -83,14 +83,7 @@ def test_studio_read_matches_the_core_read(
         PutterState.typical(1.0),
     )
     studio = _studio_read(green, dist_ft, stimp)
-    # #15010 (5/7 g on roll) leaves a <0.02% margin on the 35 ft downhill hop
-    # read where the studio port still lacks full airborne/slide parity (#14702).
-    speed_rel = 0.016 if (green, dist_ft, stimp) == (
-        "undulating_championship",
-        35.0,
-        12.0,
-    ) else 0.015
-    assert studio["clubSpeedMps"] == pytest.approx(core.putter_speed_mps, rel=speed_rel)
+    assert studio["clubSpeedMps"] == pytest.approx(core.putter_speed_mps, rel=0.015)
     assert studio["aimDeg"] == pytest.approx(math.degrees(core.heading_rad), abs=0.1)
     assert studio["holed"] is core.holed is True
     assert studio["converged"] is True
