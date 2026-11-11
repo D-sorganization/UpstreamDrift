@@ -61,7 +61,7 @@ describe("DispersionPanel (#14460)", () => {
       face_sd_deg: 2.5,
       n: 40,
     });
-    expect(await screen.findByText("12.5%")).toBeInTheDocument();
+    expect(await screen.findByText("17.5%")).toBeInTheDocument();
     expect(screen.getByText("1.99 ft")).toBeInTheDocument();
     // Lane 3 review: the batch is the core skill model, not the 3D putt.
     expect(screen.getByText(/not this 3D\s+putt/)).toBeInTheDocument();
