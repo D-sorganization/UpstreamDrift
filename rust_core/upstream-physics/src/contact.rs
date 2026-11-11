@@ -187,22 +187,23 @@ struct ImpactState {
     energy: f64,
 }
 
-fn apply_friction_impulse(
-    v_normal_scaled: &Vector3,
-    v_tangential: &Vector3,
-    t_hat: &Vector3,
-    spin_dir: &Vector3,
-    r_contact: &Vector3,
+struct FrictionImpactContext<'a> {
+    v_normal_out: &'a Vector3,
+    v_tangential: &'a Vector3,
+    t_hat: &'a Vector3,
+    spin_dir: &'a Vector3,
+    r_contact: &'a Vector3,
     spin_rate: f64,
-    friction_impulse: f64,
     mass: f64,
     inertia: f64,
-    _energy_in: f64,
-) -> ImpactState {
-    let v_out = *v_normal_scaled + (*v_tangential + *t_hat * (friction_impulse / mass));
-    let torque = r_contact.cross(&(*t_hat * friction_impulse));
-    let spin_out = spin_rate + torque.dot(spin_dir) / inertia;
-    let energy = translational_rotational_energy(mass, &v_out, inertia, spin_out);
+}
+
+fn apply_friction_impulse(ctx: &FrictionImpactContext<'_>, friction_impulse: f64) -> ImpactState {
+    let v_out =
+        *ctx.v_normal_out + (*ctx.v_tangential + *ctx.t_hat * (friction_impulse / ctx.mass));
+    let torque = ctx.r_contact.cross(&(*ctx.t_hat * friction_impulse));
+    let spin_out = ctx.spin_rate + torque.dot(ctx.spin_dir) / ctx.inertia;
+    let energy = translational_rotational_energy(ctx.mass, &v_out, ctx.inertia, spin_out);
     ImpactState {
         velocity: v_out,
         spin_rate: spin_out,
@@ -212,31 +213,13 @@ fn apply_friction_impulse(
 
 fn dissipative_friction_impulse(
     candidate: f64,
-    v_normal_scaled: &Vector3,
-    v_tangential: &Vector3,
-    t_hat: &Vector3,
-    spin_dir: &Vector3,
-    r_contact: &Vector3,
-    spin_rate: f64,
-    mass: f64,
-    inertia: f64,
+    ctx: &FrictionImpactContext<'_>,
     energy_in: f64,
 ) -> f64 {
-  if candidate.abs() < MIN_TANGENTIAL_SPEED {
+    if candidate.abs() < MIN_TANGENTIAL_SPEED {
         return 0.0;
     }
-    let full = apply_friction_impulse(
-        v_normal_scaled,
-        v_tangential,
-        t_hat,
-        spin_dir,
-        r_contact,
-        spin_rate,
-        candidate,
-        mass,
-        inertia,
-        energy_in,
-    );
+    let full = apply_friction_impulse(ctx, candidate);
     if full.energy <= energy_in + 1e-12 {
         return candidate;
     }
@@ -245,18 +228,7 @@ fn dissipative_friction_impulse(
     let mut high = 1.0;
     for _ in 0..48 {
         let mid = 0.5 * (low + high);
-        let trial = apply_friction_impulse(
-            v_normal_scaled,
-            v_tangential,
-            t_hat,
-            spin_dir,
-            r_contact,
-            spin_rate,
-            candidate * mid,
-            mass,
-            inertia,
-            energy_in,
-        );
+        let trial = apply_friction_impulse(ctx, candidate * mid);
         if trial.energy <= energy_in + 1e-12 {
             low = mid;
         } else {
@@ -341,30 +313,19 @@ pub fn calculate_impact(
     };
 
     let v_normal_out = v_normal * (-params.cor);
-    let friction_impulse = dissipative_friction_impulse(
-        candidate_friction,
-        &v_normal_out,
-        &v_tangential,
-        &t_hat,
-        &spin_dir,
-        &r_contact,
+    let friction_ctx = FrictionImpactContext {
+        v_normal_out: &v_normal_out,
+        v_tangential: &v_tangential,
+        t_hat: &t_hat,
+        spin_dir: &spin_dir,
+        r_contact: &r_contact,
         spin_rate,
-        params.mass,
+        mass: params.mass,
         inertia,
-        energy_in,
-    );
-    let post = apply_friction_impulse(
-        &v_normal_out,
-        &v_tangential,
-        &t_hat,
-        &spin_dir,
-        &r_contact,
-        spin_rate,
-        friction_impulse,
-        params.mass,
-        inertia,
-        energy_in,
-    );
+    };
+    let friction_impulse =
+        dissipative_friction_impulse(candidate_friction, &friction_ctx, energy_in);
+    let post = apply_friction_impulse(&friction_ctx, friction_impulse);
     let v_out = post.velocity;
     let spin_out = post.spin_rate;
     let energy_out = post.energy;
@@ -594,7 +555,10 @@ mod tests {
         let v_in = Vector3::new(15.0, 0.0, -8.0);
         let result = calculate_impact(&v_in, 3000.0, &params);
 
-        assert!(result.velocity.z > 0.0, "Should rebound off the z-up surface");
+        assert!(
+            result.velocity.z > 0.0,
+            "Should rebound off the z-up surface"
+        );
         assert!(result.energy_lost > 0.0);
     }
 
@@ -624,11 +588,7 @@ mod tests {
     #[test]
     fn test_angled_surface() {
         let angle = std::f64::consts::FRAC_PI_6;
-        let params = params_with_normal(
-            0.8,
-            0.2,
-            Vector3::new(angle.sin(), angle.cos(), 0.0),
-        );
+        let params = params_with_normal(0.8, 0.2, Vector3::new(angle.sin(), angle.cos(), 0.0));
 
         let v_in = Vector3::new(0.0, -10.0, 0.0);
         let result = calculate_impact(&v_in, 0.0, &params);
@@ -661,7 +621,8 @@ mod tests {
         let spin_in = 5000.0;
         let result = calculate_impact(&v_in, spin_in, &params);
 
-        let expected = expected_energy_lost_joules(&v_in, &result.velocity, spin_in, result.spin_rate);
+        let expected =
+            expected_energy_lost_joules(&v_in, &result.velocity, spin_in, result.spin_rate);
 
         assert!(
             (result.energy_lost - expected).abs() < 1e-9,
