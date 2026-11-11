@@ -12,9 +12,8 @@ from pathlib import Path
 
 from .._subject_anthropometrics import SubjectAnthropometrics
 from .._types import Sex
-from ._base import build_subject_from_ratio_table
-from ._humanoid_expansion import resolve_humanoid_segment_table
 from ._json_loader import LoadedRatioTable, load_ratio_table
+from ._ratio_table_estimate import estimate_from_loaded_ratio_table
 
 _DEFAULT_RATIO_FILE = Path(__file__).resolve().parent / "ratios" / "dempster_1955.json"
 
@@ -59,20 +58,11 @@ class DempsterEstimator:
             If any precondition is violated (see
             :func:`_base.build_subject_from_ratio_table`).
         """
-        segment_classes, segment_name_map, normalize_mass = (
-            resolve_humanoid_segment_table(
-                self._table.segment_classes,
-                self._table.segment_name_map,
-            )
-        )
-        return build_subject_from_ratio_table(
+        return estimate_from_loaded_ratio_table(
+            self._table,
             subject_id=subject_id,
             height_m=height_m,
             mass_kg=mass_kg,
             sex=sex,
             age_years=age_years,
-            method_name=self.method_name,
-            segment_classes=segment_classes,
-            segment_name_map=segment_name_map,
-            normalize_mass=normalize_mass,
         )
