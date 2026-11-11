@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import math
+from typing import cast
+
 import numpy as np
 
 # Above this absolute dot product the two quaternions are nearly identical and
@@ -90,29 +92,29 @@ def quat_inverse_distance(q1: np.ndarray, q2: np.ndarray) -> float:
     lies in ``[0, π]`` and matches
     :func:`motion_matching._geodesic.quaternion_geodesic_angles` for a single pair.
     """
-    a = np.asarray(q1, dtype=np.float64).reshape(-1)
-    b = np.asarray(q2, dtype=np.float64).reshape(-1)
-    if a.shape != (4,) or b.shape != (4,):
+    a_vec = np.asarray(q1, dtype=np.float64).reshape(4)
+    b_vec = np.asarray(q2, dtype=np.float64).reshape(4)
+    if a_vec.shape != (4,) or b_vec.shape != (4,):
         raise ValueError(
-            f"quaternions must have shape (4,); got {a.shape} and {b.shape}"
+            f"quaternions must have shape (4,); got {a_vec.shape} and {b_vec.shape}"
         )
-    a_norm = math.sqrt(np.dot(a, a))
-    b_norm = math.sqrt(np.dot(b, b))
+    a_norm = math.sqrt(np.dot(a_vec, a_vec))
+    b_norm = math.sqrt(np.dot(b_vec, b_vec))
     if a_norm == 0.0 or b_norm == 0.0:
         raise ValueError("quaternions must be non-zero")
-    a = a / a_norm
-    b = b / b_norm
-    dot = float(np.dot(a, b))
+    a_unit = cast(np.ndarray, a_vec / a_norm)
+    b_unit = cast(np.ndarray, b_vec / b_norm)
+    dot = float(np.dot(a_unit, b_unit))
     flipped = dot < 0.0
     if flipped:
-        b = -b
+        b_unit = cast(np.ndarray, -b_unit)
         dot = -dot
-    diff_norm = math.sqrt(np.dot(a - b, a - b))
+    diff_norm = math.sqrt(np.dot(a_unit - b_unit, a_unit - b_unit))
     if diff_norm < 1e-15:
         return 0.0
     if dot > 1.0 - 1e-15 and not flipped:
-        w0, x0, y0, z0 = a
-        w1, x1, y1, z1 = b
+        w0, x0, y0, z0 = a_unit
+        w1, x1, y1, z1 = b_unit
         rw = w0 * w1 + x0 * x1 + y0 * y1 + z0 * z1
         rx = w0 * x1 - x0 * w1 - y0 * z1 + z0 * y1
         ry = w0 * y1 - x0 * z1 + y0 * w1 - z0 * x1
