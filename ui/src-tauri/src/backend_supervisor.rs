@@ -195,17 +195,17 @@ impl BackendSupervisor {
     }
 }
 
-pub fn spawn_immediate_exit_child() -> std::io::Result<Child> {
-    if cfg!(windows) {
-        Command::new("cmd").args(["/C", "exit", "0"]).spawn()
-    } else {
-        Command::new("sh").args(["-c", "exit 0"]).spawn()
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn spawn_immediate_exit_child() -> std::io::Result<Child> {
+        if cfg!(windows) {
+            Command::new("cmd").args(["/C", "exit", "0"]).spawn()
+        } else {
+            Command::new("sh").args(["-c", "exit 0"]).spawn()
+        }
+    }
 
     #[test]
     fn ephemeral_port_is_nonzero() {
