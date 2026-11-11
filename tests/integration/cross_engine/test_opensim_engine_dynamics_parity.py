@@ -26,8 +26,9 @@ osim = require_opensim()
 if not isinstance(getattr(osim, "__file__", None), str) or not hasattr(osim, "Model"):
     pytest.skip("real opensim is unavailable", allow_module_level=True)
 mujoco = pytest.importorskip("mujoco")
-sys.modules.pop("pinocchio", None)
-sys.modules.pop("pinocchio.casadi", None)
+for _cached_name in list(sys.modules):
+    if _cached_name == "pinocchio" or _cached_name.startswith("pinocchio."):
+        del sys.modules[_cached_name]
 pinocchio = pytest.importorskip("pinocchio")
 
 from src.engines.physics_engines.opensim.python import (  # noqa: E402
