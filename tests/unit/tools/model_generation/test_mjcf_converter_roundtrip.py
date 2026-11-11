@@ -150,6 +150,7 @@ class TestRoundTrip:
         assert masses["base"] == pytest.approx(2.0)
         assert masses["link1"] == pytest.approx(1.0)
 
+    @pytest.mark.unit
     def test_roundtrip_preserves_joint_and_visual_rotations(
         self, converter: MJCFConverter
     ) -> None:
