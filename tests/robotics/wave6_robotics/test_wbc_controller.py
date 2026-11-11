@@ -80,6 +80,7 @@ def test_add_task_and_duplicate_rejected() -> None:
         wbc.add_task(_task("a"))
 
 
+@pytest.mark.unit
 def test_add_task_sorts_by_priority_ascending() -> None:
     wbc = WholeBodyController(FakeEngine())
     wbc.add_task(_task("low", priority=4))
