@@ -32,6 +32,25 @@ from .types import ImpactModelType, ImpactParameters, PostImpactState, PreImpact
 SPHERE_ROLLING_CAP_FACTOR = 2.0 / 7.0
 
 
+def _impact_offset_lever_arm(
+    impact_offset: np.ndarray | None,
+    clubface_normal: np.ndarray,
+) -> np.ndarray:
+    """Map face-centre offset [m] to a lever arm from the clubhead CG."""
+    if impact_offset is None:
+        return np.zeros(3)
+    h_offset = float(impact_offset[0])
+    v_offset = float(impact_offset[1])
+    up = np.array([0.0, 0.0, 1.0])
+    horizontal_axis = np.cross(up, clubface_normal)
+    horiz_mag = float(np.linalg.norm(horizontal_axis))
+    if horiz_mag > 1e-9:
+        horizontal_axis = horizontal_axis / horiz_mag
+    else:
+        horizontal_axis = np.array([0.0, 1.0, 0.0])
+    return h_offset * horizontal_axis + v_offset * up
+
+
 class ImpactModel(ABC):
     """Abstract base class for impact models."""
 
@@ -57,9 +76,9 @@ class RigidBodyImpactModel(ImpactModel):
     """Rigid body collision with coefficient of restitution.
 
     Uses instantaneous impulse-momentum equations with COR
-    to compute post-impact velocities. Tangential contact uses a translating,
-    non-rotating club surface. The scalar off-center club MOI approximation
-    does not establish full angular momentum conservation for gear-effect hits.
+    to compute post-impact velocities.     Tangential contact uses a translating club surface. Off-centre hits apply
+    the impulse lever arm to the scalar clubhead MOI so the head acquires spin;
+    coupled gear-effect spin may still be added heuristically upstream.
     """
 
     def _compute_effective_club_mass(self, pre_state: PreImpactState) -> float:
@@ -231,6 +250,11 @@ class RigidBodyImpactModel(ImpactModel):
         ball_spin = pre_state.ball_angular_velocity + (
             GOLF_BALL_RADIUS_M / GOLF_BALL_MOMENT_OF_INERTIA_KG_M2
         ) * np.cross(j_tangent, n)
+        lever_arm = _impact_offset_lever_arm(pre_state.impact_offset, n)
+        club_spin = (
+            pre_state.clubhead_angular_velocity
+            + np.cross(lever_arm, impulse) / pre_state.clubhead_moi
+        )
         energy_transfer = self._compute_energy_transfer(
             pre_state.ball_velocity,
             v_ball_post,
@@ -246,7 +270,7 @@ class RigidBodyImpactModel(ImpactModel):
             ball_velocity=v_ball_post,
             ball_angular_velocity=ball_spin,
             clubhead_velocity=v_club_post,
-            clubhead_angular_velocity=pre_state.clubhead_angular_velocity.copy(),
+            clubhead_angular_velocity=club_spin,
             contact_duration=0.0,
             energy_transfer=energy_transfer,
             impact_location=impact_loc,
