@@ -21,6 +21,7 @@ from src.shared.python.engine_core.velocity_conventions import (
     FloatingBaseConvention,
     VelocityRepresentation,
 )
+from src.shared.python.pose_interchange import se3
 from src.shared.python.pose_interchange.canonical_state import (
     CONVENTION_TAG_V2,
     CanonicalState,
@@ -184,12 +185,17 @@ class JaxSimBackend:
                 f"a must have shape ({v_arr.shape[0]},); got {a_arr.shape!r}"
             )
         self._canonical_acceleration = a_arr.copy()
+        base_quaternion = q_arr[3:7]
         self._data = self._build_data(
             base_position=q_arr[:3],
-            base_quaternion=q_arr[3:7],
+            base_quaternion=base_quaternion,
             joint_positions=q_arr[7:],
             base_linear_velocity=v_arr[:3],
-            base_angular_velocity=v_arr[3:6],
+            base_angular_velocity=_canonical_v2_body_omega_to_jaxsim(
+                v_arr[3:6],
+                base_quaternion,
+                self._convention.velocity_representation,
+            ),
             joint_velocities=v_arr[6:],
         )
         self._time = float(state.t)
@@ -203,7 +209,11 @@ class JaxSimBackend:
         q = np.concatenate([base_position, base_quaternion, joint_positions])
 
         base_linear = _vector_attr(self._data, "base_linear_velocity", 3)
-        base_angular = _vector_attr(self._data, "base_angular_velocity", 3)
+        base_angular = _jaxsim_angular_to_canonical_v2_body(
+            _vector_attr(self._data, "base_angular_velocity", 3),
+            base_quaternion,
+            self._convention.velocity_representation,
+        )
         joint_velocities = _array_attr(self._data, "joint_velocities")
         v = np.concatenate([base_linear, base_angular, joint_velocities])
         return q, v
@@ -607,6 +617,44 @@ def _vector_attr(obj: Any, name: str, size: int) -> np.ndarray:
     if vector.shape != (size,):
         raise ValueError(f"{name} must have shape ({size},)")
     return vector
+
+
+def _canonical_v2_body_omega_to_jaxsim(
+    omega_body: np.ndarray,
+    base_quaternion_wxyz: np.ndarray,
+    representation: VelocityRepresentation,
+) -> np.ndarray:
+    """Map canonical-v2 body-frame angular rate into JaxSim storage."""
+
+    omega = np.asarray(omega_body, dtype=np.float64).reshape(3)
+    if representation == VelocityRepresentation.INERTIAL:
+        rotation = se3.quat_to_matrix(base_quaternion_wxyz)
+        return rotation @ omega
+    if representation in {
+        VelocityRepresentation.BODY_FIXED,
+        VelocityRepresentation.MIXED,
+    }:
+        return omega.copy()
+    raise ValueError(f"unsupported velocity representation: {representation!r}")
+
+
+def _jaxsim_angular_to_canonical_v2_body(
+    omega_jaxsim: np.ndarray,
+    base_quaternion_wxyz: np.ndarray,
+    representation: VelocityRepresentation,
+) -> np.ndarray:
+    """Map JaxSim-stored base angular rate into canonical-v2 body frame."""
+
+    omega = np.asarray(omega_jaxsim, dtype=np.float64).reshape(3)
+    if representation == VelocityRepresentation.INERTIAL:
+        rotation = se3.quat_to_matrix(base_quaternion_wxyz)
+        return rotation.T @ omega
+    if representation in {
+        VelocityRepresentation.BODY_FIXED,
+        VelocityRepresentation.MIXED,
+    }:
+        return omega.copy()
+    raise ValueError(f"unsupported velocity representation: {representation!r}")
 
 
 def _jaxsim_base_to_canonical(value: np.ndarray) -> np.ndarray:

@@ -17,6 +17,26 @@ from src.shared.python.pose_interchange.canonical_state import (
 pytestmark = pytest.mark.unit
 
 
+def test_canonical_state_stores_inertial_angular_rate_for_rotated_base() -> None:
+    """ADR-0026 base angular velocity is body frame; JaxSim inertial storage is ``R @ omega``."""
+
+    backend = _backend()
+    quat = se3.quat_exp(np.array([0.45, -0.2, 0.35]))
+    omega_body = np.array([1.5, -2.0, 0.75])
+    q = np.concatenate([np.array([0.1, -0.2, 0.3]), quat, [0.15]])
+    v = np.concatenate([np.array([0.4, 0.1, -0.2]), omega_body, [-0.05]])
+    seed = CanonicalState(q=q, v=v, a=np.zeros_like(v), t=0.0)
+
+    backend.set_canonical_state(seed)
+    stored = np.asarray(backend._data.base_angular_velocity, dtype=np.float64)
+    rot = se3.quat_to_matrix(quat)
+    np.testing.assert_allclose(stored, rot @ omega_body, atol=1.0e-12)
+    assert not np.allclose(stored, omega_body, atol=1.0e-6)
+
+    recovered = backend.get_canonical_state()
+    np.testing.assert_allclose(recovered.v[3:6], omega_body, atol=1.0e-12)
+
+
 def test_jaxsim_canonical_state_roundtrip_spinning_translating_base() -> None:
     backend = _backend()
 
