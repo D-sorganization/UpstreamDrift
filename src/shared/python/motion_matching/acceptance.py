@@ -256,9 +256,21 @@ def _evaluate_marker_rmse(
         else (gates.g2_early_rmse_m if horizon == Horizon.G2 else gates.g3_early_rmse_m)
     )
     val_early = _extract_metric(receipt, "early_marker_rmse_m", "early_rms_m")
-    r_early = _check_rmse_gate("early_marker_rmse_m", val_early, thresh_early, "early")
-    if r_early is not None:
-        results.append(r_early)
+    if val_early is None:
+        results.append(
+            GateResult(
+                name="early_marker_rmse_m",
+                status=GateStatus.MISSING,
+                threshold=thresh_early,
+                reason="missing early marker RMSE",
+            )
+        )
+    else:
+        r_early = _check_rmse_gate(
+            "early_marker_rmse_m", val_early, thresh_early, "early"
+        )
+        if r_early is not None:
+            results.append(r_early)
 
     thresh_terminal = (
         gates.g1_terminal_rmse_m
@@ -270,11 +282,21 @@ def _evaluate_marker_rmse(
         )
     )
     val_terminal = _extract_metric(receipt, "terminal_marker_rmse_m", "terminal_rms_m")
-    r_terminal = _check_rmse_gate(
-        "terminal_marker_rmse_m", val_terminal, thresh_terminal, "terminal"
-    )
-    if r_terminal is not None:
-        results.append(r_terminal)
+    if val_terminal is None:
+        results.append(
+            GateResult(
+                name="terminal_marker_rmse_m",
+                status=GateStatus.MISSING,
+                threshold=thresh_terminal,
+                reason="missing terminal marker RMSE",
+            )
+        )
+    else:
+        r_terminal = _check_rmse_gate(
+            "terminal_marker_rmse_m", val_terminal, thresh_terminal, "terminal"
+        )
+        if r_terminal is not None:
+            results.append(r_terminal)
 
     thresh_club = (
         gates.g1_club_rmse_m
@@ -282,9 +304,19 @@ def _evaluate_marker_rmse(
         else (gates.g2_club_rmse_m if horizon == Horizon.G2 else gates.g3_club_rmse_m)
     )
     val_club = _extract_metric(receipt, "club_marker_rmse_m", "club_cluster_rms_m")
-    r_club = _check_rmse_gate("club_marker_rmse_m", val_club, thresh_club, "club")
-    if r_club is not None:
-        results.append(r_club)
+    if val_club is None:
+        results.append(
+            GateResult(
+                name="club_marker_rmse_m",
+                status=GateStatus.MISSING,
+                threshold=thresh_club,
+                reason="missing club marker RMSE",
+            )
+        )
+    else:
+        r_club = _check_rmse_gate("club_marker_rmse_m", val_club, thresh_club, "club")
+        if r_club is not None:
+            results.append(r_club)
 
     return results
 
@@ -378,7 +410,22 @@ def _evaluate_pelvis_yaw(
                 use_abs=True,
             )
         ]
-    return []
+    gate_name = (
+        "pelvis_yaw_error_pct" if horizon == Horizon.G1 else "pelvis_yaw_rmse_rad"
+    )
+    threshold = (
+        gates.g1_pelvis_yaw_error_pct if horizon == Horizon.G1 else thresh_yaw_rad
+    )
+    unit = "%" if horizon == Horizon.G1 else "rad"
+    return [
+        GateResult(
+            name=gate_name,
+            status=GateStatus.MISSING,
+            threshold=threshold,
+            unit=unit,
+            reason="missing pelvis yaw metric",
+        )
+    ]
 
 
 def _evaluate_normal_contact_force(
