@@ -209,10 +209,7 @@ mod tests {
         let load = 12.0_f64;
         let element = BeamElement::try_new(0, 1, length, ei, 0.0, 0.0).expect("element");
         let k = element_stiffness_matrix(&element).expect("stiffness");
-        let k_ff = [
-            [k[2][2], k[2][3]],
-            [k[3][2], k[3][3]],
-        ];
+        let k_ff = [[k[2][2], k[2][3]], [k[3][2], k[3][3]]];
         let delta_expected = load * length.powi(3) / (3.0 * ei);
         let delta = solve_2x2(k_ff, [load, 0.0])[0];
         assert_relative_eq!(delta, delta_expected, epsilon = 1e-12);
