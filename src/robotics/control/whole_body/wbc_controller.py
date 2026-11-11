@@ -426,8 +426,7 @@ class WholeBodyController:
                 M,
                 nle,
                 qd,
-                hierarchy_A,
-                hierarchy_b,
+                (hierarchy_A, hierarchy_b),
             )
             qp_solution = self._solver.solve(problem)
 
@@ -495,12 +494,18 @@ class WholeBodyController:
         M: NDArray,
         nle: NDArray,
         qd: NDArray,
-        hierarchy_A: list[NDArray[np.float64]] | None = None,
-        hierarchy_b: list[NDArray[np.float64]] | None = None,
+        hierarchy_equalities: tuple[
+            list[NDArray[np.float64]], list[NDArray[np.float64]]
+        ]
+        | None = None,
     ) -> QPProblem:
         if H is None:
             raise ValueError("H must be provided")
         A_eq, b_eq = self._build_dynamics_constraint(n_v, n_contact_vars, M, nle)
+        hierarchy_A: list[NDArray[np.float64]] | None = None
+        hierarchy_b: list[NDArray[np.float64]] | None = None
+        if hierarchy_equalities is not None:
+            hierarchy_A, hierarchy_b = hierarchy_equalities
         A_eq, b_eq = self._append_equality_rows(
             A_eq,
             b_eq,
