@@ -165,6 +165,11 @@ pub struct AeroForces {
 
 /// Compute all aerodynamic forces on a golf ball.
 ///
+/// Spin-induced aerodynamic lift is emitted only in [`AeroForces::magnus`]. The
+/// legacy [`AeroForces::lift`] slot stays zero so downstream APIs do not
+/// double-count the same ω × v force. Use [`compute_lift`] only when a caller
+/// needs the spin-axis × velocity formulation in isolation.
+///
 /// # Design by Contract
 /// ## Preconditions
 /// - `velocity` components must be finite
@@ -200,6 +205,18 @@ pub fn compute_aero_forces(
     AeroForces { drag, lift, magnus }
 }
 
+/// Dimensionless spin parameter ωR/v using spin transverse to velocity.
+///
+/// `cross_norm` is `|ω × v|`; only the component of ω perpendicular to v̂
+/// contributes to Magnus/lift magnitude.
+#[must_use]
+fn transverse_spin_parameter(ball_radius: f64, speed: f64, cross_norm: f64) -> f64 {
+    if speed < 1e-6 || cross_norm < 1e-6 {
+        return 0.0;
+    }
+    ball_radius * cross_norm / (speed * speed)
+}
+
 /// Compute drag force opposing motion.
 ///
 /// F_drag = -0.5 * ρ * Cd * A * |v|² * v̂
@@ -224,7 +241,9 @@ pub fn compute_drag(velocity: &Vector3, ball: &AeroBallProperties, air: &AirProp
 
 /// Compute lift force from backspin.
 ///
-/// Lift direction: spin_axis × velocity (normalized)
+/// Lift direction: spin_axis × velocity (normalized). Magnitude uses the same
+/// transverse spin parameter as [`compute_magnus`]; see [`compute_aero_forces`]
+/// for why the combined kernel keeps [`AeroForces::lift`] at zero.
 #[must_use]
 pub fn compute_lift(
     velocity: &Vector3,
@@ -238,20 +257,26 @@ pub fn compute_lift(
     }
 
     let spin_mag = spin.magnitude();
-    let spin_ratio = ball.radius * spin_mag / (speed + 1e-10);
-    let cl = compute_lift_coefficient(spin_ratio);
+    if spin_mag < 1e-6 {
+        return Vector3::new(0.0, 0.0, 0.0);
+    }
 
     // Spin axis (unit vector)
-    let spin_inv = 1.0 / (spin_mag + 1e-10);
+    let spin_inv = 1.0 / spin_mag;
     let spin_axis = Vector3::new(spin.x * spin_inv, spin.y * spin_inv, spin.z * spin_inv);
 
-    // Lift direction: spin_axis × velocity
+    // Lift direction: spin_axis × velocity; |ω̂ × v| = sin θ |v|
     let lift_dir = spin_axis.cross(velocity);
     let lift_norm = lift_dir.magnitude();
 
     if lift_norm < 1e-6 {
         return Vector3::new(0.0, 0.0, 0.0);
     }
+
+    // |ω × v| = |ω| |ω̂ × v| so the Magnus spin parameter matches compute_magnus.
+    let cross_norm = spin_mag * lift_norm;
+    let spin_ratio = transverse_spin_parameter(ball.radius, speed, cross_norm);
+    let cl = compute_lift_coefficient(spin_ratio);
 
     let f_mag = 0.5 * air.density * cl * ball.area * speed * speed;
     let inv_norm = 1.0 / lift_norm;
@@ -264,6 +289,9 @@ pub fn compute_lift(
 }
 
 /// Compute the single spin-induced Magnus/lift force.
+///
+/// Uses transverse spin `|ω × v| / |v|` (equivalently `|ω| sin θ`) in the
+/// Penner spin parameter so Magnus magnitude vanishes as ω aligns with v.
 ///
 /// F_magnus = 0.5 * ρ * Cl * A * |v|² * (ω × v) / |ω × v|
 #[must_use]
@@ -287,7 +315,7 @@ pub fn compute_magnus(
         return Vector3::new(0.0, 0.0, 0.0);
     }
 
-    let spin_param = ball.radius * spin_mag / speed;
+    let spin_param = transverse_spin_parameter(ball.radius, speed, magnus_norm);
     let cl = compute_magnus_coefficient(spin_param);
     let f_mag = 0.5 * air.density * cl * ball.area * speed * speed;
     let inv_norm = 1.0 / magnus_norm;
@@ -694,6 +722,81 @@ mod tests {
 
         let magnus = compute_magnus(&v, &spin, &ball, &air);
         assert!(magnus.magnitude() < 1e-10);
+    }
+
+    #[test]
+    fn test_magnus_rifle_spin_parallel_to_velocity_is_zero() {
+        let speed = 55.0;
+        let v = Vector3::new(speed, 0.0, 0.0);
+        // Gyro spin entirely along velocity (rifle / dead-ball spin).
+        let spin = Vector3::new(400.0, 0.0, 0.0);
+        let ball = default_ball();
+        let air = default_air();
+
+        let magnus = compute_magnus(&v, &spin, &ball, &air);
+        assert!(
+            magnus.magnitude() < 1e-10,
+            "parallel ω must not produce Magnus lift, got |F|={}",
+            magnus.magnitude()
+        );
+    }
+
+    #[test]
+    fn test_magnus_transverse_magnitude_vanishes_as_spin_aligns_with_velocity() {
+        let speed = 60.0;
+        let v = Vector3::new(speed, 0.0, 0.0);
+        let omega_mag = 400.0_f64;
+        let ball = default_ball();
+        let air = default_air();
+
+        // Pure transverse spin: |ω| entirely in Y while v is +X.
+        let pure_transverse = Vector3::new(0.0, omega_mag, 0.0);
+        let f_transverse = compute_magnus(&v, &pure_transverse, &ball, &air).magnitude();
+        let sin_transverse = 1.0_f64;
+        let spin_param_transverse = ball.radius * omega_mag * sin_transverse / speed;
+        let cl_transverse = compute_magnus_coefficient(spin_param_transverse);
+        let expected_transverse =
+            0.5 * air.density * cl_transverse * ball.area * speed * speed;
+        assert!(
+            (f_transverse - expected_transverse).abs() / expected_transverse < 1e-6,
+            "pure transverse spin should match F = 0.5 ρ Cl A v², got {f_transverse} vs {expected_transverse}"
+        );
+
+        // Rotate ω toward +X while holding |ω| fixed; transverse fraction is sin θ.
+        let mut prev_force = f_transverse;
+        for angle_deg in [80.0_f64, 45.0, 10.0, 2.0, 0.5] {
+            let theta = angle_deg.to_radians();
+            let spin = Vector3::new(
+                omega_mag * theta.cos(),
+                omega_mag * theta.sin(),
+                0.0,
+            );
+            let force = compute_magnus(&v, &spin, &ball, &air).magnitude();
+            let spin_param = ball.radius * omega_mag * theta.sin() / speed;
+            let expected = 0.5 * air.density * compute_magnus_coefficient(spin_param) * ball.area
+                * speed
+                * speed;
+            assert!(
+                (force - expected).abs() / expected < 1e-6,
+                "angle {angle_deg}°: |F| {force} vs transverse-parameter expectation {expected}"
+            );
+            assert!(
+                force <= prev_force + 1e-9,
+                "aligning ω toward v must not increase Magnus magnitude"
+            );
+            prev_force = force;
+        }
+
+        let near_rifle = Vector3::new(omega_mag * (0.01_f64.to_radians().cos()), omega_mag * 0.01_f64.to_radians().sin(), 0.0);
+        let near_force = compute_magnus(&v, &near_rifle, &ball, &air).magnitude();
+        assert!(
+            near_force < prev_force,
+            "near-rifle spin crossing should decrease Magnus below prior sample"
+        );
+        assert!(
+            near_force < 0.02,
+            "near-parallel ω must yield negligible Magnus, got {near_force}"
+        );
     }
 
     // ── Combined Forces Tests ────────────────────────────────────────────

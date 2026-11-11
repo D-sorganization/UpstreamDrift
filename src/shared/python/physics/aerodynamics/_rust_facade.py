@@ -194,7 +194,8 @@ def _python_fallback_total(
         magnus_dir = np.cross(spin, rel_velocity)
         magnus_norm = _magnitude(magnus_dir)
         if magnus_norm > 1e-6:
-            spin_param = spec.radius * spin_mag / speed
+            # Transverse spin |ω×v|/|v|, not ||ω||, so rifle spin along v is inert.
+            spin_param = spec.radius * magnus_norm / (speed * speed)
             cl = min(
                 MAX_LIFT_COEFFICIENT,
                 PENNER_LIFT_SCALE * spin_param**PENNER_LIFT_EXPONENT,
