@@ -9,6 +9,41 @@ from src.shared.python.core.physics_constants import (
 
 from .types import ImpactParameters, PostImpactState, PreImpactState
 
+_TANGENTIAL_FRICTION_EXCLUSION_REASON = (
+    "expected_loss_j is the central normal COR dissipation "
+    "0.5*mu_eff*v_rel,n^2*(1-e^2) only; tangential friction impulse work is "
+    "included in energy_lost but not modeled in the COR budget."
+)
+
+
+def compute_effective_club_mass(pre_state: PreImpactState) -> float:
+    """Scalar effective translational mass at the contact point.
+
+    Uses the clubhead CG mass and scalar MOI about the CG with the impact-offset
+    lever arm: m_eff = 1 / (1/m + r^2/I). This matches the rigid-body impact
+    solver's normal-direction reduced mass at off-center contact.
+    """
+    if pre_state is None:
+        raise ValueError("pre_state must be provided")
+    m_club = float(pre_state.clubhead_mass)
+    club_moi = float(pre_state.clubhead_moi)
+
+    if pre_state.impact_offset is not None and club_moi > 0:
+        offset = np.asarray(pre_state.impact_offset, dtype=float).reshape(-1)
+        if offset.size > 0:
+            r_offset = float(math.hypot(*offset))
+            if r_offset > 1e-6:
+                return 1.0 / (1.0 / m_club + r_offset**2 / club_moi)
+    return m_club
+
+
+def _unit_face_normal(orientation: np.ndarray) -> np.ndarray:
+    raw = np.asarray(orientation, dtype=float).reshape(-1)
+    norm = float(math.hypot(*raw)) if raw.size > 0 else 0.0
+    if norm <= 1e-12:
+        return np.array([1.0, 0.0, 0.0])
+    return raw / norm
+
 
 # fmt: off
 @precondition(  # fmt: skip
@@ -84,80 +119,80 @@ def validate_energy_balance(
     pre_state: PreImpactState,
     post_state: PostImpactState,
     params: ImpactParameters,
-) -> dict[str, float]:
-    """Validate energy balance before and after impact.
+) -> dict[str, float | bool | str]:
+    """Summarize translational and rotational kinetic energy around impact.
 
-    Total mechanical energy should be conserved up to COR losses.
-
-    Args:
-        pre_state: Pre-impact state
-        post_state: Post-impact state
-        params: Impact parameters
-
-    Returns:
-        Dictionary with energy analysis results
+    Compares measured kinetic-energy loss against the normal COR dissipation
+    budget using the effective clubhead mass at the contact point (scalar MOI
+    at offset). Tangential friction work appears in ``energy_lost`` but is
+    excluded from ``expected_loss_j``; use ``normal_energy_budget_met`` rather
+    than equating the two when friction is nonzero.
     """
     if pre_state is None:
         raise ValueError("pre_state must be provided")
-    m_ball = GOLF_BALL_MASS_KG
-    m_club = pre_state.clubhead_mass
-    I_ball = GOLF_BALL_MOMENT_OF_INERTIA_KG_M2
+    m_ball = float(GOLF_BALL_MASS_KG)
+    m_club_effective = compute_effective_club_mass(pre_state)
+    I_ball = float(GOLF_BALL_MOMENT_OF_INERTIA_KG_M2)
+    I_club = float(pre_state.clubhead_moi)
 
-    # ΔKE_expected = ½·μ·v_rel_n²·(1−e²) in the relative (COM) frame.
-    _n_raw = np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1)
-    _n_norm = math.sqrt(float(np.dot(_n_raw, _n_raw))) if _n_raw.size > 0 else 0.0
-    _n_unit = _n_raw / _n_norm if _n_norm > 1e-12 else np.array([1.0, 0.0, 0.0])
-    _v_rel = np.asarray(pre_state.clubhead_velocity, dtype=float) - np.asarray(
+    n_unit = _unit_face_normal(pre_state.clubhead_orientation)
+    v_rel = np.asarray(pre_state.clubhead_velocity, dtype=float) - np.asarray(
         pre_state.ball_velocity, dtype=float
     )
-    _mu = (float(m_ball) * float(m_club)) / (float(m_ball) + float(m_club))
-    expected_loss_j = (
-        0.5 * _mu * float(np.dot(_v_rel, _n_unit)) ** 2 * (1.0 - params.cor**2)
-    )
+    v_rel_n = float(np.dot(v_rel, n_unit))
+    mu_eff = (m_ball * m_club_effective) / (m_ball + m_club_effective)
+    expected_loss_j = 0.5 * mu_eff * v_rel_n**2 * (1.0 - params.cor**2)
 
-    # Pre-impact kinetic energy
-    ke_ball_pre = (
-        0.5 * m_ball * np.dot(pre_state.ball_velocity, pre_state.ball_velocity)
+    ke_ball_pre = 0.5 * m_ball * float(
+        np.dot(pre_state.ball_velocity, pre_state.ball_velocity)
     )
-    ke_ball_rot_pre = (
-        0.5
-        * I_ball
-        * np.dot(pre_state.ball_angular_velocity, pre_state.ball_angular_velocity)
+    ke_ball_rot_pre = 0.5 * I_ball * float(
+        np.dot(pre_state.ball_angular_velocity, pre_state.ball_angular_velocity)
     )
-    ke_club_pre = (
-        0.5 * m_club * np.dot(pre_state.clubhead_velocity, pre_state.clubhead_velocity)
+    ke_club_pre = 0.5 * float(pre_state.clubhead_mass) * float(
+        np.dot(pre_state.clubhead_velocity, pre_state.clubhead_velocity)
     )
-    total_ke_pre = ke_ball_pre + ke_ball_rot_pre + ke_club_pre
+    omega_club_pre = np.asarray(pre_state.clubhead_angular_velocity, dtype=float)
+    club_rot_ke_pre = 0.5 * I_club * float(np.dot(omega_club_pre, omega_club_pre))
 
-    # Post-impact kinetic energy
-    ke_ball_post = (
-        0.5 * m_ball * np.dot(post_state.ball_velocity, post_state.ball_velocity)
+    ke_ball_post = 0.5 * m_ball * float(
+        np.dot(post_state.ball_velocity, post_state.ball_velocity)
     )
-    ke_ball_rot_post = (
-        0.5
-        * I_ball
-        * np.dot(post_state.ball_angular_velocity, post_state.ball_angular_velocity)
+    ke_ball_rot_post = 0.5 * I_ball * float(
+        np.dot(post_state.ball_angular_velocity, post_state.ball_angular_velocity)
     )
-    ke_club_post = (
-        0.5
-        * m_club
-        * np.dot(post_state.clubhead_velocity, post_state.clubhead_velocity)
+    ke_club_post = 0.5 * float(pre_state.clubhead_mass) * float(
+        np.dot(post_state.clubhead_velocity, post_state.clubhead_velocity)
     )
-    total_ke_post = ke_ball_post + ke_ball_rot_post + ke_club_post
+    omega_club_post = np.asarray(post_state.clubhead_angular_velocity, dtype=float)
+    club_rot_ke_post = 0.5 * I_club * float(np.dot(omega_club_post, omega_club_post))
 
-    # Energy loss
+    total_ke_pre = ke_ball_pre + ke_ball_rot_pre + ke_club_pre + club_rot_ke_pre
+    total_ke_post = ke_ball_post + ke_ball_rot_post + ke_club_post + club_rot_ke_post
     energy_lost = total_ke_pre - total_ke_post
-    expected_loss_factor = 1 - params.cor**2  # COR relates velocities, not energy
+    expected_loss_factor = 1.0 - params.cor**2
+
+    friction = float(params.friction_coefficient)
+    normal_budget_met = energy_lost + 1e-9 >= expected_loss_j
 
     return {
         "total_ke_pre": float(total_ke_pre),
         "total_ke_post": float(total_ke_post),
         "energy_lost": float(energy_lost),
         "energy_loss_ratio": (
-            float(energy_lost / total_ke_pre) if total_ke_pre > 0 else 0
+            float(energy_lost / total_ke_pre) if total_ke_pre > 0 else 0.0
         ),
         "expected_loss_factor": expected_loss_factor,
         "expected_loss_j": float(expected_loss_j),
+        "effective_club_mass_kg": float(m_club_effective),
+        "club_rot_ke_pre": float(club_rot_ke_pre),
+        "club_rot_ke_post": float(club_rot_ke_post),
+        "tangential_friction_in_expected_loss": False,
+        "tangential_friction_exclusion_reason": _TANGENTIAL_FRICTION_EXCLUSION_REASON,
+        "friction_coefficient": friction,
+        "normal_energy_budget_met": normal_budget_met,
         "ball_ke_post": float(ke_ball_post),
-        "ball_launch_speed": float(math.sqrt(np.dot(post_state.ball_velocity, post_state.ball_velocity))),  # ⚡ Bolt: math.sqrt(np.dot) is ~3x faster than np.linalg.norm
+        "ball_launch_speed": float(
+            math.sqrt(np.dot(post_state.ball_velocity, post_state.ball_velocity))
+        ),
     }

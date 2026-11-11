@@ -12,6 +12,7 @@ from src.shared.python.core.physics_constants import (
 )
 
 from .types import ImpactModelType, ImpactParameters, PostImpactState, PreImpactState
+from .utils import compute_effective_club_mass
 
 # Rolling-without-slip tangential-impulse factor for a uniform solid sphere.
 #
@@ -63,26 +64,8 @@ class RigidBodyImpactModel(ImpactModel):
     """
 
     def _compute_effective_club_mass(self, pre_state: PreImpactState) -> float:
-        # Known limitation: this uses a simplified scalar effective mass model.
-        # It ignores the full 3D inertia tensor and the direction of the impact force.
-        # Should be replaced with J = (1/m + r x (I^-1 * (r x n)))^-1 * (1 + e) * v_rel
-        if pre_state is None:
-            raise ValueError("pre_state must be provided")
-        m_club = pre_state.clubhead_mass
-        club_moi = pre_state.clubhead_moi
-
-        if pre_state.impact_offset is not None and club_moi > 0:
-            r_offset = float(
-                0.0
-                if np.asarray(pre_state.impact_offset, dtype=float).reshape(-1).size
-                == 0
-                else math.hypot(
-                    *np.asarray(pre_state.impact_offset, dtype=float).reshape(-1)
-                )
-            )
-            if r_offset > 1e-6:
-                return 1.0 / (1.0 / m_club + r_offset**2 / club_moi)
-        return m_club
+        """Delegate to the shared scalar effective-mass helper at the contact point."""
+        return compute_effective_club_mass(pre_state)
 
     def _compute_impulse(
         self,
