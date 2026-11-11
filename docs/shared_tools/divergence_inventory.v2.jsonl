@@ -110,7 +110,7 @@
 {"path": "ai/mcp/widgets/integrations_health_dashboard_widget.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/mcp/widgets/mcp_servers_prefs_widget.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/memory_manager.py", "classification": "diverged", "package": "ai", "spelling_only": true}
-{"path": "ai/not_implemented_payload.py", "classification": "tools-only", "package": "ai", "spelling_only": false}
+{"path": "ai/not_implemented_payload.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/peer_review/__init__.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/peer_review/_audit.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/peer_review/_llm.py", "classification": "identical", "package": "ai", "spelling_only": false}
@@ -151,7 +151,7 @@
 {"path": "ai/tool_bridge.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/tool_registry.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/tools/__init__.py", "classification": "diverged", "package": "ai", "spelling_only": false}
-{"path": "ai/tools/agent_control.py", "classification": "diverged", "package": "ai", "spelling_only": false}
+{"path": "ai/tools/agent_control.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/tools/cli_tools.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/tools/codemap_tools.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/tools/file_ops.py", "classification": "diverged", "package": "ai", "spelling_only": true}
