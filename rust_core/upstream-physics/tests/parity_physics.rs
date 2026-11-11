@@ -94,13 +94,8 @@ fn ball_flight_matches_python_reference_fixture() {
     assert!(result.completed);
     let final_point = result.points.last().expect("trajectory has a final point");
     assert_eq!(result.steps, 126);
-    assert_close(final_point.t, 2.520_000_000_000_002, 1e-12, "landing time");
-    assert_close(final_point.x, 65.398_808_090_680_66, 1e-10, "landing x");
-    assert_close(final_point.y, 1.010_106_797_748_850_7, 1e-12, "landing y");
-    assert_close(
-        final_point.z,
-        -0.008_670_452_489_379_865,
-        1e-12,
-        "landing z",
-    );
+    assert_close(final_point.t, 2.519_417_419_531_156, 1e-12, "landing time");
+    assert_close(final_point.x, 65.387_440_022_858_91, 1e-10, "landing x");
+    assert_close(final_point.y, 1.009_920_987_087_706, 1e-12, "landing y");
+    assert_close(final_point.z, 0.0, 1e-12, "landing z");
 }

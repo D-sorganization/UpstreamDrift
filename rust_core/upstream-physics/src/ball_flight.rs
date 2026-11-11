@@ -159,6 +159,32 @@ impl BallTrajectoryResult {
     }
 }
 
+/// Linearly interpolate the segment between ``prev`` and ``final_pt`` to ``z = 0``.
+///
+/// Preconditions: ``prev.z > 0``, ``final_pt.z <= 0``, and the segment crosses
+/// the ground plane (denominator non-zero). Matches the Python
+/// ``BallFlightSimulator.simulate_landing`` convention.
+fn interpolate_ground_crossing(
+    prev: &TrajectoryPoint,
+    final_pt: &TrajectoryPoint,
+) -> TrajectoryPoint {
+    let denom = prev.z - final_pt.z;
+    let alpha = if denom.abs() > 1e-15 {
+        prev.z / denom
+    } else {
+        1.0
+    };
+    TrajectoryPoint {
+        t: prev.t + alpha * (final_pt.t - prev.t),
+        x: prev.x + alpha * (final_pt.x - prev.x),
+        y: prev.y + alpha * (final_pt.y - prev.y),
+        z: 0.0,
+        vx: prev.vx + alpha * (final_pt.vx - prev.vx),
+        vy: prev.vy + alpha * (final_pt.vy - prev.vy),
+        vz: prev.vz + alpha * (final_pt.vz - prev.vz),
+    }
+}
+
 fn integrated_forces_at_state(
     state: &[f64],
     spin_axis_v: &Vector3,
@@ -300,15 +326,16 @@ pub fn simulate_ball_trajectory(
         vec![velocity.x, velocity.y, velocity.z, ax, ay, az, domega]
     };
 
-    // Terminate when ball returns to ground (z ≤ 0, after initial launch)
-    let terminate = |t: f64, state: &[f64]| -> bool { t > 0.05 && state[2] <= 0.0 };
+    // Terminate on descending ground contact: z ≤ 0 while vz < 0. The vz guard
+    // rejects RK4 undershoot below z = 0 before apex (replaces the old t > 0.05 s).
+    let terminate = |_t: f64, state: &[f64]| -> bool { state[2] <= 0.0 && state[5] < 0.0 };
 
     let max_time = config.max_steps as f64 * config.dt;
     let result = integrate(derivative, 0.0, max_time, &y0, config, Some(terminate))?;
 
     // Convert IntegrationResult to BallTrajectoryResult
     let state_dim = result.state_dim;
-    let points: Vec<TrajectoryPoint> = result
+    let mut points: Vec<TrajectoryPoint> = result
         .times
         .iter()
         .zip(result.states.chunks(state_dim))
@@ -323,12 +350,21 @@ pub fn simulate_ball_trajectory(
         })
         .collect();
 
+    if points.len() >= 2 {
+        let last_idx = points.len() - 1;
+        let prev = points[last_idx - 1].clone();
+        let last = points[last_idx].clone();
+        if prev.z > 0.0 && last.z <= 0.0 && last.vz < 0.0 {
+            points[last_idx] = interpolate_ground_crossing(&prev, &last);
+        }
+    }
+
     // Landing (termination by ground contact) is a successful outcome, not an
     // aborted integration.  Override completed=true whenever the final point
-    // reached z ≤ 0 after the minimum flight time.
+    // reached z ≤ 0 on descent.
     let landed = points
         .last()
-        .map(|p| p.z <= 0.0 && p.t > 0.05)
+        .map(|p| p.z <= 0.0 && p.vz < 0.0)
         .unwrap_or(false);
 
     let step_forces = if record_integrated_forces {
@@ -630,6 +666,34 @@ mod tests {
             headwind_range < base_range,
             "Headwind range {headwind_range:.2} should be less than no-wind range {base_range:.2}"
         );
+    }
+
+    #[test]
+    fn test_landing_point_interpolated_to_ground_plane() {
+        let result = simulate_ball_trajectory(
+            [0.0, 0.0, 0.5],
+            [32.0, 0.5, 18.0],
+            [0.0, 1.0, 0.0],
+            220.0,
+            [0.0, 0.0, -9.81],
+            [-2.0, 0.0, 0.0],
+            &AeroBallProperties::default(),
+            &AirProperties::default(),
+            &IntegratorConfig {
+                dt: 0.02,
+                max_steps: 1_000,
+            },
+            false,
+        )
+        .unwrap();
+        let final_point = result.points.last().expect("trajectory has a final point");
+        assert!(result.completed);
+        assert!(
+            final_point.z.abs() < 1e-12,
+            "landing must be interpolated to z=0, got z={}",
+            final_point.z
+        );
+        assert!(final_point.vz < 0.0, "landing must occur on descent");
     }
 
     /// Test: normal landing must report completed = true (issue #2484).

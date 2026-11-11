@@ -83,11 +83,44 @@ def _canonicalize_sign(q: np.ndarray) -> np.ndarray:
 
 
 def quat_inverse_distance(q1: np.ndarray, q2: np.ndarray) -> float:
-    """Geodesic distance on the unit-quaternion double cover."""
-    a = np.asarray(q1, dtype=np.float64)
-    b = np.asarray(q2, dtype=np.float64)
-    dot = float(np.clip(abs(np.dot(a, b)), -1.0, 1.0))
-    return float(np.arccos(dot))
+    """Return the SO(3) rotation angle ``θ`` in radians between two orientations.
+
+    Quaternions use ``[w, x, y, z]`` order. Inputs are normalized; antipodal
+    ``q`` and ``-q`` represent the same rotation and yield ``θ = 0``. The angle
+    lies in ``[0, π]`` and matches
+    :func:`motion_matching._geodesic.quaternion_geodesic_angles` for a single pair.
+    """
+    a = np.asarray(q1, dtype=np.float64).reshape(-1)
+    b = np.asarray(q2, dtype=np.float64).reshape(-1)
+    if a.shape != (4,) or b.shape != (4,):
+        raise ValueError(
+            f"quaternions must have shape (4,); got {a.shape} and {b.shape}"
+        )
+    a_norm = math.sqrt(np.dot(a, a))
+    b_norm = math.sqrt(np.dot(b, b))
+    if a_norm == 0.0 or b_norm == 0.0:
+        raise ValueError("quaternions must be non-zero")
+    a = a / a_norm
+    b = b / b_norm
+    dot = float(np.dot(a, b))
+    flipped = dot < 0.0
+    if flipped:
+        b = -b
+        dot = -dot
+    diff_norm = math.sqrt(np.dot(a - b, a - b))
+    if diff_norm < 1e-15:
+        return 0.0
+    if dot > 1.0 - 1e-15 and not flipped:
+        w0, x0, y0, z0 = a
+        w1, x1, y1, z1 = b
+        rw = w0 * w1 + x0 * x1 + y0 * y1 + z0 * z1
+        rx = w0 * x1 - x0 * w1 - y0 * z1 + z0 * y1
+        ry = w0 * y1 - x0 * z1 + y0 * w1 - z0 * x1
+        rz = w0 * z1 - x0 * y1 + y0 * x1 + z0 * w1
+        imag = math.sqrt(rx * rx + ry * ry + rz * rz)
+        return float(2.0 * math.atan2(imag, abs(rw)))
+    dot = min(1.0, max(-1.0, dot))
+    return float(2.0 * math.atan2(math.sqrt(max(0.0, 1.0 - dot * dot)), dot))
 
 
 def slerp(q0: np.ndarray, q1: np.ndarray, t: float) -> np.ndarray:
