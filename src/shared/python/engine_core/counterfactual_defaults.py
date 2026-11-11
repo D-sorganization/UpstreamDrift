@@ -57,7 +57,7 @@ def _apply_configuration(engine: object, q: np.ndarray, v: np.ndarray | None) ->
         if v is None:
             snap = _configuration_snapshot(engine)
             if snap is None:
-                raise NotImplementedError(
+                raise NotImplementedError(  # tracked: #14943
                     "set_state(q, v) needs velocity snapshot or explicit v"
                 )
             v = np.zeros_like(snap[1])
@@ -65,7 +65,7 @@ def _apply_configuration(engine: object, q: np.ndarray, v: np.ndarray | None) ->
             set_state(q_arr, np.asarray(v, dtype=float))
         except TypeError:
             # EngineState-only engines are not supported by the default hook.
-            raise NotImplementedError(
+            raise NotImplementedError(  # tracked: #14943
                 "Engine set_state does not accept (q, v); "
                 "override compute_control_acceleration_at_state"
             ) from None
@@ -73,7 +73,7 @@ def _apply_configuration(engine: object, q: np.ndarray, v: np.ndarray | None) ->
 
     set_positions = getattr(engine, "set_joint_positions", None)
     if not callable(set_positions):
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #14943
             "Engine has no set_state(q, v) or set_joint_positions; "
             "override compute_control_acceleration_at_state"
         )
@@ -91,7 +91,7 @@ def _evaluate_at_fixed_configuration(
     q_arr = np.asarray(q, dtype=float)
     snapshot = _configuration_snapshot(engine)
     if snapshot is None:
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #14943
             "Engine does not expose readable joint/state configuration; "
             "override compute_control_acceleration_at_state"
         )
