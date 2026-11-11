@@ -44,6 +44,34 @@ ROUNDTRIP_URDF = """<?xml version="1.0"?>
 </robot>
 """
 
+ROTATED_JOINT_ROUNDTRIP_URDF = """<?xml version="1.0"?>
+<robot name="rotated_arm">
+  <link name="base">
+    <inertial>
+      <mass value="2.0"/>
+      <inertia ixx="0.1" iyy="0.2" izz="0.3" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0.02 0 0" rpy="0.25 0.1 0"/>
+      <geometry><sphere radius="0.05"/></geometry>
+    </visual>
+  </link>
+  <link name="link1">
+    <inertial>
+      <mass value="1.0"/>
+      <inertia ixx="0.05" iyy="0.05" izz="0.05" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="j1" type="revolute">
+    <parent link="base"/>
+    <child link="link1"/>
+    <origin xyz="0.1 0.2 0.3" rpy="0.5 0.3 0.1"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.5" upper="1.5" effort="10" velocity="1"/>
+  </joint>
+</robot>
+"""
+
 FIXED_JOINT_ROUNDTRIP_URDF = """<?xml version="1.0"?>
 <robot name="fixed_mount">
   <link name="base">
@@ -121,6 +149,36 @@ class TestRoundTrip:
 
         assert masses["base"] == pytest.approx(2.0)
         assert masses["link1"] == pytest.approx(1.0)
+
+    def test_roundtrip_preserves_joint_and_visual_rotations(
+        self, converter: MJCFConverter
+    ) -> None:
+        original = converter._urdf_parser.parse(ROTATED_JOINT_ROUNDTRIP_URDF)
+        mjcf = converter.urdf_to_mjcf(ROTATED_JOINT_ROUNDTRIP_URDF)
+        assert 'quat="' in mjcf
+        reparsed = converter._parse_mjcf(_element(mjcf))
+
+        original_joint = original.joints[0]
+        reparsed_joint = reparsed.joints[0]
+        assert reparsed_joint.origin.xyz == pytest.approx(
+            original_joint.origin.xyz, abs=1e-9
+        )
+        assert reparsed_joint.origin.rpy == pytest.approx(
+            original_joint.origin.rpy, abs=1e-6
+        )
+
+        base = next(link for link in reparsed.links if link.name == "base")
+        original_base = next(link for link in original.links if link.name == "base")
+        assert base.visual_origin.rpy == pytest.approx(
+            original_base.visual_origin.rpy, abs=1e-6
+        )
+
+        roundtripped_urdf = converter.mjcf_to_urdf(mjcf)
+        urdf_model = converter._urdf_parser.parse(roundtripped_urdf)
+        urdf_joint = urdf_model.joints[0]
+        assert urdf_joint.origin.rpy == pytest.approx(
+            original_joint.origin.rpy, abs=1e-6
+        )
 
     def test_roundtrip_preserves_diagonal_inertia(
         self, converter: MJCFConverter

@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import defusedxml.ElementTree as DefusedET
+from scipy.spatial.transform import Rotation
 
 if TYPE_CHECKING:
     # Type-only: never imported at runtime, and the single parse in this
@@ -84,6 +85,35 @@ class MJCFConfig:
 
 
 _WORLD_LINK = "world"
+
+
+def _is_zero_rpy(rpy: tuple[float, float, float]) -> bool:
+    return all(abs(value) < 1e-12 for value in rpy)
+
+
+def _rpy_to_mjcf_quat_attr(rpy: tuple[float, float, float]) -> str:
+    """MJCF ``quat`` attribute (w x y z) from URDF fixed-axis roll-pitch-yaw."""
+    if _is_zero_rpy(rpy):
+        return ""
+    x, y, z, w = Rotation.from_euler("xyz", rpy).as_quat()
+    return f' quat="{w:.6g} {x:.6g} {y:.6g} {z:.6g}"'
+
+
+def _origin_from_mjcf_element(elem: Any) -> Origin:
+    """Decode MJCF ``pos`` with optional ``quat`` or ``euler`` into an Origin."""
+    pos_str = elem.get("pos", "0 0 0")
+    xyz = tuple(float(value) for value in pos_str.split())
+    rpy = (0.0, 0.0, 0.0)
+    quat_str = elem.get("quat")
+    if quat_str:
+        w, x, y, z = (float(value) for value in quat_str.split())
+        rpy = tuple(Rotation.from_quat([x, y, z, w]).as_euler("xyz"))
+    else:
+        euler_str = elem.get("euler")
+        if euler_str:
+            angles = [float(value) for value in euler_str.split()]
+            rpy = tuple(Rotation.from_euler("xyz", angles).as_euler("xyz"))
+    return Origin(xyz=xyz, rpy=rpy)
 
 
 def _virtual_link(name: str) -> Link:
@@ -311,13 +341,15 @@ class MJCFConverter:
                 connecting_joint = joint
                 break
 
-        # Body element with position
+        # Body element with position and orientation (URDF joint origin).
         pos = "0 0 0"
+        quat_attr = ""
         if connecting_joint:
             xyz = connecting_joint.origin.xyz
             pos = f"{xyz[0]:.6g} {xyz[1]:.6g} {xyz[2]:.6g}"
+            quat_attr = _rpy_to_mjcf_quat_attr(connecting_joint.origin.rpy)
 
-        lines.append(f'{indent}<body name="{link_name}" pos="{pos}">')
+        lines.append(f'{indent}<body name="{link_name}" pos="{pos}"{quat_attr}>')
 
         # Inertial
         if link.inertia.mass > 0:
@@ -398,39 +430,54 @@ class MJCFConverter:
             raise ValueError("geometry must be provided")
         pos = origin.xyz
         pos_str = f"{pos[0]:.6g} {pos[1]:.6g} {pos[2]:.6g}"
+        quat_attr = _rpy_to_mjcf_quat_attr(origin.rpy)
 
         if geometry.geometry_type == GeometryType.BOX:
             size = geometry.dimensions
             # MuJoCo uses half-sizes
             half_size = f"{size[0] / 2:.6g} {size[1] / 2:.6g} {size[2] / 2:.6g}"
-            return f'{indent}<geom type="box" size="{half_size}" pos="{pos_str}"/>'
+            return (
+                f'{indent}<geom type="box" size="{half_size}" '
+                f'pos="{pos_str}"{quat_attr}/>'
+            )
 
         if geometry.geometry_type == GeometryType.CYLINDER:
             radius, length = geometry.dimensions
             # MuJoCo cylinder: radius and half-length
             return (
                 f'{indent}<geom type="cylinder" '
-                f'size="{radius:.6g} {length / 2:.6g}" pos="{pos_str}"/>'
+                f'size="{radius:.6g} {length / 2:.6g}" '
+                f'pos="{pos_str}"{quat_attr}/>'
             )
 
         if geometry.geometry_type == GeometryType.SPHERE:
             radius = geometry.dimensions[0]
-            return f'{indent}<geom type="sphere" size="{radius:.6g}" pos="{pos_str}"/>'
+            return (
+                f'{indent}<geom type="sphere" size="{radius:.6g}" '
+                f'pos="{pos_str}"{quat_attr}/>'
+            )
 
         if geometry.geometry_type == GeometryType.CAPSULE:
             radius, length = geometry.dimensions
             return (
                 f'{indent}<geom type="capsule" '
-                f'size="{radius:.6g} {length / 2:.6g}" pos="{pos_str}"/>'
+                f'size="{radius:.6g} {length / 2:.6g}" '
+                f'pos="{pos_str}"{quat_attr}/>'
             )
 
         if geometry.geometry_type == GeometryType.MESH:
             mesh_name = (
                 Path(geometry.mesh_filename).stem if geometry.mesh_filename else "mesh"
             )
-            return f'{indent}<geom type="mesh" mesh="{mesh_name}" pos="{pos_str}"/>'
+            return (
+                f'{indent}<geom type="mesh" mesh="{mesh_name}" '
+                f'pos="{pos_str}"{quat_attr}/>'
+            )
 
-        return f'{indent}<geom type="box" size="0.05 0.05 0.05" pos="{pos_str}"/>'
+        return (
+            f'{indent}<geom type="box" size="0.05 0.05 0.05" '
+            f'pos="{pos_str}"{quat_attr}/>'
+        )
 
     def _parse_mjcf(self, root: ET.Element) -> ParsedModel:
         """Parse MJCF into ParsedModel."""
@@ -545,7 +592,7 @@ class MJCFConverter:
         body_elem: ET.Element,
         parent_name: str,
         body_name: str,
-        pos: tuple[float, ...],
+        origin: Origin,
         joint_elem: ET.Element | None = None,
     ) -> Joint:
         """Parse joint elements and create a URDF joint connecting to parent.
@@ -567,7 +614,7 @@ class MJCFConverter:
                 joint_type=JointType.FIXED,
                 parent=parent_name,
                 child=body_name,
-                origin=Origin(xyz=pos),
+                origin=origin,
             )
 
         # Use the requested joint, else the first non-free joint, else the first
@@ -599,7 +646,7 @@ class MJCFConverter:
             joint_type=joint_type,
             parent=parent_name,
             child=body_name,
-            origin=Origin(xyz=pos),
+            origin=origin,
             axis=axis,
             limits=limits,
             dynamics=dynamics,
@@ -615,8 +662,7 @@ class MJCFConverter:
         """Recursively parse body elements."""
         for body_elem in elem.findall("body"):
             body_name = body_elem.get("name", f"body_{len(links)}")
-            pos_str = body_elem.get("pos", "0 0 0")
-            pos = tuple(float(v) for v in pos_str.split())
+            joint_origin = _origin_from_mjcf_element(body_elem)
 
             inertia = self._parse_body_inertial(body_elem)
             visual_geom, visual_origin, visual_material = self._parse_body_visual(
@@ -642,7 +688,7 @@ class MJCFConverter:
             attach_to = _WORLD_LINK if root_dofs else parent_name
             if attach_to:
                 self._append_body_joints(
-                    body_elem, attach_to, body_name, pos, links, joints
+                    body_elem, attach_to, body_name, joint_origin, links, joints
                 )
 
             self._parse_mjcf_body(body_elem, body_name, links, joints)
@@ -652,7 +698,7 @@ class MJCFConverter:
         body_elem: ET.Element,
         parent_name: str,
         body_name: str,
-        pos: tuple[float, ...],
+        origin: Origin,
         links: list[Link],
         joints: list[Joint],
     ) -> None:
@@ -666,10 +712,10 @@ class MJCFConverter:
         dofs = [j for j in body_elem.findall("joint") if j.get("type") != "free"]
         if len(dofs) < 2:
             joints.append(
-                self._parse_body_joint(body_elem, parent_name, body_name, pos)
+                self._parse_body_joint(body_elem, parent_name, body_name, origin)
             )
             return
-        current_parent, origin = parent_name, pos
+        current_parent, joint_origin = parent_name, origin
         for index, joint_elem in enumerate(dofs):
             child = body_name
             if index < len(dofs) - 1:
@@ -678,19 +724,22 @@ class MJCFConverter:
                 links.insert(len(links) - 1, _virtual_link(child))
             joints.append(
                 self._parse_body_joint(
-                    body_elem, current_parent, child, origin, joint_elem=joint_elem
+                    body_elem,
+                    current_parent,
+                    child,
+                    joint_origin,
+                    joint_elem=joint_elem,
                 )
             )
-            current_parent, origin = child, (0.0, 0.0, 0.0)
+            current_parent, joint_origin = child, Origin()
 
     def _parse_mjcf_geom(self, geom_elem: ET.Element) -> tuple[Geometry | None, Origin]:
         """Parse a MuJoCo geom element into a Geometry and Origin."""
         if geom_elem is None:
             raise ValueError("geom_elem must be provided")
         geom_type = geom_elem.get("type", "sphere")
-        pos_str = geom_elem.get("pos", "0 0 0")
-        pos = tuple(float(v) for v in pos_str.split())
-        origin = Origin(xyz=pos)
+        origin = _origin_from_mjcf_element(geom_elem)
+        pos = origin.xyz
 
         size_str = geom_elem.get("size", "")
         sizes = [float(v) for v in size_str.split()] if size_str else []
