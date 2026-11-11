@@ -4,20 +4,20 @@
     {
       "original_path": "AGENT_HANDOFF.md",
       "archive_path": "docs/agents/handoffs/archive/shot-pattern-integration-20261011/AGENT_HANDOFF.original.md.archive",
-      "size_bytes": 164056,
-      "sha256": "e4a374d52cdd5d9065ab2a5fc8f1affd9fb048a01276e3b48a68310bf55e7099"
+      "size_bytes": 164020,
+      "sha256": "bec93a510a099990cf2b0d26f2417403ea6e80318249e47942c4c97f41cf439b"
     },
     {
       "original_path": "docs/agents/handoffs/shot-pattern-integration-peer-records.md",
       "archive_path": "docs/agents/handoffs/archive/shot-pattern-integration-20261011/shot-pattern-integration-peer-records.original.md.archive",
-      "size_bytes": 133810,
-      "sha256": "ad8971b2dd26348ddc1c8f77013d8e3e5863befcd80841cf93f5e72062967e8c"
+      "size_bytes": 133780,
+      "sha256": "641199ab4e3cad1c0dd5d05a612395a81bba990fead92406d9f2ec330d906899"
     },
     {
       "original_path": "AGENT_HANDOFF.md@9c9000",
       "archive_path": "docs/agents/handoffs/archive/shot-pattern-integration-20261011/AGENT_HANDOFF.incoming-9c9000.md.archive",
-      "size_bytes": 165405,
-      "sha256": "a54af4af964aa9dfc5933053dc113d09aadf91c4b077adeb39d3c15fcc789a2c"
+      "size_bytes": 165369,
+      "sha256": "fe796c9f29b9207dfc8aa2fc27df0e9d172b7a4d7ae2a34a8eca915049be6f46"
     }
   ],
   "splits": [
