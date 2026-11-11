@@ -14,8 +14,10 @@ Hybrid formulation (the spec owns the dynamics, MyoFullBody owns the muscles):
 
 Each frame solves ``min sum(a^2) + w * sum(reserve^2)`` with ``0 <= a <= 1`` and
 ``tau = R^T (F_passive + a * F_active) + reserve`` (the bounded least-squares of
-:func:`musculoskeletal_static_opt.solve_frame`).  Reserve actuators exist for
-every spec coordinate; their size is the measure of what the muscles cannot do.
+:func:`musculoskeletal_static_opt.solve_frame`).  The cost is an unweighted sum
+of squared activations and reserves (no ``F_max`` or PCSA weighting).  Reserve
+actuators exist for every spec coordinate; their size is the measure of what
+the muscles cannot do.
 """
 
 from __future__ import annotations
@@ -166,6 +168,22 @@ class MuscleBasis:
         return phi[:, self.columns].T @ np.asarray(self.data.qfrc_actuator)
 
 
+def frame_quadratic_cost(
+    activation: Array,
+    active: Array,
+    passive: Array,
+    moment: Array,
+    tau: Array,
+    *,
+    reserve_weight: float,
+) -> float:
+    """Return ``sum(a^2) + w * sum(reserve^2)`` for a candidate activation."""
+    gain = moment.T * active[None, :]
+    offset = tau - moment.T @ passive
+    reserve = offset - gain @ activation
+    return float(activation @ activation + reserve_weight * (reserve @ reserve))
+
+
 def solve_frame(
     active: Array,
     passive: Array,
@@ -204,12 +222,12 @@ def solve_frame(
 
     def value(a: Array) -> float:
         r = offset - gain @ a
-        return 0.5 * float(a @ a) + 0.5 * w * float(r @ r)
+        return float(a @ a) + w * float(r @ r)
 
     a = np.zeros(nm)
     converged = False
     for _ in range(max_iter):
-        grad = a - w * (gain.T @ (offset - gain @ a))
+        grad = 2.0 * a - 2.0 * w * (gain.T @ (offset - gain @ a))
         gap = np.abs(a - np.clip(a - grad, 0.0, 1.0))
         if gap.max() < tol:
             converged = True
@@ -234,7 +252,7 @@ def solve_frame(
             converged = True  # no representable decrease left (ill-conditioned tail)
             break
     reserve = offset - gain @ a
-    cost = float(a @ a + w * (reserve @ reserve))
+    cost = value(a)
     from src.engines.physics_engines.opensim.python import (
         musculoskeletal_static_opt as so_runtime,
     )

@@ -6,6 +6,11 @@
 //! matrices, add Newmark integration, and wire PyO3 without changing these
 //! tested primitives.
 //!
+//! **Modeling scope (SCI-10):** linear Euler–Bernoulli bending only. Element
+//! stiffness does not include axial-load geometric stiffening `K_G(N)`, and
+//! external loads do not add club-head CG-offset tip moments. Cantilever
+//! deflection checks use `δ = P L³ / (3 EI)` on the linear stiffness alone.
+//!
 //! # Design by Contract
 //! - Element length must be finite and positive.
 //! - Bending stiffness `EI` must be finite and positive.
@@ -195,6 +200,30 @@ mod tests {
 
         assert_symmetric(element_stiffness_matrix(&element).expect("stiffness matrix"));
         assert_symmetric(element_mass_matrix(&element).expect("mass matrix"));
+    }
+
+    #[test]
+    fn cantilever_tip_deflection_matches_beam_theory() {
+        let length = 1.0_f64;
+        let ei = 50.0_f64;
+        let load = 12.0_f64;
+        let element = BeamElement::try_new(0, 1, length, ei, 0.0, 0.0).expect("element");
+        let k = element_stiffness_matrix(&element).expect("stiffness");
+        let k_ff = [
+            [k[2][2], k[2][3]],
+            [k[3][2], k[3][3]],
+        ];
+        let delta_expected = load * length.powi(3) / (3.0 * ei);
+        let delta = solve_2x2(k_ff, [load, 0.0])[0];
+        assert_relative_eq!(delta, delta_expected, epsilon = 1e-12);
+    }
+
+    fn solve_2x2(m: [[f64; 2]; 2], b: [f64; 2]) -> [f64; 2] {
+        let det = m[0][0] * m[1][1] - m[0][1] * m[1][0];
+        [
+            (b[0] * m[1][1] - b[1] * m[0][1]) / det,
+            (m[0][0] * b[1] - m[1][0] * b[0]) / det,
+        ]
     }
 
     #[test]
