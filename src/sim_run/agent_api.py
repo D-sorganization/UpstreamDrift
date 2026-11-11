@@ -119,8 +119,8 @@ def _status_from_engine_probe(engine_type: str) -> tuple[RuntimeStatus, str | No
 def _probe_import(module_name: str) -> tuple[RuntimeStatus, str | None]:
     try:
         importlib.import_module(module_name)
-    except Exception as exc:  # noqa: BLE001 — inventory must not raise
-        return "unavailable", f"import failed ({type(exc).__name__}: {exc})"
+    except ImportError as exc:
+        return "unavailable", f"import failed (ImportError: {exc})"
     return "available", None
 
 
