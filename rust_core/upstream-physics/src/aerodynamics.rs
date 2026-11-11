@@ -3,6 +3,18 @@
 //! Computes drag and a single spin-induced Magnus/lift force using empirical correlations
 //! from golf ball aerodynamics literature.
 //!
+//! # World Frame and Spin Sign Convention
+//!
+//! The native kernel uses a right-handed world frame with **X** downrange (target
+//! direction), **Y** left, and **Z** up. Magnus/lift direction follows **ω × v**
+//! (relative air velocity). For a level **+X** shot, **backspin** is rotation about
+//! **−Y** (`ω_y < 0`), which produces upward Magnus (**+Z**). A **+Y** spin component
+//! with **+X** velocity is **topspin** and bends the trajectory downward (**−Z** Magnus).
+//!
+//! `compute_aero_forces` returns spin lift only in `AeroForces::magnus`. The `lift`
+//! field is intentionally zero so consumers do not double-count; `compute_lift` is the
+//! same transverse-spin kernel exposed for direct call sites and parity checks.
+//!
 //! # Design by Contract
 //! - All velocity/spin inputs must be finite (no NaN/Inf)
 //! - Air density must be positive
@@ -26,6 +38,32 @@ const DRAG_CRISIS_RECOVERY_RE: f64 = 7.0e5;
 const MAX_LIFT_COEFFICIENT: f64 = 0.26;
 const PENNER_LIFT_SCALE: f64 = 0.70;
 const PENNER_LIFT_EXPONENT: f64 = 0.645;
+
+/// Transverse spin rate ||ω × v̂|| [rad/s] used for Magnus/lift magnitude.
+///
+/// Equivalent to `||ω|| sin θ` where θ is the angle between spin and velocity.
+/// Goes smoothly to zero as ω aligns with v (rifle / gyro spin).
+#[must_use]
+fn transverse_spin_rate(velocity: &Vector3, spin: &Vector3, speed: f64) -> f64 {
+    if speed < 1e-6 {
+        return 0.0;
+    }
+    spin.cross(velocity).magnitude() / speed
+}
+
+/// Dimensionless spin parameter S = r · ||ω × v̂|| / |v| for Penner lift curves.
+#[must_use]
+fn spin_parameter_transverse(
+    velocity: &Vector3,
+    spin: &Vector3,
+    ball_radius: f64,
+    speed: f64,
+) -> f64 {
+    if speed < 1e-6 {
+        return 0.0;
+    }
+    ball_radius * transverse_spin_rate(velocity, spin, speed) / speed
+}
 
 /// Air properties at given atmospheric conditions.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -194,6 +232,7 @@ pub fn compute_aero_forces(
     air.validate().expect("invalid air properties");
 
     let drag = compute_drag(velocity, ball, air);
+    // Legacy lift slot stays zero: combined kernels emit one spin force in `magnus`.
     let lift = Vector3::zero();
     let magnus = compute_magnus(velocity, spin, ball, air);
 
@@ -222,9 +261,9 @@ pub fn compute_drag(velocity: &Vector3, ball: &AeroBallProperties, air: &AirProp
     )
 }
 
-/// Compute lift force from backspin.
+/// Compute lift force from spin (same transverse-spin magnitude as `compute_magnus`).
 ///
-/// Lift direction: spin_axis × velocity (normalized)
+/// Lift direction: ω̂ × v (normalized). Uses ||ω × v̂|| in the Penner spin parameter.
 #[must_use]
 pub fn compute_lift(
     velocity: &Vector3,
@@ -238,11 +277,15 @@ pub fn compute_lift(
     }
 
     let spin_mag = spin.magnitude();
-    let spin_ratio = ball.radius * spin_mag / (speed + 1e-10);
+    if spin_mag < 1e-6 {
+        return Vector3::new(0.0, 0.0, 0.0);
+    }
+
+    let spin_ratio = spin_parameter_transverse(velocity, spin, ball.radius, speed);
     let cl = compute_lift_coefficient(spin_ratio);
 
     // Spin axis (unit vector)
-    let spin_inv = 1.0 / (spin_mag + 1e-10);
+    let spin_inv = 1.0 / spin_mag;
     let spin_axis = Vector3::new(spin.x * spin_inv, spin.y * spin_inv, spin.z * spin_inv);
 
     // Lift direction: spin_axis × velocity
@@ -265,7 +308,8 @@ pub fn compute_lift(
 
 /// Compute the single spin-induced Magnus/lift force.
 ///
-/// F_magnus = 0.5 * ρ * Cl * A * |v|² * (ω × v) / |ω × v|
+/// F_magnus = 0.5 * ρ * Cl(S) * A * |v|² * (ω × v) / |ω × v| with
+/// S = r · ||ω × v̂|| / |v| (transverse spin, zero when ω ∥ v).
 #[must_use]
 pub fn compute_magnus(
     velocity: &Vector3,
@@ -287,7 +331,7 @@ pub fn compute_magnus(
         return Vector3::new(0.0, 0.0, 0.0);
     }
 
-    let spin_param = ball.radius * spin_mag / speed;
+    let spin_param = spin_parameter_transverse(velocity, spin, ball.radius, speed);
     let cl = compute_magnus_coefficient(spin_param);
     let f_mag = 0.5 * air.density * cl * ball.area * speed * speed;
     let inv_norm = 1.0 / magnus_norm;
@@ -622,24 +666,73 @@ mod tests {
     // ── Lift Tests ───────────────────────────────────────────────────────
 
     #[test]
-    fn test_lift_with_backspin() {
-        // Backspin (positive y-spin) with forward velocity (x direction)
-        // Should produce upward lift (positive z)
+    fn test_backspin_produces_upward_magnus_in_documented_frame() {
+        // Documented frame: +X downrange, +Y left, +Z up; backspin is −Y.
+        let v = Vector3::new(50.0, 0.0, 0.0);
+        let spin = Vector3::new(0.0, -300.0, 0.0);
+        let ball = default_ball();
+        let air = default_air();
+
+        let magnus = compute_magnus(&v, &spin, &ball, &air);
+        assert!(magnus.z > 0.01, "backspin (−Y) must lift upward (+Z): got {}", magnus.z);
+        assert!(magnus.x.abs() < 1e-6 && magnus.y.abs() < 1e-6);
+    }
+
+    #[test]
+    fn test_topspin_plus_y_produces_downward_magnus_for_plus_x_shot() {
         let v = Vector3::new(50.0, 0.0, 0.0);
         let spin = Vector3::new(0.0, 300.0, 0.0);
         let ball = default_ball();
         let air = default_air();
 
-        let lift = compute_lift(&v, &spin, &ball, &air);
+        let magnus = compute_magnus(&v, &spin, &ball, &air);
+        assert!(magnus.z < -0.01, "+Y topspin must produce downward Magnus: got {}", magnus.z);
+    }
 
-        // Lift should have a significant z-component
-        // spin_axis × velocity = (0,1,0) × (50,0,0) = (0,0,-50) — negative z
-        // Actually: (0,1,0) × (50,0,0) = (1*0 - 0*0, 0*50 - 0*0, 0*0 - 1*50) = (0, 0, -50)
-        // The magnitude matters, sign depends on cross product direction
+    #[test]
+    fn test_magnus_magnitude_uses_transverse_spin() {
+        let v = Vector3::new(50.0, 0.0, 0.0);
+        let rifle = Vector3::new(250.0, 0.0, 0.0);
+        let ball = default_ball();
+        let air = default_air();
+
+        let magnus_rifle = compute_magnus(&v, &rifle, &ball, &air);
         assert!(
-            lift.magnitude() > 0.01,
-            "Backspin should produce non-zero lift"
+            magnus_rifle.magnitude() < 1e-6,
+            "ω ∥ v should yield zero Magnus, got {}",
+            magnus_rifle.magnitude()
         );
+
+        let transverse = Vector3::new(250.0, 8.0, 0.0);
+        let magnus_near = compute_magnus(&v, &transverse, &ball, &air);
+        assert!(
+            magnus_near.magnitude() > 0.01,
+            "small transverse component should restore Magnus"
+        );
+    }
+
+    #[test]
+    fn test_magnus_magnitude_continuous_near_rifle_spin() {
+        let v = Vector3::new(50.0, 0.0, 0.0);
+        let ball = default_ball();
+        let air = default_air();
+        let omega = 250.0;
+
+        let epsilons = [5.0, 1.0, 0.1, 1e-2, 1e-4, 1e-6, 0.0];
+        let mut prev = compute_magnus(&v, &Vector3::new(omega, epsilons[0], 0.0), &ball, &air)
+            .magnitude();
+        for eps in epsilons.iter().skip(1) {
+            let spin = Vector3::new(omega, *eps, 0.0);
+            let mag = compute_magnus(&v, &spin, &ball, &air).magnitude();
+            assert!(
+                mag <= prev + 1e-9,
+                "Magnus magnitude should decrease smoothly as ω aligns with v"
+            );
+            prev = mag;
+        }
+        let full_transverse =
+            compute_magnus(&v, &Vector3::new(0.0, omega, 0.0), &ball, &air).magnitude();
+        assert!(prev < full_transverse * 0.05, "near-rifle spin should be much weaker than pure topspin");
     }
 
     #[test]
