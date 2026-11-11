@@ -27,8 +27,8 @@ def _equilibrium_state(
         EquilibriumSolver(actuator.agonist),
         EquilibriumSolver(actuator.antagonist),
     )
-    l_ag = actuator.geometry.muscle_tendon_length_agonist(q)
-    l_ant = actuator.geometry.muscle_tendon_length_antagonist(q)
+    l_ag = actuator.geometry.l_mt(True, q)
+    l_ant = actuator.geometry.l_mt(False, q)
     return MTUJointState(
         a_ag,
         a_ant,
@@ -102,8 +102,8 @@ class TestCompliantEquilibrium:
             q = float(rng.uniform(-0.05, 0.45))
             a_ag = float(rng.uniform(0.1, 0.9))
             a_ant = float(rng.uniform(0.1, 0.9))
-            l_mt_ag = act.geometry.muscle_tendon_length_agonist(q)
-            l_mt_ant = act.geometry.muscle_tendon_length_antagonist(q)
+            l_mt_ag = act.geometry.l_mt(True, q)
+            l_mt_ant = act.geometry.l_mt(False, q)
             ok = True
             for muscle, l_mt, a in (
                 (act.agonist, l_mt_ag, a_ag),
