@@ -674,7 +674,11 @@ mod tests {
         let air = default_air();
 
         let magnus = compute_magnus(&v, &spin, &ball, &air);
-        assert!(magnus.z > 0.01, "backspin (−Y) must lift upward (+Z): got {}", magnus.z);
+        assert!(
+            magnus.z > 0.01,
+            "backspin (−Y) must lift upward (+Z): got {}",
+            magnus.z
+        );
         assert!(magnus.x.abs() < 1e-6 && magnus.y.abs() < 1e-6);
     }
 
@@ -686,7 +690,11 @@ mod tests {
         let air = default_air();
 
         let magnus = compute_magnus(&v, &spin, &ball, &air);
-        assert!(magnus.z < -0.01, "+Y topspin must produce downward Magnus: got {}", magnus.z);
+        assert!(
+            magnus.z < -0.01,
+            "+Y topspin must produce downward Magnus: got {}",
+            magnus.z
+        );
     }
 
     #[test]
@@ -719,8 +727,8 @@ mod tests {
         let omega = 250.0;
 
         let epsilons = [5.0, 1.0, 0.1, 1e-2, 1e-4, 1e-6, 0.0];
-        let mut prev = compute_magnus(&v, &Vector3::new(omega, epsilons[0], 0.0), &ball, &air)
-            .magnitude();
+        let mut prev =
+            compute_magnus(&v, &Vector3::new(omega, epsilons[0], 0.0), &ball, &air).magnitude();
         for eps in epsilons.iter().skip(1) {
             let spin = Vector3::new(omega, *eps, 0.0);
             let mag = compute_magnus(&v, &spin, &ball, &air).magnitude();
@@ -732,7 +740,10 @@ mod tests {
         }
         let full_transverse =
             compute_magnus(&v, &Vector3::new(0.0, omega, 0.0), &ball, &air).magnitude();
-        assert!(prev < full_transverse * 0.05, "near-rifle spin should be much weaker than pure topspin");
+        assert!(
+            prev < full_transverse * 0.05,
+            "near-rifle spin should be much weaker than pure topspin"
+        );
     }
 
     #[test]
