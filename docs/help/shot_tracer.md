@@ -82,6 +82,10 @@ model's colour come from
 Model background is in
 [../physics/BALL_FLIGHT_MODEL_DOCUMENTATION.md](../physics/BALL_FLIGHT_MODEL_DOCUMENTATION.md).
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/impact-mechanics-and-ball-flight.html): *Impact Mechanics and Ball Flight*.
+
 ## Limitations
 
 - **Every curve on this plot is model output, not measurement**, including the
