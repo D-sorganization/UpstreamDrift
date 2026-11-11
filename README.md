@@ -106,12 +106,24 @@ export for external analysis.
 
 ### Prerequisites
 
-- Python 3.11 or 3.12.
-- Git. The shared Tools layer (`theme`, `sidekick`, `chat`, `utils`, ...) is a
-  pinned submodule at `vendor/ud-tools`; the platform will not import without
+- **Python 3.11 or 3.12** with `venv` support (`python3 -m venv`; on Debian/Ubuntu
+  install the `python3-venv` or `python3.X-venv` package if `ensurepip` is
+  missing).
+- **Git.** The shared Tools layer (`theme`, `sidekick`, `chat`, `utils`, ...) is
+  a pinned submodule at `vendor/ud-tools`; the platform will not import without
   it. The repository does not use Git LFS.
-- MATLAB R2023a or later with Simulink and Simscape Multibody, only for the
-  MATLAB models.
+- **Rust** (`rustup` / Cargo), pinned by [`rust-toolchain.toml`](rust-toolchain.toml),
+  only when building `rust_core/` or WASM targets.
+- **Node.js** (20+) and npm, only when developing the Vite + Tauri surface under
+  `ui/` (see [CONTRIBUTING.md](CONTRIBUTING.md)).
+- **Windows:** MSVC Build Tools or the Visual C++ Redistributable for native
+  wheels (MuJoCo, PyQt6); see
+  [installation troubleshooting](docs/troubleshooting/installation.md).
+- **Linux:** OpenGL/OSMesa and GLFW packages for headless MuJoCo; Qt/X11
+  libraries for the PyQt6 desktop tiles — listed in
+  [installation troubleshooting](docs/troubleshooting/installation.md).
+- **MATLAB R2023a or later** with Simulink and Simscape Multibody, only for the
+  MATLAB Simscape models.
 
 The supported combinations of Python version, operating system, engine tier, and
 hardware are recorded in the
@@ -119,20 +131,52 @@ hardware are recorded in the
 
 ### Install
 
+Create and activate a virtual environment before installing into the checkout.
+
+**Linux and macOS (bash):**
+
 ```bash
 git clone https://github.com/D-sorganization/UpstreamDrift.git
 cd UpstreamDrift
 git submodule update --init --recursive vendor/ud-tools
 
+python3 -m venv .venv
+source .venv/bin/activate
+
+python -m pip install --upgrade pip
+pip install -e ".[dev]"
+
+# Optional: PyQt6 desktop tiles (model explorer, video analyzer, ...)
+# pip install -e ".[dev,gui-tools]"
+
+python scripts/ci/verify_installation.py
+```
+
+**Windows (PowerShell):**
+
+```powershell
+git clone https://github.com/D-sorganization/UpstreamDrift.git
+cd UpstreamDrift
+git submodule update --init --recursive vendor/ud-tools
+
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+python -m pip install --upgrade pip
 pip install -e ".[dev]"
 
 python scripts/ci/verify_installation.py
 ```
 
-Only the `vendor/ud-tools` submodule is required. The three model submodules
-(`shared/models/opensim/opensim-models`, `shared/models/myosuite/myo_sim`,
-`src/shared/tools/human-gazebo`) are optional and only needed for the
-experimental OpenSim/MyoSuite engines.
+Only the `vendor/ud-tools` submodule is required up front. The three model
+submodules below are optional and only needed for experimental OpenSim/MyoSuite
+work:
+
+```bash
+git submodule update --init shared/models/opensim/opensim-models
+git submodule update --init shared/models/myosuite/myo_sim
+git submodule update --init src/shared/tools/human-gazebo
+```
 
 ### Smaller Clone (Blobless)
 
@@ -143,7 +187,7 @@ transfers commits and trees up front and fetches file contents on demand:
 ```bash
 git clone --filter=blob:none https://github.com/D-sorganization/UpstreamDrift.git
 cd UpstreamDrift
-git submodule update --init vendor/ud-tools
+git submodule update --init --recursive vendor/ud-tools
 ```
 
 A blobless clone does not change the working tree. Checking out a branch still
@@ -166,11 +210,16 @@ conda activate upstream-drift
 Edit dependencies in `pyproject.toml` and run `make sync-deps` to regenerate
 `environment.yml`.
 
-For interface development without the physics engines:
+For interface development without the physics engines (with `.venv` activated):
 
 ```bash
 pip install -e .
-export GOLF_USE_MOCK_ENGINE=1
+export GOLF_USE_MOCK_ENGINE=1          # Linux/macOS bash
+```
+
+```powershell
+pip install -e .
+$env:GOLF_USE_MOCK_ENGINE = "1"        # Windows PowerShell
 ```
 
 If installation fails, see
@@ -180,13 +229,12 @@ If installation fails, see
 
 The Rust build works from a clean clone. The shared `tools-core` crate is
 fetched from a pinned `D-sorganization/Tools` revision, so no sibling checkout is
-required.
+required. Reuse the `.venv` from [Install](#install) above:
 
 ```bash
 cargo build
 
-python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
+source .venv/bin/activate        # Windows: .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip maturin
 
 cd rust_core/upstream-physics
@@ -195,7 +243,8 @@ python -c "import upstream_physics; print(upstream_physics.IntegratorConfig())"
 ```
 
 To develop against a local `Tools` checkout instead of the pinned revision, run
-`scripts/setup_tools_workspace.sh`.
+`scripts/setup_tools_workspace.sh` on Linux or macOS (there is no PowerShell
+counterpart; wire the sibling checkout manually on Windows).
 
 ## Running the Platform
 
@@ -204,7 +253,22 @@ python launch_upstream_drift.py
 ```
 
 This starts the local API server on port 8000 and opens the web interface in
-your browser. The other entry points:
+your browser.
+
+**Headless smoke test** (no browser; requires `pip install -e ".[dev]"`):
+
+```bash
+ud-sim run tests/fixtures/sim_run/smoke_case.json --format summary
+# equivalent: python -m src.sim_run.cli run tests/fixtures/sim_run/smoke_case.json
+```
+
+Valid values for `launch_upstream_drift.py --engine` and `upstream-drift --engine`
+(after install):
+
+`mujoco`, `drake`, `pinocchio`, `jaxsim`, `opensim`, `myosim`, `matlab_2d`,
+`matlab_3d`, `pendulum`, `golf_swing_pendulum`, `putting_green`
+
+The other entry points:
 
 | Command                                           | Opens                                                 |
 | ------------------------------------------------- | ----------------------------------------------------- |
@@ -231,6 +295,12 @@ make check     # Run linters and tests
 make format    # Apply Ruff formatting
 ```
 
+Run the default CI-aligned pytest slice directly:
+
+```bash
+python3 -m pytest -m "not slow and not live_simulation" -n auto --timeout=60
+```
+
 ## Engine Support
 
 Support level determines what is validated in continuous integration, not what
@@ -242,6 +312,11 @@ are found later.
 | Supported    | MuJoCo            | `pip install -e ".[dev]"`              | Required on every pull request     |
 | Extended     | Drake, Pinocchio  | `pip install -e ".[dev,all-engines]"`  | Nightly cross-engine validation    |
 | Experimental | OpenSim, MyoSuite | `pip install -e ".[dev,biomechanics]"` | Best-effort, local validation only |
+
+For OpenSim and MyoSuite, initialize the optional model submodules (see
+[Install](#install)) and prefer a **dedicated virtual environment**: the
+`biomechanics` extra pulls heavy native stacks that can conflict with the
+default MuJoCo-focused workspace.
 
 | Engine                                                       | Strengths                                                                   |
 | ------------------------------------------------------------ | --------------------------------------------------------------------------- |
@@ -276,17 +351,22 @@ sections:
 ```text
 UpstreamDrift/
 ├── launch_upstream_drift.py     Canonical entry point
+├── vendor/ud-tools/             Pinned Tools submodule (theme, sidekick, chat)
+├── shared/                      Committed model assets (URDF, meshes, configs)
+├── shared_scripts/              Fleet change-fragment and development-log scripts
+├── changes/                     Per-PR change fragments (SPEC/DL collator input)
+├── examples/                    Runnable Python walkthroughs
+├── ui/                          Vite + Tauri web and desktop shell
+├── apps/                        Thin application entry stubs
 ├── src/
 │   ├── launchers/               Launch applications
 │   ├── engines/
 │   │   ├── physics_engines/     MuJoCo, Drake, Pinocchio, OpenSim, MyoSuite
 │   │   ├── Simscape_Multibody_Models/   MATLAB and Simulink models
 │   │   └── pendulum_models/     Reduced-order models
-│   ├── shared/                  Code with more than one consumer
+│   ├── shared/                  Python libraries shared across engines and tools
 │   └── tools/                   Standalone utilities, including Pose Studio
 ├── rust_core/                   Rust physics kernels
-├── apps/                        Web interface
-├── shared/                      Model assets and vendored dependencies
 ├── docs/                        Documentation
 └── tests/                       Test suite
 ```
@@ -294,9 +374,14 @@ UpstreamDrift/
 ## Contributing
 
 Contributions are welcome. Start with the
-[contributing guide](docs/development/contributing.md), then the
+[contributing guide](docs/development/contributing.md) and
+[CONTRIBUTING.md](CONTRIBUTING.md), then the
 [development guidelines](docs/development/README.md) and the
 [testing guide](docs/testing/testing-guide.md).
+
+Pull requests from forks run on GitHub-hosted runners, not the organization’s
+self-hosted fleet; see
+[CI Standard tiers](docs/operations/ci-standard-tiers.md) for routing details.
 
 Before adding code, read [AGENTS.md](AGENTS.md). It maps the shared
 infrastructure and gives a discovery workflow that prevents reimplementing
