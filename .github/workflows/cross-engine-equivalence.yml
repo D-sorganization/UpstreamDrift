@@ -508,6 +508,10 @@ jobs:
           python -m pip install --ignore-installed pathspec hatchling editables
           pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
           pip uninstall -y pytest-vcr pytest-recording || true
+          # The recordless pip bootstrap above can leave pip's build backend
+          # inconsistent on self-hosted runners (pip 26.x get_runnable_pip).
+          # Re-bootstrap before the engine wheel, matching the equivalence job.
+          python -m ensurepip --upgrade || true
           ${{ matrix.install }}
           python3 scripts/ci/bootstrap_conformance_deps.py
 
