@@ -83,11 +83,31 @@ def _canonicalize_sign(q: np.ndarray) -> np.ndarray:
 
 
 def quat_inverse_distance(q1: np.ndarray, q2: np.ndarray) -> float:
-    """Geodesic distance on the unit-quaternion double cover."""
+    """Return the SO(3) rotation angle in radians between two orientations.
+
+    Both inputs are renormalized. ``q`` and ``-q`` represent the same
+    orientation (double cover). The value is the physical rotation angle
+    ``θ ∈ [0, π]``, not the half-angle geodesic on the unit-quaternion sphere.
+    """
     a = np.asarray(q1, dtype=np.float64)
     b = np.asarray(q2, dtype=np.float64)
-    dot = float(np.clip(abs(np.dot(a, b)), -1.0, 1.0))
-    return float(np.arccos(dot))
+    norm_a = math.sqrt(np.dot(a, a))
+    norm_b = math.sqrt(np.dot(b, b))
+    if norm_a == 0.0 or norm_b == 0.0:
+        raise ValueError("quaternion must be non-zero")
+    a = a / norm_a
+    b = b / norm_b
+    dot = float(np.dot(a, b))
+    if dot < 0.0:
+        b = -b
+        dot = -dot
+    if dot > 1.0 - 1e-14:
+        vdiff = a[1:4] - b[1:4]
+        vnorm = math.sqrt(np.dot(vdiff, vdiff))
+        if vnorm == 0.0:
+            return 0.0
+        return float(4.0 * math.asin(min(1.0, 0.5 * vnorm)))
+    return float(2.0 * math.acos(min(1.0, dot)))
 
 
 def slerp(q0: np.ndarray, q1: np.ndarray, t: float) -> np.ndarray:
