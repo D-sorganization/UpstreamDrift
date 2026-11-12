@@ -73,9 +73,7 @@ def test_activation_avoids_euler_overshoot_at_20ms() -> None:
     dyn = ActivationDynamics(tau_act=0.010, tau_deact=0.040, min_activation=0.001)
     dt = 0.020
     dadt = dyn.compute_derivative(1.0, dyn.min_activation)
-    naive = float(
-        np.clip(dyn.min_activation + dadt * dt, dyn.min_activation, 1.0)
-    )
+    naive = float(np.clip(dyn.min_activation + dadt * dt, dyn.min_activation, 1.0))
     integrated = dyn.update(1.0, dyn.min_activation, dt)
     assert naive == pytest.approx(1.0)
     assert integrated < 1.0 - 1e-6
