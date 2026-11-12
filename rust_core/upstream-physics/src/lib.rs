@@ -49,7 +49,7 @@ use pyo3::prelude::*;
 /// - `config`: `IntegratorConfig` instance
 #[cfg(feature = "python")]
 #[pyfunction]
-#[pyo3(signature = (pos0, vel0, spin_axis, omega0, gravity, wind, ball, air, config))]
+#[pyo3(signature = (pos0, vel0, spin_axis, omega0, gravity, wind, ball, air, config, *, record_integrated_forces=false))]
 #[allow(clippy::too_many_arguments)]
 fn simulate_ball_trajectory_py(
     pos0: [f64; 3],
@@ -61,9 +61,19 @@ fn simulate_ball_trajectory_py(
     ball: aerodynamics::AeroBallProperties,
     air: aerodynamics::AirProperties,
     config: rk4::IntegratorConfig,
+    record_integrated_forces: bool,
 ) -> PyResult<ball_flight::BallTrajectoryResult> {
     ball_flight::simulate_ball_trajectory(
-        pos0, vel0, spin_axis, omega0, gravity, wind, &ball, &air, &config,
+        pos0,
+        vel0,
+        spin_axis,
+        omega0,
+        gravity,
+        wind,
+        &ball,
+        &air,
+        &config,
+        record_integrated_forces,
     )
     .map_err(pyo3::exceptions::PyValueError::new_err)
 }
@@ -105,6 +115,7 @@ fn upstream_physics(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     // Ball flight trajectory simulation (wires aerodynamics + RK4)
     m.add_class::<ball_flight::TrajectoryPoint>()?;
+    m.add_class::<ball_flight::IntegratedStepForces>()?;
     m.add_class::<ball_flight::BallTrajectoryResult>()?;
     m.add_function(pyo3::wrap_pyfunction!(simulate_ball_trajectory_py, m)?)?;
 

@@ -2754,6 +2754,11 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-10 | #15000 | AIP JSON-RPC stubs return not_implemented; capabilities self-check (#14940). |
+| 2026-11-10 | #14962 | BallFlightSimulator reports per-step forces from the Rust integrator with legacy post-hoc path tagged |
+| 2026-11-10 | #14995 | Remove default-true success flags on solver and calc outputs with Oracle 1 and 8 AST gates |
+| 2026-11-10 | #15001 | Replace simulation boolean soup with lifecycle reducer, stale-socket identity guard, and ordered speed control |
+| 2026-11-10 | #14998 | CounterfactualKind/Result, simscape/putting defaults, conformance (#14943 slices 1–4) |
 | 2026-11-10 | #14992 | Enforce Tauri Cargo.toml version parity, correct production readiness doc, and add frontend dynamic port resolution |
 | 2026-11-10 | #14990 | Typed non-finite failure for syngas water router and canonical lifecycle vocabulary gate |
 | 2026-11-10 | #14993 | Wire engine lane guards into nightly, enforce MuJoCo in CI, and remove dead MATLAB job |
