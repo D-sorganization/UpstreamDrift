@@ -10,7 +10,12 @@ Every sensitivity is compared as a *basis-independent operator* in the
 reference coordinate order: ``D P^T`` for the state blocks (``P`` is the
 orthonormal basis of ``ker J_c`` the engine used), the plain matrix for the load
 block.  Rows of the acceleration blocks and the columns of every block are
-permuted by coordinate name.
+permuted by coordinate name.  Issue #12727 names these blocks ``A(t)`` and
+``B(t)``: the state map is ``[d a/d xi | d a/d eta]`` (plus the kinematic
+``d xi/dt = eta`` row in :func:`full_state_matrix`) and the load map is
+``d a/d tau``.  The impact Jacobian ``C_imp`` (NSX-83) is engine-free and is not
+compared in this harness; face-angle kernels and min-variance allocations
+arrive with the NSX-89..92 variability stack.
 
 Variance conformance is a *first-order* propagation of the sensitivities under a
 **declared** isotropic unit noise (load noise on the actuated coordinates; state
@@ -69,6 +74,16 @@ class NamedDerivatives:
     acc_load_noise: np.ndarray  # actuated selector (diagonal, 0/1)
 
 
+@dataclass(frozen=True)
+class TangentChainOperators:
+    """One-step NSX-84 tangent operators ``A(t)`` and ``B(t)`` at a fixed state."""
+
+    a_acc: np.ndarray  # acceleration row of ``A(t)`` on ``[xi; eta]``, ``(nv, 2k)``.
+    b_acc: np.ndarray  # ``B(t)`` for generalised torque, ``(nv, nv)``.
+    a_lambda: np.ndarray  # reaction row of ``A(t)``, ``(m, 2k)``.
+    b_lambda: np.ndarray  # reaction ``B(t)``, ``(m, nv)``.
+
+
 def named_derivatives(
     res: ClosedLoopDerivatives,
     own_order: tuple[str, ...],
@@ -95,6 +110,37 @@ def named_derivatives(
     }
     selector = np.diag([1.0 if n in actuated else 0.0 for n in reference_order])
     return NamedDerivatives(ops, res.method.value, selector)
+
+
+def tangent_chain_operators(named: NamedDerivatives) -> TangentChainOperators:
+    """Stack the Track N blocks as the issue's ``A(t)`` and ``B(t)`` matrices."""
+    ops = named.sensitivities
+    d_xi, d_eta = ops["d_acc_d_xi"], ops["d_acc_d_eta"]
+    lam_xi, lam_eta = ops["d_lambda_d_xi"], ops["d_lambda_d_eta"]
+    if d_eta.shape != d_xi.shape:
+        raise ValueError("d_acc_d_xi and d_acc_d_eta must share shape")
+    if lam_eta.shape != lam_xi.shape:
+        raise ValueError("d_lambda_d_xi and d_lambda_d_eta must share shape")
+    return TangentChainOperators(
+        a_acc=np.hstack((d_xi, d_eta)),
+        b_acc=ops["d_acc_d_tau"],
+        a_lambda=np.hstack((lam_xi, lam_eta)),
+        b_lambda=ops["d_lambda_d_tau"],
+    )
+
+
+def tangent_kinematics_coupling(k: int) -> np.ndarray:
+    """Top ``k`` rows of ``A(t)``: ``d xi/dt = eta`` on stacked ``[xi; eta]``."""
+    if k <= 0:
+        raise ValueError("tangent dimension must be positive")
+    return np.hstack((np.zeros((k, k)), np.eye(k)))
+
+
+def full_state_matrix(named: NamedDerivatives) -> np.ndarray:
+    """Assemble ``A(t)`` with the kinematic coupling plus the acceleration row."""
+    chain = tangent_chain_operators(named)
+    k = chain.a_acc.shape[1] // 2
+    return np.vstack((tangent_kinematics_coupling(k), chain.a_acc))
 
 
 def covariance_operators(named: NamedDerivatives) -> dict[str, np.ndarray]:
