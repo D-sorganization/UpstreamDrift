@@ -12,7 +12,9 @@ same-input bundle exists, the IK and inverse-dynamics receipt (marker and
 segment-angle errors, residual forces and moments, bundle SHA-256).  A lift
 without a bundle is recorded unavailable with the reason, never as zero.
 
-OSL-14 lift-body acceptance lives in :mod:`src.shared.python.osl_scoping.osl14`.
+OSL-14 lift-body acceptance lives in :mod:`src.shared.python.osl_scoping.osl14`;
+after bundle regeneration, compare receipts here against
+``ASSET_GATED_FOLLOWUPS`` in that module (issue #13057, step 5).
 OSL-15 scoping contracts live in :mod:`src.shared.python.osl_scoping.osl15`.
 OSL-17 rack and lead-in scoping contracts live in
 :mod:`src.shared.python.osl_scoping.osl17`.
