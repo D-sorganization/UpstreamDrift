@@ -101,9 +101,9 @@ def test_neutral_pose_is_zero_for_every_component() -> None:
 @pytest.mark.parametrize(
     ("coordinate", "field", "expected"),
     [
-        # HRG-00: LWInputY + = left wrist extension; RWInputY + = right flexion.
+        # HRG-00 + G1 (#14746): *WInputY + = wrist extension on both sides.
         ("LWInputY", "flexion_rad", -THETA),
-        ("RWInputY", "flexion_rad", THETA),
+        ("RWInputY", "flexion_rad", -THETA),
         # *WInputX + = radial deviation (cock), ulnar negative, both sides.
         ("LWInputX", "ulnar_deviation_rad", -THETA),
         ("RWInputX", "ulnar_deviation_rad", -THETA),
@@ -121,7 +121,7 @@ def test_wrist_signs_match_the_hrg00_sign_map(
 
 
 @pytest.mark.parametrize(
-    ("coordinate", "expected"), [("RFInput", THETA), ("LFInput", -THETA)]
+    ("coordinate", "expected"), [("RFInput", -THETA), ("LFInput", -THETA)]
 )
 def test_forearm_pronation_is_separate_and_signed(
     coordinate: str, expected: float
@@ -141,13 +141,13 @@ def test_elbow_extension_is_negative_isb_flexion(coordinate: str) -> None:
 
 
 def test_mirrored_motion_gives_identical_anatomical_values() -> None:
-    # Mirror across the sagittal plane: the shared +z wrist-Y axis and -x
-    # forearm axis flip sense on the left, the -y cock axis does not.
+    # G1 (#14746): the arms are sagittal mirrors, so equal coordinates on the
+    # two sides give equal anatomical angles.
     left = _angles(
         "L", {"LWInputY": -0.3, "LWInputX": 0.2, "LFInput": -0.4, "LEInput": -0.5}
     )
     right = _angles(
-        "R", {"RWInputY": 0.3, "RWInputX": 0.2, "RFInput": 0.4, "REInput": -0.5}
+        "R", {"RWInputY": -0.3, "RWInputX": 0.2, "RFInput": -0.4, "REInput": -0.5}
     )
     for a, b in (
         (left.wrist.flexion_rad, right.wrist.flexion_rad),

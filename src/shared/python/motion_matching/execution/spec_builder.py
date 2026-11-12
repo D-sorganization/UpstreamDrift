@@ -20,6 +20,7 @@ from typing import Any
 import numpy as np
 from defusedxml import ElementTree as ET
 
+from src.shared.python.motion_matching.arm_mirror import mirror_document_arm
 from src.shared.python.motion_matching.anthropometric_geometry import (
     GRIP_ROTATION_DEG,
     LEG_VISUAL_RADIUS_M,
@@ -73,6 +74,7 @@ from src.shared.python.motion_matching.full_body_spec import (
 )
 from src.shared.python.motion_matching.range_of_motion import (
     HUMAN_RANGES_DEG,
+    UPPER_RANGES_DEG,
     as_document,
 )
 from src.shared.python.motion_matching.tibial_torsion import (
@@ -110,6 +112,17 @@ LEG_MARKER_BODIES = {
 
 HIP_PERMUTATION = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]], dtype=float)
 KNEE_PERMUTATION = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]], dtype=float)
+_LIFT_UPPER_RANGES_DEG: dict[str, tuple[float, float]] = {
+    **UPPER_RANGES_DEG,
+    "LScapInputX": (-10.0, 30.0),
+    "RScapInputX": (-10.0, 30.0),
+    "LScapInputY": (-40.0, 40.0),
+    "RScapInputY": (-40.0, 40.0),
+    "LWInputX": (-40.0, 25.0),
+    "RWInputX": (-40.0, 25.0),
+    "LWInputY": (-70.0, 70.0),
+    "RWInputY": (-70.0, 70.0),
+}
 
 
 def body_fixed_xyz(angles: np.ndarray) -> np.ndarray:
@@ -664,8 +677,15 @@ def _write_outputs(
     return spec_path, receipt_path
 
 
-def _annotate_document(document: dict[str, Any], upper: dict[str, Any]) -> None:
-    """Copy the subject, anthropometry, ranges and visual hints into ``document``."""
+def _annotate_document(
+    document: dict[str, Any], upper: dict[str, Any], mirror_arm: bool = True
+) -> None:
+    """Copy the subject, anthropometry, ranges and visual hints into ``document``.
+
+    The build tables are native; ``mirror_arm`` (G1 #14746) mirrors the right-arm
+    axes and limits, ``False`` keeps the native convention for consumers whose
+    stored joint angles still use it (lifting).
+    """
     document["subject"] = upper["subject"]
     document["de_leva_table_sha256"] = de_leva_table_sha256()
     document["anthropometry"] = {
@@ -689,6 +709,8 @@ def _annotate_document(document: dict[str, Any], upper: dict[str, Any]) -> None:
             for side in ("r", "l")
         }
     )
+    if mirror_arm:
+        mirror_document_arm(document)
 
 
 def with_shaft_model(
@@ -767,28 +789,26 @@ def compose_anthropometric_document(
     native_path = native_path or get_native_geometry_spec(None)
     osim_path = osim_path or get_opensim_model(None)
     native_candidate_path = native_candidate_path or get_candidate_geometry_spec(None)
-
-    trunk_scale = float(kwargs.get("trunk_scale", 1.0))
-    arm_scale = float(kwargs.get("arm_scale", 1.0))
-    shoulder_scale = float(kwargs.get("shoulder_scale", 1.0))
-    grip_roll_deg = float(kwargs.get("grip_roll_deg", 0.0))
     match_subject_mass = bool(kwargs.get("match_subject_mass", False))
-
+    upper_ranges = kwargs.get("upper_ranges_deg") or (
+        _LIFT_UPPER_RANGES_DEG if not kwargs.get("mirror_arm", True) else None
+    )
     native = json.loads(native_path.read_text(encoding="utf-8"))
     upper = build_upper_body(
         native,
         stature_m=stature_m,
         mass_kg=mass_kg,
-        trunk_scale=trunk_scale,
-        arm_scale=arm_scale,
-        shoulder_scale=shoulder_scale,
+        trunk_scale=float(kwargs.get("trunk_scale", 1.0)),
+        arm_scale=float(kwargs.get("arm_scale", 1.0)),
+        shoulder_scale=float(kwargs.get("shoulder_scale", 1.0)),
         club=CLUBS[club],
-        grip_roll_deg=grip_roll_deg,
+        grip_roll_deg=float(kwargs.get("grip_roll_deg", 0.0)),
         grip_rotation_deg={
             "L": kwargs.get("lead_grip_rotation") or GRIP_ROTATION_DEG["L"],
             "R": kwargs.get("trail_grip_rotation") or GRIP_ROTATION_DEG["R"],
         },
         scale_hand_mass=match_subject_mass,
+        upper_ranges_deg=upper_ranges,
     )
 
     hip_frame = next(f for f in upper["frames"] if f["name"] == "Hip")
@@ -825,7 +845,7 @@ def compose_anthropometric_document(
             "marker offsets are anatomical seeds to be calibrated" + club_note
         ),
     )
-    _annotate_document(document, upper)
+    _annotate_document(document, upper, kwargs.get("mirror_arm", True))
     document = with_shaft_model(document, club, kwargs.get("shaft_model"))
     document = _apply_kwarg_tibial_torsion(document, kwargs)
     return AnthropometricDocument(

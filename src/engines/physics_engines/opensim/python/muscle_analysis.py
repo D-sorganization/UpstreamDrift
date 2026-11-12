@@ -39,6 +39,28 @@ MIN_PHYSIOLOGICAL_GRIP_N = 50.0  # Minimum physiological grip force per hand [N]
 MAX_PHYSIOLOGICAL_GRIP_N = 200.0  # Maximum physiological grip force per hand [N]
 
 
+def accumulate_muscle_generalized_forces(
+    moment_arms: dict[str, dict[str, float]],
+    active_forces: dict[str, float],
+    passive_forces: dict[str, float],
+    coord_to_speed: dict[str, int],
+    n_u: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Map muscle forces through moment arms onto generalized speed coordinates."""
+    active_tau = np.zeros(n_u)
+    passive_tau = np.zeros(n_u)
+    for muscle_name, force in active_forces.items():
+        arms = moment_arms.get(muscle_name, {})
+        passive = passive_forces.get(muscle_name, 0.0)
+        for coord_name, moment_arm in arms.items():
+            speed_idx = coord_to_speed.get(coord_name)
+            if speed_idx is None or speed_idx >= n_u:
+                continue
+            active_tau[speed_idx] += force * moment_arm
+            passive_tau[speed_idx] += passive * moment_arm
+    return active_tau, passive_tau
+
+
 @dataclass
 class MuscleAnalysis:
     """Section J: OpenSim muscle analysis results.
@@ -81,6 +103,22 @@ class OpenSimMuscleAnalyzer:
         self.state = state
         self.muscle_set = model.getMuscles()
         self.n_muscles = self.muscle_set.getSize()
+        self._coord_to_speed: dict[str, int] | None = None
+
+    def coordinate_speed_indices(self) -> dict[str, int]:
+        """Map each coordinate name to its Simbody mobility (speed) index."""
+        if self._coord_to_speed is not None:
+            return self._coord_to_speed
+        if opensim is None:
+            self._coord_to_speed = {}
+            return self._coord_to_speed
+        from src.engines.physics_engines.opensim.python.spine.inverse_dynamics import (
+            _u_indices,
+        )
+
+        probe = opensim.State(self.state)
+        self._coord_to_speed = _u_indices(self.model, probe)
+        return self._coord_to_speed
 
     def get_muscle_forces(self) -> dict[str, float]:
         """Compute current muscle forces for all muscles.
@@ -233,18 +271,17 @@ class OpenSimMuscleAnalyzer:
 
         forces = self.get_muscle_forces()
         moment_arms = self.get_moment_arms()
-
-        n_coords = self.model.getNumCoordinates()
+        coord_to_speed = self.coordinate_speed_indices()
+        n_u = self.model.getNumSpeeds()
         muscle_torques = {}
 
         for muscle_name, force in forces.items():
-            torques = np.zeros(n_coords)
-
-            if muscle_name in moment_arms:
-                moment_arm_values = list(moment_arms[muscle_name].values())
-                for coord_idx, moment_arm in enumerate(moment_arm_values):
-                    torques[coord_idx] = force * moment_arm
-
+            torques = np.zeros(n_u)
+            arms = moment_arms.get(muscle_name, {})
+            for coord_name, moment_arm in arms.items():
+                speed_idx = coord_to_speed.get(coord_name)
+                if speed_idx is not None and speed_idx < n_u:
+                    torques[speed_idx] = force * moment_arm
             muscle_torques[muscle_name] = torques
 
         return muscle_torques

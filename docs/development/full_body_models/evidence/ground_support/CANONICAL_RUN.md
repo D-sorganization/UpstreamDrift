@@ -7,6 +7,21 @@
 
 ---
 
+## Ground-Support Receipt Identity (#14771)
+
+Ground-support calibration remains sensitive to solver and dependency builds. Committed receipts are a regression baseline; regenerate on the same **pinned interpreter and scientific stack** as the host that produced them (record `python`, NumPy, SciPy, and MuJoCo versions in the CI or lab environment that ran the command).
+
+- **Deterministic segment-scale choice.** The femur × tibia search over `SCALE_GRID` picks the lexicographically smallest `(femur, tibia)` pair among ties on `pinned_rms_m`, so equal-RMS cells do not depend on evaluation order or platform min behaviour.
+- **Canonical JSON compare.** Two `receipt.json` files match for hashing when their parsed JSON is equal under sorted keys:
+
+  ```bash
+  python3 scripts/ground_support/check_receipt_canonical_match.py path/a/receipt.json path/b/receipt.json
+  ```
+
+  Exit code `0` means byte-identical canonical payloads; use it in a CI step after two regeneration passes on the pinned stack.
+
+---
+
 ## 1. Overview and Executive Summary
 
 In `docs/development/full_body_models/HANDOFF.md` and related program documentation, the headline kinematic and dynamic accuracy metrics for the MuJoCo full-body model have been quoted as:

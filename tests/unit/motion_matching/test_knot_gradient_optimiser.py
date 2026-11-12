@@ -386,6 +386,8 @@ def test_lbfgs_settings_contracts() -> None:
     settings = LbfgsSettings(max_iterations=10)
     assert settings.max_iterations == 10
     assert settings.max_evaluations is None
+    assert settings.parameter_scale == 1.0
+    assert settings.ftol is None and settings.gtol is None and settings.pgtol is None
 
     settings_eval = LbfgsSettings(max_iterations=10, max_evaluations=25)
     assert settings_eval.max_evaluations == 25
@@ -401,6 +403,15 @@ def test_lbfgs_settings_contracts() -> None:
 
     with pytest.raises(PreconditionError):
         LbfgsSettings(max_iterations=10, max_evaluations=-1)
+
+    with pytest.raises(PreconditionError):
+        LbfgsSettings(max_iterations=10, parameter_scale=0.0)
+
+    with pytest.raises(PreconditionError):
+        LbfgsSettings(max_iterations=10, ftol=-1e-9)
+
+    with pytest.raises(PreconditionError):
+        LbfgsSettings(max_iterations=10, gtol=0.0)
 
 
 def test_lbfgs_converges_on_convex_quadratic() -> None:
@@ -422,6 +433,29 @@ def test_lbfgs_converges_on_convex_quadratic() -> None:
     assert result.best_objective < 1e-10
     assert result.stop_reason == "converged"
     assert not result.best_x.flags.writeable
+
+
+def test_lbfgs_parameter_scaling_matches_unscaled_optimum() -> None:
+    """Reparametrization x = scale * y must leave the optimum in x-space unchanged (#13779)."""
+    mat_a = np.array([[3.0, 1.0], [1.0, 2.0]])
+    vec_b = np.array([2.0, -1.0])
+    x_star = np.linalg.solve(mat_a, vec_b)
+    x0 = np.array([0.1, -0.2])
+
+    def val_and_grad(x: np.ndarray) -> tuple[tuple[float, float], np.ndarray]:
+        residual = mat_a @ x - vec_b
+        cost = 0.5 * float(np.sum(residual**2))
+        grad = mat_a.T @ residual
+        return (cost, cost), grad
+
+    ref = lbfgs_minimise(val_and_grad, x0, LbfgsSettings(max_iterations=50))
+    scaled = lbfgs_minimise(
+        val_and_grad, x0, LbfgsSettings(max_iterations=50, parameter_scale=100.0)
+    )
+    assert ref.stop_reason == "converged" and scaled.stop_reason == "converged"
+    assert np.allclose(scaled.best_x, ref.best_x, atol=1e-5)
+    assert scaled.projected_gradient_norm is not None
+    assert np.isfinite(scaled.projected_gradient_norm)
 
 
 def test_lbfgs_history_zero_is_x0() -> None:
@@ -615,6 +649,7 @@ def test_lbfgs_records_projected_gradient_norm() -> None:
     norms = [r["projected_gradient_inf_norm"] for r in capped.evaluation_diagnostics]
     # SciPy's final point is an evaluated one; a capped stop keeps a large norm.
     assert capped.stop_reason == "max_iterations"
+    # Receipt uses physical x-space ``max|g|`` (chain rule), matching per-eval rows.
     assert capped.projected_gradient_norm in norms
     assert capped.projected_gradient_norm > 1e-5
 

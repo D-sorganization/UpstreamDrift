@@ -1,6 +1,6 @@
 """Impact conditions -> landing offsets via the repo's swing/ball-flight pipeline.
 
-Adapter for the dispersion tables (#14567): it maps one row of ``IMPACT_FIELDS``
+Adapter for the dispersion tables (#14567, #14610): it maps one row of ``IMPACT_FIELDS``
 (GCV-15 signs: +face open, +path in-to-out, +attack angle up; speed in mph,
 angles in degrees, strike offsets in mm) to a ``SwingState`` and runs
 ``SwingBallFlightPipeline``. Frame: x downrange, y left, z up; results are
@@ -105,11 +105,20 @@ class PipelineLandingSimulator:
         impacts: NDArray[np.float64],
         skill: str,
         wind: tuple[float, float],
+        slope: str = "flat",
+        lie: str = "fairway",
+        spin_factor: NDArray[np.float64] | None = None,
     ) -> NDArray[np.float64]:
+        """Land each impact row; ``spin_factor`` scales row i's launch spin; ``slope``/``lie`` match :data:`LandingSimulator` and are ignored here."""
+        _ = (slope, lie)
+        n = len(impacts)
+        spin = np.ones(n) if spin_factor is None else np.asarray(spin_factor, float)
+        require(spin.shape == (n,), "spin_factor must have one entry per impact row")
         pipe = self._pipeline(wind)
-        out = np.empty((len(impacts), 5 if self._landing_state else 2))
-        for i in range(len(impacts)):
-            end = pipe.run(swing_state_from_impact(impacts[i], skill)).trajectory[-1]
+        out = np.empty((n, 5 if self._landing_state else 2))
+        for i in range(n):
+            swing = swing_state_from_impact(impacts[i], skill)
+            end = pipe.run(swing, spin_factor=float(spin[i])).trajectory[-1]
             out[i, :2] = (end.position[0] * M_TO_YD, end.position[1] * M_TO_YD)
             if self._landing_state:
                 out[i, 2:] = end.velocity[:3]

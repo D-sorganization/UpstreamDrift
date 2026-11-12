@@ -74,6 +74,20 @@
         "result": "golden test passed; model built (81 compiled blocks); all 6 style/scenario runs pass determinate net-club-wrench parity vs Pinocchio; convergence, save/reload, frame-probe and force-sign checks pass",
         "rerun_trigger": "test_r2025b_receipt_hashes_match_committed_kernel_and_inputs fails when the kernel or inputs change"
       }
+    },
+    {
+      "id": "SHOW-A14-SIMSCAPE",
+      "issue": 14739,
+      "epic_issue": 14549,
+      "title": "SHOW-A14: Simscape GS3DX Address Grip Roll Under the A7 Zero (MATLAB R2025b Host, Deferred)",
+      "status": "deferred",
+      "category": "simscape_grip_roll_convention",
+      "host_requirement": "MATLAB R2025b (DeskComputer / ControlTower, C:/Program Files/MATLAB/R2025b/bin/matlab.exe)",
+      "executable": "C:/Program Files/MATLAB/R2025b/bin/matlab.exe",
+      "matlab_unittest": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tests/test_gs3dx_grip_roll_convention.m",
+      "convention_doc": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/GRIP_FIT_PLAYBOOK.md",
+      "single_source": "src/shared/python/motion_matching/grip_roll.py",
+      "rationale": "Running test_gs3dx_grip_roll_convention.m and measuring the GS3DX_Human lead and trail hand roll at address (GripStrength + FaceSquareRoll, set in the binary .slx model workspace) against the A7 zero (lead 15 deg, trail 195 deg) needs a licensed MATLAB R2025b + Simscape Multibody host (C:/Program Files/MATLAB/R2025b/bin/matlab.exe) and cannot run on headless Linux CI."
     }
   ]
 }

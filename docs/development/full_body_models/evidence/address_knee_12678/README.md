@@ -128,22 +128,65 @@ block), driver MyoSuite and every iron engine except MuJoCo (no receipt) are
 
 The two driver receipts have different `spec_canonical_sha256` values, because the Drake run
 fits its own hip calibration; they share the capture, candidate, base spec and foot mode.
-This is a check of the engines' fitted address poses, not of one `q` replayed in every
-engine; the replay is still R10 (#12692).
+This is a check of the engines' fitted address poses. The same-`q` replay is checked
+separately by #14134 (`test_address_knee_flexion_matches_across_engines`). Each engine builds
+its own FK from the same spec, measures both knees at one shared address `q` (frame 0 of the
+anthro-driver seeds `q_track`) and is compared with MuJoCo at 0.1°. On Brick, MuJoCo gave
+L 27.6249° / R 23.6806° and Drake agreed to 3e-14°. Pinocchio (no `body_poses`), OpenSim (no
+spec-driven FK adapter) and MyoSuite (not importable) are reported `unavailable`, never as
+agreement.
+
+## Canonical Receipts on the R4 Code (#12684, Acceptance 6)
+
+PR #13102 (merge `66d3c25a`, #13037) regenerated the canonical ground-support
+receipts on ControlTower after R3b (#12814) and R4 (#12788), using the unchanged
+commands and the canonical `capture` knee mode. The committed receipts
+`ground_support/anthro_driver_seeds/receipt.json` and
+`ground_support/anthro_iron_seeds_zmp/receipt.json` carry the address knee block:
+
+| Receipt                 | Lead knee (target)  | Trail knee (target) | Hyperextended | Within band |
+| ----------------------- | ------------------- | ------------------- | ------------- | ----------- |
+| `anthro_driver_seeds`   | 28.52 deg (28.57)   | 26.08 deg (26.20)   | no            | yes         |
+| `anthro_iron_seeds_zmp` | 26.38 deg (26.33)   | 24.71 deg (24.62)   | no            | yes         |
+
+`tests/unit/motion_matching/pipeline/test_canonical_address_knee_receipts.py` pins
+this. A regeneration that drops the block, falls back to `off`, or locks or
+hyperextends a knee fails there.
+
+**Marker RMS before and after.** The knee-only comparison is the controlled
+`off`/`capture` table above: same code and session, with only the knee mode changed.
+`capture` brings the address RMS from 10.54 to 9.08 mm on the driver and from 12.19
+to 11.40 mm on the 7-iron. The canonical regeneration also changed the de Leva
+table, so its own before/after does not isolate the knee. It is quoted from
+#13102, address / IK / dynamics in mm, same-session main control → regenerated:
+
+- `anthro_driver_seeds`: 9.98 / 30.42 / 89.16 → 9.48 / 29.48 / 99.33
+- `anthro_iron_seeds_zmp`: 11.48 / 30.54 / 74.32 → 11.33 / 30.69 / 74.86
+
+#13102 records the following about the earlier committed receipts and the
+dynamics RMS:
+
+- The earlier committed receipts (dynamics 74.18 and 64.35 mm, knee off) do
+  not reproduce on main HEAD, so they are not a valid "before".
+- The calibrated driver's after-impact dynamics RMS moves over 87.5 to 109.5 mm
+  (control) and 83.9 to 99.4 mm (regenerated) under a ±5 mm upper-trunk CM shift, so that number does not rank the
+  variants.
+
+These receipts predate the `dynamics.knee_flexion_deg` instrumentation (#13527).
+Knee flexion through the swing on the canonical runs is still R10's (#12692).
 
 ## Not Done Here (Left for R10, #12692)
 
-- The canonical ground-support receipts (`anthro_driver_seeds`,
-  `anthro_iron_seeds_zmp`) are not regenerated. Regenerate them once, after R3
-  and R4, on ControlTower (`ud-sim`), and report address, IK and FD RMS against
-  these numbers.
 - **Through the swing.** The knee residual acts at the address stage only. The
   trajectory IK, forward-dynamics frame 0 and the knee flexion through the first
   static window are not yet measured on the canonical runs. That is issue
   acceptance item 4. The receipt now carries the measurement (see below), so
   the R10 re-fit reports it without further code.
-- **Cross-engine.** Drake, Pinocchio, OpenSim and MyoSuite replays of the new
-  address have not been run. That is issue acceptance item 5.
+- **Cross-engine replay.** Acceptance item 5 is checked two ways: over the
+  committed receipts (see above), and live at one shared `q` with each engine's
+  own FK by #14134 (MuJoCo and Drake agree to 3e-14°; Pinocchio, OpenSim and
+  MyoSuite are `unavailable` with reasons). Adding Pinocchio and OpenSim needs
+  their FK adapters, not a harness change.
 - **Swing-wide ROM.** `range_of_motion.LOWER_LIMB_RANGES_DEG["knee_angle"]` is
   unchanged at `(-120, 10)`. Hyperextension is forbidden at the address only. A
   swing-wide change needs capture evidence through impact and the finish.

@@ -96,6 +96,9 @@ shadows:
   import_aliases.py:
     tracking_issue: 8322
     sunset_date: "2026-12-31"
+  lifecycle.py:
+    tracking_issue: 14934
+    sunset_date: "2026-12-31"
 
   # ── Pre-existing UD package surfaced by the Tools #4872 pin ───────────────
   # UpstreamDrift's plotting package predates the provider package added to
@@ -112,9 +115,11 @@ shadows:
   # migration visible; this entry does not claim the overlap is resolved.
   # #8942 closed and the 2026-10-09 sunset expired with the facade still in
   # place; the resolution (port or ADR split ruling) is tracked in #12046.
+  # #12046 was reopened after premature auto-close by #12048, and #14928 restored
+  # green CI on 2026-11-10 UTC by aligning sunset_date with the Q4 baseline.
   realtime:
     tracking_issue: 12046
-    sunset_date: "2026-11-09"
+    sunset_date: "2026-12-31"
 
   # ── ADR-0046 Stage 1 canonical launch-monitor layer — CLEARED 2026-09-02 ──
   #

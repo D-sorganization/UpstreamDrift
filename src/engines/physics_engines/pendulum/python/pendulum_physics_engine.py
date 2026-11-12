@@ -378,19 +378,24 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
             self._pendulum_state.omega1 = omega1_orig
             self._pendulum_state.omega2 = omega2_orig
 
-    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        """Zero-Velocity Counterfactual - Guideline G2.
+    def compute_control_acceleration_at_state(
+        self, q: np.ndarray, tau: np.ndarray
+    ) -> np.ndarray:
+        """ZVCF control component ``M⁻¹ τ`` at configuration ``q`` (SPEC §4)."""
+        if q is None:
+            raise ValueError("q must be provided")
+        theta1_orig = self._pendulum_state.theta1
+        theta2_orig = self._pendulum_state.theta2
+        try:
+            self._pendulum_state.theta1 = float(q[0])
+            self._pendulum_state.theta2 = float(q[1])
+            return self.compute_control_acceleration(tau)
+        finally:
+            self._pendulum_state.theta1 = theta1_orig
+            self._pendulum_state.theta2 = theta2_orig
 
-        Canonical ZVCF fixes configuration and sets velocity and declared
-        applied control to zero:
-            q_ddot_ZVCF = M(q)^-1 * (-g(q))
-
-        Args:
-            q: Joint positions [rad] (2,)
-
-        Returns:
-            Acceleration with v=0 and tau=0 [rad/s**2] (2,)
-        """
+    def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:
+        """Gravity-only diagnostic at ``v = u = 0`` (not SPEC §4 ZVCF control term)."""
         if q is None:
             raise ValueError("q must be provided")
         if len(q) < 2:
@@ -434,9 +439,17 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
             self._pendulum_state.omega1 = omega1_orig
             self._pendulum_state.omega2 = omega2_orig
 
+    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
+        """Deprecated shim → :meth:`compute_gravity_only_acceleration` (#14943)."""
+        import warnings
+
+        msg = "compute_zvcf is legacy diagnostic; use compute_gravity_only_acceleration"
+        warnings.warn(msg, DeprecationWarning, stacklevel=2)
+        return self.compute_gravity_only_acceleration(q)
+
     def compute_zero_velocity_control_preserved(self, q: np.ndarray) -> np.ndarray:
         """Return the former zero-velocity, control-preserved diagnostic."""
-        canonical = self.compute_zvcf(q)
+        canonical = self.compute_gravity_only_acceleration(q)
         theta1_orig = self._pendulum_state.theta1
         theta2_orig = self._pendulum_state.theta2
         try:

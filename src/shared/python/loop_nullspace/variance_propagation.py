@@ -40,7 +40,11 @@ from numpy.typing import ArrayLike
 
 from src.shared.python.core.contracts import ensure
 from src.shared.python.estimation.mosaic.local_policy import LinearizedDynamics
-from src.shared.python.loop_nullspace.event_section import event_projection
+from src.shared.python.loop_nullspace.event_section import (
+    GRAZING_TRANSVERSALITY,
+    event_projection,
+    transversality,
+)
 from src.shared.python.loop_nullspace.evidence import Array
 from src.shared.python.perturbation.disturbance import DisturbanceSpec, Spectrum
 
@@ -323,8 +327,20 @@ def event_outcome_rows(
     ``Pi`` (:func:`event_section.event_projection`) removes the event-time
     shift, so a perturbation along the flow changes no outcome; evaluating at a
     fixed time instead would omit it.  Postcondition: ``C_ev f = 0``.
+
+    Raises:
+        ValueError: At a near-grazing impact (``transversality`` below
+            ``GRAZING_TRANSVERSALITY``, the gate the outcome map uses), where the
+            event-time shift is not linear and Monte Carlo is required.
     """
     c_y = _matrix(outcome_jacobian, "outcome_jacobian")
+    trans = transversality(grad_g, flow)
+    if trans < GRAZING_TRANSVERSALITY:
+        _fail(
+            f"near-grazing impact (transversality {trans:.3g} < "
+            f"{GRAZING_TRANSVERSALITY}); linear event rows are unreliable, "
+            "use Monte Carlo"
+        )
     pi_mat = event_projection(grad_g, flow, g_t)
     if c_y.shape[1] != pi_mat.shape[0]:
         _fail(f"outcome_jacobian needs {pi_mat.shape[0]} columns, got {c_y.shape}")
