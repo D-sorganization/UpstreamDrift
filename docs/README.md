@@ -40,7 +40,7 @@ notation symbol ids.
 ### 1. Launch UpstreamDrift (Web UI)
 
 ```bash
-cd /home/user/UpstreamDrift
+cd <owner-home>/UpstreamDrift
 python launch_upstream_drift.py
 ```
 

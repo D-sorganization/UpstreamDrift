@@ -168,7 +168,7 @@ This mathematically guarantees acceleration parity.
 
 ### 4.1 Running the Matcher CLI
 
-The standalone script `scripts/match_pinocchio_c3d.py` can be executed locally or on remote execution nodes (e.g. `ControlTower`):
+The standalone script `scripts/match_pinocchio_c3d.py` can be executed locally or on remote execution nodes (e.g. `<host>`):
 
 ```bash
 python scripts/match_pinocchio_c3d.py \

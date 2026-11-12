@@ -82,12 +82,54 @@ def _canonicalize_sign(q: np.ndarray) -> np.ndarray:
     return q
 
 
+def _quat_conj(q: np.ndarray) -> np.ndarray:
+    """Conjugate of a ``[w, x, y, z]`` quaternion."""
+    return np.array([q[0], -q[1], -q[2], -q[3]], dtype=np.float64)
+
+
+def _quat_mul(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    """Hamilton product ``a * b`` for ``[w, x, y, z]`` quaternions."""
+    aw, ax, ay, az = a
+    bw, bx, by, bz = b
+    return np.array(
+        [
+            aw * bw - ax * bx - ay * by - az * bz,
+            aw * bx + ax * bw + ay * bz - az * by,
+            aw * by - ax * bz + ay * bw + az * bx,
+            aw * bz + ax * by - ay * bx + az * bw,
+        ],
+        dtype=np.float64,
+    )
+
+
 def quat_inverse_distance(q1: np.ndarray, q2: np.ndarray) -> float:
-    """Geodesic distance on the unit-quaternion double cover."""
+    """Return the SO(3) rotation angle in radians between two orientations.
+
+    Both inputs are renormalized. ``q`` and ``-q`` represent the same
+    orientation (double cover). The value is the physical rotation angle
+    ``θ ∈ [0, π]``, not the half-angle geodesic on the unit-quaternion sphere.
+    """
     a = np.asarray(q1, dtype=np.float64)
     b = np.asarray(q2, dtype=np.float64)
-    dot = float(np.clip(abs(np.dot(a, b)), -1.0, 1.0))
-    return float(np.arccos(dot))
+    norm_a = math.sqrt(np.dot(a, a))
+    norm_b = math.sqrt(np.dot(b, b))
+    if norm_a == 0.0 or norm_b == 0.0:
+        raise ValueError("quaternion must be non-zero")
+    a = a / norm_a
+    b = b / norm_b
+    if float(np.dot(a, b)) < 0.0:
+        b = -b
+    q_rel = _quat_mul(_quat_conj(a), b)
+    rel_norm = math.sqrt(np.dot(q_rel, q_rel))
+    if rel_norm == 0.0:
+        raise ValueError("quaternion must be non-zero")
+    q_rel = q_rel / rel_norm
+    if q_rel[0] < 0.0:
+        q_rel = -q_rel
+    vnorm = math.sqrt(np.dot(q_rel[1:4], q_rel[1:4]))
+    if vnorm == 0.0:
+        return 0.0
+    return float(2.0 * math.atan2(vnorm, q_rel[0]))
 
 
 def slerp(q0: np.ndarray, q1: np.ndarray, t: float) -> np.ndarray:
