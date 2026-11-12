@@ -27,6 +27,12 @@
       "rule": "ledger_unclassified",
       "expires": "2026-12-31",
       "note": "Committed ledger rows pending explicit lane/engine/capture reclassification (#14935)"
+    },
+    {
+      "id": "receipt-missing-capture-metadata",
+      "rule": "missing_taxonomy",
+      "expires": "2026-12-31",
+      "note": "Committed receipts pending explicit capture field (#14935)"
     }
   ]
 }

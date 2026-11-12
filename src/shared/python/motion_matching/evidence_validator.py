@@ -164,17 +164,50 @@ def validate_receipt_paths(
     return issues
 
 
+def _nonempty_taxonomy_str(data: Mapping[str, Any], key: str) -> bool:
+    value = data.get(key)
+    return isinstance(value, str) and bool(value.strip())
+
+
 def validate_receipt_taxonomy(
     rel_path: str, data: Mapping[str, Any]
 ) -> list[EvidenceIssue]:
     """Explicit engine/lane/capture metadata must not disagree with path heuristics."""
     issues: list[EvidenceIssue] = []
+    missing_fields: list[str] = []
+    if not _nonempty_taxonomy_str(data, "lane"):
+        missing_fields.append("lane")
+    if not (
+        _nonempty_taxonomy_str(data, "engine")
+        or _nonempty_taxonomy_str(data, "backend")
+    ):
+        missing_fields.append("engine")
+    if not _nonempty_taxonomy_str(data, "capture"):
+        missing_fields.append("capture")
+    if missing_fields:
+        issues.append(
+            EvidenceIssue(
+                rule="missing_taxonomy",
+                path=rel_path,
+                message=(
+                    "receipt missing explicit taxonomy fields: "
+                    + ", ".join(missing_fields)
+                ),
+            )
+        )
     engine, lane, capture, _reason = classify_receipt(rel_path, data)
     explicit_lane = data.get("lane")
     explicit_engine = data.get("engine") or data.get("backend")
     explicit_capture = data.get("capture")
     if isinstance(explicit_lane, str) and explicit_lane.strip():
-        if lane != "unclassified" and explicit_lane.strip().lower() != lane.lower():
+        explicit_lane_norm = explicit_lane.strip().lower()
+        heuristic_lane = lane.lower()
+        coarse_matched_bucket = heuristic_lane == "matched"
+        if (
+            lane != "unclassified"
+            and not coarse_matched_bucket
+            and explicit_lane_norm != heuristic_lane
+        ):
             issues.append(
                 EvidenceIssue(
                     rule="explicit_taxonomy",
@@ -328,6 +361,7 @@ def validate_committed_evidence(
             data = json.loads(receipt.read_text(encoding="utf-8"))
             if isinstance(data, Mapping):
                 raw_issues.extend(validate_receipt_paths(rel, data))
+                raw_issues.extend(validate_receipt_taxonomy(rel, data))
 
     ledger_path = repo_root / "reports" / "matched_swing_ledger.json"
     if ledger_path.is_file():

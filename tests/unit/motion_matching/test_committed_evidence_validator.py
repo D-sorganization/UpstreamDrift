@@ -13,6 +13,7 @@ from src.shared.python.motion_matching.evidence_validator import (
     validate_candidate_package,
     validate_committed_evidence,
     validate_receipt_paths,
+    validate_receipt_taxonomy,
 )
 
 pytestmark = pytest.mark.unit
@@ -41,6 +42,71 @@ def test_committed_scan_passes_with_waivers() -> None:
     report = validate_committed_evidence(REPO_ROOT, today=date(2026, 11, 10))
     assert report.waived
     assert not report.failed
+
+
+def test_committed_scan_flags_missing_taxonomy_fields(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    evidence_dir = repo / "evidence" / "matched" / "driver_sample"
+    evidence_dir.mkdir(parents=True)
+    (evidence_dir / "receipt.json").write_text(
+        json.dumps({"engine": "mujoco", "lane": "matched"}),
+        encoding="utf-8",
+    )
+    empty_waivers = tmp_path / "waivers.json"
+    empty_waivers.write_text(json.dumps({"waivers": []}), encoding="utf-8")
+    report = validate_committed_evidence(
+        repo,
+        waivers_path=empty_waivers,
+        today=date(2026, 11, 10),
+    )
+    rules = {issue.rule for issue in report.issues}
+    assert "missing_taxonomy" in rules
+    assert any("capture" in issue.message for issue in report.issues)
+
+
+def test_committed_scan_flags_taxonomy_metadata_conflict(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    evidence_dir = repo / "evidence" / "tour_baselines" / "evidence" / "driver_sample"
+    evidence_dir.mkdir(parents=True)
+    (evidence_dir / "receipt.json").write_text(
+        json.dumps(
+            {
+                "engine": "tools",
+                "lane": "native",
+                "capture": "driver",
+            }
+        ),
+        encoding="utf-8",
+    )
+    empty_waivers = tmp_path / "waivers.json"
+    empty_waivers.write_text(json.dumps({"waivers": []}), encoding="utf-8")
+    report = validate_committed_evidence(
+        repo,
+        waivers_path=empty_waivers,
+        today=date(2026, 11, 10),
+    )
+    rules = {issue.rule for issue in report.issues}
+    assert "explicit_taxonomy" in rules
+
+
+def test_validate_receipt_taxonomy_allows_matched_bucket_sub_lane() -> None:
+    issues = validate_receipt_taxonomy(
+        "evidence/matched/driver_x/receipt.json",
+        {
+            "engine": "pinocchio",
+            "lane": "crocoddyl_native_fit",
+            "capture": "driver",
+        },
+    )
+    assert not any(issue.rule == "explicit_taxonomy" for issue in issues)
+
+
+def test_validate_receipt_taxonomy_unit_lane_mismatch_outside_matched() -> None:
+    issues = validate_receipt_taxonomy(
+        "evidence/tour_baselines/evidence/driver_run/receipt.json",
+        {"engine": "tools", "lane": "wrong_lane", "capture": "driver"},
+    )
+    assert any(issue.rule == "explicit_taxonomy" for issue in issues)
 
 
 def test_committed_scan_fails_without_waivers(tmp_path: Path) -> None:
