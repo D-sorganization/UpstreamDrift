@@ -24,10 +24,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14934
 - **Branch:** agy/6004-syngas-water-router-pair
-- **PR:** #14976, #14985, #14990
+- **PR:** #14976, #14985, #14990, #14995
 - **Paths:** see #14976
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`91dabc7d`; collated from changes/14934-syngas-nonfinite-and-vocabulary.md)
+- **Last verified:** 2026-11-10 (`71515bb6`; collated from changes/14934-default-true-removal.md)
 - **Summary:** Fix syngas water unit conversions and router fallback on 60F_14.696psia basis (paired with Tools#6009)
 - **Next step:** Merge the PR.
 
@@ -898,6 +898,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#14940 · AIP JSON-RPC Stubs Return Not_Implemented; Capabilities Self-Check (#14940).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14940
+- **Branch:** merged via #15000
+- **PR:** #15000
+- **Paths:** see #15000
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`fdc7985e`; collated from changes/14940-aip-json-rpc-stubs-return-not-implemente.md)
+- **Summary:** AIP JSON-RPC stubs return not_implemented; capabilities self-check (#14940).
+- **Next step:** Shipped in PR #15000.
+
+### DL-#14937 · BallFlightSimulator Reports Per-Step Forces From the Rust Integrator With Legacy Post-Hoc Path Tagged
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14937
+- **Branch:** merged via #14962
+- **PR:** #14962
+- **Paths:** see #14962
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`a423e0d2`; collated from changes/14937-ballflightsimulator-reports-per-step-for.md)
+- **Summary:** BallFlightSimulator reports per-step forces from the Rust integrator with legacy post-hoc path tagged
+- **Next step:** Shipped in PR #14962.
+
+### DL-#14943 · CounterfactualKind/Result, Simscape/Putting Defaults, Conformance (#14943 Slices 1–4)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14943
+- **Branch:** merged via #14998
+- **PR:** #14998
+- **Paths:** see #14998
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`b73da6dd`; collated from changes/14943-counterfactualkind-result-spec-aligned-z.md)
+- **Summary:** CounterfactualKind/Result, simscape/putting defaults, conformance (#14943 slices 1–4)
+- **Next step:** Shipped in PR #14998.
+
 ### DL-#14951 · Tauri BackendState Supervisor With Ephemeral Port and Stderr Tail (Part Of #14951).
 
 - **State:** shipped
@@ -982,10 +1021,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14950
 - **Branch:** merged via #14958
-- **PR:** #14958, #14967
+- **PR:** #14958, #14967, #15001
 - **Paths:** see #14958
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`ee8519a3`; collated from changes/14950-simulation-ws-error-frame-handling-and-i.md)
+- **Last verified:** 2026-11-10 (`6a566a98`; collated from changes/14950-sim-run-lifecycle-reducer.md)
 - **Summary:** Simulation WS error frame handling and isPaused reset on stop (Part of #14950).
 - **Next step:** Shipped in PR #14958.
 

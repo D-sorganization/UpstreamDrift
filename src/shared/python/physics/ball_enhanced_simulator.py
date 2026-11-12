@@ -323,6 +323,11 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
                 velocity, spin, t, position, gravity_acc
             )
 
+            forces_model = (
+                "custom_force_provider"
+                if self._force_provider is not None
+                else "aerodynamics_engine_integrated"
+            )
             trajectory.append(
                 TrajectoryPoint(
                     time=t,
@@ -330,6 +335,7 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
                     velocity=velocity.copy(),
                     acceleration=acceleration.copy(),
                     forces=forces,
+                    forces_model=forces_model,
                 )
             )
 
