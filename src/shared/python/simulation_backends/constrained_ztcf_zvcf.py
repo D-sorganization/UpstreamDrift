@@ -201,8 +201,11 @@ def constrained_counterfactual_report(
     Preconditions: ``provider`` is constrained (``TypeError``); ``q``, ``v``
     finite and ``tau`` a finite generalised load of length ``n`` (``ValueError``).
     Postconditions: ``ztcf + control_total`` equals the closed-loop acceleration
-    under ``tau`` to rounding; ``per_actuator.sum(axis=1) == control_total``;
-    every acceleration satisfies the closure at acceleration level.  The
+    under ``tau`` to rounding; ``per_actuator.sum(axis=1) == control_total`` at
+    the measured ``(q, v)`` under the q-only ``closure_jacobian`` contract (KKT
+    linear in torque; active-set changes need a future contact-mode hook);
+    every acceleration satisfies the closure at acceleration level.  Per-actuator
+    columns use the same ``(q, v)`` and ZTCF baseline as ``control_total``.  The
     reactions are re-solved, so no quantity assumes a held ``lambda``.
     """
     _require_constrained(provider)
@@ -216,10 +219,10 @@ def constrained_counterfactual_report(
     full, _ = constrained_acceleration_at(provider, q_arr, v_arr, tau_arr)
     control_total = full - ztcf
     columns = [
-        constrained_acceleration_at(provider, q_arr, zeros, tau_arr[i] * np.eye(n)[i])[
+        constrained_acceleration_at(provider, q_arr, v_arr, tau_arr[i] * np.eye(n)[i])[
             0
         ]
-        - zvcf
+        - ztcf
         for i in range(n)
     ]
     dependence = {

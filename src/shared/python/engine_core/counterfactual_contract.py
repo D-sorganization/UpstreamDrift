@@ -53,7 +53,13 @@ def wrap_counterfactual(
     definition_version: str = COUNTERFACTUAL_DEFINITION_VERSION,
 ) -> CounterfactualResult:
     """Build a stamped result using the current definition version."""
-    return CounterfactualResult(kind, definition_version, qdd, frame, units)
+    return CounterfactualResult(
+        kind=kind,
+        definition_version=definition_version,
+        qdd=qdd,
+        frame=frame,
+        units=units,
+    )
 
 
 def ensure_comparable_counterfactuals(
