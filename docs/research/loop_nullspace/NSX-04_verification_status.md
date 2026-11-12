@@ -16,8 +16,8 @@ unverified).
 | Measure | Value |
 | --- | --- |
 | Total `torque_capacity` entries | 94 |
-| `VERIFIED` | 50 |
-| `UNVERIFIED` (all `assumed: true`) | 44 |
+| `VERIFIED` | 58 |
+| `UNVERIFIED` (all `assumed: true`) | 36 |
 
 Invariants enforced in CI:
 
@@ -28,8 +28,9 @@ Invariants enforced in CI:
 
 ## Open Work
 
-Per issue **#12553**: the eight anatomical slot pairs (hip adduction, hip
-rotation, subtalar, MTP) need primary literature or explicit `ASSUMED` reasons.
+Per issue **#12553**: hip adduction and hip rotation anatomical slots are now
+`VERIFIED` (Swake 2026 male frontal-plane; Gonçalves 2021 Biodex rotation).
+MTP extension (negative) and virtual input slots remain open.
 Hill-type muscle/tendon force–length data (board items UD-09/10) are tracked
 elsewhere (**#12723** / **#12593**), not in this issue.
 

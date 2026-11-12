@@ -16,28 +16,39 @@ The `src.sim_run.mcp` module provides a thin **stdio Model Context Protocol (MCP
 2. `submit_run`: Validates schema, executes solver in isolated subprocess, validates numerical integrity, and returns record.
 3. `get_run`: Retrieves durable record, status, timestamps, and result envelope by `run_id`.
 4. `fetch_artifact`: Safely reads simulation artifacts with strict path traversal defenses.
+5. `run_counterfactual_ztcf_golden` / `run_golf_simulator_golden_shot` (Refs #15021): pinned golden
+   cases routed through :mod:`src.sim_run.agent_capabilities`, with v1 capability run records,
+   qualification banners, and 64 KiB inline payload limits (larger results spill to artifacts).
+   REST mirrors the same handlers under ``/tools/agent-sim-run/``.
 
 ## Host Configuration
 
-Add to client configuration (e.g. `claude_desktop_config.json`):
+Cursor and Codex discover the repo-local [`.mcp.json`](../../.mcp.json) entry
+`ud-sim-mcp`, which launches the `ud-sim-mcp` console script after
+`pip install -e .`. Other MCP hosts can use the same command:
 
 ```json
 {
   "mcpServers": {
-    "upstreamdrift-sim": {
-      "command": "python",
-      "args": ["-m", "src.sim_run.mcp"],
+    "ud-sim-mcp": {
+      "command": "ud-sim-mcp",
+      "args": [],
       "env": {
-        "PYTHONPATH": ".",
-        "UD_PRIVATE_MODE": "0",
-        "UD_SIM_AUTH_TOKEN": "optional-token"
+        "UPSTREAMDRIFT_PRIVATE_MODE": "0",
+        "UPSTREAMDRIFT_AGENT_API_TOKEN": "optional-token"
       }
     }
   }
 }
 ```
 
+Legacy `UD_PRIVATE_MODE` and `UD_SIM_AUTH_TOKEN` remain accepted aliases.
+
+Regenerate the committed capability inventory with
+`python3 -m scripts.generate_sim_run_mcp_inventory` (see
+[`sim_run_mcp_capability_inventory.md`](sim_run_mcp_capability_inventory.md)).
+
 ## Security Model & Boundary Gates
 
-- **Private Mode**: When `UD_PRIVATE_MODE=1` is active, calling `submit_run` raises `PermissionError("Private Mode active: simulation execution denied")` (code `-32000`).
+- **Private Mode**: When `UPSTREAMDRIFT_PRIVATE_MODE=1` (or legacy `UD_PRIVATE_MODE=1`) is active, calling `submit_run` raises `PermissionError("Private Mode active: simulation execution denied")` (code `-32000`).
 - **Traversal Guard**: Artifact requests with `..` or absolute paths are rejected with `ValueError`.

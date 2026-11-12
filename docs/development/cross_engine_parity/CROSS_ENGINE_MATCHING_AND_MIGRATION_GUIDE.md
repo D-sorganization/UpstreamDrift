@@ -147,10 +147,10 @@ To prevent premature optimization on structurally non-equivalent models, open-so
 
 In accordance with the Codex-Gemini coordination review (2026-09-11):
 
-1. **Simscape Primary Lane (`DeskComputer`)**:
+1. **Simscape Primary Lane (`<host>`)**:
    - Dedicated ownership of Simscape transition repair ($0.70\text{ s} \to 0.75\text{ s} \to \dots$).
    - Strict candidate promotion using immutable candidate packages, explicit evaluation numbers, and automated multi-gate certification.
-2. **Numerical Diagnostics Lane (`ControlTower`)**:
+2. **Numerical Diagnostics Lane (`<host>`)**:
    - Focuses on finite-difference sensitivities, solver tolerances, bounds, and directional derivative checks before committing extensive optimization budgets.
 3. **Open-Source Engine Fleet (`brick`, `pi5-nvme`, `oglaptop`)**:
    - Implements the qualification ladder (MuJoCo first, followed by Pinocchio and Drake).

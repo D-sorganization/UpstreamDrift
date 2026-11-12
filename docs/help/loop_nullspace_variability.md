@@ -59,6 +59,10 @@ A ranking orders strategies by the ratio of their face-angle variance to a basel
 - **Strategy Pareto:** variance against effort or speed for the implemented strategies. Points that were withheld or not attempted are not drawn.
 - **Face Dispersion:** the modelled standard deviation, with linear and Monte Carlo values side by side. It is not a measured dispersion.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/after-one-solution-null-space-exploration.html): *After One Solution: Null-Space Exploration*.
+
 ## Limitations
 
 Linear first-order model; declared, not measured, noise and impedance; a rigid club; a partial strategy catalogue; no validated model of a real golfer. Scientific qualification stays in the design-manual governance pathway, where release is blocked.
