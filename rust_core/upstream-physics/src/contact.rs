@@ -120,6 +120,26 @@ impl ContactParameters {
         self.validate()
             .map_err(pyo3::exceptions::PyValueError::new_err)
     }
+
+    #[getter]
+    fn mass(&self) -> f64 {
+        self.mass
+    }
+
+    #[setter]
+    fn set_mass(&mut self, value: f64) {
+        self.mass = value;
+    }
+
+    #[getter]
+    fn radius(&self) -> f64 {
+        self.radius
+    }
+
+    #[setter]
+    fn set_radius(&mut self, value: f64) {
+        self.radius = value;
+    }
 }
 
 /// Result of a contact calculation.
