@@ -130,83 +130,26 @@ class TestActuatorControlsExceptionLogging:
         ), "Expected a warning about joint limits, got: " + str(warning_messages)
 
 
+@pytest.mark.unit
 class TestAIPMethodsExceptionLogging:
-    """Handlers in src/api/aip/methods.py must log on errors."""
+    """Unimplemented AIP handlers refuse via AIPMethodNotImplemented (#14940)."""
 
-    def _make_context(self, engine_raises: bool = False) -> dict:
-        manager = MagicMock()
-        if engine_raises:
-            manager.get_active_engine.side_effect = RuntimeError("engine dead")
-        else:
-            engine = MagicMock()
-            engine.get_state.side_effect = RuntimeError("state unavailable")
-            manager.get_active_engine.return_value = engine
-        return {"engine_manager": manager}
-
-    def test_simulation_status_failure_logs_warning(
-        self, caplog: pytest.LogCaptureFixture
+    @pytest.mark.parametrize(
+        ("func_name", "args", "match"),
+        [
+            ("_simulation_status", {}, "simulation.status"),
+            ("_model_query", {"property_name": "joints"}, "model.query"),
+            ("_analysis_metrics", {}, "analysis.metrics"),
+        ],
+    )
+    def test_unimplemented_handlers_refuse(
+        self, func_name: str, args: dict[str, object], match: str
     ) -> None:
-        """simulation.status handler must log a warning on engine error."""
-        from src.api.aip.methods import _simulation_status
+        import src.api.aip.methods as aip_methods
+        from src.api.aip.errors import AIPMethodNotImplemented
 
-        ctx = self._make_context(engine_raises=False)
-        with caplog.at_level(logging.WARNING, logger="src.api.aip.methods"):
-            result = _simulation_status(_context=ctx)
-
-        assert result["running"] is False
-        warning_messages = [
-            r.message for r in caplog.records if r.levelno >= logging.WARNING
-        ]
-        assert len(warning_messages) > 0, (
-            "Expected a warning log from _simulation_status, got none"
-        )
-
-    def test_model_query_failure_logs_warning(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
-        """model.query handler must log a warning on engine error."""
-        from src.api.aip.methods import _model_query
-
-        manager = MagicMock()
-        engine = MagicMock()
-        engine.get_joint_names.side_effect = RuntimeError("query failed")
-        del engine.joint_names  # remove so hasattr returns False for joint_names
-        manager.get_active_engine.return_value = engine
-        ctx = {"engine_manager": manager}
-
-        with caplog.at_level(logging.WARNING, logger="src.api.aip.methods"):
-            result = _model_query(property_name="joints", _context=ctx)
-
-        assert result.get("data") is None
-        warning_messages = [
-            r.message for r in caplog.records if r.levelno >= logging.WARNING
-        ]
-        assert len(warning_messages) > 0, (
-            "Expected a warning log from _model_query, got none"
-        )
-
-    def test_analysis_metrics_failure_logs_warning(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
-        """analysis.metrics handler must log a warning on engine error."""
-        from src.api.aip.methods import _analysis_metrics
-
-        manager = MagicMock()
-        engine = MagicMock()
-        engine.get_state.side_effect = RuntimeError("metrics unavailable")
-        manager.get_active_engine.return_value = engine
-        ctx = {"engine_manager": manager}
-
-        with caplog.at_level(logging.WARNING, logger="src.api.aip.methods"):
-            result = _analysis_metrics(_context=ctx)
-
-        assert "sim_time" in result
-        warning_messages = [
-            r.message for r in caplog.records if r.levelno >= logging.WARNING
-        ]
-        assert len(warning_messages) > 0, (
-            "Expected a warning log from _analysis_metrics, got none"
-        )
+        with pytest.raises(AIPMethodNotImplemented, match=match):
+            getattr(aip_methods, func_name)(**args)
 
 
 class TestPhysicsRouteExceptionLogging:

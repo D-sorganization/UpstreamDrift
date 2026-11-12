@@ -96,6 +96,9 @@ shadows:
   import_aliases.py:
     tracking_issue: 8322
     sunset_date: "2026-12-31"
+  lifecycle.py:
+    tracking_issue: 14934
+    sunset_date: "2026-12-31"
 
   # ── Pre-existing UD package surfaced by the Tools #4872 pin ───────────────
   # UpstreamDrift's plotting package predates the provider package added to

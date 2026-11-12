@@ -113,8 +113,12 @@ def verify_junit_engine_floor(
 ) -> EngineFloorReport:
     """Validate JUnit results against min_executed and max_skipped floors."""
     config = json.loads(floor_config_path.read_text(encoding="utf-8"))
-    if lane in config.get("not_covered", {}):
-        info = config["not_covered"][lane]
+    not_covered = {
+        **config.get("not_covered", {}),
+        **config.get("not_covered_engines", {}),
+    }
+    if lane in not_covered:
+        info = not_covered[lane]
         raise ValueError(
             f"Lane '{lane}' is declared not_covered: {info.get('reason')} (issue {info.get('issue')})"
         )

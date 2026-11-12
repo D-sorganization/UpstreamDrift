@@ -233,11 +233,19 @@ class SharedPuttingEngine(BasePhysicsEngine):
             float(q[0]), float(q[1]), float(v[0]), float(v[1])
         )
 
-    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        """Zero-velocity counterfactual: slope acceleration at ``q`` alone."""
+    def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:
+        """Legacy gravity-only diagnostic at ``v = u = 0`` (#14943)."""
         if q is None:
             raise ValueError("q must be provided")
         return self._slope_accel(float(q[0]), float(q[1]))
+
+    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
+        """Deprecated shim → :meth:`compute_gravity_only_acceleration` (#14943)."""
+        from src.shared.python.engine_core.counterfactual_defaults import (
+            deprecated_compute_zvcf_shim,
+        )
+
+        return deprecated_compute_zvcf_shim(self, q)
 
     def _recompute_trajectory(self) -> None:
         """Re-plan the whole putt from the current state via ``simulate_ball``."""
