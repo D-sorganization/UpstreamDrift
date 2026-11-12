@@ -233,6 +233,7 @@ def _build_sidebar_plot_request_sink(sidebar: Any) -> Callable[[Any], None] | No
 def _build_pyqt_chat_dock(sidebar: Any) -> QtWidgets.QWidget | None:
     try:
         chat_module = importlib.import_module("chat.chat_dock_widget")
+        importlib.import_module("chat._ud_attachment_manifest_mixin")
     except Exception as exc:  # noqa: BLE001 - optional chat dependency
         _logger.debug("PyQt chat dock unavailable for Sidekick: %s", exc)
         # Tools issue #2851: stash the import error so the fallback tab can
