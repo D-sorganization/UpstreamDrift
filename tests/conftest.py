@@ -629,6 +629,10 @@ def pytest_configure(config: pytest.Config) -> None:
         config.addinivalue_line(
             "markers", "cross_engine: cross-engine physics parity tests"
         )
+        config.addinivalue_line(
+            "markers",
+            "declared_skip(reason, issue): Declared skip for required engine lanes with issue citation",
+        )
     mode = config.getoption("--tools-mode")
     root_dir = Path(__file__).resolve().parent.parent
     local_path = str((root_dir / "src/shared/python").resolve())
@@ -1274,6 +1278,10 @@ def mock_mujoco_dependencies() -> Generator[tuple[MagicMock, MagicMock], None, N
 #
 # The classification logic lives in tests/support/suite_markers.py so it can be
 # unit-tested in isolation (see tests/unit/test_suite_marker_enforcement_7158).
+from tests.helpers.suite_marker_reach import (  # noqa: E402
+    apply_directory_suite_auto_markers,
+    summarize_gate_selectability,
+)
 from tests.support.suite_markers import (  # noqa: E402
     SUITE_MARKERS,
     find_unmarked,
@@ -1354,12 +1362,28 @@ def pytest_collection_modifyitems(
     _skip_fake_pyqt6_gui_items(items)
     _apply_unit_gate_quarantine(items)
     _apply_quarantine_marker(items)
+    apply_directory_suite_auto_markers(items)
 
     unmarked = find_unmarked(items)  # type: ignore[arg-type]
     config._ud_unmarked_suite_count = len(unmarked)  # type: ignore[attr-defined]
     config._ud_unmarked_suite_nodeids = [  # type: ignore[attr-defined]
         item.nodeid for item in unmarked
     ]
+
+    selected_count = len(items) - len(unmarked)
+    selectability = summarize_gate_selectability(len(items), selected_count)
+    config._ud_selectability_summary = selectability  # type: ignore[attr-defined]
+
+    summary_dest = os.environ.get("UD_WRITE_SELECTABILITY_SUMMARY", "").strip()
+    if summary_dest:
+        if summary_dest == "GITHUB_STEP_SUMMARY":
+            summary_dest = os.environ.get("GITHUB_STEP_SUMMARY", "").strip()
+        if summary_dest:
+            try:
+                with open(summary_dest, "a", encoding="utf-8") as fh:
+                    fh.write(f"- test reach ({selectability['summary_line']})\n")
+            except OSError:
+                pass
 
     if unmarked and suite_markers_enforced():
         listing = "\n".join(f"  - {item.nodeid}" for item in unmarked)
@@ -1480,6 +1504,14 @@ def pytest_runtest_makereport(
     """
     outcome = yield
     report = outcome.get_result()
+    if not report.skipped:
+        return
+
+    from src.shared.python.engine_core.engine_lane_guard import (
+        enforce_required_engine_skip_guard,
+    )
+
+    enforce_required_engine_skip_guard(item, report)
     if not report.skipped:
         return
 

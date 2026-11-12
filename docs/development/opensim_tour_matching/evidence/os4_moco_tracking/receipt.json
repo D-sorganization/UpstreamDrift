@@ -7,7 +7,7 @@
   "inputs": {
     "model_path": "/mnt/c/Users/diete/opensim-10003/os3b-scale-ik/golf_humanoid_scaled_tour_markers.osim",
     "model_sha256": "7dd1da1764bd8569d9e5de14eae6a249f8845e9fddf0f343796bef2ae8137381",
-    "source_trc_path": "/home/dieterolson/opensim-10003-runtime/docs/development/opensim_tour_matching/evidence/tour_average_tracked.trc",
+    "source_trc_path": "<owner-home>/opensim-10003-runtime/docs/development/opensim_tour_matching/evidence/tour_average_tracked.trc",
     "source_trc_sha256": "95e1714d6e044280650638feaac07894c49da4e2c300ef572de54fe13401f67b",
     "ik_states_path": "/mnt/c/Users/diete/opensim-10003/ik_states_full.sto",
     "ik_states_sha256": "325796072973aad8b007c5f975253eaf62057b91924cada85e2dae381cd1c2cc"

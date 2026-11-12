@@ -247,5 +247,5 @@ The three-page Native Desktop Supplement 1 and editable LaTeX, screenshots and
 intact synthetic bundle are saved on the local Desktop. See [Procedure](necromatcher-native-desktop-impact-methods.tex)
 and [Frozen Review](historical_capture/native-desktop-replay-impact-review.json). Tiger remains [0,191), Hogan [0,750).
 Historical fits, scientific qualification, simulation golf and final overall
-desktop parity acceptance remain open. No new ControlTower delivery or remote
+desktop parity acceptance remain open. No new <host> delivery or remote
 CI-green claim is made. The full goal remains active.

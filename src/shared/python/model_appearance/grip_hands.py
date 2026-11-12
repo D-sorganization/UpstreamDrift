@@ -32,6 +32,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 import math
 from dataclasses import replace
+from functools import lru_cache
 from typing import Any
 
 import numpy as np
@@ -132,6 +133,23 @@ def _resolve_dorsal_axis(
     return proj / size
 
 
+@lru_cache(maxsize=32)
+def _dorsum_azimuth_rad(hand: Hand, pose: GripPose) -> float:
+    """Azimuth of the baked dorsum shell about the hand-grip frame ``z`` (rad).
+
+    Measured from the mesh itself (centroid of the dorsum shell, as the tests
+    read it), so it follows the V azimuth the hand is baked at (about -35 deg
+    lead, +75 deg trail) and no copy of that number lives here (#14747). It is
+    independent of the grip radius and hand scale (baking at
+    ``GRIP_BUTT_RADIUS_M`` vs tapered radius is checked within 2° by
+    ``test_grip_hand_dorsum_follows_wrist.py``).
+    """
+    baked = build_grip_hand_mesh(hand, grip_radius_m=GRIP_BUTT_RADIUS_M, pose=pose)
+    dorsum = next(c for c in baked.components if c.finger == "dorsum")
+    centroid = dorsum.mesh.vertices.mean(axis=0)
+    return math.atan2(float(centroid[1]), float(centroid[0]))
+
+
 def grip_hand_frame(
     club: ClubAssembly,
     hand: Hand,
@@ -143,8 +161,11 @@ def grip_hand_frame(
     """4x4 transform from ``hand``'s hand-grip frame to the club-body frame.
 
     When ``wrist_follower`` or ``hands`` (with ``wrist_dorsal_axes``) is present,
-    derives ``x`` and ``y`` from the wrist follower's dorsal axis projected off
-    the grip axis ``z`` (#13996); otherwise falls back to ``_club_axes(club)``.
+    the frame is turned about the grip axis ``z`` so the *drawn dorsum shell*,
+    which the baked hand carries at azimuth ``a`` from ``x``, points along the
+    wrist follower's dorsal axis projected off ``z`` (#14747; #13996 only put the
+    dorsal axis on ``x``, leaving the drawn back 35 deg (lead) and 75 deg (trail)
+    away). Otherwise it falls back to ``_club_axes(club)``.
     """
     _check_club(club)
     if not isinstance(hand, Hand):
@@ -152,7 +173,10 @@ def grip_hand_frame(
     _check_pose(pose)
     dorsal = _resolve_dorsal_axis(hand, pose, wrist_follower, hands)
     if dorsal is not None:
-        x, y = dorsal, np.cross(_GRIP_AXIS, dorsal)
+        a = _dorsum_azimuth_rad(hand, pose)
+        tangent = np.cross(_GRIP_AXIS, dorsal)
+        x = math.cos(a) * dorsal - math.sin(a) * tangent
+        y = np.cross(_GRIP_AXIS, x)
     else:
         x, y = _club_axes(club)
     frame = np.eye(4)

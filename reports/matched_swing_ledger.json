@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-06T14:53:11Z",
+  "generated_at": "2026-11-10T02:56:41Z",
   "rows": [
     {
       "acceptance": null,
@@ -763,7 +763,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json",
-      "sha256": "f0560a66290239683ec3e64e1d522eda142eeabdc4c4226d56abca2fc7e3444e"
+      "sha256": "9899d9a9b89d34661a65cb89bc0ebf0af4f55e93eb3298eeb94ed8e9580cd680"
     },
     {
       "acceptance": {
@@ -1450,15 +1450,15 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
-        "fd_address_to_impact_rmse_m": 0.046569415796208255,
-        "fd_after_impact_rmse_m": 0.10174617843539428,
+        "fd_address_to_impact_rmse_m": 0.047053450515765344,
+        "fd_after_impact_rmse_m": 0.10043109641693285,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": 0.0663860071898135
+        "whole_marker_rmse_m": 0.06608554649900569
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json",
-      "sha256": "e94f70d9ae18db9ef2910f9ecdb43801322196d3131a3da19962732d7f75ba7c"
+      "sha256": "60f1eea3a9f1ec4803858312695ac53e3c5e58deaa354a53c855b38e31f933bc"
     },
     {
       "acceptance": null,
@@ -1497,7 +1497,7 @@
             "unit": "hash"
           },
           {
-            "measured": 0.07486206215217735,
+            "measured": 0.060185417687184405,
             "name": "whole_marker_rmse_m",
             "reason": "",
             "status": "passed",
@@ -1509,11 +1509,11 @@
             "name": "max_normal_force_n",
             "reason": "missing contact forces in dynamics receipt",
             "status": "failed",
-            "threshold": 2354.4,
+            "threshold": 2353.5959999999995,
             "unit": "N"
           },
           {
-            "measured": 0.004915108247782073,
+            "measured": 0.001877897673866538,
             "name": "max_closure_residual_m",
             "reason": "",
             "status": "passed",
@@ -1521,9 +1521,9 @@
             "unit": "m"
           },
           {
-            "measured": 0.08620367471196633,
+            "measured": 0.0,
             "name": "weight_fraction",
-            "reason": "weight fraction range [0.09, 2.65] outside [0.2, 3.0]",
+            "reason": "weight fraction range [0.00, 3.13] outside [0.2, 3.0]",
             "status": "failed",
             "threshold": 0.2,
             "unit": "BW"
@@ -1579,15 +1579,15 @@
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
-        "fd_address_to_impact_rmse_m": 0.03370915732280665,
-        "fd_after_impact_rmse_m": 0.1321795087426927,
+        "fd_address_to_impact_rmse_m": 0.034405721571437634,
+        "fd_after_impact_rmse_m": 0.10049397434023054,
         "pelvis_yaw_rmse_rad": null,
         "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": 0.07486206215217735
+        "whole_marker_rmse_m": 0.060185417687184405
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/receipt.json",
-      "sha256": "2f93e54140abe0d2b22e6129aac9d25ee9806bb3617c9ee87976effdf5d28397"
+      "sha256": "5710615214384f2dd761680a3cb3cdf9cf7c165c2fed9b0023ea5af4d5808ecc"
     },
     {
       "acceptance": {
@@ -3531,6 +3531,31 @@
       "artefacts": {
         "gif": null,
         "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "capture-a: private tour-average driver capture, 34 markers, 360 hz, 654 frames",
+      "engine": "mujoco",
+      "horizon_s": null,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/show_a9/receipt.json",
+      "sha256": "d06949d671a20564450998ca1d9ea1406cb75f86530275988f5dc759c98d51ad"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
         "npz": "docs/development/full_body_models/evidence/trunk_visuals/driver_v2_bundle.npz"
       },
       "candidate_sha": "4063705ffaa9b4ceb4a33bc144c32590ef964087a7cd980089a0f04dc386bf9a",
@@ -3749,7 +3774,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/opensim_tour_matching/evidence/os2_runtime_receipt.json",
-      "sha256": "bf65225139553ce2d8b367f923aac5a73ad89435e4fabbab4716975a098ff5c2"
+      "sha256": "48af536185cc0093f8f14bc260347a20674f3a18fc3db7619870df39d7457415"
     },
     {
       "acceptance": null,
@@ -3904,7 +3929,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/opensim_tour_matching/evidence/os4_moco_tracking/receipt.json",
-      "sha256": "0f70bcd82310347319d2807a3bcd08a5ba90c44a0f1b8f90fbebd400964051a6"
+      "sha256": "73bc38126d11ea04d56429b5ec46680c06043a10175478fa7c331eafd1260027"
     },
     {
       "acceptance": null,
@@ -3929,7 +3954,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/opensim_tour_matching/evidence/os5_polynomial_profile/receipt.json",
-      "sha256": "9e96585aac4fb4527d50dc50daeb9126a5a4d9785d7006a957e16881f7704d30"
+      "sha256": "f4c668be089fd236fdeb4ab9687252323b982dae5b57e3be4611455b13ff3d93"
     },
     {
       "acceptance": null,
@@ -4904,7 +4929,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_100/PARITY_DIAGNOSIS_RECEIPT.json",
-      "sha256": "1b50facb36bcd622b52634469d4ef8ef39d6030e0e8569ac74e7844efebf5805"
+      "sha256": "756d41f448c7e413e6e27141491b4988b4ae7604c66444bbad87e604cdbc84d9"
     },
     {
       "acceptance": null,
@@ -5092,7 +5117,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_103/runtime_license_receipt.json",
-      "sha256": "c8a81294e78897d607d82220ab01203acc1132bffd779236b24930970e14ba19"
+      "sha256": "26f8722d5c8e50698ea57d6b408f022b044064ea5a7bc3a47a3ad1be9f96ed36"
     },
     {
       "acceptance": null,
@@ -6544,5 +6569,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 161
+  "total_receipts": 162
 }
