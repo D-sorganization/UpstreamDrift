@@ -20,6 +20,12 @@ from src.shared.python.physics.impact_model import (
     RigidBodyImpactModel,
     validate_energy_balance,
 )
+from src.shared.python.physics.impact_model.utils import (
+    compute_effective_club_mass,
+    impact_offset_vector_3d,
+    pre_impact_contact_relative_velocity,
+    reduced_normal_effective_mass,
+)
 
 
 def _lofted_frictional_pre_state() -> PreImpactState:
@@ -41,16 +47,7 @@ def _lofted_frictional_pre_state() -> PreImpactState:
 
 
 def _effective_club_mass(pre_state: PreImpactState) -> float:
-    m_club = float(pre_state.clubhead_mass)
-    if pre_state.impact_offset is None or pre_state.clubhead_moi <= 0:
-        return m_club
-    offset = np.asarray(pre_state.impact_offset, dtype=float).reshape(-1)
-    if offset.size == 0:
-        return m_club
-    r_offset = float(math.hypot(*offset))
-    if r_offset <= 1e-6:
-        return m_club
-    return 1.0 / (1.0 / m_club + r_offset**2 / float(pre_state.clubhead_moi))
+    return compute_effective_club_mass(pre_state)
 
 
 def _unit_normal(orientation: np.ndarray) -> np.ndarray:
@@ -73,9 +70,9 @@ class TestValidateEnergyBalance15043:
         m_eff = _effective_club_mass(pre)
         assert m_eff < pre.clubhead_mass
         n = _unit_normal(pre.clubhead_orientation)
-        v_rel = np.asarray(pre.clubhead_velocity) - np.asarray(pre.ball_velocity)
+        v_rel = pre_impact_contact_relative_velocity(pre)
         v_rel_n = float(np.dot(v_rel, n))
-        mu = (float(GOLF_BALL_MASS_KG) * m_eff) / (float(GOLF_BALL_MASS_KG) + m_eff)
+        mu = reduced_normal_effective_mass(pre, n)
         expected = 0.5 * mu * v_rel_n**2 * (1.0 - params.cor**2)
         assert math.isclose(result["expected_loss_j"], expected, rel_tol=1e-6)
 
@@ -146,3 +143,51 @@ class TestValidateEnergyBalance15043:
             result["energy_lost"], result["expected_loss_j"], rel_tol=1e-9
         )
         assert result["club_rot_ke_post"] > result["club_rot_ke_pre"]
+
+    def test_spinning_off_center_frictionless_momentum_and_cor_energy(self) -> None:
+        """Off-center spin changes contact v_rel; impulse conserves P/L and COR energy."""
+        pre = PreImpactState(
+            clubhead_velocity=np.array([48.0, 0.2, -0.5]),
+            clubhead_angular_velocity=np.array([0.0, 12.0, -4.0]),
+            clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+            ball_position=np.zeros(3),
+            ball_velocity=np.zeros(3),
+            ball_angular_velocity=np.zeros(3),
+            clubhead_mass=0.2,
+            clubhead_moi=4.5e-4,
+            impact_offset=np.array([0.018, 0.006]),
+        )
+        params = ImpactParameters(cor=0.82, friction_coefficient=0.0)
+        post = RigidBodyImpactModel().solve(pre, params)
+        result = validate_energy_balance(pre, post, params)
+
+        m_club = float(pre.clubhead_mass)
+        p_pre = m_club * np.asarray(pre.clubhead_velocity) + float(
+            GOLF_BALL_MASS_KG
+        ) * np.asarray(pre.ball_velocity)
+        p_post = m_club * np.asarray(post.clubhead_velocity) + float(
+            GOLF_BALL_MASS_KG
+        ) * np.asarray(post.ball_velocity)
+        assert np.linalg.norm(p_post - p_pre) < 1e-6
+
+        n = _unit_normal(pre.clubhead_orientation)
+        v_rel = pre_impact_contact_relative_velocity(pre)
+        mu = reduced_normal_effective_mass(pre, n)
+        j_n = (1.0 + params.cor) * mu * float(np.dot(v_rel, n))
+        impulse = j_n * n
+        i_club = float(pre.clubhead_moi)
+        r_club = impact_offset_vector_3d(pre)
+        delta_omega_club = np.cross(r_club, -impulse) / i_club
+        assert np.allclose(
+            post.clubhead_angular_velocity - pre.clubhead_angular_velocity,
+            delta_omega_club,
+            atol=1e-9,
+        )
+        assert np.allclose(
+            post.ball_angular_velocity, pre.ball_angular_velocity, atol=1e-12
+        )
+
+        assert result["normal_energy_budget_met"] is True
+        assert math.isclose(
+            result["energy_lost"], result["expected_loss_j"], rel_tol=1e-8
+        )

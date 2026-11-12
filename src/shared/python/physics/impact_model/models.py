@@ -12,7 +12,12 @@ from src.shared.python.core.physics_constants import (
 )
 
 from .types import ImpactModelType, ImpactParameters, PostImpactState, PreImpactState
-from .utils import compute_effective_club_mass
+from .utils import (
+    compute_effective_club_mass,
+    impact_offset_vector_3d,
+    pre_impact_contact_relative_velocity,
+    reduced_normal_effective_mass,
+)
 
 # Rolling-without-slip tangential-impulse factor for a uniform solid sphere.
 #
@@ -31,34 +36,6 @@ from .utils import compute_effective_club_mass
 # Ref: classic rigid-body collision of a sphere, e.g. Cross, "Grip-slip
 # behavior of a bouncing ball", Am. J. Phys. 70, 1093 (2002).
 SPHERE_ROLLING_CAP_FACTOR = 2.0 / 7.0
-
-
-def _impact_offset_vector_3d(pre_state: PreImpactState) -> np.ndarray:
-    """2D face offset as a CG-to-contact lever arm in world coordinates."""
-    if pre_state.impact_offset is None:
-        return np.zeros(3)
-    offset = np.asarray(pre_state.impact_offset, dtype=float).reshape(-1)
-    if offset.size == 0:
-        return np.zeros(3)
-    n_unit = pre_state.clubhead_orientation / (
-        0.0
-        if np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1).size == 0
-        else math.hypot(
-            *np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1)
-        )
-    )
-    up = np.array([0.0, 0.0, 1.0])
-    horizontal_axis = np.cross(up, n_unit)
-    h_norm = float(math.hypot(*horizontal_axis))
-    horizontal_axis = (
-        np.array([0.0, 1.0, 0.0]) if h_norm <= 1e-12 else horizontal_axis / h_norm
-    )
-    vertical_axis = np.cross(n_unit, horizontal_axis)
-    v_norm = float(math.hypot(*vertical_axis))
-    if v_norm > 1e-12:
-        vertical_axis = vertical_axis / v_norm
-    v_offset = float(offset[1]) if offset.size > 1 else 0.0
-    return float(offset[0]) * horizontal_axis + v_offset * vertical_axis
 
 
 class ImpactModel(ABC):
@@ -100,16 +77,13 @@ class RigidBodyImpactModel(ImpactModel):
         self,
         v_rel: np.ndarray,
         n: np.ndarray,
-        m_club_effective: float,
+        reduced_normal_mass: float,
         cor: float,
     ) -> tuple[float, float]:
         if v_rel is None:
             raise ValueError("v_rel must be provided")
         v_approach = np.dot(v_rel, n)
-        m_eff = (GOLF_BALL_MASS_KG * m_club_effective) / (
-            GOLF_BALL_MASS_KG + m_club_effective
-        )
-        j = (1 + cor) * m_eff * v_approach
+        j = (1 + cor) * reduced_normal_mass * v_approach
         return j, v_approach
 
     def _compute_friction_impulse(
@@ -210,8 +184,6 @@ class RigidBodyImpactModel(ImpactModel):
             ),
             "clubhead_orientation must be non-zero",
         )
-        m_club_effective = self._compute_effective_club_mass(pre_state)
-
         n = pre_state.clubhead_orientation / (
             0.0
             if np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1).size
@@ -220,13 +192,14 @@ class RigidBodyImpactModel(ImpactModel):
                 *np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1)
             )
         )
-        v_rel = pre_state.clubhead_velocity - pre_state.ball_velocity
+        v_rel = pre_impact_contact_relative_velocity(pre_state)
         require(
             bool(float(np.dot(v_rel, n)) >= 0.0),
             "clubhead and ball must be approaching at contact",
         )
 
-        j, v_approach = self._compute_impulse(v_rel, n, m_club_effective, params.cor)
+        mu_normal = reduced_normal_effective_mass(pre_state, n)
+        j, v_approach = self._compute_impulse(v_rel, n, mu_normal, params.cor)
 
         j_tangent = self._compute_friction_impulse(
             pre_state,
@@ -245,7 +218,7 @@ class RigidBodyImpactModel(ImpactModel):
         club_spin = pre_state.clubhead_angular_velocity.copy()
         club_moi = float(pre_state.clubhead_moi)
         if club_moi > 0.0:
-            r_contact = _impact_offset_vector_3d(pre_state)
+            r_contact = impact_offset_vector_3d(pre_state)
             if float(np.dot(r_contact, r_contact)) > 1e-12:
                 club_spin = club_spin + np.cross(r_contact, -impulse) / club_moi
         energy_transfer = self._compute_energy_transfer(
