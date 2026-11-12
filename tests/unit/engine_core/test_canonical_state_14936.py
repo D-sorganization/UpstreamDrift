@@ -17,7 +17,10 @@ from src.shared.python.pose_interchange import se3
 from src.shared.python.engine_core.engine_availability import (
     PINOCCHIO_AVAILABLE,
 )
-from src.shared.python.pose_interchange.canonical_state import CONVENTION_TAG_V2
+from src.shared.python.pose_interchange.canonical_state import (
+    CONVENTION_TAG_V2,
+    CanonicalState,
+)
 
 _skip_no_pinocchio = pytest.mark.skipif(
     not PINOCCHIO_AVAILABLE,
@@ -73,9 +76,48 @@ def _random_canonical_on_engine(engine) -> None:
     if q_arr.shape[0] > 7:
         q_arr[7:] = rng.uniform(-0.3, 0.3, size=q_arr.shape[0] - 7)
     v_arr[:] = rng.normal(scale=0.5, size=v_arr.shape[0])
+    a_arr = rng.normal(scale=0.2, size=v_arr.shape[0])
     engine.set_state(q_arr, v_arr)
-    if hasattr(engine, "a"):
-        engine.a = rng.normal(scale=0.2, size=v_arr.shape[0])
+    if engine.engine_type == "mujoco" and engine.data is not None:
+        engine.data.qacc[:] = a_arr
+        engine.data.time = 0.42 + float(rng.uniform(0.0, 1.5))
+    elif hasattr(engine, "a"):
+        engine.a = a_arr
+
+
+_NONZERO_SIM_TIME_S = 2.375
+
+
+@pytest.mark.requires_mujoco
+def test_mujoco_canonical_roundtrip_preserves_imported_acceleration_and_time() -> None:
+    """Regression: mj_forward on read and engine.time on apply dropped state (#14936)."""
+    pytest.importorskip("mujoco")
+    if not _FLOATING_MJCF.is_file():
+        pytest.skip(f"fixture missing: {_FLOATING_MJCF}")
+
+    engine = MuJoCoPhysicsEngine()
+    engine.load_from_path(str(_FLOATING_MJCF))
+    q, v = engine.get_state()
+    nv = int(v.shape[0])
+    a_import = np.linspace(0.05, 0.05 + 0.1 * (nv - 1), num=nv, dtype=np.float64)
+    seed = CanonicalState(
+        q=np.asarray(q, dtype=np.float64),
+        v=np.asarray(v, dtype=np.float64),
+        a=a_import,
+        t=_NONZERO_SIM_TIME_S,
+        convention=CONVENTION_TAG_V2,
+    )
+    engine.set_canonical_state(seed)
+    assert engine.get_time() == pytest.approx(_NONZERO_SIM_TIME_S)
+
+    recovered = engine.get_canonical_state()
+    assert recovered.t == pytest.approx(_NONZERO_SIM_TIME_S)
+    np.testing.assert_allclose(recovered.a, a_import, atol=1.0e-12)
+
+    engine.set_canonical_state(recovered)
+    after = engine.get_canonical_state()
+    assert after.t == pytest.approx(_NONZERO_SIM_TIME_S)
+    np.testing.assert_allclose(after.a, a_import, atol=1.0e-12)
 
 
 @pytest.mark.requires_mujoco
@@ -96,6 +138,7 @@ def test_mujoco_canonical_roundtrip_identity() -> None:
     np.testing.assert_allclose(after.q, before.q, atol=1.0e-12)
     np.testing.assert_allclose(after.v, before.v, atol=1.0e-12)
     np.testing.assert_allclose(after.a, before.a, atol=1.0e-12)
+    assert before.t != 0.0, "test requires non-zero simulation timestamp"
     assert after.t == pytest.approx(before.t)
 
 
@@ -143,6 +186,8 @@ def test_mujoco_checkpoint_roundtrip_preserves_acceleration() -> None:
     np.testing.assert_allclose(after.q, before.q, atol=1.0e-12)
     np.testing.assert_allclose(after.v, before.v, atol=1.0e-12)
     np.testing.assert_allclose(after.a, before.a, atol=1.0e-12)
+    assert before.t != 0.0
+    assert after.t == pytest.approx(before.t)
 
 
 @pytest.mark.requires_mujoco

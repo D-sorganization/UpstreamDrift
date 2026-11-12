@@ -91,9 +91,8 @@ def _native_acceleration(engine: BasePhysicsEngine, v: np.ndarray) -> np.ndarray
     if engine_type == "mujoco":
         data = getattr(engine, "data", None)
         if data is not None and hasattr(data, "qacc"):
-            forward = getattr(engine, "forward", None)
-            if callable(forward):
-                forward()
+            # Do not call forward() here: mj_forward overwrites qacc with fresh
+            # dynamics and drops an imported canonical acceleration (#14936).
             return np.asarray(data.qacc, dtype=np.float64).copy()
     if engine_type == "pinocchio":
         a_attr = getattr(engine, "a", None)
@@ -154,8 +153,11 @@ def apply_canonical_state(
         mj_native = MujocoAdapter().from_canonical_v2(mj_v2)
         engine.set_state(mj_native.qpos, mj_native.qvel)
         data = getattr(engine, "data", None)
-        if data is not None and hasattr(data, "qacc"):
-            data.qacc[:] = mj_native.qacc
+        if data is not None:
+            if hasattr(data, "qacc"):
+                data.qacc[:] = mj_native.qacc
+            if hasattr(data, "time"):
+                data.time = float(state.t)
     elif engine_type == "pinocchio":
         if state.convention != CONVENTION_TAG_V2:
             raise ValueError(
