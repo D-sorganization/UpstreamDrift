@@ -82,6 +82,26 @@ def _canonicalize_sign(q: np.ndarray) -> np.ndarray:
     return q
 
 
+def _quat_conj(q: np.ndarray) -> np.ndarray:
+    """Conjugate of a ``[w, x, y, z]`` quaternion."""
+    return np.array([q[0], -q[1], -q[2], -q[3]], dtype=np.float64)
+
+
+def _quat_mul(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    """Hamilton product ``a * b`` for ``[w, x, y, z]`` quaternions."""
+    aw, ax, ay, az = a
+    bw, bx, by, bz = b
+    return np.array(
+        [
+            aw * bw - ax * bx - ay * by - az * bz,
+            aw * bx + ax * bw + ay * bz - az * by,
+            aw * by - ax * bz + ay * bw + az * bx,
+            aw * bz + ax * by - ay * bx + az * bw,
+        ],
+        dtype=np.float64,
+    )
+
+
 def quat_inverse_distance(q1: np.ndarray, q2: np.ndarray) -> float:
     """Return the SO(3) rotation angle in radians between two orientations.
 
@@ -97,17 +117,19 @@ def quat_inverse_distance(q1: np.ndarray, q2: np.ndarray) -> float:
         raise ValueError("quaternion must be non-zero")
     a = a / norm_a
     b = b / norm_b
-    dot = float(np.dot(a, b))
-    if dot < 0.0:
+    if float(np.dot(a, b)) < 0.0:
         b = -b
-        dot = -dot
-    if dot > 1.0 - 1e-14:
-        vdiff = a[1:4] - b[1:4]
-        vnorm = math.sqrt(np.dot(vdiff, vdiff))
-        if vnorm == 0.0:
-            return 0.0
-        return float(4.0 * math.asin(min(1.0, 0.5 * vnorm)))
-    return float(2.0 * math.acos(min(1.0, dot)))
+    q_rel = _quat_mul(_quat_conj(a), b)
+    rel_norm = math.sqrt(np.dot(q_rel, q_rel))
+    if rel_norm == 0.0:
+        raise ValueError("quaternion must be non-zero")
+    q_rel = q_rel / rel_norm
+    if q_rel[0] < 0.0:
+        q_rel = -q_rel
+    vnorm = math.sqrt(np.dot(q_rel[1:4], q_rel[1:4]))
+    if vnorm == 0.0:
+        return 0.0
+    return float(2.0 * math.atan2(vnorm, q_rel[0]))
 
 
 def slerp(q0: np.ndarray, q1: np.ndarray, t: float) -> np.ndarray:
