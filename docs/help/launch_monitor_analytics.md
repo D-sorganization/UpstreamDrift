@@ -111,6 +111,10 @@ Full workflow, evidence table and per-vendor boundaries:
 Security and retention rationale for dataset jobs:
 [ADR 0037](../adr/0037-immutable-launch-monitor-dataset-jobs.md).
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/shot-pattern-analysis.html): *Shot Pattern Analysis*.
+
 ## Limitations
 
 - Vendor support is header-family mapping, not validation. The repository

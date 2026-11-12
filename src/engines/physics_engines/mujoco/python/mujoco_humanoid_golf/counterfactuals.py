@@ -18,6 +18,9 @@ from typing import Literal
 import mujoco
 import numpy as np
 
+from src.shared.python.engine_core.counterfactual_contract import (
+    COUNTERFACTUAL_DEFINITION_VERSION,
+)
 from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -52,6 +55,7 @@ class CounterfactualResult:
     delta_position: np.ndarray | None
     torque_attributed_effect: np.ndarray | None
     velocity_attributed_effect: np.ndarray | None
+    definition_version: str = COUNTERFACTUAL_DEFINITION_VERSION
 
 
 class CounterfactualAnalyzer:
@@ -216,6 +220,27 @@ class CounterfactualAnalyzer:
             torque_attributed_effect=delta_qacc,  # ZTCF attributes to torques
             velocity_attributed_effect=None,
         )
+
+    def control_component_at(self, qpos: np.ndarray, ctrl: np.ndarray) -> np.ndarray:
+        """SPEC §4 ZVCF control acceleration ``M(q)⁻¹ τ`` at ``q`` (#14943).
+
+        ``ctrl`` names the legacy parameter; the vector is generalized force
+        ``τ`` with ``nv`` entries, not MuJoCo actuator commands (``nu``).
+        """
+        if qpos is None or ctrl is None:
+            raise ValueError("qpos and ctrl must be provided")
+        tau_arr = np.asarray(ctrl, dtype=float).reshape(-1)
+        if tau_arr.size != self.model.nv:
+            raise ValueError(
+                f"tau must have {self.model.nv} generalized-force entries, "
+                f"got {tau_arr.size}"
+            )
+        self._data_counterfactual.qpos[:] = qpos
+        self._data_counterfactual.qvel[:] = 0
+        self._data_counterfactual.ctrl[:] = 0
+        mujoco.mj_forward(self.model, self._data_counterfactual)
+        mass = full_mass_matrix(mujoco, self.model, self._data_counterfactual)
+        return np.linalg.solve(mass, tau_arr)
 
     def _control_acceleration(
         self, data: mujoco.MjData, qpos: np.ndarray, ctrl: np.ndarray

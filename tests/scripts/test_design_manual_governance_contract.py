@@ -37,8 +37,8 @@ def test_repository_adopts_one_qmd_authority_and_blocks_release() -> None:
     assert (authority / "index.qmd").is_file()
     assert (authority / "chapters" / "00-governance.qmd").is_file()
     assert summary.canonical_qmd_count == len(tuple(authority.rglob("*.qmd")))
-    assert summary.calculation_count == 0
-    assert summary.release_status == "blocked-inventory-required"
+    assert summary.calculation_count >= 5
+    assert summary.release_status == "inventory-partial"
     assert summary.public_projection_allowed is False
 
 
@@ -56,11 +56,25 @@ def test_policy_reuses_program_contracts_without_copying_schemas() -> None:
 def test_registry_is_fail_closed_until_up_d1_inventory() -> None:
     registry = _json(REGISTRY_PATH)
 
-    assert verify_calculation_registry(registry) == 0
-    assert registry["release_status"] == "blocked-inventory-required"
+    assert verify_calculation_registry(registry) >= 5
+    assert registry["release_status"] == "inventory-partial"
     assert registry["inventory_commit"] is None
     blocker_ids = [blocker["id"] for blocker in registry["blockers"]]
+    assert len(blocker_ids) == len(set(blocker_ids))
     assert "UP-D1-inventory-required" in blocker_ids
+
+
+def test_registry_core_decomposition_calculations_are_registered() -> None:
+    registry = _json(REGISTRY_PATH)
+    calc_ids = {row["id"] for row in registry["calculations"]}
+    required = {
+        "UP-CALC-ztcf-pointwise-drift",
+        "UP-CALC-zvcf-pointwise-control",
+        "UP-CALC-ground-reaction-breakdown",
+        "UP-CALC-impact-parameters",
+        "UP-CALC-rigid-contact-reduction",
+    }
+    assert required <= calc_ids
 
 
 @pytest.mark.parametrize(
@@ -109,6 +123,7 @@ def test_empty_registry_cannot_claim_approval() -> None:
     registry["release_status"] = "approved"
     registry["inventory_commit"] = "1" * 40
     registry["blockers"] = []
+    registry["calculations"] = []
 
     with pytest.raises(DesignManualGovernanceError, match="approved registry requires"):
         verify_calculation_registry(registry)

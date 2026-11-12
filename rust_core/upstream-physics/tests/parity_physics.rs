@@ -48,6 +48,10 @@ fn rk4_decay_matches_python_reference_fixture() {
     );
 }
 
+/// World frame for these anchors: **X** downrange, **Y** left, **Z** up.
+/// Magnus direction is **ω × v**. The `+Y` spin component in this mixed-spin
+/// fixture is **topspin** for the dominant **+X** velocity (not backspin).
+/// Pure backspin on a level **+X** shot is **−Y** and yields upward (**+Z**) Magnus.
 #[test]
 fn aerodynamics_forces_match_python_reference_fixture() {
     let velocity = Vector3::new(62.0, -4.0, 18.0);
@@ -65,11 +69,14 @@ fn aerodynamics_forces_match_python_reference_fixture() {
     assert_close(forces.lift.x, 0.0, 1e-12, "lift.x");
     assert_close(forces.lift.y, 0.0, 1e-12, "lift.y");
     assert_close(forces.lift.z, 0.0, 1e-12, "lift.z");
-    assert_close(forces.magnus.x, 0.143_857_999_343_142_6, 1e-12, "magnus.x");
-    assert_close(forces.magnus.y, -0.074_135_029_467_114_1, 1e-12, "magnus.y");
-    assert_close(forces.magnus.z, -0.511_985_337_619_072_2, 1e-12, "magnus.z");
+    assert_close(forces.magnus.x, 0.143_719_254_216_918_8, 1e-12, "magnus.x");
+    assert_close(forces.magnus.y, -0.074_063_529_278_956_4, 1e-12, "magnus.y");
+    assert_close(forces.magnus.z, -0.511_491_548_809_155, 1e-12, "magnus.z");
 }
 
+/// Ball-flight anchor uses `spin_axis = [0, 1, 0]` (pure **+Y** rotation) with
+/// mostly **+X** velocity — **topspin** in the documented frame, hence downward
+/// Magnus early in flight. This fixture pins integration parity, not backspin sign.
 #[test]
 fn ball_flight_matches_python_reference_fixture() {
     let config = IntegratorConfig {
@@ -94,13 +101,8 @@ fn ball_flight_matches_python_reference_fixture() {
     assert!(result.completed);
     let final_point = result.points.last().expect("trajectory has a final point");
     assert_eq!(result.steps, 126);
-    assert_close(final_point.t, 2.520_000_000_000_002, 1e-12, "landing time");
-    assert_close(final_point.x, 65.398_808_090_680_66, 1e-10, "landing x");
-    assert_close(final_point.y, 1.010_106_797_748_850_7, 1e-12, "landing y");
-    assert_close(
-        final_point.z,
-        -0.008_670_452_489_379_865,
-        1e-12,
-        "landing z",
-    );
+    assert_close(final_point.t, 2.519_458_517_113_387, 1e-12, "landing time");
+    assert_close(final_point.x, 65.388_199_926_238_3, 1e-10, "landing x");
+    assert_close(final_point.y, 1.009_934_125_807_955, 1e-12, "landing y");
+    assert_close(final_point.z, 0.0, 1e-12, "landing z");
 }

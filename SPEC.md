@@ -1036,7 +1036,7 @@ study,vandv,provenance,units}`, with subpackages re-exported by name and a
   Tauri Rust/npm package minors. The Linux Tauri lanes also install
   `libdbus-1-dev` because the updated Rust graph contains `libdbus-sys`.
 - **2026-06-18** - Hardened the Tauri Build check after the UI audit recovery
-  PR exposed DeskComputer runner PATH drift: `CARGO_HOME` is now rooted at the
+  PR exposed <host> runner PATH drift: `CARGO_HOME` is now rooted at the
   workspace, the Rust toolchain verifier persists `$CARGO_HOME/bin` into
   `$GITHUB_PATH`, and CI infrastructure tests pin that Cargo remains reachable
   before rustfmt/clippy/check steps run.
@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-11 | #15023 | Register ud-sim-mcp console script, generated capability inventory, and Agent API auth docs. |
 | 2026-11-10 | #15000 | AIP JSON-RPC stubs return not_implemented; capabilities self-check (#14940). |
 | 2026-11-10 | #14962 | BallFlightSimulator reports per-step forces from the Rust integrator with legacy post-hoc path tagged |
 | 2026-11-10 | #14995 | Remove default-true success flags on solver and calc outputs with Oracle 1 and 8 AST gates |

@@ -16,6 +16,13 @@ pub const DEFAULT_TAU_DEACT: f64 = 0.040;
 /// Default lower activation floor.
 pub const DEFAULT_MIN_ACTIVATION: f64 = 0.001;
 
+/// Maximum internal substep for explicit activation integration [s].
+///
+/// Set to half the smallest activation time constant at [`DEFAULT_MIN_ACTIVATION`]
+/// (`τ_act · (0.5 + 1.5 · a_min) / 2` ≈ 2.5 ms) so mocap-sized steps (10–20 ms)
+/// stay stable without Euler overshoot hidden by output clamping (#15045).
+pub const DEFAULT_MAX_ACTIVATION_INTEGRATION_DT: f64 = 0.0025075;
+
 /// First-order neural excitation to muscle activation dynamics.
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "python", pyclass(get_all, set_all))]
@@ -67,28 +74,48 @@ impl ActivationDynamics {
         Ok(())
     }
 
+    #[inline]
+    fn effective_tau(&self, u_clamped: f64, a_clamped: f64) -> f64 {
+        if u_clamped > a_clamped {
+            self.tau_act * (0.5 + 1.5 * a_clamped)
+        } else {
+            self.tau_deact / (0.5 + 1.5 * a_clamped)
+        }
+    }
+
+    /// One exponential substep for `da/dt = (u - a) / τ` with τ frozen over `dt`.
+    #[inline]
+    fn exponential_step(&self, u: f64, a: f64, dt: f64) -> f64 {
+        let u_clamped = u.clamp(self.min_activation, 1.0);
+        let a_clamped = a.clamp(self.min_activation, 1.0);
+        let tau = self.effective_tau(u_clamped, a_clamped);
+        let a_new = u_clamped + (a_clamped - u_clamped) * (-dt / tau).exp();
+        a_new.clamp(self.min_activation, 1.0)
+    }
+
     /// Compute `da/dt` after clamping excitation and activation.
     #[inline]
     pub fn compute_derivative(&self, u: f64, a: f64) -> f64 {
         let u_clamped = u.clamp(self.min_activation, 1.0);
         let a_clamped = a.clamp(self.min_activation, 1.0);
 
-        let tau = if u_clamped > a_clamped {
-            self.tau_act * (0.5 + 1.5 * a_clamped)
-        } else {
-            self.tau_deact / (0.5 + 1.5 * a_clamped)
-        };
-
+        let tau = self.effective_tau(u_clamped, a_clamped);
         (u_clamped - a_clamped) / tau
     }
 
-    /// Euler-update activation by one positive timestep.
+    /// Advance activation over a positive interval using exponential substeps.
     pub fn update(&self, u: f64, a: f64, dt: f64) -> Result<f64, String> {
         if dt <= 0.0 {
             return Err(format!("time step dt must be positive, got {dt}"));
         }
-        let a_new = a + self.compute_derivative(u, a) * dt;
-        Ok(a_new.clamp(self.min_activation, 1.0))
+        let mut a_cur = a;
+        let mut remaining = dt;
+        while remaining > 0.0 {
+            let sub_dt = remaining.min(DEFAULT_MAX_ACTIVATION_INTEGRATION_DT);
+            a_cur = self.exponential_step(u, a_cur, sub_dt);
+            remaining -= sub_dt;
+        }
+        Ok(a_cur)
     }
 
     /// Batch update helper for lower-overhead Python/RL loops.

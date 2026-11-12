@@ -6,7 +6,7 @@ Start with the [Agent Context Usage Guide](docs/agent_context/USAGE.md); its `re
 
 ## Required MATLAB Release
 
-MATLAB R2025b is the required execution, model-save and validation release for the Simscape golf model and tour-average matching epic #9921. The user has the complete required licensed feature set in R2025b. R2026a is not a requirement; do not select it from PATH or use its successful probes as R2025b acceptance evidence. On DeskComputer and ControlTower launch `C:/Program Files/MATLAB/R2025b/bin/matlab.exe` explicitly. Preserve historical reports with their actual release; run acceptance checks in R2025b. The full forward-dynamics matching goal remains active with this constraint.
+MATLAB R2025b is the required execution, model-save and validation release for the Simscape golf model and tour-average matching epic #9921. The user has the complete required licensed feature set in R2025b. R2026a is not a requirement; do not select it from PATH or use its successful probes as R2025b acceptance evidence. On <host> and <host> launch `C:/Program Files/MATLAB/R2025b/bin/matlab.exe` explicitly. Preserve historical reports with their actual release; run acceptance checks in R2025b. The full forward-dynamics matching goal remains active with this constraint.
 
 > **Read this first.** This file exists because we kept reinventing
 > infrastructure that already lived in the repo (FK solvers, skeleton
@@ -20,6 +20,38 @@ historical agent-workflow notes see
 
 This file is narrower: a **discovery workflow** for agents and a
 **directory of shared infrastructure** so we stop duplicating work.
+
+## Agent API
+
+UpstreamDrift exposes headless simulation and putting analytics to MCP clients
+through the stdio server **`ud-sim-mcp`** (console script and `.mcp.json` entry).
+The adapter is a hand-rolled JSON-RPC process in `src/sim_run/mcp.py`; a FastMCP
+migration is tracked separately (#15022).
+
+**Launch.** After `pip install -e .`, agents start the server with `ud-sim-mcp`
+(or the `.mcp.json` `ud-sim-mcp` block). See
+[`docs/development/sim_run_mcp.md`](docs/development/sim_run_mcp.md).
+
+**Capability inventory.** Engine and putting-tool runtime status is generated
+from the same probes the service uses (`python3 -m scripts.generate_sim_run_mcp_inventory`).
+The committed inventory is
+[`docs/development/sim_run_mcp_capability_inventory.md`](docs/development/sim_run_mcp_capability_inventory.md).
+Statuses are `available` or `unavailable` only — never `failed`.
+
+**Authentication and Private Mode** (Fleet Agent API naming; UpstreamDrift keeps
+legacy aliases):
+
+| Purpose | Canonical env var | Legacy alias |
+| --- | --- | --- |
+| Bearer token for tool calls when auth is enabled | `UPSTREAMDRIFT_AGENT_API_TOKEN` | `UD_SIM_AUTH_TOKEN` |
+| Deny `submit_run` while leaving read-only tools callable | `UPSTREAMDRIFT_PRIVATE_MODE` | `UD_PRIVATE_MODE` |
+
+When either canonical or legacy variable is set, the token value must be passed
+as `auth_token` on each MCP tool call. Private Mode values accept `1`, `true`, or
+`yes` (case-insensitive). Do not embed tokens in prompts, argv, or logs.
+
+Local listener authentication hardening is tracked in private Repository_Management
+records; public documentation does not describe that surface beyond this pointer.
 
 ## Modeling Reference Documentation
 
