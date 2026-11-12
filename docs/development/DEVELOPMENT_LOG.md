@@ -898,6 +898,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#15020 · Register Ud-Sim-Mcp Console Script, Generated Capability Inventory, and Agent API Auth Docs.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15020
+- **Branch:** merged via #15023
+- **PR:** #15023
+- **Paths:** see #15023
+- **Started:** 2026-11-11
+- **Last verified:** 2026-11-11 (`972404f4`; collated from changes/15020-register-ud-sim-mcp-console-script-gener.md)
+- **Summary:** Register ud-sim-mcp console script, generated capability inventory, and Agent API auth docs.
+- **Next step:** Shipped in PR #15023.
+
 ### DL-#14940 · AIP JSON-RPC Stubs Return Not_Implemented; Capabilities Self-Check (#14940).
 
 - **State:** shipped

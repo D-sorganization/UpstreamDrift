@@ -8,7 +8,7 @@ site of golf-related injuries).
 Key Components:
 - SpinalLoadAnalyzer: Calculate compression, shear, and torsion forces on the lumbar spine
 - JointStressAnalyzer: Assess stress on all major joints (hip, shoulder, wrist, knee, elbow)
-- InjuryRiskScorer: Aggregate risk scoring with evidence-based thresholds
+- InjuryRiskScorer: Aggregate screening scores (heuristic bands, not clinical limits)
 - SwingModificationRecommender: Suggest safer swing alternatives
 
 Scientific Foundation:

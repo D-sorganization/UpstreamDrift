@@ -78,7 +78,7 @@ class TestImpactStatePreservationRegression:
             record=True,
         )
 
-        # In RigidBodyImpactModel, post clubhead angular velocity retains pre-state angular velocity
+        # Center-face contact: no torque impulse from the scalar offset model
         np.testing.assert_allclose(post.clubhead_angular_velocity, omega_club)
 
         # Recorded event must also preserve all fields in pre_state

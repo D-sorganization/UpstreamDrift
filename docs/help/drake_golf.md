@@ -77,6 +77,10 @@ The engine adapter used elsewhere in the suite is `DrakePhysicsEngine` in
 `src/engines/physics_engines/drake/python/drake_physics_engine.py` - see
 [Drake engine reference](../engines/drake.md).
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/drift-is-the-past-control-is-the-present.html): *Drift Is the Past, Control Is the Present*.
+
 ## Limitations
 
 - Requires `pydrake`. Every Drake symbol falls back to `None` on import
