@@ -154,7 +154,11 @@ def _requested_law(request: Any) -> CouplingLaw | None:
 
 
 def _drive(request: Any, model: Path, scrub: Any, out: StageOutcome) -> DriveResult:
-    golf = read_golf_humanoid_motion(request.motion_path, request.golf_model_path)
+    golf = read_golf_humanoid_motion(
+        request.motion_path,
+        request.golf_model_path,
+        allow_implausible=bool(getattr(request, "allow_implausible", False)),
+    )
     if request.variant_id is not None:
         golf = apply_request_variant(request, golf, out)
     out.stages.append(
@@ -335,7 +339,14 @@ def _static_optimization(
         out.reasons.append(f"{n_flagged} frames flagged for reserve use")
     if n_failed:
         out.reasons.append(f"{n_failed} static-optimisation solves unsuccessful")
-    metrics = {"n_frames": so.frame_index.size, "n_flagged": n_flagged}
+    metrics = {
+        "n_frames": so.frame_index.size,
+        "n_flagged": n_flagged,
+        "reserve_share_by_label": {
+            str(lab): _num(share)
+            for lab, share in zip(so.frame_labels, so.reserve_share, strict=True)
+        },
+    }
     out.stages.append(_record("static_optimization", so.provenance, metrics, scrub))
     return so
 
