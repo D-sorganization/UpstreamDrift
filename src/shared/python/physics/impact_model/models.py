@@ -42,8 +42,7 @@ def _impact_offset_vector_3d(pre_state: PreImpactState) -> np.ndarray:
         return np.zeros(3)
     n_unit = pre_state.clubhead_orientation / (
         0.0
-        if np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1).size
-        == 0
+        if np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1).size == 0
         else math.hypot(
             *np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1)
         )
