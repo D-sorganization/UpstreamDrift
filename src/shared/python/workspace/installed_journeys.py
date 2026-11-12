@@ -493,6 +493,8 @@ class InstalledWorkspaceJourneysCoordinator:
         res_payload = {
             "job_name": config.job_name,
             "success": opt_res.success,
+            "status": opt_res.status,
+            "provenance": opt_res.provenance,
             "optimal_speed": opt_res.optimal_speed,
             "optimal_carry": opt_res.optimal_carry,
             "objective_value": opt_res.objective_value,
@@ -501,15 +503,25 @@ class InstalledWorkspaceJourneysCoordinator:
         res_file.write_text(json.dumps(res_payload, indent=2), encoding="utf-8")
         res_sha = compute_file_sha256(res_file)
 
+        synthetic = bool(opt_res.provenance.get("synthetic"))
+        if synthetic:
+            art_kind = ArtifactKind.DYNAMIC_STATE
+            art_schema = "workspace.optimization_placeholder/1"
+        else:
+            art_kind = ArtifactKind.RECEIPT
+            art_schema = "pipeline.ground_support_receipt/1"
+
         art = ArtifactReference(
             artifact_id=f"art-opt-{uuid.uuid4().hex[:8]}",
             path=str(res_file),
-            kind=ArtifactKind.RECEIPT,
-            schema="pipeline.ground_support_receipt/1",
+            kind=art_kind,
+            schema=art_schema,
             hash=res_sha,
             metadata={
                 "objective_value": opt_res.objective_value,
                 "metrics": opt_res.metrics,
+                "synthetic": synthetic,
+                "status": opt_res.status,
             },
         )
         self._register_run_output(config.session_id, art)

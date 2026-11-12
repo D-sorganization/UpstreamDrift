@@ -82,6 +82,7 @@ export function SimulationPage() {
     currentFrame,
     frames,
     connectionStatus,
+    phase,
     wsError,
     start,
     stop,
@@ -340,7 +341,7 @@ export function SimulationPage() {
       leftPanelLabel="Engine Controls"
       rightPanelLabel="Live Data"
       leftPanel={
-        <div className="p-4">
+        <div className="p-4" data-sim-phase={phase}>
         <h2 className="heading-page mb-2">Golf Suite</h2>
         <p className="text-xs text-gray-400 mb-6">
           {loadedEngines.length} engine{loadedEngines.length !== 1 ? 's' : ''} loaded

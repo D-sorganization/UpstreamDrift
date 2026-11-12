@@ -119,6 +119,15 @@ def test_assert_coverage_alignment_ci_mismatch() -> None:
     assert any("CI workflow coverage floor" in e for e in errors)
 
 
+@pytest.mark.unit
+def test_assert_coverage_alignment_coverage_not_measured() -> None:
+    errors: list[str] = []
+    mod._assert_coverage_alignment(
+        "Coverage is 75%", "coverage: not measured", 75, errors
+    )
+    assert errors == []
+
+
 def test_assert_path_references_exist(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
