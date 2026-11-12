@@ -7,5 +7,6 @@ summary: "State-aware counterfactual defaults, simscape lifecycle, putting contr
 
 - Addressing Brick's acceptance review #6772934494 on #14943:
   - Evaluates counterfactual defaults at configuration q with state restoration
-  - Enforces SimscapeAdapter lifecycle and 1-D array preconditions
+  - Enforces SimscapeAdapter lifecycle, 1-D preconditions, and dof-shaped vectors
+  - Adds regression tests for counterfactual adapter boundary guards
   - Implements compute_control_acceleration_at_state on SharedPuttingEngine

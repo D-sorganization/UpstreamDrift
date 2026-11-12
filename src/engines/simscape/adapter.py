@@ -777,6 +777,10 @@ class SimscapeAdapter:
         """Legacy gravity-only diagnostic — uses protocol defaults (#14943)."""
         op = "compute_gravity_only_acceleration"
         self._lifecycle.require(AdapterState.LOADED, AdapterState.RUNNING, operation=op)
+        if self._dof and q.shape != (self._dof,):
+            raise ValueError(
+                f"q must have shape ({self._dof},); got q={q.shape}"
+            )
         from src.shared.python.engine_core.counterfactual_defaults import (
             default_gravity_only_acceleration,
         )
@@ -797,6 +801,12 @@ class SimscapeAdapter:
         """SPEC §4 ZVCF control term — protocol default at fixed ``q`` (#14943)."""
         op = "compute_control_acceleration_at_state"
         self._lifecycle.require(AdapterState.LOADED, AdapterState.RUNNING, operation=op)
+        if self._dof:
+            if q.shape != (self._dof,) or tau.shape != (self._dof,):
+                raise ValueError(
+                    f"q and tau must have shape ({self._dof},); "
+                    f"got q={q.shape}, tau={tau.shape}"
+                )
         from src.shared.python.engine_core.counterfactual_defaults import (
             default_control_acceleration_at_state,
         )
