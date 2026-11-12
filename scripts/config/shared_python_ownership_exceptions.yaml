@@ -175,8 +175,3 @@ paths:
     rationale: Unit tests for UpstreamDrift's local ScrubberEngine and ScrubberInputs; Tools removed its own scrubber/tests/ directory as dead/duplicate code (Tools#4889), leaving this UD file without a same-relative Tools counterpart.
     tracking_issue: 5623
     review_date: "2026-12-31"
-  chat/tests/test_attachment_upload_rejection.py:
-    owner: UpstreamDrift
-    rationale: UD unit tests for file_upload rejection bubble updates and dedup-manifest release ahead of Tools slice #5727.
-    tracking_issue: 15013
-    review_date: "2026-12-31"
