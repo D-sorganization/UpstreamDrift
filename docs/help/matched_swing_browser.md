@@ -30,6 +30,10 @@ The Matched Swing Browser catalogs, filters, and previews certified swing trajec
 
 Scans the local and shared model repository manifests and qualified baseline receipt caches. Validates data integrity against schema contracts and surfaces qualified status badges.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/proximal_distal_energy_transfer/index.html): *Proximal-to-Distal Energy Transfer*.
+
 ## Limitations
 
 Displays precomputed records; running new optimizations requires launching the respective engine or motion matching workbench.

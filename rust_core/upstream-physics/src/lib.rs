@@ -78,6 +78,22 @@ fn simulate_ball_trajectory_py(
     .map_err(pyo3::exceptions::PyValueError::new_err)
 }
 
+/// Calculate post-impact ball state from Python (velocity components + contact params).
+#[cfg(feature = "python")]
+#[pyfunction]
+#[pyo3(signature = (vx, vy, vz, spin_rate, params))]
+fn calculate_impact_py(
+    vx: f64,
+    vy: f64,
+    vz: f64,
+    spin_rate: f64,
+    params: contact::ContactParameters,
+) -> PyResult<contact::ContactResult> {
+    let velocity = Vector3::new(vx, vy, vz);
+    contact::calculate_impact(&velocity, spin_rate, &params)
+        .map_err(pyo3::exceptions::PyValueError::new_err)
+}
+
 #[cfg(feature = "python")]
 #[pymodule]
 fn upstream_physics(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -88,6 +104,7 @@ fn upstream_physics(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // Contact model
     m.add_class::<contact::ContactParameters>()?;
     m.add_class::<contact::ContactResult>()?;
+    m.add_function(pyo3::wrap_pyfunction!(calculate_impact_py, m)?)?;
 
     // Swing plane (legacy least-squares fitter)
     m.add_class::<swing_plane::SwingPlaneResult>()?;
@@ -149,6 +166,7 @@ pub fn create_contact_parameters(cor: f64, friction: f64) -> Result<JsValue, JsV
         friction,
         ..Default::default()
     };
+    params.validate().map_err(|e| JsValue::from_str(&e))?;
     serde_wasm_bindgen::to_value(&params)
         .map_err(|e| JsValue::from_str(&format!("Failed to serialize ContactParameters: {e}")))
 }

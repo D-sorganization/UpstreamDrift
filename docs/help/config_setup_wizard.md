@@ -77,6 +77,10 @@ comparison uses `numpy.allclose`.
 process-wide embeddable-tool registry at import time, requesting a tab
 (not dock) placement with a 720x520 px minimum.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/theory-part1.html): *AffineDrift Theory Part I*.
+
 ## Limitations
 
 - **It does not read or write files.** There is no file picker, no
