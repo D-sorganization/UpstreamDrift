@@ -476,6 +476,14 @@ class TestCIEnvironmentCompatibility:
         guard = next(s for n, s in steps.items() if "actually ran" in n)
         assert "scripts/ci/require_junit_test_passed.py" in guard["run"]
         assert "${{ matrix.evidence }}" in guard["run"]
+        install_step = next(
+            s for n, s in steps.items() if n.startswith("Install ") and "parity" in n
+        )
+        install_run = install_step["run"]
+        assert "python -m ensurepip --upgrade" in install_run
+        ensurepip_pos = install_run.index("python -m ensurepip --upgrade")
+        matrix_install_pos = install_run.index("${{ matrix.install }}")
+        assert ensurepip_pos < matrix_install_pos
         names = list(steps)
         isolate = next(n for n in names if n.startswith("Isolate Python tool cache"))
         setup = next(n for n in names if n.startswith("Set up Python"))
