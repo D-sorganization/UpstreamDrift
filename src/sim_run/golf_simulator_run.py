@@ -90,6 +90,7 @@ async def execute_local_reference_shot(
     *,
     flight_simulator: FlightSimulatorProtocol | None = None,
     connected: bool = True,
+    serialize_trajectory: bool = True,
 ) -> dict[str, Any]:
     """Run one local-reference shot; sole execution path for REST and MCP."""
     now_utc = datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -113,7 +114,9 @@ async def execute_local_reference_shot(
     simulator = _resolve_flight_simulator(flight_simulator)
     launch = shot_envelope_to_launch_conditions(shot)
     points = await asyncio.to_thread(simulator.simulate_trajectory, launch)
-    trajectory = trajectory_points_to_jsonable(list(points))
+    trajectory = (
+        trajectory_points_to_jsonable(list(points)) if serialize_trajectory else []
+    )
     provenance = (
         f"local_reference:{type(simulator).__name__}:"
         f"source={shot.source_kind.value}:schema={shot.schema_version}"
@@ -147,6 +150,7 @@ def execute_golden_golf_shot(request: dict[str, Any] | None = None) -> dict[str,
     if padding > 0:
         body["trajectory"] = body["trajectory"] * padding
     public_sim = {k: v for k, v in body.items() if k != "trajectory_points"}
+    qualification = shot.qualification
     return {
         "capability": "golf_simulator_golden_shot",
         "golden_case_id": "agent_api_golf_shot_v1",
@@ -154,9 +158,9 @@ def execute_golden_golf_shot(request: dict[str, Any] | None = None) -> dict[str,
             "zvcf_definition": None,
             "qualification_state": {
                 "destination": "local_reference",
-                "contact": shot.qualification.contact.value,
-                "numerical": shot.qualification.numerical.value,
-                "scientific": shot.qualification.scientific.value,
+                "contact": qualification.contact.value,
+                "numerical": qualification.numerical.value,
+                "scientific": qualification.scientific.value,
             },
             "model_limits": [
                 "Ball-flight ODE reference simulator; not GSPro or live launch monitor.",

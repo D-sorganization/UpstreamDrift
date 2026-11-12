@@ -34,9 +34,7 @@ def run_ztcf_golden(
 ) -> dict[str, Any]:
     """Run the pinned ZTCF golden case; returns a v1 capability run record."""
     del request
-    return run_agent_capability(
-        "counterfactual_ztcf_golden", payload, _default_store()
-    )
+    return run_agent_capability("counterfactual_ztcf_golden", payload, _default_store())
 
 
 @router.post("/golf-simulator/golden-shot")
@@ -47,6 +45,4 @@ def run_golf_golden_shot(
 ) -> dict[str, Any]:
     """Simulate the pinned local golf shot; returns a v1 capability run record."""
     del request
-    return run_agent_capability(
-        "golf_simulator_golden_shot", payload, _default_store()
-    )
+    return run_agent_capability("golf_simulator_golden_shot", payload, _default_store())

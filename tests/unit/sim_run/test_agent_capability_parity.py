@@ -54,13 +54,17 @@ def capability_store(tmp_path: Path) -> SimulationRunStore:
 
 
 def test_ztcf_golden_rest_and_mcp_match_bit_for_bit(
-    capability_store: SimulationRunStore, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    capability_store: SimulationRunStore,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(agent_sim_run, "_default_store", lambda: capability_store)
     app = FastAPI()
     app.include_router(agent_sim_run.router)
     client = TestClient(app)
-    rest = client.post("/tools/agent-sim-run/counterfactual/ztcf-golden", json={}).json()
+    rest = client.post(
+        "/tools/agent-sim-run/counterfactual/ztcf-golden", json={}
+    ).json()
 
     pool = SimulationWorkerPool(capability_store, repo_root=tmp_path)
     mcp = _McpClient(SimulationMcpServer(store=capability_store, worker_pool=pool))
@@ -77,13 +81,17 @@ def test_ztcf_golden_rest_and_mcp_match_bit_for_bit(
 
 
 def test_golf_shot_golden_rest_and_mcp_match_bit_for_bit(
-    capability_store: SimulationRunStore, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    capability_store: SimulationRunStore,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(agent_sim_run, "_default_store", lambda: capability_store)
     app = FastAPI()
     app.include_router(agent_sim_run.router)
     client = TestClient(app)
-    rest = client.post("/tools/agent-sim-run/golf-simulator/golden-shot", json={}).json()
+    rest = client.post(
+        "/tools/agent-sim-run/golf-simulator/golden-shot", json={}
+    ).json()
 
     pool = SimulationWorkerPool(capability_store, repo_root=tmp_path)
     mcp = _McpClient(SimulationMcpServer(store=capability_store, worker_pool=pool))
@@ -96,7 +104,9 @@ def test_golf_shot_golden_rest_and_mcp_match_bit_for_bit(
     )
 
 
-def test_payload_over_64kib_returns_artifact(capability_store: SimulationRunStore) -> None:
+def test_payload_over_64kib_returns_artifact(
+    capability_store: SimulationRunStore,
+) -> None:
     record = run_agent_capability(
         "golf_simulator_golden_shot",
         {"trajectory_padding": 4000},
@@ -106,7 +116,7 @@ def test_payload_over_64kib_returns_artifact(capability_store: SimulationRunStor
     assert delivery["encoding"] == "artifact"
     assert delivery["size_bytes"] > 64 * 1024
     ref = delivery["artifact_ref"]
-    artifact_path = capability_store.get_run_dir(ref["run_id"]) / "artifacts" / ref[
-        "artifact_name"
-    ]
+    artifact_path = (
+        capability_store.get_run_dir(ref["run_id"]) / "artifacts" / ref["artifact_name"]
+    )
     assert artifact_path.is_file()

@@ -24,6 +24,7 @@ from src.shared.python.golf_simulator.contracts import (
     SubmissionReceipt,
     SubmissionState,
 )
+
 if TYPE_CHECKING:
     from src.shared.python.physics.swing_ball_flight_pipeline import (
         FlightSimulatorProtocol,
@@ -144,6 +145,7 @@ class LocalReferenceAdapter:
             shot,
             flight_simulator=self._flight_simulator,
             connected=True,
+            serialize_trajectory=False,
         )
         provenance = str(result["provenance"])
         record = TrajectoryRecord(
