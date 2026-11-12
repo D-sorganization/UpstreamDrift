@@ -1,6 +1,5 @@
 ---
 issue: 14427
-type: feat
 summary: "Event-relative time normalisation (101-point resampling) between named swing events"
 ---
 

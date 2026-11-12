@@ -32,25 +32,9 @@ class TimeNormalisedResult:
     event_percentages: dict[str, float]
 
 
-def resample_event_relative_101(
-    time: ArrayLike,
-    signal: ArrayLike,
-    events: Mapping[str, float],
-    *,
-    event_sequence: Sequence[str] = ("address", "impact"),
-    phase_points: Sequence[int] | None = None,
-    method: Literal["linear", "cubic"] = "linear",
-) -> TimeNormalisedResult:
-    """Resample a time-series signal to 101 points (0% to 100%) between named events (#14427).
-
-    Preconditions:
-        - time is 1-D, non-empty, finite, and strictly monotonically increasing.
-        - signal is non-empty, finite, with matching leading dimension to time.
-        - event_sequence contains at least 2 distinct named events.
-        - All named events exist in events with finite timestamps.
-        - Event timestamps are strictly monotonically increasing.
-        - Event timestamps fall within the bounds of time.
-    """
+def _validate_series_inputs(
+    time: ArrayLike, signal: ArrayLike
+) -> tuple[np.ndarray, np.ndarray]:
     t_arr = np.asarray(time, dtype=float)
     if t_arr.ndim != 1 or t_arr.size < 2:
         raise ValueError("time must be a 1-D array of length >= 2")
@@ -64,7 +48,12 @@ def resample_event_relative_101(
         raise ValueError("signal leading dimension must match time array length")
     if not np.all(np.isfinite(s_arr)):
         raise ValueError("signal array must contain only finite values")
+    return t_arr, s_arr
 
+
+def _event_times_from_sequence(
+    events: Mapping[str, float], event_sequence: Sequence[str]
+) -> tuple[tuple[str, ...], list[float]]:
     seq = tuple(str(e) for e in event_sequence)
     if len(seq) < 2:
         raise ValueError("event_sequence must contain at least 2 named events")
@@ -84,6 +73,48 @@ def resample_event_relative_101(
                 f"Event times must be strictly increasing: {seq[i]} ({event_times[i]}) "
                 f">= {seq[i + 1]} ({event_times[i + 1]})"
             )
+    return seq, event_times
+
+
+def _interpolate_at_targets(
+    method: Literal["linear", "cubic"],
+    t_arr: np.ndarray,
+    s_arr: np.ndarray,
+    target_times: np.ndarray,
+) -> np.ndarray:
+    if method == "linear":
+        if s_arr.ndim == 1:
+            return np.interp(target_times, t_arr, s_arr)
+        cols = [np.interp(target_times, t_arr, s_arr[:, d]) for d in range(s_arr.shape[1])]
+        return np.column_stack(cols)
+    if method == "cubic":
+        return CubicSpline(t_arr, s_arr, axis=0)(target_times)
+    raise ValueError(
+        f"Unsupported interpolation method: '{method}' (choose 'linear' or 'cubic')"
+    )
+
+
+def resample_event_relative_101(
+    time: ArrayLike,
+    signal: ArrayLike,
+    events: Mapping[str, float],
+    *,
+    event_sequence: Sequence[str] = ("address", "impact"),
+    phase_points: Sequence[int] | None = None,
+    method: Literal["linear", "cubic"] = "linear",
+) -> TimeNormalisedResult:
+    """Resample a time-series signal to 101 points (0% to 100%) between named events (#14427).
+
+    Preconditions:
+        - time is 1-D, non-empty, finite, and strictly monotonically increasing.
+        - signal is non-empty, finite, with matching leading dimension to time.
+        - event_sequence contains at least 2 distinct named events.
+        - All named events exist in events with finite timestamps.
+        - Event timestamps are strictly monotonically increasing.
+        - Event timestamps fall within the bounds of time.
+    """
+    t_arr, s_arr = _validate_series_inputs(time, signal)
+    seq, event_times = _event_times_from_sequence(events, event_sequence)
 
     t_min = float(t_arr[0])
     t_max = float(t_arr[-1])
@@ -139,22 +170,7 @@ def resample_event_relative_101(
         event_percentages[seq[-1]] = 100.0
         target_times = np.concatenate(phase_time_chunks)
 
-    if method == "linear":
-        if s_arr.ndim == 1:
-            values = np.interp(target_times, t_arr, s_arr)
-        else:
-            cols = [
-                np.interp(target_times, t_arr, s_arr[:, d])
-                for d in range(s_arr.shape[1])
-            ]
-            values = np.column_stack(cols)
-    elif method == "cubic":
-        cs = CubicSpline(t_arr, s_arr, axis=0)
-        values = cs(target_times)
-    else:
-        raise ValueError(
-            f"Unsupported interpolation method: '{method}' (choose 'linear' or 'cubic')"
-        )
+    values = _interpolate_at_targets(method, t_arr, s_arr, target_times)
 
     return TimeNormalisedResult(
         grid_percent=grid_percent,
