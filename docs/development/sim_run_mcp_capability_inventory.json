@@ -1,0 +1,114 @@
+{
+  "engines": [
+    {
+      "capabilities": [
+        "rigid_body",
+        "kinematics"
+      ],
+      "description": "Double pendulum dynamics benchmark",
+      "engine_type": "pendulum",
+      "id": "pendulum",
+      "kind": "engine",
+      "runtime_status": "available"
+    },
+    {
+      "capabilities": [
+        "rigid_body",
+        "contacts"
+      ],
+      "description": "MuJoCo physics engine",
+      "engine_type": "mujoco",
+      "id": "mujoco",
+      "kind": "engine",
+      "runtime_status": "available"
+    },
+    {
+      "capabilities": [
+        "rigid_body",
+        "dynamics"
+      ],
+      "description": "Pinocchio rigid body algorithms",
+      "engine_type": "pinocchio",
+      "id": "pinocchio",
+      "kind": "engine",
+      "runtime_status": "unavailable",
+      "unavailable_reason": "optional engine dependency not installed (No module named 'pinocchio')"
+    },
+    {
+      "capabilities": [
+        "rigid_body",
+        "contacts"
+      ],
+      "description": "Drake multibody plant simulation",
+      "engine_type": "drake",
+      "id": "drake",
+      "kind": "engine",
+      "runtime_status": "unavailable",
+      "unavailable_reason": "optional engine dependency not installed (No module named 'pydrake')"
+    },
+    {
+      "capabilities": [
+        "muscles",
+        "biomechanics"
+      ],
+      "description": "OpenSim musculoskeletal biomechanics",
+      "engine_type": "opensim",
+      "id": "opensim",
+      "kind": "engine",
+      "runtime_status": "unavailable",
+      "unavailable_reason": "optional engine dependency not installed (No module named 'opensim')"
+    }
+  ],
+  "putting_tools": [
+    {
+      "description": "MCP putting analytics tool `optimize_putt`",
+      "id": "optimize_putt",
+      "kind": "putting_tool",
+      "runtime_status": "available"
+    },
+    {
+      "description": "MCP putting analytics tool `putting_misread_cost`",
+      "id": "putting_misread_cost",
+      "kind": "putting_tool",
+      "runtime_status": "available"
+    },
+    {
+      "description": "MCP putting analytics tool `putting_library_study`",
+      "id": "putting_library_study",
+      "kind": "putting_tool",
+      "runtime_status": "available"
+    },
+    {
+      "description": "MCP putting analytics tool `putting_variance_attribution`",
+      "id": "putting_variance_attribution",
+      "kind": "putting_tool",
+      "runtime_status": "available"
+    },
+    {
+      "description": "MCP putting-core tool `putting_simulate_putt`",
+      "id": "putting_simulate_putt",
+      "kind": "putting_tool",
+      "runtime_status": "available"
+    },
+    {
+      "description": "MCP putting-core tool `putting_read_green`",
+      "id": "putting_read_green",
+      "kind": "putting_tool",
+      "runtime_status": "available"
+    },
+    {
+      "description": "MCP putting-core tool `putting_stimpmeter`",
+      "id": "putting_stimpmeter",
+      "kind": "putting_tool",
+      "runtime_status": "available"
+    },
+    {
+      "description": "MCP putting-core tool `putting_capture_speed`",
+      "id": "putting_capture_speed",
+      "kind": "putting_tool",
+      "runtime_status": "available"
+    }
+  ],
+  "schema": "ud-sim-mcp-capability-inventory/v1",
+  "server": "ud-sim-mcp"
+}

@@ -27,6 +27,9 @@ from src.shared.python.contracts import postcondition, precondition  # noqa: E40
 DEFAULT_LEDGER = (
     REPO_ROOT / "docs" / "development" / "model_matching" / "model_matching_status.json"
 )
+MODELS_DIR = REPO_ROOT / "docs" / "development" / "full_body_models"
+V1_SPEC = MODELS_DIR / "full_body_spec_anthro_driver.json"
+V2_SPEC = MODELS_DIR / "full_body_spec_anthro_driver_v2.json"
 OS9_DIR = "docs/development/opensim_tour_matching/evidence/os9_address_registration"
 GEOMETRY_DIR = "shared/models/opensim/opensim-models/Geometry"
 HEADLESS_ENV = {
@@ -63,6 +66,7 @@ class RenderTarget:
     model_id: str
     ledger_engine: str
     inputs: tuple[PinnedInput, ...]
+    trunk_v2: bool = False  # migrate the fit onto the v2 lumbar+thoracic trunk
 
 
 TARGETS: tuple[RenderTarget, ...] = (
@@ -70,6 +74,7 @@ TARGETS: tuple[RenderTarget, ...] = (
         model_id="mujoco_driver",
         ledger_engine="mujoco",
         inputs=(PinnedInput("bundle", None, BUNDLE_SHA256),),
+        trunk_v2=True,
     ),
     RenderTarget(
         model_id="opensim_os9",
@@ -153,6 +158,16 @@ def _reproduction(target: RenderTarget) -> str:
     return " ".join(arg.replace(str(REPO_ROOT) + "/", "") for arg in argv)
 
 
+def _trunk_lines(target: RenderTarget) -> list[str]:
+    if not target.trunk_v2:
+        return []
+    return [
+        "- Trunk: full-body-v2 lumbar + thoracic segments "
+        f"(`{V2_SPEC.name}`); v1 fit coordinates migrated by TrunkMigrator "
+        "(replay, not a refit; the marker RMS above is the v1 fit's)"
+    ]
+
+
 def render_summary(
     target: RenderTarget,
     entry: dict[str, Any],
@@ -172,6 +187,7 @@ def render_summary(
         f"- Parameters: {entry['key_parameters']}",
         f"- Marker RMS: {_metric(entry['marker_rms_mm'], 'mm')}",
         f"- Joint-angle RMS: {_metric(entry['joint_angle_rms_deg'], 'deg')}",
+        *_trunk_lines(target),
         f"- Verdict: {entry['verdict']}",
         f"- Limitations and blockers: {entry['blocker']}",
         f"- Inputs (SHA-256): {_hash_list(input_hashes)}",
@@ -194,10 +210,20 @@ def _input_paths(target: RenderTarget, mujoco_bundle: Path | None) -> dict[str, 
     }
 
 
+def _migrated_bundle(bundle: Path, out_dir: Path) -> Path:
+    """A v2 same-input bundle from the pinned v1 bundle (lumbar+thoracic trunk)."""
+    from src.shared.python.motion_matching.best_match_v2 import migrate_bundle
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    return migrate_bundle(bundle, V1_SPEC, V2_SPEC, out_dir / "bundle_v2.npz")
+
+
 def _render(target: RenderTarget, args: argparse.Namespace, commit: str) -> None:
     paths = _input_paths(target, args.mujoco_bundle)
     input_hashes = verify_inputs(target, paths)
     out_dir = args.out / target.model_id
+    if target.trunk_v2 and not args.dry_run:
+        paths = {**paths, "bundle": _migrated_bundle(paths["bundle"], out_dir)}
     command = build_command(target, paths, out_dir, sys.executable)
     print(" ".join(command))  # noqa: T201
     if args.dry_run:

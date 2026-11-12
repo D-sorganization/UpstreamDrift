@@ -42,15 +42,8 @@ YAML = Path(__file__).resolve().parents[4] / "data/sg_optimizer/baselines/pga_to
 _FW = LIE_CODES["fairway"]
 
 
-def _sim(
-    impacts: np.ndarray,
-    skill: str,
-    wind: tuple[float, float],
-    slope: str,
-    lie: str,
-):
+def _sim(impacts: np.ndarray, skill: str, wind: tuple[float, float]):
     """Stand-in physics: along = 2 * speed, lateral = 3 * face."""
-    _ = (slope, lie)
     return np.stack([2.0 * impacts[:, 0], 3.0 * impacts[:, 1]], axis=1)
 
 
@@ -165,10 +158,7 @@ def test_better_player_never_has_higher_expected_strokes() -> None:
 def _family_table(family: str):
     """Same carry for every family (centred), spread from the family's own draws."""
 
-    def sim(
-        impacts: np.ndarray, skill: str, wind: tuple[float, float], slope: str, lie: str
-    ):
-        _ = (slope, lie)
+    def sim(impacts: np.ndarray, skill: str, wind: tuple[float, float]):
         along = 90.0 + (impacts[:, 0] - impacts[:, 0].mean())
         return np.stack([along, 3.0 * impacts[:, 1]], axis=1)
 

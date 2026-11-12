@@ -1,15 +1,35 @@
-"""Fail-fast diagnosis for a foreign ``shared`` package (UpstreamDrift#14748).
+"""Bootstrap and diagnostics for ``python -m src.tools.native_viewer_export`` (#14748).
 
-A host interpreter with an editable install of another repository (for example
-Tools_Private) can bind the top-level ``shared`` package to that checkout, so
-the vendored Tools tree is never consulted and the CLI dies with an opaque
-``No module named 'shared.python.sidekick'``. This module only explains that
-state; it does not change import order or ``sys.path``.
+Pytest and the launcher inject ``src/shared/python`` (and vendored Tools paths)
+before importing the CLI. A bare ``python -m`` from the repository root does
+not, so ``src.shared.python.*`` imports can fail before ``shared`` spellings
+would resolve. :func:`ensure_native_viewer_export_imports` prepends the repo root
+and installs shared import aliases.
+
+Separately, a host interpreter with an editable install of another repository
+can bind the top-level ``shared`` package outside the pinned Tools tree; the CLI
+then dies with an opaque import error. :func:`shared_shadow_message` explains
+that case when :func:`ensure_native_viewer_export_imports` was not enough.
 """
 
 from __future__ import annotations
 
+import importlib
+import sys
 from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+def ensure_native_viewer_export_imports() -> None:
+    """Prepend the repository root and install shared import aliases once."""
+    root = str(_REPO_ROOT)
+    if root not in sys.path:
+        sys.path.insert(0, root)
+    importlib.import_module("src")
+    from src.shared.python.import_aliases import install_shared_import_aliases
+
+    install_shared_import_aliases()
 
 
 def shared_shadow_message(vendor_src: Path, shared_file: str | None) -> str | None:

@@ -1,0 +1,60 @@
+{
+  "issue": 14734,
+  "title": "SHOW-A9: Refit best-match mujoco_driver on A7 grip + A8 trunk spec",
+  "parent_epic": 14549,
+  "model_id": "mujoco_driver_candidate_a9",
+  "engine": "mujoco",
+  "approach": "Marker IK (55.3 mm) then forward dynamics with KKT feedback tracking on A7 neutral grip + A8 6-DOF trunk",
+  "capture": "capture-A: private tour-average driver capture, 34 markers, 360 Hz, 654 frames",
+  "input_hashes": {
+    "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+    "v1_spec_sha256": "fd72d8be7a6c5c557a10886a7d2717a4eb4619805a24cc1be644215eea21dcb3",
+    "v2_spec_sha256": "323c2182ed1592552de700c02ab0f297e620660f2ac5a9c7f0f01e6af8f25b8c",
+    "baseline_commit": "fa7a9b7075"
+  },
+  "address_grip": {
+    "convention": "face-on wrist roll, 0 = back of wrist up (12 o'clock), + = counterclockwise along e_h (#14731)",
+    "target_deg": 15.0,
+    "lead_roll_deg": 15.0,
+    "trail_roll_deg": -100.73,
+    "held_within_band": true,
+    "modelling_choice": true,
+    "lesson": "Capture has no hand markers; grip is a modelling choice, not a fitted output. Fit does not absorb wrist error into grip roll (A6 lesson)."
+  },
+  "wrist_coordinate_violations": {
+    "LWInputX": {"frames": 239, "min": -64.7, "max": 28.4, "range": [-40.0, 25.0]},
+    "LWInputY": {"frames": 192, "min": 34.2, "max": 94.9, "range": [-70.0, 70.0]},
+    "RScapInputX": {"frames": 576, "min": -55.0, "max": 50.5, "range": [-10.0, 30.0]},
+    "RScapInputY": {"frames": 281, "min": -145.6, "max": 3.5, "range": [-40.0, 40.0]},
+    "RWInputX": {"frames": 408, "min": -71.5, "max": 15.9, "range": [-40.0, 25.0]},
+    "RWInputY": {"frames": 654, "min": -109.6, "max": 184.7, "range": [-70.0, 70.0]}
+  },
+  "comparison_with_baseline": {
+    "marker_rms_mm": {"baseline": 50.9, "candidate": 55.3, "unit": "mm", "delta": 4.4},
+    "joint_rms_deg": {"baseline": 2.4, "candidate": 2.4, "unit": "deg", "delta": 0.0},
+    "closure_residual_mm": {"baseline": 62.2, "candidate": 76.8, "unit": "mm", "delta": 14.6},
+    "weight_fraction": {"baseline": [0.04, 2.82], "candidate": [0.0, 2.82], "unit": "BW"},
+    "peak_joint_torque_nm": {"baseline": 537.0, "candidate": 537.0, "unit": "N*m", "delta": 0.0},
+    "in_support_fraction": {"baseline": 0.637, "candidate": 0.637, "unit": "fraction", "delta": 0.0}
+  },
+  "acceptance_gates": {
+    "horizon": "G3",
+    "status": "REJECTED",
+    "is_physically_accepted": false,
+    "gates": [
+      {"name": "whole_marker_rmse_m", "status": "passed", "threshold": 0.06, "measured": 0.0553, "unit": "m", "reason": ""},
+      {"name": "max_closure_residual_m", "status": "failed", "threshold": 0.005, "measured": 0.0768, "unit": "m", "reason": "closure residual 76.8 mm > 5.0 mm threshold (#13109)"},
+      {"name": "weight_fraction", "status": "failed", "threshold": 0.2, "measured": 0.0, "unit": "BW", "reason": "min weight fraction 0.00 BW < 0.20 BW threshold"},
+      {"name": "min_inside_support_polygon_fraction", "status": "failed", "threshold": 0.85, "measured": 0.637, "unit": "fraction", "reason": "in-support fraction 0.637 < 0.850 threshold"}
+    ],
+    "qualification_note": "Physical and kinematic thresholds violated: closure residual 76.8 mm > 5 mm, weight fraction 0.00-2.82 outside 0.2-3.0"
+  },
+  "registry_update": {
+    "earned": false,
+    "action": "record_as_candidate",
+    "reason": "Candidate refit marker RMS (55.3 mm) and closure residual (76.8 mm) does not beat baseline (50.9 mm, 62.2 mm). Per Acceptance Criterion 3, the candidate is recorded with trade-offs without displacing the best-match registry entry."
+  },
+  "output_hashes": {
+    "receipt_sha256": "8593e80ddd50b476a7bbb85331fdd52f44764bf10473671314bd1f76f3dbf5b9"
+  }
+}
