@@ -221,9 +221,7 @@ def _accumulate_xml_engine_counts(
     root = ET.parse(xml_path).getroot()
     file_stem = xml_path.stem
     suites = list(root.iter("testsuite")) or [root]
-    all_tcs = [
-        (tc, s.get("name", "")) for s in suites for tc in s.iter("testcase")
-    ]
+    all_tcs = [(tc, s.get("name", "")) for s in suites for tc in s.iter("testcase")]
     matched = [
         tc
         for tc, sname in all_tcs
