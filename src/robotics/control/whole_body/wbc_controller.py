@@ -43,8 +43,10 @@ class WBCConfig:
         contact_force_regularization: Weight for contact force minimization.
         use_hierarchical: Use strict task hierarchy (HQP) vs weighted sum.
         floating_base_dofs: Unactuated (floating-base) rows in the dynamics
-            equality. When zero, contact dynamics are not over-constrained on
-            actuated DOFs (torques remain free).
+            equality. ``None`` infers the count from the engine state (or an
+            engine ``floating_base_velocity_dofs`` attribute). When zero,
+            contact dynamics are not over-constrained on actuated DOFs (torques
+            remain free). Set explicitly when inference is ambiguous.
     """
 
     dt: float = 0.001
@@ -54,7 +56,7 @@ class WBCConfig:
     acceleration_limits: NDArray[np.float64] | None = None
     contact_force_regularization: float = 1e-4
     use_hierarchical: bool = True
-    floating_base_dofs: int = 6
+    floating_base_dofs: int | None = None
 
 
 @dataclass
@@ -249,6 +251,57 @@ class WholeBodyController:
             jacobians: List of contact Jacobians, each (3, n_v) or (6, n_v).
         """
         self._contact_jacobians = list(jacobians)
+
+    def _read_engine_floating_base_dofs(self) -> int | None:
+        """Return engine-reported floating-base velocity DOF count if present."""
+        for attr in ("floating_base_velocity_dofs", "n_floating_base_velocity_dofs"):
+            if not hasattr(self._engine, attr):
+                continue
+            raw = getattr(self._engine, attr)
+            if callable(raw):
+                raw = raw()
+            value = int(raw)
+            if value < 0:
+                raise ValueError(f"Engine {attr} must be non-negative")
+            return value
+        return None
+
+    def _resolve_floating_base_dofs(self, n_v: int) -> int:
+        """Resolve unactuated row count for the dynamics equality."""
+        if n_v < 0:
+            raise ValueError("n_v must be non-negative")
+
+        configured = self._config.floating_base_dofs
+        if configured is not None:
+            if configured < 0:
+                raise ValueError("floating_base_dofs must be non-negative")
+            return min(configured, n_v)
+
+        from_engine = self._read_engine_floating_base_dofs()
+        if from_engine is not None:
+            return min(from_engine, n_v)
+
+        q, qd = self._engine.get_state()
+        n_q = len(q)
+        if len(qd) != n_v:
+            raise ValueError(
+                "Engine velocity dimension does not match solve context "
+                f"(len(v)={len(qd)}, n_v={n_v})"
+            )
+        if n_q == n_v:
+            return 0
+        if n_q == n_v + 1:
+            if n_v < 6:
+                raise ValueError(
+                    "Cannot infer floating_base_dofs for this model; set "
+                    "WBCConfig.floating_base_dofs explicitly"
+                )
+            return min(6, n_v)
+
+        raise ValueError(
+            "Cannot infer floating_base_dofs from engine coordinates "
+            f"(n_q={n_q}, n_v={n_v}); set WBCConfig.floating_base_dofs explicitly"
+        )
 
     def solve(self) -> WBCSolution:
         """Solve whole-body control problem.
@@ -598,7 +651,7 @@ class WholeBodyController:
                 J_c = J_c[:3]
             J_c_T[:, 3 * i : 3 * (i + 1)] = J_c.T
 
-        n_unactuated = min(self._config.floating_base_dofs, n_v)
+        n_unactuated = self._resolve_floating_base_dofs(n_v)
         if n_unactuated <= 0:
             return None, None
 

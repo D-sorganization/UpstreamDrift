@@ -42,6 +42,36 @@ def _one_dof_task(name: str, target_qdd: float, priority: int) -> Task:
 
 
 @pytest.mark.unit
+def test_fixed_base_default_config_nonzero_contact_torques() -> None:
+    """Default WBCConfig must not zero torques on fixed-base models with contact."""
+    nle = np.array([0.0, 0.0, 2.0, 0.0])
+    cfg = WBCConfig(use_hierarchical=False, regularization=1e-4)
+    wbc = WholeBodyController(
+        BiasedFakeEngine(nle=nle),
+        config=cfg,
+        solver=create_default_solver(),
+    )
+    wbc.add_task(
+        Task(
+            name="posture",
+            task_type=TaskType.SOFT,
+            priority=2,
+            jacobian=np.eye(3, N_V),
+            target=np.zeros(3),
+            weight=np.ones(3),
+        )
+    )
+    J_c = np.zeros((3, N_V))
+    J_c[2, 2] = 1.0
+    wbc.set_contact_jacobians([J_c])
+
+    sol = wbc.solve()
+    assert sol.success
+    assert sol.joint_torques is not None
+    assert np.linalg.norm(sol.joint_torques) > 1e-6
+
+
+@pytest.mark.unit
 def test_contact_support_yields_nonzero_actuated_torques() -> None:
     """Actuated DOFs must not receive zero torque when contacts are active."""
     nle = np.array([0.0, 0.0, 2.0, 0.0])
