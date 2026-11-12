@@ -1,4 +1,4 @@
-{"schema_version": 2, "tools_pin": "5e85cc21fe0761d519a3cae6ac1504b78b1b1f96", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
+{"schema_version": 2, "tools_pin": "0cf7f77af73eab26930486c3d65d5b5ad0b2678d", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
 {"path": "README.md", "classification": "tools-only", "package": "README.md", "spelling_only": false}
 {"path": "README_PACKAGE.md", "classification": "ud-only", "package": "README_PACKAGE.md", "spelling_only": false}
 {"path": "__init__.py", "classification": "diverged", "package": "__init__.py", "spelling_only": false}
@@ -110,6 +110,7 @@
 {"path": "ai/mcp/widgets/integrations_health_dashboard_widget.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/mcp/widgets/mcp_servers_prefs_widget.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/memory_manager.py", "classification": "diverged", "package": "ai", "spelling_only": true}
+{"path": "ai/not_implemented_payload.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/peer_review/__init__.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/peer_review/_audit.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/peer_review/_llm.py", "classification": "identical", "package": "ai", "spelling_only": false}
@@ -150,7 +151,7 @@
 {"path": "ai/tool_bridge.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/tool_registry.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/tools/__init__.py", "classification": "diverged", "package": "ai", "spelling_only": false}
-{"path": "ai/tools/agent_control.py", "classification": "diverged", "package": "ai", "spelling_only": false}
+{"path": "ai/tools/agent_control.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/tools/cli_tools.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/tools/codemap_tools.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/tools/file_ops.py", "classification": "diverged", "package": "ai", "spelling_only": true}
@@ -372,7 +373,7 @@
 {"path": "calc_backend/routers/rotation_converter.py", "classification": "diverged", "package": "calc_backend", "spelling_only": true}
 {"path": "calc_backend/routers/scrubber.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/routers/symbolic_solver.py", "classification": "diverged", "package": "calc_backend", "spelling_only": false}
-{"path": "calc_backend/routers/syngas_water.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
+{"path": "calc_backend/routers/syngas_water.py", "classification": "diverged", "package": "calc_backend", "spelling_only": true}
 {"path": "calc_backend/routers/thermal_profile.py", "classification": "diverged", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/routers/wgs_reactor.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/tests/__init__.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
@@ -601,8 +602,12 @@
 {"path": "engine_core/base_physics_engine.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/capabilities.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/checkpoint.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
+{"path": "engine_core/counterfactual_conformance.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
+{"path": "engine_core/counterfactual_contract.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
+{"path": "engine_core/counterfactual_defaults.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/cross_engine_validator.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/engine_availability.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
+{"path": "engine_core/engine_lane_guard.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/engine_loaders.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/engine_manager.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/engine_probes.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
@@ -1074,6 +1079,7 @@
 {"path": "impact_parameters/tools_gateway.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "import_aliases.py", "classification": "diverged", "package": "import_aliases.py", "spelling_only": false}
 {"path": "injury/__init__.py", "classification": "ud-only", "package": "injury", "spelling_only": false}
+{"path": "injury/heuristic_disclaimers.py", "classification": "ud-only", "package": "injury", "spelling_only": false}
 {"path": "injury/injury_risk.py", "classification": "ud-only", "package": "injury", "spelling_only": false}
 {"path": "injury/joint_stress.py", "classification": "ud-only", "package": "injury", "spelling_only": false}
 {"path": "injury/spinal_load_analysis.py", "classification": "ud-only", "package": "injury", "spelling_only": false}
@@ -1116,6 +1122,7 @@
 {"path": "launcher_embed/registry.py", "classification": "ud-only", "package": "launcher_embed", "spelling_only": false}
 {"path": "launcher_factory.py", "classification": "ud-only", "package": "launcher_factory.py", "spelling_only": false}
 {"path": "lazy_package_export.py", "classification": "ud-only", "package": "lazy_package_export.py", "spelling_only": false}
+{"path": "lifecycle.py", "classification": "identical", "package": "lifecycle.py", "spelling_only": false}
 {"path": "lift_scoping/__init__.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
 {"path": "lift_scoping/_json_validate.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
 {"path": "lift_scoping/lift5.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
@@ -1574,6 +1581,7 @@
 {"path": "motion_matching/historical_fit/spline_restriction.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/hybrid.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/identifiability.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/ik_types.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/impact_force.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/inverse/__init__.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/inverse/basis_time.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}

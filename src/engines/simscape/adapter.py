@@ -769,6 +769,24 @@ class SimscapeAdapter:
     # CounterfactualComputable
     # ------------------------------------------------------------------
 
+    def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:
+        """Legacy gravity-only diagnostic (#14943)."""
+        from src.shared.python.engine_core.counterfactual_defaults import (
+            default_gravity_only_acceleration,
+        )
+
+        return default_gravity_only_acceleration(self, q)
+
+    def compute_control_acceleration_at_state(
+        self, q: np.ndarray, tau: np.ndarray
+    ) -> np.ndarray:
+        """SPEC §4 ZVCF control term (#14943)."""
+        from src.shared.python.engine_core.counterfactual_defaults import (
+            default_control_acceleration_at_state,
+        )
+
+        return default_control_acceleration_at_state(self, q, tau)
+
     @precondition(
         lambda self, q, v: (
             isinstance(q, np.ndarray)

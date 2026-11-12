@@ -2754,6 +2754,31 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-10 | #15000 | AIP JSON-RPC stubs return not_implemented; capabilities self-check (#14940). |
+| 2026-11-10 | #14962 | BallFlightSimulator reports per-step forces from the Rust integrator with legacy post-hoc path tagged |
+| 2026-11-10 | #14995 | Remove default-true success flags on solver and calc outputs with Oracle 1 and 8 AST gates |
+| 2026-11-10 | #15001 | Replace simulation boolean soup with lifecycle reducer, stale-socket identity guard, and ordered speed control |
+| 2026-11-10 | #14998 | CounterfactualKind/Result, simscape/putting defaults, conformance (#14943 slices 1–4) |
+| 2026-11-10 | #14992 | Enforce Tauri Cargo.toml version parity, correct production readiness doc, and add frontend dynamic port resolution |
+| 2026-11-10 | #14990 | Typed non-finite failure for syngas water router and canonical lifecycle vocabulary gate |
+| 2026-11-10 | #14993 | Wire engine lane guards into nightly, enforce MuJoCo in CI, and remove dead MATLAB job |
+| 2026-11-10 | #14986 | Enable UD_AUTO_MARK_BY_DIRECTORY in unit-test-gate and enforce suite marker reach gate in CI |
+| 2026-11-10 | #14988 | Tauri BackendState supervisor with ephemeral port and stderr tail (Part of #14951). |
+| 2026-11-10 | #14985 | Add per-repo stdlib lifecycle transition kernel and contract tests |
+| 2026-11-10 | #14979 | Implement ZTCF RNEA joint reaction contract and honest scope docs |
+| 2026-11-10 | #14977 | Enforce required physics engine execution, JUnit floor checks, and JaxSim heavy test lane |
+| 2026-11-10 | #14967 | Simulation lifecycle reducer with runId and stale-socket guard; Simulation WS error frame handling and isPaused reset on stop (Part of #14950). |
+| 2026-11-10 | #14981 | Add sharded coverage collection, combination, and per-package ratchet gate |
+| 2026-11-10 | #14976 | Fix syngas water unit conversions and router fallback on 60F_14.696psia basis (paired with Tools#6009) |
+| 2026-11-10 | #14980 | Add directory-based suite marker inference, opt-out marker, gate selectability summary, and audit utility (Part of #14947, Part of #14934) |
+| 2026-11-10 | #14963 | Workspace synchronous optimization returns explicit synthetic placeholder; RECEIPT registration refused for synthetic results |
+| 2026-11-10 | #14974 | \ Marker IK exposes convergence status,reports NO_MARKERS and NaN RMS for empty frames,and routes LM with finite bounds to TRF\ |
+| 2026-11-10 | #14972 | Make coverage truth explicit in CI summary and remove dead cov-fail-under flags |
+| 2026-11-10 | #14958 | Simulation WS error frame handling and isPaused reset on stop (Part of #14950). |
+| 2026-11-10 | #14954 | Make architecture and file-size budget expiry evaluation deterministic |
+| 2026-11-10 | #14953 | ZTCF: guard multi-body misuse of compute_ztcf_forces; double-pendulum regression (#14944, Part of #14934) |
+| 2026-11-10 | #14923 | Document CI Optional Stack slice 1 (Pinocchio gravity) and add runbook contract tests |
+| 2026-11-10 | #14924 | Contract tests: Bruno B2, Pearcy P1, Hosea G1 provenance flags (#12737) |
 | 2026-11-10 | #14930 | NSX salvage tracker: unit receipts for merged NSX-22/NSX-24 rows on main (#13604) |
 | 2026-11-10 | #14933 | Redact fleet host and home literals batch 4 recovery |
 | 2026-11-10 | #14926 | UD docs and CI contract tests reaffirm PR size is advisory only (Dieter 2026-11-06) |
