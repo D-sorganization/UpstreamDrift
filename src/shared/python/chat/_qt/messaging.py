@@ -128,7 +128,9 @@ class MessagingMixin:
 
     # ── Input affordances ───────────────────────────────────────────
 
-    def _pending_attachment_bubbles(self) -> list[tuple[str, ChatMessageBubble]]:
+    def _pending_attachment_bubbles(
+        self,
+    ) -> list[tuple[str, str | None, ChatMessageBubble]]:
         pending = getattr(self, "_attachment_bubbles_pending_delivery", None)
         if pending is None:
             pending = []
@@ -136,11 +138,20 @@ class MessagingMixin:
         return pending
 
     def _track_pending_attachment_bubble(
-        self, filename: str, bubble: ChatMessageBubble
+        self,
+        filename: str,
+        bubble: ChatMessageBubble,
+        *,
+        sha256: str | None = None,
     ) -> None:
         if FILE_UPLOAD_BACKEND_DELIVERED:
             return
-        self._pending_attachment_bubbles().append((filename, bubble))
+        self._pending_attachment_bubbles().append((filename, sha256, bubble))
+
+    def _drop_attachment_manifest_sha(self, sha256: str) -> None:
+        manifest = getattr(self, "_attachment_manifest_by_sha", None)
+        if manifest is not None:
+            manifest.pop(sha256, None)
 
     def _apply_file_upload_rejection(self, detail: str) -> bool:
         """Update pending attachment bubbles when the backend rejects file_upload."""
@@ -152,8 +163,10 @@ class MessagingMixin:
         if not pending:
             return False
         while pending:
-            filename, bubble = pending.pop(0)
+            filename, sha256, bubble = pending.pop(0)
             bubble.set_content(format_attachment_rejection_bubble(filename, detail))
+            if sha256:
+                self._drop_attachment_manifest_sha(sha256)
         return True
 
     def _ingest_attachment_path(
@@ -183,7 +196,9 @@ class MessagingMixin:
                 bubble = self._add_bubble(
                     "user", format_attachment_pending_bubble(entry.filename)
                 )
-                self._track_pending_attachment_bubble(entry.filename, bubble)
+                self._track_pending_attachment_bubble(
+                    entry.filename, bubble, sha256=entry.sha256
+                )
         else:
             text = format_attachment_deduplicated_bubble(
                 entry.filename, delivered=FILE_UPLOAD_BACKEND_DELIVERED
