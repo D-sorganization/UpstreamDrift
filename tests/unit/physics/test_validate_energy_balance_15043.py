@@ -123,3 +123,26 @@ class TestValidateEnergyBalance15043:
         assert "friction_coefficient" in result
         assert isinstance(result["tangential_friction_exclusion_reason"], str)
         assert len(result["tangential_friction_exclusion_reason"]) > 20
+
+    def test_solver_frictionless_off_center_meets_cor_energy_budget(self) -> None:
+        """Rigid-body solver output must satisfy the same COR energy budget as the validator."""
+        pre = PreImpactState(
+            clubhead_velocity=np.array([50.0, 0.0, 0.0]),
+            clubhead_angular_velocity=np.zeros(3),
+            clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+            ball_position=np.zeros(3),
+            ball_velocity=np.zeros(3),
+            ball_angular_velocity=np.zeros(3),
+            clubhead_mass=0.2,
+            clubhead_moi=4.5e-4,
+            impact_offset=np.array([0.015, 0.005]),
+        )
+        params = ImpactParameters(cor=0.78, friction_coefficient=0.0)
+        post = RigidBodyImpactModel().solve(pre, params)
+        result = validate_energy_balance(pre, post, params)
+
+        assert result["normal_energy_budget_met"] is True
+        assert math.isclose(
+            result["energy_lost"], result["expected_loss_j"], rel_tol=1e-9
+        )
+        assert result["club_rot_ke_post"] > result["club_rot_ke_pre"]

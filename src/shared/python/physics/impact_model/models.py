@@ -33,6 +33,35 @@ from .utils import compute_effective_club_mass
 SPHERE_ROLLING_CAP_FACTOR = 2.0 / 7.0
 
 
+def _impact_offset_vector_3d(pre_state: PreImpactState) -> np.ndarray:
+    """2D face offset as a CG-to-contact lever arm in world coordinates."""
+    if pre_state.impact_offset is None:
+        return np.zeros(3)
+    offset = np.asarray(pre_state.impact_offset, dtype=float).reshape(-1)
+    if offset.size == 0:
+        return np.zeros(3)
+    n_unit = pre_state.clubhead_orientation / (
+        0.0
+        if np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1).size
+        == 0
+        else math.hypot(
+            *np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1)
+        )
+    )
+    up = np.array([0.0, 0.0, 1.0])
+    horizontal_axis = np.cross(up, n_unit)
+    h_norm = float(math.hypot(*horizontal_axis))
+    horizontal_axis = (
+        np.array([0.0, 1.0, 0.0]) if h_norm <= 1e-12 else horizontal_axis / h_norm
+    )
+    vertical_axis = np.cross(n_unit, horizontal_axis)
+    v_norm = float(math.hypot(*vertical_axis))
+    if v_norm > 1e-12:
+        vertical_axis = vertical_axis / v_norm
+    v_offset = float(offset[1]) if offset.size > 1 else 0.0
+    return float(offset[0]) * horizontal_axis + v_offset * vertical_axis
+
+
 class ImpactModel(ABC):
     """Abstract base class for impact models."""
 
@@ -58,9 +87,10 @@ class RigidBodyImpactModel(ImpactModel):
     """Rigid body collision with coefficient of restitution.
 
     Uses instantaneous impulse-momentum equations with COR
-    to compute post-impact velocities. Tangential contact uses a translating,
-    non-rotating club surface. The scalar off-center club MOI approximation
-    does not establish full angular momentum conservation for gear-effect hits.
+    to compute post-impact velocities. Off-center normal and tangential impulses
+    apply a scalar-MOI torque impulse about the clubhead CG. Tangential contact
+    still uses a translating club face normal; full gear-effect spin remains a
+    separate heuristic layer.
     """
 
     def _compute_effective_club_mass(self, pre_state: PreImpactState) -> float:
@@ -95,9 +125,8 @@ class RigidBodyImpactModel(ImpactModel):
         """Return surface impulse with finite ball and club translational mass.
 
         The no-slip cap includes both bodies' linear response and the ball's
-        rotational response. Off-center club rotation remains outside this
-        simplified scalar model; callers must not infer full gear-effect
-        conservation from this central-contact calculation.
+        rotational response. Club spin-up from tangential contact torque uses
+        the same scalar MOI path as the normal offset model.
         """
         if pre_state is None:
             raise ValueError("pre_state must be provided")
@@ -214,6 +243,12 @@ class RigidBodyImpactModel(ImpactModel):
         ball_spin = pre_state.ball_angular_velocity + (
             GOLF_BALL_RADIUS_M / GOLF_BALL_MOMENT_OF_INERTIA_KG_M2
         ) * np.cross(j_tangent, n)
+        club_spin = pre_state.clubhead_angular_velocity.copy()
+        club_moi = float(pre_state.clubhead_moi)
+        if club_moi > 0.0:
+            r_contact = _impact_offset_vector_3d(pre_state)
+            if float(np.dot(r_contact, r_contact)) > 1e-12:
+                club_spin = club_spin + np.cross(r_contact, -impulse) / club_moi
         energy_transfer = self._compute_energy_transfer(
             pre_state.ball_velocity,
             v_ball_post,
@@ -229,7 +264,7 @@ class RigidBodyImpactModel(ImpactModel):
             ball_velocity=v_ball_post,
             ball_angular_velocity=ball_spin,
             clubhead_velocity=v_club_post,
-            clubhead_angular_velocity=pre_state.clubhead_angular_velocity.copy(),
+            clubhead_angular_velocity=club_spin,
             contact_duration=0.0,
             energy_transfer=energy_transfer,
             impact_location=impact_loc,

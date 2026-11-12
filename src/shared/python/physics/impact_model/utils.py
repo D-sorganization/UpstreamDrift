@@ -124,9 +124,12 @@ def validate_energy_balance(
 
     Compares measured kinetic-energy loss against the normal COR dissipation
     budget using the effective clubhead mass at the contact point (scalar MOI
-    at offset). Tangential friction work appears in ``energy_lost`` but is
-    excluded from ``expected_loss_j``; use ``normal_energy_budget_met`` rather
-    than equating the two when friction is nonzero.
+    at offset). The budget matches ``RigidBodyImpactModel``: normal impulse
+    uses that effective mass and the club receives an angular impulse from
+    off-center contact torque. Tangential friction work appears in
+    ``energy_lost`` but is excluded from ``expected_loss_j``; use
+    ``normal_energy_budget_met`` rather than equating the two when friction is
+    nonzero.
     """
     if pre_state is None:
         raise ValueError("pre_state must be provided")
