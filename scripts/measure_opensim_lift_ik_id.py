@@ -11,6 +11,12 @@ contact-derived ground reaction of the OSL-2 model and, when a LIFT-5
 same-input bundle exists, the IK and inverse-dynamics receipt (marker and
 segment-angle errors, residual forces and moments, bundle SHA-256).  A lift
 without a bundle is recorded unavailable with the reason, never as zero.
+
+OSL-14 lift-body acceptance lives in :mod:`src.shared.python.osl_scoping.osl14`.
+OSL-15 scoping contracts live in :mod:`src.shared.python.osl_scoping.osl15`.
+OSL-17 rack and lead-in scoping contracts live in
+:mod:`src.shared.python.osl_scoping.osl17`.
+OSL-19 reach scoping lives in :mod:`src.shared.python.osl_scoping.osl19`.
 """
 
 from __future__ import annotations

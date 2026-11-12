@@ -266,23 +266,33 @@ def perturb_impact_rows(
     return out, draws.spin_factor
 
 
-def make_lie_modifier(
-    severity: float, rng: np.random.Generator
-) -> Callable[[Array, str], Array]:
+class _LieModifier:
+    """Callable B3 ``LieModifier`` that can also return the per-shot spin."""
+
+    def __init__(self, severity: float, rng: np.random.Generator) -> None:
+        require(0.0 <= severity <= 1.0, "severity must lie in [0, 1]", severity)
+        self._severity = severity
+        self._rng = rng
+        self._by_name = {n: _CODE_TO_LIE[c] for n, c in _NAME_TO_CODE.items()}
+
+    def with_spin(self, rows: Array, lie: str) -> tuple[Array, Array]:
+        """``(impact rows, lie) -> (rows, per-shot spin factor)``."""
+        kind = self._by_name.get(lie) or LieType(lie)
+        perturbation = lie_perturbation(kind, self._severity)
+        return perturb_impact_rows(rows, perturbation, self._rng)
+
+    def __call__(self, rows: Array, lie: str) -> Array:
+        return self.with_spin(rows, lie)[0]
+
+
+def make_lie_modifier(severity: float, rng: np.random.Generator) -> _LieModifier:
     """A B3-shaped ``LieModifier``: ``(impact rows, lie name) -> impact rows``.
 
     ``lie`` is a :class:`LieType` value or the course names ``tee``, ``fairway``,
     ``rough`` and ``sand``; anything else is rejected.  ``severity`` applies to
-    rough.  Limits: the B3 path carries clubhead speed and face angle only;
-    ``IMPACT_FIELDS`` has no spin column, so the spin cut and flyer spin are not
-    carried until B3 adds a spin channel (use :func:`perturb_impact_rows`, which
-    returns the per-shot spin factor).
+    rough.  Calling it carries clubhead speed and face angle only, since
+    ``IMPACT_FIELDS`` has no spin column; ``with_spin`` also returns the per-shot
+    spin factor, which ``build_grid_table`` hands to the landing simulator
+    (#14569).
     """
-    require(0.0 <= severity <= 1.0, "severity must lie in [0, 1]", severity)
-    by_name = {name: _CODE_TO_LIE[code] for name, code in _NAME_TO_CODE.items()}
-
-    def modify(rows: Array, lie: str) -> Array:
-        kind = by_name.get(lie) or LieType(lie)
-        return perturb_impact_rows(rows, lie_perturbation(kind, severity), rng)[0]
-
-    return modify
+    return _LieModifier(severity, rng)

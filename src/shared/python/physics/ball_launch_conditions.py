@@ -169,6 +169,7 @@ class TrajectoryPoint:
     velocity: np.ndarray
     acceleration: np.ndarray
     forces: dict[str, np.ndarray]
+    forces_model: str | None = None
 
     @property
     def speed(self) -> float:

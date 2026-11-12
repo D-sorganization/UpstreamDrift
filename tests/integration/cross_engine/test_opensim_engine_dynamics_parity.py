@@ -13,6 +13,7 @@ pendulum built through the OpenSim API; MuJoCo and Pinocchio load the URDF.
 from __future__ import annotations
 
 import math
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -25,6 +26,8 @@ osim = require_opensim()
 if not isinstance(getattr(osim, "__file__", None), str) or not hasattr(osim, "Model"):
     pytest.skip("real opensim is unavailable", allow_module_level=True)
 mujoco = pytest.importorskip("mujoco")
+sys.modules.pop("pinocchio", None)
+sys.modules.pop("pinocchio.casadi", None)
 pinocchio = pytest.importorskip("pinocchio")
 
 from src.engines.physics_engines.opensim.python import (  # noqa: E402

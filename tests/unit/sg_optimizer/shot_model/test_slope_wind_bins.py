@@ -82,14 +82,7 @@ def test_default_winds_keep_the_original_bins_and_new_bins_exist() -> None:
 
 # Aim frame: lateral + is left, so a closed (smaller) face and a crosswind from
 # the right both move the ball to + (matches the real-pipeline adapter below).
-def _linear_sim(
-    impacts: np.ndarray,
-    skill: str,
-    wind: tuple[float, float],
-    slope: str,
-    lie: str,
-):
-    _ = (slope, lie)
+def _linear_sim(impacts: np.ndarray, skill: str, wind: tuple[float, float]):
     return np.column_stack(
         [2.0 * impacts[:, 0] - wind[0], -3.0 * impacts[:, 1] + wind[1]]
     )
