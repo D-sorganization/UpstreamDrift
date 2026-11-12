@@ -17,7 +17,7 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 TEMPLATE = (
-    Path(__file__).resolve().parents[1]
+    Path(__file__).resolve().parent
     / "config"
     / "fleet_agent_api_conformance"
     / "v1"

@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import pytest
 
+pytest.importorskip("mcp")
+
 from src.sim_run.mcp import SimulationMcpServer
 from src.sim_run.mcp_fastmcp import build_fastmcp_server
 
 pytestmark = pytest.mark.unit
-
-pytest.importorskip("mcp")
 
 
 @pytest.mark.asyncio

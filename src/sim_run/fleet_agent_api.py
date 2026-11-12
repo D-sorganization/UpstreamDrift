@@ -1,6 +1,6 @@
 """Fleet Agent API v1 helpers for ``ud-sim-mcp`` (UpstreamDrift #15022).
 
-The conformance checks in ``config/fleet_agent_api_conformance/v1/template.json``
+The conformance checks in ``scripts/config/fleet_agent_api_conformance/v1/template.json``
 follow the Repository_Management template pattern (issue #2885); the template JSON
 is vendored locally because the RM package is not readable from every agent host.
 """

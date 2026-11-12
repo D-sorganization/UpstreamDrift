@@ -11,9 +11,7 @@ from src.sim_run.mcp import SimulationMcpServer
 
 pytestmark = pytest.mark.unit
 
-_FIXTURE = (
-    Path(__file__).resolve().parent / "fixtures" / "mcp_tool_contract_v1.json"
-)
+_FIXTURE = Path(__file__).resolve().parent / "fixtures" / "mcp_tool_contract_v1.json"
 
 
 @pytest.mark.unit

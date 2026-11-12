@@ -65,6 +65,7 @@
     "knowledge",
     "launch_golf_suite.py",
     "launch_upstream_drift.py",
+    "llms.txt",
     "manuals",
     "notebooks",
     "output",
