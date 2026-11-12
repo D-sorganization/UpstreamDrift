@@ -79,7 +79,5 @@ def test_expected_three_putt_probability_increases_with_stimp():
 
 
 def test_invalid_distance_rejected():
-    from src.shared.python.contracts import PreconditionError
-
-    with pytest.raises(PreconditionError):
+    with pytest.raises(Exception, match=r"distance_ft must be > 0"):
         make_probability(0.0, PuttingSkill(), GreenModel.preset("medium"))

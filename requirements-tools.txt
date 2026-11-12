@@ -2,4 +2,4 @@
 # Install with: python3 -m pip install -r requirements-tools.txt
 # Keep this revision equal to vendor/ud-tools and Cargo.toml. The required
 # agent-context job rejects divergent wheel/source/Rust installation paths.
-ud-tools @ git+https://github.com/D-sorganization/Tools.git@ed790c48808f0fe7cc107cc90fc8cd9ccd35eba1
+ud-tools @ git+https://github.com/D-sorganization/Tools.git@a47d83d644b39eb6168fb6f657c7705b89f8deaa
