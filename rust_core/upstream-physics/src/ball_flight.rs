@@ -246,14 +246,8 @@ fn refine_landing_point(
             land_state[i] = s0[i] + frac * (s1[i] - s0[i]);
         }
         land_state[2] = 0.0;
-        step_forces[last] = integrated_forces_at_state(
-            &land_state,
-            spin_axis_v,
-            gravity_v,
-            wind_v,
-            ball,
-            air,
-        );
+        step_forces[last] =
+            integrated_forces_at_state(&land_state, spin_axis_v, gravity_v, wind_v, ball, air);
     }
 }
 
