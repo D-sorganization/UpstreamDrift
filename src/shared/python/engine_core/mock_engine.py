@@ -273,9 +273,13 @@ class MockPhysicsEngine:
     def compute_control_acceleration_at_state(
         self, q: np.ndarray, tau: np.ndarray
     ) -> np.ndarray:
+        from src.shared.python.engine_core.counterfactual_defaults import (
+            default_control_acceleration_at_state,
+        )
+
         if q is None:
             raise ValueError("q must be provided")
-        return self.compute_control_acceleration(tau)
+        return default_control_acceleration_at_state(self, q, tau)
 
     def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:
         from src.shared.python.engine_core.counterfactual_defaults import (

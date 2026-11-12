@@ -95,7 +95,11 @@ CITATION_SPINAL_LOAD = MethodCitation(
     authors="Hosea et al.",
     year=1990,
     title="Biomechanical analysis of the golfer's back",
-    notes="Up to 8x body weight compression; validated by Lindsay et al. (2002).",
+    notes=(
+        "Hosea et al. (1990) report measured lumbar compression up to about "
+        "8× body weight during the golf swing (observational peak, not an "
+        "injury threshold). The default heuristic provider is not inverse dynamics."
+    ),
 )
 
 
