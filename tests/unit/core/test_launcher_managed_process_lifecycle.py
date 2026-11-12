@@ -34,6 +34,53 @@ def manager(repo_root: Path, monkeypatch: pytest.MonkeyPatch) -> ProcessManager:
     return ProcessManager(repo_root=repo_root, use_separate_terminals=False)
 
 
+def test_stream_output_drains_stderr_while_stdout_stays_open(
+    manager: ProcessManager,
+    repo_root: Path,
+) -> None:
+    """Regression: sequential stdout-then-stderr drain deadlocks on full stderr."""
+    script = _fixture_script(
+        repo_root,
+        "stderr_flood_stdout_open.py",
+        """
+        import sys
+        import time
+
+        chunk = "x" * 8192
+        for _ in range(24):
+            sys.stderr.write(chunk)
+            sys.stderr.flush()
+
+        sys.stderr.write("stderr-flood-done\\n")
+        sys.stderr.flush()
+        print("stdout-after-flood", flush=True)
+        time.sleep(0.2)
+        """,
+    )
+
+    process = manager.launch_script(
+        name="stderr-flood",
+        script_path=script,
+        cwd=repo_root,
+    )
+    assert process is not None
+
+    deadline = time.monotonic() + 5.0
+    managed = None
+    while time.monotonic() < deadline:
+        rows = manager.list_processes()
+        if rows and rows[0].get("exit_code") == 0:
+            managed = rows[0]
+            break
+        time.sleep(0.05)
+
+    assert managed is not None, (
+        "ProcessManager did not finish draining stderr while stdout stayed open "
+        "(possible stdout/stderr pipe deadlock)"
+    )
+    assert "stderr-flood-done" in managed["last_stderr_tail"]
+
+
 def test_stdout_does_not_pollute_last_stderr_tail(
     manager: ProcessManager, repo_root: Path
 ) -> None:

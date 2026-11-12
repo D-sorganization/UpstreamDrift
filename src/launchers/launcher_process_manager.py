@@ -664,42 +664,73 @@ class ProcessManager:
         thread.start()
         self._output_threads[slot_name] = thread
 
+    def _drain_output_pipe(
+        self,
+        name: str,
+        stream,
+        *,
+        managed_id: str | None,
+        stderr: bool,
+    ) -> None:
+        """Read lines from one pipe until EOF; safe to run concurrently per stream."""
+        try:
+            for raw_line in iter(stream.readline, b""):
+                line = raw_line.decode("utf-8", errors="replace").rstrip()
+                if not line:
+                    continue
+                emitted = f"STDERR: {line}" if stderr else line
+                if managed_id is not None:
+                    with self._process_lock:
+                        managed = self._process_registry.get(managed_id)
+                        if managed is not None:
+                            managed.record_output_line(emitted)
+                self._emit_output(name, emitted)
+        except (RuntimeError, ValueError, OSError) as exc:
+            logger.debug(
+                "Output stream ended for %s (%s): %s",
+                name,
+                "stderr" if stderr else "stdout",
+                exc,
+            )
+        finally:
+            with contextlib.suppress(OSError):
+                stream.close()
+
     def _stream_output(
         self, name: str, process: subprocess.Popen[bytes], managed_id: str | None = None
     ) -> None:
         """Read stdout/stderr from *process* and emit lines until EOF.
 
         Runs in a daemon thread so the main GUI thread is never blocked.
+        stdout and stderr are drained concurrently so a full stderr pipe cannot
+        deadlock while stdout stays open.
         """
         if name is None:
             raise ValueError("name must be provided")
 
-        def _maybe_record_output(line: str) -> None:
-            if managed_id is None:
-                return
-            with self._process_lock:
-                managed = self._process_registry.get(managed_id)
-                if managed is not None:
-                    managed.record_output_line(line)
-
-        try:
-            if process.stdout:
-                for raw_line in iter(process.stdout.readline, b""):
-                    line = raw_line.decode("utf-8", errors="replace").rstrip()
-                    if line:
-                        _maybe_record_output(line)
-                        self._emit_output(name, line)
-                process.stdout.close()
-            if process.stderr:
-                for raw_line in iter(process.stderr.readline, b""):
-                    line = raw_line.decode("utf-8", errors="replace").rstrip()
-                    if line:
-                        stderr_line = f"STDERR: {line}"
-                        _maybe_record_output(stderr_line)
-                        self._emit_output(name, stderr_line)
-                process.stderr.close()
-        except (RuntimeError, ValueError, OSError) as e:
-            logger.debug("Output stream ended for %s: %s", name, e)
+        drain_threads: list[threading.Thread] = []
+        if process.stdout is not None:
+            drain_threads.append(
+                threading.Thread(
+                    target=self._drain_output_pipe,
+                    args=(name, process.stdout),
+                    kwargs={"managed_id": managed_id, "stderr": False},
+                    daemon=True,
+                )
+            )
+        if process.stderr is not None:
+            drain_threads.append(
+                threading.Thread(
+                    target=self._drain_output_pipe,
+                    args=(name, process.stderr),
+                    kwargs={"managed_id": managed_id, "stderr": True},
+                    daemon=True,
+                )
+            )
+        for thread in drain_threads:
+            thread.start()
+        for thread in drain_threads:
+            thread.join()
 
         poll = process.poll()
         return_code = poll if isinstance(poll, int) else process.wait()

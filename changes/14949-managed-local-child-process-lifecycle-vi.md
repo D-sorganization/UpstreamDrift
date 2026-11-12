@@ -1,4 +1,4 @@
 ---
 issue: 14949
-summary: "Managed local child-process lifecycle via ManagedProcess registry (Part of #14949)."
+summary: "Managed local child-process lifecycle; concurrent stdout/stderr drain avoids pipe deadlock (Refs #14949)."
 ---
