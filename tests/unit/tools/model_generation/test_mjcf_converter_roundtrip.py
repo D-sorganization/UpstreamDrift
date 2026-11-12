@@ -9,11 +9,15 @@ Covers issue #7000:
 
 from __future__ import annotations
 
+import math
 import xml.etree.ElementTree as ET
 
 import defusedxml.ElementTree as DefusedET
 import pytest
-from model_generation.converters.mjcf_converter import MJCFConverter
+from model_generation.converters.mjcf_converter import (
+    MJCFConverter,
+    _origin_from_mjcf_element,
+)
 from model_generation.core.types import GeometryType, JointType
 
 # A two-link arm: revolute joint, box + cylinder visuals, diagonal inertia.
@@ -287,6 +291,65 @@ class TestParseBodyInertial:
         inertia = MJCFConverter._parse_body_inertial(body)
         assert inertia.mass == pytest.approx(1.0)
         assert inertia.ixx == pytest.approx(0.1)
+
+
+class TestMjcfCompilerAngleEuler:
+    """``euler`` attributes respect MuJoCo ``<compiler angle>`` (default degree)."""
+
+    def test_degree_compiler_converts_body_and_geom_euler(self) -> None:
+        body = _element('<body name="b" euler="90 0 0"/>')
+        origin = _origin_from_mjcf_element(body, "degree")
+        assert origin.rpy[0] == pytest.approx(math.pi / 2, abs=1e-9)
+
+        geom = _element('<geom type="sphere" size="0.1" euler="0 45 0"/>')
+        geom_origin = _origin_from_mjcf_element(geom, "degree")
+        assert geom_origin.rpy[1] == pytest.approx(math.radians(45), abs=1e-9)
+
+    def test_radian_compiler_leaves_euler_unchanged(self) -> None:
+        body = _element('<body name="b" euler="1.2 0 0"/>')
+        origin = _origin_from_mjcf_element(body, "radian")
+        assert origin.rpy[0] == pytest.approx(1.2, abs=1e-9)
+
+    def test_missing_compiler_defaults_to_degree(
+        self, converter: MJCFConverter
+    ) -> None:
+        mjcf = """<mujoco model="implicit_degree">
+  <worldbody>
+    <body name="base">
+      <body name="child" euler="90 0 0">
+        <joint name="j" type="hinge" axis="0 0 1"/>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>"""
+        reparsed = converter._parse_mjcf(_element(mjcf))
+        joint = reparsed.joints[0]
+        assert joint.origin.rpy[0] == pytest.approx(math.pi / 2, abs=1e-6)
+
+    def test_degree_mjcf_to_urdf_joint_rpy(self, converter: MJCFConverter) -> None:
+        mjcf = """<mujoco model="deg_arm">
+  <compiler angle="degree"/>
+  <worldbody>
+    <body name="base">
+      <body name="link1" euler="90 0 0">
+        <joint name="j1" type="hinge" axis="0 0 1"/>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>"""
+        urdf = converter.mjcf_to_urdf(mjcf)
+        model = converter._urdf_parser.parse(urdf)
+        assert model.joints[0].origin.rpy[0] == pytest.approx(math.pi / 2, abs=1e-6)
+
+    def test_unsupported_compiler_angle_raises(self, converter: MJCFConverter) -> None:
+        mjcf = """<mujoco model="bad_angle">
+  <compiler angle="grad"/>
+  <worldbody><body name="b"/></worldbody>
+</mujoco>"""
+        with pytest.raises(
+            ValueError, match='Unsupported MJCF <compiler angle="grad">'
+        ):
+            converter._parse_mjcf(_element(mjcf))
 
 
 class TestParseMjcfGeom:

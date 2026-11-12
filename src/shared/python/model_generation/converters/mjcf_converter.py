@@ -11,6 +11,7 @@ from __future__ import annotations
 from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 import logging
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -85,6 +86,33 @@ class MJCFConfig:
 
 
 _WORLD_LINK = "world"
+_SUPPORTED_MJCF_COMPILER_ANGLES = frozenset({"degree", "radian"})
+# MuJoCo MJCF default when `<compiler angle="…"/>` is omitted (XMLreference).
+_MJCF_DEFAULT_COMPILER_ANGLE = "degree"
+
+
+def _mjcf_compiler_angle_unit(root: Any) -> str:
+    """Return the model-wide MJCF angle unit for ``euler`` attributes and hinge ranges."""
+    compiler = root.find("compiler")
+    if compiler is None:
+        return _MJCF_DEFAULT_COMPILER_ANGLE
+    angle = compiler.get("angle", _MJCF_DEFAULT_COMPILER_ANGLE)
+    if angle not in _SUPPORTED_MJCF_COMPILER_ANGLES:
+        msg = (
+            f'Unsupported MJCF <compiler angle="{angle}">; '
+            'expected "degree" or "radian"'
+        )
+        raise ValueError(msg)
+    return angle
+
+
+def _mjcf_angles_to_radians(
+    values: list[float],
+    angle_unit: str,
+) -> list[float]:
+    if angle_unit == "degree":
+        return [math.radians(v) for v in values]
+    return values
 
 
 def _is_zero_rpy(rpy: tuple[float, float, float]) -> bool:
@@ -99,7 +127,10 @@ def _rpy_to_mjcf_quat_attr(rpy: tuple[float, float, float]) -> str:
     return f' quat="{w:.6g} {x:.6g} {y:.6g} {z:.6g}"'
 
 
-def _origin_from_mjcf_element(elem: Any) -> Origin:
+def _origin_from_mjcf_element(
+    elem: Any,
+    angle_unit: str = _MJCF_DEFAULT_COMPILER_ANGLE,
+) -> Origin:
     """Decode MJCF ``pos`` with optional ``quat`` or ``euler`` into an Origin."""
     pos_str = elem.get("pos", "0 0 0")
     xyz = tuple(float(value) for value in pos_str.split())
@@ -112,6 +143,7 @@ def _origin_from_mjcf_element(elem: Any) -> Origin:
         euler_str = elem.get("euler")
         if euler_str:
             angles = [float(value) for value in euler_str.split()]
+            angles = _mjcf_angles_to_radians(angles, angle_unit)
             rpy = tuple(Rotation.from_euler("xyz", angles).as_euler("xyz"))
     return Origin(xyz=xyz, rpy=rpy)
 
@@ -484,6 +516,7 @@ class MJCFConverter:
         if root is None:
             raise ValueError("root must be provided")
         model_name = root.get("model", "mjcf_model")
+        angle_unit = _mjcf_compiler_angle_unit(root)
 
         links: list[Link] = []
         joints: list[Joint] = []
@@ -503,7 +536,7 @@ class MJCFConverter:
         # Parse worldbody
         worldbody = root.find("worldbody")
         if worldbody is not None:
-            self._parse_mjcf_body(worldbody, None, links, joints)
+            self._parse_mjcf_body(worldbody, None, links, joints, angle_unit)
 
         # Convert materials to proper type
         from src.shared.python.model_generation.core.types import Material
@@ -563,6 +596,7 @@ class MJCFConverter:
         self,
         body_elem: ET.Element,
         body_name: str,
+        angle_unit: str,
     ) -> tuple[Geometry | None, Origin, Any]:
         """Parse visual geometry and material from an MJCF body element."""
         if body_elem is None:
@@ -574,7 +608,7 @@ class MJCFConverter:
             return None, Origin(), None
 
         geom_elem = geom_elems[0]
-        visual_geom, visual_origin = self._parse_mjcf_geom(geom_elem)
+        visual_geom, visual_origin = self._parse_mjcf_geom(geom_elem, angle_unit)
 
         visual_material = None
         rgba_str = geom_elem.get("rgba")
@@ -593,6 +627,7 @@ class MJCFConverter:
         parent_name: str,
         body_name: str,
         origin: Origin,
+        angle_unit: str,
         joint_elem: ET.Element | None = None,
     ) -> Joint:
         """Parse joint elements and create a URDF joint connecting to parent.
@@ -636,6 +671,7 @@ class MJCFConverter:
         range_str = primary_joint.get("range")
         if range_str:
             range_vals = [float(v) for v in range_str.split()]
+            range_vals = _mjcf_angles_to_radians(range_vals, angle_unit)
             limits = JointLimits(lower=range_vals[0], upper=range_vals[1])
 
         damping = float(primary_joint.get("damping", 0.5))
@@ -658,15 +694,16 @@ class MJCFConverter:
         parent_name: str | None,
         links: list[Link],
         joints: list[Joint],
+        angle_unit: str,
     ) -> None:
         """Recursively parse body elements."""
         for body_elem in elem.findall("body"):
             body_name = body_elem.get("name", f"body_{len(links)}")
-            joint_origin = _origin_from_mjcf_element(body_elem)
+            joint_origin = _origin_from_mjcf_element(body_elem, angle_unit)
 
             inertia = self._parse_body_inertial(body_elem)
             visual_geom, visual_origin, visual_material = self._parse_body_visual(
-                body_elem, body_name
+                body_elem, body_name, angle_unit
             )
 
             link = Link(
@@ -688,10 +725,16 @@ class MJCFConverter:
             attach_to = _WORLD_LINK if root_dofs else parent_name
             if attach_to:
                 self._append_body_joints(
-                    body_elem, attach_to, body_name, joint_origin, links, joints
+                    body_elem,
+                    attach_to,
+                    body_name,
+                    joint_origin,
+                    links,
+                    joints,
+                    angle_unit,
                 )
 
-            self._parse_mjcf_body(body_elem, body_name, links, joints)
+            self._parse_mjcf_body(body_elem, body_name, links, joints, angle_unit)
 
     def _append_body_joints(
         self,
@@ -701,6 +744,7 @@ class MJCFConverter:
         origin: Origin,
         links: list[Link],
         joints: list[Joint],
+        angle_unit: str,
     ) -> None:
         """Append the joint(s) between ``parent_name`` and ``body_name``.
 
@@ -712,7 +756,9 @@ class MJCFConverter:
         dofs = [j for j in body_elem.findall("joint") if j.get("type") != "free"]
         if len(dofs) < 2:
             joints.append(
-                self._parse_body_joint(body_elem, parent_name, body_name, origin)
+                self._parse_body_joint(
+                    body_elem, parent_name, body_name, origin, angle_unit
+                )
             )
             return
         current_parent, joint_origin = parent_name, origin
@@ -728,17 +774,22 @@ class MJCFConverter:
                     current_parent,
                     child,
                     joint_origin,
+                    angle_unit,
                     joint_elem=joint_elem,
                 )
             )
             current_parent, joint_origin = child, Origin()
 
-    def _parse_mjcf_geom(self, geom_elem: ET.Element) -> tuple[Geometry | None, Origin]:
+    def _parse_mjcf_geom(
+        self,
+        geom_elem: ET.Element,
+        angle_unit: str = _MJCF_DEFAULT_COMPILER_ANGLE,
+    ) -> tuple[Geometry | None, Origin]:
         """Parse a MuJoCo geom element into a Geometry and Origin."""
         if geom_elem is None:
             raise ValueError("geom_elem must be provided")
         geom_type = geom_elem.get("type", "sphere")
-        origin = _origin_from_mjcf_element(geom_elem)
+        origin = _origin_from_mjcf_element(geom_elem, angle_unit)
         pos = origin.xyz
 
         size_str = geom_elem.get("size", "")
