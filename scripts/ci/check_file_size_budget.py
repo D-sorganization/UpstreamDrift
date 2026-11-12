@@ -11,9 +11,21 @@ import sys
 from datetime import date
 from pathlib import Path
 
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from scripts.ci.check_architecture_budget import (  # noqa: E402
+    ExpiringBudgetException as ExpiringFileSizeException,
+    _evaluate_exception_is_active,
+    collect_expiring_exceptions,
+    resolve_reference_date,
+)
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG_PATH = Path("scripts/config/file_size_budget.json")
+DEFAULT_BASE_REF = "origin/main"
 
 
 def _repo_root() -> Path:
@@ -66,11 +78,12 @@ def _fallback_python_files(repo_root: Path) -> list[Path]:
     return files
 
 
-def _exception_is_active(exc: dict) -> bool:
+def _exception_is_active(exc: dict, reference_date: date | None = None) -> bool:
     expires_on = exc.get("expires_on")
     if not expires_on:
         return True
-    return date.today() <= date.fromisoformat(expires_on)
+    ref = reference_date if reference_date is not None else resolve_reference_date()
+    return ref <= date.fromisoformat(expires_on)
 
 
 def _line_count(path: Path) -> int:
@@ -96,9 +109,14 @@ def _get_owner(path: str, repo_root: Path) -> str:
     return owner
 
 
-def _collect_active_exceptions(config: dict) -> tuple[dict[str, dict], list[str]]:
+def _collect_active_exceptions(
+    config: dict, reference_date: date | None = None
+) -> tuple[dict[str, dict], list[str]]:
     active_exceptions: dict[str, dict] = {}
     invalid_exceptions: list[str] = []
+    ref_date = (
+        reference_date if reference_date is not None else resolve_reference_date()
+    )
 
     for exc in config.get("exceptions", []):
         path = str(exc.get("path", "")).strip()
@@ -117,7 +135,7 @@ def _collect_active_exceptions(config: dict) -> tuple[dict[str, dict], list[str]
             )
             continue
         try:
-            if _exception_is_active(exc):
+            if _evaluate_exception_is_active(_exception_is_active, exc, ref_date):
                 active_exceptions[path] = exc
             else:
                 invalid_exceptions.append(
@@ -131,7 +149,7 @@ def _collect_active_exceptions(config: dict) -> tuple[dict[str, dict], list[str]
     return active_exceptions, invalid_exceptions
 
 
-def main() -> int:  # noqa: C901
+def main(argv: list[str] | None = None) -> int:  # noqa: C901
     parser = argparse.ArgumentParser(
         description="Enforce changed-file line-count budget."
     )
@@ -143,17 +161,35 @@ def main() -> int:  # noqa: C901
     )
     parser.add_argument(
         "--base-ref",
-        default="origin/main",
-        help="Legacy option retained for compatibility; tracked-file scanning ignores it.",
+        default=DEFAULT_BASE_REF,
+        help="Base ref for merge-base reference date resolution.",
     )
-    args = parser.parse_args()
+    parser.add_argument(
+        "--as-of",
+        default=None,
+        help="Evaluation reference date (YYYY-MM-DD).",
+    )
+    parser.add_argument(
+        "--expiring-within-days",
+        type=int,
+        default=21,
+        help="Report active exceptions expiring within N days (default: 21).",
+    )
+    args = parser.parse_args(argv)
 
     repo_root = _repo_root()
     config = _load_config(repo_root, args.config_path)
     budget = int(config.get("max_lines", 1200))
     max_exceptions = int(config.get("max_exceptions", 8))
 
-    active_exceptions, invalid_exceptions = _collect_active_exceptions(config)
+    ref_date = resolve_reference_date(
+        repo_root=repo_root,
+        base_ref=args.base_ref,
+        as_of=args.as_of,
+    )
+    active_exceptions, invalid_exceptions = _collect_active_exceptions(
+        config, reference_date=ref_date
+    )
 
     try:
         python_files = _tracked_python_files(repo_root)
@@ -169,9 +205,7 @@ def main() -> int:  # noqa: C901
     watchlist: list[str] = []
     for file_path in python_files:
         rel = str(file_path.relative_to(repo_root)).replace("\\", "/")
-        if rel.startswith("tests/"):
-            continue
-        if rel in active_exceptions:
+        if rel.startswith("tests/") or rel in active_exceptions:
             continue
         count = _line_count(file_path)
         if count > budget:
@@ -181,6 +215,21 @@ def main() -> int:  # noqa: C901
             watchlist.append(f"{rel}: {count} lines (owner: {owner})")
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
+
+    if args.expiring_within_days >= 0:
+        expiring = collect_expiring_exceptions(
+            config, reference_date=ref_date, within_days=args.expiring_within_days
+        )
+        if expiring:
+            logger.info(
+                "EXPIRING SOON (%d exceptions expiring within %d days as of %s):",
+                len(expiring),
+                args.expiring_within_days,
+                ref_date.isoformat(),
+            )
+            for exp in expiring:
+                logger.info("  %s", exp.format())
+            logger.info("")
 
     if watchlist:
         logger.info("WATCHLIST (1080-1200 lines):")

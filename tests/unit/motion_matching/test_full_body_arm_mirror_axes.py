@@ -113,7 +113,7 @@ def test_mirror_leaves_zero_pose_frames_and_dorsal_axes_unchanged(
     )
 
     mirrored = json.loads((MODELS / spec_name).read_text(encoding="utf-8"))
-    if not arm_is_mirrored(mirrored):  # iron7 stays native until its receipts move
+    if not arm_is_mirrored(mirrored):  # pragma: no cover
         mirror_document_arm(mirrored)
     native = _unmirrored(mirrored)
     after, before = _zero_pose_frames(mirrored), _zero_pose_frames(native)
@@ -187,3 +187,85 @@ def test_native_and_mirrored_replay_give_identical_body_frames() -> None:
         assert after.keys() == before.keys()
         for body, pose in after.items():
             assert np.allclose(pose, before[body], atol=1e-9), (int(k), body)
+
+
+@pytest.mark.parametrize("fixture", ["swing_q_iron7.npz", "tracked_q_iron7.npz"])
+def test_iron7_migrated_q_replays_to_the_native_body_frames(fixture: str) -> None:
+    """Iron7 (SHOW-A17, #14753): negating the six flipped columns is exact.
+
+    The committed iron7 q are stored in the mirrored convention; the native
+    spec with those columns negated back must give the same body frames.
+    """
+    from src.shared.python.motion_matching.arm_mirror import FLIPPED_COORDINATES
+
+    mirrored = json.loads(
+        (MODELS / "full_body_spec_anthro_iron7.json").read_text(encoding="utf-8")
+    )
+    native = _unmirrored(mirrored)
+    order = mirrored["coordinate_order"]
+    cols = [i for i, name in enumerate(order) if name in FLIPPED_COORDINATES]
+    assert len(cols) == len(FLIPPED_COORDINATES)
+    q_new = np.load(FIXTURES / fixture)["q"].astype(float)
+    q_old = q_new.copy()
+    q_old[:, cols] *= -1.0
+    for k in np.linspace(0, q_new.shape[0] - 1, 20).astype(int):
+        after = _frames_at(mirrored, q_new[k])
+        before = _frames_at(native, q_old[k])
+        for body, pose in after.items():
+            assert np.allclose(pose, before[body], atol=1e-9), (int(k), body)
+
+
+def test_restart_jitter_is_mirror_equivariant() -> None:
+    """A mirrored spec draws the reflected restart starts of the native spec.
+
+    The mirror is a re-parameterisation (``q' = S q`` on the flipped arm
+    coordinates), so the multi-start jitter must satisfy ``jitter' = S jitter``
+    for the same RNG stream; otherwise the two conventions sample different
+    starts and the optimizer lands in different minima (#14753).
+    """
+    from src.shared.python.motion_matching.arm_mirror import (
+        FLIPPED_COORDINATES,
+        document_arm_mirrored,
+        restart_jitter,
+    )
+
+    mirrored = json.loads((MODELS / SPECS[0]).read_text(encoding="utf-8"))
+    native = _unmirrored(mirrored)
+    assert document_arm_mirrored(mirrored) and not document_arm_mirrored(native)
+    order = tuple(mirrored["coordinate_order"])
+    noise_native = restart_jitter(np.random.default_rng(7), 0.5, False, order)
+    noise_mirrored = restart_jitter(np.random.default_rng(7), 0.5, True, order)
+    assert noise_native.shape == (len(order) - 6,)
+    sign = np.array([-1.0 if n in FLIPPED_COORDINATES else 1.0 for n in order[6:]])
+    assert np.array_equal(noise_mirrored, sign * noise_native)
+    assert np.abs(noise_native).max() <= 0.5
+
+
+@pytest.mark.parametrize("document", [{}, {"joints": []}, {"coordinate_order": []}])
+def test_stub_specs_are_not_mirrored(document: dict) -> None:
+    from src.shared.python.motion_matching.arm_mirror import document_arm_mirrored
+
+    assert document_arm_mirrored(document) is False
+
+
+def test_mujoco_kinematics_reports_the_spec_mirror_state() -> None:
+    """The pipeline's kinematics must know the convention its jitter reflects.
+
+    ``FullBodyMarkerKinematics`` is built from an adapter and carries no spec
+    document, so it has to inherit the flag; otherwise the restarts never
+    reflect and the mirrored optimizer diverges from the native one (#14753).
+    """
+    pytest.importorskip("mujoco")
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
+        FullBodyMarkerKinematics,
+    )
+    from src.engines.physics_engines.mujoco.python.full_body_model import (
+        NativeMujocoFullBodyModel,
+    )
+
+    mirrored = json.loads((MODELS / SPECS[0]).read_text(encoding="utf-8"))
+    for doc, want in ((mirrored, True), (_unmirrored(mirrored), False)):
+        adapter = NativeMujocoFullBodyModel(json.dumps(doc).encode())
+        body = next(iter(adapter.body_frames))
+        kin = FullBodyMarkerKinematics(adapter, {"m": (body, (0.0, 0.0, 0.0))})
+        assert kin.arm_mirrored is want

@@ -91,6 +91,9 @@ def to_canonical_closure(
 
 ## NSX-04 Torque Capacity (#12553)
 
+Live verification counts and remaining source-work scope:
+`docs/research/loop_nullspace/NSX-04_verification_status.md`.
+
 `capacity_for(coordinate_order, subject, actuated=None) -> CapacityVector`
 (`loop_nullspace/capacity.py`). Preconditions: non-empty, duplicate-free
 `coordinate_order`; `subject` a `CapacitySubject(mass_kg, stature_m, sex)`

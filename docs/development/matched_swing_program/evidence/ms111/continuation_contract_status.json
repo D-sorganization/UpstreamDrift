@@ -101,7 +101,7 @@
   "depends_on": ["MS-107", "MS-100", "MS-102"],
   "issue": 10385,
   "milestone": "MS-111",
-  "notes": "Software contracts for G2/G3 continuation, armature-propagated independent replay, and fail-closed integrator parity. Native ControlTower desk success is not claimed.",
+  "notes": "Software contracts for G2/G3 continuation, armature-propagated independent replay, and fail-closed integrator parity. Native <host> desk success is not claimed.",
   "qualification": "awaiting_native_evidence",
   "schema_version": "pinocchio-g2-g3-continuation/1.0.0"
 }

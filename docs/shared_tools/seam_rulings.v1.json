@@ -153,6 +153,11 @@
       "status": "n/a",
       "rationale": "ADR-0046 Stage 1 canonical layer lives in Tools; UD's transitional 30-module copy was moved to src/tools/launch_monitor_model/ by ADR-0048 Option 1 (port order #9348)."
     },
+    "lifecycle.py": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "Identical per-repo stdlib lifecycle transition kernel (ADR-0008 / #14934 / Tools#6012)."
+    },
     "logging_pkg": {
       "ruling": "tools-canonical",
       "status": "cleaned",

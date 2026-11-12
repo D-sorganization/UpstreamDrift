@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import math
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Protocol, runtime_checkable
 
 import numpy as np
@@ -350,12 +350,13 @@ class SwingBallFlightPipeline:
     # Public interface
     # ------------------------------------------------------------------
 
-    def run(self, swing: SwingState) -> PipelineResult:
+    def run(self, swing: SwingState, *, spin_factor: float = 1.0) -> PipelineResult:
         """Execute the full swing → flight pipeline.
 
         Preconditions:
             - ``swing`` is a ``SwingState`` instance.
             - ``swing.clubhead_velocity`` must produce a post-impact ball speed > 0.
+            - ``spin_factor`` is finite and >= 0.
 
         Postcondition:
             Returns a ``PipelineResult`` with a non-empty trajectory list.
@@ -365,6 +366,9 @@ class SwingBallFlightPipeline:
 
         Args:
             swing: Clubhead kinematics at the moment of impact.
+            spin_factor: Multiplier on the derived launch spin rate, e.g. the
+                lie spin cut from ``perturb_impact_rows`` (#14569). The
+                default 1.0 leaves the launch untouched.
 
         Returns:
             ``PipelineResult`` with trajectory, carry, height, and impact data.
@@ -373,6 +377,11 @@ class SwingBallFlightPipeline:
             isinstance(swing, SwingState),
             "swing must be a SwingState instance",
             swing,
+        )
+        require(
+            math.isfinite(spin_factor) and spin_factor >= 0.0,
+            "spin_factor must be finite and >= 0",
+            spin_factor,
         )
 
         # Step 1: Build pre-impact state from swing
@@ -384,6 +393,8 @@ class SwingBallFlightPipeline:
         # Step 3: Derive launch conditions
         launch = self._deriver.derive(post)
         self._validate_launch_conditions(launch)
+        if spin_factor != 1.0:
+            launch = replace(launch, spin_rate=launch.spin_rate * spin_factor)
         pre_clamp_launch = launch
         launch, spin_clamped = self._maybe_clamp_launch_spin(launch)
 

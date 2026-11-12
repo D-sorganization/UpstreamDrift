@@ -273,6 +273,7 @@ def build_upper_body(
     grip_rotation_deg: Mapping[str, Sequence[float]] | None = None,
     scale_hand_mass: bool = False,
     handedness: str = DEFAULT_HANDEDNESS,
+    upper_ranges_deg: Mapping[str, tuple[float, float]] | None = None,
 ) -> dict[str, Any]:
     """Return the anthropometric upper-body document for a subject.
 
@@ -628,7 +629,14 @@ def build_upper_body(
             "hand_breadth_m": hand_breadth_m,
             **({} if handedness == DEFAULT_HANDEDNESS else {"handedness": handedness}),
         },
-        "coordinate_ranges_deg": {k: list(v) for k, v in COORDINATE_RANGES_DEG.items()},
+        "coordinate_ranges_deg": {
+            k: list(v)
+            for k, v in (
+                native_limits(dict(upper_ranges_deg))
+                if upper_ranges_deg is not None
+                else COORDINATE_RANGES_DEG
+            ).items()
+        },
         "address_seed_deg": dict(ADDRESS_SEED_DEG),
         "visual_hints": torso_visual_hints(names, stature_m, pelvis_h, hub_h, clav),
     }

@@ -18,11 +18,24 @@ from numpy.typing import NDArray
 from scipy.optimize import least_squares
 from scipy.spatial.transform import Rotation
 
+from src.shared.python.motion_matching.arm_mirror import (
+    document_arm_mirrored,
+    restart_jitter,
+)
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.marker_kinematics import MarkerLinearization
 from src.shared.python.motion_matching.constraint_kinematics import (
     ConstraintLinearization,
     ConstraintOptions,
+)
+from src.shared.python.motion_matching.ik_types import (
+    IKFrameReport,
+    IKTermination,
+    IKTrajectory,
+    _trajectory_bounds,
+    classify_ik_termination,
+    solve_full_body_ik_trajectory,
+    solve_full_body_ik_trajectory_with_report,
 )
 from src.shared.python.motion_matching.marker_calibration import Offsets, Pose
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
@@ -50,6 +63,8 @@ class PoseFit:
     closure_error_rad: float
     lowest_sphere_height_m: float
     iterations: int
+    termination: IKTermination = IKTermination.CONVERGED
+    converged: bool = True
 
 
 @dataclass(frozen=True)
@@ -85,6 +100,7 @@ class SolvePoseOptions:
     posture_prior: Mapping[str, tuple[float, float]] | None = None
     #: Penalise the club-body sole (spec origin) hovering above ``ground`` (#12969).
     club_sole_weight: float = 0.0
+    empty_marker_rms: float = float("nan")
 
 
 @dataclass(frozen=True)
@@ -233,10 +249,12 @@ def _run_lm_loop(
     iterations: int = 60,
     damping: float = 1e-4,
     tolerance_m: float = 1e-7,
-) -> tuple[Array, int]:
+) -> tuple[Array, int, IKTermination]:
     """Levenberg-Marquardt optimizer loop for pose fitting."""
     q = q_init.copy()
     residual, jacobian = residual_fn(q)
+    if not all(np.isfinite(x).all() for x in (q, residual, jacobian)):
+        return q, 0, IKTermination.NON_FINITE
     cost = float(residual @ residual)
     lam = max(damping, 1e-12)
     done = 0
@@ -244,11 +262,18 @@ def _run_lm_loop(
         done += 1
         gram = jacobian.T @ jacobian
         diag = np.diag(np.diag(gram) + 1e-9)
-        step = np.linalg.solve(gram + lam * diag, -jacobian.T @ residual)
+        try:
+            step = np.linalg.solve(gram + lam * diag, -jacobian.T @ residual)
+        except np.linalg.LinAlgError:
+            return q, done, IKTermination.NON_FINITE
+        if not np.isfinite(step).all():
+            return q, done, IKTermination.NON_FINITE
         trial = q.copy()
         trial[free] += step
         trial = np.clip(trial, low, high)
         trial_residual, trial_jacobian = residual_fn(trial)
+        if not all(np.isfinite(x).all() for x in (trial_residual, trial_jacobian)):
+            return q, done, IKTermination.NON_FINITE
         trial_cost = float(trial_residual @ trial_residual)
         if trial_cost < cost:
             improvement = cost - trial_cost
@@ -260,12 +285,12 @@ def _run_lm_loop(
             )
             lam = max(lam / 3.0, 1e-12)
             if improvement < tolerance_m**2 and np.linalg.norm(step) < 1e-9:
-                break
+                return q, done, IKTermination.CONVERGED
         else:
             lam *= 10.0
             if lam > 1e12:
-                break
-    return q, done
+                return q, done, IKTermination.DAMPING_DIVERGED
+    return q, done, IKTermination.ITERATION_CAP
 
 
 def _run_trf_loop(
@@ -276,11 +301,11 @@ def _run_trf_loop(
     high: Array,
     *,
     iterations: int,
-) -> tuple[Array, int]:
+) -> tuple[Array, int, IKTermination]:
     """Bounded trust-region solve on free DOFs, preserving every locked value."""
     if not np.any(free):
         residual_fn(q_init)
-        return q_init.copy(), 0
+        return q_init.copy(), 0, IKTermination.CONVERGED
     cached_x: Array | None = None
     cached_pair: tuple[Array, Array] | None = None
 
@@ -315,120 +340,10 @@ def _run_trf_loop(
     )
     pose = q_init.copy()
     pose[free] = result.x
-    return pose, int(result.nfev)
-
-
-def solve_full_body_ik_trajectory(
-    pose_fn: PoseFn,
-    offsets: Offsets,
-    capture: TourCapture,
-    initial_q: Array,
-    *,
-    options: TrajectoryIkOptions | None = None,
-    **option_overrides: Any,
-) -> Array:
-    """Solve trajectory IK; explicit finite source bounds opt into bounded TRF.
-
-    Omission preserves the original LM solver. Bounds never clip the seed or
-    widen source anatomy. Finite output is not an optimization acceptance test.
-
-    Tuning is a :class:`TrajectoryIkOptions`; its fields (``closure_fn``,
-    ``closure_weight``, ``reg_weight``, ``max_nfev``, ``coordinate_bounds``)
-    may also be passed directly as keywords, overriding ``options``.
-    """
-    q0 = np.asarray(initial_q, dtype=float)
-    if q0.ndim != 1 or not np.isfinite(q0).all():
-        raise ValueError("initial_q must be a finite 1D array")
-    if capture.frames < 1:
-        raise ValueError("capture must contain at least 1 frame")
-    missing = [label for label in capture.labels if label not in offsets]
-    if missing:
-        raise ValueError(f"Capture labels missing from offsets: {missing}")
-    opts = resolve_trajectory_options(options, option_overrides)
-    closure_fn, closure_weight = opts.closure_fn, opts.closure_weight
-    reg_weight, max_nfev = opts.reg_weight, opts.max_nfev
-    coordinate_bounds = opts.coordinate_bounds
-    low, high = _trajectory_bounds(q0, coordinate_bounds)
-
-    n_coords = q0.size
-    q_out = np.zeros((capture.frames, n_coords), dtype=float)
-    q_curr = q0.copy()
-
-    marker_indices = list(range(len(capture.labels)))
-    marker_bodies = [offsets[label][0] for label in capture.labels]
-    marker_offsets = [
-        np.asarray(offsets[label][1], dtype=float) for label in capture.labels
-    ]
-
-    for f in range(capture.frames):
-        valid_indices = [i for i in marker_indices if capture.valid[f, i]]
-        if not valid_indices:
-            q_out[f] = q_curr
-            continue
-
-        target_points = capture.points_m[f]
-        q_ref = q_curr.copy()
-
-        def residual(
-            q_eval: Array,
-            v_idx: list[int] = valid_indices,
-            targets: Array = target_points,
-            ref_q: Array = q_ref,
-        ) -> Array:
-            poses = pose_fn(q_eval)
-            diffs = []
-            for i in v_idx:
-                body = marker_bodies[i]
-                offset = marker_offsets[i]
-                r, t = poses[body]
-                p_pred = r @ offset + t
-                diffs.append(p_pred - targets[i])
-
-            res = np.concatenate(diffs)
-            if closure_fn is not None and closure_weight > 0.0:
-                closure_err = closure_fn(q_eval)
-                res = np.concatenate([res, closure_weight * closure_err])
-            if reg_weight > 0.0:
-                res = np.concatenate([res, reg_weight * (q_eval - ref_q)])
-            return res
-
-        sol = least_squares(
-            residual,
-            q_curr,
-            method="lm" if coordinate_bounds is None else "trf",
-            bounds=(low, high),
-            max_nfev=max_nfev,
-            # As in _run_trf_loop, a tiny first step from a bound is not convergence.
-            ftol=1e-8 if coordinate_bounds is None else None,
-        )
-        if np.isfinite(sol.x).all():
-            q_curr = sol.x.copy()
-        q_out[f] = q_curr
-
-    return q_out
-
-
-def _trajectory_bounds(
-    initial_q: Array,
-    bounds: tuple[Array, Array] | None,
-) -> tuple[Array, Array]:
-    """Validate explicit finite bounds before any engine geometry evaluation."""
-    if bounds is None:
-        return np.full_like(initial_q, -np.inf), np.full_like(initial_q, np.inf)
-    low, high = (np.asarray(values, dtype=float) for values in bounds)
-    if (
-        low.shape != initial_q.shape
-        or high.shape != initial_q.shape
-        or not np.isfinite(low).all()
-        or not np.isfinite(high).all()
-        or np.any(low >= high)
-        or np.any(initial_q < low)
-        or np.any(initial_q > high)
-    ):
-        raise ValueError(
-            "Coordinate bounds must be finite, ordered and contain initial_q"
-        )
-    return low.copy(), high.copy()
+    term, _ = classify_ik_termination(
+        result, has_bounds=True, low=low[free], high=high[free]
+    )
+    return pose, int(result.nfev), term
 
 
 def compute_marker_rms_trajectory(
@@ -436,6 +351,8 @@ def compute_marker_rms_trajectory(
     offsets: Offsets,
     capture: TourCapture,
     q_trajectory: Array,
+    *,
+    empty_marker_rms: float = float("nan"),
 ) -> tuple[Array, dict[str, float], float]:
     """Compute per-frame, per-marker, and overall RMS errors for a solved trajectory."""
     q_traj = np.asarray(q_trajectory, dtype=float)
@@ -445,6 +362,7 @@ def compute_marker_rms_trajectory(
     per_frame_errors: list[float] = []
     all_errors: list[float] = []
     per_marker_errors: dict[str, list[float]] = {label: [] for label in capture.labels}
+    d = float(empty_marker_rms)
 
     for f in range(capture.frames):
         poses = pose_fn(q_traj[f])
@@ -459,16 +377,14 @@ def compute_marker_rms_trajectory(
                 frame_sq_errors.append(err**2)
                 per_marker_errors[label].append(err)
 
-        if frame_sq_errors:
-            per_frame_errors.append(float(np.sqrt(np.mean(frame_sq_errors))))
-        else:
-            per_frame_errors.append(0.0)
+        f_rms = float(np.sqrt(np.mean(frame_sq_errors))) if frame_sq_errors else d
+        per_frame_errors.append(f_rms)
 
     per_marker_rms = {
-        label: float(np.sqrt(np.mean(np.square(errs)))) if errs else 0.0
+        label: float(np.sqrt(np.mean(np.square(errs)))) if errs else d
         for label, errs in per_marker_errors.items()
     }
-    total_rms = float(np.sqrt(np.mean(np.square(all_errors)))) if all_errors else 0.0
+    total_rms = float(np.sqrt(np.mean(np.square(all_errors)))) if all_errors else d
 
     return np.asarray(per_frame_errors, dtype=float), per_marker_rms, total_rms
 
@@ -562,6 +478,8 @@ class BaseFullBodyIK:
             self.specification = {}
             self.coordinate_order = tuple(coordinate_order or ())
             self.marker_bodies = []
+        #: Right-arm axes mirrored (G1); the multi-start jitter reflects with it.
+        self.arm_mirrored: bool = document_arm_mirrored(self.specification)
         self.labels: tuple[str, ...] = tuple(labels or ())
 
     def pose_fn(self, q: Array) -> dict[str, Pose]:
@@ -951,14 +869,20 @@ class BaseFullBodyIK:
         *,
         ground: GroundPlane,
         iterations: int,
+        termination: IKTermination = IKTermination.CONVERGED,
+        empty_marker_rms: float = float("nan"),
     ) -> PoseFit:
         """Build a ``PoseFit`` from a solved configuration."""
         self._set(q)
         diff = self._positions() - targets_arr
         errors = np.sqrt(np.einsum("ij,ij->i", diff, diff))
+        term = termination if prep.mask.any() else IKTermination.NO_MARKERS
         rms = (
-            float(np.sqrt(np.mean(errors[prep.mask] ** 2))) if prep.mask.any() else 0.0
+            float(np.sqrt(np.mean(errors[prep.mask] ** 2)))
+            if prep.mask.any()
+            else float(empty_marker_rms)
         )
+        converged = term == IKTermination.CONVERGED
         per_marker = {
             label: float(errors[k])
             for k, label in enumerate(self.labels)
@@ -974,6 +898,8 @@ class BaseFullBodyIK:
             closure_error_rad=rot_err,
             lowest_sphere_height_m=min(heights.values()),
             iterations=iterations,
+            termination=term,
+            converged=converged,
         )
 
     def solve_pose(
@@ -1009,7 +935,7 @@ class BaseFullBodyIK:
             )
 
         if opts.solver == "trf":
-            q, done = _run_trf_loop(
+            q, done, term = _run_trf_loop(
                 residuals,
                 prep.q,
                 prep.free,
@@ -1017,20 +943,26 @@ class BaseFullBodyIK:
                 prep.high,
                 iterations=opts.iterations,
             )
-            return self._finalize_pose_fit(
-                q, targets, prep, ground=ground, iterations=done
+        else:
+            q, done, term = _run_lm_loop(
+                residuals,
+                prep.q,
+                prep.free,
+                prep.low,
+                prep.high,
+                iterations=opts.iterations,
+                damping=opts.damping,
+                tolerance_m=opts.tolerance_m,
             )
-        q, done = _run_lm_loop(
-            residuals,
-            prep.q,
-            prep.free,
-            prep.low,
-            prep.high,
-            iterations=opts.iterations,
-            damping=opts.damping,
-            tolerance_m=opts.tolerance_m,
+        return self._finalize_pose_fit(
+            q,
+            targets,
+            prep,
+            ground=ground,
+            iterations=done,
+            termination=term,
+            empty_marker_rms=opts.empty_marker_rms,
         )
-        return self._finalize_pose_fit(q, targets, prep, ground=ground, iterations=done)
 
     def _validate_trajectory_options(
         self,
@@ -1160,8 +1092,11 @@ class BaseFullBodyIK:
                 opts.restarts if fit.marker_rms_m > opts.restart_threshold_m else 0
             ):
                 jittered = np.asarray(start, dtype=float).copy()
-                jittered[6:] += rng.uniform(
-                    -opts.restart_spread_rad, opts.restart_spread_rad, len(jittered) - 6
+                jittered[6:] += restart_jitter(
+                    rng,
+                    opts.restart_spread_rad,
+                    self.arm_mirrored,
+                    self.coordinate_order,
                 )
                 retry = self.solve_pose(
                     targets[k],

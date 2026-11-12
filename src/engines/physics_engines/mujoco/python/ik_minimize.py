@@ -58,7 +58,7 @@ class MinimizeMarkerKinematics(FullBodyMarkerKinematics):
             )
 
         warm_iters = max(5, opts.iterations - max(1, opts.iterations // 3))
-        q_seed, lm_done = _run_lm_loop(
+        q_seed, lm_done, *_ = _run_lm_loop(
             residual_and_jacobian,
             prep.q,
             prep.free,
