@@ -59,6 +59,10 @@ Section 1 of the document itself states that the visible launcher tiles are
 defined in `src/config/launcher_manifest.json` and `src/config/models.yaml`,
 which is the same registry pair that declares this tile.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/theory-part1.html): *AffineDrift Theory Part I*.
+
 ## Limitations
 
 - It is a static Markdown file. There is no search, no filtering, no

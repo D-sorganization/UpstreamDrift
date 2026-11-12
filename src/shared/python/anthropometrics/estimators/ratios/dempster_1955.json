@@ -1,6 +1,7 @@
 {
   "method": "dempster_1955",
   "citation": "Dempster, W.T. (1955). Space requirements of the seated operator. WADC Technical Report 55-159.",
+  "length_ratio_citation": "Limb and interior trunk length ratios follow Drillis & Contini (1966) / Winter (2009), applied via humanoid_character_builder model geometry (#15014).",
   "segments": {
     "head": {
       "mass_ratio": 0.081,

@@ -320,6 +320,7 @@ def test_golfer_joint_names_name_each_state_coordinate() -> None:
 
     probe = 0.001 * np.arange(1, len(q) + 1)
     golfer.set_state(probe, np.zeros_like(v))
+    assert golfer._model is not None
     coordinates = golfer._model.getCoordinateSet()  # noqa: SLF001 - checks the engine
     for k, name in enumerate(names):
         value = coordinates.get(name).getValue(golfer._state)  # noqa: SLF001
