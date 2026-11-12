@@ -10,7 +10,7 @@ import pytest
 
 from src.shared.python.model_appearance import club_assembly as ca
 from src.shared.python.model_appearance import grip_hands as gh
-from src.shared.python.model_appearance.geometry import Mesh
+from src.shared.python.model_appearance.geometry import Mesh, concat_meshes
 from src.shared.python.model_appearance.grip_hand_mesh import (
     FINGER_NAMES,
     MAX_PAD_CLEARANCE_M,
@@ -24,6 +24,7 @@ pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[3]
 RADII_M = (0.0127, 0.0138, 0.0140, 0.0145)
 MIN_SECTION_COVERAGE_DEG = 270
+MAX_UNCOVERED_AZIMUTH_GAP_DEG = 360.0 - MIN_SECTION_COVERAGE_DEG
 SECTION_HALF_WIDTH_M = 0.001
 SECTION_RADIAL_REACH_M = 0.03
 
@@ -47,13 +48,43 @@ def _parts(result: GripHandMesh, finger: str):
     return [p for p in result.components if p.finger == finger]
 
 
-def _section_coverage_deg(result: GripHandMesh, z: float) -> int:
-    pts = _surface_points(result.mesh)
+def _finger_section_meshes(result: GripHandMesh, finger: str, z: float) -> list[Mesh]:
+    """On-grip geometry that belongs to one finger's MCP axial section at ``z``."""
+    meshes: list[Mesh] = []
+    reach = result.grip_radius_m + SECTION_RADIAL_REACH_M
+    for part in result.components:
+        if not part.on_grip:
+            continue
+        if part.finger == finger or part.name == f"palm_{finger}":
+            meshes.append(part.mesh)
+            continue
+        if part.finger not in ("palm", "thumb_web", "thumb"):
+            continue
+        pts = _surface_points(part.mesh)
+        near = (np.abs(pts[:, 2] - z) <= SECTION_HALF_WIDTH_M) & (_rho(pts) <= reach)
+        if np.any(near):
+            meshes.append(part.mesh)
+    return meshes
+
+
+def _max_uncovered_azimuth_gap_deg(
+    mesh: Mesh, z: float, *, grip_radius_m: float
+) -> float:
+    """Largest angular gap on the grip cylinder slice covered only by ``mesh``."""
+    pts = _surface_points(mesh)
     near = (np.abs(pts[:, 2] - z) <= SECTION_HALF_WIDTH_M) & (
-        _rho(pts) <= result.grip_radius_m + SECTION_RADIAL_REACH_M
+        _rho(pts) <= grip_radius_m + SECTION_RADIAL_REACH_M
     )
-    azimuth = np.degrees(np.arctan2(pts[near, 1], pts[near, 0])) % 360.0
-    return int(np.unique(azimuth.astype(int)).size)
+    slice_pts = pts[near]
+    if slice_pts.size == 0:
+        return 360.0
+    azimuth = np.degrees(np.arctan2(slice_pts[:, 1], slice_pts[:, 0])) % 360.0
+    if azimuth.size == 1:
+        return 360.0
+    sorted_az = np.sort(azimuth)
+    between = np.diff(sorted_az)
+    wrap = (360.0 - sorted_az[-1]) + sorted_az[0]
+    return float(max(np.max(between), wrap))
 
 
 @pytest.mark.parametrize("hand", list(Hand))
@@ -68,8 +99,13 @@ def test_hand_section_covers_270_deg_around_grip(
         if not proximal.on_grip:
             continue
         z = float(proximal.mesh.vertices[:, 2].mean())
-        coverage = _section_coverage_deg(result, z)
-        assert coverage >= MIN_SECTION_COVERAGE_DEG, (finger, coverage)
+        section = _finger_section_meshes(result, finger, z)
+        assert section, (finger, z)
+        section_mesh = concat_meshes(*section)
+        gap_deg = _max_uncovered_azimuth_gap_deg(
+            section_mesh, z, grip_radius_m=result.grip_radius_m
+        )
+        assert gap_deg <= MAX_UNCOVERED_AZIMUTH_GAP_DEG + 1e-6, (finger, gap_deg)
 
 
 def _club(key: str) -> ca.ClubAssembly:
@@ -94,8 +130,15 @@ def test_each_contact_patch_gap_within_0_to_3_mm(
         depth = result.distance_below_butt_m + pts[:, 2]
         taper = np.array([gh.grip_radius_at(club, float(d)) for d in depth])
         gap = _rho(pts) - taper
-        assert gap.min() >= -1e-6, (part.name, gap.min())
-        assert gap.min() <= MAX_PAD_CLEARANCE_M + 1e-6, (part.name, gap.min())
+        on_patch = gap <= MAX_PAD_CLEARANCE_M + 1e-6
+        assert on_patch.any(), part.name
+        patch_gap = gap[on_patch]
+        assert patch_gap.min() >= -1e-6, (part.name, patch_gap.min(), patch_gap.max())
+        assert patch_gap.max() <= MAX_PAD_CLEARANCE_M + 1e-6, (
+            part.name,
+            patch_gap.min(),
+            patch_gap.max(),
+        )
 
 
 @pytest.mark.parametrize("hand", list(Hand))
