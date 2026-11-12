@@ -27,6 +27,18 @@ from .mujoco_corpus import (
     load_canonical_driver_spec,
     raw_spec_sha256,
 )
+from .mujoco_corpus_run import (
+    CORPUS_RUN_RECEIPT_FILENAME,
+    MUJOCO_CORPUS_RUN_RECEIPT_SCHEMA,
+    MuJoCoCorpusRunReceipt,
+    MuJoCoCorpusTrainingBundle,
+    load_corpus_run_receipt,
+    load_mujoco_corpus_for_training,
+    read_corpus_manifest,
+    resolve_repo_head_sha,
+    run_mujoco_corpus_generation,
+    verify_corpus_manifest_digest,
+)
 from .views import (
     FeasibilityView,
     InstantaneousDynamicsView,
@@ -59,5 +71,15 @@ __all__ = [
     "MUJOCO_CORPUS_MANIFEST_SCHEMA",
     "MuJoCoCorpusManifest",
     "MuJoCoEpisodeCorpusGenerator",
+    "CORPUS_RUN_RECEIPT_FILENAME",
+    "MUJOCO_CORPUS_RUN_RECEIPT_SCHEMA",
+    "MuJoCoCorpusRunReceipt",
+    "MuJoCoCorpusTrainingBundle",
+    "load_corpus_run_receipt",
+    "load_mujoco_corpus_for_training",
+    "read_corpus_manifest",
+    "resolve_repo_head_sha",
+    "run_mujoco_corpus_generation",
+    "verify_corpus_manifest_digest",
     "raw_spec_sha256",
 ]
