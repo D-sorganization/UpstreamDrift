@@ -770,30 +770,30 @@ class SimscapeAdapter:
     # ------------------------------------------------------------------
 
     @precondition(
-        lambda self, q: isinstance(q, np.ndarray) and q.ndim == 1,
-        "q must be a 1-D numpy array",
+        lambda self, q: bool(
+            isinstance(q, np.ndarray)
+            and q.ndim == 1
+            and (not self._dof or q.shape == (self._dof,))
+        ),
+        "q must be a 1-D numpy array matching adapter dof",
     )
     def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:  # noqa: ARG002
         """Legacy gravity-only diagnostic — uses protocol defaults (#14943)."""
         op = "compute_gravity_only_acceleration"
         self._lifecycle.require(AdapterState.LOADED, AdapterState.RUNNING, operation=op)
-        if self._dof and q.shape != (self._dof,):
-            raise ValueError(
-                f"q must have shape ({self._dof},); got q={q.shape}"
-            )
         from src.shared.python.engine_core.counterfactual_defaults import (
             default_gravity_only_acceleration,
         )
         return default_gravity_only_acceleration(self, q)
-
     @precondition(
-        lambda self, q, tau: (
+        lambda self, q, tau: bool(
             isinstance(q, np.ndarray)
             and isinstance(tau, np.ndarray)
             and q.ndim == 1
             and tau.ndim == 1
+            and (not self._dof or (q.shape == (self._dof,) and tau.shape == (self._dof,)))
         ),
-        "q and tau must be 1-D numpy arrays",
+        "q and tau must be 1-D numpy arrays matching adapter dof",
     )
     def compute_control_acceleration_at_state(  # noqa: ARG002
         self, q: np.ndarray, tau: np.ndarray
@@ -801,12 +801,6 @@ class SimscapeAdapter:
         """SPEC §4 ZVCF control term — protocol default at fixed ``q`` (#14943)."""
         op = "compute_control_acceleration_at_state"
         self._lifecycle.require(AdapterState.LOADED, AdapterState.RUNNING, operation=op)
-        if self._dof:
-            if q.shape != (self._dof,) or tau.shape != (self._dof,):
-                raise ValueError(
-                    f"q and tau must have shape ({self._dof},); "
-                    f"got q={q.shape}, tau={tau.shape}"
-                )
         from src.shared.python.engine_core.counterfactual_defaults import (
             default_control_acceleration_at_state,
         )

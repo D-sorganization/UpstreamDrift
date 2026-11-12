@@ -112,9 +112,9 @@ def test_counterfactual_rejects_wrong_length_vectors(slx_pair: Path) -> None:
     short_q = np.zeros(dof - 1, dtype=float)
     tau = np.zeros(dof, dtype=float)
     try:
-        with pytest.raises(ValueError, match=r"shape \(16,\)"):
+        with pytest.raises(PreconditionError):
             adapter.compute_gravity_only_acceleration(short_q)
-        with pytest.raises(ValueError, match=r"shape \(16,\)"):
+        with pytest.raises(PreconditionError):
             adapter.compute_control_acceleration_at_state(short_q, tau)
     finally:
         adapter.close()
