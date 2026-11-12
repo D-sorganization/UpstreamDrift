@@ -3,10 +3,10 @@
   "classification": "synthetic_numerical_verification_not_human_evidence",
   "constrained_motion": {
     "all_gates_pass": true,
-    "cross_engine_multiplier_relative_residual": 3.2912406029630147e-13,
+    "cross_engine_multiplier_relative_residual": 3.2920955509305444e-13,
     "equilibrium_relative_residual": 6.865049657261163e-13,
     "independent_engine_difference_detected": true,
-    "multiplier_relative_residual": 3.349443310154366e-13,
+    "multiplier_relative_residual": 3.350286903869652e-13,
     "position_residual_m": 0.0,
     "velocity_residual_m_s": 0.0,
     "virtual_power_residual_w": 0.0
@@ -77,7 +77,7 @@
     "all_gates_pass": true,
     "gravity_free_zero_torque_relative_drift": {
       "angular_momentum": 1.5118394581355118e-06,
-      "kinetic_energy": 8.665719958000917e-07,
+      "kinetic_energy": 8.665719958278473e-07,
       "linear_momentum": 1.008023158469804e-06
     },
     "independent_engine_difference_detected": true,
