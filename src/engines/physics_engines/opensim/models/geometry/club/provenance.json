@@ -21,8 +21,8 @@
         },
         "generator": "src.shared.python.model_appearance.grip_hands",
         "sha256": {
-          "lead_hand": "f5a54677ca2a5c56b39e1e7ec86cd8da8d53da5f7bdbbdc077fc654d640f25b4",
-          "trail_hand": "ba6eab4aeccd98275a9f59ed571444cd8c76cb378bdb938aeb8047c4a2771608"
+          "lead_hand": "d51a1b93f19634385272ddff30b3e92a0e4831f42c1ab23a2884ea66ada7a231",
+          "trail_hand": "cb78677df3121438afd8e8b3e626d3e2384a8a6faf47f3c065a9133335e2a88b"
         }
       },
       "head_library_name": "Driver 10.5\u00b0",
@@ -55,8 +55,8 @@
         },
         "generator": "src.shared.python.model_appearance.grip_hands",
         "sha256": {
-          "lead_hand": "4667e7662bf9c9433ee4d25545310e7ced8e8a2082b502978661e95176dbeb4a",
-          "trail_hand": "a7964d1100385db446b87ea2ea006395070e0f3c1b1ca17df9a5180bf3d0c533"
+          "lead_hand": "8348f0120d442d34a072315e485fa854d9c925ec238e5c3d1c6fa21b1ed0c1d9",
+          "trail_hand": "75cad4327247aa94622323d3524ebe95cbbb76e8df9d1e359e21c85e3c4551d3"
         }
       },
       "head_library_name": "7-Iron",

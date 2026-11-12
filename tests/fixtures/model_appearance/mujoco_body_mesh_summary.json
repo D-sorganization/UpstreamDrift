@@ -96,9 +96,9 @@
       {
         "label": "lead_hand",
         "material": "mat_skin_2",
-        "n_vertices": 5954,
+        "n_vertices": 7844,
         "bbox_min": [-0.029392, -0.060055, -0.024161],
-        "bbox_max": [0.044401, 0.030845, 0.059223]
+        "bbox_max": [0.044401, 0.030845, 0.067816]
       },
       {
         "label": "shaft",
@@ -443,9 +443,9 @@
       {
         "label": "lead_hand",
         "material": "mat_skin_2",
-        "n_vertices": 5954,
+        "n_vertices": 7844,
         "bbox_min": [-0.037498, -0.056688, -0.021005],
-        "bbox_max": [0.046009, 0.040599, 0.062366]
+        "bbox_max": [0.046599, 0.040599, 0.067268]
       },
       {
         "label": "shaft",
@@ -790,7 +790,7 @@
       {
         "label": "lead_hand",
         "material": "mat_skin_2",
-        "n_vertices": 5954,
+        "n_vertices": 7812,
         "bbox_min": [-0.034514, -0.06275, -0.008018],
         "bbox_max": [0.04077, 0.024, 0.058818]
       },

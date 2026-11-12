@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import numpy as np
 import pytest
 
+from src.shared.python.model_appearance import club_assembly as ca
+from src.shared.python.model_appearance import grip_hands as gh
 from src.shared.python.model_appearance.geometry import Mesh
 from src.shared.python.model_appearance.grip_hand_mesh import (
-    DEFAULT_HAND_MESH_PARAMS,
+    FINGER_NAMES,
     MAX_PAD_CLEARANCE_M,
     GripHandMesh,
     build_grip_hand_mesh,
@@ -16,21 +21,22 @@ from src.shared.python.model_appearance.grip_pose import GripPose, GripStyle, Ha
 
 pytestmark = pytest.mark.unit
 
+ROOT = Path(__file__).resolve().parents[3]
 RADII_M = (0.0127, 0.0138, 0.0140, 0.0145)
-_GRIP_LENGTH_M, _GRIP_BUTT_RADIUS_M, _GRIP_TIP_RADIUS_M = 0.265, 0.0118, 0.0105
+MIN_SECTION_COVERAGE_DEG = 270
+SECTION_HALF_WIDTH_M = 0.001
+SECTION_RADIAL_REACH_M = 0.03
+
+_BARY = np.array(
+    [(a, b, 1.0 - a - b) for a in np.linspace(0, 1, 9) for b in np.linspace(0, 1, 9)]
+)
+_BARY = _BARY[_BARY[:, 2] >= -1e-12]
 
 
-def _grip_radius_at(distance_below_butt_m: float) -> float:
-    f = float(distance_below_butt_m) / _GRIP_LENGTH_M
-    return _GRIP_BUTT_RADIUS_M + f * (_GRIP_TIP_RADIUS_M - _GRIP_BUTT_RADIUS_M)
-
-
-def _taper_clearance(mesh: Mesh, *, depth_below_butt_m: float) -> float:
-    pts, rho = mesh.vertices, np.hypot(mesh.vertices[:, 0], mesh.vertices[:, 1])
-    r_surface = np.array(
-        [_grip_radius_at(depth_below_butt_m + float(z)) for z in pts[:, 2]]
-    )
-    return float(np.min(rho - r_surface))
+def _surface_points(mesh: Mesh) -> np.ndarray:
+    tri = mesh.vertices[mesh.faces]
+    samples = np.einsum("kj,mjd->mkd", _BARY, tri).reshape(-1, 3)
+    return np.vstack([mesh.vertices, samples])
 
 
 def _rho(points: np.ndarray) -> np.ndarray:
@@ -41,60 +47,55 @@ def _parts(result: GripHandMesh, finger: str):
     return [p for p in result.components if p.finger == finger]
 
 
-def _span_deg(angles_deg: np.ndarray) -> float:
-    a = np.sort(np.mod(angles_deg, 360.0))
-    if len(a) < 2:
-        return 360.0
-    gaps = np.diff(np.r_[a, a[0] + 360.0])
-    return float(360.0 - np.max(gaps))
-
-
-def test_hand_section_covers_270_deg_around_grip():
-    for style in GripStyle:
-        pose = GripPose(style=style)
-        for hand in Hand:
-            r = build_grip_hand_mesh(
-                hand,
-                grip_radius_m=0.014,
-                pose=pose,
-                params=DEFAULT_HAND_MESH_PARAMS,
-            )
-            on = [p for p in r.components if p.on_grip]
-            assert on
-            pts = np.vstack([p.mesh.vertices for p in on])
-            ang = np.degrees(np.arctan2(pts[:, 1], pts[:, 0]))
-            cov = _span_deg(ang - float(r.v_azimuth_deg))
-            assert cov >= 270.0 - 0.5, (style, hand, cov)
-
-
-def _baked_on_tapered_grip(hand: Hand, pose: GripPose) -> GripHandMesh:
-    params = DEFAULT_HAND_MESH_PARAMS
-    depth = pose.distance_below_butt_m(hand)
-    nominal = build_grip_hand_mesh(
-        hand, grip_radius_m=_grip_radius_at(depth), pose=pose, params=params
+def _section_coverage_deg(result: GripHandMesh, z: float) -> int:
+    pts = _surface_points(result.mesh)
+    near = (np.abs(pts[:, 2] - z) <= SECTION_HALF_WIDTH_M) & (
+        _rho(pts) <= result.grip_radius_m + SECTION_RADIAL_REACH_M
     )
-    nearest, _ = nominal.on_grip_extent_below_butt_m()
-    radius = _grip_radius_at(min(max(nearest, 0.0), _GRIP_LENGTH_M))
-    return build_grip_hand_mesh(hand, grip_radius_m=radius, pose=pose, params=params)
+    azimuth = np.degrees(np.arctan2(pts[near, 1], pts[near, 0])) % 360.0
+    return int(np.unique(azimuth.astype(int)).size)
 
 
-def test_each_contact_patch_gap_within_0_to_3_mm():
-    pose = GripPose(style=GripStyle.TEN_FINGER)
-    for hand in Hand:
-        result = _baked_on_tapered_grip(hand, pose)
-        depth = pose.distance_below_butt_m(hand)
-        on = [p for p in result.components if p.on_grip and p.finger != "dorsum"]
-        assert on
-        nearest, farthest = result.on_grip_extent_below_butt_m()
-        taper_extra = abs(_grip_radius_at(nearest) - _grip_radius_at(farthest))
-        hi = (
-            MAX_PAD_CLEARANCE_M
-            + taper_extra
-            + abs(_grip_radius_at(depth) - float(result.grip_radius_m))
-        )
-        for part in on:
-            lo = _taper_clearance(part.mesh, depth_below_butt_m=depth)
-            assert 0.0 <= lo <= hi + 1e-6, (hand, part.name, lo)
+@pytest.mark.parametrize("hand", list(Hand))
+@pytest.mark.parametrize("style", list(GripStyle))
+@pytest.mark.parametrize("radius", RADII_M)
+def test_hand_section_covers_270_deg_around_grip(
+    hand: Hand, style: GripStyle, radius: float
+):
+    result = build_grip_hand_mesh(hand, grip_radius_m=radius, style=style)
+    for finger in FINGER_NAMES:
+        proximal = next(p for p in result.components if p.name == f"{finger}_proximal")
+        if not proximal.on_grip:
+            continue
+        z = float(proximal.mesh.vertices[:, 2].mean())
+        coverage = _section_coverage_deg(result, z)
+        assert coverage >= MIN_SECTION_COVERAGE_DEG, (finger, coverage)
+
+
+def _club(key: str) -> ca.ClubAssembly:
+    spec = ROOT / f"docs/development/full_body_models/full_body_spec_anthro_{key}.json"
+    club = ca.assembly_from_spec(json.loads(spec.read_text(encoding="utf-8")))
+    assert club is not None
+    return club
+
+
+@pytest.mark.parametrize("key", ["driver", "iron7"])
+@pytest.mark.parametrize("hand", list(Hand))
+@pytest.mark.parametrize("style", list(GripStyle))
+def test_each_contact_patch_gap_within_0_to_3_mm(
+    key: str, hand: Hand, style: GripStyle
+):
+    club = _club(key)
+    result = gh.baked_grip_hand(club, hand, GripPose(style=style))
+    for part in result.components:
+        if not part.on_grip:
+            continue
+        pts = _surface_points(part.mesh)
+        depth = result.distance_below_butt_m + pts[:, 2]
+        taper = np.array([gh.grip_radius_at(club, float(d)) for d in depth])
+        gap = _rho(pts) - taper
+        assert gap.min() >= -1e-6, (part.name, gap.min())
+        assert gap.min() <= MAX_PAD_CLEARANCE_M + 1e-6, (part.name, gap.min())
 
 
 @pytest.mark.parametrize("hand", list(Hand))

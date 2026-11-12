@@ -95,6 +95,9 @@ _SOLVER_MAX_ITERATIONS: int = 5
 _SOLVER_TOLERANCE_M: float = 1e-6
 #: Symmetric interior barrel ring stations in (0, 1) ensuring continuous azimuthal vertex coverage.
 _PHALANX_BARREL_STATIONS: tuple[float, ...] = (0.2, 0.4, 0.6, 0.8)
+#: A topology-placed finger outside the palm band or past this knuckle offset
+#: from the palm's MCP edge gets its own palm strip.
+_OWN_PALM_MIN_OFFSET_RAD: float = math.radians(1.0)
 
 
 @dataclass(frozen=True)
@@ -420,10 +423,18 @@ def build_grip_hand_mesh(
     stack = _stack_z(params)
     k = params.scale
 
-    parts = _finger_components(hand, pose, radius, curl, mcp, stack, params)
+    parts, knuckles = _finger_components(hand, pose, radius, curl, mcp, stack, params)
     z_lo = min(stack.values()) - k * params.finger_radius_m["little"] * 0.6
     z_hi = max(stack.values()) + k * params.finger_radius_m["index"] * 0.6
     parts += _palm_strip("", radius, (v, mcp), (z_lo, z_hi), params, dorsum=True)
+    for finger, (mcp_finger, z, r) in knuckles.items():
+        end = v + curl * ((curl * (mcp_finger - v)) % (2.0 * math.pi))
+        if abs(end - mcp) > _OWN_PALM_MIN_OFFSET_RAD or not z_lo <= z <= z_hi:
+            band = (
+                z - r - 0.5 * params.finger_gap_m,
+                z + r + 0.5 * params.finger_gap_m,
+            )
+            parts += _palm_strip(f"_{finger}", radius, (v, end), band, params)
     roll_deg = placement.v_azimuth_deg - NEUTRAL_V_AZIMUTH_DEG
     thumb_azimuth_deg = placement.thumb_offset_deg + roll_deg
     thumb_azimuth = math.radians(thumb_azimuth_deg)
@@ -457,13 +468,17 @@ def _finger_components(
     mcp: float,
     stack: dict[str, float],
     params: HandMeshParams,
-) -> list[HandComponent]:
-    """The five curled fingers of ``hand``, each placed on its topology site."""
+) -> tuple[list[HandComponent], dict[str, tuple[float, float, float]]]:
+    """The five curled fingers of ``hand``, each placed on its topology site.
+
+    Also returns ``{finger: (mcp_azimuth, z, radius)}`` for every on-grip finger.
+    """
     clearance, k = params.pad_clearance_m, params.scale
     placement = pose.placement(hand)
     topo = topology_of_pose(pose, grip_radius_m=radius)
 
     parts: list[HandComponent] = []
+    knuckles: dict[str, tuple[float, float, float]] = {}
     for finger in FINGER_NAMES:
         r = k * params.finger_radius_m[finger]
         p = params.phalanx_lengths_m[finger]
@@ -499,7 +514,9 @@ def _finger_components(
             finger, lengths, r, d, mcp_finger, z, curl, params.sides
         ):
             parts.append(HandComponent(name, finger, mesh, on_grip))
-    return parts
+        if on_grip:
+            knuckles[finger] = (mcp_finger, z, r)
+    return parts, knuckles
 
 
 def _palm_strip(
