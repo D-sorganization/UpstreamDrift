@@ -891,10 +891,32 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
         )
 
         ctrl = np.asarray(tau, dtype=float).reshape(-1)
-        if ctrl.size != self.model.nu:
+        q_arr = np.asarray(q, dtype=float).reshape(-1)
+        if len(q_arr) != len(self.data.qpos):
+            raise ValueError(
+                f"q must have {len(self.data.qpos)} entries, got {len(q_arr)}"
+            )
+        if ctrl.size == self.model.nu:
+            analyzer = CounterfactualAnalyzer(self.model)
+            return analyzer.control_component_at(q_arr, ctrl)
+
+        if ctrl.size != self.model.nv:
+            raise ValueError(
+                f"tau must have {self.model.nu} (actuator) or {self.model.nv} "
+                f"(generalized) entries, got {ctrl.size}"
+            )
+
+        saved_qpos = self.data.qpos.copy()
+        saved_qvel = self.data.qvel.copy()
+        try:
+            self.data.qpos[:] = q_arr
+            self.data.qvel[:] = 0.0
+            mujoco.mj_forward(self.model, self.data)
             return self.compute_control_acceleration(ctrl)
-        analyzer = CounterfactualAnalyzer(self.model)
-        return analyzer.control_component_at(q, ctrl)
+        finally:
+            self.data.qpos[:] = saved_qpos
+            self.data.qvel[:] = saved_qvel
+            mujoco.mj_forward(self.model, self.data)
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Deprecated shim → :meth:`compute_gravity_only_acceleration` (#14943)."""
