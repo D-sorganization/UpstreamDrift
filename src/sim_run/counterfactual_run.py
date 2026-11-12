@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
-from src.shared.python.simulation_backends import GolfModelParams, make_backend
+from src.shared.python.simulation_backends import (
+    EquationsOfMotionProvider,
+    GolfModelParams,
+    make_backend,
+)
 from src.shared.python.simulation_backends.ztcf_zvcf import (
     CanonicalDynamicsTrajectory,
     evaluate_ztcf_zvcf_on_canonical_trajectory,
@@ -66,7 +70,10 @@ def execute_golden_ztcf(
 ) -> dict[str, Any]:
     """Evaluate the pinned golden canonical trajectory through sim_run (ODE backend)."""
     del request  # golden inputs are fixed; hash covers the canonical case id only
-    provider = make_backend("ode", GolfModelParams.default())
+    provider = cast(
+        EquationsOfMotionProvider,
+        make_backend("ode", GolfModelParams.default()),
+    )
     evaluated = evaluate_ztcf_zvcf_on_canonical_trajectory(provider, GOLDEN_TRAJECTORY)
     return {
         "capability": "counterfactual_ztcf_golden",
