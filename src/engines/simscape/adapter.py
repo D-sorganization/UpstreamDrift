@@ -774,13 +774,17 @@ class SimscapeAdapter:
         "q must be a 1-D numpy array",
     )
     def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:  # noqa: ARG002
-        """Legacy gravity-only diagnostic at ``v = u = 0`` (#14943)."""
+        """Legacy gravity-only diagnostic — uses protocol defaults (#14943)."""
         self._lifecycle.require(
             AdapterState.LOADED,
             AdapterState.RUNNING,
             operation="compute_gravity_only_acceleration",
         )
-        return self._deferred_array("compute_gravity_only_acceleration")
+        from src.shared.python.engine_core.counterfactual_defaults import (
+            default_gravity_only_acceleration,
+        )
+
+        return default_gravity_only_acceleration(self, q)
 
     @precondition(
         lambda self, q, tau: (
@@ -794,13 +798,17 @@ class SimscapeAdapter:
     def compute_control_acceleration_at_state(  # noqa: ARG002
         self, q: np.ndarray, tau: np.ndarray
     ) -> np.ndarray:
-        """Control-induced acceleration at configuration ``q`` (#14943)."""
+        """SPEC §4 ZVCF control term — protocol default at fixed ``q`` (#14943)."""
         self._lifecycle.require(
             AdapterState.LOADED,
             AdapterState.RUNNING,
             operation="compute_control_acceleration_at_state",
         )
-        return self._deferred_array("compute_control_acceleration_at_state")
+        from src.shared.python.engine_core.counterfactual_defaults import (
+            default_control_acceleration_at_state,
+        )
+
+        return default_control_acceleration_at_state(self, q, tau)
 
     @precondition(
         lambda self, q, v: (

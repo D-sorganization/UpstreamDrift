@@ -157,12 +157,22 @@ Where:
 **Spin Parameter (Waterloo/Penner Model)**:
 
 ```
-S = (ω * r) / v
+S = (r * ||ω × v̂||) / v
 ```
 
 - ω = angular velocity [rad/s]
 - r = ball radius [m]
 - v = linear velocity relative to the air [m/s]
+- `||ω × v̂||` is the transverse spin rate (equivalent to `||ω|| sin θ`); it
+  goes to zero when spin aligns with velocity (rifle / gyro spin). The native
+  Rust/Python flight kernels use this form in `compute_magnus` so Magnus
+  magnitude vanishes continuously as `ω ∥ v`.
+
+**World frame and backspin sign** (native `upstream-physics` kernel): **X**
+downrange, **Y** left, **Z** up; Magnus follows **ω × v**. Backspin on a level
+**+X** shot is rotation about **−Y** (`ω_y < 0`) and produces upward lift
+(**+Z**). A **+Y** spin component with **+X** velocity is topspin (**−Z**
+Magnus).
 
 S is dimensionless (surface speed over air speed). A driver shot at
 2500 rpm (ω ≈ 262 rad/s) and 73 m/s gives S ≈ 262 × 0.0213 / 73 ≈ 0.077.
@@ -260,9 +270,9 @@ altitude, temperature, and humidity. Entry points:
 | Air density (sea level) | <!-- calc:air_density_sea_level_kg_m3 -->1.225<!-- /calc --> | kg/m³ | `physics_constants.py::AIR_DENSITY_SEA_LEVEL_KG_M3` | ISA standard atmosphere   |
 | Min. aero speed         | <!-- calc:min_speed_threshold_m_s -->0.1<!-- /calc -->       | m/s   | `ball_properties.py::MIN_SPEED_THRESHOLD`           | Numerical guard           |
 
-Symbols: S = spin parameter ωr/v (dimensionless); ω = ball angular
-velocity [rad/s]; r = ball radius [m]; v = airspeed [m/s]; ρ = air
-density [kg/m³]; A = cross-sectional area [m²].
+Symbols: S = transverse spin parameter r·||ω × v̂||/v (dimensionless);
+ω = ball angular velocity [rad/s]; r = ball radius [m]; v = airspeed [m/s];
+ρ = air density [kg/m³]; A = cross-sectional area [m²].
 
 #### 2.4.1 Two Live Model Families (Issue #8978)
 

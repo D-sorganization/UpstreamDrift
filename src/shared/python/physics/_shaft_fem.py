@@ -20,6 +20,10 @@ class FiniteElementShaftModel(ShaftModel):
     - Rayleigh damping
     - Cantilevered boundary conditions
 
+    Modeling scope: linear bending only — no geometric stiffness ``K_G(N)`` from
+    axial load and no club-head CG-offset tip moment. Natural validation uses
+    linear cantilever relations (for example ``δ = P L³ / (3 EI)``).
+
     Issue #756: Full FE implementation for cross-engine shaft modeling.
     """
 

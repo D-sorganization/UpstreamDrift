@@ -76,6 +76,22 @@
       }
     },
     {
+      "id": "R9c-12690",
+      "issue": 12690,
+      "epic_issue": 12678,
+      "title": "R9c: Simscape GS3DX Shared Appearance unittest and Native Render Evidence (MATLAB R2025b Host, Deferred)",
+      "status": "deferred",
+      "category": "simscape_appearance_export",
+      "host_requirement": "MATLAB R2025b (DeskComputer / ControlTower, C:/Program Files/MATLAB/R2025b/bin/matlab.exe)",
+      "executable": "C:/Program Files/MATLAB/R2025b/bin/matlab.exe",
+      "export_script": "scripts/export_simscape_appearance.py",
+      "matlab_consumer": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_read_appearance.m",
+      "matlab_unittest": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tests/test_gs3dx_appearance.m",
+      "artifact_path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/appearance/gs3dx_appearance.v1.json",
+      "evidence_path": "docs/development/full_body_models/evidence/appearance/engines/simscape/",
+      "rationale": "Running test_gs3dx_appearance.m (model parity, inertia audit, world-frame ML versus AP) and capturing the address still beside MuJoCo requires a licensed MATLAB R2025b Simscape Multibody host and human visual sign-off; Python export and parse or contract tests cover the shared-spec bridge on headless CI."
+    },
+    {
       "id": "SHOW-A14-SIMSCAPE",
       "issue": 14739,
       "epic_issue": 14549,
