@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "manual_id": "upstreamdrift",
   "repository": "D-sorganization/UpstreamDrift",
-  "release_status": "blocked-inventory-required",
+  "release_status": "inventory-partial",
   "inventory_commit": null,
   "blockers": [
     {
@@ -376,21 +376,6 @@
       "resolution": "Inventory provisional chapter58 and native_contact_policy.py: exact source-bound HuntCrossleyForce/SmoothSphereHalfSpaceForce and ContactSphere/ContactHalfSpace closures, shared native wrench sampler implementation identity including opensim_force_torque.py, constrained replay policy binding, default rejection and native source/component mutation checks. A defused namespace-disabled XML parser accepts OpenSim C++-qualified names without rewriting source bytes while retaining DTD, entity, external-resource and prefixed-resource rejection. OpenSim 4.6 synthetic fixtures exercise both declared force types and finite native wrench replay for both constrained contact laws; legacy fixtures exercise both laws through the shared sampler. This does not authorize capture contact, establish calibrated support/grip, qualify either contact law physiologically, prove a full-body Moco solve or full-horizon replay, or establish all-model parity. Strict NativeMocoRequest JSON parsing, preparation closure, export identity, and fresh-replay declaration matching are integrated; an actual HuntCrossley request audit blocks on a mutated declaration; keep calculation inventory empty and publication blocked."
     },
     {
-      "id": "UP-D1-native-diagnostic-execution-contract-inventory",
-      "owner": "UpstreamDrift issue #12236",
-      "resolution": "Inventory provisional chapter56 and native_diagnostic_contract.py/native_capability_probe.py: source-bound closed-registry findings separate software admission, exact runtime phase/identity/time window, and non-promotable physical qualification. An explicit probe-suppressed preparation records capability_probe_requested=false and runtime not_attempted with no phase or observed window; readiness still requires the probe. The CLI skip option requires prepare-only. Default behavior is unchanged, and the calculation inventory remains empty. Optional source-specific context binds only registered anatomy/support/marker gaps to evidence digests and provenance references. Optimizer admission requires generated positive audit coverage plus a native-dynamics-closed-source-v1 capability probe whose runtime libraries and implementation bytes are bound. Constrained-muscle provider profiles delegate exact CustomJoint/MovingPathPoint laws to OpenSim and revalidate at bundle build/replay. A bounded 557-component native preparation/probe completed with runtime viable over [0, 0.001] s and physical qualification unqualified; no optimizer or replay ran. The separate bounded three-knot Moco lifecycle fixture remains stopped in MocoStudy.solve(), so solve/export/replay support is unestablished. Focused fixtures do not qualify full capture, anatomy, support/grip, physiology or all-model parity. Calculation inventory remains empty and publication blocked."
-    },
-    {
-      "id": "UP-D1-native-wrapped-path-closure-inventory",
-      "owner": "UpstreamDrift issue #12234",
-      "resolution": "Inventory provisional chapter57 and native_wrapped_path.py: exact source hash, supported WrapCylinder/WrapEllipsoid/WrapSphere identities and geometry, closed PathWrap ownership/target/method/range, ConditionalPathPoint coordinate/range, exact native source revalidation, and reused native route observation. OpenSim 4.6 fixtures exercise all three shapes, default rejection, source/link mutation rejection, conditional-state observations and opt-in replay. CPP-only exact declaration and fresh replay pass without synthetic wrap entries; default CPP admission, unsupported WrapTorus, empty/orphan declarations and conditional source/dump/coordinate/range mutations reject, while chart transitions remain unqualified. This narrow software admission does not prove global path worklessness, guide-work bounds, anatomy, physiology, contact/grip, capture matching or full-horizon acceptance. Shared Chapter56 request/findings integration is a required dependency; keep calculation inventory empty and publication blocked."
-    },
-    {
-      "id": "UP-D1-native-contact-source-closure-inventory",
-      "owner": "UpstreamDrift issue #12244",
-      "resolution": "Inventory provisional chapter58 and native_contact_policy.py: exact source-bound HuntCrossleyForce/SmoothSphereHalfSpaceForce and ContactSphere/ContactHalfSpace closures, shared native wrench sampler implementation identity including opensim_force_torque.py, constrained replay policy binding, default rejection and native source/component mutation checks. A defused namespace-disabled XML parser accepts OpenSim C++-qualified names without rewriting source bytes while retaining DTD, entity, external-resource and prefixed-resource rejection. OpenSim 4.6 synthetic fixtures exercise both declared force types and finite native wrench replay for both constrained contact laws; legacy fixtures exercise both laws through the shared sampler. This does not authorize capture contact, establish calibrated support/grip, qualify either contact law physiologically, prove a full-body Moco solve or full-horizon replay, or establish all-model parity. Strict NativeMocoRequest JSON parsing, preparation closure, export identity, and fresh-replay declaration matching are integrated; an actual HuntCrossley request audit blocks on a mutated declaration; keep calculation inventory empty and publication blocked."
-    },
-    {
       "id": "UP-D1-native-path-work-inventory",
       "owner": "UpstreamDrift issue #11856",
       "resolution": "Inventory original native PathActuator fixed/moving-point force-length diagnostic in scripts/diagnostics/native_path_work.py and chapters/24-native-path-work.qmd. Actual native unit-tension acceleration agrees with native moment arm while the moving same-body segment produces a persistent geometric derivative difference. Existing consistency gate rejects nonfinite and numerically unresolved evidence; original native tests retain the difference rather than changing runtime or donor anatomy. Exact source and runtime identities are separate and source-to-binary verification is unavailable. Physiological fitting, donor path/input-domain validation, contact, complete-state full-capture replay, and manual release remain blocked."
@@ -399,21 +384,6 @@
       "id": "UP-D1-native-mixed-marker-observation-inventory",
       "owner": "UpstreamDrift issue #12195",
       "resolution": "Inventory Chapter 49 and native_mixed_marker_observation.py: source-bound fresh constrained mixed replay, complete named-state native marker FK, immutable masked observation alignment and scorer diagnostics. The native and portable contract tests establish software behavior only; marker registration, physical support/grip, physiology, capture matching, all-model parity and authenticated production execution remain unqualified."
-    },
-    {
-      "id": "UP-D1-native-diagnostic-execution-contract-inventory",
-      "owner": "UpstreamDrift issue #12236",
-      "resolution": "Inventory provisional chapter56 and native_diagnostic_contract.py/native_capability_probe.py: source-bound closed-registry findings separate software admission, exact runtime phase/identity/time window, and non-promotable physical qualification. An explicit probe-suppressed preparation records capability_probe_requested=false and runtime not_attempted with no phase or observed window; readiness still requires the probe. The CLI skip option requires prepare-only. Default behavior is unchanged, and the calculation inventory remains empty. Optional source-specific context binds only registered anatomy/support/marker gaps to evidence digests and provenance references. Optimizer admission requires generated positive audit coverage plus a native-dynamics-closed-source-v1 capability probe whose runtime libraries and implementation bytes are bound. Constrained-muscle provider profiles delegate exact CustomJoint/MovingPathPoint laws to OpenSim and revalidate at bundle build/replay. A bounded 557-component native preparation/probe completed with runtime viable over [0, 0.001] s and physical qualification unqualified; no optimizer or replay ran. The separate bounded three-knot Moco lifecycle fixture remains stopped in MocoStudy.solve(), so solve/export/replay support is unestablished. Focused fixtures do not qualify full capture, anatomy, support/grip, physiology or all-model parity. Calculation inventory remains empty and publication blocked."
-    },
-    {
-      "id": "UP-D1-native-wrapped-path-closure-inventory",
-      "owner": "UpstreamDrift issue #12234",
-      "resolution": "Inventory provisional chapter57 and native_wrapped_path.py: exact source hash, supported WrapCylinder/WrapEllipsoid/WrapSphere identities and geometry, closed PathWrap ownership/target/method/range, ConditionalPathPoint coordinate/range, exact native source revalidation, and reused native route observation. OpenSim 4.6 fixtures exercise all three shapes, default rejection, source/link mutation rejection, conditional-state observations and opt-in replay. CPP-only exact declaration and fresh replay pass without synthetic wrap entries; default CPP admission, unsupported WrapTorus, empty/orphan declarations and conditional source/dump/coordinate/range mutations reject, while chart transitions remain unqualified. This narrow software admission does not prove global path worklessness, guide-work bounds, anatomy, physiology, contact/grip, capture matching or full-horizon acceptance. Shared Chapter56 request/findings integration is a required dependency; keep calculation inventory empty and publication blocked."
-    },
-    {
-      "id": "UP-D1-native-contact-source-closure-inventory",
-      "owner": "UpstreamDrift issue #12244",
-      "resolution": "Inventory provisional chapter58 and native_contact_policy.py: exact source-bound HuntCrossleyForce/SmoothSphereHalfSpaceForce and ContactSphere/ContactHalfSpace closures, shared native wrench sampler implementation identity including opensim_force_torque.py, constrained replay policy binding, default rejection and native source/component mutation checks. A defused namespace-disabled XML parser accepts OpenSim C++-qualified names without rewriting source bytes while retaining DTD, entity, external-resource and prefixed-resource rejection. OpenSim 4.6 synthetic fixtures exercise both declared force types and finite native wrench replay for both constrained contact laws; legacy fixtures exercise both laws through the shared sampler. This does not authorize capture contact, establish calibrated support/grip, qualify either contact law physiologically, prove a full-body Moco solve or full-horizon replay, or establish all-model parity. Strict NativeMocoRequest JSON parsing, preparation closure, export identity, and fresh-replay declaration matching are integrated; an actual HuntCrossley request audit blocks on a mutated declaration; keep calculation inventory empty and publication blocked."
     },
     {
       "id": "UP-D1-frozen-training-registration-inventory",
@@ -443,8 +413,108 @@
     {
       "id": "UP-CAP-interface-capability-ellipsoids",
       "owner": "UpstreamDrift issue #14052, epic #14038",
-      "resolution": "Inventory the operational-space capability ellipsoids at the hand-club interfaces (src/shared/python/spatial_algebra/operational_space.py, capability sources in MuJoCo, Drake, Pinocchio, and display builders in force_overlay) with provisional chapter 69-interface-capability-ellipsoids.qmd. The capability framework defines operational-space mobility (W = J·A·Jᵀ), effective mass (W⁻¹), acceleration capacity (J·A·S·T²·Sᵀ·Aᵀ·Jᵀ with drift offset c_a = J·A·(−h) + J̇q̇), and force capacity ((J·S·T⁻²·Sᵀ·Jᵀ)⁻¹). Torque-limit provider protocols and cross-engine qualification parity tests verify grip coordinates, mobility eigenvalues, and capacity semi-axes within 1% and 2 degrees across MuJoCo, Drake, and Pinocchio. OpenSim integration remains held under HX6 #13763. Keep calculations empty and publication blocked until full UP-D1 inventory and review."
+      "resolution": "Inventory the operational-space capability ellipsoids at the hand-club interfaces (src/shared/python/spatial_algebra/operational_space.py, capability sources in MuJoCo, Drake, Pinocchio, and display builders in force_overlay) with provisional chapter 69-interface-capability-ellipsoids.qmd. The capability framework defines operational-space mobility (W = J\u00b7A\u00b7J\u1d40), effective mass (W\u207b\u00b9), acceleration capacity (J\u00b7A\u00b7S\u00b7T\u00b2\u00b7S\u1d40\u00b7A\u1d40\u00b7J\u1d40 with drift offset c_a = J\u00b7A\u00b7(\u2212h) + J\u0307q\u0307), and force capacity ((J\u00b7S\u00b7T\u207b\u00b2\u00b7S\u1d40\u00b7J\u1d40)\u207b\u00b9). Torque-limit provider protocols and cross-engine qualification parity tests verify grip coordinates, mobility eigenvalues, and capacity semi-axes within 1% and 2 degrees across MuJoCo, Drake, and Pinocchio. OpenSim integration remains held under HX6 #13763. Keep calculations empty and publication blocked until full UP-D1 inventory and review."
     }
   ],
-  "calculations": []
+  "calculations": [
+    {
+      "id": "UP-CALC-ztcf-pointwise-drift",
+      "title": "Pointwise ZTCF Drift Acceleration",
+      "owner": "Refs #15016; SPEC section 4",
+      "evidence_class": "provisional",
+      "manual_chapter": "docs/research/proximal_distal_energy_transfer/CONTROL_AFFINE_TERMINOLOGY_CONTRACT.md",
+      "implementation_paths": [
+        "src/shared/python/simulation_backends/ztcf_zvcf.py",
+        "src/shared/python/motion_matching/counterfactual.py"
+      ],
+      "notation_symbol_ids": [
+        "f",
+        "M",
+        "g"
+      ],
+      "affinedrift_theory_url": "https://affinedrift.com/articles/zero-torque-counterfactual.html"
+    },
+    {
+      "id": "UP-CALC-zvcf-pointwise-control",
+      "title": "Pointwise ZVCF Control Acceleration",
+      "owner": "Refs #15016; SPEC section 4",
+      "evidence_class": "provisional",
+      "manual_chapter": "docs/research/proximal_distal_energy_transfer/CONTROL_AFFINE_TERMINOLOGY_CONTRACT.md",
+      "implementation_paths": [
+        "src/shared/python/simulation_backends/ztcf_zvcf.py",
+        "src/shared/python/engine_core/sub_protocols.py"
+      ],
+      "notation_symbol_ids": [
+        "B",
+        "M",
+        "u"
+      ],
+      "affinedrift_theory_url": "https://affinedrift.com/articles/drift-is-the-past-control-is-the-present.html"
+    },
+    {
+      "id": "UP-CALC-ground-reaction-breakdown",
+      "title": "Ground Reaction Breakdown",
+      "owner": "Refs #15016; GCV-1 #11707",
+      "evidence_class": "provisional",
+      "manual_chapter": "manuals/upstreamdrift/chapters/10-ground-reaction.qmd",
+      "implementation_paths": [
+        "src/shared/python/biomechanics/ground_reaction.py"
+      ],
+      "notation_symbol_ids": [
+        "M",
+        "g",
+        "f"
+      ],
+      "affinedrift_theory_url": "https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch15_ground_reaction_forces.html"
+    },
+    {
+      "id": "UP-CALC-impact-parameters",
+      "title": "Impact Parameters and Ball Launch",
+      "owner": "Refs #15016; GCV chapter 12",
+      "evidence_class": "provisional",
+      "manual_chapter": "manuals/upstreamdrift/chapters/12-impact-parameters.qmd",
+      "implementation_paths": [
+        "src/tools/impact_parameters_panel/gui.py",
+        "src/shared/python/physics/swing_ball_flight_pipeline.py"
+      ],
+      "notation_symbol_ids": [
+        "M",
+        "u",
+        "f"
+      ],
+      "affinedrift_theory_url": "https://affinedrift.com/articles/impact-mechanics-and-ball-flight.html"
+    },
+    {
+      "id": "UP-CALC-rigid-contact-reduction",
+      "title": "Rigid Contact Wrench Reduction",
+      "owner": "Refs #15016; native contact inventory #12244",
+      "evidence_class": "provisional",
+      "manual_chapter": "manuals/upstreamdrift/chapters/58-native-contact-source-closure.qmd",
+      "implementation_paths": [
+        "src/engines/physics_engines/opensim/python/tour_matching/native_contact_policy.py"
+      ],
+      "notation_symbol_ids": [
+        "M",
+        "f",
+        "g"
+      ],
+      "affinedrift_theory_url": "https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch07_constraint_forces.html"
+    },
+    {
+      "id": "UP-CALC-grip-wrench-reduction",
+      "title": "Grip Wrench Reduction",
+      "owner": "Refs #15016; GCV-1 #11724",
+      "evidence_class": "provisional",
+      "manual_chapter": "manuals/upstreamdrift/chapters/11-grip-wrench.qmd",
+      "implementation_paths": [
+        "src/shared/python/biomechanics/grip_wrench.py"
+      ],
+      "notation_symbol_ids": [
+        "B",
+        "u",
+        "M"
+      ],
+      "affinedrift_theory_url": "https://affinedrift.com/articles/null-space-constraint-jacobian.html"
+    }
+  ]
 }

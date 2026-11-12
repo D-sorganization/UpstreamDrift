@@ -28,6 +28,10 @@ from .agent_api import (
     read_private_mode,
 )
 from .models import RunRequest, export_schemas
+from .agent_capability_tools import (
+    agent_capability_tool_handlers,
+    agent_capability_tool_specs,
+)
 from .putting_core_tools import core_tool_handlers, core_tool_specs
 from .putting_tools import putting_tool_handlers, putting_tool_specs
 from .store import RunNotFoundError, SimulationRunStore
@@ -199,6 +203,7 @@ class SimulationMcpServer:
             ),
             *putting_tool_specs(),
             *core_tool_specs(),
+            *agent_capability_tool_specs(),
         ]
 
     def handle_request(self, request: dict[str, Any]) -> dict[str, Any]:
@@ -227,6 +232,9 @@ class SimulationMcpServer:
                     "fetch_artifact": self.tool_fetch_artifact,
                     **putting_tool_handlers(self.security.check_auth),
                     **core_tool_handlers(self.security.check_auth),
+                    **agent_capability_tool_handlers(
+                        self.security.check_auth, self.store
+                    ),
                 }
                 handler = handlers.get(str(params.get("name")))
                 if not handler:

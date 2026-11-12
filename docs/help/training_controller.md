@@ -96,6 +96,10 @@ The PyQt6 surface is `gui.py`, providing `MainWindow`, `MainWidget`, and
 to stderr and returns exit code 1. `_embed_adapter.py` exposes the same
 widget to the launcher.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/passive-distributed-control.html): *Passive and Distributed Control*.
+
 ## Limitations
 
 - Two frameworks only: PyTorch and Gymnasium. The enum docstring names

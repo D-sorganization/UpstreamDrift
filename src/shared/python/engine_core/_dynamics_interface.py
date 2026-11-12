@@ -178,8 +178,14 @@ class DynamicsInterface(Protocol):
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
         """Compute control-attributed acceleration from applied torques/forces only.
 
-        SPEC §4 ZVCF (control component): acceleration due solely to actuator torques,
-        excluding passive dynamics (see :meth:`compute_gravity_only_acceleration`).
+        SPEC §4 **ZVCF (control component)** at the engine's current fixed state:
+        evaluate ``M(q)⁻¹ τ`` with velocity- and gravity-dependent terms zeroed
+        in the engine's declared split. This is the control map ``g(x)u``, not
+        the legacy gravity-only diagnostic (see
+        :meth:`compute_gravity_only_acceleration`).
+
+        Section F Requirement: Control component = acceleration due solely to
+        actuator torques, excluding passive dynamics.
 
         Mathematically: q̈_control = M(q)⁻¹ · τ
 
@@ -211,7 +217,13 @@ class DynamicsInterface(Protocol):
     def compute_control_acceleration_at_state(
         self, q: np.ndarray, tau: np.ndarray
     ) -> np.ndarray:
-        """ZVCF control component at configuration ``q`` (SPEC §4)."""
+        """ZVCF control component at an explicit configuration ``q`` (SPEC §4).
+
+        Same physical quantity as :meth:`compute_control_acceleration` but
+        evaluated after the engine applies the fixed-state intervention at ``q``.
+
+        Default delegates to :func:`counterfactual_defaults.default_control_acceleration_at_state`.
+        """
         from src.shared.python.engine_core.counterfactual_defaults import (
             default_control_acceleration_at_state,
         )
@@ -219,7 +231,11 @@ class DynamicsInterface(Protocol):
         return default_control_acceleration_at_state(self, q, tau)
 
     def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:
-        """Legacy gravity-only diagnostic at fixed ``q`` (not SPEC §4 ZVCF)."""
+        """Legacy gravity-only diagnostic at fixed ``q`` with ``v = u = 0``.
+
+        This is **not** SPEC §4 ZVCF (which is the control component). Engines
+        may override; default uses ``M(q)⁻¹ (-g(q))``.
+        """
         from src.shared.python.engine_core.counterfactual_defaults import (
             default_gravity_only_acceleration,
         )
@@ -285,51 +301,22 @@ class DynamicsInterface(Protocol):
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Deprecated shim (#14943): Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
 
-        Compute instantaneous acceleration at fixed configuration/internal
-        state with velocity and declared applied control set to zero.
+        Historically this name mixed two quantities:
 
-        **Purpose**: Answer "What acceleration would occur if motion FROZE instantaneously?"
+        - SPEC §4 **ZVCF** = control component ``M(q)⁻¹ τ`` →
+          :meth:`compute_control_acceleration` /
+          :meth:`compute_control_acceleration_at_state`
+        - Legacy **gravity-only** diagnostic at ``v = u = 0`` →
+          :meth:`compute_gravity_only_acceleration`
 
-        **Physics**: With v=0, acceleration has no velocity-dependent terms:
-            q̈_ZVCF = M(q)⁻¹ · (-h(q, 0) + J^T·λ)
-
-        **Causal Interpretation**:
-            ZVCF is a distinct intervention, not an additive control or
-            velocity component. Use a same-state affine split for attribution.
-
-        Preconditions:
-            - Engine must be in INITIALIZED state
-            - q.shape == (n_q,)
-            - q must contain finite values
-
-        Postconditions:
-            - a_zvcf.shape == (n_v,)
-            - All values are finite
-            - No declared velocity-dependent or applied-control term in result
-
-        **Example Use Case** (Golf Swing):
-            During downswing, compute ZVCF to separate gravitational pull
-            from centrifugal whip effect. At fast velocities, Coriolis dominates.
+        New code must not call this method. Implementations should delegate to
+        :meth:`compute_gravity_only_acceleration` and emit ``DeprecationWarning``.
 
         Args:
-            q: Joint positions (n_v,) [rad or m]
+            q: Joint positions (n_q,) [rad or m]
 
         Returns:
-            q̈_ZVCF: Acceleration with v=0 and u=0 (n_v,) [rad/s² or m/s²]
-
-        Raises:
-            StateError: If engine is not initialized
-            ValueError: If array dimensions don't match model
-
-        Note:
-            Velocity and applied control are zeroed; configuration (q) is kept.
-            The control-preserved variant q̈(q, 0, τ), used for centrifugal
-            barrier analysis, is a distinct diagnostic
-            (zero_velocity_control_preserved_acceleration) and never a ZVCF.
-
-        See Also:
-            - compute_ztcf: Zero-torque counterfactual
-            - Section G2: ZVCF definition in design guidelines
+            Legacy gravity-only acceleration (n_v,) [rad/s² or m/s²]
         """
         ...
 

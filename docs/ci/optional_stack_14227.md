@@ -48,7 +48,10 @@ mechanical lane fix.
 
 ## Related — Multiple-Shooting Dynamics Premise (#14227 Item 3)
 
-`test_multiple_shooting_satisfies_its_own_dynamics` may still fail because the
-reference swing is no longer "intentionally unresolved" after the gravity
-constant alignment. That threshold has **not** been widened; the owner must
-re-pick the reference case or the test premise.
+After gravity alignment (#13799), the default six-node shooting benchmark no
+longer exceeds the historical adaptive floors from #9830 (Optional Stack
+2026-11-12 measured ~0.023 rad position and ~1.37 rad/s velocity). The live
+test re-picks material floors (0.01 rad, 1.0 rad/s) plus own-grid separation
+factors instead of the pre-#13799 absolute 0.1 rad / 10 rad/s ceilings.
+Further changes need a fresh measurement on current `main`, not blind threshold
+widening.

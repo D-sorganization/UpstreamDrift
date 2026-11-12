@@ -16,6 +16,10 @@ The `src.sim_run.mcp` module provides a thin **stdio Model Context Protocol (MCP
 2. `submit_run`: Validates schema, executes solver in isolated subprocess, validates numerical integrity, and returns record.
 3. `get_run`: Retrieves durable record, status, timestamps, and result envelope by `run_id`.
 4. `fetch_artifact`: Safely reads simulation artifacts with strict path traversal defenses.
+5. `run_counterfactual_ztcf_golden` / `run_golf_simulator_golden_shot` (Refs #15021): pinned golden
+   cases routed through :mod:`src.sim_run.agent_capabilities`, with v1 capability run records,
+   qualification banners, and 64 KiB inline payload limits (larger results spill to artifacts).
+   REST mirrors the same handlers under ``/tools/agent-sim-run/``.
 
 ## Host Configuration
 
