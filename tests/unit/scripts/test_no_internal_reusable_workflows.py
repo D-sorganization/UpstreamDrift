@@ -23,7 +23,7 @@ INTERNAL_PREFIX = "D-sorganization/Repository_Management/.github/workflows/"
 PR_BODY_LINT_REUSABLE = (
     "D-sorganization/Repository_Management/.github/workflows/reusable-pr-body-lint.yml"
 )
-PR_BODY_LINT_PIN = "3b5e9f54febbd730bc2a650dc9193d26922ff49f"
+PR_BODY_LINT_PIN = "d3c5ff3fcb21e15997ca8668b8c9278e2e25dcff"
 FLEET_WORKFLOWS_CONFLICT_DISARM = (
     "D-sorganization/fleet-workflows/.github/workflows/reusable-conflict-disarm.yml"
 )
@@ -71,7 +71,7 @@ def test_pr_body_lint_calls_the_sha_pinned_rm_reusable() -> None:
     assert workflow == PR_BODY_LINT_REUSABLE
     assert ref == PR_BODY_LINT_PIN
     assert re.fullmatch(r"[0-9a-f]{40}", ref)
-    assert set(job["with"]) == {"pr_number", "repo_owner", "repo_name"}
+    assert job["with"]["report_only"] == "true"
     assert "steps" not in job
 
 
