@@ -13,8 +13,32 @@ from src.shared.python.physics.impact_model import (
     PreImpactState,
     RigidBodyImpactModel,
 )
+from src.shared.python.physics.impact_model.utils import (
+    ball_contact_lever_arm,
+    contact_point_velocity,
+    impact_offset_vector_3d,
+    pre_impact_contact_relative_velocity,
+)
 
 pytestmark = pytest.mark.unit
+
+
+def _contact_relative_velocity(
+    pre: PreImpactState,
+    *,
+    club_velocity,
+    club_angular_velocity,
+    ball_velocity,
+    ball_angular_velocity,
+):
+    n = pre.clubhead_orientation / np.linalg.norm(pre.clubhead_orientation)
+    r_club = impact_offset_vector_3d(pre)
+    r_ball = ball_contact_lever_arm(n)
+    v_club = contact_point_velocity(
+        club_velocity, club_angular_velocity, r_club
+    )
+    v_ball = contact_point_velocity(ball_velocity, ball_angular_velocity, r_ball)
+    return v_club - v_ball
 
 
 def _state():
@@ -66,17 +90,21 @@ def test_vector_impulse_preserves_momentum_and_dissipates_energy(friction):
         )
         + 1e-12
     )
-    n = state.clubhead_orientation
-    before_n = np.dot(state.clubhead_velocity - state.ball_velocity, n)
-    after_n = np.dot(post.clubhead_velocity - post.ball_velocity, n)
+    n = state.clubhead_orientation / np.linalg.norm(state.clubhead_orientation)
+    v_rel_before = pre_impact_contact_relative_velocity(state)
+    v_rel_after = _contact_relative_velocity(
+        state,
+        club_velocity=post.clubhead_velocity,
+        club_angular_velocity=post.clubhead_angular_velocity,
+        ball_velocity=post.ball_velocity,
+        ball_angular_velocity=post.ball_angular_velocity,
+    )
+    before_n = float(np.dot(v_rel_before, n))
+    after_n = float(np.dot(v_rel_after, n))
     assert after_n == pytest.approx(-0.8 * before_n, abs=1e-12)
     if friction == 10:
-        slip = (
-            post.clubhead_velocity
-            - post.ball_velocity
-            + RADIUS * np.cross(post.ball_angular_velocity, n)
-        )
-        slip -= np.dot(slip, n) * n
+        v_approach = float(np.dot(v_rel_after, n))
+        slip = v_rel_after - v_approach * n
         np.testing.assert_allclose(slip, np.zeros(3), atol=1e-12)
 
 
@@ -103,9 +131,11 @@ def test_impact_is_covariant_under_rigid_rotation():
 
 def test_existing_no_slip_spin_requires_no_tangential_impulse():
     state = _state()
-    n = state.clubhead_orientation
-    tangent = state.clubhead_velocity - state.ball_velocity
-    tangent -= np.dot(tangent, n) * n
+    n = state.clubhead_orientation / np.linalg.norm(state.clubhead_orientation)
+    state.ball_angular_velocity = np.zeros(3)
+    v_rel = pre_impact_contact_relative_velocity(state)
+    v_approach = float(np.dot(v_rel, n))
+    tangent = v_rel - v_approach * n
     state.ball_angular_velocity = np.cross(tangent, n) / RADIUS + 10 * n
     post = RigidBodyImpactModel().solve(
         state, ImpactParameters(cor=0.8, friction_coefficient=0.4)

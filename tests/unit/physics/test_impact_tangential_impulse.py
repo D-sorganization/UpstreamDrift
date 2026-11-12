@@ -13,6 +13,11 @@ from src.shared.python.physics.impact_model import (
     PreImpactState,
     RigidBodyImpactModel,
 )
+from src.shared.python.physics.impact_model.utils import (
+    ball_contact_lever_arm,
+    contact_point_velocity,
+    impact_offset_vector_3d,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -30,11 +35,19 @@ def _state(*, pre_spin: np.ndarray | None = None) -> PreImpactState:
 
 
 def _slip(
-    club_velocity: np.ndarray, ball_velocity: np.ndarray, spin: np.ndarray
+    pre: PreImpactState,
+    club_velocity: np.ndarray,
+    club_omega: np.ndarray,
+    ball_velocity: np.ndarray,
+    ball_omega: np.ndarray,
 ) -> np.ndarray:
     n = np.array([1.0, 0.0, 0.0])
-    relative = club_velocity - ball_velocity + GOLF_BALL_RADIUS_M * np.cross(spin, n)
-    return relative - np.dot(relative, n) * n
+    r_club = impact_offset_vector_3d(pre)
+    r_ball = ball_contact_lever_arm(n)
+    v_rel = contact_point_velocity(
+        club_velocity, club_omega, r_club
+    ) - contact_point_velocity(ball_velocity, ball_omega, r_ball)
+    return v_rel - np.dot(v_rel, n) * n
 
 
 def test_uncapped_contact_reaches_no_slip_with_finite_club_mass() -> None:
@@ -43,7 +56,13 @@ def test_uncapped_contact_reaches_no_slip_with_finite_club_mass() -> None:
         state, ImpactParameters(cor=0.8, friction_coefficient=10.0)
     )
     np.testing.assert_allclose(
-        _slip(post.clubhead_velocity, post.ball_velocity, post.ball_angular_velocity),
+        _slip(
+            state,
+            post.clubhead_velocity,
+            post.clubhead_angular_velocity,
+            post.ball_velocity,
+            post.ball_angular_velocity,
+        ),
         np.zeros(3),
         atol=1e-11,
     )
@@ -90,7 +109,9 @@ def test_coulomb_cap_and_zero_friction_recovery() -> None:
     assert (
         np.linalg.norm(
             _slip(
+                state,
                 capped.clubhead_velocity,
+                capped.clubhead_angular_velocity,
                 capped.ball_velocity,
                 capped.ball_angular_velocity,
             )
@@ -107,7 +128,13 @@ def test_preexisting_spin_reverses_tangential_friction() -> None:
     )
     assert post.ball_velocity[1] < 0.0
     np.testing.assert_allclose(
-        _slip(post.clubhead_velocity, post.ball_velocity, post.ball_angular_velocity),
+        _slip(
+            state,
+            post.clubhead_velocity,
+            post.clubhead_angular_velocity,
+            post.ball_velocity,
+            post.ball_angular_velocity,
+        ),
         np.zeros(3),
         atol=1e-11,
     )

@@ -103,12 +103,8 @@ class RigidBodyImpactModel(ImpactModel):
         """
         if pre_state is None:
             raise ValueError("pre_state must be provided")
-        v_tangent = v_rel - v_approach * n
-        # The ball contact point is -R*n from its center. Its surface
-        # velocity subtracts R*(omega x n) from center velocity.
-        slip = v_tangent + GOLF_BALL_RADIUS_M * np.cross(
-            pre_state.ball_angular_velocity, n
-        )
+        # v_rel is already the club-minus-ball velocity at the contact point.
+        slip = v_rel - v_approach * n
         slip_mag = float(np.linalg.norm(slip))
         if slip_mag <= 1e-12 or friction_coefficient == 0.0 or j <= 0.0:
             return np.zeros(3)
