@@ -126,6 +126,8 @@ class StageOutcome:
 def _num(value: Any) -> Any:
     if isinstance(value, bool | int | str):
         return value
+    if isinstance(value, Mapping):
+        return {str(k): _num(v) for k, v in sorted(value.items())}
     return round_sig(float(value))
 
 
