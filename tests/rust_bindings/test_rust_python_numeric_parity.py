@@ -177,7 +177,9 @@ class TestContactParity:
         self, mass: float, radius: float
     ) -> None:
         with pytest.raises(ValueError):
-            upstream_physics.ContactParameters(cor=0.8, friction=0.3, mass=mass, radius=radius)
+            upstream_physics.ContactParameters(
+                cor=0.8, friction=0.3, mass=mass, radius=radius
+            )
 
     def test_calculate_impact_rejects_invalid_mass_at_boundary(self) -> None:
         """Post-construction mutation must fail at calculate_impact (WASM parity)."""

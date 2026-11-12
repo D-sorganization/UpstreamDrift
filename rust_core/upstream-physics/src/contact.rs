@@ -663,8 +663,10 @@ mod tests {
 
     #[test]
     fn contact_parameters_validate_matches_calculate_impact() {
-        let mut params = ContactParameters::default();
-        params.mass = -1.0;
+        let params = ContactParameters {
+            mass: -1.0,
+            ..Default::default()
+        };
         assert!(params.validate().is_err());
     }
 
