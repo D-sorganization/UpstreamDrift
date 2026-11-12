@@ -55,6 +55,10 @@ narrower alias exposing only the calculator portion of the same
 underlying Tools widget - but no code in this repository implements that
 narrowing.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/theory-part1.html): *AffineDrift Theory Part I*.
+
 ## Limitations
 
 - It is a stub tile here. UpstreamDrift ships no widget, adapter,

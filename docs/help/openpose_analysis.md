@@ -59,6 +59,10 @@ Background on the integration is in
 ingestion format (2D only, BODY_25 or COCO_18 JSON) is in the
 [format matrix](../motion_pipeline/formats.md).
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/markerless-mocap-camera-selection.html): *Markerless Motion Capture Camera Selection*.
+
 ## Limitations
 
 - **Estimated keypoints are inference, not measurement.** A neural
