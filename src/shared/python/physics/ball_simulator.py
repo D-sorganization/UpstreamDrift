@@ -54,13 +54,13 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         self.environment = env or environment or EnvironmentalConditions()
 
     @precondition(
-        lambda self, launch, max_time=10.0, dt=0.01: (
+        lambda self, launch, max_time=10.0, dt=0.01, **_kw: (
             launch is not None and launch.velocity >= 0
         ),
         "Launch conditions must not be None and velocity must be non-negative",
     )
     @precondition(
-        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        lambda self, launch, max_time=10.0, dt=0.01, **_kw: max_time > 0 and dt > 0,
         "Max time and time step must be positive",
     )
     @postcondition(
@@ -68,7 +68,12 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         "Trajectory must be returned as a non-None list",
     )
     def simulate_trajectory(
-        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+        self,
+        launch: LaunchConditions,
+        max_time: float = 10.0,
+        dt: float = 0.01,
+        *,
+        legacy_forces: bool = False,
     ) -> list[TrajectoryPoint]:
         """Simulate trajectory from m/s, radian angles, and RPM spin.
 
@@ -77,7 +82,11 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         Otherwise, falls back to the Python/Numba implementation.
         """
         return self._post_process_rust(
-            self._simulate_native(launch, max_time, dt), launch
+            self._simulate_native(
+                launch, max_time, dt, record_integrated_forces=not legacy_forces
+            ),
+            launch,
+            legacy_forces=legacy_forces,
         )
 
     def simulate_landing(
@@ -111,7 +120,12 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         return prev + fraction * (end - prev)
 
     def _simulate_native(
-        self, launch: LaunchConditions, max_time: float, dt: float
+        self,
+        launch: LaunchConditions,
+        max_time: float,
+        dt: float,
+        *,
+        record_integrated_forces: bool = True,
     ) -> Any:
         """Shared native call; retain all states inside Rust until requested."""
         if (
@@ -188,6 +202,7 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
             ball_props,
             air_props,
             config,
+            record_integrated_forces=record_integrated_forces,
         )
 
     @staticmethod
@@ -227,19 +242,50 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
             )
 
     def _post_process_rust(
-        self, rust_result: Any, launch: LaunchConditions
+        self,
+        rust_result: Any,
+        launch: LaunchConditions,
+        *,
+        legacy_forces: bool = False,
     ) -> list[TrajectoryPoint]:
-        """Convert a Rust BallTrajectoryResult to a list of TrajectoryPoint objects.
-
-        Forces are calculated once for the whole trajectory via the
-        vectorized ``(3, N)`` batch path (``_calculate_forces`` dispatches on
-        ``vel.ndim``), rather than once per point through the scalar path.
-        """
+        """Convert a Rust BallTrajectoryResult to a list of TrajectoryPoint objects."""
         if launch is None:
             raise ValueError("launch must be provided")
         rust_points = list(rust_result.get_points())
         if not rust_points:
             return []
+
+        step_forces: list[Any] = []
+        if not legacy_forces and hasattr(rust_result, "get_step_forces"):
+            step_forces = list(rust_result.get_step_forces())
+        use_kernel_forces = not legacy_forces and len(step_forces) == len(rust_points)
+        forces_model = (
+            "rust_kernel_integrated"
+            if use_kernel_forces
+            else "python_polynomial_posthoc"
+        )
+
+        trajectory: list[TrajectoryPoint] = []
+        if use_kernel_forces:
+            for i, rust_point in enumerate(rust_points):
+                snapshot = step_forces[i]
+                forces = {
+                    "gravity": np.asarray(snapshot.gravity, dtype=float),
+                    "drag": np.asarray(snapshot.drag, dtype=float),
+                    "magnus": np.asarray(snapshot.magnus, dtype=float),
+                }
+                acc = np.asarray(snapshot.acceleration, dtype=float)
+                trajectory.append(
+                    TrajectoryPoint(
+                        rust_point.t,
+                        np.array([rust_point.x, rust_point.y, rust_point.z]),
+                        np.array([rust_point.vx, rust_point.vy, rust_point.vz]),
+                        acc,
+                        forces,
+                        forces_model=forces_model,
+                    )
+                )
+            return trajectory
 
         times = [p.t for p in rust_points]
         pos = np.array(
@@ -267,6 +313,7 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
                 vel[:, i],
                 acc[:, i],
                 {key: value[:, i] for key, value in forces.items()},
+                forces_model=forces_model,
             )
             for i in range(len(rust_points))
         ]

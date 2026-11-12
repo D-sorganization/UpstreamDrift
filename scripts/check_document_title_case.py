@@ -47,6 +47,8 @@ PROTECTED = re.compile(
     r"`[^`]+`|\$[^$]+\$|<[^>]+>|https?://\S+|@[\w:.-]+|\\[A-Za-z]+|"
     r"\b[A-Z]\([^)]*\)|"
     r"\b[\w.-]+\.(?i:md|qmd|tex|docx|pdf|py|html|css|yml|yaml|bib|exe|app|appimage)\b|"
+    # Version tokens (``v2``, ``v1.7.7``) are identifiers, not words to title-case.
+    r"\bv\d+(?:\.\d+)*\b|"
     # Dotfile names and paths (``.gitattributes``, ``.git/hooks``) are literals.
     r"(?<![\w.])\.\w[\w./*-]*"
 )

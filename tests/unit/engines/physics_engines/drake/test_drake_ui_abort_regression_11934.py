@@ -159,7 +159,9 @@ def test_setup_ui_sets_drake_ui_initialized(
     assert ui._drake_ui_initialized is True
 
 
-def test_visualization_mixin_guards_uninitialized() -> None:
+def test_visualization_mixin_guards_uninitialized(
+    qapp,
+) -> None:  # noqa: ANN001
     """_on_visualization_changed and _update_visualization must no-op when uninitialized."""
     ui = DummyDrakeUI()
     ui._drake_ui_initialized = False
@@ -170,7 +172,9 @@ def test_visualization_mixin_guards_uninitialized() -> None:
     ui._update_visualization.assert_not_called()
 
 
-def test_update_force_glyphs_safe_without_checkboxes() -> None:
+def test_update_force_glyphs_safe_without_checkboxes(
+    qapp,
+) -> None:  # noqa: ANN001
     """_update_force_glyphs must safely proceed if checkboxes are missing."""
     ui = DummyDrakeUI()
     ui._force_overlay = MagicMock()

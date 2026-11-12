@@ -6,7 +6,8 @@
   },
   "load_balance_contract": {
     "method_keyword": "mid-foot",
-    "barbell_load_kg_min": 99.0
+    "barbell_load_kg_min": 99.0,
+    "max_com_midfoot_offset_m": 0.0005
   },
-  "notes": "Extend `assert_ik_records_load_balance` to deadlift and clean bundles once regenerated with bar-in-IK balance (#13093)."
+  "notes": "Verify load-balance IK on both barbell and source back squat bundles; extend `assert_ik_records_load_balance` to deadlift and clean bundles once regenerated with bar-in-IK balance (#13093)."
 }

@@ -264,3 +264,81 @@ def test_main_respects_configured_exception_limit(
         ["x", "--config-path", "scripts/config/budget.json"],
     )
     assert mod.main() == 0
+
+
+@pytest.mark.unit
+def test_file_size_deterministic_expiry_and_pre_expiry_report() -> None:
+    """Evaluation uses reference_date to determine active vs expired and pre-expiry window."""
+    cfg = {
+        "exceptions": [
+            {
+                "path": "src/a.py",
+                "owner": "@t",
+                "reason": "issue #1 decomp",
+                "expires_on": "2026-11-20",
+            },
+            {
+                "path": "src/b.py",
+                "owner": "@t",
+                "reason": "issue #2 decomp",
+                "expires_on": "2026-12-30",
+            },
+        ]
+    }
+    active, invalid = mod._collect_active_exceptions(
+        cfg, reference_date=date(2026, 11, 15)
+    )
+    assert set(active.keys()) == {"src/a.py", "src/b.py"} and invalid == []
+
+    active, invalid = mod._collect_active_exceptions(
+        cfg, reference_date=date(2026, 11, 25)
+    )
+    assert set(active.keys()) == {"src/b.py"} and any("Expired" in m for m in invalid)
+
+    expiring = mod.collect_expiring_exceptions(
+        cfg, reference_date=date(2026, 11, 10), within_days=15
+    )
+    assert (
+        len(expiring) == 1
+        and expiring[0].path == "src/a.py"
+        and expiring[0].days_remaining == 10
+    )
+
+
+@pytest.mark.unit
+def test_main_with_as_of_and_expiring_file_size(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """CLI --as-of and --expiring-within-days run cleanly and report expiring."""
+    import logging
+
+    cfg = tmp_path / "budget.json"
+    cfg.write_text(
+        json.dumps(
+            {
+                "max_lines": 100,
+                "exceptions": [
+                    {
+                        "path": "src/m.py",
+                        "owner": "@t",
+                        "reason": "issue #1 decomp",
+                        "expires_on": "2026-11-20",
+                    }
+                ],
+            }
+        )
+    )
+    monkeypatch.setattr(mod, "_repo_root", lambda: tmp_path)
+    monkeypatch.setattr(mod, "_tracked_python_files", lambda r: [])
+    with caplog.at_level(logging.INFO):
+        res = mod.main(
+            [
+                "--config-path",
+                "budget.json",
+                "--as-of",
+                "2026-11-10",
+                "--expiring-within-days",
+                "21",
+            ]
+        )
+    assert res == 0 and "EXPIRING SOON" in caplog.text

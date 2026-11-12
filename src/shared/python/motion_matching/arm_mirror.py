@@ -109,3 +109,40 @@ def native_limits(
         low, high = table[name]
         out[name] = (-high, -low)
     return out
+
+
+def document_arm_mirrored(document: dict[str, Any]) -> bool:
+    """True for a document with both arms whose right arm is mirrored.
+
+    Stub and non-arm documents (no ``joints``) are unmirrored by definition.
+    """
+    names = [j.get("name", "") for j in document.get("joints") or ()]
+    has_arms = any("Right Shoulder" in n for n in names) and any(
+        "Left Shoulder" in n for n in names
+    )
+    return has_arms and arm_is_mirrored(document)
+
+
+def restart_jitter(
+    rng: np.random.Generator,
+    spread_rad: float,
+    mirrored: bool,
+    coordinate_order: Any,
+) -> Any:
+    """Multi-start jitter for the joint coordinates (everything after the root).
+
+    Draws ``uniform(-spread, spread)`` per joint coordinate and, when the model
+    is mirrored, reflects the flipped right-arm entries. The mirror is a
+    re-parameterisation (``q' = S q``), so the same RNG stream then yields
+    mirrored starts and the native and mirrored optimizers explore the same
+    poses (#14753). Precondition: ``spread_rad >= 0`` and the first six
+    coordinates are the floating root. Postcondition: shape
+    ``(len(coordinate_order) - 6,)``, magnitude at most ``spread_rad``.
+    """
+    require(spread_rad >= 0.0, "restart spread must be nonnegative")
+    names = tuple(coordinate_order)[6:]
+    noise = rng.uniform(-spread_rad, spread_rad, len(names))
+    if not mirrored:
+        return noise
+    sign = np.array([-1.0 if n in FLIPPED_COORDINATES else 1.0 for n in names])
+    return sign * noise

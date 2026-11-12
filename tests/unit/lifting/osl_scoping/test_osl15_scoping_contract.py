@@ -21,6 +21,9 @@ _FIXTURE = _ROOT / "tests/fixtures/lifting/osl_scoping/osl15_scoping_v1.json"
 _BACK_SQUAT = (
     _ROOT / "docs/development/lifting/evidence/back_squat/back_squat_barbell_bundle.npz"
 )
+_BACK_SQUAT_SOURCE = (
+    _ROOT / "docs/development/lifting/evidence/back_squat/back_squat_bundle.npz"
+)
 
 
 def test_osl15_fixture_schema() -> None:
@@ -31,6 +34,11 @@ def test_osl15_fixture_schema() -> None:
 def test_back_squat_barbell_bundle_records_load_balance() -> None:
     fixture = json.loads(_FIXTURE.read_bytes())
     assert_ik_records_load_balance(_BACK_SQUAT, fixture=fixture)
+
+
+def test_back_squat_source_bundle_records_load_balance() -> None:
+    fixture = json.loads(_FIXTURE.read_bytes())
+    assert_ik_records_load_balance(_BACK_SQUAT_SOURCE, fixture=fixture)
 
 
 def test_asset_gated_followups_block_lists_regeneration() -> None:

@@ -4287,8 +4287,8 @@
   },
   "local_artifacts": {
     ".github/workflows/ci-optional-stack.yml": {
-      "sha256": "19efe0f1a1a4b0a8667bc9132dc2ab0a81845ee035b7372c97e1f191081ed1e2",
-      "bytes": 34644,
+      "sha256": "e5137e804bf0f22ec1cd8739e570056cef436494fbb16b015e1241987c641d11",
+      "bytes": 34796,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",
@@ -4668,7 +4668,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json": {
-      "sha256": "2575313718dffe18292eafb89c2fc3b51290ed197b74ffdc8b6172f2efa8d383",
+      "sha256": "12f5241cadff2c0adb9c93149d65d98ca58b55a3cabc9d7bd6ddbd31d3a96cbe",
       "bytes": 7331,
       "referenced_by": [
         "PD-CLAIM-297",
@@ -6438,7 +6438,7 @@
       ]
     },
     "docs/research/proximal_distal_energy_transfer/release_manifest.json": {
-      "sha256": "8286cb5f6948f6a58791e3da15f0513607291323021bf5f73140d62c483bac80",
+      "sha256": "07c880d4dd540451b8bfc07e05dbdc12cce8b8ce1aba92fdbfd90eabe235b544",
       "bytes": 168990,
       "referenced_by": [
         "PD-CLAIM-241"
@@ -8024,8 +8024,8 @@
       ]
     },
     "scripts/research/proximal_distal_energy/spatial_full_body.py": {
-      "sha256": "b386ec2119ebc10f18a404ceba8b304827e418b9c2973641e644b2953d5f17d2",
-      "bytes": 33838,
+      "sha256": "e815bdd6cd46aa8f46a08c336a3b91bde78c7cf7b302bae278deddb601b867b2",
+      "bytes": 34638,
       "referenced_by": [
         "PD-CLAIM-004",
         "PD-CLAIM-175",
@@ -8523,8 +8523,8 @@
       ]
     },
     "tests/research/test_articulated_manufactured_hybrid_authority_red.py": {
-      "sha256": "8ff08d1921401a21f06ead188c262b1721b6531d8f8b234daaf07adca9727818",
-      "bytes": 8923,
+      "sha256": "441062feea5074495e313695d9d240b41c5d0509aaaf4448802272a2d61b10b1",
+      "bytes": 9392,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",

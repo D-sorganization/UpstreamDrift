@@ -5,7 +5,9 @@
     "slug": "OSL-19"
   },
   "reach": {
-    "max_grip_closure_pass_m": 0.001
+    "max_grip_closure_pass_m": 0.001,
+    "target_grip_width_m": 0.75,
+    "reach_bound_m": 0.001
   },
-  "notes": "OpenSim hand-to-grip receipt is expected under provenance.opensim_bar_reach_receipt_v1 after the bar-reach solve lands."
+  "notes": "Verify MuJoCo IK grip closure and rack geometry on back squat barbell and source bundles; OpenSim hand-to-grip receipt is expected under provenance.opensim_bar_reach_receipt_v1 after the bar-reach solve lands (#13158)."
 }

@@ -11,5 +11,12 @@
   "lead_in_contract": {
     "min_duration_s": 0.25
   },
-  "notes": "Lead-in is 0.1 s today; raising the minimum to 0.25 s is a red anchor for a longer settle (issue #13131)."
+  "receipt_contract": {
+    "max_marker_rms_m": 0.02,
+    "max_marker_peak_m": 0.04,
+    "require_forces_within": true,
+    "require_moments_within": true,
+    "allow_excluded_states": false
+  },
+  "notes": "Lead-in is 0.1 s today; raising the minimum to 0.25 s is a red anchor for a longer settle (issue #13131). OpenSim receipt affirms marker RMS < 2 cm, max < 4 cm, and whole-window Hicks residual gates with no excluded states."
 }

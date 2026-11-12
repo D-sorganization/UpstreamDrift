@@ -254,23 +254,25 @@ def test_neutral_v_azimuth_and_derived_range_bound() -> None:
         GripPose(lead_v_azimuth_deg=-40.1)
 
 
-def test_trail_v_offset_bound_admits_the_trail_hand_choice_only() -> None:
-    """#14751 (Dieter, b15): the trail V offset bound admits 64.1 deg and no more.
-
-    The explicit trail alpha of 15 deg leaves the trail V 64.1 deg from the lead V.
-    The lead V azimuth bound is unchanged.
-    """
+def test_trail_v_offset_range_bound() -> None:
+    """TRAIL_V_OFFSET_RANGE_DEG defines evidence-grounded limits (-75, 75)."""
     from src.shared.python.model_appearance import grip_pose
+    from src.shared.python.motion_matching import grip_contract
 
-    bound = grip_pose.TRAIL_V_OFFSET_BOUND_DEG
-    assert 64.1 < bound <= 65.0
-    for offset in (-bound, bound, -64.1, 0.0):
-        assert GripPose(trail_v_offset_deg=offset).trail_v_offset_deg == offset
-    for offset in (-bound - 0.1, bound + 0.1, 90.0):
-        with pytest.raises(ValueError, match="trail_v_offset_deg"):
-            GripPose(trail_v_offset_deg=offset)
-    assert grip_pose.LEAD_V_AZIMUTH_MIN_DEG == -40.0
-    assert grip_pose.LEAD_V_AZIMUTH_MAX_DEG == 90.0
+    assert hasattr(grip_pose, "TRAIL_V_OFFSET_RANGE_DEG")
+    assert grip_pose.TRAIL_V_OFFSET_RANGE_DEG == (-75.0, 75.0)
+    assert grip_contract.TRAIL_V_OFFSET_RANGE_DEG == grip_pose.TRAIL_V_OFFSET_RANGE_DEG
+
+    # Test boundary enforcement on trail_v_offset_deg
+    valid_lower = GripPose(trail_v_offset_deg=-75.0)
+    assert valid_lower.trail_v_offset_deg == -75.0
+    valid_upper = GripPose(trail_v_offset_deg=75.0)
+    assert valid_upper.trail_v_offset_deg == 75.0
+
+    with pytest.raises(ValueError, match="trail_v_offset_deg"):
+        GripPose(trail_v_offset_deg=-75.1)
+    with pytest.raises(ValueError, match="trail_v_offset_deg"):
+        GripPose(trail_v_offset_deg=75.1)
 
 
 def test_topology_of_pose_helper() -> None:

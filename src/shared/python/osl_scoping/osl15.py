@@ -47,6 +47,11 @@ FIXTURE_SCHEMA: dict[str, Any] = {
                     "exclusiveMinimum": 0,
                     "description": "Minimum IWF bar + plates load in IK (:class:`Barbell.load_kg`)",
                 },
+                "max_com_midfoot_offset_m": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "description": "Maximum tolerated deviation of body-plus-bar CoM from mid-foot",
+                },
             },
         },
     },
@@ -107,6 +112,12 @@ def assert_ik_records_load_balance(
     load_kg = float(barbell["load_kg"])
     assert load_kg >= float(contract["barbell_load_kg_min"]), (load_kg, contract)
     assert "max_offset_m" in bal and float(bal["max_offset_m"]) >= 0.0
+    if "max_com_midfoot_offset_m" in contract:
+        max_tol = float(contract["max_com_midfoot_offset_m"])
+        assert float(bal["max_offset_m"]) <= max_tol, (
+            bal["max_offset_m"],
+            max_tol,
+        )
     assert "correction_rad" in bal and isinstance(bal["correction_rad"], list)
 
 

@@ -5,10 +5,6 @@
   },
   "parity": {
     "record_relative_path": "docs/development/lifting/evidence/back_squat/bar_path_parity.json",
-    "required_engines": [
-      "mujoco",
-      "drake",
-      "pinocchio"
-    ]
+    "required_engines": ["mujoco", "drake", "pinocchio", "opensim"]
   }
 }

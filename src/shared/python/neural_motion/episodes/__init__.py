@@ -15,6 +15,18 @@ from .normalize import TrainOnlyNormalizer
 from .record import EPISODE_STORE_SCHEMA, EpisodeRecord
 from .splits import FamilySplitPlan, build_family_splits, detect_source_aliases
 from .store import EpisodeManifest, EpisodeStore
+from .mujoco_corpus import (
+    CANONICAL_DRIVER_SPEC,
+    HAND_FIX_COMMIT_SHA,
+    MUJOCO_CORPUS_MANIFEST_SCHEMA,
+    MuJoCoCorpusManifest,
+    MuJoCoEpisodeCorpusGenerator,
+    assert_spec_post_hand_fix,
+    build_corpus_manifest,
+    contract_rollout_arrays,
+    load_canonical_driver_spec,
+    raw_spec_sha256,
+)
 from .views import (
     FeasibilityView,
     InstantaneousDynamicsView,
@@ -36,6 +48,16 @@ __all__ = [
     "SequenceMatchingView",
     "TrainOnlyNormalizer",
     "WindowCache",
+    "assert_spec_post_hand_fix",
+    "build_corpus_manifest",
     "build_family_splits",
+    "CANONICAL_DRIVER_SPEC",
+    "contract_rollout_arrays",
     "detect_source_aliases",
+    "HAND_FIX_COMMIT_SHA",
+    "load_canonical_driver_spec",
+    "MUJOCO_CORPUS_MANIFEST_SCHEMA",
+    "MuJoCoCorpusManifest",
+    "MuJoCoEpisodeCorpusGenerator",
+    "raw_spec_sha256",
 ]

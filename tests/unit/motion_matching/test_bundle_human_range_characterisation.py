@@ -60,7 +60,7 @@ def characterise(q: np.ndarray, names: list[str]) -> list[RangeRow]:
 
 
 def test_characterise_flags_only_excess() -> None:
-    q = np.radians([[-50.0, 0.0], [30.0, 10.0]])
+    q = np.radians([[-70.0, 0.0], [30.0, 10.0]])  # -70 deg exceeds [-60, 45] by 10 deg
     rows = characterise(q, ["LWInputX", "LFInput"])
     by_name = {r.coordinate: r for r in rows}
     assert by_name["LWInputX"].excess_deg == pytest.approx(10.0)

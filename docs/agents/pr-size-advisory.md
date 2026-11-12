@@ -1,4 +1,8 @@
-# PR Size Advisory (#14741)
+# PR Size Advisory (#14741, #14820)
+
+**Owner order 2026-11-06 (Dieter):** PR changed-line count is **advisory in CI**, not a
+merge blocker. Over-cap diffs warn and may get ``size:large``; they must not fail the
+`pr-size` job unless a maintainer opts into ``--strict`` locally (RD #4118 parity).
 
 This repository measures **changed lines** (added + deleted from `git diff --numstat`
 on the merge-base triple-dot diff) for each pull request. That number is a **coding

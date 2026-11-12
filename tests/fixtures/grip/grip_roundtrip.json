@@ -24,8 +24,8 @@
         },
         "sidecar_grip": {},
         "refit_required": true,
-        "driver_physics_spec_sha256": "45b590721abd19247768892bbcfc6c840907baf3bf9063adbdf094cddba690be",
-        "character_physics_spec_sha256": "b0d579d165a67d89227fda83a2359b4a9153289b810d7f6d8c99141c6f486153"
+        "driver_physics_spec_sha256": "2a1316e59fe23af5a0e8ef876d494351d8132ab6611b62b4b384af6adf819b60",
+        "character_physics_spec_sha256": "2abb82f5f2ed6554d21175774fb091c46faec36de24dc6bd6d3d3711a64423df"
       }
     },
     {
@@ -52,10 +52,8 @@
         },
         "sidecar_grip": {},
         "refit_required": true,
-        "driver_physics_spec_sha256": "c5ae6e40fce8f1d790219c18bea23aa436e002aec659d191a8b6781d63e052fd",
-        "character_physics_spec_sha256": "c004f0deb32386b29e695ea14d2a693625715ad66db19cc0f1d7b92e5e072c21",
-        "driver_physics_spec_sha256_win": "efa18426a8c61c5e691590e6e401ebddb9e9d07ddc309fc36c7d0f0315987b1a",
-        "character_physics_spec_sha256_win": "a28e1986671ee1b532e8ab23eeca1aa9b0cdb2da98f69e3a7b7c7ba139e5beb4"
+        "driver_physics_spec_sha256": "c332320dedc50655082ad08628f90eddebd2e96d3b59be8582485dec03a70340",
+        "character_physics_spec_sha256": "f9bc53e3014248ad4134e748906ebe2203bc40e5515a9908decf74df5d9b11b6"
       }
     },
     {
@@ -83,8 +81,8 @@
         },
         "sidecar_grip": {},
         "refit_required": true,
-        "driver_physics_spec_sha256": "a3131b3713d704cc6c63afb3f7298fee8f152a8b47f518c94f9f2ccb636dc277",
-        "character_physics_spec_sha256": "46a976f3e2840099dedc708510500eb6436387a3192e6068a12fd82ff215e649"
+        "driver_physics_spec_sha256": "4b3d34aad93b51ce1f72ed87efd63f2d0acd3029a374052ecd724b82b04c8a36",
+        "character_physics_spec_sha256": "f375f387935df21eaa35dc1ce429aa15e83707a557215750b2a627442506808b"
       }
     },
     {
@@ -115,10 +113,8 @@
         },
         "sidecar_grip": {},
         "refit_required": true,
-        "driver_physics_spec_sha256": "4c261db7480b7679808ef42f93b6bc75c6bd370dc6f8571544b73ed24db7eb66",
-        "character_physics_spec_sha256": "6d387f095ea8271eacf23e4e7e5c6c77156309cf89108c68dcfdba98490560a8",
-        "driver_physics_spec_sha256_win": "c3d2e632a42e21aff855247938f862e3f20bf16a2ccb98f4c8442abfc659e66d",
-        "character_physics_spec_sha256_win": "7411c8d9c61173396cb82b12528d987400f0c6b30050edc3ac2653ba78537ff5"
+        "driver_physics_spec_sha256": "29105fdf1007eedef323f4cb9e84972f56b33a71aea9dc47115f6a04c5309e06",
+        "character_physics_spec_sha256": "a4a0ab04602b0de17380622410c62e7ee295fa75f30fdc0f02a958ae971a7ff6"
       }
     },
     {
@@ -148,8 +144,8 @@
           "lead_thumb_offset_deg": 20.0
         },
         "refit_required": true,
-        "driver_physics_spec_sha256": "447b912a632d00db2072cfd266224dca2029eaaba3fa929fe547da6c9c75c534",
-        "character_physics_spec_sha256": "6331c3f731d4c4d0757e4a5a3b63c7b79753d9525f1a2c9c299b76f5a56ac2cc"
+        "driver_physics_spec_sha256": "825402953408239539a6ee90cfb353c10d6082a41a29cbe5d60eb032797ed51e",
+        "character_physics_spec_sha256": "f1391ee64171a02cc03114814cb0c6c7cb1c1b58e946aa47d40cbf12bc176868"
       }
     },
     {
@@ -177,13 +173,13 @@
         },
         "sidecar_grip": {},
         "refit_required": true,
-        "driver_physics_spec_sha256": "60b2a0b527ddf730fa6bcd6b77c32d8fb832d98230d2d503eaf0a98bd9f6174f",
-        "character_physics_spec_sha256": "925168c34ac5c997b5db677981f1026947b066c5917f1f0aabeb1ad34a8e3c4c"
+        "driver_physics_spec_sha256": "a69aeb3a5c5f0d8dcf310298b14a306e8a9c315f8da934b15e6c4d853f64fbb4",
+        "character_physics_spec_sha256": "710989998a0dc0fb26a52a1922606ba97985d64739f3ab40d5a0c22c84f1ae8c"
       }
     }
   ],
   "parent": {
-    "driver_physics_spec_sha256": "790d1fb9706f625b9f54af97f12df0a97cdda460eeafe5a7c7850c367ba9e237",
-    "character_physics_spec_sha256": "c953d00409c2890f887b3031cfd239b123da39d9b23f9be247eb319e7113cd1a"
+    "driver_physics_spec_sha256": "cbb3dede296b6354e5f094364b9fc3b5f7b12f89aae200cc58eb31c32b6db7c0",
+    "character_physics_spec_sha256": "5a2c68fd8fee5c0e41d6f8bfc0883809db7a305e894a00ea7055e9a667d2b05d"
   }
 }

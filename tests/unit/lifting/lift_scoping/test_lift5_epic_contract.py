@@ -35,7 +35,12 @@ def test_all_five_committed_bundles_exist() -> None:
     assert_committed_lift_bundles_exist()
 
 
-def test_back_squat_bar_path_parity_covers_mujoco_drake_pinocchio() -> None:
+def test_back_squat_bar_path_parity_covers_all_four_engines() -> None:
     record = load_back_squat_bar_path_parity_record()
     fixture = json.loads(_FIXTURE.read_bytes())
     assert_back_squat_parity_record(record, fixture=fixture)
+
+
+def test_back_squat_bar_path_parity_default_engines_include_opensim() -> None:
+    record = load_back_squat_bar_path_parity_record()
+    assert_back_squat_parity_record(record)
