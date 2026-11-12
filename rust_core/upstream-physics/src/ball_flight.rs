@@ -214,9 +214,10 @@ fn interpolate_ground_contact(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn refine_landing_point(
-    points: &mut Vec<TrajectoryPoint>,
-    step_forces: &mut Vec<IntegratedStepForces>,
+    points: &mut [TrajectoryPoint],
+    step_forces: &mut [IntegratedStepForces],
     times: &[f64],
     states: &[f64],
     state_dim: usize,
