@@ -56,7 +56,9 @@ def test_full_state_matrix_includes_kinematic_coupling() -> None:
     full = full_state_matrix(_named(ops))
     assert full.shape == (k + nv, 2 * k)
     np.testing.assert_allclose(full[:k], tangent_kinematics_coupling(k))
-    np.testing.assert_allclose(full[k:], np.hstack((ops["d_acc_d_xi"], ops["d_acc_d_eta"])))
+    np.testing.assert_allclose(
+        full[k:], np.hstack((ops["d_acc_d_xi"], ops["d_acc_d_eta"]))
+    )
 
 
 def test_tangent_chain_operators_refuse_mismatched_blocks() -> None:
