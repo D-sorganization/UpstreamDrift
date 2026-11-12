@@ -293,6 +293,7 @@ class TestParseBodyInertial:
         assert inertia.ixx == pytest.approx(0.1)
 
 
+@pytest.mark.unit
 class TestMjcfCompilerAngleEuler:
     """``euler`` attributes respect MuJoCo ``<compiler angle>`` (default degree)."""
 
