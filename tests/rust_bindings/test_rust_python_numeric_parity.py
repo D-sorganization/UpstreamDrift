@@ -161,3 +161,27 @@ class TestContactParity:
         """ContactParameters must enforce COR in [0, 1]."""
         with pytest.raises(ValueError):
             upstream_physics.ContactParameters(cor=1.5, friction=0.0)
+
+    @pytest.mark.parametrize(
+        "mass,radius",
+        [
+            (0.0, 0.02135),
+            (-0.01, 0.02135),
+            (float("nan"), 0.02135),
+            (0.04593, 0.0),
+            (0.04593, -0.01),
+            (0.04593, float("inf")),
+        ],
+    )
+    def test_contact_parameters_reject_invalid_ball_geometry(
+        self, mass: float, radius: float
+    ) -> None:
+        with pytest.raises(ValueError):
+            upstream_physics.ContactParameters(cor=0.8, friction=0.3, mass=mass, radius=radius)
+
+    def test_calculate_impact_rejects_invalid_mass_at_boundary(self) -> None:
+        """Post-construction mutation must fail at calculate_impact (WASM parity)."""
+        params = upstream_physics.ContactParameters()
+        params.mass = 0.0
+        with pytest.raises(ValueError, match="mass must be positive"):
+            upstream_physics.calculate_impact_py(0.0, 0.0, -10.0, 0.0, params)

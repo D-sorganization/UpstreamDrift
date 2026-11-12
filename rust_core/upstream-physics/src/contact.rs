@@ -68,39 +68,57 @@ impl Default for ContactParameters {
     }
 }
 
+impl ContactParameters {
+    /// Validate contact parameters at the public API boundary (release-safe).
+    pub fn validate(&self) -> Result<(), String> {
+        if !(0.0..=1.0).contains(&self.cor) {
+            return Err(format!("COR must be in [0, 1], got {}", self.cor));
+        }
+        if self.friction < 0.0 || !self.friction.is_finite() {
+            return Err(format!(
+                "Friction must be non-negative and finite, got {}",
+                self.friction
+            ));
+        }
+        if !self.mass.is_finite() || self.mass <= 0.0 {
+            return Err(format!(
+                "mass must be positive and finite, got {}",
+                self.mass
+            ));
+        }
+        if !self.radius.is_finite() || self.radius <= 0.0 {
+            return Err(format!(
+                "radius must be positive and finite, got {}",
+                self.radius
+            ));
+        }
+        Ok(())
+    }
+}
+
 #[cfg(feature = "python")]
 #[pyo3::prelude::pymethods]
 impl ContactParameters {
     #[new]
     #[pyo3(signature = (cor=0.78, friction=0.4, mass=DEFAULT_BALL_MASS_KG, radius=DEFAULT_BALL_RADIUS_M))]
     fn py_new(cor: f64, friction: f64, mass: f64, radius: f64) -> pyo3::PyResult<Self> {
-        if !(0.0..=1.0).contains(&cor) {
-            return Err(pyo3::exceptions::PyValueError::new_err(format!(
-                "COR must be in [0, 1], got {cor}"
-            )));
-        }
-        if friction < 0.0 {
-            return Err(pyo3::exceptions::PyValueError::new_err(format!(
-                "Friction must be non-negative, got {friction}"
-            )));
-        }
-        if !mass.is_finite() || mass <= 0.0 {
-            return Err(pyo3::exceptions::PyValueError::new_err(format!(
-                "mass must be positive and finite, got {mass}"
-            )));
-        }
-        if !radius.is_finite() || radius <= 0.0 {
-            return Err(pyo3::exceptions::PyValueError::new_err(format!(
-                "radius must be positive and finite, got {radius}"
-            )));
-        }
-        Ok(Self {
+        let params = Self {
             cor,
             friction,
             normal: Vector3::new(0.0, 0.0, 1.0),
             mass,
             radius,
-        })
+        };
+        params
+            .validate()
+            .map_err(pyo3::exceptions::PyValueError::new_err)?;
+        Ok(params)
+    }
+
+    /// Validate fields (including after WASM/serde construction or attribute mutation).
+    fn validate_py(&self) -> pyo3::PyResult<()> {
+        self.validate()
+            .map_err(pyo3::exceptions::PyValueError::new_err)
     }
 }
 
@@ -211,6 +229,9 @@ fn apply_friction_impulse(ctx: &FrictionImpactContext<'_>, friction_impulse: f64
     }
 }
 
+/// Bisection safeguard: Coulomb capping plus valid COR are usually enough, but
+/// floating-point coupling can briefly push mechanical energy above `energy_in`.
+/// Scale the friction impulse down when that happens (cannot fix super-elastic COR).
 fn dissipative_friction_impulse(
     candidate: f64,
     ctx: &FrictionImpactContext<'_>,
@@ -250,43 +271,35 @@ fn dissipative_friction_impulse(
 /// * `params` - Surface contact parameters (includes ball mass and radius)
 ///
 /// # Contracts (DbC)
-/// - Precondition: `params.cor` in [0, 1]
-/// - Precondition: `params.friction` >= 0
+/// - Precondition: `params.validate()` succeeds (COR, friction, mass, radius)
 /// - Postcondition: no impulse when `velocity · normal >= 0` (receding contact)
 /// - Postcondition: `energy_lost` >= 0
 pub fn calculate_impact(
     velocity: &Vector3,
     spin_rate: f64,
     params: &ContactParameters,
-) -> ContactResult {
+) -> Result<ContactResult, String> {
+    params.validate()?;
     let speed = velocity.magnitude();
 
-    debug_assert!(
-        params.cor >= 0.0 && params.cor <= 1.0,
-        "COR must be in [0, 1]"
-    );
-    debug_assert!(params.friction >= 0.0, "Friction must be non-negative");
-    debug_assert!(params.mass > 0.0, "mass must be positive");
-    debug_assert!(params.radius > 0.0, "radius must be positive");
-
     if speed < ROLLING_SPEED_THRESHOLD {
-        return ContactResult {
+        return Ok(ContactResult {
             velocity: *velocity,
             spin_rate: 0.0,
             energy_lost: 0.0,
             is_rolling: true,
-        };
+        });
     }
 
     let normal_mag = params.normal.magnitude();
     if normal_mag < MIN_NORMAL_MAGNITUDE {
-        return unchanged_impact(velocity, spin_rate);
+        return Ok(unchanged_impact(velocity, spin_rate));
     }
     let n = params.normal.scale(1.0 / normal_mag);
 
     let v_dot_n = velocity.dot(&n);
     if v_dot_n >= 0.0 {
-        return unchanged_impact(velocity, spin_rate);
+        return Ok(unchanged_impact(velocity, spin_rate));
     }
 
     let inertia = sphere_moment_of_inertia(params.mass, params.radius);
@@ -337,12 +350,12 @@ pub fn calculate_impact(
     );
 
     let speed_out = v_out.magnitude();
-    ContactResult {
+    Ok(ContactResult {
         velocity: v_out,
         spin_rate: spin_out,
         energy_lost,
         is_rolling: speed_out < ROLLING_SPEED_THRESHOLD,
-    }
+    })
 }
 
 // ── WASM bindings ────────────────────────────────────────────────────────────
@@ -363,7 +376,8 @@ pub fn wasm_calculate_impact(
     let params: ContactParameters = serde_wasm_bindgen::from_value(params_js)
         .map_err(|e| wasm_bindgen::JsValue::from_str(&format!("Invalid params: {e}")))?;
 
-    let result = calculate_impact(&velocity, spin_rate, &params);
+    let result = calculate_impact(&velocity, spin_rate, &params)
+        .map_err(|e| wasm_bindgen::JsValue::from_str(&e))?;
     serde_wasm_bindgen::to_value(&result)
         .map_err(|e| wasm_bindgen::JsValue::from_str(&format!("Serialization error: {e}")))
 }
@@ -431,7 +445,7 @@ mod tests {
         let params = ContactParameters::default();
         let v_in = Vector3::new(1.0, 0.0, -10.0);
 
-        let result = calculate_impact(&v_in, 0.0, &params);
+        let result = calculate_impact(&v_in, 0.0, &params).expect("valid params");
 
         assert!(
             result.velocity.z > 0.0,
@@ -445,7 +459,7 @@ mod tests {
         let params = params_with_normal(0.78, 0.4, Vector3::new(0.0, 1.0, 0.0));
         let v_in = Vector3::new(2.0, 10.0, 0.0);
 
-        let result = calculate_impact(&v_in, 5000.0, &params);
+        let result = calculate_impact(&v_in, 5000.0, &params).expect("valid params");
 
         assert_eq!(result.velocity.x, v_in.x);
         assert_eq!(result.velocity.y, v_in.y);
@@ -459,7 +473,7 @@ mod tests {
         let params = params_with_normal(1.0, 0.0, Vector3::new(0.0, 1.0, 0.0));
 
         let v_in = Vector3::new(0.0, -10.0, 0.0);
-        let result = calculate_impact(&v_in, 0.0, &params);
+        let result = calculate_impact(&v_in, 0.0, &params).expect("valid params");
 
         assert!(
             (result.velocity.y - 10.0).abs() < 1e-6,
@@ -478,7 +492,7 @@ mod tests {
 
         let v_in = Vector3::new(5.0, -10.0, 0.0);
         let spin_in = 100.0;
-        let result = calculate_impact(&v_in, spin_in, &params);
+        let result = calculate_impact(&v_in, spin_in, &params).expect("valid params");
 
         assert!(
             result.velocity.y.abs() < 1e-6,
@@ -499,7 +513,7 @@ mod tests {
         let params = params_with_normal(0.8, 0.5, Vector3::new(0.0, 1.0, 0.0));
 
         let v_in = Vector3::new(10.0, -5.0, 0.0);
-        let result = calculate_impact(&v_in, 0.0, &params);
+        let result = calculate_impact(&v_in, 0.0, &params).expect("valid params");
 
         let normal_impulse = TEST_MASS * (1.0 + params.cor) * 5.0;
         let max_friction = params.friction * normal_impulse;
@@ -527,7 +541,7 @@ mod tests {
         let v_in = Vector3::new(0.0, -8.0, 0.0);
         let spin_in = 2500.0;
 
-        let result = calculate_impact(&v_in, spin_in, &params);
+        let result = calculate_impact(&v_in, spin_in, &params).expect("valid params");
 
         let n = Vector3::new(0.0, 1.0, 0.0);
         let t_hat = primary_tangent(&Vector3::zero(), &n);
@@ -553,7 +567,7 @@ mod tests {
         let params = ContactParameters::default();
 
         let v_in = Vector3::new(15.0, 0.0, -8.0);
-        let result = calculate_impact(&v_in, 3000.0, &params);
+        let result = calculate_impact(&v_in, 3000.0, &params).expect("valid params");
 
         assert!(
             result.velocity.z > 0.0,
@@ -567,7 +581,7 @@ mod tests {
         let params = ContactParameters::default();
 
         let v_in = Vector3::new(0.3, -0.1, 0.0);
-        let result = calculate_impact(&v_in, 100.0, &params);
+        let result = calculate_impact(&v_in, 100.0, &params).expect("valid params");
 
         assert!(result.is_rolling, "Ball should be rolling at low speed");
     }
@@ -577,7 +591,7 @@ mod tests {
         let params = params_with_normal(0.6, 0.3, Vector3::new(0.0, 1.0, 0.0));
 
         let v_in = Vector3::new(20.0, -15.0, 5.0);
-        let result = calculate_impact(&v_in, 5000.0, &params);
+        let result = calculate_impact(&v_in, 5000.0, &params).expect("valid params");
 
         assert!(
             result.energy_lost >= 0.0,
@@ -591,7 +605,7 @@ mod tests {
         let params = params_with_normal(0.8, 0.2, Vector3::new(angle.sin(), angle.cos(), 0.0));
 
         let v_in = Vector3::new(0.0, -10.0, 0.0);
-        let result = calculate_impact(&v_in, 0.0, &params);
+        let result = calculate_impact(&v_in, 0.0, &params).expect("valid params");
 
         assert!(
             result.velocity.x.abs() > 0.1,
@@ -600,17 +614,58 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "COR must be in [0, 1]")]
     fn test_dbc_cor_out_of_range() {
         let params = params_with_normal(1.5, 0.0, Vector3::new(0.0, 1.0, 0.0));
-        let _r = calculate_impact(&Vector3::new(0.0, -10.0, 0.0), 0.0, &params);
+        let err = calculate_impact(&Vector3::new(0.0, -10.0, 0.0), 0.0, &params)
+            .expect_err("invalid COR must be rejected");
+        assert!(err.contains("COR must be in [0, 1]"), "{err}");
     }
 
     #[test]
-    #[should_panic(expected = "Friction must be non-negative")]
     fn test_dbc_negative_friction() {
         let params = params_with_normal(0.5, -0.1, Vector3::new(0.0, 1.0, 0.0));
-        let _r = calculate_impact(&Vector3::new(0.0, -10.0, 0.0), 0.0, &params);
+        let err = calculate_impact(&Vector3::new(0.0, -10.0, 0.0), 0.0, &params)
+            .expect_err("negative friction must be rejected");
+        assert!(err.contains("Friction must be non-negative"), "{err}");
+    }
+
+    #[test]
+    fn test_rejects_zero_mass() {
+        let mut params = params_with_normal(0.8, 0.3, Vector3::new(0.0, 1.0, 0.0));
+        params.mass = 0.0;
+        let err = calculate_impact(&Vector3::new(0.0, -10.0, 0.0), 0.0, &params)
+            .expect_err("zero mass must be rejected");
+        assert!(err.contains("mass must be positive"), "{err}");
+    }
+
+    #[test]
+    fn test_rejects_negative_radius() {
+        let mut params = params_with_normal(0.8, 0.3, Vector3::new(0.0, 1.0, 0.0));
+        params.radius = -0.02;
+        let err = calculate_impact(&Vector3::new(0.0, -10.0, 0.0), 0.0, &params)
+            .expect_err("negative radius must be rejected");
+        assert!(err.contains("radius must be positive"), "{err}");
+    }
+
+    #[test]
+    fn test_rejects_non_finite_mass_and_radius() {
+        let v = Vector3::new(0.0, -10.0, 0.0);
+        let mut params = params_with_normal(0.8, 0.3, Vector3::new(0.0, 1.0, 0.0));
+        params.mass = f64::NAN;
+        let err = calculate_impact(&v, 0.0, &params).expect_err("NaN mass");
+        assert!(err.contains("mass must be positive"), "{err}");
+
+        params.mass = TEST_MASS;
+        params.radius = f64::INFINITY;
+        let err = calculate_impact(&v, 0.0, &params).expect_err("infinite radius");
+        assert!(err.contains("radius must be positive"), "{err}");
+    }
+
+    #[test]
+    fn contact_parameters_validate_matches_calculate_impact() {
+        let mut params = ContactParameters::default();
+        params.mass = -1.0;
+        assert!(params.validate().is_err());
     }
 
     #[test]
@@ -619,7 +674,7 @@ mod tests {
 
         let v_in = Vector3::new(20.0, -15.0, 5.0);
         let spin_in = 5000.0;
-        let result = calculate_impact(&v_in, spin_in, &params);
+        let result = calculate_impact(&v_in, spin_in, &params).expect("valid params");
 
         let expected =
             expected_energy_lost_joules(&v_in, &result.velocity, spin_in, result.spin_rate);
@@ -641,7 +696,7 @@ mod tests {
         let spin_in = 1800.0;
         let inertia = test_inertia();
 
-        let result = calculate_impact(&v_in, spin_in, &params);
+        let result = calculate_impact(&v_in, spin_in, &params).expect("valid params");
         let n = Vector3::new(0.0, 1.0, 0.0);
         let v_tangential = Vector3::new(v_in.x, 0.0, 0.0);
         let t_hat = primary_tangent(&v_tangential, &n);
