@@ -13,7 +13,7 @@ from src.shared.python.physics.impact_model import (
     PreImpactState,
     RigidBodyImpactModel,
 )
-from src.shared.python.physics.impact_model.utils import (
+from src.shared.python.physics.impact_model.contact_kinematics import (
     ball_contact_lever_arm,
     contact_point_velocity,
     impact_offset_vector_3d,

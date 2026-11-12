@@ -12,12 +12,12 @@ from src.shared.python.core.physics_constants import (
 )
 
 from .types import ImpactModelType, ImpactParameters, PostImpactState, PreImpactState
-from .utils import (
-    compute_effective_club_mass,
+from .contact_kinematics import (
     impact_offset_vector_3d,
     pre_impact_contact_relative_velocity,
     reduced_normal_effective_mass,
 )
+from .utils import compute_effective_club_mass
 
 # Rolling-without-slip tangential-impulse factor for a uniform solid sphere.
 #

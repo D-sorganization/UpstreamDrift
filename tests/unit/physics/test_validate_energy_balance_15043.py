@@ -20,7 +20,7 @@ from src.shared.python.physics.impact_model import (
     RigidBodyImpactModel,
     validate_energy_balance,
 )
-from src.shared.python.physics.impact_model.utils import (
+from src.shared.python.physics.impact_model.contact_kinematics import (
     compute_effective_club_mass,
     impact_offset_vector_3d,
     pre_impact_contact_relative_velocity,
