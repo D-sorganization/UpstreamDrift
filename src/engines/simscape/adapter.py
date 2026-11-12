@@ -775,15 +775,11 @@ class SimscapeAdapter:
     )
     def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:  # noqa: ARG002
         """Legacy gravity-only diagnostic — uses protocol defaults (#14943)."""
-        self._lifecycle.require(
-            AdapterState.LOADED,
-            AdapterState.RUNNING,
-            operation="compute_gravity_only_acceleration",
-        )
+        op = "compute_gravity_only_acceleration"
+        self._lifecycle.require(AdapterState.LOADED, AdapterState.RUNNING, operation=op)
         from src.shared.python.engine_core.counterfactual_defaults import (
             default_gravity_only_acceleration,
         )
-
         return default_gravity_only_acceleration(self, q)
 
     @precondition(
@@ -799,15 +795,11 @@ class SimscapeAdapter:
         self, q: np.ndarray, tau: np.ndarray
     ) -> np.ndarray:
         """SPEC §4 ZVCF control term — protocol default at fixed ``q`` (#14943)."""
-        self._lifecycle.require(
-            AdapterState.LOADED,
-            AdapterState.RUNNING,
-            operation="compute_control_acceleration_at_state",
-        )
+        op = "compute_control_acceleration_at_state"
+        self._lifecycle.require(AdapterState.LOADED, AdapterState.RUNNING, operation=op)
         from src.shared.python.engine_core.counterfactual_defaults import (
             default_control_acceleration_at_state,
         )
-
         return default_control_acceleration_at_state(self, q, tau)
 
     @precondition(
