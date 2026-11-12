@@ -32,6 +32,10 @@ The Motion Matching tool fits articulated multibody biomechanical models to obse
 
 Dynamic optimization formulates trajectory tracking as an optimal control or nonlinear least-squares problem with physics-based constraints. Forward dynamics verification checks consistency between solved joint torques and observed kinematic accelerations.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/proximal_distal_energy_transfer/index.html): *Proximal-to-Distal Energy Transfer*.
+
 ## Limitations
 
 High-frequency impact events (club-ball collision) exhibit transient accelerations that require specialised contact models. Marker occlusions are interpolated using kinematic continuity priors.

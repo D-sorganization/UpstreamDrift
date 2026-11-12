@@ -47,6 +47,10 @@ are consumed elsewhere in the suite as `osim`, per the
 `_PREFERRED_ENGINE_BY_MODEL_TYPE` mapping in
 `src/launchers/launcher_model_handlers.py`.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html): *The Physics of Golf — Forces and Torques*.
+
 ## Limitations
 
 - **It does not simulate, render, validate or convert anything.** It opens a

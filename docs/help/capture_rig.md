@@ -31,6 +31,10 @@ The Capture Rig workbench configures, calibrates, and monitors multi-camera spat
 
 Multi-camera calibration uses bundle adjustment with Levenberg-Marquardt optimization to minimize 2D-to-3D reprojection errors across simultaneous views. Epipolar geometry constraints ensure rigorous 3D spatial reconstruction.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/markerless-mocap-camera-selection.html): *Markerless Motion Capture Camera Selection*.
+
 ## Limitations
 
 Requires adequate spatial coverage and non-coplanar views. Extreme wide-angle or fisheye lenses require specialized distortion modeling.

@@ -123,9 +123,28 @@ class ZTCFReaction:
         return self.wrench[joint_idx]
 
 
-def pendulum_tangential_scalar(qddot: float, mass: float, length: float) -> float:
-    """Compute the scalar tangential inertia term m·L·q̈ validated in #7054."""
-    return float(mass * length * qddot)
+def pendulum_tangential_scalar(
+    qddot: float,
+    mass: float,
+    length: float,
+    *,
+    inertia_about_pivot: float | None = None,
+) -> float:
+    """Scalar tip-equivalent tangential inertia term for a planar pivot.
+
+    Default (``inertia_about_pivot is None``): point-mass at the tip,
+    ``F = m L q̈`` (validated in #7054).
+
+    Distributed body: pass the moment of inertia ``I_O`` about the pivot
+    [kg·m²] and tip radius ``L`` [m]; then ``F = (I_O / L) q̈``.
+    """
+    if inertia_about_pivot is None:
+        return float(mass * length * qddot)
+    if not np.isfinite(inertia_about_pivot) or inertia_about_pivot < 0.0:
+        raise ValueError("inertia_about_pivot must be finite and non-negative")
+    if not np.isfinite(length) or length <= 0.0:
+        raise ValueError("length must be finite and positive")
+    return float(inertia_about_pivot / length * qddot)
 
 
 # ============================================================================

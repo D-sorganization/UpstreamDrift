@@ -15,8 +15,8 @@ REGISTRY = ROOT / "src/config/loop_nullspace_registry.json"
 STATUS_DOC = ROOT / "docs/research/loop_nullspace/NSX-04_verification_status.md"
 
 _EXPECTED_TOTAL = 94
-_EXPECTED_VERIFIED = 50
-_EXPECTED_UNVERIFIED = 44
+_EXPECTED_VERIFIED = 58
+_EXPECTED_UNVERIFIED = 36
 
 
 def _torque_capacity() -> list[dict]:

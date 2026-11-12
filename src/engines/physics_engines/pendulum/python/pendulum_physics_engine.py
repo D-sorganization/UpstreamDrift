@@ -443,8 +443,13 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
         """Deprecated shim → :meth:`compute_gravity_only_acceleration` (#14943)."""
         import warnings
 
-        msg = "compute_zvcf is legacy diagnostic; use compute_gravity_only_acceleration"
-        warnings.warn(msg, DeprecationWarning, stacklevel=2)
+        warnings.warn(
+            "compute_zvcf is a legacy gravity-only diagnostic; "
+            "use compute_gravity_only_acceleration or "
+            "compute_control_acceleration_at_state for SPEC §4 ZVCF.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self.compute_gravity_only_acceleration(q)
 
     def compute_zero_velocity_control_preserved(self, q: np.ndarray) -> np.ndarray:
