@@ -22,6 +22,7 @@ from src.shared.python.loop_nullspace.planar_model import (
     PlanarGolferProvider,
 )
 from src.shared.python.simulation_backends.constrained_ztcf_zvcf import (
+    constrained_acceleration_at,
     constrained_counterfactual_report,
 )
 from src.shared.python.simulation_backends.protocol import (
@@ -106,38 +107,34 @@ def test_control_split_and_control_preserved_variant(planar) -> None:
     assert _scaled(kept - ref, np.max(np.abs(ref))) < TOL
 
 
-class _VelocityKeyedClosureProvider:
-    """Synthetic provider: stick (one row) at ``v=0``, slide (two rows) when moving."""
+def test_per_actuator_columns_use_measured_state_and_ztcf_baseline(planar) -> None:
+    """Per-actuator columns share ``(q, v)`` and ZTCF baseline with ``control_total`` (#15041).
 
-    def __init__(self) -> None:
-        self._v = np.zeros(2, dtype=np.float64)
-
-    def mass_matrix(self, q: np.ndarray) -> np.ndarray:
-        return np.eye(2)
-
-    def bias_forces(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
-        self._v = np.asarray(v, dtype=np.float64).reshape(-1)
-        return np.zeros(2)
-
-    def closure_jacobian(self, q: np.ndarray) -> np.ndarray:
-        if np.linalg.norm(self._v) < 1e-12:
-            return np.array([[1.0, 0.0]])
-        return np.array([[1.0, 0.0], [0.0, 1.0]])
-
-    def closure_drift(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
-        self._v = np.asarray(v, dtype=np.float64).reshape(-1)
-        rows = self.closure_jacobian(q).shape[0]
-        return np.zeros(rows)
-
-
-def test_per_actuator_columns_sum_to_control_at_measured_velocity() -> None:
-    """Per-actuator split uses the same ``(q, v)`` as ``control_total`` (#15041)."""
-    provider = _VelocityKeyedClosureProvider()
-    q = np.zeros(2)
-    v = np.array([0.5, 0.2])
-    tau = np.array([1.0, -0.7])
-    report = constrained_counterfactual_report(provider, q, v, tau)
+    ``ConstrainedEquationsOfMotionProvider`` exposes ``closure_jacobian(q)`` only;
+    velocity enters through ``bias_forces`` and ``closure_drift``.  At fixed ``q`` the
+    KKT control response is linear in torque, so additivity of columns to
+    ``control_total`` already holds under bilateral equality constraints even when
+    columns were wrongly evaluated at ``v = 0`` with a ZVCF baseline.  The fix aligns
+    the evaluation state with ``control_total`` (measured ``(q, v)``, minus ZTCF).
+    Frictional or unilateral contact with a velocity-dependent active set would
+    require an explicit contact-mode hook on the provider contract (not claimed here).
+    """
+    s, provider = planar
+    tau = s.S.T @ np.array([1.0, -2.0, 0.5, 0.3, 1.7])
+    report = constrained_counterfactual_report(provider, s.q, s.v, tau)
+    n = tau.shape[0]
+    zeros = np.zeros(n)
+    ztcf, _ = constrained_acceleration_at(provider, s.q, s.v, zeros)
+    expected = np.stack(
+        [
+            constrained_acceleration_at(provider, s.q, s.v, tau[i] * np.eye(n)[i])[0]
+            - ztcf
+            for i in range(n)
+        ],
+        axis=1,
+    )
     scale = max(1.0, float(np.max(np.abs(report.control_total))))
+    assert _scaled(report.per_actuator - expected, scale) < TOL
     assert _scaled(report.per_actuator.sum(axis=1) - report.control_total, scale) < TOL
 
 
