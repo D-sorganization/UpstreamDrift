@@ -8,6 +8,7 @@ import numpy as np
 
 from src.shared.python.engine_core.counterfactual_contract import (
     CounterfactualKind,
+    CounterfactualResult,
     wrap_counterfactual,
 )
 
@@ -35,13 +36,15 @@ def assert_drift_control_superposition(
     np.testing.assert_allclose(drift + control, full, rtol=rtol, atol=atol)
 
 
-def stamped_drift(engine: _SuperpositionEngine) -> object:
+def stamped_drift(engine: _SuperpositionEngine) -> CounterfactualResult:
     return wrap_counterfactual(
         CounterfactualKind.DRIFT, engine.compute_drift_acceleration()
     )
 
 
-def stamped_control(engine: _SuperpositionEngine, tau: np.ndarray) -> object:
+def stamped_control(
+    engine: _SuperpositionEngine, tau: np.ndarray
+) -> CounterfactualResult:
     return wrap_counterfactual(
         CounterfactualKind.CONTROL, engine.compute_control_acceleration(tau)
     )

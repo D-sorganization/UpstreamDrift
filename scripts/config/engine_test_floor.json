@@ -1,13 +1,33 @@
 {
   "lanes": {
-    "mujoco": {"min_executed": 1, "max_skipped": 0},
-    "pinocchio": {"min_executed": 1, "max_skipped": 0},
-    "drake": {"min_executed": 1, "max_skipped": 0},
-    "opensim": {"min_executed": 1, "max_skipped": 0},
-    "jaxsim": {"min_executed": 1, "max_skipped": 0}
+    "mujoco": { "min_executed": 1, "max_skipped": 0 },
+    "pinocchio": { "min_executed": 1, "max_skipped": 0 },
+    "drake": { "min_executed": 1, "max_skipped": 0 },
+    "opensim": { "min_executed": 1, "max_skipped": 0 },
+    "jaxsim": { "min_executed": 1, "max_skipped": 0 }
   },
   "not_covered": {
-    "matlab": {"reason": "MATLAB tests require proprietary runtime not available in CI", "issue": "#14948"},
-    "myosuite": {"reason": "MyoSuite tests require MuJoCo 2.x and myo_sim submodule integration in dedicated workflow", "issue": "#14948"}
+    "matlab": {
+      "reason": "Requires MATLAB license not available in CI",
+      "issue": "#14948",
+      "coverage_status": "not_covered"
+    },
+    "myosuite": {
+      "reason": "Requires MyoSuite environment not installed in standard CI lanes",
+      "issue": "#14948",
+      "coverage_status": "not_covered"
+    }
+  },
+  "not_covered_engines": {
+    "matlab": {
+      "reason": "Requires MATLAB license not available in CI",
+      "issue": "#14948",
+      "coverage_status": "not_covered"
+    },
+    "myosuite": {
+      "reason": "Requires MyoSuite environment not installed in standard CI lanes",
+      "issue": "#14948",
+      "coverage_status": "not_covered"
+    }
   }
 }

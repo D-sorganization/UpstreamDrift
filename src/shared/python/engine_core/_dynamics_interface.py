@@ -299,7 +299,7 @@ class DynamicsInterface(Protocol):
 
     @abstractmethod
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        """Deprecated shim — prefer explicit counterfactual methods (issue #14943).
+        """Deprecated shim (#14943): Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
 
         Historically this name mixed two quantities:
 

@@ -24,7 +24,7 @@ from ..aip.dispatcher import (
     make_error,
     make_response,
 )
-from ..aip.methods import create_registry
+from ..aip.methods import create_registry, methods_passing_self_check
 from ..dependencies import get_engine_manager, get_logger
 from ..models.responses import (
     AIPCapability,
@@ -51,21 +51,24 @@ async def get_capabilities() -> AIPHandshakeResponse:
     Returns:
         AIP handshake response with capabilities.
     """
-    namespaces = _registry.list_by_namespace()
+    supported = methods_passing_self_check(_registry)
+    namespaces: dict[str, list[str]] = {}
+    for name in supported:
+        if name != "system.capabilities":
+            namespaces.setdefault(
+                name.split(".", 1)[0] if "." in name else "root", []
+            ).append(name)
+
     capabilities = [
-        AIPCapability(
-            name=ns,
-            version="1.0",
-            methods=methods,
-        )
-        for ns, methods in namespaces.items()
+        AIPCapability(name=ns, version="1.0", methods=sorted(methods))
+        for ns, methods in sorted(namespaces.items())
     ]
 
     return AIPHandshakeResponse(
         server_name="UpstreamDrift AIP Server",
         protocol_version="2.0",
         capabilities=capabilities,
-        supported_methods=_registry.list_methods(),
+        supported_methods=supported,
     )
 
 

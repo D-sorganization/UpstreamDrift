@@ -31,7 +31,9 @@ chains must use each engine's recursive Newton–Euler path, not this helper.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import warnings
+from dataclasses import dataclass, field
+from typing import Any, Sequence
 
 import numpy as np
 
@@ -98,6 +100,34 @@ class ZTCFSegmentKinematics:
     segment_lengths: np.ndarray
 
 
+@dataclass(frozen=True)
+class ZTCFReaction:
+    """Immutable container for Newton–Euler ZTCF joint constraint reactions."""
+
+    frame: str = "world"
+    reference_point: str = "joint_origin"
+    sign_owner: str = "parent_on_child"
+    definition_version: str = "ztcf-rnea-v1"
+    wrench: np.ndarray = field(default_factory=lambda: np.empty((0, 3)))
+    qddot_ztcf: np.ndarray = field(default_factory=lambda: np.empty(0))
+
+    @property
+    def forces(self) -> np.ndarray:
+        return self.wrench[:, :2]
+
+    @property
+    def moments(self) -> np.ndarray:
+        return self.wrench[:, 2] if self.wrench.shape[1] == 3 else self.wrench[:, 3:]
+
+    def reaction_at_joint(self, joint_idx: int) -> np.ndarray:
+        return self.wrench[joint_idx]
+
+
+def pendulum_tangential_scalar(qddot: float, mass: float, length: float) -> float:
+    """Compute the scalar tangential inertia term m·L·q̈ validated in #7054."""
+    return float(mass * length * qddot)
+
+
 # ============================================================================
 # Core ZTCF computation
 # ============================================================================
@@ -160,84 +190,100 @@ def compute_ztcf_accelerations(
 
 
 def compute_ztcf_forces(
-    *,
-    mass_matrix: np.ndarray,
-    coriolis_vector: np.ndarray,
-    gravity_vector: np.ndarray,
-    friction_vector: np.ndarray | None = None,
-    kinematics: ZTCFSegmentKinematics,
+    *args: Any,
+    kinematics: ZTCFSegmentKinematics | None = None,
+    joint_positions: np.ndarray | None = None,
+    segment_masses: np.ndarray | None = None,
+    segment_lengths: np.ndarray | None = None,
     gravity_acceleration: float = 9.80665,
     allow_simplified: bool = False,
+    **kwargs: Any,
 ) -> ZTCFResult:
     """Compute ZTCF joint forces from dynamics matrices and kinematics.
 
-    This is the main entry point for the **single-DOF tangential** helper.  It:
-    1. Solves for zero-torque accelerations via ``compute_ztcf_accelerations``.
-    2. Maps each segment's generalized acceleration to an approximate tangential
-       linear acceleration and returns ``m * (a - g)`` per joint row.
-
-    For more than one kinematic segment, call only with ``allow_simplified=True``
-    (legacy regression) or use the hosting engine's full Newton–Euler ZTCF path.
-
-    Parameters
-    ----------
-    mass_matrix, coriolis_vector, gravity_vector, friction_vector
-        Dynamics terms (see ``compute_ztcf_accelerations``).
-    kinematics : ZTCFSegmentKinematics
-        Joint positions, segment masses, and segment lengths (one row per joint).
-    gravity_acceleration : float
-        Scalar gravitational acceleration (default 9.80665 m/s²).
-
-    Returns
-    -------
-    ZTCFResult
-        Container with joint forces and accelerations.
+    the x component equals ``m·L·q̈`` (the scalar tangential inertia term
+    validated in #7054); the returned 2D vector is a legacy diagnostic
+    approximation and is NOT a physical joint reaction force even for a
+    single pendulum (for example, at horizontal release θ = 90°, θ̇ = 0,
+    true pivot reaction is 0 while the helper returns ``[-m·g, +m·g]`` with
+    magnitude ``√2·m·g``). Use :func:`compute_ztcf_joint_reactions` for RNEA.
     """
-    joint_positions = kinematics.joint_positions
-    segment_masses = kinematics.segment_masses
-    segment_lengths = kinematics.segment_lengths
-    _validate_force_inputs(joint_positions, segment_masses, segment_lengths)
-
-    n_joints = int(np.asarray(joint_positions).shape[0])
-    if n_joints > 1 and not allow_simplified:
+    warnings.warn(
+        "compute_ztcf_forces is a legacy diagnostic placeholder and is deprecated. "
+        "Use compute_ztcf_joint_reactions for physical Newton-Euler joint reactions.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    qd, m = kwargs.pop("qddot", None), kwargs.pop("mass_matrix", None)
+    c = kwargs.pop("coriolis_vector", None)
+    g = kwargs.pop("gravity_vector", None)
+    f = kwargs.pop("friction_vector", None)
+    if len(args) == 2 and np.ndim(args[0]) == 1 and np.ndim(args[1]) == 2:
+        qd, m = np.asarray(args[0]), np.asarray(args[1])
+    elif len(args) >= 1:
+        if np.ndim(args[0]) == 2:
+            m = np.asarray(args[0])
+            c = args[1] if len(args) > 1 else c
+            g = args[2] if len(args) > 2 else g
+            f = args[3] if len(args) > 3 else f
+        else:
+            qd = np.asarray(args[0])
+    if kinematics is not None:
+        pos, masses, lengths = (
+            kinematics.joint_positions,
+            kinematics.segment_masses,
+            kinematics.segment_lengths,
+        )
+    elif (
+        joint_positions is not None
+        and segment_masses is not None
+        and segment_lengths is not None
+    ):
+        pos, masses, lengths = joint_positions, segment_masses, segment_lengths
+    else:
         raise PreconditionError(
-            "compute_ztcf_forces is a single-pendulum tangential helper; "
-            "multi-body chains need the engine recursive Newton–Euler route. "
-            "Pass allow_simplified=True only for explicit legacy regression.",
+            "Missing kinematics inputs",
+            function_name="compute_ztcf_forces",
+            parameter="kinematics",
+        )
+    _validate_force_inputs(pos, masses, lengths)
+    if int(np.asarray(pos).shape[0]) > 1 and not allow_simplified:
+        raise PreconditionError(
+            "compute_ztcf_forces is a single-pendulum tangential helper; multi-body chains need engine RNEA.",
             function_name="compute_ztcf_forces",
             parameter="joint_positions",
         )
-
-    qddot = compute_ztcf_accelerations(
-        mass_matrix=mass_matrix,
-        coriolis_vector=coriolis_vector,
-        gravity_vector=gravity_vector,
-        friction_vector=friction_vector,
-    )
-
-    n_joints = joint_positions.shape[0]
-    n_dims = joint_positions.shape[1] if joint_positions.ndim > 1 else 1
+    if qd is None:
+        if m is None:
+            raise PreconditionError(
+                "mass_matrix is required when qddot is not provided",
+                function_name="compute_ztcf_forces",
+                parameter="mass_matrix",
+            )
+        n = m.shape[0]
+        qd = compute_ztcf_accelerations(
+            mass_matrix=m,
+            coriolis_vector=c if c is not None else np.zeros(n),
+            gravity_vector=g if g is not None else np.zeros(n),
+            friction_vector=f,
+        )
     forces = _forces_from_accelerations(
-        qddot=qddot,
-        joint_positions=joint_positions,
-        segment_masses=segment_masses,
-        segment_lengths=segment_lengths,
+        qddot=qd,
+        joint_positions=pos,
+        segment_masses=masses,
+        segment_lengths=lengths,
         gravity_acceleration=gravity_acceleration,
-        n_joints=n_joints,
-        n_dims=n_dims,
+        n_joints=pos.shape[0],
+        n_dims=pos.shape[1] if pos.ndim > 1 else 1,
     )
-
     if not np.all(np.isfinite(forces)):
         raise PostconditionError(
             "ZTCF joint forces contain non-finite values",
             function_name="compute_ztcf_forces",
             result=forces,
         )
-
     return ZTCFResult(
-        joint_forces=forces,
-        joint_accelerations=qddot,
-        n_joints=n_joints,
+        joint_forces=forces, joint_accelerations=qd, n_joints=pos.shape[0]
     )
 
 
@@ -296,6 +342,191 @@ def compute_force_delta(
         )
 
     return total_forces - ztcf_forces
+
+
+# ============================================================================
+# Recursive Newton–Euler ZTCF joint reactions (RNEA)
+# ============================================================================
+
+
+def _validate_and_resolve_rnea_geometry(
+    *,
+    joint_angles: np.ndarray | Sequence[float],
+    joint_velocities: np.ndarray | Sequence[float],
+    segment_masses: np.ndarray | Sequence[float],
+    segment_lengths: np.ndarray | Sequence[float],
+    com_distances: np.ndarray | Sequence[float] | None,
+    inertias_about_com: np.ndarray | Sequence[float] | None,
+) -> tuple[np.ndarray, ...]:
+    q = np.atleast_1d(np.asarray(joint_angles, dtype=float))
+    qdot = np.atleast_1d(np.asarray(joint_velocities, dtype=float))
+    masses = np.atleast_1d(np.asarray(segment_masses, dtype=float))
+    lengths = np.atleast_1d(np.asarray(segment_lengths, dtype=float))
+    n = len(masses)
+    for name, arr in (
+        ("joint_angles", q),
+        ("joint_velocities", qdot),
+        ("segment_lengths", lengths),
+        ("segment_masses", masses),
+    ):
+        if len(arr) != n or not np.all(np.isfinite(arr)):
+            raise PreconditionError(
+                f"{name} invalid",
+                function_name="compute_ztcf_joint_reactions",
+                parameter=name,
+            )
+    has_i = inertias_about_com is not None and np.any(np.array(inertias_about_com) > 0)
+    rc = (
+        np.atleast_1d(np.asarray(com_distances, float))
+        if com_distances is not None
+        else (lengths / 2.0 if has_i else lengths.copy())
+    )
+    if len(rc) != n or not np.all(np.isfinite(rc)):
+        raise PreconditionError(
+            "com_distances invalid",
+            function_name="compute_ztcf_joint_reactions",
+            parameter="com_distances",
+        )
+    if inertias_about_com is not None:
+        ic = np.atleast_1d(np.asarray(inertias_about_com, float))
+        if len(ic) != n or not np.all(np.isfinite(ic)):
+            raise PreconditionError(
+                "inertias_about_com invalid",
+                function_name="compute_ztcf_joint_reactions",
+                parameter="inertias_about_com",
+            )
+    else:
+        ic = np.where(np.isclose(rc, lengths / 2.0), (masses * lengths**2) / 12.0, 0.0)
+    return q, qdot, masses, lengths, rc, ic
+
+
+def _resolve_rnea_qddot(
+    *,
+    q: np.ndarray,
+    qdot: np.ndarray,
+    masses: np.ndarray,
+    lengths: np.ndarray,
+    rc: np.ndarray,
+    ic: np.ndarray,
+    g: float,
+    dynamics_kwargs: dict[str, Any],
+) -> np.ndarray:
+    qddot_in = dynamics_kwargs.pop("qddot_ztcf", None)
+    m_mat = dynamics_kwargs.pop("mass_matrix", None)
+    n = len(masses)
+    if qddot_in is not None:
+        qddot = np.atleast_1d(np.asarray(qddot_in, dtype=float))
+        if len(qddot) != n or not np.all(np.isfinite(qddot)):
+            raise PreconditionError(
+                "qddot_ztcf invalid",
+                function_name="compute_ztcf_joint_reactions",
+                parameter="qddot_ztcf",
+            )
+        return qddot
+    if m_mat is not None:
+        c_in = dynamics_kwargs.pop("coriolis_vector", None)
+        g_in = dynamics_kwargs.pop("gravity_vector", None)
+        return compute_ztcf_accelerations(
+            mass_matrix=m_mat,
+            coriolis_vector=c_in if c_in is not None else np.zeros(n),
+            gravity_vector=g_in if g_in is not None else np.zeros(n),
+            friction_vector=dynamics_kwargs.pop("friction_vector", None),
+        )
+    if n == 1:
+        i_p = ic[0] + masses[0] * rc[0] ** 2
+        if i_p <= 0:
+            raise PreconditionError(
+                "Inertia about pivot must be strictly positive",
+                function_name="compute_ztcf_joint_reactions",
+            )
+        return np.array([-masses[0] * g * rc[0] * np.sin(q[0]) / i_p])
+    if n == 2:
+        m1, m2, l1, lc1, lc2 = masses[0], masses[1], lengths[0], rc[0], rc[1]
+        i1_p, i2_p = ic[0] + m1 * lc1**2, ic[1] + m2 * lc2**2
+        s2, c2 = np.sin(q[1]), np.cos(q[1])
+        h, m12 = m2 * l1 * lc2 * s2, i2_p + m2 * l1 * lc2 * c2
+        m_2d = np.array(
+            [[i1_p + i2_p + m2 * l1**2 + 2 * m2 * l1 * lc2 * c2, m12], [m12, i2_p]]
+        )
+        c_2d = np.array([-h * (2 * qdot[0] + qdot[1]) * qdot[1], h * qdot[0] ** 2])
+        g2 = m2 * lc2 * g * np.sin(q[0] + q[1])
+        g_2d = np.array([(m1 * lc1 + m2 * l1) * g * np.sin(q[0]) + g2, g2])
+        f_vec = dynamics_kwargs.pop("friction_vector", None)
+        return compute_ztcf_accelerations(
+            mass_matrix=m_2d,
+            coriolis_vector=c_2d,
+            gravity_vector=g_2d,
+            friction_vector=f_vec if f_vec is not None else np.zeros(2, dtype=float),
+        )
+    raise PreconditionError(
+        "Analytical dynamics formulation requires n <= 2 links; provide mass_matrix or qddot_ztcf for higher DOFs",
+        function_name="compute_ztcf_joint_reactions",
+        parameter="mass_matrix",
+    )
+
+
+def compute_ztcf_joint_reactions(
+    *,
+    joint_angles: np.ndarray | Sequence[float],
+    joint_velocities: np.ndarray | Sequence[float],
+    segment_masses: np.ndarray | Sequence[float],
+    segment_lengths: np.ndarray | Sequence[float],
+    gravity_acceleration: float = 9.80665,
+    relative_angles: bool = True,
+    **kwargs: Any,
+) -> ZTCFReaction:
+    """Compute physical joint constraint reaction wrenches under ZTCF via RNEA."""
+    q, qdot, masses, lengths, rc, ic = _validate_and_resolve_rnea_geometry(
+        joint_angles=joint_angles,
+        joint_velocities=joint_velocities,
+        segment_masses=segment_masses,
+        segment_lengths=segment_lengths,
+        com_distances=kwargs.pop("com_distances", None),
+        inertias_about_com=kwargs.pop("inertias_about_com", None),
+    )
+    frame = kwargs.pop("frame", "world")
+    ref_pt, sign_owner = (
+        kwargs.pop("reference_point", "joint_origin"),
+        kwargs.pop("sign_owner", "parent_on_child"),
+    )
+    def_ver = kwargs.pop("definition_version", "ztcf-rnea-v1")
+    qddot = _resolve_rnea_qddot(
+        q=q,
+        qdot=qdot,
+        masses=masses,
+        lengths=lengths,
+        rc=rc,
+        ic=ic,
+        g=gravity_acceleration,
+        dynamics_kwargs=kwargs,
+    )
+    n = len(masses)
+    phi = np.cumsum(q) if relative_angles else q.copy()
+    omega = np.cumsum(qdot) if relative_angles else qdot.copy()
+    alpha = np.cumsum(qddot) if relative_angles else qddot.copy()
+    ang_terms = alpha[:, None] * np.column_stack([np.cos(phi), np.sin(phi)]) - (
+        omega[:, None] ** 2
+    ) * np.column_stack([np.sin(phi), -np.cos(phi)])
+    a_joint, a_com = np.zeros((n + 1, 2)), np.zeros((n, 2))
+    for i in range(n):
+        a_com[i] = a_joint[i] + rc[i] * ang_terms[i]
+        a_joint[i + 1] = a_joint[i] + lengths[i] * ang_terms[i]
+    f_acc = masses[:, None] * (a_com - [0.0, -gravity_acceleration])
+    wrenches = np.column_stack([np.cumsum(f_acc[::-1], axis=0)[::-1], np.zeros(n)])
+    if not np.all(np.isfinite(wrenches)):
+        raise PostconditionError(
+            "ZTCF joint reactions contain non-finite values",
+            function_name="compute_ztcf_joint_reactions",
+            result=wrenches,
+        )
+    return ZTCFReaction(
+        frame=frame,
+        reference_point=ref_pt,
+        sign_owner=sign_owner,
+        definition_version=def_ver,
+        wrench=wrenches,
+        qddot_ztcf=qddot,
+    )
 
 
 # ============================================================================
@@ -361,11 +592,11 @@ def _validate_dynamics_inputs(
             parameter="friction_vector",
         )
 
-    # Check mass matrix is non-singular (det != 0)
-    det = np.linalg.det(mass_matrix)
-    if abs(det) < 1e-12:
+    # Check mass matrix is non-singular and well-conditioned (scale-invariant condition number)
+    cond = np.linalg.cond(mass_matrix)
+    if not np.isfinite(cond) or cond > 1e12:
         raise PreconditionError(
-            f"mass_matrix is singular or near-singular (det={det:.2e})",
+            f"Mass matrix is singular or ill-conditioned (cond={cond:.2e})",
             function_name="compute_ztcf_accelerations",
             parameter="mass_matrix",
         )

@@ -476,6 +476,14 @@ class TestCIEnvironmentCompatibility:
         guard = next(s for n, s in steps.items() if "actually ran" in n)
         assert "scripts/ci/require_junit_test_passed.py" in guard["run"]
         assert "${{ matrix.evidence }}" in guard["run"]
+        install_step = next(
+            s for n, s in steps.items() if n.startswith("Install ") and "parity" in n
+        )
+        install_run = install_step["run"]
+        assert "python -m ensurepip --upgrade" in install_run
+        ensurepip_pos = install_run.index("python -m ensurepip --upgrade")
+        matrix_install_pos = install_run.index("${{ matrix.install }}")
+        assert ensurepip_pos < matrix_install_pos
         names = list(steps)
         isolate = next(n for n in names if n.startswith("Isolate Python tool cache"))
         setup = next(n for n in names if n.startswith("Set up Python"))
@@ -540,6 +548,7 @@ class TestCIEnvironmentCompatibility:
         )
 
         assert install_index < uninstall_index < pytest_index
+        assert "--no-build-isolation" in workflow
 
     def test_cross_engine_workflows_let_pydantic_resolve_core(self) -> None:
         """Cross-engine jobs must not force an incompatible pydantic-core wheel."""
@@ -1082,7 +1091,6 @@ class TestCIEnvironmentCompatibility:
         # lighthouse-mobile: informational scores, PR-only (#14698).
         not_gating = {
             "quality-gate",
-            "matlab-tests",
             "arduino-build",
             "parity-smoke",
             "lighthouse-mobile",

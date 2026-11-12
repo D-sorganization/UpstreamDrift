@@ -99,7 +99,8 @@ jobs:
           sudo apt-get install -y xvfb
           python -m ensurepip --upgrade || true
           pip install --force-reinstall "idna[uts46]>=3.4"
-          pip install -e ".[dev]"
+          python -m pip install --ignore-installed pathspec hatchling editables
+          pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
           python3 scripts/ci/bootstrap_conformance_deps.py
           # Prevent environment pollution conflict between pytest-recording and pytest-vcr
           pip uninstall -y pytest-vcr pytest-recording || true
@@ -120,10 +121,12 @@ jobs:
           if git diff --quiet -- motion_matching/results/CROSS_ENGINE_LEADERBOARD.md; then
             echo "No changes to CROSS_ENGINE_LEADERBOARD.md"
           else
-            echo "## Cross-engine leaderboard diff" >> "$GITHUB_STEP_SUMMARY"
-            echo '```diff' >> "$GITHUB_STEP_SUMMARY"
-            git diff -- motion_matching/results/CROSS_ENGINE_LEADERBOARD.md >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            {
+              echo "## Cross-engine leaderboard diff"
+              echo '```diff'
+              git diff -- motion_matching/results/CROSS_ENGINE_LEADERBOARD.md
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload leaderboard artifact
