@@ -235,7 +235,10 @@ def test_policy_checkout_uses_fail_closed_repository_scoped_app_token() -> None:
         "actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510"
     )
     assert token_step["with"]["app-id"] == "${{ secrets.FLEET_GENERAL_AGENT_APP_ID }}"
-    assert token_step["with"]["private-key"] == "${{ secrets.FLEET_GENERAL_AGENT_APP_PRIVATE_KEY }}"
+    assert (
+        token_step["with"]["private-key"]
+        == "${{ secrets.FLEET_GENERAL_AGENT_APP_PRIVATE_KEY }}"
+    )
     assert token_step["with"]["owner"] == "${{ github.repository_owner }}"
     assert token_step["with"]["repositories"] == "Repository_Management"
     assert token_step["with"]["permission-contents"] == "read"
