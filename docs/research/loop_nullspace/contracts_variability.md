@@ -260,6 +260,11 @@ add no new dynamics. Modules (all under `src/shared/python/loop_nullspace/`):
 - `strategy_evaluators.py`, `strategy_layer_eval.py`: the adapters.
 - `strategy_campaign.py`: `run_comparison` (matched-CHS, matched-effort,
   unconstrained fronts), ranking, failure rate and `variance_budget_table`.
+- `strategy_campaign_catalogue.py` and `src/config/nsx_comparison_campaigns.json`:
+  named campaigns; ``variability_toy_matched_chs`` is the first (fixture-backed)
+  suite; remaining rows are ``deferred`` with explicit reasons.
+- `strategy_catalogue_data.py` and `src/config/nsx_strategy_catalogue.json`: JSON
+  mirror of the S1–S12 registry (authoritative source remains `strategy_spec.py`).
 - `strategy_stability.py`: `rank_under_priors` (reversals between priors) and
   `heldout_stability` (linear ranking against the NSX-91 paired and hold-out
   Monte Carlo).
