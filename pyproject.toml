@@ -375,6 +375,8 @@ upstream-drift = "launch_upstream_drift:main"
 sidekick = "sidekick.__main__:main"
 # Headless simulation batch runner CLI (Epic #14085 / #14090).
 ud-sim = "src.sim_run.cli:main"
+# Stdio MCP adapter for the sim_run Agent API (#15020).
+ud-sim-mcp = "src.sim_run.mcp:main"
 
 [project.entry-points."upstream_drift.engines"]
 # Third-party engines register here via pyproject.toml:

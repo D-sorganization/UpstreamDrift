@@ -548,6 +548,7 @@ class TestCIEnvironmentCompatibility:
         )
 
         assert install_index < uninstall_index < pytest_index
+        assert "--no-build-isolation" in workflow
 
     def test_cross_engine_workflows_let_pydantic_resolve_core(self) -> None:
         """Cross-engine jobs must not force an incompatible pydantic-core wheel."""
