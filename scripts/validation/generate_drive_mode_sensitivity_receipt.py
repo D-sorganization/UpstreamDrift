@@ -44,7 +44,9 @@ def main() -> None:
         DriveMode.JOINT_IMPEDANCE,
     ):
         extra = imp if mode is DriveMode.JOINT_IMPEDANCE else None
-        _, _, _, rec = sens.integrate_drive_mode_stm(mode, nom, extra, window_s=WINDOW_S)
+        _, _, _, rec = sens.integrate_drive_mode_stm(
+            mode, nom, extra, window_s=WINDOW_S
+        )
         modes.append(rec.to_dict())
     sweep: list[dict] = []
     for c in DEFAULT_COCONTRACTION_LEVELS:

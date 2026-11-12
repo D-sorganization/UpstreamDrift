@@ -100,9 +100,7 @@ def default_triple_mtu_actuators(
         )
 
     joint_scales = (18.0, 7.0, 2.5)
-    return tuple(
-        _one(joint_scales[j], float(q_ref[j])) for j in range(3)
-    )
+    return tuple(_one(joint_scales[j], float(q_ref[j])) for j in range(3))
 
 
 def invert_excitation(
@@ -195,7 +193,11 @@ def unpack_hill_state(x: np.ndarray) -> tuple[np.ndarray, list[MTUJointState]]:
     states: list[MTUJointState] = []
     for j in range(3):
         b = JOINT_STATE_DIM + 4 * j
-        states.append(MTUJointState(float(x[b]), float(x[b + 1]), float(x[b + 2]), float(x[b + 3])))
+        states.append(
+            MTUJointState(
+                float(x[b]), float(x[b + 1]), float(x[b + 2]), float(x[b + 3])
+            )
+        )
     return qv, states
 
 
@@ -316,9 +318,7 @@ def _finalize_hill_spec(
         qv, mtu_states = unpack_hill_state(x)
         q, v = qv[:3], qv[3:]
         for j in range(3):
-            tau_hat = spec.actuators[j].torque(
-                float(q[j]), float(v[j]), mtu_states[j]
-            )
+            tau_hat = spec.actuators[j].torque(float(q[j]), float(v[j]), mtu_states[j])
             residual[k, j] = tau_hat - float(spec.torque_command_nm[k, j])
         try:
             x = sens.step_hill_mtu_rk4(spec, x, k, dt)
@@ -347,5 +347,3 @@ def _finalize_hill_spec(
         spec.tau_deact_s,
         qualified,
     )
-
-

@@ -20,7 +20,7 @@ from src.shared.python.pendulum_simulator.hill_mtu_drive import (
     default_triple_mtu_actuators,
 )
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.xdist_group("hill_mtu_drive")]
 M = DriveMode
 RECEIPT_PATH = (
     Path(__file__).parents[4] / "docs/validation/drive_mode_sensitivity_receipt.json"
