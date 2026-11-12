@@ -159,6 +159,37 @@ def compute_step_jacobian(
     return jacobian
 
 
+def _rk4_compose_stm_step(
+    phi: FloatArray, dt: float, stage_jacobians: Sequence[FloatArray]
+) -> FloatArray:
+    kp1 = stage_jacobians[0] @ phi
+    kp2 = stage_jacobians[1] @ (phi + 0.5 * dt * kp1)
+    kp3 = stage_jacobians[2] @ (phi + 0.5 * dt * kp2)
+    kp4 = stage_jacobians[3] @ (phi + dt * kp3)
+    return phi + (dt / 6.0) * (kp1 + 2.0 * kp2 + 2.0 * kp3 + kp4)
+
+
+def _window_directional_gains(
+    phi_norm: FloatArray, segment_lengths_m: FloatArray, x_final: FloatArray
+) -> dict[str, float]:
+    def _vtip(s: FloatArray) -> float:
+        a, w = np.cumsum(s[:3]), np.cumsum(s[3:])
+        vx, vz = (
+            np.sum(-segment_lengths_m * np.cos(a) * w),
+            np.sum(segment_lengths_m * np.sin(a) * w),
+        )
+        return float(math.hypot(vx, vz))
+
+    h, eye = 1e-7, np.eye(6)
+    g_vt = np.array([_vtip(x_final + h * e) - _vtip(x_final - h * e) for e in eye])
+    u_vt = g_vt / np.linalg.norm(g_vt)
+    u_ln = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0]) / math.sqrt(3.0)
+    return {
+        "grad_v_tip": float(np.linalg.norm(phi_norm @ u_vt)),
+        "in_plane_path_lean_proxy": float(np.linalg.norm(phi_norm @ u_ln)),
+    }
+
+
 def propagate_state_transition_matrix(
     step_fn: Callable[[FloatArray, float, float, Any], FloatArray],
     initial_state: FloatArray,
@@ -543,12 +574,7 @@ def _propagate_hill_mtu_stm(
         s2 = states[k] + 0.5 * dt * k2
         s3 = states[k] + dt * _hill_stage_rhs(hill, s2, k, exc)
         a_st = [_hill_stage_jacobian(hill, st, k) for st in (states[k], s1, s2, s3)]
-        phi = trans[k]
-        kp1 = a_st[0] @ phi
-        kp2 = a_st[1] @ (phi + 0.5 * dt * kp1)
-        kp3 = a_st[2] @ (phi + 0.5 * dt * kp2)
-        kp4 = a_st[3] @ (phi + dt * kp3)
-        trans[k + 1] = phi + (dt / 6.0) * (kp1 + 2.0 * kp2 + 2.0 * kp3 + kp4)
+        trans[k + 1] = _rk4_compose_stm_step(trans[k], dt, a_st)
     return states, trans
 
 
@@ -579,20 +605,7 @@ def _hill_mtu_sensitivity_receipt(
     phi_norm = normalized_transition(phi_joint, scales)
     s_vals = tuple(float(v) for v in np.linalg.svd(phi_norm, compute_uv=False))
     xf = states[-1, :JOINT_STATE_DIM]
-
-    def _vtip(s: FloatArray) -> float:
-        a, w = np.cumsum(s[:3]), np.cumsum(s[3:])
-        vx, vz = np.sum(-lens * np.cos(a) * w), np.sum(lens * np.sin(a) * w)
-        return float(math.hypot(vx, vz))
-
-    h, eye6 = 1e-7, np.eye(6)
-    g_vt = np.array([_vtip(xf + h * e) - _vtip(xf - h * e) for e in eye6])
-    u_vt = g_vt / np.linalg.norm(g_vt)
-    u_ln = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0]) / math.sqrt(3.0)
-    gains = {
-        "grad_v_tip": float(np.linalg.norm(phi_norm @ u_vt)),
-        "in_plane_path_lean_proxy": float(np.linalg.norm(phi_norm @ u_ln)),
-    }
+    gains = _window_directional_gains(phi_norm, lens, xf)
     dt_w = float(nom.times[-1] - nom.times[w_idx])
     ftle = float(math.log(max(s_vals[0], 1e-15)) / dt_w)
     status = "UNVALIDATED" if hill.qualified else "NOT_QUALIFIED"
@@ -668,31 +681,13 @@ def integrate_drive_mode_stm(
         ts = nom.stage_undamped_torques[k] if is_und else [nom.torques[k]] * 4
         st_k = nom.stage_states[k]
         a_st = [_stage_jacobian(dyn, st_k[i], ts[i], t_st[i], imp_m) for i in range(4)]
-        phi = trans[k]
-        kp1 = a_st[0] @ phi
-        kp2 = a_st[1] @ (phi + 0.5 * dt * kp1)
-        kp3 = a_st[2] @ (phi + 0.5 * dt * kp2)
-        kp4 = a_st[3] @ (phi + dt * kp3)
-        trans[k + 1] = phi + (dt / 6.0) * (kp1 + 2.0 * kp2 + 2.0 * kp3 + kp4)
+        trans[k + 1] = _rk4_compose_stm_step(trans[k], dt, a_st)
     w_idx = min(int(round(max(0.0, t_end - window_s) / dt)), n - 1)
     phi_win = np.linalg.solve(trans[w_idx].T, trans[-1].T).T
     phi_norm = normalized_transition(phi_win, scales)
     s_vals = tuple(float(v) for v in np.linalg.svd(phi_norm, compute_uv=False))
     lens = np.array([seg.length_m for seg in dyn.parameters.segments])
-    xf, h, eye = states[-1], 1e-7, np.eye(6)
-
-    def _vtip(s: FloatArray) -> float:
-        a, w = np.cumsum(s[:3]), np.cumsum(s[3:])
-        vx, vz = np.sum(-lens * np.cos(a) * w), np.sum(lens * np.sin(a) * w)
-        return float(math.hypot(vx, vz))
-
-    g_vt = np.array([_vtip(xf + h * e) - _vtip(xf - h * e) for e in eye])
-    u_vt = g_vt / np.linalg.norm(g_vt)
-    u_ln = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0]) / math.sqrt(3.0)
-    gains = {
-        "grad_v_tip": float(np.linalg.norm(phi_norm @ u_vt)),
-        "in_plane_path_lean_proxy": float(np.linalg.norm(phi_norm @ u_ln)),
-    }
+    gains = _window_directional_gains(phi_norm, lens, states[-1])
     hyps = imp.hypotheses if imp is not None else (HYPOTHESIS_ID,)
     dt_w = float(nom.times[-1] - nom.times[w_idx])
     ftle = float(math.log(max(s_vals[0], 1e-15)) / dt_w)

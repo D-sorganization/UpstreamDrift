@@ -100,7 +100,11 @@ def default_triple_mtu_actuators(
         )
 
     joint_scales = (18.0, 7.0, 2.5)
-    return tuple(_one(joint_scales[j], float(q_ref[j])) for j in range(3))
+    return (
+        _one(joint_scales[0], float(q_ref[0])),
+        _one(joint_scales[1], float(q_ref[1])),
+        _one(joint_scales[2], float(q_ref[2])),
+    )
 
 
 def invert_excitation(
@@ -214,7 +218,9 @@ def build_matched_excitation(
         raise TypeError("nominal must be NominalTrajectory")
     n = len(nominal.torques)
     dt = float(nominal.times[1] - nominal.times[0])
-    acts = tuple(
+    if len(actuators) != 3:
+        raise ValueError("expected three joint actuators")
+    rebuilt = [
         MTUJointActuator(
             a.agonist,
             a.antagonist,
@@ -223,6 +229,11 @@ def build_matched_excitation(
             activation=a._activation,
         )
         for a in actuators
+    ]
+    acts: tuple[MTUJointActuator, MTUJointActuator, MTUJointActuator] = (
+        rebuilt[0],
+        rebuilt[1],
+        rebuilt[2],
     )
     dynamics = acts[0]._activation
     a_target = np.zeros((n, 3, 2), dtype=np.float64)
