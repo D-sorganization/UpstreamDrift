@@ -72,15 +72,6 @@ _BUTTERWORTH_12HZ = FilterDifferentiationDescriptor(
     min_sampling_hz=60.0,
 )
 
-_COMMON_META = {
-    "dimension": DimensionKind.three_d,
-    "cardan_order": "ZXY",
-    "normalisation": NormalisationKind.none,
-    "source": SourceKind.measured,
-    "definition_version": "1.0.0",
-    "filter_descriptor": _BUTTERWORTH_12HZ,
-}
-
 XFACTOR_STRETCH_CHEETHAM_ENTRY = GolfMetricDefinitionEntry(
     metric_id="x_factor.stretch.cheetham_2001",
     segments=("pelvis", "thorax"),
@@ -90,7 +81,12 @@ XFACTOR_STRETCH_CHEETHAM_ENTRY = GolfMetricDefinitionEntry(
     units="deg",
     event_anchors=("top", "early_downswing", "impact"),
     cites=("Cheetham et al. (2001)", "Optimising Performance in Golf"),
-    **_COMMON_META,
+    dimension=DimensionKind.three_d,
+    cardan_order="ZXY",
+    normalisation=NormalisationKind.none,
+    source=SourceKind.measured,
+    definition_version="1.0.0",
+    filter_descriptor=_BUTTERWORTH_12HZ,
 )
 
 KINEMATIC_SEQUENCE_CHEETHAM_ENTRY = GolfMetricDefinitionEntry(
@@ -102,8 +98,27 @@ KINEMATIC_SEQUENCE_CHEETHAM_ENTRY = GolfMetricDefinitionEntry(
     units="deg/s",
     event_anchors=("downswing", "impact"),
     cites=("Cheetham et al. (2008)", "World Scientific Congress of Golf V"),
-    **_COMMON_META,
+    dimension=DimensionKind.three_d,
+    cardan_order="ZXY",
+    normalisation=NormalisationKind.none,
+    source=SourceKind.measured,
+    definition_version="1.0.0",
+    filter_descriptor=_BUTTERWORTH_12HZ,
 )
+
+
+def _matched_degree_series(
+    values: NDArray[np.floating] | list[float],
+    times_s: NDArray[np.floating] | list[float],
+) -> tuple[NDArray[np.floating], NDArray[np.floating]]:
+    xf = np.asarray(values, dtype=float).reshape(-1)
+    ts = np.asarray(times_s, dtype=float).reshape(-1)
+    require(
+        xf.size == ts.size and xf.size >= 2,
+        "arrays must match length >= 2",
+        (xf.size, ts.size),
+    )
+    return xf, ts
 
 
 def compute_cheetham_xfactor_stretch(
@@ -113,15 +128,7 @@ def compute_cheetham_xfactor_stretch(
     impact_idx: int | None = None,
 ) -> CheethamXFactorStretchResult:
     """Compute X-factor stretch per Cheetham et al. (2001)."""
-    xf, ts = (
-        np.asarray(x_factor_deg, dtype=float).reshape(-1),
-        np.asarray(times_s, dtype=float).reshape(-1),
-    )
-    require(
-        xf.size == ts.size and xf.size >= 2,
-        "arrays must match length >= 2",
-        (xf.size, ts.size),
-    )
+    xf, ts = _matched_degree_series(x_factor_deg, times_s)
     require(0 <= top_idx < xf.size, "top_idx out of bounds", top_idx)
     if impact_idx is not None:
         require(
@@ -149,15 +156,7 @@ def compute_xfactor_velocity(
     times_s: NDArray[np.floating] | list[float],
 ) -> tuple[NDArray[np.floating], float]:
     """Compute X-factor velocity (d/dt) and peak absolute rate."""
-    xf, ts = (
-        np.asarray(x_factor_deg, dtype=float).reshape(-1),
-        np.asarray(times_s, dtype=float).reshape(-1),
-    )
-    require(
-        xf.size == ts.size and xf.size >= 2,
-        "arrays must match length >= 2",
-        (xf.size, ts.size),
-    )
+    xf, ts = _matched_degree_series(x_factor_deg, times_s)
     vel = np.gradient(xf, ts)
     return vel, float(np.max(np.abs(vel)))
 
