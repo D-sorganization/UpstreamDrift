@@ -74,6 +74,20 @@ def _render_markdown(inventory: dict[str, object]) -> str:
     for row in inventory["putting_tools"]:
         reason = row.get("unavailable_reason") or "—"
         lines.append(f"| `{row['id']}` | {row['runtime_status']} | {reason} |")
+    agent_caps = inventory.get("agent_capabilities") or []
+    if agent_caps:
+        lines.extend(
+            [
+                "",
+                "## Agent Capabilities",
+                "",
+                "| Tool | Runtime Status | Unavailable Reason |",
+                "| :--- | :---: | :--- |",
+            ]
+        )
+        for row in agent_caps:
+            reason = row.get("unavailable_reason") or "—"
+            lines.append(f"| `{row['id']}` | {row['runtime_status']} | {reason} |")
     lines.append("")
     return "\n".join(lines)
 

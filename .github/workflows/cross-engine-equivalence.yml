@@ -393,8 +393,7 @@ jobs:
           python -m pip install --ignore-installed pathspec hatchling editables
           # Re-bootstrap before editable install (pip 26.x get_runnable_pip on self-hosted).
           python -m ensurepip --upgrade || true
-          python -m pip install --ignore-installed --no-deps pip
-          pip install -e ".[dev]" --no-build-isolation
+          pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
           python3 scripts/ci/bootstrap_conformance_deps.py
           pip uninstall -y pytest-vcr pytest-recording || true
 
