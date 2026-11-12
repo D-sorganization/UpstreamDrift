@@ -96,13 +96,17 @@ function deriveConnectionStatus(phase: SimulationPhase): ConnectionStatus {
     case "idle":
     case "completed":
     case "stopped":
+    case "disconnected":
       return "disconnected";
     case "connecting":
       return "connecting";
     case "starting":
     case "running":
+    case "paused":
+    case "stopping":
       return "connected";
     case "failed":
+    case "faulted":
       return "failed";
     case "lost":
       return "lost";
@@ -220,7 +224,7 @@ export function useSimulation(engineType: string) {
       wsRef.current = ws;
 
       ws.onopen = () => {
-        if (runId !== runIdSeqRef.current) return;
+        if (ws !== wsRef.current || runId !== runIdSeqRef.current) return;
         handshakeCompleted = true;
         if (!isMountedRef.current) return;
 
@@ -246,7 +250,7 @@ export function useSimulation(engineType: string) {
       };
 
       ws.onmessage = (event) => {
-        if (runId !== runIdSeqRef.current) return;
+        if (ws !== wsRef.current || runId !== runIdSeqRef.current) return;
         if (!isMountedRef.current) return;
         try {
           const data = JSON.parse(event.data);
@@ -295,7 +299,7 @@ export function useSimulation(engineType: string) {
       };
 
       ws.onerror = () => {
-        if (runId !== runIdSeqRef.current) return;
+        if (ws !== wsRef.current || runId !== runIdSeqRef.current) return;
         logger.error("WebSocket error occurred");
         if (isMountedRef.current) {
           setTransportError("WebSocket connection error — check server status");
@@ -306,7 +310,7 @@ export function useSimulation(engineType: string) {
       // launcher-guard retry that could not obtain a token. Never leaves the UI
       // sitting on 'connecting' — an indefinite spinner is its own defect.
       const markConnectionLost = (reason: string) => {
-        if (runId !== runIdSeqRef.current) return;
+        if (ws !== wsRef.current || runId !== runIdSeqRef.current) return;
         if (!isMountedRef.current) return;
         logger.warn(reason);
         const message =
@@ -316,7 +320,7 @@ export function useSimulation(engineType: string) {
       };
 
       ws.onclose = (event) => {
-        if (runId !== runIdSeqRef.current) return;
+        if (ws !== wsRef.current || runId !== runIdSeqRef.current) return;
         if (!isMountedRef.current) return;
 
         // Clean close (code 1000) or user-initiated stop — nothing to recover.
@@ -442,8 +446,14 @@ export function useSimulation(engineType: string) {
   // that fire-and-forget (event handlers) previously turned the re-thrown error
   // into an `unhandledrejection`. A result object makes the failure contract
   // explicit (DbC) so callers can surface it via the existing error toast.
+  // Sends over the WebSocket when active (#14950 item 7) to preserve ordering
+  // with pause/stop frames, and synchronizes with the REST endpoint.
   const setSpeed = useCallback(
     async (speed: number): Promise<SetSpeedResult> => {
+      const ws = wsRef.current;
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ action: "set_speed", speed_factor: speed }));
+      }
       try {
         await apiFetch<unknown>("/api/simulation/speed", {
           method: "POST",
@@ -485,10 +495,22 @@ export function useSimulation(engineType: string) {
   const isPaused = deriveIsPaused(lifecycle.phase, lifecycle.paused);
   const wsError = lifecycle.failureMessage ?? transportError;
   const phase = lifecycle.phase;
+  const isConnected = connectionStatus === "connected";
+  const error = wsError;
+  const status = {
+    phase,
+    isConnected,
+    isRunning,
+    isPaused,
+    error,
+  };
 
   return {
     isRunning,
     isPaused,
+    isConnected,
+    error,
+    status,
     phase,
     runId: lifecycle.runId,
     currentFrame,

@@ -70,6 +70,41 @@ impl TrajectoryPoint {
     }
 }
 
+/// Per-step force snapshot evaluated at the integrated state (issue #14937).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "python", pyo3::prelude::pyclass)]
+pub struct IntegratedStepForces {
+    /// Gravitational force [N]
+    pub gravity: [f64; 3],
+    /// Drag force [N]
+    pub drag: [f64; 3],
+    /// Magnus force [N]
+    pub magnus: [f64; 3],
+    /// Acceleration implied by gravity + aerodynamics [m/s²]
+    pub acceleration: [f64; 3],
+}
+
+#[cfg(feature = "python")]
+#[pyo3::prelude::pymethods]
+impl IntegratedStepForces {
+    #[getter]
+    fn gravity(&self) -> [f64; 3] {
+        self.gravity
+    }
+    #[getter]
+    fn drag(&self) -> [f64; 3] {
+        self.drag
+    }
+    #[getter]
+    fn magnus(&self) -> [f64; 3] {
+        self.magnus
+    }
+    #[getter]
+    fn acceleration(&self) -> [f64; 3] {
+        self.acceleration
+    }
+}
+
 /// Result of a ball trajectory simulation.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "python", pyo3::prelude::pyclass)]
@@ -80,6 +115,8 @@ pub struct BallTrajectoryResult {
     pub completed: bool,
     /// Number of integration steps taken.
     pub steps: usize,
+    /// Forces at each trajectory point from the integrated aerodynamic model.
+    pub step_forces: Vec<IntegratedStepForces>,
 }
 
 #[cfg(feature = "python")]
@@ -114,6 +151,42 @@ impl BallTrajectoryResult {
             .iter()
             .map(|p| vec![p.t, p.x, p.y, p.z, p.vx, p.vy, p.vz])
             .collect()
+    }
+
+    /// Per-step forces from the integrator's aerodynamic model (empty when not recorded).
+    fn get_step_forces(&self) -> Vec<IntegratedStepForces> {
+        self.step_forces.clone()
+    }
+}
+
+fn integrated_forces_at_state(
+    state: &[f64],
+    spin_axis_v: &Vector3,
+    gravity_v: &Vector3,
+    wind_v: &Vector3,
+    ball: &AeroBallProperties,
+    air: &AirProperties,
+) -> IntegratedStepForces {
+    let velocity = Vector3::new(state[3], state[4], state[5]);
+    let omega = state[6];
+    let rel_vel = velocity - *wind_v;
+    let spin = *spin_axis_v * omega;
+    let forces = compute_aero_forces(&rel_vel, &spin, ball, air);
+    let gravity = [
+        gravity_v.x * ball.mass,
+        gravity_v.y * ball.mass,
+        gravity_v.z * ball.mass,
+    ];
+    let drag = [forces.drag.x, forces.drag.y, forces.drag.z];
+    let magnus = [forces.magnus.x, forces.magnus.y, forces.magnus.z];
+    let ax = gravity_v.x + (forces.drag.x + forces.magnus.x + forces.lift.x) / ball.mass;
+    let ay = gravity_v.y + (forces.drag.y + forces.magnus.y + forces.lift.y) / ball.mass;
+    let az = gravity_v.z + (forces.drag.z + forces.magnus.z + forces.lift.z) / ball.mass;
+    IntegratedStepForces {
+        gravity,
+        drag,
+        magnus,
+        acceleration: [ax, ay, az],
     }
 }
 
@@ -153,6 +226,7 @@ pub fn simulate_ball_trajectory(
     ball: &AeroBallProperties,
     air: &AirProperties,
     config: &IntegratorConfig,
+    record_integrated_forces: bool,
 ) -> Result<BallTrajectoryResult, String> {
     if !pos0.iter().all(|v| v.is_finite()) {
         return Err("initial position must be finite".to_string());
@@ -180,8 +254,10 @@ pub fn simulate_ball_trajectory(
     let y0 = [pos0[0], pos0[1], pos0[2], vel0[0], vel0[1], vel0[2], omega0];
 
     // Capture by reference using owned copies for the closure
-    let ball = ball.clone();
-    let air = air.clone();
+    let ball_record = ball.clone();
+    let air_record = air.clone();
+    let ball_integrate = ball.clone();
+    let air_integrate = air.clone();
     // Normalize spin_axis to unit vector; fall back to Z-axis if near-zero
     let raw_spin = Vector3::new(spin_axis[0], spin_axis[1], spin_axis[2]);
     let spin_axis_v = {
@@ -195,6 +271,9 @@ pub fn simulate_ball_trajectory(
     };
     let gravity_v = Vector3::new(gravity[0], gravity[1], gravity[2]);
     let wind_v = Vector3::new(wind[0], wind[1], wind[2]);
+    let spin_axis_record = spin_axis_v;
+    let wind_record = wind_v;
+    let gravity_record = gravity_v;
 
     let derivative = move |_t: f64, state: &[f64]| -> Vec<f64> {
         let velocity = Vector3::new(state[3], state[4], state[5]);
@@ -207,16 +286,16 @@ pub fn simulate_ball_trajectory(
         let spin = spin_axis_v * omega;
 
         // Aerodynamic forces [N]
-        let forces = compute_aero_forces(&rel_vel, &spin, &ball, &air);
+        let forces = compute_aero_forces(&rel_vel, &spin, &ball_integrate, &air_integrate);
         let total_aero = forces.drag + forces.lift + forces.magnus;
 
         // Acceleration = gravity + F_aero / mass
-        let ax = gravity_v.x + total_aero.x / ball.mass;
-        let ay = gravity_v.y + total_aero.y / ball.mass;
-        let az = gravity_v.z + total_aero.z / ball.mass;
+        let ax = gravity_v.x + total_aero.x / ball_integrate.mass;
+        let ay = gravity_v.y + total_aero.y / ball_integrate.mass;
+        let az = gravity_v.z + total_aero.z / ball_integrate.mass;
 
         // d(omega)/dt = -spin_decay_rate * omega (continuous exponential decay)
-        let domega = -ball.spin_decay_rate * omega;
+        let domega = -ball_integrate.spin_decay_rate * omega;
 
         vec![velocity.x, velocity.y, velocity.z, ax, ay, az, domega]
     };
@@ -252,10 +331,30 @@ pub fn simulate_ball_trajectory(
         .map(|p| p.z <= 0.0 && p.t > 0.05)
         .unwrap_or(false);
 
+    let step_forces = if record_integrated_forces {
+        result
+            .states
+            .chunks(state_dim)
+            .map(|state| {
+                integrated_forces_at_state(
+                    state,
+                    &spin_axis_record,
+                    &gravity_record,
+                    &wind_record,
+                    &ball_record,
+                    &air_record,
+                )
+            })
+            .collect()
+    } else {
+        Vec::new()
+    };
+
     Ok(BallTrajectoryResult {
         completed: result.completed || landed,
         steps: result.steps_taken,
         points,
+        step_forces,
     })
 }
 
@@ -290,6 +389,7 @@ mod tests {
             &ball,
             &AirProperties::default(),
             &default_config(),
+            false,
         );
         assert!(result.is_err(), "invalid ball mass must be rejected");
     }
@@ -306,6 +406,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         );
         assert!(result.is_err(), "non-finite position must be rejected");
     }
@@ -328,6 +429,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
 
@@ -375,6 +477,7 @@ mod tests {
             &ball,
             &air,
             &config,
+            false,
         )
         .unwrap();
 
@@ -412,6 +515,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
         let result2 = simulate_ball_trajectory(
@@ -424,6 +528,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
 
@@ -456,6 +561,7 @@ mod tests {
             &fast_decay,
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
         let result_slow = simulate_ball_trajectory(
@@ -468,6 +574,7 @@ mod tests {
             &slow_decay,
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
 
@@ -498,6 +605,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
 
@@ -511,6 +619,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
 
@@ -536,6 +645,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
 
@@ -559,6 +669,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
         let result_scaled = simulate_ball_trajectory(
@@ -571,6 +682,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
 
@@ -586,5 +698,39 @@ mod tests {
             last_unit.x,
             last_scaled.x
         );
+    }
+
+    #[test]
+    fn test_integrated_step_forces_match_newton_and_state_accel() {
+        let ball = AeroBallProperties::default();
+        let air = AirProperties::default();
+        let result = simulate_ball_trajectory(
+            [0.0, 0.0, 0.0],
+            [60.0, 0.0, 12.0],
+            [0.0, -1.0, 0.0],
+            2500.0 * std::f64::consts::PI / 30.0,
+            [0.0, 0.0, -9.81],
+            [0.0, 0.0, 0.0],
+            &ball,
+            &air,
+            &IntegratorConfig {
+                dt: 0.01,
+                max_steps: 200,
+            },
+            true,
+        )
+        .unwrap();
+        assert_eq!(result.points.len(), result.step_forces.len());
+        for forces in &result.step_forces {
+            let fx = forces.gravity[0] + forces.drag[0] + forces.magnus[0];
+            let fy = forces.gravity[1] + forces.drag[1] + forces.magnus[1];
+            let fz = forces.gravity[2] + forces.drag[2] + forces.magnus[2];
+            let ax = fx / ball.mass;
+            let ay = fy / ball.mass;
+            let az = fz / ball.mass;
+            assert!((ax - forces.acceleration[0]).abs() < 1e-9);
+            assert!((ay - forces.acceleration[1]).abs() < 1e-9);
+            assert!((az - forces.acceleration[2]).abs() < 1e-9);
+        }
     }
 }
