@@ -399,13 +399,213 @@ def step_drive_mode_rk4(
     return x + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
 
 
+def _hill_muscle_torques(
+    hill: Any, q: FloatArray, v: FloatArray, mtu_states: list[Any]
+) -> tuple[float, float, float]:
+    return tuple(
+        hill.actuators[j].torque(float(q[j]), float(v[j]), mtu_states[j])
+        for j in range(3)
+    )
+
+
+def _hill_stage_rhs(hill: Any, x: FloatArray, k: int, u_step: np.ndarray) -> FloatArray:
+    from double_pendulum_model.physics import triple_pendulum as tp
+    from src.shared.python.pendulum_simulator import drive_modes as dm
+    from src.shared.python.pendulum_simulator.hill_mtu_drive import (
+        _equilibrium_state,
+        solve_matched_activations,
+        unpack_hill_state,
+    )
+
+    qv, mtu_states = unpack_hill_state(x)
+    q, v = qv[:3], qv[3:]
+    tau_cmd = hill.torque_command_nm[k]
+    for j in range(3):
+        a_ag, a_ant, _ = solve_matched_activations(
+            hill.actuators[j],
+            float(q[j]),
+            float(v[j]),
+            float(tau_cmd[j]),
+            hill.cocontraction,
+        )
+        mtu_states[j] = _equilibrium_state(
+            hill.actuators[j], float(q[j]), a_ag, a_ant
+        )
+    tau = _hill_muscle_torques(hill, q, v, mtu_states)
+    acc = dm._CANONICAL_DYN.forward_dynamics(tp.TriplePendulumState(*q, *v), tau)
+    joint_dot = np.array([v[0], v[1], v[2], acc[0], acc[1], acc[2]], dtype=np.float64)
+    mtu_dot = np.zeros(12, dtype=np.float64)
+    return np.concatenate([joint_dot, mtu_dot])
+
+
+def step_hill_mtu_rk4(hill: Any, x: FloatArray, k: int, dt: float) -> FloatArray:
+    u = hill.excitation[k]
+
+    def _ev(st: FloatArray) -> FloatArray:
+        return _hill_stage_rhs(hill, st, k, u)
+
+    k1 = _ev(x)
+    k2 = _ev(x + 0.5 * dt * k1)
+    k3 = _ev(x + 0.5 * dt * k2)
+    k4 = _ev(x + dt * k3)
+    return x + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+
+
+def _hill_stage_jacobian(hill: Any, x_ref: FloatArray, k: int) -> FloatArray:
+    h, eye = 1e-7, np.eye(HILL_STATE_DIM := 18)
+    u = hill.excitation[k]
+    out = np.zeros((HILL_STATE_DIM, HILL_STATE_DIM), dtype=np.float64)
+    for j in range(HILL_STATE_DIM):
+        up = _hill_stage_rhs(hill, x_ref + h * eye[j], k, u)
+        lo = _hill_stage_rhs(hill, x_ref - h * eye[j], k, u)
+        out[:, j] = (up - lo) / (2.0 * h)
+    return out
+
+
+def _initial_hill_state(hill: Any, nom: Any) -> FloatArray:
+    from src.shared.python.pendulum_simulator.hill_mtu_drive import (
+        _equilibrium_state,
+        pack_hill_state,
+    )
+
+    q0, v0 = nom.q[0], nom.v[0]
+    mtu: list[Any] = []
+    for j in range(3):
+        a_ag, a_ant = hill.activation_target[0, j, 0], hill.activation_target[0, j, 1]
+        mtu.append(_equilibrium_state(hill.actuators[j], float(q0[j]), a_ag, a_ant))
+    return pack_hill_state(np.concatenate([q0, v0]), mtu)
+
+
+def rollout_hill_mtu(hill: Any, nom: Any) -> FloatArray:
+    """Forward 3DOF states under open-loop HILL_MTU excitation."""
+    from src.shared.python.pendulum_simulator.hill_mtu_drive import JOINT_STATE_DIM
+
+    n = len(nom.torques)
+    dt = float(nom.times[1] - nom.times[0])
+    x = _initial_hill_state(hill, nom)
+    out = np.empty((n + 1, JOINT_STATE_DIM), dtype=np.float64)
+    out[0] = x[:JOINT_STATE_DIM]
+    for k in range(n):
+        x = step_hill_mtu_rk4(hill, x, k, dt)
+        out[k + 1] = x[:JOINT_STATE_DIM]
+    return out
+
+
+def integrate_hill_mtu_stm(
+    hill: Any, nom: Any, window_s: float = 0.15
+) -> tuple[FloatArray, FloatArray, FloatArray, Any]:
+    from src.shared.python.loop_nullspace.impedance_spec import HYPOTHESIS_ID
+    from src.shared.python.pendulum_simulator import drive_modes as dm
+    from src.shared.python.pendulum_simulator.hill_mtu_drive import (
+        HILL_STATE_DIM,
+        JOINT_STATE_DIM,
+    )
+
+    if not hill.qualified:
+        jv = np.concatenate([nom.q[0], nom.v[0]])
+        eye6 = np.eye(JOINT_STATE_DIM, dtype=np.float64)
+        rec = dm.DriveModeSensitivityReceipt(
+            dm.DriveMode.HILL_MTU.value,
+            (HYPOTHESIS_ID,),
+            float("nan"),
+            (),
+            float("nan"),
+            float("nan"),
+            {"grad_v_tip": float("nan"), "in_plane_path_lean_proxy": float("nan")},
+            eye6,
+            validation_status="NOT_QUALIFIED",
+            cocontraction=hill.cocontraction,
+            tendon_mode=hill.tendon_mode.value,
+            tau_act_s=hill.tau_act_s,
+            tau_deact_s=hill.tau_deact_s,
+            residual_torque_rms_nm=hill.residual_torque_rms_nm,
+            effective_kq_mean=float(np.nanmean(hill.effective_kq)),
+            effective_dq_mean=float(np.nanmean(hill.effective_dq)),
+        )
+        return np.asarray([jv], dtype=np.float64), np.eye(HILL_STATE_DIM), eye6, rec
+
+    t_end = float(nom.times[-1])
+    if not math.isfinite(window_s) or window_s <= 0.0 or window_s > t_end + 1e-12:
+        raise ValueError("window_s must lie inside (0, t_e]")
+    n, dt = len(nom.torques), float(nom.times[1] - nom.times[0])
+    states, trans = np.empty((n + 1, HILL_STATE_DIM)), np.empty(
+        (n + 1, HILL_STATE_DIM, HILL_STATE_DIM)
+    )
+    states[0], trans[0] = _initial_hill_state(hill, nom), np.eye(HILL_STATE_DIM)
+    for k in range(n):
+        states[k + 1] = step_hill_mtu_rk4(hill, states[k], k, dt)
+        k1 = _hill_stage_rhs(hill, states[k], k, hill.excitation[k])
+        s1 = states[k] + 0.5 * dt * k1
+        k2 = _hill_stage_rhs(hill, s1, k, hill.excitation[k])
+        s2 = states[k] + 0.5 * dt * k2
+        s3 = states[k] + dt * _hill_stage_rhs(hill, s2, k, hill.excitation[k])
+        stage_states = (states[k], s1, s2, s3)
+        a_st = [_hill_stage_jacobian(hill, st, k) for st in stage_states]
+        phi = trans[k]
+        kp1 = a_st[0] @ phi
+        kp2 = a_st[1] @ (phi + 0.5 * dt * kp1)
+        kp3 = a_st[2] @ (phi + 0.5 * dt * kp2)
+        kp4 = a_st[3] @ (phi + dt * kp3)
+        trans[k + 1] = phi + (dt / 6.0) * (kp1 + 2.0 * kp2 + 2.0 * kp3 + kp4)
+    w_idx = min(int(round(max(0.0, t_end - window_s) / dt)), n - 1)
+    phi_win = np.linalg.solve(trans[w_idx].T, trans[-1].T).T
+    phi_joint = phi_win[:JOINT_STATE_DIM, :JOINT_STATE_DIM]
+    phi_norm = normalized_transition(phi_joint, StateScales((1.0, 1.0, 1.0, 10.0, 10.0, 10.0)))
+    s_vals = tuple(float(v) for v in np.linalg.svd(phi_norm, compute_uv=False))
+    lens = np.array([seg.length_m for seg in dm._UNDAMPED_DYN.parameters.segments])
+    xf = states[-1, :JOINT_STATE_DIM]
+
+    def _vtip(s: FloatArray) -> float:
+        a, w = np.cumsum(s[:3]), np.cumsum(s[3:])
+        vx, vz = np.sum(-lens * np.cos(a) * w), np.sum(lens * np.sin(a) * w)
+        return float(math.hypot(vx, vz))
+
+    h, eye6 = 1e-7, np.eye(6)
+    g_vt = np.array([_vtip(xf + h * e) - _vtip(xf - h * e) for e in eye6])
+    u_vt = g_vt / np.linalg.norm(g_vt)
+    u_ln = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0]) / math.sqrt(3.0)
+    gains = {
+        "grad_v_tip": float(np.linalg.norm(phi_norm @ u_vt)),
+        "in_plane_path_lean_proxy": float(np.linalg.norm(phi_norm @ u_ln)),
+    }
+    dt_w = float(nom.times[-1] - nom.times[w_idx])
+    ftle = float(math.log(max(s_vals[0], 1e-15)) / dt_w)
+    det_w = float(np.linalg.det(phi_joint))
+    kq_mean = float(np.nanmean(hill.effective_kq))
+    dq_mean = float(np.nanmean(hill.effective_dq))
+    status = "UNVALIDATED" if hill.qualified else "NOT_QUALIFIED"
+    rec = dm.DriveModeSensitivityReceipt(
+        dm.DriveMode.HILL_MTU.value,
+        (HYPOTHESIS_ID,),
+        s_vals[0],
+        s_vals,
+        ftle,
+        det_w,
+        gains,
+        phi_norm,
+        validation_status=status,
+        cocontraction=hill.cocontraction,
+        tendon_mode=hill.tendon_mode.value,
+        tau_act_s=hill.tau_act_s,
+        tau_deact_s=hill.tau_deact_s,
+        residual_torque_rms_nm=hill.residual_torque_rms_nm,
+        effective_kq_mean=kq_mean,
+        effective_dq_mean=dq_mean,
+    )
+    return states[:, :JOINT_STATE_DIM], trans[-1], phi_joint, rec
+
+
 def integrate_drive_mode_stm(
-    mode: Any, nom: Any, imp: Any = None, window_s: float = 0.15
+    mode: Any, nom: Any, imp: Any = None, window_s: float = 0.15, *, hill: Any = None
 ) -> tuple[FloatArray, FloatArray, FloatArray, Any]:
     from src.shared.python.loop_nullspace.impedance_spec import HYPOTHESIS_ID
     from src.shared.python.pendulum_simulator import drive_modes as dm
 
     m = dm._coerce_mode(mode)
+    if m is dm.DriveMode.HILL_MTU:
+        if hill is None:
+            raise ValueError("hill spec is required for HILL_MTU")
+        return integrate_hill_mtu_stm(hill, nom, window_s=window_s)
     t_end = float(nom.times[-1])
     if not math.isfinite(window_s) or window_s <= 0.0 or window_s > t_end + 1e-12:
         raise ValueError("window_s must lie inside (0, t_e]")
