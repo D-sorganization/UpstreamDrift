@@ -151,3 +151,4 @@ def test_on_message_error_branch_calls_file_upload_rejection() -> None:
     error_idx = dock_source.index('elif msg_type == "error":')
     error_block = dock_source[error_idx : error_idx + 500]
     assert "_apply_file_upload_rejection" in error_block
+    assert 'msg_type == "error"' in dock_source
