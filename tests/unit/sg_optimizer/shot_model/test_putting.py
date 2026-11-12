@@ -4,12 +4,25 @@ from __future__ import annotations
 
 import pytest
 
+from src.shared.python.putting_validation.reference_data import get_series
 from src.shared.python.sg_optimizer.course.conditions import GreenModel
 from src.shared.python.sg_optimizer.shot_model.player_profile import PuttingSkill
 from src.shared.python.sg_optimizer.shot_model.putting import (
+    _baseline_make,
     leave_distance_distribution,
     make_probability,
 )
+
+_BASELINE_SERIES = get_series("sg_optimizer_documented_anchors")
+
+
+def test_baseline_logistic_matches_reference_distances() -> None:
+    for distance_ft, expected in zip(
+        _BASELINE_SERIES.distances_ft,
+        _BASELINE_SERIES.values,
+        strict=True,
+    ):
+        assert _baseline_make(distance_ft) == pytest.approx(expected, rel=0, abs=1e-12)
 
 
 def test_make_probability_monotonic_decreasing():
