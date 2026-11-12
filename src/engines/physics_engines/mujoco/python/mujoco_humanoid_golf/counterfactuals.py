@@ -222,18 +222,25 @@ class CounterfactualAnalyzer:
         )
 
     def control_component_at(self, qpos: np.ndarray, ctrl: np.ndarray) -> np.ndarray:
-        """SPEC §4 ZVCF control acceleration ``M(q)⁻¹ τ`` at ``q`` (#14943)."""
+        """SPEC §4 ZVCF control acceleration ``M(q)⁻¹ τ`` at ``q`` (#14943).
+
+        ``ctrl`` names the legacy parameter; the vector is generalized force
+        ``τ`` with ``nv`` entries, not MuJoCo actuator commands (``nu``).
+        """
         if qpos is None or ctrl is None:
             raise ValueError("qpos and ctrl must be provided")
-        ctrl_arr = np.asarray(ctrl, dtype=float).reshape(-1)
-        if ctrl_arr.size == self.model.nv and ctrl_arr.size != self.model.nu:
-            self._data_counterfactual.qpos[:] = qpos
-            self._data_counterfactual.qvel[:] = 0
-            self._data_counterfactual.ctrl[:] = 0
-            mujoco.mj_forward(self.model, self._data_counterfactual)
-            mass = full_mass_matrix(mujoco, self.model, self._data_counterfactual)
-            return np.linalg.solve(mass, ctrl_arr)
-        return self._control_acceleration(self._data_counterfactual, qpos, ctrl_arr)
+        tau_arr = np.asarray(ctrl, dtype=float).reshape(-1)
+        if tau_arr.size != self.model.nv:
+            raise ValueError(
+                f"tau must have {self.model.nv} generalized-force entries, "
+                f"got {tau_arr.size}"
+            )
+        self._data_counterfactual.qpos[:] = qpos
+        self._data_counterfactual.qvel[:] = 0
+        self._data_counterfactual.ctrl[:] = 0
+        mujoco.mj_forward(self.model, self._data_counterfactual)
+        mass = full_mass_matrix(mujoco, self.model, self._data_counterfactual)
+        return np.linalg.solve(mass, tau_arr)
 
     def _control_acceleration(
         self, data: mujoco.MjData, qpos: np.ndarray, ctrl: np.ndarray

@@ -23,6 +23,27 @@ DOUBLE_PENDULUM_URDF = (
     Path(__file__).resolve().parents[2] / "fixtures" / "models" / "double_pendulum.urdf"
 )
 
+# Two hinge joints, two motors: nu == nv (dimension-ambiguity regression #14943).
+NU_EQ_NV_MJCF = """
+<mujoco model="nu_eq_nv">
+  <option gravity="0 0 -9.81"/>
+  <worldbody>
+    <body name="link1" pos="0 0 1">
+      <joint name="j1" type="hinge" axis="0 1 0"/>
+      <geom type="capsule" fromto="0 0 0 0 0 -0.5" size="0.05" mass="1"/>
+      <body name="link2" pos="0 0 -0.5">
+        <joint name="j2" type="hinge" axis="0 1 0"/>
+        <geom type="capsule" fromto="0 0 0 0 0 -0.5" size="0.05" mass="1"/>
+      </body>
+    </body>
+  </worldbody>
+  <actuator>
+    <motor joint="j1" gear="1"/>
+    <motor joint="j2" gear="1"/>
+  </actuator>
+</mujoco>
+"""
+
 
 def test_mujoco_counterfactual_result_stamps_definition_version() -> None:
     z = np.zeros(3)
@@ -116,6 +137,67 @@ def test_mujoco_compute_control_acceleration_at_state_evaluates_at_q_and_restore
     mass_target = full_mass_matrix(mujoco, engine.model, engine.data)
     expected_acc = np.linalg.solve(mass_target, tau_nv)
     np.testing.assert_allclose(acc, expected_acc)
+
+
+@require_engine("mujoco")
+def test_mujoco_control_at_state_treats_tau_as_generalized_force_when_nu_eq_nv() -> (
+    None
+):
+    import mujoco
+
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+        MuJoCoPhysicsEngine,
+    )
+    from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
+
+    model = mujoco.MjModel.from_xml_string(NU_EQ_NV_MJCF)
+    assert model.nu == model.nv == 2
+
+    engine = MuJoCoPhysicsEngine()
+    engine.model = model
+    engine.data = mujoco.MjData(model)
+
+    q_target = np.array([0.4, -0.3])
+    tau = np.array([2.0, -1.25])
+
+    acc = engine.compute_control_acceleration_at_state(q_target, tau)
+
+    data = mujoco.MjData(model)
+    data.qpos[:] = q_target
+    data.qvel[:] = 0.0
+    data.ctrl[:] = 0.0
+    mujoco.mj_forward(model, data)
+    mass = full_mass_matrix(mujoco, model, data)
+    expected = np.linalg.solve(mass, tau)
+    np.testing.assert_allclose(acc, expected)
+
+
+@require_engine("mujoco")
+def test_mujoco_counterfactual_control_component_at_tau_not_actuator_ctrl() -> None:
+    import mujoco
+
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.counterfactuals import (
+        CounterfactualAnalyzer,
+    )
+    from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
+
+    model = mujoco.MjModel.from_xml_string(NU_EQ_NV_MJCF)
+    assert model.nu == model.nv == 2
+
+    analyzer = CounterfactualAnalyzer(model)
+    qpos = np.array([0.5, 0.2])
+    tau = np.array([0.75, -0.5])
+
+    acc = analyzer.control_component_at(qpos, tau)
+
+    data = mujoco.MjData(model)
+    data.qpos[:] = qpos
+    data.qvel[:] = 0.0
+    data.ctrl[:] = 0.0
+    mujoco.mj_forward(model, data)
+    mass = full_mass_matrix(mujoco, model, data)
+    expected = np.linalg.solve(mass, tau)
+    np.testing.assert_allclose(acc, expected)
 
 
 @require_engine("pinocchio")

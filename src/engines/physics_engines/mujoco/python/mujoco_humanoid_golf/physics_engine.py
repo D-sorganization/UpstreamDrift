@@ -892,16 +892,15 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
         try:
             self.data.qpos[:] = q
             self.data.qvel[:] = 0
-            ctrl = np.asarray(tau, dtype=float).reshape(-1)
-            if ctrl.size == self.model.nu:
-                self.data.ctrl[:] = ctrl
-                mujoco.mj_forward(self.model, self.data)
-                mass = full_mass_matrix(mujoco, self.model, self.data)
-                return cast(np.ndarray, np.linalg.solve(mass, self.data.qfrc_actuator))
+            tau_arr = np.asarray(tau, dtype=float).reshape(-1)
+            if tau_arr.size != self.model.nv:
+                raise ValueError(
+                    f"tau must have {self.model.nv} entries, got {tau_arr.size}"
+                )
             self.data.ctrl[:] = 0
             mujoco.mj_forward(self.model, self.data)
             mass = full_mass_matrix(mujoco, self.model, self.data)
-            return cast(np.ndarray, np.linalg.solve(mass, ctrl))
+            return cast(np.ndarray, np.linalg.solve(mass, tau_arr))
         finally:
             self.data.qpos[:] = saved_qpos
             self.data.qvel[:] = saved_qvel
