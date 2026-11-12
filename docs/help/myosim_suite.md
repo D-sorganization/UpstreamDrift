@@ -51,6 +51,10 @@ by `load_myosim_engine()` in `src/engines/loaders.py` - documented in
 `EngineType.MYOSIM` and the MyoSuite implementation are the same thing and that
 there is no separate half-sarcomere solver in this repository.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html): *The Physics of Golf — Forces and Torques*.
+
 ## Limitations
 
 - **This tile does not simulate.** It has no viewport, no stepping, no

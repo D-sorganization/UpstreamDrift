@@ -33,6 +33,10 @@ Show how the ground loads the body during a swing: the force under each foot and
 
 `biomechanics.ground_reaction` (GCV-1) reduces each foot's contact forces to a force, centre of pressure, free moment and moment about the centre of mass. `biomechanics.ground_reaction_plot_model` turns the series into plot traces shared by every surface; `plotting.renderers.ground_reaction` draws the desktop and report sheet. The API route is `GET /api/analysis/ground-reaction?run_id=...`; the desktop dock opens a saved response JSON.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch15_ground_reaction_forces.html): *Ground Reaction Forces*.
+
 ## Limitations
 
 The centre of pressure and the load share are unavailable while the feet together carry less than 10 N. A run with no ground contact, or an engine that cannot report it (Simscape until GCV-3), is shown as "unavailable" with its reason, never as zero. Forces are software outputs of the contact model, not force-plate measurements.

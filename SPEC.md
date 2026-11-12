@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-11 | #15023 | Register ud-sim-mcp console script, generated capability inventory, and Agent API auth docs. |
 | 2026-11-10 | #15000 | AIP JSON-RPC stubs return not_implemented; capabilities self-check (#14940). |
 | 2026-11-10 | #14962 | BallFlightSimulator reports per-step forces from the Rust integrator with legacy post-hoc path tagged |
 | 2026-11-10 | #14995 | Remove default-true success flags on solver and calc outputs with Oracle 1 and 8 AST gates |
