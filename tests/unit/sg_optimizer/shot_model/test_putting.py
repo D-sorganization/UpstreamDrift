@@ -79,7 +79,7 @@ def test_expected_three_putt_probability_increases_with_stimp():
 
 
 def test_invalid_distance_rejected():
-    from src.shared.python.contracts import ContractViolationError
+    from src.shared.python.contracts import PreconditionError
 
-    with pytest.raises(ContractViolationError):
+    with pytest.raises(PreconditionError):
         make_probability(0.0, PuttingSkill(), GreenModel.preset("medium"))
