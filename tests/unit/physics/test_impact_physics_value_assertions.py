@@ -190,7 +190,7 @@ class TestComputeImpulse:
         expected_j = (1 + e) * mu * V
 
         model = RigidBodyImpactModel()
-        j, v_app = model._compute_impulse(v_rel, n, m_eff, e)
+        j, v_app = model._compute_impulse(v_rel, n, mu, e)
         assert math.isclose(j, expected_j, rel_tol=1e-9)
         assert math.isclose(v_app, V, rel_tol=1e-9)
 
