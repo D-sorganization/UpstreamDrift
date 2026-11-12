@@ -142,6 +142,21 @@ def _single_foot_peak(
     )
 
 
+def _coerce_bilateral_grf_timeseries(
+    times_s: ArrayLike,
+    fz_lead_n: ArrayLike,
+    fz_trail_n: ArrayLike,
+) -> tuple[Array, Array, Array]:
+    """Coerce bilateral vertical GRF inputs to float64 arrays with matching lengths."""
+    t, lead, trail = (
+        np.asarray(times_s, dtype=np.float64),
+        np.asarray(fz_lead_n, dtype=np.float64),
+        np.asarray(fz_trail_n, dtype=np.float64),
+    )
+    require(len(t) == len(lead) == len(trail), "Input lengths must match")
+    return t, lead, trail
+
+
 def compute_event_anchored_peaks(
     times_s: ArrayLike,
     fz_lead_n: ArrayLike,
@@ -154,12 +169,7 @@ def compute_event_anchored_peaks(
     gravity: float = STANDARD_GRAVITY_M_S2,
 ) -> GRFPeakSummary:
     """Compute peak vertical force for lead and trail feet relative to swing events."""
-    t, lead, trail = (
-        np.asarray(times_s, dtype=np.float64),
-        np.asarray(fz_lead_n, dtype=np.float64),
-        np.asarray(fz_trail_n, dtype=np.float64),
-    )
-    require(len(t) == len(lead) == len(trail), "Input lengths must match")
+    t, lead, trail = _coerce_bilateral_grf_timeseries(times_s, fz_lead_n, fz_trail_n)
     if normalisation == NormalisationKind.percent_body_weight:
         require(
             body_mass_kg is not None and body_mass_kg > 0.0, "body_mass_kg required"
@@ -249,12 +259,7 @@ def compute_lead_fraction_crossing(
     min_total_fz_n: float = 10.0,
 ) -> LeadFractionCrossing:
     """Find first upward crossing of lead vertical force fraction through threshold."""
-    t, lead, trail = (
-        np.asarray(times_s, dtype=np.float64),
-        np.asarray(fz_lead_n, dtype=np.float64),
-        np.asarray(fz_trail_n, dtype=np.float64),
-    )
-    require(len(t) == len(lead) == len(trail), "Input lengths must match")
+    t, lead, trail = _coerce_bilateral_grf_timeseries(times_s, fz_lead_n, fz_trail_n)
     total = lead + trail
     with np.errstate(invalid="ignore", divide="ignore"):
         frac = np.where(total < min_total_fz_n, np.nan, lead / total)
