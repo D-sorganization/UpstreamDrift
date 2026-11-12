@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import uuid
+from collections.abc import Callable
 from datetime import datetime, timezone
 from typing import Any, Literal
 
@@ -15,7 +16,9 @@ from .worker import get_repo_sha
 
 CapabilityId = Literal["counterfactual_ztcf_golden", "golf_simulator_golden_shot"]
 
-_EXECUTORS: dict[str, Any] = {
+CapabilityExecutor = Callable[[dict[str, Any] | None], dict[str, Any]]
+
+_EXECUTORS: dict[CapabilityId, CapabilityExecutor] = {
     "counterfactual_ztcf_golden": execute_golden_ztcf,
     "golf_simulator_golden_shot": execute_golden_golf_shot,
 }
@@ -43,9 +46,10 @@ def run_agent_capability(
     run_id: str | None = None,
 ) -> dict[str, Any]:
     """Execute one capability and return a v1 run envelope (REST/MCP shared)."""
-    executor = _EXECUTORS.get(capability_id)
-    if executor is None:
-        raise ValueError(f"Unknown capability_id '{capability_id}'")
+    try:
+        executor = _EXECUTORS[capability_id]
+    except KeyError as exc:
+        raise ValueError(f"Unknown capability_id '{capability_id}'") from exc
     assigned = run_id or f"agent_{uuid.uuid4().hex}"
     created = _iso_now()
     digest = input_sha256(capability_id, request)
