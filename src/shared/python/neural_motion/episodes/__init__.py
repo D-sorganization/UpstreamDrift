@@ -30,6 +30,7 @@ from .mujoco_corpus import (
 from .mujoco_corpus_run import (
     CORPUS_RUN_RECEIPT_FILENAME,
     MUJOCO_CORPUS_RUN_RECEIPT_SCHEMA,
+    MuJoCoCorpusGenerationRequest,
     MuJoCoCorpusRunReceipt,
     MuJoCoCorpusTrainingBundle,
     load_corpus_run_receipt,
@@ -73,6 +74,7 @@ __all__ = [
     "MuJoCoEpisodeCorpusGenerator",
     "CORPUS_RUN_RECEIPT_FILENAME",
     "MUJOCO_CORPUS_RUN_RECEIPT_SCHEMA",
+    "MuJoCoCorpusGenerationRequest",
     "MuJoCoCorpusRunReceipt",
     "MuJoCoCorpusTrainingBundle",
     "load_corpus_run_receipt",

@@ -36,6 +36,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[5]
 __all__ = [
     "CORPUS_RUN_RECEIPT_FILENAME",
     "MUJOCO_CORPUS_RUN_RECEIPT_SCHEMA",
+    "MuJoCoCorpusGenerationRequest",
     "MuJoCoCorpusRunReceipt",
     "MuJoCoCorpusTrainingBundle",
     "load_corpus_run_receipt",
@@ -177,6 +178,22 @@ class MuJoCoCorpusRunReceipt(SortedJsonWritableMixin):
         }
 
 
+@dataclass(frozen=True, slots=True)
+class MuJoCoCorpusGenerationRequest:
+    """Inputs for a measured WS-4 corpus generation run."""
+
+    store_root: Path
+    seed: int
+    episode_count: int
+    split_seed: int
+    spec: Mapping[str, Any] | None = None
+    rollout: RolloutFn | None = None
+    ratios: Mapping[str, float] | None = None
+    held_out_strata: Mapping[str, Sequence[str]] | None = None
+    receipt_path: Path | None = None
+    repo_root: Path | None = None
+
+
 @dataclass(frozen=True)
 class MuJoCoCorpusTrainingBundle:
     """Episode store, family split, and manifest after DbC verification."""
@@ -283,35 +300,27 @@ def build_corpus_run_receipt(
 
 
 def run_mujoco_corpus_generation(
-    *,
-    store_root: Path,
-    seed: int,
-    episode_count: int,
-    split_seed: int,
-    spec: Mapping[str, Any] | None = None,
-    rollout: RolloutFn | None = None,
-    ratios: Mapping[str, float] | None = None,
-    held_out_strata: Mapping[str, Sequence[str]] | None = None,
-    receipt_path: Path | None = None,
-    repo_root: Path | None = None,
+    request: MuJoCoCorpusGenerationRequest,
 ) -> tuple[MuJoCoCorpusManifest, FamilySplitPlan, MuJoCoCorpusRunReceipt]:
-    if episode_count < 1:
+    if request.episode_count < 1:
         raise ValueError("episode_count must be positive")
-    spec_doc = spec if spec is not None else load_canonical_driver_spec()
-    split_ratios = dict(ratios or _DEFAULT_RATIOS)
+    spec_doc = (
+        request.spec if request.spec is not None else load_canonical_driver_spec()
+    )
+    split_ratios = dict(request.ratios or _DEFAULT_RATIOS)
     held = {
         key: tuple(values)
-        for key, values in (held_out_strata or _DEFAULT_HELD_OUT).items()
+        for key, values in (request.held_out_strata or _DEFAULT_HELD_OUT).items()
     }
-    store_root = Path(store_root)
+    store_root = Path(request.store_root)
     store_root.mkdir(parents=True, exist_ok=True)
-    generator = MuJoCoEpisodeCorpusGenerator(rollout=rollout)
+    generator = MuJoCoEpisodeCorpusGenerator(rollout=request.rollout)
     started = time.perf_counter()
     manifest = generator.generate(
         store_root=store_root,
         spec=spec_doc,
-        seed=seed,
-        episode_count=episode_count,
+        seed=request.seed,
+        episode_count=request.episode_count,
     )
     wall_clock_s = time.perf_counter() - started
     store = EpisodeStore(store_root)
@@ -319,20 +328,20 @@ def run_mujoco_corpus_generation(
     split = build_family_splits(
         episodes,
         ratios=split_ratios,
-        seed=split_seed,
+        seed=request.split_seed,
         held_out_strata=held,
     )
     receipt = build_corpus_run_receipt(
         store_root=store_root,
         manifest=manifest,
         split=split,
-        split_seed=split_seed,
+        split_seed=request.split_seed,
         wall_clock_s=wall_clock_s,
-        repo_commit_sha=resolve_repo_head_sha(repo_root),
+        repo_commit_sha=resolve_repo_head_sha(request.repo_root),
         split_ratios=split_ratios,
         held_out_strata=held,
     )
-    out = receipt_path or (store_root / CORPUS_RUN_RECEIPT_FILENAME)
+    out = request.receipt_path or (store_root / CORPUS_RUN_RECEIPT_FILENAME)
     write_sorted_json(out, receipt.as_dict())
     return manifest, split, receipt
 

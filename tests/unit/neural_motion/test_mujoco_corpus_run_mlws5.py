@@ -25,6 +25,7 @@ from src.shared.python.neural_motion.episodes.mujoco_corpus import (
 )
 from src.shared.python.neural_motion.episodes.mujoco_corpus_run import (
     MUJOCO_CORPUS_RUN_RECEIPT_SCHEMA,
+    MuJoCoCorpusGenerationRequest,
     load_mujoco_corpus_for_training,
     load_corpus_run_receipt,
     run_mujoco_corpus_generation,
@@ -71,12 +72,14 @@ def test_loader_rejects_manifest_digest_mismatch(tmp_path: Path) -> None:
 def test_run_records_split_seed_and_builds_receipt(tmp_path: Path) -> None:
     spec = load_canonical_driver_spec()
     manifest, split, receipt = run_mujoco_corpus_generation(
-        store_root=tmp_path / "corpus",
-        seed=13782,
-        episode_count=4,
-        split_seed=991,
-        rollout=contract_rollout_arrays,
-        spec=spec,
+        MuJoCoCorpusGenerationRequest(
+            store_root=tmp_path / "corpus",
+            seed=13782,
+            episode_count=4,
+            split_seed=991,
+            rollout=contract_rollout_arrays,
+            spec=spec,
+        )
     )
     assert manifest.episode_count == 4
     assert receipt.schema == MUJOCO_CORPUS_RUN_RECEIPT_SCHEMA
@@ -106,13 +109,15 @@ def test_loader_feeds_dynamics_baseline_trainer(tmp_path: Path) -> None:
     spec = load_canonical_driver_spec()
     store_root = tmp_path / "corpus"
     _, split, _ = run_mujoco_corpus_generation(
-        store_root=store_root,
-        seed=42,
-        episode_count=6,
-        split_seed=7,
-        rollout=contract_rollout_arrays,
-        spec=spec,
-        ratios={"train": 0.5, "val": 0.25, "test": 0.25},
+        MuJoCoCorpusGenerationRequest(
+            store_root=store_root,
+            seed=42,
+            episode_count=6,
+            split_seed=7,
+            rollout=contract_rollout_arrays,
+            spec=spec,
+            ratios={"train": 0.5, "val": 0.25, "test": 0.25},
+        )
     )
     bundle = load_mujoco_corpus_for_training(store_root)
     assert bundle.split.content_digest == split.content_digest

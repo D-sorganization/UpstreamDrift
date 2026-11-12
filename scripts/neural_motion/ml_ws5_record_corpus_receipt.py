@@ -26,6 +26,7 @@ from src.shared.python.neural_motion.episodes.mujoco_corpus import (
     load_canonical_driver_spec,
 )
 from src.shared.python.neural_motion.episodes.mujoco_corpus_run import (
+    MuJoCoCorpusGenerationRequest,
     build_corpus_run_receipt,
     read_corpus_manifest,
     resolve_repo_head_sha,
@@ -56,13 +57,15 @@ def _record_from_existing_ci_fixture(
     with tempfile.TemporaryDirectory(prefix="ml_ws5_ci_") as tmp:
         tmp_root = Path(tmp) / "corpus"
         manifest, _, receipt_run = run_mujoco_corpus_generation(
-            store_root=tmp_root,
-            seed=seed,
-            episode_count=episode_count,
-            split_seed=split_seed,
-            spec=spec,
-            rollout=contract_rollout_arrays,
-            repo_root=_REPO_ROOT,
+            MuJoCoCorpusGenerationRequest(
+                store_root=tmp_root,
+                seed=seed,
+                episode_count=episode_count,
+                split_seed=split_seed,
+                spec=spec,
+                rollout=contract_rollout_arrays,
+                repo_root=_REPO_ROOT,
+            )
         )
     if manifest.content_digest != fixture_manifest:
         raise SystemExit(
@@ -122,14 +125,16 @@ def main() -> None:
         shutil.rmtree(out_dir)
     spec = load_canonical_driver_spec()
     manifest, split, receipt = run_mujoco_corpus_generation(
-        store_root=out_dir,
-        seed=args.seed,
-        episode_count=args.episode_count,
-        split_seed=args.split_seed,
-        spec=spec,
-        rollout=contract_rollout_arrays,
-        receipt_path=args.receipt_path,
-        repo_root=_REPO_ROOT,
+        MuJoCoCorpusGenerationRequest(
+            store_root=out_dir,
+            seed=args.seed,
+            episode_count=args.episode_count,
+            split_seed=args.split_seed,
+            spec=spec,
+            rollout=contract_rollout_arrays,
+            receipt_path=args.receipt_path,
+            repo_root=_REPO_ROOT,
+        )
     )
     print(manifest.content_digest)
     print(split.content_digest)
