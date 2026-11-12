@@ -80,8 +80,14 @@ def _apply_configuration(engine: object, q: np.ndarray, v: np.ndarray | None) ->
     set_positions(q_arr)
     if v is not None:
         set_velocities = getattr(engine, "set_joint_velocities", None)
-        if callable(set_velocities):
-            set_velocities(np.asarray(v, dtype=float))
+        if not callable(set_velocities):
+            raise NotImplementedError(  # tracked: #14943
+                "Engine has set_joint_positions but no set_joint_velocities; "
+                "cannot apply counterfactual v=0 or restore prior velocity. "
+                "Provide set_state(q, v) or override "
+                "compute_control_acceleration_at_state"
+            )
+        set_velocities(np.asarray(v, dtype=float))
 
 
 def _evaluate_at_fixed_configuration(
