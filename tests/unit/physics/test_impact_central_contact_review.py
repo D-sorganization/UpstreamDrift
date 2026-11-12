@@ -34,9 +34,7 @@ def _contact_relative_velocity(
     n = pre.clubhead_orientation / np.linalg.norm(pre.clubhead_orientation)
     r_club = impact_offset_vector_3d(pre)
     r_ball = ball_contact_lever_arm(n)
-    v_club = contact_point_velocity(
-        club_velocity, club_angular_velocity, r_club
-    )
+    v_club = contact_point_velocity(club_velocity, club_angular_velocity, r_club)
     v_ball = contact_point_velocity(ball_velocity, ball_angular_velocity, r_ball)
     return v_club - v_ball
 
