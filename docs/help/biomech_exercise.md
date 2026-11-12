@@ -76,6 +76,10 @@ field and launches `src/launchers/exercise_dashboard.py`. The registry mapping
 lives in `VIRTUAL_PREFIXES` in
 `src/shared/python/config/tile_target_resolution.py`.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/inverse-dynamics.html): *Inverse Dynamics*.
+
 ## Limitations
 
 - The shell computes nothing. Injury risk, joint stress and swing modification
