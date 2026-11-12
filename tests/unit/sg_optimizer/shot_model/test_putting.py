@@ -13,6 +13,8 @@ from src.shared.python.sg_optimizer.shot_model.putting import (
     make_probability,
 )
 
+pytestmark = pytest.mark.unit
+
 _BASELINE_SERIES = get_series("sg_optimizer_documented_anchors")
 
 
