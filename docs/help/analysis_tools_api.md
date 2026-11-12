@@ -283,6 +283,10 @@ citation records, not an omission on this page: the record the code ships is
 what a report or audit log will carry, so no substitute identifier is supplied
 here.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/theory-part1.html): *AffineDrift Theory Part I*.
+
 ## Limitations
 
 - No potential energy at the API layer. `/analysis/metrics` computes kinetic

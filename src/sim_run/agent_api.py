@@ -50,6 +50,11 @@ _PUTTING_CORE_TOOLS = (
     "putting_capture_speed",
 )
 
+_AGENT_CAPABILITY_TOOLS = (
+    "run_counterfactual_ztcf_golden",
+    "run_golf_simulator_golden_shot",
+)
+
 
 def _env_truthy(name: str) -> bool:
     return os.environ.get(name, "").strip().lower() in ("1", "true", "yes")
@@ -84,7 +89,7 @@ class CapabilityRow:
     """One engine or putting tool with a coarse runtime status."""
 
     id: str
-    kind: Literal["engine", "putting_tool"]
+    kind: Literal["engine", "putting_tool", "agent_capability"]
     description: str
     runtime_status: RuntimeStatus
     unavailable_reason: str | None = None
@@ -132,6 +137,14 @@ def _putting_core_status() -> tuple[RuntimeStatus, str | None]:
     return _probe_import("src.shared.python.putting_dynamics")
 
 
+def _agent_capability_status() -> tuple[RuntimeStatus, str | None]:
+    for module in ("src.sim_run.counterfactual_run", "src.sim_run.golf_simulator_run"):
+        status, reason = _probe_import(module)
+        if status != "available":
+            return status, reason
+    return "available", None
+
+
 def build_capability_inventory() -> dict[str, Any]:
     """Machine-readable inventory shared by MCP and generated docs."""
     engines: list[dict[str, Any]] = []
@@ -174,11 +187,25 @@ def build_capability_inventory() -> dict[str, Any]:
             ).to_json()
         )
 
+    agent_status, agent_reason = _agent_capability_status()
+    agent_capabilities: list[dict[str, Any]] = []
+    for tool_id in _AGENT_CAPABILITY_TOOLS:
+        agent_capabilities.append(
+            CapabilityRow(
+                id=tool_id,
+                kind="agent_capability",
+                description=f"Agent API capability `{tool_id}` via sim_run",
+                runtime_status=agent_status,
+                unavailable_reason=agent_reason,
+            ).to_json()
+        )
+
     return {
         "schema": "ud-sim-mcp-capability-inventory/v1",
         "server": SERVER_NAME,
         "engines": engines,
         "putting_tools": putting_tools,
+        "agent_capabilities": agent_capabilities,
     }
 
 

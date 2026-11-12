@@ -64,6 +64,10 @@ literature basis are documented in
 the mapping from that literature to specific modules is in
 [../physics/GOLF_BALL_FLIGHT_IMPACT_SOURCE_MAP.md](../physics/GOLF_BALL_FLIGHT_IMPACT_SOURCE_MAP.md).
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/impact-mechanics-and-ball-flight.html): *Impact Mechanics and Ball Flight*.
+
 ## Limitations
 
 - **The trajectory is model output, not measurement.** Nothing on this tile is
