@@ -21,13 +21,15 @@ pytestmark = [pytest.mark.integration, pytest.mark.slow]
 
 # Owner's real-world anthropometry (height, mass), scaled onto the de Leva
 # candidate for the owner capture only. The driver capture runs the canonical
-# driver document (no scaling) that every committed driver evidence receipt
-# names as ``base_spec_file``; the pipeline's default spec is the native v2
-# document, which lacks the measured club cluster and per-capture grip
-# rotation and gives 0.51 m dynamics RMS on this capture (#12702).
+# capture-fit driver document (no scaling) that every committed driver evidence
+# receipt names as ``base_spec_file``; the pipeline's default spec is the native
+# v2 document, which lacks the measured club cluster and per-capture grip
+# rotation and gives 0.51 m dynamics RMS on this capture (#12702, #14551). The
+# neutral-grip showpiece spec (full_body_spec_anthro_driver.json) is kept
+# separate (SHOW-A2 #14551, #14897).
 CAPTURE_SPECS: dict[str, Path] = {
     "driver": Path(__file__).resolve().parents[3]
-    / "docs/development/full_body_models/full_body_spec_anthro_driver.json",
+    / "docs/development/full_body_models/full_body_spec_anthro_driver_capture.json",
 }
 OWNER_STATURE_M = 1.956
 OWNER_MASS_KG = 104.3

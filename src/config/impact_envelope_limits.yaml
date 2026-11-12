@@ -306,13 +306,13 @@ declared_rom_deg:
       verification_status: SOURCED_WITH_ASSUMED_MARGIN
   - coordinate: RSInputZ
     lower:
-      value: -74.4
+      value: -90.0
+      citation: { id: null, note: "internal rotation prior; no source read" }
+      verification_status: UNVERIFIED
+    upper:
+      value: 74.4
       citation:
         reference: "Gill TK, Shanahan EM, Tucker GR, Buchbinder R, Hill CL. Shoulder range of movement in the general population: age and gender stratified normative data using a community-based cohort. BMC Musculoskelet Disord 21:676 (2020)"
         doi: "10.1186/s12891-020-03665-9"
-        note: "Table 3, male right external rotation 56.8 (SD 17.6) deg; bound = mean + 1 SD = 74.4; right Z- is ER"
+        note: "Table 3, male right external rotation 56.8 (SD 17.6) deg; bound = mean + 1 SD = 74.4; right Z+ is ER (mirrored with the left arm, G1 #14746)"
       verification_status: SOURCED_WITH_ASSUMED_MARGIN
-    upper:
-      value: 90.0
-      citation: { id: null, note: "internal rotation prior; no source read" }
-      verification_status: UNVERIFIED

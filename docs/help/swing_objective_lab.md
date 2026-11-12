@@ -86,6 +86,10 @@ pendulums - is documented on the
 [Pendulum Simulator](pendulum_simulator.md) page and in
 [../engines/pendulum.md](../engines/pendulum.md).
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/inverse-dynamics.html): *Inverse Dynamics*.
+
 ## Limitations
 
 - **Every swing this tile compares is optimiser output, not measurement.** No

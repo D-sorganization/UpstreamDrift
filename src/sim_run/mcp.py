@@ -21,7 +21,17 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from .agent_api import (
+    SERVER_NAME,
+    engines_for_describe,
+    read_auth_token,
+    read_private_mode,
+)
 from .models import RunRequest, export_schemas
+from .agent_capability_tools import (
+    agent_capability_tool_handlers,
+    agent_capability_tool_specs,
+)
 from .putting_core_tools import core_tool_handlers, core_tool_specs
 from .putting_tools import putting_tool_handlers, putting_tool_specs
 from .store import RunNotFoundError, SimulationRunStore
@@ -30,19 +40,7 @@ from .worker import SimulationBusyError, SimulationWorkerPool
 _LOG = logging.getLogger(__name__)
 
 MCP_PROTOCOL_VERSION = "2024-11-05"
-SERVER_NAME = "ud-sim-mcp"
 SERVER_VERSION = "1.0.0"
-
-_ENGINES = [
-    ("pendulum", "Double pendulum dynamics benchmark", ["rigid_body", "kinematics"]),
-    ("mujoco", "MuJoCo physics engine", ["rigid_body", "contacts"]),
-    ("pinocchio", "Pinocchio rigid body algorithms", ["rigid_body", "dynamics"]),
-    ("drake", "Drake multibody plant simulation", ["rigid_body", "contacts"]),
-    ("opensim", "OpenSim musculoskeletal biomechanics", ["muscles", "biomechanics"]),
-]
-_ENGINE_METADATA = [
-    {"engine_type": e, "description": d, "capabilities": c} for e, d, c in _ENGINES
-]
 
 
 def _tool_spec(
@@ -66,10 +64,7 @@ class SecurityPolicy:
 
     @classmethod
     def from_env(cls) -> SecurityPolicy:
-        p_mode = os.environ.get("UD_PRIVATE_MODE", "").lower() in ("1", "true", "yes")
-        return cls(
-            private_mode=p_mode, auth_token=os.environ.get("UD_SIM_AUTH_TOKEN") or None
-        )
+        return cls(private_mode=read_private_mode(), auth_token=read_auth_token())
 
     def check_auth(self, token: str | None) -> None:
         if self.auth_token is not None and token != self.auth_token:
@@ -102,7 +97,7 @@ class SimulationMcpServer:
     def tool_describe_engines(self, arguments: dict[str, Any]) -> dict[str, Any]:
         self.security.check_auth(arguments.get("auth_token"))
         payload = {
-            "engines": _ENGINE_METADATA,
+            "engines": engines_for_describe(),
             "request_schema": export_schemas(),
             "schema_version": "1.0.0",
         }
@@ -208,6 +203,7 @@ class SimulationMcpServer:
             ),
             *putting_tool_specs(),
             *core_tool_specs(),
+            *agent_capability_tool_specs(),
         ]
 
     def handle_request(self, request: dict[str, Any]) -> dict[str, Any]:
@@ -236,6 +232,9 @@ class SimulationMcpServer:
                     "fetch_artifact": self.tool_fetch_artifact,
                     **putting_tool_handlers(self.security.check_auth),
                     **core_tool_handlers(self.security.check_auth),
+                    **agent_capability_tool_handlers(
+                        self.security.check_auth, self.store
+                    ),
                 }
                 handler = handlers.get(str(params.get("name")))
                 if not handler:

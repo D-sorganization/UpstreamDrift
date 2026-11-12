@@ -1113,7 +1113,7 @@
       "line": 1000,
       "fields": {
         "State": "in_review",
-        "Owner": "claude (agy executors on DeskComputer and OG Laptop)",
+        "Owner": "claude (agy executors on <host> and OG Laptop)",
         "Issue": "#10960",
         "PR": "consolidated PR from `claude/ud-consolidated2-20260926` (supersedes #10974)",
         "Branch": "`claude/ud-consolidated2-20260926`",
@@ -1625,7 +1625,7 @@
         "PR": "#10723",
         "Paths": "src/shared/python/motion_matching/pinocchio_g2_g3.py; src/engines/physics_engines/pinocchio/python/full_body_fit.py; tests/unit/motion_matching/test_pinocchio_g2_g3.py; docs/development/matched_swing_program/evidence/ms111/; docs/development/matched_swing_program/README.md; docs/development/matched_swing_program/MS31_PINOCCHIO_CROCODDYL_TURNOVER.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md",
         "Started": "2026-09-22",
-        "Last verified": "2026-09-22 at SELF \u2014 unit suite green for MS-111 contracts; PR #10723 opened with squash auto-merge; no native ControlTower desk claim.",
+        "Last verified": "2026-09-22 at SELF \u2014 unit suite green for MS-111 contracts; PR #10723 opened with squash auto-merge; no native <host> desk claim.",
         "Summary": "Software contracts for Pinocchio driver/iron G2/G3 continuation schedules, same-integrator solve/replay parity (reject integrator-specific solutions), armature propagation to equivalent-model independent replay packages (save/reopen), failed-continuation evidence preservation, open-loop q0/v0 control feed (no per-frame poses), and PF-07 robustness roster. Fitter exposes `--ms111-schedule` and fail-closed integrator parity. Native G2/G3 qualification remains blocked on MS-107 accepted G1 + MS-100 receipts.",
         "Next step": "Confirm CI green on PR #10723 and allow squash auto-merge to land.",
         "Evidence": "docs/development/matched_swing_program/evidence/ms111/continuation_contract_status.json; tests/unit/motion_matching/test_pinocchio_g2_g3.py."
@@ -1713,8 +1713,8 @@
         "Paths": "src/shared/python/motion*matching/pipeline/plants/pinocchio_plant.py; pinocchio_lane_receipts.py; receipt_components.py; cli.py; src/engines/physics_engines/pinocchio/python/full_body_fit.py; tests/unit/motion_matching/pipeline/test_pinocchio_plant.py; docs/development/full_body_models/evidence/ground_support/anthro_driver*{pinocchio,pink}/",
         "Started": "2026-09-22",
         "Last verified": "2026-09-22 at SELF \u2014 rematched onto origin/main after CO-06 #10687 merge (`f191dd09d`); regenerated matched_swing status README + divergence inventory; blocked native G1 receipts unchanged.",
-        "Summary": "Wire Pinocchio MatchingPlant derivatives + Pink `create_constrained_ik`, fitter `resolve_fit_native_plant` LoD bridge, ConstrainedIkReceipt `closure_residual_m` budget, and honest blocked evidence until ControlTower native run.",
-        "Next step": "Confirm quality-gate green + squash auto-merge of PR #10684; ControlTower native pink receipts when scheduled (MS-107 owns G1).",
+        "Summary": "Wire Pinocchio MatchingPlant derivatives + Pink `create_constrained_ik`, fitter `resolve_fit_native_plant` LoD bridge, ConstrainedIkReceipt `closure_residual_m` budget, and honest blocked evidence until <host> native run.",
+        "Next step": "Confirm quality-gate green + squash auto-merge of PR #10684; <host> native pink receipts when scheduled (MS-107 owns G1).",
         "Evidence": "docs/development/full_body_models/evidence/ground_support/anthro_driver_pinocchio/; docs/development/full_body_models/evidence/ground_support/anthro_driver_pink/"
       }
     },
@@ -1975,9 +1975,9 @@
         "Branch": "fix/issue-10342-ms-43-native-lane-local",
         "Paths": "scripts/ci/run_native_engine_lane.py; scripts/ci/run_native_engine_lane.sh; docs/development/matched_swing_program/evidence/nightly/; tests/docs/test_native_lane_freshness.py; tests/scripts/test_run_native_engine_lane.py",
         "Started": "2026-09-21",
-        "Last verified": "2026-09-21 at HEAD (16 unit tests pass in test_native_lane_freshness.py and test_run_native_engine_lane.py; ruff clean; architecture budget passed; bootstrap receipts committed pending ControlTower SDK refresh)",
-        "Summary": "Added idempotent native-engine lane runner emitting hashed nightly receipts for OpenSim and MyoSuite (`requires_opensim` / `requires_myosuite` pytest markers), freshness gate warning at seven days and failing at thirty days, and ControlTower verification docs without editing `.github/workflows`.",
-        "Next step": "Refresh receipts on ControlTower opensim-10003 venv; merge PR closing #10342.",
+        "Last verified": "2026-09-21 at HEAD (16 unit tests pass in test_native_lane_freshness.py and test_run_native_engine_lane.py; ruff clean; architecture budget passed; bootstrap receipts committed pending <host> SDK refresh)",
+        "Summary": "Added idempotent native-engine lane runner emitting hashed nightly receipts for OpenSim and MyoSuite (`requires_opensim` / `requires_myosuite` pytest markers), freshness gate warning at seven days and failing at thirty days, and <host> verification docs without editing `.github/workflows`.",
+        "Next step": "Refresh receipts on <host> opensim-10003 venv; merge PR closing #10342.",
         "Evidence": "docs/development/matched_swing_program/evidence/nightly/opensim_receipt.json; docs/development/matched_swing_program/evidence/nightly/myosuite_receipt.json; tests/docs/test_native_lane_freshness.py."
       }
     },
@@ -3135,7 +3135,7 @@
         "PR": "#10071",
         "Paths": "src/engines/physics_engines/opensim/python/tour_matching; src/shared/python/motion_matching/tour_capture_contract.py; tests/opensim; docs/development/opensim_tour_matching",
         "Started": "2026-09-12",
-        "Last verified": "2026-09-13 (SELF; 17 unit tests in tests/opensim pass locally with Ruff; OpenSim 4.6 runtime qualified on ControlTower; OS-3 IK on 33 frames reaches 6.5 cm marker RMS, unscaled model)",
+        "Last verified": "2026-09-13 (SELF; 17 unit tests in tests/opensim pass locally with Ruff; OpenSim 4.6 runtime qualified on <host>; OS-3 IK on 33 frames reaches 6.5 cm marker RMS, unscaled model)",
         "Summary": "Frozen capture contract, marker-to-body map, TRC export verified by OpenSim, MarkerSet authoring with coordinate unlocking, and alternating placement/IK calibration are implemented test-first; runtime qualified; OS-3 kinematic feasibility measured. Moco tracking and sextic effort fitting not started.",
         "Next step": "Execute OS-2b/OS-3b from docs/development/opensim_tour_matching/NEXT_AGENT_PROMPT.md: golf model variant in the builder (unlocks, clamp ranges, club length), segment scaling, keep-best iteration, full 654-frame IK with per-frame RMS and overlay.",
         "Evidence": "docs/development/opensim_tour_matching/HANDOFF.md and evidence/os1_trc_receipt.json, os2_runtime_receipt.json, os3_stride20/, os3_unlocked_stride20/."

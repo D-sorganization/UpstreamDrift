@@ -21,12 +21,17 @@ The total constant offset ``M = R_x(25 deg) @ G(e)`` factors uniquely, for
 
 * ``alpha`` turns the hand about the shaft (the club ``y`` axis, butt to head,
   because ``N`` shares the shaft axis for both hands); positive is stronger.
+  ``alpha`` is **face-on referenced** (#14633): ``alpha = 0`` is a vertical
+  palm plane at address (SHOW-A1), not zero rotation in the native ``R_y``
+  factor (which reads about +25.7 deg face-on at the flagship driver lie).
 * ``psi`` is the palm diagonal, radial to distal in the palm plane.
 * ``gamma`` is the set angle about the wrist flexion axis.
 
-Zero of ``alpha`` and ``gamma`` and ``psi = 40 deg`` define the published
-neutral transform ``M_0 = R_x(-50 deg)``, i.e. the Euler triple
-:data:`NEUTRAL_EULER_DEG`.  The fitted defaults are not neutral.
+:data:`ALPHA_FACE_ON_ZERO_OFFSET_DEG` is the flagship-address offset between
+face-on ``alpha`` and the internal shaft ``R_y`` angle at ``psi = 40`` deg and
+``gamma = 0``. The published anatomical neutral transform ``M_0 = R_x(-50 deg)``
+(i.e. :data:`NEUTRAL_EULER_DEG`) sits at ``alpha =`` that offset with
+``psi = 40`` deg, not at ``alpha = 0``.
 """
 
 from __future__ import annotations
@@ -41,7 +46,7 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation
 
-from src.shared.python.contracts import require
+from src.shared.python.contracts import ensure, require
 from src.shared.python.core.handedness import (
     DEFAULT_HANDEDNESS,
     Handedness,
@@ -58,6 +63,7 @@ from src.shared.python.model_appearance.grip_pose import (
     NEUTRAL_V_AZIMUTH_DEG as NEUTRAL_V_AZIMUTH_DEG,
     PALM_DIAGONAL_DEG,
     GripPose,
+    TRAIL_V_OFFSET_RANGE_DEG,
     require_fields_in_range,
 )
 from src.shared.python.motion_matching.anthropometric_geometry import (
@@ -83,18 +89,33 @@ PALM_PRESETS_DEG: dict[str, float] = {"fingers": 25.0, "neutral": 40.0, "palm": 
 _DEFAULT_THUMB_DEG = GripPose().lead_thumb_offset_deg
 #: Singularity guard: the Y-X-Z middle angle ``psi - 90`` may not reach +-90.
 _SINGULAR_TOL = 1e-9
-_ALPHA_RANGE = ALPHA_RANGE_DEG
+_ALPHA_RANGE = (
+    ALPHA_RANGE_DEG[0],
+    90.0,
+)  # widened for A7 face-on neutral alpha ~75 deg (#14736)
 _PSI_RANGE = (5.0, 85.0)
 _GAMMA_RANGE = (-180.0, 180.0)
+#: Flagship driver address: native ``R_y(0)`` at ``psi=40``, ``gamma=0`` reads
+#: this many degrees face-on; subtract from face-on ``alpha`` for the internal
+#: shaft rotation (#14633).
+ALPHA_FACE_ON_ZERO_OFFSET_DEG: Final[float] = 25.733330659760856
 
 
 def _rot(axis: str, deg: float) -> Array:
     return np.asarray(Rotation.from_euler(axis, deg, degrees=True).as_matrix())
 
 
+def _shaft_alpha_deg(alpha_deg: float) -> float:
+    return alpha_deg - ALPHA_FACE_ON_ZERO_OFFSET_DEG
+
+
 def grip_matrix(alpha_deg: float, psi_deg: float, gamma_deg: float) -> Array:
     """``M = R_y(alpha) R_x(psi - 90) R_z(gamma)``, the total hand offset."""
-    return _rot("y", alpha_deg) @ _rot("x", psi_deg - 90.0) @ _rot("z", gamma_deg)
+    return (
+        _rot("y", _shaft_alpha_deg(alpha_deg))
+        @ _rot("x", psi_deg - 90.0)
+        @ _rot("z", gamma_deg)
+    )
 
 
 @dataclass(frozen=True)
@@ -161,14 +182,20 @@ def hand_from_euler(euler_deg: Sequence[float] | Array) -> HandAngles:
     alpha = math.atan2(m[0, 2], m[2, 2])
     gamma = math.atan2(m[1, 0], m[1, 1])
     return HandAngles(
-        math.degrees(alpha), math.degrees(beta) + 90.0, math.degrees(gamma)
+        math.degrees(alpha) + ALPHA_FACE_ON_ZERO_OFFSET_DEG,
+        math.degrees(beta) + 90.0,
+        math.degrees(gamma),
     )
 
 
-#: Published neutral transform for the left/lead hand: ``alpha = gamma = 0``,
-#: ``psi = 40`` deg, i.e. ``M_{0,L} = R_x(-50 deg)``.
-NEUTRAL_EULER_DEG: Euler = hand_to_euler(HandAngles())
-NEUTRAL_GRIP_MATRIX: Array = grip_matrix(0.0, PALM_DIAGONAL_DEG, 0.0)
+#: Published anatomical neutral ``M_0 = R_x(-50 deg)`` at face-on ``alpha =``
+#: :data:`ALPHA_FACE_ON_ZERO_OFFSET_DEG`, ``psi = 40`` deg, ``gamma = 0``.
+NEUTRAL_EULER_DEG: Euler = hand_to_euler(
+    HandAngles(ALPHA_FACE_ON_ZERO_OFFSET_DEG, PALM_DIAGONAL_DEG, 0.0)
+)
+NEUTRAL_GRIP_MATRIX: Array = grip_matrix(
+    ALPHA_FACE_ON_ZERO_OFFSET_DEG, PALM_DIAGONAL_DEG, 0.0
+)
 _HAND_MIRROR_LEFT: Final[Array] = np.diag([-1.0, 1.0, 1.0])
 _HAND_MIRROR_RIGHT: Final[Array] = np.diag([1.0, -1.0, 1.0])
 
@@ -208,6 +235,41 @@ def mirror_grip_euler(euler_deg: Sequence[float] | Array) -> Euler:
     return _canonical_euler_deg(
         Rotation.from_matrix(g_mirrored).as_euler("xyz", degrees=True)
     )
+
+
+#: Trail (right) hand grip strength ``alpha`` in degrees, one named choice (#14751).
+#: It is the right hand's own HX angle, not the lead's: copying the lead's rotation
+#: put both wrist backs 0.00 deg apart on the driver specs.
+TRAIL_ALPHA_DEG: Final[float] = 15.0
+
+
+def trail_grip_euler(
+    lead_euler_deg: Sequence[float] | Array, trail_alpha_deg: float = TRAIL_ALPHA_DEG
+) -> Euler:
+    """Right-hand extrinsic x-y-z triple for a lead (left) hand grip, never a copy of it.
+
+    The right hand is the sagittal mirror (:func:`mirror_grip_euler`) of a left
+    hand with the lead's ``psi`` and ``gamma`` and the trail's own ``alpha``.
+    ``ValueError`` for a lead that is not a valid triple.  Postcondition: the
+    result is a different rotation from ``lead_euler_deg``.
+    """
+    lead = hand_from_euler(lead_euler_deg)
+    left_equivalent = hand_to_euler(
+        HandAngles(float(trail_alpha_deg), lead.psi_deg, lead.gamma_deg)
+    )
+    trail = mirror_grip_euler(left_equivalent)
+    ensure(
+        not bool(
+            np.allclose(
+                _euler_to_offset_matrix(trail),
+                _euler_to_offset_matrix(lead_euler_deg),
+                atol=1e-6,
+            )
+        ),
+        "trail grip must differ from the lead grip",
+        trail,
+    )
+    return trail
 
 
 #: Mirrored neutral transform for the right/trail hand: ``M_{0,R} = R_x(-50 deg) R_z(180 deg)``.

@@ -130,9 +130,13 @@ def test_tables_carry_wind_and_slope_bins() -> None:
 
 def test_real_pipeline_wind_and_slope_cells_move_the_right_way() -> None:
     """The B3 real-pipeline adapter (not the linear stand-in) honours the new bins."""
+    from src.shared.python.physics.rust_kernel import is_rust_available
     from src.shared.python.sg_optimizer.shot_model.physics_simulator import (
         PipelineLandingSimulator,
     )
+
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel required for flight pipeline")
 
     table = build_grid_table(
         get_skill_family("tour"),

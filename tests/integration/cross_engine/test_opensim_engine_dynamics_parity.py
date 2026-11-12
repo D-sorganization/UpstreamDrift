@@ -13,6 +13,7 @@ pendulum built through the OpenSim API; MuJoCo and Pinocchio load the URDF.
 from __future__ import annotations
 
 import math
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -25,7 +26,15 @@ osim = require_opensim()
 if not isinstance(getattr(osim, "__file__", None), str) or not hasattr(osim, "Model"):
     pytest.skip("real opensim is unavailable", allow_module_level=True)
 mujoco = pytest.importorskip("mujoco")
-pinocchio = pytest.importorskip("pinocchio")
+for _cached_name in list(sys.modules):
+    if _cached_name == "pinocchio" or _cached_name.startswith("pinocchio."):
+        del sys.modules[_cached_name]
+try:
+    import pinocchio  # noqa: PLC0415
+except (ImportError, ModuleNotFoundError, NameError) as exc:
+    # A broken partial import leaves pinocchio_pywrap_default undefined; skip
+    # instead of aborting adapter-core collection (#14973).
+    pytest.skip(f"pinocchio unavailable: {exc}", allow_module_level=True)
 
 from src.engines.physics_engines.opensim.python import (  # noqa: E402
     opensim_physics_engine as engine_module,
@@ -293,6 +302,7 @@ def test_golfer_joint_names_name_each_state_coordinate() -> None:
 
     probe = 0.001 * np.arange(1, len(q) + 1)
     golfer.set_state(probe, np.zeros_like(v))
+    assert golfer._model is not None
     coordinates = golfer._model.getCoordinateSet()  # noqa: SLF001 - checks the engine
     for k, name in enumerate(names):
         value = coordinates.get(name).getValue(golfer._state)  # noqa: SLF001
