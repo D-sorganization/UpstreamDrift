@@ -29,7 +29,7 @@ from .agent_capability_tools import (
     agent_capability_tool_handlers,
     agent_capability_tool_specs,
 )
-from .fleet_agent_api import CONTRACT_VERSION
+from .fleet_agent_api import CONTRACT_VERSION, client_run_record_v1
 from .models import RunRequest, export_schemas
 from .putting_core_tools import core_tool_handlers, core_tool_specs
 from .putting_tools import putting_tool_handlers, putting_tool_specs
@@ -123,11 +123,8 @@ class SimulationMcpServer:
                 "content": [{"type": "text", "text": f"SimulationBusyError: {exc}"}],
             }
 
-        return {
-            "content": [
-                {"type": "text", "text": json.dumps(finished.model_dump(mode="json"))}
-            ]
-        }
+        payload = client_run_record_v1(finished.model_dump(mode="json"))
+        return {"content": [{"type": "text", "text": json.dumps(payload)}]}
 
     def tool_get_run(self, arguments: dict[str, Any]) -> dict[str, Any]:
         self.security.check_auth(arguments.get("auth_token"))
@@ -138,11 +135,8 @@ class SimulationMcpServer:
             record = self.store.get_run(run_id)
         except RunNotFoundError as exc:
             raise ValueError(f"Run '{run_id}' not found") from exc
-        return {
-            "content": [
-                {"type": "text", "text": json.dumps(record.model_dump(mode="json"))}
-            ]
-        }
+        payload = client_run_record_v1(record.model_dump(mode="json"))
+        return {"content": [{"type": "text", "text": json.dumps(payload)}]}
 
     def tool_fetch_artifact(self, arguments: dict[str, Any]) -> dict[str, Any]:
         self.security.check_auth(arguments.get("auth_token"))

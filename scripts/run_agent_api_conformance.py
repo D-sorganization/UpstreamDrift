@@ -42,7 +42,6 @@ def _assert_payload(assertions: list[str], payload: dict[str, Any]) -> list[str]
     from src.sim_run.fleet_agent_api import (
         CONTRACT_VERSION,
         assert_run_record_conformance,
-        map_sim_run_record_v1,
     )
 
     failures: list[str] = []
@@ -69,17 +68,11 @@ def _assert_payload(assertions: list[str], payload: dict[str, Any]) -> list[str]
         if item.startswith("status:"):
             want = item.split(":", 1)[1]
             got = payload.get("status")
-            if got != want and payload.get("schema_version"):
-                mapped = map_sim_run_record_v1(payload)
-                got = mapped.get("status")
             if got != want:
                 failures.append(f"status {got!r} != {want!r}")
             continue
         if item == "provenance.contract_version":
             prov = payload.get("provenance") or {}
-            if not prov.get("contract_version"):
-                mapped = map_sim_run_record_v1(payload)
-                prov = mapped.get("provenance") or {}
             if prov.get("contract_version") != CONTRACT_VERSION:
                 failures.append("missing provenance.contract_version")
             continue

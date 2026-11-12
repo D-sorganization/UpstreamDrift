@@ -23,12 +23,18 @@ _STATUS_TO_FLEET: dict[str, FleetRunStatus] = {
 }
 
 
+_FLEET_VALUES = frozenset(_STATUS_TO_FLEET.values())
+
+
 def fleet_run_status(local_status: str | None) -> FleetRunStatus | None:
     """Map sim_run lifecycle status strings to the Fleet v1 enum."""
     if not local_status:
         return None
-    key = local_status.strip().lower()
-    return _STATUS_TO_FLEET.get(key)
+    raw = local_status.strip()
+    upper = raw.upper()
+    if upper in _FLEET_VALUES:
+        return upper  # type: ignore[return-value]
+    return _STATUS_TO_FLEET.get(raw.lower())
 
 
 def map_sim_run_record_v1(record: dict[str, Any]) -> dict[str, Any]:
@@ -53,18 +59,39 @@ def map_sim_run_record_v1(record: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def assert_run_record_conformance(record: dict[str, Any]) -> list[str]:
-    """Validate a tool payload against Fleet v1 sim_run mapping rules."""
-    failures: list[str] = []
+def client_run_record_v1(record: dict[str, Any]) -> dict[str, Any]:
+    """Apply Fleet v1 public fields to a local run record for MCP clients."""
     mapped = map_sim_run_record_v1(record)
-    if mapped["contract_version"] != CONTRACT_VERSION:
-        failures.append("contract_version mismatch")
     fleet_status = mapped["status"]
     if fleet_status is None:
-        failures.append(f"unmapped status {record.get('status')!r}")
-    elif fleet_status not in _STATUS_TO_FLEET.values():
-        failures.append(f"invalid fleet status {fleet_status!r}")
-    prov = mapped.get("provenance") or {}
+        raise ValueError(f"unmapped run status {record.get('status')!r}")
+    out: dict[str, Any] = dict(record)
+    out["contract_version"] = CONTRACT_VERSION
+    out["status"] = fleet_status
+    out["provenance"] = mapped["provenance"]
+    result = out.get("result")
+    if isinstance(result, dict):
+        result_copy = dict(result)
+        prov = result_copy.get("provenance")
+        if isinstance(prov, dict):
+            prov_copy = dict(prov)
+            prov_copy["contract_version"] = CONTRACT_VERSION
+            result_copy["provenance"] = prov_copy
+        out["result"] = result_copy
+    return out
+
+
+def assert_run_record_conformance(record: dict[str, Any]) -> list[str]:
+    """Validate a client-visible run record is already Fleet v1 shaped."""
+    failures: list[str] = []
+    if record.get("contract_version") != CONTRACT_VERSION:
+        failures.append("contract_version mismatch")
+    status = record.get("status")
+    if status not in _FLEET_VALUES:
+        failures.append(f"invalid fleet status {status!r}")
+    prov = record.get("provenance") or {}
     if prov.get("contract_version") != CONTRACT_VERSION:
-        failures.append("missing provenance.contract_version")
+        nested = (record.get("result") or {}).get("provenance") or {}
+        if nested.get("contract_version") != CONTRACT_VERSION:
+            failures.append("missing provenance.contract_version")
     return failures

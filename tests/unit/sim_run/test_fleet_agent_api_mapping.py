@@ -7,6 +7,7 @@ import pytest
 from src.sim_run.fleet_agent_api import (
     CONTRACT_VERSION,
     assert_run_record_conformance,
+    client_run_record_v1,
     fleet_run_status,
     map_sim_run_record_v1,
 )
@@ -33,4 +34,10 @@ def test_map_sim_run_record_v1_projects_contract_and_status() -> None:
     assert mapped["status"] == "SUCCEEDED"
     assert mapped["provenance"]["contract_version"] == CONTRACT_VERSION
     assert mapped["provenance"]["repo_sha"] == "abc"
-    assert not assert_run_record_conformance(payload)
+    assert assert_run_record_conformance(payload) == [
+        "contract_version mismatch",
+        "invalid fleet status 'succeeded'",
+        "missing provenance.contract_version",
+    ]
+    public = client_run_record_v1(payload)
+    assert not assert_run_record_conformance(public)
