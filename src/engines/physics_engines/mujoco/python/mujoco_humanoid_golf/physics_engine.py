@@ -886,36 +886,25 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
         if self.model is None or self.data is None:
             return np.array([])
 
-        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.counterfactuals import (
-            CounterfactualAnalyzer,
-        )
-
-        ctrl = np.asarray(tau, dtype=float).reshape(-1)
-        q_arr = np.asarray(q, dtype=float).reshape(-1)
-        if len(q_arr) != len(self.data.qpos):
-            raise ValueError(
-                f"q must have {len(self.data.qpos)} entries, got {len(q_arr)}"
-            )
-        if ctrl.size == self.model.nu:
-            analyzer = CounterfactualAnalyzer(self.model)
-            return analyzer.control_component_at(q_arr, ctrl)
-
-        if ctrl.size != self.model.nv:
-            raise ValueError(
-                f"tau must have {self.model.nu} (actuator) or {self.model.nv} "
-                f"(generalized) entries, got {ctrl.size}"
-            )
-
         saved_qpos = self.data.qpos.copy()
         saved_qvel = self.data.qvel.copy()
+        saved_ctrl = self.data.ctrl.copy()
         try:
-            self.data.qpos[:] = q_arr
-            self.data.qvel[:] = 0.0
+            self.data.qpos[:] = q
+            self.data.qvel[:] = 0
+            tau_arr = np.asarray(tau, dtype=float).reshape(-1)
+            if tau_arr.size != self.model.nv:
+                raise ValueError(
+                    f"tau must have {self.model.nv} entries, got {tau_arr.size}"
+                )
+            self.data.ctrl[:] = 0
             mujoco.mj_forward(self.model, self.data)
-            return self.compute_control_acceleration(ctrl)
+            mass = full_mass_matrix(mujoco, self.model, self.data)
+            return cast(np.ndarray, np.linalg.solve(mass, tau_arr))
         finally:
             self.data.qpos[:] = saved_qpos
             self.data.qvel[:] = saved_qvel
+            self.data.ctrl[:] = saved_ctrl
             mujoco.mj_forward(self.model, self.data)
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:

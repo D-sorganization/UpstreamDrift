@@ -194,7 +194,9 @@ def _python_fallback_total(
         magnus_dir = np.cross(spin, rel_velocity)
         magnus_norm = _magnitude(magnus_dir)
         if magnus_norm > 1e-6:
-            spin_param = spec.radius * spin_mag / speed
+            # Transverse spin ||ω × v̂|| — matches rust_core compute_magnus (#15042).
+            transverse_spin = magnus_norm / speed
+            spin_param = spec.radius * transverse_spin / speed
             cl = min(
                 MAX_LIFT_COEFFICIENT,
                 PENNER_LIFT_SCALE * spin_param**PENNER_LIFT_EXPONENT,

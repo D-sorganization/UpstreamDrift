@@ -609,6 +609,8 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
 
         return cast(np.ndarray, a_full - a_drift)
 
+    @precondition(lambda self, q: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Gravity-only acceleration must contain finite values")
     def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:
         """Legacy gravity-only diagnostic at ``v = u = 0`` (not SPEC §4 ZVCF)."""
         if not (q is not None):
@@ -618,8 +620,18 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         q_arr = self._require_vector("q", q, self.model.nq)
         v_zero = np.zeros(self.model.nv)
         tau = np.zeros(self.model.nv)
-        return cast(np.ndarray, pin.aba(self.model, self.data, q_arr, v_zero, tau))
+        try:
+            return cast(
+                np.ndarray,
+                pin.aba(self.model, self.data, q_arr, v_zero, tau).copy(),
+            )
+        finally:
+            pin.forwardKinematics(self.model, self.data, self.q, self.v)
 
+    @precondition(
+        lambda self, q, tau: self.is_initialized, "Engine must be initialized"
+    )
+    @postcondition(check_finite, "Control acceleration must contain finite values")
     def compute_control_acceleration_at_state(
         self, q: np.ndarray, tau: np.ndarray
     ) -> np.ndarray:
@@ -637,6 +649,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             return self.compute_control_acceleration(tau_arr)
         finally:
             self.q, self.v = q_save, v_save
+            pin.forwardKinematics(self.model, self.data, self.q, self.v)
 
     @precondition(lambda self, q: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "ZVCF acceleration must contain finite values")

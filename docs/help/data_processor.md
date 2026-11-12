@@ -60,6 +60,10 @@ A second, independent entry point exists in the Sidekick tools sidebar:
 lazily imports the same heavy surface on demand, deliberately so that
 Sidekick startup does not depend on the full Data Processor UI stack.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/theory-part1.html): *AffineDrift Theory Part I*.
+
 ## Limitations
 
 - The registry `path`,

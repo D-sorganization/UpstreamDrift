@@ -215,3 +215,7 @@ Load a pre-computed trajectory:
 ---
 
 _See also: [Full User Manual](../user_guide/user_manual.md) | [Engine Selection](engine_selection.md) | [Visualization](visualization.md)_
+
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/passive-distributed-control.html): *Passive and Distributed Control*.
