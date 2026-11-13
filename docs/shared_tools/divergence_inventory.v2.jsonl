@@ -2843,7 +2843,7 @@
 {"path": "sidekick/ui/tools_sidebar/calculator_workspace_facade.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/tools_sidebar/chat_settings.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/tools_sidebar/chat_settings_contract.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/ui/tools_sidebar/chat_tab.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
+{"path": "sidekick/ui/tools_sidebar/chat_tab.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/tools_sidebar/command_history.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/tools_sidebar/data_explorer_service.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/ui/tools_sidebar/data_explorer_tab.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
