@@ -299,8 +299,13 @@ _ERROR_ACCESS_DENIED = 5
 def _load_kernel32() -> tuple[Any, Callable[[], int]]:
     """Return a Win32 ``kernel32`` handle with 64-bit-safe signatures."""
     win_dll_cls = getattr(ctypes, "WinDLL", None)
-    if win_dll_cls is None:  # pragma: no cover - non-Windows runtime
-        raise OSError("WinDLL is unavailable on this platform")
+    get_last_error_fn: Callable[[], int] | None = getattr(
+        ctypes, "get_last_error", None
+    )
+    if (
+        win_dll_cls is None or get_last_error_fn is None
+    ):  # pragma: no cover - non-Windows runtime
+        raise OSError("Win32 ctypes APIs are unavailable on this platform")
     k32 = win_dll_cls("kernel32", use_last_error=True)
     k32.OpenProcess.argtypes = [ctypes.c_ulong, ctypes.c_int, ctypes.c_ulong]
     k32.OpenProcess.restype = ctypes.c_void_p
@@ -311,7 +316,7 @@ def _load_kernel32() -> tuple[Any, Callable[[], int]]:
     k32.GetExitCodeProcess.restype = ctypes.c_int
     k32.CloseHandle.argtypes = [ctypes.c_void_p]
     k32.CloseHandle.restype = ctypes.c_int
-    return k32, ctypes.get_last_error
+    return k32, get_last_error_fn
 
 
 def _is_pid_alive_windows(
