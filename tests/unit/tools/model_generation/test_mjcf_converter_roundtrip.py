@@ -10,9 +10,8 @@ Covers issue #7000:
 from __future__ import annotations
 
 import math
-import xml.etree.ElementTree as ET
 
-import defusedxml.ElementTree as DefusedET
+import defusedxml.ElementTree as ET
 import pytest
 from model_generation.converters.mjcf_converter import (
     MJCFConverter,
@@ -114,7 +113,7 @@ FIXED_JOINT_ROUNDTRIP_URDF = """<?xml version="1.0"?>
 
 def _element(xml_str: str) -> ET.Element:
     """Parse an MJCF snippet into an Element via defusedxml (matches module)."""
-    return DefusedET.fromstring(xml_str)
+    return ET.fromstring(xml_str)
 
 
 @pytest.fixture
@@ -200,7 +199,7 @@ class TestRoundTrip:
         mjcf = converter.urdf_to_mjcf(ROUNDTRIP_URDF)
         urdf = converter.mjcf_to_urdf(mjcf)
         # Result must itself be parseable URDF naming both links.
-        root = DefusedET.fromstring(urdf)
+        root = ET.fromstring(urdf)
         link_names = {link.get("name") for link in root.findall("link")}
         assert {"base", "link1"} <= link_names
 
