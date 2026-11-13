@@ -58,6 +58,7 @@ dependencies = [
     # path; it previously existed only as a hand-edit in the generated
     # environment.yml, where it constrained conda users alone and was
     # scheduled for deletion by the next `make sync-deps` (#8689).
+    # CVE-2026-126347 fixed in 6.6.1 (#13761).
     "tornado>=6.6.1",
     # Transitive via flask/uvicorn/pip-tools rather than imported directly.
     # Declared here for the same reason as tornado above: the floor must bind
