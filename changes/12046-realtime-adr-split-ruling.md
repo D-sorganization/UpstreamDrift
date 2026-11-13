@@ -1,0 +1,1 @@
+- Record ADR-0061 (`docs/adr/0061-realtime-provider-split-ruling.md`) formalizing the `realtime` provider split ruling between UpstreamDrift and Tools, replace `sunset_date` in `scripts/config/shadow_modules.yaml` with `adr_ruling`, and enforce verified ADR references in `tests/unit/repo_hygiene/test_no_shadow_of_tools_shared.py` (#12046).
