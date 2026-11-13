@@ -344,7 +344,12 @@ pairs against the Pinocchio ANALYTIC reference, ten metrics each).
 * **Track N** compares `d a/d tau`, `d a/d xi`, `d a/d eta` and the three
   `d lambda` blocks as basis-independent operators (`D P^T` for state blocks) in
   the Pinocchio coordinate order, at the NSX-56 projected states (frames 0 and
-  400), one seeded actuated load and one closure tangent space.
+  400), one seeded actuated load and one closure tangent space. Issue #12727 names
+  the same blocks `A(t)` and `B(t)`: the state map is `[d a/d xi | d a/d eta]`
+  (with the kinematic `d xi/dt = eta` row in
+  `loop_nullspace_derivative_support.full_state_matrix`) and the load map is
+  `d a/d tau`. The impact Jacobian `C_imp` (NSX-83) is engine-free and is
+  **not** a cross-engine divergence row here.
 * **Track S** (scientific comparison, not a measured noise level) compares the
   first-order covariance maps the sensitivities induce under a *declared* unit
   isotropic noise: `acc_load_variance = A S A^T`, `acc_state_variance = D_xi
