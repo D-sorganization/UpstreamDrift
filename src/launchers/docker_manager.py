@@ -9,14 +9,37 @@ from __future__ import annotations
 import logging
 import os
 import queue
-import signal
+import re
 import shutil
+import signal
+import socket
 import subprocess
 import threading
 import time
+import uuid
+from collections.abc import Callable
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+CONTAINER_LABEL_MANAGED = "upstreamdrift.managed=true"
+CONTAINER_LABEL_PID_KEY = "upstreamdrift.launcher_pid"
+DEFAULT_MESHCAT_PORT = 7000
+
+
+def _is_pid_alive(pid: int) -> bool:
+    """Return True when ``pid`` refers to a live OS process."""
+    if pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except OSError:
+        return False
+    return True
 
 
 def get_docker_cmd() -> list[str]:
@@ -372,6 +395,34 @@ class DockerLauncher:
         from src.shared.python.logging_pkg.logging_config import get_logger
 
         self.logger = get_logger(__name__)
+        self._launcher_pid = os.getpid()
+        self._container_lock = threading.Lock()
+        self._active_containers: dict[str, int | None] = {}
+        self._reserved_ports: set[int] = set()
+
+    def _make_container_name(self, model_type: str, model_name: str = "") -> str:
+        raw = model_name or model_type or "sim"
+        slug = re.sub(r"[^a-zA-Z0-9_.-]+", "-", raw).strip("-").lower()[:24] or "sim"
+        return f"ud-{slug}-{uuid.uuid4().hex[:8]}"
+
+    def _select_host_port(
+        self,
+        preferred: int = DEFAULT_MESHCAT_PORT,
+        max_probes: int = 25,
+    ) -> int:
+        with self._container_lock:
+            reserved = set(self._reserved_ports)
+        for offset in range(max_probes):
+            candidate = preferred + offset
+            if candidate in reserved:
+                continue
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+                try:
+                    probe.bind(("127.0.0.1", candidate))
+                except OSError:
+                    continue
+                return candidate
+        return preferred
 
     def check_image_exists(self) -> bool:
         """Check if the Docker image exists.
@@ -412,6 +463,9 @@ class DockerLauncher:
         model_type: str,
         repo_path: Path,
         use_gpu: bool = False,
+        *,
+        container_name: str | None = None,
+        host_port: int = DEFAULT_MESHCAT_PORT,
     ) -> list[str]:
         """Build the Docker launch command for a model.
 
@@ -419,6 +473,8 @@ class DockerLauncher:
             model_type: Type of the model (drake, pinocchio, custom_humanoid, etc.)
             repo_path: Path to the model within the repository.
             use_gpu: Whether to enable GPU support.
+            container_name: Explicit container name (auto-generated when omitted).
+            host_port: Host port mapped to MeshCat port 7000.
 
         Returns:
             List of command arguments for docker run.
@@ -426,10 +482,10 @@ class DockerLauncher:
         if model_type is None:
             raise ValueError("model_type must be provided")
 
+        resolved_name = container_name or self._make_container_name(model_type)
+
         repo_root_str = str(self.repo_root)
         if "wsl" in get_docker_cmd():
-            import re
-
             match = re.match(r"^([a-zA-Z]):(.*)", repo_root_str)
             if match:
                 drive = match.group(1).lower()
@@ -441,6 +497,12 @@ class DockerLauncher:
         cmd = get_docker_cmd() + [
             "run",
             "--rm",
+            "--name",
+            resolved_name,
+            "--label",
+            CONTAINER_LABEL_MANAGED,
+            "--label",
+            f"{CONTAINER_LABEL_PID_KEY}={self._launcher_pid}",
             "-v",
             f"{repo_root_str}:/workspace",
             "-e",
@@ -478,7 +540,7 @@ class DockerLauncher:
 
         # Port mapping for MeshCat (Drake/Pinocchio)
         if model_type in ("drake", "pinocchio"):
-            cmd.extend(["-p", "7000:7000", "-e", "MESHCAT_HOST=0.0.0.0"])  # nosec: Docker container networking requires 0.0.0.0
+            cmd.extend(["-p", f"{host_port}:7000", "-e", "MESHCAT_HOST=0.0.0.0"])  # nosec: Docker container networking requires 0.0.0.0
 
         # Working Directory
         work_dir = (
@@ -521,7 +583,24 @@ class DockerLauncher:
         """
         if model_type is None:
             raise ValueError("model_type must be provided")
-        cmd = self.build_launch_command(model_type, repo_path, use_gpu)
+        container_name = self._make_container_name(model_type, model_name)
+        allocated_port: int | None = None
+        if model_type in ("drake", "pinocchio"):
+            allocated_port = self._select_host_port(DEFAULT_MESHCAT_PORT)
+            cmd = self.build_launch_command(
+                model_type,
+                repo_path,
+                use_gpu,
+                container_name=container_name,
+                host_port=allocated_port,
+            )
+        else:
+            cmd = self.build_launch_command(
+                model_type,
+                repo_path,
+                use_gpu,
+                container_name=container_name,
+            )
         self.logger.info(f"Docker Launch: {' '.join(cmd)}")
 
         try:
@@ -544,7 +623,86 @@ class DockerLauncher:
                         subprocess.CREATE_NEW_CONSOLE if os.name == "nt" else 0  # type: ignore[attr-defined]
                     ),
                 )
+            with self._container_lock:
+                self._active_containers[container_name] = allocated_port
+                if allocated_port is not None:
+                    self._reserved_ports.add(allocated_port)
             return process
         except (FileNotFoundError, PermissionError, OSError) as e:
             self.logger.error(f"Failed to launch Docker container: {e}")
             return None
+
+    def stop_container(self, container_name: str) -> bool:
+        """Stop a managed Docker container by name and release its reserved port."""
+        if not container_name:
+            return False
+        cmd = get_docker_cmd() + ["stop", "-t", "2", container_name]
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+            stopped = result.returncode == 0
+        except (subprocess.SubprocessError, OSError) as exc:
+            self.logger.warning("Failed to stop container %s: %s", container_name, exc)
+            stopped = False
+        with self._container_lock:
+            port = self._active_containers.pop(container_name, None)
+            if port is not None:
+                self._reserved_ports.discard(port)
+        return stopped
+
+    def stop_all_containers(self) -> list[str]:
+        """Stop all containers started by this launcher instance."""
+        with self._container_lock:
+            names = list(self._active_containers.keys())
+        stopped: list[str] = []
+        for container_name in names:
+            if self.stop_container(container_name):
+                stopped.append(container_name)
+        return stopped
+
+    def sweep_orphan_containers(
+        self,
+        *,
+        pid_alive_fn: Callable[[int], bool] | None = None,
+    ) -> list[str]:
+        """Stop running UpstreamDrift containers whose launcher PID is gone."""
+        is_alive = pid_alive_fn or _is_pid_alive
+        ps_cmd = get_docker_cmd() + [
+            "ps",
+            "--filter",
+            f"label={CONTAINER_LABEL_MANAGED}",
+            "--format",
+            '{{.Names}}\t{{.Label "' + CONTAINER_LABEL_PID_KEY + '"}}',
+        ]
+        try:
+            result = subprocess.run(ps_cmd, capture_output=True, text=True, timeout=10)
+        except (subprocess.SubprocessError, OSError) as exc:
+            self.logger.debug("Orphan container sweep skipped: %s", exc)
+            return []
+        if result.returncode != 0 or not result.stdout.strip():
+            return []
+
+        stopped: list[str] = []
+        for line in result.stdout.splitlines():
+            parts = line.strip().split("\t", 1)
+            if len(parts) != 2:
+                continue
+            cname, pid_text = parts[0].strip(), parts[1].strip()
+            if not cname:
+                continue
+            try:
+                owner_pid = int(pid_text)
+            except ValueError:
+                continue
+            if not is_alive(owner_pid) and self.stop_container(cname):
+                stopped.append(cname)
+        return stopped
+
+    def sweep_orphan_containers_async(self) -> threading.Thread:
+        """Run orphan container cleanup on a daemon thread at startup."""
+        thread = threading.Thread(
+            target=self.sweep_orphan_containers,
+            name="docker-orphan-sweep",
+            daemon=True,
+        )
+        thread.start()
+        return thread

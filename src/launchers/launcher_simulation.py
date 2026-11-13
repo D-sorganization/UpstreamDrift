@@ -27,7 +27,10 @@ from src.launchers.launcher_constants import (
     CREATE_NO_WINDOW,
     REPOS_ROOT,
 )
-from src.launchers.engine_status import engine_running_text
+from src.launchers.engine_status import (
+    apply_post_launch_for_manager,
+    engine_running_text,
+)
 from src.launchers.engine_availability import engine_for_model, install_hint
 from src.launchers.launcher_model_sources import (
     get_model_source_root,
@@ -618,9 +621,9 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 success = False
 
             if success:
-                self.show_toast(f"{model.name} Launched", "success")
-                self.lbl_status.setText(engine_running_text(model.name))
-                self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
+                self._apply_managed_launch_status(
+                    model.name, "", f"{model.name} Launched"
+                )
             else:
                 reason = None
                 status_message = getattr(handler, "status_message", None)
@@ -810,9 +813,9 @@ except (RuntimeError, TypeError, AttributeError) as e:
             if process:
                 # Route Docker output through the unified console
                 self.process_manager.attach_process(model.name, process)
-                self.show_toast(f"{model.name} Launched (Docker)", "success")
-                self.lbl_status.setText(engine_running_text(model.name, "Docker"))
-                self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
+                self._apply_managed_launch_status(
+                    model.name, "Docker", f"{model.name} Launched (Docker)"
+                )
             else:
                 self.lbl_status.setText("* Docker Error")
                 self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
@@ -852,7 +855,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
         use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
 
         if use_wsl:
-            success = self.process_manager.launch_in_wsl(str(script_path))
+            success = self.process_manager.launch_in_wsl(str(script_path), name=name)
             self._report_wsl_launch(name, success)
             return
 
@@ -863,27 +866,37 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
         self._report_native_launch(name, bool(process))
 
+    def _set_launch_status(self, text: str, style: str) -> None:
+        self.lbl_status.setText(text)
+        self.lbl_status.setStyleSheet(style)
+
+    def _apply_managed_launch_status(self, name: str, suffix: str, toast: str) -> None:
+        apply_post_launch_for_manager(
+            self.process_manager,
+            name,
+            suffix,
+            self._set_launch_status,
+            self.show_toast,
+            success_style=Styles.STATUS_SUCCESS,
+            error_style=Styles.STATUS_ERROR,
+            toast_label=toast,
+        )
+
     def _report_wsl_launch(self, name: str, success: bool) -> None:
         """Show the status/toast for a WSL launch, or an error dialog."""
         if success:
-            self.lbl_status.setText(engine_running_text(name, "WSL"))
-            self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
-            self.show_toast(f"{name} Launched in WSL", "success")
-        else:
-            QMessageBox.critical(
-                self.launcher, "Launch Error", f"Failed to launch {name} in WSL"
-            )
+            self._apply_managed_launch_status(name, "WSL", f"{name} Launched in WSL")
+            return
+        msg = f"Failed to launch {name} in WSL"
+        QMessageBox.critical(self.launcher, "Launch Error", msg)
 
     def _report_native_launch(self, name: str, launched: bool) -> None:
         """Show the status/toast for a native launch, or an error dialog."""
         if launched:
-            self.show_toast(f"{name} Launched", "success")
-            self.lbl_status.setText(engine_running_text(name))
-            self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
-        else:
-            QMessageBox.critical(
-                self.launcher, "Launch Error", f"Failed to launch {name}"
-            )
+            self._apply_managed_launch_status(name, "", f"{name} Launched")
+            return
+        msg = f"Failed to launch {name}"
+        QMessageBox.critical(self.launcher, "Launch Error", msg)
 
     @precondition(
         lambda self, name, module_name, cwd: name is not None and len(name.strip()) > 0,
@@ -907,7 +920,9 @@ except (RuntimeError, TypeError, AttributeError) as e:
         use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
 
         if use_wsl:
-            success = self.process_manager.launch_module_in_wsl(module_name, cwd)
+            success = self.process_manager.launch_module_in_wsl(
+                module_name, cwd, name=name
+            )
             self._report_wsl_launch(name, success)
             return
 
