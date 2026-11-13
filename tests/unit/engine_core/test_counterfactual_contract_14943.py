@@ -27,7 +27,11 @@ def test_mixed_counterfactual_kind_comparison_raises() -> None:
 
 def test_mixed_definition_version_comparison_raises() -> None:
     a = wrap_counterfactual(CounterfactualKind.CONTROL, np.ones(3))
-    b = CounterfactualResult(CounterfactualKind.CONTROL, "legacy-v0", np.ones(3))
+    b = CounterfactualResult(
+        kind=CounterfactualKind.CONTROL,
+        definition_version="legacy-v0",
+        qdd=np.ones(3),
+    )
     with pytest.raises(ValueError, match="definition_version"):
         ensure_comparable_counterfactuals(a, b)
 

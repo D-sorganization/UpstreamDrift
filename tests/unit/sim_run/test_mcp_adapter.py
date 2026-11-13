@@ -82,14 +82,14 @@ def test_mcp_client_round_trip_all_four_tools(
         assert "result" in submit_resp, f"Submit failed: {submit_resp}"
         run_record = json.loads(submit_resp["result"]["content"][0]["text"])
         run_id = run_record["run_id"]
-        assert run_record["status"] == "succeeded", (
+        assert run_record["status"] == "SUCCEEDED", (
             f"Run failed with: {run_record.get('error')}"
         )
 
         get_resp = client.tool("get_run", {"run_id": run_id})
         assert (
             json.loads(get_resp["result"]["content"][0]["text"])["status"]
-            == "succeeded"
+            == "SUCCEEDED"
         )
 
         store.save_artifact(run_id, "summary.json", '{"benchmark": "pass"}')

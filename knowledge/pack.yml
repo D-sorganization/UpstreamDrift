@@ -19,9 +19,14 @@ sources:
   - repo: UpstreamDrift
     authority: reference
     include:
+      - "SPEC.md"
       - "docs/adr/**/*.md"
       - "docs/api/**/*.md"
       - "docs/codemap/**/*.md"
+      - "docs/conventions/**/*.md"
+      - "docs/engines/**/*.md"
+      - "docs/simulation_backends/**/*.md"
+      - "docs/physics/**/*.md"
     exclude:
       - "docs/development/**"
       - "docs/assessments/**"

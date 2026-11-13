@@ -4,19 +4,19 @@
     {
       "path": "src/shared/python/motion_matching/full_body_forward_dynamics.py",
       "owner": "@dieterolson @D-sorganization/simulation-team",
-      "reason": "Issue #10330 temporary exception for consolidated forward dynamics and tracking during HO-1 landing; scheduled for decomposition by controller/simulation domain (1443 lines). Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10330 temporary exception for consolidated forward dynamics and tracking during HO-1 landing; scheduled for decomposition by controller/simulation domain (1443 lines) (measured 1591 > 1200 lines). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
       "path": "src/shared/python/motion_matching/acceptance.py",
       "owner": "@dieterolson @D-sorganization/simulation-team",
-      "reason": "Issue #10431 temporary exception for motion matching acceptance fixtures and negative tests during PF-01 landing; scheduled for decomposition by simulation-team (1427 lines). Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10431 temporary exception for motion matching acceptance fixtures and negative tests during PF-01 landing; scheduled for decomposition by simulation-team (1427 lines) (measured 1511 > 1200 lines). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
       "path": "src/shared/python/motion_matching/pipeline/cli.py",
       "owner": "@dieterolson @D-sorganization/simulation-team",
-      "reason": "Issue #12042 temporary exception while turn metrics, weld projection, and IK restart policies are decomposed from pipeline CLI (1457 lines). Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #12042 temporary exception while turn metrics, weld projection, and IK restart policies are decomposed from pipeline CLI (1457 lines) (measured 1529 > 1200 lines). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     }
   ]

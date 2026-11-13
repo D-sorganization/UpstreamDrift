@@ -1,7 +1,7 @@
 """Model Context Protocol (MCP) stdio adapter for headless simulation runs.
 
-Epic #14085 / Child Task #14092:
-Thin stdio MCP adapter exposing 4 simulation run service tools:
+Epic #14085 / Child Task #14092; FastMCP stdio transport (#15022).
+Thin MCP adapter exposing simulation run service tools:
 describe_engines, submit_run, get_run, fetch_artifact; plus the putting-study
 tools optimize_putt, putting_misread_cost and putting_library_study (#14177,
 see ``putting_tools``) and the putting-core tools putting_simulate_putt,
@@ -11,11 +11,9 @@ putting_read_green, putting_stimpmeter and putting_capture_speed (#14141 step
 
 from __future__ import annotations
 
-import asyncio
 import base64
 import json
 import logging
-import os
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -27,6 +25,11 @@ from .agent_api import (
     read_auth_token,
     read_private_mode,
 )
+from .agent_capability_tools import (
+    agent_capability_tool_handlers,
+    agent_capability_tool_specs,
+)
+from .fleet_agent_api import CONTRACT_VERSION, client_run_record_v1
 from .models import RunRequest, export_schemas
 from .putting_core_tools import core_tool_handlers, core_tool_specs
 from .putting_tools import putting_tool_handlers, putting_tool_specs
@@ -72,7 +75,7 @@ class SecurityPolicy:
 
 
 class SimulationMcpServer:
-    """Stdio JSON-RPC 2.0 MCP server exposing simulation run tools."""
+    """Simulation MCP tool router (JSON-RPC test harness + FastMCP backend)."""
 
     def __init__(
         self,
@@ -92,9 +95,11 @@ class SimulationMcpServer:
 
     def tool_describe_engines(self, arguments: dict[str, Any]) -> dict[str, Any]:
         self.security.check_auth(arguments.get("auth_token"))
+        request_schema = export_schemas()
         payload = {
+            "contract_version": CONTRACT_VERSION,
             "engines": engines_for_describe(),
-            "request_schema": export_schemas(),
+            "request_schema": request_schema,
             "schema_version": "1.0.0",
         }
         return {"content": [{"type": "text", "text": json.dumps(payload)}]}
@@ -118,11 +123,8 @@ class SimulationMcpServer:
                 "content": [{"type": "text", "text": f"SimulationBusyError: {exc}"}],
             }
 
-        return {
-            "content": [
-                {"type": "text", "text": json.dumps(finished.model_dump(mode="json"))}
-            ]
-        }
+        payload = client_run_record_v1(finished.model_dump(mode="json"))
+        return {"content": [{"type": "text", "text": json.dumps(payload)}]}
 
     def tool_get_run(self, arguments: dict[str, Any]) -> dict[str, Any]:
         self.security.check_auth(arguments.get("auth_token"))
@@ -133,11 +135,8 @@ class SimulationMcpServer:
             record = self.store.get_run(run_id)
         except RunNotFoundError as exc:
             raise ValueError(f"Run '{run_id}' not found") from exc
-        return {
-            "content": [
-                {"type": "text", "text": json.dumps(record.model_dump(mode="json"))}
-            ]
-        }
+        payload = client_run_record_v1(record.model_dump(mode="json"))
+        return {"content": [{"type": "text", "text": json.dumps(payload)}]}
 
     def tool_fetch_artifact(self, arguments: dict[str, Any]) -> dict[str, Any]:
         self.security.check_auth(arguments.get("auth_token"))
@@ -177,7 +176,19 @@ class SimulationMcpServer:
         }
         return {"content": [{"type": "text", "text": json.dumps(payload)}]}
 
-    def _tools(self) -> list[dict[str, Any]]:
+    def _tool_handlers(self) -> dict[str, Any]:
+        return {
+            "describe_engines": self.tool_describe_engines,
+            "submit_run": self.tool_submit_run,
+            "get_run": self.tool_get_run,
+            "fetch_artifact": self.tool_fetch_artifact,
+            **putting_tool_handlers(self.security.check_auth),
+            **core_tool_handlers(self.security.check_auth),
+            **agent_capability_tool_handlers(self.security.check_auth, self.store),
+        }
+
+    def tool_specs(self) -> list[dict[str, Any]]:
+        """Pinned MCP tool list shared by JSON-RPC tests and FastMCP ``tools/list``."""
         a = {"auth_token": "string"}
         run_p = {
             **a,
@@ -199,7 +210,20 @@ class SimulationMcpServer:
             ),
             *putting_tool_specs(),
             *core_tool_specs(),
+            *agent_capability_tool_specs(),
         ]
+
+    def _tools(self) -> list[dict[str, Any]]:
+        """Backward-compatible alias for :meth:`tool_specs`."""
+        return self.tool_specs()
+
+    def invoke_tool(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+        """Dispatch a single tool call; raises on auth and validation errors."""
+        handlers = self._tool_handlers()
+        handler = handlers.get(name)
+        if not handler:
+            raise ValueError(f"Unknown tool: '{name}'")
+        return handler(arguments or {})
 
     def handle_request(self, request: dict[str, Any]) -> dict[str, Any]:
         """Dispatch a single JSON-RPC 2.0 message."""
@@ -218,20 +242,11 @@ class SimulationMcpServer:
             elif method in ("notifications/initialized", "ping"):
                 res = {}
             elif method == "tools/list":
-                res = {"tools": self._tools()}
+                res = {"tools": self.tool_specs()}
             elif method == "tools/call":
-                handlers = {
-                    "describe_engines": self.tool_describe_engines,
-                    "submit_run": self.tool_submit_run,
-                    "get_run": self.tool_get_run,
-                    "fetch_artifact": self.tool_fetch_artifact,
-                    **putting_tool_handlers(self.security.check_auth),
-                    **core_tool_handlers(self.security.check_auth),
-                }
-                handler = handlers.get(str(params.get("name")))
-                if not handler:
-                    raise ValueError(f"Unknown tool: '{params.get('name')}'")
-                res = handler(params.get("arguments") or {})
+                res = self.invoke_tool(
+                    str(params.get("name")), params.get("arguments") or {}
+                )
             else:
                 raise ValueError(f"Unknown JSON-RPC method: '{method}'")
             return {"jsonrpc": "2.0", "id": req_id, "result": res}
@@ -259,32 +274,29 @@ class SimulationMcpServer:
 
 
 async def run_stdio_loop(server: SimulationMcpServer) -> None:
-    """Run asynchronous stdin/stdout JSON-RPC event loop."""
-    loop = asyncio.get_running_loop()
-    reader = asyncio.StreamReader()
-    await loop.connect_read_pipe(
-        lambda: asyncio.StreamReaderProtocol(reader), sys.stdin
-    )
-    w_transport, w_protocol = await loop.connect_write_pipe(
-        asyncio.streams.FlowControlMixin, sys.stdout
-    )
-    writer = asyncio.StreamWriter(w_transport, w_protocol, None, loop)
-    while True:
-        line = await reader.readline()
-        if not line:
-            break
-        try:
-            req = json.loads(line.decode("utf-8"))
-        except json.JSONDecodeError:
-            continue
-        resp = server.handle_request(req)
-        writer.write((json.dumps(resp) + "\n").encode("utf-8"))
-        await writer.drain()
+    """Run the official MCP SDK stdio loop via FastMCP."""
+    from .mcp_fastmcp import build_fastmcp_server
+
+    fastmcp = build_fastmcp_server(server)
+    if fastmcp is None:
+        raise RuntimeError(
+            "ud-sim-mcp: install the MCP SDK: pip install 'upstream-drift[sim-mcp]'"
+        )
+    await fastmcp.run_stdio_async()
 
 
 def main() -> None:  # pragma: no cover — CLI process entrypoint
     logging.basicConfig(level=logging.INFO, stream=sys.stderr)
-    asyncio.run(run_stdio_loop(SimulationMcpServer()))
+    from .mcp_fastmcp import build_fastmcp_server
+
+    fastmcp = build_fastmcp_server(SimulationMcpServer())
+    if fastmcp is None:
+        sys.stderr.write(
+            "ud-sim-mcp: install the MCP SDK: pip install 'upstream-drift[sim-mcp]'\n"
+        )
+        raise SystemExit(2)
+    fastmcp.run(transport="stdio")
+    raise SystemExit(0)
 
 
 if __name__ == "__main__":  # pragma: no cover

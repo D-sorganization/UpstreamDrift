@@ -226,17 +226,19 @@ Implementation:
 
 ### 10.6.2 ZVCF -- Zero-Velocity Counterfactual
 
+Canonical [SPEC §4](../../../SPEC.md#4-architecture-overview) ZVCF is the control component $M(q)^{-1}\tau$ (`compute_control_acceleration`). The legacy `compute_zvcf(q)` method evaluates gravity-only acceleration with both velocity and controls zeroed:
+
 ```python
 a_zvcf = engine.compute_zvcf(q)
 ```
 
 Implementation:
 
-1. Save current state
+1. Save current state and controls
 2. Set state with desired $q$ and $v = 0$
-3. Controls are preserved
-4. Realize dynamics and extract accelerations
-5. Restore original state
+3. Set zero control (all muscle activations = 0)
+4. Realize acceleration dynamics and extract accelerations from `state.getUDot()`
+5. Restore original state and controls
 
 ---
 
