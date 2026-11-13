@@ -122,6 +122,40 @@ def test_single_a_to_g_coefficient_order_and_descending_helpers() -> None:
     assert "c_6" in gates_text and "A + B*t" in gates_text
 
 
+def test_cubic_to_normalized_sextic_preserves_cubic_native_ag_keyword() -> None:
+    """cubic_to_normalized_sextic preserves cubic_native_ag and accepts new alias."""
+    cubic_desc = np.array([0.0, 0.0, 0.0, 2.0, -3.0, 1.5, 0.5])
+    t_full = 1.814
+    expected = constrained_sextic.descending_polyval_to_normalized(
+        cubic_desc, T_full=t_full
+    )
+
+    np.testing.assert_allclose(
+        constrained_sextic.cubic_to_normalized_sextic(cubic_desc, T_full=t_full),
+        expected,
+    )
+    np.testing.assert_allclose(
+        constrained_sextic.cubic_to_normalized_sextic(
+            cubic_native_ag=cubic_desc, T_full=t_full
+        ),
+        expected,
+    )
+    np.testing.assert_allclose(
+        constrained_sextic.cubic_to_normalized_sextic(
+            cubic_descending_coeffs=cubic_desc, T_full=t_full
+        ),
+        expected,
+    )
+    with pytest.raises(TypeError):
+        constrained_sextic.cubic_to_normalized_sextic(T_full=t_full)
+    with pytest.raises(TypeError):
+        constrained_sextic.cubic_to_normalized_sextic(
+            cubic_native_ag=cubic_desc,
+            cubic_descending_coeffs=cubic_desc,
+            T_full=t_full,
+        )
+
+
 def test_pelvis_ilc_passes_flag_and_shooting_fit_terminology() -> None:
     """CLI accepts --pelvis-ilc-passes and documents iterative-learning semantics."""
     parser = cli.build_parser()

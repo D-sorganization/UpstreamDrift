@@ -82,10 +82,30 @@ def normalized_to_simscape_powers(
 
 
 def cubic_to_normalized_sextic(
-    cubic_descending_coeffs: Array, *, T_full: float = T_FULL_DEFAULT
+    cubic_native_ag: Array | None = None,
+    *,
+    cubic_descending_coeffs: Array | None = None,
+    T_full: float = T_FULL_DEFAULT,
 ) -> Array:
-    """Elevate a descending ``polyval`` cubic (``c_6 = c_5 = c_4 = 0``) to ascending powers of ``s = t/T_full``."""
-    return descending_polyval_to_normalized(cubic_descending_coeffs, T_full=T_full)
+    """Elevate a descending ``polyval`` cubic (``c_6 = c_5 = c_4 = 0``) to ascending powers of ``s = t/T_full``.
+
+    Preserves the ``cubic_native_ag`` parameter name for backward compatibility
+    while also accepting ``cubic_descending_coeffs`` as a keyword alias.
+    """
+    if cubic_native_ag is not None and cubic_descending_coeffs is not None:
+        raise TypeError(
+            "Pass only one of cubic_native_ag or cubic_descending_coeffs, not both"
+        )
+    coeffs = (
+        cubic_descending_coeffs
+        if cubic_descending_coeffs is not None
+        else cubic_native_ag
+    )
+    if coeffs is None:
+        raise TypeError(
+            "cubic_to_normalized_sextic() missing required argument: 'cubic_native_ag'"
+        )
+    return descending_polyval_to_normalized(coeffs, T_full=T_full)
 
 
 def build_prefix_svd_basis(
