@@ -32,7 +32,7 @@ git log -8 --oneline
 python -m src.tools.shot_pattern_analysis.matrix docs/research/shot_pattern_analysis/corrected_results
 python -m src.tools.shot_pattern_analysis.overview docs/research/shot_pattern_analysis/corrected_results --output-dir docs/research/shot_pattern_analysis/overview_v2
 python -m pytest tests/tools/shot_pattern_analysis tests/ui/tools/shot_pattern_analysis
-python <owner-home>/Repositories/Repository_Management/scripts/pre_pr.py --base-ref origin/main
+python "$HOME/Repositories/Repository_Management/scripts/pre_pr.py" --base-ref origin/main
 ```
 
 The matrix command now skips only verified complete bundles. Before running it, inspect the latest commits and this document so existing valid runs are preserved. Never run the expensive full matrix merely to regenerate scores or plots.
@@ -93,9 +93,9 @@ type checking passes 24 files without exclusions or suppressions.
 
 ```bash
 QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg MUJOCO_GL=egl SDL_VIDEODRIVER=dummy \
-MYPYPATH="$PWD" PYTHONPATH=<owner-home>/Repositories/Repository_Management \
+MYPYPATH="$PWD" PYTHONPATH="$HOME/Repositories/Repository_Management" \
 /tmp/shot-pattern-validation-venv-20261009/bin/python \
-<owner-home>/Repositories/Repository_Management/scripts/pre_pr.py \
+"$HOME/Repositories/Repository_Management/scripts/pre_pr.py" \
   --from-ref "$(git merge-base origin/main HEAD)" --to-ref HEAD
 ```
 
