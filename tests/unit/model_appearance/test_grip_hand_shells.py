@@ -67,16 +67,40 @@ def _finger_section_surface_point_sets(
     return point_sets
 
 
+def _circular_arc_span_deg(azimuth_deg: np.ndarray) -> float:
+    """Smallest arc on [0, 360) that contains every azimuth (360 - max circular gap)."""
+    if azimuth_deg.size < 2:
+        return 0.0
+    az_sorted = np.sort(np.asarray(azimuth_deg, dtype=float) % 360.0)
+    gaps = np.diff(az_sorted)
+    gaps = np.append(gaps, az_sorted[0] + 360.0 - az_sorted[-1])
+    return float(360.0 - gaps.max())
+
+
+def _circular_arc_interval_deg(azimuth_deg: np.ndarray) -> tuple[float, float] | None:
+    """Bounds of the smallest containing arc; ``lo > hi`` when the arc crosses 0°."""
+    if azimuth_deg.size < 2:
+        return None
+    az_sorted = np.sort(np.asarray(azimuth_deg, dtype=float) % 360.0)
+    n = az_sorted.shape[0]
+    gaps = np.diff(az_sorted)
+    gaps = np.append(gaps, az_sorted[0] + 360.0 - az_sorted[-1])
+    max_gap_idx = int(np.argmax(gaps))
+    lo = float(az_sorted[(max_gap_idx + 1) % n])
+    hi = float(az_sorted[max_gap_idx])
+    return (lo, hi)
+
+
 def _finger_arc_intervals_deg(
     point_sets: list[np.ndarray],
 ) -> list[tuple[float, float]]:
     """Azimuth interval on the grip-cylinder section contributed by each finger."""
     intervals: list[tuple[float, float]] = []
     for pts in point_sets:
-        if pts.shape[0] < 2:
-            continue
-        azimuth = np.degrees(np.arctan2(pts[:, 1], pts[:, 0])) % 360.0
-        intervals.append((float(azimuth.min()), float(azimuth.max())))
+        azimuth = np.degrees(np.arctan2(pts[:, 1], pts[:, 0]))
+        interval = _circular_arc_interval_deg(azimuth)
+        if interval is not None:
+            intervals.append(interval)
     return intervals
 
 
@@ -191,6 +215,18 @@ def test_each_contact_patch_gap_within_0_to_3_mm(
         _assert_patch_clearance_within_limit(
             patch_gap, taper_slack, part_name=part.name
         )
+
+
+def test_circular_arc_span_at_0_360_seam_is_short_not_linear_span() -> None:
+    """Points straddling the seam must not read as ~340° via linear min/max."""
+    seam_az = np.array([350.0, 10.0])
+    linear_span = float(seam_az.max() - seam_az.min())
+    assert linear_span > 300.0
+    assert _circular_arc_span_deg(seam_az) == pytest.approx(20.0, abs=1e-6)
+    lo, hi = _circular_arc_interval_deg(seam_az)
+    assert lo == pytest.approx(350.0, abs=1e-6)
+    assert hi == pytest.approx(10.0, abs=1e-6)
+    assert lo > hi
 
 
 def test_contact_patch_clearance_rejects_over_limit_sample() -> None:
