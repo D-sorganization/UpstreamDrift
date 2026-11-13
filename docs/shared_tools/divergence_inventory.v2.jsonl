@@ -413,7 +413,7 @@
 {"path": "chat/_qt/exports.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/history_sidebar.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/input.py", "classification": "identical", "package": "chat", "spelling_only": false}
-{"path": "chat/_qt/messaging.py", "classification": "diverged", "package": "chat", "spelling_only": true}
+{"path": "chat/_qt/messaging.py", "classification": "diverged", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/queue_panel.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/sessions.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/streaming.py", "classification": "identical", "package": "chat", "spelling_only": false}
@@ -455,6 +455,7 @@
 {"path": "chat/terminal_providers.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/terminal_runtime.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/__init__.py", "classification": "identical", "package": "chat", "spelling_only": false}
+{"path": "chat/tests/test_attachment_upload_rejection.py", "classification": "ud-only", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_chat.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_chat_drift.py", "classification": "diverged", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_chat_routing_lifecycle.py", "classification": "identical", "package": "chat", "spelling_only": false}
