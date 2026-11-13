@@ -27,9 +27,10 @@ import sys
 import tempfile
 import threading
 from collections.abc import Callable
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import TYPE_CHECKING
 
+from src.shared.python.core.process_safety import narrow_catch
 from src.shared.python.data_io.user_config_root import user_config_path
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.secure_subprocess import (
@@ -160,6 +161,17 @@ def _build_windows_console_cmd(args: list[str], *, keep_terminal_open: bool) -> 
     return f'cmd /c "{inner}"'
 
 
+_OBSERVER_ERRORS = (
+    RuntimeError,
+    OSError,
+    TypeError,
+    ValueError,
+    AttributeError,
+    LookupError,
+)
+_CLEANUP_ERRORS = (RuntimeError, OSError, subprocess.SubprocessError)
+
+
 class ProcessManager:
     """Manages subprocess lifecycle for the Golf Launcher.
 
@@ -206,6 +218,7 @@ class ProcessManager:
         self._output_threads: dict[str, threading.Thread] = {}
         self.on_process_list_changed: Callable[[], None] | None = None
         self.on_process_changed: Callable[[ManagedProcess], None] | None = None
+        self.container_cleanup_callback: Callable[[], object] | None = None
         self.duplicate_key_policy = DuplicateKeyPolicy.ALLOW_SECOND
         self._early_confirm_seconds = 0.15
 
@@ -475,11 +488,12 @@ class ProcessManager:
         return None
 
     def _notify_process_changed(self, managed: ManagedProcess) -> None:
+        msg = "Process observer callback failed"
         if self.on_process_changed is not None:
-            with contextlib.suppress(Exception):
+            with narrow_catch(*_OBSERVER_ERRORS, log_message=msg):
                 self.on_process_changed(managed)
         if self.on_process_list_changed is not None:
-            with contextlib.suppress(Exception):
+            with narrow_catch(*_OBSERVER_ERRORS, log_message=msg):
                 self.on_process_list_changed()
 
     def _active_slots_for_key(self, key: str) -> list[ManagedProcess]:
@@ -519,18 +533,9 @@ class ProcessManager:
         self, slot_name: str, process: subprocess.Popen[bytes]
     ) -> None:
         """Register a process created outside normal launch paths (MATLAB shim)."""
-        managed = ManagedProcess(
-            id=new_managed_id(),
-            key=slot_name,
-            slot_name=slot_name,
-            kind=ProcessKind.MATLAB,
-            state=ProcessState.STARTING,
-            process=process,
-        )
-        with self._process_lock:
-            self._process_registry[managed.id] = managed
-        self._start_exit_waiter(managed)
-        self._schedule_running_confirmation(managed.id)
+        _assign_to_job(process)
+        if self._register_process(slot_name, process, kind=ProcessKind.MATLAB) is None:
+            reap_declined_child_spawn(process)
 
     def _remove_slot(self, slot_name: str) -> None:
         with self._process_lock:
@@ -944,10 +949,30 @@ class ProcessManager:
         """Return the conda environment name from WSL_CONDA_ENV env var (default: base)."""
         return os.environ.get("WSL_CONDA_ENV", "base")
 
+    def _spawn_wsl_process(self, key: str, cmd: list[str], log_label: str) -> bool:
+        try:
+            logger.info("%s", log_label)
+            if os.name == "nt":
+                process = subprocess.Popen(
+                    cmd,
+                    creationflags=CREATE_NEW_CONSOLE,
+                )
+            else:
+                process = subprocess.Popen(cmd)
+            _assign_to_job(process)
+            if self._register_process(key, process, kind=ProcessKind.WSL) is None:
+                reap_declined_child_spawn(process)
+            return True
+        except (FileNotFoundError, PermissionError, OSError) as e:
+            logger.error("WSL launch failed: %s", e)
+            return False
+
     def launch_in_wsl(
         self,
         script_path: str,
         project_dir: str | None = None,
+        *,
+        name: str | None = None,
     ) -> bool:
         """Launch a script in WSL2 Ubuntu environment.
 
@@ -961,18 +986,17 @@ class ProcessManager:
         Args:
             script_path: Windows path to the script.
             project_dir: Override WSL project dir (uses WSL_PROJECT_DIR if not set).
+            name: Optional process registry key (defaults to script stem).
 
         Returns:
             True if launch succeeded, False otherwise.
         """
-        # Convert Windows path to WSL path
         if script_path is None:
             raise ValueError("script_path must be provided")
 
         resolved_project_dir = project_dir or self._get_wsl_project_dir()
         distro = self._get_wsl_distro()
         conda_env = self._get_wsl_conda_env()
-
         wsl_script_path = self._convert_to_wsl_path(script_path)
 
         # Use shlex.quote to prevent injection of shell metacharacters in the
@@ -989,29 +1013,17 @@ class ProcessManager:
             f"cd {quoted_project_dir}\n"
             f"python {quoted_wsl_script}\n"
         )
-
         cmd = ["wsl", "-d", distro, "--", "bash", "-c", wsl_cmd]
-
-        try:
-            logger.info(f"Launching in WSL: {script_path}")
-            if os.name == "nt":
-                subprocess.Popen(
-                    cmd,
-                    creationflags=CREATE_NEW_CONSOLE,
-                )
-            else:
-                subprocess.Popen(cmd)
-            return True
-
-        except (FileNotFoundError, PermissionError, OSError) as e:
-            logger.error(f"WSL launch failed: {e}")
-            return False
+        key = name or PureWindowsPath(script_path).stem or script_path
+        return self._spawn_wsl_process(key, cmd, f"Launching in WSL: {script_path}")
 
     def launch_module_in_wsl(
         self,
         module_name: str,
         cwd: Path | None = None,
         project_dir: str | None = None,
+        *,
+        name: str | None = None,
     ) -> bool:
         """Launch a Python module in WSL2 Ubuntu environment.
 
@@ -1021,15 +1033,14 @@ class ProcessManager:
             module_name: Python module name to run with -m flag.
             cwd: Optional working directory (Windows Path).
             project_dir: Override WSL project dir (uses WSL_PROJECT_DIR if not set).
+            name: Optional process registry key (defaults to module_name).
 
         Returns:
             True if launch succeeded, False otherwise.
         """
-        # Determine working directory
         if module_name is None:
             raise ValueError("module_name must be provided")
 
-        # Validate module name: must be a dotted Python identifier.
         if not _MODULE_NAME_RE.match(module_name):
             logger.error(
                 "WSL module launch rejected: invalid module name %r", module_name
@@ -1044,9 +1055,6 @@ class ProcessManager:
         if cwd:
             work_dir = self._convert_to_wsl_path(str(cwd))
 
-        # Use shlex.quote to prevent injection of shell metacharacters in the
-        # paths that are interpolated into the bash -c script.
-        # module_name has already been validated against the allowlist regex.
         quoted_project_dir = shlex.quote(resolved_project_dir)
         quoted_work_dir = shlex.quote(work_dir)
         quoted_conda_env = shlex.quote(conda_env)
@@ -1059,23 +1067,10 @@ class ProcessManager:
             f"cd {quoted_work_dir}\n"
             f"python -m {module_name}\n"
         )
-
         cmd = ["wsl", "-d", distro, "--", "bash", "-c", wsl_cmd]
-
-        try:
-            logger.info(f"Launching module in WSL: {module_name}")
-            if os.name == "nt":
-                subprocess.Popen(
-                    cmd,
-                    creationflags=CREATE_NEW_CONSOLE,
-                )
-            else:
-                subprocess.Popen(cmd)
-            return True
-
-        except (FileNotFoundError, PermissionError, OSError) as e:
-            logger.error(f"WSL module launch failed: {e}")
-            return False
+        return self._spawn_wsl_process(
+            name or module_name, cmd, f"Launching module in WSL: {module_name}"
+        )
 
     def _convert_to_wsl_path(self, windows_path: str) -> str:
         """Convert a Windows path to a WSL path.
@@ -1119,8 +1114,13 @@ class ProcessManager:
                 logger.error("Error terminating %s: %s", managed.slot_name, e)
 
         self.running_processes.clear()
+        if self.container_cleanup_callback is not None:
+            with narrow_catch(*_CLEANUP_ERRORS, log_message="Docker cleanup failed"):
+                self.container_cleanup_callback()
         if self.on_process_list_changed is not None:
-            with contextlib.suppress(Exception):
+            with narrow_catch(
+                *_OBSERVER_ERRORS, log_message="Process observer callback failed"
+            ):
                 self.on_process_list_changed()
 
     def is_process_running(self, name: str) -> bool:
