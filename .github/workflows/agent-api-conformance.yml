@@ -1,0 +1,95 @@
+name: agent-api-conformance
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "src/sim_run/**"
+      - "scripts/config/fleet_agent_api_conformance/**"
+      - "scripts/run_agent_api_conformance.py"
+      - ".github/workflows/agent-api-conformance.yml"
+      - ".mcp.json"
+      - "pyproject.toml"
+      - "llms.txt"
+      - "tests/unit/sim_run/test_mcp_*"
+      - "tests/unit/sim_run/test_fleet_agent_api_mapping.py"
+      - "tests/unit/sim_run/fixtures/**"
+  push:
+    branches: [main]
+    paths:
+      - "src/sim_run/**"
+      - "scripts/config/fleet_agent_api_conformance/**"
+      - "scripts/run_agent_api_conformance.py"
+      - ".github/workflows/agent-api-conformance.yml"
+      - ".mcp.json"
+      - "pyproject.toml"
+      - "llms.txt"
+  merge_group:
+
+concurrency:
+  group: >-
+    ${{ github.workflow }}-${{ github.event_name }}-${{
+      github.ref == 'refs/heads/main' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  pick-runner:
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: >-
+      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' &&
+      'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Set runner
+        id: check
+        run: |
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet-docker"
+
+  conformance:
+    needs: pick-runner
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
+
+      - name: Install package with sim-mcp extra
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m ensurepip --upgrade || true
+          python -m pip install --ignore-installed --no-deps pip
+          python -m ensurepip --upgrade || true
+          pip install -e ".[sim-mcp,dev]" || pip install -e ".[sim-mcp,dev]" --no-build-isolation
+
+      - name: Run Fleet Agent API conformance
+        env:
+          UPSTREAMDRIFT_GIT_SHA: ${{ github.sha }}
+        run: python3 scripts/run_agent_api_conformance.py

@@ -16,6 +16,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.integration
+
 from anthropometrics.estimators import (
     DeLevaEstimator,
     DempsterEstimator,
@@ -100,6 +102,24 @@ def test_de_leva_female_pelvis_published() -> None:
 
 
 # Dempster 1955 -- WADC TR-55-159, segment ratio table.
+def test_dempster_published_limb_mass_fractions() -> None:
+    """Dempster thigh and upper-arm masses match WADC TR-55-159 (#15014)."""
+    mass_kg = 73.0
+    record = DempsterEstimator().estimate(
+        subject_id="dempster_mass",
+        height_m=1.741,
+        mass_kg=mass_kg,
+        sex="M",
+    )
+    segs = _segment_dict(record)
+    assert segs["left_thigh"].mass_kg == pytest.approx(
+        mass_kg * 0.10, abs=PUBLISHED_TOL
+    )
+    assert segs["left_upper_arm"].mass_kg == pytest.approx(
+        mass_kg * 0.028, abs=PUBLISHED_TOL
+    )
+
+
 @pytest.mark.parametrize(
     ("anatomical", "length_ratio", "com_proximal_ratio"),
     [
@@ -162,6 +182,21 @@ def test_dempster_gyration_radii_diagonal_inertia() -> None:
 
 
 # Zatsiorsky-Seluyanov 1985 -- Biomechanics IX-B regression table.
+def test_zatsiorsky_published_limb_mass_fractions() -> None:
+    """Zatsiorsky-Seluyanov thigh mass matches Biomechanics IX-B table."""
+    mass_kg = 73.0
+    record = ZatsiorskyEstimator().estimate(
+        subject_id="zat_mass",
+        height_m=1.741,
+        mass_kg=mass_kg,
+        sex="M",
+    )
+    segs = _segment_dict(record)
+    assert segs["left_thigh"].mass_kg == pytest.approx(
+        mass_kg * 0.1416, abs=PUBLISHED_TOL
+    )
+
+
 @pytest.mark.parametrize(
     ("anatomical", "length_ratio", "com_proximal_ratio"),
     [

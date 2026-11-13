@@ -80,6 +80,10 @@ Qt layer:
 `PinocchioPhysicsEngine` - see
 [Pinocchio engine reference](../engines/pinocchio.md).
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/drift-is-the-past-control-is-the-present.html): *Drift Is the Past, Control Is the Present*.
+
 ## Limitations
 
 - Requires the `pinocchio` wheel; `PINOCCHIO_AVAILABLE` goes false without it.

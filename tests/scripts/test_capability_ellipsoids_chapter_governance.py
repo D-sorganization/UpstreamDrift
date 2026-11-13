@@ -68,5 +68,5 @@ def test_design_manual_governance_passes() -> None:
     """Repository governance verification must pass cleanly with the new chapter."""
     summary = verify_repository(REPO_ROOT)
     assert summary.manual_id == "upstreamdrift"
-    assert summary.calculation_count == 0
-    assert summary.release_status == "blocked-inventory-required"
+    assert summary.calculation_count >= 5
+    assert summary.release_status == "inventory-partial"

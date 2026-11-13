@@ -57,6 +57,10 @@ plotter and return. A terrain-engine import is present only as a commented-out
 line. `src/tools/golf_simulation_suite/gui.py` builds a `QMainWindow` with one
 `QLabel` and no logic at all.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/drift-is-the-past-control-is-the-present.html): *Drift Is the Past, Control Is the Present*.
+
 ## Limitations
 
 - **Nothing this tile displays is a simulation, a model output, or a
