@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import chat._ud_attachment_manifest_mixin  # noqa: F401 — lazy-load patch for tests
+
 from pathlib import Path
 from typing import Any
 import pytest
@@ -156,11 +158,13 @@ def test_on_message_error_branch_calls_file_upload_rejection() -> None:
 
 @pytest.mark.unit
 def test_chat_dock_lazy_load_wires_ud_attachment_manifest() -> None:
-    """UD-owned Qt load path must install manifest release without child-copy edits."""
-    source = (_repo_root() / "src/shared/python/chat/chat_dock_widget.py").read_text(
-        encoding="utf-8"
-    )
-    load_idx = source.index("def _load_qt_module")
-    load_block = source[load_idx : load_idx + 600]
-    assert "_chat_dock_widget_qt" in load_block
-    assert "_ud_attachment_manifest_mixin" in load_block
+    """UD-owned bootstrap must patch lazy load without child-copy edits."""
+    mixin_source = (
+        _repo_root() / "src/shared/python/chat/_ud_attachment_manifest_mixin.py"
+    ).read_text(encoding="utf-8")
+    assert "_patch_chat_dock_lazy_load" in mixin_source
+    assert "install_ud_attachment_manifest_on_chat_dock" in mixin_source
+    dock_shell = (
+        _repo_root() / "src/shared/python/chat/chat_dock_widget.py"
+    ).read_text(encoding="utf-8")
+    assert "_ud_attachment_manifest_mixin" not in dock_shell

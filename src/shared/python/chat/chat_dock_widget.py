@@ -226,7 +226,6 @@ def _load_qt_module() -> Any:
 
     try:
         from . import _chat_dock_widget_qt
-        from . import _ud_attachment_manifest_mixin  # noqa: F401 — patch ChatDockWidget
     except ImportError as exc:
         raise ChatQtUnavailableError(
             ChatQtDiagnostic(
