@@ -254,11 +254,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="leave wrists/forearms unbounded even with fitted grip rotation",
     )
     parser.add_argument(
+        "--pelvis-ilc-passes",
         "--shooting-fit",
+        dest="shooting_fit",
         type=int,
         default=0,
         metavar="N",
-        help="contact-aware shooting fit of tracked reference (FB-5): N passes",
+        help="iterative-learning pelvis-drift correction (FB-5, legacy alias --shooting-fit; not boundary-value shooting): N passes",
     )
     parser.add_argument(
         "--shooting-gain",

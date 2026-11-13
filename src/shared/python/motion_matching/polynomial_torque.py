@@ -24,7 +24,9 @@ def evaluate_polynomial_torque(
 
     ``coeffs[j, k]`` is the coefficient of ``t**k``. For the canonical
     seven-column layout this is ``[A, B, C, D, E, F, G]`` for
-    ``A + B*t + ... + G*t**6``.
+    ``A + B*t + ... + G*t**6``. Note: ``A..G`` exclusively denotes this
+    ascending order (unlike descending ``polyval`` ``[c_6..c_0]`` in
+    ``constrained_sextic.py``).
     """
     coeffs_arr = np.asarray(coeffs, dtype=np.float64)
     if coeffs_arr.ndim != 2:
