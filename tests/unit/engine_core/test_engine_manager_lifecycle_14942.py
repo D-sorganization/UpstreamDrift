@@ -155,3 +155,85 @@ def test_cleanup_closes_unregistered_active_physics_engine(
     assert manager.active_physics_engine is None
     assert manager.current_engine is None
     assert manager.engine_status[EngineType.PINOCCHIO] == EngineStatus.AVAILABLE
+
+
+def test_cleanup_preserves_failed_cached_engine_and_blocks_reload_until_retry_succeeds(
+    manager: EngineManager,
+) -> None:
+    """Failed close() preserves the cached engine and prevents unsafe reload until retry succeeds."""
+    engine = MagicMock(name="engine")
+    engine.close = MagicMock(side_effect=[RuntimeError("close boom"), None])
+    manager._loaded_engines[EngineType.MUJOCO] = engine
+    manager.engine_status[EngineType.MUJOCO] = EngineStatus.LOADED
+    manager.current_engine = EngineType.MUJOCO
+    manager.active_physics_engine = engine
+
+    manager.cleanup()
+
+    assert manager._loaded_engines.get(EngineType.MUJOCO) is engine
+    assert manager.engine_status[EngineType.MUJOCO] == EngineStatus.ERROR
+    assert manager.get_last_error(EngineType.MUJOCO) == "cleanup failed: close boom"
+    assert manager.active_physics_engine is None
+    assert manager.current_engine is None
+    assert manager.get_active_physics_engine(EngineType.MUJOCO) is None
+    assert manager.get_active_physics_engine() is None
+
+    with patch.object(manager, "_load_engine") as mock_load:
+        assert manager.switch_engine(EngineType.MUJOCO) is False
+        mock_load.assert_not_called()
+    assert manager.get_last_error(EngineType.MUJOCO) == "cleanup failed: close boom"
+
+    manager.cleanup()
+
+    assert engine.close.call_count == 2
+    assert EngineType.MUJOCO not in manager._loaded_engines
+    assert manager.engine_status[EngineType.MUJOCO] == EngineStatus.AVAILABLE
+    assert manager.get_last_error(EngineType.MUJOCO) is None
+
+    with patch.object(manager, "_load_engine", return_value=MagicMock()) as mock_load:
+        assert manager.switch_engine(EngineType.MUJOCO) is True
+        mock_load.assert_called_once_with(EngineType.MUJOCO)
+
+
+def test_cleanup_preserves_failed_unregistered_active_engine_until_retry_succeeds(
+    manager: EngineManager,
+) -> None:
+    """Failed close() on unregistered active_physics_engine preserves it for retry cleanup."""
+    orphan = MagicMock(name="orphan")
+    orphan.close = MagicMock(side_effect=[OSError("device busy"), None])
+    manager.active_physics_engine = orphan
+    manager.current_engine = EngineType.PINOCCHIO
+    manager.engine_status[EngineType.PINOCCHIO] = EngineStatus.LOADED
+
+    manager.cleanup()
+
+    assert manager._loaded_engines.get(EngineType.PINOCCHIO) is orphan
+    assert manager.engine_status[EngineType.PINOCCHIO] == EngineStatus.ERROR
+    assert manager.get_last_error(EngineType.PINOCCHIO) == "cleanup failed: device busy"
+    assert manager.active_physics_engine is None
+    assert manager.current_engine is None
+
+    with patch.object(manager, "_load_engine") as mock_load:
+        assert manager.switch_engine(EngineType.PINOCCHIO) is False
+        mock_load.assert_not_called()
+
+    manager.cleanup()
+
+    assert orphan.close.call_count == 2
+    assert EngineType.PINOCCHIO not in manager._loaded_engines
+    assert manager.engine_status[EngineType.PINOCCHIO] == EngineStatus.AVAILABLE
+    assert manager.get_last_error(EngineType.PINOCCHIO) is None
+
+    anon = MagicMock(name="anon")
+    anon.close = MagicMock(side_effect=[RuntimeError("anon busy"), None])
+    manager.active_physics_engine = anon
+    manager.current_engine = None
+
+    manager.cleanup()
+
+    assert anon.close.call_count == 1
+    assert manager.get_active_physics_engine() is None
+
+    manager.cleanup()
+
+    assert anon.close.call_count == 2

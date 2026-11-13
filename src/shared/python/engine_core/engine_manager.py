@@ -182,6 +182,20 @@ class EngineManager(ContractChecker):
 
         # Register standard loaders (lazy import to avoid shared -> engines
         # module-level dependency; loaders now live in src.engines.loaders)
+        self._register_default_loaders()
+
+        # Initialize engine status
+        self.provider_engine_paths = self._discover_provider_engine_paths()
+        self._discover_engines()
+
+        self._lock = threading.RLock()
+        self._pendulum_model_dir: Path | None = None
+        self._loaded_engines: dict[EngineType, PhysicsEngine] = {}
+        self._last_engine_errors: dict[EngineType, str] = {}
+        self._pending_cleanup: list[PhysicsEngine] = []
+
+    def _register_default_loaders(self) -> None:
+        """Register lazy loader factories for built-in engines."""
         from src.engines.loaders import LOADER_MAP
 
         registry = get_registry()
@@ -201,15 +215,6 @@ class EngineManager(ContractChecker):
                 )
             )
 
-        # Initialize engine status
-        self.provider_engine_paths = self._discover_provider_engine_paths()
-        self._discover_engines()
-
-        self._lock = threading.RLock()
-        self._pendulum_model_dir: Path | None = None
-        self._loaded_engines: dict[EngineType, PhysicsEngine] = {}
-        self._last_engine_errors: dict[EngineType, str] = {}
-
     def _transition(self, engine_type: EngineType, target: EngineStatus) -> None:
         """Execute a state transition for an engine under lock."""
         with self._lock:
@@ -225,9 +230,15 @@ class EngineManager(ContractChecker):
     ) -> PhysicsEngine | None:
         """Get the currently active PhysicsEngine instance."""
         if engine_type is not None:
-            loaded = self._loaded_engines.get(engine_type)
-            if loaded is not None:
-                return loaded
+            if self.engine_status.get(engine_type) == EngineStatus.LOADED:
+                loaded = self._loaded_engines.get(engine_type)
+                if loaded is not None:
+                    return loaded
+            return (
+                self.active_physics_engine
+                if self.current_engine == engine_type
+                else None
+            )
         return self.active_physics_engine
 
     def get_available_engines(self) -> list[EngineType]:
@@ -265,6 +276,17 @@ class EngineManager(ContractChecker):
                 self._last_engine_errors.pop(engine_type, None)
                 logger.info("Reactivated loaded engine: %s", engine_type.value)
                 return True
+
+            if engine_type in self._loaded_engines:
+                self._transition(engine_type, EngineStatus.ERROR)
+                self._last_engine_errors.setdefault(
+                    engine_type, "cleanup failed: previous instance still retained"
+                )
+                logger.warning(
+                    "Refusing to reload engine %s while unclosed instance remains in cache; retry cleanup() first",
+                    engine_type.value,
+                )
+                return False
 
             if status not in (EngineStatus.AVAILABLE, EngineStatus.ERROR):
                 logger.error(
@@ -433,34 +455,75 @@ class EngineManager(ContractChecker):
                 )
                 raise EngineLaunchError(engine_type.value, reason=str(e)) from e
 
+    def _close_cached_engines(
+        self, attempted_ids: set[int]
+    ) -> dict[EngineType, PhysicsEngine]:
+        """Attempt to close cached engines, retaining any that fail close()."""
+        failed_engines: dict[EngineType, PhysicsEngine] = {}
+        for engine_type, engine in list(self._loaded_engines.items()):
+            attempted_ids.add(id(engine))
+            close = getattr(engine, "close", None)
+            if callable(close):
+                try:
+                    close()
+                    logger.info(
+                        "engine_shutdown status=success engine=%s",
+                        engine_type.value,
+                    )
+                except (RuntimeError, OSError) as e:
+                    logger.warning(
+                        "engine_shutdown_failed engine=%s error=%s",
+                        engine_type.value,
+                        e,
+                        exc_info=True,
+                    )
+                    failed_engines[engine_type] = engine
+                    self._transition(engine_type, EngineStatus.ERROR)
+                    self._last_engine_errors[engine_type] = f"cleanup failed: {e}"
+                    continue
+
+            self._last_engine_errors.pop(engine_type, None)
+            if self.engine_status.get(engine_type) in (
+                EngineStatus.LOADED,
+                EngineStatus.ERROR,
+            ):
+                self._transition(engine_type, EngineStatus.AVAILABLE)
+        return failed_engines
+
+    def _retry_pending_cleanup(self, attempted_ids: set[int]) -> list[PhysicsEngine]:
+        """Retry close() for unregistered engines retained after a prior failure."""
+        still_pending: list[PhysicsEngine] = []
+        for pending_engine in list(self._pending_cleanup):
+            if id(pending_engine) in attempted_ids:
+                continue
+            attempted_ids.add(id(pending_engine))
+            close = getattr(pending_engine, "close", None)
+            if callable(close):
+                try:
+                    close()
+                    logger.info("pending_engine_shutdown status=success")
+                except (RuntimeError, OSError) as e:
+                    logger.warning(
+                        "pending_engine_shutdown_failed error=%s", e, exc_info=True
+                    )
+                    still_pending.append(pending_engine)
+        return still_pending
+
     def cleanup(self) -> None:
         """Clean up loaded engines."""
         with self._lock:
-            closed_ids: set[int] = set()
-            for engine_type, engine in list(self._loaded_engines.items()):
-                close = getattr(engine, "close", None)
-                if callable(close):
-                    try:
-                        close()
-                        logger.info(
-                            "engine_shutdown status=success engine=%s",
-                            engine_type.value,
-                        )
-                    except (RuntimeError, OSError) as e:
-                        logger.warning(
-                            "engine_shutdown_failed engine=%s error=%s",
-                            engine_type.value,
-                            e,
-                            exc_info=True,
-                        )
-                closed_ids.add(id(engine))
-                if self.engine_status.get(engine_type) == EngineStatus.LOADED:
-                    self._transition(engine_type, EngineStatus.AVAILABLE)
-
+            attempted_ids: set[int] = set()
+            failed_engines = self._close_cached_engines(attempted_ids)
             self._loaded_engines.clear()
+            self._loaded_engines.update(failed_engines)
+
+            still_pending = self._retry_pending_cleanup(attempted_ids)
 
             active = self.active_physics_engine
-            if active is not None and id(active) not in closed_ids:
+            current = self.current_engine
+            active_failed = False
+            if active is not None and id(active) not in attempted_ids:
+                attempted_ids.add(id(active))
                 close = getattr(active, "close", None)
                 if callable(close):
                     try:
@@ -470,14 +533,25 @@ class EngineManager(ContractChecker):
                         logger.warning(
                             "active_engine_shutdown_failed error=%s", e, exc_info=True
                         )
-                closed_ids.add(id(active))
+                        active_failed = True
+                        if current is not None:
+                            self._loaded_engines[current] = active
+                            self._transition(current, EngineStatus.ERROR)
+                            self._last_engine_errors[current] = f"cleanup failed: {e}"
+                        else:
+                            still_pending.append(active)
 
             if (
-                self.current_engine is not None
-                and self.engine_status.get(self.current_engine) == EngineStatus.LOADED
+                not active_failed
+                and current is not None
+                and current not in self._loaded_engines
+                and self.engine_status.get(current)
+                in (EngineStatus.LOADED, EngineStatus.ERROR)
             ):
-                self._transition(self.current_engine, EngineStatus.AVAILABLE)
+                self._last_engine_errors.pop(current, None)
+                self._transition(current, EngineStatus.AVAILABLE)
 
+            self._pending_cleanup = still_pending
             self.active_physics_engine = None
             self.current_engine = None
             logger.info("engine_cleanup_complete")
