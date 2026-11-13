@@ -89,6 +89,29 @@ _WORLD_LINK = "world"
 _SUPPORTED_MJCF_COMPILER_ANGLES = frozenset({"degree", "radian"})
 # MuJoCo MJCF default when `<compiler angle="…"/>` is omitted (XMLreference).
 _MJCF_DEFAULT_COMPILER_ANGLE = "degree"
+# MuJoCo welds child bodies without a ``<joint>``; encode URDF fixed-joint names in
+# the body ``name`` only when the body carries no non-free joints (see roundtrip
+# tests — literal ``*__fixed__*`` body names that already have hinges are kept).
+_MJCF_FIXED_JOINT_MARKER = "__fixed__"
+
+
+def _mjcf_body_name_for_fixed_joint(link_name: str, joint_name: str) -> str:
+    """MJCF body ``name`` that round-trips a URDF ``fixed`` joint label."""
+    return f"{link_name}{_MJCF_FIXED_JOINT_MARKER}{joint_name}"
+
+
+def _decode_mjcf_fixed_joint_body_name(
+    body_name: str,
+    *,
+    has_dof_joint: bool,
+) -> tuple[str, str | None]:
+    """Return URDF link name and optional fixed-joint name decoded from MJCF body."""
+    if has_dof_joint or _MJCF_FIXED_JOINT_MARKER not in body_name:
+        return body_name, None
+    link_name, _, joint_name = body_name.partition(_MJCF_FIXED_JOINT_MARKER)
+    if not link_name or not joint_name:
+        return body_name, None
+    return link_name, joint_name
 
 
 def _mjcf_compiler_angle_unit(root: Any) -> str:
@@ -376,12 +399,17 @@ class MJCFConverter:
         # Body element with position and orientation (URDF joint origin).
         pos = "0 0 0"
         quat_attr = ""
+        mjcf_body_name = link_name
         if connecting_joint:
             xyz = connecting_joint.origin.xyz
             pos = f"{xyz[0]:.6g} {xyz[1]:.6g} {xyz[2]:.6g}"
             quat_attr = _rpy_to_mjcf_quat_attr(connecting_joint.origin.rpy)
+            if connecting_joint.joint_type == JointType.FIXED:
+                mjcf_body_name = _mjcf_body_name_for_fixed_joint(
+                    link_name, connecting_joint.name
+                )
 
-        lines.append(f'{indent}<body name="{link_name}" pos="{pos}"{quat_attr}>')
+        lines.append(f'{indent}<body name="{mjcf_body_name}" pos="{pos}"{quat_attr}>')
 
         # Inertial
         if link.inertia.mass > 0:
@@ -629,6 +657,7 @@ class MJCFConverter:
         origin: Origin,
         angle_unit: str,
         joint_elem: ET.Element | None = None,
+        fixed_joint_name: str | None = None,
     ) -> Joint:
         """Parse joint elements and create a URDF joint connecting to parent.
 
@@ -645,7 +674,7 @@ class MJCFConverter:
         joint_elems = body_elem.findall("joint")
         if not joint_elems:
             return Joint(
-                name=f"{parent_name}_to_{body_name}",
+                name=fixed_joint_name or f"{parent_name}_to_{body_name}",
                 joint_type=JointType.FIXED,
                 parent=parent_name,
                 child=body_name,
@@ -699,15 +728,21 @@ class MJCFConverter:
         """Recursively parse body elements."""
         for body_elem in elem.findall("body"):
             body_name = body_elem.get("name", f"body_{len(links)}")
+            has_dof_joint = any(
+                j.get("type") != "free" for j in body_elem.findall("joint")
+            )
+            link_name, fixed_joint_name = _decode_mjcf_fixed_joint_body_name(
+                body_name, has_dof_joint=has_dof_joint
+            )
             joint_origin = _origin_from_mjcf_element(body_elem, angle_unit)
 
             inertia = self._parse_body_inertial(body_elem)
             visual_geom, visual_origin, visual_material = self._parse_body_visual(
-                body_elem, body_name, angle_unit
+                body_elem, link_name, angle_unit
             )
 
             link = Link(
-                name=body_name,
+                name=link_name,
                 inertia=inertia,
                 visual_geometry=visual_geom,
                 visual_origin=visual_origin,
@@ -727,14 +762,15 @@ class MJCFConverter:
                 self._append_body_joints(
                     body_elem,
                     attach_to,
-                    body_name,
+                    link_name,
                     joint_origin,
                     links,
                     joints,
                     angle_unit,
+                    fixed_joint_name=fixed_joint_name,
                 )
 
-            self._parse_mjcf_body(body_elem, body_name, links, joints, angle_unit)
+            self._parse_mjcf_body(body_elem, link_name, links, joints, angle_unit)
 
     def _append_body_joints(
         self,
@@ -745,6 +781,7 @@ class MJCFConverter:
         links: list[Link],
         joints: list[Joint],
         angle_unit: str,
+        fixed_joint_name: str | None = None,
     ) -> None:
         """Append the joint(s) between ``parent_name`` and ``body_name``.
 
@@ -757,7 +794,12 @@ class MJCFConverter:
         if len(dofs) < 2:
             joints.append(
                 self._parse_body_joint(
-                    body_elem, parent_name, body_name, origin, angle_unit
+                    body_elem,
+                    parent_name,
+                    body_name,
+                    origin,
+                    angle_unit,
+                    fixed_joint_name=fixed_joint_name,
                 )
             )
             return
