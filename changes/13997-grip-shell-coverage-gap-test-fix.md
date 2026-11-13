@@ -1,4 +1,4 @@
 ---
 issue: 13997
-summary: "Tighten #13997 grip shell tests: finger-sector 270° wrap (no thumb/shared-palm pooling) and contact-patch clearance on baker nominal touch band."
+summary: "Tighten #13997 grip shell tests: finger-only merged arc coverage and contact-patch clearance without 3 mm selection cap."
 ---

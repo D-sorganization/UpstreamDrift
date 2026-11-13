@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import math
 from pathlib import Path
 
 import numpy as np
@@ -13,12 +12,9 @@ from src.shared.python.model_appearance import club_assembly as ca
 from src.shared.python.model_appearance import grip_hands as gh
 from src.shared.python.model_appearance.geometry import Mesh
 from src.shared.python.model_appearance.grip_hand_mesh import (
-    DEFAULT_HAND_MESH_PARAMS,
     FINGER_NAMES,
     MAX_PAD_CLEARANCE_M,
     GripHandMesh,
-    HandComponent,
-    HandMeshParams,
     build_grip_hand_mesh,
 )
 from src.shared.python.model_appearance.grip_pose import GripPose, GripStyle, Hand
@@ -28,11 +24,11 @@ pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[3]
 RADII_M = (0.0127, 0.0138, 0.0140, 0.0145)
 MIN_SECTION_COVERAGE_DEG = 270
-MAX_UNCOVERED_AZIMUTH_GAP_DEG = 360.0 - MIN_SECTION_COVERAGE_DEG
 SECTION_HALF_WIDTH_M = 0.001
 SECTION_RADIAL_REACH_M = 0.03
-# Extra clearance while baking on one radius then placing on a tapered club (grip_hands).
-_BAKE_TAPER_SLACK_M = 0.0003
+# Radial thickness of the on-grip patch sampled from each part's closest approach (not
+# the 0–3 mm acceptance cap).
+_CONTACT_PATCH_SAMPLE_BAND_M = 0.001
 
 _BARY = np.array(
     [(a, b, 1.0 - a - b) for a in np.linspace(0, 1, 9) for b in np.linspace(0, 1, 9)]
@@ -54,107 +50,64 @@ def _parts(result: GripHandMesh, finger: str):
     return [p for p in result.components if p.finger == finger]
 
 
-def _finger_mcp_azimuth_rad(result: GripHandMesh, finger: str, z: float) -> float:
-    proximal = next(p for p in result.components if p.name == f"{finger}_proximal")
-    pts = proximal.mesh.vertices
-    band = pts[np.abs(pts[:, 2] - z) <= SECTION_HALF_WIDTH_M]
-    if band.size == 0:
-        band = pts
-    return math.atan2(float(np.mean(band[:, 1])), float(np.mean(band[:, 0])))
-
-
-def _in_curl_sector(
-    azimuth_rad: np.ndarray, lo: float, hi: float, curl: int
-) -> np.ndarray:
-    """Whether each azimuth lies in the sector from ``lo`` to ``hi`` in curl direction."""
-    two_pi = 2.0 * math.pi
-    az = np.mod(azimuth_rad, two_pi)
-    lo_m = lo % two_pi
-    hi_m = hi % two_pi
-    if curl < 0:
-        if lo_m >= hi_m:
-            return (az <= hi_m) | (az >= lo_m)
-        return (az >= lo_m) & (az <= hi_m)
-    if hi_m >= lo_m:
-        return (az >= lo_m) & (az <= hi_m)
-    return (az >= lo_m) | (az <= hi_m)
-
-
-def _finger_section_surface_points(
-    result: GripHandMesh, finger: str, z: float
+def _finger_section_surface_point_sets(
+    result: GripHandMesh, z_lo: float, z_hi: float
 ) -> list[np.ndarray]:
-    """Surface samples for one finger's MCP section (no thumb or foreign palm geometry)."""
-    wrap_half = math.radians(MIN_SECTION_COVERAGE_DEG / 2.0)
-    mcp_az = _finger_mcp_azimuth_rad(result, finger, z)
-    curl = result.curl_sign
-    lo = mcp_az - curl * wrap_half
-    hi = mcp_az + curl * wrap_half
+    """Surface samples per finger phalanx (excludes palm, thumb, thumb_web)."""
     point_sets: list[np.ndarray] = []
-    for part in result.components:
-        if not part.on_grip:
+    reach = result.grip_radius_m + SECTION_RADIAL_REACH_M
+    for finger in FINGER_NAMES:
+        parts = [p for p in result.components if p.finger == finger]
+        if not parts:
             continue
-        if part.finger == finger or part.name == f"palm_{finger}":
-            point_sets.append(_surface_points(part.mesh))
-            continue
-        if part.name != "palm" or part.finger != "palm":
-            continue
-        pts = _surface_points(part.mesh)
-        band = np.abs(pts[:, 2] - z) <= SECTION_HALF_WIDTH_M
-        radial = _rho(pts) <= result.grip_radius_m + SECTION_RADIAL_REACH_M
-        sector = _in_curl_sector(np.arctan2(pts[:, 1], pts[:, 0]), lo, hi, curl)
-        pick = band & radial & sector
+        pts = np.vstack([_surface_points(p.mesh) for p in parts])
+        pick = (pts[:, 2] >= z_lo) & (pts[:, 2] <= z_hi) & (_rho(pts) <= reach)
         if np.any(pick):
             point_sets.append(pts[pick])
     return point_sets
 
 
-def _max_uncovered_azimuth_gap_deg(
-    point_sets: list[np.ndarray], z: float, *, grip_radius_m: float
-) -> float:
-    """Largest angular gap on the grip-cylinder slice from the given surface samples."""
-    if not point_sets:
-        return 360.0
-    pts = np.vstack(point_sets)
-    near = (np.abs(pts[:, 2] - z) <= SECTION_HALF_WIDTH_M) & (
-        _rho(pts) <= grip_radius_m + SECTION_RADIAL_REACH_M
-    )
-    slice_pts = pts[near]
-    if slice_pts.size == 0:
-        return 360.0
-    azimuth = np.degrees(np.arctan2(slice_pts[:, 1], slice_pts[:, 0])) % 360.0
-    if azimuth.size == 1:
-        return 360.0
-    sorted_az = np.sort(azimuth)
-    between = np.diff(sorted_az)
-    wrap = (360.0 - sorted_az[-1]) + sorted_az[0]
-    return float(max(np.max(between), wrap))
-
-
-@pytest.mark.parametrize("hand", list(Hand))
-@pytest.mark.parametrize("style", list(GripStyle))
-@pytest.mark.parametrize("radius", RADII_M)
-def test_hand_section_covers_270_deg_around_grip(
-    hand: Hand, style: GripStyle, radius: float
-):
-    result = build_grip_hand_mesh(hand, grip_radius_m=radius, style=style)
-    for finger in FINGER_NAMES:
-        proximal = next(p for p in result.components if p.name == f"{finger}_proximal")
-        if not proximal.on_grip:
+def _finger_arc_intervals_deg(
+    point_sets: list[np.ndarray],
+) -> list[tuple[float, float]]:
+    """Azimuth interval on the grip-cylinder section contributed by each finger."""
+    intervals: list[tuple[float, float]] = []
+    for pts in point_sets:
+        if pts.shape[0] < 2:
             continue
-        z = float(proximal.mesh.vertices[:, 2].mean())
-        point_sets = _finger_section_surface_points(result, finger, z)
-        assert point_sets, (finger, z)
-        gap_deg = _max_uncovered_azimuth_gap_deg(
-            point_sets, z, grip_radius_m=result.grip_radius_m
-        )
-        assert gap_deg <= MAX_UNCOVERED_AZIMUTH_GAP_DEG + 1e-6, (finger, gap_deg)
+        azimuth = np.degrees(np.arctan2(pts[:, 1], pts[:, 0])) % 360.0
+        intervals.append((float(azimuth.min()), float(azimuth.max())))
+    return intervals
 
 
-def _part_nominal_clearance_m(part: HandComponent, params: HandMeshParams) -> float:
-    """Baker nominal pad clearance (m) for patch membership, not acceptance limits."""
-    if part.finger in {"palm", "thumb_web"} or part.name.startswith("palm_"):
-        return params.palm_clearance_m
-    return params.pad_clearance_m
+def _merged_covered_arc_deg(intervals: list[tuple[float, float]]) -> float:
+    """Union of finger arc intervals around the grip, in degrees."""
+    if not intervals:
+        return 0.0
+    segments: list[tuple[float, float]] = []
+    for lo, hi in intervals:
+        if lo <= hi:
+            segments.append((lo, hi))
+        else:
+            segments.append((lo, 360.0))
+            segments.append((0.0, hi))
+    segments.sort(key=lambda pair: pair[0])
+    merged: list[tuple[float, float]] = []
+    for lo, hi in segments:
+        if not merged or lo > merged[-1][1] + 1e-9:
+            merged.append((lo, hi))
+        else:
+            prev_lo, prev_hi = merged[-1]
+            merged[-1] = (prev_lo, max(prev_hi, hi))
+    covered = sum(hi - lo for lo, hi in merged)
+    if len(merged) > 1 and merged[0][0] < 1e-9 and merged[-1][1] > 360.0 - 1e-9:
+        wrapped = 360.0 - (merged[0][1] - merged[-1][0])
+        covered = max(covered, wrapped)
+    return float(covered)
+
+
+def _assert_covered_arc_at_least_deg(covered_deg: float, minimum_deg: float) -> None:
+    assert covered_deg >= minimum_deg - 1e-6, (covered_deg, minimum_deg)
 
 
 def _taper_slack_m(club: ca.ClubAssembly, distance_below_butt_m: np.ndarray) -> float:
@@ -164,11 +117,57 @@ def _taper_slack_m(club: ca.ClubAssembly, distance_below_butt_m: np.ndarray) -> 
     return float(radii.max() - radii.min())
 
 
+def _contact_patch_samples(gap: np.ndarray) -> np.ndarray:
+    """Points on the contact patch from closest approach, without the 0–3 mm cut."""
+    min_gap = float(gap.min())
+    upper = min_gap + _CONTACT_PATCH_SAMPLE_BAND_M
+    return gap[gap <= upper + 1e-12]
+
+
+def _assert_patch_clearance_within_limit(
+    patch_gap: np.ndarray, taper_slack: float, *, part_name: str
+) -> None:
+    assert patch_gap.size, part_name
+    assert patch_gap.min() >= -1e-6, (part_name, patch_gap.min(), patch_gap.max())
+    limit = MAX_PAD_CLEARANCE_M + taper_slack + 1e-6
+    assert patch_gap.max() <= limit, (
+        part_name,
+        patch_gap.min(),
+        patch_gap.max(),
+        taper_slack,
+        limit,
+    )
+
+
 def _club(key: str) -> ca.ClubAssembly:
     spec = ROOT / f"docs/development/full_body_models/full_body_spec_anthro_{key}.json"
     club = ca.assembly_from_spec(json.loads(spec.read_text(encoding="utf-8")))
     assert club is not None
     return club
+
+
+@pytest.mark.parametrize("hand", list(Hand))
+@pytest.mark.parametrize("style", list(GripStyle))
+@pytest.mark.parametrize("radius", RADII_M)
+def test_hand_section_covers_270_deg_around_grip(
+    hand: Hand, style: GripStyle, radius: float
+):
+    result = build_grip_hand_mesh(hand, grip_radius_m=radius, style=style)
+    proximal_z = [
+        float(
+            next(p for p in result.components if p.name == f"{finger}_proximal")
+            .mesh.vertices[:, 2]
+            .mean()
+        )
+        for finger in FINGER_NAMES
+    ]
+    z_lo = min(proximal_z) - SECTION_HALF_WIDTH_M
+    z_hi = max(proximal_z) + SECTION_HALF_WIDTH_M
+    point_sets = _finger_section_surface_point_sets(result, z_lo, z_hi)
+    assert point_sets, (hand, style, radius)
+    intervals = _finger_arc_intervals_deg(point_sets)
+    covered = _merged_covered_arc_deg(intervals)
+    _assert_covered_arc_at_least_deg(covered, MIN_SECTION_COVERAGE_DEG)
 
 
 @pytest.mark.parametrize("key", ["driver", "iron7"])
@@ -178,7 +177,6 @@ def test_each_contact_patch_gap_within_0_to_3_mm(
     key: str, hand: Hand, style: GripStyle
 ):
     club = _club(key)
-    params = DEFAULT_HAND_MESH_PARAMS
     result = gh.baked_grip_hand(club, hand, GripPose(style=style))
     for part in result.components:
         if not part.on_grip:
@@ -188,17 +186,21 @@ def test_each_contact_patch_gap_within_0_to_3_mm(
         taper = np.array([gh.grip_radius_at(club, float(d)) for d in depth])
         gap = _rho(pts) - taper
         taper_slack = _taper_slack_m(club, depth)
-        nominal = _part_nominal_clearance_m(part, params)
-        # Touching patch from baker nominal clearance + taper slack only (not 0–3 mm).
-        on_patch = gap <= nominal + _BAKE_TAPER_SLACK_M + taper_slack + 1e-6
-        assert on_patch.any(), part.name
-        patch_gap = gap[on_patch]
-        assert patch_gap.min() >= -1e-6, (part.name, patch_gap.min(), patch_gap.max())
-        assert patch_gap.max() <= MAX_PAD_CLEARANCE_M + taper_slack + 1e-6, (
-            part.name,
-            patch_gap.min(),
-            patch_gap.max(),
-            taper_slack,
+        patch_gap = _contact_patch_samples(gap)
+        assert patch_gap.size, part.name
+        _assert_patch_clearance_within_limit(
+            patch_gap, taper_slack, part_name=part.name
+        )
+
+
+def test_contact_patch_clearance_rejects_over_limit_sample() -> None:
+    taper_slack = 0.0001
+    ok = np.array([0.0005, 0.0012, 0.0018])
+    _assert_patch_clearance_within_limit(ok, taper_slack, part_name="synthetic_ok")
+    bad = np.array([0.0005, 0.0012, 0.0036])
+    with pytest.raises(AssertionError):
+        _assert_patch_clearance_within_limit(
+            bad, taper_slack, part_name="synthetic_bad"
         )
 
 
