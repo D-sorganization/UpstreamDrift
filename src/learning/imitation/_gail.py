@@ -214,6 +214,25 @@ class OfflineAdversarialImitation(ImitationLearner):
         self._training_history = history
         return history
 
+    def _sample_policy_states(
+        self,
+        states: NDArray[np.floating],
+        rollout_fn: RolloutFn | None,
+    ) -> NDArray[np.floating]:
+        """Sample policy states from ``rollout_fn`` or perturb ``states`` offline."""
+        n = len(states)
+        if rollout_fn is None:
+            return states + self._rng.normal(0.0, 0.1, size=states.shape)
+        policy_states = np.asarray(
+            rollout_fn(self._forward_policy, n), dtype=np.float64
+        )
+        if policy_states.shape != (n, self.observation_dim):
+            raise ValueError(
+                f"rollout_fn must return shape {(n, self.observation_dim)}, "
+                f"got {policy_states.shape}"
+            )
+        return policy_states
+
     def _adversarial_step(
         self,
         states: NDArray[np.floating],
@@ -226,34 +245,9 @@ class OfflineAdversarialImitation(ImitationLearner):
         *,
         rollout_fn: RolloutFn | None = None,
     ) -> tuple[float, float]:
-        """Run one discriminator update and one policy update on a mini-batch.
-
-        Args:
-            states: Expert states for this mini-batch, shape ``(N, obs_dim)``.
-            actions: Matching expert actions, shape ``(N, action_dim)``.
-            disc_state: Adam moments for the discriminator.
-            policy_state: Adam moments for the policy.
-            lr: Learning rate.
-            weight_decay: L2 coefficient.
-            step: 1-based global optimiser step (for Adam bias correction).
-            rollout_fn: Optional on-policy state sampler ``(policy_fn, n) -> states``.
-
-        Returns:
-            ``(discriminator_loss, policy_loss)`` for this mini-batch.
-        """
+        """Run one discriminator and one policy Adam update on a mini-batch."""
         n = len(states)
-        if rollout_fn is not None:
-            policy_states = np.asarray(
-                rollout_fn(self._forward_policy, n), dtype=np.float64
-            )
-            if policy_states.shape != (n, self.observation_dim):
-                raise ValueError(
-                    f"rollout_fn must return shape {(n, self.observation_dim)}, "
-                    f"got {policy_states.shape}"
-                )
-        else:
-            # Offline fallback: exploration noise stands in for environment rollouts.
-            policy_states = states + self._rng.normal(0.0, 0.1, size=states.shape)
+        policy_states = self._sample_policy_states(states, rollout_fn)
 
         # --- Discriminator update: expert -> 1, policy -> 0. ---
         policy_actions = self._forward_policy(policy_states)

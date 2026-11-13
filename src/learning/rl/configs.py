@@ -223,6 +223,9 @@ class TaskConfig:
         max_episode_steps: Maximum steps per episode.
         early_termination: Whether to terminate on failure.
         success_threshold: Threshold for considering task successful.
+        base_height_threshold: Pelvis fall cutoff [m] (~1.7 m adult nominal = 0.3 m).
+        base_tilt_threshold: Upright cos(tilt) cutoff (dimensionless, default 0.8).
+        target_height: Target standing pelvis height [m] (~1.7 m adult nominal = 0.9 m).
     """
 
     task_type: TaskType = TaskType.LOCOMOTION
@@ -234,6 +237,9 @@ class TaskConfig:
     max_episode_steps: int = 1000
     early_termination: bool = True
     success_threshold: float = 0.05
+    base_height_threshold: float = 0.3
+    base_tilt_threshold: float = 0.8
+    target_height: float = 0.9
 
     def is_success(self, error: float) -> bool:
         """Check if task is successfully completed.

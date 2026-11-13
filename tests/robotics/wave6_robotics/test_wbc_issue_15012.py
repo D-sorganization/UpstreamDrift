@@ -175,146 +175,110 @@ def test_tasks_sorted_lowest_priority_number_first() -> None:
 
 
 @pytest.mark.unit
-def test_linearize_friction_cone_is_inscribed_inner_approximation() -> None:
-    """C4: linearized pyramid must sit strictly inside ||f_t|| <= mu * f_n."""
-    from src.robotics.contact.friction_cone import linearize_friction_cone
+def test_friction_cone_c4_inscribed_and_c5_projection() -> None:
+    """C4/C5: inscribed pyramid & exact Euclidean Lorentz-cone projection."""
+    import src.robotics.contact.friction_cone as fc
 
-    mu = 0.5
-    A, b = linearize_friction_cone(mu=mu, normal=np.array([0.0, 0.0, 1.0]), num_faces=8)
-    # Vertex angle pi/8 bisects two face normals; norm > mu must violate A @ f <= b.
-    angle = np.pi / 8.0
-    outside_cone = np.array([0.52 * np.cos(angle), 0.52 * np.sin(angle), 1.0])
-    assert np.any(A @ outside_cone > b)
-    # Inscribed vertex at mu exactly satisfies A @ f <= b.
-    vertex_on_cone = np.array([mu * np.cos(angle), mu * np.sin(angle), 1.0])
-    assert np.all(A @ vertex_on_cone <= b + 1e-12)
-
-
-@pytest.mark.unit
-def test_project_to_friction_cone_returns_true_euclidean_projection() -> None:
-    """C5: Euclidean projection onto the second-order Lorentz cone."""
-    from src.robotics.contact.friction_cone import (
-        FrictionCone,
-        project_to_friction_cone,
-    )
-
-    cone = FrictionCone(mu=0.5, normal=np.array([0.0, 0.0, 1.0]))
-    f = np.array([3.0, 0.0, 1.0])
-    projected = project_to_friction_cone(f, cone)
-    np.testing.assert_allclose(projected, np.array([1.0, 0.0, 2.0]), atol=1e-12)
-    assert cone.contains(projected)
-
-    polar_f = np.array([1.0, 0.0, -0.6])
-    np.testing.assert_allclose(
-        project_to_friction_cone(polar_f, cone), np.zeros(3), atol=1e-12
-    )
-
-    surface_f = np.array([3.0, 0.0, -1.0])
-    np.testing.assert_allclose(
-        project_to_friction_cone(surface_f, cone), np.array([0.2, 0.0, 0.4]), atol=1e-12
-    )
+    mu, a = 0.5, np.pi / 8.0
+    n_vec = np.array([0.0, 0.0, 1.0])
+    A, b = fc.linearize_friction_cone(mu=mu, normal=n_vec, num_faces=8)
+    assert np.any(A @ np.array([0.52 * np.cos(a), 0.52 * np.sin(a), 1.0]) > b)
+    assert np.all(A @ np.array([mu * np.cos(a), mu * np.sin(a), 1.0]) <= b + 1e-12)
+    cone = fc.FrictionCone(mu=mu, normal=n_vec)
+    assert cone.contains(fc.project_to_friction_cone(np.array([3.0, 0.0, 1.0]), cone))
+    pts = [
+        ([3, 0, 1], [1, 0, 2]),
+        ([1, 0, -0.6], [0, 0, 0]),
+        ([3, 0, -1], [0.2, 0, 0.4]),
+    ]
+    for raw, exp in pts:
+        got = fc.project_to_friction_cone(np.array(raw, float), cone)
+        np.testing.assert_allclose(got, np.array(exp, float), atol=1e-12)
 
 
 @pytest.mark.unit
 def test_rl_floating_base_obs_and_action_dimensions_and_contact_forces() -> None:
-    """C7: free-flyer uses n_q for pos, n_v for vel, actuated DOFs, plus contacts."""
+    """C7: free-flyer uses n_q, n_v, actuated DOFs, contacts, and TaskConfig."""
     pytest.importorskip("gymnasium")
-    from src.learning.rl.configs import ObservationConfig
+    from src.learning.rl.configs import ObservationConfig, TaskConfig
     from src.learning.rl.humanoid_envs import HumanoidWalkEnv
 
-    engine = SimpleNamespace(
-        n_q=19,
-        n_v=18,
-        reset=lambda: None,
-        step=lambda: None,
-        set_joint_torques=lambda _a: None,
-        get_joint_positions=lambda: np.zeros(19),
-        get_joint_velocities=lambda: np.zeros(18),
-        get_joint_torques=lambda: np.zeros(12),
-        get_contact_forces=lambda: np.zeros(6),
-        get_base_velocity=lambda: np.array([1.0, 0.0, 0.0]),
-        get_base_position=lambda: np.array([0.0, 0.0, 0.9]),
-        get_base_orientation=lambda: np.array([1.0, 0.0, 0.0, 0.0]),
-    )
+    eng = SimpleNamespace(n_q=19, n_v=18, reset=lambda: None, step=lambda: None)
+    eng.set_joint_torques = lambda _a: None
+    spec = [
+        ("get_joint_positions", np.zeros(19)),
+        ("get_joint_velocities", np.zeros(18)),
+        ("get_joint_torques", np.zeros(12)),
+        ("get_contact_forces", np.zeros(6)),
+        ("get_base_velocity", np.array([1.0, 0.0, 0.0])),
+        ("get_base_position", np.array([0.0, 0.0, 0.9])),
+        ("get_base_orientation", np.array([1.0, 0.0, 0.0, 0.0])),
+    ]
+    for name, val in spec:
+        setattr(eng, name, lambda val=val: val)
     env = HumanoidWalkEnv(
-        engine=engine, obs_config=ObservationConfig(include_contact_forces=True)
+        eng,
+        obs_config=ObservationConfig(include_contact_forces=True),
+        task_config=TaskConfig(base_height_threshold=0.15, base_tilt_threshold=0.7),
     )
-    assert env.action_space.shape == (12,)
-    assert env.observation_space.shape == (19 + 18 + 6,)
-    obs, _ = env.reset(seed=0)
-    assert obs.shape == env.observation_space.shape
+    assert env._base_height_threshold == 0.15 and env._base_tilt_threshold == 0.7
+    assert env.action_space.shape == (12,) and env.observation_space.shape == (43,)
+    assert env.reset(seed=0)[0].shape == (43,)
 
 
 @pytest.mark.unit
 def test_domain_randomization_gravity_opt_in_and_inertia_coupling() -> None:
     """C8: gravity randomization defaults to False and inertia scales with mass."""
-    from src.learning.sim2real.domain_randomization import (
-        DomainRandomizationConfig,
-        DomainRandomizer,
-    )
+    import src.learning.sim2real.domain_randomization as dr
 
-    state = {
-        "m": np.array([2.0, 4.0]),
-        "I": np.array([[0.1, 0.1, 0.1], [0.2, 0.2, 0.2]]),
-    }
-    engine = SimpleNamespace(
-        get_link_masses=lambda: state["m"].copy(),
-        set_link_masses=lambda v: state.__setitem__("m", np.asarray(v, float).copy()),
-        get_link_inertias=lambda: state["I"].copy(),
-        set_link_inertias=lambda v: state.__setitem__("I", np.asarray(v, float).copy()),
+    st = {"m": np.array([2.0, 4.0]), "I": np.full((2, 3), 0.1)}
+    eng = SimpleNamespace(
+        get_link_masses=lambda: st["m"].copy(),
+        set_link_masses=lambda v: st.__setitem__("m", np.asarray(v, float).copy()),
+        get_link_inertias=lambda: st["I"].copy(),
+        set_link_inertias=lambda v: st.__setitem__("I", np.asarray(v, float).copy()),
     )
-    cfg = DomainRandomizationConfig(
+    cfg = dr.DomainRandomizationConfig(
         randomize_friction=False, randomize_damping=False, randomize_motor=False
     )
-    assert cfg.randomize_gravity is False
-    nominal_inertia = engine.get_link_inertias()
-    rand = DomainRandomizer(engine, config=cfg, seed=7)
-    applied = rand.randomize()
-    assert "gravity" not in applied
-    np.testing.assert_allclose(
-        engine.get_link_inertias(), nominal_inertia * applied["mass_scale"]
-    )
+    nominal = eng.get_link_inertias()
+    applied = (rand := dr.DomainRandomizer(eng, config=cfg, seed=7)).randomize()
+    assert cfg.randomize_gravity is False and "gravity" not in applied
+    np.testing.assert_allclose(eng.get_link_inertias(), nominal * applied["mass_scale"])
     rand.reset_to_nominal()
-    np.testing.assert_allclose(engine.get_link_inertias(), nominal_inertia)
+    np.testing.assert_allclose(eng.get_link_inertias(), nominal)
 
 
 @pytest.mark.unit
 def test_offline_adversarial_imitation_honesty_and_rollout_hook() -> None:
     """C9: expose OfflineAdversarialImitation and support optional rollout_fn."""
-    from src.learning.imitation import GAIL, Demonstration, DemonstrationDataset
-    from src.learning.imitation import OfflineAdversarialImitation, TrainingConfig
+    import src.learning.imitation as im
 
-    assert (
-        OfflineAdversarialImitation is GAIL and GAIL.USES_ENVIRONMENT_ROLLOUTS is False
+    assert im.OfflineAdversarialImitation is im.GAIL
+    assert im.GAIL.USES_ENVIRONMENT_ROLLOUTS is False
+    dt = np.float32
+    d = im.Demonstration(
+        np.arange(8, dtype=dt) * 0.01,
+        np.ones((8, 2), dt),
+        np.ones((8, 1), dt),
+        np.zeros((8, 2), dt),
     )
-    demo = Demonstration(
-        timestamps=np.arange(8, dtype=np.float32) * 0.01,
-        joint_positions=np.ones((8, 2), dtype=np.float32),
-        joint_velocities=np.ones((8, 1), dtype=np.float32),
-        actions=np.zeros((8, 2), dtype=np.float32),
+    cfg = im.TrainingConfig(epochs=2, batch_size=4, hidden_sizes=[8], seed=1)
+    seen: list[int] = []
+    hist = im.GAIL(3, 2, cfg).train(
+        im.DemonstrationDataset([d]),
+        validation_split=0.0,
+        rollout_fn=lambda _p, n: seen.append(n) or np.full((n, 3), 2.0, dt),
     )
-    ds = DemonstrationDataset([demo])
-    learner = GAIL(
-        3, 2, TrainingConfig(epochs=2, batch_size=4, hidden_sizes=[8], seed=1)
-    )
-    called_counts: list[int] = []
-
-    def fake_rollout(_policy_fn, n_samples: int) -> np.ndarray:
-        called_counts.append(n_samples)
-        return np.full((n_samples, 3), 2.0, dtype=np.float32)
-
-    history = learner.train(ds, validation_split=0.0, rollout_fn=fake_rollout)
-    assert called_counts and len(history["policy_loss"]) == 2
+    assert seen and len(hist["policy_loss"]) == 2
 
 
 @pytest.mark.unit
 def test_wbc_config_exposes_documented_friction_and_force_bounds() -> None:
     """C11: WBCConfig exposes configurable friction_coeff and max_contact_force."""
     cfg = WBCConfig(friction_coeff=0.6, max_contact_force=5000.0)
-    assert cfg.friction_coeff == pytest.approx(0.6)
-    assert cfg.max_contact_force == pytest.approx(5000.0)
     wbc = WholeBodyController(FakeEngine(), config=cfg)
+    assert wbc.config.friction_coeff == 0.6 and wbc.config.max_contact_force == 5000.0
     wbc.set_contact_jacobians([np.eye(3, N_V)])
     x_lb, x_ub = wbc._build_variable_bounds(N_V, 3, np.zeros(N_V))
-    assert np.allclose(x_lb[N_V:], -5000.0)
-    assert np.allclose(x_ub[N_V:], 5000.0)
+    assert np.allclose(x_lb[N_V:], -5000.0) and np.allclose(x_ub[N_V:], 5000.0)
