@@ -25,6 +25,7 @@ __all__ = [
     "ArtefactPaths",
     "classify_receipt",
     "default_ledger_path",
+    "derive_candidate_verdict",
     "extract_acceptance",
     "extract_artefacts",
     "extract_candidate_sha",
@@ -32,6 +33,7 @@ __all__ = [
     "extract_metrics",
     "find_repo_root",
     "scan",
+    "scan_candidate_packages",
 ]
 
 DEFAULT_ROOTS: tuple[Path, ...] = (
@@ -501,3 +503,52 @@ def scan(
         total_receipts=len(rows),
         rows=rows,
     )
+
+
+def derive_candidate_verdict(rel_path: str, data: Mapping[str, Any]) -> dict[str, Any]:
+    """Derive QUALIFIED/REJECTED verdict from candidate gates and metric recomputation."""
+    from .evidence_validator import validate_candidate_gate_metrics
+
+    gates = data.get("gates")
+    metric_issues = validate_candidate_gate_metrics(rel_path, data)
+    reasons: list[str] = [issue.message for issue in metric_issues]
+    failed_gates: list[str] = []
+    if isinstance(gates, Mapping) and gates:
+        failed_gates = sorted(
+            name for name, passed in gates.items() if passed is not True
+        )
+        if failed_gates:
+            reasons.append(f"failed gates: {', '.join(failed_gates)}")
+    else:
+        reasons.append("missing or empty gates block")
+
+    qualified = (
+        isinstance(gates, Mapping)
+        and bool(gates)
+        and not failed_gates
+        and not metric_issues
+    )
+    return {
+        "candidate_path": rel_path,
+        "candidate_id": data.get("candidate_id"),
+        "declared_accepted": data.get("accepted"),
+        "is_physically_accepted": qualified,
+        "verdict": "QUALIFIED" if qualified else "REJECTED",
+        "gates_passed": data.get("gates_passed"),
+        "reasons": reasons,
+    }
+
+
+def scan_candidate_packages(repo_root: Path | None = None) -> list[dict[str, Any]]:
+    """Discover and derive qualification verdicts for ``candidates/*.json`` packages."""
+    root = repo_root or _find_repo_root()
+    candidates_dir = root / "candidates"
+    if not candidates_dir.is_dir():
+        return []
+    entries: list[dict[str, Any]] = []
+    for pkg in sorted(candidates_dir.glob("*.json")):
+        rel_str = pkg.relative_to(root).as_posix()
+        data = json.loads(pkg.read_text(encoding="utf-8"))
+        if isinstance(data, Mapping):
+            entries.append(derive_candidate_verdict(rel_str, data))
+    return entries
