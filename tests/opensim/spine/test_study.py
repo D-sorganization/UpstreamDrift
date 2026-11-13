@@ -203,6 +203,22 @@ def test_receipt_json_round_trip(tmp_path) -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize("bad", ["false", "true", 0, 1, None])
+def test_allow_implausible_rejects_non_bool(tmp_path, bad: object) -> None:
+    motion = _write_motion(tmp_path / "swing.sto")
+    base = {
+        "study_id": "implausible",
+        "motion_path": motion,
+        "golf_model_path": GOLF_MODEL,
+        "model_id": "fixture",
+        "model_path": tmp_path / "x.osim",
+        "output_dir": tmp_path / "out",
+    }
+    with pytest.raises(TypeError, match="allow_implausible must be a bool"):
+        SpineStudyRequest(**{**base, "allow_implausible": bad})
+
+
+@pytest.mark.unit
 def test_allow_implausible_enters_fingerprint_when_set(tmp_path) -> None:
     motion = _write_motion(tmp_path / "swing.sto")
     base = {

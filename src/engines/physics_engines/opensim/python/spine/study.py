@@ -255,6 +255,8 @@ class SpineStudyRequest:
             raise TypeError("unlock_driven_coordinates must be a bool")
         if not isinstance(self.restrict_law_to_model, bool):
             raise TypeError("restrict_law_to_model must be a bool")
+        if not isinstance(self.allow_implausible, bool):
+            raise TypeError("allow_implausible must be a bool")
         if self.restrict_law_to_model and self.coupling_law_id is None:
             raise ValueError("restrict_law_to_model requires a coupling_law_id")
         if isinstance(self.cost_exponent, bool) or self.cost_exponent not in _EXPONENTS:

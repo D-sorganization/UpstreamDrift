@@ -142,6 +142,14 @@ def _record(
     )
 
 
+def _allow_implausible_from_request(request: Any) -> bool:
+    """Return ``request.allow_implausible`` without truthy string coercion."""
+    value = getattr(request, "allow_implausible", False)
+    if not isinstance(value, bool):
+        raise TypeError("allow_implausible must be a bool")
+    return value
+
+
 def _requested_law(request: Any) -> CouplingLaw | None:
     """The named law, restricted to the model's mapped levels when asked."""
     if request.coupling_law_id is None:
@@ -159,7 +167,7 @@ def _drive(request: Any, model: Path, scrub: Any, out: StageOutcome) -> DriveRes
     golf = read_golf_humanoid_motion(
         request.motion_path,
         request.golf_model_path,
-        allow_implausible=bool(getattr(request, "allow_implausible", False)),
+        allow_implausible=_allow_implausible_from_request(request),
     )
     if request.variant_id is not None:
         golf = apply_request_variant(request, golf, out)
