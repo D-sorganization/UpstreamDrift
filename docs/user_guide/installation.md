@@ -13,7 +13,7 @@
 
 ### MATLAB Environment (Optional)
 
-- **MATLAB R2023a** or newer.
+- **MATLAB R2025b** (required release for Simscape golf model execution, model saves, and validation; on Windows launch `C:/Program Files/MATLAB/R2025b/bin/matlab.exe` explicitly rather than relying on `PATH` or R2026a).
 - **Simulink** and **Simscape Multibody** (for the legacy MATLAB/Simscape models).
 
 ## Step-by-Step Setup

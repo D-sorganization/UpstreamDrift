@@ -19,6 +19,7 @@ def test_installation_guide_uses_current_org_submodule_and_pyproject() -> None:
         "Golf_Modeling_Suite",
         "git lfs",
         "requirements.txt",
+        "MATLAB R2023a",
     ):
         assert stale not in text, f"Stale reference {stale!r} still in installation.md"
 
@@ -26,6 +27,7 @@ def test_installation_guide_uses_current_org_submodule_and_pyproject() -> None:
         "D-sorganization/UpstreamDrift",
         "vendor/ud-tools",
         'pip install -e ".[dev]"',
+        "MATLAB R2025b",
     ):
         assert required in text, f"Expected {required!r} in installation.md"
 
