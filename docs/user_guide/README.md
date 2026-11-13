@@ -1,6 +1,6 @@
 # User Guide
 
-This section provides everything you need to know to use the Golf Modeling Suite.
+This section provides everything you need to know to use UpstreamDrift.
 
 ## Contents
 

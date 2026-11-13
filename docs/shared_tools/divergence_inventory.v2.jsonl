@@ -605,6 +605,7 @@
 {"path": "engine_core/_recorder_interface.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/_simulation_interface.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/base_physics_engine.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
+{"path": "engine_core/canonical_state_io.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/capabilities.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/checkpoint.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
 {"path": "engine_core/counterfactual_conformance.py", "classification": "ud-only", "package": "engine_core", "spelling_only": false}
@@ -1239,6 +1240,7 @@
 {"path": "loop_nullspace/noise_aware_spec.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/noise_aware_verification.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/nonlinearity_gate.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/nsx94_tradeoff_report.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/output_policy_integration.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/paired_mc_spec.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/paired_monte_carlo.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
