@@ -190,6 +190,68 @@ fn integrated_forces_at_state(
     }
 }
 
+/// Linear time interpolation of position/velocity when ``z`` crosses zero.
+fn interpolate_ground_contact(
+    t_above: f64,
+    state_above: &[f64],
+    t_below: f64,
+    state_below: &[f64],
+) -> TrajectoryPoint {
+    let z_above = state_above[2];
+    let z_below = state_below[2];
+    debug_assert!(z_above > 0.0 && z_below <= 0.0);
+    let fraction = z_above / (z_above - z_below);
+    let t = t_above + fraction * (t_below - t_above);
+    let lerp = |a: f64, b: f64| a + fraction * (b - a);
+    TrajectoryPoint {
+        t,
+        x: lerp(state_above[0], state_below[0]),
+        y: lerp(state_above[1], state_below[1]),
+        z: 0.0,
+        vx: lerp(state_above[3], state_below[3]),
+        vy: lerp(state_above[4], state_below[4]),
+        vz: lerp(state_above[5], state_below[5]),
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn refine_landing_point(
+    points: &mut [TrajectoryPoint],
+    step_forces: &mut [IntegratedStepForces],
+    times: &[f64],
+    states: &[f64],
+    state_dim: usize,
+    spin_axis_v: &Vector3,
+    gravity_v: &Vector3,
+    wind_v: &Vector3,
+    ball: &AeroBallProperties,
+    air: &AirProperties,
+    record_forces: bool,
+) {
+    if points.len() < 2 {
+        return;
+    }
+    let last = points.len() - 1;
+    if points[last].z > 0.0 || points[last - 1].z <= 0.0 {
+        return;
+    }
+    let t0 = times[last - 1];
+    let t1 = times[last];
+    let s0 = &states[(last - 1) * state_dim..last * state_dim];
+    let s1 = &states[last * state_dim..(last + 1) * state_dim];
+    points[last] = interpolate_ground_contact(t0, s0, t1, s1);
+    if record_forces && step_forces.len() == points.len() {
+        let mut land_state = s1.to_vec();
+        let frac = s0[2] / (s0[2] - s1[2]);
+        for i in 0..state_dim {
+            land_state[i] = s0[i] + frac * (s1[i] - s0[i]);
+        }
+        land_state[2] = 0.0;
+        step_forces[last] =
+            integrated_forces_at_state(&land_state, spin_axis_v, gravity_v, wind_v, ball, air);
+    }
+}
+
 /// Simulate a ball trajectory using the Rust RK4 integrator.
 ///
 /// The state vector is `[x, y, z, vx, vy, vz, omega]`.
@@ -300,15 +362,15 @@ pub fn simulate_ball_trajectory(
         vec![velocity.x, velocity.y, velocity.z, ax, ay, az, domega]
     };
 
-    // Terminate when ball returns to ground (z ≤ 0, after initial launch)
-    let terminate = |t: f64, state: &[f64]| -> bool { t > 0.05 && state[2] <= 0.0 };
+    // Ground crossing while descending (physical landing event, not a time guard).
+    let terminate = |_t: f64, state: &[f64]| -> bool { state[2] <= 0.0 && state[5] < 0.0 };
 
     let max_time = config.max_steps as f64 * config.dt;
     let result = integrate(derivative, 0.0, max_time, &y0, config, Some(terminate))?;
 
     // Convert IntegrationResult to BallTrajectoryResult
     let state_dim = result.state_dim;
-    let points: Vec<TrajectoryPoint> = result
+    let mut points: Vec<TrajectoryPoint> = result
         .times
         .iter()
         .zip(result.states.chunks(state_dim))
@@ -323,15 +385,7 @@ pub fn simulate_ball_trajectory(
         })
         .collect();
 
-    // Landing (termination by ground contact) is a successful outcome, not an
-    // aborted integration.  Override completed=true whenever the final point
-    // reached z ≤ 0 after the minimum flight time.
-    let landed = points
-        .last()
-        .map(|p| p.z <= 0.0 && p.t > 0.05)
-        .unwrap_or(false);
-
-    let step_forces = if record_integrated_forces {
+    let mut step_forces = if record_integrated_forces {
         result
             .states
             .chunks(state_dim)
@@ -349,6 +403,25 @@ pub fn simulate_ball_trajectory(
     } else {
         Vec::new()
     };
+
+    refine_landing_point(
+        &mut points,
+        &mut step_forces,
+        &result.times,
+        &result.states,
+        state_dim,
+        &spin_axis_record,
+        &gravity_record,
+        &wind_record,
+        &ball_record,
+        &air_record,
+        record_integrated_forces,
+    );
+
+    let landed = points
+        .last()
+        .map(|p| p.z.abs() < 1e-12 && p.vz < 0.0)
+        .unwrap_or(false);
 
     Ok(BallTrajectoryResult {
         completed: result.completed || landed,
@@ -630,6 +703,31 @@ mod tests {
             headwind_range < base_range,
             "Headwind range {headwind_range:.2} should be less than no-wind range {base_range:.2}"
         );
+    }
+
+    /// Landing carry uses the ground-plane crossing, not the discrete undershoot.
+    #[test]
+    fn test_landing_interpolated_to_z_zero() {
+        let result = simulate_ball_trajectory(
+            [0.0, 0.0, 0.5],
+            [20.0, 0.0, 10.0],
+            [0.0, 1.0, 0.0],
+            100.0,
+            [0.0, 0.0, -9.81],
+            [0.0, 0.0, 0.0],
+            &AeroBallProperties::default(),
+            &AirProperties::default(),
+            &default_config(),
+            false,
+        )
+        .unwrap();
+        let landing = result.points.last().expect("landing point");
+        assert!(
+            landing.z.abs() < 1e-12,
+            "landing z should be on the ground plane, got {}",
+            landing.z
+        );
+        assert!(landing.vz < 0.0, "landing must occur while descending");
     }
 
     /// Test: normal landing must report completed = true (issue #2484).

@@ -330,9 +330,19 @@ The full contract is in [support tiers](docs/engines/support_tiers.md);
 feature-level coverage is in
 [engine capabilities](docs/engines/engine_capabilities.md).
 
+## Theory
+
+UpstreamDrift is the execution and evidence platform. Theory, notation, and
+teaching articles live on [AffineDrift](https://affinedrift.com), with the shared
+[notation authority](https://github.com/D-sorganization/AffineDrift/blob/main/NOTATION.md).
+Every launcher help page (press **F1**) includes a **Background** link to the
+matching AffineDrift article; see
+`scripts/config/affine_drift_theory_links.v1.json` for the registry.
+
 ## Documentation
 
-The [documentation hub](docs/README.md) is the entry point. Frequently used
+The [documentation hub](docs/README.md) is the entry point. AffineDrift theory
+links are summarized in the hub's **Background reading** note. Frequently used
 sections:
 
 - [Project map](docs/architecture/PROJECT_MAP.md) — every feature, module, and integration.

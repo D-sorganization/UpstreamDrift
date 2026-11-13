@@ -8,6 +8,7 @@ policies, and constrained SLSQP trajectory fitting.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Any, Sequence, TypeAlias
 
@@ -69,6 +70,8 @@ def compute_marker_metrics(
         valid_mask.shape == pred_markers.shape[:2], "Validity mask shape must match"
     )
     require(len(time_s) == pred_markers.shape[0], "Time frames must match markers")
+    if not np.any(valid_mask):
+        raise ValueError("No valid marker samples in trajectory")
 
     diff = pred_markers - target_markers
     error_sq = np.einsum(
@@ -84,13 +87,12 @@ def compute_marker_metrics(
     wl_i = labels.index("WaistLeft") if "WaistLeft" in labels else -1
     wr_i = labels.index("WaistRight") if "WaistRight" in labels else -1
 
-    yaw_m: PelvisYawMetrics
     if wl_i >= 0 and wr_i >= 0:
         yaw_m = compute_pelvis_yaw_metrics(
             pred_markers[-1], target_markers[-1], wl_i, wr_i
         )
     else:
-        yaw_m = PelvisYawMetrics(0.0, 0.0, 0.0, 0.0, True)
+        yaw_m = compute_pelvis_yaw_metrics(None, None, 0, 0)
 
     score = float(
         np.sum(error_sq[valid_mask])
@@ -104,15 +106,21 @@ def compute_marker_metrics(
 
     whole_rms = float(np.sqrt(np.mean(error_sq[valid_mask])))
     early_rms = (
-        float(np.sqrt(np.mean(error_sq[early_mask]))) if np.any(early_mask) else 0.0
+        float(np.sqrt(np.mean(error_sq[early_mask])))
+        if np.any(early_mask)
+        else float("nan")
     )
     term_valid = valid_mask[-1]
     term_rms = (
-        float(np.sqrt(np.mean(error_sq[-1, term_valid]))) if np.any(term_valid) else 0.0
+        float(np.sqrt(np.mean(error_sq[-1, term_valid])))
+        if np.any(term_valid)
+        else float("nan")
     )
     club_valid = club_mask & term_valid
     club_rms = (
-        float(np.sqrt(np.mean(error_sq[-1, club_valid]))) if np.any(club_valid) else 0.0
+        float(np.sqrt(np.mean(error_sq[-1, club_valid])))
+        if np.any(club_valid)
+        else float("nan")
     )
 
     return MarkerMetricResults(
@@ -126,6 +134,10 @@ def compute_marker_metrics(
     )
 
 
+def _metric_measured(value: float) -> bool:
+    return math.isfinite(value)
+
+
 def check_acceptance(
     metrics: MarkerMetricResults,
     *,
@@ -136,6 +148,15 @@ def check_acceptance(
     pelvis_yaw_ceiling_pct: float = 5.0,
 ) -> bool:
     """Check physical acceptance gates for a candidate swing."""
+    measured = (
+        metrics.whole_rms_m,
+        metrics.early_rms_m,
+        metrics.terminal_rms_m,
+        metrics.club_cluster_rms_m,
+        metrics.pelvis_yaw_error_pct,
+    )
+    if not all(_metric_measured(v) for v in measured):
+        return False
     return (
         metrics.whole_rms_m <= whole_rms_ceiling
         and metrics.early_rms_m <= early_rms_ceiling

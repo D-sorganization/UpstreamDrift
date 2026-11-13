@@ -174,7 +174,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
             # Scoped to the tool cache ONLY (UpstreamDrift#9443).
-            # This used to be `chown -R ... /home/dieterolson/actions-runners`,
+            # This used to be `chown -R ... <owner-home>/actions-runners`,
             # which swept EVERY runner's _work tree on the host -- including
             # the checked-out repositories of jobs running concurrently on
             # other runners. chown bumps each inode's ctime without touching
@@ -360,7 +360,7 @@ jobs:
           else
             echo "Running directly on host. Sharing tool cache."
             # Scoped to the tool cache ONLY (UpstreamDrift#9443).
-            # This used to be `chown -R ... /home/dieterolson/actions-runners`,
+            # This used to be `chown -R ... <owner-home>/actions-runners`,
             # which swept EVERY runner's _work tree on the host -- including
             # the checked-out repositories of jobs running concurrently on
             # other runners. chown bumps each inode's ctime without touching
@@ -391,6 +391,8 @@ jobs:
           python -m ensurepip --upgrade || true
           python -m pip install --ignore-installed --no-deps pip
           python -m pip install --ignore-installed pathspec hatchling editables
+          # Re-bootstrap before editable install (pip 26.x get_runnable_pip on self-hosted).
+          python -m ensurepip --upgrade || true
           pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
           python3 scripts/ci/bootstrap_conformance_deps.py
           pip uninstall -y pytest-vcr pytest-recording || true

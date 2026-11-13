@@ -74,7 +74,7 @@ loudly if not.
 
 ## FB-3-P Completed (#10065)
 
-FB-3-P is implemented and verified on ControlTower with Pinocchio 4.1.0:
+FB-3-P is implemented and verified on <host> with Pinocchio 4.1.0:
 
 - `src/engines/physics_engines/pinocchio/python/native_model.py`: extended with
   `FullBodyPinocchioModel` and `build_full_body_pinocchio_model` without touching
@@ -97,15 +97,15 @@ FB-3-P is implemented and verified on ControlTower with Pinocchio 4.1.0:
   - Gate (d): Closure residuals unchanged on the upper-body chain to $0.0$ max
     difference (< $10^{-12}$) across 20 random positions and velocities.
 - Evidence archived under `docs/development/full_body_models/evidence/fb3_pinocchio/`:
-  - Driver: `verify_pinocchio_full_body.py` (auto-dispatches to ControlTower if
+  - Driver: `verify_pinocchio_full_body.py` (auto-dispatches to <host> if
     local Pinocchio is absent).
   - Receipt: `receipt.json`.
 - Tests: `tests/unit/motion_matching/test_pinocchio_full_body_builder.py` (6 passed
-  on ControlTower in 0.46s; clean skip on Windows).
+  on <host> in 0.46s; clean skip on Windows).
 
 ## FB-3-D Completed (#10067)
 
-FB-3-D is implemented and verified on ControlTower with Drake 1.57.0:
+FB-3-D is implemented and verified on <host> with Drake 1.57.0:
 
 - `src/engines/physics_engines/drake/python/full_body_urdf.py`: exports `full-body-v1`
   documents to URDF XML preserving all 41 scalar joints (27 upper-body joints + 14
@@ -133,9 +133,9 @@ FB-3-D is implemented and verified on ControlTower with Drake 1.57.0:
     20 random positions and velocities.
   - Accelerations: 41 coordinates, all finite under combined contact forces and weld closure.
 - Evidence archived under `docs/development/full_body_models/evidence/fb3_drake/`:
-  - Driver: `verify_drake_full_body.py` (auto-dispatches to ControlTower if local Drake is absent).
+  - Driver: `verify_drake_full_body.py` (auto-dispatches to <host> if local Drake is absent).
   - Receipt: `receipt.json` (`059ed50e48b65e0d84e3d7c7cfc7bfd0a99262470e28387e5f9b8a5ee0447001`).
-- Tests: `tests/unit/motion_matching/test_full_body_drake.py` (6 passed on ControlTower
+- Tests: `tests/unit/motion_matching/test_full_body_drake.py` (6 passed on <host>
   in 0.98s; 1 passed, 5 cleanly skipped on Windows without pydrake).
 
 ## Visual Skeleton Layer Completed (Step 1 of the Visuals Plan)
@@ -164,7 +164,7 @@ FB-3-D is implemented and verified on ControlTower with Drake 1.57.0:
   labelled joint-to-joint Simscape skeleton `simscape_skeleton_address.png`
   with `address_posture.json` (`render_simscape_skeleton.py`), and
   `render_playback.py` for the default pose and playback GIF. No MATLAB is
-  runnable on DeskComputer (`C:/Program Files/MATLAB/R2025b` has no
+  runnable on <host> (`C:/Program Files/MATLAB/R2025b` has no
   `bin/matlab.exe`), so the Simscape skeleton is drawn from the ported
   geometry whose frame parity against R2025b is receipted at 2.1e-13 m
   (`native_frame_parity_r2025b.json`).

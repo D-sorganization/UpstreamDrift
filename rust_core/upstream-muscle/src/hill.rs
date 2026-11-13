@@ -34,9 +34,11 @@ pub const DEFAULT_TENDON_STRAIN_AT_FMAX: f64 = 0.04;
 /// Matches the literal `0.25` in the Python source's denominator.
 pub const HILL_A_CONCENTRIC: f64 = 0.25;
 
-/// Hill clamp on normalized concentric velocity to keep the denominator
-/// `1 - v_norm/0.25` strictly positive. Matches `max(v_norm, -0.99)` in the
-/// Python source.
+/// Normalized shortening velocity at which the concentric Hill branch reaches
+/// zero force (`(1 + v) / (1 - v/a)` with [`HILL_A_CONCENTRIC`]).
+pub const V_CONCENTRIC_ZERO_FORCE: f64 = -1.0;
+
+/// Legacy clamp from the pre-#15045 port; superseded by [`V_CONCENTRIC_ZERO_FORCE`].
 pub const V_CONCENTRIC_CLAMP: f64 = -0.99;
 
 /// Eccentric force asymptote multiplier (~1.4 × F_max plateau).
@@ -111,17 +113,18 @@ pub fn f_p(l_norm: f64) -> f64 {
 /// for `v_norm >= 0`.
 ///
 /// Equivalent to `HillMuscleModel.force_velocity`.
+///
+/// Concentric branch follows the Hill hyperbola for `v_norm ∈ (-1, 0)` and is
+/// clamped to zero for `v_norm ≤ -1` (beyond maximum shortening). The join
+/// with the eccentric branch at `v_norm = 0` is C⁰ but not C¹ — see
+/// `tests/issue_15045_contract.rs`.
 #[inline]
 pub fn f_v(v_norm: f64) -> f64 {
     if v_norm < 0.0 {
-        // Concentric. Clamp to keep the denominator strictly positive (the
-        // Python source uses max(v_norm, -0.99) for the same reason).
-        let v = if v_norm > V_CONCENTRIC_CLAMP {
-            v_norm
-        } else {
-            V_CONCENTRIC_CLAMP
-        };
-        (1.0 + v) / (1.0 - v / HILL_A_CONCENTRIC)
+        if v_norm <= V_CONCENTRIC_ZERO_FORCE {
+            return 0.0;
+        }
+        (1.0 + v_norm) / (1.0 - v_norm / HILL_A_CONCENTRIC)
     } else {
         // Eccentric.
         (1.0 + v_norm * F_ECCENTRIC_ASYMPTOTE / ECCENTRIC_SHAPE) / (1.0 + v_norm / ECCENTRIC_SHAPE)
@@ -137,6 +140,9 @@ pub fn f_v(v_norm: f64) -> f64 {
 /// applies, reaching F_max at reference strain `DEFAULT_TENDON_STRAIN_AT_FMAX`.
 ///
 /// Equivalent to `HillMuscleModel.tendon_force`.
+///
+/// The toe/linear junction at `ε_toe = 0.609 ε₀` is C⁰ with matching force but
+/// not generally C¹ — parity-checked against Python in `tests/issue_15045_contract.rs`.
 #[inline]
 pub fn f_t(l_tendon_norm: f64) -> f64 {
     f_t_with_reference_strain(l_tendon_norm, DEFAULT_TENDON_STRAIN_AT_FMAX)
@@ -211,12 +217,10 @@ mod tests {
     }
 
     #[test]
-    fn f_v_concentric_clamps_at_0_99() {
-        // The Python source clamps v_norm to -0.99; values past the clamp
-        // must produce the same result as exactly -0.99.
-        let clamped = f_v(V_CONCENTRIC_CLAMP);
-        assert_relative_eq!(f_v(-1.5), clamped, epsilon = 1e-12);
-        assert_relative_eq!(f_v(-5.0), clamped, epsilon = 1e-12);
+    fn f_v_concentric_zero_beyond_vmax_shortening() {
+        assert_relative_eq!(f_v(-1.0), 0.0, epsilon = 1e-12);
+        assert_relative_eq!(f_v(-1.5), 0.0, epsilon = 1e-12);
+        assert_relative_eq!(f_v(-5.0), 0.0, epsilon = 1e-12);
     }
 
     #[test]

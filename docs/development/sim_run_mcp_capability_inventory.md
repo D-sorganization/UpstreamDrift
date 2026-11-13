@@ -38,3 +38,10 @@ records; public docs do not describe that surface.
 | `putting_read_green` | available | — |
 | `putting_stimpmeter` | available | — |
 | `putting_capture_speed` | available | — |
+
+## Agent Capabilities
+
+| Tool | Runtime Status | Unavailable Reason |
+| :--- | :---: | :--- |
+| `run_counterfactual_ztcf_golden` | available | — |
+| `run_golf_simulator_golden_shot` | available | — |
