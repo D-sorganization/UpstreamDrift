@@ -150,6 +150,45 @@ def _rpy_to_mjcf_quat_attr(rpy: tuple[float, float, float]) -> str:
     return f' quat="{w:.6g} {x:.6g} {y:.6g} {z:.6g}"'
 
 
+def _mjcf_inertial_lines(link: Link, indent: str) -> list[str]:
+    """Return MJCF ``<inertial>`` lines for a link, or an empty list when mass is zero."""
+    if link.inertia.mass <= 0:
+        return []
+    com = link.inertia.center_of_mass
+    com_str = f"{com[0]:.6g} {com[1]:.6g} {com[2]:.6g}"
+    if link.inertia.is_diagonal():
+        inertia_str = (
+            f"{link.inertia.ixx:.6g} {link.inertia.iyy:.6g} {link.inertia.izz:.6g}"
+        )
+        tag = "diaginertia"
+    else:
+        inertia_str = (
+            f"{link.inertia.ixx:.6g} {link.inertia.iyy:.6g} "
+            f"{link.inertia.izz:.6g} {link.inertia.ixy:.6g} "
+            f"{link.inertia.ixz:.6g} {link.inertia.iyz:.6g}"
+        )
+        tag = "fullinertia"
+    return [
+        f'{indent}<inertial mass="{link.inertia.mass:.6g}" '
+        f'pos="{com_str}" {tag}="{inertia_str}"/>'
+    ]
+
+
+def _mjcf_dof_joint_line(joint: Joint, indent: str) -> str:
+    """Return one MJCF ``<joint>`` element for a non-fixed URDF joint."""
+    mjcf_type = URDF_TO_MJCF_JOINT.get(joint.joint_type, "hinge")
+    axis = joint.axis
+    axis_str = f"{axis[0]:.6g} {axis[1]:.6g} {axis[2]:.6g}"
+    joint_line = (
+        f'{indent}<joint name="{joint.name}" type="{mjcf_type}" axis="{axis_str}"'
+    )
+    if joint.limits:
+        joint_line += f' range="{joint.limits.lower:.6g} {joint.limits.upper:.6g}"'
+    if joint.dynamics:
+        joint_line += f' damping="{joint.dynamics.damping:.6g}"'
+    return f"{joint_line}/>"
+
+
 def _origin_from_mjcf_element(
     elem: Any,
     angle_unit: str = _MJCF_DEFAULT_COMPILER_ANGLE,
@@ -411,53 +450,10 @@ class MJCFConverter:
 
         lines.append(f'{indent}<body name="{mjcf_body_name}" pos="{pos}"{quat_attr}>')
 
-        # Inertial
-        if link.inertia.mass > 0:
-            com = link.inertia.center_of_mass
-            com_str = f"{com[0]:.6g} {com[1]:.6g} {com[2]:.6g}"
+        lines.extend(_mjcf_inertial_lines(link, indent + "  "))
 
-            if link.inertia.is_diagonal():
-                inertia_str = (
-                    f"{link.inertia.ixx:.6g} {link.inertia.iyy:.6g} "
-                    f"{link.inertia.izz:.6g}"
-                )
-                lines.append(
-                    f'{indent}  <inertial mass="{link.inertia.mass:.6g}" '
-                    f'pos="{com_str}" diaginertia="{inertia_str}"/>'
-                )
-            else:
-                inertia_str = (
-                    f"{link.inertia.ixx:.6g} {link.inertia.iyy:.6g} "
-                    f"{link.inertia.izz:.6g} {link.inertia.ixy:.6g} "
-                    f"{link.inertia.ixz:.6g} {link.inertia.iyz:.6g}"
-                )
-                lines.append(
-                    f'{indent}  <inertial mass="{link.inertia.mass:.6g}" '
-                    f'pos="{com_str}" fullinertia="{inertia_str}"/>'
-                )
-
-        # Joint (if not root)
         if connecting_joint and connecting_joint.joint_type != JointType.FIXED:
-            mjcf_type = URDF_TO_MJCF_JOINT.get(connecting_joint.joint_type, "hinge")
-            axis = connecting_joint.axis
-            axis_str = f"{axis[0]:.6g} {axis[1]:.6g} {axis[2]:.6g}"
-
-            joint_line = (
-                f'{indent}  <joint name="{connecting_joint.name}" '
-                f'type="{mjcf_type}" axis="{axis_str}"'
-            )
-
-            if connecting_joint.limits:
-                joint_line += (
-                    f' range="{connecting_joint.limits.lower:.6g} '
-                    f'{connecting_joint.limits.upper:.6g}"'
-                )
-
-            if connecting_joint.dynamics:
-                joint_line += f' damping="{connecting_joint.dynamics.damping:.6g}"'
-
-            joint_line += "/>"
-            lines.append(joint_line)
+            lines.append(_mjcf_dof_joint_line(connecting_joint, indent + "  "))
 
         # Geometry (visual)
         if link.visual_geometry and self.config.include_visuals:
