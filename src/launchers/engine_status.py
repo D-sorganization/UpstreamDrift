@@ -32,8 +32,7 @@ class _TextLabel(Protocol):
     def text(self) -> str: ...
 
 
-def engine_running_text(name: str, suffix: str = "") -> str:
-    """Return the status-label text for a running engine (``* Name Running``)."""
+def _format_engine_state_text(name: str, verb: str, suffix: str = "") -> str:
     if not isinstance(name, str):
         raise TypeError("name must be a string")
     if not name.strip():
@@ -41,7 +40,12 @@ def engine_running_text(name: str, suffix: str = "") -> str:
     if not isinstance(suffix, str):
         raise TypeError("suffix must be a string")
     tail = f" ({suffix})" if suffix else ""
-    return f"* {name} Running{tail}"
+    return f"* {name} {verb}{tail}"
+
+
+def engine_running_text(name: str, suffix: str = "") -> str:
+    """Return the status-label text for a running engine (``* Name Running``)."""
+    return _format_engine_state_text(name, "Running", suffix)
 
 
 def is_engine_running_status(text: str, name: str) -> bool:
@@ -81,14 +85,7 @@ def reset_status_if_engine_closed(
 
 def engine_starting_text(name: str, suffix: str = "") -> str:
     """Return the status-label text while a child launch is starting."""
-    if not isinstance(name, str):
-        raise TypeError("name must be a string")
-    if not name.strip():
-        raise ValueError("name must not be blank")
-    if not isinstance(suffix, str):
-        raise TypeError("suffix must be a string")
-    tail = f" ({suffix})" if suffix else ""
-    return f"* {name} Starting{tail}"
+    return _format_engine_state_text(name, "Starting", suffix)
 
 
 def engine_crashed_text(name: str, exit_code: int | None) -> str:

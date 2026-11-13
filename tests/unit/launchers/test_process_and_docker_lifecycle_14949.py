@@ -19,6 +19,7 @@ from src.launchers import docker_manager, engine_status
 from src.launchers.docker_manager import DockerLauncher
 from src.launchers.launcher_process_manager import ProcessManager
 from src.launchers.managed_process import ManagedProcess, ProcessKind, ProcessState
+from src.shared.python.core.process_safety import is_pid_alive
 
 pytestmark = pytest.mark.unit
 
@@ -279,9 +280,6 @@ def test_launch_in_wsl_uses_pure_windows_stem_without_concrete_path(
     manager: ProcessManager,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    def _fail_concrete_path(*_args: object, **_kwargs: object) -> object:
-        raise NotImplementedError("cannot instantiate 'WindowsPath' on your system")
-
     fake_proc = MagicMock()
     fake_proc.pid = 4321
     fake_proc.poll.return_value = None
@@ -289,7 +287,11 @@ def test_launch_in_wsl_uses_pure_windows_stem_without_concrete_path(
     monkeypatch.setattr("src.launchers.launcher_process_manager.os.name", "nt")
     monkeypatch.setattr(
         "src.launchers.launcher_process_manager.Path",
-        _fail_concrete_path,
+        MagicMock(
+            side_effect=NotImplementedError(
+                "cannot instantiate 'WindowsPath' on your system"
+            )
+        ),
     )
     monkeypatch.setattr(
         "src.launchers.launcher_process_manager._assign_to_job",
@@ -302,3 +304,159 @@ def test_launch_in_wsl_uses_pure_windows_stem_without_concrete_path(
         row for row in manager.list_processes() if row["kind"] == ProcessKind.WSL.value
     ]
     assert [row["key"] for row in slots] == ["script"]
+
+
+def test_is_pid_alive_never_calls_os_kill_on_windows(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.shared.python.core import process_safety
+
+    with patch.object(process_safety.os, "kill") as mock_kill:
+        assert is_pid_alive(0) is False
+        assert is_pid_alive(-1) is False
+        with pytest.raises(TypeError, match="int"):
+            is_pid_alive(True)  # type: ignore[arg-type]
+
+        monkeypatch.setattr(process_safety.os, "name", "nt")
+        if sys.platform == "win32":
+            assert is_pid_alive(os.getpid()) is True
+        else:
+            monkeypatch.setattr(
+                process_safety, "_is_pid_alive_windows", lambda pid: pid == 4242
+            )
+            assert is_pid_alive(4242) is True
+            assert is_pid_alive(9999) is False
+        mock_kill.assert_not_called()
+
+
+def test_is_pid_alive_windows_exit_code_and_posix_kill_paths(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import ctypes
+    from src.shared.python.core import process_safety
+
+    closed_handles: list[int] = []
+
+    class _FakeKernel32:
+        def __init__(self, handle: int, exit_code: int) -> None:
+            self._handle = handle
+            self._exit_code = exit_code
+
+        def OpenProcess(self, _access: int, _inherit: int, _pid: int) -> int:
+            return self._handle
+
+        def GetExitCodeProcess(self, _handle: int, out_ptr: object) -> int:
+            ctypes.cast(out_ptr, ctypes.POINTER(ctypes.c_ulong))[0] = self._exit_code  # type: ignore[arg-type]
+            return 1
+
+        def CloseHandle(self, handle: int) -> int:
+            closed_handles.append(handle)
+            return 1
+
+    assert (
+        process_safety._is_pid_alive_windows(
+            111, kernel32=_FakeKernel32(0, 0), get_last_error=lambda: 5
+        )
+        is True
+    )
+    assert (
+        process_safety._is_pid_alive_windows(
+            111, kernel32=_FakeKernel32(0, 0), get_last_error=lambda: 87
+        )
+        is False
+    )
+    assert (
+        process_safety._is_pid_alive_windows(
+            111, kernel32=_FakeKernel32(0x100, 259), get_last_error=lambda: 0
+        )
+        is True
+    )
+    assert (
+        process_safety._is_pid_alive_windows(
+            111, kernel32=_FakeKernel32(0x200, 0), get_last_error=lambda: 0
+        )
+        is False
+    )
+    assert closed_handles == [0x100, 0x200]
+
+    monkeypatch.setattr(process_safety.os, "name", "posix")
+    with patch.object(process_safety.os, "kill", return_value=None) as mock_kill:
+        assert is_pid_alive(12345) is True
+        mock_kill.assert_called_once_with(12345, 0)
+
+    with patch.object(process_safety.os, "kill", side_effect=ProcessLookupError):
+        assert is_pid_alive(12345) is False
+
+    with patch.object(process_safety.os, "kill", side_effect=PermissionError):
+        assert is_pid_alive(12345) is True
+
+
+def test_resolve_matlab_r2025b_executable_avoids_path_and_rejects_r2026a(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.launchers import launcher_simulation
+
+    monkeypatch.delenv("MATLAB_R2025B_EXE", raising=False)
+    monkeypatch.setattr(launcher_simulation.os, "name", "nt")
+    assert (
+        launcher_simulation.resolve_matlab_r2025b_executable()
+        == "C:/Program Files/MATLAB/R2025b/bin/matlab.exe"
+    )
+    monkeypatch.setattr(launcher_simulation.os, "name", "posix")
+    assert (
+        launcher_simulation.resolve_matlab_r2025b_executable()
+        == "/usr/local/MATLAB/R2025b/bin/matlab"
+    )
+
+    monkeypatch.setenv(
+        "MATLAB_R2025B_EXE", "C:/Program Files/MATLAB/R2026a/bin/matlab.exe"
+    )
+    with pytest.raises(ValueError, match="R2025b"):
+        launcher_simulation.resolve_matlab_r2025b_executable()
+
+    monkeypatch.setenv("MATLAB_R2025B_EXE", "matlab")
+    with pytest.raises(ValueError, match="R2025b"):
+        launcher_simulation.resolve_matlab_r2025b_executable()
+
+
+def test_launch_matlab_app_uses_explicit_r2025b_executable_on_windows(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    from src.launchers import launcher_simulation
+
+    monkeypatch.delenv("MATLAB_R2025B_EXE", raising=False)
+    monkeypatch.setattr(launcher_simulation.os, "name", "nt")
+    slx_file = tmp_path / "GolfSwing3D_Kinetic.slx"
+    slx_file.write_text("", encoding="utf-8")
+    monkeypatch.setattr(
+        launcher_simulation,
+        "resolve_model_artifact_path",
+        lambda _app, _root: slx_file,
+    )
+    monkeypatch.setattr(
+        launcher_simulation,
+        "get_model_source_root",
+        lambda _app, _root: tmp_path,
+    )
+
+    host = SimpleNamespace(
+        running_processes={},
+        show_toast=MagicMock(),
+    )
+    sim = launcher_simulation.SimulationManager(host)
+    app = SimpleNamespace(
+        id="matlab_3d",
+        name="Simscape 3D",
+        path=str(slx_file),
+    )
+    fake_proc = MagicMock(spec=subprocess.Popen)
+    with patch.object(
+        launcher_simulation, "secure_popen", return_value=fake_proc
+    ) as mock_popen:
+        ok = sim._launch_matlab_app(app)
+
+    assert ok is True
+    launched_cmd = mock_popen.call_args.args[0]
+    assert launched_cmd[0] == "C:/Program Files/MATLAB/R2025b/bin/matlab.exe"
+    assert host.running_processes["matlab_3d"] is fake_proc

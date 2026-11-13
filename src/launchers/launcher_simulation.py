@@ -26,6 +26,7 @@ from PyQt6.QtWidgets import QApplication, QMessageBox
 from src.launchers.launcher_constants import (
     CREATE_NO_WINDOW,
     REPOS_ROOT,
+    resolve_matlab_r2025b_executable,
 )
 from src.launchers.engine_status import (
     apply_post_launch_for_manager,
@@ -1159,16 +1160,14 @@ except (RuntimeError, TypeError, AttributeError) as e:
                     creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
                 )
             else:
-                # Determine the appropriate MATLAB command based on file type
                 if str(app_path).endswith(".slx"):
                     matlab_cmd = f"open_system('{path_str}')"
                 elif str(app_path).endswith(".m"):
                     matlab_cmd = f"cd('{str(abs_path.parent).replace(chr(92), '/')}'); run('{abs_path.name}')"
                 else:
                     matlab_cmd = f"open('{path_str}')"
-
-                cmd = ["matlab", "-nosplash", "-r", matlab_cmd]
-
+                matlab_exe = resolve_matlab_r2025b_executable()
+                cmd = [matlab_exe, "-nosplash", "-r", matlab_cmd]
                 process = secure_popen(
                     cmd,
                     cwd=str(model_root),
@@ -1178,7 +1177,6 @@ except (RuntimeError, TypeError, AttributeError) as e:
             self.running_processes[app.id] = process
             self.show_toast(f"{app.name} launch initiated.", "success")
             return True
-
         except FileNotFoundError:
             self.show_toast("MATLAB executable not found in PATH.", "error")
             return False
@@ -1192,7 +1190,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 "error",
             )
             return False
-        except (PermissionError, OSError) as e:
+        except (PermissionError, OSError, ValueError) as e:
             logger.error(f"Failed to launch MATLAB app: {e}")
             self.show_toast(f"Launch failed: {e}", "error")
             return False

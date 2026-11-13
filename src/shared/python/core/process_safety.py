@@ -19,9 +19,11 @@ wrap, return, and re-raise.
 from __future__ import annotations
 
 import asyncio
+import ctypes
 import logging
+import os
 import subprocess
-from collections.abc import Awaitable, Iterator, Sequence
+from collections.abc import Awaitable, Callable, Iterator, Sequence
 from contextlib import contextmanager
 from typing import Any, TypeVar
 
@@ -29,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "AllTasksFailedError",
+    "is_pid_alive",
     "managed_popen",
     "narrow_catch",
     "safe_gather",
@@ -286,3 +289,76 @@ def narrow_catch(
         yield
     except exception_types:
         logger.exception(log_message)
+
+
+_PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+_STILL_ACTIVE = 259
+_ERROR_ACCESS_DENIED = 5
+
+
+def _load_kernel32() -> tuple[Any, Callable[[], int]]:
+    """Return a Win32 ``kernel32`` handle with 64-bit-safe signatures."""
+    win_dll_cls = getattr(ctypes, "WinDLL", None)
+    if win_dll_cls is None:  # pragma: no cover - non-Windows runtime
+        raise OSError("WinDLL is unavailable on this platform")
+    k32 = win_dll_cls("kernel32", use_last_error=True)
+    k32.OpenProcess.argtypes = [ctypes.c_ulong, ctypes.c_int, ctypes.c_ulong]
+    k32.OpenProcess.restype = ctypes.c_void_p
+    k32.GetExitCodeProcess.argtypes = [
+        ctypes.c_void_p,
+        ctypes.POINTER(ctypes.c_ulong),
+    ]
+    k32.GetExitCodeProcess.restype = ctypes.c_int
+    k32.CloseHandle.argtypes = [ctypes.c_void_p]
+    k32.CloseHandle.restype = ctypes.c_int
+    return k32, ctypes.get_last_error
+
+
+def _is_pid_alive_windows(
+    pid: int,
+    *,
+    kernel32: Any | None = None,
+    get_last_error: Callable[[], int] | None = None,
+) -> bool:
+    """Query Win32 process liveness without ``os.kill(pid, 0)`` (CTRL_C_EVENT)."""
+    k32 = kernel32
+    last_error_fn = get_last_error
+    if k32 is None or last_error_fn is None:
+        loaded_k32, loaded_err = _load_kernel32()
+        k32 = k32 or loaded_k32
+        last_error_fn = last_error_fn or loaded_err
+
+    handle = k32.OpenProcess(_PROCESS_QUERY_LIMITED_INFORMATION, 0, pid)
+    if not handle:
+        return int(last_error_fn()) == _ERROR_ACCESS_DENIED
+    try:
+        exit_code = ctypes.c_ulong(0)
+        ok = bool(k32.GetExitCodeProcess(handle, ctypes.byref(exit_code)))
+        return ok and exit_code.value == _STILL_ACTIVE
+    finally:
+        k32.CloseHandle(handle)
+
+
+def is_pid_alive(pid: int) -> bool:
+    """Return True when ``pid`` refers to a live OS process.
+
+    Never invokes ``os.kill(pid, 0)`` on Windows (where signal 0 aliases
+    ``CTRL_C_EVENT`` and signals the console process group).
+    """
+    if isinstance(pid, bool) or not isinstance(pid, int):
+        raise TypeError(f"pid must be an int, got {type(pid).__name__}")
+    if pid <= 0:
+        return False
+    if os.name == "nt":
+        return _is_pid_alive_windows(pid)
+    if not hasattr(os, "kill"):
+        return True
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except OSError:
+        return False
+    return True

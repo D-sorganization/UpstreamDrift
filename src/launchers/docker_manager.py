@@ -20,26 +20,13 @@ import uuid
 from collections.abc import Callable
 from pathlib import Path
 
+from src.shared.python.core.process_safety import is_pid_alive
+
 logger = logging.getLogger(__name__)
 
 CONTAINER_LABEL_MANAGED = "upstreamdrift.managed=true"
 CONTAINER_LABEL_PID_KEY = "upstreamdrift.launcher_pid"
 DEFAULT_MESHCAT_PORT = 7000
-
-
-def _is_pid_alive(pid: int) -> bool:
-    """Return True when ``pid`` refers to a live OS process."""
-    if pid <= 0:
-        return False
-    try:
-        os.kill(pid, 0)
-    except ProcessLookupError:
-        return False
-    except PermissionError:
-        return True
-    except OSError:
-        return False
-    return True
 
 
 def get_docker_cmd() -> list[str]:
@@ -215,19 +202,20 @@ class DockerBuildThread(QThread):
         self, process: subprocess.Popen[str]
     ) -> tuple[threading.Thread, queue.Queue[str]] | None:
         """Stream Docker stdout without blocking timeout enforcement."""
-        if process.stdout is None:
+        stdout_pipe = process.stdout
+        if stdout_pipe is None:
             return None
 
         output_queue: queue.Queue[str] = queue.Queue()
 
         def read_stdout() -> None:
             try:
-                for line in iter(process.stdout.readline, ""):
+                for line in iter(stdout_pipe.readline, ""):
                     stripped = line.strip()
                     if stripped:
                         output_queue.put(stripped)
             finally:
-                process.stdout.close()
+                stdout_pipe.close()
 
         reader = threading.Thread(
             target=read_stdout,
@@ -661,7 +649,7 @@ class DockerLauncher:
         pid_alive_fn: Callable[[int], bool] | None = None,
     ) -> list[str]:
         """Stop running UpstreamDrift containers whose launcher PID is gone."""
-        is_alive = pid_alive_fn or _is_pid_alive
+        is_alive = pid_alive_fn or is_pid_alive
         ps_cmd = get_docker_cmd() + [
             "ps",
             "--filter",
