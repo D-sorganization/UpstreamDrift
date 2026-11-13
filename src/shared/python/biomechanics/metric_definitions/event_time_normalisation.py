@@ -85,7 +85,9 @@ def _interpolate_at_targets(
     if method == "linear":
         if s_arr.ndim == 1:
             return np.interp(target_times, t_arr, s_arr)
-        cols = [np.interp(target_times, t_arr, s_arr[:, d]) for d in range(s_arr.shape[1])]
+        cols = [
+            np.interp(target_times, t_arr, s_arr[:, d]) for d in range(s_arr.shape[1])
+        ]
         return np.column_stack(cols)
     if method == "cubic":
         return CubicSpline(t_arr, s_arr, axis=0)(target_times)
