@@ -131,7 +131,7 @@ fits its own hip calibration; they share the capture, candidate, base spec and f
 This is a check of the engines' fitted address poses. The same-`q` replay is checked
 separately by #14134 (`test_address_knee_flexion_matches_across_engines`). Each engine builds
 its own FK from the same spec, measures both knees at one shared address `q` (frame 0 of the
-anthro-driver seeds `q_track`) and is compared with MuJoCo at 0.1°. On Brick, MuJoCo gave
+anthro-driver seeds `q_track`) and is compared with MuJoCo at 0.1°. On `<host>`, MuJoCo gave
 L 27.6249° / R 23.6806° and Drake agreed to 3e-14°. Pinocchio (no `body_poses`), OpenSim (no
 spec-driven FK adapter) and MyoSuite (not importable) are reported `unavailable`, never as
 agreement.
@@ -139,7 +139,7 @@ agreement.
 ## Canonical Receipts on the R4 Code (#12684, Acceptance 6)
 
 PR #13102 (merge `66d3c25a`, #13037) regenerated the canonical ground-support
-receipts on ControlTower after R3b (#12814) and R4 (#12788), using the unchanged
+receipts on `<host>` after R3b (#12814) and R4 (#12788), using the unchanged
 commands and the canonical `capture` knee mode. The committed receipts
 `ground_support/anthro_driver_seeds/receipt.json` and
 `ground_support/anthro_iron_seeds_zmp/receipt.json` carry the address knee block:

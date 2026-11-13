@@ -76,7 +76,7 @@ G1 gates (run-102 thresholds): whole <= 25 mm, early <= 12 mm, terminal
   (CLI), problem assembly `crocoddyl_problem.py` (pure), action models and
   rollouts `crocoddyl_action.py`, marker kinematics + Gauss-Newton IK
   `marker_kinematics.py`, GIF renderer `candidate_playback.py`.
-- Runtime: <host> (Tailscale host `controltower`, SSH shell is cmd.exe),
+- Runtime: <host> (Tailscale SSH alias `<host>`, SSH shell is cmd.exe),
   WSL distro `<host>-Runner`, micromamba env `upstream-motion-runtime`
   at `<owner-home>/mm-root` (Pinocchio 4.1.0, Crocoddyl 3.2.1, Pink 4.4.0
   from `scripts/config/motion_runtime/linux-64.explicit.txt`, plus ezc3d,
@@ -89,8 +89,8 @@ G1 gates (run-102 thresholds): whole <= 25 mm, early <= 12 mm, terminal
   Windows; native tests need the env above.
 
 Remote pattern that works (quoting through cmd.exe -> wsl -> bash mangles `$`
-and quotes): write a script locally, `scp -q script.sh controltower:C:/Users/diete/`,
-run `ssh controltower "wsl -d <host>-Runner -- bash /mnt/c/Users/diete/script.sh"`,
+and quotes): write a script locally, `scp -q script.sh "${UD_SSH_HOST}:C:/Users/${UD_WIN_USER}/"`,
+run `ssh "${UD_SSH_HOST}" "wsl -d ${UD_WSL_DISTRO} -- bash /mnt/c/Users/${UD_WIN_USER}/script.sh"`,
 pipe through `tr -d '\r'`. Long runs: launch detached with
 `scripts/matched_swing/run_crocoddyl_fit.sh` and poll the log for `^EXIT`.
 

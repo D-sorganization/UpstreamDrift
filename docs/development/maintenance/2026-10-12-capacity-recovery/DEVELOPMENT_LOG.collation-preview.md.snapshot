@@ -738,7 +738,7 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 
 - **PR:** not recorded in source
 - **State:** in_review
-- **Owner:** local (session `claude-deskcomputer-20260925-ud`)
+- **Owner:** local (session `claude-<host>-20260925-ud`)
 - **Issue:** #9619 (companion #9630)
 - **Branch:** `agy/ud-9619-adr0041`
 - **Paths:** `docs/adr/0041-markerless-mocap-consumer-authority.md`, `tests/architecture/test_markerless_mocap_authority.py`, `docs/development/DEVELOPMENT_LOG.md`
@@ -1170,7 +1170,7 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 ### DL-#10363 · Matched Swing Continuation Review & Drake G1 Retraction
 
 - **State:** in_review
-- **Owner:** claude-deskcomputer-20260925-ud
+- **Owner:** claude-<host>-20260925-ud
 - **Issue:** #10363
 - **Branch:** agy/ud-10363-drake-retraction
 - **PR:** draft PR from `agy/ud-10363-drake-retraction`

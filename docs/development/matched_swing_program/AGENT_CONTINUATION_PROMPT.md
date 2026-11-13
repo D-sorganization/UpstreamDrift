@@ -19,8 +19,8 @@ new evidence directory, verify hashes/coverage, and report all failed/missing
 gates. Keep the current result even if rejected. No parameter sweep is required.
 
 For Windows SSH quoting, write an owned LF script, copy it with scp to
-`controltower:C:/Users/diete/`, then execute it through
-`ssh controltower "wsl -d <host>-Runner -- bash /mnt/c/Users/diete/NAME.sh"`.
+`${UD_SSH_HOST}:C:/Users/${UD_WIN_USER}/`, then execute it through
+`ssh "${UD_SSH_HOST}" "wsl -d ${UD_WSL_DISTRO} -- bash /mnt/c/Users/${UD_WIN_USER}/NAME.sh"`.
 Use a unique NAME and script containing only the selected read-only inspection
 commands. Native paths and process IDs in the snapshot are historical; verify
 current state. Check processes, file timestamps and receipts, not just a quiet

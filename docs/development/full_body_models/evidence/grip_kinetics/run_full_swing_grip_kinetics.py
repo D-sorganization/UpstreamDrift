@@ -64,8 +64,8 @@ from src.shared.python.model_appearance import club_face as cf  # noqa: E402
 ROOT = HERE.parents[4]
 MODELS = ROOT / "docs/development/full_body_models"
 FIXTURES = ROOT / "tests/fixtures/club_face"
-DEFAULT_OUT = Path(
-    "<owner-home>/Videos/Parity Audit/golfer_realism/grip_kinetics/full_swing"
+DEFAULT_OUT = (
+    Path.home() / "Videos/Parity Audit/golfer_realism/grip_kinetics/full_swing"
 )
 CAPTURES = {"driver": ("driver", "A"), "iron7": ("iron", "B")}
 IMPACT_HALF_WINDOW_S = 0.010

@@ -282,7 +282,7 @@ python3 -m scripts.render_head_gaze_clips RUN_IK RUN_GAZE OUT/driver_fd_ikneck_v
 ```
 
 Clips of the forward-dynamics replay (IK neck on the left, gaze neck on the
-right; 1920x1080, 60 fps, 1x, 0.5x and impact 0.25x) are on host brick under
+right; 1920x1080, 60 fps, 1x, 0.5x and impact 0.25x) are on `<host>` under
 `~/Videos/Parity Audit/golfer_realism/head_gaze/osv3c/`.
 
 ### Closed-Loop Gaze Neck
@@ -350,7 +350,7 @@ python3 -m scripts.render_head_gaze_clips RUN_OPEN RUN_CLOSED OUT/driver_fd_gaze
 ```
 
 Clips (open loop on the left, closed loop on the right; 1920x1080, 60 fps, 1x,
-0.5x and impact 0.25x) are on host brick under
+0.5x and impact 0.25x) are on `<host>` under
 `~/Videos/Parity Audit/golfer_realism/head_gaze/osv3d/`.
 
 ## Head-Gaze Clips

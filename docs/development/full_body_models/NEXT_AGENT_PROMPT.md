@@ -48,7 +48,7 @@ Order of work and done gates:
 5. FB-5 (#10069, Claude): full-body two-window shooting fit with contact.
 6. FB-6 (#10070): cross-engine parity and visual review.
 
-Compute conventions: ssh alias controltower, WSL distro <host>-Runner,
+Compute conventions: ssh alias `<host>`, WSL distro `<host>-Runner`,
 launch long jobs with systemd-run --user through a launcher that records pid
 and exit code (see the native lane's run_job.py pattern); ssh-spawned
 background processes die at logout. One BLAS/OpenMP thread for comparable

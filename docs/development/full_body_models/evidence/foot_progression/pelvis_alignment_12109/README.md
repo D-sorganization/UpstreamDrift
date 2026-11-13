@@ -2,7 +2,7 @@
 
 MuJoCo calibrated address, `--static-seeds --foot-progression capture`, both
 tour captures (capture-A driver, capture-B 7-iron). Each `leg_yaw_budget.json`
-is written by `scripts/diagnose_address_leg_yaw.py` and run on brick.
+is written by `scripts/diagnose_address_leg_yaw.py` and run on `<host>`.
 
 - `before_*`: commit `bee92b09ff`. The hip rewrite takes its alignment from
   `build_receipt_v2.json`.

@@ -366,8 +366,23 @@ def run_local_engine_replay(
     return outcome, traj_path, receipt_path
 
 
-def _sync_to_remote(remote_base: str) -> None:
+def _sync_to_remote(
+    remote_base: str,
+    host: str | None = None,
+    distro: str | None = None,
+) -> None:
     """Synchronize required codebase files to remote execution directory."""
+    if host is None or distro is None:
+        from docs.development.full_body_models.evidence._remote import (
+            resolve_remote_target,
+        )
+
+        resolved_host, resolved_distro, _ = resolve_remote_target(
+            "Ubuntu-22.04", run_fn=subprocess.run
+        )
+        host = host or resolved_host
+        distro = distro or resolved_distro
+
     dirs = [
         f"{remote_base}/data",
         f"{remote_base}/docs/development/full_body_models/evidence/fb4_calibration/pinocchio",
@@ -382,7 +397,7 @@ def _sync_to_remote(remote_base: str) -> None:
         f"{remote_base}/src/engines/physics_engines/drake/python",
     ]
     subprocess.run(
-        ["ssh", "deskcomputer", "wsl", "-d", "Ubuntu-22.04", "mkdir", "-p", *dirs],
+        ["ssh", host, "wsl", "-d", distro, "mkdir", "-p", *dirs],
         check=True,
     )
 
@@ -417,10 +432,10 @@ def _sync_to_remote(remote_base: str) -> None:
             subprocess.run(
                 [
                     "ssh",
-                    "deskcomputer",
+                    host,
                     "wsl",
                     "-d",
-                    "Ubuntu-22.04",
+                    distro,
                     "tee",
                     f"{remote_base}/{rel}",
                 ],
@@ -432,10 +447,10 @@ def _sync_to_remote(remote_base: str) -> None:
     subprocess.run(
         [
             "ssh",
-            "deskcomputer",
+            host,
             "wsl",
             "-d",
-            "Ubuntu-22.04",
+            distro,
             "find",
             remote_base,
             "-name",
@@ -451,10 +466,17 @@ def run_remote_engine_replay(
     output_dir: Path,
     num_frames: int = 0,
 ) -> tuple[EngineReplayOutcome, Path, Path]:
-    """Execute replay remotely on deskcomputer WSL Ubuntu-22.04 and fetch back artifacts."""
-    logger.info("Executing remote replay for %s on deskcomputer WSL...", engine.upper())
-    remote_base = "<owner-home>/fb6_parity_run"
-    _sync_to_remote(remote_base)
+    """Execute replay remotely on the configured WSL host and fetch back artifacts."""
+    from docs.development.full_body_models.evidence._remote import resolve_remote_target
+
+    host, distro, remote_home = resolve_remote_target(
+        "Ubuntu-22.04", run_fn=subprocess.run
+    )
+    logger.info(
+        "Executing remote replay for %s on remote WSL %s...", engine.upper(), distro
+    )
+    remote_base = f"{remote_home}/fb6_parity_run"
+    _sync_to_remote(remote_base, host=host, distro=distro)
 
     remote_out = f"{remote_base}/docs/development/full_body_models/evidence/fb6_parity"
     script = f"""
@@ -464,7 +486,7 @@ python3 docs/development/full_body_models/evidence/fb6_parity/verify_cross_engin
 """.encode()
 
     res = subprocess.run(
-        ["ssh", "deskcomputer", "wsl", "-d", "Ubuntu-22.04", "bash"],
+        ["ssh", host, "wsl", "-d", distro, "bash"],
         input=script,
         capture_output=True,
     )
@@ -485,10 +507,10 @@ python3 docs/development/full_body_models/evidence/fb6_parity/verify_cross_engin
         cat_p = subprocess.run(
             [
                 "ssh",
-                "deskcomputer",
+                host,
                 "wsl",
                 "-d",
-                "Ubuntu-22.04",
+                distro,
                 "cat",
                 f"{remote_out}/{name}",
             ],

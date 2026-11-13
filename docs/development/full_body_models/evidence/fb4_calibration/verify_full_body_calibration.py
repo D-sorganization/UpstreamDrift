@@ -100,7 +100,22 @@ def get_engine_version(engine_name: str) -> str:
     return "unknown"
 
 
-def _sync_files_to_remote(remote_base: str) -> None:
+def _sync_files_to_remote(
+    remote_base: str,
+    host: str | None = None,
+    distro: str | None = None,
+) -> None:
+    if host is None or distro is None:
+        from docs.development.full_body_models.evidence._remote import (
+            resolve_remote_target,
+        )
+
+        resolved_host, resolved_distro, _ = resolve_remote_target(
+            "Ubuntu-22.04", run_fn=subprocess.run
+        )
+        host = host or resolved_host
+        distro = distro or resolved_distro
+
     dirs = [
         f"{remote_base}/docs/development/full_body_models",
         f"{remote_base}/docs/development/simscape_tour_matching/native_evidence",
@@ -117,7 +132,7 @@ def _sync_files_to_remote(remote_base: str) -> None:
         f"{remote_base}/tests/unit/motion_matching",
     ]
     p0 = subprocess.run(
-        ["ssh", "deskcomputer", "wsl", "-d", "Ubuntu-22.04", "mkdir", "-p", *dirs],
+        ["ssh", host, "wsl", "-d", distro, "mkdir", "-p", *dirs],
         capture_output=True,
     )
     if p0.returncode != 0:
@@ -160,7 +175,7 @@ def _sync_files_to_remote(remote_base: str) -> None:
         remote_path = f"{remote_base}/{rel}"
         content = local_path.read_bytes()
         p = subprocess.run(
-            ["ssh", "deskcomputer", "wsl", "-d", "Ubuntu-22.04", "tee", remote_path],
+            ["ssh", host, "wsl", "-d", distro, "tee", remote_path],
             input=content,
             capture_output=True,
         )
@@ -171,10 +186,10 @@ def _sync_files_to_remote(remote_base: str) -> None:
     subprocess.run(
         [
             "ssh",
-            "deskcomputer",
+            host,
             "wsl",
             "-d",
-            "Ubuntu-22.04",
+            distro,
             "find",
             remote_base,
             "-name",
@@ -186,13 +201,16 @@ def _sync_files_to_remote(remote_base: str) -> None:
 
 
 def run_remote_engine(engine_name: str, stride: int, iterations: int) -> dict[str, Any]:
-    sys.stdout.write(
-        f"Engine {engine_name} running on deskcomputer WSL Ubuntu-22.04...\n"
+    from docs.development.full_body_models.evidence._remote import resolve_remote_target
+
+    host, distro, remote_home = resolve_remote_target(
+        "Ubuntu-22.04", run_fn=subprocess.run
     )
+    sys.stdout.write(f"Engine {engine_name} running on remote WSL {distro}...\n")
     sys.stdout.flush()
 
-    remote_base = "<owner-home>/fb4_calibration_run"
-    _sync_files_to_remote(remote_base)
+    remote_base = f"{remote_home}/fb4_calibration_run"
+    _sync_files_to_remote(remote_base, host=host, distro=distro)
 
     script = (
         f"cd {remote_base}\n"
@@ -202,7 +220,7 @@ def run_remote_engine(engine_name: str, stride: int, iterations: int) -> dict[st
     ).encode()
 
     res = subprocess.run(
-        ["ssh", "deskcomputer", "wsl", "-d", "Ubuntu-22.04", "bash"],
+        ["ssh", host, "wsl", "-d", distro, "bash"],
         input=script,
         capture_output=True,
     )
@@ -223,10 +241,10 @@ def run_remote_engine(engine_name: str, stride: int, iterations: int) -> dict[st
         cat_proc = subprocess.run(
             [
                 "ssh",
-                "deskcomputer",
+                host,
                 "wsl",
                 "-d",
-                "Ubuntu-22.04",
+                distro,
                 "cat",
                 f"{remote_base}/docs/development/full_body_models/evidence/fb4_calibration/{engine_name}/{filename}",
             ],

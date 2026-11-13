@@ -138,7 +138,7 @@ OpenSim for the lower limbs (this decides the FB-1 Euler assumption).
 UpstreamDrift model visuals, step <3|4|5|6> from
 docs/development/full_body_models/VISUALS_HANDOFF.md on branch
 docs/10003-opensim-matching-epic (worktree
-C:/Users/diete/Repositories/Worktrees/UpstreamDrift-opensim-10003). Read
+<owner-home>/Repositories/Worktrees/UpstreamDrift-opensim-10003). Read
 AGENTS.md, CLAUDE.md, that handoff, full_body_models/HANDOFF.md and
 docs/development/HANDOFF.md on feat/9967-native-simscape-pinocchio first.
 Lease the issue you work (#10062 children, or #10003 for step 5) with your

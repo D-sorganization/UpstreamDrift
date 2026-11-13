@@ -44,9 +44,7 @@ from src.shared.python.grip_contact.parity import (  # noqa: E402
 MODELS = ROOT / "docs/development/full_body_models"
 FIXTURES = ROOT / "tests/fixtures/club_face"
 OUT = HERE / "parity"
-PLOTS = Path(
-    "<owner-home>/Videos/Parity Audit/golfer_realism/grip_kinetics/parity"
-)
+PLOTS = Path.home() / "Videos/Parity Audit/golfer_realism/grip_kinetics/parity"
 ENGINE_MODULES = {
     "mujoco": "src.engines.physics_engines.mujoco.python.grip_bushing",
     "drake": "src.engines.physics_engines.drake.python.grip_bushing",
