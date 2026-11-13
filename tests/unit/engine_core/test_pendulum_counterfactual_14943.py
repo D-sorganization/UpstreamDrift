@@ -46,3 +46,17 @@ def test_pendulum_stamped_kinds_and_zvcf_shim(pendulum: PendulumPhysicsEngine) -
         q, np.array([0.3, 0.0])
     )
     assert zvcf_control.shape == (2,)
+
+
+def test_zvcf_shim_evaluates_supplied_q_not_current_state(
+    pendulum: PendulumPhysicsEngine,
+) -> None:
+    pendulum.set_state(np.array([0.9, 0.1]), np.array([0.4, -0.2]))
+    q_arg = np.array([0.15, -0.35])
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        shim = pendulum.compute_zvcf(q_arg)
+    expected = pendulum.compute_gravity_only_acceleration(q_arg)
+    at_current = pendulum.compute_gravity_only_acceleration(np.array([0.9, 0.1]))
+    np.testing.assert_allclose(shim, expected)
+    assert not np.allclose(shim, at_current)
