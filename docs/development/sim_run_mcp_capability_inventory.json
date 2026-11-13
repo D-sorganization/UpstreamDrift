@@ -1,4 +1,18 @@
 {
+  "agent_capabilities": [
+    {
+      "description": "Agent API capability `run_counterfactual_ztcf_golden` via sim_run",
+      "id": "run_counterfactual_ztcf_golden",
+      "kind": "agent_capability",
+      "runtime_status": "available"
+    },
+    {
+      "description": "Agent API capability `run_golf_simulator_golden_shot` via sim_run",
+      "id": "run_golf_simulator_golden_shot",
+      "kind": "agent_capability",
+      "runtime_status": "available"
+    }
+  ],
   "engines": [
     {
       "capabilities": [

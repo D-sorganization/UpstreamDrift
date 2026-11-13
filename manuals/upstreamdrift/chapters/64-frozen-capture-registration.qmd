@@ -2,7 +2,7 @@
 
 This provisional F07/F08 pathway, child #11912, separates an explicitly authored
 coordinate gauge from anatomical marker correspondence. It extends the existing
-rigid-registration provider and the [native geometry pathway](26-native-opensim-geometry.qmd).
+rigid-registration provider and the [native geometry pathway](60-native-opensim-geometry.qmd).
 It does not qualify muscle dynamics, contact or independent replay described in
 the [native replay chapter](13-native-muscle-replay.qmd).
 

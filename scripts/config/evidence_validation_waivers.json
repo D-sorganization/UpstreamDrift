@@ -1,0 +1,38 @@
+{
+  "issue": 14935,
+  "waivers": [
+    {
+      "id": "candidate-ms-080s-seeded-accepted-gates",
+      "rule": "accepted_gates_consistency",
+      "path": "candidates/candidate_ms_080s_seeded_package.json",
+      "expires": "2026-12-31",
+      "note": "Known contradictory accepted=true with 1/5 gates; remediation tracked in #14935"
+    },
+    {
+      "id": "receipt-driver-g1-crocoddyl-rk45-warm-start",
+      "rule": "host_absolute_provenance",
+      "path": "evidence/matched/driver_g1_crocoddyl_rk45/receipt.json",
+      "expires": "2026-12-31",
+      "note": "warm_start_source uses owner host path pending provenance hash policy"
+    },
+    {
+      "id": "receipt-driver-g1-crocoddyl-rk45-b100-paths",
+      "rule": "host_absolute_provenance",
+      "path": "evidence/matched/driver_g1_crocoddyl_rk45_b100/receipt.json",
+      "expires": "2026-12-31",
+      "note": "attachments_source and warm_start_source host paths; #14935"
+    },
+    {
+      "id": "ledger-unclassified-historical",
+      "rule": "ledger_unclassified",
+      "expires": "2026-12-31",
+      "note": "Committed ledger rows pending explicit lane/engine/capture reclassification (#14935)"
+    },
+    {
+      "id": "receipt-missing-capture-metadata",
+      "rule": "missing_taxonomy",
+      "expires": "2026-12-31",
+      "note": "Committed receipts pending explicit capture field (#14935)"
+    }
+  ]
+}
