@@ -37,9 +37,10 @@ class AerodynamicsConfig:
         drag_enabled: Enable drag force (air resistance)
         lift_enabled: Enable lift force (from backspin)
         magnus_enabled: Enable Magnus force (from spin)
-        drag_coefficient: Base drag coefficient (Cd)
-        lift_coefficient: Base lift coefficient (Cl)
-        magnus_coefficient: Magnus effect coefficient (Cm)
+        drag_coefficient: Base drag coefficient (Cd) passed to ``DragModel``
+        lift_coefficient: Scalar lift cap for standalone ``LiftModel`` only
+            (``AerodynamicsEngine`` emits combined spin lift in ``magnus``)
+        magnus_coefficient: Magnus/lift coefficient cap used by ``MagnusModel``
         spin_decay_rate: Rate of spin decay [1/s]
         reynolds_correction_enabled: Apply Reynolds number correction to Cd
         ball_radius: Ball radius for calculations [m]

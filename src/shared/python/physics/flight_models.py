@@ -1000,7 +1000,7 @@ class FlightModelRegistry:
             ConstantCoefficientSpec(
                 name="Nathan",
                 description="Constant Cd/Cl model with spin decay",
-                reference="Nathan et al. (2018)",
+                reference="Illustrative constant-Cd/Cl preset (Bearman & Harvey 1976 post-critical band)",
                 cd=0.22,
                 cl=0.24,
                 spin_decay=0.03,
@@ -1010,7 +1010,7 @@ class FlightModelRegistry:
             ConstantCoefficientSpec(
                 name="Ballantyne",
                 description="Constant Cd/Cl model for steady spin",
-                reference="Ballantyne et al. (2012)",
+                reference="Illustrative constant-Cd/Cl preset (Bearman & Harvey 1976 post-critical band)",
                 cd=0.20,
                 cl=0.18,
                 spin_decay=0.02,
@@ -1020,7 +1020,7 @@ class FlightModelRegistry:
             ConstantCoefficientSpec(
                 name="J. Cole",
                 description="Constant Cd/Cl model with moderate decay",
-                reference="Cole (2016)",
+                reference="Illustrative constant-Cd/Cl preset (Bearman & Harvey 1976 post-critical band)",
                 cd=0.23,
                 cl=0.22,
                 spin_decay=0.04,
@@ -1030,7 +1030,7 @@ class FlightModelRegistry:
             ConstantCoefficientSpec(
                 name="Rospie DL",
                 description="Constant Cd/Cl model tuned for driver launch",
-                reference="Rospie & Layton (2014)",
+                reference="Illustrative constant-Cd/Cl preset (Bearman & Harvey 1976 post-critical band)",
                 cd=0.21,
                 cl=0.19,
                 spin_decay=0.03,
@@ -1040,7 +1040,7 @@ class FlightModelRegistry:
             ConstantCoefficientSpec(
                 name="Charry L3",
                 description="Constant Cd/Cl model with higher drag",
-                reference="Charry et al. (2017)",
+                reference="Illustrative constant-Cd/Cl preset (Bearman & Harvey 1976 post-critical band)",
                 cd=0.24,
                 cl=0.21,
                 spin_decay=0.05,
