@@ -20,12 +20,15 @@ from __future__ import annotations
 import argparse
 import shutil
 from pathlib import Path
+from typing import Any
 
 from src.shared.python.neural_motion.episodes.mujoco_corpus import (
+    CORPUS_MANIFEST_FILENAME,
     contract_rollout_arrays,
     load_canonical_driver_spec,
 )
 from src.shared.python.neural_motion.episodes.mujoco_corpus_run import (
+    CORPUS_RUN_RECEIPT_FILENAME,
     MuJoCoCorpusGenerationRequest,
     build_corpus_run_receipt,
     read_corpus_manifest,
@@ -43,6 +46,57 @@ _DEFAULT_RECEIPT = (
     _REPO_ROOT
     / "docs/plans/neural_motion_matching/evidence/ml_ws5_mujoco_corpus_ci_receipt.json"
 )
+_OUTPUT_MARKER_FILENAME = ".ml_ws5_record_corpus_receipt.json"
+_OUTPUT_MARKER_SCHEMA = "neural-ml-ws5-output-marker/1.0.0"
+_STORE_INDEX_FILENAME = "manifest.json"
+_SHARDS_DIRNAME = "shards"
+
+
+def _output_marker_payload() -> dict[str, Any]:
+    return {"schema": _OUTPUT_MARKER_SCHEMA}
+
+
+def write_output_marker(out_dir: Path) -> None:
+    """Record that ``out_dir`` was produced by this script (enables safe --overwrite)."""
+    write_sorted_json(out_dir / _OUTPUT_MARKER_FILENAME, _output_marker_payload())
+
+
+def _unlink_if_present(path: Path) -> None:
+    if path.is_file():
+        path.unlink()
+
+
+def remove_prior_tool_outputs(out_dir: Path) -> None:
+    """Drop corpus artifacts from a prior run; never delete unrelated paths in ``out_dir``."""
+    _unlink_if_present(out_dir / _OUTPUT_MARKER_FILENAME)
+    _unlink_if_present(out_dir / CORPUS_MANIFEST_FILENAME)
+    _unlink_if_present(out_dir / _STORE_INDEX_FILENAME)
+    _unlink_if_present(out_dir / CORPUS_RUN_RECEIPT_FILENAME)
+    shards = out_dir / _SHARDS_DIRNAME
+    if shards.is_dir():
+        shutil.rmtree(shards)
+
+
+def prepare_output_dir(out_dir: Path, *, overwrite: bool) -> None:
+    """Refuse a non-empty ``out_dir`` unless ``overwrite`` clears a marked prior run."""
+    if not out_dir.exists():
+        return
+    entries = list(out_dir.iterdir())
+    if not entries:
+        return
+    if not overwrite:
+        raise SystemExit(
+            f"refusing non-empty output directory {out_dir}; "
+            "use an empty directory or pass --overwrite to replace a prior "
+            f"{_OUTPUT_MARKER_FILENAME} run without deleting unrelated files"
+        )
+    marker = out_dir / _OUTPUT_MARKER_FILENAME
+    if not marker.is_file():
+        raise SystemExit(
+            f"refusing --overwrite for {out_dir}: missing {_OUTPUT_MARKER_FILENAME} "
+            "(directory is non-empty but was not created by this tool)"
+        )
+    remove_prior_tool_outputs(out_dir)
 
 
 def _record_from_existing_ci_fixture(
@@ -107,6 +161,14 @@ def main() -> None:
     parser.add_argument("--episode-count", type=int, default=1)
     parser.add_argument("--split-seed", type=int, default=137810)
     parser.add_argument("--receipt-path", type=Path)
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help=(
+            "Replace a prior run in --output-dir that was marked with "
+            f"{_OUTPUT_MARKER_FILENAME}; unrelated files in the directory are kept"
+        ),
+    )
     args = parser.parse_args()
 
     if args.ci_fixture:
@@ -121,8 +183,7 @@ def main() -> None:
         parser.error("--output-dir is required unless --ci-fixture is set")
 
     out_dir = args.output_dir.resolve()
-    if out_dir.exists():
-        shutil.rmtree(out_dir)
+    prepare_output_dir(out_dir, overwrite=bool(args.overwrite))
     spec = load_canonical_driver_spec()
     manifest, split, receipt = run_mujoco_corpus_generation(
         MuJoCoCorpusGenerationRequest(
@@ -136,6 +197,7 @@ def main() -> None:
             repo_root=_REPO_ROOT,
         )
     )
+    write_output_marker(out_dir)
     print(manifest.content_digest)
     print(split.content_digest)
     print(receipt.content_digest)
