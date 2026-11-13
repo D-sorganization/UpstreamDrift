@@ -2759,7 +2759,6 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 | 2026-11-12 | #15032 | Re-bootstrap pip with ensurepip before force-overlay-parity engine installs (#15027). |
 | 2026-11-12 | #15033 | Label injury spinal-load heuristics honestly; disclaim unvalidated screening bands. |
 | 2026-11-12 | #15024 | Fix OpenSim IAA gravity sign and moment-arm mapping; MuJoCo constraint-consistent control acceleration; minor docs/dead code |
-| 2026-11-12 | #14965 | CounterfactualKind/Result, simscape/putting defaults, conformance (#14943 slices 1–4) |
 | 2026-11-12 | #14957 | Agent control stubs return honest not_implemented results (#14939). |
 | 2026-11-12 | #14828 | NP-05 benchmark localized edit vs constrained fine-tune (#14480) |
 | 2026-11-11 | #15023 | Register ud-sim-mcp console script, generated capability inventory, and Agent API auth docs. |
