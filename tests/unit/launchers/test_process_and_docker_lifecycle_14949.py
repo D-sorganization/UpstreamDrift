@@ -273,3 +273,32 @@ def test_docker_container_naming_pid_label_port_avoidance_cleanup_and_sweep(
     sweep_cmds = [call.args[0] for call in mock_run.call_args_list]
     assert any("stop" in c and "ud-orphan-1111" in c for c in sweep_cmds)
     assert not any("ud-live-2222" in c for c in sweep_cmds)
+
+
+def test_launch_in_wsl_uses_pure_windows_stem_without_concrete_path(
+    manager: ProcessManager,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def _fail_concrete_path(*_args: object, **_kwargs: object) -> object:
+        raise NotImplementedError("cannot instantiate 'WindowsPath' on your system")
+
+    fake_proc = MagicMock()
+    fake_proc.pid = 4321
+    fake_proc.poll.return_value = None
+
+    monkeypatch.setattr("src.launchers.launcher_process_manager.os.name", "nt")
+    monkeypatch.setattr(
+        "src.launchers.launcher_process_manager.Path",
+        _fail_concrete_path,
+    )
+    monkeypatch.setattr(
+        "src.launchers.launcher_process_manager._assign_to_job",
+        lambda _proc: None,
+    )
+    with patch("subprocess.Popen", return_value=fake_proc):
+        assert manager.launch_in_wsl("C:\\fake\\script.py") is True
+
+    slots = [
+        row for row in manager.list_processes() if row["kind"] == ProcessKind.WSL.value
+    ]
+    assert [row["key"] for row in slots] == ["script"]

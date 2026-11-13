@@ -458,6 +458,40 @@ class DockerLauncher:
             self.logger.warning(f"Failed to check Docker image: {e}")
             return False
 
+    def _docker_workspace_root(self, docker_cmd: list[str]) -> str:
+        """Convert repo_root to a WSL mount path when launching via ``wsl docker``."""
+        repo_root_str = str(self.repo_root)
+        if "wsl" not in docker_cmd:
+            return repo_root_str
+        match = re.match(r"^([a-zA-Z]):(.*)", repo_root_str)
+        if match:
+            drive = match.group(1).lower()
+            path_part = match.group(2).replace("\\", "/")
+            return f"/mnt/{drive}{path_part}"
+        return repo_root_str.replace("\\", "/")
+
+    @staticmethod
+    def _display_args() -> list[str]:
+        """Build host-OS display environment and X11 mount flags for Docker GUI apps."""
+        if os.name == "nt":
+            return [
+                "-e",
+                "DISPLAY=host.docker.internal:0",
+                "-e",
+                "MUJOCO_GL=glfw",
+                "-e",
+                "PYOPENGL_PLATFORM=glx",
+                "-e",
+                "QT_QPA_PLATFORM=xcb",
+            ]
+        disp = os.environ.get("DISPLAY", ":0")
+        return [
+            "-e",
+            f"DISPLAY={disp}",
+            "-v",
+            "/tmp/.X11-unix:/tmp/.X11-unix",  # nosec B108 - Docker X11 socket mount
+        ]
+
     def build_launch_command(
         self,
         model_type: str,
@@ -483,18 +517,10 @@ class DockerLauncher:
             raise ValueError("model_type must be provided")
 
         resolved_name = container_name or self._make_container_name(model_type)
+        docker_cmd = get_docker_cmd()
+        repo_root_str = self._docker_workspace_root(docker_cmd)
 
-        repo_root_str = str(self.repo_root)
-        if "wsl" in get_docker_cmd():
-            match = re.match(r"^([a-zA-Z]):(.*)", repo_root_str)
-            if match:
-                drive = match.group(1).lower()
-                path_part = match.group(2).replace("\\", "/")
-                repo_root_str = f"/mnt/{drive}{path_part}"
-            else:
-                repo_root_str = repo_root_str.replace("\\", "/")
-
-        cmd = get_docker_cmd() + [
+        cmd = docker_cmd + [
             "run",
             "--rm",
             "--name",
@@ -508,53 +534,23 @@ class DockerLauncher:
             "-e",
             "PYTHONPATH=/workspace:/workspace/src:/workspace/src/shared/python",
         ]
+        cmd.extend(self._display_args())
 
-        # Display configuration for GUI apps
-        if os.name == "nt":  # Windows
-            cmd.extend(
-                [
-                    "-e",
-                    "DISPLAY=host.docker.internal:0",
-                    "-e",
-                    "MUJOCO_GL=glfw",
-                    "-e",
-                    "PYOPENGL_PLATFORM=glx",
-                    "-e",
-                    "QT_QPA_PLATFORM=xcb",
-                ]
-            )
-        else:  # Linux
-            disp = os.environ.get("DISPLAY", ":0")
-            cmd.extend(
-                [
-                    "-e",
-                    f"DISPLAY={disp}",
-                    "-v",
-                    "/tmp/.X11-unix:/tmp/.X11-unix",  # nosec B108 - Docker X11 socket mount
-                ]
-            )
-
-        # GPU Support
         if use_gpu:
             cmd.extend(["--gpus=all"])
 
-        # Port mapping for MeshCat (Drake/Pinocchio)
         if model_type in ("drake", "pinocchio"):
             cmd.extend(["-p", f"{host_port}:7000", "-e", "MESHCAT_HOST=0.0.0.0"])  # nosec: Docker container networking requires 0.0.0.0
 
-        # Working Directory
         work_dir = (
             f"/workspace/{repo_path.parent.relative_to(self.repo_root).as_posix()}"
         )
         cmd.extend(["-w", work_dir])
 
-        # Python command - determine correct launch command based on model type
         if model_type == "drake":
             cmd.extend([self.image_name, "python", "-m", "src.drake_gui_app"])
         elif model_type == "pinocchio":
             cmd.extend([self.image_name, "python", "pinocchio_golf/gui.py"])
-        elif model_type in ("custom_humanoid", "custom_dashboard"):
-            cmd.extend([self.image_name, "python", repo_path.name])
         else:
             cmd.extend([self.image_name, "python", repo_path.name])
 

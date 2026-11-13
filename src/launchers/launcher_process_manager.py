@@ -27,7 +27,7 @@ import sys
 import tempfile
 import threading
 from collections.abc import Callable
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import TYPE_CHECKING
 
 from src.shared.python.core.process_safety import narrow_catch
@@ -1014,7 +1014,7 @@ class ProcessManager:
             f"python {quoted_wsl_script}\n"
         )
         cmd = ["wsl", "-d", distro, "--", "bash", "-c", wsl_cmd]
-        key = name or Path(script_path).stem or script_path
+        key = name or PureWindowsPath(script_path).stem or script_path
         return self._spawn_wsl_process(key, cmd, f"Launching in WSL: {script_path}")
 
     def launch_module_in_wsl(
