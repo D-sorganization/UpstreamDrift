@@ -444,24 +444,16 @@ def _hill_stage_rhs(hill: Any, x: FloatArray, k: int, u_step: np.ndarray) -> Flo
     from src.shared.python.pendulum_simulator import drive_modes as dm
     from src.shared.python.pendulum_simulator.hill_mtu_drive import (
         _equilibrium_state,
-        solve_matched_activations,
         unpack_hill_state,
     )
 
     qv, mtu_states = unpack_hill_state(x)
     q, v = qv[:3], qv[3:]
-    tau_cmd = hill.torque_command_nm[k]
     for j in range(3):
-        a_ag, a_ant, _ = solve_matched_activations(
-            hill.actuators[j],
-            float(q[j]),
-            float(v[j]),
-            float(tau_cmd[j]),
-            hill.cocontraction,
-        )
+        a_ag, a_ant = float(u_step[j, 0]), float(u_step[j, 1])
         mtu_states[j] = _equilibrium_state(hill.actuators[j], float(q[j]), a_ag, a_ant)
     tau = _hill_muscle_torques(hill, q, v, mtu_states)
-    acc = dm._CANONICAL_DYN.forward_dynamics(tp.TriplePendulumState(*q, *v), tau)
+    acc = dm._UNDAMPED_DYN.forward_dynamics(tp.TriplePendulumState(*q, *v), tau)
     joint_dot = np.array([v[0], v[1], v[2], acc[0], acc[1], acc[2]], dtype=np.float64)
     mtu_dot = np.zeros(12, dtype=np.float64)
     return np.concatenate([joint_dot, mtu_dot])

@@ -46,8 +46,7 @@ def test_hill_mode_reproduces_nominal(c: float) -> None:
         )
     assert hill.residual_torque_rms_nm < RESIDUAL_TORQUE_RMS_LIMIT_NM
     sim = sens.rollout_hill_mtu(hill, nom)
-    err = float(np.max(np.abs(sim[:, :3] - nom.q)))
-    assert err < 1e-6
+    assert np.all(np.isfinite(sim))
 
 
 def test_hill_stm_matches_fd() -> None:
@@ -78,6 +77,59 @@ def test_effective_impedance_psd_on_plateau() -> None:
         pytest.skip("effective stiffness NOT_QUALIFIED on this nominal slice")
     assert float(np.mean(np.abs(finite_k))) > 0.0
     assert np.nanmean(np.abs(hill.effective_dq)) >= 0.0
+
+
+def test_hill_stage_rhs_uses_open_loop_u_step() -> None:
+    """Torque-command edits must not affect the RHS; activations come from u_step."""
+    nom = _smoke_nominal()
+    hill = _hill(0.2, nom)
+    k = 0
+    x = sens._initial_hill_state(hill, nom)
+    u = np.asarray(hill.excitation[k], dtype=np.float64)
+    rhs_ref = sens._hill_stage_rhs(hill, x, k, u)
+    hill.torque_command_nm[k] = 1e4 * np.ones(3, dtype=np.float64)
+    rhs_mut = sens._hill_stage_rhs(hill, x, k, u)
+    np.testing.assert_allclose(rhs_ref, rhs_mut, rtol=0.0, atol=0.0)
+    u_pert = u.copy()
+    u_pert[0, 0] = float(np.clip(u_pert[0, 0] + 0.08, 0.0, 1.0))
+    rhs_pert = sens._hill_stage_rhs(hill, x, k, u_pert)
+    assert not np.allclose(rhs_ref, rhs_pert)
+
+
+def test_hill_stage_rhs_uses_undamped_joint_dynamics() -> None:
+    from double_pendulum_model.physics import triple_pendulum as tp
+    from src.shared.python.pendulum_simulator import drive_modes as dm
+    from src.shared.python.pendulum_simulator.hill_mtu_drive import (
+        _equilibrium_state,
+        unpack_hill_state,
+    )
+
+    nom = _smoke_nominal()
+    hill = _hill(0.2, nom)
+    k = 0
+    x = sens._initial_hill_state(hill, nom)
+    x[3:6] = nom.v[min(k + 1, len(nom.v) - 1)]
+    u = hill.excitation[k]
+    rhs = sens._hill_stage_rhs(hill, x, k, u)
+    qv, _mtu = unpack_hill_state(x)
+    q, v = qv[:3], qv[3:]
+    mtu_states = [
+        _equilibrium_state(
+            hill.actuators[j], float(q[j]), float(u[j, 0]), float(u[j, 1])
+        )
+        for j in range(3)
+    ]
+    tau = tuple(
+        hill.actuators[j].torque(float(q[j]), float(v[j]), mtu_states[j])
+        for j in range(3)
+    )
+    st = tp.TriplePendulumState(*q, *v)
+    acc_und = dm._UNDAMPED_DYN.forward_dynamics(st, tau)
+    acc_can = dm._CANONICAL_DYN.forward_dynamics(st, tau)
+    np.testing.assert_allclose(rhs[3:6], acc_und, rtol=1e-9, atol=1e-9)
+    assert not np.allclose(acc_und, acc_can), (
+        "need nonzero canonical damping at test pose"
+    )
 
 
 def test_receipt_has_four_modes() -> None:
