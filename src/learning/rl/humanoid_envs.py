@@ -46,6 +46,9 @@ class HumanoidWalkEnv(RoboticsGymEnv):
         action_config: ActionConfig | None = None,
         reward_config: RewardConfig | None = None,
         render_mode: str | None = None,
+        *,
+        base_height_threshold: float = 0.3,
+        base_tilt_threshold: float = 0.8,
     ) -> None:
         """Initialize humanoid walking environment.
 
@@ -57,6 +60,8 @@ class HumanoidWalkEnv(RoboticsGymEnv):
             action_config: Action configuration.
             reward_config: Reward configuration.
             render_mode: Render mode.
+            base_height_threshold: Pelvis fall cutoff [m] (~1.7 m adult nominal = 0.3 m).
+            base_tilt_threshold: Upright cos(tilt) cutoff (dimensionless, default 0.8).
         """
         # Create task config for walking
         if engine is None:
@@ -78,9 +83,9 @@ class HumanoidWalkEnv(RoboticsGymEnv):
             render_mode=render_mode,
         )
 
-        # Walking specific state
-        self._base_height_threshold = 0.3  # Minimum height before termination
-        self._base_tilt_threshold = 0.8  # Max tilt (cos angle from vertical)
+        # Walking termination cutoffs calibrated to a ~1.7 m adult humanoid model.
+        self._base_height_threshold = base_height_threshold
+        self._base_tilt_threshold = base_tilt_threshold
 
     def _apply_action(self, action: NDArray[np.floating]) -> None:
         """Apply joint torques or positions to humanoid."""
@@ -251,6 +256,9 @@ class HumanoidStandEnv(RoboticsGymEnv):
         action_config: ActionConfig | None = None,
         reward_config: RewardConfig | None = None,
         render_mode: str | None = None,
+        *,
+        base_height_threshold: float = 0.3,
+        target_height: float = 0.9,
     ) -> None:
         """Initialize humanoid standing environment.
 
@@ -262,6 +270,8 @@ class HumanoidStandEnv(RoboticsGymEnv):
             action_config: Action configuration.
             reward_config: Reward configuration.
             render_mode: Render mode.
+            base_height_threshold: Pelvis fall cutoff [m] (~1.7 m adult nominal = 0.3 m).
+            target_height: Target standing pelvis height [m] (~1.7 m adult nominal = 0.9 m).
         """
         if engine is None:
             raise ValueError("engine must be provided")
@@ -283,8 +293,8 @@ class HumanoidStandEnv(RoboticsGymEnv):
         )
 
         self._perturbation_force = perturbation_force
-        self._base_height_threshold = 0.3
-        self._target_height = 0.9  # Standing height
+        self._base_height_threshold = base_height_threshold
+        self._target_height = target_height
 
     def _apply_action(self, action: NDArray[np.floating]) -> None:
         """Apply joint control to humanoid."""
@@ -331,6 +341,12 @@ class HumanoidStandEnv(RoboticsGymEnv):
         if self.obs_config.include_joint_vel:
             qd = self.engine.get_joint_velocities()
             obs_parts.append(qd)
+
+        if self.obs_config.include_joint_torque:
+            obs_parts.append(self.engine.get_joint_torques())
+
+        if self.obs_config.include_contact_forces:
+            obs_parts.append(self.engine.get_contact_forces())
 
         if self.obs_config.include_imu:
             imu = self.engine.get_imu_data()

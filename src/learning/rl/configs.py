@@ -42,6 +42,8 @@ class ObservationConfig:
         include_ee_pos: Include end-effector positions.
         include_ee_vel: Include end-effector velocities.
         include_contact_forces: Include contact force readings.
+        contact_force_dim: Expected contact-force vector length when
+            ``include_contact_forces`` is enabled (0 lets the env query engine).
         include_imu: Include IMU sensor data.
         include_privileged: Include privileged info (for teacher policies).
         position_noise_std: Standard deviation of position noise.
@@ -55,6 +57,7 @@ class ObservationConfig:
     include_ee_pos: bool = False
     include_ee_vel: bool = False
     include_contact_forces: bool = False
+    contact_force_dim: int = 0
     include_imu: bool = False
     include_privileged: bool = False
 
@@ -65,29 +68,47 @@ class ObservationConfig:
     # History
     history_length: int = 1
 
-    def get_obs_dim(self, n_joints: int, n_ee: int = 0) -> int:
+    def get_obs_dim(
+        self,
+        n_joints: int,
+        n_ee: int = 0,
+        *,
+        n_vel: int | None = None,
+        n_actuators: int | None = None,
+        contact_force_dim: int | None = None,
+    ) -> int:
         """Calculate observation dimension based on config.
 
         Args:
-            n_joints: Number of joints in the robot.
+            n_joints: Configuration position dimension (``n_q``).
             n_ee: Number of end-effectors.
+            n_vel: Generalized velocity dimension (``n_v``; defaults to ``n_joints``).
+            n_actuators: Actuated joint torque dimension (defaults to ``n_vel``).
+            contact_force_dim: Contact-force vector length when enabled.
 
         Returns:
             Total observation dimension.
         """
         if n_joints is None:
             raise ValueError("n_joints must be provided")
+        vel_dim = n_joints if n_vel is None else n_vel
+        act_dim = vel_dim if n_actuators is None else n_actuators
+        cf_dim = (
+            self.contact_force_dim if contact_force_dim is None else contact_force_dim
+        )
         dim = 0
         if self.include_joint_pos:
             dim += n_joints
         if self.include_joint_vel:
-            dim += n_joints
+            dim += vel_dim
         if self.include_joint_torque:
-            dim += n_joints
+            dim += act_dim
         if self.include_ee_pos:
             dim += n_ee * 3
         if self.include_ee_vel:
             dim += n_ee * 6
+        if self.include_contact_forces:
+            dim += cf_dim
         if self.include_imu:
             dim += 6  # 3 accel + 3 gyro
         return dim * self.history_length
