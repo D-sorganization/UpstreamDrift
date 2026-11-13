@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -112,3 +113,34 @@ def test_get_running_processes_legacy_manager_fallback(tmp_path: Path) -> None:
         "Legacy Engine": {"pid": 777, "running": True, "exit_code": None}
     }
     proc.poll.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    ("kill_return", "expected"),
+    [
+        (True, True),
+        (False, False),
+        (MagicMock(), True),
+    ],
+)
+def test_stop_process_returns_strict_bool(
+    tmp_path: Path, kill_return: object, expected: bool
+) -> None:
+    """stop_process() must return a strict bool matching kill_process_tree truthiness."""
+    service = LauncherService(repo_root=tmp_path)
+    proc = MagicMock(pid=1234)
+    running_processes = {"proc": proc}
+    service._process_manager = MagicMock(running_processes=running_processes)
+
+    mock_module = MagicMock()
+    mock_module.kill_process_tree.return_value = kill_return
+
+    with patch.dict(
+        sys.modules, {"src.shared.python.security.subprocess_utils": mock_module}
+    ):
+        result = service.stop_process("proc")
+
+    assert result is expected
+    assert type(result) is bool
+    mock_module.kill_process_tree.assert_called_once_with(1234)
+    assert "proc" not in running_processes
