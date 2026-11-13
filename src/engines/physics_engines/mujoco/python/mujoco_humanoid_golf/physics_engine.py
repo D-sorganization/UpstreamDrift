@@ -623,7 +623,10 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
         """Compute control-attributed acceleration from applied torques only.
 
-        Section F Implementation: Computes M(q)^-1 * tau to isolate control component.
+        Section F: control is the increment of constrained forward dynamics over
+        ZTCF at the same state: ``a_control = a_full(τ) - a_drift``. This matches
+        the unconstrained ``M^-1 τ`` only when no equality constraints or contacts
+        are active.
 
         Args:
             tau: Applied generalized forces (nv,) [N·m or N]
@@ -636,13 +639,39 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
         if self.model is None or self.data is None:
             return np.array([])
 
-        # Get mass matrix
-        M = self.compute_mass_matrix()
+        tau_arr = np.asarray(tau, dtype=float).reshape(-1)
+        if len(tau_arr) != self.model.nv:
+            raise ValueError(
+                f"tau must have {self.model.nv} entries, got {len(tau_arr)}"
+            )
 
-        # Control component: M^-1 * tau
-        a_control = np.linalg.solve(M, tau)
+        a_drift = self.compute_affine_drift()
+        a_full = self._constrained_forward_acceleration(tau_arr)
+        return cast(np.ndarray, a_full - a_drift)
 
-        return a_control
+    def _constrained_forward_acceleration(
+        self, generalized_force: np.ndarray | None
+    ) -> np.ndarray:
+        """MuJoCo forward ``qacc`` with actuation and external loads cleared."""
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        saved_ctrl = self.data.ctrl.copy()
+        saved_qfrc = self.data.qfrc_applied.copy()
+        saved_xfrc = self.data.xfrc_applied.copy()
+        try:
+            self.data.ctrl[:] = 0.0
+            self.data.qfrc_applied[:] = 0.0
+            self.data.xfrc_applied[:] = 0.0
+            if generalized_force is not None:
+                self.data.qfrc_applied[:] = generalized_force
+            mujoco.mj_forward(self.model, self.data)
+            return self.data.qacc.copy()
+        finally:
+            self.data.ctrl[:] = saved_ctrl
+            self.data.qfrc_applied[:] = saved_qfrc
+            self.data.xfrc_applied[:] = saved_xfrc
+            mujoco.mj_forward(self.model, self.data)
 
     def compute_affine_drift(self) -> np.ndarray:
         """Compute the 'Drift' vector f(q, qdot).
@@ -656,21 +685,7 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
         if self.model is None or self.data is None:
             return np.array([])
 
-        # Save current control
-        saved_ctrl = self.data.ctrl.copy()
-
-        # Zero out control
-        self.data.ctrl[:] = 0
-
-        # Compute forward dynamics
-        mujoco.mj_forward(self.model, self.data)
-        drift_acc = self.data.qacc.copy()
-
-        # Restore control
-        self.data.ctrl[:] = saved_ctrl
-        mujoco.mj_forward(self.model, self.data)  # Restore state
-
-        return cast(np.ndarray, drift_acc)
+        return cast(np.ndarray, self._constrained_forward_acceleration(None))
 
     # -------- Section 4: Jacobian Analysis --------
 
@@ -808,14 +823,18 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
         saved_qpos = self.data.qpos.copy()
         saved_qvel = self.data.qvel.copy()
         saved_ctrl = self.data.ctrl.copy()
+        saved_qfrc = self.data.qfrc_applied.copy()
+        saved_xfrc = self.data.xfrc_applied.copy()
 
         try:
             # Set to counterfactual state
             self.data.qpos[:] = q
             self.data.qvel[:] = v
 
-            # Zero out control (ZTCF: zero torque)
+            # ZTCF: zero actuation and external generalized loads
             self.data.ctrl[:] = 0
+            self.data.qfrc_applied[:] = 0
+            self.data.xfrc_applied[:] = 0
 
             # Compute forward dynamics with zero control
             mujoco.mj_forward(self.model, self.data)
@@ -830,58 +849,71 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
             self.data.qpos[:] = saved_qpos
             self.data.qvel[:] = saved_qvel
             self.data.ctrl[:] = saved_ctrl
+            self.data.qfrc_applied[:] = saved_qfrc
+            self.data.xfrc_applied[:] = saved_xfrc
             mujoco.mj_forward(self.model, self.data)
 
-    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
-
-        Compute acceleration at fixed configuration with joint velocities and
-        declared applied control set to zero.
-
-        **Purpose**: Answer "What acceleration would occur if motion FROZE
-        instantaneously?"
-
-        **Physics**: With v=0, acceleration has no velocity-dependent terms:
-            q̈_ZVCF = M(q)⁻¹ · (J^T·λ₀₀ - g(q))
-            (λ₀₀: constraint reactions recomputed under v = 0, τ = 0)
-
-        Args:
-            q: Joint positions (n_q,) [rad or m]
-
-        Returns:
-            q̈_ZVCF: Acceleration with v=0 and u=0 (n_v,) [rad/s² or m/s²]
-        """
+    def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:
+        """Legacy gravity-only diagnostic at ``v = u = 0`` (not SPEC §4 ZVCF)."""
         if q is None:
             raise ValueError("q must be provided")
         if self.model is None or self.data is None:
             return np.array([])
 
-        # Save current state
         saved_qpos = self.data.qpos.copy()
         saved_qvel = self.data.qvel.copy()
         saved_ctrl = self.data.ctrl.copy()
 
         try:
-            # Set to counterfactual configuration with v=0
             self.data.qpos[:] = q
-            self.data.qvel[:] = 0  # ZVCF: zero velocity
-            self.data.ctrl[:] = 0  # ZVCF: zero declared applied control
-
-            # Compute forward dynamics with zero velocity
+            self.data.qvel[:] = 0
+            self.data.ctrl[:] = 0
             mujoco.mj_forward(self.model, self.data)
-            self.data.qvel[:] = 0  # #7979
-
-            # Extract acceleration
-            a_zvcf = self.data.qacc.copy()
-
-            return cast(np.ndarray, a_zvcf)
-
+            self.data.qvel[:] = 0
+            return cast(np.ndarray, self.data.qacc.copy())
         finally:
-            # Restore original state
             self.data.qpos[:] = saved_qpos
             self.data.qvel[:] = saved_qvel
             self.data.ctrl[:] = saved_ctrl
             mujoco.mj_forward(self.model, self.data)
+
+    def compute_control_acceleration_at_state(
+        self, q: np.ndarray, tau: np.ndarray
+    ) -> np.ndarray:
+        """SPEC §4 ZVCF control component via MuJoCo counterfactual kernel (#14943)."""
+        if q is None or tau is None:
+            raise ValueError("q and tau must be provided")
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        saved_qpos = self.data.qpos.copy()
+        saved_qvel = self.data.qvel.copy()
+        saved_ctrl = self.data.ctrl.copy()
+        try:
+            self.data.qpos[:] = q
+            self.data.qvel[:] = 0
+            tau_arr = np.asarray(tau, dtype=float).reshape(-1)
+            if tau_arr.size != self.model.nv:
+                raise ValueError(
+                    f"tau must have {self.model.nv} entries, got {tau_arr.size}"
+                )
+            self.data.ctrl[:] = 0
+            mujoco.mj_forward(self.model, self.data)
+            mass = full_mass_matrix(mujoco, self.model, self.data)
+            return cast(np.ndarray, np.linalg.solve(mass, tau_arr))
+        finally:
+            self.data.qpos[:] = saved_qpos
+            self.data.qvel[:] = saved_qvel
+            self.data.ctrl[:] = saved_ctrl
+            mujoco.mj_forward(self.model, self.data)
+
+    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
+        """Deprecated shim → :meth:`compute_gravity_only_acceleration` (#14943)."""
+        from src.shared.python.engine_core.counterfactual_defaults import (
+            deprecated_compute_zvcf_shim,
+        )
+
+        return deprecated_compute_zvcf_shim(self, q)
 
     # -------- Section B5: Flexible Beam Shaft --------
 

@@ -24,10 +24,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14934
 - **Branch:** agy/6004-syngas-water-router-pair
-- **PR:** #14976, #14985, #14990
+- **PR:** #14976, #14985, #14990, #14995
 - **Paths:** see #14976
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`91dabc7d`; collated from changes/14934-syngas-nonfinite-and-vocabulary.md)
+- **Last verified:** 2026-11-10 (`71515bb6`; collated from changes/14934-default-true-removal.md)
 - **Summary:** Fix syngas water unit conversions and router fallback on 60F_14.696psia basis (paired with Tools#6009)
 - **Next step:** Merge the PR.
 
@@ -811,8 +811,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Paths:** scripts/ci/run_native_engine_lane.py; scripts/ci/run_native_engine_lane.sh; docs/development/matched_swing_program/evidence/nightly/; tests/docs/test_native_lane_freshness.py; tests/scripts/test_run_native_engine_lane.py
 - **Started:** 2026-09-21
 - **Last verified:** 2026-10-11 at e68baeabde8f (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** Added idempotent native-engine lane runner emitting hashed nightly receipts for OpenSim and MyoSuite (`requires_opensim` / `requires_myosuite` pytest markers), freshness gate warning at seven days and failing at thirty days, and ControlTower verification docs without editing `.github/workflows`.
-- **Next step:** Refresh receipts on ControlTower opensim-10003 venv; merge PR closing #10342.
+- **Summary:** Added idempotent native-engine lane runner emitting hashed nightly receipts for OpenSim and MyoSuite (`requires_opensim` / `requires_myosuite` pytest markers), freshness gate warning at seven days and failing at thirty days, and fleet native-host verification docs without editing `.github/workflows`.
+- **Next step:** Refresh receipts on the fleet native host opensim-10003 venv; merge PR closing #10342.
 - **Evidence:** docs/development/matched_swing_program/evidence/nightly/opensim_receipt.json; docs/development/matched_swing_program/evidence/nightly/myosuite_receipt.json; tests/docs/test_native_lane_freshness.py.
 
 ### DL-#9162 · Local Branch Triage
@@ -897,6 +897,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Next step:** Follow COMPLETION_HANDOFF_20260916.md: restore clean-runtime native providers, coordinate #10260 finite-weld derivative qualification, produce articulated feasibility evidence, fit0.90 s and deliver repeatable reports. Run102 remains rejected; no new compute launched by this review.
 
 ## Shipped (Last 90 Days)
+
+### DL-#15020 · Register Ud-Sim-Mcp Console Script, Generated Capability Inventory, and Agent API Auth Docs.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15020
+- **Branch:** merged via #15023
+- **PR:** #15023
+- **Paths:** see #15023
+- **Started:** 2026-11-11
+- **Last verified:** 2026-11-11 (`972404f4`; collated from changes/15020-register-ud-sim-mcp-console-script-gener.md)
+- **Summary:** Register ud-sim-mcp console script, generated capability inventory, and Agent API auth docs.
+- **Next step:** Shipped in PR #15023.
+
+### DL-#14940 · AIP JSON-RPC Stubs Return Not_Implemented; Capabilities Self-Check (#14940).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14940
+- **Branch:** merged via #15000
+- **PR:** #15000
+- **Paths:** see #15000
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`fdc7985e`; collated from changes/14940-aip-json-rpc-stubs-return-not-implemente.md)
+- **Summary:** AIP JSON-RPC stubs return not_implemented; capabilities self-check (#14940).
+- **Next step:** Shipped in PR #15000.
+
+### DL-#14937 · BallFlightSimulator Reports Per-Step Forces From the Rust Integrator With Legacy Post-Hoc Path Tagged
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14937
+- **Branch:** merged via #14962
+- **PR:** #14962
+- **Paths:** see #14962
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`a423e0d2`; collated from changes/14937-ballflightsimulator-reports-per-step-for.md)
+- **Summary:** BallFlightSimulator reports per-step forces from the Rust integrator with legacy post-hoc path tagged
+- **Next step:** Shipped in PR #14962.
 
 ### DL-#14943 · CounterfactualKind/Result, Simscape/Putting Defaults, Conformance (#14943 Slices 1–4)
 
@@ -995,10 +1034,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14950
 - **Branch:** merged via #14958
-- **PR:** #14958, #14967
+- **PR:** #14958, #14967, #15001
 - **Paths:** see #14958
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`ee8519a3`; collated from changes/14950-simulation-ws-error-frame-handling-and-i.md)
+- **Last verified:** 2026-11-10 (`6a566a98`; collated from changes/14950-sim-run-lifecycle-reducer.md)
 - **Summary:** Simulation WS error frame handling and isPaused reset on stop (Part of #14950).
 - **Next step:** Shipped in PR #14958.
 
@@ -3051,7 +3090,7 @@ Earlier Methods V8 and the five-page extraction report remain unchanged.
 
 See [Application Procedure](necromatcher-replay-impact.md) and its linked review/report. Tiger stays
 within original frames 0–190 ([0,191)); Hogan stays [0,750). No historical
-Library mutation, qualified match or new ControlTower delivery is established.
+Library mutation, qualified match or new fleet-native-host delivery is established.
 Remaining goal work includes improved historical matching, authored dynamics,
 simulation golf integration and desktop parity. The full goal remains active.
 
@@ -3076,7 +3115,7 @@ The three-page Native Desktop Supplement 1 and editable LaTeX, screenshots and
 intact synthetic bundle are saved on the local Desktop. See [Procedure](necromatcher-replay-impact.md)
 and [Frozen Review](historical_capture/native-desktop-replay-impact-review.json). Tiger remains [0,191), Hogan [0,750).
 Historical fits, scientific qualification, simulation golf and final overall
-desktop parity acceptance remain open. No new ControlTower delivery or remote
+desktop parity acceptance remain open. No new fleet-native-host delivery or remote
 CI-green claim is made. The full goal remains active.
 
 ## Local Research Admission Race Follow-Up — #11493

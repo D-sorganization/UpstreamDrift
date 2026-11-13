@@ -48,6 +48,8 @@ ALLOWLIST: frozenset[str] = frozenset(
         "install.sh",
         "VERSION",
         "sidekick.spec",
+        # Agent / LLM discovery index for ud-sim-mcp (#15022).
+        "llms.txt",
     }
 )
 

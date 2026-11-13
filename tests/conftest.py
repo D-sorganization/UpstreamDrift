@@ -1507,13 +1507,14 @@ def pytest_runtest_makereport(
     if not report.skipped:
         return
 
-    from src.shared.python.engine_core.engine_lane_guard import (
-        enforce_required_engine_skip_guard,
-    )
+    if os.environ.get("UD_REQUIRE_ENGINES", "").strip():
+        from src.shared.python.engine_core.engine_lane_guard import (
+            enforce_required_engines_on_report,
+        )
 
-    enforce_required_engine_skip_guard(item, report)
-    if not report.skipped:
-        return
+        enforce_required_engines_on_report(report, nodeid=item.nodeid, item=item)
+        if not report.skipped:
+            return
 
     longrepr = report.longrepr
     reason = ""

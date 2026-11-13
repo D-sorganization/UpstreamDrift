@@ -119,7 +119,7 @@ shadows:
   # green CI on 2026-11-10 UTC by aligning sunset_date with the Q4 baseline.
   realtime:
     tracking_issue: 12046
-    sunset_date: "2026-12-31"
+    sunset_date: "2026-12-10"
 
   # ── ADR-0046 Stage 1 canonical launch-monitor layer — CLEARED 2026-09-02 ──
   #
