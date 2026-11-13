@@ -119,6 +119,13 @@ def compute_ztcf(self, q, v) -> np.ndarray:
         self.data.qvel[:] = saved_qvel
         self.data.ctrl[:] = saved_ctrl
         mujoco.mj_forward(self.model, self.data)
+
+
+# Canonical SPEC §4 ZVCF evaluates M(q)^{-1} * tau via
+# compute_control_acceleration_at_state(q, tau) (with qvel=0 and gravity off).
+# The deprecated legacy compute_zvcf(q) shim delegates to
+# compute_gravity_only_acceleration(q) (setting qvel = 0 and ctrl[:] = 0, then
+# restoring saved state and controls).
 ```
 
 ### 6.2.5 Flexible Shaft
