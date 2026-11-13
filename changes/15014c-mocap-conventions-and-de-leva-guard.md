@@ -1,0 +1,1 @@
+- Issue #15014c: Guard cross-repo `humanoid_character_builder` imports in `anthropometrics`, fix Zatsiorsky living-subject description and model-geometry inertia note in `docs/user_guide/anthropometrics.md`, distinguish intrinsic-XYZ vs Drake `RollPitchYaw` / `DrakeNativeState`, and document the 6 Hz gait-analysis filter default in `apply_filter`.

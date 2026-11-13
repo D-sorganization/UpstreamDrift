@@ -21,13 +21,13 @@ from.
 
 ## A. Convention matrix
 
-| Engine    | Pelvis prefix in `q`                | Joint units | Quat order | Sign-flip gotchas                                                  |
-| --------- | ----------------------------------- | ----------- | ---------- | ------------------------------------------------------------------ |
-| Drake     | `[x, y, z, roll, pitch, yaw]` (rad) | rad         | n/a (RPY)  | URDF axes occasionally mirror canonical Y; tracked per joint slot. |
-| MuJoCo    | `[x, y, z, qw, qx, qy, qz]`         | rad         | **wxyz**   | Free-joint quaternion is **w-first**.                              |
-| Pinocchio | `[x, y, z, qx, qy, qz, qw]`         | rad         | **xyzw**   | Free-flyer quaternion is **w-last** — the opposite of MuJoCo.      |
-| OpenSim   | `[x, y, z, rotX, rotY, rotZ]` (deg) | deg         | n/a (XYZ)  | Several `.osim` models invert Y for shoulder external rotation.    |
-| Simscape  | `[x, y, z, rot_x, rot_y, rot_z]`    | deg         | n/a (XYZ)  | Torso-twist joint between spine and hub (see AGENTS.md §G).        |
+| Engine    | Pelvis prefix in `q`                              | Joint units | Quat order                        | Sign-flip gotchas                                                             |
+| --------- | ------------------------------------------------- | ----------- | --------------------------------- | ----------------------------------------------------------------------------- |
+| Drake     | `[x, y, z, rot_x, rot_y, rot_z]` (rad, chain XYZ) | rad         | n/a / `wxyz` (`DrakeNativeState`) | Distinct from `RollPitchYaw`; see §C. URDF axes may mirror Y via `JointSlot`. |
+| MuJoCo    | `[x, y, z, qw, qx, qy, qz]`                       | rad         | **wxyz**                          | Free-joint quaternion is **w-first**.                                         |
+| Pinocchio | `[x, y, z, qx, qy, qz, qw]`                       | rad         | **xyzw**                          | Free-flyer quaternion is **w-last** — the opposite of MuJoCo.                 |
+| OpenSim   | `[x, y, z, rotX, rotY, rotZ]` (deg)               | deg         | n/a (XYZ)                         | Several `.osim` models invert Y for shoulder external rotation.               |
+| Simscape  | `[x, y, z, rot_x, rot_y, rot_z]`                  | deg         | n/a (XYZ)                         | Torso-twist joint between spine and hub (see AGENTS.md §G).                   |
 
 The `JointSlot` dataclass in
 `src/shared/python/pose_interchange/protocol.py` captures these per
@@ -59,9 +59,13 @@ when reading raw `.osim` / `.sto` files outside the tool.
 
 Three flavours:
 
-1. **6-DOF Euler** (Drake, OpenSim, Simscape):
-   `[x, y, z, rot_x, rot_y, rot_z]` — six floats. Drake is in
-   radians, OpenSim and Simscape in degrees.
+1. **6-DOF Euler** (Drake revolute-chain adapter, OpenSim, Simscape):
+   `[x, y, z, rot_x, rot_y, rot_z]` — six floats representing intrinsic XYZ
+   (`R = Rx * Ry * Rz`). OpenSim and Simscape use degrees. For Drake,
+   `DrakeAdapter` assumes an explicit `x->y->z` revolute chain in radians;
+   do **not** confuse this with Drake `RollPitchYaw` (`R = Rz * Ry * Rx`) or
+   Drake's native floating-base quaternion state `DrakeNativeState`
+   (`[qw, qx, qy, qz, x, y, z]` via `from_canonical_state` / `to_canonical_state`).
 2. **7-DOF, w-first quaternion** (MuJoCo):
    `[x, y, z, qw, qx, qy, qz]`.
 3. **7-DOF, w-last quaternion** (Pinocchio):
