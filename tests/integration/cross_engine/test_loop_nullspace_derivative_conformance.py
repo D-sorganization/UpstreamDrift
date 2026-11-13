@@ -78,8 +78,19 @@ from tests.integration.cross_engine.test_loop_nullspace_conformance import (  # 
     reference_adapter,
 )
 
-pytestmark = pytest.mark.integration
+pytestmark = [pytest.mark.integration, pytest.mark.requires_pinocchio]
 # ruff: noqa: F811 - the NSX-56 module fixtures are imported by name
+
+# Pinocchio is always the reference here.  Per-engine ``requires_*`` marks on
+# ``dpair`` would make ``UD_REQUIRE_ENGINES=mujoco`` (core CI) treat a missing
+# Pinocchio skip as a required-mujoco failure; engine availability is gated by
+# ``importorskip`` / ``require_real_module`` inside the fixtures instead.
+DERIV_OTHERS = (
+    pytest.param(EngineType.MUJOCO, id="mujoco"),
+    pytest.param(EngineType.MYOSUITE, id="myosuite"),
+    pytest.param(EngineType.DRAKE, id="drake"),
+    pytest.param(EngineType.OPENSIM, id="opensim"),
+)
 
 REGISTRY = DivergenceRegistry.from_yaml(
     Path(__file__).with_name("divergence_registry.yaml")
@@ -116,7 +127,7 @@ def _derivatives(adapter, named_q, named_v, tau, order, actuated):
     return res, named_derivatives(res, own, order, actuated), own
 
 
-@pytest.fixture(scope="module", params=OTHERS)
+@pytest.fixture(scope="module", params=DERIV_OTHERS)
 def dpair(request, reference_adapter, projected):
     """``DerivativePair`` of one engine against Pinocchio at one projected state."""
     engine = request.param
