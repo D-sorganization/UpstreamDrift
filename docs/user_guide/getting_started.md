@@ -5,6 +5,7 @@
 ```bash
 git clone https://github.com/D-sorganization/UpstreamDrift.git
 cd UpstreamDrift
+git submodule update --init --recursive vendor/ud-tools
 python -m pip install -e ".[dev]"
 ```
 

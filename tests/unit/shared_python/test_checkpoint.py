@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import unittest
+from dataclasses import replace
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -61,15 +62,17 @@ class MockCheckpointable:
 
     def save_checkpoint(self) -> StateCheckpoint:
         """Save current state into a checkpoint."""
-        return StateCheckpoint(
-            id=f"cp_{self.time}",
-            timestamp=self.time,
-            wall_time=0.0,
+        q = np.array([], dtype=float)
+        v = np.array([], dtype=float)
+        created = StateCheckpoint.create(
             engine_type=self.engine_type,
             engine_state={"val": self.current_state},
-            q=(),
-            v=(),
+            q=q,
+            v=v,
+            timestamp=self.time,
         )
+        # Stable per-simulation-time IDs (create() uses wall-clock ms and can collide).
+        return replace(created, id=f"cp_{self.time}")
 
     def restore_checkpoint(self, checkpoint: StateCheckpoint) -> None:
         """Restore state from a checkpoint."""
@@ -165,18 +168,14 @@ class TestBasePhysicsEngineCheckpoint(unittest.TestCase):
         self.assertEqual(cp.engine_state["t"], 1.5)
 
     def test_checkpoint_restore_checkpoint(self) -> None:
-        cp = StateCheckpoint(
-            id="restore_test",
+        q = np.array([3.0, 4.0])
+        v = np.array([0.3, 0.4])
+        cp = StateCheckpoint.create(
+            engine_type=self.engine.engine_type,
+            engine_state={"q": q, "v": v, "t": 2.0},
+            q=q,
+            v=v,
             timestamp=2.0,
-            wall_time=0.0,
-            engine_type="test",
-            engine_state={
-                "q": np.array([3.0, 4.0]),
-                "v": np.array([0.3, 0.4]),
-                "t": 2.0,
-            },
-            q=(3.0, 4.0),
-            v=(0.3, 0.4),
         )
         self.engine.restore_checkpoint(cp)
 
@@ -193,7 +192,7 @@ class TestBasePhysicsEngineCheckpoint(unittest.TestCase):
             id="partial_test",
             timestamp=3.0,
             wall_time=0.0,
-            engine_type="test",
+            engine_type=self.engine.engine_type,
             engine_state={},
             q=(),
             v=(),
