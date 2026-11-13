@@ -197,6 +197,11 @@ def _derivative(state: _State, sliding: bool, surface: SurfaceSpec) -> _State:
     x, y, vx, vy, surface_speed = state
     grad = surface.height.gradient(x, y)
     gx, gy = -_G * grad[0], -_G * grad[1]
+    # Solid-sphere rolling: spin-energy partition gives (5/7) g along the slope (#15010).
+    if not sliding:
+        _roll_g = 5.0 / 7.0
+        gx *= _roll_g
+        gy *= _roll_g
     speed = math.hypot(vx, vy)
     if speed <= 0.0:
         return (0.0, 0.0, gx, gy, 0.0)

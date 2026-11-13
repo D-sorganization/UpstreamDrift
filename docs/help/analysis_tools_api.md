@@ -273,14 +273,19 @@ The `notes` field on each citation qualifies the method:
   stretch-shortening cycle." Attached to `XFactorMetrics.methodology`.
 - Crunch Factor (`CITATION_CRUNCH_FACTOR`): "Lateral bend + axial rotation
   coupling metric." Attached to `CrunchFactorMetrics.methodology`.
-- Spinal Load Analysis (`CITATION_SPINAL_LOAD`): "Up to 8x body weight
-  compression; validated by Lindsay et al. (2002)." Attached to
-  `SpinalLoadResult.methodology`.
+- Spinal Load Analysis (`CITATION_SPINAL_LOAD`): Hosea et al. (1990) measured
+  peaks up to about 8× body weight (observational, not an injury threshold);
+  the default provider is a heuristic, not inverse dynamics. Attached to
+  `SpinalLoadResult.methodology`. See `SpinalLoadResult.method_limitations`.
 
 Two of the four citations carry no DOI in the source. That is a gap in the
 citation records, not an omission on this page: the record the code ships is
 what a report or audit log will carry, so no substitute identifier is supplied
 here.
+
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/theory-part1.html): *AffineDrift Theory Part I*.
 
 ## Limitations
 

@@ -17,9 +17,14 @@ from src.shared.python.engine_core.capabilities import (
 )
 from src.shared.python.engine_core.velocity_conventions import (
     CANONICAL_FLOATING_BASE_CONVENTION,
-    CANONICAL_VELOCITY_REPRESENTATION,
+    SPATIAL_WRENCH_REPRESENTATION,
     FloatingBaseConvention,
     VelocityRepresentation,
+)
+from src.shared.python.pose_interchange import se3
+from src.shared.python.pose_interchange.canonical_state import (
+    CONVENTION_TAG_V2,
+    CanonicalState,
 )
 from src.shared.python.simulation_backends.protocol import Trace
 
@@ -47,9 +52,9 @@ class JaxSimBackend:
         apis: _JaxSimApis | None = None,
         convention: FloatingBaseConvention = CANONICAL_FLOATING_BASE_CONVENTION,
     ) -> None:
-        if convention.velocity_representation != CANONICAL_VELOCITY_REPRESENTATION:
+        if convention.velocity_representation != SPATIAL_WRENCH_REPRESENTATION:
             raise ValueError(
-                "JaxSimBackend normalizes to the suite canonical convention"
+                "JaxSimBackend normalizes spatial wrenches to SPATIAL_WRENCH_REPRESENTATION"
             )
         self._apis = apis
         self._convention = convention
@@ -58,6 +63,7 @@ class JaxSimBackend:
         self._model_name = ""
         self._control: NDArray[np.float64] = np.zeros(0, dtype=np.float64)
         self._time = 0.0
+        self._canonical_acceleration: NDArray[np.float64] | None = None
 
     @property
     def model_name(self) -> str:
@@ -111,26 +117,33 @@ class JaxSimBackend:
         v = np.concatenate([base_angular, base_linear, joint_velocities])
         return q, v
 
+    def _validate_canonical_v2_qv_shapes(
+        self, q: np.ndarray, v: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
+        q_arr = np.asarray(q, dtype=np.float64)
+        v_arr = np.asarray(v, dtype=np.float64)
+        expected_q = 7 + self._dofs()
+        expected_v = 6 + self._dofs()
+        if q_arr.shape != (expected_q,):
+            raise ValueError(f"q must have shape ({expected_q},)")
+        if v_arr.shape != (expected_v,):
+            raise ValueError(f"v must have shape ({expected_v},)")
+        return q_arr, v_arr
+
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
         """Set generalized position and canonical generalized velocity."""
 
         self._require_loaded()
-        q = np.asarray(q, dtype=np.float64)
-        v = np.asarray(v, dtype=np.float64)
-        expected_q = 7 + self._dofs()
-        expected_v = 6 + self._dofs()
-        if q.shape != (expected_q,):
-            raise ValueError(f"q must have shape ({expected_q},)")
-        if v.shape != (expected_v,):
-            raise ValueError(f"v must have shape ({expected_v},)")
+        q_arr, v_arr = self._validate_canonical_v2_qv_shapes(q, v)
         self._data = self._build_data(
-            base_position=q[:3],
-            base_quaternion=q[3:7],
-            joint_positions=q[7:],
-            base_angular_velocity=v[:3],
-            base_linear_velocity=v[3:6],
-            joint_velocities=v[6:],
+            base_position=q_arr[:3],
+            base_quaternion=q_arr[3:7],
+            joint_positions=q_arr[7:],
+            base_angular_velocity=v_arr[:3],
+            base_linear_velocity=v_arr[3:6],
+            joint_velocities=v_arr[6:],
         )
+        self._canonical_acceleration = None
 
     def set_control(self, u: np.ndarray) -> None:
         """Store joint generalized forces for the next forward/step call."""
@@ -146,6 +159,67 @@ class JaxSimBackend:
 
         return self._time
 
+    def get_canonical_state(self) -> CanonicalState:
+        """Export ADR-0026 ``canonical-v2`` dynamic state (#14936)."""
+
+        self._require_loaded()
+        q, v = self._canonical_v2_qv_from_data()
+        if self._canonical_acceleration is None:
+            a = np.zeros_like(v)
+        else:
+            a = self._canonical_acceleration.copy()
+        return CanonicalState(q=q, v=v, a=a, t=self.get_time())
+
+    def set_canonical_state(self, state: CanonicalState) -> None:
+        """Import ADR-0026 ``canonical-v2`` dynamic state (#14936)."""
+
+        self._require_loaded()
+        if state.convention != CONVENTION_TAG_V2:
+            raise ValueError(
+                f"convention must be {CONVENTION_TAG_V2!r}, got {state.convention!r}"
+            )
+        q_arr, v_arr = self._validate_canonical_v2_qv_shapes(state.q, state.v)
+        a_arr = np.asarray(state.a, dtype=np.float64)
+        if a_arr.shape != v_arr.shape:
+            raise ValueError(
+                f"a must have shape ({v_arr.shape[0]},); got {a_arr.shape!r}"
+            )
+        self._canonical_acceleration = a_arr.copy()
+        base_quaternion = q_arr[3:7]
+        self._data = self._build_data(
+            base_position=q_arr[:3],
+            base_quaternion=base_quaternion,
+            joint_positions=q_arr[7:],
+            base_linear_velocity=v_arr[:3],
+            base_angular_velocity=_canonical_v2_body_omega_jaxsim_exchange(
+                v_arr[3:6],
+                base_quaternion,
+                self._convention.velocity_representation,
+                to_jaxsim=True,
+            ),
+            joint_velocities=v_arr[6:],
+        )
+        self._time = float(state.t)
+
+    def _canonical_v2_qv_from_data(self) -> tuple[np.ndarray, np.ndarray]:
+        """Read ``canonical-v2`` ``(q, v)`` from loaded JaxSim data."""
+
+        base_position = _vector_attr(self._data, "base_position", 3)
+        base_quaternion = _vector_attr(self._data, "base_quaternion", 4)
+        joint_positions = _array_attr(self._data, "joint_positions")
+        q = np.concatenate([base_position, base_quaternion, joint_positions])
+
+        base_linear = _vector_attr(self._data, "base_linear_velocity", 3)
+        base_angular = _canonical_v2_body_omega_jaxsim_exchange(
+            _vector_attr(self._data, "base_angular_velocity", 3),
+            base_quaternion,
+            self._convention.velocity_representation,
+            to_jaxsim=False,
+        )
+        joint_velocities = _array_attr(self._data, "joint_velocities")
+        v = np.concatenate([base_linear, base_angular, joint_velocities])
+        return q, v
+
     def reset(self) -> None:
         """Reset loaded model data to the zero state."""
 
@@ -156,6 +230,7 @@ class JaxSimBackend:
         )
         self._control = np.zeros(self._dofs(), dtype=np.float64)
         self._time = 0.0
+        self._canonical_acceleration = None
 
     def forward(self) -> None:
         """Refresh JaxSim forward-kinematics caches without advancing time."""
@@ -182,6 +257,7 @@ class JaxSimBackend:
                 self._model = model.replace(time_step=step_dt)
                 self._data = apis.model.step(self._model, data, **kwargs)
         self._time += step_dt
+        self._canonical_acceleration = None
 
     def rollout(
         self,
@@ -543,6 +619,27 @@ def _vector_attr(obj: Any, name: str, size: int) -> np.ndarray:
     if vector.shape != (size,):
         raise ValueError(f"{name} must have shape ({size},)")
     return vector
+
+
+def _canonical_v2_body_omega_jaxsim_exchange(
+    omega: np.ndarray,
+    base_quaternion_wxyz: np.ndarray,
+    representation: VelocityRepresentation,
+    *,
+    to_jaxsim: bool,
+) -> np.ndarray:
+    """Exchange canonical-v2 body angular rate with JaxSim storage."""
+
+    omega_arr = np.asarray(omega, dtype=np.float64).reshape(3)
+    if representation == VelocityRepresentation.INERTIAL:
+        rotation = se3.quat_to_matrix(base_quaternion_wxyz)
+        return rotation @ omega_arr if to_jaxsim else rotation.T @ omega_arr
+    if representation in {
+        VelocityRepresentation.BODY_FIXED,
+        VelocityRepresentation.MIXED,
+    }:
+        return omega_arr.copy()
+    raise ValueError(f"unsupported velocity representation: {representation!r}")
 
 
 def _jaxsim_base_to_canonical(value: np.ndarray) -> np.ndarray:

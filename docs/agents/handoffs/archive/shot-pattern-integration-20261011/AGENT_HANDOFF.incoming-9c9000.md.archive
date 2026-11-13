@@ -48,7 +48,7 @@
 
 # Active: Adopted Per-Capture Grip Rotation, #12221
 
-- Branch `claude/12221-grip-adopt`, stacked on #12270. Applies the fitted `grip_rotation_deg` to `full_body_spec_anthro_driver.json` only; calibrated driver commands now add `--fix-club-markers`. Driver receipts regenerated on ControlTower (address / IK / dynamics, mm): `anthro_driver_seeds` 11.0 / 30.3 / 82.0, `anthro_driver_drake` 11.0 / 30.3 / 86.3 (dynamics worse), `anthro_driver` 50.9 / 46.5 / 71.9. Replay is sensitive at 3 to 15 mm to tiny parameter changes (CANONICAL_RUN.md §2A).
+- Branch `claude/12221-grip-adopt`, stacked on #12270. Applies the fitted `grip_rotation_deg` to `full_body_spec_anthro_driver.json` only; calibrated driver commands now add `--fix-club-markers`. Driver receipts regenerated on <host> (address / IK / dynamics, mm): `anthro_driver_seeds` 11.0 / 30.3 / 82.0, `anthro_driver_drake` 11.0 / 30.3 / 86.3 (dynamics worse), `anthro_driver` 50.9 / 46.5 / 71.9. Replay is sensitive at 3 to 15 mm to tiny parameter changes (CANONICAL_RUN.md §2A).
 - Driver club-face fixture regenerated at `9fe74740a5` (impact speed -2.5 %, peak 4.4 ms early, face 16.88 / 14.96 deg; meets GCV-20 and OSV-10); #12266 no longer blocks it. The MSK driver grip calibration and both `golf_humanoid*.osim` clubs were regenerated from it (`rebuild_club`). The OpenSim bushing grip exceeds its 2 deg / 50 N full-swing bounds only in the 6 ms ball-impact window (2.62 deg, 51.3 N): strict xfail, decision on #12272.
 - 7-iron deferred: document, OpenSim export and receipts unchanged (4.0 / 28.4 / 109.9 and 41.5 / 45.2 / 104.9). Its refit passes on the tracked swing but its same-input export gives -5.0 %, -5.1 ms, 8.71 deg face, which would redden eight face tests; fit receipt stays committed for a follow-up.
 - The PR awaits the owner decision on making `--fix-club-markers` the calibrated default.
@@ -175,7 +175,7 @@ source provenance, matching and all-model qualification remain open.
 # Active: Two-Hand Grip Pose - OSV-2 #11728 (Slice 1)
 
 - Branch `claude/osv-2-grip-pose` (PR #12032), merged with main after OSV-9 (#11795). `model_appearance/grip_pose.py` is the club-agnostic grip definition; its lead (3.2 cm below the butt) and trail (10.82 cm) positions mirror the generated-spec `GripInterface`, the single source, and `tests/opensim/test_grip_closure_both_hands.py` fails on drift. `club_geometry`, `address.py` and the MyoSuite scene sites import it. The Rajagopal models keep the OSV-9 topology (lead `WeldJoint hand_l_to_club`, trail `WeldConstraint hand_r_to_club`); `msk_club_grip_calibration.json` is untouched.
-- Canned-swing closure residual (`python3 -m scripts.grip_closure_report --output r.json`): MuJoCo, Drake (ControlTower), Pinocchio, OpenSim full-body weld <= 1.8e-7 m; MyoSuite unavailable. Open: owner review of a 1.5 cm lead position (needs `msk_club_calibration` rerun for both models and clubs), finger meshes, stills and clips (slice 2), no `golf_humanoid` swing residual.
+- Canned-swing closure residual (`python3 -m scripts.grip_closure_report --output r.json`): MuJoCo, Drake (<host>), Pinocchio, OpenSim full-body weld <= 1.8e-7 m; MyoSuite unavailable. Open: owner review of a 1.5 cm lead position (needs `msk_club_calibration` rerun for both models and clubs), finger meshes, stills and clips (slice 2), no `golf_humanoid` swing residual.
 
 # Active: Gaze Weight Selection, #11729
 
@@ -225,7 +225,7 @@ source provenance, matching and all-model qualification remain open.
 # Active: Right Knee Flexes Negative Like the Left - #12057
 
 - Branch `claude/knee-r-axis-12057`. `spec_builder.leg_extension` mirrors any knee whose hinge points to -z (`AXIS_MIRROR`), and `scripts/mirror_spec_right_knee.py` fixed the committed anthro specs. Spec-to-Rajagopal knee sign is -1 on both sides, and MyoSuite `knee_angle_r` is -1. The generated osims and the inventory hashes are refreshed.
-- Canonical receipts were regenerated on ControlTower; a control at the parent commit reproduced the old receipt exactly. Calibrated driver 7.7/33.0/61.6 -> 5.6/31.0/77.0 mm, 7-iron 6.5/31.1/47.0 -> 5.0/28.8/71.2 mm. The trail knee at address is now -27/-21 deg (was pinned near 0).
+- Canonical receipts were regenerated on <host>; a control at the parent commit reproduced the old receipt exactly. Calibrated driver 7.7/33.0/61.6 -> 5.6/31.0/77.0 mm, 7-iron 6.5/31.1/47.0 -> 5.0/28.8/71.2 mm. The trail knee at address is now -27/-21 deg (was pinned near 0).
 - Open: the dynamics replay regresses (#12110). Trail toe-out is -2.1/-4.4 deg with `hip_rotation_r` at its -40 deg limit (#12109). Reference: `docs/research/hip_axis_mirroring/` (Right Knee Axis Convention section).
 
 # Active: Grip Wrench Gaps - GCV-8 #11714
@@ -237,7 +237,7 @@ source provenance, matching and all-model qualification remain open.
 
 - Branch `claude/gcv-14-mujoco-backend`, stacked on PR #12026 (`claude/gcv-14-speed-variants`). `native_viewer_export` has a fifth engine, `mujoco` (`backends/mujoco_native.py` + `mujoco_worker.py`): full-body MJCF with the default appearance document (body, head, club meshes, scene) rendered by `mujoco.Renderer` through the shared view presets and glyph overlay. It replaces the earlier throwaway stick-figure evidence renderer.
 - Tests: `tests/unit/tools/native_viewer_export/test_mujoco_backend.py` (registration, `unavailable_reason()`, appearance/club scene, `requires_gl` render); the speed-variant frame-count and 0 ms HUD test iterates `ENGINES`, so it covers MuJoCo.
-- Evidence: ControlTower renders `gcv14/mujoco_native` (`MUJOCO_GL=osmesa`), see the PR body for frame counts and the impact frame.
+- Evidence: <host> renders `gcv14/mujoco_native` (`MUJOCO_GL=osmesa`), see the PR body for frame counts and the impact frame.
 
 # Active: OpenSim Contact Grip, OSV-7 Phase 4 #11739
 
@@ -248,7 +248,7 @@ source provenance, matching and all-model qualification remain open.
 
 - Branch `claude/gcv-14-speed-variants`, stacked on PR #12004 (kinematic impact time). `video_timing.frame_schedule.SPEED_VARIANTS = (1, 0.5, 0.25)` is the default of `ExportSettings.speeds` and `--speeds`; `motion_matching.export.export_video_variants` writes the same three clips for any engine's candidate (MuJoCo, MyoSuite, Drake, Pinocchio, OpenSim, Simscape logs).
 - Tests: `test_speed_variants_engines.py` (frame counts from the time span for all four native engines, HUD 0 ms at the ball-passage impact) and `test_export.py` (variants per engine).
-- Evidence: only MuJoCo renders on ControlTower (stick figure, no club, 1920x1080, 60 fps). Drake and Pinocchio need `playwright` and its Chromium libraries, OpenSim needs `xwd`, MyoSuite needs `myosuite.envs.env_base` (#11997); none are in the `ud-sim` image and installing them needs root or a new image (owner action).
+- Evidence: only MuJoCo renders on <host> (stick figure, no club, 1920x1080, 60 fps). Drake and Pinocchio need `playwright` and its Chromium libraries, OpenSim needs `xwd`, MyoSuite needs `myosuite.envs.env_base` (#11997); none are in the `ud-sim` image and installing them needs root or a new image (owner action).
 
 # Active: Same-Input Parity Design-Manual Chapter - SIP P-9 #11614
 
@@ -452,7 +452,7 @@ its source rotation bound. Preserve native replay, anatomy and registration gate
 
 # Active: Run-102 Simscape Playback MP4 — #11569 Task 4
 
-- Branch `claude/run102-playback-mp4-11569`; commit `SELF`. `export_video(..., size_px=(w, h))` and `cross_engine_replay.render_replay_frames(size_px=...)` set the frame size (default 480x480 unchanged; text scales with height). Run-102 marker playback rendered from the committed `two_window_fit_9967_102/candidate.npz` at 1920x1080, 60 fps, 1x / 0.5x / 0.1x into DeskComputer `~/Videos/Parity Audit/simscape/run102_playback/` (not committed).
+- Branch `claude/run102-playback-mp4-11569`; commit `SELF`. `export_video(..., size_px=(w, h))` and `cross_engine_replay.render_replay_frames(size_px=...)` set the frame size (default 480x480 unchanged; text scales with height). Run-102 marker playback rendered from the committed `two_window_fit_9967_102/candidate.npz` at 1920x1080, 60 fps, 1x / 0.5x / 0.1x into <host> `~/Videos/Parity Audit/simscape/run102_playback/` (not committed).
 - This is the marker-overlay playback (capture vs Simscape markers), not a Mechanics Explorer render (a GUI window, which the headless rule excludes on agent hosts). Run-103 is still blocked (`native_gate.json`).
 
 # Active: Muscle Qualification Evidence Guard — F07 #11791

@@ -1,0 +1,749 @@
+[
+  {
+    "description": "List engines and schema",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "name": "describe_engines"
+  },
+  {
+    "description": "Fetch simulation artifact",
+    "inputSchema": {
+      "properties": {
+        "artifact_name": {
+          "type": "string"
+        },
+        "auth_token": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id",
+        "artifact_name"
+      ],
+      "type": "object"
+    },
+    "name": "fetch_artifact"
+  },
+  {
+    "description": "Retrieve run by ID",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id"
+      ],
+      "type": "object"
+    },
+    "name": "get_run"
+  },
+  {
+    "description": "Best aim and pace for one putt under the player's stroke noise",
+    "inputSchema": {
+      "properties": {
+        "aims_deg": {
+          "description": "Candidate aims, degrees left.",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "aspect_deg": {
+          "description": "Fall line, deg CCW of the hole line.",
+          "type": "number"
+        },
+        "auth_token": {
+          "type": "string"
+        },
+        "baseline": {
+          "description": "The player's expected putts by distance; prices a miss.",
+          "properties": {
+            "distances_ft": {
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            "expected_putts": {
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          "required": [
+            "distances_ft",
+            "expected_putts"
+          ],
+          "type": "object"
+        },
+        "distance_ft": {
+          "description": "Putt length, feet (0, 100].",
+          "type": "number"
+        },
+        "grade_pct": {
+          "description": "Green slope, percent [0, 10].",
+          "type": "number"
+        },
+        "line_sd_deg": {
+          "description": "Start-line error SD, degrees.",
+          "type": "number"
+        },
+        "n": {
+          "description": "Putts per candidate.",
+          "type": "integer"
+        },
+        "objective": {
+          "enum": [
+            "sg",
+            "must_make"
+          ],
+          "type": "string"
+        },
+        "paces_ft": {
+          "description": "Candidate paces, feet past the hole.",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "speed_sd": {
+          "description": "Log speed-ratio error SD.",
+          "type": "number"
+        },
+        "stimp": {
+          "description": "Green speed, feet [5, 16].",
+          "type": "number"
+        }
+      },
+      "required": [
+        "distance_ft",
+        "baseline"
+      ],
+      "type": "object"
+    },
+    "name": "optimize_putt"
+  },
+  {
+    "description": "Max ball speed the hole can still capture at an offset.",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "entry_offset_m": {
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "name": "putting_capture_speed"
+  },
+  {
+    "description": "Weighted putting report over putt classes; baseline prices SG",
+    "inputSchema": {
+      "properties": {
+        "aims_deg": {
+          "description": "Candidate aims, degrees left.",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "aspect_deg": {
+          "description": "Fall line, deg CCW of the hole line.",
+          "type": "number"
+        },
+        "auth_token": {
+          "type": "string"
+        },
+        "baseline": {
+          "description": "The player's expected putts by distance; prices a miss.",
+          "properties": {
+            "distances_ft": {
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            "expected_putts": {
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          "required": [
+            "distances_ft",
+            "expected_putts"
+          ],
+          "type": "object"
+        },
+        "classes": {
+          "items": {
+            "properties": {
+              "count": {
+                "description": "Encounter weight (default 1).",
+                "type": "number"
+              },
+              "distance_ft": {
+                "description": "Feet [2, 60].",
+                "type": "number"
+              },
+              "orientation": {
+                "enum": [
+                  "flat",
+                  "uphill",
+                  "downhill",
+                  "left_to_right",
+                  "right_to_left",
+                  "oblique"
+                ],
+                "type": "string"
+              },
+              "slope_pct": {
+                "description": "Percent [0, 4].",
+                "type": "number"
+              },
+              "stimp": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "distance_ft"
+            ],
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "distance_ft": {
+          "description": "Putt length, feet (0, 100].",
+          "type": "number"
+        },
+        "grade_pct": {
+          "description": "Green slope, percent [0, 10].",
+          "type": "number"
+        },
+        "line_sd_deg": {
+          "description": "Start-line error SD, degrees.",
+          "type": "number"
+        },
+        "n": {
+          "description": "Putts per candidate.",
+          "type": "integer"
+        },
+        "objective": {
+          "enum": [
+            "sg",
+            "must_make"
+          ],
+          "type": "string"
+        },
+        "paces_ft": {
+          "description": "Candidate paces, feet past the hole.",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "speed_sd": {
+          "description": "Log speed-ratio error SD.",
+          "type": "number"
+        },
+        "stimp": {
+          "description": "Green speed, feet [5, 16].",
+          "type": "number"
+        }
+      },
+      "required": [
+        "baseline",
+        "classes"
+      ],
+      "type": "object"
+    },
+    "name": "putting_library_study"
+  },
+  {
+    "description": "Expected-strokes cost of green misreads versus a perfect read",
+    "inputSchema": {
+      "properties": {
+        "aims_deg": {
+          "description": "Candidate aims, degrees left.",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "aspect_deg": {
+          "description": "Fall line, deg CCW of the hole line.",
+          "type": "number"
+        },
+        "auth_token": {
+          "type": "string"
+        },
+        "baseline": {
+          "description": "The player's expected putts by distance; prices a miss.",
+          "properties": {
+            "distances_ft": {
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            "expected_putts": {
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          "required": [
+            "distances_ft",
+            "expected_putts"
+          ],
+          "type": "object"
+        },
+        "distance_ft": {
+          "description": "Putt length, feet (0, 100].",
+          "type": "number"
+        },
+        "grade_pct": {
+          "description": "Green slope, percent [0, 10].",
+          "type": "number"
+        },
+        "line_sd_deg": {
+          "description": "Start-line error SD, degrees.",
+          "type": "number"
+        },
+        "n": {
+          "description": "Putts per candidate.",
+          "type": "integer"
+        },
+        "objective": {
+          "enum": [
+            "sg",
+            "must_make"
+          ],
+          "type": "string"
+        },
+        "paces_ft": {
+          "description": "Candidate paces, feet past the hole.",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "reads": {
+          "items": {
+            "properties": {
+              "slope_scale": {
+                "type": "number"
+              },
+              "stimp_ratio": {
+                "type": "number"
+              }
+            },
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "speed_sd": {
+          "description": "Log speed-ratio error SD.",
+          "type": "number"
+        },
+        "stimp": {
+          "description": "Green speed, feet [5, 16].",
+          "type": "number"
+        }
+      },
+      "required": [
+        "distance_ft",
+        "baseline",
+        "reads"
+      ],
+      "type": "object"
+    },
+    "name": "putting_misread_cost"
+  },
+  {
+    "description": "Solve the putter speed and heading that holes a putt.",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "distance_m": {
+          "type": "number"
+        },
+        "slope_aspect_deg": {
+          "type": "number"
+        },
+        "slope_pct": {
+          "type": "number"
+        },
+        "stimp_ft": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "distance_m"
+      ],
+      "type": "object"
+    },
+    "name": "putting_read_green"
+  },
+  {
+    "description": "Simulate one putt on the shared putting-dynamics core.",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "distance_m": {
+          "type": "number"
+        },
+        "heading_deg": {
+          "type": "number"
+        },
+        "putter_speed_mps": {
+          "type": "number"
+        },
+        "slope_aspect_deg": {
+          "type": "number"
+        },
+        "slope_pct": {
+          "type": "number"
+        },
+        "stimp_ft": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "putter_speed_mps",
+        "distance_m"
+      ],
+      "type": "object"
+    },
+    "name": "putting_simulate_putt"
+  },
+  {
+    "description": "Virtual USGA Stimpmeter reading of a green.",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "slope_aspect_deg": {
+          "type": "number"
+        },
+        "slope_pct": {
+          "type": "number"
+        },
+        "stimp_ft": {
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "name": "putting_stimpmeter"
+  },
+  {
+    "description": "Strokes gained per round by removing each putting error source",
+    "inputSchema": {
+      "properties": {
+        "aims_deg": {
+          "description": "Candidate aims, degrees left.",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "aspect_deg": {
+          "description": "Fall line, deg CCW of the hole line.",
+          "type": "number"
+        },
+        "aspect_sd_deg": {
+          "description": "Fall-line read SD, degrees.",
+          "type": "number"
+        },
+        "auth_token": {
+          "type": "string"
+        },
+        "base_samples": {
+          "description": "Sobol base samples.",
+          "type": "integer"
+        },
+        "baseline": {
+          "description": "The player's expected putts by distance; prices a miss.",
+          "properties": {
+            "distances_ft": {
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            "expected_putts": {
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          "required": [
+            "distances_ft",
+            "expected_putts"
+          ],
+          "type": "object"
+        },
+        "classes": {
+          "items": {
+            "properties": {
+              "count": {
+                "description": "Encounter weight (default 1).",
+                "type": "number"
+              },
+              "distance_ft": {
+                "description": "Feet [2, 60].",
+                "type": "number"
+              },
+              "orientation": {
+                "enum": [
+                  "flat",
+                  "uphill",
+                  "downhill",
+                  "left_to_right",
+                  "right_to_left",
+                  "oblique"
+                ],
+                "type": "string"
+              },
+              "slope_pct": {
+                "description": "Percent [0, 4].",
+                "type": "number"
+              },
+              "stimp": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "distance_ft"
+            ],
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "distance_ft": {
+          "description": "Putt length, feet (0, 100].",
+          "type": "number"
+        },
+        "face_bias_deg": {
+          "type": "number"
+        },
+        "face_sd_deg": {
+          "description": "Face-angle SD, degrees [0, 10].",
+          "type": "number"
+        },
+        "face_weight": {
+          "description": "Face share of start line [0, 1].",
+          "type": "number"
+        },
+        "factors": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "first_putts_per_round": {
+          "description": "Default 18.",
+          "type": "number"
+        },
+        "grade_pct": {
+          "description": "Green slope, percent [0, 10].",
+          "type": "number"
+        },
+        "grade_rel_bias": {
+          "type": "number"
+        },
+        "grade_rel_sd": {
+          "description": "Slope-read relative SD [0, 1].",
+          "type": "number"
+        },
+        "line_sd_deg": {
+          "description": "Start-line error SD, degrees.",
+          "type": "number"
+        },
+        "n": {
+          "description": "Putts per candidate.",
+          "type": "integer"
+        },
+        "n_bootstrap": {
+          "type": "integer"
+        },
+        "n_samples": {
+          "description": "Putts per elimination run.",
+          "type": "integer"
+        },
+        "objective": {
+          "enum": [
+            "sg",
+            "must_make"
+          ],
+          "type": "string"
+        },
+        "pace_ft_past": {
+          "description": "Intended pace, feet past.",
+          "type": "number"
+        },
+        "paces_ft": {
+          "description": "Candidate paces, feet past the hole.",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "path_sd_deg": {
+          "description": "Path SD, degrees [0, 15].",
+          "type": "number"
+        },
+        "reduction": {
+          "description": "Spread kept by a partial cut (0, 1].",
+          "type": "number"
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "speed_bias": {
+          "type": "number"
+        },
+        "speed_cv": {
+          "description": "Start-speed CV [0, 0.5].",
+          "type": "number"
+        },
+        "speed_sd": {
+          "description": "Log speed-ratio error SD.",
+          "type": "number"
+        },
+        "stimp": {
+          "description": "Green speed, feet [5, 16].",
+          "type": "number"
+        },
+        "stimp_rel_sd": {
+          "description": "Speed-read relative SD [0, 0.5].",
+          "type": "number"
+        },
+        "strike_toe_sd_mm": {
+          "description": "Toe/heel strike SD, mm [0, 25].",
+          "type": "number"
+        }
+      },
+      "required": [
+        "baseline",
+        "classes"
+      ],
+      "type": "object"
+    },
+    "name": "putting_variance_attribution"
+  },
+  {
+    "description": "Evaluate the pinned ZTCF golden case via sim_run (ODE backend); returns a v1 capability run record.",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "request": {
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "name": "run_counterfactual_ztcf_golden"
+  },
+  {
+    "description": "Simulate the pinned local golf shot via sim_run; returns a v1 capability run record with trajectory.",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "request": {
+          "type": "object"
+        },
+        "trajectory_padding": {
+          "description": "Test-only trajectory repeat factor.",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "name": "run_golf_simulator_golden_shot"
+  },
+  {
+    "description": "Submit simulation run",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "number"
+        },
+        "engine_type": {
+          "type": "string"
+        },
+        "timestep": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "engine_type"
+      ],
+      "type": "object"
+    },
+    "name": "submit_run"
+  }
+]
