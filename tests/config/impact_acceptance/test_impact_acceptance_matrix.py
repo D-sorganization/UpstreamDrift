@@ -288,10 +288,15 @@ def test_inertia_row_matches_library(
     slower = np.linalg.norm(toe.ball_velocity) < np.linalg.norm(centered.ball_velocity)
     expected = models[model_id]["inertia_tensor"] == "scalar_moi_effective_mass"
     assert slower == expected
-    # No model applies gear-effect spin on its own; the solver API overlays it.
-    np.testing.assert_allclose(
-        toe.ball_angular_velocity, centered.ball_angular_velocity
-    )
+    # No model applies gear-effect spin on its own; off-center MOI only softens loft backspin.
+    toe_spin = toe.ball_angular_velocity
+    centered_spin = centered.ball_angular_velocity
+    assert abs(toe_spin[0]) < 1e-9
+    assert abs(toe_spin[2]) < 1e-9
+    if expected and models[model_id]["tangential_spin"] == "supported":
+        assert abs(toe_spin[1]) < abs(centered_spin[1])
+    else:
+        np.testing.assert_allclose(toe_spin, centered_spin)
 
 
 @pytest.mark.parametrize("model_id", ["rigid_body", "spring_damper", "finite_time"])
