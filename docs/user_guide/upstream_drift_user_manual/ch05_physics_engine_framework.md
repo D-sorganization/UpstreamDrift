@@ -148,16 +148,21 @@ $$\ddot{q}_{\text{ZTCF}} = M(q)^{-1}\bigl(-C(q,v)\,v - g(q) + J^T\lambda\bigr)$$
 def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray
 ```
 
-**ZVCF (Zero-Velocity Counterfactual, G2):** "What happens if motion freezes?"
+**ZVCF (SPEC §4 control component / legacy zero-velocity gravity diagnostic, G2):**
 
-$$\ddot{q}_{\text{ZVCF}} = M(q)^{-1}\bigl(-g(q) + \tau + J^T\lambda\bigr)$$
+Under the canonical [SPEC §4](../../../SPEC.md#4-architecture-overview) split at a fixed state $(q, v)$, ZVCF is the control component (`compute_control_acceleration` / `compute_control_acceleration_at_state`, with velocity and gravity off):
+
+$$\ddot{q}_{\text{ZVCF}} = M(q)^{-1}\,\tau$$
+
+The legacy `compute_zvcf(self, q)` method is a deprecated shim (`#14943`) that evaluates the gravity-only diagnostic at $v = 0, \tau = 0$ (delegating to `compute_gravity_only_acceleration`):
+
+$$\ddot{q}_{\text{gravity-only}} = M(q)^{-1}\bigl(-g(q) + J^T\lambda\bigr)$$
 
 ```python
-def compute_zvcf(self, q: np.ndarray) -> np.ndarray
+def compute_zvcf(self, q: np.ndarray) -> np.ndarray  # Deprecated; sets v=0 and tau=0
 ```
 
-The difference $\Delta a_{\text{velocity}} = a_{\text{full}} - a_{\text{ZVCF}}$
-isolates Coriolis/centrifugal contributions.
+Because `compute_zvcf(q)` zeroes both velocity and applied torque, comparing $a_{\text{full}} - a_{\text{zvcf\_shim}}$ includes both velocity and control effects unless compared against the explicit control-preserved diagnostic (`zero_velocity_control_preserved_acceleration` in `simulation_backends/ztcf_zvcf.py`).
 
 ### 5.2.6 Section B5 -- Flexible Shaft Interface (Optional)
 
