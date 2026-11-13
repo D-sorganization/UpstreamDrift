@@ -16,17 +16,17 @@ def _load_messaging_module():
     from chat._qt.messaging import (
         ATTACHMENT_PENDING_PREFIX,
         ATTACHMENT_REJECTED_PREFIX,
-        MessagingMixin,
         compute_attachment_intake,
         file_upload_error_detail,
         format_attachment_deduplicated_bubble,
         format_attachment_pending_bubble,
     )
+    from chat._ud_attachment_manifest_mixin import UdAttachmentManifestMixin
 
     return (
         ATTACHMENT_PENDING_PREFIX,
         ATTACHMENT_REJECTED_PREFIX,
-        MessagingMixin,
+        UdAttachmentManifestMixin,
         compute_attachment_intake,
         file_upload_error_detail,
         format_attachment_deduplicated_bubble,
@@ -42,8 +42,8 @@ class _FakeBubble:
         self.content = text
 
 
-def _upload_host_class(messaging_mixin: type) -> type:
-    class _UploadHost(messaging_mixin):
+def _upload_host_class(ud_mixin: type) -> type:
+    class _UploadHost(ud_mixin):
         """Minimal host object exercising MessagingMixin attachment paths."""
 
         def __init__(self) -> None:
@@ -79,13 +79,13 @@ def test_apply_file_upload_rejection_updates_pending_bubble() -> None:
     (
         _,
         ATTACHMENT_REJECTED_PREFIX,
-        MessagingMixin,
+        UdAttachmentManifestMixin,
         __,
         ___,
         ____,
         format_attachment_pending_bubble,
     ) = _load_messaging_module()
-    host = _upload_host_class(MessagingMixin)()
+    host = _upload_host_class(UdAttachmentManifestMixin)()
     bubble = _FakeBubble()
     bubble.content = format_attachment_pending_bubble("notes.txt")
     host._attachment_bubbles_pending_delivery.append(("notes.txt", "deadbeef", bubble))
@@ -104,13 +104,13 @@ def test_apply_file_upload_rejection_drops_manifest_so_retry_is_not_deduped(
     (
         ATTACHMENT_PENDING_PREFIX,
         _,
-        MessagingMixin,
+        UdAttachmentManifestMixin,
         compute_attachment_intake,
         ___,
         format_attachment_deduplicated_bubble,
         ____,
     ) = _load_messaging_module()
-    host = _upload_host_class(MessagingMixin)()
+    host = _upload_host_class(UdAttachmentManifestMixin)()
     path = tmp_path / "retry-me.txt"
     path.write_bytes(b"same payload every time")
 

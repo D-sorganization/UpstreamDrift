@@ -185,3 +185,8 @@ paths:
     rationale: UD-only mixin clearing attachment dedup manifest entries on file_upload rejection (#15013).
     tracking_issue: 15013
     review_date: "2026-12-31"
+  chat/_ud_attachment_manifest_handlers.py:
+    owner: UpstreamDrift
+    rationale: UD-only handlers delegating to MessagingMixin while releasing dedup manifest SHA on file_upload rejection (#15013).
+    tracking_issue: 15013
+    review_date: "2026-12-31"
