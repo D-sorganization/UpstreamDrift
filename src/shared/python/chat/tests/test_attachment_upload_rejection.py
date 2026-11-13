@@ -152,3 +152,15 @@ def test_on_message_error_branch_calls_file_upload_rejection() -> None:
     error_block = dock_source[error_idx : error_idx + 500]
     assert "_apply_file_upload_rejection" in error_block
     assert 'msg_type == "error"' in dock_source
+
+
+@pytest.mark.unit
+def test_chat_dock_lazy_load_wires_ud_attachment_manifest() -> None:
+    """UD-owned Qt load path must install manifest release without child-copy edits."""
+    source = (_repo_root() / "src/shared/python/chat/chat_dock_widget.py").read_text(
+        encoding="utf-8"
+    )
+    load_idx = source.index("def _load_qt_module")
+    load_block = source[load_idx : load_idx + 600]
+    assert "_chat_dock_widget_qt" in load_block
+    assert "_ud_attachment_manifest_mixin" in load_block

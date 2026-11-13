@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from chat._qt.messaging import AttachmentIntakeEntry, MAX_ATTACHMENT_BYTES
+from chat._qt.messaging import (
+    AttachmentIntakeEntry,
+    MAX_ATTACHMENT_BYTES,
+    MessagingMixin,
+)
 from chat._ud_attachment_manifest_handlers import (
     apply_file_upload_rejection,
     drop_attachment_manifest_sha,
@@ -14,6 +18,10 @@ from chat._ud_attachment_manifest_handlers import (
 
 class UdAttachmentManifestMixin:
     """Release dedup manifest entries when the backend rejects ``file_upload``."""
+
+    def _track_pending_attachment_bubble(self, filename: str, bubble) -> None:
+        """Delegate to :class:`MessagingMixin` for minimal test/dock hosts."""
+        MessagingMixin._track_pending_attachment_bubble(self, filename, bubble)
 
     def _drop_attachment_manifest_sha(self, sha256: str) -> None:
         drop_attachment_manifest_sha(self, sha256)
