@@ -11,6 +11,7 @@ import {
   type ExportFormat,
 } from './characterSpecTypes';
 import type { CharacterSpecState } from './useCharacterSpec';
+import { launcherFetch } from '../../api/launcherFetch';
 
 /**
  * Spec-native Character Builder panel (CMB-7a, #11658).
@@ -113,7 +114,7 @@ export function CharacterSpecPanel({ spec }: { spec: CharacterSpecState }) {
       setExportingFmt(fmt);
       setExportError(null);
       try {
-        const response = await fetch(
+        const response = await launcherFetch(
           `${getApiBase()}/api/character-builder/export/${fmt}`,
           {
             method: 'POST',
