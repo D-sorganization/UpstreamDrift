@@ -65,10 +65,13 @@ def test_docker_build_workflows_use_shared_buildkit_contract() -> None:
             f"{wf.name} should have at least one build-push-action step"
         )
 
-        # 1. Must ensure shared builder once per build step
-        assert (
-            content.count("python3 scripts/ci/shared_buildkit.py ensure") == build_count
-        ), f"{wf.name} must run shared_buildkit.py ensure for each build"
+        # 1. Must ensure shared builder once per build step (profile full retry
+        # re-attaches BuildKit before the second build-push-action).
+        ensure_count = content.count("python3 scripts/ci/shared_buildkit.py ensure")
+        assert ensure_count == build_count, (
+            f"{wf.name} must run shared_buildkit.py ensure for each build "
+            f"(builds={build_count}, ensure={ensure_count})"
+        )
 
         # 2. Must use continue-on-error for the ensure step
         assert "continue-on-error: true" in content, (
