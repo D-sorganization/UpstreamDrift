@@ -277,6 +277,7 @@
 {"path": "biomechanics/metric_definitions/event_time_normalisation.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/metric_definitions/grf_cop_observability.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/metric_definitions/schema.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
+{"path": "biomechanics/metric_definitions/xfactor_kinematic_sequence.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/model_bindings.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/mtu_joint_actuator.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/multi_muscle.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
