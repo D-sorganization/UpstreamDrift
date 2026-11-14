@@ -80,4 +80,7 @@ def test_conflict_disarm_keeps_dry_run_and_the_12634_exclusion() -> None:
 
     assert job["with"]["dry_run"] == "${{ inputs.dry_run || 'true' }}"
     assert job["with"]["exclude_prs"] == "${{ inputs.exclude_prs || '12634' }}"
-    assert set(job["secrets"]) == {"JULES_APP_ID", "JULES_APP_PRIVATE_KEY"}
+    assert set(job["secrets"]) == {
+        "FLEET_GENERAL_AGENT_APP_ID",
+        "FLEET_GENERAL_AGENT_APP_PRIVATE_KEY",
+    }

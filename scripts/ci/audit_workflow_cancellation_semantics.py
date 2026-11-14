@@ -21,7 +21,6 @@ CANCEL_FALSE_ALLOWLIST = frozenset(
         "approve-same-repo-runs.yml",
         "conflict-disarm.yml",
         "cross-engine-leaderboard-publish.yml",
-        "jules-push-pr-noise-disable.yml",
         "release.yml",
     }
 )

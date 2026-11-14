@@ -11,7 +11,7 @@ name: Collate Change Fragments
 # Ported from Repository_Management's collate-changes.yml. It never pushes to
 # main: it proposes the result on the reused branch bot/collate-changes and
 # arms auto-merge through Repository_Management's scripts/automerge_guard.py
-# (checked out read-only, as Jules-Redundant-PR-Closer.yml does), which
+# (checked out read-only), which
 # honours reviewer holds.
 #
 # Push-only on purpose: in the merge queue (merge_group) the PR number is not
@@ -44,8 +44,8 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
-          app-id: ${{ secrets.JULES_APP_ID }}
-          private-key: ${{ secrets.JULES_APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.FLEET_GENERAL_AGENT_APP_ID }}
+          private-key: ${{ secrets.FLEET_GENERAL_AGENT_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
