@@ -32,6 +32,11 @@ with contextlib.suppress(ImportError, AttributeError, OSError, RuntimeError):
 # once the hang is diagnosed.
 # ---------------------------------------------------------------------------
 import os as _os
+from collections.abc import Generator
+
+import pytest
+
+_HOST_OS_NAME: str = _os.name
 
 _WATCHDOG_SRC = "\n".join(
     [
@@ -148,6 +153,27 @@ def pytest_configure(config) -> None:
 
 def pytest_unconfigure(config) -> None:
     _disarm_hang_forensics(config)
+
+
+@pytest.hookimpl(hookwrapper=True, tryfirst=True)
+def pytest_runtest_makereport(item, call) -> Generator[None, object, None]:
+    """Keep ``os.name`` aligned with the host platform while formatting reports."""
+    current = _os.name
+    if current != _HOST_OS_NAME:
+        _os.name = _HOST_OS_NAME
+        try:
+            yield
+        finally:
+            _os.name = current
+    else:
+        yield
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_runtest_teardown(item, nextitem) -> None:
+    """Ensure direct (non-monkeypatch) ``os.name`` mutations cannot leak across tests."""
+    if _os.name != _HOST_OS_NAME:
+        _os.name = _HOST_OS_NAME
 
 
 # ---------------------------------------------------------------------------
