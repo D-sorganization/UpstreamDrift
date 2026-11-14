@@ -2,11 +2,17 @@
 
 from __future__ import annotations
 
+import ast
 import json
 import re
+import warnings
 from pathlib import Path
 
 import pytest
+
+from src.engines.physics_engines.opensim.python.opensim_physics_engine import (
+    OpenSimPhysicsEngine,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -15,6 +21,7 @@ _SPEC_PATH = _REPO_ROOT / "SPEC.md"
 _MANIFEST_PATH = _REPO_ROOT / "src" / "config" / "launcher_manifest.json"
 _MIGRATION_PATH = _REPO_ROOT / "src" / "config" / "capability_migration.json"
 _HELP_PATH = _REPO_ROOT / "docs" / "help" / "tools_calculator_hub.md"
+_GOLF_SIM_HELP_PATH = _REPO_ROOT / "docs" / "help" / "golf_simulation_suite.md"
 _CH10_PATH = (
     _REPO_ROOT
     / "docs"
@@ -54,12 +61,15 @@ def test_launcher_manifest_c5_honest_tile_capabilities_and_labels() -> None:
     manifest = json.loads(_MANIFEST_PATH.read_text(encoding="utf-8"))
     migration = json.loads(_MIGRATION_PATH.read_text(encoding="utf-8"))
     help_text = _HELP_PATH.read_text(encoding="utf-8")
+    golf_help_text = _GOLF_SIM_HELP_PATH.read_text(encoding="utf-8")
 
     golf_sim = _tile_by_id(manifest, "golf_simulation_suite")
     assert golf_sim["name"] == "Golf Simulation Suite"
     assert golf_sim["status"] == "prototype"
     assert "full_simulation" not in golf_sim["capabilities"]
     assert golf_sim["capabilities"] == ["prototype_visualization", "demo_inspection"]
+    assert "prototype_visualization" in golf_help_text
+    assert "demo_inspection" in golf_help_text
 
     calc_hub = _tile_by_id(manifest, "tools_calculator_hub")
     expected_name = "Tools Calculator Suite (Data Processor Entry)"
@@ -84,3 +94,22 @@ def test_ch10_workflow_example_uses_canonical_zvcf_control_acceleration() -> Non
 
     assert "engine.compute_zvcf(" not in workflow
     assert "engine.compute_control_acceleration_at_state(q, tau)" in workflow
+
+    code_match = re.search(r"```python\n(.*?)```", workflow, re.DOTALL)
+    assert code_match is not None
+    code_block = code_match.group(1)
+    tree = ast.parse(code_block)
+    attrs = sorted(
+        {
+            node.attr
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Attribute)
+            and isinstance(node.value, ast.Name)
+            and node.value.id == "engine"
+        }
+    )
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        engine = OpenSimPhysicsEngine()
+    assert [attr for attr in attrs if not hasattr(engine, attr)] == []
+    assert "np.zeros_like(v)" in code_block
