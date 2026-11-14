@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import io
+import subprocess
 import textwrap
+import threading
 import time
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -207,3 +211,80 @@ def test_cleanup_processes_terminates_children(
         time.sleep(0.05)
     assert process.poll() is not None
     assert len(manager.running_processes) == 0
+
+
+@pytest.mark.parametrize("mode", ["launch_script", "attach_process"])
+def test_piped_exit_waits_for_stderr_drain_before_crashed_transition_and_public_exit_code(
+    manager: ProcessManager,
+    repo_root: Path,
+    mode: str,
+) -> None:
+    """CRASHED transition and exit_code must wait until piped stderr drains to EOF."""
+    release_stderr = threading.Event()
+    stderr_read_started = threading.Event()
+
+    class _GatedStderr:
+        def __init__(self) -> None:
+            self._chunks = [b"ImportError: deterministic_race_marker\n", b""]
+
+        def readline(self) -> bytes:
+            stderr_read_started.set()
+            assert release_stderr.wait(timeout=5.0)
+            return self._chunks.pop(0) if self._chunks else b""
+
+        def close(self) -> None:
+            return None
+
+    fake_proc = MagicMock(spec=subprocess.Popen)
+    fake_proc.pid = 42420
+    fake_proc.poll.return_value = 1
+    fake_proc.wait.return_value = 1
+    fake_proc.stdout = io.BytesIO(b"")
+    fake_proc.stderr = _GatedStderr()
+
+    transitions: list[tuple[ProcessState, str]] = []
+    manager.on_process_changed = lambda m: transitions.append(
+        (m.state, m.last_stderr_tail)
+    )
+
+    try:
+        if mode == "launch_script":
+            script = _fixture_script(
+                repo_root, "gated_fail.py", "raise SystemExit(1)\n"
+            )
+            with (
+                patch("src.launchers.launcher_process_manager.validate_script_path"),
+                patch(
+                    "src.launchers.launcher_process_manager.secure_popen",
+                    return_value=fake_proc,
+                ),
+                patch("src.launchers.launcher_process_manager._assign_to_job"),
+            ):
+                launched = manager.launch_script("RaceModel", script, repo_root)
+            assert launched is fake_proc
+        else:
+            manager.attach_process("RaceModel", fake_proc)
+
+        assert stderr_read_started.wait(timeout=5.0)
+
+        rows_while_draining = manager.list_processes()
+        assert len(rows_while_draining) == 1
+        assert rows_while_draining[0]["exit_code"] is None
+        assert rows_while_draining[0]["state"] == ProcessState.STARTING.value
+        assert ProcessState.CRASHED not in [state for state, _ in transitions]
+    finally:
+        release_stderr.set()
+
+    stream_thread = manager._output_threads["RaceModel"]
+    stream_thread.join(timeout=5.0)
+    assert not stream_thread.is_alive()
+
+    rows_after = manager.list_processes()
+    assert len(rows_after) == 1
+    assert rows_after[0]["state"] == ProcessState.CRASHED.value
+    assert rows_after[0]["exit_code"] == 1
+    assert "ImportError: deterministic_race_marker" in rows_after[0]["last_stderr_tail"]
+    assert (
+        ProcessState.CRASHED,
+        "ImportError: deterministic_race_marker",
+    ) in transitions

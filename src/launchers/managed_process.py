@@ -70,6 +70,7 @@ class ManagedProcess:
     _stderr_tail: deque[str] = field(
         default_factory=lambda: deque(maxlen=_STDERR_TAIL_LINES)
     )
+    _awaiting_output_drain: bool = False
 
     @property
     def pid(self) -> int | None:
@@ -87,7 +88,7 @@ class ManagedProcess:
             self._stderr_tail.append(line.removeprefix("STDERR:").lstrip())
 
     def to_public_dict(self) -> dict[str, Any]:
-        poll = self.process.poll()
+        poll = None if self._awaiting_output_drain else self.process.poll()
         return {
             "id": self.id,
             "key": self.key,

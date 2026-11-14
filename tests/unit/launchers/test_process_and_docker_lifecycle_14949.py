@@ -8,6 +8,7 @@ import socket
 import subprocess
 import sys
 import textwrap
+import threading
 import time
 from pathlib import Path
 from types import SimpleNamespace
@@ -151,6 +152,7 @@ def test_fast_failing_child_never_shows_running_and_surfaces_stderr_tail(
 
     statuses: list[str] = []
     toasts: list[tuple[str, str]] = []
+    crashed_notified = threading.Event()
 
     def _set_status(text: str, _style: str) -> None:
         statuses.append(text)
@@ -167,6 +169,8 @@ def test_fast_failing_child_never_shows_running_and_surfaces_stderr_tail(
             success_style="ok",
             error_style="err",
         )
+        if managed.state == ProcessState.CRASHED:
+            crashed_notified.set()
 
     manager.on_process_changed = _on_changed
     proc = manager.launch_script("TestModel", script, repo_root)
@@ -185,12 +189,7 @@ def test_fast_failing_child_never_shows_running_and_surfaces_stderr_tail(
         toast_label="TestModel Launched",
     )
 
-    deadline = time.monotonic() + 3.0
-    while time.monotonic() < deadline:
-        rows = manager.list_processes()
-        if rows and rows[0]["state"] == ProcessState.CRASHED.value:
-            break
-        time.sleep(0.05)
+    assert crashed_notified.wait(timeout=3.0)
 
     assert any("Starting" in s or "Crashed" in s for s in statuses)
     assert not any("Running" in s for s in statuses)

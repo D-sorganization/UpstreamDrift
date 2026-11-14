@@ -557,6 +557,7 @@ class ProcessManager:
         process: subprocess.Popen[bytes],
         *,
         kind: ProcessKind = ProcessKind.LOCAL,
+        has_output_stream: bool = False,
     ) -> ManagedProcess | None:
         slot_name = self._allocate_slot_name(key)
         if slot_name is None:
@@ -568,10 +569,12 @@ class ProcessManager:
             kind=kind,
             state=ProcessState.STARTING,
             process=process,
+            _awaiting_output_drain=has_output_stream,
         )
         with self._process_lock:
             self._process_registry[managed.id] = managed
-        self._start_exit_waiter(managed)
+        if not has_output_stream:
+            self._start_exit_waiter(managed)
         self._schedule_running_confirmation(managed.id)
         self._notify_process_changed(managed)
         return managed
@@ -594,20 +597,24 @@ class ProcessManager:
         timer.daemon = True
         timer.start()
 
-    def _start_exit_waiter(self, managed: ManagedProcess) -> None:
-        def _wait() -> None:
-            poll = managed.process.poll()
-            if isinstance(poll, int):
-                return_code = poll
-            else:
-                waited = managed.process.wait()
-                return_code = waited if isinstance(waited, int) else 1
-            with self._process_lock:
-                current = self._process_registry.get(managed.id)
-                if current is None:
-                    return
+    def _finalize_process_exit(
+        self,
+        managed_id: str,
+        process: subprocess.Popen[bytes],
+    ) -> int:
+        poll = process.poll()
+        if isinstance(poll, int):
+            return_code = poll
+        else:
+            waited = process.wait()
+            return_code = waited if isinstance(waited, int) else 1
+        snapshot: ManagedProcess | None = None
+        with self._process_lock:
+            current = self._process_registry.get(managed_id)
+            if current is not None:
+                current._awaiting_output_drain = False
                 current.exit_code = return_code
-                if current.state == ProcessState.STOPPING:
+                if current.state in {ProcessState.STOPPING, ProcessState.KILLED}:
                     terminal = ProcessState.KILLED
                 elif return_code == 0:
                     terminal = ProcessState.EXITED
@@ -615,7 +622,13 @@ class ProcessManager:
                     terminal = ProcessState.CRASHED
                 current.state = terminal
                 snapshot = current
+        if snapshot is not None:
             self._notify_process_changed(snapshot)
+        return return_code
+
+    def _start_exit_waiter(self, managed: ManagedProcess) -> None:
+        def _wait() -> None:
+            self._finalize_process_exit(managed.id, managed.process)
 
         thread = threading.Thread(target=_wait, name=f"exit-waiter-{managed.id}")
         thread.daemon = True
@@ -649,7 +662,12 @@ class ProcessManager:
         """
         if name is None:
             raise ValueError("name must be provided")
-        managed = self._register_process(name, process, kind=ProcessKind.DOCKER)
+        managed = self._register_process(
+            name,
+            process,
+            kind=ProcessKind.DOCKER,
+            has_output_stream=True,
+        )
         if managed is None:
             reap_declined_child_spawn(process)
             return
@@ -702,15 +720,27 @@ class ProcessManager:
             for stream, is_stderr in ((process.stdout, False), (process.stderr, True))
             if stream is not None
         ]
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
+        try:
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join()
 
-        poll = process.poll()
-        return_code = poll if isinstance(poll, int) else process.wait()
-        if isinstance(return_code, int):
-            self._emit_output(name, f"[exited with code {return_code}]")
+            if managed_id is not None:
+                return_code: int | None = self._finalize_process_exit(
+                    managed_id, process
+                )
+            else:
+                poll = process.poll()
+                return_code = poll if isinstance(poll, int) else process.wait()
+            if isinstance(return_code, int):
+                self._emit_output(name, f"[exited with code {return_code}]")
+        finally:
+            if managed_id is not None:
+                with self._process_lock:
+                    current = self._process_registry.get(managed_id)
+                    if current is not None:
+                        current._awaiting_output_drain = False
 
     def launch_script_with_args(
         self,
@@ -809,7 +839,12 @@ class ProcessManager:
                 creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
                 preexec_fn=_preexec_fn,
             )
-            managed = self._register_process(name, process, kind=ProcessKind.LOCAL)
+            managed = self._register_process(
+                name,
+                process,
+                kind=ProcessKind.LOCAL,
+                has_output_stream=True,
+            )
             if managed is None:
                 reap_declined_child_spawn(process)
                 return None
