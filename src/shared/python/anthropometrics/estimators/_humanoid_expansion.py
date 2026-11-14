@@ -24,17 +24,18 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from humanoid_character_builder.core.anthropometry import (
-    VIRTUAL_SEGMENTS,
-    _GEOMETRY,
-    _SEGMENT_NAME_MAP,
-    _VIRTUAL_INERTIA,
-)
-
 from ._base import SegmentRatios
+from ._local_anthropometry import load_local_anthropometry_module
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+
+_ANTHROPOMETRY_MODULE = load_local_anthropometry_module(__name__)
+VIRTUAL_SEGMENTS = _ANTHROPOMETRY_MODULE.VIRTUAL_SEGMENTS
+_GEOMETRY = _ANTHROPOMETRY_MODULE._GEOMETRY
+_SEGMENT_NAME_MAP = _ANTHROPOMETRY_MODULE._SEGMENT_NAME_MAP
+_VIRTUAL_INERTIA = _ANTHROPOMETRY_MODULE._VIRTUAL_INERTIA
+virtual_segment_count = _ANTHROPOMETRY_MODULE.virtual_segment_count
 
 
 _COARSE_CLASS_IDS = frozenset(
@@ -62,8 +63,6 @@ def _virtual_mass_total(virtual_key: str) -> float:
     """Return total body-mass fraction for a bilateral virtual segment class."""
     parent, share = VIRTUAL_SEGMENTS[virtual_key]
     _ = parent
-    from humanoid_character_builder.core.anthropometry import virtual_segment_count
-
     return share * virtual_segment_count(virtual_key)
 
 

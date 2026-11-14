@@ -58,13 +58,15 @@ through the matching reader (`anthropometrics.readers.read_urdf_inertial`).
 
 ### Pick the right estimator
 
-| Estimator             | When to use it                                                                       | Source                             |
-| --------------------- | ------------------------------------------------------------------------------------ | ---------------------------------- |
-| `DeLevaEstimator`     | Default. Sex-specific tables, modern measurement protocol, CoM on longitudinal axis. | de Leva (1996)                     |
-| `DempsterEstimator`   | Reproducing classic biomechanics studies that cite Dempster ratios.                  | Dempster (1955)                    |
-| `ZatsiorskyEstimator` | When you need raw cadaver-derived inertia tensors (e.g. for sensitivity analyses).   | Zatsiorsky-Seluyanov (1985 / 2002) |
+| Estimator             | When to use it                                                                                                   | Source                                                    |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `DeLevaEstimator`     | Default. Sex-specific tables, modern gamma-ray protocol, CoM on longitudinal axis.                               | de Leva (1996)                                            |
+| `DempsterEstimator`   | Classic biomechanics baselines using Dempster cadaver mass/CoM/gyration ratios + Drillis–Contini/Winter lengths. | Dempster (1955); Drillis & Contini (1966) / Winter (2009) |
+| `ZatsiorskyEstimator` | Raw gamma-ray scanning inertia parameters from living subjects (e.g. for sensitivity analyses).                  | Zatsiorsky-Seluyanov (1985 / 2002)                        |
 
-All three implement the `Estimator` Protocol and are interchangeable:
+All three implement the same `Estimator` API Protocol, **though they are not numerically interchangeable**: they reflect distinct study protocols (cadaver vs gamma-ray scanning of living subjects) and coarse-to-humanoid trunk partitioning conventions.
+
+> **Note on `humanoid_character_builder` inertias:** `humanoid_character_builder` constructs skeleton geometry from model-geometry proportions (`_GEOMETRY`) rather than de Leva's published endpoint lengths, and applies de Leva's CoM and gyration fractions to those model-geometry lengths (`I = m * (k * L_model)^2`). Use `DeLevaEstimator` directly when you need inertia tensors evaluated strictly on de Leva endpoint lengths.
 
 ```python
 from anthropometrics.estimators import (
