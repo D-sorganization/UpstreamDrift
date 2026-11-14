@@ -18,6 +18,149 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#15045 · Hill F_V Zero Beyond Vmax; Exponential Activation Substeps for Mocap Dt
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15045
+- **Branch:** cursor/hill-activation-sci-15045-1ec6
+- **PR:** #15054
+- **Paths:** see #15054
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`59cb1fcb`; collated from changes/15045-hill-f-v-zero-beyond-vmax-exponential-ac.md)
+- **Summary:** Hill f_v zero beyond Vmax; exponential activation substeps for mocap dt
+- **Next step:** Merge after CI green
+
+### DL-#15044 · SO(3) Quat_Inverse_Distance (Relative-Quaternion Angle), Interpolated Ball-Flight Ground Landing
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15044
+- **Branch:** cursor/quat-landing-sci-15044-e727
+- **PR:** #15056
+- **Paths:** see #15056
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`67fef889`; collated from changes/15044-so-3-quat-inverse-distance-and-interpola.md)
+- **Summary:** SO(3) quat_inverse_distance (relative-quaternion angle), interpolated ball-flight ground landing
+- **Next step:** Review and merge after CI.
+
+### DL-#15043 · Align Rigid-Body Off-Center COR Impulse With Validator Budget via Club Torque; Solver Integration Test.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15043
+- **Branch:** cursor/validate-energy-balance-15043-4fad
+- **PR:** #15051
+- **Paths:** see #15051
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`37a0e84f`; collated from changes/15043-energy-validator-uses-effective-club-mas.md)
+- **Summary:** Align rigid-body off-center COR impulse with validator budget via club torque; solver integration test.
+- **Next step:** Merge after CI.
+
+### DL-#15040 · Fix Turf Contact Impact: Joule Energy Loss, Receding Guard, Coupled Friction-Spin; Release-Safe Mass/Radius Validation
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15040
+- **Branch:** cursor/turf-contact-impact-15040-eeaa
+- **PR:** #15048
+- **Paths:** see #15048
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`b2212bc8`; collated from changes/15040-fix-turf-contact-impact-joule-energy-los.md)
+- **Summary:** Fix turf contact impact: joule energy loss, receding guard, coupled friction-spin; release-safe mass/radius validation
+- **Next step:** Merge after CI green and exact-head review
+
+### DL-#15022 · Agent API V1 Conformance CI and FastMCP Migration for Ud-Sim-Mcp
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15022
+- **Branch:** cursor/agent-api-v1-fastmcp-15022-1251
+- **PR:** #15073
+- **Paths:** see #15073
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`808174d4`; collated from changes/15022-agent-api-v1-fastmcp.md)
+- **Summary:** Agent API v1 conformance CI and FastMCP migration for ud-sim-mcp
+- **Next step:** Merge after conformance and sim_run tests are green in CI.
+
+### DL-#15015 · Fail-Closed Motion-Matching Gates; Archive Run-102 Evidence Script With Restore Ref.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15015
+- **Branch:** cursor/motion-matching-gate-honesty-15015-2352
+- **PR:** #15037
+- **Paths:** see #15037
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`1d015b47`; collated from changes/15015-fail-closed-motion-matching-gates-archiv.md)
+- **Summary:** Fail-closed motion-matching gates; archive run-102 evidence script with restore ref.
+- **Next step:** Merge after CI green; follow up GATES.md and coefficient order.
+
+### DL-#15014 · Fix Dempster/Zatsiorsky Segment Mass Expansion and C3D Export Placeholder (Part A)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15014
+- **Branch:** cursor/segment-mass-c3d-fix-e135
+- **PR:** #15036, #15035
+- **Paths:** see #15036
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`01c67c54`; collated from changes/15014-urdf-mjcf-converter-preserves-joint-and.md)
+- **Summary:** Fix Dempster/Zatsiorsky segment mass expansion and C3D export placeholder (part a)
+- **Next step:** Merge after CI green; part (a) remains on another lane.
+
+### DL-#13887 · Add Hill MTU Joint Actuator (Agonist/Antagonist, Compliant Tendon, Linearisation API).
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13887
+- **Branch:** cursor/hill-mtu-joint-actuator-cce3
+- **PR:** #15062
+- **Paths:** see #15062
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`1b0ef44a`; collated from changes/13887-add-hill-mtu-joint-actuator-agonist-anta.md)
+- **Summary:** Add Hill MTU joint actuator (agonist/antagonist, compliant tendon, linearisation API).
+- **Next step:** Merge after CI.
+
+### DL-#13781 · ML-WS-4 Native MuJoCo Episode Corpus Generator, Manifest Hashes, and CI Fixture
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13781
+- **Branch:** cursor/ml-ws4-mujoco-episode-corpus-b024
+- **PR:** #15059
+- **Paths:** see #15059
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`aa6cfb89`; collated from changes/13781-ml-ws-4-native-mujoco-episode-corpus-gen.md)
+- **Summary:** ML-WS-4 native MuJoCo episode corpus generator, manifest hashes, and CI fixture
+- **Next step:** Merge after CI green
+
+### DL-#12723 · NSX-94: Commit Cross-Engine Co-Contraction Trade-Off Evidence JSON and Validation Harness
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12723
+- **Branch:** cursor/nsx94-tradeoff-report-3f62
+- **PR:** #15067
+- **Paths:** see #15067
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`90bfee5b`; collated from changes/12723-nsx-94-commit-cross-engine-co-contractio.md)
+- **Summary:** NSX-94: commit cross-engine co-contraction trade-off evidence JSON and validation harness
+- **Next step:** Merge after CI green.
+
+### DL-#12690 · R9c: Catalog MATLAB R2025b Appearance Acceptance as Deferred; Extend Headless Export and MATLAB Consumer Contract Tests.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #12690
+- **Branch:** cursor/simscape-appearance-r9c-c25e
+- **PR:** #15065
+- **Paths:** see #15065
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`bbaf03c0`; collated from changes/12690-r9c-catalog-matlab-r2025b-appearance-acc.md)
+- **Summary:** R9c: catalog MATLAB R2025b appearance acceptance as deferred; extend headless export and MATLAB consumer contract tests.
+- **Next step:** Run test_gs3dx_appearance.m on DeskComputer R2025b and commit simscape address evidence.
+
 ### DL-#15027 · Re-Bootstrap Pip With Ensurepip Before Force-Overlay-Parity Engine Installs (#15027).
 
 - **State:** in_review
@@ -924,6 +1067,279 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#15095 · Fix SwingMetricsMixin Test Harness After Velocity Delegation and Add Unit Marker (#15095)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15095
+- **Branch:** merged via #15096
+- **PR:** #15096
+- **Paths:** see #15096
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`c0d0f6c9`; collated from changes/15095-dbc-swing-phase-unit-marker.md)
+- **Summary:** Fix SwingMetricsMixin test harness after velocity delegation and add unit marker (#15095)
+- **Next step:** Shipped in PR #15096.
+
+### DL-#15093 · Guard NP-05 Lexical Test Against Collated Changelog Fragment Removal (#15093)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15093
+- **Branch:** merged via #15094
+- **PR:** #15094
+- **Paths:** see #15094
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`a011577c`; collated from changes/15093-np05-collated-changes-guard.md)
+- **Summary:** Guard NP-05 lexical test against collated changelog fragment removal (#15093)
+- **Next step:** Shipped in PR #15094.
+
+### DL-#15046 · SCI-10/12/13/14: Shaft FEM Scope Docs, Pendulum Inertia Param, Static-Opt Cost, Spatial Ordering
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15046
+- **Branch:** merged via #15052
+- **PR:** #15052
+- **Paths:** see #15052
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`e25c7b5b`; collated from changes/15046-sci-10-12-13-14-shaft-fem-scope-docs-pen.md)
+- **Summary:** SCI-10/12/13/14: shaft FEM scope docs, pendulum inertia param, static-opt cost, spatial ordering
+- **Next step:** Shipped in PR #15052.
+
+### DL-#15042 · Use Transverse Spin in Magnus/Lift Magnitude; Document Frame and Parity Fixtures (#15042).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15042
+- **Branch:** merged via #15053
+- **PR:** #15053
+- **Paths:** see #15053
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`9c8f8834`; collated from changes/15042-use-transverse-spin-in-magnus-lift-magni.md)
+- **Summary:** Use transverse spin in Magnus/lift magnitude; document frame and parity fixtures (#15042).
+- **Next step:** Shipped in PR #15053.
+
+### DL-#15041 · Evaluate Constrained Per-Actuator Columns at Measured (Q, V) With ZTCF Baseline
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15041
+- **Branch:** merged via #15049
+- **PR:** #15049
+- **Paths:** see #15049
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`c6acff9d`; collated from changes/15041-evaluate-constrained-per-actuator-column.md)
+- **Summary:** Evaluate constrained per-actuator columns at measured (q, v) with ZTCF baseline
+- **Next step:** Shipped in PR #15049.
+
+### DL-#15030 · Quantize Spatial Model Canonical Hashes for Cross-Runtime Manufactured Authority Parity, Regenerate Publication Evidence, and Re-Pick Optional-Stack Shooting Defect Floor After #14227 Gravity Alignment.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15030
+- **Branch:** merged via #15069
+- **PR:** #15069
+- **Paths:** see #15069
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`3e7c72e8`; collated from changes/15030-quantize-spatial-model-canonical-hashes.md)
+- **Summary:** Quantize spatial model canonical hashes for cross-runtime manufactured authority parity, regenerate publication evidence, and re-pick optional-stack shooting defect floor after #14227 gravity alignment.
+- **Next step:** Shipped in PR #15069.
+
+### DL-#15028 · Wave 0.1: Independent Triage of 67 Budget Exceptions That Expired 2026-11-30 (Measured Sizes, Regression Tests).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15028
+- **Branch:** merged via #15074
+- **PR:** #15074
+- **Paths:** see #15074
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`175e7bc6`; collated from changes/15028-wave0-architecture-budget-triage.md)
+- **Summary:** Wave 0.1: independent triage of 67 budget exceptions that expired 2026-11-30 (measured sizes, regression tests).
+- **Next step:** Shipped in PR #15074.
+
+### DL-#15021 · Expose ZTCF and Golf-Simulator Golden Capabilities via Sim_Run With REST/MCP Parity and 64 KiB Artifact Spill.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15021
+- **Branch:** merged via #15061
+- **PR:** #15061
+- **Paths:** see #15061
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`b1bc35ea`; collated from changes/15021-expose-ztcf-and-golf-simulator-golden-ca.md)
+- **Summary:** Expose ZTCF and golf-simulator golden capabilities via sim_run with REST/MCP parity and 64 KiB artifact spill.
+- **Next step:** Shipped in PR #15061.
+
+### DL-#15016 · Link Tile Help to AffineDrift Theory; Register Six Provisional Core Calculations and Dedupe Registry Blocker Ids
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15016
+- **Branch:** merged via #15063
+- **PR:** #15063, #15080, #15079
+- **Paths:** see #15063
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`3e24dc3f`; collated from changes/15016-zvcf-manual-consistency.md)
+- **Summary:** Link tile help to AffineDrift theory; register six provisional core calculations and dedupe registry blocker ids
+- **Next step:** Shipped in PR #15063.
+
+### DL-#15012 · Fix WBC Zero Torques With Contact and Hierarchical Task Enforcement
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15012
+- **Branch:** merged via #15025
+- **PR:** #15025
+- **Paths:** see #15025
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`19294384`; collated from changes/15012-fix-wbc-zero-torques-with-contact-and-hi.md)
+- **Summary:** Fix WBC zero torques with contact and hierarchical task enforcement
+- **Next step:** Shipped in PR #15025.
+
+### DL-#15010 · Correct Putting Slope Rolling (5/7 G), Unify Stimp Friction, Impact Club Spin, Flight Spin Sign Docs, Rust Air Temperature K
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15010
+- **Branch:** merged via #15026
+- **PR:** #15026
+- **Paths:** see #15026
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`49d3fc78`; collated from changes/15010-correct-putting-slope-rolling-5-7-g-unif.md)
+- **Summary:** Correct putting slope rolling (5/7 g), unify stimp friction, impact club spin, flight spin sign docs, Rust air temperature K
+- **Next step:** Shipped in PR #15026.
+
+### DL-#14949 · Managed Local Child-Process Lifecycle; Concurrent Stdout/Stderr Drain Avoids Pipe Deadlock (Refs #14949).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14949
+- **Branch:** merged via #14956
+- **PR:** #14956, #15081
+- **Paths:** see #14956
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`450becd6`; collated from changes/14949-wsl-matlab-docker-lifecycle.md)
+- **Summary:** Managed local child-process lifecycle; concurrent stdout/stderr drain avoids pipe deadlock (Refs #14949).
+- **Next step:** Shipped in PR #14956.
+
+### DL-#14942 · EngineManager Reloads LOADED Engines; Cleanup Resets Status and Closes Active Engine (#14942).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14942
+- **Branch:** merged via #15017
+- **PR:** #15017, #14961
+- **Paths:** see #15017
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`38c09978`; collated from changes/14942-enginemanager-reloads-loaded-engines-cle.md)
+- **Summary:** EngineManager reloads LOADED engines; cleanup resets status and closes active engine (#14942).
+- **Next step:** Shipped in PR #15017.
+
+### DL-#14936 · JaxSim Canonical-V2 Round-Trip; Rename Velocity Constant to SPATIAL_WRENCH_REPRESENTATION
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14936
+- **Branch:** merged via #15038
+- **PR:** #15038, #14966
+- **Paths:** see #15038
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`1f3202e7`; collated from changes/14936-wire-canonical-v2-get-set-on-basephysics.md)
+- **Summary:** JaxSim canonical-v2 round-trip; rename velocity constant to SPATIAL_WRENCH_REPRESENTATION
+- **Next step:** Shipped in PR #15038.
+
+### DL-#14935 · Committed Evidence Scan Calls Receipt Taxonomy Validation; Missing Fields and Conflicts Are Tested (#14935).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14935
+- **Branch:** merged via #14960
+- **PR:** #14960
+- **Paths:** see #14960
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`c52d3757`; collated from changes/14935-committed-evidence-validator-with-gate-a.md)
+- **Summary:** Committed evidence scan calls receipt taxonomy validation; missing fields and conflicts are tested (#14935).
+- **Next step:** Shipped in PR #14960.
+
+### DL-#14502 · NP-09 Policy Input-Output Sensitivity at Stated Operating Points (#14502)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14502
+- **Branch:** merged via #14825
+- **PR:** #14825
+- **Paths:** see #14825
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`1780a5e5`; collated from changes/14502-np09-io-sensitivity.md)
+- **Summary:** NP-09 policy input-output sensitivity at stated operating points (#14502)
+- **Next step:** Shipped in PR #14825.
+
+### DL-#14427 · Event-Relative Time Normalisation (101-Point Resampling) Between Named Swing Events
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14427
+- **Branch:** merged via #14834
+- **PR:** #14834
+- **Paths:** see #14834
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`e64ae5e7`; collated from changes/14427-gm4-event-time-normalisation.md)
+- **Summary:** Event-relative time normalisation (101-point resampling) between named swing events
+- **Next step:** Shipped in PR #14834.
+
+### DL-#14426 · GM-3 Cheetham X-Factor Stretch and Kinematic Sequence (#14426)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14426
+- **Branch:** merged via #14836
+- **PR:** #14836
+- **Paths:** see #14836
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`8722411f`; collated from changes/14426-gm3-xfactor-kinematic-seq.md)
+- **Summary:** GM-3 Cheetham X-factor stretch and kinematic sequence (#14426)
+- **Next step:** Shipped in PR #14836.
+
+### DL-#14425 · GRF and COP Observability, Event-Anchored Peaks, and Normalisation Contracts (GM-2).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14425
+- **Branch:** merged via #14837
+- **PR:** #14837
+- **Paths:** see #14837
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`120e4803`; collated from changes/14425-gm2-grf-cop-observability.md)
+- **Summary:** GRF and COP observability, event-anchored peaks, and normalisation contracts (GM-2).
+- **Next step:** Shipped in PR #14837.
+
+### DL-#12727 · NSX-98: Document A(t)/B(t) Assembly in Derivative Conformance Harness
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12727
+- **Branch:** merged via #15066
+- **PR:** #15066
+- **Paths:** see #15066
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`f7edaa35`; collated from changes/12727-nsx-98-document-a-t-b-t-assembly-in-deri.md)
+- **Summary:** NSX-98: document A(t)/B(t) assembly in derivative conformance harness
+- **Next step:** Shipped in PR #15066.
+
+### DL-#12046 · Interim 30-Day Realtime Shadow Ledger Sunset (#12046) so Hygiene Tests Pass Pending Tools Migration
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12046
+- **Branch:** merged via #14929
+- **PR:** #14929
+- **Paths:** see #14929
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`7a52997f`; collated from changes/12046-realtime-shadow-sunset-interim.md)
+- **Summary:** Interim 30-day realtime shadow ledger sunset (#12046) so hygiene tests pass pending Tools migration
+- **Next step:** Shipped in PR #14929.
+
 ### DL-#15047 · README Onboarding: Venv-First Install, Toolchains, Ud-Sim, Engines, Layout Tree.
 
 - **State:** shipped
@@ -1008,10 +1424,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14940
 - **Branch:** merged via #15000
-- **PR:** #15000
+- **PR:** #15000, #14959
 - **Paths:** see #15000
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`fdc7985e`; collated from changes/14940-aip-json-rpc-stubs-return-not-implemente.md)
+- **Last verified:** 2026-11-14 (`d91cd296`; collated from changes/14940-aip-json-rpc-stubs-return-not-implemente.md)
 - **Summary:** AIP JSON-RPC stubs return not_implemented; capabilities self-check (#14940).
 - **Next step:** Shipped in PR #15000.
 
@@ -1034,10 +1450,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14943
 - **Branch:** merged via #14998
-- **PR:** #14998, #14965
+- **PR:** #14998, #14965, #15005, #14973, #15007
 - **Paths:** see #14998
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-12 (`4dd93114`; collated from changes/14943-counterfactualkind-result-spec-aligned-z.md)
+- **Last verified:** 2026-11-14 (`96af1f50`; collated from changes/14943-mujoco-tau-generalized-force.md)
 - **Summary:** CounterfactualKind/Result, simscape/putting defaults, conformance (#14943 slices 1–4)
 - **Next step:** Shipped in PR #14998.
 
@@ -1060,10 +1476,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14948
 - **Branch:** merged via #14977
-- **PR:** #14977, #14993
+- **PR:** #14977, #14993, #15004
 - **Paths:** see #14977
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`84913b7f`; collated from changes/14948-engine-lane-coverage-and-matlab.md)
+- **Last verified:** 2026-11-14 (`7376c4ab`; collated from changes/14948-conftest-makereport-and-floor.md)
 - **Summary:** Enforce required physics engine execution, JUnit floor checks, and JaxSim heavy test lane
 - **Next step:** Shipped in PR #14977.
 
@@ -1853,10 +2269,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12724
 - **Branch:** merged via #14761
-- **PR:** #14761
+- **PR:** #14761, #15068
 - **Paths:** see #14761
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`104a43b6`; collated from changes/12724-s6-catalogue-reason-now-names-the-missin.md)
+- **Last verified:** 2026-11-14 (`36f6dbbf`; collated from changes/12724-nsx-95-campaign-catalogue-json-strategy.md)
 - **Summary:** S6 catalogue reason now names the missing arm on the NSX-97 UCM split
 - **Next step:** Shipped in PR #14761.
 
@@ -2126,10 +2542,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12553
 - **Branch:** merged via #14684
-- **PR:** #14684, #14690, #14696, #14704, #14713, #14725, #14787, #14925
+- **PR:** #14684, #14690, #14696, #14704, #14713, #14725, #14787, #14925, #15064
 - **Paths:** see #14684
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-10 (`448c4a2c`; collated from changes/12553-nsx04-verification-status-inventory.md)
+- **Last verified:** 2026-11-14 (`65360d12`; collated from changes/12553-verify-hip-adduction-and-rotation-torque.md)
 - **Summary:** NSX-04 slice 1: verified subtalar inversion/eversion and MTP flexion torque capacities (da Fonseca 2025, Saeki 2021); hip and MTP-extension slots keep ASSUMED with stated reasons
 - **Next step:** Shipped in PR #14684.
 
