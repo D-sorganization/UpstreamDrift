@@ -530,11 +530,11 @@
   "qualification": "none; manufactured source-bound pose, zero-rate geometry only",
   "runtime": {
     "drake_distribution_version": "1.57.0",
-    "full_body_model_module_origin": "/home/dieterolson/native_engine_parity_20261011_final_50203626/src/engines/physics_engines/drake/python/full_body_model.py",
+    "full_body_model_module_origin": "<owner-home>/native_engine_parity_20261011_final_50203626/src/engines/physics_engines/drake/python/full_body_model.py",
     "full_body_model_module_sha256": "a60b02a1cd77f53a360f1259487049c60a364334981cdeca28c7052edab11f47",
-    "full_body_spec_module_origin": "/home/dieterolson/native_engine_parity_20261011_final_50203626/src/shared/python/motion_matching/full_body_spec.py",
+    "full_body_spec_module_origin": "<owner-home>/native_engine_parity_20261011_final_50203626/src/shared/python/motion_matching/full_body_spec.py",
     "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
-    "pydrake_package_origin": "/home/dieterolson/native_engine_parity_20261011_final_50203626/.venv312/lib/python3.12/site-packages/pydrake/__init__.py",
+    "pydrake_package_origin": "<owner-home>/native_engine_parity_20261011_final_50203626/.venv312/lib/python3.12/site-packages/pydrake/__init__.py",
     "pydrake_package_sha256": "66a841e3e9d11d1dbcd1f030ee31c0b4983025ad26b0b98031606beb7e3f853c",
     "python": "3.12.12 (main, Oct 10 2025, 08:52:57) [GCC 11.4.0]"
   },
@@ -647,9 +647,9 @@
     "tests/unit/motion_matching/test_pinocchio_full_body_builder.py": "3f99fa206f3ae7c28b69bb68a0a4dd945ae7cda1995c2becc6e3bc09c85905da"
   },
   "source_import_paths": [
-    "/home/dieterolson/native_engine_parity_20261011_final_50203626/src",
-    "/home/dieterolson/native_engine_parity_20261011_final_50203626/src/shared/python",
-    "/home/dieterolson/native_engine_parity_20261011_final_50203626"
+    "<owner-home>/native_engine_parity_20261011_final_50203626/src",
+    "<owner-home>/native_engine_parity_20261011_final_50203626/src/shared/python",
+    "<owner-home>/native_engine_parity_20261011_final_50203626"
   ],
   "source_setup_helper_sha256": "2d619a9540920cf7093af61a1cbc8cdf865b0ca7cc56c968c631e2f879c78cb3",
   "status": "observed_kinematics_only",

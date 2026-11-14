@@ -25,6 +25,8 @@ __all__ = [
     "mean_control_fails_while_modes_succeed",
 ]
 
+# Fixed output gain [N*m or dimensionless control units] scaling normalized tanh
+# proposal logits in [-1, 1] into benchmark actuation range [-5, 5].
 CONTROL_SCALE = 5.0
 
 

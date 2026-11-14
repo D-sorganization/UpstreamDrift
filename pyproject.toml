@@ -58,7 +58,7 @@ dependencies = [
     # path; it previously existed only as a hand-edit in the generated
     # environment.yml, where it constrained conda users alone and was
     # scheduled for deletion by the next `make sync-deps` (#8689).
-    "tornado>=6.6",
+    "tornado>=6.6.1",
     # Transitive via flask/uvicorn/pip-tools rather than imported directly.
     # Declared here for the same reason as tornado above: the floor must bind
     # on every install path, not depend on whichever dependent resolves first.
@@ -96,6 +96,9 @@ dependencies = [
     # in 50.0.0), PYSEC-2026-3553 and PYSEC-2026-3554 (both 49.0.0) (#8738).
     "cryptography>=50.0.0",
     "email-validator>=2.0.0",
+    # Transitive via email-validator; floor binds pip-audit on every install path
+    # (CVE-2026-128089, fixed in 2.9.2; #13761).
+    "dnspython>=2.9.2",
     # Hardened XML parsing used at module load by src/api/routes/models.py, which
     # is imported by src/api/routes/__init__.py and therefore by every API server
     # start-up. Tiny pure-Python package; must be core, not urdf-extra-only (#8032).
