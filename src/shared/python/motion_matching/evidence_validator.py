@@ -6,27 +6,66 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date
 import json
+import math
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeGuard
 
+from src.shared.python.motion_matching.acceptance import AcceptanceGates
 from src.shared.python.motion_matching.ledger import classify_receipt
 
 __all__ = [
+    "DEFAULT_MAX_LEDGER_UNCLASSIFIED",
+    "DEFAULT_MAX_LEDGER_UNVERIFIED",
     "EvidenceIssue",
     "ValidationReport",
+    "ledger_unclassified_count",
+    "ledger_unverified_count",
     "load_waivers",
+    "validate_candidate_gate_metrics",
     "validate_candidate_package",
+    "validate_ledger_ratchets",
     "validate_receipt_paths",
     "validate_receipt_taxonomy",
     "validate_committed_evidence",
 ]
 
+DEFAULT_MAX_LEDGER_UNCLASSIFIED = 37
+DEFAULT_MAX_LEDGER_UNVERIFIED = 122
+
+_HTTP_URL_RE = re.compile(r"https?://\S+")
+
 _HOST_ABSOLUTE_RE = re.compile(
-    r"(^/home/|^/Users/|^/mnt/"
-    r"|^[A-Za-z]:[\\/]"
-    r"|^candidate:/home/|^candidate:/Users/)"
+    r"(?:file://"
+    r"|(?<![A-Za-z0-9_])~[\\/]"
+    r"|/home/"
+    r"|/Users/"
+    r"|/mnt/"
+    r"|(?<![A-Za-z0-9_])[A-Za-z]:[\\/])"
 )
+
+_CORE_CANDIDATE_GATES = (
+    "whole_window_pass",
+    "early_retention_pass",
+    "terminal_rmse_pass",
+    "clubhead_terminal_pass",
+)
+_PELVIS_YAW_GATES = (
+    "pelvis_yaw_pass",
+    "pelvis_yaw_080_pass",
+    "pelvis_yaw_105_pass",
+    "pelvis_yaw_115_pass",
+    "pelvis_yaw_1233_pass",
+)
+
+
+def _is_valid_real_number(value: Any) -> TypeGuard[int | float]:
+    """Return True iff ``value`` is a finite int/float (excluding bool)."""
+    return (
+        not isinstance(value, bool)
+        and isinstance(value, (int, float))
+        and math.isfinite(float(value))
+    )
 
 
 @dataclass(frozen=True)
@@ -61,14 +100,180 @@ def _parse_gates_passed(text: str) -> tuple[int, int] | None:
         return None
 
 
+_DEFAULT_GATES = AcceptanceGates()
+
+
+def _thresholds_for_duration(duration_s: Any) -> dict[str, tuple[str, float]]:
+    dur = float(duration_s) if isinstance(duration_s, (int, float)) else 0.8
+    if dur > 1.35:
+        whole, early = (
+            _DEFAULT_GATES.g3_whole_driver_rmse_m,
+            _DEFAULT_GATES.g3_early_rmse_m,
+        )
+        term, club = _DEFAULT_GATES.g3_terminal_rmse_m, _DEFAULT_GATES.g3_club_rmse_m
+    elif dur > 0.90:
+        whole, early = _DEFAULT_GATES.g2_whole_rmse_m, _DEFAULT_GATES.g2_early_rmse_m
+        term, club = _DEFAULT_GATES.g2_terminal_rmse_m, _DEFAULT_GATES.g2_club_rmse_m
+    else:
+        whole, early = _DEFAULT_GATES.g1_whole_rmse_m, _DEFAULT_GATES.g1_early_rmse_m
+        term, club = _DEFAULT_GATES.g1_terminal_rmse_m, _DEFAULT_GATES.g1_club_rmse_m
+    yaw_pct = _DEFAULT_GATES.g1_pelvis_yaw_error_pct
+    return {
+        "whole_window_pass": ("rmse_m", whole),
+        "early_retention_pass": ("early_rmse_m", early),
+        "terminal_rmse_pass": ("terminal_rmse_m", term),
+        "clubhead_terminal_pass": ("clubhead_terminal_rmse_m", club),
+        "pelvis_yaw_pass": ("pelvis_yaw_error_pct", yaw_pct),
+        "pelvis_yaw_080_pass": ("pelvis_yaw_080_error_pct", yaw_pct),
+        "pelvis_yaw_105_pass": ("pelvis_yaw_105_error_pct", yaw_pct),
+        "pelvis_yaw_115_pass": ("pelvis_yaw_115_error_pct", yaw_pct),
+        "pelvis_yaw_1233_pass": ("pelvis_yaw_1233_error_pct", yaw_pct),
+    }
+
+
+def validate_candidate_gate_metrics(
+    rel_path: str, data: Mapping[str, Any]
+) -> list[EvidenceIssue]:
+    """Recompute verifiable candidate gate booleans against AcceptanceGates limits."""
+    gates = data.get("gates")
+    if not isinstance(gates, Mapping) or not gates:
+        return []
+    issues: list[EvidenceIssue] = []
+    duration_s = data.get("duration_s")
+    valid_duration = _is_valid_real_number(duration_s) and float(duration_s) > 0.0
+    if not valid_duration:
+        issues.append(
+            EvidenceIssue(
+                rule="gate_metric_mismatch",
+                path=rel_path,
+                message=f"duration_s={duration_s!r} must be a positive finite number",
+            )
+        )
+    missing_core = [gate for gate in _CORE_CANDIDATE_GATES if gate not in gates]
+    if missing_core:
+        issues.append(
+            EvidenceIssue(
+                rule="gate_metric_mismatch",
+                path=rel_path,
+                message=f"missing required core gates: {', '.join(missing_core)}",
+            )
+        )
+    if not any(gate in gates for gate in _PELVIS_YAW_GATES):
+        issues.append(
+            EvidenceIssue(
+                rule="gate_metric_mismatch",
+                path=rel_path,
+                message="missing required pelvis_yaw gate",
+            )
+        )
+
+    thresholds = _thresholds_for_duration(duration_s if valid_duration else 0.8)
+    for gate_name, stored in gates.items():
+        if not isinstance(stored, bool):
+            issues.append(
+                EvidenceIssue(
+                    rule="gate_metric_mismatch",
+                    path=rel_path,
+                    message=f"{gate_name}={stored!r} must be a boolean",
+                )
+            )
+            continue
+        if gate_name not in thresholds:
+            if stored is True:
+                issues.append(
+                    EvidenceIssue(
+                        rule="gate_metric_mismatch",
+                        path=rel_path,
+                        message=f"{gate_name}=True has no verifiable metric threshold",
+                    )
+                )
+            continue
+        metric_key, limit = thresholds[gate_name]
+        measured = data.get(metric_key)
+        if (
+            metric_key not in data
+            or not _is_valid_real_number(measured)
+            or float(measured) < 0.0
+        ):
+            issues.append(
+                EvidenceIssue(
+                    rule="gate_metric_mismatch",
+                    path=rel_path,
+                    message=(
+                        f"{gate_name} requires finite non-negative numeric {metric_key}, "
+                        f"got {measured!r}"
+                    ),
+                )
+            )
+            continue
+        recomputed = float(measured) <= limit
+        if stored != recomputed:
+            issues.append(
+                EvidenceIssue(
+                    rule="gate_metric_mismatch",
+                    path=rel_path,
+                    message=(
+                        f"{gate_name}={stored} disagrees with {metric_key}={measured} "
+                        f"vs threshold {limit}"
+                    ),
+                )
+            )
+    return issues
+
+
 def validate_candidate_package(
     rel_path: str, data: Mapping[str, Any]
 ) -> list[EvidenceIssue]:
-    """``accepted`` must agree with gate booleans and ``gates_passed``."""
+    """``accepted`` must agree with gate booleans, metrics, and ``gates_passed``."""
     issues: list[EvidenceIssue] = []
-    if not data.get("accepted"):
-        return issues
     gates = data.get("gates")
+    accepted = data.get("accepted")
+
+    if isinstance(gates, Mapping) and gates:
+        all_passed = all(passed is True for passed in gates.values())
+        true_count = sum(1 for value in gates.values() if value is True)
+        passed_text = data.get("gates_passed")
+        if isinstance(passed_text, str) and passed_text.strip():
+            parsed = _parse_gates_passed(passed_text.strip())
+            if parsed is None:
+                issues.append(
+                    EvidenceIssue(
+                        rule="accepted_gates_consistency",
+                        path=rel_path,
+                        message=f"gates_passed={passed_text!r} is not a valid N/M count",
+                    )
+                )
+            elif parsed != (true_count, len(gates)):
+                issues.append(
+                    EvidenceIssue(
+                        rule="accepted_gates_consistency",
+                        path=rel_path,
+                        message=(
+                            f"gates_passed={passed_text!r} disagrees with "
+                            f"{true_count}/{len(gates)} gate booleans"
+                        ),
+                    )
+                )
+        elif accepted:
+            issues.append(
+                EvidenceIssue(
+                    rule="accepted_gates_consistency",
+                    path=rel_path,
+                    message="accepted=true but gates_passed is missing or empty",
+                )
+            )
+        if accepted is False and all_passed:
+            issues.append(
+                EvidenceIssue(
+                    rule="accepted_gates_consistency",
+                    path=rel_path,
+                    message="accepted=false despite all gates passing",
+                )
+            )
+
+    if not accepted:
+        issues.extend(validate_candidate_gate_metrics(rel_path, data))
+        return issues
     if not isinstance(gates, Mapping) or not gates:
         issues.append(
             EvidenceIssue(
@@ -77,6 +282,7 @@ def validate_candidate_package(
                 message="accepted=true but gates block is missing or empty",
             )
         )
+        issues.extend(validate_candidate_gate_metrics(rel_path, data))
         return issues
     failed = [name for name, passed in gates.items() if passed is not True]
     if failed:
@@ -89,39 +295,7 @@ def validate_candidate_package(
                 ),
             )
         )
-    true_count = sum(1 for value in gates.values() if value is True)
-    passed_text = data.get("gates_passed")
-    if not isinstance(passed_text, str) or not passed_text.strip():
-        issues.append(
-            EvidenceIssue(
-                rule="accepted_gates_consistency",
-                path=rel_path,
-                message="accepted=true but gates_passed is missing or empty",
-            )
-        )
-        return issues
-    parsed = _parse_gates_passed(passed_text.strip())
-    if parsed is None:
-        issues.append(
-            EvidenceIssue(
-                rule="accepted_gates_consistency",
-                path=rel_path,
-                message=f"gates_passed={passed_text!r} is not a valid N/M count",
-            )
-        )
-        return issues
-    passed_count, total = parsed
-    if passed_count != true_count or total != len(gates):
-        issues.append(
-            EvidenceIssue(
-                rule="accepted_gates_consistency",
-                path=rel_path,
-                message=(
-                    f"gates_passed={passed_text!r} disagrees with "
-                    f"{true_count}/{len(gates)} gate booleans"
-                ),
-            )
-        )
+    issues.extend(validate_candidate_gate_metrics(rel_path, data))
     return issues
 
 
@@ -129,7 +303,7 @@ def _walk_strings(
     value: Any, *, field_path: str, issues: list[EvidenceIssue], rel_path: str
 ) -> None:
     if isinstance(value, str):
-        if _HOST_ABSOLUTE_RE.search(value):
+        if "file://" in value or _HOST_ABSOLUTE_RE.search(_HTTP_URL_RE.sub("", value)):
             issues.append(
                 EvidenceIssue(
                     rule="host_absolute_provenance",
@@ -370,6 +544,7 @@ def validate_committed_evidence(
         if isinstance(rows, list):
             row_maps = [row for row in rows if isinstance(row, Mapping)]
             raw_issues.extend(validate_ledger_unclassified_rows(row_maps))
+            raw_issues.extend(validate_ledger_ratchets(row_maps))
 
     active: list[EvidenceIssue] = []
     waived: list[EvidenceIssue] = []
@@ -397,3 +572,36 @@ def ledger_unclassified_count(ledger_rows: Sequence[Mapping[str, Any]]) -> int:
     return sum(
         1 for row in ledger_rows if str(row.get("lane", "")).lower() == "unclassified"
     )
+
+
+def ledger_unverified_count(ledger_rows: Sequence[Mapping[str, Any]]) -> int:
+    return sum(1 for row in ledger_rows if row.get("acceptance") is None)
+
+
+def validate_ledger_ratchets(
+    ledger_rows: Sequence[Mapping[str, Any]],
+    *,
+    max_unclassified: int = DEFAULT_MAX_LEDGER_UNCLASSIFIED,
+    max_unverified: int = DEFAULT_MAX_LEDGER_UNVERIFIED,
+) -> list[EvidenceIssue]:
+    """Enforce shrink-only upper bounds on unclassified and unjudged ledger rows."""
+    issues: list[EvidenceIssue] = []
+    unclassified = ledger_unclassified_count(ledger_rows)
+    if unclassified > max_unclassified:
+        issues.append(
+            EvidenceIssue(
+                rule="ledger_unclassified_ratchet",
+                path="reports/matched_swing_ledger.json",
+                message=f"unclassified count {unclassified} exceeds ratchet {max_unclassified}",
+            )
+        )
+    unverified = ledger_unverified_count(ledger_rows)
+    if unverified > max_unverified:
+        issues.append(
+            EvidenceIssue(
+                rule="ledger_unverified_ratchet",
+                path="reports/matched_swing_ledger.json",
+                message=f"missing-verdict count {unverified} exceeds ratchet {max_unverified}",
+            )
+        )
+    return issues
