@@ -474,7 +474,8 @@ if analysis:
 
 # 5. Counterfactual analysis
 a_ztcf = engine.compute_ztcf(q, v)
-a_zvcf = engine.compute_zvcf(q)
+tau = np.zeros_like(v)  # or applied generalized forces [N*m or N]
+a_zvcf = engine.compute_control_acceleration_at_state(q, tau)  # SPEC §4 ZVCF: M(q)^-1 tau (gravity/velocity zeroed)
 print(f"ZTCF acceleration norm: {np.linalg.norm(a_ztcf):.3f} rad/s^2")
 print(f"ZVCF acceleration norm: {np.linalg.norm(a_zvcf):.3f} rad/s^2")
 ```

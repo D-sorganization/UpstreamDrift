@@ -19,7 +19,7 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01; model.py updated for worktree vendor resolution."
     },
     "launcher-atlas": {
-      "fingerprint": "1c8411687397e840688e9df9a4e817a43d1482483df207552d8060968bfb9542",
+      "fingerprint": "0723687c013869ba207a1178b654d7513c88b19b0f9a3473cbf7cf59e4555d89",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
@@ -27,7 +27,7 @@
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
         "src/config/feature_parity.json": "8215da70f795fb83b3579a95a597c9eaa647878f52016b24094c65f789251ce8",
-        "src/config/launcher_manifest.json": "59cf9a1547300feaae6a3a954ff7375f58725645ebf2f5f1071b7722f4ab7ac2",
+        "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
         "src/config/models.yaml": "ad3f0cf74f12a3a0df3443b3f40ace2393123ee6d39ee34b055d4f79c4a1c873",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Re-reviewed launcher-atlas after adding a notes field to tools.putting_green in feature_parity.json (web Metric/Imperial units selector, UD #14458). Identifiers and parity status unchanged; contract unchanged; capability atlas regenerated (generate_capability_atlas --check clean, tests/scripts/test_capability_atlas.py 11 passed)."
+      "rationale": "Reviewed UD #15016 launcher_manifest.json tile label and capability honesty updates (golf_simulation_suite prototype capabilities; tools_calculator_hub Data Processor entry clarification and dead /tools/calculators web_route removal). Regenerated capability atlas (generate_capability_atlas --check clean)."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",
