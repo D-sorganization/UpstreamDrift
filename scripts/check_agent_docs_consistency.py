@@ -102,7 +102,6 @@ def _iter_duplicate_paragraphs(text: str) -> list[str]:
 def _iter_repo_relative_paths(text: str) -> list[str]:
     candidates = re.finditer(r"`([^`\n]+)`", text)
     repo_roots = {
-        ".gaai",
         ".github",
         "docs",
         "installer",

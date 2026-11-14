@@ -20,14 +20,6 @@ Houses Claude-specific workspace commands, prompt augmentations, and tool skills
 - `.claude/commands/`: Custom command extensions and task scripts.
 - `.claude/skills/`: Specialized domain skills for Claude agents.
 
-### `.gaai` — GAAI Project and Automation Scripts
-
-Stores Global Artificial Autonomous Intelligence (GAAI) workspace configurations:
-
-- `.gaai/core/`: Engine bindings and core agent protocols.
-- `.gaai/project/`: Repository-specific project context and metadata.
-- `.gaai/scripts/`: Automation scripts and execution hooks.
-
 ### `.gemini` — Gemini Command Specifications
 
 Contains Gemini-targeted command manifests and agent protocol templates:
