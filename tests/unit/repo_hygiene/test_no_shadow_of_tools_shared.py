@@ -14,8 +14,9 @@ Design-by-contract:
 
 - The ledger is a **ratchet**. Entries may disappear (debt paid down); a new
   shadow that is not in the ledger fails this test.
-- Every ledger entry MUST carry a positive-int ``tracking_issue`` and a
-  parseable ISO ``sunset_date`` that has not yet passed. Silent ledger rot is
+- Every ledger entry MUST carry a positive-int ``tracking_issue`` and either
+  a parseable ISO ``sunset_date`` that has not yet passed OR a verified
+  ``adr_ruling`` path under ``docs/adr/`` (never both). Silent ledger rot is
   the primary failure mode this guard exists to prevent.
 - A missing vendor tree **fails closed in CI**. It only degrades to a skip on a
   developer machine that has not run ``git submodule update --init``. This
@@ -85,13 +86,41 @@ def _require_vendor_shared() -> Path:
     return require_vendor_path(_VENDOR_SHARED)
 
 
-def _load_ledger(path: Path | None = None) -> dict[str, dict[str, Any]]:
+def _validate_adr_ruling(name: str, adr_ruling: Any, repo_root: Path) -> None:
+    """Validate an ``adr_ruling`` field referencing an existing ADR under ``docs/adr/``."""
+    assert isinstance(adr_ruling, str) and adr_ruling, (
+        f"shadow_modules.yaml entry {name!r}: 'adr_ruling' must be a non-empty "
+        f"relative POSIX path under 'docs/adr/', got {adr_ruling!r}"
+    )
+    rel = PurePosixPath(adr_ruling)
+    assert (
+        not rel.is_absolute()
+        and adr_ruling == rel.as_posix()
+        and ".." not in rel.parts
+        and len(rel.parts) == 3
+        and rel.parts[:2] == ("docs", "adr")
+        and rel.suffix == ".md"
+    ), (
+        f"shadow_modules.yaml entry {name!r}: 'adr_ruling' must be a canonical "
+        f"POSIX path 'docs/adr/<file>.md', got {adr_ruling!r}"
+    )
+    adr_path = repo_root / rel
+    assert adr_path.is_file(), (
+        f"shadow_modules.yaml entry {name!r}: 'adr_ruling' target {adr_ruling!r} "
+        f"does not exist at {adr_path}"
+    )
+
+
+def _load_ledger(
+    path: Path | None = None, *, repo_root: Path | None = None
+) -> dict[str, dict[str, Any]]:
     """Load and validate the shadow-module ledger.
 
     Returns an empty dict when the file declares ``shadows: {}``. Raises
-    :class:`AssertionError` on malformed or expired entries.
+    :class:`AssertionError` on malformed, expired, or unbacked entries.
     """
     ledger_path = _LEDGER_PATH if path is None else path
+    effective_repo_root = _REPO_ROOT if repo_root is None else repo_root
     assert ledger_path.is_file(), (
         f"Shadow ledger missing at {ledger_path}. See UpstreamDrift issue #5623."
     )
@@ -107,11 +136,21 @@ def _load_ledger(path: Path | None = None) -> dict[str, dict[str, Any]]:
             f"got {type(entry)!r}"
         )
         issue = entry.get("tracking_issue")
-        sunset = entry.get("sunset_date")
         assert isinstance(issue, int) and issue > 0, (
             f"shadow_modules.yaml entry {name!r}: 'tracking_issue' must be a "
             f"positive int, got {issue!r}"
         )
+        has_sunset = "sunset_date" in entry
+        has_adr = "adr_ruling" in entry
+        assert has_sunset != has_adr, (
+            f"shadow_modules.yaml entry {name!r}: must declare exclusively one "
+            "of 'sunset_date' or 'adr_ruling'"
+        )
+        if has_adr:
+            _validate_adr_ruling(name, entry.get("adr_ruling"), effective_repo_root)
+            continue
+
+        sunset = entry.get("sunset_date")
         assert isinstance(sunset, str) and sunset, (
             f"shadow_modules.yaml entry {name!r}: 'sunset_date' must be a "
             f"non-empty ISO date string, got {sunset!r}"
@@ -223,19 +262,25 @@ def test_ledger_is_well_formed() -> None:
     _load_ledger()
 
 
-def test_realtime_shadow_ledger_stays_tied_to_issue_12046() -> None:
-    """Interim #12046: extend sunset while publish/subscribe APIs remain UD-only."""
+def test_realtime_shadow_ledger_is_governed_by_adr_split_ruling() -> None:
+    """UD #12046: realtime carries an ADR-0061 split ruling without a sunset date."""
     entry = _load_ledger()["realtime"]
     assert entry["tracking_issue"] == 12046
-    assert date.fromisoformat(entry["sunset_date"]) >= date.today()
+    assert "sunset_date" not in entry
+    assert entry["adr_ruling"] == "docs/adr/0061-realtime-provider-split-ruling.md"
+    assert (_REPO_ROOT / entry["adr_ruling"]).is_file()
 
 
 def test_load_ledger_succeeds_against_utc_and_local_dates() -> None:
-    """Regression #14928: _load_ledger() succeeds against both UTC date and local date."""
+    """Regression #14928: _load_ledger() validates sunset dates and ADR rulings."""
     shadows = _load_ledger()
     today_utc = datetime.now(timezone.utc).date()
     today_local = date.today()
     for name, entry in shadows.items():
+        if "adr_ruling" in entry:
+            assert "sunset_date" not in entry
+            assert (_REPO_ROOT / entry["adr_ruling"]).is_file()
+            continue
         parsed_sunset = date.fromisoformat(entry["sunset_date"])
         assert parsed_sunset >= today_utc, (
             f"shadow_modules.yaml entry {name!r}: 'sunset_date' "
@@ -245,6 +290,76 @@ def test_load_ledger_succeeds_against_utc_and_local_dates() -> None:
             f"shadow_modules.yaml entry {name!r}: 'sunset_date' "
             f"{entry['sunset_date']!r} expired locally ({parsed_sunset} < {today_local})"
         )
+
+
+def test_load_ledger_accepts_valid_adr_ruling_without_sunset_date(
+    tmp_path: Path,
+) -> None:
+    """An entry backed by an existing docs/adr/*.md file passes without sunset_date."""
+    adr_dir = tmp_path / "docs" / "adr"
+    adr_dir.mkdir(parents=True)
+    (adr_dir / "0099-split-ruling.md").write_text("# ADR-0099\n", encoding="utf-8")
+    ledger = tmp_path / "shadow_modules.yaml"
+    ledger.write_text(
+        "shadows:\n"
+        "  some_module:\n"
+        "    tracking_issue: 12046\n"
+        '    adr_ruling: "docs/adr/0099-split-ruling.md"\n',
+        encoding="utf-8",
+    )
+
+    loaded = _load_ledger(ledger, repo_root=tmp_path)
+    assert loaded["some_module"]["adr_ruling"] == "docs/adr/0099-split-ruling.md"
+
+
+def test_load_ledger_rejects_adr_ruling_missing_file_or_outside_docs_adr(
+    tmp_path: Path,
+) -> None:
+    """Invalid or nonexistent adr_ruling paths must fail closed."""
+    outside = tmp_path / "notes.md"
+    outside.write_text("# Not an ADR\n", encoding="utf-8")
+    ledger = tmp_path / "shadow_modules.yaml"
+
+    ledger.write_text(
+        "shadows:\n"
+        "  some_module:\n"
+        "    tracking_issue: 12046\n"
+        '    adr_ruling: "docs/adr/9999-missing.md"\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(AssertionError, match="does not exist"):
+        _load_ledger(ledger, repo_root=tmp_path)
+
+    ledger.write_text(
+        "shadows:\n"
+        "  some_module:\n"
+        "    tracking_issue: 12046\n"
+        '    adr_ruling: "notes.md"\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(AssertionError, match="docs/adr/"):
+        _load_ledger(ledger, repo_root=tmp_path)
+
+
+def test_load_ledger_rejects_entry_with_both_sunset_date_and_adr_ruling(
+    tmp_path: Path,
+) -> None:
+    """An entry must not combine a temporary sunset_date with an adr_ruling."""
+    adr_dir = tmp_path / "docs" / "adr"
+    adr_dir.mkdir(parents=True)
+    (adr_dir / "0099-split-ruling.md").write_text("# ADR-0099\n", encoding="utf-8")
+    ledger = tmp_path / "shadow_modules.yaml"
+    ledger.write_text(
+        "shadows:\n"
+        "  some_module:\n"
+        "    tracking_issue: 12046\n"
+        '    sunset_date: "2099-01-01"\n'
+        '    adr_ruling: "docs/adr/0099-split-ruling.md"\n',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(AssertionError, match="exclusively one"):
+        _load_ledger(ledger, repo_root=tmp_path)
 
 
 def test_load_ledger_rejects_expired_sunset_date(tmp_path: Path) -> None:

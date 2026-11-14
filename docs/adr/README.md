@@ -67,7 +67,8 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0057](0057-hrg-hx5-articulated-hand-option.md)                         | HRG-HX5 Articulated-Finger Hand Option                                            | Accepted                                 | 2026-10-25 |
 | [0058](0058-one-shared-putting-core.md)                                 | One Shared Putting Physics Core                                                   | Accepted                                 | 2026-11-01 |
 | [0059](0059-trunk-lumbar-thoracic-coupled-by-default.md)                | Lumbar and Thoracic Trunk DOFs Are Coupled by Default                             | Accepted                                 | 2026-11-04 |
-| [0060](0060-opensim-humanoid-scaling-and-fit-fidelity.md)              | OpenSim Humanoid Scaling and Fit Fidelity — Panel Plan and TDD Slices              | Proposed                                 | 2026-11-06 |
+| [0060](0060-opensim-humanoid-scaling-and-fit-fidelity.md)               | OpenSim Humanoid Scaling and Fit Fidelity — Panel Plan and TDD Slices             | Proposed                                 | 2026-11-06 |
+| [0061](0061-realtime-provider-split-ruling.md)                          | Realtime Provider Split Ruling Between UpstreamDrift and Tools                    | Accepted                                 | 2026-11-13 |
 
 Note: ADR 0013 was amended on 2026-05-31 to document the CC-32
 canonical-core app-shell registry reuse of the embeddable-tool contract.
