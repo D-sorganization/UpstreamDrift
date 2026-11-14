@@ -12,9 +12,10 @@ pendulum built through the OpenSim API; MuJoCo and Pinocchio load the URDF.
 
 from __future__ import annotations
 
+import importlib
 import math
-import sys
 from pathlib import Path
+from types import ModuleType
 
 import numpy as np
 import pytest
@@ -26,15 +27,25 @@ osim = require_opensim()
 if not isinstance(getattr(osim, "__file__", None), str) or not hasattr(osim, "Model"):
     pytest.skip("real opensim is unavailable", allow_module_level=True)
 mujoco = pytest.importorskip("mujoco")
-for _cached_name in list(sys.modules):
-    if _cached_name == "pinocchio" or _cached_name.startswith("pinocchio."):
-        del sys.modules[_cached_name]
-try:
-    import pinocchio  # noqa: PLC0415
-except (ImportError, ModuleNotFoundError, NameError) as exc:
-    # A broken partial import leaves pinocchio_pywrap_default undefined; skip
-    # instead of aborting adapter-core collection (#14973).
-    pytest.skip(f"pinocchio unavailable: {exc}", allow_module_level=True)
+
+
+def _import_pinocchio() -> ModuleType:
+    """Import Pinocchio once without evicting ``sys.modules`` entries.
+
+    Clearing cached Pinocchio modules during collection corrupts the C
+    extension for later conformance tests in the same pytest session (#14966).
+    """
+    try:
+        return importlib.import_module("pinocchio")
+    except (
+        ImportError,
+        ModuleNotFoundError,
+        NameError,
+        AttributeError,
+        RuntimeError,
+    ) as exc:
+        pytest.skip(f"pinocchio is not loadable: {exc}")
+
 
 from src.engines.physics_engines.opensim.python import (  # noqa: E402
     opensim_physics_engine as engine_module,
@@ -148,10 +159,11 @@ def engine(tmp_path: Path) -> OpenSimPhysicsEngine:
 class _Reference:
     """MuJoCo and Pinocchio dynamics of the URDF at one state."""
 
-    def __init__(self) -> None:
+    def __init__(self, pin: ModuleType) -> None:
+        self._pin = pin
         self.mj_model = mujoco.MjModel.from_xml_path(str(URDF))
         self.mj_data = mujoco.MjData(self.mj_model)
-        self.pin_model = pinocchio.buildModelFromUrdf(str(URDF))
+        self.pin_model = pin.buildModelFromUrdf(str(URDF))
         self.pin_data = self.pin_model.createData()
 
     def mujoco(self, q: np.ndarray, v: np.ndarray) -> dict[str, np.ndarray]:
@@ -172,22 +184,28 @@ class _Reference:
 
     def pinocchio(self, q: np.ndarray, v: np.ndarray) -> dict[str, np.ndarray]:
         model, data = self.pin_model, self.pin_data
-        mass = pinocchio.crba(model, data, q)
+        pin = self._pin
+        mass = pin.crba(model, data, q)
         mass = np.triu(mass) + np.triu(mass, 1).T
         return {
             "M": mass,
-            "bias": pinocchio.rnea(model, data, q, v, np.zeros(model.nv)),
-            "gravity": pinocchio.computeGeneralizedGravity(model, data, q),
-            "drift": pinocchio.aba(model, data, q, v, np.zeros(model.nv)),
+            "bias": pin.rnea(model, data, q, v, np.zeros(model.nv)),
+            "gravity": pin.computeGeneralizedGravity(model, data, q),
+            "drift": pin.aba(model, data, q, v, np.zeros(model.nv)),
         }
 
     def inverse_dynamics(self, q: np.ndarray, v: np.ndarray, a: np.ndarray):
-        return pinocchio.rnea(self.pin_model, self.pin_data, q, v, a)
+        return self._pin.rnea(self.pin_model, self.pin_data, q, v, a)
 
 
 @pytest.fixture(scope="module")
-def reference() -> _Reference:
-    return _Reference()
+def pinocchio_bindings() -> ModuleType:
+    return _import_pinocchio()
+
+
+@pytest.fixture(scope="module")
+def reference(pinocchio_bindings: ModuleType) -> _Reference:
+    return _Reference(pinocchio_bindings)
 
 
 @pytest.mark.parametrize(("q", "v"), STATES)

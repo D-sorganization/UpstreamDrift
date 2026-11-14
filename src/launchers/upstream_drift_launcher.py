@@ -28,6 +28,7 @@ from PyQt6.QtGui import QCloseEvent
 from PyQt6.QtWidgets import QApplication, QMainWindow
 
 from src.launchers.docker_manager import DockerLauncher
+from src.launchers.engine_status import make_qt_process_changed_handler
 
 from src.launchers.embedded_tool_bootstrap import bootstrap_embeddable_tools
 
@@ -414,8 +415,21 @@ class UpstreamDriftLauncher(QMainWindow):
         self.process_manager.on_process_list_changed = (  # type: ignore[attr-defined]
             self.ui_setup_manager.update_running_processes_ui
         )
+        self.process_manager.on_process_changed = make_qt_process_changed_handler(
+            QTimer.singleShot,
+            self._set_launch_status,
+            self.show_toast,
+            self._restore_idle_status,
+            success_style=Styles.STATUS_SUCCESS,
+            error_style=Styles.STATUS_ERROR,
+        )
         self.model_handler_registry = ModelHandlerRegistry()
         self.docker_launcher = DockerLauncher(REPOS_ROOT)
+        self.process_manager.container_cleanup_callback = (
+            self.docker_launcher.stop_all_containers
+        )
+        if "PYTEST_CURRENT_TEST" not in os.environ:
+            self.docker_launcher.sweep_orphan_containers_async()
         self.running_processes = self.process_manager.running_processes
 
         # Activate approved Upstream-owned extensions before adapters import
@@ -1136,6 +1150,7 @@ class UpstreamDriftLauncher(QMainWindow):
 
     def _terminate_all_processes(self) -> None:
         """Terminate all remaining child processes."""
+        self.docker_launcher.stop_all_containers()
         for key, process in list(self.running_processes.items()):
             if process.poll() is None:
                 logger.info(f"Terminating child process: {key}")

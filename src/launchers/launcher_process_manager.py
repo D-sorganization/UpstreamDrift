@@ -27,9 +27,10 @@ import sys
 import tempfile
 import threading
 from collections.abc import Callable
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import TYPE_CHECKING
 
+from src.shared.python.core.process_safety import narrow_catch
 from src.shared.python.data_io.user_config_root import user_config_path
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.secure_subprocess import (
@@ -38,6 +39,15 @@ from src.shared.python.security.secure_subprocess import (
     validate_script_path,
 )
 from src.shared.python.security.subprocess_utils import kill_process_tree
+from src.launchers.managed_process import (
+    DuplicateKeyPolicy,
+    ManagedProcess,
+    ProcessKind,
+    ProcessState,
+    RunningProcessesView,
+    new_managed_id,
+    reap_declined_child_spawn,
+)
 
 if TYPE_CHECKING:
     from subprocess import Popen
@@ -151,6 +161,17 @@ def _build_windows_console_cmd(args: list[str], *, keep_terminal_open: bool) -> 
     return f'cmd /c "{inner}"'
 
 
+_OBSERVER_ERRORS = (
+    RuntimeError,
+    OSError,
+    TypeError,
+    ValueError,
+    AttributeError,
+    LookupError,
+)
+_CLEANUP_ERRORS = (RuntimeError, OSError, subprocess.SubprocessError)
+
+
 class ProcessManager:
     """Manages subprocess lifecycle for the Golf Launcher.
 
@@ -182,13 +203,24 @@ class ProcessManager:
         if repo_root is None:
             raise ValueError("repo_root must be provided")
         self.repo_root = repo_root
-        self.running_processes: dict[str, Popen[bytes]] = {}
+        # Thread-safe guard for running_processes dict (issue #2715)
+        self._process_lock = threading.RLock()
+        self._process_registry: dict[str, ManagedProcess] = {}
+        self.running_processes = RunningProcessesView(
+            self._process_registry,
+            self._process_lock,
+            self._attach_external_process,
+            self._remove_slot,
+            self._clear_registry,
+        )
         self.output_callback = output_callback
         self.use_separate_terminals = use_separate_terminals
         self._output_threads: dict[str, threading.Thread] = {}
-        # Thread-safe guard for running_processes dict (issue #2715)
-        self._process_lock = threading.RLock()
         self.on_process_list_changed: Callable[[], None] | None = None
+        self.on_process_changed: Callable[[ManagedProcess], None] | None = None
+        self.container_cleanup_callback: Callable[[], object] | None = None
+        self.duplicate_key_policy = DuplicateKeyPolicy.ALLOW_SECOND
+        self._early_confirm_seconds = 0.15
 
         # Persistent log file for all process output
         self._log_file_path = self.get_log_path()
@@ -441,14 +473,172 @@ class ProcessManager:
         else:
             logger.info("[%s] %s", name, line)
 
-    def _add_to_running_processes(
-        self, name: str, process: subprocess.Popen[bytes]
-    ) -> None:
+    def list_processes(self) -> list[dict[str, object]]:
+        """Return public metadata for all tracked processes (Sidekick/actions)."""
         with self._process_lock:
-            self.running_processes[name] = process
+            return [
+                managed.to_public_dict() for managed in self._process_registry.values()
+            ]
+
+    def get_managed_process(self, slot_name: str) -> ManagedProcess | None:
+        with self._process_lock:
+            for managed in self._process_registry.values():
+                if managed.slot_name == slot_name:
+                    return managed
+        return None
+
+    def _notify_process_changed(self, managed: ManagedProcess) -> None:
+        msg = "Process observer callback failed"
+        if self.on_process_changed is not None:
+            with narrow_catch(*_OBSERVER_ERRORS, log_message=msg):
+                self.on_process_changed(managed)
         if self.on_process_list_changed is not None:
-            with contextlib.suppress(Exception):
+            with narrow_catch(*_OBSERVER_ERRORS, log_message=msg):
                 self.on_process_list_changed()
+
+    def _active_slots_for_key(self, key: str) -> list[ManagedProcess]:
+        return [
+            managed
+            for managed in self._process_registry.values()
+            if managed.key == key and managed.process.poll() is None
+        ]
+
+    def _allocate_slot_name(self, key: str) -> str | None:
+        active = self._active_slots_for_key(key)
+        if not active:
+            return key
+        if self.duplicate_key_policy == DuplicateKeyPolicy.FOCUS_EXISTING:
+            return None
+        if self.duplicate_key_policy == DuplicateKeyPolicy.REPLACE:
+            for managed in active:
+                self._terminate_managed(managed, ProcessState.KILLED)
+            return key
+        counter = 2
+        while True:
+            candidate = f"{key} (#{counter})"
+            if candidate not in self.running_processes:
+                return candidate
+            counter += 1
+
+    def _set_managed_state(self, managed_id: str, state: ProcessState) -> None:
+        with self._process_lock:
+            managed = self._process_registry.get(managed_id)
+            if managed is None:
+                return
+            managed.state = state
+            snapshot = managed
+        self._notify_process_changed(snapshot)
+
+    def _attach_external_process(
+        self, slot_name: str, process: subprocess.Popen[bytes]
+    ) -> None:
+        """Register a process created outside normal launch paths (MATLAB shim)."""
+        _assign_to_job(process)
+        if self._register_process(slot_name, process, kind=ProcessKind.MATLAB) is None:
+            reap_declined_child_spawn(process)
+
+    def _remove_slot(self, slot_name: str) -> None:
+        with self._process_lock:
+            target_id = None
+            for managed_id, managed in self._process_registry.items():
+                if managed.slot_name == slot_name:
+                    target_id = managed_id
+                    break
+            if target_id is not None:
+                del self._process_registry[target_id]
+
+    def _clear_registry(self) -> None:
+        with self._process_lock:
+            self._process_registry.clear()
+
+    def _register_process(
+        self,
+        key: str,
+        process: subprocess.Popen[bytes],
+        *,
+        kind: ProcessKind = ProcessKind.LOCAL,
+    ) -> ManagedProcess | None:
+        slot_name = self._allocate_slot_name(key)
+        if slot_name is None:
+            return None
+        managed = ManagedProcess(
+            id=new_managed_id(),
+            key=key,
+            slot_name=slot_name,
+            kind=kind,
+            state=ProcessState.STARTING,
+            process=process,
+        )
+        with self._process_lock:
+            self._process_registry[managed.id] = managed
+        self._start_exit_waiter(managed)
+        self._schedule_running_confirmation(managed.id)
+        self._notify_process_changed(managed)
+        return managed
+
+    def _schedule_running_confirmation(self, managed_id: str) -> None:
+        def _promote() -> None:
+            with self._process_lock:
+                managed = self._process_registry.get(managed_id)
+                if managed is None:
+                    return
+                if managed.state != ProcessState.STARTING:
+                    return
+                if managed.process.poll() is not None:
+                    return
+                managed.state = ProcessState.RUNNING
+                snapshot = managed
+            self._notify_process_changed(snapshot)
+
+        timer = threading.Timer(self._early_confirm_seconds, _promote)
+        timer.daemon = True
+        timer.start()
+
+    def _start_exit_waiter(self, managed: ManagedProcess) -> None:
+        def _wait() -> None:
+            poll = managed.process.poll()
+            if isinstance(poll, int):
+                return_code = poll
+            else:
+                waited = managed.process.wait()
+                return_code = waited if isinstance(waited, int) else 1
+            with self._process_lock:
+                current = self._process_registry.get(managed.id)
+                if current is None:
+                    return
+                current.exit_code = return_code
+                if current.state == ProcessState.STOPPING:
+                    terminal = ProcessState.KILLED
+                elif return_code == 0:
+                    terminal = ProcessState.EXITED
+                else:
+                    terminal = ProcessState.CRASHED
+                current.state = terminal
+                snapshot = current
+            self._notify_process_changed(snapshot)
+
+        thread = threading.Thread(target=_wait, name=f"exit-waiter-{managed.id}")
+        thread.daemon = True
+        thread.start()
+
+    def _terminate_managed(self, managed: ManagedProcess, state: ProcessState) -> None:
+        managed.state = ProcessState.STOPPING
+        try:
+            if managed.process.poll() is None:
+                if not kill_process_tree(managed.process.pid):
+                    managed.process.terminate()
+        except (OSError, ValueError) as exc:
+            logger.debug("terminate %s failed: %s", managed.slot_name, exc)
+        managed.state = state
+
+    def _add_to_running_processes(
+        self,
+        name: str,
+        process: subprocess.Popen[bytes],
+        *,
+        kind: ProcessKind = ProcessKind.LOCAL,
+    ) -> None:
+        self._register_process(name, process, kind=kind)
 
     def attach_process(self, name: str, process: subprocess.Popen[bytes]) -> None:
         """Attach an externally-created process for output streaming.
@@ -459,40 +649,68 @@ class ProcessManager:
         """
         if name is None:
             raise ValueError("name must be provided")
-        self._add_to_running_processes(name, process)
-        t = threading.Thread(
+        managed = self._register_process(name, process, kind=ProcessKind.DOCKER)
+        if managed is None:
+            reap_declined_child_spawn(process)
+            return
+        self._start_output_stream_thread(managed.slot_name, process, managed.id)
+
+    def _start_output_stream_thread(
+        self,
+        slot_name: str,
+        process: subprocess.Popen[bytes],
+        managed_id: str,
+    ) -> None:
+        thread = threading.Thread(
             target=self._stream_output,
-            args=(name, process),
+            args=(slot_name, process, managed_id),
             daemon=True,
         )
-        t.start()
-        self._output_threads[name] = t
+        thread.start()
+        self._output_threads[slot_name] = thread
 
-    def _stream_output(self, name: str, process: subprocess.Popen[bytes]) -> None:
-        """Read stdout/stderr from *process* and emit lines until EOF.
-
-        Runs in a daemon thread so the main GUI thread is never blocked.
-        """
+    def _stream_output(
+        self, name: str, process: subprocess.Popen[bytes], managed_id: str | None = None
+    ) -> None:
+        """Read stdout/stderr concurrently until EOF (daemon thread)."""
         if name is None:
             raise ValueError("name must be provided")
-        try:
-            if process.stdout:
-                for raw_line in iter(process.stdout.readline, b""):
-                    line = raw_line.decode("utf-8", errors="replace").rstrip()
-                    if line:
-                        self._emit_output(name, line)
-                process.stdout.close()
-            if process.stderr:
-                for raw_line in iter(process.stderr.readline, b""):
-                    line = raw_line.decode("utf-8", errors="replace").rstrip()
-                    if line:
-                        self._emit_output(name, f"STDERR: {line}")
-                process.stderr.close()
-        except (RuntimeError, ValueError, OSError) as e:
-            logger.debug("Output stream ended for %s: %s", name, e)
 
-        return_code = process.wait()
-        self._emit_output(name, f"[exited with code {return_code}]")
+        def _drain(stream, *, stderr: bool) -> None:
+            try:
+                for raw_line in iter(stream.readline, b""):
+                    line = raw_line.decode("utf-8", errors="replace").rstrip()
+                    if not line:
+                        continue
+                    emitted = f"STDERR: {line}" if stderr else line
+                    if managed_id is not None:
+                        with self._process_lock:
+                            managed = self._process_registry.get(managed_id)
+                            if managed is not None:
+                                managed.record_output_line(emitted)
+                    self._emit_output(name, emitted)
+            except (RuntimeError, ValueError, OSError) as exc:
+                logger.debug("Output stream ended for %s: %s", name, exc)
+            finally:
+                with contextlib.suppress(OSError):
+                    stream.close()
+
+        threads = [
+            threading.Thread(
+                target=_drain, args=(stream,), kwargs={"stderr": is_stderr}, daemon=True
+            )
+            for stream, is_stderr in ((process.stdout, False), (process.stderr, True))
+            if stream is not None
+        ]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+        poll = process.poll()
+        return_code = poll if isinstance(poll, int) else process.wait()
+        if isinstance(return_code, int):
+            self._emit_output(name, f"[exited with code {return_code}]")
 
     def launch_script_with_args(
         self,
@@ -544,8 +762,11 @@ class ProcessManager:
         cwd: Path,
         process_env: dict[str, str],
         keep_terminal_open: bool,
-    ) -> subprocess.Popen[bytes]:
+    ) -> subprocess.Popen[bytes] | None:
         """Spawn subprocess and track it in running processes and job object."""
+        if self._allocate_slot_name(name) is None:
+            logger.info("Declined duplicate launch for %s (focus existing)", name)
+            return None
         logger.info(
             "Launching %s: cmd=%s, cwd=%s, PYTHONPATH=%s",
             name,
@@ -573,6 +794,10 @@ class ProcessManager:
                     env=process_env,
                     preexec_fn=_preexec_fn,
                 )
+            managed = self._register_process(name, process, kind=ProcessKind.LOCAL)
+            if managed is None:
+                reap_declined_child_spawn(process)
+                return None
         else:
             process = secure_popen(
                 cmd_args,
@@ -580,20 +805,17 @@ class ProcessManager:
                 suite_root=self.repo_root,
                 env=process_env,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
+                stderr=subprocess.PIPE,
                 creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
                 preexec_fn=_preexec_fn,
             )
-            t = threading.Thread(
-                target=self._stream_output,
-                args=(name, process),
-                daemon=True,
-            )
-            t.start()
-            self._output_threads[name] = t
+            managed = self._register_process(name, process, kind=ProcessKind.LOCAL)
+            if managed is None:
+                reap_declined_child_spawn(process)
+                return None
+            self._start_output_stream_thread(managed.slot_name, process, managed.id)
 
         _assign_to_job(process)
-        self._add_to_running_processes(name, process)
         logger.info(f"Launched {name} (PID: {process.pid})")
         return process
 
@@ -727,10 +949,30 @@ class ProcessManager:
         """Return the conda environment name from WSL_CONDA_ENV env var (default: base)."""
         return os.environ.get("WSL_CONDA_ENV", "base")
 
+    def _spawn_wsl_process(self, key: str, cmd: list[str], log_label: str) -> bool:
+        try:
+            logger.info("%s", log_label)
+            if os.name == "nt":
+                process = subprocess.Popen(
+                    cmd,
+                    creationflags=CREATE_NEW_CONSOLE,
+                )
+            else:
+                process = subprocess.Popen(cmd)
+            _assign_to_job(process)
+            if self._register_process(key, process, kind=ProcessKind.WSL) is None:
+                reap_declined_child_spawn(process)
+            return True
+        except (FileNotFoundError, PermissionError, OSError) as e:
+            logger.error("WSL launch failed: %s", e)
+            return False
+
     def launch_in_wsl(
         self,
         script_path: str,
         project_dir: str | None = None,
+        *,
+        name: str | None = None,
     ) -> bool:
         """Launch a script in WSL2 Ubuntu environment.
 
@@ -744,18 +986,17 @@ class ProcessManager:
         Args:
             script_path: Windows path to the script.
             project_dir: Override WSL project dir (uses WSL_PROJECT_DIR if not set).
+            name: Optional process registry key (defaults to script stem).
 
         Returns:
             True if launch succeeded, False otherwise.
         """
-        # Convert Windows path to WSL path
         if script_path is None:
             raise ValueError("script_path must be provided")
 
         resolved_project_dir = project_dir or self._get_wsl_project_dir()
         distro = self._get_wsl_distro()
         conda_env = self._get_wsl_conda_env()
-
         wsl_script_path = self._convert_to_wsl_path(script_path)
 
         # Use shlex.quote to prevent injection of shell metacharacters in the
@@ -772,29 +1013,17 @@ class ProcessManager:
             f"cd {quoted_project_dir}\n"
             f"python {quoted_wsl_script}\n"
         )
-
         cmd = ["wsl", "-d", distro, "--", "bash", "-c", wsl_cmd]
-
-        try:
-            logger.info(f"Launching in WSL: {script_path}")
-            if os.name == "nt":
-                subprocess.Popen(
-                    cmd,
-                    creationflags=CREATE_NEW_CONSOLE,
-                )
-            else:
-                subprocess.Popen(cmd)
-            return True
-
-        except (FileNotFoundError, PermissionError, OSError) as e:
-            logger.error(f"WSL launch failed: {e}")
-            return False
+        key = name or PureWindowsPath(script_path).stem or script_path
+        return self._spawn_wsl_process(key, cmd, f"Launching in WSL: {script_path}")
 
     def launch_module_in_wsl(
         self,
         module_name: str,
         cwd: Path | None = None,
         project_dir: str | None = None,
+        *,
+        name: str | None = None,
     ) -> bool:
         """Launch a Python module in WSL2 Ubuntu environment.
 
@@ -804,15 +1033,14 @@ class ProcessManager:
             module_name: Python module name to run with -m flag.
             cwd: Optional working directory (Windows Path).
             project_dir: Override WSL project dir (uses WSL_PROJECT_DIR if not set).
+            name: Optional process registry key (defaults to module_name).
 
         Returns:
             True if launch succeeded, False otherwise.
         """
-        # Determine working directory
         if module_name is None:
             raise ValueError("module_name must be provided")
 
-        # Validate module name: must be a dotted Python identifier.
         if not _MODULE_NAME_RE.match(module_name):
             logger.error(
                 "WSL module launch rejected: invalid module name %r", module_name
@@ -827,9 +1055,6 @@ class ProcessManager:
         if cwd:
             work_dir = self._convert_to_wsl_path(str(cwd))
 
-        # Use shlex.quote to prevent injection of shell metacharacters in the
-        # paths that are interpolated into the bash -c script.
-        # module_name has already been validated against the allowlist regex.
         quoted_project_dir = shlex.quote(resolved_project_dir)
         quoted_work_dir = shlex.quote(work_dir)
         quoted_conda_env = shlex.quote(conda_env)
@@ -842,23 +1067,10 @@ class ProcessManager:
             f"cd {quoted_work_dir}\n"
             f"python -m {module_name}\n"
         )
-
         cmd = ["wsl", "-d", distro, "--", "bash", "-c", wsl_cmd]
-
-        try:
-            logger.info(f"Launching module in WSL: {module_name}")
-            if os.name == "nt":
-                subprocess.Popen(
-                    cmd,
-                    creationflags=CREATE_NEW_CONSOLE,
-                )
-            else:
-                subprocess.Popen(cmd)
-            return True
-
-        except (FileNotFoundError, PermissionError, OSError) as e:
-            logger.error(f"WSL module launch failed: {e}")
-            return False
+        return self._spawn_wsl_process(
+            name or module_name, cmd, f"Launching module in WSL: {module_name}"
+        )
 
     def _convert_to_wsl_path(self, windows_path: str) -> str:
         """Convert a Windows path to a WSL path.
@@ -879,25 +1091,36 @@ class ProcessManager:
 
     def cleanup_processes(self) -> None:
         """Terminate all running processes managed by this manager."""
-        for name, proc in list(self.running_processes.items()):
+        with self._process_lock:
+            managed_list = list(self._process_registry.values())
+        for managed in managed_list:
             try:
-                if proc.poll() is None:  # Process is still running
-                    logger.info(f"Terminating process: {name}")
-                    # Use kill_process_tree to ensure terminal and all children close
-                    if not kill_process_tree(proc.pid):
-                        # Fallback to direct termination
-                        proc.terminate()
+                if managed.process.poll() is None:
+                    logger.info("Terminating process: %s", managed.slot_name)
+                    managed.state = ProcessState.STOPPING
+                    kill_process_tree(managed.process.pid)
+                    try:
+                        managed.process.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        logger.warning("Force killing process: %s", managed.slot_name)
+                        managed.process.terminate()
                         try:
-                            proc.wait(timeout=5)
+                            managed.process.wait(timeout=5)
                         except subprocess.TimeoutExpired:
-                            logger.warning(f"Force killing process: {name}")
-                            proc.kill()
+                            managed.process.kill()
+                            managed.process.wait(timeout=5)
+                    managed.state = ProcessState.KILLED
             except (OSError, ValueError) as e:
-                logger.error(f"Error terminating {name}: {e}")
+                logger.error("Error terminating %s: %s", managed.slot_name, e)
 
         self.running_processes.clear()
+        if self.container_cleanup_callback is not None:
+            with narrow_catch(*_CLEANUP_ERRORS, log_message="Docker cleanup failed"):
+                self.container_cleanup_callback()
         if self.on_process_list_changed is not None:
-            with contextlib.suppress(Exception):
+            with narrow_catch(
+                *_OBSERVER_ERRORS, log_message="Process observer callback failed"
+            ):
                 self.on_process_list_changed()
 
     def is_process_running(self, name: str) -> bool:
@@ -911,9 +1134,15 @@ class ProcessManager:
         """
         if name is None:
             raise ValueError("name must be provided")
-        if name not in self.running_processes:
-            return False
-        return self.running_processes[name].poll() is None
+        managed = self.get_managed_process(name)
+        if managed is None:
+            if name not in self.running_processes:
+                return False
+            return self.running_processes[name].poll() is None
+        return managed.process.poll() is None and managed.state in {
+            ProcessState.STARTING,
+            ProcessState.RUNNING,
+        }
 
 
 def is_vcxsrv_running() -> bool:

@@ -1,8 +1,7 @@
 """Fleet Agent API helpers for ``ud-sim-mcp`` (UpstreamDrift #15020).
 
 Capability inventory and environment-variable naming for the stdio MCP adapter.
-FastMCP migration is tracked separately (#15022); this module does not change
-the JSON-RPC wire protocol.
+FastMCP stdio transport is implemented in :mod:`src.sim_run.mcp_fastmcp` (#15022).
 """
 
 from __future__ import annotations

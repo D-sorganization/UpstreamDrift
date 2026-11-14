@@ -199,6 +199,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 847 | `src/api/routes/bunker_workbench.py` |
 | 846 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_render.m` |
 | 846 | `src/tools/model_explorer/gui.py` |
+| 845 | `src/shared/python/model_generation/converters/mjcf_converter.py` |
 | 843 | `src/shared/python/motion_pipeline/orchestrator.py` |
 | 842 | `src/engines/physics_engines/opensim/python/msk_lift_model.py` |
 | 842 | `src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py` |

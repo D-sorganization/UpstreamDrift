@@ -25,8 +25,8 @@ This file is narrower: a **discovery workflow** for agents and a
 
 UpstreamDrift exposes headless simulation and putting analytics to MCP clients
 through the stdio server **`ud-sim-mcp`** (console script and `.mcp.json` entry).
-The adapter is a hand-rolled JSON-RPC process in `src/sim_run/mcp.py`; a FastMCP
-migration is tracked separately (#15022).
+The adapter uses the official MCP Python SDK (FastMCP stdio transport) in
+`src/sim_run/mcp_fastmcp.py` with the tool router in `src/sim_run/mcp.py`.
 
 **Launch.** After `pip install -e .`, agents start the server with `ud-sim-mcp`
 (or the `.mcp.json` `ud-sim-mcp` block). See
