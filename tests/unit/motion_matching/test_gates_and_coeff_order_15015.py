@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import dataclasses
 from pathlib import Path
 import re
@@ -9,10 +10,12 @@ import re
 import numpy as np
 import pytest
 
-from src.shared.python.motion_matching import constrained_sextic
+from src.shared.python.motion_matching import acceptance, constrained_sextic
 from src.shared.python.motion_matching.acceptance import (
     AcceptanceGates,
     AcceptanceVerdict,
+    Horizon,
+    evaluate,
 )
 from src.shared.python.motion_matching.pipeline import cli, dynamics
 from src.shared.python.motion_matching.polynomial_torque import (
@@ -59,26 +62,57 @@ def test_gates_md_matches_all_acceptance_gates_fields() -> None:
 
 
 def test_gates_md_python_snippet_runs_with_acceptance_module() -> None:
-    """GATES.md validation example uses acceptance.evaluate and executes cleanly."""
+    """GATES.md validation example uses acceptance.evaluate and parses cleanly."""
     text = GATES_DOC.read_text(encoding="utf-8")
     assert "acceptance_contract" not in text
     assert "evaluate_receipt_acceptance" not in text
 
     blocks = _PYTHON_BLOCK_RE.findall(text)
     assert blocks, "GATES.md must include an executable Python example"
-    namespace: dict[str, object] = {
-        "receipt_dict": {
-            "capture": "driver",
-            "whole_marker_rmse_m": 0.020,
-            "early_marker_rmse_m": 0.010,
-            "terminal_marker_rmse_m": 0.030,
-            "club_marker_rmse_m": 0.050,
-            "pelvis_yaw_error_pct": 2.0,
-        }
+
+    tree = ast.parse("\n".join(blocks))
+    imported_names: set[str] = set()
+    for node in tree.body:
+        if (
+            isinstance(node, ast.ImportFrom)
+            and node.module == "src.shared.python.motion_matching.acceptance"
+        ):
+            imported_names.update(alias.name for alias in node.names)
+
+    expected_imports = {"AcceptanceGates", "Horizon", "evaluate"}
+    assert expected_imports <= imported_names
+    for name in expected_imports:
+        assert hasattr(acceptance, name)
+
+    verdict_calls = [
+        node.value
+        for node in tree.body
+        if isinstance(node, ast.Assign)
+        and len(node.targets) == 1
+        and isinstance(node.targets[0], ast.Name)
+        and node.targets[0].id == "verdict"
+        and isinstance(node.value, ast.Call)
+        and isinstance(node.value.func, ast.Name)
+        and node.value.func.id == "evaluate"
+    ]
+    assert len(verdict_calls) == 1
+    call = verdict_calls[0]
+    assert len(call.args) == 1
+    assert isinstance(call.args[0], ast.Name)
+    assert call.args[0].id == "receipt_dict"
+    assert {kw.arg for kw in call.keywords} >= {"horizon", "gates"}
+
+    receipt_dict: dict[str, object] = {
+        "capture": "driver",
+        "whole_marker_rmse_m": 0.020,
+        "early_marker_rmse_m": 0.010,
+        "terminal_marker_rmse_m": 0.030,
+        "club_marker_rmse_m": 0.050,
+        "pelvis_yaw_error_pct": 2.0,
     }
-    exec("\n".join(blocks), namespace)
-    verdict = namespace.get("verdict")
+    verdict = evaluate(receipt_dict, horizon=Horizon.G1, gates=AcceptanceGates())
     assert isinstance(verdict, AcceptanceVerdict)
+    assert verdict.horizon is Horizon.G1
 
 
 def test_single_a_to_g_coefficient_order_and_descending_helpers() -> None:
