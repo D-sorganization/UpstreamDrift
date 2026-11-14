@@ -270,17 +270,24 @@ Valid values for `launch_upstream_drift.py --engine` and `upstream-drift --engin
 
 The other entry points:
 
-| Command                                           | Opens                                                 |
-| ------------------------------------------------- | ----------------------------------------------------- |
-| `python launch_upstream_drift.py`                 | Web interface (recommended default entry point)       |
-| `python launch_upstream_drift.py --classic`       | PyQt6 desktop application (canonical reference model) |
-| `python launch_upstream_drift.py --api-only`      | API server with no interface                          |
-| `python launch_upstream_drift.py --engine <name>` | A single engine directly                              |
-| `python -m src.tools.pose_studio`                 | Pose Studio, standalone                               |
+| Command                                           | Opens                                                       |
+| ------------------------------------------------- | ----------------------------------------------------------- |
+| `python launch_upstream_drift.py`                 | Web interface (recommended default entry point)             |
+| `python launch_upstream_drift.py --classic`       | PyQt6 desktop application (canonical reference model)       |
+| `python launch_upstream_drift.py --api-only`      | API server with no interface                                |
+| `python launch_upstream_drift.py --engine <name>` | A single engine directly                                    |
+| `python -m src.tools.pose_studio`                 | Pose Studio, standalone                                     |
+| `sidekick`                                        | Standalone Sidekick assistant (`sidekick.__main__:main`)    |
+| `ud-sim`                                          | Headless simulation batch runner (`src.sim_run.cli:main`)   |
+| `ud-sim-mcp`                                      | Stdio MCP server for `sim_run` (`src.sim_run.mcp:main`)     |
+| `python -m src.shared.python.feature_registry`    | Feature capability & dependency probe (`--json`, `--check`) |
 
 `upstream-drift` is installed as a console script and accepts the same
-arguments. The PyQt6 desktop application serves as the canonical feature-parity
-reference model against which web capabilities are tracked (see
+arguments as `launch_upstream_drift.py`, including `--port <int>` (default
+`8000`), `--no-browser` (skip opening a browser tab), and `--install-shortcuts`
+(create desktop application shortcuts). The PyQt6 desktop application serves as
+the canonical feature-parity reference model against which web capabilities are
+tracked (see
 [`docs/development/feature_parity_matrix.md`](docs/development/feature_parity_matrix.md)).
 The desktop application remains supported for users who prefer a native window.
 
@@ -325,6 +332,11 @@ default MuJoCo-focused workspace.
 | [Pinocchio](src/engines/physics_engines/pinocchio/README.md) | Fast rigid-body algorithms, analytical derivatives, PINK inverse kinematics |
 | [OpenSim](src/engines/physics_engines/opensim/README.md)     | Biomechanics validation surface, experimental                               |
 | [MyoSuite](src/engines/physics_engines/myosuite/README.md)   | Muscle modeling surface, experimental                                       |
+
+Additional `--engine` targets available in the launcher include
+[JaxSim](src/engines/physics_engines/jaxsim/README.md) (`jaxsim`), analytical
+pendulum models (`pendulum`, `golf_swing_pendulum`), the `putting_green`
+simulator, and legacy MATLAB/Simscape models (`matlab_2d`, `matlab_3d`).
 
 The full contract is in [support tiers](docs/engines/support_tiers.md);
 feature-level coverage is in

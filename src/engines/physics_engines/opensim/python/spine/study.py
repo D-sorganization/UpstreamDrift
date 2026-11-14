@@ -187,6 +187,8 @@ class SpineStudyRequest:
             ``club_and_grf``; default ``supplied`` with ``external_loads``,
             else ``none``).  Cannot be combined with a movement variant;
             generated policies cannot be combined with ``external_loads``.
+        allow_implausible: when True, the golf-input plausibility gate is
+            bypassed and recorded in the golf_input stage (#13434, #13427).
         output_dir: where artifacts and the receipt are written (never
             recorded in the receipt).
 
@@ -224,6 +226,7 @@ class SpineStudyRequest:
     unlock_driven_coordinates: bool = False
     fullbody_map: str | None = None
     external_loads_policy: str | None = None
+    allow_implausible: bool = False
 
     def __post_init__(self) -> None:
         if not isinstance(self.study_id, str) or not _ID_RE.fullmatch(self.study_id):
@@ -252,6 +255,8 @@ class SpineStudyRequest:
             raise TypeError("unlock_driven_coordinates must be a bool")
         if not isinstance(self.restrict_law_to_model, bool):
             raise TypeError("restrict_law_to_model must be a bool")
+        if not isinstance(self.allow_implausible, bool):
+            raise TypeError("allow_implausible must be a bool")
         if self.restrict_law_to_model and self.coupling_law_id is None:
             raise ValueError("restrict_law_to_model requires a coupling_law_id")
         if isinstance(self.cost_exponent, bool) or self.cost_exponent not in _EXPONENTS:
@@ -388,6 +393,7 @@ class SpineStudyRequest:
                 if self.unlock_driven_coordinates
                 else {}
             ),
+            **({"allow_implausible": True} if self.allow_implausible else {}),
         }
         if self.fullbody_map is not None:
             data["fullbody_map"] = self.fullbody_map

@@ -177,7 +177,18 @@ def require_real_module(name: str) -> None:
     without ``pin``). ``pytest.importorskip`` accepts that mock, and the adapter
     then fails inside its constructor on mock arithmetic.
     """
-    module = pytest.importorskip(name)
+    import importlib
+
+    try:
+        module = importlib.import_module(name)
+    except (
+        ImportError,
+        ModuleNotFoundError,
+        NameError,
+        AttributeError,
+        RuntimeError,
+    ) as exc:
+        pytest.skip(f"real {name} is not loadable: {exc}")
     if type(module).__module__ == "unittest.mock":
         pytest.skip(f"real {name} is not installed (mocked module in sys.modules)")
 
