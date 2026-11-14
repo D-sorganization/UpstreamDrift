@@ -275,6 +275,26 @@ def dockerfile_maturin_loop_failures(dockerfile: str) -> list[str]:
     return failures
 
 
+def dockerfile_lockfile_pin_drift_failures(dockerfile: str, lockfile: str) -> list[str]:
+    """Ensure Dockerfile package pins do not drift from requirements.lock."""
+    lock_pins = {
+        pkg.lower().replace("_", "-"): ver
+        for pkg, ver in re.findall(
+            r"^([A-Za-z0-9_.-]+)==([^\s\\;#]+)", lockfile, re.MULTILINE
+        )
+    }
+    failures: list[str] = []
+    for pkg, ver in re.findall(
+        r"([A-Za-z0-9_.-]+)(?:\[[^\]]+\])?==([0-9A-Za-z_.+-]+)", dockerfile
+    ):
+        expected = lock_pins.get(pkg.lower().replace("_", "-"))
+        if expected is not None and expected != ver:
+            failures.append(
+                f"Dockerfile pins {pkg}=={ver}, drifting from requirements.lock {expected}"
+            )
+    return failures
+
+
 def docker_contract_failures(root: Path = Path(".")) -> list[str]:
     failures = _root_context_dockerignore_failures(root)
     pin_by_file: dict[str, set[str]] = {}
@@ -292,6 +312,11 @@ def docker_contract_failures(root: Path = Path(".")) -> list[str]:
 
     dockerfile = _read(root / "Dockerfile")
     failures.extend(dockerfile_maturin_loop_failures(dockerfile))
+    lockfile_path = root / "requirements.lock"
+    if lockfile_path.is_file():
+        failures.extend(
+            dockerfile_lockfile_pin_drift_failures(dockerfile, _read(lockfile_path))
+        )
     if "ARG SKIP_AUDIT=false" not in dockerfile:
         failures.append("Dockerfile builder audit must default to enabled")
     for required in (

@@ -581,6 +581,22 @@ def test_dockerfile_maturin_loop_rejects_done_and_and_compound_chain(
     assert any("done &&" in f for f in _failures(tmp_path))
 
 
+def test_dockerfile_lockfile_pin_drift_rejects_downgraded_pin() -> None:
+    """Dockerfile must not downgrade packages pinned in requirements.lock."""
+    failures = guard.dockerfile_lockfile_pin_drift_failures(
+        "RUN pip install tornado==6.6\n",
+        "tornado==6.6.1\n",
+    )
+    assert any("tornado==6.6" in f and "6.6.1" in f for f in failures)
+    assert (
+        guard.dockerfile_lockfile_pin_drift_failures(
+            "RUN pip install tornado==6.6.1\n",
+            "tornado==6.6.1\n",
+        )
+        == []
+    )
+
+
 def test_repository_dockerfiles_satisfy_contracts() -> None:
     repo_root = Path(__file__).resolve().parents[3]
     assert guard.docker_contract_failures(repo_root) == []
