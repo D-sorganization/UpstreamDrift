@@ -2,27 +2,30 @@
 
 # UpstreamDrift Project Status
 
-Refreshed by project-steward on 2026-11-01: added DV-14176 from the validated
-`docs/development/planning/catalog.json` as a parked feature. Its simulator and
-skill-sampler prerequisites (#14171 and #14169) have since merged; published/licensed
-reference data and its provenance remain unavailable. No deferred feature has moved
-to done. Since the 2026-10-19 refresh, merged work relevant to
-the premier golf-modeling focus includes putting simulation, reference fixtures,
-skill sampling, expected-putts/strokes-gained optimization and variance attribution
-(PRs #14149, #14155, #14170, #14171, #14181, #14192, #14194, #14195, #14196,
-#14197, #14198, #14203, #14218, #14220 and #14226). The putting analytics epic
-#14168 remains open; its published-data calibration record DV-14176 remains parked.
-GitHub currently shows 87 open issues and 6 open PRs (5 ready, 1 draft). The latest
-main workflow batch started 2026-11-01 12:47 UTC and still had CI Standard and
-Docker checks in progress at the time of this refresh; several other workflows in
-that batch completed successfully, so main CI is pending rather than fully green.
+Refreshed by project-steward on 2026-11-14 from the validated
+`docs/development/planning/catalog.json`, GitHub and the Runner Dashboard. The
+catalog remains the sole deferred-validation authority; all 15 records, owner
+plans and original source snapshots are present and validate. All 15 Board
+decisions remain pending, and no record has evidence that clears its external
+measurement, hardware, licensed-data, independent-review or human-trial gate.
+No charter feature status changed; the closed putting-analytics and NSX
+source issues remain parked deferred obligations.
 
-The Board-proposal dry-run template is available in the Repository_Management
-checkout, but this run could not submit the overdue architectural resourcing
-proposal: the authorized `submit_proposal` fleet tool returned “requires approval,
-but approval policy is never.” No proposal was filed through another channel.
-The pending decisions remain listed below; a later steward run with the proposal
-tool available should link the resulting Board proposal here.
+Since the 2026-11-01 refresh, merged software and research work includes NSX
+campaign/trade-off and torque-capacity work (#15064, #15067, #15068), Simscape
+and matched-motion work, and Agent API/documentation updates (#15073, #15080).
+These merges advance executable work but do not supply external-validation
+evidence. GitHub currently shows 94 open issues and 28 open PRs (25 ready, 3
+drafts). Main CI is pending: the latest main-push batch at 2026-11-14 13:00 UTC
+has CI Standard, CI Requires OpenSim, and Release and Companion Publication in
+progress; completed checks in that batch include Docs Governance and Conflict
+Disarm. This checkout does not contain `docs/fleet-in-flight.md`; live fleet
+activity was read from the Runner Dashboard API.
+
+The overdue architectural resourcing decisions remain under Decisions Needed.
+No `submit_proposal` fleet tool is exposed in this run, so no Board proposal
+was submitted and no proposal link or approval is asserted. Keep the decisions
+open until the Board records a decision and the proposal capability is available.
 
 Refreshed by project-steward on 2026-10-19: added DV-11984, DV-11542, DV-12554,
 DV-12583, DV-12718, DV-13061 and DV-13082 (catalog `docs/development/planning/catalog.json`
