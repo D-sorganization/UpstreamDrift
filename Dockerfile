@@ -140,7 +140,7 @@ RUN set -eu; \
         waiver_flags="$(python /tmp/check_pip_audit_waivers.py \
             --waiver-file /tmp/pip_audit_waivers.json)"; \
         # shellcheck disable=SC2086 - intentional word-splitting of flags
-        python -m pip_audit --timeout 60 $waiver_flags; \
+        python -m pip_audit --timeout 120 $waiver_flags; \
         pip uninstall -y pip-audit; \
     fi
 
