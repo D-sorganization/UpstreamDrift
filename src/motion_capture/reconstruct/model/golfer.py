@@ -24,7 +24,7 @@ universal and torso revolute the other way round):
 Legs and the head are not in the MATLAB model and are added for the
 detectors (hips, knees, ankles, nose); the wrist universal has no logged
 angles and keeps a plausible convention. The Simscape world is taken as
-z up, x toward the target and y to the golfer's right (right-handed, ADR-0041
+z up, x toward the target and y to the golfer's left (right-handed, ADR-0041
 with y and z swapped); that assumption only moves the root's hip angles and
 translation, which are per-session offsets in any case.
 """
@@ -48,7 +48,7 @@ CYCLIC = 2 * PI / 3 / np.sqrt(3.0)  # 120 degrees about a body diagonal
 SWAP = PI / np.sqrt(2.0)  # 180 degrees about a face diagonal
 ZERO = (0.0, 0.0, 0.0)
 
-#: Simscape world (x toward target, y to the golfer's right, z up) from ours
+#: Simscape world (x toward target, y to the golfer's left, z up) from ours
 #: (x toward target, y up, z to the golfer's right): x_s = x, y_s = -z, z_s = y.
 WORLD_SIMSCAPE_FROM_OURS = np.array([[1.0, 0, 0], [0, 0, -1.0], [0, 1.0, 0]])
 #: Constant frame ahead of the hip primitives, in the Simscape world.
@@ -317,7 +317,7 @@ CONVENTION_NOTE = (
     "upstreamdrift golfer-scapula/2.0: body frames are the GolfSwing3D_Kinetic "
     "sensor frames; angles are the Simscape start-position variables (degrees, "
     "translations metres in the Simscape world: z up, x toward the target, y to "
-    "the golfer's right). Conventions validated against the model's logs, "
+    "the golfer's left). Conventions validated against the model's logs, "
     "residual <= 2.7e-4 rad (#9714, docs/motion_capture/evidence/simscape_axes.md); "
     "wrist rows are named only."
 )
@@ -342,12 +342,26 @@ def simscape_angles_to_q(
     n = len(next(iter(angles_deg.values())))
     q = np.zeros((n, model.n_dof))
     col = {name: i for i, name in enumerate(model.dof_names)}
+    translation_keys = (
+        "TranslationStartPositionX",
+        "TranslationStartPositionY",
+        "TranslationStartPositionZ",
+    )
+    if all(key in angles_deg for key in translation_keys):
+        simscape_translation = np.column_stack(
+            [np.asarray(angles_deg[key], dtype=float) for key in translation_keys]
+        )
+        q[:, [col["pelvis.tx"], col["pelvis.ty"], col["pelvis.tz"]]] = (
+            simscape_translation @ WORLD_SIMSCAPE_FROM_OURS
+        )
     for ours, (theirs, sign) in SIMSCAPE_NAMES.items():
-        if theirs in angles_deg:
-            values = np.asarray(angles_deg[theirs], dtype=float)
-            q[:, col[ours]] = sign * (
-                values if ours.split(".")[1].startswith("t") else np.radians(values)
-            )
+        if theirs not in angles_deg:
+            continue
+        kind = ours.split(".")[1]
+        if kind.startswith("t"):
+            continue
+        values = np.asarray(angles_deg[theirs], dtype=float)
+        q[:, col[ours]] = sign * np.radians(values)
     return q
 
 
