@@ -230,7 +230,11 @@ def test_styles_produce_visibly_distinct_fingers() -> None:
 
 
 #: Shells added by #13997 after this golden was frozen (own tests).
-_SHELLS_13997 = frozenset({"dorsum"})
+_SHELLS_13997 = frozenset({"dorsum", "thumb_web"})
+
+
+def _skip_grip_hand_golden_component(name: str) -> bool:
+    return name in _SHELLS_13997 or name.startswith("palm_")
 
 
 def test_mesh_summary_per_style_golden() -> None:
@@ -248,7 +252,7 @@ def test_mesh_summary_per_style_golden() -> None:
         for hand_key, hand_mesh in [("lead", lead), ("trail", trail)]:
             actual_summary = {}
             for comp in hand_mesh.components:
-                if comp.name in _SHELLS_13997:
+                if _skip_grip_hand_golden_component(comp.name):
                     continue  # covered by test_grip_hand_shells.py
                 v = comp.mesh.vertices
                 actual_summary[comp.name] = {

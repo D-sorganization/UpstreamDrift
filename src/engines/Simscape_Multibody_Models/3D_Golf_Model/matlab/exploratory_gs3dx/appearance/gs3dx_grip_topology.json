@@ -850,6 +850,33 @@
               "name": "thumb_distal",
               "on_grip": true,
               "vertex_count": 130
+            },
+            {
+              "bounds_max_grip_m": [
+                0.06005,
+                0.02355003,
+                0.00555188
+              ],
+              "bounds_min_grip_m": [
+                0.00347,
+                -0.00233401,
+                -0.02356
+              ],
+              "centroid_grip_m": [
+                0.03176,
+                0.01185906,
+                -0.00995093
+              ],
+              "centroid_hand_m": [
+                0.01185906,
+                -0.00995093,
+                -0.00024
+              ],
+              "face_count": 1984,
+              "finger": "thumb_web",
+              "name": "thumb_web",
+              "on_grip": true,
+              "vertex_count": 994
             }
           ],
           "distance_below_butt_m": 0.032,
@@ -1289,6 +1316,33 @@
             },
             {
               "bounds_max_grip_m": [
+                0.07095,
+                0.0302581,
+                0.03219882
+              ],
+              "bounds_min_grip_m": [
+                0.05705,
+                -0.03219858,
+                -0.0136456
+              ],
+              "centroid_grip_m": [
+                0.064,
+                -0.00458929,
+                0.01136036
+              ],
+              "centroid_hand_m": [
+                -0.00458929,
+                0.01136036,
+                -0.0442
+              ],
+              "face_count": 3328,
+              "finger": "palm",
+              "name": "palm_little",
+              "on_grip": true,
+              "vertex_count": 1666
+            },
+            {
+              "bounds_max_grip_m": [
                 0.1377,
                 0.0327,
                 0.0095
@@ -1340,6 +1394,33 @@
               "name": "thumb_distal",
               "on_grip": true,
               "vertex_count": 130
+            },
+            {
+              "bounds_max_grip_m": [
+                0.13625,
+                0.02356,
+                0.0235586
+              ],
+              "bounds_min_grip_m": [
+                0.07967,
+                -0.01514408,
+                -0.00233401
+              ],
+              "centroid_grip_m": [
+                0.10796,
+                0.00579867,
+                0.0124353
+              ],
+              "centroid_hand_m": [
+                0.00579867,
+                0.0124353,
+                -0.00024
+              ],
+              "face_count": 2496,
+              "finger": "thumb_web",
+              "name": "thumb_web",
+              "on_grip": true,
+              "vertex_count": 1250
             }
           ],
           "distance_below_butt_m": 0.1082,
@@ -2957,6 +3038,33 @@
               "name": "thumb_distal",
               "on_grip": true,
               "vertex_count": 130
+            },
+            {
+              "bounds_max_grip_m": [
+                0.06005,
+                0.02355003,
+                0.00555188
+              ],
+              "bounds_min_grip_m": [
+                0.00347,
+                -0.00233401,
+                -0.02356
+              ],
+              "centroid_grip_m": [
+                0.03176,
+                0.01185906,
+                -0.00995093
+              ],
+              "centroid_hand_m": [
+                0.01185906,
+                -0.00995093,
+                -0.00024
+              ],
+              "face_count": 1984,
+              "finger": "thumb_web",
+              "name": "thumb_web",
+              "on_grip": true,
+              "vertex_count": 994
             }
           ],
           "distance_below_butt_m": 0.032,
@@ -3396,6 +3504,60 @@
             },
             {
               "bounds_max_grip_m": [
+                0.14835,
+                0.0302581,
+                0.03218656
+              ],
+              "bounds_min_grip_m": [
+                0.13205,
+                -0.03219678,
+                -0.00943077
+              ],
+              "centroid_grip_m": [
+                0.1402,
+                -0.0037526,
+                0.01272085
+              ],
+              "centroid_hand_m": [
+                -0.0037526,
+                0.01272085,
+                0.032
+              ],
+              "face_count": 3200,
+              "finger": "palm",
+              "name": "palm_index",
+              "on_grip": true,
+              "vertex_count": 1602
+            },
+            {
+              "bounds_max_grip_m": [
+                0.07095,
+                0.0302581,
+                0.03219882
+              ],
+              "bounds_min_grip_m": [
+                0.05705,
+                -0.03219858,
+                -0.0136456
+              ],
+              "centroid_grip_m": [
+                0.064,
+                -0.00458929,
+                0.01136036
+              ],
+              "centroid_hand_m": [
+                -0.00458929,
+                0.01136036,
+                -0.0442
+              ],
+              "face_count": 3328,
+              "finger": "palm",
+              "name": "palm_little",
+              "on_grip": true,
+              "vertex_count": 1666
+            },
+            {
+              "bounds_max_grip_m": [
                 0.1377,
                 0.0327,
                 0.0095
@@ -3447,6 +3609,33 @@
               "name": "thumb_distal",
               "on_grip": true,
               "vertex_count": 130
+            },
+            {
+              "bounds_max_grip_m": [
+                0.13625,
+                0.02356,
+                0.0235586
+              ],
+              "bounds_min_grip_m": [
+                0.07967,
+                -0.01514408,
+                -0.00233401
+              ],
+              "centroid_grip_m": [
+                0.10796,
+                0.00579867,
+                0.0124353
+              ],
+              "centroid_hand_m": [
+                0.00579867,
+                0.0124353,
+                -0.00024
+              ],
+              "face_count": 2496,
+              "finger": "thumb_web",
+              "name": "thumb_web",
+              "on_grip": true,
+              "vertex_count": 1250
             }
           ],
           "distance_below_butt_m": 0.1082,
@@ -5061,6 +5250,33 @@
             },
             {
               "bounds_max_grip_m": [
+                0.07615,
+                0.03219997,
+                0.01198822
+              ],
+              "bounds_min_grip_m": [
+                0.05985,
+                -0.03219668,
+                -0.03218813
+              ],
+              "centroid_grip_m": [
+                0.068,
+                0.00060301,
+                -0.00968121
+              ],
+              "centroid_hand_m": [
+                0.00060301,
+                -0.00968121,
+                0.036
+              ],
+              "face_count": 3840,
+              "finger": "palm",
+              "name": "palm_index",
+              "on_grip": true,
+              "vertex_count": 1922
+            },
+            {
+              "bounds_max_grip_m": [
                 0.0615,
                 0.03220321,
                 0.01338431
@@ -5112,6 +5328,33 @@
               "name": "thumb_distal",
               "on_grip": true,
               "vertex_count": 130
+            },
+            {
+              "bounds_max_grip_m": [
+                0.06005,
+                0.02355003,
+                0.00555188
+              ],
+              "bounds_min_grip_m": [
+                0.00347,
+                -0.00233401,
+                -0.02356
+              ],
+              "centroid_grip_m": [
+                0.03176,
+                0.01185906,
+                -0.00995093
+              ],
+              "centroid_hand_m": [
+                0.01185906,
+                -0.00995093,
+                -0.00024
+              ],
+              "face_count": 1984,
+              "finger": "thumb_web",
+              "name": "thumb_web",
+              "on_grip": true,
+              "vertex_count": 994
             }
           ],
           "distance_below_butt_m": 0.032,
@@ -5602,6 +5845,33 @@
               "name": "thumb_distal",
               "on_grip": true,
               "vertex_count": 130
+            },
+            {
+              "bounds_max_grip_m": [
+                0.13625,
+                0.02356,
+                0.0235586
+              ],
+              "bounds_min_grip_m": [
+                0.07967,
+                -0.01514408,
+                -0.00233401
+              ],
+              "centroid_grip_m": [
+                0.10796,
+                0.00579867,
+                0.0124353
+              ],
+              "centroid_hand_m": [
+                0.00579867,
+                0.0124353,
+                -0.00024
+              ],
+              "face_count": 2496,
+              "finger": "thumb_web",
+              "name": "thumb_web",
+              "on_grip": true,
+              "vertex_count": 1250
             }
           ],
           "distance_below_butt_m": 0.1082,
@@ -7148,6 +7418,33 @@
             },
             {
               "bounds_max_grip_m": [
+                0.07615,
+                0.03219997,
+                0.01198822
+              ],
+              "bounds_min_grip_m": [
+                0.05985,
+                -0.03219668,
+                -0.03218813
+              ],
+              "centroid_grip_m": [
+                0.068,
+                0.00060301,
+                -0.00968121
+              ],
+              "centroid_hand_m": [
+                0.00060301,
+                -0.00968121,
+                0.036
+              ],
+              "face_count": 3840,
+              "finger": "palm",
+              "name": "palm_index",
+              "on_grip": true,
+              "vertex_count": 1922
+            },
+            {
+              "bounds_max_grip_m": [
                 0.0615,
                 0.03220321,
                 0.01338431
@@ -7199,6 +7496,33 @@
               "name": "thumb_distal",
               "on_grip": true,
               "vertex_count": 130
+            },
+            {
+              "bounds_max_grip_m": [
+                0.06005,
+                0.02355003,
+                0.00555188
+              ],
+              "bounds_min_grip_m": [
+                0.00347,
+                -0.00233401,
+                -0.02356
+              ],
+              "centroid_grip_m": [
+                0.03176,
+                0.01185906,
+                -0.00995093
+              ],
+              "centroid_hand_m": [
+                0.01185906,
+                -0.00995093,
+                -0.00024
+              ],
+              "face_count": 1984,
+              "finger": "thumb_web",
+              "name": "thumb_web",
+              "on_grip": true,
+              "vertex_count": 994
             }
           ],
           "distance_below_butt_m": 0.032,
@@ -7638,6 +7962,33 @@
             },
             {
               "bounds_max_grip_m": [
+                0.14835,
+                0.0302581,
+                0.03218656
+              ],
+              "bounds_min_grip_m": [
+                0.13205,
+                -0.03219678,
+                -0.00943077
+              ],
+              "centroid_grip_m": [
+                0.1402,
+                -0.0037526,
+                0.01272085
+              ],
+              "centroid_hand_m": [
+                -0.0037526,
+                0.01272085,
+                0.032
+              ],
+              "face_count": 3200,
+              "finger": "palm",
+              "name": "palm_index",
+              "on_grip": true,
+              "vertex_count": 1602
+            },
+            {
+              "bounds_max_grip_m": [
                 0.1377,
                 0.0327,
                 0.0095
@@ -7689,6 +8040,33 @@
               "name": "thumb_distal",
               "on_grip": true,
               "vertex_count": 130
+            },
+            {
+              "bounds_max_grip_m": [
+                0.13625,
+                0.02356,
+                0.0235586
+              ],
+              "bounds_min_grip_m": [
+                0.07967,
+                -0.01514408,
+                -0.00233401
+              ],
+              "centroid_grip_m": [
+                0.10796,
+                0.00579867,
+                0.0124353
+              ],
+              "centroid_hand_m": [
+                0.00579867,
+                0.0124353,
+                -0.00024
+              ],
+              "face_count": 2496,
+              "finger": "thumb_web",
+              "name": "thumb_web",
+              "on_grip": true,
+              "vertex_count": 1250
             }
           ],
           "distance_below_butt_m": 0.1082,
@@ -9323,6 +9701,33 @@
             },
             {
               "bounds_max_grip_m": [
+                0.07615,
+                0.03219997,
+                0.01198822
+              ],
+              "bounds_min_grip_m": [
+                0.05985,
+                -0.03219668,
+                -0.03218813
+              ],
+              "centroid_grip_m": [
+                0.068,
+                0.00060301,
+                -0.00968121
+              ],
+              "centroid_hand_m": [
+                0.00060301,
+                -0.00968121,
+                0.036
+              ],
+              "face_count": 3840,
+              "finger": "palm",
+              "name": "palm_index",
+              "on_grip": true,
+              "vertex_count": 1922
+            },
+            {
+              "bounds_max_grip_m": [
                 0.0615,
                 0.03220321,
                 0.01338431
@@ -9374,6 +9779,33 @@
               "name": "thumb_distal",
               "on_grip": true,
               "vertex_count": 130
+            },
+            {
+              "bounds_max_grip_m": [
+                0.06005,
+                0.02355003,
+                0.00555188
+              ],
+              "bounds_min_grip_m": [
+                0.00347,
+                -0.00233401,
+                -0.02356
+              ],
+              "centroid_grip_m": [
+                0.03176,
+                0.01185906,
+                -0.00995093
+              ],
+              "centroid_hand_m": [
+                0.01185906,
+                -0.00995093,
+                -0.00024
+              ],
+              "face_count": 1984,
+              "finger": "thumb_web",
+              "name": "thumb_web",
+              "on_grip": true,
+              "vertex_count": 994
             }
           ],
           "distance_below_butt_m": 0.032,
@@ -9813,6 +10245,33 @@
             },
             {
               "bounds_max_grip_m": [
+                0.0901918,
+                0.0302581,
+                0.03219882
+              ],
+              "bounds_min_grip_m": [
+                0.0762918,
+                -0.03219858,
+                -0.0136456
+              ],
+              "centroid_grip_m": [
+                0.0832418,
+                -0.00458929,
+                0.01136036
+              ],
+              "centroid_hand_m": [
+                -0.00458929,
+                0.01136036,
+                -0.0249582
+              ],
+              "face_count": 3328,
+              "finger": "palm",
+              "name": "palm_little",
+              "on_grip": true,
+              "vertex_count": 1666
+            },
+            {
+              "bounds_max_grip_m": [
                 0.1377,
                 0.0327,
                 0.0095
@@ -9864,6 +10323,33 @@
               "name": "thumb_distal",
               "on_grip": true,
               "vertex_count": 130
+            },
+            {
+              "bounds_max_grip_m": [
+                0.13625,
+                0.02356,
+                0.0235586
+              ],
+              "bounds_min_grip_m": [
+                0.07967,
+                -0.01514408,
+                -0.00233401
+              ],
+              "centroid_grip_m": [
+                0.10796,
+                0.00579867,
+                0.0124353
+              ],
+              "centroid_hand_m": [
+                0.00579867,
+                0.0124353,
+                -0.00024
+              ],
+              "face_count": 2496,
+              "finger": "thumb_web",
+              "name": "thumb_web",
+              "on_grip": true,
+              "vertex_count": 1250
             }
           ],
           "distance_below_butt_m": 0.1082,
@@ -11484,6 +11970,33 @@
             },
             {
               "bounds_max_grip_m": [
+                0.07615,
+                0.03219997,
+                0.01198822
+              ],
+              "bounds_min_grip_m": [
+                0.05985,
+                -0.03219668,
+                -0.03218813
+              ],
+              "centroid_grip_m": [
+                0.068,
+                0.00060301,
+                -0.00968121
+              ],
+              "centroid_hand_m": [
+                0.00060301,
+                -0.00968121,
+                0.036
+              ],
+              "face_count": 3840,
+              "finger": "palm",
+              "name": "palm_index",
+              "on_grip": true,
+              "vertex_count": 1922
+            },
+            {
+              "bounds_max_grip_m": [
                 0.0615,
                 0.03220321,
                 0.01338431
@@ -11535,6 +12048,33 @@
               "name": "thumb_distal",
               "on_grip": true,
               "vertex_count": 130
+            },
+            {
+              "bounds_max_grip_m": [
+                0.06005,
+                0.02355003,
+                0.00555188
+              ],
+              "bounds_min_grip_m": [
+                0.00347,
+                -0.00233401,
+                -0.02356
+              ],
+              "centroid_grip_m": [
+                0.03176,
+                0.01185906,
+                -0.00995093
+              ],
+              "centroid_hand_m": [
+                0.01185906,
+                -0.00995093,
+                -0.00024
+              ],
+              "face_count": 1984,
+              "finger": "thumb_web",
+              "name": "thumb_web",
+              "on_grip": true,
+              "vertex_count": 994
             }
           ],
           "distance_below_butt_m": 0.032,
@@ -11974,6 +12514,60 @@
             },
             {
               "bounds_max_grip_m": [
+                0.16035,
+                0.0302581,
+                0.03218656
+              ],
+              "bounds_min_grip_m": [
+                0.14405,
+                -0.03219678,
+                -0.00943077
+              ],
+              "centroid_grip_m": [
+                0.1522,
+                -0.0037526,
+                0.01272085
+              ],
+              "centroid_hand_m": [
+                -0.0037526,
+                0.01272085,
+                0.044
+              ],
+              "face_count": 3200,
+              "finger": "palm",
+              "name": "palm_index",
+              "on_grip": true,
+              "vertex_count": 1602
+            },
+            {
+              "bounds_max_grip_m": [
+                0.0901918,
+                0.0302581,
+                0.03219882
+              ],
+              "bounds_min_grip_m": [
+                0.0762918,
+                -0.03219858,
+                -0.0136456
+              ],
+              "centroid_grip_m": [
+                0.0832418,
+                -0.00458929,
+                0.01136036
+              ],
+              "centroid_hand_m": [
+                -0.00458929,
+                0.01136036,
+                -0.0249582
+              ],
+              "face_count": 3328,
+              "finger": "palm",
+              "name": "palm_little",
+              "on_grip": true,
+              "vertex_count": 1666
+            },
+            {
+              "bounds_max_grip_m": [
                 0.1377,
                 0.0327,
                 0.0095
@@ -12025,6 +12619,33 @@
               "name": "thumb_distal",
               "on_grip": true,
               "vertex_count": 130
+            },
+            {
+              "bounds_max_grip_m": [
+                0.13625,
+                0.02356,
+                0.0235586
+              ],
+              "bounds_min_grip_m": [
+                0.07967,
+                -0.01514408,
+                -0.00233401
+              ],
+              "centroid_grip_m": [
+                0.10796,
+                0.00579867,
+                0.0124353
+              ],
+              "centroid_hand_m": [
+                0.00579867,
+                0.0124353,
+                -0.00024
+              ],
+              "face_count": 2496,
+              "finger": "thumb_web",
+              "name": "thumb_web",
+              "on_grip": true,
+              "vertex_count": 1250
             }
           ],
           "distance_below_butt_m": 0.1082,
