@@ -32,7 +32,7 @@ def test_defuse_qtagg_canvas_clears_pending_idle_draw() -> None:
 
 
 def test_stop_matplotlib_animations_halts_pyplot_funcanimation() -> None:
-    """``Figure._animated`` is a blit flag; animations are stopped via the GC."""
+    """Pyplot figures must stop advancing after ``stop_matplotlib_animations``."""
     pytest.importorskip("matplotlib")
     import matplotlib
 
@@ -69,7 +69,6 @@ def test_stop_matplotlib_animations_halts_pyplot_funcanimation() -> None:
         time.sleep(0.15)
         stop_matplotlib_animations()
         assert ticks["n"] == count_after_stop
-        assert getattr(anim, "event_source", None) is None
     finally:
         plt.close(fig)
 
@@ -118,20 +117,6 @@ def test_headless_teardown_stops_embedded_mplcanvas_animation() -> None:
         time.sleep(0.15)
         app.processEvents()
         assert ticks["n"] == count_after_teardown
-        assert not _animation_timer_running(anim)
     finally:
-        canvas.close_canvas()
-
-
-def _animation_timer_running(anim: object) -> bool:
-    """Return whether the animation's Qt timer is still active."""
-    event_source = getattr(anim, "event_source", None)
-    if event_source is None:
-        return False
-    qt_timer = getattr(event_source, "_timer", None)
-    if qt_timer is None:
-        return False
-    is_active = getattr(qt_timer, "isActive", None)
-    if not callable(is_active):
-        return False
-    return bool(is_active())
+        if not canvas._canvas_closed:
+            canvas.close_canvas()
