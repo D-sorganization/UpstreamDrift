@@ -47,15 +47,17 @@ def _defuse_qtagg_canvas(canvas: Any) -> None:
 
 def _halt_animation(anim: Any) -> None:
     """Stop one animation's timer and disconnect its canvas callbacks."""
+    event_source = getattr(anim, "event_source", None)
+    step = getattr(anim, "_step", None)
+    if event_source is not None and callable(step):
+        with _suppress_all():
+            event_source.remove_callback(step)
+            event_source.stop()
     for method_name in ("pause", "_stop"):
         method = getattr(anim, method_name, None)
         if callable(method):
             with _suppress_all():
                 method()
-    event_source = getattr(anim, "event_source", None)
-    if event_source is not None:
-        with _suppress_all():
-            event_source.stop()
 
 
 def _stop_animations_on_figures(figures: list[Any]) -> None:
@@ -95,6 +97,7 @@ def _close_embedded_mpl_canvases() -> None:
         return
     figures = [c.fig for c in live if getattr(c, "fig", None) is not None]
     _stop_animations_on_figures(figures)
+    settle_qt_event_loop(passes=2)
     for canvas in live:
         close_canvas = getattr(canvas, "close_canvas", None)
         if not callable(close_canvas):
