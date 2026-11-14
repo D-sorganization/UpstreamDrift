@@ -15,6 +15,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from types import ModuleType
 
 import numpy as np
 import pytest
@@ -169,7 +170,7 @@ def multiplier_envelope(
     return centre - spread, centre + spread
 
 
-def require_real_module(name: str) -> None:
+def require_real_module(name: str) -> ModuleType:
     """Skip unless the real ``name`` bindings are importable (not a mock).
 
     The suite's conftest may inject a ``MagicMock`` as ``sys.modules[name]`` so
@@ -191,6 +192,11 @@ def require_real_module(name: str) -> None:
         pytest.skip(f"real {name} is not loadable: {exc}")
     if type(module).__module__ == "unittest.mock":
         pytest.skip(f"real {name} is not installed (mocked module in sys.modules)")
+    if not isinstance(getattr(module, "__file__", None), str):
+        pytest.skip(
+            f"real {name} is not installed (stub without __file__ in sys.modules)"
+        )
+    return module
 
 
 def require_real_pinocchio() -> None:
