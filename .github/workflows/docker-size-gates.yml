@@ -30,7 +30,6 @@ concurrency:
   # One image build at a time per ref across docker-size-gates and docker-security-scan
   # so shared BuildKit on the fleet does not hit lease/prune races (#13761).
   group: docker-image-build-${{ github.ref }}
-  # Queue with docker-security-scan; do not cancel an in-flight peer workflow build.
   cancel-in-progress: false
 
 permissions:
