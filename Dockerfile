@@ -60,9 +60,11 @@ RUN mkdir -p /wheels && \
         rust_core/upstream-motion-matching \
         rust_core/ai_backend; do \
         maturin build --release --features python \
-            -m "$crate/Cargo.toml" --out /wheels; \
+            -m "$crate/Cargo.toml" --out /wheels || exit 1; \
     done && \
-    ls -1 /wheels
+    ls -1 /wheels && \
+    test -n "$(ls /wheels/upstream_physics-*.whl 2>/dev/null)" || \
+    (echo "upstream_physics wheel missing after maturin build" && exit 1)
 
 # Core API + physics stack from lockfile
 COPY requirements.lock /tmp/requirements.lock
@@ -99,7 +101,7 @@ RUN pip install \
     qpsolvers==4.7.0 \
     osqp==1.0.5 \
     meshcat==0.3.2 \
-    tornado==6.6 \
+    tornado==6.6.1 \
     "robot_descriptions==1.14.0" \
     "imageio[ffmpeg]==2.37.0" \
     "trimesh==4.9.0"

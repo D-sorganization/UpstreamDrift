@@ -66,7 +66,9 @@ defusedxml==0.7.1
 deprecated==1.3.1
     # via limits
 dnspython==2.9.2
-    # via email-validator
+    # via
+    #   email-validator
+    #   upstream-drift (pyproject.toml)
 email-validator==2.3.0
     # via upstream-drift (pyproject.toml)
 et-xmlfile==2.0.0
