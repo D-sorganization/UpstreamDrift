@@ -8,9 +8,10 @@ a later test's event processing and destabilize the merge queue.
 
 from __future__ import annotations
 
+import gc
 import logging
 import sys
-from typing import Any
+from typing import Any, Iterator
 
 logger = logging.getLogger(__name__)
 
@@ -37,21 +38,41 @@ def settle_qt_event_loop(*, passes: int = 5) -> None:
         instance.processEvents()
 
 
-def close_matplotlib_qt_canvases() -> None:
-    """Defuse idle draws and close every managed matplotlib figure."""
+def _iter_qt_figure_canvases() -> Iterator[Any]:
+    """Yield QtAgg figure canvases, including embeds not registered in ``Gcf``."""
     mpl = sys.modules.get("matplotlib")
     if mpl is None:
         return
     try:
         from matplotlib._pylab_helpers import Gcf
-        import matplotlib.pyplot as plt
+        from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
     except (ImportError, AttributeError):
         return
 
+    seen: set[int] = set()
     for manager in list(Gcf.get_all_fig_managers()):
         canvas = getattr(manager, "canvas", None)
-        if canvas is None:
-            continue
+        if canvas is not None and id(canvas) not in seen:
+            seen.add(id(canvas))
+            yield canvas
+
+    for obj in gc.get_objects():
+        if isinstance(obj, FigureCanvasQTAgg) and id(obj) not in seen:
+            seen.add(id(obj))
+            yield obj
+
+
+def close_matplotlib_qt_canvases() -> None:
+    """Defuse idle draws and close every QtAgg canvas (``Gcf`` and embedded)."""
+    mpl = sys.modules.get("matplotlib")
+    if mpl is None:
+        return
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError:
+        return
+
+    for canvas in _iter_qt_figure_canvases():
         close_canvas = getattr(canvas, "close_canvas", None)
         if callable(close_canvas):
             try:
@@ -74,28 +95,36 @@ def _defuse_qtagg_canvas(canvas: Any) -> None:
             setattr(canvas, attr, False)
 
 
-def stop_matplotlib_animations() -> None:
-    """Stop any running ``FuncAnimation`` instances still attached to figures."""
-    if "matplotlib.pyplot" not in sys.modules:
+def _iter_live_animations() -> Iterator[Any]:
+    """Yield live :class:`~matplotlib.animation.Animation` instances via the GC."""
+    if "matplotlib.animation" not in sys.modules:
         return
     try:
-        import matplotlib.pyplot as plt
+        from matplotlib.animation import Animation
     except ImportError:
         return
-    for num in list(plt.get_fignums()):
-        fig = plt.figure(num)
-        anim = getattr(fig, "_animated", None)
-        if anim is None:
-            continue
-        event_source = getattr(anim, "event_source", None)
-        if event_source is not None:
+    for obj in gc.get_objects():
+        if isinstance(obj, Animation):
+            yield obj
+
+
+def _halt_animation(anim: Any) -> None:
+    """Stop one animation's timer and disconnect its canvas callbacks."""
+    for method_name in ("pause", "_stop"):
+        method = getattr(anim, method_name, None)
+        if callable(method):
             with _suppress_all():
-                event_source.stop()
-        for method_name in ("_stop", "pause"):
-            method = getattr(anim, method_name, None)
-            if callable(method):
-                with _suppress_all():
-                    method()
+                method()
+    event_source = getattr(anim, "event_source", None)
+    if event_source is not None:
+        with _suppress_all():
+            event_source.stop()
+
+
+def stop_matplotlib_animations() -> None:
+    """Stop running :class:`~matplotlib.animation.Animation` timers."""
+    for anim in _iter_live_animations():
+        _halt_animation(anim)
 
 
 def headless_test_teardown() -> None:
