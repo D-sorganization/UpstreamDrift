@@ -39,6 +39,13 @@ from src.shared.python.physics.ball_trajectory_analysis import TrajectoryAnalysi
 logger = get_logger(__name__)
 
 
+def _air_temperature_kelvin(env: EnvironmentalConditions) -> float:
+    """Convert :class:`EnvironmentalConditions.temperature` [C] for the Rust kernel."""
+    if env.temperature < 200.0:
+        return env.temperature + 273.15
+    return env.temperature
+
+
 @invariant(lambda self: self.ball.mass > 0, "Ball mass must be positive")
 @invariant(lambda self: self.environment.gravity > 0, "Gravity must be positive")
 class BallFlightSimulator(TrajectoryAnalysisMixin):
@@ -170,7 +177,7 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         air_props = upstream_physics.AirProperties(
             density=self.environment.air_density,
             viscosity=1.81e-5,
-            temperature=self.environment.temperature,
+            temperature=_air_temperature_kelvin(self.environment),
             pressure=101325.0,
         )
 

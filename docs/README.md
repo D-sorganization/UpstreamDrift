@@ -4,6 +4,18 @@
 
 Welcome to UpstreamDrift - a professional biomechanical analysis and physics simulation platform.
 
+## Background Reading
+
+Implementation docs here explain how to run tools and engines. Theory and
+notation for those surfaces are published on
+[AffineDrift](https://affinedrift.com). Each tile help page under
+`docs/help/` includes a **Background** section linking the matching article;
+the machine-readable map is
+`scripts/config/affine_drift_theory_links.v1.json`. Core decomposition
+quantities are listed provisionally in
+`manuals/upstreamdrift/calculation-registry.json` with AffineDrift URLs and
+notation symbol ids.
+
 ## Quick Navigation
 
 | I want to...             | Go to...                                                                 |
@@ -28,7 +40,7 @@ Welcome to UpstreamDrift - a professional biomechanical analysis and physics sim
 ### 1. Launch UpstreamDrift (Web UI)
 
 ```bash
-cd /home/user/UpstreamDrift
+cd <owner-home>/UpstreamDrift
 python launch_upstream_drift.py
 ```
 

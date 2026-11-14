@@ -8,7 +8,7 @@ This guide explains how to develop and troubleshoot the Golf Modeling Suite API.
 
 ```bash
 # 1. Ensure you're in the project root
-cd /home/user/Golf_Modeling_Suite
+cd <owner-home>/Golf_Modeling_Suite
 
 # 2. Start the API server
 python start_api_server.py

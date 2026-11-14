@@ -454,42 +454,41 @@ def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
 
 ### 9.5.2 Zero-Velocity Counterfactual (ZVCF)
 
-ZVCF answers: "What acceleration would occur if motion froze instantaneously?"
+Under canonical [SPEC §4](../../../SPEC.md#4-architecture-overview), ZVCF is the control component $M(q)^{-1}\tau$ (`compute_control_acceleration_at_state(q, tau)`). The deprecated `compute_zvcf(q)` shim (`#14943`) evaluates ABA with both velocity and torque zeroed ($v = 0, \tau = 0$), delegating to `compute_gravity_only_acceleration`:
 
-$$\ddot{q}_{ZVCF} = \text{ABA}(q, \mathbf{0}, \tau)$$
+$$\ddot{q}_{\text{gravity-only}} = \text{ABA}(q, \mathbf{0}, \mathbf{0}) = -M(q)^{-1} g(q)$$
 
-This isolates gravity and control from Coriolis/centrifugal effects. The velocity-dependent
-contribution can then be computed as:
-
-$$\Delta \ddot{q}_{velocity} = \ddot{q}_{full} - \ddot{q}_{ZVCF}$$
+To isolate velocity-dependent effects from the instantaneous control-preserved baseline at fixed torque, use `zero_velocity_control_preserved_acceleration` in `simulation_backends/ztcf_zvcf.py` rather than comparing against `compute_zvcf(q)` (which also zeroes $\tau$):
 
 ```python
 def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-    """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
+    """Deprecated shim -> compute_gravity_only_acceleration (#14943).
 
     Args:
         q: Joint positions (n_q,) [rad or m]
 
     Returns:
-        Acceleration with v=0, preserving current control (n_v,)
+        Gravity-only acceleration with v=0 and tau=0 (n_v,)
     """
 ```
 
 **Usage** -- Downswing analysis:
 
 ```python
-# During downswing, separate gravity from centrifugal "whip"
+# Separate passive drift (ZTCF) from control (SPEC §4 ZVCF) and gravity-only baseline
 q, v = engine.get_state()
 
 a_full = pin.aba(engine.model, engine.data, q, v, engine.tau)
-a_zvcf = engine.compute_zvcf(q)   # No Coriolis/centrifugal
-a_ztcf = engine.compute_ztcf(q, v)  # No control torques
+a_grav_only = engine.compute_zvcf(q)                     # Legacy shim: v=0, tau=0
+a_ztcf = engine.compute_ztcf(q, v)                       # No control torques (f(x))
+a_zvcf = engine.compute_control_acceleration_at_state(   # SPEC §4 ZVCF: M(q)^{-1} tau
+    q, engine.tau
+)
 
-a_coriolis_centrifugal = a_full - a_zvcf
 a_control_effect = a_full - a_ztcf
-
-print(f"Centrifugal contribution: {np.linalg.norm(a_coriolis_centrifugal):.2f} rad/s^2")
 print(f"Control contribution:     {np.linalg.norm(a_control_effect):.2f} rad/s^2")
+print(f"Gravity-only norm:        {np.linalg.norm(a_grav_only):.2f} rad/s^2")
+print(f"Control-component norm:   {np.linalg.norm(a_zvcf):.2f} rad/s^2")
 ```
 
 ---

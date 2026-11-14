@@ -10,7 +10,7 @@
     {
       "path": "docs/development/DEVELOPMENT_LOG.md",
       "owner": "@maintainers",
-      "reason": "Active repository development log tracking feature states across the project; pending topic decomposition. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Active repository development log tracking feature states across the project; pending topic decomposition (measured 175098 > 51200 bytes). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {

@@ -769,22 +769,41 @@ class SimscapeAdapter:
     # CounterfactualComputable
     # ------------------------------------------------------------------
 
-    def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:
-        """Legacy gravity-only diagnostic (#14943)."""
+    @precondition(
+        lambda self, q: bool(
+            isinstance(q, np.ndarray)
+            and q.ndim == 1
+            and (not self._dof or q.shape == (self._dof,))
+        ),
+        "q must be a 1-D numpy array matching adapter dof",
+    )
+    def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:  # noqa: ARG002
+        """Legacy gravity-only diagnostic — uses protocol defaults (#14943)."""
+        op = "compute_gravity_only_acceleration"
+        self._lifecycle.require(AdapterState.LOADED, AdapterState.RUNNING, operation=op)
         from src.shared.python.engine_core.counterfactual_defaults import (
             default_gravity_only_acceleration,
         )
-
         return default_gravity_only_acceleration(self, q)
-
-    def compute_control_acceleration_at_state(
+    @precondition(
+        lambda self, q, tau: bool(
+            isinstance(q, np.ndarray)
+            and isinstance(tau, np.ndarray)
+            and q.ndim == 1
+            and tau.ndim == 1
+            and (not self._dof or (q.shape == (self._dof,) and tau.shape == (self._dof,)))
+        ),
+        "q and tau must be 1-D numpy arrays matching adapter dof",
+    )
+    def compute_control_acceleration_at_state(  # noqa: ARG002
         self, q: np.ndarray, tau: np.ndarray
     ) -> np.ndarray:
-        """SPEC §4 ZVCF control term (#14943)."""
+        """SPEC §4 ZVCF control term — protocol default at fixed ``q`` (#14943)."""
+        op = "compute_control_acceleration_at_state"
+        self._lifecycle.require(AdapterState.LOADED, AdapterState.RUNNING, operation=op)
         from src.shared.python.engine_core.counterfactual_defaults import (
             default_control_acceleration_at_state,
         )
-
         return default_control_acceleration_at_state(self, q, tau)
 
     @precondition(
