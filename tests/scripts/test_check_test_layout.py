@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from scripts.check_test_layout import audit_test_layout
 
 
@@ -59,3 +61,20 @@ def test_audit_test_layout_rejects_overlapping_fixture_names(
     assert len(findings) == 1
     assert findings[0].path == Path("tests/unit/conftest.py")
     assert "duplicate fixture" in findings[0].reason
+
+
+@pytest.mark.unit
+def test_audit_test_layout_rejects_missing_legacy_src_dirs_when_enabled(
+    tmp_path: Path,
+) -> None:
+    findings = audit_test_layout(tmp_path, check_legacy_dirs_exist=True)
+
+    missing_paths = {f.path.as_posix() for f in findings}
+    assert "src/engines/lower_body_model/tests" in missing_paths
+    assert all("does not exist on disk" in f.reason for f in findings)
+
+
+@pytest.mark.unit
+def test_repo_legacy_src_test_dirs_exist_on_disk() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+    assert audit_test_layout(repo_root, check_legacy_dirs_exist=True) == []

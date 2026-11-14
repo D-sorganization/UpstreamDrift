@@ -44,19 +44,12 @@ LEGACY_SRC_TEST_DIRS = frozenset(
         "src/shared/python/calc_backend/tests",
         "src/shared/python/chat/tests",
         "src/shared/python/dashboard/tests",
-        "src/shared/python/data_processing/tests",
         "src/shared/python/humanoid_character_builder/tests",
         "src/shared/python/model_generation/tests",
         "src/shared/python/optimization/tests",
-        "src/shared/python/plot_engine/tests",
-        "src/shared/python/plot_theme/tests",
-        "src/shared/python/programmatic_pid/tests",
         "src/shared/python/sidekick/process_calculators/scrubber/tests",
         "src/shared/python/sidekick/tests",
-        "src/shared/python/signal_toolkit/tests",
         "src/shared/python/spatial_algebra/tests",
-        "src/shared/python/tests",
-        "src/shared/python/upstream_drift_tools/tests",
     }
 )
 
@@ -145,7 +138,9 @@ def _audit_duplicate_fixtures(repo_root: Path) -> list[LayoutFinding]:
     return findings
 
 
-def audit_test_layout(repo_root: Path) -> list[LayoutFinding]:
+def audit_test_layout(
+    repo_root: Path, *, check_legacy_dirs_exist: bool = False
+) -> list[LayoutFinding]:
     """Return all test-layout violations below ``repo_root``.
 
     Preconditions: ``repo_root`` must be an existing directory.
@@ -182,6 +177,16 @@ def audit_test_layout(repo_root: Path) -> list[LayoutFinding]:
                     )
                 )
 
+    if check_legacy_dirs_exist:
+        for rel_dir in sorted(LEGACY_SRC_TEST_DIRS):
+            if not (repo_root / rel_dir).is_dir():
+                findings.append(
+                    LayoutFinding(
+                        path=Path(rel_dir),
+                        reason="configured legacy src test directory does not exist on disk",
+                    )
+                )
+
     findings.extend(_audit_duplicate_fixtures(repo_root))
     return findings
 
@@ -190,7 +195,7 @@ def main(argv: list[str] | None = None) -> int:
     """Run the test-layout audit and print findings for CI."""
     args = argv if argv is not None else sys.argv[1:]
     repo_root = Path(args[0]).resolve() if args else Path(__file__).resolve().parents[1]
-    findings = audit_test_layout(repo_root)
+    findings = audit_test_layout(repo_root, check_legacy_dirs_exist=True)
     if not findings:
         return 0
 
