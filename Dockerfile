@@ -4,7 +4,9 @@
 FROM python:3.12-slim@sha256:c2d8472b831337ab296a8ce652e1ba786e9e3034fc445dc58b50a7f5251f0003 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    PIP_RETRIES=10 \
+    PIP_DEFAULT_TIMEOUT=60
 
 # Build tools for packages that compile C extensions (cryptography, etc.)
 # `curl` + `pkg-config`/`libssl-dev` are also needed to install the Rust
@@ -60,9 +62,11 @@ RUN mkdir -p /wheels && \
         rust_core/upstream-motion-matching \
         rust_core/ai_backend; do \
         maturin build --release --features python \
-            -m "$crate/Cargo.toml" --out /wheels; \
+            -m "$crate/Cargo.toml" --out /wheels || exit 1; \
     done && \
-    ls -1 /wheels
+    ls -1 /wheels && \
+    test -n "$(ls /wheels/upstream_physics-*.whl 2>/dev/null)" || \
+    (echo "upstream_physics wheel missing after maturin build" && exit 1)
 
 # Core API + physics stack from lockfile
 COPY requirements.lock /tmp/requirements.lock
@@ -99,7 +103,7 @@ RUN pip install \
     qpsolvers==4.7.0 \
     osqp==1.0.5 \
     meshcat==0.3.2 \
-    tornado==6.6 \
+    tornado==6.6.1 \
     "robot_descriptions==1.14.0" \
     "imageio[ffmpeg]==2.37.0" \
     "trimesh==4.9.0"
@@ -136,7 +140,7 @@ RUN set -eu; \
         waiver_flags="$(python /tmp/check_pip_audit_waivers.py \
             --waiver-file /tmp/pip_audit_waivers.json)"; \
         # shellcheck disable=SC2086 - intentional word-splitting of flags
-        python -m pip_audit $waiver_flags; \
+        python -m pip_audit --timeout 120 $waiver_flags; \
         pip uninstall -y pip-audit; \
     fi
 

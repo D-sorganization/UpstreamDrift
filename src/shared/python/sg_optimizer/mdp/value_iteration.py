@@ -259,6 +259,12 @@ class HoleMDP:
         return best
 
     def expected_strokes(self, state: State, value: NDArray[np.float64]) -> float:
+        """Strokes remaining from ``state`` under the solved ``value`` field.
+
+        With :func:`~src.shared.python.sg_optimizer.strategy.green_terminal`, the
+        green lie is terminal so this is *strokes to reach the green* — putting is
+        not modelled in the hole MDP. See strategy view output labels.
+        """
         ix, iy = self.raster.world_to_index(state.x, state.y)
         nx, ny = self.raster.shape
         if not (0 <= ix < nx and 0 <= iy < ny):
