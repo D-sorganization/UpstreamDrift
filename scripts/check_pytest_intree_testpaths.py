@@ -4,11 +4,12 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from pathlib import Path
 
-try:
+if sys.version_info >= (3, 11):
     import tomllib
-except ImportError:  # pragma: no cover - Python 3.10 fallback
+else:  # pragma: no cover - Python 3.10 fallback
     import tomli as tomllib  # type: ignore[import-not-found]
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -43,18 +44,34 @@ def _is_covered(test_file: Path, testpaths: list[Path]) -> bool:
     return any(test_file == path or path in test_file.parents for path in testpaths)
 
 
+def find_missing_testpaths(repo_root: Path, testpaths: list[Path]) -> list[str]:
+    """Return configured pytest testpaths that do not exist as directories."""
+    if not isinstance(repo_root, Path):
+        raise TypeError("repo_root must be a pathlib.Path")
+    if not repo_root.is_dir():
+        raise ValueError(f"repo_root must be an existing directory: {repo_root}")
+    return [path.as_posix() for path in testpaths if not (repo_root / path).is_dir()]
+
+
 def main() -> int:
     testpaths = _configured_testpaths()
+    missing_dirs = find_missing_testpaths(ROOT, testpaths)
     missing = [
         str(path)
         for path in _tracked_in_tree_tests()
         if not _is_covered(path, testpaths)
     ]
+    if missing_dirs:
+        sys.stderr.write("Configured pytest testpaths do not exist on disk:\n")
+        sys.stderr.write("\n".join(missing_dirs) + "\n")
     if missing:
-        print("Tracked in-tree tests are not covered by pytest testpaths:")
-        print("\n".join(missing))
+        sys.stderr.write("Tracked in-tree tests are not covered by pytest testpaths:\n")
+        sys.stderr.write("\n".join(missing) + "\n")
+    if missing_dirs or missing:
         return 1
-    print("All tracked in-tree tests are covered by pytest testpaths.")
+    sys.stdout.write(
+        "All configured testpaths exist and cover tracked in-tree tests.\n"
+    )
     return 0
 
 
