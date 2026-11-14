@@ -8,6 +8,7 @@ a later test's event processing and destabilize the merge queue.
 
 from __future__ import annotations
 
+import gc
 import logging
 import sys
 from typing import Any
@@ -44,6 +45,39 @@ def _defuse_qtagg_canvas(canvas: Any) -> None:
             setattr(canvas, attr, False)
 
 
+def _halt_animation(anim: Any) -> None:
+    """Stop one animation's timer and disconnect its canvas callbacks."""
+    for method_name in ("pause", "_stop"):
+        method = getattr(anim, method_name, None)
+        if callable(method):
+            with _suppress_all():
+                method()
+    event_source = getattr(anim, "event_source", None)
+    if event_source is not None:
+        with _suppress_all():
+            event_source.stop()
+
+
+def _stop_animations_on_figures(figures: list[Any]) -> None:
+    """Stop :class:`~matplotlib.animation.Animation` objects tied to ``figures``.
+
+    Embedded :class:`~src.shared.python.plotting.mpl_canvas.MplCanvas` figures are
+    not in ``Gcf``, so this uses a narrow ``gc.get_objects()`` scan only when at
+    least one live embedded canvas exists — not on every unit test.
+    """
+    if not figures or "matplotlib.animation" not in sys.modules:
+        return
+    try:
+        from matplotlib.animation import Animation
+    except ImportError:
+        return
+    fig_ids = {id(fig) for fig in figures}
+
+    for obj in gc.get_objects():
+        if isinstance(obj, Animation) and id(getattr(obj, "_fig", None)) in fig_ids:
+            _halt_animation(obj)
+
+
 def _close_embedded_mpl_canvases() -> None:
     """Close embedded :class:`~src.shared.python.plotting.mpl_canvas.MplCanvas` widgets.
 
@@ -56,7 +90,12 @@ def _close_embedded_mpl_canvases() -> None:
         from src.shared.python.plotting.mpl_canvas import iter_live_mpl_canvases
     except (ImportError, OSError):
         return
-    for canvas in iter_live_mpl_canvases():
+    live = tuple(iter_live_mpl_canvases())
+    if not live:
+        return
+    figures = [c.fig for c in live if getattr(c, "fig", None) is not None]
+    _stop_animations_on_figures(figures)
+    for canvas in live:
         close_canvas = getattr(canvas, "close_canvas", None)
         if not callable(close_canvas):
             continue
