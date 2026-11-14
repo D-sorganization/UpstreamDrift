@@ -23,8 +23,9 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: docker-security-scan-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # Serialize with docker-size-gates and docker-smoke — same host BuildKit.
+  group: docker-image-build-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: read

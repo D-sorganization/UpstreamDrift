@@ -27,8 +27,10 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: docker-size-gates-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # One image build at a time per ref across docker-size-gates, docker-security-scan,
+  # and docker-smoke so shared fleet BuildKit does not hit lease/prune races (#13761).
+  group: docker-image-build-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
