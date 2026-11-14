@@ -294,6 +294,8 @@ class SidekickSidebarManager:
                 exc,
             )
             return None
+        with contextlib.suppress(Exception):
+            import chat._ud_attachment_manifest_mixin  # noqa: F401 — #15013
         try:
             return importlib.import_module("sidekick.ui.tools_sidebar.api")
         except ImportError:

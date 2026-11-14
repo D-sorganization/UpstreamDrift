@@ -190,7 +190,7 @@ uncontrolled recording establishes a grip mechanism.
 
 ## Turnover
 
-- Worktree: `C:/Users/diete/Repositories/UpstreamDrift-impact-acoustics`.
+- Worktree: `<owner-home>/Repositories/UpstreamDrift-impact-acoustics`.
 - Branch: `docs/9700-impact-acoustics-program`; commit `SELF`; PR #9706; initial implementation `077ae9df9`.
 - Completed: relevant implementation/test inventory, source ownership, state
   contract, study/validation design and linked implementation issues.
@@ -200,7 +200,7 @@ uncontrolled recording establishes a grip mechanism.
   import loader because the isolated vendor directory was empty. Initialized
   the existing eab74a901a Tools pin and reran; no vendor pin change.
   PR #9706 is open for normal protected review.
-- Preserve #8557/#9153 protected records and frozen ControlTower/WSL recovery
+- Preserve #8557/#9153 protected records and frozen <host>/WSL recovery
   restrictions in the root handoff. Do not import old checkpoints as new data.
 - Next implementation is #9703 after its provider dependency is reviewed and
   qualified. Physical and acoustic effect determination remains open research.

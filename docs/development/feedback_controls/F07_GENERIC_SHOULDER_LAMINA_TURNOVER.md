@@ -6,7 +6,7 @@ PR #12246's full CI suite found one stale exact-pin impact acceptance record:
 24,025 tests passed and one failed because the record still referenced Tools
 `86d0f28b1cc5acf61185e07e320c816c2d005512`. The failure was reproduced locally
 before updating metadata. All 26 remaining capability probes passed against
-the new pin. DeskComputer built an archive of exact Tools commit
+the new pin. <host> built an archive of exact Tools commit
 `6b6e4be55e7086a33db43b36d2632765be619bde`; the transferred bundle was served
 and verified locally, covering 76 assets, five JavaScript assets, 2,801,426
 bytes and the missing-artifact 404. See

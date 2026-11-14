@@ -4,7 +4,7 @@
   "epic": 10363,
   "date": "2026-09-27",
   "code": "main @ 3a11b5c07 (after #11047); factors toggled in a scratch checkout only",
-  "method": "Full pipeline regeneration per permutation on DeskComputer, Python 3.12. bound_widening=2.0 sets pipeline.constants.BOUND_WIDENING; hip_zero_twist=false passes zero_twist_deg=None to apply_hip_calibration; the pre-HO-11 base spec is full_body_spec_anthro_driver.json at 69a626010.",
+  "method": "Full pipeline regeneration per permutation on <host>, Python 3.12. bound_widening=2.0 sets pipeline.constants.BOUND_WIDENING; hip_zero_twist=false passes zero_twist_deg=None to apply_hip_calibration; the pre-HO-11 base spec is full_body_spec_anthro_driver.json at 69a626010.",
   "permutations": [
     {
       "id": "current_static_seeds",

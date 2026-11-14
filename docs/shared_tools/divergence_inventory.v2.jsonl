@@ -1,4 +1,4 @@
-{"schema_version": 2, "tools_pin": "0cf7f77af73eab26930486c3d65d5b5ad0b2678d", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
+{"schema_version": 2, "tools_pin": "a47d83d644b39eb6168fb6f657c7705b89f8deaa", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
 {"path": "README.md", "classification": "tools-only", "package": "README.md", "spelling_only": false}
 {"path": "README_PACKAGE.md", "classification": "ud-only", "package": "README_PACKAGE.md", "spelling_only": false}
 {"path": "__init__.py", "classification": "diverged", "package": "__init__.py", "spelling_only": false}
@@ -20,6 +20,7 @@
 {"path": "ai/adapters/bitnet_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/adapters/claude_code_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/adapters/cli_provider_setup.py", "classification": "diverged", "package": "ai", "spelling_only": false}
+{"path": "ai/adapters/cli_subprocess_runner.py", "classification": "tools-only", "package": "ai", "spelling_only": false}
 {"path": "ai/adapters/cline_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/adapters/codex_cli_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/adapters/factory.py", "classification": "diverged", "package": "ai", "spelling_only": false}
@@ -345,6 +346,7 @@
 {"path": "body_segment_parameters/de_leva_1996.py", "classification": "ud-only", "package": "body_segment_parameters", "spelling_only": false}
 {"path": "calc_backend/API_STANDARDIZATION.md", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/__init__.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
+{"path": "calc_backend/agent_api.py", "classification": "tools-only", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/api/__init__.py", "classification": "diverged", "package": "calc_backend", "spelling_only": true}
 {"path": "calc_backend/api/standard_response.py", "classification": "ud-only", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/app.py", "classification": "diverged", "package": "calc_backend", "spelling_only": false}
@@ -364,9 +366,15 @@
 {"path": "calc_backend/contracts/thermal_profile.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/contracts/wgs_reactor.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/health.py", "classification": "diverged", "package": "calc_backend", "spelling_only": false}
+{"path": "calc_backend/mcp_server.py", "classification": "tools-only", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/models/__init__.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/models/pressure_drop.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/protocols.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
+{"path": "calc_backend/registry/__init__.py", "classification": "tools-only", "package": "calc_backend", "spelling_only": false}
+{"path": "calc_backend/registry/catalog.py", "classification": "tools-only", "package": "calc_backend", "spelling_only": false}
+{"path": "calc_backend/registry/spec.py", "classification": "tools-only", "package": "calc_backend", "spelling_only": false}
+{"path": "calc_backend/registry/store.py", "classification": "tools-only", "package": "calc_backend", "spelling_only": false}
+{"path": "calc_backend/registry/wire.py", "classification": "tools-only", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/routers/__init__.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/routers/acid_gas_dewpoint.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
 {"path": "calc_backend/routers/baghouse.py", "classification": "identical", "package": "calc_backend", "spelling_only": false}
@@ -405,7 +413,7 @@
 {"path": "chat/_qt/exports.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/history_sidebar.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/input.py", "classification": "identical", "package": "chat", "spelling_only": false}
-{"path": "chat/_qt/messaging.py", "classification": "identical", "package": "chat", "spelling_only": false}
+{"path": "chat/_qt/messaging.py", "classification": "diverged", "package": "chat", "spelling_only": true}
 {"path": "chat/_qt/queue_panel.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/sessions.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_qt/streaming.py", "classification": "identical", "package": "chat", "spelling_only": false}
@@ -417,6 +425,8 @@
 {"path": "chat/_router_protocol_adapters.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_theme_protocol.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/_thinking_indicator.py", "classification": "identical", "package": "chat", "spelling_only": false}
+{"path": "chat/_ud_attachment_manifest_handlers.py", "classification": "ud-only", "package": "chat", "spelling_only": false}
+{"path": "chat/_ud_attachment_manifest_mixin.py", "classification": "ud-only", "package": "chat", "spelling_only": false}
 {"path": "chat/_workspace_protocol.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/ai_settings_controller.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/chat_dock_widget.py", "classification": "identical", "package": "chat", "spelling_only": false}
@@ -446,6 +456,7 @@
 {"path": "chat/terminal_providers.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/terminal_runtime.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/__init__.py", "classification": "identical", "package": "chat", "spelling_only": false}
+{"path": "chat/tests/test_attachment_upload_rejection.py", "classification": "ud-only", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_chat.py", "classification": "identical", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_chat_drift.py", "classification": "diverged", "package": "chat", "spelling_only": false}
 {"path": "chat/tests/test_chat_routing_lifecycle.py", "classification": "identical", "package": "chat", "spelling_only": false}
@@ -2613,7 +2624,7 @@
 {"path": "sidekick/process_calculators/analysis_utils.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/baghouse_README.md", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/baghouse_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
-{"path": "sidekick/process_calculators/constants.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
+{"path": "sidekick/process_calculators/constants.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/electrode_advancement_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": true}
 {"path": "sidekick/process_calculators/financial_calculator.py", "classification": "diverged", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/process_calculators/flare_README.md", "classification": "identical", "package": "sidekick", "spelling_only": false}
