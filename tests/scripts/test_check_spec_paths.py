@@ -129,3 +129,98 @@ def test_cli_enforces_actual_change_log_section(
     monkeypatch.setattr(checker, "SPEC", spec)
     monkeypatch.setattr(checker, "HISTORICAL_PATHS", registry)
     assert checker.main() == expected
+
+
+def test_check_doc_paths_flags_missing_bare_dirs_and_non_py_files(tmp_path: Path):
+    """Curated doc path check catches missing bare dirs and non-Python files."""
+    existing_py = tmp_path / "src/shared/python/contracts.py"
+    existing_py.parent.mkdir(parents=True)
+    existing_py.write_text("# ok\n", encoding="utf-8")
+    existing_dir = tmp_path / "tests/unit/api"
+    existing_dir.mkdir(parents=True)
+
+    doc = tmp_path / "docs/testing/guide.md"
+    doc.parent.mkdir(parents=True)
+    doc.write_text(
+        "\n".join(
+            [
+                "Valid `src/shared/python/contracts.py` and `tests/unit/api`.",
+                "Missing dir `tests/e2e`.",
+                "Missing workflow `.github/workflows/mesh-backends-test.yml`.",
+                "Missing asset `tests/assets/pro_driver.c3d`.",
+                "Missing py `src/shared/python/missing.py`.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    bad = checker.check_doc_paths(tmp_path, [doc])
+    assert bad == [
+        "  docs/testing/guide.md:2: missing path 'tests/e2e'",
+        "  docs/testing/guide.md:3: missing path '.github/workflows/mesh-backends-test.yml'",
+        "  docs/testing/guide.md:4: missing path 'tests/assets/pro_driver.c3d'",
+        "  docs/testing/guide.md:5: missing path 'src/shared/python/missing.py'",
+    ]
+
+
+def test_check_doc_paths_ignores_fenced_code_blocks_and_module_constants(
+    tmp_path: Path,
+):
+    """Fenced snippets and real module UPPER_SNAKE constants are ignored; bad suffixes fail."""
+    avail_mod = tmp_path / "src/shared/python/engine_core/engine_availability.py"
+    avail_mod.parent.mkdir(parents=True, exist_ok=True)
+    avail_mod.write_text("PINOCCHIO_AVAILABLE = False\n", encoding="utf-8")
+
+    doc = tmp_path / "docs/README.md"
+    doc.parent.mkdir(parents=True)
+    doc.write_text(
+        "\n".join(
+            [
+                "Valid constant `src/shared/python/engine_core/engine_availability.PINOCCHIO_AVAILABLE`.",
+                "Uppercase ext STL `src/assets/Missing.STL`.",
+                "Uppercase ext PNG `src/assets/Missing.PNG`.",
+                "Uppercase ext MD `docs/Missing.MD`.",
+                "Existing module uppercase ext `src/shared/python/engine_core/engine_availability.STL`.",
+                "Missing module constant `src/shared/python/missing_mod.SOME_CONST`.",
+                "```bash",
+                "pytest tests/nonexistent_in_fence/",
+                "```",
+                "Inline after fence `src/missing_after_fence.py`.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    bad = checker.check_doc_paths(tmp_path, [doc])
+    assert bad == [
+        "  docs/README.md:2: missing path 'src/assets/Missing.STL'",
+        "  docs/README.md:3: missing path 'src/assets/Missing.PNG'",
+        "  docs/README.md:4: missing path 'docs/Missing.MD'",
+        "  docs/README.md:5: missing path 'src/shared/python/engine_core/engine_availability.STL'",
+        "  docs/README.md:6: missing path 'src/shared/python/missing_mod.SOME_CONST'",
+        "  docs/README.md:10: missing path 'src/missing_after_fence.py'",
+    ]
+
+
+def test_cli_fails_when_curated_docs_cite_missing_repo_path(
+    history, monkeypatch: pytest.MonkeyPatch
+):
+    """CLI main() exits non-zero when a curated doc references a missing repo path."""
+    root, _, row, records, _ = history
+    spec = root / "SPEC.md"
+    spec.write_text(f"## 12. Change Log\n\n{row}\n", encoding="utf-8")
+    registry = root / "history.json"
+    registry.write_text(json.dumps({"paths": records}), encoding="utf-8")
+    readme = root / "docs/README.md"
+    readme.parent.mkdir(parents=True, exist_ok=True)
+    readme.write_text("Broken `src/missing_module.py`.\n", encoding="utf-8")
+
+    monkeypatch.setattr(checker, "ROOT", root)
+    monkeypatch.setattr(checker, "SPEC", spec)
+    monkeypatch.setattr(checker, "HISTORICAL_PATHS", registry)
+    assert checker.main() == 1
+
+
+def test_repository_curated_docs_have_no_broken_repo_paths():
+    """All curated testing, architecture, and manual docs resolve on disk."""
+    assert checker.check_doc_paths(checker.ROOT) == []

@@ -302,7 +302,7 @@ requires_model_loaded = require_state(
 
 ## 5.4 `BasePhysicsEngine`
 
-**File:** `src/shared/python/base_physics_engine.py`
+**File:** `src/shared/python/engine_core/base_physics_engine.py`
 
 `BasePhysicsEngine` is an abstract base class that factors out behaviour common
 to all engine implementations:
@@ -372,7 +372,7 @@ implementations that serialise the `EngineState` into a `StateCheckpoint` object
 
 ## 5.5 Engine Registry
 
-**File:** `src/shared/python/engine_registry.py`
+**File:** `src/shared/python/engine_core/engine_registry.py`
 
 The registry decouples engine _discovery_ from engine _instantiation_.
 
@@ -432,7 +432,7 @@ The `EngineRegistry` class exposes three methods:
 
 ## 5.6 Engine Manager
 
-**File:** `src/shared/python/engine_manager.py`
+**File:** `src/shared/python/engine_core/engine_manager.py`
 
 The `EngineManager` is the user-facing facade that ties the registry, probes, and
 engine factories together.
@@ -481,7 +481,7 @@ the registry factory. Special cases (MATLAB, Pendulum) use dedicated loaders.
 
 ## 5.7 Engine Probes
 
-**File:** `src/shared/python/engine_probes.py`
+**File:** `src/shared/python/engine_core/engine_probes.py`
 
 Each engine has a corresponding probe class that checks installation status at runtime.
 

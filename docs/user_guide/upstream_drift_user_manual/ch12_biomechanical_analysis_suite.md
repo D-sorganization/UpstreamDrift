@@ -820,7 +820,7 @@ for structured output. The complete set:
 
 ## 12.9 Muscle Synergy Analysis
 
-The `MuscleSynergyAnalyzer` (in `src/shared/python/muscle_analysis.py`) extracts coordinated
+The `MuscleSynergyAnalyzer` (in `src/shared/python/biomechanics/muscle_analysis.py`) extracts coordinated
 muscle activation patterns using Non-negative Matrix Factorization (NMF).
 
 ### 12.9.1 Theory
