@@ -18,9 +18,153 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#15045 · Hill F_V Zero Beyond Vmax; Exponential Activation Substeps for Mocap Dt
+
+- **State:** shipped
+- **Shipped:** 2026-11-12
+- **Owner:** unassigned
+- **Issue:** #15045
+- **Branch:** cursor/hill-activation-sci-15045-1ec6
+- **PR:** #15054
+- **Paths:** see #15054
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`59cb1fcb`; collated from changes/15045-hill-f-v-zero-beyond-vmax-exponential-ac.md)
+- **Summary:** Hill f_v zero beyond Vmax; exponential activation substeps for mocap dt
+
+### DL-#15044 · SO(3) Quat_Inverse_Distance (Relative-Quaternion Angle), Interpolated Ball-Flight Ground Landing
+
+- **State:** shipped
+- **Shipped:** 2026-11-12
+- **Owner:** unassigned
+- **Issue:** #15044
+- **Branch:** cursor/quat-landing-sci-15044-e727
+- **PR:** #15056
+- **Paths:** see #15056
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`67fef889`; collated from changes/15044-so-3-quat-inverse-distance-and-interpola.md)
+- **Summary:** SO(3) quat_inverse_distance (relative-quaternion angle), interpolated ball-flight ground landing
+
+### DL-#15043 · Align Rigid-Body Off-Center COR Impulse With Validator Budget via Club Torque; Solver Integration Test.
+
+- **State:** shipped
+- **Shipped:** 2026-11-12
+- **Owner:** unassigned
+- **Issue:** #15043
+- **Branch:** cursor/validate-energy-balance-15043-4fad
+- **PR:** #15051
+- **Paths:** see #15051
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`37a0e84f`; collated from changes/15043-energy-validator-uses-effective-club-mas.md)
+- **Summary:** Align rigid-body off-center COR impulse with validator budget via club torque; solver integration test.
+
+### DL-#15040 · Fix Turf Contact Impact: Joule Energy Loss, Receding Guard, Coupled Friction-Spin; Release-Safe Mass/Radius Validation
+
+- **State:** shipped
+- **Shipped:** 2026-11-12
+- **Owner:** unassigned
+- **Issue:** #15040
+- **Branch:** cursor/turf-contact-impact-15040-eeaa
+- **PR:** #15048
+- **Paths:** see #15048
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`b2212bc8`; collated from changes/15040-fix-turf-contact-impact-joule-energy-los.md)
+- **Summary:** Fix turf contact impact: joule energy loss, receding guard, coupled friction-spin; release-safe mass/radius validation
+
+### DL-#15022 · Agent API V1 Conformance CI and FastMCP Migration for Ud-Sim-Mcp
+
+- **State:** shipped
+- **Shipped:** 2026-11-12
+- **Owner:** unassigned
+- **Issue:** #15022
+- **Branch:** cursor/agent-api-v1-fastmcp-15022-1251
+- **PR:** #15073
+- **Paths:** see #15073
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`808174d4`; collated from changes/15022-agent-api-v1-fastmcp.md)
+- **Summary:** Agent API v1 conformance CI and FastMCP migration for ud-sim-mcp
+
+### DL-#15015 · Fail-Closed Motion-Matching Gates; Archive Run-102 Evidence Script With Restore Ref.
+
+- **State:** shipped
+- **Shipped:** 2026-11-12
+- **Owner:** unassigned
+- **Issue:** #15015
+- **Branch:** cursor/motion-matching-gate-honesty-15015-2352
+- **PR:** #15037
+- **Paths:** see #15037
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`1d015b47`; collated from changes/15015-fail-closed-motion-matching-gates-archiv.md)
+- **Summary:** Fail-closed motion-matching gates; archive run-102 evidence script with restore ref.
+
+### DL-#15014 · Fix Dempster/Zatsiorsky Segment Mass Expansion and C3D Export Placeholder (Part A)
+
+- **State:** shipped
+- **Shipped:** 2026-11-14
+- **Owner:** unassigned
+- **Issue:** #15014
+- **Branch:** cursor/segment-mass-c3d-fix-e135
+- **PR:** #15036, #15035
+- **Paths:** see #15036
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`01c67c54`; collated from changes/15014-urdf-mjcf-converter-preserves-joint-and.md)
+- **Summary:** Fix Dempster/Zatsiorsky segment mass expansion and C3D export placeholder (part a)
+
+### DL-#13887 · Add Hill MTU Joint Actuator (Agonist/Antagonist, Compliant Tendon, Linearisation API).
+
+- **State:** shipped
+- **Shipped:** 2026-11-12
+- **Owner:** unassigned
+- **Issue:** #13887
+- **Branch:** cursor/hill-mtu-joint-actuator-cce3
+- **PR:** #15062
+- **Paths:** see #15062
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`1b0ef44a`; collated from changes/13887-add-hill-mtu-joint-actuator-agonist-anta.md)
+- **Summary:** Add Hill MTU joint actuator (agonist/antagonist, compliant tendon, linearisation API).
+
+### DL-#13781 · ML-WS-4 Native MuJoCo Episode Corpus Generator, Manifest Hashes, and CI Fixture
+
+- **State:** shipped
+- **Shipped:** 2026-11-12
+- **Owner:** unassigned
+- **Issue:** #13781
+- **Branch:** cursor/ml-ws4-mujoco-episode-corpus-b024
+- **PR:** #15059
+- **Paths:** see #15059
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`aa6cfb89`; collated from changes/13781-ml-ws-4-native-mujoco-episode-corpus-gen.md)
+- **Summary:** ML-WS-4 native MuJoCo episode corpus generator, manifest hashes, and CI fixture
+
+### DL-#12723 · NSX-94: Commit Cross-Engine Co-Contraction Trade-Off Evidence JSON and Validation Harness
+
+- **State:** shipped
+- **Shipped:** 2026-11-13
+- **Owner:** unassigned
+- **Issue:** #12723
+- **Branch:** cursor/nsx94-tradeoff-report-3f62
+- **PR:** #15067
+- **Paths:** see #15067
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`90bfee5b`; collated from changes/12723-nsx-94-commit-cross-engine-co-contractio.md)
+- **Summary:** NSX-94: commit cross-engine co-contraction trade-off evidence JSON and validation harness
+
+### DL-#12690 · R9c: Catalog MATLAB R2025b Appearance Acceptance as Deferred; Extend Headless Export and MATLAB Consumer Contract Tests.
+
+- **State:** shipped
+- **Shipped:** 2026-11-12
+- **Owner:** unassigned
+- **Issue:** #12690
+- **Branch:** cursor/simscape-appearance-r9c-c25e
+- **PR:** #15065
+- **Paths:** see #15065
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`bbaf03c0`; collated from changes/12690-r9c-catalog-matlab-r2025b-appearance-acc.md)
+- **Summary:** R9c: catalog MATLAB R2025b appearance acceptance as deferred; extend headless export and MATLAB consumer contract tests.
+
 ### DL-#15027 · Re-Bootstrap Pip With Ensurepip Before Force-Overlay-Parity Engine Installs (#15027).
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-11
 - **Owner:** unassigned
 - **Issue:** #15027
 - **Branch:** cursor/force-overlay-pip-ensurepip-a939
@@ -29,11 +173,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-12
 - **Last verified:** 2026-11-12 (`3afe09c1`; collated from changes/15027-re-bootstrap-pip-with-ensurepip-before-f.md)
 - **Summary:** Re-bootstrap pip with ensurepip before force-overlay-parity engine installs (#15027).
-- **Next step:** Confirm force-overlay-parity matrix with ci:full on PR #15030.
 
 ### DL-#15011 · Label Injury Spinal-Load Heuristics Honestly; Disclaim Unvalidated Screening Bands.
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-11
 - **Owner:** unassigned
 - **Issue:** #15011
 - **Branch:** cursor/injury-heuristic-labels-118d
@@ -42,11 +186,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-12
 - **Last verified:** 2026-11-12 (`a1a26523`; collated from changes/15011-label-injury-spinal-load-heuristics-hone.md)
 - **Summary:** Label injury spinal-load heuristics honestly; disclaim unvalidated screening bands.
-- **Next step:** Merge after CI green.
 
 ### DL-#14934 · Fix Syngas Water Unit Conversions and Router Fallback on 60F_14.696Psia Basis (Paired With Tools#6009)
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-10
 - **Owner:** unassigned
 - **Issue:** #14934
 - **Branch:** agy/6004-syngas-water-router-pair
@@ -55,11 +199,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-10
 - **Last verified:** 2026-11-10 (`71515bb6`; collated from changes/14934-default-true-removal.md)
 - **Summary:** Fix syngas water unit conversions and router fallback on 60F_14.696psia basis (paired with Tools#6009)
-- **Next step:** Merge the PR.
 
 ### DL-#14906 · Correct SHOW-A10 Evidence Provenance Manifest and Summary Attribution Without Regenerating Artifacts
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-09
 - **Owner:** unassigned
 - **Issue:** #14906
 - **Branch:** agy/ct/14906-show-a10-provenance-correction
@@ -68,11 +212,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-09
 - **Last verified:** 2026-11-09 (`94f794b0`; collated from changes/14906-show-a10-provenance-correction.md)
 - **Summary:** Correct SHOW-A10 evidence provenance manifest and summary attribution without regenerating artifacts
-- **Next step:** Merge the A10 provenance correction slice while keeping epic #14906 open.
 
 ### DL-#14397 · Canonical Float Rounding Before Hashing for Ubuntu 26.04
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-08
 - **Owner:** unassigned
 - **Issue:** #14397
 - **Branch:** agy/14397-ubuntu-2604-hash-drift
@@ -81,11 +225,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-08
 - **Last verified:** 2026-11-08 (`604503f6`; collated from changes/14397-ubuntu-2604-hash-drift.md)
 - **Summary:** physics_spec_sha256 and the saved-comparison receipts compare floats at a canonical precision (12 significant digits, 1e-12 absolute) so BLAS/libm last-bit drift cannot move them (owner option A)
-- **Next step:** Merge the PR.
 
 ### DL-#14896 · CI Checkout Depth Qualification and Transfer Budget Policy
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-08
 - **Owner:** fleet-orchestrator
 - **Issue:** #14896
 - **Branch:** agy/14896-ci-checkout-depth-contracts
@@ -94,11 +238,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-08
 - **Last verified:** 2026-11-08 (`0ec24365`; collated from changes/14896-ci-checkout-depth-contracts.md)
 - **Summary:** Qualify job-specific CI checkout depth, transfer bandwidth budgets, and sparse-state regression contracts
-- **Next step:** Open PR from agy/14896-ci-checkout-depth-contracts; arm auto-merge.
 
 ### DL-#14895 · Source Asset Selective LFS Policy and Inventory Contracts
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-08
 - **Owner:** fleet-orchestrator
 - **Issue:** #14895
 - **Branch:** agy/14895-source-asset-lfs-policy
@@ -107,7 +251,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-08
 - **Last verified:** 2026-11-08 (`c6375e53`; collated from changes/14895-source-asset-lfs-policy.md)
 - **Summary:** Selective Git LFS policy, source asset inventory contracts, and fail-closed hydration verification
-- **Next step:** Open PR from agy/14895-source-asset-lfs-policy; arm auto-merge.
 
 ### DL-#14894 · Research Artifacts: Checksum-Bound Storage Contracts
 
@@ -124,7 +267,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#13158 · OSL-19: Grip Closure and OpenSim Reach Receipt
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-08
 - **Owner:** fleet-orchestrator
 - **Issue:** #13158
 - **Branch:** agy/13158-osl19-grip-closure-reach
@@ -133,11 +277,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-06
 - **Last verified:** 2026-11-08 (`9e90db40`; collated from changes/13158-osl-19-grip-closure-reach.md)
 - **Summary:** OSL-19: grip closure contracts and OpenSim reach hook for back-squat bundles
-- **Next step:** Open PR from agy/13158-osl19-grip-closure-reach; resolve right-hand reach solve under cited arm ranges.
 
 ### DL-#13131 · OSL-17: Back-Squat Bar Rack and Rest Window
 
-- **State:** in_progress
+- **State:** shipped
+- **Shipped:** 2026-11-08
 - **Owner:** fleet-orchestrator
 - **Issue:** #13131
 - **Branch:** agy/13131-osl17-bar-rack-rest
@@ -146,11 +290,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-06
 - **Last verified:** 2026-11-08 (`ccd72956`; collated from changes/13131-osl-17-back-squat-bar-rack-and-rest.md)
 - **Summary:** OSL-17: put back-squat bar on BackTop high-bar rack, verify lead-in settle and whole-window OpenSim Hicks and marker gates
-- **Next step:** Open PR from agy/13131-osl17-bar-rack-rest; resolve floating-base regulation for re-track bound.
 
 ### DL-#13093 · OSL-15: Regenerate Source Back Squat With Bar Load
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-08
 - **Owner:** fleet-orchestrator
 - **Issue:** #13093
 - **Branch:** agy/13093-osl15-load-balance-squat
@@ -159,11 +303,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-06
 - **Last verified:** 2026-11-08 (`7b629286`; collated from changes/13093-osl-15-load-balance-squat.md)
 - **Summary:** OSL-15: verify bar-load balance in IK provenance (combined CoM constrained over mid-foot) on back-squat barbell and source bundles
-- **Next step:** Merge PR #14904; regenerate deadlift/clean bundles to clear xfails.
 
 ### DL-#11746 · LIFT-6: OpenSim Lift Composition and Static Hold Contracts
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-08
 - **Owner:** fleet-orchestrator
 - **Issue:** #11746
 - **Branch:** agy/11746-lift6-composition-static-hold
@@ -172,11 +316,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-06
 - **Last verified:** 2026-11-08 (`c3813358`; collated from changes/11746-lift-6-composition-static-hold.md)
 - **Summary:** LIFT-6: OpenSim full-body lift composition, 80-muscle count, static hold, and kinetics qualification contracts
-- **Next step:** Open PR from agy/11746-lift6-composition-static-hold; complete remaining host evidence gates.
 
 ### DL-#11745 · LIFT-5: Four-Engine Bar Path Parity Contract
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-08
 - **Owner:** fleet-orchestrator
 - **Issue:** #11745
 - **Branch:** agy/11745-lift5-four-engine-bar-path-parity
@@ -185,11 +329,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-06
 - **Last verified:** 2026-11-08 (`960d2084`; collated from changes/11745-lift-5-four-engine-bar-path-parity.md)
 - **Summary:** LIFT-5: four-engine bar path parity contract and tests covering MuJoCo, Drake, Pinocchio, and OpenSim
-- **Next step:** Open PR from agy/11745-lift5-four-engine-bar-path-parity; optional parity lanes for remaining lifts.
 
 ### DL-#13991 · Docs: ADR-0060 OpenSim Scaling and Fit Plan (#13991)
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-06
 - **Owner:** unassigned
 - **Issue:** #13991
 - **Branch:** cursor/opensim-scaling-panel-plan-13991-94df
@@ -198,11 +342,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-06
 - **Last verified:** 2026-11-06 (`320872fc`; collated from changes/13991-docs-adr-0060-opensim-scaling-and-fit-pl.md)
 - **Summary:** docs: ADR-0060 OpenSim scaling and fit plan (#13991)
-- **Next step:** Panel records dissent on issue; promote ADR to Accepted when agreed.
 
 ### DL-#14419 · Avoid Merge_Group Changed-Paths Checkout Hang and Sync Admission Publisher
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-05
 - **Owner:** unassigned
 - **Issue:** #14419
 - **Branch:** fix/14419-merge-group-checkout-depth
@@ -211,11 +355,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-05
 - **Last verified:** 2026-11-05 (`d100e477`; collated from changes/14419-avoid-merge-group-changed-paths-checkout.md)
 - **Summary:** Avoid merge_group changed-paths checkout hang and sync admission publisher
-- **Next step:** Merge the PR.
 
 ### DL-#14417 · Sync the Admission Publisher Workflow and Provenance Digest With the Canonical Provider
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-05
 - **Owner:** unassigned
 - **Issue:** #14417
 - **Branch:** codex/14417-admission-publisher-sync
@@ -224,11 +368,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-05
 - **Last verified:** 2026-11-05 (`982d34d5`; collated from changes/14417-sync-the-admission-publisher-workflow-an.md)
 - **Summary:** Sync the admission publisher workflow and provenance digest with the canonical provider
-- **Next step:** Merge the PR after required checks pass.
 
 ### DL-#14429 · Avoid OpenSim Classify Checkout Hang With Shallow Fetch
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-05
 - **Owner:** unassigned
 - **Issue:** #14429
 - **Branch:** agy/14429-opensim-classify-shallow-checkout
@@ -237,11 +381,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-05
 - **Last verified:** 2026-11-05 (`a9657f01`; collated from changes/14429-avoid-opensim-classify-checkout-hang-wit.md)
 - **Summary:** Avoid OpenSim classify checkout hang with shallow fetch
-- **Next step:** Merge the PR.
 
 ### DL-#14535 · Size-Aware Development-Log Archiver: Archive Oldest Terminal Entries When the Log Nears the Byte Cap
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-05
 - **Owner:** unassigned
 - **Issue:** #14535
 - **Branch:** claude-ct/14535-devlog-size-trigger
@@ -250,11 +394,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-05
 - **Last verified:** 2026-11-05 (`8c6f82c1`; collated from changes/14535-size-aware-development-log-archiver-arch.md)
 - **Summary:** Size-aware development-log archiver: archive oldest terminal entries when the log nears the byte cap
-- **Next step:** Merge the PR.
 
 ### DL-#14434 · RUN-4: Ud-Sim Reproduce Reruns a Stored Run From Its Model File With the Recorded Seed and Parameters, Compares Each Output Within an Absolute Tolerance and Reports Engine Version Mismatches; the Run Store Now Closes Copied Files and Reports Corrupt Records Cleanly
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-04
 - **Owner:** unassigned
 - **Issue:** #14434
 - **Branch:** brick/backlog-completion/14434-reproduce-run
@@ -263,11 +407,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-04
 - **Last verified:** 2026-11-04 (`4f5f12f7`; collated from changes/14434-reproduce-a-stored-run-with-a-drift-report.md)
 - **Summary:** RUN-4: ud-sim reproduce reruns a stored run from its model file with the recorded seed and parameters, compares each output within an absolute tolerance and reports engine version mismatches; the run store now closes copied files and reports corrupt records cleanly
-- **Next step:** Merge the PR, then RUN-5 #14435 (route the other engines through the shared emitter and add their reproducers).
 
 ### DL-#14433 · RUN-3: Content-Addressed Run Store (Run_Id = SHA-256 of the Canonical Manifest, Outputs Stored Once by Hash) With Ud-Sim Runs Add, List and Show; Store Root From --Store or $UD_RUN_STORE
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-04
 - **Owner:** unassigned
 - **Issue:** #14433
 - **Branch:** brick/backlog-completion/14433-run-store
@@ -276,11 +420,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-04
 - **Last verified:** 2026-11-04 (`f6703b27`; collated from changes/14433-content-addressed-run-store-and-lookup-cli.md)
 - **Summary:** RUN-3: content-addressed run store (run_id = SHA-256 of the canonical manifest, outputs stored once by hash) with ud-sim runs add, list and show; store root from --store or $UD_RUN_STORE
-- **Next step:** Merge the PR, then RUN-4 #14434 (reproduce a stored run by id with a drift report).
 
 ### DL-#14453 · Install Trivy From Checksum-Verified GitHub Releases in CI.
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-04
 - **Owner:** unassigned
 - **Issue:** #14453
 - **Branch:** codex/14453-trivy-install
@@ -289,11 +433,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-04
 - **Last verified:** 2026-11-04 (`4082c388`; collated from changes/14453-install-trivy-from-checksum-verified-git.md)
 - **Summary:** Install Trivy from checksum-verified GitHub releases in CI.
-- **Next step:** Merge the pull request after required checks pass.
 
 ### DL-#14274 · Config/Secret Separation and Upgrade/Rollback Guarantees
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-05
 - **Owner:** unassigned
 - **Issue:** #14274
 - **Branch:** feat/14274-config-secrets
@@ -302,11 +446,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-03
 - **Last verified:** 2026-11-05 (`b281ba3e`; collated from changes/14274-root-dockerignore-secret-contract.md)
 - **Summary:** Config/secret separation and upgrade/rollback guarantees
-- **Next step:** Complete independent review and open the scoped CI contract PR.
 
 ### DL-#14275 · \ Define and Implement Clean-Environment Install Smoke Test\
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-03
 - **Owner:** unassigned
 - **Issue:** #14275
 - **Branch:** feat/14275-install-smoke
@@ -315,11 +459,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-03
 - **Last verified:** 2026-11-03 (`8823f013`; collated from changes/14275-define-and-implement-clean-environment-i.md)
 - **Summary:** \ Define and implement clean-environment install smoke test\
-- **Next step:** \Merge the PR.\
 
 ### DL-#14273 · Versioned Releases With Verifiable Artifacts and SBOM
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-03
 - **Owner:** unassigned
 - **Issue:** #14273
 - **Branch:** feat/14273-release-sbom
@@ -328,11 +472,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-03
 - **Last verified:** 2026-11-03 (`90eadd46`; collated from changes/14273-versioned-releases-and-sbom.md)
 - **Summary:** Versioned releases with verifiable artifacts and SBOM
-- **Next step:** Merge the PR.
 
 ### DL-#14259 · Redesign Home With Pipeline and Truthful Engine Readiness
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-03
 - **Owner:** unassigned
 - **Issue:** #14259
 - **Branch:** feat/14259-redesign-home
@@ -341,11 +485,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-03
 - **Last verified:** 2026-11-03 (`956f7fc7`; collated from changes/14259-redesign-home.md)
 - **Summary:** Redesign Home with pipeline and truthful engine readiness
-- **Next step:** Merge PR via auto-squash
 
 ### DL-#14094 · Record E1 Review Evidence, Arithmetic Limits and Pinned-Source Corrections Without Closing the Epic
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-03
 - **Owner:** unassigned
 - **Issue:** #14094
 - **Branch:** chore/14094-e1-evidence-ledger
@@ -354,11 +498,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-03
 - **Last verified:** 2026-11-03 (`3e4c587a`; collated from changes/14094-record-e1-review-evidence-arithmetic-lim.md)
 - **Summary:** Record E1 review evidence, arithmetic limits and pinned-source corrections without closing the epic
-- **Next step:** Review the E1 documentation PR; retain E2-E8 evidence gates
 
 ### DL-#14337 · Document a Bounded Local-Only Grok Bot Simulation Caller Path
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-02
 - **Owner:** unassigned
 - **Issue:** #14337
 - **Branch:** codex/14337-local-grok-simulation-relay-plan
@@ -367,11 +511,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-02
 - **Last verified:** 2026-11-02 (`b385be55`; collated from changes/14337-grok-simulation-relay.md)
 - **Summary:** Document a bounded local-only Grok Bot simulation caller path
-- **Next step:** Merge the PR.
 
 ### DL-#14272 · Record Evidence-Based Deployment Boundary
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-02
 - **Owner:** unassigned
 - **Issue:** #14272
 - **Branch:** codex/14272-deployment-boundary
@@ -380,11 +524,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-02
 - **Last verified:** 2026-11-02 (`f3b7adf7`; collated from changes/14272-record-evidence-based-deployment-boundar.md)
 - **Summary:** Record evidence-based deployment boundary
-- **Next step:** Merge the PR.
 
 ### DL-#14266 · Define Mobile Workflows and Server-Side Runtime Boundary
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-02
 - **Owner:** unassigned
 - **Issue:** #14266
 - **Branch:** codex/14266-mobile-workflow-discovery
@@ -393,11 +537,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-02
 - **Last verified:** 2026-11-02 (`f6c5af05`; collated from changes/14266-define-mobile-workflows-and-server-side.md)
 - **Summary:** Define mobile workflows and server-side runtime boundary
-- **Next step:** Merge the PR.
 
 ### DL-#14290 · Gate JaxSim/Pinocchio Free-Body Parity on Strict Engine Outputs and a Rotated Inertial Oracle
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-02
 - **Owner:** unassigned
 - **Issue:** #14290
 - **Branch:** cursor/14290-parity-test-guard-2cee
@@ -406,11 +550,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-02
 - **Last verified:** 2026-11-02 (`0ee3ee11`; collated from changes/14290-rotated-free-body-oracle.md)
 - **Summary:** Gate JaxSim/Pinocchio free-body parity on strict engine outputs and a rotated inertial oracle
-- **Next step:** Merge after cross-engine equivalence lane executes three named cases with receipt artifact.
 
 ### DL-#14257 · Wire Dashboard Help and F1 to the Global HelpPanel With Focus-Safe Close and Mobile Layout
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-02
 - **Owner:** unassigned
 - **Issue:** #14257
 - **Branch:** codex/dashboard-help-panel-14257-20261102
@@ -419,11 +563,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-02
 - **Last verified:** 2026-11-02 (`7e37e215`; collated from changes/14257-dashboard-help-panel.md)
 - **Summary:** Wire dashboard Help and F1 to the global HelpPanel with focus-safe close and mobile layout
-- **Next step:** Finish the focused UI checks, open the linked PR, and verify protected CI
 
 ### DL-#14253 · Replace Undefined Tailwind Gray Shades With Supported Palette Utilities Across the Model Explorer and Workspace UI
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-02
 - **Owner:** unassigned
 - **Issue:** #14253
 - **Branch:** codex/fix-tailwind-gray-scale-14253-main
@@ -432,11 +576,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-02
 - **Last verified:** 2026-11-02 (`fde79256`; collated from changes/14253-replace-undefined-tailwind-gray-shades-w.md)
 - **Summary:** Replace undefined Tailwind gray shades with supported palette utilities across the model explorer and workspace UI
-- **Next step:** Capture matching desktop and phone after views, then obtain independent review before pushing.
 
 ### DL-#14250 · Use a Local CC0 HDR With Fallback Scene Lighting on All Three Affected Pages
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-02
 - **Owner:** unassigned
 - **Issue:** #14250
 - **Branch:** codex/terrain-hdr-offline-14250
@@ -445,11 +589,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-02
 - **Last verified:** 2026-11-02 (`5dcd3ea0`; collated from changes/14250-use-a-local-cc0-hdr-with-fallback-scene.md)
 - **Summary:** Use a local CC0 HDR with fallback scene lighting on all three affected pages
-- **Next step:** After the baseline PlateImportForm build issue is resolved, verify a clean Vite/Tauri asset output; then request independent review.
 
 ### DL-#14251 · Normalize Terrain Preset Loading and Preserve Concurrent API Errors.
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-02
 - **Owner:** unassigned
 - **Issue:** #14251
 - **Branch:** codex/terrain-api-contract-14251
@@ -458,11 +602,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-02
 - **Last verified:** 2026-11-02 (`4ef03dc0`; collated from changes/14251-normalize-terrain-preset-loading-and-pre.md)
 - **Summary:** Normalize terrain preset loading and preserve concurrent API errors.
-- **Next step:** Complete independent review before pushing.
 
 ### DL-#14177 · Putting Optimizer and Misread-Cost MCP Tools
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-01
 - **Owner:** unassigned
 - **Issue:** #14177
 - **Branch:** claude/putting-tools-14177
@@ -471,11 +615,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-01
 - **Last verified:** 2026-11-02 (`ab77c162`; collated from changes/14177-sg-optimizer-putting-provider.md)
 - **Summary:** Putting Optimizer and Misread-Cost MCP Tools
-- **Next step:** Wire the putting tools into the PyQt6 app and API routes with a feature-parity entry
 
 ### DL-#14176 · Add Putting Reference Data and Validation Harness
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-07
 - **Owner:** unassigned
 - **Issue:** #14176
 - **Branch:** claude/putting-validation-14176
@@ -484,11 +628,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-01
 - **Last verified:** 2026-11-07 (`4ef29833`; collated from changes/14176-putting-make-rate-calibration.md)
 - **Summary:** Add Putting Reference Data and Validation Harness
-- **Next step:** Calibrate presets once the batch roll and skill sampler merge
 
 ### DL-#14175 · Add Putting Analytics Variance Attribution and Error-Source Elimination
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-03
 - **Owner:** unassigned
 - **Issue:** #14175
 - **Branch:** claude/putting-variance-14175
@@ -497,11 +641,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-01
 - **Last verified:** 2026-11-03 (`edfad820`; collated from changes/14175-document-variance-attribution-study-inpu.md)
 - **Summary:** Add Putting Analytics Variance Attribution and Error-Source Elimination
-- **Next step:** Merge after 14188
 
 ### DL-#14174 · Add Putting Analytics Putt Library and Aggregate Report
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-01
 - **Owner:** unassigned
 - **Issue:** #14174
 - **Branch:** claude/putting-library-14174
@@ -510,11 +654,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-01
 - **Last verified:** 2026-11-01 (`bb30e42a`; collated from changes/14174-add-putting-analytics-putt-library-and-a.md)
 - **Summary:** Add Putting Analytics Putt Library and Aggregate Report
-- **Next step:** Merge after 14181
 
 ### DL-#14173 · Plan on the Perceived Green and Execute on the True Green
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-03
 - **Owner:** unassigned
 - **Issue:** #14173
 - **Branch:** claude/putting-perceived-green-14173
@@ -523,11 +667,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-01
 - **Last verified:** 2026-11-03 (`d6398046`; collated from changes/14173-report-the-expected-strokes-cost-of-gree.md)
 - **Summary:** Plan on the Perceived Green and Execute on the True Green
-- **Next step:** Add aspect misreads and per-class read-cost reporting over the putt library
 
 ### DL-#14171 · Add BatchRollModel PuttOutcomeModel Adapter
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-01
 - **Owner:** unassigned
 - **Issue:** #14171
 - **Branch:** claude/putting-roll-model-14171
@@ -536,11 +680,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-01
 - **Last verified:** 2026-11-01 (`2dd6c08d`; collated from changes/14171-add-vectorised-batch-roll-integrator.md)
 - **Summary:** Add BatchRollModel PuttOutcomeModel Adapter
-- **Next step:** Merge after 14181; then the BatchRollModel adapter PR
 
 ### DL-#14170 · Putting Analytics: Expected Putts and Aim/Pace Optimiser
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-01
 - **Owner:** unassigned
 - **Issue:** #14170
 - **Branch:** claude/project-thread-sfn9g4
@@ -549,11 +693,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-01
 - **Last verified:** 2026-11-01 (`2403e048`; collated from changes/14170-putting-analytics-expected-putts.md)
 - **Summary:** Add putting_analytics: skill-conditioned expected-putts curve solved exactly, aim and pace optimiser for strokes-gained and must-make objectives, and strokes gained against both the player's own curve and a tour reference (epic #14168)
-- **Next step:** Land #14169 skill profile and dispersion sampler, then wire a putting_dynamics outcome model (#14171)
 
 ### DL-#14169 · Putting Analytics: Skill Profile and Dispersion Sampler
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-01
 - **Owner:** unassigned
 - **Issue:** #14169
 - **Branch:** claude/putting-skill-sampler-14169
@@ -562,11 +706,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-01
 - **Last verified:** 2026-11-01 (`ab03503c`; collated from changes/14169-add-putting-analytics-skill-profile-stro.md)
 - **Summary:** Add putting_analytics skill profile (stroke face, path, speed, strike and green-read dispersion) and a per-channel seeded Monte Carlo sampler whose single-channel ablations leave other draws identical (epic #14168)
-- **Next step:** Wire the profile into a putting_dynamics PuttOutcomeModel (#14171)
 
 ### DL-#14146 · Docker Size Gates Measure Compressed Content Size via the Engine API Instead of .Size, Whose Meaning Changed Between Docker Engine 29.1.3 And 29.9.2
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-10-31
 - **Owner:** unassigned
 - **Issue:** #14146
 - **Branch:** brick/ci-toolchain/14146-docker-size-measure
@@ -575,11 +719,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-11-01
 - **Last verified:** 2026-11-01 (`06c2d8d5`; collated from changes/14146-docker-size-gates-measure-compressed-con.md)
 - **Summary:** Docker size gates measure compressed content size via the Engine API instead of .Size, whose meaning changed between Docker Engine 29.1.3 and 29.9.2
-- **Next step:** Merge after acceptance review
 
 ### DL-#13885 · Pure Two-Hand Grip-Margin Metric: Per-Pad Coulomb Margin, UNLOADED Floor, Slip Events, Grasp-Map Internal Wrench and GripMarginReport
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-02
 - **Owner:** unassigned
 - **Issue:** #13885
 - **Branch:** brick/issues-ud/13885-grip-margin-metric
@@ -588,11 +732,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-10-31
 - **Last verified:** 2026-11-02 (`be3b8bc5`; collated from changes/13885-grip-margin-swing-receipt.md)
 - **Summary:** Pure two-hand grip-margin metric: per-pad Coulomb margin, UNLOADED floor, slip events, grasp-map internal wrench and GripMarginReport
-- **Next step:** Merge after CI; closes scripted swing acceptance for #13885.
 
 ### DL-#12712 · NSX-83: Add the ClubheadSeries to RigidClubState Adapter and Constant-Twist Event Location Feeding the Shared Impact Outcome Map.
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-10-29
 - **Owner:** unassigned
 - **Issue:** #12712
 - **Branch:** claude/ud-12712-1
@@ -601,11 +745,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-10-29
 - **Last verified:** 2026-10-29 (`3a0aba29`; collated from changes/12712-nsx-83-add-the-clubheadseries-to-rigidcl.md)
 - **Summary:** NSX-83: add the ClubheadSeries to RigidClubState adapter and constant-twist event location feeding the shared impact outcome map.
-- **Next step:** Merge the PR; then wire NSX-90/91/92 to impact_outcome_map and add Tools launch-angle/spin-rate.
 
 ### DL-#13174 · HRG-D3: Render_Golfer_Realism_Showcase --V2-Spec Renders Labelled Address/Top/Impact Stills of the Full-Body-V2 Trunk Visuals; GL Stills Still Need a GL Host
 
-- **State:** in_review
+- **State:** shipped
+- **Shipped:** 2026-11-02
 - **Owner:** unassigned
 - **Issue:** #13174
 - **Branch:** claude/ud-13174-1
@@ -614,7 +758,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-10-29
 - **Last verified:** 2026-11-02 (`99a4b0c5`; collated from changes/13174-attach-osmesa-mujoco-address-top-impact.md)
 - **Summary:** HRG-D3: render_golfer_realism_showcase --v2-spec renders labelled address/top/impact stills of the full-body-v2 trunk visuals; GL stills still need a GL host
-- **Next step:** Merge PR; close #13174.
 
 ### DL-#11161 — Capture Registry, Capture Export and Swing Comparison (Owner Swing vs Tour Average)
 
@@ -924,6 +1067,279 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#15095 · Fix SwingMetricsMixin Test Harness After Velocity Delegation and Add Unit Marker (#15095)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15095
+- **Branch:** merged via #15096
+- **PR:** #15096
+- **Paths:** see #15096
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`c0d0f6c9`; collated from changes/15095-dbc-swing-phase-unit-marker.md)
+- **Summary:** Fix SwingMetricsMixin test harness after velocity delegation and add unit marker (#15095)
+- **Next step:** Shipped in PR #15096.
+
+### DL-#15093 · Guard NP-05 Lexical Test Against Collated Changelog Fragment Removal (#15093)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15093
+- **Branch:** merged via #15094
+- **PR:** #15094
+- **Paths:** see #15094
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`a011577c`; collated from changes/15093-np05-collated-changes-guard.md)
+- **Summary:** Guard NP-05 lexical test against collated changelog fragment removal (#15093)
+- **Next step:** Shipped in PR #15094.
+
+### DL-#15046 · SCI-10/12/13/14: Shaft FEM Scope Docs, Pendulum Inertia Param, Static-Opt Cost, Spatial Ordering
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15046
+- **Branch:** merged via #15052
+- **PR:** #15052
+- **Paths:** see #15052
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`e25c7b5b`; collated from changes/15046-sci-10-12-13-14-shaft-fem-scope-docs-pen.md)
+- **Summary:** SCI-10/12/13/14: shaft FEM scope docs, pendulum inertia param, static-opt cost, spatial ordering
+- **Next step:** Shipped in PR #15052.
+
+### DL-#15042 · Use Transverse Spin in Magnus/Lift Magnitude; Document Frame and Parity Fixtures (#15042).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15042
+- **Branch:** merged via #15053
+- **PR:** #15053
+- **Paths:** see #15053
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`9c8f8834`; collated from changes/15042-use-transverse-spin-in-magnus-lift-magni.md)
+- **Summary:** Use transverse spin in Magnus/lift magnitude; document frame and parity fixtures (#15042).
+- **Next step:** Shipped in PR #15053.
+
+### DL-#15041 · Evaluate Constrained Per-Actuator Columns at Measured (Q, V) With ZTCF Baseline
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15041
+- **Branch:** merged via #15049
+- **PR:** #15049
+- **Paths:** see #15049
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`c6acff9d`; collated from changes/15041-evaluate-constrained-per-actuator-column.md)
+- **Summary:** Evaluate constrained per-actuator columns at measured (q, v) with ZTCF baseline
+- **Next step:** Shipped in PR #15049.
+
+### DL-#15030 · Quantize Spatial Model Canonical Hashes for Cross-Runtime Manufactured Authority Parity, Regenerate Publication Evidence, and Re-Pick Optional-Stack Shooting Defect Floor After #14227 Gravity Alignment.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15030
+- **Branch:** merged via #15069
+- **PR:** #15069
+- **Paths:** see #15069
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`3e7c72e8`; collated from changes/15030-quantize-spatial-model-canonical-hashes.md)
+- **Summary:** Quantize spatial model canonical hashes for cross-runtime manufactured authority parity, regenerate publication evidence, and re-pick optional-stack shooting defect floor after #14227 gravity alignment.
+- **Next step:** Shipped in PR #15069.
+
+### DL-#15028 · Wave 0.1: Independent Triage of 67 Budget Exceptions That Expired 2026-11-30 (Measured Sizes, Regression Tests).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15028
+- **Branch:** merged via #15074
+- **PR:** #15074
+- **Paths:** see #15074
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`175e7bc6`; collated from changes/15028-wave0-architecture-budget-triage.md)
+- **Summary:** Wave 0.1: independent triage of 67 budget exceptions that expired 2026-11-30 (measured sizes, regression tests).
+- **Next step:** Shipped in PR #15074.
+
+### DL-#15021 · Expose ZTCF and Golf-Simulator Golden Capabilities via Sim_Run With REST/MCP Parity and 64 KiB Artifact Spill.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15021
+- **Branch:** merged via #15061
+- **PR:** #15061
+- **Paths:** see #15061
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`b1bc35ea`; collated from changes/15021-expose-ztcf-and-golf-simulator-golden-ca.md)
+- **Summary:** Expose ZTCF and golf-simulator golden capabilities via sim_run with REST/MCP parity and 64 KiB artifact spill.
+- **Next step:** Shipped in PR #15061.
+
+### DL-#15016 · Link Tile Help to AffineDrift Theory; Register Six Provisional Core Calculations and Dedupe Registry Blocker Ids
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15016
+- **Branch:** merged via #15063
+- **PR:** #15063, #15080, #15079
+- **Paths:** see #15063
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`3e24dc3f`; collated from changes/15016-zvcf-manual-consistency.md)
+- **Summary:** Link tile help to AffineDrift theory; register six provisional core calculations and dedupe registry blocker ids
+- **Next step:** Shipped in PR #15063.
+
+### DL-#15012 · Fix WBC Zero Torques With Contact and Hierarchical Task Enforcement
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15012
+- **Branch:** merged via #15025
+- **PR:** #15025
+- **Paths:** see #15025
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`19294384`; collated from changes/15012-fix-wbc-zero-torques-with-contact-and-hi.md)
+- **Summary:** Fix WBC zero torques with contact and hierarchical task enforcement
+- **Next step:** Shipped in PR #15025.
+
+### DL-#15010 · Correct Putting Slope Rolling (5/7 G), Unify Stimp Friction, Impact Club Spin, Flight Spin Sign Docs, Rust Air Temperature K
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15010
+- **Branch:** merged via #15026
+- **PR:** #15026
+- **Paths:** see #15026
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`49d3fc78`; collated from changes/15010-correct-putting-slope-rolling-5-7-g-unif.md)
+- **Summary:** Correct putting slope rolling (5/7 g), unify stimp friction, impact club spin, flight spin sign docs, Rust air temperature K
+- **Next step:** Shipped in PR #15026.
+
+### DL-#14949 · Managed Local Child-Process Lifecycle; Concurrent Stdout/Stderr Drain Avoids Pipe Deadlock (Refs #14949).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14949
+- **Branch:** merged via #14956
+- **PR:** #14956, #15081
+- **Paths:** see #14956
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`450becd6`; collated from changes/14949-wsl-matlab-docker-lifecycle.md)
+- **Summary:** Managed local child-process lifecycle; concurrent stdout/stderr drain avoids pipe deadlock (Refs #14949).
+- **Next step:** Shipped in PR #14956.
+
+### DL-#14942 · EngineManager Reloads LOADED Engines; Cleanup Resets Status and Closes Active Engine (#14942).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14942
+- **Branch:** merged via #15017
+- **PR:** #15017, #14961
+- **Paths:** see #15017
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`38c09978`; collated from changes/14942-enginemanager-reloads-loaded-engines-cle.md)
+- **Summary:** EngineManager reloads LOADED engines; cleanup resets status and closes active engine (#14942).
+- **Next step:** Shipped in PR #15017.
+
+### DL-#14936 · JaxSim Canonical-V2 Round-Trip; Rename Velocity Constant to SPATIAL_WRENCH_REPRESENTATION
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14936
+- **Branch:** merged via #15038
+- **PR:** #15038, #14966
+- **Paths:** see #15038
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`1f3202e7`; collated from changes/14936-wire-canonical-v2-get-set-on-basephysics.md)
+- **Summary:** JaxSim canonical-v2 round-trip; rename velocity constant to SPATIAL_WRENCH_REPRESENTATION
+- **Next step:** Shipped in PR #15038.
+
+### DL-#14935 · Committed Evidence Scan Calls Receipt Taxonomy Validation; Missing Fields and Conflicts Are Tested (#14935).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14935
+- **Branch:** merged via #14960
+- **PR:** #14960
+- **Paths:** see #14960
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`c52d3757`; collated from changes/14935-committed-evidence-validator-with-gate-a.md)
+- **Summary:** Committed evidence scan calls receipt taxonomy validation; missing fields and conflicts are tested (#14935).
+- **Next step:** Shipped in PR #14960.
+
+### DL-#14502 · NP-09 Policy Input-Output Sensitivity at Stated Operating Points (#14502)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14502
+- **Branch:** merged via #14825
+- **PR:** #14825
+- **Paths:** see #14825
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`1780a5e5`; collated from changes/14502-np09-io-sensitivity.md)
+- **Summary:** NP-09 policy input-output sensitivity at stated operating points (#14502)
+- **Next step:** Shipped in PR #14825.
+
+### DL-#14427 · Event-Relative Time Normalisation (101-Point Resampling) Between Named Swing Events
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14427
+- **Branch:** merged via #14834
+- **PR:** #14834
+- **Paths:** see #14834
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`e64ae5e7`; collated from changes/14427-gm4-event-time-normalisation.md)
+- **Summary:** Event-relative time normalisation (101-point resampling) between named swing events
+- **Next step:** Shipped in PR #14834.
+
+### DL-#14426 · GM-3 Cheetham X-Factor Stretch and Kinematic Sequence (#14426)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14426
+- **Branch:** merged via #14836
+- **PR:** #14836
+- **Paths:** see #14836
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`8722411f`; collated from changes/14426-gm3-xfactor-kinematic-seq.md)
+- **Summary:** GM-3 Cheetham X-factor stretch and kinematic sequence (#14426)
+- **Next step:** Shipped in PR #14836.
+
+### DL-#14425 · GRF and COP Observability, Event-Anchored Peaks, and Normalisation Contracts (GM-2).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14425
+- **Branch:** merged via #14837
+- **PR:** #14837
+- **Paths:** see #14837
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`120e4803`; collated from changes/14425-gm2-grf-cop-observability.md)
+- **Summary:** GRF and COP observability, event-anchored peaks, and normalisation contracts (GM-2).
+- **Next step:** Shipped in PR #14837.
+
+### DL-#12727 · NSX-98: Document A(t)/B(t) Assembly in Derivative Conformance Harness
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12727
+- **Branch:** merged via #15066
+- **PR:** #15066
+- **Paths:** see #15066
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`f7edaa35`; collated from changes/12727-nsx-98-document-a-t-b-t-assembly-in-deri.md)
+- **Summary:** NSX-98: document A(t)/B(t) assembly in derivative conformance harness
+- **Next step:** Shipped in PR #15066.
+
+### DL-#12046 · Interim 30-Day Realtime Shadow Ledger Sunset (#12046) so Hygiene Tests Pass Pending Tools Migration
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12046
+- **Branch:** merged via #14929
+- **PR:** #14929
+- **Paths:** see #14929
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`7a52997f`; collated from changes/12046-realtime-shadow-sunset-interim.md)
+- **Summary:** Interim 30-day realtime shadow ledger sunset (#12046) so hygiene tests pass pending Tools migration
+- **Next step:** Shipped in PR #14929.
+
 ### DL-#15047 · README Onboarding: Venv-First Install, Toolchains, Ud-Sim, Engines, Layout Tree.
 
 - **State:** shipped
@@ -1008,10 +1424,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14940
 - **Branch:** merged via #15000
-- **PR:** #15000
+- **PR:** #15000, #14959
 - **Paths:** see #15000
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`fdc7985e`; collated from changes/14940-aip-json-rpc-stubs-return-not-implemente.md)
+- **Last verified:** 2026-11-14 (`d91cd296`; collated from changes/14940-aip-json-rpc-stubs-return-not-implemente.md)
 - **Summary:** AIP JSON-RPC stubs return not_implemented; capabilities self-check (#14940).
 - **Next step:** Shipped in PR #15000.
 
@@ -1034,10 +1450,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14943
 - **Branch:** merged via #14998
-- **PR:** #14998, #14965
+- **PR:** #14998, #14965, #15005, #14973, #15007
 - **Paths:** see #14998
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-12 (`4dd93114`; collated from changes/14943-counterfactualkind-result-spec-aligned-z.md)
+- **Last verified:** 2026-11-14 (`96af1f50`; collated from changes/14943-mujoco-tau-generalized-force.md)
 - **Summary:** CounterfactualKind/Result, simscape/putting defaults, conformance (#14943 slices 1–4)
 - **Next step:** Shipped in PR #14998.
 
@@ -1060,10 +1476,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14948
 - **Branch:** merged via #14977
-- **PR:** #14977, #14993
+- **PR:** #14977, #14993, #15004
 - **Paths:** see #14977
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`84913b7f`; collated from changes/14948-engine-lane-coverage-and-matlab.md)
+- **Last verified:** 2026-11-14 (`7376c4ab`; collated from changes/14948-conftest-makereport-and-floor.md)
 - **Summary:** Enforce required physics engine execution, JUnit floor checks, and JaxSim heavy test lane
 - **Next step:** Shipped in PR #14977.
 
@@ -1853,10 +2269,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12724
 - **Branch:** merged via #14761
-- **PR:** #14761
+- **PR:** #14761, #15068
 - **Paths:** see #14761
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`104a43b6`; collated from changes/12724-s6-catalogue-reason-now-names-the-missin.md)
+- **Last verified:** 2026-11-14 (`36f6dbbf`; collated from changes/12724-nsx-95-campaign-catalogue-json-strategy.md)
 - **Summary:** S6 catalogue reason now names the missing arm on the NSX-97 UCM split
 - **Next step:** Shipped in PR #14761.
 
@@ -2126,10 +2542,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12553
 - **Branch:** merged via #14684
-- **PR:** #14684, #14690, #14696, #14704, #14713, #14725, #14787, #14925
+- **PR:** #14684, #14690, #14696, #14704, #14713, #14725, #14787, #14925, #15064
 - **Paths:** see #14684
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-10 (`448c4a2c`; collated from changes/12553-nsx04-verification-status-inventory.md)
+- **Last verified:** 2026-11-14 (`65360d12`; collated from changes/12553-verify-hip-adduction-and-rotation-torque.md)
 - **Summary:** NSX-04 slice 1: verified subtalar inversion/eversion and MTP flexion torque capacities (da Fonseca 2025, Saeki 2021); hip and MTP-extension slots keep ASSUMED with stated reasons
 - **Next step:** Shipped in PR #14684.
 
