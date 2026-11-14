@@ -73,6 +73,7 @@ from src.api.diagnostics import (  # noqa: E402
     APIDiagnostics,
     get_diagnostic_endpoint_html,
 )
+from src.api.middleware import local_capability  # noqa: E402
 from src.api.route_registry import (  # noqa: E402
     register_routes,
     ws_compatible_auth_dependency,
@@ -988,6 +989,7 @@ def create_local_app() -> FastAPI:
         redoc_url="/api/redoc",
     )
 
+    local_capability.configure_local_capability_guard(app)  # inside CORS
     # CORS: Allow local origins only
     _configure_cors(app)
     configure_trusted_hosts(app)
