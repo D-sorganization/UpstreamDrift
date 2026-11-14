@@ -11,11 +11,13 @@ from __future__ import annotations
 from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
 import logging
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import defusedxml.ElementTree as DefusedET
+from scipy.spatial.transform import Rotation
 
 if TYPE_CHECKING:
     # Type-only: never imported at runtime, and the single parse in this
@@ -84,6 +86,128 @@ class MJCFConfig:
 
 
 _WORLD_LINK = "world"
+_SUPPORTED_MJCF_COMPILER_ANGLES = frozenset({"degree", "radian"})
+# MuJoCo MJCF default when `<compiler angle="…"/>` is omitted (XMLreference).
+_MJCF_DEFAULT_COMPILER_ANGLE = "degree"
+# MuJoCo welds child bodies without a ``<joint>``; encode URDF fixed-joint names in
+# the body ``name`` only when the body carries no non-free joints (see roundtrip
+# tests — literal ``*__fixed__*`` body names that already have hinges are kept).
+_MJCF_FIXED_JOINT_MARKER = "__fixed__"
+
+
+def _mjcf_body_name_for_fixed_joint(link_name: str, joint_name: str) -> str:
+    """MJCF body ``name`` that round-trips a URDF ``fixed`` joint label."""
+    return f"{link_name}{_MJCF_FIXED_JOINT_MARKER}{joint_name}"
+
+
+def _decode_mjcf_fixed_joint_body_name(
+    body_name: str,
+    *,
+    has_dof_joint: bool,
+) -> tuple[str, str | None]:
+    """Return URDF link name and optional fixed-joint name decoded from MJCF body."""
+    if has_dof_joint or _MJCF_FIXED_JOINT_MARKER not in body_name:
+        return body_name, None
+    link_name, _, joint_name = body_name.partition(_MJCF_FIXED_JOINT_MARKER)
+    if not link_name or not joint_name:
+        return body_name, None
+    return link_name, joint_name
+
+
+def _mjcf_compiler_angle_unit(root: Any) -> str:
+    """Return the model-wide MJCF angle unit for ``euler`` attributes and hinge ranges."""
+    compiler = root.find("compiler")
+    if compiler is None:
+        return _MJCF_DEFAULT_COMPILER_ANGLE
+    angle = compiler.get("angle", _MJCF_DEFAULT_COMPILER_ANGLE)
+    if angle not in _SUPPORTED_MJCF_COMPILER_ANGLES:
+        msg = (
+            f'Unsupported MJCF <compiler angle="{angle}">; '
+            'expected "degree" or "radian"'
+        )
+        raise ValueError(msg)
+    return angle
+
+
+def _mjcf_angles_to_radians(
+    values: list[float],
+    angle_unit: str,
+) -> list[float]:
+    if angle_unit == "degree":
+        return [math.radians(v) for v in values]
+    return values
+
+
+def _is_zero_rpy(rpy: tuple[float, float, float]) -> bool:
+    return all(abs(value) < 1e-12 for value in rpy)
+
+
+def _rpy_to_mjcf_quat_attr(rpy: tuple[float, float, float]) -> str:
+    """MJCF ``quat`` attribute (w x y z) from URDF fixed-axis roll-pitch-yaw."""
+    if _is_zero_rpy(rpy):
+        return ""
+    x, y, z, w = Rotation.from_euler("xyz", rpy).as_quat()
+    return f' quat="{w:.6g} {x:.6g} {y:.6g} {z:.6g}"'
+
+
+def _mjcf_inertial_lines(link: Link, indent: str) -> list[str]:
+    """Return MJCF ``<inertial>`` lines for a link, or an empty list when mass is zero."""
+    if link.inertia.mass <= 0:
+        return []
+    com = link.inertia.center_of_mass
+    com_str = f"{com[0]:.6g} {com[1]:.6g} {com[2]:.6g}"
+    if link.inertia.is_diagonal():
+        inertia_str = (
+            f"{link.inertia.ixx:.6g} {link.inertia.iyy:.6g} {link.inertia.izz:.6g}"
+        )
+        tag = "diaginertia"
+    else:
+        inertia_str = (
+            f"{link.inertia.ixx:.6g} {link.inertia.iyy:.6g} "
+            f"{link.inertia.izz:.6g} {link.inertia.ixy:.6g} "
+            f"{link.inertia.ixz:.6g} {link.inertia.iyz:.6g}"
+        )
+        tag = "fullinertia"
+    return [
+        f'{indent}<inertial mass="{link.inertia.mass:.6g}" '
+        f'pos="{com_str}" {tag}="{inertia_str}"/>'
+    ]
+
+
+def _mjcf_dof_joint_line(joint: Joint, indent: str) -> str:
+    """Return one MJCF ``<joint>`` element for a non-fixed URDF joint."""
+    mjcf_type = URDF_TO_MJCF_JOINT.get(joint.joint_type, "hinge")
+    axis = joint.axis
+    axis_str = f"{axis[0]:.6g} {axis[1]:.6g} {axis[2]:.6g}"
+    joint_line = (
+        f'{indent}<joint name="{joint.name}" type="{mjcf_type}" axis="{axis_str}"'
+    )
+    if joint.limits:
+        joint_line += f' range="{joint.limits.lower:.6g} {joint.limits.upper:.6g}"'
+    if joint.dynamics:
+        joint_line += f' damping="{joint.dynamics.damping:.6g}"'
+    return f"{joint_line}/>"
+
+
+def _origin_from_mjcf_element(
+    elem: Any,
+    angle_unit: str = _MJCF_DEFAULT_COMPILER_ANGLE,
+) -> Origin:
+    """Decode MJCF ``pos`` with optional ``quat`` or ``euler`` into an Origin."""
+    pos_str = elem.get("pos", "0 0 0")
+    xyz = tuple(float(value) for value in pos_str.split())
+    rpy = (0.0, 0.0, 0.0)
+    quat_str = elem.get("quat")
+    if quat_str:
+        w, x, y, z = (float(value) for value in quat_str.split())
+        rpy = tuple(Rotation.from_quat([x, y, z, w]).as_euler("xyz"))
+    else:
+        euler_str = elem.get("euler")
+        if euler_str:
+            angles = [float(value) for value in euler_str.split()]
+            angles = _mjcf_angles_to_radians(angles, angle_unit)
+            rpy = tuple(Rotation.from_euler("xyz", angles).as_euler("xyz"))
+    return Origin(xyz=xyz, rpy=rpy)
 
 
 def _virtual_link(name: str) -> Link:
@@ -311,61 +435,25 @@ class MJCFConverter:
                 connecting_joint = joint
                 break
 
-        # Body element with position
+        # Body element with position and orientation (URDF joint origin).
         pos = "0 0 0"
+        quat_attr = ""
+        mjcf_body_name = link_name
         if connecting_joint:
             xyz = connecting_joint.origin.xyz
             pos = f"{xyz[0]:.6g} {xyz[1]:.6g} {xyz[2]:.6g}"
-
-        lines.append(f'{indent}<body name="{link_name}" pos="{pos}">')
-
-        # Inertial
-        if link.inertia.mass > 0:
-            com = link.inertia.center_of_mass
-            com_str = f"{com[0]:.6g} {com[1]:.6g} {com[2]:.6g}"
-
-            if link.inertia.is_diagonal():
-                inertia_str = (
-                    f"{link.inertia.ixx:.6g} {link.inertia.iyy:.6g} "
-                    f"{link.inertia.izz:.6g}"
-                )
-                lines.append(
-                    f'{indent}  <inertial mass="{link.inertia.mass:.6g}" '
-                    f'pos="{com_str}" diaginertia="{inertia_str}"/>'
-                )
-            else:
-                inertia_str = (
-                    f"{link.inertia.ixx:.6g} {link.inertia.iyy:.6g} "
-                    f"{link.inertia.izz:.6g} {link.inertia.ixy:.6g} "
-                    f"{link.inertia.ixz:.6g} {link.inertia.iyz:.6g}"
-                )
-                lines.append(
-                    f'{indent}  <inertial mass="{link.inertia.mass:.6g}" '
-                    f'pos="{com_str}" fullinertia="{inertia_str}"/>'
+            quat_attr = _rpy_to_mjcf_quat_attr(connecting_joint.origin.rpy)
+            if connecting_joint.joint_type == JointType.FIXED:
+                mjcf_body_name = _mjcf_body_name_for_fixed_joint(
+                    link_name, connecting_joint.name
                 )
 
-        # Joint (if not root)
+        lines.append(f'{indent}<body name="{mjcf_body_name}" pos="{pos}"{quat_attr}>')
+
+        lines.extend(_mjcf_inertial_lines(link, indent + "  "))
+
         if connecting_joint and connecting_joint.joint_type != JointType.FIXED:
-            mjcf_type = URDF_TO_MJCF_JOINT.get(connecting_joint.joint_type, "hinge")
-            axis = connecting_joint.axis
-            axis_str = f"{axis[0]:.6g} {axis[1]:.6g} {axis[2]:.6g}"
-
-            joint_line = (
-                f'{indent}  <joint name="{connecting_joint.name}" '
-                f'type="{mjcf_type}" axis="{axis_str}"'
-            )
-
-            if connecting_joint.limits:
-                joint_line += (
-                    f' range="{connecting_joint.limits.lower:.6g} '
-                    f'{connecting_joint.limits.upper:.6g}"'
-                )
-
-            if connecting_joint.dynamics:
-                joint_line += f' damping="{connecting_joint.dynamics.damping:.6g}"'
-
-            joint_line += "/>"
-            lines.append(joint_line)
+            lines.append(_mjcf_dof_joint_line(connecting_joint, indent + "  "))
 
         # Geometry (visual)
         if link.visual_geometry and self.config.include_visuals:
@@ -398,45 +486,61 @@ class MJCFConverter:
             raise ValueError("geometry must be provided")
         pos = origin.xyz
         pos_str = f"{pos[0]:.6g} {pos[1]:.6g} {pos[2]:.6g}"
+        quat_attr = _rpy_to_mjcf_quat_attr(origin.rpy)
 
         if geometry.geometry_type == GeometryType.BOX:
             size = geometry.dimensions
             # MuJoCo uses half-sizes
             half_size = f"{size[0] / 2:.6g} {size[1] / 2:.6g} {size[2] / 2:.6g}"
-            return f'{indent}<geom type="box" size="{half_size}" pos="{pos_str}"/>'
+            return (
+                f'{indent}<geom type="box" size="{half_size}" '
+                f'pos="{pos_str}"{quat_attr}/>'
+            )
 
         if geometry.geometry_type == GeometryType.CYLINDER:
             radius, length = geometry.dimensions
             # MuJoCo cylinder: radius and half-length
             return (
                 f'{indent}<geom type="cylinder" '
-                f'size="{radius:.6g} {length / 2:.6g}" pos="{pos_str}"/>'
+                f'size="{radius:.6g} {length / 2:.6g}" '
+                f'pos="{pos_str}"{quat_attr}/>'
             )
 
         if geometry.geometry_type == GeometryType.SPHERE:
             radius = geometry.dimensions[0]
-            return f'{indent}<geom type="sphere" size="{radius:.6g}" pos="{pos_str}"/>'
+            return (
+                f'{indent}<geom type="sphere" size="{radius:.6g}" '
+                f'pos="{pos_str}"{quat_attr}/>'
+            )
 
         if geometry.geometry_type == GeometryType.CAPSULE:
             radius, length = geometry.dimensions
             return (
                 f'{indent}<geom type="capsule" '
-                f'size="{radius:.6g} {length / 2:.6g}" pos="{pos_str}"/>'
+                f'size="{radius:.6g} {length / 2:.6g}" '
+                f'pos="{pos_str}"{quat_attr}/>'
             )
 
         if geometry.geometry_type == GeometryType.MESH:
             mesh_name = (
                 Path(geometry.mesh_filename).stem if geometry.mesh_filename else "mesh"
             )
-            return f'{indent}<geom type="mesh" mesh="{mesh_name}" pos="{pos_str}"/>'
+            return (
+                f'{indent}<geom type="mesh" mesh="{mesh_name}" '
+                f'pos="{pos_str}"{quat_attr}/>'
+            )
 
-        return f'{indent}<geom type="box" size="0.05 0.05 0.05" pos="{pos_str}"/>'
+        return (
+            f'{indent}<geom type="box" size="0.05 0.05 0.05" '
+            f'pos="{pos_str}"{quat_attr}/>'
+        )
 
     def _parse_mjcf(self, root: ET.Element) -> ParsedModel:
         """Parse MJCF into ParsedModel."""
         if root is None:
             raise ValueError("root must be provided")
         model_name = root.get("model", "mjcf_model")
+        angle_unit = _mjcf_compiler_angle_unit(root)
 
         links: list[Link] = []
         joints: list[Joint] = []
@@ -456,7 +560,7 @@ class MJCFConverter:
         # Parse worldbody
         worldbody = root.find("worldbody")
         if worldbody is not None:
-            self._parse_mjcf_body(worldbody, None, links, joints)
+            self._parse_mjcf_body(worldbody, None, links, joints, angle_unit)
 
         # Convert materials to proper type
         from src.shared.python.model_generation.core.types import Material
@@ -516,6 +620,7 @@ class MJCFConverter:
         self,
         body_elem: ET.Element,
         body_name: str,
+        angle_unit: str,
     ) -> tuple[Geometry | None, Origin, Any]:
         """Parse visual geometry and material from an MJCF body element."""
         if body_elem is None:
@@ -527,7 +632,7 @@ class MJCFConverter:
             return None, Origin(), None
 
         geom_elem = geom_elems[0]
-        visual_geom, visual_origin = self._parse_mjcf_geom(geom_elem)
+        visual_geom, visual_origin = self._parse_mjcf_geom(geom_elem, angle_unit)
 
         visual_material = None
         rgba_str = geom_elem.get("rgba")
@@ -545,8 +650,10 @@ class MJCFConverter:
         body_elem: ET.Element,
         parent_name: str,
         body_name: str,
-        pos: tuple[float, ...],
+        origin: Origin,
+        angle_unit: str,
         joint_elem: ET.Element | None = None,
+        fixed_joint_name: str | None = None,
     ) -> Joint:
         """Parse joint elements and create a URDF joint connecting to parent.
 
@@ -563,11 +670,11 @@ class MJCFConverter:
         joint_elems = body_elem.findall("joint")
         if not joint_elems:
             return Joint(
-                name=f"{parent_name}_to_{body_name}",
+                name=fixed_joint_name or f"{parent_name}_to_{body_name}",
                 joint_type=JointType.FIXED,
                 parent=parent_name,
                 child=body_name,
-                origin=Origin(xyz=pos),
+                origin=origin,
             )
 
         # Use the requested joint, else the first non-free joint, else the first
@@ -589,6 +696,7 @@ class MJCFConverter:
         range_str = primary_joint.get("range")
         if range_str:
             range_vals = [float(v) for v in range_str.split()]
+            range_vals = _mjcf_angles_to_radians(range_vals, angle_unit)
             limits = JointLimits(lower=range_vals[0], upper=range_vals[1])
 
         damping = float(primary_joint.get("damping", 0.5))
@@ -599,7 +707,7 @@ class MJCFConverter:
             joint_type=joint_type,
             parent=parent_name,
             child=body_name,
-            origin=Origin(xyz=pos),
+            origin=origin,
             axis=axis,
             limits=limits,
             dynamics=dynamics,
@@ -611,20 +719,26 @@ class MJCFConverter:
         parent_name: str | None,
         links: list[Link],
         joints: list[Joint],
+        angle_unit: str,
     ) -> None:
         """Recursively parse body elements."""
         for body_elem in elem.findall("body"):
             body_name = body_elem.get("name", f"body_{len(links)}")
-            pos_str = body_elem.get("pos", "0 0 0")
-            pos = tuple(float(v) for v in pos_str.split())
+            has_dof_joint = any(
+                j.get("type") != "free" for j in body_elem.findall("joint")
+            )
+            link_name, fixed_joint_name = _decode_mjcf_fixed_joint_body_name(
+                body_name, has_dof_joint=has_dof_joint
+            )
+            joint_origin = _origin_from_mjcf_element(body_elem, angle_unit)
 
             inertia = self._parse_body_inertial(body_elem)
             visual_geom, visual_origin, visual_material = self._parse_body_visual(
-                body_elem, body_name
+                body_elem, link_name, angle_unit
             )
 
             link = Link(
-                name=body_name,
+                name=link_name,
                 inertia=inertia,
                 visual_geometry=visual_geom,
                 visual_origin=visual_origin,
@@ -642,19 +756,28 @@ class MJCFConverter:
             attach_to = _WORLD_LINK if root_dofs else parent_name
             if attach_to:
                 self._append_body_joints(
-                    body_elem, attach_to, body_name, pos, links, joints
+                    body_elem,
+                    attach_to,
+                    link_name,
+                    joint_origin,
+                    links,
+                    joints,
+                    angle_unit,
+                    fixed_joint_name=fixed_joint_name,
                 )
 
-            self._parse_mjcf_body(body_elem, body_name, links, joints)
+            self._parse_mjcf_body(body_elem, link_name, links, joints, angle_unit)
 
     def _append_body_joints(
         self,
         body_elem: ET.Element,
         parent_name: str,
         body_name: str,
-        pos: tuple[float, ...],
+        origin: Origin,
         links: list[Link],
         joints: list[Joint],
+        angle_unit: str,
+        fixed_joint_name: str | None = None,
     ) -> None:
         """Append the joint(s) between ``parent_name`` and ``body_name``.
 
@@ -666,10 +789,17 @@ class MJCFConverter:
         dofs = [j for j in body_elem.findall("joint") if j.get("type") != "free"]
         if len(dofs) < 2:
             joints.append(
-                self._parse_body_joint(body_elem, parent_name, body_name, pos)
+                self._parse_body_joint(
+                    body_elem,
+                    parent_name,
+                    body_name,
+                    origin,
+                    angle_unit,
+                    fixed_joint_name=fixed_joint_name,
+                )
             )
             return
-        current_parent, origin = parent_name, pos
+        current_parent, joint_origin = parent_name, origin
         for index, joint_elem in enumerate(dofs):
             child = body_name
             if index < len(dofs) - 1:
@@ -678,19 +808,27 @@ class MJCFConverter:
                 links.insert(len(links) - 1, _virtual_link(child))
             joints.append(
                 self._parse_body_joint(
-                    body_elem, current_parent, child, origin, joint_elem=joint_elem
+                    body_elem,
+                    current_parent,
+                    child,
+                    joint_origin,
+                    angle_unit,
+                    joint_elem=joint_elem,
                 )
             )
-            current_parent, origin = child, (0.0, 0.0, 0.0)
+            current_parent, joint_origin = child, Origin()
 
-    def _parse_mjcf_geom(self, geom_elem: ET.Element) -> tuple[Geometry | None, Origin]:
+    def _parse_mjcf_geom(
+        self,
+        geom_elem: ET.Element,
+        angle_unit: str = _MJCF_DEFAULT_COMPILER_ANGLE,
+    ) -> tuple[Geometry | None, Origin]:
         """Parse a MuJoCo geom element into a Geometry and Origin."""
         if geom_elem is None:
             raise ValueError("geom_elem must be provided")
         geom_type = geom_elem.get("type", "sphere")
-        pos_str = geom_elem.get("pos", "0 0 0")
-        pos = tuple(float(v) for v in pos_str.split())
-        origin = Origin(xyz=pos)
+        origin = _origin_from_mjcf_element(geom_elem, angle_unit)
+        pos = origin.xyz
 
         size_str = geom_elem.get("size", "")
         sizes = [float(v) for v in size_str.split()] if size_str else []
