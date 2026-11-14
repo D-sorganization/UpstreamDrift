@@ -18,6 +18,32 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#15027 · Re-Bootstrap Pip With Ensurepip Before Force-Overlay-Parity Engine Installs (#15027).
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15027
+- **Branch:** cursor/force-overlay-pip-ensurepip-a939
+- **PR:** #15032
+- **Paths:** see #15032
+- **Started:** 2026-11-12
+- **Last verified:** 2026-11-12 (`3afe09c1`; collated from changes/15027-re-bootstrap-pip-with-ensurepip-before-f.md)
+- **Summary:** Re-bootstrap pip with ensurepip before force-overlay-parity engine installs (#15027).
+- **Next step:** Confirm force-overlay-parity matrix with ci:full on PR #15030.
+
+### DL-#15011 · Label Injury Spinal-Load Heuristics Honestly; Disclaim Unvalidated Screening Bands.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15011
+- **Branch:** cursor/injury-heuristic-labels-118d
+- **PR:** #15033
+- **Paths:** see #15033
+- **Started:** 2026-11-12
+- **Last verified:** 2026-11-12 (`a1a26523`; collated from changes/15011-label-injury-spinal-load-heuristics-hone.md)
+- **Summary:** Label injury spinal-load heuristics honestly; disclaim unvalidated screening bands.
+- **Next step:** Merge after CI green.
+
 ### DL-#14934 · Fix Syngas Water Unit Conversions and Router Fallback on 60F_14.696Psia Basis (Paired With Tools#6009)
 
 - **State:** in_review
@@ -898,6 +924,71 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#15047 · README Onboarding: Venv-First Install, Toolchains, Ud-Sim, Engines, Layout Tree.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15047
+- **Branch:** cursor/readme-onboarding-15047-1324
+- **PR:** #15057
+- **Paths:** see #15057
+- **Started:** 2026-11-12
+- **Last verified:** 2026-11-12 (`95058d94`; collated from changes/15047-readme-onboarding-venv-first-install-too.md)
+- **Summary:** README onboarding: venv-first install, toolchains, ud-sim, engines, layout tree.
+- **Next step:** Shipped in PR #15057.
+
+### DL-#15029 · Renew or Delete 67 Budget Exceptions Expiring 2026-11-30 (Wave 0 #15028).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15029
+- **Branch:** merged via #15031
+- **PR:** #15031
+- **Paths:** see #15031
+- **Started:** 2026-11-12
+- **Last verified:** 2026-11-12 (`28da654d`; collated from changes/15029-renew-or-delete-67-budget-exceptions-exp.md)
+- **Summary:** Renew or delete 67 budget exceptions expiring 2026-11-30 (Wave 0 #15028).
+- **Next step:** Shipped in PR #15031.
+
+### DL-#15009 · Fix OpenSim IAA Gravity Sign and Moment-Arm Mapping; MuJoCo Constraint-Consistent Control Acceleration; Minor Docs/Dead Code
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15009
+- **Branch:** merged via #15024
+- **PR:** #15024
+- **Paths:** see #15024
+- **Started:** 2026-11-12
+- **Last verified:** 2026-11-12 (`625a16e6`; collated from changes/15009-fix-opensim-iaa-gravity-sign-and-moment.md)
+- **Summary:** Fix OpenSim IAA gravity sign and moment-arm mapping; MuJoCo constraint-consistent control acceleration; minor docs/dead code
+- **Next step:** Shipped in PR #15024.
+
+### DL-#14939 · Agent Control Stubs Return Honest Not_Implemented Results (#14939).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14939
+- **Branch:** merged via #14957
+- **PR:** #14957
+- **Paths:** see #14957
+- **Started:** 2026-11-12
+- **Last verified:** 2026-11-12 (`2383b013`; collated from changes/14939-agent-control-stubs-return-honest-not-im.md)
+- **Summary:** Agent control stubs return honest not_implemented results (#14939).
+- **Next step:** Shipped in PR #14957.
+
+### DL-#14480 · NP-05 Benchmark Localized Edit vs Constrained Fine-Tune (#14480)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14480
+- **Branch:** merged via #14828
+- **PR:** #14828
+- **Paths:** see #14828
+- **Started:** 2026-11-12
+- **Last verified:** 2026-11-12 (`ecc9b1f0`; collated from changes/14480-np05-edit-vs-finetune-benchmark.md)
+- **Summary:** NP-05 benchmark localized edit vs constrained fine-tune (#14480)
+- **Next step:** Shipped in PR #14828.
+
 ### DL-#15020 · Register Ud-Sim-Mcp Console Script, Generated Capability Inventory, and Agent API Auth Docs.
 
 - **State:** shipped
@@ -943,10 +1034,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14943
 - **Branch:** merged via #14998
-- **PR:** #14998
+- **PR:** #14998, #14965
 - **Paths:** see #14998
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`b73da6dd`; collated from changes/14943-counterfactualkind-result-spec-aligned-z.md)
+- **Last verified:** 2026-11-12 (`4dd93114`; collated from changes/14943-counterfactualkind-result-spec-aligned-z.md)
 - **Summary:** CounterfactualKind/Result, simscape/putting defaults, conformance (#14943 slices 1–4)
 - **Next step:** Shipped in PR #14998.
 
