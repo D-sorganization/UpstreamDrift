@@ -66,6 +66,10 @@ The GUI is `src/launchers/cross_engine_dashboard.py`. All heavy imports (PyQt6,
 matplotlib, engine modules) are deferred to runtime. `--no-gui` gives a headless
 path for CI, and the GUI path also falls back to headless when PyQt6 is absent.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/drift-is-the-past-control-is-the-present.html): *Drift Is the Past, Control Is the Present*.
+
 ## Limitations
 
 - **`total_energy_final` is not in joules.** The docstring labels it "(J)", but

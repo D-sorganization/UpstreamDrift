@@ -57,6 +57,7 @@ SUPPORTED_SCHEMAS: Final[frozenset[str]] = frozenset(
         "simulation_backend.trace/2.1.0",
         "motion_capture.c3d/1",
         "pipeline.ground_support_receipt/1",
+        "workspace.optimization_placeholder/1",
         "workspace.handoff/1.0.0",
         "dataset/c3d",
         "dataset/h5",

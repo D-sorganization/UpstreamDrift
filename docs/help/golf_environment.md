@@ -58,6 +58,10 @@ combo box replaces the environment and clears any overlaid trajectories.
 There is no physics module behind this tile. Trajectories come from whatever
 caller supplies them.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html): *The Physics of Golf — Forces and Torques*.
+
 ## Limitations
 
 - **The standalone window shows a hardcoded demonstration curve, not a

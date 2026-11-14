@@ -302,6 +302,13 @@ solver or contact-model behavior must be recorded in
 check, metric, tolerance, and rationale. An unregistered divergence is a hard
 failure.
 
+### 2.10 Address Grip Roll Convention (SHOW-A7 #14731, SHOW-A13 #14738)
+
+All models and bindings share the face-on address grip roll convention
+in `src/shared/python/motion_matching/grip_roll.py`: 0° = back of wrist on top
+of the shaft (12 o'clock), + counterclockwise toward target. Default address
+grip is 15° ± 1°, guarded by `motion_matching.grip_roll_guard`.
+
 ---
 
 ## 3. Per-engine target architecture (summary)

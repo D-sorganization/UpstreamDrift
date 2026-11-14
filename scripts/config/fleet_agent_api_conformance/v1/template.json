@@ -1,0 +1,65 @@
+{
+  "schema_version": "fleet-agent-api-conformance/v1",
+  "standard_ref": "UpstreamDrift #15022; RM conformance template pattern (Tools config/fleet_agent_api_conformance/v1)",
+  "server": {
+    "command": "ud-sim-mcp",
+    "transport": "stdio"
+  },
+  "required_tools": [
+    "describe_engines",
+    "submit_run",
+    "get_run",
+    "fetch_artifact",
+    "optimize_putt",
+    "putting_misread_cost",
+    "putting_library_study",
+    "putting_variance_attribution",
+    "putting_simulate_putt",
+    "putting_read_green",
+    "putting_stimpmeter",
+    "putting_capture_speed",
+    "run_counterfactual_ztcf_golden",
+    "run_golf_simulator_golden_shot"
+  ],
+  "checks": [
+    {
+      "id": "stdio_initialize",
+      "kind": "handshake"
+    },
+    {
+      "id": "tools_present",
+      "kind": "list_tools"
+    },
+    {
+      "id": "describe_engines_contract",
+      "kind": "call",
+      "tool": "describe_engines",
+      "arguments": {},
+      "assertions": ["contract_version", "request_schema"]
+    },
+    {
+      "id": "submit_pendulum",
+      "kind": "call",
+      "tool": "submit_run",
+      "arguments": {
+        "engine_type": "pendulum",
+        "duration": 0.05,
+        "timestep": 0.01,
+        "parameters": { "length": 1.0, "mass": 0.5 }
+      },
+      "assertions": [
+        "sim_run_record_v1",
+        "status:SUCCEEDED",
+        "provenance.contract_version"
+      ]
+    },
+    {
+      "id": "ztcf_golden",
+      "kind": "call",
+      "tool": "run_counterfactual_ztcf_golden",
+      "arguments": {},
+      "assertions": ["capability_record_v1"]
+    }
+  ],
+  "exceptions": []
+}

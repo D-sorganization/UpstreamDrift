@@ -105,6 +105,10 @@ and squat, full-squat, deadlift, bench-press configurations), `exercises/`
 `spine_loads.py`, `strength.py` (Hill model), `validation.py`, `cli.py`,
 `__main__.py`.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/inverse-dynamics.html): *Inverse Dynamics*.
+
 ## Limitations
 
 - Two dimensions only. The model is a sagittal-plane three-link chain. The

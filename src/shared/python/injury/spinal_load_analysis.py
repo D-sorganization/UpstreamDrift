@@ -5,8 +5,10 @@
 """
 Spinal Load Analysis Module
 
-Calculates forces on the lumbar spine during the golf swing to assess injury risk.
-Based on peer-reviewed biomechanics research on golf-related low back pain.
+Heuristic screening estimates for lumbar loading during the golf swing. Default
+loads use a closed-form moment-arm shortcut (not inverse dynamics and not a
+distributed musculoskeletal solve). Model-based providers supply qualified loads
+without applying these heuristic screening bands.
 
 Key Metrics:
 - Axial compression (vertical loading)
@@ -16,16 +18,16 @@ Key Metrics:
 - X-factor stretch (pelvis-thorax separation)
 - Crunch factor (combined lateral bend + rotation)
 
-Risk Thresholds (from literature):
-- L4-L5 Compression: Safe <4x BW, Caution 4-6x BW, High Risk >6x BW
-- Lateral Shear: Safe <0.5x BW, Caution 0.5-1x BW, High Risk >1x BW
-- X-Factor Stretch: Safe <45°, Caution 45-55°, High Risk >55°
-- Transition Time: Safe >0.3s, Caution 0.2-0.3s, High Risk <0.2s
+Literature context (measurements, not injury thresholds):
+- Hosea et al. (1990) reported measured peaks up to about 8× body weight
+  compression during the swing
+- McHardy & Pollard (2005) described the crunch-factor construct
+- Lindsay et al. (2002) reviewed spine loading mechanisms
 
-References:
-- Hosea et al. (1990) measured up to 8x body weight compression
-- McHardy & Pollard (2005) identified crunch factor in modern swing
-- Lindsay et al. (2002) review of spine loading mechanisms
+Internal screening bands (compression, shear, X-factor, transition) are
+engineering defaults for relative comparison within this module only. They are
+not validated clinical injury limits; see
+:mod:`src.shared.python.injury.heuristic_disclaimers`.
 """
 
 from dataclasses import dataclass, field
@@ -41,6 +43,10 @@ from src.shared.python.analysis.dataclasses import (
 )
 from src.shared.python.core.constants import GRAVITY_M_S2
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.injury.heuristic_disclaimers import (
+    LITERATURE_PEAK_COMPRESSION_BW_HOSEA_1990,
+    SPINAL_LOAD_HEURISTIC_LIMITATIONS,
+)
 from src.shared.python.injury.spinal_load_providers import (
     HeuristicSpinalLoadProvider,
     SpinalLoadProvider,
@@ -139,6 +145,15 @@ class SpinalLoadResult:
     is_model_based: bool = False
     risk_assessed: bool = True
 
+    # Limits of the heuristic pathway; empty when unset (model loads set separately).
+    method_limitations: str = ""
+
+    def user_facing_method_label(self) -> str:
+        """Short label for UI and reports."""
+        if self.is_model_based:
+            return "Model-based spinal loads (see provider provenance; not heuristic)"
+        return "Heuristic spinal load estimate (not inverse dynamics)"
+
     def get_citations(self) -> list[MethodCitation]:
         """Return all unique methodology citations for this result and its metrics."""
         citations: list[MethodCitation] = [self.methodology]
@@ -161,20 +176,31 @@ class SpinalLoadResult:
 
 class SpinalLoadAnalyzer:
     """
-    Analyzes forces on the lumbar spine during the golf swing.
+    Heuristic lumbar load screening for the golf swing.
 
-    This analyzer computes compression, shear, and torsion loads on spinal
-    segments using inverse dynamics and anatomical models. Results are
-    compared against evidence-based injury risk thresholds.
+    Default loads use
+    :class:`~src.shared.python.injury.spinal_load_providers.HeuristicSpinalLoadProvider`
+    (closed-form body-weight share plus torque over a fixed 5 cm moment arm). This
+    is not inverse dynamics. Optional screening bands classify results
+    relative to internal defaults only; they are not validated clinical injury
+    thresholds.
 
     Example:
         >>> analyzer = SpinalLoadAnalyzer(body_weight=80.0)
         >>> result = analyzer.analyze(joint_angles, joint_velocities, joint_torques)
+        >>> print(result.user_facing_method_label())
         >>> print(f"Peak compression: {result.peak_compression_bw:.1f}x body weight")
-        >>> print(f"Overall risk: {result.overall_risk.value}")
+        >>> print(f"Screening band: {result.overall_risk.value}")
     """
 
-    # Risk thresholds (based on literature)
+    #: Literature-reported peak (Hosea et al. 1990); not a safe limit.
+    LITERATURE_PEAK_COMPRESSION_BW = LITERATURE_PEAK_COMPRESSION_BW_HOSEA_1990
+
+    SCREENING_BAND_NOTE = (
+        "Internal screening bands only; not literature-validated injury limits."
+    )
+
+    # Internal screening bands (heuristic defaults, not clinical thresholds)
     COMPRESSION_SAFE = 4.0  # x body weight
     COMPRESSION_CAUTION = 6.0
     COMPRESSION_HIGH = 8.0
@@ -265,11 +291,15 @@ class SpinalLoadAnalyzer:
         """
         if joint_angles is None:
             raise ValueError("joint_angles must be provided")
+        is_heuristic = not self.provider.is_model_based
         result = SpinalLoadResult(
             time=time,
             provider_id=self.provider.provider_id,
             is_model_based=self.provider.is_model_based,
-            risk_assessed=not self.provider.is_model_based,
+            risk_assessed=is_heuristic,
+            method_limitations=SPINAL_LOAD_HEURISTIC_LIMITATIONS
+            if is_heuristic
+            else "Model-based spinal loads; heuristic screening bands not applied.",
         )
         n_frames = len(time)
 
@@ -555,7 +585,7 @@ class SpinalLoadAnalyzer:
         return result
 
     def _assess_risk(self, result: SpinalLoadResult) -> SpinalLoadResult:  # noqa: C901
-        """Assess risk levels based on computed values."""
+        """Map peak heuristic loads to internal screening bands (not clinical limits)."""
         # Compression risk
         if result is None:
             raise ValueError("result must be provided")
@@ -669,7 +699,8 @@ class SpinalLoadAnalyzer:
 
         if result.overall_risk == SpinalRiskLevel.SAFE:
             recommendations.append(
-                "Spinal loads are within safe limits. Maintain current technique."
+                "Heuristic screening bands are in the low internal range for this "
+                "module. This is not a clinical clearance or injury-risk diagnosis."
             )
             return recommendations
 

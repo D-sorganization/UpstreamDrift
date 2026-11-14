@@ -68,6 +68,10 @@ The models themselves are described in
 integration - including the `matlab.engine` bridge and its 30-60 s start-up
 cost - in [MATLAB engine reference](../engines/matlab.md).
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html): *The Physics of Golf — Forces and Torques*.
+
 ## Limitations
 
 - **Nothing runs without MATLAB.** There is no Python re-implementation and no

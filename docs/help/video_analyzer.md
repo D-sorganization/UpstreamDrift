@@ -30,6 +30,10 @@ The Video Analyzer extracts 2D biomechanical keypoints, swing planes, body angle
 
 Video frames are decoded via OpenCV / FFmpeg. Kinematic joint detection applies trained neural pose estimation with temporal filtering to reduce jitter. Geometric measurements project pixel coordinates into metric dimensions using calibrated planar scales.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/markerless-mocap-camera-selection.html): *Markerless Motion Capture Camera Selection*.
+
 ## Limitations
 
 Single-camera video suffers from planar foreshortening and parallax errors when motion occurs out of plane. 3D spatial quantities should be evaluated with multi-camera motion capture.

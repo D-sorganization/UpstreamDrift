@@ -214,7 +214,13 @@ class ManipulationPickPlaceEnv(RoboticsGymEnv):
         """Build observation space including object state."""
         from gymnasium import spaces
 
-        base_dim = self.obs_config.get_obs_dim(self._n_joints, self._n_ee)
+        base_dim = self.obs_config.get_obs_dim(
+            self._n_joints,
+            self._n_ee,
+            n_vel=self._n_velocities,
+            n_actuators=self._n_actuators,
+            contact_force_dim=self._resolve_contact_force_dim(),
+        )
         # Add object pos (3), target pos (3), grasp state (1)
         total_dim = base_dim + 7
         return spaces.Box(

@@ -148,16 +148,21 @@ $$\ddot{q}_{\text{ZTCF}} = M(q)^{-1}\bigl(-C(q,v)\,v - g(q) + J^T\lambda\bigr)$$
 def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray
 ```
 
-**ZVCF (Zero-Velocity Counterfactual, G2):** "What happens if motion freezes?"
+**ZVCF (SPEC §4 control component / legacy zero-velocity gravity diagnostic, G2):**
 
-$$\ddot{q}_{\text{ZVCF}} = M(q)^{-1}\bigl(-g(q) + \tau + J^T\lambda\bigr)$$
+Under the canonical [SPEC §4](../../../SPEC.md#4-architecture-overview) split at a fixed state $(q, v)$, ZVCF is the control component (`compute_control_acceleration` / `compute_control_acceleration_at_state`, with velocity and gravity off):
+
+$$\ddot{q}_{\text{ZVCF}} = M(q)^{-1}\,\tau$$
+
+The legacy `compute_zvcf(self, q)` method is a deprecated shim (`#14943`) that evaluates the gravity-only diagnostic at $v = 0, \tau = 0$ (delegating to `compute_gravity_only_acceleration`):
+
+$$\ddot{q}_{\text{gravity-only}} = M(q)^{-1}\bigl(-g(q) + J^T\lambda\bigr)$$
 
 ```python
-def compute_zvcf(self, q: np.ndarray) -> np.ndarray
+def compute_zvcf(self, q: np.ndarray) -> np.ndarray  # Deprecated; sets v=0 and tau=0
 ```
 
-The difference $\Delta a_{\text{velocity}} = a_{\text{full}} - a_{\text{ZVCF}}$
-isolates Coriolis/centrifugal contributions.
+Because `compute_zvcf(q)` zeroes both velocity and applied torque, comparing $a_{\text{full}} - a_{\text{zvcf\_shim}}$ includes both velocity and control effects unless compared against the explicit control-preserved diagnostic (`zero_velocity_control_preserved_acceleration` in `simulation_backends/ztcf_zvcf.py`).
 
 ### 5.2.6 Section B5 -- Flexible Shaft Interface (Optional)
 
@@ -297,7 +302,7 @@ requires_model_loaded = require_state(
 
 ## 5.4 `BasePhysicsEngine`
 
-**File:** `src/shared/python/base_physics_engine.py`
+**File:** `src/shared/python/engine_core/base_physics_engine.py`
 
 `BasePhysicsEngine` is an abstract base class that factors out behaviour common
 to all engine implementations:
@@ -367,7 +372,7 @@ implementations that serialise the `EngineState` into a `StateCheckpoint` object
 
 ## 5.5 Engine Registry
 
-**File:** `src/shared/python/engine_registry.py`
+**File:** `src/shared/python/engine_core/engine_registry.py`
 
 The registry decouples engine _discovery_ from engine _instantiation_.
 
@@ -427,7 +432,7 @@ The `EngineRegistry` class exposes three methods:
 
 ## 5.6 Engine Manager
 
-**File:** `src/shared/python/engine_manager.py`
+**File:** `src/shared/python/engine_core/engine_manager.py`
 
 The `EngineManager` is the user-facing facade that ties the registry, probes, and
 engine factories together.
@@ -476,7 +481,7 @@ the registry factory. Special cases (MATLAB, Pendulum) use dedicated loaders.
 
 ## 5.7 Engine Probes
 
-**File:** `src/shared/python/engine_probes.py`
+**File:** `src/shared/python/engine_core/engine_probes.py`
 
 Each engine has a corresponding probe class that checks installation status at runtime.
 

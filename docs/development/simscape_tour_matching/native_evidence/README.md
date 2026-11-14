@@ -1,6 +1,6 @@
-# DeskComputer Native Evidence
+# <host> Native Evidence
 
-R2025b qualification: all 22 native tests pass on DeskComputer in MATLAB 25.2.0.3177638 (R2025b) Update 5. The actual 20 ms forward simulation succeeds with finite joint states and club/grip positions (95.89 s). Source revision: `4191ca3aca126216ea02e26e485ff72908f3ad2b`. Evidence: `native_evidence/native_r2025b_suite.json` and `native_evidence/baseline_r2025b.json`. Actuator-torque extraction and full-swing fitting remain unqualified.
+R2025b qualification: all 22 native tests pass on <host> in MATLAB 25.2.0.3177638 (R2025b) Update 5. The actual 20 ms forward simulation succeeds with finite joint states and club/grip positions (95.89 s). Source revision: `4191ca3aca126216ea02e26e485ff72908f3ad2b`. Evidence: `native_evidence/native_r2025b_suite.json` and `native_evidence/baseline_r2025b.json`. Actuator-torque extraction and full-swing fitting remain unqualified.
 
 Current acceptance requires MATLAB R2025b. Reports naming R2026a retain their
 original provenance and do not qualify the R2025b target.
@@ -35,7 +35,7 @@ as recorded in the parent remote-execution document.
   units still need source-port qualification before treating them as SI.
 
 Full scripts, logs and raw MAT outputs remain in
-`C:/Users/diete/SimscapeTour9921` on DeskComputer. Raw MAT files retain both opts
+`C:/Users/diete/SimscapeTour9921` on <host>. Raw MAT files retain both opts
 and theta. They are intentionally not embedded in source control.
 
 The next slice adds `joint_sensor_red.json` (four expected mapping failures and
@@ -134,7 +134,7 @@ start with `capture_fit_sim_options(0.02)`, assign the recorded `overrides`
 struct to `opts.input_overrides`, and run the existing wrapper with 189 zero
 coefficients. This only validates the initial pose; it does not track the swing.
 
-The exploratory optimizer and replay scripts remain in DeskComputer scratch
+The exploratory optimizer and replay scripts remain in <host> scratch
 `SimscapeTour9921/native_pose_seed.m` and `native_pose_replay.m`, alongside their
 MAT outputs. The search uses 21 coordinate targets, six right-arm guesses,
 100 maximum least-squares iterations, 2400 evaluations, a 0.005 coordinate

@@ -3,14 +3,25 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import sys
 from pathlib import Path
+
+from src.shared.python.contracts import require
 
 from src.shared.python.sg_optimizer.course.rasterize import rasterize_synthetic
 from src.shared.python.sg_optimizer.mdp.action import default_action_set
 from src.shared.python.sg_optimizer.mdp.state import State
-from src.shared.python.sg_optimizer.shot_model.baseline import load_baseline
+from src.shared.python.sg_optimizer.shot_model.baseline import (
+    BaselineBag,
+    load_baseline,
+)
+from src.shared.python.sg_optimizer.shot_model.baseline_model import BaselineShotModel
+from src.shared.python.sg_optimizer.shot_model.dispersion_table import DispersionTable
+from src.shared.python.sg_optimizer.shot_model.outcome import ShotOutcomeModel
 from src.shared.python.sg_optimizer.shot_model.player_profile import PlayerProfile
+from src.shared.python.sg_optimizer.shot_model.registry import get_shot_model
+from src.shared.python.sg_optimizer.shot_model.table_model import TableShotModel
 from src.shared.python.sg_optimizer.strategy import (
     SolveSettings,
     StrategyProblem,
@@ -49,6 +60,16 @@ def add_strategy_parser(subparsers: argparse._SubParsersAction) -> None:
         "depends on the raster resolution)",
     )
     p.add_argument("--html", metavar="PATH", help="also write the HTML/SVG view")
+    model = p.add_mutually_exclusive_group()
+    model.add_argument(
+        "--shot-table",
+        metavar="PATH",
+        help="dispersion-table JSON for the personal solve (tour baseline for "
+        "clubs the table does not cover)",
+    )
+    model.add_argument(
+        "--shot-model", metavar="NAME", help="registered shot-model backend"
+    )
     hole = p.add_mutually_exclusive_group(required=True)
     hole.add_argument("--hole-spec")
     hole.add_argument("--classic", metavar="SLUG")
@@ -62,6 +83,8 @@ def run_strategy(args: argparse.Namespace) -> int:
         _load_hole_spec,
     )
 
+    baseline = load_baseline(args.baseline)
+    model, label = _shot_model(args, baseline)
     hole = (
         _load_hole_spec(args.hole_spec)
         if args.hole_spec is not None
@@ -70,7 +93,6 @@ def run_strategy(args: argparse.Namespace) -> int:
     raster = rasterize_synthetic(hole, resolution_yd=args.resolution)
     if not args.pin_only:
         raster = green_terminal(raster)
-    baseline = load_baseline(args.baseline)
     problem = StrategyProblem(
         raster,
         baseline,
@@ -85,9 +107,35 @@ def run_strategy(args: argparse.Namespace) -> int:
         quick_tour=args.quick_tour,
         top=args.top,
         green_terminal_mode=not args.pin_only,
+        model=model,
         settings=SolveSettings(args.n_samples, args.seed, args.max_iter),
     )
+    view = dataclasses.replace(view, shot_model=label)
     sys.stdout.write(render_text(view))
     if args.html:
         Path(args.html).write_text(render_html(view), encoding="utf-8")
     return 0
+
+
+def _shot_model(
+    args: argparse.Namespace, baseline: BaselineBag
+) -> tuple[ShotOutcomeModel | None, str]:
+    """The explicitly selected model and its provenance label (fail closed).
+
+    No selection keeps the default baseline (``None``). An explicit selection is
+    validated before any solve and never replaced by the baseline.
+    """
+    explicit = args.shot_table is not None or args.shot_model is not None
+    require(
+        not (explicit and args.quick_tour),
+        "--quick-tour skips the personal solve; drop --shot-table/--shot-model",
+    )
+    if args.shot_table is not None:
+        path = Path(args.shot_table)
+        require(path.is_file(), f"shot table not found: {path}")
+        table = DispersionTable.from_json(path)
+        model = TableShotModel(table, BaselineShotModel(baseline))
+        return model, f"table {table.table_hash} ({path.name})"
+    if args.shot_model is not None:
+        return get_shot_model(args.shot_model, baseline), args.shot_model
+    return None, "baseline"

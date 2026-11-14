@@ -144,6 +144,10 @@ class UnifiedLaunchConditions:
     launch_angle: float
     azimuth_angle: float = 0.0
     spin_rate: float = 2500.0
+    #: Tilt from pure backspin [rad]. Positive values inject sidespin about
+    #: +Z; in the UD z-up frame (+Y is left), positive ``spin_axis_angle``
+    #: curves the ball toward +Y. Many launch-monitor exports use the
+    #: opposite sign for tilt — convert at import.
     spin_axis_angle: float = 0.0
     ball_mass: float = GOLF_BALL_MASS
     ball_radius: float = GOLF_BALL_RADIUS
@@ -231,6 +235,9 @@ class UnifiedLaunchConditions:
               direction: [sin(azimuth), -cos(azimuth), 0], producing upward Magnus lift.
             - Sidespin acts about the vertical (z-up) axis: [0, 0, 1], producing
               lateral curvature without vertical lift.
+            - ``spin_axis_angle`` is measured from pure backspin; **positive values
+              curve the ball toward +Y (left)** at azimuth zero. TrackMan-style tilt
+              often uses the opposite sign.
 
         Returns:
             Angular velocity vector [rad/s] as an array of shape (3,).

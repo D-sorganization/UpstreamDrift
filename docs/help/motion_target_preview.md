@@ -69,6 +69,10 @@ The wider matching context is in
 notes and issue history are in its
 [README](../../src/tools/starting_pose_matcher/README.md).
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/proximal_distal_energy_transfer/index.html): *Proximal-to-Distal Energy Transfer*.
+
 ## Limitations
 
 - **It does not run the optimiser.** It produces the starting-pose

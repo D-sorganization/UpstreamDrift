@@ -670,7 +670,7 @@
       "bytes": 11261
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_manufactured_solution.json": {
-      "sha256": "2575313718dffe18292eafb89c2fc3b51290ed197b74ffdc8b6172f2efa8d383",
+      "sha256": "12f5241cadff2c0adb9c93149d65d98ca58b55a3cabc9d7bd6ddbd31d3a96cbe",
       "bytes": 7331
     },
     "docs/research/proximal_distal_energy_transfer/data/articulated_native_constraint_discrepancy.json": {
@@ -3186,8 +3186,8 @@
       "bytes": 17127
     },
     "scripts/research/proximal_distal_energy/spatial_full_body.py": {
-      "sha256": "b386ec2119ebc10f18a404ceba8b304827e418b9c2973641e644b2953d5f17d2",
-      "bytes": 33838
+      "sha256": "e815bdd6cd46aa8f46a08c336a3b91bde78c7cf7b302bae278deddb601b867b2",
+      "bytes": 34638
     },
     "scripts/research/proximal_distal_energy/subject_scaled_closed_contact.py": {
       "sha256": "b62fd2d7b90bb0593d660c362ebfc266cb905f0d808593b2c978a515275a3d0a",

@@ -98,6 +98,10 @@ Dropping a component can only shrink the feasible set, so restricted envelopes l
 - A ranking of strategies or allocations is a ranking under the declared assumptions. It is not coaching advice.
 - No single hand split is the golfer's. No stiffness or co-contraction is inferred from net joint torques.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/after-one-solution-null-space-exploration.html): *After One Solution: Null-Space Exploration*.
+
 ## Related
 
 - [Grip Wrench Plots](grip_wrench_plots.md) - the desktop tool that hosts the NSX tabs, including the Variability & Consistency tab.

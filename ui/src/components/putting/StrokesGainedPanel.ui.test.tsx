@@ -49,7 +49,7 @@ describe("StrokesGainedPanel (#14468)", () => {
     expect(args.leave_ft).toBeCloseTo(1.1, 9);
     expect(
       await screen.findByText(
-        "From 10.0 ft you average 1.79 putts. This putt gained -0.22 strokes.",
+        "From 10.0 ft you average 1.78 putts. This putt gained -0.22 strokes.",
       ),
     ).toBeInTheDocument();
     const chart = screen.getByRole("img", { name: /Your Expected Putts/ });

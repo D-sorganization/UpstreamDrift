@@ -67,6 +67,10 @@ The tile adds no physics of its own. It is a viewer over the preset builders
 and the terrain query API; the elevation grid, patch and region decomposition,
 and per-material coefficients are all defined by those modules.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch07_constraint_forces.html): *Constraint Forces*.
+
 ## Limitations
 
 - **The elevation, slope, friction, and rolling-resistance values are model

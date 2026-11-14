@@ -40,6 +40,7 @@ GRIP_AXIS = np.array([0.0, 1.0, 0.0])
 def _drawn_dorsum_direction(spec: dict, hand: Hand) -> np.ndarray:
     """Unit direction, off the shaft, of the placed dorsum shell's centroid."""
     club = ca.assembly_from_spec(spec)
+    assert club is not None
     hands = resolved_hand_spec(spec)
     depth = hands.pose.distance_below_butt_m(hand)
     baked = build_grip_hand_mesh(
@@ -66,12 +67,43 @@ def test_drawn_dorsum_is_the_wrist_frame_dorsal_axis(key: str, hand: Hand) -> No
 
 
 @pytest.mark.parametrize("key", sorted(SPECS))
+def test_drawn_backs_are_anatomically_separated(key: str) -> None:
+    """The drawn backs of lead and trail hands sit well apart (>= 90 deg, #14747)."""
+    spec = json.loads(SPECS[key].read_text(encoding="utf-8"))
+    lead_back = _drawn_dorsum_direction(spec, Hand.LEAD)
+    trail_back = _drawn_dorsum_direction(spec, Hand.TRAIL)
+    angle = math.degrees(math.acos(float(np.clip(lead_back @ trail_back, -1.0, 1.0))))
+    assert angle >= 90.0, (key, angle)
+
+
+@pytest.mark.parametrize("key", sorted(SPECS))
 def test_placed_hands_stay_proper_rotations_and_keep_chirality(key: str) -> None:
     spec = json.loads(SPECS[key].read_text(encoding="utf-8"))
     club = ca.assembly_from_spec(spec)
+    assert club is not None
     hands = resolved_hand_spec(spec)
     for hand in Hand:
         rot = gh.grip_hand_frame(club, hand, hands.pose, hands=hands)[:3, :3]
         np.testing.assert_allclose(rot @ rot.T, np.eye(3), atol=1e-12)
         assert np.linalg.det(rot) == pytest.approx(1.0)
         np.testing.assert_allclose(rot[:, 2], GRIP_AXIS, atol=1e-12)
+
+        depth = hands.pose.distance_below_butt_m(hand)
+        baked = build_grip_hand_mesh(
+            hand,
+            grip_radius_m=gh.grip_radius_at(club, depth),
+            pose=hands.pose,
+            params=gh._mesh_params(hands.hand_length_m),
+        )
+        parts = {c.name: c for c in baked.components}
+        thumb = parts["thumb_distal"].mesh.vertices.mean(axis=0) - parts[
+            "thumb_proximal"
+        ].mesh.vertices.mean(axis=0)
+        idx_axis = parts["index_middle"].mesh.vertices.mean(axis=0) - parts[
+            "index_proximal"
+        ].mesh.vertices.mean(axis=0)
+        palm_v = parts["palm"].mesh.vertices.mean(axis=0)
+        palm_out = np.array([palm_v[0], palm_v[1], 0.0])
+        chirality = float(np.dot(np.cross(thumb, idx_axis), palm_out))
+        expected_sign = -1 if hand is Hand.LEAD else 1
+        assert int(np.sign(chirality)) == expected_sign

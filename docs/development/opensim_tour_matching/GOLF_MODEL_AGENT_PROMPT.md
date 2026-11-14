@@ -14,7 +14,7 @@ reuse/reset Claude's \_wt_claude_10341 or assume its native code is merged.
 The model is under docs/development/opensim_tour_matching/evidence/os7_moco_g1/
 on that source ref. Verify the inspection.json hash before calling it baseline.
 Keep the original model and IK/replay files unchanged. HANDOFF.md has the
-ControlTower runtime/job paths; inspect live identity before any job action.
+<host> runtime/job paths; inspect live identity before any job action.
 
 ## First Bounded Assignment
 

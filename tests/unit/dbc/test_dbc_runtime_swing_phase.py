@@ -9,53 +9,50 @@ Tests contracts added to:
 from __future__ import annotations
 
 import unittest
-from unittest.mock import MagicMock
 
 import numpy as np
+import pytest
+
+from src.shared.python.analysis.phase_detection import PhaseDetectionMixin
+from src.shared.python.analysis.swing_metrics import SwingMetricsMixin
+
+pytestmark = pytest.mark.unit
 
 
-def _make_swing_mixin(n: int = 200, n_joints: int = 4) -> object:
-    """Create a mock SwingMetricsMixin with realistic swing data."""
-    from src.shared.python.analysis.swing_metrics import SwingMetricsMixin
+class _SwingMetricsHarness(SwingMetricsMixin):
+    """Concrete SwingMetricsMixin harness preserving real MRO delegation."""
 
+
+class _PhaseDetectionHarness(PhaseDetectionMixin):
+    """Concrete PhaseDetectionMixin harness preserving real MRO delegation."""
+
+    times: np.ndarray
+    duration: float
+    club_head_speed: np.ndarray | None
+
+
+def _make_swing_mixin(n: int = 200, n_joints: int = 4) -> _SwingMetricsHarness:
+    """Create a concrete SwingMetricsMixin instance with realistic swing data."""
     rng = np.random.default_rng(42)
-    obj = MagicMock(spec=SwingMetricsMixin)
+    obj = _SwingMetricsHarness()
     obj.times = np.linspace(0, 2, n)
-    obj.dt = obj.times[1] - obj.times[0]
+    obj.dt = float(obj.times[1] - obj.times[0])
     obj.joint_positions = rng.standard_normal((n, n_joints)).cumsum(axis=0)
 
     # Create realistic club head speed: starts slow, ramps up, peaks near end
     t_norm = np.linspace(0, 1, n)
     obj.club_head_speed = np.abs(30.0 * t_norm**2 * np.sin(np.pi * t_norm))
-
-    obj.compute_range_of_motion = SwingMetricsMixin.compute_range_of_motion.__get__(obj)
-    obj.compute_tempo = SwingMetricsMixin.compute_tempo.__get__(obj)
-    obj.compute_x_factor = SwingMetricsMixin.compute_x_factor.__get__(obj)
-    obj.compute_x_factor_stretch = SwingMetricsMixin.compute_x_factor_stretch.__get__(
-        obj
-    )
     return obj
 
 
-def _make_phase_mixin(n: int = 200) -> object:
-    """Create a mock PhaseDetectionMixin with realistic data."""
-    from src.shared.python.analysis.phase_detection import PhaseDetectionMixin
-
-    obj = MagicMock(spec=PhaseDetectionMixin)
+def _make_phase_mixin(n: int = 200) -> _PhaseDetectionHarness:
+    """Create a concrete PhaseDetectionMixin instance with realistic data."""
+    obj = _PhaseDetectionHarness()
     obj.times = np.linspace(0, 2, n)
     obj.duration = 2.0
     # Create realistic speed profile
     t_norm = np.linspace(0, 1, n)
     obj.club_head_speed = np.abs(30.0 * t_norm**2 * np.sin(np.pi * t_norm))
-
-    obj.detect_swing_phases = PhaseDetectionMixin.detect_swing_phases.__get__(obj)
-    obj._fallback_single_phase = PhaseDetectionMixin._fallback_single_phase
-    obj._smooth_speed = PhaseDetectionMixin._smooth_speed
-    obj._find_key_events = PhaseDetectionMixin._find_key_events
-    obj._build_phase_definitions = PhaseDetectionMixin._build_phase_definitions
-    obj._create_phases_from_definitions = (
-        PhaseDetectionMixin._create_phases_from_definitions
-    )
     return obj
 
 
@@ -115,25 +112,57 @@ class TestTempoPostconditions(unittest.TestCase):
 
 
 class TestXFactorStretchPostconditions(unittest.TestCase):
-    """Verify ensure() on compute_x_factor_stretch."""
+    """Verify ensure() and deprecation behavior on compute_x_factor_stretch."""
 
     def test_peak_stretch_rate_non_negative(self) -> None:
         obj = _make_swing_mixin()
-        result = obj.compute_x_factor_stretch(0, 1)
+        with self.assertWarns(DeprecationWarning):
+            result = obj.compute_x_factor_stretch(0, 1)
         self.assertIsNotNone(result)
-        velocity_arr, peak_rate = result
+        assert result is not None
+        _, peak_rate = result
         self.assertGreaterEqual(peak_rate, 0.0)
 
     def test_dbc_runtime_swing_phase_out_of_range_returns_none(self) -> None:
         obj = _make_swing_mixin()
-        result = obj.compute_x_factor_stretch(0, 99)
+        with self.assertWarns(DeprecationWarning):
+            result = obj.compute_x_factor_stretch(0, 99)
         self.assertIsNone(result)
 
     def test_constant_joints_zero_stretch(self) -> None:
         obj = _make_swing_mixin()
         obj.joint_positions = np.ones((200, 4))
-        result = obj.compute_x_factor_stretch(0, 1)
+        with self.assertWarns(DeprecationWarning):
+            result = obj.compute_x_factor_stretch(0, 1)
         self.assertIsNotNone(result)
+        assert result is not None
+        _, peak_rate = result
+        self.assertAlmostEqual(peak_rate, 0.0)
+
+
+class TestXFactorVelocityPostconditions(unittest.TestCase):
+    """Verify ensure() on compute_x_factor_velocity directly."""
+
+    def test_peak_velocity_non_negative(self) -> None:
+        obj = _make_swing_mixin()
+        result = obj.compute_x_factor_velocity(0, 1)
+        self.assertIsNotNone(result)
+        assert result is not None
+        velocity_arr, peak_rate = result
+        self.assertEqual(velocity_arr.shape[0], 200)
+        self.assertGreaterEqual(peak_rate, 0.0)
+
+    def test_out_of_range_returns_none(self) -> None:
+        obj = _make_swing_mixin()
+        result = obj.compute_x_factor_velocity(0, 99)
+        self.assertIsNone(result)
+
+    def test_constant_joints_zero_velocity(self) -> None:
+        obj = _make_swing_mixin()
+        obj.joint_positions = np.ones((200, 4))
+        result = obj.compute_x_factor_velocity(0, 1)
+        self.assertIsNotNone(result)
+        assert result is not None
         _, peak_rate = result
         self.assertAlmostEqual(peak_rate, 0.0)
 

@@ -64,8 +64,8 @@ realizability is inferred.
 
 ## Preserved Local Evidence
 
-Native environment: /home/dieterolson/.cache/codex-impact/shooting9830/venv.
-Evidence directory: /home/dieterolson/.cache/codex-impact/shooting9830/evidence.
+Native environment: <owner-home>/.cache/codex-impact/shooting9830/venv.
+Evidence directory: <owner-home>/.cache/codex-impact/shooting9830/evidence.
 Full per-interval metrics are in fixed-candidate-study.json (8),
 fixed-candidate-study-16.json and fixed-candidate-study-32.json.
 
@@ -201,7 +201,7 @@ budget. A separate 1,000-iteration diagnostic also fails, stopping at 635
 iterations; more iterations did not resolve it. Raw status is 1 and does not
 identify a more specific IPOPT failure cause. The failed result's fallback
 warm-start `x` was not analyzed as a final candidate. Diagnostic provenance is
-archived in `/home/dieterolson/.cache/codex-impact/bioptim9842/budget1000.json`,
+archived in `<owner-home>/.cache/codex-impact/bioptim9842/budget1000.json`,
 including source hashes for the then-uncommitted compatibility patch.
 
 A separate environment preserves the same 51 packages except CasADi 3.6.7.

@@ -58,6 +58,10 @@ in the canonical convention regardless of the engine's own convention;
 the units badge exists to tell you what that engine reports natively,
 and does not change any value you see.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/degrees-of-freedom-and-dimensionality.html): *Degrees of Freedom and Dimensionality*.
+
 ## Limitations
 
 - **Save and load are stubs.** The buttons carry a tooltip saying so:

@@ -4,14 +4,16 @@ from __future__ import annotations
 
 import importlib
 import os
-from pathlib import Path
 import subprocess  # nosec B404 - fixed interpreter and local import probe
 import sys
+from collections.abc import Iterator
+from pathlib import Path
 from types import ModuleType
 
 import pytest
 
 from src.launchers.sidekick_extension_overlay import (
+    ManifestGatedSidekickFinder,
     install_manifest_gated_sidekick_extensions,
     validate_parent_sidekick_runtime,
 )
@@ -50,23 +52,59 @@ def _write_manifest(path: Path, entries: dict[str, str]) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _is_sidekick_module_name(name: str) -> bool:
+    return name in {
+        "shared",
+        "sidekick",
+        "src.shared",
+        "upstream_drift_tools",
+    } or name.startswith(
+        (
+            "shared.python",
+            "sidekick.",
+            "src.shared.python.sidekick",
+            "src.shared.python.upstream_drift_tools",
+            "upstream_drift_tools.",
+        )
+    )
+
+
 def _clear_sidekick_modules(monkeypatch: pytest.MonkeyPatch) -> None:
     for name in tuple(sys.modules):
-        if name in {
-            "shared",
-            "sidekick",
-            "src.shared",
-            "upstream_drift_tools",
-        } or name.startswith(
-            (
-                "shared.python",
-                "sidekick.",
-                "src.shared.python.sidekick",
-                "src.shared.python.upstream_drift_tools",
-                "upstream_drift_tools.",
-            )
-        ):
+        if _is_sidekick_module_name(name):
             monkeypatch.delitem(sys.modules, name, raising=False)
+
+
+@pytest.fixture(autouse=True)
+def _isolate_sidekick_module_state() -> Iterator[None]:
+    """Snapshot and restore sidekick sys.modules and sys.meta_path around each test."""
+    saved_meta_path = list(sys.meta_path)
+    saved_modules = {
+        name: mod for name, mod in sys.modules.items() if _is_sidekick_module_name(name)
+    }
+    saved_dicts = {name: dict(mod.__dict__) for name, mod in saved_modules.items()}
+    saved_paths = {
+        name: list(mod.__path__)
+        for name, mod in saved_modules.items()
+        if hasattr(mod, "__path__")
+    }
+    try:
+        yield
+    finally:
+        for entry in list(sys.meta_path):
+            if isinstance(entry, ManifestGatedSidekickFinder):
+                entry.uninstall()
+        sys.meta_path[:] = saved_meta_path
+        for name in tuple(sys.modules):
+            if _is_sidekick_module_name(name) and name not in saved_modules:
+                sys.modules.pop(name, None)
+        for name, mod in saved_modules.items():
+            sys.modules[name] = mod
+            mod.__dict__.clear()
+            mod.__dict__.update(saved_dicts[name])
+            if name in saved_paths:
+                mod.__path__ = list(saved_paths[name])
+        importlib.invalidate_caches()
 
 
 def test_exact_approved_extension_loads_after_canonical_parent(
@@ -100,16 +138,19 @@ def test_exact_approved_extension_loads_after_canonical_parent(
         parent_python_root=parent,
         manifest_path=manifest,
     )
-    extension = importlib.import_module("sidekick.lab.bio.force_plate_stitching")
-    canonical = importlib.import_module("shared.python.sidekick.lab.bio.c3d_reader")
+    try:
+        extension = importlib.import_module("sidekick.lab.bio.force_plate_stitching")
+        canonical = importlib.import_module("shared.python.sidekick.lab.bio.c3d_reader")
 
-    assert Path(extension.__file__).resolve() == approved.resolve()
-    assert extension.ORIGIN == "UpstreamDrift"
-    assert canonical.ORIGIN == "Tools"
-    assert str(local / "sidekick") not in list(
-        importlib.import_module("sidekick").__path__
-    )
-    finder.uninstall()
+        assert extension.__file__ is not None
+        assert Path(extension.__file__).resolve() == approved.resolve()
+        assert extension.ORIGIN == "UpstreamDrift"
+        assert canonical.ORIGIN == "Tools"
+        assert str(local / "sidekick") not in list(
+            importlib.import_module("sidekick").__path__
+        )
+    finally:
+        finder.uninstall()
     assert "sidekick.lab.bio.force_plate_stitching" not in sys.modules
     assert "shared.python.sidekick.lab.bio.force_plate_stitching" not in sys.modules
     assert "src.shared.python.sidekick.lab.bio.force_plate_stitching" not in sys.modules
@@ -117,6 +158,39 @@ def test_exact_approved_extension_loads_after_canonical_parent(
         getattr(sys.modules.get("sidekick.lab.bio"), "force_plate_stitching", None)
         is None
     )
+
+
+def test_overlay_teardown_leaves_no_finder_or_tmp_sidekick_modules(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Subsequent tests must resolve canonical modules rather than leaked tmp stubs."""
+    repo_root = Path(__file__).resolve().parents[3]
+    tools_root = Path(
+        os.environ.get("TOOLS_REPO_PATH", repo_root / "vendor/ud-tools")
+    ).resolve()
+    canonical_src = (
+        tools_root / "src" if (tools_root / "src").is_dir() else repo_root / "src"
+    )
+    basetemp = tmp_path.parent.resolve()
+
+    assert not any(
+        isinstance(entry, ManifestGatedSidekickFinder) for entry in sys.meta_path
+    )
+    for name, module in tuple(sys.modules.items()):
+        if not _is_sidekick_module_name(name):
+            continue
+        mod_file = getattr(module, "__file__", None)
+        if mod_file is None:
+            continue
+        resolved = Path(mod_file).resolve()
+        assert not resolved.is_relative_to(basetemp), (
+            f"Leaked sidekick stub module in sys.modules: {name} -> {resolved}"
+        )
+
+    monkeypatch.syspath_prepend(str(canonical_src))
+    c3d_reader = importlib.import_module("shared.python.sidekick.lab.bio.c3d_reader")
+    assert hasattr(c3d_reader, "BIOMECHANICAL_MARKER_MAX_M")
 
 
 def test_local_only_package_supports_exact_approved_relative_imports(
@@ -157,11 +231,15 @@ def test_local_only_package_supports_exact_approved_relative_imports(
         parent_python_root=parent,
         manifest_path=manifest,
     )
-    package = importlib.import_module("sidekick.process_calculators.syngas_compression")
+    try:
+        package = importlib.import_module(
+            "sidekick.process_calculators.syngas_compression"
+        )
 
-    assert package.VALUE == 42
-    assert list(package.__path__) == []
-    finder.uninstall()
+        assert package.VALUE == 42
+        assert list(package.__path__) == []
+    finally:
+        finder.uninstall()
 
 
 def test_unclassified_local_extension_fails_closed(tmp_path: Path) -> None:

@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import math
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Protocol, runtime_checkable
 
 import numpy as np
@@ -41,6 +41,11 @@ from src.shared.python.physics.ball_launch_conditions import (
     EnvironmentalConditions,
     LaunchConditions,
     TrajectoryPoint,
+)
+from src.shared.python.physics.ball_flight_validity import (
+    FlightValidityVerdict,
+    assess_trajectory_validity,
+    clamp_launch_spin_rate,
 )
 from src.shared.python.physics.ball_properties import BallProperties
 from src.shared.python.physics.impact_model import (
@@ -291,6 +296,7 @@ class SwingBallFlightPipeline:
         max_flight_time: float = 10.0,
         flight_dt: float = 0.01,
         flight_simulator: FlightSimulatorProtocol | None = None,
+        clamp_launch_spin: bool = True,
     ) -> None:
         require(
             max_flight_time > 0,
@@ -318,6 +324,7 @@ class SwingBallFlightPipeline:
         # Accept injected simulator for testability; production code passes None
         # to defer construction until first use (lazy Rust-kernel check).
         self._flight_simulator = flight_simulator
+        self._clamp_launch_spin = clamp_launch_spin
 
         logger.debug(
             "swing_ball_flight_pipeline_created model_type=%s max_flight_time=%s",
@@ -343,12 +350,13 @@ class SwingBallFlightPipeline:
     # Public interface
     # ------------------------------------------------------------------
 
-    def run(self, swing: SwingState) -> PipelineResult:
+    def run(self, swing: SwingState, *, spin_factor: float = 1.0) -> PipelineResult:
         """Execute the full swing → flight pipeline.
 
         Preconditions:
             - ``swing`` is a ``SwingState`` instance.
             - ``swing.clubhead_velocity`` must produce a post-impact ball speed > 0.
+            - ``spin_factor`` is finite and >= 0.
 
         Postcondition:
             Returns a ``PipelineResult`` with a non-empty trajectory list.
@@ -358,6 +366,9 @@ class SwingBallFlightPipeline:
 
         Args:
             swing: Clubhead kinematics at the moment of impact.
+            spin_factor: Multiplier on the derived launch spin rate, e.g. the
+                lie spin cut from ``perturb_impact_rows`` (#14569). The
+                default 1.0 leaves the launch untouched.
 
         Returns:
             ``PipelineResult`` with trajectory, carry, height, and impact data.
@@ -366,6 +377,11 @@ class SwingBallFlightPipeline:
             isinstance(swing, SwingState),
             "swing must be a SwingState instance",
             swing,
+        )
+        require(
+            math.isfinite(spin_factor) and spin_factor >= 0.0,
+            "spin_factor must be finite and >= 0",
+            spin_factor,
         )
 
         # Step 1: Build pre-impact state from swing
@@ -377,12 +393,23 @@ class SwingBallFlightPipeline:
         # Step 3: Derive launch conditions
         launch = self._deriver.derive(post)
         self._validate_launch_conditions(launch)
+        if spin_factor != 1.0:
+            launch = replace(launch, spin_rate=launch.spin_rate * spin_factor)
+        pre_clamp_launch = launch
+        launch, spin_clamped = self._maybe_clamp_launch_spin(launch)
 
         # Step 4: Run ball flight simulation
         trajectory = self._run_flight_simulation(launch)
 
         # Step 5: Extract metrics
-        result = self._build_result(swing, post, launch, trajectory)
+        result = self._build_result(
+            swing,
+            post,
+            launch,
+            trajectory,
+            spin_clamped=spin_clamped,
+            pre_clamp_launch=pre_clamp_launch if spin_clamped else None,
+        )
         self._validate_result_sanity(result)
 
         ensure(
@@ -449,14 +476,38 @@ class SwingBallFlightPipeline:
 
         return BallFlightSimulator(ball=self._ball, env=self._environment)
 
+    def _maybe_clamp_launch_spin(
+        self, launch: LaunchConditions
+    ) -> tuple[LaunchConditions, bool]:
+        if not self._clamp_launch_spin:
+            return launch, False
+        return clamp_launch_spin_rate(launch)
+
     def _build_result(
         self,
         swing: SwingState,
         post: PostImpactState,
         launch: LaunchConditions,
         trajectory: list[TrajectoryPoint],
+        *,
+        spin_clamped: bool = False,
+        pre_clamp_launch: LaunchConditions | None = None,
     ) -> PipelineResult:
         """Assemble the final ``PipelineResult``."""
+        path = np.array([p.position for p in trajectory], dtype=float)
+        validity: FlightValidityVerdict = assess_trajectory_validity(path)
+        metadata: dict[str, Any] = {
+            "engine": swing.engine_name,
+            "flight_valid": validity.valid,
+            "flight_invalid_reason": validity.invalid_reason,
+            **swing.metadata,
+        }
+        if spin_clamped:
+            metadata["launch_spin_clamped"] = True
+            if pre_clamp_launch is not None:
+                metadata["pre_clamp_launch_spin_rpm"] = float(
+                    pre_clamp_launch.spin_rate
+                )
         return PipelineResult(
             swing_state=swing,
             impact_state=post,
@@ -468,7 +519,7 @@ class SwingBallFlightPipeline:
             landing_angle_deg=self._metrics.landing_angle_deg(trajectory),
             impact_params=self._impact_params,
             environment=self._environment,
-            metadata={"engine": swing.engine_name, **swing.metadata},
+            metadata=metadata,
         )
 
     @staticmethod

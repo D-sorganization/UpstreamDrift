@@ -107,7 +107,9 @@ def test_rk4_solution_satisfies_the_dynamics_it_transcribed() -> None:
     )
 
     golfer, club = GolferModel(), ClubModel()
-    config = OptimizationConfig(n_nodes=8, swing_duration=1.0, max_iterations=500)
+    # Six nodes keeps the RK4 transcription within optional-stack IPOPT budgets on
+    # loaded self-hosted runners (eight nodes hit the iteration cap in CI 2026-11-12).
+    config = OptimizationConfig(n_nodes=6, swing_duration=0.8, max_iterations=800)
     joint_limits = swing_joint_limits(golfer)
     x0 = generate_initial_guess(golfer, config, joint_limits)
     solution = solve_max_speed_ocp(

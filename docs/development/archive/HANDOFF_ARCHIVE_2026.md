@@ -530,7 +530,7 @@
 
 - Repository: `D-sorganization/UpstreamDrift`
 - Branch: `fix/issue-11182-kinematic-sequence`
-- Worktree: `/home/user/ud-wt/a11182`
+- Worktree: `<owner-home>/ud-wt/a11182`
 - Commit: `SELF`
 - Pull request: opened from this branch (Closes #11182, Refs #11161)
 - Objective: make `swing_comparison.metrics.compute_kinematic_sequence` measure thorax yaw from trunk markers and use a rate-independent post-impact window.
@@ -591,7 +591,7 @@
 
 # Current Handoff — Remove Deprecated ForceVector3D and Force Overlay `vectors` (#11362)
 
-- Repository: `D-sorganization/UpstreamDrift`; worktree `/home/user/ud-wt/a11362`
+- Repository: `D-sorganization/UpstreamDrift`; worktree `<owner-home>/ud-wt/a11362`
 - Branch: `feat/issue-11362-remove-force-vector3d`; commit `SELF`; PR: see the PR for this branch (`Closes #11362`, `Refs #11285`)
 - Governing issue: #11362 (epic #11285); follows #11363 (glyph streaming) and #11377 (React GlyphSet migration)
 - Objective: Remove the deprecated `ForceVector3D` model, `ForceOverlayResponse.vectors` and the `glyphs_to_legacy_vectors` translation helper now that the UI renders the serialized GlyphSet.
@@ -1014,7 +1014,7 @@
 
 # MuJoCo Reaction Labels and Parity Fixture Rod — #11346
 
-- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/mjlabel`
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `<owner-home>/ud-wt/mjlabel`
 - Branch: `fix/mujoco-reaction-label-joint-name`; commit: SELF; PR: #11381 (open; `Refs #11346`, `Refs #11285`); DL entry `DL-#11285`
 - Governing issue: #11346 (per-engine parity lanes, PR #11375); epic #11285
 - Completed: the first real run of the new MuJoCo parity lane failed two rows. `MujocoForceTorqueSource` labelled joint reactions by body name while Drake, Pinocchio and OpenSim use the joint name, and its own actuator label already uses the joint name. Reactions now use the first joint's name (the joint whose anchor is reported); a joint-less body keeps its body name. The parity MJCF pendulum had only an `<inertial>`, so MuJoCo's native axial source (rods only) returned nothing; a non-colliding capsule from the pivot to the COM fixes that without changing mass or inertia and without touching any tolerance.
@@ -1133,14 +1133,14 @@
 
 # MuJoCo 3.14 Axial-Load Axis Discovery — #11349
 
-- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/mj314`; branch `fix/mujoco-314-axial-load-axis`; commit: SELF; PR: see the PR for this branch (`Closes #11349`).
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `<owner-home>/ud-wt/mj314`; branch `fix/mujoco-314-axial-load-axis`; commit: SELF; PR: see the PR for this branch (`Closes #11349`).
 - Completed: `MujocoAxialLoadSource._discover_axes` compares geom and joint types via `int()` (numpy int vs pybind enum `in`/`==` is direction-dependent and False on mujoco 3.14, so no rods were found and `sample()` returned None). Regression tests for capsule/cylinder discovery and free/non-rod exclusion in `tests/unit/body_part_viz/test_mujoco_axial_loads.py`.
 - Validation: `pytest tests/unit/body_part_viz/test_mujoco_axial_loads.py` 9 passed on mujoco 3.14.0. Failures outside scope here: tests needing PyQt6 (not installed in this venv).
 - Next steps: none for this fix; other mujoco 3.14 drift is listed in the PR body.
 
 # OpenSim Engine State and Control Setters Under OpenSim 4 — #11344
 
-- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11344`
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `<owner-home>/ud-wt/11344`
 - Branch: `fix/issue-11344-opensim-set-state`; commit: SELF; PR: #11352 (merged; `Closes #11344`, `Refs #11285`); DL entry `DL-#11285`
 - Completed: `OpenSimPhysicsEngine.set_state` builds vectors with `opensim.Vector(list)` (4.x has no `Vector(int)`), keeps time, realizes Velocity and raises `ValueError` on length mismatch. `set_control` goes through `Model.setControls` (a bare `updControls` + `markControlsAsValid` does not invalidate an already-realized Dynamics stage, so actuation stayed 0); the values are retained in `self._controls` and re-applied by `set_state` because changing q/u drops realized controls. ZTCF/ZVCF snapshot and restore that retained value. `tests/unit/engines/opensim/test_opensim_set_state_control.py` (10 live tests, including a nonzero actuator torque in the force/torque frame) and `tests/integration/cross_engine/test_opensim_engine_state_control_parity.py` (engine set_state/set_control gives the same force/torque frame as a model with state and PrescribedController baked in).
 - Known limits: `step()` integrates through the Manager, which recomputes controls from the model controllers, so a `set_control` value does not persist across steps without a controller. Not fixed here: `reset()` calls `Manager.setSessionTime` (absent in 4.x), `compute_inverse_dynamics` uses `Vector(n_u)` (so `compute_gravity_forces`/`compute_bias_forces` return empty arrays on 4.x). The parity builders in `tests/integration/cross_engine/test_force_overlay_parity.py` (PR #11345) can switch from baked-in state/controller to `set_state`/`set_control`.
@@ -1150,7 +1150,7 @@
 
 # Colour Utilities DRY — #11289 (FTO-4)
 
-- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11289`
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `<owner-home>/Repositories/UpstreamDrift-worktrees/antigravity-11289`
 - Branch: `feat/fto-11289-colour-utils-dry`; commit: SELF; PR: #11338
 - Governing issue: #11289 (parent epic #11285, design authority ADR-0052 §1 and `force_torque_overlay_epic.md`)
 - Objective: [FTO-4] Colour utilities DRY: one hex/RGBA helper and a registered tension/compression colormap.
@@ -1169,7 +1169,7 @@
 
 # Force and Torque Glyph Builder Delivery — #11285 / #11288
 
-- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11288`
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `<owner-home>/Repositories/UpstreamDrift-worktrees/antigravity-11288`
 - Branch: `feat/fto-11288-glyph-builder`; commit: SELF; PR: #11288
 - Governing issue: #11288 (parent epic #11285, design authority ADR-0052 §2-§4 and `force_torque_overlay_epic.md`)
 - Objective: [FTO-3] Glyph builder: ForceGlyphStyle, build_glyphs, scale_for_view and FORCE_KIND_PALETTE.
@@ -1192,7 +1192,7 @@
 
 # Force Overlay Parity Suite — #11306 (FTO-21)
 
-- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11306`
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `<owner-home>/ud-wt/11306`
 - Branch: `feat/issue-11306-fto21-force-parity`; commit: SELF; PR: see the PR for this branch (`Closes #11306`, `Refs #11285`)
 - Governing issue: #11306 (epic #11285, ADR-0052); DL entry `DL-#11285`
 - Completed: `tests/integration/cross_engine/test_force_overlay_parity.py` and `force_overlay_fixtures.py` (one validated parameter set; per-engine model builders beside the test; `assert_wrench`; tolerances set once). Drake, Pinocchio and OpenSim rows are live; MuJoCo skips until FTO-9 (#11294) adds `get_force_torque_frame` and then runs unchanged; Pinocchio and Simscape skip the resting-contact case with a stated reason; a Simscape synthetic-CSV row checks the FTO-18 loader keeps world/applied-to-body; a sign guard proves the suite bites. `CROSS_ENGINE_PARITY_SPEC.md` section 2.5.3.
@@ -1203,7 +1203,7 @@
 
 # OpenSim Muscle Lines of Action — #11301 (FTO-16)
 
-- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11301`
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `<owner-home>/ud-wt/11301`
 - Branch: `feat/issue-11301-fto16-opensim-muscle-lines`; commit: SELF; PR: see the PR for this branch (`Closes #11301`, `Refs #11285`)
 - Governing issue: #11301 (epic #11285, ADR-0052); DL entry `DL-#11285`
 - Completed: `OpenSimForceTorqueSource.muscle_wrenches(state)` plus `include_muscles=True` constructor flag; `sample` includes them. `MUSCLE` wrenches at the first and last force-carrying `getPointForceDirections` points (force = tendon force x ground direction, rotated to Z-up with the FTO-15 rotation; torque None); labels `muscle:<name>:origin|insertion`. `tests/unit/engines/opensim/test_opensim_muscle_wrenches.py` (10 tests: hanging-block equilibrium, equal and opposite ends, passive force at zero activation, no muscles, disabled, via point, postcondition). Docs: OPENSIM_INTEGRATION.md; cross-reference in `get_muscle_forces` docstring.
@@ -1214,7 +1214,7 @@
 
 # Pinocchio Force/Torque Provider — #11298 (FTO-13)
 
-- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11298`
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `<owner-home>/ud-wt/11298`
 - Branch: `feat/issue-11298-fto13-pinocchio-provider`; commit: SELF; PR: see the PR for this branch (`Closes #11298`, `Refs #11285`)
 - Governing issue: #11298 (parent epic #11285, ADR-0052 section 4)
 - Completed:
@@ -1238,7 +1238,7 @@
 
 # Simscape Output Force Channels — #11304 (FTO-19)
 
-- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11304`
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `<owner-home>/ud-wt/11304`
 - Branch: `feat/issue-11304-fto19-simscape-output-force-channels`; commit: SELF; PR: see the PR for this branch (`Refs #11304`, `Refs #11285`)
 - Governing issue: #11304 (epic #11285, ADR-0052); DL entry `DL-#11285`
 - Completed (Python side, no MATLAB): `SimscapeOutput.force_columns` (optional, validated) and `to_force_series()`; `logsout_to_simscape_output` reads an optional `forces` key; the CSV loader was split so `force_series_from_columns` is the single core (DRY); `tests/engines/simscape/test_output_force_columns.py`; parity spec section 3.1 note. Review fixes: live output wrenches carry source `simscape_output` (CSV keeps `simscape_csv`, via `wrench_source`); non-mapping `forces` raises `SimscapeSimulationError`.
@@ -1248,7 +1248,7 @@
 
 # OpenSim Force/Torque Provider — #11300 (FTO-15)
 
-- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11300`
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `<owner-home>/ud-wt/11300`
 - Branch: `feat/issue-11300-fto15-opensim-provider`; commit: SELF; PR: see the PR for this branch (`Closes #11300`, `Refs #11285`)
 - Governing issue: #11300 (epic #11285, ADR-0052); DL entry `DL-#11285`
 - Completed: `src/engines/physics_engines/opensim/python/opensim_force_torque.py` (`OpenSimForceTorqueSource`, `R_ZUP_FROM_OPENSIM_GROUND`); engine `get_force_torque_frame`, `get_segment_axial_loads`, `compute_contact_forces`; `contact_forces` and `force_visualization` PARTIAL; `tests/unit/engines/opensim/test_opensim_force_torque.py` (25 tests); capability test updated; "Force Overlay Channels" section in `docs/development/OPENSIM_INTEGRATION.md`.
@@ -1259,7 +1259,7 @@
 
 # Force Conversions — #11287 (FTO-2)
 
-- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11287`
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `<owner-home>/Repositories/UpstreamDrift-worktrees/antigravity-11287`
 - Branch: `feat/fto-11287-shared-conversions`; commit: SELF; PR: #11287
 - Governing issue: #11287 (parent epic #11285, design authority ADR-0052 §1 and `force_torque_overlay_epic.md`)
 - Objective: [FTO-2] Shared force conversions: joint torque to moment vector, local to world, reactions to tension/compression.
@@ -1278,7 +1278,7 @@
 
 # Simscape Force Loader — #11303 (FTO-18)
 
-- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11303`
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `<owner-home>/ud-wt/11303`
 - Branch: `feat/issue-11303-fto18-simscape-loader`; commit: SELF; PR: see PR for #11303
 - Governing issue: #11303 (epic #11285, ADR-0052); DL entry `DL-#11285`
 - Completed: `src/engines/simscape/force_channels.py` (channel table, `load_simscape_force_series`), `SimscapeAdapter.load_force_series`, `tests/unit/engines/simscape/test_force_channels.py`, parity spec section 3.1.
@@ -1290,7 +1290,7 @@
 
 # Force and Torque Overlay Contract — #11286 (FTO-1)
 
-- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11286`
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `<owner-home>/Repositories/UpstreamDrift-worktrees/antigravity-11286`
 - Branch: `feat/fto-11286-force-torque-overlay-contract`; commit: SELF; PR: #11286
 - Governing issue: #11286 (parent epic #11285, design authority ADR-0052 §1 and `force_torque_overlay_epic.md`)
 - Objective: [FTO-1] Force/torque overlay contract: ForceTorqueFrame, wire schema and shared fixtures.
@@ -1398,7 +1398,7 @@ The parent owns LaTeX, export pipelines, source code, development log (DL), AGEN
 
 ## Verified Baseline Desktop IK Exports
 
-Desktop delivery folder: `Simscape_Matches_20261001` on ControlTower. Four Desktop Fit IK H.264 30 fps clips represent the verified baseline:
+Desktop delivery folder: `Simscape_Matches_20261001` on <host>. Four Desktop Fit IK H.264 30 fps clips represent the verified baseline:
 
 - **Capture A Baseline (Tour Reference, 360 Hz, 654 frames)**:
   - Sample coverage: 55 frames.
@@ -1924,7 +1924,7 @@ One Low: Bolt speedup claims without benchmark fixtures.
 - Branch: `claude/ud-11071-lbfgs-converge` (baseline `origin/main` d4286fbf)
 - Commit: `SELF`
 - Pull request: #11075 (https://github.com/D-sorganization/UpstreamDrift/pull/11075); closes #11071 (follow-up to #11058, epic #11006).
-- Done: re-ran only `mjx-lbfgs` at `--mjx-iterations 60` with the MJX interpreter (Python 3.12.10, MuJoCo 3.13.0, DeskComputer, commit ec249edf, whose `src/` and `scripts/` match main d4286fbf). `none` and `shooting` do not read `--mjx-iterations`, and only `knot_gradient_optimiser.py` changed since their #11058 runs, so their cases hold a `reuse.json` pointer to `../mjx_benchmark` instead of copies; the ledger therefore does not count them twice. `load_row` follows the pointer and rejects a dangling one (`tests/unit/motion_matching/test_benchmark_mjx_knot_solvers_script.py`).
+- Done: re-ran only `mjx-lbfgs` at `--mjx-iterations 60` with the MJX interpreter (Python 3.12.10, MuJoCo 3.13.0, <host>, commit ec249edf, whose `src/` and `scripts/` match main d4286fbf). `none` and `shooting` do not read `--mjx-iterations`, and only `knot_gradient_optimiser.py` changed since their #11058 runs, so their cases hold a `reuse.json` pointer to `../mjx_benchmark` instead of copies; the ledger therefore does not count them twice. `load_row` follows the pointer and rejects a dangling one (`tests/unit/motion_matching/test_benchmark_mjx_knot_solvers_script.py`).
 - Budget choice: the #11058 L-BFGS runs took about 1.6-2.8 ks for 10 iterations. 60 iterations took 6217 s (driver) and 5097 s (iron), 70 evaluations each.
 - Result (replay RMS through the shared simulator, driver / iron): 40.8 / 42.6 mm, down from 47.2 / 52.9 mm at 10 iterations; shooting stays 84.5 / 88.6 mm. Downswing weight fraction min 0.31 / 0.29, so the iron did **not** lose contact (it rose from 0.17). Both runs stopped on `max_iterations`.
 - Trend: the MJX-plant RMS in the optimiser history went 37.6 → 28.2 mm (driver) and 34.5 → 27.3 mm (iron) between evaluations 10 and 69, about 0.05 mm per evaluation at the end. The shared-simulator replay stays 12-15 mm above the MJX plant, so more iterations mostly shrink the plant number, not the scored one.
@@ -1946,7 +1946,7 @@ One Low: Bolt speedup claims without benchmark fixtures.
   - Every MJX reference is rescored through the shared `FullBodySimulator` (`trajectory_optimiser.shared_simulator_replay`, via `pipeline.dynamics.score_reference`). A stage that writes no reference is an error.
   - `weight_fraction_report` gives receipts a per-phase weight fraction.
   - `solver_benchmark.py` scores the receipts and makes the promotion decision; `scripts/benchmark_mjx_knot_solvers.py` runs the benchmark or re-renders it (`--render-only`).
-- Evidence: the receipts, `rows.json` and `REPORT.md` are in `docs/development/full_body_models/evidence/mjx_benchmark`. The runs used the MJX interpreter (Python 3.12.10, MuJoCo 3.13.0) on DeskComputer at commit `fee18106`, with shooting at 8 passes and MJX at 10 iterations, one run at a time.
+- Evidence: the receipts, `rows.json` and `REPORT.md` are in `docs/development/full_body_models/evidence/mjx_benchmark`. The runs used the MJX interpreter (Python 3.12.10, MuJoCo 3.13.0) on <host> at commit `fee18106`, with shooting at 8 passes and MJX at 10 iterations, one run at a time.
 - Result (replay RMS, driver / iron): none 84.5 / 88.6 mm; shooting 84.5 / 88.6 mm (never beats its start); mjx-adam 62.4 / 55.7 mm, but it **loses iron downswing contact** (weight fraction min 0.00); mjx-lbfgs 47.2 / 52.9 mm (weight fraction min 0.33 / 0.17). No arm reaches G1 (25 mm). IPOPT is unavailable: no cyipopt or pydrake binding.
 - Decision: keep `none` as the default. Both MJX methods stopped on the iteration budget, not on convergence. Follow-up #11071 runs L-BFGS to convergence.
 - Deviation: the issue's `least_squares` FD arm was not run, because one Jacobian means 47 knots × 38 actuated coordinates = 1786 shared replays. L-BFGS-B on the exact gradient replaces it; the report says so.
@@ -2137,7 +2137,7 @@ One Low: Bolt speedup claims without benchmark fixtures.
 - Pull request: #11047; entry DL-#11043. Closes #11043.
 - Root cause: the KKT solve enforces the weld only at acceleration level (`J a = -J̇ q̇`), so it conserves the relative weld velocity it starts with. `replay` seeded `v0` with the one-sided finite difference of the smoothed reference, which violated the weld by 187 mm/s and 32.1 deg/s on the `--fit-closure` run (17.6 mm/s on `--static-seeds`). The grip opened linearly, gave the weld Jacobian nonzero root columns, and a controller direction crossed `MIN_SINGULAR_VALUE` at t = 0.333 s: 9.5 kN·m on `RScapInputY` in one step.
 - Built: `motion_matching/weld_manifold.py::project_onto_weld` (mass-weighted projection, the weld's own inelastic impulse), `FullBodySimulator.consistent_velocity`, with `_mass_and_weld` extracted from `affine_dynamics`. `pipeline/dynamics.replay` and `execution/downswing` now start from the projected velocity.
-- Measured with the full pipeline on this branch (driver, DeskComputer, Python 3.12): `--static-seeds --fit-closure` 861.2 → 83.0 mm dynamics RMS, weight fraction max 50.0 → 3.72, peak torque 29 968 → 1 124 N·m, support 0.50 → 0.98, backswing root 493 → 8 mm. `--static-seeds` control 83.0 → 84.5 mm, weight fraction 3.44 → 3.76, peak torque 719 → 912 N·m, support 0.95 → 0.96.
+- Measured with the full pipeline on this branch (driver, <host>, Python 3.12): `--static-seeds --fit-closure` 861.2 → 83.0 mm dynamics RMS, weight fraction max 50.0 → 3.72, peak torque 29 968 → 1 124 N·m, support 0.50 → 0.98, backswing root 493 → 8 mm. `--static-seeds` control 83.0 → 84.5 mm, weight fraction 3.44 → 3.76, peak torque 719 → 912 N·m, support 0.95 → 0.96.
 - Tests: `tests/unit/motion_matching/test_weld_manifold.py` (6), plus `test_full_body_simulation.py`, `pipeline/test_dynamics.py` and the downswing tests: all pass. Reverting the `replay` line fails `test_replay_starts_on_the_weld`.
 - Not done: the committed evidence receipts were not regenerated; the pipeline still has no fail-closed guard on a diverged replay (the issue's fallback acceptance).
 - Pre-push mypy caught an un-annotated `Array` alias in `weld_manifold.py`; it is now `TypeAlias`.
@@ -2184,7 +2184,7 @@ One Low: Bolt speedup claims without benchmark fixtures.
 - Pull request: #11038; entry DL-#11037. Package 2a of epic #11006. Executed by agy (Gemini 3.8 Flash), reviewed line by line.
 - Built: `src/shared/python/motion_matching/jax_contact.py` (imports JAX; no `__init__` imports it): `sphere_ground_contact_jax` over the shared `ContactParameters`/`GroundPlane` with an explicit tangential-speed floor, and `weld_wrench_jax` with caller-supplied `WeldGains`.
 - Measured parity against `contact_law.sphere_ground_contact` on 2000 seeded states: normal 0.0 N, friction 1.0e-11 N maximum difference (float64).
-- The tests run only where JAX is installed: `~/.venv-mjx` from `scripts/setup_mjx_env.ps1` now exists on DeskComputer (jax 0.11.1, mujoco 3.13.0); the default env and CI skip them.
+- The tests run only where JAX is installed: `~/.venv-mjx` from `scripts/setup_mjx_env.ps1` now exists on <host> (jax 0.11.1, mujoco 3.13.0); the default env and CI skip them.
 - Next step: none; merged as PR #11038.
 
 ---
@@ -2336,7 +2336,7 @@ One Low: Bolt speedup claims without benchmark fixtures.
   were reverted to main (the flip contradicted `test_impact_physics_value_assertions`: toe impact
   gives draw spin, so the two `test_impact_model` gear tests need a convention decision, not a
   sign change); their 11 dependent IDs and the 24 Linux failures are re-quarantined.
-- Slices (agy on DeskComputer and OG Laptop, reviewed and trimmed by Claude):
+- Slices (agy on <host> and OG Laptop, reviewed and trimmed by Claude):
   - validation-contracts: shoulder FK origin (the gear-effect sign flip was reverted).
   - signal-hygiene: launcher test drift.
   - ai-gui-adapters: lazy API routers; theme router prefix (the `ai` adapter shadow edits were
@@ -2440,7 +2440,7 @@ candidate IDs>` → 90 passed, 11 failed (re-quarantined).
 
 - Objective: stop UpstreamDrift shipping stale copies of Tools-owned `sidekick` modules, so the
   quarantined tests that demand their absence pass.
-- Status: agy (Gemini 3.8 Flash) slice on DeskComputer, reviewed and trimmed by Claude.
+- Status: agy (Gemini 3.8 Flash) slice on <host>, reviewed and trimmed by Claude.
   - Deleted, now resolved from `vendor/ud-tools/src/shared/python/sidekick/`: `standalone/`
     (runner, window, session_store, preferences, onboarding), `persistence/`, `__main__.py`,
     `ui/tools_sidebar/default_tabs.py`.
@@ -2900,7 +2900,7 @@ Next verify physical timing and named solver-ID/unit mappings for the selected h
 
 ### Selected Motion and Owner Video Acquisition
 
-The owner-approved public album source recorded by main #11283 is accessible from DeskComputer. Its observed Download all ZIP contains six source-export MP4s that exactly match the previously staged streams by size and SHA-256; raw-camera provenance remains unverified. The pinned OpenPose BODY_25 network loaded and completed synthetic inference at 20:33:36Z; this is runtime evidence, not owner detection accuracy. The selected head-weight-0.1 references have 55 tour / 46 owner samples over 1.8 / 1.5 seconds. All 101 frames passed the existing named native-target and quiet-reference mapper at 20:37:51Z, with no model loaded. A subsequent native audit at 20:42:55Z verified ankle FK against both configured Human models to numerical precision across all frames. All six streams fully decoded with FFmpeg and 9,539 increasing presentation timestamps. A controlled local owner trial confirmed a gap-to-measured transition near the largest root step. Stronger rotational smoothing reduces leg-coordinate jumps but worsens root discontinuity and mean marker RMS, so it is not promoted. Separate gap-weight trials reduce the transition root step to 23.664 / 17.292 mm, with interpolation provenance retained; neither is promoted before full-chain and uncertainty review. No stance correction, velocity reference, full-motion dynamics, video pairing or camera comparison is qualified by those audits.
+The owner-approved public album source recorded by main #11283 is accessible from <host>. Its observed Download all ZIP contains six source-export MP4s that exactly match the previously staged streams by size and SHA-256; raw-camera provenance remains unverified. The pinned OpenPose BODY_25 network loaded and completed synthetic inference at 20:33:36Z; this is runtime evidence, not owner detection accuracy. The selected head-weight-0.1 references have 55 tour / 46 owner samples over 1.8 / 1.5 seconds. All 101 frames passed the existing named native-target and quiet-reference mapper at 20:37:51Z, with no model loaded. A subsequent native audit at 20:42:55Z verified ankle FK against both configured Human models to numerical precision across all frames. All six streams fully decoded with FFmpeg and 9,539 increasing presentation timestamps. A controlled local owner trial confirmed a gap-to-measured transition near the largest root step. Stronger rotational smoothing reduces leg-coordinate jumps but worsens root discontinuity and mean marker RMS, so it is not promoted. Separate gap-weight trials reduce the transition root step to 23.664 / 17.292 mm, with interpolation provenance retained; neither is promoted before full-chain and uncertainty review. No stance correction, velocity reference, full-motion dynamics, video pairing or camera comparison is qualified by those audits.
 
 Next review selected-coordinate continuity and explicit accepted-stance correction before developing motion references. Grade the private streams and freeze camera, pairing, timing and held-out comparison protocols before reporting agreement. Draft #11172 retains ownership of shared capture services; #11268 supplements #11161 rather than replacing marker evidence.
 

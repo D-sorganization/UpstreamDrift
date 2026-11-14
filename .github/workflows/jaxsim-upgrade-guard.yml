@@ -72,6 +72,7 @@ jobs:
           python -m pip install --ignore-installed --no-deps pip
           python -m ensurepip --upgrade || true
           pip install -e ".[dev,jaxsim]" || pip install -e ".[dev,jaxsim]" --no-build-isolation
+          python3 scripts/ci/bootstrap_conformance_deps.py
           pip uninstall -y pytest-vcr pytest-recording || true
 
       - name: Verify JaxSim pin is installed

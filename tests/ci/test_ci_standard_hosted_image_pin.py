@@ -1,8 +1,7 @@
-"""ci-standard hosted runs stay on ubuntu-24.04 until the 26.04 migration (#14398, #14397).
+"""ci-standard hosted runs use ubuntu-latest (#14398, #14397).
 
-GitHub is moving ``ubuntu-latest`` to ubuntu-26.04, where four exact-hash fixture
-tests drift and merge groups are ejected depending on which image a job lands on.
-``pick-runner`` therefore routes hosted jobs to the pinned ``ubuntu-24.04`` label.
+#14397 canonicalized float hashing across runner CPU/glibc images, allowing
+pick-runner to target ubuntu-latest without exact-hash fixture drift.
 """
 
 from __future__ import annotations
@@ -23,11 +22,10 @@ def _pick_runner_script() -> str:
     return workflow["jobs"]["pick-runner"]["steps"][0]["run"]
 
 
-def test_pick_runner_routes_hosted_jobs_to_pinned_ubuntu_2404() -> None:
+def test_pick_runner_routes_hosted_jobs_to_ubuntu_latest() -> None:
     hosted = re.findall(r'runner="(ubuntu-[^"]+)"', _pick_runner_script())
 
     assert hosted, "pick-runner must assign a hosted runner label"
-    assert set(hosted) == {"ubuntu-24.04"}, (
-        "hosted pick-runner targets must stay pinned to ubuntu-24.04 until #14397 "
-        f"migrates the fixture hashes to ubuntu-26.04; found {hosted}"
+    assert set(hosted) == {"ubuntu-latest"}, (
+        f"hosted pick-runner targets should use ubuntu-latest (#14397); found {hosted}"
     )

@@ -194,10 +194,9 @@ class TestTurfProperties:
             turf.stimp_rating = 12  # type: ignore
 
     def test_realistic_stimp_to_friction_mapping(self) -> None:
-        """Test the physics-based mapping from stimp to friction."""
-        # Stimp = distance ball rolls from standard ramp
-        # Based on physics: μ ≈ 0.196 / stimp
-        # (Derived from energy conservation on 20° ramp)
+        """Stimp-10 friction matches the shared USGA stimp-roll law."""
+
+        from src.shared.python.putting_dynamics import stimp_to_rolling_mu
 
         stimp_8 = TurfProperties(stimp_rating=8)
         stimp_10 = TurfProperties(stimp_rating=10)
@@ -210,6 +209,9 @@ class TestTurfProperties:
         assert (
             stimp_10.rolling_friction_coefficient
             > stimp_12.rolling_friction_coefficient
+        )
+        assert stimp_10.rolling_friction_coefficient == pytest.approx(
+            stimp_to_rolling_mu(10.0), rel=1e-12
         )
 
     def test_effective_velocity_with_grain(self, default_turf: TurfProperties) -> None:

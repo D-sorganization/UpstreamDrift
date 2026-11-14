@@ -120,6 +120,12 @@ def test_minor_words_next_to_edge_literals_stay_lowercase() -> None:
     assert expected_title("and the ci.yml for") == "And the ci.yml For"
 
 
+def test_version_tokens_stay_lowercase_literals() -> None:
+    assert expected_title("Lane Rules v2") == "Lane Rules v2"
+    assert expected_title("API v1.7.7 Release Notes") == "API v1.7.7 Release Notes"
+    assert expected_title("Migrate to v10") == "Migrate to v10"
+
+
 def test_middle_dot_starts_a_new_title_segment() -> None:
     # Collated development-log headings are ``DL-#N · <summary>`` (#14407).
     heading = "DL-#14235 · The Web App Has a Putting Analytics Page"

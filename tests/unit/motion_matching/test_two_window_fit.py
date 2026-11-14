@@ -95,6 +95,38 @@ def test_check_acceptance_honest_gates() -> None:
     assert check_acceptance(bad_terminal) is False
 
 
+def test_check_acceptance_fails_when_subwindows_unmeasured() -> None:
+    """Missing early/terminal/club samples must not pass as zero RMS."""
+    import math
+
+    unmeasured = MarkerMetricResults(
+        whole_rms_m=0.020,
+        early_rms_m=float("nan"),
+        terminal_rms_m=0.030,
+        club_cluster_rms_m=0.050,
+        pelvis_yaw_error_pct=2.0,
+        pelvis_yaw_diff_deg=0.5,
+        score=1.0,
+    )
+    assert check_acceptance(unmeasured) is False
+    assert math.isnan(unmeasured.early_rms_m)
+
+
+def test_compute_marker_metrics_missing_waist_fails_acceptance() -> None:
+    """Without WaistLeft/WaistRight labels, pelvis yaw must not read as passing."""
+    time_s = np.array([0.0, 0.5])
+    labels = ("Head", "Back")
+    pred = np.zeros((2, 2, 3))
+    target = np.zeros((2, 2, 3))
+    valid = np.ones((2, 2), dtype=bool)
+
+    metrics = compute_marker_metrics(
+        pred, target, valid, time_s, labels, pelvis_yaw_weight=0.0
+    )
+    assert check_acceptance(metrics) is False
+    assert metrics.pelvis_yaw_error_pct == pytest.approx(100.0)
+
+
 def test_reproduces_run102_uninterrupted_metrics_and_zero_parity() -> None:
     """Reproduces run-102 returned candidate uninterrupted metrics and verifies parity."""
     receipt_path = RUN102_DIR / "receipt.json"

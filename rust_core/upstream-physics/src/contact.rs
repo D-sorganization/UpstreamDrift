@@ -1,7 +1,8 @@
 //! Contact dynamics for ball-surface impacts.
 //!
-//! Implements a coefficient-of-restitution (COR) model with
-//! spin transfer for golf ball impacts on various surfaces.
+//! Implements a coefficient-of-restitution (COR) model with Coulomb friction
+//! coupled to scalar backspin about an axis perpendicular to the contact normal
+//! and primary tangential slip direction.
 //!
 //! # Design by Contract
 //! - COR must be in [0, 1]
@@ -14,11 +15,28 @@ use tools_core::Vector3;
 /// Speed below which a ball is considered to be rolling [m/s].
 const ROLLING_SPEED_THRESHOLD: f64 = 0.5;
 
-/// Fraction of spin retained after impact (multiplied by COR).
-const SPIN_RETENTION_FACTOR: f64 = 0.9;
-
 /// Minimum magnitude for a valid surface normal vector.
 const MIN_NORMAL_MAGNITUDE: f64 = 1e-10;
+
+/// Minimum tangential speed used to pick a friction axis [m/s].
+const MIN_TANGENTIAL_SPEED: f64 = 1e-8;
+
+/// Standard golf ball mass [kg] (45.93 g).
+const DEFAULT_BALL_MASS_KG: f64 = 0.04593;
+
+/// Standard golf ball radius [m].
+const DEFAULT_BALL_RADIUS_M: f64 = 0.02135;
+
+fn default_ball_mass_kg() -> f64 {
+    DEFAULT_BALL_MASS_KG
+}
+
+fn default_ball_radius_m() -> f64 {
+    DEFAULT_BALL_RADIUS_M
+}
+
+/// Solid-sphere moment of inertia factor \(I = \frac{2}{5} m r^2\).
+const SPHERE_INERTIA_FACTOR: f64 = 2.0 / 5.0;
 
 /// Parameters for a contact surface.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -30,6 +48,12 @@ pub struct ContactParameters {
     pub friction: f64,
     /// Surface normal vector (unit vector pointing away from surface).
     pub normal: Vector3,
+    /// Ball mass [kg].
+    #[serde(default = "default_ball_mass_kg")]
+    pub mass: f64,
+    /// Ball radius [m].
+    #[serde(default = "default_ball_radius_m")]
+    pub radius: f64,
 }
 
 impl Default for ContactParameters {
@@ -38,7 +62,37 @@ impl Default for ContactParameters {
             cor: 0.78,                           // Typical golf green COR
             friction: 0.4,                       // Typical grass friction
             normal: Vector3::new(0.0, 0.0, 1.0), // Flat ground (Z-up)
+            mass: DEFAULT_BALL_MASS_KG,
+            radius: DEFAULT_BALL_RADIUS_M,
         }
+    }
+}
+
+impl ContactParameters {
+    /// Validate contact parameters at the public API boundary (release-safe).
+    pub fn validate(&self) -> Result<(), String> {
+        if !(0.0..=1.0).contains(&self.cor) {
+            return Err(format!("COR must be in [0, 1], got {}", self.cor));
+        }
+        if self.friction < 0.0 || !self.friction.is_finite() {
+            return Err(format!(
+                "Friction must be non-negative and finite, got {}",
+                self.friction
+            ));
+        }
+        if !self.mass.is_finite() || self.mass <= 0.0 {
+            return Err(format!(
+                "mass must be positive and finite, got {}",
+                self.mass
+            ));
+        }
+        if !self.radius.is_finite() || self.radius <= 0.0 {
+            return Err(format!(
+                "radius must be positive and finite, got {}",
+                self.radius
+            ));
+        }
+        Ok(())
     }
 }
 
@@ -46,23 +100,45 @@ impl Default for ContactParameters {
 #[pyo3::prelude::pymethods]
 impl ContactParameters {
     #[new]
-    #[pyo3(signature = (cor=0.78, friction=0.4))]
-    fn py_new(cor: f64, friction: f64) -> pyo3::PyResult<Self> {
-        if !(0.0..=1.0).contains(&cor) {
-            return Err(pyo3::exceptions::PyValueError::new_err(format!(
-                "COR must be in [0, 1], got {cor}"
-            )));
-        }
-        if friction < 0.0 {
-            return Err(pyo3::exceptions::PyValueError::new_err(format!(
-                "Friction must be non-negative, got {friction}"
-            )));
-        }
-        Ok(Self {
+    #[pyo3(signature = (cor=0.78, friction=0.4, mass=DEFAULT_BALL_MASS_KG, radius=DEFAULT_BALL_RADIUS_M))]
+    fn py_new(cor: f64, friction: f64, mass: f64, radius: f64) -> pyo3::PyResult<Self> {
+        let params = Self {
             cor,
             friction,
             normal: Vector3::new(0.0, 0.0, 1.0),
-        })
+            mass,
+            radius,
+        };
+        params
+            .validate()
+            .map_err(pyo3::exceptions::PyValueError::new_err)?;
+        Ok(params)
+    }
+
+    /// Validate fields (including after WASM/serde construction or attribute mutation).
+    fn validate_py(&self) -> pyo3::PyResult<()> {
+        self.validate()
+            .map_err(pyo3::exceptions::PyValueError::new_err)
+    }
+
+    #[getter]
+    fn mass(&self) -> f64 {
+        self.mass
+    }
+
+    #[setter]
+    fn set_mass(&mut self, value: f64) {
+        self.mass = value;
+    }
+
+    #[getter]
+    fn radius(&self) -> f64 {
+        self.radius
+    }
+
+    #[setter]
+    fn set_radius(&mut self, value: f64) {
+        self.radius = value;
     }
 }
 
@@ -72,9 +148,9 @@ impl ContactParameters {
 pub struct ContactResult {
     /// Post-impact velocity.
     pub velocity: Vector3,
-    /// Post-impact spin rate [rad/s].
+    /// Post-impact spin rate [rad/s] about the spin axis used for coupling.
     pub spin_rate: f64,
-    /// Energy lost during impact [J].
+    /// Energy lost during impact [J] (translational plus rotational).
     pub energy_lost: f64,
     /// Whether the ball is rolling (speed below threshold).
     pub is_rolling: bool,
@@ -89,100 +165,217 @@ impl ContactResult {
     }
 }
 
+fn sphere_moment_of_inertia(mass: f64, radius: f64) -> f64 {
+    SPHERE_INERTIA_FACTOR * mass * radius * radius
+}
+
+/// Effective mass for tangential impulse at the contact point of a solid sphere.
+fn tangential_effective_mass(mass: f64, radius: f64, inertia: f64) -> f64 {
+    1.0 / (1.0 / mass + (radius * radius) / inertia)
+}
+
+fn reference_tangent(normal: &Vector3) -> Vector3 {
+    let mut reference = Vector3::new(1.0, 0.0, 0.0);
+    if reference.dot(normal).abs() > 0.9 {
+        reference = Vector3::new(0.0, 0.0, 1.0);
+    }
+    let projected = reference - *normal * reference.dot(normal);
+    let mag = projected.magnitude();
+    if mag < MIN_NORMAL_MAGNITUDE {
+        return Vector3::new(0.0, 0.0, 0.0);
+    }
+    projected.scale(1.0 / mag)
+}
+
+fn primary_tangent(v_tangential: &Vector3, normal: &Vector3) -> Vector3 {
+    let tangential_speed = v_tangential.magnitude();
+    if tangential_speed >= MIN_TANGENTIAL_SPEED {
+        return v_tangential.scale(1.0 / tangential_speed);
+    }
+    reference_tangent(normal)
+}
+
+fn spin_axis(normal: &Vector3, tangent: &Vector3) -> Vector3 {
+    let axis = normal.cross(tangent);
+    let mag = axis.magnitude();
+    if mag < MIN_NORMAL_MAGNITUDE {
+        return Vector3::new(0.0, 0.0, 0.0);
+    }
+    axis.scale(1.0 / mag)
+}
+
+fn translational_rotational_energy(mass: f64, velocity: &Vector3, inertia: f64, spin: f64) -> f64 {
+    let speed = velocity.magnitude();
+    0.5 * mass * speed * speed + 0.5 * inertia * spin * spin
+}
+
+fn unchanged_impact(velocity: &Vector3, spin_rate: f64) -> ContactResult {
+    let speed = velocity.magnitude();
+    ContactResult {
+        velocity: *velocity,
+        spin_rate,
+        energy_lost: 0.0,
+        is_rolling: speed < ROLLING_SPEED_THRESHOLD,
+    }
+}
+
+struct ImpactState {
+    velocity: Vector3,
+    spin_rate: f64,
+    energy: f64,
+}
+
+struct FrictionImpactContext<'a> {
+    v_normal_out: &'a Vector3,
+    v_tangential: &'a Vector3,
+    t_hat: &'a Vector3,
+    spin_dir: &'a Vector3,
+    r_contact: &'a Vector3,
+    spin_rate: f64,
+    mass: f64,
+    inertia: f64,
+}
+
+fn apply_friction_impulse(ctx: &FrictionImpactContext<'_>, friction_impulse: f64) -> ImpactState {
+    let v_out =
+        *ctx.v_normal_out + (*ctx.v_tangential + *ctx.t_hat * (friction_impulse / ctx.mass));
+    let torque = ctx.r_contact.cross(&(*ctx.t_hat * friction_impulse));
+    let spin_out = ctx.spin_rate + torque.dot(ctx.spin_dir) / ctx.inertia;
+    let energy = translational_rotational_energy(ctx.mass, &v_out, ctx.inertia, spin_out);
+    ImpactState {
+        velocity: v_out,
+        spin_rate: spin_out,
+        energy,
+    }
+}
+
+/// Bisection safeguard: Coulomb capping plus valid COR are usually enough, but
+/// floating-point coupling can briefly push mechanical energy above `energy_in`.
+/// Scale the friction impulse down when that happens (cannot fix super-elastic COR).
+fn dissipative_friction_impulse(
+    candidate: f64,
+    ctx: &FrictionImpactContext<'_>,
+    energy_in: f64,
+) -> f64 {
+    if candidate.abs() < MIN_TANGENTIAL_SPEED {
+        return 0.0;
+    }
+    let full = apply_friction_impulse(ctx, candidate);
+    if full.energy <= energy_in + 1e-12 {
+        return candidate;
+    }
+
+    let mut low = 0.0;
+    let mut high = 1.0;
+    for _ in 0..48 {
+        let mid = 0.5 * (low + high);
+        let trial = apply_friction_impulse(ctx, candidate * mid);
+        if trial.energy <= energy_in + 1e-12 {
+            low = mid;
+        } else {
+            high = mid;
+        }
+    }
+    candidate * low
+}
+
 /// Calculate the post-impact state of a ball hitting a surface.
 ///
-/// Uses a simple COR model:
-/// - Normal component is reflected and scaled by COR
-/// - Tangential component is reduced by friction
-/// - Spin is modified based on surface interaction
+/// Uses COR for the normal direction, Coulomb friction capped by the normal
+/// impulse, and couples tangential slip with scalar spin about
+/// `normalize(normal × tangential)`.
 ///
 /// # Arguments
 /// * `velocity` - Incoming velocity vector [m/s]
-/// * `spin_rate` - Incoming spin rate [rad/s]
-/// * `params` - Surface contact parameters
+/// * `spin_rate` - Incoming spin rate [rad/s] about the coupled spin axis
+/// * `params` - Surface contact parameters (includes ball mass and radius)
 ///
 /// # Contracts (DbC)
-/// - Precondition: `params.cor` in [0, 1]
-/// - Precondition: `params.friction` >= 0
+/// - Precondition: `params.validate()` succeeds (COR, friction, mass, radius)
+/// - Postcondition: no impulse when `velocity · normal >= 0` (receding contact)
 /// - Postcondition: `energy_lost` >= 0
-///
-/// # Returns
-/// `ContactResult` with post-impact state
 pub fn calculate_impact(
     velocity: &Vector3,
     spin_rate: f64,
     params: &ContactParameters,
-) -> ContactResult {
+) -> Result<ContactResult, String> {
+    params.validate()?;
     let speed = velocity.magnitude();
 
-    // DbC: validate inputs
-    debug_assert!(
-        params.cor >= 0.0 && params.cor <= 1.0,
-        "COR must be in [0, 1]"
-    );
-    debug_assert!(params.friction >= 0.0, "Friction must be non-negative");
-
-    // Rolling threshold
     if speed < ROLLING_SPEED_THRESHOLD {
-        return ContactResult {
+        return Ok(ContactResult {
             velocity: *velocity,
             spin_rate: 0.0,
             energy_lost: 0.0,
             is_rolling: true,
-        };
+        });
     }
 
-    let normal = &params.normal;
-    let normal_mag = normal.magnitude();
+    let normal_mag = params.normal.magnitude();
     if normal_mag < MIN_NORMAL_MAGNITUDE {
-        // Degenerate normal, return unchanged
-        return ContactResult {
-            velocity: *velocity,
-            spin_rate,
-            energy_lost: 0.0,
-            is_rolling: false,
-        };
+        return Ok(unchanged_impact(velocity, spin_rate));
+    }
+    let n = params.normal.scale(1.0 / normal_mag);
+
+    let v_dot_n = velocity.dot(&n);
+    if v_dot_n >= 0.0 {
+        return Ok(unchanged_impact(velocity, spin_rate));
     }
 
-    // Normalize the surface normal
-    let n = normal.scale(1.0 / normal_mag);
+    let inertia = sphere_moment_of_inertia(params.mass, params.radius);
+    let energy_in = translational_rotational_energy(params.mass, velocity, inertia, spin_rate);
 
-    // Decompose velocity into normal and tangential components
-    let v_dot_n = velocity.dot(&n);
     let v_normal = n * v_dot_n;
     let v_tangential = *velocity - v_normal;
+    let t_hat = primary_tangent(&v_tangential, &n);
+    let spin_dir = spin_axis(&n, &t_hat);
 
-    // Apply COR to normal component (reflect)
+    let r_contact = n * (-params.radius);
+    let spin_vector = spin_dir * spin_rate;
+    let contact_velocity = spin_vector.cross(&r_contact);
+    let slip_scalar = v_tangential.dot(&t_hat) + contact_velocity.dot(&t_hat);
+
+    let normal_impulse = params.mass * (1.0 + params.cor) * (-v_dot_n);
+    let max_friction = params.friction * normal_impulse;
+    let effective_mass = tangential_effective_mass(params.mass, params.radius, inertia);
+    let candidate_friction = if slip_scalar.abs() < MIN_TANGENTIAL_SPEED {
+        0.0
+    } else {
+        let desired = -slip_scalar * effective_mass;
+        desired.clamp(-max_friction, max_friction)
+    };
+
     let v_normal_out = v_normal * (-params.cor);
+    let friction_ctx = FrictionImpactContext {
+        v_normal_out: &v_normal_out,
+        v_tangential: &v_tangential,
+        t_hat: &t_hat,
+        spin_dir: &spin_dir,
+        r_contact: &r_contact,
+        spin_rate,
+        mass: params.mass,
+        inertia,
+    };
+    let friction_impulse =
+        dissipative_friction_impulse(candidate_friction, &friction_ctx, energy_in);
+    let post = apply_friction_impulse(&friction_ctx, friction_impulse);
+    let v_out = post.velocity;
+    let spin_out = post.spin_rate;
+    let energy_out = post.energy;
+    let energy_lost = energy_in - energy_out;
 
-    // Apply friction to tangential component
-    let friction_factor = (1.0 - params.friction).max(0.0);
-    let v_tangential_out = v_tangential * friction_factor;
-
-    // Combine
-    let v_out = v_normal_out + v_tangential_out;
-
-    // Energy calculation
-    let ke_in = 0.5 * speed * speed; // Per unit mass
-    let speed_out = v_out.magnitude();
-    let ke_out = 0.5 * speed_out * speed_out;
-    let energy_lost = ke_in - ke_out;
-
-    // DbC postcondition: energy lost must be non-negative
     debug_assert!(
         energy_lost >= -1e-10,
         "DbC postcondition: energy_lost must be non-negative, got {energy_lost}"
     );
 
-    // Spin modification: reduce by COR-weighted factor
-    let spin_out = spin_rate * params.cor * SPIN_RETENTION_FACTOR;
-
-    ContactResult {
+    let speed_out = v_out.magnitude();
+    Ok(ContactResult {
         velocity: v_out,
         spin_rate: spin_out,
         energy_lost,
         is_rolling: speed_out < ROLLING_SPEED_THRESHOLD,
-    }
+    })
 }
 
 // ── WASM bindings ────────────────────────────────────────────────────────────
@@ -191,16 +384,6 @@ pub fn calculate_impact(
 // struct-level #[wasm_bindgen] derives.
 
 /// WASM-exposed contact impact calculation.
-///
-/// # JS API
-/// ```js
-/// const result = calculateImpact(
-///   { x: 0, y: -10, z: 0 },  // velocity
-///   3000.0,                    // spin_rate
-///   { cor: 0.78, friction: 0.4, normal: { x: 0, y: 1, z: 0 } }
-/// );
-/// // result = { velocity: { x, y, z }, spin_rate, energy_lost, is_rolling }
-/// ```
 #[cfg(feature = "wasm")]
 #[wasm_bindgen::prelude::wasm_bindgen(js_name = "calculateImpact")]
 pub fn wasm_calculate_impact(
@@ -213,7 +396,8 @@ pub fn wasm_calculate_impact(
     let params: ContactParameters = serde_wasm_bindgen::from_value(params_js)
         .map_err(|e| wasm_bindgen::JsValue::from_str(&format!("Invalid params: {e}")))?;
 
-    let result = calculate_impact(&velocity, spin_rate, &params);
+    let result = calculate_impact(&velocity, spin_rate, &params)
+        .map_err(|e| wasm_bindgen::JsValue::from_str(&e))?;
     serde_wasm_bindgen::to_value(&result)
         .map_err(|e| wasm_bindgen::JsValue::from_str(&format!("Serialization error: {e}")))
 }
@@ -224,6 +408,47 @@ pub fn wasm_calculate_impact(
 mod tests {
     use super::*;
 
+    const TEST_MASS: f64 = DEFAULT_BALL_MASS_KG;
+    const TEST_RADIUS: f64 = DEFAULT_BALL_RADIUS_M;
+
+    fn test_inertia() -> f64 {
+        sphere_moment_of_inertia(TEST_MASS, TEST_RADIUS)
+    }
+
+    fn params_with_normal(cor: f64, friction: f64, normal: Vector3) -> ContactParameters {
+        ContactParameters {
+            cor,
+            friction,
+            normal,
+            mass: TEST_MASS,
+            radius: TEST_RADIUS,
+        }
+    }
+
+    fn spin_axis_momentum_scalar(
+        velocity: &Vector3,
+        spin: f64,
+        normal: &Vector3,
+        tangent: &Vector3,
+    ) -> f64 {
+        let spin_dir = spin_axis(normal, tangent);
+        let r_contact_to_center = *normal * TEST_RADIUS;
+        let orbital = r_contact_to_center.cross(&(*velocity * TEST_MASS));
+        orbital.dot(&spin_dir) + test_inertia() * spin
+    }
+
+    fn expected_energy_lost_joules(
+        v_in: &Vector3,
+        v_out: &Vector3,
+        spin_in: f64,
+        spin_out: f64,
+    ) -> f64 {
+        let inertia = test_inertia();
+        let e_in = translational_rotational_energy(TEST_MASS, v_in, inertia, spin_in);
+        let e_out = translational_rotational_energy(TEST_MASS, v_out, inertia, spin_out);
+        e_in - e_out
+    }
+
     #[test]
     fn test_default_contact_parameters_use_z_up_normal() {
         let params = ContactParameters::default();
@@ -231,6 +456,8 @@ mod tests {
         assert_eq!(params.normal.x, 0.0);
         assert_eq!(params.normal.y, 0.0);
         assert_eq!(params.normal.z, 1.0);
+        assert_eq!(params.mass, TEST_MASS);
+        assert_eq!(params.radius, TEST_RADIUS);
     }
 
     #[test]
@@ -238,7 +465,7 @@ mod tests {
         let params = ContactParameters::default();
         let v_in = Vector3::new(1.0, 0.0, -10.0);
 
-        let result = calculate_impact(&v_in, 0.0, &params);
+        let result = calculate_impact(&v_in, 0.0, &params).expect("valid params");
 
         assert!(
             result.velocity.z > 0.0,
@@ -247,109 +474,144 @@ mod tests {
         );
     }
 
-    /// Test 1: Perfectly elastic bounce (COR=1) conserves normal speed.
+    #[test]
+    fn test_receding_contact_applies_no_impulse() {
+        let params = params_with_normal(0.78, 0.4, Vector3::new(0.0, 1.0, 0.0));
+        let v_in = Vector3::new(2.0, 10.0, 0.0);
+
+        let result = calculate_impact(&v_in, 5000.0, &params).expect("valid params");
+
+        assert_eq!(result.velocity.x, v_in.x);
+        assert_eq!(result.velocity.y, v_in.y);
+        assert_eq!(result.velocity.z, v_in.z);
+        assert_eq!(result.spin_rate, 5000.0);
+        assert_eq!(result.energy_lost, 0.0);
+    }
+
     #[test]
     fn test_elastic_bounce() {
-        let params = ContactParameters {
-            cor: 1.0,
-            friction: 0.0,
-            normal: Vector3::new(0.0, 1.0, 0.0),
-        };
+        let params = params_with_normal(1.0, 0.0, Vector3::new(0.0, 1.0, 0.0));
 
-        let v_in = Vector3::new(0.0, -10.0, 0.0); // Straight down
-        let result = calculate_impact(&v_in, 0.0, &params);
+        let v_in = Vector3::new(0.0, -10.0, 0.0);
+        let result = calculate_impact(&v_in, 0.0, &params).expect("valid params");
 
-        // Should bounce back at same speed
         assert!(
             (result.velocity.y - 10.0).abs() < 1e-6,
             "Expected vy=10.0, got {}",
             result.velocity.y
         );
-        assert!(result.energy_lost.abs() < 1e-6, "No energy should be lost");
+        assert!(
+            result.energy_lost.abs() < 1e-9,
+            "No energy should be lost for elastic head-on bounce"
+        );
     }
 
-    /// Test 2: Perfectly inelastic impact (COR=0) kills normal velocity.
     #[test]
     fn test_inelastic_bounce() {
-        let params = ContactParameters {
-            cor: 0.0,
-            friction: 0.0,
-            normal: Vector3::new(0.0, 1.0, 0.0),
-        };
+        let params = params_with_normal(0.0, 0.0, Vector3::new(0.0, 1.0, 0.0));
 
         let v_in = Vector3::new(5.0, -10.0, 0.0);
-        let result = calculate_impact(&v_in, 100.0, &params);
+        let spin_in = 100.0;
+        let result = calculate_impact(&v_in, spin_in, &params).expect("valid params");
 
-        // Normal component should be zero
         assert!(
             result.velocity.y.abs() < 1e-6,
             "Normal velocity should be zero"
         );
-        // Tangential preserved (no friction)
         assert!(
             (result.velocity.x - 5.0).abs() < 1e-6,
-            "Tangential velocity preserved"
+            "Tangential velocity preserved without friction"
+        );
+        assert!(
+            (result.spin_rate - spin_in).abs() < 1e-6,
+            "Spin unchanged without friction"
         );
     }
 
-    /// Test 3: Friction reduces tangential velocity.
     #[test]
-    fn test_friction_reduces_tangential() {
-        let params = ContactParameters {
-            cor: 0.8,
-            friction: 0.5,
-            normal: Vector3::new(0.0, 1.0, 0.0),
-        };
+    fn test_friction_reduces_tangential_physics() {
+        let params = params_with_normal(0.8, 0.5, Vector3::new(0.0, 1.0, 0.0));
 
         let v_in = Vector3::new(10.0, -5.0, 0.0);
-        let result = calculate_impact(&v_in, 0.0, &params);
+        let result = calculate_impact(&v_in, 0.0, &params).expect("valid params");
 
-        // Tangential should be reduced by friction_factor = 1 - 0.5 = 0.5
+        let normal_impulse = TEST_MASS * (1.0 + params.cor) * 5.0;
+        let max_friction = params.friction * normal_impulse;
+        let effective_mass = tangential_effective_mass(TEST_MASS, TEST_RADIUS, test_inertia());
+        let desired_friction = -10.0 * effective_mass;
+        let friction_impulse = desired_friction.clamp(-max_friction, max_friction);
+        let expected_vx = 10.0 + friction_impulse / TEST_MASS;
+        let expected_vy = -params.cor * v_in.y;
+
         assert!(
-            (result.velocity.x - 5.0).abs() < 1e-6,
-            "Expected vx=5.0, got {}",
+            (result.velocity.x - expected_vx).abs() < 1e-9,
+            "Expected vx={expected_vx}, got {}",
             result.velocity.x
+        );
+        assert!(
+            (result.velocity.y - expected_vy).abs() < 1e-9,
+            "Expected vy={expected_vy}, got {}",
+            result.velocity.y
         );
     }
 
-    /// Test 4: Typical golf green impact.
     #[test]
-    fn test_typical_green_impact() {
-        let params = ContactParameters::default(); // COR=0.78, friction=0.4
+    fn test_friction_couples_spin_with_tangential_slip() {
+        let params = params_with_normal(0.8, 0.35, Vector3::new(0.0, 1.0, 0.0));
+        let v_in = Vector3::new(0.0, -8.0, 0.0);
+        let spin_in = 2500.0;
 
-        let v_in = Vector3::new(15.0, -8.0, 0.0);
-        let result = calculate_impact(&v_in, 3000.0, &params);
+        let result = calculate_impact(&v_in, spin_in, &params).expect("valid params");
 
-        // Post-impact should have reduced speed
-        assert!(result.velocity.magnitude() < v_in.magnitude());
-        // Energy should be lost
-        assert!(result.energy_lost > 0.0);
-        // Spin should decrease
-        assert!(result.spin_rate < 3000.0);
+        let n = Vector3::new(0.0, 1.0, 0.0);
+        let t_hat = primary_tangent(&Vector3::zero(), &n);
+        let l_before = spin_axis_momentum_scalar(&v_in, spin_in, &n, &t_hat);
+        let l_after = spin_axis_momentum_scalar(&result.velocity, result.spin_rate, &n, &t_hat);
+
+        assert!(
+            result.velocity.x.abs() > 1e-6,
+            "Pure-spin slip should drive tangential rebound"
+        );
+        assert!(
+            (result.spin_rate - spin_in).abs() > 1e-6,
+            "Spin must change when friction opposes spin-generated slip"
+        );
+        assert!(
+            (l_before - l_after).abs() < 1e-7,
+            "Coupled friction must conserve spin-axis momentum about contact"
+        );
     }
 
-    /// Test 5: Very slow ball should be rolling.
+    #[test]
+    fn test_typical_green_impact() {
+        let params = ContactParameters::default();
+
+        let v_in = Vector3::new(15.0, 0.0, -8.0);
+        let result = calculate_impact(&v_in, 3000.0, &params).expect("valid params");
+
+        assert!(
+            result.velocity.z > 0.0,
+            "Should rebound off the z-up surface"
+        );
+        assert!(result.energy_lost > 0.0);
+    }
+
     #[test]
     fn test_rolling_threshold() {
         let params = ContactParameters::default();
 
-        let v_in = Vector3::new(0.3, -0.1, 0.0); // Below threshold
-        let result = calculate_impact(&v_in, 100.0, &params);
+        let v_in = Vector3::new(0.3, -0.1, 0.0);
+        let result = calculate_impact(&v_in, 100.0, &params).expect("valid params");
 
         assert!(result.is_rolling, "Ball should be rolling at low speed");
     }
 
-    /// Test 6: Energy conservation: lost energy is non-negative.
     #[test]
     fn test_energy_non_negative() {
-        let params = ContactParameters {
-            cor: 0.6,
-            friction: 0.3,
-            normal: Vector3::new(0.0, 1.0, 0.0),
-        };
+        let params = params_with_normal(0.6, 0.3, Vector3::new(0.0, 1.0, 0.0));
 
         let v_in = Vector3::new(20.0, -15.0, 5.0);
-        let result = calculate_impact(&v_in, 5000.0, &params);
+        let result = calculate_impact(&v_in, 5000.0, &params).expect("valid params");
 
         assert!(
             result.energy_lost >= 0.0,
@@ -357,71 +619,115 @@ mod tests {
         );
     }
 
-    /// Test 7: Angled surface normal.
     #[test]
     fn test_angled_surface() {
-        // 30-degree slope
         let angle = std::f64::consts::FRAC_PI_6;
-        let params = ContactParameters {
-            cor: 0.8,
-            friction: 0.2,
-            normal: Vector3::new(angle.sin(), angle.cos(), 0.0),
-        };
+        let params = params_with_normal(0.8, 0.2, Vector3::new(angle.sin(), angle.cos(), 0.0));
 
         let v_in = Vector3::new(0.0, -10.0, 0.0);
-        let result = calculate_impact(&v_in, 0.0, &params);
+        let result = calculate_impact(&v_in, 0.0, &params).expect("valid params");
 
-        // Ball should deflect sideways on angled surface
         assert!(
             result.velocity.x.abs() > 0.1,
             "Should deflect on angled surface"
         );
     }
 
-    // ── DbC precondition tests (TDD) ────────────────────────────────────
-
-    /// Test 8: COR > 1 triggers debug_assert.
     #[test]
-    #[should_panic(expected = "COR must be in [0, 1]")]
     fn test_dbc_cor_out_of_range() {
-        let params = ContactParameters {
-            cor: 1.5,
-            friction: 0.0,
-            normal: Vector3::new(0.0, 1.0, 0.0),
-        };
-        let _r = calculate_impact(&Vector3::new(0.0, -10.0, 0.0), 0.0, &params);
+        let params = params_with_normal(1.5, 0.0, Vector3::new(0.0, 1.0, 0.0));
+        let err = calculate_impact(&Vector3::new(0.0, -10.0, 0.0), 0.0, &params)
+            .expect_err("invalid COR must be rejected");
+        assert!(err.contains("COR must be in [0, 1]"), "{err}");
     }
 
-    /// Test 9: Negative friction triggers debug_assert.
     #[test]
-    #[should_panic(expected = "Friction must be non-negative")]
     fn test_dbc_negative_friction() {
-        let params = ContactParameters {
-            cor: 0.5,
-            friction: -0.1,
-            normal: Vector3::new(0.0, 1.0, 0.0),
-        };
-        let _r = calculate_impact(&Vector3::new(0.0, -10.0, 0.0), 0.0, &params);
+        let params = params_with_normal(0.5, -0.1, Vector3::new(0.0, 1.0, 0.0));
+        let err = calculate_impact(&Vector3::new(0.0, -10.0, 0.0), 0.0, &params)
+            .expect_err("negative friction must be rejected");
+        assert!(err.contains("Friction must be non-negative"), "{err}");
     }
 
-    /// Test 10: Energy lost equals ke_in - ke_out without silent clamping.
     #[test]
-    fn test_energy_lost_exact_difference_unclamped() {
+    fn test_rejects_zero_mass() {
+        let mut params = params_with_normal(0.8, 0.3, Vector3::new(0.0, 1.0, 0.0));
+        params.mass = 0.0;
+        let err = calculate_impact(&Vector3::new(0.0, -10.0, 0.0), 0.0, &params)
+            .expect_err("zero mass must be rejected");
+        assert!(err.contains("mass must be positive"), "{err}");
+    }
+
+    #[test]
+    fn test_rejects_negative_radius() {
+        let mut params = params_with_normal(0.8, 0.3, Vector3::new(0.0, 1.0, 0.0));
+        params.radius = -0.02;
+        let err = calculate_impact(&Vector3::new(0.0, -10.0, 0.0), 0.0, &params)
+            .expect_err("negative radius must be rejected");
+        assert!(err.contains("radius must be positive"), "{err}");
+    }
+
+    #[test]
+    fn test_rejects_non_finite_mass_and_radius() {
+        let v = Vector3::new(0.0, -10.0, 0.0);
+        let mut params = params_with_normal(0.8, 0.3, Vector3::new(0.0, 1.0, 0.0));
+        params.mass = f64::NAN;
+        let err = calculate_impact(&v, 0.0, &params).expect_err("NaN mass");
+        assert!(err.contains("mass must be positive"), "{err}");
+
+        params.mass = TEST_MASS;
+        params.radius = f64::INFINITY;
+        let err = calculate_impact(&v, 0.0, &params).expect_err("infinite radius");
+        assert!(err.contains("radius must be positive"), "{err}");
+    }
+
+    #[test]
+    fn contact_parameters_validate_matches_calculate_impact() {
         let params = ContactParameters {
-            cor: 0.8,
-            friction: 0.3,
-            normal: Vector3::new(0.0, 1.0, 0.0),
+            mass: -1.0,
+            ..Default::default()
         };
+        assert!(params.validate().is_err());
+    }
+
+    #[test]
+    fn test_energy_lost_is_joules_including_rotation() {
+        let params = params_with_normal(0.8, 0.3, Vector3::new(0.0, 1.0, 0.0));
 
         let v_in = Vector3::new(20.0, -15.0, 5.0);
-        let result = calculate_impact(&v_in, 5000.0, &params);
+        let spin_in = 5000.0;
+        let result = calculate_impact(&v_in, spin_in, &params).expect("valid params");
 
-        let speed_in = v_in.magnitude();
-        let ke_in = 0.5 * speed_in * speed_in;
-        let speed_out = result.velocity.magnitude();
-        let ke_out = 0.5 * speed_out * speed_out;
-        let expected_loss = ke_in - ke_out;
+        let expected =
+            expected_energy_lost_joules(&v_in, &result.velocity, spin_in, result.spin_rate);
 
-        assert_eq!(result.energy_lost, expected_loss);
+        assert!(
+            (result.energy_lost - expected).abs() < 1e-9,
+            "energy_lost must be full mechanical energy change in joules"
+        );
+        assert!(
+            result.energy_lost > TEST_MASS * 0.5 * v_in.magnitude().powi(2) * 0.01,
+            "Scaled joule loss must exceed the old per-kg mistake"
+        );
+    }
+
+    #[test]
+    fn test_angular_momentum_coupling_about_contact() {
+        let params = params_with_normal(0.75, 0.4, Vector3::new(0.0, 1.0, 0.0));
+        let v_in = Vector3::new(6.0, -12.0, 0.0);
+        let spin_in = 1800.0;
+        let inertia = test_inertia();
+
+        let result = calculate_impact(&v_in, spin_in, &params).expect("valid params");
+        let n = Vector3::new(0.0, 1.0, 0.0);
+        let v_tangential = Vector3::new(v_in.x, 0.0, 0.0);
+        let t_hat = primary_tangent(&v_tangential, &n);
+        let l_before = spin_axis_momentum_scalar(&v_in, spin_in, &n, &t_hat);
+        let l_after = spin_axis_momentum_scalar(&result.velocity, result.spin_rate, &n, &t_hat);
+        assert!(
+            (l_before - l_after).abs() < 1e-7,
+            "Coupled impulse must conserve angular momentum about contact"
+        );
+        let _ = inertia;
     }
 }

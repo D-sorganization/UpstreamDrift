@@ -7,7 +7,6 @@ Distinctly separates numerical trajectory simulation from submission receipt aud
 from __future__ import annotations
 
 import datetime
-import asyncio
 import uuid
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
@@ -24,9 +23,6 @@ from src.shared.python.golf_simulator.contracts import (
     SimulatorEvent,
     SubmissionReceipt,
     SubmissionState,
-)
-from src.shared.python.golf_simulator.launch_bridge import (
-    shot_envelope_to_launch_conditions,
 )
 
 if TYPE_CHECKING:
@@ -143,35 +139,32 @@ class LocalReferenceAdapter:
                 detail="Adapter not connected",
             )
 
-        # Convert shot envelope to LaunchConditions
-        launch = shot_envelope_to_launch_conditions(shot)
+        from src.sim_run.golf_simulator_run import execute_local_reference_shot
 
-        # Simulate trajectory using the underlying flight simulator
-        points = await asyncio.to_thread(
-            self._flight_simulator.simulate_trajectory, launch
+        result = await execute_local_reference_shot(
+            shot,
+            flight_simulator=self._flight_simulator,
+            connected=True,
+            serialize_trajectory=False,
         )
-
-        provenance = (
-            f"local_reference:{type(self._flight_simulator).__name__}:"
-            f"source={shot.source_kind.value}:schema={shot.schema_version}"
-        )
-
+        provenance = str(result["provenance"])
         record = TrajectoryRecord(
             shot_id=shot.shot_id,
-            points=list(points),
+            points=result["trajectory_points"],
             simulated_at_utc=now_utc,
             provenance=provenance,
         )
         self._trajectories[shot.shot_id] = record
 
+        receipt_payload = result["receipt"]
         return SubmissionReceipt(
-            shot_id=shot.shot_id,
-            session_id=shot.session_id,
-            state=SubmissionState.CONFIRMED_ACCEPTED,
-            destination_id="local_reference",
-            attempt_id=attempt_id,
-            timestamp_utc=now_utc,
-            detail=f"Local simulation completed ({len(points)} points)",
+            shot_id=receipt_payload["shot_id"],
+            session_id=receipt_payload["session_id"],
+            state=SubmissionState(receipt_payload["state"]),
+            destination_id=receipt_payload["destination_id"],
+            attempt_id=receipt_payload["attempt_id"],
+            timestamp_utc=receipt_payload["timestamp_utc"],
+            detail=receipt_payload["detail"],
         )
 
     def get_last_trajectory(self, shot_id: str) -> list[Any] | None:

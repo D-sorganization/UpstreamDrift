@@ -3,7 +3,7 @@
 Governing issue: [#10385](https://github.com/D-sorganization/UpstreamDrift/issues/10385).
 
 This directory holds **software-contract** status only. Files here do not
-qualify native ControlTower driver/iron G2/G3 dynamics.
+qualify native <host> driver/iron G2/G3 dynamics.
 
 | File                                | Role                                                 |
 | ----------------------------------- | ---------------------------------------------------- |

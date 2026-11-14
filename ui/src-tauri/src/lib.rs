@@ -1,21 +1,82 @@
 use serde::Serialize;
-use std::process::{Child, Command};
+use std::process::Command;
 use std::sync::Mutex;
+use std::time::Duration;
 use tauri::{Manager, State};
 
-/// Canonical backend port — must match `DEFAULT_SERVER_PORT` in
-/// `src/shared/python/config/typed_settings.py` (issue #6637).
-const BACKEND_PORT: u16 = 8000;
+mod backend_supervisor;
+
+use backend_supervisor::{BackendState, BackendSupervisor};
 
 /// Managed state holding the Python backend server process.
-struct BackendProcess(Mutex<Option<Child>>);
+struct BackendProcess(Mutex<BackendSupervisor>);
 
 #[derive(Serialize, Clone)]
 struct BackendStatus {
     running: bool,
     pid: Option<u32>,
     port: u16,
+    state: String,
     error: Option<String>,
+    stderr_tail: Option<String>,
+}
+
+fn backend_state_label(state: &BackendState) -> String {
+    match state {
+        BackendState::NotStarted => "not_started",
+        BackendState::Starting { .. } => "starting",
+        BackendState::Ready { .. } => "ready",
+        BackendState::Exited { .. } => "exited",
+        BackendState::Failed { .. } => "failed",
+        BackendState::Stopping => "stopping",
+    }
+    .to_string()
+}
+
+fn backend_status_from(supervisor: &BackendSupervisor) -> BackendStatus {
+    let state_label = backend_state_label(&supervisor.state);
+    match &supervisor.state {
+        BackendState::Ready { pid, port } => BackendStatus {
+            running: true,
+            pid: Some(*pid),
+            port: *port,
+            state: state_label,
+            error: None,
+            stderr_tail: None,
+        },
+        BackendState::Starting { port } => BackendStatus {
+            running: false,
+            pid: supervisor.child.as_ref().map(std::process::Child::id),
+            port: *port,
+            state: state_label,
+            error: None,
+            stderr_tail: None,
+        },
+        BackendState::Exited { code, stderr_tail } => BackendStatus {
+            running: false,
+            pid: None,
+            port: supervisor.running_port(),
+            state: state_label,
+            error: Some(format!("Backend exited with code: {code}")),
+            stderr_tail: Some(stderr_tail.clone()),
+        },
+        BackendState::Failed { reason } => BackendStatus {
+            running: false,
+            pid: None,
+            port: supervisor.running_port(),
+            state: state_label,
+            error: Some(reason.clone()),
+            stderr_tail: Some(supervisor.stderr_tail_text()),
+        },
+        _ => BackendStatus {
+            running: false,
+            pid: None,
+            port: supervisor.running_port(),
+            state: state_label,
+            error: None,
+            stderr_tail: None,
+        },
+    }
 }
 
 #[derive(Serialize, Clone)]
@@ -84,36 +145,17 @@ fn find_python() -> Option<(String, String)> {
 #[tauri::command]
 fn start_backend(state: State<'_, BackendProcess>) -> Result<BackendStatus, String> {
     let mut guard = state.0.lock().map_err(|e| e.to_string())?;
-
-    // Check if already running
-    if let Some(ref mut child) = *guard {
-        match child.try_wait() {
-            Ok(None) => {
-                return Ok(BackendStatus {
-                    running: true,
-                    pid: Some(child.id()),
-                    port: BACKEND_PORT,
-                    error: None,
-                });
-            }
-            _ => {
-                // Process exited, clear it
-                *guard = None;
-            }
-        }
+    guard.poll();
+    if matches!(
+        guard.state,
+        BackendState::Ready { .. } | BackendState::Starting { .. }
+    ) {
+        return Ok(backend_status_from(&guard));
     }
 
     let repo_root = find_repo_root().ok_or("Could not find repository root")?;
     let (python_cmd, _) = find_python().ok_or("Python not found on PATH")?;
-
-    let server_script = repo_root.join("launch_golf_suite.py");
-    let script_path = if server_script.exists() {
-        server_script
-    } else {
-        // Fallback: run local_server directly
-        repo_root.join("src").join("api").join("local_server.py")
-    };
-
+    let script_path = repo_root.join("src").join("api").join("local_server.py");
     if !script_path.exists() {
         return Err(format!(
             "Server script not found: {}",
@@ -128,23 +170,16 @@ fn start_backend(state: State<'_, BackendProcess>) -> Result<BackendStatus, Stri
         repo_root.display()
     );
 
-    let child = Command::new(&python_cmd)
-        .arg(&script_path)
-        .arg("--api-only")
-        .current_dir(&repo_root)
-        .env("PYTHONPATH", &repo_root)
-        .spawn()
-        .map_err(|e| format!("Failed to start backend: {}", e))?;
-
-    let pid = child.id();
-    *guard = Some(child);
-
-    Ok(BackendStatus {
-        running: true,
-        pid: Some(pid),
-        port: BACKEND_PORT,
-        error: None,
-    })
+    guard.start(&python_cmd, &script_path, &repo_root)?;
+    for _ in 0..25 {
+        guard.poll();
+        if matches!(guard.state, BackendState::Ready { .. }) {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(200));
+    }
+    guard.poll();
+    Ok(backend_status_from(&guard))
 }
 
 /// Kill the managed backend child if one is running. Shared by the
@@ -156,73 +191,24 @@ fn kill_backend(process: &BackendProcess) {
         Ok(g) => g,
         Err(poisoned) => poisoned.into_inner(),
     };
-    if let Some(mut child) = guard.take() {
-        let pid = child.id();
-        let _ = child.kill();
-        let _ = child.wait();
-        log::info!("Backend server stopped (pid {})", pid);
-    }
+    let _ = guard.stop();
+    log::info!("Backend server stopped");
 }
 
 /// Stop the Python backend server.
 #[tauri::command]
 fn stop_backend(state: State<'_, BackendProcess>) -> Result<BackendStatus, String> {
     kill_backend(&state);
-
-    Ok(BackendStatus {
-        running: false,
-        pid: None,
-        port: BACKEND_PORT,
-        error: None,
-    })
+    let guard = state.0.lock().map_err(|e| e.to_string())?;
+    Ok(backend_status_from(&guard))
 }
 
 /// Get current backend status.
 #[tauri::command]
 fn backend_status(state: State<'_, BackendProcess>) -> Result<BackendStatus, String> {
     let mut guard = state.0.lock().map_err(|e| e.to_string())?;
-
-    if let Some(ref mut child) = *guard {
-        match child.try_wait() {
-            Ok(None) => {
-                return Ok(BackendStatus {
-                    running: true,
-                    pid: Some(child.id()),
-                    port: BACKEND_PORT,
-                    error: None,
-                });
-            }
-            Ok(Some(status)) => {
-                let error = if status.success() {
-                    None
-                } else {
-                    Some(format!("Backend exited with code: {:?}", status.code()))
-                };
-                *guard = None;
-                return Ok(BackendStatus {
-                    running: false,
-                    pid: None,
-                    port: BACKEND_PORT,
-                    error,
-                });
-            }
-            Err(e) => {
-                return Ok(BackendStatus {
-                    running: false,
-                    pid: None,
-                    port: BACKEND_PORT,
-                    error: Some(format!("Failed to check backend status: {}", e)),
-                });
-            }
-        }
-    }
-
-    Ok(BackendStatus {
-        running: false,
-        pid: None,
-        port: BACKEND_PORT,
-        error: None,
-    })
+    guard.poll();
+    Ok(backend_status_from(&guard))
 }
 
 /// Get comprehensive diagnostic information.
@@ -249,7 +235,7 @@ fn get_diagnostics(state: State<'_, BackendProcess>) -> Result<DiagnosticInfo, S
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .manage(BackendProcess(Mutex::new(None)))
+        .manage(BackendProcess(Mutex::new(BackendSupervisor::default())))
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
@@ -302,4 +288,21 @@ pub fn run() {
                 }
             }
         });
+}
+
+#[cfg(test)]
+mod version_sync_tests {
+    #[test]
+    fn cargo_and_tauri_versions_match() {
+        let manifest_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        let manifest = std::fs::read_to_string(manifest_dir.join("Cargo.toml")).expect("cargo");
+        let cargo_ver = manifest
+            .lines()
+            .find(|line| line.trim().starts_with("version ="))
+            .and_then(|line| line.split('"').nth(1))
+            .expect("cargo version");
+        let conf = std::fs::read_to_string(manifest_dir.join("tauri.conf.json")).expect("conf");
+        let parsed: serde_json::Value = serde_json::from_str(&conf).expect("json");
+        assert_eq!(cargo_ver, parsed["version"].as_str().unwrap());
+    }
 }

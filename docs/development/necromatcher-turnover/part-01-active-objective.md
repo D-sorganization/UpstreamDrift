@@ -20,20 +20,20 @@ the partial comparison with a requested budget of 120 evaluations,
 Actual evaluation counts remain unavailable; fit results remain nonconverged
 and rejected. Twelve selected model-proxy surface
 poses are actual outputs. Four full-source shaded videos have subsequently
-completed and reached ControlTower Desktop; four focal sensitivity seeds and
+completed and reached <host> Desktop; four focal sensitivity seeds and
 the 52-frame diagnostic shaft cohort have been independently checked. Follow
 the [Current Full-Video and Source-Binding Checkpoint](../necromatcher-full-shape-checkpoint.md)
 for these later producers, exact receipts, telemetry implementation and pending
 orientation/analytic-derivative work. Exact source, raw metrics, uncertainty and physical
 qualification remain distinct. The earlier budget and row-time reports and the
-new full-shape report are verified on ControlTower Desktop; row-time delivery contains thirteen hash-checked payloads
+new full-shape report are verified on <host> Desktop; row-time delivery contains thirteen hash-checked payloads
 and 5,242,778 bytes. All earlier reports, receipts and producer identities remain
 preserved. Historical no-diagnostic/no-shape statements below apply only to their
 recorded earlier checkpoints, not this current status.
 
 ## Historical Camera, Morphology and Shutter Qualification
 
-Follow [Camera, Morphology, Shutter and Human Motion Qualification](../necromatcher-camera-morphology-shutter-review.md) for source diagnostics, saved camera assumptions, sourced dimension priors, authored attachment and ROM checks, immutable shutter hypotheses and controlled follow-up trials. Original 960 source frames are verified. The nine-page source supplement and 77-file source audit package remain preserved on ControlTower Desktop. The current full-video checkpoint above supersedes earlier pending-export statements; physical camera, anatomy, shutter and ROM qualification remains open.
+Follow [Camera, Morphology, Shutter and Human Motion Qualification](../necromatcher-camera-morphology-shutter-review.md) for source diagnostics, saved camera assumptions, sourced dimension priors, authored attachment and ROM checks, immutable shutter hypotheses and controlled follow-up trials. Original 960 source frames are verified. The nine-page source supplement and 77-file source audit package remain preserved on <host> Desktop. The current full-video checkpoint above supersedes earlier pending-export statements; physical camera, anatomy, shutter and ROM qualification remains open.
 
 ## Shared Authorities
 

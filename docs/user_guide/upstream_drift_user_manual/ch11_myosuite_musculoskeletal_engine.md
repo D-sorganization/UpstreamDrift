@@ -17,7 +17,7 @@ reinforcement learning interfaces, making it ideal for:
 | ------------------------------------------------------------------------ | ------------------------------------------ |
 | `src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py` | `PhysicsEngine` protocol wrapper           |
 | `src/engines/physics_engines/myosuite/python/muscle_analysis.py`         | Muscle analysis, grip modeling             |
-| `src/shared/python/myosuite_adapter.py`                                  | RL environment adapter (`MuscleDrivenEnv`) |
+| `src/shared/python/biomechanics/myosuite_adapter.py`                     | RL environment adapter (`MuscleDrivenEnv`) |
 
 ### Dependencies
 
@@ -518,7 +518,8 @@ a_ztcf = engine.compute_ztcf(q, v)
 
 ```python
 a_zvcf = engine.compute_zvcf(q)
-# Saves state, sets q with v=0, sim.forward(), reads qacc, restores
+# Saves state/ctrl, sets q with v=0, zeros ctrl (ctrl=0), sim.forward(), reads qacc, restores
+# Canonical SPEC §4 ZVCF (M^{-1} * tau) is compute_control_acceleration(tau)
 ```
 
 ---
@@ -548,11 +549,11 @@ policy = train_muscle_policy(env, total_timesteps=100000)
 
 ### Reward Functions
 
-| Task | Reward | Description |
+| Task       | Reward | Description         |
 | ---------- | ------ | ------------------- | --------------- | ------------------------- |
-| `tracking` | $- | q - q\_{target} | $ | Track time-varying target |
-| `reach` | $- | q - q\_{target} | - 0.01 \cdot t$ | Reach target quickly |
-| `swing` | Custom | Golf swing specific |
+| `tracking` | $-     | q - q\_{target}     | $               | Track time-varying target |
+| `reach`    | $-     | q - q\_{target}     | - 0.01 \cdot t$ | Reach target quickly      |
+| `swing`    | Custom | Golf swing specific |
 
 ---
 

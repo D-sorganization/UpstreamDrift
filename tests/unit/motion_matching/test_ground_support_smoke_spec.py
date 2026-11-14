@@ -1,12 +1,13 @@
-"""#12702: the MuJoCo-native smoke runs the document its bounds were measured on.
+"""#12702, #14897: the MuJoCo-native smoke runs the document its bounds were measured on.
 
 The smoke test's dynamics bound (0.15 m) is a statement about the canonical
 driver run: ``evidence/ground_support/anthro_driver/receipt.json`` records
-``base_spec_file = full_body_spec_anthro_driver.json`` (measured club cluster,
-per-capture grip rotation, driver club record). The pipeline's *default* spec
-is the native qualified v2 document, whose own committed receipt
+``base_spec_file = full_body_spec_anthro_driver_capture.json`` (measured club
+cluster, per-capture grip rotation, driver club record, canonical hash
+``ab724a31...``; #14551, #14897). The pipeline's *default* spec is the native
+qualified v2 document, whose own committed receipt
 (``evidence/ground_support/receipt.json``) sits at 0.174 m dynamics and 0.51 m
-on the driver capture, so the smoke must name the canonical document.
+on the driver capture, so the smoke must name the canonical capture document.
 """
 
 from __future__ import annotations

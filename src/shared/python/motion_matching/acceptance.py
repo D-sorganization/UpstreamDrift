@@ -213,6 +213,30 @@ def _check_rmse_gate(
     )
 
 
+def _append_marker_rmse_gate(
+    results: list[GateResult],
+    name: str,
+    measured: float | None,
+    threshold: float,
+    label: str,
+    *,
+    missing_reason: str,
+) -> None:
+    if measured is None:
+        results.append(
+            GateResult(
+                name=name,
+                status=GateStatus.MISSING,
+                threshold=threshold,
+                reason=missing_reason,
+            )
+        )
+        return
+    gate = _check_rmse_gate(name, measured, threshold, label)
+    if gate is not None:
+        results.append(gate)
+
+
 def _evaluate_marker_rmse(
     receipt: Mapping[str, Any],
     horizon: Horizon,
@@ -234,21 +258,14 @@ def _evaluate_marker_rmse(
     val_whole = _extract_metric(
         receipt, "whole_marker_rmse_m", "whole_rms_m", "marker_rms_m"
     )
-    if val_whole is None:
-        results.append(
-            GateResult(
-                name="whole_marker_rmse_m",
-                status=GateStatus.MISSING,
-                threshold=thresh_whole,
-                reason="missing whole marker RMSE",
-            )
-        )
-    else:
-        r_whole = _check_rmse_gate(
-            "whole_marker_rmse_m", val_whole, thresh_whole, "whole"
-        )
-        if r_whole is not None:
-            results.append(r_whole)
+    _append_marker_rmse_gate(
+        results,
+        "whole_marker_rmse_m",
+        val_whole,
+        thresh_whole,
+        "whole",
+        missing_reason="missing whole marker RMSE",
+    )
 
     thresh_early = (
         gates.g1_early_rmse_m
@@ -256,9 +273,14 @@ def _evaluate_marker_rmse(
         else (gates.g2_early_rmse_m if horizon == Horizon.G2 else gates.g3_early_rmse_m)
     )
     val_early = _extract_metric(receipt, "early_marker_rmse_m", "early_rms_m")
-    r_early = _check_rmse_gate("early_marker_rmse_m", val_early, thresh_early, "early")
-    if r_early is not None:
-        results.append(r_early)
+    _append_marker_rmse_gate(
+        results,
+        "early_marker_rmse_m",
+        val_early,
+        thresh_early,
+        "early",
+        missing_reason="missing early marker RMSE",
+    )
 
     thresh_terminal = (
         gates.g1_terminal_rmse_m
@@ -270,11 +292,14 @@ def _evaluate_marker_rmse(
         )
     )
     val_terminal = _extract_metric(receipt, "terminal_marker_rmse_m", "terminal_rms_m")
-    r_terminal = _check_rmse_gate(
-        "terminal_marker_rmse_m", val_terminal, thresh_terminal, "terminal"
+    _append_marker_rmse_gate(
+        results,
+        "terminal_marker_rmse_m",
+        val_terminal,
+        thresh_terminal,
+        "terminal",
+        missing_reason="missing terminal marker RMSE",
     )
-    if r_terminal is not None:
-        results.append(r_terminal)
 
     thresh_club = (
         gates.g1_club_rmse_m
@@ -282,9 +307,14 @@ def _evaluate_marker_rmse(
         else (gates.g2_club_rmse_m if horizon == Horizon.G2 else gates.g3_club_rmse_m)
     )
     val_club = _extract_metric(receipt, "club_marker_rmse_m", "club_cluster_rms_m")
-    r_club = _check_rmse_gate("club_marker_rmse_m", val_club, thresh_club, "club")
-    if r_club is not None:
-        results.append(r_club)
+    _append_marker_rmse_gate(
+        results,
+        "club_marker_rmse_m",
+        val_club,
+        thresh_club,
+        "club",
+        missing_reason="missing club marker RMSE",
+    )
 
     return results
 
@@ -378,7 +408,22 @@ def _evaluate_pelvis_yaw(
                 use_abs=True,
             )
         ]
-    return []
+    gate_name = (
+        "pelvis_yaw_error_pct" if horizon == Horizon.G1 else "pelvis_yaw_rmse_rad"
+    )
+    threshold = (
+        gates.g1_pelvis_yaw_error_pct if horizon == Horizon.G1 else thresh_yaw_rad
+    )
+    unit = "%" if horizon == Horizon.G1 else "rad"
+    return [
+        GateResult(
+            name=gate_name,
+            status=GateStatus.MISSING,
+            threshold=threshold,
+            unit=unit,
+            reason="missing pelvis yaw metric",
+        )
+    ]
 
 
 def _evaluate_normal_contact_force(

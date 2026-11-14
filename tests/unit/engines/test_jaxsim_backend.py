@@ -19,7 +19,7 @@ from src.shared.python.engine_core.sub_protocols import (
     SupportsParameterGradients,
 )
 from src.shared.python.engine_core.velocity_conventions import (
-    CANONICAL_VELOCITY_REPRESENTATION,
+    SPATIAL_WRENCH_REPRESENTATION,
 )
 
 
@@ -258,9 +258,7 @@ def test_jaxsim_backend_satisfies_core_sub_protocols() -> None:
     assert isinstance(backend, Queryable)
     assert isinstance(backend, DynamicsComputable)
     assert isinstance(backend, SupportsParameterGradients)
-    assert (
-        backend.convention.velocity_representation is CANONICAL_VELOCITY_REPRESENTATION
-    )
+    assert backend.convention.velocity_representation is SPATIAL_WRENCH_REPRESENTATION
 
 
 def test_jaxsim_backend_state_round_trips_in_canonical_order() -> None:

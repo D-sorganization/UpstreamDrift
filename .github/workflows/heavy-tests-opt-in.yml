@@ -17,7 +17,16 @@ on:
         default: "all"
         type: choice
         options:
-          ["all", "pinocchio", "drake", "jaxsim", "mujoco", "local_embeddings"]
+          [
+            "all",
+            "pinocchio",
+            "drake",
+            "jaxsim",
+            "mujoco",
+            "local_embeddings",
+            "coverage",
+            "auto-mark-dry-run",
+          ]
       python_version:
         description: "Python version to test with"
         required: false
@@ -64,7 +73,7 @@ jobs:
           echo "runner=$runner" >> "$GITHUB_OUTPUT"
           echo "Selected runner: $runner"
   run-heavy-tests:
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine != 'local_embeddings' }}
+    if: ${{ github.event_name != 'workflow_dispatch' || (inputs.engine != 'local_embeddings' && inputs.engine != 'coverage') }}
     needs: pick-runner
     name: Heavy Integration Tests (${{ matrix.engine }})
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -177,12 +186,19 @@ jobs:
             pip install -e ".[drake]"
           fi
 
+      - name: Install JaxSim extra (jaxsim leg only)
+        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine) && matrix.engine == 'jaxsim' }}
+        run: |
+          pip install -e ".[jaxsim]"
+
       - name: Verify heavy dependencies
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
         run: |
           python -c "
           import sys
           deps = ['mujoco', 'pinocchio', 'mediapipe', 'pyvista', 'trimesh', 'scipy', 'sympy', 'ezc3d', 'ezdxf']
+          if '${{ matrix.engine }}' == 'jaxsim':
+              deps.append('jaxsim')
           failures = []
           for pkg in deps:
               try:
@@ -199,6 +215,8 @@ jobs:
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
         timeout-minutes: 60
         shell: bash
+        env:
+          UD_REQUIRE_ENGINES: ${{ matrix.engine }}
         run: |
           set -o pipefail
           xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \
@@ -253,6 +271,19 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           tail -40 "heavy_test_output_${{ matrix.engine }}.log" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
           echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check test results
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine }}
+        run: |
+          if [ -f "heavy_test_results_${{ matrix.engine }}.xml" ]; then
+            python3 scripts/ci/check_engine_test_floor.py \
+              --junit "heavy_test_results_${{ matrix.engine }}.xml" \
+              --config "scripts/config/engine_test_floor.json" \
+              --lane "${{ matrix.engine }}"
+          else
+            echo "::error::heavy_test_results_${{ matrix.engine }}.xml missing"
+            exit 1
+          fi
 
       - name: Upload heavy test artifacts
         if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == matrix.engine) }}
@@ -401,3 +432,99 @@ jobs:
             local_embedding_results.xml
             local_embedding_evidence.json
           retention-days: 30
+
+  coverage-shard:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == 'coverage' }}
+    needs: pick-runner
+    name: Sharded Coverage (${{ matrix.shard }})
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { shard: api, path: src/api, tests: tests/unit/api }
+          - {
+              shard: shared,
+              path: src/shared/python,
+              tests: tests/unit/data_io,
+            }
+          - { shard: engines, path: src/engines, tests: tests/unit/engines }
+          - {
+              shard: deploy,
+              path: src/deployment,
+              tests: tests/unit/deployment,
+            }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - name: Measure and save coverage shard
+        run: |
+          pip install --upgrade pip && pip install pytest pytest-cov coverage && pip install -e . --no-deps || true
+          mkdir -p .coverage_shards
+          COVERAGE_FILE=".coverage_shards/.coverage.${{ matrix.shard }}" \
+            python -m pytest "--cov=${{ matrix.path }}" "${{ matrix.tests }}" -q || true
+      - name: Upload coverage shard
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: coverage-shard-${{ matrix.shard }}
+          path: .coverage_shards/.coverage.*
+          retention-days: 7
+
+  coverage-combine-ratchet:
+    needs: [pick-runner, coverage-shard]
+    if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.engine == 'all' || inputs.engine == 'coverage') && needs.coverage-shard.result == 'success' }}
+    name: Combine Coverage and Ratchet Gate
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - name: Download all coverage shards
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          pattern: coverage-shard-*
+          path: .coverage_shards
+          merge-multiple: true
+      - name: Combine coverage and evaluate ratchet
+        run: |
+          pip install coverage
+          cd .coverage_shards && coverage combine && coverage json -o ../coverage.json && cd ..
+          python scripts/ci/package_coverage_ratchet.py --coverage-json coverage.json --budget-json scripts/config/mypy_exclusion_budget.json
+      - name: Upload combined coverage.json
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: coverage-report-${{ github.run_id }}
+          path: coverage.json
+          retention-days: 14
+
+  suite-marker-auto-mark-dry-run:
+    needs: pick-runner
+    if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && (inputs.engine == 'all' || inputs.engine == 'auto-mark-dry-run')) }}
+    name: Suite Marker Auto-Mark Full Migration Dry-Run (issue #14947)
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 30
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+      - name: Run full auto-marked dry-run
+        shell: bash
+        env:
+          UD_AUTO_MARK_BY_DIRECTORY: "1"
+          UD_AUTO_MARK_INCLUDE_BASELINE: "1"
+        run: |
+          set +e
+          python -m pytest tests/unit -m unit --continue-on-collection-errors || true
+      - name: Generate Failure Rollup Summary
+        if: always()
+        shell: bash
+        run: |
+          echo "## Suite Marker Auto-Mark Migration Dry-Run Rollup" >> "$GITHUB_STEP_SUMMARY"
+          python3 scripts/ci/check_suite_marker_reach.py >> "$GITHUB_STEP_SUMMARY" 2>&1 || true

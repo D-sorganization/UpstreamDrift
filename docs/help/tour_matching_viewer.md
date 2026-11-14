@@ -31,6 +31,10 @@ The Tour Matching Viewer visualizes matched Tour-player swing baselines alongsid
 
 Synchronizes measured and simulated states using landmark time-warping or impact-relative alignment. Renders 3D skeletal avatars and force vectors using PyVista / VTK rendering pipelines.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/proximal_distal_energy_transfer/index.html): *Proximal-to-Distal Energy Transfer*.
+
 ## Limitations
 
 Ground truth optical data is subject to marker placement uncertainty (~5 mm) and soft-tissue artifact. Simulated outputs depend on engine model fidelity.

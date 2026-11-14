@@ -523,7 +523,7 @@ class TestWholeBodyController:
         task_high = Task(
             name="high",
             task_type=TaskType.SOFT,
-            priority=10,
+            priority=0,
             jacobian=np.eye(6),
             target=np.zeros(6),
         )
@@ -532,7 +532,7 @@ class TestWholeBodyController:
         wbc.add_task(task_low)
         wbc.add_task(task_high)
 
-        # High priority should be first after sorting
+        # High priority (smaller number) should be first after sorting
         tasks = wbc.tasks
         assert tasks[0].name == "high"
         assert tasks[1].name == "low"

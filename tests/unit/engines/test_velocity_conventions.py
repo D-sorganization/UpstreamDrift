@@ -12,6 +12,7 @@ from src.shared.python.engine_core.capabilities import SPATIAL_JACOBIAN_ORDER
 from src.shared.python.engine_core.velocity_conventions import (
     CANONICAL_FLOATING_BASE_CONVENTION,
     CANONICAL_VELOCITY_REPRESENTATION,
+    SPATIAL_WRENCH_REPRESENTATION,
     FloatingBaseConvention,
     VelocityRepresentation,
     convert_floating_base_velocity,
@@ -68,7 +69,8 @@ def test_mixed_representation_matches_jaxsim_default_contract() -> None:
 
     np.testing.assert_allclose(inertial[:3], rotation @ mixed[:3])
     np.testing.assert_allclose(inertial[3:], mixed[3:])
-    assert CANONICAL_VELOCITY_REPRESENTATION is VelocityRepresentation.INERTIAL
+    assert SPATIAL_WRENCH_REPRESENTATION is VelocityRepresentation.INERTIAL
+    assert CANONICAL_VELOCITY_REPRESENTATION is SPATIAL_WRENCH_REPRESENTATION
 
 
 def test_gravity_vector_uses_linear_frame_of_representation() -> None:

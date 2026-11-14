@@ -99,6 +99,12 @@
       "status": "pending-cleanup",
       "rationale": "Tools' contracts.py is newer (2026-08-20) and the finder already aliases src.shared.python.contracts to it; UD-only _contracts_*.py helpers are unrelated and stay."
     },
+    "core": {
+      "ruling": "split",
+      "status": "pending-cleanup",
+      "rationale": "UpstreamDrift `core/` holds UD-only contracts/helpers and engine integration; Tools `core/` supplies shared primitives. The packages overlap only where both trees carry the same relative path.",
+      "follow_up": "D-sorganization/UpstreamDrift#9406"
+    },
     "cors.py": {
       "ruling": "tools-canonical",
       "status": "cleaned",
@@ -152,6 +158,11 @@
       "ruling": "tools-canonical",
       "status": "n/a",
       "rationale": "ADR-0046 Stage 1 canonical layer lives in Tools; UD's transitional 30-module copy was moved to src/tools/launch_monitor_model/ by ADR-0048 Option 1 (port order #9348)."
+    },
+    "lifecycle.py": {
+      "ruling": "tools-canonical",
+      "status": "pending-cleanup",
+      "rationale": "Identical per-repo stdlib lifecycle transition kernel (ADR-0008 / #14934 / Tools#6012)."
     },
     "logging_pkg": {
       "ruling": "tools-canonical",
@@ -250,8 +261,8 @@
     "realtime": {
       "ruling": "split",
       "status": "pending-cleanup",
-      "rationale": "Tools now owns the persistent file transport ported for UD #8942. UD still owns the publish/subscribe facade, channel registry, protocol and WebSocket integration; its __init__.py exports a different API and cannot be replaced by the Tools package initializer. The two transport_file.py implementations differ in handle lifetime, polling and incremental reads. Preserve the current UD API until the #8942 migration qualifies transport behavior and a facade-compatible import route; no retirement is claimed by provider update #9912.",
-      "follow_up": "D-sorganization/UpstreamDrift#8942"
+      "rationale": "Tools owns standalone FileTransport (Tools #5090, UD #8942). UD retains canonical ownership of the publish/subscribe facade, channel registry, protocol, and WebSocket integration per ADR-0061 (#12046); the two transport_file.py implementations differ in handle lifetime, polling, and incremental reads. No retirement is claimed.",
+      "follow_up": "docs/adr/0061-realtime-provider-split-ruling.md"
     },
     "theme": {
       "ruling": "split",

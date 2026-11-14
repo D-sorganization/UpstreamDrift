@@ -1,0 +1,181 @@
+"""LIFT-6 (#11746) — OpenSim full-body musculoskeletal lift pipeline contracts.
+
+Imports `opensim_full_body_lifts` **inside** functions so headless environments
+without the full dependency graph can still load the JSON-only parts of this
+package when tests split.
+
+Epic acceptance still needs end-to-end receipts, reserve qualification and
+owner video evidence; see :data:`HOST_GATED_FOLLOWUPS`.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable, Mapping
+from typing import Any, Final
+
+from ._json_validate import validate_payload
+
+ISSUE_ID: Final = 11746
+
+FIXTURE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "required": ["schema_version", "issue", "composition", "kinetics"],
+    "properties": {
+        "schema_version": {"const": "ud.lift_scoping.lift6.v1"},
+        "issue": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {"id": {"const": ISSUE_ID}},
+        },
+        "composition": {
+            "type": "object",
+            "required": ["expected_muscle_count"],
+            "properties": {
+                "expected_muscle_count": {
+                    "type": "integer",
+                    "minimum": 1,
+                },
+                "standard_lifts": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {"type": "string"},
+                },
+            },
+        },
+        "kinetics": {
+            "type": "object",
+            "required": ["expect_qualified_when_opensim_and_trajectory"],
+            "properties": {
+                "expect_qualified_when_opensim_and_trajectory": {"type": "boolean"},
+            },
+        },
+        "static_hold": {
+            "type": "object",
+            "required": ["require_bar_held_both_hands"],
+            "properties": {
+                "require_bar_held_both_hands": {"type": "boolean"},
+            },
+        },
+    },
+}
+
+HOST_GATED_FOLLOWUPS: Final[tuple[str, ...]] = (
+    "Verify muscle-force qualification (reserve share, CMC/SO choice) meets "
+    "acceptance thresholds on a host with native OpenSim and opensim-models.",
+    "Record joint moments, hand wrench (GCV-7), GRF (GCV-1) and L5/S1 load "
+    "receipts per lift with provenance; owner clips stay off-repo per epic rules.",
+)
+
+
+def validate_lift6_fixture(record: Mapping[str, Any]) -> dict[str, Any]:
+    validate_payload(record, FIXTURE_SCHEMA)
+    return dict(record)
+
+
+def host_gated_followups_block() -> str:
+    lines = [f"LIFT-6 (#{ISSUE_ID}) — OpenSim host and evidence gates:", ""]
+    prefix = "- Tracked follow-up (#"
+    lines.extend(f"{prefix}{ISSUE_ID}): {t}" for t in HOST_GATED_FOLLOWUPS)
+    return "\n".join(lines)
+
+
+def assert_opensim_lift_composition_counts(
+    *,
+    compose: Callable[..., Any] | None = None,
+    fixture: Mapping[str, Any],
+) -> None:
+    """When OpenSim is available, composed squat model carries expected muscle count."""
+    validate_payload(fixture, FIXTURE_SCHEMA)
+    from src.shared.python.engine_core.engine_availability import is_engine_available
+    from src.shared.python.lifting.opensim_full_body_lifts import (
+        OpenSimFullBodyLiftSpec,
+        compose_opensim_full_body_lift,
+    )
+
+    if not is_engine_available("opensim"):
+        return
+    fn = compose_opensim_full_body_lift if compose is None else compose
+    comp = fn(OpenSimFullBodyLiftSpec("squat"))
+    if comp.status != "composed":
+        return
+    mc = comp.muscle_count
+    assert mc is not None
+    assert int(mc) == int(fixture["composition"]["expected_muscle_count"])
+
+
+def assert_evaluate_kinetics_contract(
+    *,
+    evaluate: Callable[..., Any] | None = None,
+    fixture: Mapping[str, Any],
+) -> None:
+    """`evaluate_opensim_lift_kinetics` never returns qualified without a trajectory."""
+    validate_payload(fixture, FIXTURE_SCHEMA)
+    from src.shared.python.engine_core.engine_availability import is_engine_available
+    from src.shared.python.lifting.opensim_full_body_lifts import (
+        OpenSimFullBodyLiftSpec,
+        evaluate_opensim_lift_kinetics,
+    )
+
+    if not is_engine_available("opensim"):
+        return
+    fn = evaluate_opensim_lift_kinetics if evaluate is None else evaluate
+    spec = OpenSimFullBodyLiftSpec("squat")
+    res = fn(spec, None)
+    assert not res.is_qualified
+    if fixture["kinetics"]["expect_qualified_when_opensim_and_trajectory"]:
+        assert res.status == "unqualified"
+
+
+def assert_opensim_all_five_lifts_supported(
+    *, fixture: Mapping[str, Any] | None = None
+) -> None:
+    """All standard lifts produce OpenSimFullBodyLiftSpec instances."""
+    from src.shared.python.lifting.opensim_full_body_lifts import (
+        OpenSimFullBodyLiftSpec,
+    )
+
+    if fixture is not None:
+        validate_payload(fixture, FIXTURE_SCHEMA)
+        lifts = fixture.get("composition", {}).get(
+            "standard_lifts",
+            ("squat", "deadlift", "bench_press", "clean_and_jerk", "snatch"),
+        )
+    else:
+        lifts = ("squat", "deadlift", "bench_press", "clean_and_jerk", "snatch")
+    for name in lifts:
+        spec = OpenSimFullBodyLiftSpec(name)
+        assert spec.lift == name
+
+
+def assert_opensim_lift_static_hold_contract(
+    *,
+    compose: Callable[..., Any] | None = None,
+    hold_fn: Callable[..., Any] | None = None,
+    fixture: Mapping[str, Any] | None = None,
+) -> None:
+    """When composed, static hold confirms bar is held in both hands with native reactions."""
+    from src.shared.python.engine_core.engine_availability import is_engine_available
+    from src.shared.python.lifting.opensim_full_body_lifts import (
+        OpenSimFullBodyLiftSpec,
+        compose_opensim_full_body_lift,
+        opensim_lift_static_hold,
+    )
+
+    if not is_engine_available("opensim"):
+        return
+    fn = compose_opensim_full_body_lift if compose is None else compose
+    hfn = opensim_lift_static_hold if hold_fn is None else hold_fn
+    comp = fn(OpenSimFullBodyLiftSpec("squat"))
+    if comp.status != "composed":
+        return
+    hold = hfn(comp)
+    assert isinstance(hold, dict), hold
+    if fixture is not None:
+        validate_payload(fixture, FIXTURE_SCHEMA)
+        req_held = fixture.get("static_hold", {}).get(
+            "require_bar_held_both_hands", True
+        )
+        if req_held:
+            assert hold.get("available") is True, hold
+            assert hold.get("bar_hold") is not None
+            assert hold.get("native") is not None

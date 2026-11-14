@@ -47,7 +47,7 @@ PDF is `8a935064550d7eb91803f918d2f00b1d55dd22c8317b26616395242ffbbb86e6`.
 All eight rendered pages were independently inspected by root; all twelve
 external figure/source pairs were rehashed. Root report receipt is
 `456538763c9e9382d1e7e724337b435e90d145e6662e298a2311e1d8d0a83ab3`.
-The report is now separately byte-verified on ControlTower Desktop in
+The report is now separately byte-verified on <host> Desktop in
 `Necromatcher Balanced Full Shape Checkpoint Report 2026-10-03 V1`:
 26 payloads totaling 23,799,673 bytes, including exact source, PDF, twelve
 figures and reproduction/provenance receipts. Remote receipt SHA256 is

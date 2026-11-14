@@ -33,11 +33,11 @@ fn sine_trajectory_qdot_close_to_analytic_derivative() {
     let q = sine_traj(1000, 1, dt);
     let r = finite_diff_uniform(&q, dt).unwrap();
 
-    for i in 1..999 {
+    for (i, qdot_row) in r.qdot.iter().enumerate().take(999).skip(1) {
         let t = i as f64 * dt;
         let analytic = 2.0 * std::f64::consts::PI * (2.0 * std::f64::consts::PI * t).cos();
         // 1e-3 tolerance: dominated by O(dt^2) truncation, not bits.
-        assert_relative_eq!(r.qdot[i][0], analytic, max_relative = 1e-3, epsilon = 1e-3);
+        assert_relative_eq!(qdot_row[0], analytic, max_relative = 1e-3, epsilon = 1e-3);
     }
 }
 

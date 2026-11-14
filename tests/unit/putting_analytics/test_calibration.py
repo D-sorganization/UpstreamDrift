@@ -102,3 +102,50 @@ def test_tour_preset_matches_the_tour_target_and_beats_scratch_amateurs() -> Non
         cal.TOUR_AVERAGE, reference_table("shotscope_mygolfspy", "hcp_0"), settings
     )
     assert sum(scratch.residuals_pct) > 0.0 and scratch.rms_error_pct < 8.0
+
+
+def test_calibrated_presets_record_provenance_and_residuals() -> None:
+    presets = cal.CALIBRATED_PRESETS
+    for key in ("tour", "scratch", "10", "20"):
+        assert key in presets
+        preset = presets[key]
+        assert preset.handicap_tier == key
+        assert preset.line_scale > 0.0 and preset.pace_scale > 0.0
+        assert preset.rms_error_pct < 2.0
+        assert len(preset.residuals_pct) >= 8
+        assert preset.source_id and preset.target_group and preset.assumptions
+
+
+def test_calibrated_tour_reproduces_broadie_reference() -> None:
+    settings = cal.FitSettings(n=400, seed=0)
+    broadie_table = reference_table("broadie_2014", "pga_tour")
+    tour_make = cal.compare_seeded(cal.TOUR_AVERAGE, broadie_table, settings)
+    assert tour_make.rms_error_pct < 2.5
+    assert max(abs(r) for r in tour_make.residuals_pct) <= 3.5
+
+    # Check derived E_player(d) against Broadie 2014 expected putts table
+    diffs, max_abs_diff = cal.compare_expected_putts(
+        cal.TOUR_AVERAGE, cal.BROADIE_2014_TOUR_EXPECTED_PUTTS, n=400, seed=1
+    )
+    assert len(diffs) == len(cal.BROADIE_2014_TOUR_EXPECTED_PUTTS.distances_ft)
+    assert max_abs_diff <= 0.10
+
+
+def test_calibrated_amateur_presets_reproduce_reference_make_rates() -> None:
+    settings = cal.FitSettings(n=300, seed=0)
+    for key, group in (("scratch", "hcp_0"), ("10", "hcp_10"), ("20", "hcp_20")):
+        preset = cal.CALIBRATED_PRESETS[key]
+        table = reference_table("shotscope_mygolfspy", group)
+        comparison = cal.compare_seeded(preset.profile, table, settings)
+        assert comparison.rms_error_pct < 3.5
+
+
+def test_skill_get_calibrated_preset() -> None:
+    from src.shared.python.putting_analytics import skill
+
+    for tier in ("tour", "scratch", "10", "20", "hcp_10", "hcp_20"):
+        profile = skill.get_calibrated_preset(tier)
+        assert profile.name.endswith("-average")
+
+    with pytest.raises(ValueError, match="unknown skill tier"):
+        skill.get_calibrated_preset("unknown_tier")

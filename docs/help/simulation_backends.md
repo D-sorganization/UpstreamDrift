@@ -63,6 +63,10 @@ point `src/tools/simulation_backends_launcher/__main__.py` only imports it and
 prints an install hint on `ImportError`. The tile's own reference document is
 `src/tools/simulation_backends_launcher/README.md`.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/zero-torque-counterfactual.html): *Zero-Torque Counterfactual (ZTCF) Family*.
+
 ## Limitations
 
 - **The model is a 2 degree-of-freedom double pendulum, not a golfer.** Only

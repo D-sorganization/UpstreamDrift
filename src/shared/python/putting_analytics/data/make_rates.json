@@ -91,5 +91,16 @@
       "underlying_data": "not named (PGA Tour statistics)", "sample_size": null,
       "groups": {"pga_tour": [[[3, 5], 88], [[5, 10], 57], [[10, 15], 33], [[15, 20], 19]]}
     }
+,
+    {
+      "id": "broadie_2014", "role": "reference", "metric": "make_pct",
+      "title": "Every Shot Counts: Using the Revolutionary Strokes Gained Approach to Improve Your Golf Performance and Strategy",
+      "publisher": "Gotham Books", "published": "2014-03-06",
+      "url": "https://www.everyshotcounts.com",
+      "underlying_data": "PGA Tour ShotLink 2004-2012, Appendix Table A.5", "sample_size": null,
+      "groups": {
+        "pga_tour": [[3, 96], [4, 85], [5, 75], [6, 70], [8, 50], [10, 40], [15, 24], [20, 14], [30, 7], [40, 4], [50, 3], [60, 2]]
+      }
+    }
   ]
 }

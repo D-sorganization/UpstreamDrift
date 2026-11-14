@@ -22,6 +22,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.core.physics_constants import GRAVITY_M_S2
+from src.shared.python.putting_dynamics import stimp_to_rolling_mu
 
 # One source for the grass and condition tables (epic #14141 step 4b).
 from src.shared.python.putting_dynamics import GrassType, TurfCondition
@@ -91,26 +92,16 @@ class TurfProperties:
 
     @property
     def rolling_friction_coefficient(self) -> float:
-        """Compute rolling friction coefficient from stimp rating.
+        """Compute rolling-resistance coefficient from the USGA stimp reading.
 
-        The relationship between stimp and friction is derived from
-        energy conservation on the stimpmeter ramp:
-
-        μ ≈ 0.196 / stimp
-
-        This comes from:
-        - Ramp angle: 20°
-        - Ball release height: 6 inches
-        - Energy loss to friction during roll
+        Delegates to :func:`src.shared.python.putting_dynamics.stimp_to_rolling_mu`
+        (``mu = v_release**2 / (2 g S)`` with ``v_release ~= 1.83 m/s`` from the
+        30 in stimpmeter notch and 20° release angle).
         """
         if self._friction_override is not None:
             return self._friction_override
 
-        # Physics-based calculation
-        # From stimpmeter: ball rolls 'stimp' feet from 20° ramp
-        # Using energy conservation: μ ≈ h * sin(θ) / (stimp * cos(θ))
-        # Simplified: μ ≈ 0.196 / stimp (approximately)
-        base_friction = 0.196 / self.stimp_rating
+        base_friction = stimp_to_rolling_mu(self.stimp_rating)
 
         # Adjust for height of cut (longer grass = more friction)
         # Note: height_of_cut_mm is guaranteed non-None after __post_init__

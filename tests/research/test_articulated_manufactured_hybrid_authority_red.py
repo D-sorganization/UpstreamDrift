@@ -236,6 +236,18 @@ def test_rolling_native_output_has_actual_provenance_and_no_authority(
     assert COMMITTED.read_bytes() == committed_before
 
 
+def test_spatial_model_canonical_hash_ignores_sub_nanogram_float_noise() -> None:
+    """ULP drift in anthropometric masses must not change publication model identity."""
+
+    from scripts.research.proximal_distal_energy.spatial_full_body import (
+        quantize_physical_scalar_for_canonical_identity,
+    )
+
+    assert quantize_physical_scalar_for_canonical_identity(
+        20.630748000000004
+    ) == quantize_physical_scalar_for_canonical_identity(20.630748)
+
+
 def test_corrupted_engine_killswitch_remains_in_native_contract() -> None:
     """The hybrid split cannot remove the registered corrupted-engine falsifier."""
 

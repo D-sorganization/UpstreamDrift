@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from src.shared.python.core.canonical_floats import canonical_floats
 from src.tools.shot_pattern_analysis import matched_lean_control as lean
 from src.tools.shot_pattern_analysis import matched_sensitivity as sensitivity
 from tests.tools.shot_pattern_analysis.test_matched_explicit_source_pair import (
@@ -107,7 +108,11 @@ def synthetic_receipts(root):
 def test_saved_comparison_receipts_remain_exact(tmp_path):
     expected = json.loads(REFERENCE.read_text())["receipts"]
     actual = synthetic_receipts(tmp_path)
-    assert json.dumps(actual, allow_nan=False) == json.dumps(expected, allow_nan=False)
+    # Exact at the canonical precision (#14397): libm drift on another image
+    # must not fail the comparison, while any real change still does.
+    assert json.dumps(canonical_floats(actual), allow_nan=False) == json.dumps(
+        canonical_floats(expected), allow_nan=False
+    )
 
 
 def test_sensitivity_grid_order_and_rejection():

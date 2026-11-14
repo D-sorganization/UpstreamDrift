@@ -44,7 +44,7 @@ The Simscape Multibody Golf Models provide comprehensive biomechanical simulatio
 
 ### Required Software
 
-- **MATLAB** R2023a or later (R2023b+ recommended)
+- **MATLAB** R2025b (required execution, model-save and validation release; see `AGENTS.md`)
 - **Simulink** (included with MATLAB)
 - **Simscape Multibody** (Add-On Toolbox)
 
@@ -75,7 +75,7 @@ end
 ### 1. Open MATLAB
 
 ```matlab
-cd /path/to/UpstreamDrift/engines/Simscape_Multibody_Models
+cd /path/to/UpstreamDrift/src/engines/Simscape_Multibody_Models
 ```
 
 ### 2. Choose Your Model

@@ -40,7 +40,27 @@ def test_strike_offsets_map_to_metres() -> None:
     np.testing.assert_allclose(s.impact_offset, [0.010, -0.005])
 
 
+def test_real_pipeline_driver_rest_exceeds_carry() -> None:
+    from src.shared.python.physics.rust_kernel import is_rust_available
+    from src.shared.python.sg_optimizer.shot_model.ground_runout import SlopeAwareGround
+
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel required for flight pipeline")
+    sim_carry = PipelineLandingSimulator()
+    sim_land = PipelineLandingSimulator(landing_state=True)
+    ground = SlopeAwareGround()
+    impacts = np.array([_ZERO])
+    carry = sim_carry(impacts, "driver", (0.0, 0.0))
+    landing = sim_land(impacts, "driver", (0.0, 0.0))
+    rest = ground(landing, "fairway", "flat", "driver")
+    assert rest[0, 0] > carry[0, 0] + 0.5
+
+
 def test_real_pipeline_driver_carry_is_plausible_and_face_curves_ball() -> None:
+    from src.shared.python.physics.rust_kernel import is_rust_available
+
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel required for flight pipeline")
     sim = PipelineLandingSimulator()
     out = sim(np.stack([_ZERO, _ZERO + [0, 4.0, 0, 0, 0, 0]]), "driver", (0.0, 0.0))
     assert 150.0 < out[0, 0] < 330.0  # yards; a 100 mph driver
@@ -49,6 +69,10 @@ def test_real_pipeline_driver_carry_is_plausible_and_face_curves_ball() -> None:
 
 
 def test_landing_state_mode_adds_velocity_and_matches_carry_columns() -> None:
+    from src.shared.python.physics.rust_kernel import is_rust_available
+
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel required for flight pipeline")
     rows = np.stack([_ZERO, _ZERO + [0, 4.0, 0, 0, 0, 0]])
     carry = PipelineLandingSimulator()(rows, "mid_iron", (0.0, 0.0))
     state = PipelineLandingSimulator(landing_state=True)(rows, "mid_iron", (0.0, 0.0))

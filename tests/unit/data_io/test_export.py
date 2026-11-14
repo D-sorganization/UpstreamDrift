@@ -13,6 +13,7 @@ import src.shared.python.data_io.export as export_module
 from src.shared.python.data_io.export import (
     CaptureExportData,
     export_recording_all_formats,
+    export_to_c3d,
     get_available_export_formats,
 )
 
@@ -43,6 +44,20 @@ class TestGetAvailableExportFormats:
     def test_has_c3d(self) -> None:
         formats = get_available_export_formats()
         assert "c3d" in formats
+
+    def test_c3d_listed_as_placeholder_not_available(self) -> None:
+        info = get_available_export_formats()["c3d"]
+        assert info["available"] is False
+        assert "canonical_c3d_exporter" in info["description"]
+
+
+class TestC3dPlaceholder:
+    def test_export_to_c3d_does_not_write_file(self, tmp_path: Path) -> None:
+        out = tmp_path / "recording.c3d"
+        times = np.linspace(0.0, 1.0, 5)
+        angles = np.zeros((5, 3))
+        assert export_to_c3d(str(out), times, angles, ["a", "b", "c"]) is False
+        assert not out.exists()
 
     def test_json_always_available(self) -> None:
         formats = get_available_export_formats()

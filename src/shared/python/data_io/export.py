@@ -20,15 +20,12 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.data_io.native_dll_guard import import_ezc3d
 from src.shared.python.core.contracts import precondition
 from src.shared.python.data_io.provenance import (
     ProvenanceInfo,
     add_provenance_header_file,
 )
 from src.shared.python.engine_core.engine_availability import (
-    C3D_AVAILABLE,
-    EZC3D_AVAILABLE,
     SCIPY_AVAILABLE,
 )
 from src.shared.python.engine_core.engine_availability import (
@@ -445,129 +442,25 @@ def export_to_c3d(
     units: dict[str, str] | None = None,  # noqa: PLR0913
 ) -> bool:
 # fmt: on
-    """Export recording to C3D motion capture format.
+    """Placeholder hook for simulation recording exports (#15014).
 
-    Args:
-        output_path: Output .c3d file path
-        times: Time array (N,)
-        joint_positions: Joint positions (N, nq)
-        joint_names: Names of joints
-        forces: Optional force data (N, nforces, 3)
-        moments: Optional moment data (N, nforces, 3)
-        frame_rate: Sampling rate in Hz
-        units: Dictionary of units (position, force, moment)
+    This entry point accepts joint-angle time series, not 3-D marker
+    trajectories. Writing them into a C3D ``POINT`` block would fabricate
+  optical motion-capture data.
+
+    For real marker export use
+    ``src.motion_capture.canonical_c3d_exporter.export_markers_to_c3d``.
 
     Returns:
-        True if successful
-
-    .. tip::
-        For new code, prefer constructing a ``CaptureExportData`` and calling
-        ``export_to_c3d_from_data`` instead of passing individual args.
+        Always ``False``; no file is written.
     """
-    if output_path is None:
-        raise ValueError("output_path must be provided")
-    if not EZC3D_AVAILABLE and not C3D_AVAILABLE:
-        logger.error("ezc3d or c3d required for C3D export (pip install ezc3d)")
-        return False
-
-    data = CaptureExportData(
-        times=times,
-        joint_positions=joint_positions,
-        joint_names=joint_names,
-        forces=forces,
-        moments=moments,
-        frame_rate=frame_rate,
-        units=units or {"position": "mm", "force": "N", "moment": "Nmm"},
+    _ = (output_path, times, joint_positions, joint_names, forces, moments, frame_rate, units)
+    logger.error(
+        "export_to_c3d is a placeholder and does not write C3D marker data. "
+        "Use src.motion_capture.canonical_c3d_exporter.export_markers_to_c3d "
+        "with shape (T, n_markers, 3) marker positions in metres."
     )
-
-    try:
-        if EZC3D_AVAILABLE:
-            return _export_to_c3d_ezc3d(output_path, data)
-        return _export_to_c3d_py(output_path, data)
-    except (RuntimeError, ValueError, OSError) as e:
-        logger.error(f"Failed to export to C3D: {e}")
-        return False
-
-
-def _export_to_c3d_ezc3d(  # noqa: C901
-    output_path: str,
-    data: CaptureExportData,
-) -> bool:
-    """Export using ezc3d library."""
-    if output_path is None:
-        raise ValueError("output_path must be provided")
-    ezc3d = import_ezc3d()
-
-    c = ezc3d.c3d()
-    c["parameters"]["POINT"]["RATE"]["value"] = [data.frame_rate]
-    c["parameters"]["POINT"]["UNITS"]["value"] = [data.units["position"]]
-
-    num_frames = len(data.times)
-    num_markers = data.joint_positions.shape[1]
-    c["parameters"]["POINT"]["LABELS"]["value"] = data.joint_names[:num_markers]
-
-    # Point data: [X, Y, Z, residual] for each marker
-    points = np.zeros((4, num_markers, num_frames))
-    for i in range(num_markers):
-        angles = data.joint_positions[:, i]
-        radius = (i + 1) * 100  # mm
-        points[0, i, :] = radius * np.cos(angles)
-        points[1, i, :] = radius * np.sin(angles)
-        points[2, i, :] = np.arange(num_frames) * 10
-        points[3, i, :] = 0  # Residual
-    c["data"]["points"] = points
-
-    # Analog data (forces/moments)
-    if data.forces is not None or data.moments is not None:
-        analog_data = []
-        analog_labels = []
-        if data.forces is not None:
-            for fp in range(data.forces.shape[1]):
-                for axis, label in enumerate(["X", "Y", "Z"]):
-                    analog_data.append(data.forces[:, fp, axis])
-                    analog_labels.append(f"Force{fp + 1}_{label}")
-        if data.moments is not None:
-            for mp in range(data.moments.shape[1]):
-                for axis, label in enumerate(["X", "Y", "Z"]):
-                    analog_data.append(data.moments[:, mp, axis])
-                    analog_labels.append(f"Moment{mp + 1}_{label}")
-        if analog_data:
-            c["data"]["analogs"] = np.array(analog_data)
-            c["parameters"]["ANALOG"]["LABELS"]["value"] = analog_labels
-            c["parameters"]["ANALOG"]["RATE"]["value"] = [data.frame_rate]
-            c["parameters"]["FORCE_PLATFORM"]["UNITS"]["value"] = [data.units["force"]]
-
-    c.write(output_path)
-    return True
-
-
-def _export_to_c3d_py(
-    output_path: str,
-    data: CaptureExportData,
-) -> bool:
-    """Export using c3d library (fallback)."""
-    if output_path is None:
-        raise ValueError("output_path must be provided")
-    import c3d
-
-    writer = c3d.Writer(point_rate=data.frame_rate)
-    num_frames = len(data.times)
-    num_markers = data.joint_positions.shape[1]
-
-    for frame_idx in range(num_frames):
-        frame_points = []
-        for marker_idx in range(num_markers):
-            angle = data.joint_positions[frame_idx, marker_idx]
-            radius = (marker_idx + 1) * 100
-            x = radius * np.cos(angle)
-            y = radius * np.sin(angle)
-            z = frame_idx * 10
-            frame_points.append([x, y, z, 0.0, 0.0])
-        writer.add_frames([(np.array(frame_points), np.array([]))])
-
-    with open(output_path, "wb") as f:
-        writer.write(f)
-    return True
+    return False
 
 
 def _export_json(
@@ -775,7 +668,10 @@ def get_available_export_formats() -> dict[str, dict[str, Any]]:
         "c3d": {
             "name": "C3D",
             "extension": ".c3d",
-            "available": EZC3D_AVAILABLE or C3D_AVAILABLE,
-            "description": "Motion Capture Standard - compatible with Vicon, etc.",
+            "available": False,
+            "description": (
+                "Placeholder only — use motion_capture.canonical_c3d_exporter "
+                "for marker trajectories"
+            ),
         },
     }

@@ -39,9 +39,9 @@ _HASH_FROZEN_ROWS: tuple[tuple[str, str, str], ...] = (
 
 # Snapshot from main @ b0c6bcc2f7 (exception inventory keys only), minus the
 # WSCG ``_analyze_case`` and ``build_outputs`` rows retired by #13852.
-_MAIN_EXCEPTION_KEY_COUNT = 106
+_MAIN_EXCEPTION_KEY_COUNT = 100
 _MAIN_EXCEPTION_KEYS_SHA256 = (
-    "14036b4ab879cd56cdedf567887aaf6a7180f3f25106d1becf04a9f4d5094e88"
+    "c1dba497ff1f2115edcc00225a2cf95da6b2c9b363648be2ad5d2afe1452fe75"
 )
 
 
@@ -123,3 +123,74 @@ def test_no_architecture_budget_exception_expires_before_2026_11_01_for_renewed_
         assert key in active, f"{key} must be active on {evaluation_day}"
         expired = [msg for msg in invalid if path in msg and symbol in msg]
         assert expired == [], f"unexpected invalid messages for {key}: {expired}"
+
+
+_WAVE0_TRACKING_ISSUE = 15029
+_WAVE0_RENEWAL_EXPIRES_ON = "2027-01-31"
+_WAVE0_COHORT_SIZE = 53
+# Rows deleted in #15031 because symbols were within budget on 2026-11-11.
+_WAVE0_REMOVED_KEYS: tuple[tuple[str, str, str], ...] = (
+    (
+        "docs/development/full_body_models/build_anthropometric_spec.py",
+        "main",
+        "function-lines",
+    ),
+    (
+        "docs/development/full_body_models/evidence/ground_support/"
+        "downswing_experiment.py",
+        "main",
+        "function-lines",
+    ),
+    (
+        "docs/development/full_body_models/evidence/ground_support/"
+        "mjx_trajectory_optimisation.py",
+        "build",
+        "function-lines",
+    ),
+    (
+        "docs/development/full_body_models/evidence/ground_support/"
+        "run_ground_support.py",
+        "main",
+        "function-lines",
+    ),
+    (
+        "src/shared/python/motion_matching/contact_force_allocator.py",
+        "ContactForceAllocator.allocate",
+        "function-lines",
+    ),
+    (
+        "src/shared/python/motion_matching/force_nullspace/redistribution.py",
+        "redistribute_forces",
+        "function-lines",
+    ),
+    (
+        "src/shared/python/motion_matching/force_nullspace/redistribution.py",
+        "redistribute_trajectory",
+        "function-lines",
+    ),
+)
+
+
+@pytest.mark.unit
+def test_wave0_architecture_budget_cohort_metadata() -> None:
+    """Wave-0 (#15028) renewals carry measured sizes and stay active on 2026-12-01."""
+    config = _load_config()
+    keys = _exception_keys(config)
+
+    for removed in _WAVE0_REMOVED_KEYS:
+        assert removed not in keys, f"stale exception row must stay removed: {removed}"
+
+    wave0 = [
+        entry
+        for entry in config["exceptions"]
+        if "Part of #15028" in str(entry.get("reason", ""))
+        and entry.get("issue") == _WAVE0_TRACKING_ISSUE
+    ]
+    assert len(wave0) == _WAVE0_COHORT_SIZE
+
+    evaluation_day = date(2026, 12, 1)
+    for entry in wave0:
+        assert entry["expires_on"] == _WAVE0_RENEWAL_EXPIRES_ON
+        assert "triaged 2026-11-12" in str(entry["reason"])
+        assert " > " in str(entry["reason"])
+        assert evaluation_day <= date.fromisoformat(str(entry["expires_on"]))

@@ -181,6 +181,33 @@ def hand_x_origin(topology: ContactTopology, hand: str) -> float:
     return float(0.5 * (p_prox + p_dist))
 
 
+def palm_pad_direction(
+    topology: ContactTopology, hand: str
+) -> tuple[float, float, float]:
+    """Unit direction from the shaft axis to the ``hand`` palm pads, in the grip frame.
+
+    The palm pads sit at ``theta = alpha + pi`` around the shaft in the grip y-z
+    plane (``+x`` along the shaft), so this is the one place the palm side of a
+    hand is read from the topology. Dorsal conventions (sign, engine hand frame)
+    are applied by callers, not stored per engine (SHOW-A12, #14737).
+
+    Preconditions: ``hand`` in ``('lead', 'trail')``. Postcondition: ``x == 0``
+    and the vector has unit norm.
+    """
+    require(hand in HAND_ROLES, f"hand must be one of {HAND_ROLES}, got {hand!r}")
+    cy = 0.5 * sum(
+        topology.site(f"{hand}_palm_{end}").centre_m[1]
+        for end in ("proximal", "distal")
+    )
+    cz = 0.5 * sum(
+        topology.site(f"{hand}_palm_{end}").centre_m[2]
+        for end in ("proximal", "distal")
+    )
+    norm = math.hypot(cy, cz)
+    require(norm > 1e-9, "the palm pads must be off the shaft axis")
+    return (0.0, cy / norm, cz / norm)
+
+
 def map_site_to_hand_frame(
     topology: ContactTopology,
     site: ContactSite | str,

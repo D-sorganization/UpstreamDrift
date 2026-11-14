@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import functools
+import importlib
 import json
 from collections.abc import Mapping, Sequence
 from pathlib import Path
@@ -75,31 +76,43 @@ def _load_style_inputs(
     return spec_bytes, swing, interface, topo_model
 
 
+def _require_real_module(module_name: str) -> None:
+    """Raise ``ImportError`` unless ``module_name`` is the real engine package.
+
+    ``tests/unit/conftest.py`` plants a ``MagicMock`` for ``pydrake`` when Drake
+    is absent. Importing it succeeds, so the engine looks available and then
+    fails inside the simulator, which aborts the whole report.
+    """
+    module = importlib.import_module(module_name)
+    if type(module).__module__ == "unittest.mock":
+        raise ImportError(f"{module_name} is a mock, not an installed engine")
+
+
 def _import_engine_simulator(engine: str) -> object:
     """Import the ``simulate_grip_contact`` callable for ``engine``."""
     if engine == "pinocchio":
-        import pinocchio  # noqa: F401, PLC0415
+        _require_real_module("pinocchio")
         from src.engines.physics_engines.pinocchio.python.grip_contact_sim import (  # noqa: PLC0415
             simulate_grip_contact as _sim_pin,
         )
 
         return _sim_pin
     if engine == "opensim":
-        import opensim  # noqa: F401, PLC0415
+        _require_real_module("opensim")
         from src.engines.physics_engines.opensim.python.grip_contact_osim_sim import (  # noqa: PLC0415
             simulate_grip_contact as _sim_osim,
         )
 
         return _sim_osim
     if engine == "mujoco":
-        import mujoco  # noqa: F401, PLC0415
+        _require_real_module("mujoco")
         from src.engines.physics_engines.mujoco.python.grip_contact_sim import (  # noqa: PLC0415
             simulate_grip_contact as _sim_mj,
         )
 
         return _sim_mj
     if engine == "drake":
-        import pydrake  # noqa: F401, PLC0415
+        _require_real_module("pydrake")
         from src.engines.physics_engines.drake.python.grip_contact_sim import (  # noqa: PLC0415
             simulate_grip_contact as _sim_drake,
         )

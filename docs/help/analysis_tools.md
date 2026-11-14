@@ -442,3 +442,7 @@ def make_custom_plot_data(
 ---
 
 _See also: [Full User Manual](../user_guide/user_manual.md) | [Simulation Controls](simulation_controls.md) | [Visualization](visualization.md)_
+
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/theory-part1.html): *AffineDrift Theory Part I*.

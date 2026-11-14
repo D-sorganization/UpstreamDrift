@@ -147,6 +147,9 @@ raise SystemExit(0 if speed > 0.1 else 3)
 """
 
 
+_HEALTH_CACHE: tuple[bool, str] | None = None
+
+
 def crocoddyl_stack_healthy(*, timeout_s: float = 90.0) -> tuple[bool, str]:
     """Probe whether the crocoddyl/pinocchio binary stack actually works.
 
@@ -159,8 +162,12 @@ def crocoddyl_stack_healthy(*, timeout_s: float = 90.0) -> tuple[bool, str]:
     Returns:
         ``(healthy, reason)`` — reason is empty when healthy.
     """
+    global _HEALTH_CACHE
+    if _HEALTH_CACHE is not None:
+        return _HEALTH_CACHE
     if not crocoddyl_available():
-        return False, _INSTALL_HINT
+        _HEALTH_CACHE = (False, _INSTALL_HINT)
+        return _HEALTH_CACHE
     import subprocess
     import sys
 
@@ -172,16 +179,20 @@ def crocoddyl_stack_healthy(*, timeout_s: float = 90.0) -> tuple[bool, str]:
             check=False,
         )
     except subprocess.TimeoutExpired:
-        return False, _UNHEALTHY_STACK_MESSAGE + " (probe timed out)"
+        _HEALTH_CACHE = (False, _UNHEALTHY_STACK_MESSAGE + " (probe timed out)")
+        return _HEALTH_CACHE
     if completed.returncode == 0:
-        return True, ""
+        _HEALTH_CACHE = (True, "")
+        return _HEALTH_CACHE
     if completed.returncode < 0:
-        return (
+        _HEALTH_CACHE = (
             False,
             _UNHEALTHY_STACK_MESSAGE
             + f" (probe crashed with signal {-completed.returncode})",
         )
-    return False, _UNHEALTHY_STACK_MESSAGE
+        return _HEALTH_CACHE
+    _HEALTH_CACHE = (False, _UNHEALTHY_STACK_MESSAGE)
+    return _HEALTH_CACHE
 
 
 @dataclass(frozen=True)
@@ -359,6 +370,18 @@ def solve_swing_ddp(
         model, data, clubhead_frame, pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
     )
     terminal_speed = float(np.linalg.norm(np.asarray(velocity.linear)))
+    iterations = int(solver.iter)
+    false_convergence = bool(converged) and iterations <= 2 and terminal_speed < 1.0
+    if false_convergence:
+        return DdpSwingResult(
+            success=False,
+            xs=xs,
+            us=us,
+            terminal_speed=terminal_speed,
+            cost=float(solver.cost),
+            iterations=iterations,
+            message=_UNHEALTHY_STACK_MESSAGE,
+        )
 
     return DdpSwingResult(
         success=bool(converged),
@@ -366,6 +389,6 @@ def solve_swing_ddp(
         us=us,
         terminal_speed=terminal_speed,
         cost=float(solver.cost),
-        iterations=int(solver.iter),
+        iterations=iterations,
         message="FDDP converged" if converged else "FDDP did not converge",
     )

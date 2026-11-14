@@ -133,6 +133,10 @@ fn upstream_muscle(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("DEFAULT_TAU_ACT", activation::DEFAULT_TAU_ACT)?;
     m.add("DEFAULT_TAU_DEACT", activation::DEFAULT_TAU_DEACT)?;
     m.add("DEFAULT_MIN_ACTIVATION", activation::DEFAULT_MIN_ACTIVATION)?;
+    m.add(
+        "DEFAULT_MAX_ACTIVATION_INTEGRATION_DT",
+        activation::DEFAULT_MAX_ACTIVATION_INTEGRATION_DT,
+    )?;
     python_api::register(m)?;
     Ok(())
 }

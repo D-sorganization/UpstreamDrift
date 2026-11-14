@@ -25,6 +25,8 @@ _MJ_DATA_SPEC = [
     "qvel",
     "qacc",
     "ctrl",
+    "qfrc_applied",
+    "xfrc_applied",
     "qfrc_bias",
     "qfrc_grav",
     "qfrc_inverse",
@@ -188,16 +190,20 @@ def test_mujoco_physics_engine_compute_inverse_dynamics(engine, mock_mj) -> None
 
 def test_compute_affine_drift(engine, mock_mj) -> None:
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
+    engine.model.nv = 1
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
     engine.data.ctrl = np.array([1.0])
+    engine.data.qfrc_applied = np.array([0.2])
+    engine.data.xfrc_applied = np.zeros((1, 6))
     engine.data.qacc = np.array([0.5])  # Simulated drift acc
 
     drift = engine.compute_affine_drift()
 
     assert drift is not None
     np.testing.assert_array_equal(drift, np.array([0.5]))
-    # Should have restored control
+    # Should have restored control and external loads
     np.testing.assert_array_equal(engine.data.ctrl, np.array([1.0]))
+    np.testing.assert_array_equal(engine.data.qfrc_applied, np.array([0.2]))
     assert mock_mj.mj_forward.call_count == 2  # Once for drift, once for restore
 
 

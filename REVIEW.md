@@ -7,7 +7,12 @@ section.
 
 ## Scope and Size
 
-- Under 500 changed lines after formatters, targeting `main`, never stacked.
+- **Reference cap:** prefer **≤ 500 changed lines** (added + deleted, post-formatter)
+  targeting `main`, never stacked. **Owner order 2026-11-06 (Dieter):** this is a
+  coding standard and CI **advisory** only — warnings and optional ``size:large``
+  label, not a merge blocker (#14820, RD #4118 parity). See
+  `docs/agents/pr-size-advisory.md`. Deletion-only PRs may exceed the reference cap
+  without splitting a cohesive fix for line count alone.
 - Tools code (chat, sidekick, shared) is edited in the upstream Tools
   repository, never shadowed in `src/shared/python/` (AGENTS.md, Where to
   Edit).

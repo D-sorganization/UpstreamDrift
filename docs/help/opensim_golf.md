@@ -71,6 +71,10 @@ The GUI is `MainWidget` in
 The engine adapter used elsewhere in the suite is `OpenSimPhysicsEngine` - see
 [OpenSim engine reference](../engines/opensim.md).
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/drift-is-the-past-control-is-the-present.html): *Drift Is the Past, Control Is the Present*.
+
 ## Limitations
 
 - **There is no demo or fallback mode.** The module docstring says so

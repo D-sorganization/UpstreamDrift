@@ -10,8 +10,8 @@
     {
       "path": "docs/development/DEVELOPMENT_LOG.md",
       "owner": "@maintainers",
-      "reason": "Active repository development log tracking feature states across the project; pending topic decomposition.",
-      "expires_on": "2026-11-30"
+      "reason": "Active repository development log tracking feature states across the project; pending topic decomposition (measured 175098 > 51200 bytes). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
+      "expires_on": "2027-01-31"
     },
     {
       "path": "AGENTS.md",

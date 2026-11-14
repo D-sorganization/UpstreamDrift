@@ -26,7 +26,7 @@ in [`docs/simulation_backends/README.md`](../../../../docs/simulation_backends/R
 | `mujoco_backend.py` | `mujoco` — CPU MuJoCo backend; independent dynamics primitives for cross-validation.                                                                                            |
 | `mjwarp_backend.py` | `mjwarp` — GPU MuJoCo Warp backend for batched rollouts (optional `[warp]` extra).                                                                                              |
 | `mjx_backend.py`    | `mjx` — MJX/JAX backend for batched differentiable rollouts (optional `[mjx]` extra).                                                                                           |
-| `trace.py`          | HDF5 (de)serialisation of `Trace` / `BatchTrace`.                                                                                                                               |
+| `trace_io.py`       | HDF5 (de)serialisation of `Trace` / `BatchTrace`.                                                                                                                               |
 | `ztcf_zvcf.py`      | Pointwise ZTCF/ZVCF and affine drift/control analysis over `EquationsOfMotionProvider`, including canonical-v2 trajectory input and HDF5 analysis persistence.                  |
 
 ## Choosing a backend

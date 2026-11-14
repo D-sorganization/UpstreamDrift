@@ -70,6 +70,10 @@ fallbacks.
 
 Defining module: `src/launchers/library_widget.py`.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/theory-part1.html): *AffineDrift Theory Part I*.
+
 ## Limitations
 
 - No document rendering. The preview pane shows metadata plus a note that full

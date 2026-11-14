@@ -31,7 +31,7 @@ import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 import numpy as np
 from numpy.typing import NDArray
@@ -65,6 +65,40 @@ ALPHA_RANGE_DEG: tuple[float, float] = (-60.0, 60.0)
 #: 20.0 deg + (-60.0 deg) = -40.0 deg.
 LEAD_V_AZIMUTH_MIN_DEG: float = NEUTRAL_V_AZIMUTH_DEG + ALPHA_RANGE_DEG[0]
 LEAD_V_AZIMUTH_MAX_DEG: float = 90.0
+
+#: Permitted range of trail hand V orientation offset relative to lead hand (degrees).
+#:
+#: Derivation from biomechanical and golf-instruction evidence (SHOW-A21, #14797):
+#: 1. Golf instruction (Hogan 1957, "Five Lessons", pp. 19-34; Leadbetter 1990,
+#:    "The Golf Swing", ch. 2; Cochran & Stobbs 1968, "Search for the Perfect Swing",
+#:    pp. 50-57):
+#:    - Neutral grip: both thumb-index V's are parallel and point between the chin
+#:      and the trail shoulder (nominally right eye/ear), giving trail V-offset ~0 deg.
+#:    - Weak grip: lead V points to chin/left ear (~0 deg), trail V points to chin (~0 deg).
+#:    - Strong grip: lead V points past trail shoulder (~35-45 deg), trail V points
+#:      past trail shoulder (~35-50 deg).
+#:    - Instruction-tolerated mixed/compensatory grips (e.g. strong lead with neutral/weak trail,
+#:      or weak lead with strong trail) exhibit relative V divergence up to ~40-65 deg.
+#: 2. Forearm pronation-supination functional anatomy:
+#:    - Kapandji (1982, "The Physiology of the Joints", Vol. 1: "The Upper Limb",
+#:      pp. 102-117): active pronation 85 deg, active supination 90 deg.
+#:    - AAOS (1965, "Joint Motion: Method of Measuring and Recording"): average
+#:      pronation 80 deg, average supination 85 deg.
+#:    - In a bilateral grasp of a cylindrical club at address, the functional
+#:      relative pronation/supination envelope between hands while maintaining
+#:      thenar eminence palmar contact on the grip/thumb is approximately +/-75 deg.
+#:      Beyond this range, the trail palm loses contact or the forearm exceeds
+#:      physiological passive compliance.
+#: 3. Capture-measured hand orientations:
+#:    - Tour driver v1 capture fit (pre-A2): lead alpha = -25.02 deg, trail alpha = +16.31 deg,
+#:      giving measured trail V-offset = +41.33 deg (which failed the old un-cited +/-30 deg bound).
+#:    - Flagship iron7: lead alpha = -13.91 deg, trail alpha = +13.82 deg,
+#:      giving measured trail V-offset = +27.73 deg.
+#:    - G2 trail options (#14751): option (c) parallel V's has 0.0 deg (passes);
+#:      option (b15) trail alpha 15 has -64.1 deg (passes within 75 deg envelope);
+#:      option (a) pure mirror has -98.2 deg (rejected: exceeds anatomical forearm limits).
+TRAIL_V_OFFSET_RANGE_DEG: Final[tuple[float, float]] = (-75.0, 75.0)
+TRAIL_V_OFFSET_BOUND_DEG: Final[float] = 75.0
 
 #: Nominal point of the hand body (metres, hand frame) that sits on the grip:
 #: about 6 cm distal to the wrist origin along the hand's ``-y``.  The OSV-9
@@ -198,7 +232,11 @@ class GripPose:
                 ("lead_below_butt_m", 0.0, 0.1),
                 ("hand_spacing_m", 0.0, 0.2),
                 ("lead_v_azimuth_deg", LEAD_V_AZIMUTH_MIN_DEG, LEAD_V_AZIMUTH_MAX_DEG),
-                ("trail_v_offset_deg", -30.0, 30.0),
+                (
+                    "trail_v_offset_deg",
+                    TRAIL_V_OFFSET_RANGE_DEG[0],
+                    TRAIL_V_OFFSET_RANGE_DEG[1],
+                ),
                 ("lead_thumb_offset_deg", 0.0, 45.0),
                 ("palm_diagonal_deg", 0.0, 90.0),
                 ("grip_strength_deg", -30.0, 30.0),

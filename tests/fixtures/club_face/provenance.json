@@ -274,7 +274,7 @@
     "weight": 3.0
    },
    "face_weight": 3.0,
-   "fixture_sha256": "00c7e47295f9fb6190f8a5516bbf5c9622a4db28c592c4400e6eb14a79037458",
+   "fixture_sha256": "06dbdb02b5bc9c28d91a4e7b4570d8c46bc4e1cd50614e191292026beb5a2d01",
    "foot_progression": {
     "address_model_deg": {
      "left": 16.517857284333843,
@@ -289,6 +289,12 @@
      "left": 16.368121989889968,
      "right": 4.032115544619926
     }
+   },
+   "g1_migration": {
+    "issue": 14746,
+    "native_fixture": "swing_q_driver_native.npz",
+    "native_fixture_sha256": "00c7e47295f9fb6190f8a5516bbf5c9622a4db28c592c4400e6eb14a79037458",
+    "note": "fixture_sha256 is the migrated (mirrored right-arm) swing; the generation inputs below describe the native run it was migrated from"
    },
    "generated_at_commit": "9fe74740a526afb8723e7bda9fc60258e673c5c8",
    "impact_split": {
@@ -654,7 +660,7 @@
     "weight": 3.0
    },
    "face_weight": 3.0,
-   "fixture_sha256": "e33dc871adea1279849c41aae2a341686d64fdc894d49ee37740aa0c7a5a5e54",
+   "fixture_sha256": "b09c2f7ebc2f73380f080331d8b8c2a8e1d17f74d38cfc87d5a3bc76e0a05f00",
    "foot_progression": {
     "address_model_deg": {
      "left": 15.307770380326039,
@@ -669,6 +675,12 @@
      "left": 14.998533032325602,
      "right": -0.37171697863684805
     }
+   },
+   "g1_migration": {
+    "issue": 14753,
+    "native_fixture_sha256": "e33dc871adea1279849c41aae2a341686d64fdc894d49ee37740aa0c7a5a5e54",
+    "native_tracked_sha256": "f8c727af5e706f98d8c27994d9f553ef22ad12e0392601ff696772e5248ac23c",
+    "note": "fixture_sha256 is the migrated (mirrored right-arm) swing; the generation inputs describe the native run it was migrated from"
    },
    "generated_at_commit": "639f557086fd3cd160937c25129b8b5a2f4d77d5",
    "impact_split": {
@@ -749,7 +761,7 @@
    ],
    "run_receipt_sha256": "555fe63d4f9c8d109d257edaafe9647ac0a8e88d1149db114df12e143a03f026",
    "spec_sha256": "dcad19e0a13b52f26aa8b0efdcba0b48d81c3a7c62a50b47072d957fde0e9f84",
-   "tracked_sha256": "f8c727af5e706f98d8c27994d9f553ef22ad12e0392601ff696772e5248ac23c"
+   "tracked_sha256": "69c747dd64917468b04194e35e5185bd228b931b565722c088bb68634bfc3ed5"
   }
  },
  "generator": "scripts/regenerate_club_face_fixtures.py",

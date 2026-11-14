@@ -98,6 +98,10 @@ Background on the pendulum model family is in
 double-pendulum parameterisation are analysed in
 [../research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md](../research/proximal_distal_energy_transfer/DOUBLE_PENDULUM_IDENTIFIABILITY.md).
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/drift-components-wrench-double-pendulum.html): *Drift Components on a Wrench Double Pendulum*.
+
 ## Limitations
 
 - **Everything this tile produces is model output, not measurement.** It is a

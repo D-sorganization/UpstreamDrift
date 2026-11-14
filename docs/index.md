@@ -28,53 +28,54 @@ separated from current guidance.
 ### Stable
 
 - [`adapters/`](adapters/authoring_guide.md) - 1 page
-- [`adr/`](adr/README.md) - 56 pages
+- [`adr/`](adr/README.md) - 63 pages
 - [`agent_context/`](agent_context/) - 8 pages
-- [`agents/`](agents/shared-infrastructure.md) - 1 page
+- [`agents/`](agents/) - 17 pages
 - [`api/`](api/README.md) - 7 pages
 - [`architecture/`](architecture/) - 22 pages
-- [`audits/`](audits/) - 7 pages
+- [`audits/`](audits/) - 9 pages
+- [`ci/`](ci/optional_stack_14227.md) - 1 page
 - [`ci-failures/`](ci-failures/) - 5 pages
 - [`code-quality/`](code-quality/function-design-review.md) - 1 page
 - [`codemap/`](codemap/README.md) - 3 pages
 - [`conformance/`](conformance/) - no Markdown pages
 - [`conventions/`](conventions/) - 3 pages
-- [`critiques/`](critiques/README.md) - 3 pages
-- [`deployment/`](deployment/interim_setup.md) - 1 page
-- [`development/`](development/README.md) - 370 pages
+- [`critiques/`](critiques/README.md) - 5 pages
+- [`deployment/`](deployment/) - 5 pages
+- [`development/`](development/README.md) - 472 pages
 - [`engineering/`](engineering/) - 2 pages
 - [`engines/`](engines/README.md) - 17 pages
 - [`estimation/`](estimation/) - 2 pages
 - [`examples/`](examples/) - no Markdown pages
 - [`governance/`](governance/) - 6 pages
-- [`help/`](help/) - 61 pages
+- [`help/`](help/) - 67 pages
 - [`installation/`](installation/) - 3 pages
 - [`legal/`](legal/licenses.md) - 1 page
 - [`motion_matching/`](motion_matching/README.md) - 2 pages
 - [`motion_pipeline/`](motion_pipeline/README.md) - 6 pages
-- [`operations/`](operations/) - 22 pages
+- [`operations/`](operations/) - 29 pages
 - [`physics/`](physics/) - 3 pages
 - [`portfolio/`](portfolio/golf_modeling_demo.md) - 1 page
 - [`references/`](references/README.md) - 1 page
-- [`reviews/`](reviews/) - 3 pages
-- [`shared_tools/`](shared_tools/README.md) - 2 pages
+- [`reviews/`](reviews/) - 4 pages
+- [`shared_tools/`](shared_tools/README.md) - 1 page
 - [`sidekick/`](sidekick/README.md) - 3 pages
 - [`simulation_backends/`](simulation_backends/README.md) - 4 pages
 - [`specs/`](specs/README.md) - 4 pages
 - [`sphinx/`](sphinx/_static/VENDORED.md) - 1 page
 - [`technical/`](technical/README.md) - 7 pages
 - [`templates/`](templates/sanitation-report.md) - 1 page
-- [`testing/`](testing/) - 8 pages
+- [`testing/`](testing/) - 15 pages
 - [`troubleshooting/`](troubleshooting/README.md) - 6 pages
 - [`tutorials/`](tutorials/README.md) - 6 pages
-- [`user_guide/`](user_guide/README.md) - 35 pages
-- [`validation/`](validation/cross_engine_v1.md) - 1 page
+- [`user_guide/`](user_guide/README.md) - 64 pages
+- [`validation/`](validation/) - 2 pages
 - [`workflows/`](workflows/) - 2 pages
 
 ### Draft
 
 - [`ai_implementation/`](ai_implementation/README.md) - 5 pages
-- [`bunkershot3d/`](bunkershot3d/) - 10 pages
+- [`bunkershot3d/`](bunkershot3d/README.md) - 11 pages
 - [`competitive_analysis/`](competitive_analysis/COMPETITOR_ANALYSIS.md) - 1 page
 - [`config/`](config/pydantic-settings-migration.md) - 1 page
 - [`design/`](design/) - 3 pages
@@ -82,24 +83,24 @@ separated from current guidance.
 - [`model_explorer/`](model_explorer/attachment-manifests.md) - 1 page
 - [`motion_capture/`](motion_capture/) - 22 pages
 - [`motion_training/`](motion_training/README.md) - 1 page
-- [`plans/`](plans/README.md) - 76 pages
+- [`plans/`](plans/README.md) - 79 pages
 - [`project/`](project/) - 2 pages
-- [`proposals/`](proposals/ROBOTICS_EXPANSION_PROPOSAL.md) - 1 page
-- [`research/`](research/) - 42 pages
-- [`screenshots/`](screenshots/) - no Markdown pages
+- [`proposals/`](proposals/) - 2 pages
+- [`research/`](research/) - 270 pages
+- [`screenshots/`](screenshots/) - 13 pages
 - [`sg_optimizer/`](sg_optimizer/README.md) - 3 pages
 - [`status/`](status/) - no Markdown pages
 - [`technical_debt/`](technical_debt/TODO_FIXME_REGISTER.md) - 1 page
-- [`ux/`](ux/field_metadata.md) - 1 page
+- [`ux/`](ux/) - 2 pages
 
 ### Archived
 
-- [`spec/`](spec/CHANGELOG_ARCHIVE.md) - 1 page
 - [`assessments/`](assessments/README.md) - 294 pages
 - [`audit_reports/`](audit_reports/induced_acceleration_audit.md) - 1 page
 - [`historical/`](historical/README.md) - 4 pages
 - [`issues/`](issues/README.md) - 57 pages
 - [`review_archive/`](review_archive/) - 24 pages
+- [`spec/`](spec/CHANGELOG_ARCHIVE.md) - 1 page
 - [`status_quo_analysis/`](status_quo_analysis/running_log.md) - 1 page
 - [`ui/`](ui/FEATURE_PARITY_MATRIX.md) - 1 page
 
@@ -159,6 +160,7 @@ repository, which made them effectively unreachable.
 | `audit_reports/`        | @quality-team         | archived  | Audit outputs and review evidence from repository-wide inspections.                                                                 |
 | `audits/`               | @quality-team         | stable    | Dated audit records, including the current adversarial and hardening reviews.                                                       |
 | `bunkershot3d/`         | @physics-team         | draft     | Granular bunker-shot backend comparison notes (Project Chrono, LIGGGHTS, MuJoCo MPM).                                               |
+| `ci/`                   | @quality-team         | stable    | CI runbooks, optional-stack notes, and workflow-adjacent operator guides for scheduled jobs.                                          |
 | `ci-failures/`          | @quality-team         | stable    | CI failure reports and evidence for tracked regressions, blockers, and qualification-gate outcomes.                                 |
 | `code-quality/`         | @quality-team         | stable    | Coding standards, quality gates, and maintainability guidance.                                                                      |
 | `codemap/`              | @docs-team            | stable    | Code-map indexer (chat + MCP) integration notes, agent setup, and MCP wiring guidance.                                              |

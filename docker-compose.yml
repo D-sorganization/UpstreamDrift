@@ -14,7 +14,7 @@ x-explorer-common: &explorer-common
     context: .
     dockerfile: Dockerfile.modular
     # Host prune jobs skip images labelled keep (they take 25+ min to rebuild
-    # over the ControlTower WAN).
+    # over the <host> WAN).
     labels:
       keep: "true"
     args:
@@ -48,7 +48,7 @@ services:
       - ./data:/workspace/data
     environment:
       - PYTHONPATH=/workspace
-      - PATH=/home/golfer/.local/bin:/opt/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - PATH=<owner-home>/.local/bin:/opt/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       - DATABASE_URL=sqlite:////workspace/golf_modeling_suite.db
       - API_HOST=0.0.0.0
       - API_PORT=8001
@@ -200,7 +200,7 @@ services:
     command: ["gui"]
     shm_size: "1gb"
 
-  # --- Images other ControlTower jobs expect (ct-run.sh) ---------------------
+  # --- Images other <host> jobs expect (ct-run.sh) ---------------------
   # `build:` as well as `image:`, so a pruned image is rebuilt on demand and never
   # becomes a failed pull. `scripts/docker/explorer.sh ensure` does this for you.
   # ud-sim:latest = the explorer base (all engines + Qt + EGL + ffmpeg); its

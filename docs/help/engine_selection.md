@@ -207,3 +207,7 @@ Common solutions:
 ---
 
 _See also: [Full User Manual](../user_guide/user_manual.md) | [Simulation Controls](simulation_controls.md) | [Visualization](visualization.md)_
+
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html): *The Physics of Golf — Forces and Torques*.

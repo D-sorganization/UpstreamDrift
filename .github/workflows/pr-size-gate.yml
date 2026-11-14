@@ -1,0 +1,75 @@
+name: PR Size Advisory
+
+# Owner order 2026-11-06 (Dieter): changed-line count is advisory (warnings and
+# optional ``size:large`` label), not a merge blocker — #14820, RD #4118 / #14741.
+# Fleet preference: small cohesive PRs.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  merge_group:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: pr-size-gate-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  pr-size:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    name: pr-size
+    runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Report changed-line count (advisory)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "merge_group" ]; then
+            base="${{ github.event.merge_group.base_sha }}"
+            head="${{ github.event.merge_group.head_sha }}"
+            pr_number=""
+            if [ -n "${{ github.event.merge_group.head_ref }}" ]; then
+              pr_number=$(gh pr list --repo "${{ github.repository }}" \
+                --head "${{ github.event.merge_group.head_ref }}" \
+                --json number --jq '.[0].number // empty' 2>/dev/null || true)
+            fi
+          else
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+            pr_number="${{ github.event.pull_request.number }}"
+          fi
+
+          args=(python3 scripts/ci/check_pr_diff_size.py \
+            --repo-root "${GITHUB_WORKSPACE}" \
+            --base-sha "$base" \
+            --head-sha "$head")
+          if [ -n "${pr_number:-}" ]; then
+            args+=(--pr "$pr_number")
+          fi
+
+          "${args[@]}"
+
+          advisory="false"
+          if [ -n "${GITHUB_OUTPUT:-}" ] && grep -q '^advisory=true' "$GITHUB_OUTPUT" 2>/dev/null; then
+            advisory="true"
+          fi
+
+          if [ "${{ github.event_name }}" = "pull_request" ] \
+            && [ "$advisory" = "true" ] \
+            && [ -n "${pr_number:-}" ]; then
+            echo "::notice::Applying advisory label size:large to PR #${pr_number} (best-effort)"
+            gh pr edit "$pr_number" --repo "${{ github.repository }}" \
+              --add-label "size:large" || true
+          fi

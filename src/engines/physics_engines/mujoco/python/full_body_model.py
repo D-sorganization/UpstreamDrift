@@ -43,6 +43,7 @@ from src.shared.python.biomechanics.grip_wrench import (
 )
 from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
 from src.shared.python.force_overlay.contracts import OverlayWrench
+from src.shared.python.motion_matching.arm_mirror import document_arm_mirrored
 from src.shared.python.motion_matching.club_shaft_chain import passive_coordinates
 from src.shared.python.motion_matching.contact_law import (
     ContactParameters,
@@ -79,6 +80,7 @@ class NativeMujocoFullBodyModel:
         self.model, self.data = self._build_model(self.xml)
 
         self.coordinate_order: list[str] = list(self.metadata["coordinate_order"])
+        self.arm_mirrored: bool = document_arm_mirrored(spec)
         self.upper_body_coordinates = int(spec["upper_body_counts"]["coordinates"])
         # MJCF bodies sit at their joint follower frame; this maps a point given
         # in the specification's body frame into the MuJoCo body frame.
@@ -128,7 +130,11 @@ class NativeMujocoFullBodyModel:
         self._spec_for_partition = spec
         self._solid_groups: dict[str, RigidInertia] | None = None
 
-        # Contact setup
+        self._init_contact_model(spec)
+        self._errors: tuple[np.ndarray, np.ndarray] | None = None
+
+    def _init_contact_model(self, spec: dict[str, Any]) -> None:
+        """Initialize ground planes, support surfaces, and contact spheres."""
         contact_cfg = spec["contact"]
         self.contact_parameters = ContactParameters(**contact_cfg["parameters"])
         ground_cfg = contact_cfg["ground"]
@@ -162,8 +168,6 @@ class NativeMujocoFullBodyModel:
                 "body_id": body_id,
                 "radius": radius,
             }
-
-        self._errors: tuple[np.ndarray, np.ndarray] | None = None
 
     def _init_neck_limits(self, enabled: bool) -> None:
         """Set the dof indices and radian ``(lower, upper)`` of the limited neck.

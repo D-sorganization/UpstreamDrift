@@ -23,14 +23,14 @@
     "aim_heading_deg": 0
   },
   "solve": {
-    "putter_speed_mps": 1.6062500000000002,
-    "aim_heading_deg": -7.2749436832871925,
-    "break_m": -0.3798924777707047,
+    "putter_speed_mps": 1.6015625,
+    "aim_heading_deg": -5.4453544859284495,
+    "break_m": -0.28468906733704097,
     "holed": true,
     "converged": true
   },
   "reads": {
-    "metric": "Optimum read:  1.61 m/s at -7.3°, aim 38.0 cm right of the cup",
-    "imperial": "Optimum read:  3.6 mph at -7.3°, aim 15.0 in right of the cup"
+    "metric": "Optimum read:  1.60 m/s at -5.4\u00b0, aim 28.5 cm right of the cup",
+    "imperial": "Optimum read:  3.6 mph at -5.4\u00b0, aim 11.2 in right of the cup"
   }
 }

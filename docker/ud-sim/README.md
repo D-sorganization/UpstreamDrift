@@ -1,6 +1,6 @@
 # Ud-Sim:Latest Image
 
-ControlTower jobs (including Brick Model Parity `ct-run.sh`) expect a local
+<host> jobs (including Brick Model Parity `ct-run.sh`) expect a local
 Docker image tagged **`ud-sim:latest`**. There is **no** `docker/ud-sim/Dockerfile`
 and no registry publish step for this tag.
 
@@ -41,7 +41,7 @@ Jobs assume:
    argument with `exec` (for example `docker run --rm ud-sim:latest python3 -m …`).
 3. **Headless GL** — pass `-e QT_QPA_PLATFORM=offscreen -e MUJOCO_GL=egl` when
    not using the compose service defaults (the `ud-sim` service sets these).
-4. **Workspace** — mount the repo at `/workspace` the same way other ControlTower
+4. **Workspace** — mount the repo at `/workspace` the same way other <host>
    receipts document.
 
 The default `docker run ud-sim:latest` with no command runs the `engines` smoke

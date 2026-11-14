@@ -3,14 +3,14 @@
 
 EXIT_CODE=1  # Default to failure (overwritten on success)
 EXITING=false  # Re-entry guard for on_exit
-LOCK_FILE="/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/core/../project/contexts/backlog/.delivery-locks/GH2034.lock"
+LOCK_FILE="<owner-home>/gaai-fleet/UpstreamDrift/.gaai/core/../project/contexts/backlog/.delivery-locks/GH2034.lock"
 echo $$ > "$LOCK_FILE"
 
 capture_metadata() {
   # Capture delivery metadata directly from delivery log + git log.
   # This runs in the wrapper because claude -p (headless) does not trigger
   # the Claude Code Stop hook — metadata would never be captured otherwise.
-  local delivery_log="/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/core/../project/contexts/backlog/.delivery-logs/GH2034.log"
+  local delivery_log="<owner-home>/gaai-fleet/UpstreamDrift/.gaai/core/../project/contexts/backlog/.delivery-logs/GH2034.log"
   local fields_updated=0
 
   # cost_usd — from delivery log (type:result → total_cost_usd)
@@ -33,7 +33,7 @@ except: pass
 PYEOF
     2>/dev/null) || cost=""
     if [[ -n "$cost" && "$cost" != "0" ]]; then
-      "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/core/scripts/backlog-scheduler.sh" --set-field "GH2034" cost_usd "$cost" "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml" 2>/dev/null && {
+      "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/core/scripts/backlog-scheduler.sh" --set-field "GH2034" cost_usd "$cost" "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml" 2>/dev/null && {
         fields_updated=1
         echo "[WRAPPER] cost_usd=$cost"
       }
@@ -44,7 +44,7 @@ PYEOF
   local started
   started=$(git log --all --format='%aI' --grep="chore(GH2034): in_progress" -1 2>/dev/null) || started=""
   if [[ -n "$started" ]]; then
-    "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/core/scripts/backlog-scheduler.sh" --set-field "GH2034" started_at "$started" "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml" 2>/dev/null && {
+    "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/core/scripts/backlog-scheduler.sh" --set-field "GH2034" started_at "$started" "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml" 2>/dev/null && {
       fields_updated=1
       echo "[WRAPPER] started_at=$started"
     }
@@ -54,7 +54,7 @@ PYEOF
   local completed
   completed=$(git log --all --format='%aI' --grep="chore(GH2034): done" -1 2>/dev/null) || completed=""
   if [[ -n "$completed" ]]; then
-    "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/core/scripts/backlog-scheduler.sh" --set-field "GH2034" completed_at "$completed" "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml" 2>/dev/null && {
+    "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/core/scripts/backlog-scheduler.sh" --set-field "GH2034" completed_at "$completed" "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml" 2>/dev/null && {
       fields_updated=1
       echo "[WRAPPER] completed_at=$completed"
     }
@@ -69,9 +69,9 @@ PYEOF
       pr_url=$(echo "$pr_json" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d[0].get('url',''))" 2>/dev/null) || pr_url=""
       pr_number=$(echo "$pr_json" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d[0].get('number',''))" 2>/dev/null) || pr_number=""
       pr_state=$(echo "$pr_json" | python3 -c "import json,sys; d=json.load(sys.stdin); s=d[0]; print('merged' if s.get('mergedAt') else s.get('state','open').lower())" 2>/dev/null) || pr_state=""
-      [[ -n "$pr_url" ]] && "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/core/scripts/backlog-scheduler.sh" --set-field "GH2034" pr_url "$pr_url" "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml" 2>/dev/null && fields_updated=1
-      [[ -n "$pr_number" ]] && "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/core/scripts/backlog-scheduler.sh" --set-field "GH2034" pr_number "$pr_number" "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml" 2>/dev/null && fields_updated=1
-      [[ -n "$pr_state" ]] && "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/core/scripts/backlog-scheduler.sh" --set-field "GH2034" pr_status "$pr_state" "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml" 2>/dev/null && fields_updated=1
+      [[ -n "$pr_url" ]] && "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/core/scripts/backlog-scheduler.sh" --set-field "GH2034" pr_url "$pr_url" "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml" 2>/dev/null && fields_updated=1
+      [[ -n "$pr_number" ]] && "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/core/scripts/backlog-scheduler.sh" --set-field "GH2034" pr_number "$pr_number" "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml" 2>/dev/null && fields_updated=1
+      [[ -n "$pr_state" ]] && "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/core/scripts/backlog-scheduler.sh" --set-field "GH2034" pr_status "$pr_state" "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml" 2>/dev/null && fields_updated=1
     fi
   fi
 
@@ -96,13 +96,13 @@ on_exit() {
   # Kill child processes (claude, tee)
   kill $(jobs -p) 2>/dev/null || true
 
-  rm -f "$LOCK_FILE" "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/core/../project/contexts/backlog/.delivery-locks/GH2034_run.sh"
+  rm -f "$LOCK_FILE" "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/core/../project/contexts/backlog/.delivery-locks/GH2034_run.sh"
 
   # Check story status to decide: capture metadata or mark failed
-  cd "/home/dieterolson/gaai-fleet/UpstreamDrift"
+  cd "<owner-home>/gaai-fleet/UpstreamDrift"
   git pull origin 'staging' --ff-only --quiet 2>&1 || true
   local current_status
-  current_status=$(grep -A 8 'id: GH2034' '/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml' | grep 'status:' | head -1 | sed 's/.*status: *//')
+  current_status=$(grep -A 8 'id: GH2034' '<owner-home>/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml' | grep 'status:' | head -1 | sed 's/.*status: *//')
 
   if [[ "$current_status" == "done" ]]; then
     # Story done — capture delivery metadata (stop hook doesn't fire in -p mode)
@@ -112,14 +112,14 @@ on_exit() {
     echo "[WRAPPER] Delivery failed (exit $EXIT_CODE). Marking GH2034 as failed on staging..."
     (
       if command -v flock &>/dev/null; then
-        flock "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/core/../project/contexts/backlog/.delivery-locks/.staging.lock" bash -c "
-          '/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/core/scripts/backlog-scheduler.sh' --set-status 'GH2034' failed '/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml' 2>/dev/null || true
+        flock "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/core/../project/contexts/backlog/.delivery-locks/.staging.lock" bash -c "
+          '<owner-home>/gaai-fleet/UpstreamDrift/.gaai/core/scripts/backlog-scheduler.sh' --set-status 'GH2034' failed '<owner-home>/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml' 2>/dev/null || true
           git add '.gaai/project/contexts/backlog/active.backlog.yaml' 2>/dev/null
           git commit -m 'chore(GH2034): failed [delivery-wrapper]' --quiet 2>/dev/null
           git push origin 'staging' --quiet 2>&1
         "
       else
-        '/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/core/scripts/backlog-scheduler.sh' --set-status 'GH2034' failed '/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml' 2>/dev/null || true
+        '<owner-home>/gaai-fleet/UpstreamDrift/.gaai/core/scripts/backlog-scheduler.sh' --set-status 'GH2034' failed '<owner-home>/gaai-fleet/UpstreamDrift/.gaai/project/contexts/backlog/active.backlog.yaml' 2>/dev/null || true
         git add '.gaai/project/contexts/backlog/active.backlog.yaml' 2>/dev/null
         git commit -m 'chore(GH2034): failed [delivery-wrapper]' --quiet 2>/dev/null
         git push origin 'staging' --quiet 2>&1 || true
@@ -137,15 +137,15 @@ echo "  Skip permissions: true"
 echo "================================================================"
 echo ""
 
-cd "/home/dieterolson/gaai-fleet/UpstreamDrift"
+cd "<owner-home>/gaai-fleet/UpstreamDrift"
 unset CLAUDECODE 2>/dev/null || true
 
 # Truncate stale log from previous runs (prevents false heartbeat kills)
-: > "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/core/../project/contexts/backlog/.delivery-logs/GH2034.log"
+: > "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/core/../project/contexts/backlog/.delivery-logs/GH2034.log"
 
 # Slash commands don't work in -p mode — expand the command file into a prompt
 # Strip YAML frontmatter (--+\n...\n--+) — claude -p treats leading dashes as a CLI option
-DELIVERY_PROMPT=$(awk 'BEGIN{s=0} NR==1 && /^--+$/{s=1; next} s==1 && /^--+$/{s=0; next} s==0' "/home/dieterolson/gaai-fleet/UpstreamDrift/.claude/commands/gaai-deliver.md")
+DELIVERY_PROMPT=$(awk 'BEGIN{s=0} NR==1 && /^--+$/{s=1; next} s==1 && /^--+$/{s=0; next} s==0' "<owner-home>/gaai-fleet/UpstreamDrift/.claude/commands/gaai-deliver.md")
 
 # --output-format stream-json streams NDJSON events in real-time, so:
 #   - tee updates the log file continuously (natural heartbeat for daemon monitor)
@@ -153,17 +153,17 @@ DELIVERY_PROMPT=$(awk 'BEGIN{s=0} NR==1 && /^--+$/{s=1; next} s==1 && /^--+$/{s=
 if command -v gtimeout &>/dev/null; then
   gtimeout "14400" claude --dangerously-skip-permissions --model sonnet --max-turns 200 --output-format stream-json --verbose -p "${DELIVERY_PROMPT}
 
-Deliver story: GH2034" 2>&1 | tee -a "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/core/../project/contexts/backlog/.delivery-logs/GH2034.log"
+Deliver story: GH2034" 2>&1 | tee -a "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/core/../project/contexts/backlog/.delivery-logs/GH2034.log"
   EXIT_CODE=${PIPESTATUS[0]}
 elif command -v timeout &>/dev/null; then
   timeout "14400" claude --dangerously-skip-permissions --model sonnet --max-turns 200 --output-format stream-json --verbose -p "${DELIVERY_PROMPT}
 
-Deliver story: GH2034" 2>&1 | tee -a "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/core/../project/contexts/backlog/.delivery-logs/GH2034.log"
+Deliver story: GH2034" 2>&1 | tee -a "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/core/../project/contexts/backlog/.delivery-logs/GH2034.log"
   EXIT_CODE=${PIPESTATUS[0]}
 else
   claude --dangerously-skip-permissions --model sonnet --max-turns 200 --output-format stream-json --verbose -p "${DELIVERY_PROMPT}
 
-Deliver story: GH2034" 2>&1 | tee -a "/home/dieterolson/gaai-fleet/UpstreamDrift/.gaai/core/../project/contexts/backlog/.delivery-logs/GH2034.log"
+Deliver story: GH2034" 2>&1 | tee -a "<owner-home>/gaai-fleet/UpstreamDrift/.gaai/core/../project/contexts/backlog/.delivery-logs/GH2034.log"
   EXIT_CODE=${PIPESTATUS[0]}
 fi
 

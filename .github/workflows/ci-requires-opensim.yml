@@ -234,7 +234,7 @@ jobs:
         # OPENSIM_VENV_SCHEMA to force a rebuild on every runner.
         env:
           OPENSIM_PIN: "4.6"
-          OPENSIM_VENV_SCHEMA: "1"
+          OPENSIM_VENV_SCHEMA: "2"
         run: |
           set -euo pipefail
           base="${RUNNER_TOOL_CACHE:-$RUNNER_TEMP}/upstreamdrift-opensim-venv/${RUNNER_NAME:-local}"
@@ -251,7 +251,7 @@ jobs:
 
           venv_ok() {
             [ "$(cat "$venv/.opensim-venv-complete" 2>/dev/null)" = "$key" ] || return 1
-            "$venv/bin/python" -c "import opensim, pytest, xdist, pytest_timeout; assert opensim.GetVersion().startswith('$OPENSIM_PIN')" >/dev/null || return 1
+            "$venv/bin/python" -c "import opensim, pinocchio, pytest, xdist, pytest_timeout; assert opensim.GetVersion().startswith('$OPENSIM_PIN')" >/dev/null || return 1
             "$venv/bin/python" -m pip freeze --exclude-editable | cmp -s - "$venv/.opensim-venv-freeze"
           }
 
@@ -265,6 +265,8 @@ jobs:
             "$venv/bin/python" -m pip install --upgrade pip
             "$venv/bin/python" -m pip install "${no_cache[@]}" --ignore-installed -r requirements-dev.lock
             "$venv/bin/python" -m pip install "${no_cache[@]}" "opensim==$OPENSIM_PIN"
+            # Pinocchio is the reference engine of the slow grip parity tests (#13560).
+            "$venv/bin/python" -m pip install "${no_cache[@]}" pin
             "$venv/bin/python" -m pip freeze --exclude-editable > "$venv/.opensim-venv-freeze"
             echo "$key" > "$venv/.opensim-venv-complete"
           fi
@@ -374,6 +376,13 @@ jobs:
               print("::error::Zero tests passed! All selected tests were skipped or none were run.", file=sys.stderr)
               sys.exit(1)
           PY
+
+      - name: Run slow OpenSim grip parity tests
+        if: needs.classify-changes.outputs.run == 'true'
+        # The lane above excludes slow tests, so the OpenSim-vs-Pinocchio grip
+        # parity cases never ran in CI (#13560). Run exactly those here.
+        run: |
+          python -m pytest             tests/unit/grip_contact/test_grip_style_parity_report.py             -m "requires_opensim and requires_pinocchio and slow"             -k "opensim"             --timeout=900             --timeout-method=thread             -rs -rx             --tb=short             -v
 
   report-nightly:
     name: Report Nightly OpenSim Result

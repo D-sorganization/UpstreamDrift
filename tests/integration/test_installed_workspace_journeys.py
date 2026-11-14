@@ -333,11 +333,11 @@ def test_journey_4_optimization_training_to_result(tmp_path: Path) -> None:
 
     opt_result = journeys.execute_optimization_training_to_result(config)
 
-    assert opt_result.status == RecoveryStatus.SUCCESS
-    assert opt_result.converged is True
+    assert opt_result.status == RecoveryStatus.FAILED
+    assert opt_result.converged is False
     assert opt_result.result_artifact is not None
-    assert opt_result.result_artifact.kind == ArtifactKind.RECEIPT
-    assert opt_result.result_artifact.metadata["objective_value"] <= 1.0
+    assert opt_result.result_artifact.kind == ArtifactKind.DYNAMIC_STATE
+    assert opt_result.result_artifact.metadata.get("synthetic") is True
 
 
 def test_journey_5_estimation_to_comparison_and_indicators(tmp_path: Path) -> None:

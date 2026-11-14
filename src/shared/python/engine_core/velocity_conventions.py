@@ -53,8 +53,15 @@ class VelocityRepresentation(str, Enum):
     MIXED = "mixed"
 
 
-CANONICAL_VELOCITY_REPRESENTATION = VelocityRepresentation.INERTIAL
-"""Suite-normalized floating-base velocity representation."""
+SPATIAL_WRENCH_REPRESENTATION = VelocityRepresentation.INERTIAL
+"""Frame convention for spatial Jacobian / wrench rows (``SPATIAL_JACOBIAN_ORDER``).
+
+This is not the ADR-0026 dynamic-state velocity layout; see
+``pose_interchange.canonical_state`` for ``canonical-v2`` state vectors.
+"""
+
+CANONICAL_VELOCITY_REPRESENTATION = SPATIAL_WRENCH_REPRESENTATION
+"""Deprecated alias for :data:`SPATIAL_WRENCH_REPRESENTATION` (issue #14936)."""
 
 
 @dataclass(frozen=True)
@@ -87,7 +94,7 @@ class FloatingBaseConvention:
 
 
 CANONICAL_FLOATING_BASE_CONVENTION = FloatingBaseConvention(
-    velocity_representation=CANONICAL_VELOCITY_REPRESENTATION,
+    velocity_representation=SPATIAL_WRENCH_REPRESENTATION,
 )
 
 

@@ -923,7 +923,7 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         bias = self.compute_bias_forces()
         velocity_forces = bias - gravity
 
-        gravity_accel = np.linalg.solve(M_solve, gravity)
+        gravity_accel = -np.linalg.solve(M_solve, gravity)
         velocity_accel = -np.linalg.solve(
             M_solve, velocity_forces
         )  # Since bias = C*v + G
@@ -934,18 +934,15 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         moment_arms = analyzer.get_moment_arms()
 
         n_u = self._model.getNumSpeeds()  # type: ignore
-        active_tau = np.zeros(n_u)
-        passive_tau = np.zeros(n_u)
+        from .muscle_analysis import accumulate_muscle_generalized_forces
 
-        for muscle_name in active_forces:
-            if muscle_name in moment_arms:
-                moment_arm_values = list(moment_arms[muscle_name].values())
-                for coord_idx, r in enumerate(moment_arm_values):
-                    if coord_idx < n_u:
-                        active_tau[coord_idx] += active_forces[muscle_name] * r
-                        passive_tau[coord_idx] += (
-                            passive_forces.get(muscle_name, 0.0) * r
-                        )
+        active_tau, passive_tau = accumulate_muscle_generalized_forces(
+            moment_arms,
+            active_forces,
+            passive_forces,
+            analyzer.coordinate_speed_indices(),
+            n_u,
+        )
 
         active_muscle_accel = np.linalg.solve(M_solve, active_tau)
         passive_muscle_accel = np.linalg.solve(M_solve, passive_tau)

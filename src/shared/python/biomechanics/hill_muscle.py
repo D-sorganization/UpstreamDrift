@@ -151,6 +151,10 @@ class HillMuscleModel:
     def force_velocity(self, v_norm: float) -> float:
         """Force-velocity relationship (Hill's Hyperbola).
 
+        The concentric and eccentric branches meet at ``v_norm = 0`` with C⁰
+        continuity only (documented kink). Tendon ``f_t`` toe/linear junction
+        is C⁰ at ``ε_toe`` — see parity tests in ``upstream-muscle``.
+
         Args:
             v_norm: Normalized velocity (v_CE / v_max_m_s)
                    Positive = lengthening (eccentric)
@@ -159,15 +163,13 @@ class HillMuscleModel:
         Returns:
             Force multiplier [0, 1.4]
         """
-        # Concentric (shortening)
         if v_norm is None:
             raise ValueError("v_norm must be provided")
+        # Concentric (shortening): Hill hyperbola on (-1, 0), zero beyond Vmax (#15045).
         if v_norm < 0:
-            # Hill's hyperbola: clamp v_norm to prevent division by zero
-            # The denominator (1 - v_norm / 0.25) = 0 when v_norm = 0.25
-            # Since v_norm < 0 for concentric, we clamp at -0.99 * v_max
-            v_norm_clamped = max(v_norm, -0.99)
-            return float((1 + v_norm_clamped) / (1 - v_norm_clamped / 0.25))
+            if v_norm <= -1.0:
+                return 0.0
+            return float((1 + v_norm) / (1 - v_norm / 0.25))
 
         # Eccentric (lengthening)
         # Force increases up to ~1.4x F_max

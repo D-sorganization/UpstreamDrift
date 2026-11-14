@@ -40,8 +40,8 @@ def _fake_kernel(captured: dict[str, Any]) -> types.ModuleType:
         captured["ball"] = kwargs
         return _Recorder(**kwargs)
 
-    def simulate(*_args: Any) -> Any:
-        return types.SimpleNamespace(get_points=list)
+    def simulate(*_args: Any, **_kwargs: Any) -> Any:
+        return types.SimpleNamespace(get_points=list, get_step_forces=list)
 
     module.IntegratorConfig = _Recorder  # type: ignore[attr-defined]
     module.AeroBallProperties = ball_props  # type: ignore[attr-defined]

@@ -23,6 +23,12 @@ import numpy.typing as npt
 from scipy.optimize import minimize
 
 from src.shared.python.contracts import require
+from src.shared.python.putting_analytics.expected_putts import (
+    BROADIE_2014_TOUR_EXPECTED_PUTTS,
+    ExpectedPuttsTable,
+    PuttAction,
+    solve_expected_putts,
+)
 from src.shared.python.putting_analytics.make_rate_reference import (
     MakeRatePoint,
     MakeRateTable,
@@ -186,3 +192,145 @@ TOUR_PACE_SCALE = 0.8375
 TOUR_AVERAGE = scaled_profile(
     TOUR_SHAPE, TOUR_LINE_SCALE, TOUR_PACE_SCALE, "tour-average"
 )
+
+
+@dataclass(frozen=True)
+class CalibratedPreset:
+    """A putting skill preset with recorded provenance, scales, and residuals."""
+
+    name: str
+    handicap_tier: str
+    profile: PuttingSkillProfile
+    line_scale: float
+    pace_scale: float
+    source_id: str
+    target_group: str
+    rms_error_pct: float
+    residuals_pct: tuple[float, ...]
+    assumptions: str
+
+
+SCRATCH_LINE_SCALE = 2.0521
+SCRATCH_PACE_SCALE = 0.6489
+SCRATCH_AVERAGE = scaled_profile(
+    TOUR_SHAPE, SCRATCH_LINE_SCALE, SCRATCH_PACE_SCALE, "scratch-average"
+)
+
+HCP_10_LINE_SCALE = 2.6116
+HCP_10_PACE_SCALE = 0.5287
+HCP_10_AVERAGE = scaled_profile(
+    TOUR_SHAPE, HCP_10_LINE_SCALE, HCP_10_PACE_SCALE, "hcp-10-average"
+)
+
+HCP_20_LINE_SCALE = 3.2562
+HCP_20_PACE_SCALE = 0.5901
+HCP_20_AVERAGE = scaled_profile(
+    TOUR_SHAPE, HCP_20_LINE_SCALE, HCP_20_PACE_SCALE, "hcp-20-average"
+)
+
+CALIBRATED_PRESETS: dict[str, CalibratedPreset] = {
+    "tour": CalibratedPreset(
+        name="tour-average",
+        handicap_tier="tour",
+        profile=TOUR_AVERAGE,
+        line_scale=TOUR_LINE_SCALE,
+        pace_scale=TOUR_PACE_SCALE,
+        source_id="golfmagic_2022",
+        target_group="pga_tour",
+        rms_error_pct=0.60,
+        residuals_pct=(
+            -0.20,
+            0.30,
+            0.00,
+            -0.40,
+            0.00,
+            -0.10,
+            -0.60,
+            -1.10,
+            -0.80,
+            -0.80,
+            -0.40,
+            -0.70,
+            0.00,
+        ),
+        assumptions="Base spread ratios from TOUR_SHAPE; line and pace scaled via Nelder-Mead on PGA Tour ShotLink published make rates",
+    ),
+    "scratch": CalibratedPreset(
+        name="scratch-average",
+        handicap_tier="scratch",
+        profile=SCRATCH_AVERAGE,
+        line_scale=SCRATCH_LINE_SCALE,
+        pace_scale=SCRATCH_PACE_SCALE,
+        source_id="shotscope_mygolfspy",
+        target_group="hcp_0",
+        rms_error_pct=1.01,
+        residuals_pct=(0.83, -0.07, 0.03, -1.97, 1.40, 0.60, 0.90, -0.63),
+        assumptions="Base spread ratios from TOUR_SHAPE; line and pace scaled via Nelder-Mead on Shot Scope scratch make rate bands",
+    ),
+    "10": CalibratedPreset(
+        name="hcp-10-average",
+        handicap_tier="10",
+        profile=HCP_10_AVERAGE,
+        line_scale=HCP_10_LINE_SCALE,
+        pace_scale=HCP_10_PACE_SCALE,
+        source_id="shotscope_mygolfspy",
+        target_group="hcp_10",
+        rms_error_pct=0.44,
+        residuals_pct=(0.70, -0.17, 0.33, 0.17, -0.83, 0.40, -0.23, 0.07),
+        assumptions="Base spread ratios from TOUR_SHAPE; line and pace scaled via Nelder-Mead on Shot Scope 10-handicap make rate bands",
+    ),
+    "20": CalibratedPreset(
+        name="hcp-20-average",
+        handicap_tier="20",
+        profile=HCP_20_AVERAGE,
+        line_scale=HCP_20_LINE_SCALE,
+        pace_scale=HCP_20_PACE_SCALE,
+        source_id="shotscope_mygolfspy",
+        target_group="hcp_20",
+        rms_error_pct=1.67,
+        residuals_pct=(3.17, -1.10, -2.03, 2.40, -1.00, 0.30, -0.37, 0.10),
+        assumptions="Base spread ratios from TOUR_SHAPE; line and pace scaled via Nelder-Mead on Shot Scope 20-handicap make rate bands",
+    ),
+}
+
+
+def compare_expected_putts(
+    profile: PuttingSkillProfile,
+    table: ExpectedPuttsTable = BROADIE_2014_TOUR_EXPECTED_PUTTS,
+    stimp: float = 10.0,
+    pace_ft_past: float = 1.5,
+    n: int = 500,
+    seed: int = 1,
+) -> tuple[tuple[float, ...], float]:
+    """Compare player's derived E_player(d) against a reference expected-putts table.
+
+    Returns (residuals_per_distance, max_abs_residual).
+    """
+    from src.shared.python.putting_analytics.service_sg import SkillPuttModel
+    from src.shared.python.putting_analytics.skill_roll_model import PlaneGreen
+
+    green = PlaneGreen(0.0, 0.0, stimp)
+    model = SkillPuttModel(profile, green)
+    extended_grid = np.unique(
+        np.concatenate(
+            [
+                np.array([1.0, 2.0]),
+                np.asarray(table.distances_ft, dtype=float),
+                np.array([35.0, 40.0]),
+            ]
+        )
+    )
+    extended_grid.sort()
+    curve = solve_expected_putts(
+        model,
+        extended_grid,
+        lambda _d: PuttAction(0.0, pace_ft_past),
+        n=n,
+        seed=seed,
+    )
+    diffs = tuple(
+        float(curve(d)) - ref_val
+        for d, ref_val in zip(table.distances_ft, table.values, strict=True)
+    )
+    max_abs = float(max(abs(diff) for diff in diffs))
+    return diffs, max_abs

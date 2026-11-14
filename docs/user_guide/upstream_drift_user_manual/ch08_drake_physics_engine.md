@@ -192,9 +192,9 @@ using Drake's `SetPositions`/`SetVelocities`/`GetPositions`/`GetVelocities`:
 
 $$\ddot{q}_{\text{ZTCF}} = -M(q)^{-1} b(q, v)$$
 
-**ZVCF:** Set $v = 0$ at configuration $q$:
+**ZVCF:** Canonical [SPEC §4](../../../SPEC.md#4-architecture-overview) ZVCF is the control component $M(q)^{-1}\tau$ (`compute_control_acceleration`). The legacy `compute_zvcf(q)` method sets $v = 0$ and $\tau = 0$ at configuration $q$ to return the gravity-only acceleration:
 
-$$\ddot{q}_{\text{ZVCF}} = M(q)^{-1}(\tau - g(q))$$
+$$\ddot{q}_{\text{gravity-only}} = -M(q)^{-1} g(q)$$
 
 ### 8.2.9 Contact Forces
 

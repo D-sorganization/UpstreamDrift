@@ -58,7 +58,7 @@ dependencies = [
     # path; it previously existed only as a hand-edit in the generated
     # environment.yml, where it constrained conda users alone and was
     # scheduled for deletion by the next `make sync-deps` (#8689).
-    "tornado>=6.6",
+    "tornado>=6.6.1",
     # Transitive via flask/uvicorn/pip-tools rather than imported directly.
     # Declared here for the same reason as tornado above: the floor must bind
     # on every install path, not depend on whichever dependent resolves first.
@@ -96,6 +96,9 @@ dependencies = [
     # in 50.0.0), PYSEC-2026-3553 and PYSEC-2026-3554 (both 49.0.0) (#8738).
     "cryptography>=50.0.0",
     "email-validator>=2.0.0",
+    # Transitive via email-validator; floor binds pip-audit on every install path
+    # (CVE-2026-128089, fixed in 2.9.2; #13761).
+    "dnspython>=2.9.2",
     # Hardened XML parsing used at module load by src/api/routes/models.py, which
     # is imported by src/api/routes/__init__.py and therefore by every API server
     # start-up. Tiny pure-Python package; must be core, not urdf-extra-only (#8032).
@@ -115,6 +118,8 @@ force-plate-live = ["python-socketio[client]>=5"]
 # subscribe path when ``UD_REALTIME_BACKEND=python`` or the rust wheel is
 # absent). Imported lazily in ``ws_pubsub.py`` (#13423).
 realtime = ["websockets>=12.0,<18.0"]
+# Stdio MCP SDK for ``ud-sim-mcp`` (Agent API epic #15019 / #15022).
+sim-mcp = ["mcp>=1.2,<2"]
 # Pandoc is an external CLI; this extra supplies the Python PDF renderer.
 shot-pattern-report = ["reportlab>=4,<6", "pypdf>=6,<7", "matplotlib>=3.10.8,<4"]
 # Optional JIT for the profiled incremental contact loop; Python reference remains available.
@@ -375,6 +380,8 @@ upstream-drift = "launch_upstream_drift:main"
 sidekick = "sidekick.__main__:main"
 # Headless simulation batch runner CLI (Epic #14085 / #14090).
 ud-sim = "src.sim_run.cli:main"
+# Stdio MCP adapter for the sim_run Agent API (#15020).
+ud-sim-mcp = "src.sim_run.mcp:main"
 
 [project.entry-points."upstream_drift.engines"]
 # Third-party engines register here via pyproject.toml:
@@ -705,6 +712,13 @@ follow_imports = "skip"
 module = "src.api.*"
 disallow_untyped_defs = true
 warn_return_any = true
+
+[[tool.mypy.overrides]]
+module = [
+    "shared.python.sidekick.*",
+    "src.shared.python.sidekick.*",
+]
+follow_imports = "skip"
 
 [[tool.mypy.overrides]]
 module = [

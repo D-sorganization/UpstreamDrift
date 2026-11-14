@@ -51,6 +51,10 @@ Every list of allowed values comes from the backend (`GET /api/analysis/loop-nul
 
 `biomechanics.grip_wrench.analyze_grip` reduces the two hand wrenches to the midpoint with the shared wrench-transport helper. `force_overlay.grip_frame` turns the analysis into an overlay frame, `biomechanics.grip_plot_model` into plot series. The API route is `GET /api/analysis/grip-wrench?run_id=...`. The video export draws the same glyphs and offers a `hands_closeup` camera that follows the grip midpoint.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/null-space-constraint-jacobian.html): *Null-Space Constraint Jacobian*.
+
 ## Limitations
 
 The left/right split of two rigid welds is set by the solver, not by physics; read it together with the split method. A quantity that cannot be computed (OpenSim, a run with no grip data, an allocation that yields only the net wrench, an engine that supplies no free torque) is shown as "unavailable" with its reason, never as zero. Wrenches are software outputs, not measured hand forces.

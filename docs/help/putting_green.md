@@ -199,6 +199,10 @@ for a current one.
 Turf and stimpmeter references, with provenance classes, are collected in
 [../physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md](../physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md).
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/putting-roll-models.html): *Putting Roll Models*.
+
 ## Limitations
 
 - **The roll is model output, not measurement.** No number on this tile is a

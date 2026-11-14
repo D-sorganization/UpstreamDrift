@@ -1,0 +1,274 @@
+{
+  "registry_id": "upstreamdrift-affine-drift-theory-links",
+  "version": "1.0.0",
+  "pages": {
+    "analysis_tools": {
+      "title": "AffineDrift Theory Part I",
+      "url": "https://affinedrift.com/articles/theory-part1.html"
+    },
+    "analysis_tools_api": {
+      "title": "AffineDrift Theory Part I",
+      "url": "https://affinedrift.com/articles/theory-part1.html"
+    },
+    "anatomical_event_table": {
+      "title": "The Physics of Golf \u2014 Forces and Torques",
+      "url": "https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html"
+    },
+    "ball_flight_simulator": {
+      "title": "Impact Mechanics and Ball Flight",
+      "url": "https://affinedrift.com/articles/impact-mechanics-and-ball-flight.html"
+    },
+    "biomech_exercise": {
+      "title": "Inverse Dynamics",
+      "url": "https://affinedrift.com/articles/inverse-dynamics.html"
+    },
+    "biomech_gait": {
+      "title": "Inverse Dynamics",
+      "url": "https://affinedrift.com/articles/inverse-dynamics.html"
+    },
+    "biomech_sit_to_stand": {
+      "title": "Inverse Dynamics",
+      "url": "https://affinedrift.com/articles/inverse-dynamics.html"
+    },
+    "c3d_viewer": {
+      "title": "Markerless Motion Capture Camera Selection",
+      "url": "https://affinedrift.com/articles/markerless-mocap-camera-selection.html"
+    },
+    "capture_rig": {
+      "title": "Markerless Motion Capture Camera Selection",
+      "url": "https://affinedrift.com/articles/markerless-mocap-camera-selection.html"
+    },
+    "character_builder": {
+      "title": "Degrees of Freedom and Dimensionality",
+      "url": "https://affinedrift.com/articles/degrees-of-freedom-and-dimensionality.html"
+    },
+    "chat_assistant": {
+      "title": "Core Theses Registry",
+      "url": "https://affinedrift.com/articles/core-theses-registry.html"
+    },
+    "config_setup_wizard": {
+      "title": "AffineDrift Theory Part I",
+      "url": "https://affinedrift.com/articles/theory-part1.html"
+    },
+    "cross_engine_dashboard": {
+      "title": "Drift Is the Past, Control Is the Present",
+      "url": "https://affinedrift.com/articles/drift-is-the-past-control-is-the-present.html"
+    },
+    "data_explorer": {
+      "title": "AffineDrift Theory Part I",
+      "url": "https://affinedrift.com/articles/theory-part1.html"
+    },
+    "data_processor": {
+      "title": "AffineDrift Theory Part I",
+      "url": "https://affinedrift.com/articles/theory-part1.html"
+    },
+    "dataset_generator": {
+      "title": "AffineDrift Theory Part I",
+      "url": "https://affinedrift.com/articles/theory-part1.html"
+    },
+    "drake_golf": {
+      "title": "Drift Is the Past, Control Is the Present",
+      "url": "https://affinedrift.com/articles/drift-is-the-past-control-is-the-present.html"
+    },
+    "drake_models_shared": {
+      "title": "The Physics of Golf \u2014 Forces and Torques",
+      "url": "https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html"
+    },
+    "engine_selection": {
+      "title": "The Physics of Golf \u2014 Forces and Torques",
+      "url": "https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html"
+    },
+    "golf_environment": {
+      "title": "The Physics of Golf \u2014 Forces and Torques",
+      "url": "https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html"
+    },
+    "golf_simulation_suite": {
+      "title": "Drift Is the Past, Control Is the Present",
+      "url": "https://affinedrift.com/articles/drift-is-the-past-control-is-the-present.html"
+    },
+    "golf_simulator": {
+      "title": "Impact Mechanics and Ball Flight",
+      "url": "https://affinedrift.com/articles/impact-mechanics-and-ball-flight.html"
+    },
+    "grip_wrench_plots": {
+      "title": "Null-Space Constraint Jacobian",
+      "url": "https://affinedrift.com/articles/null-space-constraint-jacobian.html"
+    },
+    "ground_reaction_plots": {
+      "title": "Ground Reaction Forces",
+      "url": "https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch15_ground_reaction_forces.html"
+    },
+    "impact_parameters": {
+      "title": "Impact Mechanics and Ball Flight",
+      "url": "https://affinedrift.com/articles/impact-mechanics-and-ball-flight.html"
+    },
+    "launch_monitor_analytics": {
+      "title": "Shot Pattern Analysis",
+      "url": "https://affinedrift.com/articles/shot-pattern-analysis.html"
+    },
+    "library_tool": {
+      "title": "AffineDrift Theory Part I",
+      "url": "https://affinedrift.com/articles/theory-part1.html"
+    },
+    "loop_nullspace": {
+      "title": "After One Solution: Null-Space Exploration",
+      "url": "https://affinedrift.com/articles/after-one-solution-null-space-exploration.html"
+    },
+    "loop_nullspace_variability": {
+      "title": "After One Solution: Null-Space Exploration",
+      "url": "https://affinedrift.com/articles/after-one-solution-null-space-exploration.html"
+    },
+    "matched_swing_browser": {
+      "title": "Proximal-to-Distal Energy Transfer",
+      "url": "https://affinedrift.com/articles/proximal_distal_energy_transfer/index.html"
+    },
+    "matlab_suite": {
+      "title": "The Physics of Golf \u2014 Forces and Torques",
+      "url": "https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html"
+    },
+    "mediapipe_analysis": {
+      "title": "Markerless Motion Capture Camera Selection",
+      "url": "https://affinedrift.com/articles/markerless-mocap-camera-selection.html"
+    },
+    "model_explorer": {
+      "title": "Degrees of Freedom and Dimensionality",
+      "url": "https://affinedrift.com/articles/degrees-of-freedom-and-dimensionality.html"
+    },
+    "motion_capture": {
+      "title": "Markerless Motion Capture Camera Selection",
+      "url": "https://affinedrift.com/articles/markerless-mocap-camera-selection.html"
+    },
+    "motion_matching": {
+      "title": "Proximal-to-Distal Energy Transfer",
+      "url": "https://affinedrift.com/articles/proximal_distal_energy_transfer/index.html"
+    },
+    "motion_target_preview": {
+      "title": "Proximal-to-Distal Energy Transfer",
+      "url": "https://affinedrift.com/articles/proximal_distal_energy_transfer/index.html"
+    },
+    "movement_optimizer": {
+      "title": "Inverse Dynamics",
+      "url": "https://affinedrift.com/articles/inverse-dynamics.html"
+    },
+    "mujoco_models_shared": {
+      "title": "The Physics of Golf \u2014 Forces and Torques",
+      "url": "https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html"
+    },
+    "mujoco_unified": {
+      "title": "Drift Is the Past, Control Is the Present",
+      "url": "https://affinedrift.com/articles/drift-is-the-past-control-is-the-present.html"
+    },
+    "myosim_suite": {
+      "title": "The Physics of Golf \u2014 Forces and Torques",
+      "url": "https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html"
+    },
+    "necromatcher": {
+      "title": "Proximal-to-Distal Energy Transfer",
+      "url": "https://affinedrift.com/articles/proximal_distal_energy_transfer/index.html"
+    },
+    "openpose_analysis": {
+      "title": "Markerless Motion Capture Camera Selection",
+      "url": "https://affinedrift.com/articles/markerless-mocap-camera-selection.html"
+    },
+    "opensim_golf": {
+      "title": "Drift Is the Past, Control Is the Present",
+      "url": "https://affinedrift.com/articles/drift-is-the-past-control-is-the-present.html"
+    },
+    "opensim_models_shared": {
+      "title": "The Physics of Golf \u2014 Forces and Torques",
+      "url": "https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html"
+    },
+    "pendulum_simulator": {
+      "title": "Drift Components on a Wrench Double Pendulum",
+      "url": "https://affinedrift.com/articles/drift-components-wrench-double-pendulum.html"
+    },
+    "pinocchio_golf": {
+      "title": "Drift Is the Past, Control Is the Present",
+      "url": "https://affinedrift.com/articles/drift-is-the-past-control-is-the-present.html"
+    },
+    "pinocchio_models_shared": {
+      "title": "The Physics of Golf \u2014 Forces and Torques",
+      "url": "https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html"
+    },
+    "pose_studio": {
+      "title": "Degrees of Freedom and Dimensionality",
+      "url": "https://affinedrift.com/articles/degrees-of-freedom-and-dimensionality.html"
+    },
+    "project_map": {
+      "title": "AffineDrift Theory Part I",
+      "url": "https://affinedrift.com/articles/theory-part1.html"
+    },
+    "putting_analytics": {
+      "title": "Putting Roll Models",
+      "url": "https://affinedrift.com/articles/putting-roll-models.html"
+    },
+    "putting_green": {
+      "title": "Putting Roll Models",
+      "url": "https://affinedrift.com/articles/putting-roll-models.html"
+    },
+    "rate_of_closure": {
+      "title": "Rotation-Induced Spin",
+      "url": "https://affinedrift.com/articles/rotation-induced-spin.html"
+    },
+    "shot_pattern_analysis": {
+      "title": "Shot Pattern Analysis",
+      "url": "https://affinedrift.com/articles/shot-pattern-analysis.html"
+    },
+    "shot_tracer": {
+      "title": "Impact Mechanics and Ball Flight",
+      "url": "https://affinedrift.com/articles/impact-mechanics-and-ball-flight.html"
+    },
+    "sidekick": {
+      "title": "Core Theses Registry",
+      "url": "https://affinedrift.com/articles/core-theses-registry.html"
+    },
+    "simulation_backends": {
+      "title": "Zero-Torque Counterfactual (ZTCF) Family",
+      "url": "https://affinedrift.com/articles/zero-torque-counterfactual.html"
+    },
+    "simulation_controls": {
+      "title": "Passive and Distributed Control",
+      "url": "https://affinedrift.com/articles/passive-distributed-control.html"
+    },
+    "spine_viewer": {
+      "title": "Inverse Dynamics",
+      "url": "https://affinedrift.com/articles/inverse-dynamics.html"
+    },
+    "swing_flight_pipeline": {
+      "title": "Impact Mechanics and Ball Flight",
+      "url": "https://affinedrift.com/articles/impact-mechanics-and-ball-flight.html"
+    },
+    "swing_objective_lab": {
+      "title": "Inverse Dynamics",
+      "url": "https://affinedrift.com/articles/inverse-dynamics.html"
+    },
+    "terrain_engine": {
+      "title": "Constraint Forces",
+      "url": "https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch07_constraint_forces.html"
+    },
+    "tools_calculator_hub": {
+      "title": "AffineDrift Theory Part I",
+      "url": "https://affinedrift.com/articles/theory-part1.html"
+    },
+    "tour_matching_viewer": {
+      "title": "Proximal-to-Distal Energy Transfer",
+      "url": "https://affinedrift.com/articles/proximal_distal_energy_transfer/index.html"
+    },
+    "training_controller": {
+      "title": "Passive and Distributed Control",
+      "url": "https://affinedrift.com/articles/passive-distributed-control.html"
+    },
+    "video_analyzer": {
+      "title": "Markerless Motion Capture Camera Selection",
+      "url": "https://affinedrift.com/articles/markerless-mocap-camera-selection.html"
+    },
+    "video_processor": {
+      "title": "Markerless Motion Capture Camera Selection",
+      "url": "https://affinedrift.com/articles/markerless-mocap-camera-selection.html"
+    },
+    "visualization": {
+      "title": "AffineDrift Theory Part I",
+      "url": "https://affinedrift.com/articles/theory-part1.html"
+    }
+  }
+}

@@ -5,7 +5,7 @@ Continuation 102 restarts from Candidate 101 (`b505d8b6...`) and implements the 
 1. **Recentered Control Bounds ($\pm 3.0\text{ N/Nm}$)**: Unlocked the 22 control coordinates that had become pinned against historical box boundaries inherited from Parent 19, restoring full bidirectional gradient authority across all 81 active B4/B5/B6 parameters.
 2. **Recentered Node Chart at $t=0.60\text{ s}$**: Anchored chart directly on Candidate 101's integrated endpoint with zero initial defect, eliminating the 11 saturated node coordinates.
 3. **Zero Active Bound Count Achieved**: The optimization converged with **0 active theta bounds** (lower=0, upper=0) and **0 active node bounds**, completely eliminating numerical boundary lock.
-4. **Independent MATLAB R2025b Update 5 Validation**: Evaluated on DeskComputer under qualified solver settings (`ode15s`, `RelTol 1e-6`, `MaxStep 1/1440 s`), demonstrating **60.5 micrometer** max Euclidean discrepancy and **1.1 micrometer** mean discrepancy against Pinocchio 4.1.0.
+4. **Independent MATLAB R2025b Update 5 Validation**: Evaluated on <host> under qualified solver settings (`ode15s`, `RelTol 1e-6`, `MaxStep 1/1440 s`), demonstrating **60.5 micrometer** max Euclidean discrepancy and **1.1 micrometer** mean discrepancy against Pinocchio 4.1.0.
 
 ---
 

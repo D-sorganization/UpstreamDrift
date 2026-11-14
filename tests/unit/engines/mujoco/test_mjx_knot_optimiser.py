@@ -43,6 +43,8 @@ def test_settings_valid_defaults() -> None:
     assert s.horizon_s == 1.65
     assert s.weld_stiffness == WELD_STIFFNESS_N_M
     assert s.weld_damping == WELD_DAMPING_N_S_M
+    assert s.lbfgs_parameter_scale == 10.0
+    assert s.lbfgs_ftol is None and s.lbfgs_gtol is None and s.lbfgs_pgtol is None
 
 
 def test_settings_rejected_iterations() -> None:

@@ -270,13 +270,37 @@ class MockPhysicsEngine:
         mapped[:n] = np.asarray(tau, dtype=float).reshape(-1)[:n]
         return np.linalg.solve(m, mapped)
 
+    def compute_control_acceleration_at_state(
+        self, q: np.ndarray, tau: np.ndarray
+    ) -> np.ndarray:
+        from src.shared.python.engine_core.counterfactual_defaults import (
+            default_control_acceleration_at_state,
+        )
+
+        if q is None:
+            raise ValueError("q must be provided")
+        return default_control_acceleration_at_state(self, q, tau)
+
+    def compute_gravity_only_acceleration(self, q: np.ndarray) -> np.ndarray:
+        from src.shared.python.engine_core.counterfactual_defaults import (
+            default_gravity_only_acceleration,
+        )
+
+        if q is None:
+            raise ValueError("q must be provided")
+        return default_gravity_only_acceleration(self, q)
+
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         return self.compute_drift_acceleration()
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
+        from src.shared.python.engine_core.counterfactual_defaults import (
+            deprecated_compute_zvcf_shim,
+        )
+
         if q is None:
             raise ValueError("q must be provided")
-        return np.zeros(self.compute_mass_matrix().shape[0])
+        return deprecated_compute_zvcf_shim(self, q)
 
     def compute_contact_forces(self) -> np.ndarray:
         return np.zeros(3)

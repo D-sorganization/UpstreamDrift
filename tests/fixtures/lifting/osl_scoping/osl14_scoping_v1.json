@@ -1,0 +1,18 @@
+{
+  "schema_version": "ud.osl_scoping.osl14.v1",
+  "issue": {
+    "id": 13057,
+    "slug": "OSL-14"
+  },
+  "lift_body": {
+    "stature_m": 1.78,
+    "mass_kg": 80.0,
+    "hip_half_width_m": 0.18512,
+    "lumbar_coordinates": [
+      "SpineInputX",
+      "SpineInputY"
+    ],
+    "has_pelvis_as_observe_landmarks": false
+  },
+  "notes": "Pelvis landmark tracking (ASIS/PSIS) is deferred — see issue #13057 TODOs."
+}

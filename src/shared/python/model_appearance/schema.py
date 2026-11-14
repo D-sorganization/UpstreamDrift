@@ -22,6 +22,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, cast
 
+from src.shared.python.core.canonical_floats import canonical_floats
 from src.shared.python.core.handedness import (
     DEFAULT_HANDEDNESS,
     HANDEDNESS_CHOICES,
@@ -33,6 +34,15 @@ SCHEMA_PATH = Path(__file__).with_name("appearance_v1.schema.json")
 APPEARANCE_SUFFIX = ".appearance.json"
 # Spec keys that only ever affect pictures; excluded from the physics hash.
 VISUAL_ONLY_SPEC_KEYS = ("visual_hints", "appearance")
+# Full-precision digests the physics hash leaves out (#14397): each would carry
+# last-bit BLAS drift into it.  ``upper_body_sha256`` digests a slice of this
+# same document, whose floats are hashed at canonical precision anyway; the
+# parent's ``parent_spec_canonical_sha256`` (visual keys included) sits beside
+# its ``parent_physics_spec_sha256``, which identifies the parent stably.
+_FULL_PRECISION_DIGEST_PATHS = (
+    ("upper_body_sha256",),
+    ("spec_revision", "parent_spec_canonical_sha256"),
+)
 # Owner ruling (#12685): the default outfit is charcoal trousers. The preset
 # itself is defined in ``library.CLOTHING``, which checks this name exists.
 # Every default comes from the one contract (HRG-B1, #13163; see ``defaults``).
@@ -432,13 +442,27 @@ def physics_spec_sha256(spec: bytes | Mapping[str, Any]) -> str:
     """Hash of a spec with all visual-only keys removed (canonical JSON).
 
     Postcondition: identical for two specs that differ only in
-    ``visual_hints`` or an embedded ``appearance`` key.
+    ``visual_hints`` or an embedded ``appearance`` key, and for two specs
+    whose floats differ only below the canonical precision (12 significant
+    digits, 1e-12 zero floor; :mod:`~src.shared.python.core.canonical_floats`,
+    #14397), so BLAS or libm last-bit drift cannot move the hash.  The
+    full-precision digests ``upper_body_sha256`` and
+    ``spec_revision.parent_spec_canonical_sha256`` are left out for the same
+    reason (see ``_FULL_PRECISION_DIGEST_PATHS``).
     """
     data = json.loads(spec) if isinstance(spec, bytes | bytearray) else spec
     stripped = copy.deepcopy(dict(data))
     for key in VISUAL_ONLY_SPEC_KEYS:
         stripped.pop(key, None)
-    canonical = json.dumps(stripped, sort_keys=True, separators=(",", ":"))
+    for *parents, key in _FULL_PRECISION_DIGEST_PATHS:
+        node: Any = stripped
+        for name in parents:
+            node = node.get(name) if isinstance(node, Mapping) else None
+        if isinstance(node, dict):
+            node.pop(key, None)
+    canonical = json.dumps(
+        canonical_floats(stripped), sort_keys=True, separators=(",", ":")
+    )
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 

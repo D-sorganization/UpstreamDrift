@@ -78,7 +78,7 @@ default library.
 
 The **Theme** column on each row controls the colour group. The
 matplotlib renderer applies the shared dark-theme palette
-(`src/shared/python/theme/matplotlib_style.py`); changing a group
+(`src/shared/python/body_part_viz/theme.py`); changing a group
 re-runs the palette without re-fitting the geometry, so it is cheap.
 
 Typical groupings:

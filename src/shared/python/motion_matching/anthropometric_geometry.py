@@ -61,6 +61,7 @@ from src.shared.python.motion_matching.club_models import (
     apply_club,
 )
 from src.shared.python.motion_matching.grip_fit import grip_rotation
+from src.shared.python.motion_matching.arm_mirror import native_limits
 from src.shared.python.motion_matching.range_of_motion import UPPER_RANGES_DEG
 
 Array = NDArray[np.float64]
@@ -85,7 +86,8 @@ NECK_JOINT = "GolfSwing3D_Kinetic/Neck Joint"
 
 # Anatomical ranges in this document's conventions come from the shared
 # range-of-motion table; ball-joint Euler components stay unbounded.
-COORDINATE_RANGES_DEG: dict[str, tuple[float, float]] = dict(UPPER_RANGES_DEG)
+# The build tables are native; ``mirror_document_arm`` flips the right-arm limits.
+COORDINATE_RANGES_DEG: dict[str, tuple[float, float]] = native_limits(UPPER_RANGES_DEG)
 # Shoulder gimbal base: the upper arm points forward at zero pose so that the
 # middle (Ry) rotation stays far from its +-90 deg singularity during a swing,
 # where the arms hang forward-down at address and rise to about 45 deg above
@@ -271,6 +273,7 @@ def build_upper_body(
     grip_rotation_deg: Mapping[str, Sequence[float]] | None = None,
     scale_hand_mass: bool = False,
     handedness: str = DEFAULT_HANDEDNESS,
+    upper_ranges_deg: Mapping[str, tuple[float, float]] | None = None,
 ) -> dict[str, Any]:
     """Return the anthropometric upper-body document for a subject.
 
@@ -626,7 +629,14 @@ def build_upper_body(
             "hand_breadth_m": hand_breadth_m,
             **({} if handedness == DEFAULT_HANDEDNESS else {"handedness": handedness}),
         },
-        "coordinate_ranges_deg": {k: list(v) for k, v in COORDINATE_RANGES_DEG.items()},
+        "coordinate_ranges_deg": {
+            k: list(v)
+            for k, v in (
+                native_limits(dict(upper_ranges_deg))
+                if upper_ranges_deg is not None
+                else COORDINATE_RANGES_DEG
+            ).items()
+        },
         "address_seed_deg": dict(ADDRESS_SEED_DEG),
         "visual_hints": torso_visual_hints(names, stature_m, pelvis_h, hub_h, clav),
     }

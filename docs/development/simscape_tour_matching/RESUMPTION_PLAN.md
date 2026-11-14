@@ -2,13 +2,13 @@
 
 ## Assessment
 
-The execution pathway is established: R2025b on DeskComputer, native initialization, one forward wrapper, continuous polynomial efforts, identity-checked prefix transfer, checkpoints, cold replay and all-27 actuator audits. A lower-cost coding agent can operate this pathway with bounded instructions and explicit escalation gates. This is an engineering assessment of the task, not a benchmark of any particular model.
+The execution pathway is established: R2025b on <host>, native initialization, one forward wrapper, continuous polynomial efforts, identity-checked prefix transfer, checkpoints, cold replay and all-27 actuator audits. A lower-cost coding agent can operate this pathway with bounded instructions and explicit escalation gates. This is an engineering assessment of the task, not a benchmark of any particular model.
 
 The complete scientific solution is not established. The longest verified prefix covers 0.6 of 1.813889 seconds (about one third), at 9.062024 mm RMS. Both latest optimizations exhausted their budgets without convergence. The full capture has missing observations; fixed rigid marker attachments and connected-model constraints leave residuals that torque optimization alone may not remove. Sampled calibrated pose RMS of 26.824744 mm is a local kinematic diagnostic, not a certified global error floor. Geometry and attachment choices remain provisional.
 
 ## First Bounded Execution Assignment
 
-1. Read AGENT_HANDOFF.md and RESUME_AND_STORAGE.md. Confirm DeskComputer connectivity, explicit R2025b, free scratch space, no competing fit in the intended runtime, and unchanged source revision. Keep the saved 0.6 s run immutable.
+1. Read AGENT_HANDOFF.md and RESUME_AND_STORAGE.md. Confirm <host> connectivity, explicit R2025b, free scratch space, no competing fit in the intended runtime, and unchanged source revision. Keep the saved 0.6 s run immutable.
 2. Use original-state runtime 0715f95f3 and its existing runner. Create a new uniquely named run for 0.7 s, cubic basis, finite-difference step 0.00001 and max-nfev 10. Transfer from prefix-600ms-cubic-refine-02/first_prefix_fit.json with the original qualified seed. These are proposed starting settings, not claimed optimal settings. Use the saved launch script/arguments as the template; preserve the transfer report and exact source identity.
 3. Keep geometry, offsets, q0 and qd0 fixed. Every simulation begins at global t0; extending the fitted interval never means restarting dynamics from a measured intermediate pose. Save every checkpoint and actual nonblank process exit code.
 4. On completion, run the existing independent R2025b cold replay and audit all 27 actuator channels. Retain the existing initialization/projection/effort tolerances. If any invariant fails, preserve the failed evidence and stop this assignment for diagnosis.
@@ -35,7 +35,7 @@ Keep the calibrated-state experiment separate. Its 0.1 s residual is 12.191880 m
 | Choose geometry/attachments, alter solver or objective, diagnose structural residuals | Strong Scientific Reviewer                       |
 | Change tolerances, define final acceptance, assess physiological realism              | Strong Scientific Reviewer and User Requirements |
 
-No new agent or task is launched by this plan. Switching to a cheaper agent reduces orchestration cost; MATLAB simulation time remains. The last refinement used 877 native evaluations and about 65 minutes for fitting on DeskComputer, plus cold validation. This is a historical measurement, not a forecast for longer intervals. Avoid unnecessary reasoning while native processes run; use durable checkpoints and bounded monitoring.
+No new agent or task is launched by this plan. Switching to a cheaper agent reduces orchestration cost; MATLAB simulation time remains. The last refinement used 877 native evaluations and about 65 minutes for fitting on <host>, plus cold validation. This is a historical measurement, not a forecast for longer intervals. Avoid unnecessary reasoning while native processes run; use durable checkpoints and bounded monitoring.
 
 ## Completion Evidence
 

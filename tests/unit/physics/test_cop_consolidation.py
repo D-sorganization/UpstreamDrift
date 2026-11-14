@@ -156,7 +156,7 @@ def test_cop_implementations_live_only_in_the_canonical_module() -> None:
             "grep",
             "-n",
             "-E",
-            "def (compute_center_of_pressure|compute_cop)",
+            "def (compute_center_of_pressure|compute_cop_from_grf|compute_cop_trajectory_length)",
             "--",
             "src",
         ],

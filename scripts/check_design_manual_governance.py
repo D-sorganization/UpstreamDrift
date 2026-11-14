@@ -238,6 +238,44 @@ def _valid_revision(value: object) -> bool:
     )
 
 
+_CALCULATION_FIELDS = {
+    "id",
+    "title",
+    "owner",
+    "evidence_class",
+    "manual_chapter",
+    "implementation_paths",
+    "notation_symbol_ids",
+    "affinedrift_theory_url",
+}
+
+
+def _unique_ids(items: list[dict[str, object]], label: str) -> None:
+    ids = [_text(item["id"], f"{label} id") for item in items]
+    if len(ids) != len(set(ids)):
+        raise DesignManualGovernanceError(f"{label} ids must be unique")
+
+
+def _verify_calculations(calculations: list[object]) -> None:
+    parsed: list[dict[str, object]] = []
+    for calculation in calculations:
+        item = _object(calculation, "registry calculation", _CALCULATION_FIELDS)
+        for field, value in item.items():
+            if field in {"implementation_paths", "notation_symbol_ids"}:
+                entries = _array(value, f"calculation {field}")
+                for entry in entries:
+                    _text(entry, f"calculation {field} entry")
+                continue
+            _text(value, f"calculation {field}")
+        theory = item["affinedrift_theory_url"]
+        if not isinstance(theory, str) or "affinedrift.com" not in theory:
+            raise DesignManualGovernanceError(
+                "calculation affinedrift_theory_url must cite affinedrift.com"
+            )
+        parsed.append(item)
+    _unique_ids(parsed, "calculation")
+
+
 def verify_calculation_registry(registry: object) -> int:
     """Validate the shared registry envelope without copying its owned schema."""
     document = _object(
@@ -273,12 +311,22 @@ def verify_calculation_registry(registry: object) -> int:
             raise DesignManualGovernanceError(
                 "blocked registry requires no calculations, null commit, and blockers"
             )
+    elif status == "inventory-partial":
+        if not calculations or not blockers or document["inventory_commit"] is not None:
+            raise DesignManualGovernanceError(
+                "partial registry requires calculations, blockers, and null commit"
+            )
     else:
         raise DesignManualGovernanceError("release status is unsupported in UP-D0")
+    blocker_objects: list[dict[str, object]] = []
     for blocker in blockers:
         item = _object(blocker, "registry blocker", {"id", "owner", "resolution"})
         for field, value in item.items():
             _text(value, f"blocker {field}")
+        blocker_objects.append(item)
+    _unique_ids(blocker_objects, "blocker")
+    if calculations:
+        _verify_calculations(calculations)
     return len(calculations)
 
 

@@ -33,24 +33,32 @@ repository is a development or test convenience.
 ## Version Contract
 
 - `pyproject.toml` `[project].version` is canonical.
-- `src/api/_version.py`, `ui/package.json`, root `Cargo.toml`, and
-  `rust_core/upstream-physics/pyproject.toml` must match the canonical version.
+- `src/api/_version.py`, `ui/package.json`, root `Cargo.toml`,
+  `rust_core/upstream-physics/pyproject.toml`, `ui/src-tauri/Cargo.toml`, and
+  `ui/src-tauri/tauri.conf.json` must match the canonical version.
 - The canonical version must match the latest `vX.Y.Z` tag or be ahead of it
   during release preparation.
 - `scripts/check_version_consistency.py` is the CI gate for this contract.
 
 ## Compatibility Matrix
 
-| Artifact           | OS                                            | Python    | Tier(s) supported | Hardware              |
-| ------------------ | --------------------------------------------- | --------- | ----------------- | --------------------- |
-| Python wheel       | Linux x86_64, macOS arm64, Windows 10+ x86_64 | 3.11-3.12 | core; +extras     | CPU                   |
-| Docker image (API) | Linux x86_64                                  | 3.12      | core+extended     | CPU; optional CUDA 12 |
-| Tauri desktop      | Linux x86_64, macOS arm64, Windows 10+ x86_64 | bundled   | core+extended     | CPU                   |
-| Rust crate         | Linux, macOS, Windows                         | n/a       | n/a               | CPU                   |
+| Artifact           | OS                                            | Python           | Tier(s) supported | Hardware              |
+| ------------------ | --------------------------------------------- | ---------------- | ----------------- | --------------------- |
+| Python wheel       | Linux x86_64, macOS arm64, Windows 10+ x86_64 | 3.11-3.12        | core; +extras     | CPU                   |
+| Docker image (API) | Linux x86_64                                  | 3.12             | core+extended     | CPU; optional CUDA 12 |
+| Tauri desktop      | Linux x86_64, macOS arm64, Windows 10+ x86_64 | local (see note) | core+extended     | CPU                   |
+| Rust crate         | Linux, macOS, Windows                         | n/a              | n/a               | CPU                   |
 
 Supported means a release has a green smoke test in `tests/smoke/` for the
 artifact and the combination is on the release checklist. Combinations outside
 this matrix are best-effort.
+
+> [!NOTE]
+> No bundled or self-contained Python interpreter is shipped with the Tauri
+> desktop bundle today (packaging changes are governed by #14264 and the Sidekick
+> packaging hold). The Tauri shell resolves the local Python interpreter via
+> `UD_PYTHON`, repository `.venv`, or system `python3`/`python` under the
+> `BackendState` supervisor.
 
 ## Service Objectives
 

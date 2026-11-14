@@ -103,9 +103,8 @@ MUJOCO_GL=egl python3 scripts/measure_lift_bar_path_parity.py
   landmark is the spec's `Hub` frame (shoulder-girdle centre), matching the
   optimizer's back-squat bar at the shoulder joint. The barbell and hand
   contact arrive with LIFT-4 (#11744).
-- Literature comparison of bar path, bar velocity and phase timing is not yet
-  recorded: TODO(#11745) add cited reference values as evidence, not tuning
-  targets.
+- The optimizer and retargeted high-bar trajectories have separate literature
+  evidence below; neither is claimed as athlete validation or a tuning target.
 
 ## Lift Body (OSL-14, #13057)
 
@@ -446,4 +445,87 @@ MuJoCo plant at frame 0, and `bar_path_parity.replay_bar_path` per engine.
 ### Model Accommodation Statement
 
 The selected barbell grip width of $0.75$ m is an explicit model accommodation to the Rajagopal musculoskeletal arm range limits, not a measured human high-bar athletic grip. In the Rajagopal model, the rigid thoracic trunk and fixed revolute joint limits severely restrict the posterior upper-extremity reachable workspace.
+
+## Back-Squat Trajectory Evidence (LIFT-5, #11745)
+
+This section records the trajectory values in the committed bundle and one
+free-weight study with directly measured vertical bar displacement. These are
+evidence about the stored trajectory and study protocol, not validation of the
+model as an athlete and not trajectory-tuning targets.
+
+### Reproducing the Committed Trajectory Metrics
+
+Run the bounded extractor from the repository root:
+
+```bash
+python -m scripts.report_back_squat_trajectory_metrics
+```
+
+It reads the committed `back_squat_bundle.npz` manifest only. It does not call
+the optimizer, regenerate the lift, or replay an engine. Its source is commit
+`c7eed64da2a3440637f20e9c28a079bfb91b911c`, with Tools pin
+`160c9c785e4559067e2b532f189227f662f50579`. The optimizer metadata records a
+full-squat solution for an 80 kg, 1.78 m lifter and a 100 kg bar over 3.0 s,
+sampled at 151 points (20 ms intervals). The bundle's engine-tracking window
+is only 0.2 s, from 1.4 to 1.6 s; the full-lift measurements below come from
+the saved optimizer solution and whole-lift IK path in the manifest, not that
+short replay window.
+
+Velocity is the unfiltered `numpy.gradient` of each saved path against its
+sample times (`edge_order=2`). Descent is defined from the first saved sample
+to the sample with minimum vertical coordinate; ascent runs from that bottom
+sample to the last saved sample. Vertical is positive upward. The planar
+optimizer path is expressed as forward/up coordinates relative to the ankle;
+the retargeted path is the IK bar-centre world position projected onto the
+stored sagittal-forward axis, with world `z` as vertical. The two records are
+different representations and should not be interchanged.
+
+| Quantity | Optimizer planar path | Retargeted high-bar IK path |
+| --- | ---: | ---: |
+| Bottom time (s) | 1.500 | 1.500 |
+| Descent / ascent duration (s) | 1.500 / 1.500 | 1.500 / 1.500 |
+| Vertical excursion (m) | 0.728520 | 0.510201 |
+| Forward-coordinate range (m) | 0.093407 | 0.067592 |
+| Sagittal path length (m) | 1.481307 | 1.051299 |
+| Peak downward vertical speed (m/s, time) | −1.049031 at 1.340 s | −0.610012 at 1.320 s |
+| Peak upward vertical speed (m/s, time) | 1.049031 at 1.660 s | 0.608549 at 1.680 s |
+
+The optimizer coordinates and retargeted IK bar-centre coordinates produce
+different vertical excursions and speeds. The extractor preserves that
+difference instead of presenting one as a substitute for the other.
+
+### Published Vertical-Displacement Reference
+
+Larsen et al. measured barbell displacement in 18 recreationally trained
+participants (9 men, 9 women) performing 3-RM back squats in high-bar and
+low-bar placements with narrow and wide stances. Squat depth was set by a
+band requiring the proximal hamstring to touch before ascent. The paper
+reports these mean ± SD vertical descent displacements:
+
+| Study condition | Reported mean ± SD vertical descent displacement (m) |
+| --- | ---: |
+| High bar, narrow stance | 0.64 ± 0.05 |
+| High bar, wide stance | 0.60 ± 0.04 |
+| Low bar, narrow stance | 0.63 ± 0.05 |
+| Low bar, wide stance | 0.61 ± 0.05 |
+
+The study used a linear encoder sampled at 200 Hz to record barbell position.
+It separately defines ascent events `v0`, `vmax1`, `dmax1`, `vmin`, and
+`vmax2`, and defines ascent displacement from `v0`. The reported descent
+displacement has the same physical quantity and unit as the model's vertical
+excursion, so it is shown as measurement-context reference. It is not a
+matched benchmark: the study
+used human 3-RM repetitions and a prescribed hamstring-to-band depth, whereas
+the saved optimizer path is a prescribed solution and the IK path is a
+retargeted model trajectory. The bundle has no individual 1-RM normalization,
+and its finite-difference velocities are sampled at 50 Hz without the study's
+measurement pipeline. The study's tabulated text does not give matching
+whole-repetition phase durations or a forward bar-path displacement, so those
+quantities are not compared here.
+
+Source: Larsen S, Kristiansen E, Helms E, van den Tillaar R. “Effects of
+Stance Width and Barbell Placement on Kinematics, Kinetics, and Myoelectric
+Activity in Back Squats.” *Frontiers in Sports and Active Living*.
+2021;3:719013. [Full text and methods](https://pmc.ncbi.nlm.nih.gov/articles/PMC8440835/),
+doi:10.3389/fspor.2021.719013.
 

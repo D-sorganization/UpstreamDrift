@@ -50,6 +50,10 @@ _LAZY_GLYPH_NAMES = frozenset(
 def __getattr__(name: str) -> Any:
     """Resolve glyph exports lazily from :mod:`.glyphs` (PEP 562)."""
     if name in _LAZY_GLYPH_NAMES:
+        # Import matplotlib before ``glyphs`` so headless gates that block it
+        # fail on first attribute access (tests/unit/force_overlay/test_lazy_glyph_import.py).
+        import matplotlib  # noqa: F401
+
         from . import glyphs
 
         value = getattr(glyphs, name)

@@ -33,10 +33,7 @@ def client() -> TestClient:
 def test_route_matches_the_shared_fixture(client: TestClient, case: dict) -> None:
     body = client.post("/character-builder/grip", json=case["picks"]).json()
     expected = case["expected"]
-    allowed_shas = {expected["character_physics_spec_sha256"]}
-    if "character_physics_spec_sha256_win" in expected:
-        allowed_shas.add(expected["character_physics_spec_sha256_win"])
-    assert body["physics_spec_sha256"] in allowed_shas
+    assert body["physics_spec_sha256"] == expected["character_physics_spec_sha256"]
     assert body["refit_required"] == expected["refit_required"]
     if expected["grip"] is not None:
         assert body["grip"] == expected["grip"]
@@ -49,9 +46,12 @@ def test_route_refuses_an_unknown_pick_and_an_impossible_one(
     client: TestClient,
 ) -> None:
     assert client.post("/character-builder/grip", json={"spin": 1}).status_code == 422
-    r = client.post("/character-builder/grip", json={"lead_shaft_rotation": -60})
-    # -60 deg is the lead alpha bound (lead V azimuth -40 deg, HRG-GS-G4); the
-    # trail hand then sits outside the trail V offset range: still impossible.
+    r = client.post(
+        "/character-builder/grip",
+        json={"lead_shaft_rotation": -60, "trail_shaft_rotation": 20},
+    )
+    # -60 deg lead with 20 deg trail leaves the trail hand 80 deg stronger,
+    # outside the +/-75 deg trail V offset range (SHOW-A21, #14797): still impossible.
     assert r.status_code == 422 and "trail_v_offset_deg" in r.json()["detail"]
 
 

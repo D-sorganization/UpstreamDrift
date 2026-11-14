@@ -2,7 +2,7 @@
   "source_base": "23176ad571cbd56028b43ba35123cd8185f890c3",
   "implementation_revision": "SELF (commit containing this manifest)",
   "matlab_release": "R2025b",
-  "host": "DeskComputer",
+  "host": "<host>",
   "hash_convention": "SHA256 of UTF-8 source with LF line endings",
   "source_hashes": {
     "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/build_golf_kinematics.m": "9a5c62832eb056bf20d6fa12b8dfd5e84fbf80986d25e8d3670826a75a1ba419",

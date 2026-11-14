@@ -36,7 +36,10 @@ from concurrent.futures import Future
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.core.process_safety import managed_popen
+from src.shared.python.core.process_safety import (
+    is_pid_alive as _pid_is_alive,
+    managed_popen,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ..contracts import ProgressSink, ThreadingCancelToken
@@ -581,28 +584,3 @@ def scan_pidfiles(output_dirs: Sequence[Path]) -> dict[Path, int | None]:
             continue
         findings[pidfile] = pid if _pid_is_alive(pid) else None
     return findings
-
-
-def _pid_is_alive(pid: int) -> bool:
-    """POSIX-safe ``kill(pid, 0)`` liveness probe.
-
-    Returns ``False`` for non-positive pids without calling ``kill``;
-    on Windows (no ``os.kill`` with signal 0 semantics) we fall back to
-    a permissive ``True`` since the launcher's reattach UI can still
-    re-probe via its own mechanism.
-    """
-
-    if pid <= 0:
-        return False
-    if not hasattr(os, "kill"):
-        return True  # pragma: no cover - exotic platforms
-    try:
-        os.kill(pid, 0)
-    except ProcessLookupError:
-        return False
-    except PermissionError:
-        # Process exists but we lack signal rights — treat as alive.
-        return True
-    except OSError:
-        return False
-    return True

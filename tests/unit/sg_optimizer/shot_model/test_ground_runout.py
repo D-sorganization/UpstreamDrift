@@ -112,7 +112,10 @@ def test_table_cells_report_rest_not_carry_and_slopes_change_them() -> None:
     grid = TableGrid(("mid_iron",), ("fairway",), ("calm",), ("flat", "up_5", "down_5"))
     kw = {"n": 64, "seed": 3, "slope_modifier": make_slope_modifier}
     carry = build_grid_table(
-        family, lambda i, s, w: _stub_sim(i, s, w)[:, :2], grid, **kw
+        family,
+        lambda i, s, w: _stub_sim(i, s, w)[:, :2],
+        grid,
+        **kw,
     )
     rest = build_grid_table(family, _stub_sim, grid, ground=GROUND, **kw)
     cell = lambda t, slope: t.lookup("mid_iron", "mid_iron", "fairway", "calm", slope)  # noqa: E731
@@ -122,7 +125,9 @@ def test_table_cells_report_rest_not_carry_and_slopes_change_them() -> None:
         run["up_5"] < run["flat"] < run["down_5"]
     )  # the slope bins alone move the runout
     assert rest.provenance["ground_model"] == GROUND_MODEL_ID
-    assert "ground_model" not in carry.provenance  # carry-only hashes are unchanged
+    assert (
+        "ground_model" not in carry.provenance
+    )  # carry-only hashes are unchanged (#14708, #14816)
 
 
 def test_ground_without_landing_state_columns_is_rejected() -> None:
@@ -130,7 +135,11 @@ def test_ground_without_landing_state_columns_is_rejected() -> None:
     grid = TableGrid(("mid_iron",), ("fairway",), ("calm",))
     with pytest.raises(ContractViolationError):
         build_grid_table(
-            family, lambda i, s, w: _stub_sim(i, s, w)[:, :2], grid, n=8, ground=GROUND
+            family,
+            lambda i, s, w: _stub_sim(i, s, w)[:, :2],
+            grid,
+            n=8,
+            ground=GROUND,
         )
 
 
@@ -161,6 +170,10 @@ def test_changing_a_coefficient_changes_the_table_hash(monkeypatch) -> None:
 def test_roll_fraction_of_carry_falls_from_driver_to_wedge_on_the_real_pipeline() -> (
     None
 ):
+    from src.shared.python.physics.rust_kernel import is_rust_available
+
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel required for flight pipeline")
     family, sim = get_skill_family("tour"), PipelineLandingSimulator(landing_state=True)
     z = standard_normals(0, 12)
     frac = []

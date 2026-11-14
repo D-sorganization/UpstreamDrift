@@ -231,7 +231,7 @@ The preserved profile receipt is
 its external preservation receipt is
 `5fe2702b26687781de98e6e521b92a4ba74fbd7dd4e13000a84e7127f02af4f2`.
 
-ControlTower Desktop delivery has two new exclusive folders:
+<host> Desktop delivery has two new exclusive folders:
 
 - `Necromatcher 3D Shape Still Review 2026-10-03 V2`: 48 individually size/SHA
   verified comparison and audit files; remote receipt
@@ -257,7 +257,7 @@ inventory, then compile with the already available compiler. Assets remain
 external acquisition evidence; they are not committed as public source files.
 Inspect every rendered page and issue a new immutable review receipt after any
 change. Earlier 74-page methods and nine-page source/shutter reports, the old
-Desktop index and prior ControlTower deliveries remain preserved.
+Desktop index and prior <host> deliveries remain preserved.
 
 ## Solver Budget, Fixed Row-Time and ROI Checkpoint
 
@@ -306,7 +306,7 @@ precede the first pose by about 45 seconds and do not establish hardware isolati
 remain pending separate authorization and execution.
 
 The reviewed budget and row-time bundles are delivered to distinct exclusive
-ControlTower Desktop folders. Row-time has thirteen verified payloads totaling
+<host> Desktop folders. Row-time has thirteen verified payloads totaling
 5,242,778 bytes; budget has eleven totaling 525,303 bytes. Both exact sources,
 PDF/review hashes and delivery proofs are recorded in the compact receipts.
 To reproduce, copy the canonical TEX into its delivered bundle root, verify

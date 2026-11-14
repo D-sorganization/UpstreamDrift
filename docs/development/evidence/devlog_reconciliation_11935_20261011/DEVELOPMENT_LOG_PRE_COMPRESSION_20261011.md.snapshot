@@ -838,7 +838,7 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 ### DL-#10960 · Fabricated-Evidence Audit: Fail-Closed Remediation of Literal Receipts and Self-Scored Fits
 
 - **State:** shipped
-- **Owner:** claude (agy executors on DeskComputer and OG Laptop)
+- **Owner:** claude (agy executors on <host> and OG Laptop)
 - **Issue:** #10960
 - **PR:** #11017
 - **Branch:** `claude/ud-consolidated2-20260926`
@@ -991,8 +991,8 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Paths:** src/shared/python/motion*matching/pipeline/plants/pinocchio_plant.py; pinocchio_lane_receipts.py; receipt_components.py; cli.py; src/engines/physics_engines/pinocchio/python/full_body_fit.py; tests/unit/motion_matching/pipeline/test_pinocchio_plant.py; docs/development/full_body_models/evidence/ground_support/anthro_driver*{pinocchio,pink}/
 - **Started:** 2026-09-22
 - **Last verified:** 2026-09-22 at SELF — rematched onto origin/main after CO-06 #10687 merge (`f191dd09d`); regenerated matched_swing status README + divergence inventory; blocked native G1 receipts unchanged.
-- **Summary:** Wire Pinocchio MatchingPlant derivatives + Pink `create_constrained_ik`, fitter `resolve_fit_native_plant` LoD bridge, ConstrainedIkReceipt `closure_residual_m` budget, and honest blocked evidence until ControlTower native run.
-- **Next step:** Confirm quality-gate green + squash auto-merge of PR #10684; ControlTower native pink receipts when scheduled (MS-107 owns G1).
+- **Summary:** Wire Pinocchio MatchingPlant derivatives + Pink `create_constrained_ik`, fitter `resolve_fit_native_plant` LoD bridge, ConstrainedIkReceipt `closure_residual_m` budget, and honest blocked evidence until <host> native run.
+- **Next step:** Confirm quality-gate green + squash auto-merge of PR #10684; <host> native pink receipts when scheduled (MS-107 owns G1).
 - **Evidence:** docs/development/full_body_models/evidence/ground_support/anthro_driver_pinocchio/; docs/development/full_body_models/evidence/ground_support/anthro_driver_pink/
 
 ### DL-#10345 · MyoSuite Kinematic Replay With Coordinate Map and Marker Parity Receipt
@@ -1116,8 +1116,8 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Paths:** scripts/ci/run_native_engine_lane.py; scripts/ci/run_native_engine_lane.sh; docs/development/matched_swing_program/evidence/nightly/; tests/docs/test_native_lane_freshness.py; tests/scripts/test_run_native_engine_lane.py
 - **Started:** 2026-09-21
 - **Last verified:** 2026-10-11 at e68baeabde8ff639f846a167ca7703ace43bd0a9 (metadata/path inventory only; no tests or native runs; see evidence/devlog_reconciliation_11935_20261011/DEVELOPMENT_LOG_CURRENT_SOURCE_METADATA_AUDIT_e68_20261011.json)
-- **Summary:** Added idempotent native-engine lane runner emitting hashed nightly receipts for OpenSim and MyoSuite (`requires_opensim` / `requires_myosuite` pytest markers), freshness gate warning at seven days and failing at thirty days, and ControlTower verification docs without editing `.github/workflows`.
-- **Next step:** Refresh receipts on ControlTower opensim-10003 venv; merge PR closing #10342.
+- **Summary:** Added idempotent native-engine lane runner emitting hashed nightly receipts for OpenSim and MyoSuite (`requires_opensim` / `requires_myosuite` pytest markers), freshness gate warning at seven days and failing at thirty days, and <host> verification docs without editing `.github/workflows`.
+- **Next step:** Refresh receipts on <host> opensim-10003 venv; merge PR closing #10342.
 - **Evidence:** docs/development/matched_swing_program/evidence/nightly/opensim_receipt.json; docs/development/matched_swing_program/evidence/nightly/myosuite_receipt.json; tests/docs/test_native_lane_freshness.py.
 
 ### DL-#9422 · Rig Capture Sessions Through the Tools MocapSession Contract

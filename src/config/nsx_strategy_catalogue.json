@@ -1,0 +1,331 @@
+[
+  {
+    "id": "S1",
+    "name": "Null-space redistribution",
+    "mechanism": "Move the closure-family allocation z to the minimum-face-variance point of the NSX-92 problem, with the signal-dependent noise (M1) as the only allocation-to-variance channel.",
+    "mechanism_ids": [
+      "H-NOISE-SIGNAL-DEPENDENT"
+    ],
+    "availability": "implemented",
+    "cost": {
+      "basis": "capacity_weighted_allocation_effort",
+      "description": "capacity-weighted quadratic effort of the allocated torque history"
+    },
+    "evaluators": [
+      "src.shared.python.loop_nullspace.noise_aware_allocation.minimise_face_variance"
+    ],
+    "adapter": "src.shared.python.loop_nullspace.strategy_evaluators.evaluate_allocation_arm",
+    "representations": [
+      {
+        "model_class": "rigid_joint_torque",
+        "availability": "implemented",
+        "reason": ""
+      },
+      {
+        "model_class": "muscle_driven",
+        "availability": "not_implemented",
+        "reason": "muscle redundancy is not wired into the NSX-92 solve"
+      }
+    ]
+  },
+  {
+    "id": "S2",
+    "name": "Co-contraction and impedance",
+    "mechanism": "Raise joint stiffness/damping (declared impedance windows, NSX-93) or antagonist co-contraction (short-range stiffness against signal-dependent noise, NSX-94).",
+    "mechanism_ids": [
+      "H-DECLARED-JOINT-IMPEDANCE",
+      "H-MUSCLE-SHORT-RANGE-STIFFNESS"
+    ],
+    "availability": "implemented",
+    "cost": {
+      "basis": "expected_layer_l2_effort",
+      "description": "expected quadratic effort of the declared impedance / feedback torque (a separate line from the allocated torque, rule R10)"
+    },
+    "evaluators": [
+      "src.shared.python.loop_nullspace.layer_linear.layer_variance",
+      "src.shared.python.loop_nullspace.muscle_variance.cocontraction_variance_curve"
+    ],
+    "adapter": "src.shared.python.loop_nullspace.strategy_evaluators.evaluate_layer_arm",
+    "representations": [
+      {
+        "model_class": "rigid_joint_torque",
+        "availability": "implemented",
+        "reason": ""
+      },
+      {
+        "model_class": "muscle_driven",
+        "availability": "implemented",
+        "reason": ""
+      }
+    ]
+  },
+  {
+    "id": "S3",
+    "name": "Distal stabilization near impact",
+    "mechanism": "A declared impedance window that ends at impact (NSX-93), stabilizing late in the downswing only.",
+    "mechanism_ids": [
+      "H-DECLARED-JOINT-IMPEDANCE"
+    ],
+    "availability": "implemented",
+    "cost": {
+      "basis": "expected_layer_l2_effort",
+      "description": "expected quadratic effort of the declared impedance / feedback torque (a separate line from the allocated torque, rule R10)"
+    },
+    "evaluators": [
+      "src.shared.python.loop_nullspace.layer_linear.layer_variance"
+    ],
+    "adapter": "src.shared.python.loop_nullspace.strategy_evaluators.evaluate_layer_arm",
+    "representations": [
+      {
+        "model_class": "rigid_joint_torque",
+        "availability": "implemented",
+        "reason": ""
+      },
+      {
+        "model_class": "muscle_driven",
+        "availability": "not_implemented",
+        "reason": "no muscle-level evaluator exists for this mechanism"
+      }
+    ]
+  },
+  {
+    "id": "S4",
+    "name": "Proximal-distal effort shift",
+    "mechanism": "Shift effort between proximal and distal joints at fixed clubhead speed.",
+    "mechanism_ids": [
+      "H-NOISE-SIGNAL-DEPENDENT"
+    ],
+    "availability": "not_implemented",
+    "cost": {
+      "basis": "undefined",
+      "description": "no cost model exists until the strategy is implemented"
+    },
+    "evaluators": [],
+    "adapter": null,
+    "representations": [
+      {
+        "model_class": "rigid_joint_torque",
+        "availability": "not_implemented",
+        "reason": "no per-joint effort-share parameterisation exists"
+      },
+      {
+        "model_class": "muscle_driven",
+        "availability": "not_implemented",
+        "reason": "no muscle-level evaluator exists for this mechanism"
+      }
+    ]
+  },
+  {
+    "id": "S5",
+    "name": "Grip pressure and hand-split preload",
+    "mechanism": "Redistribute the allocation through the geometric preload of the closure (M2) with additive noise, isolated from M1.",
+    "mechanism_ids": [
+      "H-GEOMETRIC-PRELOAD"
+    ],
+    "availability": "implemented",
+    "cost": {
+      "basis": "capacity_weighted_allocation_effort",
+      "description": "capacity-weighted quadratic effort of the allocated torque history"
+    },
+    "evaluators": [
+      "src.shared.python.loop_nullspace.noise_aware_allocation.minimise_face_variance"
+    ],
+    "adapter": "src.shared.python.loop_nullspace.strategy_evaluators.evaluate_allocation_arm",
+    "representations": [
+      {
+        "model_class": "rigid_joint_torque",
+        "availability": "implemented",
+        "reason": ""
+      },
+      {
+        "model_class": "muscle_driven",
+        "availability": "not_implemented",
+        "reason": "the hand-club closure has no muscle-level model"
+      }
+    ]
+  },
+  {
+    "id": "S6",
+    "name": "Kinematic redundancy (UCM)",
+    "mechanism": "Confine joint-space variability to the uncontrolled manifold of the clubhead outcome.",
+    "mechanism_ids": [],
+    "availability": "not_implemented",
+    "cost": {
+      "basis": "undefined",
+      "description": "no cost model exists until the strategy is implemented"
+    },
+    "evaluators": [],
+    "adapter": null,
+    "representations": [
+      {
+        "model_class": "rigid_joint_torque",
+        "availability": "not_implemented",
+        "reason": "UCM split exists (variability_ucm.ucm_decompose, NSX-97); no S6 arm turns it into a strategy parameter and cost"
+      },
+      {
+        "model_class": "muscle_driven",
+        "availability": "not_implemented",
+        "reason": "no muscle-level evaluator exists for this mechanism"
+      }
+    ]
+  },
+  {
+    "id": "S7",
+    "name": "Delayed feedback",
+    "mechanism": "Delayed state feedback with a declared gain schedule and sensorimotor delay (NSX-93), limited by its delay margin.",
+    "mechanism_ids": [
+      "H-SENSORIMOTOR-DELAY"
+    ],
+    "availability": "implemented",
+    "cost": {
+      "basis": "expected_layer_l2_effort",
+      "description": "expected quadratic effort of the declared impedance / feedback torque (a separate line from the allocated torque, rule R10)"
+    },
+    "evaluators": [
+      "src.shared.python.loop_nullspace.layer_linear.layer_variance"
+    ],
+    "adapter": "src.shared.python.loop_nullspace.strategy_evaluators.evaluate_layer_arm",
+    "representations": [
+      {
+        "model_class": "rigid_joint_torque",
+        "availability": "implemented",
+        "reason": ""
+      },
+      {
+        "model_class": "muscle_driven",
+        "availability": "not_implemented",
+        "reason": "no muscle-level evaluator exists for this mechanism"
+      }
+    ]
+  },
+  {
+    "id": "S8",
+    "name": "Speed-accuracy trade-off",
+    "mechanism": "Trade clubhead speed for consistency: the variance of cases with different nominal speed at a common effort cap (NSX-92 CHS front).",
+    "mechanism_ids": [
+      "H-NOISE-SIGNAL-DEPENDENT"
+    ],
+    "availability": "implemented",
+    "cost": {
+      "basis": "capacity_weighted_allocation_effort",
+      "description": "capacity-weighted quadratic effort of the allocated torque history"
+    },
+    "evaluators": [
+      "src.shared.python.loop_nullspace.noise_aware_front.chs_variance_front",
+      "src.shared.python.loop_nullspace.noise_aware_allocation.minimise_face_variance"
+    ],
+    "adapter": "src.shared.python.loop_nullspace.strategy_evaluators.evaluate_speed_accuracy",
+    "representations": [
+      {
+        "model_class": "rigid_joint_torque",
+        "availability": "implemented",
+        "reason": ""
+      },
+      {
+        "model_class": "muscle_driven",
+        "availability": "not_implemented",
+        "reason": "no muscle-level evaluator exists for this mechanism"
+      }
+    ]
+  },
+  {
+    "id": "S9",
+    "name": "Biarticular coupling",
+    "mechanism": "Use muscles that span two joints to couple joint torques.",
+    "mechanism_ids": [],
+    "availability": "not_implemented",
+    "cost": {
+      "basis": "undefined",
+      "description": "no cost model exists until the strategy is implemented"
+    },
+    "evaluators": [],
+    "adapter": null,
+    "representations": [
+      {
+        "model_class": "rigid_joint_torque",
+        "availability": "unavailable",
+        "reason": "a joint-torque model has no biarticular muscles to couple"
+      },
+      {
+        "model_class": "muscle_driven",
+        "availability": "not_implemented",
+        "reason": "no biarticular comparison is built on the NSX-94 frame"
+      }
+    ]
+  },
+  {
+    "id": "S10",
+    "name": "Shaft-flex phase matching",
+    "mechanism": "Time the release to the shaft's flexural phase at impact.",
+    "mechanism_ids": [],
+    "availability": "unavailable",
+    "cost": {
+      "basis": "undefined",
+      "description": "no cost model exists until the strategy is implemented"
+    },
+    "evaluators": [],
+    "adapter": null,
+    "representations": [
+      {
+        "model_class": "rigid_joint_torque",
+        "availability": "unavailable",
+        "reason": "the rigid club has no shaft flexibility to phase-match"
+      },
+      {
+        "model_class": "muscle_driven",
+        "availability": "unavailable",
+        "reason": "the rigid club in the muscle-driven model has no shaft flexibility to phase-match"
+      }
+    ]
+  },
+  {
+    "id": "S11",
+    "name": "Timing and sequencing robustness",
+    "mechanism": "Tolerate timing jitter of the sequencing of segment peaks.",
+    "mechanism_ids": [],
+    "availability": "not_implemented",
+    "cost": {
+      "basis": "undefined",
+      "description": "no cost model exists until the strategy is implemented"
+    },
+    "evaluators": [],
+    "adapter": null,
+    "representations": [
+      {
+        "model_class": "rigid_joint_torque",
+        "availability": "not_implemented",
+        "reason": "no timing-disturbance variance evaluator exists"
+      },
+      {
+        "model_class": "muscle_driven",
+        "availability": "not_implemented",
+        "reason": "no muscle-level evaluator exists for this mechanism"
+      }
+    ]
+  },
+  {
+    "id": "S12",
+    "name": "Address-state consistency",
+    "mechanism": "Reduce the variability of the address posture (initial state).",
+    "mechanism_ids": [],
+    "availability": "not_implemented",
+    "cost": {
+      "basis": "undefined",
+      "description": "no cost model exists until the strategy is implemented"
+    },
+    "evaluators": [],
+    "adapter": null,
+    "representations": [
+      {
+        "model_class": "rigid_joint_torque",
+        "availability": "not_implemented",
+        "reason": "no address-consistency cost model exists"
+      },
+      {
+        "model_class": "muscle_driven",
+        "availability": "not_implemented",
+        "reason": "no muscle-level evaluator exists for this mechanism"
+      }
+    ]
+  }
+]

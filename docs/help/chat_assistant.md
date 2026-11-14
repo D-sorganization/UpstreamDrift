@@ -74,6 +74,10 @@ message. The context builder strips keys and values matching secrets and
 PII patterns, and the module docstring states that no file paths or
 credentials reach the assistant.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/core-theses-registry.html): *Core Theses Registry*.
+
 ## Limitations
 
 - **The registry gives this tile an empty `path`, deliberately.** Its

@@ -158,7 +158,7 @@ jobs:
     if: >-
       (!github.event.pull_request ||
       github.event.pull_request.head.repo.full_name == github.repository)
-    needs: pick-runner
+    needs: [pick-runner, docker-smoke-and-size]
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 120
     env:
@@ -220,6 +220,10 @@ jobs:
           emit-source-provenance: "true"
 
       - name: Build modular image (profile=${{ matrix.profile }})
+        id: docker-build
+        # Advisory full builds can exceed 25 min; fleet runners occasionally drop
+        # mid-build ("lost communication with the server") without a size breach.
+        continue-on-error: ${{ matrix.profile == 'full' }}
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
         with:
           context: .
@@ -232,6 +236,47 @@ jobs:
           tags: ${{ env.IMAGE }}
           labels: org.upstreamdrift.ci=docker-size-gates
           builder: ${{ steps.buildkit.outputs.builder || steps.buildx-fallback.outputs.name }}
+
+      - name: Attach shared BuildKit builder (full profile retry)
+        id: buildkit-retry
+        if: matrix.profile == 'full' && steps.docker-build.outcome == 'failure'
+        continue-on-error: true
+        shell: bash
+        run: python3 scripts/ci/shared_buildkit.py ensure --github-output "$GITHUB_OUTPUT"
+
+      - name: Set up a throwaway Buildx builder (full profile retry fallback)
+        id: buildx-fallback-retry
+        if: steps.buildkit.outputs.builder == '' && matrix.profile == 'full' && steps.docker-build.outcome == 'failure'
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069
+
+      - name: Retry full profile build after fleet runner blip
+        id: docker-build-retry
+        if: matrix.profile == 'full' && steps.docker-build.outcome == 'failure'
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
+        with:
+          context: .
+          file: ./Dockerfile.modular
+          build-args: |
+            PROFILE=${{ matrix.profile }}
+            TOOLS_GITLINK_SHA=${{ steps.pinned-tools.outputs.gitlink-sha }}
+            TOOLS_SOURCE_SHA256=${{ steps.pinned-tools.outputs.source-sha256 }}
+          load: true
+          tags: ${{ env.IMAGE }}
+          labels: org.upstreamdrift.ci=docker-size-gates
+          builder: ${{ steps.buildkit.outputs.builder || steps.buildx-fallback.outputs.name }}
+
+      - name: Require modular image build
+        if: always()
+        run: |
+          if [ "${{ steps.docker-build.outcome }}" = "success" ]; then
+            exit 0
+          fi
+          if [ "${{ matrix.profile }}" = "full" ] && [ "${{ steps.docker-build-retry.outcome }}" = "success" ]; then
+            echo "Full profile build succeeded on retry."
+            exit 0
+          fi
+          echo "::error::Docker build failed for profile ${{ matrix.profile }}"
+          exit 1
 
       - name: Verify size budget (profile=${{ matrix.profile }}, budget=${{ matrix.max_size_mb }} MB)
         run: |

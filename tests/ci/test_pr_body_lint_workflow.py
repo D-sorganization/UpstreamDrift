@@ -11,7 +11,7 @@ pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW = REPO_ROOT / ".github" / "workflows" / "pr-body-lint.yml"
-PINNED_SHA = "d3c5ff3fcb21e15997ca8668b8c9278e2e25dcff"  # pragma: allowlist secret
+PINNED_SHA = "3b5e9f54febbd730bc2a650dc9193d26922ff49f"  # pragma: allowlist secret
 
 
 def test_pr_body_lint_is_a_report_only_pull_request_target_caller() -> None:
@@ -29,5 +29,5 @@ def test_pr_body_lint_is_a_report_only_pull_request_target_caller() -> None:
     assert "runs-on" not in job
     uses = str(job["uses"])
     assert PINNED_SHA in uses
-    assert job["with"]["report_only"] == "true"
+    assert set(job["with"]) == {"pr_number", "repo_owner", "repo_name"}
     assert "checkout" not in WORKFLOW.read_text(encoding="utf-8").lower()

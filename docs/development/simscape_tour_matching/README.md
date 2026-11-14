@@ -1,10 +1,10 @@
 # Tour-Average Simscape Forward-Dynamics Matching
 
-R2025b qualification: all 22 native tests pass on DeskComputer in MATLAB 25.2.0.3177638 (R2025b) Update 5. The actual 20 ms forward simulation succeeds with finite joint states and club/grip positions (95.89 s). Source revision: `4191ca3aca126216ea02e26e485ff72908f3ad2b`. Evidence: `native_evidence/native_r2025b_suite.json` and `native_evidence/baseline_r2025b.json`. Subsequent milestones qualify all 27 sensed actuator efforts and a 0.4 s exploratory fit; full-swing fitting remains unqualified. See [Current Handoff](../../../AGENT_HANDOFF.md).
+R2025b qualification: all 22 native tests pass on <host> in MATLAB 25.2.0.3177638 (R2025b) Update 5. The actual 20 ms forward simulation succeeds with finite joint states and club/grip positions (95.89 s). Source revision: `4191ca3aca126216ea02e26e485ff72908f3ad2b`. Evidence: `native_evidence/native_r2025b_suite.json` and `native_evidence/baseline_r2025b.json`. Subsequent milestones qualify all 27 sensed actuator efforts and a 0.4 s exploratory fit; full-swing fitting remains unqualified. See [Current Handoff](../../../AGENT_HANDOFF.md).
 
 ## Required MATLAB Release
 
-MATLAB R2025b is the required execution, model-save and validation release for the Simscape golf model and tour-average matching epic #9921. The user has the complete required licensed feature set in R2025b. R2026a is not a requirement; do not select it from PATH or use its successful probes as R2025b acceptance evidence. On DeskComputer and ControlTower launch `C:/Program Files/MATLAB/R2025b/bin/matlab.exe` explicitly. Preserve historical reports with their actual release; run acceptance checks in R2025b. The full forward-dynamics matching goal remains active with this constraint.
+MATLAB R2025b is the required execution, model-save and validation release for the Simscape golf model and tour-average matching epic #9921. The user has the complete required licensed feature set in R2025b. R2026a is not a requirement; do not select it from PATH or use its successful probes as R2025b acceptance evidence. On <host> and <host> launch `C:/Program Files/MATLAB/R2025b/bin/matlab.exe` explicitly. Preserve historical reports with their actual release; run acceptance checks in R2025b. The full forward-dynamics matching goal remains active with this constraint.
 
 Epic: [#9921](https://github.com/D-sorganization/UpstreamDrift/issues/9921).
 Dependency: kinetics handoff #9714; separate reference-model work #9914.
@@ -12,10 +12,10 @@ Foundation implementation: #9924.
 
 ## Qualification Status
 
-The full swing is not yet qualified. DeskComputer has completed and independently replayed a 0.4 s quadratic forward-dynamics candidate with 3.119775 mm marker RMS. The next 0.5 s prefix is running; see AGENT_HANDOFF.md for the current checkpoint. The local
+The full swing is not yet qualified. <host> has completed and independently replayed a 0.4 s quadratic forward-dynamics candidate with 3.119775 mm marker RMS. The next 0.5 s prefix is running; see AGENT_HANDOFF.md for the current checkpoint. The local
 MATLAB R2024a, R2024b, R2025a and R2025b
 directories lack `bin/matlab.exe`; MATLAB is absent from PATH and the Python
-engine package is absent. SSH over Tailscale to DeskComputer and ControlTower
+engine package is absent. SSH over Tailscale to <host> and <host>
 has since been verified. Use the explicit R2025b executable on either host.
 Earlier R2026a probes are historical evidence only. See [Remote Execution](REMOTE_EXECUTION.md)
 for the machine-transfer handoff and current remote state.

@@ -33,6 +33,9 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 logger = logging.getLogger(__name__)
 logger = get_logger(__name__)
 
+# Half the activation τ at min_activation (≈2.5 ms); keeps 10–20 ms mocap steps stable (#15045).
+MAX_ACTIVATION_INTEGRATION_DT: float = 0.0025075
+
 
 class ActivationDynamics:
     """Models neural excitation to muscle activation dynamics.
@@ -115,10 +118,24 @@ class ActivationDynamics:
         ensure(np.isfinite(result), "derivative da/dt must be finite", result)
         return result
 
+    def _effective_tau(self, u: float, a: float) -> float:
+        if u > a:
+            return self.tau_act * (0.5 + 1.5 * a)
+        return self.tau_deact / (0.5 + 1.5 * a)
+
+    def _exponential_step(self, u: float, a: float, dt: float) -> float:
+        u_clamped = float(np.clip(u, self.min_activation, 1.0))
+        a_clamped = float(np.clip(a, self.min_activation, 1.0))
+        tau = self._effective_tau(u_clamped, a_clamped)
+        a_new = u_clamped + (a_clamped - u_clamped) * float(np.exp(-dt / tau))
+        return float(np.clip(a_new, self.min_activation, 1.0))
+
     def update(self, u: float, a: float, dt: float) -> float:
         """Update activation state by one time step.
 
-        Uses Euler integration: a(t+dt) = a(t) + da/dt * dt
+        Uses exponential substeps (τ frozen per substep) capped at
+        ``MAX_ACTIVATION_INTEGRATION_DT`` so Forward-Euler overshoot does not
+        hide behind the output clamp for mocap-sized ``dt``.
 
         Design by Contract:
             Precondition: dt > 0
@@ -135,11 +152,14 @@ class ActivationDynamics:
         if u is None:
             raise ValueError("u must be provided")
         require(dt > 0, "time step dt must be positive", dt)
-        dadt = self.compute_derivative(u, a)
-        a_new = a + dadt * dt
+        a_cur = a
+        remaining = dt
+        while remaining > 0.0:
+            sub_dt = min(remaining, MAX_ACTIVATION_INTEGRATION_DT)
+            a_cur = self._exponential_step(u, a_cur, sub_dt)
+            remaining -= sub_dt
 
-        # Clamp result
-        result = float(np.clip(a_new, self.min_activation, 1.0))
+        result = float(np.clip(a_cur, self.min_activation, 1.0))
         ensure(
             self.min_activation <= result <= 1.0,
             "activation must be in [min_activation, 1.0]",

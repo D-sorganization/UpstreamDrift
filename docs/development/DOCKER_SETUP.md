@@ -144,7 +144,7 @@ docker exec golf-suite-backend pytest tests/api/ -v
 
 ---
 
-## Model Explorer in Docker (ControlTower)
+## Model Explorer in Docker (<host>)
 
 The `explorer-*` compose services run the PyQt6 Model Explorer and the MP4
 exporter inside one image built from `Dockerfile.modular` (`PROFILE=full`:
@@ -153,13 +153,13 @@ stubs on native Windows (Pinocchio, Drake) are real pip wheels, so this is the
 preferred place to exercise all of them.
 
 All three services share the `explorer-base` build stage; they differ only in
-default environment (`QT_QPA_PLATFORM`, `MUJOCO_GL`, `DISPLAY`). ControlTower
-runs a Docker daemon inside the `ControlTower-Runner` WSL2 distro (not Docker
+default environment (`QT_QPA_PLATFORM`, `MUJOCO_GL`, `DISPLAY`). <host>
+runs a Docker daemon inside the `<host>-Runner` WSL2 distro (not Docker
 Desktop), so run `docker compose` **from that distro**: bind-mount paths are
 daemon-side Linux paths.
 
 ```bash
-wsl -d ControlTower-Runner
+wsl -d <host>-Runner
 cd /mnt/c/Users/diete/Repositories/UpstreamDrift   # or any checkout
 ```
 
@@ -255,7 +255,7 @@ or recent Windows 10) and a daemon running inside WSL2.
 
 ### Verified in the Container
 
-Verified on ControlTower (2026-10-16) with `explorer.sh engines`: MuJoCo 3.8.0,
+Verified on <host> (2026-10-16) with `explorer.sh engines`: MuJoCo 3.8.0,
 Pinocchio 4.1.0, Drake 1.58.0, OpenSim 4.6, MyoSuite 3.0.0 and PyQt6 (Qt 6.11.0)
 all report `ok`. The headless export writes a 60-frame 1280x720 MP4 whose
 decoded frame count matches, and the noVNC and WSLg services both show the
@@ -273,7 +273,7 @@ host prune jobs (`runner-cleanup --disk-guard` from Runner_Dashboard and
 `scripts/docker/docker-cache-prune.sh`, installed to `/usr/local/sbin/docker-cache-prune`
 by Runner_Dashboard deploy) skip images with that label
 (`--filter label!=keep`). Before UD #13113 only the explorer stage was
-labelled, and ControlTower's disk guard deleted every profile image (and
+labelled, and <host>'s disk guard deleted every profile image (and
 `ud-sim:latest`, which shares the `explorer-headless` stage in
 `Dockerfile.modular`). Put the label in the
 Dockerfile, not on the `docker build` command line, so cached and ad-hoc
@@ -295,7 +295,7 @@ services build them on demand, so a pruned image is rebuilt rather than pulled:
 
 `ud-sim:latest` is documented in `docker/ud-sim/README.md`: it is **not** a
 separate Dockerfile; the `ud-sim` compose service builds `Dockerfile.modular`
-target `explorer-headless` and tags the result `ud-sim:latest` for ControlTower
+target `explorer-headless` and tags the result `ud-sim:latest` for <host>
 and `ct-run.sh`.
 
 `scripts/docker/explorer.sh` runs `docker image inspect` on the image it is

@@ -36,11 +36,15 @@ class TableLieModifier:
     def provenance(self) -> dict[str, Any]:
         return {"lie_model": {"seed": self.seed, "rough_severity": self.rough_severity}}
 
-    def __call__(self, rows: np.ndarray, lie: str) -> np.ndarray:
+    def with_spin(self, rows: np.ndarray, lie: str) -> tuple[np.ndarray, np.ndarray]:
+        """The rows of ``__call__`` plus the per-shot lie spin factor."""
         require(lie in _LIES, f"lie must be one of {_LIES}", lie)
         seq = np.random.SeedSequence([self.seed, _STREAM, _LIES.index(lie)])
         rng = np.random.Generator(np.random.PCG64(seq))
-        return make_lie_modifier(self.rough_severity, rng)(rows, lie)
+        return make_lie_modifier(self.rough_severity, rng).with_spin(rows, lie)
+
+    def __call__(self, rows: np.ndarray, lie: str) -> np.ndarray:
+        return self.with_spin(rows, lie)[0]
 
 
 def lie_modifier_for_table(

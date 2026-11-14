@@ -1,0 +1,6 @@
+# UpstreamDrift agent discovery hints
+
+- Headless simulation MCP server: `ud-sim-mcp` (`src.sim_run.mcp`, `.mcp.json` entry).
+- Fleet Agent API v1 conformance template: `scripts/config/fleet_agent_api_conformance/v1/template.json`.
+- CI runner: `python3 scripts/run_agent_api_conformance.py` (requires `pip install -e '.[sim-mcp]'`).
+- Capability inventory: `docs/development/sim_run_mcp_capability_inventory.md`.

@@ -43,7 +43,7 @@ describe("strokes-gained arguments pinned to the shared core (#14468)", () => {
 
   it("summarises the core report in the user's units", () => {
     expect(sgSummary({ ...sgCase.report, sg_player: null }, "metric")).toBe(
-      "From 3.0 m you average 1.79 putts.",
+      "From 3.0 m you average 1.78 putts.",
     );
   });
 });

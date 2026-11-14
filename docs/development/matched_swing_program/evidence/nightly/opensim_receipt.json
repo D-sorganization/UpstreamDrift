@@ -46,7 +46,7 @@
   },
   "python": "C:\\Python314\\python.exe",
   "repository_revision": "835efaee37c9f242a72e53ba269a4906683c6253",
-  "runner_hint": "ControlTower opensim-10003 venv; nightly-cross-engine.yml",
+  "runner_hint": "<host> opensim-10003 venv; nightly-cross-engine.yml",
   "schema_version": 1,
   "scope": "native-engine pytest lane only; no model, fit, acceptance, or release claim",
   "source_freshness": {

@@ -35,7 +35,7 @@
   "profile": "pure_torque",
   "provenance": {
     "candidate_sha256": "ee4a908737f4cf3065bb6e64a056dfab71926c43ac40c0e85574fc8531576c82",
-    "host": "DeskComputer",
+    "host": "<host>",
     "matlab_release": "2025b",
     "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
     "model_sha256": "b817fea76407f71b29e42aeb188890df53d2d86874c7e5875d14d353f4a1a248",

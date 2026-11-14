@@ -1,0 +1,22 @@
+{
+  "schema_version": "ud.lift_scoping.lift6.v1",
+  "issue": {
+    "id": 11746
+  },
+  "composition": {
+    "expected_muscle_count": 80,
+    "standard_lifts": [
+      "squat",
+      "deadlift",
+      "bench_press",
+      "clean_and_jerk",
+      "snatch"
+    ]
+  },
+  "kinetics": {
+    "expect_qualified_when_opensim_and_trajectory": true
+  },
+  "static_hold": {
+    "require_bar_held_both_hands": true
+  }
+}

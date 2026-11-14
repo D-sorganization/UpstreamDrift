@@ -8,6 +8,11 @@
       "env": {
         "CODEMAP_REPO_ROOT": "${workspaceFolder}"
       }
+    },
+    "ud-sim-mcp": {
+      "command": "ud-sim-mcp",
+      "args": [],
+      "env": {}
     }
   }
 }

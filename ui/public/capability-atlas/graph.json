@@ -1250,9 +1250,8 @@
       "category": "simulation",
       "status": "prototype",
       "capabilities": [
-        "full_simulation",
-        "parameter_sweep",
-        "batch_runs"
+        "prototype_visualization",
+        "demo_inspection"
       ]
     },
     {
@@ -3381,7 +3380,7 @@
   },
   "inputs": {
     "src/config/models.yaml": "ad3f0cf74f12a3a0df3443b3f40ace2393123ee6d39ee34b055d4f79c4a1c873",
-    "src/config/launcher_manifest.json": "59cf9a1547300feaae6a3a954ff7375f58725645ebf2f5f1071b7722f4ab7ac2",
+    "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
     "src/config/feature_parity.json": "8215da70f795fb83b3579a95a597c9eaa647878f52016b24094c65f789251ce8",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"

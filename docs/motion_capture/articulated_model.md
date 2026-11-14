@@ -257,4 +257,4 @@ to its Simscape variable and sign. The replay test drives the model with
 the logged angles and lands every body frame on its sensor to ≤ 1.7e-3 rad
 and the joint positions to ≤ 0.6 mm. The remaining assumption is the
 Simscape world orientation (z up, x toward the target, y to the golfer's
-right), which only affects the root's hip angles and translation.
+left), which only affects the root's hip angles and translation.

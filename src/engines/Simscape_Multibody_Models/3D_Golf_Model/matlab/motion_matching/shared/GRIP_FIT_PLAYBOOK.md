@@ -31,6 +31,41 @@ lambda               = 1e-4    ← total-work regularizer strength
 
 ---
 
+## Grip Roll Convention (SHOW-A7)
+
+The hand roll on the shaft uses the fleet grip zero from SHOW-A7 (#14731,
+owner choice B' on #14549). The single source is
+`src/shared/python/motion_matching/grip_roll.py`. This page states the
+convention; it does not restate the formula, so read the angle from that
+module and never copy it into MATLAB.
+
+- **Zero:** the back of the wrist (the dorsal axis) is on top of the shaft, at
+  12 o'clock on the face-on clock.
+- **Sign:** + is counterclockwise, toward the target side.
+- **Address default:** the lead hand is at 15°. The trail hand faces it across
+  the shaft, so it reads 195°.
+
+Three Simscape quantities sit next to this angle but are not it:
+
+| Quantity | What it is | Relation to the A7 hand roll |
+| --- | --- | --- |
+| `target.grip_quat` | Mid-hands frame on the club shaft ([CLUB_IK_SPEC.md](CLUB_IK_SPEC.md)) | A club pose. Stage 1 fits it, and it carries no hand roll. |
+| `GripStrength` (model workspace, logged as `model_GripStrength`) | The club's roll about the shaft inside the hands, from the `Club/GripStrength` transform | A model parameter. Its A7 value needs the R2025b check below. |
+| `FaceSquareRoll` (−20.73°) | Added to `GripStrength` so the face is square at address ([HUMAN.md](../../exploratory_gs3dx/docs/HUMAN.md)) | A face-alignment offset, not a grip change. |
+
+The gs3dx grip topology (`exploratory_gs3dx/appearance/gs3dx_grip_topology.json`)
+holds club-attached contact frames. Re-zeroing the wrist joints for A7 leaves
+them unchanged, which `tests/unit/grip_contact/test_simscape_grip_zero_convention.py`
+pins. `solve_starting_pose.m` fits the club grip position and orientation, so
+the A7 zero does not change its inputs.
+
+**Deferred R2025b check (SHOW-A14, #14739):** build `GS3DX_Human`, measure the
+lead and trail hand roll at address against this convention, and record a run
+of `exploratory_gs3dx/tests/test_gs3dx_grip_roll_convention.m`. The entry is in
+`docs/development/deferred-catalog-bundle.json`.
+
+---
+
 ## The two-stage workflow
 
 ```

@@ -93,7 +93,7 @@ def test_assumed_slots_are_surfaced_not_silent(spec: dict) -> None:
         assert name in vec.verified_slots, name
     for name in ("SpineInputX", "LSInputX", "LSInputY", "LSInputZ", "LFInput"):
         assert name in vec.assumed_slots, name
-    assert "hip_rotation_r" in vec.assumed_slots
+    assert "mtp_angle_r" in vec.assumed_slots
     assert vec.warnings and "ASSUMED" in vec.warnings[0]
 
 
@@ -151,6 +151,40 @@ def test_anderson_scaling_is_proportional_to_weight_times_height() -> None:
     assert b.tau_max_negative_nm[0] / a.tau_max_negative_nm[0] == pytest.approx(ratio)
 
 
+def test_anderson_2007_citation_records_table_three_scope_for_hip_non_sagittal_slots() -> (
+    None
+):
+    """Table 3 C1 documents six sagittal-plane lower-limb MVC rows for male 18-25;
+    hip adduction and hip rotation are cited from separate open-access sources."""
+    reg = json.loads(
+        (ROOT / "src" / "config" / "loop_nullspace_registry.json").read_text("utf-8")
+    )
+    anderson = next(c for c in reg["citations"] if c["id"] == "CIT-ANDERSON-2007")
+    checked = anderson["claim_checked"]
+    assert "six lower-limb exertion rows" in checked
+    assert "hip extension" in checked and "dorsiflexion" in checked
+    assert "no C1 row for hip abduction/adduction" in checked
+    assert "hip internal/external rotation" in checked
+    wake = next(c for c in reg["citations"] if c["id"] == "CIT-SWAKE-2026")
+    assert "Table 2" in wake["claim_checked"]
+    gon = next(c for c in reg["citations"] if c["id"] == "CIT-GONCALVES-2021")
+    assert "Table 2" in gon["claim_checked"]
+    for slot, citation in (
+        ("hip_adduction_r", "CIT-SWAKE-2026"),
+        ("hip_adduction_l", "CIT-SWAKE-2026"),
+        ("hip_rotation_r", "CIT-GONCALVES-2021"),
+        ("hip_rotation_l", "CIT-GONCALVES-2021"),
+    ):
+        for direction in ("negative", "positive"):
+            entry = next(
+                e
+                for e in reg["torque_capacity"]
+                if e["joint_slot"] == slot and e["direction"] == direction
+            )
+            assert entry["verification_status"] == "VERIFIED"
+            assert entry["source"]["citation_id"] == citation
+
+
 def test_unscaled_population_values_are_returned_verbatim() -> None:
     vec = capacity_for(("TorsoInput", "LEInput"), CapacitySubject(50.0, 1.5))
     assert vec.tau_max_negative_nm[0] == pytest.approx(68.7)
@@ -200,10 +234,46 @@ _ANATOMICAL = ("hip_adduction", "hip_rotation", "subtalar_angle", "mtp_angle")
 # (slot, direction) -> (citation id, cited Nm). Subtalar: da Fonseca 2025 Table 6,
 # male mean peak torque (inversion 37.0, eversion 33.4). MTP flexion: Saeki 2021
 # Results, first MTP 11.6 + second-fifth MTP 8.0 Nm.
+_G = 9.80665
+_H = 1.71
+_M = 78.0
+
+
+def _bw_ref_tau(coefficient: float) -> float:
+    """Match registry rounding: coefficient to 6 decimals, tau at 78 kg / 1.71 m."""
+    c = round(coefficient, 6)
+    return round(c * _M * _G * _H, 2)
+
+
+_abd_coeff = ((1.82 + 1.84) / 2) / (_G * _H)
+_add_coeff = ((1.98 + 1.70) / 2) / (_G * _H)
+_COH_M, _COH_H = 69.9, 1.7
+_ir_coeff = 68.0 / (_COH_M * _G * _COH_H)
+_er_coeff = 50.0 / (_COH_M * _G * _COH_H)
+_HIP_ADD_NEG = _bw_ref_tau(_abd_coeff)
+_HIP_ADD_POS = _bw_ref_tau(_add_coeff)
+_HIP_ROT_NEG = _bw_ref_tau(_ir_coeff)
+_HIP_ROT_POS = _bw_ref_tau(_er_coeff)
 _CITED = {
     **{(f"subtalar_angle_{s}", "positive"): ("CIT-DAFONSECA-2025", 37.0) for s in "lr"},
     **{(f"subtalar_angle_{s}", "negative"): ("CIT-DAFONSECA-2025", 33.4) for s in "lr"},
     **{(f"mtp_angle_{s}", "positive"): ("CIT-SAEKI-2021", 19.6) for s in "lr"},
+    **{
+        (f"hip_adduction_{s}", "negative"): ("CIT-SWAKE-2026", _HIP_ADD_NEG)
+        for s in "lr"
+    },
+    **{
+        (f"hip_adduction_{s}", "positive"): ("CIT-SWAKE-2026", _HIP_ADD_POS)
+        for s in "lr"
+    },
+    **{
+        (f"hip_rotation_{s}", "negative"): ("CIT-GONCALVES-2021", _HIP_ROT_NEG)
+        for s in "lr"
+    },
+    **{
+        (f"hip_rotation_{s}", "positive"): ("CIT-GONCALVES-2021", _HIP_ROT_POS)
+        for s in "lr"
+    },
 }
 
 
@@ -227,7 +297,7 @@ def test_capacity_reproduces_cited_value(slot: str, direction: str) -> None:
     got = (
         vec.tau_max_positive_nm if direction == "positive" else vec.tau_max_negative_nm
     )
-    assert got[0] == pytest.approx(nm)
+    assert got[0] == pytest.approx(nm, abs=0.01)
 
 
 def test_every_anatomical_slot_is_verified_or_states_what_was_not_found() -> None:

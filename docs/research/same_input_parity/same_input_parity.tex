@@ -240,7 +240,7 @@ The substeps are necessary.  Contact introduces stiff modes near
 $-9.9\times10^{3}$~s$^{-1}$; a single $1$~ms RK4 step has amplification
 $|R|\approx274$ for such a mode, whereas $8$ substeps bring $h\lambda$ inside
 the RK4 stability region.  Two bundles were generated on 2026-10-06 on host
-\texttt{brick}, from the pipeline specs
+\texttt{<host>}, from the pipeline specs
 \texttt{full\_body\_spec\_anthro\_driver.json} and
 \texttt{full\_body\_spec\_anthro\_iron7.json}.  The zero-order-hold reference
 tracks the capture about $4\times$ more loosely than the canonical pipeline
@@ -269,7 +269,7 @@ finer hold.}  A bundle may also carry a latched ball-impact plan
 identically; this reference reports no impact-bearing parity result.
 
 \paragraph{Hold Measurements (Tracking Fidelity, Not Engine Parity).}
-Measured on host \texttt{brick} for \#12279 (7-iron run \texttt{s38-fxi2},
+Measured on host \texttt{<host>} for \#12279 (7-iron run \texttt{s38-fxi2},
 $0$--$0.9$~s), recorded in \url{docs/development/full_body_models/DESIGN_DECISIONS_2.md}
 section~20 (merged in PR \#12478, commit \texttt{422bf65f8b}) and
 \texttt{simscape\_matching\_reference.tex}; they were taken in
@@ -370,7 +370,7 @@ then became $\le5.5\times10^{-9}$ and the results above followed.
 \paragraph{Evidence Provenance.}  Receipts are the 16 JSON files below
 (fields \texttt{bundle\_sha256}, \texttt{engine}, \texttt{full\_horizon},
 \texttt{segments}, \texttt{worst\_segment}), generated 2026-10-06 on host
-\texttt{brick}; they live outside the repository under
+\texttt{<host>}; they live outside the repository under
 \texttt{Videos/Parity Audit/receipts/}.
 \begin{itemize}[nosep]
 \item Driver bundle \texttt{driver.npz}, sha256\\
@@ -469,7 +469,7 @@ This document compiles with \texttt{tectonic same\_input\_parity.tex}.
 
 \section{Limitations}
 \begin{itemize}[nosep]
-\item Simscape (P-8, \#11613) replay harness is wired and validated for the MATLAB R2025b host with fail-closed rejection of R2026a, consuming \texttt{same-input-bundle/v1} via \texttt{smimport} and ZOH torque actuation; final numerical evidence qualification remains bounded to the designated R2025b host (\texttt{DeskComputer} or \texttt{ControlTower}).
+\item Simscape (P-8, \#11613) replay harness is wired and validated for the MATLAB R2025b host with fail-closed rejection of R2026a, consuming \texttt{same-input-bundle/v1} via \texttt{smimport} and ZOH torque actuation; final numerical evidence qualification remains bounded to the designated R2025b host (\texttt{<host>} or \texttt{<host>}).
 \item The effort-hold measurements (\#12279) are single-host numbers from the
   issue thread and were not re-run; the club-face fixtures are not regenerated
   with the finer hold, and no cross-engine parity receipt exists at a finer

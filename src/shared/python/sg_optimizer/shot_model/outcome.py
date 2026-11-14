@@ -10,8 +10,8 @@ across it); rotating into the hole frame is the caller's job.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 import numpy as np
 from numpy.typing import NDArray
@@ -26,10 +26,16 @@ if TYPE_CHECKING:  # pragma: no cover - import cycle guard
 
 @dataclass(frozen=True)
 class LandingSamples:
-    """``n`` sampled landing points of one shot, aim frame, yards."""
+    """``n`` sampled landing points of one shot, aim frame, yards.
+
+    ``provenance`` names what produced the samples (a table-backed model records
+    the dispersion ``cell`` key and ``table_hash`` it read, #14743); empty when
+    the backend has nothing to report.
+    """
 
     along: NDArray[np.float64]
     lateral: NDArray[np.float64]
+    provenance: dict[str, Any] = field(default_factory=dict, compare=False)
 
     def __post_init__(self) -> None:
         require(self.along.ndim == 1 and self.along.size > 0, "need a 1-D sample")

@@ -210,7 +210,7 @@ def test_wrist_model_within_human_ranges() -> None:
     """Wrists within human ranges produce zero range_of_motion violation flags (MM-2, #10104)."""
     coordinate_order = ["LWInputX", "LWInputY", "RWInputX", "RWInputY"]
     # Physiological angles within HUMAN_RANGES_DEG:
-    # LWInputX: (-40, 25), LWInputY: (-70, 70)
+    # LWInputX: (-60, 45), LWInputY: (-80, 80) (#14795)
     q_valid_deg = np.array(
         [
             [-10.0, 15.0, -15.0, 20.0],
@@ -225,8 +225,8 @@ def test_wrist_model_within_human_ranges() -> None:
         f"Expected 0 violations for physiological wrist angles, got {viol}"
     )
 
-    # Excessive wrist cock (e.g. 50 deg > 25 deg upper limit)
-    q_invalid_deg = np.array([[50.0, 15.0, -15.0, 20.0]])
+    # Excessive wrist cock (e.g. 70 deg > 45 deg upper limit, #14795)
+    q_invalid_deg = np.array([[70.0, 15.0, -15.0, 20.0]])
     q_invalid_rad = np.radians(q_invalid_deg)
     viol_invalid = violations(
         q_invalid_rad, coordinate_order, ranges_deg=HUMAN_RANGES_DEG
