@@ -39,9 +39,22 @@ ENV PATH="/opt/venv/bin:$PATH"
 ENV RUSTUP_HOME=/opt/rustup \
     CARGO_HOME=/opt/cargo \
     PATH="/opt/cargo/bin:/opt/venv/bin:$PATH"
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
-    | sh -s -- -y --profile minimal --default-toolchain 1.94.0 && \
-    rustc --version && cargo --version
+# Download-init (no pipe) so a transient curl/DNS failure cannot feed an empty
+# script to sh and surface as exit 127 on rustc. Fleet builds have seen
+# Could not resolve host: sh.rustup.rs under concurrent image lanes.
+RUN set -eu; \
+    for attempt in 1 2 3 4 5; do \
+      if curl --proto '=https' --tlsv1.2 -fsS --retry 3 --retry-delay 5 --retry-all-errors \
+          -o /tmp/rustup-init.sh https://sh.rustup.rs \
+          && sh /tmp/rustup-init.sh -y --profile minimal --default-toolchain 1.94.0 \
+          && rustc --version && cargo --version; then \
+        rm -f /tmp/rustup-init.sh; \
+        exit 0; \
+      fi; \
+      echo "rustup bootstrap attempt ${attempt} failed; retrying..." >&2; \
+      sleep $((attempt * 5)); \
+    done; \
+    exit 1
 
 RUN pip install --upgrade pip==26.2.1 && pip install maturin==1.13.3
 
