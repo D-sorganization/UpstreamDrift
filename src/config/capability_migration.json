@@ -612,7 +612,7 @@
     },
     "tools_calculator_hub": {
       "id": "tools_calculator_hub",
-      "name": "Tools Calculator Suite",
+      "name": "Tools Calculator Suite (Data Processor Entry)",
       "entity_kind": "cli_tool",
       "primary_workspace": "analysis",
       "secondary_links": [],
