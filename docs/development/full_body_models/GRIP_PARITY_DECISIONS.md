@@ -249,7 +249,7 @@ The issue's hypothesis was that the prescribed hand-to-hand relative pose drifts
 
 So projecting the trail hand onto the lead hand's pose plus the nominal offset is the identity, and a "rigid-consistent input" is what the run already used. The helper is `grip_contact.hand_drift.hand_relative_drift`.
 
-**Diagnostics on the same full swing** (MuJoCo contact, Euler, dt = 1e-5 s, peak values; driver / 7-iron; ControlTower, about 1 min per run). Bushing is the OpenSim reference of section 16.
+**Diagnostics on the same full swing** (MuJoCo contact, Euler, dt = 1e-5 s, peak values; driver / 7-iron; <host>, about 1 min per run). Bushing is the OpenSim reference of section 16.
 
 | Run                                     | Peak L / R hand force (N)       | Peak net (N) | Peak internal (N) | Peak axial squeeze (N) | Pad normal sum per hand (kN) | Peak axial slip (mm) |
 | --------------------------------------- | ------------------------------- | ------------ | ----------------- | ---------------------- | ---------------------------- | -------------------- |
@@ -306,7 +306,7 @@ Acceptance read-out for #11986: the mechanism is identified with numbers (drift 
 | Pad normal force sum (per hand, peak)                       | 1365 N                   | 1353 N                   |
 | Hand-to-club deflection                                     | 0.59 mm, 0.75 deg        | 0.44 mm, 0.62 deg        |
 | Peak axial slip, roll slip                                  | 0.38 mm, 8.7 mrad        | 0.18 mm, 2.3 mrad        |
-| Wall time (ControlTower)                                    | 355 s                    | 404 s                    |
+| Wall time (<host>)                                    | 355 s                    | 404 s                    |
 
 Convergence: driver accuracy $10^{-4}$ gives a net-force RMS error of 131 N (spikes, not converged), $10^{-6}$ gives 10.7 N and $10^{-8}$ gives 7.1 N; peak net force is 428.04 N at $10^{-6}$ and 428.00 N at $10^{-8}$.
 
@@ -392,4 +392,4 @@ Tolerances are unchanged (5 % peak, 2 % RMS). Against `main`:
 ### Consequences
 
 - Pair sets, per-hand loads and the exported Simscape topology, kernel constants, golden vectors and scenario digests change. Per-hand splits stay indeterminate (§19); net force and moment remain the determinate checks.
-- Simscape evidence in `exploratory_gs3dx/receipts/grip_contact/`, and any "Initial Preload Transient" analysis built on the old topology, are stale until rerun in MATLAB R2025b on DeskComputer. That rerun stays deferred under HRG-GS-M12.
+- Simscape evidence in `exploratory_gs3dx/receipts/grip_contact/`, and any "Initial Preload Transient" analysis built on the old topology, are stale until rerun in MATLAB R2025b on <host>. That rerun stays deferred under HRG-GS-M12.

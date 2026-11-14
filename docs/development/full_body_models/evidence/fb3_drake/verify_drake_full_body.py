@@ -8,7 +8,7 @@ Tests all four Done Gates:
 Plus forward accelerations combining contact forces and weld loop-closure dynamics.
 
 If real Drake is not available in the local environment, automatically executes
-on ControlTower via SSH and saves the resulting receipt.
+on <host> via SSH and saves the resulting receipt.
 """
 
 from __future__ import annotations
@@ -67,14 +67,29 @@ def has_real_drake() -> bool:
         return False
 
 
-def _sync_files_to_remote(remote_base: str) -> None:
+def _sync_files_to_remote(
+    remote_base: str,
+    host: str | None = None,
+    distro: str | None = None,
+) -> None:
+    if host is None or distro is None:
+        from docs.development.full_body_models.evidence._remote import (
+            resolve_remote_target,
+        )
+
+        resolved_host, resolved_distro, _ = resolve_remote_target(
+            "Ubuntu-24.04", run_fn=subprocess.run
+        )
+        host = host or resolved_host
+        distro = distro or resolved_distro
+
     p0 = subprocess.run(
         [
             "ssh",
-            "controltower",
+            host,
             "wsl",
             "-d",
-            "ControlTower-Runner",
+            distro,
             "mkdir",
             "-p",
             f"{remote_base}/src/engines/physics_engines/drake/python",
@@ -128,10 +143,10 @@ def _sync_files_to_remote(remote_base: str) -> None:
         p = subprocess.run(
             [
                 "ssh",
-                "controltower",
+                host,
                 "wsl",
                 "-d",
-                "ControlTower-Runner",
+                distro,
                 "tee",
                 remote_path,
             ],
@@ -144,23 +159,28 @@ def _sync_files_to_remote(remote_base: str) -> None:
             )
 
 
-def run_remote_controltower() -> dict[str, Any]:
-    """Execute verification remotely on ControlTower and return the receipt."""
+def run_remote_host() -> dict[str, Any]:
+    """Execute verification remotely on the configured SSH host and return the receipt."""
+    from docs.development.full_body_models.evidence._remote import resolve_remote_target
+
+    host, distro, remote_home = resolve_remote_target(
+        "Ubuntu-24.04", run_fn=subprocess.run
+    )
     sys.stdout.write(
-        "Real Drake not available locally. Dispatching to ControlTower...\n"
+        "Real Drake not available locally. Dispatching to remote host...\n"
     )
     sys.stdout.flush()
 
-    remote_base = "/home/dieterolson/fb3_pinocchio_test"
-    _sync_files_to_remote(remote_base)
+    remote_base = f"{remote_home}/fb3_pinocchio_test"
+    _sync_files_to_remote(remote_base, host=host, distro=distro)
 
     script = (
         f"cd {remote_base}\n"
-        f"/home/dieterolson/drake-native-10022/bin/python "
+        f"{remote_home}/drake-native-10022/bin/python "
         f"docs/development/full_body_models/evidence/fb3_drake/verify_drake_full_body.py --local\n"
     ).encode()
     res = subprocess.run(
-        ["ssh", "controltower", "wsl", "-d", "ControlTower-Runner", "bash"],
+        ["ssh", host, "wsl", "-d", distro, "bash"],
         input=script,
         capture_output=True,
     )
@@ -177,7 +197,7 @@ def run_remote_controltower() -> dict[str, Any]:
     # Fetch receipt from remote
     fetch_cmd = f"cat {remote_base}/docs/development/full_body_models/evidence/fb3_drake/receipt.json\n".encode()
     res_fetch = subprocess.run(
-        ["ssh", "controltower", "wsl", "-d", "ControlTower-Runner", "bash"],
+        ["ssh", host, "wsl", "-d", distro, "bash"],
         input=fetch_cmd,
         capture_output=True,
     )
@@ -574,7 +594,7 @@ def main() -> None:
     if force_local or has_real_drake():
         receipt = run_local_verification()
     else:
-        receipt = run_remote_controltower()
+        receipt = run_remote_host()
         RECEIPT_PATH.parent.mkdir(parents=True, exist_ok=True)
         RECEIPT_PATH.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
 
