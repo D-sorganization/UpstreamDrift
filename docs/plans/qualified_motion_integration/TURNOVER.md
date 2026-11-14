@@ -79,21 +79,21 @@ Remote CI remains authoritative for merge readiness.
 
 ## Runtime and Resource Procedure
 
-On OGLAPTOP use the existing Ubuntu-24.04 environments. Do not reinstall or
+On `<host>` use the existing Ubuntu-24.04 environments. Do not reinstall or
 mix pip Pinocchio into the conda Crocoddyl environment. The preserved runtimes
 are local conveniences; reproducible repository pins remain authoritative.
 
-| Runtime                                    | Local Location                                            | Verified Use                                     |
-| ------------------------------------------ | --------------------------------------------------------- | ------------------------------------------------ |
-| Pinocchio 3.8 / Pink 4.4                   | `/home/dieterolson/.venvs/upstream-motion-10254`          | IK and native derivative tests                   |
-| Crocoddyl 3.2.1 / Pinocchio 4.1 / Pink 4.4 | `/home/dieterolson/.venvs/upstream-crocoddyl-conda-10254` | Crocoddyl and QP probes                          |
-| Gepetto / Pinocchio 3.8                    | `/home/dieterolson/.venvs/upstream-gepetto-10254`         | Corrupt Prefix; Repair Before Live Qualification |
+| Runtime                                    | Local Location                                       | Verified Use                                     |
+| ------------------------------------------ | ---------------------------------------------------- | ------------------------------------------------ |
+| Pinocchio 3.8 / Pink 4.4                   | `<owner-home>/.venvs/upstream-motion-10254`          | IK and native derivative tests                   |
+| Crocoddyl 3.2.1 / Pinocchio 4.1 / Pink 4.4 | `<owner-home>/.venvs/upstream-crocoddyl-conda-10254` | Crocoddyl and QP probes                          |
+| Gepetto / Pinocchio 3.8                    | `<owner-home>/.venvs/upstream-gepetto-10254`         | Corrupt Prefix; Repair Before Live Qualification |
 
 After #10268 is present in the selected checkout, run from that checkout in WSL:
 
 ```bash
-/home/dieterolson/.local/bin/micromamba run \
-  -p /home/dieterolson/.venvs/upstream-crocoddyl-conda-10254 \
+"$HOME/.local/bin/micromamba" run \
+  -p "$HOME/.venvs/upstream-crocoddyl-conda-10254" \
   python3 scripts/ci/check_motion_runtime.py --receipt /tmp/motion-runtime.json
 ```
 
@@ -109,7 +109,7 @@ test configuration mocks optional engines. Save JUnit XML, require a positive
 executed count and zero skips for the assigned qualification. Do not use
 `-n auto` for native benchmarks while local CI runners are active. Limit large
 native work to one job at a time; coordinate with the other worker before
-full-horizon allocation. OGLAPTOP policy is four daytime runners, up to six
+full-horizon allocation. `<host>` policy is four daytime runners, up to six
 overnight. Do not stop jobs, WSL or other workers for this project.
 
 ## Gepetto Assessment Result
