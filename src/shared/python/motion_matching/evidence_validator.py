@@ -6,9 +6,10 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date
 import json
+import math
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeGuard
 
 from src.shared.python.motion_matching.acceptance import AcceptanceGates
 from src.shared.python.motion_matching.ledger import classify_receipt
@@ -32,14 +33,39 @@ __all__ = [
 DEFAULT_MAX_LEDGER_UNCLASSIFIED = 37
 DEFAULT_MAX_LEDGER_UNVERIFIED = 122
 
+_HTTP_URL_RE = re.compile(r"https?://\S+")
+
 _HOST_ABSOLUTE_RE = re.compile(
     r"(?:file://"
     r"|(?<![A-Za-z0-9_])~[\\/]"
     r"|/home/"
     r"|/Users/"
-    r"|/mnt/[A-Za-z]/"
+    r"|/mnt/"
     r"|(?<![A-Za-z0-9_])[A-Za-z]:[\\/])"
 )
+
+_CORE_CANDIDATE_GATES = (
+    "whole_window_pass",
+    "early_retention_pass",
+    "terminal_rmse_pass",
+    "clubhead_terminal_pass",
+)
+_PELVIS_YAW_GATES = (
+    "pelvis_yaw_pass",
+    "pelvis_yaw_080_pass",
+    "pelvis_yaw_105_pass",
+    "pelvis_yaw_115_pass",
+    "pelvis_yaw_1233_pass",
+)
+
+
+def _is_valid_real_number(value: Any) -> TypeGuard[int | float]:
+    """Return True iff ``value`` is a finite int/float (excluding bool)."""
+    return (
+        not isinstance(value, bool)
+        and isinstance(value, (int, float))
+        and math.isfinite(float(value))
+    )
 
 
 @dataclass(frozen=True)
@@ -113,15 +139,74 @@ def validate_candidate_gate_metrics(
     if not isinstance(gates, Mapping) or not gates:
         return []
     issues: list[EvidenceIssue] = []
-    thresholds = _thresholds_for_duration(data.get("duration_s"))
-    for gate_name, (metric_key, limit) in thresholds.items():
-        if gate_name not in gates or metric_key not in data:
+    duration_s = data.get("duration_s")
+    valid_duration = _is_valid_real_number(duration_s) and float(duration_s) > 0.0
+    if not valid_duration:
+        issues.append(
+            EvidenceIssue(
+                rule="gate_metric_mismatch",
+                path=rel_path,
+                message=f"duration_s={duration_s!r} must be a positive finite number",
+            )
+        )
+    missing_core = [gate for gate in _CORE_CANDIDATE_GATES if gate not in gates]
+    if missing_core:
+        issues.append(
+            EvidenceIssue(
+                rule="gate_metric_mismatch",
+                path=rel_path,
+                message=f"missing required core gates: {', '.join(missing_core)}",
+            )
+        )
+    if not any(gate in gates for gate in _PELVIS_YAW_GATES):
+        issues.append(
+            EvidenceIssue(
+                rule="gate_metric_mismatch",
+                path=rel_path,
+                message="missing required pelvis_yaw gate",
+            )
+        )
+
+    thresholds = _thresholds_for_duration(duration_s if valid_duration else 0.8)
+    for gate_name, stored in gates.items():
+        if not isinstance(stored, bool):
+            issues.append(
+                EvidenceIssue(
+                    rule="gate_metric_mismatch",
+                    path=rel_path,
+                    message=f"{gate_name}={stored!r} must be a boolean",
+                )
+            )
             continue
-        stored = gates[gate_name]
-        measured = data[metric_key]
-        if not isinstance(stored, bool) or not isinstance(measured, (int, float)):
+        if gate_name not in thresholds:
+            if stored is True:
+                issues.append(
+                    EvidenceIssue(
+                        rule="gate_metric_mismatch",
+                        path=rel_path,
+                        message=f"{gate_name}=True has no verifiable metric threshold",
+                    )
+                )
             continue
-        recomputed = measured == measured and float(measured) <= limit
+        metric_key, limit = thresholds[gate_name]
+        measured = data.get(metric_key)
+        if (
+            metric_key not in data
+            or not _is_valid_real_number(measured)
+            or float(measured) < 0.0
+        ):
+            issues.append(
+                EvidenceIssue(
+                    rule="gate_metric_mismatch",
+                    path=rel_path,
+                    message=(
+                        f"{gate_name} requires finite non-negative numeric {metric_key}, "
+                        f"got {measured!r}"
+                    ),
+                )
+            )
+            continue
+        recomputed = float(measured) <= limit
         if stored != recomputed:
             issues.append(
                 EvidenceIssue(
@@ -140,7 +225,7 @@ def validate_candidate_package(
     rel_path: str, data: Mapping[str, Any]
 ) -> list[EvidenceIssue]:
     """``accepted`` must agree with gate booleans, metrics, and ``gates_passed``."""
-    issues = validate_candidate_gate_metrics(rel_path, data)
+    issues: list[EvidenceIssue] = []
     gates = data.get("gates")
     accepted = data.get("accepted")
 
@@ -187,6 +272,7 @@ def validate_candidate_package(
             )
 
     if not accepted:
+        issues.extend(validate_candidate_gate_metrics(rel_path, data))
         return issues
     if not isinstance(gates, Mapping) or not gates:
         issues.append(
@@ -196,6 +282,7 @@ def validate_candidate_package(
                 message="accepted=true but gates block is missing or empty",
             )
         )
+        issues.extend(validate_candidate_gate_metrics(rel_path, data))
         return issues
     failed = [name for name, passed in gates.items() if passed is not True]
     if failed:
@@ -208,6 +295,7 @@ def validate_candidate_package(
                 ),
             )
         )
+    issues.extend(validate_candidate_gate_metrics(rel_path, data))
     return issues
 
 
@@ -215,7 +303,7 @@ def _walk_strings(
     value: Any, *, field_path: str, issues: list[EvidenceIssue], rel_path: str
 ) -> None:
     if isinstance(value, str):
-        if _HOST_ABSOLUTE_RE.search(value):
+        if "file://" in value or _HOST_ABSOLUTE_RE.search(_HTTP_URL_RE.sub("", value)):
             issues.append(
                 EvidenceIssue(
                     rule="host_absolute_provenance",

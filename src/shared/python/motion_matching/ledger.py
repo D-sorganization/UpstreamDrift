@@ -507,18 +507,30 @@ def scan(
 
 def derive_candidate_verdict(rel_path: str, data: Mapping[str, Any]) -> dict[str, Any]:
     """Derive QUALIFIED/REJECTED verdict from candidate gates and metric recomputation."""
-    from .evidence_validator import validate_candidate_gate_metrics
+    from .evidence_validator import (
+        _CORE_CANDIDATE_GATES,
+        _PELVIS_YAW_GATES,
+        validate_candidate_gate_metrics,
+    )
 
     gates = data.get("gates")
     metric_issues = validate_candidate_gate_metrics(rel_path, data)
     reasons: list[str] = [issue.message for issue in metric_issues]
     failed_gates: list[str] = []
+    missing_core: list[str] = []
+    has_pelvis_yaw = False
     if isinstance(gates, Mapping) and gates:
         failed_gates = sorted(
             name for name, passed in gates.items() if passed is not True
         )
         if failed_gates:
             reasons.append(f"failed gates: {', '.join(failed_gates)}")
+        missing_core = [gate for gate in _CORE_CANDIDATE_GATES if gate not in gates]
+        if missing_core:
+            reasons.append(f"missing required core gates: {', '.join(missing_core)}")
+        has_pelvis_yaw = any(gate in gates for gate in _PELVIS_YAW_GATES)
+        if not has_pelvis_yaw:
+            reasons.append("missing required pelvis_yaw gate")
     else:
         reasons.append("missing or empty gates block")
 
@@ -526,6 +538,8 @@ def derive_candidate_verdict(rel_path: str, data: Mapping[str, Any]) -> dict[str
         isinstance(gates, Mapping)
         and bool(gates)
         and not failed_gates
+        and not missing_core
+        and has_pelvis_yaw
         and not metric_issues
     )
     return {

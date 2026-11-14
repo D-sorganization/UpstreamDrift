@@ -16,7 +16,10 @@ from src.shared.python.motion_matching.evidence_validator import (
     validate_ledger_ratchets,
     validate_receipt_paths,
 )
-from src.shared.python.motion_matching.ledger import scan_candidate_packages
+from src.shared.python.motion_matching.ledger import (
+    derive_candidate_verdict,
+    scan_candidate_packages,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -86,6 +89,91 @@ def test_stored_gate_true_with_metric_above_threshold_is_flagged() -> None:
         assert committed_issues == [], f"{pkg.name}: {committed_issues}"
 
 
+def test_missing_null_nonnumeric_or_unverified_metrics_fail_closed() -> None:
+    """Missing, null, non-numeric, or unverified metrics/gates must fail closed."""
+    base_gates: dict[str, bool] = {
+        "whole_window_pass": True,
+        "early_retention_pass": True,
+        "terminal_rmse_pass": True,
+        "clubhead_terminal_pass": True,
+        "pelvis_yaw_pass": True,
+    }
+    base_valid: dict[str, object] = {
+        "duration_s": 0.8,
+        "rmse_m": 0.015,
+        "early_rmse_m": 0.008,
+        "terminal_rmse_m": 0.020,
+        "clubhead_terminal_rmse_m": 0.030,
+        "pelvis_yaw_error_pct": 1.2,
+        "accepted": True,
+        "gates": dict(base_gates),
+        "gates_passed": "5/5",
+    }
+    assert validate_candidate_gate_metrics("candidates/valid.json", base_valid) == []
+    assert (
+        derive_candidate_verdict("candidates/valid.json", base_valid)["verdict"]
+        == "QUALIFIED"
+    )
+
+    bad_payloads: list[tuple[str, dict[str, object]]] = []
+
+    missing_metric = dict(base_valid)
+    del missing_metric["rmse_m"]
+    bad_payloads.append(("missing_rmse_m", missing_metric))
+
+    bad_payloads.append(("null_early_rmse", {**base_valid, "early_rmse_m": None}))
+    bad_payloads.append(
+        ("str_terminal_rmse", {**base_valid, "terminal_rmse_m": "0.010"})
+    )
+    bad_payloads.append(
+        ("bool_clubhead_rmse", {**base_valid, "clubhead_terminal_rmse_m": True})
+    )
+    bad_payloads.append(("nan_rmse", {**base_valid, "rmse_m": float("nan")}))
+    bad_payloads.append(("inf_rmse", {**base_valid, "rmse_m": float("inf")}))
+    bad_payloads.append(("neg_rmse", {**base_valid, "rmse_m": -0.01}))
+
+    missing_duration = dict(base_valid)
+    del missing_duration["duration_s"]
+    bad_payloads.append(("missing_duration", missing_duration))
+    bad_payloads.append(("zero_duration", {**base_valid, "duration_s": 0.0}))
+    bad_payloads.append(("bool_duration", {**base_valid, "duration_s": True}))
+
+    for bad_gate in (1, "true", None):
+        bad_gates: dict[str, object] = dict(base_gates)
+        bad_gates["whole_window_pass"] = bad_gate
+        bad_payloads.append(
+            (f"non_bool_gate_{bad_gate!r}", {**base_valid, "gates": bad_gates})
+        )
+
+    for extra_gate in ("shaft_inclination_pass", "custom_gate_pass"):
+        unmapped: dict[str, object] = {**base_gates, extra_gate: True}
+        bad_payloads.append(
+            (f"unmapped_true_{extra_gate}", {**base_valid, "gates": unmapped})
+        )
+
+    missing_core_gate = dict(base_gates)
+    del missing_core_gate["whole_window_pass"]
+    bad_payloads.append(
+        ("missing_core_gate", {**base_valid, "gates": missing_core_gate})
+    )
+
+    missing_yaw_gate = dict(base_gates)
+    del missing_yaw_gate["pelvis_yaw_pass"]
+    bad_payloads.append(
+        ("missing_pelvis_yaw_gate", {**base_valid, "gates": missing_yaw_gate})
+    )
+
+    for label, payload in bad_payloads:
+        issues = validate_candidate_gate_metrics(f"candidates/{label}.json", payload)
+        assert any(issue.rule == "gate_metric_mismatch" for issue in issues), (
+            f"{label}: expected gate_metric_mismatch, got {issues}"
+        )
+        verdict = derive_candidate_verdict(f"candidates/{label}.json", payload)
+        assert verdict["verdict"] == "REJECTED", (
+            f"{label}: expected REJECTED, got {verdict}"
+        )
+
+
 def test_unanchored_and_uri_host_paths_are_flagged() -> None:
     """Unanchored /home, /Users, /mnt, ~/, file://, and drive paths must fail."""
     bad_samples = (
@@ -94,6 +182,8 @@ def test_unanchored_and_uri_host_paths_are_flagged() -> None:
         "source: /Users/dev/out.json",
         "uri:D:\\runs\\stage.json",
         "loaded from /mnt/c/data/trial.json",
+        "/mnt/data/fits/run.npz",
+        "source: /mnt/shared/trial.json",
         "candidate:/home/owner/fits/w030r/candidate.npz",
     )
     for sample in bad_samples:
@@ -109,6 +199,7 @@ def test_unanchored_and_uri_host_paths_are_flagged() -> None:
             "warm_start_source": "candidates/candidate_ms_080s_package.json",
             "warm_start_sha256": "a" * 64,
             "docs_url": "https://github.com/D-sorganization/UpstreamDrift",
+            "notes_url": "https://example.com/Users/guide/mnt/data/home/index",
         },
     )
     assert clean == []
