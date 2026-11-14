@@ -5,7 +5,9 @@ Provides:
 - SVD subspace decomposition of the polynomial evaluation matrix over [0, T_prefix] to
   isolate parameter directions with minimal influence on early motion but maximal influence
   at transition.
-- Direct conversion between normalized powers p_0..p_6 and Simscape native A..G coefficients.
+- Direct conversion between normalized ascending powers p_0..p_6 and descending ``polyval``
+  coefficients ``[c_6, c_5, c_4, c_3, c_2, c_1, c_0]`` for ``c_6*t^6 + ... + c_0``
+  (reversed relative to canonical ascending ``A + B*t + ... + G*t^6`` in ``polynomial_torque.py``).
 """
 
 from __future__ import annotations
@@ -30,17 +32,17 @@ def _validate_coeffs_shape_and_duration(values: np.ndarray, T_full: float) -> No
         raise ValueError("T_full must be finite and positive")
 
 
-def simscape_powers_to_normalized(
-    simscape_coeffs: Array, *, T_full: float = T_FULL_DEFAULT
+def descending_polyval_to_normalized(
+    polyval_coeffs: Array, *, T_full: float = T_FULL_DEFAULT
 ) -> Array:
-    """Convert Simscape native A..G coefficients [A, B, C, D, E, F, G] to ascending powers of s = t/T_full.
+    """Convert descending ``polyval`` coefficients ``[c_6, c_5, c_4, c_3, c_2, c_1, c_0]`` to ascending powers of ``s = t/T_full``.
 
-    Simscape evaluates: tau(t) = A*t^6 + B*t^5 + C*t^4 + D*t^3 + E*t^2 + F*t + G.
-    Normalized time s = t / T_full => t = s * T_full.
-    tau(s) = sum_{j=0}^6 p_j * s^j.
-    p_j = simscape_coeffs[6 - j] * (T_full ** j).
+    Evaluates ``tau(t) = c_6*t^6 + c_5*t^5 + c_4*t^4 + c_3*t^3 + c_2*t^2 + c_1*t + c_0``.
+    Normalized time ``s = t / T_full`` gives ``tau(s) = sum_{j=0}^6 p_j * s^j``
+    with ``p_j = polyval_coeffs[..., 6 - j] * (T_full ** j)``.
+    Canonical ``[A..G]`` in ``polynomial_torque.py`` uses the reversed ascending order ``t^0..t^6``.
     """
-    values = np.asarray(simscape_coeffs, dtype=np.float64)
+    values = np.asarray(polyval_coeffs, dtype=np.float64)
     _validate_coeffs_shape_and_duration(values, T_full)
 
     powers = np.arange(COEFFS_PER_ACTUATOR, dtype=np.float64)
@@ -49,13 +51,12 @@ def simscape_powers_to_normalized(
     return ascending * scale
 
 
-def normalized_to_simscape_powers(
+def normalized_to_descending_polyval(
     normalized_coeffs: Array, *, T_full: float = T_FULL_DEFAULT
 ) -> Array:
-    """Convert ascending powers of s = t/T_full [p_0, ..., p_6] to Simscape native A..G.
+    """Convert ascending powers of ``s = t/T_full`` ``[p_0, ..., p_6]`` to descending ``polyval`` order.
 
-    A = p_6 / T_full^6, ..., G = p_0.
-    Returns array in Simscape order [A, B, C, D, E, F, G].
+    Returns ``[c_6, c_5, c_4, c_3, c_2, c_1, c_0]`` with ``c_6 = p_6 / T_full^6`` down to ``c_0 = p_0``.
     """
     values = np.asarray(normalized_coeffs, dtype=np.float64)
     _validate_coeffs_shape_and_duration(values, T_full)
@@ -66,13 +67,45 @@ def normalized_to_simscape_powers(
     return ascending_powers[..., ::-1]
 
 
-def cubic_to_normalized_sextic(
-    cubic_native_ag: Array, *, T_full: float = T_FULL_DEFAULT
+def simscape_powers_to_normalized(
+    simscape_coeffs: Array, *, T_full: float = T_FULL_DEFAULT
 ) -> Array:
-    """Elevate a cubic polynomial (given in native 7-coefficient Simscape format where A=B=C=0)
-    to degree-6 ascending powers of s = t/T_full.
+    """Backward-compatible alias for :func:`descending_polyval_to_normalized`."""
+    return descending_polyval_to_normalized(simscape_coeffs, T_full=T_full)
+
+
+def normalized_to_simscape_powers(
+    normalized_coeffs: Array, *, T_full: float = T_FULL_DEFAULT
+) -> Array:
+    """Backward-compatible alias for :func:`normalized_to_descending_polyval`."""
+    return normalized_to_descending_polyval(normalized_coeffs, T_full=T_full)
+
+
+def cubic_to_normalized_sextic(
+    cubic_native_ag: Array | None = None,
+    *,
+    cubic_descending_coeffs: Array | None = None,
+    T_full: float = T_FULL_DEFAULT,
+) -> Array:
+    """Elevate a descending ``polyval`` cubic (``c_6 = c_5 = c_4 = 0``) to ascending powers of ``s = t/T_full``.
+
+    Preserves the ``cubic_native_ag`` parameter name for backward compatibility
+    while also accepting ``cubic_descending_coeffs`` as a keyword alias.
     """
-    return simscape_powers_to_normalized(cubic_native_ag, T_full=T_full)
+    if cubic_native_ag is not None and cubic_descending_coeffs is not None:
+        raise TypeError(
+            "Pass only one of cubic_native_ag or cubic_descending_coeffs, not both"
+        )
+    coeffs = (
+        cubic_descending_coeffs
+        if cubic_descending_coeffs is not None
+        else cubic_native_ag
+    )
+    if coeffs is None:
+        raise TypeError(
+            "cubic_to_normalized_sextic() missing required argument: 'cubic_native_ag'"
+        )
+    return descending_polyval_to_normalized(coeffs, T_full=T_full)
 
 
 def build_prefix_svd_basis(

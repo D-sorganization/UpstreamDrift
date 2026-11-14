@@ -1,16 +1,13 @@
 # Matched Swing Program — Single Source of Truth
 
-## Continuation Review Warning
+## Continuation Authority
 
-The 2026-09-18 source review found that this document's `acceptance_contract.py`
-reference does not exist on reviewed main. The implemented evaluator is
-`src/shared/python/motion_matching/acceptance.py`: G1 is the 0–0.85 s dynamic
-horizon (whole 25 mm, early 12 mm, terminal 35 mm), not a 30 mm full-capture IK
-milestone. Historical tables below conflict with that evaluator and epic
-#10363 and MUST NOT be used to accept a run. MS-100 (#10374) must reconcile
-and version the complete contract; do not change thresholds during fitting.
-Read the [continuation prompt](AGENT_CONTINUATION_PROMPT.md) and exact receipts.
-The review does not qualify the evaluator or replace missing physical evidence.
+The single source of truth for physical acceptance evaluation is `AcceptanceGates`
+and `evaluate` in `src/shared/python/motion_matching/acceptance.py`, and
+[`GATES.md`](GATES.md) is tested directly against those thresholds (`g1_whole_rmse_m`
+is 25 mm over 0–0.85 s, `g1_early_rmse_m` is 12 mm, and `g1_terminal_rmse_m` is
+35 mm). Do not relax thresholds during fitting; read the
+[continuation prompt](AGENT_CONTINUATION_PROMPT.md) and exact receipts.
 
 **Program Lead:** Dieter Olson (`agent:local`)  
 **Governing Epic:** [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363)  
@@ -36,7 +33,7 @@ The **Matched Swing Program** delivers a physically realistic, cross-engine matc
 
 ### Core Mandates:
 
-- **No Threshold Relaxation:** Numerical tolerances are fixed. G1 kinematic fit is an engineering milestone ($\le 30$ mm IK), not dynamic match or product release.
+- **No Threshold Relaxation:** Numerical tolerances are fixed (`AcceptanceGates` sets G1 `0–0.85 s` whole-horizon marker RMSE `<= 25 mm`). Partial or strength-limited states do not qualify.
 - **Fail-Closed Gate Evaluation:** Missing files, missing sensor channels, unverified SHA-256 hashes, or non-finite outputs fail closed.
 - **Dual-Club Full-Swing Coverage:** G3 professional release requires verified driver and 7-iron captures across all engines. Partial or strength-limited states do not qualify.
 - **Path-Anchored Numbers:** Every metric cited in documentation must anchor directly to a verified receipt JSON field.
