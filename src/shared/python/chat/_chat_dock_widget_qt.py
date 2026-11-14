@@ -599,6 +599,8 @@ class ChatDockWidget(StreamingMixin, TerminalModeMixin, MessagingMixin, QDockWid
 
         elif msg_type == "error":
             detail = data.get("detail", "Unknown error")
+            if hasattr(self, "_apply_file_upload_rejection"):
+                self._apply_file_upload_rejection(str(detail))
             self._status_label.setText(f"Error: {detail}")
             self._exit_thinking_state()
             # Surface remaining queue state to the user; do NOT auto-flush
