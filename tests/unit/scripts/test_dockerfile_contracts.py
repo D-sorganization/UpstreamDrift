@@ -126,6 +126,7 @@ def _write_minimal_tree(root: Path, *, modular_pip: str = "26.1.2") -> None:
     (root / ".dockerignore").write_text(_DOCKERIGNORE_OK, encoding="utf-8")
     (root / "Dockerfile").write_text(
         """
+RUN set -eu; for crate in rust_core/upstream-physics; do maturin build --release --features python -m "$crate/Cargo.toml" --out /wheels || exit 1; done; ls -1 /wheels
 RUN pip install --upgrade pip==26.1.2
 ARG SKIP_AUDIT=false
 RUN pip install pip-audit==2.10.0
@@ -541,3 +542,61 @@ def test_ud_sim_service_must_not_set_default_command(tmp_path: Path) -> None:
     )
 
     assert any("command" in f and "ud-sim" in f for f in _failures(tmp_path))
+
+
+def test_dockerfile_maturin_loop_rejects_unguarded_for_loop(tmp_path: Path) -> None:
+    """Issue #15112: unguarded maturin loop exits 0 when earlier crates fail."""
+    _write_minimal_tree(tmp_path)
+    (tmp_path / "Dockerfile").write_text(
+        (tmp_path / "Dockerfile")
+        .read_text(encoding="utf-8")
+        .replace(
+            'RUN set -eu; for crate in rust_core/upstream-physics; do maturin build --release --features python -m "$crate/Cargo.toml" --out /wheels || exit 1; done; ls -1 /wheels',
+            'RUN mkdir -p /wheels && cd /tmp/rust && for crate in a b; do maturin build -m "$crate/Cargo.toml" --out /wheels; done && ls -1 /wheels',
+        ),
+        encoding="utf-8",
+    )
+
+    failures = _failures(tmp_path)
+    assert any("set -e" in f for f in failures)
+    assert any("done &&" in f for f in failures)
+    assert any("|| exit 1" in f for f in failures)
+
+
+def test_dockerfile_maturin_loop_rejects_done_and_and_compound_chain(
+    tmp_path: Path,
+) -> None:
+    """POSIX /bin/sh suppresses set -e inside any `for ... done && ...` command."""
+    _write_minimal_tree(tmp_path)
+    (tmp_path / "Dockerfile").write_text(
+        (tmp_path / "Dockerfile")
+        .read_text(encoding="utf-8")
+        .replace(
+            'RUN set -eu; for crate in rust_core/upstream-physics; do maturin build --release --features python -m "$crate/Cargo.toml" --out /wheels || exit 1; done; ls -1 /wheels',
+            'RUN set -eu; for crate in a b; do maturin build -m "$crate/Cargo.toml" --out /wheels || exit 1; done && ls -1 /wheels',
+        ),
+        encoding="utf-8",
+    )
+
+    assert any("done &&" in f for f in _failures(tmp_path))
+
+
+def test_dockerfile_lockfile_pin_drift_rejects_downgraded_pin() -> None:
+    """Dockerfile must not downgrade packages pinned in requirements.lock."""
+    failures = guard.dockerfile_lockfile_pin_drift_failures(
+        "RUN pip install tornado==6.6\n",
+        "tornado==6.6.1\n",
+    )
+    assert any("tornado==6.6" in f and "6.6.1" in f for f in failures)
+    assert (
+        guard.dockerfile_lockfile_pin_drift_failures(
+            "RUN pip install tornado==6.6.1\n",
+            "tornado==6.6.1\n",
+        )
+        == []
+    )
+
+
+def test_repository_dockerfiles_satisfy_contracts() -> None:
+    repo_root = Path(__file__).resolve().parents[3]
+    assert guard.docker_contract_failures(repo_root) == []

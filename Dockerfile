@@ -52,8 +52,9 @@ ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 # the maturin build loop in .github/workflows/ci-standard.yml.
 COPY Cargo.toml /tmp/rust/Cargo.toml
 COPY rust_core /tmp/rust/rust_core
-RUN mkdir -p /wheels && \
-    cd /tmp/rust && \
+RUN set -eu; \
+    mkdir -p /wheels; \
+    cd /tmp/rust; \
     for crate in \
         rust_core/upstream-physics \
         rust_core/upstream-mocap-preproc \
@@ -63,10 +64,12 @@ RUN mkdir -p /wheels && \
         rust_core/ai_backend; do \
         maturin build --release --features python \
             -m "$crate/Cargo.toml" --out /wheels || exit 1; \
-    done && \
-    ls -1 /wheels && \
-    test -n "$(ls /wheels/upstream_physics-*.whl 2>/dev/null)" || \
-    (echo "upstream_physics wheel missing after maturin build" && exit 1)
+    done; \
+    ls -1 /wheels; \
+    test -n "$(ls /wheels/upstream_physics-*.whl 2>/dev/null)" || { \
+        echo "upstream_physics wheel missing after maturin build" >&2; \
+        exit 1; \
+    }
 
 # Core API + physics stack from lockfile
 COPY requirements.lock /tmp/requirements.lock
