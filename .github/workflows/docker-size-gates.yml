@@ -237,6 +237,18 @@ jobs:
           labels: org.upstreamdrift.ci=docker-size-gates
           builder: ${{ steps.buildkit.outputs.builder || steps.buildx-fallback.outputs.name }}
 
+      - name: Attach shared BuildKit builder (full profile retry)
+        id: buildkit-retry
+        if: matrix.profile == 'full' && steps.docker-build.outcome == 'failure'
+        continue-on-error: true
+        shell: bash
+        run: python3 scripts/ci/shared_buildkit.py ensure --github-output "$GITHUB_OUTPUT"
+
+      - name: Set up a throwaway Buildx builder (full profile retry fallback)
+        id: buildx-fallback-retry
+        if: steps.buildkit.outputs.builder == '' && matrix.profile == 'full' && steps.docker-build.outcome == 'failure'
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069
+
       - name: Retry full profile build after fleet runner blip
         id: docker-build-retry
         if: matrix.profile == 'full' && steps.docker-build.outcome == 'failure'
