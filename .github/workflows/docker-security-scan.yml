@@ -23,7 +23,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: docker-security-scan-${{ github.ref }}
+  # Serialize with docker-size-gates — same host BuildKit cannot run two pulls/builds.
+  group: docker-image-build-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
