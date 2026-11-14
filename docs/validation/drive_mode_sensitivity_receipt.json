@@ -1,15 +1,27 @@
 {
   "schema": "upstreamdrift.drive_mode_sensitivity_receipt.v1",
-  "issue": 13886,
+  "issue": 13888,
+  "parent_epic": 13789,
   "validation_status": "UNVALIDATED",
-  "impedance_hypotheses": ["H-DECLARED-JOINT-IMPEDANCE"],
+  "impedance_hypotheses": [
+    "H-DECLARED-JOINT-IMPEDANCE"
+  ],
   "window_s": 0.15,
   "modes": [
     {
       "drive_mode": "torque_undamped",
-      "impedance_hypotheses": ["H-DECLARED-JOINT-IMPEDANCE"],
+      "impedance_hypotheses": [
+        "H-DECLARED-JOINT-IMPEDANCE"
+      ],
       "sigma_max_window": 3.22524,
-      "singular_values_window": [3.22524, 1.844631, 1.455093, 0.814355, 0.510122, 0.304138],
+      "singular_values_window": [
+        3.22524,
+        1.844631,
+        1.455093,
+        0.814355,
+        0.510122,
+        0.304138
+      ],
       "ftle_window": 7.806716,
       "det_phi_window": 1.093758,
       "directional_gains": {
@@ -20,9 +32,18 @@
     },
     {
       "drive_mode": "torque_canonical",
-      "impedance_hypotheses": ["H-DECLARED-JOINT-IMPEDANCE"],
+      "impedance_hypotheses": [
+        "H-DECLARED-JOINT-IMPEDANCE"
+      ],
       "sigma_max_window": 2.620546,
-      "singular_values_window": [2.620546, 1.75921, 1.235341, 0.732272, 0.478982, 0.167501],
+      "singular_values_window": [
+        2.620546,
+        1.75921,
+        1.235341,
+        0.732272,
+        0.478982,
+        0.167501
+      ],
       "ftle_window": 6.422552,
       "det_phi_window": 0.334584,
       "directional_gains": {
@@ -33,9 +54,18 @@
     },
     {
       "drive_mode": "joint_impedance",
-      "impedance_hypotheses": ["H-DECLARED-JOINT-IMPEDANCE"],
+      "impedance_hypotheses": [
+        "H-DECLARED-JOINT-IMPEDANCE"
+      ],
       "sigma_max_window": 1.763086,
-      "singular_values_window": [1.763086, 1.01807, 0.640855, 0.477068, 0.13468, 0.005996],
+      "singular_values_window": [
+        1.763086,
+        1.01807,
+        0.640855,
+        0.477068,
+        0.13468,
+        0.005996
+      ],
       "ftle_window": 3.780437,
       "det_phi_window": 0.000443,
       "directional_gains": {
@@ -43,32 +73,90 @@
         "in_plane_path_lean_proxy": 0.869915
       },
       "validation_status": "UNVALIDATED"
+    },
+    {
+      "drive_mode": "hill_mtu",
+      "validation_status": "NOT_QUALIFIED",
+      "impedance_hypotheses": [
+        "H-DECLARED-JOINT-IMPEDANCE"
+      ]
     }
   ],
   "impedance_k_sweep": [
     {
       "k_nm_per_rad": 0.0,
       "d_nm_s_per_rad": 1.5,
-      "sigma_max_window": 2.024735,
-      "ftle_window": 4.702926
+      "sigma_max_window": 2.02473502351421,
+      "ftle_window": 4.702925596073204
     },
     {
       "k_nm_per_rad": 10.0,
       "d_nm_s_per_rad": 1.5,
-      "sigma_max_window": 1.937887,
-      "ftle_window": 4.410656
+      "sigma_max_window": 1.9378872679566628,
+      "ftle_window": 4.4106556167177935
     },
     {
       "k_nm_per_rad": 25.0,
       "d_nm_s_per_rad": 1.5,
-      "sigma_max_window": 1.856102,
-      "ftle_window": 4.12319
+      "sigma_max_window": 1.8561016957062224,
+      "ftle_window": 4.123189505387288
     },
     {
       "k_nm_per_rad": 50.0,
       "d_nm_s_per_rad": 1.5,
-      "sigma_max_window": 1.763086,
-      "ftle_window": 3.780437
+      "sigma_max_window": 1.7630858795597708,
+      "ftle_window": 3.7804374293442473
     }
-  ]
+  ],
+  "hill_cocontraction_sweep": [
+    {
+      "drive_mode": "hill_mtu",
+      "validation_status": "NOT_QUALIFIED",
+      "cocontraction": 0.05,
+      "tendon_mode": "rigid",
+      "sigma_max_window": null,
+      "ftle_window": null
+    },
+    {
+      "drive_mode": "hill_mtu",
+      "validation_status": "NOT_QUALIFIED",
+      "cocontraction": 0.05,
+      "tendon_mode": "compliant",
+      "sigma_max_window": null,
+      "ftle_window": null
+    },
+    {
+      "drive_mode": "hill_mtu",
+      "validation_status": "NOT_QUALIFIED",
+      "cocontraction": 0.2,
+      "tendon_mode": "rigid",
+      "sigma_max_window": null,
+      "ftle_window": null
+    },
+    {
+      "drive_mode": "hill_mtu",
+      "validation_status": "NOT_QUALIFIED",
+      "cocontraction": 0.2,
+      "tendon_mode": "compliant",
+      "sigma_max_window": null,
+      "ftle_window": null
+    },
+    {
+      "drive_mode": "hill_mtu",
+      "validation_status": "NOT_QUALIFIED",
+      "cocontraction": 0.5,
+      "tendon_mode": "rigid",
+      "sigma_max_window": null,
+      "ftle_window": null
+    },
+    {
+      "drive_mode": "hill_mtu",
+      "validation_status": "NOT_QUALIFIED",
+      "cocontraction": 0.5,
+      "tendon_mode": "compliant",
+      "sigma_max_window": null,
+      "ftle_window": null
+    }
+  ],
+  "smoke_note": "Full sweep uses t_end=0.2 s; CI smoke uses t_end=0.08 s in unit tests."
 }
