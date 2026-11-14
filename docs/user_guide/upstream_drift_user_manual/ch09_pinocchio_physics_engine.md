@@ -34,7 +34,7 @@ pip install numpy          # Required
 pip install pink           # Optional: inverse kinematics
 ```
 
-Availability is checked at import time via `src/shared/python/engine_availability.PINOCCHIO_AVAILABLE`.
+Availability is checked at import time via `src/shared/python/engine_core/engine_availability.PINOCCHIO_AVAILABLE`.
 When Pinocchio is absent, a `DummyPin` stub prevents `NameError` but raises `ImportError` on any
 actual usage.
 

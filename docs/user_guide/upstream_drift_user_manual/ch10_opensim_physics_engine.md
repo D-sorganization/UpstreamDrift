@@ -23,7 +23,7 @@ pip install opensim      # OpenSim Python bindings (>= 4.4)
 pip install numpy
 ```
 
-Availability is checked via `src/shared/python/engine_availability.OPENSIM_AVAILABLE`.
+Availability is checked via `src/shared/python/engine_core/engine_availability.OPENSIM_AVAILABLE`.
 
 ---
 

@@ -167,11 +167,11 @@ from src.engines.physics_engines.drake.python.motion_matching import (
     simulate_with_coefficients,
     FitResult,
 )
-from tests.fixtures.motion_matching_strategy import (
-    STANDARD_COEFFICIENTS,
-    STANDARD_POSE,
-    TIME_SPAN,
-)
+from tests.fixtures.motion_matching_strategy import create_sample_strategy_package
+
+STANDARD_COEFFICIENTS = np.zeros(7)
+STANDARD_POSE: dict[str, float] = {}
+TIME_SPAN = (0.0, 0.3)
 
 pytestmark = [pytest.mark.unit, pytest.mark.requires_drake]
 
@@ -272,11 +272,11 @@ from src.engines.physics_engines.drake.python.motion_matching import (
 from src.engines.physics_engines.mujoco.python.motion_matching import (
     fit_swing_deterministic as mujoco_fit_swing_deterministic,
 )
-from tests.fixtures.motion_matching_strategy import (
-    REFERENCE_TARGET_TRAJECTORY,
-    OPTIMIZATION_BOUNDS,
-    INITIAL_GUESS,
-)
+from tests.fixtures.motion_matching_strategy import create_sample_strategy_package
+
+REFERENCE_TARGET_TRAJECTORY = create_sample_strategy_package("drake").candidate.q
+OPTIMIZATION_BOUNDS = {"min": [-1.0] * 7, "max": [1.0] * 7}
+INITIAL_GUESS = np.zeros(7)
 
 pytestmark = [pytest.mark.unit, pytest.mark.requires_drake]
 
@@ -750,7 +750,7 @@ coefficients = np.zeros(engine.expected_coefficient_count())
 
 1. Verify coefficient ranges per engine spec
 2. Check coefficient count matches engine requirements
-3. Use `STANDARD_COEFFICIENTS` from fixture as reference
+3. Use `create_sample_strategy_package(...)` from `tests/fixtures/motion_matching_strategy.py` as reference
 
 ---
 

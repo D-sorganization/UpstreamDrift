@@ -20,7 +20,7 @@ PATH_PATTERN = re.compile(r"`([a-zA-Z_][a-zA-Z0-9_./-]+(?:\.py|/))`")
 FENCE_PATTERN = re.compile(r"^```.*?^```", re.MULTILINE | re.DOTALL)
 INLINE_CODE_PATTERN = re.compile(r"(?<!`)`([^`\n]+)`(?!`)")
 DOC_REPO_PATH_PATTERN = re.compile(r"^[a-zA-Z0-9_./-]+$")
-MODULE_ATTR_SUFFIX_PATTERN = re.compile(r"\.[A-Z_][A-Z0-9_]*$")
+MODULE_CONST_ATTR_PATTERN = re.compile(r"^[A-Z][A-Z0-9]*_[A-Z0-9_]+$")
 
 # These prefixes are the project's package roots. Anything matched against
 # them must exist; everything else is treated as a non-path identifier.
@@ -102,6 +102,18 @@ def _default_doc_targets(root: Path) -> list[Path]:
     return targets
 
 
+def _is_python_module_constant_ref(root: Path, path: str) -> bool:
+    """Return True iff ``<module>.<UPPER_SNAKE_CONST>`` points to an existing Python module."""
+    if "." not in path:
+        return False
+    module_prefix, attr_name = path.rsplit(".", 1)
+    if not MODULE_CONST_ATTR_PATTERN.fullmatch(attr_name):
+        return False
+    return (root / f"{module_prefix}.py").is_file() or (
+        root / module_prefix / "__init__.py"
+    ).is_file()
+
+
 def check_doc_paths(root: Path, doc_files: list[Path] | None = None) -> list[str]:
     """Return formatted missing-path violations in curated markdown files.
 
@@ -127,7 +139,7 @@ def check_doc_paths(root: Path, doc_files: list[Path] | None = None) -> list[str
                 continue
             if not DOC_REPO_PATH_PATTERN.fullmatch(path):
                 continue
-            if MODULE_ATTR_SUFFIX_PATTERN.search(path):
+            if _is_python_module_constant_ref(root, path):
                 continue
             if not (root / path.rstrip("/")).exists():
                 line = stripped[: match.start()].count("\n") + 1

@@ -166,13 +166,22 @@ def test_check_doc_paths_flags_missing_bare_dirs_and_non_py_files(tmp_path: Path
 def test_check_doc_paths_ignores_fenced_code_blocks_and_module_constants(
     tmp_path: Path,
 ):
-    """Fenced code snippets and module constant qualifiers are ignored."""
+    """Fenced snippets and real module UPPER_SNAKE constants are ignored; bad suffixes fail."""
+    avail_mod = tmp_path / "src/shared/python/engine_core/engine_availability.py"
+    avail_mod.parent.mkdir(parents=True, exist_ok=True)
+    avail_mod.write_text("PINOCCHIO_AVAILABLE = False\n", encoding="utf-8")
+
     doc = tmp_path / "docs/README.md"
     doc.parent.mkdir(parents=True)
     doc.write_text(
         "\n".join(
             [
-                "Constant `src/shared/python/engine_availability.PINOCCHIO_AVAILABLE`.",
+                "Valid constant `src/shared/python/engine_core/engine_availability.PINOCCHIO_AVAILABLE`.",
+                "Uppercase ext STL `src/assets/Missing.STL`.",
+                "Uppercase ext PNG `src/assets/Missing.PNG`.",
+                "Uppercase ext MD `docs/Missing.MD`.",
+                "Existing module uppercase ext `src/shared/python/engine_core/engine_availability.STL`.",
+                "Missing module constant `src/shared/python/missing_mod.SOME_CONST`.",
                 "```bash",
                 "pytest tests/nonexistent_in_fence/",
                 "```",
@@ -184,7 +193,12 @@ def test_check_doc_paths_ignores_fenced_code_blocks_and_module_constants(
 
     bad = checker.check_doc_paths(tmp_path, [doc])
     assert bad == [
-        "  docs/README.md:5: missing path 'src/missing_after_fence.py'",
+        "  docs/README.md:2: missing path 'src/assets/Missing.STL'",
+        "  docs/README.md:3: missing path 'src/assets/Missing.PNG'",
+        "  docs/README.md:4: missing path 'docs/Missing.MD'",
+        "  docs/README.md:5: missing path 'src/shared/python/engine_core/engine_availability.STL'",
+        "  docs/README.md:6: missing path 'src/shared/python/missing_mod.SOME_CONST'",
+        "  docs/README.md:10: missing path 'src/missing_after_fence.py'",
     ]
 
 
