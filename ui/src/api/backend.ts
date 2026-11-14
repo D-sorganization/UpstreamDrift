@@ -191,7 +191,9 @@ export async function getDiagnostics(): Promise<DiagnosticInfo> {
     // module, so importing apiFetch back would create a circular dependency.
     // We build the URL via getApiBase() directly to stay Tauri-safe (#6897).
     try {
-      const response = await fetch(`${getApiBase()}/api/diagnostics`);
+      // Loaded on demand for the same reason: launcherFetch depends on this module.
+      const { launcherFetch } = await import('./launcherFetch');
+      const response = await launcherFetch(`${getApiBase()}/api/diagnostics`);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
