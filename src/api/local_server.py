@@ -90,7 +90,7 @@ from src.api.utils.path_validation import (  # noqa: E402
 )
 from src.api.services.chat_app_context import make_app_state_provider  # noqa: E402
 from src.shared.python.app_state import get_state_logger  # noqa: E402
-from src.shared.python.config.environment import is_production  # noqa: E402
+from src.shared.python.config.environment import get_golf_port, is_production  # noqa: E402
 from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
 
 logger = get_logger(__name__)
@@ -644,6 +644,7 @@ def _register_health_and_diagnostic_endpoints(
         return {
             "status": "healthy",
             "mode": "local",
+            "bind_port": get_golf_port(),
             "auth_required": False,
             "engines": [e.value for e in engine_manager.get_available_engines()],
             "ui_available": _startup_metrics.get("static_files_mounted", False),
