@@ -3,12 +3,61 @@
 Provides shared fixtures and setup for all unit tests.
 """
 
+from __future__ import annotations
+
+from pathlib import Path
 import sys
 from unittest.mock import MagicMock
 
 import pytest
 
 _MOCKED_MODULES: set[str] = set()
+_UNIT_ROOT = Path(__file__).resolve().parent
+
+
+def _is_mock_module(module: object | None) -> bool:
+    """Return True if *module* is a unittest.mock stand-in rather than real."""
+    return module is not None and type(module).__module__ == "unittest.mock"
+
+
+def _reset_engine_availability_cache() -> None:
+    """Clear memoized engine availability so mock/real transitions re-probe."""
+    try:
+        from src.shared.python.engine_core.engine_availability import (
+            reset_engine_status_cache,
+        )
+
+        reset_engine_status_cache()
+    except ImportError:
+        # engine_availability is an internal module; if it cannot be imported
+        # the cache does not exist to poison, so there is nothing to reset.
+        pass
+
+
+def _is_unit_item(item: pytest.Item) -> bool:
+    """True when *item* belongs under the tests/unit/ directory tree."""
+    try:
+        return Path(str(item.path)).resolve().is_relative_to(_UNIT_ROOT)
+    except (AttributeError, OSError, ValueError):
+        return False
+
+
+def _install_unit_mocks() -> None:
+    """Ensure every module stubbed at collection time has a fresh MagicMock."""
+    for module_name in _MOCKED_MODULES:
+        sys.modules[module_name] = MagicMock()
+    _reset_engine_availability_cache()
+
+
+def _remove_unit_mocks() -> None:
+    """Remove unit-only MagicMock stubs from sys.modules when outside tests/unit."""
+    removed = False
+    for module_name in _MOCKED_MODULES:
+        if _is_mock_module(sys.modules.get(module_name)):
+            sys.modules.pop(module_name, None)
+            removed = True
+    if removed:
+        _reset_engine_availability_cache()
 
 
 def pytest_configure(config):
@@ -64,6 +113,28 @@ def pytest_configure(config):
             _MOCKED_MODULES.add("pinocchio.casadi")
 
 
+def pytest_collection_finish(session: pytest.Session) -> None:
+    """Drop collection-time stubs before non-unit tests begin."""
+    del session
+    _remove_unit_mocks()
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_runtest_setup(item: pytest.Item) -> None:
+    """Ensure unit stubs are active only while executing tests/unit/ items."""
+    if _is_unit_item(item):
+        _install_unit_mocks()
+    else:
+        _remove_unit_mocks()
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_runtest_teardown(item: pytest.Item, nextitem: pytest.Item | None) -> None:
+    """Strip unit-only MagicMocks as execution leaves tests/unit/."""
+    if _is_unit_item(item) and (nextitem is None or not _is_unit_item(nextitem)):
+        _remove_unit_mocks()
+
+
 @pytest.fixture(autouse=True)
 def _reset_mocks_between_tests():
     """Reset all mocked modules before each test to prevent cross-test pollution.
@@ -80,22 +151,6 @@ def _reset_mocks_between_tests():
     detects mocks and reports NOT_INSTALLED, but resetting the cache per test
     keeps that determination from leaking across the mock/unmock boundary.
     """
-    # Reset only the modules that were actually mocked
-    for module_name in _MOCKED_MODULES:
-        if module_name in sys.modules:
-            sys.modules[module_name] = MagicMock()
-
-    # Drop any memoised availability verdict so each test re-probes against the
-    # current sys.modules state rather than a stale cross-test result.
-    try:
-        from src.shared.python.engine_core.engine_availability import (
-            reset_engine_status_cache,
-        )
-
-        reset_engine_status_cache()
-    except ImportError:
-        # engine_availability is an internal module; if it cannot be imported
-        # the cache does not exist to poison, so there is nothing to reset.
-        pass
+    _install_unit_mocks()
 
     yield
