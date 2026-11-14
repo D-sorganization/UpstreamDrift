@@ -239,6 +239,42 @@ def explorer_contract_failures(root: Path) -> list[str]:
     return failures
 
 
+def dockerfile_maturin_loop_failures(dockerfile: str) -> list[str]:
+    """Ensure Dockerfile maturin crate builds fail closed on any crate error.
+
+    POSIX ``/bin/sh`` (``dash``) returns only the exit status of the last loop
+    iteration unless ``set -e`` is active *and* the loop is not part of an ``&&``
+    list (where ``set -e`` is suppressed for the entire compound command).
+    """
+    normalized = re.sub(r"\\\r?\n", " ", dockerfile)
+    maturin_runs = [
+        line.strip()
+        for line in normalized.splitlines()
+        if re.match(r"^\s*RUN\s+", line, re.IGNORECASE) and "maturin build" in line
+    ]
+    if not maturin_runs:
+        return ["Dockerfile builder stage must build Rust wheels with maturin build"]
+
+    failures: list[str] = []
+    for run_cmd in maturin_runs:
+        if not re.search(r"\bset\s+-[a-z]*e[a-z]*\b", run_cmd):
+            failures.append(
+                "Dockerfile maturin build RUN step must enable set -e so crate "
+                "build failures abort the layer"
+            )
+        if re.search(r"\bdone\s*&&", run_cmd):
+            failures.append(
+                "Dockerfile maturin build loop must not chain 'done &&' (POSIX "
+                "/bin/sh disables set -e inside compound commands before &&)"
+            )
+        if not re.search(r"maturin build\b[^;|]*\|\|\s*exit\s+1\b", run_cmd):
+            failures.append(
+                "Dockerfile maturin build invocation must guard each crate with "
+                "'|| exit 1' to prevent partial /wheels cache poisoning"
+            )
+    return failures
+
+
 def docker_contract_failures(root: Path = Path(".")) -> list[str]:
     failures = _root_context_dockerignore_failures(root)
     pin_by_file: dict[str, set[str]] = {}
@@ -255,6 +291,7 @@ def docker_contract_failures(root: Path = Path(".")) -> list[str]:
         failures.append(f"Dockerfile pip pins diverge: {pin_by_file}")
 
     dockerfile = _read(root / "Dockerfile")
+    failures.extend(dockerfile_maturin_loop_failures(dockerfile))
     if "ARG SKIP_AUDIT=false" not in dockerfile:
         failures.append("Dockerfile builder audit must default to enabled")
     for required in (
