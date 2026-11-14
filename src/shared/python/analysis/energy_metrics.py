@@ -33,7 +33,10 @@ class EnergyMetricsMixin:
             potential_energy: Potential energy time series
 
         Returns:
-            Dictionary of energy metrics
+            Dictionary of energy metrics. Note ``energy_efficiency`` is a
+            swing-kinetic ratio (``kinetic_energy[argmax(club_head_speed)] /
+            max(kinetic_energy + potential_energy) * 100``, or ``0.0`` if
+            ``self.club_head_speed`` is unset), not thermodynamic efficiency.
         """
         if kinetic_energy is None:
             raise ValueError("kinetic_energy must be provided")

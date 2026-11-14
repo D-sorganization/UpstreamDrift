@@ -14,6 +14,7 @@ from src.shared.python.core.physics_constants import (
 from .types import ImpactModelType, ImpactParameters, PostImpactState, PreImpactState
 from .contact_kinematics import (
     impact_offset_vector_3d,
+    normal_effective_inverse_mass,
     pre_impact_contact_relative_velocity,
     reduced_normal_effective_mass,
 )
@@ -110,7 +111,12 @@ class RigidBodyImpactModel(ImpactModel):
             return np.zeros(3)
         inverse_effective_mass = (
             1.0 / GOLF_BALL_MASS_KG
-            + 1.0 / pre_state.clubhead_mass
+            + normal_effective_inverse_mass(
+                pre_state.clubhead_mass,
+                float(pre_state.clubhead_moi),
+                impact_offset_vector_3d(pre_state),
+                slip / slip_mag,
+            )
             + GOLF_BALL_RADIUS_M**2 / GOLF_BALL_MOMENT_OF_INERTIA_KG_M2
         )
         j_tangent = min(
@@ -206,6 +212,8 @@ class RigidBodyImpactModel(ImpactModel):
             params.friction_coefficient,
         )
         impulse = j * n + j_tangent
+        # Linear momentum conservation uses full clubhead_mass for CM translation;
+        # off-center rotational compliance enters clubhead angular velocity via r x (-J).
         v_ball_post = pre_state.ball_velocity + impulse / GOLF_BALL_MASS_KG
         v_club_post = pre_state.clubhead_velocity - impulse / pre_state.clubhead_mass
         ball_spin = pre_state.ball_angular_velocity + (
@@ -381,10 +389,11 @@ class SpringDamperImpactModel(ImpactModel):
 
 
 class FiniteTimeImpactModel(ImpactModel):
-    """Finite-time impulse-momentum model.
+    """Instantaneous impulse-momentum model with stamped contact duration.
 
-    Computes impact over a specified contact duration using
-    momentum conservation and gradual force application.
+    Computes the instantaneous ``RigidBodyImpactModel`` impulse jump and stamps
+    ``params.contact_duration`` as metadata. Use ``SpringDamperImpactModel``
+    for time-stepped contact force integration.
     """
 
     def solve(

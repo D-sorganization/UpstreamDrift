@@ -32,7 +32,12 @@ from src.shared.python.physics.ball_launch_conditions import (
     LaunchConditions,
     TrajectoryPoint,
 )
-from src.shared.python.physics.ball_properties import BallProperties
+from src.shared.python.physics.ball_properties import (
+    MAX_LIFT_COEFFICIENT,
+    PENNER_LIFT_EXPONENT,
+    PENNER_LIFT_SCALE,
+    BallProperties,
+)
 from src.shared.python.physics.ball_trajectory_analysis import TrajectoryAnalysisMixin
 
 if TYPE_CHECKING:
@@ -550,5 +555,19 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
             results.append(analysis)
 
         return results
+
+    @property
+    def model_metadata(self) -> dict[str, object]:
+        """Return declared aerodynamic model family and effective parameters."""
+        return {
+            "drag_model": "reynolds_dimpled_sphere",
+            "base_cd": float(self.aero_config.drag_coefficient),
+            "lift_scale": PENNER_LIFT_SCALE,
+            "lift_exponent": PENNER_LIFT_EXPONENT,
+            "cl_max": min(
+                MAX_LIFT_COEFFICIENT, float(self.aero_config.magnus_coefficient)
+            ),
+            "spin_decay_rate": float(self.aero_config.spin_decay_rate),
+        }
 
     # Analysis methods are inherited from TrajectoryAnalysisMixin (DRY principle).

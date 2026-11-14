@@ -4,11 +4,10 @@ This submodule contains BallFlightSimulator, the base simulator that delegates
 trajectory integration to the upstream_physics Rust wheel. Extracted from
 ball_flight_physics.py as part of P1 sprint decomposition (issue #2486).
 
-.. deprecated::
-    The RK4 integration loop has a Rust kernel equivalent in ``upstream_physics``
-    (via ``rust_kernel.create_integrator_config``). New simulation code should use
-    the Rust-backed integrator for native performance and WASM parity with the
-    React frontend.
+.. note::
+     Trajectory integration requires the ``upstream_physics`` Rust wheel
+    (``RuntimeError`` is raised if unavailable); there is no Python/Numba
+    integrator fallback.
 """
 
 from __future__ import annotations
@@ -60,6 +59,18 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         self.ball = ball or BallProperties()
         self.environment = env or environment or EnvironmentalConditions()
 
+    @property
+    def model_metadata(self) -> dict[str, Any]:
+        """Return declared aerodynamic model family and effective parameters."""
+        return {
+            "drag_model": "reynolds_dimpled_sphere",
+            "base_cd": float(GOLF_BALL_DRAG_COEFFICIENT),
+            "lift_scale": PENNER_LIFT_SCALE,
+            "lift_exponent": PENNER_LIFT_EXPONENT,
+            "cl_max": MAX_LIFT_COEFFICIENT,
+            "spin_decay_rate": float(self.ball.spin_decay_rate),
+        }
+
     @precondition(
         lambda self, launch, max_time=10.0, dt=0.01, **_kw: (
             launch is not None and launch.velocity >= 0
@@ -82,11 +93,10 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         *,
         legacy_forces: bool = False,
     ) -> list[TrajectoryPoint]:
-        """Simulate trajectory from m/s, radian angles, and RPM spin.
+        """Simulate trajectory via ``upstream_physics`` from m/s, radians, and RPM.
 
-        When the upstream_physics Rust wheel is installed, the RK4 integration
-        is delegated to the native Rust implementation for performance.
-        Otherwise, falls back to the Python/Numba implementation.
+        Raises ``RuntimeError`` if the Rust extension is not installed (no
+        Python/Numba fallback).
         """
         return self._post_process_rust(
             self._simulate_native(
@@ -176,6 +186,8 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
 
         air_props = upstream_physics.AirProperties(
             density=self.environment.air_density,
+            # Matches upstream_physics::AirProperties::default() (~20 C air) and
+            # the sha256-pinned default_trajectory.json fixture; DragModel uses 1.789e-5 (15 C ISA).
             viscosity=1.81e-5,
             temperature=_air_temperature_kelvin(self.environment),
             pressure=101325.0,
