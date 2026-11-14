@@ -51,6 +51,13 @@ def stubbed(monkeypatch, tmp_path):
     )
 
 
+@pytest.mark.parametrize("bad", ["false", "true", 0, 1, None])
+def test_allow_implausible_from_request_rejects_non_bool(bad: object) -> None:
+    request = SimpleNamespace(allow_implausible=bad)
+    with pytest.raises(TypeError, match="allow_implausible must be a bool"):
+        ss._allow_implausible_from_request(request)
+
+
 def test_all_stages_ok_is_not_failed(stubbed) -> None:
     out = ss.run_stages(stubbed, Path("m.osim"), str)
     assert out.failed is False

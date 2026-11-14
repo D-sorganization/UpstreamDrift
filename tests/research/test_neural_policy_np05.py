@@ -56,19 +56,48 @@ def test_heldout_split_validation_rejects_overlap() -> None:
         validate_splits(tx, hx_overlap)
 
 
-def test_lexical_guardrail_zero_violations() -> None:
+REQUIRED_LEXICAL_FILES = (
+    "src/research/neural_policy/edit_vs_finetune_benchmark.py",
+    "docs/research/np05_edit_vs_finetune_report.md",
+    "tests/research/test_neural_policy_np05.py",
+)
+OPTIONAL_LEXICAL_FILES = ("changes/14480-np05-edit-vs-finetune-benchmark.md",)
+
+
+def _assert_lexical_guardrail(root: Path) -> None:
     words = "imp:edance,stiff:ness,syn:ergy,co-con:traction,mus:cle,ana:tomy,control-:affine,ZT:CF,ZV:CF"
     banned = [w.replace(":", "") for w in words.split(",")]  # noqa: SIM905
-    root = Path(__file__).resolve().parents[2]
-    files = (
-        "src/research/neural_policy/edit_vs_finetune_benchmark.py",
-        "docs/research/np05_edit_vs_finetune_report.md",
-        "tests/research/test_neural_policy_np05.py",
-        "changes/14480-np05-edit-vs-finetune-benchmark.md",
-    )
+    files: list[str] = list(REQUIRED_LEXICAL_FILES)
+    files.extend(rel for rel in OPTIONAL_LEXICAL_FILES if (root / rel).is_file())
     for rel in files:
         txt = (root / rel).read_text(encoding="utf-8")
         for b in banned:
             assert not re.search(r"\b" + re.escape(b) + r"\b", txt, re.IGNORECASE), (
                 f"{b} in {rel}"
             )
+
+
+def test_lexical_guardrail_zero_violations() -> None:
+    root = Path(__file__).resolve().parents[2]
+    _assert_lexical_guardrail(root)
+
+
+def test_lexical_guardrail_tolerates_collated_change_fragment_and_catches_violation(
+    tmp_path: Path,
+) -> None:
+    for rel in (
+        "src/research/neural_policy/edit_vs_finetune_benchmark.py",
+        "docs/research/np05_edit_vs_finetune_report.md",
+        "tests/research/test_neural_policy_np05.py",
+    ):
+        target = tmp_path / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("clean baseline content\n", encoding="utf-8")
+
+    _assert_lexical_guardrail(tmp_path)
+
+    fragment = tmp_path / "changes/14480-np05-edit-vs-finetune-benchmark.md"
+    fragment.parent.mkdir(parents=True, exist_ok=True)
+    fragment.write_text(f"bad {'mus:cle'.replace(':', '')} token\n", encoding="utf-8")
+    with pytest.raises(AssertionError):
+        _assert_lexical_guardrail(tmp_path)
