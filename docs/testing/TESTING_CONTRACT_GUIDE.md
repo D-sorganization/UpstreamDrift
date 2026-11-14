@@ -42,10 +42,10 @@ This guide documents the cross-engine motion-matching testing strategy for the U
 
 ### What Is a Contract Test?
 
-A **contract test** validates that a function implementation respects a shared interface contract, regardless of the underlying engine. For motion-matching, contracts are defined in:
+A **contract test** validates that a function implementation respects a shared interface contract, regardless of the underlying engine. For motion-matching, strategy fixtures are defined in:
 
 ```python
-tests/fixtures/contract_test_cases.py
+tests/fixtures/motion_matching_strategy.py
 ```
 
 Each contract specifies:
@@ -159,7 +159,7 @@ tests/unit/motion_matching/
 ### Contract Test Example
 
 ```python
-# tests/unit/motion_matching/drake/test_drake_simulate_contract.py
+# Example contract test pattern (see tests/unit/motion_matching/test_fit_result_contract.py)
 
 import pytest
 import numpy as np
@@ -167,7 +167,7 @@ from src.engines.physics_engines.drake.python.motion_matching import (
     simulate_with_coefficients,
     FitResult,
 )
-from tests.fixtures.contract_test_cases import (
+from tests.fixtures.motion_matching_strategy import (
     STANDARD_COEFFICIENTS,
     STANDARD_POSE,
     TIME_SPAN,
@@ -262,7 +262,7 @@ The **recovery oracle** uses MuJoCo as a reference engine to validate determinis
 ### Implementation
 
 ```python
-# tests/unit/motion_matching/test_fit_swing_determinism.py
+# Example determinism check (see tests/unit/motion_matching/test_fit_result_contract.py)
 
 import pytest
 import numpy as np
@@ -272,7 +272,7 @@ from src.engines.physics_engines.drake.python.motion_matching import (
 from src.engines.physics_engines.mujoco.python.motion_matching import (
     fit_swing_deterministic as mujoco_fit_swing_deterministic,
 )
-from tests.fixtures.contract_test_cases import (
+from tests.fixtures.motion_matching_strategy import (
     REFERENCE_TARGET_TRAJECTORY,
     OPTIMIZATION_BOUNDS,
     INITIAL_GUESS,
@@ -514,7 +514,7 @@ pytestmark = [pytest.mark.unit, pytest.mark.requires_drake]
 
 ### Step 1: Define Contract in Fixture
 
-Add test case to `tests/fixtures/contract_test_cases.py`:
+Add test case to `tests/fixtures/motion_matching_strategy.py`:
 
 ```python
 # New swing scenario for contract testing
@@ -528,7 +528,7 @@ NEW_SWING_BOUNDS = {
 ### Step 2: Add Test to Engine Implementation
 
 ```python
-# tests/unit/motion_matching/drake/test_drake_simulate_contract.py
+# Example: tests/unit/motion_matching/test_fit_result_contract.py
 
 @pytest.mark.parametrize("coefficients,name", [
     (STANDARD_COEFFICIENTS, "Standard swing"),
@@ -550,7 +550,7 @@ def test_simulate_with_new_scenario(coefficients, name):
 ### Step 3: Add to Determinism Oracle
 
 ```python
-# tests/unit/motion_matching/test_fit_swing_determinism.py
+# Example determinism oracle (see tests/motion_matching/test_cross_engine_equivalence.py)
 
 @pytest.mark.parametrize("engine_name", ["Drake", "MuJoCo", "OpenSim", "Pinocchio"])
 def test_recovery_oracle_new_scenario(engine_name):
@@ -581,8 +581,8 @@ def test_recovery_oracle_new_scenario(engine_name):
 # Run new tests for all engines
 python3 -m pytest tests/unit/motion_matching/ -k "new_scenario" -v
 
-# Verify determinism oracle passes
-python3 -m pytest tests/unit/motion_matching/test_fit_swing_determinism.py -v
+# Verify contract tests pass
+python3 -m pytest tests/unit/motion_matching/test_fit_result_contract.py -v
 
 # Verify cross-engine equivalence
 python3 -m pytest tests/motion_matching/test_cross_engine_equivalence.py -v
@@ -664,9 +664,9 @@ if rmse <= 0.001:  # 1mm tolerance
 **Cause 2: Engine-specific bug**
 
 ```python
-# Run isolated engine test to isolate issue
-python3 -m pytest tests/unit/motion_matching/mujoco/test_mujoco_simulate_contract.py -v
-# Check if engine-specific contract tests pass
+# Run contract tests to isolate issue
+python3 -m pytest tests/unit/motion_matching/test_fit_result_contract.py -v
+# Check if motion-matching contract tests pass
 ```
 
 **Cause 3: Bounds or initial guess mismatch**

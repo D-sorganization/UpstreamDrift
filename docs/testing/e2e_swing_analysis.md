@@ -36,9 +36,9 @@ pytest tests/integration/test_end_to_end.py -k "downswing"
 
 ### 1. Video-to-Biomechanics
 
-**File**: `tests/integration/test_video_e2e.py` (Proposed)
+**File**: `tests/integration/test_end_to_end.py` (video pipeline scenario; see also `tests/integration/test_c3d_body_video_export.py`)
 
-- **Input**: `tests/assets/swing_sample.mp4`
+- **Input**: Sample swing video (`swing_sample.mp4` from `golf_test_data.zip`)
 - **Steps**:
   - Upload video to API.
   - Trigger `analyze_video` task.
@@ -50,9 +50,9 @@ pytest tests/integration/test_end_to_end.py -k "downswing"
 
 ### 2. Mocap-to-Torque
 
-**File**: `tests/integration/test_mocap_e2e.py`
+**File**: `tests/integration/test_c3d_body_video_export.py` (and `tests/integration/test_end_to_end.py`)
 
-- **Input**: `tests/assets/pro_driver.c3d`
+- **Input**: Sample C3D capture (`pro_driver.c3d` from `golf_test_data.zip`) and `tests/assets/simple_arm.urdf`
 - **Steps**:
   - Load C3D file.
   - Run Inverse Kinematics (IK).

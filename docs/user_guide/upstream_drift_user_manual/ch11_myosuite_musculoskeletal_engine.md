@@ -17,7 +17,7 @@ reinforcement learning interfaces, making it ideal for:
 | ------------------------------------------------------------------------ | ------------------------------------------ |
 | `src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py` | `PhysicsEngine` protocol wrapper           |
 | `src/engines/physics_engines/myosuite/python/muscle_analysis.py`         | Muscle analysis, grip modeling             |
-| `src/shared/python/myosuite_adapter.py`                                  | RL environment adapter (`MuscleDrivenEnv`) |
+| `src/shared/python/biomechanics/myosuite_adapter.py`                     | RL environment adapter (`MuscleDrivenEnv`) |
 
 ### Dependencies
 

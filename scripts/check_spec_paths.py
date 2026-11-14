@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail if SPEC.md cites paths that don't exist on disk."""
+"""Fail if SPEC.md or curated documentation cites repo paths that don't exist."""
 
 from __future__ import annotations
 
@@ -16,6 +16,11 @@ HISTORICAL_PATHS = ROOT / "scripts/config/spec_historical_paths.json"
 
 # Match `path/like/this.py` or `path/like/this/` inside backticks.
 PATH_PATTERN = re.compile(r"`([a-zA-Z_][a-zA-Z0-9_./-]+(?:\.py|/))`")
+
+FENCE_PATTERN = re.compile(r"^```.*?^```", re.MULTILINE | re.DOTALL)
+INLINE_CODE_PATTERN = re.compile(r"(?<!`)`([^`\n]+)`(?!`)")
+DOC_REPO_PATH_PATTERN = re.compile(r"^[a-zA-Z0-9_./-]+$")
+MODULE_ATTR_SUFFIX_PATTERN = re.compile(r"\.[A-Z_][A-Z0-9_]*$")
 
 # These prefixes are the project's package roots. Anything matched against
 # them must exist; everything else is treated as a non-path identifier.
@@ -79,10 +84,61 @@ def _historical_path_is_verified(
         return False
 
 
+def _default_doc_targets(root: Path) -> list[Path]:
+    """Return curated architecture, testing, and user guide markdown paths."""
+    targets: list[Path] = [
+        root / "docs/README.md",
+        root / "docs/architecture/C4.md",
+        root / "docs/user_guide/mesh_backends_setup.md",
+    ]
+    for rel_dir in (
+        "docs/testing",
+        "docs/user_guide/body_part_viz",
+        "docs/user_guide/upstream_drift_user_manual",
+    ):
+        folder = root / rel_dir
+        if folder.is_dir():
+            targets.extend(sorted(folder.glob("*.md")))
+    return targets
+
+
+def check_doc_paths(root: Path, doc_files: list[Path] | None = None) -> list[str]:
+    """Return formatted missing-path violations in curated markdown files.
+
+    Preconditions:
+        ``root`` is the repository root path to resolve citations against.
+    Postconditions:
+        Returns an empty list iff every inline backticked repo path outside
+        fenced code blocks resolves on disk under ``root``.
+    """
+    targets = _default_doc_targets(root) if doc_files is None else doc_files
+    bad: list[str] = []
+    for doc_file in targets:
+        if not doc_file.is_file():
+            continue
+        raw = doc_file.read_text(encoding="utf-8")
+        stripped = FENCE_PATTERN.sub(
+            lambda match: "\n" * match.group(0).count("\n"), raw
+        )
+        rel = doc_file.relative_to(root).as_posix()
+        for match in INLINE_CODE_PATTERN.finditer(stripped):
+            path = match.group(1)
+            if not any(path.startswith(prefix) for prefix in REPO_ROOTS):
+                continue
+            if not DOC_REPO_PATH_PATTERN.fullmatch(path):
+                continue
+            if MODULE_ATTR_SUFFIX_PATTERN.search(path):
+                continue
+            if not (root / path.rstrip("/")).exists():
+                line = stripped[: match.start()].count("\n") + 1
+                bad.append(f"  {rel}:{line}: missing path {path!r}")
+    return bad
+
+
 def main() -> int:
     text = SPEC.read_text(encoding="utf-8")
     records = json.loads(HISTORICAL_PATHS.read_text(encoding="utf-8"))["paths"]
-    bad: list[str] = []
+    spec_bad: list[str] = []
     history_header = re.search(r"(?m)^## 12\. Change Log\s*$", text)
     history_start = history_header.end() if history_header else len(text) + 1
     history_end = text.find("\n## ", history_start)
@@ -101,11 +157,19 @@ def main() -> int:
             ):
                 print(f"Verified historical path provenance: SPEC.md:{line}: {path}")
                 continue
-            bad.append(f"  SPEC.md:{line}: missing path {path!r}")
-    if bad:
+            spec_bad.append(f"  SPEC.md:{line}: missing path {path!r}")
+    doc_bad = check_doc_paths(ROOT)
+    if spec_bad:
         print("FAIL: SPEC.md references paths that do not exist:")
-        print("\n".join(bad))
+        print("\n".join(spec_bad))
         print("\nUpdate SPEC.md or add the file/directory it claims exists.")
+    if doc_bad:
+        print("FAIL: Documentation files reference paths that do not exist:")
+        print("\n".join(doc_bad))
+        print(
+            "\nUpdate the documentation path or add the file/directory it claims exists."
+        )
+    if spec_bad or doc_bad:
         return 1
     return 0
 
