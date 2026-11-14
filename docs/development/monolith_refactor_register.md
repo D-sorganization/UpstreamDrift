@@ -17,7 +17,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1529 | `src/shared/python/motion_matching/pipeline/cli.py` |
 | 1511 | `src/shared/python/motion_matching/acceptance.py` |
 | 1319 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/runSimulation.m` |
-| 1230 | `src/launchers/launcher_process_manager.py` |
 | 1200 | `src/engines/simscape/adapter.py` |
 | 1200 | `src/tools/shot_pattern_analysis/matched_lean_control.py` |
 | 1199 | `src/api/services/simulation_service.py` |
@@ -28,6 +27,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1196 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py` |
 | 1196 | `src/launchers/launcher_simulation.py` |
 | 1196 | `src/shared/python/grip_contact/topology_contact.py` |
+| 1195 | `src/launchers/launcher_process_manager.py` |
 | 1195 | `src/launchers/model_card.py` |
 | 1195 | `src/launchers/upstream_drift_launcher.py` |
 | 1195 | `src/tools/shot_pattern_analysis/matched_supplement_figures.py` |

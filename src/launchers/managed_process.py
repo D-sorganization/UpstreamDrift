@@ -182,3 +182,97 @@ def reap_declined_child_spawn(process: Popen[bytes]) -> None:
                 process.wait(timeout=5)
     except (OSError, ValueError):
         pass
+
+
+def resolve_process_exit_code(process: Popen[bytes]) -> int:
+    """Return a child process exit code without extra waiting if already exited."""
+    poll = process.poll()
+    if isinstance(poll, int):
+        return poll
+    waited = process.wait()
+    return waited if isinstance(waited, int) else 1
+
+
+def clear_awaiting_output_drain(
+    registry: dict[str, ManagedProcess],
+    lock: threading.RLock,
+    managed_id: str,
+) -> None:
+    """Clear the output-drain hold on a tracked process if still registered."""
+    with lock:
+        current = registry.get(managed_id)
+        if current is not None:
+            current._awaiting_output_drain = False
+
+
+def finalize_managed_exit(
+    registry: dict[str, ManagedProcess],
+    lock: threading.RLock,
+    managed_id: str,
+    process: Popen[bytes],
+    notify: Callable[[ManagedProcess], None],
+) -> int:
+    """Finalize ManagedProcess terminal state and exit code, then notify observer."""
+    return_code = resolve_process_exit_code(process)
+    snapshot: ManagedProcess | None = None
+    with lock:
+        current = registry.get(managed_id)
+        if current is not None:
+            current._awaiting_output_drain = False
+            current.exit_code = return_code
+            if current.state in {ProcessState.STOPPING, ProcessState.KILLED}:
+                terminal = ProcessState.KILLED
+            elif return_code == 0:
+                terminal = ProcessState.EXITED
+            else:
+                terminal = ProcessState.CRASHED
+            current.state = terminal
+            snapshot = current
+    if snapshot is not None:
+        notify(snapshot)
+    return return_code
+
+
+def drain_process_streams(
+    slot_name: str,
+    process: Popen[bytes],
+    *,
+    managed_id: str | None,
+    registry: dict[str, ManagedProcess],
+    lock: threading.RLock,
+    emit_output: Callable[[str, str], None],
+    on_error: Callable[[Exception], None] | None = None,
+) -> None:
+    """Drain stdout and stderr pipes concurrently until EOF."""
+
+    def _drain(stream: Any, *, stderr: bool) -> None:
+        try:
+            for raw_line in iter(stream.readline, b""):
+                line = raw_line.decode("utf-8", errors="replace").rstrip()
+                if not line:
+                    continue
+                emitted = f"STDERR: {line}" if stderr else line
+                if managed_id is not None:
+                    with lock:
+                        managed = registry.get(managed_id)
+                        if managed is not None:
+                            managed.record_output_line(emitted)
+                emit_output(slot_name, emitted)
+        except (RuntimeError, ValueError, OSError) as exc:
+            if on_error is not None:
+                on_error(exc)
+        finally:
+            with contextlib.suppress(OSError):
+                stream.close()
+
+    threads = [
+        threading.Thread(
+            target=_drain, args=(stream,), kwargs={"stderr": is_stderr}, daemon=True
+        )
+        for stream, is_stderr in ((process.stdout, False), (process.stderr, True))
+        if stream is not None
+    ]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()

@@ -45,8 +45,12 @@ from src.launchers.managed_process import (
     ProcessKind,
     ProcessState,
     RunningProcessesView,
+    clear_awaiting_output_drain,
+    drain_process_streams,
+    finalize_managed_exit,
     new_managed_id,
     reap_declined_child_spawn,
+    resolve_process_exit_code,
 )
 
 if TYPE_CHECKING:
@@ -602,36 +606,21 @@ class ProcessManager:
         managed_id: str,
         process: subprocess.Popen[bytes],
     ) -> int:
-        poll = process.poll()
-        if isinstance(poll, int):
-            return_code = poll
-        else:
-            waited = process.wait()
-            return_code = waited if isinstance(waited, int) else 1
-        snapshot: ManagedProcess | None = None
-        with self._process_lock:
-            current = self._process_registry.get(managed_id)
-            if current is not None:
-                current._awaiting_output_drain = False
-                current.exit_code = return_code
-                if current.state in {ProcessState.STOPPING, ProcessState.KILLED}:
-                    terminal = ProcessState.KILLED
-                elif return_code == 0:
-                    terminal = ProcessState.EXITED
-                else:
-                    terminal = ProcessState.CRASHED
-                current.state = terminal
-                snapshot = current
-        if snapshot is not None:
-            self._notify_process_changed(snapshot)
-        return return_code
+        return finalize_managed_exit(
+            self._process_registry,
+            self._process_lock,
+            managed_id,
+            process,
+            self._notify_process_changed,
+        )
 
     def _start_exit_waiter(self, managed: ManagedProcess) -> None:
-        def _wait() -> None:
-            self._finalize_process_exit(managed.id, managed.process)
-
-        thread = threading.Thread(target=_wait, name=f"exit-waiter-{managed.id}")
-        thread.daemon = True
+        thread = threading.Thread(
+            target=self._finalize_process_exit,
+            args=(managed.id, managed.process),
+            name=f"exit-waiter-{managed.id}",
+            daemon=True,
+        )
         thread.start()
 
     def _terminate_managed(self, managed: ManagedProcess, state: ProcessState) -> None:
@@ -693,54 +682,30 @@ class ProcessManager:
         """Read stdout/stderr concurrently until EOF (daemon thread)."""
         if name is None:
             raise ValueError("name must be provided")
-
-        def _drain(stream, *, stderr: bool) -> None:
-            try:
-                for raw_line in iter(stream.readline, b""):
-                    line = raw_line.decode("utf-8", errors="replace").rstrip()
-                    if not line:
-                        continue
-                    emitted = f"STDERR: {line}" if stderr else line
-                    if managed_id is not None:
-                        with self._process_lock:
-                            managed = self._process_registry.get(managed_id)
-                            if managed is not None:
-                                managed.record_output_line(emitted)
-                    self._emit_output(name, emitted)
-            except (RuntimeError, ValueError, OSError) as exc:
-                logger.debug("Output stream ended for %s: %s", name, exc)
-            finally:
-                with contextlib.suppress(OSError):
-                    stream.close()
-
-        threads = [
-            threading.Thread(
-                target=_drain, args=(stream,), kwargs={"stderr": is_stderr}, daemon=True
-            )
-            for stream, is_stderr in ((process.stdout, False), (process.stderr, True))
-            if stream is not None
-        ]
         try:
-            for thread in threads:
-                thread.start()
-            for thread in threads:
-                thread.join()
-
-            if managed_id is not None:
-                return_code: int | None = self._finalize_process_exit(
-                    managed_id, process
-                )
-            else:
-                poll = process.poll()
-                return_code = poll if isinstance(poll, int) else process.wait()
+            drain_process_streams(
+                name,
+                process,
+                managed_id=managed_id,
+                registry=self._process_registry,
+                lock=self._process_lock,
+                emit_output=self._emit_output,
+                on_error=lambda exc: logger.debug(
+                    "Output stream ended for %s: %s", name, exc
+                ),
+            )
+            return_code = (
+                self._finalize_process_exit(managed_id, process)
+                if managed_id is not None
+                else resolve_process_exit_code(process)
+            )
             if isinstance(return_code, int):
                 self._emit_output(name, f"[exited with code {return_code}]")
         finally:
             if managed_id is not None:
-                with self._process_lock:
-                    current = self._process_registry.get(managed_id)
-                    if current is not None:
-                        current._awaiting_output_drain = False
+                clear_awaiting_output_drain(
+                    self._process_registry, self._process_lock, managed_id
+                )
 
     def launch_script_with_args(
         self,
