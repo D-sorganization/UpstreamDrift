@@ -64,3 +64,13 @@ def test_launcher_api_regression_module_exists() -> None:
     assert _LAUNCHER_REGRESSION.is_file(), (
         "tests/unit/api/test_launcher_service_processes_14227.py must guard slice 3"
     )
+
+
+def test_runbook_records_green_scheduled_optional_stack_after_slice3() -> None:
+    """#14227 acceptance: post-#15089 scheduled lane success on main."""
+    text = _RUNBOOK.read_text(encoding="utf-8")
+    assert "43688504401" in text, (
+        "runbook must record the first green scheduled CI Optional Stack run after #15089"
+    )
+    assert "optional-stack-check" in text
+    assert "Green" in text or "success" in text.lower()
