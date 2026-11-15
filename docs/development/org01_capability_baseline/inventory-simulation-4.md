@@ -6,6 +6,7 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 
 | ID | Name | Entity Kind | Primary Workspace | Secondary Links | Authority | Lifecycle | Evidence | Acceptance Owner |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `pinocchio_models_shared` | Pinocchio Models | `model` | `simulation` | — | `pinocchio` | 🟢 active_feature | `Pinocchio_Models` | `tests/config/test_launcher_registry_parity.py` |
 | `realtime_ws` | Realtime WebSocket | `service` | `simulation` | — | `core` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
 | `robotics_module` | Robotics Module | `library` | `simulation` | — | `core` | 🟢 active_feature | `src/robotics/__init__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `settings.desktop_only_tabs` | Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance) | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/launchers/settings_dialog.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
@@ -16,6 +17,7 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `simulation_backends` | Simulation Backends | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/simulation_backends_launcher/__main__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `terrain_engine` | Terrain Engine | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/terrain_engine/gui.py` | `tests/config/test_launcher_registry_parity.py` |
 | `tools.golf_simulator` | Golf Simulator capability-aware controls and replay submission | `feature` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/golf_simulator/gui.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `tools.grip_build_preview` | HRG grip build stage replay preview (CLI) | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/tools/grip_build_preview/cli.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `tools.matlab_suite` | MATLAB/Simscape model suite | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/launchers/matlab_suite_dialog.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `tools.native_viewer_export` | Native per-engine viewer video export (CLI) | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/tools/native_viewer_export/cli.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `unreal_integration` | Unreal Integration | `library` | `simulation` | — | `core` | 🟢 active_feature | `src/unreal_integration/__init__.py` | `tests/config/test_launcher_registry_parity.py` |
