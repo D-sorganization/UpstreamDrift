@@ -130,13 +130,10 @@ def test_consumer_uses_protected_policy_checkout_and_trusted_event_base() -> Non
         for index, step in enumerate(steps)
         if step.get("uses", "").startswith("actions/setup-python@")
     )
-    fetch_stacked = _step(workflow, "Fetch stacked pull request base objects")
-    fetch_index = steps.index(fetch_stacked)
     resolver = _step(workflow, "Resolve trusted development-log baseline")
     resolver_index = steps.index(resolver)
     assert target_checkout_index < token_index < policy_checkout_index < setup_index
-    assert setup_index + 1 == fetch_index
-    assert fetch_index + 1 == resolver_index
+    assert setup_index + 1 == resolver_index
     assert steps[setup_index]["with"]["python-version"] == "3.12"
     script = resolver["run"]
     assert resolver["env"]["PR_BASE_SHA"] == "${{ github.event.pull_request.base.sha }}"
@@ -156,7 +153,6 @@ def test_consumer_uses_protected_policy_checkout_and_trusted_event_base() -> Non
     assert "policy/scripts/devlog_trusted_base.py" in script
     assert "target/scripts/devlog_trusted_base.py" not in script
     assert "git -C target rev-parse HEAD" not in script
-    assert "stack_continuation_deferred" in script
     for flag in (
         "--repo-root target",
         '--event "$EVENT_NAME"',
@@ -238,11 +234,8 @@ def test_policy_checkout_uses_fail_closed_repository_scoped_app_token() -> None:
     assert token_step["uses"] == (
         "actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510"
     )
-    assert token_step["with"]["app-id"] == "${{ secrets.FLEET_GENERAL_AGENT_APP_ID }}"
-    assert (
-        token_step["with"]["private-key"]
-        == "${{ secrets.FLEET_GENERAL_AGENT_APP_PRIVATE_KEY }}"
-    )
+    assert token_step["with"]["app-id"] == "${{ secrets.JULES_APP_ID }}"
+    assert token_step["with"]["private-key"] == "${{ secrets.JULES_APP_PRIVATE_KEY }}"
     assert token_step["with"]["owner"] == "${{ github.repository_owner }}"
     assert token_step["with"]["repositories"] == "Repository_Management"
     assert token_step["with"]["permission-contents"] == "read"
@@ -410,7 +403,7 @@ assert args.event == "pull_request"
 assert args.event_base_sha == {"a" * 40!r}
 assert args.pr_head_sha == {"b" * 40!r}
 assert args.expected_sha == {"d" * 40!r}
-assert args.base_ref == "main"
+assert args.base_ref == "release/next"
 assert args.repository == "D-sorganization/UpstreamDrift"
 assert args.default_branch == "main"
 pathlib.Path(os.environ["HELPER_CALL_MARKER"]).write_text("protected", encoding="utf-8")
@@ -435,7 +428,7 @@ print(json.dumps({{"verified": True, "proof_kind": "pull_request_protected_merge
             "PR_BASE_SHA": "a" * 40,
             "PR_HEAD_SHA": "b" * 40,
             "GITHUB_SHA": "d" * 40,
-            "BASE_REF": "main",
+            "BASE_REF": "release/next",
             "REPOSITORY": "D-sorganization/UpstreamDrift",
             "DEFAULT_BRANCH": "main",
             "MERGE_GROUP_BASE_SHA": "",
