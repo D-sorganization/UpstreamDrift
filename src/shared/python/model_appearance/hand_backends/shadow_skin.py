@@ -103,7 +103,7 @@ def _palm_frame(
         - float(np.dot(grip_inward, d_dist)) * d_dist
         - float(np.dot(grip_inward, d_rad)) * d_rad
     )
-    d_palm = _unit(d_palm, np.cross(d_dist, d_rad))
+    d_palm = _unit(d_palm, np.asarray(np.cross(d_dist, d_rad), dtype=np.float64))
     if float(np.dot(d_palm[:2], -palm_p[:2])) < 0.0:
         d_palm = -d_palm
     return d_dist, d_rad, d_palm
