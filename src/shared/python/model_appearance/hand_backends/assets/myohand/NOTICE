@@ -15,10 +15,21 @@ Scientific lineage (informational; per upstream myo_sim/hand/README.md)
 - 2nd-Hand finger model (simtk.org/projects/hand_muscle): MIT (McFarland et al.,
   2019).
 
+Skin / surface geometry
+-----------------------
+myo_sim does **not** ship a watertight skin mesh.  ``hand/assets/myohand_body.xml``
+uses ``class="skin"`` MuJoCo **capsule and ellipsoid** geoms for contact wrapping,
+not renderable surface STL.  This backend draws **bone STL meshes only** in bone
+colour as an anatomical skeleton reference.
+
+Research-only use
+-----------------
+MoBL upstream lineage carries non-commercial terms in OpenSim materials.  The
+``myohand`` registry entry is **research-only** and not the default production
+backend until HRG-HX6 #13763 owner sign-off.
+
 UpstreamDrift does not copy STL assets into src/; the visual backend loads the
-pinned submodule at runtime. HRG-HX6 licensing ADR (#13763) remains open for
-owner sign-off; this option follows the same pinned-myosim pattern as HRG-GS-M8
-(#13330).
+pinned submodule at runtime (same pattern as HRG-GS-M8, #13330).
 
 This NOTICE satisfies Apache-2.0 Section 4(d) attribution for derivative
 visual-backend code that references myo_sim mesh assets.

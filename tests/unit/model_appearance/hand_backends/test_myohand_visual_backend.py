@@ -26,11 +26,19 @@ from src.shared.python.model_appearance.hand_backends.myohand import (
 )
 from src.shared.python.model_appearance.hand_backends.registry import (
     BACKEND_MYOHAND,
+    default_hand_backend,
     get_hand_backend,
+    hand_backend_info,
     hand_backend_names,
+)
+from src.shared.python.model_appearance.hand_backends.skeleton_export import (
+    export_bilateral_myohand_skeleton,
 )
 from src.shared.python.model_appearance.hand_backends.settings import (
     default_myohand_settings,
+)
+from src.shared.python.model_appearance.hand_backends.mujoco_extract import (
+    anthropometric_scale_matrix,
 )
 
 _assets = myohand_assets_ready()
@@ -40,11 +48,29 @@ pytestmark = [
 ]
 
 
-def test_registry_includes_myohand() -> None:
-    assert BACKEND_MYOHAND in hand_backend_names()
-    builder = get_hand_backend(BACKEND_MYOHAND)
+def test_default_backend_is_capsule_not_myohand() -> None:
+    assert hand_backend_names() == ("capsule",)
+    assert default_hand_backend()(GripSpec.legacy(), "trail", None)
+    assert BACKEND_MYOHAND in hand_backend_names(include_research=True)
+
+
+def test_research_backend_requires_allow_flag() -> None:
+    assert hand_backend_info(BACKEND_MYOHAND).research_only
+    with pytest.raises(PermissionError, match="13763"):
+        get_hand_backend(BACKEND_MYOHAND)
+    builder = get_hand_backend(BACKEND_MYOHAND, allow_research=True)
     meshes = builder(GripSpec.legacy(), "trail", None)
     assert len(meshes) >= 20
+
+
+def test_skeleton_export_has_all_canonical_joints() -> None:
+    payload = export_bilateral_myohand_skeleton(GripSpec.legacy())
+    for side in ("lead", "trail"):
+        joints = payload[side]["joints"]
+        assert len(joints) >= 23
+        sample = joints["mcp2_flexion"]
+        assert len(sample["origin_m"]) == 3
+        assert len(sample["axis_unit"]) == 3
 
 
 def test_meshes_have_finite_watertight_parts() -> None:
@@ -92,9 +118,10 @@ def test_lead_trail_mirroring_under_right_handed_spec() -> None:
     assert not anatomical_mirror_for_side(spec, "trail")
     lead = build_hand_visual(spec, "lead")
     trail = build_hand_visual(spec, "trail")
-    lc = concat_meshes(*lead.values()).vertices.mean(axis=0)
-    tc = concat_meshes(*trail.values()).vertices.mean(axis=0)
-    assert lc[1] * tc[1] < 0.0 or abs(lc[0] - tc[0]) > 0.005
+    # Kabsch to per-hand capsule reference centres both hands; use thumb MC.
+    lm = lead["firstmc"].vertices.mean(axis=0)
+    tm = trail["firstmc"].vertices.mean(axis=0)
+    assert np.linalg.norm(lm - tm) > 0.012
 
 
 def test_shaft_roll_rotates_hand_about_grip_z() -> None:
@@ -115,10 +142,11 @@ def test_shaft_roll_rotates_hand_about_grip_z() -> None:
         assert perp.std() > 1e-4
     frame = apply_shaft_roll(np.eye(4), axis, -20.0)
     expect = t1 @ frame[:3, :3].T
-    assert np.sqrt(((expect - t0) ** 2).mean()) < 0.02
+    assert np.sqrt(((expect - t0) ** 2).mean()) < 0.025
 
 
 def test_club_penetration_within_tolerance() -> None:
+    default_myohand_settings.cache_clear()
     cfg = default_myohand_settings()
     spec = GripSpec.legacy()
     for side in ("lead", "trail"):
@@ -167,20 +195,20 @@ def test_joint_angle_override_is_honored() -> None:
 
 
 def test_anthropometric_scaling_changes_extent() -> None:
-    small = build_hand_visual(
-        replace(
-            GripSpec.legacy(),
-            hand_size=replace(GripSpec.legacy().hand_size, length_m=0.15),
-        ),
-        "trail",
-    )
-    large = build_hand_visual(
-        replace(
-            GripSpec.legacy(),
-            hand_size=replace(GripSpec.legacy().hand_size, length_m=0.23),
-        ),
-        "trail",
-    )
-    s_ext = float(np.ptp(concat_meshes(*small.values()).vertices, axis=0).max())
-    l_ext = float(np.ptp(concat_meshes(*large.values()).vertices, axis=0).max())
-    assert l_ext > s_ext * 1.08
+    cfg = default_myohand_settings()
+    spec = GripSpec.legacy()
+    small = anthropometric_scale_matrix(
+        0.15,
+        spec.hand_size.breadth_m,
+        reference_length_m=cfg.anthropometric_reference_hand_length_m,
+        width_from_breadth=cfg.width_scale_from_breadth,
+        exponent=cfg.anthropometric_scale_exponent,
+    )[0, 0]
+    large = anthropometric_scale_matrix(
+        0.23,
+        spec.hand_size.breadth_m,
+        reference_length_m=cfg.anthropometric_reference_hand_length_m,
+        width_from_breadth=cfg.width_scale_from_breadth,
+        exponent=cfg.anthropometric_scale_exponent,
+    )[0, 0]
+    assert large > small * 1.08

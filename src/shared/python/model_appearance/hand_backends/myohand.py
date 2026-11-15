@@ -1,11 +1,14 @@
-"""MyoHub MyoHand anatomical mesh visual backend (epic #15122)."""
+"""MyoHub MyoHand **bone** visual backend (anatomical skeleton reference, epic #15122).
+
+Myo_sim provides STL **bone** meshes plus MuJoCo ``class="skin"`` capsule/ellipsoid
+geoms (not a continuous skin surface). This backend renders bones only, in bone
+colour, posed with the same curl-to-grip joint targets as the capsule reference.
+"""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
-from functools import lru_cache
-from pathlib import Path
-from typing import Literal
+from typing import Any
 
 import numpy as np
 
@@ -22,11 +25,13 @@ from src.shared.python.model_appearance.hand_backends.joint_mapping import (
     grip_spec_to_myohand_joint_angles,
 )
 from src.shared.python.model_appearance.hand_backends.mujoco_extract import (
-    anthropometric_scale_matrix,
     apply_joint_targets,
-    extract_hand_bone_meshes,
     load_myohand_model,
     transform_meshes,
+)
+from src.shared.python.model_appearance.hand_backends.registration import (
+    posed_bones_in_model_frame,
+    registration_to_grip_hand_mesh,
 )
 from src.shared.python.model_appearance.hand_backends.settings import (
     MyoHandVisualSettings,
@@ -37,13 +42,45 @@ from src.shared.python.model_appearance.hand_backends.types import (
     HandVisualSide,
 )
 
-_REPO_ROOT = Path(__file__).resolve().parents[5]
-
 
 def _check_grip_spec(spec: object) -> GripSpec:
     if not isinstance(spec, GripSpec):
         raise TypeError(f"grip_spec must be GripSpec, got {type(spec).__name__}")
     return spec
+
+
+def _model_and_data(
+    targets: dict[str, float],
+    cfg: MyoHandVisualSettings,
+) -> tuple[Any, Any, dict[str, Mesh]]:
+    import mujoco
+
+    model = load_myohand_model(cfg.model_xml_path)
+    data = mujoco.MjData(model)
+    apply_joint_targets(model, data, targets)
+    raw = posed_bones_in_model_frame(
+        model,
+        data,
+        allowed_bodies=frozenset(cfg.hand_body_names),
+    )
+    return model, data, raw
+
+
+def _pipeline_transform(
+    spec: GripSpec,
+    side: HandVisualSide,
+    raw_bones: dict[str, Mesh],
+    cfg: MyoHandVisualSettings,
+    joint_angles: Mapping[str, float] | None,
+) -> np.ndarray:
+    _ = joint_angles
+    return registration_to_grip_hand_mesh(
+        spec,
+        side,
+        raw_bones,
+        cfg=cfg,
+        grip_radius_m=cfg.grip_radius_m,
+    )
 
 
 def build_hand_visual(
@@ -53,14 +90,13 @@ def build_hand_visual(
     *,
     settings: MyoHandVisualSettings | None = None,
 ) -> HandVisualMeshes:
-    """Build posed MyoHand bone meshes in the grip hand-grip frame.
+    """Build posed MyoHand **bone** meshes in the grip hand-grip frame.
 
-    Preconditions:
-        Pinned ``myo_sim`` assets exist (see :func:`myohand_assets_ready`).
-    Postconditions:
-        Returned meshes are in the same hand-grip frame as :mod:`grip_hand_mesh`
-        (origin on the grip axis, ``z`` butt→head), keyed by carpal/phalanx body
-        name. Visual only — not used for contact.
+    Joint angles come from the shared curl-to-grip map (``pose_to_myohand_joint_targets``
+    on :class:`GripSpec`); rigid placement Kabsch-aligns bones to the capsule hand
+  mesh for that pose (contact reference, not a neutral calibrator).
+
+    Research-only: see registry metadata and #13763 before production use.
     """
     spec = _check_grip_spec(grip_spec)
     if side not in ("lead", "trail"):
@@ -74,43 +110,21 @@ def build_hand_visual(
         grip_radius_m=cfg.grip_radius_m,
         joint_angle_overrides=joint_angles,
     )
+    _model, _data, raw = _model_and_data(targets, cfg)
 
-    import mujoco
-
-    model = load_myohand_model(cfg.model_xml_path)
-    data = mujoco.MjData(model)
-    apply_joint_targets(model, data, targets)
-
-    raw = extract_hand_bone_meshes(
-        model,
-        data,
-        allowed_bodies=frozenset(cfg.hand_body_names),
-    )
-
-    scale = anthropometric_scale_matrix(
-        spec.hand_size.length_m,
-        spec.hand_size.breadth_m,
-        reference_length_m=cfg.anthropometric_reference_hand_length_m,
-        width_from_breadth=cfg.width_scale_from_breadth,
-        exponent=cfg.anthropometric_scale_exponent,
-    )
+    transform = _pipeline_transform(spec, side, raw, cfg, joint_angles)
     mirror = anatomical_mirror_for_side(spec, side)
-    reg = np.asarray(cfg.model_to_grip, dtype=float)
-    reg = scale @ reg
-
-    placed = transform_meshes(raw, reg, mirror_y=mirror)
+    placed = transform_meshes(raw, transform, mirror_y=mirror)
 
     roll_deg = resolved_shaft_roll_deg(spec, side)
     if abs(roll_deg) > 1e-12:
-        frame = np.eye(4)
-        frame = apply_shaft_roll(frame, APPEARANCE_GRIP_SHAFT_AXIS, roll_deg)
+        frame = apply_shaft_roll(np.eye(4), APPEARANCE_GRIP_SHAFT_AXIS, roll_deg)
         placed = transform_meshes(placed, frame)
 
     return placed
 
 
 def myohand_assets_ready(settings: MyoHandVisualSettings | None = None) -> bool:
-    """True when the pinned MyoHand MJCF is on disk."""
     cfg = default_myohand_settings() if settings is None else settings
     return cfg.model_xml_path.is_file()
 
@@ -120,7 +134,6 @@ def penetration_depth_m(
     *,
     club_radius_m: float,
 ) -> float:
-    """Maximal grip-cylinder penetration (positive means inside the club)."""
     if club_radius_m <= 0.0:
         raise ValueError("club_radius_m must be positive")
     if not meshes:
@@ -135,27 +148,24 @@ def finger_pair_penetration_m(
     body_a: str,
     body_b: str,
 ) -> float:
-    """Symmetric minimum distance between two part meshes (negative = overlap)."""
     if body_a not in meshes or body_b not in meshes:
         return float("inf")
     from scipy.spatial import cKDTree
 
-    a = meshes[body_a].vertices
-    b = meshes[body_b].vertices
-    tree = cKDTree(b)
-    d, _ = tree.query(a, k=1)
-    return float(-d.min())
+    tree = cKDTree(meshes[body_b].vertices)
+    dist, _ = tree.query(meshes[body_a].vertices, k=1)
+    return float(-dist.min())
 
 
 def mirror_y_vertices(mesh: Mesh) -> Mesh:
-    """Mirror mesh about grip-frame ``y`` (handedness test helper)."""
     verts = mesh.vertices.copy()
     verts[:, 1] *= -1.0
-    faces = mesh.faces[:, ::-1].copy()
-    return Mesh(verts, faces)
+    return Mesh(verts, mesh.faces[:, ::-1].copy())
 
 
 __all__ = [
+    "_model_and_data",
+    "_pipeline_transform",
     "build_hand_visual",
     "finger_pair_penetration_m",
     "mirror_y_vertices",

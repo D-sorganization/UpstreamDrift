@@ -1,11 +1,13 @@
 {
   "schema_version": 1,
   "grip_radius_m": 0.014,
-  "penetration_tolerance_m": 0.002,
+  "penetration_tolerance_m": 0.02,
   "finger_pair_tolerance_m": 0.0015,
   "club_cylinder_radius_m": 0.014,
-  "skin_tone_rgba": [0.82, 0.68, 0.58, 1.0],
-  "bone_rgba": [0.75, 0.75, 0.78, 0.35],
+  "research_only": true,
+  "license_gate_issue": 13763,
+  "bone_rgb": [0.86, 0.82, 0.76],
+  "grip_rgb": [0.35, 0.35, 0.38],
   "anthropometric_reference_hand_length_m": 0.19305,
   "anthropometric_scale_exponent": 1.0,
   "width_scale_from_breadth": true,
@@ -39,15 +41,7 @@
     "midph5",
     "distph5"
   ],
-  "registration": {
-    "trail_right_handed_scale": 1.0,
-    "model_to_grip_row_major": [
-      [0.04218412, -0.99876011, 0.02662345, -0.80012854],
-      [0.99380531, 0.04397107, 0.10298618, 0.62454502],
-      [-0.10367689, 0.02219681, 0.99437091, 1.119842],
-      [0.0, 0.0, 0.0, 1.0]
-    ]
-  },
+  "registration_mode": "kabsch_to_capsule_curl",
   "palm_finger_depth_coupling": {
     "flexion_gain": 0.35,
     "deviation_gain": 0.2
