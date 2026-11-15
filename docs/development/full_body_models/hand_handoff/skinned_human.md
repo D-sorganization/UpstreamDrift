@@ -15,8 +15,8 @@ which is also the text for the PR description.
 | `.../hand_backends/posing.py` | Shared curl-to-contact posing for any backend (`PosableHand`) |
 | `.../hand_backends/skinned_human.py` | This backend: `build_hand_visual`, `solve_grip_joint_angles`, settings loader |
 | `.../hand_backends/skinned_pair.py` | Both hands on one club: `build_grip_hands` (trail hand slides along the grip, then curls round grip plus lead-hand capsules) |
-| `.../hand_backends/correctives.py` | Switchable corrective shapes after skinning: fold relaxation, the palm pad, and lifting skin a hair inside the grip to its surface (owner-approved 2026-11-15) |
-| `.../hand_backends/subdivision.py` | Loop subdivision of the skin mesh and its weights (`mesh.subdivision_levels`, 0 switches it off); the grip is solved on the original vertices of the subdivided skin |
+| `.../hand_backends/correctives.py` | Switchable corrective shapes after skinning: fold relaxation, the palm pad, lifting skin a hair inside the grip to its surface, and relaxing creases pinched at the knuckles (owner-approved 2026-11-15) |
+| `.../hand_backends/subdivision.py` | Loop subdivision of the skin mesh and its weights (`mesh.subdivision_levels`, 0 switches it off), with the nail edges kept sharp (`mesh.creases`); the grip is solved on the original vertices of the subdivided skin |
 | `.../hand_backends/qa.py` | Contact, penetration, fold, anthropometry, pair and forearm metrics |
 | `scripts/config/skinned_human_hand.json` | Every pose setting |
 | `scripts/config/hand_visual_quality.json` | Every test tolerance and reference |
