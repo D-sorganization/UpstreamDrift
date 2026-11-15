@@ -108,8 +108,7 @@ def test_no_flipped_or_degenerate_triangles_after_skinning(side: str) -> None:
     result = _hand(side)
     defects = skinning_defects(result, min_area_m2=float(_Q["min_triangle_area_m2"]))
     assert defects["degenerate"] == 0
-    # Pure LBS folds a few triangles into the inner crease of a joint bent
-    # near a right angle; none may flip anywhere else, and the fold is capped.
+    # Fold relaxation leaves no triangle inside out (it is capped at zero).
     assert defects["flipped"] <= int(_Q["max_crease_fold_faces"]), defects
     assert defects["flipped_area_fraction"] <= float(
         _Q["max_crease_fold_area_fraction"]
@@ -120,14 +119,62 @@ def test_no_flipped_or_degenerate_triangles_after_skinning(side: str) -> None:
     )
 
 
+def _without_correctives(side: str):
+    key = (side, "no correctives")
+    if key not in _CACHE:
+        raw = load_settings_mapping()
+        raw["correctives"] = {
+            "fold_relax": {**raw["correctives"]["fold_relax"], "iterations": 0},
+            "palm_pad": {**raw["correctives"]["palm_pad"], "reach_m": 0.0},
+        }
+        _CACHE[key] = build_hand_visual(
+            _spec(), side, grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
+        )
+    return _CACHE[key]
+
+
+def _palm_contact_count(result) -> int:
+    palm = result.rest_asset.dominant_vertex_ids(
+        ("wrist",) + tuple(f"meta_{f}" for f in FINGERS)
+    )
+    xy = result.mesh.vertices[palm, :2]
+    gap = np.hypot(xy[:, 0], xy[:, 1]) - _RADIUS
+    return int((gap <= float(_Q["contact_tolerance_m"])).sum())
+
+
 @pytest.mark.parametrize("side", _SIDES)
-def test_pose_is_joint_rotation_and_linear_blend_skinning_only(side: str) -> None:
-    """No vertex is pushed: the mesh is exactly LBS of the reported pose."""
-    assert skinning_residual_m(_hand(side)) < 1e-12
-    transforms = _hand(side).bone_transforms
-    for t in transforms:
+def test_with_correctives_off_the_pose_is_pure_linear_blend_skinning(
+    side: str,
+) -> None:
+    """Switched off, no vertex is pushed: the mesh is exactly LBS of the pose."""
+    plain = _without_correctives(side)
+    assert skinning_residual_m(plain) < 1e-12
+    for t in plain.bone_transforms:
         np.testing.assert_allclose(t[:3, :3] @ t[:3, :3].T, np.eye(3), atol=1e-9)
         assert np.linalg.det(t[:3, :3]) == pytest.approx(1.0)
+    # The correctives change the skin only: the solved pose is the same.
+    assert plain.joint_angles == _hand(side).joint_angles
+    np.testing.assert_array_equal(plain.bone_transforms, _hand(side).bone_transforms)
+
+
+@pytest.mark.parametrize("side", _SIDES)
+def test_correctives_unfold_the_webs_and_seat_the_palm_pad(side: str) -> None:
+    """Owner-approved correctives (#15150): small, local, and they earn it."""
+    plain, shaped = _without_correctives(side), _hand(side)
+    area = float(_Q["min_triangle_area_m2"])
+    assert skinning_defects(plain, min_area_m2=area)["flipped"] > 0
+    assert skinning_defects(shaped, min_area_m2=area)["flipped"] == 0
+    shift = np.linalg.norm(shaped.mesh.vertices - plain.mesh.vertices, axis=1)
+    assert 0.0 < shift.max() <= float(_Q["max_corrective_shift_m"])
+    assert (shift > 1e-9).mean() <= float(_Q["max_corrective_vertex_fraction"])
+    # No finger skin moves: fingers reach the grip by joint rotation alone.
+    digits = shaped.rest_asset.dominant_vertex_ids(
+        [f"{f}_{s}" for f in FINGERS for s in ("mid", "dist")] + ["thumb_dist"]
+    )
+    assert shift[digits].max() == 0.0
+    least = int(_Q["min_palm_contact_vertices"])
+    assert _palm_contact_count(shaped) >= least > _palm_contact_count(plain)
+    assert shaped.contact_gaps_m["palm"] <= plain.contact_gaps_m["palm"]
 
 
 def test_anthropometric_ratios_match_the_references() -> None:
@@ -334,6 +381,21 @@ def test_bad_settings_and_inputs_are_rejected() -> None:
         settings_from_mapping({**raw, "skin_rgb": [1.2, 0.5, 0.5]})
     with pytest.raises(ValueError):
         settings_from_mapping({**raw, "curl": {**raw["curl"], "arch_passes": 0}})
+    for part, bad in (
+        ("fold_relax", {"step": 0.0}),
+        ("fold_relax", {"iterations": -1}),
+        ("palm_pad", {"reach_m": -0.01}),
+        ("palm_pad", {"bones": ["no_such_bone"]}),
+    ):
+        changed = {**raw["correctives"]}
+        changed[part] = {**changed[part], **bad}
+        with pytest.raises(ValueError):
+            build_hand_visual(
+                _spec(),
+                "trail",
+                grip_radius_m=_RADIUS,
+                settings=settings_from_mapping({**raw, "correctives": changed}),
+            )
     with pytest.raises(ValueError):
         build_hand_visual(_spec(), "trail", grip_radius_m=0.0)
     with pytest.raises(ValueError):
@@ -396,6 +458,10 @@ def test_two_hands_share_the_club_without_passing_through_each_other() -> None:
     for side in _SIDES:
         inside = max_grip_cylinder_penetration_m(pair[side].mesh.vertices, _RADIUS)
         assert inside <= float(_Q["penetration_tolerance_m"])
+        defects = skinning_defects(
+            pair[side], min_area_m2=float(_Q["min_triangle_area_m2"])
+        )
+        assert defects["flipped"] == 0 and defects["degenerate"] == 0, defects
     # On their own the two hands overlap: the pair solve is doing real work.
     alone = build_hand_visual(_spec(), "trail", grip_radius_m=_RADIUS)
     shifted = dataclasses.replace(
@@ -422,8 +488,9 @@ def test_trail_hand_of_the_pair_still_wraps_the_grip_or_the_lead_hand() -> None:
     lead_z = pair["lead"].frame_from_rest[2, 3]
     trail_z = pair["trail"].frame_from_rest[2, 3]
     assert trail_z - lead_z > 0.5 * _spec().hand_spacing_m, "trail is nearer the head"
+    # Only the corrective shapes move skin off the skinned pose, and not far.
     for side in _SIDES:
-        assert skinning_residual_m(pair[side]) < 1e-9
+        assert skinning_residual_m(pair[side]) <= float(_Q["max_corrective_shift_m"])
 
 
 def test_trail_fingers_seat_on_the_grip_and_only_the_little_overlaps() -> None:

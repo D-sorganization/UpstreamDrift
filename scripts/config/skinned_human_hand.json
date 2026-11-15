@@ -93,6 +93,27 @@
       "forearm"
     ]
   },
+  "correctives": {
+    "fold_relax": {
+      "iterations": 8,
+      "rings": 2,
+      "step": 0.5
+    },
+    "palm_pad": {
+      "bones": [
+        "wrist",
+        "meta_index",
+        "meta_middle",
+        "meta_ring",
+        "meta_little"
+      ],
+      "reach_m": 0.012,
+      "clearance_m": 0.0003,
+      "facing_full": 0.5,
+      "smooth_iterations": 6,
+      "passes": 2
+    }
+  },
   "wrist": {
     "lead": {
       "extension_deg": 0.0,

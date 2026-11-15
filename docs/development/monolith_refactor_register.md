@@ -118,6 +118,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 983 | `src/shared/python/motion_matching/multi_engine_torque_allocator.py` |
 | 981 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
 | 981 | `src/shared/python/workspace/necromatcher_video.py` |
+| 977 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 975 | `src/api/routes/simulation_ws.py` |
 | 974 | `src/launchers/embedded_host.py` |
 | 973 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_camera_system.py` |
@@ -155,7 +156,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 919 | `src/bunkershot3d/vandv/ledger.py` |
 | 916 | `src/tools/bunker_shot_gui/export.py` |
 | 913 | `src/engines/physics_engines/opensim/python/tour_matching/native_diagnostic_contract.py` |
-| 912 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 908 | `src/engines/physics_engines/opensim/python/grip_contact_osim_sim.py` |
 | 907 | `src/unreal_integration/mesh_loader.py` |
 | 903 | `src/shared/python/motion_matching/club_only/body_candidates.py` |

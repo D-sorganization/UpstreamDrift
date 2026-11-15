@@ -52,8 +52,9 @@ def skinning_defects(
     joint (see :func:`skinning.flipped_face_ids`); ``flipped_area_fraction``
     is their share of the skin area.
     """
-    asset, transforms, _ = _audit_parts(result)
-    posed = pose_vertices(asset, transforms)
+    asset, transforms, frame = _audit_parts(result)
+    # The mesh itself, taken back to the rest frame: correctives count too.
+    posed = (result.mesh.vertices - frame[:3, 3]) @ np.linalg.inv(frame[:3, :3]).T
     flipped = flipped_face_ids(asset, transforms, posed)
     areas = face_areas(posed, asset.faces)
     return {
@@ -69,7 +70,8 @@ def skinning_residual_m(result: HandVisualResult) -> float:
     """Largest distance between the mesh and pure LBS + one rigid frame.
 
     Zero (to rounding) proves the hand was posed by joint rotation alone:
-    no vertex was pushed, clamped or inflated after skinning.
+    no vertex was pushed, clamped or inflated after skinning. With the
+    corrective shapes on it is the farthest any vertex was moved by them.
     """
     asset, transforms, frame = _audit_parts(result)
     expected = pose_vertices(asset, transforms) @ frame[:3, :3].T + frame[:3, 3]
