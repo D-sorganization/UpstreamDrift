@@ -34,6 +34,7 @@ import { GripWrenchCharts } from '@/components/analysis/GripWrenchCharts';
 import { MatchedSwingGifPlayer } from '@/components/analysis/MatchedSwingGifPlayer';
 import { OutputStatusBadges } from '@/components/analysis/outputPolicy/OutputStatusBadges';
 import type { MocapJoint } from '@/components/visualization/MocapSkeleton3D';
+import { LauncherDownloadLink } from '@/api/LauncherMediaElements';
 
 const MocapSkeleton3D = lazy(
   () => import('@/components/visualization/MocapSkeleton3D'),
@@ -467,36 +468,36 @@ export function MatchedSwingsPage() {
           >
             {isLaunchingViewer ? 'Launching Viewer…' : 'Open Native Viewer'}
           </button>
-          <a
+          <LauncherDownloadLink
             href={matchedSwingReportUrl(selectedRun.id)}
             download
             className="text-xs rounded border border-gray-700 bg-gray-800 px-2 py-1 hover:border-gray-500"
           >
             Export Report
-          </a>
-          <a
+          </LauncherDownloadLink>
+          <LauncherDownloadLink
             href={matchedSwingReportUrl(selectedRun.id, 'pdf')}
             download
             className="text-xs rounded border border-gray-700 bg-gray-800 px-2 py-1 hover:border-gray-500"
           >
             Export Report (PDF)
-          </a>
+          </LauncherDownloadLink>
           {selectedRun.capabilities.has_video_export ? (
             <>
-              <a
+              <LauncherDownloadLink
                 href={matchedSwingVideoUrl(selectedRun.id, 'gif')}
                 download
                 className="text-xs rounded border border-gray-700 bg-gray-800 px-2 py-1 hover:border-gray-500"
               >
                 Export Video (GIF)
-              </a>
-              <a
+              </LauncherDownloadLink>
+              <LauncherDownloadLink
                 href={matchedSwingVideoUrl(selectedRun.id, 'mp4')}
                 download
                 className="text-xs rounded border border-gray-700 bg-gray-800 px-2 py-1 hover:border-gray-500"
               >
                 Export Video (MP4)
-              </a>
+              </LauncherDownloadLink>
             </>
           ) : (
             <>

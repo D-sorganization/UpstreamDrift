@@ -19,6 +19,7 @@ import {
   type ExportFormats,
   type RecordingMeta,
 } from '@/api/recordings';
+import { LauncherDownloadLink } from '@/api/LauncherMediaElements';
 
 interface RecordingsPanelProps {
   /** Disable mutating actions while a simulation is running. */
@@ -160,7 +161,7 @@ export function RecordingsPanel({ isRunning = false }: RecordingsPanelProps) {
                 </div>
                 <div className="mt-1.5 flex flex-wrap gap-1">
                   {availableFormats.map(([key, info]) => (
-                    <a
+                    <LauncherDownloadLink
                       key={key}
                       href={recordingExportUrl(rec.id, key)}
                       download={`${rec.id}${info.extension}`}
@@ -168,7 +169,7 @@ export function RecordingsPanel({ isRunning = false }: RecordingsPanelProps) {
                       className="px-2 py-0.5 text-xs rounded bg-gray-600 text-gray-200 hover:bg-gray-500"
                     >
                       {info.name}
-                    </a>
+                    </LauncherDownloadLink>
                   ))}
                 </div>
               </li>

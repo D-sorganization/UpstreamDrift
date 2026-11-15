@@ -7,6 +7,7 @@ import { VideoExportControls } from '@/components/necromatcher/VideoExportContro
 import { RefitControls } from '@/components/necromatcher/RefitControls';
 import { fetchPlayers, fetchSwings, fetchAssets, fetchCaptureFrame, captureFrameImageUrl, swingExportUrl,
   fetchFitProjection, fetchFitSummary, type FitSummary, type FitProjection, type HistoricalPlayer, type HistoricalSwing, type HistoricalAsset, type CaptureFrame } from '@/api/necromatcher';
+import { LauncherDownloadLink, LauncherImage } from '@/api/LauncherMediaElements';
 
 const card = 'rounded-lg border border-gray-700 bg-gray-800 p-4 text-left hover:border-blue-400 focus-visible:outline-2 focus-visible:outline-blue-400';
 const readableError = (error: unknown) => error instanceof Error ? error.message : 'The library could not be loaded. Retry after checking the backend.';
@@ -80,7 +81,7 @@ export function NecromatcherPage() {
     {!player && <p className="text-sm text-gray-400">Select a Historical Player.</p>}
     {player && swings.length === 0 && <p className="text-sm text-gray-400">No Swings Saved for This Player.</p>}
     {swings.map((item) => <button key={item.session_id} className={`${card} w-full text-white`} aria-pressed={swing === item.session_id} onClick={() => selectSwing(item.session_id)}>{item.name}</button>)}
-    {selectedSwing && <a className="block text-blue-300 hover:underline" href={swingExportUrl(selectedSwing)}>Export Swing Package</a>}
+    {selectedSwing && <LauncherDownloadLink className="block text-blue-300 hover:underline" href={swingExportUrl(selectedSwing)}>Export Swing Package</LauncherDownloadLink>}
     <Link className="block text-blue-300 hover:underline" to="/tools/matched-swings">Matched Swing Results</Link>
     <LibraryActions player={player} swing={selectedSwing} onChanged={() => setRevision((value) => value + 1)} />
   </div>;
@@ -115,7 +116,7 @@ export function NecromatcherPage() {
 function SourceFrameReview({capture, frame, projection, failed, frameCount, frameIndices, frameIndex, onChange}: {capture: string; frame: CaptureFrame | null; projection: FitProjection | null; failed: boolean; frameCount: number; frameIndices: number[]; frameIndex: number; onChange: (index: number) => void}) {
   const pts = frame ? frame.frame.pts_ticks * frame.frame.timebase_numerator / frame.frame.timebase_denominator : null;
   return <section className="space-y-3" aria-label="Source Frame Review">
-    {frame ? <><div className="relative max-w-4xl"><img alt="Historical Source Frame" src={captureFrameImageUrl(capture, frameIndex)} className="w-full h-auto rounded" />
+    {frame ? <><div className="relative max-w-4xl"><LauncherImage alt="Historical Source Frame" src={captureFrameImageUrl(capture, frameIndex)} className="w-full h-auto rounded" />
       <KeypointOverlay points={frame.observation.landmarks} coordinates="normalized_image_xy" width={frame.image_width} height={frame.image_height} showVisibility />
       {projection && <KeypointOverlay points={projection.points} coordinates="image_pixels" width={frame.image_width} height={frame.image_height} purpose="native_model" />}
     </div>

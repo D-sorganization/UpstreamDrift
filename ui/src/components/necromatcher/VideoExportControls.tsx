@@ -11,6 +11,7 @@ import {
 import { useResearchJob } from './useResearchJob';
 import { ShaftEvidenceInput } from './ShaftEvidenceInput';
 import { SourceScopeSummary } from './SourceScopeInput';
+import { LauncherDownloadLink } from '@/api/LauncherMediaElements';
 
 type OverlayOptions = VideoOverlayOptions | ForceLayer | undefined;
 
@@ -122,11 +123,11 @@ function VideoExportForm(props: Props) {
       {run?.shape_overlay && <p className="text-xs">Stored Model Proxy Opacity: {run.shape_overlay.opacity} · Uncalibrated Authored Geometry; Skeleton Retained.</p>}
       <SourceScopeSummary scope={run?.source_fit_scope} binding={run?.source_fit_scope_binding} />
       {active && controlAvailable && <button type="button" className="rounded border p-2" onClick={() => void job.cancel()}>Cancel Overlay Export</button>}
-      {ready && <a className="block text-blue-300 hover:underline" href={videoExportDownloadUrl(run.run_id)}>Download Overlay Package</a>}
+      {ready && <LauncherDownloadLink className="block text-blue-300 hover:underline" href={videoExportDownloadUrl(run.run_id)}>Download Overlay Package</LauncherDownloadLink>}
       {stored && (
         <div className="space-y-2">
           <p className="text-xs text-orange-300">Download Readiness Unverified. Guarded verification can reject changed files.</p>
-          <a className="block text-blue-300 hover:underline" href={videoExportDownloadUrl(run.run_id)}>Verify Stored Overlay Package</a>
+          <LauncherDownloadLink className="block text-blue-300 hover:underline" href={videoExportDownloadUrl(run.run_id)}>Verify Stored Overlay Package</LauncherDownloadLink>
         </div>
       )}
       {run?.producer_source_commit && <p className="text-xs">Producer Commit: {run.producer_source_commit} · Historical Execution; Current Source Equality Unverified.</p>}

@@ -9,7 +9,8 @@
  * this component instead fetches the frame count/durations and renders the
  * current frame as a separately-served PNG
  * (`GET /matched-swings/{id}/animation/frames[/{index}]`), advancing frames
- * on a `setTimeout` keyed to each frame's duration while playing.
+ * on a `setTimeout` keyed to each frame's duration while playing. Frames are
+ * fetched once through `launcherFetch` and shown from local object URLs.
  *
  * The parent keys this component on `runId` (`key={run.id}`) so switching
  * runs remounts it with fresh state, instead of resetting state inside an
@@ -22,6 +23,7 @@ import {
   matchedSwingAnimationFrameUrl,
   type MatchedSwingAnimationInfo,
 } from '@/api/matchedSwings';
+import { fetchLauncherObjectUrl } from '@/api/launcherMedia';
 
 type LoadState = 'loading' | 'ready' | 'error';
 
@@ -38,6 +40,7 @@ export function MatchedSwingGifPlayer({
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<MatchedSwingAnimationInfo | null>(null);
+  const [frames, setFrames] = useState<Record<number, string>>({});
   const [frameIndex, setFrameIndex] = useState(0);
   const [playing, setPlaying] = useState(true);
 
@@ -48,14 +51,25 @@ export function MatchedSwingGifPlayer({
   useEffect(() => {
     if (!hasAnimation) return;
     let cancelled = false;
+    const objectUrls: string[] = [];
     fetchMatchedSwingAnimationInfo(runId)
       .then((data) => {
         if (cancelled) return;
         setInfo(data);
         setLoadState('ready');
         for (let i = 0; i < data.frame_count; i += 1) {
-          const preload = new Image();
-          preload.src = matchedSwingAnimationFrameUrl(runId, i);
+          fetchLauncherObjectUrl(matchedSwingAnimationFrameUrl(runId, i))
+            .then((objectUrl) => {
+              if (cancelled) {
+                URL.revokeObjectURL(objectUrl);
+                return;
+              }
+              objectUrls.push(objectUrl);
+              setFrames((prev) => ({ ...prev, [i]: objectUrl }));
+            })
+            .catch(() => {
+              // A frame that fails to load stays blank; playback continues.
+            });
         }
       })
       .catch((err: unknown) => {
@@ -65,6 +79,7 @@ export function MatchedSwingGifPlayer({
       });
     return () => {
       cancelled = true;
+      objectUrls.forEach((objectUrl) => URL.revokeObjectURL(objectUrl));
     };
   }, [runId, hasAnimation]);
 
@@ -95,7 +110,7 @@ export function MatchedSwingGifPlayer({
       )}
       {hasAnimation && loadState === 'ready' && info && (
         <img
-          src={matchedSwingAnimationFrameUrl(runId, frameIndex)}
+          src={frames[frameIndex]}
           alt="matched swing animation frame"
           className="mx-auto max-h-72 rounded border border-gray-700 bg-black"
         />

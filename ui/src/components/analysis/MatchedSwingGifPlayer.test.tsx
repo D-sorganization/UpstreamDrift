@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { MatchedSwingGifPlayer } from './MatchedSwingGifPlayer';
 import * as api from '@/api/matchedSwings';
+import * as media from '@/api/launcherMedia';
 import type { MatchedSwingAnimationInfo } from '@/api/matchedSwings';
 
 const INFO: MatchedSwingAnimationInfo = {
@@ -166,5 +167,28 @@ describe('MatchedSwingGifPlayer', () => {
       vi.advanceTimersByTime(40);
     });
     expect(screen.getByText('Frame 2 / 3')).toBeInTheDocument();
+  });
+
+  it('shows frames fetched with the launcher capability as object URLs', async () => {
+    const revoke = vi.fn();
+    vi.stubGlobal('URL', Object.assign(URL, { revokeObjectURL: revoke }));
+    vi.spyOn(api, 'fetchMatchedSwingAnimationInfo').mockResolvedValue(INFO);
+    const fetchFrame = vi
+      .spyOn(media, 'fetchLauncherObjectUrl')
+      .mockImplementation(async (url: string) => `blob:${url}`);
+
+    const { unmount } = render(<MatchedSwingGifPlayer runId="r1" hasAnimation />);
+    await flush();
+    await flush();
+
+    expect(fetchFrame).toHaveBeenCalledTimes(INFO.frame_count);
+    expect(screen.getByAltText('matched swing animation frame')).toHaveAttribute(
+      'src',
+      `blob:${api.matchedSwingAnimationFrameUrl('r1', 0)}`,
+    );
+
+    unmount();
+    expect(revoke).toHaveBeenCalledTimes(INFO.frame_count);
+    vi.unstubAllGlobals();
   });
 });

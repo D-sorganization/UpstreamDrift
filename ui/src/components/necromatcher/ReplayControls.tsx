@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { fetchAssets, fetchReplaySummary, replayDataUrl, type HistoricalAsset, type ReplaySummary } from '@/api/necromatcher';
 import { ReplayImpactControls } from './ReplayImpactControls';
+import { LauncherDownloadLink } from '@/api/LauncherMediaElements';
 
 function verifiedSummary(asset: HistoricalAsset, summary: ReplaySummary): ReplaySummary {
   const meta = summary.metadata;
@@ -65,7 +66,7 @@ function ReplayLibrary({swing}: {swing: string}) {
       <p>Independent replay: executed | Root policy: unactuated | Initial state: exact saved pose and authored rates</p>
       <p>Fit: {String(summary.metadata.fit_id)} | Model: {String(summary.metadata.model_id)} | Profile: {String(summary.metadata.profile_id)} | Capture: {String(summary.metadata.capture_id)}</p>
       {['fit','model','profile','capture'].map((parent) => <p key={parent}>{parent} hash: {String(summary.metadata[`${parent}_hash`])}</p>)}
-      <a className="text-blue-300 underline" href={replayDataUrl(summary.replay_id)}>Download Verified Replay HDF5</a>
+      <LauncherDownloadLink className="text-blue-300 underline" href={replayDataUrl(summary.replay_id)}>Download Verified Replay HDF5</LauncherDownloadLink>
       <ReplayImpactControls replay={summary.replay_id} sampleCount={summary.sample_count} />
     </div>}
   </section>;
