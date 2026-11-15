@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
-import math
+import os
+import subprocess
+import sys
 from dataclasses import replace
 from pathlib import Path
 
@@ -20,7 +22,6 @@ from src.shared.python.grip_spec.shaft_roll import (
     resolved_shaft_roll_deg,
 )
 from src.shared.python.model_appearance.club_assembly import ClubAssembly
-from src.shared.python.model_appearance.grip_hand_mesh import build_grip_hand_mesh
 from src.shared.python.model_appearance.grip_hands import (
     grip_hand_frame,
     grip_hand_meshes,
@@ -42,13 +43,6 @@ _EVIDENCE_DIR = (
     Path(__file__).resolve().parents[3]
     / "docs/development/full_body_models/evidence/grip_shaft_roll"
 )
-
-
-def _palm_azimuth_deg(hand: Hand, pose: GripPose) -> float:
-    mesh = build_grip_hand_mesh(hand, grip_radius_m=0.014, pose=pose)
-    palm = next(c for c in mesh.components if c.name == "palm")
-    c = palm.mesh.vertices.mean(axis=0)
-    return math.degrees(math.atan2(float(c[1]), float(c[0])))
 
 
 def test_shaft_roll_zero_matches_legacy_projection_and_mesh() -> None:
@@ -155,38 +149,24 @@ def test_shaft_roll_rejects_out_of_range() -> None:
 
 @pytest.mark.slow
 def test_shaft_roll_preview_evidence_images() -> None:
-    """Save ±15° lead-only preview meshes as committed evidence (#15138)."""
-    matplotlib = pytest.importorskip("matplotlib")
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt  # noqa: PLC0415
-
-    _EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
-    club = _iron7_club()
-    cases = {
-        "lead_minus_15deg": -15.0,
-        "lead_plus_15deg": 15.0,
-    }
-    manifest: dict[str, object] = {"cases": {}}
-    base_pose = GripSpec.legacy().to_grip_pose()
-    for name, roll in cases.items():
-        pose = GripSpec.legacy(lead=HandGripSpec(shaft_roll_deg=roll)).to_grip_pose()
-        mesh = build_grip_hand_mesh(Hand.LEAD, grip_radius_m=0.014, pose=pose)
-        fig = plt.figure(figsize=(4, 4))
-        ax = fig.add_subplot(111, projection="3d")
-        v = mesh.mesh.vertices
-        ax.scatter(v[:, 0], v[:, 1], v[:, 2], s=1, c="tab:blue")
-        ax.set_title(f"lead shaft_roll {roll:+.0f}°")
-        out = _EVIDENCE_DIR / f"{name}.png"
-        fig.savefig(out, dpi=120, bbox_inches="tight")
-        plt.close(fig)
-        manifest["cases"][name] = {
-            "shaft_roll_deg": roll,
-            "palm_azimuth_deg": _palm_azimuth_deg(Hand.LEAD, pose),
-            "baseline_palm_azimuth_deg": _palm_azimuth_deg(Hand.LEAD, base_pose),
-            "png": str(out.relative_to(_EVIDENCE_DIR.parents[2])),
-        }
-    receipt = _EVIDENCE_DIR / "receipt.json"
-    receipt.write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    """Commit solid-mesh shaft-roll strips for lead and trail (#15138)."""
+    pytest.importorskip("matplotlib")
+    repo_root = Path(__file__).resolve().parents[3]
+    script = _EVIDENCE_DIR / "render_shaft_roll_evidence.py"
+    subprocess.run(
+        [sys.executable, str(script)],
+        cwd=repo_root,
+        check=True,
+        env={**os.environ, "MPLBACKEND": "Agg"},
     )
-    assert receipt.is_file()
+    receipt = json.loads((_EVIDENCE_DIR / "receipt.json").read_text(encoding="utf-8"))
+    expected = {
+        "lead_butt_shaft_roll_strip.png",
+        "lead_side_shaft_roll_strip.png",
+        "trail_butt_shaft_roll_strip.png",
+        "trail_side_shaft_roll_strip.png",
+    }
+    for name in expected:
+        assert (_EVIDENCE_DIR / name).is_file()
+    assert (_EVIDENCE_DIR / "receipt.json").is_file()
+    assert set(receipt["artifacts"]) == expected
