@@ -1,8 +1,8 @@
-## Shared hand renderer (`hand_backends/render.py`)
+## Shared Hand Renderer (`hand_backends/render.py`)
 
 Refs #15150 (epic). Auto-merge is not armed, on the owner's instruction.
 
-### State at `82cc5c1112` (2026-11-14, about 11 PM PT)
+### State at `82cc5c1112` (2026-11-14, About 11 PM PT)
 
 - One renderer for every hand backend: headless MuJoCo (EGL, then OSMesa), with a matplotlib fallback that is not quality-bar evidence.
 - Views: palm, back, thumb side, pinky side, butt and eye, named relative to the hand so lead and trail keep the same names.
@@ -11,7 +11,7 @@ Refs #15150 (epic). Auto-merge is not armed, on the owner's instruction.
 - A command-line tool writes frames, a both-hands frame, contact sheets and a manifest. 55 renderer tests pass.
 - PR #15149 already uses it for the skinned hand's 36 frames (measured fill 0.696 to 0.699).
 
-### Self-review (lead, after driving it for the skinned hand all evening)
+### Self-Review (Lead, After Driving It for the Skinned Hand All Evening)
 
 | Check | Score out of 5 | Note |
 | --- | --- | --- |
@@ -27,7 +27,7 @@ The capsule hand in these pictures is the crude in-repo source. It tests the ren
 | --- | --- |
 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/82cc5c111230c79d80dd4414315a678957b0c531/docs/development/full_body_models/evidence/hand_render/contact_sheet_lead_palm.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/82cc5c111230c79d80dd4414315a678957b0c531/docs/development/full_body_models/evidence/hand_render/contact_sheet_trail_palm.png?raw=true) |
 
-### Open problems
+### Open Problems
 
 - **Size.** 56 files and about 3,700 added lines of its own, over the 500-line gate. It needs `large-pr-approved` or an owner decision.
 - **One unrelated test fails** on this branch: `tests/docs/test_matched_swing_status_freshness.py`.
@@ -45,7 +45,7 @@ The capsule hand in these pictures is the crude in-repo source. It tests the ren
 - Crease-aware normals: corners whose face normals differ by more than the crease angle are not averaged. Smooth skin and crisp block edges come from the same code.
 - Fill measured on the longer bounding-box side overstates how big a diagonal hand looks.
 
-### Next steps
+### Next Steps
 
 1. Add an area-based fill measure and fit to it, with a failing test first.
 2. Draw the shaft in every view by extending the club toward the head inside the frame.
