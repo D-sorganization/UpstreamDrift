@@ -1,16 +1,106 @@
 {
-  "cases": {
-    "lead_minus_15deg": {
-      "baseline_palm_azimuth_deg": -34.99999999999996,
-      "palm_azimuth_deg": -34.99999999999996,
-      "png": "full_body_models/evidence/grip_shaft_roll/lead_minus_15deg.png",
-      "shaft_roll_deg": -15.0
+  "artifacts": {
+    "lead_butt_shaft_roll_strip.png": {
+      "panels": [
+        {
+          "hand": "lead",
+          "shaft_roll_deg": -15.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "butt"
+        },
+        {
+          "hand": "lead",
+          "shaft_roll_deg": 0.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "butt"
+        },
+        {
+          "hand": "lead",
+          "shaft_roll_deg": 15.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "butt"
+        }
+      ],
+      "path": "full_body_models/evidence/grip_shaft_roll/lead_butt_shaft_roll_strip.png"
     },
-    "lead_plus_15deg": {
-      "baseline_palm_azimuth_deg": -34.99999999999996,
-      "palm_azimuth_deg": -34.99999999999996,
-      "png": "full_body_models/evidence/grip_shaft_roll/lead_plus_15deg.png",
-      "shaft_roll_deg": 15.0
+    "lead_side_shaft_roll_strip.png": {
+      "panels": [
+        {
+          "hand": "lead",
+          "shaft_roll_deg": -15.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "side"
+        },
+        {
+          "hand": "lead",
+          "shaft_roll_deg": 0.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "side"
+        },
+        {
+          "hand": "lead",
+          "shaft_roll_deg": 15.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "side"
+        }
+      ],
+      "path": "full_body_models/evidence/grip_shaft_roll/lead_side_shaft_roll_strip.png"
+    },
+    "trail_butt_shaft_roll_strip.png": {
+      "panels": [
+        {
+          "hand": "trail",
+          "shaft_roll_deg": -15.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "butt"
+        },
+        {
+          "hand": "trail",
+          "shaft_roll_deg": 0.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "butt"
+        },
+        {
+          "hand": "trail",
+          "shaft_roll_deg": 15.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "butt"
+        }
+      ],
+      "path": "full_body_models/evidence/grip_shaft_roll/trail_butt_shaft_roll_strip.png"
+    },
+    "trail_side_shaft_roll_strip.png": {
+      "panels": [
+        {
+          "hand": "trail",
+          "shaft_roll_deg": -15.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "side"
+        },
+        {
+          "hand": "trail",
+          "shaft_roll_deg": 0.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "side"
+        },
+        {
+          "hand": "trail",
+          "shaft_roll_deg": 15.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "side"
+        }
+      ],
+      "path": "full_body_models/evidence/grip_shaft_roll/trail_side_shaft_roll_strip.png"
     }
-  }
+  },
+  "club": {
+    "alias": "iron7",
+    "length_m": 0.95
+  },
+  "rolls_deg": [
+    -15.0,
+    0.0,
+    15.0
+  ],
+  "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign"
 }
