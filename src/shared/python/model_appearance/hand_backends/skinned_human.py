@@ -52,6 +52,7 @@ from src.shared.python.model_appearance.hand_backends.posing import (
     cylinder_distance,
     flat_hand_rotation,
     rigid,
+    SeatLimits,
     seat_on_obstacle,
     wrap_to_contact,
 )
@@ -491,9 +492,11 @@ def _seat_flat_hand(
         tilt_axis=np.array([-s, c, 0.0]),
         tilt_pivot=np.zeros(3),
         split_coordinate=pts[keep, 2],
-        max_tilt_rad=math.radians(settings.seat_max_tilt_deg),
-        max_travel_m=settings.seat_max_travel_m,
-        iterations=settings.seat_iterations,
+        limits=SeatLimits(
+            max_tilt_rad=math.radians(settings.seat_max_tilt_deg),
+            max_travel_m=settings.seat_max_travel_m,
+            iterations=settings.seat_iterations,
+        ),
     )
     hand.placement = correction @ hand.placement
     if palm_obstacle is None:

@@ -19,6 +19,7 @@ from src.shared.python.model_appearance.hand_backends.posing import (
     CurlJoint,
     CurlSettings,
     FlatHandLandmarks,
+    SeatLimits,
     club_axis_in_hand,
     curl_to_contact,
     cylinder_distance,
@@ -140,6 +141,9 @@ def test_curl_rejects_bad_settings() -> None:
         CurlSettings(0.0, 10, 1e-3, 1e-4)
     with pytest.raises(ValueError):
         CurlJoint("prox", 1.0, 0.5, 0.0)
+    for bad in ((-0.1, 0.01, 8), (0.1, 0.0, 8), (0.1, 0.01, 0)):
+        with pytest.raises(ValueError):
+            SeatLimits(*bad)
 
 
 def _landmarks() -> FlatHandLandmarks:

@@ -455,6 +455,23 @@ def rigid(rotation: Array, translation: Array) -> Array:
     return out
 
 
+@dataclass(frozen=True)
+class SeatLimits:
+    """Search limits of :func:`seat_on_obstacle` (all from configuration)."""
+
+    max_tilt_rad: float
+    max_travel_m: float
+    iterations: int
+
+    def __post_init__(self) -> None:
+        if _finite(self.max_tilt_rad, "max_tilt_rad") < 0.0:
+            raise ValueError("max_tilt_rad must be non-negative")
+        if _finite(self.max_travel_m, "max_travel_m") <= 0.0:
+            raise ValueError("max_travel_m must be positive")
+        if self.iterations < 1:
+            raise ValueError("iterations must be at least 1")
+
+
 def seat_on_obstacle(
     points: Array,
     obstacle: ObstacleDistance,
@@ -463,9 +480,7 @@ def seat_on_obstacle(
     tilt_axis: Array,
     tilt_pivot: Array,
     split_coordinate: Array,
-    max_tilt_rad: float,
-    max_travel_m: float,
-    iterations: int,
+    limits: SeatLimits,
 ) -> tuple[Array, float, float]:
     """Rest rigid ``points`` on the obstacle so that both halves touch it.
 
@@ -483,8 +498,8 @@ def seat_on_obstacle(
     upper = np.asarray(split_coordinate) > 0.0
     if not upper.any() or upper.all():
         raise ValueError("both halves of the hand need contact points")
-    if iterations < 1 or max_travel_m <= 0.0 or max_tilt_rad < 0.0:
-        raise ValueError("bad seating limits")
+    max_tilt_rad, max_travel_m = limits.max_tilt_rad, limits.max_travel_m
+    iterations = limits.iterations
 
     def tilt_matrix(angle: float) -> Array:
         x, y, z = axis_u
