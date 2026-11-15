@@ -183,7 +183,7 @@ def tube_mesh_from_polyline(
             tangent = curve[-1] - curve[-2]
         else:
             tangent = curve[i + 1] - curve[i - 1]
-        tangent = tangent / max(np.linalg.norm(tangent), 1e-12)
+        tangent = tangent / max(float(np.linalg.norm(tangent)), 1e-12)
         ref = np.array([0.0, 0.0, 1.0])
         if abs(float(np.dot(tangent, ref))) > 0.92:
             ref = np.array([0.0, 1.0, 0.0])

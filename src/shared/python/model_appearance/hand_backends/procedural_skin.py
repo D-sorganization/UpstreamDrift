@@ -176,7 +176,7 @@ def _solve_finger_chain(
         1.0,
     )
     # Keep flexion axis consistent across all phalanges so lead never hyperextends.
-    flex_axis = _unit(np.cross(u_flat, -dorsal))
+    flex_axis = _unit(np.asarray(np.cross(u_flat, -dorsal), dtype=np.float64))
     pts: list[Array] = [mcp]
     p_curr = mcp.copy()
     u_curr = u_flat.copy()

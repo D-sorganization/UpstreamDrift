@@ -317,8 +317,11 @@ def _welded_vertex_normals(mesh: Mesh, weld_tol_m: float = 1.5e-4) -> Array:
     for c in range(3):
         np.add.at(wn, wf[:, c], fn)
     norms = np.linalg.norm(wn, axis=1, keepdims=True)
-    wn = np.where(norms > 1e-12, wn / np.maximum(norms, 1e-12), [0.0, 0.0, 1.0])
-    return wn[inv]
+    unit_wn = np.asarray(
+        np.where(norms > 1e-12, wn / np.maximum(norms, 1e-12), [0.0, 0.0, 1.0]),
+        dtype=np.float64,
+    )
+    return unit_wn[inv]
 
 
 def _rasterize_ssaa(
