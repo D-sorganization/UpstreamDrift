@@ -13,7 +13,15 @@ pytestmark = pytest.mark.unit
 _PKG = Path(__file__).resolve().parents[3] / "src/shared/python/grip_spec"
 _FORCE_MODULE = _PKG / "providers.py"
 _ALLOWED_GEOMETRY_FILES = frozenset(
-    {"defaults.py", "serialization.py", "types.py", "validation.py", "projection.py"}
+    {
+        "config.py",
+        "defaults.py",
+        "serialization.py",
+        "shaft_roll.py",
+        "types.py",
+        "validation.py",
+        "projection.py",
+    }
 )
 
 
