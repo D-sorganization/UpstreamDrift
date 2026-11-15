@@ -174,6 +174,14 @@ def test_missing_null_nonnumeric_or_unverified_metrics_fail_closed() -> None:
         )
 
 
+def test_club_face_fixture_provenance_has_no_host_absolute_paths() -> None:
+    """Committed club-face provenance must use repo-relative paths (#14935)."""
+    rel = "tests/fixtures/club_face/provenance.json"
+    data = json.loads((REPO_ROOT / rel).read_text(encoding="utf-8"))
+    issues = validate_receipt_paths(rel, data)
+    assert issues == [], f"host paths in fixture provenance: {issues}"
+
+
 def test_unanchored_and_uri_host_paths_are_flagged() -> None:
     """Unanchored /home, /Users, /mnt, ~/, file://, and drive paths must fail."""
     bad_samples = (

@@ -234,11 +234,12 @@ def validate_candidate_package(
 ) -> list[EvidenceIssue]:
     """``accepted`` must agree with gate booleans, metrics, and ``gates_passed``."""
     issues: list[EvidenceIssue] = []
-    gates = data.get("gates")
+    gates_raw = data.get("gates")
     accepted = data.get("accepted")
 
-    implied = gates_imply_accepted(gates)
-    if implied is not None:
+    implied = gates_imply_accepted(gates_raw)
+    if implied is not None and isinstance(gates_raw, Mapping):
+        gates: Mapping[str, Any] = gates_raw
         all_passed = implied
         true_count = sum(1 for value in gates.values() if value is True)
         passed_text = data.get("gates_passed")
@@ -286,7 +287,7 @@ def validate_candidate_package(
     if not accepted:
         issues.extend(validate_candidate_gate_metrics(rel_path, data))
         return issues
-    if not isinstance(gates, Mapping) or not gates:
+    if not isinstance(gates_raw, Mapping) or not gates_raw:
         issues.append(
             EvidenceIssue(
                 rule="accepted_gates_consistency",
@@ -537,6 +538,15 @@ def validate_committed_evidence(
             if isinstance(data, Mapping):
                 raw_issues.extend(validate_receipt_paths(rel, data))
                 raw_issues.extend(validate_receipt_taxonomy(rel, data))
+
+    club_face_provenance = (
+        repo_root / "tests" / "fixtures" / "club_face" / "provenance.json"
+    )
+    if club_face_provenance.is_file():
+        rel = club_face_provenance.relative_to(repo_root).as_posix()
+        payload = json.loads(club_face_provenance.read_text(encoding="utf-8"))
+        if isinstance(payload, Mapping):
+            raw_issues.extend(validate_receipt_paths(rel, payload))
 
     ledger_path = repo_root / "reports" / "matched_swing_ledger.json"
     if ledger_path.is_file():
