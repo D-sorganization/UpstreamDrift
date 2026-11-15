@@ -1,4 +1,24 @@
 {
+  "issue": 15138,
+  "engine": "shared",
+  "lane": "grip_authoring",
+  "capture": "iron7",
+  "acceptance": {
+    "horizon": "G0",
+    "is_physically_accepted": false,
+    "status": "PASSED",
+    "gates": [
+      {
+        "name": "grip_authoring_geometry",
+        "status": "passed",
+        "threshold": 0.0,
+        "measured": 0.0,
+        "unit": "deg",
+        "reason": "Unit tests gate apply_shaft_roll; strips are visual acceptance for #15138."
+      }
+    ],
+    "qualification_note": "Geometry preview evidence (HRG-GB1b #15138); not a forward-dynamics qualification."
+  },
   "artifacts": {
     "lead_butt_shaft_roll_strip.png": {
       "panels": [

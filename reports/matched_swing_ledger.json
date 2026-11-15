@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-15T03:59:09Z",
+  "generated_at": "2026-11-15T04:17:56Z",
   "rows": [
     {
       "acceptance": null,
@@ -677,17 +677,32 @@
       "sha256": "e98e79a8ba8a5ed7425fd27540add17a141de284bcbcf905edc490df724f2915"
     },
     {
-      "acceptance": null,
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.0,
+            "name": "grip_authoring_geometry",
+            "reason": "Unit tests gate apply_shaft_roll; strips are visual acceptance for #15138.",
+            "status": "passed",
+            "threshold": 0.0,
+            "unit": "deg"
+          }
+        ],
+        "horizon": "G0",
+        "is_physically_accepted": false,
+        "qualification_note": "Geometry preview evidence (HRG-GB1b #15138); not a forward-dynamics qualification.",
+        "status": "PASSED"
+      },
       "artefacts": {
         "gif": null,
         "mot": null,
         "npz": null
       },
       "candidate_sha": null,
-      "capture": null,
-      "engine": "unknown",
+      "capture": "iron7",
+      "engine": "shared",
       "horizon_s": null,
-      "lane": "unclassified",
+      "lane": "grip_authoring",
       "metrics": {
         "club_marker_rmse_m": null,
         "early_marker_rmse_m": null,
@@ -697,9 +712,9 @@
         "terminal_marker_rmse_m": null,
         "whole_marker_rmse_m": null
       },
-      "reason": "Unrecognized directory path structure",
+      "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/grip_shaft_roll/receipt.json",
-      "sha256": "5f6c5e2b8318dd949a05d241727c16c13834e9f215da5b6fc33ca9d781818b3b"
+      "sha256": "670ebbd2d5f67f3ea7355caa00c48b38e657c30955cf5fc1267006a4fe6707f5"
     },
     {
       "acceptance": null,
