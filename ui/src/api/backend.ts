@@ -218,7 +218,9 @@ export async function getBackendStatus(): Promise<BackendStatus> {
 export async function getDiagnostics(): Promise<DiagnosticInfo> {
   if (!isTauri()) {
     try {
-      const response = await fetch(`${getApiBase()}/api/diagnostics`);
+      // Loaded on demand for the same reason: launcherFetch depends on this module.
+      const { launcherFetch } = await import('./launcherFetch');
+      const response = await launcherFetch(`${getApiBase()}/api/diagnostics`);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }

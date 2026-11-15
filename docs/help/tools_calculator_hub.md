@@ -40,14 +40,14 @@ whose `EXTERNAL_TOOLS` registry contains keys for `video_analyzer`,
 
 What the two tiles differ in is metadata only:
 
-| Field          | `data_processor`                                                                                | `tools_calculator_hub`                     |
-| -------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `status`       | `ready`                                                                                         | `external`                                 |
-| `maturity`     | `ready`                                                                                         | `beta`                                     |
-| `surfaces`     | `pyqt`, `web`                                                                                   | `web`                                      |
-| `web_route`    | `/tools/data-processor`                                                                         | `/tools/calculators`                       |
-| `order`        | 15                                                                                              | 44                                         |
-| `capabilities` | data_import, signal_processing, time_series, filtering, statistics, export, process_calculators | process_calculators, engineering, analysis |
+| Field          | `data_processor`                                                                                | `tools_calculator_hub`                    |
+| -------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `status`       | `ready`                                                                                         | `external`                                |
+| `maturity`     | `ready`                                                                                         | `beta`                                    |
+| `surfaces`     | `pyqt`, `web`                                                                                   | `web`                                     |
+| `web_route`    | `/tools/data-processor`                                                                         | `(none; native-window)`                   |
+| `order`        | 15                                                                                              | 44                                        |
+| `capabilities` | data_import, signal_processing, time_series, filtering, statistics, export, process_calculators | process_calculators, data_processor_alias |
 
 The one substantive overlap is the `process_calculators` capability,
 which both tiles claim. That is consistent with this tile being a
@@ -57,7 +57,7 @@ narrowing.
 
 ## Background
 
-Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/theory-part1.html): *AffineDrift Theory Part I*.
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/theory-part1.html): _AffineDrift Theory Part I_.
 
 ## Limitations
 

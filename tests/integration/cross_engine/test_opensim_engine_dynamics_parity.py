@@ -12,39 +12,23 @@ pendulum built through the OpenSim API; MuJoCo and Pinocchio load the URDF.
 
 from __future__ import annotations
 
-import importlib
 import math
 from pathlib import Path
 from types import ModuleType
+from typing import Any
 
 import numpy as np
 import pytest
 from tests.helpers.opensim_support import require_opensim
+from tests.integration.cross_engine.loop_nullspace_conformance_support import (
+    require_real_module,
+)
 
 osim = require_opensim()
 # A MagicMock stand-in (the core lane has no OpenSim) answers hasattr(); only
 # the real SDK is an on-disk module.
 if not isinstance(getattr(osim, "__file__", None), str) or not hasattr(osim, "Model"):
     pytest.skip("real opensim is unavailable", allow_module_level=True)
-mujoco = pytest.importorskip("mujoco")
-
-
-def _import_pinocchio() -> ModuleType:
-    """Import Pinocchio once without evicting ``sys.modules`` entries.
-
-    Clearing cached Pinocchio modules during collection corrupts the C
-    extension for later conformance tests in the same pytest session (#14966).
-    """
-    try:
-        return importlib.import_module("pinocchio")
-    except (
-        ImportError,
-        ModuleNotFoundError,
-        NameError,
-        AttributeError,
-        RuntimeError,
-    ) as exc:
-        pytest.skip(f"pinocchio is not loadable: {exc}")
 
 
 from src.engines.physics_engines.opensim.python import (  # noqa: E402
@@ -156,24 +140,22 @@ def engine(tmp_path: Path) -> OpenSimPhysicsEngine:
     return loaded
 
 
-class _Reference:
-    """MuJoCo and Pinocchio dynamics of the URDF at one state."""
+class _MuJoCoReference:
+    """MuJoCo dynamics of the URDF at one state."""
 
-    def __init__(self, pin: ModuleType) -> None:
-        self._pin = pin
-        self.mj_model = mujoco.MjModel.from_xml_path(str(URDF))
-        self.mj_data = mujoco.MjData(self.mj_model)
-        self.pin_model = pin.buildModelFromUrdf(str(URDF))
-        self.pin_data = self.pin_model.createData()
+    def __init__(self, mj: ModuleType) -> None:
+        self._mj: Any = mj
+        self.mj_model = self._mj.MjModel.from_xml_path(str(URDF))
+        self.mj_data = self._mj.MjData(self.mj_model)
 
-    def mujoco(self, q: np.ndarray, v: np.ndarray) -> dict[str, np.ndarray]:
+    def snapshot(self, q: np.ndarray, v: np.ndarray) -> dict[str, np.ndarray]:
         model, data = self.mj_model, self.mj_data
         data.qpos[:] = q
         data.qvel[:] = v
         data.ctrl[:] = 0.0
         data.qfrc_applied[:] = 0.0
-        mujoco.mj_forward(model, data)
-        mass = full_mass_matrix(mujoco, model, data)
+        self._mj.mj_forward(model, data)
+        mass = full_mass_matrix(self._mj, model, data)
         # Without phantom contacts (#12989), data.qacc and data.qacc_smooth agree
         # and give the unconstrained passive drift acceleration directly.
         return {
@@ -182,7 +164,16 @@ class _Reference:
             "drift": data.qacc.copy(),
         }
 
-    def pinocchio(self, q: np.ndarray, v: np.ndarray) -> dict[str, np.ndarray]:
+
+class _PinocchioReference:
+    """Pinocchio dynamics of the URDF at one state."""
+
+    def __init__(self, pin: ModuleType) -> None:
+        self._pin: Any = pin
+        self.pin_model = self._pin.buildModelFromUrdf(str(URDF))
+        self.pin_data = self.pin_model.createData()
+
+    def snapshot(self, q: np.ndarray, v: np.ndarray) -> dict[str, np.ndarray]:
         model, data = self.pin_model, self.pin_data
         pin = self._pin
         mass = pin.crba(model, data, q)
@@ -199,21 +190,28 @@ class _Reference:
 
 
 @pytest.fixture(scope="module")
-def pinocchio_bindings() -> ModuleType:
-    return _import_pinocchio()
+def mujoco_reference() -> _MuJoCoReference:
+    return _MuJoCoReference(require_real_module("mujoco"))
 
 
 @pytest.fixture(scope="module")
-def reference(pinocchio_bindings: ModuleType) -> _Reference:
-    return _Reference(pinocchio_bindings)
+def pinocchio_reference() -> _PinocchioReference:
+    return _PinocchioReference(require_real_module("pinocchio"))
 
 
+@pytest.mark.requires_mujoco
+@pytest.mark.requires_pinocchio
 @pytest.mark.parametrize(("q", "v"), STATES)
 def test_bias_gravity_drift_match_mujoco_and_pinocchio(
-    engine: OpenSimPhysicsEngine, reference: _Reference, q, v
+    engine: OpenSimPhysicsEngine,
+    mujoco_reference: _MuJoCoReference,
+    pinocchio_reference: _PinocchioReference,
+    q,
+    v,
 ) -> None:
     engine.set_state(q, v)
-    mj, pin = reference.mujoco(q, v), reference.pinocchio(q, v)
+    mj = mujoco_reference.snapshot(q, v)
+    pin = pinocchio_reference.snapshot(q, v)
     np.testing.assert_allclose(mj["bias"], pin["bias"], atol=ATOL, rtol=0)
 
     np.testing.assert_allclose(engine.compute_mass_matrix(), pin["M"], atol=ATOL)
@@ -232,31 +230,40 @@ def test_bias_gravity_drift_match_mujoco_and_pinocchio(
     np.testing.assert_array_equal(engine.get_state()[1], v)
 
 
+@pytest.mark.requires_pinocchio
 @pytest.mark.parametrize(("q", "v"), STATES)
 @pytest.mark.parametrize("a", [np.array([0.0, 0.0]), np.array([1.5, -2.0])])
 def test_inverse_dynamics_matches_pinocchio(
-    engine: OpenSimPhysicsEngine, reference: _Reference, q, v, a
+    engine: OpenSimPhysicsEngine,
+    pinocchio_reference: _PinocchioReference,
+    q,
+    v,
+    a,
 ) -> None:
     engine.set_state(q, v)
     tau = engine.compute_inverse_dynamics(a)
 
     assert tau.shape == (2,)
     np.testing.assert_allclose(
-        tau, reference.inverse_dynamics(q, v, a), atol=ATOL, rtol=0
+        tau, pinocchio_reference.inverse_dynamics(q, v, a), atol=ATOL, rtol=0
     )
     np.testing.assert_allclose(
         tau, engine.compute_mass_matrix() @ a + engine.compute_bias_forces(), atol=ATOL
     )
 
 
+@pytest.mark.requires_pinocchio
 @pytest.mark.parametrize(("q", "v"), STATES)
 def test_counterfactuals_match_pinocchio(
-    engine: OpenSimPhysicsEngine, reference: _Reference, q, v
+    engine: OpenSimPhysicsEngine,
+    pinocchio_reference: _PinocchioReference,
+    q,
+    v,
 ) -> None:
     """ZTCF and ZVCF are the zero-control forward dynamics, not stale udot."""
     engine.set_state(np.array([0.2, 0.1]), np.array([0.0, 0.0]))
-    pin_ztcf = reference.pinocchio(q, v)["drift"]
-    pin_zvcf = reference.pinocchio(q, np.zeros(2))["drift"]
+    pin_ztcf = pinocchio_reference.snapshot(q, v)["drift"]
+    pin_zvcf = pinocchio_reference.snapshot(q, np.zeros(2))["drift"]
 
     np.testing.assert_allclose(engine.compute_ztcf(q, v), pin_ztcf, atol=1e-9, rtol=0)
     np.testing.assert_allclose(engine.compute_zvcf(q), pin_zvcf, atol=1e-9, rtol=0)

@@ -554,7 +554,7 @@ with $\epsilon_{toe} \approx 0.033$ (3.3% strain at the toe region transition).
 
 The time delay between neural excitation and muscle activation is modeled
 as a first-order differential equation (implemented in
-`src/shared/python/activation_dynamics.py`):
+`src/shared/python/biomechanics/activation_dynamics.py`):
 
 $$\dot{a} = \frac{u - a}{\tau(u, a)}$$
 
@@ -601,7 +601,7 @@ determine the fiber length and tendon length partition.
 #### A.7.1 Runge-Kutta `4th` Order (RK4)
 
 The primary integrator for ball flight simulation
-(`src/shared/python/ball_flight_physics.py`):
+(`src/shared/python/physics/ball_flight_physics.py`):
 
 $$k_1 = f(t_n, y_n)$$
 
@@ -765,7 +765,7 @@ flexible club shaft.
 | Knees          | 2   | Flexion/extension (each)                                           |
 
 **Club shaft flexibility:** Additional DOF from modal or finite element
-shaft model (see `src/shared/python/flexible_shaft.py`):
+shaft model (see `src/shared/python/physics/flexible_shaft.py`):
 
 - Modal model: 2-4 mode shapes (bending modes)
 - FE model: $2 \times n_{nodes}$ DOF (deflection + rotation per node)
@@ -838,7 +838,7 @@ mesh-based collision and visualization geometries.
 ## Appendix C: Golf Ball Physics
 
 This appendix documents the ball flight model implemented in
-`src/shared/python/ball_flight_physics.py` and the aerodynamics module.
+`src/shared/python/physics/ball_flight_physics.py` and the aerodynamics module.
 
 ---
 

@@ -261,8 +261,8 @@
     "realtime": {
       "ruling": "split",
       "status": "pending-cleanup",
-      "rationale": "Tools now owns the persistent file transport ported for UD #8942. UD still owns the publish/subscribe facade, channel registry, protocol and WebSocket integration; its __init__.py exports a different API and cannot be replaced by the Tools package initializer. The two transport_file.py implementations differ in handle lifetime, polling and incremental reads. Preserve the current UD API until the #8942 migration qualifies transport behavior and a facade-compatible import route; no retirement is claimed by provider update #9912.",
-      "follow_up": "D-sorganization/UpstreamDrift#8942"
+      "rationale": "Tools owns standalone FileTransport (Tools #5090, UD #8942). UD retains canonical ownership of the publish/subscribe facade, channel registry, protocol, and WebSocket integration per ADR-0061 (#12046); the two transport_file.py implementations differ in handle lifetime, polling, and incremental reads. No retirement is claimed.",
+      "follow_up": "docs/adr/0061-realtime-provider-split-ruling.md"
     },
     "theme": {
       "ruling": "split",

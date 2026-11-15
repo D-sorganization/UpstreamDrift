@@ -55,3 +55,24 @@ test re-picks material floors (0.01 rad, 1.0 rad/s) plus own-grid separation
 factors instead of the pre-#13799 absolute 0.1 rad / 10 rad/s ceilings.
 Further changes need a fresh measurement on current `main`, not blind threshold
 widening.
+
+## Slice 3 — Optional-Stack Launcher Processes API Mock Contract (Mechanical)
+
+Commit #14956 (`Part of #14949`) updated `LauncherService.get_running_processes()`
+in `src/api/services/launcher_service.py` to prefer
+`process_manager.list_processes()` when callable, which broke un-spec'd
+`MagicMock` `ProcessManager` fixtures in `tests/api/test_launcher_launch_api.py`
+and `tests/unit/api/services/test_launcher_service.py` (an auto-created
+`MagicMock.list_processes()` returned an empty iterable and shadowed
+`running_processes`), causing 5 Optional Stack API test failures in
+`TestProcessesEndpoint` and `TestLaunchLifecycle`.
+
+**Fix & regression lock:**
+
+- `LauncherService.get_running_processes()` only ingests sequence rows from
+  `list_processes()` whose `slot_name` is a `str`, and populates any remaining
+  entries from `running_processes` without re-polling slots already returned by
+  `list_processes()`.
+- Regression coverage in `tests/unit/api/test_launcher_service_processes_14227.py`
+  and existing tests in `tests/api/test_launcher_launch_api.py` and
+  `tests/unit/api/services/test_launcher_service.py`.

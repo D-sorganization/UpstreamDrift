@@ -54,7 +54,7 @@ organized alphabetically.
 ### Technical Terms
 
 **Activation dynamics**
-: The time-dependent process by which neural excitation signals are transformed into muscle activation levels. Modeled as a first-order ODE with asymmetric time constants for activation (~10 ms) and deactivation (~40 ms). See `src/shared/python/activation_dynamics.py` and Appendix A.6.8.
+: The time-dependent process by which neural excitation signals are transformed into muscle activation levels. Modeled as a first-order ODE with asymmetric time constants for activation (~10 ms) and deactivation (~40 ms). See `src/shared/python/biomechanics/activation_dynamics.py` and Appendix A.6.8.
 
 **Admittance control**
 : A control paradigm where the controller accepts force inputs and produces motion outputs. The robot behaves as if it has a specified mass-spring-damper system: $F_{ext} = M_d \ddot{x} + D_d \dot{x} + K_d x$. Complementary to impedance control.
@@ -105,7 +105,7 @@ organized alphabetically.
 : The horizontal orientation of the club face at impact, relative to the target line. Open (pointing right of target for right-handed), closed (pointing left), or square.
 
 **Flexible shaft model**
-: A model that accounts for golf club shaft bending during the swing. UpstreamDrift supports three approaches: rigid (no flex), modal (2-4 bending mode shapes), and finite element (beam elements with 2 DOF per node). See `src/shared/python/flexible_shaft.py`.
+: A model that accounts for golf club shaft bending during the swing. UpstreamDrift supports three approaches: rigid (no flex), modal (2-4 bending mode shapes), and finite element (beam elements with 2 DOF per node). See `src/shared/python/physics/flexible_shaft.py`.
 
 **Force closure**
 : A contact configuration where the contact forces can resist any external wrench. Requires contacts that can generate forces in enough independent directions.
@@ -257,7 +257,7 @@ organized alphabetically.
 : The principle that components should be independent -- changing one should not affect others. In UpstreamDrift, physics engines, analysis modules, and the API layer are orthogonal: each can be modified independently.
 
 **PhysicalConstant**
-: A custom `float` subclass in UpstreamDrift that carries unit, source citation, and description metadata alongside the numeric value. Defined in `src/shared/python/physics_constants.py`.
+: A custom `float` subclass in UpstreamDrift that carries unit, source citation, and description metadata alongside the numeric value. Defined in `src/shared/python/core/physics_constants.py`.
 
 **Structured logging**
 : A logging approach where log entries are machine-parsable (typically JSON) with typed fields rather than free-form text. UpstreamDrift uses `structlog` for all logging.

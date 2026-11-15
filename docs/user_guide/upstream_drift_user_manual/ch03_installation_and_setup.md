@@ -385,7 +385,7 @@ make test-unit
 make test
 
 # Specific test category
-pytest tests/physics_validation/ -v --tb=short
+pytest tests/unit/physics/ -v --tb=short
 ```
 
 ### Checking System Health
@@ -409,7 +409,7 @@ python scripts/check_system_health.py
   xvfb-run python launch_upstream_drift.py
   xvfb-run pytest tests/ -v
   ```
-- **WSL (Windows Subsystem for Linux)**: Refer to `docs/wsl_setup.md` for
+- **WSL (Windows Subsystem for Linux)**: Refer to `docs/development/wsl_setup.md` for
   WSL-specific configuration including display forwarding.
 
 ### macOS
