@@ -78,6 +78,8 @@ export interface PhysicalGripPicks {
   preset?: GripPreset;
   lead_shaft_rotation?: number;
   trail_shaft_rotation?: number;
+  lead_shaft_roll?: number;
+  trail_shaft_roll?: number;
   lead_palm_diagonal?: number;
   trail_palm_diagonal?: number;
   lead_set_angle?: number;
@@ -108,6 +110,8 @@ const NON_STYLE_PHYSICAL_KEYS: ReadonlyArray<keyof PhysicalGripPicks> = [
   'preset',
   'lead_shaft_rotation',
   'trail_shaft_rotation',
+  'lead_shaft_roll',
+  'trail_shaft_roll',
   'lead_palm_diagonal',
   'trail_palm_diagonal',
   'lead_set_angle',
