@@ -15,6 +15,15 @@ import numpy.typing as npt
 
 Array = npt.NDArray[np.float64]
 
+# G1 ``pelvis_yaw_error_pct`` gate (5%) maps to 4.5° via this fixed reference so the
+# metric does not tighten when the capture frame's target heading approaches zero (#15015).
+PELVIS_YAW_ERROR_REFERENCE_DEG = 90.0
+
+
+def pelvis_yaw_error_pct_from_diff_deg(diff_deg: float) -> float:
+    """Map wrapped yaw error (degrees) to a rotation-invariant percentage."""
+    return float(abs(diff_deg) / PELVIS_YAW_ERROR_REFERENCE_DEG * 100.0)
+
 
 @dataclass(frozen=True)
 class PelvisYawMetrics:
@@ -90,7 +99,7 @@ def compute_pelvis_yaw_metrics(
     yaw_pred = float(np.degrees(np.arctan2(v_p[1], v_p[0])))
     yaw_target = float(np.degrees(np.arctan2(v_t[1], v_t[0])))
     diff_deg = float((yaw_pred - yaw_target + 180.0) % 360.0 - 180.0)
-    error_pct = float(abs(diff_deg) / max(abs(yaw_target), 1.0) * 100.0)
+    error_pct = pelvis_yaw_error_pct_from_diff_deg(diff_deg)
 
     return PelvisYawMetrics(
         yaw_pred_deg=yaw_pred,
