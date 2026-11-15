@@ -52,7 +52,7 @@ def skinning_defects(
     joint (see :func:`skinning.flipped_face_ids`); ``flipped_area_fraction``
     is their share of the skin area.
     """
-    asset, transforms = _audit_parts(result)
+    asset, transforms, _ = _audit_parts(result)
     posed = pose_vertices(asset, transforms)
     flipped = flipped_face_ids(asset, transforms, posed)
     areas = face_areas(posed, asset.faces)
@@ -71,22 +71,21 @@ def skinning_residual_m(result: HandVisualResult) -> float:
     Zero (to rounding) proves the hand was posed by joint rotation alone:
     no vertex was pushed, clamped or inflated after skinning.
     """
-    asset, transforms = _audit_parts(result)
-    frame = result.frame_from_rest
+    asset, transforms, frame = _audit_parts(result)
     expected = pose_vertices(asset, transforms) @ frame[:3, :3].T + frame[:3, 3]
     return float(np.abs(expected - result.mesh.vertices).max())
 
 
 def _audit_parts(
     result: HandVisualResult,
-) -> tuple[SkinnedHandAsset, NDArray[np.float64]]:
+) -> tuple[SkinnedHandAsset, NDArray[np.float64], NDArray[np.float64]]:
     if (
         result.rest_asset is None
         or result.bone_transforms is None
         or result.frame_from_rest is None
     ):
         raise ValueError("result carries no skinning audit data")
-    return result.rest_asset, result.bone_transforms
+    return result.rest_asset, result.bone_transforms, result.frame_from_rest
 
 
 def anthropometric_ratios(
@@ -175,10 +174,10 @@ def forearm_spread_deg(first: HandVisualResult, second: HandVisualResult) -> flo
     """Angle between the two forearms seen along the shaft (from the butt)."""
 
     def proximal(result: HandVisualResult) -> NDArray[np.float64]:
-        asset, transforms = _audit_parts(result)
+        asset, transforms, frame = _audit_parts(result)
         i = asset.bone_index("forearm")
         bone = asset.bone_heads[i] - asset.bone_tails[i]
-        direction = result.frame_from_rest[:3, :3] @ transforms[i][:3, :3] @ bone
+        direction = frame[:3, :3] @ transforms[i][:3, :3] @ bone
         flat = direction[:2]
         return flat / np.linalg.norm(flat)
 

@@ -18,6 +18,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -119,8 +120,8 @@ class SkinnedHumanSettings:
         return math.radians(low), math.radians(high)
 
 
-def _pair(raw: object, name: str) -> tuple[float, float]:
-    values = tuple(float(x) for x in raw)  # type: ignore[union-attr]
+def _pair(raw: Any, name: str) -> tuple[float, float]:
+    values = tuple(float(x) for x in raw)
     if len(values) != 2 or not all(math.isfinite(v) for v in values):
         raise ValueError(f"{name} must be two finite numbers")
     if values[0] > values[1]:
@@ -128,24 +129,24 @@ def _pair(raw: object, name: str) -> tuple[float, float]:
     return values[0], values[1]
 
 
-def _unit_interval(value: object, name: str) -> float:
-    number = float(value)  # type: ignore[arg-type]
+def _unit_interval(value: Any, name: str) -> float:
+    number = float(value)
     if not 0.0 <= number <= 1.0:
         raise ValueError(f"{name} must be in [0, 1]")
     return number
 
 
-def settings_from_mapping(raw: Mapping[str, object]) -> SkinnedHumanSettings:
+def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
     """Validate a settings mapping. Raises ``ValueError``/``KeyError`` if bad."""
-    rgb = tuple(_unit_interval(x, "skin_rgb") for x in raw["skin_rgb"])  # type: ignore[union-attr]
+    rgb = tuple(_unit_interval(x, "skin_rgb") for x in raw["skin_rgb"])
     if len(rgb) != 3:
         raise ValueError("skin_rgb must be three numbers in [0, 1]")
-    anthro: Mapping = raw["anthropometry"]  # type: ignore[assignment]
-    place: Mapping = raw["placement"]  # type: ignore[assignment]
-    pre: Mapping = raw["preshape"]  # type: ignore[assignment]
-    curl: Mapping = raw["curl"]  # type: ignore[assignment]
-    thumb: Mapping = raw["thumb"]  # type: ignore[assignment]
-    pair: Mapping = raw["pair"]  # type: ignore[assignment]
+    anthro: Mapping = raw["anthropometry"]
+    place: Mapping = raw["placement"]
+    pre: Mapping = raw["preshape"]
+    curl: Mapping = raw["curl"]
+    thumb: Mapping = raw["thumb"]
+    pair: Mapping = raw["pair"]
     passes = int(curl["arch_passes"])
     if passes < 1:
         raise ValueError("arch_passes must be at least 1")
@@ -201,8 +202,8 @@ def settings_from_mapping(raw: Mapping[str, object]) -> SkinnedHumanSettings:
             (
                 side,
                 (
-                    float(raw["wrist"][side]["extension_deg"]),  # type: ignore[index]
-                    float(raw["wrist"][side]["ulnar_deviation_deg"]),  # type: ignore[index]
+                    float(raw["wrist"][side]["extension_deg"]),
+                    float(raw["wrist"][side]["ulnar_deviation_deg"]),
                 ),
             )
             for side in ("lead", "trail")
@@ -210,7 +211,7 @@ def settings_from_mapping(raw: Mapping[str, object]) -> SkinnedHumanSettings:
     )
 
 
-def load_settings_mapping() -> dict[str, object]:
+def load_settings_mapping() -> dict[str, Any]:
     """The raw settings JSON (for callers that override a few values)."""
     if not SETTINGS_PATH.is_file():
         raise ValueError(f"missing settings: {SETTINGS_PATH}")
@@ -724,10 +725,10 @@ def _solve_right_hand(
     if given is not None:
         arch = {k: float(given.get(k, 0.0)) for k in arch}
         _seat_flat_hand(hand, targets, grip, arch, other)
-        angles = {**_straight_angles(), **{k: float(v) for k, v in given.items()}}
-        _aim_thumb(hand, targets, angles, grip_radius_m)
+        posed = {**_straight_angles(), **{k: float(v) for k, v in given.items()}}
+        _aim_thumb(hand, targets, posed, grip_radius_m)
         _bend_wrist(hand, side)
-        return _SolvedHand(hand, angles, _segment_gaps(hand, angles, obstacle), targets)
+        return _SolvedHand(hand, posed, _segment_gaps(hand, posed, obstacle), targets)
     chains = _finger_chains(settings)
     angles: dict[str, float] = {}
     for _ in range(settings.arch_passes):

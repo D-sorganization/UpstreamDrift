@@ -27,6 +27,7 @@ import hashlib
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -87,7 +88,7 @@ def _unit(v: np.ndarray) -> np.ndarray:
     return v / norm
 
 
-def load_settings() -> dict[str, object]:
+def load_settings() -> dict[str, Any]:
     return json.loads(SETTINGS.read_text(encoding="utf-8"))
 
 
@@ -252,7 +253,7 @@ def _cap_boundaries(
 
 
 def _smooth_thumb_web(
-    weights: np.ndarray, tris: np.ndarray, smoothing: dict[str, object]
+    weights: np.ndarray, tris: np.ndarray, smoothing: dict[str, Any]
 ) -> np.ndarray:
     """Blend the skin weights across the web between thumb and index.
 
@@ -396,7 +397,7 @@ def main() -> int:
             )
         print("hand_cc0.npz matches the MakeHuman source" if same else "MISMATCH")  # noqa: T201
         return 0 if same else 1
-    np.savez_compressed(OUT, **arrays)
+    np.savez_compressed(OUT, **arrays)  # type: ignore[arg-type]
     write_provenance(arrays)
     print(  # noqa: T201
         f"wrote {OUT.name}: {len(arrays['vertices'])} vertices, "
