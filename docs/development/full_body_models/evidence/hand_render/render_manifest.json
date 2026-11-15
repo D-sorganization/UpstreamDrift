@@ -155,9 +155,9 @@
       "backend": "capsule",
       "engine": "egl",
       "file": "capsule_lead_butt_rollm20.png",
-      "fill_fraction": 0.6992,
+      "fill_fraction": 0.6807,
       "roll_deg": -20.0,
-      "sha256": "6a725317a60463b5d7a6cf2fba8cc0ed4c45e4a9567203c4d8f77b8450a81cad",
+      "sha256": "0b4e4691f0cf7f1af4ad8fba7dfc47f035abed231c6bd929f90da6d5d80e4504",
       "side": "lead",
       "view": "butt"
     },
@@ -165,9 +165,9 @@
       "backend": "capsule",
       "engine": "egl",
       "file": "capsule_lead_butt_rollp00.png",
-      "fill_fraction": 0.6992,
+      "fill_fraction": 0.6787,
       "roll_deg": 0.0,
-      "sha256": "4b83c904bab73736ff8931da96ce4143cc0b747adaa97043e1ce8feaca7f6936",
+      "sha256": "fdb84e7f4a6790389a62c8363fe46f3116ba5213661e51070b623a4e07c8c99d",
       "side": "lead",
       "view": "butt"
     },
@@ -175,9 +175,9 @@
       "backend": "capsule",
       "engine": "egl",
       "file": "capsule_lead_butt_rollp20.png",
-      "fill_fraction": 0.6992,
+      "fill_fraction": 0.6787,
       "roll_deg": 20.0,
-      "sha256": "9b2920d400912cadc630d461096cb7b3831d310d3f49d78fd37a1639c008d554",
+      "sha256": "e18d9e0e8519dc5e69380a045f63d5a29610fd39c67d31c55390fee45f3dcc75",
       "side": "lead",
       "view": "butt"
     },
@@ -337,7 +337,7 @@
       "file": "capsule_trail_butt_rollm20.png",
       "fill_fraction": 0.6992,
       "roll_deg": -20.0,
-      "sha256": "4b28862fc6c3909e6845e423e872e0b8ec125b1461896423e76452dfa3e7b78a",
+      "sha256": "0d41017d3d3e86cd64c7c690e120c067bdef73c5c48c24e6cfd275a6f848ed90",
       "side": "trail",
       "view": "butt"
     },
@@ -347,7 +347,7 @@
       "file": "capsule_trail_butt_rollp00.png",
       "fill_fraction": 0.6992,
       "roll_deg": 0.0,
-      "sha256": "24daf66134911473035a10c581bdef4880a95859e1d88f401a2f98944245bfca",
+      "sha256": "159dfdbcecf6b3341fa4f721cbe9722d8b998e3294c7540521a8324eedc3a124",
       "side": "trail",
       "view": "butt"
     },
@@ -357,7 +357,7 @@
       "file": "capsule_trail_butt_rollp20.png",
       "fill_fraction": 0.6992,
       "roll_deg": 20.0,
-      "sha256": "d8866ce827556b56391423cb1ba67b40e4a7bbc154a72d50e7ed51452d672dea",
+      "sha256": "bc09d6a41f1d0fc9be88c668c22bda260350a8170bd682315c074ed78e3de8ca",
       "side": "trail",
       "view": "butt"
     },
@@ -435,9 +435,9 @@
       "backend": "capsule",
       "engine": "egl",
       "file": "capsule_both_butt_rollp00.png",
-      "fill_fraction": 0.6992,
+      "fill_fraction": 0.6855,
       "roll_deg": 0.0,
-      "sha256": "80dfb5f3535f78d3041c9fc432cfb0748de695d4bb7d3e981324066e9e94c42e",
+      "sha256": "ba5ef37cdf45c3b8a5c2fc36050f2012587857b71c1e795f46673d72288225b1",
       "side": "both",
       "view": "butt"
     },
@@ -513,5 +513,5 @@
     "subject": "the renderer, using the in-repo capsule hand as the only source"
   },
   "settings_file": "scripts/config/hand_render.json",
-  "settings_hash": "9c6087f506dad96fd792cd5034fd89fe64ab832107d4132d07f2f21823729fe6"
+  "settings_hash": "c5720839e61d461da517811b7c66826912f5a95d0c92aeaf50d4967c73df88ff"
 }

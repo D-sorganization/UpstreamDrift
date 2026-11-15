@@ -2,7 +2,7 @@
 
 Refs #15150 (epic). Auto-merge is not armed, on the owner's instruction.
 
-### State at `8b590d9cf5` (2026-11-15)
+### State at `49d64f9e57` plus re-rendered butt frames (2026-11-15)
 
 - One renderer for every hand backend: headless MuJoCo (EGL, then OSMesa), with a matplotlib fallback that is not quality-bar evidence.
 - Views: palm, back, thumb side, pinky side, butt and eye, named relative to the hand so lead and trail keep the same names.
@@ -34,7 +34,7 @@ The capsule hand in these pictures is the crude in-repo source. It tests the ren
 - **`render_view` rolls the skin itself.** A backend that already applies shaft roll (the skinned hand does) must call `render_scene` with its own mesh and basis, or the roll is applied twice.
 - **Shadows are off.** MuJoCo shadow maps showed acne at this scale.
 - **No golden-image test.** Tests check fill, engine choice, normals and repeatability, not a reference picture.
-- **Butt view.** The camera sits close to the butt end, so the grip's end cap covers much of the frame. It needs a longer lens or a slightly off-axis eye; both are view settings.
+- **Butt view (fixed this round).** It looked straight down the shaft, so the grip's end cap hid the hand. The eye is now tilted to the palm side (`views.butt.eye` = `(0, -0.55, -0.83)`), which shows the fingers wrapping and the heel of the hand on the grip. The grip end still crosses part of the frame. Only the seven butt frames changed in the re-render.
 - **Fill is a bounding-box side, not an area.** I chose to fix what the box is fitted to (the hand) and did not add an area measure: no hand can cover 70 % of the frame's area without being cropped.
 
 ## Learnings
@@ -45,11 +45,13 @@ The capsule hand in these pictures is the crude in-repo source. It tests the ren
 - Headless rendering needs `MUJOCO_GL=egl` and no `DISPLAY`. The engine makes its own context, so it works even if MuJoCo is already bound to GLFW.
 - Crease-aware normals: corners whose face normals differ by more than the crease angle are not averaged. Smooth skin and crisp block edges come from the same code.
 - Fit the camera to the hand, not to everything skin-coloured. A backend with a forearm stub should set `frame_focus` (a boolean mask per vertex) on its result or pass `focus=` on its `ScenePart`.
+- A view straight along the shaft shows the end cap, not the hand. Tilt the butt view to the palm side; a test now requires the tilt, so it cannot drift back.
+- A test fixture that offsets a stub along one fixed direction can vanish into the distance in a new view. Offset it toward the camera side of every required view.
 - Fill measured on the longer bounding-box side still overstates how big a diagonal hand looks.
 
 ### Next Steps
 
-1. Give the butt view a longer lens or an off-axis eye so the hand is not hidden by the grip's end cap.
+1. Judge the tilted butt view on the other backends and adjust the tilt if one of them hides the palm.
 2. Draw the shaft in every view by extending the club toward the head inside the frame.
 3. Try contact shadows again with a tighter light frustum.
 4. Add a contact-sheet mode that tiles every registered backend at one view and roll.
