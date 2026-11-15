@@ -226,7 +226,7 @@ def _capture(
 
     try:
         context_type = importlib.import_module(f"mujoco.{backend}").GLContext
-    except Exception as exc:  # noqa: BLE001 - PyOpenGL raises many types here
+    except (ImportError, AttributeError, RuntimeError, OSError) as exc:
         raise GLUnavailableError(
             f"cannot load the {backend!r} GL platform in this process: {exc}"
         ) from exc

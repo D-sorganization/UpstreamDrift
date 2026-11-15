@@ -151,7 +151,7 @@ def as_mesh(mesh: Any) -> Mesh:
 
 
 def _rgba(value: Any, name: str) -> Rgba:
-    arr = np.asarray(value, dtype=float).reshape(-1)
+    arr: NDArray[np.float64] = np.asarray(value, dtype=float).reshape(-1)
     if arr.size == 3:
         arr = np.append(arr, 1.0)
     if arr.size != 4 or not np.isfinite(arr).all() or arr.min() < 0 or arr.max() > 1:
@@ -275,9 +275,10 @@ def build_club_parts(
         raise ValueError("the grip needs a positive length; raise the margin")
     head = rubber_end + settings.shaft_extension_m
     sides = settings.club_sides
-    grip = tapered_tube((0, 0, butt), (0, 0, rubber_end), radius, radius, sides)
+    ends = [np.array([0.0, 0.0, z]) for z in (butt, rubber_end, head)]
+    grip = tapered_tube(ends[0], ends[1], radius, radius, sides)
     shaft_r = settings.shaft_radius_m
-    shaft = tapered_tube((0, 0, rubber_end), (0, 0, head), shaft_r, shaft_r, sides)
+    shaft = tapered_tube(ends[1], ends[2], shaft_r, shaft_r, sides)
     return (
         ScenePart(grip, settings.grip_rgba, "grip"),
         ScenePart(shaft, settings.shaft_rgba, "shaft"),
@@ -498,7 +499,7 @@ def camera_rig(
     back = _unit(basis.combine(spec.eye), f"view {view!r} eye", eps)
     up_hint = basis.combine(spec.up)
     right = _unit(np.cross(up_hint, back), f"view {view!r} up", eps)
-    up = np.cross(back, right)
+    up: Array = np.cross(back, right)
     axes = np.stack([right, up, back], axis=1)
     cam = vertices @ axes
     lo, hi = cam.min(axis=0), cam.max(axis=0)
@@ -526,7 +527,7 @@ def camera_rig(
         fov_deg=settings.fov_deg,
         distance=distance,
     )
-    ensure(distance > 0.0 and np.isfinite(rig.eye).all(), "the eye is finite")
+    ensure(bool(distance > 0.0 and np.isfinite(rig.eye).all()), "the eye is finite")
     return rig
 
 
@@ -595,7 +596,7 @@ def corner_normals(mesh: Mesh, *, weld_tolerance_m: float, crease_deg: float) ->
     keep = cosine >= math.cos(math.radians(crease_deg))
     summed = np.zeros((len(order), 3))
     np.add.at(summed, source[keep], weighted[face_b[keep]])
-    normals = np.empty_like(summed)
+    normals: NDArray[np.float64] = np.empty_like(summed)
     normals[order] = summed
     length = np.linalg.norm(normals, axis=1, keepdims=True)
     own = unit[corner_face]
