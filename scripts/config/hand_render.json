@@ -1,0 +1,229 @@
+{
+  "schema_version": 1,
+  "frame_px": 1024,
+  "fill_fraction": 0.7,
+  "fill_tolerance": 0.12,
+  "fov_deg": 28.0,
+  "frame_iterations": 12,
+  "supersample": 1,
+  "msaa_samples": 8,
+  "znear_ratio": 0.02,
+  "zfar_ratio": 2.0,
+  "backdrop_texture_px": 8,
+  "epsilon": 1e-09,
+  "grip_radius_m": 0.014,
+  "shaft_radius_m": 0.0045,
+  "grip_length_margin_m": 0.04,
+  "shaft_extension_m": 0.12,
+  "club_sides": 64,
+  "rolls_deg": [
+    -20.0,
+    0.0,
+    20.0
+  ],
+  "roll_range_deg": [
+    -180.0,
+    180.0
+  ],
+  "engine_order": [
+    "osmesa",
+    "egl",
+    "matplotlib"
+  ],
+  "gl_probe": {
+    "frame_px": 8,
+    "timeout_s": 120.0
+  },
+  "background_rgba": [
+    0.17,
+    0.18,
+    0.21,
+    1.0
+  ],
+  "skin_rgba": [
+    0.77,
+    0.56,
+    0.46,
+    1.0
+  ],
+  "grip_material": "grip_rubber",
+  "shaft_material": "satin_steel",
+  "surface": {
+    "skin": {
+      "specular": 0.1,
+      "shininess": 0.2
+    },
+    "grip": {
+      "specular": 0.45,
+      "shininess": 0.3
+    },
+    "shaft": {
+      "specular": 0.6,
+      "shininess": 0.6
+    }
+  },
+  "views": {
+    "palm": {
+      "eye": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "up": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "back": {
+      "eye": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "up": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "thumb_side": {
+      "eye": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "up": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "pinky_side": {
+      "eye": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "up": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "butt": {
+      "eye": [
+        0.0,
+        -0.55,
+        -0.83
+      ],
+      "up": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "eye": {
+      "eye": [
+        0.15,
+        0.55,
+        -0.75
+      ],
+      "up": [
+        0.0,
+        0.35,
+        1.0
+      ]
+    }
+  },
+  "lights": {
+    "key": {
+      "direction": [
+        -0.6,
+        0.65,
+        0.47
+      ],
+      "color": [
+        1.0,
+        0.97,
+        0.92
+      ],
+      "intensity": 1.0,
+      "specular": 0.6,
+      "cast_shadow": true
+    },
+    "fill": {
+      "direction": [
+        0.8,
+        -0.15,
+        0.5
+      ],
+      "color": [
+        0.82,
+        0.88,
+        1.0
+      ],
+      "intensity": 0.3,
+      "specular": 0.0,
+      "cast_shadow": false
+    },
+    "rim": {
+      "direction": [
+        0.45,
+        0.5,
+        -0.74
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "intensity": 0.75,
+      "specular": 0.5,
+      "cast_shadow": false
+    }
+  },
+  "ambient_rgb": [
+    0.1,
+    0.1,
+    0.11
+  ],
+  "wrap": 0.45,
+  "sss_tint": [
+    0.55,
+    0.18,
+    0.12
+  ],
+  "sss_strength": 0.22,
+  "shadows": false,
+  "shadow_map_px": 4096,
+  "basis": {
+    "outer_radius_quantile": 0.5,
+    "thumb_height_quantile": 0.9
+  },
+  "normal_weld_tolerance_m": 1e-06,
+  "luminance_weights": [
+    0.2126,
+    0.7152,
+    0.0722
+  ],
+  "min_luminance_std": 0.04,
+  "golden_px": 64,
+  "perceptual_mae_max": 0.06,
+  "matplotlib": {
+    "dpi": 128.0,
+    "edge_width": 0.3
+  },
+  "sheet": {
+    "cell_px": 512,
+    "label_height_px": 44,
+    "label_font_px": 26,
+    "margin_px": 12,
+    "label_rgb": [
+      235,
+      235,
+      240
+    ]
+  },
+  "normal_crease_deg": 60.0
+}

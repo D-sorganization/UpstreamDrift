@@ -1,0 +1,517 @@
+{
+  "contact_sheets": [
+    {
+      "engine": "egl",
+      "file": "contact_sheet_lead_palm.png",
+      "rolls_deg": [
+        -20.0,
+        0.0,
+        20.0
+      ],
+      "sha256": "f65a299f3567d3f47e8a3b0b9d57c0eeee0a114bd044bef255c0afd5685ef36e",
+      "side": "lead",
+      "view": "palm"
+    },
+    {
+      "engine": "egl",
+      "file": "contact_sheet_trail_palm.png",
+      "rolls_deg": [
+        -20.0,
+        0.0,
+        20.0
+      ],
+      "sha256": "9d0a31081022f097043aeaf82d52c6e09a58eedd4cad55178cf80c60c4cf9cf5",
+      "side": "trail",
+      "view": "palm"
+    }
+  ],
+  "engines": [
+    "egl"
+  ],
+  "fill_fraction_target": 0.7,
+  "frame_px": 1024,
+  "frames": [
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_palm_rollm20.png",
+      "fill_fraction": 0.6885,
+      "roll_deg": -20.0,
+      "sha256": "d597ae609f0893040ed27b536b858d8adba94282ca73c289a73ce6716bfdf629",
+      "side": "lead",
+      "view": "palm"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_palm_rollp00.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 0.0,
+      "sha256": "9835505ecb7301fac9de6858df52f90845293a836d13ee14d2ba446decf82dce",
+      "side": "lead",
+      "view": "palm"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_palm_rollp20.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 20.0,
+      "sha256": "067b9ef562e70eefb3f08d071511f2a633100ecac9fcf2449776cee2acb4db55",
+      "side": "lead",
+      "view": "palm"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_back_rollm20.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": -20.0,
+      "sha256": "39b0b68fb7fb390f8e5fa17045caaaf6e26b76f3db123cd25b1eedeb27b7059c",
+      "side": "lead",
+      "view": "back"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_back_rollp00.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 0.0,
+      "sha256": "eee447065ac7804d2766e5e37c5f225a27fc28399940086630739f98a62f723e",
+      "side": "lead",
+      "view": "back"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_back_rollp20.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 20.0,
+      "sha256": "80ff6c860218a5ff82a69a21c4e88c98918f0827506e21a0eddd5f84e6d05709",
+      "side": "lead",
+      "view": "back"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_thumb_side_rollm20.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": -20.0,
+      "sha256": "ff936ff17d459d9120e9ffb6a9481c3401c4f9f7cc1eb9ab3d05bc50172b2312",
+      "side": "lead",
+      "view": "thumb_side"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_thumb_side_rollp00.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 0.0,
+      "sha256": "9f227b93040a7379225315d03062df910f86bd4356e7f300bc2e34a77dc11163",
+      "side": "lead",
+      "view": "thumb_side"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_thumb_side_rollp20.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 20.0,
+      "sha256": "0ad7bef2acc4bbe10b8cae8c882c4d8eeb9c18f30949aee8ab9df1e1e61abd94",
+      "side": "lead",
+      "view": "thumb_side"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_pinky_side_rollm20.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": -20.0,
+      "sha256": "e13646e5f3d0d4dcaab6121836d2b31766c79e04c6709748f6b2589811c783f5",
+      "side": "lead",
+      "view": "pinky_side"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_pinky_side_rollp00.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 0.0,
+      "sha256": "29c989c73a68edf16465de4ec898cc08e3aaa49fe487bf5b6972a8b545971ef1",
+      "side": "lead",
+      "view": "pinky_side"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_pinky_side_rollp20.png",
+      "fill_fraction": 0.6904,
+      "roll_deg": 20.0,
+      "sha256": "a37a8f66f2a1c06ddb7b1d2751d8b754b170a9e90510ce4fc135d706b005bce0",
+      "side": "lead",
+      "view": "pinky_side"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_butt_rollm20.png",
+      "fill_fraction": 0.6807,
+      "roll_deg": -20.0,
+      "sha256": "0b4e4691f0cf7f1af4ad8fba7dfc47f035abed231c6bd929f90da6d5d80e4504",
+      "side": "lead",
+      "view": "butt"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_butt_rollp00.png",
+      "fill_fraction": 0.6787,
+      "roll_deg": 0.0,
+      "sha256": "fdb84e7f4a6790389a62c8363fe46f3116ba5213661e51070b623a4e07c8c99d",
+      "side": "lead",
+      "view": "butt"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_butt_rollp20.png",
+      "fill_fraction": 0.6787,
+      "roll_deg": 20.0,
+      "sha256": "e18d9e0e8519dc5e69380a045f63d5a29610fd39c67d31c55390fee45f3dcc75",
+      "side": "lead",
+      "view": "butt"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_eye_rollm20.png",
+      "fill_fraction": 0.6611,
+      "roll_deg": -20.0,
+      "sha256": "8cb917569ac2de4a653ad8097584bdc770e6fe7cb644904097cb185444eb0a57",
+      "side": "lead",
+      "view": "eye"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_eye_rollp00.png",
+      "fill_fraction": 0.6895,
+      "roll_deg": 0.0,
+      "sha256": "296336675be0b62dd6c8519c216f93da1622ed4f04e0d7da4928471e9bb5c383",
+      "side": "lead",
+      "view": "eye"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_lead_eye_rollp20.png",
+      "fill_fraction": 0.6982,
+      "roll_deg": 20.0,
+      "sha256": "39ca5ab6d360b69bd32599c10c4b189bd730ce9127ff708cb0c8cb1718425a0e",
+      "side": "lead",
+      "view": "eye"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_palm_rollm20.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": -20.0,
+      "sha256": "f6590c3a230dee56fa78d8f1477dc2e33c3591d41b15902a3d31e55ef721af51",
+      "side": "trail",
+      "view": "palm"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_palm_rollp00.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 0.0,
+      "sha256": "3a81ee024437065008d5f1642a044b5c5a68e972ab85de47b980de62a60f3041",
+      "side": "trail",
+      "view": "palm"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_palm_rollp20.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 20.0,
+      "sha256": "d81fa223f975f9fbc0daa1453b810b6a1dd2708947e24cc385f0a396a0f4519e",
+      "side": "trail",
+      "view": "palm"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_back_rollm20.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": -20.0,
+      "sha256": "7e91974fc2486bb8a147503e71f4f4bae55d0ec9f3ac02e8f26c20eed0fb6611",
+      "side": "trail",
+      "view": "back"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_back_rollp00.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 0.0,
+      "sha256": "e66b8b97b728d8b2499f44f150c66f7dfb2a53d68a2ad7233f36a84293d0a82d",
+      "side": "trail",
+      "view": "back"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_back_rollp20.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 20.0,
+      "sha256": "bdb613f217dc0ca8b7f1322f9e323dbebe06e5b0f2b16d526588c4d813479732",
+      "side": "trail",
+      "view": "back"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_thumb_side_rollm20.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": -20.0,
+      "sha256": "994b778ec51cba33898e12a702c38d58915f85d617dc2bfc6ccd215f44714b39",
+      "side": "trail",
+      "view": "thumb_side"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_thumb_side_rollp00.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 0.0,
+      "sha256": "cddccc3a0057fdd310db6476a5b183692d370c8d3aaa37818353e78ddcbecd9d",
+      "side": "trail",
+      "view": "thumb_side"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_thumb_side_rollp20.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 20.0,
+      "sha256": "d4fc3421f8460676483a9976fbc74dacc1dc7045122756c583e1dafe3ffcff6d",
+      "side": "trail",
+      "view": "thumb_side"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_pinky_side_rollm20.png",
+      "fill_fraction": 0.6445,
+      "roll_deg": -20.0,
+      "sha256": "7d463171ebec93996c571077f18feac759efe10ea6f674d674da306db50dc328",
+      "side": "trail",
+      "view": "pinky_side"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_pinky_side_rollp00.png",
+      "fill_fraction": 0.6484,
+      "roll_deg": 0.0,
+      "sha256": "439da3bd5cfe022c61cead39ea7d70833aafffe9200e049106bf8eac763498a9",
+      "side": "trail",
+      "view": "pinky_side"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_pinky_side_rollp20.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 20.0,
+      "sha256": "41203c09b600738637e21b2dfb61c6e5a9c94b55ad3c0b7f6048bfc542763183",
+      "side": "trail",
+      "view": "pinky_side"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_butt_rollm20.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": -20.0,
+      "sha256": "0d41017d3d3e86cd64c7c690e120c067bdef73c5c48c24e6cfd275a6f848ed90",
+      "side": "trail",
+      "view": "butt"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_butt_rollp00.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 0.0,
+      "sha256": "159dfdbcecf6b3341fa4f721cbe9722d8b998e3294c7540521a8324eedc3a124",
+      "side": "trail",
+      "view": "butt"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_butt_rollp20.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 20.0,
+      "sha256": "bc09d6a41f1d0fc9be88c668c22bda260350a8170bd682315c074ed78e3de8ca",
+      "side": "trail",
+      "view": "butt"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_eye_rollm20.png",
+      "fill_fraction": 0.6816,
+      "roll_deg": -20.0,
+      "sha256": "fefe157350eeb79e28a334f9fd651ec6081e1b058ce32a092377947084c25cc0",
+      "side": "trail",
+      "view": "eye"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_eye_rollp00.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 0.0,
+      "sha256": "a89a6453413ade666999141dc801c9821116e9075931ffcc5af976b9c86482eb",
+      "side": "trail",
+      "view": "eye"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_trail_eye_rollp20.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 20.0,
+      "sha256": "d66fa103cafa1a0a26227ab12e716db48838ab1c4ecc39bbb330a2443232e56b",
+      "side": "trail",
+      "view": "eye"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_both_palm_rollp00.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 0.0,
+      "sha256": "981b11f220bd671506b264afc1320c8e9484d427b19a75779709af54d0e18055",
+      "side": "both",
+      "view": "palm"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_both_back_rollp00.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 0.0,
+      "sha256": "ad103ff531cc1eba29cc882d00b21c635c7525f910d5a11b613a7de40d0f6229",
+      "side": "both",
+      "view": "back"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_both_thumb_side_rollp00.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 0.0,
+      "sha256": "c2d3f060c5f5a350712197750c8e564e927cf83acad68787aef3bc9ce54b8839",
+      "side": "both",
+      "view": "thumb_side"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_both_pinky_side_rollp00.png",
+      "fill_fraction": 0.6992,
+      "roll_deg": 0.0,
+      "sha256": "2c1b1057ae0f98c5f4aab0af008866f960e989d0d3322da239672ec82cfb56e2",
+      "side": "both",
+      "view": "pinky_side"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_both_butt_rollp00.png",
+      "fill_fraction": 0.6855,
+      "roll_deg": 0.0,
+      "sha256": "ba5ef37cdf45c3b8a5c2fc36050f2012587857b71c1e795f46673d72288225b1",
+      "side": "both",
+      "view": "butt"
+    },
+    {
+      "backend": "capsule",
+      "engine": "egl",
+      "file": "capsule_both_eye_rollp00.png",
+      "fill_fraction": 0.6924,
+      "roll_deg": 0.0,
+      "sha256": "6ac7779edc69517a61e72c8dffebc7625babdf43c7908f503ebcef134f399265",
+      "side": "both",
+      "view": "eye"
+    }
+  ],
+  "gl_backend": "egl",
+  "gl_errors": {
+    "osmesa": "AttributeError: 'NoneType' object has no attribute 'glGetError'"
+  },
+  "issue": 15150,
+  "kind": "hand_render_evidence",
+  "quality_bar_evidence": true,
+  "self_review": {
+    "capsule_anatomy_checklist": {
+      "cupped_palm": "fail: the capsule palm is a curved block",
+      "fingers_wrap_the_grip": "pass",
+      "knuckle_line": "fail: none modelled",
+      "no_tubes_blobs_or_torn_triangles": "fail: the capsule hand is tubes by construction; no torn triangles",
+      "note": "these lines judge the capsule source, which is known to be crude, not the renderer",
+      "separate_fingers_and_thumb": "pass"
+    },
+    "known_limits": [
+      "MuJoCo shadow maps showed acne and serrated edges at this scale, so shadows are off in settings",
+      "wrap and subsurface tint are only a warm ambient term in the MuJoCo engine",
+      "no pyrender engine",
+      "the matplotlib fallback is faceted and is not quality-bar evidence"
+    ],
+    "per_view_score_out_of_5": {
+      "back": {
+        "note": "clean gradient across the dorsum; shaft out of frame",
+        "score": 4
+      },
+      "butt": {
+        "note": "framing is right; the butt cap is a flat near-black disc; shaft hidden behind the grip",
+        "score": 3
+      },
+      "eye": {
+        "note": "grip and shaft both visible; best single view",
+        "score": 4
+      },
+      "palm": {
+        "note": "fingers across the grip read clearly; flat without contact shadows; shaft out of frame",
+        "score": 4
+      },
+      "pinky_side": {
+        "note": "same as thumb side",
+        "score": 4
+      },
+      "thumb_side": {
+        "note": "depth reads from the key and rim lights; shaft out of frame",
+        "score": 4
+      }
+    },
+    "renderer_checks": {
+      "club_visible": "partial: grip rubber in every view; the steel shaft stub is in frame only in the eye view",
+      "hand_fills_about_70_percent": "pass: measured fill 0.64 to 0.70 on the longer axis in all 42 frames",
+      "key_fill_rim_lights_no_headlight": "pass, with a limit: there are no cast shadows, so fingers lack a contact shadow on the grip",
+      "lead_and_trail_mirror": "pass: the trail fingers curl the opposite way and the views keep their names for both hands",
+      "repeat_render_byte_identical": "pass on EGL",
+      "skin_shading_smooth": "pass: no facet glitter; hard block rims stay crisp through the crease angle"
+    },
+    "reviewed_on": "2026-11-14",
+    "reviewer": "implementing agent, by opening the PNGs",
+    "subject": "the renderer, using the in-repo capsule hand as the only source"
+  },
+  "settings_file": "scripts/config/hand_render.json",
+  "settings_hash": "c5720839e61d461da517811b7c66826912f5a95d0c92aeaf50d4967c73df88ff"
+}
