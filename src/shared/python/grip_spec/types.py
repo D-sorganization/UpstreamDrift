@@ -31,6 +31,7 @@ from src.shared.python.grip_spec.defaults import (
     NEUTRAL_TRAIL_THUMB_AZIMUTH_DEG,
     SCHEMA_VERSION,
 )
+from src.shared.python.grip_spec.shaft_roll import SHAFT_ROLL_RANGE_DEG
 from src.shared.python.grip_spec.validation import (
     require_fields_in_range,
     validate_grip_style_fields,
@@ -69,6 +70,8 @@ class HandGripSpec:
     v_azimuth_deg: float = LEGACY_LEAD_V_AZIMUTH_DEG
     thumb_azimuth_deg: float = LEGACY_LEAD_THUMB_AZIMUTH_DEG
     thumb_straightness: float = 1.0
+    #: Rotation about the shaft axis (butt→head); see :mod:`grip_spec.shaft_roll`.
+    shaft_roll_deg: float = 0.0
     joint_coupling_overrides: tuple[tuple[str, float], ...] = ()
 
     def __post_init__(self) -> None:
@@ -81,6 +84,7 @@ class HandGripSpec:
                 ("thumb_straightness", 0.0, 1.0),
                 ("v_azimuth_deg", -40.0, 90.0),
                 ("thumb_azimuth_deg", -90.0, 90.0),
+                ("shaft_roll_deg", *SHAFT_ROLL_RANGE_DEG),
             ),
         )
         require(
