@@ -21,15 +21,15 @@
         },
         "generator": "src.shared.python.model_appearance.grip_hands",
         "sha256": {
-          "lead_hand": "8719448bcf8addde697484aeb0ee8a739237ada7cb5209517f76d2ef10019b27",
-          "trail_hand": "4277fd7aaa469d3160ba267aacef0fb289d2ba49dd1f7da0373444f83428ebbf"
+          "lead_hand": "3d76ed1141bde8483ad64cb65970b4d338e472d89bb65fdc90c0bafbbbf4e32a",
+          "trail_hand": "c7a5db0ca0f0b1817e1945b117725d6c38466d19aa9e9c85d7fd4dc64c5bc43a"
         }
       },
       "head_library_name": "Driver 10.5\u00b0",
-      "head_source": "tools_parametric",
+      "head_source": "committed_stl",
       "sha256": {
         "grip": "3d3497e3c6920fc697f39789b44e494322466415e13a9e505d1bb7ca0803e4dc",
-        "head": "f171d4d8d47a516bdf4485d4e926bf9c4f2c180893b65a50aa58f37d872e37b4",
+        "head": "2219a2f7d934dd671b8fbc4add7a9672ab754f8c8c58ae6c72328755e76b980a",
         "shaft": "54ff22636c0e443c544107c22b42f852381690feeac59dc694268d678fcbeeea"
       },
       "spec_sha256": "9f15a045b588770c8e3eb6e8ce37f480f10a9e755fc6daf0a8b6d50edfcdea01"
@@ -40,7 +40,7 @@
         "face_roll_deg": -48.99,
         "grip_length_m": 0.265,
         "head_alias": "iron7",
-        "length_m": 0.94,
+        "length_m": 0.95,
         "shaft_radius_m": 0.0065
       },
       "files": {
@@ -55,18 +55,18 @@
         },
         "generator": "src.shared.python.model_appearance.grip_hands",
         "sha256": {
-          "lead_hand": "5c2fcad8dfc477d2254abf3d33ee9075e3db5fa30c5aa94c13bf99c0a16acedf",
-          "trail_hand": "adcf3e366ce68d3fd12d5375fd86e0aea2a4890a8afacc1bfc6b172c1222b055"
+          "lead_hand": "77686ea7f767a5ce1a24614c3abdc61a09577fb599850b9c6137efce1e8ffb5f",
+          "trail_hand": "7dd5d3fefd0884ce3c3a42d4d7030b36d9c88d58e69140e0276b5e1202839cc1"
         }
       },
       "head_library_name": "7-Iron",
-      "head_source": "tools_parametric",
+      "head_source": "committed_stl",
       "sha256": {
-        "grip": "b2793b4abb56d89491dcb367f810993eb1b049ce3d9a36bdadd6635599a3ef6d",
-        "head": "55caa4004a6b1089f860a968053fb4b5f3ee281fac42356638d41246686dd9d0",
-        "shaft": "9bbe857b20acc00dd3ab138c3c732aa9516fefaadaa0bb0e04b7da21b485d5ff"
+        "grip": "1db1f35175ac79266f36ca27ebe07ad813e9edf489a06698780f1905ae9b7a7f",
+        "head": "fd5953c6744078d635cde7b5c255f27e750747d9903157aedc1c46add7632adf",
+        "shaft": "84dbee85d869c8b1ba066ef22f1b968c9ed1f71a28f7aa0882215c6d9295daac"
       },
-      "spec_sha256": "9a14c1ecd38e71add368371d5f7085c9104130c239073f207722f0938bbd594f"
+      "spec_sha256": "10fb3ab1996af21ad83759792cebeaac133e1b972cf334a2b2d4e6cacc1a34fa"
     }
   },
   "frame": "club body: origin at sole point on shaft axis, shaft -y",

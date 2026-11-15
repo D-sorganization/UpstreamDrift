@@ -61,7 +61,7 @@ def test_patch_lies_on_the_lead_thumb_surface() -> None:
     patch, frame, _ = _patch()
     p = _to_hand(frame, np.array(patch.point_club_m))
     params = DEFAULT_HAND_MESH_PARAMS
-    z0, _, z2 = params.thumb_stations_m
+    z0, _, z2 = params.thumb_patch_axis_stations_m
     centre = np.array(patch.thumb_axis_hand_m)
     z = np.clip(p[2], z0, z2)
     gap = (

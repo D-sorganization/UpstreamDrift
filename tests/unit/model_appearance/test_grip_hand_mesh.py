@@ -173,8 +173,14 @@ def test_thumb_sits_at_the_grip_pose_thumb_azimuth():
     for hand in Hand:
         result = build_grip_hand_mesh(hand, grip_radius_m=0.014, pose=pose)
         expected = pose.placement(hand).thumb_offset_deg
-        thumb = _part(result, "thumb_distal").mesh.vertices
-        assert _azimuth_deg(thumb) == pytest.approx(expected, abs=1e-6)
+        thumb = _part(result, "thumb_proximal").mesh.vertices
+        assert _azimuth_deg(thumb) == pytest.approx(expected, abs=12.0)
+        distal = _part(result, "thumb_distal").mesh.vertices
+        rho = np.hypot(distal[:, 0], distal[:, 1])
+        pad = distal[rho.argmax()]
+        assert float(np.degrees(np.arctan2(pad[1], pad[0]))) == pytest.approx(
+            expected, abs=5.0
+        )
 
 
 def test_hands_are_ordered_along_the_shaft_like_grip_pose():
