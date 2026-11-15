@@ -8,6 +8,10 @@ Routes a browser requests without custom headers stay open: health probes, the
 manifest that hands out the capability, tile logos (``<img>``) and the API docs
 pages. WebSocket handshakes are checked separately in ``src.api.auth.ws_auth``.
 
+Image and download routes are guarded too. The UI fetches them with the header
+and shows them from object URLs (``ui/src/api/launcherMedia.ts``), because a
+plain ``<img src>`` or ``<a href>`` request cannot carry it.
+
 Opt-out: ``UPSTREAMDRIFT_LOCAL_API_ALLOW_UNAUTHENTICATED=1`` (also ``true`` or
 ``yes``) turns the check off for loopback callers only and logs a warning at
 startup. It is meant for local debugging; leave it unset for normal use.

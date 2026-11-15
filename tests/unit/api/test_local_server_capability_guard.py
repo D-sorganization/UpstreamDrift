@@ -24,6 +24,16 @@ OPT_OUT_ENV = "UPSTREAMDRIFT_LOCAL_API_ALLOW_UNAUTHENTICATED"
 BASE_URL = "http://127.0.0.1:8000"
 GUARDED_PATHS = ("/api/engines", "/api/v1/engines", "/api/launcher/processes")
 OPEN_PATHS = ("/api/health", "/api/v1/health", "/api/launcher/manifest")
+# Images and downloads. The UI fetches these with the capability header and
+# shows them from object URLs, so they are guarded like every other route.
+MEDIA_PATHS = (
+    "/api/v1/matched-swings/run-1/animation/frames/3",
+    "/api/v1/matched-swings/run-1/report",
+    "/api/v1/necromatcher/captures/cap-1/frames/0/image",
+    "/api/v1/necromatcher/swings/swing-1/export",
+    "/api/recordings/rec-1/export",
+    "/api/diagnostics/html",
+)
 
 
 @pytest.fixture
@@ -63,6 +73,19 @@ def test_header_less_browser_routes_stay_open(app: object, path: str) -> None:
     """Page navigations and ``<img>`` requests cannot carry a custom header."""
     with TestClient(app, base_url=BASE_URL) as client:
         assert client.get(path).status_code != 403
+
+
+def test_capability_reaches_a_route_with_a_known_answer(app: object) -> None:
+    with TestClient(app, base_url=BASE_URL) as client:
+        response = client.get("/api/launcher/processes", headers={HEADER: _token(app)})
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize("path", MEDIA_PATHS)
+def test_media_and_download_routes_need_the_capability(app: object, path: str) -> None:
+    with TestClient(app, base_url=BASE_URL) as client:
+        assert client.get(path).status_code == 403
+        assert client.get(path, headers={HEADER: _token(app)}).status_code != 403
 
 
 def test_wrong_capability_is_refused(app: object) -> None:
