@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 import numpy as np
 from scipy.signal import savgol_filter
 
@@ -157,41 +158,35 @@ class SwingMetricsMixin:
         )
         return np.asarray(x_factor)
 
-    def compute_x_factor_stretch(
-        self,
-        shoulder_joint_idx: int,
-        hip_joint_idx: int,
+    def compute_x_factor_velocity(
+        self, shoulder_joint_idx: int, hip_joint_idx: int
     ) -> tuple[np.ndarray, float] | None:
-        """Compute X-Factor velocity (stretch rate) and peak stretch.
-
-        Design by Contract:
-            Postcondition:
-                - peak_stretch_rate >= 0
-
-        Args:
-            shoulder_joint_idx: Index of shoulder/torso rotation joint
-            hip_joint_idx: Index of hip rotation joint
-
-        Returns:
-            Tuple of (x_factor_velocity_array, peak_stretch_rate) or None
-        """
+        """Compute X-Factor velocity (finite difference derivative) and peak rate."""
         if shoulder_joint_idx is None:
             raise ValueError("shoulder_joint_idx must be provided")
+        if hip_joint_idx is None:
+            raise ValueError("hip_joint_idx must be provided")
+
         x_factor = self.compute_x_factor(shoulder_joint_idx, hip_joint_idx)
-        if x_factor is None:
+        if x_factor is None or len(x_factor) == 0:
             return None
 
-        # Calculate derivative (finite difference)
         x_factor_velocity = np.gradient(x_factor, self.dt)
-        peak_stretch_rate = float(np.max(np.abs(x_factor_velocity)))
+        peak_velocity = float(np.max(np.abs(x_factor_velocity)))
+        ensure(peak_velocity >= 0, "peak velocity must be non-negative", peak_velocity)
+        return x_factor_velocity, peak_velocity
 
-        ensure(
-            peak_stretch_rate >= 0,
-            "peak stretch rate must be non-negative",
-            peak_stretch_rate,
+    def compute_x_factor_stretch(
+        self, shoulder_joint_idx: int, hip_joint_idx: int
+    ) -> tuple[np.ndarray, float] | None:
+        """Deprecated alias for compute_x_factor_velocity (#14426, GM-3)."""
+        warnings.warn(
+            "compute_x_factor_stretch is deprecated and returns X-factor velocity (d/dt); "
+            "use compute_x_factor_velocity or Cheetham X-factor stretch per Cheetham et al. (2001).",
+            DeprecationWarning,
+            stacklevel=2,
         )
-
-        return x_factor_velocity, peak_stretch_rate
+        return self.compute_x_factor_velocity(shoulder_joint_idx, hip_joint_idx)
 
     def find_club_head_speed_peak(self) -> PeakInfo | None:
         """Find peak club head speed - delegates to BasicStatsMixin.

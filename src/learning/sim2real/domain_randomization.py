@@ -48,7 +48,7 @@ class DomainRandomizationConfig:
     observation_noise_std: float = 0.01
     action_noise_std: float = 0.01
 
-    # Environment
+    # Environment (gravity is fixed for standard terrestrial sim-to-real; opt in for tilted frames)
     gravity_range: tuple[float, float] = (9.5, 10.1)
 
     # Which parameters to randomize
@@ -56,7 +56,7 @@ class DomainRandomizationConfig:
     randomize_friction: bool = True
     randomize_damping: bool = True
     randomize_motor: bool = True
-    randomize_gravity: bool = True
+    randomize_gravity: bool = False
     randomize_delays: bool = True
     randomize_noise: bool = True
 
@@ -129,6 +129,10 @@ class DomainRandomizer:
             if fn is None:
                 continue
             params[key] = np.asarray(fn(), dtype=float).copy()
+        inertia_get = getattr(self.engine, "get_link_inertias", None)
+        inertia_set = getattr(self.engine, "set_link_inertias", None)
+        if callable(inertia_get) and callable(inertia_set):
+            params["inertias"] = np.asarray(inertia_get(), dtype=float).copy()
         return params
 
     def _requested_physics_keys(self) -> list[str]:
@@ -204,12 +208,15 @@ class DomainRandomizer:
 
         randomization: dict[str, Any] = {}
 
-        # Randomize mass
+        # Randomize mass (scales link inertias proportionally under uniform-density geometry)
         if self.config.randomize_mass and "masses" in self.nominal_params:
             scale = self._rng.uniform(*self.config.mass_range)
             new_masses = self.nominal_params["masses"] * scale
             self.engine.set_link_masses(new_masses)
             randomization["mass_scale"] = scale
+            if "inertias" in self.nominal_params:
+                self.engine.set_link_inertias(self.nominal_params["inertias"] * scale)
+                randomization["inertia_scaled"] = True
 
         # Randomize friction
         if self.config.randomize_friction and "friction" in self.nominal_params:
@@ -277,6 +284,9 @@ class DomainRandomizer:
         """Reset all parameters to nominal values."""
         if "masses" in self.nominal_params:
             self.engine.set_link_masses(self.nominal_params["masses"])
+
+        if "inertias" in self.nominal_params:
+            self.engine.set_link_inertias(self.nominal_params["inertias"])
 
         if "friction" in self.nominal_params:
             self.engine.set_friction_coefficients(self.nominal_params["friction"])

@@ -23,8 +23,9 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: docker-security-scan-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # Serialize with docker-size-gates and docker-smoke — same host BuildKit.
+  group: docker-image-build-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -39,6 +40,9 @@ jobs:
     timeout-minutes: 40
     name: Trivy Container Scan
     runs-on: d-sorg-fleet-docker
+    # Per-run tag: concurrent refs on one host must not share upstreamdrift:ci (#13761).
+    env:
+      IMAGE: upstreamdrift:ci-${{ github.run_id }}-${{ github.run_attempt }}
 
     steps:
       - name: Checkout code
@@ -76,14 +80,15 @@ jobs:
           file: ./Dockerfile
           target: runtime
           load: true
-          tags: upstreamdrift:ci
+          tags: ${{ env.IMAGE }}
+          labels: org.upstreamdrift.ci=docker-security-scan
           builder: ${{ steps.buildkit.outputs.builder || steps.buildx-fallback.outputs.name }}
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           skip-setup-trivy: "true"
-          image-ref: "upstreamdrift:ci"
+          image-ref: ${{ env.IMAGE }}
           format: "sarif"
           output: "trivy-results.sarif"
           severity: "CRITICAL,HIGH"
@@ -102,7 +107,7 @@ jobs:
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           skip-setup-trivy: "true"
-          image-ref: "upstreamdrift:ci"
+          image-ref: ${{ env.IMAGE }}
           format: "table"
           severity: "CRITICAL,HIGH"
           # Fail the build on actionable HIGH or CRITICAL vulnerabilities.
@@ -112,3 +117,10 @@ jobs:
           ignore-unfixed: "true"
           vuln-type: "os,library"
           timeout: "30m0s"
+
+      - name: Remove this run's image (always, #13761)
+        if: always()
+        shell: bash
+        run: |
+          docker image rm "$IMAGE" || true
+          docker image prune --force --filter label=org.upstreamdrift.ci=docker-security-scan

@@ -517,7 +517,7 @@
       "logo": "golf_logo.svg",
       "status": "prototype",
       "maturity": "prototype",
-      "capabilities": ["full_simulation", "parameter_sweep", "batch_runs"],
+      "capabilities": ["prototype_visualization", "demo_inspection"],
       "order": 21,
       "web": {
         "mode": "native-window"
@@ -1001,7 +1001,7 @@
     },
     {
       "id": "tools_calculator_hub",
-      "name": "Tools Calculator Suite",
+      "name": "Tools Calculator Suite (Data Processor Entry)",
       "description": "Engineering process calculators from the Tools repo (50+ calculators). NOTE (#9478): currently opens the shared Data Processor window (byte-identical launch target, no adapter or web route of its own); a dedicated calculator surface is a follow-up.",
       "category": "tool",
       "type": "special_app",
@@ -1013,10 +1013,9 @@
         "src/shared/python",
         "src/data_processing/data_processor/python"
       ],
-      "web_route": "/tools/calculators",
       "logo": "data_explorer.svg",
       "status": "external",
-      "capabilities": ["process_calculators", "engineering", "analysis"],
+      "capabilities": ["process_calculators", "data_processor_alias"],
       "order": 44,
       "web": {
         "mode": "native-window"

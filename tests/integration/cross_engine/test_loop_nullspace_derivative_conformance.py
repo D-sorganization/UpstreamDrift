@@ -8,7 +8,9 @@ compared with the Pinocchio reference at the same projected state, load and
 closure tangent space.
 
 * **Track N** compares ``d a/d tau``, ``d a/d xi``, ``d a/d eta`` and the three
-  ``d lambda`` blocks as basis-independent operators.  The tolerance of each
+  ``d lambda`` blocks as basis-independent operators (the issue's ``A(t)`` and
+  ``B(t)`` via :func:`~loop_nullspace_derivative_support.tangent_chain_operators`).
+  The tolerance of each
   engine-pair metric is the entry registered in ``divergence_registry.yaml``
   (check ``closed_loop_derivative_conformance``), written from the bound
   derived in ``loop_nullspace_derivative_support.sensitivity_bounds``.
@@ -64,6 +66,7 @@ from tests.integration.cross_engine.loop_nullspace_derivative_support import (
     require_hard_kkt,
     scaled_bound,
     sensitivity_bounds,
+    tangent_chain_operators,
     variance_bounds,
 )
 from tests.integration.cross_engine.test_loop_nullspace_conformance import (  # noqa: F401
@@ -75,8 +78,19 @@ from tests.integration.cross_engine.test_loop_nullspace_conformance import (  # 
     reference_adapter,
 )
 
-pytestmark = pytest.mark.integration
+pytestmark = [pytest.mark.integration, pytest.mark.requires_pinocchio]
 # ruff: noqa: F811 - the NSX-56 module fixtures are imported by name
+
+# Pinocchio is always the reference here.  Per-engine ``requires_*`` marks on
+# ``dpair`` would make ``UD_REQUIRE_ENGINES=mujoco`` (core CI) treat a missing
+# Pinocchio skip as a required-mujoco failure; engine availability is gated by
+# ``importorskip`` / ``require_real_module`` inside the fixtures instead.
+DERIV_OTHERS = (
+    pytest.param(EngineType.MUJOCO, id="mujoco"),
+    pytest.param(EngineType.MYOSUITE, id="myosuite"),
+    pytest.param(EngineType.DRAKE, id="drake"),
+    pytest.param(EngineType.OPENSIM, id="opensim"),
+)
 
 REGISTRY = DivergenceRegistry.from_yaml(
     Path(__file__).with_name("divergence_registry.yaml")
@@ -113,7 +127,7 @@ def _derivatives(adapter, named_q, named_v, tau, order, actuated):
     return res, named_derivatives(res, own, order, actuated), own
 
 
-@pytest.fixture(scope="module", params=OTHERS)
+@pytest.fixture(scope="module", params=DERIV_OTHERS)
 def dpair(request, reference_adapter, projected):
     """``DerivativePair`` of one engine against Pinocchio at one projected state."""
     engine = request.param
@@ -211,6 +225,24 @@ def test_track_n_sensitivities_agree_within_the_registered_tolerance(dpair) -> N
         assert errs[metric] <= tol, (
             f"{dpair.engine.value} {metric}: {errs[metric]:.3g} exceeds {tol:.3g}"
         )
+
+
+def test_track_n_tangent_chain_blocks_match_component_metrics(dpair) -> None:
+    """``A(t)`` and ``B(t)`` blocks inherit the same registered tolerances."""
+    ref = tangent_chain_operators(dpair.ref)
+    other = tangent_chain_operators(dpair.other)
+    k = ref.a_acc.shape[1] // 2
+    columns = (
+        ("d_acc_d_xi", ref.a_acc[:, :k], other.a_acc[:, :k]),
+        ("d_acc_d_eta", ref.a_acc[:, k:], other.a_acc[:, k:]),
+        ("d_acc_d_tau", ref.b_acc, other.b_acc),
+        ("d_lambda_d_xi", ref.a_lambda[:, :k], other.a_lambda[:, :k]),
+        ("d_lambda_d_eta", ref.a_lambda[:, k:], other.a_lambda[:, k:]),
+        ("d_lambda_d_tau", ref.b_lambda, other.b_lambda),
+    )
+    for metric, want, got in columns:
+        tol = _entry(dpair.engine, metric).tolerance
+        assert scaled_error(got, want) <= tol, metric
 
 
 def test_track_n_difference_is_inside_the_derived_bound(dpair) -> None:

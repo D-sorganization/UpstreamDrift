@@ -277,7 +277,7 @@ class DynamicsInterface(Protocol):
             vs. active muscle torques.
 
         Args:
-            q: Joint positions (n_v,) [rad or m]
+            q: Joint positions (n_q,) [rad or m]
             v: Joint velocities (n_v,) [rad/s or m/s]
 
         Returns:

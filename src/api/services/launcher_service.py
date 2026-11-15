@@ -77,15 +77,25 @@ class LauncherService:
         Returns:
             Dictionary mapping process name to status info.
         """
-        running = self.process_manager.running_processes
-        processes = {}
-        for name, proc in running.items():
-            poll = proc.poll()
-            processes[name] = {
-                "pid": proc.pid,
-                "running": poll is None,
-                "exit_code": poll,
-            }
+        processes: dict[str, dict[str, Any]] = {}
+        list_processes = getattr(self.process_manager, "list_processes", None)
+        if callable(list_processes):
+            rows = list_processes()
+            if isinstance(rows, (list, tuple)):
+                for row in rows:
+                    if isinstance(row, dict) and isinstance(row.get("slot_name"), str):
+                        processes[row["slot_name"]] = row
+
+        running = getattr(self.process_manager, "running_processes", None)
+        if running is not None and hasattr(running, "items"):
+            for name, proc in running.items():
+                if name not in processes:
+                    poll = proc.poll()
+                    processes[name] = {
+                        "pid": proc.pid,
+                        "running": poll is None,
+                        "exit_code": poll,
+                    }
         return processes
 
     @precondition(
@@ -114,4 +124,4 @@ class LauncherService:
         success = kill_process_tree(proc.pid)
         del running[name]
         logger.info("[stop] Process %s stopped and removed", name)
-        return success
+        return bool(success)

@@ -67,6 +67,7 @@ from fastapi.responses import HTMLResponse, JSONResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 
 from src.api._version import __version__  # noqa: E402
+from src.api.middleware.trusted_hosts import configure_trusted_hosts  # noqa: E402
 from src.api.debug_guard import debug_endpoints_enabled  # noqa: E402
 from src.api.diagnostics import (  # noqa: E402
     APIDiagnostics,
@@ -989,6 +990,7 @@ def create_local_app() -> FastAPI:
 
     # CORS: Allow local origins only
     _configure_cors(app)
+    configure_trusted_hosts(app)
 
     # Initialize services (lazy loading)
     engine_manager = _create_engine_manager()

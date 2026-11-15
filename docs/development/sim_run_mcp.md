@@ -4,7 +4,8 @@ Child task of Epic [#14085](https://github.com/D-sorganization/UpstreamDrift/iss
 
 ## Overview
 
-The `src.sim_run.mcp` module provides a thin **stdio Model Context Protocol (MCP)** server for local agents (Grok Bot, Claude Desktop, Antigravity) to query physics simulation engines, execute runs, poll results, and inspect artifacts.
+The `src.sim_run.mcp` module provides a thin **stdio Model Context Protocol (MCP)** server (FastMCP
+transport via `src.sim_run.mcp_fastmcp`) for local agents (Grok Bot, Claude Desktop, Antigravity) to query physics simulation engines, execute runs, poll results, and inspect artifacts.
 
 - **No network sockets**: Communicates strictly over stdio; zero listeners bound (ADR-0007).
 - **Service boundary enforcement**: Auth tokens and Private Mode restrictions enforced at service boundary.

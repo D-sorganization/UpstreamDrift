@@ -88,7 +88,7 @@ jobs:
         # green even when drake / pinocchio / opensim aren't installed.
         run: |
           python -m ensurepip --upgrade || true
-          python -m pip install --upgrade pip
+          python -m pip install --ignore-installed --no-deps pip
           python -m venv "$RUNNER_TEMP/leaderboard-venv"
           echo "$RUNNER_TEMP/leaderboard-venv/bin" >> "$GITHUB_PATH"
           export PATH="$RUNNER_TEMP/leaderboard-venv/bin:$PATH"
@@ -100,6 +100,7 @@ jobs:
           python -m ensurepip --upgrade || true
           pip install --force-reinstall "idna[uts46]>=3.4"
           python -m pip install --ignore-installed pathspec hatchling editables
+          python -m ensurepip --upgrade || true
           pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
           python3 scripts/ci/bootstrap_conformance_deps.py
           # Prevent environment pollution conflict between pytest-recording and pytest-vcr

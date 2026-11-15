@@ -42,7 +42,7 @@ The provider follow-up #12246 advances the Tools dependency to the merged
 triangle-lamina provider revision. The existing exact-pin test first failed
 against the old reconciliation record. Before updating that record, all 26
 other matrix/capability probes passed. An archive of the exact new Tools pin
-was built on DeskComputer with Node 25.9.0/npm 11.12.1, then the transferred
+was built on <host> with Node 25.9.0/npm 11.12.1, then the transferred
 bundle was actually served and verified locally with Python 3.13.5,
 FastAPI 0.128.0 and httpx 0.28.1. Verification covered 76 assets, five
 JavaScript assets, 2,801,426 bytes, exact revision/mount/digests and the
@@ -68,7 +68,7 @@ and the missing-file 404. The complete matrix suite then passed all 27 tests.
 Retain the original pin-drift RED receipt. The new served receipt is
 `docs/development/feedback_controls/F09O-IMPACT-SERVED-RECEIPT.json`.
 
-The diagnostic build used DeskComputer's Node 25.9.0/npm 11.12.1. Its existing
+The diagnostic build used <host>'s Node 25.9.0/npm 11.12.1. Its existing
 native SDK environment lacked FastAPI, so the transferred built bundle was
 verified locally with Python 3.13/FastAPI 0.128.0/httpx 0.28.1. No native SDK
 environment was modified. These actual versions are separate from the CI

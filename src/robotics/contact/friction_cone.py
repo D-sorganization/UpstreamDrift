@@ -175,39 +175,41 @@ def linearize_friction_cone(
     normal: NDArray[np.float64],
     num_faces: int = 8,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Linearize friction cone as polyhedral constraint A @ f <= b.
+    """Inscribed (inner) polyhedral approximation A @ f <= b of the friction cone.
 
-    Approximates the second-order cone constraint ||f_t|| <= mu * f_n
-    with linear inequalities.
+    Approximates the second-order cone constraint ||f_t|| <= mu * f_n using an
+    inscribed ``num_faces``-gon whose vertices lie on the exact circular cone
+    ||f_t|| = mu * f_n, so every admissible force strictly satisfies Coulomb friction:
+    d_i^T @ f - mu * cos(pi / num_faces) * n^T @ f <= 0.
 
     Args:
         mu: Friction coefficient.
         normal: Contact normal direction (3,).
-        num_faces: Number of faces in polyhedral approximation.
+        num_faces: Number of faces in polyhedral approximation (must be >= 3).
 
     Returns:
-        Tuple of (A, b) such that A @ f <= b enforces friction cone.
+        Tuple of (A, b) such that A @ f <= b enforces the inscribed cone.
         A has shape (num_faces, 3), b has shape (num_faces,).
     """
     if mu is None:
         raise ValueError("mu must be provided")
+    if num_faces < 3:
+        raise ValueError(f"num_faces must be >= 3, got {num_faces}")
     normal = np.asarray(normal, dtype=np.float64)
     normal = normal / math.hypot(*normal)
 
     t1, t2 = _get_tangent_vectors(normal)
+    mu_inscribed = mu * math.cos(math.pi / num_faces)
 
-    # Each face: -n^T @ f + (1/mu) * d_i^T @ f <= 0
-    # where d_i is the i-th tangent direction
+    # Inscribed polygon face i has unit normal d_i bisecting adjacent vertices;
+    # distance to origin in f_t plane is mu * cos(pi / num_faces) * f_n.
     A = np.zeros((num_faces, 3))
     b = np.zeros(num_faces)
 
     for i in range(num_faces):
         angle = 2 * np.pi * i / num_faces
         d = np.cos(angle) * t1 + np.sin(angle) * t2
-
-        # Constraint: d^T @ f <= mu * n^T @ f
-        # Rewrite: d^T @ f - mu * n^T @ f <= 0
-        A[i] = d - mu * normal
+        A[i] = d - mu_inscribed * normal
         b[i] = 0.0
 
     return A, b
@@ -275,45 +277,40 @@ def project_to_friction_cone(
     force: NDArray[np.float64],
     cone: FrictionCone,
 ) -> NDArray[np.float64]:
-    """Project force vector onto friction cone.
+    """Compute the exact Euclidean projection of ``force`` onto ``cone``.
 
-    Finds the closest force inside the friction cone.
+    Projects onto the second-order Coulomb Lorentz cone
+    ``{f : ||f_t|| <= cone.mu * f_n, f_n >= 0}``.
 
     Args:
         force: Force vector (3,) to project.
         cone: Friction cone to project onto.
 
     Returns:
-        Projected force (3,) inside the cone.
+        Euclidean closest force vector (3,) inside ``cone``.
     """
     if force is None:
         raise ValueError("force must be provided")
     force = np.asarray(force, dtype=np.float64)
 
-    # Decompose into normal and tangential
     f_n = float(np.dot(force, cone.normal))
     f_t = force - f_n * cone.normal
     f_t_mag = math.hypot(*f_t)
 
-    # Case 1: Force is inside cone
-    if cone.contains(force):
+    # Case 1: Frictionless limit reduces to half-space projection on normal.
+    if cone.mu == 0.0:
+        return max(f_n, 0.0) * cone.normal
+
+    # Case 2: Force is already inside the second-order cone.
+    if f_n >= 0.0 and f_t_mag <= cone.mu * f_n:
         return force.copy()
 
-    # Case 2: Normal force is negative (pulling)
-    if f_n < 0:
-        # Project to origin (no force)
-        if f_t_mag <= -cone.mu * f_n:
-            return np.zeros(3)
-        # Project to cone surface
-        return _project_to_cone_surface(f_n, f_t, f_t_mag, cone)
+    # Case 3: Inside the polar cone (||f_t|| <= -f_n / mu); closest point is 0.
+    if f_n + cone.mu * f_t_mag <= 0.0:
+        return np.zeros(3, dtype=np.float64)
 
-    # Case 3: Tangential force exceeds limit
-    if f_t_mag > cone.mu * f_n:
-        # Scale tangential to friction limit
-        f_t_proj = f_t * (cone.mu * f_n / f_t_mag) if f_t_mag > 1e-10 else f_t
-        return f_n * cone.normal + f_t_proj
-
-    return force.copy()
+    # Case 4: Exterior region projecting orthogonally onto the lateral cone surface.
+    return _project_to_cone_surface(f_n, f_t, f_t_mag, cone)
 
 
 def _project_to_cone_surface(
@@ -322,38 +319,14 @@ def _project_to_cone_surface(
     f_t_mag: float,
     cone: FrictionCone,
 ) -> NDArray[np.float64]:
-    """Project to cone surface when normal is negative.
-
-    This handles the edge case where force points away from surface.
-
-    Args:
-        f_n: Normal force component (negative).
-        f_t: Tangential force vector.
-        f_t_mag: Magnitude of tangential force.
-        cone: Friction cone.
-
-    Returns:
-        Projected force on cone surface.
-    """
-    # Find point on cone edge that minimizes distance
-    # The cone edge is at angle arctan(mu) from normal
+    """Euclidean projection onto the lateral boundary of the second-order cone."""
     if f_n is None:
         raise ValueError("f_n must be provided")
-    if f_t_mag < 1e-10:
-        return np.zeros(3)
+    if f_t_mag < 1e-12:
+        return max(f_n, 0.0) * cone.normal
 
     t_dir = f_t / f_t_mag
-
-    # Project onto the line from origin along cone edge
-    cone_angle = np.arctan(cone.mu)
-    edge_dir = np.cos(cone_angle) * cone.normal + np.sin(cone_angle) * t_dir
-
-    # Project force onto this direction
-    proj = np.dot(
-        np.array([f_n, f_t_mag]), np.array([np.cos(cone_angle), np.sin(cone_angle)])
-    )
-
-    if proj <= 0:
-        return np.zeros(3)
-
-    return proj * edge_dir
+    alpha = (f_n + cone.mu * f_t_mag) / (1.0 + cone.mu * cone.mu)
+    if alpha <= 0.0:
+        return np.zeros(3, dtype=np.float64)
+    return alpha * (cone.normal + cone.mu * t_dir)

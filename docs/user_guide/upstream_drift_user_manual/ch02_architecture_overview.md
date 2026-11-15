@@ -104,7 +104,7 @@ for running the same model across multiple engines.
 ### The PhysicsEngine Protocol
 
 All engines conform to the `PhysicsEngine` protocol defined in
-`src/shared/python/base_physics_engine.py`. This protocol specifies the minimum
+`src/shared/python/engine_core/base_physics_engine.py`. This protocol specifies the minimum
 interface that any engine adapter must implement:
 
 ```python
@@ -280,7 +280,7 @@ UpstreamDrift/
 
 ### The `src/shared/python/` Module
 
-The `shared/python/` directory is the largest single module, containing
+The `src/shared/python/` directory is the largest single module, containing
 approximately 120 Python files that provide reusable functionality consumed across
 all engines and analysis modules. Key components include:
 

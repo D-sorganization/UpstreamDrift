@@ -48,6 +48,27 @@ def test_capabilities_lists_only_self_checked_methods() -> None:
     assert supported == methods_passing_self_check(registry)
 
 
+def test_model_list_self_check_rejects_discovery_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def _broken_discover() -> list[str]:
+        raise RuntimeError("model discovery unavailable")
+
+    monkeypatch.setattr(
+        "src.api.routes.models.discover_models",
+        _broken_discover,
+    )
+    registry = create_registry()
+    supported = methods_passing_self_check(registry)
+    assert "model.list" not in supported
+    assert "system.ping" in supported
+
+    caps_handler = registry.get_method("system.capabilities")
+    assert caps_handler is not None
+    payload = caps_handler()
+    assert "model.list" not in payload["supported_methods"]
+
+
 def test_aip_methods_do_not_use_hasattr_or_missing_engine_manager_api() -> None:
     source = (Path(__file__).resolve().parents[3] / "src/api/aip/methods.py").read_text(
         encoding="utf-8"

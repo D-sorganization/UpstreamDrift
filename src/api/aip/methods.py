@@ -109,9 +109,19 @@ def create_registry() -> MethodRegistry:
     return registry
 
 
+def _probe_model_list(handler: Callable[..., Any]) -> None:
+    """Self-check ``model.list``: discovery errors are returned, not raised."""
+    result = handler()
+    if not isinstance(result, dict):
+        raise ValueError(f"model.list returned {type(result).__name__}, expected dict")
+    error = result.get("error")
+    if error:
+        raise RuntimeError(str(error))
+
+
 _SELF_CHECK_HANDLERS: dict[str, Callable[[Callable[..., Any]], None]] = {
     "system.ping": lambda handler: handler(),
-    "model.list": lambda handler: handler(),
+    "model.list": _probe_model_list,
 }
 
 

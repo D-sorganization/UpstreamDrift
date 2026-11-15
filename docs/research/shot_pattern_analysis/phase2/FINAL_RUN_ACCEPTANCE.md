@@ -84,7 +84,7 @@ and project completion remain open.
 - `validation/independent_preflight.json`: `b472dd91bfea058737f6bc441f29d903bc2718d4354438ba65d3a2c9ff108ed9`
 - `validation/independent_head_sensitivity.json`: `3bd6acb1118b6cbedd03171744a09a1b810f8a77cd7e4dc72c1d609181edb558`
 - `validation/independent_pilot_audit.json`: `11ca90a9c77843da2adc6d2fec59dd20283792e0f37dff792dd1a675b0d9492e`
-- `validation/independent_control_pilot_audit.json`: `c3dc7fc43d6ff9ca044d291fe5f5a7af059313b28cc20af5affafd0d5f330bad`
+- `validation/independent_control_pilot_audit.json`: `b8e71dad0b4749c90f24d76d231fa98590bec26efe782bba3c3b063157fb0d4a`
 - `validation/independent_control_scoring.json`: `2f647e734840ea49b5b6d3a18d3817d21caf2ac5797cf624030e26ae0460e7ff`
 - `validation/frozen_software.json`: `955b1af843ccfbb1bdc2ccc7dcd7e796b4dc2232947b7fb1bcd58469b0476dd3`
 - `pilot_v1/figure_review/pilot_comparable_shaft_path_final/review_receipt.json`: `988a1f24d6851e56fcebaaad7aa70ef6b7f70095e5381145c3b72a3c807b2c02`

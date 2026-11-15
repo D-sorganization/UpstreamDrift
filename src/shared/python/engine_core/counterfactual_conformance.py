@@ -27,13 +27,16 @@ def assert_drift_control_superposition(
     rtol: float = 1e-8,
     atol: float = 1e-9,
 ) -> None:
-    """SECTION F / SPEC §4: drift + control equals full generalized acceleration."""
-    mass = engine.compute_mass_matrix()
-    bias = engine.compute_bias_forces()
-    drift = engine.compute_drift_acceleration()
-    control = engine.compute_control_acceleration(tau)
-    full = np.linalg.solve(mass, np.asarray(tau, dtype=float).reshape(-1) - bias)
-    np.testing.assert_allclose(drift + control, full, rtol=rtol, atol=atol)
+    full = np.linalg.solve(
+        engine.compute_mass_matrix(),
+        np.asarray(tau, float).reshape(-1) - engine.compute_bias_forces(),
+    )
+    np.testing.assert_allclose(
+        engine.compute_drift_acceleration() + engine.compute_control_acceleration(tau),
+        full,
+        rtol=rtol,
+        atol=atol,
+    )
 
 
 def stamped_drift(engine: _SuperpositionEngine) -> CounterfactualResult:

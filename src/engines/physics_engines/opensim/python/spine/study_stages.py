@@ -126,6 +126,8 @@ class StageOutcome:
 def _num(value: Any) -> Any:
     if isinstance(value, bool | int | str):
         return value
+    if isinstance(value, Mapping):
+        return {str(k): _num(v) for k, v in sorted(value.items())}
     return round_sig(float(value))
 
 
@@ -138,6 +140,14 @@ def _record(
         provenance={str(k): scrub(str(v)) for k, v in sorted(provenance.items())},
         metrics={str(k): _num(v) for k, v in sorted(metrics.items())},
     )
+
+
+def _allow_implausible_from_request(request: Any) -> bool:
+    """Return ``request.allow_implausible`` without truthy string coercion."""
+    value = getattr(request, "allow_implausible", False)
+    if not isinstance(value, bool):
+        raise TypeError("allow_implausible must be a bool")
+    return value
 
 
 def _requested_law(request: Any) -> CouplingLaw | None:
@@ -154,7 +164,11 @@ def _requested_law(request: Any) -> CouplingLaw | None:
 
 
 def _drive(request: Any, model: Path, scrub: Any, out: StageOutcome) -> DriveResult:
-    golf = read_golf_humanoid_motion(request.motion_path, request.golf_model_path)
+    golf = read_golf_humanoid_motion(
+        request.motion_path,
+        request.golf_model_path,
+        allow_implausible=_allow_implausible_from_request(request),
+    )
     if request.variant_id is not None:
         golf = apply_request_variant(request, golf, out)
     out.stages.append(
@@ -335,7 +349,14 @@ def _static_optimization(
         out.reasons.append(f"{n_flagged} frames flagged for reserve use")
     if n_failed:
         out.reasons.append(f"{n_failed} static-optimisation solves unsuccessful")
-    metrics = {"n_frames": so.frame_index.size, "n_flagged": n_flagged}
+    metrics = {
+        "n_frames": so.frame_index.size,
+        "n_flagged": n_flagged,
+        "reserve_share_by_label": {
+            str(lab): _num(share)
+            for lab, share in zip(so.frame_labels, so.reserve_share, strict=True)
+        },
+    }
     out.stages.append(_record("static_optimization", so.provenance, metrics, scrub))
     return so
 

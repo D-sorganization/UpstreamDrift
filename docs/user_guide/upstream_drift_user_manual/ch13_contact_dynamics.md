@@ -198,7 +198,7 @@ engine satisfies these protocols during initialization.
 The friction cone module (`src/robotics/contact/friction_cone.py`) provides tools
 for representing, testing, linearizing, and projecting forces with respect to
 Coulomb friction constraints. All functions employ Design by Contract decorators
-from `src/shared/python/contracts`.
+from `src/shared/python/contracts.py`.
 
 ### 13.2.1 The FrictionCone Frozen Dataclass
 

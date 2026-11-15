@@ -8,7 +8,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #14934: SyngasWaterCalculator.calculate_water_content verbatim Tools child copy (105 > 100 limit 110). Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #14934: SyngasWaterCalculator.calculate_water_content verbatim Tools child copy (105 > 100 limit 110). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -125,7 +125,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #9411: Pinned vendor copy of PhysicsValidator.validate_inertia_tensor performs comprehensive inertia checks across 101 lines (> 100 budget). Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #9411: Pinned vendor copy of PhysicsValidator.validate_inertia_tensor performs comprehensive inertia checks across 101 lines (> 100 budget) (101 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -143,7 +143,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10436: explore_torque_tradeoffs explores feasible force null spaces and generates torque distribution tradeoffs. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10436: explore_torque_tradeoffs explores feasible force null spaces and generates torque distribution tradeoffs (254 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -152,7 +152,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #9193: _documentation_record validates documentation records, audiences, statuses, and cross-references. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #9193: _documentation_record validates documentation records, audiences, statuses, and cross-references (103 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -161,7 +161,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #9193: render_evidence_document renders evidence documents, programs, and tables for publication quality. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #9193: render_evidence_document renders evidence documents, programs, and tables for publication quality (117 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -170,7 +170,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10108: hip_rotation_zero calculates zero-twist rotation angle offsets with dual-leg knee-in/ankle fallback across frame subsets. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10108: hip_rotation_zero calculates zero-twist rotation angle offsets with dual-leg knee-in/ankle fallback across frame subsets (124 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -179,7 +179,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10108: hip_rotation_zero accepts marker kinematics, waist offsets, knee/ankle label pairs, and calibration options without lossy unpacking. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10108: hip_rotation_zero accepts marker kinematics, waist offsets, knee/ankle label pairs, and calibration options without lossy unpacking (11 > 8 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -188,7 +188,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10431: SwingEvaluator.evaluate coordinates tracking, contact penetration, kinematic closure, and phase event verification across full-swing time series without lossy parameter packing. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10431: SwingEvaluator.evaluate coordinates tracking, contact penetration, kinematic closure, and phase event verification across full-swing time series without lossy parameter packing (9 > 8 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -197,7 +197,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10433: ContactForceAllocator.allocate coordinates RNEA, Jacobians, objectives, bounds, contact masks, and terrain normals without lossy unpacking. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10433: ContactForceAllocator.allocate coordinates RNEA, Jacobians, objectives, bounds, contact masks, and terrain normals without lossy unpacking (10 > 8 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -206,7 +206,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10108: apply_hip_calibration transforms joint frames and incorporates zero-twist offsets into parent-to-base transforms. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10108: apply_hip_calibration transforms joint frames and incorporates zero-twist offsets into parent-to-base transforms (101 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -215,7 +215,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #9967: execution script for candidate 100 fit preserves exact experimental configuration and data logging; hash-frozen evidence artifact. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #9967: execution script for candidate 100 fit preserves exact experimental configuration and data logging; hash-frozen evidence artifact (576 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -224,7 +224,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #9967: execution script for continuation 101 fit preserves exact experimental configuration and data logging; hash-frozen evidence artifact. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #9967: execution script for continuation 101 fit preserves exact experimental configuration and data logging; hash-frozen evidence artifact (603 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -233,7 +233,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10338: execution script for candidate 102 fit preserves CLI options and delegates to modular motion_matching.two_window_fit. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10338: execution script for candidate 102 fit preserves CLI options and delegates to modular motion_matching.two_window_fit (590 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -242,7 +242,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #9967: run_convergence_audit executes and certifies the 9-configuration Pinocchio vs Simscape solver convergence matrix. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #9967: run_convergence_audit executes and certifies the 9-configuration Pinocchio vs Simscape solver convergence matrix (162 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -251,7 +251,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #9967: solve_equality_least_squares implements generalized bounded equality-constrained least-squares solver with QR nullspace projection. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #9967: solve_equality_least_squares implements generalized bounded equality-constrained least-squares solver with QR nullspace projection (176 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -260,7 +260,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #9967: solve_equality_least_squares accepts problem matrices (A, b, C, d), bounds, regularization, and solver options without lossy unpacking. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #9967: solve_equality_least_squares accepts problem matrices (A, b, C, d), bounds, regularization, and solver options without lossy unpacking (11 > 8 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -269,7 +269,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #9967: inner residual evaluation in multiple shooting fit coordinates marker errors, terminal states, defect constraints, and pelvis yaw penalties. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #9967: inner residual evaluation in multiple shooting fit coordinates marker errors, terminal states, defect constraints, and pelvis yaw penalties (131 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -278,7 +278,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #9967: inner analytic Jacobian in multiple shooting fit evaluates exact block derivatives for markers, continuity defects, and 2-component pelvis yaw penalty. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #9967: inner analytic Jacobian in multiple shooting fit evaluates exact block derivatives for markers, continuity defects, and 2-component pelvis yaw penalty (133 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -287,7 +287,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10193: solve_impact preserves complete clubhead kinematics (angular velocity, loft, lie, MOI) to avoid lossy slicing before impact solver; callers migrate to solve_pre_impact_state. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10193: solve_impact preserves complete clubhead kinematics (angular velocity, loft, lie, MOI) to avoid lossy slicing before impact solver; callers migrate to solve_pre_impact_state (12 > 8 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -296,7 +296,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10193: solve_with_gear_effect preserves complete clubhead kinematics (angular velocity, loft, lie, MOI) to avoid lossy slicing before impact solver; callers migrate to solve_pre_impact_state. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10193: solve_with_gear_effect preserves complete clubhead kinematics (angular velocity, loft, lie, MOI) to avoid lossy slicing before impact solver; callers migrate to solve_pre_impact_state (11 > 8 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -314,7 +314,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #12803: this file is a byte-identical Tools-owned child copy (pinned vendor/ud-tools); __init__ is 112 lines in the canonical Tools source (Tools #4897/#5642/#5644) and cannot be edited here. Shrinking it is a Tools change; this entry retires on the next Tools split. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #12803: this file is a byte-identical Tools-owned child copy (pinned vendor/ud-tools); __init__ is 112 lines in the canonical Tools source (Tools #4897/#5642/#5644) and cannot be edited here. Shrinking it is a Tools change; this entry retires on the next Tools split (112 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -323,7 +323,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #12803: this file is a byte-identical Tools-owned child copy (pinned vendor/ud-tools); _on_message is 119 lines in the canonical Tools source (Tools #4897/#5642/#5644) and cannot be edited here. Shrinking it is a Tools change; this entry retires on the next Tools split. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #12803: this file is a byte-identical Tools-owned child copy (pinned vendor/ud-tools); _on_message is 119 lines in the canonical Tools source (Tools #4897/#5642/#5644) and cannot be edited here. Shrinking it is a Tools change; this entry retires on the next Tools split (119 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -453,7 +453,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "issue": 15029,
-      "reason": "Issue #9921: reproduction script executes complete multi-stage transition fitting and diagnostic export workflow. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #9921: reproduction script executes complete multi-stage transition fitting and diagnostic export workflow (335 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -462,7 +462,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "issue": 15029,
-      "reason": "Issue #9921: multiple shooting optimizer coordinates interval partitioning, defect matching, and Pareto-tuning. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #9921: multiple shooting optimizer coordinates interval partitioning, defect matching, and Pareto-tuning (531 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -471,7 +471,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "issue": 15029,
-      "reason": "Issue #9921: multiple shooting optimizer requires options, target trajectories, initial guess, and telemetry callbacks. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #9921: multiple shooting optimizer requires options, target trajectories, initial guess, and telemetry callbacks (9 > 8 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -480,7 +480,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "issue": 15029,
-      "reason": "Issue #9921: prefix stage coordinator handles De Casteljau continuity, bounds, and gate enforcement across ladder horizons. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #9921: prefix stage coordinator handles De Casteljau continuity, bounds, and gate enforcement across ladder horizons (184 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -489,7 +489,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "issue": 15029,
-      "reason": "Issue #10063: build script driver coordinates spec parsing, pelvis registration, and receipt generation across engines. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10063: build script driver coordinates spec parsing, pelvis registration, and receipt generation across engines (134 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -498,7 +498,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "issue": 15029,
-      "reason": "Issue #10003: calibration driver coordinates TRC subsampling, OpenSim IK tool configuration, and receipt logging. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10003: calibration driver coordinates TRC subsampling, OpenSim IK tool configuration, and receipt logging (159 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -507,7 +507,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "issue": 15029,
-      "reason": "Issue #10186: MJX trajectory optimisation runner landing in HO-0; scheduled for refactoring in HO-5 under epic #10162. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10186: MJX trajectory optimisation runner landing in HO-0; scheduled for refactoring in HO-5 under epic #10162 (172 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -516,7 +516,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "issue": 15029,
-      "reason": "Issue #10186: visual layer attachment function landing in HO-0; scheduled for decomposition under epic #10162. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10186: visual layer attachment function landing in HO-0; scheduled for decomposition under epic #10162 (185 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -525,7 +525,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "issue": 15029,
-      "reason": "Issue #10186: anthropometric candidate constructor landing in HO-0; scheduled for decomposition in HO-1 under epic #10162. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10186: anthropometric candidate constructor landing in HO-0; scheduled for decomposition in HO-1 under epic #10162 (114 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -534,7 +534,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "issue": 15029,
-      "reason": "Issue #10186: upper body builder landing in HO-0; scheduled for decomposition in HO-1 under epic #10162. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10186: upper body builder landing in HO-0; scheduled for decomposition in HO-1 under epic #10162 (387 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -543,7 +543,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "issue": 15029,
-      "reason": "Issue #10186: upper body builder parameter count landing in HO-0; scheduled for options object refactoring in HO-1 under epic #10162. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10186: upper body builder parameter count landing in HO-0; scheduled for options object refactoring in HO-1 under epic #10162 (14 > 8 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -552,7 +552,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "issue": 15029,
-      "reason": "Issue #10186: visual skeleton derivation landing in HO-0; scheduled for decomposition under epic #10162. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10186: visual skeleton derivation landing in HO-0; scheduled for decomposition under epic #10162 (120 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -561,7 +561,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10399: fit_address_pose performs multi-objective optimization with bilateral grip closure, ground plane clearance, and holdout validation. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10399: fit_address_pose performs multi-objective optimization with bilateral grip closure, ground plane clearance, and holdout validation (209 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -570,7 +570,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10400: qualify_full_swing_tracking validates ladder stages, continuity, dynamic grip closure, and compiles dual receipts under MS-100 / MS-104. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10400: qualify_full_swing_tracking validates ladder stages, continuity, dynamic grip closure, and compiles dual receipts under MS-100 / MS-104 (202 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -579,7 +579,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10398: align_tour_capture_to_golf_world computes stance support ground plane translation and target-line yaw rotation. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10398: align_tour_capture_to_golf_world computes stance support ground plane translation and target-line yaw rotation (118 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -588,7 +588,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10396: apply_segment_scaling scales joint frames, attached meshes, COM positions, and inertia matrices under fixed_mass or density_preserving policies. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10396: apply_segment_scaling scales joint frames, attached meshes, COM positions, and inertia matrices under fixed_mass or density_preserving policies (149 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -597,7 +597,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10403: build_golf_view_package packages model variants, verifies hashes, renders keyframe milestone stills, and exports reproducible video. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10403: build_golf_view_package packages model variants, verifies hashes, renders keyframe milestone stills, and exports reproducible video (187 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -606,7 +606,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10403: build_golf_view_package accepts trajectory, variant, presets, paths, digest hashes, and event milestones. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10403: build_golf_view_package accepts trajectory, variant, presets, paths, digest hashes, and event milestones (12 > 8 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -615,7 +615,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10338: match_pinocchio_c3d orchestrates full-swing kinematics, C3D extraction, contact detection, and state estimation. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10338: match_pinocchio_c3d orchestrates full-swing kinematics, C3D extraction, contact detection, and state estimation (520 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -624,7 +624,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10338: match_pinocchio_c3d accepts model paths, trajectory configurations, contact parameters, and tolerances without lossy unpacking. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10338: match_pinocchio_c3d accepts model paths, trajectory configurations, contact parameters, and tolerances without lossy unpacking (13 > 8 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -633,7 +633,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10338: make_action_models builds Crocoddyl ActionModelAbstract sequences configuring marker tracking and contact residual models. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10338: make_action_models builds Crocoddyl ActionModelAbstract sequences configuring marker tracking and contact residual models (163 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -642,7 +642,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10338: make_action_models accepts pinocchio model, contact sequences, weights, and time steps without lossy unpacking. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10338: make_action_models accepts pinocchio model, contact sequences, weights, and time steps without lossy unpacking (10 > 8 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -651,7 +651,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10338: tracking_rollout simulates forward dynamics along Crocoddyl shooting nodes with state/control constraints. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10338: tracking_rollout simulates forward dynamics along Crocoddyl shooting nodes with state/control constraints (11 > 8 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -660,7 +660,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10338: _resume_from_candidate restores optimization warm-start states, multipliers, and trajectory knots from prior checkpoint. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10338: _resume_from_candidate restores optimization warm-start states, multipliers, and trajectory knots from prior checkpoint (11 > 8 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -669,7 +669,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10338: run_fit coordinates multi-stage full body dynamic motion matching fitting against C3D point cloud. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10338: run_fit coordinates multi-stage full body dynamic motion matching fitting against C3D point cloud (307 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -678,7 +678,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10338: CLI entrypoint for full body fitting with argument parsing and execution logging. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10338: CLI entrypoint for full body fitting with argument parsing and execution logging (121 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -687,7 +687,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10338: SwingEvaluator.evaluate computes kinetic energy, momentum transfer, and clubhead delivery metrics across motion phases. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10338: SwingEvaluator.evaluate computes kinetic energy, momentum transfer, and clubhead delivery metrics across motion phases (188 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -696,7 +696,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10329: build_parser configures CLI flags for multi-engine pipeline execution across Drake, MuJoCo, and Pinocchio. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10329: build_parser configures CLI flags for multi-engine pipeline execution across Drake, MuJoCo, and Pinocchio (274 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -705,7 +705,7 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10329: _solve_pink_ik coordinates Pink solver setup, frame targets, posture regularization, and iterative frame progression. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10329: _solve_pink_ik coordinates Pink solver setup, frame targets, posture regularization, and iterative frame progression (128 > 100 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -714,7 +714,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #10329: _simulate_and_receipt orchestrates trajectory simulation, marker metrics, receipt schema emission, and artifact bundle export. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #10329: _simulate_and_receipt orchestrates trajectory simulation, marker metrics, receipt schema emission, and artifact bundle export (11 > 8 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {
@@ -775,7 +775,7 @@
       "rule": "parameters",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 15029,
-      "reason": "Issue #11767 (GCV-20): split_time_s is one explicit optional keyword added to the existing public computed-torque tracking API so the reference rates can be differentiated on each side of the ball impact. It is threaded through several callers (pipeline/dynamics.py, same_input/reference.py) as the same named keyword, so folding it into an options object is a wider call-site migration than this acceptance change; track that consolidation before this exception expires. Tracking renewal #15029 (Part of #15028); renewed once 2026-11-11.",
+      "reason": "Issue #11767 (GCV-20): split_time_s is one explicit optional keyword added to the existing public computed-torque tracking API so the reference rates can be differentiated on each side of the ball impact. It is threaded through several callers (pipeline/dynamics.py, same_input/reference.py) as the same named keyword, so folding it into an options object is a wider call-site migration than this acceptance change; track that consolidation before this exception expires (10 > 8 budget). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12. Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
     },
     {

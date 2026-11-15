@@ -32,6 +32,7 @@ class NormalisationKind(str, Enum):
     percent_body_weight = "percent_body_weight"
     peak_to_peak_unit = "peak_to_peak_unit"
     address_relative = "address_relative"
+    event_relative_101 = "event_relative_101"
 
 
 class FilterDifferentiationDescriptor(BaseModel):
@@ -66,6 +67,40 @@ class FilterDifferentiationDescriptor(BaseModel):
         if v <= 0:
             msg = "lowpass_cutoff_hz must be positive when set"
             raise ValueError(msg)
+        return v
+
+
+class EventTimeNormalisationDescriptor(BaseModel):
+    """Declared event-relative 101-point time normalisation contract (#14427).
+
+    Defines 101-point resampling (0% to 100% in 1% increments) between named swing events.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    event_sequence: tuple[str, ...] = Field(
+        default=("address", "impact"),
+        min_length=2,
+        description="Ordered sequence of named swing events spanning the 101-point window.",
+    )
+    n_points: int = Field(
+        default=101,
+        ge=2,
+        description="Number of resampled points (default: 101 for 0%..100%).",
+    )
+    method: str = Field(
+        default="linear",
+        min_length=1,
+        description="Interpolation method identifier ('linear' or 'cubic').",
+    )
+
+    @field_validator("event_sequence")
+    @classmethod
+    def _non_blank_sequence(cls, v: tuple[str, ...]) -> tuple[str, ...]:
+        for item in v:
+            if not isinstance(item, str) or not item.strip():
+                msg = "event_sequence entries must be non-empty strings"
+                raise ValueError(msg)
         return v
 
 
@@ -113,6 +148,10 @@ class GolfMetricDefinitionEntry(BaseModel):
         description="Mandatory bibliographic or ADR references.",
     )
     filter_descriptor: FilterDifferentiationDescriptor
+    time_normalisation: EventTimeNormalisationDescriptor | None = Field(
+        default=None,
+        description="Optional 101-point event-relative time normalisation descriptor (#14427).",
+    )
 
     @field_validator("segments", "event_anchors", "cites")
     @classmethod
