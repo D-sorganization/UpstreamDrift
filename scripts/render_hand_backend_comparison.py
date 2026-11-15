@@ -1,21 +1,25 @@
-"""Backend contact sheet: 2 columns, roll 0°, 1024px legible layout."""
+"""Backend contact sheet: all registered backends, roll 0°, smooth 2x2 SSAA."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import logging
 import sys
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+from PIL import Image, ImageDraw, ImageFont
+
 from src.shared.python.grip_spec import GripSpec
+from src.shared.python.grip_spec.shaft_roll import resolved_shaft_roll_deg
+from src.shared.python.hand_size import hand_mesh_scale
 from src.shared.python.model_appearance.grip_hand_mesh import (
     FINGER_NAMES,
     HandMeshParams,
     build_grip_hand_mesh,
 )
-from src.shared.python.grip_spec.shaft_roll import resolved_shaft_roll_deg
-from src.shared.python.hand_size import hand_mesh_scale
 from src.shared.python.model_appearance.grip_pose import Hand
 from src.shared.python.model_appearance.hand_backends.contract import (
     HandJointAngles,
@@ -28,35 +32,34 @@ from src.shared.python.model_appearance.hand_backends.metrics import (
     grip_shaft_penetration_fraction,
     inter_finger_penetration_fraction,
 )
+from src.shared.python.model_appearance.hand_backends.placement import (
+    mesh_in_shared_visual_frame,
+)
 from src.shared.python.model_appearance.hand_backends.preview import (
-    add_grip_shaft_solid,
-    frame_hand_viewport,
-    plot_shaded_mesh,
+    club_context_drawables,
+    render_shaded_scene_rgb,
     skin_tone_rgb,
-    transform_mesh,
     view_rotation,
+)
+from src.shared.python.model_appearance.hand_backends.procedural_skin import (
+    measure_procedural_hand_anthropometry,
 )
 from src.shared.python.model_appearance.hand_backends.registry import (
     build_hand_visual,
     registered_backend_ids,
 )
 from src.shared.python.model_appearance.hand_backends.settings import (
-    DEFAULT_VISUAL_GRIP_RADIUS_M,
     DEFAULT_HAND_VISUAL_SETTINGS,
+    DEFAULT_VISUAL_GRIP_RADIUS_M,
     HandVisualSettings,
 )
-from src.shared.python.model_appearance.hand_backends.skeleton_extract import (
-    finger_polyline,
-    middle_finger_length,
-)
-from src.shared.python.model_appearance.geometry import concat_meshes
-from src.shared.python.model_appearance.hand_backends.placement import (
-    mesh_in_shared_visual_frame,
-)
 
-RENDER_DPI = 128
+_LOG = logging.getLogger(__name__)
+CELL_PX = 512
+HEADER_PX = 34
+BANNER_PX = 48
 VIEWS = ("palm", "back", "side")
-ROW_SPECS: tuple[tuple[str, str | None, str], ...] = (
+ROW_SPECS: tuple[tuple[str, HandRole | None, str], ...] = (
     ("lead", "lead", "palm"),
     ("lead", "lead", "back"),
     ("lead", "lead", "side"),
@@ -97,13 +100,33 @@ def _metrics_for_backend(
         for part in reference.components
         if part.finger in FINGER_NAMES and part.name.endswith("_proximal")
     ]
-    mid_len = None
+    hand_len_m: float | None = None
+    palm_wid_m: float | None = None
+    mid_len_m: float | None = None
+    extra: dict[str, Any] = {}
     if backend_id == "procedural_skin":
-        mid_len = middle_finger_length(finger_polyline(reference, "middle"))
+        proc = measure_procedural_hand_anthropometry(
+            grip_spec,
+            role,
+            grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
+            settings=settings,
+        )
+        hand_len_m = float(proc["hand_length_m"])
+        palm_wid_m = float(proc["palm_width_m"])
+        mid_len_m = float(proc["middle_finger_length_m"])
+        extra = {
+            "palm_length_m": proc["palm_length_m"],
+            "cup_depth_m": proc["cup_depth_m"],
+            "max_knuckle_gap_m": proc["max_knuckle_gap_m"],
+            "min_inter_finger_gap_m": proc["min_inter_finger_gap_m"],
+            "pad_clearances_m": proc["pad_clearances_m"],
+        }
     anthro = anthropometric_vs_reference(
         rolled,
         reference=settings.anthropometry,
-        middle_finger_length_m=mid_len,
+        hand_length_m=hand_len_m,
+        palm_width_m=palm_wid_m,
+        middle_finger_length_m=mid_len_m,
     )
     return {
         "backend_id": backend_id,
@@ -121,6 +144,7 @@ def _metrics_for_backend(
         "palm_arch_angle_deg": vis.palm_arch_angle_deg,
         **anthropometric_ratios(rolled),
         **anthro,
+        **extra,
     }
 
 
@@ -130,27 +154,29 @@ def render_contact_sheet(
     *,
     settings: HandVisualSettings = DEFAULT_HAND_VISUAL_SETTINGS,
 ) -> None:
-    matplotlib = __import__("matplotlib")
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-
     backends = registered_backend_ids()
-    if len(backends) > 2:
-        backends = backends[:2]
     spec = GripSpec.legacy()
     n_rows = len(ROW_SPECS)
     n_cols = len(backends)
-    fig = plt.figure(
-        figsize=(6.0 * n_cols, 3.0 * n_rows),
-        facecolor="white",
+    club = club_context_drawables(DEFAULT_VISUAL_GRIP_RADIUS_M)
+
+    cell_h = HEADER_PX + CELL_PX
+    canvas = Image.new(
+        "RGB", (n_cols * CELL_PX, BANNER_PX + n_rows * cell_h), (242, 244, 247)
     )
+    draw = ImageDraw.Draw(canvas)
+    font_title = ImageFont.load_default(size=22)
+    font_cell = ImageFont.load_default(size=18)
+    title_text = "Hand backends @ shaft roll 0° (" + " | ".join(backends) + ")"
+    draw.rectangle([0, 0, canvas.width, BANNER_PX], fill=(28, 34, 46))
+    draw.text((16, 12), title_text, fill=(245, 247, 250), font=font_title)
+
     metrics: list[dict[str, Any]] = []
-    cell = 0
-    for row_label, role, view in ROW_SPECS:
+    for row_idx, (row_label, role, view) in enumerate(ROW_SPECS):
         rot = view_rotation(view)
-        for backend_id in backends:
-            cell += 1
-            ax = fig.add_subplot(n_rows, n_cols, cell, projection="3d")
+        y0 = BANNER_PX + row_idx * cell_h
+        for col_idx, backend_id in enumerate(backends):
+            x0 = col_idx * CELL_PX
             if role is not None:
                 angles = HandJointAngles.from_grip_spec(spec, role)
                 vis = build_hand_visual(
@@ -166,11 +192,17 @@ def render_contact_sheet(
                     _metrics_for_backend(backend_id, spec, role, angles, settings)
                 )
                 color = skin_tone_rgb(settings.skin_material_for_role(role))
-                posed = transform_mesh(mesh, rot)
-                plot_shaded_mesh(ax, posed, color=color, frame_fill=0.72)
+                rgb = render_shaded_scene_rgb(
+                    [(mesh, color, 0.09), *club],
+                    focus_vertices=mesh.vertices,
+                    view_rot=rot,
+                    width_px=CELL_PX,
+                    height_px=CELL_PX,
+                    target_fill=settings.render_frame_fill,
+                )
             else:
                 meshes = []
-                colors = []
+                drawables: list[tuple[Any, tuple[float, float, float], float]] = []
                 for r in ("lead", "trail"):
                     angles = HandJointAngles.from_grip_spec(spec, r)
                     vis = build_hand_visual(
@@ -183,41 +215,36 @@ def render_contact_sheet(
                     )
                     mesh = hand_mesh_with_shaft_roll(vis.mesh, spec, r)
                     shared = mesh_in_shared_visual_frame(mesh, spec, r)
-                    meshes.append(transform_mesh(shared, rot))
-                    colors.append(skin_tone_rgb(settings.skin_material_for_role(r)))
-                for m, col in zip(meshes, colors, strict=True):
-                    plot_shaded_mesh(
-                        ax, m, color=col, auto_frame=False, frame_fill=0.72
+                    meshes.append(shared.vertices)
+                    drawables.append(
+                        (
+                            shared,
+                            skin_tone_rgb(settings.skin_material_for_role(r)),
+                            0.09,
+                        )
                     )
-                combined = concat_meshes(*meshes)
-                frame_hand_viewport(ax, combined.vertices, fill_fraction=0.72)
-            z0, z1 = (
-                float(ax.get_zlim3d()[0]),
-                float(ax.get_zlim3d()[1]),
+                drawables.extend(club)
+                rgb = render_shaded_scene_rgb(
+                    drawables,
+                    focus_vertices=np.vstack(meshes),
+                    view_rot=rot,
+                    width_px=CELL_PX,
+                    height_px=CELL_PX,
+                    target_fill=settings.render_frame_fill,
+                )
+            draw.rectangle(
+                [x0, y0, x0 + CELL_PX - 1, y0 + HEADER_PX], fill=(228, 232, 238)
             )
-            add_grip_shaft_solid(
-                ax,
-                DEFAULT_VISUAL_GRIP_RADIUS_M,
-                z_range=(z0, z1),
-                rotation=rot,
+            draw.text(
+                (x0 + 12, y0 + 7),
+                f"{backend_id}  |  {row_label} · {view}",
+                fill=(24, 28, 36),
+                font=font_cell,
             )
-            ax.set_title(
-                f"{backend_id}\n{row_label} · {view}",
-                fontsize=11,
-                linespacing=1.2,
-            )
-            ax.set_axis_off()
-    fig.suptitle(
-        "Hand backends @ shaft roll 0°  (capsule | procedural skin)",
-        fontsize=14,
-        y=0.995,
-    )
-    fig.subplots_adjust(
-        left=0.02, right=0.98, top=0.96, bottom=0.02, hspace=0.08, wspace=0.05
-    )
+            canvas.paste(Image.fromarray(rgb), (x0, y0 + HEADER_PX))
+
     output_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(output_png, dpi=RENDER_DPI, facecolor="white")
-    plt.close(fig)
+    canvas.save(output_png)
     output_json.write_text(
         json.dumps({"metrics": metrics, "shaft_roll_deg": 0.0}, indent=2) + "\n",
         encoding="utf-8",
@@ -225,6 +252,7 @@ def render_contact_sheet(
 
 
 def main(argv: list[str] | None = None) -> int:
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--png",
@@ -242,7 +270,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     render_contact_sheet(args.png, args.json)
-    print(f"Wrote {args.png} and {args.json}")
+    _LOG.info("Wrote %s and %s", args.png, args.json)
     return 0
 
 

@@ -91,6 +91,8 @@ def anthropometric_vs_reference(
     *,
     reference: object,
     middle_finger_length_m: float | None = None,
+    hand_length_m: float | None = None,
+    palm_width_m: float | None = None,
 ) -> dict[str, float | bool]:
     """Compare measured mesh extents to :class:`HandAnthropometryReference`."""
     from src.shared.python.model_appearance.hand_backends.settings import (
@@ -100,16 +102,22 @@ def anthropometric_vs_reference(
     if not isinstance(reference, HandAnthropometryReference):
         raise TypeError("reference must be HandAnthropometryReference")
     measured = anthropometric_ratios(mesh)
+    eff_length = (
+        measured["hand_length_m"] if hand_length_m is None else float(hand_length_m)
+    )
+    eff_width = (
+        measured["hand_breadth_m"] if palm_width_m is None else float(palm_width_m)
+    )
     tol = reference.ratio_tolerance_rel
     checks: dict[str, float | bool] = {
         "reference_hand_length_m": reference.reference_hand_length_m,
         "reference_palm_width_m": reference.reference_palm_width_m,
         "reference_middle_finger_length_m": reference.middle_finger_length_m,
         "hand_length_within_tolerance": _within(
-            measured["hand_length_m"], reference.reference_hand_length_m, tol
+            eff_length, reference.reference_hand_length_m, tol
         ),
         "palm_width_within_tolerance": _within(
-            measured["hand_breadth_m"], reference.reference_palm_width_m, tol
+            eff_width, reference.reference_palm_width_m, tol
         ),
     }
     if middle_finger_length_m is not None:

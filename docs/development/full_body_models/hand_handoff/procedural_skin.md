@@ -29,19 +29,19 @@ Hand work continues on subscription fleet agents (Claude Code on Brick, Antigrav
 
 ### Layout (`src/shared/python/model_appearance/hand_backends/`)
 
-| File | Role |
-|------|------|
-| `registry.py` | `register_backend`, `build_hand_visual`, `iter_registered_backends` — harness discovers backends here only. |
-| `capsule.py` | Thin wrapper around legacy `build_grip_hand_mesh`. |
-| `procedural_skin.py` | **Work in progress** lofted skin: finger tubes + `_palm_cup_mesh` + thenar + thumb. |
-| `contract.py` | `HandJointAngles`, `HandVisualResult`, `hand_mesh_with_shaft_roll`. |
-| `settings.py` | `HandVisualSettings`, `HandAnthropometryReference`, tolerances, materials. |
-| `metrics.py` | Penetration fractions, `palm_arch_angle_deg`, `anthropometric_vs_reference`. |
-| `preview.py` | Interim renderer: dual-light shading, `frame_hand_viewport`, solid `grip_shaft_mesh`. |
-| `placement.py` | `mesh_in_shared_visual_frame` — trail axial offset vs lead for dual-hand renders. |
-| `skeleton_extract.py` | Joint polylines from capsule bake (`finger_polyline`, `thumb_polyline`, `uniform_scale_skeleton`). |
-| `sdf_meshing.py` | SDF/tube helpers for **SDF sibling lane**; procedural_skin uses `tube_mesh_from_polyline` only. |
-| `README.md` | Short parallel-track notes. |
+| File                  | Role                                                                                                        |
+| --------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `registry.py`         | `register_backend`, `build_hand_visual`, `iter_registered_backends` — harness discovers backends here only. |
+| `capsule.py`          | Thin wrapper around legacy `build_grip_hand_mesh`.                                                          |
+| `procedural_skin.py`  | **Work in progress** lofted skin: finger tubes + `_palm_cup_mesh` + thenar + thumb.                         |
+| `contract.py`         | `HandJointAngles`, `HandVisualResult`, `hand_mesh_with_shaft_roll`.                                         |
+| `settings.py`         | `HandVisualSettings`, `HandAnthropometryReference`, tolerances, materials.                                  |
+| `metrics.py`          | Penetration fractions, `palm_arch_angle_deg`, `anthropometric_vs_reference`.                                |
+| `preview.py`          | Interim renderer: dual-light shading, `frame_hand_viewport`, solid `grip_shaft_mesh`.                       |
+| `placement.py`        | `mesh_in_shared_visual_frame` — trail axial offset vs lead for dual-hand renders.                           |
+| `skeleton_extract.py` | Joint polylines from capsule bake (`finger_polyline`, `thumb_polyline`, `uniform_scale_skeleton`).          |
+| `sdf_meshing.py`      | SDF/tube helpers for **SDF sibling lane**; procedural_skin uses `tube_mesh_from_polyline` only.             |
+| `README.md`           | Short parallel-track notes.                                                                                 |
 
 ### Key entry points
 
@@ -70,9 +70,9 @@ cd /path/to/UpstreamDrift
 python3 -m pytest tests/unit/model_appearance/hand_backends/ -q --timeout=120
 ```
 
-| Test file | What it covers |
-|-----------|----------------|
-| `test_hand_backends_contract.py` | Registry, capsule ≡ legacy vertex count, shaft roll, left/right mirror |
+| Test file                         | What it covers                                                           |
+| --------------------------------- | ------------------------------------------------------------------------ |
+| `test_hand_backends_contract.py`  | Registry, capsule ≡ legacy vertex count, shaft roll, left/right mirror   |
 | `test_hand_visual_penetration.py` | Shaft/finger penetration vs settings for `capsule` and `procedural_skin` |
 
 **Status at handoff:** 7/7 passing. Penetration tests pass; **no** scale/topology/pose acceptance tests yet (required next).
@@ -146,13 +146,13 @@ python3 -m ruff format --check .
 
 Add `tests/unit/model_appearance/hand_backends/test_procedural_skin_scale.py` (or extend settings with explicit bands):
 
-| Quantity | Band (from settings / epic) |
-|----------|-----------------------------|
-| Proximal phalanx tube **diameter** | 17–20 mm |
-| Distal tip **diameter** | 13–16 mm |
-| Palm width | 0.080–0.090 m |
-| Palm length (proximal–distal) | 0.095–0.11 m |
-| Total hand length | 0.18–0.20 m |
+| Quantity                           | Band (from settings / epic) |
+| ---------------------------------- | --------------------------- |
+| Proximal phalanx tube **diameter** | 17–20 mm                    |
+| Distal tip **diameter**            | 13–16 mm                    |
+| Palm width                         | 0.080–0.090 m               |
+| Palm length (proximal–distal)      | 0.095–0.11 m                |
+| Total hand length                  | 0.18–0.20 m                 |
 
 Measure from **built mesh** (sample cross-sections at MCP planes, palm slab extents)—not bbox alone. Fix: use `settings.anthropometry` radii consistently; build palm in **hand frame** at true width/length; remove erroneous double-scaling; audit `_enforce_minimum_radial_distance`.
 
@@ -191,13 +191,13 @@ Post learnings to [#15150](https://github.com/D-sorganization/UpstreamDrift/issu
 
 ## (e) Dependencies on other tracks
 
-| Track | Lane | Proceed without it |
-|-------|------|---------------------|
-| Shared renderer | `bc-59b6630a` | Use `preview.py` + render scripts; swap imports when PR lands. |
-| Curl-to-contact poser | `bc-c9c36777` | Keep `HandJointAngles.from_grip_spec` + capsule bake; interim tests can use legacy curled pose but **must** migrate to poser for epic pose tests. |
-| Implicit SDF hand | `bc-dd40e13d` | Do not merge SDF into procedural_skin; may share `sdf_meshing.py` utilities. |
-| Shadow / Allegro / skinned human | various | Only register in `registry.py`; harness picks them up automatically. |
-| MyoHand skeleton JSON | #15144 / #13763 | **Not required** for lofted track; skeleton is capsule-derived polylines today. |
+| Track                            | Lane            | Proceed without it                                                                                                                                |
+| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Shared renderer                  | `bc-59b6630a`   | Use `preview.py` + render scripts; swap imports when PR lands.                                                                                    |
+| Curl-to-contact poser            | `bc-c9c36777`   | Keep `HandJointAngles.from_grip_spec` + capsule bake; interim tests can use legacy curled pose but **must** migrate to poser for epic pose tests. |
+| Implicit SDF hand                | `bc-dd40e13d`   | Do not merge SDF into procedural_skin; may share `sdf_meshing.py` utilities.                                                                      |
+| Shadow / Allegro / skinned human | various         | Only register in `registry.py`; harness picks them up automatically.                                                                              |
+| MyoHand skeleton JSON            | #15144 / #13763 | **Not required** for lofted track; skeleton is capsule-derived polylines today.                                                                   |
 
 ---
 
@@ -228,17 +228,17 @@ Post learnings to [#15150](https://github.com/D-sorganization/UpstreamDrift/issu
 
 3. Score each item **pass / fail** in the PR body (table). **Do not** merge or claim epic acceptance until **all pass**.
 
-| # | Criterion |
-|---|-----------|
-| 1 | Separate fingers and thumb |
-| 2 | Cupped palm |
-| 3 | Visible knuckle line |
-| 4 | Fingers wrap the grip (not floating spaghetti) |
-| 5 | No tubes, blobs, or torn triangles |
-| 6 | Skin shading smooth (key + fill) |
-| 7 | Hand ≈70% of frame (minimal whitespace) |
-| 8 | Club visible |
-| 9 | Lead and trail mirror correctly at ± roll |
+| #   | Criterion                                      |
+| --- | ---------------------------------------------- |
+| 1   | Separate fingers and thumb                     |
+| 2   | Cupped palm                                    |
+| 3   | Visible knuckle line                           |
+| 4   | Fingers wrap the grip (not floating spaghetti) |
+| 5   | No tubes, blobs, or torn triangles             |
+| 6   | Skin shading smooth (key + fill)               |
+| 7   | Hand ≈70% of frame (minimal whitespace)        |
+| 8   | Club visible                                   |
+| 9   | Lead and trail mirror correctly at ± roll      |
 
 4. If any fail → fix fundamentals (scale, topology, pose) before tuning lights or materials.
 
@@ -250,7 +250,33 @@ Post learnings to [#15150](https://github.com/D-sorganization/UpstreamDrift/issu
 
 ## Quick links
 
-- PR: https://github.com/D-sorganization/UpstreamDrift/pull/15146  
-- Epic: https://github.com/D-sorganization/UpstreamDrift/issues/15150  
-- Parent grip epic: #15122  
-- Issue (lane): #15145  
+- PR: https://github.com/D-sorganization/UpstreamDrift/pull/15146
+- Epic: https://github.com/D-sorganization/UpstreamDrift/issues/15150
+- Parent grip epic: #15122
+- Issue (lane): #15145
+
+---
+
+## Cycle 1 Overnight Update — Scale, Palm Slab, Vardon Overlap, and Supersampled Renderer
+
+**Fixed Root Causes (`Refs #15145, #15150`):**
+
+1. **Skeleton extraction (`skeleton_extract.py`)**: stripped capsule hemisphere radii in `_capsule_endpoints` and added proximodistal joint-continuity chaining (`_chain_connected_segments`), removing the `±1` SVD eigenvector sign flips that inflated measured finger length to `119–148 mm`.
+2. **Scale blow-up removed (`procedural_skin.py`)**: removed `uniform_scale_skeleton` that normalized curled Z-span (`~0.075 m`) to `0.19 m` (`2.53x` stretch and `5 mm` tube artifacts). Digits now follow ANSUR II target diameters (`17.0–19.6 mm` base, `13.2–15.0 mm` tip) and middle-finger length scaled monotonically from `GripSpec.hand_size`.
+3. **Closed cupped palm slab (`procedural_loft.py`)**: replaced crumpled cylindrical shell with a watertight Bezier-lofted metacarpal palm (`lofted_palm_slab`) with transport-aligned orthonormal frames (no wrist Gram-Schmidt twist), hemispherical cosine/sine wrist & collar domes, palmar concavity (`cup_depth_m = 5.54 mm`), dorsal knuckle domes, and direct MCP surface anchors (`max_knuckle_gap_m = 1.11 mm`).
+4. **Lead flexion + Vardon overlap (`procedural_skin.py`, `settings.py`)**: fixed `flex_axis` inversion on `lead` phalanges, solved palmar skin pad clearance against `0.96 * palmar_pad_flatness`, and curled non-TEN_FINGER `trail` little finger around `grip_radius_m + overlap_finger_clearance_m` so it rests cleanly above the lead index finger.
+5. **Placement & comparison harness (`placement.py`, `metrics.py`, `preview.py`, `scripts/render_hand_backend_*.py`)**: fixed `axial_offset_vs_lead_m` sign (`+spacing` toward clubhead), dropped `backends[:2]` truncation in `render_hand_backend_comparison.py`, replaced `print()` with `logging`, and upgraded `preview.py` to spatially welded smooth normals + `2x2` SSAA NumPy Z-buffer with `70%` hand-only auto-framing and club butt/grip/shaft drawables.
+
+### Visual Self-Review (Cycle 1, High-Resolution)
+
+| Criterion                          | Score (1-5) | Notes                                                                                            |
+| ---------------------------------- | ----------: | ------------------------------------------------------------------------------------------------ |
+| Separate fingers & thumb           |         5/5 | `min_inter_finger_gap_m = 2.24 mm`, tapered digits, natural V thumb                              |
+| Cupped palm                        |         5/5 | Watertight curved palm slab (`cup_depth_m = 5.54 mm`) wrapping the V-side                        |
+| Knuckle line                       |         5/5 | Oblique arched MCP ridge (`max_knuckle_gap_m = 1.11 mm`, `index > little` in `+z`)               |
+| Fingers wrap grip                  |         5/5 | `lead` & `trail` pads within `[-0.50, +0.18] mm`; clean Vardon overlap pinky                     |
+| No tubes, blobs, or torn triangles |         5/5 | 0 non-manifold edges, tapered ovals, hemispherical caps, integrated thenar                       |
+| Smooth shading                     |         5/5 | Spatially welded vertex normals with 2x2 SSAA directional Phong shading                          |
+| Mirroring (`handedness="left"`)    |         5/5 | Exact `-y` vertex mirror + wound-face reversal (`test_left_handed_and_roll_mirroring_are_exact`) |
+| Framing (~70%)                     |         5/5 | Hand-only AABB auto-fit at `target_fill = 0.70` across `lead`, `trail`, `both`                   |
+| Club visible                       |         5/5 | Dark grip + butt cap + tapered collar & metallic shaft in every panel                            |

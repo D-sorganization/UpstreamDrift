@@ -16,7 +16,7 @@ def axial_offset_vs_lead_m(grip_spec: GripSpec, role: str) -> float:
     if role == "lead":
         return 0.0
     trail_z = pose.placement(Hand.TRAIL).distance_below_butt_m
-    return float(lead_z - trail_z)
+    return float(trail_z - lead_z)
 
 
 def translate_mesh(mesh: Mesh, delta: np.ndarray) -> Mesh:

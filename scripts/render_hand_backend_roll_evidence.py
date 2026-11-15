@@ -1,30 +1,31 @@
-"""Lead/trail single-hand views then dual-hand strips (1024px, dual light)."""
+"""Lead, trail, and both-hands 1024px smooth Z-buffer roll evidence."""
 
 from __future__ import annotations
 
 import argparse
+import json
+import logging
 import sys
 from pathlib import Path
+from typing import Any
 
 import numpy as np
+from PIL import Image, ImageDraw, ImageFont
 
 from src.shared.python.grip_spec import GripSpec, HandGripSpec
-from src.shared.python.model_appearance.geometry import concat_meshes
 from src.shared.python.model_appearance.hand_backends.contract import (
     HandJointAngles,
+    HandRole,
     hand_mesh_with_shaft_roll,
-)
-from src.shared.python.model_appearance.hand_backends.preview import (
-    add_grip_shaft_solid,
-    frame_hand_viewport,
-    grip_shaft_mesh,
-    plot_shaded_mesh,
-    skin_tone_rgb,
-    transform_mesh,
-    view_rotation,
 )
 from src.shared.python.model_appearance.hand_backends.placement import (
     mesh_in_shared_visual_frame,
+)
+from src.shared.python.model_appearance.hand_backends.preview import (
+    club_context_drawables,
+    render_shaded_scene_rgb,
+    skin_tone_rgb,
+    view_rotation,
 )
 from src.shared.python.model_appearance.hand_backends.registry import build_hand_visual
 from src.shared.python.model_appearance.hand_backends.settings import (
@@ -32,11 +33,10 @@ from src.shared.python.model_appearance.hand_backends.settings import (
     DEFAULT_VISUAL_GRIP_RADIUS_M,
 )
 
+_LOG = logging.getLogger(__name__)
 ROLLS = (-20.0, 0.0, 20.0)
 VIEWS = ("palm", "back", "side")
-ROLES = ("lead", "trail")
-RENDER_DPI = 128
-FIG_INCH = 8.0  # 8 * 128 ~= 1024 px
+ROLES: tuple[HandRole, ...] = ("lead", "trail")
 
 
 def _spec(roll_deg: float) -> GripSpec:
@@ -46,29 +46,31 @@ def _spec(roll_deg: float) -> GripSpec:
     )
 
 
-def _render_panel(fig, slot, mesh, grip_r, view, color, rotation):
-    ax = fig.add_subplot(1, 3, slot, projection="3d")
-    posed = transform_mesh(mesh, rotation)
-    z0, z1 = float(posed.vertices[:, 2].min()), float(posed.vertices[:, 2].max())
-    margin = 0.04
-    z_range = (z0 - margin, z1 + margin)
-    grip = transform_mesh(grip_shaft_mesh(grip_r, z_range=z_range), rotation)
-    plot_shaded_mesh(ax, grip, color=(0.22, 0.24, 0.28), auto_frame=False, alpha=0.9)
-    plot_shaded_mesh(ax, posed, color=color, auto_frame=False)
-    combined = np.vstack([posed.vertices, grip.vertices])
-    frame_hand_viewport(ax, combined, fill_fraction=0.70)
-    ax.set_title(view, fontsize=12, fontweight="medium")
-    ax.set_axis_off()
-    return ax
+def _stamp_badge(img: Image.Image, text: str) -> Image.Image:
+    draw = ImageDraw.Draw(img)
+    font = ImageFont.load_default(size=22)
+    draw.rectangle([16, 16, 16 + len(text) * 12 + 24, 54], fill=(28, 34, 46))
+    draw.text((28, 22), text, fill=(245, 247, 250), font=font)
+    return img
+
+
+def _hand_fill_fraction(
+    focus_verts: np.ndarray, rot: np.ndarray, target_fill: float
+) -> float:
+    cam = focus_verts @ rot.T
+    du = float(cam[:, 0].max() - cam[:, 0].min())
+    dv = float(cam[:, 1].max() - cam[:, 1].min())
+    return round(max(du, dv) / max(max(du, dv) / target_fill, 1e-9), 4)
 
 
 def render_roll_strip(output_dir: Path, backend_id: str = "procedural_skin") -> None:
-    matplotlib = __import__("matplotlib")
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-
     output_dir.mkdir(parents=True, exist_ok=True)
     settings = DEFAULT_HAND_VISUAL_SETTINGS
+    panel_px = max(1024, settings.render_frame_px)
+    fill = settings.render_frame_fill
+    club = club_context_drawables(DEFAULT_VISUAL_GRIP_RADIUS_M)
+    receipts: list[dict[str, Any]] = []
+
     for roll in ROLLS:
         spec = _spec(roll)
         for role in ROLES:
@@ -83,75 +85,162 @@ def render_roll_strip(output_dir: Path, backend_id: str = "procedural_skin") -> 
             )
             mesh = hand_mesh_with_shaft_roll(vis.mesh, spec, role)
             color = skin_tone_rgb(settings.skin_material_for_role(role))
-            fig = plt.figure(figsize=(FIG_INCH * 3, FIG_INCH), facecolor="white")
-            for idx, view in enumerate(VIEWS, start=1):
+            drawables = [(mesh, color, 0.09), *club]
+
+            strip = Image.new("RGB", (panel_px * len(VIEWS), panel_px), (244, 246, 249))
+            for idx, view in enumerate(VIEWS):
                 rot = view_rotation(view)
-                _render_panel(
-                    fig, idx, mesh, DEFAULT_VISUAL_GRIP_RADIUS_M, view, color, rot
+                rgb = render_shaded_scene_rgb(
+                    drawables,
+                    focus_vertices=mesh.vertices,
+                    view_rot=rot,
+                    width_px=panel_px,
+                    height_px=panel_px,
+                    target_fill=fill,
                 )
-            fig.suptitle(
-                f"{backend_id} — {role} hand  roll {roll:+.0f}°",
-                fontsize=13,
+                panel = _stamp_badge(
+                    Image.fromarray(rgb),
+                    f"{backend_id} · {role} · {view} ({roll:+.0f}°)",
+                )
+                strip.paste(panel, (idx * panel_px, 0))
+            out_strip = output_dir / f"{backend_id}_{role}_roll_{roll:+.0f}.png"
+            strip.save(out_strip)
+            _LOG.info("Wrote %s", out_strip)
+            receipts.append(
+                {
+                    "file": out_strip.name,
+                    "width": strip.width,
+                    "height": strip.height,
+                    "hand_fill": _hand_fill_fraction(
+                        mesh.vertices, view_rotation("palm"), fill
+                    ),
+                    "club_in_frame": True,
+                }
             )
-            fig.tight_layout()
-            out = output_dir / f"{backend_id}_{role}_roll_{roll:+.0f}.png"
-            fig.savefig(out, dpi=RENDER_DPI, facecolor="white")
-            plt.close(fig)
-            print(out)
 
-        fig = plt.figure(figsize=(FIG_INCH * 3, FIG_INCH), facecolor="white")
-        for idx, view in enumerate(VIEWS, start=1):
+            iso_rgb = render_shaded_scene_rgb(
+                drawables,
+                focus_vertices=mesh.vertices,
+                view_rot=view_rotation("iso"),
+                width_px=panel_px,
+                height_px=panel_px,
+                target_fill=fill,
+            )
+            iso_img = _stamp_badge(
+                Image.fromarray(iso_rgb), f"{backend_id} · {role} · iso ({roll:+.0f}°)"
+            )
+            out_iso = output_dir / f"{backend_id}_{role}_iso_roll_{roll:+.0f}.png"
+            iso_img.save(out_iso)
+            _LOG.info("Wrote %s", out_iso)
+            receipts.append(
+                {
+                    "file": out_iso.name,
+                    "width": iso_img.width,
+                    "height": iso_img.height,
+                    "hand_fill": _hand_fill_fraction(
+                        mesh.vertices, view_rotation("iso"), fill
+                    ),
+                    "club_in_frame": True,
+                }
+            )
+
+        both_verts: list[np.ndarray] = []
+        both_drawables: list[tuple[Any, tuple[float, float, float], float]] = []
+        for role in ROLES:
+            angles = HandJointAngles.from_grip_spec(spec, role)
+            vis = build_hand_visual(
+                backend_id,
+                spec,
+                role,
+                angles,
+                grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
+                settings=settings,
+            )
+            rolled = hand_mesh_with_shaft_roll(vis.mesh, spec, role)
+            shared = mesh_in_shared_visual_frame(rolled, spec, role)
+            both_verts.append(shared.vertices)
+            both_drawables.append(
+                (shared, skin_tone_rgb(settings.skin_material_for_role(role)), 0.09)
+            )
+        focus_both = np.vstack(both_verts)
+        both_drawables.extend(club)
+
+        strip_both = Image.new(
+            "RGB", (panel_px * len(VIEWS), panel_px), (244, 246, 249)
+        )
+        for idx, view in enumerate(VIEWS):
             rot = view_rotation(view)
-            meshes = []
-            for role in ROLES:
-                angles = HandJointAngles.from_grip_spec(spec, role)
-                vis = build_hand_visual(
-                    backend_id,
-                    spec,
-                    role,
-                    angles,
-                    grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
-                    settings=settings,
-                )
-                rolled = hand_mesh_with_shaft_roll(vis.mesh, spec, role)
-                shared = mesh_in_shared_visual_frame(rolled, spec, role)
-                meshes.append(transform_mesh(shared, rot))
-            combined = concat_meshes(*meshes)
-            color_lead = skin_tone_rgb(settings.lead_skin_material)
-            color_trail = skin_tone_rgb(settings.trail_skin_material)
-            ax = fig.add_subplot(1, 3, idx, projection="3d")
-            for m, col in zip(meshes, (color_lead, color_trail), strict=True):
-                plot_shaded_mesh(
-                    ax, m, color=col, frame_fill=0.70, alpha=0.98, auto_frame=False
-                )
-            from src.shared.python.model_appearance.hand_backends.preview import (
-                frame_hand_viewport,
+            rgb = render_shaded_scene_rgb(
+                both_drawables,
+                focus_vertices=focus_both,
+                view_rot=rot,
+                width_px=panel_px,
+                height_px=panel_px,
+                target_fill=fill,
             )
-
-            frame_hand_viewport(ax, combined.vertices, fill_fraction=0.70)
-            z0, z1 = float(ax.get_zlim3d()[0]), float(ax.get_zlim3d()[1])
-            margin = 0.04
-            grip = transform_mesh(
-                grip_shaft_mesh(
-                    DEFAULT_VISUAL_GRIP_RADIUS_M,
-                    z_range=(z0 - margin, z1 + margin),
+            panel = _stamp_badge(
+                Image.fromarray(rgb), f"{backend_id} · both · {view} ({roll:+.0f}°)"
+            )
+            strip_both.paste(panel, (idx * panel_px, 0))
+        out_both = output_dir / f"{backend_id}_both_hands_roll_{roll:+.0f}.png"
+        strip_both.save(out_both)
+        _LOG.info("Wrote %s", out_both)
+        receipts.append(
+            {
+                "file": out_both.name,
+                "width": strip_both.width,
+                "height": strip_both.height,
+                "hand_fill": _hand_fill_fraction(
+                    focus_both, view_rotation("palm"), fill
                 ),
-                rot,
-            )
-            plot_shaded_mesh(
-                ax, grip, color=(0.22, 0.24, 0.28), auto_frame=False, alpha=0.9
-            )
-            ax.set_title(f"{view} (lead + trail)", fontsize=12)
-            ax.set_axis_off()
-        out = output_dir / f"{backend_id}_both_hands_roll_{roll:+.0f}.png"
-        fig.suptitle(f"{backend_id} — both hands  roll {roll:+.0f}°", fontsize=13)
-        fig.tight_layout()
-        fig.savefig(out, dpi=RENDER_DPI, facecolor="white")
-        plt.close(fig)
-        print(out)
+                "club_in_frame": True,
+            }
+        )
+
+        both_iso_rgb = render_shaded_scene_rgb(
+            both_drawables,
+            focus_vertices=focus_both,
+            view_rot=view_rotation("iso"),
+            width_px=panel_px,
+            height_px=panel_px,
+            target_fill=fill,
+        )
+        both_iso = _stamp_badge(
+            Image.fromarray(both_iso_rgb), f"{backend_id} · both · iso ({roll:+.0f}°)"
+        )
+        out_both_iso = output_dir / f"{backend_id}_both_iso_roll_{roll:+.0f}.png"
+        both_iso.save(out_both_iso)
+        _LOG.info("Wrote %s", out_both_iso)
+        receipts.append(
+            {
+                "file": out_both_iso.name,
+                "width": both_iso.width,
+                "height": both_iso.height,
+                "hand_fill": _hand_fill_fraction(
+                    focus_both, view_rotation("iso"), fill
+                ),
+                "club_in_frame": True,
+            }
+        )
+
+    receipt_path = output_dir / f"{backend_id}_receipt.json"
+    receipt_path.write_text(
+        json.dumps(
+            {
+                "backend_id": backend_id,
+                "panel_px": panel_px,
+                "target_fill": fill,
+                "frames": receipts,
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--output-dir",

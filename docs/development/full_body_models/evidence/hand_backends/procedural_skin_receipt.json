@@ -1,0 +1,133 @@
+{
+  "backend_id": "procedural_skin",
+  "panel_px": 1024,
+  "target_fill": 0.7,
+  "frames": [
+    {
+      "file": "procedural_skin_lead_roll_-20.png",
+      "width": 3072,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_lead_iso_roll_-20.png",
+      "width": 1024,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_trail_roll_-20.png",
+      "width": 3072,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_trail_iso_roll_-20.png",
+      "width": 1024,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_both_hands_roll_-20.png",
+      "width": 3072,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_both_iso_roll_-20.png",
+      "width": 1024,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_lead_roll_+0.png",
+      "width": 3072,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_lead_iso_roll_+0.png",
+      "width": 1024,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_trail_roll_+0.png",
+      "width": 3072,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_trail_iso_roll_+0.png",
+      "width": 1024,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_both_hands_roll_+0.png",
+      "width": 3072,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_both_iso_roll_+0.png",
+      "width": 1024,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_lead_roll_+20.png",
+      "width": 3072,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_lead_iso_roll_+20.png",
+      "width": 1024,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_trail_roll_+20.png",
+      "width": 3072,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_trail_iso_roll_+20.png",
+      "width": 1024,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_both_hands_roll_+20.png",
+      "width": 3072,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    },
+    {
+      "file": "procedural_skin_both_iso_roll_+20.png",
+      "width": 1024,
+      "height": 1024,
+      "hand_fill": 0.7,
+      "club_in_frame": true
+    }
+  ]
+}

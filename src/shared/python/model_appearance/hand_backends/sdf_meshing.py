@@ -134,8 +134,8 @@ def catmull_rom_spline(points: np.ndarray, samples: int) -> np.ndarray:
     if len(points) < 2:
         return points
     if len(points) == 2:
-        t = np.linspace(0.0, 1.0, samples)
-        return points[0] + np.outer(t, points[1] - points[0])
+        t_lin = np.linspace(0.0, 1.0, samples)
+        return points[0] + np.outer(t_lin, points[1] - points[0])
     pts = [points[0], *points, points[-1]]
     out: list[np.ndarray] = []
     segs = len(points) - 1
