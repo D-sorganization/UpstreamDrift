@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-14T12:05:26Z",
+  "generated_at": "2026-11-15T03:59:09Z",
   "rows": [
     {
       "acceptance": null,
@@ -675,6 +675,31 @@
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/grip_kinetics/receipt_full_window_conditioned.json",
       "sha256": "e98e79a8ba8a5ed7425fd27540add17a141de284bcbcf905edc490df724f2915"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": null,
+      "engine": "unknown",
+      "horizon_s": null,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/grip_shaft_roll/receipt.json",
+      "sha256": "5f6c5e2b8318dd949a05d241727c16c13834e9f215da5b6fc33ca9d781818b3b"
     },
     {
       "acceptance": null,
@@ -6569,5 +6594,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 162
+  "total_receipts": 163
 }
