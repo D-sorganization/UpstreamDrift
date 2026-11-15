@@ -27,7 +27,6 @@ import numpy as np
 
 import src.shared.python.model_appearance.hand_backends as hand_backends
 from src.shared.python.grip_spec.types import GripSpec
-from src.shared.python.model_appearance.geometry import Mesh
 from src.shared.python.model_appearance.hand_backends.qa import (
     load_hand_visual_quality,
     max_grip_cylinder_penetration_m,
@@ -90,8 +89,11 @@ def main() -> int:
     views = tuple(SETTINGS["views"])
     report: dict[str, object] = {"frames": {}, "hands": {}, "pairs": {}}
 
-    def skin(mesh: Mesh, rgb) -> object:
-        return render.ScenePart(mesh, (*rgb, 1.0), "skin")
+    def skin(result) -> object:
+        """The hand as a skin part; the camera frames on its declared focus."""
+        return render.ScenePart(
+            result.mesh, (*result.skin_rgb, 1.0), "skin", result.frame_focus
+        )
 
     def shoot(name: str, parts, view: str, basis, side: str) -> None:
         z = np.concatenate([p.mesh.vertices[:, 2] for p in parts])
@@ -138,7 +140,7 @@ def main() -> int:
             for view in views:
                 shoot(
                     f"skinned_{side}_{view}_{tag}",
-                    [skin(result.mesh, result.skin_rgb)],
+                    [skin(result)],
                     view,
                     _basis(flat[side]),
                     side,
@@ -156,7 +158,7 @@ def main() -> int:
                 k: round(1e3 * v, 2) for k, v in both["trail"].contact_gaps_m.items()
             },
         }
-        pair = [skin(r.mesh, r.skin_rgb) for r in both.values()]
+        pair = [skin(r) for r in both.values()]
         for view in views:
             shoot(
                 f"skinned_both_{view}_{tag}", pair, view, _basis(flat["lead"]), "lead"

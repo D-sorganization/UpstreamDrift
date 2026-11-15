@@ -28,7 +28,8 @@ class HandVisualResult:
     ``mesh`` and ``skin_rgb`` are what a renderer needs. The rest lets a
     caller audit the pose: skinned backends report the joint angles, the gap
     between the grip and each phalanx, and the bone transforms and rigid frame
-    that produced every vertex.
+    that produced every vertex. ``frame_focus`` marks the vertices a renderer
+    frames its camera on (the hand, not the forearm stub); ``None`` means all.
     """
 
     backend: str
@@ -42,3 +43,4 @@ class HandVisualResult:
     bone_transforms: NDArray[np.float64] | None = None
     frame_from_rest: NDArray[np.float64] | None = None
     rest_asset: SkinnedHandAsset | None = None
+    frame_focus: NDArray[np.bool_] | None = None

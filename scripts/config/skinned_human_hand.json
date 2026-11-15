@@ -88,6 +88,11 @@
     "max_spacing_adjust_m": 0.03,
     "capsule_margin_m": 0.001
   },
+  "framing": {
+    "excluded_bones": [
+      "forearm"
+    ]
+  },
   "wrist": {
     "lead": {
       "extension_deg": 0.0,

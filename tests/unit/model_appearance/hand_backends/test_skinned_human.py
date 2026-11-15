@@ -304,6 +304,30 @@ def test_settings_drive_the_result() -> None:
     ) <= float(_Q["penetration_tolerance_m"])
 
 
+@pytest.mark.parametrize("side", _SIDES)
+def test_the_hand_declares_a_frame_focus_that_leaves_out_the_forearm(
+    side: str,
+) -> None:
+    """A renderer frames on the hand; the forearm stub is context (#15150)."""
+    result = _hand(side)
+    focus = result.frame_focus
+    assert focus.dtype == np.bool_ and focus.shape == (len(result.mesh.vertices),)
+    forearm = result.rest_asset.dominant_vertex_ids(("forearm",))
+    assert len(forearm) > 0 and not focus[forearm].any()
+    assert focus.sum() == len(focus) - len(forearm)
+    raw = load_settings_mapping()
+    raw["framing"] = {"excluded_bones": []}
+    everything = build_hand_visual(
+        _spec(), side, grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
+    )
+    assert everything.frame_focus.all()
+    with pytest.raises(ValueError):
+        raw["framing"] = {"excluded_bones": ["no_such_bone"]}
+        build_hand_visual(
+            _spec(), side, grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
+        )
+
+
 def test_bad_settings_and_inputs_are_rejected() -> None:
     raw = load_settings_mapping()
     with pytest.raises(ValueError):

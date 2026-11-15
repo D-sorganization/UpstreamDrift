@@ -117,6 +117,7 @@ class SkinnedHumanSettings:
     pair_grip_fingers: tuple[str, ...]
     pair_max_spacing_adjust_m: float
     pair_capsule_margin_m: float
+    frame_excluded_bones: tuple[str, ...]
     wrist_deg: tuple[tuple[str, tuple[float, float]], ...]
 
     def limit_rad(self, joint: str) -> tuple[float, float]:
@@ -222,6 +223,9 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
         ),
         pair_capsule_margin_m=_non_negative(
             pair["capsule_margin_m"], "capsule_margin_m"
+        ),
+        frame_excluded_bones=tuple(
+            str(bone) for bone in raw["framing"]["excluded_bones"]
         ),
         wrist_deg=tuple(
             (
@@ -876,6 +880,11 @@ def _result(
     require(bool(np.isfinite(vertices).all()), "skinned vertices must be finite")
     mesh = Mesh(vertices, faces)
     ensure(mesh.volume() > 0.0, "skinned hand must stay outward wound")
+    unknown = set(settings.frame_excluded_bones) - set(hand.asset.bone_names)
+    if unknown:
+        raise ValueError(f"framing.excluded_bones names no bone: {sorted(unknown)}")
+    focus = np.ones(len(vertices), dtype=bool)
+    focus[hand.asset.dominant_vertex_ids(settings.frame_excluded_bones)] = False
     return HandVisualResult(
         backend=BACKEND_NAME,
         side=side,
@@ -888,6 +897,7 @@ def _result(
         bone_transforms=transforms,
         frame_from_rest=frame,
         rest_asset=hand.asset,
+        frame_focus=focus,
     )
 
 

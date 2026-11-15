@@ -13,7 +13,8 @@ which is also the text for the PR description.
 | `assets/hand_cc0/` | MakeHuman right-hand extract (`hand_cc0.npz`), builder, NOTICE, PROVENANCE |
 | `src/shared/python/model_appearance/hand_backends/skinning.py` | Asset type, hierarchical linear blend skinning, triangle checks |
 | `.../hand_backends/posing.py` | Shared curl-to-contact posing for any backend (`PosableHand`) |
-| `.../hand_backends/skinned_human.py` | This backend: `build_hand_visual`, `build_grip_hands`, `solve_grip_joint_angles` |
+| `.../hand_backends/skinned_human.py` | This backend: `build_hand_visual`, `solve_grip_joint_angles`, settings loader |
+| `.../hand_backends/skinned_pair.py` | Both hands on one club: `build_grip_hands` (trail hand slides along the grip, then curls round grip plus lead-hand capsules) |
 | `.../hand_backends/qa.py` | Contact, penetration, fold, anthropometry, pair and forearm metrics |
 | `scripts/config/skinned_human_hand.json` | Every pose setting |
 | `scripts/config/hand_visual_quality.json` | Every test tolerance and reference |
