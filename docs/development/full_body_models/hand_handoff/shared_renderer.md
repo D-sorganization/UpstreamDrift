@@ -102,7 +102,7 @@ so the camera looks along `-eye`.
 | `back` | `(0, 1, 0)` | shaft | Back of the hand |
 | `thumb_side` | `(1, 0, 0)` | shaft | Thumb (radial) side |
 | `pinky_side` | `(-1, 0, 0)` | shaft | Little-finger side |
-| `butt` | `(0, 0, -1)` | dorsum | From the butt end, looking toward the head |
+| `butt` | `(0, -0.55, -0.83)` | dorsum | From the butt end, tilted to the palm side so the heel pad on the grip shows |
 | `eye` | `(0.15, 0.55, -0.75)` | `(0, 0.35, 1)` | The golfer's eye |
 
 The first handoff called this column a look direction. It is the eye

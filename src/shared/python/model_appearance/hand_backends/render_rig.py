@@ -499,7 +499,7 @@ def camera_rig(
     back = _unit(basis.combine(spec.eye), f"view {view!r} eye", eps)
     up_hint = basis.combine(spec.up)
     right = _unit(np.cross(up_hint, back), f"view {view!r} up", eps)
-    up: Array = np.cross(back, right)
+    up: Array = np.asarray(np.cross(back, right), dtype=np.float64)
     axes = np.stack([right, up, back], axis=1)
     cam = vertices @ axes
     lo, hi = cam.min(axis=0), cam.max(axis=0)
