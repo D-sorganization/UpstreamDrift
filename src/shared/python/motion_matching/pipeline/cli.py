@@ -255,10 +255,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--shooting-fit",
+        "--pelvis-ilc-passes",
         type=int,
         default=0,
         metavar="N",
-        help="contact-aware shooting fit of tracked reference (FB-5): N passes",
+        dest="shooting_fit",
+        help=(
+            "pelvis iterative-learning correction on the tracked reference (FB-5): "
+            "N replay/IK passes that nudge the pelvis command against measured drift; "
+            "not a multiple-shooting BVP integrator"
+        ),
     )
     parser.add_argument(
         "--shooting-gain",
