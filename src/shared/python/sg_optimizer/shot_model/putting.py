@@ -3,6 +3,12 @@
 Strictly separate from the through-the-bag swing model (spec pitfall #6).
 Accepts a ``GreenModel`` so that green-speed conditions modulate both
 make-% and leave-distance spread.
+
+The shot-pattern / Broadie-PGA-approach helper in
+``src/tools/shot_pattern_analysis/scoring.py`` (Equations 6–7 from
+`Broadie (2011) <https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf>`_)
+is a **different** one-putt curve. Do not expect its make-% to match this
+module's logistic; SG optimiser code should import from here only.
 """
 
 from __future__ import annotations
