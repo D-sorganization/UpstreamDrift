@@ -1,0 +1,12 @@
+Hand Backend Evidence — Third-Party Components
+================================================
+
+This evidence folder contains only procedurally generated PNG/JSON artifacts.
+
+Runtime libraries used during rendering (already governed by repository
+`docs/legal/licenses.md`):
+
+- NumPy — BSD-style license
+- Matplotlib — PSF-based license
+
+No external hand models, textures, or LFS objects are added by this lane.
