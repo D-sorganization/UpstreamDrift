@@ -18,6 +18,97 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#15115 · Local API App Applies the Shared Allowed-Host Policy
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15115
+- **Branch:** claude-og/local-server-host-check
+- **PR:** #15116
+- **Paths:** see #15116
+- **Started:** 2026-11-15
+- **Last verified:** 2026-11-15 (`795caaad`; collated from changes/15115-local-api-app-applies-the-shared-allowed.md)
+- **Summary:** Local API app applies the shared allowed-host policy
+- **Next step:** Merge the PR.
+
+### DL-#15112 · Fail Closed on Per-Crate Maturin Build Errors in Dockerfile and Enforce in check_dockerfile_contracts.py.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15112
+- **Branch:** gemini-og/15112-dockerfile-maturin-fail-closed
+- **PR:** #15114
+- **Paths:** see #15114
+- **Started:** 2026-11-15
+- **Last verified:** 2026-11-15 (`7699de0c`; collated from changes/15112-dockerfile-maturin-fail-closed.md)
+- **Summary:** Fail closed on per-crate maturin build errors in Dockerfile and enforce in check_dockerfile_contracts.py.
+- **Next step:** Merge PR for #15112.
+
+### DL-#15107 · Fix Broken Repo Paths in Curated Testing, Architecture, and Manual Docs and Enforce in check_spec_paths.py.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15107
+- **Branch:** gemini-og/15107-docs-broken-repo-paths
+- **PR:** #15113
+- **Paths:** see #15113
+- **Started:** 2026-11-15
+- **Last verified:** 2026-11-15 (`6b454ac0`; collated from changes/15107-docs-broken-repo-paths.md)
+- **Summary:** Fix broken repo paths in curated testing, architecture, and manual docs and enforce in check_spec_paths.py.
+- **Next step:** Merge PR #15113.
+
+### DL-#13888 · Add HILL_MTU Drive Mode to 3DOF FTLE Study With Matched Nominal Excitation and Four-Mode Receipt.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13888
+- **Branch:** cursor/hill-mtu-drive-mode-3dof-ftle-f296
+- **PR:** #15076
+- **Paths:** see #15076
+- **Started:** 2026-11-15
+- **Last verified:** 2026-11-15 (`1b4ce670`; collated from changes/13888-hill-mtu-drive-mode-3dof-ftle-study.md)
+- **Summary:** Add HILL_MTU drive mode to 3DOF FTLE study with matched nominal excitation and four-mode receipt.
+- **Next step:** Merge after CI; full t_end=0.2 Hill receipt rows remain NOT_QUALIFIED until MTU equilibrium converges on full swing.
+
+### DL-#13782 · ML-WS-5 MuJoCo Corpus Run Receipt, Manifest-Verified Loader, and CI Evidence
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13782
+- **Branch:** cursor/ml-ws5-corpus-receipt-loader-791f
+- **PR:** #15075
+- **Paths:** see #15075
+- **Started:** 2026-11-15
+- **Last verified:** 2026-11-15 (`0adc2797`; collated from changes/13782-ml-ws-5-mujoco-corpus-run-receipt-manife.md)
+- **Summary:** ML-WS-5 MuJoCo corpus run receipt, manifest-verified loader, and CI evidence
+- **Next step:** Barb review / CI
+
+### DL-#13761 · Bump Dnspython to 2.9.2 and Tornado to 6.6.1; Remove Stale Tornado Pip-Audit Waivers.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13761
+- **Branch:** cursor/pip-audit-dnspython-tornado-54d2
+- **PR:** #15086
+- **Paths:** see #15086
+- **Started:** 2026-11-15
+- **Last verified:** 2026-11-15 (`b6abbfbf`; collated from changes/13761-bump-dnspython-to-2-9-2-and-tornado-to-6.md)
+- **Summary:** Bump dnspython to 2.9.2 and tornado to 6.6.1; remove stale tornado pip-audit waivers.
+- **Next step:** Merge after CI green.
+
+### DL-#13427 · Regression-Test Address Reserve Share; Wire Study Allow_Implausible and OS-9 Asset Gate
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13427
+- **Branch:** cursor/spn-d9-address-reserve-share-ab3e
+- **PR:** #15077
+- **Paths:** see #15077
+- **Started:** 2026-11-15
+- **Last verified:** 2026-11-15 (`d56bdccf`; collated from changes/13427-regression-test-address-reserve-share-wi.md)
+- **Summary:** Regression-test address reserve share; wire study allow_implausible and OS-9 asset gate
+- **Next step:** Owner decides address trunk bound; merge qualified OS-9 native receipt when measured
+
 ### DL-#15045 · Hill F_V Zero Beyond Vmax; Exponential Activation Substeps for Mocap Dt
 
 - **State:** shipped
@@ -1067,6 +1158,123 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#15117 · Desktop UI Sends the Launcher Capability Token on Backend API Requests Through One Shared Fetch Helper
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15117
+- **Branch:** merged via #15118
+- **PR:** #15118
+- **Paths:** see #15118
+- **Started:** 2026-11-15
+- **Last verified:** 2026-11-15 (`800ac553`; collated from changes/15117-desktop-ui-sends-the-launcher-capability.md)
+- **Summary:** Desktop UI sends the launcher capability token on backend API requests through one shared fetch helper
+- **Next step:** Shipped in PR #15118.
+
+### DL-#15108 · Scope Tests/Unit/conftest.py Engine MagicMocks to Tests/Unit and Guard OpenSim Dynamics Parity (#15108)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15108
+- **Branch:** merged via #15109
+- **PR:** #15109
+- **Paths:** see #15109
+- **Started:** 2026-11-15
+- **Last verified:** 2026-11-15 (`daf6ce2a`; collated from changes/15108-scope-unit-conftest-engine-mocks.md)
+- **Summary:** Scope tests/unit/conftest.py engine MagicMocks to tests/unit and guard OpenSim dynamics parity (#15108)
+- **Next step:** Shipped in PR #15109.
+
+### DL-#15101 · Join or Retain Retiring BinderThread and CameraWorker Instances Until Qt Finishes Thread Teardown so Capture Rig Preview Never Aborts in ~QThread.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15101
+- **Branch:** merged via #15102
+- **PR:** #15102
+- **Paths:** see #15102
+- **Started:** 2026-11-15
+- **Last verified:** 2026-11-15 (`8123908e`; collated from changes/15101-preview-qthread-lifetime.md)
+- **Summary:** Join or retain retiring BinderThread and CameraWorker instances until Qt finishes thread teardown so Capture Rig preview never aborts in ~QThread.
+- **Next step:** Shipped in PR #15102.
+
+### DL-#15097 · Isolate Sidekick Sys.Modules and Sys.Meta_Path State Across Overlay Tests (#15097)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15097
+- **Branch:** merged via #15099
+- **PR:** #15099
+- **Paths:** see #15099
+- **Started:** 2026-11-15
+- **Last verified:** 2026-11-15 (`eb2d9b7e`; collated from changes/15097-sidekick-overlay-module-isolation.md)
+- **Summary:** Isolate sidekick sys.modules and sys.meta_path state across overlay tests (#15097)
+- **Next step:** Shipped in PR #15099.
+
+### DL-#15091 · Drain Child Output Streams Before Transitioning ManagedProcess Exit State and Exposing Exit_Code
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15091
+- **Branch:** merged via #15092
+- **PR:** #15092
+- **Paths:** see #15092
+- **Started:** 2026-11-15
+- **Last verified:** 2026-11-15 (`257654e0`; collated from changes/15091-stderr-drain-before-exit.md)
+- **Summary:** Drain child output streams before transitioning ManagedProcess exit state and exposing exit_code
+- **Next step:** Shipped in PR #15092.
+
+### DL-#15013 · Restore UdAttachmentManifestMixin so Rejected File_Upload Clears Dedup SHA and Retry Sends WebSocket Again; Re-Add Reject-Then-Retry Regression Tests.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15013
+- **Branch:** merged via #15072
+- **PR:** #15072
+- **Paths:** see #15072
+- **Started:** 2026-11-15
+- **Last verified:** 2026-11-15 (`ae164ab5`; collated from changes/15013-reconcile-sg-putting-logistic-with-regis.md)
+- **Summary:** Restore UdAttachmentManifestMixin so rejected file_upload clears dedup SHA and retry sends WebSocket again; re-add reject-then-retry regression tests.
+- **Next step:** Shipped in PR #15072.
+
+### DL-#14850 · Redact Host/Home Literals in Batch 5 Docs and Add Shell Placeholder Regression Test
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14850
+- **Branch:** merged via #14850
+- **PR:** #14850
+- **Paths:** see #14850
+- **Started:** 2026-11-15
+- **Last verified:** 2026-11-15 (`9a0dbab7`; collated from changes/14850-redact-host-home-literals-in-batch-5-doc.md)
+- **Summary:** Redact host/home literals in batch 5 docs and add shell placeholder regression test
+- **Next step:** Shipped in PR #14850.
+
+### DL-#14849 · Parameterize Remote Evidence Runners and Finish Batch 3 Host Redaction
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14849
+- **Branch:** merged via #14849
+- **PR:** #14849
+- **Paths:** see #14849
+- **Started:** 2026-11-15
+- **Last verified:** 2026-11-15 (`c60c445c`; collated from changes/14849-parameterize-remote-evidence-runners-and.md)
+- **Summary:** Parameterize remote evidence runners and finish batch 3 host redaction
+- **Next step:** Shipped in PR #14849.
+
+### DL-#14310 · Headless Qt/Matplotlib Teardown After Each Test and MuJoCo Offscreen Renderer Release (#14310)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14310
+- **Branch:** merged via #15098
+- **PR:** #15098
+- **Paths:** see #15098
+- **Started:** 2026-11-15
+- **Last verified:** 2026-11-15 (`180394fd`; collated from changes/14310-headless-gui-teardown.md)
+- **Summary:** Headless Qt/matplotlib teardown after each test and MuJoCo offscreen renderer release (#14310)
+- **Next step:** Shipped in PR #15098.
+
 ### DL-#15095 · Fix SwingMetricsMixin Test Harness After Velocity Delegation and Add Unit Marker (#15095)
 
 - **State:** shipped
@@ -1177,10 +1385,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #15016
 - **Branch:** merged via #15063
-- **PR:** #15063, #15080, #15079
+- **PR:** #15063, #15080, #15079, #15090
 - **Paths:** see #15063
 - **Started:** 2026-11-14
-- **Last verified:** 2026-11-14 (`3e24dc3f`; collated from changes/15016-zvcf-manual-consistency.md)
+- **Last verified:** 2026-11-15 (`d54c0c57`; collated from changes/15016-spec-input-map-manifest-honesty.md)
 - **Summary:** Link tile help to AffineDrift theory; register six provisional core calculations and dedupe registry blocker ids
 - **Next step:** Shipped in PR #15063.
 
@@ -1190,10 +1398,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #15012
 - **Branch:** merged via #15025
-- **PR:** #15025
+- **PR:** #15025, #15083
 - **Paths:** see #15025
 - **Started:** 2026-11-14
-- **Last verified:** 2026-11-14 (`19294384`; collated from changes/15012-fix-wbc-zero-torques-with-contact-and-hi.md)
+- **Last verified:** 2026-11-15 (`339be5a5`; collated from changes/15012-friction-cone-rl-honesty.md)
 - **Summary:** Fix WBC zero torques with contact and hierarchical task enforcement
 - **Next step:** Shipped in PR #15025.
 
@@ -1255,10 +1463,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14935
 - **Branch:** merged via #14960
-- **PR:** #14960
+- **PR:** #14960, #15120, #15082
 - **Paths:** see #14960
 - **Started:** 2026-11-14
-- **Last verified:** 2026-11-14 (`c52d3757`; collated from changes/14935-committed-evidence-validator-with-gate-a.md)
+- **Last verified:** 2026-11-15 (`318242c0`; collated from changes/14935-evidence-recompute-and-ratchets.md)
 - **Summary:** Committed evidence scan calls receipt taxonomy validation; missing fields and conflicts are tested (#14935).
 - **Next step:** Shipped in PR #14960.
 
@@ -1268,10 +1476,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14502
 - **Branch:** merged via #14825
-- **PR:** #14825
+- **PR:** #14825, #15100
 - **Paths:** see #14825
 - **Started:** 2026-11-14
-- **Last verified:** 2026-11-14 (`1780a5e5`; collated from changes/14502-np09-io-sensitivity.md)
+- **Last verified:** 2026-11-15 (`30f937bf`; collated from changes/14502-np09-lexical-fragment-guard.md)
 - **Summary:** NP-09 policy input-output sensitivity at stated operating points (#14502)
 - **Next step:** Shipped in PR #14825.
 
@@ -1333,10 +1541,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12046
 - **Branch:** merged via #14929
-- **PR:** #14929
+- **PR:** #14929, #15085
 - **Paths:** see #14929
 - **Started:** 2026-11-14
-- **Last verified:** 2026-11-14 (`7a52997f`; collated from changes/12046-realtime-shadow-sunset-interim.md)
+- **Last verified:** 2026-11-15 (`e47a24aa`; collated from changes/12046-realtime-adr-split-ruling.md)
 - **Summary:** Interim 30-day realtime shadow ledger sunset (#12046) so hygiene tests pass pending Tools migration
 - **Next step:** Shipped in PR #14929.
 
@@ -1580,10 +1788,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14227
 - **Branch:** merged via #14923
-- **PR:** #14923
+- **PR:** #14923, #15089
 - **Paths:** see #14923
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`e946eb78`; collated from changes/14227-document-ci-optional-stack-slice-1-pinoc.md)
+- **Last verified:** 2026-11-15 (`20669b6c`; collated from changes/14227-optional-stack-launcher-processes.md)
 - **Summary:** Document CI Optional Stack slice 1 (Pinocchio gravity) and add runbook contract tests
 - **Next step:** Shipped in PR #14923.
 

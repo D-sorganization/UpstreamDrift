@@ -2754,6 +2754,29 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-15 | #15118 | Desktop UI sends the launcher capability token on backend API requests through one shared fetch helper |
+| 2026-11-15 | #15116 | Local API app applies the shared allowed-host policy |
+| 2026-11-15 | #15114 | Fail closed on per-crate maturin build errors in Dockerfile and enforce in check_dockerfile_contracts.py. |
+| 2026-11-15 | #15109 | Scope tests/unit/conftest.py engine MagicMocks to tests/unit and guard OpenSim dynamics parity (#15108) |
+| 2026-11-15 | #15113 | Fix broken repo paths in curated testing, architecture, and manual docs and enforce in check_spec_paths.py. |
+| 2026-11-15 | #15102 | Join or retain retiring BinderThread and CameraWorker instances until Qt finishes thread teardown so Capture Rig preview never aborts in ~QThread. |
+| 2026-11-15 | #15099 | Isolate sidekick sys.modules and sys.meta_path state across overlay tests (#15097) |
+| 2026-11-15 | #15092 | Drain child output streams before transitioning ManagedProcess exit state and exposing exit_code |
+| 2026-11-15 | #15090 | Align SPEC Section 4 G(x)u control input notation, launcher manifest tile honesty, and ch10 canonical ZVCF call |
+| 2026-11-15 | #15072 | Restore UdAttachmentManifestMixin so rejected file_upload clears dedup SHA and retry sends WebSocket again; re-add reject-then-retry regression tests.; Reconcile SG putting logistic with registry; require launch-monitor length units; document green-terminal expected strokes scope; wire chat file-upload rejection to WebSocket errors and release dedup manifest on reject. |
+| 2026-11-15 | #15083 | Inscribed friction cone + Euclidean projection, floating-base RL obs/action dimensions, inertia-coupled opt-in domain randomization, offline GAIL honesty, and documented WBC/learning defaults |
+| 2026-11-15 | #15082 | Recompute candidate AcceptanceGates from stored metrics, catch unanchored host paths, and ratchet ledger counts. |
+| 2026-11-15 | #15120 | Honest candidate acceptance flags and fail-closed gates_imply_accepted guard (#14935) |
+| 2026-11-15 | #14850 | Redact host/home literals in batch 5 docs and add shell placeholder regression test |
+| 2026-11-15 | #14849 | Parameterize remote evidence runners and finish batch 3 host redaction |
+| 2026-11-15 | #15100 | Guard NP-09 lexical test against collated changelog fragment removal |
+| 2026-11-15 | #15098 | Headless Qt/matplotlib teardown after each test and MuJoCo offscreen renderer release (#14310) |
+| 2026-11-15 | #15089 | Preserve running_processes fallback in LauncherService.get_running_processes when list_processes is auto-mocked |
+| 2026-11-15 | #15076 | Add HILL_MTU drive mode to 3DOF FTLE study with matched nominal excitation and four-mode receipt. |
+| 2026-11-15 | #15075 | ML-WS-5 MuJoCo corpus run receipt, manifest-verified loader, and CI evidence |
+| 2026-11-15 | #15086 | Bump dnspython to 2.9.2 and tornado to 6.6.1; remove stale tornado pip-audit waivers. |
+| 2026-11-15 | #15077 | Regression-test address reserve share; wire study allow_implausible and OS-9 asset gate |
+| 2026-11-15 | #15085 | Ratify ADR-0061 realtime provider split ruling, replace sunset_date with adr_ruling in shadow_modules.yaml, and verify ADR references |
 | 2026-11-14 | #15096 | Fix SwingMetricsMixin test harness after velocity delegation and add unit marker (#15095) |
 | 2026-11-14 | #15094 | Guard NP-05 lexical test against collated changelog fragment removal (#15093) |
 | 2026-11-14 | #15052 | SCI-10/12/13/14: shaft FEM scope docs, pendulum inertia param, static-opt cost, spatial ordering |
