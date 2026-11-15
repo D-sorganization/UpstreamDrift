@@ -247,7 +247,10 @@ def drain_process_streams(
 
     def _drain(stream: Any, *, stderr: bool) -> None:
         try:
-            for raw_line in iter(stream.readline, b""):
+            while True:
+                raw_line = stream.readline()
+                if not isinstance(raw_line, (bytes, bytearray)) or not raw_line:
+                    break
                 line = raw_line.decode("utf-8", errors="replace").rstrip()
                 if not line:
                     continue
