@@ -130,5 +130,9 @@ def render_preview_frame(
         label,
         (12, settings.height_px - 28),
         size=14,
-        fill=tuple(int(v) for v in plan.status_color_rgb),
+        fill=(
+            int(plan.status_color_rgb[0]),
+            int(plan.status_color_rgb[1]),
+            int(plan.status_color_rgb[2]),
+        ),
     )

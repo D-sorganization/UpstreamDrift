@@ -60,7 +60,8 @@ def main(argv: list[str] | None = None) -> int:
 
             paired.append(np.concatenate([left, right], axis=1))
         frames = tuple(paired)
-    suffix = args.out.suffix.lower()
+    out_suffix = args.out.suffix
+    suffix = out_suffix.lower()
     if suffix == ".gif":
         write_gif(args.out, frames, fps=args.fps)
     elif suffix == ".mp4":
