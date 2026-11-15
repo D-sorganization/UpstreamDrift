@@ -12,7 +12,7 @@ from src.shared.python.grip_build.contact_protocol import (
 
 DEFAULT_BUILDER_NAME = "flat_hand_curl_v1"
 
-_builders: dict[str, object] = {}
+_builders: dict[str, GripBuilder] = {}
 _contact_models: dict[str, ContactDistanceModel] = {
     DefaultCapsuleContactModel.name: DefaultCapsuleContactModel()
 }
