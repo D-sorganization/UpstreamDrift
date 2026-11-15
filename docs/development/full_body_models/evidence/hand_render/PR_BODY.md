@@ -2,7 +2,7 @@
 
 Refs #15150 (epic). Auto-merge is not armed, on the owner's instruction.
 
-### State at `49d64f9e57` plus re-rendered butt frames (2026-11-15)
+### State at `49d64f9e57` Plus Re-Rendered Butt Frames (2026-11-15)
 
 - One renderer for every hand backend: headless MuJoCo (EGL, then OSMesa), with a matplotlib fallback that is not quality-bar evidence.
 - Views: palm, back, thumb side, pinky side, butt and eye, named relative to the hand so lead and trail keep the same names.
