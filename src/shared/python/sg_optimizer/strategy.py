@@ -19,7 +19,11 @@ from src.shared.python.sg_optimizer.shot_model.player_profile import PlayerProfi
 
 @dataclass(frozen=True)
 class StrategyReport:
-    """Expected strokes and first shot for the tour baseline and for the player."""
+    """Strokes to reach the green (MDP terminates at green / holed lie).
+
+    Putting is not composed into the hole MDP; these values are *not* full
+    hole-out expected strokes. See :func:`green_terminal` and strategy-view labels.
+    """
 
     tour_strokes: float
     personal_strokes: float
