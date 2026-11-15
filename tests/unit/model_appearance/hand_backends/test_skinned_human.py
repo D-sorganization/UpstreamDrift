@@ -84,6 +84,15 @@ def test_every_fingertip_and_middle_phalanx_touches_the_grip(side: str) -> None:
 
 
 @pytest.mark.parametrize("side", _SIDES)
+def test_the_thumb_lies_on_the_grip_not_on_its_tip(side: str) -> None:
+    """Both thumb phalanges seat: the pad is on the grip, not a ramp to it."""
+    gaps = _hand(side).contact_gaps_m
+    assert gaps["thumb_dist"] <= float(_Q["contact_tolerance_m"])
+    limit = float(_Q["thumb_pad_tolerance_m"])
+    assert gaps["thumb_prox"] <= limit, f"{side} {gaps['thumb_prox'] * 1e3:.1f} mm"
+
+
+@pytest.mark.parametrize("side", _SIDES)
 def test_no_skin_penetrates_the_grip_beyond_tolerance(side: str) -> None:
     result = _hand(side)
     depth = max_grip_cylinder_penetration_m(result.mesh.vertices, _RADIUS)

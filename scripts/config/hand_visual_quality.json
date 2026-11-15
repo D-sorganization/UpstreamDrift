@@ -25,5 +25,6 @@
   "forearm_spread_range_deg": [
     15.0,
     50.0
-  ]
+  ],
+  "thumb_pad_tolerance_m": 0.006
 }

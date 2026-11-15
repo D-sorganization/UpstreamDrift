@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import json
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -662,6 +662,7 @@ def _thumb_chain(
             CurlJoint("thumb_prox", mcp_low, mcp_high, mcp_low),
             CurlJoint("thumb_dist", ip_low, ip_high, ip_low),
         ),
+        must_touch=("thumb_prox", "thumb_dist"),
     )
 
 
@@ -684,6 +685,26 @@ def _bend_wrist(hand: _GripHand, side: HandSide) -> None:
     # wrist joint, not the elbow, is the point that stays put.
     slip = (elbow - wrist) - turn @ (elbow - wrist)
     hand.placement = hand.placement @ rigid(np.eye(3), -slip)
+
+
+def _wrap(
+    hand: _GripHand,
+    chains: Sequence[CurlChain],
+    obstacle: ObstacleDistance,
+    start: Mapping[str, float],
+) -> dict[str, float]:
+    """Curl ``chains`` to contact, with the wrap search if it is switched on."""
+    settings = hand.settings
+    if settings.wrap_scan_samples >= 2:
+        return wrap_to_contact(
+            hand,
+            chains,
+            obstacle,
+            settings.curl,
+            start,
+            samples=settings.wrap_scan_samples,
+        ).angles
+    return curl_to_contact(hand, chains, obstacle, settings.curl, start).angles
 
 
 @dataclass(frozen=True)
@@ -741,21 +762,9 @@ def _solve_right_hand(
         arch = _arch_from_knuckles(angles, settings)
     _seat_flat_hand(hand, targets, grip, arch, other)
     start = {**_straight_angles(), **arch}
-    if settings.wrap_scan_samples >= 2:
-        angles = wrap_to_contact(
-            hand,
-            chains,
-            obstacle,
-            settings.curl,
-            start,
-            samples=settings.wrap_scan_samples,
-        ).angles
-    else:
-        angles = curl_to_contact(hand, chains, obstacle, settings.curl, start).angles
+    angles = _wrap(hand, chains, obstacle, start)
     _aim_thumb(hand, targets, angles, grip_radius_m)
-    angles = curl_to_contact(
-        hand, (_thumb_chain(settings, targets),), obstacle, settings.curl, angles
-    ).angles
+    angles = _wrap(hand, (_thumb_chain(settings, targets),), obstacle, angles)
     _bend_wrist(hand, side)
     return _SolvedHand(hand, angles, _segment_gaps(hand, angles, obstacle), targets)
 
