@@ -2,12 +2,13 @@
 
 Refs #15150 (epic), #15148. Stacked on `cursor/hrg-gb1b-shaft-roll-2882`. Auto-merge is not armed, on the owner's instruction.
 
-### State at `ce68544de4` (2026-11-15)
+### State at `a0b3b6f62b` (2026-11-15)
 
 - The hand is MakeHuman's hm08 mesh with MakeHuman's own `default.mhskel` skeleton and `default_weights.mhw` skin weights (CC0, pinned commit, recorded in `assets/hand_cc0/NOTICE` and `PROVENANCE.json`). Two declared changes to the weights and one to the mesh: see "Deviations".
-- Posing is joint rotation plus linear blend skinning. Four owner-approved corrective shapes then move a little skin (`correctives.py`): fold relaxation around inside-out triangles, a palm pad that settles onto the grip, lifting skin that dips under 2 mm inside the grip back to its surface, and (new) relaxing creases that skinning pinched between the knuckles. All are switchable. With all off, a test rebuilds the mesh from the reported bone transforms and requires agreement to 1e-12 m; with them on, the solved joint angles are identical.
+- Posing is joint rotation plus linear blend skinning. Four owner-approved corrective shapes then move a little skin (`correctives.py`): fold relaxation around inside-out triangles, a palm pad that settles onto the grip, laying skin pressed up to 4 mm into the grip flat on its surface (`lift_out`, now with a bulge), and (new) relaxing creases that skinning pinched between the knuckles. All are switchable. With all off, a test rebuilds the mesh from the reported bone transforms and requires agreement to 1e-12 m; with them on, the solved joint angles are identical.
 - **The skin is Loop-subdivided once** (`subdivision.py`, setting `mesh.subdivision_levels`, 0 switches it off): 7,074 vertices and 14,144 triangles per hand, up from 1,770 and 3,536. Skin weights go through the same operator. The grip is solved on the original vertices of the subdivided skin, so the solve costs the same and a solved contact is a contact of the drawn skin.
 - **New: nail edges stay sharp.** Edges on the fingertip bones that fold by 40 degrees or more in MakeHuman's mesh are kept as creases through subdivision (`mesh.creases`; an empty bone list switches it off).
+- **New: the hand squeezes the grip (#15179, #15180).** The joints used to stop at first touch, so each finger segment touched at one spot and the grip looked loose. The digits now close `squeeze.finger_depth_m` (2.5 mm) and the palm seats `squeeze.palm_depth_m` (1.5 mm) into the grip, standing for soft pad compression. The `press_flat` corrective then lays the pressed skin on the surface and bulges the skin beside it a little. Zero depths give the old pose. The drawn skin never enters the grip.
 - The pose follows the grip spec: flat hand beside the club, club under the index finger's first segment and just below the base of the little finger, then MCP, PIP, DIP close in that order until the skin touches. Knuckle flexion drives the ring and little metacarpals so the palm cups.
 - The thumb now lies on the grip along its pad, not on its tip.
 - `build_grip_hands` (new module `skinned_pair.py`) poses both hands on one club. The trail hand slides toward the club head by the least amount that frees its index, middle and ring fingers from the lead hand, then curls round the grip. Its little finger rests on the lead index finger (overlap grip).
@@ -15,7 +16,7 @@ Refs #15150 (epic), #15148. Stacked on `cursor/hrg-gb1b-shaft-roll-2882`. Auto-m
 - Each hand declares which vertices a renderer should frame on (`frame_focus`: everything except the forearm stub), so the hand itself fills 0.70 of the frame.
 - Shaft roll comes from `HandGripSpec.shaft_roll_deg`. Every size, tolerance, limit, gain and colour is in `scripts/config/skinned_human_hand.json`, `scripts/config/hand_visual_quality.json` or `assets/hand_cc0/build_settings.json`.
 - Contact physics is untouched (still capsules). This is the visual model.
-- Tests: 93 pass, 1 skipped (the source-rebuild check needs a MakeHuman checkout; the asset file is unchanged in this round).
+- Tests: 97 pass, 1 skipped (the source-rebuild check needs a MakeHuman checkout; the asset file is unchanged in this round).
 
 ### Measured (Legacy Grip Spec, Grip Radius 14 mm)
 
@@ -30,9 +31,14 @@ Refs #15150 (epic), #15148. Stacked on `cursor/hrg-gb1b-shaft-roll-2882`. Auto-m
 | Degenerate triangles | 0 | 0 | 0 |
 | Triangles folded into a crease | 2 per hand | 0 per hand, single and pair | 0 (tightened from 2) |
 | Palm skin within 1.5 mm of the grip | 0 vertices | 95 vertices of the finer mesh, palm gap 0.3 mm (was 1.1 mm) | at least 8 |
-| Farthest a corrective moves any vertex | 0 | 6.0 mm lead, 6.6 mm trail; 519 of 7,074 vertices move | 8 mm |
+| Farthest a corrective moves any vertex | 0 | 4.8 mm lead, 6.0 mm trail | 8 mm |
+| Skin within 0.5 mm of the grip (pair) | 10.2 cm2 lead, 11.1 cm2 trail | 28.0 cm2 lead, 24.5 cm2 trail | none; the test uses the triangle measure below |
+| Triangles wholly within 0.5 mm of the grip, single hands | under two thirds of now | 20.5 cm2 lead, 19.2 cm2 trail | at least 18 cm2 (new) and 1.5 times the unsqueezed hand |
+| Angle of the grip covered by skin within 2 mm, per 10 mm slice | 100 to 150 degrees | 150 to 250 degrees | none yet |
+| Finger and thumb bone axis to the grip surface | 4.8 mm | 1.75 mm lead (thumb tip), 2.7 mm trail | at least 1.5 mm (new) |
+| Vertices any corrective moves | 7 % | 28.6 % lead, 28.2 % trail | 32 % (widened from 12 %: pressed pads move by design) |
 | Mean triangle edge | 5.6 mm | 2.7 mm | 4 mm (new) |
-| Edges pinched more than 45 degrees past rest, palm and first finger segments | 21 lead, 18 trail | 3 lead, 1 trail | 6 (new) |
+| Edges pinched more than 45 degrees past rest, palm and first finger segments | 21 lead, 18 trail | 5 lead, 4 trail (the tighter knuckles pinch more web skin) | 6 |
 | Hand share of the frame (forearm left out) | 0.48 to 0.60 | 0.67 to 0.70 | 0.70 plus or minus 0.12 |
 | Left-handed golfer is the exact mirror | yes | yes | 1e-9 m |
 | Shaft roll 0 and plus or minus 20 degrees is a rigid turn | yes | yes | 1e-9 m |
@@ -44,7 +50,7 @@ Refs #15150 (epic), #15148. Stacked on `cursor/hrg-gb1b-shaft-roll-2882`. Auto-m
 | Separate fingers and thumb | 4 | 4 | 4 | same |
 | Cupped palm | 3 | 3 | 3 | same; accepted by the owner for this PR (2026-11-15) |
 | Knuckle line | 4 | 4 | 4 | same |
-| Fingers wrap the grip | 4 | 4 | 4 | pair up from 3 |
+| Fingers wrap the grip | 4 | 4 | 4 | same score, visibly tighter: the pads lie flat on the grip. Not 5: the thumb base is still 29 mm off the grip and the index finger still hooks (#15181, #15182) |
 | No tubes, blobs or torn triangles | 4 | 4 | 4 | same: no folded triangle on the finer mesh either |
 | Smooth shading | 5 | 5 | 4 | trail up from 4: the knuckle creases are relaxed; the pair keeps faint creases where the fingers interlock |
 | Correct mirroring | 5 | 5 | 5 | same |
@@ -61,11 +67,11 @@ Each hand reads as a human hand holding a golf club, and the pair now reads as t
 
 | | Palm | Back | Thumb side | Butt |
 | --- | --- | --- | --- | --- |
-| Lead | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_butt_rollp00.png?raw=true) |
-| Trail | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_butt_rollp00.png?raw=true) |
-| Both | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollp00.png?raw=true) |
-| Both, roll -20 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollm20.png?raw=true) |
-| Both, roll +20 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/ce68544de41a37e94e91215839cf5a02f566adfe/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollp20.png?raw=true) |
+| Lead | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_butt_rollp00.png?raw=true) |
+| Trail | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_butt_rollp00.png?raw=true) |
+| Both | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollp00.png?raw=true) |
+| Both, roll -20 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollm20.png?raw=true) |
+| Both, roll +20 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/a0b3b6f62bbb085577c8cd9cb06fcd9eb8e05ead/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollp20.png?raw=true) |
 
 All 36 frames (1024 px, MuJoCo EGL through the shared renderer of #15154) and `render_manifest.json` are in `docs/development/full_body_models/evidence/hand_skinned_human/`.
 
@@ -113,13 +119,25 @@ All 36 frames (1024 px, MuJoCo EGL through the shared renderer of #15154) and `r
 - Zero folded triangles still leaves pinched creases. Measure the fold of each edge against its fold at rest and relax the ones that grew too much; an absolute angle limit would flatten the nails.
 - Keep a visual corrective off skin that is in contact. The sharpest creases are inside the finger joints against the grip; relaxing them would undo the contact the solver found, and nobody sees them.
 - Two relaxers in a row can leave a fold the first one made. Run the fold check last and give it room to finish.
+- A solver that stops at first touch gives point contact, and point contact reads as a loose grip however good the hand looks. Close a pad-compression depth past first touch and flatten the pressed skin; contact area nearly tripled.
+- Shrink the obstacle for the solver rather than adding a compression term to the stop rule. Every joint then closes the same depth with no new logic, and the lead-hand capsules are left at full size so the hands still do not overlap.
+- A tighter pose folds more skin. Each time the joints close further, re-check folded triangles and pinched edges and widen the relaxers' reach (rings) before adding passes.
+- Relax creases before folds, never after: crease relaxation last re-folded two triangles.
+- A contact-area measure that counts skin inside the obstacle cannot tell pressing from penetrating. Pair it with the penetration check.
 - Solver speed is forward kinematics. Precomputed hinge matrices and skinning only the vertices a joint moves took a pair from 55 s to 14 s.
 - Never run Python from inside `hand_backends/`: its `types.py` shadows the standard library.
 
 ### Next Steps
 
-1. Even out the thumb nail rim (more crease edges or a semi-sharp rule).
-2. A sculpted grip-pose palm shape, as a follow-up issue under #15150 if the palm view is still not good enough.
-3. Check the finger-length references against the paper.
+Filed from the grip review (2026-11-15), in order of impact:
+
+1. #15181 close the thumb base and palm arch onto the grip (the wedge of air seen from the butt).
+2. #15182 flex the index knuckle with the other fingers.
+3. #15183 join the two hands: trail lifeline on the lead thumb, little finger in the groove.
+4. #15184 close the fingers side to side.
+5. #15185 tapered grip with a butt cap.
+6. #15186 surface realism.
+
+Open in this round: the bulge beside a pressed pad is faint (the skin there faces the grip, so little of its normal points sideways); the lead little fingertip shows a ragged nail edge where the creased nail rim is pressed flat; bone thickness is not modelled, only the bone axis.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
