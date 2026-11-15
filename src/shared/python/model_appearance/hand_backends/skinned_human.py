@@ -45,6 +45,7 @@ from src.shared.python.model_appearance.hand_backends.posing import (
     CurlSettings,
     FlatHandLandmarks,
     ObstacleDistance,
+    capsule_union_distance,
     club_axis_in_hand,
     curl_to_contact,
     cylinder_distance,
@@ -75,6 +76,8 @@ SETTINGS_PATH = (
 _SEGMENTS = ("prox", "mid", "dist")
 _JOINT_OF_SEGMENT = {"prox": "mcp", "mid": "pip", "dist": "dip"}
 _THUMB_BONES = ("thumb_meta", "thumb_prox", "thumb_dist")
+_EYE3 = np.eye(3)
+_EYE4 = np.eye(4)
 #: Virtual hinge at the thumb base that presses the thumb onto the grip.
 THUMB_PRESS = "thumb_press"
 
@@ -107,6 +110,9 @@ class SkinnedHumanSettings:
     thumb_mcp_limits_deg: tuple[float, float]
     thumb_ip_limits_deg: tuple[float, float]
     thumb_straight_ip_limit_deg: float
+    pair_capsule_radius_scale: float
+    pair_thumb_radius_scale: float
+    wrist_deg: tuple[tuple[str, tuple[float, float]], ...]
 
     def limit_rad(self, joint: str) -> tuple[float, float]:
         low, high = dict(self.limits_deg)[joint]
@@ -139,6 +145,7 @@ def settings_from_mapping(raw: Mapping[str, object]) -> SkinnedHumanSettings:
     pre: Mapping = raw["preshape"]  # type: ignore[assignment]
     curl: Mapping = raw["curl"]  # type: ignore[assignment]
     thumb: Mapping = raw["thumb"]  # type: ignore[assignment]
+    pair: Mapping = raw["pair"]  # type: ignore[assignment]
     passes = int(curl["arch_passes"])
     if passes < 1:
         raise ValueError("arch_passes must be at least 1")
@@ -184,6 +191,22 @@ def settings_from_mapping(raw: Mapping[str, object]) -> SkinnedHumanSettings:
         thumb_mcp_limits_deg=_pair(thumb["mcp_limits_deg"], "mcp_limits_deg"),
         thumb_ip_limits_deg=_pair(thumb["ip_limits_deg"], "ip_limits_deg"),
         thumb_straight_ip_limit_deg=float(thumb["straight_ip_limit_deg"]),
+        pair_capsule_radius_scale=_unit_interval(
+            pair["capsule_radius_scale"], "capsule_radius_scale"
+        ),
+        pair_thumb_radius_scale=_unit_interval(
+            pair["thumb_radius_scale"], "thumb_radius_scale"
+        ),
+        wrist_deg=tuple(
+            (
+                side,
+                (
+                    float(raw["wrist"][side]["extension_deg"]),  # type: ignore[index]
+                    float(raw["wrist"][side]["ulnar_deviation_deg"]),  # type: ignore[index]
+                ),
+            )
+            for side in ("lead", "trail")
+        ),
     )
 
 
@@ -294,7 +317,7 @@ class _GripHand:
     def _hinge(self, i: int, angle: float) -> Array:
         """Rodrigues rotation about bone ``i``'s flexion axis (precomputed)."""
         k, kk = self._hinge_k[i], self._hinge_kk[i]
-        return np.eye(3) + math.sin(angle) * k + (1.0 - math.cos(angle)) * kk
+        return _EYE3 + math.sin(angle) * k + (1.0 - math.cos(angle)) * kk
 
     def rotations(self, angles: Mapping[str, float]) -> dict[str, Array]:
         asset = self.asset
@@ -303,11 +326,14 @@ class _GripHand:
             if name == THUMB_PRESS:
                 continue
             i = self._index[name]
-            hinge = self._hinge(i, angle - float(asset.rest_flexion_rad[i]))
+            delta = angle - float(asset.rest_flexion_rad[i])
+            if delta == 0.0:
+                continue
+            hinge = self._hinge(i, delta)
             out[name] = out[name] @ hinge if name in out else hinge
         if THUMB_PRESS in angles:
             press = rotation_about_axis(self.press_axis, angles[THUMB_PRESS])
-            out["thumb_meta"] = press @ out.get("thumb_meta", np.eye(3))
+            out["thumb_meta"] = press @ out.get("thumb_meta", _EYE3)
         return out
 
     def transforms(self, angles: Mapping[str, float]) -> Array:
@@ -317,18 +343,24 @@ class _GripHand:
         heads, parents = self.asset.bone_heads, self._parents
         out = np.empty((len(parents), 4, 4))
         for i, name in enumerate(self.asset.bone_names):
-            local = np.eye(4)
             rot = rotations.get(name)
-            if rot is not None:
-                local[:3, :3] = rot
-                local[:3, 3] = heads[i] - rot @ heads[i]
+            if rot is None:
+                out[i] = _EYE4 if parents[i] < 0 else out[parents[i]]
+                continue
+            local = _EYE4.copy()
+            local[:3, :3] = rot
+            local[:3, 3] = heads[i] - rot @ heads[i]
             out[i] = local if parents[i] < 0 else out[parents[i]] @ local
         return out
 
-    def points(self, angles: Mapping[str, float]) -> Array:
-        """Skinned vertices in the grip frame (same as ``pose_vertices``)."""
+    def points(
+        self, angles: Mapping[str, float], ids: NDArray[np.int64] | None = None
+    ) -> Array:
+        """Skinned vertices in the grip frame (same as ``pose_vertices``);
+        only vertices ``ids`` when given."""
         stacked = self.transforms(angles)[:, :3, :].transpose(0, 2, 1).reshape(-1, 3)
-        local = self._blend @ stacked
+        blend = self._blend if ids is None else self._blend[ids]
+        local = blend @ stacked
         return local @ self.placement[:3, :3].T + self.placement[:3, 3]
 
     def segment_ids(self, bone: str) -> NDArray[np.int64]:
@@ -426,8 +458,13 @@ def _seat_flat_hand(
     targets: _RightHandTargets,
     obstacle: ObstacleDistance,
     arch: Mapping[str, float],
+    palm_obstacle: ObstacleDistance | None = None,
 ) -> None:
-    """Lay the flat hand beside the club and rest it on the grip (rigidly)."""
+    """Lay the flat hand beside the club and rest it on the grip (rigidly).
+
+    The straight fingers only have to clear ``obstacle`` (the grip); the palm
+    must also clear ``palm_obstacle`` (the grip and the other hand) if given.
+    """
     settings = hand.settings
     marks = flat_hand_landmarks(hand)
     point, direction = club_axis_in_hand(
@@ -445,10 +482,11 @@ def _seat_flat_hand(
         np.arange(len(pts)), hand.asset.influenced_vertex_ids(_THUMB_BONES)
     )
     c, s = math.cos(targets.palm_azimuth_rad), math.sin(targets.palm_azimuth_rad)
+    approach = np.array([-c, -s, 0.0])
     correction, _, _ = seat_on_obstacle(
         pts[keep],
         obstacle,
-        approach=np.array([-c, -s, 0.0]),
+        approach=approach,
         tilt_axis=np.array([-s, c, 0.0]),
         tilt_pivot=np.zeros(3),
         split_coordinate=pts[keep, 2],
@@ -457,6 +495,27 @@ def _seat_flat_hand(
         iterations=settings.seat_iterations,
     )
     hand.placement = correction @ hand.placement
+    if palm_obstacle is None:
+        return
+    # Back the seated hand straight off until its palm clears the other hand.
+    palm = hand.points({**_straight_angles(), **arch}, _palm_ids(hand.asset))
+    allowance = settings.curl.penetration_allowance_m
+
+    def clear(lift: float) -> bool:
+        return float(palm_obstacle(palm - lift * approach).min()) >= -allowance
+
+    low, high = 0.0, settings.seat_max_travel_m
+    if clear(low):
+        return
+    for _ in range(settings.seat_iterations):
+        mid = 0.5 * (low + high)
+        low, high = (low, mid) if clear(mid) else (mid, high)
+    hand.placement = rigid(np.eye(3), -high * approach) @ hand.placement
+
+
+def _palm_ids(asset: SkinnedHandAsset) -> NDArray[np.int64]:
+    """Skin of the palm and back of the hand (wrist and metacarpals)."""
+    return asset.dominant_vertex_ids(("wrist",) + tuple(f"meta_{f}" for f in FINGERS))
 
 
 def _finger_chains(settings: SkinnedHumanSettings) -> tuple[CurlChain, ...]:
@@ -517,14 +576,18 @@ def _clamped_rotation(source: Array, target: Array, max_rad: float) -> Array:
     return rotation_about_axis(axis, min(max_rad, math.atan2(norm, float(a @ b))))
 
 
-def _thumb_half_thickness(asset: SkinnedHandAsset) -> float:
-    """Median distance from the thumb's last bone to its skin."""
-    i = asset.bone_index("thumb_dist")
+def _bone_skin_radius(asset: SkinnedHandAsset, bone_name: str) -> float:
+    """Median distance from a bone to the skin it mostly moves."""
+    i = asset.bone_index(bone_name)
     bone = asset.bone_tails[i] - asset.bone_heads[i]
-    rel = asset.rest_vertices[asset.dominant_vertex_ids(("thumb_dist",))]
+    rel = asset.rest_vertices[asset.dominant_vertex_ids((bone_name,))]
     rel = rel - asset.bone_heads[i]
-    along = rel @ bone / (bone @ bone)
+    along = np.clip(rel @ bone / (bone @ bone), 0.0, 1.0)
     return float(np.median(np.linalg.norm(rel - along[:, None] * bone, axis=1)))
+
+
+def _thumb_half_thickness(asset: SkinnedHandAsset) -> float:
+    return _bone_skin_radius(asset, "thumb_dist")
 
 
 def _aim_thumb(
@@ -598,6 +661,27 @@ def _thumb_chain(
     )
 
 
+def _bend_wrist(hand: _GripHand, side: HandSide) -> None:
+    """Turn the forearm about the wrist joint; the hand stays where it is.
+
+    Extension tips the forearm toward the back of the hand, ulnar deviation
+    toward the little-finger side (right-hand rest frame: x radial, z palmar).
+    """
+    extension, ulnar = dict(hand.settings.wrist_deg)[side]
+    turn = rotation_about_axis(
+        np.array([0.0, 0.0, 1.0]), -math.radians(ulnar)
+    ) @ rotation_about_axis(np.array([1.0, 0.0, 0.0]), math.radians(extension))
+    asset = hand.asset
+    elbow = asset.bone_heads[asset.bone_index("forearm")]
+    wrist = asset.bone_heads[asset.bone_index("wrist")]
+    hand.fixed["forearm"] = turn
+    hand.fixed["wrist"] = turn.T
+    # The forearm bone pivots at its elbow end: slide the hand back so the
+    # wrist joint, not the elbow, is the point that stays put.
+    slip = (elbow - wrist) - turn @ (elbow - wrist)
+    hand.placement = hand.placement @ rigid(np.eye(3), -slip)
+
+
 @dataclass(frozen=True)
 class _SolvedHand:
     hand: _GripHand
@@ -618,10 +702,7 @@ def _segment_gaps(
     }
     for bone in ("thumb_prox", "thumb_dist"):
         gaps[bone] = float(d[hand.segment_ids(bone)].min())
-    palm = hand.asset.dominant_vertex_ids(
-        ("wrist",) + tuple(f"meta_{f}" for f in FINGERS)
-    )
-    gaps["palm"] = float(d[palm].min())
+    gaps["palm"] = float(d[_palm_ids(hand.asset)].min())
     gaps["hand"] = float(d.min())
     return gaps
 
@@ -632,26 +713,29 @@ def _solve_right_hand(
     grip_radius_m: float,
     settings: SkinnedHumanSettings,
     given: Mapping[str, float] | None,
+    obstacle: ObstacleDistance | None = None,
 ) -> _SolvedHand:
     asset = _sized_asset(spec.hand_size.length_m, spec.hand_size.breadth_m, settings)
     hand = _GripHand(asset, settings)
     targets = _targets(spec, side, settings)
-    obstacle = cylinder_distance(grip_radius_m)
+    grip = cylinder_distance(grip_radius_m)
+    other, obstacle = obstacle, obstacle or grip
     arch = {f"meta_{f}": 0.0 for f in FINGERS}
     if given is not None:
         arch = {k: float(given.get(k, 0.0)) for k in arch}
-        _seat_flat_hand(hand, targets, obstacle, arch)
+        _seat_flat_hand(hand, targets, grip, arch, other)
         angles = {**_straight_angles(), **{k: float(v) for k, v in given.items()}}
         _aim_thumb(hand, targets, angles, grip_radius_m)
+        _bend_wrist(hand, side)
         return _SolvedHand(hand, angles, _segment_gaps(hand, angles, obstacle), targets)
     chains = _finger_chains(settings)
     angles: dict[str, float] = {}
     for _ in range(settings.arch_passes):
-        _seat_flat_hand(hand, targets, obstacle, arch)
+        _seat_flat_hand(hand, targets, grip, arch, other)
         start = {**_straight_angles(), **arch}
         angles = curl_to_contact(hand, chains, obstacle, settings.curl, start).angles
         arch = _arch_from_knuckles(angles, settings)
-    _seat_flat_hand(hand, targets, obstacle, arch)
+    _seat_flat_hand(hand, targets, grip, arch, other)
     start = {**_straight_angles(), **arch}
     if settings.wrap_scan_samples >= 2:
         angles = wrap_to_contact(
@@ -668,6 +752,7 @@ def _solve_right_hand(
     angles = curl_to_contact(
         hand, (_thumb_chain(settings, targets),), obstacle, settings.curl, angles
     ).angles
+    _bend_wrist(hand, side)
     return _SolvedHand(hand, angles, _segment_gaps(hand, angles, obstacle), targets)
 
 
@@ -722,16 +807,33 @@ def build_hand_visual(
     settings = settings or default_settings()
     given = None if joint_angles is None else joint_angles.as_mapping()
     solved = _solve_right_hand(grip_spec, side, grip_radius_m, settings, given)
+    return _result(solved, grip_spec, side, grip_radius_m, settings, 0.0)
+
+
+def _club_from_build(
+    spec: GripSpec, side: HandSide, mirrored: bool, z_m: float
+) -> Array:
+    """Right-hand build frame to the club frame: mirror, shaft roll, station."""
+    frame = np.diag([1.0, -1.0 if mirrored else 1.0, 1.0, 1.0])
+    roll_deg = resolved_shaft_roll_deg(spec, side)
+    roll = apply_shaft_roll(np.eye(3), APPEARANCE_GRIP_SHAFT_AXIS, roll_deg)[:3, :3]
+    return rigid(roll, np.array([0.0, 0.0, z_m])) @ frame
+
+
+def _result(
+    solved: _SolvedHand,
+    spec: GripSpec,
+    side: HandSide,
+    grip_radius_m: float,
+    settings: SkinnedHumanSettings,
+    z_m: float,
+) -> HandVisualResult:
     hand = solved.hand
     transforms = hand.transforms(solved.angles)
-    frame = hand.placement.copy()
+    frame = _club_from_build(spec, side, solved.targets.mirrored, z_m) @ hand.placement
     faces = hand.asset.faces.copy()
     if solved.targets.mirrored:
-        frame = np.diag([1.0, -1.0, 1.0, 1.0]) @ frame
         faces = faces[:, ::-1].copy()
-    roll_deg = resolved_shaft_roll_deg(grip_spec, side)
-    roll = apply_shaft_roll(np.eye(3), APPEARANCE_GRIP_SHAFT_AXIS, roll_deg)[:3, :3]
-    frame = rigid(roll, np.zeros(3)) @ frame
     local = pose_vertices(hand.asset, transforms)
     vertices = local @ frame[:3, :3].T + frame[:3, 3]
     require(bool(np.isfinite(vertices).all()), "skinned vertices must be finite")
@@ -750,6 +852,70 @@ def build_hand_visual(
         frame_from_rest=frame,
         rest_asset=hand.asset,
     )
+
+
+def _bone_capsules(
+    solved: _SolvedHand, settings: SkinnedHumanSettings
+) -> tuple[Array, Array, Array]:
+    """The solved hand's digits and metacarpals as capsules (its build frame)."""
+    hand = solved.hand
+    bones = [f"{f}_{s}" for f in FINGERS for s in _SEGMENTS]
+    bones += [f"meta_{f}" for f in FINGERS] + list(_THUMB_BONES)
+    starts = [hand.joint_position(b, solved.angles) for b in bones]
+    ends = [hand.joint_position(b, solved.angles, tail=True) for b in bones]
+    radii = [
+        _bone_skin_radius(hand.asset, b)
+        * settings.pair_capsule_radius_scale
+        * (settings.pair_thumb_radius_scale if b in _THUMB_BONES else 1.0)
+        for b in bones
+    ]
+    return np.array(starts), np.array(ends), np.array(radii)
+
+
+def build_grip_hands(
+    grip_spec: GripSpec,
+    *,
+    grip_radius_m: float,
+    settings: SkinnedHumanSettings | None = None,
+) -> dict[HandSide, HandVisualResult]:
+    """Both hands on one club, in the lead hand's grip frame.
+
+    The lead hand is posed on the bare grip. The trail hand sits
+    ``hand_spacing_m`` toward the club head and is posed around the grip *and*
+    the lead hand's digits, so it rests on them instead of passing through.
+    Its ``contact_gaps_m`` are clearances to that combined obstacle.
+    """
+    _check_inputs(grip_spec, "lead", grip_radius_m)
+    settings = settings or default_settings()
+    lead = _solve_right_hand(grip_spec, "lead", grip_radius_m, settings, None)
+    starts, ends, radii = _bone_capsules(lead, settings)
+    club_from_lead = _club_from_build(grip_spec, "lead", lead.targets.mirrored, 0.0)
+    trail_mirrored = _targets(grip_spec, "trail", settings).mirrored
+    club_from_trail = _club_from_build(
+        grip_spec, "trail", trail_mirrored, grip_spec.hand_spacing_m
+    )
+    trail_from_lead = np.linalg.inv(club_from_trail) @ club_from_lead
+
+    def moved(points: Array) -> Array:
+        return points @ trail_from_lead[:3, :3].T + trail_from_lead[:3, 3]
+
+    obstacle = capsule_union_distance(
+        cylinder_distance(grip_radius_m), moved(starts), moved(ends), radii
+    )
+    trail = _solve_right_hand(
+        grip_spec, "trail", grip_radius_m, settings, None, obstacle
+    )
+    return {
+        "lead": _result(lead, grip_spec, "lead", grip_radius_m, settings, 0.0),
+        "trail": _result(
+            trail,
+            grip_spec,
+            "trail",
+            grip_radius_m,
+            settings,
+            grip_spec.hand_spacing_m,
+        ),
+    }
 
 
 def register() -> None:

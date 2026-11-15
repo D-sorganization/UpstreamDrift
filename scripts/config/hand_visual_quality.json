@@ -20,5 +20,10 @@
   "max_crease_fold_faces": 16,
   "max_crease_fold_area_fraction": 0.004,
   "anthropometric_reference_note": "breadth_over_length: ANSUR II pooled, as used by hand_size.py. Finger ratios are bone-chain lengths (knuckle to tip; thumb from its carpometacarpal joint) recalled from Buryanov and Kotiuch 2010 and NOT re-verified against the paper; treat as indicative until checked.",
-  "min_finger_total_curl_deg": 100.0
+  "min_finger_total_curl_deg": 100.0,
+  "pair_penetration_tolerance_m": 0.001,
+  "forearm_spread_range_deg": [
+    15.0,
+    50.0
+  ]
 }

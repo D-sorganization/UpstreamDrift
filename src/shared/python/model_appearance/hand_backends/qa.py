@@ -120,3 +120,67 @@ def anthropometric_ratios(
         "little_over_middle": finger["little"] / finger["middle"],
         "thumb_over_middle": thumb / finger["middle"],
     }
+
+
+def _winding_numbers(
+    points: NDArray[np.float64], vertices: NDArray[np.float64], faces: NDArray
+) -> NDArray[np.float64]:
+    """Winding number of a closed outward-wound mesh about each point."""
+    total = np.zeros(len(points))
+    for chunk in np.array_split(np.arange(len(points)), max(1, len(points) // 256)):
+        rel = vertices[faces][None, :, :, :] - points[chunk][:, None, None, :]
+        a, b, c = rel[:, :, 0], rel[:, :, 1], rel[:, :, 2]
+        la, lb, lc = (np.linalg.norm(x, axis=2) for x in (a, b, c))
+        triple = np.einsum("ijk,ijk->ij", a, np.cross(b, c))
+        denom = (
+            la * lb * lc
+            + np.einsum("ijk,ijk->ij", a, b) * lc
+            + np.einsum("ijk,ijk->ij", b, c) * la
+            + np.einsum("ijk,ijk->ij", c, a) * lb
+        )
+        total[chunk] = np.arctan2(triple, denom).sum(axis=1) / (2.0 * np.pi)
+    return total
+
+
+def _depth_inside_m(
+    points: NDArray[np.float64], vertices: NDArray[np.float64], faces: NDArray
+) -> float:
+    """How far the deepest of ``points`` lies inside the closed mesh (0 if none).
+
+    Depth is the distance to the nearest mesh vertex, edge midpoint or face
+    centre, so it overstates true depth by at most about half an edge length.
+    """
+    inside = points[_winding_numbers(points, vertices, faces) > 0.5]
+    if len(inside) == 0:
+        return 0.0
+    tri = vertices[faces]
+    samples = np.vstack(
+        [vertices, tri.mean(axis=1)]
+        + [0.5 * (tri[:, i] + tri[:, (i + 1) % 3]) for i in range(3)]
+    )
+    gaps = np.linalg.norm(inside[:, None, :] - samples[None, :, :], axis=2)
+    return float(gaps.min(axis=1).max())
+
+
+def hand_pair_penetration_m(first: HandVisualResult, second: HandVisualResult) -> float:
+    """Deepest that either hand's skin vertices sit inside the other hand."""
+    a, b = first.mesh, second.mesh
+    return max(
+        _depth_inside_m(a.vertices, b.vertices, b.faces),
+        _depth_inside_m(b.vertices, a.vertices, a.faces),
+    )
+
+
+def forearm_spread_deg(first: HandVisualResult, second: HandVisualResult) -> float:
+    """Angle between the two forearms seen along the shaft (from the butt)."""
+
+    def proximal(result: HandVisualResult) -> NDArray[np.float64]:
+        asset, transforms = _audit_parts(result)
+        i = asset.bone_index("forearm")
+        bone = asset.bone_heads[i] - asset.bone_tails[i]
+        direction = result.frame_from_rest[:3, :3] @ transforms[i][:3, :3] @ bone
+        flat = direction[:2]
+        return flat / np.linalg.norm(flat)
+
+    cosine = float(np.clip(proximal(first) @ proximal(second), -1.0, 1.0))
+    return float(np.degrees(np.arccos(cosine)))

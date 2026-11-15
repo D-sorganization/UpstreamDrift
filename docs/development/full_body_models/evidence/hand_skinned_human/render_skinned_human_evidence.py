@@ -31,9 +31,12 @@ from src.shared.python.model_appearance.geometry import Mesh
 from src.shared.python.model_appearance.hand_backends.qa import (
     load_hand_visual_quality,
     max_grip_cylinder_penetration_m,
+    forearm_spread_deg,
+    hand_pair_penetration_m,
     skinning_defects,
 )
 from src.shared.python.model_appearance.hand_backends.skinned_human import (
+    build_grip_hands,
     build_hand_visual,
 )
 
@@ -83,7 +86,7 @@ def main() -> int:
     quality = load_hand_visual_quality()
     radius = float(quality["grip_radius_m"])
     views = tuple(SETTINGS["views"])
-    report: dict[str, object] = {"frames": {}, "hands": {}}
+    report: dict[str, object] = {"frames": {}, "hands": {}, "pairs": {}}
 
     def skin(mesh: Mesh, rgb) -> object:
         return render.ScenePart(mesh, (*rgb, 1.0), "skin")
@@ -106,7 +109,6 @@ def main() -> int:
         side: build_hand_visual(_spec(0.0), side, grip_radius_m=radius)
         for side in ("lead", "trail")
     }
-    spacing = _spec(0.0).hand_spacing_m
     for roll in SETTINGS["rolls_deg"]:
         hands = {
             side: build_hand_visual(_spec(float(roll)), side, grip_radius_m=radius)
@@ -139,15 +141,20 @@ def main() -> int:
                     _basis(flat[side]),
                     side,
                 )
-        # Both hands: the trail hand sits one hand spacing toward the head.
-        trail = hands["trail"]
-        shifted = Mesh(
-            trail.mesh.vertices + np.array([0.0, 0.0, spacing]), trail.mesh.faces
-        )
-        pair = [
-            skin(hands["lead"].mesh, hands["lead"].skin_rgb),
-            skin(shifted, trail.skin_rgb),
-        ]
+        # Both hands: the trail hand is posed around the grip and the lead hand.
+        both = build_grip_hands(_spec(float(roll)), grip_radius_m=radius)
+        report["pairs"][tag] = {
+            "pair_penetration_mm": round(
+                1e3 * hand_pair_penetration_m(both["lead"], both["trail"]), 3
+            ),
+            "forearm_spread_deg": round(
+                forearm_spread_deg(both["lead"], both["trail"]), 1
+            ),
+            "trail_contact_gaps_mm": {
+                k: round(1e3 * v, 2) for k, v in both["trail"].contact_gaps_m.items()
+            },
+        }
+        pair = [skin(r.mesh, r.skin_rgb) for r in both.values()]
         for view in views:
             shoot(
                 f"skinned_both_{view}_{tag}", pair, view, _basis(flat["lead"]), "lead"

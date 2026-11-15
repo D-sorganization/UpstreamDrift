@@ -49,7 +49,7 @@ class _PlanarFinger:
         self._base = np.array([base_x, _RADIUS + _HALF_THICKNESS, 0.0])
         self._samples = 25
 
-    def points(self, angles: Mapping[str, float]) -> np.ndarray:
+    def points(self, angles: Mapping[str, float], ids=None) -> np.ndarray:
         origin = self._base.copy()
         heading = 0.0
         out = []
@@ -60,7 +60,8 @@ class _PlanarFinger:
             s = np.linspace(0.0, length, self._samples)[:, None]
             out.append(origin + s * along - _HALF_THICKNESS * normal)
             origin = origin + length * along
-        return np.vstack(out)
+        points = np.vstack(out)
+        return points if ids is None else points[ids]
 
     def segment_ids(self, bone: str) -> np.ndarray:
         k = self.bones.index(bone)

@@ -27,6 +27,8 @@ from src.shared.python.model_appearance.hand_backends.joint_angles import (
 )
 from src.shared.python.model_appearance.hand_backends.qa import (
     anthropometric_ratios,
+    forearm_spread_deg,
+    hand_pair_penetration_m,
     load_hand_visual_quality,
     max_grip_cylinder_penetration_m,
     skinning_defects,
@@ -34,6 +36,7 @@ from src.shared.python.model_appearance.hand_backends.qa import (
 )
 from src.shared.python.model_appearance.hand_backends.skinned_human import (
     BACKEND_NAME,
+    build_grip_hands,
     build_hand_visual,
     default_settings,
     load_settings_mapping,
@@ -341,3 +344,87 @@ def test_fast_posing_kinematics_match_the_reference_skinning() -> None:
     np.testing.assert_allclose(
         hand.points(angles), pose_vertices(hand.asset, reference), atol=1e-12
     )
+
+
+def _pair(roll_deg: float = 0.0):
+    key = ("pair", roll_deg)
+    if key not in _CACHE:
+        _CACHE[key] = build_grip_hands(_spec(roll_deg), grip_radius_m=_RADIUS)
+    return _CACHE[key]
+
+
+def test_two_hands_share_the_club_without_passing_through_each_other() -> None:
+    pair = _pair()
+    depth = hand_pair_penetration_m(pair["lead"], pair["trail"])
+    assert depth <= float(_Q["pair_penetration_tolerance_m"]), f"{depth * 1e3:.2f} mm"
+    for side in _SIDES:
+        inside = max_grip_cylinder_penetration_m(pair[side].mesh.vertices, _RADIUS)
+        assert inside <= float(_Q["penetration_tolerance_m"])
+    # On their own the two hands overlap: the pair solve is doing real work.
+    alone = build_hand_visual(_spec(), "trail", grip_radius_m=_RADIUS)
+    shifted = dataclasses.replace(
+        alone,
+        mesh=type(alone.mesh)(
+            alone.mesh.vertices + [0.0, 0.0, _spec().hand_spacing_m],
+            alone.mesh.faces,
+        ),
+    )
+    assert hand_pair_penetration_m(pair["lead"], shifted) > depth + 0.002
+
+
+def test_trail_hand_of_the_pair_still_wraps_the_grip_or_the_lead_hand() -> None:
+    pair = _pair()
+    gaps = pair["trail"].contact_gaps_m
+    tolerance = float(_Q["contact_tolerance_m"])
+    for finger in FINGERS:
+        for segment in ("mid", "dist"):
+            assert gaps[f"{finger}_{segment}"] <= tolerance, f"{finger}_{segment}"
+    assert gaps["hand"] >= -float(_Q["penetration_tolerance_m"])
+    np.testing.assert_allclose(
+        pair["lead"].mesh.vertices, _hand("lead").mesh.vertices, atol=1e-12
+    )
+    lead_z = pair["lead"].frame_from_rest[2, 3]
+    trail_z = pair["trail"].frame_from_rest[2, 3]
+    assert trail_z - lead_z > 0.5 * _spec().hand_spacing_m, "trail is nearer the head"
+    for side in _SIDES:
+        assert skinning_residual_m(pair[side]) < 1e-9
+
+
+def test_forearms_leave_the_club_on_the_golfers_side() -> None:
+    low, high = (float(v) for v in _Q["forearm_spread_range_deg"])
+    pair = _pair()
+    spread = forearm_spread_deg(pair["lead"], pair["trail"])
+    assert low <= spread <= high, f"forearms {spread:.0f} deg apart"
+
+
+def test_pair_follows_per_hand_shaft_roll() -> None:
+    flat, rolled = _pair(), _pair(20.0)
+    turn = math.radians(20.0)
+    c, s = math.cos(turn), math.sin(turn)
+    rot = np.array([[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]])
+    for side in _SIDES:
+        a, b = flat[side].mesh.vertices, rolled[side].mesh.vertices
+        direct = np.abs(a @ rot.T - b).max()
+        other = np.abs(a @ rot - b).max()
+        assert min(direct, other) < float(_Q["shaft_roll_error_m"]) + 1e-6
+
+
+def test_wrist_bend_turns_the_forearm_and_leaves_the_hand_alone() -> None:
+    raw = load_settings_mapping()
+    straight = {"extension_deg": 0.0, "ulnar_deviation_deg": 0.0}
+    raw["wrist"] = {"lead": straight, "trail": straight}
+    unbent = build_hand_visual(
+        _spec(), "trail", grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
+    )
+    bent = _hand("trail")
+    asset = bent.rest_asset
+    digits = asset.dominant_vertex_ids(
+        tuple(f"{f}_{s}" for f in FINGERS for s in ("prox", "mid", "dist"))
+    )
+    np.testing.assert_allclose(
+        bent.mesh.vertices[digits], unbent.mesh.vertices[digits], atol=1e-9
+    )
+    stub = asset.dominant_vertex_ids(("forearm",))
+    moved = np.abs(bent.mesh.vertices[stub] - unbent.mesh.vertices[stub]).max()
+    assert moved > 0.003, "the forearm did not turn"
+    assert bent.joint_angles == unbent.joint_angles

@@ -126,8 +126,9 @@ class CurlSettings:
 class PosableHand(Protocol):
     """What a backend offers so that this module can pose it."""
 
-    def points(self, angles: Mapping[str, float]) -> Array:
-        """Skin points ``(N, 3)`` in the obstacle frame for these hinge angles."""
+    def points(self, angles: Mapping[str, float], ids: IntArray | None = None) -> Array:
+        """Skin points ``(N, 3)`` in the obstacle frame for these hinge angles;
+        only the points ``ids`` (in that order) when given."""
 
     def segment_ids(self, bone: str) -> IntArray:
         """Indices of the skin points that belong to ``bone``'s own segment."""
@@ -175,12 +176,11 @@ def capsule_union_distance(
     denom = np.maximum(np.einsum("ij,ij->i", ab, ab), 1e-18)
 
     def distance(points: Array) -> Array:
-        out = base(points)
-        for k in range(len(a)):
-            t = np.clip((points - a[k]) @ ab[k] / denom[k], 0.0, 1.0)
-            closest = a[k] + t[:, None] * ab[k]
-            out = np.minimum(out, np.linalg.norm(points - closest, axis=1) - r[k])
-        return out
+        rel = points[:, None, :] - a[None, :, :]
+        t = np.clip(np.einsum("nkj,kj->nk", rel, ab) / denom, 0.0, 1.0)
+        off = rel - t[:, :, None] * ab[None, :, :]
+        capsules = (np.linalg.norm(off, axis=2) - r).min(axis=1)
+        return np.minimum(base(points), capsules)
 
     return distance
 
@@ -203,11 +203,13 @@ def _curl_joint(
     angles: dict[str, float],
 ) -> tuple[dict[str, float], float]:
     """Close one joint until its segment touches or something would penetrate."""
-    segment = hand.segment_ids(joint.bone)
-    moved = hand.moved_ids(joint.bone)
+    # Only the skin this joint moves can change its clearance.
+    watched = np.union1d(hand.moved_ids(joint.bone), hand.segment_ids(joint.bone))
+    segment = np.searchsorted(watched, hand.segment_ids(joint.bone))
+    moved = np.searchsorted(watched, hand.moved_ids(joint.bone))
 
     def clearances(angle: float) -> tuple[float, float]:
-        d = obstacle(hand.points(_apply(joint, angle, angles)))
+        d = obstacle(hand.points(_apply(joint, angle, angles), watched))
         return float(d[segment].min()), float(d[moved].min())
 
     def free(angle: float) -> bool:
