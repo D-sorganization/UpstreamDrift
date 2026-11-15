@@ -56,6 +56,10 @@ from src.shared.python.core.handedness import (
     validate_handedness,
 )
 from src.shared.python.grip_contact.contact_topology import GripStyle as GripStyle
+from src.shared.python.grip_spec.validation import (
+    require_fields_in_range,
+    validate_grip_style_fields,
+)
 from src.shared.python.model_appearance.grip_pose import (
     ALPHA_RANGE_DEG as ALPHA_RANGE_DEG,
     LEAD_BELOW_BUTT_M,
@@ -64,7 +68,6 @@ from src.shared.python.model_appearance.grip_pose import (
     PALM_DIAGONAL_DEG,
     GripPose,
     TRAIL_V_OFFSET_RANGE_DEG,
-    require_fields_in_range,
 )
 from src.shared.python.motion_matching.anthropometric_geometry import (
     GRIP_ULNAR_OFFSET_DEG,
@@ -341,12 +344,7 @@ class GripSpec:
     def __post_init__(self) -> None:
         require(isinstance(self.lead, HandAngles), "lead must be a HandAngles")
         require(isinstance(self.trail, HandAngles), "trail must be a HandAngles")
-        if not isinstance(self.style, GripStyle):
-            raise TypeError(f"style must be a GripStyle, got {self.style!r}")
-        if not isinstance(self.trigger_finger, bool):
-            raise TypeError(
-                f"trigger_finger must be a bool, got {self.trigger_finger!r}"
-            )
+        validate_grip_style_fields(self.style, self.trigger_finger)
         validate_handedness(self.handedness)
         self.pose()  # validates the shared values and the V azimuth range
 

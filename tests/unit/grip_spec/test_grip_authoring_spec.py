@@ -12,6 +12,7 @@ import pytest
 
 from dataclasses import replace
 
+from src.shared.python.grip_contact.contact_topology import GripStyle
 from src.shared.python.grip_spec import (
     GripForceProvider,
     GripSpec,
@@ -21,7 +22,7 @@ from src.shared.python.grip_spec import (
     resolve_contact_parameters,
     resolve_grip_force_limits,
 )
-from src.shared.python.grip_contact.contact_topology import GripStyle
+from src.shared.python.grip_spec.validation import validate_grip_style_fields
 from src.shared.python.model_appearance.grip_hand_mesh import build_grip_hand_mesh
 from src.shared.python.model_appearance.grip_pose import (
     DEFAULT_GRIP_POSE,
@@ -126,6 +127,13 @@ def test_force_and_contact_params_resolved_from_provider() -> None:
 def test_grip_spec_public_constructors_validate() -> None:
     with pytest.raises(TypeError):
         GripSpec.legacy(style="overlap")  # type: ignore[arg-type]
+
+
+def test_validate_grip_style_fields_rejects_non_style() -> None:
+    with pytest.raises(TypeError, match="GripStyle"):
+        validate_grip_style_fields("overlap", False)
+    with pytest.raises(TypeError, match="bool"):
+        validate_grip_style_fields(GripStyle.OVERLAP, 0)
 
 
 # --- registration smoke (swappable by name) ---

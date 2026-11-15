@@ -6,6 +6,7 @@ import math
 from collections.abc import Sequence
 
 from src.shared.python.contracts import require
+from src.shared.python.grip_contact.contact_topology import GripStyle
 
 
 def require_fields_in_range(
@@ -21,4 +22,12 @@ def require_fields_in_range(
         require(lo <= value <= hi, f"{name} must be in [{lo}, {hi}], got {value}")
 
 
-__all__ = ["require_fields_in_range"]
+def validate_grip_style_fields(style: object, trigger_finger: object) -> None:
+    """Validate grip style enum and trigger-finger flag (shared with grip contract)."""
+    if not isinstance(style, GripStyle):
+        raise TypeError(f"style must be a GripStyle, got {style!r}")
+    if not isinstance(trigger_finger, bool):
+        raise TypeError(f"trigger_finger must be a bool, got {trigger_finger!r}")
+
+
+__all__ = ["require_fields_in_range", "validate_grip_style_fields"]

@@ -31,7 +31,10 @@ from src.shared.python.grip_spec.defaults import (
     NEUTRAL_TRAIL_THUMB_AZIMUTH_DEG,
     SCHEMA_VERSION,
 )
-from src.shared.python.grip_spec.validation import require_fields_in_range
+from src.shared.python.grip_spec.validation import (
+    require_fields_in_range,
+    validate_grip_style_fields,
+)
 
 
 def _default_hand_breadth_m() -> float:
@@ -110,12 +113,7 @@ class GripSpec:
 
     def __post_init__(self) -> None:
         require(self.schema_version == SCHEMA_VERSION, "unsupported schema_version")
-        if not isinstance(self.style, GripStyle):
-            raise TypeError(f"style must be a GripStyle, got {self.style!r}")
-        if not isinstance(self.trigger_finger, bool):
-            raise TypeError(
-                f"trigger_finger must be a bool, got {self.trigger_finger!r}"
-            )
+        validate_grip_style_fields(self.style, self.trigger_finger)
         if not isinstance(self.hand_size, HandSize):
             raise TypeError("hand_size must be a HandSize")
         if not isinstance(self.lead, HandGripSpec) or not isinstance(

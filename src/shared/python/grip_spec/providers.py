@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
 
 from src.shared.python.contracts import require
 from src.shared.python.grip_contact.grip_force_limit import UNLIMITED, GripForceLimit
@@ -62,12 +62,14 @@ _FORCE_REGISTRY: dict[str, GripForceProvider] = {
     DEFAULT_FORCE_PROVIDER_NAME: _UnspecifiedForceProvider(),
 }
 _CONTACT_REGISTRY: dict[str, ContactParameterProvider] = {
-    DEFAULT_CONTACT_PROVIDER_NAME: _UnspecifiedContactProvider(),
+    DEFAULT_CONTACT_PROVIDER_NAME: cast(
+        ContactParameterProvider, _UnspecifiedContactProvider()
+    ),
 }
 
 
 def register_grip_force_provider(name: str, provider: GripForceProvider) -> None:
-    require(isinstance(name, str) and name.strip(), "provider name required")
+    require(bool(isinstance(name, str) and name.strip()), "provider name required")
     if not isinstance(provider, GripForceProvider):
         raise TypeError("provider must implement GripForceProvider")
     _FORCE_REGISTRY[name] = provider
@@ -76,17 +78,17 @@ def register_grip_force_provider(name: str, provider: GripForceProvider) -> None
 def register_contact_parameter_provider(
     name: str, provider: ContactParameterProvider
 ) -> None:
-    require(isinstance(name, str) and name.strip(), "provider name required")
+    require(bool(isinstance(name, str) and name.strip()), "provider name required")
     if not isinstance(provider, ContactParameterProvider):
         raise TypeError("provider must implement ContactParameterProvider")
     _CONTACT_REGISTRY[name] = provider
 
 
 def resolve_grip_force_limits(spec: GripSpec) -> dict[str, GripForceLimit]:
-    provider = _FORCE_REGISTRY.get(spec.force_provider_name)
-    require(
-        provider is not None, f"unknown force provider {spec.force_provider_name!r}"
-    )
+    name = spec.force_provider_name
+    if name not in _FORCE_REGISTRY:
+        require(False, f"unknown force provider {name!r}")
+    provider = _FORCE_REGISTRY[name]
     return {
         "lead": provider.lead_force_limit(),
         "trail": provider.trail_force_limit(),
@@ -94,12 +96,10 @@ def resolve_grip_force_limits(spec: GripSpec) -> dict[str, GripForceLimit]:
 
 
 def resolve_contact_parameters(spec: GripSpec) -> ContactParameterProvider:
-    provider = _CONTACT_REGISTRY.get(spec.contact_provider_name)
-    require(
-        provider is not None,
-        f"unknown contact provider {spec.contact_provider_name!r}",
-    )
-    return provider
+    name = spec.contact_provider_name
+    if name not in _CONTACT_REGISTRY:
+        require(False, f"unknown contact provider {name!r}")
+    return _CONTACT_REGISTRY[name]
 
 
 __all__ = [
