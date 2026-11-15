@@ -74,6 +74,26 @@ class PadConformSettings:
             raise ValueError("pad smooth_iterations and passes must not be negative")
 
 
+@dataclass(frozen=True)
+class PressSettings:
+    """Soft skin pressed against the obstacle the hand squeezes.
+
+    Skin up to ``max_depth_m`` inside the obstacle is laid on its surface
+    (``0`` switches the corrective off). The flesh it displaces bulges beside
+    the contact patch: skin within ``bulge_rings`` edges of pressed skin
+    moves sideways by ``bulge_gain`` times the press depth spread to it
+    (``bulge_gain == 0`` leaves that skin alone).
+    """
+
+    max_depth_m: float
+    bulge_gain: float
+    bulge_rings: int
+
+    def __post_init__(self) -> None:
+        if self.max_depth_m < 0.0 or self.bulge_gain < 0.0 or self.bulge_rings < 0:
+            raise ValueError("press depth, bulge gain and rings must not be negative")
+
+
 def vertex_neighbours(faces: IntArray, vertex_count: int) -> list[IntArray]:
     """Edge-connected neighbours of every vertex."""
     pairs = np.concatenate(
@@ -206,6 +226,47 @@ def lift_out(vertices: Array, distance: Distance, *, max_depth_m: float) -> Arra
     if len(ids):
         away = distance_gradient(distance, out[ids], _GRADIENT_STEP_M)
         out[ids] -= gap[ids, None] * away
+    return out
+
+
+def press_flat(
+    vertices: Array,
+    faces: IntArray,
+    distance: Distance,
+    settings: PressSettings,
+    vertex_normals: Callable[[Array], Array],
+) -> Array:
+    """Lay pressed skin on the obstacle and bulge the skin beside it.
+
+    See :class:`PressSettings`. The bulge moves a vertex along its outward
+    normal with the part that points into the obstacle removed, so it spreads
+    sideways. Postconditions: skin that was up to ``max_depth_m`` inside ends
+    on the surface; no bulged vertex ends inside; skin farther than
+    ``bulge_rings`` edges from pressed skin is returned unchanged.
+    """
+    out = lift_out(vertices, distance, max_depth_m=settings.max_depth_m)
+    depth = np.linalg.norm(out - vertices, axis=1)
+    if settings.bulge_gain == 0.0 or settings.bulge_rings == 0 or not depth.any():
+        return out
+    neighbours = vertex_neighbours(faces, len(out))
+    pressed = np.flatnonzero(depth > 0.0)
+    spread, region = depth.copy(), pressed
+    for _ in range(settings.bulge_rings):
+        region = _grown(region, neighbours, 1)
+        spread[region] = np.maximum(
+            spread[region], 0.5 * _neighbour_mean(spread, neighbours, region)
+        )
+    beside = np.setdiff1d(region, pressed)
+    if len(beside) == 0:
+        return out
+    normal = vertex_normals(out)[beside]
+    away = distance_gradient(distance, out[beside], _GRADIENT_STEP_M)
+    into = np.minimum(np.einsum("ij,ij->i", normal, away), 0.0)
+    sideways = normal - into[:, None] * away
+    moved = out[beside] + settings.bulge_gain * spread[beside, None] * sideways
+    short = np.maximum(np.minimum(distance(out[beside]), 0.0) - distance(moved), 0.0)
+    moved += short[:, None] * distance_gradient(distance, moved, _GRADIENT_STEP_M)
+    out[beside] = moved
     return out
 
 

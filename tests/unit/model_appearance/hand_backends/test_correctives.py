@@ -10,9 +10,11 @@ import pytest
 from src.shared.python.model_appearance.hand_backends.correctives import (
     FoldRelaxSettings,
     PadConformSettings,
+    PressSettings,
     conform_pads,
     distance_gradient,
     lift_out,
+    press_flat,
     relax_folds,
     sharpened_faces,
     vertex_neighbours,
@@ -241,3 +243,60 @@ def test_relaxing_a_sharpened_crease_brings_it_under_the_limit() -> None:
     relaxed = relax_folds(posed, faces, sharp, FoldRelaxSettings(12, 1, 0.5))
     assert len(sharp(relaxed)) == 0
     assert 0.0 < relaxed[:, 2].max() < posed[:, 2].max()
+
+
+def _bowl(depth: float) -> tuple[np.ndarray, np.ndarray]:
+    """The sheet as skin facing the floor (``-z``), dipping ``depth`` into it."""
+    vertices, faces = _grid()
+    centre = vertices[(_N // 2) * _N + _N // 2].copy()
+    reach = np.linalg.norm(vertices[:, :2] - centre[:2], axis=1)
+    vertices[:, 2] = 3.0 * depth * (reach / reach.max()) ** 2 - depth
+    return vertices, faces[:, ::-1].copy()
+
+
+def _down_normals(faces: np.ndarray):
+    def normals(v: np.ndarray) -> np.ndarray:
+        tri = v[faces]
+        face = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+        out = np.zeros_like(v)
+        for k in range(3):
+            np.add.at(out, faces[:, k], face)
+        return out / np.linalg.norm(out, axis=1, keepdims=True)
+
+    return normals
+
+
+def test_pressed_skin_lies_flat_and_the_skin_beside_it_bulges_sideways() -> None:
+    vertices, faces = _bowl(0.002)
+    settings = PressSettings(max_depth_m=0.003, bulge_gain=0.5, bulge_rings=1)
+    out = press_flat(vertices, faces, _floor, settings, _down_normals(faces))
+    pressed = vertices[:, 2] < 0.0
+    assert pressed.any() and not pressed.all()
+    np.testing.assert_allclose(out[pressed, 2], 0.0, atol=1e-9)
+    assert out[:, 2].min() >= -1e-12
+    centre = vertices[(_N // 2) * _N + _N // 2, :2]
+    outward = vertices[:, :2] - centre
+    moved = ~pressed & (np.abs(out - vertices).max(axis=1) > 0.0)
+    assert moved.any()
+    # The bulge pushes skin away from the contact patch, never into the floor.
+    assert (
+        np.einsum("ij,ij->i", (out - vertices)[moved, :2], outward[moved]) > 0
+    ).all()
+    assert (out[moved, 2] >= vertices[moved, 2] - 1e-12).all()
+    # It reaches one ring past the pressed skin and no farther.
+    neighbours = vertex_neighbours(faces, len(vertices))
+    ring = {int(j) for i in np.flatnonzero(pressed) for j in neighbours[i]}
+    assert set(np.flatnonzero(moved).tolist()) <= ring
+
+
+def test_press_without_bulge_is_lift_out_and_bad_settings_raise() -> None:
+    vertices, faces = _bowl(0.002)
+    flat = PressSettings(max_depth_m=0.003, bulge_gain=0.0, bulge_rings=2)
+    out = press_flat(vertices, faces, _floor, flat, _down_normals(faces))
+    np.testing.assert_array_equal(out, lift_out(vertices, _floor, max_depth_m=0.003))
+    off = PressSettings(max_depth_m=0.0, bulge_gain=0.5, bulge_rings=2)
+    unchanged = press_flat(vertices, faces, _floor, off, _down_normals(faces))
+    np.testing.assert_array_equal(unchanged, vertices)
+    for bad in ((-0.001, 0.5, 1), (0.001, -0.1, 1), (0.001, 0.5, -1)):
+        with pytest.raises(ValueError):
+            PressSettings(*bad)

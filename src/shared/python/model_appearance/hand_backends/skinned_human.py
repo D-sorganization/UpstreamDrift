@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import json
 import math
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -38,7 +38,9 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     FoldRelaxSettings,
     PadConformSettings,
     conform_pads,
+    PressSettings,
     lift_out,
+    press_flat,
     sharpened_faces,
     relax_folds,
 )
@@ -139,7 +141,9 @@ class SkinnedHumanSettings:
     frame_excluded_bones: tuple[str, ...]
     fold_relax: FoldRelaxSettings
     palm_pad: PadConformSettings
-    lift_out_max_depth_m: float
+    press: PressSettings
+    squeeze_finger_depth_m: float
+    squeeze_palm_depth_m: float
     crease_relax: FoldRelaxSettings
     crease_relax_bones: tuple[str, ...]
     crease_relax_max_added_fold_deg: float
@@ -239,8 +243,10 @@ def _corrective_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
         "crease_relax_max_added_fold_deg": _positive(
             crease["max_added_fold_deg"], "crease_relax.max_added_fold_deg"
         ),
-        "lift_out_max_depth_m": _non_negative(
-            raw["lift_out"]["max_depth_m"], "lift_out.max_depth_m"
+        "press": PressSettings(
+            max_depth_m=float(raw["lift_out"]["max_depth_m"]),
+            bulge_gain=float(raw["lift_out"]["bulge_gain"]),
+            bulge_rings=int(raw["lift_out"]["bulge_rings"]),
         ),
     }
 
@@ -323,6 +329,12 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
             str(bone) for bone in raw["framing"]["excluded_bones"]
         ),
         **_corrective_fields(raw["correctives"]),
+        squeeze_finger_depth_m=_non_negative(
+            raw["squeeze"]["finger_depth_m"], "squeeze.finger_depth_m"
+        ),
+        squeeze_palm_depth_m=_non_negative(
+            raw["squeeze"]["palm_depth_m"], "squeeze.palm_depth_m"
+        ),
         wrist_deg=tuple(
             (
                 side,
@@ -887,20 +899,31 @@ def _solve_right_hand(
     grip_radius_m: float,
     settings: SkinnedHumanSettings,
     given: Mapping[str, float] | None,
-    obstacle: ObstacleDistance | None = None,
+    scene: Callable[[float], ObstacleDistance] | None = None,
 ) -> _SolvedHand:
+    """Pose one hand as a right hand. ``scene(depth)`` is the distance to what
+    it holds with the grip shrunk by ``depth`` (default: the bare grip)."""
+    paired = scene is not None
     size = spec.hand_size
     solve, skin = _sized_assets(size.length_m, size.breadth_m, settings)
     hand = _GripHand(solve, settings)
     targets = _targets(spec, side, settings)
-    grip = cylinder_distance(grip_radius_m)
-    other, obstacle = obstacle, obstacle or grip
+    deepest = max(settings.squeeze_finger_depth_m, settings.squeeze_palm_depth_m)
+    if deepest >= grip_radius_m:
+        raise ValueError("squeeze depth must be less than the grip radius")
+    scene = scene or (lambda depth: cylinder_distance(grip_radius_m - depth))
+    obstacle = scene(0.0)
+    # Soft pads give: the palm seats, and the digits close, a little way in.
+    grip = cylinder_distance(grip_radius_m - settings.squeeze_palm_depth_m)
+    other = scene(settings.squeeze_palm_depth_m) if paired else None
+    soft = scene(settings.squeeze_finger_depth_m)
+    thumb_radius_m = grip_radius_m - settings.squeeze_finger_depth_m
     arch = {f"meta_{f}": 0.0 for f in FINGERS}
     if given is not None:
         arch = {k: float(given.get(k, 0.0)) for k in arch}
         _seat_flat_hand(hand, targets, grip, arch, other)
         posed = {**_straight_angles(), **{k: float(v) for k, v in given.items()}}
-        _aim_thumb(hand, targets, posed, grip_radius_m)
+        _aim_thumb(hand, targets, posed, thumb_radius_m)
         _bend_wrist(hand, side)
         return _SolvedHand(hand, posed, targets, obstacle, skin)
     chains = _finger_chains(settings)
@@ -908,13 +931,13 @@ def _solve_right_hand(
     for _ in range(settings.arch_passes):
         _seat_flat_hand(hand, targets, grip, arch, other)
         start = {**_straight_angles(), **arch}
-        angles = curl_to_contact(hand, chains, obstacle, settings.curl, start).angles
+        angles = curl_to_contact(hand, chains, soft, settings.curl, start).angles
         arch = _arch_from_knuckles(angles, settings)
     _seat_flat_hand(hand, targets, grip, arch, other)
     start = {**_straight_angles(), **arch}
-    angles = _wrap(hand, chains, obstacle, start)
-    _aim_thumb(hand, targets, angles, grip_radius_m)
-    angles = _wrap(hand, (_thumb_chain(settings, targets),), obstacle, angles)
+    angles = _wrap(hand, chains, soft, start)
+    _aim_thumb(hand, targets, angles, thumb_radius_m)
+    angles = _wrap(hand, (_thumb_chain(settings, targets),), soft, angles)
     _bend_wrist(hand, side)
     return _SolvedHand(hand, angles, targets, obstacle, skin)
 
@@ -986,16 +1009,15 @@ def _club_from_build(
 def _corrected_skin(
     solved: _SolvedHand,
     transforms: Array,
-    grip: ObstacleDistance,
     settings: SkinnedHumanSettings,
 ) -> Array:
     """Skinned vertices in the grip frame, with the corrective shapes applied.
 
     Linear blend skinning first; then the palm pad settles onto the obstacle,
-    creases that skinning pinched between the knuckles relax, skin a hair
-    inside the ``grip`` is lifted to its surface, and the skin around any
-    folded triangle relaxes (see ``correctives``). With all four switched off
-    this is exactly ``pose_vertices``.
+    creases that skinning pinched between the knuckles relax, skin pressed
+    into what the hand holds is laid on its surface and bulges beside it, and
+    the skin around any folded triangle relaxes (see ``correctives``). With
+    all four switched off this is exactly ``pose_vertices``.
     """
     asset, placement = solved.skin_asset, solved.hand.placement
     rotation, offset = placement[:3, :3], placement[:3, 3]
@@ -1021,13 +1043,21 @@ def _corrected_skin(
         return found[relaxable[found]]
 
     skin = relax_folds(skin, asset.faces, creased, settings.crease_relax)
-    skin = lift_out(skin, grip, max_depth_m=settings.lift_out_max_depth_m)
-    return relax_folds(
+    skin = press_flat(
+        skin,
+        asset.faces,
+        solved.obstacle,
+        settings.press,
+        lambda v: vertex_normals(v, asset.faces),
+    )
+    skin = relax_folds(
         skin,
         asset.faces,
         lambda v: flipped_face_ids(asset, transforms, (v - offset) @ rotation),
         settings.fold_relax,
     )
+    # Relaxing may have drawn skin back in: leave none inside what is held.
+    return lift_out(skin, solved.obstacle, max_depth_m=settings.press.max_depth_m)
 
 
 def _result(
@@ -1045,8 +1075,7 @@ def _result(
     faces = asset.faces.copy()
     if solved.targets.mirrored:
         faces = faces[:, ::-1].copy()
-    grip = cylinder_distance(grip_radius_m)
-    skin = _corrected_skin(solved, transforms, grip, settings)
+    skin = _corrected_skin(solved, transforms, settings)
     vertices = skin @ club_from_grip[:3, :3].T + club_from_grip[:3, 3]
     require(bool(np.isfinite(vertices).all()), "skinned vertices must be finite")
     mesh = Mesh(vertices, faces)

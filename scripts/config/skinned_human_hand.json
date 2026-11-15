@@ -73,6 +73,10 @@
       "little": 26.0
     }
   },
+  "squeeze": {
+    "finger_depth_m": 0.0025,
+    "palm_depth_m": 0.0015
+  },
   "thumb": {
     "max_swing_deg": 75.0,
     "max_twist_deg": 60.0,
@@ -109,7 +113,7 @@
   "correctives": {
     "fold_relax": {
       "iterations": 16,
-      "rings": 2,
+      "rings": 3,
       "step": 0.5
     },
     "crease_relax": {
@@ -127,8 +131,8 @@
         "thumb_prox"
       ],
       "max_added_fold_deg": 45.0,
-      "iterations": 8,
-      "rings": 1,
+      "iterations": 16,
+      "rings": 2,
       "step": 0.5
     },
     "palm_pad": {
@@ -146,7 +150,9 @@
       "passes": 2
     },
     "lift_out": {
-      "max_depth_m": 0.002
+      "max_depth_m": 0.004,
+      "bulge_gain": 0.5,
+      "bulge_rings": 3
     }
   },
   "wrist": {

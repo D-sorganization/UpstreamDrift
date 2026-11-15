@@ -28,9 +28,11 @@ from src.shared.python.model_appearance.hand_backends.joint_angles import (
 from src.shared.python.model_appearance.hand_backends.qa import (
     anthropometric_ratios,
     forearm_spread_deg,
+    grip_contact_area_m2,
     hand_pair_penetration_m,
     load_hand_visual_quality,
     max_grip_cylinder_penetration_m,
+    min_bone_grip_clearance_m,
     pinched_edge_count,
     skinning_defects,
     skinning_residual_m,
@@ -127,7 +129,7 @@ def _without_correctives(side: str):
         raw["correctives"] = {
             "fold_relax": {**raw["correctives"]["fold_relax"], "iterations": 0},
             "palm_pad": {**raw["correctives"]["palm_pad"], "reach_m": 0.0},
-            "lift_out": {"max_depth_m": 0.0},
+            "lift_out": {**raw["correctives"]["lift_out"], "max_depth_m": 0.0},
             "crease_relax": {**raw["correctives"]["crease_relax"], "iterations": 0},
         }
         _CACHE[key] = build_hand_visual(
@@ -219,6 +221,41 @@ def test_creases_pinched_between_the_knuckles_are_relaxed(side: str) -> None:
     assert pinched_edge_count(plain, bones, limit) > most
 
 
+def _no_squeeze(side: str):
+    key = (side, "no squeeze")
+    if key not in _CACHE:
+        raw = load_settings_mapping()
+        raw["squeeze"] = {"finger_depth_m": 0.0, "palm_depth_m": 0.0}
+        _CACHE[key] = build_hand_visual(
+            _spec(), side, grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
+        )
+    return _CACHE[key]
+
+
+@pytest.mark.parametrize("side", _SIDES)
+def test_the_hand_squeezes_the_grip_instead_of_resting_on_it(side: str) -> None:
+    """Joints close a pad-compression depth past first touch (#15179)."""
+    loose, firm = _no_squeeze(side), _hand(side)
+    band = float(_Q["contact_band_m"])
+    area = grip_contact_area_m2(firm, band)
+    assert area >= float(_Q["min_grip_contact_area_m2"])
+    assert area > 1.5 * grip_contact_area_m2(loose, band)
+    curl = {
+        which: sum(
+            math.degrees(result.joint_angles.as_mapping()[f"{f}_{s}"])
+            for f in FINGERS
+            for s in ("prox", "mid", "dist")
+        )
+        for which, result in (("loose", loose), ("firm", firm))
+    }
+    assert curl["firm"] > curl["loose"]
+    # Soft tissue gives way, bone does not: no finger bone enters the grip.
+    assert min_bone_grip_clearance_m(firm) >= float(_Q["min_bone_grip_clearance_m"])
+    assert max_grip_cylinder_penetration_m(firm.mesh.vertices, _RADIUS) <= float(
+        _Q["penetration_tolerance_m"]
+    )
+
+
 def _palm_contact_count(result) -> int:
     palm = result.rest_asset.dominant_vertex_ids(
         ("wrist",) + tuple(f"meta_{f}" for f in FINGERS)
@@ -253,17 +290,25 @@ def test_correctives_unfold_the_webs_and_seat_the_palm_pad(side: str) -> None:
     shift = np.linalg.norm(shaped.mesh.vertices - plain.mesh.vertices, axis=1)
     assert 0.0 < shift.max() <= float(_Q["max_corrective_shift_m"])
     assert (shift > 1e-9).mean() <= float(_Q["max_corrective_vertex_fraction"])
-    # Fingers reach the grip by joint rotation alone: their skin moves only
-    # where it dipped a hair inside the grip, and then only onto its surface.
+    # Finger skin pressed into the grip is laid on its surface; the skin
+    # beside it bulges, by less than the press depth.
     digits = shaped.rest_asset.dominant_vertex_ids(
         [f"{f}_{s}" for f in FINGERS for s in ("mid", "dist")] + ["thumb_dist"]
     )
-    assert shift[digits].max() <= default_settings().lift_out_max_depth_m
-    lifted = digits[shift[digits] > 0.0]
-    radial = np.linalg.norm(shaped.mesh.vertices[lifted, :2], axis=1)
-    np.testing.assert_allclose(radial, _RADIUS, atol=1e-6)
+    assert shift[digits].max() <= default_settings().press.max_depth_m
+    radial = np.linalg.norm(shaped.mesh.vertices[digits, :2], axis=1)
+    inside = np.linalg.norm(plain.mesh.vertices[digits, :2], axis=1) < _RADIUS
+    assert inside.any()
+    np.testing.assert_allclose(radial[inside], _RADIUS, atol=1e-6)
     least = int(_Q["min_palm_contact_vertices"])
-    assert _palm_contact_count(shaped) >= least > _palm_contact_count(plain)
+    # Without the correctives the squeezed palm sits inside the grip, where
+    # more of it is near the surface; shaped, it must lie on the surface.
+    assert _palm_contact_count(shaped) >= least
+    palm = shaped.rest_asset.dominant_vertex_ids(
+        ("wrist",) + tuple(f"meta_{f}" for f in FINGERS)
+    )
+    depth = _RADIUS - np.linalg.norm(plain.mesh.vertices[palm, :2], axis=1)
+    assert depth.max() > float(_Q["penetration_tolerance_m"])
     assert shaped.contact_gaps_m["palm"] <= plain.contact_gaps_m["palm"]
 
 
@@ -477,6 +522,7 @@ def test_bad_settings_and_inputs_are_rejected() -> None:
             settings_from_mapping({**raw, "mesh": mesh})
     for part, bad in (
         ("lift_out", {"max_depth_m": -0.001}),
+        ("lift_out", {"bulge_gain": -0.5}),
         ("crease_relax", {"max_added_fold_deg": 0.0}),
         ("crease_relax", {"bones": ["no_such_bone"]}),
         ("fold_relax", {"step": 0.0}),
@@ -493,6 +539,17 @@ def test_bad_settings_and_inputs_are_rejected() -> None:
                 grip_radius_m=_RADIUS,
                 settings=settings_from_mapping({**raw, "correctives": changed}),
             )
+    for bad in ({"finger_depth_m": -0.001}, {"palm_depth_m": -0.001}):
+        with pytest.raises(ValueError):
+            settings_from_mapping({**raw, "squeeze": {**raw["squeeze"], **bad}})
+    with pytest.raises(ValueError):  # a squeeze as deep as the grip is thick
+        deep = {**raw, "squeeze": {**raw["squeeze"], "finger_depth_m": _RADIUS}}
+        build_hand_visual(
+            _spec(),
+            "trail",
+            grip_radius_m=_RADIUS,
+            settings=settings_from_mapping(deep),
+        )
     with pytest.raises(ValueError):
         build_hand_visual(_spec(), "trail", grip_radius_m=0.0)
     with pytest.raises(ValueError):

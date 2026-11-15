@@ -47,6 +47,41 @@ def max_grip_cylinder_penetration_m(
     return float(max(0.0, radius_m - rho.min()))
 
 
+def grip_contact_area_m2(result: HandVisualResult, within_m: float) -> float:
+    """Skin area lying on the grip: triangles with every corner no farther
+    than ``within_m`` from the grip cylinder about ``z``."""
+    if result.grip_radius_m is None:
+        raise ValueError("result carries no grip radius")
+    v, f = result.mesh.vertices, result.mesh.faces
+    near = (np.hypot(v[:, 0], v[:, 1]) - result.grip_radius_m <= within_m)[f].all(
+        axis=1
+    )
+    tri = v[f[near]]
+    cross = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+    return float(0.5 * np.linalg.norm(cross, axis=1).sum())
+
+
+def min_bone_grip_clearance_m(result: HandVisualResult, samples: int = 5) -> float:
+    """Least distance from a finger or thumb bone axis to the grip surface.
+
+    Negative means a bone lies inside the grip. Metacarpals and the forearm
+    are left out: they do not wrap the grip.
+    """
+    asset, transforms, frame = _audit_parts(result)
+    if result.grip_radius_m is None:
+        raise ValueError("result carries no grip radius")
+    least = np.inf
+    for i, name in enumerate(asset.bone_names):
+        if not name.endswith(("_prox", "_mid", "_dist")):
+            continue
+        t = np.linspace(0.0, 1.0, samples)[:, None]
+        rest = (1.0 - t) * asset.bone_heads[i] + t * asset.bone_tails[i]
+        posed = rest @ transforms[i][:3, :3].T + transforms[i][:3, 3]
+        club = posed @ frame[:3, :3].T + frame[:3, 3]
+        least = min(least, float(np.hypot(club[:, 0], club[:, 1]).min()))
+    return float(least - result.grip_radius_m)
+
+
 def skinning_defects(
     result: HandVisualResult, *, min_area_m2: float
 ) -> dict[str, float]:

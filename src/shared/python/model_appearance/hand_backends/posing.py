@@ -157,6 +157,20 @@ def cylinder_distance(radius_m: float) -> ObstacleDistance:
     return distance
 
 
+def inset_distance(distance: ObstacleDistance, depth_m: float) -> ObstacleDistance:
+    """``distance`` to the obstacle shrunk by ``depth_m`` all round.
+
+    A hand that closes on the shrunk obstacle presses its soft pads
+    ``depth_m`` into the real one. ``depth_m == 0`` returns ``distance``.
+    """
+    depth = _finite(depth_m, "depth_m")
+    if depth < 0.0:
+        raise ValueError("inset depth must not be negative")
+    if depth == 0.0:
+        return distance
+    return lambda points: distance(points) + depth
+
+
 def capsule_union_distance(
     base: ObstacleDistance, starts: Array, ends: Array, radii: Array
 ) -> ObstacleDistance:

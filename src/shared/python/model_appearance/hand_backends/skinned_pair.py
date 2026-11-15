@@ -8,6 +8,8 @@ only; contact physics stays on the capsule hand.
 
 from __future__ import annotations
 
+from functools import partial
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -17,6 +19,7 @@ from src.shared.python.model_appearance.hand_backends.posing import (
     ObstacleDistance,
     capsule_union_distance,
     cylinder_distance,
+    inset_distance,
 )
 from src.shared.python.model_appearance.hand_backends.skinned_human import (
     _SEGMENTS,
@@ -71,15 +74,18 @@ class _LeadObstacle:
         )
         self._trail_mirrored = _targets(spec, "trail", settings).mirrored
 
-    def at(self, spacing_m: float) -> ObstacleDistance:
-        """Grip plus lead-hand capsules with the trail hand ``spacing_m`` away."""
+    def at(self, spacing_m: float, inset_m: float = 0.0) -> ObstacleDistance:
+        """Grip plus lead-hand capsules with the trail hand ``spacing_m`` away.
+
+        ``inset_m`` shrinks the grip (not the lead hand) by a squeeze depth.
+        """
         club_from_trail = _club_from_build(
             self.spec, "trail", self._trail_mirrored, spacing_m
         )
         move = np.linalg.inv(club_from_trail) @ self._club_from_lead
         starts, ends, radii = self._capsules
         return capsule_union_distance(
-            self.grip,
+            inset_distance(self.grip, inset_m),
             starts @ move[:3, :3].T + move[:3, 3],
             ends @ move[:3, :3].T + move[:3, 3],
             radii,
@@ -104,9 +110,10 @@ def _settled_spacing_m(scene: _LeadObstacle, grip_radius_m: float) -> float:
     hand = alone.hand
     skin = hand.points(alone.angles, hand.asset.dominant_vertex_ids(bones))
     allowance = settings.curl.penetration_allowance_m
+    squeeze = settings.squeeze_finger_depth_m
 
     def free(extra: float) -> bool:
-        distance = scene.at(spec.hand_spacing_m + extra)
+        distance = scene.at(spec.hand_spacing_m + extra, squeeze)
         return float(distance(skin).min()) >= -allowance
 
     if free(0.0):
@@ -140,7 +147,7 @@ def build_grip_hands(
     scene = _LeadObstacle(grip_spec, grip_radius_m, settings)
     spacing = _settled_spacing_m(scene, grip_radius_m)
     trail = _solve_right_hand(
-        grip_spec, "trail", grip_radius_m, settings, None, scene.at(spacing)
+        grip_spec, "trail", grip_radius_m, settings, None, partial(scene.at, spacing)
     )
     return {
         "lead": _result(scene.lead, grip_spec, "lead", grip_radius_m, settings, 0.0),
