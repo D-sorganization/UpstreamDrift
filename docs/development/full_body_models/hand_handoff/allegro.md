@@ -62,10 +62,12 @@ Sibling lanes already reported two failures the Allegro work must not repeat
 
 ## Current State
 
-No Allegro backend, registry, settings file, test, or evidence PNG exists.
-`src/shared/python/model_appearance/hand_backends/` is not on this branch.
-`grip_hands.grip_hand_meshes` still bakes the procedural capsule hand.
-Nothing in `src/` or `tests/` changed for this lane.
+Implemented under PR #15153 (`Refs #15152`, `Refs #15150`):
+
+- Provenance & license: `PROVENANCE.json` and `NOTICE` in `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/hand_assets/wonik_allegro/` with verified BSD-2-Clause `LICENSE` and all 14 `assets/*.stl` SHA256 hashes.
+- JSON config & contract settings: `scripts/config/hand_backend_allegro.json` and `src/shared/python/model_appearance/hand_backends/allegro_settings.py` (all tolerances, anthropometry bounds, solver steps, `palm_center_offset_deg = 134.0`, 4-DOF thumb curl presets + `thumb_max_z_m = 0.056`, skin-tone RGBAs, and rendering parameters).
+- Backend & pose solver: `allegro_solver.py`, `allegro.py`, and `registry.py` implementing `build_hand_visual(grip_spec, side, joint_angles)` (`"allegro"`) with hidden group-3 collision geometry, human anthropometric scaling via `GripSpec.hand_size`, 3-finger contact curl + 4-DOF thumb opposition solve, per-digit penetration relaxation, and `mf_base`-centered RH/LH mirroring. No little finger is invented (`little_finger: absent`).
+- Evidence & tests: `docs/development/full_body_models/evidence/hand_backend_allegro/render_allegro_hand_evidence.py` (27 `1024 px` Z-buffered renders + `receipt.json`) and `tests/unit/model_appearance/test_allegro_visual_backend.py` (21 parametrized/integration tests covering Gates 1–9, thumb compactness, and bilateral spacing clearance).
 
 The hand model is already vendored and already used as a MuJoCo contact
 fixture (not a qualified golfer) by
@@ -100,24 +102,24 @@ is a `<position>` whose `ctrlrange` equals the joint range. A future clamp
 controller can command these sixteen actuators. This visual task does not
 apply forces.
 
-| Joint | Actuator | Range (rad) | Axis in the zero pose |
-| --- | --- | --- | --- |
-| `ffj0` | `ffa0` | −0.47 to 0.47 | about +X (abduction) |
-| `ffj1` | `ffa1` | −0.196 to 1.61 | about −Y (flexion) |
-| `ffj2` | `ffa2` | −0.174 to 1.709 | about −Y |
-| `ffj3` | `ffa3` | −0.227 to 1.618 | about −Y |
-| `mfj0` | `mfa0` | −0.47 to 0.47 | about +X |
-| `mfj1` | `mfa1` | −0.196 to 1.61 | about −Y |
-| `mfj2` | `mfa2` | −0.174 to 1.709 | about −Y |
-| `mfj3` | `mfa3` | −0.227 to 1.618 | about −Y |
-| `rfj0` | `rfa0` | −0.47 to 0.47 | about +X |
-| `rfj1` | `rfa1` | −0.196 to 1.61 | about −Y |
-| `rfj2` | `rfa2` | −0.174 to 1.709 | about −Y |
-| `rfj3` | `rfa3` | −0.227 to 1.618 | about −Y |
-| `thj0` | `tha0` | 0.263 to 1.396 | about −X |
-| `thj1` | `tha1` | −0.105 to 1.163 | about −Y |
-| `thj2` | `tha2` | −0.189 to 1.644 | about +Z |
-| `thj3` | `tha3` | −0.162 to 1.719 | about +Z |
+| Joint  | Actuator | Range (rad)     | Axis in the zero pose |
+| ------ | -------- | --------------- | --------------------- |
+| `ffj0` | `ffa0`   | −0.47 to 0.47   | about +X (abduction)  |
+| `ffj1` | `ffa1`   | −0.196 to 1.61  | about −Y (flexion)    |
+| `ffj2` | `ffa2`   | −0.174 to 1.709 | about −Y              |
+| `ffj3` | `ffa3`   | −0.227 to 1.618 | about −Y              |
+| `mfj0` | `mfa0`   | −0.47 to 0.47   | about +X              |
+| `mfj1` | `mfa1`   | −0.196 to 1.61  | about −Y              |
+| `mfj2` | `mfa2`   | −0.174 to 1.709 | about −Y              |
+| `mfj3` | `mfa3`   | −0.227 to 1.618 | about −Y              |
+| `rfj0` | `rfa0`   | −0.47 to 0.47   | about +X              |
+| `rfj1` | `rfa1`   | −0.196 to 1.61  | about −Y              |
+| `rfj2` | `rfa2`   | −0.174 to 1.709 | about −Y              |
+| `rfj3` | `rfa3`   | −0.227 to 1.618 | about −Y              |
+| `thj0` | `tha0`   | 0.263 to 1.396  | about −X              |
+| `thj1` | `tha1`   | −0.105 to 1.163 | about −Y              |
+| `thj2` | `tha2`   | −0.189 to 1.644 | about +Z              |
+| `thj3` | `tha3`   | −0.162 to 1.719 | about +Z              |
 
 `thj0` does not include 0. A zero `qpos` is outside that joint. Initialize
 every joint inside `jnt_range` (the lower end is the open pose).
@@ -453,22 +455,22 @@ Directory `hand_assets/wonik_allegro/`:
   upstream listing. A later agent should hash the rest once and store the
   digests in `PROVENANCE.json`. Digests of the local files, sha256:
 
-| File | Bytes | sha256 |
-| --- | --- | --- |
-| `base_link.stl` | 163884 | `4060e1ae52bca21367e15a1dfab16bc7c2e81849566631b7f55e2cf376b7bc85` |
-| `base_link_left.stl` | 433984 | `9f66c1cb8d27b9f07e49101a7997a49c60d3cc3ccbc8de96065322df68f47a0b` |
-| `link_0.0.stl` | 57584 | `32b90a6744d472a6ffaee02cbf32eb8a5600b1da0944e86aeb9f53503a9f8ac9` |
-| `link_1.0.stl` | 70084 | `e3dfb35b6682f62f18ca6ed0b39cb94ff627b68e0e3373cf7212390574604680` |
-| `link_12.0_left.stl` | 217084 | `1749ba567bf36729a81eaecf384bc4f5483be8c496af54d230500b96f1d81dcc` |
+| File                  | Bytes  | sha256                                                             |
+| --------------------- | ------ | ------------------------------------------------------------------ |
+| `base_link.stl`       | 163884 | `4060e1ae52bca21367e15a1dfab16bc7c2e81849566631b7f55e2cf376b7bc85` |
+| `base_link_left.stl`  | 433984 | `9f66c1cb8d27b9f07e49101a7997a49c60d3cc3ccbc8de96065322df68f47a0b` |
+| `link_0.0.stl`        | 57584  | `32b90a6744d472a6ffaee02cbf32eb8a5600b1da0944e86aeb9f53503a9f8ac9` |
+| `link_1.0.stl`        | 70084  | `e3dfb35b6682f62f18ca6ed0b39cb94ff627b68e0e3373cf7212390574604680` |
+| `link_12.0_left.stl`  | 217084 | `1749ba567bf36729a81eaecf384bc4f5483be8c496af54d230500b96f1d81dcc` |
 | `link_12.0_right.stl` | 204284 | `c5418fc127311eefee1d8ee69dfcfde2157d038286900bee91608d2701b00f13` |
-| `link_13.0.stl` | 22484 | `e906896afc078a12c9c377e3a2b07f375583d3b869581f9962030cabc888be29` |
-| `link_14.0.stl` | 46884 | `a9e4983e4bff7fc7d868b4965c9865edb2669b946434095703766202b5de01ff` |
-| `link_15.0.stl` | 43284 | `bf963adb775b79b27649f4f5dff4ced58ef676ce86cc677de49d3810382d11e0` |
-| `link_15.0_tip.stl` | 71984 | `a7147c765d4b6d2eb16fa14bba2e8eceec4a750bc346260893ca02aca1fd7a63` |
-| `link_2.0.stl` | 52884 | `9c98477c65b45f5a3de1df0e1b54281da2385f4eafd057d103ab40893771c2d0` |
-| `link_3.0.stl` | 18084 | `fe333088176395aa7d8a913aa953d3cd649c4c77753224239b78b2c99e3e314c` |
-| `link_3.0_tip.stl` | 71984 | `9c3fa04fea0dfa1257c8a1b02d2b7d982b0d985c1ddda1edf148827944835f39` |
-| `link_4.0.stl` | 22884 | `f80ac4d443169c56507afaa0b3c72ec3679312bc80cbaebd03e73e96dd18c408` |
+| `link_13.0.stl`       | 22484  | `e906896afc078a12c9c377e3a2b07f375583d3b869581f9962030cabc888be29` |
+| `link_14.0.stl`       | 46884  | `a9e4983e4bff7fc7d868b4965c9865edb2669b946434095703766202b5de01ff` |
+| `link_15.0.stl`       | 43284  | `bf963adb775b79b27649f4f5dff4ced58ef676ce86cc677de49d3810382d11e0` |
+| `link_15.0_tip.stl`   | 71984  | `a7147c765d4b6d2eb16fa14bba2e8eceec4a750bc346260893ca02aca1fd7a63` |
+| `link_2.0.stl`        | 52884  | `9c98477c65b45f5a3de1df0e1b54281da2385f4eafd057d103ab40893771c2d0` |
+| `link_3.0.stl`        | 18084  | `fe333088176395aa7d8a913aa953d3cd649c4c77753224239b78b2c99e3e314c` |
+| `link_3.0_tip.stl`    | 71984  | `9c3fa04fea0dfa1257c8a1b02d2b7d982b0d985c1ddda1edf148827944835f39` |
+| `link_4.0.stl`        | 22884  | `f80ac4d443169c56507afaa0b3c72ec3679312bc80cbaebd03e73e96dd18c408` |
 
 `link_4.0.stl` is unused by both MJCF files.
 
