@@ -111,12 +111,16 @@ jobs:
                   '{"verified":false,"proof_kind":"helper_unpublished","baseline_sha":null,"reason":"Protected trusted-base helper is not yet published"}' \
                   > "$proof"
               else
+                expected_sha="$GITHUB_SHA"
+                if [[ "$BASE_REF" != "$DEFAULT_BRANCH" ]]; then
+                  expected_sha="$PR_HEAD_SHA"
+                fi
                 if ! python "$trusted_base_helper" \
                   --repo-root target \
                   --event "$EVENT_NAME" \
                   --event-base-sha "$PR_BASE_SHA" \
                   --pr-head-sha "$PR_HEAD_SHA" \
-                  --expected-sha "$GITHUB_SHA" \
+                  --expected-sha "$expected_sha" \
                   --base-ref "$BASE_REF" \
                   --repository "$REPOSITORY" \
                   --default-branch "$DEFAULT_BRANCH" > "$proof"; then
