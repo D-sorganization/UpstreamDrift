@@ -47,8 +47,10 @@ pytestmark = pytest.mark.unit
 # (slightly resampled, within the recorded 0.0605 mm cross-engine parity).
 RUN102_EARLY_RMS_M = 0.009995357264954529
 RUN102_CLUB_RMS_M = 0.008391285435051065
-RUN102_PELVIS_YAW_PCT = 0.5954129834382699
-RUN102_QUALIFIED_REPORT_YAW_PCT = 0.6099819870175595
+RUN102_PELVIS_YAW_PCT = 0.361281524448979
+# ``qualified_candidate_replay.json`` records ``pelvis_yaw_diff_deg``; map with the
+# rotation-invariant reference (issue #15015 C7), not the archived pct literal.
+RUN102_QUALIFIED_REPORT_YAW_PCT = 0.370121626981567
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 RUN102_DIR = (

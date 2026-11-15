@@ -6,7 +6,7 @@
     "early_rms_m": 0.009995357264954529,
     "terminal_rms_m": 0.04030335259128564,
     "club_cluster_rms_m": 0.008391285435051065,
-    "pelvis_yaw_error_pct": 0.5954129834382699,
+    "pelvis_yaw_error_pct": 0.361281524448979,
     "pelvis_yaw_diff_deg": 0.3251533720040811,
     "score": 28.584757407262227
   },
@@ -22,7 +22,7 @@
     "early_rms_m": 0.009995135614984909,
     "terminal_rms_m": 0.04031367410730996,
     "club_cluster_rms_m": 0.008424186734364101,
-    "pelvis_yaw_error_pct": 0.5288764152981652,
+    "pelvis_yaw_error_pct": 0.320908819388958,
     "pelvis_yaw_diff_deg": 0.28881793745006235,
     "score": 28.586134094059144,
     "score_with_effort": 30.11633491711881
@@ -40,7 +40,7 @@
   "unsegmented_rms_m": 0.020267269569536953,
   "terminal_replay_gap_m": 1.5016631321656787e-7,
   "pelvis_yaw_diff_deg": 0.3251533720040811,
-  "pelvis_yaw_error_pct": 0.5954129834382699,
+  "pelvis_yaw_error_pct": 0.361281524448979,
   "function_evaluations": 60,
   "active_bound_count": 0,
   "active_theta_lower": 0,
