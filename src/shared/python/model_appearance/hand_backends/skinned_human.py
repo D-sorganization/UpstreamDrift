@@ -39,6 +39,7 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     PadConformSettings,
     conform_pads,
     lift_out,
+    sharpened_faces,
     relax_folds,
 )
 from src.shared.python.model_appearance.hand_backends.joint_angles import (
@@ -74,6 +75,7 @@ from src.shared.python.model_appearance.hand_backends.skinning import (
 )
 from src.shared.python.model_appearance.hand_backends.subdivision import (
     original_resolution,
+    sharp_edges,
     subdivide_asset,
 )
 from src.shared.python.model_appearance.hand_backends.types import HandVisualResult
@@ -105,6 +107,8 @@ class SkinnedHumanSettings:
     skin_rgb: tuple[float, float, float]
     breadth_band_m: float
     subdivision_levels: int
+    crease_bones: tuple[str, ...]
+    crease_min_fold_deg: float
     scale_limits: tuple[float, float]
     palm_contact_azimuth_offset_deg: float
     palm_centre_wrap_deg: float
@@ -136,6 +140,9 @@ class SkinnedHumanSettings:
     fold_relax: FoldRelaxSettings
     palm_pad: PadConformSettings
     lift_out_max_depth_m: float
+    crease_relax: FoldRelaxSettings
+    crease_relax_bones: tuple[str, ...]
+    crease_relax_max_added_fold_deg: float
     wrist_deg: tuple[tuple[str, tuple[float, float]], ...]
 
     def limit_rad(self, joint: str) -> tuple[float, float]:
@@ -183,6 +190,25 @@ def _subdivision_levels(value: Any) -> int:
     return value
 
 
+def _positive(value: Any, name: str) -> float:
+    number = float(value)
+    if not number > 0.0:
+        raise ValueError(f"{name} must be positive")
+    return number
+
+
+def _bone_mask(
+    asset: SkinnedHandAsset, bones: Sequence[str], name: str
+) -> NDArray[np.bool_]:
+    """Per-vertex flag: the strongest influence is one of ``bones``."""
+    unknown = set(bones) - set(asset.bone_names)
+    if unknown:
+        raise ValueError(f"{name} names no bone: {sorted(unknown)}")
+    mask = np.zeros(len(asset.rest_vertices), dtype=bool)
+    mask[asset.dominant_vertex_ids(bones)] = True
+    return mask
+
+
 def _fold_relax(raw: Mapping[str, Any]) -> FoldRelaxSettings:
     return FoldRelaxSettings(
         iterations=int(raw["iterations"]),
@@ -200,6 +226,23 @@ def _palm_pad(raw: Mapping[str, Any]) -> PadConformSettings:
         smooth_iterations=int(raw["smooth_iterations"]),
         passes=int(raw["passes"]),
     )
+
+
+def _corrective_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
+    """The ``correctives`` section as :class:`SkinnedHumanSettings` fields."""
+    crease: Mapping[str, Any] = raw["crease_relax"]
+    return {
+        "fold_relax": _fold_relax(raw["fold_relax"]),
+        "palm_pad": _palm_pad(raw["palm_pad"]),
+        "crease_relax": _fold_relax(crease),
+        "crease_relax_bones": tuple(str(b) for b in crease["bones"]),
+        "crease_relax_max_added_fold_deg": _positive(
+            crease["max_added_fold_deg"], "crease_relax.max_added_fold_deg"
+        ),
+        "lift_out_max_depth_m": _non_negative(
+            raw["lift_out"]["max_depth_m"], "lift_out.max_depth_m"
+        ),
+    }
 
 
 def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
@@ -226,6 +269,10 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
         skin_rgb=(rgb[0], rgb[1], rgb[2]),
         breadth_band_m=float(anthro["breadth_band_m"]),
         subdivision_levels=_subdivision_levels(raw["mesh"]["subdivision_levels"]),
+        crease_bones=tuple(str(b) for b in raw["mesh"]["creases"]["bones"]),
+        crease_min_fold_deg=_positive(
+            raw["mesh"]["creases"]["min_fold_deg"], "mesh.creases.min_fold_deg"
+        ),
         scale_limits=_pair(anthro["scale_limits"], "scale_limits"),
         palm_contact_azimuth_offset_deg=float(place["palm_contact_azimuth_offset_deg"]),
         palm_centre_wrap_deg=float(place["palm_centre_wrap_deg"]),
@@ -275,11 +322,7 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
         frame_excluded_bones=tuple(
             str(bone) for bone in raw["framing"]["excluded_bones"]
         ),
-        fold_relax=_fold_relax(raw["correctives"]["fold_relax"]),
-        palm_pad=_palm_pad(raw["correctives"]["palm_pad"]),
-        lift_out_max_depth_m=_non_negative(
-            raw["correctives"]["lift_out"]["max_depth_m"], "lift_out.max_depth_m"
-        ),
+        **_corrective_fields(raw["correctives"]),
         wrist_deg=tuple(
             (
                 side,
@@ -341,7 +384,14 @@ def _sized_assets(
     contact of the skin. With no subdivision the two are the same object.
     """
     source = load_hand_cc0_asset().asset
-    base = subdivide_asset(source, settings.subdivision_levels)
+    # Edges that are sharp in the source (the nails) stay sharp when subdivided.
+    creases = sharp_edges(
+        source.rest_vertices,
+        source.faces,
+        settings.crease_min_fold_deg,
+        _bone_mask(source, settings.crease_bones, "mesh.creases.bones"),
+    )
+    base = subdivide_asset(source, settings.subdivision_levels, creases)
     distal = length_m / asset_hand_length_m(base)
     radial = breadth_m / asset_hand_breadth_m(base, settings.breadth_band_m)
     low, high = settings.scale_limits
@@ -942,9 +992,10 @@ def _corrected_skin(
     """Skinned vertices in the grip frame, with the corrective shapes applied.
 
     Linear blend skinning first; then the palm pad settles onto the obstacle,
-    skin a hair inside the ``grip`` is lifted to its surface, and the skin
-    around any folded triangle relaxes (see ``correctives``). With all three
-    switched off this is exactly ``pose_vertices``.
+    creases that skinning pinched between the knuckles relax, skin a hair
+    inside the ``grip`` is lifted to its surface, and the skin around any
+    folded triangle relaxes (see ``correctives``). With all four switched off
+    this is exactly ``pose_vertices``.
     """
     asset, placement = solved.skin_asset, solved.hand.placement
     rotation, offset = placement[:3, :3], placement[:3, 3]
@@ -960,6 +1011,16 @@ def _corrected_skin(
         settings.palm_pad,
         lambda v: vertex_normals(v, asset.faces),
     )
+    relaxable = _bone_mask(
+        asset, settings.crease_relax_bones, "correctives.crease_relax.bones"
+    )[asset.faces].all(axis=1)
+
+    def creased(v: Array) -> NDArray[np.int64]:
+        limit = settings.crease_relax_max_added_fold_deg
+        found = sharpened_faces(v, asset.rest_vertices, asset.faces, limit)
+        return found[relaxable[found]]
+
+    skin = relax_folds(skin, asset.faces, creased, settings.crease_relax)
     skin = lift_out(skin, grip, max_depth_m=settings.lift_out_max_depth_m)
     return relax_folds(
         skin,

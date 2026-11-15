@@ -207,3 +207,40 @@ def lift_out(vertices: Array, distance: Distance, *, max_depth_m: float) -> Arra
         away = distance_gradient(distance, out[ids], _GRADIENT_STEP_M)
         out[ids] -= gap[ids, None] * away
     return out
+
+
+def edge_folds(vertices: Array, faces: IntArray) -> tuple[Array, IntArray]:
+    """Fold angle (degrees between the two face normals) of every interior
+    edge, and the two faces that meet there."""
+    sides = np.sort(
+        np.concatenate([faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]]), axis=1
+    )
+    order = np.lexsort((sides[:, 1], sides[:, 0]))
+    sides, face = sides[order], np.tile(np.arange(len(faces)), 3)[order]
+    paired = np.flatnonzero((sides[:-1] == sides[1:]).all(axis=1))
+    pair = np.column_stack([face[paired], face[paired + 1]])
+    normal = np.cross(
+        vertices[faces[:, 1]] - vertices[faces[:, 0]],
+        vertices[faces[:, 2]] - vertices[faces[:, 0]],
+    )
+    normal /= np.maximum(np.linalg.norm(normal, axis=1, keepdims=True), 1e-30)
+    cosine = np.einsum("ij,ij->i", normal[pair[:, 0]], normal[pair[:, 1]])
+    return np.degrees(np.arccos(np.clip(cosine, -1.0, 1.0))), pair
+
+
+def sharpened_faces(
+    posed: Array, rest: Array, faces: IntArray, max_added_fold_deg: float
+) -> IntArray:
+    """Faces at an edge that folds more than ``max_added_fold_deg`` beyond
+    its fold at rest.
+
+    Skinning pinches the skin between two knuckles into a crease that is not
+    inside out, so fold relaxation leaves it, but it catches the light. An
+    edge that is sharp at rest (a nail) is not reported. Use it as the
+    ``folded`` argument of :func:`relax_folds`.
+    """
+    if max_added_fold_deg <= 0.0:
+        raise ValueError("max_added_fold_deg must be positive")
+    now, pair = edge_folds(posed, faces)
+    before, _ = edge_folds(rest, faces)
+    return np.unique(pair[now - before > max_added_fold_deg]).astype(np.int64)

@@ -75,6 +75,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1089 | `src/shared/python/motion_pipeline/contracts.py` |
 | 1084 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py` |
 | 1078 | `src/engines/physics_engines/drake/python/full_body_model.py` |
+| 1078 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1073 | `src/shared/python/sidekick/calculators/thermo/steam_engine.py` |
 | 1072 | `src/shared/python/grip_contact/binding.py` |
 | 1069 | `src/tools/native_viewer_export/core.py` |
@@ -97,7 +98,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1035 | `src/engines/physics_engines/opensim/python/opensim_physics_engine.py` |
 | 1034 | `src/shared/python/motion_matching/pipeline/receipt_components.py` |
 | 1032 | `src/launchers/launcher_ui_setup.py` |
-| 1022 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1022 | `src/tools/bunker_shot_gui/render3d.py` |
 | 1021 | `src/tools/bunker_shot_gui/slices.py` |
 | 1020 | `src/shared/python/optimization/casadi_backend.py` |

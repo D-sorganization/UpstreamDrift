@@ -60,13 +60,54 @@ def _odd_rows(edges: IntArray, wings: IntArray, vertex_count: int) -> sparse.csr
     return sparse.csr_matrix((data, (rows, cols)), shape=(count, vertex_count))
 
 
-def loop_subdivision(
-    faces: IntArray, vertex_count: int
-) -> tuple[sparse.csr_matrix, IntArray]:
-    """One level of Loop subdivision as a linear operator.
+def _crease_ids(edges: IntArray, creases: IntArray, vertex_count: int) -> IntArray:
+    """Row of ``edges`` for every crease edge. Raises if one is not an edge."""
+    wanted = np.sort(np.asarray(creases, dtype=np.int64).reshape(-1, 2), axis=1)
+    keys = edges[:, 0] * vertex_count + edges[:, 1]
+    ask = wanted[:, 0] * vertex_count + wanted[:, 1]
+    ids = np.searchsorted(keys, ask)
+    if (ids >= len(keys)).any() or (keys[np.minimum(ids, len(keys) - 1)] != ask).any():
+        raise ValueError("a crease edge is not an edge of the mesh")
+    return np.unique(ids)
 
-    Returns ``(operator, fine_faces)``: ``operator @ values`` gives the values
-    on the fine mesh for any per-vertex quantity. Postconditions: the first
+
+def _sharpen(
+    operator: sparse.csr_matrix, edges: IntArray, crease_ids: IntArray, count: int
+) -> sparse.csr_matrix:
+    """Replace the rows of crease vertices by the crease rules.
+
+    A new vertex on a crease edge is the edge midpoint. An original vertex
+    with two crease edges moves only along them (3/4 itself, 1/8 each end);
+    with three or more it is a corner and stays. One crease edge ends there
+    (a dart), and the vertex stays smooth.
+    """
+    rows = operator.tolil()
+    ends = edges[crease_ids]
+    for edge_id, (a, b) in zip(crease_ids.tolist(), ends.tolist(), strict=True):
+        rows[count + edge_id, :] = 0.0
+        rows[count + edge_id, a] = rows[count + edge_id, b] = 0.5
+    degree = np.bincount(ends.ravel(), minlength=count)
+    for vertex in np.flatnonzero(degree >= 2).tolist():
+        rows[vertex, :] = 0.0
+        if degree[vertex] > 2:
+            rows[vertex, vertex] = 1.0
+            continue
+        rows[vertex, vertex] = 0.75
+        near = ends[(ends == vertex).any(axis=1)]
+        for other in near[near != vertex].tolist():
+            rows[vertex, other] = 0.125
+    return rows.tocsr()
+
+
+def creased_loop_subdivision(
+    faces: IntArray, vertex_count: int, creases: IntArray
+) -> tuple[sparse.csr_matrix, IntArray, IntArray]:
+    """One level of Loop subdivision that keeps the ``creases`` edges sharp.
+
+    ``creases`` is ``(C, 2)`` vertex pairs, each an edge of the mesh. Returns
+    ``(operator, fine_faces, fine_creases)``: ``operator @ values`` gives
+    any per-vertex quantity on the fine mesh, and ``fine_creases`` are the
+    same creases on it (each edge split in two). Postconditions: the first
     ``vertex_count`` fine vertices are the original ones in order; every row
     of ``operator`` sums to one; ``fine_faces`` keeps the winding. Raises
     ``ValueError`` unless the mesh is a closed manifold.
@@ -78,6 +119,9 @@ def loop_subdivision(
     operator = sparse.vstack(
         [_even_rows(edges, vertex_count), _odd_rows(edges, wings, vertex_count)]
     ).tocsr()
+    crease_ids = _crease_ids(edges, creases, vertex_count)
+    if len(crease_ids):
+        operator = _sharpen(operator, edges, crease_ids, vertex_count)
     mid = vertex_count + side_edge.reshape(3, -1)  # sides ab, bc, ca
     a, b, c = f[:, 0], f[:, 1], f[:, 2]
     ab, bc, ca = mid[0], mid[1], mid[2]
@@ -89,7 +133,46 @@ def loop_subdivision(
             np.column_stack([ab, bc, ca]),
         ]
     )
-    return operator, fine.astype(np.int64)
+    middle = vertex_count + crease_ids
+    fine_creases = np.concatenate(
+        [
+            np.column_stack([edges[crease_ids, 0], middle]),
+            np.column_stack([middle, edges[crease_ids, 1]]),
+        ]
+    )
+    return operator, fine.astype(np.int64), fine_creases.astype(np.int64)
+
+
+def loop_subdivision(
+    faces: IntArray, vertex_count: int
+) -> tuple[sparse.csr_matrix, IntArray]:
+    """:func:`creased_loop_subdivision` with no creases: smooth everywhere."""
+    none = np.empty((0, 2), dtype=np.int64)
+    operator, fine, _ = creased_loop_subdivision(faces, vertex_count, none)
+    return operator, fine
+
+
+def sharp_edges(
+    vertices: Array, faces: IntArray, min_dihedral_deg: float, mask: NDArray[np.bool_]
+) -> IntArray:
+    """Edges that fold by at least ``min_dihedral_deg`` with both ends in ``mask``.
+
+    The fold is the angle between the normals of the two faces at the edge.
+    """
+    if np.asarray(mask).shape != (len(vertices),):
+        raise ValueError("mask must hold one flag per vertex")
+    edges, side_edge, _ = _edges(np.asarray(faces, dtype=np.int64))
+    normal = np.cross(
+        vertices[faces[:, 1]] - vertices[faces[:, 0]],
+        vertices[faces[:, 2]] - vertices[faces[:, 0]],
+    )
+    normal /= np.maximum(np.linalg.norm(normal, axis=1, keepdims=True), 1e-30)
+    face_of_side = np.tile(np.arange(len(faces)), 3)
+    pair = face_of_side[np.argsort(side_edge, kind="stable")].reshape(-1, 2)
+    cosine = np.einsum("ij,ij->i", normal[pair[:, 0]], normal[pair[:, 1]])
+    fold = np.degrees(np.arccos(np.clip(cosine, -1.0, 1.0)))
+    keep = (fold >= min_dihedral_deg) & mask[edges[:, 0]] & mask[edges[:, 1]]
+    return edges[keep]
 
 
 def _strongest(dense: Array, count: int) -> tuple[IntArray, Array]:
@@ -99,11 +182,14 @@ def _strongest(dense: Array, count: int) -> tuple[IntArray, Array]:
     return order.astype(np.int64), weights / weights.sum(axis=1, keepdims=True)
 
 
-def subdivide_asset(asset: SkinnedHandAsset, levels: int) -> SkinnedHandAsset:
+def subdivide_asset(
+    asset: SkinnedHandAsset, levels: int, creases: IntArray | None = None
+) -> SkinnedHandAsset:
     """``asset`` with its mesh Loop-subdivided ``levels`` times.
 
     The skeleton is unchanged and each vertex keeps as many bone influences
-    as before. Original vertex ids stay valid. ``levels == 0`` returns
+    as before. Original vertex ids stay valid. ``creases`` (``(C, 2)`` edges
+    of the mesh) stay sharp at every level. ``levels == 0`` returns
     ``asset`` itself; a negative or non-integer ``levels`` raises.
     """
     if isinstance(levels, bool) or not isinstance(levels, int):
@@ -113,8 +199,9 @@ def subdivide_asset(asset: SkinnedHandAsset, levels: int) -> SkinnedHandAsset:
     if levels == 0:
         return asset
     vertices, faces, dense = asset.rest_vertices, asset.faces, asset.dense_weights()
+    sharp = np.empty((0, 2), dtype=np.int64) if creases is None else creases
     for _ in range(levels):
-        operator, faces = loop_subdivision(faces, len(vertices))
+        operator, faces, sharp = creased_loop_subdivision(faces, len(vertices), sharp)
         vertices, dense = operator @ vertices, operator @ dense
     indices, weights = _strongest(dense, asset.joint_indices.shape[1])
     return replace(

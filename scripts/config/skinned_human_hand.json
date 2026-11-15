@@ -12,7 +12,17 @@
     ]
   },
   "mesh": {
-    "subdivision_levels": 1
+    "subdivision_levels": 1,
+    "creases": {
+      "bones": [
+        "thumb_dist",
+        "index_dist",
+        "middle_dist",
+        "ring_dist",
+        "little_dist"
+      ],
+      "min_fold_deg": 40.0
+    }
   },
   "placement": {
     "palm_contact_azimuth_offset_deg": 55.0,
@@ -98,8 +108,27 @@
   },
   "correctives": {
     "fold_relax": {
-      "iterations": 8,
+      "iterations": 16,
       "rings": 2,
+      "step": 0.5
+    },
+    "crease_relax": {
+      "bones": [
+        "wrist",
+        "meta_index",
+        "meta_middle",
+        "meta_ring",
+        "meta_little",
+        "index_prox",
+        "middle_prox",
+        "ring_prox",
+        "little_prox",
+        "thumb_meta",
+        "thumb_prox"
+      ],
+      "max_added_fold_deg": 45.0,
+      "iterations": 8,
+      "rings": 1,
       "step": 0.5
     },
     "palm_pad": {

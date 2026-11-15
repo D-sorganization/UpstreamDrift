@@ -70,6 +70,25 @@ def skinning_defects(
     }
 
 
+def pinched_edge_count(
+    result: HandVisualResult, bones: tuple[str, ...], max_added_fold_deg: float
+) -> int:
+    """Edges on skin led by ``bones`` that fold more than ``max_added_fold_deg``
+    beyond their fold at rest: creases skinning pinched into the skin."""
+    from src.shared.python.model_appearance.hand_backends.correctives import (
+        edge_folds,
+    )
+
+    asset, _, _ = _audit_parts(result)
+    now, pair = edge_folds(result.mesh.vertices, asset.faces)
+    rest, _ = edge_folds(asset.rest_vertices, asset.faces)
+    mask = np.zeros(len(asset.rest_vertices), dtype=bool)
+    mask[asset.dominant_vertex_ids(bones)] = True
+    inside = mask[asset.faces].all(axis=1)
+    both = inside[pair[:, 0]] & inside[pair[:, 1]]
+    return int(((now - rest > max_added_fold_deg) & both).sum())
+
+
 def skinning_residual_m(result: HandVisualResult) -> float:
     """Largest distance between the mesh and pure LBS + one rigid frame.
 

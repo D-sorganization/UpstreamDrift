@@ -12,8 +12,10 @@ from src.shared.python.model_appearance.hand_backends.skinning import (
     rotation_about_axis,
 )
 from src.shared.python.model_appearance.hand_backends.subdivision import (
+    creased_loop_subdivision,
     loop_subdivision,
     original_resolution,
+    sharp_edges,
     subdivide_asset,
 )
 
@@ -149,3 +151,74 @@ def test_original_resolution_is_the_fine_skin_at_the_source_vertices() -> None:
     assert original_resolution(source, source) is source
     with pytest.raises(ValueError):
         original_resolution(source, fine)
+
+
+_EQUATOR = np.array([[0, 2], [2, 1], [1, 3], [3, 0]], dtype=np.int64)
+
+
+def test_a_creased_edge_stays_sharp_and_the_rest_stays_smooth() -> None:
+    vertices, faces = _octahedron()
+    smooth, _ = loop_subdivision(faces, len(vertices))
+    operator, fine, fine_creases = creased_loop_subdivision(
+        faces, len(vertices), _EQUATOR
+    )
+    np.testing.assert_allclose(np.asarray(operator.sum(axis=1)).ravel(), 1.0)
+    out, plain = operator @ vertices, smooth @ vertices
+    # A crease vertex moves only along its crease: 3/4 itself, 1/8 each side.
+    np.testing.assert_allclose(
+        out[0], 0.75 * vertices[0] + 0.125 * (vertices[2] + vertices[3])
+    )
+    assert np.linalg.norm(out[0]) > np.linalg.norm(plain[0])
+    # The new vertex on a crease edge is the plain midpoint of that edge.
+    mids = {tuple(np.round(row, 12)) for row in out[len(vertices) :]}
+    assert tuple(np.round(0.5 * (vertices[0] + vertices[2]), 12)) in mids
+    # Vertices off the crease follow the smooth rule unchanged.
+    np.testing.assert_allclose(out[4:6], plain[4:6])
+    # Each crease edge is split in two, ready for the next level.
+    assert fine_creases.shape == (2 * len(_EQUATOR), 2)
+    used = {
+        tuple(sorted(edge))
+        for face in fine
+        for edge in zip(face, np.roll(face, -1), strict=True)
+    }
+    assert all(tuple(sorted(edge)) in used for edge in fine_creases.tolist())
+    assert len(fine) == 4 * len(faces)
+
+
+def test_no_creases_is_plain_loop_subdivision_and_a_stray_edge_raises() -> None:
+    vertices, faces = _octahedron()
+    smooth, smooth_faces = loop_subdivision(faces, len(vertices))
+    operator, fine, creases = creased_loop_subdivision(
+        faces, len(vertices), np.empty((0, 2), dtype=np.int64)
+    )
+    np.testing.assert_array_equal(fine, smooth_faces)
+    np.testing.assert_allclose(operator.toarray(), smooth.toarray())
+    assert creases.shape == (0, 2)
+    with pytest.raises(ValueError):  # 0 and 1 are opposite corners: no such edge
+        creased_loop_subdivision(faces, len(vertices), np.array([[0, 1]]))
+
+
+def test_sharp_edges_are_found_by_dihedral_angle_within_a_vertex_mask() -> None:
+    vertices, faces = _octahedron()
+    everything = np.ones(len(vertices), dtype=bool)
+    # Every octahedron edge folds by about 70.5 degrees.
+    assert len(sharp_edges(vertices, faces, 60.0, everything)) == 12
+    assert len(sharp_edges(vertices, faces, 80.0, everything)) == 0
+    upper = vertices[:, 2] >= 0.0
+    found = sharp_edges(vertices, faces, 60.0, upper)
+    assert len(found) == 8 and upper[found].all()
+    with pytest.raises(ValueError):
+        sharp_edges(vertices, faces, 60.0, everything[:-1])
+
+
+def test_an_asset_subdivided_with_creases_keeps_them_sharp_at_every_level() -> None:
+    asset = _asset()
+    plain = subdivide_asset(asset, 2)
+    creased = subdivide_asset(asset, 2, _EQUATOR)
+    assert creased.faces.shape == plain.faces.shape
+    np.testing.assert_allclose(creased.joint_weights.sum(axis=1), 1.0, atol=1e-12)
+    equator = np.abs(asset.rest_vertices[:, 2]) < 1e-12
+    count = len(asset.rest_vertices)
+    reach = np.linalg.norm(creased.rest_vertices[:count][equator], axis=1)
+    smooth = np.linalg.norm(plain.rest_vertices[:count][equator], axis=1)
+    assert (reach > smooth + 0.05).all()

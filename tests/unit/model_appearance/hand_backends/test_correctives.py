@@ -14,6 +14,7 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     distance_gradient,
     lift_out,
     relax_folds,
+    sharpened_faces,
     vertex_neighbours,
 )
 
@@ -207,3 +208,36 @@ def test_lifting_out_is_switched_off_by_zero_depth_and_rejects_a_negative() -> N
     assert out is not vertices
     with pytest.raises(ValueError):
         lift_out(vertices, _floor, max_depth_m=-0.001)
+
+
+def _tent(height: float) -> tuple[np.ndarray, np.ndarray]:
+    """The sheet with its middle row lifted into a ridge of ``height``."""
+    vertices, faces = _grid()
+    vertices[(_N // 2) * _N : (_N // 2 + 1) * _N, 2] = height
+    return vertices, faces
+
+
+def test_faces_at_an_edge_that_sharpened_past_the_limit_are_reported() -> None:
+    rest, faces = _grid()
+    posed, _ = _tent(1.5 * _CELL)  # each side of the ridge tilts 56 degrees
+    assert len(sharpened_faces(rest, rest, faces, 40.0)) == 0
+    found = sharpened_faces(posed, rest, faces, 40.0)
+    assert len(found) > 0
+    ridge = (_N // 2) * _CELL
+    centres = posed[faces[found]].mean(axis=1)
+    assert (np.abs(centres[:, 0] - ridge) <= 2.0 * _CELL).all()
+    # An edge that was already that sharp at rest is not a new crease.
+    assert len(sharpened_faces(posed, posed, faces, 40.0)) == 0
+    assert len(sharpened_faces(posed, rest, faces, 170.0)) == 0
+
+
+def test_relaxing_a_sharpened_crease_brings_it_under_the_limit() -> None:
+    rest, faces = _grid()
+    posed, _ = _tent(1.5 * _CELL)
+
+    def sharp(v: np.ndarray) -> np.ndarray:
+        return sharpened_faces(v, rest, faces, 40.0)
+
+    relaxed = relax_folds(posed, faces, sharp, FoldRelaxSettings(12, 1, 0.5))
+    assert len(sharp(relaxed)) == 0
+    assert 0.0 < relaxed[:, 2].max() < posed[:, 2].max()

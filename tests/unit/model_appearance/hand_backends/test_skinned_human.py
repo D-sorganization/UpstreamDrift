@@ -31,6 +31,7 @@ from src.shared.python.model_appearance.hand_backends.qa import (
     hand_pair_penetration_m,
     load_hand_visual_quality,
     max_grip_cylinder_penetration_m,
+    pinched_edge_count,
     skinning_defects,
     skinning_residual_m,
 )
@@ -127,6 +128,7 @@ def _without_correctives(side: str):
             "fold_relax": {**raw["correctives"]["fold_relax"], "iterations": 0},
             "palm_pad": {**raw["correctives"]["palm_pad"], "reach_m": 0.0},
             "lift_out": {"max_depth_m": 0.0},
+            "crease_relax": {**raw["correctives"]["crease_relax"], "iterations": 0},
         }
         _CACHE[key] = build_hand_visual(
             _spec(), side, grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
@@ -171,6 +173,50 @@ def test_the_skin_is_subdivided_and_the_setting_switches_it_off(side: str) -> No
     tolerance = float(_Q["contact_tolerance_m"])
     for result in (fine, coarse):
         assert result.contact_gaps_m["index_dist"] <= tolerance
+
+
+def _built(key: str, change):
+    if key not in _CACHE:
+        raw = load_settings_mapping()
+        change(raw)
+        _CACHE[key] = build_hand_visual(
+            _spec(), "lead", grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
+        )
+    return _CACHE[key]
+
+
+def test_nail_edges_stay_sharp_through_subdivision() -> None:
+    """Nails are sharp edges in MakeHuman's mesh; smoothing them blurs the nail."""
+    from src.shared.python.model_appearance.hand_backends.subdivision import (
+        sharp_edges,
+    )
+
+    settings = default_settings()
+
+    def nail_edges(result) -> int:
+        asset = result.rest_asset
+        mask = np.zeros(len(asset.rest_vertices), dtype=bool)
+        mask[asset.dominant_vertex_ids(settings.crease_bones)] = True
+        limit = settings.crease_min_fold_deg
+        return len(sharp_edges(asset.rest_vertices, asset.faces, limit, mask))
+
+    blurred = _built("no creases", lambda raw: raw["mesh"]["creases"].update(bones=[]))
+    coarse = nail_edges(_unsubdivided("lead"))
+    assert coarse > 0
+    # The sharp source edges are split, not smoothed away.
+    assert nail_edges(_hand("lead")) > coarse
+    assert nail_edges(blurred) < 0.5 * coarse
+    assert len(blurred.mesh.faces) == len(_hand("lead").mesh.faces)
+
+
+@pytest.mark.parametrize("side", _SIDES)
+def test_creases_pinched_between_the_knuckles_are_relaxed(side: str) -> None:
+    settings = default_settings()
+    bones, limit = settings.crease_relax_bones, settings.crease_relax_max_added_fold_deg
+    plain, shaped = _without_correctives(side), _hand(side)
+    most = int(_Q["max_pinched_knuckle_edges"])
+    assert pinched_edge_count(shaped, bones, limit) <= most
+    assert pinched_edge_count(plain, bones, limit) > most
 
 
 def _palm_contact_count(result) -> int:
@@ -427,9 +473,12 @@ def test_bad_settings_and_inputs_are_rejected() -> None:
         settings_from_mapping({**raw, "curl": {**raw["curl"], "arch_passes": 0}})
     for levels in (-1, 4, 1.5, True):
         with pytest.raises(ValueError):
-            settings_from_mapping({**raw, "mesh": {"subdivision_levels": levels}})
+            mesh = {**raw["mesh"], "subdivision_levels": levels}
+            settings_from_mapping({**raw, "mesh": mesh})
     for part, bad in (
         ("lift_out", {"max_depth_m": -0.001}),
+        ("crease_relax", {"max_added_fold_deg": 0.0}),
+        ("crease_relax", {"bones": ["no_such_bone"]}),
         ("fold_relax", {"step": 0.0}),
         ("fold_relax", {"iterations": -1}),
         ("palm_pad", {"reach_m": -0.01}),
