@@ -23,7 +23,8 @@ from src.shared.python.grip_build.registry import (
     register_grip_builder,
 )
 from src.shared.python.grip_contact.grip_geometry import GripGeometry, get_grip_preset
-from src.shared.python.grip_spec.spec import GripSpec, HandGripSpec
+from src.shared.python.grip_build.finger_order import lead_finger_curl_order
+from src.shared.python.grip_spec.types import GripSpec, HandGripSpec
 from src.shared.python.model_appearance.grip_hand_mesh import GRIP_RADIUS_RANGE_M
 
 BUILDER_VERSION: Final[str] = "gb2-0.1.0"
@@ -70,7 +71,7 @@ class FlatHandCurlBuilder:
         chain = HandChain(
             hand_size=spec.hand_size,
             curl_sign=curl_sign,
-            dip_over_pip=dict(hand_spec.joint_coupling_overrides.dip_over_pip),
+            dip_over_pip=dict(hand_spec.joint_coupling_overrides),
             grip_radius_m=grip_radius,
         )
         depth_shift = (hand_spec.palm_finger_depth - 0.5) * 0.012
@@ -82,7 +83,8 @@ class FlatHandCurlBuilder:
         gaps: list[float] = []
         overall = BuildStatus.OK
         placed_capsules: list[tuple[np.ndarray, np.ndarray, float]] = []
-        for finger in spec.curl_order:
+        finger_order = lead_finger_curl_order(spec)
+        for finger in finger_order:
             for joint in _JOINT_NAMES:
                 status, flex_rad, clearance = self._curl_joint(
                     chain,
@@ -119,12 +121,12 @@ class FlatHandCurlBuilder:
                 "pip": chain.joint_angles[finger].pip_rad,
                 "dip": chain.joint_angles[finger].dip_rad,
             }
-            for finger in spec.curl_order
+            for finger in finger_order
         }
         receipt = BuildReceipt(
             schema_version=BUILD_RECEIPT_SCHEMA_VERSION,
             builder_version=BUILDER_VERSION,
-            spec_sha256=spec.spec_sha256(),
+            spec_sha256=spec.spec_sha256,
             curl_order=spec.curl_order,
             handedness=str(spec.handedness),
             bone_tolerance_m=BONE_TOLERANCE_M,

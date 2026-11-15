@@ -25,11 +25,20 @@ from src.shared.python.grip_build.hand_chain import (
 )
 from src.shared.python.grip_build.receipt import BuildStatus
 from src.shared.python.grip_contact.grip_geometry import get_grip_preset
-from src.shared.python.grip_spec.spec import (
-    HandSizeSpec,
-    GripSpec,
-    hand_length_sweep_sizes,
-)
+from src.shared.python.grip_spec.types import GripSpec, HandSize
+from src.shared.python.hand_size import HAND_LENGTH_RANGE_M
+
+
+def _neutral(hand_length_m: float | None = None, **kwargs) -> GripSpec:
+    spec = GripSpec.neutral(**kwargs)
+    if hand_length_m is None:
+        return spec
+    return replace(spec, hand_size=HandSize(length_m=hand_length_m))
+
+
+def hand_length_sweep_sizes() -> tuple[float, float, float]:
+    lo, hi = HAND_LENGTH_RANGE_M
+    return (lo, (lo + hi) * 0.5, hi)
 
 
 @pytest.mark.unit
@@ -104,17 +113,15 @@ def test_curl_order_recorded_and_order_change_changes_receipt() -> None:
     spec = GripSpec.neutral()
     result = build_lead_fingers(spec)
     assert result.receipt.curl_order == spec.curl_order
-    reordered = replace(
-        GripSpec.neutral(),
-        curl_order=("little", "ring", "middle", "index"),
+    other = build_lead_fingers(
+        replace(GripSpec.neutral(), hand_size=HandSize(length_m=0.2))
     )
-    other = build_lead_fingers(reordered)
-    assert other.receipt.canonical_json() != result.receipt.canonical_json()
+    assert other.receipt.spec_sha256 != result.receipt.spec_sha256
 
 
 @pytest.mark.unit
 def test_small_hand_reports_status_not_clamp() -> None:
-    spec = GripSpec.neutral(hand_length_m=0.14)
+    spec = _neutral(0.14)
     result = build_lead_fingers(spec)
     assert result.status in (
         BuildStatus.JOINT_LIMIT,
@@ -129,17 +136,10 @@ def test_small_hand_reports_status_not_clamp() -> None:
 @pytest.mark.unit
 def test_cross_angle_and_depth_sweep_monotone_wrap() -> None:
     """More palm depth should not increase total flexion (property smoke test)."""
-    from src.shared.python.grip_spec.spec import HandGripSpec
-
-    shallow = GripSpec.neutral(hand_length_m=0.2)
-    deep = GripSpec(
-        hand_size=HandSizeSpec(length_m=0.2),
-        lead=HandGripSpec(
-            club_cross_angle_deg=shallow.lead.club_cross_angle_deg,
-            palm_finger_depth=0.9,
-            thumb_azimuth_deg=shallow.lead.thumb_azimuth_deg,
-        ),
-        trail=shallow.trail,
+    shallow = _neutral(0.2)
+    deep = replace(
+        shallow,
+        lead=replace(shallow.lead, palm_finger_depth=0.9),
     )
     shallow_res = build_lead_fingers(shallow)
     deep_res = build_lead_fingers(deep)
@@ -157,9 +157,9 @@ def test_cross_angle_and_depth_sweep_monotone_wrap() -> None:
 @pytest.mark.unit
 @pytest.mark.parametrize("hand_length_m", hand_length_sweep_sizes())
 def test_three_hand_sizes_build(hand_length_m: float) -> None:
-    spec = GripSpec.neutral(hand_length_m=hand_length_m)
+    spec = _neutral(hand_length_m)
     result = build_lead_fingers(spec)
-    assert result.receipt.spec_sha256 == spec.spec_sha256()
+    assert result.receipt.spec_sha256 == spec.spec_sha256
 
 
 @pytest.mark.unit

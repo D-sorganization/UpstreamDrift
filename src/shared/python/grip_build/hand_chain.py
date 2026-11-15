@@ -10,7 +10,8 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.grip_build.geometry import deg_to_rad, rotation_about_axis
-from src.shared.python.grip_spec.spec import DEFAULT_CURL_ORDER, HandSizeSpec
+from src.shared.python.grip_build.finger_order import LEAD_FINGER_CURL_ORDER
+from src.shared.python.grip_spec.types import HandSize
 from src.shared.python.hand_size import hand_mesh_scale
 from src.shared.python.model_appearance.grip_hand_mesh import (
     DEFAULT_HAND_MESH_PARAMS,
@@ -52,7 +53,7 @@ class FingerJointAngles:
 class HandChain:
     """Palm + four fingers (lead build only; thumb reserved for GB-3)."""
 
-    hand_size: HandSizeSpec
+    hand_size: HandSize
     mesh_params: HandMeshParams = field(
         default_factory=lambda: replace(DEFAULT_HAND_MESH_PARAMS)
     )
@@ -71,7 +72,7 @@ class HandChain:
             "mesh_params",
             replace(self.mesh_params, scale=self.mesh_params.scale * scale),
         )
-        for finger in DEFAULT_CURL_ORDER:
+        for finger in LEAD_FINGER_CURL_ORDER:
             if finger not in self.joint_angles:
                 self.joint_angles[finger] = FingerJointAngles()
             if finger not in self.dip_over_pip:
@@ -143,7 +144,7 @@ class HandChain:
     def all_capsules(self) -> list[tuple[str, int, np.ndarray, np.ndarray, float]]:
         """Flattened capsules with finger and segment indices."""
         out: list[tuple[str, int, np.ndarray, np.ndarray, float]] = []
-        for finger in DEFAULT_CURL_ORDER:
+        for finger in LEAD_FINGER_CURL_ORDER:
             for seg_idx, (p0, p1, r) in enumerate(self.finger_capsules(finger)):
                 out.append((finger, seg_idx, p0, p1, r))
         return out
