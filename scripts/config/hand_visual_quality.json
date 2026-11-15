@@ -1,0 +1,6 @@
+{
+  "grip_cylinder_penetration_m": 0.002,
+  "self_penetration_fraction": 0.08,
+  "shaft_roll_median_error_m": 0.003,
+  "mirror_median_error_m": 0.004
+}

@@ -1,0 +1,3 @@
+MakeHuman CC0 hand extract (hm08 base.obj) for `hand_backends/skinned_human.py`.
+MANO and SMPL-X are research-only alternatives; their licences are non-commercial
+and those assets are not vendored in this repository.
