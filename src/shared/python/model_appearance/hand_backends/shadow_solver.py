@@ -535,7 +535,7 @@ def _solve_thumb_pose(
     handedness = grip_spec.handedness
     prefix = _prefix(hand, handedness)
     spec_hand = grip_spec.trail if hand == Hand.TRAIL else grip_spec.lead
-    role = "trail" if hand == Hand.TRAIL else "lead"
+    role: Literal["lead", "trail"] = "trail" if hand == Hand.TRAIL else "lead"
     target_az = math.radians(grip_spec.resolved_thumb_azimuth_deg(role))
     target_r = grip_radius_m + cfg.pad_clearance_m
     safe_r = grip_radius_m + cfg.thumb_min_radial_clearance_m

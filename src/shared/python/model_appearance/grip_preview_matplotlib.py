@@ -104,7 +104,7 @@ def axis_half_widths(ax: Axes) -> tuple[float, float, float]:
 
 def face_lambert_colours(
     vertices: Array,
-    faces: Array,
+    faces: NDArray[np.int64],
     style: GripMeshPreviewStyle = _DEFAULT_STYLE,
 ) -> Array:
     """RGB face colours from triangle normals and a single light direction."""
