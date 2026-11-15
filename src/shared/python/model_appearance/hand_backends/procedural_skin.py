@@ -1,4 +1,8 @@
-"""Procedural anatomical skin lofted over the capsule skeleton."""
+"""Lofted procedural skin (epic #15150 track — distinct from implicit SDF lane).
+
+One Catmull–Rom tapered tube per digit, cupped palm shell, thenar pad, thumb sweep.
+Does not use marching-cubes whole-hand SDF (see ``sdf_meshing`` for the SDF lane).
+"""
 
 from __future__ import annotations
 
@@ -9,12 +13,10 @@ import numpy as np
 from src.shared.python.grip_spec.types import GripSpec
 from src.shared.python.hand_size import hand_mesh_scale
 from src.shared.python.model_appearance.geometry import (
-    LoftOptions,
     Mesh,
     closed_grid_mesh,
     concat_meshes,
     ellipsoid_mesh,
-    lofted_segment,
 )
 from src.shared.python.model_appearance.grip_hand_mesh import (
     FINGER_NAMES,
@@ -32,6 +34,17 @@ from src.shared.python.model_appearance.hand_backends.settings import (
     DEFAULT_HAND_VISUAL_SETTINGS,
     HandVisualSettings,
 )
+from src.shared.python.model_appearance.hand_backends.sdf_meshing import (
+    catmull_rom_spline,
+    tube_mesh_from_polyline,
+)
+from src.shared.python.model_appearance.hand_backends.skeleton_extract import (
+    finger_polyline,
+    palm_z_extent,
+    thumb_polyline,
+    uniform_scale_skeleton,
+)
+
 
 BACKEND_ID = "procedural_skin"
 
@@ -42,7 +55,6 @@ def _enforce_minimum_radial_distance(
     *,
     inner_floor_m: float,
 ) -> Mesh:
-    """Push any vertex strictly inside ``inner_floor_m`` radially outward."""
     verts = np.asarray(mesh.vertices, dtype=float).copy()
     rho = np.hypot(verts[:, 0], verts[:, 1])
     too_close = rho < inner_floor_m
@@ -54,137 +66,103 @@ def _enforce_minimum_radial_distance(
     return Mesh(verts, mesh.faces.copy())
 
 
-def _component_axis_radius(
-    vertices: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray, float]:
-    centroid = vertices.mean(axis=0)
-    centered = vertices - centroid
-    _, _, vh = np.linalg.svd(centered, full_matrices=False)
-    axis = vh[0]
-    axis = axis / np.linalg.norm(axis)
-    projections = centered @ axis
-    start = centroid + axis * float(projections.min())
-    end = centroid + axis * float(projections.max())
-    radial = np.linalg.norm(centered - np.outer(projections, axis), axis=1)
-    radius = float(np.percentile(radial, 92))
-    return start, end, max(radius, 1e-4)
-
-
-def _smooth_segment(
-    start: np.ndarray,
-    end: np.ndarray,
-    radius: float,
+def _continuous_finger_tube(
+    points: np.ndarray,
     *,
-    rings: int,
+    base_radius_m: float,
+    tip_radius_m: float,
     sides: int,
-    knuckle_scale: float = 1.12,
-    pad_scale: float = 0.92,
 ) -> Mesh:
-    mid = 0.5 * (start + end)
-    knuckle = lofted_segment(
-        start,
-        mid,
-        radius * knuckle_scale,
-        LoftOptions(rings=rings, sides=sides, end_scale=pad_scale),
+    """One tapered tube along a Catmull–Rom spine (no segment bulbs)."""
+    return tube_mesh_from_polyline(
+        points,
+        base_radius_m,
+        tip_radius_m,
+        sides=sides,
+        spline_samples=max(56, 12 * len(points)),
     )
-    pad = lofted_segment(
-        mid,
-        end,
-        radius * pad_scale,
-        LoftOptions(rings=max(4, rings - 2), sides=sides, end_scale=0.85),
-    )
-    return concat_meshes(knuckle, pad)
 
 
-def _arched_palm_mesh(
+def _palm_cup_mesh(
+    knuckles: np.ndarray,
+    *,
     grip_radius_m: float,
-    baked_mesh: Mesh,
+    z_lo: float,
     joint_angles: HandJointAngles,
-    params: HandMeshParams,
+    anthro: object,
     settings: HandVisualSettings,
 ) -> Mesh:
-    """Deformable palm grid with transverse and longitudinal arches."""
-    verts = baked_mesh.vertices
-    z_lo, z_hi = float(verts[:, 2].min()), float(verts[:, 2].max())
-    rho_lo = float(np.percentile(np.hypot(verts[:, 0], verts[:, 1]), 15))
-    rho_hi = float(np.percentile(np.hypot(verts[:, 0], verts[:, 1]), 85))
+    """Cupped metacarpal shell with visible knuckle ridge."""
+    from src.shared.python.model_appearance.hand_backends.settings import (
+        HandAnthropometryReference,
+    )
+
+    if not isinstance(anthro, HandAnthropometryReference):
+        raise TypeError("anthro must be HandAnthropometryReference")
     curl = joint_angles.palm_finger_depth
-    transverse = 0.004 + 0.010 * curl
-    longitudinal = 0.003 + 0.008 * (1.0 - curl)
-    rings = settings.palm_grid_rings
-    sides = settings.palm_grid_sides
-    theta = np.linspace(-0.35, 1.45, sides)
-    stations = np.linspace(z_lo, z_hi, rings)
-    inner = grip_radius_m + params.palm_clearance_m
-    thickness = params.scale * params.palm_thickness_m
-    grid = []
-    for frac, z in enumerate(stations):
+    transverse = 0.003 + 0.005 * curl
+    clearance = 0.0015
+    inner = grip_radius_m + clearance
+    width = anthro.reference_palm_width_m
+    rings = 10
+    sides = settings.procedural_skin_sides
+    z_knuckle = float(np.mean(knuckles[:, 2]))
+    zs = np.linspace(z_lo - 0.006, z_knuckle + 0.004, rings)
+    theta = np.linspace(-0.5 * math.pi, 0.85 * math.pi, sides)
+    grid: list[list[np.ndarray]] = []
+    for frac, z in enumerate(zs):
         t = frac / max(1, rings - 1)
+        arch = transverse * math.sin(math.pi * t)
         for th in theta:
-            arch_t = transverse * math.sin(math.pi * t)
-            arch_l = longitudinal * math.sin(math.pi * (th / math.pi))
-            r = max(
-                inner + 0.0005,
-                inner + thickness * (0.55 + 0.45 * math.sin(th)) + arch_t + arch_l,
-            )
+            wave = 0.0018 * math.cos(4.0 * th)
+            palmar = inner + 0.0035 + arch + wave
+            dorsal_bump = 0.011 * (1.0 - t)
+            rho = palmar + dorsal_bump
+            taper_y = 0.5 + 0.5 * math.cos(th)
+            rho += width * 0.04 * taper_y * (1.0 - t)
             grid.append(
-                np.array(
-                    [r * math.cos(th), r * math.sin(th), z],
-                    dtype=float,
-                )
+                np.array([rho * math.cos(th), rho * math.sin(th), z], dtype=float)
             )
     arr = np.asarray(grid, dtype=float).reshape(rings, sides, 3)
-    outer = arr[:, arr.shape[1] // 4, :]
-    top = outer.mean(axis=0) + np.array([0.0, 0.0, -0.008], dtype=float)
-    bottom = arr[-1].mean(axis=0) + np.array([0.006, 0.0, 0.006], dtype=float)
-    palm = closed_grid_mesh(arr, top, bottom)
-    dorsal_centre = np.array(
+    dorsal_pole = np.array(
         [
-            0.85 * (rho_lo + rho_hi) * 0.5,
+            inner + 0.024,
             0.0,
-            0.5 * (z_lo + z_hi) + 0.012,
+            0.5 * (z_lo + z_knuckle) + 0.006,
         ],
         dtype=float,
     )
-    dorsum = ellipsoid_mesh(
-        dorsal_centre,
-        np.array([0.022, 0.028, 0.040], dtype=float) * params.scale,
-        np.array([0.0, 0.0, 1.0], dtype=float),
-        rings=settings.procedural_skin_rings,
-        sides=settings.procedural_skin_sides,
-    )
-    return concat_meshes(palm, dorsum)
+    palmar_pole = np.mean(knuckles, axis=0) - np.array([0.006, 0.0, 0.0])
+    return closed_grid_mesh(arr, dorsal_pole, palmar_pole)
 
 
-def _thenar_eminences(
-    grip_radius_m: float,
-    params: HandMeshParams,
+def _thenar_pad(
+    thumb_root: np.ndarray,
     hand: Hand,
+    *,
     settings: HandVisualSettings,
-) -> list[Mesh]:
-    k = params.scale
-    thumb_side = -1.0 if hand is Hand.LEAD else 1.0
-    thenar = ellipsoid_mesh(
-        np.array(
-            [grip_radius_m + 0.020, thumb_side * 0.014, -0.008],
-            dtype=float,
-        ),
-        np.array([0.016, 0.014, 0.022], dtype=float) * k,
+    scale: float,
+) -> Mesh:
+    side = -1.0 if hand is Hand.LEAD else 1.0
+    centre = thumb_root + np.array([0.003, side * 0.011, -0.004])
+    return ellipsoid_mesh(
+        centre,
+        np.array([0.014, 0.012, 0.018], dtype=float) * scale,
         np.array([1.0, 0.0, 0.0], dtype=float),
-        rings=settings.procedural_skin_rings,
+        rings=settings.procedural_skin_sides,
         sides=settings.procedural_skin_sides,
     )
-    hypo = ellipsoid_mesh(
-        np.array(
-            [grip_radius_m + 0.014, -thumb_side * 0.026, 0.018],
-            dtype=float,
-        ),
-        np.array([0.012, 0.011, 0.018], dtype=float) * k,
-        np.array([0.0, 1.0, 0.0], dtype=float),
-        rings=settings.procedural_skin_rings,
-        sides=settings.procedural_skin_sides,
-    )
-    return [thenar, hypo]
+
+
+def _thumb_tube(
+    thumb_line: np.ndarray,
+    *,
+    base_r: float,
+    tip_r: float,
+    sides: int,
+) -> Mesh:
+    dense = catmull_rom_spline(thumb_line, 40)
+    return tube_mesh_from_polyline(dense, base_r, tip_r, sides=sides, spline_samples=40)
 
 
 def build_hand_visual(
@@ -207,30 +185,65 @@ def build_hand_visual(
         pose=pose,
         params=params,
     )
+    finger_lines = [finger_polyline(reference, f) for f in FINGER_NAMES]
+    thumb_line = thumb_polyline(reference)
+    z_lo, z_hi = palm_z_extent(reference)
+    measured_len = float(reference.mesh.vertices[:, 2].max()) - float(
+        reference.mesh.vertices[:, 2].min()
+    )
+    finger_lines = uniform_scale_skeleton(
+        finger_lines,
+        target_length_m=settings.anthropometry.reference_hand_length_m,
+        measured_length_m=measured_len,
+    )
+    thumb_len = float(np.linalg.norm(thumb_line[-1] - thumb_line[0]))
+    thumb_line = uniform_scale_skeleton(
+        [thumb_line],
+        target_length_m=settings.anthropometry.reference_hand_length_m * 0.44,
+        measured_length_m=thumb_len,
+    )[0]
+    anthro = settings.anthropometry
+    base_r = anthro.finger_radius_base_m
+    tip_r = anthro.finger_radius_tip_m
     shells: list[Mesh] = []
-    for comp in reference.components:
-        if comp.finger in {*FINGER_NAMES, "thumb"} and "_" in comp.name:
-            start, end, radius = _component_axis_radius(comp.mesh.vertices)
-            shells.append(
-                _smooth_segment(
-                    start,
-                    end,
-                    radius,
-                    rings=settings.procedural_skin_rings,
-                    sides=settings.procedural_skin_sides,
-                )
+    knuckles: list[np.ndarray] = []
+    for line in finger_lines:
+        knuckles.append(line[0].copy())
+        shells.append(
+            _continuous_finger_tube(
+                line,
+                base_radius_m=base_r,
+                tip_radius_m=tip_r,
+                sides=settings.procedural_skin_sides,
             )
-        elif comp.finger == "palm":
-            shells.append(
-                _arched_palm_mesh(
-                    float(grip_radius_m),
-                    comp.mesh,
-                    joint_angles,
-                    params,
-                    settings,
-                )
-            )
-    shells.extend(_thenar_eminences(float(grip_radius_m), params, hand, settings))
+        )
+    knuckle_arr = np.vstack(knuckles)
+    shells.append(
+        _palm_cup_mesh(
+            knuckle_arr,
+            grip_radius_m=float(grip_radius_m),
+            z_lo=z_lo,
+            joint_angles=joint_angles,
+            anthro=anthro,
+            settings=settings,
+        )
+    )
+    shells.append(
+        _thenar_pad(
+            thumb_line[0],
+            hand,
+            settings=settings,
+            scale=scale,
+        )
+    )
+    shells.append(
+        _thumb_tube(
+            thumb_line,
+            base_r=base_r * 1.06,
+            tip_r=tip_r * 0.94,
+            sides=settings.procedural_skin_sides,
+        )
+    )
     mesh = concat_meshes(*shells)
     inner_floor = float(grip_radius_m) - settings.shaft_penetration_tolerance_m + 1e-9
     mesh = _enforce_minimum_radial_distance(
@@ -242,7 +255,7 @@ def build_hand_visual(
         role=side,
         mesh=mesh,
         grip_radius_m=float(grip_radius_m),
-        material=settings.skin_material,
+        material=settings.skin_material_for_role(side),
         palm_arch_angle_deg=arch,
     )
 

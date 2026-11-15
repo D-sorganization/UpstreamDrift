@@ -1,4 +1,4 @@
-"""Per-roll dual-hand grip evidence (±20°, 0°) for PR acceptance."""
+"""Lead/trail single-hand views then dual-hand strips (1024px, dual light)."""
 
 from __future__ import annotations
 
@@ -15,9 +15,16 @@ from src.shared.python.model_appearance.hand_backends.contract import (
     hand_mesh_with_shaft_roll,
 )
 from src.shared.python.model_appearance.hand_backends.preview import (
-    add_grip_cylinder_wire,
+    add_grip_shaft_solid,
+    frame_hand_viewport,
+    grip_shaft_mesh,
     plot_shaded_mesh,
     skin_tone_rgb,
+    transform_mesh,
+    view_rotation,
+)
+from src.shared.python.model_appearance.hand_backends.placement import (
+    mesh_in_shared_visual_frame,
 )
 from src.shared.python.model_appearance.hand_backends.registry import build_hand_visual
 from src.shared.python.model_appearance.hand_backends.settings import (
@@ -26,23 +33,10 @@ from src.shared.python.model_appearance.hand_backends.settings import (
 )
 
 ROLLS = (-20.0, 0.0, 20.0)
-VIEWS = (
-    ("front", np.eye(3)),
-    (
-        "side",
-        np.array(
-            [[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0]],
-            dtype=float,
-        ),
-    ),
-    (
-        "grip",
-        np.array(
-            [[1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]],
-            dtype=float,
-        ),
-    ),
-)
+VIEWS = ("palm", "back", "side")
+ROLES = ("lead", "trail")
+RENDER_DPI = 128
+FIG_INCH = 8.0  # 8 * 128 ~= 1024 px
 
 
 def _spec(roll_deg: float) -> GripSpec:
@@ -52,6 +46,22 @@ def _spec(roll_deg: float) -> GripSpec:
     )
 
 
+def _render_panel(fig, slot, mesh, grip_r, view, color, rotation):
+    ax = fig.add_subplot(1, 3, slot, projection="3d")
+    posed = transform_mesh(mesh, rotation)
+    z0, z1 = float(posed.vertices[:, 2].min()), float(posed.vertices[:, 2].max())
+    margin = 0.04
+    z_range = (z0 - margin, z1 + margin)
+    grip = transform_mesh(grip_shaft_mesh(grip_r, z_range=z_range), rotation)
+    plot_shaded_mesh(ax, grip, color=(0.22, 0.24, 0.28), auto_frame=False, alpha=0.9)
+    plot_shaded_mesh(ax, posed, color=color, auto_frame=False)
+    combined = np.vstack([posed.vertices, grip.vertices])
+    frame_hand_viewport(ax, combined, fill_fraction=0.70)
+    ax.set_title(view, fontsize=12, fontweight="medium")
+    ax.set_axis_off()
+    return ax
+
+
 def render_roll_strip(output_dir: Path, backend_id: str = "procedural_skin") -> None:
     matplotlib = __import__("matplotlib")
     matplotlib.use("Agg")
@@ -59,14 +69,41 @@ def render_roll_strip(output_dir: Path, backend_id: str = "procedural_skin") -> 
 
     output_dir.mkdir(parents=True, exist_ok=True)
     settings = DEFAULT_HAND_VISUAL_SETTINGS
-    color = skin_tone_rgb(settings.skin_material)
     for roll in ROLLS:
         spec = _spec(roll)
-        fig = plt.figure(figsize=(12, 3.6))
-        for idx, (view_name, frame) in enumerate(VIEWS, start=1):
-            ax = fig.add_subplot(1, 3, idx, projection="3d")
+        for role in ROLES:
+            angles = HandJointAngles.from_grip_spec(spec, role)
+            vis = build_hand_visual(
+                backend_id,
+                spec,
+                role,
+                angles,
+                grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
+                settings=settings,
+            )
+            mesh = hand_mesh_with_shaft_roll(vis.mesh, spec, role)
+            color = skin_tone_rgb(settings.skin_material_for_role(role))
+            fig = plt.figure(figsize=(FIG_INCH * 3, FIG_INCH), facecolor="white")
+            for idx, view in enumerate(VIEWS, start=1):
+                rot = view_rotation(view)
+                _render_panel(
+                    fig, idx, mesh, DEFAULT_VISUAL_GRIP_RADIUS_M, view, color, rot
+                )
+            fig.suptitle(
+                f"{backend_id} — {role} hand  roll {roll:+.0f}°",
+                fontsize=13,
+            )
+            fig.tight_layout()
+            out = output_dir / f"{backend_id}_{role}_roll_{roll:+.0f}.png"
+            fig.savefig(out, dpi=RENDER_DPI, facecolor="white")
+            plt.close(fig)
+            print(out)
+
+        fig = plt.figure(figsize=(FIG_INCH * 3, FIG_INCH), facecolor="white")
+        for idx, view in enumerate(VIEWS, start=1):
+            rot = view_rotation(view)
             meshes = []
-            for role in ("lead", "trail"):
+            for role in ROLES:
                 angles = HandJointAngles.from_grip_spec(spec, role)
                 vis = build_hand_visual(
                     backend_id,
@@ -77,24 +114,39 @@ def render_roll_strip(output_dir: Path, backend_id: str = "procedural_skin") -> 
                     settings=settings,
                 )
                 rolled = hand_mesh_with_shaft_roll(vis.mesh, spec, role)
-                from src.shared.python.model_appearance.geometry import Mesh
-
-                meshes.append(
-                    Mesh(rolled.vertices @ frame, rolled.faces),
-                )
+                shared = mesh_in_shared_visual_frame(rolled, spec, role)
+                meshes.append(transform_mesh(shared, rot))
             combined = concat_meshes(*meshes)
-            plot_shaded_mesh(ax, combined, color=color)
-            z0, z1 = (
-                float(combined.vertices[:, 2].min()),
-                float(combined.vertices[:, 2].max()),
+            color_lead = skin_tone_rgb(settings.lead_skin_material)
+            color_trail = skin_tone_rgb(settings.trail_skin_material)
+            ax = fig.add_subplot(1, 3, idx, projection="3d")
+            for m, col in zip(meshes, (color_lead, color_trail), strict=True):
+                plot_shaded_mesh(
+                    ax, m, color=col, frame_fill=0.70, alpha=0.98, auto_frame=False
+                )
+            from src.shared.python.model_appearance.hand_backends.preview import (
+                frame_hand_viewport,
             )
-            add_grip_cylinder_wire(ax, DEFAULT_VISUAL_GRIP_RADIUS_M, z_range=(z0, z1))
-            ax.set_title(f"{view_name} roll {roll:+.0f}°")
+
+            frame_hand_viewport(ax, combined.vertices, fill_fraction=0.70)
+            z0, z1 = float(ax.get_zlim3d()[0]), float(ax.get_zlim3d()[1])
+            margin = 0.04
+            grip = transform_mesh(
+                grip_shaft_mesh(
+                    DEFAULT_VISUAL_GRIP_RADIUS_M,
+                    z_range=(z0 - margin, z1 + margin),
+                ),
+                rot,
+            )
+            plot_shaded_mesh(
+                ax, grip, color=(0.22, 0.24, 0.28), auto_frame=False, alpha=0.9
+            )
+            ax.set_title(f"{view} (lead + trail)", fontsize=12)
             ax.set_axis_off()
         out = output_dir / f"{backend_id}_both_hands_roll_{roll:+.0f}.png"
-        fig.suptitle(f"{backend_id} — lead+trail")
+        fig.suptitle(f"{backend_id} — both hands  roll {roll:+.0f}°", fontsize=13)
         fig.tight_layout()
-        fig.savefig(out, dpi=160, facecolor="white")
+        fig.savefig(out, dpi=RENDER_DPI, facecolor="white")
         plt.close(fig)
         print(out)
 

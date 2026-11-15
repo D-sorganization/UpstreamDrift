@@ -86,6 +86,51 @@ def palm_arch_angle_deg(mesh: Mesh) -> float:
     return math.degrees(math.acos(cos_angle))
 
 
+def anthropometric_vs_reference(
+    mesh: Mesh,
+    *,
+    reference: object,
+    middle_finger_length_m: float | None = None,
+) -> dict[str, float | bool]:
+    """Compare measured mesh extents to :class:`HandAnthropometryReference`."""
+    from src.shared.python.model_appearance.hand_backends.settings import (
+        HandAnthropometryReference,
+    )
+
+    if not isinstance(reference, HandAnthropometryReference):
+        raise TypeError("reference must be HandAnthropometryReference")
+    measured = anthropometric_ratios(mesh)
+    tol = reference.ratio_tolerance_rel
+    checks: dict[str, float | bool] = {
+        "reference_hand_length_m": reference.reference_hand_length_m,
+        "reference_palm_width_m": reference.reference_palm_width_m,
+        "reference_middle_finger_length_m": reference.middle_finger_length_m,
+        "hand_length_within_tolerance": _within(
+            measured["hand_length_m"], reference.reference_hand_length_m, tol
+        ),
+        "palm_width_within_tolerance": _within(
+            measured["hand_breadth_m"], reference.reference_palm_width_m, tol
+        ),
+    }
+    if middle_finger_length_m is not None:
+        checks["middle_finger_length_m"] = middle_finger_length_m
+        checks["middle_finger_within_tolerance"] = _within(
+            middle_finger_length_m,
+            reference.middle_finger_length_m,
+            tol,
+        )
+    checks["anthropometrics_accepted"] = all(
+        checks[k] for k in checks if k.endswith("_within_tolerance")
+    )
+    return checks
+
+
+def _within(measured: float, target: float, rel_tol: float) -> bool:
+    if target <= 0.0:
+        return False
+    return abs(measured - target) / target <= rel_tol
+
+
 def anthropometric_ratios(mesh: Mesh) -> dict[str, float]:
     """Hand length/breadth and finger-length ratios from axis-aligned bounds."""
     verts = mesh.vertices
@@ -117,6 +162,7 @@ def anthropometric_ratios(mesh: Mesh) -> dict[str, float]:
 
 __all__ = [
     "anthropometric_ratios",
+    "anthropometric_vs_reference",
     "grip_shaft_penetration_fraction",
     "inter_finger_penetration_fraction",
     "palm_arch_angle_deg",

@@ -1,4 +1,4 @@
-"""Side-by-side hand backend comparison contact sheet (epic #15122)."""
+"""Backend contact sheet: 2 columns, roll 0°, 1024px legible layout."""
 
 from __future__ import annotations
 
@@ -8,16 +8,14 @@ import sys
 from pathlib import Path
 from typing import Any
 
-import numpy as np
-
-from src.shared.python.grip_spec import GripSpec, HandGripSpec
+from src.shared.python.grip_spec import GripSpec
 from src.shared.python.model_appearance.grip_hand_mesh import (
     FINGER_NAMES,
+    HandMeshParams,
     build_grip_hand_mesh,
 )
 from src.shared.python.grip_spec.shaft_roll import resolved_shaft_roll_deg
 from src.shared.python.hand_size import hand_mesh_scale
-from src.shared.python.model_appearance.grip_hand_mesh import HandMeshParams
 from src.shared.python.model_appearance.grip_pose import Hand
 from src.shared.python.model_appearance.hand_backends.contract import (
     HandJointAngles,
@@ -26,13 +24,17 @@ from src.shared.python.model_appearance.hand_backends.contract import (
 )
 from src.shared.python.model_appearance.hand_backends.metrics import (
     anthropometric_ratios,
+    anthropometric_vs_reference,
     grip_shaft_penetration_fraction,
     inter_finger_penetration_fraction,
 )
 from src.shared.python.model_appearance.hand_backends.preview import (
-    add_grip_cylinder_wire,
+    add_grip_shaft_solid,
+    frame_hand_viewport,
     plot_shaded_mesh,
     skin_tone_rgb,
+    transform_mesh,
+    view_rotation,
 )
 from src.shared.python.model_appearance.hand_backends.registry import (
     build_hand_visual,
@@ -43,20 +45,28 @@ from src.shared.python.model_appearance.hand_backends.settings import (
     DEFAULT_HAND_VISUAL_SETTINGS,
     HandVisualSettings,
 )
-
-DEFAULT_ROLLS_DEG = (-20.0, 0.0, 20.0)
-_VIEW_AXES = (
-    ("front", (0, -1, 0)),
-    ("side", (1, 0, 0)),
-    ("grip", (0, 0, 1)),
+from src.shared.python.model_appearance.hand_backends.skeleton_extract import (
+    finger_polyline,
+    middle_finger_length,
+)
+from src.shared.python.model_appearance.geometry import concat_meshes
+from src.shared.python.model_appearance.hand_backends.placement import (
+    mesh_in_shared_visual_frame,
 )
 
-
-def _spec_for_roll(roll_deg: float) -> GripSpec:
-    return GripSpec.legacy(
-        lead=HandGripSpec(shaft_roll_deg=roll_deg),
-        trail=HandGripSpec(shaft_roll_deg=-roll_deg * 0.5),
-    )
+RENDER_DPI = 128
+VIEWS = ("palm", "back", "side")
+ROW_SPECS: tuple[tuple[str, str | None, str], ...] = (
+    ("lead", "lead", "palm"),
+    ("lead", "lead", "back"),
+    ("lead", "lead", "side"),
+    ("trail", "trail", "palm"),
+    ("trail", "trail", "back"),
+    ("trail", "trail", "side"),
+    ("both", None, "palm"),
+    ("both", None, "back"),
+    ("both", None, "side"),
+)
 
 
 def _metrics_for_backend(
@@ -87,6 +97,14 @@ def _metrics_for_backend(
         for part in reference.components
         if part.finger in FINGER_NAMES and part.name.endswith("_proximal")
     ]
+    mid_len = None
+    if backend_id == "procedural_skin":
+        mid_len = middle_finger_length(finger_polyline(reference, "middle"))
+    anthro = anthropometric_vs_reference(
+        rolled,
+        reference=settings.anthropometry,
+        middle_finger_length_m=mid_len,
+    )
     return {
         "backend_id": backend_id,
         "role": role,
@@ -102,22 +120,8 @@ def _metrics_for_backend(
         ),
         "palm_arch_angle_deg": vis.palm_arch_angle_deg,
         **anthropometric_ratios(rolled),
+        **anthro,
     }
-
-
-def _rotate_view(mesh, view: tuple[float, float, float]):
-    from src.shared.python.model_appearance.geometry import Mesh
-
-    direction = np.asarray(view, dtype=float)
-    direction /= np.linalg.norm(direction)
-    up = np.array([0.0, 0.0, 1.0])
-    if abs(float(np.dot(direction, up))) > 0.95:
-        up = np.array([0.0, 1.0, 0.0])
-    right = np.cross(up, direction)
-    right /= np.linalg.norm(right)
-    up = np.cross(direction, right)
-    frame = np.column_stack([right, up, direction])
-    return Mesh(mesh.vertices @ frame, mesh.faces)
 
 
 def render_contact_sheet(
@@ -131,58 +135,91 @@ def render_contact_sheet(
     import matplotlib.pyplot as plt
 
     backends = registered_backend_ids()
-    roles: tuple[HandRole, ...] = ("lead", "trail")
-    metrics: list[dict[str, Any]] = []
-    n_rows = len(DEFAULT_ROLLS_DEG) * len(roles) * len(_VIEW_AXES)
+    if len(backends) > 2:
+        backends = backends[:2]
+    spec = GripSpec.legacy()
+    n_rows = len(ROW_SPECS)
     n_cols = len(backends)
-    fig = plt.figure(figsize=(3.2 * n_cols, 2.4 * n_rows))
-    color = skin_tone_rgb(settings.skin_material)
+    fig = plt.figure(
+        figsize=(6.0 * n_cols, 3.0 * n_rows),
+        facecolor="white",
+    )
+    metrics: list[dict[str, Any]] = []
     cell = 0
-    for roll in DEFAULT_ROLLS_DEG:
-        spec = _spec_for_roll(roll)
-        for role in roles:
-            angles = HandJointAngles.from_grip_spec(spec, role)
-            for view_name, view_axis in _VIEW_AXES:
-                for backend_id in backends:
-                    cell += 1
-                    ax = fig.add_subplot(n_rows, n_cols, cell, projection="3d")
+    for row_label, role, view in ROW_SPECS:
+        rot = view_rotation(view)
+        for backend_id in backends:
+            cell += 1
+            ax = fig.add_subplot(n_rows, n_cols, cell, projection="3d")
+            if role is not None:
+                angles = HandJointAngles.from_grip_spec(spec, role)
+                vis = build_hand_visual(
+                    backend_id,
+                    spec,
+                    role,
+                    angles,
+                    grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
+                    settings=settings,
+                )
+                mesh = hand_mesh_with_shaft_roll(vis.mesh, spec, role)
+                metrics.append(
+                    _metrics_for_backend(backend_id, spec, role, angles, settings)
+                )
+                color = skin_tone_rgb(settings.skin_material_for_role(role))
+                posed = transform_mesh(mesh, rot)
+                plot_shaded_mesh(ax, posed, color=color, frame_fill=0.72)
+            else:
+                meshes = []
+                colors = []
+                for r in ("lead", "trail"):
+                    angles = HandJointAngles.from_grip_spec(spec, r)
                     vis = build_hand_visual(
                         backend_id,
                         spec,
-                        role,
+                        r,
                         angles,
                         grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
                         settings=settings,
                     )
-                    mesh = hand_mesh_with_shaft_roll(vis.mesh, spec, role)
-                    metrics.append(
-                        _metrics_for_backend(backend_id, spec, role, angles, settings)
+                    mesh = hand_mesh_with_shaft_roll(vis.mesh, spec, r)
+                    shared = mesh_in_shared_visual_frame(mesh, spec, r)
+                    meshes.append(transform_mesh(shared, rot))
+                    colors.append(skin_tone_rgb(settings.skin_material_for_role(r)))
+                for m, col in zip(meshes, colors, strict=True):
+                    plot_shaded_mesh(
+                        ax, m, color=col, auto_frame=False, frame_fill=0.72
                     )
-                    viewed = _rotate_view(mesh, view_axis)
-                    plot_shaded_mesh(ax, viewed, color=color)
-                    z0, z1 = (
-                        float(mesh.vertices[:, 2].min()),
-                        float(mesh.vertices[:, 2].max()),
-                    )
-                    add_grip_cylinder_wire(
-                        ax, DEFAULT_VISUAL_GRIP_RADIUS_M, z_range=(z0, z1)
-                    )
-                    ax.set_title(
-                        f"{backend_id} {role} {view_name} roll={roll:+.0f}°",
-                        fontsize=7,
-                    )
-                    ax.set_axis_off()
+                combined = concat_meshes(*meshes)
+                frame_hand_viewport(ax, combined.vertices, fill_fraction=0.72)
+            z0, z1 = (
+                float(ax.get_zlim3d()[0]),
+                float(ax.get_zlim3d()[1]),
+            )
+            add_grip_shaft_solid(
+                ax,
+                DEFAULT_VISUAL_GRIP_RADIUS_M,
+                z_range=(z0, z1),
+                rotation=rot,
+            )
+            ax.set_title(
+                f"{backend_id}\n{row_label} · {view}",
+                fontsize=11,
+                linespacing=1.2,
+            )
+            ax.set_axis_off()
     fig.suptitle(
-        "Hand visual backends — GripSpec.legacy() iron7 grip",
-        fontsize=11,
+        "Hand backends @ shaft roll 0°  (capsule | procedural skin)",
+        fontsize=14,
+        y=0.995,
     )
-    fig.tight_layout()
+    fig.subplots_adjust(
+        left=0.02, right=0.98, top=0.96, bottom=0.02, hspace=0.08, wspace=0.05
+    )
     output_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(output_png, dpi=160, facecolor="white")
+    fig.savefig(output_png, dpi=RENDER_DPI, facecolor="white")
     plt.close(fig)
     output_json.write_text(
-        json.dumps({"metrics": metrics, "rolls_deg": list(DEFAULT_ROLLS_DEG)}, indent=2)
-        + "\n",
+        json.dumps({"metrics": metrics, "shaft_roll_deg": 0.0}, indent=2) + "\n",
         encoding="utf-8",
     )
 
