@@ -1,8 +1,8 @@
-## Skinned human hand on the club (MakeHuman CC0 rig, linear blend skinning)
+## Skinned Human Hand on the Club (MakeHuman CC0 Rig, Linear Blend Skinning)
 
 Refs #15150 (epic), #15148. Stacked on `cursor/hrg-gb1b-shaft-roll-2882`. Auto-merge is not armed, on the owner's instruction.
 
-### State at `a1b29c56a9` (2026-11-14, about 10:45 PM PT)
+### State at `a1b29c56a9` (2026-11-14, About 10:45 PM PT)
 
 - The hand is MakeHuman's hm08 mesh with MakeHuman's own `default.mhskel` skeleton and `default_weights.mhw` skin weights (CC0, pinned commit, recorded in `assets/hand_cc0/NOTICE` and `PROVENANCE.json`). One declared change to the weights: see "Deviations".
 - Posing is joint rotation plus linear blend skinning only. A test rebuilds the mesh from the reported bone transforms and requires agreement to 1e-9 m, so no vertex is pushed.
@@ -12,7 +12,7 @@ Refs #15150 (epic), #15148. Stacked on `cursor/hrg-gb1b-shaft-roll-2882`. Auto-m
 - Contact physics is untouched (still capsules). This is the visual model.
 - Tests: 53 pass, 1 skipped (the source-rebuild check needs a MakeHuman checkout; I ran `build_hand_asset.py --check` by hand and it matches).
 
-### Measured (legacy grip spec, grip radius 14 mm)
+### Measured (Legacy Grip Spec, Grip Radius 14 mm)
 
 | Check | Result | Limit (setting) |
 | --- | --- | --- |
@@ -26,7 +26,7 @@ Refs #15150 (epic), #15148. Stacked on `cursor/hrg-gb1b-shaft-roll-2882`. Auto-m
 | Left-handed golfer is the exact mirror | yes | 1e-9 m |
 | Shaft roll 0 and plus or minus 20 degrees is a rigid turn | yes | 1e-9 m |
 
-### Self-review (I opened every frame; scores out of 5)
+### Self-Review (I Opened Every Frame; Scores Out Of 5)
 
 | Criterion | Lead | Trail | Both hands |
 | --- | --- | --- | --- |
@@ -57,7 +57,7 @@ A single hand reads as a human hand holding a golf club. The pair reads as two h
 
 All 36 frames (1024 px, MuJoCo EGL through the shared renderer of #15154) and `render_manifest.json` are in `docs/development/full_body_models/evidence/hand_skinned_human/`.
 
-### Deviations and things to check
+### Deviations and Things to Check
 
 - **Skin weights at the thumb web are smoothed.** MakeHuman's weights change abruptly between thumb and index, and the web skin folded over itself when the thumb closed. `thumb_web_smoothing` in `assets/hand_cc0/build_settings.json` blends them; zero iterations rebuilds with the untouched weights. Dieter, please say if you would rather keep the weights pure and accept the fold.
 - **Wrist bend is new.** Extension and ulnar deviation per hand are settings (lead 0 and 20 degrees, trail 15 and 10). The grip spec does not cover the wrist; these are my values.
@@ -79,7 +79,7 @@ All 36 frames (1024 px, MuJoCo EGL through the shared renderer of #15154) and `r
 - Solver speed is forward kinematics. Precomputed hinge matrices and skinning only the vertices a joint moves took a pair from 55 s to 14 s.
 - Never run Python from inside `hand_backends/`: its `types.py` shadows the standard library.
 
-### Next steps
+### Next Steps
 
 1. Bring the thenar pad round (thumb base opposition) so the palm cups and the thumb's first segment lies on the grip.
 2. Use the lead hand's skin, not capsules, as the trail hand's obstacle so its ring and little fingers close properly.

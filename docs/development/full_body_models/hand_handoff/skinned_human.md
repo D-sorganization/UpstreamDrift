@@ -1,4 +1,4 @@
-# Skinned human hand: handoff
+# Skinned Human Hand: Handoff
 
 Epic #15150, issue #15148, PR #15149, branch `cursor/skinned-human-hand-backend-751f`.
 
@@ -6,7 +6,7 @@ State, scores, frames, deviations, learnings and next steps are in
 [`../evidence/hand_skinned_human/PR_BODY.md`](../evidence/hand_skinned_human/PR_BODY.md),
 which is also the text for the PR description.
 
-## Where things are
+## Where Things Are
 
 | Path | What it is |
 | --- | --- |
@@ -20,7 +20,7 @@ which is also the text for the PR description.
 | `tests/unit/model_appearance/hand_backends/` | 54 tests |
 | `docs/development/full_body_models/evidence/hand_skinned_human/` | Evidence script, 36 frames, manifest |
 
-## Commands (run from the repository root)
+## Commands (Run From the Repository Root)
 
 ```bash
 PYTHONPATH=. python -m pytest tests/unit/model_appearance/hand_backends -o addopts="" -q
@@ -39,7 +39,7 @@ this branch; `HAND_RENDERER_ROOT` points at a checkout of it. Do not run
 Python from inside `hand_backends/`: its `types.py` shadows the standard
 library.
 
-## How the pose is built
+## How the Pose Is Built
 
 1. Size the asset to the spec's hand length and breadth.
 2. Lay the flat right hand beside the club (`club_axis_in_hand`,
