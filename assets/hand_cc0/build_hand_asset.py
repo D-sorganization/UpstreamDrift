@@ -281,13 +281,16 @@ def _cap_boundaries(
     return np.vstack(new_verts), np.vstack(new_tris), loops
 
 
-def _smooth_thumb_web(
-    weights: np.ndarray, tris: np.ndarray, smoothing: dict[str, Any]
+def _smooth_seam(
+    weights: np.ndarray,
+    tris: np.ndarray,
+    sides: tuple[list[str], list[str]],
+    smoothing: dict[str, Any],
 ) -> np.ndarray:
-    """Blend the skin weights across the web between thumb and index.
+    """Blend the skin weights across the seam between two groups of bones.
 
-    MakeHuman's weights change abruptly there, and linear blend skinning then
-    folds the web skin over itself when the thumb closes on the grip. Each
+    MakeHuman's weights change abruptly at some seams, and linear blend
+    skinning then folds the skin over itself when the joint closes. Each
     vertex within ``rings`` edges of the seam is moved ``blend`` of the way to
     the mean of its neighbours, ``iterations`` times. Zero iterations leaves
     MakeHuman's weights untouched.
@@ -295,15 +298,17 @@ def _smooth_thumb_web(
     iterations = int(smoothing["iterations"])
     if iterations == 0:
         return weights
-    thumb = [BONE_NAMES.index(b) for b in smoothing["thumb_bones"]]
-    palm = BONE_NAMES.index(str(smoothing["palm_bone"]))
+    first = [BONE_NAMES.index(b) for b in sides[0]]
+    second = [BONE_NAMES.index(b) for b in sides[1]]
     floor, blend = float(smoothing["min_weight"]), float(smoothing["blend"])
     neighbours: list[set[int]] = [set() for _ in weights]
     for a, b, c in tris.tolist():
         neighbours[a].update((b, c))
         neighbours[b].update((a, c))
         neighbours[c].update((a, b))
-    seam = (weights[:, thumb].sum(axis=1) > floor) & (weights[:, palm] > floor)
+    seam = (weights[:, first].sum(axis=1) > floor) & (
+        weights[:, second].sum(axis=1) > floor
+    )
     region = set(np.flatnonzero(seam).tolist())
     for _ in range(int(smoothing["rings"])):
         region |= {u for v in region for u in neighbours[v]}
@@ -313,6 +318,20 @@ def _smooth_thumb_web(
         mean = np.array([out[sorted(neighbours[v])].mean(axis=0) for v in ids])
         out[ids] = (1.0 - blend) * out[ids] + blend * mean
     return out
+
+
+def _smooth_weights(
+    weights: np.ndarray, tris: np.ndarray, settings: dict[str, Any]
+) -> np.ndarray:
+    """The declared departures from MakeHuman's weights (see NOTICE)."""
+    web = settings["thumb_web_smoothing"]
+    weights = _smooth_seam(
+        weights, tris, (list(web["thumb_bones"]), [str(web["palm_bone"])]), web
+    )
+    crease = settings["finger_crease_smoothing"]
+    for first, second in crease["seams"]:
+        weights = _smooth_seam(weights, tris, ([first], [second]), crease)
+    return weights
 
 
 def build(makehuman_root: Path) -> dict[str, np.ndarray]:
@@ -348,7 +367,7 @@ def build(makehuman_root: Path) -> dict[str, np.ndarray]:
     weights[len(used) :, 0] = 1.0  # the cap rides on the forearm
     empty = weights.sum(axis=1) <= 0.0
     weights[empty, 0] = 1.0
-    weights = _smooth_thumb_web(weights, tris, settings["thumb_web_smoothing"])
+    weights = _smooth_weights(weights, tris, settings)
     top = int(settings["max_influences"])
     order = np.argsort(-weights, axis=1)[:, :top]
     top_w = np.take_along_axis(weights, order, axis=1)
@@ -404,10 +423,12 @@ def write_provenance(arrays: dict[str, np.ndarray]) -> None:
         "bone_count": int(len(arrays["bone_names"])),
         "modifications": "Skin weights are MakeHuman's except across the web "
         "between thumb and index, where they are smoothed (build_settings.json "
-        "thumb_web_smoothing; zero iterations restores the originals). The cut "
+        "thumb_web_smoothing), and across the first finger creases (build_settings."
+        "json finger_crease_smoothing); zero iterations restores the originals. The cut "
         "end of the forearm stub is closed with a dome that is not MakeHuman "
         "geometry (build_settings.json forearm_cap; zero rings gives a flat fan).",
         "thumb_web_smoothing": settings["thumb_web_smoothing"],
+        "finger_crease_smoothing": settings["finger_crease_smoothing"],
         "forearm_cap": settings["forearm_cap"],
         "research_only_alternatives": "MANO and SMPL-X hand models are "
         "research/non-commercial licences and are not bundled; they remain "

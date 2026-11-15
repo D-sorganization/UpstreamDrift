@@ -15,13 +15,16 @@ Source commit: a8bc2d54ff0ac92e78ff71431b1023eda42bf482
 
 Changes made: unit conversion to metres, a change of frame (wrist origin; x
 radial, y distal, z palmar), quads split into triangles, the forearm opening
-closed with a fan, at most four bone influences kept per vertex, and bones
+closed (see below), at most four bone influences kept per vertex, and bones
 renamed (`finger2-1.R` -> `index_prox`, and so on; the table is `BONE_MAP` in
 `build_hand_asset.py`). The skin weights across the web between thumb and
 index are smoothed (`thumb_web_smoothing` in `build_settings.json`) because
 the original weights fold that skin over itself when the thumb closes; set
-its iterations to zero to rebuild with MakeHuman's weights untouched. Vertex
-positions, joint positions and all other weights are MakeHuman's.
+its iterations to zero to rebuild with MakeHuman's weights untouched. The
+weights across the first crease of each finger (proximal to middle phalanx)
+are smoothed lightly for the same reason (`finger_crease_smoothing`, also
+switched off by zero iterations). Vertex positions, joint positions and all
+other weights are MakeHuman's.
 
 MANO and SMPL-X are research-only alternatives; their licences are
 non-commercial and those assets are not vendored in this repository.

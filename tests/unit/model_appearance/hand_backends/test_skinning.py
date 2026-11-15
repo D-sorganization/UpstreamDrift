@@ -47,6 +47,8 @@ def test_asset_is_the_makehuman_rig_with_cc0_provenance() -> None:
     # The one change to MakeHuman's weights is declared in both records.
     assert record["thumb_web_smoothing"]["iterations"] >= 0
     assert "thumb_web_smoothing" in notice
+    assert record["finger_crease_smoothing"]["iterations"] >= 0
+    assert "finger_crease_smoothing" in notice
 
 
 def test_asset_has_a_dense_mesh_and_a_full_hand_skeleton() -> None:

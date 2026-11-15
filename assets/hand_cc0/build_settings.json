@@ -25,5 +25,29 @@
     "rings": 3,
     "iterations": 10,
     "blend": 0.5
+  },
+  "finger_crease_smoothing": {
+    "seams": [
+      [
+        "index_prox",
+        "index_mid"
+      ],
+      [
+        "middle_prox",
+        "middle_mid"
+      ],
+      [
+        "ring_prox",
+        "ring_mid"
+      ],
+      [
+        "little_prox",
+        "little_mid"
+      ]
+    ],
+    "min_weight": 0.05,
+    "rings": 1,
+    "iterations": 2,
+    "blend": 0.5
   }
 }
