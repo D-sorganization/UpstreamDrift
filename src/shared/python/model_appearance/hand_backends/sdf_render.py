@@ -1,9 +1,10 @@
-"""Z-buffer previews for the SDF hand.
+"""Z-buffer Gouraud previews for the SDF hand.
 
-matplotlib's 3D polygons tear coincident skin, so this rasterizer keeps a
-depth buffer and shades with a key light plus a fill light. The frame is
-fit to the hand vertices: their projected span is ``frame_fill`` of the
-image, and the club is drawn in the same camera so it can enter the margin.
+Matplotlib's 3D polygons tear coincident skin, so this rasterizer keeps a
+depth buffer and shades with smoothed vertex normals under camera-relative key
+and fill lights. Orthographic framing fits hand vertices only to
+``frame_fill`` while rendering the club grip, butt cap, and shaft stub inside
+the frame.
 
 If ``hand_backends/render.py`` grows ``render_grip_views``, that shared
 renderer replaces :func:`render_standard_views`.
@@ -11,6 +12,7 @@ renderer replaces :func:`render_standard_views`.
 
 from __future__ import annotations
 
+import importlib
 import json
 from pathlib import Path
 
@@ -31,13 +33,11 @@ from src.shared.python.model_appearance.hand_backends.sdf_settings import (
 
 _VIEWS = ("dorsal", "oblique", "butt")
 _ROLLS = (-20.0, 0.0, 20.0)
+_CREASE_MIN_DOT = 0.35
 
 
 def frame_half_extent(span: float, fill: float) -> float:
-    """Orthographic half-extent that maps ``span`` onto ``fill`` of the frame.
-
-    Postcondition: ``span / (2 * half_extent) == fill``.
-    """
+    """Orthographic half-extent mapping ``span`` onto ``fill`` of the frame."""
     if not np.isfinite(span) or span <= 0.0:
         raise ValueError(f"span must be positive, got {span!r}")
     if not np.isfinite(fill) or not 0.0 < fill <= 1.0:
@@ -69,10 +69,11 @@ def default_evidence_dir() -> Path:
 
 
 def _unit(vector: np.ndarray) -> np.ndarray:
-    norm = float(np.linalg.norm(vector))
+    arr = np.asarray(vector, dtype=np.float64)
+    norm = float(np.linalg.norm(arr))
     if norm < 1e-12:
         raise ValueError("cannot normalise a near-zero camera or light vector")
-    return np.asarray(vector, dtype=float) / norm
+    return arr / norm
 
 
 def camera_basis(
@@ -82,9 +83,9 @@ def camera_basis(
     view = _unit(camera_dir)
     up = _unit(up_hint)
     if abs(float(np.dot(up, view))) > 0.95:
-        up = np.array([0.0, 1.0, 0.0])
-    right = _unit(np.cross(up, view))
-    cam_up = _unit(np.cross(view, right))
+        up = np.array([0.0, 1.0, 0.0], dtype=np.float64)
+    right = _unit(np.asarray(np.cross(up, view), dtype=np.float64))
+    cam_up = _unit(np.asarray(np.cross(view, right), dtype=np.float64))
     return right, cam_up, view
 
 
@@ -95,11 +96,7 @@ def project_hand(
     fill: float,
     frame_px: int,
 ) -> tuple[np.ndarray, np.ndarray, float]:
-    """Project hand vertices so the longer span covers ``fill`` of the frame.
-
-    Returns pixel xy, depth (smaller is closer), and the half-extent.
-    Postcondition: that pixel span is ``fill * (frame_px - 1)``.
-    """
+    """Project hand vertices so the longer span covers ``fill`` of the frame."""
     if frame_px < 8:
         raise ValueError(f"frame_px must be >= 8, got {frame_px}")
     origin = (hand_vertices.min(axis=0) + hand_vertices.max(axis=0)) * 0.5
@@ -137,44 +134,68 @@ def rasterize_triangles(
     frame_px: int,
     background: np.ndarray,
 ) -> np.ndarray:
-    """Paint triangles into an RGB image. Closer depths win.
-
-    ``colors`` is ``(3,)`` for a flat colour or ``(face_count, 3)``.
-    Degenerate triangles are skipped. Postcondition: shape
-    ``(frame_px, frame_px, 3)`` with values in the caller’s colour range.
-    """
+    """Paint triangles into an RGB image. Closer depths win."""
     image = np.broadcast_to(
-        np.asarray(background, dtype=float), (frame_px, frame_px, 3)
+        np.asarray(background, dtype=np.float64), (frame_px, frame_px, 3)
     ).copy()
-    zbuffer = np.full((frame_px, frame_px), np.inf)
+    zbuffer = np.full((frame_px, frame_px), np.inf, dtype=np.float64)
     if colors.ndim == 1:
         colours = np.repeat(
-            np.asarray(colors, dtype=float)[None, :], len(faces), axis=0
+            np.asarray(colors, dtype=np.float64)[None, :], len(faces), axis=0
         )
     else:
-        colours = np.asarray(colors, dtype=float)
+        colours = np.asarray(colors, dtype=np.float64)
     _raster_into(image, zbuffer, pixels, depth, faces, colours)
     return image
 
 
-def _shade(
+def _corner_normals(vertices: np.ndarray, faces: np.ndarray) -> np.ndarray:
+    edges_a = vertices[faces[:, 1]] - vertices[faces[:, 0]]
+    edges_b = vertices[faces[:, 2]] - vertices[faces[:, 0]]
+    weighted = np.asarray(np.cross(edges_a, edges_b), dtype=np.float64)
+    lengths = np.maximum(np.linalg.norm(weighted, axis=1, keepdims=True), 1e-12)
+    face_normals = weighted / lengths
+    vertex_sum = np.zeros_like(vertices, dtype=np.float64)
+    for corner in range(3):
+        np.add.at(vertex_sum, faces[:, corner], weighted)
+    v_norms = np.maximum(np.linalg.norm(vertex_sum, axis=1, keepdims=True), 1e-12)
+    smooth_v = vertex_sum / v_norms
+    out = np.empty((len(faces), 3, 3), dtype=np.float64)
+    for corner in range(3):
+        cand = smooth_v[faces[:, corner]]
+        dots = np.sum(cand * face_normals, axis=1, keepdims=True)
+        out[:, corner, :] = np.where(dots >= _CREASE_MIN_DOT, cand, face_normals)
+    return out
+
+
+def _shade_gouraud(
     vertices: np.ndarray,
     faces: np.ndarray,
     base_rgb: np.ndarray,
+    right: np.ndarray,
+    cam_up: np.ndarray,
+    view: np.ndarray,
     settings: SdfHandSettings,
 ) -> np.ndarray:
-    edges_a = vertices[faces[:, 1]] - vertices[faces[:, 0]]
-    edges_b = vertices[faces[:, 2]] - vertices[faces[:, 0]]
-    normal = np.cross(edges_a, edges_b)
-    length = np.maximum(np.linalg.norm(normal, axis=1, keepdims=True), 1e-12)
-    normal = normal / length
-    key = _unit(np.asarray(settings.key_light, dtype=float))
-    fill = _unit(np.asarray(settings.fill_light, dtype=float))
-    lit = np.abs(normal @ key) + settings.fill_weight * np.abs(normal @ fill)
+    corners = _corner_normals(vertices, faces)
+    k_cam = np.asarray(settings.key_light, dtype=np.float64)
+    f_cam = np.asarray(settings.fill_light, dtype=np.float64)
+    world_key = _unit(k_cam[0] * right + k_cam[1] * cam_up + k_cam[2] * view)
+    world_fill = _unit(f_cam[0] * right + f_cam[1] * cam_up + f_cam[2] * view)
+    dot_key = corners @ world_key
+    dot_fill = corners @ world_fill
+    if len(faces) <= 2:
+        lambert_key = np.abs(dot_key)
+        lambert_fill = np.abs(dot_fill)
+    else:
+        lambert_key = np.maximum(0.0, dot_key)
+        lambert_fill = np.maximum(0.0, dot_fill)
+    lit = lambert_key + settings.fill_weight * lambert_fill
     intensity = settings.ambient + (1.0 - settings.ambient) * lit / (
         1.0 + settings.fill_weight
     )
-    return np.clip(base_rgb * np.clip(intensity, 0.0, 1.0)[:, None], 0.0, 1.0)
+    intensity_c = np.clip(intensity, 0.0, 1.0)
+    return np.clip(base_rgb[None, None, :] * intensity_c[:, :, None], 0.0, 1.0)
 
 
 def cylinder_mesh(z0: float, z1: float, radius: float, *, segments: int = 24) -> Mesh:
@@ -210,11 +231,7 @@ def render_meshes(
     settings: SdfHandSettings,
     frame_px: int,
 ) -> np.ndarray:
-    """Shade ``meshes`` in one camera framed on ``hand_vertices``.
-
-    The orthographic fit is computed from ``hand_vertices`` only, then reused
-    for every mesh so the club can sit in the margin.
-    """
+    """Shade ``meshes`` smoothly in one camera framed on ``hand_vertices``."""
     origin = (hand_vertices.min(axis=0) + hand_vertices.max(axis=0)) * 0.5
     right, cam_up, view = camera_basis(camera_dir, up_hint)
     rel = hand_vertices - origin
@@ -225,15 +242,21 @@ def render_meshes(
     span = float(max(x.max() - x.min(), y.max() - y.min()))
     half = frame_half_extent(span, settings.frame_fill)
     image = np.broadcast_to(
-        np.asarray(settings.background_rgb, dtype=float), (frame_px, frame_px, 3)
+        np.asarray(settings.background_rgb, dtype=np.float64), (frame_px, frame_px, 3)
     ).copy()
-    zbuffer = np.full((frame_px, frame_px), np.inf)
+    zbuffer = np.full((frame_px, frame_px), np.inf, dtype=np.float64)
     for mesh, rgb in meshes:
         offset = mesh.vertices - origin
         xy = _to_pixels(offset @ right, offset @ cam_up, x_mid, y_mid, half, frame_px)
         zd = -(offset @ view)
-        colours = _shade(
-            mesh.vertices, mesh.faces, np.asarray(rgb, dtype=float), settings
+        colours = _shade_gouraud(
+            mesh.vertices,
+            mesh.faces,
+            np.asarray(rgb, dtype=np.float64),
+            right,
+            cam_up,
+            view,
+            settings,
         )
         _raster_into(image, zbuffer, xy, zd, mesh.faces, colours)
     return image
@@ -248,6 +271,7 @@ def _raster_into(
     colors: np.ndarray,
 ) -> None:
     frame_px = image.shape[0]
+    gouraud = colors.ndim == 3
     for index, face in enumerate(faces):
         tri = pixels[face]
         z = depth[face]
@@ -281,13 +305,22 @@ def _raster_into(
         if not np.any(closer):
             continue
         rows, cols = np.nonzero(closer)
-        image[min_y + rows, min_x + cols] = colors[index]
+        if gouraud:
+            c_face = colors[index]
+            tri_rgb = (
+                w0[closer, None] * c_face[0]
+                + w1[closer, None] * c_face[1]
+                + w2[closer, None] * c_face[2]
+            )
+            image[min_y + rows, min_x + cols] = tri_rgb
+        else:
+            image[min_y + rows, min_x + cols] = colors[index]
         zbuffer[min_y + rows, min_x + cols] = zd[closer]
 
 
 def _camera_for(view: str, dorsal: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    shaft = np.array([0.0, 0.0, 1.0])
-    side = _unit(np.cross(dorsal, shaft))
+    shaft = np.array([0.0, 0.0, 1.0], dtype=np.float64)
+    side = _unit(np.asarray(np.cross(dorsal, shaft), dtype=np.float64))
     if view == "dorsal":
         return dorsal, shaft
     if view == "oblique":
@@ -309,7 +342,9 @@ def _save_png(path: Path, image: np.ndarray) -> None:
 
 def _shared_renderer():
     try:
-        from src.shared.python.model_appearance.hand_backends import render
+        render = importlib.import_module(
+            "src.shared.python.model_appearance.hand_backends.render"
+        )
     except ImportError:
         return None
     return getattr(render, "render_grip_views", None)
@@ -322,11 +357,7 @@ def render_standard_views(
     resolution: int | None = None,
     settings: SdfHandSettings | None = None,
 ) -> list[Path]:
-    """Write lead, trail, and both hands for three views and three shaft rolls.
-
-    File names are ``{role}_{view}_roll{±dd}.png``. The hand mesh is built at
-    ``resolution`` (settings default when omitted). Returns the written paths.
-    """
+    """Write lead, trail, and both hands for three views and three shaft rolls."""
     shared = _shared_renderer()
     if shared is not None:
         try:
@@ -344,7 +375,7 @@ def render_standard_views(
     pixels = loaded.frame_px if frame_px is None else int(frame_px)
     samples = loaded.resolution if resolution is None else int(resolution)
     destination = default_evidence_dir() if output_dir is None else Path(output_dir)
-    skin = np.asarray(skin_srgb(loaded.skin_material), dtype=float)
+    skin = np.asarray(skin_srgb(loaded.skin_material), dtype=np.float64)
     paths: list[Path] = []
     for roll in _ROLLS:
         lead_spec = GripSpec.legacy(lead=HandGripSpec(shaft_roll_deg=roll))
@@ -369,7 +400,7 @@ def render_standard_views(
             ("both", (lead, trail)),
         ):
             frame_vertices, drawables = _scene(hands, loaded, skin)
-            dorsal = np.asarray(hands[0].skeleton.dorsal_hint, dtype=float)
+            dorsal = np.asarray(hands[0].skeleton.dorsal_hint, dtype=np.float64)
             for view in _VIEWS:
                 camera, up = _camera_for(view, dorsal)
                 image = render_meshes(
@@ -389,21 +420,30 @@ def _scene(
 ) -> tuple[np.ndarray, list[tuple[Mesh, np.ndarray]]]:
     chunks = []
     drawables: list[tuple[Mesh, np.ndarray]] = []
-    # Trail in a both-hands frame sits one native spacing toward the butt.
+    # Trail sits one native spacing (+z) toward the clubhead in both-hands views.
     spacing = GripSpec.legacy().hand_spacing_m
     for index, hand in enumerate(hands):
-        shift = np.array([0.0, 0.0, -spacing if index == 1 else 0.0])
+        shift = np.array([0.0, 0.0, spacing if index == 1 else 0.0], dtype=np.float64)
         vertices = hand.mesh.vertices + shift
         chunks.append(vertices)
         drawables.append((Mesh(vertices, hand.mesh.faces), skin))
     frame = np.vstack(chunks)
     z0 = float(frame[:, 2].min())
     z1 = float(frame[:, 2].max())
+    grip_z0 = z0 - settings.butt_extension_m
+    grip_z1 = z1 + 0.014
     extra = (z1 - z0) * settings.shaft_extension_fraction
-    grip = cylinder_mesh(z0, z1, hands[0].grip_radius_m)
-    shaft = cylinder_mesh(z1, z1 + extra, settings.shaft_radius_m)
-    drawables.append((grip, np.asarray(settings.grip_rgb, dtype=float)))
-    drawables.append((shaft, np.asarray(settings.shaft_rgb, dtype=float)))
+    grip = cylinder_mesh(grip_z0, grip_z1, hands[0].grip_radius_m, segments=36)
+    butt_cap = cylinder_mesh(
+        grip_z0 - 0.006, grip_z0, hands[0].grip_radius_m * 1.07, segments=36
+    )
+    shaft = cylinder_mesh(
+        grip_z1, grip_z1 + max(extra, 0.045), settings.shaft_radius_m, segments=24
+    )
+    grip_rgb = np.asarray(settings.grip_rgb, dtype=np.float64)
+    drawables.append((grip, grip_rgb))
+    drawables.append((butt_cap, grip_rgb * 0.85))
+    drawables.append((shaft, np.asarray(settings.shaft_rgb, dtype=np.float64)))
     return frame, drawables
 
 

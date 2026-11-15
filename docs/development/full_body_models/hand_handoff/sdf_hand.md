@@ -44,17 +44,18 @@ contract module when the lanes merge.
 
 Package: `src/shared/python/model_appearance/hand_backends/`.
 
-| File              | Role                                                                                                      |
-| ----------------- | --------------------------------------------------------------------------------------------------------- |
-| `contract.py`     | `HandRole`, `HandJointAngles.from_grip_spec`                                                              |
-| `sdf_settings.py` | `load_sdf_hand_settings`, frozen `SdfHandSettings`                                                        |
-| `sdf_field.py`    | Round cones, spheres, ellipsoids, polynomial smooth-min, `evaluate_hand_sdf`, `analytic_grip_penetration` |
-| `sdf_pose.py`     | `pose_curl_to_contact`, `pose_hand_skeleton`, `phalanx_contact_points`                                    |
-| `sdf_mesh.py`     | `marching_cubes_mesh`, `taubin_smooth`, `mesh_is_watertight`                                              |
-| `sdf_hand.py`     | `build_hand_visual`, `HandVisualResult.sdf`                                                               |
-| `registry.py`     | Registers only `sdf_hand`. Dispatcher takes the backend id first                                          |
-| `sdf_render.py`   | Z-buffer, `render_standard_views`, `render_meshes`, `project_hand`                                        |
-| `__init__.py`     | Exports the dispatcher                                                                                    |
+| File                | Role                                                                                                      |
+| ------------------- | --------------------------------------------------------------------------------------------------------- |
+| `contract.py`       | `HandRole`, `HandJointAngles.from_grip_spec`                                                              |
+| `sdf_settings.py`   | `load_sdf_hand_settings`, frozen `SdfHandSettings`                                                        |
+| `sdf_field.py`      | Round cones, spheres, ellipsoids, polynomial smooth-min, `evaluate_hand_sdf`, `analytic_grip_penetration` |
+| `sdf_primitives.py` | Primitive builders, directional ellipsoid clearance, skeleton measurements                                |
+| `sdf_pose.py`       | `pose_curl_to_contact`, `pose_hand_skeleton`, `phalanx_contact_points`                                    |
+| `sdf_mesh.py`       | `marching_cubes_mesh`, `taubin_smooth`, `mesh_is_watertight`                                              |
+| `sdf_hand.py`       | `build_hand_visual`, `HandVisualResult.sdf`                                                               |
+| `registry.py`       | Registers only `sdf_hand`. Dispatcher takes the backend id first                                          |
+| `sdf_render.py`     | Z-buffer, `render_standard_views`, `render_meshes`, `project_hand`                                        |
+| `__init__.py`       | Exports the dispatcher                                                                                    |
 
 Settings file: `scripts/config/sdf_hand.json`. Every sculpt number lives
 there. The loader rejects a middle-finger chain that is not
@@ -80,23 +81,13 @@ Skeleton construction in `pose_curl_to_contact`:
   `full_contact_palm_finger_depth` (0.5, the legacy default).
 - A palmar sphere on each phalanx brings the tangent point out to the
   proximal contact radius so the taper does not leave a gap.
-- Metacarpals run from the knuckle outward. Wrist gathering changes z
-  only (`wrist_convergence`). A chord that would point back through the
-  cylinder has its inward component removed. Length is then restored so
-  the measured middle-finger chain stays exact.
+- Metacarpals run proximally from the knuckle (`head + wrist_dir * length`) and gather monotonically in `z` toward the carpal arch (`wrist_convergence`), keeping fingers uncrossed across the palm.
 - Ellipsoid centres for the palm fill, thenar, hypothenar, thumb web, and
-  wrist are pushed out until their bounding sphere sits on or outside
-  `R + pad_clearance`. That helper is `_clear_of_grip` in `sdf_pose.py`.
-  It is code, not a JSON setting.
+  wrist use directional support (`clear_of_grip_ellipsoid` in `sdf_primitives.py`) with `ellipsoid_support_margin_m`.
+- `HandSize.breadth_m` scales palm width relative to `resolve_hand_breadth_m(length_m)`, `club_cross_angle_deg` pivots outer digit MCP azimuths via `cross_angle_mcp_tilt_gain`, and non-`TEN_FINGER` trail styles lift `little` by `overlap_little_lift_m`.
 - Groups: hard min across the four fingers, smooth-min into the palm with
   `blend_m.mcp`, smooth-min of the thumb with `blend_m.web`, then crease
   subtraction. Nails are unioned last with `blend_m.nail`.
-
-`club_cross_angle_deg` is stored on `HandJointAngles` and does not move
-the mesh. Overlap, interlock, and the trigger finger are not applied.
-Every finger uses one tangent circle. Azimuths are read from the raw
-`HandGripSpec`, not from `GripPose.placement`, so a test can set both
-hands to 0 degrees and get a pure mirror.
 
 Default grip radius in the settings is 0.014 m. `build_hand_visual`
 rejects a radius outside `GRIP_RADIUS_RANGE_M` (0.008–0.03 m) before it

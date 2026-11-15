@@ -92,6 +92,12 @@ class SdfHandSettings:
     web_radii_m: tuple[float, float, float]
     wrist_radii_m: tuple[float, float, float]
     palm_fill_radii_m: tuple[float, float, float]
+    ellipsoid_support_margin_m: float
+    legacy_club_cross_angle_deg: float
+    cross_angle_mcp_tilt_gain: float
+    overlap_little_lift_m: float
+    palm_head_weight: float
+    butt_extension_m: float
     finger_spread_deg: Mapping[str, float]
     transverse_arch_coeff: Mapping[str, float]
     fingers: Mapping[str, FingerProfile]
@@ -342,6 +348,20 @@ def load_sdf_hand_settings(path: Path | None = None) -> SdfHandSettings:
         web_radii_m=_vec3("web_radii_m", raw.get("web_radii_m")),
         wrist_radii_m=_vec3("wrist_radii_m", raw.get("wrist_radii_m")),
         palm_fill_radii_m=_vec3("palm_fill_radii_m", raw.get("palm_fill_radii_m")),
+        ellipsoid_support_margin_m=_positive(
+            "ellipsoid_support_margin_m", raw.get("ellipsoid_support_margin_m")
+        ),
+        legacy_club_cross_angle_deg=_finite(
+            "legacy_club_cross_angle_deg", raw.get("legacy_club_cross_angle_deg")
+        ),
+        cross_angle_mcp_tilt_gain=_finite(
+            "cross_angle_mcp_tilt_gain", raw.get("cross_angle_mcp_tilt_gain")
+        ),
+        overlap_little_lift_m=_finite(
+            "overlap_little_lift_m", raw.get("overlap_little_lift_m")
+        ),
+        palm_head_weight=_finite("palm_head_weight", raw.get("palm_head_weight")),
+        butt_extension_m=_positive("butt_extension_m", raw.get("butt_extension_m")),
         finger_spread_deg=_finger_map(
             "finger_spread_deg", raw.get("finger_spread_deg")
         ),
