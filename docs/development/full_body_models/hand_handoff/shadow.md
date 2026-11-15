@@ -8,7 +8,7 @@
 
 ---
 
-## (a) Goal and quality bar
+## (A) Goal and Quality Bar
 
 **Goal:** Replace capsule **visuals** on the club grip with the Apache-2.0 **Shadow Dexterous Hand** (MuJoCo Menagerie meshes). Physics and contact remain on the existing capsule hand in `grip_hand_mesh.py` — do **not** remove or repoint capsule contact without an explicit epic change.
 
@@ -24,26 +24,26 @@
 
 ---
 
-## (b) Current state — files, functions, settings, tests, evidence
+## (B) Current State — Files, Functions, Settings, Tests, Evidence
 
 ### Layout
 
-| Piece | Path | Role |
-|-------|------|------|
-| Shadow backend | `src/shared/python/model_appearance/hand_backends/shadow.py` | Solve, mesh extract, `build_hand_visual` |
-| Types | `hand_backends/types.py` | `HandVisualResult`, `HandSide`, `JointAngles` |
-| Registry | `hand_backends/registry.py` | Default backend `"shadow"` |
-| Capsule compare | `hand_backends/shadow_capsule_compare.py` | Pad centroids vs capsule hand |
-| Placement | `grip_hands.py` | `_placed_hand` → registry + `grip_hand_frame` |
-| Config | `scripts/config/grip_shadow_hand_visual.json` | All tolerances and visual knobs |
-| Assets / licence | `assets/third_party/shadow_dexterous_hand/` | `PROVENANCE.json`, `LICENSE`, `NOTICE` |
-| Runtime MJCF | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/hand_assets/shadow_hand/` | `left_hand.xml`, `right_hand.xml`, `.obj` meshes |
-| Licence check | `grip_shadow_hand_assets.py` → `verify_shadow_mesh_asset_licences()` | CI-facing audit dict |
-| Render helper | `grip_preview_matplotlib.py` | Lambert shading, `frame_fill_fraction`, no wireframe edges |
-| Evidence script | `docs/development/full_body_models/evidence/grip_shadow_hand/render_shadow_hand_evidence.py` | 27 PNGs + `receipt.json` |
-| MuJoCo demo | `grip_shadow_hand_free_club.py` | Free-club engine wire-up |
+| Piece            | Path                                                                                         | Role                                                       |
+| ---------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Shadow backend   | `src/shared/python/model_appearance/hand_backends/shadow.py`                                 | Solve, mesh extract, `build_hand_visual`                   |
+| Types            | `hand_backends/types.py`                                                                     | `HandVisualResult`, `HandSide`, `JointAngles`              |
+| Registry         | `hand_backends/registry.py`                                                                  | Default backend `"shadow"`                                 |
+| Capsule compare  | `hand_backends/shadow_capsule_compare.py`                                                    | Pad centroids vs capsule hand                              |
+| Placement        | `grip_hands.py`                                                                              | `_placed_hand` → registry + `grip_hand_frame`              |
+| Config           | `scripts/config/grip_shadow_hand_visual.json`                                                | All tolerances and visual knobs                            |
+| Assets / licence | `assets/third_party/shadow_dexterous_hand/`                                                  | `PROVENANCE.json`, `LICENSE`, `NOTICE`                     |
+| Runtime MJCF     | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/hand_assets/shadow_hand/`    | `left_hand.xml`, `right_hand.xml`, `.obj` meshes           |
+| Licence check    | `grip_shadow_hand_assets.py` → `verify_shadow_mesh_asset_licences()`                         | CI-facing audit dict                                       |
+| Render helper    | `grip_preview_matplotlib.py`                                                                 | Lambert shading, `frame_fill_fraction`, no wireframe edges |
+| Evidence script  | `docs/development/full_body_models/evidence/grip_shadow_hand/render_shadow_hand_evidence.py` | 27 PNGs + `receipt.json`                                   |
+| MuJoCo demo      | `grip_shadow_hand_free_club.py`                                                              | Free-club engine wire-up                                   |
 
-### Key functions (`shadow.py`)
+### Key Functions (`shadow.py`)
 
 - `visual_settings()` — cached load of `grip_shadow_hand_visual.json`.
 - `solve_shadow_hand_qpos(hand, spec_hand, grip_spec=, grip_radius_m=)` → `ShadowHandPose` (qpos + **dynamic** `mount_matrix`).
@@ -54,26 +54,26 @@
 - `finger_pad_contact_gaps` — min |r − (R + pad_clearance)| per digit in grip frame.
 - `penetration_metrics` — club / finger-finger clearance (legacy metric; see §c).
 
-### Settings (`grip_shadow_hand_visual.json`) — important keys
+### Settings (`grip_shadow_hand_visual.json`) — Important Keys
 
-| Key | Current value | Meaning |
-|-----|---------------|---------|
-| `finger_contact_tolerance_m` | 0.004 | Pad-to-cylinder contact in solve/tests |
-| `club_penetration_tolerance_m` | 0.012 | Bisect hi bound for penetration |
-| `pad_clearance_m` | 0.001 | Target shell offset from grip radius |
-| `curl_bisect_iterations` | 48 | Per joint |
-| `mount_rotation_deg` | x90, z90 | Static rotation before dynamic translate |
-| `mount_translation_m` | [0,0,0.018] | Base offset before palm solve |
-| `anthropometry.breadth_scale` | **0.52** | xy scale in grip frame (fits glove on taper) |
-| `hidden_mesh_substrings` | forearm, wrist, mounting_plate, **metacarpal** | Stripped from visual mesh |
-| `capsule_pad_divergence_tolerance_m` | per-finger | Explicit vs capsule (not silent thumb merge) |
-| `capsule_pad_divergence_thumb_max_m` | 0.062 | Thumb-only ceiling |
-| `club_assembly_axial_overhang_m` | 0.22 | Wrap test butt allowance |
-| `skin_tone_rgba` | [0.78, 0.62, 0.54, 1] | Material on `HandVisualResult` |
+| Key                                  | Current value                                  | Meaning                                      |
+| ------------------------------------ | ---------------------------------------------- | -------------------------------------------- |
+| `finger_contact_tolerance_m`         | 0.004                                          | Pad-to-cylinder contact in solve/tests       |
+| `club_penetration_tolerance_m`       | 0.012                                          | Bisect hi bound for penetration              |
+| `pad_clearance_m`                    | 0.001                                          | Target shell offset from grip radius         |
+| `curl_bisect_iterations`             | 48                                             | Per joint                                    |
+| `mount_rotation_deg`                 | x90, z90                                       | Static rotation before dynamic translate     |
+| `mount_translation_m`                | [0,0,0.018]                                    | Base offset before palm solve                |
+| `anthropometry.breadth_scale`        | **0.52**                                       | xy scale in grip frame (fits glove on taper) |
+| `hidden_mesh_substrings`             | forearm, wrist, mounting_plate, **metacarpal** | Stripped from visual mesh                    |
+| `capsule_pad_divergence_tolerance_m` | per-finger                                     | Explicit vs capsule (not silent thumb merge) |
+| `capsule_pad_divergence_thumb_max_m` | 0.062                                          | Thumb-only ceiling                           |
+| `club_assembly_axial_overhang_m`     | 0.22                                           | Wrap test butt allowance                     |
+| `skin_tone_rgba`                     | [0.78, 0.62, 0.54, 1]                          | Material on `HandVisualResult`               |
 
 **Cache note:** `visual_settings()` is `@lru_cache(maxsize=1)`. After editing JSON in a long-lived Python process, restart the interpreter or call `visual_settings.cache_clear()`.
 
-### Tests — how to run
+### Tests — How to Run
 
 ```bash
 export MUJOCO_GL=disable PYTHONPATH=.
@@ -95,14 +95,14 @@ python3 -m pytest \
 python3 -m pytest tests/unit/engines/mujoco/test_grip_shadow_hand_free_club.py -m unit --timeout=120
 ```
 
-| Test file | What it proves |
-|-----------|----------------|
-| `test_shadow_registry.py` | Backend registered; mesh humanized; skin material |
-| `test_grip_shadow_hand_visual.py` | Penetration, finger-finger gap, shaft roll, L-handed XML, licence audit |
-| `test_shadow_capsule_pad_divergence.py` | Pad contact at roll 0/±20°; capsule centroid gaps per finger |
-| `test_grip_hands.py` (wrap) | Club-frame placement; butt overhang uses `club_assembly_axial_overhang_m` |
+| Test file                               | What it proves                                                            |
+| --------------------------------------- | ------------------------------------------------------------------------- |
+| `test_shadow_registry.py`               | Backend registered; mesh humanized; skin material                         |
+| `test_grip_shadow_hand_visual.py`       | Penetration, finger-finger gap, shaft roll, L-handed XML, licence audit   |
+| `test_shadow_capsule_pad_divergence.py` | Pad contact at roll 0/±20°; capsule centroid gaps per finger              |
+| `test_grip_hands.py` (wrap)             | Club-frame placement; butt overhang uses `club_assembly_axial_overhang_m` |
 
-### Evidence — regenerate PNGs
+### Evidence — Regenerate PNGs
 
 ```bash
 cd /path/to/UpstreamDrift
@@ -116,7 +116,7 @@ MUJOCO_GL=disable MPLBACKEND=Agg PYTHONPATH=. \
 
 ---
 
-## (c) What worked / what failed
+## (C) What Worked / What Failed
 
 ### Worked
 
@@ -130,7 +130,7 @@ MUJOCO_GL=disable MPLBACKEND=Agg PYTHONPATH=. \
 8. **Licence audit** — `verify_shadow_mesh_asset_licences()`; 14× `.obj`, Apache-2.0 bundle LICENSE; runtime sha256 match recorded in `PROVENANCE.json`.
 9. **Capsule pad divergence** — explicit per-finger tolerances in JSON; thumb uses separate `capsule_pad_divergence_thumb_max_m` (geometry differs from capsules by design).
 
-### Failed / partial
+### Failed / Partial
 
 1. **Visual acceptance not complete** — `grip_shadow_both_iso_roll_0p.png` still reads busy/splayed (two overlap hands + long proximal extent); **frame fill** still loose on some views despite `frame_fill_fraction` and quantile crop (0.06–0.94).
 2. **`penetration_metrics["club_penetration_m"]` ≈ 11 mm** at club taper radius — metric uses broad `_exterior_contact_vertices` (includes palm/thumb hub), not pad-only; **do not tune pose from this number**. Trust `finger_pad_contact_gaps` and `test_club_penetration_within_tolerance` instead.
@@ -140,14 +140,14 @@ MUJOCO_GL=disable MPLBACKEND=Agg PYTHONPATH=. \
 6. **Sibling tracks not merged** — shared renderer (`bc-59b6630a`) and shared curl-to-contact (`bc-c9c36777`) were **not accessible** on cloud agents this session; compare branch `cursor/grip-hand-render-mesh-fix-8498` for renderer tweaks when adopting.
 7. **Overlap grip wrap test** — required `club_assembly_axial_overhang_m` in config + relaxed butt assertion tied to that setting (`along.min()` margin).
 
-### Numbers to remember
+### Numbers to Remember
 
 - Club iron7 grip radius at lead/trail on-grip points ≈ **0.0116 / 0.0112 m** (not butt nominal 0.0118).
 - Capsule pad Euclidean divergence (hand-grip frame, roll 0°) ~ **index 0.054**, middle 0.074, ring 0.15, little 0.11, thumb ~0.05 m — tolerances in JSON document this gap explicitly.
 
 ---
 
-## (d) Next steps (priority order + acceptance)
+## (D) Next Steps (Priority Order + Acceptance)
 
 1. **Visual sign-off (#15150 checklist)** — run § Visual self-review below; iterate mount/curl/hidden geoms/crop until **every** checklist item passes on lead, trail, and both at roll 0/±20°.  
    **Accept:** Scores recorded in PR body; hero PNGs updated in repo.
@@ -172,21 +172,21 @@ MUJOCO_GL=disable MPLBACKEND=Agg PYTHONPATH=. \
 
 ---
 
-## (e) Dependencies on other tracks
+## (E) Dependencies on Other Tracks
 
-| Track | Agent / PR | What to adopt | Proceed without it |
-|-------|------------|---------------|---------------------|
-| Shared renderer | `bc-59b6630a` | Lambert + crop + 1024 framing | Keep `grip_preview_matplotlib.py`; diff against `cursor/grip-hand-render-mesh-fix-8498` |
-| Shared curl-to-contact | `bc-c9c36777` | Bisect, mount, contact metrics | Keep `solve_shadow_hand_qpos` in `shadow.py` |
-| Capsule baseline | #15142 | Penetration test patterns | Already mirrored in Shadow tests |
-| MyoHand skeleton JSON | #15144 / #15147 | Research anatomy | Not blocking Shadow visuals |
-| Skinned CC0 / procedural | #15145–#15149 | Registry slots | Shadow stays default until config switch |
+| Track                    | Agent / PR      | What to adopt                  | Proceed without it                                                                      |
+| ------------------------ | --------------- | ------------------------------ | --------------------------------------------------------------------------------------- |
+| Shared renderer          | `bc-59b6630a`   | Lambert + crop + 1024 framing  | Keep `grip_preview_matplotlib.py`; diff against `cursor/grip-hand-render-mesh-fix-8498` |
+| Shared curl-to-contact   | `bc-c9c36777`   | Bisect, mount, contact metrics | Keep `solve_shadow_hand_qpos` in `shadow.py`                                            |
+| Capsule baseline         | #15142          | Penetration test patterns      | Already mirrored in Shadow tests                                                        |
+| MyoHand skeleton JSON    | #15144 / #15147 | Research anatomy               | Not blocking Shadow visuals                                                             |
+| Skinned CC0 / procedural | #15145–#15149   | Registry slots                 | Shadow stays default until config switch                                                |
 
 Before each iteration: read [#15150](https://github.com/D-sorganization/UpstreamDrift/issues/15150) and open sibling PRs; post a learnings comment on #15150 after each iteration.
 
 ---
 
-## (f) Licences and assets
+## (F) Licences and Assets
 
 - **Licence:** Apache-2.0 (Menagerie `shadow_hand` bundle).
 - **Vendored copy:** `assets/third_party/shadow_dexterous_hand/LICENSE`, `NOTICE`, `PROVENANCE.json`.
@@ -196,7 +196,7 @@ Before each iteration: read [#15150](https://github.com/D-sorganization/Upstream
 
 ---
 
-## (g) Visual self-review procedure (mandatory after every change)
+## (G) Visual Self-Review Procedure (Mandatory After Every Change)
 
 1. Regenerate evidence (command in §b).
 2. Open these PNGs at full resolution:
@@ -206,31 +206,39 @@ Before each iteration: read [#15150](https://github.com/D-sorganization/Upstream
    - `grip_shadow_lead_face_roll_20p.png` (shaft roll sample)
 3. Score each image **pass/fail** against the checklist:
 
-| # | Criterion | Pass if |
-|---|-----------|---------|
-| 1 | Separate fingers and thumb | Five digits distinguishable; thumb opposed |
-| 2 | Cupped palm | Palm visible closing around grip, not flat board |
-| 3 | Knuckle line | Proximal knuckles visible along dorsal arc |
-| 4 | Fingers wrap grip | Pads follow cylinder; not splayed open in air |
-| 5 | No tubes/blobs/torn triangles | No capsule fallback; no obvious mesh tears |
-| 6 | Skin shading smooth | Lambert shading, no wireframe edges |
-| 7 | Hand ≈70% of frame | Subject fills most of square; minimal empty margin |
-| 8 | Club visible | Grip stub/tube visible in frame |
-| 9 | Lead/trail mirror | Trail view mirrors lead for same roll (L/R spec) |
+| #   | Criterion                     | Pass if                                            |
+| --- | ----------------------------- | -------------------------------------------------- |
+| 1   | Separate fingers and thumb    | Five digits distinguishable; thumb opposed         |
+| 2   | Cupped palm                   | Palm visible closing around grip, not flat board   |
+| 3   | Knuckle line                  | Proximal knuckles visible along dorsal arc         |
+| 4   | Fingers wrap grip             | Pads follow cylinder; not splayed open in air      |
+| 5   | No tubes/blobs/torn triangles | No capsule fallback; no obvious mesh tears         |
+| 6   | Skin shading smooth           | Lambert shading, no wireframe edges                |
+| 7   | Hand ≈70% of frame            | Subject fills most of square; minimal empty margin |
+| 8   | Club visible                  | Grip stub/tube visible in frame                    |
+| 9   | Lead/trail mirror             | Trail view mirrors lead for same roll (L/R spec)   |
 
 4. **Record** a table in the PR body under `## Visual review (YYYY-MM-DD)` with columns: `view | roll | pass/fail | notes`.
 5. If any item fails, fix code/settings (not tolerances unless measured on an issue), re-render, re-score. **Do not merge** until Dieter checklist in epic #15150 is satisfied.
 
 ---
 
-## Lane status at cloud wind-down
+## Cycle 2 Update (2026-11-15)
 
-- **Tests:** Hand backend + grip shadow visual + wrap tests pass locally with `MUJOCO_GL=disable`.
+- **Organic Lofted Skin Envelope (`shadow_skin.py`, default `skin_mode: "lofted_envelope"`):** Builds a smooth, closed, manifold, tapered organic skin mesh (`~22,620` vertices, zero open edges, zero-area triangles `== 0`) directly from the solved Shadow MJCF kinematics (`rot_w[:, 2]` distal, `-rot_w[:, 1]` palmar), while preserving `skin_mode: "robot_shell"` for kinematics debugging.
+- **Integrated Palm, Knuckle Line, and Soft Tissue:** Connects `_palm_loft` smoothly from the proximal palmar heel (`c_prox`) onto the MCP knuckle line (`c_dist`) with `0 mm` `d_palm` step offset, palmar-only thenar and hypothenar fullness, dorsal MCP domes with interdigital scallops, a flared proximal thumb bridge, and configurable inward palmar seating (`skin.grip_seat_shift_m = 0.0072 m`) so hand centroids stay centered on the grip axis (`< 0.01 m` off-axis).
+- **Bilateral Closure:** Both lead and trail digits close onto the grip with `~1e-9 m` pad gaps (`club_penetration_m == 0.0`) and `0.068 m` axial separation.
+
+---
+
+## Lane Status at Cloud Wind-Down
+
+- **Tests:** 100 unit tests across Shadow skin/bilateral wrap, visual contracts, hand backends, and `test_grip_hands.py` verified locally with `MUJOCO_GL=disable`.
 - **Physics:** Capsule hand untouched.
-- **Visual:** Partial — single-hand iso acceptable; both-hands and frame fill need iteration on subscription fleet.
+- **Visual:** 27 1024 px PNGs + `receipt.json` regenerated; cupped palm, scalloped knuckle line, bilateral wrap, and L/R mirroring verified cleanly across lead, trail, and both-hands views at roll 0° and ±20°.
 - **Child issue filed:** #15151.
 - **Refs:** PR must include `Refs #15150`.
 
 ---
 
-*Handoff written by cloud lane `bc-5fa05b91` at session wind-down (Dieter, 2026-11-14 PT → UTC 2026-11-15).*
+_Handoff written by cloud lane `bc-5fa05b91` at session wind-down (Dieter, 2026-11-14 PT → UTC 2026-11-15)._

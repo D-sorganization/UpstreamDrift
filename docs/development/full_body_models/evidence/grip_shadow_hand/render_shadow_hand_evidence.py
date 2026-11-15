@@ -7,6 +7,7 @@ import logging
 import sys
 from dataclasses import replace
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -263,6 +264,53 @@ def render_scene(
     return pil.resize((out_px, out_px), Image.Resampling.BILINEAR)
 
 
+def _write_evidence_receipt(
+    cfg: Any,
+    base: GripSpec,
+    records: list[dict[str, object]],
+) -> None:
+    s_lead = solve_shadow_hand_qpos(
+        Hand.LEAD, base.lead, grip_spec=base, grip_radius_m=cfg.grip_radius_nominal_m
+    )
+    s_trail = solve_shadow_hand_qpos(
+        Hand.TRAIL, base.trail, grip_spec=base, grip_radius_m=cfg.grip_radius_nominal_m
+    )
+    receipt = {
+        "frame_px": cfg.render_frame_px,
+        "frame_fill": cfg.render_frame_fill,
+        "anthropometry": {
+            "lead": measure_shadow_anthropometry(base, "lead"),
+            "trail": measure_shadow_anthropometry(base, "trail"),
+        },
+        "lead_pad_gaps_m": finger_pad_contact_gaps(
+            Hand.LEAD, s_lead, grip_radius_m=cfg.grip_radius_nominal_m
+        ),
+        "trail_pad_gaps_m": finger_pad_contact_gaps(
+            Hand.TRAIL, s_trail, grip_radius_m=cfg.grip_radius_nominal_m
+        ),
+        "lead_penetration": penetration_metrics(
+            Hand.LEAD,
+            s_lead.qpos,
+            mount_matrix=s_lead.mount_matrix,
+            grip_radius_m=cfg.grip_radius_nominal_m,
+        ),
+        "trail_penetration": penetration_metrics(
+            Hand.TRAIL,
+            s_trail.qpos,
+            mount_matrix=s_trail.mount_matrix,
+            grip_radius_m=cfg.grip_radius_nominal_m,
+        ),
+        "renders": records,
+    }
+    (_OUT_DIR / "receipt.json").write_text(
+        json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
+    )
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    logging.getLogger(__name__).info(
+        "Rendered %d images at %dpx.", len(records), cfg.render_frame_px
+    )
+
+
 def main() -> None:
     cfg = visual_settings()
     base = GripSpec.legacy()
@@ -324,46 +372,7 @@ def main() -> None:
                     {"file": fname, "mode": mode, "view": view, "roll_deg": roll}
                 )
 
-    s_lead = solve_shadow_hand_qpos(
-        Hand.LEAD, base.lead, grip_spec=base, grip_radius_m=cfg.grip_radius_nominal_m
-    )
-    s_trail = solve_shadow_hand_qpos(
-        Hand.TRAIL, base.trail, grip_spec=base, grip_radius_m=cfg.grip_radius_nominal_m
-    )
-    receipt = {
-        "frame_px": cfg.render_frame_px,
-        "frame_fill": cfg.render_frame_fill,
-        "anthropometry": {
-            "lead": measure_shadow_anthropometry(base, "lead"),
-            "trail": measure_shadow_anthropometry(base, "trail"),
-        },
-        "lead_pad_gaps_m": finger_pad_contact_gaps(
-            Hand.LEAD, s_lead, grip_radius_m=cfg.grip_radius_nominal_m
-        ),
-        "trail_pad_gaps_m": finger_pad_contact_gaps(
-            Hand.TRAIL, s_trail, grip_radius_m=cfg.grip_radius_nominal_m
-        ),
-        "lead_penetration": penetration_metrics(
-            Hand.LEAD,
-            s_lead.qpos,
-            mount_matrix=s_lead.mount_matrix,
-            grip_radius_m=cfg.grip_radius_nominal_m,
-        ),
-        "trail_penetration": penetration_metrics(
-            Hand.TRAIL,
-            s_trail.qpos,
-            mount_matrix=s_trail.mount_matrix,
-            grip_radius_m=cfg.grip_radius_nominal_m,
-        ),
-        "renders": records,
-    }
-    (_OUT_DIR / "receipt.json").write_text(
-        json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
-    )
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-    logging.getLogger(__name__).info(
-        "Rendered %d images at %dpx.", len(records), cfg.render_frame_px
-    )
+    _write_evidence_receipt(cfg, base, records)
 
 
 if __name__ == "__main__":

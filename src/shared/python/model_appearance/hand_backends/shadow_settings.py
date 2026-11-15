@@ -66,6 +66,8 @@ class ShadowHandVisualSettings:
     render_frame_fill: float
     curl_bisect_iterations: int
     curl_joint_step_rad: float
+    mcp_preflex_rad: float
+    skin_mode: str
     grip_radius_nominal_m: float
     mount_matrix: Array
     palm_center_offset_deg: float
@@ -92,16 +94,35 @@ class ShadowHandVisualSettings:
     palm_dorsal_cap_z_m: float
     palm_dorsal_softness_m: float
     palm_tangency_x_m: float
+    palm_heel_curve_m: float
     wrist_taper_min_scale: float
     mcp_bridge_radius_m: float
     palm_transverse_arch_m: float
     palm_arch_half_breadth_m: float
     palm_diagonal_max_deg: float
+    skin_palm_rings: int
+    skin_palm_sides: int
+    skin_digit_samples: int
+    skin_digit_sides: int
+    skin_phalanx_taper: float
+    skin_knuckle_dome_m: float
+    skin_palm_cup_m: float
+    skin_thenar_radii_m: tuple[float, float, float]
+    skin_hypothenar_radii_m: tuple[float, float, float]
+    skin_web_radius_m: float
+    skin_grip_seat_shift_m: float
 
 
 def _pair(raw: Any, default: tuple[float, float]) -> tuple[float, float]:
     vals = raw if raw is not None else default
     return (float(vals[0]), float(vals[1]))
+
+
+def _triple(
+    raw: Any, default: tuple[float, float, float]
+) -> tuple[float, float, float]:
+    vals = raw if raw is not None else default
+    return (float(vals[0]), float(vals[1]), float(vals[2]))
 
 
 def _load_settings() -> ShadowHandVisualSettings:
@@ -115,6 +136,7 @@ def _load_settings() -> ShadowHandVisualSettings:
     mount[:3, 3] = np.asarray(raw.get("mount_translation_m", (0.0, 0.0, 0.0)), float)
     anthro = raw.get("anthropometry", {})
     topo = raw.get("topology", {})
+    skin = raw.get("skin", {})
     return ShadowHandVisualSettings(
         club_penetration_tolerance_m=float(raw["club_penetration_tolerance_m"]),
         club_assembly_axial_overhang_m=float(
@@ -130,9 +152,11 @@ def _load_settings() -> ShadowHandVisualSettings:
         render_frame_fill=float(raw.get("render_frame_fill", 0.70)),
         curl_bisect_iterations=int(raw["curl_bisect_iterations"]),
         curl_joint_step_rad=float(raw["curl_joint_step_rad"]),
+        mcp_preflex_rad=float(raw.get("mcp_preflex_rad", 0.60)),
+        skin_mode=str(raw.get("skin_mode", "lofted_envelope")),
         grip_radius_nominal_m=float(raw["grip_radius_nominal_m"]),
         mount_matrix=mount,
-        palm_center_offset_deg=float(raw.get("palm_center_offset_deg", 55.0)),
+        palm_center_offset_deg=float(raw.get("palm_center_offset_deg", 106.0)),
         palm_diagonal_tilt_gain=float(raw.get("palm_diagonal_tilt_gain", 0.45)),
         wrist_gain=dict(raw["wrist_from_spec"]),
         palm_cup_gain=dict(raw.get("palm_cup_from_spec", {})),
@@ -170,12 +194,28 @@ def _load_settings() -> ShadowHandVisualSettings:
         palm_palmar_softness_m=float(topo.get("palm_palmar_softness_m", 0.0022)),
         palm_dorsal_cap_z_m=float(topo.get("palm_dorsal_cap_z_m", -0.0112)),
         palm_dorsal_softness_m=float(topo.get("palm_dorsal_softness_m", 0.0018)),
-        palm_tangency_x_m=float(topo.get("palm_tangency_x_m", 0.338)),
+        palm_tangency_x_m=float(topo.get("palm_tangency_x_m", 0.334)),
+        palm_heel_curve_m=float(topo.get("palm_heel_curve_m", 0.014)),
         wrist_taper_min_scale=float(topo.get("wrist_taper_min_scale", 0.80)),
         mcp_bridge_radius_m=float(topo.get("mcp_bridge_radius_m", 0.0082)),
         palm_transverse_arch_m=float(topo.get("palm_transverse_arch_m", 0.0028)),
         palm_arch_half_breadth_m=float(topo.get("palm_arch_half_breadth_m", 0.038)),
         palm_diagonal_max_deg=float(topo.get("palm_diagonal_max_deg", 7.0)),
+        skin_palm_rings=int(skin.get("palm_rings", 96)),
+        skin_palm_sides=int(skin.get("palm_sides", 88)),
+        skin_digit_samples=int(skin.get("digit_samples", 64)),
+        skin_digit_sides=int(skin.get("digit_sides", 36)),
+        skin_phalanx_taper=float(skin.get("phalanx_taper", 0.85)),
+        skin_knuckle_dome_m=float(skin.get("knuckle_dome_m", 0.0048)),
+        skin_palm_cup_m=float(skin.get("palm_cup_m", 0.0038)),
+        skin_thenar_radii_m=_triple(
+            skin.get("thenar_radii_m"), (0.0145, 0.0105, 0.0230)
+        ),
+        skin_hypothenar_radii_m=_triple(
+            skin.get("hypothenar_radii_m"), (0.0115, 0.0085, 0.0240)
+        ),
+        skin_web_radius_m=float(skin.get("web_radius_m", 0.0085)),
+        skin_grip_seat_shift_m=float(skin.get("grip_seat_shift_m", 0.0072)),
     )
 
 

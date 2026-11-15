@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Iterator
+from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Literal
 
@@ -163,9 +164,16 @@ def apply_wrist_offsets(
     settings: ShadowHandVisualSettings | None = None,
 ) -> None:
     """Apply clamped wrist/palm-cup offsets without destabilizing the mounted palm."""
-    offsets = map_hand_grip_spec_to_wrist(
-        spec_hand, handedness=handedness, settings=settings
+    cfg = visual_settings() if settings is None else settings
+    arch_key = (
+        "lfj5_lead_base_arch_rad" if hand == Hand.LEAD else "lfj5_trail_base_arch_rad"
     )
+    base_arch = float(cfg.palm_cup_gain.get(arch_key, 0.0))
+    offsets = dict(
+        map_hand_grip_spec_to_wrist(spec_hand, handedness=handedness, settings=settings)
+    )
+    if base_arch:
+        offsets["LFJ5"] = offsets.get("LFJ5", 0.0) + base_arch
     prefix = _prefix(hand, handedness)
     for short, delta in offsets.items():
         if short.startswith("WRJ"):
@@ -194,6 +202,9 @@ def _contour_palm_world(verts: Array, cfg: ShadowHandVisualSettings) -> Array:
     wrist_s = 1.0 - (1.0 - cfg.wrist_taper_min_scale) * (u_w * u_w * (3.0 - 2.0 * u_w))
     out[:, 1] = y * wrist_s
     z2 = z2 * (1.0 - 0.22 * (u_w * u_w))
+    # Curve the proximal palm heel palmarward so it wraps the grip instead of sticking straight out.
+    u_heel = np.clip((0.315 - x) / 0.057, 0.0, 1.0)
+    z2 = z2 + cfg.palm_heel_curve_m * (u_heel * u_heel)
     arch_y = np.clip(1.0 - (y / cfg.palm_arch_half_breadth_m) ** 2, 0.0, 1.0)
     arch_x = np.clip((x - 0.258) / 0.025, 0.0, 1.0) * np.clip(
         (0.358 - x) / 0.025, 0.0, 1.0
@@ -380,26 +391,37 @@ def _part_min_radial(
     return float(_radial_xy(pts).min())
 
 
+@dataclass(frozen=True)
+class _SolveCtx:
+    """Bundled MuJoCo state and mount parameters for per-joint contact solving."""
+
+    model: Any
+    data: Any
+    cfg: ShadowHandVisualSettings
+    mount: Array
+    grip_radius_m: float
+
+
 def _solve_joint_contact(
     qpos: Array,
-    model: Any,
-    data: Any,
-    cfg: ShadowHandVisualSettings,
+    ctx: _SolveCtx,
     *,
     jname: str,
     finger: str,
     eval_segments: tuple[str, ...],
     guard_segments: tuple[str, ...],
-    grip_radius_m: float,
-    mount: Array,
+    min_q: float | None = None,
 ) -> None:
     mujoco = _require_mujoco()
+    model, data, cfg = ctx.model, ctx.data, ctx.cfg
+    mount, grip_radius_m = ctx.mount, ctx.grip_radius_m
     try:
         qidx = _joint_qpos_index(model, jname)
         jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, jname)
     except ValueError:
         return
-    lo = max(float(model.jnt_range[jid, 0]), float(qpos[qidx]))
+    base_lo = float(qpos[qidx]) if min_q is None else float(min_q)
+    lo = max(float(model.jnt_range[jid, 0]), base_lo)
     hi_lim = float(model.jnt_range[jid, 1])
     target_r = grip_radius_m + cfg.pad_clearance_m
     init_guard_r = _part_min_radial(
@@ -457,43 +479,39 @@ def _solve_joint_contact(
 
 def _curl_digit_cascade(
     qpos: Array,
-    model: Any,
-    data: Any,
+    ctx: _SolveCtx,
     hand: Hand,
     finger: str,
-    grip_radius_m: float,
-    cfg: ShadowHandVisualSettings,
     *,
     handedness: Handedness,
-    mount: Array,
 ) -> None:
     prefix = _prefix(hand, handedness)
     tag = _FINGER_BODY_TAG[finger].upper()
+    mcp_floor = max(0.46, ctx.cfg.mcp_preflex_rad - 0.04)
     stages = (
-        (f"{prefix}{tag}J3", ("proximal",), ("proximal", "middle", "distal")),
-        (f"{prefix}{tag}J2", ("middle",), ("middle", "distal")),
-        (f"{prefix}{tag}J1", ("distal",), ("distal",)),
+        (
+            f"{prefix}{tag}J3",
+            ("proximal",),
+            ("proximal", "middle", "distal"),
+            mcp_floor,
+        ),
+        (f"{prefix}{tag}J2", ("middle",), ("middle", "distal"), None),
+        (f"{prefix}{tag}J1", ("distal",), ("distal",), None),
     )
-    for jname, eval_segs, guard_segs in stages:
+    for jname, eval_segs, guard_segs, min_q in stages:
         _solve_joint_contact(
             qpos,
-            model,
-            data,
-            cfg,
+            ctx,
             jname=jname,
             finger=finger,
             eval_segments=eval_segs,
             guard_segments=guard_segs,
-            grip_radius_m=grip_radius_m,
-            mount=mount,
+            min_q=min_q,
         )
 
 
 def _score_thumb_state(
-    model: Any,
-    data: Any,
-    cfg: ShadowHandVisualSettings,
-    mount: Array,
+    ctx: _SolveCtx,
     idx_tree: cKDTree,
     *,
     target_az: float,
@@ -502,15 +520,18 @@ def _score_thumb_state(
     z_target: float,
 ) -> float:
     th_all = _transform_to_grip_frame(
-        _select_part_vertices(model, data, cfg, finger="thumb"), mount
+        _select_part_vertices(ctx.model, ctx.data, ctx.cfg, finger="thumb"),
+        ctx.mount,
     )
     min_r = float(_radial_xy(th_all).min())
     pen_pen = 1e5 * max(0.0, safe_r - min_r) ** 2
     idx_gap = float(idx_tree.query(th_all[::4], k=1)[0].min())
     idx_pen = 500.0 * max(0.0, 0.0015 - idx_gap) ** 2
     distal = _transform_to_grip_frame(
-        _select_part_vertices(model, data, cfg, finger="thumb", segments=("distal",)),
-        mount,
+        _select_part_vertices(
+            ctx.model, ctx.data, ctx.cfg, finger="thumb", segments=("distal",)
+        ),
+        ctx.mount,
     )
     d_mean = distal.mean(axis=0)
     az = math.atan2(d_mean[1], d_mean[0])
@@ -532,6 +553,13 @@ def _solve_thumb_pose(
     mount: Array,
 ) -> None:
     mujoco = _require_mujoco()
+    ctx = _SolveCtx(
+        model=model,
+        data=data,
+        cfg=cfg,
+        mount=mount,
+        grip_radius_m=grip_radius_m,
+    )
     handedness = grip_spec.handedness
     prefix = _prefix(hand, handedness)
     spec_hand = grip_spec.trail if hand == Hand.TRAIL else grip_spec.lead
@@ -555,10 +583,8 @@ def _solve_thumb_pose(
     id5 = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, f"{prefix}THJ5")
     id4 = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, f"{prefix}THJ4")
 
-    q5_vals = np.linspace(model.jnt_range[id5, 0], model.jnt_range[id5, 1], 9)
-    q4_vals = np.linspace(
-        max(0.15, float(model.jnt_range[id4, 0])), float(model.jnt_range[id4, 1]), 8
-    )
+    q5_vals = np.linspace(model.jnt_range[id5, 0], model.jnt_range[id5, 1], 11)
+    q4_vals = np.linspace(model.jnt_range[id4, 0], model.jnt_range[id4, 1], 9)
 
     coarse: list[tuple[float, float, float]] = []
     qpos[j2], qpos[j1] = 0.25, 0.0
@@ -568,10 +594,7 @@ def _solve_thumb_pose(
             data.qpos[:] = qpos
             mujoco.mj_forward(model, data)
             score = _score_thumb_state(
-                model,
-                data,
-                cfg,
-                mount,
+                ctx,
                 idx_tree,
                 target_az=target_az,
                 target_r=target_r,
@@ -583,29 +606,25 @@ def _solve_thumb_pose(
 
     best_score = math.inf
     best_qpos = qpos.copy()
-    for _cscore, v5, v4 in coarse[:4]:
+    for _cscore, v5, v4 in coarse[:5]:
         cand_q = qpos.copy()
         cand_q[j5], cand_q[j4], cand_q[j2], cand_q[j1] = v5, v4, 0.0, 0.0
         data.qpos[:] = cand_q
         mujoco.mj_forward(model, data)
-        for jshort, segs in (("THJ2", ("middle", "distal")), ("THJ1", ("distal",))):
+        for jshort, segs in (
+            ("THJ2", ("middle", "distal")),
+            ("THJ1", ("distal",)),
+        ):
             _solve_joint_contact(
                 cand_q,
-                model,
-                data,
-                cfg,
+                ctx,
                 jname=f"{prefix}{jshort}",
                 finger="thumb",
                 eval_segments=segs,
                 guard_segments=("proximal", "middle", "distal"),
-                grip_radius_m=grip_radius_m,
-                mount=mount,
             )
         fscore = _score_thumb_state(
-            model,
-            data,
-            cfg,
-            mount,
+            ctx,
             idx_tree,
             target_az=target_az,
             target_r=target_r,
@@ -644,22 +663,23 @@ def _relax_club_penetration(
     mujoco = _require_mujoco()
     prefix = _prefix(hand, handedness)
     for _ in range(20):
+        stepped = False
         data.qpos[:] = qpos
         mujoco.mj_forward(model, data)
-        pts = _transform_to_grip_frame(
-            _select_part_vertices(
-                model,
-                data,
-                cfg,
-                segments=("palm", "metacarpal", "proximal", "middle", "distal"),
-            ),
-            mount,
-        )
-        deficit = float(radius - float(_radial_xy(pts).min()))
-        if deficit <= cfg.club_penetration_tolerance_m * 0.5:
-            return qpos
-        stepped = False
         for finger in ("index", "middle", "ring", "little", "thumb"):
+            pts = _transform_to_grip_frame(
+                _select_part_vertices(
+                    model,
+                    data,
+                    cfg,
+                    finger=finger,
+                    segments=("proximal", "middle", "distal"),
+                ),
+                mount,
+            )
+            deficit = float(radius - float(_radial_xy(pts).min()))
+            if deficit <= cfg.club_penetration_tolerance_m * 0.5:
+                continue
             tag = _FINGER_BODY_TAG[finger].upper()
             for j in ("J3", "J2", "J1", "J4"):
                 jname = f"{prefix}{tag}{j}"
@@ -674,6 +694,31 @@ def _relax_club_penetration(
         if not stepped:
             return qpos
     return qpos
+
+
+def _forward_and_mount(
+    model: Any,
+    data: Any,
+    qpos: Array,
+    hand: Hand,
+    grip_spec: GripSpec,
+    grip_radius_m: float,
+    cfg: ShadowHandVisualSettings,
+) -> Array:
+    """Apply qpos, advance MuJoCo kinematics, and compute the grip mount matrix."""
+    mujoco = _require_mujoco()
+    data.qpos[:] = qpos
+    mujoco.mj_forward(model, data)
+    spec_hand = grip_spec.trail if hand == Hand.TRAIL else grip_spec.lead
+    return _compute_mount_matrix(
+        model,
+        data,
+        hand=hand,
+        spec_hand=spec_hand,
+        grip_spec=grip_spec,
+        grip_radius_m=grip_radius_m,
+        cfg=cfg,
+    )
 
 
 def solve_shadow_hand_qpos(
@@ -697,26 +742,28 @@ def solve_shadow_hand_qpos(
     )
     data.qpos[:] = qpos
     mujoco.mj_forward(model, data)
-    mount = _compute_mount_matrix(
-        model,
-        data,
-        hand=hand,
-        spec_hand=spec_hand,
-        grip_spec=grip_spec,
-        grip_radius_m=radius,
+    prefix = _prefix(hand, handedness)
+    for finger in ("index", "middle", "ring", "little"):
+        tag = _FINGER_BODY_TAG[finger].upper()
+        try:
+            qpos[_joint_qpos_index(model, f"{prefix}{tag}J3")] = cfg.mcp_preflex_rad
+        except ValueError:
+            continue
+    mount = _forward_and_mount(model, data, qpos, hand, grip_spec, radius, cfg)
+    ctx = _SolveCtx(
+        model=model,
+        data=data,
         cfg=cfg,
+        mount=mount,
+        grip_radius_m=radius,
     )
     for finger in _finger_curl_sequence(hand, grip_spec):
         _curl_digit_cascade(
             qpos,
-            model,
-            data,
+            ctx,
             hand,
             finger,
-            radius,
-            cfg,
             handedness=handedness,
-            mount=mount,
         )
     _solve_thumb_pose(qpos, model, data, hand, grip_spec, radius, cfg, mount=mount)
     qpos = _relax_club_penetration(

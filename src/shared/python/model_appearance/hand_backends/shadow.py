@@ -23,11 +23,15 @@ from src.shared.python.model_appearance.hand_backends.shadow_settings import (
     ShadowHandVisualSettings,
     visual_settings,
 )
+from src.shared.python.model_appearance.hand_backends.shadow_skin import (
+    build_shadow_skin_mesh,
+    measure_shadow_skin_envelope,
+)
 from src.shared.python.model_appearance.hand_backends.shadow_solver import (
     _apply_joint_angles,
     _baseline_qpos,
     _canonical_part_key,
-    _compute_mount_matrix,
+    _forward_and_mount,
     _forward_model,
     _hand_from_side,
     _iter_visible_geoms,
@@ -167,8 +171,9 @@ def _resolve_visual_call(
     grip_spec: GripSpec,
     side: HandSide,
     grip_radius_m: float | None,
+    settings: ShadowHandVisualSettings | None = None,
 ) -> tuple[ShadowHandVisualSettings, Hand, HandGripSpec, float]:
-    cfg = visual_settings()
+    cfg = visual_settings() if settings is None else settings
     hand = _hand_from_side(side)
     spec_hand = grip_spec.trail if hand == Hand.TRAIL else grip_spec.lead
     radius = _validate_grip_radius(
@@ -249,21 +254,20 @@ def build_hand_visual(
     joint_angles: JointAngles,
     *,
     grip_radius_m: float | None = None,
+    settings: ShadowHandVisualSettings | None = None,
 ) -> HandVisualResult:
     """Build humanized Shadow skin mesh in ``grip_hand_frame`` (visual only)."""
-    cfg, hand, spec_hand, radius = _resolve_visual_call(grip_spec, side, grip_radius_m)
+    cfg, hand, spec_hand, radius = _resolve_visual_call(
+        grip_spec, side, grip_radius_m, settings=settings
+    )
+    if cfg.skin_mode not in ("lofted_envelope", "robot_shell"):
+        raise ValueError(f"unknown Shadow skin_mode {cfg.skin_mode!r}")
     handedness = grip_spec.handedness
     if joint_angles is None:
         solved = solve_shadow_hand_qpos(
             hand, spec_hand, grip_spec=grip_spec, grip_radius_m=radius, settings=cfg
         )
-        mesh = extract_shadow_hand_mesh(
-            hand,
-            solved.qpos,
-            mount_matrix=solved.mount_matrix,
-            settings=cfg,
-            handedness=handedness,
-        )
+        qpos, mount = solved.qpos, solved.mount_matrix
     else:
         mujoco = _require_mujoco()
         model = _load_model(hand == Hand.TRAIL, handedness)
@@ -276,17 +280,17 @@ def build_hand_visual(
         qpos = _apply_joint_angles(
             base_q, model, hand, joint_angles, handedness=handedness
         )
-        data.qpos[:] = qpos
-        mujoco.mj_forward(model, data)
-        mount = _compute_mount_matrix(
-            model,
-            data,
-            hand=hand,
-            spec_hand=spec_hand,
+        mount = _forward_and_mount(model, data, qpos, hand, grip_spec, radius, cfg)
+    if cfg.skin_mode == "lofted_envelope":
+        mesh = build_shadow_skin_mesh(
+            hand,
+            qpos,
+            mount_matrix=mount,
             grip_spec=grip_spec,
             grip_radius_m=radius,
-            cfg=cfg,
+            settings=cfg,
         )
+    else:
         mesh = extract_shadow_hand_mesh(
             hand, qpos, mount_matrix=mount, settings=cfg, handedness=handedness
         )
@@ -299,12 +303,15 @@ def build_shadow_grip_hand_mesh(
     grip_radius_m: float,
     pose: GripPose | None = None,
     grip_spec: GripSpec | None = None,
+    settings: ShadowHandVisualSettings | None = None,
 ) -> Mesh:
     """Compatibility wrapper used by placement helpers."""
     _ = pose
     spec = GripSpec.legacy() if grip_spec is None else grip_spec
     side: HandSide = "trail" if hand == Hand.TRAIL else "lead"
-    return build_hand_visual(spec, side, None, grip_radius_m=grip_radius_m).mesh
+    return build_hand_visual(
+        spec, side, None, grip_radius_m=grip_radius_m, settings=settings
+    ).mesh
 
 
 def penetration_metrics(
@@ -363,11 +370,13 @@ __all__ = [
     "apply_wrist_offsets",
     "build_hand_visual",
     "build_shadow_grip_hand_mesh",
+    "build_shadow_skin_mesh",
     "extract_shadow_hand_mesh",
     "extract_shadow_hand_parts",
     "finger_pad_contact_gaps",
     "map_hand_grip_spec_to_wrist",
     "measure_shadow_anthropometry",
+    "measure_shadow_skin_envelope",
     "penetration_metrics",
     "shadow_distal_pad_centroid",
     "solve_shadow_hand_qpos",

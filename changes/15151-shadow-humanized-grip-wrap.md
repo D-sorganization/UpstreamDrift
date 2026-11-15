@@ -1,4 +1,4 @@
 ---
 issue: 15151
-summary: "Humanize Shadow hand scale, palm contour, MCP bridges, contact curl, and 1024px visual evidence"
+summary: "Replace Shadow robot shell visuals with organic cupped skin loft, bilateral contact closure, and 1024px evidence"
 ---

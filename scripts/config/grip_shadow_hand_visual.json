@@ -19,7 +19,9 @@
   "capsule_pad_divergence_thumb_max_m": 0.038,
   "curl_bisect_iterations": 48,
   "curl_joint_step_rad": 0.015,
+  "mcp_preflex_rad": 0.48,
   "grasp_soft_qpos_scale": 1.0,
+  "skin_mode": "lofted_envelope",
   "mount_rotation_deg": {
     "axis1": "x",
     "angle1": 90,
@@ -27,7 +29,7 @@
     "angle2": 90
   },
   "mount_translation_m": [0.0, 0.0, 0.018],
-  "palm_center_offset_deg": 134.0,
+  "palm_center_offset_deg": 124.0,
   "palm_diagonal_tilt_gain": 0.45,
   "grip_radius_nominal_m": 0.012,
   "wrist_from_spec": {
@@ -40,7 +42,9 @@
   "palm_cup_from_spec": {
     "palm_depth_to_lfj5_gain": 0.22,
     "palm_depth_to_thj5_gain": 0.08,
-    "club_cross_to_lfj5_gain": 0.004
+    "club_cross_to_lfj5_gain": 0.004,
+    "lfj5_lead_base_arch_rad": 0.0,
+    "lfj5_trail_base_arch_rad": 0.0
   },
   "skin_tone_rgba": [0.83, 0.66, 0.55, 1.0],
   "hidden_body_substrings": ["forearm", "_wrist"],
@@ -64,11 +68,25 @@
     "palm_palmar_softness_m": 0.0022,
     "palm_dorsal_cap_z_m": -0.0112,
     "palm_dorsal_softness_m": 0.0018,
-    "palm_tangency_x_m": 0.366,
+    "palm_tangency_x_m": 0.355,
+    "palm_heel_curve_m": 0.0,
     "wrist_taper_min_scale": 0.8,
     "mcp_bridge_radius_m": 0.0075,
     "palm_transverse_arch_m": 0.0028,
     "palm_arch_half_breadth_m": 0.038,
     "palm_diagonal_max_deg": 7.0
+  },
+  "skin": {
+    "palm_rings": 28,
+    "palm_sides": 36,
+    "digit_samples": 90,
+    "digit_sides": 48,
+    "phalanx_taper": 0.85,
+    "knuckle_dome_m": 0.0048,
+    "palm_cup_m": 0.0062,
+    "thenar_radii_m": [0.0145, 0.0105, 0.023],
+    "hypothenar_radii_m": [0.0115, 0.0085, 0.024],
+    "web_radius_m": 0.0085,
+    "grip_seat_shift_m": 0.0072
   }
 }
