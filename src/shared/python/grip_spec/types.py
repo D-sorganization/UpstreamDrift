@@ -15,7 +15,10 @@ from src.shared.python.grip_contact.contact_topology import GripStyle
 from src.shared.python.hand_size import DEFAULT_HAND_LENGTH_M, resolve_hand_breadth_m
 from src.shared.python.model_appearance.grip_pose import (
     LEAD_BELOW_BUTT_M,
+    LEAD_V_AZIMUTH_MAX_DEG,
+    LEAD_V_AZIMUTH_MIN_DEG,
     NATIVE_HAND_SPACING_M,
+    TRAIL_V_OFFSET_RANGE_DEG,
 )
 
 from src.shared.python.grip_spec.defaults import (
@@ -79,8 +82,8 @@ class HandGripSpec:
                 ("index_contact_station", 0.0, 1.0),
                 ("palm_finger_depth", 0.0, 1.0),
                 ("thumb_straightness", 0.0, 1.0),
-                ("v_azimuth_deg", -40.0, 90.0),
-                ("thumb_azimuth_deg", -90.0, 90.0),
+                ("v_azimuth_deg", LEAD_V_AZIMUTH_MIN_DEG, LEAD_V_AZIMUTH_MAX_DEG),
+                ("thumb_azimuth_deg", 0.0, 45.0),
             ),
         )
         require(
@@ -130,6 +133,21 @@ class GripSpec:
         )
         require(self.hand_spacing_m > 0.0, "hand_spacing_m must be positive")
         ensure(len(self.curl_order) >= 1, "curl_order must not be empty")
+        self._validate_projectable_to_grip_pose()
+
+    def _validate_projectable_to_grip_pose(self) -> None:
+        """Ensure per-hand fields map to a valid :class:`GripPose` without silent fixes."""
+        trail_v_offset_deg = self.trail.v_azimuth_deg - self.lead.v_azimuth_deg
+        lo, hi = TRAIL_V_OFFSET_RANGE_DEG
+        require(
+            lo <= trail_v_offset_deg <= hi,
+            (
+                "trail V offset "
+                f"{trail_v_offset_deg:.4g} deg (trail v_azimuth_deg minus lead "
+                "v_azimuth_deg) is outside GripPose trail_v_offset_deg range "
+                f"[{lo}, {hi}]"
+            ),
+        )
 
     @classmethod
     def legacy(cls, **overrides: Any) -> GripSpec:

@@ -33,9 +33,7 @@ from src.shared.python.model_appearance.grip_pose import (
 pytestmark = pytest.mark.unit
 
 _SHELLS_13997 = frozenset({"dorsum"})
-_GOLDEN_MESH_DIGEST = (
-    "8e7f3c2a9b1d4e6f0a2c5d8b3e7f1a4c9d0e3b6f8a1c4d7e0b3f6a9c2d5e8f1a0"
-)
+_GOLDEN_MESH_DIGEST = "a197809270636c398441505e402274b6107ec032588d22f3563f173f2523393a"
 
 
 def _mesh_summary_digest(pose: GripPose | None = None) -> str:
@@ -58,12 +56,6 @@ def _mesh_summary_digest(pose: GripPose | None = None) -> str:
                 }
     payload = json.dumps(summary, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _freeze_default_mesh_digest() -> None:
-    global _GOLDEN_MESH_DIGEST
-    _GOLDEN_MESH_DIGEST = _mesh_summary_digest(DEFAULT_GRIP_POSE)
 
 
 def test_legacy_spec_projects_to_default_grip_pose_exactly() -> None:
@@ -105,6 +97,19 @@ def test_spec_rejects_out_of_range_fields() -> None:
         GripSpec.legacy(hand_size=HandSize(length_m=float("nan"), breadth_m=0.08))
     with pytest.raises(ValueError, match="schema_version"):
         GripSpec.from_dict({"schema_version": 99, "handedness": "right"})
+    with pytest.raises(ValueError, match="thumb_azimuth_deg"):
+        HandGripSpec(thumb_azimuth_deg=-5.0)
+    with pytest.raises(ValueError, match="trail V offset"):
+        GripSpec.legacy(
+            lead=HandGripSpec(v_azimuth_deg=90.0),
+            trail=HandGripSpec(v_azimuth_deg=-40.0),
+        )
+
+
+def test_left_handed_neutral_projects_unsigned_lead_thumb_offset() -> None:
+    pose = GripSpec.neutral(handedness="left").to_grip_pose()
+    assert pose.lead_thumb_offset_deg == pytest.approx(22.5)
+    assert pose.handedness == "left"
 
 
 def test_existing_grip_pose_and_grip_hand_mesh_outputs_unchanged() -> None:
@@ -139,7 +144,23 @@ def test_validate_grip_style_fields_rejects_non_style() -> None:
 # --- registration smoke (swappable by name) ---
 
 
-def test_custom_force_provider_registers_and_resolves() -> None:
+@pytest.fixture
+def _restore_force_provider_registry() -> None:
+    from src.shared.python.grip_spec import providers as grip_providers
+
+    saved = dict(grip_providers._FORCE_REGISTRY)
+    try:
+        yield
+    finally:
+        grip_providers._FORCE_REGISTRY.clear()
+        grip_providers._FORCE_REGISTRY.update(saved)
+
+
+def test_custom_force_provider_registers_and_resolves(
+    _restore_force_provider_registry: None,
+) -> None:
+    provider_name = "unit-test-cap-grip-force-provider"
+
     @dataclasses.dataclass(frozen=True)
     class _CapProvider(GripForceProvider):
         cap_n: float
@@ -150,9 +171,14 @@ def test_custom_force_provider_registers_and_resolves() -> None:
         def trail_force_limit(self) -> float | str:
             return "unlimited"
 
-    register_grip_force_provider("cap-test", _CapProvider(cap_n=250.0))
-    spec = replace(GripSpec.legacy(), force_provider_name="cap-test")
-    limits = resolve_grip_force_limits(spec)
-    assert limits["lead"] == pytest.approx(250.0)
-    pose = spec.to_grip_pose()
-    assert pose.lead_grip_force_limit_n == pytest.approx(250.0)
+    register_grip_force_provider(provider_name, _CapProvider(cap_n=250.0))
+    try:
+        spec = replace(GripSpec.legacy(), force_provider_name=provider_name)
+        limits = resolve_grip_force_limits(spec)
+        assert limits["lead"] == pytest.approx(250.0)
+        pose = spec.to_grip_pose()
+        assert pose.lead_grip_force_limit_n == pytest.approx(250.0)
+    finally:
+        from src.shared.python.grip_spec import providers as grip_providers
+
+        grip_providers._FORCE_REGISTRY.pop(provider_name, None)
