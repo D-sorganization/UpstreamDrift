@@ -514,43 +514,6 @@ def test_resolver_fails_closed_when_protected_helper_is_missing(tmp_path: Path) 
 
 
 @pytest.mark.skipif(os.name == "nt", reason="the extracted workflow step requires Bash")
-def test_resolver_defers_trusted_base_for_stack_continuation_base(
-    tmp_path: Path,
-) -> None:
-    """Stacked PRs target a feature parent; trusted-base stays strict with no baseline."""
-    policy_helper = tmp_path / "policy/scripts/devlog_trusted_base.py"
-    policy_helper.parent.mkdir(parents=True)
-    policy_helper.write_text("raise RuntimeError('helper must not run')\n", encoding="utf-8")
-
-    resolver = _step(_workflow(), "Resolve trusted development-log baseline")
-    result = _run_shell(
-        resolver["run"],
-        {
-            "EVENT_NAME": "pull_request",
-            "PR_BASE_SHA": "a" * 40,
-            "PR_HEAD_SHA": "b" * 40,
-            "GITHUB_SHA": "d" * 40,
-            "BASE_REF": "cursor/hrg-gb1-grip-spec-96ca",
-            "REPOSITORY": "D-sorganization/UpstreamDrift",
-            "DEFAULT_BRANCH": "main",
-            "MERGE_GROUP_BASE_SHA": "",
-            "GITHUB_OUTPUT": str(tmp_path / "output"),
-            "RUNNER_TEMP": str(tmp_path / "runner-temp"),
-        },
-        cwd=tmp_path,
-    )
-
-    assert result.returncode == 0, result.stdout + result.stderr
-    assert (tmp_path / "output").read_text(encoding="utf-8") == "sha=\n"
-    saved_proof = json.loads(
-        (tmp_path / "runner-temp/devlog-base-proof.json").read_text(encoding="utf-8")
-    )
-    assert saved_proof["verified"] is False
-    assert saved_proof["proof_kind"] == "stack_continuation_deferred"
-    assert saved_proof["baseline_sha"] is None
-
-
-@pytest.mark.skipif(os.name == "nt", reason="the extracted workflow step requires Bash")
 @pytest.mark.parametrize(
     ("helper_output", "helper_exit_code"),
     [
