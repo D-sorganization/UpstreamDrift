@@ -218,6 +218,8 @@ class ClubInHands(FreeClubPlantMixin):
         interface: GripInterface,
         pads: PadContactModel | None = None,
         topology_model: TopologyContactModel | None = None,
+        *,
+        grip_pose: Any = None,
     ) -> None:
         if pads is None and topology_model is None:
             raise ValueError("either pads or topology_model must be provided")
@@ -302,7 +304,15 @@ class ClubInHands(FreeClubPlantMixin):
         self.scene_graph = scene_graph
         self.club = body
         self.context = plant.GetMyMutableContextFromRoot(self.diagram_context)
-        self._offsets = {s: interface.frame(s).matrix() for s in SIDES}
+        from src.shared.python.grip_spec.shaft_roll import (
+            grip_interface_offsets_with_shaft_roll,
+        )
+        from src.shared.python.model_appearance.grip_pose import DEFAULT_GRIP_POSE
+
+        self._grip_pose = DEFAULT_GRIP_POSE if grip_pose is None else grip_pose
+        self._offsets = grip_interface_offsets_with_shaft_roll(
+            interface, self._grip_pose
+        )
         self._q0 = body.floating_positions_start()
         self._v0 = body.floating_velocities_start_in_v()
         self.last_side_wrenches: dict[str, TopologySideWrench] = {}
@@ -711,11 +721,24 @@ def simulate_grip_contact(
     )
 
 
+def hand_attachment_rotation_for_pose(pose, hand):
+    """Hand-to-club attachment rotation (Drake path, HRG-GB1b #15138)."""
+    from src.shared.python.grip_spec.shaft_roll import hand_to_club_relative_rotation
+    from src.shared.python.model_appearance.grip_pose import GripPose, Hand
+
+    if not isinstance(pose, GripPose):
+        raise TypeError(f"pose must be a GripPose, got {type(pose).__name__}")
+    if not isinstance(hand, Hand):
+        raise TypeError(f"hand must be a Hand, got {hand!r}")
+    return hand_to_club_relative_rotation(pose, hand)
+
+
 __all__ = [
     "HAND_BODY_NAMES",
     "ClubInHands",
     "HandSiteAttachment",
     "IntegratorTolerances",
+    "hand_attachment_rotation_for_pose",
     "hand_body_name",
     "hand_site_attachments",
     "simulate_grip_contact",
