@@ -917,6 +917,7 @@
 {"path": "grip_contact/deterministic_linalg.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/deterministic_math.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/elastic_foundation.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_contact/field_validation.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/force_decomposition.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/friction_band.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/friction_curve_match.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
@@ -951,6 +952,13 @@
 {"path": "grip_contact/topology_contact.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/topology_series.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/trajectory_conditioning.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
+{"path": "grip_spec/__init__.py", "classification": "ud-only", "package": "grip_spec", "spelling_only": false}
+{"path": "grip_spec/defaults.py", "classification": "ud-only", "package": "grip_spec", "spelling_only": false}
+{"path": "grip_spec/projection.py", "classification": "ud-only", "package": "grip_spec", "spelling_only": false}
+{"path": "grip_spec/providers.py", "classification": "ud-only", "package": "grip_spec", "spelling_only": false}
+{"path": "grip_spec/serialization.py", "classification": "ud-only", "package": "grip_spec", "spelling_only": false}
+{"path": "grip_spec/types.py", "classification": "ud-only", "package": "grip_spec", "spelling_only": false}
+{"path": "grip_spec/validation.py", "classification": "ud-only", "package": "grip_spec", "spelling_only": false}
 {"path": "ground_model/__init__.py", "classification": "ud-only", "package": "ground_model", "spelling_only": false}
 {"path": "ground_model/consumer_gateway.py", "classification": "ud-only", "package": "ground_model", "spelling_only": false}
 {"path": "gui_launcher/__init__.py", "classification": "identical", "package": "gui_launcher", "spelling_only": false}
