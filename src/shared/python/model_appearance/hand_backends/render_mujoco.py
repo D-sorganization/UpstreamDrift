@@ -57,9 +57,9 @@ model = mujoco.MjModel.from_xml_string(
 gl = context_type(px, px)
 try:
     gl.make_current()
-    context = mujoco.MjrContext(model, mujoco.mjtFontScale.mjFONTSCALE_150.value)
+    context = mujoco.MjrContext(model, int(mujoco.mjtFontScale.mjFONTSCALE_150))
     try:
-        mujoco.mjr_setBuffer(mujoco.mjtFramebuffer.mjFB_OFFSCREEN.value, context)
+        mujoco.mjr_setBuffer(int(mujoco.mjtFramebuffer.mjFB_OFFSCREEN), context)
         pixels = np.empty((px, px, 3), dtype=np.uint8)
         mujoco.mjr_readPixels(pixels, None, mujoco.MjrRect(0, 0, px, px), context)
     finally:
@@ -244,7 +244,7 @@ def _capture(
         mujoco.MjvOption(),
         None,
         camera,
-        mujoco.mjtCatBit.mjCAT_ALL.value,
+        int(mujoco.mjtCatBit.mjCAT_ALL),
         scene,
     )
     viewport = mujoco.MjrRect(0, 0, size, size)
@@ -252,9 +252,9 @@ def _capture(
     gl = context_type(size, size)
     try:
         gl.make_current()
-        context = mujoco.MjrContext(model, mujoco.mjtFontScale.mjFONTSCALE_150.value)
+        context = mujoco.MjrContext(model, int(mujoco.mjtFontScale.mjFONTSCALE_150))
         try:
-            mujoco.mjr_setBuffer(mujoco.mjtFramebuffer.mjFB_OFFSCREEN.value, context)
+            mujoco.mjr_setBuffer(int(mujoco.mjtFramebuffer.mjFB_OFFSCREEN), context)
             mujoco.mjr_render(viewport, scene, context)
             mujoco.mjr_readPixels(pixels, None, viewport, context)
         finally:
@@ -292,7 +292,8 @@ def render_mujoco(
     scale = settings.supersample
     size = settings.frame_px * scale
     colour = _capture(model, size, backend, segmentation=False)
-    model.vis.quality.offsamples = 0
+    quality = model.vis.quality
+    quality.offsamples = 0
     mask = _capture(model, size, backend, segmentation=True)
     if scale > 1:
         frame = settings.frame_px
