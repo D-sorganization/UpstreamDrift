@@ -1033,9 +1033,10 @@ def _corrected_skin(
         settings.palm_pad,
         lambda v: vertex_normals(v, asset.faces),
     )
-    relaxable = _bone_mask(
+    relaxable_mask = _bone_mask(
         asset, settings.crease_relax_bones, "correctives.crease_relax.bones"
-    )[asset.faces].all(axis=1)
+    )
+    relaxable = np.asarray(relaxable_mask[asset.faces].all(axis=1))
 
     def creased(v: Array) -> NDArray[np.int64]:
         limit = settings.crease_relax_max_added_fold_deg

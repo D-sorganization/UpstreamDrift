@@ -119,7 +119,7 @@ def pinched_edge_count(
     rest, _ = edge_folds(asset.rest_vertices, asset.faces)
     mask = np.zeros(len(asset.rest_vertices), dtype=bool)
     mask[asset.dominant_vertex_ids(bones)] = True
-    inside = mask[asset.faces].all(axis=1)
+    inside = np.asarray(mask[asset.faces].all(axis=1))
     both = inside[pair[:, 0]] & inside[pair[:, 1]]
     return int(((now - rest > max_added_fold_deg) & both).sum())
 
