@@ -9,7 +9,8 @@ This adapter implements :class:`~src.shared.python.grip_contact.binding.ModelGri
 
 - Attaches non-colliding zero-mass visual style proxy geoms from :class:`GripSpec`
   (``overlap``, ``interlock``, ``ten_finger``, ``trigger_finger``) without altering
-  body mass, inertia, or welded forward dynamics.
+  body mass, inertia, or welded forward dynamics. Free-club Shadow Dexterous Hand
+  meshes use :mod:`grip_shadow_hand_free_club` (drake/pinocchio/opensim: TODO).
 - Extracts the equality weld constraint wrench from ``data.efc_force`` via
   :func:`~src.engines.physics_engines.mujoco.python.grip_efc.weld_wrench_on_club`
   and feeds it to :func:`~src.shared.python.grip_contact.binding.evaluate_contacts`

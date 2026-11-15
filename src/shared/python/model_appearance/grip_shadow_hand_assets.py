@@ -1,0 +1,58 @@
+"""Provenance gate for vendored Shadow Dexterous Hand grip visuals (#15122)."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from functools import lru_cache
+from pathlib import Path
+from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+PROVENANCE_PATH = REPO_ROOT / "assets/third_party/shadow_dexterous_hand/PROVENANCE.json"
+CANONICAL_HAND_ROOT = (
+    REPO_ROOT
+    / "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/hand_assets/shadow_hand"
+)
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+@lru_cache(maxsize=1)
+def load_shadow_hand_provenance() -> dict[str, Any]:
+    """Load and verify the third-party provenance record (fail closed)."""
+    if not PROVENANCE_PATH.is_file():
+        raise ValueError(f"Shadow hand provenance missing: {PROVENANCE_PATH}")
+    record = json.loads(PROVENANCE_PATH.read_text(encoding="utf-8"))
+    if record.get("licence") != "Apache-2.0":
+        raise ValueError("Shadow hand licence must be Apache-2.0")
+    canonical = CANONICAL_HAND_ROOT
+    if not canonical.is_dir():
+        raise ValueError(f"Shadow hand runtime assets missing: {canonical}")
+    manifests: dict[str, str] = record.get("files_sha256", {})
+    for name, want in manifests.items():
+        path = canonical / name
+        if not path.is_file():
+            raise ValueError(f"Shadow hand asset file missing: {path}")
+        got = _sha256(path)
+        if got != want:
+            raise ValueError(f"Shadow hand {name} sha256 {got} != provenance {want}")
+    licence_copy = PROVENANCE_PATH.parent / "LICENSE"
+    if not licence_copy.is_file():
+        raise ValueError("Shadow hand LICENSE copy missing under assets/third_party")
+    return record
+
+
+def shadow_hand_mjcf_path(*, trail: bool) -> Path:
+    """Return ``right_hand.xml`` (trail) or ``left_hand.xml`` (lead)."""
+    load_shadow_hand_provenance()
+    name = "right_hand.xml" if trail else "left_hand.xml"
+    path = CANONICAL_HAND_ROOT / name
+    if not path.is_file():
+        raise ValueError(f"Shadow hand MJCF missing: {path}")
+    return path
+
+
+__all__ = ["CANONICAL_HAND_ROOT", "PROVENANCE_PATH", "load_shadow_hand_provenance", "shadow_hand_mjcf_path"]

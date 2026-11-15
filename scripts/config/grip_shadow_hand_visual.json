@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "club_penetration_tolerance_m": 0.012,
+  "finger_finger_penetration_tolerance_m": 0.002,
+  "shaft_roll_check_deg": 20.0,
+  "pad_clearance_m": 0.001,
+  "curl_bisect_iterations": 48,
+  "curl_joint_step_rad": 0.015,
+  "grasp_soft_qpos_scale": 1.0,
+  "mount_rotation_deg": {
+    "axis1": "x",
+    "angle1": 90,
+    "axis2": "z",
+    "angle2": 90
+  },
+  "mount_translation_m": [0.0, 0.0, -0.262],
+  "grip_radius_nominal_m": 0.012,
+  "wrist_from_spec": {
+    "club_cross_to_wrj1_gain": 0.012,
+    "palm_depth_to_wrj2_gain": 0.35,
+    "v_azimuth_to_ffj4_gain": 0.008,
+    "thumb_azimuth_to_thj5_gain": 0.015,
+    "thumb_straight_to_thj4_gain": 0.9
+  },
+  "palm_cup_from_spec": {
+    "palm_depth_to_lfj5_gain": 0.22,
+    "palm_depth_to_thj5_gain": 0.08,
+    "club_cross_to_lfj5_gain": 0.004
+  },
+  "skin_tone_rgba": [0.78, 0.62, 0.54, 1.0],
+  "hidden_body_substrings": ["forearm", "_wrist"],
+  "hidden_mesh_substrings": ["forearm", "wrist"],
+  "anthropometry": {
+    "reference_hand_length_m": 0.19,
+    "reference_hand_breadth_m": 0.087,
+    "length_scale": 1.0,
+    "breadth_scale": 1.0
+  }
+}

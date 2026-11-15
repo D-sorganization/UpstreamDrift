@@ -1,0 +1,21 @@
+{
+  "asset": "shadow_dexterous_hand_e3m5",
+  "licence": "Apache-2.0",
+  "licence_file": "LICENSE",
+  "upstream": {
+    "name": "MuJoCo Menagerie Shadow Hand (E3M5)",
+    "publisher": "Shadow Robot Company / DeepMind Menagerie",
+    "url": "https://github.com/google-deepmind/mujoco_menagerie/tree/main/shadow_hand",
+    "commit_hint": "vendored with upstream MuJoCo humanoid golf hand_assets"
+  },
+  "canonical_runtime_path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/hand_assets/shadow_hand",
+  "files_sha256": {
+    "LICENSE": "d42cae9a0f292b7a713597ba26e1e1e23d50df906c488f0d36fd3538af200bc1",
+    "right_hand.xml": "b48fa63390bb32d1bc00ebe5cc724d411daeaf7b552bc3afb5a4725208c9567e",
+    "left_hand.xml": "726d93acccede69152b7db64646704ebb5981faf198b89b62c48e6613e63b0ae"
+  },
+  "mesh_obj_count": 14,
+  "mesh_obj_bytes": 3500720,
+  "visual_only": true,
+  "note": "Apache-2.0 Shadow Dexterous Hand meshes for grip visuals; physics contact remains capsule proxies."
+}
