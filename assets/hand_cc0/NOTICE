@@ -1,6 +1,24 @@
-MakeHuman CC0 hand extract (hm08 base.obj) for `hand_backends/skinned_human.py`.
-MANO and SMPL-X are research-only alternatives; their licences are non-commercial
-and those assets are not vendored in this repository.
+CC0 skinned human hand for `hand_backends/skinned_human.py` (epic #15150, #15148).
 
-Source mesh: https://github.com/makehumancommunity/makehuman/blob/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/3dobjs/base.obj
+`hand_cc0.npz` is derived, by `build_hand_asset.py`, from three MakeHuman
+files. All three are CC0 1.0 (public-domain dedication); see `LICENSE.CC0.txt`
+and `SOURCE_LICENSE_STATEMENT.txt`.
+
+Source repository: https://github.com/makehumancommunity/makehuman
 Source commit: a8bc2d54ff0ac92e78ff71431b1023eda42bf482
+
+| File | Role | Licence marker |
+| --- | --- | --- |
+| makehuman/data/3dobjs/base.obj | hm08 base mesh; the right hand and a forearm stub are cut out by skin weight | CC0 (MakeHuman asset licence) |
+| makehuman/data/rigs/default.mhskel | "MakeHuman default skeleton", (c) 2020 Data Collection AB, Joel Palmius, Jonas Hauquier; bones, joints and hierarchy of the right hand | `"license": "CC0"` in the file |
+| makehuman/data/rigs/default_weights.mhw | "MakeHuman weights", (c) 2021 Data Collection AB, Joel Palmius, Jonas Hauquier; skin weights of the right-hand bones | `"license": "CC0"` in the file |
+
+Changes made: unit conversion to metres, a change of frame (wrist origin; x
+radial, y distal, z palmar), quads split into triangles, the forearm opening
+closed with a fan, at most four bone influences kept per vertex, and bones
+renamed (`finger2-1.R` -> `index_prox`, and so on; the table is `BONE_MAP` in
+`build_hand_asset.py`). Vertex positions, joint positions and weights are
+otherwise MakeHuman's.
+
+MANO and SMPL-X are research-only alternatives; their licences are
+non-commercial and those assets are not vendored in this repository.

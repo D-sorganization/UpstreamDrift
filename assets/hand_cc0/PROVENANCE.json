@@ -1,9 +1,16 @@
 {
-  "asset_sha256": "fea547a86ebf92fd091e4ad06057d9dddd493fa019529ca98fe3ac1970b47923",
+  "asset_sha256": "be89681f0ec027667fd35cef2804e1fa500d0ac36087bc00b1af0505af04d608",
+  "content_sha256": "516190fd31d3dce5997fb66fc96bd6e1be783607f01f972d99538f0b2f45f4b1",
   "licence": "CC0-1.0",
-  "quantum_metres": 5e-05,
-  "research_only_alternatives": "MANO and SMPL-X hand models are research/non-commercial licences and are not bundled; they remain research-only alternatives.",
+  "source_name": "MakeHuman hm08 base mesh, default skeleton and default weights (right hand extract)",
   "source_commit": "a8bc2d54ff0ac92e78ff71431b1023eda42bf482",
-  "source_name": "MakeHuman base mesh hm08 (right hand extract)",
-  "source_url": "https://github.com/makehumancommunity/makehuman/blob/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/3dobjs/base.obj"
+  "source_urls": [
+    "https://github.com/makehumancommunity/makehuman/blob/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/3dobjs/base.obj",
+    "https://github.com/makehumancommunity/makehuman/blob/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/rigs/default.mhskel",
+    "https://github.com/makehumancommunity/makehuman/blob/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/rigs/default_weights.mhw"
+  ],
+  "vertex_count": 1690,
+  "face_count": 3376,
+  "bone_count": 21,
+  "research_only_alternatives": "MANO and SMPL-X hand models are research/non-commercial licences and are not bundled; they remain research-only alternatives."
 }

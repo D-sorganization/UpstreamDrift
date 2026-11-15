@@ -5,7 +5,9 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 from src.shared.python.grip_spec.types import GripSpec
-from src.shared.python.model_appearance.hand_backends.joint_angles import HandJointAngles
+from src.shared.python.model_appearance.hand_backends.joint_angles import (
+    HandJointAngles,
+)
 from src.shared.python.model_appearance.hand_backends.types import (
     HandSide,
     HandVisualResult,
@@ -44,11 +46,12 @@ def list_hand_visual_backends() -> tuple[str, ...]:
 def build_hand_visual(
     grip_spec: GripSpec,
     side: HandSide,
-    joint_angles: HandJointAngles,
+    joint_angles: HandJointAngles | None = None,
     *,
     grip_radius_m: float,
     backend: str = _DEFAULT_BACKEND,
 ) -> HandVisualResult:
+    """Build one hand with ``backend``; ``joint_angles=None`` lets it pose itself."""
     return get_hand_visual_backend(backend).builder(
         grip_spec,
         side,

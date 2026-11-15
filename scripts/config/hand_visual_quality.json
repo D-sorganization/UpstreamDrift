@@ -1,6 +1,23 @@
 {
-  "grip_cylinder_penetration_m": 0.002,
-  "self_penetration_fraction": 0.08,
-  "shaft_roll_median_error_m": 0.003,
-  "mirror_median_error_m": 0.008
+  "grip_radius_m": 0.014,
+  "contact_tolerance_m": 0.0015,
+  "penetration_tolerance_m": 0.0005,
+  "min_triangle_area_m2": 1e-10,
+  "shaft_roll_error_m": 1e-09,
+  "mirror_error_m": 1e-09,
+  "pinky_palm_depth_range_m": [
+    0.002,
+    0.045
+  ],
+  "anthropometric_tolerance": 0.15,
+  "anthropometric_reference": {
+    "breadth_over_length": 0.449,
+    "index_over_middle": 0.883,
+    "ring_over_middle": 0.956,
+    "little_over_middle": 0.757,
+    "thumb_over_middle": 1.127
+  },
+  "max_crease_fold_faces": 16,
+  "max_crease_fold_area_fraction": 0.004,
+  "anthropometric_reference_note": "breadth_over_length: ANSUR II pooled, as used by hand_size.py. Finger ratios are bone-chain lengths (knuckle to tip; thumb from its carpometacarpal joint) recalled from Buryanov and Kotiuch 2010 and NOT re-verified against the paper; treat as indicative until checked."
 }

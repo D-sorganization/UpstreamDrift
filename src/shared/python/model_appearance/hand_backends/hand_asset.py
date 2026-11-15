@@ -1,4 +1,4 @@
-"""CC0 hand mesh asset loader (MakeHuman derivative, epic #15122)."""
+"""CC0 hand asset loader (MakeHuman mesh, skeleton and weights; epic #15150)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,6 @@ from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
-from numpy.typing import NDArray
 
 from src.shared.python.model_appearance.hand_backends.skinning import SkinnedHandAsset
 
@@ -26,32 +25,26 @@ class HandAssetRecord:
     sha256: str
 
 
-def _load_npz(path: Path, record: dict[str, object]) -> SkinnedHandAsset:
+def _load_npz(path: Path) -> SkinnedHandAsset:
     with np.load(path, allow_pickle=False) as data:
-        quantum = float(record["quantum_metres"])
-        verts = data["vertices"].astype(np.float64) * quantum
-        faces = data["faces"].astype(np.int64)
-        joint_indices = data["joint_indices"].astype(np.uint16)
-        joint_weights = data["joint_weights"].astype(np.float32)
-        rest_poses = data["rest_poses"].astype(np.float64)
-        rest_poses[:, :3, 3] *= quantum
-        bone_names = tuple(str(x) for x in np.asarray(data["bone_names"]).tolist())
-        palm_ids = data["palm_arch_vertex_ids"].astype(np.int64)
-        grip_ids = data["grip_bind_vertex_ids"].astype(np.int64)
-    return SkinnedHandAsset(
-        rest_vertices=verts,
-        faces=faces,
-        joint_indices=joint_indices,
-        joint_weights=joint_weights,
-        rest_poses=rest_poses,
-        bone_names=bone_names,
-        palm_arch_vertex_ids=palm_ids,
-        grip_bind_vertex_ids=grip_ids,
-    )
+        return SkinnedHandAsset(
+            rest_vertices=data["vertices"].astype(np.float64),
+            faces=data["faces"].astype(np.int64),
+            joint_indices=data["joint_indices"].astype(np.int64),
+            joint_weights=data["joint_weights"].astype(np.float64),
+            bone_names=tuple(str(x) for x in data["bone_names"].tolist()),
+            bone_parents=data["bone_parents"].astype(np.int64),
+            bone_heads=data["bone_heads"].astype(np.float64),
+            bone_tails=data["bone_tails"].astype(np.float64),
+            flex_axes=data["flex_axes"].astype(np.float64),
+            rest_flexion_rad=data["rest_flexion_rad"].astype(np.float64),
+        )
 
 
 @lru_cache(maxsize=1)
 def load_hand_cc0_asset() -> HandAssetRecord:
+    """Load the committed asset. Raises ``ValueError`` if it is missing, is not
+    recorded as CC0, or does not match the hash in ``PROVENANCE.json``."""
     if not PROVENANCE_PATH.is_file():
         raise ValueError(f"hand provenance missing: {PROVENANCE_PATH}")
     if not ASSET_PATH.is_file():
@@ -59,9 +52,15 @@ def load_hand_cc0_asset() -> HandAssetRecord:
     record = json.loads(PROVENANCE_PATH.read_text(encoding="utf-8"))
     if record.get("licence") != LICENCE_ID:
         raise ValueError(f"hand licence must be {LICENCE_ID}")
-    raw = ASSET_PATH.read_bytes()
-    digest = hashlib.sha256(raw).hexdigest()
+    digest = hashlib.sha256(ASSET_PATH.read_bytes()).hexdigest()
     if digest != record.get("asset_sha256"):
         raise ValueError("hand asset sha256 does not match provenance")
-    asset = _load_npz(ASSET_PATH, record)
+    asset = _load_npz(ASSET_PATH)
+    weights = asset.joint_weights
+    asset = SkinnedHandAsset(
+        **{
+            **asset.__dict__,
+            "joint_weights": weights / weights.sum(axis=1, keepdims=True),
+        }
+    )
     return HandAssetRecord(asset=asset, sha256=digest)

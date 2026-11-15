@@ -1,161 +1,321 @@
-"""Skinned CC0 human hand visual backend (epic #15122)."""
+"""Skinned MakeHuman hand holding the grip (epic #15150, #15148).
+
+Every tolerance comes from ``scripts/config/hand_visual_quality.json``.
+"""
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
+import dataclasses
+import math
 
 import numpy as np
 import pytest
-from scipy.spatial import cKDTree
 
-from src.shared.python.grip_spec import GripSpec, HandGripSpec
-from src.shared.python.grip_spec.shaft_roll import apply_shaft_roll
-from src.shared.python.model_appearance.geometry import Mesh
+from src.shared.python.grip_spec.types import GripSpec
+from src.shared.python.model_appearance.hand_backends import (
+    build_hand_visual as registry_build,
+)
+from src.shared.python.model_appearance.hand_backends import (
+    list_hand_visual_backends,
+)
+from src.shared.python.model_appearance.hand_backends.hand_asset import (
+    load_hand_cc0_asset,
+)
 from src.shared.python.model_appearance.hand_backends.joint_angles import (
+    FINGERS,
     HandJointAngles,
-    legacy_neutral_joint_angles,
 )
 from src.shared.python.model_appearance.hand_backends.qa import (
+    anthropometric_ratios,
     load_hand_visual_quality,
     max_grip_cylinder_penetration_m,
-    max_self_penetration_fraction,
-)
-from src.shared.python.model_appearance.hand_backends.registry import (
-    build_hand_visual,
-    get_hand_visual_backend,
+    skinning_defects,
+    skinning_residual_m,
 )
 from src.shared.python.model_appearance.hand_backends.skinned_human import (
     BACKEND_NAME,
-    SkinnedHumanSettings,
+    build_hand_visual,
     default_settings,
+    load_settings_mapping,
+    settings_from_mapping,
+    solve_grip_joint_angles,
 )
 
 pytestmark = pytest.mark.unit
 
-_REPO = Path(__file__).resolve().parents[4]
-_GRIP_RADIUS_M = 0.0145
-_SHAFT_AXIS = np.array([0.0, 0.0, 1.0])
+_Q = load_hand_visual_quality()
+_RADIUS = float(_Q["grip_radius_m"])
+_SIDES = ("lead", "trail")
+_CACHE: dict[tuple, object] = {}
 
 
-def _spec(**kwargs: object) -> GripSpec:
-    return GripSpec.legacy(**kwargs)
-
-
-def _angles() -> HandJointAngles:
-    return legacy_neutral_joint_angles(_spec(), "lead")
-
-
-def _build(side: str = "lead", **spec_kw: object) -> Mesh:
-    spec = _spec(**spec_kw)
-    angles = legacy_neutral_joint_angles(spec, side)
-    result = build_hand_visual(spec, side, angles, grip_radius_m=_GRIP_RADIUS_M)
-    assert result.backend == BACKEND_NAME
-    return result.mesh
-
-
-def test_registry_exposes_skinned_human_backend() -> None:
-    backend = get_hand_visual_backend(BACKEND_NAME)
-    assert backend.name == BACKEND_NAME
-
-
-def test_build_returns_finite_watertight_mesh() -> None:
-    mesh = _build()
-    assert mesh.vertices.shape[1] == 3
-    assert np.isfinite(mesh.vertices).all()
-    assert len(mesh.vertices) >= 800
-    assert len(mesh.faces) >= 1500
-    assert mesh.volume() > 0.0
-
-
-def test_grip_cylinder_penetration_within_tolerance() -> None:
-    quality = load_hand_visual_quality()
-    tol = quality["grip_cylinder_penetration_m"]
-    for side in ("lead", "trail"):
-        mesh = _build(side)
-        pen = max_grip_cylinder_penetration_m(mesh.vertices, _GRIP_RADIUS_M)
-        assert pen <= tol, f"{side} grip penetration {pen:.4f} m > {tol} m"
-
-
-def test_inter_finger_penetration_within_tolerance() -> None:
-    quality = load_hand_visual_quality()
-    tol = quality["self_penetration_fraction"]
-    mesh = _build("lead")
-    frac = max_self_penetration_fraction(mesh, sample_stride=6)
-    assert frac <= tol, f"self penetration fraction {frac:.3f} > {tol}"
-
-
-def _grip_envelope_rho(mesh: Mesh) -> float:
-    v = mesh.vertices
-    band = v[(v[:, 0] < 0.03) & (np.hypot(v[:, 0], v[:, 1]) < 0.08)]
-    if len(band) == 0:
-        return float("inf")
-    return float(np.hypot(band[:, 0], band[:, 1]).min())
-
-
-def test_trail_is_mirror_of_lead_geometry() -> None:
-    spec = _spec()
-    lead = build_hand_visual(
-        spec,
-        "lead",
-        legacy_neutral_joint_angles(spec, "lead"),
-        grip_radius_m=_GRIP_RADIUS_M,
-    ).mesh
-    trail = build_hand_visual(
-        spec,
-        "trail",
-        legacy_neutral_joint_angles(spec, "trail"),
-        grip_radius_m=_GRIP_RADIUS_M,
-    ).mesh
-    lead_m = lead.vertices.copy()
-    lead_m[:, 1] *= -1.0
-    tree = cKDTree(trail.vertices)
-    dists, _ = tree.query(lead_m, k=1)
-    quality = load_hand_visual_quality()
-    assert float(np.median(dists)) < quality["mirror_median_error_m"]
-
-
-def test_shaft_roll_rotates_mesh_about_grip_axis() -> None:
-    base_spec = _spec()
-    rolled = _spec(lead=HandGripSpec(shaft_roll_deg=20.0))
-    angles = legacy_neutral_joint_angles(base_spec, "lead")
-    mesh0 = build_hand_visual(
-        base_spec, "lead", angles, grip_radius_m=_GRIP_RADIUS_M
-    ).mesh
-    mesh1 = build_hand_visual(rolled, "lead", angles, grip_radius_m=_GRIP_RADIUS_M).mesh
-    rot = apply_shaft_roll(np.eye(3), _SHAFT_AXIS, 20.0)[:3, :3]
-    expected = mesh0.vertices @ rot.T
-    rel1 = mesh1.vertices
-    err = np.linalg.norm(expected - rel1, axis=1)
-    assert float(np.median(err)) < 0.003
-
-
-def test_palm_arch_increases_grip_side_curvature() -> None:
-    shallow = HandJointAngles.from_legacy_curl(
-        finger_curl_scale=0.35, palm_arch_scale=0.2
+def _spec(roll_deg: float = 0.0, handedness: str = "right") -> GripSpec:
+    base = GripSpec.legacy()
+    return dataclasses.replace(
+        base,
+        handedness=handedness,
+        lead=dataclasses.replace(base.lead, shaft_roll_deg=roll_deg),
+        trail=dataclasses.replace(base.trail, shaft_roll_deg=roll_deg),
     )
-    deep = HandJointAngles.from_legacy_curl(finger_curl_scale=0.85, palm_arch_scale=1.0)
-    spec = _spec()
-    m0 = build_hand_visual(spec, "lead", shallow, grip_radius_m=_GRIP_RADIUS_M).mesh
-    m1 = build_hand_visual(spec, "lead", deep, grip_radius_m=_GRIP_RADIUS_M).mesh
-    # Deeper curl + palm arch cups the palm toward the grip (more negative x on palm).
-    def _palm_mean_x(mesh: Mesh) -> float:
-        v = mesh.vertices
-        band = v[(v[:, 0] < 0.01) & (np.hypot(v[:, 0], v[:, 1]) < 0.07)]
-        return float(band[:, 0].mean()) if len(band) else 0.0
-
-    assert _palm_mean_x(m1) < _palm_mean_x(m0)
 
 
-def test_hand_cc0_provenance_present() -> None:
-    provenance = _REPO / "assets" / "hand_cc0" / "PROVENANCE.json"
-    assert provenance.is_file(), "missing hand_cc0 PROVENANCE.json"
-    record = json.loads(provenance.read_text(encoding="utf-8"))
-    assert record.get("licence") == "CC0-1.0"
-    assert "MANO" in record.get("research_only_alternatives", "")
+def _hand(side: str, roll_deg: float = 0.0, handedness: str = "right"):
+    key = (side, roll_deg, handedness)
+    if key not in _CACHE:
+        _CACHE[key] = build_hand_visual(
+            _spec(roll_deg, handedness), side, grip_radius_m=_RADIUS
+        )
+    return _CACHE[key]
 
 
-def test_settings_not_hardcoded_in_builder() -> None:
+@pytest.mark.parametrize("side", _SIDES)
+def test_every_fingertip_and_middle_phalanx_touches_the_grip(side: str) -> None:
+    gaps = _hand(side).contact_gaps_m
+    tolerance = float(_Q["contact_tolerance_m"])
+    for finger in FINGERS:
+        for segment in ("mid", "dist"):
+            gap = gaps[f"{finger}_{segment}"]
+            assert gap <= tolerance, f"{side} {finger}_{segment} {gap * 1e3:.2f} mm"
+    assert gaps["thumb_dist"] <= tolerance, f"{side} thumb {gaps['thumb_dist']}"
+    assert gaps["palm"] <= tolerance, f"{side} palm {gaps['palm'] * 1e3:.2f} mm"
+
+
+@pytest.mark.parametrize("side", _SIDES)
+def test_no_skin_penetrates_the_grip_beyond_tolerance(side: str) -> None:
+    result = _hand(side)
+    depth = max_grip_cylinder_penetration_m(result.mesh.vertices, _RADIUS)
+    assert depth <= float(_Q["penetration_tolerance_m"]), f"{depth * 1e3:.2f} mm"
+    assert result.contact_gaps_m["hand"] >= -float(_Q["penetration_tolerance_m"])
+
+
+@pytest.mark.parametrize("side", _SIDES)
+def test_no_flipped_or_degenerate_triangles_after_skinning(side: str) -> None:
+    result = _hand(side)
+    defects = skinning_defects(result, min_area_m2=float(_Q["min_triangle_area_m2"]))
+    assert defects["degenerate"] == 0
+    # Pure LBS folds a few triangles into the inner crease of a joint bent
+    # near a right angle; none may flip anywhere else, and the fold is capped.
+    assert defects["flipped"] <= int(_Q["max_crease_fold_faces"]), defects
+    assert defects["flipped_area_fraction"] <= float(
+        _Q["max_crease_fold_area_fraction"]
+    ), defects
+    assert result.mesh.volume() > 0.0
+    np.testing.assert_allclose(
+        np.linalg.norm(result.vertex_normals, axis=1), 1.0, atol=1e-9
+    )
+
+
+@pytest.mark.parametrize("side", _SIDES)
+def test_pose_is_joint_rotation_and_linear_blend_skinning_only(side: str) -> None:
+    """No vertex is pushed: the mesh is exactly LBS of the reported pose."""
+    assert skinning_residual_m(_hand(side)) < 1e-12
+    transforms = _hand(side).bone_transforms
+    for t in transforms:
+        np.testing.assert_allclose(t[:3, :3] @ t[:3, :3].T, np.eye(3), atol=1e-9)
+        assert np.linalg.det(t[:3, :3]) == pytest.approx(1.0)
+
+
+def test_anthropometric_ratios_match_the_references() -> None:
     settings = default_settings()
-    assert isinstance(settings, SkinnedHumanSettings)
-    assert settings.skin_rgb != (0.0, 0.0, 0.0)
+    ratios = anthropometric_ratios(load_hand_cc0_asset().asset, settings.breadth_band_m)
+    tolerance = float(_Q["anthropometric_tolerance"])
+    for name, reference in _Q["anthropometric_reference"].items():
+        error = abs(ratios[name] - reference) / reference
+        assert error <= tolerance, f"{name}: {ratios[name]:.3f} vs {reference}"
+
+
+def test_hand_is_scaled_to_the_spec_hand_size() -> None:
+    spec = _spec()
+    asset = _hand("trail").rest_asset
+    from src.shared.python.model_appearance.hand_backends.skinned_human import (
+        asset_hand_breadth_m,
+        asset_hand_length_m,
+    )
+
+    assert asset_hand_length_m(asset) == pytest.approx(spec.hand_size.length_m)
+    assert asset_hand_breadth_m(
+        asset, default_settings().breadth_band_m
+    ) == pytest.approx(spec.hand_size.breadth_m)
+
+
+def test_left_handed_golfer_is_the_exact_mirror_image() -> None:
+    """A left-hander's hands are the right-hander's reflected in the swing plane."""
+    for side in _SIDES:
+        right = _hand(side).mesh
+        left = _hand(side, handedness="left").mesh
+        mirrored = right.vertices * np.array([1.0, -1.0, 1.0])
+        np.testing.assert_allclose(
+            left.vertices, mirrored, atol=float(_Q["mirror_error_m"])
+        )
+        np.testing.assert_array_equal(left.faces, right.faces[:, ::-1])
+        assert left.volume() > 0.0
+
+
+def _chirality(result) -> float:
+    """Sign of (index→little knuckle) x (wrist→middle knuckle) . palm normal."""
+    asset, frame, t = result.rest_asset, result.frame_from_rest, result.bone_transforms
+
+    def head(bone: str) -> np.ndarray:
+        i = asset.bone_index(bone)
+        local = t[i][:3, :3] @ asset.bone_heads[i] + t[i][:3, 3]
+        return frame[:3, :3] @ local + frame[:3, 3]
+
+    across = head("little_prox") - head("index_prox")
+    along = head("middle_prox") - head("wrist")
+    palm_centre = 0.5 * (head("index_prox") + head("little_prox"))
+    toward_grip = -np.array([palm_centre[0], palm_centre[1], 0.0])
+    return float(np.sign(np.cross(across, along) @ toward_grip))
+
+
+def test_lead_and_trail_are_opposite_hands_on_opposite_sides() -> None:
+    lead, trail = _hand("lead"), _hand("trail")
+    assert _chirality(lead) == -_chirality(trail) != 0.0
+    # Right-handed golfer: the trail (right) hand's palm sits away from the
+    # target (+y), the lead (left) hand's toward it.
+    assert trail.mesh.vertices[:, 1].mean() > 0.0 > lead.mesh.vertices[:, 1].mean()
+    assert np.linalg.det(trail.frame_from_rest[:3, :3]) == pytest.approx(1.0)
+    assert np.linalg.det(lead.frame_from_rest[:3, :3]) == pytest.approx(-1.0)
+
+
+@pytest.mark.parametrize("side", _SIDES)
+@pytest.mark.parametrize("roll_deg", (-20.0, 20.0))
+def test_shaft_roll_turns_the_whole_hand_about_the_shaft(
+    side: str, roll_deg: float
+) -> None:
+    flat = _hand(side, 0.0)
+    rolled = _hand(side, roll_deg)
+    a = math.radians(roll_deg)
+    rot = np.array(
+        [[math.cos(a), -math.sin(a), 0.0], [math.sin(a), math.cos(a), 0.0], [0, 0, 1]]
+    )
+    np.testing.assert_allclose(
+        rolled.mesh.vertices,
+        flat.mesh.vertices @ rot.T,
+        atol=float(_Q["shaft_roll_error_m"]),
+    )
+    # Contact is unchanged: the grip is a surface of revolution.
+    depth = max_grip_cylinder_penetration_m(rolled.mesh.vertices, _RADIUS)
+    assert depth <= float(_Q["penetration_tolerance_m"])
+    assert rolled.joint_angles == flat.joint_angles
+
+
+def test_left_handed_shaft_roll_is_mirrored() -> None:
+    right = _hand("lead", 20.0).mesh.vertices
+    left = _hand("lead", 20.0, handedness="left").mesh.vertices
+    np.testing.assert_allclose(
+        left, right * np.array([1.0, -1.0, 1.0]), atol=float(_Q["mirror_error_m"])
+    )
+
+
+@pytest.mark.parametrize("side", _SIDES)
+def test_club_lies_on_the_index_first_segment_and_below_the_pinky_base(
+    side: str,
+) -> None:
+    """Dieter's grip spec, measured on the posed hand."""
+    result = _hand(side)
+    asset, frame, t = result.rest_asset, result.frame_from_rest, result.bone_transforms
+
+    def joint(bone: str, tail: bool = False) -> np.ndarray:
+        i = asset.bone_index(bone)
+        rest = asset.bone_tails[i] if tail else asset.bone_heads[i]
+        return frame[:3, :3] @ (t[i][:3, :3] @ rest + t[i][:3, 3]) + frame[:3, 3]
+
+    # The index finger's first segment spans the grip axis station.
+    mcp, pip = joint("index_prox"), joint("index_mid")
+    gaps = result.contact_gaps_m
+    assert gaps["index_prox"] <= float(_Q["contact_tolerance_m"])
+    # The little-finger knuckle is distal of where the club passes it: the
+    # club crosses the palm just below the base of the pinky.
+    wrist, little = joint("wrist"), joint("little_prox")
+    distal = joint("middle_prox") - wrist
+    distal /= np.linalg.norm(distal)
+    foot = np.array([0.0, 0.0, little[2]])  # nearest grip-axis point
+    depth = float((little - foot) @ distal)
+    low, high = _Q["pinky_palm_depth_range_m"]
+    assert low <= depth <= high, f"{side} pinky depth {depth * 1e3:.1f} mm"
+    # Slight angle: index knuckle and little knuckle are at different heights.
+    assert abs(mcp[2] - little[2]) > 0.02
+    assert np.isfinite(pip).all()
+
+
+@pytest.mark.parametrize("side", _SIDES)
+def test_fingers_wrap_and_the_palm_cups(side: str) -> None:
+    angles = _hand(side).joint_angles
+    for finger in FINGERS:
+        total = sum(
+            angles.flexion_deg(f"{finger}_{s}") for s in ("prox", "mid", "dist")
+        )
+        assert total > 120.0, f"{side} {finger} only curls {total:.0f} deg"
+        for joint, segment in (("mcp", "prox"), ("pip", "mid"), ("dip", "dist")):
+            low, high = dict(default_settings().limits_deg)[joint]
+            assert (
+                low - 1e-6 <= angles.flexion_deg(f"{finger}_{segment}") <= high + 1e-6
+            )
+    assert angles.flexion_deg("meta_little") > angles.flexion_deg("meta_ring") > 0.0
+
+
+def test_thumb_lies_along_the_shaft_at_the_spec_azimuth() -> None:
+    for side in _SIDES:
+        result = _hand(side)
+        asset = result.rest_asset
+        ids = asset.dominant_vertex_ids(("thumb_dist",))
+        pad = result.mesh.vertices[ids].mean(axis=0)
+        fingers = result.mesh.vertices[
+            asset.dominant_vertex_ids(tuple(f"{f}_dist" for f in FINGERS))
+        ].mean(axis=0)
+        azimuth = math.degrees(math.atan2(pad[1], pad[0]))
+        assert abs(azimuth) < 45.0, f"{side} thumb azimuth {azimuth:.0f}"
+        assert pad[2] > fingers[2], "thumb points toward the head"
+
+
+def test_settings_drive_the_result() -> None:
+    raw = load_settings_mapping()
+    raw["skin_rgb"] = [0.4, 0.3, 0.2]
+    raw["curl"] = {**raw["curl"], "limits_deg": {**raw["curl"]["limits_deg"]}}
+    raw["curl"]["limits_deg"]["pip"] = [0.0, 30.0]
+    settings = settings_from_mapping(raw)
+    result = build_hand_visual(
+        _spec(), "trail", grip_radius_m=_RADIUS, settings=settings
+    )
+    assert result.skin_rgb == (0.4, 0.3, 0.2)
+    for finger in FINGERS:
+        assert result.joint_angles.flexion_deg(f"{finger}_mid") <= 30.0 + 1e-6
+    thicker = build_hand_visual(_spec(), "trail", grip_radius_m=_RADIUS * 1.3)
+    assert thicker.joint_angles != _hand("trail").joint_angles
+    assert max_grip_cylinder_penetration_m(
+        thicker.mesh.vertices, _RADIUS * 1.3
+    ) <= float(_Q["penetration_tolerance_m"])
+
+
+def test_bad_settings_and_inputs_are_rejected() -> None:
+    raw = load_settings_mapping()
+    with pytest.raises(ValueError):
+        settings_from_mapping({**raw, "skin_rgb": [1.2, 0.5, 0.5]})
+    with pytest.raises(ValueError):
+        settings_from_mapping({**raw, "curl": {**raw["curl"], "arch_passes": 0}})
+    with pytest.raises(ValueError):
+        build_hand_visual(_spec(), "trail", grip_radius_m=0.0)
+    with pytest.raises(ValueError):
+        build_hand_visual(_spec(), "middle", grip_radius_m=_RADIUS)  # type: ignore[arg-type]
+    with pytest.raises(TypeError):
+        build_hand_visual(_spec(), "trail", {"a": 1.0}, grip_radius_m=_RADIUS)  # type: ignore[arg-type]
+
+
+def test_explicit_joint_angles_are_applied_as_given() -> None:
+    solved = solve_grip_joint_angles(_spec(), "trail", grip_radius_m=_RADIUS)
+    assert solved == _hand("trail").joint_angles
+    again = build_hand_visual(_spec(), "trail", solved, grip_radius_m=_RADIUS)
+    np.testing.assert_allclose(
+        again.mesh.vertices, _hand("trail").mesh.vertices, atol=1e-9
+    )
+    flat = build_hand_visual(
+        _spec(), "trail", HandJointAngles.from_mapping({}), grip_radius_m=_RADIUS
+    )
+    assert flat.contact_gaps_m["index_dist"] > 0.01, "flat hand must not wrap"
+
+
+def test_registry_builds_the_default_backend() -> None:
+    assert BACKEND_NAME in list_hand_visual_backends()
+    result = registry_build(_spec(), "lead", grip_radius_m=_RADIUS)
+    assert result.backend == BACKEND_NAME
+    np.testing.assert_allclose(result.mesh.vertices, _hand("lead").mesh.vertices)
