@@ -14,6 +14,7 @@ _MODEL_PROVIDER = _REPO / "src/shared/python/optimization/model_provider.py"
 _REGRESSION_TEST = _REPO / "tests/unit/optimization/test_model_provider.py"
 _LAUNCHER_SERVICE = _REPO / "src/api/services/launcher_service.py"
 _LAUNCHER_REGRESSION = _REPO / "tests/unit/api/test_launcher_service_processes_14227.py"
+_OPTIONAL_STACK_WORKFLOW = _REPO / ".github" / "workflows" / "ci-optional-stack.yml"
 
 
 def test_optional_stack_14227_runbook_exists() -> None:
@@ -74,3 +75,11 @@ def test_runbook_records_green_scheduled_optional_stack_after_slice3() -> None:
     )
     assert "optional-stack-check" in text
     assert "Green" in text or "success" in text.lower()
+
+
+def test_workflow_references_14227_scheduled_acceptance_runbook() -> None:
+    """Anti-phantom-merge: closing #14227 must touch this workflow path."""
+    text = _OPTIONAL_STACK_WORKFLOW.read_text(encoding="utf-8")
+    assert "optional_stack_14227.md" in text
+    assert "#14227" in text
+    assert "43688504401" in text

@@ -18,6 +18,10 @@ name: CI Optional Stack
 #   2. The relevant API and Pinocchio ecosystem tests run without being
 #      skipped due to missing dependencies.
 #   3. This comment block documents which job is the optional-stack lane.
+#
+# Scheduled-lane recovery (#14227): run status and green acceptance evidence
+# are recorded in docs/ci/optional_stack_14227.md (first green scheduled run
+# 43688504401 on 2026-11-15 after slices 1-3 on main).
 # ---------------------------------------------------------------------------
 #
 # Trigger policy (issue #12224): this lane needs the scarce docker fleet
