@@ -88,6 +88,34 @@ def both_hands_parts(lead: Any, trail: Any, settings: Any) -> list[render.SceneP
     return [*parts, *club]
 
 
+def _contact_sheets(
+    args: argparse.Namespace,
+    sides: list[str],
+    rolls: list[float],
+    settings: Any,
+    out: Path,
+) -> list[dict[str, Any]]:
+    """Write one contact sheet per side when ``args.contact_sheet`` is set."""
+    sheets: list[dict[str, Any]] = []
+    if not args.contact_sheet:
+        return sheets
+    for side in sides:
+        sheet = render.render_contact_sheet(
+            _csv(args.backend),
+            rolls,
+            view=args.sheet_view,
+            side=side,
+            settings=settings,
+            engine=args.engine,
+        )
+        path = out / f"contact_sheet_{side}_{args.sheet_view}.png"
+        render.save_png(sheet, path)
+        sheets.append(
+            _record(path, sheet, side=side, view=args.sheet_view, rolls_deg=rolls)
+        )
+    return sheets
+
+
 def run(args: argparse.Namespace) -> dict[str, Any]:
     """Render everything ``args`` asks for and return the manifest."""
     settings = render.load_hand_render_settings(args.settings)
@@ -149,22 +177,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                         path, frame, backend=name, side="both", view=view, roll_deg=0.0
                     )
                 )
-    sheets: list[dict[str, Any]] = []
-    if args.contact_sheet:
-        for side in sides:
-            sheet = render.render_contact_sheet(
-                _csv(args.backend),
-                rolls,
-                view=args.sheet_view,
-                side=side,
-                settings=settings,
-                engine=args.engine,
-            )
-            path = out / f"contact_sheet_{side}_{args.sheet_view}.png"
-            render.save_png(sheet, path)
-            sheets.append(
-                _record(path, sheet, side=side, view=args.sheet_view, rolls_deg=rolls)
-            )
+    sheets = _contact_sheets(args, sides, rolls, settings, out)
 
     engines = sorted({entry["engine"] for entry in frames})
     manifest = {
