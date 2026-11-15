@@ -304,6 +304,14 @@ class ClubInHands(FreeClubPlantMixin):
         self.scene_graph = scene_graph
         self.club = body
         self.context = plant.GetMyMutableContextFromRoot(self.diagram_context)
+        self._init_grip_pose_offsets(interface, grip_pose)
+        self._q0 = body.floating_positions_start()
+        self._v0 = body.floating_velocities_start_in_v()
+        self.last_side_wrenches: dict[str, TopologySideWrench] = {}
+        self.last_applied_spatial_forces: tuple[Any, ...] = ()
+
+    def _init_grip_pose_offsets(self, interface: GripInterface, grip_pose: Any) -> None:
+        """Bind :class:`GripPose` shaft-roll offsets for hand placement."""
         from src.shared.python.grip_spec.shaft_roll import (
             grip_interface_offsets_with_shaft_roll,
         )
@@ -313,10 +321,6 @@ class ClubInHands(FreeClubPlantMixin):
         self._offsets = grip_interface_offsets_with_shaft_roll(
             interface, self._grip_pose
         )
-        self._q0 = body.floating_positions_start()
-        self._v0 = body.floating_velocities_start_in_v()
-        self.last_side_wrenches: dict[str, TopologySideWrench] = {}
-        self.last_applied_spatial_forces: tuple[Any, ...] = ()
 
     def _register_attachments(
         self,
