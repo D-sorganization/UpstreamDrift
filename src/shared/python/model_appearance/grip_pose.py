@@ -52,6 +52,7 @@ from src.shared.python.core.handedness import (
 )
 from src.shared.python.grip_contact.contact_topology import GripStyle as GripStyle
 from src.shared.python.grip_contact.pad_layout import GRIP_RADIUS_M
+from src.shared.python.grip_contact.field_validation import require_fields_in_range
 
 if TYPE_CHECKING:
     from src.shared.python.grip_contact.contact_topology import ContactTopology
@@ -418,23 +419,6 @@ def topology_of_pose(
         handedness=pose.handedness,
     )
     return contact_topology(spec, grip_radius_m=grip_radius_m)
-
-
-def require_fields_in_range(
-    obj: object, bounds: Sequence[tuple[str, float, float]]
-) -> None:
-    """Require each named attribute of ``obj`` to be a finite number in range.
-
-    Precondition: every ``(name, lo, hi)`` names an attribute of ``obj`` and
-    ``lo <= hi``. Raises ``ValueError`` naming the first offending field.
-    """
-    for name, lo, hi in bounds:
-        value = getattr(obj, name)
-        require(
-            isinstance(value, (int, float)) and math.isfinite(value),
-            f"{name} must be a finite number, got {value!r}",
-        )
-        require(lo <= value <= hi, f"{name} must be in [{lo}, {hi}], got {value}")
 
 
 def _unit_axis(
