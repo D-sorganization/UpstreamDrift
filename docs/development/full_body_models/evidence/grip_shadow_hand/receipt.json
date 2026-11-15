@@ -1,18 +1,42 @@
 {
   "artifacts": [
-    "grip_shadow_butt_roll_0p.png",
-    "grip_shadow_butt_roll_20m.png",
-    "grip_shadow_butt_roll_20p.png",
-    "grip_shadow_face_roll_0p.png",
-    "grip_shadow_face_roll_20m.png",
-    "grip_shadow_face_roll_20p.png",
-    "grip_shadow_iso_roll_0p.png",
-    "grip_shadow_iso_roll_20m.png",
-    "grip_shadow_iso_roll_20p.png"
+    "grip_shadow_both_butt_roll_0p.png",
+    "grip_shadow_both_butt_roll_20m.png",
+    "grip_shadow_both_butt_roll_20p.png",
+    "grip_shadow_both_face_roll_0p.png",
+    "grip_shadow_both_face_roll_20m.png",
+    "grip_shadow_both_face_roll_20p.png",
+    "grip_shadow_both_iso_roll_0p.png",
+    "grip_shadow_both_iso_roll_20m.png",
+    "grip_shadow_both_iso_roll_20p.png",
+    "grip_shadow_lead_butt_roll_0p.png",
+    "grip_shadow_lead_butt_roll_20m.png",
+    "grip_shadow_lead_butt_roll_20p.png",
+    "grip_shadow_lead_face_roll_0p.png",
+    "grip_shadow_lead_face_roll_20m.png",
+    "grip_shadow_lead_face_roll_20p.png",
+    "grip_shadow_lead_iso_roll_0p.png",
+    "grip_shadow_lead_iso_roll_20m.png",
+    "grip_shadow_lead_iso_roll_20p.png",
+    "grip_shadow_trail_butt_roll_0p.png",
+    "grip_shadow_trail_butt_roll_20m.png",
+    "grip_shadow_trail_butt_roll_20p.png",
+    "grip_shadow_trail_face_roll_0p.png",
+    "grip_shadow_trail_face_roll_20m.png",
+    "grip_shadow_trail_face_roll_20p.png",
+    "grip_shadow_trail_iso_roll_0p.png",
+    "grip_shadow_trail_iso_roll_20m.png",
+    "grip_shadow_trail_iso_roll_20p.png"
   ],
   "shaft_rolls_deg": [
     0.0,
     20.0,
     -20.0
-  ]
+  ],
+  "subsets": [
+    "both",
+    "lead",
+    "trail"
+  ],
+  "dpi": 1024
 }

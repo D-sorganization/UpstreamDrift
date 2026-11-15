@@ -14,6 +14,7 @@ from src.shared.python.model_appearance.grip_hands import grip_hand_frame, grip_
 from src.shared.python.model_appearance.grip_pose import DEFAULT_GRIP_POSE, Hand
 from src.shared.python.model_appearance.grip_shadow_hand_assets import (
     load_shadow_hand_provenance,
+    verify_shadow_mesh_asset_licences,
 )
 from src.shared.python.model_appearance.grip_shadow_hand_visual import (
     build_shadow_grip_hand_mesh,
@@ -37,6 +38,11 @@ def test_shadow_hand_provenance_gate() -> None:
     record = load_shadow_hand_provenance()
     assert record["licence"] == "Apache-2.0"
     assert record["mesh_obj_count"] == 14
+    licence_audit = verify_shadow_mesh_asset_licences()
+    assert licence_audit["bundle_licence_spdx"] == "Apache-2.0"
+    assert licence_audit["runtime_matches_vendored_licence_copy"]
+    assert licence_audit["mesh_obj_licence_spdx"] == "Apache-2.0"
+    assert licence_audit["mesh_obj_count"] == record["mesh_obj_count"]
 
 
 def test_shadow_hand_mesh_has_many_vertices_and_fingers() -> None:
@@ -55,20 +61,30 @@ def test_club_penetration_within_tolerance() -> None:
     settings = visual_settings()
     for hand in (Hand.LEAD, Hand.TRAIL):
         hand_spec = spec.lead if hand == Hand.LEAD else spec.trail
-        qpos = solve_shadow_hand_qpos(
+        solved = solve_shadow_hand_qpos(
             hand, hand_spec, grip_spec=spec, grip_radius_m=radius
         )
-        metrics = penetration_metrics(hand, qpos, grip_radius_m=radius)
+        metrics = penetration_metrics(
+            hand,
+            solved.qpos,
+            grip_radius_m=radius,
+            mount_matrix=solved.mount_matrix,
+        )
         assert metrics["club_penetration_m"] <= settings.club_penetration_tolerance_m
 
 
 def test_finger_finger_clearance_within_tolerance() -> None:
     spec = GripSpec.legacy()
     settings = visual_settings()
-    qpos = solve_shadow_hand_qpos(
+    solved = solve_shadow_hand_qpos(
         Hand.TRAIL, spec.trail, grip_spec=spec, grip_radius_m=0.012
     )
-    metrics = penetration_metrics(Hand.TRAIL, qpos, grip_radius_m=0.012)
+    metrics = penetration_metrics(
+        Hand.TRAIL,
+        solved.qpos,
+        grip_radius_m=0.012,
+        mount_matrix=solved.mount_matrix,
+    )
     gap = metrics["finger_finger_gap_m"]
     assert gap + settings.finger_finger_penetration_tolerance_m >= 0
 

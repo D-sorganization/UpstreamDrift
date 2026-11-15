@@ -17,5 +17,14 @@
   "mesh_obj_count": 14,
   "mesh_obj_bytes": 3500720,
   "visual_only": true,
+  "mesh_licence_verification": {
+    "spdx": "Apache-2.0",
+    "basis": "Single LICENSE in the Menagerie shadow_hand bundle covers all .obj visual meshes; no separate per-mesh licence files.",
+    "runtime_licence_path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/hand_assets/shadow_hand/LICENSE",
+    "vendored_licence_copy": "assets/third_party/shadow_dexterous_hand/LICENSE",
+    "mesh_glob": "assets/*.obj",
+    "mesh_obj_count": 14,
+    "runtime_licence_sha256": "d42cae9a0f292b7a713597ba26e1e1e23d50df906c488f0d36fd3538af200bc1"
+  },
   "note": "Apache-2.0 Shadow Dexterous Hand meshes for grip visuals; physics contact remains capsule proxies."
 }

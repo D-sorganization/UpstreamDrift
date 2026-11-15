@@ -39,12 +39,14 @@ def test_humanized_mesh_omits_forearm_extent() -> None:
 
 def test_joint_angle_dict_round_trip_wrist() -> None:
     spec = GripSpec.legacy()
+    from src.shared.python.model_appearance.grip_pose import Hand
+
     solved = shadow.solve_shadow_hand_qpos(
-        shadow._hand_from_side("trail"),
+        Hand.TRAIL,
         spec.trail,
         grip_spec=spec,
         grip_radius_m=0.012,
     )
-    overrides = {"WRJ1": float(solved[0]), "WRJ2": float(solved[1])}
+    overrides = {"WRJ1": float(solved.qpos[0]), "WRJ2": float(solved.qpos[1])}
     built = shadow.build_hand_visual(spec, "trail", overrides, grip_radius_m=0.012)
     assert built.mesh.volume() > 0.0

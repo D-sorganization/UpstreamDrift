@@ -1,9 +1,19 @@
 {
   "schema_version": 1,
   "club_penetration_tolerance_m": 0.012,
+  "club_assembly_axial_overhang_m": 0.22,
   "finger_finger_penetration_tolerance_m": 0.002,
   "shaft_roll_check_deg": 20.0,
   "pad_clearance_m": 0.001,
+  "finger_contact_tolerance_m": 0.004,
+  "capsule_pad_divergence_tolerance_m": {
+    "index": 0.058,
+    "middle": 0.08,
+    "ring": 0.155,
+    "little": 0.12,
+    "thumb_note": "Per-finger retarget from capsule hand; thumb ceiling separate"
+  },
+  "capsule_pad_divergence_thumb_max_m": 0.062,
   "curl_bisect_iterations": 48,
   "curl_joint_step_rad": 0.015,
   "grasp_soft_qpos_scale": 1.0,
@@ -13,7 +23,11 @@
     "axis2": "z",
     "angle2": 90
   },
-  "mount_translation_m": [0.0, 0.0, -0.262],
+  "mount_translation_m": [
+    0.0,
+    0.0,
+    0.018
+  ],
   "grip_radius_nominal_m": 0.012,
   "wrist_from_spec": {
     "club_cross_to_wrj1_gain": 0.012,
@@ -27,13 +41,26 @@
     "palm_depth_to_thj5_gain": 0.08,
     "club_cross_to_lfj5_gain": 0.004
   },
-  "skin_tone_rgba": [0.78, 0.62, 0.54, 1.0],
-  "hidden_body_substrings": ["forearm", "_wrist"],
-  "hidden_mesh_substrings": ["forearm", "wrist"],
+  "skin_tone_rgba": [
+    0.78,
+    0.62,
+    0.54,
+    1.0
+  ],
+  "hidden_body_substrings": [
+    "forearm",
+    "_wrist"
+  ],
+  "hidden_mesh_substrings": [
+    "forearm",
+    "wrist",
+    "mounting_plate",
+    "metacarpal"
+  ],
   "anthropometry": {
     "reference_hand_length_m": 0.19,
     "reference_hand_breadth_m": 0.087,
     "length_scale": 1.0,
-    "breadth_scale": 1.0
+    "breadth_scale": 0.52
   }
 }

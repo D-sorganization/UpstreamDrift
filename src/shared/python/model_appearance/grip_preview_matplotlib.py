@@ -27,11 +27,12 @@ class GripMeshPreviewStyle:
     diffuse: float = 0.55
     specular: float = 0.1
     light_direction: tuple[float, float, float] = (0.35, 0.45, 1.0)
-    edge_rgba: tuple[float, float, float, float] = (0.95, 0.92, 0.88, 0.28)
-    edge_linewidth: float = 0.18
+    edge_rgba: tuple[float, float, float, float] | None = None
+    edge_linewidth: float = 0.0
     alpha: float = 1.0
-    margin_fraction: float = 1.08
-    min_half_width_m: float = 0.045
+    margin_fraction: float = 1.05
+    min_half_width_m: float = 0.028
+    frame_fill_fraction: float = 0.72
 
 
 _DEFAULT_STYLE = GripMeshPreviewStyle()
@@ -76,12 +77,18 @@ def apply_equal_axis_limits(
     style: GripMeshPreviewStyle = _DEFAULT_STYLE,
 ) -> float:
     """Crop all three axes to the same half-width around ``centre``."""
-    mid, half = equal_half_width_from_points(
-        points,
-        margin_fraction=style.margin_fraction,
-        min_half_width_m=style.min_half_width_m,
-        centre=centre,
+    pts = np.asarray(points, dtype=float)
+    if centre is None:
+        centre = pts.mean(axis=0)
+    else:
+        centre = np.asarray(centre, dtype=float)
+    extent = float(np.max(np.ptp(pts, axis=0)))
+    fill = max(style.frame_fill_fraction, 0.35)
+    half = max(
+        style.min_half_width_m,
+        0.5 * extent / fill * style.margin_fraction,
     )
+    mid = centre
     ax.set_xlim(mid[0] - half, mid[0] + half)
     ax.set_ylim(mid[1] - half, mid[1] + half)
     ax.set_zlim(mid[2] - half, mid[2] + half)
@@ -130,12 +137,14 @@ def add_mesh_preview(
 
     tri = mesh.vertices[mesh.faces]
     colours = face_lambert_colours(mesh.vertices, mesh.faces, style=style)
+    edgecolors = None if style.edge_rgba is None else [style.edge_rgba] * len(tri)
     collection = Poly3DCollection(
         tri,
         facecolors=colours,
-        edgecolors=[style.edge_rgba] * len(tri),
+        edgecolors=edgecolors,
         linewidths=style.edge_linewidth,
         alpha=style.alpha,
+        shade=False,
     )
     ax.add_collection3d(collection)
     return collection
