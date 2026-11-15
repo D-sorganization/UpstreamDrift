@@ -1,141 +1,163 @@
 #!/usr/bin/env python3
-"""Evidence stills for the skinned_human hand visual backend (#15122)."""
+"""Evidence stills of the skinned MakeHuman hand on the club (epic #15150).
+
+Lead, trail and both hands, from the palm, back, thumb side and butt end, at
+shaft roll 0 and +/-20 degrees. The hand is built with the roll in its grip
+spec (the backend rolls it); the camera stays where the unrolled hand puts it.
+
+The frames come from the shared renderer (``hand_backends/render.py``, PR
+#15154). Until that lands on this branch, point ``--renderer-root`` (or
+``HAND_RENDERER_ROOT``) at a checkout of its branch.
+
+    PYTHONPATH=. MUJOCO_GL=egl python \\
+        docs/development/full_body_models/evidence/hand_skinned_human/render_skinned_human_evidence.py \\
+        --renderer-root ../hand-renderer-15154
+"""
 
 from __future__ import annotations
 
 import argparse
+import dataclasses
+import json
+import os
+import sys
 from pathlib import Path
 
-import matplotlib
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 import numpy as np
 
-from src.shared.python.grip_spec import GripSpec, HandGripSpec
+import src.shared.python.model_appearance.hand_backends as hand_backends
+from src.shared.python.grip_spec.types import GripSpec
 from src.shared.python.model_appearance.geometry import Mesh
-from src.shared.python.model_appearance.grip_preview_matplotlib import (
-    GripMeshPreviewStyle,
-    add_mesh_preview,
-    apply_equal_axis_limits,
-)
-from src.shared.python.model_appearance.hand_backends import build_hand_visual
-from src.shared.python.model_appearance.hand_backends.joint_angles import (
-    legacy_neutral_joint_angles,
+from src.shared.python.model_appearance.hand_backends.qa import (
+    load_hand_visual_quality,
+    max_grip_cylinder_penetration_m,
+    skinning_defects,
 )
 from src.shared.python.model_appearance.hand_backends.skinned_human import (
-    default_settings,
+    build_hand_visual,
 )
 
-_OUT = Path(__file__).resolve().parent
-_GRIP_R = 0.0145
-_ROLLS = (-20.0, 0.0, 20.0)
-_DPI = 128
-_PX = 1024
-_HAND_STYLE = GripMeshPreviewStyle(
-    base_rgb=default_settings().skin_rgb,
-    smooth_normals=True,
-    margin_fraction=0.32,
-    min_half_width_m=0.032,
-)
-_SHAFT_STYLE = GripMeshPreviewStyle(
-    base_rgb=(0.22, 0.24, 0.28),
-    ambient=0.45,
-    diffuse=0.4,
-    smooth_normals=True,
-    margin_fraction=0.32,
-    min_half_width_m=0.032,
-)
+OUT = Path(__file__).resolve().parent
+SETTINGS = json.loads((OUT / "evidence_settings.json").read_text(encoding="utf-8"))
+_PACKAGE = Path("src/shared/python/model_appearance/hand_backends")
 
 
-def _grip_cylinder(radius: float, *, segments: int = 64) -> Mesh:
-    theta = np.linspace(0, 2 * np.pi, segments, endpoint=False)
-    z0, z1 = -0.04, 0.16
-    verts, faces = [], []
-    for z in (z0, z1):
-        ring = np.column_stack(
-            [radius * np.cos(theta), radius * np.sin(theta), np.full_like(theta, z)]
-        )
-        base = len(verts)
-        verts.append(ring)
-        if base > 0:
-            for i in range(segments):
-                j = (i + 1) % segments
-                faces.append([base - segments + i, base - segments + j, base + i])
-                faces.append([base - segments + j, base + j, base + i])
-    return Mesh(np.vstack(verts), np.asarray(faces, dtype=np.int64))
+def _load_renderer(root: str | None):
+    """Import the shared renderer, from this tree or from ``root``."""
+    if not (Path(hand_backends.__file__).parent / "render.py").is_file():
+        if not root or not (Path(root) / _PACKAGE / "render.py").is_file():
+            raise SystemExit("shared renderer not found: pass --renderer-root")
+        hand_backends.__path__.append(str(Path(root).resolve() / _PACKAGE))
+    from src.shared.python.model_appearance.hand_backends import render
+
+    return render
 
 
-def _render_view(
-    meshes: list[tuple[Mesh, GripMeshPreviewStyle]],
-    *,
-    elev: float,
-    azim: float,
-    out_path: Path,
-    title: str,
-) -> None:
-    fig = plt.figure(figsize=(_PX / _DPI, _PX / _DPI), dpi=_DPI)
-    ax = fig.add_subplot(111, projection="3d")
-    frame_pts = np.vstack([mesh.vertices for mesh, _ in meshes])
-    for mesh, style in meshes:
-        add_mesh_preview(ax, mesh, style=style)
-    apply_equal_axis_limits(ax, frame_pts, style=_HAND_STYLE)
-    ax.view_init(elev=elev, azim=azim)
-    ax.set_title(title, color="#e8e4dc", fontsize=11)
-    ax.set_axis_off()
-    fig.patch.set_facecolor("#12151a")
-    fig.savefig(out_path, bbox_inches="tight", pad_inches=0.02, facecolor=fig.get_facecolor())
-    plt.close(fig)
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--out", type=Path, default=_OUT)
-    args = parser.parse_args()
-    args.out.mkdir(parents=True, exist_ok=True)
-    shaft = _grip_cylinder(_GRIP_R)
-    views = (("butt", 12, -35), ("side", 6, 24), ("top", 82, -48))
-    for side in ("lead", "trail"):
-        for roll in _ROLLS:
-            hand_key = "lead" if side == "lead" else "trail"
-            spec = GripSpec.legacy(**{hand_key: HandGripSpec(shaft_roll_deg=roll)})
-            angles = legacy_neutral_joint_angles(spec, side)
-            hand = build_hand_visual(spec, side, angles, grip_radius_m=_GRIP_R).mesh
-            for view_name, elev, azim in views:
-                out = args.out / f"{side}_{view_name}_roll_{roll:+.0f}.png"
-                _render_view(
-                    [(shaft, _SHAFT_STYLE), (hand, _HAND_STYLE)],
-                    elev=elev,
-                    azim=azim,
-                    out_path=out,
-                    title=f"{side} hand  roll={roll:+.0f}°  ({view_name})",
-                )
-    both_spec = GripSpec.legacy(
-        lead=HandGripSpec(shaft_roll_deg=0.0),
-        trail=HandGripSpec(shaft_roll_deg=0.0),
+def _spec(roll_deg: float) -> GripSpec:
+    base = GripSpec.legacy()
+    return dataclasses.replace(
+        base,
+        lead=dataclasses.replace(base.lead, shaft_roll_deg=roll_deg),
+        trail=dataclasses.replace(base.trail, shaft_roll_deg=roll_deg),
     )
-    lead = build_hand_visual(
-        both_spec,
-        "lead",
-        legacy_neutral_joint_angles(both_spec, "lead"),
-        grip_radius_m=_GRIP_R,
-    ).mesh
-    trail = build_hand_visual(
-        both_spec,
-        "trail",
-        legacy_neutral_joint_angles(both_spec, "trail"),
-        grip_radius_m=_GRIP_R,
-    ).mesh
-    for view_name, elev, azim in views:
-        out = args.out / f"both_{view_name}_roll_0.png"
-        _render_view(
-            [(shaft, _SHAFT_STYLE), (lead, _HAND_STYLE), (trail, _HAND_STYLE)],
-            elev=elev,
-            azim=azim,
-            out_path=out,
-            title=f"Both hands  roll=0°  ({view_name})",
+
+
+def _basis(result) -> tuple[np.ndarray, np.ndarray]:
+    """Thumb-side and back-of-hand directions of an unrolled result."""
+    rotation = result.frame_from_rest[:3, :3]
+    return rotation @ np.array([1.0, 0.0, 0.0]), rotation @ np.array([0.0, 0.0, -1.0])
+
+
+def _roll_tag(roll_deg: float) -> str:
+    return f"roll{'m' if roll_deg < 0 else 'p'}{abs(round(roll_deg)):02d}"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--renderer-root", default=os.environ.get("HAND_RENDERER_ROOT"))
+    args = parser.parse_args()
+    render = _load_renderer(args.renderer_root)
+    settings = render.load_hand_render_settings().with_overrides(
+        frame_px=int(SETTINGS["frame_px"])
+    )
+    quality = load_hand_visual_quality()
+    radius = float(quality["grip_radius_m"])
+    views = tuple(SETTINGS["views"])
+    report: dict[str, object] = {"frames": {}, "hands": {}}
+
+    def skin(mesh: Mesh, rgb) -> object:
+        return render.ScenePart(mesh, (*rgb, 1.0), "skin")
+
+    def shoot(name: str, parts, view: str, basis, side: str) -> None:
+        z = np.concatenate([p.mesh.vertices[:, 2] for p in parts])
+        club = render.build_club_parts(
+            float(z.min()), float(z.max()), settings=settings, grip_radius_m=radius
         )
+        frame = render.render_scene(
+            [*parts, *club], view, basis=basis, settings=settings, side=side
+        )
+        render.save_png(frame, OUT / f"{name}.png")
+        report["frames"][name] = {
+            "engine": frame.engine,
+            "fill": round(float(frame.fill_fraction), 3),
+        }
+
+    flat = {
+        side: build_hand_visual(_spec(0.0), side, grip_radius_m=radius)
+        for side in ("lead", "trail")
+    }
+    spacing = _spec(0.0).hand_spacing_m
+    for roll in SETTINGS["rolls_deg"]:
+        hands = {
+            side: build_hand_visual(_spec(float(roll)), side, grip_radius_m=radius)
+            for side in ("lead", "trail")
+        }
+        tag = _roll_tag(float(roll))
+        for side, result in hands.items():
+            defects = skinning_defects(
+                result, min_area_m2=float(quality["min_triangle_area_m2"])
+            )
+            report["hands"][f"{side}_{tag}"] = {
+                "max_penetration_mm": round(
+                    1e3 * max_grip_cylinder_penetration_m(result.mesh.vertices, radius),
+                    3,
+                ),
+                "contact_gaps_mm": {
+                    k: round(1e3 * v, 2) for k, v in result.contact_gaps_m.items()
+                },
+                "joint_angles_deg": {
+                    k: round(float(np.degrees(v)), 1)
+                    for k, v in result.joint_angles.as_mapping().items()
+                },
+                **defects,
+            }
+            for view in views:
+                shoot(
+                    f"skinned_{side}_{view}_{tag}",
+                    [skin(result.mesh, result.skin_rgb)],
+                    view,
+                    _basis(flat[side]),
+                    side,
+                )
+        # Both hands: the trail hand sits one hand spacing toward the head.
+        trail = hands["trail"]
+        shifted = Mesh(
+            trail.mesh.vertices + np.array([0.0, 0.0, spacing]), trail.mesh.faces
+        )
+        pair = [
+            skin(hands["lead"].mesh, hands["lead"].skin_rgb),
+            skin(shifted, trail.skin_rgb),
+        ]
+        for view in views:
+            shoot(
+                f"skinned_both_{view}_{tag}", pair, view, _basis(flat["lead"]), "lead"
+            )
+    (OUT / "render_manifest.json").write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    sys.stdout.write(f"wrote {len(report['frames'])} frames to {OUT}\n")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

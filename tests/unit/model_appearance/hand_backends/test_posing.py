@@ -23,6 +23,7 @@ from src.shared.python.model_appearance.hand_backends.posing import (
     curl_to_contact,
     cylinder_distance,
     flat_hand_rotation,
+    wrap_to_contact,
 )
 
 pytestmark = pytest.mark.unit
@@ -189,3 +190,39 @@ def test_flat_hand_rotation_puts_shaft_on_z_and_palm_on_the_grip() -> None:
     np.testing.assert_allclose(rot @ direction, [0.0, 0.0, 1.0], atol=1e-12)
     radial_out = np.array([math.cos(azimuth), math.sin(azimuth), 0.0])
     np.testing.assert_allclose(rot @ marks.palmar, -radial_out, atol=1e-12)
+
+
+def test_wrap_search_frees_a_finger_that_lands_on_its_tip() -> None:
+    """Base well above the grip: the greedy curl hooks, the wrap search wraps."""
+    finger = _PlanarFinger(base_x=-0.012)
+    finger._base = finger._base + np.array([0.0, 0.012, 0.0])
+    distance = cylinder_distance(_RADIUS)
+    chain = CurlChain("finger", _chain().joints, must_touch=("mid", "dist"))
+    greedy = curl_to_contact(finger, (chain,), distance, _SETTINGS, {})
+    wrapped = wrap_to_contact(finger, (chain,), distance, _SETTINGS, {}, samples=12)
+    posed = finger.points(wrapped.angles)
+    assert float(distance(posed).min()) >= -_SETTINGS.penetration_allowance_m - 1e-9
+
+    def shortfall(result) -> float:
+        return sum(
+            max(0.0, result.gaps[b] - _SETTINGS.contact_tolerance_m)
+            for b in chain.must_touch
+        )
+
+    assert shortfall(wrapped) <= shortfall(greedy) + 1e-12
+    assert max(wrapped.angles.values()) <= max(greedy.angles.values()) + 1e-12
+    for joint in chain.joints:
+        assert joint.lower_rad <= wrapped.angles[joint.bone] <= joint.upper_rad
+    with pytest.raises(ValueError):
+        wrap_to_contact(finger, (chain,), distance, _SETTINGS, {}, samples=1)
+    with pytest.raises(ValueError):
+        CurlChain("finger", _chain().joints, must_touch=("thumb",))
+
+
+def test_a_pre_curled_joint_carries_on_from_where_it_is() -> None:
+    finger = _PlanarFinger(base_x=-0.012)
+    far = cylinder_distance(_RADIUS * 0.05)
+    limit = math.radians(40.0)
+    start = {"mid": math.radians(25.0)}
+    result = curl_to_contact(finger, (_chain(limit),), far, _SETTINGS, start)
+    assert result.angles["mid"] >= math.radians(25.0)

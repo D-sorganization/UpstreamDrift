@@ -1,6 +1,6 @@
 {
-  "asset_sha256": "be89681f0ec027667fd35cef2804e1fa500d0ac36087bc00b1af0505af04d608",
-  "content_sha256": "516190fd31d3dce5997fb66fc96bd6e1be783607f01f972d99538f0b2f45f4b1",
+  "asset_sha256": "2da660fe42c1e025ad0eee5d41c7472ce2521cc63c94cf3d40d50eaf916bd0ef",
+  "content_sha256": "81cf2c7e4f066a12616bb12c7bcb8ca4079605f9670f42f9454546eab4952e3e",
   "licence": "CC0-1.0",
   "source_name": "MakeHuman hm08 base mesh, default skeleton and default weights (right hand extract)",
   "source_commit": "a8bc2d54ff0ac92e78ff71431b1023eda42bf482",

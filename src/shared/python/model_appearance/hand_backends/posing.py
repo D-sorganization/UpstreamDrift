@@ -92,10 +92,15 @@ class CurlChain:
 
     name: str
     joints: tuple[CurlJoint, ...]
+    #: Segments that should end up touching (empty = every joint's segment).
+    must_touch: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.joints:
             raise ValueError(f"chain {self.name!r} has no joints")
+        bones = {joint.bone for joint in self.joints}
+        if not set(self.must_touch) <= bones:
+            raise ValueError(f"chain {self.name!r}: must_touch names an unknown joint")
 
 
 @dataclass(frozen=True)
@@ -208,7 +213,10 @@ def _curl_joint(
     def free(angle: float) -> bool:
         return clearances(angle)[1] >= -settings.penetration_allowance_m
 
-    angle = joint.start_rad
+    # A joint that an earlier coupling has already curled carries on from there.
+    angle = min(
+        joint.upper_rad, max(joint.start_rad, angles.get(joint.bone, joint.start_rad))
+    )
     if not free(angle):
         # Already inside the obstacle: open the joint until it is clear.
         while angle > joint.lower_rad and not free(angle):
@@ -273,6 +281,89 @@ def curl_to_contact(
                 <= joint.upper_rad + 1e-12
             ):
                 raise AssertionError(f"{joint.bone} left its joint limits")
+    return CurlResult(angles=angles, gaps=gaps, order=tuple(order))
+
+
+def _chain_cost(
+    hand: PosableHand,
+    chain: CurlChain,
+    obstacle: ObstacleDistance,
+    settings: CurlSettings,
+    angles: Mapping[str, float],
+) -> tuple[float, float]:
+    """(contact shortfall in metres, largest fraction of a joint's range used)."""
+    distance = obstacle(hand.points(angles))
+    wanted = chain.must_touch or tuple(joint.bone for joint in chain.joints)
+    shortfall = sum(
+        max(
+            0.0,
+            float(distance[hand.segment_ids(b)].min()) - settings.contact_tolerance_m,
+        )
+        for b in wanted
+    )
+    used = max(
+        (angles[j.bone] - j.lower_rad) / max(j.upper_rad - j.lower_rad, 1e-12)
+        for j in chain.joints
+    )
+    return shortfall, used
+
+
+def wrap_to_contact(
+    hand: PosableHand,
+    chains: Sequence[CurlChain],
+    obstacle: ObstacleDistance,
+    settings: CurlSettings,
+    initial_angles: Mapping[str, float],
+    *,
+    samples: int,
+) -> CurlResult:
+    """Curl each chain, then look for a better wrap than the greedy curl.
+
+    The greedy curl (:func:`curl_to_contact`) closes the first joint as far
+    as it goes, so a digit whose tip lands first is left hooked, its middle
+    segment off the obstacle. Here the chain's first joint is also tried at
+    ``samples`` angles across its range, the joints after it are closed to
+    contact in order, and the pose is kept that leaves the chain's
+    ``must_touch`` segments closest to the obstacle; among equally good poses
+    the one that uses the smallest share of any joint's range wins. No pose
+    that penetrates beyond the allowance is considered.
+
+    Preconditions and postconditions are those of :func:`curl_to_contact`;
+    ``samples`` must be at least 2.
+    """
+    if samples < 2:
+        raise ValueError("samples must be at least 2")
+    angles = {str(k): float(v) for k, v in initial_angles.items()}
+    order: list[str] = []
+    for chain in chains:
+        first, rest = chain.joints[0], chain.joints[1:]
+        moved = hand.moved_ids(first.bone)
+        best_angles = curl_to_contact(hand, (chain,), obstacle, settings, angles).angles
+        best_cost = _chain_cost(hand, chain, obstacle, settings, best_angles)
+        span = first.upper_rad - first.lower_rad
+        # A coarse pass over the whole range, then a fine pass around the best.
+        for width in (span, 2.0 * span / (samples - 1)):
+            centre = best_angles[first.bone] if width < span else first.lower_rad
+            low = max(first.lower_rad, centre - 0.5 * width) if width < span else centre
+            high = min(first.upper_rad, low + width)
+            for angle in np.linspace(low, high, samples):
+                candidate = _apply(first, float(angle), angles)
+                for joint in rest:
+                    candidate, _ = _curl_joint(
+                        hand, joint, obstacle, settings, candidate
+                    )
+                clear = float(obstacle(hand.points(candidate))[moved].min())
+                if clear < -settings.penetration_allowance_m:
+                    continue
+                cost = _chain_cost(hand, chain, obstacle, settings, candidate)
+                closer = cost[0] < best_cost[0] - 1e-9
+                level = cost[0] <= best_cost[0] + 1e-9
+                if closer or (level and cost[1] < best_cost[1]):
+                    best_cost, best_angles = cost, candidate
+        angles = best_angles
+        order.extend(joint.bone for joint in chain.joints)
+    final = obstacle(hand.points(angles))
+    gaps = {bone: float(final[hand.segment_ids(bone)].min()) for bone in order}
     return CurlResult(angles=angles, gaps=gaps, order=tuple(order))
 
 

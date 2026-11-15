@@ -1,0 +1,5 @@
+{
+  "frame_px": 1024,
+  "views": ["palm", "back", "thumb_side", "butt"],
+  "rolls_deg": [-20.0, 0.0, 20.0]
+}

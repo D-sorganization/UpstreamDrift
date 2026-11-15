@@ -39,6 +39,7 @@ from src.shared.python.model_appearance.hand_backends.joint_angles import (
     HandSide,
 )
 from src.shared.python.model_appearance.hand_backends.posing import (
+    CoupledJoint,
     CurlChain,
     CurlJoint,
     CurlSettings,
@@ -50,6 +51,7 @@ from src.shared.python.model_appearance.hand_backends.posing import (
     flat_hand_rotation,
     rigid,
     seat_on_obstacle,
+    wrap_to_contact,
 )
 from src.shared.python.model_appearance.hand_backends.skinning import (
     SkinnedHandAsset,
@@ -85,6 +87,7 @@ class SkinnedHumanSettings:
     breadth_band_m: float
     scale_limits: tuple[float, float]
     palm_contact_azimuth_offset_deg: float
+    palm_centre_wrap_deg: float
     index_station_at_spec_zero: float
     seat_max_tilt_deg: float
     seat_max_travel_m: float
@@ -92,6 +95,9 @@ class SkinnedHumanSettings:
     finger_adduction_fraction: float
     curl: CurlSettings
     limits_deg: tuple[tuple[str, tuple[float, float]], ...]
+    pip_per_mcp: float
+    dip_per_pip: float
+    wrap_scan_samples: int
     arch_passes: int
     arch_gain: tuple[tuple[str, float], ...]
     arch_limit_deg: tuple[tuple[str, float], ...]
@@ -147,6 +153,7 @@ def settings_from_mapping(raw: Mapping[str, object]) -> SkinnedHumanSettings:
         breadth_band_m=float(anthro["breadth_band_m"]),
         scale_limits=_pair(anthro["scale_limits"], "scale_limits"),
         palm_contact_azimuth_offset_deg=float(place["palm_contact_azimuth_offset_deg"]),
+        palm_centre_wrap_deg=float(place["palm_centre_wrap_deg"]),
         index_station_at_spec_zero=_unit_interval(
             place["index_station_at_spec_zero"], "index_station_at_spec_zero"
         ),
@@ -165,6 +172,9 @@ def settings_from_mapping(raw: Mapping[str, object]) -> SkinnedHumanSettings:
         limits_deg=tuple(
             (k, _pair(v, f"limits_deg.{k}")) for k, v in curl["limits_deg"].items()
         ),
+        pip_per_mcp=float(curl["synergy"]["pip_per_mcp"]),
+        dip_per_pip=float(curl["synergy"]["dip_per_pip"]),
+        wrap_scan_samples=int(curl["wrap_scan_samples"]),
         arch_passes=passes,
         arch_gain=tuple((k, float(v)) for k, v in curl["arch_gain"].items()),
         arch_limit_deg=tuple((k, float(v)) for k, v in curl["arch_limit_deg"].items()),
@@ -243,9 +253,25 @@ class _GripHand:
         self.asset = asset
         self.settings = settings
         self.placement = np.eye(4)
-        self.fixed: dict[str, Array] = self._adduction()
         self.press_axis = np.array([1.0, 0.0, 0.0])
+        self._index = {name: i for i, name in enumerate(asset.bone_names)}
+        self._parents = [int(p) for p in asset.bone_parents]
+        axes = asset.flex_axes
+        k = np.zeros((len(axes), 3, 3))
+        k[:, 0, 1], k[:, 0, 2] = -axes[:, 2], axes[:, 1]
+        k[:, 1, 0], k[:, 1, 2] = axes[:, 2], -axes[:, 0]
+        k[:, 2, 0], k[:, 2, 1] = -axes[:, 1], axes[:, 0]
+        self._hinge_k, self._hinge_kk = k, k @ k
+        # Linear blend skinning as one matrix product: weights times [v, 1].
+        homogeneous = np.hstack(
+            [asset.rest_vertices, np.ones((len(asset.rest_vertices), 1))]
+        )
+        dense = asset.dense_weights()
+        self._blend = (dense[:, :, None] * homogeneous[:, None, :]).reshape(
+            len(dense), -1
+        )
         self._segment: dict[str, NDArray[np.int64]] = {}
+        self.fixed: dict[str, Array] = self._adduction()
         self._moved: dict[str, NDArray[np.int64]] = {}
 
     def _adduction(self) -> dict[str, Array]:
@@ -265,16 +291,19 @@ class _GripHand:
         d = self.asset.bone_tails[i] - self.asset.bone_heads[i]
         return d / np.linalg.norm(d)
 
+    def _hinge(self, i: int, angle: float) -> Array:
+        """Rodrigues rotation about bone ``i``'s flexion axis (precomputed)."""
+        k, kk = self._hinge_k[i], self._hinge_kk[i]
+        return np.eye(3) + math.sin(angle) * k + (1.0 - math.cos(angle)) * kk
+
     def rotations(self, angles: Mapping[str, float]) -> dict[str, Array]:
         asset = self.asset
         out = dict(self.fixed)
         for name, angle in angles.items():
             if name == THUMB_PRESS:
                 continue
-            i = asset.bone_index(name)
-            hinge = rotation_about_axis(
-                asset.flex_axes[i], angle - asset.rest_flexion_rad[i]
-            )
+            i = self._index[name]
+            hinge = self._hinge(i, angle - float(asset.rest_flexion_rad[i]))
             out[name] = out[name] @ hinge if name in out else hinge
         if THUMB_PRESS in angles:
             press = rotation_about_axis(self.press_axis, angles[THUMB_PRESS])
@@ -282,10 +311,24 @@ class _GripHand:
         return out
 
     def transforms(self, angles: Mapping[str, float]) -> Array:
-        return bone_transforms(self.asset, self.rotations(angles))
+        """Forward kinematics; equal to ``skinning.bone_transforms`` of
+        :meth:`rotations` (a unit test holds the two together)."""
+        rotations = self.rotations(angles)
+        heads, parents = self.asset.bone_heads, self._parents
+        out = np.empty((len(parents), 4, 4))
+        for i, name in enumerate(self.asset.bone_names):
+            local = np.eye(4)
+            rot = rotations.get(name)
+            if rot is not None:
+                local[:3, :3] = rot
+                local[:3, 3] = heads[i] - rot @ heads[i]
+            out[i] = local if parents[i] < 0 else out[parents[i]] @ local
+        return out
 
     def points(self, angles: Mapping[str, float]) -> Array:
-        local = pose_vertices(self.asset, self.transforms(angles))
+        """Skinned vertices in the grip frame (same as ``pose_vertices``)."""
+        stacked = self.transforms(angles)[:, :3, :].transpose(0, 2, 1).reshape(-1, 3)
+        local = self._blend @ stacked
         return local @ self.placement[:3, :3].T + self.placement[:3, 3]
 
     def segment_ids(self, bone: str) -> NDArray[np.int64]:
@@ -365,7 +408,9 @@ def _targets(
     station = hand.index_contact_station or settings.index_station_at_spec_zero
     return _RightHandTargets(
         palm_azimuth_rad=math.radians(
-            v_azimuth + settings.palm_contact_azimuth_offset_deg
+            v_azimuth
+            + settings.palm_contact_azimuth_offset_deg
+            + settings.palm_centre_wrap_deg
         ),
         thumb_azimuth_rad=math.radians(-hand.thumb_azimuth_deg),
         cross_angle_deg=hand.club_cross_angle_deg,
@@ -415,13 +460,36 @@ def _seat_flat_hand(
 
 
 def _finger_chains(settings: SkinnedHumanSettings) -> tuple[CurlChain, ...]:
+    """Finger chains, knuckle first.
+
+    While a joint closes, the joints beyond it follow at the synergy gains, so
+    a finger curls as it closes instead of swinging in straight and landing
+    on its tip. Each following joint then carries on from where it was left.
+    """
+    pip_gain, dip_gain = settings.pip_per_mcp, settings.dip_per_pip
     chains = []
     for finger in FINGERS:
-        joints = []
-        for segment in _SEGMENTS:
-            low, high = settings.limit_rad(_JOINT_OF_SEGMENT[segment])
-            joints.append(CurlJoint(f"{finger}_{segment}", low, high, low))
-        chains.append(CurlChain(finger, tuple(joints)))
+        limits = {s: settings.limit_rad(_JOINT_OF_SEGMENT[s]) for s in _SEGMENTS}
+        prox, mid, dist = (f"{finger}_{s}" for s in _SEGMENTS)
+        joints = (
+            CurlJoint(
+                prox,
+                *limits["prox"],
+                limits["prox"][0],
+                (
+                    CoupledJoint(mid, pip_gain, limits["mid"][1]),
+                    CoupledJoint(dist, pip_gain * dip_gain, limits["dist"][1]),
+                ),
+            ),
+            CurlJoint(
+                mid,
+                *limits["mid"],
+                limits["mid"][0],
+                (CoupledJoint(dist, dip_gain, limits["dist"][1]),),
+            ),
+            CurlJoint(dist, *limits["dist"], limits["dist"][0]),
+        )
+        chains.append(CurlChain(finger, joints, must_touch=(mid, dist)))
     return tuple(chains)
 
 
@@ -585,7 +653,17 @@ def _solve_right_hand(
         arch = _arch_from_knuckles(angles, settings)
     _seat_flat_hand(hand, targets, obstacle, arch)
     start = {**_straight_angles(), **arch}
-    angles = curl_to_contact(hand, chains, obstacle, settings.curl, start).angles
+    if settings.wrap_scan_samples >= 2:
+        angles = wrap_to_contact(
+            hand,
+            chains,
+            obstacle,
+            settings.curl,
+            start,
+            samples=settings.wrap_scan_samples,
+        ).angles
+    else:
+        angles = curl_to_contact(hand, chains, obstacle, settings.curl, start).angles
     _aim_thumb(hand, targets, angles, grip_radius_m)
     angles = curl_to_contact(
         hand, (_thumb_chain(settings, targets),), obstacle, settings.curl, angles

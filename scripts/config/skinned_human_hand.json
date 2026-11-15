@@ -6,24 +6,27 @@
   },
   "placement": {
     "palm_contact_azimuth_offset_deg": 55.0,
+    "palm_centre_wrap_deg": 58.0,
     "index_station_at_spec_zero": 0.45,
     "seat_max_tilt_deg": 30.0,
     "seat_max_travel_m": 0.07,
     "seat_iterations": 32
   },
   "preshape": {
-    "finger_adduction_fraction": 0.7
+    "finger_adduction_fraction": 1.0
   },
   "curl": {
     "step_deg": 2.0,
     "bisection_steps": 22,
-    "contact_tolerance_m": 0.0015,
+    "contact_tolerance_m": 0.001,
     "penetration_allowance_m": 0.0003,
     "limits_deg": {
       "mcp": [0.0, 95.0],
       "pip": [0.0, 115.0],
       "dip": [0.0, 85.0]
     },
+    "synergy": {"pip_per_mcp": 0.0, "dip_per_pip": 0.3},
+    "wrap_scan_samples": 16,
     "arch_passes": 2,
     "arch_gain": {"index": 0.0, "middle": 0.0, "ring": 0.10, "little": 0.20},
     "arch_limit_deg": {"index": 0.0, "middle": 0.0, "ring": 8.0, "little": 16.0}

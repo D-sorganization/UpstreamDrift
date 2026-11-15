@@ -163,7 +163,11 @@ def bone_tables(
         ids = [BONE_NAMES.index(b) for b in chain]
         pts = np.vstack([heads_a[ids], tails_a[ids[-1]][None]])
         toward = ulnar_palmar if digit == "thumb" else palmar
-        axes[ids] = _digit_flex_axis(pts, toward, ratio)
+        # A finger's rest joints are too nearly in line to fix its plane of
+        # flexion (the fit rolls neighbouring fingers apart), so fingers hinge
+        # about the palm-plane axis square to the finger; the thumb is fitted.
+        fit_ratio = ratio if digit == "thumb" else float("inf")
+        axes[ids] = _digit_flex_axis(pts, toward, fit_ratio)
     for meta in METACARPALS:
         i = BONE_NAMES.index(meta)
         axes[i] = _unit(np.cross(_unit(tails_a[i] - heads_a[i]), palmar))

@@ -1,0 +1,420 @@
+{
+  "frames": {
+    "skinned_both_back_rollm20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_both_back_rollp00": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_both_back_rollp20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_both_butt_rollm20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_both_butt_rollp00": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_both_butt_rollp20": {
+      "engine": "egl",
+      "fill": 0.691
+    },
+    "skinned_both_palm_rollm20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_both_palm_rollp00": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_both_palm_rollp20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_both_thumb_side_rollm20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_both_thumb_side_rollp00": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_both_thumb_side_rollp20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_lead_back_rollm20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_lead_back_rollp00": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_lead_back_rollp20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_lead_butt_rollm20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_lead_butt_rollp00": {
+      "engine": "egl",
+      "fill": 0.697
+    },
+    "skinned_lead_butt_rollp20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_lead_palm_rollm20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_lead_palm_rollp00": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_lead_palm_rollp20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_lead_thumb_side_rollm20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_lead_thumb_side_rollp00": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_lead_thumb_side_rollp20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_trail_back_rollm20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_trail_back_rollp00": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_trail_back_rollp20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_trail_butt_rollm20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_trail_butt_rollp00": {
+      "engine": "egl",
+      "fill": 0.697
+    },
+    "skinned_trail_butt_rollp20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_trail_palm_rollm20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_trail_palm_rollp00": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_trail_palm_rollp20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_trail_thumb_side_rollm20": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_trail_thumb_side_rollp00": {
+      "engine": "egl",
+      "fill": 0.699
+    },
+    "skinned_trail_thumb_side_rollp20": {
+      "engine": "egl",
+      "fill": 0.699
+    }
+  },
+  "hands": {
+    "lead_rollm20": {
+      "contact_gaps_mm": {
+        "hand": -0.3,
+        "index_dist": -0.3,
+        "index_mid": -0.13,
+        "index_prox": 0.07,
+        "little_dist": -0.3,
+        "little_mid": 0.83,
+        "little_prox": 3.53,
+        "middle_dist": -0.3,
+        "middle_mid": -0.23,
+        "middle_prox": -0.13,
+        "palm": 0.0,
+        "ring_dist": -0.3,
+        "ring_mid": 0.88,
+        "ring_prox": 2.13,
+        "thumb_dist": -0.3,
+        "thumb_prox": 13.35
+      },
+      "degenerate": 0,
+      "flipped": 9,
+      "flipped_area_fraction": 0.0013231485630339434,
+      "joint_angles_deg": {
+        "index_dist": 47.9,
+        "index_mid": 71.5,
+        "index_prox": 0.0,
+        "little_dist": 15.1,
+        "little_mid": 50.3,
+        "little_prox": 73.9,
+        "meta_index": 0.0,
+        "meta_little": 16.0,
+        "meta_middle": 0.0,
+        "meta_ring": 7.5,
+        "middle_dist": 30.5,
+        "middle_mid": 86.1,
+        "middle_prox": 51.6,
+        "ring_dist": 22.6,
+        "ring_mid": 75.4,
+        "ring_prox": 65.9,
+        "thumb_dist": 8.5,
+        "thumb_press": 4.3,
+        "thumb_prox": 12.0
+      },
+      "max_penetration_mm": 0.3
+    },
+    "lead_rollp00": {
+      "contact_gaps_mm": {
+        "hand": -0.3,
+        "index_dist": -0.3,
+        "index_mid": -0.13,
+        "index_prox": 0.07,
+        "little_dist": -0.3,
+        "little_mid": 0.83,
+        "little_prox": 3.53,
+        "middle_dist": -0.3,
+        "middle_mid": -0.23,
+        "middle_prox": -0.13,
+        "palm": 0.0,
+        "ring_dist": -0.3,
+        "ring_mid": 0.88,
+        "ring_prox": 2.13,
+        "thumb_dist": -0.3,
+        "thumb_prox": 13.35
+      },
+      "degenerate": 0,
+      "flipped": 9,
+      "flipped_area_fraction": 0.0013231485630339434,
+      "joint_angles_deg": {
+        "index_dist": 47.9,
+        "index_mid": 71.5,
+        "index_prox": 0.0,
+        "little_dist": 15.1,
+        "little_mid": 50.3,
+        "little_prox": 73.9,
+        "meta_index": 0.0,
+        "meta_little": 16.0,
+        "meta_middle": 0.0,
+        "meta_ring": 7.5,
+        "middle_dist": 30.5,
+        "middle_mid": 86.1,
+        "middle_prox": 51.6,
+        "ring_dist": 22.6,
+        "ring_mid": 75.4,
+        "ring_prox": 65.9,
+        "thumb_dist": 8.5,
+        "thumb_press": 4.3,
+        "thumb_prox": 12.0
+      },
+      "max_penetration_mm": 0.3
+    },
+    "lead_rollp20": {
+      "contact_gaps_mm": {
+        "hand": -0.3,
+        "index_dist": -0.3,
+        "index_mid": -0.13,
+        "index_prox": 0.07,
+        "little_dist": -0.3,
+        "little_mid": 0.83,
+        "little_prox": 3.53,
+        "middle_dist": -0.3,
+        "middle_mid": -0.23,
+        "middle_prox": -0.13,
+        "palm": 0.0,
+        "ring_dist": -0.3,
+        "ring_mid": 0.88,
+        "ring_prox": 2.13,
+        "thumb_dist": -0.3,
+        "thumb_prox": 13.35
+      },
+      "degenerate": 0,
+      "flipped": 9,
+      "flipped_area_fraction": 0.0013231485630339434,
+      "joint_angles_deg": {
+        "index_dist": 47.9,
+        "index_mid": 71.5,
+        "index_prox": 0.0,
+        "little_dist": 15.1,
+        "little_mid": 50.3,
+        "little_prox": 73.9,
+        "meta_index": 0.0,
+        "meta_little": 16.0,
+        "meta_middle": 0.0,
+        "meta_ring": 7.5,
+        "middle_dist": 30.5,
+        "middle_mid": 86.1,
+        "middle_prox": 51.6,
+        "ring_dist": 22.6,
+        "ring_mid": 75.4,
+        "ring_prox": 65.9,
+        "thumb_dist": 8.5,
+        "thumb_press": 4.3,
+        "thumb_prox": 12.0
+      },
+      "max_penetration_mm": 0.3
+    },
+    "trail_rollm20": {
+      "contact_gaps_mm": {
+        "hand": -0.3,
+        "index_dist": -0.3,
+        "index_mid": -0.13,
+        "index_prox": 0.07,
+        "little_dist": -0.3,
+        "little_mid": 0.83,
+        "little_prox": 3.53,
+        "middle_dist": -0.3,
+        "middle_mid": -0.23,
+        "middle_prox": -0.13,
+        "palm": 0.0,
+        "ring_dist": -0.3,
+        "ring_mid": 0.88,
+        "ring_prox": 2.13,
+        "thumb_dist": -0.3,
+        "thumb_prox": 10.13
+      },
+      "degenerate": 0,
+      "flipped": 9,
+      "flipped_area_fraction": 0.002387355112490795,
+      "joint_angles_deg": {
+        "index_dist": 47.9,
+        "index_mid": 71.5,
+        "index_prox": 0.0,
+        "little_dist": 15.1,
+        "little_mid": 50.3,
+        "little_prox": 73.9,
+        "meta_index": 0.0,
+        "meta_little": 16.0,
+        "meta_middle": 0.0,
+        "meta_ring": 7.5,
+        "middle_dist": 30.5,
+        "middle_mid": 86.1,
+        "middle_prox": 51.6,
+        "ring_dist": 22.6,
+        "ring_mid": 75.4,
+        "ring_prox": 65.9,
+        "thumb_dist": 9.1,
+        "thumb_press": 2.9,
+        "thumb_prox": 12.0
+      },
+      "max_penetration_mm": 0.3
+    },
+    "trail_rollp00": {
+      "contact_gaps_mm": {
+        "hand": -0.3,
+        "index_dist": -0.3,
+        "index_mid": -0.13,
+        "index_prox": 0.07,
+        "little_dist": -0.3,
+        "little_mid": 0.83,
+        "little_prox": 3.53,
+        "middle_dist": -0.3,
+        "middle_mid": -0.23,
+        "middle_prox": -0.13,
+        "palm": 0.0,
+        "ring_dist": -0.3,
+        "ring_mid": 0.88,
+        "ring_prox": 2.13,
+        "thumb_dist": -0.3,
+        "thumb_prox": 10.13
+      },
+      "degenerate": 0,
+      "flipped": 9,
+      "flipped_area_fraction": 0.002387355112490795,
+      "joint_angles_deg": {
+        "index_dist": 47.9,
+        "index_mid": 71.5,
+        "index_prox": 0.0,
+        "little_dist": 15.1,
+        "little_mid": 50.3,
+        "little_prox": 73.9,
+        "meta_index": 0.0,
+        "meta_little": 16.0,
+        "meta_middle": 0.0,
+        "meta_ring": 7.5,
+        "middle_dist": 30.5,
+        "middle_mid": 86.1,
+        "middle_prox": 51.6,
+        "ring_dist": 22.6,
+        "ring_mid": 75.4,
+        "ring_prox": 65.9,
+        "thumb_dist": 9.1,
+        "thumb_press": 2.9,
+        "thumb_prox": 12.0
+      },
+      "max_penetration_mm": 0.3
+    },
+    "trail_rollp20": {
+      "contact_gaps_mm": {
+        "hand": -0.3,
+        "index_dist": -0.3,
+        "index_mid": -0.13,
+        "index_prox": 0.07,
+        "little_dist": -0.3,
+        "little_mid": 0.83,
+        "little_prox": 3.53,
+        "middle_dist": -0.3,
+        "middle_mid": -0.23,
+        "middle_prox": -0.13,
+        "palm": 0.0,
+        "ring_dist": -0.3,
+        "ring_mid": 0.88,
+        "ring_prox": 2.13,
+        "thumb_dist": -0.3,
+        "thumb_prox": 10.13
+      },
+      "degenerate": 0,
+      "flipped": 9,
+      "flipped_area_fraction": 0.002387355112490795,
+      "joint_angles_deg": {
+        "index_dist": 47.9,
+        "index_mid": 71.5,
+        "index_prox": 0.0,
+        "little_dist": 15.1,
+        "little_mid": 50.3,
+        "little_prox": 73.9,
+        "meta_index": 0.0,
+        "meta_little": 16.0,
+        "meta_middle": 0.0,
+        "meta_ring": 7.5,
+        "middle_dist": 30.5,
+        "middle_mid": 86.1,
+        "middle_prox": 51.6,
+        "ring_dist": 22.6,
+        "ring_mid": 75.4,
+        "ring_prox": 65.9,
+        "thumb_dist": 9.1,
+        "thumb_press": 2.9,
+        "thumb_prox": 12.0
+      },
+      "max_penetration_mm": 0.3
+    }
+  }
+}

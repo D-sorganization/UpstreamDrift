@@ -245,7 +245,9 @@ def test_fingers_wrap_and_the_palm_cups(side: str) -> None:
         total = sum(
             angles.flexion_deg(f"{finger}_{s}") for s in ("prox", "mid", "dist")
         )
-        assert total > 120.0, f"{side} {finger} only curls {total:.0f} deg"
+        assert total > float(_Q["min_finger_total_curl_deg"]), (
+            f"{side} {finger} only curls {total:.0f} deg"
+        )
         for joint, segment in (("mcp", "prox"), ("pip", "mid"), ("dip", "dist")):
             low, high = dict(default_settings().limits_deg)[joint]
             assert (
@@ -319,3 +321,23 @@ def test_registry_builds_the_default_backend() -> None:
     result = registry_build(_spec(), "lead", grip_radius_m=_RADIUS)
     assert result.backend == BACKEND_NAME
     np.testing.assert_allclose(result.mesh.vertices, _hand("lead").mesh.vertices)
+
+
+def test_fast_posing_kinematics_match_the_reference_skinning() -> None:
+    from src.shared.python.model_appearance.hand_backends import skinned_human as sh
+    from src.shared.python.model_appearance.hand_backends.skinning import (
+        bone_transforms,
+        pose_vertices,
+    )
+
+    settings = default_settings()
+    size = _spec().hand_size
+    hand = sh._GripHand(
+        sh._sized_asset(size.length_m, size.breadth_m, settings), settings
+    )
+    angles = _hand("trail").joint_angles.as_mapping()
+    reference = bone_transforms(hand.asset, hand.rotations(angles))
+    np.testing.assert_allclose(hand.transforms(angles), reference, atol=1e-12)
+    np.testing.assert_allclose(
+        hand.points(angles), pose_vertices(hand.asset, reference), atol=1e-12
+    )
