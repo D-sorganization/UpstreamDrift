@@ -490,10 +490,18 @@ class MuJoCoViewerWidget(QWidget):
 
     def clear(self) -> None:
         """Clear the visualization."""
+        if self._renderer is not None:
+            self._renderer.release()
         self._urdf_content = ""
         self._launch_btn.setEnabled(False)
         self._update_placeholder("No URDF content")
         self._status_label.setText("")
+
+    def closeEvent(self, event) -> None:
+        """Release MuJoCo GL state before Qt destroys the widget."""
+        if self._renderer is not None:
+            self._renderer.release()
+        super().closeEvent(event)
 
     def reset_view(self) -> None:
         """Reset camera to default position."""
