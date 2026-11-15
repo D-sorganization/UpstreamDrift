@@ -132,6 +132,7 @@ class HandRenderSettings:
     basis_outer_radius_quantile: float
     basis_thumb_height_quantile: float
     normal_weld_tolerance_m: float
+    normal_crease_deg: float
     luminance_weights: Vec3
     min_luminance_std: float
     golden_px: int
@@ -405,6 +406,7 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> HandRenderSettings:
         normal_weld_tolerance_m=_number(
             raw, "normal_weld_tolerance_m", low=0.0, low_open=True
         ),
+        normal_crease_deg=_number(raw, "normal_crease_deg", low=0.0, high=180.0),
         luminance_weights=_vector(raw, "luminance_weights", 3, low=0.0, high=1.0),  # type: ignore[arg-type]
         min_luminance_std=_number(raw, "min_luminance_std", low=0.0, high=1.0),
         golden_px=_integer(raw, "golden_px", low=4, high=1024),

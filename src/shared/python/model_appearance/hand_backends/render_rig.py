@@ -511,3 +511,46 @@ def vertex_normals(mesh: Mesh, *, weld_tolerance_m: float) -> Array:
     )
     ensure(bool(np.isfinite(normals).all()), "vertex normals are finite")
     return normals
+
+
+def corner_normals(mesh: Mesh, *, weld_tolerance_m: float, crease_deg: float) -> Array:
+    """Smooth unit normals per face corner, shape ``(M, 3, 3)``.
+
+    Like :func:`vertex_normals`, but a corner only averages the faces around
+    its (welded) vertex that lie within ``crease_deg`` of its own face. Skin
+    stays smooth; a hard edge such as a block rim or a wrist cut stays sharp
+    instead of smearing a gradient across the flat sides.
+    """
+    vertices, faces = mesh.vertices, mesh.faces
+    tri = vertices[faces]
+    weighted = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+    area = np.linalg.norm(weighted, axis=1, keepdims=True)
+    unit = weighted / np.where(area > 0.0, area, 1.0)
+    keys = np.round(vertices / weld_tolerance_m).astype(np.int64)
+    _, welded = np.unique(keys, axis=0, return_inverse=True)
+    corner_vertex = welded.reshape(-1)[faces].reshape(-1)
+    corner_face = np.repeat(np.arange(len(faces)), 3)
+    order = np.argsort(corner_vertex, kind="stable")
+    _, first, count = np.unique(
+        corner_vertex[order], return_index=True, return_counts=True
+    )
+    group_start = np.repeat(first, count)
+    group_size = np.repeat(count, count)
+    source = np.repeat(np.arange(len(order)), group_size)
+    block_start = np.cumsum(group_size) - group_size
+    partner = np.repeat(group_start, group_size) + (
+        np.arange(len(source)) - np.repeat(block_start, group_size)
+    )
+    face_a = corner_face[order][source]
+    face_b = corner_face[order][partner]
+    cosine = np.einsum("ij,ij->i", unit[face_a], unit[face_b])
+    keep = cosine >= math.cos(math.radians(crease_deg))
+    summed = np.zeros((len(order), 3))
+    np.add.at(summed, source[keep], weighted[face_b[keep]])
+    normals = np.empty_like(summed)
+    normals[order] = summed
+    length = np.linalg.norm(normals, axis=1, keepdims=True)
+    own = unit[corner_face]
+    normals = np.where(length > 0.0, normals / np.where(length > 0.0, length, 1.0), own)
+    ensure(bool(np.isfinite(normals).all()), "corner normals are finite")
+    return normals.reshape(len(faces), 3, 3)

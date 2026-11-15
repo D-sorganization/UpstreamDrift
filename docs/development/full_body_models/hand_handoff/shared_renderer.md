@@ -1,7 +1,8 @@
 # Shared Hand Renderer Handoff
 
-This file is the handoff for the shared grip-hand renderer. No renderer
-code landed in this run. Read this file before writing any of it.
+This file describes the shared grip-hand renderer as it now exists on
+`cursor/hrg-shared-hand-renderer-cec5`. The renderer, its settings, its
+tests, a CLI, and a scored set of capsule-hand pictures are on the branch.
 
 Epic: [Human Hand Model on the Club](https://github.com/D-sorganization/UpstreamDrift/issues/15150)
 (parent grip epic [#15122](https://github.com/D-sorganization/UpstreamDrift/issues/15122)).
@@ -36,13 +37,15 @@ a contact sheet across registry backends at shaft roll −20°, 0°, and +20°,
 golden-image tests with a perceptual tolerance, and a smoke test that
 runs headless.
 
-Engine order, fixed by the task:
+Engine order, as built:
 
-1. MuJoCo offscreen (`MUJOCO_GL=osmesa`, then `MUJOCO_GL=egl`).
-2. pyrender with trimesh, only when MuJoCo cannot render.
-3. A matplotlib fallback only when neither of those can render. The
-   fallback must still auto-frame the hand. A receipt that says
+1. MuJoCo offscreen through OSMesa, then through EGL.
+2. A matplotlib fallback only when neither can create a GL context. The
+   fallback still auto-frames the hand. A manifest that says
    `engine=matplotlib` is not quality-bar evidence.
+
+pyrender is not wired in. It is not installed on the build host, and the
+task for this lane said to skip it.
 
 Contact physics stays on the capsule grip. This renderer is visual only.
 
@@ -59,111 +62,190 @@ branch is on `main`.
 
 ### Files That Exist
 
-There is no `hand_backends` package on this branch. These are the pieces
-the renderer must call, and they already exist:
+| Piece | Path |
+| --- | --- |
+| Settings | `scripts/config/hand_render.json` |
+| Settings loader | `src/shared/python/model_appearance/hand_backends/render_settings.py` |
+| Scene, basis, camera rig, normals | `src/shared/python/model_appearance/hand_backends/render_rig.py` |
+| MuJoCo engine | `src/shared/python/model_appearance/hand_backends/render_mujoco.py` |
+| Matplotlib fallback | `src/shared/python/model_appearance/hand_backends/render_matplotlib.py` |
+| Public facade | `src/shared/python/model_appearance/hand_backends/render.py` |
+| CLI | `scripts/render_hand_backend.py` |
+| Tests | `tests/unit/model_appearance/hand_backends/test_render.py` |
+| Pictures and manifest | `docs/development/full_body_models/evidence/hand_render/` |
 
-| Piece | Path | What it gives the renderer |
-| --- | --- | --- |
-| Capsule hand | `src/shared/python/model_appearance/grip_hand_mesh.py` | `build_grip_hand_mesh(hand, *, grip_radius_m, pose)` returns `GripHandMesh` with `.mesh`, `.components`, `.grip_radius_m` |
-| Hand-grip frame | same module, module docstring | Origin on the grip axis at the hand centre. `z` runs butt to head. `x` is azimuth 0. `y` is azimuth 90°. The grip cylinder is `x**2 + y**2 = R**2` |
-| Shaft roll | `src/shared/python/grip_spec/shaft_roll.py` | `APPEARANCE_GRIP_SHAFT_AXIS = (0, 0, 1)`. `apply_shaft_roll(eye(3), axis, roll_deg)` rotates column vectors. The mesh baker does not apply roll |
-| Authoring spec | `src/shared/python/grip_spec/types.py` | `GripSpec.legacy()`, `HandGripSpec(shaft_roll_deg=...)`, `spec.to_grip_pose()` |
-| Club tube | `src/shared/python/model_appearance/club_shaft_mesh.py` | `tapered_tube(start, end, r_start, r_end, sides)` |
-| Materials | `src/shared/python/model_appearance/library.py` | `MATERIALS["grip_rubber"]`, shaft finishes `graphite` and `satin_steel`, skin swatches via `Material.rgba` |
-| Spacing | `src/shared/python/model_appearance/grip_pose.py` | `LEAD_BELOW_BUTT_M = 0.032`, `NATIVE_HAND_SPACING_M = 0.0762` |
-| Contracts | `src/shared/python/contracts.py` | `require` / `ensure` raise only when `DBC_LEVEL` is `enforce` (the default). Public entry points must also raise `ValueError` or `TypeError`, because `DBC_LEVEL=off` silences `require` |
-| Mesh type | `src/shared/python/model_appearance/geometry.py` | `Mesh(vertices (N, 3), faces (M, 3))` |
+`hand_backends/__init__.py` holds a docstring only, so the backend lanes
+can add their own without a conflict that matters.
 
-Unit tests for the capsule mesh already pass through
-`tests/unit/model_appearance/test_grip_hand_mesh.py`. They use
-`grip_radius_m=0.014`. Put that radius in settings. Do not invent a new
-one in the renderer.
+### What Rendered
 
-There is no `scripts/config/hand_render.json`. There is no `render.py`,
-no CLI, no golden PNG, and no `tests/unit/model_appearance/hand_backends/`
-directory. Nothing in this run calls `build_grip_hand_mesh`.
+On the build host (Linux, Python 3.12, MuJoCo 3.8.0, `libEGL` present,
+`libOSMesa` absent) every frame came from the `egl` engine. The OSMesa
+probe failed with `AttributeError: 'NoneType' object has no attribute
+'glGetError'` and the renderer moved on to EGL. OSMesa has not been run
+through this code. A repeat render is byte-identical on EGL.
 
-### Settings to Add
+### Settings
 
-One JSON file, `scripts/config/hand_render.json`. The renderer reads it.
-Numbers below are the contract for that file, not literals to scatter
-through Python.
+Every number is in `scripts/config/hand_render.json`. The loader raises
+`ValueError` for a missing file, a missing key, a non-finite number, a
+value outside its range, or an unknown view name.
+`settings.with_overrides(frame_px=1536)` returns a re-validated copy.
 
-| Key | Value to record | Why |
-| --- | --- | --- |
-| `frame_px` | at least 1024 | Epic quality bar |
-| `fill_fraction` | 0.70 | Hand, not the whole club, occupies this share of width and height |
-| `fill_tolerance` | a band around 0.70, suggested 0.12 until a real render is scored | Auto-frame test |
-| `fov_deg` | a modest perspective, suggested 28 | Keep distortion off the fingers |
-| `grip_radius_m` | 0.014 | Matches existing capsule tests |
-| `shaft_radius_m` | thinner than the grip, suggested 0.0045 | Steel above the grip rubber |
-| `grip_length_margin_m` | suggested 0.04 past the hand | Club visible without shrinking the hand |
-| `shaft_extension_m` | suggested 0.12 toward the head | Shaft continues past the rubber |
-| `rolls_deg` | −20, 0, +20 | Contact sheet |
-| `views` | `palm`, `back`, `thumb_side`, `pinky_side`, `butt`, `eye` | Task list |
-| `background_rgba` | dark neutral, suggested `(0.12, 0.13, 0.15, 1)` | So skin is not the same colour as the backdrop |
-| `skin_rgba` | from the library skin swatch, suggested a mid tone near `(0.77, 0.56, 0.46, 1)` | Fallback when a backend sends no colour |
-| `grip_rgba` | `MATERIALS["grip_rubber"].rgba` | Club rubber |
-| `shaft_rgba` | `MATERIALS["satin_steel"].rgba` or `graphite` | Shaft |
-| `lights` | `key`, `fill`, `rim` in camera space | Directions, colours, intensities, and which one casts a shadow |
-| `wrap` | suggested 0.45 | Subsurface-like wrap term |
-| `sss_tint` | a red-brown, suggested `(0.55, 0.18, 0.12)` | Wrap approximation |
-| `sss_strength` | suggested 0.22 | Wrap approximation |
-| `shadows` | true when the engine can do it cheaply | Soft shadows are optional |
-| `perceptual_mae_max` | suggested 0.06 on a 64×64 box-filtered luminance image | Golden tolerance |
-| `min_luminance_std` | a floor that rejects a flat wash, suggested 0.04 on foreground pixels in 0–1 | Smoke test |
+Views are stored as an `eye` and an `up` vector in the anatomical basis
+`(thumb, dorsum, shaft)`. `eye` points from the hand toward the camera,
+so the camera looks along `-eye`.
 
-View directions are coefficients in an anatomical basis
-`(thumb, dorsum, shaft)`, not hard-coded world axes. Suggested
-coefficients, to be stored in the JSON:
+| View | `eye` | `up` | What It Shows |
+| --- | --- | --- | --- |
+| `palm` | `(0, -1, 0)` | shaft | Fingers across the grip |
+| `back` | `(0, 1, 0)` | shaft | Back of the hand |
+| `thumb_side` | `(1, 0, 0)` | shaft | Thumb (radial) side |
+| `pinky_side` | `(-1, 0, 0)` | shaft | Little-finger side |
+| `butt` | `(0, 0, -1)` | dorsum | From the butt end, looking toward the head |
+| `eye` | `(0.15, 0.55, -0.75)` | `(0, 0.35, 1)` | The golfer's eye |
 
-| View | Look direction `(thumb, dorsum, shaft)` | Up |
-| --- | --- | --- |
-| `palm` | `(0, -1, 0)` | shaft |
-| `back` | `(0, 1, 0)` | shaft |
-| `thumb_side` | `(1, 0, 0)` | shaft |
-| `pinky_side` | `(-1, 0, 0)` | shaft |
-| `butt` | `(0, 0, -1)` | dorsum |
-| `eye` | `(0.15, 0.55, -0.75)` | mix of dorsum and shaft |
+The first handoff called this column a look direction. It is the eye
+direction: with a look direction of `(0, -1, 0)` the `palm` view would
+show the back of the hand.
 
-Derive the basis from skin vertices in the hand-grip frame:
+Grip and shaft colours are named library materials (`grip_material`,
+`shaft_material`), read from `MATERIALS`, so the colour has one source.
 
-- Shaft is `+z`.
-- Dorsum is the unit `xy` direction of the outer skin vertices (the bulk
-  of a grip hand sits off the shaft, on the back of the hand).
-- Thumb is the unit `xy` direction of the skin vertex with the highest
-  `z` that is also far from the shaft. The capsule thumb points toward
-  the club head.
+## How Backend Tracks Call It
 
-Auto-frame on skin vertices only. Place the eye along the view direction
-so the projected skin bounds fill `fill_fraction` of both axes, then
-take the longer requirement. Include the grip rubber and a shaft stub
-in the scene even when they extend past the frame. The club has to
-appear inside the hand, and the hand stays near 70%.
+```python
+from src.shared.python.model_appearance.hand_backends.render import (
+    ScenePart,
+    build_club_parts,
+    load_hand_render_settings,
+    register_render_source,
+    render_contact_sheet,
+    render_scene,
+    render_view,
+    save_png,
+)
 
-Both hands share the grip-frame axes. Put the trail mesh at
-`z = -(trail_distance_below_butt - lead_distance_below_butt)`, which is
-about `-NATIVE_HAND_SPACING_M` for the legacy spec. Check that against
-`GripPose` before freezing it.
+frame = render_view(result, "palm", shaft_roll_deg=0.0, side="lead")
+save_png(frame, "lead_palm.png")
+frame.image          # uint8 RGB, (frame_px, frame_px, 3)
+frame.engine         # "osmesa", "egl" or "matplotlib"
+frame.fill_fraction  # measured skin span of the frame, longer axis
+frame.kind_mask      # uint8: 0 background, 1 skin, 2 grip, 3 shaft
+```
 
-### How to Run Tests Today
+Signatures:
 
-There are no renderer tests yet. The capsule mesh suite is the regression
-net for the geometry you will wrap:
+```python
+render_view(result, view, *, shaft_roll_deg=0.0, side="lead", settings=None,
+            grip_radius_m=None, basis=None, engine=None) -> RenderedView
+render_scene(parts, view, *, basis=None, settings=None, side="lead",
+             engine=None) -> RenderedView
+build_club_parts(z_min, z_max, *, settings, grip_radius_m=None)
+    -> (grip ScenePart, shaft ScenePart)
+anatomical_basis(skin_vertices, *, side, settings=None) -> AnatomicalBasis
+save_png(rendered, path) -> Path
+register_render_source(name, builder, *, replace=False) -> None
+render_contact_sheet(backend_ids=None, rolls_deg=None, view="palm",
+                     side="lead", settings=None, *, engine=None) -> ContactSheet
+```
+
+`result` is duck-typed, in the hand-grip frame (grip axis `z`, butt
+toward head): an object with `.mesh` (`vertices`, `faces`) and an
+optional `.skin_rgb`, `.material_rgba`, `.material` (library name) or
+`.grip_radius_m`; a bare mesh; or a `dict` of meshes.
+
+`ScenePart(mesh, rgba, kind)` takes `kind` in `skin`, `grip`, `shaft`.
+`render_scene` frames the camera on every skin part, which is how to draw
+both hands: place two skin meshes in one frame and add
+`build_club_parts(z_min, z_max, settings=...)`.
+
+### Passing Your Own Basis
+
+A backend that knows its palm normal and thumb side should pass them:
+
+```python
+render_view(result, "palm", basis=(thumb_side_vector, dorsum_vector))
+```
+
+`basis` is `(thumb, dorsum)`, `(thumb, dorsum, shaft)`, or an
+`AnatomicalBasis`. The renderer orthonormalises in the order shaft,
+dorsum, thumb. `thumb` here is the radial side of the hand, not the
+thumb bone: a vector along the shaft raises `ValueError`. Give the basis
+for the hand before the roll; the camera does not follow the roll, so a
+roll shows as the hand turning.
+
+Without `basis`, `render_view` looks for `result.render_basis`, then for
+`result.components` tagged `dorsum` and `thumb` (the capsule hand), then
+falls back to a vertex heuristic. The heuristic put the capsule trail
+hand about a quarter turn off, because its overlapped little finger
+pulls the centroid. Do not rely on it for a real hand.
+
+### Shaft Roll
+
+`shaft_roll_deg` turns the skin about `+z` with `apply_shaft_roll`. If
+the backend already baked the roll, pass `0` so it is not applied twice.
+
+### Contact Sheet Sources
+
+`register_render_source(name, builder)` stores a callable that is called
+as `builder(side="lead" | "trail", grip_radius_m=<float>)` and returns a
+`result`. Wrap a lane's own `build_hand_visual` in a lambda. The local
+`capsule` source is registered when `render.py` is imported.
+
+### Command Line
 
 ```bash
 QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg PYTHONPATH=. \
-  python3 -m pytest tests/unit/model_appearance/test_grip_hand_mesh.py \
-  -m unit --timeout=60
+  python3 scripts/render_hand_backend.py \
+  --backend capsule \
+  --views palm,back,thumb_side,pinky_side,butt,eye \
+  --rolls -20,0,20 --both-hands --contact-sheet \
+  --out docs/development/full_body_models/evidence/hand_render
 ```
 
-After `render.py` exists, the suite to add and keep green is:
+It writes `<backend>_<side>_<view>_roll<m20|p00|p20>.png`, a both-hands
+frame per view, `contact_sheet_<side>_<view>.png`, and
+`render_manifest.json` (engine, GL probe errors, settings hash, and a
+SHA-256 and fill fraction per frame).
+
+The manifest is not named `receipt.json` on purpose. Any JSON with
+`receipt` in its name under an evidence root is swept into the
+matched-swing ledger (`src/shared/python/motion_matching/ledger.py`),
+which then wants a lane classification, an acceptance block, and a
+refreshed `reports/matched_swing_ledger.json`. A picture manifest is not
+a swing receipt. `--manifest-name receipt.json` is there for whoever
+decides to take that on.
+
+## How to Run Tests
 
 ```bash
-MUJOCO_GL=osmesa QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg PYTHONPATH=. \
+QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg PYTHONPATH=. \
   python3 -m pytest tests/unit/model_appearance/hand_backends \
   -m unit --timeout=120
 ```
+
+The pinned Tools tree has to be initialised first
+(`git submodule update --init vendor/ud-tools`), or `src/__init__.py`
+refuses to import under pytest.
+
+Result on the build host: 55 passed, 0 skipped, with the GL tests running
+on EGL. The GL tests skip only when no GL context can be created, and the
+skip message carries the GL error text.
+
+The tests cover: the settings loader and its rejections; scene assembly
+and the four duck-typed result shapes; shaft roll against
+`apply_shaft_roll`; welded smooth normals and the crease angle; camera
+determinism, palm opposite back, the butt eye position, and fill within
+tolerance for six views and both hands; the GL frame size, byte-identical
+repeat, skin luminance spread, background and club colours, palm against
+back and against a rolled palm, the shaft in the eye view, and a
+two-hand `render_scene`; the matplotlib fallback; the source registry;
+PNG round trip; the contact sheet; and two CLI runs writing identical
+bytes.
+
+There is no golden-image test. `golden_px` and `perceptual_mae_max` are
+in the settings and nothing reads them yet.
 
 Title case on this handoff:
 
@@ -172,7 +254,104 @@ python3 scripts/check_document_title_case.py \
   docs/development/full_body_models/hand_handoff/shared_renderer.md
 ```
 
-### Sibling Backends, Read Only
+## What Worked and What Failed
+
+### Worked
+
+- Smooth skin. Each skin mesh is sent to MuJoCo unindexed with one normal
+  per face corner. A corner averages the faces around its vertex that lie
+  within `normal_crease_deg` (60°) of its own face, after welding
+  vertices closer than `normal_weld_tolerance_m`. Seams with duplicated
+  vertices shade smooth, and a hard rim stays sharp.
+- Framing. The eye distance and target are iterated so the projected
+  skin bounds are centred and the longer axis spans `fill_fraction`. The
+  measured fill was 0.64 to 0.70 over the 42 committed frames; the low
+  end is the club hiding the outermost skin pixels.
+- A fixed camera from `pos` and `xyaxes`, the headlight off, and key,
+  fill, and rim directional lights given in camera space.
+- An exact part mask from a second, non-multisampled segmentation pass.
+- 8x multisampling through `<quality offsamples>`.
+
+### Failed or Left Out
+
+- Shadows. MuJoCo shadow maps showed acne specks and serrated edges on
+  the fingers at this scale, at every `shadowclip`, `shadowscale`, and
+  `shadowsize` tried. `shadows` is `false` in the settings. Setting it to
+  `true` turns the key-light shadow back on with those artefacts. The
+  pictures therefore have no contact shadow between fingers and grip.
+- Wrap and subsurface tint. MuJoCo's fixed pipeline has no wrap term.
+  The MuJoCo engine only adds `wrap * sss_strength * sss_tint` to the
+  ambient light. The matplotlib fallback applies the real wrap formula.
+- `mujoco.Renderer`. Under pytest something imports MuJoCo before
+  `tests/conftest.py` sets `MUJOCO_GL`, which binds it to GLFW, and GLFW
+  cannot render headless. The engine opens `mujoco.egl.GLContext` or
+  `mujoco.osmesa.GLContext` itself and drives `MjrContext` directly, and
+  it frees both explicitly.
+- Probing OSMesa in-process. A failed OSMesa import breaks `import
+  mujoco` for the rest of the process, so each backend is probed in a
+  child process and the result is cached.
+- The shaft stub in the side views. With the hand at 70% of the frame
+  and a 4 cm rubber margin, the steel starts outside the frame in
+  `palm`, `back`, `thumb_side`, and `pinky_side`. It shows in `eye`. The
+  grip rubber shows in every view.
+- The matplotlib fallback is faceted (one colour per triangle) and uses
+  a painter's sort with no depth buffer.
+- No pyrender engine, no golden-image test, no `--scratch-import` flag
+  for sibling backends.
+- `argparse` reads `--rolls -20,0,20` as an option. The CLI rewrites it
+  to `--rolls=-20,0,20` before parsing.
+
+### Still True From the First Probe
+
+- Do not select GLFW for headless runs.
+- A new shared `registry.py` importing every lane's backend will not
+  import on this branch. The renderer duck-types the result instead.
+- Do not commit another lane's backend, assets, or meshes. MANO and
+  SMPL-X stay research-only.
+
+## Self-Review Score
+
+Scored by opening the 42 frames, the six both-hands frames, and the two
+contact sheets. The same text is in
+`evidence/hand_render/self_review.json` and in the manifest.
+
+Renderer:
+
+| Check | Result |
+| --- | --- |
+| Smooth skin shading | Pass. No facet glitter |
+| Hand fills about 70% | Pass. 0.64 to 0.70 measured |
+| Key, fill, rim; no headlight | Pass, but no cast shadows, so the fingers have no contact shadow |
+| Club visible | Partial. Grip rubber in every view; the shaft stub only in `eye` |
+| Lead and trail mirror | Pass |
+| Repeat render identical | Pass on EGL |
+
+| View | Score out of 5 | Note |
+| --- | --- | --- |
+| `palm` | 4 | Reads clearly; flat without contact shadows |
+| `back` | 4 | Clean gradient over the dorsum |
+| `thumb_side` | 4 | Depth reads from key and rim |
+| `pinky_side` | 4 | Same |
+| `butt` | 3 | Framing right; the butt cap is a flat near-black disc |
+| `eye` | 4 | Grip and shaft both visible |
+
+The capsule hand itself fails the cupped palm, knuckle line, and
+"no tubes" lines of the checklist below. That is the capsule source, and
+it is expected.
+
+## Next Steps
+
+1. Get OSMesa run once on a host that has `libOSMesa`.
+2. Fix or replace shadows (a baked ambient-occlusion term would need
+   vertex colours, which MuJoCo meshes do not take).
+3. Add the golden-image test for `palm` at roll 0°, compared only when
+   the engine name matches.
+4. Decide whether the manifest should join the matched-swing ledger.
+5. Add a `--scratch-import PATH` flag to the CLI for sibling backends.
+6. The implementation PR is over the 500-line limit; it needs the
+   `large-pr-approved` label or a split.
+
+## Sibling Backends, Read Only
 
 Each lane invented its own registry. They are not on this branch. Do not
 copy their trees into the commit. Import them from a scratch checkout
@@ -190,260 +369,6 @@ when you need a demo sheet.
 also has `hand_backends/preview.py`, which draws a flat-shaded
 `Poly3DCollection` plus a grip wireframe. That is the picture this
 renderer replaces. Do not extend that preview.
-
-## What Worked and What Failed
-
-Probed on this Linux cloud VM (Python 3.12.3) on 2026-11-15. No hand was
-rendered. The probes drew a sphere only, so they prove the GL path and
-nothing about framing, skin, or the club.
-
-### What the Fresh VM Had
-
-`numpy` 1.26.4 was importable. These were not: `mujoco`, `pyrender`,
-`trimesh`, `PIL`, `matplotlib`, `imageio`. `ldconfig` had `libGL.so.1`,
-`libGLX`, and `libGLESv2`. It did not have `libOSMesa` or `libEGL`.
-`DISPLAY` was `:1`. `sudo` apt worked.
-
-A fresh Ubuntu image of this kind cannot offscreen-render until the
-system libraries are installed. Do not write the engine probe as
-"import mujoco and hope".
-
-### What Rendered
-
-Installed for the probe only, not as a repo dependency change:
-
-- `libosmesa6` 25.1.7-1ubuntu2~24.04.2
-- `libegl1` 1.7.0-1build1 and `libegl-mesa0` 25.2.8
-- `mujoco` 3.17.0 (satisfies `pyproject.toml` `mujoco>=3.6,<4`)
-- `pillow` 13.0.0
-
-`MUJOCO_GL=osmesa` with `DISPLAY` unset rendered a 64×64 RGB sphere
-(`min 0`, `max 142`, `mean 8`) and `Renderer.close()` returned cleanly.
-Use this as the primary engine. A fixed camera (`pos` plus `xyaxes`)
-was enough. The default headlight was turned off in the MJCF
-(`<headlight active="0"/>`).
-
-`MUJOCO_GL=egl` with `DISPLAY` unset also returned a 64×64 frame
-(`max 139`, `mean 7`). Process teardown then raised
-`OpenGL.raw.EGL._errors.EGLError` inside `Renderer.__del__` →
-`mujoco.egl.GLContext.free`. A green image is not a clean exit on EGL.
-Prefer OSMesa. If you must use EGL, call `close()` yourself and do not
-let the destructor fail the test.
-
-pyrender 0.1.45 with `PYOPENGL_PLATFORM=egl`, an icosphere, a
-directional light, and a `PerspectiveCamera` returned a 64×64 frame
-(`max 150`, `mean 51`). That path can be the second engine.
-
-### What Failed
-
-`MUJOCO_GL=glfw` with `DISPLAY` unset:
-
-- `GLFWError: (65550) b'X11: The DISPLAY environment variable is missing'`
-- then `mujoco.FatalError: an OpenGL platform library has not been loaded into this process`
-
-Do not select GLFW for CI.
-
-pyrender 0.1.45 with `PYOPENGL_PLATFORM=osmesa`:
-
-```text
-ImportError: cannot import name 'OSMesaCreateContextAttribs'
-from 'OpenGL.osmesa'
-```
-
-Do not use pyrender's OSMesa platform. MuJoCo's own OSMesa binding is
-the one that worked.
-
-`pip install pyrender` in the same user environment downgraded
-`PyOpenGL` 3.1.10 to 3.1.0 and upgraded `numpy` 1.26.4 to 2.5.4.
-MuJoCo OSMesa still rendered afterwards (`max 81` on a second sphere).
-Pin `PyOpenGL` to the version MuJoCo wants, and do not let a pyrender
-install float numpy.
-
-pyrender with no camera raises `ValueError: Cannot render scene without a camera`. That one is a caller bug, not a platform bug.
-
-### Dead Ends
-
-- A new `registry.py` that imports shadow, procedural skin, MyoHand, and
-  the skinned human will not import on this branch, and it will conflict
-  with four incompatible registries. Duck-type the result object instead.
-- MuJoCo's free camera (`azimuth`, `elevation`, `distance`) is Z-up in
-  the world. In the hand-grip frame Z is the shaft. A free-camera butt
-  view and a free-camera palm view will not match the table above. Set
-  `pos` and `xyaxes` from the look-at basis: camera `z` points from the
-  target back to the eye, camera `x` is `normalize(cross(up, z))`,
-  camera `y` is `cross(z, x)`.
-- Leaving the MuJoCo headlight on is the washed-out look the epic is
-  rejecting.
-- Matplotlib `Poly3DCollection` plus a cylinder wireframe is the picture
-  [#15142](https://github.com/D-sorganization/UpstreamDrift/pull/15142)
-  and [#15146](https://github.com/D-sorganization/UpstreamDrift/pull/15146)
-  already produced. It is the fallback, and the receipt must say so.
-- Reading only `.mesh` drops the MyoHand backend, which returns
-  `dict[str, Mesh]`.
-- Reading only `material_rgba` drops the procedural backend (`material`
-  is a string) and the skinned backend (`skin_rgb`).
-- Committing another lane's backend, assets, or meshes. Scratch
-  checkouts only.
-- Pushing this work onto `cursor/hrg-gb1b-shaft-roll-2882` or any
-  sibling branch.
-- Editing `vendor/ud-tools/` or policy workflows.
-- Arming auto-merge or merging. Dieter reviews the checklist before
-  merge.
-- Treating a sphere probe, a changed golden, or a raised tolerance as
-  acceptance. The ledger rule in `CLAUDE.md` applies in spirit here too:
-  an image of a sphere is not a hand.
-- Vendoring MANO or SMPL-X. They stay research-only.
-
-## Next Steps
-
-Do these in order. Each step's tests go in the same commit as the code
-(red, then green). Stay under 1200 lines per file. Split engines into
-`render_mujoco.py`, `render_pyrender.py`, and `render_matplotlib.py` if
-`render.py` would cross that line. `render.py` stays the public facade.
-
-No `print()` under `src/`. The CLI lives in `scripts/render_hand_backend.py`
-(scripts may print) or writes through `sys.stdout` from `__main__.py`.
-
-1. Settings loader. Acceptance: a unit test loads
-   `scripts/config/hand_render.json`; `frame_px >= 1024`;
-   `fill_fraction == 0.70`; the six view names and the three rolls are
-   present; key, fill, and rim lights are present. A missing file, a
-   non-finite number, or an unknown view name raises `ValueError`.
-
-2. Scene assembly with no GL. Acceptance: `build_grip_hand_mesh` for
-   `Hand.LEAD` and `Hand.TRAIL` at `grip_radius_m` from settings yields
-   parts tagged skin, grip, and shaft. A shaft roll of +20° moves skin
-   vertices about `z` and matches `apply_shaft_roll` on a column vector.
-   Roll 0° leaves vertices unchanged. Duck-typed inputs covered by
-   tests: an object with `.mesh` and `.material_rgba`; an object with
-   `.mesh` and a string `.material` that resolves in `MATERIALS`; an
-   object with `.mesh` and `.skin_rgb`; a `dict` of `Mesh` values.
-   Empty vertices, a non-finite roll, and a roll outside `[-180, 180]`
-   raise `ValueError` or `TypeError`.
-
-3. Camera rig, still no GL. Acceptance: two calls on the same scene
-   return the same eye, target, and up. Palm and back look in opposite
-   directions along dorsum. Butt looks along `-z`. The projected skin
-   bounds are `fill_fraction` within `fill_tolerance`. The rig reads
-   coefficients from settings.
-
-4. MuJoCo OSMesa engine. Acceptance, marked so a machine without
-   `libOSMesa` skips with the import or GL error in the message, and a
-   machine that has it does not skip: one 1024 px palm image; a second
-   render is byte-identical; foreground fill is inside the tolerance of
-   0.70; foreground luminance standard deviation is at least
-   `min_luminance_std`; pixels near `grip_rgba` are present; the palm
-   image differs from the back image and from palm at +20°. Headlight
-   off. Key, fill, and rim from the camera-space settings. `Renderer.close()`
-   is called. Run it as `MUJOCO_GL=osmesa` with `DISPLAY` unset.
-
-5. pyrender engine, used only when step 4 cannot create a context.
-   Acceptance: the same structural assertions as step 4, with
-   `PYOPENGL_PLATFORM=egl` and an explicit camera in the scene. Do not
-   set `PYOPENGL_PLATFORM=osmesa` (the `OSMesaCreateContextAttribs`
-   import is broken on pyrender 0.1.45). Pin `PyOpenGL` so a pyrender
-   install cannot downgrade MuJoCo's copy.
-
-6. Matplotlib fallback, used only when steps 4 and 5 both fail.
-   Acceptance: the image is still at least 1024 px, the hand fill test
-   still passes, and the returned metadata says `engine=matplotlib`.
-   Smooth vertex normals and one Lambert light are enough for the
-   fallback. It is not the golden source.
-
-7. Golden perceptual test for the OSMesa palm view at roll 0°.
-   Acceptance: mean absolute error of a 64×64 box-filtered luminance
-   image against the committed PNG is at most `perceptual_mae_max`.
-   A flat grey image fails. Store the engine name beside the PNG.
-   Compare goldens only when the running engine name matches. Do not
-   loosen the tolerance to hide an engine change.
-
-8. Contact-sheet CLI. Acceptance: a grid whose rows are registered
-   sources and whose columns are the three rolls; each cell is one
-   standard view (palm is enough for the sheet); labels name the
-   backend and the roll; two runs write identical PNG bytes. On this
-   branch the only source is the local capsule. Suggested invocation
-   once the module exists:
-
-   ```bash
-   MUJOCO_GL=osmesa QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg PYTHONPATH=. \
-     python3 scripts/render_hand_backend.py \
-     --backend capsule \
-     --views palm,back,thumb_side,pinky_side,butt,eye \
-     --rolls -20,0,20 \
-     --contact-sheet \
-     --out docs/development/full_body_models/evidence/hand_render
-   ```
-
-9. Scratch-only demos of sibling backends. Acceptance: a flag such as
-   `--scratch-import PATH` loads that tree's `build_hand_visual`,
-   adapts the return value, and writes PNGs plus a `receipt.json` that
-   lists which backends imported and the exception for any that did
-   not. The commit contains none of their source. Shadow needs its
-   Menagerie assets. MyoHand needs the pinned `myo_sim` tree and is
-   research-only until [#13763](https://github.com/D-sorganization/UpstreamDrift/issues/13763)
-   is signed off. The skinned human needs `assets/hand_cc0/` from
-   [#15149](https://github.com/D-sorganization/UpstreamDrift/pull/15149).
-   Procedural skin in [#15146](https://github.com/D-sorganization/UpstreamDrift/pull/15146)
-   is pure NumPy and is the easiest second row.
-
-10. Run the visual self-review procedure below after step 4 and again
-    after every later change. Commit the PNGs and the score. A passing
-    pytest with no opened PNG is not done.
-
-File a child issue of [#15150](https://github.com/D-sorganization/UpstreamDrift/issues/15150)
-when you open the implementation PR. Use `Refs`, never `Fixes` or
-`Closes`. This handoff PR does not close the epic. Do not arm
-auto-merge.
-
-## How Backend Tracks Call It
-
-Nothing here is importable yet. Implement this surface and keep it
-stable so the other lanes can call it without taking a dependency on
-MuJoCo in their own modules.
-
-```python
-from src.shared.python.model_appearance.hand_backends.render import (
-    register_render_source,
-    render_contact_sheet,
-    render_view,
-)
-
-register_render_source("shadow", build_hand_visual)
-
-image = render_view(result, "palm", shaft_roll_deg=0.0, side="lead")
-sheet = render_contact_sheet(
-    backend_ids=("capsule", "shadow"),
-    rolls_deg=(-20.0, 0.0, 20.0),
-    view="palm",
-    side="lead",
-)
-```
-
-`result` may be any of these, all in the hand-grip frame:
-
-- `GripHandMesh` or any object with `.mesh` (`vertices`, `faces`) and
-  optional `.grip_radius_m`
-- shadow: `.mesh` and `.material_rgba`
-- procedural: `.mesh` and `.material` (library name)
-- skinned human: `.mesh` and `.skin_rgb`
-- MyoHand: `dict[str, Mesh]`
-
-`render_view` returns `uint8` RGB of shape `(frame_px, frame_px, 3)` and
-metadata naming the engine (`osmesa`, `egl`, `pyrender`, or
-`matplotlib`). `register_render_source(name, builder)` stores a callable
-the contact sheet invokes. The local capsule builder is registered on
-import and calls `build_grip_hand_mesh`. It does not import the other
-lanes.
-
-Other lanes should keep their own `build_hand_visual(grip_spec, side,
-joint_angles, ...)` and pass the object they already return. They should
-stop baking matplotlib evidence once this function exists. They should
-not each grow a camera rig.
-
-Shaft roll stays in the renderer (or is already baked by the backend).
-If the backend has already applied `apply_shaft_roll`, pass
-`shaft_roll_deg=0` so the hand is not rolled twice. Document which
-choice that backend made in its PR.
 
 ## Licences and Dependencies
 
@@ -491,7 +416,3 @@ Checklist:
 - The hand fills about 70% of the frame.
 - The club is visible (grip rubber and shaft).
 - Lead and trail mirror correctly.
-
-This run has no hand PNGs to score. The sphere probes above are not a
-score. The first implementation PR is incomplete until a person can
-open the six views and mark this list.
