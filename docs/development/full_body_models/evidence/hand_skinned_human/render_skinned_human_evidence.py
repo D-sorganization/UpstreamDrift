@@ -36,8 +36,10 @@ from src.shared.python.model_appearance.hand_backends.qa import (
     skinning_defects,
 )
 from src.shared.python.model_appearance.hand_backends.skinned_human import (
-    build_grip_hands,
     build_hand_visual,
+)
+from src.shared.python.model_appearance.hand_backends.skinned_pair import (
+    build_grip_hands,
 )
 
 OUT = Path(__file__).resolve().parent

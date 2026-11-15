@@ -149,7 +149,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 942 | `src/shared/python/estimation/dime_dynamics_window.py` |
 | 938 | `src/robotics/control/whole_body/wbc_controller.py` |
 | 934 | `src/shared/python/sidekick/ui/tools_sidebar/os_terminal.py` |
-| 933 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 932 | `src/shared/python/model_generation/library/model_library.py` |
 | 924 | `src/research/differentiable/engine.py` |
 | 922 | `src/shared/python/shadow_tracker/service.py` |
@@ -159,6 +158,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 908 | `src/engines/physics_engines/opensim/python/grip_contact_osim_sim.py` |
 | 907 | `src/unreal_integration/mesh_loader.py` |
 | 903 | `src/shared/python/motion_matching/club_only/body_candidates.py` |
+| 902 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 902 | `src/tools/capture_rig/reference_comparison.py` |
 | 897 | `src/shared/python/motion_matching/surrogate/compact/training.py` |
 | 896 | `src/bunkershot3d/solvers/mpm/ballreach.py` |

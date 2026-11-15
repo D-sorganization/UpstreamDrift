@@ -36,12 +36,15 @@ from src.shared.python.model_appearance.hand_backends.qa import (
 )
 from src.shared.python.model_appearance.hand_backends.skinned_human import (
     BACKEND_NAME,
-    build_grip_hands,
     build_hand_visual,
     default_settings,
     load_settings_mapping,
     settings_from_mapping,
     solve_grip_joint_angles,
+)
+
+from src.shared.python.model_appearance.hand_backends.skinned_pair import (
+    build_grip_hands,
 )
 
 pytestmark = pytest.mark.unit
@@ -397,6 +400,23 @@ def test_trail_hand_of_the_pair_still_wraps_the_grip_or_the_lead_hand() -> None:
     assert trail_z - lead_z > 0.5 * _spec().hand_spacing_m, "trail is nearer the head"
     for side in _SIDES:
         assert skinning_residual_m(pair[side]) < 1e-9
+
+
+def test_trail_fingers_seat_on_the_grip_and_only_the_little_overlaps() -> None:
+    """Overlap grip: the trail little finger rides on the lead hand; the other
+    trail fingers reach the grip itself, not the lead index finger."""
+    trail = _pair()["trail"]
+    grip = np.hypot(*trail.mesh.vertices[:, :2].T) - _RADIUS
+    tolerance = float(_Q["contact_tolerance_m"])
+    for finger in ("index", "middle", "ring"):
+        for segment in ("mid", "dist"):
+            ids = trail.rest_asset.dominant_vertex_ids((f"{finger}_{segment}",))
+            gap = float(grip[ids].min())
+            assert gap <= tolerance, f"trail {finger}_{segment} {gap * 1e3:.1f} mm"
+    # The slide toward the head is bounded (the solo trail hand sits at z = 0).
+    moved = trail.frame_from_rest[2, 3] - _hand("trail").frame_from_rest[2, 3]
+    moved -= _spec().hand_spacing_m
+    assert -1e-9 <= moved <= default_settings().pair_max_spacing_adjust_m + 1e-9
 
 
 def test_forearms_leave_the_club_on_the_golfers_side() -> None:

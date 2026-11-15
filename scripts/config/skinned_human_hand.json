@@ -79,7 +79,14 @@
   },
   "pair": {
     "capsule_radius_scale": 1.0,
-    "thumb_radius_scale": 1.0
+    "thumb_radius_scale": 1.0,
+    "grip_fingers": [
+      "index",
+      "middle",
+      "ring"
+    ],
+    "max_spacing_adjust_m": 0.03,
+    "capsule_margin_m": 0.001
   },
   "wrist": {
     "lead": {

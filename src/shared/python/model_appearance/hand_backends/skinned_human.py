@@ -114,6 +114,9 @@ class SkinnedHumanSettings:
     thumb_straight_ip_limit_deg: float
     pair_capsule_radius_scale: float
     pair_thumb_radius_scale: float
+    pair_grip_fingers: tuple[str, ...]
+    pair_max_spacing_adjust_m: float
+    pair_capsule_margin_m: float
     wrist_deg: tuple[tuple[str, tuple[float, float]], ...]
 
     def limit_rad(self, joint: str) -> tuple[float, float]:
@@ -134,6 +137,20 @@ def _unit_interval(value: Any, name: str) -> float:
     number = float(value)
     if not 0.0 <= number <= 1.0:
         raise ValueError(f"{name} must be in [0, 1]")
+    return number
+
+
+def _fingers(raw: Any) -> tuple[str, ...]:
+    names = tuple(str(x) for x in raw)
+    if not set(names) <= set(FINGERS):
+        raise ValueError(f"grip_fingers must be among {FINGERS}")
+    return names
+
+
+def _non_negative(value: Any, name: str) -> float:
+    number = float(value)
+    if not (math.isfinite(number) and number >= 0.0):
+        raise ValueError(f"{name} must be non-negative and finite")
     return number
 
 
@@ -198,6 +215,13 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
         ),
         pair_thumb_radius_scale=_unit_interval(
             pair["thumb_radius_scale"], "thumb_radius_scale"
+        ),
+        pair_grip_fingers=_fingers(pair["grip_fingers"]),
+        pair_max_spacing_adjust_m=_non_negative(
+            pair["max_spacing_adjust_m"], "max_spacing_adjust_m"
+        ),
+        pair_capsule_margin_m=_non_negative(
+            pair["capsule_margin_m"], "capsule_margin_m"
         ),
         wrist_deg=tuple(
             (
@@ -865,70 +889,6 @@ def _result(
         frame_from_rest=frame,
         rest_asset=hand.asset,
     )
-
-
-def _bone_capsules(
-    solved: _SolvedHand, settings: SkinnedHumanSettings
-) -> tuple[Array, Array, Array]:
-    """The solved hand's digits and metacarpals as capsules (its build frame)."""
-    hand = solved.hand
-    bones = [f"{f}_{s}" for f in FINGERS for s in _SEGMENTS]
-    bones += [f"meta_{f}" for f in FINGERS] + list(_THUMB_BONES)
-    starts = [hand.joint_position(b, solved.angles) for b in bones]
-    ends = [hand.joint_position(b, solved.angles, tail=True) for b in bones]
-    radii = [
-        _bone_skin_radius(hand.asset, b)
-        * settings.pair_capsule_radius_scale
-        * (settings.pair_thumb_radius_scale if b in _THUMB_BONES else 1.0)
-        for b in bones
-    ]
-    return np.array(starts), np.array(ends), np.array(radii)
-
-
-def build_grip_hands(
-    grip_spec: GripSpec,
-    *,
-    grip_radius_m: float,
-    settings: SkinnedHumanSettings | None = None,
-) -> dict[HandSide, HandVisualResult]:
-    """Both hands on one club, in the lead hand's grip frame.
-
-    The lead hand is posed on the bare grip. The trail hand sits
-    ``hand_spacing_m`` toward the club head and is posed around the grip *and*
-    the lead hand's digits, so it rests on them instead of passing through.
-    Its ``contact_gaps_m`` are clearances to that combined obstacle.
-    """
-    _check_inputs(grip_spec, "lead", grip_radius_m)
-    settings = settings or default_settings()
-    lead = _solve_right_hand(grip_spec, "lead", grip_radius_m, settings, None)
-    starts, ends, radii = _bone_capsules(lead, settings)
-    club_from_lead = _club_from_build(grip_spec, "lead", lead.targets.mirrored, 0.0)
-    trail_mirrored = _targets(grip_spec, "trail", settings).mirrored
-    club_from_trail = _club_from_build(
-        grip_spec, "trail", trail_mirrored, grip_spec.hand_spacing_m
-    )
-    trail_from_lead = np.linalg.inv(club_from_trail) @ club_from_lead
-
-    def moved(points: Array) -> Array:
-        return points @ trail_from_lead[:3, :3].T + trail_from_lead[:3, 3]
-
-    obstacle = capsule_union_distance(
-        cylinder_distance(grip_radius_m), moved(starts), moved(ends), radii
-    )
-    trail = _solve_right_hand(
-        grip_spec, "trail", grip_radius_m, settings, None, obstacle
-    )
-    return {
-        "lead": _result(lead, grip_spec, "lead", grip_radius_m, settings, 0.0),
-        "trail": _result(
-            trail,
-            grip_spec,
-            "trail",
-            grip_radius_m,
-            settings,
-            grip_spec.hand_spacing_m,
-        ),
-    }
 
 
 def register() -> None:
