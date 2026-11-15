@@ -22,8 +22,14 @@ The JSON schema (shared by :file:`ratios/dempster_1955.json` and
       "segment_name_map": {
         "<anatomical_name>": "<class_id>",
         ...
-      }
+      },
+      "table_kind": "coarse_eight_class"  # optional; Dempster / Zatsiorsky
     }
+
+Coarse eight-class tables (:attr:`COARSE_TABLE_KIND`) ship only the published
+Dempster (1955) or Zatsiorsky-Seluyanov (1985) segment classes. The legacy
+``segment_name_map`` that duplicated trunk mass across partitions is **not**
+used; :mod:`_humanoid_expansion` replaces it at estimate time (#15014).
 
 This module parses that schema into the same in-memory
 representation (:class:`SegmentRatios` + a flat name map) used by
@@ -39,6 +45,8 @@ from pathlib import Path
 from typing import Any
 
 from ._base import SegmentRatios
+
+COARSE_TABLE_KIND = "coarse_eight_class"
 
 
 @dataclass(frozen=True)
@@ -108,18 +116,25 @@ def load_ratio_table(path: Path) -> LoadedRatioTable:
         raise ValueError(
             f"ratio table {path!s} root must be an object, got {type(data).__name__}"
         )
-    _require_keys(
-        data,
-        ("method", "citation", "segments", "segment_name_map"),
-        f"ratio table {path!s}",
-    )
+    table_kind = str(data.get("table_kind", ""))
+    coarse_table = table_kind == COARSE_TABLE_KIND
+    required_root = ("method", "citation", "segments")
+    if not coarse_table:
+        required_root = (*required_root, "segment_name_map")
+    _require_keys(data, required_root, f"ratio table {path!s}")
     raw_segments = data["segments"]
-    raw_name_map = data["segment_name_map"]
+    raw_name_map = data.get("segment_name_map", {})
     if not isinstance(raw_segments, dict) or not raw_segments:
         raise ValueError(f"ratio table {path!s} 'segments' must be a non-empty mapping")
-    if not isinstance(raw_name_map, dict) or not raw_name_map:
+    if not coarse_table:
+        if not isinstance(raw_name_map, dict) or not raw_name_map:
+            raise ValueError(
+                f"ratio table {path!s} 'segment_name_map' must be a non-empty mapping"
+            )
+    elif raw_name_map:
         raise ValueError(
-            f"ratio table {path!s} 'segment_name_map' must be a non-empty mapping"
+            f"ratio table {path!s} sets table_kind={COARSE_TABLE_KIND!r}; "
+            "omit segment_name_map (humanoid expansion supplies the map)"
         )
 
     classes = {
