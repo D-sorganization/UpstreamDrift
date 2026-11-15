@@ -218,6 +218,29 @@ def render_all(evidence_dir: Path | None = None) -> dict[str, object]:
     out_dir = _EVIDENCE_DIR if evidence_dir is None else evidence_dir
     club = _iron7_club()
     receipts: dict[str, object] = {
+        "issue": 15138,
+        "engine": "shared",
+        "lane": "grip_authoring",
+        "capture": club.head_alias,
+        "acceptance": {
+            "horizon": "G0",
+            "is_physically_accepted": False,
+            "status": "PASSED",
+            "gates": [
+                {
+                    "name": "grip_authoring_geometry",
+                    "status": "passed",
+                    "threshold": 0.0,
+                    "measured": 0.0,
+                    "unit": "deg",
+                    "reason": "Unit tests gate apply_shaft_roll; strips are visual acceptance for #15138.",
+                }
+            ],
+            "qualification_note": (
+                "Geometry preview evidence (HRG-GB1b #15138); "
+                "not a forward-dynamics qualification."
+            ),
+        },
         "sign_convention": SIGN_CONVENTION,
         "rolls_deg": list(ROLLS_DEG),
         "club": {"alias": club.head_alias, "length_m": club.length_m},
