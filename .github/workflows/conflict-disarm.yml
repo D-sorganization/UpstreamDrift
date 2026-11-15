@@ -42,5 +42,5 @@ jobs:
       exclude_prs: ${{ inputs.exclude_prs || '12634' }}
       runner: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     secrets:
-      JULES_APP_ID: ${{ secrets.JULES_APP_ID }}
-      JULES_APP_PRIVATE_KEY: ${{ secrets.JULES_APP_PRIVATE_KEY }}
+      FLEET_GENERAL_AGENT_APP_ID: ${{ secrets.FLEET_GENERAL_AGENT_APP_ID }}
+      FLEET_GENERAL_AGENT_APP_PRIVATE_KEY: ${{ secrets.FLEET_GENERAL_AGENT_APP_PRIVATE_KEY }}
