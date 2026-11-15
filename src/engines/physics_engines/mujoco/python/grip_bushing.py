@@ -207,7 +207,11 @@ class ClubOnBushings:
         xml = club_mjcf(ClubDynamics.from_spec(spec), gravity, timestep_s)
         self.model, self.data = loader(xml)
         self._body = int(self.model.body("club").id)
-        self._offsets = {s: interface.frame(s).matrix() for s in SIDES}
+        from src.shared.python.grip_spec.shaft_roll import (
+            grip_interface_offsets_with_shaft_roll,
+        )
+
+        self._offsets = grip_interface_offsets_with_shaft_roll(interface, grip_pose)
         self.hand_source: HandSource | None = None
         self.last: _Sample | None = None
 
