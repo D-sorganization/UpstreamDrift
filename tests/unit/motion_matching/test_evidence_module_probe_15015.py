@@ -25,6 +25,14 @@ RUN102_DIR = (
     / "native_evidence"
     / "two_window_fit_9967_102"
 )
+RUN101_DIR = (
+    REPO_ROOT
+    / "docs"
+    / "development"
+    / "simscape_tour_matching"
+    / "native_evidence"
+    / "two_window_fit_9967_101"
+)
 
 
 @pytest.mark.parametrize(
@@ -57,3 +65,16 @@ def test_run102_script_exits_before_native_imports() -> None:
     )
     assert proc.returncode == 2
     assert "archived on this branch" in proc.stderr
+
+
+def test_run101_script_exits_before_native_imports() -> None:
+    script = RUN101_DIR / "two_window_fit_101.py"
+    proc = subprocess.run(
+        [sys.executable, str(script), "--help"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert proc.returncode == 2
+    assert "two_window_fit_101.py is archived on this branch" in proc.stderr
