@@ -1,0 +1,16 @@
+{
+  "cases": {
+    "lead_minus_15deg": {
+      "baseline_palm_azimuth_deg": -34.99999999999996,
+      "palm_azimuth_deg": -34.99999999999996,
+      "png": "full_body_models/evidence/grip_shaft_roll/lead_minus_15deg.png",
+      "shaft_roll_deg": -15.0
+    },
+    "lead_plus_15deg": {
+      "baseline_palm_azimuth_deg": -34.99999999999996,
+      "palm_azimuth_deg": -34.99999999999996,
+      "png": "full_body_models/evidence/grip_shaft_roll/lead_plus_15deg.png",
+      "shaft_roll_deg": 15.0
+    }
+  }
+}
