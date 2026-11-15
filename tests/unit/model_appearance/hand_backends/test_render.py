@@ -313,9 +313,19 @@ def test_palm_and_back_are_opposite_and_butt_sits_at_the_butt_end() -> None:
     np.testing.assert_allclose(back.back, basis.dorsum, atol=1e-12)
     np.testing.assert_allclose(palm.back, -back.back, atol=1e-12)
     butt, _, _ = _rig("butt")
-    np.testing.assert_allclose(butt.back, [0.0, 0.0, -1.0], atol=1e-12)
     assert butt.eye[2] < butt.target[2]
-    np.testing.assert_allclose(butt.up, basis.dorsum, atol=1e-12)
+
+
+def test_butt_view_looks_up_the_shaft_from_the_palm_side() -> None:
+    """Straight down the shaft the end cap hides the hand; the view is tilted
+    to the palm side so the heel pad on the grip is in frame."""
+    butt, basis, _ = _rig("butt")
+    along = float(butt.back @ basis.shaft)
+    palmar = float(-butt.back @ basis.dorsum)
+    assert along < -0.7, "butt view no longer looks from the butt end"
+    assert 0.3 < palmar < -along, "butt view is not tilted to the palm side"
+    assert abs(float(butt.back @ basis.thumb)) < 1e-12
+    assert float(butt.up @ basis.dorsum) > 0.7
 
 
 @pytest.mark.parametrize("side", ["lead", "trail"])
@@ -340,7 +350,8 @@ def _stubbed_scene(view_side: str = "lead"):
     reach = float(np.ptp(vertices, axis=0).max())
     basis = render.anatomical_basis(vertices, side=view_side, settings=SETTINGS)
     corners = 0.01 * np.array([[0.0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]])
-    offset = 0.9 * reach * (basis.dorsum + basis.thumb + basis.shaft)
+    # Toward the butt, so no required view sees the stub shrink into the distance.
+    offset = 0.9 * reach * (basis.dorsum + basis.thumb - basis.shaft)
     stub = Mesh(
         vertices.mean(axis=0) + corners + offset,
         np.array([[0, 2, 1], [0, 1, 3], [0, 3, 2], [1, 2, 3]]),
