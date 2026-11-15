@@ -22,6 +22,7 @@ __all__ = [
     "ledger_unclassified_count",
     "ledger_unverified_count",
     "load_waivers",
+    "gates_imply_accepted",
     "validate_candidate_gate_metrics",
     "validate_candidate_package",
     "validate_ledger_ratchets",
@@ -98,6 +99,13 @@ def _parse_gates_passed(text: str) -> tuple[int, int] | None:
         return int(left.strip()), int(right.strip())
     except ValueError:
         return None
+
+
+def gates_imply_accepted(gates: Any) -> bool | None:
+    """Return whether every gate boolean is true, or None when gates are unusable."""
+    if not isinstance(gates, Mapping) or not gates:
+        return None
+    return all(passed is True for passed in gates.values())
 
 
 _DEFAULT_GATES = AcceptanceGates()
@@ -229,8 +237,9 @@ def validate_candidate_package(
     gates = data.get("gates")
     accepted = data.get("accepted")
 
-    if isinstance(gates, Mapping) and gates:
-        all_passed = all(passed is True for passed in gates.values())
+    implied = gates_imply_accepted(gates)
+    if implied is not None:
+        all_passed = implied
         true_count = sum(1 for value in gates.values() if value is True)
         passed_text = data.get("gates_passed")
         if isinstance(passed_text, str) and passed_text.strip():
@@ -262,12 +271,15 @@ def validate_candidate_package(
                     message="accepted=true but gates_passed is missing or empty",
                 )
             )
-        if accepted is False and all_passed:
+        if accepted is not None and bool(accepted) != all_passed:
             issues.append(
                 EvidenceIssue(
                     rule="accepted_gates_consistency",
                     path=rel_path,
-                    message="accepted=false despite all gates passing",
+                    message=(
+                        f"accepted={accepted!r} disagrees with gates "
+                        f"({'all passed' if all_passed else 'not all passed'})"
+                    ),
                 )
             )
 
@@ -284,17 +296,6 @@ def validate_candidate_package(
         )
         issues.extend(validate_candidate_gate_metrics(rel_path, data))
         return issues
-    failed = [name for name, passed in gates.items() if passed is not True]
-    if failed:
-        issues.append(
-            EvidenceIssue(
-                rule="accepted_gates_consistency",
-                path=rel_path,
-                message=(
-                    f"accepted=true but gates failed: {', '.join(sorted(failed))}"
-                ),
-            )
-        )
     issues.extend(validate_candidate_gate_metrics(rel_path, data))
     return issues
 
