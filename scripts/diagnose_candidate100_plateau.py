@@ -8,6 +8,8 @@ from pathlib import Path
 import numpy as np
 import scipy.io as sio
 
+from src.shared.python.motion_matching.pelvis_yaw import pelvis_yaw_error_pct_from_diff_deg
+
 EVIDENCE_DIR = (
     Path(__file__).resolve().parents[1]
     / "docs"
@@ -58,7 +60,7 @@ def diagnose() -> None:
     yp = np.degrees(np.arctan2(vp[1], vp[0]))
     yt = np.degrees(np.arctan2(vt[1], vt[0]))
     ydiff = (yp - yt + 180) % 360 - 180
-    yerr_pct = abs(ydiff) / max(abs(yt), 1.0) * 100
+    yerr_pct = pelvis_yaw_error_pct_from_diff_deg(ydiff)
     logger.info(
         "Pelvis Yaw Pred: %.2f deg, Target: %.2f deg, Diff: %.2f deg, Error: %.2f%%",
         yp,

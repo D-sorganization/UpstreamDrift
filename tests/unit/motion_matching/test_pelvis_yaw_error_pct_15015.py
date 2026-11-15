@@ -5,11 +5,14 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+import math
+
 from src.shared.python.motion_matching.pelvis_yaw import (
     PELVIS_YAW_ERROR_REFERENCE_DEG,
     compute_pelvis_yaw_metrics,
     pelvis_yaw_error_pct_from_diff_deg,
 )
+from src.shared.python.motion_matching.replay_metrics import compute_replay_five_metrics
 
 pytestmark = pytest.mark.unit
 
@@ -67,6 +70,30 @@ def test_pelvis_yaw_error_pct_uses_fixed_reference_not_target_heading() -> None:
         )
 
 
-def test_pelvis_yaw_reference_matches_g1_five_percent_gate() -> None:
-    """The G1 gate at 5% corresponds to 4.5° at the fixed 90° reference."""
+def test_pelvis_yaw_pct_maps_four_point_five_deg_to_five_percent() -> None:
+    """At the fixed 90° reference, 4.5° angular error yields a 5% reported value."""
     assert pelvis_yaw_error_pct_from_diff_deg(4.5) == pytest.approx(5.0, abs=1e-9)
+
+
+def test_pelvis_yaw_error_pct_from_diff_deg_rejects_non_finite() -> None:
+    with pytest.raises(ValueError, match="finite"):
+        pelvis_yaw_error_pct_from_diff_deg(float("nan"))
+    with pytest.raises(ValueError, match="finite"):
+        pelvis_yaw_error_pct_from_diff_deg(float("inf"))
+
+
+def test_replay_five_metrics_pelvis_nan_when_waist_invalid_on_terminal_frame() -> None:
+    """``compute_replay_five_metrics`` reports NaN (not a sentinel pct) when pelvis is degenerate."""
+    time_s = np.array([0.10, 0.85])
+    pred = np.zeros((2, 2, 3))
+    target = np.ones((2, 2, 3))
+    valid = np.array([[True, True], [False, True]], dtype=bool)
+    labels = ["WaistLeft", "WaistRight"]
+    metrics = compute_replay_five_metrics(
+        time_s=time_s,
+        pred_markers_m=pred,
+        target_markers_m=target,
+        valid=valid,
+        marker_labels=labels,
+    )
+    assert math.isnan(metrics.pelvis_yaw_error_pct)

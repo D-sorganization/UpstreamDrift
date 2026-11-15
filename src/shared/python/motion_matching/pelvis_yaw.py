@@ -22,6 +22,8 @@ PELVIS_YAW_ERROR_REFERENCE_DEG = 90.0
 
 def pelvis_yaw_error_pct_from_diff_deg(diff_deg: float) -> float:
     """Map wrapped yaw error (degrees) to a rotation-invariant percentage."""
+    if not np.isfinite(diff_deg):
+        raise ValueError(f"diff_deg must be finite, got {diff_deg!r}")
     return float(abs(diff_deg) / PELVIS_YAW_ERROR_REFERENCE_DEG * 100.0)
 
 

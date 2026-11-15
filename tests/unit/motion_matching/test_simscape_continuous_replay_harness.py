@@ -24,6 +24,9 @@ import numpy as np
 import pytest
 
 from src.shared.python.motion_matching.acceptance import Horizon
+from src.shared.python.motion_matching.pelvis_yaw import (
+    pelvis_yaw_error_pct_from_diff_deg,
+)
 from src.shared.python.motion_matching.simscape_replay_harness import (
     ContinuousReplayControlIdentity,
     ContinuousReplayProfile,
@@ -47,7 +50,10 @@ pytestmark = pytest.mark.unit
 # (slightly resampled, within the recorded 0.0605 mm cross-engine parity).
 RUN102_EARLY_RMS_M = 0.009995357264954529
 RUN102_CLUB_RMS_M = 0.008391285435051065
+RUN102_PELVIS_YAW_DIFF_DEG = 0.3251533720040811
 RUN102_PELVIS_YAW_PCT = 0.361281524448979
+# Archived ``returned.json`` still records the pre-#15015 formula; do not rewrite evidence.
+RUN102_ARCHIVED_PELVIS_YAW_PCT = 0.5954129834382699
 # ``qualified_candidate_replay.json`` records ``pelvis_yaw_diff_deg``; map with the
 # rotation-invariant reference (issue #15015 C7), not the archived pct literal.
 RUN102_QUALIFIED_REPORT_YAW_PCT = 0.370121626981567
@@ -490,6 +496,9 @@ def test_receipt_holds_measured_pelvis_yaw_and_omits_unmeasured_gates() -> None:
     rd = receipt.receipt_dict
     yaw_measured = float(rd["pelvis_yaw_error_pct"])
     assert yaw_measured == pytest.approx(RUN102_PELVIS_YAW_PCT, abs=1e-9)
+    assert yaw_measured == pytest.approx(
+        pelvis_yaw_error_pct_from_diff_deg(RUN102_PELVIS_YAW_DIFF_DEG), abs=1e-9
+    )
     # Also stays in the recorded fresh-R2025b prediction band (resampled markers).
     assert yaw_measured == pytest.approx(RUN102_QUALIFIED_REPORT_YAW_PCT, abs=3e-2)
     assert yaw_measured != 0.5  # the fabricated literal must be gone
@@ -511,6 +520,24 @@ def test_receipt_holds_measured_pelvis_yaw_and_omits_unmeasured_gates() -> None:
     )
     assert yaw_gate.status.value == "passed"
     assert yaw_gate.measured == pytest.approx(yaw_measured, abs=1e-12)
+
+
+def test_run102_archived_returned_json_pelvis_pct_unchanged() -> None:
+    """Native evidence artifacts must not be hand-edited to match new formulas."""
+    returned_path = RUN102_DIR / "returned.json"
+    assert returned_path.is_file()
+    archived = json.loads(returned_path.read_text(encoding="utf-8"))
+    uninterrupted = float(archived["uninterrupted_metrics"]["pelvis_yaw_error_pct"])
+    assert uninterrupted == pytest.approx(RUN102_ARCHIVED_PELVIS_YAW_PCT, abs=1e-12)
+    assert uninterrupted != pytest.approx(RUN102_PELVIS_YAW_PCT, abs=1e-3)
+
+
+def test_run102_pelvis_pct_tolerance_change_at_fixed_diff_deg() -> None:
+    """Issue #15015 C7: same |Δyaw| yields a lower pct; G1 5% now means 4.5° not ~2.73°."""
+    new_pct = pelvis_yaw_error_pct_from_diff_deg(RUN102_PELVIS_YAW_DIFF_DEG)
+    assert new_pct == pytest.approx(RUN102_PELVIS_YAW_PCT, abs=1e-12)
+    assert new_pct < RUN102_ARCHIVED_PELVIS_YAW_PCT
+    assert pelvis_yaw_error_pct_from_diff_deg(4.5) == pytest.approx(5.0, abs=1e-9)
 
 
 def test_receipt_roundtrip_preserves_null_terminal_channels(tmp_path: Path) -> None:
