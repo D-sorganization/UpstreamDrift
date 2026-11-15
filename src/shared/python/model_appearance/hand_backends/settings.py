@@ -21,7 +21,7 @@ def _rgb_triple(raw: Any, name: str) -> tuple[float, float, float]:
 
 @dataclass(frozen=True)
 class MyoHandVisualSettings:
-    """Tolerances and colours for :mod:`hand_backends.myohand` (bone skeleton)."""
+    """Tolerances, calibration and colours for :mod:`hand_backends.myohand`."""
 
     schema_version: int
     grip_radius_m: float
@@ -32,12 +32,26 @@ class MyoHandVisualSettings:
     license_gate_issue: int
     bone_rgb: tuple[float, float, float]
     grip_rgb: tuple[float, float, float]
+    shaft_rgb: tuple[float, float, float]
+    butt_cap_rgb: tuple[float, float, float]
+    background_rgb: tuple[float, float, float]
     anthropometric_reference_hand_length_m: float
     anthropometric_scale_exponent: float
     width_scale_from_breadth: bool
     model_xml_relpath: str
     hand_body_names: tuple[str, ...]
+    palm_anchor_bodies: tuple[str, ...]
     registration_mode: str
+    mcp_azimuth_offset_deg: float
+    mcp_tangential_bias_m: float
+    palm_axial_offset_m: float
+    palm_seat_clearance_m: float
+    bone_target_clearance_m: float
+    bone_safe_clearance_m: float
+    distal_contact_tolerance_m: float
+    middle_contact_tolerance_m: float
+    thumb_contact_tolerance_m: float
+    thumb_max_z_m: float
     palm_finger_depth_flexion_gain: float
     palm_finger_depth_deviation_gain: float
     thumb_straightness_range_rad: tuple[float, float]
@@ -62,6 +76,9 @@ def load_myohand_settings(path: Path | None = None) -> MyoHandVisualSettings:
         license_gate_issue=int(payload["license_gate_issue"]),
         bone_rgb=_rgb_triple(payload["bone_rgb"], "bone_rgb"),
         grip_rgb=_rgb_triple(payload["grip_rgb"], "grip_rgb"),
+        shaft_rgb=_rgb_triple(payload["shaft_rgb"], "shaft_rgb"),
+        butt_cap_rgb=_rgb_triple(payload["butt_cap_rgb"], "butt_cap_rgb"),
+        background_rgb=_rgb_triple(payload["background_rgb"], "background_rgb"),
         anthropometric_reference_hand_length_m=float(
             payload["anthropometric_reference_hand_length_m"]
         ),
@@ -69,7 +86,18 @@ def load_myohand_settings(path: Path | None = None) -> MyoHandVisualSettings:
         width_scale_from_breadth=bool(payload["width_scale_from_breadth"]),
         model_xml_relpath=str(payload["model_xml_relpath"]),
         hand_body_names=tuple(str(n) for n in payload["hand_body_names"]),
+        palm_anchor_bodies=tuple(str(n) for n in payload["palm_anchor_bodies"]),
         registration_mode=str(payload["registration_mode"]),
+        mcp_azimuth_offset_deg=float(payload["mcp_azimuth_offset_deg"]),
+        mcp_tangential_bias_m=float(payload["mcp_tangential_bias_m"]),
+        palm_axial_offset_m=float(payload["palm_axial_offset_m"]),
+        palm_seat_clearance_m=float(payload["palm_seat_clearance_m"]),
+        bone_target_clearance_m=float(payload["bone_target_clearance_m"]),
+        bone_safe_clearance_m=float(payload["bone_safe_clearance_m"]),
+        distal_contact_tolerance_m=float(payload["distal_contact_tolerance_m"]),
+        middle_contact_tolerance_m=float(payload["middle_contact_tolerance_m"]),
+        thumb_contact_tolerance_m=float(payload["thumb_contact_tolerance_m"]),
+        thumb_max_z_m=float(payload["thumb_max_z_m"]),
         palm_finger_depth_flexion_gain=float(palm["flexion_gain"]),
         palm_finger_depth_deviation_gain=float(palm["deviation_gain"]),
         thumb_straightness_range_rad=(
@@ -84,4 +112,8 @@ def default_myohand_settings() -> MyoHandVisualSettings:
     return load_myohand_settings()
 
 
-__all__ = ["MyoHandVisualSettings", "default_myohand_settings", "load_myohand_settings"]
+__all__ = [
+    "MyoHandVisualSettings",
+    "default_myohand_settings",
+    "load_myohand_settings",
+]

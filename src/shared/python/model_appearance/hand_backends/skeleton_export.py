@@ -7,13 +7,8 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.grip_spec.types import GripSpec
-from src.shared.python.model_appearance.hand_backends.joint_mapping import (
-    anatomical_mirror_for_side,
-    grip_spec_to_myohand_joint_angles,
-)
 from src.shared.python.model_appearance.hand_backends.myohand import (
-    _model_and_data,
-    _pipeline_transform,
+    _resolved_pose_and_transform,
 )
 from src.shared.python.model_appearance.hand_backends.settings import (
     MyoHandVisualSettings,
@@ -43,15 +38,12 @@ def export_myohand_skeleton(
     )
 
     cfg = default_myohand_settings() if settings is None else settings
-    targets = grip_spec_to_myohand_joint_angles(
-        grip_spec,
-        side,
-        grip_radius_m=cfg.grip_radius_m,
-        joint_angle_overrides=joint_angles,
+    model, data, _raw, targets, transform = _resolved_pose_and_transform(
+        grip_spec, side, cfg, joint_angles
     )
-    model, data, raw = _model_and_data(targets, cfg)
-    transform = _pipeline_transform(grip_spec, side, raw, cfg, joint_angles)
-    mirror = anatomical_mirror_for_side(grip_spec, side)
+    rot = transform[:3, :3]
+    det_sign = 1.0 if float(np.linalg.det(rot)) >= 0.0 else -1.0
+    axial_rot = det_sign * np.linalg.inv(rot).T
 
     joints: dict[str, dict[str, list[float]]] = {}
     name_to_id = {
@@ -65,11 +57,9 @@ def export_myohand_skeleton(
         origin = np.asarray(data.xanchor[jid], dtype=float).reshape(1, 3)
         axis = np.asarray(data.xaxis[jid], dtype=float).reshape(1, 3)
         origin_g = _world_to_grip(origin, transform)[0]
-        axis_g = axis @ transform[:3, :3].T
-        axis_g = axis_g[0] / max(float(np.linalg.norm(axis_g)), 1e-12)
-        if mirror:
-            origin_g[1] *= -1.0
-            axis_g[1] *= -1.0
+        axis_g = (axis @ axial_rot.T)[0]
+        axis_norm = max(float(np.linalg.norm(axis_g)), 1e-12)
+        axis_g = axis_g / axis_norm
         joints[jname] = {
             "origin_m": [float(v) for v in origin_g],
             "axis_unit": [float(v) for v in axis_g],

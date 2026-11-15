@@ -88,20 +88,19 @@ def transform_meshes(
     *,
     mirror_y: bool = False,
 ) -> dict[str, Mesh]:
-    """Apply a rigid ``4x4`` transform; optional mirror about grip ``y``."""
+    """Apply a rigid/affine ``4x4`` transform; flip winding whenever parity is odd."""
     t = np.asarray(transform, dtype=float)
     if t.shape != (4, 4):
         raise ValueError("transform must be 4x4")
     rot = t[:3, :3]
     trans = t[:3, 3]
+    flip_winding = (float(np.linalg.det(rot)) < 0.0) ^ bool(mirror_y)
     out: dict[str, Mesh] = {}
     for name, mesh in meshes.items():
         verts = mesh.vertices @ rot.T + trans
         if mirror_y:
             verts[:, 1] *= -1.0
-            faces = mesh.faces[:, ::-1].copy()
-        else:
-            faces = mesh.faces
+        faces = mesh.faces[:, ::-1].copy() if flip_winding else mesh.faces
         out[name] = Mesh(verts, faces)
     return out
 

@@ -2,12 +2,14 @@
 
 Myo_sim provides STL **bone** meshes plus MuJoCo ``class="skin"`` capsule/ellipsoid
 geoms (not a continuous skin surface). This backend renders bones only, in bone
-colour, posed with the same curl-to-grip joint targets as the capsule reference.
+colour, mounted anatomically on the grip and curled to contact while keeping the
+capsule contact physics untouched.
 """
 
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import replace
 from typing import Any
 
 import numpy as np
@@ -20,17 +22,19 @@ from src.shared.python.grip_spec.shaft_roll import (
 )
 from src.shared.python.grip_spec.types import GripSpec
 from src.shared.python.model_appearance.geometry import Mesh
+from src.shared.python.model_appearance.hand_backends.contact_solver import (
+    solve_myohand_contact_pose,
+)
 from src.shared.python.model_appearance.hand_backends.joint_mapping import (
-    anatomical_mirror_for_side,
     grip_spec_to_myohand_joint_angles,
 )
 from src.shared.python.model_appearance.hand_backends.mujoco_extract import (
     apply_joint_targets,
+    extract_hand_bone_meshes,
     load_myohand_model,
     transform_meshes,
 )
 from src.shared.python.model_appearance.hand_backends.registration import (
-    posed_bones_in_model_frame,
     registration_to_grip_hand_mesh,
 )
 from src.shared.python.model_appearance.hand_backends.settings import (
@@ -58,7 +62,7 @@ def _model_and_data(
     model = load_myohand_model(cfg.model_xml_path)
     data = mujoco.MjData(model)
     apply_joint_targets(model, data, targets)
-    raw = posed_bones_in_model_frame(
+    raw = extract_hand_bone_meshes(
         model,
         data,
         allowed_bodies=frozenset(cfg.hand_body_names),
@@ -74,13 +78,85 @@ def _pipeline_transform(
     joint_angles: Mapping[str, float] | None,
 ) -> np.ndarray:
     _ = joint_angles
-    return registration_to_grip_hand_mesh(
+    if cfg.registration_mode == "kabsch_to_capsule_curl":
+        return registration_to_grip_hand_mesh(
+            spec,
+            side,
+            raw_bones,
+            cfg=cfg,
+            grip_radius_m=cfg.grip_radius_m,
+        )
+    _, _, _, _, m_total = _resolved_pose_and_transform(spec, side, cfg, joint_angles)
+    return m_total
+
+
+def _canonical_rh_spec(spec: GripSpec) -> GripSpec:
+    return replace(
         spec,
-        side,
-        raw_bones,
-        cfg=cfg,
-        grip_radius_m=cfg.grip_radius_m,
+        handedness="right",
+        lead=replace(spec.lead, shaft_roll_deg=0.0),
+        trail=replace(spec.trail, shaft_roll_deg=0.0),
     )
+
+
+def _resolved_pose_and_transform(
+    spec: GripSpec,
+    side: HandVisualSide,
+    cfg: MyoHandVisualSettings,
+    joint_angles: Mapping[str, float] | None,
+) -> tuple[Any, Any, dict[str, Mesh], dict[str, float], np.ndarray]:
+    import mujoco
+
+    spec_rh = _canonical_rh_spec(spec)
+    hand_spec = spec_rh.lead if side == "lead" else spec_rh.trail
+    locked = {k.removeprefix("rh_") for k, _ in hand_spec.joint_coupling_overrides}
+    if joint_angles:
+        locked.update(str(k).removeprefix("rh_") for k in joint_angles)
+
+    seed_targets = grip_spec_to_myohand_joint_angles(
+        spec_rh,
+        side,
+        grip_radius_m=cfg.grip_radius_m,
+        joint_angle_overrides=joint_angles,
+    )
+    model = load_myohand_model(cfg.model_xml_path)
+    data = mujoco.MjData(model)
+
+    if cfg.registration_mode == "kabsch_to_capsule_curl":
+        apply_joint_targets(model, data, seed_targets)
+        raw = extract_hand_bone_meshes(
+            model, data, allowed_bodies=frozenset(cfg.hand_body_names)
+        )
+        m_total = registration_to_grip_hand_mesh(
+            spec_rh, side, raw, cfg=cfg, grip_radius_m=cfg.grip_radius_m
+        )
+        targets = seed_targets
+    else:
+        targets, m_total = solve_myohand_contact_pose(
+            model,
+            data,
+            spec_rh,
+            side,
+            seed_targets,
+            cfg=cfg,
+            grip_radius_m=cfg.grip_radius_m,
+            locked_joints=locked,
+        )
+        apply_joint_targets(model, data, targets)
+        raw = extract_hand_bone_meshes(
+            model, data, allowed_bodies=frozenset(cfg.hand_body_names)
+        )
+
+    if spec.handedness == "left":
+        mirror_mat = np.diag([1.0, -1.0, 1.0, 1.0])
+        m_total = mirror_mat @ m_total
+
+    roll_deg = resolved_shaft_roll_deg(spec, side)
+    if abs(roll_deg) > 1e-12:
+        roll_mat = apply_shaft_roll(np.eye(4), APPEARANCE_GRIP_SHAFT_AXIS, roll_deg)
+        m_total = roll_mat @ m_total
+
+    return model, data, raw, targets, m_total
 
 
 def build_hand_visual(
@@ -92,10 +168,8 @@ def build_hand_visual(
 ) -> HandVisualMeshes:
     """Build posed MyoHand **bone** meshes in the grip hand-grip frame.
 
-    Joint angles come from the shared curl-to-grip map (``pose_to_myohand_joint_targets``
-    on :class:`GripSpec`); rigid placement Kabsch-aligns bones to the capsule hand
-  mesh for that pose (contact reference, not a neutral calibrator).
-
+    Joint angles use :func:`grip_spec_to_myohand_joint_angles` plus the active
+    curl-to-contact solver when ``registration_mode == 'anatomical_curl_to_contact'``.
     Research-only: see registry metadata and #13763 before production use.
     """
     spec = _check_grip_spec(grip_spec)
@@ -104,24 +178,10 @@ def build_hand_visual(
     cfg = default_myohand_settings() if settings is None else settings
     require(myohand_assets_ready(cfg), "myo_sim assets missing")
 
-    targets = grip_spec_to_myohand_joint_angles(
-        spec,
-        side,
-        grip_radius_m=cfg.grip_radius_m,
-        joint_angle_overrides=joint_angles,
+    _model, _data, raw, _targets, m_total = _resolved_pose_and_transform(
+        spec, side, cfg, joint_angles
     )
-    _model, _data, raw = _model_and_data(targets, cfg)
-
-    transform = _pipeline_transform(spec, side, raw, cfg, joint_angles)
-    mirror = anatomical_mirror_for_side(spec, side)
-    placed = transform_meshes(raw, transform, mirror_y=mirror)
-
-    roll_deg = resolved_shaft_roll_deg(spec, side)
-    if abs(roll_deg) > 1e-12:
-        frame = apply_shaft_roll(np.eye(4), APPEARANCE_GRIP_SHAFT_AXIS, roll_deg)
-        placed = transform_meshes(placed, frame)
-
-    return placed
+    return transform_meshes(raw, m_total)
 
 
 def myohand_assets_ready(settings: MyoHandVisualSettings | None = None) -> bool:
@@ -166,6 +226,7 @@ def mirror_y_vertices(mesh: Mesh) -> Mesh:
 __all__ = [
     "_model_and_data",
     "_pipeline_transform",
+    "_resolved_pose_and_transform",
     "build_hand_visual",
     "finger_pair_penetration_m",
     "mirror_y_vertices",

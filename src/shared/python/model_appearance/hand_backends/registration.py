@@ -16,7 +16,9 @@ from src.shared.python.model_appearance.hand_backends.mujoco_extract import (
     anthropometric_scale_matrix,
     extract_hand_bone_meshes,
 )
-from src.shared.python.model_appearance.hand_backends.settings import MyoHandVisualSettings
+from src.shared.python.model_appearance.hand_backends.settings import (
+    MyoHandVisualSettings,
+)
 from src.shared.python.model_appearance.hand_backends.types import HandVisualSide
 
 
@@ -96,7 +98,9 @@ def registration_to_grip_hand_mesh(
     )
 
 
-def posed_bones_in_model_frame(model, data, *, allowed_bodies: frozenset[str]) -> dict[str, Mesh]:
+def posed_bones_in_model_frame(
+    model, data, *, allowed_bodies: frozenset[str]
+) -> dict[str, Mesh]:
     return extract_hand_bone_meshes(model, data, allowed_bodies=allowed_bodies)
 
 

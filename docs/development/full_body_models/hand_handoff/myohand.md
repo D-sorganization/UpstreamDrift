@@ -30,18 +30,18 @@ This is **not** a production skinned grip visual. Myo_sim ships STL bones only; 
 
 ### Source modules (`src/shared/python/model_appearance/hand_backends/`)
 
-| Module | Role |
-|--------|------|
-| `myohand.py` | `build_hand_visual`, `penetration_depth_m`, `finger_pair_penetration_m`, `mirror_y_vertices`; exports `_model_and_data`, `_pipeline_transform` for skeleton export |
-| `registration.py` | `kabsch_rigid_transform`, `registration_to_grip_hand_mesh` — aligns posed bones to **curled capsule** from `build_grip_hand_mesh` |
-| `skeleton_export.py` | `export_myohand_skeleton`, `export_bilateral_myohand_skeleton` — JSON in grip hand frame |
-| `joint_mapping.py` | `grip_spec_to_myohand_joint_targets`, `anatomical_mirror_for_side` |
-| `mujoco_extract.py` | `load_myohand_model`, `apply_joint_targets`, `extract_hand_bone_meshes`, `anthropometric_scale_matrix` |
-| `render_evidence.py` | Interim lit matplotlib renderer (`LitRenderSettings`, `render_scene_png`) — **temporary** until shared renderer lane lands |
-| `registry.py` | `register_hand_backend`, `get_hand_backend(..., allow_research=True)`, `default_hand_backend()` → **capsule** |
-| `capsule.py` | Default visual backend wrapper |
-| `settings.py` | `MyoHandVisualSettings`, `default_myohand_settings()` (cached, loads JSON) |
-| `types.py` | `BACKEND_MYOHAND`, `MYOHAND_BACKEND_INFO` (`research_only=True`) |
+| Module               | Role                                                                                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `myohand.py`         | `build_hand_visual`, `penetration_depth_m`, `finger_pair_penetration_m`, `mirror_y_vertices`; exports `_model_and_data`, `_pipeline_transform` for skeleton export |
+| `registration.py`    | `kabsch_rigid_transform`, `registration_to_grip_hand_mesh` — aligns posed bones to **curled capsule** from `build_grip_hand_mesh`                                  |
+| `skeleton_export.py` | `export_myohand_skeleton`, `export_bilateral_myohand_skeleton` — JSON in grip hand frame                                                                           |
+| `joint_mapping.py`   | `grip_spec_to_myohand_joint_targets`, `anatomical_mirror_for_side`                                                                                                 |
+| `mujoco_extract.py`  | `load_myohand_model`, `apply_joint_targets`, `extract_hand_bone_meshes`, `anthropometric_scale_matrix`                                                             |
+| `render_evidence.py` | Interim lit matplotlib renderer (`LitRenderSettings`, `render_scene_png`) — **temporary** until shared renderer lane lands                                         |
+| `registry.py`        | `register_hand_backend`, `get_hand_backend(..., allow_research=True)`, `default_hand_backend()` → **capsule**                                                      |
+| `capsule.py`         | Default visual backend wrapper                                                                                                                                     |
+| `settings.py`        | `MyoHandVisualSettings`, `default_myohand_settings()` (cached, loads JSON)                                                                                         |
+| `types.py`           | `BACKEND_MYOHAND`, `MYOHAND_BACKEND_INFO` (`research_only=True`)                                                                                                   |
 
 ### Settings
 
@@ -97,22 +97,22 @@ python3 -m pytest tests/unit/model_appearance/hand_backends/test_myohand_visual_
 python3 -m ruff check src/shared/python/model_appearance/hand_backends/
 ```
 
-| Test | Intent |
-|------|--------|
-| `test_default_backend_is_capsule_not_myohand` | Registry default |
-| `test_research_backend_requires_allow_flag` | `get_hand_backend("myohand")` raises without `allow_research=True` |
-| `test_skeleton_export_has_all_canonical_joints` | JSON export completeness |
-| `test_meshes_have_finite_watertight_parts` | Mesh sanity |
-| `test_palm_finger_depth_moves_cmc_and_wrist_joints` | GripSpec coupling |
-| `test_thumb_straightness_moves_thumb_mp_ip` | Thumb mapping |
-| `test_lead_trail_mirroring_under_right_handed_spec` | `firstmc` centroid separation > 12 mm |
-| `test_shaft_roll_rotates_hand_about_grip_z` | Roll after registration (Kabsch seed excludes roll) |
-| `test_club_penetration_within_tolerance` | Radial penetration metric (see §c) |
-| `test_finger_parts_do_not_interpenetrate_beyond_tolerance` | Inter-bone clearance |
-| `test_left_handed_mirrors_shaft_roll_on_build` | Left-handed smoke |
-| `test_mirror_y_swaps_hand_side` | Mirror helper |
-| `test_joint_angle_override_is_honored` | Overrides |
-| `test_anthropometric_scaling_changes_extent` | Scale matrix monotonicity (not final mesh extent) |
+| Test                                                       | Intent                                                             |
+| ---------------------------------------------------------- | ------------------------------------------------------------------ |
+| `test_default_backend_is_capsule_not_myohand`              | Registry default                                                   |
+| `test_research_backend_requires_allow_flag`                | `get_hand_backend("myohand")` raises without `allow_research=True` |
+| `test_skeleton_export_has_all_canonical_joints`            | JSON export completeness                                           |
+| `test_meshes_have_finite_watertight_parts`                 | Mesh sanity                                                        |
+| `test_palm_finger_depth_moves_cmc_and_wrist_joints`        | GripSpec coupling                                                  |
+| `test_thumb_straightness_moves_thumb_mp_ip`                | Thumb mapping                                                      |
+| `test_lead_trail_mirroring_under_right_handed_spec`        | `firstmc` centroid separation > 12 mm                              |
+| `test_shaft_roll_rotates_hand_about_grip_z`                | Roll after registration (Kabsch seed excludes roll)                |
+| `test_club_penetration_within_tolerance`                   | Radial penetration metric (see §c)                                 |
+| `test_finger_parts_do_not_interpenetrate_beyond_tolerance` | Inter-bone clearance                                               |
+| `test_left_handed_mirrors_shaft_roll_on_build`             | Left-handed smoke                                                  |
+| `test_mirror_y_swaps_hand_side`                            | Mirror helper                                                      |
+| `test_joint_angle_override_is_honored`                     | Overrides                                                          |
+| `test_anthropometric_scaling_changes_extent`               | Scale matrix monotonicity (not final mesh extent)                  |
 
 ### Evidence PNGs
 
@@ -150,15 +150,15 @@ Naming: `{side}_{view}_club_roll_{p0|m20|p20}.png` or `both_{view}_club_roll_*.p
 
 ### Failed / partial (with numbers)
 
-| Issue | Detail |
-|-------|--------|
-| **Not a grip visual** | No skin; first iteration used skin-tinted bones without club — rejected. |
-| **Fingertip air gap** | Bones curl in joint space but STLs do not hug rubber; visually ~10–15 mm gap. `penetration_depth_m` measures **inward** penetration (positive when verts inside cylinder radius); **air gap yields ~0** in that metric — so unit test can pass while visuals fail “wrap the grip”. |
-| **Frame fill < 70%** | Matplotlib 3D ortho + tight limits: content bbox ~25–45% of 1024×1024 on sampled PNGs after iteration 2. |
-| **Kabsch vs anthropometric extent** | Final mesh extent does **not** track `HandSize.length_m` monotonically (registration absorbs scale to capsule). Test now checks `anthropometric_scale_matrix` only — **do not** reintroduce full-mesh extent assertion without fixing pipeline. |
-| **Random Kabsch subsample** | Seeding from `spec_sha256` broke shaft-roll test (RMS ~0.04 m). Fixed: stride subsample; seed from `(side, sorted joint targets)`. |
-| **Lead/trail mirroring** | Whole-hand centroid useless after Kabsch; use **`firstmc`** separation (> 12 mm) for legacy spec. |
-| **Epic comments** | Cloud bot got **403** posting to #15150; learnings live on PR #15147 comment until subscription agent posts. |
+| Issue                               | Detail                                                                                                                                                                                                                                                                             |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Not a grip visual**               | No skin; first iteration used skin-tinted bones without club — rejected.                                                                                                                                                                                                           |
+| **Fingertip air gap**               | Bones curl in joint space but STLs do not hug rubber; visually ~10–15 mm gap. `penetration_depth_m` measures **inward** penetration (positive when verts inside cylinder radius); **air gap yields ~0** in that metric — so unit test can pass while visuals fail “wrap the grip”. |
+| **Frame fill < 70%**                | Matplotlib 3D ortho + tight limits: content bbox ~25–45% of 1024×1024 on sampled PNGs after iteration 2.                                                                                                                                                                           |
+| **Kabsch vs anthropometric extent** | Final mesh extent does **not** track `HandSize.length_m` monotonically (registration absorbs scale to capsule). Test now checks `anthropometric_scale_matrix` only — **do not** reintroduce full-mesh extent assertion without fixing pipeline.                                    |
+| **Random Kabsch subsample**         | Seeding from `spec_sha256` broke shaft-roll test (RMS ~0.04 m). Fixed: stride subsample; seed from `(side, sorted joint targets)`.                                                                                                                                                 |
+| **Lead/trail mirroring**            | Whole-hand centroid useless after Kabsch; use **`firstmc`** separation (> 12 mm) for legacy spec.                                                                                                                                                                                  |
+| **Epic comments**                   | Cloud bot got **403** posting to #15150; learnings live on PR #15147 comment until subscription agent posts.                                                                                                                                                                       |
 
 ### Dead ends (avoid)
 
@@ -227,13 +227,13 @@ Naming: `{side}_{view}_club_roll_{p0|m20|p20}.png` or `both_{view}_club_roll_*.p
 
 ## (e) Dependencies on other tracks
 
-| Track | ID | This lane without it |
-|-------|-----|----------------------|
-| Shared renderer | bc-59b6630a | Keep `render_evidence.py`; tune `half`, `frame_fill`, `dpi` locally |
-| Shared curl-to-contact | bc-c9c36777 | Keep `grip_spec_to_myohand_joint_angles` + Kabsch to capsule |
-| Capsule baseline | #15141 / #15142 | Already depends on `build_grip_hand_mesh` |
-| Skinned human | #15149 | **Consume skeleton JSON now** — no blocker on renderer |
-| Shaft roll GB1b | #15138 / #15139 | Base branch includes per-hand roll |
+| Track                  | ID              | This lane without it                                                |
+| ---------------------- | --------------- | ------------------------------------------------------------------- |
+| Shared renderer        | bc-59b6630a     | Keep `render_evidence.py`; tune `half`, `frame_fill`, `dpi` locally |
+| Shared curl-to-contact | bc-c9c36777     | Keep `grip_spec_to_myohand_joint_angles` + Kabsch to capsule        |
+| Capsule baseline       | #15141 / #15142 | Already depends on `build_grip_hand_mesh`                           |
+| Skinned human          | #15149          | **Consume skeleton JSON now** — no blocker on renderer              |
+| Shaft roll GB1b        | #15138 / #15139 | Base branch includes per-hand roll                                  |
 
 **Proceed without shared modules:** Skeleton JSON and bone meshes are usable today; visual polish waits on renderer/posing.
 
@@ -241,12 +241,12 @@ Naming: `{side}_{view}_club_roll_{p0|m20|p20}.png` or `both_{view}_club_roll_*.p
 
 ## (f) Licences and assets (#13763)
 
-| Asset | Licence | Notes |
-|-------|---------|--------|
-| `myo_sim` hand STLs | Apache-2.0 | Submodule pin; no new vendoring in PR |
-| MoBL / 2nd-Hand lineage | BSD + **non-commercial** (upstream README) | Recorded in `NOTICE` |
-| Backend default | **Research-only** | `research_only: true`, `license_gate_issue: 13763` |
-| MANO / SMPL-X | Not vendored | Cited as research-only alternatives |
+| Asset                   | Licence                                    | Notes                                              |
+| ----------------------- | ------------------------------------------ | -------------------------------------------------- |
+| `myo_sim` hand STLs     | Apache-2.0                                 | Submodule pin; no new vendoring in PR              |
+| MoBL / 2nd-Hand lineage | BSD + **non-commercial** (upstream README) | Recorded in `NOTICE`                               |
+| Backend default         | **Research-only**                          | `research_only: true`, `license_gate_issue: 13763` |
+| MANO / SMPL-X           | Not vendored                               | Cited as research-only alternatives                |
 
 **Production use** requires explicit owner sign-off on #13763; do not clear `research_only` without it.
 
@@ -271,17 +271,17 @@ After **any** change to posing, registration, rendering, or evidence scripts:
 
 3. **Score** each checklist item **pass / fail / N/A** (skeleton lane: N/A for skin-only items).
 
-   | # | Criterion | Skeleton lane | Current score (2026-11-15) |
-   |---|-----------|---------------|---------------------------|
-   | 1 | Separate fingers and thumb | Required | **pass** |
-   | 2 | Cupped palm | Required | **partial** (curl via joints; palm not rubber-wrapped) |
-   | 3 | Knuckle line readable | Required | **pass** |
-   | 4 | Fingers wrap the grip | Required | **fail** (air gap) |
-   | 5 | No tubes/blobs/torn triangles | Required | **pass** |
-   | 6 | Skin shading smooth | Skin backends | **N/A** |
-   | 7 | Hand ~70% of frame | Required | **fail** (~30–45%) |
-   | 8 | Club visible | Required | **pass** |
-   | 9 | Lead and trail mirror correctly | Required | **pass** (both-hand views) |
+   | #   | Criterion                       | Skeleton lane | Current score (2026-11-15)                             |
+   | --- | ------------------------------- | ------------- | ------------------------------------------------------ |
+   | 1   | Separate fingers and thumb      | Required      | **pass**                                               |
+   | 2   | Cupped palm                     | Required      | **partial** (curl via joints; palm not rubber-wrapped) |
+   | 3   | Knuckle line readable           | Required      | **pass**                                               |
+   | 4   | Fingers wrap the grip           | Required      | **fail** (air gap)                                     |
+   | 5   | No tubes/blobs/torn triangles   | Required      | **pass**                                               |
+   | 6   | Skin shading smooth             | Skin backends | **N/A**                                                |
+   | 7   | Hand ~70% of frame              | Required      | **fail** (~30–45%)                                     |
+   | 8   | Club visible                    | Required      | **pass**                                               |
+   | 9   | Lead and trail mirror correctly | Required      | **pass** (both-hand views)                             |
 
 4. **Record scores** in PR **## Learnings** and honest verdict; iterate until all **Required** items pass before claiming epic quality bar met.
 
@@ -310,11 +310,21 @@ After **any** change to posing, registration, rendering, or evidence scripts:
 
 ## Quick reference
 
-| Item | Value |
-|------|--------|
-| PR | [#15147](https://github.com/D-sorganization/UpstreamDrift/pull/15147) |
-| Epic | [#15150](https://github.com/D-sorganization/UpstreamDrift/issues/15150) |
-| Skeleton JSON | `docs/development/full_body_models/evidence/hand_backend_myohand/myohand_skeleton_grip_spec_neutral.json` |
-| Base branch (at handoff) | `cursor/hrg-gb1b-shaft-roll-2882` |
-| Default backend | `capsule` |
-| Opt-in myohand | `get_hand_backend("myohand", allow_research=True)` |
+| Item                     | Value                                                                                                     |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| PR                       | [#15147](https://github.com/D-sorganization/UpstreamDrift/pull/15147)                                     |
+| Epic                     | [#15150](https://github.com/D-sorganization/UpstreamDrift/issues/15150)                                   |
+| Skeleton JSON            | `docs/development/full_body_models/evidence/hand_backend_myohand/myohand_skeleton_grip_spec_neutral.json` |
+| Base branch (at handoff) | `cursor/hrg-gb1b-shaft-roll-2882`                                                                         |
+| Default backend          | `capsule`                                                                                                 |
+| Opt-in myohand           | `get_hand_backend("myohand", allow_research=True)`                                                        |
+
+## Cycle 1 Calibration Update
+
+### What Changed Since Previous Handoff
+
+- Replaced coarse Kabsch-to-capsule registration with `anatomical_curl_to_contact` (`contact_solver.py`), optimizing finger and 4-DOF thumb flexion directly against the `GripSpec` grip cylinder (`0.002 m` penetration guard, `0.0105 m` middle-phalanx tolerance, `0.0055 m` thumb-tip tolerance, `0.0028 m` palm seat clearance).
+- Fixed mirrored triangle winding via `(det < 0) ^ mirror_y` in `mujoco_extract.py` and cofactor axial transformation in `skeleton_export.py` so exported `myohand_skeleton_grip_spec_neutral.json` joint origins/axes track the exact posed `lead` and `trail` bones under `0°` and `±20°` shaft roll.
+- Upgraded `render_evidence.py` to vectorized `uint64` packed `ss=2` Gouraud Z-buffer rendering (`1024 px`, `0.7` frame fill, full dark grip sleeve + silver shaft visible in `lead`, `trail`, and `both` views).
+- Added `tests/unit/model_appearance/hand_backends/test_myohand_contact_and_framing.py`; `19 passed` across `tests/unit/model_appearance/hand_backends/`.
+- Kept `research_only=True` (`allow_research=True` required) pending `#13763` sign-off.

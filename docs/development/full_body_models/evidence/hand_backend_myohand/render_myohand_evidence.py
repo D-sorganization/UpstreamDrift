@@ -8,7 +8,10 @@ from dataclasses import replace
 from pathlib import Path
 
 from src.shared.python.grip_spec import GripSpec
-from src.shared.python.model_appearance.club_assembly import ClubAssembly, assembly_meshes
+from src.shared.python.model_appearance.club_assembly import (
+    ClubAssembly,
+    assembly_meshes,
+)
 from src.shared.python.model_appearance.geometry import Mesh
 from src.shared.python.model_appearance.grip_hands import grip_hand_frame
 from src.shared.python.model_appearance.grip_pose import Hand
@@ -16,6 +19,9 @@ from src.shared.python.model_appearance.hand_backends.myohand import build_hand_
 from src.shared.python.model_appearance.hand_backends.render_evidence import (
     LitRenderSettings,
     render_scene_png,
+)
+from src.shared.python.model_appearance.hand_backends.settings import (
+    default_myohand_settings,
 )
 from src.shared.python.model_appearance.hand_backends.skeleton_export import (
     export_bilateral_myohand_skeleton,
@@ -26,10 +32,20 @@ VIEWS = ("front", "side", "top", "grip_oblique")
 ROLLS = (0.0, -20.0, 20.0)
 
 
-def _place_hand_on_club(club: ClubAssembly, spec: GripSpec, side: str) -> dict[str, Mesh]:
+def _zero_roll_spec(spec: GripSpec) -> GripSpec:
+    return replace(
+        spec,
+        lead=replace(spec.lead, shaft_roll_deg=0.0),
+        trail=replace(spec.trail, shaft_roll_deg=0.0),
+    )
+
+
+def _place_hand_on_club(
+    club: ClubAssembly, spec: GripSpec, side: str
+) -> dict[str, Mesh]:
     hand = Hand.LEAD if side == "lead" else Hand.TRAIL
-    pose = spec.to_grip_pose()
-    frame = grip_hand_frame(club, hand, pose)
+    # Pass zero-roll pose so shaft_roll_deg is applied once inside build_hand_visual.
+    frame = grip_hand_frame(club, hand, _zero_roll_spec(spec).to_grip_pose())
     local = build_hand_visual(spec, side)  # type: ignore[arg-type]
     rot, trans = frame[:3, :3], frame[:3, 3]
     return {
@@ -44,7 +60,10 @@ def _scene_meshes(
     *,
     sides: tuple[str, ...] = ("lead", "trail"),
 ) -> dict[str, Mesh]:
-    parts = {k: v for k, v in assembly_meshes(club).items() if k == "grip"}
+    club_meshes = assembly_meshes(club)
+    parts: dict[str, Mesh] = {
+        k: club_meshes[k] for k in ("grip", "shaft") if k in club_meshes
+    }
     for side in sides:
         parts.update(_place_hand_on_club(club, spec, side))
     return parts
@@ -53,7 +72,16 @@ def _scene_meshes(
 def main() -> None:
     club = ClubAssembly("iron7", 0.95, 0.25, 0.0065)
     base = GripSpec.neutral()
-    lit = LitRenderSettings(image_px=1024)
+    cfg = default_myohand_settings()
+    lit = LitRenderSettings(
+        image_px=1024,
+        frame_fill=0.70,
+        bone_rgb=cfg.bone_rgb,
+        grip_rgb=cfg.grip_rgb,
+        shaft_rgb=cfg.shaft_rgb,
+        butt_cap_rgb=cfg.butt_cap_rgb,
+        background_rgb=cfg.background_rgb,
+    )
     artifacts: list[str] = []
 
     skeleton = export_bilateral_myohand_skeleton(base)
@@ -97,9 +125,12 @@ def main() -> None:
         "spec": "GripSpec.neutral",
         "rolls_deg": list(ROLLS),
         "image_px": lit.image_px,
+        "frame_fill": lit.frame_fill,
         "artifacts": sorted(artifacts),
     }
-    (OUT / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    (OUT / "receipt.json").write_text(
+        json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
+    )
 
 
 if __name__ == "__main__":

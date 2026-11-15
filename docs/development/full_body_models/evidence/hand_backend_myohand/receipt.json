@@ -9,6 +9,7 @@
     20.0
   ],
   "image_px": 1024,
+  "frame_fill": 0.7,
   "artifacts": [
     "both_front_club_roll_m20.png",
     "both_front_club_roll_p0.png",
