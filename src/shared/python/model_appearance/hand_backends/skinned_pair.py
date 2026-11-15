@@ -65,8 +65,9 @@ class _LeadObstacle:
         self.grip = cylinder_distance(grip_radius_m)
         self.lead = _solve_right_hand(spec, "lead", grip_radius_m, settings, None)
         self._capsules = _bone_capsules(self.lead, settings)
+        lead_targets = self.lead.targets
         self._club_from_lead = _club_from_build(
-            spec, "lead", self.lead.targets.mirrored, 0.0
+            spec, "lead", lead_targets.mirrored, 0.0
         )
         self._trail_mirrored = _targets(spec, "trail", settings).mirrored
 
@@ -100,7 +101,8 @@ def _settled_spacing_m(scene: _LeadObstacle, grip_radius_m: float) -> float:
         return spec.hand_spacing_m
     alone = _solve_right_hand(spec, "trail", grip_radius_m, settings, None)
     bones = [f"{f}_{s}" for f in settings.pair_grip_fingers for s in _SEGMENTS]
-    skin = alone.hand.points(alone.angles, alone.hand.asset.dominant_vertex_ids(bones))
+    hand = alone.hand
+    skin = hand.points(alone.angles, hand.asset.dominant_vertex_ids(bones))
     allowance = settings.curl.penetration_allowance_m
 
     def free(extra: float) -> bool:
