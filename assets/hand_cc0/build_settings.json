@@ -10,5 +10,16 @@
   "forearm_stub_length_m": 0.055,
   "hand_weight_threshold": 0.5,
   "max_influences": 4,
-  "min_plane_fit_ratio": 0.03
+  "min_plane_fit_ratio": 0.03,
+  "thumb_web_smoothing": {
+    "thumb_bones": [
+      "thumb_meta",
+      "thumb_prox"
+    ],
+    "palm_bone": "meta_index",
+    "min_weight": 0.05,
+    "rings": 3,
+    "iterations": 10,
+    "blend": 0.5
+  }
 }

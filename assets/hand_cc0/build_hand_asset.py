@@ -251,6 +251,40 @@ def _cap_boundaries(
     return np.vstack(new_verts), np.vstack(new_tris), loops
 
 
+def _smooth_thumb_web(
+    weights: np.ndarray, tris: np.ndarray, smoothing: dict[str, object]
+) -> np.ndarray:
+    """Blend the skin weights across the web between thumb and index.
+
+    MakeHuman's weights change abruptly there, and linear blend skinning then
+    folds the web skin over itself when the thumb closes on the grip. Each
+    vertex within ``rings`` edges of the seam is moved ``blend`` of the way to
+    the mean of its neighbours, ``iterations`` times. Zero iterations leaves
+    MakeHuman's weights untouched.
+    """
+    iterations = int(smoothing["iterations"])
+    if iterations == 0:
+        return weights
+    thumb = [BONE_NAMES.index(b) for b in smoothing["thumb_bones"]]
+    palm = BONE_NAMES.index(str(smoothing["palm_bone"]))
+    floor, blend = float(smoothing["min_weight"]), float(smoothing["blend"])
+    neighbours: list[set[int]] = [set() for _ in weights]
+    for a, b, c in tris.tolist():
+        neighbours[a].update((b, c))
+        neighbours[b].update((a, c))
+        neighbours[c].update((a, b))
+    seam = (weights[:, thumb].sum(axis=1) > floor) & (weights[:, palm] > floor)
+    region = set(np.flatnonzero(seam).tolist())
+    for _ in range(int(smoothing["rings"])):
+        region |= {u for v in region for u in neighbours[v]}
+    ids = sorted(region)
+    out = weights.copy()
+    for _ in range(iterations):
+        mean = np.array([out[sorted(neighbours[v])].mean(axis=0) for v in ids])
+        out[ids] = (1.0 - blend) * out[ids] + blend * mean
+    return out
+
+
 def build(makehuman_root: Path) -> dict[str, np.ndarray]:
     settings = load_settings()
     rig = load_makehuman_rig(makehuman_root)
@@ -284,6 +318,7 @@ def build(makehuman_root: Path) -> dict[str, np.ndarray]:
     weights[len(used) :, 0] = 1.0  # cap centroid rides on the forearm
     empty = weights.sum(axis=1) <= 0.0
     weights[empty, 0] = 1.0
+    weights = _smooth_thumb_web(weights, tris, settings["thumb_web_smoothing"])
     top = int(settings["max_influences"])
     order = np.argsort(-weights, axis=1)[:, :top]
     top_w = np.take_along_axis(weights, order, axis=1)
@@ -337,6 +372,10 @@ def write_provenance(arrays: dict[str, np.ndarray]) -> None:
         "vertex_count": int(len(arrays["vertices"])),
         "face_count": int(len(arrays["faces"])),
         "bone_count": int(len(arrays["bone_names"])),
+        "modifications": "Skin weights are MakeHuman's except across the web "
+        "between thumb and index, where they are smoothed (build_settings.json "
+        "thumb_web_smoothing; zero iterations restores the originals).",
+        "thumb_web_smoothing": settings["thumb_web_smoothing"],
         "research_only_alternatives": "MANO and SMPL-X hand models are "
         "research/non-commercial licences and are not bundled; they remain "
         "research-only alternatives.",
