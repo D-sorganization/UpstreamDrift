@@ -35,6 +35,8 @@ def grip_pose_from_authoring_spec(
         handedness=spec.handedness,
         lead_grip_force_limit_n=force_limits["lead"],
         trail_grip_force_limit_n=force_limits["trail"],
+        lead_shaft_roll_deg=spec.lead.shaft_roll_deg,
+        trail_shaft_roll_deg=spec.trail.shaft_roll_deg,
     )
 
 
