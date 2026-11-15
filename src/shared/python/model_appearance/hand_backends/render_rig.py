@@ -39,11 +39,17 @@ Array = NDArray[np.float64]
 
 @dataclass(frozen=True)
 class ScenePart:
-    """One mesh of the scene. ``kind`` is ``"skin"``, ``"grip"`` or ``"shaft"``."""
+    """One mesh of the scene. ``kind`` is ``"skin"``, ``"grip"`` or ``"shaft"``.
+
+    ``focus`` is ``None`` or a boolean mask, one entry per vertex, of the
+    vertices the camera frames on. A skin part with a forearm stub marks the
+    hand so the stub does not shrink the hand in the frame.
+    """
 
     mesh: Any
     rgba: Rgba
     kind: str
+    focus: Any = None
 
 
 @dataclass(frozen=True)
@@ -159,7 +165,24 @@ def validated_part(part: Any) -> ScenePart:
         raise TypeError(f"scene parts must be ScenePart, got {type(part).__name__}")
     if part.kind not in PART_KINDS:
         raise ValueError(f"part kind {part.kind!r} is not one of {PART_KINDS}")
-    return ScenePart(as_mesh(part.mesh), _rgba(part.rgba, "part rgba"), part.kind)
+    mesh = as_mesh(part.mesh)
+    focus = checked_focus(part.focus, len(mesh.vertices))
+    return ScenePart(mesh, _rgba(part.rgba, "part rgba"), part.kind, focus)
+
+
+def checked_focus(focus: Any, vertex_count: int) -> NDArray[np.bool_] | None:
+    """``focus`` as a boolean mask of ``vertex_count`` entries, or ``None``."""
+    if focus is None:
+        return None
+    if isinstance(focus, str):
+        raise TypeError("focus must be a boolean mask, not a string")
+    mask = np.asarray(focus)
+    if mask.dtype != np.bool_ or mask.shape != (vertex_count,):
+        raise ValueError(
+            f"focus must be a boolean mask of shape ({vertex_count},), "
+            f"got {mask.dtype} {mask.shape}"
+        )
+    return mask
 
 
 def result_meshes(result: Any) -> tuple[Mesh, ...]:
@@ -272,6 +295,8 @@ def assemble_scene(
 
     The roll turns the skin only (the club is a body of revolution). The grip
     radius is ``grip_radius_m``, else ``result.grip_radius_m``, else settings.
+    A single-mesh result may declare ``frame_focus``, the vertex mask the
+    camera frames on (see :class:`ScenePart`).
     """
     roll = checked_roll(shaft_roll_deg, settings)
     meshes = result_meshes(result)
@@ -279,7 +304,8 @@ def assemble_scene(
     radius = grip_radius_m
     if radius is None:
         radius = getattr(result, "grip_radius_m", None)
-    skin = tuple(ScenePart(roll_mesh(m, roll), rgba, "skin") for m in meshes)
+    focus = getattr(result, "frame_focus", None) if len(meshes) == 1 else None
+    skin = tuple(ScenePart(roll_mesh(m, roll), rgba, "skin", focus) for m in meshes)
     z = np.concatenate([m.vertices[:, 2] for m in meshes])
     club = build_club_parts(
         float(z.min()), float(z.max()), settings=settings, grip_radius_m=radius
@@ -300,6 +326,28 @@ def skin_vertices_of(parts: Sequence[ScenePart]) -> Array:
     if not skins:
         raise ValueError("the scene has no skin part to frame the camera on")
     return np.vstack(skins)
+
+
+def focus_vertices_of(parts: Sequence[ScenePart]) -> Array:
+    """The skin vertices the camera frames on, stacked.
+
+    A skin part with a ``focus`` mask contributes only its marked vertices; a
+    part without one contributes all of them. Raises ``ValueError`` when the
+    scene has no skin or every skin vertex is masked out.
+    """
+    chosen = []
+    for part in parts:
+        if part.kind != "skin":
+            continue
+        vertices = np.asarray(part.mesh.vertices, dtype=float)
+        mask = checked_focus(part.focus, len(vertices))
+        chosen.append(vertices if mask is None else vertices[mask])
+    if not chosen:
+        raise ValueError("the scene has no skin part to frame the camera on")
+    stacked = np.vstack(chosen)
+    if len(stacked) == 0:
+        raise ValueError("the focus masks leave no skin vertex to frame on")
+    return stacked
 
 
 def _unit(vector: Any, name: str, epsilon: float) -> Array:

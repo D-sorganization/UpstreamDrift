@@ -22,6 +22,7 @@ when the backend already baked the roll.
 from __future__ import annotations
 
 import logging
+import math
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -56,6 +57,7 @@ from src.shared.python.model_appearance.hand_backends.render_rig import (
     projected_fill,
     result_basis,
     side_name,
+    focus_vertices_of,
     skin_vertices_of,
     validated_part,
 )
@@ -132,8 +134,25 @@ def gl_engine_status(
     return probe_gl_backend(resolve_settings(settings))
 
 
-def _measured_fill(kind_mask: NDArray[np.uint8]) -> float:
+def _measured_fill(kind_mask: NDArray[np.uint8], window: Any = None) -> float:
+    """Longer side of the skin pixels' bounds over the frame side.
+
+    ``window`` is ``None`` or the ``(lo, hi)`` projected bounds of the focus
+    vertices in normalised device coordinates; skin pixels outside it (a
+    forearm stub the camera does not frame on) are left out of the measure.
+    """
     skin = kind_mask == PART_KINDS.index("skin") + 1
+    if window is not None:
+        side = kind_mask.shape[0]
+        lo, hi = (np.asarray(bound, dtype=float) for bound in window)
+        left, right = (np.array([lo[0], hi[0]]) + 1.0) / 2.0 * side
+        top, bottom = (1.0 - np.array([hi[1], lo[1]])) / 2.0 * side
+        inside = np.zeros_like(skin)
+        inside[
+            max(0, math.floor(top) - 1) : math.ceil(bottom) + 1,
+            max(0, math.floor(left) - 1) : math.ceil(right) + 1,
+        ] = True
+        skin &= inside
     rows = np.flatnonzero(skin.any(axis=1))
     cols = np.flatnonzero(skin.any(axis=0))
     if rows.size == 0:
@@ -156,7 +175,9 @@ def render_scene(
 
     ``parts`` is a sequence of :class:`ScenePart` already placed in a common
     hand-grip frame (for example two skin meshes and the club for the
-    both-hands frame). The camera auto-frames on every skin part. ``basis``
+    both-hands frame). The camera auto-frames on the skin, or on the ``focus``
+    vertices of a skin part that marks them, so ``settings.fill_fraction`` is
+    the share of the frame the hand itself spans. ``basis``
     is ``None`` (vertex heuristic, signed by ``side``), an
     :class:`AnatomicalBasis`, or ``(thumb, dorsum[, shaft])`` vectors.
     ``engine`` forces ``"matplotlib"`` or one GL backend; ``None`` follows
@@ -173,7 +194,8 @@ def render_scene(
     settings.view(view)
     skin = skin_vertices_of(checked)
     frame_basis = coerce_basis(basis, skin, side=side, settings=settings)
-    rig = camera_rig(skin, view, frame_basis, settings)
+    focus = focus_vertices_of(checked)
+    rig = camera_rig(focus, view, frame_basis, settings)
     require(rig.distance > 0.0, "the camera sits off the target")
 
     image: NDArray[np.uint8] | None = None
@@ -191,7 +213,12 @@ def render_scene(
     if image is None:
         image = render_matplotlib(checked, rig, settings)
         used = FALLBACK_ENGINE
-    fill = projected_fill(rig, skin) if mask is None else _measured_fill(mask)
+    if mask is None:
+        fill = projected_fill(rig, focus)
+    else:
+        ndc = rig.project(focus)
+        window = None if len(focus) == len(skin) else (ndc.min(axis=0), ndc.max(axis=0))
+        fill = _measured_fill(mask, window)
     rendered = RenderedView(
         image=image,
         engine=used,

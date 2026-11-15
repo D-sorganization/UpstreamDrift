@@ -24,6 +24,7 @@ from src.shared.python.model_appearance.grip_pose import Hand
 from src.shared.python.model_appearance.hand_backends import render
 from src.shared.python.model_appearance.hand_backends.render_rig import (
     corner_normals,
+    focus_vertices_of,
     orthonormal_basis,
     projected_fill,
     result_basis,
@@ -330,6 +331,82 @@ def test_projected_skin_fills_the_frame(view: str, side: str) -> None:
     assert np.abs(ndc).max() < 1.0
 
 
+def _stubbed_scene(view_side: str = "lead"):
+    """A hand with a forearm-like stub: the stub is skin but not the focus."""
+    hand = render.assemble_scene(_hand(view_side), settings=SETTINGS)
+    skin = [p for p in hand if p.kind == "skin"]
+    club = [p for p in hand if p.kind != "skin"]
+    vertices = skin_vertices_of(skin)
+    reach = float(np.ptp(vertices, axis=0).max())
+    basis = render.anatomical_basis(vertices, side=view_side, settings=SETTINGS)
+    corners = 0.01 * np.array([[0.0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]])
+    offset = 0.9 * reach * (basis.dorsum + basis.thumb + basis.shaft)
+    stub = Mesh(
+        vertices.mean(axis=0) + corners + offset,
+        np.array([[0, 2, 1], [0, 1, 3], [0, 3, 2], [1, 2, 3]]),
+    )
+    focused = [render.ScenePart(p.mesh, p.rgba, "skin") for p in skin]
+    stub_part = render.ScenePart(
+        stub, SETTINGS.skin_rgba, "skin", focus=np.zeros(4, dtype=bool)
+    )
+    return [*focused, stub_part, *club], vertices, basis
+
+
+@pytest.mark.parametrize("view", REQUIRED_VIEWS)
+def test_camera_frames_on_the_focus_not_on_every_skin_vertex(view: str) -> None:
+    """The hand fills the frame; a forearm stub does not shrink it (#15150)."""
+    parts, hand_vertices, basis = _stubbed_scene()
+    np.testing.assert_array_equal(focus_vertices_of(parts), hand_vertices)
+    assert len(skin_vertices_of(parts)) == len(hand_vertices) + 4
+    frame = render.render_scene(parts, view, basis=basis, engine="matplotlib")
+    assert projected_fill(frame.camera, hand_vertices) == pytest.approx(
+        SETTINGS.fill_fraction, abs=0.01
+    )
+    assert frame.fill_fraction == pytest.approx(SETTINGS.fill_fraction, abs=0.01)
+    whole = projected_fill(frame.camera, skin_vertices_of(parts))
+    assert whole > SETTINGS.fill_fraction + SETTINGS.fill_tolerance
+
+
+def test_a_part_without_focus_frames_on_all_of_its_vertices() -> None:
+    parts = render.assemble_scene(_hand(), settings=SETTINGS)
+    np.testing.assert_array_equal(focus_vertices_of(parts), skin_vertices_of(parts))
+
+
+def test_bad_focus_masks_raise() -> None:
+    mesh = _hand().mesh
+    count = len(mesh.vertices)
+    for bad in (np.ones(count - 1, dtype=bool), np.ones(count), "all"):
+        with pytest.raises((ValueError, TypeError)):
+            render.render_scene(
+                [render.ScenePart(mesh, SETTINGS.skin_rgba, "skin", focus=bad)],
+                "palm",
+                engine="matplotlib",
+            )
+    nothing = render.ScenePart(
+        mesh, SETTINGS.skin_rgba, "skin", focus=np.zeros(count, dtype=bool)
+    )
+    with pytest.raises(ValueError, match="focus"):
+        render.render_scene([nothing], "palm", engine="matplotlib")
+
+
+def test_render_view_frames_on_the_focus_a_result_declares() -> None:
+    hand = _hand()
+    mesh = hand.mesh
+    focus = mesh.vertices[:, 2] >= np.median(mesh.vertices[:, 2])
+    declared = SimpleNamespace(
+        mesh=mesh, grip_radius_m=SETTINGS.grip_radius_m, frame_focus=focus
+    )
+    for roll in (0.0, 20.0):
+        frame = render.render_view(
+            declared, "back", shaft_roll_deg=roll, engine="matplotlib"
+        )
+        rotation = apply_shaft_roll(np.eye(3), APPEARANCE_GRIP_SHAFT_AXIS, roll)
+        rolled = mesh.vertices[focus] @ rotation.T
+        assert projected_fill(frame.camera, rolled) == pytest.approx(
+            SETTINGS.fill_fraction, abs=0.01
+        )
+
+
 def test_rig_reads_view_coefficients_from_settings() -> None:
     raw = json.loads(json.dumps(RAW))
     raw["views"]["palm"]["eye"] = [0.0, 1.0, 0.0]
@@ -477,6 +554,14 @@ def test_gl_render_scene_frames_two_hands(gl_frames) -> None:
     assert np.count_nonzero(both.kind_mask == 1) != np.count_nonzero(
         single.kind_mask == 1
     )
+
+
+def test_gl_measured_fill_follows_the_focus(gl_frames) -> None:
+    """The reported fill is measured on the pixels of the focus region."""
+    parts, _, basis = _stubbed_scene()
+    frame = render.render_scene(parts, "back", basis=basis)
+    assert frame.kind_mask is not None
+    assert abs(frame.fill_fraction - SETTINGS.fill_fraction) <= SETTINGS.fill_tolerance
 
 
 def test_matplotlib_fallback_is_framed_and_labelled() -> None:
