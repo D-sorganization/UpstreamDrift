@@ -1,0 +1,120 @@
+{
+  "hand_length_m": 0.193,
+  "palm_width_m": 0.085,
+  "default_grip_radius_m": 0.014,
+  "pad_clearance_m": 0.001,
+  "contact_tolerance_m": 0.0035,
+  "penetration_tolerance_m": 0.0015,
+  "mcp_from_v_deg": 110.0,
+  "full_contact_palm_finger_depth": 0.5,
+  "open_hand_lift_m": 0.012,
+  "mc_tangent_weight": 0.5,
+  "mc_radial_weight": 0.85,
+  "wrist_convergence": 0.72,
+  "transverse_arch_m": 0.0045,
+  "longitudinal_arch_m": 0.006,
+  "blend_m": {
+    "joint": 0.0055,
+    "palm": 0.009,
+    "mcp": 0.007,
+    "web": 0.011,
+    "nail": 0.0016,
+    "crease": 0.0022
+  },
+  "resolution": 48,
+  "test_resolution": 30,
+  "min_resolution": 16,
+  "bounds_pad_m": 0.016,
+  "taubin_iterations": 6,
+  "taubin_lambda": 0.5,
+  "taubin_mu": -0.53,
+  "frame_px": 1024,
+  "frame_fill": 0.7,
+  "test_frame_px": 64,
+  "skin_material": "skin_2",
+  "grip_rgb": [0.1, 0.09, 0.08],
+  "shaft_rgb": [0.45, 0.46, 0.48],
+  "background_rgb": [0.93, 0.93, 0.94],
+  "key_light": [0.35, 0.25, 0.9],
+  "fill_light": [-0.65, -0.2, 0.4],
+  "fill_weight": 0.45,
+  "ambient": 0.28,
+  "shaft_radius_m": 0.0042,
+  "shaft_extension_fraction": 0.18,
+  "knuckle_radius_fraction": 0.7,
+  "knuckle_dorsal_fraction": 0.45,
+  "crease_radius_fraction": 0.22,
+  "crease_depth_fraction": 0.78,
+  "crease_span_fraction": 1.15,
+  "nail_radii_m": [0.0055, 0.0024, 0.0045],
+  "nail_along_fraction": 0.22,
+  "thenar_radii_m": [0.016, 0.011, 0.02],
+  "hypothenar_radii_m": [0.013, 0.01, 0.018],
+  "web_radii_m": [0.012, 0.008, 0.014],
+  "wrist_radii_m": [0.016, 0.012, 0.014],
+  "palm_fill_radii_m": [0.03, 0.013, 0.032],
+  "finger_spread_deg": {
+    "index": -3.0,
+    "middle": -1.0,
+    "ring": 1.5,
+    "little": 4.0
+  },
+  "transverse_arch_coeff": {
+    "index": -0.25,
+    "middle": 1.0,
+    "ring": 0.75,
+    "little": -0.05
+  },
+  "fingers": {
+    "index": {
+      "phalanges_m": [0.04, 0.024, 0.018],
+      "metacarpal_m": 0.078,
+      "metacarpal_radii_m": [0.0075, 0.009],
+      "radii_m": [
+        [0.009, 0.0082],
+        [0.0082, 0.0075],
+        [0.0075, 0.007]
+      ]
+    },
+    "middle": {
+      "phalanges_m": [0.046, 0.027, 0.018],
+      "metacarpal_m": 0.102,
+      "metacarpal_radii_m": [0.008, 0.01],
+      "radii_m": [
+        [0.01, 0.009],
+        [0.0085, 0.0076],
+        [0.0074, 0.007]
+      ]
+    },
+    "ring": {
+      "phalanges_m": [0.043, 0.025, 0.018],
+      "metacarpal_m": 0.09,
+      "metacarpal_radii_m": [0.0075, 0.009],
+      "radii_m": [
+        [0.009, 0.0082],
+        [0.0082, 0.0075],
+        [0.0075, 0.007]
+      ]
+    },
+    "little": {
+      "phalanges_m": [0.034, 0.02, 0.016],
+      "metacarpal_m": 0.07,
+      "metacarpal_radii_m": [0.0068, 0.008],
+      "radii_m": [
+        [0.008, 0.0075],
+        [0.0075, 0.0072],
+        [0.0072, 0.007]
+      ]
+    }
+  },
+  "thumb": {
+    "metacarpal_m": 0.048,
+    "metacarpal_radii_m": [0.011, 0.01],
+    "phalanges_m": [0.032, 0.028],
+    "radii_m": [
+      [0.01, 0.009],
+      [0.009, 0.008]
+    ],
+    "stations_m": [-0.01, 0.022, 0.05]
+  }
+}
