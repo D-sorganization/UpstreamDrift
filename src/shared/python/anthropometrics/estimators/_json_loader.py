@@ -118,10 +118,10 @@ def load_ratio_table(path: Path) -> LoadedRatioTable:
         )
     table_kind = str(data.get("table_kind", ""))
     coarse_table = table_kind == COARSE_TABLE_KIND
-    required_root = ("method", "citation", "segments")
+    required_keys: tuple[str, ...] = ("method", "citation", "segments")
     if not coarse_table:
-        required_root = (*required_root, "segment_name_map")
-    _require_keys(data, required_root, f"ratio table {path!s}")
+        required_keys = (*required_keys, "segment_name_map")
+    _require_keys(data, required_keys, f"ratio table {path!s}")
     raw_segments = data["segments"]
     raw_name_map = data.get("segment_name_map", {})
     if not isinstance(raw_segments, dict) or not raw_segments:
