@@ -55,6 +55,7 @@ class MyoHandVisualSettings:
     palm_finger_depth_flexion_gain: float
     palm_finger_depth_deviation_gain: float
     thumb_straightness_range_rad: tuple[float, float]
+    render_frame_fill: float
 
     @property
     def model_xml_path(self) -> Path:
@@ -104,6 +105,7 @@ def load_myohand_settings(path: Path | None = None) -> MyoHandVisualSettings:
             float(thumb_rng[0]),
             float(thumb_rng[1]),
         ),
+        render_frame_fill=float(payload["render_frame_fill"]),
     )
 
 

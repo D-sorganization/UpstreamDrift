@@ -9,7 +9,7 @@ Subscription fleet (Claude Code on Brick, Antigravity on DeskComputer) continues
 
 ---
 
-## (a) Goal and quality bar
+## (A) Goal and Quality Bar
 
 **Goal:** Provide a **research-only anatomical skeleton reference** for human hands on a golf club — separate MyoHand **bone** meshes in the grip hand-grip frame, plus a **bilateral skeleton JSON** (joint centres and axes) for the MakeHuman skinned track ([#15149](https://github.com/D-sorganization/UpstreamDrift/pull/15149)), SDF, and posing lanes.
 
@@ -21,14 +21,14 @@ This is **not** a production skinned grip visual. Myo_sim ships STL bones only; 
 
 ---
 
-## (b) Current state
+## (B) Current State
 
-### Submodule / assets
+### Submodule / Assets
 
 - **Model:** `shared/models/myosuite/myo_sim/` (pinned submodule). Hand XML: `hand/myohand.xml` (see `model_xml_relpath` in settings JSON).
 - **NOTICE:** `src/shared/python/model_appearance/hand_backends/assets/myohand/NOTICE`
 
-### Source modules (`src/shared/python/model_appearance/hand_backends/`)
+### Source Modules (`src/shared/python/model_appearance/hand_backends/`)
 
 | Module               | Role                                                                                                                                                               |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -57,7 +57,7 @@ Important fields:
 - `research_only`, `license_gate_issue`: **13763**
 - `model_xml_relpath`: relative to repo root
 
-### Skeleton JSON (ready for skinned track)
+### Skeleton JSON (Ready for Skinned Track)
 
 **Committed example:**
 
@@ -137,7 +137,7 @@ Naming: `{side}_{view}_club_roll_{p0|m20|p20}.png` or `both_{view}_club_roll_*.p
 
 ---
 
-## (c) What worked and what failed
+## (C) What Worked and What Failed
 
 ### Worked
 
@@ -148,7 +148,7 @@ Naming: `{side}_{view}_club_roll_{p0|m20|p20}.png` or `both_{view}_club_roll_*.p
 5. **Registry safety** — `research_only`, default remains `capsule`, explicit `allow_research=True`.
 6. **Club in every evidence frame** — Grip mesh from `ClubAssembly` + `assembly_meshes`.
 
-### Failed / partial (with numbers)
+### Failed / Partial (With Numbers)
 
 | Issue                               | Detail                                                                                                                                                                                                                                                                             |
 | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -160,7 +160,7 @@ Naming: `{side}_{view}_club_roll_{p0|m20|p20}.png` or `both_{view}_club_roll_*.p
 | **Lead/trail mirroring**            | Whole-hand centroid useless after Kabsch; use **`firstmc`** separation (> 12 mm) for legacy spec.                                                                                                                                                                                  |
 | **Epic comments**                   | Cloud bot got **403** posting to #15150; learnings live on PR #15147 comment until subscription agent posts.                                                                                                                                                                       |
 
-### Dead ends (avoid)
+### Dead Ends (Avoid)
 
 - Rendering MuJoCo `class="skin"` geoms as “skin” — not a surface mesh.
 - Static `model_to_grip` matrix from JSON — superseded by Kabsch to capsule.
@@ -171,9 +171,9 @@ Naming: `{side}_{view}_club_roll_{p0|m20|p20}.png` or `both_{view}_club_roll_*.p
 
 ---
 
-## (d) Next steps (priority order)
+## (D) Next Steps (Priority Order)
 
-### 1. Stabilize skeleton JSON for MakeHuman lane (P0)
+### 1. Stabilize Skeleton JSON for MakeHuman Lane (P0)
 
 **Acceptance:**
 
@@ -181,7 +181,7 @@ Naming: `{side}_{view}_club_roll_{p0|m20|p20}.png` or `both_{view}_club_roll_*.p
 - `python3 -m pytest tests/unit/model_appearance/hand_backends/test_myohand_visual_backend.py::test_skeleton_export_has_all_canonical_joints`
 - Document consumer path in #15149 / skinned_human code when wired.
 
-### 2. Adopt shared curl-to-contact (P1) — epic track bc-c9c36777
+### 2. Adopt Shared Curl-to-Contact (P1) — Epic Track Bc-C9c36777
 
 **When:** PR lands on stack from #15150.
 
@@ -191,7 +191,7 @@ Naming: `{side}_{view}_club_roll_{p0|m20|p20}.png` or `both_{view}_club_roll_*.p
 - Visual self-review: “fingers wrap the grip” → **pass** on `lead_grip_oblique_club_roll_p0.png` and trail analogue.
 - `penetration_depth_m` and/or new contact metrics match epic tolerances (settings, not hard-coded).
 
-### 3. Adopt shared renderer (P1) — epic track bc-59b6630a
+### 3. Adopt Shared Renderer (P1) — Epic Track Bc-59B6630a
 
 **When:** PR lands on stack.
 
@@ -201,21 +201,21 @@ Naming: `{side}_{view}_club_roll_{p0|m20|p20}.png` or `both_{view}_club_roll_*.p
 - PNGs ≥ 1024 px; subject fill ≥ **0.65** of frame (automate bbox metric in script or test).
 - Re-render full matrix; update `receipt.json`.
 
-### 4. Tighten visual contact without shared module (P2 fallback)
+### 4. Tighten Visual Contact Without Shared Module (P2 Fallback)
 
 **Acceptance:**
 
 - Per-finger radial distance to grip cylinder ≤ configured tolerance in **grip_hand_frame** (new unit test).
 - Regenerate evidence; human checklist ≥ 7/10 applicable items (skeleton lane: skip skin shading).
 
-### 5. Licence / default backend (P3)
+### 5. Licence / Default Backend (P3)
 
 **Acceptance:**
 
 - Owner sign-off on [#13763](https://github.com/D-sorganization/UpstreamDrift/issues/13763) recorded.
 - Only then: `research_only: false` in JSON + registry; update NOTICE.
 
-### 6. Merge coordination
+### 6. Merge Coordination
 
 **Acceptance:**
 
@@ -225,7 +225,7 @@ Naming: `{side}_{view}_club_roll_{p0|m20|p20}.png` or `both_{view}_club_roll_*.p
 
 ---
 
-## (e) Dependencies on other tracks
+## (E) Dependencies on Other Tracks
 
 | Track                  | ID              | This lane without it                                                |
 | ---------------------- | --------------- | ------------------------------------------------------------------- |
@@ -239,7 +239,7 @@ Naming: `{side}_{view}_club_roll_{p0|m20|p20}.png` or `both_{view}_club_roll_*.p
 
 ---
 
-## (f) Licences and assets (#13763)
+## (F) Licences and Assets (#13763)
 
 | Asset                   | Licence                                    | Notes                                              |
 | ----------------------- | ------------------------------------------ | -------------------------------------------------- |
@@ -252,7 +252,7 @@ Naming: `{side}_{view}_club_roll_{p0|m20|p20}.png` or `both_{view}_club_roll_*.p
 
 ---
 
-## (g) Visual self-review procedure (mandatory after every visual change)
+## (G) Visual Self-Review Procedure (Mandatory After Every Visual Change)
 
 After **any** change to posing, registration, rendering, or evidence scripts:
 
@@ -308,7 +308,7 @@ After **any** change to posing, registration, rendering, or evidence scripts:
 
 ---
 
-## Quick reference
+## Quick Reference
 
 | Item                     | Value                                                                                                     |
 | ------------------------ | --------------------------------------------------------------------------------------------------------- |
@@ -328,3 +328,23 @@ After **any** change to posing, registration, rendering, or evidence scripts:
 - Upgraded `render_evidence.py` to vectorized `uint64` packed `ss=2` Gouraud Z-buffer rendering (`1024 px`, `0.7` frame fill, full dark grip sleeve + silver shaft visible in `lead`, `trail`, and `both` views).
 - Added `tests/unit/model_appearance/hand_backends/test_myohand_contact_and_framing.py`; `19 passed` across `tests/unit/model_appearance/hand_backends/`.
 - Kept `research_only=True` (`allow_research=True` required) pending `#13763` sign-off.
+
+## Cycle 2 Calibration Update (2026-11-15)
+
+### What Changed
+
+- Added thumb segment XY chord guard in `contact_solver.py` (`_ThumbEvalCtx`, `_xy_segment_min_r`, `_thumb_pose_cost`, and `_relax_thumb_penetration` invoked from `_relax_club_penetration`) so `firstmc -> proximal_thumb -> distal_thumb` clears the `GripSpec` grip cylinder without chord pass-through across `0°` and `±20°` shaft roll.
+- Exposed `render_frame_fill: 0.74` as a setting in `scripts/config/hand_backend_myohand.json` and `MyoHandVisualSettings` (`settings.py`), wired into `docs/development/full_body_models/evidence/hand_backend_myohand/render_myohand_evidence.py`.
+- Added Cycle 2 TDD suite `tests/unit/model_appearance/hand_backends/test_myohand_cycle2_thumb_cup_framing.py` verifying `research_only is True`, `license_gate_issue == 13763`, `0.72 <= render_frame_fill <= 0.76`, thumb bone-centroid XY chord clearance on `lead`/`trail` across `(-20.0, 0.0, 20.0)` deg roll, `distal_thumb` radial wrap band, and healthy `export_bilateral_myohand_skeleton(GripSpec.neutral())`.
+- Regenerated 33 `1024 px` PNG evidence images, `receipt.json` (`"frame_fill": 0.74`, `"research_only": true`), and `myohand_skeleton_grip_spec_neutral.json`, and visually verified `lead`, `trail`, and `both` across `0°` and `±20°` roll.
+
+### Verification Command and Result
+
+- Evidence render: `PYTHONPATH=. python docs/development/full_body_models/evidence/hand_backend_myohand/render_myohand_evidence.py` -> regenerated 34 artifacts (`33` PNGs + `receipt.json` + `myohand_skeleton_grip_spec_neutral.json`).
+- Unit tests: `run_pytest.py ... tests/unit/model_appearance/hand_backends/ -v` -> **`27 passed, 4 warnings in 23.28s`**.
+
+### Remaining Known Issues
+
+- On the `trail` hand, `distal_thumb` flares slightly wider away from the grip sleeve than on `lead` (still within the `0.0055 m` `thumb_contact_tolerance_m`).
+- Remains gated by `research_only=True` (`allow_research=True` required) pending `#13763` license sign-off.
+- Still uses standalone `render_myohand_evidence.py` until shared `posing.py` (`#15164`) and `render.py` (`#15154`) land and are pulled in.

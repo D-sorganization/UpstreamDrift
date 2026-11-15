@@ -71,5 +71,6 @@
     "flexion_gain": 0.35,
     "deviation_gain": 0.2
   },
-  "thumb_straightness_range_rad": [-0.55, 0.15]
+  "thumb_straightness_range_rad": [-0.55, 0.15],
+  "render_frame_fill": 0.74
 }

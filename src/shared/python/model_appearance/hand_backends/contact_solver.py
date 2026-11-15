@@ -386,6 +386,82 @@ def _solve_fingers(
         ]
 
 
+@dataclass(frozen=True)
+class _ThumbEvalCtx:
+    """Immutable workspace context for evaluating candidate thumb joint poses."""
+
+    model: Any
+    data: Any
+    cache: _ModelCache
+    q_base: dict[str, float]
+    rot: Array
+    trans: Array
+    tgt_az: float
+    tgt_r: float
+    safe_r: float
+    chord_guard_r: float
+    max_z_m: float
+
+
+def _xy_segment_min_r(p0: Array, p1: Array) -> float:
+    """Return minimum XY distance from the shaft axis (0, 0) to segment [p0, p1]."""
+    a = p0[:2]
+    d = p1[:2] - a
+    denom = float(d[0] * d[0] + d[1] * d[1])
+    t = (
+        0.0
+        if denom < 1e-12
+        else float(np.clip(-(a[0] * d[0] + a[1] * d[1]) / denom, 0.0, 1.0))
+    )
+    closest = a + t * d
+    return float(math.hypot(float(closest[0]), float(closest[1])))
+
+
+def _thumb_pose_cost(
+    ctx: _ThumbEvalCtx, angles: tuple[float, float, float, float]
+) -> float:
+    ca, cf, mp, ip = angles
+    cand = dict(ctx.q_base)
+    cand["cmc_abduction"] = ca
+    cand["cmc_flexion"] = cf
+    cand["mp_flexion"] = mp
+    cand["ip_flexion"] = ip
+    _forward_fast(ctx.model, ctx.data, ctx.cache, cand)
+    pts = _placed_from_cache(
+        ctx.data, ctx.cache.sparse_geoms, ctx.rot, ctx.trans, _THUMB_BODIES
+    )
+    th_all = np.vstack([pts[b] for b in _THUMB_BODIES])
+    min_r = float(np.hypot(th_all[:, 0], th_all[:, 1]).min())
+    max_z = float(th_all[:, 2].max())
+    c_mc = pts["firstmc"].mean(axis=0)
+    c_px = pts["proximal_thumb"].mean(axis=0)
+    c_ds = pts["distal_thumb"].mean(axis=0)
+    chord_r = min(_xy_segment_min_r(c_mc, c_px), _xy_segment_min_r(c_px, c_ds))
+
+    dp = pts["distal_thumb"]
+    dm = dp.mean(axis=0)
+    r_dp = np.hypot(dp[:, 0], dp[:, 1])
+    r_d = float(r_dp.min()) - ctx.tgt_r
+    r_d_max = max(0.0, float(r_dp.max()) - (ctx.tgt_r + 0.0085))
+    az = math.atan2(float(dm[1]), float(dm[0]))
+    az_err = math.atan2(math.sin(az - ctx.tgt_az), math.cos(az - ctx.tgt_az))
+    z_err = (float(dm[2]) - 0.028) / 0.020
+    pen_cost = 4.0e5 * max(0.0, ctx.safe_r - min_r) ** 2
+    chord_cost = 6.0e5 * max(0.0, ctx.chord_guard_r - chord_r) ** 2
+    max_z_cost = 1.0e6 * max(0.0, max_z - ctx.max_z_m) ** 2
+    ext_cost = 0.5 * (max(0.0, -mp - 0.35) ** 2 + max(0.0, -ip - 0.35) ** 2)
+    return (
+        (r_d / 0.0025) ** 2
+        + (r_d_max / 0.003) ** 2
+        + (az_err / 0.50) ** 2
+        + z_err**2
+        + pen_cost
+        + chord_cost
+        + max_z_cost
+        + ext_cost
+    )
+
+
 def _solve_thumb(
     model: Any,
     data: Any,
@@ -406,9 +482,19 @@ def _solve_thumb(
     tgt_az = math.radians(
         spec_rh.resolved_thumb_azimuth_deg("trail" if side == "trail" else "lead")
     )
-    eval_bodies = (*_THUMB_BODIES, "proxph2")
-    safe_r = grip_radius_m + cfg.bone_safe_clearance_m
-    tgt_r = grip_radius_m + cfg.bone_target_clearance_m
+    ctx = _ThumbEvalCtx(
+        model=model,
+        data=data,
+        cache=cache,
+        q_base=q,
+        rot=rot,
+        trans=trans,
+        tgt_az=tgt_az,
+        tgt_r=grip_radius_m + cfg.bone_target_clearance_m,
+        safe_r=grip_radius_m + cfg.bone_safe_clearance_m,
+        chord_guard_r=grip_radius_m + 0.0005,
+        max_z_m=cfg.thumb_max_z_m,
+    )
 
     def _vals_for(name: str, grid: tuple[float, ...]) -> tuple[float, ...]:
         if name in locked:
@@ -416,43 +502,13 @@ def _solve_thumb(
         lo, hi = limits[name]
         return tuple(float(np.clip(v, lo, hi)) for v in grid)
 
-    def _eval_thumb(ca: float, cf: float, mp: float, ip: float) -> float:
-        cand = dict(q)
-        cand["cmc_abduction"] = ca
-        cand["cmc_flexion"] = cf
-        cand["mp_flexion"] = mp
-        cand["ip_flexion"] = ip
-        _forward_fast(model, data, cache, cand)
-        pts = _placed_from_cache(data, cache.sparse_geoms, rot, trans, eval_bodies)
-        th_all = np.vstack([pts[b] for b in _THUMB_BODIES])
-        min_r = float(np.hypot(th_all[:, 0], th_all[:, 1]).min())
-        max_z = float(th_all[:, 2].max())
-        dp = pts["distal_thumb"]
-        dm = dp.mean(axis=0)
-        r_dp = np.hypot(dp[:, 0], dp[:, 1])
-        r_d = float(r_dp.min()) - tgt_r
-        r_d_max = max(0.0, float(r_dp.max()) - (tgt_r + 0.0085))
-        az = math.atan2(float(dm[1]), float(dm[0]))
-        az_err = math.atan2(math.sin(az - tgt_az), math.cos(az - tgt_az))
-        z_err = (float(dm[2]) - 0.028) / 0.020
-        pen_cost = 4.0e5 * max(0.0, safe_r - min_r) ** 2
-        max_z_cost = 1.0e6 * max(0.0, max_z - cfg.thumb_max_z_m) ** 2
-        return (
-            (r_d / 0.0025) ** 2
-            + (r_d_max / 0.003) ** 2
-            + (az_err / 0.50) ** 2
-            + z_err**2
-            + pen_cost
-            + max_z_cost
-        )
-
     best_th = (q["cmc_abduction"], q["cmc_flexion"], q["mp_flexion"], q["ip_flexion"])
     best_cost = 1.0e12
     for ca in _vals_for("cmc_abduction", (-0.4, 0.0, 0.4, 0.78)):
         for cf in _vals_for("cmc_flexion", (-0.6, -0.1, 0.3, 0.70)):
             for mp in _vals_for("mp_flexion", (-0.6, 0.0, 0.65)):
                 for ip in _vals_for("ip_flexion", (-1.0, -0.5, -0.1, 0.25, 0.44)):
-                    cost = _eval_thumb(ca, cf, mp, ip)
+                    cost = _thumb_pose_cost(ctx, (ca, cf, mp, ip))
                     if cost < best_cost:
                         best_cost = cost
                         best_th = (ca, cf, mp, ip)
@@ -466,7 +522,7 @@ def _solve_thumb(
             for sgn in (-1.0, 1.0):
                 probe = list(cur)
                 probe[k_idx] = float(np.clip(cur[k_idx] + sgn * step, lo, hi))
-                cost = _eval_thumb(probe[0], probe[1], probe[2], probe[3])
+                cost = _thumb_pose_cost(ctx, (probe[0], probe[1], probe[2], probe[3]))
                 if cost < best_cost:
                     best_cost = cost
                     cur = probe
@@ -477,6 +533,41 @@ def _solve_thumb(
         cur[2],
         cur[3],
     )
+
+
+def _relax_thumb_penetration(
+    ctx: _ThumbEvalCtx,
+    q: dict[str, float],
+    locked: set[str],
+    min_allowed: float,
+) -> None:
+    limits = ctx.cache.limits
+    thumb_joints = ("ip_flexion", "mp_flexion", "cmc_flexion")
+    for _ in range(14):
+        _forward_fast(ctx.model, ctx.data, ctx.cache, q)
+        pts = _placed_from_cache(
+            ctx.data, ctx.cache.full_geoms, ctx.rot, ctx.trans, _THUMB_BODIES
+        )
+        r_verts = min(
+            float(np.hypot(pts[b][:, 0], pts[b][:, 1]).min()) for b in _THUMB_BODIES
+        )
+        c_mc = pts["firstmc"].mean(axis=0)
+        c_px = pts["proximal_thumb"].mean(axis=0)
+        c_ds = pts["distal_thumb"].mean(axis=0)
+        r_chord = min(_xy_segment_min_r(c_mc, c_px), _xy_segment_min_r(c_px, c_ds))
+        if min(r_verts, r_chord) >= min_allowed:
+            break
+        changed = False
+        for jname in thumb_joints:
+            if jname in locked:
+                continue
+            lo, _ = limits[jname]
+            if q[jname] > lo + 0.02:
+                q[jname] = max(lo, q[jname] - 0.05)
+                changed = True
+                break
+        if not changed:
+            break
 
 
 def _relax_club_penetration(
@@ -512,6 +603,20 @@ def _relax_club_penetration(
                     break
             if not changed:
                 break
+    thumb_ctx = _ThumbEvalCtx(
+        model=model,
+        data=data,
+        cache=cache,
+        q_base=q,
+        rot=rot,
+        trans=trans,
+        tgt_az=0.0,
+        tgt_r=grip_radius_m,
+        safe_r=grip_radius_m,
+        chord_guard_r=grip_radius_m,
+        max_z_m=cfg.thumb_max_z_m,
+    )
+    _relax_thumb_penetration(thumb_ctx, q, locked, min_allowed)
     apply_joint_targets(model, data, q)
 
 

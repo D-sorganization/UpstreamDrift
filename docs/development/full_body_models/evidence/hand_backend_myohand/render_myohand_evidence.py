@@ -75,7 +75,7 @@ def main() -> None:
     cfg = default_myohand_settings()
     lit = LitRenderSettings(
         image_px=1024,
-        frame_fill=0.70,
+        frame_fill=cfg.render_frame_fill,
         bone_rgb=cfg.bone_rgb,
         grip_rgb=cfg.grip_rgb,
         shaft_rgb=cfg.shaft_rgb,
