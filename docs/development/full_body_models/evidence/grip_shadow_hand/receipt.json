@@ -1,42 +1,208 @@
 {
-  "artifacts": [
-    "grip_shadow_both_butt_roll_0p.png",
-    "grip_shadow_both_butt_roll_20m.png",
-    "grip_shadow_both_butt_roll_20p.png",
-    "grip_shadow_both_face_roll_0p.png",
-    "grip_shadow_both_face_roll_20m.png",
-    "grip_shadow_both_face_roll_20p.png",
-    "grip_shadow_both_iso_roll_0p.png",
-    "grip_shadow_both_iso_roll_20m.png",
-    "grip_shadow_both_iso_roll_20p.png",
-    "grip_shadow_lead_butt_roll_0p.png",
-    "grip_shadow_lead_butt_roll_20m.png",
-    "grip_shadow_lead_butt_roll_20p.png",
-    "grip_shadow_lead_face_roll_0p.png",
-    "grip_shadow_lead_face_roll_20m.png",
-    "grip_shadow_lead_face_roll_20p.png",
-    "grip_shadow_lead_iso_roll_0p.png",
-    "grip_shadow_lead_iso_roll_20m.png",
-    "grip_shadow_lead_iso_roll_20p.png",
-    "grip_shadow_trail_butt_roll_0p.png",
-    "grip_shadow_trail_butt_roll_20m.png",
-    "grip_shadow_trail_butt_roll_20p.png",
-    "grip_shadow_trail_face_roll_0p.png",
-    "grip_shadow_trail_face_roll_20m.png",
-    "grip_shadow_trail_face_roll_20p.png",
-    "grip_shadow_trail_iso_roll_0p.png",
-    "grip_shadow_trail_iso_roll_20m.png",
-    "grip_shadow_trail_iso_roll_20p.png"
-  ],
-  "shaft_rolls_deg": [
-    0.0,
-    20.0,
-    -20.0
-  ],
-  "subsets": [
-    "both",
-    "lead",
-    "trail"
-  ],
-  "dpi": 1024
+  "frame_px": 1024,
+  "frame_fill": 0.7,
+  "anthropometry": {
+    "lead": {
+      "hand_length_m": 0.19320697027870232,
+      "palm_breadth_m": 0.0849296598264872,
+      "index_proximal_width_m": 0.02058425546717231,
+      "middle_proximal_width_m": 0.02058425546717232,
+      "ring_proximal_width_m": 0.020584255467172317,
+      "little_proximal_width_m": 0.020584255467172314
+    },
+    "trail": {
+      "hand_length_m": 0.19320697027870232,
+      "palm_breadth_m": 0.0849296598264872,
+      "index_proximal_width_m": 0.020584255467172314,
+      "middle_proximal_width_m": 0.020584255467172317,
+      "ring_proximal_width_m": 0.02058425546717232,
+      "little_proximal_width_m": 0.02058425546717231
+    }
+  },
+  "lead_pad_gaps_m": {
+    "index": 1.0619930160965518e-09,
+    "middle": 1.8286150892110609e-09,
+    "ring": 2.2819772634019575e-10,
+    "little": 4.799305935304643e-10,
+    "thumb": 2.7903102640947086e-09
+  },
+  "trail_pad_gaps_m": {
+    "index": 2.411071169106105e-10,
+    "middle": 3.1231785213581276e-10,
+    "ring": 1.5426205122320846e-09,
+    "little": 2.0790630363143325e-09,
+    "thumb": 3.42453745916238e-09
+  },
+  "lead_penetration": {
+    "club_penetration_m": 0.0,
+    "finger_finger_gap_m": 0.00109558755821938
+  },
+  "trail_penetration": {
+    "club_penetration_m": 0.0,
+    "finger_finger_gap_m": 0.001095266147453967
+  },
+  "renders": [
+    {
+      "file": "grip_shadow_lead_iso_roll_0p.png",
+      "mode": "lead",
+      "view": "iso",
+      "roll_deg": 0.0
+    },
+    {
+      "file": "grip_shadow_lead_butt_roll_0p.png",
+      "mode": "lead",
+      "view": "butt",
+      "roll_deg": 0.0
+    },
+    {
+      "file": "grip_shadow_lead_face_roll_0p.png",
+      "mode": "lead",
+      "view": "face",
+      "roll_deg": 0.0
+    },
+    {
+      "file": "grip_shadow_trail_iso_roll_0p.png",
+      "mode": "trail",
+      "view": "iso",
+      "roll_deg": 0.0
+    },
+    {
+      "file": "grip_shadow_trail_butt_roll_0p.png",
+      "mode": "trail",
+      "view": "butt",
+      "roll_deg": 0.0
+    },
+    {
+      "file": "grip_shadow_trail_face_roll_0p.png",
+      "mode": "trail",
+      "view": "face",
+      "roll_deg": 0.0
+    },
+    {
+      "file": "grip_shadow_both_iso_roll_0p.png",
+      "mode": "both",
+      "view": "iso",
+      "roll_deg": 0.0
+    },
+    {
+      "file": "grip_shadow_both_butt_roll_0p.png",
+      "mode": "both",
+      "view": "butt",
+      "roll_deg": 0.0
+    },
+    {
+      "file": "grip_shadow_both_face_roll_0p.png",
+      "mode": "both",
+      "view": "face",
+      "roll_deg": 0.0
+    },
+    {
+      "file": "grip_shadow_lead_iso_roll_20p.png",
+      "mode": "lead",
+      "view": "iso",
+      "roll_deg": 20.0
+    },
+    {
+      "file": "grip_shadow_lead_butt_roll_20p.png",
+      "mode": "lead",
+      "view": "butt",
+      "roll_deg": 20.0
+    },
+    {
+      "file": "grip_shadow_lead_face_roll_20p.png",
+      "mode": "lead",
+      "view": "face",
+      "roll_deg": 20.0
+    },
+    {
+      "file": "grip_shadow_trail_iso_roll_20p.png",
+      "mode": "trail",
+      "view": "iso",
+      "roll_deg": 20.0
+    },
+    {
+      "file": "grip_shadow_trail_butt_roll_20p.png",
+      "mode": "trail",
+      "view": "butt",
+      "roll_deg": 20.0
+    },
+    {
+      "file": "grip_shadow_trail_face_roll_20p.png",
+      "mode": "trail",
+      "view": "face",
+      "roll_deg": 20.0
+    },
+    {
+      "file": "grip_shadow_both_iso_roll_20p.png",
+      "mode": "both",
+      "view": "iso",
+      "roll_deg": 20.0
+    },
+    {
+      "file": "grip_shadow_both_butt_roll_20p.png",
+      "mode": "both",
+      "view": "butt",
+      "roll_deg": 20.0
+    },
+    {
+      "file": "grip_shadow_both_face_roll_20p.png",
+      "mode": "both",
+      "view": "face",
+      "roll_deg": 20.0
+    },
+    {
+      "file": "grip_shadow_lead_iso_roll_20m.png",
+      "mode": "lead",
+      "view": "iso",
+      "roll_deg": -20.0
+    },
+    {
+      "file": "grip_shadow_lead_butt_roll_20m.png",
+      "mode": "lead",
+      "view": "butt",
+      "roll_deg": -20.0
+    },
+    {
+      "file": "grip_shadow_lead_face_roll_20m.png",
+      "mode": "lead",
+      "view": "face",
+      "roll_deg": -20.0
+    },
+    {
+      "file": "grip_shadow_trail_iso_roll_20m.png",
+      "mode": "trail",
+      "view": "iso",
+      "roll_deg": -20.0
+    },
+    {
+      "file": "grip_shadow_trail_butt_roll_20m.png",
+      "mode": "trail",
+      "view": "butt",
+      "roll_deg": -20.0
+    },
+    {
+      "file": "grip_shadow_trail_face_roll_20m.png",
+      "mode": "trail",
+      "view": "face",
+      "roll_deg": -20.0
+    },
+    {
+      "file": "grip_shadow_both_iso_roll_20m.png",
+      "mode": "both",
+      "view": "iso",
+      "roll_deg": -20.0
+    },
+    {
+      "file": "grip_shadow_both_butt_roll_20m.png",
+      "mode": "both",
+      "view": "butt",
+      "roll_deg": -20.0
+    },
+    {
+      "file": "grip_shadow_both_face_roll_20m.png",
+      "mode": "both",
+      "view": "face",
+      "roll_deg": -20.0
+    }
+  ]
 }

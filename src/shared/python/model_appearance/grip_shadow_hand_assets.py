@@ -77,10 +77,17 @@ def verify_shadow_mesh_asset_licences() -> dict[str, Any]:
     }
 
 
-def shadow_hand_mjcf_path(*, trail: bool) -> Path:
-    """Return ``right_hand.xml`` (trail) or ``left_hand.xml`` (lead)."""
+def shadow_hand_mjcf_path(
+    *,
+    trail: bool,
+    handedness: str = "right",
+) -> Path:
+    """Return ``right_hand.xml`` or ``left_hand.xml`` for trail/lead and handedness."""
     load_shadow_hand_provenance()
-    name = "right_hand.xml" if trail else "left_hand.xml"
+    if handedness not in ("right", "left"):
+        raise ValueError(f"handedness must be 'right' or 'left', got {handedness!r}")
+    use_right = bool(trail) ^ (handedness == "left")
+    name = "right_hand.xml" if use_right else "left_hand.xml"
     path = CANONICAL_HAND_ROOT / name
     if not path.is_file():
         raise ValueError(f"Shadow hand MJCF missing: {path}")

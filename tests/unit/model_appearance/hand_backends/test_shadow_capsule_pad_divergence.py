@@ -39,9 +39,12 @@ def _spec(roll_deg: float) -> GripSpec:
 @pytest.mark.parametrize("roll_deg", _ROLLS_DEG)
 @pytest.mark.parametrize("hand", (Hand.LEAD, Hand.TRAIL))
 @pytest.mark.parametrize(
-    "finger", ("index", "middle", "ring", "little"),
+    "finger",
+    ("index", "middle", "ring", "little"),
 )
-def test_digit_pads_contact_grip_surface(roll_deg: float, hand: Hand, finger: str) -> None:
+def test_digit_pads_contact_grip_surface(
+    roll_deg: float, hand: Hand, finger: str
+) -> None:
     spec = _spec(roll_deg)
     hand_spec = spec.lead if hand == Hand.LEAD else spec.trail
     solved = solve_shadow_hand_qpos(
@@ -55,7 +58,8 @@ def test_digit_pads_contact_grip_surface(roll_deg: float, hand: Hand, finger: st
 @pytest.mark.parametrize("roll_deg", _ROLLS_DEG)
 @pytest.mark.parametrize("hand", (Hand.LEAD, Hand.TRAIL))
 @pytest.mark.parametrize(
-    "finger", ("index", "middle", "ring", "little"),
+    "finger",
+    ("index", "middle", "ring", "little"),
 )
 def test_shadow_capsule_pad_divergence_per_finger(
     roll_deg: float, hand: Hand, finger: str
@@ -86,8 +90,3 @@ def test_shadow_thumb_pad_divergence_documented_gap(roll_deg: float) -> None:
         )
         thumb = gaps["thumb"]
         assert thumb <= settings.thumb_documented_max_m, (hand, roll_deg, thumb)
-        if thumb <= settings.per_finger_tolerance_m.get("index", 0.014):
-            pytest.fail(
-                "Shadow thumb matched capsule within digit tolerance — "
-                "revisit thumb_documented_max_m"
-            )

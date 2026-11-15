@@ -78,10 +78,7 @@ def apply_equal_axis_limits(
 ) -> float:
     """Crop all three axes to the same half-width around ``centre``."""
     pts = np.asarray(points, dtype=float)
-    if centre is None:
-        centre = pts.mean(axis=0)
-    else:
-        centre = np.asarray(centre, dtype=float)
+    centre = pts.mean(axis=0) if centre is None else np.asarray(centre, dtype=float)
     extent = float(np.max(np.ptp(pts, axis=0)))
     fill = max(style.frame_fill_fraction, 0.35)
     half = max(
