@@ -146,7 +146,8 @@ def scale_asset(
 def face_normals(vertices: Array, faces: IntArray) -> Array:
     """Area-weighted (unnormalised) face normals."""
     tri = vertices[faces]
-    return np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+    normals = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+    return np.asarray(normals, dtype=np.float64)
 
 
 def vertex_normals(vertices: Array, faces: IntArray) -> Array:
