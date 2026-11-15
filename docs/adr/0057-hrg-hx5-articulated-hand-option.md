@@ -98,6 +98,25 @@ acceptance.
 - Follow-up: create a separately scoped runtime issue after HX6 is resolved.
   That issue must implement the tests above before adding model geometry.
 
+## Proposed Addendum (HRG-GB, Epic #15122 / GB-1 #15123)
+
+**Status within this addendum:** Proposed (moves to Accepted when GB-3 builder
+goldens pass).
+
+1. **Authoring contract.** A versioned, engine-free `GripSpec`
+   (`src/shared/python/grip_spec/`) is the single source for grip geometry
+   parameters (per-hand club cross angle, palm-versus-fingers depth, thumb
+   azimuth, style, handedness, and hand size). Legacy
+   `GripPose` remains the compatibility projection via
+   `GripSpec.to_grip_pose()`; existing receipts and default meshes stay
+   unchanged when `GripSpec.legacy()` is used.
+2. **Export format.** The procedurally built, frozen phalanx capsules per grip
+   style are the export format for the breadth-scaled palm option. Runtime
+   finger degrees of freedom during the swing remain out of scope for this ADR.
+3. **Acceptance gate.** This addendum becomes Accepted only after GB-3 golden
+   builder poses pass with checksum evidence recorded on the epic; until then,
+   no full-body geometry change is authorized by this addendum alone.
+
 ## Validation
 
 This ADR is documentation only. Its specification was checked against the
