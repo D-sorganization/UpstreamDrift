@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "grip_radius_m": 0.014,
+  "penetration_tolerance_m": 0.002,
+  "finger_pair_tolerance_m": 0.0015,
+  "club_cylinder_radius_m": 0.014,
+  "skin_tone_rgba": [0.82, 0.68, 0.58, 1.0],
+  "bone_rgba": [0.75, 0.75, 0.78, 0.35],
+  "anthropometric_reference_hand_length_m": 0.19305,
+  "anthropometric_scale_exponent": 1.0,
+  "width_scale_from_breadth": true,
+  "model_xml_relpath": "shared/models/myosuite/myo_sim/hand/myohand.xml",
+  "hand_body_names": [
+    "lunate",
+    "scaphoid",
+    "pisiform",
+    "triquetrum",
+    "capitate",
+    "trapezium",
+    "firstmc",
+    "proximal_thumb",
+    "distal_thumb",
+    "trapezoid",
+    "hamate",
+    "secondmc",
+    "proxph2",
+    "midph2",
+    "distph2",
+    "thirdmc",
+    "proxph3",
+    "midph3",
+    "distph3",
+    "fourthmc",
+    "proxph4",
+    "midph4",
+    "distph4",
+    "fifthmc",
+    "proxph5",
+    "midph5",
+    "distph5"
+  ],
+  "registration": {
+    "trail_right_handed_scale": 1.0,
+    "model_to_grip_row_major": [
+      [0.04218412, -0.99876011, 0.02662345, -0.80012854],
+      [0.99380531, 0.04397107, 0.10298618, 0.62454502],
+      [-0.10367689, 0.02219681, 0.99437091, 1.119842],
+      [0.0, 0.0, 0.0, 1.0]
+    ]
+  },
+  "palm_finger_depth_coupling": {
+    "flexion_gain": 0.35,
+    "deviation_gain": 0.2
+  },
+  "thumb_straightness_range_rad": [-0.55, 0.15]
+}

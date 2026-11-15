@@ -1,0 +1,6 @@
+MyoHand mesh assets are distributed under the Apache License, Version 2.0
+by MyoHub/myo_sim. A full copy of that license is in:
+
+  shared/models/myosuite/myo_sim/LICENSE
+
+UpstreamDrift's own hand_backends Python code is MIT-licensed with the repository.

@@ -1,0 +1,30 @@
+{
+  "backend": "myohand",
+  "spec": "GripSpec.neutral",
+  "rolls_deg": [
+    0.0,
+    -20.0,
+    20.0
+  ],
+  "artifacts": [
+    "both_hands_grip_oblique_roll_0.png",
+    "lead_front_roll_m20.png",
+    "lead_front_roll_p0.png",
+    "lead_front_roll_p20.png",
+    "lead_side_roll_m20.png",
+    "lead_side_roll_p0.png",
+    "lead_side_roll_p20.png",
+    "lead_top_roll_m20.png",
+    "lead_top_roll_p0.png",
+    "lead_top_roll_p20.png",
+    "trail_front_roll_m20.png",
+    "trail_front_roll_p0.png",
+    "trail_front_roll_p20.png",
+    "trail_side_roll_m20.png",
+    "trail_side_roll_p0.png",
+    "trail_side_roll_p20.png",
+    "trail_top_roll_m20.png",
+    "trail_top_roll_p0.png",
+    "trail_top_roll_p20.png"
+  ]
+}

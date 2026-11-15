@@ -1,0 +1,24 @@
+MyoHand visual meshes (UpstreamDrift hand_backends/myohand.py)
+================================================================
+
+Upstream source
+---------------
+- Repository: https://github.com/MyoHub/myo_sim
+- Pin (git submodule): 33f3ded946f55adbdcf963c99999587aadaf975f
+- SPDX license identifier on myo_sim distribution: Apache-2.0
+  (see shared/models/myosuite/myo_sim/LICENSE in this repository)
+
+Scientific lineage (informational; per upstream myo_sim/hand/README.md)
+-----------------------------------------------------------------------
+- MoBL upper extremity (simtk.org/projects/upexdyn): BSD 3-Clause with
+  non-commercial use terms in upstream OpenSim materials.
+- 2nd-Hand finger model (simtk.org/projects/hand_muscle): MIT (McFarland et al.,
+  2019).
+
+UpstreamDrift does not copy STL assets into src/; the visual backend loads the
+pinned submodule at runtime. HRG-HX6 licensing ADR (#13763) remains open for
+owner sign-off; this option follows the same pinned-myosim pattern as HRG-GS-M8
+(#13330).
+
+This NOTICE satisfies Apache-2.0 Section 4(d) attribution for derivative
+visual-backend code that references myo_sim mesh assets.
