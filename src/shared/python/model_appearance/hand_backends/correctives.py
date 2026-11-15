@@ -2,9 +2,10 @@
 
 Joint rotation with linear blend skinning cannot do two things a real hand
 does: keep the skin of a web from folding through itself, and let the soft
-pads of the palm settle onto what the hand holds. The two correctives here
-move vertices *after* skinning to supply that. Both are owner-approved
-(2026-11-15), visual only, and switchable: zero iterations or zero reach
+pads of the palm settle onto what the hand holds. The correctives here move
+vertices *after* skinning to supply that, and lift skin that ends a hair
+inside the grip back to its surface. All are owner-approved (2026-11-15),
+visual only, and switchable: zero iterations, zero reach or zero depth
 leaves the skinned mesh untouched.
 """
 
@@ -183,4 +184,26 @@ def conform_pads(
     neighbours = vertex_neighbours(faces, len(out))
     for _ in range(settings.passes):
         _conform_once(out, vertex_normals(out), neighbours, pad_ids, distance, settings)
+    return out
+
+
+def lift_out(vertices: Array, distance: Distance, *, max_depth_m: float) -> Array:
+    """Lift skin that sits just inside the obstacle back to its surface.
+
+    Joints are solved until skin vertices touch, so skin between two touching
+    vertices can dip a fraction of a millimetre inside a round grip; flesh
+    would compress instead. Vertices up to ``max_depth_m`` inside move out
+    along the distance gradient (``0`` switches it off). Deeper ones are a
+    posing fault and are left for the quality checks to report.
+    """
+    if max_depth_m < 0.0:
+        raise ValueError("lift-out max_depth_m must not be negative")
+    out = np.array(vertices, dtype=np.float64)
+    if max_depth_m == 0.0:
+        return out
+    gap = distance(out)
+    ids = np.flatnonzero((gap < 0.0) & (gap >= -max_depth_m))
+    if len(ids):
+        away = distance_gradient(distance, out[ids], _GRADIENT_STEP_M)
+        out[ids] -= gap[ids, None] * away
     return out

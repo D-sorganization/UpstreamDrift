@@ -97,6 +97,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1035 | `src/engines/physics_engines/opensim/python/opensim_physics_engine.py` |
 | 1034 | `src/shared/python/motion_matching/pipeline/receipt_components.py` |
 | 1032 | `src/launchers/launcher_ui_setup.py` |
+| 1022 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1022 | `src/tools/bunker_shot_gui/render3d.py` |
 | 1021 | `src/tools/bunker_shot_gui/slices.py` |
 | 1020 | `src/shared/python/optimization/casadi_backend.py` |
@@ -118,7 +119,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 983 | `src/shared/python/motion_matching/multi_engine_torque_allocator.py` |
 | 981 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
 | 981 | `src/shared/python/workspace/necromatcher_video.py` |
-| 977 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 975 | `src/api/routes/simulation_ws.py` |
 | 974 | `src/launchers/embedded_host.py` |
 | 973 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_camera_system.py` |

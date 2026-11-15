@@ -29,5 +29,7 @@
   "thumb_pad_tolerance_m": 0.006,
   "max_corrective_shift_m": 0.008,
   "max_corrective_vertex_fraction": 0.12,
-  "min_palm_contact_vertices": 8
+  "min_palm_contact_vertices": 8,
+  "max_mean_edge_length_m": 0.004,
+  "max_subdivision_joint_change_deg": 5.0
 }

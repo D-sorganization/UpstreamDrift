@@ -12,6 +12,7 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     PadConformSettings,
     conform_pads,
     distance_gradient,
+    lift_out,
     relax_folds,
     vertex_neighbours,
 )
@@ -183,3 +184,26 @@ def test_bad_corrective_settings_raise() -> None:
     ):
         with pytest.raises(ValueError):
             PadConformSettings(**{**_PAD.__dict__, **bad})
+
+
+def test_skin_just_inside_the_obstacle_is_lifted_to_its_surface() -> None:
+    vertices, _ = _grid()
+    vertices[:, 2] = np.linspace(-0.004, 0.004, len(vertices))
+    out = lift_out(vertices, _floor, max_depth_m=0.001)
+    shallow = (vertices[:, 2] < 0.0) & (vertices[:, 2] >= -0.001)
+    assert shallow.any()
+    np.testing.assert_allclose(out[shallow, 2], 0.0, atol=1e-9)
+    np.testing.assert_array_equal(out[shallow, :2], vertices[shallow, :2])
+    # Skin outside, and skin deeper than the limit (a posing fault), stays.
+    np.testing.assert_array_equal(out[~shallow], vertices[~shallow])
+    assert (~shallow & (vertices[:, 2] < 0.0)).any()
+
+
+def test_lifting_out_is_switched_off_by_zero_depth_and_rejects_a_negative() -> None:
+    vertices, _ = _grid()
+    vertices[:, 2] = -0.0005
+    out = lift_out(vertices, _floor, max_depth_m=0.0)
+    np.testing.assert_array_equal(out, vertices)
+    assert out is not vertices
+    with pytest.raises(ValueError):
+        lift_out(vertices, _floor, max_depth_m=-0.001)

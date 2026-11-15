@@ -19,6 +19,10 @@ from src.shared.python.model_appearance.hand_backends.skinning import (
 )
 from src.shared.python.model_appearance.hand_backends.types import HandVisualResult
 
+# Point-triangle pairs evaluated at once by the winding-number check (memory).
+_WINDING_CHUNK_ELEMENTS = 400_000
+_RAY_CHUNK_POINTS = 128
+
 QUALITY_PATH = (
     Path(__file__).resolve().parents[5]
     / "scripts"
@@ -128,7 +132,10 @@ def _winding_numbers(
 ) -> NDArray[np.float64]:
     """Winding number of a closed outward-wound mesh about each point."""
     total = np.zeros(len(points))
-    for chunk in np.array_split(np.arange(len(points)), max(1, len(points) // 256)):
+    per_chunk = max(1, _WINDING_CHUNK_ELEMENTS // max(1, len(faces)))
+    for chunk in np.array_split(
+        np.arange(len(points)), max(1, len(points) // per_chunk)
+    ):
         rel = vertices[faces][None, :, :, :] - points[chunk][:, None, None, :]
         a, b, c = rel[:, :, 0], rel[:, :, 1], rel[:, :, 2]
         la, lb, lc = (np.linalg.norm(x, axis=2) for x in (a, b, c))
@@ -143,6 +150,46 @@ def _winding_numbers(
     return total
 
 
+def _edge_side(
+    start: NDArray[np.float64],
+    end: NDArray[np.float64],
+    point: NDArray[np.float64],
+    plane: tuple[int, int],
+) -> NDArray[np.float64]:
+    """Signed area of ``start -> end -> point`` projected on the ``plane`` axes."""
+    u, v = plane
+    return (end[..., u] - start[..., u]) * (point[..., v] - start[..., v]) - (
+        end[..., v] - start[..., v]
+    ) * (point[..., u] - start[..., u])
+
+
+def _ray_says_inside(
+    points: NDArray[np.float64], tri: NDArray[np.float64], axis: int
+) -> NDArray[np.bool_]:
+    """Whether a ray from each point along ``+axis`` crosses the closed mesh
+    an odd number of times. Fast, but a ray through an edge can miscount, so
+    it only preselects points for the exact winding number."""
+    u, v = (k for k in range(3) if k != axis)
+    order = np.argsort(points[:, u], kind="stable")
+    low, high = tri[:, :, u].min(axis=1), tri[:, :, u].max(axis=1)
+    inside = np.zeros(len(points), dtype=bool)
+    for chunk in np.array_split(order, max(1, len(order) // _RAY_CHUNK_POINTS)):
+        if len(chunk) == 0:
+            continue
+        p = points[chunk]
+        near = tri[(high >= p[:, u].min()) & (low <= p[:, u].max())]
+        a, b, c = near[None, :, 0], near[None, :, 1], near[None, :, 2]
+        q = p[:, None, :]
+        ab, bc, ca = (_edge_side(s, e, q, (u, v)) for s, e in ((a, b), (b, c), (c, a)))
+        area = ab + bc + ca
+        over = ((ab >= 0) & (bc >= 0) & (ca >= 0)) | ((ab <= 0) & (bc <= 0) & (ca <= 0))
+        over &= area != 0.0
+        safe = np.where(area == 0.0, 1.0, area)
+        height = (bc * a[..., axis] + ca * b[..., axis] + ab * c[..., axis]) / safe
+        inside[chunk] = (over & (height > q[..., axis])).sum(axis=1) % 2 == 1
+    return inside
+
+
 def _depth_inside_m(
     points: NDArray[np.float64], vertices: NDArray[np.float64], faces: NDArray
 ) -> float:
@@ -151,6 +198,13 @@ def _depth_inside_m(
     Depth is the distance to the nearest mesh vertex, edge midpoint or face
     centre, so it overstates true depth by at most about half an edge length.
     """
+    # A point outside the mesh's bounding box is outside the mesh; of the
+    # rest only those a ray test calls inside get the exact winding number.
+    low, high = vertices.min(axis=0), vertices.max(axis=0)
+    points = points[((points >= low) & (points <= high)).all(axis=1)]
+    tri = vertices[faces]
+    maybe = _ray_says_inside(points, tri, 2) | _ray_says_inside(points, tri, 1)
+    points = points[maybe]
     inside = points[_winding_numbers(points, vertices, faces) > 0.5]
     if len(inside) == 0:
         return 0.0

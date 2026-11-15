@@ -126,11 +126,51 @@ def _without_correctives(side: str):
         raw["correctives"] = {
             "fold_relax": {**raw["correctives"]["fold_relax"], "iterations": 0},
             "palm_pad": {**raw["correctives"]["palm_pad"], "reach_m": 0.0},
+            "lift_out": {"max_depth_m": 0.0},
         }
         _CACHE[key] = build_hand_visual(
             _spec(), side, grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
         )
     return _CACHE[key]
+
+
+def _unsubdivided(side: str):
+    key = (side, "no subdivision")
+    if key not in _CACHE:
+        raw = load_settings_mapping()
+        raw["mesh"] = {**raw["mesh"], "subdivision_levels": 0}
+        _CACHE[key] = build_hand_visual(
+            _spec(), side, grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
+        )
+    return _CACHE[key]
+
+
+def _mean_edge_m(result) -> float:
+    v, f = result.mesh.vertices, result.mesh.faces
+    sides = np.concatenate([f[:, [0, 1]], f[:, [1, 2]], f[:, [2, 0]]])
+    return float(np.linalg.norm(v[sides[:, 0]] - v[sides[:, 1]], axis=1).mean())
+
+
+@pytest.mark.parametrize("side", _SIDES)
+def test_the_skin_is_subdivided_and_the_setting_switches_it_off(side: str) -> None:
+    """One Loop level by default (#15150): finer skin, same hand, same grip."""
+    fine, coarse = _hand(side), _unsubdivided(side)
+    source = load_hand_cc0_asset().asset
+    assert len(coarse.mesh.faces) == len(source.faces)
+    assert len(fine.mesh.faces) == 4 * len(source.faces)
+    assert len(fine.vertex_normals) == len(fine.mesh.vertices)
+    assert len(fine.frame_focus) == len(fine.mesh.vertices)
+    limit = float(_Q["max_mean_edge_length_m"])
+    assert _mean_edge_m(fine) <= limit < _mean_edge_m(coarse)
+    # The solved pose barely moves: subdivision is a change of skin, not grip.
+    for joint, angle in coarse.joint_angles.as_mapping().items():
+        other = fine.joint_angles.as_mapping()[joint]
+        assert abs(other - angle) <= math.radians(
+            float(_Q["max_subdivision_joint_change_deg"])
+        ), joint
+    tolerance = float(_Q["contact_tolerance_m"])
+    for result in (fine, coarse):
+        assert result.contact_gaps_m["index_dist"] <= tolerance
 
 
 def _palm_contact_count(result) -> int:
@@ -167,11 +207,15 @@ def test_correctives_unfold_the_webs_and_seat_the_palm_pad(side: str) -> None:
     shift = np.linalg.norm(shaped.mesh.vertices - plain.mesh.vertices, axis=1)
     assert 0.0 < shift.max() <= float(_Q["max_corrective_shift_m"])
     assert (shift > 1e-9).mean() <= float(_Q["max_corrective_vertex_fraction"])
-    # No finger skin moves: fingers reach the grip by joint rotation alone.
+    # Fingers reach the grip by joint rotation alone: their skin moves only
+    # where it dipped a hair inside the grip, and then only onto its surface.
     digits = shaped.rest_asset.dominant_vertex_ids(
         [f"{f}_{s}" for f in FINGERS for s in ("mid", "dist")] + ["thumb_dist"]
     )
-    assert shift[digits].max() == 0.0
+    assert shift[digits].max() <= default_settings().lift_out_max_depth_m
+    lifted = digits[shift[digits] > 0.0]
+    radial = np.linalg.norm(shaped.mesh.vertices[lifted, :2], axis=1)
+    np.testing.assert_allclose(radial, _RADIUS, atol=1e-6)
     least = int(_Q["min_palm_contact_vertices"])
     assert _palm_contact_count(shaped) >= least > _palm_contact_count(plain)
     assert shaped.contact_gaps_m["palm"] <= plain.contact_gaps_m["palm"]
@@ -381,7 +425,11 @@ def test_bad_settings_and_inputs_are_rejected() -> None:
         settings_from_mapping({**raw, "skin_rgb": [1.2, 0.5, 0.5]})
     with pytest.raises(ValueError):
         settings_from_mapping({**raw, "curl": {**raw["curl"], "arch_passes": 0}})
+    for levels in (-1, 4, 1.5, True):
+        with pytest.raises(ValueError):
+            settings_from_mapping({**raw, "mesh": {"subdivision_levels": levels}})
     for part, bad in (
+        ("lift_out", {"max_depth_m": -0.001}),
         ("fold_relax", {"step": 0.0}),
         ("fold_relax", {"iterations": -1}),
         ("palm_pad", {"reach_m": -0.01}),
@@ -434,7 +482,7 @@ def test_fast_posing_kinematics_match_the_reference_skinning() -> None:
     settings = default_settings()
     size = _spec().hand_size
     hand = sh._GripHand(
-        sh._sized_asset(size.length_m, size.breadth_m, settings), settings
+        sh._sized_assets(size.length_m, size.breadth_m, settings)[0], settings
     )
     angles = _hand("trail").joint_angles.as_mapping()
     reference = bone_transforms(hand.asset, hand.rotations(angles))

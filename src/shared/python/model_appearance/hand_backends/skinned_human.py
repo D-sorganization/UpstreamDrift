@@ -38,6 +38,7 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     FoldRelaxSettings,
     PadConformSettings,
     conform_pads,
+    lift_out,
     relax_folds,
 )
 from src.shared.python.model_appearance.hand_backends.joint_angles import (
@@ -71,6 +72,10 @@ from src.shared.python.model_appearance.hand_backends.skinning import (
     scale_asset,
     vertex_normals,
 )
+from src.shared.python.model_appearance.hand_backends.subdivision import (
+    original_resolution,
+    subdivide_asset,
+)
 from src.shared.python.model_appearance.hand_backends.types import HandVisualResult
 
 Array = NDArray[np.float64]
@@ -83,6 +88,8 @@ SETTINGS_PATH = (
     / "skinned_human_hand.json"
 )
 _SEGMENTS = ("prox", "mid", "dist")
+_MAX_SUBDIVISION_LEVELS = 3
+_BREADTH_FIT_PASSES = 2
 _JOINT_OF_SEGMENT = {"prox": "mcp", "mid": "pip", "dist": "dip"}
 _THUMB_BONES = ("thumb_meta", "thumb_prox", "thumb_dist")
 _EYE3 = np.eye(3)
@@ -97,6 +104,7 @@ class SkinnedHumanSettings:
 
     skin_rgb: tuple[float, float, float]
     breadth_band_m: float
+    subdivision_levels: int
     scale_limits: tuple[float, float]
     palm_contact_azimuth_offset_deg: float
     palm_centre_wrap_deg: float
@@ -127,6 +135,7 @@ class SkinnedHumanSettings:
     frame_excluded_bones: tuple[str, ...]
     fold_relax: FoldRelaxSettings
     palm_pad: PadConformSettings
+    lift_out_max_depth_m: float
     wrist_deg: tuple[tuple[str, tuple[float, float]], ...]
 
     def limit_rad(self, joint: str) -> tuple[float, float]:
@@ -162,6 +171,16 @@ def _non_negative(value: Any, name: str) -> float:
     if not (math.isfinite(number) and number >= 0.0):
         raise ValueError(f"{name} must be non-negative and finite")
     return number
+
+
+def _subdivision_levels(value: Any) -> int:
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError("mesh.subdivision_levels must be an integer")
+    if not 0 <= value <= _MAX_SUBDIVISION_LEVELS:
+        raise ValueError(
+            f"mesh.subdivision_levels must be 0..{_MAX_SUBDIVISION_LEVELS}"
+        )
+    return value
 
 
 def _fold_relax(raw: Mapping[str, Any]) -> FoldRelaxSettings:
@@ -206,6 +225,7 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
     return SkinnedHumanSettings(
         skin_rgb=(rgb[0], rgb[1], rgb[2]),
         breadth_band_m=float(anthro["breadth_band_m"]),
+        subdivision_levels=_subdivision_levels(raw["mesh"]["subdivision_levels"]),
         scale_limits=_pair(anthro["scale_limits"], "scale_limits"),
         palm_contact_azimuth_offset_deg=float(place["palm_contact_azimuth_offset_deg"]),
         palm_centre_wrap_deg=float(place["palm_centre_wrap_deg"]),
@@ -257,6 +277,9 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
         ),
         fold_relax=_fold_relax(raw["correctives"]["fold_relax"]),
         palm_pad=_palm_pad(raw["correctives"]["palm_pad"]),
+        lift_out_max_depth_m=_non_negative(
+            raw["correctives"]["lift_out"]["max_depth_m"], "lift_out.max_depth_m"
+        ),
         wrist_deg=tuple(
             (
                 side,
@@ -307,17 +330,31 @@ def asset_hand_breadth_m(asset: SkinnedHandAsset, band_m: float) -> float:
 
 
 @lru_cache(maxsize=8)
-def _sized_asset(
+def _sized_assets(
     length_m: float, breadth_m: float, settings: SkinnedHumanSettings
-) -> SkinnedHandAsset:
-    base = load_hand_cc0_asset().asset
+) -> tuple[SkinnedHandAsset, SkinnedHandAsset]:
+    """``(solve, skin)`` assets scaled to the hand size.
+
+    ``skin`` is the mesh that is drawn: subdivided as set, then scaled.
+    ``solve`` is the same hand at the source resolution (the skin's original
+    vertices), which is what the grip is solved on: a contact found on it is a
+    contact of the skin. With no subdivision the two are the same object.
+    """
+    source = load_hand_cc0_asset().asset
+    base = subdivide_asset(source, settings.subdivision_levels)
     distal = length_m / asset_hand_length_m(base)
     radial = breadth_m / asset_hand_breadth_m(base, settings.breadth_band_m)
     low, high = settings.scale_limits
     for name, value in (("length", distal), ("breadth", radial)):
         if not low <= value <= high:
             raise ValueError(f"hand {name} scale {value:.2f} outside {low}..{high}")
-    return scale_asset(base, (radial, distal, radial))
+    skin = scale_asset(base, (radial, distal, radial))
+    # Lengthening the hand moves skin in or out of the knuckle band the
+    # breadth is measured in, so the breadth is corrected on the scaled hand.
+    for _ in range(_BREADTH_FIT_PASSES):
+        radial *= breadth_m / asset_hand_breadth_m(skin, settings.breadth_band_m)
+        skin = scale_asset(base, (radial, distal, radial))
+    return original_resolution(skin, source), skin
 
 
 # --------------------------------------------------------------------------
@@ -771,6 +808,7 @@ class _SolvedHand:
     angles: dict[str, float]
     targets: _RightHandTargets
     obstacle: ObstacleDistance
+    skin_asset: SkinnedHandAsset
 
 
 def _segment_gaps(
@@ -801,8 +839,9 @@ def _solve_right_hand(
     given: Mapping[str, float] | None,
     obstacle: ObstacleDistance | None = None,
 ) -> _SolvedHand:
-    asset = _sized_asset(spec.hand_size.length_m, spec.hand_size.breadth_m, settings)
-    hand = _GripHand(asset, settings)
+    size = spec.hand_size
+    solve, skin = _sized_assets(size.length_m, size.breadth_m, settings)
+    hand = _GripHand(solve, settings)
     targets = _targets(spec, side, settings)
     grip = cylinder_distance(grip_radius_m)
     other, obstacle = obstacle, obstacle or grip
@@ -813,7 +852,7 @@ def _solve_right_hand(
         posed = {**_straight_angles(), **{k: float(v) for k, v in given.items()}}
         _aim_thumb(hand, targets, posed, grip_radius_m)
         _bend_wrist(hand, side)
-        return _SolvedHand(hand, posed, targets, obstacle)
+        return _SolvedHand(hand, posed, targets, obstacle, skin)
     chains = _finger_chains(settings)
     angles: dict[str, float] = {}
     for _ in range(settings.arch_passes):
@@ -827,7 +866,7 @@ def _solve_right_hand(
     _aim_thumb(hand, targets, angles, grip_radius_m)
     angles = _wrap(hand, (_thumb_chain(settings, targets),), obstacle, angles)
     _bend_wrist(hand, side)
-    return _SolvedHand(hand, angles, targets, obstacle)
+    return _SolvedHand(hand, angles, targets, obstacle, skin)
 
 
 def _check_inputs(grip_spec: GripSpec, side: str, grip_radius_m: float) -> None:
@@ -895,16 +934,19 @@ def _club_from_build(
 
 
 def _corrected_skin(
-    solved: _SolvedHand, transforms: Array, settings: SkinnedHumanSettings
+    solved: _SolvedHand,
+    transforms: Array,
+    grip: ObstacleDistance,
+    settings: SkinnedHumanSettings,
 ) -> Array:
     """Skinned vertices in the grip frame, with the corrective shapes applied.
 
-    Linear blend skinning first; then the palm pad settles onto the obstacle
-    and the skin around any folded triangle relaxes (see ``correctives``).
-    With both switched off this is exactly ``pose_vertices``.
+    Linear blend skinning first; then the palm pad settles onto the obstacle,
+    skin a hair inside the ``grip`` is lifted to its surface, and the skin
+    around any folded triangle relaxes (see ``correctives``). With all three
+    switched off this is exactly ``pose_vertices``.
     """
-    hand = solved.hand
-    asset, placement = hand.asset, hand.placement
+    asset, placement = solved.skin_asset, solved.hand.placement
     rotation, offset = placement[:3, :3], placement[:3, 3]
     skin = pose_vertices(asset, transforms) @ rotation.T + offset
     unknown = set(settings.palm_pad.bones) - set(asset.bone_names)
@@ -918,6 +960,7 @@ def _corrected_skin(
         settings.palm_pad,
         lambda v: vertex_normals(v, asset.faces),
     )
+    skin = lift_out(skin, grip, max_depth_m=settings.lift_out_max_depth_m)
     return relax_folds(
         skin,
         asset.faces,
@@ -937,19 +980,21 @@ def _result(
     hand = solved.hand
     transforms = hand.transforms(solved.angles)
     club_from_grip = _club_from_build(spec, side, solved.targets.mirrored, z_m)
-    faces = hand.asset.faces.copy()
+    asset = solved.skin_asset
+    faces = asset.faces.copy()
     if solved.targets.mirrored:
         faces = faces[:, ::-1].copy()
-    skin = _corrected_skin(solved, transforms, settings)
+    grip = cylinder_distance(grip_radius_m)
+    skin = _corrected_skin(solved, transforms, grip, settings)
     vertices = skin @ club_from_grip[:3, :3].T + club_from_grip[:3, 3]
     require(bool(np.isfinite(vertices).all()), "skinned vertices must be finite")
     mesh = Mesh(vertices, faces)
     ensure(mesh.volume() > 0.0, "skinned hand must stay outward wound")
-    unknown = set(settings.frame_excluded_bones) - set(hand.asset.bone_names)
+    unknown = set(settings.frame_excluded_bones) - set(asset.bone_names)
     if unknown:
         raise ValueError(f"framing.excluded_bones names no bone: {sorted(unknown)}")
     focus = np.ones(len(vertices), dtype=bool)
-    focus[hand.asset.dominant_vertex_ids(settings.frame_excluded_bones)] = False
+    focus[asset.dominant_vertex_ids(settings.frame_excluded_bones)] = False
     return HandVisualResult(
         backend=BACKEND_NAME,
         side=side,
@@ -961,7 +1006,7 @@ def _result(
         grip_radius_m=float(grip_radius_m),
         bone_transforms=transforms,
         frame_from_rest=club_from_grip @ hand.placement,
-        rest_asset=hand.asset,
+        rest_asset=asset,
         frame_focus=focus,
     )
 
