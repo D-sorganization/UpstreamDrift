@@ -90,6 +90,7 @@ class AllegroHandVisualSettings:
     topology_knuckle_line_max_gap_m: float
     render_frame_px: int
     render_frame_fill: float
+    both_frame_fill: float
     club_axial_overhang_m: float
 
 
@@ -163,6 +164,7 @@ def visual_settings() -> AllegroHandVisualSettings:
         topology_knuckle_line_max_gap_m=float(topo["knuckle_line_max_gap_m"]),
         render_frame_px=int(rend["frame_px"]),
         render_frame_fill=float(rend["frame_fill"]),
+        both_frame_fill=float(rend["both_frame_fill"]),
         club_axial_overhang_m=float(rend["club_axial_overhang_m"]),
     )
 

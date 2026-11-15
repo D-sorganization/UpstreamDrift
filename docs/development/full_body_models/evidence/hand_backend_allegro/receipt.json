@@ -51,7 +51,7 @@
       "hand_fill_fraction": 0.7,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.0,
-      "sha256": "ae11e11c634aed091d6120005fdef05109d2427a63968aa4284d0e96741c0b5e"
+      "sha256": "6e44c783ec1c8e666aa03c0061f2b786ee1a73a7c572fed1a57d5f52ab5019a1"
     },
     {
       "file": "allegro_lead_side_rollp000.png",
@@ -75,7 +75,7 @@
       "hand_fill_fraction": 0.7,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.0,
-      "sha256": "a3959ca31fa722b7636c0eed4fdc1dc679b74176a9106f83cf999292dae9047b"
+      "sha256": "be603d24828ac52dfd344946d6665488e79fc04dc98af2f917991d35fda73ce2"
     },
     {
       "file": "allegro_lead_side_rollp020.png",
@@ -99,7 +99,7 @@
       "hand_fill_fraction": 0.7000000000000001,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.0,
-      "sha256": "2e12e1ceedbdfe01419a92963287397155007f3f7f4f7fdcc48ac19e58319dd3"
+      "sha256": "7b27497c3cf5e473f875018ff87cfb4ff32c980032b665f7c2fc7a424742ba41"
     },
     {
       "file": "allegro_lead_top_rollm020.png",
@@ -123,7 +123,7 @@
       "hand_fill_fraction": 0.7,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.0,
-      "sha256": "d15dc686caebed6ec8d7c0a3554c3cd873679871895ca8223ab4d108a9e7411c"
+      "sha256": "f3406d20eb05e5d3b3642a340099c9844a80f65ff5ada75d04620816739c33cd"
     },
     {
       "file": "allegro_lead_top_rollp000.png",
@@ -147,7 +147,7 @@
       "hand_fill_fraction": 0.7,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.0,
-      "sha256": "02fdb9a0147730d6dc93a4e804c85bdbb0a9df3a86dc1fe07312e556d6ae91f9"
+      "sha256": "4d58103e5571368f90bfa72e46156e7e3f13f95a4998976b49c6dc22859c9b77"
     },
     {
       "file": "allegro_lead_top_rollp020.png",
@@ -171,7 +171,7 @@
       "hand_fill_fraction": 0.7,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.0,
-      "sha256": "598bf9a657b6f6be3d1d5f95c5364e84e8b8f4ac4d9e49a7963ce858f2477b1b"
+      "sha256": "218b6171f33699234d14f56c5ae031dc1f1c881fde325c070cc3185747c0fde0"
     },
     {
       "file": "allegro_lead_butt_rollm020.png",
@@ -195,7 +195,7 @@
       "hand_fill_fraction": 0.7,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.0,
-      "sha256": "2ddba297f623188ae011876095dab22b10a0726181f29774a74087c326abe354"
+      "sha256": "928891650f3cbbaad2b612e9ca3b08f6edbdebc33b37804cf3c97e82ae963754"
     },
     {
       "file": "allegro_lead_butt_rollp000.png",
@@ -219,7 +219,7 @@
       "hand_fill_fraction": 0.7,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.0,
-      "sha256": "c9b5dffbbdcc2bcffe6619505d789860411f022339dd41b5c80e5b30f01b1c9e"
+      "sha256": "49da812e97c6813f1c896a690e49e96c6fea14104d6e987fcd851bb4fa5513de"
     },
     {
       "file": "allegro_lead_butt_rollp020.png",
@@ -243,7 +243,7 @@
       "hand_fill_fraction": 0.7,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.0,
-      "sha256": "da2b73f2241f69690b3ca07a2e90972d2be679752405a21cbaf7e47d44ef8f7a"
+      "sha256": "2c6ce183e2f071ddeb1db53f0ca53e5b445141e9e32106ed82d9637ceaae41b7"
     },
     {
       "file": "allegro_trail_side_rollm020.png",
@@ -267,7 +267,7 @@
       "hand_fill_fraction": 0.7,
       "lead_z_mean_m": 0.0,
       "trail_z_mean_m": 0.003476904327996458,
-      "sha256": "9ebb29efca75cdb7ba6ad46e174b0f947b39122dba4923cb43aa041d317ff11e"
+      "sha256": "05bd971d26f65c3824aaa1d33884deb6ef5ae8bc9166a881b30779b546e8a724"
     },
     {
       "file": "allegro_trail_side_rollp000.png",
@@ -291,7 +291,7 @@
       "hand_fill_fraction": 0.6999999999999998,
       "lead_z_mean_m": 0.0,
       "trail_z_mean_m": 0.003476904327996458,
-      "sha256": "ad330853ffbb002953c421396820929f0e50f2bd39324853df035db0c3864e3b"
+      "sha256": "08b6d6b2e0cfedf04f1e16608b96192904cd9e09f54469943b6853480dcb984b"
     },
     {
       "file": "allegro_trail_side_rollp020.png",
@@ -315,7 +315,7 @@
       "hand_fill_fraction": 0.7,
       "lead_z_mean_m": 0.0,
       "trail_z_mean_m": 0.003476904327996458,
-      "sha256": "39d81716dca6d4b316b7c5978c1ccfe4d9a15b5d77e2791fdc00f063be59acca"
+      "sha256": "e9a1e4c4f2c7b191ce15febfbf869167ce18fed49d24500c03d15f137daa7f77"
     },
     {
       "file": "allegro_trail_top_rollm020.png",
@@ -339,7 +339,7 @@
       "hand_fill_fraction": 0.7,
       "lead_z_mean_m": 0.0,
       "trail_z_mean_m": 0.003476904327996458,
-      "sha256": "ccf55f0fbef5a35220e84d1fd446c474a762ed20fc4e477aaf2c6f7fe9285e72"
+      "sha256": "dc8d416383eacb58b7607535bdc20a5b402bf35c42123ebe00d5aa3de20c3bfe"
     },
     {
       "file": "allegro_trail_top_rollp000.png",
@@ -363,7 +363,7 @@
       "hand_fill_fraction": 0.7000000000000001,
       "lead_z_mean_m": 0.0,
       "trail_z_mean_m": 0.003476904327996458,
-      "sha256": "e5c6ce107f64510152f86040062699d636b17fbd3db1b229e1a5627ad35a4637"
+      "sha256": "45f50210458a0e95e1228eaea6f593884a5505f985f46d06b8ef38519458f365"
     },
     {
       "file": "allegro_trail_top_rollp020.png",
@@ -387,7 +387,7 @@
       "hand_fill_fraction": 0.7,
       "lead_z_mean_m": 0.0,
       "trail_z_mean_m": 0.003476904327996458,
-      "sha256": "e2421fdf28df9a0a39084a97f23aca7fab229fdbe5e46ad27bd4d15acded2e51"
+      "sha256": "301ebd8b0e39df1fdfbc91b3e5f7389dcc46c2e1d50fd7c0c2d4a35a5f091259"
     },
     {
       "file": "allegro_trail_butt_rollm020.png",
@@ -411,7 +411,7 @@
       "hand_fill_fraction": 0.7,
       "lead_z_mean_m": 0.0,
       "trail_z_mean_m": 0.003476904327996458,
-      "sha256": "ca062cd9272801dff2474e8186e5ae5e1e551f92ea9176ba26e09623ef010051"
+      "sha256": "1f706cfa67e1331d23c832aff01f0df71e7f58d2b7229db3da862f47ab7758e5"
     },
     {
       "file": "allegro_trail_butt_rollp000.png",
@@ -435,7 +435,7 @@
       "hand_fill_fraction": 0.7,
       "lead_z_mean_m": 0.0,
       "trail_z_mean_m": 0.003476904327996458,
-      "sha256": "8cf4e56104c834205cc2b919ce0d6924d3befbc6fbb9735992601021b5f98879"
+      "sha256": "449cb89c1efb866da8b425347afdab54ef009e524bb03fa746666a18b60b50e3"
     },
     {
       "file": "allegro_trail_butt_rollp020.png",
@@ -459,7 +459,7 @@
       "hand_fill_fraction": 0.7,
       "lead_z_mean_m": 0.0,
       "trail_z_mean_m": 0.003476904327996458,
-      "sha256": "f73db370ff7ae9c028f8bdacd096adb2d6916d33ca6518717f7121d6d48e4705"
+      "sha256": "1d19c0a6ab04381e79166db303d9fca533b30d0f9fcd39f7ca51cc1139d1c5f2"
     },
     {
       "file": "allegro_both_side_rollm020.png",
@@ -475,15 +475,15 @@
         0.08858344259247591
       ],
       "viewport_bounds": [
-        -0.13455681482368684,
-        0.12250870108079878,
-        -0.12992224592633686,
-        0.12714326997814876
+        -0.1259879642935373,
+        0.11393985055064926,
+        -0.12135339539618734,
+        0.11857441944799924
       ],
-      "hand_fill_fraction": 0.7,
+      "hand_fill_fraction": 0.75,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.07967690432799647,
-      "sha256": "4951389689a9f67289e056eedafc98b73ee78d55c19c5ddcbee19733b5e6bcf5"
+      "sha256": "4af6e823411922e6fdd9e060a709bfae5d9f759cfa928963ed107a9c691bca81"
     },
     {
       "file": "allegro_both_side_rollp000.png",
@@ -499,15 +499,15 @@
         0.08813290082241651
       ],
       "viewport_bounds": [
-        -0.13177269971899594,
-        0.12210457661255293,
-        -0.12766278405940004,
-        0.12621449227214884
+        -0.12331012384127765,
+        0.11364200073483463,
+        -0.11920020818168175,
+        0.11775191639443053
       ],
-      "hand_fill_fraction": 0.7,
+      "hand_fill_fraction": 0.75,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.07967690432799647,
-      "sha256": "02b7e205d9040945f228aa0e6889a64dc1a87a0d83693966d703abb393d32925"
+      "sha256": "69605d4ff9ca48df8f29801946acacad905558459e2cb7b52f5ddcfb0adc7e12"
     },
     {
       "file": "allegro_both_side_rollp020.png",
@@ -523,15 +523,15 @@
         0.08950213759564159
       ],
       "viewport_bounds": [
-        -0.11938229054533828,
-        0.13291371688514297,
-        -0.12494946872026746,
-        0.12734653871021379
+        -0.11097242363098889,
+        0.12450384997079358,
+        -0.11653960180591807,
+        0.1189366717958644
       ],
-      "hand_fill_fraction": 0.7,
+      "hand_fill_fraction": 0.75,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.07967690432799647,
-      "sha256": "da4b32a373e39e54d979826a378060b40bedfee116d7b284bbe4340b39156c06"
+      "sha256": "54ac227f104f08601071703a949c59888fa23b920002e68cd0487cba16343cce"
     },
     {
       "file": "allegro_both_top_rollm020.png",
@@ -547,15 +547,15 @@
         0.09589048292427564
       ],
       "viewport_bounds": [
-        -0.1321172669118801,
-        0.13481641988648266,
-        -0.13100315085433273,
-        0.13593053594403004
+        -0.1232194773519347,
+        0.12591863032653722,
+        -0.12210536129438729,
+        0.12703274638408463
       ],
-      "hand_fill_fraction": 0.7000000000000001,
+      "hand_fill_fraction": 0.75,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.07967690432799647,
-      "sha256": "46ae13a2b951e63f6225fc388287ac6314153fa8b252db43b95db90fc4e5e92d"
+      "sha256": "c706d40f87c9e4d6120bb976502ac441cbb276c4b814824146a3b51246a80f2a"
     },
     {
       "file": "allegro_both_top_rollp000.png",
@@ -571,15 +571,15 @@
         0.09608259054253601
       ],
       "viewport_bounds": [
-        -0.12763366866358172,
-        0.13944223830888364,
-        -0.13093193038405954,
-        0.13614397658840582
+        -0.11873113843116621,
+        0.13053970807646811,
+        -0.12202940015164401,
+        0.1272414463559903
       ],
-      "hand_fill_fraction": 0.7,
+      "hand_fill_fraction": 0.75,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.07967690432799647,
-      "sha256": "b6846e89df914d911a6a98a4cc95a788ee1cb26bef7ccd0ef32383259919dec6"
+      "sha256": "70e78674597e3bdb23770a82cb1933946ac15c2b7cab08b68dfc02736a0e36cc"
     },
     {
       "file": "allegro_both_top_rollp020.png",
@@ -595,15 +595,15 @@
         0.09564575716334363
       ],
       "viewport_bounds": [
-        -0.13045449274296017,
-        0.13512341410953604,
-        -0.13009546366127817,
-        0.13548244319121805
+        -0.12160189584787696,
+        0.12627081721445282,
+        -0.12124286676619495,
+        0.12662984629613486
       ],
-      "hand_fill_fraction": 0.7,
+      "hand_fill_fraction": 0.75,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.07967690432799647,
-      "sha256": "ff742d741220dee1345c70a5d57320b3844b70f0819ed787d1e7ecfcf1a1ac1c"
+      "sha256": "5792f702e7fd319dea4ff31bc5004c78a2de95804aec46cbbb40fd57967a6297"
     },
     {
       "file": "allegro_both_butt_rollm020.png",
@@ -619,15 +619,15 @@
         0.07585509561322502
       ],
       "viewport_bounds": [
-        -0.10865678087624761,
-        0.10910812450025797,
-        -0.10924507395680472,
-        0.10851983141970087
+        -0.10139795069703075,
+        0.10184929432104112,
+        -0.10198624377758786,
+        0.10126100124048401
       ],
-      "hand_fill_fraction": 0.7,
+      "hand_fill_fraction": 0.75,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.07967690432799647,
-      "sha256": "4176f19a0fc9cb7de90d93990a0b3d06cdb1034c179101f0f1022b12bf00b1f3"
+      "sha256": "1a6cea28d5572669be2f581de72b882758b9c780f97e776acff4adf9eeb5f8a3"
     },
     {
       "file": "allegro_both_butt_rollp000.png",
@@ -643,15 +643,15 @@
         0.07196053105665422
       ],
       "viewport_bounds": [
-        -0.09909074875104627,
-        0.10971486381130004,
-        -0.10552423962134014,
-        0.10328137294100617
+        -0.09213056166563471,
+        0.10275467672588848,
+        -0.09856405253592858,
+        0.09632118585559461
       ],
-      "hand_fill_fraction": 0.7,
+      "hand_fill_fraction": 0.75,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.07967690432799647,
-      "sha256": "9da053e70c78ab04e058b43bd3a810a7a0f02e5918c37afb10feb63ad2fa740f"
+      "sha256": "09e0010ee990771af9069388f4d6825dfab990693b3b5ff673c6e395a5ba1784"
     },
     {
       "file": "allegro_both_butt_rollp020.png",
@@ -667,15 +667,59 @@
         0.06389645647893297
       ],
       "viewport_bounds": [
-        -0.08676483695599482,
-        0.09746456263887837,
-        -0.09269853317670923,
-        0.09153086641816396
+        -0.08062385696949904,
+        0.09132358265238259,
+        -0.08655755319021347,
+        0.08538988643166817
       ],
-      "hand_fill_fraction": 0.7,
+      "hand_fill_fraction": 0.75,
       "lead_z_mean_m": 0.004707403411630241,
       "trail_z_mean_m": 0.07967690432799647,
-      "sha256": "d58c3743e47ec82d93763fbcd04fc177ffb1c97903977e3adf2141d9f2afb383"
+      "sha256": "f767e1bb82831a504c0bc522d7d0dd87e2b5f57955d78e66dd19d4af65a2cc5a"
     }
-  ]
+  ],
+  "pad_gaps_by_roll_m": {
+    "-20": {
+      "lead": {
+        "index": -4.091621840964996e-05,
+        "middle": 3.250414480510805e-05,
+        "ring": 0.00019999828261360424,
+        "thumb": 0.002876531429927975
+      },
+      "trail": {
+        "index": 0.00010348554801884076,
+        "middle": 8.225876632611887e-05,
+        "ring": 0.00023101724219035634,
+        "thumb": 0.0017474226479039946
+      }
+    },
+    "0": {
+      "lead": {
+        "index": -4.091621840965169e-05,
+        "middle": 3.250414480511152e-05,
+        "ring": 0.00019999828261360424,
+        "thumb": 0.0028765314299279855
+      },
+      "trail": {
+        "index": 0.00010348554801883729,
+        "middle": 8.22587663261206e-05,
+        "ring": 0.0002310172421903494,
+        "thumb": 0.0017474226479039894
+      }
+    },
+    "+20": {
+      "lead": {
+        "index": -4.091621840964822e-05,
+        "middle": 3.250414480511152e-05,
+        "ring": 0.00019999828261360424,
+        "thumb": 0.0028765314299279785
+      },
+      "trail": {
+        "index": 0.00010348554801884076,
+        "middle": 8.225876632611887e-05,
+        "ring": 0.00023101724219035114,
+        "thumb": 0.0017474226479039859
+      }
+    }
+  }
 }

@@ -551,3 +551,22 @@ light and a fill light. No wireframe as the only shading.
 5. Stop claiming success when the pictures disagree with the tests. A green
    penetration test with a picture that shows an open hand means the metric
    is measuring the wrong vertices.
+
+## Cycle 2 Overnight Turnover (2026-11-15)
+
+### What Changed
+
+- Updated `tip_pad_rgba` in [hand_backend_allegro.json](../../../../scripts/config/hand_backend_allegro.json) from `[0.91, 0.86, 0.82, 1.0]` to `[0.85, 0.69, 0.58, 1.0]` (`r - b = 0.27 >= 0.14`) so fingertip domes match the warm `skin_tone_rgba` palette instead of neutral silicone grey.
+- Added configurable `both_frame_fill: 0.75` (`rendering.both_frame_fill`) across [hand_backend_allegro.json](../../../../scripts/config/hand_backend_allegro.json), [allegro_settings.py](../../../../src/shared/python/model_appearance/hand_backends/allegro_settings.py), and [render_allegro_hand_evidence.py](../../../../docs/development/full_body_models/evidence/hand_backend_allegro/render_allegro_hand_evidence.py) so two-hand renders stay well-framed while single-hand renders keep `frame_fill = 0.70`.
+- Extracted `build_evidence_receipt(..., include_roll_audit=True)` in [render_allegro_hand_evidence.py](../../../../docs/development/full_body_models/evidence/hand_backend_allegro/render_allegro_hand_evidence.py) to record `pad_gaps_by_roll_m` across `-20`, `0`, and `+20` deg shaft roll on both `lead` and `trail`.
+- Added Cycle 2 TDD suite [test_allegro_cycle2_receipt_and_theme.py](../../../../tests/unit/model_appearance/test_allegro_cycle2_receipt_and_theme.py).
+
+### Verification Command and Result
+
+- `pytest tests/unit/model_appearance -k allegro -v` -> **`24 passed, 625 deselected, 4 warnings`**.
+- `python docs/development/full_body_models/evidence/hand_backend_allegro/render_allegro_hand_evidence.py` regenerated all 27 `1024 px` PNGs and updated [receipt.json](../../../../docs/development/full_body_models/evidence/hand_backend_allegro/receipt.json) with identical `pad_gaps_by_roll_m` values across `-20`, `0`, and `+20` deg roll (`index`/`middle`/`ring` `<= 0.23 mm`, `thumb` `<= 2.88 mm`, club penetration `<= 0.19 mm`).
+
+### Honest Robot-Hand Limits and Next Integration
+
+- `little_finger` remains `absent` (4-finger 16-DOF Wonik Allegro V3 CAD model) and the palm block (`base_link` + flange) is rigid/flat rather than humanly cupped; these are documented hardware bounds in `NOTICE` and `allegro.md`.
+- Awaiting shared `hand_backends/posing.py` (#15164) and `hand_backends/render.py` (#15154) merge for cross-track consolidation.

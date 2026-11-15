@@ -40,7 +40,7 @@
   "thumb_refine_steps_rad": [0.12, 0.05, 0.015],
   "finger_abduction_inward_rad": 0.06,
   "skin_tone_rgba": [0.83, 0.66, 0.55, 1.0],
-  "tip_pad_rgba": [0.91, 0.86, 0.82, 1.0],
+  "tip_pad_rgba": [0.85, 0.69, 0.58, 1.0],
   "anthropometry": {
     "native_hand_length_m": 0.2432,
     "native_hand_breadth_m": 0.11348,
@@ -58,6 +58,7 @@
   "rendering": {
     "frame_px": 1024,
     "frame_fill": 0.7,
+    "both_frame_fill": 0.75,
     "club_axial_overhang_m": 0.22,
     "grip_rubber_rgba": [0.16, 0.17, 0.19, 1.0],
     "butt_cap_rgba": [0.24, 0.25, 0.28, 1.0],

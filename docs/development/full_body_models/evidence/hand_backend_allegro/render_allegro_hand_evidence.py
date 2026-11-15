@@ -43,6 +43,7 @@ _ROLLS = (-20.0, 0.0, 20.0)
 class _RenderTheme:
     frame_px: int
     frame_fill: float
+    both_frame_fill: float
     club_overhang_m: float
     grip_rgba: tuple[float, float, float, float]
     butt_cap_rgba: tuple[float, float, float, float]
@@ -63,6 +64,7 @@ def _load_theme() -> _RenderTheme:
     return _RenderTheme(
         frame_px=int(raw["frame_px"]),
         frame_fill=float(raw["frame_fill"]),
+        both_frame_fill=float(raw["both_frame_fill"]),
         club_overhang_m=float(raw["club_axial_overhang_m"]),
         grip_rgba=tuple(float(v) for v in raw["grip_rubber_rgba"]),  # type: ignore[arg-type]
         butt_cap_rgba=tuple(float(v) for v in raw["butt_cap_rgba"]),  # type: ignore[arg-type]
@@ -336,7 +338,8 @@ def render_single_view(
     x_mid = float(0.5 * (hx.min() + hx.max()))
     y_mid = float(0.5 * (hy.min() + hy.max()))
     h_span = float(max(hx.max() - hx.min(), hy.max() - hy.min()))
-    half = h_span / (2.0 * theme.frame_fill)
+    fill = theme.both_frame_fill if mode == "both" else theme.frame_fill
+    half = h_span / (2.0 * fill)
 
     n_px = theme.frame_px
     image = np.broadcast_to(theme.background_rgb, (n_px, n_px, 3)).copy()
@@ -378,6 +381,41 @@ def render_single_view(
     }
 
 
+def build_evidence_receipt(
+    renders: list[dict[str, Any]],
+    *,
+    spec: GripSpec | None = None,
+    include_roll_audit: bool = True,
+) -> dict[str, Any]:
+    """Assemble the evidence receipt with per-roll pad-gap audit metrics."""
+    base_spec = GripSpec.legacy() if spec is None else spec
+    receipt: dict[str, Any] = {
+        "backend": "allegro",
+        "render_count": len(renders),
+        "anthropometry_lead": measure_allegro_anthropometry(base_spec, "lead"),
+        "pad_gaps_lead_m": finger_pad_contact_gaps(base_spec, "lead"),
+        "pad_gaps_trail_m": finger_pad_contact_gaps(base_spec, "trail"),
+        "penetration_lead": penetration_metrics(base_spec, "lead"),
+        "penetration_trail": penetration_metrics(base_spec, "trail"),
+        "renders": renders,
+    }
+    if include_roll_audit:
+        by_roll: dict[str, dict[str, dict[str, float]]] = {}
+        for roll in _ROLLS:
+            roll_key = f"{int(roll):+d}" if roll != 0.0 else "0"
+            rolled_spec = dataclasses.replace(
+                base_spec,
+                lead=dataclasses.replace(base_spec.lead, shaft_roll_deg=roll),
+                trail=dataclasses.replace(base_spec.trail, shaft_roll_deg=roll),
+            )
+            by_roll[roll_key] = {
+                "lead": finger_pad_contact_gaps(rolled_spec, "lead"),
+                "trail": finger_pad_contact_gaps(rolled_spec, "trail"),
+            }
+        receipt["pad_gaps_by_roll_m"] = by_roll
+    return receipt
+
+
 def render_evidence_suite(out_dir: Path | None = None) -> dict[str, Any]:
     """Render all 27 (mode x view x roll) Allegro PNGs and write receipt.json."""
     target_dir = Path(__file__).resolve().parent if out_dir is None else out_dir
@@ -400,16 +438,7 @@ def render_evidence_suite(out_dir: Path | None = None) -> dict[str, Any]:
                 ).hexdigest()
                 renders.append(stats)
 
-    receipt = {
-        "backend": "allegro",
-        "render_count": len(renders),
-        "anthropometry_lead": measure_allegro_anthropometry(spec, "lead"),
-        "pad_gaps_lead_m": finger_pad_contact_gaps(spec, "lead"),
-        "pad_gaps_trail_m": finger_pad_contact_gaps(spec, "trail"),
-        "penetration_lead": penetration_metrics(spec, "lead"),
-        "penetration_trail": penetration_metrics(spec, "trail"),
-        "renders": renders,
-    }
+    receipt = build_evidence_receipt(renders, spec=spec, include_roll_audit=True)
     (target_dir / "receipt.json").write_text(
         json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
     )
