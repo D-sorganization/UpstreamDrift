@@ -31,7 +31,7 @@ from src.shared.python.contracts import ensure
 from src.shared.python.model_appearance.hand_backends.render_rig import (
     CameraRig,
     ScenePart,
-    vertex_normals,
+    corner_normals,
 )
 from src.shared.python.model_appearance.hand_backends.render_settings import (
     GL_ENGINES,
@@ -131,15 +131,21 @@ def _fmt(values: Any) -> str:
 
 def _mesh_asset(name: str, part: ScenePart, settings: HandRenderSettings) -> str:
     mesh = part.mesh
-    faces = " ".join(str(int(i)) for i in np.asarray(mesh.faces).reshape(-1))
-    normal = ""
-    if part.kind == "skin":
-        normals = vertex_normals(
-            mesh, weld_tolerance_m=settings.normal_weld_tolerance_m
+    if part.kind != "skin":
+        faces = " ".join(str(int(i)) for i in np.asarray(mesh.faces).reshape(-1))
+        return (
+            f'<mesh name="{name}" vertex="{_fmt(mesh.vertices)}" '
+            f'face="{faces}" inertia="shell"/>'
         )
-        normal = f' normal="{_fmt(normals)}"'
+    normals = corner_normals(
+        mesh,
+        weld_tolerance_m=settings.normal_weld_tolerance_m,
+        crease_deg=settings.normal_crease_deg,
+    )
+    corners = mesh.vertices[mesh.faces].reshape(-1, 3)
+    faces = " ".join(str(i) for i in range(len(corners)))
     return (
-        f'<mesh name="{name}" vertex="{_fmt(mesh.vertices)}"{normal} '
+        f'<mesh name="{name}" vertex="{_fmt(corners)}" normal="{_fmt(normals)}" '
         f'face="{faces}" inertia="shell"/>'
     )
 

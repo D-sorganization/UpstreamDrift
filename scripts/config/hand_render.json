@@ -163,7 +163,7 @@
         0.88,
         1.0
       ],
-      "intensity": 0.24,
+      "intensity": 0.3,
       "specular": 0.0,
       "cast_shadow": false
     },
@@ -224,5 +224,6 @@
       235,
       240
     ]
-  }
+  },
+  "normal_crease_deg": 60.0
 }

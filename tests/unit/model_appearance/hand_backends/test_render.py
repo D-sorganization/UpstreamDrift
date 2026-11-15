@@ -23,6 +23,7 @@ from src.shared.python.model_appearance.grip_hand_mesh import build_grip_hand_me
 from src.shared.python.model_appearance.grip_pose import Hand
 from src.shared.python.model_appearance.hand_backends import render
 from src.shared.python.model_appearance.hand_backends.render_rig import (
+    corner_normals,
     orthonormal_basis,
     projected_fill,
     result_basis,
@@ -245,6 +246,38 @@ def test_vertex_normals_are_smooth_across_duplicated_seam_vertices() -> None:
     )
     outward = sphere_like.vertices - sphere_like.vertices.mean(axis=0)
     assert np.mean(np.einsum("ij,ij->i", smooth, outward) > 0.0) > 0.95
+
+
+def test_corner_normals_keep_hard_edges_and_smooth_skin() -> None:
+    corners = np.array(
+        [[x, y, z] for x in (0, 1) for y in (0, 1) for z in (0, 1)], float
+    )
+    quads = [
+        (0, 1, 3, 2),
+        (4, 6, 7, 5),
+        (0, 4, 5, 1),
+        (2, 3, 7, 6),
+        (0, 2, 6, 4),
+        (1, 5, 7, 3),
+    ]
+    faces = np.array([t for a, b, c, d in quads for t in ((a, b, c), (a, c, d))])
+    cube = Mesh(corners, faces)
+    kwargs = {"weld_tolerance_m": SETTINGS.normal_weld_tolerance_m}
+    sharp = corner_normals(cube, crease_deg=SETTINGS.normal_crease_deg, **kwargs)
+    tri = corners[faces]
+    flat = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+    flat /= np.linalg.norm(flat, axis=1, keepdims=True)
+    np.testing.assert_allclose(
+        sharp, np.repeat(flat[:, None, :], 3, axis=1), atol=1e-12
+    )
+    rounded = corner_normals(cube, crease_deg=120.0, **kwargs)
+    diagonal = (corners - 0.5) / np.linalg.norm(corners - 0.5, axis=1, keepdims=True)
+    assert np.einsum("fcj,fcj->fc", rounded, diagonal[faces]).min() > 0.9
+    finger = _hand().components[0].mesh
+    smooth = corner_normals(finger, crease_deg=SETTINGS.normal_crease_deg, **kwargs)
+    welded = vertex_normals(finger, **kwargs)
+    assert np.einsum("fcj,fcj->fc", smooth, welded[finger.faces]).min() > 0.95
+    np.testing.assert_allclose(np.linalg.norm(smooth, axis=2), 1.0)
 
 
 # --- 3. camera rig ----------------------------------------------------------
@@ -517,3 +550,33 @@ def test_contact_sheet_has_a_cell_per_source_and_roll() -> None:
     assert sheet.image.tobytes() == again.image.tobytes()
     with pytest.raises(ValueError, match="unknown render source"):
         render.render_contact_sheet(("absent",), settings=small, engine="matplotlib")
+
+
+def test_cli_writes_identical_pngs_and_a_manifest(tmp_path) -> None:
+    from scripts import render_hand_backend as cli
+
+    runs = []
+    for name in ("first", "second"):
+        out = tmp_path / name
+        argv = ["--backend", "capsule", "--views", "palm,butt", "--rolls", "-20,20"]
+        argv += ["--frame-px", "96", "--engine", "matplotlib", "--both-hands"]
+        argv += ["--contact-sheet", "--out", str(out)]
+        assert cli.main(argv) == 0
+        runs.append(out)
+    names = sorted(p.name for p in runs[0].glob("*.png"))
+    assert "capsule_lead_palm_rollm20.png" in names
+    assert "capsule_trail_butt_rollp20.png" in names
+    assert "capsule_both_palm_rollp00.png" in names
+    assert "contact_sheet_lead_palm.png" in names
+    assert len(names) == 2 * 2 * 2 + 2 + 2
+    for name in names:
+        assert (runs[0] / name).read_bytes() == (runs[1] / name).read_bytes()
+    manifest = json.loads((runs[0] / cli.DEFAULT_MANIFEST).read_text("utf-8"))
+    assert manifest["engines"] == ["matplotlib"]
+    assert manifest["quality_bar_evidence"] is False
+    assert manifest["frame_px"] == 96
+    assert len(manifest["settings_hash"]) == 64
+    assert {f["file"] for f in manifest["frames"]} | {
+        s["file"] for s in manifest["contact_sheets"]
+    } == set(names)
+    assert str(tmp_path) not in json.dumps(manifest)
