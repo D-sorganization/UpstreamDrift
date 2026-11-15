@@ -83,5 +83,3 @@ def advance_patch_state(
     return PatchTransition(
         runtime.state, entered_slip=entered_slip, entered_release=entered_release
     )
-
-
