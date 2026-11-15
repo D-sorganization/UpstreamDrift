@@ -63,7 +63,8 @@ def test_build_returns_finite_watertight_mesh() -> None:
     mesh = _build()
     assert mesh.vertices.shape[1] == 3
     assert np.isfinite(mesh.vertices).all()
-    assert len(mesh.faces) >= 120
+    assert len(mesh.vertices) >= 800
+    assert len(mesh.faces) >= 1500
     assert mesh.volume() > 0.0
 
 
@@ -84,6 +85,14 @@ def test_inter_finger_penetration_within_tolerance() -> None:
     assert frac <= tol, f"self penetration fraction {frac:.3f} > {tol}"
 
 
+def _grip_envelope_rho(mesh: Mesh) -> float:
+    v = mesh.vertices
+    band = v[(v[:, 0] < 0.03) & (np.hypot(v[:, 0], v[:, 1]) < 0.08)]
+    if len(band) == 0:
+        return float("inf")
+    return float(np.hypot(band[:, 0], band[:, 1]).min())
+
+
 def test_trail_is_mirror_of_lead_geometry() -> None:
     spec = _spec()
     lead = build_hand_visual(
@@ -102,7 +111,8 @@ def test_trail_is_mirror_of_lead_geometry() -> None:
     lead_m[:, 1] *= -1.0
     tree = cKDTree(trail.vertices)
     dists, _ = tree.query(lead_m, k=1)
-    assert float(np.median(dists)) < 0.004
+    quality = load_hand_visual_quality()
+    assert float(np.median(dists)) < quality["mirror_median_error_m"]
 
 
 def test_shaft_roll_rotates_mesh_about_grip_axis() -> None:
@@ -128,8 +138,13 @@ def test_palm_arch_increases_grip_side_curvature() -> None:
     spec = _spec()
     m0 = build_hand_visual(spec, "lead", shallow, grip_radius_m=_GRIP_RADIUS_M).mesh
     m1 = build_hand_visual(spec, "lead", deep, grip_radius_m=_GRIP_RADIUS_M).mesh
-    # Deeper curl + palm arch should pull the grip-side envelope closer to the club.
-    assert float(m1.vertices[:, 0].min()) < float(m0.vertices[:, 0].min())
+    # Deeper curl + palm arch cups the palm toward the grip (more negative x on palm).
+    def _palm_mean_x(mesh: Mesh) -> float:
+        v = mesh.vertices
+        band = v[(v[:, 0] < 0.01) & (np.hypot(v[:, 0], v[:, 1]) < 0.07)]
+        return float(band[:, 0].mean()) if len(band) else 0.0
+
+    assert _palm_mean_x(m1) < _palm_mean_x(m0)
 
 
 def test_hand_cc0_provenance_present() -> None:

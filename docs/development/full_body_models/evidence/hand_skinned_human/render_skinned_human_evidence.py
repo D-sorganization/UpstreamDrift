@@ -27,16 +27,30 @@ from src.shared.python.model_appearance.hand_backends.skinned_human import (
     default_settings,
 )
 
-_REPO = Path(__file__).resolve().parents[5]
 _OUT = Path(__file__).resolve().parent
 _GRIP_R = 0.0145
 _ROLLS = (-20.0, 0.0, 20.0)
-_STYLE = GripMeshPreviewStyle(base_rgb=default_settings().skin_rgb)
+_DPI = 128
+_PX = 1024
+_HAND_STYLE = GripMeshPreviewStyle(
+    base_rgb=default_settings().skin_rgb,
+    smooth_normals=True,
+    margin_fraction=0.32,
+    min_half_width_m=0.032,
+)
+_SHAFT_STYLE = GripMeshPreviewStyle(
+    base_rgb=(0.22, 0.24, 0.28),
+    ambient=0.45,
+    diffuse=0.4,
+    smooth_normals=True,
+    margin_fraction=0.32,
+    min_half_width_m=0.032,
+)
 
 
-def _grip_cylinder(radius: float, *, segments: int = 48) -> Mesh:
+def _grip_cylinder(radius: float, *, segments: int = 64) -> Mesh:
     theta = np.linspace(0, 2 * np.pi, segments, endpoint=False)
-    z0, z1 = -0.03, 0.14
+    z0, z1 = -0.04, 0.16
     verts, faces = [], []
     for z in (z0, z1):
         ring = np.column_stack(
@@ -60,16 +74,17 @@ def _render_view(
     out_path: Path,
     title: str,
 ) -> None:
-    fig = plt.figure(figsize=(5.5, 5.5), dpi=160)
+    fig = plt.figure(figsize=(_PX / _DPI, _PX / _DPI), dpi=_DPI)
     ax = fig.add_subplot(111, projection="3d")
-    pts = np.vstack([m.vertices for m, _ in meshes])
+    frame_pts = np.vstack([mesh.vertices for mesh, _ in meshes])
     for mesh, style in meshes:
         add_mesh_preview(ax, mesh, style=style)
-    apply_equal_axis_limits(ax, pts)
+    apply_equal_axis_limits(ax, frame_pts, style=_HAND_STYLE)
     ax.view_init(elev=elev, azim=azim)
-    ax.set_title(title)
+    ax.set_title(title, color="#e8e4dc", fontsize=11)
     ax.set_axis_off()
-    fig.savefig(out_path, bbox_inches="tight", facecolor="#1e1e24")
+    fig.patch.set_facecolor("#12151a")
+    fig.savefig(out_path, bbox_inches="tight", pad_inches=0.02, facecolor=fig.get_facecolor())
     plt.close(fig)
 
 
@@ -79,10 +94,7 @@ def main() -> None:
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     shaft = _grip_cylinder(_GRIP_R)
-    shaft_style = GripMeshPreviewStyle(
-        base_rgb=(0.35, 0.35, 0.4), ambient=0.5, diffuse=0.35
-    )
-    views = (("butt", 18, -55), ("side", 12, 30), ("top", 85, -60))
+    views = (("butt", 12, -35), ("side", 6, 24), ("top", 82, -48))
     for side in ("lead", "trail"):
         for roll in _ROLLS:
             hand_key = "lead" if side == "lead" else "trail"
@@ -92,7 +104,7 @@ def main() -> None:
             for view_name, elev, azim in views:
                 out = args.out / f"{side}_{view_name}_roll_{roll:+.0f}.png"
                 _render_view(
-                    [(shaft, shaft_style), (hand, _STYLE)],
+                    [(shaft, _SHAFT_STYLE), (hand, _HAND_STYLE)],
                     elev=elev,
                     azim=azim,
                     out_path=out,
@@ -117,7 +129,7 @@ def main() -> None:
     for view_name, elev, azim in views:
         out = args.out / f"both_{view_name}_roll_0.png"
         _render_view(
-            [(shaft, shaft_style), (lead, _STYLE), (trail, _STYLE)],
+            [(shaft, _SHAFT_STYLE), (lead, _HAND_STYLE), (trail, _HAND_STYLE)],
             elev=elev,
             azim=azim,
             out_path=out,

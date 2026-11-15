@@ -83,31 +83,50 @@ def _scale_factors(spec: GripSpec) -> tuple[float, float]:
 def _clamp_grip_clearance(
     vertices: np.ndarray, grip_radius_m: float, pad_m: float
 ) -> np.ndarray:
+    """Push only penetrating palm verts onto the clearance surface (do not inflate)."""
     v = vertices.copy()
     rho = np.hypot(v[:, 0], v[:, 1])
-    on_grip = (v[:, 0] < 0.04) & (rho < grip_radius_m + pad_m)
-    for i in np.nonzero(on_grip)[0]:
-        if rho[i] < 1e-9:
-            continue
-        scale = (grip_radius_m + pad_m) / rho[i]
+    target = grip_radius_m + pad_m
+    inside = (v[:, 0] < 0.04) & (rho > 1e-5) & (rho < grip_radius_m - 2e-4)
+    for i in np.nonzero(inside)[0]:
+        scale = target / rho[i]
         v[i, 0] *= scale
         v[i, 1] *= scale
     return v
 
 
-def _place_on_grip(
-    vertices: np.ndarray, grip_radius_m: float, settings: SkinnedHumanSettings
+def _grip_bind_vertices(
+    vertices: np.ndarray, record_grip_ids: np.ndarray
 ) -> np.ndarray:
+    if len(record_grip_ids) > 32:
+        return vertices[record_grip_ids]
+    rho = np.hypot(vertices[:, 0], vertices[:, 1])
+    mask = (vertices[:, 0] < 0.02) & (rho < 0.11) & (vertices[:, 2] < 0.13)
+    if not np.any(mask):
+        mask = vertices[:, 0] < 0.03
+    return vertices[mask]
+
+
+def _place_on_grip(
+    vertices: np.ndarray,
+    grip_radius_m: float,
+    settings: SkinnedHumanSettings,
+    *,
+    grip_bind_ids: np.ndarray,
+) -> np.ndarray:
+    """Radial scale in x-y so the palm band sits on the grip cylinder (z unchanged)."""
     v = vertices.copy()
-    palm_side = v[:, 0] < 0.0
-    if not np.any(palm_side):
-        palm_side = np.ones(len(v), dtype=bool)
-    rho = np.hypot(v[palm_side, 0], v[palm_side, 1])
-    min_rho = float(rho.min())
-    if min_rho < 1e-9:
+    band = _grip_bind_vertices(v, grip_bind_ids)
+    rho = np.hypot(band[:, 0], band[:, 1])
+    ref = float(np.percentile(rho, 12))
+    if ref < 1e-9:
         return v
     target = grip_radius_m + settings.grip_wrap_translation_m
-    v *= target / min_rho
+    radial = target / ref
+    v[:, 0] *= radial
+    v[:, 1] *= radial
+    palm_z = float(np.percentile(band[:, 2], 20))
+    v[:, 2] -= palm_z
     return v
 
 
@@ -149,7 +168,9 @@ def build_hand_visual(
     verts[:, 2] *= uniform
     if side == "trail":
         verts[:, 1] *= -1.0
-    verts = _place_on_grip(verts, grip_radius_m, settings)
+    verts = _place_on_grip(
+        verts, grip_radius_m, settings, grip_bind_ids=asset.grip_bind_vertex_ids
+    )
     verts = _clamp_grip_clearance(
         verts, grip_radius_m, settings.grip_wrap_translation_m
     )

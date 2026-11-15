@@ -76,8 +76,8 @@ def joint_angles_from_grip_spec(spec: GripSpec, side: HandSide) -> HandJointAngl
     """Angles that approximate the legacy capsule baker for this ``GripSpec``."""
     hand = _hand_grip_spec(spec, side)
     depth = float(hand.palm_finger_depth)
-    curl_scale = 0.45 + 0.45 * depth
-    arch_scale = 0.35 + 0.5 * depth
+    curl_scale = 0.55 + 0.5 * depth
+    arch_scale = 0.45 + 0.55 * depth
     angles = HandJointAngles.from_legacy_curl(
         finger_curl_scale=curl_scale,
         palm_arch_scale=arch_scale,

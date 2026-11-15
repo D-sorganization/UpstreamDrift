@@ -1,8 +1,9 @@
 {
-  "asset_sha256": "a90e7aa695745830a83e52a7f4de229fa2fd952787f2dc1bac828b0f8c05560f",
+  "asset_sha256": "fea547a86ebf92fd091e4ad06057d9dddd493fa019529ca98fe3ac1970b47923",
   "licence": "CC0-1.0",
   "quantum_metres": 5e-05,
   "research_only_alternatives": "MANO and SMPL-X hand models are research/non-commercial licences and are not bundled; they remain research-only alternatives.",
-  "source_name": "MakeHuman base mesh hm08 (hand extract)",
-  "source_url": "https://github.com/makehumancommunity/makehuman/blob/3c701a8e52f09e69922e8b598d23be2d7dfc49e3/makehuman/data/3dobjs/base.obj"
+  "source_commit": "a8bc2d54ff0ac92e78ff71431b1023eda42bf482",
+  "source_name": "MakeHuman base mesh hm08 (right hand extract)",
+  "source_url": "https://github.com/makehumancommunity/makehuman/blob/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/3dobjs/base.obj"
 }

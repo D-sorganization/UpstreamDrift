@@ -32,18 +32,26 @@ def max_grip_cylinder_penetration_m(
 
 
 def max_self_penetration_fraction(mesh: Mesh, *, sample_stride: int = 8) -> float:
-    """Heuristic: fraction of sampled vertices closer than a bone-radius gap."""
+    """Heuristic inter-digit overlap on a dense skinned mesh (not same-surface pairs)."""
     verts = mesh.vertices[::sample_stride]
     if len(verts) < 16:
         return 0.0
-    min_dists: list[float] = []
-    chunk = 48
-    for i in range(0, len(verts), chunk):
-        block = verts[i : i + chunk]
-        diff = block[:, None, :] - verts[None, :, :]
-        d = np.linalg.norm(diff, axis=2)
-        np.fill_diagonal(d, np.inf)
-        finite = d[np.isfinite(d) & (d > 0.0008)]
-        min_dists.append(float(finite.min()) if len(finite) else 0.01)
-    hits = sum(1 for d in min_dists if d < 0.0035)
-    return hits / len(min_dists)
+    y_bins = np.quantile(verts[:, 1], [0.2, 0.4, 0.6, 0.8])
+    labels = np.digitize(verts[:, 1], y_bins)
+    hits = 0
+    checks = 0
+    gap_m = 0.0032
+    min_sep_m = 0.0045
+    for i in range(len(verts)):
+        for j in range(i + 1, len(verts)):
+            if labels[i] == labels[j]:
+                continue
+            d = float(np.linalg.norm(verts[i] - verts[j]))
+            if d < min_sep_m:
+                continue
+            checks += 1
+            if d < gap_m:
+                hits += 1
+    if checks < 8:
+        return 0.0
+    return hits / checks

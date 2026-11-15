@@ -23,15 +23,18 @@ class GripMeshPreviewStyle:
     """Lambert-shaded mesh colours for grip/hand evidence stills."""
 
     base_rgb: tuple[float, float, float] = (0.72, 0.58, 0.48)
-    ambient: float = 0.35
-    diffuse: float = 0.55
-    specular: float = 0.1
-    light_direction: tuple[float, float, float] = (0.35, 0.45, 1.0)
-    edge_rgba: tuple[float, float, float, float] = (0.95, 0.92, 0.88, 0.28)
-    edge_linewidth: float = 0.18
+    ambient: float = 0.32
+    diffuse: float = 0.62
+    specular: float = 0.12
+    light_direction: tuple[float, float, float] = (0.45, 0.35, 1.0)
+    fill_light_direction: tuple[float, float, float] = (-0.55, 0.25, 0.35)
+    fill_diffuse: float = 0.22
+    edge_rgba: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0)
+    edge_linewidth: float = 0.0
     alpha: float = 1.0
-    margin_fraction: float = 1.08
-    min_half_width_m: float = 0.045
+    margin_fraction: float = 0.22
+    min_half_width_m: float = 0.028
+    smooth_normals: bool = True
 
 
 _DEFAULT_STYLE = GripMeshPreviewStyle()
@@ -107,23 +110,55 @@ def axis_half_widths(ax: Axes) -> tuple[float, float, float]:
     return spans[0], spans[1], spans[2]
 
 
-def face_lambert_colours(
-    vertices: Array,
-    faces: Array,
-    style: GripMeshPreviewStyle = _DEFAULT_STYLE,
-) -> Array:
-    """RGB face colours from triangle normals and a single light direction."""
+def _face_normals(vertices: Array, faces: Array) -> Array:
     tri = vertices[faces]
     e1 = tri[:, 1] - tri[:, 0]
     e2 = tri[:, 2] - tri[:, 0]
     normals = np.cross(e1, e2)
     lens = np.linalg.norm(normals, axis=1, keepdims=True)
     lens = np.maximum(lens, 1e-12)
-    normals = normals / lens
-    light = _unit(np.asarray(style.light_direction, dtype=float))
-    ndotl = np.clip(normals @ light, 0.0, 1.0)
-    shade = style.ambient + style.diffuse * ndotl + style.specular * ndotl**8
-    shade = np.clip(shade, 0.0, 1.0)[:, None]
+    return normals / lens
+
+
+def _vertex_normals(vertices: Array, faces: Array) -> Array:
+    fn = _face_normals(vertices, faces)
+    vnorm = np.zeros_like(vertices)
+    for fi, face in enumerate(faces):
+        for vid in face:
+            vnorm[vid] += fn[fi]
+    lens = np.linalg.norm(vnorm, axis=1, keepdims=True)
+    lens = np.maximum(lens, 1e-12)
+    return vnorm / lens
+
+
+def _shade_normals(normals: Array, style: GripMeshPreviewStyle) -> Array:
+    key = _unit(np.asarray(style.light_direction, dtype=float))
+    fill = _unit(np.asarray(style.fill_light_direction, dtype=float))
+    nd_key = np.clip(normals @ key, 0.0, 1.0)
+    nd_fill = np.clip(normals @ fill, 0.0, 1.0)
+    shade = (
+        style.ambient
+        + style.diffuse * nd_key
+        + style.fill_diffuse * nd_fill
+        + style.specular * nd_key**10
+    )
+    return np.clip(shade, 0.0, 1.0)
+
+
+def face_lambert_colours(
+    vertices: Array,
+    faces: Array,
+    style: GripMeshPreviewStyle = _DEFAULT_STYLE,
+) -> Array:
+    """RGB face colours from (smooth) normals and key + fill lights."""
+    if style.smooth_normals:
+        vnorm = _vertex_normals(vertices, faces)
+        tri_norm = vnorm[faces].mean(axis=1)
+        lens = np.linalg.norm(tri_norm, axis=1, keepdims=True)
+        tri_norm = tri_norm / np.maximum(lens, 1e-12)
+        shade = _shade_normals(tri_norm, style)[:, None]
+    else:
+        shade = _shade_normals(_face_normals(vertices, faces), style)[:, None]
     base = np.asarray(style.base_rgb, dtype=float)
     return np.clip(base * shade, 0.0, 1.0)
 
