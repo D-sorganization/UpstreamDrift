@@ -1,6 +1,6 @@
 {
-  "asset_sha256": "7aedd90a62e4b0cb56b65bbd3f6e9621d3a22f0703229660df24483df4fd0a15",
-  "content_sha256": "57fd76d2a1323dfe096bc1c0b84fdf15fedf92b95b5d9568321c0a0164d820a2",
+  "asset_sha256": "1c2d2ef9bb1e869c87bba7a2ef80c4c65af04da3251745aaafb5392c36e224bd",
+  "content_sha256": "0a273835ecb621a5ac12362f245d7f7d4b1b5b8d636f2d062d81529d731b8691",
   "licence": "CC0-1.0",
   "source_name": "MakeHuman hm08 base mesh, default skeleton and default weights (right hand extract)",
   "source_commit": "a8bc2d54ff0ac92e78ff71431b1023eda42bf482",
@@ -9,10 +9,10 @@
     "https://github.com/makehumancommunity/makehuman/blob/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/rigs/default.mhskel",
     "https://github.com/makehumancommunity/makehuman/blob/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/rigs/default_weights.mhw"
   ],
-  "vertex_count": 1690,
-  "face_count": 3376,
+  "vertex_count": 1770,
+  "face_count": 3536,
   "bone_count": 21,
-  "modifications": "Skin weights are MakeHuman's except across the web between thumb and index, where they are smoothed (build_settings.json thumb_web_smoothing; zero iterations restores the originals).",
+  "modifications": "Skin weights are MakeHuman's except across the web between thumb and index, where they are smoothed (build_settings.json thumb_web_smoothing; zero iterations restores the originals). The cut end of the forearm stub is closed with a dome that is not MakeHuman geometry (build_settings.json forearm_cap; zero rings gives a flat fan).",
   "thumb_web_smoothing": {
     "thumb_bones": [
       "thumb_meta",
@@ -23,6 +23,10 @@
     "rings": 3,
     "iterations": 10,
     "blend": 0.5
+  },
+  "forearm_cap": {
+    "rings": 4,
+    "depth_fraction": 0.6
   },
   "research_only_alternatives": "MANO and SMPL-X hand models are research/non-commercial licences and are not bundled; they remain research-only alternatives."
 }

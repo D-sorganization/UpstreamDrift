@@ -93,6 +93,34 @@ def test_rest_mesh_is_closed_outward_wound_and_a_right_hand() -> None:
     assert asset.bone_tails[asset.bone_index("middle_dist")][1] > 0.15
 
 
+def test_forearm_ends_in_a_rounded_cap_not_a_flat_disc() -> None:
+    """The cut end of the forearm is domed, so no view shows a flat disc."""
+    settings = json.loads((ASSET_DIR / "build_settings.json").read_text("utf-8"))
+    rings = int(settings["forearm_cap"]["rings"])
+    assert rings >= 2 and float(settings["forearm_cap"]["depth_fraction"]) > 0.0
+    asset = _asset()
+    verts, faces = asset.rest_vertices, asset.faces
+    apex = int(verts[:, 1].argmin())
+    # Walk outward from the apex one edge ring at a time.
+    seen, level = {apex}, {apex}
+    radius, height = [], []
+    for _ in range(rings + 1):
+        touching = faces[np.isin(faces, list(level)).any(axis=1)]
+        level = set(touching.ravel().tolist()) - seen
+        seen |= level
+        ring = verts[sorted(level)]
+        radius.append(
+            float(np.linalg.norm(ring[:, [0, 2]] - verts[apex, [0, 2]], axis=1).mean())
+        )
+        height.append(float(ring[:, 1].mean() - verts[apex, 1]))
+    assert all(b > a for a, b in zip(radius, radius[1:], strict=False)), radius
+    assert all(b > a for a, b in zip(height, height[1:], strict=False)), height
+    # A dome flattens toward its apex: the first ring rises least per unit radius.
+    slopes = np.diff([0.0, *height]) / np.diff([0.0, *radius])
+    assert slopes[0] < slopes[-1]
+    assert height[-1] > 0.3 * radius[-1], "cap is too flat to read as rounded"
+
+
 def test_identity_pose_reproduces_the_rest_mesh() -> None:
     asset = _asset()
     posed = pose_vertices(asset, bone_transforms(asset, {}))

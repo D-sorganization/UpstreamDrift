@@ -223,9 +223,18 @@ def _triangulate(quads: np.ndarray, verts: np.ndarray) -> np.ndarray:
 
 
 def _cap_boundaries(
-    verts: np.ndarray, tris: np.ndarray
+    verts: np.ndarray, tris: np.ndarray, cap: dict[str, Any]
 ) -> tuple[np.ndarray, np.ndarray, list[np.ndarray]]:
-    """Close each open boundary loop with a centroid fan. Returns loops too."""
+    """Close each open boundary loop with a dome. Returns the loops too.
+
+    The dome is ``rings`` copies of the loop, shrunk toward its centroid along
+    a quarter circle and pushed out of the mesh by up to ``depth_fraction`` of
+    the loop's mean radius, then a fan to the apex. ``rings`` of zero gives a
+    flat centroid fan.
+    """
+    rings, depth_fraction = int(cap["rings"]), float(cap["depth_fraction"])
+    if rings < 0 or depth_fraction < 0.0:
+        raise ValueError("forearm_cap rings and depth_fraction must be >= 0")
     edges: dict[tuple[int, int], int] = {}
     for tri in tris:
         for k in range(3):
@@ -242,11 +251,31 @@ def _cap_boundaries(
             loop.append(step)
         loop_a = np.asarray(loop, dtype=np.int64)
         loops.append(loop_a)
-        new_verts.append(verts[loop_a].mean(axis=0)[None])
-        fan = [
-            (loop_a[(k + 1) % len(loop_a)], loop_a[k], count)
-            for k in range(len(loop_a))
-        ]
+        n = len(loop_a)
+        rim = verts[loop_a]
+        centre = rim.mean(axis=0)
+        # Newell normal of the loop; the boundary runs so that it points out.
+        outward = _unit(np.cross(rim, np.roll(rim, -1, axis=0)).sum(axis=0))
+        if outward @ (centre - verts.mean(axis=0)) < 0.0:
+            outward = -outward
+        depth = depth_fraction * float(np.linalg.norm(rim - centre, axis=1).mean())
+        previous = loop_a
+        for ring in range(1, rings + 1):
+            theta = 0.5 * np.pi * ring / (rings + 1)
+            new_verts.append(
+                centre
+                + np.cos(theta) * (rim - centre)
+                + depth * np.sin(theta) * outward
+            )
+            current = np.arange(count, count + n)
+            count += n
+            for k in range(n):
+                a, b = previous[k], previous[(k + 1) % n]
+                c, d = current[k], current[(k + 1) % n]
+                new_tris.append(np.asarray([(b, a, c), (b, c, d)], dtype=np.int64))
+            previous = current
+        new_verts.append((centre + depth * outward)[None])
+        fan = [(previous[(k + 1) % n], previous[k], count) for k in range(n)]
         new_tris.append(np.asarray(fan, dtype=np.int64))
         count += 1
     return np.vstack(new_verts), np.vstack(new_tris), loops
@@ -307,7 +336,7 @@ def build(makehuman_root: Path) -> dict[str, np.ndarray]:
     remap[used] = np.arange(len(used))
     verts = local[used]
     tris = _triangulate(remap[quads], verts)
-    verts, tris, loops = _cap_boundaries(verts, tris)
+    verts, tris, loops = _cap_boundaries(verts, tris, settings["forearm_cap"])
     if len(loops) != 1:
         raise ValueError(f"expected one forearm opening, found {len(loops)}")
 
@@ -316,7 +345,7 @@ def build(makehuman_root: Path) -> dict[str, np.ndarray]:
     for column, bone in enumerate(HAND_BONES):
         asset_name = next(name for name, mh in BONE_MAP if mh == bone)
         weights[: len(used), BONE_NAMES.index(asset_name)] = hand_w[used, column]
-    weights[len(used) :, 0] = 1.0  # cap centroid rides on the forearm
+    weights[len(used) :, 0] = 1.0  # the cap rides on the forearm
     empty = weights.sum(axis=1) <= 0.0
     weights[empty, 0] = 1.0
     weights = _smooth_thumb_web(weights, tris, settings["thumb_web_smoothing"])
@@ -375,8 +404,11 @@ def write_provenance(arrays: dict[str, np.ndarray]) -> None:
         "bone_count": int(len(arrays["bone_names"])),
         "modifications": "Skin weights are MakeHuman's except across the web "
         "between thumb and index, where they are smoothed (build_settings.json "
-        "thumb_web_smoothing; zero iterations restores the originals).",
+        "thumb_web_smoothing; zero iterations restores the originals). The cut "
+        "end of the forearm stub is closed with a dome that is not MakeHuman "
+        "geometry (build_settings.json forearm_cap; zero rings gives a flat fan).",
         "thumb_web_smoothing": settings["thumb_web_smoothing"],
+        "forearm_cap": settings["forearm_cap"],
         "research_only_alternatives": "MANO and SMPL-X hand models are "
         "research/non-commercial licences and are not bundled; they remain "
         "research-only alternatives.",

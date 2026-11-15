@@ -8,6 +8,10 @@
   ],
   "makehuman_unit_m": 0.1,
   "forearm_stub_length_m": 0.055,
+  "forearm_cap": {
+    "rings": 4,
+    "depth_fraction": 0.6
+  },
   "hand_weight_threshold": 0.5,
   "max_influences": 4,
   "min_plane_fit_ratio": 0.03,
