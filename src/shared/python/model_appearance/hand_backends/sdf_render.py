@@ -318,13 +318,28 @@ def _raster_into(
         zbuffer[min_y + rows, min_x + cols] = zd[closer]
 
 
-def _camera_for(view: str, dorsal: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _camera_for(
+    view: str,
+    dorsal: np.ndarray,
+    *,
+    thumb_dir: np.ndarray | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
     shaft = np.array([0.0, 0.0, 1.0], dtype=np.float64)
     side = _unit(np.asarray(np.cross(dorsal, shaft), dtype=np.float64))
     if view == "dorsal":
         return dorsal, shaft
     if view == "oblique":
-        return _unit(dorsal * 0.75 + side * 0.35 - shaft * 0.45), shaft
+        if thumb_dir is not None:
+            rad_th = _unit(
+                np.array(
+                    [float(thumb_dir[0]), float(thumb_dir[1]), 0.0], dtype=np.float64
+                )
+            )
+            side_sign = 1.0 if float(np.dot(rad_th, side)) >= 0.0 else -1.0
+            return _unit(
+                rad_th * 0.65 + side * (0.55 * side_sign) + shaft * 0.45
+            ), shaft
+        return _unit(dorsal * 0.72 + side * 0.38 + shaft * 0.42), shaft
     if view == "butt":
         return -shaft, dorsal
     raise ValueError(f"unknown view {view!r}")
@@ -401,8 +416,19 @@ def render_standard_views(
         ):
             frame_vertices, drawables = _scene(hands, loaded, skin)
             dorsal = np.asarray(hands[0].skeleton.dorsal_hint, dtype=np.float64)
+            thumb_prim = next(
+                (p for p in hands[0].skeleton.primitives if p.name == "thumb_proximal"),
+                None,
+            )
+            thumb_dir = (
+                np.array(
+                    [thumb_prim.start[0], thumb_prim.start[1], 0.0], dtype=np.float64
+                )
+                if thumb_prim is not None
+                else None
+            )
             for view in _VIEWS:
-                camera, up = _camera_for(view, dorsal)
+                camera, up = _camera_for(view, dorsal, thumb_dir=thumb_dir)
                 image = render_meshes(
                     drawables, frame_vertices, camera, up, loaded, pixels
                 )

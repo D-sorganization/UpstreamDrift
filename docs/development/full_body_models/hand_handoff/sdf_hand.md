@@ -395,3 +395,22 @@ do not grade the picture.
 
 6. When every item is yes on the lead and trail sheets, stop and ask for
    Dieter's sign-off. Your yes is not that sign-off.
+
+## Cycle 2 Overnight Turnover (2026-11-15)
+
+### What Changed
+
+- Replaced the flat-paddle metacarpal extrapolation in [sdf_pose.py](../../../../src/shared/python/model_appearance/hand_backends/sdf_pose.py) (`_pose_metacarpals_and_palm`) with a circumferential grip-cupping arc configured by `palm_wrap_arc_rad`, `palm_base_hover_m`, `palm_axial_drop_m`, `wrist_convergence`, and `thumb_opposition_sweep_m` ([sdf_settings.py](../../../../src/shared/python/model_appearance/hand_backends/sdf_settings.py), [sdf_hand.json](../../../../scripts/config/sdf_hand.json)).
+- Bridged `thumb_web` (`web_centre` and `web_along` in `_pose_thumb`) across `thumb_mid -> bases["index"]` and tuned `palm_fill_radii_m`, `wrist_radii_m`, `web_radii_m`, and `crease_*` fractions in [sdf_hand.json](../../../../scripts/config/sdf_hand.json) to eliminate the thumb-index web eyelet hole, oversized saucer flare, and protruding ulnar wrist horn.
+- Updated `_camera_for` in [sdf_render.py](../../../../src/shared/python/model_appearance/hand_backends/sdf_render.py) to accept `thumb_dir` and build an orthonormal lateral-oblique basis that avoids radial cancellation on `trail`.
+- Added Cycle 2 TDD suite [test_sdf_hand_cycle2_cup_and_thumb.py](../../../../tests/unit/model_appearance/hand_backends/test_sdf_hand_cycle2_cup_and_thumb.py) testing cupped metacarpal radii, opposed thumb sweep/length, and `oblique` thumb-side camera geometry.
+
+### Verification Command and Result
+
+- `pytest tests/unit/model_appearance/hand_backends/test_sdf_hand.py tests/unit/model_appearance/hand_backends/test_sdf_hand_sculpt_and_controls.py tests/unit/model_appearance/hand_backends/test_sdf_hand_cycle2_cup_and_thumb.py -v` -> **`29 passed, 3 warnings`**.
+- `MPLBACKEND=Agg python scripts/render_sdf_hand_evidence.py` regenerated all 27 `1024 px` evidence PNGs (`lead`, `trail`, `both` x `dorsal`, `oblique`, `butt` x `-20`, `0`, `+20` deg roll).
+
+### Remaining Known Issues
+
+- A subtle 2–3 px flexion crease dimple remains visible on the radial outer cheek of `index_pip` in `butt` views, and the dorsal `wrist` / `palm_fill` junction retains two soft contour lobes; both are parameter-only follow-ups in `scripts/config/sdf_hand.json`.
+- Awaiting shared `hand_backends/posing.py` (#15164) and `hand_backends/render.py` (#15154) integration once those Brick PRs merge to `main`.

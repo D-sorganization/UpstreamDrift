@@ -210,44 +210,50 @@ def _pose_metacarpals_and_palm(
     margin_m: float,
 ) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray]]:
     bases: dict[str, np.ndarray] = {}
-    heads: dict[str, np.ndarray] = {}
+    heads: dict[str, np.ndarray] = {
+        finger: proximal_starts[finger] for finger in _DIGITS
+    }
+    centroid_z = float(np.mean([heads[name][2] for name in _DIGITS]))
     for finger in _DIGITS:
         profile = settings.finger(finger)
         length = profile.metacarpal_m * scale
-        head = proximal_starts[finger]
-        radial = outward_at[finger]
+        head = heads[finger]
         prox = next(prim for prim in primitives if prim.name == f"{finger}_proximal")
         prox_dir = unit(np.asarray(prox.end) - np.asarray(prox.start))
-        wrist_dir = unit(
-            -prox_dir * settings.mc_tangent_weight + radial * settings.mc_radial_weight
+        curl_sign = (
+            1.0 if float(head[0] * prox_dir[1] - head[1] * prox_dir[0]) >= 0.0 else -1.0
         )
-        bases[finger] = head + wrist_dir * length
-        heads[finger] = head
-
-    centroid_z = float(np.mean([heads[name][2] for name in _DIGITS]))
-    for finger in _DIGITS:
-        length = settings.finger(finger).metacarpal_m * scale
-        gathered = np.array(bases[finger], dtype=np.float64, copy=True)
-        gathered[2] = (
-            centroid_z + (heads[finger][2] - centroid_z) * settings.wrist_convergence
+        az_head = math.atan2(float(head[1]), float(head[0]))
+        az_base = az_head - curl_sign * settings.palm_wrap_arc_rad
+        extra_lift = max(
+            0.0,
+            float(np.hypot(head[0], head[1]))
+            - (grip_radius_m + clearance + profile.radii_m[0][0] * scale),
         )
-        gathered = gathered + outward_at[finger] * (
-            settings.transverse_arch_m * scale * settings.transverse_arch_coeff[finger]
+        r_target = (
+            grip_radius_m
+            + clearance
+            + extra_lift
+            + (
+                settings.palm_base_hover_m
+                + settings.transverse_arch_m * settings.transverse_arch_coeff[finger]
+            )
+            * scale
         )
-        head = heads[finger]
-        radial_xy = np.array([head[0], head[1], 0.0], dtype=np.float64)
-        radial = (
-            unit(radial_xy)
-            if float(np.linalg.norm(radial_xy)) > 1e-8
-            else outward_at[finger]
+        z_target = (
+            centroid_z
+            - settings.palm_axial_drop_m * scale
+            + (head[2] - centroid_z) * settings.wrist_convergence
         )
-        delta = gathered - head
-        outward_component = float(np.dot(delta, radial))
-        if outward_component < 0.0:
-            delta = delta - outward_component * radial
-        if float(np.linalg.norm(delta)) < 1e-8:
-            delta = radial
-        bases[finger] = head + unit(delta) * length
+        gathered = np.array(
+            [
+                r_target * math.cos(az_base),
+                r_target * math.sin(az_base),
+                z_target,
+            ],
+            dtype=np.float64,
+        )
+        bases[finger] = head + unit(gathered - head) * length
 
     for finger in _DIGITS:
         profile = settings.finger(finger)
@@ -257,8 +263,15 @@ def _pose_metacarpals_and_palm(
         )
         base = bases[finger]
         head = heads[finger]
-        bow = outward_at[finger] * (settings.longitudinal_arch_m * scale)
-        mid = 0.5 * (base + head) + bow
+        mid_raw = 0.5 * (base + head)
+        radial_xy = np.array([mid_raw[0], mid_raw[1], 0.0], dtype=np.float64)
+        radial_mid = (
+            unit(radial_xy)
+            if float(np.linalg.norm(radial_xy)) > 1e-8
+            else outward_at[finger]
+        )
+        bow = radial_mid * (settings.longitudinal_arch_m * scale)
+        mid = mid_raw + bow
         mid_r = 0.5 * (base_r + head_r)
         palmar = palmar_at[finger]
         primitives.append(
@@ -399,14 +412,27 @@ def _pose_thumb(
     tangent_radius = grip_radius_m + clearance + thumb_contact + lift
     centre_xy = tangent_radius * outward
     stations = tuple(station * scale for station in thumb.stations_m)
+    tan_dir = float(curl) * np.cross(
+        np.array([0.0, 0.0, 1.0], dtype=np.float64), outward
+    )
+    sweep = settings.thumb_opposition_sweep_m * scale
+    tan_offsets = (-0.35 * sweep, 0.15 * sweep, 0.65 * sweep)
     straight = [
         (
-            centre_xy + np.array([0.0, 0.0, stations[0]], dtype=np.float64),
-            centre_xy + np.array([0.0, 0.0, stations[1]], dtype=np.float64),
+            centre_xy
+            + np.array([0.0, 0.0, stations[0]], dtype=np.float64)
+            + tan_dir * tan_offsets[0],
+            centre_xy
+            + np.array([0.0, 0.0, stations[1]], dtype=np.float64)
+            + tan_dir * tan_offsets[1],
         ),
         (
-            centre_xy + np.array([0.0, 0.0, stations[1]], dtype=np.float64),
-            centre_xy + np.array([0.0, 0.0, stations[2]], dtype=np.float64),
+            centre_xy
+            + np.array([0.0, 0.0, stations[1]], dtype=np.float64)
+            + tan_dir * tan_offsets[1],
+            centre_xy
+            + np.array([0.0, 0.0, stations[2]], dtype=np.float64)
+            + tan_dir * tan_offsets[2],
         ),
     ]
     flexed = tangent_chain(
@@ -513,10 +539,12 @@ def _pose_thumb(
         )
     )
     web_radii = scaled_radii(settings.web_radii_m, scale)
-    web_along = unit(proximal_starts["index"] - thumb_head)
+    web_along = unit(
+        0.5 * (proximal_starts["index"] + proximal_starts["middle"]) - thumb_mid
+    )
     web_centre = clear_of_grip_ellipsoid(
-        0.5 * (thumb_head + proximal_starts["index"]) * 0.65
-        + 0.35 * (0.5 * (thumb_mid + bases["index"])),
+        0.45 * (0.5 * (thumb_head + proximal_starts["index"]))
+        + 0.55 * (0.5 * (thumb_mid + bases["index"])),
         web_along,
         palmar,
         web_radii,

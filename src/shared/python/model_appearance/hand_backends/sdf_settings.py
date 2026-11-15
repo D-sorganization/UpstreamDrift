@@ -59,6 +59,10 @@ class SdfHandSettings:
     wrist_convergence: float
     transverse_arch_m: float
     longitudinal_arch_m: float
+    palm_wrap_arc_rad: float
+    palm_base_hover_m: float
+    palm_axial_drop_m: float
+    thumb_opposition_sweep_m: float
     blend_m: Mapping[str, float]
     resolution: int
     test_resolution: int
@@ -300,6 +304,12 @@ def load_sdf_hand_settings(path: Path | None = None) -> SdfHandSettings:
         transverse_arch_m=_finite("transverse_arch_m", raw.get("transverse_arch_m")),
         longitudinal_arch_m=_finite(
             "longitudinal_arch_m", raw.get("longitudinal_arch_m")
+        ),
+        palm_wrap_arc_rad=_positive("palm_wrap_arc_rad", raw.get("palm_wrap_arc_rad")),
+        palm_base_hover_m=_positive("palm_base_hover_m", raw.get("palm_base_hover_m")),
+        palm_axial_drop_m=_positive("palm_axial_drop_m", raw.get("palm_axial_drop_m")),
+        thumb_opposition_sweep_m=_finite(
+            "thumb_opposition_sweep_m", raw.get("thumb_opposition_sweep_m")
         ),
         blend_m=blends,
         resolution=resolution,
