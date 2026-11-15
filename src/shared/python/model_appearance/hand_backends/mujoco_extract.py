@@ -77,8 +77,8 @@ def extract_hand_bone_meshes(
     meshes: dict[str, Mesh] = {}
     for body, chunks in out.items():
         verts = np.vstack(chunks)
-        tri = np.vstack(faces[body])
-        meshes[body] = Mesh(verts, tri)
+        merged_tri = np.vstack(faces[body])
+        meshes[body] = Mesh(verts, merged_tri)
     return meshes
 
 
