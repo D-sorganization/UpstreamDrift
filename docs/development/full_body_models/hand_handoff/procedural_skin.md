@@ -280,3 +280,33 @@ Post learnings to [#15150](https://github.com/D-sorganization/UpstreamDrift/issu
 | Mirroring (`handedness="left"`)    |         5/5 | Exact `-y` vertex mirror + wound-face reversal (`test_left_handed_and_roll_mirroring_are_exact`) |
 | Framing (~70%)                     |         5/5 | Hand-only AABB auto-fit at `target_fill = 0.70` across `lead`, `trail`, `both`                   |
 | Club visible                       |         5/5 | Dark grip + butt cap + tapered collar & metallic shaft in every panel                            |
+
+---
+
+## Cycle 2 Overnight Update — Dorsal Knuckle Valleys, Distal Wrap, and Thumb Opposition
+
+**Fixes Shipped (`Refs #15145, #15150`):**
+
+1. **Uniform Superellipse Parameterization and Softened Relief (`procedural_loft.py`, `settings.py`)**: split `shape_exp_w` (`0.94 - 0.06 * sin(pi * t)`) from `shape_exp_d` (`0.72 - 0.06 * sin(pi * t)`) with `procedural_skin_sides = 40` so ring vertices cover all four metacarpal heads and all three interdigital valleys evenly (`knuckle_dome_height_m = 0.0045 m`, `interdigital_valley_m = 0.0022 m`, distal cap fade `end_scale**1.6`). Broadened `edge_eminences` (`0.25 -> 0.10`, width `0.34`) to remove the sharp ulnar rim while keeping `cup_depth_m = 3.30 mm`.
+2. **Proximal Socket Seating (`procedural_skin.py`)**: shifted each digit's `socket_pt` along `_unit(0.60 * u_flat + 0.40 * (anchor - mid_ctrl))` with a `-0.28 * base_r * dorsal_mcp` offset so the proximal hemisphere stays cleanly buried inside the metacarpal head with zero dorsal protrusion behind the index knuckle.
+3. **Distal Pad Wrap Solver and Opposed Thumb (`procedural_skin.py`, `settings.py`)**: added `_FingerSolveSpec` staged distal-pad flexion constraints (`distal_pad_t_start = 0.65`) and diagonal thumb azimuth sweep (`thumb_base_opposition_rad = 0.62`), while blending the thenar ellipsoid (`thenar_flare_scale = 1.06`) between `th_cmc`, `th_mcp`, and `radial_palm` aligned along `th_mcp - wrist_center`.
+4. **Comparison Harness (`scripts/render_hand_backend_comparison.py`)**: kept all backends active (`metrics.json` verified `anthropometrics_accepted: true` for `procedural_skin` and generated `contact_sheet.png`).
+
+### Visual Self-Review (Cycle 2, High-Resolution)
+
+| #   | Criterion                          | Status     | Notes                                                                                                     |
+| --- | ---------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------- |
+| 1   | Separate fingers and thumb         | Pass (5/5) | `min_inter_finger_gap_m = 2.29 mm`; clean separation across digits and thumb                              |
+| 2   | Cupped palm                        | Pass (4/5) | Smooth palmar concavity (`cup_depth_m = 3.30 mm`) without ulnar canoe rim                                 |
+| 3   | Visible knuckle line               | Pass (5/5) | Four dorsal metacarpal domes with soft interdigital valleys and zero index socket protrusion              |
+| 4   | Fingers wrap the grip              | Pass (5/5) | `pad_clearances_m` in `[-0.50, -0.40] mm` with zero mid-phalanx penetration; trail pinky overlaps cleanly |
+| 5   | No tubes, blobs, or torn triangles | Pass (4/5) | Watertight closed lofted surfaces; slight residual crease where thenar meets radial palm margin           |
+| 6   | Skin shading smooth                | Pass (5/5) | Spatially welded smooth vertex normals and 2x2 SSAA directional shading                                   |
+| 7   | Hand about 70 percent of frame     | Pass (5/5) | Configured `render_frame_fill = 0.70` at `1024 px` across single and dual hand views                      |
+| 8   | Club visible                       | Pass (5/5) | Dark grip, butt cap, and metallic shaft visible in every view                                             |
+| 9   | Lead and trail mirror at roll      | Pass (5/5) | Verified across `0` and `+/-20` deg roll renders and exact `-y` left-handedness tests                     |
+
+### Next Cycle Turnover Notes
+
+- **Remaining polish**: boolean/implicit CSG blending between `thenar_mesh` and `palm_mesh` would erase the subtle radial crease in `trail_iso` if an anatomical seamless blend is desired later without switching to `sdf_hand`.
+- **Verification**: `54 passed` across `test_hand_backends_contract.py`, `test_hand_visual_penetration.py`, `test_procedural_skin_cycle2_anatomy.py`, `test_procedural_skin_scale_and_topology.py`, and `test_grip_hands.py`.

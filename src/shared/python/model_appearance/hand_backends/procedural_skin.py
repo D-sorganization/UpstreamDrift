@@ -29,6 +29,7 @@ from src.shared.python.model_appearance.hand_backends.contract import (
 )
 from src.shared.python.model_appearance.hand_backends.metrics import palm_arch_angle_deg
 from src.shared.python.model_appearance.hand_backends.procedural_loft import (
+    PalmSlabSpec,
     lofted_anatomical_digit,
     lofted_palm_slab,
 )
@@ -85,19 +86,34 @@ def _rodrigues(vec: Array, axis: Array, angle_rad: float) -> Array:
     return vec * c + np.cross(k, vec) * s + k * (float(np.dot(k, vec)) * (1.0 - c))
 
 
+@dataclass(frozen=True)
+class _FingerSolveSpec:
+    """Target grip wrap and distal-pad seating contract for a finger chain."""
+
+    grip_radius_m: float
+    target_clearance_m: float
+    depth_factor: float
+    palmar_scale: float
+    distal_pad_t_start: float = 0.65
+    min_full_clearance_m: float = -0.00015
+    stage_clearances_m: tuple[float, float, float] = (0.0018, 0.0016, 0.0005)
+
+
 def _segment_skin_clearance(
     p0: Array,
     p1: Array,
     r0: float,
     r1: float,
-    grip_radius_m: float,
-    palmar_scale: float,
+    solve: _FingerSolveSpec,
+    *,
+    t_start: float = 0.15,
+    n_samples: int = 9,
 ) -> float:
-    ts = np.linspace(0.15, 1.0, 9)
+    ts = np.linspace(t_start, 1.0, n_samples)
     pts = p0[None, :] + ts[:, None] * (p1 - p0)[None, :]
     radii = r0 * (1.0 - ts) + r1 * ts
     rho = np.hypot(pts[:, 0], pts[:, 1])
-    return float(np.min(rho - palmar_scale * radii - grip_radius_m))
+    return float(np.min(rho - solve.palmar_scale * radii - solve.grip_radius_m))
 
 
 def _solve_flex_angle(
@@ -105,55 +121,73 @@ def _solve_flex_angle(
     u_in: Array,
     flex_axis: Array,
     length: float,
-    r0: float,
-    r1: float,
-    grip_radius_m: float,
-    target_clearance_m: float,
-    palmar_scale: float,
+    radii: tuple[float, float],
+    solve: _FingerSolveSpec,
 ) -> float:
-    """Solve joint flexion (rad) bringing phalanx palmar skin onto ``target_clearance``."""
-    thetas = np.linspace(0.05, 1.65, 24)
-    gaps = np.array(
-        [
-            _segment_skin_clearance(
-                p_start,
-                p_start + length * _rodrigues(u_in, flex_axis, float(th)),
-                r0,
-                r1,
-                grip_radius_m,
-                palmar_scale,
-            )
-            for th in thetas
-        ],
-        dtype=float,
-    )
-    # Find the earliest crossing down to target_clearance_m, or closest safe point.
-    crossings = np.where(gaps <= target_clearance_m)[0]
-    if len(crossings) > 0:
-        idx = int(crossings[0])
-        if idx == 0:
-            return float(thetas[0])
+    """Solve joint flexion (rad) seating distal pad without mid-segment penetration."""
+    r0, r1 = radii
+    thetas = np.linspace(0.05, 1.75, 36)
+    distal_gaps = np.empty(len(thetas), dtype=float)
+    full_gaps = np.empty(len(thetas), dtype=float)
+    for idx, th in enumerate(thetas):
+        p_end = p_start + length * _rodrigues(u_in, flex_axis, float(th))
+        distal_gaps[idx] = _segment_skin_clearance(
+            p_start,
+            p_end,
+            r0,
+            r1,
+            solve,
+            t_start=solve.distal_pad_t_start,
+            n_samples=6,
+        )
+        full_gaps[idx] = _segment_skin_clearance(
+            p_start, p_end, r0, r1, solve, t_start=0.15, n_samples=10
+        )
+
+    safe_mask = full_gaps >= solve.min_full_clearance_m
+    safe_idx = np.where(safe_mask)[0]
+    if len(safe_idx) == 0:
+        return float(thetas[int(np.argmax(full_gaps))])
+
+    # First angle where distal pad reaches target while full segment stays outside shaft.
+    hits = [
+        int(i) for i in safe_idx if i > 0 and distal_gaps[i] <= solve.target_clearance_m
+    ]
+    if hits:
+        idx = hits[0]
         lo, hi = float(thetas[idx - 1]), float(thetas[idx])
-        for _ in range(14):
-            mid = 0.5 * (lo + hi)
-            g = _segment_skin_clearance(
-                p_start,
-                p_start + length * _rodrigues(u_in, flex_axis, mid),
-                r0,
-                r1,
-                grip_radius_m,
-                palmar_scale,
-            )
-            if g > target_clearance_m:
-                lo = mid
-            else:
-                hi = mid
-        return 0.5 * (lo + hi)
-    valid = np.where(gaps >= -0.0002)[0]
-    if len(valid) > 0:
-        best = valid[int(np.argmin(np.abs(gaps[valid] - target_clearance_m)))]
-        return float(thetas[best])
-    return float(thetas[int(np.argmin(np.abs(gaps - target_clearance_m)))])
+        if distal_gaps[idx - 1] > solve.target_clearance_m:
+            for _ in range(14):
+                mid = 0.5 * (lo + hi)
+                p_end = p_start + length * _rodrigues(u_in, flex_axis, mid)
+                g_dist = _segment_skin_clearance(
+                    p_start,
+                    p_end,
+                    r0,
+                    r1,
+                    solve,
+                    t_start=solve.distal_pad_t_start,
+                    n_samples=6,
+                )
+                g_full = _segment_skin_clearance(
+                    p_start, p_end, r0, r1, solve, t_start=0.15, n_samples=10
+                )
+                if (
+                    g_dist > solve.target_clearance_m
+                    and g_full >= solve.min_full_clearance_m
+                ):
+                    lo = mid
+                elif g_full < solve.min_full_clearance_m:
+                    hi = mid
+                else:
+                    hi = mid
+            return 0.5 * (lo + hi)
+        return float(thetas[idx])
+
+    best = safe_idx[
+        int(np.argmin(np.abs(distal_gaps[safe_idx] - solve.target_clearance_m)))
+    ]
+    return float(thetas[best])
 
 
 def _solve_finger_chain(
@@ -163,10 +197,7 @@ def _solve_finger_chain(
     lengths: tuple[float, float, float],
     base_r: float,
     tip_r: float,
-    grip_radius_m: float,
-    target_clearance_m: float,
-    depth_factor: float,
-    palmar_scale: float,
+    solve: _FingerSolveSpec,
 ) -> tuple[Array, Array]:
     total_len = sum(lengths)
     cumulative = (
@@ -189,14 +220,11 @@ def _solve_finger_chain(
             u_curr,
             flex_axis,
             seg_len,
-            r0,
-            r1,
-            grip_radius_m,
-            target_clearance_m,
-            palmar_scale,
+            (r0, r1),
+            replace(solve, target_clearance_m=solve.stage_clearances_m[k]),
         )
         th_open = 0.05 if k == 0 else 0.04
-        th = (1.0 - depth_factor) * th_open + depth_factor * th_closed
+        th = (1.0 - solve.depth_factor) * th_open + solve.depth_factor * th_closed
         u_next = _rodrigues(u_curr, flex_axis, th)
         if k == 0:
             prox_dir = u_next.copy()
@@ -305,21 +333,25 @@ def _build_canonical_hand(
     ) * length_scale
 
     palm_mesh, mcp_surface_arr, measured_cup, palm_arc_length_m = lofted_palm_slab(
-        wrist_center=wrist_center,
-        mid_ctrl=mid_ctrl,
-        knuckle_center=knuckle_center,
-        width_axis=width_axis,
-        dorsal_axis=_radial(mcp_az - curl * math.radians(18.0)),
-        wrist_width_m=breadth_m * settings.wrist_width_fraction,
-        knuckle_width_m=breadth_m,
-        wrist_thickness_m=wrist_thickness,
-        palm_thickness_m=palm_thickness,
-        knuckle_dome_height_m=settings.knuckle_dome_height_m * length_scale,
-        cup_depth_m=cup_depth,
-        knuckle_u_fractions=_KNUCKLE_U_FRACTIONS,
-        sides=settings.procedural_skin_sides,
-        grip_floor_m=inner_floor,
-        mcp_span_fraction=settings.mcp_span_fraction,
+        PalmSlabSpec(
+            wrist_center=wrist_center,
+            mid_ctrl=mid_ctrl,
+            knuckle_center=knuckle_center,
+            width_axis=width_axis,
+            dorsal_axis=_radial(mcp_az - curl * math.radians(18.0)),
+            wrist_width_m=breadth_m * settings.wrist_width_fraction,
+            knuckle_width_m=breadth_m,
+            wrist_thickness_m=wrist_thickness,
+            palm_thickness_m=palm_thickness,
+            knuckle_dome_height_m=settings.knuckle_dome_height_m * length_scale,
+            cup_depth_m=cup_depth,
+            knuckle_u_fractions=_KNUCKLE_U_FRACTIONS,
+            sides=settings.procedural_skin_sides,
+            grip_floor_m=inner_floor,
+            mcp_span_fraction=settings.mcp_span_fraction,
+            interdigital_valley_m=settings.interdigital_valley_m * length_scale,
+            distal_cap_shift_m=settings.distal_cap_shift_m * length_scale,
+        )
     )
 
     mid_target = anthro.middle_finger_length_m * length_scale * 1.11
@@ -357,8 +389,8 @@ def _build_canonical_hand(
             and finger == "little"
         )
         u_flat = _unit(
-            curl_tan * 0.88
-            + dorsal_mcp * 0.44
+            curl_tan * 0.94
+            + dorsal_mcp * 0.34
             + width_axis * (math.sin(splay) + (0.0 if on_grip else 0.14))
         )
         solve_radius_m = (
@@ -374,16 +406,27 @@ def _build_canonical_hand(
             lengths,
             base_r,
             tip_r,
-            solve_radius_m,
-            0.0009,
-            depth_factor,
-            palmar_scale,
+            _FingerSolveSpec(
+                grip_radius_m=solve_radius_m,
+                target_clearance_m=0.0005 if on_grip else 0.0009,
+                depth_factor=depth_factor,
+                palmar_scale=palmar_scale,
+                distal_pad_t_start=settings.distal_pad_t_start,
+                stage_clearances_m=(
+                    (0.0018, 0.0016, 0.0005) if on_grip else (0.0009, 0.0009, 0.0009)
+                ),
+            ),
         )
         finger_joints[finger] = joints
         finger_radii[finger] = (base_r, tip_r)
         proximal_dirs[finger] = p_dir
 
-        socket_pt = anchor - u_flat * (settings.knuckle_socket_inset_m * length_scale)
+        inward_dir = _unit(0.60 * u_flat + 0.40 * _unit(anchor - mid_ctrl))
+        socket_pt = (
+            anchor
+            - inward_dir * (settings.knuckle_socket_inset_m * length_scale)
+            - dorsal_mcp * (0.28 * base_r)
+        )
         socket_rho = float(np.hypot(socket_pt[0], socket_pt[1]))
         min_socket_rho = float(grip_radius_m) + palmar_scale * base_r + 0.0008
         if socket_rho < min_socket_rho:
@@ -405,37 +448,43 @@ def _build_canonical_hand(
     thumb_az = math.radians(placement.thumb_offset_deg + roll_delta)
     th_base_r = 0.5 * anthro.thumb_base_diameter_m * length_scale
     th_tip_r = 0.5 * anthro.thumb_tip_diameter_m * length_scale
+    opp = settings.thumb_base_opposition_rad
+    straight = min(1.0, max(0.0, joint_angles.thumb_straightness))
     th_out = _radial(thumb_az)
     th_tan = curl * _tangential(thumb_az)
-    th_rho = float(grip_radius_m) + 0.0011 + th_base_r * 0.90 + 0.6 * open_lift
-    radial_palm = 0.50 * mid_ctrl + 0.25 * wrist_center + 0.25 * mcp_anchors["index"]
-    th_cmc_target = (th_rho + 0.006 * length_scale) * th_out + np.array(
-        [0.0, 0.0, float(radial_palm[2]) - 0.008 * length_scale], float
+    th_cmc_az = thumb_az - curl * 0.65 * opp
+    th_mcp_az = thumb_az - curl * 0.30 * opp
+    th_ip_az = thumb_az + curl * (0.20 * opp + (1.0 - straight) * 0.16)
+    th_tip_az = thumb_az + curl * (0.58 * opp + (1.0 - straight) * 0.24)
+    th_mcp_rho = (
+        float(grip_radius_m) + palmar_scale * th_base_r + 0.0022 + 0.6 * open_lift
     )
-    th_cmc = 0.70 * radial_palm + 0.30 * th_cmc_target
+    th_ip_rho = (
+        float(grip_radius_m)
+        + palmar_scale * 0.5 * (th_base_r + th_tip_r)
+        + 0.0010
+        + 0.6 * open_lift
+    )
+    th_tip_rho = (
+        float(grip_radius_m) + palmar_scale * th_tip_r + 0.0005 + 0.6 * open_lift
+    )
+    radial_palm = 0.50 * mid_ctrl + 0.25 * wrist_center + 0.25 * mcp_anchors["index"]
+    z_base = float(mcp_anchors["index"][2])
+    th_cmc = (th_mcp_rho + 0.005 * length_scale) * _radial(th_cmc_az) + np.array(
+        [0.0, 0.0, z_base - 0.026 * length_scale], float
+    )
     cmc_rho = float(np.hypot(th_cmc[0], th_cmc[1]))
     min_cmc_rho = float(grip_radius_m) + 0.0015 + th_base_r
     if cmc_rho < min_cmc_rho:
         th_cmc[:2] *= min_cmc_rho / max(cmc_rho, 1e-12)
-    z_base = float(mcp_anchors["index"][2])
-    th_mcp = th_rho * th_out + np.array(
-        [0.0, 0.0, z_base - 0.016 * length_scale], float
+    th_mcp = th_mcp_rho * _radial(th_mcp_az) + np.array(
+        [0.0, 0.0, z_base - 0.012 * length_scale], float
     )
-    straight = min(1.0, max(0.0, joint_angles.thumb_straightness))
-    th_ip = (
-        th_rho * th_out
-        + th_tan * ((1.0 - straight) * 0.012 * length_scale)
-        + np.array(
-            [0.0, 0.0, z_base + (0.006 + 0.005 * straight) * length_scale], float
-        )
+    th_ip = th_ip_rho * _radial(th_ip_az) + np.array(
+        [0.0, 0.0, z_base + (0.008 + 0.004 * straight) * length_scale], float
     )
-    th_tip = (
-        (th_rho - 0.0005 * length_scale)
-        * _radial(thumb_az + curl * math.radians(12.0 * (1.0 - straight)))
-        + th_tan * ((1.0 - straight) * 0.020 * length_scale)
-        + np.array(
-            [0.0, 0.0, z_base + (0.018 + 0.012 * straight) * length_scale], float
-        )
+    th_tip = th_tip_rho * _radial(th_tip_az) + np.array(
+        [0.0, 0.0, z_base + (0.021 + 0.011 * straight) * length_scale], float
     )
     thumb_mesh = lofted_anatomical_digit(
         np.asarray([th_cmc, th_mcp, th_ip, th_tip], float),
@@ -448,16 +497,25 @@ def _build_canonical_hand(
         joint_fractions=(0.45, 0.74),
         grip_floor_m=inner_floor,
     )
-    thenar_r = np.asarray(settings.thenar_half_extents_m, float) * length_scale
-    thenar_c = 0.55 * th_cmc + 0.45 * th_mcp
+    finger_meshes["thumb"] = thumb_mesh
+    flare = np.array(
+        [
+            settings.thenar_flare_scale * 0.90,
+            0.95,
+            settings.thenar_flare_scale,
+        ],
+        float,
+    )
+    thenar_r = np.asarray(settings.thenar_half_extents_m, float) * length_scale * flare
+    thenar_c = 0.44 * th_cmc + 0.28 * th_mcp + 0.28 * radial_palm
     thenar_rho = float(np.hypot(thenar_c[0], thenar_c[1]))
-    min_thenar_rho = float(grip_radius_m) + 0.002 + float(thenar_r[1])
+    min_thenar_rho = float(grip_radius_m) + 0.0015 + float(thenar_r[1])
     if thenar_rho < min_thenar_rho:
         thenar_c[:2] *= min_thenar_rho / max(thenar_rho, 1e-12)
     thenar_mesh = ellipsoid_mesh(
         thenar_c,
         np.array([thenar_r[2], thenar_r[0], thenar_r[1]], float),
-        _unit(th_mcp - th_cmc),
+        _unit(th_mcp - wrist_center),
         rings=12,
         sides=settings.procedural_skin_sides,
         width_hint=_unit(radial_palm - mid_ctrl),
