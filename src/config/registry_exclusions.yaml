@@ -69,3 +69,9 @@ exclusions:
       records each engine's own viewer (Drake/Pinocchio MeshCat via headless
       Chromium, OpenSim simbody under xvfb, MyoSuite EGL) to mp4 files; it
       has no interactive window to host in the launcher (epic #11673).
+  - package: grip_build_preview
+    reason: >-
+      Headless CLI (python -m src.tools.grip_build_preview) replaying HRG
+      grip_build receipt stages to stills/GIF; visual-only export with no
+      interactive launcher tile until GB epic review (HRG-GB4 / #15126).
+    issue: "#15126"

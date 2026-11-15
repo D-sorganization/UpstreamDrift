@@ -502,6 +502,30 @@
       "evidence": "src/tools/grip_wrench_plots/gui.py",
       "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
     },
+    "grip_build_preview": {
+      "id": "grip_build_preview",
+      "name": "Tools Package: grip_build_preview",
+      "entity_kind": "cli_tool",
+      "primary_workspace": "simulation",
+      "secondary_links": ["analysis"],
+      "provider_authority": "core",
+      "lifecycle": "intentionally_headless",
+      "alias_target": null,
+      "evidence": "src/tools/grip_build_preview/__init__.py",
+      "acceptance_owner": "tests/config/test_registry_exclusions.py"
+    },
+    "tools.grip_build_preview": {
+      "id": "tools.grip_build_preview",
+      "name": "HRG grip build stage replay preview (CLI)",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "exempt",
+      "alias_target": null,
+      "evidence": "src/tools/grip_build_preview/cli.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
     "anatomical_event_table": {
       "id": "anatomical_event_table",
       "name": "Anatomical Event Table",
