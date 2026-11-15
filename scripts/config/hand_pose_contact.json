@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "contact_gap_tolerance_m": 0.002,
+  "penetration_tolerance_m": 0.0005,
+  "base_clearance_m": 0.0004,
+  "just_below_pinky_m": 0.0015,
+  "open_gap_m": 0.02,
+  "curl_samples": 25,
+  "mcp_limit_deg": 110.0,
+  "pip_limit_deg": 120.0,
+  "dip_limit_deg": 100.0,
+  "arch_gain_rad": 0.45,
+  "arch_travel_m": 0.004,
+  "arch_weight": {
+    "index": 0.15,
+    "middle": 0.4,
+    "ring": 0.75,
+    "little": 1.0
+  },
+  "cross_azimuth_scale": 0.25,
+  "thumb_lengths_m": [0.046, 0.032, 0.022],
+  "thumb_flex_limit_deg": 80.0,
+  "palm_grid_nu": 7,
+  "palm_grid_nv": 5,
+  "palm_standoff_m": 0.012,
+  "palm_arch_travel_m": 0.012,
+  "palm_cell_m": 0.008,
+  "min_wrap_rad": 1.0,
+  "style_separation_m": 0.005,
+  "hinge_bisection_steps": 24,
+  "axis_samples": 13,
+  "metacarpal_length_m": {
+    "index": 0.068,
+    "middle": 0.066,
+    "ring": 0.058,
+    "little": 0.052
+  }
+}
