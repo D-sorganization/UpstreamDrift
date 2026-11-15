@@ -56,7 +56,7 @@ from src.shared.python.core.handedness import (
     validate_handedness,
 )
 from src.shared.python.grip_contact.contact_topology import GripStyle as GripStyle
-from src.shared.python.grip_spec.validation import (
+from src.shared.python.grip_contact.field_validation import (
     require_fields_in_range,
     validate_grip_style_fields,
 )
