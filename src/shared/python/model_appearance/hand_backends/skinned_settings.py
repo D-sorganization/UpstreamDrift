@@ -69,6 +69,10 @@ class SkinnedHumanSettings:
     palm_cup_max_deg: float
     palm_cup_step_deg: float
     palm_cup_pivot_fraction: float
+    thumb_toward_index_max_deg: tuple[tuple[str, float], ...]
+    thumb_toward_index_steps: int
+    thumb_toward_index_straightness: float
+    thumb_index_gap_m: float
     side_close_max_deg: float
     side_close_gap_m: float
     side_close_index_gap_m: float
@@ -261,6 +265,23 @@ def _pair_fields(pair: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def _thumb_turn_fields(thumb: Mapping) -> dict[str, Any]:
+    """The thumb's turn toward the forefinger tip (#15181)."""
+    return {
+        "thumb_toward_index_max_deg": tuple(
+            (side, _non_negative(thumb["toward_index_max_deg"][side], side))
+            for side in ("lead", "trail")
+        ),
+        "thumb_toward_index_steps": int(
+            _positive(thumb["toward_index_steps"], "toward_index_steps")
+        ),
+        "thumb_toward_index_straightness": _unit_interval(
+            thumb["toward_index_straightness"], "toward_index_straightness"
+        ),
+        "thumb_index_gap_m": _non_negative(thumb["index_gap_m"], "index_gap_m"),
+    }
+
+
 def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
     """Validate a settings mapping. Raises ``ValueError``/``KeyError`` if bad."""
     rgb = tuple(_unit_interval(x, "skin_rgb") for x in raw["skin_rgb"])
@@ -329,6 +350,7 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
         palm_cup_pivot_fraction=_non_negative(
             thumb["palm_cup_pivot_fraction"], "palm_cup_pivot_fraction"
         ),
+        **_thumb_turn_fields(thumb),
         **_pair_fields(raw["pair"]),
         frame_excluded_bones=tuple(
             str(bone) for bone in raw["framing"]["excluded_bones"]

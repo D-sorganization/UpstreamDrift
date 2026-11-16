@@ -66,7 +66,13 @@ from src.shared.python.model_appearance.hand_backends.posing import (
     rigid,
     SeatLimits,
     seat_on_obstacle,
+    skin_distance,
     wrap_to_contact,
+)
+from src.shared.python.model_appearance.hand_backends.skinned_targets import (
+    RightHandTargets as _RightHandTargets,
+    targets_for as _targets,
+    turned as _turned,
 )
 from src.shared.python.model_appearance.hand_backends.skinned_settings import (
     JOINT_OF_SEGMENT as _JOINT_OF_SEGMENT,
@@ -350,47 +356,6 @@ def flat_hand_landmarks(hand: _GripHand) -> FlatHandLandmarks:
     )
 
 
-@dataclass(frozen=True)
-class _RightHandTargets:
-    """Grip-frame targets for the right-hand build of one side."""
-
-    palm_azimuth_rad: float
-    thumb_azimuth_rad: float
-    cross_angle_deg: float
-    index_station: float
-    pinky_palm_depth_m: float
-    thumb_straightness: float
-    mirrored: bool
-
-
-def _targets(
-    spec: GripSpec, side: HandSide, settings: SkinnedHumanSettings
-) -> _RightHandTargets:
-    """Express one hand's spec as targets for a right hand.
-
-    Azimuth 0 is the top of the grip and increases away from the target. For a
-    right-handed golfer the trail hand is the right hand; the lead hand is
-    built as its mirror image (``y -> -y``), so its targets are negated here.
-    """
-    hand = spec.lead if side == "lead" else spec.trail
-    v_azimuth = hand.v_azimuth_deg if side == "trail" else -hand.v_azimuth_deg
-    is_right = (side == "trail") == (spec.handedness == "right")
-    station = hand.index_contact_station or settings.index_station_at_spec_zero
-    return _RightHandTargets(
-        palm_azimuth_rad=math.radians(
-            v_azimuth
-            + settings.palm_contact_azimuth_offset_deg
-            + settings.palm_centre_wrap_deg
-        ),
-        thumb_azimuth_rad=math.radians(-hand.thumb_azimuth_deg),
-        cross_angle_deg=hand.club_cross_angle_deg,
-        index_station=station,
-        pinky_palm_depth_m=hand.pinky_side_palm_depth_m,
-        thumb_straightness=hand.thumb_straightness,
-        mirrored=not is_right,
-    )
-
-
 def _seat_flat_hand(
     hand: _GripHand,
     targets: _RightHandTargets,
@@ -551,6 +516,7 @@ def _aim_thumb(
     are rotations of the thumb's base joint; nothing else moves.
     """
     settings, asset = hand.settings, hand.asset
+    hand.fixed.pop("thumb_meta", None)  # each aim starts from the rest thumb
     # Aim from the thumb's rest shape, whatever thumb angles come later.
     angles = {k: v for k, v in angles.items() if not k.startswith("thumb")}
     grip_from_rest = hand.placement[:3, :3]
@@ -760,6 +726,80 @@ def _thumb_chain(
     )
 
 
+def _lay_thumb(
+    hand: _GripHand,
+    targets: _RightHandTargets,
+    angles: Mapping[str, float],
+    obstacle: ObstacleDistance,
+    grip_radius_m: float,
+    max_turn_deg: float,
+) -> dict[str, float]:
+    """Aim the thumb and press it onto the grip, up against the forefinger tip.
+
+    The thumb lies at its spec azimuth, turned toward the tip of the hand's
+    own forefinger by the least angle, up to ``max_turn_deg`` (the hand's
+    ``thumb.toward_index_max_deg``),
+    that brings its skin within ``thumb.index_gap_m`` of the fingertip, and
+    never so far that the thumb leaves the grip to ride on the finger or
+    runs into the other hand; the
+    angle is found in ``thumb.toward_index_steps`` halvings. A turned thumb lies across the grip, so it may bend as far as
+    ``thumb.toward_index_straightness`` allows. The forefinger's skin beyond
+    its first segment is in the thumb's way. The turn is returned as the
+    ``thumb_side`` angle; a maximum of zero keeps the thumb on its azimuth.
+    """
+    settings, key = hand.settings, f"thumb{_SIDE_SUFFIX}"
+    limit = math.radians(max_turn_deg)
+    skin = hand.points(angles)
+    tip = skin[hand.segment_ids("index_dist")]
+    centre = tip.mean(axis=0)
+    toward = math.remainder(
+        math.atan2(centre[1], centre[0]) - targets.thumb_azimuth_rad, math.tau
+    )
+    reach = math.copysign(min(abs(toward), limit), toward)
+    ids = _finger_ids(hand, "index", _SEGMENTS[1:])
+    normals = vertex_normals(skin, hand.asset.faces)[ids]
+    finger = skin_distance(skin[ids], normals, settings.pair_skin_reach_m)
+    tree, thumb = cKDTree(tip), hand.segment_ids(THUMB_PRESS)
+    bend = min(targets.thumb_straightness, settings.thumb_toward_index_straightness)
+    gap_m = settings.thumb_index_gap_m
+    lifted = math.radians(settings.thumb_press_range_deg[0]) + 1e-9
+
+    def around(points: Array) -> Array:
+        return np.minimum(obstacle(points), finger(points))
+
+    def laid(turn: float) -> tuple[bool, bool, dict[str, float]]:
+        """The thumb turned by ``turn``: is it at the fingertip, has it left
+        the grip (to ride on the finger, or stuck in the other hand), and
+        its pose."""
+        share = abs(turn / reach) if reach else 0.0
+        straight = (1.0 - share) * targets.thumb_straightness + share * bend
+        aimed = _turned(targets, turn, straight)
+        _aim_thumb(hand, aimed, angles, grip_radius_m)
+        chain = (_thumb_chain(settings, aimed),)
+        if turn:  # a plain curl: the gap then closes steadily with the turn
+            pose = curl_to_contact(hand, chain, around, settings.curl, angles).angles
+        else:
+            pose = _wrap(hand, chain, obstacle, angles)
+        skin = hand.points(pose, thumb)
+        near = float(np.min(np.asarray(tree.query(skin)[0]))) <= gap_m
+        # Off the grip it rides on the finger; deep in, or never pressed
+        # down from where it starts, something is in its way.
+        depth = float(np.min(obstacle(skin)))
+        off = abs(depth) > gap_m or pose[THUMB_PRESS] <= lifted
+        return near, off, {**pose, key: turn}
+
+    near, _, pose = laid(0.0)
+    if not reach or near:
+        return pose
+    low, high = 0.0, reach
+    for _ in range(settings.thumb_toward_index_steps):
+        mid = 0.5 * (low + high)
+        near, riding, _ = laid(mid)
+        low, high = (low, mid) if near or riding else (mid, high)
+    near, riding, pose = laid(high)
+    return laid(low)[2] if riding else pose  # leaves the hand aimed as chosen
+
+
 def _bend_wrist(hand: _GripHand, side: HandSide) -> None:
     """Turn the forearm about the wrist joint; the hand stays where it is.
 
@@ -904,7 +944,8 @@ def _solve_right_hand(
             if f"{finger}{_SIDE_SUFFIX}" in posed:
                 hand.swing_sideways(f"{finger}_prox", posed[f"{finger}{_SIDE_SUFFIX}"])
         _cup_palm(hand, targets, posed, soft, thumb_radius_m)
-        _aim_thumb(hand, targets, posed, thumb_radius_m)
+        turn = posed.get(f"thumb{_SIDE_SUFFIX}", 0.0)
+        _aim_thumb(hand, _turned(targets, turn), posed, thumb_radius_m)
         _bend_wrist(hand, side)
         return _SolvedHand(hand, posed, targets, obstacle, skin, pad, points)
     chains = _finger_chains(settings, crook.get("index_prox", 0.0))
@@ -942,8 +983,8 @@ def _solve_right_hand(
         _overlap_little_finger(hand, angles, pair.groove)
     angles = wrap(start)
     _cup_palm(hand, targets, angles, soft, thumb_radius_m)
-    _aim_thumb(hand, targets, angles, thumb_radius_m)
-    angles = _wrap(hand, (_thumb_chain(settings, targets),), soft, angles)
+    most = dict(settings.thumb_toward_index_max_deg)[side]
+    angles = _lay_thumb(hand, targets, angles, soft, thumb_radius_m, most)
     _bend_wrist(hand, side)
     for bone, swing in hand.side.items():  # so given angles rebuild this pose
         angles[f"{bone.removesuffix('_prox')}{_SIDE_SUFFIX}"] = swing

@@ -40,6 +40,7 @@ from src.shared.python.model_appearance.hand_backends.qa import (
     pinched_edge_count,
     skinning_defects,
     skinning_residual_m,
+    thumb_gaps_m,
 )
 from src.shared.python.model_appearance.hand_backends.skinned_human import (
     BACKEND_NAME,
@@ -571,9 +572,20 @@ def test_fingers_wrap_and_the_palm_cups(side: str) -> None:
     assert angles.flexion_deg("meta_little") > angles.flexion_deg("meta_ring") > 0.0
 
 
+def _thumb_on_its_azimuth():
+    """The trail hand with the turn toward the forefinger switched off."""
+    if "plain thumb" not in _CACHE:
+        raw = copy.deepcopy(dict(load_settings_mapping()))
+        raw["thumb"]["toward_index_max_deg"] = {"lead": 0.0, "trail": 0.0}
+        _CACHE["plain thumb"] = build_hand_visual(
+            _spec(), "trail", grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
+        )
+    return _CACHE["plain thumb"]
+
+
 def test_thumb_lies_along_the_shaft_at_the_spec_azimuth() -> None:
-    for side in _SIDES:
-        result = _hand(side)
+    """Before it is turned toward the forefinger tip, as the trail thumb is."""
+    for side, result in (("lead", _hand("lead")), ("trail", _thumb_on_its_azimuth())):
         asset = result.rest_asset
         ids = asset.dominant_vertex_ids(("thumb_dist",))
         pad = result.mesh.vertices[ids].mean(axis=0)
@@ -781,6 +793,43 @@ def test_the_overlap_and_the_closing_up_can_be_switched_off() -> None:
     bad["pair"]["obstacle"] = "boxes"
     with pytest.raises(ValueError):
         settings_from_mapping(bad)
+
+
+@pytest.mark.parametrize("side", ["lead", "trail"])
+def test_the_thumb_lies_against_the_forefinger_tip_and_the_hand(side: str) -> None:
+    """Owner's grip: the trail thumb gently touches its own forefinger's tip
+    and both thumbs are pressed against the hand, not spread from it. The
+    lead thumb stays under the trail palm, so it only leans toward its
+    forefinger (#15181, #15183)."""
+    gaps = thumb_gaps_m(_hand(side))
+    assert gaps["index_tip"] <= float(_Q[f"max_{side}_thumb_index_tip_gap_m"]), gaps
+    assert gaps["hand"] <= float(_Q["max_thumb_hand_gap_m"]), gaps
+
+
+def test_the_trail_thumb_meets_its_forefinger_tip_in_the_pair_too() -> None:
+    gaps = thumb_gaps_m(_pair()["trail"])
+    assert gaps["index_tip"] <= float(_Q["max_trail_thumb_index_tip_gap_m"]), gaps
+
+
+def test_turning_the_thumb_to_the_forefinger_can_be_switched_off() -> None:
+    raw = copy.deepcopy(dict(load_settings_mapping()))
+    plain = _thumb_on_its_azimuth()
+    assert plain.joint_angles.as_mapping()["thumb_side"] == 0.0
+    assert abs(_hand("trail").joint_angles.as_mapping()["thumb_side"]) > 0.1
+    limit = float(_Q["max_trail_thumb_index_tip_gap_m"])
+    assert thumb_gaps_m(plain)["index_tip"] > 2.0 * limit, (
+        "the thumb stays on its azimuth"
+    )
+    for key, value in (
+        ("toward_index_max_deg", {"lead": 0.0, "trail": -1.0}),
+        ("toward_index_steps", 0),
+        ("toward_index_straightness", 1.5),
+        ("index_gap_m", -0.001),
+    ):
+        bad = copy.deepcopy(raw)
+        bad["thumb"][key] = value
+        with pytest.raises(ValueError):
+            settings_from_mapping(bad)
 
 
 def _pair_spacing_m() -> float:

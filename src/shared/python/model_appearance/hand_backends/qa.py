@@ -103,6 +103,26 @@ def finger_side_gaps_m(result: HandVisualResult) -> dict[str, float]:
     return gaps
 
 
+def thumb_gaps_m(result: HandVisualResult) -> dict[str, float]:
+    """How close the thumb lies to the rest of its own hand, between skin
+    vertices: ``"index_tip"`` from the thumb's two free segments to the end
+    segment of the forefinger, ``"hand"`` from the thumb's first free segment
+    to the forefinger's first segment and the palm bone behind it."""
+    from scipy.spatial import cKDTree
+
+    asset, _, _ = _audit_parts(result)
+    v = result.mesh.vertices
+
+    def gap(mine: tuple[str, ...], theirs: tuple[str, ...]) -> float:
+        tree = cKDTree(v[asset.dominant_vertex_ids(theirs)])
+        return float(np.min(tree.query(v[asset.dominant_vertex_ids(mine)])[0]))
+
+    return {
+        "index_tip": gap(("thumb_prox", "thumb_dist"), ("index_dist",)),
+        "hand": gap(("thumb_prox",), ("index_prox", "meta_index")),
+    }
+
+
 def hand_to_finger_gaps_m(
     hand: HandVisualResult, other: HandVisualResult, finger: str
 ) -> dict[str, float]:
