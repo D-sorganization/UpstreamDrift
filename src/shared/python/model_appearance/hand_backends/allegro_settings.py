@@ -9,9 +9,11 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+from numpy.typing import NDArray
+
 from src.shared.python.contracts import ensure, require
 from src.shared.python.core.handedness import Handedness
-from src.shared.python.model_appearance.hand_backends.types import Array
 
 REPO_ROOT = Path(__file__).resolve().parents[5]
 _CONFIG_PATH = REPO_ROOT / "scripts/config/hand_backend_allegro.json"
@@ -19,6 +21,8 @@ ALLEGRO_ASSETS_ROOT = (
     REPO_ROOT
     / "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/hand_assets/wonik_allegro"
 )
+
+Array = NDArray[np.float64]
 
 _DIGIT_TAG: dict[str, str] = {
     "index": "ff",
@@ -216,6 +220,7 @@ def allegro_mjcf_path(*, trail: bool, handedness: str = "right") -> Path:
 
 
 __all__ = [
+    "Array",
     "ALLEGRO_ASSETS_ROOT",
     "AllegroHandPose",
     "AllegroHandVisualSettings",

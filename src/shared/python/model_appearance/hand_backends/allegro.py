@@ -18,6 +18,7 @@ from src.shared.python.model_appearance.geometry import Mesh, concat_meshes
 from src.shared.python.model_appearance.grip_pose import Hand
 from src.shared.python.model_appearance.hand_backends.allegro_settings import (
     _DIGIT_TAG,
+    Array,
     AllegroHandVisualSettings,
     visual_settings,
 )
@@ -35,15 +36,20 @@ from src.shared.python.model_appearance.hand_backends.allegro_solver import (
     _select_part_vertices,
     _transform_to_grip_frame,
     _validate_grip_radius,
+    JointAngles,
     apply_joint_angles,
     solve_allegro_hand_qpos,
 )
+from src.shared.python.model_appearance.hand_backends.registry import (
+    HandVisualBackend,
+    register_hand_visual_backend,
+)
 from src.shared.python.model_appearance.hand_backends.types import (
-    Array,
     HandSide,
     HandVisualResult,
-    JointAngles,
 )
+
+BACKEND_NAME = "allegro"
 
 
 def _resolve_call(
@@ -243,13 +249,13 @@ def penetration_metrics(
     }
 
 
-def build_hand_visual(
+def build_allegro_hand_mesh(
     grip_spec: GripSpec,
     side: HandSide,
     joint_angles: JointAngles = None,
     *,
     grip_radius_m: float | None = None,
-) -> HandVisualResult:
+) -> Mesh:
     """Build scaled, wrapped Wonik Allegro 4-finger visual mesh in grip_hand_frame."""
     cfg, hand, qpos, mount = _pose_and_mount(
         grip_spec, side, joint_angles, grip_radius_m=grip_radius_m
@@ -264,15 +270,52 @@ def build_hand_visual(
         base += len(gverts)
     if not all_verts:
         raise ValueError("no Wonik Allegro visual geoms found")
-    mesh = Mesh(np.vstack(all_verts), np.vstack(all_faces))
-    return HandVisualResult(mesh=mesh, material_rgba=cfg.skin_tone_rgba)
+    return Mesh(np.vstack(all_verts), np.vstack(all_faces))
+
+
+def build_hand_visual(
+    grip_spec: GripSpec,
+    side: HandSide,
+    joint_angles: JointAngles = None,
+    *,
+    grip_radius_m: float,
+    skin_rgb: tuple[float, float, float] | None = None,
+) -> HandVisualResult:
+    """ADR-0057 contract: the Allegro hand, rolled about the shaft, as one mesh."""
+    cfg = visual_settings()
+    mesh = build_allegro_hand_mesh(
+        grip_spec, side, joint_angles, grip_radius_m=grip_radius_m
+    )
+    r, g, b = cfg.skin_tone_rgba[:3]
+    return HandVisualResult(
+        backend=BACKEND_NAME,
+        side=side,
+        mesh=mesh,
+        skin_rgb=(r, g, b) if skin_rgb is None else skin_rgb,
+        grip_radius_m=float(grip_radius_m),
+    )
+
+
+def register() -> None:
+    """Add the Allegro hand to the shared registry (called lazily)."""
+    register_hand_visual_backend(
+        HandVisualBackend(
+            name=BACKEND_NAME,
+            builder=build_hand_visual,
+            description="Wonik Allegro 4-finger hand (Menagerie meshes, MuJoCo FK)",
+            capabilities=frozenset({"self_posing", "explicit_joint_angles"}),
+        )
+    )
 
 
 __all__ = [
+    "BACKEND_NAME",
     "allegro_mount_determinant",
+    "build_allegro_hand_mesh",
     "build_hand_visual",
     "extract_allegro_hand_parts",
     "finger_pad_contact_gaps",
     "measure_allegro_anthropometry",
     "penetration_metrics",
+    "register",
 ]

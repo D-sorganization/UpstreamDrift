@@ -23,16 +23,43 @@ from src.shared.python.grip_spec.types import GripSpec, HandGripSpec, HandSize
 from src.shared.python.model_appearance.grip_pose import Hand
 from src.shared.python.model_appearance.hand_backends.allegro_settings import (
     _DIGIT_TAG,
+    Array,
     AllegroHandPose,
     AllegroHandVisualSettings,
     allegro_mjcf_path,
     visual_settings,
 )
 from src.shared.python.model_appearance.hand_backends.types import (
-    Array,
+    HandJointAngles,
     HandSide,
-    JointAngles,
 )
+
+JointAngles = HandJointAngles | Mapping[str, float] | Array | Sequence[float] | None
+
+# Canonical HandJointAngles hinge -> Allegro MJCF joint. Allegro j0 is finger
+# abduction (thumb: rotation); j1/j2/j3 are the proximal, middle and distal
+# flexion hinges. The hand has no little finger and no ring metacarpal.
+_CANONICAL_SEGMENT_JOINT: dict[str, str] = {"prox": "j1", "mid": "j2", "dist": "j3"}
+_CANONICAL_THUMB_JOINT: dict[str, str] = {
+    "thumb_press": "thj1",
+    "thumb_prox": "thj2",
+    "thumb_dist": "thj3",
+}
+
+
+def allegro_joint_name(name: str) -> str:
+    """Map a canonical ``HandJointAngles`` hinge to its Allegro MJCF joint.
+
+    Native Allegro names (``ffj1``, ``thj0``...) pass through unchanged.
+    """
+    if name in _CANONICAL_THUMB_JOINT:
+        return _CANONICAL_THUMB_JOINT[name]
+    finger, _, segment = name.partition("_")
+    if finger == "little" or name == "meta_ring":
+        raise ValueError(f"Allegro has no joint for canonical hinge {name!r}")
+    if finger in _DIGIT_TAG and segment in _CANONICAL_SEGMENT_JOINT:
+        return f"{_DIGIT_TAG[finger]}{_CANONICAL_SEGMENT_JOINT[segment]}"
+    return name
 
 
 def _require_mujoco() -> Any:
@@ -598,8 +625,11 @@ def apply_joint_angles(qpos: Array, model: Any, joint_angles: JointAngles) -> Ar
     out = qpos.copy()
     if joint_angles is None:
         return out
+    if isinstance(joint_angles, HandJointAngles):
+        joint_angles = joint_angles.as_mapping()
     if isinstance(joint_angles, Mapping):
-        for name, val in joint_angles.items():
+        for raw_name, val in joint_angles.items():
+            name = allegro_joint_name(str(raw_name))
             qidx = _joint_qpos_index(model, str(name))
             jid = _require_mujoco().mj_name2id(
                 model, _require_mujoco().mjtObj.mjOBJ_JOINT, str(name)
@@ -724,6 +754,8 @@ __all__ = [
     "_select_part_vertices",
     "_transform_to_grip_frame",
     "_validate_grip_radius",
+    "JointAngles",
+    "allegro_joint_name",
     "apply_joint_angles",
     "solve_allegro_hand_qpos",
 ]

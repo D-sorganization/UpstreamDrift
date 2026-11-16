@@ -221,11 +221,15 @@ Shadow PR #15143 (`cursor/shadow-hand-grip-visuals-4437` at
 Menagerie robot hand, skin tint, hidden hardware, and curl-to-contact inside
 the backend. Copy that shape:
 
-- `types.py`: `HandSide = "lead" | "trail"`, `JointAngles` as a mapping, an
-  array, or `None`, and `HandVisualResult(mesh, material_rgba)`.
-- Module function `build_hand_visual(grip_spec, side, joint_angles, *, grip_radius_m=None)`.
-- `registry.py`: `register_hand_backend`, `list_hand_backends`, and
-  `build_hand_visual(backend, grip_spec, side, joint_angles, **kwargs)`.
+- Shared ADR-0057 contract (`types.py`, `registry.py`, owned by the shared
+  registry): `HandVisualResult(backend, side, mesh, skin_rgb, grip_radius_m)`.
+  Allegro's `JointAngles` (canonical `HandJointAngles`, a mapping of
+  canonical or native `ffj1`-style names, a 16-DOF array, or `None`) lives in
+  `allegro_solver.py`; `allegro_joint_name()` maps canonical hinges.
+- Module function `build_hand_visual(grip_spec, side, joint_angles=None, *, grip_radius_m, skin_rgb=None)`;
+  the raw mesh builder is `build_allegro_hand_mesh`.
+- `allegro.register()` adds it to the shared registry; callers use
+  `build_hand_visual(grip_spec, side, joint_angles, grip_radius_m=..., backend="allegro")`.
 - Register `"allegro"`. Call it by name from the evidence script. Do not
   retarget `grip_hands.py` to Allegro. Shadow did retarget it; that edit
   will conflict, and the capsule hand must keep working.
@@ -370,8 +374,8 @@ this session.
    Acceptance: that displacement test.
 
 9. **Registry.** `"allegro"` is listed, and
-   `build_hand_visual("allegro", spec, "trail", None)` returns a finite mesh
-   and the skin RGBA from the JSON file. Acceptance: the test does not
+   `build_hand_visual(spec, "trail", grip_radius_m=r, backend="allegro")`
+   returns a finite mesh and the skin RGB from the JSON file. Acceptance: the test does not
    import a private helper to see the colour.
 
 10. **Evidence and the visual self-review.** Implement the script in the

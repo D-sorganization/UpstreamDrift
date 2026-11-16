@@ -17,6 +17,11 @@ from src.shared.python.grip_spec.shaft_roll import (
     resolved_shaft_roll_deg,
 )
 from src.shared.python.grip_spec.types import GripSpec, HandGripSpec, HandSize
+from src.shared.python.model_appearance.hand_backends import (
+    HandVisualResult,
+    build_hand_visual,
+    list_hand_visual_backends,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -30,6 +35,28 @@ CONFIG_PATH = REPO_ROOT / "scripts/config/hand_backend_allegro.json"
 
 def _radial_xy(vertices: np.ndarray) -> np.ndarray:
     return np.hypot(vertices[:, 0], vertices[:, 1])
+
+
+def _build(
+    spec: GripSpec,
+    side: str,
+    joint_angles: object = None,
+    *,
+    grip_radius_m: float | None = None,
+) -> HandVisualResult:
+    """Build the Allegro hand through the shared registry dispatch."""
+    from src.shared.python.model_appearance.hand_backends.allegro_settings import (
+        visual_settings,
+    )
+
+    radius = visual_settings().grip_radius_nominal_m
+    return build_hand_visual(
+        spec,
+        side,  # type: ignore[arg-type]
+        joint_angles,  # type: ignore[arg-type]
+        grip_radius_m=radius if grip_radius_m is None else grip_radius_m,
+        backend="allegro",
+    )
 
 
 def _part_gap_m(a: np.ndarray, b: np.ndarray) -> float:
@@ -65,28 +92,51 @@ def test_allegro_license_notice_and_provenance_integrity() -> None:
 
 def test_registry_contract_and_visual_result() -> None:
     """Gate 2: backend registered under 'allegro', honors shared contract."""
-    from src.shared.python.model_appearance.hand_backends import (
-        HandVisualResult,
-        build_hand_visual,
-        list_hand_backends,
-    )
     from src.shared.python.model_appearance.hand_backends.allegro_settings import (
         visual_settings,
     )
 
-    assert "allegro" in list_hand_backends()
+    assert "allegro" in list_hand_visual_backends()
     cfg = visual_settings()
     spec = GripSpec.legacy()
-    res = build_hand_visual("allegro", spec, "lead", None)
+    res = _build(spec, "lead")
     assert isinstance(res, HandVisualResult)
-    assert res.material_rgba == cfg.skin_tone_rgba
+    assert res.backend == "allegro"
+    assert res.skin_rgb == cfg.skin_tone_rgba[:3]
     assert np.isfinite(res.mesh.vertices).all()
     assert len(res.mesh.vertices) > 1000
     assert len(res.mesh.faces) > 1000
     assert abs(float(res.mesh.volume())) > 1e-6
 
     with pytest.raises(KeyError):
-        build_hand_visual("nonexistent_backend_xyz", spec, "lead", None)
+        build_hand_visual(
+            spec, "lead", grip_radius_m=0.012, backend="nonexistent_backend_xyz"
+        )
+
+
+def test_canonical_joint_names_map_to_allegro_hinges() -> None:
+    """Shared HandJointAngles names drive the matching Allegro MJCF joints."""
+    from src.shared.python.model_appearance.hand_backends.allegro_solver import (
+        allegro_joint_name,
+    )
+    from src.shared.python.model_appearance.hand_backends.types import (
+        HandJointAngles,
+    )
+
+    assert allegro_joint_name("index_prox") == "ffj1"
+    assert allegro_joint_name("middle_mid") == "mfj2"
+    assert allegro_joint_name("ring_dist") == "rfj3"
+    assert allegro_joint_name("thumb_press") == "thj1"
+    assert allegro_joint_name("thumb_dist") == "thj3"
+    assert allegro_joint_name("ffj0") == "ffj0"
+    for absent in ("little_prox", "meta_ring"):
+        with pytest.raises(ValueError, match="no joint"):
+            allegro_joint_name(absent)
+
+    spec = GripSpec.legacy()
+    canonical = _build(spec, "lead", HandJointAngles.from_mapping({"index_prox": 0.6}))
+    native = _build(spec, "lead", {"ffj1": 0.6})
+    np.testing.assert_allclose(canonical.mesh.vertices, native.mesh.vertices)
 
 
 def test_hidden_hardware_and_mesh_count() -> None:
@@ -176,7 +226,6 @@ def test_topology_and_monotonic_knuckle_line(side: str) -> None:
 @pytest.mark.parametrize("side", ("lead", "trail"))
 def test_curl_to_contact_across_grip_radii(side: str, radius_m: float) -> None:
     """Gate 6: zero club penetration, snug pad contact across 0.0105-0.0135 m."""
-    from src.shared.python.model_appearance.hand_backends import build_hand_visual
     from src.shared.python.model_appearance.hand_backends.allegro import (
         finger_pad_contact_gaps,
         penetration_metrics,
@@ -187,7 +236,7 @@ def test_curl_to_contact_across_grip_radii(side: str, radius_m: float) -> None:
 
     cfg = visual_settings()
     spec = GripSpec.legacy()
-    res = build_hand_visual("allegro", spec, side, None, grip_radius_m=radius_m)  # type: ignore[arg-type]
+    res = _build(spec, side, grip_radius_m=radius_m)  # type: ignore[arg-type]
     min_r = float(_radial_xy(res.mesh.vertices).min())
     assert min_r >= radius_m - cfg.club_penetration_tolerance_m
 
@@ -206,27 +255,25 @@ def test_curl_to_contact_across_grip_radii(side: str, radius_m: float) -> None:
 
 def test_invalid_grip_radius_rejected() -> None:
     """Gate 6b: DbC rejects out-of-range, non-finite, or bool grip_radius_m."""
-    from src.shared.python.model_appearance.hand_backends import build_hand_visual
 
     spec = GripSpec.legacy()
     for bad in (-0.01, 0.0, 0.005, 0.03, float("nan"), True):
         with pytest.raises((ValueError, TypeError)):
-            build_hand_visual("allegro", spec, "lead", None, grip_radius_m=bad)  # type: ignore[arg-type]
+            _build(spec, "lead", None, grip_radius_m=bad)  # type: ignore[arg-type]
 
 
 def test_shaft_roll_v_azimuth_mirroring_and_joint_angles() -> None:
     """Gate 7: shaft_roll_deg, v_azimuth_deg, handedness mirror, explicit joint_angles."""
-    from src.shared.python.model_appearance.hand_backends import build_hand_visual
     from src.shared.python.model_appearance.hand_backends.allegro import (
         allegro_mount_determinant,
         extract_allegro_hand_parts,
     )
 
     base = GripSpec.legacy()
-    res0 = build_hand_visual("allegro", base, "lead", None)
+    res0 = _build(base, "lead", None)
 
     rolled_spec = replace(base, lead=replace(base.lead, shaft_roll_deg=20.0))
-    res_roll = build_hand_visual("allegro", rolled_spec, "lead", None)
+    res_roll = _build(rolled_spec, "lead", None)
     # Rotating about +z shaft axis keeps radial distance invariant
     assert np.allclose(
         _radial_xy(res0.mesh.vertices),
@@ -249,7 +296,7 @@ def test_shaft_roll_v_azimuth_mirroring_and_joint_angles() -> None:
     az_spec = replace(
         base, lead=replace(base.lead, v_azimuth_deg=base.lead.v_azimuth_deg + 30.0)
     )
-    res_az = build_hand_visual("allegro", az_spec, "lead", None)
+    res_az = _build(az_spec, "lead", None)
     assert not np.allclose(res0.mesh.vertices[:, :2], res_az.mesh.vertices[:, :2])
 
     # Proper orientation det > 0 for both handednesses
@@ -259,8 +306,8 @@ def test_shaft_roll_v_azimuth_mirroring_and_joint_angles() -> None:
     assert allegro_mount_determinant(left_spec, "lead") > 0.0
     assert allegro_mount_determinant(left_spec, "trail") > 0.0
 
-    res_rh = build_hand_visual("allegro", base, "lead", None)
-    res_lh = build_hand_visual("allegro", left_spec, "lead", None)
+    res_rh = _build(base, "lead", None)
+    res_lh = _build(left_spec, "lead", None)
     assert np.isfinite(res_lh.mesh.vertices).all()
     assert (
         abs(
@@ -279,13 +326,13 @@ def test_shaft_roll_v_azimuth_mirroring_and_joint_angles() -> None:
 
     # Explicit joint_angles override
     override_q = np.zeros(16, dtype=float)
-    res_flat = build_hand_visual("allegro", base, "lead", override_q)
+    res_flat = _build(base, "lead", override_q)
     assert float(np.ptp(res_flat.mesh.vertices[:, 2])) != float(
         np.ptp(res0.mesh.vertices[:, 2])
     ) or not np.allclose(res_flat.mesh.vertices, res0.mesh.vertices)
 
     # Dict override + APPEARANCE_GRIP_SHAFT_AXIS sanity
-    res_dict = build_hand_visual("allegro", base, "lead", {"ffj1": 0.6, "thj0": 0.9})
+    res_dict = _build(base, "lead", {"ffj1": 0.6, "thj0": 0.9})
     assert not np.allclose(res_dict.mesh.vertices, res_flat.mesh.vertices)
     assert np.allclose(APPEARANCE_GRIP_SHAFT_AXIS, [0.0, 0.0, 1.0])
 
