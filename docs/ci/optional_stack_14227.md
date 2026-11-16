@@ -82,8 +82,12 @@ and `tests/unit/api/services/test_launcher_service.py` (an auto-created
 
 | Run | `optional-stack-check` | `articulated-manufactured-authority` | `articulated-manufactured-rolling` |
 | --- | --- | --- | --- |
-| [43688504401](https://github.com/D-sorganization/UpstreamDrift/actions/runs/43688504401) (2026-11-15, scheduled) | Green — post-#15089 `#14227` slice 3 on `main` (`b8159ea3c` at schedule time) | Green | Green |
+| [43688504401](https://github.com/D-sorganization/UpstreamDrift/actions/runs/43688504401) (2026-11-15, scheduled) | Green — post-#15089 `#14227` slice 3 on `main` (`d7bdbc569` at schedule time) | Green | Green |
 | [43569598549](https://github.com/D-sorganization/UpstreamDrift/actions/runs/43569598549) (2026-11-14) | Red — 5 API failures in `test_launcher_launch_api.py` (pre-#15089 merge) | Green | Green |
 
 Scheduled acceptance for #14227 is the 2026-11-15 green run above. Earlier
 failures are retained as history only.
+
+The run metadata and all three lane checkout logs identify source commit
+`d7bdbc569964ca2f85af6f3f1e05bd0362b87e7b`. Acceptance remains scoped to that
+historical source commit.
