@@ -188,6 +188,25 @@ def _side_close_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def _pair_fields(pair: Mapping[str, Any]) -> dict[str, Any]:
+    """The ``pair`` section as :class:`SkinnedHumanSettings` fields."""
+    return {
+        "pair_capsule_radius_scale": _unit_interval(
+            pair["capsule_radius_scale"], "capsule_radius_scale"
+        ),
+        "pair_thumb_radius_scale": _unit_interval(
+            pair["thumb_radius_scale"], "thumb_radius_scale"
+        ),
+        "pair_grip_fingers": _fingers(pair["grip_fingers"]),
+        "pair_max_spacing_adjust_m": _non_negative(
+            pair["max_spacing_adjust_m"], "max_spacing_adjust_m"
+        ),
+        "pair_capsule_margin_m": _non_negative(
+            pair["capsule_margin_m"], "capsule_margin_m"
+        ),
+    }
+
+
 def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
     """Validate a settings mapping. Raises ``ValueError``/``KeyError`` if bad."""
     rgb = tuple(_unit_interval(x, "skin_rgb") for x in raw["skin_rgb"])
@@ -198,7 +217,6 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
     pre: Mapping = raw["preshape"]
     curl: Mapping = raw["curl"]
     thumb: Mapping = raw["thumb"]
-    pair: Mapping = raw["pair"]
     passes = int(curl["arch_passes"])
     if passes < 1:
         raise ValueError("arch_passes must be at least 1")
@@ -254,19 +272,7 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
         palm_cup_pivot_fraction=_non_negative(
             thumb["palm_cup_pivot_fraction"], "palm_cup_pivot_fraction"
         ),
-        pair_capsule_radius_scale=_unit_interval(
-            pair["capsule_radius_scale"], "capsule_radius_scale"
-        ),
-        pair_thumb_radius_scale=_unit_interval(
-            pair["thumb_radius_scale"], "thumb_radius_scale"
-        ),
-        pair_grip_fingers=_fingers(pair["grip_fingers"]),
-        pair_max_spacing_adjust_m=_non_negative(
-            pair["max_spacing_adjust_m"], "max_spacing_adjust_m"
-        ),
-        pair_capsule_margin_m=_non_negative(
-            pair["capsule_margin_m"], "capsule_margin_m"
-        ),
+        **_pair_fields(raw["pair"]),
         frame_excluded_bones=tuple(
             str(bone) for bone in raw["framing"]["excluded_bones"]
         ),
