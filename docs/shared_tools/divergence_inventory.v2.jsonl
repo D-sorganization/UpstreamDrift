@@ -953,10 +953,12 @@
 {"path": "grip_contact/topology_series.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_contact/trajectory_conditioning.py", "classification": "ud-only", "package": "grip_contact", "spelling_only": false}
 {"path": "grip_spec/__init__.py", "classification": "ud-only", "package": "grip_spec", "spelling_only": false}
+{"path": "grip_spec/config.py", "classification": "ud-only", "package": "grip_spec", "spelling_only": false}
 {"path": "grip_spec/defaults.py", "classification": "ud-only", "package": "grip_spec", "spelling_only": false}
 {"path": "grip_spec/projection.py", "classification": "ud-only", "package": "grip_spec", "spelling_only": false}
 {"path": "grip_spec/providers.py", "classification": "ud-only", "package": "grip_spec", "spelling_only": false}
 {"path": "grip_spec/serialization.py", "classification": "ud-only", "package": "grip_spec", "spelling_only": false}
+{"path": "grip_spec/shaft_roll.py", "classification": "ud-only", "package": "grip_spec", "spelling_only": false}
 {"path": "grip_spec/types.py", "classification": "ud-only", "package": "grip_spec", "spelling_only": false}
 {"path": "grip_spec/validation.py", "classification": "ud-only", "package": "grip_spec", "spelling_only": false}
 {"path": "ground_model/__init__.py", "classification": "ud-only", "package": "ground_model", "spelling_only": false}
