@@ -16,6 +16,41 @@ from src.shared.python.analysis.dataclasses import (
 from src.shared.python.core.contracts import ensure
 
 
+def _split_trapezoid(values: np.ndarray, dx: float) -> tuple[float, float]:
+    """Integrate the positive and negative parts of a sampled signal.
+
+    The signal is treated as piecewise linear. On a segment whose endpoints
+    straddle zero the integral is split at the linear zero crossing, so only
+    the triangle on each side of zero is counted. Trapezoid integration of
+    ``max(x, 0)`` / ``min(x, 0)`` instead counts the whole half-segment and
+    inflates both totals (their sum, the net integral, is unaffected).
+
+    Preconditions: ``values`` is a 1-D array of at least two finite samples
+    and ``dx`` is the uniform sample spacing.
+
+    Postconditions: the first result is ``>= 0``, the second ``<= 0`` and
+    their sum equals ``trapezoid(values, dx=dx)``.
+
+    Returns:
+        ``(positive_integral, negative_integral)``.
+    """
+    a = np.asarray(values[:-1], dtype=float)
+    b = np.asarray(values[1:], dtype=float)
+    both_pos = (a >= 0) & (b >= 0)
+    both_neg = (a <= 0) & (b <= 0)
+    crossing = ~(both_pos | both_neg)
+
+    # Segments with a sign change: split at the zero crossing a/(a-b).
+    denom = np.where(crossing, a - b, 1.0)
+    frac = np.where(crossing, a / denom, 0.0)  # fraction of dx before crossing
+    pos_cross = np.where(a > 0, a * frac, b * (1.0 - frac)) * 0.5 * dx
+    neg_cross = np.where(a < 0, a * frac, b * (1.0 - frac)) * 0.5 * dx
+
+    pos = np.where(both_pos, 0.5 * (a + b) * dx, np.where(crossing, pos_cross, 0.0))
+    neg = np.where(both_neg, 0.5 * (a + b) * dx, np.where(crossing, neg_cross, 0.0))
+    return float(pos.sum()), float(neg.sum())
+
+
 class PowerWorkMetricsMixin:
     """Mixin for power, work, and stiffness analysis.
 
@@ -80,16 +115,7 @@ class PowerWorkMetricsMixin:
 
         power = torque * velocity
 
-        pos_power = np.maximum(power, 0)
-        neg_power = np.minimum(power, 0)
-
-        if hasattr(np, "trapezoid"):
-            positive_work = np.trapezoid(pos_power, dx=dt)
-            negative_work = np.trapezoid(neg_power, dx=dt)
-        else:
-            trapz_func = getattr(np, "trapz")  # noqa: B009
-            positive_work = trapz_func(pos_power, dx=dt)
-            negative_work = trapz_func(neg_power, dx=dt)
+        positive_work, negative_work = _split_trapezoid(power, dt)
 
         net_work = positive_work + negative_work
 
@@ -249,18 +275,12 @@ class PowerWorkMetricsMixin:
         data = data[:n_samples]
         dt = self.dt
 
-        pos_data = np.maximum(data, 0)
-        neg_data = np.minimum(data, 0)
-
         if hasattr(np, "trapezoid"):
             net_impulse = float(np.trapezoid(data, dx=dt))
-            pos_impulse = float(np.trapezoid(pos_data, dx=dt))
-            neg_impulse = float(np.trapezoid(neg_data, dx=dt))
         else:
             trapz_func = getattr(np, "trapz")  # noqa: B009
             net_impulse = float(trapz_func(data, dx=dt))
-            pos_impulse = float(trapz_func(pos_data, dx=dt))
-            neg_impulse = float(trapz_func(neg_data, dx=dt))
+        pos_impulse, neg_impulse = _split_trapezoid(data, dt)
 
         return ImpulseMetrics(
             net_impulse=net_impulse,
