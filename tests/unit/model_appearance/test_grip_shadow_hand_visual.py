@@ -10,7 +10,10 @@ import pytest
 
 from src.shared.python.grip_spec import GripSpec, HandGripSpec
 from src.shared.python.model_appearance.club_assembly import ClubAssembly
-from src.shared.python.model_appearance.grip_hands import grip_hand_frame, grip_hand_meshes
+from src.shared.python.model_appearance.grip_hands import (
+    grip_hand_frame,
+    grip_hand_meshes,
+)
 from src.shared.python.model_appearance.grip_pose import DEFAULT_GRIP_POSE, Hand
 from src.shared.python.model_appearance.grip_shadow_hand_assets import (
     load_shadow_hand_provenance,
@@ -142,8 +145,10 @@ def test_hand_grip_spec_round_trip_wrist_mapping() -> None:
     assert again == wrist
 
 
-def test_grip_hand_meshes_use_shadow_not_capsule_count() -> None:
+def test_grip_hand_meshes_draw_shadow_when_opted_in() -> None:
     club = _iron7()
-    meshes = grip_hand_meshes(club, DEFAULT_GRIP_POSE, grip_spec=GripSpec.legacy())
+    meshes = grip_hand_meshes(
+        club, DEFAULT_GRIP_POSE, grip_spec=GripSpec.legacy(), hand_backend="shadow"
+    )
     for label in ("lead_hand", "trail_hand"):
         assert len(meshes[label].vertices) > 10_000
