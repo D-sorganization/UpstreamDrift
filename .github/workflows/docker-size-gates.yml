@@ -27,9 +27,11 @@ on:
   workflow_dispatch:
 
 concurrency:
-  # One image build at a time per ref across docker-size-gates, docker-security-scan,
-  # and docker-smoke so shared fleet BuildKit does not hit lease/prune races (#13761).
-  group: docker-image-build-${{ github.ref }}
+  # Per-workflow group: GitHub allows one running + one pending per group; sharing
+  # one group across docker-size-gates, docker-security-scan, and docker-smoke
+  # silently drops a third workflow run (#15086). BuildKit on a host is already
+  # serialized via scripts/ci/shared_buildkit.py (flock on ud-buildkit).
+  group: docker-size-gates-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:

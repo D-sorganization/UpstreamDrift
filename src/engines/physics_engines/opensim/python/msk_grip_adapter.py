@@ -149,7 +149,10 @@ def admit_opensim_grip_model(model_id: str) -> OpenSimModelAdmission:
 
 
 def _hand_interface_transforms(
-    club: MskClub, calibration: GripCalibration
+    club: MskClub,
+    calibration: GripCalibration,
+    *,
+    grip_pose=None,
 ) -> dict[str, np.ndarray]:
     """Compute 4x4 transform of each hand's ``GripInterface`` frame in the hand body."""
     transforms: dict[str, np.ndarray] = {}
@@ -161,7 +164,14 @@ def _hand_interface_transforms(
         inv_shaft[:3, 3] = -(rot_t @ club.grip_points[side])
         side_iface = iface.frame(side)
         hand_shaft = calibration.hand_frames[side]
-        transforms[side] = hand_shaft @ inv_shaft @ side_iface.matrix()
+        transform = hand_shaft @ inv_shaft @ side_iface.matrix()
+        if grip_pose is not None:
+            from src.shared.python.grip_spec.shaft_roll import attachment_base_transform
+            from src.shared.python.model_appearance.grip_pose import Hand
+
+            hand = Hand.LEAD if side == "L" else Hand.TRAIL
+            transform = attachment_base_transform(grip_pose, hand, base=transform)
+        transforms[side] = transform
     return transforms
 
 

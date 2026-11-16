@@ -80,6 +80,11 @@
       "path": "tests/unit/engines/putting_green/test_simulator.py",
       "issue": "#14141",
       "reason": "Exercised the legacy duplicate putting_green physics (ud-legacy-roll/1) deleted by #14141 step 10e per ADR-0058 (one shared putting core); replacement coverage: tests/unit/engines/putting_green/test_shared_engine.py."
+    },
+    {
+      "path": "tests/ci/test_jules_push_pr_noise_retirement.py",
+      "issue": "#13575",
+      "reason": "Retired with scripts/ci/jules_push_pr_noise_retirement.py and scripts/config/jules_push_pr_noise_retirement.json when the Jules push/PR noise workflows were removed (#13575). Replacement coverage: tests/ci/test_workflow_cancellation_semantics.py::test_retired_jules_noise_workflow_not_on_cancel_false_allowlist."
     }
   ]
 }

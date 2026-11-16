@@ -70,7 +70,14 @@ _SHARED_PICKS = {
     "lead_below_butt": "lead_below_butt_m",
     "hand_spacing": "hand_spacing_m",
 }
-PHYSICAL_PICKS = ("preset", *_HAND_PICKS, *_SHARED_PICKS, "grip_style")
+AUTHORING_SHAFT_ROLL_PICKS = ("lead_shaft_roll", "trail_shaft_roll")
+PHYSICAL_PICKS = (
+    "preset",
+    *_HAND_PICKS,
+    *_SHARED_PICKS,
+    *AUTHORING_SHAFT_ROLL_PICKS,
+    "grip_style",
+)
 VISUAL_PICKS = (
     "grip_thumb_offset_deg",
     "grip_strength_deg",
@@ -93,6 +100,8 @@ class GripOverrides:
     preset: str | None = None
     lead_shaft_rotation: float | None = None
     trail_shaft_rotation: float | None = None
+    lead_shaft_roll: float | None = None
+    trail_shaft_roll: float | None = None
     lead_palm_diagonal: float | None = None
     trail_palm_diagonal: float | None = None
     lead_set_angle: float | None = None
@@ -462,6 +471,18 @@ _FLAGS: tuple[tuple[str, str, type, str], ...] = (
         "trail_shaft_rotation",
         float,
         "trail hand rotation about the shaft, degrees (positive is stronger)",
+    ),
+    (
+        "--lead-shaft-roll",
+        "lead_shaft_roll",
+        float,
+        "lead hand shaft roll about butt→head, degrees (HRG-GB1b attachment frame)",
+    ),
+    (
+        "--trail-shaft-roll",
+        "trail_shaft_roll",
+        float,
+        "trail hand shaft roll about butt→head, degrees (HRG-GB1b attachment frame)",
     ),
     (
         "--lead-palm-diagonal",

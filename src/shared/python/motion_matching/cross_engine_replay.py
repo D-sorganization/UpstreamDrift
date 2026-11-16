@@ -148,6 +148,7 @@ class EngineReplayOutcome:
     max_closure_residual_m: float
     max_closure_translation_m: float | None = None
     max_closure_rotation_rad: float | None = None
+    aligned_model_markers_m: Array | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -232,9 +233,10 @@ class CrossEngineComparisonReport:
             PARITY_REPORT_SCHEMA_VERSION,
             ComparisonClass,
             EngineParityRow,
-            PointwiseDifference,
             UnifiedParityReport,
         )
+
+        pointwise_by_engine = _inter_engine_pointwise_marker_diffs(self)
 
         rows: dict[str, EngineParityRow] = {}
         for eng, outcome in self.outcomes.items():
@@ -248,18 +250,7 @@ class CrossEngineComparisonReport:
                 if outcome.shared_metrics is not None
                 else None
             )
-            pt_diffs: dict[str, PointwiseDifference] = {}
-            for pair_key, diffs in self.pairwise_metric_diffs.items():
-                if eng in pair_key:
-                    for k, val in diffs.items():
-                        pt_diffs[k] = PointwiseDifference(
-                            metric_name=k,
-                            max_abs_diff=val,
-                            rms_diff=val,
-                            mean_diff=val,
-                            unit="m" if "marker" in k else "rad",
-                            pass_gate=(val <= 0.001 if "marker" in k else val <= 0.05),
-                        )
+            pt_diffs = dict(pointwise_by_engine.get(eng, {}))
             rows[eng] = EngineParityRow(
                 engine=eng,
                 status=(
@@ -284,6 +275,61 @@ class CrossEngineComparisonReport:
             engine_rows=rows,
             pairwise_comparisons=self.pairwise_metric_diffs,
         )
+
+
+def _inter_engine_pointwise_marker_diffs(
+    report: CrossEngineComparisonReport,
+) -> dict[str, dict[str, Any]]:
+    """Aligned marker trajectories only; never infer pointwise stats from aggregate RMSE."""
+    by_engine: dict[str, dict[str, Any]] = {}
+    engines = report.engines
+    for i in range(len(engines)):
+        for j in range(i + 1, len(engines)):
+            eng_a, eng_b = engines[i], engines[j]
+            out_a = report.outcomes[eng_a]
+            out_b = report.outcomes[eng_b]
+            traj_a = out_a.aligned_model_markers_m
+            traj_b = out_b.aligned_model_markers_m
+            if traj_a is None or traj_b is None:
+                continue
+            if np.asarray(traj_a).shape != np.asarray(traj_b).shape:
+                continue
+            diff = _evaluate_aligned_marker_pointwise(
+                np.asarray(traj_a, dtype=np.float64),
+                np.asarray(traj_b, dtype=np.float64),
+            )
+            key = f"inter_engine_markers_{eng_a}_vs_{eng_b}"
+            by_engine.setdefault(eng_a, {})[key] = diff
+            by_engine.setdefault(eng_b, {})[key] = diff
+    return by_engine
+
+
+def _evaluate_aligned_marker_pointwise(
+    traj_a: Array,
+    traj_b: Array,
+    tolerance_m: float = 0.001,
+) -> Any:
+    """Pointwise marker distance; matches parity_report.evaluate_pointwise_trajectory_parity."""
+    from src.shared.python.motion_matching.parity_schema import PointwiseDifference
+
+    delta = np.asarray(traj_a, dtype=np.float64) - np.asarray(traj_b, dtype=np.float64)
+    if delta.ndim >= 3:
+        pointwise_dist = np.sqrt(np.sum(delta**2, axis=-1))
+    elif delta.ndim == 2:
+        pointwise_dist = np.abs(delta)
+    else:
+        pointwise_dist = np.abs(delta)
+    max_val = float(np.max(pointwise_dist))
+    rms_val = float(np.sqrt(np.mean(pointwise_dist**2)))
+    mean_val = float(np.mean(pointwise_dist))
+    return PointwiseDifference(
+        metric_name="marker_diff_m",
+        max_abs_diff=max_val,
+        rms_diff=rms_val,
+        mean_diff=mean_val,
+        unit="m",
+        pass_gate=bool(max_val <= tolerance_m),
+    )
 
 
 def _compute_pairwise_diffs(
