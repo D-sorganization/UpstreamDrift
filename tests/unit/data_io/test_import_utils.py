@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from types import ModuleType
 
 import pytest
 from src.shared.python.data_io.import_utils import (
@@ -13,6 +14,20 @@ from src.shared.python.data_io.import_utils import (
     import_from,
     lazy_import,
 )
+
+pytestmark = pytest.mark.unit
+
+
+@pytest.fixture
+def versioned_submodule(monkeypatch: pytest.MonkeyPatch) -> ModuleType:
+    package = ModuleType("_test_import_package")
+    package.__path__ = []
+    package.__version__ = "10.0"
+    child = ModuleType("_test_import_package.backend")
+    monkeypatch.setitem(sys.modules, package.__name__, package)
+    monkeypatch.setitem(sys.modules, child.__name__, child)
+    return child
+
 
 # ---------------------------------------------------------------------------
 # ensure_imports
@@ -47,6 +62,11 @@ class TestEnsureImports:
 
 
 class TestLazyImport:
+    def test_returns_requested_dotted_module(self) -> None:
+        from xml.etree import ElementTree
+
+        assert lazy_import("xml.etree.ElementTree") is ElementTree
+
     def test_returns_module(self) -> None:
         mod = lazy_import("sys")
         assert mod is sys
@@ -105,6 +125,13 @@ class TestCheckOptionalDependency:
 
 
 class TestGetModuleVersion:
+    def test_reads_dotted_module_version(self, versioned_submodule) -> None:
+        versioned_submodule.__version__ = "2.0"
+        assert get_module_version(versioned_submodule.__name__) == "2.0"
+
+    def test_does_not_inherit_parent_version(self, versioned_submodule) -> None:
+        assert get_module_version(versioned_submodule.__name__) is None
+
     def test_numpy_has_version(self) -> None:
         version = get_module_version("numpy")
         assert version is not None
@@ -121,6 +148,10 @@ class TestGetModuleVersion:
 
 
 class TestCheckMinimumVersion:
+    def test_parent_version_cannot_qualify_dotted_module(self, versioned_submodule):
+        versioned_submodule.__version__ = "1.0"
+        assert not check_minimum_version(versioned_submodule.__name__, "2.0")
+
     def test_numpy_meets_ancient_minimum(self) -> None:
         assert check_minimum_version("numpy", "1.0.0") is True
 
