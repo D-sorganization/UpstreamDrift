@@ -217,6 +217,7 @@ def test_dispatch_load_hdf5(tmp_path: Path):
     pd.testing.assert_frame_equal(df, loaded)
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "value",
     [
