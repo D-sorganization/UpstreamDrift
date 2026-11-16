@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import os
 from unittest.mock import patch
 
@@ -238,3 +239,20 @@ class TestSocketAccessors:
     def test_get_realtime_port_reads_env_override(self) -> None:
         with _set(GOLF_REALTIME_PORT="9999"):
             assert get_realtime_port() == 9999
+
+
+@pytest.mark.parametrize(
+    "bounds",
+    [{"min_value": 0.0}, {"max_value": 1.0}, {"min_value": 0.0, "max_value": 1.0}],
+)
+def test_bounded_float_rejects_nan(bounds: dict[str, float]) -> None:
+    """NaN cannot meet either numeric bound."""
+    with _set(**{_TEST_VAR: "NaN"}), pytest.raises(EnvironmentError, match="NaN"):
+        get_env_float(_TEST_VAR, **bounds)
+
+
+def test_unbounded_float_preserves_nan() -> None:
+    """Unbounded parsing retains Python float semantics."""
+    with _set(**{_TEST_VAR: "NaN"}):
+        value = get_env_float(_TEST_VAR)
+    assert value is not None and math.isnan(value)

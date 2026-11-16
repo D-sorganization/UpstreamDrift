@@ -32,6 +32,7 @@ Usage:
 from __future__ import annotations
 
 import functools
+import math
 import os
 from typing import TypeVar
 
@@ -210,7 +211,7 @@ def get_env_float(
         Float value or None.
 
     Raises:
-        EnvironmentError: If value is not a valid float or out of range.
+        EnvironmentError: If value is invalid, out of range, or NaN with numeric bounds.
 
     Example:
         >>> timeout = get_env_float("TIMEOUT", default=30.0, min_value=0.0)
@@ -229,6 +230,13 @@ def get_env_float(
             expected="float",
             actual=value,
         ) from e
+
+    if (min_value is not None or max_value is not None) and math.isnan(float_value):
+        raise EnvironmentError(
+            name,
+            "NaN cannot satisfy numeric bounds",
+            actual=value,
+        )
 
     if min_value is not None and float_value < min_value:
         raise EnvironmentError(
