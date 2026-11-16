@@ -43,7 +43,8 @@ def test_json_serializer_ndarray():
 
 def test_json_serializer_numpy_scalars():
     s = _make_json_serializer()
-    assert s(np.int32(5)) == 5.0
+    assert s(np.int32(5)) == 5
+    assert type(s(np.int32(5))) is int
     assert s(np.float64(2.5)) == 2.5
 
 
@@ -236,5 +237,5 @@ def test_save_json_preserves_numpy_integer_type_and_value(
 
     payload = json.loads(path.read_text())
     for actual in (payload["results"]["count"], payload["metadata"]["seed"]):
-        assert type(actual) is int
         assert actual == int(value)
+        assert type(actual) is int
