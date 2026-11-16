@@ -7,13 +7,30 @@ This page restates it for review; the JSON is authoritative.
 | Field                                               | Value                                                                                                                                 |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | Audit snapshot (UpstreamDrift / Tools)              | `1f69a51fce997932f04a6ad1dd95bf4d065ba971` / `3d93bb2c89813e17551814d3be7e895f791e29af` (2026-09-04)                                  |
-| Reconciled against (UpstreamDrift source / Tools pin) | `e97e6c98519c5b9933c5a38324c3ba0c01785b5f` / `160c9c785e4559067e2b532f189227f662f50579` (2026-10-24 UTC; merged Tools PR #5724) |
+| Reconciled against (UpstreamDrift source / Tools pin) | `c7a5675c89b14a0b8b92af8c120cc62262a25c58` / `083acade5af7a8a33538e94371416e852f42f3cb` (2026-11-16 UTC; candidate Tools PR #6076) |
 | Release claim                                       | `code_verified_only`; no predictive-accuracy claim                                                                                    |
 | Supported Python matrix                             | 3.11 and 3.12 (CI Standard); 3.12 for the lock and Docker image                                                                       |
 
 ## Model-Capability Matrix
 
-### Current Provider Pin Reconciliation
+### Current Candidate Provider Pin Reconciliation
+
+PR #15219 consumes candidate Tools revision
+`083acade5af7a8a33538e94371416e852f42f3cb` from Tools PR #6076.
+From UpstreamDrift source `c7a5675c89b14a0b8b92af8c120cc62262a25c58`,
+all 28 applicable capability/matrix probes passed before updating the pin
+record. The previously built candidate bundle was served again through the
+verifier using Python 3.11, FastAPI and httpx. All 76 assets (five JavaScript
+assets; 2,804,364 bytes) matched their digests; a missing file returned 404.
+The executed receipt is
+[`impact_explorer_bundle_receipt_20261116.json`](impact_explorer_bundle_receipt_20261116.json).
+
+Reproduce the capability tests and build/serve commands below with the candidate
+revision in both revision arguments. This is candidate software evidence only:
+Tools #6076 remains open, so the main-ancestor gate remains blocked. The
+predictive-accuracy and physical-qualification claims are unchanged.
+
+### Historical Published Provider Pin Reconciliation
 
 The merged Tools PR #5724 publishes `160c9c785e4559067e2b532f189227f662f50579`. From UpstreamDrift source `e97e6c98519c5b9933c5a38324c3ba0c01785b5f`, all 28 applicable matrix/capability probes passed before advancing the reconciliation metadata; the exact-pin probe was excluded until that advance. The exact published checkout was built with Node 22.23.2/npm 10.9.8, then served and verified with Python 3.11, FastAPI and httpx from the isolated project validation environment.
 

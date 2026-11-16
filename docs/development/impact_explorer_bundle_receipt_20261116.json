@@ -1,0 +1,15 @@
+{
+  "mount": "/impact-explorer-app",
+  "release_revision": "083acade5af7a8a33538e94371416e852f42f3cb",
+  "assets_verified": 76,
+  "javascript_assets": 5,
+  "total_bytes": 2804364,
+  "index_references": [
+    "/impact-explorer-app/assets/index-CU-UuABX.js",
+    "/impact-explorer-app/assets/react-vendor-DjFNwwcj.js",
+    "/impact-explorer-app/assets/katex-iVNSI_mN.js",
+    "/impact-explorer-app/assets/katex-x_CSpnfL.css",
+    "/impact-explorer-app/assets/index-ByQMvKwJ.css"
+  ],
+  "missing_artifact_status": 404
+}
