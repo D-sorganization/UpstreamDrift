@@ -61,8 +61,12 @@ def load_json_config(
             return default.copy()
         return {}
 
-    with open(path_obj, encoding="utf-8") as f:
-        config: dict[str, Any] = json.load(f)
+    try:
+        with open(path_obj, encoding="utf-8") as f:
+            config: dict[str, Any] = json.load(f)
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        logger.error("Failed to load JSON configuration %s: %s", path_obj, exc)
+        return default.copy() if default is not None else {}
 
     logger.debug(f"Loaded configuration from {path}")
     return config
@@ -135,8 +139,12 @@ def load_yaml_config(
             return default.copy()
         return {}
 
-    with open(path_obj, encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+    try:
+        with open(path_obj, encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+    except (OSError, UnicodeError, yaml.YAMLError) as exc:
+        logger.error("Failed to load YAML configuration %s: %s", path_obj, exc)
+        return default.copy() if default is not None else {}
 
     logger.debug(f"Loaded YAML configuration from {path}")
     return config or {}
