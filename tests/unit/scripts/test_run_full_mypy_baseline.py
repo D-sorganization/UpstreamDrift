@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts.ci import run_full_mypy_baseline as mod
 
 
@@ -110,6 +112,7 @@ def test_update_baseline_writes_current_errors(tmp_path: Path, monkeypatch) -> N
     assert data["errors"] == [expected.to_json()]
 
 
+@pytest.mark.unit
 def test_ndarray_stub_message_variants_are_distinct_baseline_keys() -> None:
     """SciPy-stubs 1.17+ rephrases ndarray diagnostics; refresh the baseline when they drift."""
     stale = _error(
