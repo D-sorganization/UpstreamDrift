@@ -210,6 +210,10 @@ class GripPose:
     lead_roll_offset_deg: float = 0.0
     #: Visual roll offset for the trail hand in degrees ([-30, 30]).
     trail_roll_offset_deg: float = 0.0
+    #: Physical shaft roll for the lead hand (HRG-GB1b); see grip_spec.shaft_roll.
+    lead_shaft_roll_deg: float = 0.0
+    #: Physical shaft roll for the trail hand (HRG-GB1b).
+    trail_shaft_roll_deg: float = 0.0
     #: Cap in newtons on the lead hand's total pad normal force (HRG-HX4). A
     #: force, not ``grip_strength_deg`` (the visual roll). ``"unlimited"`` or > 0.
     lead_grip_force_limit_n: GripForceLimit = UNLIMITED
@@ -243,6 +247,8 @@ class GripPose:
                 ("grip_strength_deg", -30.0, 30.0),
                 ("lead_roll_offset_deg", -30.0, 30.0),
                 ("trail_roll_offset_deg", -30.0, 30.0),
+                ("lead_shaft_roll_deg", -180.0, 180.0),
+                ("trail_shaft_roll_deg", -180.0, 180.0),
             ),
         )
         require(self.hand_spacing_m > 0.0, "hand_spacing_m must be positive")
@@ -321,6 +327,12 @@ class GripPose:
         if hand is Hand.LEAD:
             return self.lead_roll_offset_deg
         return self.trail_roll_offset_deg
+
+    def shaft_roll_deg(self, hand: Hand) -> float:
+        """Per-hand physical shaft roll with handedness mirroring (#15138)."""
+        from src.shared.python.grip_spec.shaft_roll import pose_shaft_roll_deg
+
+        return pose_shaft_roll_deg(self, hand)
 
     def placement(self, hand: Hand) -> HandPlacement:
         """Full placement of one hand (position along the grip and angles)."""
