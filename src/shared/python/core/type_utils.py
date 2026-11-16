@@ -79,7 +79,7 @@ def safe_int(
                 return int(float(value))
 
         return int(value)
-    except (ValueError, TypeError) as e:
+    except (ValueError, TypeError, OverflowError) as e:
         if strict:
             raise ValueError(f"Cannot convert {value!r} to int: {e}") from e
         return default
@@ -144,7 +144,7 @@ def safe_float(  # noqa: C901
             return default
 
         return result
-    except (ValueError, TypeError) as e:
+    except (ValueError, TypeError, OverflowError) as e:
         if strict:
             raise ValueError(f"Cannot convert {value!r} to float: {e}") from e
         return default
