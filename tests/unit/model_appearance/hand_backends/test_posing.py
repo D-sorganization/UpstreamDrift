@@ -24,6 +24,7 @@ from src.shared.python.model_appearance.hand_backends.posing import (
     curl_to_contact,
     cylinder_distance,
     flat_hand_rotation,
+    skin_distance,
     wrap_to_contact,
 )
 
@@ -231,3 +232,27 @@ def test_a_pre_curled_joint_carries_on_from_where_it_is() -> None:
     start = {"mid": math.radians(25.0)}
     result = curl_to_contact(finger, (_chain(limit),), far, _SETTINGS, start)
     assert result.angles["mid"] >= math.radians(25.0)
+
+
+def test_skin_distance_is_signed_and_exact_near_the_surface() -> None:
+    """A closed skin given as points and outward normals: a 50 mm sphere."""
+    k = np.arange(4000) + 0.5
+    polar, turn = np.arccos(1.0 - 2.0 * k / 4000), np.pi * (1.0 + 5.0**0.5) * k
+    normals = np.column_stack(
+        [np.sin(polar) * np.cos(turn), np.sin(polar) * np.sin(turn), np.cos(polar)]
+    )
+    distance = skin_distance(0.05 * normals, normals)
+    direction = np.array([0.3, -0.5, 0.81])
+    direction /= np.linalg.norm(direction)
+    for radius, tolerance in (
+        (0.03, 2e-3),
+        (0.049, 1e-4),
+        (0.0505, 1e-4),
+        (0.08, 2e-3),
+    ):
+        got = float(distance((radius * direction)[None, :])[0])
+        assert got == pytest.approx(radius - 0.05, abs=tolerance), radius
+    with pytest.raises(ValueError):
+        skin_distance(normals, normals[:-1])
+    with pytest.raises(ValueError):
+        skin_distance(normals[:3], normals[:3] * np.nan)

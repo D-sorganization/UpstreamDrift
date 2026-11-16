@@ -5,6 +5,7 @@ Every tolerance comes from ``scripts/config/hand_visual_quality.json``.
 
 from __future__ import annotations
 
+import copy
 import dataclasses
 import math
 
@@ -744,6 +745,49 @@ def test_the_trail_hand_closes_up_against_the_lead_index_finger() -> None:
     assert gaps["ring"] <= float(_Q["max_pair_ring_finger_gap_m"]), gaps
 
 
+def test_the_overlapped_little_finger_lies_in_the_lead_finger_groove() -> None:
+    """Overlap grip: the trail little finger sits in the groove between the
+    lead forefinger and middle finger, touching both (#15183)."""
+    pair = _pair()
+    limit = float(_Q["max_pair_little_groove_gap_m"])
+    for finger in ("index", "middle"):
+        gap = hand_to_finger_gaps_m(pair["trail"], pair["lead"], finger)["little"]
+        assert gap <= limit, f"little finger {gap * 1e3:.1f} mm off the lead {finger}"
+
+
+def test_the_overlap_and_the_closing_up_can_be_switched_off() -> None:
+    raw = copy.deepcopy(dict(load_settings_mapping()))
+    raw["pair"].update(overlap_max_swing_deg=0.0, max_spacing_close_m=0.0)
+    apart = build_grip_hands(
+        _spec(), grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
+    )
+    ring = hand_to_finger_gaps_m(apart["trail"], _pair()["lead"], "index")["ring"]
+    assert ring > float(_Q["max_pair_ring_finger_gap_m"]), "no longer closed up"
+    swing = _pair()["trail"].joint_angles.as_mapping()["little_side"]
+    plain = apart["trail"].joint_angles.as_mapping()["little_side"]
+    assert abs(swing - plain) > math.radians(10.0), "the overlap swings the finger"
+    for key in (
+        "overlap_max_swing_deg",
+        "max_spacing_close_m",
+        "skin_margin_m",
+        "yield_max_depth_m",
+        "skin_reach_m",
+    ):
+        bad = copy.deepcopy(raw)
+        bad["pair"][key] = -1.0
+        with pytest.raises(ValueError):
+            settings_from_mapping(bad)
+    bad = copy.deepcopy(raw)
+    bad["pair"]["obstacle"] = "boxes"
+    with pytest.raises(ValueError):
+        settings_from_mapping(bad)
+
+
+def _pair_spacing_m() -> float:
+    trail = _pair()["trail"]
+    return float(trail.frame_from_rest[2, 3] - _hand("trail").frame_from_rest[2, 3])
+
+
 def test_two_hands_share_the_club_without_passing_through_each_other() -> None:
     pair = _pair()
     depth = hand_pair_penetration_m(pair["lead"], pair["trail"])
@@ -797,10 +841,11 @@ def test_trail_fingers_seat_on_the_grip_and_only_the_little_overlaps() -> None:
             ids = trail.rest_asset.dominant_vertex_ids((f"{finger}_{segment}",))
             gap = float(grip[ids].min())
             assert gap <= tolerance, f"trail {finger}_{segment} {gap * 1e3:.1f} mm"
-    # The slide toward the head is bounded (the solo trail hand sits at z = 0).
-    moved = trail.frame_from_rest[2, 3] - _hand("trail").frame_from_rest[2, 3]
-    moved -= _spec().hand_spacing_m
-    assert -1e-9 <= moved <= default_settings().pair_max_spacing_adjust_m + 1e-9
+    # The slide along the grip is bounded (the solo trail hand sits at z = 0).
+    moved = _pair_spacing_m() - _spec().hand_spacing_m
+    settings = default_settings()
+    assert moved >= -settings.pair_max_spacing_close_m - 1e-9
+    assert moved <= settings.pair_max_spacing_adjust_m + 1e-9
 
 
 def test_forearms_leave_the_club_on_the_golfers_side() -> None:

@@ -44,6 +44,7 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     press_flat,
     sharpened_faces,
     relax_folds,
+    yield_to_points,
 )
 from src.shared.python.model_appearance.hand_backends.joint_angles import (
     FINGERS,
@@ -703,6 +704,41 @@ def _close_fingers(hand: _GripHand, angles: Mapping[str, float]) -> None:
         hand.swing_sideways(bone, low)
 
 
+def _overlap_little_finger(
+    hand: _GripHand, angles: Mapping[str, float], groove: Callable[[Array], Array]
+) -> None:
+    """Swing the little finger over the groove between two fingers of the
+    other hand, which it then curls into (overlap grip, #15183).
+
+    ``groove`` is signed: zero where a point is as far from one of those
+    fingers as from the other. The swing is searched from where the finger
+    lies up to ``pair.overlap_max_swing_deg`` either way; zero switches it off.
+    """
+    settings = hand.settings
+    limit = math.radians(settings.pair_overlap_max_swing_deg)
+    if not limit:
+        return
+    bone = "little_prox"
+
+    def offset(swing: float) -> float:
+        hand.swing_sideways(bone, swing)
+        ends = [
+            hand.joint_position("little_dist", angles, tail=t) for t in (False, True)
+        ]
+        return float(groove(np.array(ends)).mean())
+
+    low = hand.side.get(bone, 0.0)
+    at_low = offset(low)
+    high = min((-limit, limit), key=lambda swing: abs(offset(swing)))
+    if at_low * offset(high) > 0.0:  # the groove is out of reach: go nearest
+        hand.swing_sideways(bone, high if abs(offset(high)) < abs(at_low) else low)
+        return
+    for _ in range(settings.curl.bisection_steps):
+        mid = 0.5 * (low + high)
+        low, high = (mid, high) if offset(mid) * at_low > 0.0 else (low, mid)
+    hand.swing_sideways(bone, 0.5 * (low + high))
+
+
 def _thumb_chain(
     settings: SkinnedHumanSettings, targets: _RightHandTargets
 ) -> CurlChain:
@@ -751,9 +787,13 @@ def _wrap(
     obstacle: ObstacleDistance,
     start: Mapping[str, float],
     samples: int | None = None,
+    target: ObstacleDistance | None = None,
 ) -> dict[str, float]:
     """Curl ``chains`` to contact, with the wrap search if it is switched on
-    (``samples`` overrides ``curl.wrap_scan_samples``)."""
+    (``samples`` overrides ``curl.wrap_scan_samples``; ``target`` as in
+    :func:`posing.wrap_to_contact`)."""
+    if not chains:
+        return dict(start)
     settings = hand.settings
     samples = settings.wrap_scan_samples if samples is None else samples
     if samples >= 2:
@@ -764,8 +804,25 @@ def _wrap(
             settings.curl,
             start,
             samples=samples,
+            target=target,
         ).angles
     return curl_to_contact(hand, chains, obstacle, settings.curl, start).angles
+
+
+@dataclass(frozen=True)
+class _Scene:
+    """What a hand of a pair is posed around, in that hand's build frame.
+
+    ``distance(depth, palm=False)`` is the signed distance to the grip, shrunk
+    by ``depth``, and the other hand; ``palm`` asks for the shape the palm
+    must clear. ``groove``, if any, is where the little finger overlaps (see
+    :func:`_overlap_little_finger`).
+    """
+
+    distance: Callable[..., ObstacleDistance]
+    groove: Callable[[Array], Array] | None = None
+    #: Skin vertices of the other hand, which this hand's skin gives way to.
+    skin_points: Array | None = None
 
 
 @dataclass(frozen=True)
@@ -778,6 +835,8 @@ class _SolvedHand:
     #: What the palm pad settles onto, if not ``obstacle`` (a pair: the other
     #: hand at ``pair.palm_capsule_radius_scale``).
     palm_obstacle: ObstacleDistance | None = None
+    #: Skin vertices of the other hand of a pair (see :class:`_Scene`).
+    other_skin: Array | None = None
 
 
 def _segment_gaps(
@@ -806,11 +865,11 @@ def _solve_right_hand(
     grip_radius_m: float,
     settings: SkinnedHumanSettings,
     given: Mapping[str, float] | None,
-    scene: Callable[..., ObstacleDistance] | None = None,
+    pair: _Scene | None = None,
 ) -> _SolvedHand:
-    """Pose one hand as a right hand. ``scene(depth)`` is the distance to what
-    it holds with the grip shrunk by ``depth`` (default: the bare grip)."""
-    paired = scene is not None
+    """Pose one hand as a right hand, around ``pair`` if it is one of a pair
+    (default: the bare grip)."""
+    paired = pair is not None
     size = spec.hand_size
     solve, skin = _sized_assets(size.length_m, size.breadth_m, settings)
     hand = _GripHand(solve, settings)
@@ -822,9 +881,10 @@ def _solve_right_hand(
     def bare(depth: float, **_: object) -> ObstacleDistance:
         return cylinder_distance(grip_radius_m - depth)
 
-    scene = scene or bare
+    scene = pair.distance if pair is not None else bare
     obstacle = scene(0.0)
     pad = scene(0.0, palm=True) if paired else None
+    points = pair.skin_points if pair is not None else None
     # Soft pads give: the palm seats, and the digits close, a little way in.
     grip = cylinder_distance(grip_radius_m - settings.squeeze_palm_depth_m)
     other = scene(settings.squeeze_palm_depth_m, palm=True) if paired else None
@@ -846,8 +906,23 @@ def _solve_right_hand(
         _cup_palm(hand, targets, posed, soft, thumb_radius_m)
         _aim_thumb(hand, targets, posed, thumb_radius_m)
         _bend_wrist(hand, side)
-        return _SolvedHand(hand, posed, targets, obstacle, skin, pad)
+        return _SolvedHand(hand, posed, targets, obstacle, skin, pad, points)
     chains = _finger_chains(settings, crook.get("index_prox", 0.0))
+    # Of a pair, the fingers that hold the grip aim for the grip itself; the
+    # other hand is only in their way. The rest may come to rest on it.
+    held = settings.pair_grip_fingers if paired else ()
+    mine = cylinder_distance(grip_radius_m - settings.squeeze_finger_depth_m)
+
+    def wrap(start: Mapping[str, float], samples: int | None = None) -> dict:
+        """Wrap the fingers; with ``samples`` given, the first pass, on which
+        the sideways closing is fitted: there the grip fingers see only the
+        grip, as on a single hand, so the other hand cannot skew the fit."""
+        on_grip = [chain for chain in chains if chain.name in held]
+        others = [chain for chain in chains if chain.name not in held]
+        around = mine if samples is not None else soft
+        angles = _wrap(hand, on_grip, around, start, samples, mine)
+        return _wrap(hand, others, soft, angles, samples)
+
     angles: dict[str, float] = {}
     for _ in range(settings.arch_passes):
         _seat_flat_hand(hand, targets, grip, {**arch, **crook}, other)
@@ -861,16 +936,18 @@ def _solve_right_hand(
     hand.swing_sideways(None)
     if settings.side_close_max_deg:
         coarse = min(settings.wrap_scan_samples, settings.side_close_scan_samples)
-        angles = _wrap(hand, chains, soft, start, coarse)
+        angles = wrap(start, coarse)
         _close_fingers(hand, angles)
-    angles = _wrap(hand, chains, soft, start)
+    if pair is not None and pair.groove is not None:
+        _overlap_little_finger(hand, angles, pair.groove)
+    angles = wrap(start)
     _cup_palm(hand, targets, angles, soft, thumb_radius_m)
     _aim_thumb(hand, targets, angles, thumb_radius_m)
     angles = _wrap(hand, (_thumb_chain(settings, targets),), soft, angles)
     _bend_wrist(hand, side)
     for bone, swing in hand.side.items():  # so given angles rebuild this pose
         angles[f"{bone.removesuffix('_prox')}{_SIDE_SUFFIX}"] = swing
-    return _SolvedHand(hand, angles, targets, obstacle, skin, pad)
+    return _SolvedHand(hand, angles, targets, obstacle, skin, pad, points)
 
 
 def _check_inputs(grip_spec: GripSpec, side: str, grip_radius_m: float) -> None:
@@ -989,7 +1066,16 @@ def _corrected_skin(
         settings.fold_relax,
     )
     # Relaxing may have drawn skin back in: leave none inside what is held.
-    return lift_out(skin, solved.obstacle, max_depth_m=settings.press.max_depth_m)
+    skin = lift_out(skin, solved.obstacle, max_depth_m=settings.press.max_depth_m)
+    if solved.other_skin is None:
+        return skin
+    return yield_to_points(
+        skin,
+        lambda v: vertex_normals(v, asset.faces),
+        solved.other_skin,
+        max_depth_m=settings.pair_yield_max_depth_m,
+        passes=settings.pair_yield_passes,
+    )
 
 
 def _result(

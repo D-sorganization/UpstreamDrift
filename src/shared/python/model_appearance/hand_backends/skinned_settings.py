@@ -79,6 +79,16 @@ class SkinnedHumanSettings:
     pair_grip_fingers: tuple[str, ...]
     pair_max_spacing_adjust_m: float
     pair_capsule_margin_m: float
+    pair_obstacle: str
+    pair_skin_margin_m: float
+    pair_max_spacing_close_m: float
+    pair_finger_gap_m: float
+    pair_overlap_max_swing_deg: float
+    pair_spacing_passes: int
+    pair_overlap_bias_m: float
+    pair_skin_reach_m: float
+    pair_yield_max_depth_m: float
+    pair_yield_passes: int
     frame_excluded_bones: tuple[str, ...]
     fold_relax: FoldRelaxSettings
     palm_pad: PadConformSettings
@@ -133,6 +143,13 @@ def _subdivision_levels(value: Any) -> int:
             f"mesh.subdivision_levels must be 0..{_MAX_SUBDIVISION_LEVELS}"
         )
     return value
+
+
+def _finite(value: Any, name: str) -> float:
+    number = float(value)
+    if not math.isfinite(number):
+        raise ValueError(f"{name} must be finite")
+    return number
 
 
 def _positive(value: Any, name: str) -> float:
@@ -194,6 +211,16 @@ def _side_close_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+#: What stands in for the lead hand when the trail hand is posed around it.
+PAIR_OBSTACLES = ("skin", "capsules")
+
+
+def _one_of(raw: Any, allowed: tuple[str, ...], name: str) -> str:
+    if raw not in allowed:
+        raise ValueError(f"{name} must be one of {allowed}, got {raw!r}")
+    return str(raw)
+
+
 def _pair_fields(pair: Mapping[str, Any]) -> dict[str, Any]:
     """The ``pair`` section as :class:`SkinnedHumanSettings` fields."""
     return {
@@ -212,6 +239,24 @@ def _pair_fields(pair: Mapping[str, Any]) -> dict[str, Any]:
         ),
         "pair_capsule_margin_m": _non_negative(
             pair["capsule_margin_m"], "capsule_margin_m"
+        ),
+        "pair_obstacle": _one_of(pair["obstacle"], PAIR_OBSTACLES, "pair.obstacle"),
+        "pair_skin_margin_m": _non_negative(pair["skin_margin_m"], "skin_margin_m"),
+        "pair_max_spacing_close_m": _non_negative(
+            pair["max_spacing_close_m"], "max_spacing_close_m"
+        ),
+        "pair_finger_gap_m": _non_negative(pair["finger_gap_m"], "finger_gap_m"),
+        "pair_skin_reach_m": _positive(pair["skin_reach_m"], "skin_reach_m"),
+        "pair_yield_max_depth_m": _non_negative(
+            pair["yield_max_depth_m"], "yield_max_depth_m"
+        ),
+        "pair_yield_passes": int(_non_negative(pair["yield_passes"], "yield_passes")),
+        "pair_overlap_bias_m": _finite(pair["overlap_bias_m"], "overlap_bias_m"),
+        "pair_spacing_passes": int(
+            _non_negative(pair["spacing_passes"], "spacing_passes")
+        ),
+        "pair_overlap_max_swing_deg": _non_negative(
+            pair["overlap_max_swing_deg"], "overlap_max_swing_deg"
         ),
     }
 

@@ -114,6 +114,16 @@
       "ring"
     ],
     "max_spacing_adjust_m": 0.03,
+    "max_spacing_close_m": 0.03,
+    "finger_gap_m": 0.0003,
+    "spacing_passes": 1,
+    "obstacle": "skin",
+    "skin_margin_m": 0.0,
+    "skin_reach_m": 0.015,
+    "yield_max_depth_m": 0.003,
+    "yield_passes": 3,
+    "overlap_max_swing_deg": 30.0,
+    "overlap_bias_m": 0.003,
     "capsule_margin_m": 0.0005
   },
   "framing": {

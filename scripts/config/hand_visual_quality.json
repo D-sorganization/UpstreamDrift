@@ -41,7 +41,8 @@
   "max_finger_side_gap_m": 0.002,
   "max_index_side_gap_m": 0.005,
   "max_pair_little_finger_gap_m": 0.001,
-  "max_pair_ring_finger_gap_m": 0.003,
+  "max_pair_ring_finger_gap_m": 0.001,
+  "max_pair_little_groove_gap_m": 0.0015,
   "min_index_knuckle_flexion_deg": 15.0,
   "max_index_segment_gap_m": 0.004
 }

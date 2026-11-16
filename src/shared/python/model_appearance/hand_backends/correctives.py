@@ -229,6 +229,47 @@ def lift_out(vertices: Array, distance: Distance, *, max_depth_m: float) -> Arra
     return out
 
 
+def yield_to_points(
+    vertices: Array,
+    normals_of: Callable[[Array], Array],
+    points: Array,
+    *,
+    max_depth_m: float,
+    passes: int,
+) -> Array:
+    """Dent skin that points of another body poke through.
+
+    The obstacle correctives clear this skin's *vertices*. Where its
+    triangles are large, the other body can still stand through the skin
+    between them. Each of ``points`` up to ``max_depth_m`` under the skin
+    pushes the three skin vertices nearest it inward along their normals by
+    its depth, as flesh would give way; zero depth or passes switches it off.
+    """
+    if max_depth_m < 0.0 or passes < 0:
+        raise ValueError("yield max_depth_m and passes must not be negative")
+    out = np.array(vertices, dtype=np.float64)
+    points = np.asarray(points, dtype=np.float64).reshape(-1, 3)
+    if max_depth_m == 0.0 or len(points) == 0:
+        return out
+    from scipy.spatial import cKDTree
+
+    for _ in range(passes):
+        normals = normals_of(out)
+        tree = cKDTree(out)
+        reach, nearest = tree.query(points, distance_upper_bound=4.0 * max_depth_m)
+        near = np.flatnonzero(np.isfinite(reach))
+        first = nearest[near]
+        depth = -np.einsum("ij,ij->i", points[near] - out[first], normals[first])
+        under = (depth > 0.0) & (depth <= max_depth_m)
+        if not under.any():
+            break
+        ids = tree.query(points[near[under]], k=3)[1]
+        dent = np.zeros(len(out))
+        np.maximum.at(dent, ids.ravel(), np.repeat(depth[under], 3))
+        out -= dent[:, None] * normals
+    return out
+
+
 def press_flat(
     vertices: Array,
     faces: IntArray,

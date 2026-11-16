@@ -14,6 +14,7 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     conform_pads,
     distance_gradient,
     lift_out,
+    yield_to_points,
     press_flat,
     relax_folds,
     sharpened_faces,
@@ -300,3 +301,24 @@ def test_press_without_bulge_is_lift_out_and_bad_settings_raise() -> None:
     for bad in ((-0.001, 0.5, 1), (0.001, -0.1, 1), (0.001, 0.5, -1)):
         with pytest.raises(ValueError):
             PressSettings(*bad)
+
+
+def test_skin_gives_way_to_a_point_standing_through_a_large_triangle() -> None:
+    """A coarse sheet (outside is +z) over a point 1 mm under its middle."""
+    sheet = np.array([[0.0, 0, 0], [0.006, 0, 0], [0.003, 0.006, 0], [0.03, 0.03, 0]])
+    up = lambda v: np.tile([0.0, 0.0, 1.0], (len(v), 1))  # noqa: E731
+    point = np.array([[0.003, 0.002, -0.001]])
+    out = yield_to_points(sheet, up, point, max_depth_m=0.003, passes=2)
+    np.testing.assert_allclose(out[:3, 2], -0.001, atol=1e-12)
+    np.testing.assert_array_equal(out[3], sheet[3])
+    np.testing.assert_array_equal(out[:, :2], sheet[:, :2])
+    # A point above the skin, or deeper than the limit, moves nothing.
+    for z in (0.001, -0.005):
+        still = yield_to_points(
+            sheet, up, point * [1, 1, 0] + [0, 0, z], max_depth_m=0.003, passes=2
+        )
+        np.testing.assert_array_equal(still, sheet)
+    off = yield_to_points(sheet, up, point, max_depth_m=0.0, passes=2)
+    np.testing.assert_array_equal(off, sheet)
+    with pytest.raises(ValueError):
+        yield_to_points(sheet, up, point, max_depth_m=-0.001, passes=2)

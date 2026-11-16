@@ -199,6 +199,43 @@ def capsule_union_distance(
     return distance
 
 
+def skin_distance(
+    vertices: Array, normals: Array, reach_m: float = math.inf
+) -> ObstacleDistance:
+    """Signed distance to a closed skin given by ``vertices`` and outward ``normals``.
+
+    Near the skin the distance is the height above the tangent plane of the
+    nearest vertex, which is exact to second order in the vertex spacing; far
+    from it, the distance to that vertex. The sign is that of the height, so
+    points under the skin are negative. Points farther than ``reach_m`` from
+    every vertex are simply reported ``reach_m`` away, which keeps the search
+    short. Used to pose one hand around the other hand's actual skin.
+    """
+    from scipy.spatial import cKDTree
+
+    v = np.asarray(vertices, dtype=float).reshape(-1, 3)
+    n = np.asarray(normals, dtype=float).reshape(-1, 3)
+    if len(v) != len(n) or len(v) < 4 or not np.isfinite(np.c_[v, n]).all():
+        raise ValueError("a skin needs matching finite vertices and normals")
+    if not reach_m > 0.0:
+        raise ValueError("skin reach_m must be positive")
+    tree = cKDTree(v)
+    spacing = float(np.median(tree.query(v, k=2)[0][:, 1]))
+
+    def distance(points: Array) -> Array:
+        found = tree.query(points, distance_upper_bound=reach_m)
+        reach, nearest = np.asarray(found[0]), np.asarray(found[1])
+        near = np.isfinite(reach)
+        nearest = nearest[near]
+        height = np.einsum("ij,ij->i", points[near] - v[nearest], n[nearest])
+        size = np.maximum(np.abs(height), reach[near] - spacing)
+        out = np.full(len(points), reach_m)
+        out[near] = np.where(height < 0.0, -size, size)
+        return out
+
+    return distance
+
+
 def _apply(
     joint: CurlJoint, angle: float, angles: dict[str, float]
 ) -> dict[str, float]:
@@ -332,6 +369,7 @@ def wrap_to_contact(
     initial_angles: Mapping[str, float],
     *,
     samples: int,
+    target: ObstacleDistance | None = None,
 ) -> CurlResult:
     """Curl each chain, then look for a better wrap than the greedy curl.
 
@@ -342,7 +380,9 @@ def wrap_to_contact(
     contact in order, and the pose is kept that leaves the chain's
     ``must_touch`` segments closest to the obstacle; among equally good poses
     the one that uses the smallest share of any joint's range wins. No pose
-    that penetrates beyond the allowance is considered.
+    that penetrates beyond the allowance is considered. ``target``, if given,
+    is what the ``must_touch`` segments should lie on, when that is only part
+    of ``obstacle`` (the grip, with the other hand also in the way).
 
     Preconditions and postconditions are those of :func:`curl_to_contact`;
     ``samples`` must be at least 2.
@@ -351,11 +391,12 @@ def wrap_to_contact(
         raise ValueError("samples must be at least 2")
     angles = {str(k): float(v) for k, v in initial_angles.items()}
     order: list[str] = []
+    wanted = target or obstacle
     for chain in chains:
         first, rest = chain.joints[0], chain.joints[1:]
         moved = hand.moved_ids(first.bone)
         best_angles = curl_to_contact(hand, (chain,), obstacle, settings, angles).angles
-        best_cost = _chain_cost(hand, chain, obstacle, settings, best_angles)
+        best_cost = _chain_cost(hand, chain, wanted, settings, best_angles)
         span = first.upper_rad - first.lower_rad
         # A coarse pass over the whole range, then a fine pass around the best.
         for width in (span, 2.0 * span / (samples - 1)):
@@ -371,7 +412,7 @@ def wrap_to_contact(
                 clear = float(obstacle(hand.points(candidate))[moved].min())
                 if clear < -settings.penetration_allowance_m:
                     continue
-                cost = _chain_cost(hand, chain, obstacle, settings, candidate)
+                cost = _chain_cost(hand, chain, wanted, settings, candidate)
                 closer = cost[0] < best_cost[0] - 1e-9
                 level = cost[0] <= best_cost[0] + 1e-9
                 if closer or (level and cost[1] < best_cost[1]):

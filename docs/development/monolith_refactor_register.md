@@ -57,6 +57,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1136 | `src/engines/feedback_native_execution.py` |
 | 1134 | `src/shared/python/shadow_tracker/segmentation.py` |
 | 1134 | `src/tools/model_explorer/model_library.py` |
+| 1130 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1129 | `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py` |
 | 1128 | `src/tools/starting_pose_matcher/gui_main_widget.py` |
 | 1127 | `src/shared/python/swing_comparison/metrics.py` |
@@ -88,7 +89,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1053 | `src/tools/tour_matching_viewer/core.py` |
 | 1050 | `src/engines/physics_engines/opensim/python/spine/inverse_dynamics.py` |
 | 1047 | `src/shared/python/force_overlay/glyphs.py` |
-| 1044 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1042 | `src/shared/python/grip_contact/matlab_kernel.py` |
 | 1040 | `src/bunkershot3d/solvers/mpm/order_of_accuracy.py` |
 | 1040 | `src/tools/tour_matching_viewer/gui.py` |
