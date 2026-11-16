@@ -1,6 +1,6 @@
 """MuJoCo free-club scene hook for Shadow hand grip visuals (#15122).
 
-Drake, Pinocchio, and OpenSim shadow-hand grip visuals: TODO (track on epic #15122).
+Drake, Pinocchio, and OpenSim shadow-hand grip visuals: TODO(#15122).
 """
 
 from __future__ import annotations

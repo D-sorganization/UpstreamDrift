@@ -558,7 +558,7 @@ def _score_thumb_state(
     )
     min_r = float(_radial_xy(th_all).min())
     pen_pen = 1e5 * max(0.0, safe_r - min_r) ** 2
-    idx_gap = float(idx_tree.query(th_all[::4], k=1)[0].min())
+    idx_gap = float(np.asarray(idx_tree.query(th_all[::4], k=1)[0]).min())
     idx_pen = 500.0 * max(0.0, 0.0015 - idx_gap) ** 2
     distal = _transform_to_grip_frame(
         _select_part_vertices(

@@ -390,7 +390,7 @@ def penetration_metrics(
     for i, a in enumerate(keys):
         tree_a = cKDTree(clouds[a])
         for b in keys[i + 1 :]:
-            ff_gap = min(ff_gap, float(tree_a.query(clouds[b], k=1)[0].min()))
+            ff_gap = min(ff_gap, float(np.asarray(tree_a.query(clouds[b], k=1)[0]).min()))
     return {
         "club_penetration_m": club_pen,
         "finger_finger_gap_m": float(ff_gap),
