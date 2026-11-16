@@ -81,3 +81,32 @@ class GripBuildResult:
     receipt: BuildReceipt
     joint_angles_rad: dict[str, dict[str, float]]
     status: BuildStatus
+
+
+@dataclass(frozen=True)
+class FullGripBuildResult:
+    """GB-3 output: both hands, thumb stages, and topology-tagged contacts."""
+
+    receipt: BuildReceipt
+    joint_angles_rad: dict[str, dict[str, float]]
+    contact_clearances_m: dict[str, float]
+    active_contact_pairs: tuple[str, ...]
+    status: BuildStatus
+
+    @property
+    def lead_finger_result(self) -> GripBuildResult:
+        flat = self.joint_angles_rad.get("lead", {})
+        lead: dict[str, dict[str, float]] = {}
+        for finger in ("index", "middle", "ring", "little"):
+            joints = {
+                joint: flat[f"{finger}_{joint}"]
+                for joint in ("mcp", "pip", "dip")
+                if f"{finger}_{joint}" in flat
+            }
+            if joints:
+                lead[finger] = joints
+        return GripBuildResult(
+            receipt=self.receipt,
+            joint_angles_rad=lead,
+            status=self.status,
+        )

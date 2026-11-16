@@ -9,8 +9,9 @@ from typing import Final
 import numpy as np
 from numpy.typing import NDArray
 
-from src.shared.python.grip_build.geometry import deg_to_rad, rotation_about_axis
 from src.shared.python.grip_build.finger_order import LEAD_FINGER_CURL_ORDER
+from src.shared.python.grip_build.geometry import deg_to_rad, rotation_about_axis
+from src.shared.python.grip_build.thumb import ThumbJointAngles
 from src.shared.python.grip_spec.types import HandSize
 from src.shared.python.hand_size import hand_mesh_scale
 from src.shared.python.model_appearance.grip_hand_mesh import (
@@ -51,7 +52,7 @@ class FingerJointAngles:
 
 @dataclass
 class HandChain:
-    """Palm + four fingers (lead build only; thumb reserved for GB-3)."""
+    """Palm + four fingers + thumb state for procedural GB-2/GB-3 builds."""
 
     hand_size: HandSize
     mesh_params: HandMeshParams = field(
@@ -62,6 +63,10 @@ class HandChain:
     dip_over_pip: dict[str, float] = field(default_factory=dict)
     flat_lateral_offset_m: float = 0.0
     grip_radius_m: float = 0.015
+    palm_wrap_rad: float = 0.0
+    axial_shift_m: float = 0.0
+    thumb_azimuth_rad: float = 0.0
+    thumb: ThumbJointAngles = field(default_factory=ThumbJointAngles)
 
     def __post_init__(self) -> None:
         if self.curl_sign not in (-1, 1):
@@ -97,6 +102,12 @@ class HandChain:
             x = self.grip_radius_m + pad + radius
         return np.array([x, y, 0.0], dtype=np.float64)
 
+    def _apply_frame(self, point: np.ndarray) -> np.ndarray:
+        rot = rotation_about_axis(np.array([0.0, 0.0, 1.0]), self.palm_wrap_rad)
+        shifted = point.copy()
+        shifted[2] += self.axial_shift_m
+        return rot @ shifted
+
     def finger_capsules(
         self, finger: str
     ) -> list[tuple[np.ndarray, np.ndarray, float]]:
@@ -131,7 +142,10 @@ class HandChain:
             end = origin + direction * seg_len
             points.append((origin.copy(), end.copy(), radius))
             origin = end
-        return points
+        return [
+            (self._apply_frame(p0), self._apply_frame(p1), radius)
+            for p0, p1, radius in points
+        ]
 
     def segment_capsule(
         self, finger: str, joint: str
@@ -148,6 +162,26 @@ class HandChain:
             for seg_idx, (p0, p1, r) in enumerate(self.finger_capsules(finger)):
                 out.append((finger, seg_idx, p0, p1, r))
         return out
+
+    def palm_heel_radius_m(self) -> float:
+        return self.mesh_params.scale * 0.012
+
+    def palm_heel_point(self) -> np.ndarray:
+        base = np.array(
+            [self.grip_radius_m * 0.2, -0.028 + self.flat_lateral_offset_m, -0.01],
+            dtype=np.float64,
+        )
+        return self._apply_frame(base)
+
+    def palm_pocket_radius_m(self) -> float:
+        return self.mesh_params.scale * 0.010
+
+    def trail_palm_pocket_point(self) -> np.ndarray:
+        base = np.array(
+            [self.grip_radius_m * 0.15, 0.018, 0.02],
+            dtype=np.float64,
+        )
+        return self._apply_frame(base)
 
     def joint_within_limits(self) -> bool:
         for angles in self.joint_angles.values():

@@ -9,6 +9,7 @@ from src.shared.python.grip_build.contact_protocol import (
     ContactDistanceModel,
     DefaultCapsuleContactModel,
 )
+from src.shared.python.grip_build.receipt import FullGripBuildResult
 
 DEFAULT_BUILDER_NAME = "flat_hand_curl_v1"
 
@@ -26,6 +27,9 @@ class GripBuilder(Protocol):
 
     def build_lead_fingers(self, *args, **kwargs):
         """Build lead-hand finger curl stages."""
+
+    def build_grip(self, *args, **kwargs) -> FullGripBuildResult:
+        """Build the full GB-3 grip (optional on older builders)."""
 
 
 def register_grip_builder(name: str, builder: GripBuilder) -> None:
