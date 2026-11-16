@@ -124,9 +124,17 @@ def appearance_frame_with_shaft_roll(
     hand: Hand,
 ) -> np.ndarray:
     """Apply shaft roll in the appearance hand-grip frame (z = shaft)."""
-    return apply_shaft_roll(
-        frame, APPEARANCE_GRIP_SHAFT_AXIS, pose_shaft_roll_deg(pose, hand)
-    )
+    roll_deg = pose_shaft_roll_deg(pose, hand)
+    if not math.isfinite(roll_deg) or abs(roll_deg) <= 1e-15:
+        return np.asarray(frame, dtype=float).copy()
+    arr = np.asarray(frame, dtype=float)
+    if arr.shape != (4, 4):
+        raise ValueError(f"frame must be shape (4, 4), got {arr.shape}")
+    axis = _normalize_axis(APPEARANCE_GRIP_SHAFT_AXIS, "shaft_axis")
+    delta = axis_angle_to_rotation_matrix(axis, math.radians(roll_deg))
+    out = arr.copy()
+    out[:3, :3] = out[:3, :3] @ delta
+    return out
 
 
 def grip_interface_offsets_with_shaft_roll(
