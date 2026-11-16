@@ -6,6 +6,7 @@ quantifying similarities and differences in kinematics, timing, and coordination
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Any
 
@@ -19,6 +20,26 @@ from src.shared.python.validation_pkg.statistical_analysis import StatisticalAna
 # Constants for scoring
 EPSILON = 1e-9
 SIMILARITY_SCORE_CONSTANT = 100.0
+
+
+def _percent_difference(reference: float, student: float) -> float:
+    """Signed difference of ``student`` from ``reference`` in percent of ``reference``.
+
+    A zero reference has no relative scale: equal values give ``0.0`` and any
+    other student value gives ``nan`` (undefined), never ``0.0``, so a student
+    who moves against a reference that does not is not reported as a match.
+    """
+    diff = student - reference
+    if reference == 0:
+        return 0.0 if diff == 0 else float("nan")
+    return diff / reference * 100.0
+
+
+def _score_from_percent(percent_diff: float, penalty_per_percent: float) -> float:
+    """Similarity score in [0, 100]; an undefined (NaN) percent difference scores 0."""
+    if math.isnan(percent_diff):
+        return 0.0
+    return max(0.0, 100.0 - abs(percent_diff) * penalty_per_percent)
 
 
 @dataclass
@@ -81,11 +102,11 @@ class SwingComparator:
         ref_ratio = ref_tempo[2]
         stu_ratio = stu_tempo[2]
         diff = stu_ratio - ref_ratio
-        pct_diff = (diff / ref_ratio) * 100 if ref_ratio != 0 else 0.0
+        pct_diff = _percent_difference(ref_ratio, stu_ratio)
 
         # Score: Perfect match = 100. Decay based on difference.
         # Acceptable range +/- 10%?
-        score = max(0.0, 100.0 - abs(pct_diff) * 2.0)
+        score = _score_from_percent(pct_diff, 2.0)
 
         return ComparisonMetric(
             name="Tempo Ratio",
@@ -200,13 +221,12 @@ class SwingComparator:
                 stu_peak = float(np.max(np.abs(self.student.joint_velocities[:, idx])))
 
                 diff = stu_peak - ref_peak
-                pct = (diff / ref_peak * 100) if ref_peak > 0 else 0.0
+                pct = _percent_difference(ref_peak, stu_peak)
 
                 # Score: 100 if >= ref (for speed). Or match?
                 # Usually more speed is good, but let's assume matching target is goal.
                 # Let's say matching within 5% is 100.
-                error = abs(pct)
-                score = max(0.0, 100.0 - error)
+                score = _score_from_percent(pct, 1.0)
 
                 metrics[name] = ComparisonMetric(
                     name=f"Peak {name} Speed",
@@ -225,14 +245,14 @@ class SwingComparator:
             ref_chs = float(np.max(self.ref.club_head_speed))
             stu_chs = float(np.max(self.student.club_head_speed))
             diff = stu_chs - ref_chs
-            pct = (diff / ref_chs * 100) if ref_chs > 0 else 0.0
+            pct = _percent_difference(ref_chs, stu_chs)
             metrics["Club Head"] = ComparisonMetric(
                 name="Peak Club Head Speed",
                 reference_value=ref_chs,
                 student_value=stu_chs,
                 difference=diff,
                 percent_diff=pct,
-                score=max(0.0, 100.0 - abs(pct)),
+                score=_score_from_percent(pct, 1.0),
             )
 
         return metrics
