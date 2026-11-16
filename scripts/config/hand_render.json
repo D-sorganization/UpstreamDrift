@@ -48,6 +48,21 @@
   ],
   "grip_material": "grip_rubber",
   "shaft_material": "satin_steel",
+  "grip_cap_rgba": [
+    0.13,
+    0.13,
+    0.14,
+    1.0
+  ],
+  "grip_vent_rgba": [
+    0.02,
+    0.02,
+    0.02,
+    1.0
+  ],
+  "grip_mouth_step_m": 0.0013,
+  "grip_ring_spacing_m": 0.005,
+  "grip_cap_round_segments": 8,
   "surface": {
     "skin": {
       "specular": 0.1,

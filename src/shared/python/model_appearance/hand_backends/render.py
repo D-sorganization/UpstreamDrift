@@ -48,6 +48,7 @@ from src.shared.python.model_appearance.hand_backends.render_mujoco import (
 from src.shared.python.model_appearance.hand_backends.render_rig import (
     AnatomicalBasis,
     CameraRig,
+    GripDrawing,
     RenderedView,
     ScenePart,
     assemble_scene,
@@ -76,6 +77,7 @@ __all__ = [
     "CameraRig",
     "ContactSheet",
     "GLUnavailableError",
+    "GripDrawing",
     "HandRenderSettings",
     "PART_KINDS",
     "REQUIRED_VIEWS",
