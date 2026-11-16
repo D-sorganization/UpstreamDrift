@@ -43,13 +43,121 @@ class ScenePart:
 
     ``focus`` is ``None`` or a boolean mask, one entry per vertex, of the
     vertices the camera frames on. A skin part with a forearm stub marks the
-    hand so the stub does not shrink the hand in the frame.
+    hand so the stub does not shrink the hand in the frame. ``name`` is an
+    optional label that tells parts of one kind apart (the drawn grip uses
+    :data:`GRIP_PART_NAMES`); it does not change how a part is rendered.
     """
 
     mesh: Any
     rgba: Rgba
     kind: str
     focus: Any = None
+    name: str = ""
+
+
+#: ``ScenePart.name`` of the rubber, the butt cap and the vent of a drawn grip.
+GRIP_PART_NAMES: tuple[str, str, str] = ("grip_rubber", "grip_cap", "grip_vent")
+#: ``ScenePart.name`` of the steel shaft of a drawn grip.
+SHAFT_PART_NAME = "shaft"
+
+
+@dataclass(frozen=True)
+class GripDrawing:
+    """Outline of a real golf grip: a tapered rubber sleeve with a butt cap.
+
+    ``knots`` are ``(z_m, radius_m)`` pairs in the scene (club) frame with
+    ``z`` strictly ascending; the radius is linear between them. The first
+    knot is the edge of the butt cap and the last is the mouth (head end) of
+    the grip. The cap flares from the first knot radius out to
+    ``cap_radius_m`` and extends ``cap_height_m`` toward the butt (``-z``)
+    beyond the first knot; ``cap_round_m`` is the radius of its rounded outer
+    edge (zero is a sharp edge) and ``vent_radius_m`` the radius of the vent
+    hole drawn in the centre of its flat end (zero is no vent).
+
+    Contract (``ValueError`` otherwise): at least two knots, finite numbers,
+    ascending ``z``, positive radii, ``cap_radius_m >= knots[0]`` radius,
+    ``cap_height_m > 0``, ``0 <= cap_round_m <= cap_height_m`` and
+    ``0 <= vent_radius_m < cap_radius_m - cap_round_m`` (the vent lies on the
+    flat end face).
+    """
+
+    knots: tuple[tuple[float, float], ...]
+    cap_radius_m: float
+    cap_height_m: float
+    cap_round_m: float
+    vent_radius_m: float
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "knots", _checked_knots(self.knots))
+        for name in ("cap_radius_m", "cap_height_m", "cap_round_m", "vent_radius_m"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise ValueError(f"{name} must be a number, got {value!r}")
+            if not math.isfinite(value):
+                raise ValueError(f"{name} must be finite, got {value!r}")
+            object.__setattr__(self, name, float(value))
+        edge_radius = self.knots[0][1]
+        if self.cap_radius_m < edge_radius:
+            raise ValueError(
+                f"cap_radius_m={self.cap_radius_m} must not be below the first "
+                f"knot radius {edge_radius}"
+            )
+        if self.cap_height_m <= 0.0:
+            raise ValueError(f"cap_height_m={self.cap_height_m} must be positive")
+        if not 0.0 <= self.cap_round_m <= self.cap_height_m:
+            raise ValueError(
+                f"cap_round_m={self.cap_round_m} must lie in "
+                f"[0, cap_height_m={self.cap_height_m}]"
+            )
+        flat = self.cap_radius_m - self.cap_round_m
+        if not 0.0 <= self.vent_radius_m < flat:
+            raise ValueError(
+                f"vent_radius_m={self.vent_radius_m} must lie in [0, {flat}), "
+                "inside the flat end of the cap (cap_radius_m - cap_round_m)"
+            )
+
+    @property
+    def edge(self) -> tuple[float, float]:
+        """``(z_m, radius_m)`` of the first knot, the edge of the butt cap."""
+        return self.knots[0]
+
+    @property
+    def mouth(self) -> tuple[float, float]:
+        """``(z_m, radius_m)`` of the last knot, the head end of the rubber."""
+        return self.knots[-1]
+
+    @property
+    def cap_end_z_m(self) -> float:
+        """``z`` of the flat end face of the butt cap."""
+        return self.knots[0][0] - self.cap_height_m
+
+
+def _checked_knots(knots: Any) -> tuple[tuple[float, float], ...]:
+    """``knots`` as float pairs, validated for :class:`GripDrawing`."""
+    if isinstance(knots, (str, bytes)) or not isinstance(knots, Sequence):
+        raise ValueError("knots must be a sequence of (z_m, radius_m) pairs")
+    if len(knots) < 2:
+        raise ValueError(f"a grip drawing needs at least two knots, got {len(knots)}")
+    out: list[tuple[float, float]] = []
+    for knot in knots:
+        if (
+            isinstance(knot, (str, bytes))
+            or not isinstance(knot, Sequence)
+            or len(knot) != 2
+            or any(isinstance(v, bool) or not isinstance(v, (int, float)) for v in knot)
+        ):
+            raise ValueError(f"knots must be (z_m, radius_m) pairs, got {knot!r}")
+        z, radius = float(knot[0]), float(knot[1])
+        if not (math.isfinite(z) and math.isfinite(radius)):
+            raise ValueError(f"knots must be finite, got {knot!r}")
+        if radius <= 0.0:
+            raise ValueError(f"knot radii must be positive, got {knot!r}")
+        if out and z <= out[-1][0]:
+            raise ValueError(
+                f"knot z must be strictly ascending, got {z} after {out[-1][0]}"
+            )
+        out.append((z, radius))
+    return tuple(out)
 
 
 @dataclass(frozen=True)
@@ -167,7 +275,9 @@ def validated_part(part: Any) -> ScenePart:
         raise ValueError(f"part kind {part.kind!r} is not one of {PART_KINDS}")
     mesh = as_mesh(part.mesh)
     focus = checked_focus(part.focus, len(mesh.vertices))
-    return ScenePart(mesh, _rgba(part.rgba, "part rgba"), part.kind, focus)
+    if not isinstance(part.name, str):
+        raise TypeError(f"part name must be a string, got {part.name!r}")
+    return ScenePart(mesh, _rgba(part.rgba, "part rgba"), part.kind, focus, part.name)
 
 
 def checked_focus(focus: Any, vertex_count: int) -> NDArray[np.bool_] | None:
@@ -252,15 +362,26 @@ def build_club_parts(
     *,
     settings: HandRenderSettings,
     grip_radius_m: float | None = None,
-) -> tuple[ScenePart, ScenePart]:
+    grip: GripDrawing | None = None,
+) -> tuple[ScenePart, ...]:
     """Grip rubber and a shaft stub along ``+z`` for a hand spanning
     ``[z_min, z_max]``.
 
-    The rubber is the cylinder ``x**2 + y**2 = R**2`` from
+    Without ``grip`` the rubber is the cylinder ``x**2 + y**2 = R**2`` from
     ``z_min - grip_length_margin_m`` (butt side) to
     ``z_max + grip_length_margin_m``; the shaft continues
     ``shaft_extension_m`` toward the head. Returns ``(grip, shaft)``.
+
+    With a :class:`GripDrawing` the whole grip is drawn from its butt cap to
+    its mouth whatever ``[z_min, z_max]`` is, and ``grip_radius_m`` is not
+    used: see :func:`drawn_club_parts` for the parts returned.
+
+    Raises ``ValueError`` for non-finite or reversed ``z`` bounds or a radius
+    that does not clear the shaft, ``TypeError`` for a ``grip`` that is not a
+    :class:`GripDrawing`.
     """
+    if grip is not None:
+        return drawn_club_parts(z_min, z_max, grip, settings=settings)
     radius = settings.grip_radius_m if grip_radius_m is None else float(grip_radius_m)
     values = (float(z_min), float(z_max), radius)
     if not all(math.isfinite(v) for v in values):
@@ -276,13 +397,204 @@ def build_club_parts(
     head = rubber_end + settings.shaft_extension_m
     sides = settings.club_sides
     ends = [np.array([0.0, 0.0, z]) for z in (butt, rubber_end, head)]
-    grip = tapered_tube(ends[0], ends[1], radius, radius, sides)
+    rubber = tapered_tube(ends[0], ends[1], radius, radius, sides)
     shaft_r = settings.shaft_radius_m
     shaft = tapered_tube(ends[1], ends[2], shaft_r, shaft_r, sides)
     return (
-        ScenePart(grip, settings.grip_rgba, "grip"),
+        ScenePart(rubber, settings.grip_rgba, "grip"),
         ScenePart(shaft, settings.shaft_rgba, "shaft"),
     )
+
+
+def _profile_strips(
+    profile: Sequence[tuple[float, float]], *, crease_deg: float, epsilon: float
+) -> list[list[tuple[float, float]]]:
+    """``profile`` without repeated points, cut where it turns past the crease."""
+    points: list[tuple[float, float]] = []
+    for z, radius in profile:
+        if (
+            not points
+            or math.hypot(z - points[-1][0], radius - points[-1][1]) > epsilon
+        ):
+            points.append((z, radius))
+    strips = [[points[0]]]
+    for index in range(1, len(points)):
+        strips[-1].append(points[index])
+        if index + 1 == len(points):
+            break
+        before = np.subtract(points[index], points[index - 1])
+        after = np.subtract(points[index + 1], points[index])
+        turn = math.atan2(
+            abs(float(before[0] * after[1] - before[1] * after[0])),
+            float(before @ after),
+        )
+        if math.degrees(turn) > crease_deg:
+            strips.append([points[index]])
+    return strips
+
+
+def lathe_mesh(
+    profile: Sequence[tuple[float, float]], *, settings: HandRenderSettings
+) -> Mesh:
+    """Closed solid of revolution about ``z`` through ``(z_m, radius_m)`` points.
+
+    ``profile`` must outline a closed section: it starts and ends on the axis
+    (radius zero) or returns to its first point. Each point becomes a ring of
+    ``settings.club_sides`` vertices, or one pole vertex on the axis. The
+    profile is cut where it turns by more than ``settings.normal_crease_deg``
+    and the pieces do not share vertices, so smooth normals stay smooth along
+    a taper and a hard rim stays sharp. Faces wind outward.
+
+    Raises ``ValueError`` for fewer than three distinct points, a non-finite
+    number, a negative radius, or a section that encloses no volume.
+    """
+    points = np.asarray(profile, dtype=float)
+    if points.ndim != 2 or points.shape[1] != 2 or not np.isfinite(points).all():
+        raise ValueError("profile must be finite (z_m, radius_m) pairs")
+    if points[:, 1].min() < 0.0:
+        raise ValueError("profile radii must not be negative")
+    eps, sides = settings.epsilon, settings.club_sides
+    strips = _profile_strips(
+        [(float(z), float(r)) for z, r in points],
+        crease_deg=settings.normal_crease_deg,
+        epsilon=eps,
+    )
+    if sum(len(strip) for strip in strips) < 3:
+        raise ValueError("profile needs at least three distinct points")
+    phi = np.linspace(0.0, 2.0 * math.pi, sides, endpoint=False)
+    circle = np.stack([np.cos(phi), np.sin(phi)], axis=1)
+    step = np.arange(sides)
+    after = (step + 1) % sides
+    vertices: list[Array] = []
+    faces: list[NDArray[np.int64]] = []
+    count = 0
+    for strip in strips:
+        rows: list[tuple[int, bool]] = []
+        for z, radius in strip:
+            pole = radius <= eps
+            ring = np.zeros((1, 2)) if pole else radius * circle
+            vertices.append(np.column_stack([ring, np.full(len(ring), z)]))
+            rows.append((count, pole))
+            count += len(ring)
+        for (a, a_pole), (b, b_pole) in zip(rows, rows[1:], strict=False):
+            if a_pole and b_pole:
+                raise ValueError("profile runs along the axis")
+            if a_pole:
+                faces.append(np.stack([np.full(sides, a), b + step, b + after], axis=1))
+            elif b_pole:
+                faces.append(np.stack([a + step, np.full(sides, b), a + after], axis=1))
+            else:
+                faces.append(np.stack([a + step, b + step, b + after], axis=1))
+                faces.append(np.stack([a + step, b + after, a + after], axis=1))
+    mesh = Mesh(np.vstack(vertices), np.vstack(faces).astype(np.int64))
+    volume = mesh.volume()
+    if abs(volume) <= eps**2:
+        raise ValueError("profile encloses no volume")
+    if volume < 0.0:
+        mesh = Mesh(mesh.vertices, mesh.faces[:, ::-1].copy())
+    return mesh
+
+
+def _rubber_profile(
+    grip: GripDrawing, settings: HandRenderSettings
+) -> list[tuple[float, float]]:
+    """Rubber section: butt closure, the knots (subdivided), mouth closure."""
+    profile = [(grip.edge[0], 0.0), grip.edge]
+    for (z_a, r_a), (z_b, r_b) in zip(grip.knots, grip.knots[1:], strict=False):
+        rings = max(1, math.ceil((z_b - z_a) / settings.grip_ring_spacing_m))
+        for index in range(1, rings):
+            t = index / rings
+            profile.append((z_a + t * (z_b - z_a), r_a + t * (r_b - r_a)))
+        profile.append((z_b, r_b))
+    profile.append((grip.mouth[0], 0.0))
+    return profile
+
+
+def _cap_profile(
+    grip: GripDrawing, settings: HandRenderSettings
+) -> list[tuple[float, float]]:
+    """Cap section: flare, rounded edge, flat end and (with a vent) its bore."""
+    z_edge, r_edge = grip.edge
+    end, vent = grip.cap_end_z_m, grip.vent_radius_m
+    wide, rounding = grip.cap_radius_m, grip.cap_round_m
+    profile = [(z_edge, vent), (z_edge, r_edge), (end + rounding, wide)]
+    segments = settings.grip_cap_round_segments
+    for index in range(1, segments + 1):
+        angle = 0.5 * math.pi * index / segments
+        profile.append(
+            (
+                end + rounding * (1.0 - math.sin(angle)),
+                wide - rounding * (1.0 - math.cos(angle)),
+            )
+        )
+    profile[-1] = (end, wide - rounding)
+    profile.append((end, vent))
+    if vent > 0.0:
+        profile.append((z_edge, vent))
+    return profile
+
+
+def drawn_club_parts(
+    z_min: float, z_max: float, grip: GripDrawing, *, settings: HandRenderSettings
+) -> tuple[ScenePart, ...]:
+    """A real golf grip and its steel shaft for a hand spanning ``[z_min, z_max]``.
+
+    Returns the parts named :data:`GRIP_PART_NAMES` then
+    :data:`SHAFT_PART_NAME`: the rubber (a surface of revolution through
+    ``grip.knots`` with a ring at least every ``grip_ring_spacing_m``), the
+    butt cap (flare, rounded edge, flat end), the vent plug that fills the
+    hole in the cap end (only when ``grip.vent_radius_m > 0``), and the
+    shaft. The first three are of kind ``"grip"``. The shaft starts at the
+    mouth, ``grip_mouth_step_m`` thinner than the rubber there, and runs to
+    the farther of ``z_max + grip_length_margin_m + shaft_extension_m`` and
+    ``shaft_extension_m`` beyond the mouth, so it never shows at the butt.
+
+    Raises ``TypeError`` when ``grip`` is not a :class:`GripDrawing`,
+    ``ValueError`` for non-finite or reversed ``z`` bounds or a mouth too
+    thin for ``grip_mouth_step_m``.
+    """
+    if not isinstance(grip, GripDrawing):
+        raise TypeError(f"grip must be a GripDrawing or None, got {grip!r}")
+    if not (math.isfinite(z_min) and math.isfinite(z_max)):
+        raise ValueError("z_min and z_max must be finite")
+    if z_min > z_max:
+        raise ValueError(f"z_min={z_min} must not exceed z_max={z_max}")
+    mouth_z, mouth_radius = grip.mouth
+    shaft_radius = mouth_radius - settings.grip_mouth_step_m
+    if shaft_radius <= 0.0:
+        raise ValueError(
+            f"grip_mouth_step_m={settings.grip_mouth_step_m} leaves no shaft "
+            f"inside a mouth of radius {mouth_radius}"
+        )
+    rubber_name, cap_name, vent_name = GRIP_PART_NAMES
+    rubber = lathe_mesh(_rubber_profile(grip, settings), settings=settings)
+    cap = lathe_mesh(_cap_profile(grip, settings), settings=settings)
+    parts = [
+        ScenePart(rubber, settings.grip_rgba, "grip", name=rubber_name),
+        ScenePart(cap, settings.grip_cap_rgba, "grip", name=cap_name),
+    ]
+    if grip.vent_radius_m > 0.0:
+        end, vent = grip.cap_end_z_m, grip.vent_radius_m
+        plug = lathe_mesh(
+            [(end, 0.0), (end, vent), (grip.edge[0], vent), (grip.edge[0], 0.0)],
+            settings=settings,
+        )
+        parts.append(ScenePart(plug, settings.grip_vent_rgba, "grip", name=vent_name))
+    reach = settings.shaft_extension_m
+    head = max(float(z_max) + settings.grip_length_margin_m, mouth_z) + reach
+    shaft = tapered_tube(
+        np.array([0.0, 0.0, mouth_z]),
+        np.array([0.0, 0.0, head]),
+        shaft_radius,
+        shaft_radius,
+        settings.club_sides,
+    )
+    parts.append(ScenePart(shaft, settings.shaft_rgba, "shaft", name=SHAFT_PART_NAME))
+    ensure(
+        float(shaft.vertices[:, 2].min()) >= mouth_z - settings.epsilon,
+        "the shaft is drawn only beyond the mouth of the grip",
+    )
+    return tuple(parts)
 
 
 def assemble_scene(

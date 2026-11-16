@@ -23,6 +23,7 @@ from src.shared.python.model_appearance.grip_hand_mesh import build_grip_hand_me
 from src.shared.python.model_appearance.grip_pose import Hand
 from src.shared.python.model_appearance.hand_backends import render
 from src.shared.python.model_appearance.hand_backends.render_rig import (
+    GripDrawing,
     corner_normals,
     focus_vertices_of,
     orthonormal_basis,
@@ -229,6 +230,264 @@ def test_bad_scene_inputs_raise() -> None:
         render.render_scene(
             render.build_club_parts(0.0, 0.1, settings=SETTINGS), "palm"
         )
+
+
+# --- 2b. the real golf grip (tapered rubber, butt cap, vent) ----------------
+
+GRIP_KNOTS = (
+    (-0.060, 0.01219),
+    (-0.0092, 0.01143),
+    (0.0924, 0.00991),
+    (0.2067, 0.00889),
+)
+GRIP = GripDrawing(
+    knots=GRIP_KNOTS,
+    cap_radius_m=0.0133,
+    cap_height_m=0.005,
+    cap_round_m=0.002,
+    vent_radius_m=0.0012,
+)
+GRIP_FIELDS = {
+    "knots": GRIP_KNOTS,
+    "cap_radius_m": 0.0133,
+    "cap_height_m": 0.005,
+    "cap_round_m": 0.002,
+    "vent_radius_m": 0.0012,
+}
+
+
+def _named(parts, name: str):
+    return [p for p in parts if p.name == name]
+
+
+def _radius(vertices: np.ndarray) -> np.ndarray:
+    return np.hypot(vertices[:, 0], vertices[:, 1])
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "match"),
+    [
+        ("knots", ((0.0, 0.012),), "two knots"),
+        ("knots", ((0.0, 0.012), (0.0, 0.011)), "ascending"),
+        ("knots", ((0.1, 0.012), (0.0, 0.011)), "ascending"),
+        ("knots", ((0.0, 0.012), (0.1, 0.0)), "positive"),
+        ("knots", ((0.0, 0.012), (0.1, float("nan"))), "finite"),
+        ("knots", ((float("inf"), 0.012), (0.1, 0.01)), "finite"),
+        ("knots", ((0.0, 0.012, 1.0), (0.1, 0.01)), "pairs"),
+        ("cap_radius_m", 0.012, "cap_radius_m"),
+        ("cap_height_m", -0.001, "cap_height_m"),
+        ("cap_round_m", -0.001, "cap_round_m"),
+        ("cap_round_m", 0.006, "cap_round_m"),
+        ("vent_radius_m", -0.001, "vent_radius_m"),
+        ("vent_radius_m", 0.0133, "vent_radius_m"),
+        ("vent_radius_m", float("nan"), "finite"),
+    ],
+)
+def test_grip_drawing_contract_errors(field: str, value: object, match: str) -> None:
+    with pytest.raises(ValueError, match=match):
+        GripDrawing(**{**GRIP_FIELDS, field: value})
+
+
+def test_grip_drawing_is_frozen_and_normalises_its_knots() -> None:
+    drawing = GripDrawing(**{**GRIP_FIELDS, "knots": [list(k) for k in GRIP_KNOTS]})
+    assert drawing.knots == GRIP_KNOTS
+    assert drawing == GRIP
+    with pytest.raises(AttributeError):
+        drawing.cap_radius_m = 0.02  # type: ignore[misc]
+
+
+def test_club_without_a_drawing_is_the_plain_cylinder() -> None:
+    radius = SETTINGS.grip_radius_m
+    margin = SETTINGS.grip_length_margin_m
+    default = render.build_club_parts(-0.03, 0.07, settings=SETTINGS)
+    explicit = render.build_club_parts(-0.03, 0.07, settings=SETTINGS, grip=None)
+    assert [p.kind for p in default] == ["grip", "shaft"]
+    for a, b in zip(default, explicit, strict=True):
+        assert np.array_equal(a.mesh.vertices, b.mesh.vertices)
+        assert np.array_equal(a.mesh.faces, b.mesh.faces)
+        assert a.rgba == b.rgba
+    grip, shaft = default
+    sides = SETTINGS.club_sides
+    assert grip.mesh.vertices.shape == (2 * sides + 2, 3)
+    assert shaft.mesh.vertices.shape == (2 * sides + 2, 3)
+    assert np.allclose(_radius(grip.mesh.vertices[: 2 * sides]), radius)
+    assert np.isclose(grip.mesh.vertices[:, 2].min(), -0.03 - margin)
+    assert np.isclose(grip.mesh.vertices[:, 2].max(), 0.07 + margin)
+    assert np.isclose(shaft.mesh.vertices[:, 2].min(), 0.07 + margin)
+    assert np.isclose(
+        shaft.mesh.vertices[:, 2].max(), 0.07 + margin + SETTINGS.shaft_extension_m
+    )
+    assert grip.rgba == SETTINGS.grip_rgba and shaft.rgba == SETTINGS.shaft_rgba
+
+
+def test_drawn_grip_parts_kinds_and_colours() -> None:
+    parts = render.build_club_parts(-0.03, 0.07, settings=SETTINGS, grip=GRIP)
+    assert [p.name for p in parts] == ["grip_rubber", "grip_cap", "grip_vent", "shaft"]
+    assert [p.kind for p in parts] == ["grip", "grip", "grip", "shaft"]
+    rubber, cap, vent, shaft = parts
+    assert rubber.rgba == SETTINGS.grip_rgba
+    assert cap.rgba == SETTINGS.grip_cap_rgba
+    assert vent.rgba == SETTINGS.grip_vent_rgba
+    assert shaft.rgba == SETTINGS.shaft_rgba
+    for part in parts:
+        checked = render.validated_part(part)
+        assert checked.name == part.name
+        assert np.isfinite(part.mesh.vertices).all()
+        faces = part.mesh.faces
+        assert faces.min() >= 0 and faces.max() < len(part.mesh.vertices)
+        assert len(np.unique(faces)) == len(part.mesh.vertices)
+        assert part.mesh.volume() > 0.0
+        tri = part.mesh.vertices[faces]
+        area = np.linalg.norm(
+            np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0]), axis=1
+        )
+        assert area.min() > 0.0
+
+
+def test_drawn_rubber_follows_the_knots_and_tapers_monotonically() -> None:
+    parts = render.build_club_parts(-0.03, 0.07, settings=SETTINGS, grip=GRIP)
+    (rubber,) = _named(parts, "grip_rubber")
+    vertices = rubber.mesh.vertices
+    radius = _radius(vertices)
+    assert np.isclose(vertices[:, 2].min(), GRIP_KNOTS[0][0], atol=1e-12)
+    assert np.isclose(vertices[:, 2].max(), GRIP_KNOTS[-1][0], atol=1e-12)
+    for z, r in GRIP_KNOTS:
+        at_knot = np.abs(vertices[:, 2] - z) < 1e-9
+        assert at_knot.sum() >= SETTINGS.club_sides
+        assert abs(radius[at_knot].max() - r) < 1e-6
+    wall = radius > GRIP_KNOTS[-1][1] - 1e-9
+    order = np.argsort(vertices[wall, 2], kind="stable")
+    along = radius[wall][order]
+    assert np.all(np.diff(along) <= 1e-9)
+    expected = np.interp(vertices[wall, 2], *np.array(GRIP_KNOTS).T)
+    assert np.allclose(radius[wall], expected, atol=1e-9)
+    spacing = np.diff(np.unique(np.round(vertices[wall, 2], 9)))
+    assert spacing.max() <= SETTINGS.grip_ring_spacing_m + 1e-9
+
+
+def test_drawn_rubber_shades_smoothly_along_the_taper() -> None:
+    parts = render.build_club_parts(-0.03, 0.07, settings=SETTINGS, grip=GRIP)
+    (rubber,) = _named(parts, "grip_rubber")
+    vertices = rubber.mesh.vertices
+    radius = _radius(vertices)
+    wall = radius > GRIP_KNOTS[-1][1] - 1e-9
+    normals = corner_normals(
+        rubber.mesh,
+        weld_tolerance_m=SETTINGS.normal_weld_tolerance_m,
+        crease_deg=SETTINGS.normal_crease_deg,
+    )
+    faces = rubber.mesh.faces
+    on_wall = wall[faces].all(axis=1)
+    corner = vertices[faces[on_wall]].reshape(-1, 3)
+    outward = corner[:, :2] / np.hypot(corner[:, 0], corner[:, 1])[:, None]
+    wall_normals = normals[on_wall].reshape(-1, 3)
+    assert np.einsum("ij,ij->i", wall_normals[:, :2], outward).min() > 0.999
+    assert np.abs(wall_normals[:, 2]).max() < 0.03
+
+
+def test_drawn_cap_flares_rounds_and_ends_flat() -> None:
+    parts = render.build_club_parts(-0.03, 0.07, settings=SETTINGS, grip=GRIP)
+    (cap,) = _named(parts, "grip_cap")
+    vertices = cap.mesh.vertices
+    radius = _radius(vertices)
+    z0, r0 = GRIP_KNOTS[0]
+    end = z0 - GRIP.cap_height_m
+    assert abs(radius.max() - GRIP.cap_radius_m) < 1e-9
+    assert np.isclose(vertices[:, 2].min(), end, atol=1e-12)
+    assert np.isclose(vertices[:, 2].max(), z0, atol=1e-12)
+    at_edge = np.abs(vertices[:, 2] - z0) < 1e-9
+    assert abs(radius[at_edge].max() - r0) < 1e-9
+    widest = vertices[np.abs(radius - GRIP.cap_radius_m) < 1e-9, 2]
+    assert np.allclose(widest, end + GRIP.cap_round_m, atol=1e-9)
+    on_end = np.abs(vertices[:, 2] - end) < 1e-9
+    assert abs(radius[on_end].max() - (GRIP.cap_radius_m - GRIP.cap_round_m)) < 1e-9
+    assert abs(radius[on_end].min() - GRIP.vent_radius_m) < 1e-9
+    rounded = (vertices[:, 2] < end + GRIP.cap_round_m - 1e-9) & ~on_end
+    assert rounded.sum() >= SETTINGS.club_sides
+    centre = np.array([end + GRIP.cap_round_m, GRIP.cap_radius_m - GRIP.cap_round_m])
+    offset = np.stack([vertices[rounded, 2], radius[rounded]], axis=1) - centre
+    assert np.allclose(np.linalg.norm(offset, axis=1), GRIP.cap_round_m, atol=1e-9)
+
+
+def test_drawn_vent_fills_the_cap_hole_and_is_optional() -> None:
+    parts = render.build_club_parts(-0.03, 0.07, settings=SETTINGS, grip=GRIP)
+    (vent,) = _named(parts, "grip_vent")
+    end = GRIP_KNOTS[0][0] - GRIP.cap_height_m
+    assert abs(_radius(vent.mesh.vertices).max() - GRIP.vent_radius_m) < 1e-9
+    assert np.isclose(vent.mesh.vertices[:, 2].min(), end, atol=1e-12)
+    assert vent.mesh.vertices[:, 2].max() <= GRIP_KNOTS[0][0] + 1e-12
+    plain = GripDrawing(**{**GRIP_FIELDS, "vent_radius_m": 0.0})
+    closed = render.build_club_parts(-0.03, 0.07, settings=SETTINGS, grip=plain)
+    assert [p.name for p in closed] == ["grip_rubber", "grip_cap", "shaft"]
+    (cap,) = _named(closed, "grip_cap")
+    on_end = np.abs(cap.mesh.vertices[:, 2] - end) < 1e-9
+    assert _radius(cap.mesh.vertices[on_end]).min() == 0.0
+
+
+@pytest.mark.parametrize(
+    ("z_max", "head"),
+    [
+        (0.07, GRIP_KNOTS[-1][0] + SETTINGS.shaft_extension_m),
+        (
+            0.30,
+            0.30 + SETTINGS.grip_length_margin_m + SETTINGS.shaft_extension_m,
+        ),
+    ],
+)
+def test_drawn_shaft_starts_at_the_mouth_and_reaches_the_head(
+    z_max: float, head: float
+) -> None:
+    parts = render.build_club_parts(-0.03, z_max, settings=SETTINGS, grip=GRIP)
+    (shaft,) = _named(parts, "shaft")
+    (rubber,) = _named(parts, "grip_rubber")
+    mouth_z, mouth_r = GRIP_KNOTS[-1]
+    z = shaft.mesh.vertices[:, 2]
+    assert z.min() >= mouth_z - 1e-12
+    assert np.isclose(z.max(), head, atol=1e-12)
+    assert z.max() >= z_max
+    assert np.isclose(rubber.mesh.vertices[:, 2].max(), mouth_z, atol=1e-12)
+    shaft_r = _radius(shaft.mesh.vertices).max()
+    assert abs(shaft_r - (mouth_r - SETTINGS.grip_mouth_step_m)) < 1e-9
+    assert 0.0 < shaft_r < mouth_r
+
+
+def test_drawn_grip_edge_cases_and_bad_inputs() -> None:
+    sharp = GripDrawing(**{**GRIP_FIELDS, "cap_round_m": 0.0})
+    flush = GripDrawing(
+        **{**GRIP_FIELDS, "cap_radius_m": GRIP_KNOTS[0][1], "cap_round_m": 0.005}
+    )
+    for drawing in (sharp, flush):
+        for part in render.build_club_parts(0.0, 0.1, settings=SETTINGS, grip=drawing):
+            render.validated_part(part)
+            assert part.mesh.volume() > 0.0
+    (cap,) = _named(
+        render.build_club_parts(0.0, 0.1, settings=SETTINGS, grip=sharp), "grip_cap"
+    )
+    assert abs(_radius(cap.mesh.vertices).max() - sharp.cap_radius_m) < 1e-9
+    with pytest.raises(ValueError):
+        render.build_club_parts(0.1, -0.1, settings=SETTINGS, grip=GRIP)
+    with pytest.raises(ValueError, match="finite"):
+        render.build_club_parts(float("nan"), 0.1, settings=SETTINGS, grip=GRIP)
+    with pytest.raises(TypeError, match="GripDrawing"):
+        render.build_club_parts(0.0, 0.1, settings=SETTINGS, grip=GRIP_FIELDS)
+    thin = SETTINGS.with_overrides(grip_mouth_step_m=0.01)
+    with pytest.raises(ValueError, match="grip_mouth_step_m"):
+        render.build_club_parts(0.0, 0.1, settings=thin, grip=GRIP)
+
+
+@pytest.mark.parametrize(
+    ("key", "value"),
+    [
+        ("grip_mouth_step_m", 0.0),
+        ("grip_ring_spacing_m", 0.0),
+        ("grip_cap_round_segments", 0),
+        ("grip_cap_rgba", [0.1, 0.1, 0.1]),
+        ("grip_vent_rgba", [0.1, 0.1, 0.1, 2.0]),
+    ],
+)
+def test_bad_grip_drawing_settings_raise(key: str, value: object) -> None:
+    with pytest.raises(ValueError):
+        SETTINGS.with_overrides(**{key: value})
 
 
 def test_vertex_normals_are_smooth_across_duplicated_seam_vertices() -> None:

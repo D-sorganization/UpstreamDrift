@@ -120,6 +120,11 @@ class HandRenderSettings:
     skin_rgba: Rgba
     grip_rgba: Rgba
     shaft_rgba: Rgba
+    grip_cap_rgba: Rgba
+    grip_vent_rgba: Rgba
+    grip_mouth_step_m: float
+    grip_ring_spacing_m: float
+    grip_cap_round_segments: int
     surface: Mapping[str, SurfaceSpec]
     views: Mapping[str, ViewSpec]
     lights: Mapping[str, LightSpec]
@@ -333,6 +338,21 @@ def _sheet(raw: Mapping[str, Any]) -> SheetSpec:
     )
 
 
+def _grip_drawing_settings(raw: Mapping[str, Any]) -> dict[str, Any]:
+    """The settings only a drawn grip (``GripDrawing``) reads."""
+    return {
+        "grip_cap_rgba": _vector(raw, "grip_cap_rgba", 4, low=0.0, high=1.0),
+        "grip_vent_rgba": _vector(raw, "grip_vent_rgba", 4, low=0.0, high=1.0),
+        "grip_mouth_step_m": _number(raw, "grip_mouth_step_m", low=0.0, low_open=True),
+        "grip_ring_spacing_m": _number(
+            raw, "grip_ring_spacing_m", low=0.0, low_open=True
+        ),
+        "grip_cap_round_segments": _integer(
+            raw, "grip_cap_round_segments", low=1, high=256
+        ),
+    }
+
+
 def settings_from_mapping(raw: Mapping[str, Any]) -> HandRenderSettings:
     """Validate a decoded settings object.
 
@@ -388,6 +408,7 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> HandRenderSettings:
         skin_rgba=_vector(raw, "skin_rgba", 4, low=0.0, high=1.0),  # type: ignore[arg-type]
         grip_rgba=_library_rgba(raw, "grip_material"),
         shaft_rgba=_library_rgba(raw, "shaft_material"),
+        **_grip_drawing_settings(raw),
         surface=_surfaces(raw),
         views=_views(raw),
         lights=_lights(raw),

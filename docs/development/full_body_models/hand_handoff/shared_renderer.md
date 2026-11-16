@@ -141,8 +141,10 @@ render_view(result, view, *, shaft_roll_deg=0.0, side="lead", settings=None,
             grip_radius_m=None, basis=None, engine=None) -> RenderedView
 render_scene(parts, view, *, basis=None, settings=None, side="lead",
              engine=None) -> RenderedView
-build_club_parts(z_min, z_max, *, settings, grip_radius_m=None)
-    -> (grip ScenePart, shaft ScenePart)
+build_club_parts(z_min, z_max, *, settings, grip_radius_m=None, grip=None)
+    -> (grip ScenePart, shaft ScenePart)            # grip=None: plain cylinder
+    -> (rubber, cap[, vent], shaft) ScenePart tuple # grip=GripDrawing(...)
+GripDrawing(knots, cap_radius_m, cap_height_m, cap_round_m, vent_radius_m)
 anatomical_basis(skin_vertices, *, side, settings=None) -> AnatomicalBasis
 save_png(rendered, path) -> Path
 register_render_source(name, builder, *, replace=False) -> None
@@ -159,6 +161,17 @@ optional `.skin_rgb`, `.material_rgba`, `.material` (library name) or
 `render_scene` frames the camera on every skin part, which is how to draw
 both hands: place two skin meshes in one frame and add
 `build_club_parts(z_min, z_max, settings=...)`.
+
+`grip=GripDrawing(...)` draws a real golf grip instead of the cylinder:
+tapered rubber through `knots` (`(z_m, radius_m)`, first knot the edge of
+the butt cap, last knot the mouth), a flared and rounded butt cap, an
+optional vent, and the steel shaft from the mouth toward the head. The
+parts carry `ScenePart.name` `grip_rubber`, `grip_cap`, `grip_vent` and
+`shaft`; the first three are of kind `grip`. Their colours and mesh
+density are the `grip_cap_rgba`, `grip_vent_rgba`, `grip_mouth_step_m`,
+`grip_ring_spacing_m` and `grip_cap_round_segments` settings.
+`render_view` and `assemble_scene` still draw the cylinder; pass the
+drawn parts to `render_scene`.
 
 ### Passing Your Own Basis
 
