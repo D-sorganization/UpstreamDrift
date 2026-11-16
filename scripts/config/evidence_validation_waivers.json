@@ -2,13 +2,6 @@
   "issue": 14935,
   "waivers": [
     {
-      "id": "candidate-ms-080s-seeded-accepted-gates",
-      "rule": "accepted_gates_consistency",
-      "path": "candidates/candidate_ms_080s_seeded_package.json",
-      "expires": "2026-12-31",
-      "note": "Known contradictory accepted=true with 1/5 gates; remediation tracked in #14935"
-    },
-    {
       "id": "receipt-driver-g1-crocoddyl-rk45-warm-start",
       "rule": "host_absolute_provenance",
       "path": "evidence/matched/driver_g1_crocoddyl_rk45/receipt.json",

@@ -51,9 +51,10 @@ def test_shaft_roll_zero_matches_legacy_projection_and_mesh() -> None:
     assert projected.lead_shaft_roll_deg == 0.0
     assert projected.trail_shaft_roll_deg == 0.0
     club = _iron7_club()
-    placed = grip_hand_meshes(club, projected, grip_spec=GripSpec.legacy())
+    placed = grip_hand_meshes(club, projected)
+    baseline = grip_hand_meshes(club, DEFAULT_GRIP_POSE)
     for key in placed:
-        assert len(placed[key].vertices) > 10_000
+        assert np.allclose(placed[key].vertices, baseline[key].vertices, atol=1e-9)
 
 
 def test_plus_minus_theta_is_identity() -> None:
@@ -99,6 +100,25 @@ def test_roll_axis_fixes_shaft_line_points() -> None:
         p = frame[:3, 3] + t * axis
         p2 = apply_shaft_roll(frame, axis, 25.0)[:3, 3] + t * axis
         assert np.allclose(p, p2, atol=1e-12)
+
+
+def test_grip_hand_frame_shaft_column_unchanged_after_roll() -> None:
+    """Shaft roll spins the hand about the club Y shaft; grip axis must stay fixed."""
+    club = _iron7_club()
+    shaft = np.array([0.0, 1.0, 0.0])
+    for hand in (Hand.LEAD, Hand.TRAIL):
+        pose = GripSpec.legacy(
+            lead=HandGripSpec(shaft_roll_deg=15.0),
+            trail=HandGripSpec(shaft_roll_deg=-12.0),
+        ).to_grip_pose()
+        frame = grip_hand_frame(club, hand, pose)
+        assert np.allclose(frame[:3, 2], shaft, atol=1e-12)
+        zero = grip_hand_frame(
+            club,
+            hand,
+            replace(pose, lead_shaft_roll_deg=0.0, trail_shaft_roll_deg=0.0),
+        )
+        assert np.allclose(frame[:3, 3], zero[:3, 3], atol=1e-12)
 
 
 def test_left_handed_mirrors_shaft_roll_sign() -> None:

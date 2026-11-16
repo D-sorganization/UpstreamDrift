@@ -24,7 +24,6 @@ CANCEL_FALSE_ALLOWLIST = frozenset(
         "docker-security-scan.yml",
         "docker-size-gates.yml",
         "docker-smoke.yml",
-        "jules-push-pr-noise-disable.yml",
         "release.yml",
     }
 )

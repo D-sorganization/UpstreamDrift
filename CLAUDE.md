@@ -63,9 +63,8 @@ Short version:
 
 4. **Priority order** (see `Repository_Management/shared_scripts/agent_identity.py`):
    `user > maxwell-daemon > claude > codex > jules > local > gaai`. The
-   `Jules-Redundant-PR-Closer` workflow in this repo enforces this — when
-   two agents file PRs against the same issue, the lower-priority PR is
-   auto-closed with a deferral comment.
+   Fleet agent identity policy defines the order; duplicate PR handling is
+   managed by the Repository_Management tooling.
 
 5. **The `Agent-Lease-Reaper` runs every 30 minutes from `Repository_Management`** and sweeps stale claims fleet-wide. Manual release via a `<!-- agent-lease v1 release -->` comment is welcome but not required.
 

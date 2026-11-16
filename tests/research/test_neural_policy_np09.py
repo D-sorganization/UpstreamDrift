@@ -59,16 +59,45 @@ def test_named_swing_events_and_report_properties() -> None:
         assert rep.event == ev and "not guaranteed" in rep.disclaimer
 
 
-def test_lexical_guardrail_zero_violations() -> None:
+REQUIRED_LEXICAL_FILES = (
+    "src/research/neural_policy/io_sensitivity.py",
+    "tests/research/test_neural_policy_np09.py",
+)
+# Collation deletes the fragment after folding it into SPEC.md. Scan it only
+# while it is still on disk so the merge queue does not fail on its absence.
+OPTIONAL_LEXICAL_FILES = ("changes/14502-np09-io-sensitivity.md",)
+
+
+def _assert_lexical_guardrail(root: Path) -> None:
     words = "imp:edance,stiff:ness,syn:ergy,co-con:traction,mus:cle,ana:tomy,control-:affine,ZT:CF,ZV:CF"
     banned = [w.replace(":", "") for w in words.split(",")]  # noqa: SIM905
-    root = Path(__file__).resolve().parents[2]
-    files = (
-        "src/research/neural_policy/io_sensitivity.py",
-        "tests/research/test_neural_policy_np09.py",
-        "changes/14502-np09-io-sensitivity.md",
-    )
+    files: list[str] = list(REQUIRED_LEXICAL_FILES)
+    files.extend(rel for rel in OPTIONAL_LEXICAL_FILES if (root / rel).is_file())
     for rel in files:
         txt = (root / rel).read_text(encoding="utf-8")
         for b in banned:
-            assert not re.search(r"\b" + re.escape(b) + r"\b", txt, re.IGNORECASE)
+            assert not re.search(r"\b" + re.escape(b) + r"\b", txt, re.IGNORECASE), (
+                f"{b} in {rel}"
+            )
+
+
+def test_lexical_guardrail_zero_violations() -> None:
+    root = Path(__file__).resolve().parents[2]
+    _assert_lexical_guardrail(root)
+
+
+def test_lexical_guardrail_tolerates_collated_change_fragment_and_catches_violation(
+    tmp_path: Path,
+) -> None:
+    for rel in REQUIRED_LEXICAL_FILES:
+        target = tmp_path / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("clean baseline content\n", encoding="utf-8")
+
+    _assert_lexical_guardrail(tmp_path)
+
+    fragment = tmp_path / OPTIONAL_LEXICAL_FILES[0]
+    fragment.parent.mkdir(parents=True, exist_ok=True)
+    fragment.write_text(f"bad {'mus:cle'.replace(':', '')} token\n", encoding="utf-8")
+    with pytest.raises(AssertionError):
+        _assert_lexical_guardrail(tmp_path)

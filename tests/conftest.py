@@ -8,6 +8,9 @@ from __future__ import annotations
 
 import os
 
+# Host OS name for pytest report formatting when tests mutate ``os.name`` (#15103).
+_HOST_OS_NAME = os.name
+
 # ---------------------------------------------------------------------------
 # Fleet Testing Standards §5: thread-safety + headless env vars.
 # Must be set BEFORE any heavy import (numpy, matplotlib, Qt, etc.) so that
@@ -1117,6 +1120,7 @@ def pytest_runtest_teardown(item: pytest.Item, nextitem: pytest.Item | None) -> 
             pytrace=False,
         )
     finally:
+        os.name = _HOST_OS_NAME
         from tests.helpers.headless_gui_teardown import headless_test_teardown
 
         headless_test_teardown()
@@ -1498,7 +1502,7 @@ def _skip_reason_is_missing_rust_wheel(reason: str) -> bool:
     )
 
 
-@pytest.hookimpl(hookwrapper=True)
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(
     item: pytest.Item, call: pytest.CallInfo[None]
 ) -> Generator[None, Any, None]:
@@ -1509,7 +1513,15 @@ def pytest_runtest_makereport(
     Postcondition: a skip caused by a missing Rust wheel becomes a failure so
     the wheel-installing CI lane cannot pass while silently skipping parity.
     """
-    outcome = yield
+    saved_os_name: str | None = None
+    if call.when == "call":
+        saved_os_name = os.name
+        os.name = _HOST_OS_NAME
+    try:
+        outcome = yield
+    finally:
+        if saved_os_name is not None:
+            os.name = saved_os_name
     report = outcome.get_result()
     if not report.skipped:
         return

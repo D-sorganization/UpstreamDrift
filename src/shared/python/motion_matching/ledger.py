@@ -246,6 +246,13 @@ def classify_receipt(
     elif "visual_layer" in p:
         lane, engine = "visual_layer", "mujoco"
         capture = "driver" if "driver" in p else ("iron" if "iron" in p else None)
+    elif "grip_shaft_roll" in p:
+        lane, engine = "grip_authoring", "shared"
+        club = data.get("club")
+        if isinstance(club, Mapping) and isinstance(club.get("alias"), str):
+            capture = club["alias"].strip().lower()
+        else:
+            capture = "iron7"
     elif "viewer" in p:
         lane, engine, capture = "viewer", "mujoco", "driver"
     elif "evidence/matched" in p or "work_package" in data:
