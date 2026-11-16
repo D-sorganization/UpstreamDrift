@@ -38,14 +38,14 @@ def pad_divergence_settings() -> PadDivergenceSettings:
     raw = json.loads(_CONFIG_PATH.read_text(encoding="utf-8"))
     block = raw.get("capsule_pad_divergence_tolerance_m", {})
     tol = {
-        k: float(block[k])
-        for k in ("index", "middle", "ring", "little")
-        if k in block
+        k: float(block[k]) for k in ("index", "middle", "ring", "little") if k in block
     }
     for finger in ("index", "middle", "ring", "little"):
         tol.setdefault(finger, 0.014)
     thumb_max = float(raw.get("capsule_pad_divergence_thumb_max_m", 0.028))
-    return PadDivergenceSettings(per_finger_tolerance_m=tol, thumb_documented_max_m=thumb_max)
+    return PadDivergenceSettings(
+        per_finger_tolerance_m=tol, thumb_documented_max_m=thumb_max
+    )
 
 
 def _capsule_pad_centroid(

@@ -40,14 +40,14 @@ def build_free_club_shadow_hands_mjcf(
     mesh geoms with ``contype=\"0\" conaffinity=\"0\" mass=\"0\"``.
     """
     spec = GripSpec.legacy() if grip_spec is None else grip_spec
-    club = (
-        ClubAssembly("iron7", 0.95, 0.25, 0.0065)
-        if club is None
-        else club
-    )
+    club = ClubAssembly("iron7", 0.95, 0.25, 0.0065) if club is None else club
     pose = spec.to_grip_pose()
     meshes = grip_hand_meshes(club, pose, grip_spec=spec)
-    mesh_root = mesh_dir if mesh_dir is not None else Path(tempfile.mkdtemp(prefix="ud-shadow-grip-"))
+    mesh_root = (
+        mesh_dir
+        if mesh_dir is not None
+        else Path(tempfile.mkdtemp(prefix="ud-shadow-grip-"))
+    )
     mesh_root.mkdir(parents=True, exist_ok=True)
 
     assets: list[tuple[str, Path]] = []
@@ -72,7 +72,8 @@ def build_free_club_shadow_hands_mjcf(
         )
 
     asset_lines = "\n".join(
-        f'<mesh name="{name}" file="{path.name}" scale="1 1 1"/>' for name, path in assets
+        f'<mesh name="{name}" file="{path.name}" scale="1 1 1"/>'
+        for name, path in assets
     )
     club_len = float(club.length_m)
     grip_lo = float(club.length_m - club.grip_length_m)
@@ -87,7 +88,7 @@ def build_free_club_shadow_hands_mjcf(
       <freejoint name="club_free"/>
       <geom name="grip" type="cylinder" fromto="0 {grip_lo} 0 0 {club_len} 0" size="{GRIP_BUTT_RADIUS_M}" rgba="0.3 0.3 0.3 1" contype="0" conaffinity="0"/>
     </body>
-    {''.join(body_xml)}
+    {"".join(body_xml)}
   </worldbody>
 </mujoco>"""
     DefusedET.fromstring(xml)  # parse check
