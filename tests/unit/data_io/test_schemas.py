@@ -115,3 +115,19 @@ def test_none_array_raises_value_error() -> None:
 
 def test_pandera_available_returns_bool() -> None:
     assert isinstance(pandera_available(), bool)
+
+
+@pytest.mark.parametrize("require_numeric", [False, True])
+def test_dataframe_with_no_rows_raises(require_numeric: bool) -> None:
+    data = pd.DataFrame({"time": [], "q0": []})
+    with pytest.raises(DataFormatError, match="empty.csv.*zero rows"):
+        validate_csv_dataframe(
+            data, source="empty.csv", require_numeric=require_numeric
+        )
+
+
+@pytest.mark.parametrize("columns", [2, 5])
+def test_trajectory_with_no_rows_raises(columns: int) -> None:
+    data = np.empty((0, columns))
+    with pytest.raises(DataFormatError, match="empty.npy.*zero rows"):
+        validate_trajectory_array(data, source="empty.npy")

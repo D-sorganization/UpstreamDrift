@@ -81,3 +81,18 @@ def test_numpy_loaded_trajectory_array_shape() -> None:
 
     arr = np.array([[0.0, 1.0], [0.1, 2.0]])
     assert validate_trajectory_array(arr, source="mem") is arr
+
+
+def test_header_only_csv_soft_fails(tmp_path: Path) -> None:
+    csv_path = tmp_path / "header_only.csv"
+    csv_path.write_text("time,q0\n", encoding="utf-8")
+    assert load_csv_data(csv_path) is None
+
+
+def test_header_only_golf_csv_raises_typed_error(tmp_path: Path) -> None:
+    from src.shared.python.core.error_utils import DataFormatError
+
+    csv_path = tmp_path / "header_only.csv"
+    csv_path.write_text("time,q0\n", encoding="utf-8")
+    with pytest.raises(DataFormatError, match="header_only.csv.*zero rows"):
+        load_golf_data(csv_path)
