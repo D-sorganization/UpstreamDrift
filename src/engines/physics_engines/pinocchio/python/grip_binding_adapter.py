@@ -84,6 +84,7 @@ class PinocchioGripAdapter:
         model_hash: str = "full-body-v1",
         handedness: Handedness = DEFAULT_HANDEDNESS,
         attachment_mode: str = "contact",
+        grip_pose: Any | None = None,
     ) -> None:
         if isinstance(source, GripInterface):
             self._interface = source
@@ -98,6 +99,7 @@ class PinocchioGripAdapter:
                 f"source must be GripInterface or ClubInHands, got {type(source).__name__}"
             )
         validate_handedness(handedness)
+        self._grip_pose = grip_pose
         self._model_id = model_id
         self._model_hash = model_hash
         self._handedness: Handedness = handedness
@@ -147,6 +149,7 @@ class PinocchioGripAdapter:
             topology,
             lead_hand_body=self._lead_hand_body,
             trail_hand_body=self._trail_hand_body,
+            grip_pose=self._grip_pose,
         )
         left_frame = self._interface.left
         right_frame = self._interface.right

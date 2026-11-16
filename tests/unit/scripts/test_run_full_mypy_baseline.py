@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts.ci import run_full_mypy_baseline as mod
 
 
@@ -110,8 +112,39 @@ def test_update_baseline_writes_current_errors(tmp_path: Path, monkeypatch) -> N
     assert data["errors"] == [expected.to_json()]
 
 
+@pytest.mark.unit
+def test_ndarray_stub_message_variants_are_distinct_baseline_keys() -> None:
+    """SciPy-stubs 1.17+ rephrases ndarray diagnostics; refresh the baseline when they drift."""
+    stale = _error(
+        path="src/api/services/recording_service.py",
+        line=173,
+        message=(
+            'Argument 2 to "savez_compressed" has incompatible type '
+            '"**dict[str, ndarray[tuple[Any, ...], dtype[Any]]]"; expected "bool"'
+        ),
+        code="arg-type",
+    )
+    current = _error(
+        path="src/api/services/recording_service.py",
+        line=173,
+        message=(
+            'Argument 2 to "savez_compressed" has incompatible type '
+            '"**dict[str, ndarray[Any, Any]]"; expected "bool"'
+        ),
+        code="arg-type",
+    )
+
+    new_errors, stale_errors = mod.compare_to_baseline([current], [stale])
+
+    assert new_errors == [current]
+    assert stale_errors == [stale]
+
+
 def test_ci_standard_uses_full_src_baseline_runner_on_push() -> None:
-    workflow = Path(".github/workflows/ci-standard.yml").read_text(encoding="utf-8")
+    repo_root = Path(__file__).resolve().parents[3]
+    workflow = (repo_root / ".github/workflows/ci-standard.yml").read_text(
+        encoding="utf-8"
+    )
 
     assert "python3 scripts/ci/run_full_mypy_baseline.py" in workflow
     assert "mypy src --config-file pyproject.toml" not in workflow

@@ -52,6 +52,7 @@ from src.shared.python.core.handedness import (
 )
 from src.shared.python.grip_contact.contact_topology import GripStyle as GripStyle
 from src.shared.python.grip_contact.pad_layout import GRIP_RADIUS_M
+from src.shared.python.grip_contact.field_validation import require_fields_in_range
 
 if TYPE_CHECKING:
     from src.shared.python.grip_contact.contact_topology import ContactTopology
@@ -209,6 +210,10 @@ class GripPose:
     lead_roll_offset_deg: float = 0.0
     #: Visual roll offset for the trail hand in degrees ([-30, 30]).
     trail_roll_offset_deg: float = 0.0
+    #: Physical shaft roll for the lead hand (HRG-GB1b); see grip_spec.shaft_roll.
+    lead_shaft_roll_deg: float = 0.0
+    #: Physical shaft roll for the trail hand (HRG-GB1b).
+    trail_shaft_roll_deg: float = 0.0
     #: Cap in newtons on the lead hand's total pad normal force (HRG-HX4). A
     #: force, not ``grip_strength_deg`` (the visual roll). ``"unlimited"`` or > 0.
     lead_grip_force_limit_n: GripForceLimit = UNLIMITED
@@ -242,6 +247,8 @@ class GripPose:
                 ("grip_strength_deg", -30.0, 30.0),
                 ("lead_roll_offset_deg", -30.0, 30.0),
                 ("trail_roll_offset_deg", -30.0, 30.0),
+                ("lead_shaft_roll_deg", -180.0, 180.0),
+                ("trail_shaft_roll_deg", -180.0, 180.0),
             ),
         )
         require(self.hand_spacing_m > 0.0, "hand_spacing_m must be positive")
@@ -320,6 +327,12 @@ class GripPose:
         if hand is Hand.LEAD:
             return self.lead_roll_offset_deg
         return self.trail_roll_offset_deg
+
+    def shaft_roll_deg(self, hand: Hand) -> float:
+        """Per-hand physical shaft roll with handedness mirroring (#15138)."""
+        from src.shared.python.grip_spec.shaft_roll import pose_shaft_roll_deg
+
+        return pose_shaft_roll_deg(self, hand)
 
     def placement(self, hand: Hand) -> HandPlacement:
         """Full placement of one hand (position along the grip and angles)."""
@@ -418,23 +431,6 @@ def topology_of_pose(
         handedness=pose.handedness,
     )
     return contact_topology(spec, grip_radius_m=grip_radius_m)
-
-
-def require_fields_in_range(
-    obj: object, bounds: Sequence[tuple[str, float, float]]
-) -> None:
-    """Require each named attribute of ``obj`` to be a finite number in range.
-
-    Precondition: every ``(name, lo, hi)`` names an attribute of ``obj`` and
-    ``lo <= hi``. Raises ``ValueError`` naming the first offending field.
-    """
-    for name, lo, hi in bounds:
-        value = getattr(obj, name)
-        require(
-            isinstance(value, (int, float)) and math.isfinite(value),
-            f"{name} must be a finite number, got {value!r}",
-        )
-        require(lo <= value <= hi, f"{name} must be in [{lo}, {hi}], got {value}")
 
 
 def _unit_axis(

@@ -22,6 +22,14 @@ RUN102_DIR = (
     / "native_evidence"
     / "two_window_fit_9967_102"
 )
+RUN101_DIR = (
+    REPO_ROOT
+    / "docs"
+    / "development"
+    / "simscape_tour_matching"
+    / "native_evidence"
+    / "two_window_fit_9967_101"
+)
 
 
 def test_run102_evidence_script_is_archived_not_silent() -> None:
@@ -30,5 +38,15 @@ def test_run102_evidence_script_is_archived_not_silent() -> None:
     assert result.valid is True
     assert result.disposition == EvidenceScriptDisposition.ARCHIVED
     assert result.script_path.name == "two_window_fit_102.py"
+    assert result.script_path.is_file()
+    assert "7bbca06c74b901e06db184b88e196224ae166e01" in result.detail
+
+
+def test_run101_evidence_script_is_archived_not_silent() -> None:
+    """Run 101 shares the native replay gap; manifest must fail closed like run 102."""
+    result = validate_evidence_run_dir(RUN101_DIR, repo_root=REPO_ROOT)
+    assert result.valid is True
+    assert result.disposition == EvidenceScriptDisposition.ARCHIVED
+    assert result.script_path.name == "two_window_fit_101.py"
     assert result.script_path.is_file()
     assert "7bbca06c74b901e06db184b88e196224ae166e01" in result.detail
