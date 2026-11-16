@@ -14,8 +14,11 @@ from src.shared.python.data_io.io_utils import (
     load_json,
     read_text,
     save_json,
+    save_yaml,
     write_text,
 )
+
+pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # ensure_directory
@@ -73,6 +76,47 @@ class TestLoadJson:
 
 
 class TestSaveJson:
+    @pytest.mark.parametrize("kind", ["value", "key", "circular"])
+    def test_serialization_failure_preserves_existing_file(
+        self, tmp_path: Path, kind: str
+    ) -> None:
+        payload: dict[object, object] = {"bad": object()}
+        if kind == "key":
+            payload = {("bad",): 1}
+        elif kind == "circular":
+            payload = {}
+            payload["self"] = payload
+        target = tmp_path / "config.json"
+        original = b'{"keep": true}\r\n'
+        target.write_bytes(original)
+
+        error = ValueError if kind == "circular" else TypeError
+        with pytest.raises(error):
+            save_json(target, payload)
+        assert target.read_bytes() == original
+
+    def test_serialization_failure_does_not_create_parent(self, tmp_path: Path) -> None:
+        target = tmp_path / "new" / "config.json"
+        with pytest.raises(TypeError):
+            save_json(target, {"bad": object()})
+        assert not target.parent.exists()
+
+    def test_serialization_options_preserved(self, tmp_path: Path) -> None:
+        target = tmp_path / "config.json"
+        assert (
+            save_json(
+                target,
+                {"z": "café", "a": 1},
+                indent=4,
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+            == target
+        )
+        assert (
+            target.read_text(encoding="utf-8") == '{\n    "a": 1,\n    "z": "café"\n}'
+        )
+
     def test_saves_and_reloads(self, tmp_path: Path) -> None:
         data = {"x": 1, "y": [2, 3]}
         f = tmp_path / "out.json"
@@ -99,6 +143,39 @@ class TestSaveJson:
 
 
 # ---------------------------------------------------------------------------
+class TestSaveYaml:
+    def test_serialization_failure_preserves_existing_file(
+        self, tmp_path: Path
+    ) -> None:
+        yaml = pytest.importorskip("yaml")
+        target = tmp_path / "config.yaml"
+        original = b"keep: true\r\n"
+        target.write_bytes(original)
+        with pytest.raises(yaml.representer.RepresenterError):
+            save_yaml(target, {"bad": object()})
+        assert target.read_bytes() == original
+
+    def test_serialization_failure_does_not_create_parent(self, tmp_path: Path) -> None:
+        yaml = pytest.importorskip("yaml")
+        target = tmp_path / "new" / "config.yaml"
+        with pytest.raises(yaml.representer.RepresenterError):
+            save_yaml(target, {"bad": object()})
+        assert not target.parent.exists()
+
+    def test_successful_write_preserves_options(self, tmp_path: Path) -> None:
+        yaml = pytest.importorskip("yaml")
+        target = tmp_path / "config.yaml"
+        payload = {"z": "café", "a": 1}
+        assert (
+            save_yaml(target, payload, default_flow_style=True, sort_keys=True)
+            == target
+        )
+        text = target.read_text(encoding="utf-8")
+        assert text.startswith("{a: 1,")
+        assert "café" in text
+        assert yaml.safe_load(text) == payload
+
+
 # read_text / write_text
 # ---------------------------------------------------------------------------
 
