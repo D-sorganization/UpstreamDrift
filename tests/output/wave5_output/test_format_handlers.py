@@ -214,3 +214,27 @@ def test_dispatch_load_hdf5(tmp_path: Path):
     save_hdf5(df, p)
     loaded = dispatch_load(p, OutputFormat.HDF5)
     pd.testing.assert_frame_equal(df, loaded)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        np.int8(-7),
+        np.int32(5),
+        np.int64(2**53 + 1),
+        np.int64(-(2**53 + 1)),
+        np.int64(np.iinfo(np.int64).min),
+        np.int64(np.iinfo(np.int64).max),
+        np.uint64(np.iinfo(np.uint64).max),
+    ],
+)
+def test_save_json_preserves_numpy_integer_type_and_value(
+    tmp_path: Path, provenance: ProvenanceInfo, value: np.integer
+) -> None:
+    path = tmp_path / "integers.json"
+    save_json({"count": value}, path, provenance, {"seed": value}, "mujoco")
+
+    payload = json.loads(path.read_text())
+    for actual in (payload["results"]["count"], payload["metadata"]["seed"]):
+        assert type(actual) is int
+        assert actual == int(value)
