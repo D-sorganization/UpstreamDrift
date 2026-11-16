@@ -103,12 +103,14 @@
     "palm_cup_max_deg": 70.0,
     "palm_cup_step_deg": 2.0,
     "palm_cup_pivot_fraction": 1.0,
+    "toward_index_target": "knuckle",
     "toward_index_max_deg": {
-      "lead": 0.0,
-      "trail": 150.0
+      "lead": 35.0,
+      "trail": 75.0
     },
+    "knuckle_distance_m": 0.016,
     "toward_index_steps": 8,
-    "toward_index_straightness": 0.2,
+    "toward_index_straightness": 1.0,
     "index_gap_m": 0.001
   },
   "pair": {

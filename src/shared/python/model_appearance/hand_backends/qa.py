@@ -123,6 +123,19 @@ def thumb_gaps_m(result: HandVisualResult) -> dict[str, float]:
     }
 
 
+def thumb_pinch_m(result: HandVisualResult) -> float:
+    """Distance from the thumb's end joint to the forefinger's knuckle, joint
+    centre to joint centre: how tightly the two are pinched into a V. Both
+    joints lie inside the flesh, so touching skin leaves about 15 mm."""
+    asset, transforms, _ = _audit_parts(result)
+
+    def joint(bone: str) -> NDArray[np.float64]:
+        i = asset.bone_index(bone)
+        return transforms[i][:3, :3] @ asset.bone_heads[i] + transforms[i][:3, 3]
+
+    return float(np.linalg.norm(joint("thumb_dist") - joint("index_prox")))
+
+
 def hand_to_finger_gaps_m(
     hand: HandVisualResult, other: HandVisualResult, finger: str
 ) -> dict[str, float]:

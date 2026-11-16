@@ -14,7 +14,7 @@ Refs #15150 (epic), #15148. Stacked on `cursor/hrg-gb1b-shaft-roll-2882`. Auto-m
 - **New: the forefinger wraps with the other fingers (#15182).** A flat hand seated on the grip has the forefinger's first segment lying on it, so that knuckle could not flex and the finger hooked from its middle joint. The hand is now seated with the knuckle already flexed (`preshape.index_knuckle_flexion_deg`, 15 degrees; zero or `GripSpec.trigger_finger` switches it off), so the club lies in the crook of the finger. Knuckle flexion went from 10 to 19 degrees and the forefinger lies 0.7 mm from the middle finger.
 - **New: the fingers touch side to side (#15184).** After the curl, the ring finger swings sideways at its knuckle until its skin meets the middle finger, the little finger meets the ring finger and the index finger meets the middle finger. The index finger keeps a slightly larger gap (`side_close.index_gap_m`, 3 mm; the others `gap_m`, 1.5 mm). Zero `side_close.max_deg` switches it off. The swings are reported as `<finger>_side` joint angles, so supplying the solved angles rebuilds the same pose.
 - **New: overlap grip, hands closed up (#15183).** `build_grip_hands` (`skinned_pair.py`) poses both hands on one club. The trail hand is now posed round the lead hand's actual skin, not capsules (`pair.obstacle`: `"skin"` or `"capsules"`). It slides toward the lead hand until its ring finger is against the lead forefinger (`pair.max_spacing_close_m`, `pair.finger_gap_m`), and its little finger swings sideways into the groove between the lead forefinger and middle finger (`pair.overlap_max_swing_deg`, `pair.overlap_bias_m`; zero switches the overlap off). Where the lead forefinger tip stood through a coarse triangle of the trail palm, the trail skin gives way (`pair.yield_max_depth_m`).
-- **New: the trail thumb lies against its forefinger tip (#15181).** The thumb is turned from its spec azimuth toward the tip of its own forefinger by the least angle that brings the skin within `thumb.index_gap_m` (1 mm), and never so far that it leaves the grip or runs into the other hand. `thumb.toward_index_max_deg` is set per hand: 150 for the trail hand, 0 for the lead hand (see "Deviations"). Zero switches it off. The turn is reported as the `thumb_side` joint angle.
+- **New: thumb and forefinger pinched into a V (#15181).** Each thumb is turned from its spec azimuth toward the knuckle of its own forefinger (the joint between the palm and the finger's first segment) until the thumb's end joint is within `thumb.knuckle_distance_m` of it, and never so far that it leaves the grip or runs into the other hand. `thumb.toward_index_max_deg` caps the turn per hand: 35 for the lead hand, 75 for the trail hand (see "Deviations" for why not more). Zero switches it off. `thumb.toward_index_target = "fingertip"` gives the earlier behaviour (thumb skin on the forefinger tip) instead. The turn is reported as the `thumb_side` joint angle.
 - The forearm ends in a rounded cap, not a flat disc.
 - Each hand declares which vertices a renderer should frame on (`frame_focus`: everything except the forearm stub), so the hand itself fills 0.70 of the frame.
 - Shaft roll comes from `HandGripSpec.shaft_roll_deg`. Every size, tolerance, limit, gain and colour is in `scripts/config/skinned_human_hand.json`, `scripts/config/hand_visual_quality.json` or `assets/hand_cc0/build_settings.json`.
@@ -26,17 +26,17 @@ Refs #15150 (epic), #15148. Stacked on `cursor/hrg-gb1b-shaft-roll-2882`. Auto-m
 | Check | Before | Now | Limit (setting) |
 | --- | --- | --- | --- |
 | Thumb first segment to grip | 12.2 and 14.5 mm | 5.1 mm lead, 4.9 mm trail | 6 mm |
-| Thumb first segment, median gap of the skin facing the grip | 15.0 mm lead, 16.4 mm trail | 2.5 mm lead, 3.7 mm trail | 5 mm (new) |
+| Thumb first segment, median gap of the skin facing the grip | 15.0 mm lead, 16.4 mm trail | 1.5 mm lead, 0.7 mm trail | 5 mm (new) |
 | Thumb base pad, median gap of the skin facing the grip | 35.7 mm lead, 37.0 mm trail | 21.3 mm lead, 18.1 mm trail | at least 10 mm closer than without the cup (new) |
 | Finger to its neighbour, skin to skin (single hand) | index-middle 8.7 mm, middle-ring 4.6 mm, ring-little 2.1 mm | 0.7 mm, 0.3 mm, 0.9 mm (swings: index 14, ring 12, little 15 degrees) | 2 mm; index 5 mm (new) |
 | Forefinger knuckle flexion | 10 degrees (middle finger 62) | 19 degrees | at least 15 (new) |
 | Forefinger middle and end segments to the middle finger | 3.2 and 2.3 mm | at most 0.7 mm | 4 mm each (new) |
-| Trail fingers to the lead index finger (pair) | ring 1.8 mm, little 0.2 mm | ring 0.4 mm, little 1.0 mm | ring 1 mm (tightened from 3), little 1 mm |
-| Trail little finger to the lead middle finger (pair; the groove) | 18 mm | 0.5 mm | 1.5 mm to each of the two fingers (new) |
-| Hand spacing along the grip (pair) | 76.2 mm (spec) plus slide | 75.3 mm | spec minus 30 mm to spec plus 30 mm |
-| Trail thumb to its own forefinger tip | 19.0 mm | 1.4 mm single, 1.2 mm in the pair | 2.5 mm (new) |
-| Lead thumb to its own forefinger tip | 20.9 mm | 20.9 mm (not turned, see Deviations) | 24 mm (new; records the present state) |
-| Thumb first free segment to the hand beside it | not measured | 1.2 mm lead, 2.0 mm trail | 3 mm (new) |
+| Trail fingers to the lead index finger (pair) | ring 1.8 mm, little 0.2 mm | ring 0.4 mm, little 0.8 mm | ring 1 mm (tightened from 3), little 1 mm |
+| Trail little finger to the lead middle finger (pair; the groove) | 18 mm | 0.4 mm | 1.5 mm to each of the two fingers (new) |
+| Hand spacing along the grip (pair) | 76.2 mm (spec) plus slide | 74.9 mm | spec minus 30 mm to spec plus 30 mm |
+| Thumb end joint to its own forefinger knuckle, joint centre to joint centre | 32.7 mm lead, 38.0 mm trail | 24.8 mm lead, 22.1 mm trail (21.6 mm in the pair) | 26 mm lead, 23 mm trail (new) |
+| Trail thumb to its own forefinger tip, with `toward_index_target = "fingertip"` | 19.0 mm | 1.4 mm | 2.5 mm |
+| Thumb first free segment to the hand beside it | not measured | 1.5 mm lead, 0.9 mm trail | 3 mm (new) |
 | Each finger segment to the neighbouring finger (single hand) | not measured | 0.5 to 3.2 mm on every segment | none yet; the test checks the least distance per finger |
 | Fingertip and middle phalanx to grip, single hands | 0.95 mm | 1.0 mm | 1.5 mm |
 | Trail index, middle, ring to the grip itself (pair) | ring 6.8 mm | at most 1.0 mm | 1.5 mm |
@@ -53,7 +53,7 @@ Refs #15150 (epic), #15148. Stacked on `cursor/hrg-gb1b-shaft-roll-2882`. Auto-m
 | Finger and thumb bone axis to the grip surface | 4.8 mm | 1.75 mm lead (thumb tip), 2.7 mm trail | at least 1.5 mm (new) |
 | Vertices any corrective moves | 7 % | 28.6 % lead, 28.2 % trail | 32 % (widened from 12 %: pressed pads move by design) |
 | Mean triangle edge | 5.6 mm | 2.7 mm | 4 mm (new) |
-| Edges pinched more than 45 degrees past rest, palm and first finger segments | 21 lead, 18 trail | 5 lead, 4 trail (the tighter knuckles pinch more web skin) | 6 |
+| Edges pinched more than 45 degrees past rest, palm and first finger segments | 21 lead, 18 trail | 3 lead, 3 trail (the tighter knuckles pinch more web skin) | 6 |
 | Hand share of the frame (forearm left out) | 0.48 to 0.60 | 0.67 to 0.70 | 0.70 plus or minus 0.12 |
 | Left-handed golfer is the exact mirror | yes | yes | 1e-9 m |
 | Shaft roll 0 and plus or minus 20 degrees is a rigid turn | yes | yes | 1e-9 m |
@@ -78,8 +78,8 @@ Each hand reads as a human hand holding a golf club, and the pair now reads as t
 - **Nail rims.** The nails have crisp rims again. The thumb nail's rim is slightly uneven where the source mesh has few edges.
 - **Inner finger creases.** The creases inside the middle finger joints are still sharp (up to 119 degrees past rest). They face the grip and are hidden, and relaxing them would move skin that is in contact, so they are left out of the crease corrective.
 - **Butt view.** Fixed in #15154: the view is now tilted to the palm side, so it shows the fingers wrapping and the heel of the hand on the grip. The grip end still crosses part of the frame.
-- **Trail thumb (new).** It now crosses the grip to lie beside its forefinger tip, pressed to the hand. Harsh points: it is straight and long, so its end reaches about 25 mm past the fingertip instead of meeting it pad to pad; it lies 103 to 105 degrees round from the spec's thumb line.
-- **Lead thumb and forefinger (not met).** The owner asked for these to be close too. They are 21 mm apart, unchanged. See "Deviations".
+- **Thumb and forefinger V (new).** Trail hand: the thumb pad lies against the side of the forefinger knuckle and the V is closed in the back and thumb-side views. Lead hand: the V is clearly narrower than before, but a thin groove still shows between the thumb and the knuckle in the thumb-side view. Harsh points: both thumbs are straight, so the V reads as a thumb laid beside the hand, not a thumb folded into it; the joints are 22 to 25 mm apart centre to centre, which is skin touching skin on the trail hand and about 1.5 mm of air on the lead hand.
+- **Lead thumb, limited by the pair.** It could reach 17 mm from its knuckle on a single hand, and that looked best alone. In the pair it then lies where the trail ring fingertip comes round the grip, and that finger stands 2 mm or more off. It stops at 35 degrees, the most that keeps every trail finger wrapped.
 - **Overlapped little finger.** It reaches the groove and touches both lead fingers, but it looks thin and a little clawed (side swing 30 degrees, at its limit).
 - **Lead thumb in the pair.** It is hidden under the trail palm, as in a real grip. The trail thumb shows in the back and thumb-side views.
 
@@ -103,8 +103,9 @@ All 36 frames (1024 px, MuJoCo EGL through the shared renderer of #15154) and `r
 - **Skin weights at the finger middle creases are lightly smoothed** (`finger_crease_smoothing`, kept with the owner's go-ahead on 2026-11-15). One ring, two passes at half blend. It took the folds from 5 to 2 per hand before the correctives. Zero iterations turns it off.
 - **The forearm cut is closed with a dome** (`forearm_cap`: 4 rings, depth 0.6 of the loop radius). These vertices are not MakeHuman's. Zero rings gives the flat fan back.
 - **The trail hand may slide up to 30 mm along the grip** either way from the spec's hand spacing (`pair.max_spacing_adjust_m` away, `pair.max_spacing_close_m` toward the lead hand). It now ends 0.9 mm closer than the spec. Zero for both keeps the spec's spacing exactly.
-- **The trail thumb leaves the spec's thumb azimuth** by 103 to 105 degrees to meet its forefinger tip, as the owner asked on 2026-11-15. The fingers of this hand wrap about 190 degrees round a 14 mm grip, so the fingertip ends 82 degrees short of the spec's thumb line; the thumb goes to the fingertip. `thumb.toward_index_max_deg.trail = 0` puts it back on the spec line.
-- **The lead thumb is not turned.** Turned 30 degrees it lost grip contact and came no nearer its fingertip; turned 50 to 70 degrees it lay where the trail palm sits and the hands overlapped by 1.2 to 1.7 mm. It needs the owner's call: accept, or let the lead forefinger wrap further.
+- **Both thumbs leave the spec's thumb azimuth**, the lead by 35 degrees and the trail by 75, toward the forefinger knuckle, as the owner asked on 2026-11-15 ("a nice tight V"). `thumb.toward_index_max_deg = 0` for a hand puts its thumb back on the spec line.
+- **Neither thumb reaches its knuckle.** Lead: past 35 degrees the trail ring finger no longer wraps (middle segment 1.6 mm off at 41 degrees, 2.1 mm at 45, limit 1.5). Trail: past about 80 degrees the skin of the thumb web folds (one flipped triangle and nine pinched edges at 90 degrees, limits zero and six). I did not loosen either limit. The pair is also touchy near the lead limit: at 32 and 38 degrees the little finger settles differently and the hands overlap by 0.7 to 0.8 mm (limit 1.0); 35 gives 0.00. It needs the owner's call whether this V is tight enough.
+- **The trail hand is no longer slid clear of the lead thumb.** The spacing step used to slide the trail hand along the grip until its fingers stood clear of the whole lead hand. A fingertip resting against the side of the lead thumb can never be cleared that way, because the thumb runs along the grip, so the hand was pushed 30 mm down the shaft. The step now settles against the lead hand without its thumb; the fingers are still posed around the thumb.
 - **The thumb's middle joint may bend back** (MCP to -10 degrees) so the pad lies flat; the end joint no longer does (IP from 0). These limits are my values.
 - **The palm cup moves the thumb's base joint** by up to 70 degrees of arc about a line through the middle of the palm. A real hand gets there by folding the whole palm; this model moves only the thumb ray and lets skinning stretch the skin between. Visual only, switchable.
 - **Wrist bend** (lead 0 and 20 degrees, trail 15 and 10) and **`palm_centre_wrap_deg` (37)** are my values, tuned by eye.
@@ -127,6 +128,10 @@ All 36 frames (1024 px, MuJoCo EGL through the shared renderer of #15154) and `r
 - Search a pose setting with a plain curl, not the wrap scan. The wrap scan jumps between answers, so the gap against the turn was jagged and each try cost 2 s; the plain curl was steady at 0.1 s and could be bisected.
 - A search needs to know when a pose is not a pose. A thumb that started inside the other hand never moved and still counted as valid; test for "never pressed down" and "off the grip".
 - What suits one hand can break the pair. The lead thumb turned across the grip put the trail thumb on top of the lead hand, 16 mm off the grip. Check the pair render after every single-hand change.
+- Ask what a search can and cannot change. Sliding along the grip cannot clear an obstacle that runs along the grip; the slide went to its far limit instead. Leave such an obstacle out of that search.
+- Lay a moved digit with the same routine as an unmoved one. The quick curl left the turned lead thumb's base 3 mm higher than the wrap search does, and that alone displaced the other hand.
+- Aim at joints, measure joints. "Thumb end joint by the forefinger knuckle" is a distance between two joint centres; a skin-to-skin gap was already 1 mm at the web and said nothing.
+- The skin sets the limit before the skeleton does: the trail thumb could turn 90 degrees, but its web folded past 80.
 
 - A finger whose first segment already lies on the obstacle cannot flex at the knuckle. Flex it before seating the hand (15 degrees), so the obstacle sits in the crook; more than 20 degrees lifts the palm off (first-segment gaps of 3 to 14 mm at 35 to 60 degrees).
 - Measure the gap between fingers from the middle and end segments only. The web at the bases is always close, so a whole-finger minimum barely changes with the swing and the answer flipped between the coarse and the fine mesh (4 against 11 degrees of swing).
@@ -179,9 +184,9 @@ All 36 frames (1024 px, MuJoCo EGL through the shared renderer of #15154) and `r
 
 Filed from the grip review (2026-11-15), in order of impact:
 
-1. #15181 thumb: palm cup done; trail thumb now against its forefinger tip (1.4 mm). Still open there: the base pad is about 20 mm off the grip and the little-finger side of the palm is 9 to 11 mm off.
+1. #15181 thumb: palm cup done; thumb and forefinger pinched (end joint 24.8 mm lead, 22.1 mm trail from the knuckle). Still open there: a tighter lead V needs the trail ring finger to rest on the lead thumb without lifting; a tighter trail V needs web skin that does not fold; the base pad is about 20 mm off the grip and the little-finger side of the palm is 9 to 11 mm off.
 2. #15182 forefinger: wraps now (knuckle 19 degrees). Still open: the knuckle is well short of the other fingers' 62 degrees, which the spec's club line under the first segment limits.
-3. #15183 join the two hands: ring finger against the lead forefinger, little finger in the groove, hands 0.9 mm inside the spec spacing. Still open: trail lifeline on the lead thumb; the little finger looks clawed; lead thumb to forefinger tip (21 mm).
+3. #15183 join the two hands: ring finger against the lead forefinger, little finger in the groove, hands 1.3 mm inside the spec spacing. Still open: trail lifeline on the lead thumb; the little finger looks clawed; the pair is touchy to the lead thumb's turn.
 4. #15184 close the fingers side to side: done within each hand. Each segment is within 0.5 to 3.2 mm of its neighbour.
 5. #15185 tapered grip with a butt cap.
 6. #15186 surface realism.

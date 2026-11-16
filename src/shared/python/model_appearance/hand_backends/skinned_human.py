@@ -734,28 +734,31 @@ def _lay_thumb(
     grip_radius_m: float,
     max_turn_deg: float,
 ) -> dict[str, float]:
-    """Aim the thumb and press it onto the grip, up against the forefinger tip.
+    """Aim the thumb and press it onto the grip, pinched to the forefinger.
 
-    The thumb lies at its spec azimuth, turned toward the tip of the hand's
-    own forefinger by the least angle, up to ``max_turn_deg`` (the hand's
-    ``thumb.toward_index_max_deg``),
-    that brings its skin within ``thumb.index_gap_m`` of the fingertip, and
-    never so far that the thumb leaves the grip to ride on the finger or
-    runs into the other hand; the
-    angle is found in ``thumb.toward_index_steps`` halvings. A turned thumb lies across the grip, so it may bend as far as
-    ``thumb.toward_index_straightness`` allows. The forefinger's skin beyond
-    its first segment is in the thumb's way. The turn is returned as the
+    The thumb lies at its spec azimuth, turned toward the hand's own
+    forefinger by the least angle, up to ``max_turn_deg`` (the hand's
+    ``thumb.toward_index_max_deg``), that brings it to its target, and never
+    so far that it leaves the grip to ride on the finger or runs into the
+    other hand. ``thumb.toward_index_target`` names the target: ``"knuckle"``
+    brings the thumb's end joint within ``thumb.knuckle_distance_m`` of the
+    forefinger's knuckle joint, a tight V; ``"fingertip"`` brings the thumb's
+    skin within ``thumb.index_gap_m`` of the fingertip, on the other side.
+    The angle is found in ``thumb.toward_index_steps`` halvings. A turned
+    thumb may bend as far as ``thumb.toward_index_straightness`` allows, and
+    the forefinger's skin is in its way. The turn is returned as the
     ``thumb_side`` angle; a maximum of zero keeps the thumb on its azimuth.
     """
     settings, key = hand.settings, f"thumb{_SIDE_SUFFIX}"
-    limit = math.radians(max_turn_deg)
+    pinch = settings.thumb_toward_index_target == "knuckle"
     skin = hand.points(angles)
     tip = skin[hand.segment_ids("index_dist")]
-    centre = tip.mean(axis=0)
+    knuckle = hand.joint_position("index_prox", angles)
+    goal = knuckle if pinch else tip.mean(axis=0)
     toward = math.remainder(
-        math.atan2(centre[1], centre[0]) - targets.thumb_azimuth_rad, math.tau
+        math.atan2(goal[1], goal[0]) - targets.thumb_azimuth_rad, math.tau
     )
-    reach = math.copysign(min(abs(toward), limit), toward)
+    reach = math.copysign(min(abs(toward), math.radians(max_turn_deg)), toward)
     ids = _finger_ids(hand, "index", _SEGMENTS[1:])
     normals = vertex_normals(skin, hand.asset.faces)[ids]
     finger = skin_distance(skin[ids], normals, settings.pair_skin_reach_m)
@@ -767,26 +770,33 @@ def _lay_thumb(
     def around(points: Array) -> Array:
         return np.minimum(obstacle(points), finger(points))
 
-    def laid(turn: float) -> tuple[bool, bool, dict[str, float]]:
-        """The thumb turned by ``turn``: is it at the fingertip, has it left
+    def there(pose: Mapping[str, float], skin: Array) -> bool:
+        if pinch:
+            joint = hand.joint_position("thumb_dist", pose)
+            apart = float(np.linalg.norm(joint - knuckle))
+            return apart <= settings.thumb_knuckle_distance_m
+        return float(np.min(np.asarray(tree.query(skin)[0]))) <= gap_m
+
+    def laid(turn: float, seat: bool = False) -> tuple[bool, bool, dict[str, float]]:
+        """The thumb turned by ``turn``: is it at its target, has it left
         the grip (to ride on the finger, or stuck in the other hand), and
-        its pose."""
+        its pose. ``seat`` lays it with the wrap search, as an unturned
+        thumb is laid, so its first segment sits as low."""
         share = abs(turn / reach) if reach else 0.0
         straight = (1.0 - share) * targets.thumb_straightness + share * bend
         aimed = _turned(targets, turn, straight)
         _aim_thumb(hand, aimed, angles, grip_radius_m)
         chain = (_thumb_chain(settings, aimed),)
-        if turn:  # a plain curl: the gap then closes steadily with the turn
+        if turn and not seat:  # a plain curl: the gap closes steadily
             pose = curl_to_contact(hand, chain, around, settings.curl, angles).angles
         else:
-            pose = _wrap(hand, chain, obstacle, angles)
+            pose = _wrap(hand, chain, around if turn else obstacle, angles)
         skin = hand.points(pose, thumb)
-        near = float(np.min(np.asarray(tree.query(skin)[0]))) <= gap_m
         # Off the grip it rides on the finger; deep in, or never pressed
         # down from where it starts, something is in its way.
         depth = float(np.min(obstacle(skin)))
         off = abs(depth) > gap_m or pose[THUMB_PRESS] <= lifted
-        return near, off, {**pose, key: turn}
+        return there(pose, skin), off, {**pose, key: turn}
 
     near, _, pose = laid(0.0)
     if not reach or near:
@@ -796,8 +806,9 @@ def _lay_thumb(
         mid = 0.5 * (low + high)
         near, riding, _ = laid(mid)
         low, high = (low, mid) if near or riding else (mid, high)
-    near, riding, pose = laid(high)
-    return laid(low)[2] if riding else pose  # leaves the hand aimed as chosen
+    turn = low if laid(high)[1] else high
+    _, riding, pose = laid(turn, pinch)
+    return laid(turn)[2] if riding else pose  # leaves the hand aimed as chosen
 
 
 def _bend_wrist(hand: _GripHand, side: HandSide) -> None:

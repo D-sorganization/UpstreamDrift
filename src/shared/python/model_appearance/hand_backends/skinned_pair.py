@@ -93,6 +93,16 @@ class _LeadObstacle:
             vertex_normals(shown.vertices, shown.faces),
             settings.pair_skin_reach_m,
         )
+        # Without its thumb: what the trail hand is slid up against.
+        asset = self.lead.skin_asset
+        fingers = np.setdiff1d(
+            np.arange(len(shown.vertices)), asset.dominant_vertex_ids(_THUMB_BONES)
+        )
+        self._finger_skin = skin_distance(
+            self._lead_skin[fingers],
+            vertex_normals(shown.vertices, shown.faces)[fingers],
+            settings.pair_skin_reach_m,
+        )
         scale = settings.pair_capsule_radius_scale
         self._capsules = _bone_capsules(self.lead, settings, scale)
         self._palm_radii = _bone_capsules(
@@ -104,13 +114,17 @@ class _LeadObstacle:
         )
         self._trail_mirrored = _targets(spec, "trail", settings).mirrored
 
-    def hand(self, spacing_m: float, *, palm: bool = False) -> ObstacleDistance:
+    def hand(
+        self, spacing_m: float, *, palm: bool = False, thumb: bool = True
+    ) -> ObstacleDistance:
         """The lead hand alone with the trail hand ``spacing_m`` away.
 
         It is its skin, ``pair.skin_margin_m`` thicker, or, with
         ``pair.obstacle`` set to ``capsules``, its digits as capsules;
         ``palm`` then selects the capsules the trail palm must clear, which
-        are scaled by ``pair.palm_capsule_radius_scale`` instead.
+        are scaled by ``pair.palm_capsule_radius_scale`` instead. With
+        ``thumb`` false the lead thumb is left out: it lies along the grip,
+        so no slide along the grip clears it.
         """
         club_from_trail = _club_from_build(
             self.spec, "trail", self._trail_mirrored, spacing_m
@@ -118,14 +132,16 @@ class _LeadObstacle:
         if self.settings.pair_obstacle == "skin":
             turn, shift = club_from_trail[:3, :3].T, club_from_trail[:3, 3]
             margin = self.settings.pair_skin_margin_m
-            return lambda points: self._skin(points @ turn + shift) - margin
+            skin = self._skin if thumb else self._finger_skin
+            return lambda points: skin(points @ turn + shift) - margin
         move = np.linalg.inv(club_from_trail) @ self._club_from_lead
         starts, ends, radii = self._capsules
+        keep = slice(None) if thumb else slice(0, -len(_THUMB_BONES))
         return capsule_union_distance(
             _nothing,
-            starts @ move[:3, :3].T + move[:3, 3],
-            ends @ move[:3, :3].T + move[:3, 3],
-            self._palm_radii if palm else radii,
+            (starts @ move[:3, :3].T + move[:3, 3])[keep],
+            (ends @ move[:3, :3].T + move[:3, 3])[keep],
+            (self._palm_radii if palm else radii)[keep],
         )
 
     def at(
@@ -186,7 +202,8 @@ def _settled_spacing_m(scene: _LeadObstacle, trail: _SolvedHand, at_m: float) ->
 
     ``trail`` is the trail hand as posed ``at_m`` from the lead hand. Held in
     that pose it slides along the grip until its ``pair.grip_fingers`` stand
-    ``pair.finger_gap_m`` off the lead hand, staying within
+    ``pair.finger_gap_m`` off the lead hand's fingers and palm (its thumb lies
+    along the grip, and a fingertip may rest against it), staying within
     ``pair.max_spacing_close_m`` toward the lead hand and
     ``pair.max_spacing_adjust_m`` toward the club head of the spec's
     ``hand_spacing_m``. The fingers not listed (the little finger of an
@@ -205,7 +222,7 @@ def _settled_spacing_m(scene: _LeadObstacle, trail: _SolvedHand, at_m: float) ->
         need = -settings.curl.penetration_allowance_m
 
     def free(spacing_m: float) -> bool:
-        return float(scene.hand(spacing_m)(skin).min()) >= need
+        return float(scene.hand(spacing_m, thumb=False)(skin).min()) >= need
 
     low, high = (nearest, at_m) if free(at_m) else (at_m, farthest)
     if low >= high or free(low):

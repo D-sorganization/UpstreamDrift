@@ -59,7 +59,7 @@ library.
    at the knuckle until their middle and end segments meet the neighbour (`side_close`, zero
    `max_deg` switches it off; the swings are reported as `<finger>_side`
    joint angles).
-4. Cup the palm: carry the thumb base toward the line where the thumb is to lie (`thumb.palm_cup_*`, zero switches it off), then lay the thumb (`_lay_thumb`): aim it along the shaft and press it onto the grip, turned toward its own forefinger tip by the least angle that brings the two within `thumb.index_gap_m` (`thumb.toward_index_max_deg` per hand, zero switches it off; reported as the `thumb_side` angle).
+4. Cup the palm: carry the thumb base toward the line where the thumb is to lie (`thumb.palm_cup_*`, zero switches it off), then lay the thumb (`_lay_thumb`): aim it along the shaft and press it onto the grip, turned toward its own forefinger's knuckle by the least angle that brings the thumb's end joint within `thumb.knuckle_distance_m` of it (`thumb.toward_index_max_deg` per hand, 35 lead and 75 trail, zero switches it off; `thumb.toward_index_target = "fingertip"` sends the thumb's skin to the fingertip instead; reported as the `thumb_side` angle). The lead limit is set by the pair (the trail ring finger must still wrap), the trail limit by the thumb web's skin (it folds past about 80 degrees). In a pair the trail hand's spacing settles against the lead hand without its thumb (`_LeadObstacle.hand(thumb=False)`).
 5. Bend the wrist, mirror for a left hand, apply the shaft roll.
 
 For a pair, the lead hand is solved first; its skin (`posing.skin_distance`)

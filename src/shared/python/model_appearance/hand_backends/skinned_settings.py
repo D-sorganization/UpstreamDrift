@@ -73,6 +73,8 @@ class SkinnedHumanSettings:
     thumb_toward_index_steps: int
     thumb_toward_index_straightness: float
     thumb_index_gap_m: float
+    thumb_knuckle_distance_m: float
+    thumb_toward_index_target: str
     side_close_max_deg: float
     side_close_gap_m: float
     side_close_index_gap_m: float
@@ -216,6 +218,8 @@ def _side_close_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
 
 
 #: What stands in for the lead hand when the trail hand is posed around it.
+#: What the thumb is turned toward (``thumb.toward_index_target``).
+THUMB_TARGETS = ("knuckle", "fingertip")
 PAIR_OBSTACLES = ("skin", "capsules")
 
 
@@ -279,6 +283,12 @@ def _thumb_turn_fields(thumb: Mapping) -> dict[str, Any]:
             thumb["toward_index_straightness"], "toward_index_straightness"
         ),
         "thumb_index_gap_m": _non_negative(thumb["index_gap_m"], "index_gap_m"),
+        "thumb_knuckle_distance_m": _non_negative(
+            thumb["knuckle_distance_m"], "knuckle_distance_m"
+        ),
+        "thumb_toward_index_target": _one_of(
+            thumb["toward_index_target"], THUMB_TARGETS, "thumb.toward_index_target"
+        ),
     }
 
 

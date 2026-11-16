@@ -41,6 +41,7 @@ from src.shared.python.model_appearance.hand_backends.qa import (
     skinning_defects,
     skinning_residual_m,
     thumb_gaps_m,
+    thumb_pinch_m,
 )
 from src.shared.python.model_appearance.hand_backends.skinned_human import (
     BACKEND_NAME,
@@ -52,6 +53,7 @@ from src.shared.python.model_appearance.hand_backends.skinned_human import (
 )
 
 from src.shared.python.model_appearance.hand_backends.skinned_pair import (
+    _LeadObstacle,
     build_grip_hands,
 )
 
@@ -572,20 +574,22 @@ def test_fingers_wrap_and_the_palm_cups(side: str) -> None:
     assert angles.flexion_deg("meta_little") > angles.flexion_deg("meta_ring") > 0.0
 
 
-def _thumb_on_its_azimuth():
-    """The trail hand with the turn toward the forefinger switched off."""
-    if "plain thumb" not in _CACHE:
+def _thumb_on_its_azimuth(side: str = "trail"):
+    """A hand with the turn toward the forefinger switched off."""
+    key = f"plain thumb {side}"
+    if key not in _CACHE:
         raw = copy.deepcopy(dict(load_settings_mapping()))
         raw["thumb"]["toward_index_max_deg"] = {"lead": 0.0, "trail": 0.0}
-        _CACHE["plain thumb"] = build_hand_visual(
-            _spec(), "trail", grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
+        _CACHE[key] = build_hand_visual(
+            _spec(), side, grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
         )
-    return _CACHE["plain thumb"]
+    return _CACHE[key]
 
 
 def test_thumb_lies_along_the_shaft_at_the_spec_azimuth() -> None:
-    """Before it is turned toward the forefinger tip, as the trail thumb is."""
-    for side, result in (("lead", _hand("lead")), ("trail", _thumb_on_its_azimuth())):
+    """Before it is turned toward the forefinger's knuckle."""
+    for side in _SIDES:
+        result = _thumb_on_its_azimuth(side)
         asset = result.rest_asset
         ids = asset.dominant_vertex_ids(("thumb_dist",))
         pad = result.mesh.vertices[ids].mean(axis=0)
@@ -795,41 +799,64 @@ def test_the_overlap_and_the_closing_up_can_be_switched_off() -> None:
         settings_from_mapping(bad)
 
 
+def _thumb_settings(**thumb: object):
+    raw = copy.deepcopy(dict(load_settings_mapping()))
+    raw["thumb"].update(thumb)
+    return raw
+
+
+def _thumb_to_fingertip():
+    """The trail hand with the thumb sent to the forefinger tip instead."""
+    if "tip thumb" not in _CACHE:
+        raw = _thumb_settings(
+            toward_index_target="fingertip",
+            toward_index_max_deg={"lead": 0.0, "trail": 150.0},
+        )
+        _CACHE["tip thumb"] = build_hand_visual(
+            _spec(), "trail", grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
+        )
+    return _CACHE["tip thumb"]
+
+
 @pytest.mark.parametrize("side", ["lead", "trail"])
-def test_the_thumb_lies_against_the_forefinger_tip_and_the_hand(side: str) -> None:
-    """Owner's grip: the trail thumb gently touches its own forefinger's tip
-    and both thumbs are pressed against the hand, not spread from it. The
-    lead thumb stays under the trail palm, so it only leans toward its
-    forefinger (#15181, #15183)."""
-    gaps = thumb_gaps_m(_hand(side))
-    assert gaps["index_tip"] <= float(_Q[f"max_{side}_thumb_index_tip_gap_m"]), gaps
-    assert gaps["hand"] <= float(_Q["max_thumb_hand_gap_m"]), gaps
+def test_the_thumb_and_forefinger_are_pinched_into_a_tight_v(side: str) -> None:
+    """Owner's grip: the thumb's end joint lies by the forefinger's knuckle,
+    the thumb pressed against the hand and still on the grip (#15181)."""
+    hand = _hand(side)
+    assert thumb_pinch_m(hand) <= float(_Q["max_thumb_knuckle_distance_m"][side])
+    assert thumb_gaps_m(hand)["hand"] <= float(_Q["max_thumb_hand_gap_m"])
+    limit = float(_Q["max_thumb_first_segment_median_gap_m"])
+    assert median_facing_grip_gap_m(hand, ("thumb_prox",)) <= limit
+    assert thumb_pinch_m(hand) < thumb_pinch_m(_thumb_on_its_azimuth(side)) - 0.006
 
 
-def test_the_trail_thumb_meets_its_forefinger_tip_in_the_pair_too() -> None:
-    gaps = thumb_gaps_m(_pair()["trail"])
+def test_the_thumbs_stay_pinched_in_the_pair() -> None:
+    for side in _SIDES:
+        limit = float(_Q["max_thumb_knuckle_distance_m"][side])
+        assert thumb_pinch_m(_pair()[side]) <= limit, side
+
+
+def test_the_thumb_can_go_to_the_forefinger_tip_instead() -> None:
+    """The earlier request, kept as a setting: thumb skin on the fingertip."""
+    gaps = thumb_gaps_m(_thumb_to_fingertip())
     assert gaps["index_tip"] <= float(_Q["max_trail_thumb_index_tip_gap_m"]), gaps
 
 
 def test_turning_the_thumb_to_the_forefinger_can_be_switched_off() -> None:
-    raw = copy.deepcopy(dict(load_settings_mapping()))
     plain = _thumb_on_its_azimuth()
     assert plain.joint_angles.as_mapping()["thumb_side"] == 0.0
-    assert abs(_hand("trail").joint_angles.as_mapping()["thumb_side"]) > 0.1
-    limit = float(_Q["max_trail_thumb_index_tip_gap_m"])
-    assert thumb_gaps_m(plain)["index_tip"] > 2.0 * limit, (
-        "the thumb stays on its azimuth"
-    )
+    for side in _SIDES:
+        assert abs(_hand(side).joint_angles.as_mapping()["thumb_side"]) > 0.1
     for key, value in (
         ("toward_index_max_deg", {"lead": 0.0, "trail": -1.0}),
         ("toward_index_steps", 0),
         ("toward_index_straightness", 1.5),
         ("index_gap_m", -0.001),
+        ("knuckle_distance_m", -0.001),
+        ("toward_index_target", "wrist"),
     ):
-        bad = copy.deepcopy(raw)
-        bad["thumb"][key] = value
         with pytest.raises(ValueError):
-            settings_from_mapping(bad)
+            settings_from_mapping(_thumb_settings(**{key: value}))
 
 
 def _pair_spacing_m() -> float:
@@ -858,6 +885,25 @@ def test_two_hands_share_the_club_without_passing_through_each_other() -> None:
         ),
     )
     assert hand_pair_penetration_m(pair["lead"], shifted) > depth + 0.002
+
+
+def test_the_trail_hand_is_not_slid_clear_of_the_lead_thumb() -> None:
+    """The lead thumb lies along the grip: no slide along the grip clears it,
+    so the spacing settles against the lead hand without its thumb."""
+    for obstacle in ("skin", "capsules"):
+        mapping = copy.deepcopy(dict(load_settings_mapping()))
+        mapping["pair"]["obstacle"] = obstacle
+        scene = _LeadObstacle(_spec(), _RADIUS, settings_from_mapping(mapping))
+        lead = scene.lead_result
+        spacing = _spec().hand_spacing_m
+        points = scene.skin_points(spacing)  # the lead skin, as the trail sees it
+        whole = scene.hand(spacing)(points)
+        without = scene.hand(spacing, thumb=False)(points)
+        thumb = lead.rest_asset.dominant_vertex_ids(("thumb_dist",))
+        finger = lead.rest_asset.dominant_vertex_ids(("index_mid",))
+        assert whole[thumb].max() < 0.004, obstacle
+        assert np.median(without[thumb]) > np.median(whole[thumb]) + 0.004, obstacle
+        np.testing.assert_allclose(without[finger], whole[finger], atol=1e-9)
 
 
 def test_trail_hand_of_the_pair_still_wraps_the_grip_or_the_lead_hand() -> None:
