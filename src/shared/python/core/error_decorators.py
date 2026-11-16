@@ -20,6 +20,7 @@ Usage:
 from __future__ import annotations
 
 import functools
+import importlib
 import sys
 from collections.abc import Callable
 from typing import Any, TypeVar, cast
@@ -266,6 +267,9 @@ def safe_import(module_name: str, package: str | None = None) -> Any | None:
         module_name: Name of module to import
         package: Package name for relative imports
 
+    Relative names require a package anchor, following importlib.import_module.
+    Only ImportError is suppressed; invalid context and initialization errors propagate.
+
     Returns:
         Imported module or None if import fails
 
@@ -276,7 +280,7 @@ def safe_import(module_name: str, package: str | None = None) -> Any | None:
             pass
     """
     try:
-        return __import__(module_name, fromlist=[""], level=0)
+        return importlib.import_module(module_name, package=package)
     except ImportError as e:
         logger.debug(f"Failed to import {module_name}: {e}")
         return None

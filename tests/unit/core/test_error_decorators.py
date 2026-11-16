@@ -5,7 +5,9 @@ Tests all decorators, context managers, and utility functions for error handling
 
 from __future__ import annotations
 
+import importlib
 import logging
+from pathlib import Path
 
 import pytest
 from src.shared.python.core.error_decorators import (
@@ -384,3 +386,37 @@ class TestCheckModuleAvailable:
     def test_error_decorators_numpy_available(self) -> None:
         """numpy is available in our environment."""
         assert check_module_available("numpy") is True
+
+
+@pytest.mark.parametrize(
+    ("name", "package", "resolved"),
+    [
+        (".etree.ElementTree", "xml", "xml.etree.ElementTree"),
+        (".ElementTree", "xml.etree", "xml.etree.ElementTree"),
+        ("..etree.ElementTree", "xml.etree", "xml.etree.ElementTree"),
+        ("xml.etree.ElementTree", "unused_package", "xml.etree.ElementTree"),
+    ],
+)
+def test_safe_import_resolves_package_context(
+    name: str, package: str, resolved: str
+) -> None:
+    assert safe_import(name, package=package) is importlib.import_module(resolved)
+
+
+def test_safe_import_missing_relative_child_is_unavailable() -> None:
+    assert safe_import(".missing_contract_child", package="xml") is None
+
+
+def test_safe_import_preserves_module_initialization_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = tmp_path / "relative_import_contract_fixture.py"
+    module.write_text('raise ValueError("fixture initialization failure")\n')
+    monkeypatch.syspath_prepend(str(tmp_path))
+    with pytest.raises(ValueError, match="fixture initialization failure"):
+        safe_import("relative_import_contract_fixture")
+
+
+def test_safe_import_relative_name_requires_package_anchor() -> None:
+    with pytest.raises(TypeError, match="package"):
+        safe_import(".ElementTree")
