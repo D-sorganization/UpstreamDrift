@@ -133,6 +133,9 @@ class SkinnedHumanSettings:
     thumb_mcp_limits_deg: tuple[float, float]
     thumb_ip_limits_deg: tuple[float, float]
     thumb_straight_ip_limit_deg: float
+    palm_cup_max_deg: float
+    palm_cup_step_deg: float
+    palm_cup_pivot_fraction: float
     pair_capsule_radius_scale: float
     pair_thumb_radius_scale: float
     pair_grip_fingers: tuple[str, ...]
@@ -312,6 +315,11 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
         thumb_mcp_limits_deg=_pair(thumb["mcp_limits_deg"], "mcp_limits_deg"),
         thumb_ip_limits_deg=_pair(thumb["ip_limits_deg"], "ip_limits_deg"),
         thumb_straight_ip_limit_deg=float(thumb["straight_ip_limit_deg"]),
+        palm_cup_max_deg=_non_negative(thumb["palm_cup_max_deg"], "palm_cup_max_deg"),
+        palm_cup_step_deg=_positive(thumb["palm_cup_step_deg"], "palm_cup_step_deg"),
+        palm_cup_pivot_fraction=_non_negative(
+            thumb["palm_cup_pivot_fraction"], "palm_cup_pivot_fraction"
+        ),
         pair_capsule_radius_scale=_unit_interval(
             pair["capsule_radius_scale"], "capsule_radius_scale"
         ),
@@ -454,6 +462,8 @@ class _GripHand:
         )
         self._segment: dict[str, NDArray[np.int64]] = {}
         self.fixed: dict[str, Array] = self._adduction()
+        # Rigid moves applied to a bone before its own rotation (palm cup).
+        self.offsets: dict[str, Array] = {}
         self._moved: dict[str, NDArray[np.int64]] = {}
 
     def _adduction(self) -> dict[str, Array]:
@@ -502,13 +512,16 @@ class _GripHand:
         heads, parents = self.asset.bone_heads, self._parents
         out = np.empty((len(parents), 4, 4))
         for i, name in enumerate(self.asset.bone_names):
-            rot = rotations.get(name)
-            if rot is None:
+            rot, offset = rotations.get(name), self.offsets.get(name)
+            if rot is None and offset is None:
                 out[i] = _EYE4 if parents[i] < 0 else out[parents[i]]
                 continue
             local = _EYE4.copy()
-            local[:3, :3] = rot
-            local[:3, 3] = heads[i] - rot @ heads[i]
+            if rot is not None:
+                local[:3, :3] = rot
+                local[:3, 3] = heads[i] - rot @ heads[i]
+            if offset is not None:
+                local = offset @ local
             out[i] = local if parents[i] < 0 else out[parents[i]] @ local
         return out
 
@@ -802,6 +815,58 @@ def _aim_thumb(
     hand.press_axis = grip_from_rest.T @ (press / np.linalg.norm(press))
 
 
+def _cup_palm(
+    hand: _GripHand,
+    targets: _RightHandTargets,
+    angles: Mapping[str, float],
+    obstacle: ObstacleDistance,
+    grip_radius_m: float,
+) -> None:
+    """Swing the thumb ray toward the grip, as a cupping palm does (#15181).
+
+    A flat palm touches the grip along one line and leaves the thumb base
+    far out, so the thumb can only reach the grip as a ramp. Here the thumb
+    base bone, with the pad of flesh on it, turns about a line parallel to
+    the club through a point between the thumb base and the middle of the
+    palm. Of the angles up to ``palm_cup_max_deg`` that keep that pad out of
+    ``obstacle``, it takes the one that brings the thumb's base joint
+    nearest to where the thumb is to lie. Zero switches the cup off.
+    """
+    settings, asset = hand.settings, hand.asset
+    hand.offsets.pop("thumb_meta", None)
+    if settings.palm_cup_max_deg == 0.0:
+        return
+    i_thumb, i_palm = asset.bone_index("thumb_meta"), asset.bone_index("meta_middle")
+    base = asset.bone_heads[i_thumb]
+    palm = 0.5 * (asset.bone_heads[i_palm] + asset.bone_tails[i_palm])
+    pivot = base + settings.palm_cup_pivot_fraction * (palm - base)
+    axis = hand.placement[:3, :3].T @ np.array([0.0, 0.0, 1.0])
+    angles = {k: v for k, v in angles.items() if not k.startswith("thumb")}
+    ids = hand.segment_ids("thumb_meta")
+    allowance = settings.curl.penetration_allowance_m
+    rho = grip_radius_m + _bone_skin_radius(asset, "thumb_meta")
+    goal = rho * np.array(
+        [math.cos(targets.thumb_azimuth_rad), math.sin(targets.thumb_azimuth_rad)]
+    )
+
+    def cupped(angle: float) -> Array:
+        # The joint is carried along the arc; the thumb is aimed afterwards.
+        arm = rotation_about_axis(axis, angle) @ (base - pivot)
+        return rigid(np.eye(3), pivot + arm - base)
+
+    def miss(angle: float) -> float:
+        hand.offsets["thumb_meta"] = cupped(angle)
+        if float(obstacle(hand.points(angles, ids)).min()) < -allowance:
+            return math.inf
+        joint = hand.joint_position("thumb_meta", angles)
+        return float(np.linalg.norm(joint[:2] - goal))
+
+    step = math.radians(settings.palm_cup_step_deg)
+    count = int(settings.palm_cup_max_deg / settings.palm_cup_step_deg)
+    best = min((k * step for k in range(-count, count + 1)), key=miss)
+    hand.offsets["thumb_meta"] = cupped(best)
+
+
 def _thumb_chain(
     settings: SkinnedHumanSettings, targets: _RightHandTargets
 ) -> CurlChain:
@@ -923,6 +988,7 @@ def _solve_right_hand(
         arch = {k: float(given.get(k, 0.0)) for k in arch}
         _seat_flat_hand(hand, targets, grip, arch, other)
         posed = {**_straight_angles(), **{k: float(v) for k, v in given.items()}}
+        _cup_palm(hand, targets, posed, soft, thumb_radius_m)
         _aim_thumb(hand, targets, posed, thumb_radius_m)
         _bend_wrist(hand, side)
         return _SolvedHand(hand, posed, targets, obstacle, skin)
@@ -936,6 +1002,7 @@ def _solve_right_hand(
     _seat_flat_hand(hand, targets, grip, arch, other)
     start = {**_straight_angles(), **arch}
     angles = _wrap(hand, chains, soft, start)
+    _cup_palm(hand, targets, angles, soft, thumb_radius_m)
     _aim_thumb(hand, targets, angles, thumb_radius_m)
     angles = _wrap(hand, (_thumb_chain(settings, targets),), soft, angles)
     _bend_wrist(hand, side)

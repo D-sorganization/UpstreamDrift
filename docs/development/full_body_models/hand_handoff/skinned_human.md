@@ -49,7 +49,7 @@ library.
    `flat_hand_rotation`) and seat it rigidly on the grip.
 3. Curl the fingers to contact, set the metacarpal arch from knuckle flexion,
    re-seat, then run the wrap search.
-4. Aim the thumb along the shaft and press it onto the grip.
+4. Cup the palm: carry the thumb base toward the line where the thumb is to lie (`thumb.palm_cup_*`, zero switches it off), then aim the thumb along the shaft and press it onto the grip.
 5. Bend the wrist, mirror for a left hand, apply the shaft roll.
 
 For a pair, the lead hand is solved first; its digits become capsules in the

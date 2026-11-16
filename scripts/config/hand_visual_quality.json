@@ -28,12 +28,14 @@
   ],
   "thumb_pad_tolerance_m": 0.006,
   "max_corrective_shift_m": 0.008,
-  "max_corrective_vertex_fraction": 0.32,
+  "max_corrective_vertex_fraction": 0.34,
   "min_palm_contact_vertices": 8,
   "max_mean_edge_length_m": 0.004,
   "max_subdivision_joint_change_deg": 5.0,
   "max_pinched_knuckle_edges": 6,
   "contact_band_m": 0.0005,
   "min_grip_contact_area_m2": 0.0018,
-  "min_bone_grip_clearance_m": 0.0015
+  "min_bone_grip_clearance_m": 0.0015,
+  "max_thumb_first_segment_median_gap_m": 0.005,
+  "min_palm_cup_thenar_approach_m": 0.01
 }

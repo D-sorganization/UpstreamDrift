@@ -162,8 +162,8 @@
         "ring_dist": 0.0,
         "ring_mid": 0.0,
         "ring_prox": 0.0,
-        "thumb_dist": 0.0,
-        "thumb_prox": 3.69
+        "thumb_dist": -0.0,
+        "thumb_prox": 0.0
       },
       "degenerate": 0,
       "flipped": 0,
@@ -185,9 +185,9 @@
         "ring_dist": 22.5,
         "ring_mid": 74.9,
         "ring_prox": 71.4,
-        "thumb_dist": -22.5,
-        "thumb_press": 26.6,
-        "thumb_prox": -10.0
+        "thumb_dist": 4.2,
+        "thumb_press": 16.9,
+        "thumb_prox": -9.6
       },
       "max_penetration_mm": 0.0
     },
@@ -207,8 +207,8 @@
         "ring_dist": 0.0,
         "ring_mid": 0.0,
         "ring_prox": 0.0,
-        "thumb_dist": 0.0,
-        "thumb_prox": 3.69
+        "thumb_dist": -0.0,
+        "thumb_prox": 0.0
       },
       "degenerate": 0,
       "flipped": 0,
@@ -230,9 +230,9 @@
         "ring_dist": 22.5,
         "ring_mid": 74.9,
         "ring_prox": 71.4,
-        "thumb_dist": -22.5,
-        "thumb_press": 26.6,
-        "thumb_prox": -10.0
+        "thumb_dist": 4.2,
+        "thumb_press": 16.9,
+        "thumb_prox": -9.6
       },
       "max_penetration_mm": 0.0
     },
@@ -252,8 +252,8 @@
         "ring_dist": 0.0,
         "ring_mid": 0.0,
         "ring_prox": 0.0,
-        "thumb_dist": 0.0,
-        "thumb_prox": 3.69
+        "thumb_dist": -0.0,
+        "thumb_prox": 0.0
       },
       "degenerate": 0,
       "flipped": 0,
@@ -275,9 +275,9 @@
         "ring_dist": 22.5,
         "ring_mid": 74.9,
         "ring_prox": 71.4,
-        "thumb_dist": -22.5,
-        "thumb_press": 26.6,
-        "thumb_prox": -10.0
+        "thumb_dist": 4.2,
+        "thumb_press": 16.9,
+        "thumb_prox": -9.6
       },
       "max_penetration_mm": 0.0
     },
@@ -298,7 +298,7 @@
         "ring_mid": 0.0,
         "ring_prox": 0.0,
         "thumb_dist": 0.0,
-        "thumb_prox": 3.8
+        "thumb_prox": 0.0
       },
       "degenerate": 0,
       "flipped": 0,
@@ -320,9 +320,9 @@
         "ring_dist": 22.5,
         "ring_mid": 74.9,
         "ring_prox": 71.4,
-        "thumb_dist": -21.4,
-        "thumb_press": 24.1,
-        "thumb_prox": -10.0
+        "thumb_dist": 4.2,
+        "thumb_press": 16.9,
+        "thumb_prox": -9.1
       },
       "max_penetration_mm": 0.0
     },
@@ -343,7 +343,7 @@
         "ring_mid": 0.0,
         "ring_prox": 0.0,
         "thumb_dist": 0.0,
-        "thumb_prox": 3.8
+        "thumb_prox": 0.0
       },
       "degenerate": 0,
       "flipped": 0,
@@ -365,9 +365,9 @@
         "ring_dist": 22.5,
         "ring_mid": 74.9,
         "ring_prox": 71.4,
-        "thumb_dist": -21.4,
-        "thumb_press": 24.1,
-        "thumb_prox": -10.0
+        "thumb_dist": 4.2,
+        "thumb_press": 16.9,
+        "thumb_prox": -9.1
       },
       "max_penetration_mm": 0.0
     },
@@ -388,7 +388,7 @@
         "ring_mid": 0.0,
         "ring_prox": 0.0,
         "thumb_dist": 0.0,
-        "thumb_prox": 3.8
+        "thumb_prox": 0.0
       },
       "degenerate": 0,
       "flipped": 0,
@@ -410,9 +410,9 @@
         "ring_dist": 22.5,
         "ring_mid": 74.9,
         "ring_prox": 71.4,
-        "thumb_dist": -21.4,
-        "thumb_press": 24.1,
-        "thumb_prox": -10.0
+        "thumb_dist": 4.2,
+        "thumb_press": 16.9,
+        "thumb_prox": -9.1
       },
       "max_penetration_mm": 0.0
     }
@@ -437,7 +437,7 @@
         "ring_mid": 0.0,
         "ring_prox": 0.0,
         "thumb_dist": 0.0,
-        "thumb_prox": 3.76
+        "thumb_prox": 0.0
       }
     },
     "rollp00": {
@@ -459,7 +459,7 @@
         "ring_mid": 0.0,
         "ring_prox": 0.0,
         "thumb_dist": 0.0,
-        "thumb_prox": 3.76
+        "thumb_prox": 0.0
       }
     },
     "rollp20": {
@@ -481,7 +481,7 @@
         "ring_mid": 0.0,
         "ring_prox": 0.0,
         "thumb_dist": 0.0,
-        "thumb_prox": 3.76
+        "thumb_prox": 0.0
       }
     }
   }

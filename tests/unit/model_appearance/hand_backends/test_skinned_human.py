@@ -32,6 +32,7 @@ from src.shared.python.model_appearance.hand_backends.qa import (
     hand_pair_penetration_m,
     load_hand_visual_quality,
     max_grip_cylinder_penetration_m,
+    median_facing_grip_gap_m,
     min_bone_grip_clearance_m,
     pinched_edge_count,
     skinning_defects,
@@ -252,6 +253,44 @@ def test_the_hand_squeezes_the_grip_instead_of_resting_on_it(side: str) -> None:
     # Soft tissue gives way, bone does not: no finger bone enters the grip.
     assert min_bone_grip_clearance_m(firm) >= float(_Q["min_bone_grip_clearance_m"])
     assert max_grip_cylinder_penetration_m(firm.mesh.vertices, _RADIUS) <= float(
+        _Q["penetration_tolerance_m"]
+    )
+
+
+def _no_palm_cup(side: str):
+    key = (side, "no palm cup")
+    if key not in _CACHE:
+        raw = load_settings_mapping()
+        raw["thumb"] = {**raw["thumb"], "palm_cup_max_deg": 0.0}
+        _CACHE[key] = build_hand_visual(
+            _spec(), side, grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
+        )
+    return _CACHE[key]
+
+
+@pytest.mark.parametrize("side", _SIDES)
+def test_the_palm_cups_so_the_thumb_base_lies_on_the_grip(side: str) -> None:
+    """The thumb ray swings toward the grip before the thumb is aimed (#15181)."""
+    flat, cupped = _no_palm_cup(side), _hand(side)
+    limit = float(_Q["max_thumb_first_segment_median_gap_m"])
+    first = ("thumb_prox",)
+    assert median_facing_grip_gap_m(cupped, first) <= limit
+    assert median_facing_grip_gap_m(flat, first) > limit
+    base = ("thumb_meta",)
+    closer = float(_Q["min_palm_cup_thenar_approach_m"])
+    assert (
+        median_facing_grip_gap_m(flat, base) - median_facing_grip_gap_m(cupped, base)
+        >= closer
+    )
+    # Only the thumb ray moves: the fingers hold the grip as before.
+    for finger in FINGERS:
+        for segment in ("prox", "mid", "dist"):
+            name = f"{finger}_{segment}"
+            np.testing.assert_allclose(
+                cupped.joint_angles.as_mapping()[name],
+                flat.joint_angles.as_mapping()[name],
+            )
+    assert max_grip_cylinder_penetration_m(cupped.mesh.vertices, _RADIUS) <= float(
         _Q["penetration_tolerance_m"]
     )
 
@@ -539,6 +578,13 @@ def test_bad_settings_and_inputs_are_rejected() -> None:
                 grip_radius_m=_RADIUS,
                 settings=settings_from_mapping({**raw, "correctives": changed}),
             )
+    for bad in (
+        {"palm_cup_max_deg": -1.0},
+        {"palm_cup_step_deg": 0.0},
+        {"palm_cup_pivot_fraction": -0.1},
+    ):
+        with pytest.raises(ValueError):
+            settings_from_mapping({**raw, "thumb": {**raw["thumb"], **bad}})
     for bad in ({"finger_depth_m": -0.001}, {"palm_depth_m": -0.001}):
         with pytest.raises(ValueError):
             settings_from_mapping({**raw, "squeeze": {**raw["squeeze"], **bad}})

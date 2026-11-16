@@ -89,10 +89,13 @@
       50.0
     ],
     "ip_limits_deg": [
-      -25.0,
+      0.0,
       70.0
     ],
-    "straight_ip_limit_deg": 12.0
+    "straight_ip_limit_deg": 12.0,
+    "palm_cup_max_deg": 70.0,
+    "palm_cup_step_deg": 2.0,
+    "palm_cup_pivot_fraction": 1.0
   },
   "pair": {
     "capsule_radius_scale": 1.0,

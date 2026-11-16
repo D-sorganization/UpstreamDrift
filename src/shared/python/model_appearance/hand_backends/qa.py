@@ -61,6 +61,27 @@ def grip_contact_area_m2(result: HandVisualResult, within_m: float) -> float:
     return float(0.5 * np.linalg.norm(cross, axis=1).sum())
 
 
+def median_facing_grip_gap_m(
+    result: HandVisualResult, bones: tuple[str, ...], min_facing: float = 0.3
+) -> float:
+    """Median gap to the grip of the skin of ``bones`` that faces the grip.
+
+    Skin faces the grip when its normal has at least ``min_facing`` of its
+    length toward the grip axis. Raises ``ValueError`` if none does.
+    """
+    if result.grip_radius_m is None or result.vertex_normals is None:
+        raise ValueError("result carries no grip radius or no vertex normals")
+    asset, _, _ = _audit_parts(result)
+    ids = asset.dominant_vertex_ids(bones)
+    v, n = result.mesh.vertices[ids], result.vertex_normals[ids]
+    rho = np.hypot(v[:, 0], v[:, 1])
+    inward = -(n[:, 0] * v[:, 0] + n[:, 1] * v[:, 1]) / np.maximum(rho, 1e-12)
+    facing = inward >= min_facing
+    if not facing.any():
+        raise ValueError(f"no skin of {bones} faces the grip")
+    return float(np.median(rho[facing]) - result.grip_radius_m)
+
+
 def min_bone_grip_clearance_m(result: HandVisualResult, samples: int = 5) -> float:
     """Least distance from a finger or thumb bone axis to the grip surface.
 
