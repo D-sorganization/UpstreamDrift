@@ -38,6 +38,8 @@ Array = NDArray[np.float64]
 _OUT_DIR = Path(__file__).resolve().parent
 _VIEWS = ("iso", "butt", "face")
 _ROLLS = (0.0, 20.0, -20.0)
+_DARK_SKIN_RGB = (0.36, 0.24, 0.17)
+_LARGE_HAND_SCALE = 1.15
 
 
 def _apply_xf(mesh: Mesh, xf: Array) -> Mesh:
@@ -318,7 +320,8 @@ def main() -> None:
         head_alias="iron_7", length_m=0.94, grip_length_m=0.27, shaft_radius_m=0.0062
     )
     club_meshes = assembly_meshes(club)
-    roll0_xf = grip_hand_frame(club, Hand.LEAD, base.to_grip_pose())
+    base_pose = base.to_grip_pose()
+    roll0_xf = grip_hand_frame(club, Hand.LEAD, base_pose)
     lead_rgb = (cfg.skin_tone_rgba[0], cfg.skin_tone_rgba[1], cfg.skin_tone_rgba[2])
     trail_rgb = (lead_rgb[0] * 0.92, lead_rgb[1] * 0.89, lead_rgb[2] * 0.86)
     records: list[dict[str, object]] = []
@@ -329,13 +332,17 @@ def main() -> None:
             lead=replace(base.lead, shaft_roll_deg=roll),
             trail=replace(base.trail, shaft_roll_deg=roll),
         )
-        pose = spec.to_grip_pose()
         rtag = f"roll_{int(roll)}p" if roll >= 0 else f"roll_{abs(int(roll))}m"
 
-        lead_local = build_hand_visual(spec, "lead", None).mesh
-        trail_local = build_hand_visual(spec, "trail", None).mesh
-        lead_mesh = _apply_xf(lead_local, grip_hand_frame(club, Hand.LEAD, pose))
-        trail_mesh = _apply_xf(trail_local, grip_hand_frame(club, Hand.TRAIL, pose))
+        # The backend applies the shaft roll (ADR-0057 A2), so place each hand
+        # with the unrolled frame.
+        radius = cfg.grip_radius_nominal_m
+        lead_local = build_hand_visual(spec, "lead", grip_radius_m=radius).mesh
+        trail_local = build_hand_visual(spec, "trail", grip_radius_m=radius).mesh
+        lead_mesh = _apply_xf(lead_local, grip_hand_frame(club, Hand.LEAD, base_pose))
+        trail_mesh = _apply_xf(
+            trail_local, grip_hand_frame(club, Hand.TRAIL, base_pose)
+        )
 
         static_parts = [
             (club_meshes["grip"], (0.17, 0.17, 0.20), 0.10),
@@ -372,7 +379,66 @@ def main() -> None:
                     {"file": fname, "mode": mode, "view": view, "roll_deg": roll}
                 )
 
+    records.extend(
+        _render_variants(cfg, base, club, club_meshes, roll0_xf, lead_rgb, trail_rgb)
+    )
     _write_evidence_receipt(cfg, base, records)
+
+
+def _render_variants(
+    cfg: Any,
+    base: GripSpec,
+    club: ClubAssembly,
+    club_meshes: dict[str, Mesh],
+    roll0_xf: Array,
+    lead_rgb: tuple[float, float, float],
+    trail_rgb: tuple[float, float, float],
+) -> list[dict[str, object]]:
+    """Both hands at roll 0 with a chosen skin colour and with a larger hand."""
+    size = base.hand_size
+    large = replace(
+        base,
+        hand_size=replace(
+            size,
+            length_m=size.length_m * _LARGE_HAND_SCALE,
+            breadth_m=size.breadth_m * _LARGE_HAND_SCALE,
+        ),
+    )
+    pose = base.to_grip_pose()
+    radius = cfg.grip_radius_nominal_m
+    variants = {
+        "skin_dark": (base, _DARK_SKIN_RGB, _DARK_SKIN_RGB),
+        "size_large": (large, None, None),
+    }
+    records: list[dict[str, object]] = []
+    for tag, (spec, lead_skin, trail_skin) in variants.items():
+        lead = build_hand_visual(spec, "lead", grip_radius_m=radius, skin_rgb=lead_skin)
+        trail = build_hand_visual(
+            spec, "trail", grip_radius_m=radius, skin_rgb=trail_skin
+        )
+        lead_mesh = _apply_xf(lead.mesh, grip_hand_frame(club, Hand.LEAD, pose))
+        trail_mesh = _apply_xf(trail.mesh, grip_hand_frame(club, Hand.TRAIL, pose))
+        parts = [
+            (lead_mesh, lead.skin_rgb if lead_skin else lead_rgb, 0.08),
+            (trail_mesh, trail.skin_rgb if trail_skin else trail_rgb, 0.08),
+            (club_meshes["grip"], (0.17, 0.17, 0.20), 0.10),
+            (club_meshes["shaft"], (0.72, 0.75, 0.80), 0.35),
+        ]
+        hverts = np.vstack([lead_mesh.vertices, trail_mesh.vertices])
+        for view in ("iso", "face"):
+            im = render_scene(
+                parts,
+                hverts,
+                _camera_basis(view, roll0_xf),
+                out_px=cfg.render_frame_px,
+                fill=cfg.render_frame_fill,
+            )
+            fname = f"grip_shadow_both_{view}_{tag}.png"
+            im.save(_OUT_DIR / fname)
+            records.append(
+                {"file": fname, "mode": "both", "view": view, "variant": tag}
+            )
+    return records
 
 
 if __name__ == "__main__":

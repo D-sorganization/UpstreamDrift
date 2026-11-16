@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Literal
@@ -27,7 +27,37 @@ from src.shared.python.model_appearance.hand_backends.shadow_settings import (
     ShadowHandVisualSettings,
     visual_settings,
 )
-from src.shared.python.model_appearance.hand_backends.types import HandSide, JointAngles
+from src.shared.python.model_appearance.hand_backends.types import (
+    HandJointAngles,
+    HandSide,
+)
+
+#: Shadow-native names (``FFJ3``), canonical :class:`HandJointAngles`, or a
+#: full ``qpos`` vector.
+JointAngles = HandJointAngles | Mapping[str, float] | NDArray[np.float64] | None
+
+_CANONICAL_FINGER_PREFIX = {"index": "FF", "middle": "MF", "ring": "RF", "little": "LF"}
+_CANONICAL_SEGMENT_JOINT = {"prox": "J3", "mid": "J2", "dist": "J1"}
+_CANONICAL_THUMB_JOINT = {
+    "thumb_press": "THJ4",
+    "thumb_prox": "THJ2",
+    "thumb_dist": "THJ1",
+}
+
+
+def shadow_joint_name(canonical: str) -> str:
+    """Shadow joint for a canonical hinge (``index_prox`` -> ``FFJ3``).
+
+    Names that are not canonical pass through unchanged (Shadow-native keys).
+    """
+    if canonical in _CANONICAL_THUMB_JOINT:
+        return _CANONICAL_THUMB_JOINT[canonical]
+    finger, _, segment = canonical.partition("_")
+    if finger in _CANONICAL_FINGER_PREFIX and segment in _CANONICAL_SEGMENT_JOINT:
+        return _CANONICAL_FINGER_PREFIX[finger] + _CANONICAL_SEGMENT_JOINT[segment]
+    if canonical == "meta_ring":
+        raise ValueError("the Shadow hand has no ring metacarpal joint (meta_ring)")
+    return canonical
 
 
 def _require_mujoco() -> Any:
@@ -112,10 +142,13 @@ def _apply_joint_angles(
     if isinstance(joint_angles, np.ndarray):
         require(len(joint_angles) == model.nq, "joint_angles qpos length mismatch")
         return np.asarray(joint_angles, float)
+    if isinstance(joint_angles, HandJointAngles):
+        joint_angles = joint_angles.as_mapping()
     out = qpos.copy()
     prefix = _prefix(hand, handedness)
     for key, value in joint_angles.items():
-        jname = key if key.startswith(("lh_", "rh_")) else f"{prefix}{key}"
+        native = shadow_joint_name(key)
+        jname = native if native.startswith(("lh_", "rh_")) else f"{prefix}{native}"
         out[_joint_qpos_index(model, jname)] = float(value)
     return out
 

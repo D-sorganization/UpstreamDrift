@@ -10,6 +10,11 @@ from numpy.typing import NDArray
 from scipy.spatial import cKDTree
 
 from src.shared.python.core.handedness import Handedness
+from src.shared.python.grip_spec.shaft_roll import (
+    APPEARANCE_GRIP_SHAFT_AXIS,
+    apply_shaft_roll,
+    resolved_shaft_roll_deg,
+)
 from src.shared.python.grip_spec.types import GripSpec, HandGripSpec
 from src.shared.python.model_appearance.geometry import Mesh, concat_meshes
 from src.shared.python.model_appearance.grip_pose import GripPose, Hand
@@ -27,7 +32,12 @@ from src.shared.python.model_appearance.hand_backends.shadow_skin import (
     build_shadow_skin_mesh,
     measure_shadow_skin_envelope,
 )
+from src.shared.python.model_appearance.hand_backends.registry import (
+    HandVisualBackend,
+    register_hand_visual_backend,
+)
 from src.shared.python.model_appearance.hand_backends.shadow_solver import (
+    JointAngles,
     _apply_joint_angles,
     _baseline_qpos,
     _canonical_part_key,
@@ -50,8 +60,9 @@ from src.shared.python.model_appearance.hand_backends.shadow_solver import (
 from src.shared.python.model_appearance.hand_backends.types import (
     HandSide,
     HandVisualResult,
-    JointAngles,
 )
+
+BACKEND_NAME = "shadow"
 
 
 def shadow_distal_pad_centroid(
@@ -251,12 +262,17 @@ def measure_shadow_anthropometry(
 def build_hand_visual(
     grip_spec: GripSpec,
     side: HandSide,
-    joint_angles: JointAngles,
+    joint_angles: JointAngles = None,
     *,
-    grip_radius_m: float | None = None,
+    grip_radius_m: float,
+    skin_rgb: tuple[float, float, float] | None = None,
     settings: ShadowHandVisualSettings | None = None,
 ) -> HandVisualResult:
-    """Build humanized Shadow skin mesh in ``grip_hand_frame`` (visual only)."""
+    """Humanized Shadow skin mesh in ``grip_hand_frame`` (visual only, ADR-0057 A2).
+
+    The hand is posed unrolled; the per-hand shaft roll is then applied as a
+    rigid rotation about the shaft axis.
+    """
     cfg, hand, spec_hand, radius = _resolve_visual_call(
         grip_spec, side, grip_radius_m, settings=settings
     )
@@ -294,7 +310,29 @@ def build_hand_visual(
         mesh = extract_shadow_hand_mesh(
             hand, qpos, mount_matrix=mount, settings=cfg, handedness=handedness
         )
-    return HandVisualResult(mesh=mesh, material_rgba=cfg.skin_tone_rgba)
+    roll = apply_shaft_roll(
+        np.eye(3), APPEARANCE_GRIP_SHAFT_AXIS, resolved_shaft_roll_deg(grip_spec, side)
+    )[:3, :3]
+    rgb = cfg.skin_tone_rgba[:3] if skin_rgb is None else skin_rgb
+    return HandVisualResult(
+        backend=BACKEND_NAME,
+        side=side,
+        mesh=Mesh(mesh.vertices @ roll.T, mesh.faces),
+        skin_rgb=(float(rgb[0]), float(rgb[1]), float(rgb[2])),
+        grip_radius_m=radius,
+    )
+
+
+def register() -> None:
+    """Add the Shadow backend to the shared registry (called lazily)."""
+    register_hand_visual_backend(
+        HandVisualBackend(
+            name=BACKEND_NAME,
+            builder=build_hand_visual,
+            description="Humanized Shadow Dexterous Hand skin (Menagerie, #15122)",
+            capabilities=frozenset({"self_posing", "explicit_joint_angles"}),
+        )
+    )
 
 
 def build_shadow_grip_hand_mesh(
@@ -360,6 +398,7 @@ def penetration_metrics(
 
 
 __all__ = [
+    "BACKEND_NAME",
     "_CURL_STAGE_FINGERS",
     "_FINGER_BODY_TAG",
     "_FINGER_CHAINS",
@@ -371,6 +410,7 @@ __all__ = [
     "build_hand_visual",
     "build_shadow_grip_hand_mesh",
     "build_shadow_skin_mesh",
+    "register",
     "extract_shadow_hand_mesh",
     "extract_shadow_hand_parts",
     "finger_pad_contact_gaps",

@@ -3,43 +3,43 @@
   "frame_fill": 0.7,
   "anthropometry": {
     "lead": {
-      "hand_length_m": 0.19320697027870232,
-      "palm_breadth_m": 0.0849296598264872,
-      "index_proximal_width_m": 0.02058425546717231,
-      "middle_proximal_width_m": 0.02058425546717232,
-      "ring_proximal_width_m": 0.020584255467172317,
-      "little_proximal_width_m": 0.020584255467172314
+      "hand_length_m": 0.19320696966290168,
+      "palm_breadth_m": 0.08492965982648823,
+      "index_proximal_width_m": 0.020584253955299277,
+      "middle_proximal_width_m": 0.020584253955299277,
+      "ring_proximal_width_m": 0.020584253955299277,
+      "little_proximal_width_m": 0.02058425395529928
     },
     "trail": {
-      "hand_length_m": 0.19320697027870232,
-      "palm_breadth_m": 0.0849296598264872,
-      "index_proximal_width_m": 0.020584255467172314,
-      "middle_proximal_width_m": 0.020584255467172317,
-      "ring_proximal_width_m": 0.02058425546717232,
-      "little_proximal_width_m": 0.02058425546717231
+      "hand_length_m": 0.19320696966290168,
+      "palm_breadth_m": 0.08492965982648823,
+      "index_proximal_width_m": 0.02058425395529928,
+      "middle_proximal_width_m": 0.020584253955299277,
+      "ring_proximal_width_m": 0.020584253955299277,
+      "little_proximal_width_m": 0.020584253955299277
     }
   },
   "lead_pad_gaps_m": {
-    "index": 1.901172913543192e-09,
-    "middle": 1.128268546299327e-09,
-    "ring": 4.2968847403790367e-10,
-    "little": 2.0419723169295967e-09,
-    "thumb": 1.028901805769089e-09
+    "index": 1.7687305439717527e-10,
+    "middle": 5.437114300455015e-11,
+    "ring": 8.757227217687236e-10,
+    "little": 2.6147065068649056e-10,
+    "thumb": 7.559211121638265e-10
   },
   "trail_pad_gaps_m": {
-    "index": 6.829461614288324e-10,
-    "middle": 7.40983495048364e-10,
-    "ring": 3.410530746705831e-10,
-    "little": 1.6463632956931207e-09,
-    "thumb": 3.322572078579e-11
+    "index": 1.4214439538612345e-09,
+    "middle": 6.843251937338479e-10,
+    "ring": 7.675082201730188e-10,
+    "little": 2.3927572874449243e-09,
+    "thumb": 5.78749050419991e-10
   },
   "lead_penetration": {
     "club_penetration_m": 0.0,
-    "finger_finger_gap_m": 0.001763447728029144
+    "finger_finger_gap_m": 0.001763447102419632
   },
   "trail_penetration": {
     "club_penetration_m": 0.0,
-    "finger_finger_gap_m": 0.00176294586107929
+    "finger_finger_gap_m": 0.0017629460565310527
   },
   "renders": [
     {
@@ -203,6 +203,30 @@
       "mode": "both",
       "view": "face",
       "roll_deg": -20.0
+    },
+    {
+      "file": "grip_shadow_both_iso_skin_dark.png",
+      "mode": "both",
+      "view": "iso",
+      "variant": "skin_dark"
+    },
+    {
+      "file": "grip_shadow_both_face_skin_dark.png",
+      "mode": "both",
+      "view": "face",
+      "variant": "skin_dark"
+    },
+    {
+      "file": "grip_shadow_both_iso_size_large.png",
+      "mode": "both",
+      "view": "iso",
+      "variant": "size_large"
+    },
+    {
+      "file": "grip_shadow_both_face_size_large.png",
+      "mode": "both",
+      "view": "face",
+      "variant": "size_large"
     }
   ]
 }
