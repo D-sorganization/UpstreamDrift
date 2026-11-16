@@ -1,4 +1,4 @@
-{"schema_version": 2, "tools_pin": "a47d83d644b39eb6168fb6f657c7705b89f8deaa", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
+{"schema_version": 2, "tools_pin": "083acade5af7a8a33538e94371416e852f42f3cb", "ud_root": "src/shared/python", "tools_root": "vendor/ud-tools/src/shared/python", "vendor_shim_roots": {"sidekick": "vendor/ud-tools/src/sidekick", "chat": "vendor/ud-tools/src/chat", "chat_contracts": "vendor/ud-tools/src/chat_contracts", "contracts": "vendor/ud-tools/src/contracts.py", "utils": "vendor/ud-tools/src/python/src/utils"}}
 {"path": "README.md", "classification": "tools-only", "package": "README.md", "spelling_only": false}
 {"path": "README_PACKAGE.md", "classification": "ud-only", "package": "README_PACKAGE.md", "spelling_only": false}
 {"path": "__init__.py", "classification": "diverged", "package": "__init__.py", "spelling_only": false}
@@ -9,8 +9,8 @@
 {"path": "_contracts_primitives.py", "classification": "ud-only", "package": "_contracts_primitives.py", "spelling_only": false}
 {"path": "_contracts_validators.py", "classification": "ud-only", "package": "_contracts_validators.py", "spelling_only": false}
 {"path": "_seam_redirect.py", "classification": "ud-only", "package": "_seam_redirect.py", "spelling_only": false}
-{"path": "ai/__init__.py", "classification": "identical", "package": "ai", "spelling_only": false}
-{"path": "ai/_onnx_preflight.py", "classification": "identical", "package": "ai", "spelling_only": false}
+{"path": "ai/__init__.py", "classification": "diverged", "package": "ai", "spelling_only": false}
+{"path": "ai/_onnx_preflight.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/_settings_model.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/access_policy.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/adapters/__init__.py", "classification": "diverged", "package": "ai", "spelling_only": false}
@@ -20,7 +20,10 @@
 {"path": "ai/adapters/bitnet_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": true}
 {"path": "ai/adapters/claude_code_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/adapters/cli_provider_setup.py", "classification": "diverged", "package": "ai", "spelling_only": false}
+{"path": "ai/adapters/cli_qualification.py", "classification": "tools-only", "package": "ai", "spelling_only": false}
 {"path": "ai/adapters/cli_subprocess_runner.py", "classification": "tools-only", "package": "ai", "spelling_only": false}
+{"path": "ai/adapters/cli_tool_bridge.py", "classification": "tools-only", "package": "ai", "spelling_only": false}
+{"path": "ai/adapters/cli_turn_lifecycle.py", "classification": "tools-only", "package": "ai", "spelling_only": false}
 {"path": "ai/adapters/cline_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/adapters/codex_cli_adapter.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/adapters/factory.py", "classification": "diverged", "package": "ai", "spelling_only": false}
@@ -46,7 +49,7 @@
 {"path": "ai/data/glossary_core.json", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/data/glossary_extended.json", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/education.py", "classification": "diverged", "package": "ai", "spelling_only": false}
-{"path": "ai/exceptions.py", "classification": "identical", "package": "ai", "spelling_only": false}
+{"path": "ai/exceptions.py", "classification": "diverged", "package": "ai", "spelling_only": false}
 {"path": "ai/glossary_data_core.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/glossary_data_extended.py", "classification": "identical", "package": "ai", "spelling_only": false}
 {"path": "ai/gui/__init__.py", "classification": "identical", "package": "ai", "spelling_only": false}
@@ -1167,7 +1170,7 @@
 {"path": "launcher_embed/registry.py", "classification": "ud-only", "package": "launcher_embed", "spelling_only": false}
 {"path": "launcher_factory.py", "classification": "ud-only", "package": "launcher_factory.py", "spelling_only": false}
 {"path": "lazy_package_export.py", "classification": "ud-only", "package": "lazy_package_export.py", "spelling_only": false}
-{"path": "lifecycle.py", "classification": "identical", "package": "lifecycle.py", "spelling_only": false}
+{"path": "lifecycle.py", "classification": "diverged", "package": "lifecycle.py", "spelling_only": false}
 {"path": "lift_scoping/__init__.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
 {"path": "lift_scoping/_json_validate.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
 {"path": "lift_scoping/lift5.py", "classification": "ud-only", "package": "lift_scoping", "spelling_only": false}
