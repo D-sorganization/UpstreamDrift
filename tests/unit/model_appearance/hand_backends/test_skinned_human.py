@@ -27,6 +27,7 @@ from src.shared.python.model_appearance.hand_backends.joint_angles import (
 )
 from src.shared.python.model_appearance.hand_backends.qa import (
     anthropometric_ratios,
+    finger_side_gaps_m,
     forearm_spread_deg,
     grip_contact_area_m2,
     hand_pair_penetration_m,
@@ -293,6 +294,40 @@ def test_the_palm_cups_so_the_thumb_base_lies_on_the_grip(side: str) -> None:
     assert max_grip_cylinder_penetration_m(cupped.mesh.vertices, _RADIUS) <= float(
         _Q["penetration_tolerance_m"]
     )
+
+
+def _fingers_apart(side: str):
+    key = (side, "fingers apart")
+    if key not in _CACHE:
+        raw = load_settings_mapping()
+        raw["side_close"] = {**raw["side_close"], "max_deg": 0.0}
+        _CACHE[key] = build_hand_visual(
+            _spec(), side, grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
+        )
+    return _CACHE[key]
+
+
+@pytest.mark.parametrize("side", _SIDES)
+def test_neighbouring_fingers_touch_along_the_grip(side: str) -> None:
+    """Fingers close side to side; the forefinger may keep a slight gap (#15184)."""
+    apart, closed = (
+        finger_side_gaps_m(_fingers_apart(side)),
+        finger_side_gaps_m(_hand(side)),
+    )
+    limit = float(_Q["max_finger_side_gap_m"])
+    index_limit = float(_Q["max_index_side_gap_m"])
+    for pair, gap in closed.items():
+        most = index_limit if pair.startswith("index") else limit
+        assert gap <= most, f"{side} {pair} {gap * 1e3:.1f} mm"
+        assert gap > 0.0
+    assert apart["middle-ring"] > limit
+    assert apart["index-middle"] > index_limit
+    # Closing sideways does not lift a finger off the grip.
+    tolerance = float(_Q["contact_tolerance_m"])
+    for finger in FINGERS:
+        for segment in ("mid", "dist"):
+            gap = _hand(side).contact_gaps_m[f"{finger}_{segment}"]
+            assert gap <= tolerance, f"{side} {finger}_{segment}"
 
 
 def _palm_contact_count(result) -> int:
@@ -585,6 +620,9 @@ def test_bad_settings_and_inputs_are_rejected() -> None:
     ):
         with pytest.raises(ValueError):
             settings_from_mapping({**raw, "thumb": {**raw["thumb"], **bad}})
+    for bad in ({"max_deg": -1.0}, {"gap_m": -0.001}, {"index_gap_m": -0.001}):
+        with pytest.raises(ValueError):
+            settings_from_mapping({**raw, "side_close": {**raw["side_close"], **bad}})
     for bad in ({"finger_depth_m": -0.001}, {"palm_depth_m": -0.001}):
         with pytest.raises(ValueError):
             settings_from_mapping({**raw, "squeeze": {**raw["squeeze"], **bad}})

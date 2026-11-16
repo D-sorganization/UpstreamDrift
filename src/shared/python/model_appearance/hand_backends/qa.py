@@ -82,6 +82,27 @@ def median_facing_grip_gap_m(
     return float(np.median(rho[facing]) - result.grip_radius_m)
 
 
+def finger_side_gaps_m(result: HandVisualResult) -> dict[str, float]:
+    """Least skin distance between each pair of neighbouring fingers.
+
+    Keys are ``"index-middle"``, ``"middle-ring"`` and ``"ring-little"``. The
+    distance is from the middle and end segments of the first finger to any
+    skin of the second, between skin vertices.
+    """
+    from scipy.spatial import cKDTree
+
+    asset, _, _ = _audit_parts(result)
+    v = result.mesh.vertices
+    gaps: dict[str, float] = {}
+    for a, b in zip(FINGERS, FINGERS[1:], strict=False):
+        outer = asset.dominant_vertex_ids((f"{a}_mid", f"{a}_dist"))
+        other = asset.dominant_vertex_ids(
+            tuple(f"{b}_{s}" for s in ("prox", "mid", "dist"))
+        )
+        gaps[f"{a}-{b}"] = float(np.min(cKDTree(v[other]).query(v[outer])[0]))
+    return gaps
+
+
 def min_bone_grip_clearance_m(result: HandVisualResult, samples: int = 5) -> float:
     """Least distance from a finger or thumb bone axis to the grip surface.
 

@@ -37,5 +37,7 @@
   "min_grip_contact_area_m2": 0.0018,
   "min_bone_grip_clearance_m": 0.0015,
   "max_thumb_first_segment_median_gap_m": 0.005,
-  "min_palm_cup_thenar_approach_m": 0.01
+  "min_palm_cup_thenar_approach_m": 0.01,
+  "max_finger_side_gap_m": 0.002,
+  "max_index_side_gap_m": 0.005
 }

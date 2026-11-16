@@ -1,0 +1,303 @@
+"""Settings of the skinned MakeHuman hand (epic #15150).
+
+Every number the hand uses comes from ``scripts/config/skinned_human_hand.json``;
+this module loads and validates it. Split out of :mod:`skinned_human` to keep
+that module inside the file-size budget.
+"""
+
+from __future__ import annotations
+
+import json
+import math
+from collections.abc import Mapping
+from dataclasses import dataclass
+from functools import lru_cache
+from pathlib import Path
+from typing import Any
+
+from src.shared.python.model_appearance.hand_backends.correctives import (
+    FoldRelaxSettings,
+    PadConformSettings,
+    PressSettings,
+)
+from src.shared.python.model_appearance.hand_backends.joint_angles import FINGERS
+from src.shared.python.model_appearance.hand_backends.posing import CurlSettings
+
+
+SETTINGS_PATH = (
+    Path(__file__).resolve().parents[5]
+    / "scripts"
+    / "config"
+    / "skinned_human_hand.json"
+)
+_MAX_SUBDIVISION_LEVELS = 3
+JOINT_OF_SEGMENT = {"prox": "mcp", "mid": "pip", "dist": "dip"}
+
+
+@dataclass(frozen=True)
+class SkinnedHumanSettings:
+    """Everything tunable about the skinned hand (loaded from JSON)."""
+
+    skin_rgb: tuple[float, float, float]
+    breadth_band_m: float
+    subdivision_levels: int
+    crease_bones: tuple[str, ...]
+    crease_min_fold_deg: float
+    scale_limits: tuple[float, float]
+    palm_contact_azimuth_offset_deg: float
+    palm_centre_wrap_deg: float
+    index_station_at_spec_zero: float
+    seat_max_tilt_deg: float
+    seat_max_travel_m: float
+    seat_iterations: int
+    finger_adduction_fraction: float
+    curl: CurlSettings
+    limits_deg: tuple[tuple[str, tuple[float, float]], ...]
+    pip_per_mcp: float
+    dip_per_pip: float
+    wrap_scan_samples: int
+    arch_passes: int
+    arch_gain: tuple[tuple[str, float], ...]
+    arch_limit_deg: tuple[tuple[str, float], ...]
+    thumb_max_swing_deg: float
+    thumb_max_twist_deg: float
+    thumb_press_range_deg: tuple[float, float]
+    thumb_mcp_limits_deg: tuple[float, float]
+    thumb_ip_limits_deg: tuple[float, float]
+    thumb_straight_ip_limit_deg: float
+    palm_cup_max_deg: float
+    palm_cup_step_deg: float
+    palm_cup_pivot_fraction: float
+    side_close_max_deg: float
+    side_close_gap_m: float
+    side_close_index_gap_m: float
+    pair_capsule_radius_scale: float
+    pair_thumb_radius_scale: float
+    pair_grip_fingers: tuple[str, ...]
+    pair_max_spacing_adjust_m: float
+    pair_capsule_margin_m: float
+    frame_excluded_bones: tuple[str, ...]
+    fold_relax: FoldRelaxSettings
+    palm_pad: PadConformSettings
+    press: PressSettings
+    squeeze_finger_depth_m: float
+    squeeze_palm_depth_m: float
+    crease_relax: FoldRelaxSettings
+    crease_relax_bones: tuple[str, ...]
+    crease_relax_max_added_fold_deg: float
+    wrist_deg: tuple[tuple[str, tuple[float, float]], ...]
+
+    def limit_rad(self, joint: str) -> tuple[float, float]:
+        low, high = dict(self.limits_deg)[joint]
+        return math.radians(low), math.radians(high)
+
+
+def _pair(raw: Any, name: str) -> tuple[float, float]:
+    values = tuple(float(x) for x in raw)
+    if len(values) != 2 or not all(math.isfinite(v) for v in values):
+        raise ValueError(f"{name} must be two finite numbers")
+    if values[0] > values[1]:
+        raise ValueError(f"{name} must be ordered low, high")
+    return values[0], values[1]
+
+
+def _unit_interval(value: Any, name: str) -> float:
+    number = float(value)
+    if not 0.0 <= number <= 1.0:
+        raise ValueError(f"{name} must be in [0, 1]")
+    return number
+
+
+def _fingers(raw: Any) -> tuple[str, ...]:
+    names = tuple(str(x) for x in raw)
+    if not set(names) <= set(FINGERS):
+        raise ValueError(f"grip_fingers must be among {FINGERS}")
+    return names
+
+
+def _non_negative(value: Any, name: str) -> float:
+    number = float(value)
+    if not (math.isfinite(number) and number >= 0.0):
+        raise ValueError(f"{name} must be non-negative and finite")
+    return number
+
+
+def _subdivision_levels(value: Any) -> int:
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError("mesh.subdivision_levels must be an integer")
+    if not 0 <= value <= _MAX_SUBDIVISION_LEVELS:
+        raise ValueError(
+            f"mesh.subdivision_levels must be 0..{_MAX_SUBDIVISION_LEVELS}"
+        )
+    return value
+
+
+def _positive(value: Any, name: str) -> float:
+    number = float(value)
+    if not number > 0.0:
+        raise ValueError(f"{name} must be positive")
+    return number
+
+
+def _fold_relax(raw: Mapping[str, Any]) -> FoldRelaxSettings:
+    return FoldRelaxSettings(
+        iterations=int(raw["iterations"]),
+        rings=int(raw["rings"]),
+        step=float(raw["step"]),
+    )
+
+
+def _palm_pad(raw: Mapping[str, Any]) -> PadConformSettings:
+    return PadConformSettings(
+        bones=tuple(str(bone) for bone in raw["bones"]),
+        reach_m=float(raw["reach_m"]),
+        clearance_m=float(raw["clearance_m"]),
+        facing_full=float(raw["facing_full"]),
+        smooth_iterations=int(raw["smooth_iterations"]),
+        passes=int(raw["passes"]),
+    )
+
+
+def _corrective_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
+    """The ``correctives`` section as :class:`SkinnedHumanSettings` fields."""
+    crease: Mapping[str, Any] = raw["crease_relax"]
+    return {
+        "fold_relax": _fold_relax(raw["fold_relax"]),
+        "palm_pad": _palm_pad(raw["palm_pad"]),
+        "crease_relax": _fold_relax(crease),
+        "crease_relax_bones": tuple(str(b) for b in crease["bones"]),
+        "crease_relax_max_added_fold_deg": _positive(
+            crease["max_added_fold_deg"], "crease_relax.max_added_fold_deg"
+        ),
+        "press": PressSettings(
+            max_depth_m=float(raw["lift_out"]["max_depth_m"]),
+            bulge_gain=float(raw["lift_out"]["bulge_gain"]),
+            bulge_rings=int(raw["lift_out"]["bulge_rings"]),
+        ),
+    }
+
+
+def _side_close_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
+    """The ``side_close`` section as :class:`SkinnedHumanSettings` fields."""
+    return {
+        "side_close_max_deg": _non_negative(raw["max_deg"], "side_close.max_deg"),
+        "side_close_gap_m": _non_negative(raw["gap_m"], "side_close.gap_m"),
+        "side_close_index_gap_m": _non_negative(
+            raw["index_gap_m"], "side_close.index_gap_m"
+        ),
+    }
+
+
+def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
+    """Validate a settings mapping. Raises ``ValueError``/``KeyError`` if bad."""
+    rgb = tuple(_unit_interval(x, "skin_rgb") for x in raw["skin_rgb"])
+    if len(rgb) != 3:
+        raise ValueError("skin_rgb must be three numbers in [0, 1]")
+    anthro: Mapping = raw["anthropometry"]
+    place: Mapping = raw["placement"]
+    pre: Mapping = raw["preshape"]
+    curl: Mapping = raw["curl"]
+    thumb: Mapping = raw["thumb"]
+    pair: Mapping = raw["pair"]
+    passes = int(curl["arch_passes"])
+    if passes < 1:
+        raise ValueError("arch_passes must be at least 1")
+    for finger in FINGERS:
+        if finger not in curl["arch_gain"] or finger not in curl["arch_limit_deg"]:
+            raise ValueError(f"arch settings missing finger {finger!r}")
+    for joint in JOINT_OF_SEGMENT.values():
+        if joint not in curl["limits_deg"]:
+            raise ValueError(f"limits_deg missing joint {joint!r}")
+    return SkinnedHumanSettings(
+        skin_rgb=(rgb[0], rgb[1], rgb[2]),
+        breadth_band_m=float(anthro["breadth_band_m"]),
+        subdivision_levels=_subdivision_levels(raw["mesh"]["subdivision_levels"]),
+        crease_bones=tuple(str(b) for b in raw["mesh"]["creases"]["bones"]),
+        crease_min_fold_deg=_positive(
+            raw["mesh"]["creases"]["min_fold_deg"], "mesh.creases.min_fold_deg"
+        ),
+        scale_limits=_pair(anthro["scale_limits"], "scale_limits"),
+        palm_contact_azimuth_offset_deg=float(place["palm_contact_azimuth_offset_deg"]),
+        palm_centre_wrap_deg=float(place["palm_centre_wrap_deg"]),
+        index_station_at_spec_zero=_unit_interval(
+            place["index_station_at_spec_zero"], "index_station_at_spec_zero"
+        ),
+        seat_max_tilt_deg=float(place["seat_max_tilt_deg"]),
+        seat_max_travel_m=float(place["seat_max_travel_m"]),
+        seat_iterations=int(place["seat_iterations"]),
+        finger_adduction_fraction=_unit_interval(
+            pre["finger_adduction_fraction"], "finger_adduction_fraction"
+        ),
+        curl=CurlSettings(
+            step_rad=math.radians(float(curl["step_deg"])),
+            bisection_steps=int(curl["bisection_steps"]),
+            contact_tolerance_m=float(curl["contact_tolerance_m"]),
+            penetration_allowance_m=float(curl["penetration_allowance_m"]),
+        ),
+        limits_deg=tuple(
+            (k, _pair(v, f"limits_deg.{k}")) for k, v in curl["limits_deg"].items()
+        ),
+        pip_per_mcp=float(curl["synergy"]["pip_per_mcp"]),
+        dip_per_pip=float(curl["synergy"]["dip_per_pip"]),
+        wrap_scan_samples=int(curl["wrap_scan_samples"]),
+        arch_passes=passes,
+        arch_gain=tuple((k, float(v)) for k, v in curl["arch_gain"].items()),
+        arch_limit_deg=tuple((k, float(v)) for k, v in curl["arch_limit_deg"].items()),
+        thumb_max_swing_deg=float(thumb["max_swing_deg"]),
+        thumb_max_twist_deg=float(thumb["max_twist_deg"]),
+        thumb_press_range_deg=_pair(thumb["press_range_deg"], "press_range_deg"),
+        thumb_mcp_limits_deg=_pair(thumb["mcp_limits_deg"], "mcp_limits_deg"),
+        thumb_ip_limits_deg=_pair(thumb["ip_limits_deg"], "ip_limits_deg"),
+        thumb_straight_ip_limit_deg=float(thumb["straight_ip_limit_deg"]),
+        palm_cup_max_deg=_non_negative(thumb["palm_cup_max_deg"], "palm_cup_max_deg"),
+        palm_cup_step_deg=_positive(thumb["palm_cup_step_deg"], "palm_cup_step_deg"),
+        palm_cup_pivot_fraction=_non_negative(
+            thumb["palm_cup_pivot_fraction"], "palm_cup_pivot_fraction"
+        ),
+        pair_capsule_radius_scale=_unit_interval(
+            pair["capsule_radius_scale"], "capsule_radius_scale"
+        ),
+        pair_thumb_radius_scale=_unit_interval(
+            pair["thumb_radius_scale"], "thumb_radius_scale"
+        ),
+        pair_grip_fingers=_fingers(pair["grip_fingers"]),
+        pair_max_spacing_adjust_m=_non_negative(
+            pair["max_spacing_adjust_m"], "max_spacing_adjust_m"
+        ),
+        pair_capsule_margin_m=_non_negative(
+            pair["capsule_margin_m"], "capsule_margin_m"
+        ),
+        frame_excluded_bones=tuple(
+            str(bone) for bone in raw["framing"]["excluded_bones"]
+        ),
+        **_corrective_fields(raw["correctives"]),
+        **_side_close_fields(raw["side_close"]),
+        squeeze_finger_depth_m=_non_negative(
+            raw["squeeze"]["finger_depth_m"], "squeeze.finger_depth_m"
+        ),
+        squeeze_palm_depth_m=_non_negative(
+            raw["squeeze"]["palm_depth_m"], "squeeze.palm_depth_m"
+        ),
+        wrist_deg=tuple(
+            (
+                side,
+                (
+                    float(raw["wrist"][side]["extension_deg"]),
+                    float(raw["wrist"][side]["ulnar_deviation_deg"]),
+                ),
+            )
+            for side in ("lead", "trail")
+        ),
+    )
+
+
+def load_settings_mapping() -> dict[str, Any]:
+    """The raw settings JSON (for callers that override a few values)."""
+    if not SETTINGS_PATH.is_file():
+        raise ValueError(f"missing settings: {SETTINGS_PATH}")
+    return json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
+def default_settings() -> SkinnedHumanSettings:
+    return settings_from_mapping(load_settings_mapping())

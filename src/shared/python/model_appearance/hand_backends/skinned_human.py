@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+from scipy.spatial import cKDTree
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import ensure, require
@@ -66,6 +67,14 @@ from src.shared.python.model_appearance.hand_backends.posing import (
     seat_on_obstacle,
     wrap_to_contact,
 )
+from src.shared.python.model_appearance.hand_backends.skinned_settings import (
+    JOINT_OF_SEGMENT as _JOINT_OF_SEGMENT,
+    SETTINGS_PATH as SETTINGS_PATH,
+    SkinnedHumanSettings as SkinnedHumanSettings,
+    default_settings as default_settings,
+    load_settings_mapping as load_settings_mapping,
+    settings_from_mapping as settings_from_mapping,
+)
 from src.shared.python.model_appearance.hand_backends.skinning import (
     SkinnedHandAsset,
     bone_transforms,
@@ -85,123 +94,15 @@ from src.shared.python.model_appearance.hand_backends.types import HandVisualRes
 Array = NDArray[np.float64]
 
 BACKEND_NAME = "skinned_human"
-SETTINGS_PATH = (
-    Path(__file__).resolve().parents[5]
-    / "scripts"
-    / "config"
-    / "skinned_human_hand.json"
-)
 _SEGMENTS = ("prox", "mid", "dist")
-_MAX_SUBDIVISION_LEVELS = 3
 _BREADTH_FIT_PASSES = 2
-_JOINT_OF_SEGMENT = {"prox": "mcp", "mid": "pip", "dist": "dip"}
 _THUMB_BONES = ("thumb_meta", "thumb_prox", "thumb_dist")
+#: Side closing: each finger and the neighbour it closes on, middle outward.
+_SIDE_ORDER = (("ring", "middle"), ("little", "ring"), ("index", "middle"))
 _EYE3 = np.eye(3)
 _EYE4 = np.eye(4)
 #: Virtual hinge at the thumb base that presses the thumb onto the grip.
 THUMB_PRESS = "thumb_press"
-
-
-@dataclass(frozen=True)
-class SkinnedHumanSettings:
-    """Everything tunable about the skinned hand (loaded from JSON)."""
-
-    skin_rgb: tuple[float, float, float]
-    breadth_band_m: float
-    subdivision_levels: int
-    crease_bones: tuple[str, ...]
-    crease_min_fold_deg: float
-    scale_limits: tuple[float, float]
-    palm_contact_azimuth_offset_deg: float
-    palm_centre_wrap_deg: float
-    index_station_at_spec_zero: float
-    seat_max_tilt_deg: float
-    seat_max_travel_m: float
-    seat_iterations: int
-    finger_adduction_fraction: float
-    curl: CurlSettings
-    limits_deg: tuple[tuple[str, tuple[float, float]], ...]
-    pip_per_mcp: float
-    dip_per_pip: float
-    wrap_scan_samples: int
-    arch_passes: int
-    arch_gain: tuple[tuple[str, float], ...]
-    arch_limit_deg: tuple[tuple[str, float], ...]
-    thumb_max_swing_deg: float
-    thumb_max_twist_deg: float
-    thumb_press_range_deg: tuple[float, float]
-    thumb_mcp_limits_deg: tuple[float, float]
-    thumb_ip_limits_deg: tuple[float, float]
-    thumb_straight_ip_limit_deg: float
-    palm_cup_max_deg: float
-    palm_cup_step_deg: float
-    palm_cup_pivot_fraction: float
-    pair_capsule_radius_scale: float
-    pair_thumb_radius_scale: float
-    pair_grip_fingers: tuple[str, ...]
-    pair_max_spacing_adjust_m: float
-    pair_capsule_margin_m: float
-    frame_excluded_bones: tuple[str, ...]
-    fold_relax: FoldRelaxSettings
-    palm_pad: PadConformSettings
-    press: PressSettings
-    squeeze_finger_depth_m: float
-    squeeze_palm_depth_m: float
-    crease_relax: FoldRelaxSettings
-    crease_relax_bones: tuple[str, ...]
-    crease_relax_max_added_fold_deg: float
-    wrist_deg: tuple[tuple[str, tuple[float, float]], ...]
-
-    def limit_rad(self, joint: str) -> tuple[float, float]:
-        low, high = dict(self.limits_deg)[joint]
-        return math.radians(low), math.radians(high)
-
-
-def _pair(raw: Any, name: str) -> tuple[float, float]:
-    values = tuple(float(x) for x in raw)
-    if len(values) != 2 or not all(math.isfinite(v) for v in values):
-        raise ValueError(f"{name} must be two finite numbers")
-    if values[0] > values[1]:
-        raise ValueError(f"{name} must be ordered low, high")
-    return values[0], values[1]
-
-
-def _unit_interval(value: Any, name: str) -> float:
-    number = float(value)
-    if not 0.0 <= number <= 1.0:
-        raise ValueError(f"{name} must be in [0, 1]")
-    return number
-
-
-def _fingers(raw: Any) -> tuple[str, ...]:
-    names = tuple(str(x) for x in raw)
-    if not set(names) <= set(FINGERS):
-        raise ValueError(f"grip_fingers must be among {FINGERS}")
-    return names
-
-
-def _non_negative(value: Any, name: str) -> float:
-    number = float(value)
-    if not (math.isfinite(number) and number >= 0.0):
-        raise ValueError(f"{name} must be non-negative and finite")
-    return number
-
-
-def _subdivision_levels(value: Any) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError("mesh.subdivision_levels must be an integer")
-    if not 0 <= value <= _MAX_SUBDIVISION_LEVELS:
-        raise ValueError(
-            f"mesh.subdivision_levels must be 0..{_MAX_SUBDIVISION_LEVELS}"
-        )
-    return value
-
-
-def _positive(value: Any, name: str) -> float:
-    number = float(value)
-    if not number > 0.0:
-        raise ValueError(f"{name} must be positive")
-    return number
 
 
 def _bone_mask(
@@ -214,158 +115,6 @@ def _bone_mask(
     mask = np.zeros(len(asset.rest_vertices), dtype=bool)
     mask[asset.dominant_vertex_ids(bones)] = True
     return mask
-
-
-def _fold_relax(raw: Mapping[str, Any]) -> FoldRelaxSettings:
-    return FoldRelaxSettings(
-        iterations=int(raw["iterations"]),
-        rings=int(raw["rings"]),
-        step=float(raw["step"]),
-    )
-
-
-def _palm_pad(raw: Mapping[str, Any]) -> PadConformSettings:
-    return PadConformSettings(
-        bones=tuple(str(bone) for bone in raw["bones"]),
-        reach_m=float(raw["reach_m"]),
-        clearance_m=float(raw["clearance_m"]),
-        facing_full=float(raw["facing_full"]),
-        smooth_iterations=int(raw["smooth_iterations"]),
-        passes=int(raw["passes"]),
-    )
-
-
-def _corrective_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
-    """The ``correctives`` section as :class:`SkinnedHumanSettings` fields."""
-    crease: Mapping[str, Any] = raw["crease_relax"]
-    return {
-        "fold_relax": _fold_relax(raw["fold_relax"]),
-        "palm_pad": _palm_pad(raw["palm_pad"]),
-        "crease_relax": _fold_relax(crease),
-        "crease_relax_bones": tuple(str(b) for b in crease["bones"]),
-        "crease_relax_max_added_fold_deg": _positive(
-            crease["max_added_fold_deg"], "crease_relax.max_added_fold_deg"
-        ),
-        "press": PressSettings(
-            max_depth_m=float(raw["lift_out"]["max_depth_m"]),
-            bulge_gain=float(raw["lift_out"]["bulge_gain"]),
-            bulge_rings=int(raw["lift_out"]["bulge_rings"]),
-        ),
-    }
-
-
-def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
-    """Validate a settings mapping. Raises ``ValueError``/``KeyError`` if bad."""
-    rgb = tuple(_unit_interval(x, "skin_rgb") for x in raw["skin_rgb"])
-    if len(rgb) != 3:
-        raise ValueError("skin_rgb must be three numbers in [0, 1]")
-    anthro: Mapping = raw["anthropometry"]
-    place: Mapping = raw["placement"]
-    pre: Mapping = raw["preshape"]
-    curl: Mapping = raw["curl"]
-    thumb: Mapping = raw["thumb"]
-    pair: Mapping = raw["pair"]
-    passes = int(curl["arch_passes"])
-    if passes < 1:
-        raise ValueError("arch_passes must be at least 1")
-    for finger in FINGERS:
-        if finger not in curl["arch_gain"] or finger not in curl["arch_limit_deg"]:
-            raise ValueError(f"arch settings missing finger {finger!r}")
-    for joint in _JOINT_OF_SEGMENT.values():
-        if joint not in curl["limits_deg"]:
-            raise ValueError(f"limits_deg missing joint {joint!r}")
-    return SkinnedHumanSettings(
-        skin_rgb=(rgb[0], rgb[1], rgb[2]),
-        breadth_band_m=float(anthro["breadth_band_m"]),
-        subdivision_levels=_subdivision_levels(raw["mesh"]["subdivision_levels"]),
-        crease_bones=tuple(str(b) for b in raw["mesh"]["creases"]["bones"]),
-        crease_min_fold_deg=_positive(
-            raw["mesh"]["creases"]["min_fold_deg"], "mesh.creases.min_fold_deg"
-        ),
-        scale_limits=_pair(anthro["scale_limits"], "scale_limits"),
-        palm_contact_azimuth_offset_deg=float(place["palm_contact_azimuth_offset_deg"]),
-        palm_centre_wrap_deg=float(place["palm_centre_wrap_deg"]),
-        index_station_at_spec_zero=_unit_interval(
-            place["index_station_at_spec_zero"], "index_station_at_spec_zero"
-        ),
-        seat_max_tilt_deg=float(place["seat_max_tilt_deg"]),
-        seat_max_travel_m=float(place["seat_max_travel_m"]),
-        seat_iterations=int(place["seat_iterations"]),
-        finger_adduction_fraction=_unit_interval(
-            pre["finger_adduction_fraction"], "finger_adduction_fraction"
-        ),
-        curl=CurlSettings(
-            step_rad=math.radians(float(curl["step_deg"])),
-            bisection_steps=int(curl["bisection_steps"]),
-            contact_tolerance_m=float(curl["contact_tolerance_m"]),
-            penetration_allowance_m=float(curl["penetration_allowance_m"]),
-        ),
-        limits_deg=tuple(
-            (k, _pair(v, f"limits_deg.{k}")) for k, v in curl["limits_deg"].items()
-        ),
-        pip_per_mcp=float(curl["synergy"]["pip_per_mcp"]),
-        dip_per_pip=float(curl["synergy"]["dip_per_pip"]),
-        wrap_scan_samples=int(curl["wrap_scan_samples"]),
-        arch_passes=passes,
-        arch_gain=tuple((k, float(v)) for k, v in curl["arch_gain"].items()),
-        arch_limit_deg=tuple((k, float(v)) for k, v in curl["arch_limit_deg"].items()),
-        thumb_max_swing_deg=float(thumb["max_swing_deg"]),
-        thumb_max_twist_deg=float(thumb["max_twist_deg"]),
-        thumb_press_range_deg=_pair(thumb["press_range_deg"], "press_range_deg"),
-        thumb_mcp_limits_deg=_pair(thumb["mcp_limits_deg"], "mcp_limits_deg"),
-        thumb_ip_limits_deg=_pair(thumb["ip_limits_deg"], "ip_limits_deg"),
-        thumb_straight_ip_limit_deg=float(thumb["straight_ip_limit_deg"]),
-        palm_cup_max_deg=_non_negative(thumb["palm_cup_max_deg"], "palm_cup_max_deg"),
-        palm_cup_step_deg=_positive(thumb["palm_cup_step_deg"], "palm_cup_step_deg"),
-        palm_cup_pivot_fraction=_non_negative(
-            thumb["palm_cup_pivot_fraction"], "palm_cup_pivot_fraction"
-        ),
-        pair_capsule_radius_scale=_unit_interval(
-            pair["capsule_radius_scale"], "capsule_radius_scale"
-        ),
-        pair_thumb_radius_scale=_unit_interval(
-            pair["thumb_radius_scale"], "thumb_radius_scale"
-        ),
-        pair_grip_fingers=_fingers(pair["grip_fingers"]),
-        pair_max_spacing_adjust_m=_non_negative(
-            pair["max_spacing_adjust_m"], "max_spacing_adjust_m"
-        ),
-        pair_capsule_margin_m=_non_negative(
-            pair["capsule_margin_m"], "capsule_margin_m"
-        ),
-        frame_excluded_bones=tuple(
-            str(bone) for bone in raw["framing"]["excluded_bones"]
-        ),
-        **_corrective_fields(raw["correctives"]),
-        squeeze_finger_depth_m=_non_negative(
-            raw["squeeze"]["finger_depth_m"], "squeeze.finger_depth_m"
-        ),
-        squeeze_palm_depth_m=_non_negative(
-            raw["squeeze"]["palm_depth_m"], "squeeze.palm_depth_m"
-        ),
-        wrist_deg=tuple(
-            (
-                side,
-                (
-                    float(raw["wrist"][side]["extension_deg"]),
-                    float(raw["wrist"][side]["ulnar_deviation_deg"]),
-                ),
-            )
-            for side in ("lead", "trail")
-        ),
-    )
-
-
-def load_settings_mapping() -> dict[str, Any]:
-    """The raw settings JSON (for callers that override a few values)."""
-    if not SETTINGS_PATH.is_file():
-        raise ValueError(f"missing settings: {SETTINGS_PATH}")
-    return json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
-
-
-@lru_cache(maxsize=1)
-def default_settings() -> SkinnedHumanSettings:
-    return settings_from_mapping(load_settings_mapping())
 
 
 # --------------------------------------------------------------------------
@@ -464,6 +213,9 @@ class _GripHand:
         self.fixed: dict[str, Array] = self._adduction()
         # Rigid moves applied to a bone before its own rotation (palm cup).
         self.offsets: dict[str, Array] = {}
+        # Sideways swing of a finger at its knuckle, radians (side closing).
+        self.side: dict[str, float] = {}
+        self._side_turn: dict[str, Array] = {}
         self._moved: dict[str, NDArray[np.int64]] = {}
 
     def _adduction(self) -> dict[str, Array]:
@@ -483,6 +235,17 @@ class _GripHand:
         d = self.asset.bone_tails[i] - self.asset.bone_heads[i]
         return d / np.linalg.norm(d)
 
+    def swing_sideways(self, bone: str | None, swing: float = 0.0) -> None:
+        """Swing finger ``bone`` sideways at its knuckle by ``swing`` radians,
+        about the axis across its flexion axis. ``None`` clears every swing."""
+        if bone is None:
+            self.side.clear()
+            self._side_turn.clear()
+            return
+        axis = np.cross(self.asset.flex_axes[self._index[bone]], self.direction(bone))
+        self.side[bone] = swing
+        self._side_turn[bone] = rotation_about_axis(axis / np.linalg.norm(axis), swing)
+
     def _hinge(self, i: int, angle: float) -> Array:
         """Rodrigues rotation about bone ``i``'s flexion axis (precomputed)."""
         k, kk = self._hinge_k[i], self._hinge_kk[i]
@@ -492,7 +255,7 @@ class _GripHand:
         asset = self.asset
         out = dict(self.fixed)
         for name, angle in angles.items():
-            if name == THUMB_PRESS:
+            if name == THUMB_PRESS or name.endswith(_SIDE_SUFFIX):
                 continue
             i = self._index[name]
             delta = angle - float(asset.rest_flexion_rad[i])
@@ -500,6 +263,8 @@ class _GripHand:
                 continue
             hinge = self._hinge(i, delta)
             out[name] = out[name] @ hinge if name in out else hinge
+        for name, turn in self._side_turn.items():
+            out[name] = out[name] @ turn if name in out else turn
         if THUMB_PRESS in angles:
             press = rotation_about_axis(self.press_axis, angles[THUMB_PRESS])
             out["thumb_meta"] = press @ out.get("thumb_meta", _EYE3)
@@ -867,6 +632,57 @@ def _cup_palm(
     hand.offsets["thumb_meta"] = cupped(best)
 
 
+def _finger_ids(hand: _GripHand, finger: str) -> NDArray[np.int64]:
+    return np.concatenate([hand.segment_ids(f"{finger}_{s}") for s in _SEGMENTS])
+
+
+def _side_gap(
+    hand: _GripHand, angles: Mapping[str, float], finger: str, neighbour: str
+) -> float:
+    """Least skin distance from ``finger`` to ``neighbour`` in this pose."""
+    mine, theirs = _finger_ids(hand, finger), _finger_ids(hand, neighbour)
+    pts = hand.points(angles, np.concatenate([mine, theirs]))
+    return float(np.min(cKDTree(pts[len(mine) :]).query(pts[: len(mine)])[0]))
+
+
+#: Joint-angle name of a finger's sideways swing at its knuckle: ``ring_side``.
+_SIDE_SUFFIX = "_side"
+
+
+def _close_fingers(hand: _GripHand, angles: Mapping[str, float]) -> None:
+    """Swing each finger sideways at its knuckle until it meets its neighbour.
+
+    The middle finger stays; the ring finger closes on it, the little finger
+    on the ring finger and the index finger on the middle finger. A finger
+    stops ``side_close.gap_m`` from its neighbour (the index finger
+    ``index_gap_m``) or at ``max_deg``; zero ``max_deg`` switches this off.
+    """
+    settings = hand.settings
+    limit = math.radians(settings.side_close_max_deg)
+    hand.swing_sideways(None)
+    for finger, neighbour in _SIDE_ORDER if limit else ():
+        bone = f"{finger}_prox"
+        index = finger == "index"
+        want = settings.side_close_index_gap_m if index else settings.side_close_gap_m
+
+        def gap(
+            swing: float, bone: str = bone, pair: tuple = (finger, neighbour)
+        ) -> float:
+            hand.swing_sideways(bone, swing)
+            return _side_gap(hand, angles, *pair)
+
+        probe = settings.curl.step_rad
+        sign = 1.0 if gap(probe) < gap(-probe) else -1.0
+        low, high = 0.0, sign * limit
+        if gap(low) <= want or gap(high) > want:
+            hand.swing_sideways(bone, low if gap(low) <= want else high)
+            continue
+        for _ in range(settings.curl.bisection_steps):
+            mid = 0.5 * (low + high)
+            low, high = (mid, high) if gap(mid) > want else (low, mid)
+        hand.swing_sideways(bone, low)
+
+
 def _thumb_chain(
     settings: SkinnedHumanSettings, targets: _RightHandTargets
 ) -> CurlChain:
@@ -988,6 +804,10 @@ def _solve_right_hand(
         arch = {k: float(given.get(k, 0.0)) for k in arch}
         _seat_flat_hand(hand, targets, grip, arch, other)
         posed = {**_straight_angles(), **{k: float(v) for k, v in given.items()}}
+        hand.swing_sideways(None)
+        for finger in FINGERS:  # sideways swings are applied as given, too
+            if f"{finger}{_SIDE_SUFFIX}" in posed:
+                hand.swing_sideways(f"{finger}_prox", posed[f"{finger}{_SIDE_SUFFIX}"])
         _cup_palm(hand, targets, posed, soft, thumb_radius_m)
         _aim_thumb(hand, targets, posed, thumb_radius_m)
         _bend_wrist(hand, side)
@@ -1001,11 +821,14 @@ def _solve_right_hand(
         arch = _arch_from_knuckles(angles, settings)
     _seat_flat_hand(hand, targets, grip, arch, other)
     start = {**_straight_angles(), **arch}
+    _close_fingers(hand, angles)  # on the greedy curl, before the final wrap
     angles = _wrap(hand, chains, soft, start)
     _cup_palm(hand, targets, angles, soft, thumb_radius_m)
     _aim_thumb(hand, targets, angles, thumb_radius_m)
     angles = _wrap(hand, (_thumb_chain(settings, targets),), soft, angles)
     _bend_wrist(hand, side)
+    for bone, swing in hand.side.items():  # so given angles rebuild this pose
+        angles[f"{bone.removesuffix('_prox')}{_SIDE_SUFFIX}"] = swing
     return _SolvedHand(hand, angles, targets, obstacle, skin)
 
 

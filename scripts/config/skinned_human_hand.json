@@ -77,6 +77,11 @@
     "finger_depth_m": 0.0025,
     "palm_depth_m": 0.0015
   },
+  "side_close": {
+    "max_deg": 20.0,
+    "gap_m": 0.0015,
+    "index_gap_m": 0.003
+  },
   "thumb": {
     "max_swing_deg": 75.0,
     "max_twist_deg": 60.0,

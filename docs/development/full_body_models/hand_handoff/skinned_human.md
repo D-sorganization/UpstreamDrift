@@ -23,6 +23,9 @@ which is also the text for the PR description.
 | `tests/unit/model_appearance/hand_backends/` | 54 tests |
 | `docs/development/full_body_models/evidence/hand_skinned_human/` | Evidence script, 36 frames, manifest |
 
+Settings are loaded and validated in `hand_backends/skinned_settings.py`
+(split out of `skinned_human.py` to keep it under the file-size limit).
+
 ## Commands (Run From the Repository Root)
 
 ```bash
@@ -49,6 +52,10 @@ library.
    `flat_hand_rotation`) and seat it rigidly on the grip.
 3. Curl the fingers to contact, set the metacarpal arch from knuckle flexion,
    re-seat, then run the wrap search.
+   Before the final wrap the ring, little and index fingers swing sideways
+   at the knuckle until they meet their neighbour (`side_close`, zero
+   `max_deg` switches it off; the swings are reported as `<finger>_side`
+   joint angles).
 4. Cup the palm: carry the thumb base toward the line where the thumb is to lie (`thumb.palm_cup_*`, zero switches it off), then aim the thumb along the shaft and press it onto the grip.
 5. Bend the wrist, mirror for a left hand, apply the shaft roll.
 
