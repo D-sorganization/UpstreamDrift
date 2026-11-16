@@ -169,7 +169,7 @@ def main() -> int:
     args = parser.parse_args()
     receipt = render_all(args.out, legacy_camera=args.legacy_camera)
     if args.write_receipt:
-        name = "receipt_before.json" if args.legacy_camera else "receipt_after.json"
+        name = "render_stats_before.json" if args.legacy_camera else "render_stats_after.json"
         (args.out / name).write_text(
             json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
         )

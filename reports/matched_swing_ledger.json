@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-16T21:04:27Z",
+  "generated_at": "2026-11-16T01:18:41Z",
   "rows": [
     {
       "acceptance": null,
@@ -550,56 +550,6 @@
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/flex_shaft/r11/r11_chain_receipt.json",
       "sha256": "b9e77f22e1c03dc162f4adc7cad87a41c43b60059a6110d6506a14d5ba14f173"
-    },
-    {
-      "acceptance": null,
-      "artefacts": {
-        "gif": null,
-        "mot": null,
-        "npz": null
-      },
-      "candidate_sha": null,
-      "capture": null,
-      "engine": "unknown",
-      "horizon_s": null,
-      "lane": "unclassified",
-      "metrics": {
-        "club_marker_rmse_m": null,
-        "early_marker_rmse_m": null,
-        "fd_address_to_impact_rmse_m": null,
-        "fd_after_impact_rmse_m": null,
-        "pelvis_yaw_rmse_rad": null,
-        "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": null
-      },
-      "reason": "Unrecognized directory path structure",
-      "receipt_path": "docs/development/full_body_models/evidence/grip_hand_preview/receipt_after.json",
-      "sha256": "03bae60eefc6ac75f50763dd73c492027f7235ffda21319b412e366ffcc45c13"
-    },
-    {
-      "acceptance": null,
-      "artefacts": {
-        "gif": null,
-        "mot": null,
-        "npz": null
-      },
-      "candidate_sha": null,
-      "capture": null,
-      "engine": "unknown",
-      "horizon_s": null,
-      "lane": "unclassified",
-      "metrics": {
-        "club_marker_rmse_m": null,
-        "early_marker_rmse_m": null,
-        "fd_address_to_impact_rmse_m": null,
-        "fd_after_impact_rmse_m": null,
-        "pelvis_yaw_rmse_rad": null,
-        "terminal_marker_rmse_m": null,
-        "whole_marker_rmse_m": null
-      },
-      "reason": "Unrecognized directory path structure",
-      "receipt_path": "docs/development/full_body_models/evidence/grip_hand_preview/receipt_before.json",
-      "sha256": "bed6cba5cf8c1836cea25f8b11292f981ed50d5f31fd1d23fdbe2a72dfaa6e1b"
     },
     {
       "acceptance": null,
@@ -6659,5 +6609,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 165
+  "total_receipts": 163
 }
