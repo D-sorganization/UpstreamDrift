@@ -54,8 +54,8 @@ class TestSignalProcessing:
         # Smooth: Gaussian velocity profile
         smooth = np.exp(-50 * (t - 0.5) ** 2)
 
-        # Jerky: Add high frequency noise
-        jerky = smooth + 0.1 * np.sin(2 * np.pi * 40 * t)
+        # Jerky: add an in-band (below the default 20 Hz cut-off) oscillation
+        jerky = smooth + 0.1 * np.sin(2 * np.pi * 15 * t)
 
         sal_smooth = compute_spectral_arc_length(smooth, fs)
         sal_jerky = compute_spectral_arc_length(jerky, fs)

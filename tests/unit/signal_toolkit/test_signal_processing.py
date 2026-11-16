@@ -168,6 +168,40 @@ class TestComputeSpectralArcLength:
         # Complex signal should be more negative (longer arc length)
         assert sal_complex < sal_simple
 
+    @staticmethod
+    def _min_jerk_speed(fs: float = 200.0) -> np.ndarray:
+        """Minimum-jerk speed profile 30 tau^2 (1 - tau)^2 over 1 s."""
+        tau = np.arange(0.0, 1.0, 1.0 / fs)
+        return 30.0 * tau**2 * (1.0 - tau) ** 2
+
+    def test_independent_of_fc_above_signal_bandwidth(self) -> None:
+        """Adaptive cut-off (Balasubramanian 2015): raising fc past the band adds nothing."""
+        v = self._min_jerk_speed()
+        values = [
+            compute_spectral_arc_length(v, 200.0, fc=fc) for fc in (10, 20, 40, 80)
+        ]
+        assert max(values) - min(values) < 1e-9
+
+    def test_min_jerk_matches_published_magnitude(self) -> None:
+        """Min-jerk SAL is about -1.4 (Balasubramanian et al. 2015, Fig. 3)."""
+        sal = compute_spectral_arc_length(self._min_jerk_speed(), 200.0)
+        assert -1.5 < sal < -1.3
+
+    def test_amplitude_scale_invariant(self) -> None:
+        v = self._min_jerk_speed()
+        assert compute_spectral_arc_length(7.5 * v, 200.0) == pytest.approx(
+            compute_spectral_arc_length(v, 200.0), abs=1e-9
+        )
+
+    def test_sub_threshold_noise_floor_does_not_change_result(self) -> None:
+        """Broadband content below amp_th must not add arc length."""
+        v = self._min_jerk_speed()
+        rng = np.random.default_rng(0)
+        noisy = v + 1e-4 * rng.standard_normal(v.size)
+        assert compute_spectral_arc_length(noisy, 200.0) == pytest.approx(
+            compute_spectral_arc_length(v, 200.0), abs=0.05
+        )
+
     def test_empty_data_returns_zero(self) -> None:
         result = compute_spectral_arc_length(np.array([]), fs=100.0)
         assert result == 0.0
