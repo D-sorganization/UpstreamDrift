@@ -7,6 +7,7 @@ Expected values use the symmetric percent difference
 from __future__ import annotations
 
 import math
+from fractions import Fraction
 
 import numpy as np
 import pytest
@@ -71,6 +72,36 @@ def test_negative_values_sign_follows_difference(analyzer) -> None:  # noqa: ANN
     metric = analyzer.compare_scalars("m", -4.0, -6.0)
     assert metric.difference == 2.0
     assert metric.percent_diff == pytest.approx(40.0)
+
+
+@pytest.mark.parametrize(
+    "a,b,expected",
+    [
+        (1.6e308, 1.5e308, 100.0 / 15.5),
+        (1.6e308, -1.5e308, 200.0),
+        (-1.6e308, 1.5e308, -200.0),
+        (math.ulp(0.0), 0.0, 200.0),
+        (0.0, math.ulp(0.0), -200.0),
+        (math.ulp(0.0), -math.ulp(0.0), 200.0),
+        (math.ulp(0.0), math.ulp(0.0), 0.0),
+        (4.824193288964698e-36, -5.81075688469156e-36, 200.0),
+    ],
+)
+def test_finite_extremes_preserve_symmetric_percent(
+    analyzer, a: float, b: float, expected: float
+) -> None:  # noqa: ANN001
+    actual = analyzer.compare_scalars("m", a, b).percent_diff
+    assert actual == pytest.approx(expected)
+    assert -200.0 <= actual <= 200.0
+
+
+def test_close_large_values_preserve_subtraction_accuracy(analyzer) -> None:  # noqa: ANN001
+    a = 1.6e308
+    b = math.nextafter(a, 0.0)
+    exact_a, exact_b = Fraction(a), Fraction(b)
+    expected = float(200 * (exact_a - exact_b) / (abs(exact_a) + abs(exact_b)))
+    actual = analyzer.compare_scalars("m", a, b).percent_diff
+    assert actual == pytest.approx(expected, rel=1e-12, abs=0.0)
 
 
 @pytest.mark.parametrize(

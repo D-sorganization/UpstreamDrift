@@ -159,13 +159,24 @@ class ComparativeSwingAnalyzer:
         diff = val_a - val_b
         # Symmetric percent difference. The denominator is the mean magnitude so
         # opposite-sign values do not cancel to zero and report a perfect match.
-        scale = (abs(val_a) + abs(val_b)) / 2.0
+        # Normalize before summing/subtracting: finite extremes can overflow
+        # those operations, and halving a subnormal can round to zero.
+        scale = max(abs(val_a), abs(val_b))
         if math.isnan(diff) or math.isnan(scale):
             percent = math.nan  # missing data must not read as agreement
         elif scale == 0.0:
             percent = 0.0  # both exactly zero: identical
         else:
-            percent = diff / scale * 100
+            scaled_a, scaled_b = val_a / scale, val_b / scale
+            mean_magnitude = (abs(scaled_a) + abs(scaled_b)) / 2.0
+            # Preserve close, like-signed subtraction accuracy. Opposite signs
+            # use normalized operands so numerator/denominator round together.
+            scaled_diff = (
+                diff / scale
+                if math.isfinite(diff) and (val_a < 0) == (val_b < 0)
+                else scaled_a - scaled_b
+            )
+            percent = scaled_diff / mean_magnitude * 100
 
         return ComparisonMetric(
             name=metric_name,
