@@ -27,7 +27,9 @@ def test_equal_half_width_uses_one_span_for_all_axes():
             [-0.05, 0.01, 0.04],
         ]
     )
-    _, half = equal_half_width_from_points(pts, margin_fraction=1.0, min_half_width_m=0.0)
+    _, half = equal_half_width_from_points(
+        pts, margin_fraction=1.0, min_half_width_m=0.0
+    )
     assert half == pytest.approx(0.5, rel=1e-6)
 
 

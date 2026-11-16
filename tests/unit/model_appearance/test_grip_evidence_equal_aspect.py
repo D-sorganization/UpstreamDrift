@@ -21,6 +21,6 @@ _SCRIPTS = (
 def test_grip_kinetics_renderers_use_equal_axis_helper(path: Path) -> None:
     text = path.read_text(encoding="utf-8")
     assert "apply_equal_axis_limits" in text, path.name
-    assert "set_box_aspect((1, 1, 1))" not in text.split("apply_equal_axis_limits")[0], (
-        path.name
-    )
+    assert (
+        "set_box_aspect((1, 1, 1))" not in text.split("apply_equal_axis_limits")[0]
+    ), path.name

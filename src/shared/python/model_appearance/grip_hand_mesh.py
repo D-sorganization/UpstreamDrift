@@ -348,8 +348,7 @@ def _finger(
     lengths: tuple[float, float, float],
     radius: float,
     tangent_radius: float,
-    mcp_azimuth: float,
-    z: float,
+    root: tuple[float, float],
     curl: int,
     sides: int,
     *,
@@ -359,7 +358,9 @@ def _finger(
 
     Postcondition: each phalanx touches the circle at one tangent point, so
     its nearest approach to the grip axis is ``tangent_radius - radius``.
+    ``root`` is the MCP azimuth (rad) and the finger's axial height (m).
     """
+    mcp_azimuth, z = root
     d = tangent_radius
     before = lengths[0] / 2.0  # proximal tangent point at its midpoint
     theta = mcp_azimuth + curl * math.atan2(before, d)
@@ -513,6 +514,7 @@ def _finger_components(
                 radius,
                 curl,
                 params.sides,
+                params.proximal_radial_offset_m,
             )
         else:
             d = radius + clearance + r
@@ -526,8 +528,7 @@ def _finger_components(
             lengths,
             r,
             d,
-            mcp_finger,
-            z,
+            (mcp_finger, z),
             curl,
             params.sides,
             proximal_only_offset_m=prox_offset,
@@ -578,8 +579,13 @@ def _solve_topology_finger(
     grip_radius: float,
     curl: int,
     sides: int,
+    proximal_offset_m: float = 0.0,
 ) -> tuple[float, float, float, bool]:
-    """Solve (d, mcp_azimuth, z, on_grip) matching target_site.centre_m to <= 1 mm."""
+    """Solve (d, mcp_azimuth, z, on_grip) matching target_site.centre_m to <= 1 mm.
+
+    ``proximal_offset_m`` is applied to on-grip fingers exactly as the mesh
+    builder applies it, so the solved distal tip lands on the site.
+    """
     centre = target_site.centre_m
     target_z = centre[0] - distance_below_butt_m
     target_rho = float(np.hypot(centre[1], centre[2]))
@@ -587,6 +593,7 @@ def _solve_topology_finger(
 
     gap = site_grip_surface_gap_m(target_site, grip_radius)
     on_grip = abs(gap) <= 0.001
+    offset = proximal_offset_m if on_grip else 0.0
 
     d_min = (
         grip_radius + r + _SOLVER_ON_GRIP_RADIAL_MARGIN_M
@@ -597,7 +604,9 @@ def _solve_topology_finger(
     converged = False
     c_final: NDArray[np.float64] | None = None
     for _ in range(_SOLVER_MAX_ITERATIONS):
-        parts_tmp = _finger("tmp", lengths, r, d, 0.0, 0.0, curl, sides)
+        parts_tmp = _finger(
+            "tmp", lengths, r, d, (0.0, 0.0), curl, sides, proximal_only_offset_m=offset
+        )
         c = parts_tmp[_DISTAL_INDEX][1].vertices.mean(axis=0)
         err = float(np.hypot(c[0], c[1])) - target_rho
         if abs(err) < _SOLVER_TOLERANCE_M or (on_grip and d == d_min and err > 0):
@@ -608,7 +617,9 @@ def _solve_topology_finger(
 
     if not converged:
         # Check if the final updated d achieved convergence
-        parts_tmp = _finger("tmp", lengths, r, d, 0.0, 0.0, curl, sides)
+        parts_tmp = _finger(
+            "tmp", lengths, r, d, (0.0, 0.0), curl, sides, proximal_only_offset_m=offset
+        )
         c = parts_tmp[_DISTAL_INDEX][1].vertices.mean(axis=0)
         err = float(np.hypot(c[0], c[1])) - target_rho
         if abs(err) < _SOLVER_TOLERANCE_M or (on_grip and d == d_min and err > 0):
