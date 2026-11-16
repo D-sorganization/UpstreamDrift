@@ -10,6 +10,7 @@ Usage:
 
 from __future__ import annotations
 
+from importlib import import_module
 from typing import Any
 
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -52,7 +53,7 @@ def lazy_import(module_name: str) -> Any:
         module_name: Name of module to import
 
     Returns:
-        Imported module
+        The requested module, including the leaf module for dotted names.
 
     Raises:
         ImportError: If module cannot be imported
@@ -61,7 +62,7 @@ def lazy_import(module_name: str) -> Any:
         np = lazy_import("numpy")
     """
     try:
-        module = __import__(module_name)
+        module = import_module(module_name)
         logger.debug(f"Lazily imported: {module_name}")
         return module
     except ImportError as e:
@@ -127,14 +128,15 @@ def get_module_version(module_name: str) -> str | None:
         module_name: Name of module
 
     Returns:
-        Version string or None if not available
+        Version of the requested module, or None if not available. A dotted
+        module does not inherit its parent package's version.
 
     Example:
         version = get_module_version("numpy")
         logger.info(f"NumPy version: {version}")
     """
     try:
-        module = __import__(module_name)
+        module = import_module(module_name)
         version = getattr(module, "__version__", None)
         if version:
             logger.debug(f"{module_name} version: {version}")
