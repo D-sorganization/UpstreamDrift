@@ -59,7 +59,26 @@ library.
    at the knuckle until their middle and end segments meet the neighbour (`side_close`, zero
    `max_deg` switches it off; the swings are reported as `<finger>_side`
    joint angles).
-4. Cup the palm: carry the thumb base toward the line where the thumb is to lie (`thumb.palm_cup_*`, zero switches it off), then lay the thumb (`_lay_thumb`): aim it along the shaft and press it onto the grip, turned toward its own forefinger's knuckle by the least angle that brings the thumb's end joint within `thumb.knuckle_distance_m` of it (`thumb.toward_index_max_deg` per hand, 35 lead and 75 trail, zero switches it off; `thumb.toward_index_target = "fingertip"` sends the thumb's skin to the fingertip instead; reported as the `thumb_side` angle). The lead limit is set by the pair (the trail ring finger must still wrap), the trail limit by the thumb web's skin (it folds past about 80 degrees). In a pair the trail hand's spacing settles against the lead hand without its thumb (`_LeadObstacle.hand(thumb=False)`).
+4. Cup the palm: carry the thumb base toward the line where the thumb is to
+   lie (`thumb.palm_cup_*`, zero switches it off; the trail hand of a pair
+   cups only `pair.palm_cup_max_deg`, because its palm lies on the lead
+   thumb). Then lay the thumb (`_lay_thumb`): aim it along the shaft, press it
+   onto the grip, and turn it to its target (`thumb.toward_index_target`).
+   `"azimuth"` (the default, owner request 2026-11-16) turns it until the
+   middle of its end bone is within `thumb.azimuth_tolerance_deg` of the
+   spec's `thumb_azimuth_deg`, because pressing carries the thumb sideways;
+   the search is `skinned_targets.scanned_turn` and keeps the closest pose
+   it tried, since the pose jumps where the thumb lifts. `"knuckle"` brings
+   the thumb's end joint within `thumb.knuckle_distance_m` of its own
+   forefinger's knuckle (a tight V; use `toward_index_max_deg` 35 lead and 75
+   trail there: the pair limits the lead, the thumb web's skin the trail).
+   `"fingertip"` sends the thumb's skin to the forefinger tip.
+   `thumb.toward_index_max_deg` caps the turn per hand, zero switches it off;
+   the turn is reported as the `thumb_side` angle. The evidence and the tests
+   use 45 degrees for both thumbs (`owner_thumb_azimuth_deg` in
+   `hand_visual_quality.json`): lead thumb on the away-from-target side,
+   trail thumb on the target side. In a pair the trail hand's spacing settles
+   against the lead hand without its thumb (`_LeadObstacle.hand(thumb=False)`).
 5. Bend the wrist, mirror for a left hand, apply the shaft roll.
 
 For a pair, the lead hand is solved first; its skin (`posing.skin_distance`)
@@ -69,5 +88,17 @@ gripping fingers are `pair.finger_gap_m` off the lead hand, and solved again.
 In an overlap grip its little finger swings into the groove between the lead
 forefinger and middle finger. Fingers named in `pair.grip_fingers` aim for the
 grip alone; the lead hand is only in their way. Last, the trail skin gives way
-where a lead fingertip stands through it (`correctives.yield_to_points`).
+where the lead hand stands through it, and stands `pair.yield_clearance_m`
+off it where the two all but touch (`correctives.yield_to_points`).
 Targets of a hand live in `skinned_targets.py`.
+
+## Open After the Grip Request (2026-11-16)
+
+- Thumb and forefinger are not pinched with the thumbs at 45 degrees: the
+  joints are 40 mm (lead) and 47 mm (trail) apart, only the web skin is
+  closed. The forefinger knuckle is 51 and 91 degrees round the grip from
+  the thumb's line, so no thumb setting closes it.
+- The forefinger knuckle is not straightened. `preshape.index_knuckle_flexion_deg`
+  below 15 holds on single hands and unseats the trail ring finger in the pair.
+- In the pair the trail thumb's first segment is 5.5 mm off the grip, and the
+  trail hand is erratic above 73 degrees of `pair.palm_cup_max_deg`.

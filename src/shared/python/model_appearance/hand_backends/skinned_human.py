@@ -71,6 +71,7 @@ from src.shared.python.model_appearance.hand_backends.posing import (
 )
 from src.shared.python.model_appearance.hand_backends.skinned_targets import (
     RightHandTargets as _RightHandTargets,
+    scanned_turn as _scanned_turn,
     targets_for as _targets,
     turned as _turned,
 )
@@ -734,20 +735,20 @@ def _lay_thumb(
     grip_radius_m: float,
     max_turn_deg: float,
 ) -> dict[str, float]:
-    """Aim the thumb and press it onto the grip, pinched to the forefinger.
+    """Aim the thumb and press it onto the grip, then turn it to its target.
 
-    The thumb lies at its spec azimuth, turned toward the hand's own
-    forefinger by the least angle, up to ``max_turn_deg`` (the hand's
-    ``thumb.toward_index_max_deg``), that brings it to its target, and never
-    so far that it leaves the grip to ride on the finger or runs into the
-    other hand. ``thumb.toward_index_target`` names the target: ``"knuckle"``
-    brings the thumb's end joint within ``thumb.knuckle_distance_m`` of the
-    forefinger's knuckle joint, a tight V; ``"fingertip"`` brings the thumb's
-    skin within ``thumb.index_gap_m`` of the fingertip, on the other side.
-    The angle is found in ``thumb.toward_index_steps`` halvings. A turned
-    thumb may bend as far as ``thumb.toward_index_straightness`` allows, and
-    the forefinger's skin is in its way. The turn is returned as the
-    ``thumb_side`` angle; a maximum of zero keeps the thumb on its azimuth.
+    Pressing a thumb down carries it sideways. ``thumb.toward_index_target``
+    names what the turn, of up to ``max_turn_deg`` (the hand's
+    ``thumb.toward_index_max_deg``), brings it to: ``"azimuth"`` puts the
+    middle of its end bone back on the spec azimuth; ``"knuckle"`` brings its
+    end joint within ``thumb.knuckle_distance_m`` of the forefinger's knuckle,
+    a tight V; ``"fingertip"`` brings its skin within ``thumb.index_gap_m`` of
+    the fingertip. The last two take the least such turn toward the hand's own
+    forefinger and never leave the grip to ride on the finger or run into the
+    other hand. The angle is found in ``thumb.toward_index_steps`` steps; a
+    turned thumb may bend as far as ``thumb.toward_index_straightness`` allows
+    and the forefinger's skin is in its way. The turn is returned as the
+    ``thumb_side`` angle; a maximum of zero leaves the thumb as first aimed.
     """
     settings, key = hand.settings, f"thumb{_SIDE_SUFFIX}"
     pinch = settings.thumb_toward_index_target == "knuckle"
@@ -782,7 +783,7 @@ def _lay_thumb(
         the grip (to ride on the finger, or stuck in the other hand), and
         its pose. ``seat`` lays it with the wrap search, as an unturned
         thumb is laid, so its first segment sits as low."""
-        share = abs(turn / reach) if reach else 0.0
+        share = min(abs(turn / reach), 1.0) if reach else 0.0
         straight = (1.0 - share) * targets.thumb_straightness + share * bend
         aimed = _turned(targets, turn, straight)
         _aim_thumb(hand, aimed, angles, grip_radius_m)
@@ -798,6 +799,22 @@ def _lay_thumb(
         off = abs(depth) > gap_m or pose[THUMB_PRESS] <= lifted
         return there(pose, skin), off, {**pose, key: turn}
 
+    if settings.thumb_toward_index_target == "azimuth":
+
+        def missed(turn: float) -> tuple[float, dict[str, float]]:
+            pose = laid(turn, True)[2]  # pressing it down carries it sideways
+            ends = [
+                hand.joint_position("thumb_dist", pose, tail=t) for t in (False, True)
+            ]
+            pad = 0.5 * (ends[0] + ends[1])
+            miss = targets.thumb_azimuth_rad - math.atan2(pad[1], pad[0])
+            return math.remainder(miss, math.tau), pose
+
+        steps, close = (
+            settings.thumb_toward_index_steps,
+            settings.thumb_azimuth_close_rad,
+        )
+        return _scanned_turn(missed, math.radians(max_turn_deg), steps, close)
     near, _, pose = laid(0.0)
     if not reach or near:
         return pose
@@ -923,7 +940,7 @@ def _solve_right_hand(
     paired = pair is not None
     size = spec.hand_size
     solve, skin = _sized_assets(size.length_m, size.breadth_m, settings)
-    hand = _GripHand(solve, settings)
+    hand = _GripHand(solve, settings.beside_other_hand() if paired else settings)
     targets = _targets(spec, side, settings)
     deepest = max(settings.squeeze_finger_depth_m, settings.squeeze_palm_depth_m)
     if deepest >= grip_radius_m:
@@ -1127,6 +1144,7 @@ def _corrected_skin(
         solved.other_skin,
         max_depth_m=settings.pair_yield_max_depth_m,
         passes=settings.pair_yield_passes,
+        clearance_m=settings.pair_yield_clearance_m,
     )
 
 

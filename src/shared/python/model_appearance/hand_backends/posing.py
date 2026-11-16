@@ -220,7 +220,7 @@ def skin_distance(
     if not reach_m > 0.0:
         raise ValueError("skin reach_m must be positive")
     tree = cKDTree(v)
-    spacing = float(np.median(tree.query(v, k=2)[0][:, 1]))
+    spacing = float(np.median(np.asarray(tree.query(v, k=2)[0])[:, 1]))
 
     def distance(points: Array) -> Array:
         found = tree.query(points, distance_upper_bound=reach_m)

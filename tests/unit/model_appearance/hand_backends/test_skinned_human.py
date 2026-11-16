@@ -65,13 +65,19 @@ _SIDES = ("lead", "trail")
 _CACHE: dict[tuple, object] = {}
 
 
-def _spec(roll_deg: float = 0.0, handedness: str = "right") -> GripSpec:
+def _spec(
+    roll_deg: float = 0.0, handedness: str = "right", thumb_deg: float | None = None
+) -> GripSpec:
+    """The legacy grip with the owner's thumb azimuth on both hands."""
     base = GripSpec.legacy()
+    if thumb_deg is None:
+        thumb_deg = float(_Q["owner_thumb_azimuth_deg"])
+    turned = {"shaft_roll_deg": roll_deg, "thumb_azimuth_deg": thumb_deg}
     return dataclasses.replace(
         base,
         handedness=handedness,
-        lead=dataclasses.replace(base.lead, shaft_roll_deg=roll_deg),
-        trail=dataclasses.replace(base.trail, shaft_roll_deg=roll_deg),
+        lead=dataclasses.replace(base.lead, **turned),
+        trail=dataclasses.replace(base.trail, **turned),
     )
 
 
@@ -175,10 +181,19 @@ def test_the_skin_is_subdivided_and_the_setting_switches_it_off(side: str) -> No
     assert _mean_edge_m(fine) <= limit < _mean_edge_m(coarse)
     # The solved pose barely moves: subdivision is a change of skin, not grip.
     for joint, angle in coarse.joint_angles.as_mapping().items():
+        if joint == "thumb_side":
+            continue  # a searched turn, held to where the thumb ends up below
         other = fine.joint_angles.as_mapping()[joint]
         assert abs(other - angle) <= math.radians(
             float(_Q["max_subdivision_joint_change_deg"])
         ), joint
+    # The thumb is turned until it lies on its line, and that search answers
+    # 15 degrees apart on the two skins of the trail hand (#15181): both must
+    # still put the thumb on the line.
+    want = float(_Q["owner_thumb_azimuth_deg"]) * (1.0 if side == "lead" else -1.0)
+    for result in (fine, coarse):
+        miss = abs(_thumb_azimuth_deg(result) - want)
+        assert miss <= float(_Q["max_thumb_azimuth_error_deg"])
     tolerance = float(_Q["contact_tolerance_m"])
     for result in (fine, coarse):
         assert result.contact_gaps_m["index_dist"] <= tolerance
@@ -574,31 +589,44 @@ def test_fingers_wrap_and_the_palm_cups(side: str) -> None:
     assert angles.flexion_deg("meta_little") > angles.flexion_deg("meta_ring") > 0.0
 
 
-def _thumb_on_its_azimuth(side: str = "trail"):
-    """A hand with the turn toward the forefinger switched off."""
-    key = f"plain thumb {side}"
-    if key not in _CACHE:
-        raw = copy.deepcopy(dict(load_settings_mapping()))
-        raw["thumb"]["toward_index_max_deg"] = {"lead": 0.0, "trail": 0.0}
-        _CACHE[key] = build_hand_visual(
-            _spec(), side, grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
-        )
-    return _CACHE[key]
+def _thumb_azimuth_deg(result) -> float:
+    """Where the thumb's pad lies about the shaft, from the top of the grip,
+    positive away from the target (the club frame of a right-handed golfer)."""
+    asset, transforms = result.rest_asset, result.bone_transforms
+    i = asset.bone_index("thumb_dist")
+    pad = 0.5 * (asset.bone_heads[i] + asset.bone_tails[i])
+    pad = transforms[i][:3, :3] @ pad + transforms[i][:3, 3]
+    pad = result.frame_from_rest[:3, :3] @ pad + result.frame_from_rest[:3, 3]
+    return math.degrees(math.atan2(pad[1], pad[0]))
 
 
-def test_thumb_lies_along_the_shaft_at_the_spec_azimuth() -> None:
-    """Before it is turned toward the forefinger's knuckle."""
-    for side in _SIDES:
-        result = _thumb_on_its_azimuth(side)
-        asset = result.rest_asset
-        ids = asset.dominant_vertex_ids(("thumb_dist",))
-        pad = result.mesh.vertices[ids].mean(axis=0)
-        fingers = result.mesh.vertices[
-            asset.dominant_vertex_ids(tuple(f"{f}_dist" for f in FINGERS))
-        ].mean(axis=0)
-        azimuth = math.degrees(math.atan2(pad[1], pad[0]))
-        assert abs(azimuth) < 45.0, f"{side} thumb azimuth {azimuth:.0f}"
-        assert pad[2] > fingers[2], "thumb points toward the head"
+@pytest.mark.parametrize("side", _SIDES)
+def test_the_thumbs_lie_on_their_own_sides_of_the_shaft(side: str) -> None:
+    """Owner's grip: the lead thumb about 45 degrees to the away-from-target
+    side of the top of the grip, the trail thumb as far to the target side,
+    each along the shaft, on the grip and against its own hand (#15181)."""
+    want = float(_Q["owner_thumb_azimuth_deg"]) * (1.0 if side == "lead" else -1.0)
+    slack = float(_Q["max_thumb_azimuth_error_deg"])
+    for hand in (_hand(side), _pair()[side]):
+        assert abs(_thumb_azimuth_deg(hand) - want) <= slack
+        assert thumb_gaps_m(hand)["hand"] <= float(_Q["max_thumb_hand_gap_m"])
+    # Single hands only: in the pair the trail palm lies on the lead thumb and
+    # cups less, and its thumb's first segment is still 5.5 mm off (#15181).
+    limit = float(_Q["max_thumb_first_segment_median_gap_m"])
+    assert median_facing_grip_gap_m(_hand(side), ("thumb_prox",)) <= limit
+    asset, v = _hand(side).rest_asset, _hand(side).mesh.vertices
+    pad = v[asset.dominant_vertex_ids(("thumb_dist",))].mean(axis=0)
+    tips = tuple(f"{f}_dist" for f in FINGERS)
+    assert pad[2] > v[asset.dominant_vertex_ids(tips)].mean(axis=0)[2]
+
+
+def test_the_thumb_follows_the_spec_azimuth() -> None:
+    """Nothing about 45 degrees is built in: another spec, another thumb."""
+    spec = _spec(thumb_deg=20.0)
+    slack = float(_Q["max_thumb_azimuth_error_deg"])
+    for side, sign in (("lead", 1.0), ("trail", -1.0)):
+        hand = build_hand_visual(spec, side, grip_radius_m=_RADIUS)
+        assert abs(_thumb_azimuth_deg(hand) - sign * 20.0) <= slack, side
 
 
 def test_settings_drive_the_result() -> None:
@@ -805,48 +833,57 @@ def _thumb_settings(**thumb: object):
     return raw
 
 
-def _thumb_to_fingertip():
-    """The trail hand with the thumb sent to the forefinger tip instead."""
-    if "tip thumb" not in _CACHE:
-        raw = _thumb_settings(
-            toward_index_target="fingertip",
-            toward_index_max_deg={"lead": 0.0, "trail": 150.0},
+def _legacy_thumb(side: str, **thumb: object):
+    """One hand of the legacy grip with ``thumb`` settings changed."""
+    key = f"legacy thumb {side} {sorted(thumb.items())}"
+    if key not in _CACHE:
+        settings = settings_from_mapping(_thumb_settings(**thumb))
+        _CACHE[key] = build_hand_visual(
+            GripSpec.legacy(), side, grip_radius_m=_RADIUS, settings=settings
         )
-        _CACHE["tip thumb"] = build_hand_visual(
-            _spec(), "trail", grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
-        )
-    return _CACHE["tip thumb"]
+    return _CACHE[key]
+
+
+_KNUCKLE = {"lead": 35.0, "trail": 75.0}
+_UNTURNED = {"lead": 0.0, "trail": 0.0}
 
 
 @pytest.mark.parametrize("side", ["lead", "trail"])
-def test_the_thumb_and_forefinger_are_pinched_into_a_tight_v(side: str) -> None:
-    """Owner's grip: the thumb's end joint lies by the forefinger's knuckle,
-    the thumb pressed against the hand and still on the grip (#15181)."""
-    hand = _hand(side)
+def test_the_thumb_can_be_pinched_to_the_forefinger_knuckle_instead(side: str) -> None:
+    """The earlier request, kept as a setting: the thumb's end joint by the
+    forefinger's knuckle, a tight V, the thumb still on the grip (#15181)."""
+    hand = _legacy_thumb(
+        side, toward_index_target="knuckle", toward_index_max_deg=_KNUCKLE
+    )
+    plain = _legacy_thumb(
+        side, toward_index_target="knuckle", toward_index_max_deg=_UNTURNED
+    )
     assert thumb_pinch_m(hand) <= float(_Q["max_thumb_knuckle_distance_m"][side])
     assert thumb_gaps_m(hand)["hand"] <= float(_Q["max_thumb_hand_gap_m"])
-    limit = float(_Q["max_thumb_first_segment_median_gap_m"])
-    assert median_facing_grip_gap_m(hand, ("thumb_prox",)) <= limit
-    assert thumb_pinch_m(hand) < thumb_pinch_m(_thumb_on_its_azimuth(side)) - 0.006
-
-
-def test_the_thumbs_stay_pinched_in_the_pair() -> None:
-    for side in _SIDES:
-        limit = float(_Q["max_thumb_knuckle_distance_m"][side])
-        assert thumb_pinch_m(_pair()[side]) <= limit, side
+    assert thumb_pinch_m(hand) < thumb_pinch_m(plain) - 0.006
 
 
 def test_the_thumb_can_go_to_the_forefinger_tip_instead() -> None:
     """The earlier request, kept as a setting: thumb skin on the fingertip."""
-    gaps = thumb_gaps_m(_thumb_to_fingertip())
+    tip = _legacy_thumb(
+        "trail",
+        toward_index_target="fingertip",
+        toward_index_max_deg={"lead": 0.0, "trail": 150.0},
+    )
+    gaps = thumb_gaps_m(tip)
     assert gaps["index_tip"] <= float(_Q["max_trail_thumb_index_tip_gap_m"]), gaps
 
 
-def test_turning_the_thumb_to_the_forefinger_can_be_switched_off() -> None:
-    plain = _thumb_on_its_azimuth()
+def test_turning_the_thumb_can_be_switched_off() -> None:
+    raw = _thumb_settings(toward_index_max_deg=_UNTURNED)
+    plain = build_hand_visual(
+        _spec(), "trail", grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
+    )
     assert plain.joint_angles.as_mapping()["thumb_side"] == 0.0
-    for side in _SIDES:
-        assert abs(_hand(side).joint_angles.as_mapping()["thumb_side"]) > 0.1
+    assert abs(_hand("trail").joint_angles.as_mapping()["thumb_side"]) > 0.1
+    slack = float(_Q["max_thumb_azimuth_error_deg"])
+    want = -float(_Q["owner_thumb_azimuth_deg"])
+    assert abs(_thumb_azimuth_deg(plain) - want) > slack  # pressed off its line
     for key, value in (
         ("toward_index_max_deg", {"lead": 0.0, "trail": -1.0}),
         ("toward_index_steps", 0),

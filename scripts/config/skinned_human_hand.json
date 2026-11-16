@@ -100,16 +100,17 @@
       70.0
     ],
     "straight_ip_limit_deg": 12.0,
-    "palm_cup_max_deg": 70.0,
+    "palm_cup_max_deg": 90.0,
     "palm_cup_step_deg": 2.0,
     "palm_cup_pivot_fraction": 1.0,
-    "toward_index_target": "knuckle",
+    "toward_index_target": "azimuth",
     "toward_index_max_deg": {
-      "lead": 35.0,
-      "trail": 75.0
+      "lead": 60.0,
+      "trail": 60.0
     },
     "knuckle_distance_m": 0.016,
     "toward_index_steps": 8,
+    "azimuth_tolerance_deg": 4.0,
     "toward_index_straightness": 1.0,
     "index_gap_m": 0.001
   },
@@ -131,8 +132,10 @@
     "skin_reach_m": 0.015,
     "yield_max_depth_m": 0.003,
     "yield_passes": 3,
+    "yield_clearance_m": 0.0003,
+    "palm_cup_max_deg": 70.0,
     "overlap_max_swing_deg": 30.0,
-    "overlap_bias_m": 0.003,
+    "overlap_bias_m": 0.0025,
     "capsule_margin_m": 0.0005
   },
   "framing": {

@@ -49,6 +49,8 @@
     "trail": 0.023
   },
   "max_thumb_hand_gap_m": 0.003,
+  "owner_thumb_azimuth_deg": 45.0,
+  "max_thumb_azimuth_error_deg": 5.0,
   "min_index_knuckle_flexion_deg": 15.0,
   "max_index_segment_gap_m": 0.004
 }

@@ -6,6 +6,7 @@ Split from ``skinned_human`` to keep that module within the size budget.
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from dataclasses import dataclass, replace
 
 from src.shared.python.grip_spec.types import GripSpec
@@ -70,3 +71,33 @@ def turned(
 
 
 __all__ = ["RightHandTargets", "targets_for", "turned"]
+
+
+def scanned_turn(
+    missed: Callable[[float], tuple[float, dict[str, float]]],
+    most_rad: float,
+    steps: int,
+    close_rad: float,
+) -> dict[str, float]:
+    """The pose of the least turn that brings a signed miss near zero.
+
+    ``missed(turn)`` gives the miss left at a turn, and the pose there. Turns
+    are tried from zero toward the first miss in ``steps`` even steps up to
+    ``most_rad``, stopping at the first whose miss is within ``close_rad``.
+    A pose can jump past its line (a thumb that lifts), so that no turn is
+    close: the closest pose tried is then returned. The miss need not fall
+    steadily with the turn, which is why this is a scan and not a bisection.
+
+    Precondition: ``close_rad`` is not negative.
+    """
+    if close_rad < 0.0:
+        raise ValueError(f"close_rad must not be negative, got {close_rad}")
+    miss, pose = missed(0.0)
+    best, step = abs(miss), math.copysign(most_rad, miss) / max(steps, 1)
+    for k in range(1, steps + 1 if step else 0):
+        if best <= close_rad:
+            break
+        now, tried = missed(k * step)
+        if abs(now) < best:
+            best, pose = abs(now), tried
+    return pose

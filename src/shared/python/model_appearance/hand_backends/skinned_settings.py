@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import math
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -74,6 +74,7 @@ class SkinnedHumanSettings:
     thumb_toward_index_straightness: float
     thumb_index_gap_m: float
     thumb_knuckle_distance_m: float
+    thumb_azimuth_close_rad: float
     thumb_toward_index_target: str
     side_close_max_deg: float
     side_close_gap_m: float
@@ -95,6 +96,8 @@ class SkinnedHumanSettings:
     pair_skin_reach_m: float
     pair_yield_max_depth_m: float
     pair_yield_passes: int
+    pair_yield_clearance_m: float
+    pair_palm_cup_max_deg: float
     frame_excluded_bones: tuple[str, ...]
     fold_relax: FoldRelaxSettings
     palm_pad: PadConformSettings
@@ -105,6 +108,11 @@ class SkinnedHumanSettings:
     crease_relax_bones: tuple[str, ...]
     crease_relax_max_added_fold_deg: float
     wrist_deg: tuple[tuple[str, tuple[float, float]], ...]
+
+    def beside_other_hand(self) -> SkinnedHumanSettings:
+        """These settings for the trail hand of a pair. Its palm lies on the
+        lead thumb, so it cups only as far as ``pair.palm_cup_max_deg``."""
+        return replace(self, palm_cup_max_deg=self.pair_palm_cup_max_deg)
 
     def limit_rad(self, joint: str) -> tuple[float, float]:
         low, high = dict(self.limits_deg)[joint]
@@ -218,8 +226,8 @@ def _side_close_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
 
 
 #: What stands in for the lead hand when the trail hand is posed around it.
-#: What the thumb is turned toward (``thumb.toward_index_target``).
-THUMB_TARGETS = ("knuckle", "fingertip")
+#: What the thumb's turn brings it to (``thumb.toward_index_target``).
+THUMB_TARGETS = ("azimuth", "knuckle", "fingertip")
 PAIR_OBSTACLES = ("skin", "capsules")
 
 
@@ -259,6 +267,12 @@ def _pair_fields(pair: Mapping[str, Any]) -> dict[str, Any]:
             pair["yield_max_depth_m"], "yield_max_depth_m"
         ),
         "pair_yield_passes": int(_non_negative(pair["yield_passes"], "yield_passes")),
+        "pair_yield_clearance_m": _non_negative(
+            pair["yield_clearance_m"], "yield_clearance_m"
+        ),
+        "pair_palm_cup_max_deg": _non_negative(
+            pair["palm_cup_max_deg"], "pair.palm_cup_max_deg"
+        ),
         "pair_overlap_bias_m": _finite(pair["overlap_bias_m"], "overlap_bias_m"),
         "pair_spacing_passes": int(
             _non_negative(pair["spacing_passes"], "spacing_passes")
@@ -285,6 +299,9 @@ def _thumb_turn_fields(thumb: Mapping) -> dict[str, Any]:
         "thumb_index_gap_m": _non_negative(thumb["index_gap_m"], "index_gap_m"),
         "thumb_knuckle_distance_m": _non_negative(
             thumb["knuckle_distance_m"], "knuckle_distance_m"
+        ),
+        "thumb_azimuth_close_rad": math.radians(
+            _non_negative(thumb["azimuth_tolerance_deg"], "azimuth_tolerance_deg")
         ),
         "thumb_toward_index_target": _one_of(
             thumb["toward_index_target"], THUMB_TARGETS, "thumb.toward_index_target"

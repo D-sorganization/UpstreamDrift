@@ -58,11 +58,16 @@ def _load_renderer(root: str | None):
 
 
 def _spec(roll_deg: float) -> GripSpec:
+    """The legacy grip with the owner's thumbs: the lead thumb that far to
+    the away-from-target side of the top of the grip, the trail thumb that
+    far to the target side."""
     base = GripSpec.legacy()
+    thumb = float(load_hand_visual_quality()["owner_thumb_azimuth_deg"])
+    turned = {"shaft_roll_deg": roll_deg, "thumb_azimuth_deg": thumb}
     return dataclasses.replace(
         base,
-        lead=dataclasses.replace(base.lead, shaft_roll_deg=roll_deg),
-        trail=dataclasses.replace(base.trail, shaft_roll_deg=roll_deg),
+        lead=dataclasses.replace(base.lead, **turned),
+        trail=dataclasses.replace(base.trail, **turned),
     )
 
 

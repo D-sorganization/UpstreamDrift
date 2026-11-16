@@ -322,3 +322,22 @@ def test_skin_gives_way_to_a_point_standing_through_a_large_triangle() -> None:
     np.testing.assert_array_equal(off, sheet)
     with pytest.raises(ValueError):
         yield_to_points(sheet, up, point, max_depth_m=-0.001, passes=2)
+
+
+def test_skin_stands_a_clearance_off_points_that_all_but_touch_it() -> None:
+    """In a hollow between vertices a point can be inside the skin and still
+    above its nearest vertex: skin within the clearance gives way too."""
+    sheet = np.array([[0.0, 0, 0], [0.006, 0, 0], [0.003, 0.006, 0], [0.03, 0.03, 0]])
+    up = lambda v: np.tile([0.0, 0.0, 1.0], (len(v), 1))  # noqa: E731
+    point = np.array([[0.003, 0.002, 0.00005]])
+    limits = {"max_depth_m": 0.003, "passes": 3}
+    out = yield_to_points(sheet, up, point, clearance_m=0.0003, **limits)
+    np.testing.assert_allclose(out[:3, 2], -0.00025, atol=1e-12)
+    np.testing.assert_array_equal(out[3], sheet[3])
+    far = yield_to_points(
+        sheet, up, point + [0, 0, 0.001], clearance_m=0.0003, **limits
+    )
+    np.testing.assert_array_equal(far, sheet)
+    np.testing.assert_array_equal(yield_to_points(sheet, up, point, **limits), sheet)
+    with pytest.raises(ValueError):
+        yield_to_points(sheet, up, point, clearance_m=-0.0001, **limits)

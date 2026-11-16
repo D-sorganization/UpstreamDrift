@@ -236,6 +236,7 @@ def yield_to_points(
     *,
     max_depth_m: float,
     passes: int,
+    clearance_m: float = 0.0,
 ) -> Array:
     """Dent skin that points of another body poke through.
 
@@ -244,9 +245,14 @@ def yield_to_points(
     between them. Each of ``points`` up to ``max_depth_m`` under the skin
     pushes the three skin vertices nearest it inward along their normals by
     its depth, as flesh would give way; zero depth or passes switches it off.
+
+    Depth is measured from the nearest skin vertex. In a hollow between
+    vertices a point can be inside the skin and still above that vertex, so
+    points less than ``clearance_m`` above the skin dent it too, until the
+    skin stands that far off them.
     """
-    if max_depth_m < 0.0 or passes < 0:
-        raise ValueError("yield max_depth_m and passes must not be negative")
+    if max_depth_m < 0.0 or passes < 0 or clearance_m < 0.0:
+        raise ValueError("yield depth, passes and clearance must not be negative")
     out = np.array(vertices, dtype=np.float64)
     points = np.asarray(points, dtype=np.float64).reshape(-1, 3)
     if max_depth_m == 0.0 or len(points) == 0:
@@ -258,14 +264,14 @@ def yield_to_points(
         tree = cKDTree(out)
         reach, nearest = tree.query(points, distance_upper_bound=4.0 * max_depth_m)
         near = np.flatnonzero(np.isfinite(reach))
-        first = nearest[near]
+        first = np.asarray(nearest)[near]
         depth = -np.einsum("ij,ij->i", points[near] - out[first], normals[first])
-        under = (depth > 0.0) & (depth <= max_depth_m)
+        under = (depth > -clearance_m + 1e-12) & (depth <= max_depth_m)
         if not under.any():
             break
         ids = tree.query(points[near[under]], k=3)[1]
         dent = np.zeros(len(out))
-        np.maximum.at(dent, ids.ravel(), np.repeat(depth[under], 3))
+        np.maximum.at(dent, ids.ravel(), np.repeat(depth[under] + clearance_m, 3))
         out -= dent[:, None] * normals
     return out
 
