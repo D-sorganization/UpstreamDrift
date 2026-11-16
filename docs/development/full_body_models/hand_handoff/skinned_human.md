@@ -50,10 +50,13 @@ library.
 1. Size the asset to the spec's hand length and breadth.
 2. Lay the flat right hand beside the club (`club_axis_in_hand`,
    `flat_hand_rotation`) and seat it rigidly on the grip.
+   The forefinger knuckle is flexed first (`preshape.index_knuckle_flexion_deg`,
+   zero or `GripSpec.trigger_finger` switches it off), so the club lies in
+   the crook of that finger and the finger can wrap.
 3. Curl the fingers to contact, set the metacarpal arch from knuckle flexion,
    re-seat, then run the wrap search.
    Before the final wrap the ring, little and index fingers swing sideways
-   at the knuckle until they meet their neighbour (`side_close`, zero
+   at the knuckle until their middle and end segments meet the neighbour (`side_close`, zero
    `max_deg` switches it off; the swings are reported as `<finger>_side`
    joint angles).
 4. Cup the palm: carry the thumb base toward the line where the thumb is to lie (`thumb.palm_cup_*`, zero switches it off), then aim the thumb along the shaft and press it onto the grip.

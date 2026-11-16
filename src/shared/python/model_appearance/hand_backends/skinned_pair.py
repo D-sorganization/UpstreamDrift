@@ -40,9 +40,10 @@ Array = NDArray[np.float64]
 
 
 def _bone_capsules(
-    solved: _SolvedHand, settings: SkinnedHumanSettings
+    solved: _SolvedHand, settings: SkinnedHumanSettings, radius_scale: float
 ) -> tuple[Array, Array, Array]:
-    """The solved hand's digits and metacarpals as capsules (its build frame)."""
+    """The solved hand's digits and metacarpals as capsules (its build frame),
+    ``radius_scale`` times as thick as the skin around each bone."""
     hand = solved.hand
     bones = [f"{f}_{s}" for f in FINGERS for s in _SEGMENTS]
     bones += [f"meta_{f}" for f in FINGERS] + list(_THUMB_BONES)
@@ -50,7 +51,7 @@ def _bone_capsules(
     ends = [hand.joint_position(b, solved.angles, tail=True) for b in bones]
     radii = [
         _bone_skin_radius(hand.asset, b)
-        * settings.pair_capsule_radius_scale
+        * radius_scale
         * (settings.pair_thumb_radius_scale if b in _THUMB_BONES else 1.0)
         + settings.pair_capsule_margin_m
         for b in bones
@@ -67,23 +68,32 @@ class _LeadObstacle:
         self.spec, self.settings = spec, settings
         self.grip = cylinder_distance(grip_radius_m)
         self.lead = _solve_right_hand(spec, "lead", grip_radius_m, settings, None)
-        self._capsules = _bone_capsules(self.lead, settings)
+        scale = settings.pair_capsule_radius_scale
+        self._capsules = _bone_capsules(self.lead, settings, scale)
+        self._palm_radii = _bone_capsules(
+            self.lead, settings, settings.pair_palm_capsule_radius_scale
+        )[2]
         lead_targets = self.lead.targets
         self._club_from_lead = _club_from_build(
             spec, "lead", lead_targets.mirrored, 0.0
         )
         self._trail_mirrored = _targets(spec, "trail", settings).mirrored
 
-    def at(self, spacing_m: float, inset_m: float = 0.0) -> ObstacleDistance:
+    def at(
+        self, spacing_m: float, inset_m: float = 0.0, *, palm: bool = False
+    ) -> ObstacleDistance:
         """Grip plus lead-hand capsules with the trail hand ``spacing_m`` away.
 
         ``inset_m`` shrinks the grip (not the lead hand) by a squeeze depth.
+        ``palm`` selects the capsules the trail palm must clear, which are
+        scaled by ``pair.palm_capsule_radius_scale`` instead.
         """
         club_from_trail = _club_from_build(
             self.spec, "trail", self._trail_mirrored, spacing_m
         )
         move = np.linalg.inv(club_from_trail) @ self._club_from_lead
         starts, ends, radii = self._capsules
+        radii = self._palm_radii if palm else radii
         return capsule_union_distance(
             inset_distance(self.grip, inset_m),
             starts @ move[:3, :3].T + move[:3, 3],

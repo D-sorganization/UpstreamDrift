@@ -51,6 +51,7 @@ class SkinnedHumanSettings:
     seat_max_travel_m: float
     seat_iterations: int
     finger_adduction_fraction: float
+    index_knuckle_flexion_deg: float
     curl: CurlSettings
     limits_deg: tuple[tuple[str, tuple[float, float]], ...]
     pip_per_mcp: float
@@ -71,7 +72,9 @@ class SkinnedHumanSettings:
     side_close_max_deg: float
     side_close_gap_m: float
     side_close_index_gap_m: float
+    side_close_scan_samples: int
     pair_capsule_radius_scale: float
+    pair_palm_capsule_radius_scale: float
     pair_thumb_radius_scale: float
     pair_grip_fingers: tuple[str, ...]
     pair_max_spacing_adjust_m: float
@@ -185,6 +188,9 @@ def _side_close_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
         "side_close_index_gap_m": _non_negative(
             raw["index_gap_m"], "side_close.index_gap_m"
         ),
+        "side_close_scan_samples": int(
+            _non_negative(raw["scan_samples"], "side_close.scan_samples")
+        ),
     }
 
 
@@ -193,6 +199,9 @@ def _pair_fields(pair: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "pair_capsule_radius_scale": _unit_interval(
             pair["capsule_radius_scale"], "capsule_radius_scale"
+        ),
+        "pair_palm_capsule_radius_scale": _positive(
+            pair["palm_capsule_radius_scale"], "palm_capsule_radius_scale"
         ),
         "pair_thumb_radius_scale": _unit_interval(
             pair["thumb_radius_scale"], "thumb_radius_scale"
@@ -245,6 +254,9 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
         seat_iterations=int(place["seat_iterations"]),
         finger_adduction_fraction=_unit_interval(
             pre["finger_adduction_fraction"], "finger_adduction_fraction"
+        ),
+        index_knuckle_flexion_deg=_non_negative(
+            pre["index_knuckle_flexion_deg"], "index_knuckle_flexion_deg"
         ),
         curl=CurlSettings(
             step_rad=math.radians(float(curl["step_deg"])),

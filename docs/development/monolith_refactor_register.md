@@ -88,6 +88,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1053 | `src/tools/tour_matching_viewer/core.py` |
 | 1050 | `src/engines/physics_engines/opensim/python/spine/inverse_dynamics.py` |
 | 1047 | `src/shared/python/force_overlay/glyphs.py` |
+| 1044 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1042 | `src/shared/python/grip_contact/matlab_kernel.py` |
 | 1040 | `src/bunkershot3d/solvers/mpm/order_of_accuracy.py` |
 | 1040 | `src/tools/tour_matching_viewer/gui.py` |
@@ -107,7 +108,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1013 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 1008 | `src/engines/physics_engines/mujoco/python/grip_contact_sim.py` |
 | 1007 | `src/shared/python/grip_contact/simscape_grip_contact.py` |
-| 1003 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1001 | `src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py` |
 | 1000 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_opengl_renderer.py` |
 | 999 | `src/shared/python/estimation/dime_contracts.py` |

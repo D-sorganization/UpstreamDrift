@@ -297,6 +297,44 @@ def test_the_palm_cups_so_the_thumb_base_lies_on_the_grip(side: str) -> None:
     )
 
 
+def _index_gaps_m(result) -> dict[str, float]:
+    """Skin distance from the forefinger's middle and end segments to the
+    middle finger."""
+    from scipy.spatial import cKDTree
+
+    asset, v = result.rest_asset, result.mesh.vertices
+    middle = asset.dominant_vertex_ids(
+        tuple(f"middle_{s}" for s in ("prox", "mid", "dist"))
+    )
+    tree = cKDTree(v[middle])
+    return {
+        s: float(np.min(tree.query(v[asset.dominant_vertex_ids((f"index_{s}",))])[0]))
+        for s in ("mid", "dist")
+    }
+
+
+@pytest.mark.parametrize("side", _SIDES)
+def test_the_forefinger_knuckle_flexes_and_the_finger_lies_on_its_neighbour(
+    side: str,
+) -> None:
+    """The forefinger wraps with the others instead of hooking (#15182)."""
+    hand = _hand(side)
+    flexion = hand.joint_angles.flexion_deg("index_prox")
+    assert flexion >= float(_Q["min_index_knuckle_flexion_deg"]), flexion
+    for segment, gap in _index_gaps_m(hand).items():
+        assert gap <= float(_Q["max_index_segment_gap_m"]), (segment, gap)
+
+
+def test_a_trigger_finger_keeps_the_forefinger_apart() -> None:
+    """With ``trigger_finger`` on, the forefinger is not pre-flexed (#15182)."""
+    spec = dataclasses.replace(_spec(), trigger_finger=True)
+    trigger = build_hand_visual(spec, "trail", grip_radius_m=_RADIUS)
+    wrapped = _hand("trail")
+    low = trigger.joint_angles.flexion_deg("index_prox")
+    assert low < wrapped.joint_angles.flexion_deg("index_prox") - 5.0
+    assert low < float(_Q["min_index_knuckle_flexion_deg"])
+
+
 def _fingers_apart(side: str):
     key = (side, "fingers apart")
     if key not in _CACHE:
@@ -384,7 +422,11 @@ def test_correctives_unfold_the_webs_and_seat_the_palm_pad(side: str) -> None:
     )
     depth = _RADIUS - np.linalg.norm(plain.mesh.vertices[palm, :2], axis=1)
     assert depth.max() > float(_Q["penetration_tolerance_m"])
-    assert shaped.contact_gaps_m["palm"] <= plain.contact_gaps_m["palm"]
+    # Shaped, the palm is on the surface (gap zero) even when the plain palm
+    # sat a hair inside it (a negative gap within the solver's allowance).
+    assert (
+        shaped.contact_gaps_m["palm"] <= max(plain.contact_gaps_m["palm"], 0.0) + 1e-9
+    )
 
 
 def test_anthropometric_ratios_match_the_references() -> None:
@@ -621,6 +663,10 @@ def test_bad_settings_and_inputs_are_rejected() -> None:
     ):
         with pytest.raises(ValueError):
             settings_from_mapping({**raw, "thumb": {**raw["thumb"], **bad}})
+    with pytest.raises(ValueError):
+        settings_from_mapping(
+            {**raw, "preshape": {**raw["preshape"], "index_knuckle_flexion_deg": -1.0}}
+        )
     for bad in ({"max_deg": -1.0}, {"gap_m": -0.001}, {"index_gap_m": -0.001}):
         with pytest.raises(ValueError):
             settings_from_mapping({**raw, "side_close": {**raw["side_close"], **bad}})

@@ -457,8 +457,13 @@ def _palm_ids(asset: SkinnedHandAsset) -> NDArray[np.int64]:
     return asset.dominant_vertex_ids(("wrist",) + tuple(f"meta_{f}" for f in FINGERS))
 
 
-def _finger_chains(settings: SkinnedHumanSettings) -> tuple[CurlChain, ...]:
+def _finger_chains(
+    settings: SkinnedHumanSettings, index_knuckle_rad: float = 0.0
+) -> tuple[CurlChain, ...]:
     """Finger chains, knuckle first.
+
+    The forefinger's knuckle starts at, and never opens below,
+    ``index_knuckle_rad`` (the flexion the hand was seated with).
 
     While a joint closes, the joints beyond it follow at the synergy gains, so
     a finger curls as it closes instead of swinging in straight and landing
@@ -469,6 +474,9 @@ def _finger_chains(settings: SkinnedHumanSettings) -> tuple[CurlChain, ...]:
     for finger in FINGERS:
         limits = {s: settings.limit_rad(_JOINT_OF_SEGMENT[s]) for s in _SEGMENTS}
         prox, mid, dist = (f"{finger}_{s}" for s in _SEGMENTS)
+        if finger == "index":
+            low = min(max(limits["prox"][0], index_knuckle_rad), limits["prox"][1])
+            limits["prox"] = (low, limits["prox"][1])
         joints = (
             CurlJoint(
                 prox,
@@ -632,15 +640,20 @@ def _cup_palm(
     hand.offsets["thumb_meta"] = cupped(best)
 
 
-def _finger_ids(hand: _GripHand, finger: str) -> NDArray[np.int64]:
-    return np.concatenate([hand.segment_ids(f"{finger}_{s}") for s in _SEGMENTS])
+def _finger_ids(
+    hand: _GripHand, finger: str, segments: Sequence[str] = _SEGMENTS
+) -> NDArray[np.int64]:
+    return np.concatenate([hand.segment_ids(f"{finger}_{s}") for s in segments])
 
 
 def _side_gap(
     hand: _GripHand, angles: Mapping[str, float], finger: str, neighbour: str
 ) -> float:
-    """Least skin distance from ``finger`` to ``neighbour`` in this pose."""
-    mine, theirs = _finger_ids(hand, finger), _finger_ids(hand, neighbour)
+    """Least skin distance from the middle and end segments of ``finger`` to
+    ``neighbour``. The first segments are left out: the web between two
+    fingers is always close, whatever the fingers do beyond it."""
+    mine = _finger_ids(hand, finger, _SEGMENTS[1:])
+    theirs = _finger_ids(hand, neighbour)
     pts = hand.points(angles, np.concatenate([mine, theirs]))
     return float(np.min(cKDTree(pts[len(mine) :]).query(pts[: len(mine)])[0]))
 
@@ -671,8 +684,15 @@ def _close_fingers(hand: _GripHand, angles: Mapping[str, float]) -> None:
             hand.swing_sideways(bone, swing)
             return _side_gap(hand, angles, *pair)
 
+        def apart(swing: float, bone: str = bone, other: str = neighbour) -> float:
+            """Distance between the two fingers' end joints (mesh-independent)."""
+            hand.swing_sideways(bone, swing)
+            mine = hand.joint_position(bone.replace("_prox", "_dist"), angles)
+            theirs = hand.joint_position(f"{other}_dist", angles)
+            return float(np.linalg.norm(mine - theirs))
+
         probe = settings.curl.step_rad
-        sign = 1.0 if gap(probe) < gap(-probe) else -1.0
+        sign = 1.0 if apart(probe) < apart(-probe) else -1.0
         low, high = 0.0, sign * limit
         if gap(low) <= want or gap(high) > want:
             hand.swing_sideways(bone, low if gap(low) <= want else high)
@@ -730,17 +750,20 @@ def _wrap(
     chains: Sequence[CurlChain],
     obstacle: ObstacleDistance,
     start: Mapping[str, float],
+    samples: int | None = None,
 ) -> dict[str, float]:
-    """Curl ``chains`` to contact, with the wrap search if it is switched on."""
+    """Curl ``chains`` to contact, with the wrap search if it is switched on
+    (``samples`` overrides ``curl.wrap_scan_samples``)."""
     settings = hand.settings
-    if settings.wrap_scan_samples >= 2:
+    samples = settings.wrap_scan_samples if samples is None else samples
+    if samples >= 2:
         return wrap_to_contact(
             hand,
             chains,
             obstacle,
             settings.curl,
             start,
-            samples=settings.wrap_scan_samples,
+            samples=samples,
         ).angles
     return curl_to_contact(hand, chains, obstacle, settings.curl, start).angles
 
@@ -752,6 +775,9 @@ class _SolvedHand:
     targets: _RightHandTargets
     obstacle: ObstacleDistance
     skin_asset: SkinnedHandAsset
+    #: What the palm pad settles onto, if not ``obstacle`` (a pair: the other
+    #: hand at ``pair.palm_capsule_radius_scale``).
+    palm_obstacle: ObstacleDistance | None = None
 
 
 def _segment_gaps(
@@ -780,7 +806,7 @@ def _solve_right_hand(
     grip_radius_m: float,
     settings: SkinnedHumanSettings,
     given: Mapping[str, float] | None,
-    scene: Callable[[float], ObstacleDistance] | None = None,
+    scene: Callable[..., ObstacleDistance] | None = None,
 ) -> _SolvedHand:
     """Pose one hand as a right hand. ``scene(depth)`` is the distance to what
     it holds with the grip shrunk by ``depth`` (default: the bare grip)."""
@@ -792,17 +818,26 @@ def _solve_right_hand(
     deepest = max(settings.squeeze_finger_depth_m, settings.squeeze_palm_depth_m)
     if deepest >= grip_radius_m:
         raise ValueError("squeeze depth must be less than the grip radius")
-    scene = scene or (lambda depth: cylinder_distance(grip_radius_m - depth))
+
+    def bare(depth: float, **_: object) -> ObstacleDistance:
+        return cylinder_distance(grip_radius_m - depth)
+
+    scene = scene or bare
     obstacle = scene(0.0)
+    pad = scene(0.0, palm=True) if paired else None
     # Soft pads give: the palm seats, and the digits close, a little way in.
     grip = cylinder_distance(grip_radius_m - settings.squeeze_palm_depth_m)
-    other = scene(settings.squeeze_palm_depth_m) if paired else None
+    other = scene(settings.squeeze_palm_depth_m, palm=True) if paired else None
     soft = scene(settings.squeeze_finger_depth_m)
     thumb_radius_m = grip_radius_m - settings.squeeze_finger_depth_m
     arch = {f"meta_{f}": 0.0 for f in FINGERS}
+    # The hand is seated with the forefinger knuckle already flexed, so the
+    # club lies in the crook of that finger and the finger can wrap (#15182).
+    knuckle = math.radians(settings.index_knuckle_flexion_deg)
+    crook = {} if spec.trigger_finger else {"index_prox": knuckle}
     if given is not None:
         arch = {k: float(given.get(k, 0.0)) for k in arch}
-        _seat_flat_hand(hand, targets, grip, arch, other)
+        _seat_flat_hand(hand, targets, grip, {**arch, **crook}, other)
         posed = {**_straight_angles(), **{k: float(v) for k, v in given.items()}}
         hand.swing_sideways(None)
         for finger in FINGERS:  # sideways swings are applied as given, too
@@ -811,17 +846,23 @@ def _solve_right_hand(
         _cup_palm(hand, targets, posed, soft, thumb_radius_m)
         _aim_thumb(hand, targets, posed, thumb_radius_m)
         _bend_wrist(hand, side)
-        return _SolvedHand(hand, posed, targets, obstacle, skin)
-    chains = _finger_chains(settings)
+        return _SolvedHand(hand, posed, targets, obstacle, skin, pad)
+    chains = _finger_chains(settings, crook.get("index_prox", 0.0))
     angles: dict[str, float] = {}
     for _ in range(settings.arch_passes):
-        _seat_flat_hand(hand, targets, grip, arch, other)
-        start = {**_straight_angles(), **arch}
+        _seat_flat_hand(hand, targets, grip, {**arch, **crook}, other)
+        start = {**_straight_angles(), **arch, **crook}
         angles = curl_to_contact(hand, chains, soft, settings.curl, start).angles
         arch = _arch_from_knuckles(angles, settings)
-    _seat_flat_hand(hand, targets, grip, arch, other)
-    start = {**_straight_angles(), **arch}
-    _close_fingers(hand, angles)  # on the greedy curl, before the final wrap
+    _seat_flat_hand(hand, targets, grip, {**arch, **crook}, other)
+    start = {**_straight_angles(), **arch, **crook}
+    # Close the fingers sideways on the wrapped pose, then wrap again: the
+    # greedy curl hooks the forefinger, and a swing fitted to it is wrong.
+    hand.swing_sideways(None)
+    if settings.side_close_max_deg:
+        coarse = min(settings.wrap_scan_samples, settings.side_close_scan_samples)
+        angles = _wrap(hand, chains, soft, start, coarse)
+        _close_fingers(hand, angles)
     angles = _wrap(hand, chains, soft, start)
     _cup_palm(hand, targets, angles, soft, thumb_radius_m)
     _aim_thumb(hand, targets, angles, thumb_radius_m)
@@ -829,7 +870,7 @@ def _solve_right_hand(
     _bend_wrist(hand, side)
     for bone, swing in hand.side.items():  # so given angles rebuild this pose
         angles[f"{bone.removesuffix('_prox')}{_SIDE_SUFFIX}"] = swing
-    return _SolvedHand(hand, angles, targets, obstacle, skin)
+    return _SolvedHand(hand, angles, targets, obstacle, skin, pad)
 
 
 def _check_inputs(grip_spec: GripSpec, side: str, grip_radius_m: float) -> None:
@@ -919,7 +960,7 @@ def _corrected_skin(
         skin,
         asset.faces,
         asset.dominant_vertex_ids(settings.palm_pad.bones),
-        solved.obstacle,
+        solved.palm_obstacle or solved.obstacle,
         settings.palm_pad,
         lambda v: vertex_normals(v, asset.faces),
     )
