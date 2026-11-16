@@ -13,11 +13,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 from src.shared.python.grip_spec import GripSpec, HandGripSpec
-from src.shared.python.model_appearance.hand_backends.contract import (
-    HandJointAngles,
-    HandRole,
-    hand_mesh_with_shaft_roll,
-)
+from src.shared.python.model_appearance.hand_backends.types import HandSide
 from src.shared.python.model_appearance.hand_backends.placement import (
     mesh_in_shared_visual_frame,
 )
@@ -27,7 +23,9 @@ from src.shared.python.model_appearance.hand_backends.preview import (
     skin_tone_rgb,
     view_rotation,
 )
-from src.shared.python.model_appearance.hand_backends.registry import build_hand_visual
+from src.shared.python.model_appearance.hand_backends.comparison import (
+    build_for_comparison,
+)
 from src.shared.python.model_appearance.hand_backends.settings import (
     DEFAULT_HAND_VISUAL_SETTINGS,
     DEFAULT_VISUAL_GRIP_RADIUS_M,
@@ -36,7 +34,7 @@ from src.shared.python.model_appearance.hand_backends.settings import (
 _LOG = logging.getLogger(__name__)
 ROLLS = (-20.0, 0.0, 20.0)
 VIEWS = ("palm", "back", "side")
-ROLES: tuple[HandRole, ...] = ("lead", "trail")
+ROLES: tuple[HandSide, ...] = ("lead", "trail")
 
 
 def _spec(roll_deg: float) -> GripSpec:
@@ -74,16 +72,14 @@ def render_roll_strip(output_dir: Path, backend_id: str = "procedural_skin") -> 
     for roll in ROLLS:
         spec = _spec(roll)
         for role in ROLES:
-            angles = HandJointAngles.from_grip_spec(spec, role)
-            vis = build_hand_visual(
+            vis = build_for_comparison(
                 backend_id,
                 spec,
                 role,
-                angles,
                 grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
                 settings=settings,
             )
-            mesh = hand_mesh_with_shaft_roll(vis.mesh, spec, role)
+            mesh = vis.mesh
             color = skin_tone_rgb(settings.skin_material_for_role(role))
             drawables = [(mesh, color, 0.09), *club]
 
@@ -147,16 +143,14 @@ def render_roll_strip(output_dir: Path, backend_id: str = "procedural_skin") -> 
         both_verts: list[np.ndarray] = []
         both_drawables: list[tuple[Any, tuple[float, float, float], float]] = []
         for role in ROLES:
-            angles = HandJointAngles.from_grip_spec(spec, role)
-            vis = build_hand_visual(
+            vis = build_for_comparison(
                 backend_id,
                 spec,
                 role,
-                angles,
                 grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
                 settings=settings,
             )
-            rolled = hand_mesh_with_shaft_roll(vis.mesh, spec, role)
+            rolled = vis.mesh
             shared = mesh_in_shared_visual_frame(rolled, spec, role)
             both_verts.append(shared.vertices)
             both_drawables.append(

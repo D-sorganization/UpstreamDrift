@@ -2,8 +2,8 @@
 
 Parallel tracks share:
 
-- `build_hand_visual(grip_spec, side, joint_angles)` → meshes in the **grip-hand frame**
-- `registry.py` — discover backends; other lanes call `register_backend(...)`
+- The shared contract and registry from ADR-0057 (`types.py`, `registry.py`, conformance test `test_hand_backend_conformance.py`); `procedural_skin` registers through `register()`
+- `comparison.py` — harness columns: the capsule baseline (`capsule.py`, not registered) plus every enabled registered backend
 - `scripts/render_hand_backend_comparison.py` — contact sheet + `metrics.json`
 
 ## This lane (PR #15146, lofted procedural skin)

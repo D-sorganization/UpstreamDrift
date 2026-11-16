@@ -27,7 +27,7 @@
       "shaft_roll_deg": 0.0,
       "shaft_penetration_fraction": 0.0,
       "finger_penetration_fraction": 0.0,
-      "palm_arch_angle_deg": 2.036391250414155,
+      "palm_arch_angle_deg": 2.0363912504139754,
       "hand_length_m": 0.1568360813627106,
       "hand_breadth_m": 0.1240943336473512,
       "hand_depth_m": 0.08154846554330349,
@@ -48,9 +48,9 @@
       "max_knuckle_gap_m": 0.0011002103794154105,
       "min_inter_finger_gap_m": 0.002287708038172422,
       "pad_clearances_m": {
-        "index": -0.0003999164902639546,
+        "index": -0.00039991649026395633,
         "middle": -0.0004990000000000012,
-        "ring": -0.0004990000000000046,
+        "ring": -0.0004990000000000029,
         "little": -0.0004990000000000029
       }
     },
@@ -81,7 +81,7 @@
       "shaft_roll_deg": 0.0,
       "shaft_penetration_fraction": 0.0,
       "finger_penetration_fraction": 0.0,
-      "palm_arch_angle_deg": 2.036391250414155,
+      "palm_arch_angle_deg": 2.0363912504139754,
       "hand_length_m": 0.1568360813627106,
       "hand_breadth_m": 0.1240943336473512,
       "hand_depth_m": 0.08154846554330349,
@@ -102,9 +102,9 @@
       "max_knuckle_gap_m": 0.0011002103794154105,
       "min_inter_finger_gap_m": 0.002287708038172422,
       "pad_clearances_m": {
-        "index": -0.0003999164902639546,
+        "index": -0.00039991649026395633,
         "middle": -0.0004990000000000012,
-        "ring": -0.0004990000000000046,
+        "ring": -0.0004990000000000029,
         "little": -0.0004990000000000029
       }
     },
@@ -135,7 +135,7 @@
       "shaft_roll_deg": 0.0,
       "shaft_penetration_fraction": 0.0,
       "finger_penetration_fraction": 0.0,
-      "palm_arch_angle_deg": 2.036391250414155,
+      "palm_arch_angle_deg": 2.0363912504139754,
       "hand_length_m": 0.1568360813627106,
       "hand_breadth_m": 0.1240943336473512,
       "hand_depth_m": 0.08154846554330349,
@@ -156,9 +156,9 @@
       "max_knuckle_gap_m": 0.0011002103794154105,
       "min_inter_finger_gap_m": 0.002287708038172422,
       "pad_clearances_m": {
-        "index": -0.0003999164902639546,
+        "index": -0.00039991649026395633,
         "middle": -0.0004990000000000012,
-        "ring": -0.0004990000000000046,
+        "ring": -0.0004990000000000029,
         "little": -0.0004990000000000029
       }
     },
@@ -168,7 +168,7 @@
       "shaft_roll_deg": 0.0,
       "shaft_penetration_fraction": 0.0,
       "finger_penetration_fraction": 0.0,
-      "palm_arch_angle_deg": 1.1277040729832781,
+      "palm_arch_angle_deg": 1.1277040729836012,
       "hand_length_m": 0.10250000000000001,
       "hand_breadth_m": 0.07894586104682998,
       "hand_depth_m": 0.09008891945059325,
@@ -206,13 +206,13 @@
       "middle_finger_within_tolerance": true,
       "anthropometrics_accepted": true,
       "palm_length_m": 0.10200311893035004,
-      "cup_depth_m": 0.003301537572464844,
+      "cup_depth_m": 0.0033015375724648388,
       "max_knuckle_gap_m": 0.0011002103794154013,
-      "min_inter_finger_gap_m": 0.0022877080381724446,
+      "min_inter_finger_gap_m": 0.0022877080381724416,
       "pad_clearances_m": {
         "index": -0.0003999164902639494,
         "middle": -0.0004990000000000012,
-        "ring": -0.0004990000000000046,
+        "ring": -0.0004990000000000029,
         "little": 0.0037055708732456737
       }
     },
@@ -222,7 +222,7 @@
       "shaft_roll_deg": 0.0,
       "shaft_penetration_fraction": 0.0,
       "finger_penetration_fraction": 0.0,
-      "palm_arch_angle_deg": 1.1277040729832781,
+      "palm_arch_angle_deg": 1.1277040729836012,
       "hand_length_m": 0.10250000000000001,
       "hand_breadth_m": 0.07894586104682998,
       "hand_depth_m": 0.09008891945059325,
@@ -260,13 +260,13 @@
       "middle_finger_within_tolerance": true,
       "anthropometrics_accepted": true,
       "palm_length_m": 0.10200311893035004,
-      "cup_depth_m": 0.003301537572464844,
+      "cup_depth_m": 0.0033015375724648388,
       "max_knuckle_gap_m": 0.0011002103794154013,
-      "min_inter_finger_gap_m": 0.0022877080381724446,
+      "min_inter_finger_gap_m": 0.0022877080381724416,
       "pad_clearances_m": {
         "index": -0.0003999164902639494,
         "middle": -0.0004990000000000012,
-        "ring": -0.0004990000000000046,
+        "ring": -0.0004990000000000029,
         "little": 0.0037055708732456737
       }
     },
@@ -276,7 +276,7 @@
       "shaft_roll_deg": 0.0,
       "shaft_penetration_fraction": 0.0,
       "finger_penetration_fraction": 0.0,
-      "palm_arch_angle_deg": 1.1277040729832781,
+      "palm_arch_angle_deg": 1.1277040729836012,
       "hand_length_m": 0.10250000000000001,
       "hand_breadth_m": 0.07894586104682998,
       "hand_depth_m": 0.09008891945059325,
@@ -314,13 +314,13 @@
       "middle_finger_within_tolerance": true,
       "anthropometrics_accepted": true,
       "palm_length_m": 0.10200311893035004,
-      "cup_depth_m": 0.003301537572464844,
+      "cup_depth_m": 0.0033015375724648388,
       "max_knuckle_gap_m": 0.0011002103794154013,
-      "min_inter_finger_gap_m": 0.0022877080381724446,
+      "min_inter_finger_gap_m": 0.0022877080381724416,
       "pad_clearances_m": {
         "index": -0.0003999164902639494,
         "middle": -0.0004990000000000012,
-        "ring": -0.0004990000000000046,
+        "ring": -0.0004990000000000029,
         "little": 0.0037055708732456737
       }
     }

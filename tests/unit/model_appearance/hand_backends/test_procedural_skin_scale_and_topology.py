@@ -16,17 +16,15 @@ from src.shared.python.model_appearance.grip_hand_mesh import (
     build_grip_hand_mesh,
 )
 from src.shared.python.model_appearance.grip_pose import GripStyle, Hand
-from src.shared.python.model_appearance.hand_backends.contract import (
-    HandJointAngles,
-    hand_mesh_with_shaft_roll,
-)
 from src.shared.python.model_appearance.hand_backends.metrics import (
     grip_shaft_penetration_fraction,
 )
 from src.shared.python.model_appearance.hand_backends.placement import (
     axial_offset_vs_lead_m,
 )
-from src.shared.python.model_appearance.hand_backends.registry import build_hand_visual
+from src.shared.python.model_appearance.hand_backends.procedural_skin import (
+    build_hand_visual,
+)
 from src.shared.python.model_appearance.hand_backends.settings import (
     DEFAULT_VISUAL_GRIP_RADIUS_M,
     HandVisualSettings,
@@ -80,12 +78,9 @@ def test_trail_shared_visual_offset_places_trail_toward_clubhead() -> None:
 def test_procedural_skin_mesh_is_watertight_and_not_over_scaled(role: str) -> None:
     spec = GripSpec.legacy()
     settings = HandVisualSettings()
-    angles = HandJointAngles.from_grip_spec(spec, role)  # type: ignore[arg-type]
     vis = build_hand_visual(
-        "procedural_skin",
         spec,
         role,  # type: ignore[arg-type]
-        angles,
         grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
         settings=settings,
     )
@@ -212,12 +207,9 @@ def test_procedural_skin_wraps_grip_radius_within_contact_tolerance(
 
     spec = GripSpec.legacy(style=GripStyle.TEN_FINGER)
     settings = HandVisualSettings()
-    angles = HandJointAngles.from_grip_spec(spec, role)  # type: ignore[arg-type]
     vis = build_hand_visual(
-        "procedural_skin",
         spec,
         role,  # type: ignore[arg-type]
-        angles,
         grip_radius_m=grip_radius_m,
         settings=settings,
     )
@@ -247,24 +239,20 @@ def test_left_handed_and_roll_mirroring_are_exact() -> None:
     right = GripSpec.legacy(lead=HandGripSpec(shaft_roll_deg=20.0))
     left = GripSpec.legacy(handedness="left", lead=HandGripSpec(shaft_roll_deg=20.0))
     vis_r = build_hand_visual(
-        "procedural_skin",
         right,
         "lead",
-        HandJointAngles.from_grip_spec(right, "lead"),
         grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
         settings=settings,
     )
     vis_l = build_hand_visual(
-        "procedural_skin",
         left,
         "lead",
-        HandJointAngles.from_grip_spec(left, "lead"),
         grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
         settings=settings,
     )
     assert vis_l.mesh.volume() > 0.0
-    rolled_r = hand_mesh_with_shaft_roll(vis_r.mesh, right, "lead")
-    rolled_l = hand_mesh_with_shaft_roll(vis_l.mesh, left, "lead")
+    rolled_r = vis_r.mesh
+    rolled_l = vis_l.mesh
     mean_r = rolled_r.vertices.mean(axis=0)
     mean_l = rolled_l.vertices.mean(axis=0)
     assert mean_l[0] == pytest.approx(mean_r[0], abs=1e-4)

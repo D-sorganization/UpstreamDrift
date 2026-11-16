@@ -5,7 +5,6 @@ from __future__ import annotations
 import pytest
 
 from src.shared.python.grip_spec import GripSpec
-from src.shared.python.model_appearance.hand_backends.contract import HandJointAngles
 from src.shared.python.model_appearance.grip_hand_mesh import (
     FINGER_NAMES,
     build_grip_hand_mesh,
@@ -17,7 +16,9 @@ from src.shared.python.model_appearance.hand_backends.metrics import (
 )
 from src.shared.python.hand_size import hand_mesh_scale
 from src.shared.python.model_appearance.grip_hand_mesh import HandMeshParams
-from src.shared.python.model_appearance.hand_backends.registry import build_hand_visual
+from src.shared.python.model_appearance.hand_backends.comparison import (
+    build_for_comparison,
+)
 from src.shared.python.model_appearance.hand_backends.settings import (
     DEFAULT_VISUAL_GRIP_RADIUS_M,
     HandVisualSettings,
@@ -31,12 +32,10 @@ def test_no_shaft_or_finger_penetration_beyond_tolerance(backend_id: str) -> Non
     spec = GripSpec.legacy()
     settings = HandVisualSettings()
     for role in ("lead", "trail"):
-        angles = HandJointAngles.from_grip_spec(spec, role)  # type: ignore[arg-type]
-        vis = build_hand_visual(
+        vis = build_for_comparison(
             backend_id,
             spec,
             role,
-            angles,
             grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
             settings=settings,
         )

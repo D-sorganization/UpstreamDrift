@@ -8,9 +8,9 @@ import pytest
 from src.shared.python.grip_spec import GripSpec
 from src.shared.python.model_appearance.grip_pose import GripStyle
 from src.shared.python.model_appearance.hand_backends.contract import (
-    HandJointAngles,
-    HandRole,
+    GripArticulation,
 )
+from src.shared.python.model_appearance.hand_backends.types import HandSide
 from src.shared.python.model_appearance.hand_backends.procedural_skin import (
     _build_canonical_hand,
 )
@@ -40,10 +40,10 @@ def test_cycle2_anatomy_settings_present() -> None:
 
 
 @pytest.mark.parametrize("side", ("lead", "trail"))
-def test_distal_finger_pads_wrap_onto_grip_both_hands(side: HandRole) -> None:
+def test_distal_finger_pads_wrap_onto_grip_both_hands(side: HandSide) -> None:
     """Distal finger tips must seat onto the grip rather than hovering open."""
     spec = GripSpec.legacy(style=GripStyle.TEN_FINGER)
-    angles = HandJointAngles.from_grip_spec(spec, side)
+    angles = GripArticulation.from_grip_spec(spec, side)
     built = _build_canonical_hand(
         spec,
         side,
@@ -63,12 +63,12 @@ def test_distal_finger_pads_wrap_onto_grip_both_hands(side: HandRole) -> None:
 
 
 @pytest.mark.parametrize("side", ("lead", "trail"))
-def test_thumb_opposes_across_grip_at_default_straightness(side: HandRole) -> None:
+def test_thumb_opposes_across_grip_at_default_straightness(side: HandSide) -> None:
     """Thumb must wrap diagonally and seat on the grip even at thumb_straightness=1.0."""
     spec = GripSpec.legacy()
     hand_spec = spec.lead if side == "lead" else spec.trail
     assert hand_spec.thumb_straightness == pytest.approx(1.0)
-    angles = HandJointAngles.from_grip_spec(spec, side)
+    angles = GripArticulation.from_grip_spec(spec, side)
     built = _build_canonical_hand(
         spec,
         side,
@@ -93,11 +93,11 @@ def test_thumb_opposes_across_grip_at_default_straightness(side: HandRole) -> No
 
 @pytest.mark.parametrize("side", ("lead", "trail"))
 def test_palm_dorsum_shows_knuckle_domes_and_interdigital_valleys(
-    side: HandRole,
+    side: HandSide,
 ) -> None:
     """Dorsal knuckle domes must stand proud of adjacent interdigital valleys."""
     spec = GripSpec.legacy()
-    angles = HandJointAngles.from_grip_spec(spec, side)
+    angles = GripArticulation.from_grip_spec(spec, side)
     built = _build_canonical_hand(
         spec,
         side,

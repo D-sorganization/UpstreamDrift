@@ -21,16 +21,13 @@ from src.shared.python.model_appearance.grip_hand_mesh import (
     build_grip_hand_mesh,
 )
 from src.shared.python.model_appearance.grip_pose import Hand
-from src.shared.python.model_appearance.hand_backends.contract import (
-    HandJointAngles,
-    HandRole,
-    hand_mesh_with_shaft_roll,
-)
+from src.shared.python.model_appearance.hand_backends.types import HandSide
 from src.shared.python.model_appearance.hand_backends.metrics import (
     anthropometric_ratios,
     anthropometric_vs_reference,
     grip_shaft_penetration_fraction,
     inter_finger_penetration_fraction,
+    palm_arch_angle_deg,
 )
 from src.shared.python.model_appearance.hand_backends.placement import (
     mesh_in_shared_visual_frame,
@@ -44,9 +41,9 @@ from src.shared.python.model_appearance.hand_backends.preview import (
 from src.shared.python.model_appearance.hand_backends.procedural_skin import (
     measure_procedural_hand_anthropometry,
 )
-from src.shared.python.model_appearance.hand_backends.registry import (
-    build_hand_visual,
-    registered_backend_ids,
+from src.shared.python.model_appearance.hand_backends.comparison import (
+    build_for_comparison,
+    comparison_backend_names,
 )
 from src.shared.python.model_appearance.hand_backends.settings import (
     DEFAULT_HAND_VISUAL_SETTINGS,
@@ -59,7 +56,7 @@ CELL_PX = 512
 HEADER_PX = 34
 BANNER_PX = 48
 VIEWS = ("palm", "back", "side")
-ROW_SPECS: tuple[tuple[str, HandRole | None, str], ...] = (
+ROW_SPECS: tuple[tuple[str, HandSide | None, str], ...] = (
     ("lead", "lead", "palm"),
     ("lead", "lead", "back"),
     ("lead", "lead", "side"),
@@ -75,19 +72,17 @@ ROW_SPECS: tuple[tuple[str, HandRole | None, str], ...] = (
 def _metrics_for_backend(
     backend_id: str,
     grip_spec: GripSpec,
-    role: HandRole,
-    angles: HandJointAngles,
+    role: HandSide,
     settings: HandVisualSettings,
 ) -> dict[str, Any]:
-    vis = build_hand_visual(
+    vis = build_for_comparison(
         backend_id,
         grip_spec,
         role,
-        angles,
         grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
         settings=settings,
     )
-    rolled = hand_mesh_with_shaft_roll(vis.mesh, grip_spec, role)
+    rolled = vis.mesh
     hand = Hand.LEAD if role == "lead" else Hand.TRAIL
     reference = build_grip_hand_mesh(
         hand,
@@ -141,7 +136,7 @@ def _metrics_for_backend(
             finger_clouds,
             tolerance_m=settings.finger_penetration_tolerance_m,
         ),
-        "palm_arch_angle_deg": vis.palm_arch_angle_deg,
+        "palm_arch_angle_deg": palm_arch_angle_deg(rolled),
         **anthropometric_ratios(rolled),
         **anthro,
         **extra,
@@ -154,7 +149,7 @@ def render_contact_sheet(
     *,
     settings: HandVisualSettings = DEFAULT_HAND_VISUAL_SETTINGS,
 ) -> None:
-    backends = registered_backend_ids()
+    backends = comparison_backend_names()
     spec = GripSpec.legacy()
     n_rows = len(ROW_SPECS)
     n_cols = len(backends)
@@ -178,19 +173,15 @@ def render_contact_sheet(
         for col_idx, backend_id in enumerate(backends):
             x0 = col_idx * CELL_PX
             if role is not None:
-                angles = HandJointAngles.from_grip_spec(spec, role)
-                vis = build_hand_visual(
+                vis = build_for_comparison(
                     backend_id,
                     spec,
                     role,
-                    angles,
                     grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
                     settings=settings,
                 )
-                mesh = hand_mesh_with_shaft_roll(vis.mesh, spec, role)
-                metrics.append(
-                    _metrics_for_backend(backend_id, spec, role, angles, settings)
-                )
+                mesh = vis.mesh
+                metrics.append(_metrics_for_backend(backend_id, spec, role, settings))
                 color = skin_tone_rgb(settings.skin_material_for_role(role))
                 rgb = render_shaded_scene_rgb(
                     [(mesh, color, 0.09), *club],
@@ -204,16 +195,14 @@ def render_contact_sheet(
                 meshes = []
                 drawables: list[tuple[Any, tuple[float, float, float], float]] = []
                 for r in ("lead", "trail"):
-                    angles = HandJointAngles.from_grip_spec(spec, r)
-                    vis = build_hand_visual(
+                    vis = build_for_comparison(
                         backend_id,
                         spec,
                         r,
-                        angles,
                         grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
                         settings=settings,
                     )
-                    mesh = hand_mesh_with_shaft_roll(vis.mesh, spec, r)
+                    mesh = vis.mesh
                     shared = mesh_in_shared_visual_frame(mesh, spec, r)
                     meshes.append(shared.vertices)
                     drawables.append(

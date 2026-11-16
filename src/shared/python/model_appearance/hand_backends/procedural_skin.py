@@ -22,12 +22,20 @@ from src.shared.python.model_appearance.grip_pose import (
     GripStyle,
     Hand,
 )
-from src.shared.python.model_appearance.hand_backends.contract import (
-    HandJointAngles,
-    HandRole,
-    HandVisualResult,
+from src.shared.python.model_appearance.hand_backends.capsule import (
+    rolled_about_shaft,
+    skin_rgb_for,
 )
-from src.shared.python.model_appearance.hand_backends.metrics import palm_arch_angle_deg
+from src.shared.python.model_appearance.hand_backends.contract import (
+    GripArticulation,
+)
+from src.shared.python.model_appearance.hand_backends.joint_angles import (
+    HandJointAngles,
+)
+from src.shared.python.model_appearance.hand_backends.registry import (
+    HandVisualBackend,
+    register_hand_visual_backend,
+)
 from src.shared.python.model_appearance.hand_backends.procedural_loft import (
     PalmSlabSpec,
     lofted_anatomical_digit,
@@ -37,6 +45,10 @@ from src.shared.python.model_appearance.hand_backends.settings import (
     DEFAULT_HAND_VISUAL_SETTINGS,
     DEFAULT_VISUAL_GRIP_RADIUS_M,
     HandVisualSettings,
+)
+from src.shared.python.model_appearance.hand_backends.types import (
+    HandSide,
+    HandVisualResult,
 )
 
 Array = NDArray[np.float64]
@@ -249,8 +261,8 @@ def _mirror_point_y(pt: Array) -> Array:
 
 def _build_canonical_hand(
     grip_spec: GripSpec,
-    side: HandRole,
-    joint_angles: HandJointAngles,
+    side: HandSide,
+    joint_angles: GripArticulation,
     *,
     grip_radius_m: float,
     settings: HandVisualSettings,
@@ -560,13 +572,13 @@ def _build_canonical_hand(
 
 def measure_procedural_hand_anthropometry(
     grip_spec: GripSpec,
-    side: HandRole,
+    side: HandSide,
     *,
     grip_radius_m: float = DEFAULT_VISUAL_GRIP_RADIUS_M,
     settings: HandVisualSettings = DEFAULT_HAND_VISUAL_SETTINGS,
 ) -> dict[str, Any]:
     """Measure true anatomical dimensions, knuckle attachment, cup depth, and pad gaps."""
-    angles = HandJointAngles.from_grip_spec(grip_spec, side)
+    angles = GripArticulation.from_grip_spec(grip_spec, side)
     built = _build_canonical_hand(
         grip_spec,
         side,
@@ -615,29 +627,45 @@ def measure_procedural_hand_anthropometry(
 
 def build_hand_visual(
     grip_spec: GripSpec,
-    side: HandRole,
-    joint_angles: HandJointAngles,
+    side: HandSide,
+    joint_angles: HandJointAngles | None = None,
     *,
     grip_radius_m: float,
+    skin_rgb: tuple[float, float, float] | None = None,
     settings: HandVisualSettings = DEFAULT_HAND_VISUAL_SETTINGS,
 ) -> HandVisualResult:
-    if not isinstance(joint_angles, HandJointAngles):
-        raise TypeError("joint_angles must be HandJointAngles")
+    """Lofted procedural skin in the hand-grip frame (ADR-0057 A2 contract).
+
+    The hand poses itself from ``grip_spec``; explicit joint angles are not
+    supported. The shaft roll is applied last, as a rigid rotation.
+    """
+    if joint_angles is not None:
+        raise ValueError("procedural_skin poses itself; pass joint_angles=None")
     built = _build_canonical_hand(
         grip_spec,
         side,
-        joint_angles,
+        GripArticulation.from_grip_spec(grip_spec, side),
         grip_radius_m=float(grip_radius_m),
         settings=settings,
     )
-    arch = palm_arch_angle_deg(built.mesh)
     return HandVisualResult(
-        backend_id=BACKEND_ID,
-        role=side,
-        mesh=built.mesh,
+        backend=BACKEND_ID,
+        side=side,
+        mesh=rolled_about_shaft(built.mesh, grip_spec, side),
+        skin_rgb=skin_rgb or skin_rgb_for(settings.skin_material_for_role(side)),
         grip_radius_m=float(grip_radius_m),
-        material=settings.skin_material_for_role(side),
-        palm_arch_angle_deg=arch,
+    )
+
+
+def register() -> None:
+    """Add the procedural skin backend to the shared registry (called lazily)."""
+    register_hand_visual_backend(
+        HandVisualBackend(
+            name=BACKEND_ID,
+            builder=build_hand_visual,
+            description="Lofted procedural skin with an arched, cupped palm",
+            capabilities=frozenset({"self_posing"}),
+        )
     )
 
 
@@ -645,4 +673,5 @@ __all__ = [
     "BACKEND_ID",
     "build_hand_visual",
     "measure_procedural_hand_anthropometry",
+    "register",
 ]
