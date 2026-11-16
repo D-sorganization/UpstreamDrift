@@ -119,8 +119,8 @@ class ComparativeSwingAnalyzer:
         interp_a = interpolate.interp1d(t_a_norm, data_a, kind="linear")
         interp_b = interpolate.interp1d(t_b_norm, data_b, kind="linear")
 
-        sig_a_resampled = interp_a(t_common)
-        sig_b_resampled = interp_b(t_common)
+        sig_a_resampled = np.asarray(interp_a(t_common), dtype=np.float64)
+        sig_b_resampled = np.asarray(interp_b(t_common), dtype=np.float64)
 
         # Compute differences
         error_curve = sig_a_resampled - sig_b_resampled
