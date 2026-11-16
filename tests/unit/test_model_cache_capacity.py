@@ -79,3 +79,13 @@ def test_count_pressure_preserves_minimum_age_protection(tmp_path: Path) -> None
     assert len(cache) == 2
     assert first.local_path.exists() and second.local_path.exists()
     assert cache.get("first") is not None and cache.get("second") is not None
+
+
+def test_put_keeps_new_model_when_it_alone_exceeds_size_limit(tmp_path: Path) -> None:
+    """Aggressive cleanup must not delete the file returned by this insertion."""
+    cache = _make_cache(tmp_path, 1, min_age_days=0)
+    path = cache.get_cache_path("large.urdf")
+    path.write_bytes(b"x" * (2 * 1024 * 1024))
+    entry = cache.put("large", path)
+    assert entry.local_path.exists()
+    assert cache.get("large") is entry
