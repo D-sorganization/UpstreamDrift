@@ -78,3 +78,39 @@ def test_exact_zero_sample_does_not_split() -> None:
     assert result is not None
     assert result["positive_work"] == pytest.approx(0.5)
     assert result["negative_work"] == pytest.approx(-0.5)
+
+
+@pytest.mark.parametrize(
+    "left,right,positive,negative",
+    [
+        (1e308, -1e308, 2.5e307, -2.5e307),
+        (-1e308, 1e308, 2.5e307, -2.5e307),
+        (1e16, -1.0, 5e15, -5e-17),
+        (-1.0, 1e16, 5e15, -5e-17),
+    ],
+)
+@pytest.mark.parametrize("metric", ["work", "impulse"])
+def test_crossing_weights_survive_finite_dynamic_range(
+    left: float, right: float, positive: float, negative: float, metric: str
+) -> None:
+    """The small triangle must survive cancellation; opposite peaks stay finite."""
+    obj = _make(np.array([left, right]), np.ones(2), np.array([0.0, 1.0]))
+    if metric == "work":
+        work = obj.compute_work_metrics(0)
+        assert work is not None
+        actual_positive, actual_negative, actual_net = (
+            work["positive_work"],
+            work["negative_work"],
+            work["net_work"],
+        )
+    else:
+        impulse = obj.compute_impulse_metrics("torque", 0)
+        assert impulse is not None
+        actual_positive, actual_negative, actual_net = (
+            impulse.positive_impulse,
+            impulse.negative_impulse,
+            impulse.net_impulse,
+        )
+    assert actual_positive == pytest.approx(positive, rel=1e-14, abs=0.0)
+    assert actual_negative == pytest.approx(negative, rel=1e-14, abs=0.0)
+    assert actual_net == pytest.approx(positive + negative, rel=1e-14)

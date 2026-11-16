@@ -40,11 +40,16 @@ def _split_trapezoid(values: np.ndarray, dx: float) -> tuple[float, float]:
     both_neg = (a <= 0) & (b <= 0)
     crossing = ~(both_pos | both_neg)
 
-    # Segments with a sign change: split at the zero crossing a/(a-b).
-    denom = np.where(crossing, a - b, 1.0)
-    frac = np.where(crossing, a / denom, 0.0)  # fraction of dx before crossing
-    pos_cross = np.where(a > 0, a * frac, b * (1.0 - frac)) * 0.5 * dx
-    neg_cross = np.where(a < 0, a * frac, b * (1.0 - frac)) * 0.5 * dx
+    # Scale before finding each side's fraction: a-b can overflow, and
+    # computing the second fraction as 1-first can erase a small triangle.
+    scale = np.where(crossing, np.maximum(np.abs(a), np.abs(b)), 1.0)
+    left = np.where(crossing, np.abs(a / scale), 0.0)
+    right = np.where(crossing, np.abs(b / scale), 0.0)
+    denom = np.where(crossing, left + right, 1.0)
+    left_area = (0.5 * a) * (left / denom) * dx
+    right_area = (0.5 * b) * (right / denom) * dx
+    pos_cross = np.where(a > 0, left_area, right_area)
+    neg_cross = np.where(a < 0, left_area, right_area)
 
     pos = np.where(both_pos, 0.5 * (a + b) * dx, np.where(crossing, pos_cross, 0.0))
     neg = np.where(both_neg, 0.5 * (a + b) * dx, np.where(crossing, neg_cross, 0.0))
