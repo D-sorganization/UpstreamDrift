@@ -198,3 +198,31 @@ class TestConvenienceFunctions:
         sig = _make_signal()
         result = compute_integral(sig)
         assert np.isfinite(result.value)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("initial", [10.0, -2.5])
+def test_initial_value_offsets_both_cumulative_paths(initial: float) -> None:
+    signal = Signal(time=np.arange(5.0), values=np.ones(5), name="constant")
+    integrator = Integrator()
+    result = integrator.integrate(signal, initial_value=initial)
+    assert result.value == pytest.approx(4.0)
+    assert result.cumulative_signal is not None
+    np.testing.assert_allclose(
+        result.cumulative_signal.values, initial + np.arange(5.0)
+    )
+    np.testing.assert_allclose(
+        integrator.cumulative_integral(signal, initial_value=initial).values,
+        initial + np.arange(5.0),
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("initial", [float("nan"), float("inf"), float("-inf")])
+def test_initial_value_must_be_finite(initial: float) -> None:
+    signal = Signal(time=np.arange(5.0), values=np.ones(5), name="constant")
+    integrator = Integrator()
+    with pytest.raises(ValueError, match="initial_value"):
+        integrator.integrate(signal, initial_value=initial)
+    with pytest.raises(ValueError, match="initial_value"):
+        integrator.cumulative_integral(signal, initial_value=initial)
