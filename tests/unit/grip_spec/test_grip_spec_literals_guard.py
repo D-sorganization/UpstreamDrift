@@ -25,24 +25,31 @@ _ALLOWED_GEOMETRY_FILES = frozenset(
 )
 
 
+def _assignment_targets(node: ast.Assign | ast.AnnAssign) -> list[ast.expr]:
+    if isinstance(node, ast.AnnAssign):
+        return [node.target]
+    return list(node.targets)
+
+
 def _force_literal_nodes(path: Path) -> list[int]:
     tree = ast.parse(path.read_text(encoding="utf-8"))
     hits: list[int] = []
     for node in ast.walk(tree):
-        if not isinstance(node, ast.Assign):
+        if not isinstance(node, (ast.Assign, ast.AnnAssign)):
+            continue
+        if isinstance(node, ast.AnnAssign) and node.value is None:
             continue
         targets = " ".join(
             getattr(t, "id", "")
             or getattr(getattr(t, "attr", None), "__str__", lambda: "")()
-            for t in node.targets
+            for t in _assignment_targets(node)
         ).lower()
         if not any(
             token in targets for token in ("force", "stiff", "friction", "preload")
         ):
             continue
-        if isinstance(node.value, ast.Constant) and isinstance(
-            node.value.value, (int, float)
-        ):
+        value = node.value
+        if isinstance(value, ast.Constant) and isinstance(value.value, (int, float)):
             hits.append(node.lineno)
     return hits
 

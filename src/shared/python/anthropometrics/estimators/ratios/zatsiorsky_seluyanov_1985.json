@@ -1,5 +1,6 @@
 {
   "method": "zatsiorsky_seluyanov_1985",
+  "table_kind": "coarse_eight_class",
   "citation": "Zatsiorsky, V.M. & Seluyanov, V.N. (1985). Estimation of the mass and inertia characteristics of the human body by means of the best predictive regression equations. In: Biomechanics IX-B (Winter et al., eds.), Human Kinetics, pp. 233-239.",
   "segments": {
     "head": {
@@ -82,28 +83,5 @@
         "longitudinal": 0.124
       }
     }
-  },
-  "segment_name_map": {
-    "head": "head",
-    "neck": "trunk",
-    "thorax": "trunk",
-    "lumbar": "trunk",
-    "pelvis": "trunk",
-    "left_shoulder": "upper_arm",
-    "right_shoulder": "upper_arm",
-    "left_upper_arm": "upper_arm",
-    "right_upper_arm": "upper_arm",
-    "left_forearm": "forearm",
-    "right_forearm": "forearm",
-    "left_hand": "hand",
-    "right_hand": "hand",
-    "left_hip": "thigh",
-    "right_hip": "thigh",
-    "left_thigh": "thigh",
-    "right_thigh": "thigh",
-    "left_shin": "shank",
-    "right_shin": "shank",
-    "left_foot": "foot",
-    "right_foot": "foot"
   }
 }

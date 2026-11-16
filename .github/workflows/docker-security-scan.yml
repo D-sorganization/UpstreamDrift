@@ -23,8 +23,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  # Serialize with docker-size-gates and docker-smoke — same host BuildKit.
-  group: docker-image-build-${{ github.ref }}
+  # Distinct from docker-size-gates and docker-smoke (see #15086 fix-forward).
+  group: docker-security-scan-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:

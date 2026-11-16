@@ -540,17 +540,18 @@ def _run_prefix_stage(
         terminal_rmse_m = float(np.sqrt(np.mean(term_sq_dists)))
         terminal_max_m = float(np.sqrt(np.max(term_sq_dists)))
     else:
-        terminal_rmse_m = 0.0
-        terminal_max_m = 0.0
+        terminal_rmse_m = float("nan")
+        terminal_max_m = float("nan")
 
     # Compute pelvis yaw metrics (< 5% error requirement)
-    pelvis_yaw_diff_deg = 0.0
-    pelvis_yaw_error_pct = 0.0
+    pelvis_yaw_diff_deg = float("nan")
+    pelvis_yaw_error_pct = float("nan")
     if options.pelvis_indices is not None and len(prediction) > 0 and len(measured) > 0:
         wl_i, wr_i = options.pelvis_indices
         yaw_m = compute_pelvis_yaw_metrics(prediction[-1], measured[-1], wl_i, wr_i)
-        pelvis_yaw_diff_deg = yaw_m.yaw_diff_deg
-        pelvis_yaw_error_pct = yaw_m.pelvis_yaw_error_pct
+        if yaw_m.valid:
+            pelvis_yaw_diff_deg = yaw_m.yaw_diff_deg
+            pelvis_yaw_error_pct = yaw_m.pelvis_yaw_error_pct
 
     parameter_uncertainty = fitted_uncertainty_or_none(optimum)
 
@@ -640,11 +641,13 @@ def fit_prefixes(
     accepted = bool(final.optimizer_converged and final.rmse_m <= acceptance_rmse_m)
     if opt.pelvis_indices is not None:
         accepted = accepted and bool(
-            final.pelvis_yaw_error_pct <= opt.pelvis_yaw_max_error_pct
+            np.isfinite(final.pelvis_yaw_error_pct)
+            and final.pelvis_yaw_error_pct <= opt.pelvis_yaw_max_error_pct
         )
     if opt.acceptance_terminal_rmse_m is not None:
         accepted = accepted and bool(
-            final.terminal_rmse_m <= opt.acceptance_terminal_rmse_m
+            np.isfinite(final.terminal_rmse_m)
+            and final.terminal_rmse_m <= opt.acceptance_terminal_rmse_m
         )
     return PrefixFit(
         _readonly(values),

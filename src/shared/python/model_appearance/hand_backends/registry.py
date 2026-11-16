@@ -1,100 +1,135 @@
-"""Registry for swappable hand visual backends."""
+"""The one registry of grip hand visual backends (ADR-0057 A3).
+
+Backends register a :class:`HandVisualBackend`; the registry never chooses a
+default backend. Built-in backends register lazily: each module path in
+``_BUILTIN_BACKEND_MODULES`` is imported the first time the registry is read
+and its ``register()`` is called. Contact geometry is not handled here; it
+stays on the capsule pads. The shared poser (``posing.py``) is not part of
+this registry.
+"""
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+import importlib
+import re
+from collections.abc import Callable
+from dataclasses import dataclass, field
 
 from src.shared.python.grip_spec.types import GripSpec
 from src.shared.python.model_appearance.hand_backends.types import (
-    BACKEND_CAPSULE,
-    BACKEND_MYOHAND,
-    DEFAULT_HAND_VISUAL_BACKEND,
-    MYOHAND_BACKEND_INFO,
-    HandBackendInfo,
-    HandVisualMeshes,
-    HandVisualSide,
+    HandJointAngles,
+    HandSide,
+    HandVisualResult,
 )
 
-HandVisualBuilder = Callable[
-    [GripSpec, HandVisualSide, Mapping[str, float] | None],
-    HandVisualMeshes,
-]
+HandVisualBuilder = Callable[..., HandVisualResult]
+
+#: Backends that stay registered but opt-in until an owner decision clears
+#: them (MyoHand: HX6 #13763 geometry lineage).
+DISABLED_BY_DEFAULT: frozenset[str] = frozenset({"myohand"})
+
+_NAME_PATTERN = re.compile(r"^[a-z][a-z0-9]*(_[a-z0-9]+)*$")
+
+#: Module paths whose ``register()`` adds a built-in backend. Tracks append one.
+_BUILTIN_BACKEND_MODULES: tuple[str, ...] = ()
+
+_REGISTRY: dict[str, HandVisualBackend] = {}
+_builtins_loaded = False
 
 
 @dataclass(frozen=True)
-class _Entry:
+class HandVisualBackend:
+    """One registered backend: a name, its builder and its metadata."""
+
+    name: str
     builder: HandVisualBuilder
-    info: HandBackendInfo
+    description: str = ""
+    capabilities: frozenset[str] = field(default_factory=frozenset)
+    default_enabled: bool = True
+
+    def __post_init__(self) -> None:
+        if not callable(self.builder):
+            raise TypeError(f"builder for {self.name!r} must be callable")
+        if not isinstance(self.capabilities, frozenset):
+            raise TypeError("capabilities must be a frozenset of strings")
 
 
-_REGISTRY: dict[str, _Entry] = {}
+def register_hand_visual_backend(backend: HandVisualBackend) -> None:
+    """Add ``backend``.
+
+    Raises ``ValueError`` for a name that is not lower-case ``snake_case``, a
+    duplicate name, or an attempt to enable a backend in
+    :data:`DISABLED_BY_DEFAULT`.
+    """
+    if not isinstance(backend.name, str) or not _NAME_PATTERN.match(backend.name):
+        raise ValueError(
+            f"backend name must be lower-case snake_case, got {backend.name!r}"
+        )
+    if backend.name in _REGISTRY:
+        raise ValueError(f"backend {backend.name!r} already registered")
+    if backend.name in DISABLED_BY_DEFAULT and backend.default_enabled:
+        raise ValueError(
+            f"backend {backend.name!r} must be registered with default_enabled=False"
+        )
+    _REGISTRY[backend.name] = backend
 
 
-def register_hand_backend(
-    name: str,
-    builder: HandVisualBuilder,
-    *,
-    info: HandBackendInfo | None = None,
-) -> None:
-    if not name or not name.strip():
-        raise ValueError("backend name must be non-empty")
-    meta = info or HandBackendInfo(name=name)
-    _REGISTRY[name] = _Entry(builder=builder, info=meta)
-
-
-def hand_backend_info(name: str) -> HandBackendInfo:
-    return _REGISTRY[name].info
-
-
-def get_hand_backend(
-    name: str,
-    *,
-    allow_research: bool = False,
-) -> HandVisualBuilder:
+def get_hand_visual_backend(name: str) -> HandVisualBackend:
+    """The backend called ``name``; ``KeyError`` lists the known names."""
+    _ensure_builtin_backends()
     if name not in _REGISTRY:
         raise KeyError(
-            f"unknown hand visual backend {name!r}; choose from {sorted(_REGISTRY)}"
+            f"unknown hand visual backend {name!r}; known: {sorted(_REGISTRY)}"
         )
-    entry = _REGISTRY[name]
-    if entry.info.research_only and not allow_research:
-        raise PermissionError(
-            f"backend {name!r} is research-only until HRG-HX6 #13763 sign-off; "
-            "pass allow_research=True for lab use"
+    return _REGISTRY[name]
+
+
+def list_hand_visual_backends(*, include_disabled: bool = False) -> tuple[str, ...]:
+    """Sorted backend names; disabled backends only when asked for."""
+    _ensure_builtin_backends()
+    return tuple(
+        sorted(
+            name
+            for name, backend in _REGISTRY.items()
+            if include_disabled or backend.default_enabled
         )
-    return entry.builder
-
-
-def default_hand_backend() -> HandVisualBuilder:
-    return get_hand_backend(DEFAULT_HAND_VISUAL_BACKEND)
-
-
-def hand_backend_names(*, include_research: bool = False) -> tuple[str, ...]:
-    names = []
-    for key, entry in sorted(_REGISTRY.items()):
-        if entry.info.research_only and not include_research:
-            continue
-        names.append(key)
-    return tuple(names)
-
-
-def _register_defaults() -> None:
-    from src.shared.python.model_appearance.hand_backends import capsule, myohand
-
-    register_hand_backend(BACKEND_CAPSULE, capsule.build_hand_visual)
-    register_hand_backend(
-        BACKEND_MYOHAND,
-        myohand.build_hand_visual,
-        info=MYOHAND_BACKEND_INFO,
     )
 
 
-_register_defaults()
+def build_hand_visual(
+    grip_spec: GripSpec,
+    side: HandSide,
+    joint_angles: HandJointAngles | None = None,
+    *,
+    grip_radius_m: float,
+    backend: str,
+    skin_rgb: tuple[float, float, float] | None = None,
+) -> HandVisualResult:
+    """Build one hand with the named backend (disabled backends build by name)."""
+    return get_hand_visual_backend(backend).builder(
+        grip_spec,
+        side,
+        joint_angles,
+        grip_radius_m=grip_radius_m,
+        skin_rgb=skin_rgb,
+    )
+
+
+def _ensure_builtin_backends() -> None:
+    global _builtins_loaded
+    if _builtins_loaded:
+        return
+    _builtins_loaded = True
+    for module_path in _BUILTIN_BACKEND_MODULES:
+        importlib.import_module(module_path).register()
+
 
 __all__ = [
-    "default_hand_backend",
-    "get_hand_backend",
-    "hand_backend_info",
-    "hand_backend_names",
-    "register_hand_backend",
+    "DISABLED_BY_DEFAULT",
+    "HandVisualBackend",
+    "HandVisualBuilder",
+    "build_hand_visual",
+    "get_hand_visual_backend",
+    "list_hand_visual_backends",
+    "register_hand_visual_backend",
 ]
