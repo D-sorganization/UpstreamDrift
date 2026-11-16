@@ -103,6 +103,22 @@ def finger_side_gaps_m(result: HandVisualResult) -> dict[str, float]:
     return gaps
 
 
+def hand_to_finger_gaps_m(
+    hand: HandVisualResult, other: HandVisualResult, finger: str
+) -> dict[str, float]:
+    """Least skin distance from each finger of ``hand`` to ``finger`` of
+    ``other``, between skin vertices. Both results share one frame (a pair)."""
+    from scipy.spatial import cKDTree
+
+    def skin(result: HandVisualResult, name: str) -> NDArray[np.float64]:
+        asset, _, _ = _audit_parts(result)
+        bones = tuple(f"{name}_{s}" for s in ("prox", "mid", "dist"))
+        return result.mesh.vertices[asset.dominant_vertex_ids(bones)]
+
+    tree = cKDTree(skin(other, finger))
+    return {f: float(np.min(tree.query(skin(hand, f))[0])) for f in FINGERS}
+
+
 def min_bone_grip_clearance_m(result: HandVisualResult, samples: int = 5) -> float:
     """Least distance from a finger or thumb bone axis to the grip surface.
 

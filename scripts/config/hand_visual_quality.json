@@ -39,5 +39,7 @@
   "max_thumb_first_segment_median_gap_m": 0.005,
   "min_palm_cup_thenar_approach_m": 0.01,
   "max_finger_side_gap_m": 0.002,
-  "max_index_side_gap_m": 0.005
+  "max_index_side_gap_m": 0.005,
+  "max_pair_little_finger_gap_m": 0.001,
+  "max_pair_ring_finger_gap_m": 0.003
 }

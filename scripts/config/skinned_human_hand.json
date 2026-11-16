@@ -103,7 +103,7 @@
     "palm_cup_pivot_fraction": 1.0
   },
   "pair": {
-    "capsule_radius_scale": 1.0,
+    "capsule_radius_scale": 0.75,
     "thumb_radius_scale": 1.0,
     "grip_fingers": [
       "index",
@@ -111,7 +111,7 @@
       "ring"
     ],
     "max_spacing_adjust_m": 0.03,
-    "capsule_margin_m": 0.001
+    "capsule_margin_m": 0.0005
   },
   "framing": {
     "excluded_bones": [

@@ -31,6 +31,7 @@ from src.shared.python.model_appearance.hand_backends.qa import (
     forearm_spread_deg,
     grip_contact_area_m2,
     hand_pair_penetration_m,
+    hand_to_finger_gaps_m,
     load_hand_visual_quality,
     max_grip_cylinder_penetration_m,
     median_facing_grip_gap_m,
@@ -687,6 +688,14 @@ def _pair(roll_deg: float = 0.0):
     if key not in _CACHE:
         _CACHE[key] = build_grip_hands(_spec(roll_deg), grip_radius_m=_RADIUS)
     return _CACHE[key]
+
+
+def test_the_trail_hand_closes_up_against_the_lead_index_finger() -> None:
+    """The hands touch: trail little and ring fingers on the lead forefinger (#15183)."""
+    pair = _pair()
+    gaps = hand_to_finger_gaps_m(pair["trail"], pair["lead"], "index")
+    assert gaps["little"] <= float(_Q["max_pair_little_finger_gap_m"]), gaps
+    assert gaps["ring"] <= float(_Q["max_pair_ring_finger_gap_m"]), gaps
 
 
 def test_two_hands_share_the_club_without_passing_through_each_other() -> None:
