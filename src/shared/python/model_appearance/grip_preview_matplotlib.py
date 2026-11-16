@@ -12,8 +12,8 @@ from numpy.typing import NDArray
 from src.shared.python.model_appearance.geometry import Mesh
 
 if TYPE_CHECKING:
-    from matplotlib.axes import Axes
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+    from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 Array = NDArray[np.float64]
 
@@ -74,7 +74,7 @@ def equal_half_width_from_points(
 
 
 def apply_equal_axis_limits(
-    ax: Axes,
+    ax: Axes3D,
     points: Array,
     *,
     centre: Array | None = None,
@@ -98,7 +98,7 @@ def apply_equal_axis_limits(
     return half
 
 
-def axis_half_widths(ax: Axes) -> tuple[float, float, float]:
+def axis_half_widths(ax: Axes3D) -> tuple[float, float, float]:
     """Read back axis half-widths from a matplotlib 3D axes."""
     spans = []
     for getter in (ax.get_xlim, ax.get_ylim, ax.get_zlim):
@@ -109,7 +109,7 @@ def axis_half_widths(ax: Axes) -> tuple[float, float, float]:
 
 def face_lambert_colours(
     vertices: Array,
-    faces: Array,
+    faces: NDArray[np.int64],
     style: GripMeshPreviewStyle = _DEFAULT_STYLE,
 ) -> Array:
     """RGB face colours from triangle normals and a single light direction."""
@@ -129,7 +129,7 @@ def face_lambert_colours(
 
 
 def add_mesh_preview(
-    ax: Axes,
+    ax: Axes3D,
     mesh: Mesh,
     *,
     style: GripMeshPreviewStyle = _DEFAULT_STYLE,
