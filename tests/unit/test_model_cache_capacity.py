@@ -89,3 +89,42 @@ def test_put_keeps_new_model_when_it_alone_exceeds_size_limit(tmp_path: Path) ->
     entry = cache.put("large", path)
     assert entry.local_path.exists()
     assert cache.get("large") is entry
+
+
+@pytest.mark.parametrize("layout", ["same_file", "old_parent", "old_child"])
+def test_cleanup_preserves_paths_overlapping_the_active_insertion(
+    tmp_path: Path, layout: str
+) -> None:
+    """Evicting another ID must not delete the active model's file or children."""
+    cache = _make_cache(tmp_path, 1, min_age_days=0)
+    model_dir = tmp_path / "models"
+    model_dir.mkdir()
+    model_file = model_dir / "model.urdf"
+    original = b"<robot name='shared'/>"
+    model_file.write_bytes(original)
+    old_path = model_dir if layout == "old_parent" else model_file
+    new_path = model_dir if layout == "old_child" else model_file
+    old = cache.put("old", old_path)
+    old.cached_at = old.last_accessed = 0.0
+
+    current = cache.put("new", new_path)
+
+    assert model_file.read_bytes() == original
+    assert cache.get("new") is current
+    restored = ModelCache(cache.config)
+    assert restored.get("new") is not None
+
+
+def test_cleanup_preserves_shared_files_owned_by_recent_entries(tmp_path: Path) -> None:
+    """An old alias must not bypass another entry's minimum-age protection."""
+    cache = _make_cache(tmp_path, 2)
+    model_file = cache.get_cache_path("shared.urdf")
+    model_file.write_text("<robot/>", encoding="utf-8")
+    old = cache.put("old", model_file)
+    recent = cache.put("recent", model_file)
+    old.cached_at = old.last_accessed = 0.0
+
+    _add_model(cache, "new")
+
+    assert model_file.read_text(encoding="utf-8") == "<robot/>"
+    assert cache.get("recent") is recent

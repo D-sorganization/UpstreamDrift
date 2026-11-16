@@ -337,6 +337,7 @@ class ModelCache:
         """Remove eligible old LRU entries toward both size and count targets.
 
         Retain the active insertion and entries protected by minimum age.
+        Their overlapping paths inherit protection from deletion by another ID.
         """
         logger.info("Running cache cleanup...")
 
@@ -346,6 +347,11 @@ class ModelCache:
         min_age = time.time() - (self.config.min_age_days * 24 * 60 * 60)
         max_size = self.config.max_size_mb * 1024 * 1024
         target_size = max_size * 0.7  # Clean to 70%
+        protected_paths = {
+            entry.model_id: entry.local_path.resolve()
+            for entry in sorted_entries
+            if entry.model_id == protected_model_id or entry.cached_at > min_age
+        }
 
         removed = 0
         for entry in sorted_entries:
@@ -356,7 +362,16 @@ class ModelCache:
                 break
 
             # Keep the current insertion and files protected by minimum age.
-            if entry.model_id == protected_model_id or entry.cached_at > min_age:
+            if entry.model_id in protected_paths:
+                continue
+            # Removing a directory also removes descendants; removing a child
+            # can corrupt a retained directory model. Protect both directions.
+            entry_path = entry.local_path.resolve()
+            if any(
+                entry_path.is_relative_to(protected_path)
+                or protected_path.is_relative_to(entry_path)
+                for protected_path in protected_paths.values()
+            ):
                 continue
 
             self.remove(entry.model_id)
