@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import numpy as np
 
 from ..contracts import Keypoint, KeypointFrame, Marker, MarkerFrame
@@ -116,6 +118,31 @@ def estimate_fps(frames: list) -> float:
         return 30.0
 
     return 1.0 / dt
+
+
+def prepare_resample_inputs(
+    frames: list,
+    target_fps: float,
+    source_fps: float | None,
+    to_array: Callable[[list], np.ndarray],
+) -> tuple[float, np.ndarray, np.ndarray, np.ndarray]:
+    """Gather everything a resampler needs from ``frames`` (len >= 2).
+
+    Returns ``(source_fps, new_timestamps, data, source_timestamps)`` where
+    ``source_fps`` is auto-detected when ``None`` and ``data`` comes from
+    ``to_array(frames)``.
+
+    Raises:
+        ValueError: ``target_fps`` is not a positive finite number.
+    """
+    if source_fps is None:
+        source_fps = estimate_fps(frames)
+    new_timestamps = resample_timestamps(
+        frames[0].timestamp, frames[-1].timestamp, target_fps
+    )
+    data = to_array(frames)
+    timestamps = np.array([f.timestamp for f in frames])
+    return source_fps, new_timestamps, data, timestamps
 
 
 def _keypoint_from_array(
