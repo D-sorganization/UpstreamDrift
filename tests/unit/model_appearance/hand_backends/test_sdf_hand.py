@@ -15,14 +15,14 @@ from src.shared.python.grip_spec.shaft_roll import (
 )
 from src.shared.python.grip_spec.types import GripSpec, HandGripSpec, HandSize
 from src.shared.python.model_appearance.geometry import Mesh
-from src.shared.python.model_appearance.hand_backends.contract import HandJointAngles
+from src.shared.python.model_appearance.hand_backends.contract import GripArticulation
 from src.shared.python.model_appearance.hand_backends.sdf_field import (
     analytic_grip_penetration,
     evaluate_hand_sdf,
     sd_round_cone,
     smin,
 )
-from src.shared.python.model_appearance.hand_backends.sdf_hand import build_hand_visual
+from src.shared.python.model_appearance.hand_backends.sdf_hand import build_sdf_hand
 from src.shared.python.model_appearance.hand_backends.sdf_mesh import mesh_is_watertight
 from src.shared.python.model_appearance.hand_backends.sdf_pose import (
     phalanx_contact_points,
@@ -41,7 +41,7 @@ from src.shared.python.model_appearance.hand_backends.registry import (
     build_hand_visual as build_registered,
 )
 from src.shared.python.model_appearance.hand_backends.registry import (
-    registered_backend_ids,
+    list_hand_visual_backends,
 )
 
 pytestmark = pytest.mark.unit
@@ -65,11 +65,11 @@ _CONTACT = (
 )
 
 
-def _angles(spec: GripSpec, side: str) -> HandJointAngles:
-    return HandJointAngles.from_grip_spec(spec, side)  # type: ignore[arg-type]
+def _angles(spec: GripSpec, side: str) -> GripArticulation:
+    return GripArticulation.from_grip_spec(spec, side)  # type: ignore[arg-type]
 
 
-def _pose(spec: GripSpec, side: str, angles: HandJointAngles | None = None):
+def _pose(spec: GripSpec, side: str, angles: GripArticulation | None = None):
     return pose_hand_skeleton(
         spec,
         side,  # type: ignore[arg-type]
@@ -192,7 +192,7 @@ def test_opening_the_hand_lifts_the_fingers_off_the_grip() -> None:
     opened = _pose(
         spec,
         "lead",
-        HandJointAngles(
+        GripArticulation(
             palm_finger_depth=0.0, thumb_straightness=1.0, club_cross_angle_deg=0.0
         ),
     )
@@ -242,20 +242,21 @@ def test_preconditions_reject_bad_inputs_before_meshing(
     spec = GripSpec.legacy()
     angles = _angles(spec, "lead")
     with pytest.raises(ValueError, match="side"):
-        build_hand_visual(spec, "nope", angles)  # type: ignore[arg-type]
+        build_sdf_hand(spec, "nope", angles)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="grip_radius"):
-        build_hand_visual(spec, "lead", angles, grip_radius_m=0.0)
-    with pytest.raises(TypeError, match="HandJointAngles"):
-        build_hand_visual(spec, "lead", "bad")  # type: ignore[arg-type]
+        build_sdf_hand(spec, "lead", angles, grip_radius_m=0.0)
+    with pytest.raises(TypeError, match="GripArticulation"):
+        build_sdf_hand(spec, "lead", "bad")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="resolution"):
-        build_hand_visual(spec, "lead", angles, resolution=4)
+        build_sdf_hand(spec, "lead", angles, resolution=4)
 
 
 def test_registry_dispatches_sdf_hand_and_rejects_unknown_ids() -> None:
-    assert "sdf_hand" in registered_backend_ids()
+    pytest.importorskip("skimage")
+    assert "sdf_hand" in list_hand_visual_backends()
     spec = GripSpec.legacy()
     with pytest.raises(KeyError, match="unknown"):
-        build_registered("missing", spec, "lead", _angles(spec, "lead"))
+        build_registered(spec, "lead", grip_radius_m=0.012, backend="missing")
 
 
 def test_orthographic_frame_fills_seventy_percent() -> None:
@@ -317,7 +318,7 @@ def test_render_keeps_a_dark_club_pixel() -> None:
 def meshed_lead():
     pytest.importorskip("skimage")
     spec = GripSpec.legacy()
-    return build_hand_visual(
+    return build_sdf_hand(
         spec,
         "lead",
         _angles(spec, "lead"),
@@ -337,14 +338,14 @@ def test_shaft_roll_is_a_vertex_rotation() -> None:
     pytest.importorskip("skimage")
     spec = GripSpec.legacy()
     rolled_spec = replace(spec, lead=replace(spec.lead, shaft_roll_deg=20.0))
-    plain = build_hand_visual(
+    plain = build_sdf_hand(
         spec,
         "lead",
         _angles(spec, "lead"),
         settings=SETTINGS,
         resolution=SETTINGS.min_resolution,
     )
-    rolled = build_hand_visual(
+    rolled = build_sdf_hand(
         rolled_spec,
         "lead",
         _angles(rolled_spec, "lead"),

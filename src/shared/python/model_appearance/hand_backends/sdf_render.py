@@ -20,10 +20,10 @@ import numpy as np
 
 from src.shared.python.grip_spec.types import GripSpec, HandGripSpec
 from src.shared.python.model_appearance.geometry import Mesh
-from src.shared.python.model_appearance.hand_backends.contract import HandJointAngles
+from src.shared.python.model_appearance.hand_backends.contract import GripArticulation
 from src.shared.python.model_appearance.hand_backends.sdf_hand import (
-    HandVisualResult,
-    build_hand_visual,
+    SdfHandVisual,
+    build_sdf_hand,
 )
 from src.shared.python.model_appearance.hand_backends.sdf_settings import (
     SdfHandSettings,
@@ -395,17 +395,17 @@ def render_standard_views(
     for roll in _ROLLS:
         lead_spec = GripSpec.legacy(lead=HandGripSpec(shaft_roll_deg=roll))
         trail_spec = GripSpec.legacy(trail=HandGripSpec(shaft_roll_deg=roll))
-        lead = build_hand_visual(
+        lead = build_sdf_hand(
             lead_spec,
             "lead",
-            HandJointAngles.from_grip_spec(lead_spec, "lead"),
+            GripArticulation.from_grip_spec(lead_spec, "lead"),
             settings=loaded,
             resolution=samples,
         )
-        trail = build_hand_visual(
+        trail = build_sdf_hand(
             trail_spec,
             "trail",
-            HandJointAngles.from_grip_spec(trail_spec, "trail"),
+            GripArticulation.from_grip_spec(trail_spec, "trail"),
             settings=loaded,
             resolution=samples,
         )
@@ -440,7 +440,7 @@ def render_standard_views(
 
 
 def _scene(
-    hands: tuple[HandVisualResult, ...],
+    hands: tuple[SdfHandVisual, ...],
     settings: SdfHandSettings,
     skin: np.ndarray,
 ) -> tuple[np.ndarray, list[tuple[Mesh, np.ndarray]]]:

@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.grip_spec.types import GripSpec
-from src.shared.python.model_appearance.hand_backends.contract import HandJointAngles
+from src.shared.python.model_appearance.hand_backends.contract import GripArticulation
 from src.shared.python.model_appearance.hand_backends.sdf_pose import (
     pose_hand_skeleton,
 )
@@ -26,7 +26,7 @@ def test_palm_metacarpals_cup_around_grip_without_flat_paddle(side: str) -> None
     skeleton = pose_hand_skeleton(
         spec,
         side,  # type: ignore[arg-type]
-        HandJointAngles.from_grip_spec(spec, side),  # type: ignore[arg-type]
+        GripArticulation.from_grip_spec(spec, side),  # type: ignore[arg-type]
         grip_radius_m=settings.default_grip_radius_m,
         settings=settings,
     )
@@ -49,7 +49,7 @@ def test_thumb_has_opposed_sweep_and_reaches_past_index(side: str) -> None:
     skeleton = pose_hand_skeleton(
         spec,
         side,  # type: ignore[arg-type]
-        HandJointAngles.from_grip_spec(spec, side),  # type: ignore[arg-type]
+        GripArticulation.from_grip_spec(spec, side),  # type: ignore[arg-type]
         grip_radius_m=settings.default_grip_radius_m,
         settings=settings,
     )
@@ -90,7 +90,7 @@ def test_oblique_camera_prefers_thumb_side_and_keeps_70pct_fill(side: str) -> No
     skeleton = pose_hand_skeleton(
         spec,
         side,  # type: ignore[arg-type]
-        HandJointAngles.from_grip_spec(spec, side),  # type: ignore[arg-type]
+        GripArticulation.from_grip_spec(spec, side),  # type: ignore[arg-type]
         grip_radius_m=settings.default_grip_radius_m,
         settings=settings,
     )

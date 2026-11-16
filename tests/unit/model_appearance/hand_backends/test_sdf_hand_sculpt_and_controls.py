@@ -8,7 +8,7 @@ import pytest
 from src.shared.python.grip_contact.contact_topology import GripStyle
 from src.shared.python.grip_spec.types import GripSpec, HandGripSpec, HandSize
 from src.shared.python.model_appearance.geometry import Mesh
-from src.shared.python.model_appearance.hand_backends.contract import HandJointAngles
+from src.shared.python.model_appearance.hand_backends.contract import GripArticulation
 from src.shared.python.model_appearance.hand_backends.sdf_field import evaluate_hand_sdf
 from src.shared.python.model_appearance.hand_backends.sdf_pose import (
     pose_hand_skeleton,
@@ -58,7 +58,7 @@ def test_dorsal_mcp_knuckle_line_stands_proud_of_interdigital_valleys() -> None:
     skeleton = pose_hand_skeleton(
         spec,
         "lead",
-        HandJointAngles.from_grip_spec(spec, "lead"),
+        GripArticulation.from_grip_spec(spec, "lead"),
         grip_radius_m=settings.default_grip_radius_m,
         settings=settings,
     )
@@ -92,14 +92,14 @@ def test_breadth_cross_angle_and_grip_style_controls_move_skeleton() -> None:
     narrow = pose_hand_skeleton(
         narrow_spec,
         "lead",
-        HandJointAngles.from_grip_spec(narrow_spec, "lead"),
+        GripArticulation.from_grip_spec(narrow_spec, "lead"),
         grip_radius_m=settings.default_grip_radius_m,
         settings=settings,
     )
     wide = pose_hand_skeleton(
         wide_spec,
         "lead",
-        HandJointAngles.from_grip_spec(wide_spec, "lead"),
+        GripArticulation.from_grip_spec(wide_spec, "lead"),
         grip_radius_m=settings.default_grip_radius_m,
         settings=settings,
     )
@@ -110,14 +110,14 @@ def test_breadth_cross_angle_and_grip_style_controls_move_skeleton() -> None:
     sk_low = pose_hand_skeleton(
         low_cross,
         "lead",
-        HandJointAngles.from_grip_spec(low_cross, "lead"),
+        GripArticulation.from_grip_spec(low_cross, "lead"),
         grip_radius_m=settings.default_grip_radius_m,
         settings=settings,
     )
     sk_high = pose_hand_skeleton(
         high_cross,
         "lead",
-        HandJointAngles.from_grip_spec(high_cross, "lead"),
+        GripArticulation.from_grip_spec(high_cross, "lead"),
         grip_radius_m=settings.default_grip_radius_m,
         settings=settings,
     )
@@ -130,14 +130,14 @@ def test_breadth_cross_angle_and_grip_style_controls_move_skeleton() -> None:
     sk_ten = pose_hand_skeleton(
         ten_spec,
         "trail",
-        HandJointAngles.from_grip_spec(ten_spec, "trail"),
+        GripArticulation.from_grip_spec(ten_spec, "trail"),
         grip_radius_m=settings.default_grip_radius_m,
         settings=settings,
     )
     sk_ov = pose_hand_skeleton(
         ov_spec,
         "trail",
-        HandJointAngles.from_grip_spec(ov_spec, "trail"),
+        GripArticulation.from_grip_spec(ov_spec, "trail"),
         grip_radius_m=settings.default_grip_radius_m,
         settings=settings,
     )
@@ -157,26 +157,26 @@ def test_scene_places_trail_hand_toward_clubhead_and_shades_smoothly() -> None:
     lead_sk = pose_hand_skeleton(
         lead_spec,
         "lead",
-        HandJointAngles.from_grip_spec(lead_spec, "lead"),
+        GripArticulation.from_grip_spec(lead_spec, "lead"),
         grip_radius_m=settings.default_grip_radius_m,
         settings=settings,
     )
     trail_sk = pose_hand_skeleton(
         trail_spec,
         "trail",
-        HandJointAngles.from_grip_spec(trail_spec, "trail"),
+        GripArticulation.from_grip_spec(trail_spec, "trail"),
         grip_radius_m=settings.default_grip_radius_m,
         settings=settings,
     )
     from src.shared.python.model_appearance.hand_backends.sdf_hand import (
-        HandVisualResult,
+        SdfHandVisual,
     )
 
     tri = Mesh(
         np.array([[0.0, 0.0, 0.0], [0.02, 0.0, 0.0], [0.0, 0.02, 0.01]]),
         np.array([[0, 1, 2]], dtype=np.int64),
     )
-    lead_res = HandVisualResult(
+    lead_res = SdfHandVisual(
         backend_id="sdf_hand",
         role="lead",
         mesh=tri,
@@ -186,7 +186,7 @@ def test_scene_places_trail_hand_toward_clubhead_and_shades_smoothly() -> None:
         settings=settings,
         roll=np.eye(3),
     )
-    trail_res = HandVisualResult(
+    trail_res = SdfHandVisual(
         backend_id="sdf_hand",
         role="trail",
         mesh=tri,

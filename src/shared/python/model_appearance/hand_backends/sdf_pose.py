@@ -23,7 +23,7 @@ from src.shared.python.grip_spec.types import GripSpec
 from src.shared.python.hand_size import resolve_hand_breadth_m
 from src.shared.python.model_appearance.hand_backends.contract import (
     HAND_ROLES,
-    HandJointAngles,
+    GripArticulation,
     HandRole,
 )
 from src.shared.python.model_appearance.hand_backends.sdf_field import Primitive
@@ -391,7 +391,7 @@ def _pose_thumb(
     *,
     grip_spec: GripSpec,
     side: HandRole,
-    joint_angles: HandJointAngles,
+    joint_angles: GripArticulation,
     settings: SdfHandSettings,
     scale: float,
     grip_radius_m: float,
@@ -569,7 +569,7 @@ def _pose_thumb(
 def pose_curl_to_contact(
     grip_spec: GripSpec,
     side: HandRole,
-    joint_angles: HandJointAngles,
+    joint_angles: GripArticulation,
     *,
     grip_radius_m: float,
     settings: SdfHandSettings,
@@ -577,15 +577,15 @@ def pose_curl_to_contact(
     """Pose one hand's SDF skeleton curled onto the grip cylinder.
 
     Preconditions: ``side`` is lead or trail, ``grip_radius_m`` is positive,
-    and ``joint_angles`` is a :class:`HandJointAngles`. Postcondition: the
+    and ``joint_angles`` is a :class:`GripArticulation`. Postcondition: the
     measured middle-finger length and palm width track the scaled settings,
     and on-grip phalanx axes lie outside the grip.
     """
     if side not in HAND_ROLES:
         raise ValueError(f"side must be one of {HAND_ROLES}, got {side!r}")
-    if not isinstance(joint_angles, HandJointAngles):
+    if not isinstance(joint_angles, GripArticulation):
         raise TypeError(
-            f"joint_angles must be HandJointAngles, got {type(joint_angles).__name__}"
+            f"joint_angles must be GripArticulation, got {type(joint_angles).__name__}"
         )
     if not math.isfinite(grip_radius_m) or grip_radius_m <= 0.0:
         raise ValueError(f"grip_radius_m must be positive, got {grip_radius_m!r}")
@@ -677,7 +677,7 @@ def _shared_poser():
 def pose_hand_skeleton(
     grip_spec: GripSpec,
     side: HandRole,
-    joint_angles: HandJointAngles,
+    joint_angles: GripArticulation,
     *,
     grip_radius_m: float,
     settings: SdfHandSettings,

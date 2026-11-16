@@ -1,25 +1,26 @@
-"""Shared hand-visual types for epic #15150.
+"""Grip-spec articulation inputs for the SDF hand backend (#15155).
 
-Sibling lanes (procedural skin, shadow, MyoHand, skinned human) grew the same
-three-argument ``build_hand_visual(grip_spec, side, joint_angles)`` shape.
-This module is the SDF lane's copy of that contract so a later merge can keep
-one definition.
+The shared backend types live in :mod:`hand_backends.types` (ADR-0057 A2);
+this module keeps only the SDF poser's own inputs.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal
 
 from src.shared.python.grip_spec.types import GripSpec
+from src.shared.python.model_appearance.hand_backends.types import (
+    HAND_SIDES,
+    HandSide,
+)
 
-HandRole = Literal["lead", "trail"]
-HAND_ROLES: tuple[HandRole, ...] = ("lead", "trail")
+HandRole = HandSide
+HAND_ROLES: tuple[HandRole, ...] = HAND_SIDES
 
 
 @dataclass(frozen=True)
-class HandJointAngles:
-    """Curl inputs shared by every visual backend.
+class GripArticulation:
+    """Curl inputs read from :class:`GripSpec` for one hand.
 
     ``palm_finger_depth`` and ``thumb_straightness`` are the GripSpec fields
     in ``[0, 1]``. ``club_cross_angle_deg`` is carried for the contract; the
@@ -31,7 +32,7 @@ class HandJointAngles:
     club_cross_angle_deg: float
 
     @classmethod
-    def from_grip_spec(cls, spec: GripSpec, role: HandRole) -> HandJointAngles:
+    def from_grip_spec(cls, spec: GripSpec, role: HandRole) -> GripArticulation:
         """Read the per-hand authoring fields for ``role``."""
         if role not in HAND_ROLES:
             raise ValueError(f"role must be one of {HAND_ROLES}, got {role!r}")
@@ -43,4 +44,4 @@ class HandJointAngles:
         )
 
 
-__all__ = ["HAND_ROLES", "HandJointAngles", "HandRole"]
+__all__ = ["HAND_ROLES", "GripArticulation", "HandRole"]
