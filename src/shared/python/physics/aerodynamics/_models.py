@@ -198,7 +198,10 @@ class LiftModel:
             return np.zeros_like(velocity_vector)
 
         lift_dir = lift_dir / lift_norm
-        spin_ratio = self.ball_radius * spin_magnitude / speed
+        # Transverse spin ||w x v_hat|| = w sin(theta): spin along the flight
+        # direction produces no lift, so the force vanishes continuously (#15042).
+        sin_theta = lift_norm / speed
+        spin_ratio = self.ball_radius * spin_magnitude * sin_theta / speed
         cl = self._compute_lift_coefficient(spin_ratio)
         force_magnitude = 0.5 * air_density * cl * self.ball_area * speed**2
         return force_magnitude * lift_dir
@@ -253,7 +256,8 @@ class MagnusModel:
             return np.zeros_like(velocity_vector)
 
         magnus_dir = magnus_dir / magnus_norm
-        spin_param = self.ball_radius * spin_magnitude / speed
+        # ||w x v|| / v = w sin(theta) is the transverse spin rate (#15042).
+        spin_param = self.ball_radius * (magnus_norm / speed) / speed
         cm = self._compute_magnus_coefficient(spin_param)
         force_magnitude = 0.5 * air_density * cm * self.ball_area * speed**2
         return force_magnitude * magnus_dir
