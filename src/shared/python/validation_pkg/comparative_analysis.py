@@ -6,6 +6,7 @@ calculating differences in kinematics, kinetics, and timing.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -27,7 +28,7 @@ class ComparisonMetric:
     value_a: float
     value_b: float
     difference: float  # a - b
-    percent_diff: float  # (a - b) / mean * 100
+    percent_diff: float  # (a - b) / mean(|a|, |b|) * 100; NaN if either is NaN
 
 
 @dataclass
@@ -156,8 +157,15 @@ class ComparativeSwingAnalyzer:
         if metric_name is None:
             raise ValueError("metric_name must be provided")
         diff = val_a - val_b
-        mean = (val_a + val_b) / 2.0
-        percent = (diff / mean * 100) if abs(mean) > 1e-9 else 0.0
+        # Symmetric percent difference. The denominator is the mean magnitude so
+        # opposite-sign values do not cancel to zero and report a perfect match.
+        scale = (abs(val_a) + abs(val_b)) / 2.0
+        if math.isnan(diff) or math.isnan(scale):
+            percent = math.nan  # missing data must not read as agreement
+        elif scale == 0.0:
+            percent = 0.0  # both exactly zero: identical
+        else:
+            percent = diff / scale * 100
 
         return ComparisonMetric(
             name=metric_name,

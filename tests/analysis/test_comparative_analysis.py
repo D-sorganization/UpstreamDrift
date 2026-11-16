@@ -230,9 +230,10 @@ def test_compare_scalars_zero_mean() -> None:
     rec_b = MockRecorder()
     analyzer = ComparativeSwingAnalyzer(rec_a, rec_b)
 
-    # Values that average to nearly zero
+    # Opposite-sign values are not a match: 2e-10 / 1e-10 * 100 = 200 (#15226)
     metric = analyzer.compare_scalars("test_metric", 1e-10, -1e-10)
-    assert metric.percent_diff == 0.0  # Should handle division by near-zero
+    assert metric.percent_diff == pytest.approx(200.0)
+    assert analyzer.compare_scalars("test_metric", 0.0, 0.0).percent_diff == 0.0
 
 
 def test_missing_fields() -> None:
