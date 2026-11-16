@@ -1362,6 +1362,7 @@
 {"path": "model_appearance/grip_pose.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/__init__.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/correctives.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/hand_backends/golf_grip.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/hand_asset.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/joint_angles.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/posing.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}

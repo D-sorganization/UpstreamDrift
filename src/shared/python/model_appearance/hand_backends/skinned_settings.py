@@ -20,6 +20,7 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     PadConformSettings,
     PressSettings,
 )
+from src.shared.python.model_appearance.hand_backends.golf_grip import load_golf_grip
 from src.shared.python.model_appearance.hand_backends.joint_angles import FINGERS
 from src.shared.python.model_appearance.hand_backends.posing import CurlSettings
 
@@ -45,7 +46,8 @@ class SkinnedHumanSettings:
     crease_min_fold_deg: float
     scale_limits: tuple[float, float]
     palm_contact_azimuth_offset_deg: float
-    palm_centre_wrap_deg: float
+    palm_centre_wrap_deg: tuple[tuple[str, float], ...]
+    grip_taper: float
     index_station_at_spec_zero: float
     seat_max_tilt_deg: float
     seat_max_travel_m: float
@@ -92,6 +94,8 @@ class SkinnedHumanSettings:
     pair_finger_gap_m: float
     pair_overlap_max_swing_deg: float
     pair_spacing_passes: int
+    pair_spacing_pick: str
+    pair_final_slide_max_m: float
     pair_overlap_bias_m: float
     pair_skin_reach_m: float
     pair_yield_max_depth_m: float
@@ -229,6 +233,7 @@ def _side_close_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
 #: What the thumb's turn brings it to (``thumb.toward_index_target``).
 THUMB_TARGETS = ("azimuth", "knuckle", "fingertip")
 PAIR_OBSTACLES = ("skin", "capsules")
+PAIR_SPACING_PICKS = ("best", "last")
 
 
 def _one_of(raw: Any, allowed: tuple[str, ...], name: str) -> str:
@@ -277,10 +282,26 @@ def _pair_fields(pair: Mapping[str, Any]) -> dict[str, Any]:
         "pair_spacing_passes": int(
             _non_negative(pair["spacing_passes"], "spacing_passes")
         ),
+        "pair_final_slide_max_m": _non_negative(
+            pair["final_slide_max_m"], "pair.final_slide_max_m"
+        ),
+        "pair_spacing_pick": _one_of(
+            pair["spacing_pick"], PAIR_SPACING_PICKS, "pair.spacing_pick"
+        ),
         "pair_overlap_max_swing_deg": _non_negative(
             pair["overlap_max_swing_deg"], "overlap_max_swing_deg"
         ),
     }
+
+
+GRIP_SHAPES = ("tapered", "cylinder")
+
+
+def _grip_taper(shape: Any) -> float:
+    """Radius change per metre of the grip the hands hold (``grip.shape``)."""
+    if shape not in GRIP_SHAPES:
+        raise ValueError(f"grip.shape must be one of {GRIP_SHAPES}")
+    return load_golf_grip().taper if shape == "tapered" else 0.0
 
 
 def _thumb_turn_fields(thumb: Mapping) -> dict[str, Any]:
@@ -338,7 +359,11 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
         ),
         scale_limits=_pair(anthro["scale_limits"], "scale_limits"),
         palm_contact_azimuth_offset_deg=float(place["palm_contact_azimuth_offset_deg"]),
-        palm_centre_wrap_deg=float(place["palm_centre_wrap_deg"]),
+        grip_taper=_grip_taper(raw["grip"]["shape"]),
+        palm_centre_wrap_deg=tuple(
+            (side, _finite(place["palm_centre_wrap_deg"][side], side))
+            for side in ("lead", "trail")
+        ),
         index_station_at_spec_zero=_unit_interval(
             place["index_station_at_spec_zero"], "index_station_at_spec_zero"
         ),

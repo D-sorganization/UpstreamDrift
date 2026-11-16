@@ -7,12 +7,14 @@ import math
 import numpy as np
 import pytest
 
+from src.shared.python.grip_spec.types import GripSpec
 from src.shared.python.model_appearance.hand_backends.skinned_settings import (
     load_settings_mapping,
     settings_from_mapping,
 )
 from src.shared.python.model_appearance.hand_backends.skinned_targets import (
     scanned_turn,
+    targets_for,
 )
 
 pytestmark = pytest.mark.unit
@@ -80,4 +82,28 @@ def test_the_trail_hand_of_a_pair_has_its_own_palm_cup_limit() -> None:
     assert paired.thumb_azimuth_close_rad == alone.thumb_azimuth_close_rad
     raw["pair"] = {**raw["pair"], "palm_cup_max_deg": -1.0}
     with pytest.raises(ValueError, match="palm_cup_max_deg"):
+        settings_from_mapping(raw)
+
+
+def test_each_hand_is_turned_on_the_grip_by_its_own_wrap() -> None:
+    """``placement.palm_centre_wrap_deg`` is per hand: the two hands meet the
+    grip differently, so one turn cannot close both thumbs on their palms."""
+    raw = dict(load_settings_mapping())
+    wraps = {"lead": -30.0, "trail": -75.0}
+    raw["placement"] = {**raw["placement"], "palm_centre_wrap_deg": wraps}
+    settings = settings_from_mapping(raw)
+    spec = GripSpec.legacy()
+    offset = settings.palm_contact_azimuth_offset_deg
+    for side, v_azimuth in (
+        ("lead", -spec.lead.v_azimuth_deg),
+        ("trail", spec.trail.v_azimuth_deg),
+    ):
+        palm = targets_for(spec, side, settings).palm_azimuth_rad
+        assert math.degrees(palm) == pytest.approx(v_azimuth + offset + wraps[side])
+
+
+def test_a_wrap_must_be_given_for_both_hands() -> None:
+    raw = dict(load_settings_mapping())
+    raw["placement"] = {**raw["placement"], "palm_centre_wrap_deg": {"lead": 1.0}}
+    with pytest.raises((KeyError, ValueError, TypeError)):
         settings_from_mapping(raw)

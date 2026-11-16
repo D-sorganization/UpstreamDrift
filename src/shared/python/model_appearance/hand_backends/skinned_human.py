@@ -810,11 +810,10 @@ def _lay_thumb(
             miss = targets.thumb_azimuth_rad - math.atan2(pad[1], pad[0])
             return math.remainder(miss, math.tau), pose
 
-        steps, close = (
-            settings.thumb_toward_index_steps,
-            settings.thumb_azimuth_close_rad,
-        )
-        return _scanned_turn(missed, math.radians(max_turn_deg), steps, close)
+        most, close = math.radians(max_turn_deg), settings.thumb_azimuth_close_rad
+        steps = settings.thumb_toward_index_steps
+        chosen = _scanned_turn(missed, most, steps, close)
+        return laid(chosen[key], True)[2]  # leaves the hand aimed as chosen
     near, _, pose = laid(0.0)
     if not reach or near:
         return pose
@@ -947,14 +946,14 @@ def _solve_right_hand(
         raise ValueError("squeeze depth must be less than the grip radius")
 
     def bare(depth: float, **_: object) -> ObstacleDistance:
-        return cylinder_distance(grip_radius_m - depth)
+        return cylinder_distance(grip_radius_m - depth, settings.grip_taper)
 
     scene = pair.distance if pair is not None else bare
     obstacle = scene(0.0)
     pad = scene(0.0, palm=True) if paired else None
     points = pair.skin_points if pair is not None else None
     # Soft pads give: the palm seats, and the digits close, a little way in.
-    grip = cylinder_distance(grip_radius_m - settings.squeeze_palm_depth_m)
+    grip = bare(settings.squeeze_palm_depth_m)
     other = scene(settings.squeeze_palm_depth_m, palm=True) if paired else None
     soft = scene(settings.squeeze_finger_depth_m)
     thumb_radius_m = grip_radius_m - settings.squeeze_finger_depth_m
@@ -980,7 +979,7 @@ def _solve_right_hand(
     # Of a pair, the fingers that hold the grip aim for the grip itself; the
     # other hand is only in their way. The rest may come to rest on it.
     held = settings.pair_grip_fingers if paired else ()
-    mine = cylinder_distance(grip_radius_m - settings.squeeze_finger_depth_m)
+    mine = bare(settings.squeeze_finger_depth_m)
 
     def wrap(start: Mapping[str, float], samples: int | None = None) -> dict:
         """Wrap the fingers; with ``samples`` given, the first pass, on which
@@ -1160,9 +1159,8 @@ def _result(
     transforms = hand.transforms(solved.angles)
     club_from_grip = _club_from_build(spec, side, solved.targets.mirrored, z_m)
     asset = solved.skin_asset
-    faces = asset.faces.copy()
-    if solved.targets.mirrored:
-        faces = faces[:, ::-1].copy()
+    flip = -1 if solved.targets.mirrored else 1
+    faces = asset.faces[:, ::flip].copy()
     skin = _corrected_skin(solved, transforms, settings)
     vertices = skin @ club_from_grip[:3, :3].T + club_from_grip[:3, 3]
     require(bool(np.isfinite(vertices).all()), "skinned vertices must be finite")
@@ -1181,7 +1179,8 @@ def _result(
         vertex_normals=vertex_normals(vertices, faces),
         joint_angles=HandJointAngles.from_mapping(solved.angles),
         contact_gaps_m=_segment_gaps(hand, skin, solved.obstacle),
-        grip_radius_m=float(grip_radius_m),
+        grip_radius_m=float(grip_radius_m - settings.grip_taper * z_m),
+        grip_taper=settings.grip_taper,
         bone_transforms=transforms,
         frame_from_rest=club_from_grip @ hand.placement,
         rest_asset=asset,

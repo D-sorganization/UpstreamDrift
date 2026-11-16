@@ -11,6 +11,8 @@ capsule hand.
 
 from __future__ import annotations
 
+import dataclasses
+import logging
 from collections.abc import Callable
 from functools import partial
 
@@ -24,8 +26,11 @@ from src.shared.python.model_appearance.hand_backends.posing import (
     ObstacleDistance,
     capsule_union_distance,
     cylinder_distance,
-    inset_distance,
     skin_distance,
+)
+from src.shared.python.model_appearance.hand_backends.qa import (
+    hand_to_finger_gaps_m,
+    segment_grip_gap_m,
 )
 from src.shared.python.model_appearance.hand_backends.skinned_human import (
     _SEGMENTS,
@@ -45,6 +50,7 @@ from src.shared.python.model_appearance.hand_backends.skinning import vertex_nor
 from src.shared.python.model_appearance.hand_backends.types import HandVisualResult
 
 Array = NDArray[np.float64]
+logger = logging.getLogger(__name__)
 
 
 def _bone_capsules(
@@ -79,7 +85,7 @@ class _LeadObstacle:
         self, spec: GripSpec, grip_radius_m: float, settings: SkinnedHumanSettings
     ) -> None:
         self.spec, self.settings = spec, settings
-        self.grip = cylinder_distance(grip_radius_m)
+        self.radius_m, self.taper = grip_radius_m, settings.grip_taper
         self.lead = _solve_right_hand(spec, "lead", grip_radius_m, settings, None)
         #: The lead hand as it is shown, in the club frame.
         self.lead_result = _result(
@@ -149,9 +155,13 @@ class _LeadObstacle:
     ) -> ObstacleDistance:
         """Grip plus lead hand (see :meth:`hand`) for a trail hand ``spacing_m``
         away. ``inset_m`` shrinks the grip, not the lead hand, by a squeeze."""
-        grip = inset_distance(self.grip, inset_m)
+        grip = cylinder_distance(self.radius_at_m(spacing_m) - inset_m, self.taper)
         lead = self.hand(spacing_m, palm=palm)
         return lambda points: np.minimum(grip(points), lead(points))
+
+    def radius_at_m(self, spacing_m: float) -> float:
+        """The grip's radius where a hand ``spacing_m`` toward the head sits."""
+        return self.radius_m + self.taper * spacing_m
 
     def skin_points(self, spacing_m: float) -> Array:
         """The lead hand's skin vertices in the trail hand's build frame."""
@@ -233,6 +243,31 @@ def _settled_spacing_m(scene: _LeadObstacle, trail: _SolvedHand, at_m: float) ->
     return high
 
 
+def pair_fault_m(
+    trail: HandVisualResult, lead: HandVisualResult, settings: SkinnedHumanSettings
+) -> float:
+    """How badly a posed trail hand holds, as one length (zero is a clean hold).
+
+    The worst of three gaps: the widest between a middle or end finger segment
+    and what it should rest on (``contact_gaps_m``), the widest between such a
+    segment of the ``pair.grip_fingers`` and the grip itself (they reach the
+    grip, not the lead hand), and that between the lead forefinger and the
+    nearest of those fingers.
+    """
+    ends = ("_mid", "_dist")
+    seat = max(
+        [gap for name, gap in trail.contact_gaps_m.items() if name.endswith(ends)]
+        + [
+            segment_grip_gap_m(trail, f"{finger}{end}")
+            for finger in settings.pair_grip_fingers
+            for end in ends
+        ]
+    )
+    to_lead = hand_to_finger_gaps_m(trail, lead, "index")
+    touch = min((to_lead[f] for f in settings.pair_grip_fingers), default=0.0)
+    return max(seat, touch, 0.0)
+
+
 def build_grip_hands(
     grip_spec: GripSpec,
     *,
@@ -246,6 +281,12 @@ def build_grip_hands(
     and is posed around the grip *and* the lead hand, so it rests on it
     instead of passing through. Its ``contact_gaps_m`` are clearances to that
     combined obstacle.
+
+    Posing the trail hand moves its fingers, so the slide and the pose are
+    repeated ``pair.spacing_passes`` times, each pass ending with a slide of
+    up to ``pair.final_slide_max_m`` in the pose it found, and with
+    ``pair.spacing_pick`` set to ``best`` the pass that holds best is kept
+    (:func:`pair_fault_m`).
 
     Preconditions: as :func:`skinned_human.build_hand_visual`. Postconditions:
     the lead hand equals the single-hand build; the trail hand's frame is
@@ -263,18 +304,45 @@ def build_grip_hands(
             scene.skin_points(spacing_m),
         )
         return _solve_right_hand(
-            grip_spec, "trail", grip_radius_m, settings, None, around
+            grip_spec, "trail", scene.radius_at_m(spacing_m), settings, None, around
         )
+
+    def closed_up(trail: _SolvedHand, spacing_m: float) -> HandVisualResult:
+        """The posed hand, slid as it is up against the lead hand if that is
+        within ``pair.final_slide_max_m`` (posing it moved its fingers). The
+        slide is rigid, so keep it to the few millimetres the skin gives."""
+        to_m = _settled_spacing_m(scene, trail, spacing_m)
+        if to_m == spacing_m or (
+            abs(to_m - spacing_m) > settings.pair_final_slide_max_m
+        ):
+            return shown(trail, spacing_m)
+        there = dataclasses.replace(  # its skin gives way to the lead hand there
+            trail,
+            obstacle=scene.at(to_m),
+            palm_obstacle=scene.at(to_m, palm=True),
+            other_skin=scene.skin_points(to_m),
+        )
+        return shown(there, to_m)
+
+    def shown(trail: _SolvedHand, spacing_m: float) -> HandVisualResult:
+        radius_m = scene.radius_at_m(spacing_m)
+        return _result(trail, grip_spec, "trail", radius_m, settings, spacing_m)
 
     spacing = grip_spec.hand_spacing_m
     trail = posed(spacing)
     slides = settings.pair_max_spacing_close_m or settings.pair_max_spacing_adjust_m
-    for _ in range(settings.pair_spacing_passes if slides else 0):
-        if not settings.pair_grip_fingers:
-            break
+    passes = settings.pair_spacing_passes if slides else 0
+    tried: list[HandVisualResult] = []
+    for _ in range(passes if settings.pair_grip_fingers else 0):
         spacing = _settled_spacing_m(scene, trail, spacing)
         trail = posed(spacing)
-    return {
-        "lead": scene.lead_result,
-        "trail": _result(trail, grip_spec, "trail", grip_radius_m, settings, spacing),
-    }
+        tried.append(closed_up(trail, spacing))
+    if not tried:
+        tried.append(shown(trail, spacing))
+    kept = tried[-1]
+    if settings.pair_spacing_pick == "best":  # the earliest of the best
+        lead = scene.lead_result
+        faults = [pair_fault_m(hand, lead, settings) for hand in tried]
+        logger.debug("pair settle faults by pass (m): %s", faults)
+        kept = tried[int(np.argmin(faults))]
+    return {"lead": scene.lead_result, "trail": kept}

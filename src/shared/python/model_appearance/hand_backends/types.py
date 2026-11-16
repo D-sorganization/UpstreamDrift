@@ -40,6 +40,9 @@ class HandVisualResult:
     joint_angles: HandJointAngles | None = None
     contact_gaps_m: dict[str, float] = field(default_factory=dict)
     grip_radius_m: float | None = None
+    #: Change of the grip's radius per metre of ``z`` (a golf grip narrows
+    #: toward the head); ``grip_radius_m`` is the radius at ``z = 0``.
+    grip_taper: float = 0.0
     bone_transforms: NDArray[np.float64] | None = None
     frame_from_rest: NDArray[np.float64] | None = None
     rest_asset: SkinnedHandAsset | None = None

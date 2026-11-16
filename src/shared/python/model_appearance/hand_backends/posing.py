@@ -146,13 +146,22 @@ class CurlResult:
     order: tuple[str, ...]
 
 
-def cylinder_distance(radius_m: float) -> ObstacleDistance:
-    """Signed distance to an infinite cylinder of ``radius_m`` about ``z``."""
+def cylinder_distance(radius_m: float, taper: float = 0.0) -> ObstacleDistance:
+    """Distance to the grip about ``z``: ``radius_m`` at ``z = 0``, changing
+    by ``taper`` per metre of ``z`` (zero: an infinite cylinder; a golf grip
+    narrows toward the head by about 0.015). It is the true distance to the
+    cone, measured square to its surface, so a step of that length along the
+    gradient lands on it."""
     if not math.isfinite(radius_m) or radius_m <= 0.0:
         raise ValueError("cylinder radius must be positive and finite")
+    if not math.isfinite(taper):
+        raise ValueError("grip taper must be finite")
+
+    slant = math.hypot(1.0, taper)
 
     def distance(points: Array) -> Array:
-        return np.hypot(points[:, 0], points[:, 1]) - radius_m
+        radius = radius_m + taper * points[:, 2]
+        return (np.hypot(points[:, 0], points[:, 1]) - radius) / slant
 
     return distance
 

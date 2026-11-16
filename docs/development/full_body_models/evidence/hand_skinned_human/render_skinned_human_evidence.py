@@ -34,8 +34,10 @@ from src.shared.python.model_appearance.hand_backends.qa import (
     hand_pair_penetration_m,
     skinning_defects,
 )
+from src.shared.python.model_appearance.hand_backends.golf_grip import load_golf_grip
 from src.shared.python.model_appearance.hand_backends.skinned_human import (
     build_hand_visual,
+    default_settings,
 )
 from src.shared.python.model_appearance.hand_backends.skinned_pair import (
     build_grip_hands,
@@ -62,12 +64,16 @@ def _spec(roll_deg: float) -> GripSpec:
     the away-from-target side of the top of the grip, the trail thumb that
     far to the target side."""
     base = GripSpec.legacy()
-    thumb = float(load_hand_visual_quality()["owner_thumb_azimuth_deg"])
+    quality = load_hand_visual_quality()
+    thumb = float(quality["owner_thumb_azimuth_deg"])
     turned = {"shaft_roll_deg": roll_deg, "thumb_azimuth_deg": thumb}
+    heel = float(quality["owner_lead_heel_pad_depth_m"])
+    below = float(quality["owner_lead_below_cap_edge_m"])
     return dataclasses.replace(
         base,
-        lead=dataclasses.replace(base.lead, **turned),
+        lead=dataclasses.replace(base.lead, pinky_side_palm_depth_m=heel, **turned),
         trail=dataclasses.replace(base.trail, **turned),
+        lead_below_butt_m=below + load_golf_grip().cap_height_m,
     )
 
 
@@ -81,6 +87,18 @@ def _roll_tag(roll_deg: float) -> str:
     return f"roll{'m' if roll_deg < 0 else 'p'}{abs(round(roll_deg)):02d}"
 
 
+def _grip_drawing(render, quality):
+    """The golf grip as the renderer draws it, placed under the lead hand."""
+    grip = load_golf_grip()
+    return render.GripDrawing(
+        knots=grip.drawing_knots(float(quality["owner_lead_below_cap_edge_m"])),
+        cap_radius_m=grip.cap_radius_m,
+        cap_height_m=grip.cap_height_m,
+        cap_round_m=grip.cap_round_m,
+        vent_radius_m=grip.vent_radius_m,
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--renderer-root", default=os.environ.get("HAND_RENDERER_ROOT"))
@@ -91,6 +109,8 @@ def main() -> int:
     )
     quality = load_hand_visual_quality()
     radius = float(quality["grip_radius_m"])
+    taper = default_settings().grip_taper
+    drawing = _grip_drawing(render, quality)
     views = tuple(SETTINGS["views"])
     report: dict[str, object] = {"frames": {}, "hands": {}, "pairs": {}}
 
@@ -103,7 +123,7 @@ def main() -> int:
     def shoot(name: str, parts, view: str, basis, side: str) -> None:
         z = np.concatenate([p.mesh.vertices[:, 2] for p in parts])
         club = render.build_club_parts(
-            float(z.min()), float(z.max()), settings=settings, grip_radius_m=radius
+            float(z.min()), float(z.max()), settings=settings, grip=drawing
         )
         frame = render.render_scene(
             [*parts, *club], view, basis=basis, settings=settings, side=side
@@ -130,7 +150,10 @@ def main() -> int:
             )
             report["hands"][f"{side}_{tag}"] = {
                 "max_penetration_mm": round(
-                    1e3 * max_grip_cylinder_penetration_m(result.mesh.vertices, radius),
+                    1e3
+                    * max_grip_cylinder_penetration_m(
+                        result.mesh.vertices, radius, taper
+                    ),
                     3,
                 ),
                 "contact_gaps_mm": {

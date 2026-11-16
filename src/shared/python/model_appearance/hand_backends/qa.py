@@ -40,11 +40,21 @@ def load_hand_visual_quality() -> dict[str, object]:
 
 
 def max_grip_cylinder_penetration_m(
-    vertices: NDArray[np.float64], radius_m: float
+    vertices: NDArray[np.float64], radius_m: float, taper: float = 0.0
 ) -> float:
-    """Depth of the deepest vertex inside the grip cylinder about ``z`` (0 if none)."""
-    rho = np.hypot(vertices[:, 0], vertices[:, 1])
+    """Depth of the deepest vertex inside the grip about ``z`` (0 if none); the
+    grip is ``radius_m`` at ``z = 0`` and changes by ``taper`` per metre."""
+    rho = np.hypot(vertices[:, 0], vertices[:, 1]) - taper * vertices[:, 2]
     return float(max(0.0, radius_m - rho.min()))
+
+
+def _grip_radius_m(
+    result: HandVisualResult, z_m: NDArray[np.float64]
+) -> NDArray[np.float64]:
+    """The grip's radius at heights ``z_m`` in the result's frame."""
+    if result.grip_radius_m is None:
+        raise ValueError("result carries no grip radius")
+    return np.asarray(result.grip_radius_m + result.grip_taper * z_m, dtype=float)
 
 
 def grip_contact_area_m2(result: HandVisualResult, within_m: float) -> float:
@@ -53,9 +63,8 @@ def grip_contact_area_m2(result: HandVisualResult, within_m: float) -> float:
     if result.grip_radius_m is None:
         raise ValueError("result carries no grip radius")
     v, f = result.mesh.vertices, result.mesh.faces
-    near = (np.hypot(v[:, 0], v[:, 1]) - result.grip_radius_m <= within_m)[f].all(
-        axis=1
-    )
+    gap = np.hypot(v[:, 0], v[:, 1]) - _grip_radius_m(result, v[:, 2])
+    near = (gap <= within_m)[f].all(axis=1)
     tri = v[f[near]]
     cross = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
     return float(0.5 * np.linalg.norm(cross, axis=1).sum())
@@ -79,7 +88,7 @@ def median_facing_grip_gap_m(
     facing = inward >= min_facing
     if not facing.any():
         raise ValueError(f"no skin of {bones} faces the grip")
-    return float(np.median(rho[facing]) - result.grip_radius_m)
+    return float(np.median((rho - _grip_radius_m(result, v[:, 2]))[facing]))
 
 
 def finger_side_gaps_m(result: HandVisualResult) -> dict[str, float]:
@@ -152,6 +161,23 @@ def hand_to_finger_gaps_m(
     return {f: float(np.min(tree.query(skin(hand, f))[0])) for f in FINGERS}
 
 
+def segment_grip_gap_m(result: HandVisualResult, bone: str) -> float:
+    """Least distance from the skin of ``bone`` to the grip itself (radial,
+    against the taper); negative when that skin is inside the grip.
+
+    Precondition: the result carries a grip radius and ``bone`` owns skin.
+    """
+    if result.grip_radius_m is None:
+        raise ValueError("result carries no grip radius")
+    asset, _, _ = _audit_parts(result)
+    ids = asset.dominant_vertex_ids((bone,))
+    if len(ids) == 0:
+        raise ValueError(f"no skin follows {bone!r}")
+    skin = result.mesh.vertices[ids]
+    radius = _grip_radius_m(result, skin[:, 2])
+    return float(np.min(np.hypot(skin[:, 0], skin[:, 1]) - radius))
+
+
 def min_bone_grip_clearance_m(result: HandVisualResult, samples: int = 5) -> float:
     """Least distance from a finger or thumb bone axis to the grip surface.
 
@@ -169,8 +195,9 @@ def min_bone_grip_clearance_m(result: HandVisualResult, samples: int = 5) -> flo
         rest = (1.0 - t) * asset.bone_heads[i] + t * asset.bone_tails[i]
         posed = rest @ transforms[i][:3, :3].T + transforms[i][:3, 3]
         club = posed @ frame[:3, :3].T + frame[:3, 3]
-        least = min(least, float(np.hypot(club[:, 0], club[:, 1]).min()))
-    return float(least - result.grip_radius_m)
+        gap = np.hypot(club[:, 0], club[:, 1]) - _grip_radius_m(result, club[:, 2])
+        least = min(least, float(gap.min()))
+    return float(least)
 
 
 def skinning_defects(

@@ -24,9 +24,15 @@
       "min_fold_deg": 40.0
     }
   },
+  "grip": {
+    "shape": "tapered"
+  },
   "placement": {
     "palm_contact_azimuth_offset_deg": 55.0,
-    "palm_centre_wrap_deg": 37.0,
+    "palm_centre_wrap_deg": {
+      "lead": 37.0,
+      "trail": 37.0
+    },
     "index_station_at_spec_zero": 0.45,
     "seat_max_tilt_deg": 30.0,
     "seat_max_travel_m": 0.07,
@@ -125,8 +131,10 @@
     ],
     "max_spacing_adjust_m": 0.03,
     "max_spacing_close_m": 0.03,
-    "finger_gap_m": 0.0003,
-    "spacing_passes": 1,
+    "finger_gap_m": 0.0006,
+    "spacing_passes": 3,
+    "spacing_pick": "best",
+    "final_slide_max_m": 0.004,
     "obstacle": "skin",
     "skin_margin_m": 0.0,
     "skin_reach_m": 0.015,
@@ -136,7 +144,7 @@
     "palm_cup_max_deg": 70.0,
     "overlap_max_swing_deg": 30.0,
     "overlap_bias_m": 0.0025,
-    "capsule_margin_m": 0.0005
+    "capsule_margin_m": 0.0006
   },
   "framing": {
     "excluded_bones": [
@@ -174,7 +182,9 @@
         "meta_index",
         "meta_middle",
         "meta_ring",
-        "meta_little"
+        "meta_little",
+        "thumb_meta",
+        "thumb_prox"
       ],
       "reach_m": 0.012,
       "clearance_m": 0.0003,

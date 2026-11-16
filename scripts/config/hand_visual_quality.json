@@ -1,5 +1,7 @@
 {
-  "grip_radius_m": 0.014,
+  "grip_radius_m": 0.011292,
+  "owner_lead_below_cap_edge_m": 0.06,
+  "owner_lead_heel_pad_depth_m": 0.035,
   "contact_tolerance_m": 0.0015,
   "penetration_tolerance_m": 0.0005,
   "min_triangle_area_m2": 1e-10,

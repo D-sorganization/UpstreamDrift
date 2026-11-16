@@ -46,7 +46,7 @@ def targets_for(
         palm_azimuth_rad=math.radians(
             v_azimuth
             + settings.palm_contact_azimuth_offset_deg
-            + settings.palm_centre_wrap_deg
+            + dict(settings.palm_centre_wrap_deg)[side]
         ),
         thumb_azimuth_rad=math.radians(-hand.thumb_azimuth_deg),
         cross_angle_deg=hand.club_cross_angle_deg,
