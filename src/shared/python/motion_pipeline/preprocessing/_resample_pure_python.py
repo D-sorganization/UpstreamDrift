@@ -16,6 +16,7 @@ from ._frame_arrays import (
     estimate_fps as _estimate_fps,
     keypoints_to_array as _keypoints_to_array,
     markers_to_array as _markers_to_array,
+    resample_timestamps as _resample_timestamps,
     vectorized_interp_axes as _vectorized_interp_axes,
 )
 
@@ -60,10 +61,8 @@ def _resample_keypoints(
         source_fps = _estimate_fps(seq.frames)
 
     # Compute new timestamps
-    duration = seq.frames[-1].timestamp - seq.frames[0].timestamp
-    num_new_frames = int(duration * target_fps) + 1
-    new_timestamps = np.linspace(
-        seq.frames[0].timestamp, seq.frames[-1].timestamp, num_new_frames
+    new_timestamps = _resample_timestamps(
+        seq.frames[0].timestamp, seq.frames[-1].timestamp, target_fps
     )
 
     # Extract data arrays
@@ -105,10 +104,8 @@ def _resample_markers(
         source_fps = _estimate_fps(traj.frames)
 
     # Compute new timestamps
-    duration = traj.frames[-1].timestamp - traj.frames[0].timestamp
-    num_new_frames = int(duration * target_fps) + 1
-    new_timestamps = np.linspace(
-        traj.frames[0].timestamp, traj.frames[-1].timestamp, num_new_frames
+    new_timestamps = _resample_timestamps(
+        traj.frames[0].timestamp, traj.frames[-1].timestamp, target_fps
     )
 
     # Extract data arrays

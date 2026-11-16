@@ -84,6 +84,26 @@ def vectorized_interp_axes(
     return data[lo] + t * (data[hi] - data[lo])
 
 
+#: Slack absorbing float error when a span is an exact multiple of the period
+#: (``0.29 * 100`` evaluates to ``28.999999999999996``).
+_GRID_COUNT_TOLERANCE = 1e-9
+
+
+def resample_timestamps(start: float, stop: float, target_fps: float) -> np.ndarray:
+    """Return timestamps ``start + k / target_fps`` that do not pass ``stop``.
+
+    The step is exactly ``1 / target_fps``; the final sample is the last one
+    at or before ``stop`` (the span is not stretched to hit ``stop``).
+
+    Raises:
+        ValueError: ``target_fps`` is not a positive finite number.
+    """
+    if not (np.isfinite(target_fps) and target_fps > 0.0):
+        raise ValueError(f"target_fps must be positive and finite, got {target_fps!r}")
+    count = int(np.floor((stop - start) * target_fps + _GRID_COUNT_TOLERANCE)) + 1
+    return start + np.arange(count) / target_fps
+
+
 def estimate_fps(frames: list) -> float:
     """Estimate FPS from frame timestamps."""
     if len(frames) < 2:
