@@ -30,18 +30,17 @@ This is **not** a production skinned grip visual. Myo_sim ships STL bones only; 
 
 ### Source Modules (`src/shared/python/model_appearance/hand_backends/`)
 
-| Module               | Role                                                                                                                                                               |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `myohand.py`         | `build_hand_visual`, `penetration_depth_m`, `finger_pair_penetration_m`, `mirror_y_vertices`; exports `_model_and_data`, `_pipeline_transform` for skeleton export |
-| `registration.py`    | `kabsch_rigid_transform`, `registration_to_grip_hand_mesh` — aligns posed bones to **curled capsule** from `build_grip_hand_mesh`                                  |
-| `skeleton_export.py` | `export_myohand_skeleton`, `export_bilateral_myohand_skeleton` — JSON in grip hand frame                                                                           |
-| `joint_mapping.py`   | `grip_spec_to_myohand_joint_targets`, `anatomical_mirror_for_side`                                                                                                 |
-| `mujoco_extract.py`  | `load_myohand_model`, `apply_joint_targets`, `extract_hand_bone_meshes`, `anthropometric_scale_matrix`                                                             |
-| `render_evidence.py` | Interim lit matplotlib renderer (`LitRenderSettings`, `render_scene_png`) — **temporary** until shared renderer lane lands                                         |
-| `registry.py`        | `register_hand_backend`, `get_hand_backend(..., allow_research=True)`, `default_hand_backend()` → **capsule**                                                      |
-| `capsule.py`         | Default visual backend wrapper                                                                                                                                     |
-| `settings.py`        | `MyoHandVisualSettings`, `default_myohand_settings()` (cached, loads JSON)                                                                                         |
-| `types.py`           | `BACKEND_MYOHAND`, `MYOHAND_BACKEND_INFO` (`research_only=True`)                                                                                                   |
+| Module               | Role                                                                                                                                                                                                                                                        |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `myohand.py`         | `build_hand_visual` (ADR-0057 contract, one mesh), `build_myohand_bone_meshes` (per-bone dict), `register()`, `penetration_depth_m`, `finger_pair_penetration_m`, `mirror_y_vertices`; exports `_model_and_data`, `_pipeline_transform` for skeleton export |
+| `registration.py`    | `kabsch_rigid_transform`, `registration_to_grip_hand_mesh` — aligns posed bones to **curled capsule** from `build_grip_hand_mesh`                                                                                                                           |
+| `skeleton_export.py` | `export_myohand_skeleton`, `export_bilateral_myohand_skeleton` — JSON in grip hand frame                                                                                                                                                                    |
+| `joint_mapping.py`   | `grip_spec_to_myohand_joint_targets`, `anatomical_mirror_for_side`                                                                                                                                                                                          |
+| `mujoco_extract.py`  | `load_myohand_model`, `apply_joint_targets`, `extract_hand_bone_meshes`, `anthropometric_scale_matrix`                                                                                                                                                      |
+| `render_evidence.py` | Interim lit matplotlib renderer (`LitRenderSettings`, `render_scene_png`) — **temporary** until shared renderer lane lands                                                                                                                                  |
+| `registry.py`        | Shared ADR-0057 registry (#15197): `myohand` registers with `default_enabled=False` when myo_sim assets exist; build it by name                                                                                                                             |
+| `settings.py`        | `MyoHandVisualSettings`, `default_myohand_settings()` (cached, loads JSON)                                                                                                                                                                                  |
+| `types.py`           | Shared `HandSide`, `HandVisualResult` (ADR-0057 A2)                                                                                                                                                                                                         |
 
 ### Settings
 
@@ -97,22 +96,22 @@ python3 -m pytest tests/unit/model_appearance/hand_backends/test_myohand_visual_
 python3 -m ruff check src/shared/python/model_appearance/hand_backends/
 ```
 
-| Test                                                       | Intent                                                             |
-| ---------------------------------------------------------- | ------------------------------------------------------------------ |
-| `test_default_backend_is_capsule_not_myohand`              | Registry default                                                   |
-| `test_research_backend_requires_allow_flag`                | `get_hand_backend("myohand")` raises without `allow_research=True` |
-| `test_skeleton_export_has_all_canonical_joints`            | JSON export completeness                                           |
-| `test_meshes_have_finite_watertight_parts`                 | Mesh sanity                                                        |
-| `test_palm_finger_depth_moves_cmc_and_wrist_joints`        | GripSpec coupling                                                  |
-| `test_thumb_straightness_moves_thumb_mp_ip`                | Thumb mapping                                                      |
-| `test_lead_trail_mirroring_under_right_handed_spec`        | `firstmc` centroid separation > 12 mm                              |
-| `test_shaft_roll_rotates_hand_about_grip_z`                | Roll after registration (Kabsch seed excludes roll)                |
-| `test_club_penetration_within_tolerance`                   | Radial penetration metric (see §c)                                 |
-| `test_finger_parts_do_not_interpenetrate_beyond_tolerance` | Inter-bone clearance                                               |
-| `test_left_handed_mirrors_shaft_roll_on_build`             | Left-handed smoke                                                  |
-| `test_mirror_y_swaps_hand_side`                            | Mirror helper                                                      |
-| `test_joint_angle_override_is_honored`                     | Overrides                                                          |
-| `test_anthropometric_scaling_changes_extent`               | Scale matrix monotonicity (not final mesh extent)                  |
+| Test                                                       | Intent                                                           |
+| ---------------------------------------------------------- | ---------------------------------------------------------------- |
+| `test_myohand_is_registered_but_disabled_by_default`       | Listed only with `include_disabled=True`                         |
+| `test_disabled_backend_still_builds_by_name`               | `build_hand_visual(..., backend="myohand")` builds the bone mesh |
+| `test_skeleton_export_has_all_canonical_joints`            | JSON export completeness                                         |
+| `test_meshes_have_finite_watertight_parts`                 | Mesh sanity                                                      |
+| `test_palm_finger_depth_moves_cmc_and_wrist_joints`        | GripSpec coupling                                                |
+| `test_thumb_straightness_moves_thumb_mp_ip`                | Thumb mapping                                                    |
+| `test_lead_trail_mirroring_under_right_handed_spec`        | `firstmc` centroid separation > 12 mm                            |
+| `test_shaft_roll_rotates_hand_about_grip_z`                | Roll after registration (Kabsch seed excludes roll)              |
+| `test_club_penetration_within_tolerance`                   | Radial penetration metric (see §c)                               |
+| `test_finger_parts_do_not_interpenetrate_beyond_tolerance` | Inter-bone clearance                                             |
+| `test_left_handed_mirrors_shaft_roll_on_build`             | Left-handed smoke                                                |
+| `test_mirror_y_swaps_hand_side`                            | Mirror helper                                                    |
+| `test_joint_angle_override_is_honored`                     | Overrides                                                        |
+| `test_anthropometric_scaling_changes_extent`               | Scale matrix monotonicity (not final mesh extent)                |
 
 ### Evidence PNGs
 
@@ -316,8 +315,8 @@ After **any** change to posing, registration, rendering, or evidence scripts:
 | Epic                     | [#15150](https://github.com/D-sorganization/UpstreamDrift/issues/15150)                                   |
 | Skeleton JSON            | `docs/development/full_body_models/evidence/hand_backend_myohand/myohand_skeleton_grip_spec_neutral.json` |
 | Base branch (at handoff) | `cursor/hrg-gb1b-shaft-roll-2882`                                                                         |
-| Default backend          | `capsule`                                                                                                 |
-| Opt-in myohand           | `get_hand_backend("myohand", allow_research=True)`                                                        |
+| Default drawn hand       | capsule mesh (outside the registry, ADR-0057 A3)                                                          |
+| Opt-in myohand           | `build_hand_visual(spec, side, grip_radius_m=r, backend="myohand")`                                       |
 
 ## Cycle 1 Calibration Update
 

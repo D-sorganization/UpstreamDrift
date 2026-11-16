@@ -19,7 +19,7 @@ from src.shared.python.model_appearance.hand_backends.mujoco_extract import (
 from src.shared.python.model_appearance.hand_backends.settings import (
     MyoHandVisualSettings,
 )
-from src.shared.python.model_appearance.hand_backends.types import HandVisualSide
+from src.shared.python.model_appearance.hand_backends.types import HandSide
 
 
 def kabsch_rigid_transform(source: np.ndarray, target: np.ndarray) -> np.ndarray:
@@ -56,7 +56,7 @@ def _subsample(verts: np.ndarray, count: int, seed: int) -> np.ndarray:
 
 def registration_to_grip_hand_mesh(
     spec: GripSpec,
-    side: HandVisualSide,
+    side: HandSide,
     raw_bones: dict[str, Mesh],
     *,
     cfg: MyoHandVisualSettings,

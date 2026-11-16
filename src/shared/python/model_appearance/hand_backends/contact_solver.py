@@ -21,7 +21,7 @@ from src.shared.python.model_appearance.hand_backends.mujoco_extract import (
 from src.shared.python.model_appearance.hand_backends.settings import (
     MyoHandVisualSettings,
 )
-from src.shared.python.model_appearance.hand_backends.types import HandVisualSide
+from src.shared.python.model_appearance.hand_backends.types import HandSide
 
 Array = NDArray[np.float64]
 
@@ -141,7 +141,7 @@ def _unit(vec: Array) -> Array:
 
 
 def _handed_curl_and_theta(
-    spec_rh: GripSpec, side: HandVisualSide, cfg: MyoHandVisualSettings
+    spec_rh: GripSpec, side: HandSide, cfg: MyoHandVisualSettings
 ) -> tuple[float, float, float]:
     hand_spec = spec_rh.lead if side == "lead" else spec_rh.trail
     curl = 1.0 if side == "trail" else -1.0
@@ -198,7 +198,7 @@ def _model_triad_and_zero_bones(
 
 def anatomical_grip_mount_transform(
     spec_rh: GripSpec,
-    side: HandVisualSide,
+    side: HandSide,
     raw0: dict[str, Mesh],
     r_model_t: Array,
     *,
@@ -468,7 +468,7 @@ def _solve_thumb(
     cache: _ModelCache,
     q: dict[str, float],
     spec_rh: GripSpec,
-    side: HandVisualSide,
+    side: HandSide,
     rot: Array,
     trans: Array,
     locked: set[str],
@@ -624,7 +624,7 @@ def solve_myohand_contact_pose(
     model: Any,
     data: Any,
     spec_rh: GripSpec,
-    side: HandVisualSide,
+    side: HandSide,
     seed_targets: dict[str, float],
     *,
     cfg: MyoHandVisualSettings,

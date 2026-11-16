@@ -15,7 +15,9 @@ from src.shared.python.model_appearance.club_assembly import (
 from src.shared.python.model_appearance.geometry import Mesh
 from src.shared.python.model_appearance.grip_hands import grip_hand_frame
 from src.shared.python.model_appearance.grip_pose import Hand
-from src.shared.python.model_appearance.hand_backends.myohand import build_hand_visual
+from src.shared.python.model_appearance.hand_backends.myohand import (
+    build_myohand_bone_meshes,
+)
 from src.shared.python.model_appearance.hand_backends.render_evidence import (
     LitRenderSettings,
     render_scene_png,
@@ -44,9 +46,9 @@ def _place_hand_on_club(
     club: ClubAssembly, spec: GripSpec, side: str
 ) -> dict[str, Mesh]:
     hand = Hand.LEAD if side == "lead" else Hand.TRAIL
-    # Pass zero-roll pose so shaft_roll_deg is applied once inside build_hand_visual.
+    # Pass zero-roll pose so shaft_roll_deg is applied once inside build_myohand_bone_meshes.
     frame = grip_hand_frame(club, hand, _zero_roll_spec(spec).to_grip_pose())
-    local = build_hand_visual(spec, side)  # type: ignore[arg-type]
+    local = build_myohand_bone_meshes(spec, side)  # type: ignore[arg-type]
     rot, trans = frame[:3, :3], frame[:3, 3]
     return {
         f"{side}_{name}": Mesh(mesh.vertices @ rot.T + trans, mesh.faces)

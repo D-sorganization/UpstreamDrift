@@ -9,7 +9,7 @@ import pytest
 
 from src.shared.python.grip_spec import GripSpec
 from src.shared.python.model_appearance.hand_backends.myohand import (
-    build_hand_visual,
+    build_myohand_bone_meshes,
     myohand_assets_ready,
 )
 from src.shared.python.model_appearance.hand_backends.settings import (
@@ -61,7 +61,7 @@ def test_thumb_bone_chords_clear_grip_cylinder_and_distal_wraps(
         if side == "lead"
         else replace(base, trail=replace(base.trail, shaft_roll_deg=roll_deg))
     )
-    meshes = build_hand_visual(spec, side)  # type: ignore[arg-type]
+    meshes = build_myohand_bone_meshes(spec, side)  # type: ignore[arg-type]
 
     c_mc = meshes["firstmc"].vertices.mean(axis=0)
     c_px = meshes["proximal_thumb"].vertices.mean(axis=0)

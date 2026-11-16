@@ -18,18 +18,16 @@ from src.shared.python.model_appearance.hand_backends.joint_mapping import (
     grip_spec_to_myohand_joint_angles,
 )
 from src.shared.python.model_appearance.hand_backends.myohand import (
-    build_hand_visual,
+    build_myohand_bone_meshes,
     finger_pair_penetration_m,
     mirror_y_vertices,
     myohand_assets_ready,
     penetration_depth_m,
 )
 from src.shared.python.model_appearance.hand_backends.registry import (
-    BACKEND_MYOHAND,
-    default_hand_backend,
-    get_hand_backend,
-    hand_backend_info,
-    hand_backend_names,
+    build_hand_visual,
+    get_hand_visual_backend,
+    list_hand_visual_backends,
 )
 from src.shared.python.model_appearance.hand_backends.skeleton_export import (
     export_bilateral_myohand_skeleton,
@@ -48,19 +46,21 @@ pytestmark = [
 ]
 
 
-def test_default_backend_is_capsule_not_myohand() -> None:
-    assert hand_backend_names() == ("capsule",)
-    assert default_hand_backend()(GripSpec.legacy(), "trail", None)
-    assert BACKEND_MYOHAND in hand_backend_names(include_research=True)
+def test_myohand_is_registered_but_disabled_by_default() -> None:
+    assert "myohand" not in list_hand_visual_backends()
+    assert "myohand" in list_hand_visual_backends(include_disabled=True)
+    assert get_hand_visual_backend("myohand").default_enabled is False
 
 
-def test_research_backend_requires_allow_flag() -> None:
-    assert hand_backend_info(BACKEND_MYOHAND).research_only
-    with pytest.raises(PermissionError, match="13763"):
-        get_hand_backend(BACKEND_MYOHAND)
-    builder = get_hand_backend(BACKEND_MYOHAND, allow_research=True)
-    meshes = builder(GripSpec.legacy(), "trail", None)
-    assert len(meshes) >= 20
+def test_disabled_backend_still_builds_by_name() -> None:
+    result = build_hand_visual(
+        GripSpec.legacy(), "trail", grip_radius_m=0.012, backend="myohand"
+    )
+    assert result.backend == "myohand"
+    assert result.skin_rgb == default_myohand_settings().bone_rgb
+    bones = build_myohand_bone_meshes(GripSpec.legacy(), "trail")
+    assert len(bones) >= 20
+    assert len(result.mesh.vertices) == sum(len(m.vertices) for m in bones.values())
 
 
 def test_skeleton_export_has_all_canonical_joints() -> None:
@@ -74,7 +74,7 @@ def test_skeleton_export_has_all_canonical_joints() -> None:
 
 
 def test_meshes_have_finite_watertight_parts() -> None:
-    meshes = build_hand_visual(GripSpec.legacy(), "lead")
+    meshes = build_myohand_bone_meshes(GripSpec.legacy(), "lead")
     for name, mesh in meshes.items():
         assert mesh.vertices.shape[1] == 3
         assert mesh.faces.shape[1] == 3
@@ -116,8 +116,8 @@ def test_lead_trail_mirroring_under_right_handed_spec() -> None:
     spec = GripSpec.legacy()
     assert anatomical_mirror_for_side(spec, "lead")
     assert not anatomical_mirror_for_side(spec, "trail")
-    lead = build_hand_visual(spec, "lead")
-    trail = build_hand_visual(spec, "trail")
+    lead = build_myohand_bone_meshes(spec, "lead")
+    trail = build_myohand_bone_meshes(spec, "trail")
     # Kabsch to per-hand capsule reference centres both hands; use thumb MC.
     lm = lead["firstmc"].vertices.mean(axis=0)
     tm = trail["firstmc"].vertices.mean(axis=0)
@@ -130,8 +130,10 @@ def test_shaft_roll_rotates_hand_about_grip_z() -> None:
     rolled = GripSpec.legacy(
         trail=HandGripSpec(shaft_roll_deg=20.0),
     )
-    base = concat_meshes(*build_hand_visual(base_spec, "trail").values()).vertices
-    moved = concat_meshes(*build_hand_visual(rolled, "trail").values()).vertices
+    base = concat_meshes(
+        *build_myohand_bone_meshes(base_spec, "trail").values()
+    ).vertices
+    moved = concat_meshes(*build_myohand_bone_meshes(rolled, "trail").values()).vertices
     axis = APPEARANCE_GRIP_SHAFT_AXIS / np.linalg.norm(APPEARANCE_GRIP_SHAFT_AXIS)
     t0 = base - base.mean(0)
     t1 = moved - moved.mean(0)
@@ -150,14 +152,14 @@ def test_club_penetration_within_tolerance() -> None:
     cfg = default_myohand_settings()
     spec = GripSpec.legacy()
     for side in ("lead", "trail"):
-        meshes = build_hand_visual(spec, side)  # type: ignore[arg-type]
+        meshes = build_myohand_bone_meshes(spec, side)  # type: ignore[arg-type]
         pen = penetration_depth_m(meshes, club_radius_m=cfg.club_cylinder_radius_m)
         assert pen <= cfg.penetration_tolerance_m, (side, pen)
 
 
 def test_finger_parts_do_not_interpenetrate_beyond_tolerance() -> None:
     cfg = default_myohand_settings()
-    meshes = build_hand_visual(GripSpec.legacy(), "trail")
+    meshes = build_myohand_bone_meshes(GripSpec.legacy(), "trail")
     pairs = (
         ("proxph2", "proxph3"),
         ("proxph2", "proximal_thumb"),
@@ -172,13 +174,13 @@ def test_finger_parts_do_not_interpenetrate_beyond_tolerance() -> None:
 
 def test_left_handed_mirrors_shaft_roll_on_build() -> None:
     spec = GripSpec.legacy(handedness="left", trail=HandGripSpec(shaft_roll_deg=15.0))
-    meshes = build_hand_visual(spec, "trail")
+    meshes = build_myohand_bone_meshes(spec, "trail")
     assert len(meshes) > 0
 
 
 def test_mirror_y_swaps_hand_side() -> None:
     spec = GripSpec.legacy()
-    trail = concat_meshes(*build_hand_visual(spec, "trail").values())
+    trail = concat_meshes(*build_myohand_bone_meshes(spec, "trail").values())
     mirrored = mirror_y_vertices(trail)
     assert mirrored.vertices[:, 1].mean() == pytest.approx(
         -trail.vertices[:, 1].mean(), rel=0, abs=1e-9
@@ -187,8 +189,8 @@ def test_mirror_y_swaps_hand_side() -> None:
 
 def test_joint_angle_override_is_honored() -> None:
     spec = GripSpec.legacy()
-    open_hand = build_hand_visual(spec, "trail", {"mcp2_flexion": 0.0})
-    curled = build_hand_visual(spec, "trail", {"mcp2_flexion": 1.2})
+    open_hand = build_myohand_bone_meshes(spec, "trail", {"mcp2_flexion": 0.0})
+    curled = build_myohand_bone_meshes(spec, "trail", {"mcp2_flexion": 1.2})
     o = open_hand["proxph2"].vertices.mean(0)
     c = curled["proxph2"].vertices.mean(0)
     assert np.linalg.norm(c - o) > 0.005

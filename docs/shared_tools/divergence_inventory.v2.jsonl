@@ -1363,7 +1363,6 @@
 {"path": "model_appearance/hand_backends/__init__.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/assets/myohand/LICENSE", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/assets/myohand/NOTICE", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
-{"path": "model_appearance/hand_backends/capsule.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/contact_solver.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/joint_angles.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/joint_mapping.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}

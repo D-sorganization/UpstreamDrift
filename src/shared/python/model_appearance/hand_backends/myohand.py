@@ -21,7 +21,7 @@ from src.shared.python.grip_spec.shaft_roll import (
     resolved_shaft_roll_deg,
 )
 from src.shared.python.grip_spec.types import GripSpec
-from src.shared.python.model_appearance.geometry import Mesh
+from src.shared.python.model_appearance.geometry import Mesh, concat_meshes
 from src.shared.python.model_appearance.hand_backends.contact_solver import (
     solve_myohand_contact_pose,
 )
@@ -41,10 +41,22 @@ from src.shared.python.model_appearance.hand_backends.settings import (
     MyoHandVisualSettings,
     default_myohand_settings,
 )
-from src.shared.python.model_appearance.hand_backends.types import (
-    HandVisualMeshes,
-    HandVisualSide,
+from src.shared.python.model_appearance.hand_backends.joint_angles import (
+    HandJointAngles,
 )
+from src.shared.python.model_appearance.hand_backends.registry import (
+    HandVisualBackend,
+    register_hand_visual_backend,
+)
+from src.shared.python.model_appearance.hand_backends.types import (
+    HandSide,
+    HandVisualResult,
+)
+
+#: Posed bone meshes keyed by MyoHand body name.
+HandVisualMeshes = dict[str, Mesh]
+
+BACKEND_NAME = "myohand"
 
 
 def _check_grip_spec(spec: object) -> GripSpec:
@@ -72,7 +84,7 @@ def _model_and_data(
 
 def _pipeline_transform(
     spec: GripSpec,
-    side: HandVisualSide,
+    side: HandSide,
     raw_bones: dict[str, Mesh],
     cfg: MyoHandVisualSettings,
     joint_angles: Mapping[str, float] | None,
@@ -101,7 +113,7 @@ def _canonical_rh_spec(spec: GripSpec) -> GripSpec:
 
 def _resolved_pose_and_transform(
     spec: GripSpec,
-    side: HandVisualSide,
+    side: HandSide,
     cfg: MyoHandVisualSettings,
     joint_angles: Mapping[str, float] | None,
 ) -> tuple[Any, Any, dict[str, Mesh], dict[str, float], np.ndarray]:
@@ -159,9 +171,9 @@ def _resolved_pose_and_transform(
     return model, data, raw, targets, m_total
 
 
-def build_hand_visual(
+def build_myohand_bone_meshes(
     grip_spec: GripSpec,
-    side: HandVisualSide,
+    side: HandSide,
     joint_angles: Mapping[str, float] | None = None,
     *,
     settings: MyoHandVisualSettings | None = None,
@@ -182,6 +194,60 @@ def build_hand_visual(
         spec, side, cfg, joint_angles
     )
     return transform_meshes(raw, m_total)
+
+
+def build_hand_visual(
+    grip_spec: GripSpec,
+    side: HandSide,
+    joint_angles: HandJointAngles | Mapping[str, float] | None = None,
+    *,
+    grip_radius_m: float,
+    skin_rgb: tuple[float, float, float] | None = None,
+    settings: MyoHandVisualSettings | None = None,
+) -> HandVisualResult:
+    """All posed MyoHand bones as one mesh (ADR-0057 A2 contract).
+
+    Opt-in only (``default_enabled=False``) until HX6 #13763 clears the MoBL
+    lineage. ``skin_rgb`` defaults to the settings' bone colour.
+    """
+    cfg = default_myohand_settings() if settings is None else settings
+    cfg = replace(cfg, grip_radius_m=float(grip_radius_m))
+    angles = (
+        joint_angles.as_mapping()
+        if isinstance(joint_angles, HandJointAngles)
+        else joint_angles
+    )
+    bones = build_myohand_bone_meshes(grip_spec, side, angles, settings=cfg)
+    rgb = cfg.bone_rgb if skin_rgb is None else skin_rgb
+    return HandVisualResult(
+        backend=BACKEND_NAME,
+        side=side,
+        mesh=concat_meshes(*(bones[name] for name in sorted(bones))),
+        skin_rgb=(float(rgb[0]), float(rgb[1]), float(rgb[2])),
+        grip_radius_m=cfg.grip_radius_m,
+    )
+
+
+def register() -> None:
+    """Add MyoHand to the shared registry, disabled by default (ADR-0057 A3).
+
+    Registers only when the myo_sim submodule is initialised, so a checkout
+    without the MoBL assets lists no backend it cannot build.
+    """
+    if not myohand_assets_ready():
+        return
+    register_hand_visual_backend(
+        HandVisualBackend(
+            name=BACKEND_NAME,
+            builder=build_hand_visual,
+            description=(
+                "MyoHub myo_sim anatomical bone meshes (MoBL lineage); "
+                "research-only until HX6 #13763 owner sign-off"
+            ),
+            capabilities=frozenset({"self_posing", "explicit_joint_angles"}),
+            default_enabled=False,
+        )
+    )
 
 
 def myohand_assets_ready(settings: MyoHandVisualSettings | None = None) -> bool:
@@ -227,7 +293,11 @@ __all__ = [
     "_model_and_data",
     "_pipeline_transform",
     "_resolved_pose_and_transform",
+    "BACKEND_NAME",
+    "HandVisualMeshes",
     "build_hand_visual",
+    "build_myohand_bone_meshes",
+    "register",
     "finger_pair_penetration_m",
     "mirror_y_vertices",
     "myohand_assets_ready",

@@ -19,10 +19,10 @@ from src.shared.python.model_appearance.grip_hand_mesh import (
 )
 from src.shared.python.model_appearance.grip_pose import Hand
 
-HandVisualSide = Literal["lead", "trail"]
+HandSide = Literal["lead", "trail"]
 
 
-def _hand_for_side(side: HandVisualSide, spec: GripSpec) -> Hand:
+def _hand_for_side(side: HandSide, spec: GripSpec) -> Hand:
     if side == "lead":
         return Hand.LEAD
     if side == "trail":
@@ -41,7 +41,7 @@ def _mesh_params(spec: GripSpec) -> HandMeshParams:
 
 def grip_spec_to_myohand_joint_angles(
     spec: GripSpec,
-    side: HandVisualSide,
+    side: HandSide,
     *,
     grip_radius_m: float,
     params: HandMeshParams | None = None,
@@ -111,7 +111,7 @@ def _clamp_like_adapter(joint: str, value: float) -> float:
     return float(np.clip(value, lo, hi))
 
 
-def anatomical_mirror_for_side(spec: GripSpec, side: HandVisualSide) -> bool:
+def anatomical_mirror_for_side(spec: GripSpec, side: HandSide) -> bool:
     """Whether to sagittally mirror the anatomical right-hand chain."""
     if spec.handedness == "right":
         return side == "lead"

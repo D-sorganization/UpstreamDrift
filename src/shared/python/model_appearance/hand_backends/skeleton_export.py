@@ -14,7 +14,7 @@ from src.shared.python.model_appearance.hand_backends.settings import (
     MyoHandVisualSettings,
     default_myohand_settings,
 )
-from src.shared.python.model_appearance.hand_backends.types import HandVisualSide
+from src.shared.python.model_appearance.hand_backends.types import HandSide
 
 
 def _world_to_grip(points: np.ndarray, transform: np.ndarray) -> np.ndarray:
@@ -25,7 +25,7 @@ def _world_to_grip(points: np.ndarray, transform: np.ndarray) -> np.ndarray:
 
 def export_myohand_skeleton(
     grip_spec: GripSpec,
-    side: HandVisualSide,
+    side: HandSide,
     *,
     settings: MyoHandVisualSettings | None = None,
     joint_angles: dict[str, float] | None = None,

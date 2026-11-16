@@ -18,7 +18,7 @@ from src.shared.python.model_appearance.geometry import Mesh
 from src.shared.python.model_appearance.grip_hands import grip_hand_frame
 from src.shared.python.model_appearance.grip_pose import Hand
 from src.shared.python.model_appearance.hand_backends.myohand import (
-    build_hand_visual,
+    build_myohand_bone_meshes,
     myohand_assets_ready,
     penetration_depth_m,
 )
@@ -70,9 +70,9 @@ def _hand_size_spec(length_m: float) -> GripSpec:
 
 
 def test_anthropometric_scaling_monotonic_on_final_bones() -> None:
-    small = build_hand_visual(_hand_size_spec(0.165), "trail")
-    medium = build_hand_visual(_hand_size_spec(0.189), "trail")
-    large = build_hand_visual(_hand_size_spec(0.215), "trail")
+    small = build_myohand_bone_meshes(_hand_size_spec(0.165), "trail")
+    medium = build_myohand_bone_meshes(_hand_size_spec(0.189), "trail")
+    large = build_myohand_bone_meshes(_hand_size_spec(0.215), "trail")
 
     def _breadth_span(m: dict[str, Mesh]) -> float:
         c2 = m["secondmc"].vertices.mean(axis=0)
@@ -108,8 +108,8 @@ def test_mirroring_outward_winding_and_knuckle_attachment() -> None:
     )
 
     for side in ("lead", "trail"):
-        rh = build_hand_visual(rh_spec, side)  # type: ignore[arg-type]
-        lh = build_hand_visual(lh_spec, side)  # type: ignore[arg-type]
+        rh = build_myohand_bone_meshes(rh_spec, side)  # type: ignore[arg-type]
+        lh = build_myohand_bone_meshes(lh_spec, side)  # type: ignore[arg-type]
 
         for bone_name in ("capitate", "thirdmc", "firstmc", "distph2", "distal_thumb"):
             c_rh = rh[bone_name].vertices.mean(axis=0)
@@ -133,7 +133,7 @@ def test_fingers_and_thumb_wrap_grip_within_contact_tolerances() -> None:
 
     spec = GripSpec.neutral()
     for side in ("lead", "trail"):
-        meshes = build_hand_visual(spec, side)  # type: ignore[arg-type]
+        meshes = build_myohand_bone_meshes(spec, side)  # type: ignore[arg-type]
         pen = penetration_depth_m(meshes, club_radius_m=cfg.club_cylinder_radius_m)
         assert pen <= cfg.penetration_tolerance_m, (side, pen)
 
@@ -174,7 +174,7 @@ def test_skeleton_export_matches_placed_bones_and_keeps_license_gate() -> None:
         side_data = payload[side]
         assert side_data["research_only"] is True
         assert side_data["license_gate_issue"] == 13763
-        placed = build_hand_visual(spec, side)  # type: ignore[arg-type]
+        placed = build_myohand_bone_meshes(spec, side)  # type: ignore[arg-type]
         joints = side_data["joints"]
         assert len(joints) >= 23
         for idx, ph_name in (
@@ -202,7 +202,7 @@ def test_render_scene_png_frames_hand_at_seventy_percent_with_club(
     rot, trans = frame[:3, :3], frame[:3, 3]
     bones = {
         f"lead_{name}": Mesh(mesh.vertices @ rot.T + trans, mesh.faces)
-        for name, mesh in build_hand_visual(spec, "lead").items()
+        for name, mesh in build_myohand_bone_meshes(spec, "lead").items()
     }
     club_meshes = assembly_meshes(club)
     lit = LitRenderSettings(image_px=1024, frame_fill=0.70)
