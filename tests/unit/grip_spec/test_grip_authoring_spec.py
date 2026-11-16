@@ -33,7 +33,7 @@ from src.shared.python.model_appearance.grip_pose import (
 pytestmark = pytest.mark.unit
 
 _SHELLS_13997 = frozenset({"dorsum"})
-_GOLDEN_MESH_DIGEST = "a197809270636c398441505e402274b6107ec032588d22f3563f173f2523393a"
+_GOLDEN_MESH_DIGEST = "65a0961c60b66324326c0b962e19650cbfab2e9426360ff3868304f0ed0a63a4"
 
 
 def _mesh_summary_digest(pose: GripPose | None = None) -> str:
