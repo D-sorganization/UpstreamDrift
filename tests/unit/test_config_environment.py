@@ -241,6 +241,7 @@ class TestSocketAccessors:
             assert get_realtime_port() == 9999
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "bounds",
     [{"min_value": 0.0}, {"max_value": 1.0}, {"min_value": 0.0, "max_value": 1.0}],
@@ -251,6 +252,7 @@ def test_bounded_float_rejects_nan(bounds: dict[str, float]) -> None:
         get_env_float(_TEST_VAR, **bounds)
 
 
+@pytest.mark.unit
 def test_unbounded_float_preserves_nan() -> None:
     """Unbounded parsing retains Python float semantics."""
     with _set(**{_TEST_VAR: "NaN"}):
