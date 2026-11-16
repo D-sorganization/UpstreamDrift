@@ -15,6 +15,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from src.shared.python.motion_matching.pelvis_yaw import (
+    pelvis_yaw_error_pct_from_diff_deg,
+)
 from src.shared.python.motion_matching.two_window_fit import (
     MarkerMetricResults,
     TwoWindowParityInputs,
@@ -35,6 +38,10 @@ RUN102_DIR = (
     / "native_evidence"
     / "two_window_fit_9967_102"
 )
+RUN102_PELVIS_YAW_DIFF_DEG = 0.3251533720040811
+RUN102_PELVIS_YAW_PCT = 0.361281524448979
+# Archived ``returned.json`` retains the pre-#15015 pct mapping; do not rewrite evidence.
+RUN102_ARCHIVED_PELVIS_YAW_PCT = 0.5954129834382699
 
 
 def test_compute_marker_metrics_analytical() -> None:
@@ -171,6 +178,17 @@ def test_reproduces_run102_uninterrupted_metrics_and_zero_parity() -> None:
     # Verifies exact reproduction of all metrics to machine precision
     for key, expected_val in expected_unint.items():
         computed_val = getattr(metrics, key)
+        if key == "pelvis_yaw_error_pct":
+            # Legacy artifact literal; recomputation uses rotation-invariant #15015 mapping.
+            assert expected_val == pytest.approx(
+                RUN102_ARCHIVED_PELVIS_YAW_PCT, abs=1e-12
+            )
+            assert computed_val == pytest.approx(RUN102_PELVIS_YAW_PCT, abs=1e-12)
+            assert computed_val == pytest.approx(
+                pelvis_yaw_error_pct_from_diff_deg(RUN102_PELVIS_YAW_DIFF_DEG),
+                abs=1e-12,
+            )
+            continue
         assert computed_val == pytest.approx(expected_val, abs=1e-12)
 
     # 2. Evaluate zero-displacement parity using identical uninterrupted markers

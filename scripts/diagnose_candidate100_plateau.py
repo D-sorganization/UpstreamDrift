@@ -8,7 +8,9 @@ from pathlib import Path
 import numpy as np
 import scipy.io as sio
 
-from src.shared.python.motion_matching.pelvis_yaw import pelvis_yaw_error_pct_from_diff_deg
+from src.shared.python.motion_matching.pelvis_yaw import (
+    pelvis_yaw_error_pct_from_diff_deg,
+)
 
 EVIDENCE_DIR = (
     Path(__file__).resolve().parents[1]
