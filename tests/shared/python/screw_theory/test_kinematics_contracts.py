@@ -19,6 +19,8 @@ from src.shared.python.screw_theory.kinematics import (
     compute_screw_endpoints,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _twist(angular, linear, reference=(0.0, 0.0, 0.0)) -> Twist:
     return Twist(
