@@ -30,7 +30,7 @@ def grip_pose_from_authoring_spec(
         hand_spacing_m=spec.hand_spacing_m,
         lead_v_azimuth_deg=lead_v,
         trail_v_offset_deg=trail_v - lead_v,
-        lead_thumb_offset_deg=abs(spec.resolved_thumb_azimuth_deg("lead")),
+        lead_thumb_offset_deg=spec.lead.thumb_azimuth_deg,
         palm_diagonal_deg=spec.lead.club_cross_angle_deg,
         handedness=spec.handedness,
         lead_grip_force_limit_n=force_limits["lead"],

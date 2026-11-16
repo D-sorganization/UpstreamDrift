@@ -123,13 +123,18 @@ def compute_marker_metrics(
         else float("nan")
     )
 
+    pelvis_yaw_error_pct = (
+        float(yaw_m.pelvis_yaw_error_pct) if yaw_m.valid else float("nan")
+    )
+    pelvis_yaw_diff_deg = float(yaw_m.yaw_diff_deg) if yaw_m.valid else float("nan")
+
     return MarkerMetricResults(
         whole_rms_m=whole_rms,
         early_rms_m=early_rms,
         terminal_rms_m=term_rms,
         club_cluster_rms_m=club_rms,
-        pelvis_yaw_error_pct=float(yaw_m.pelvis_yaw_error_pct),
-        pelvis_yaw_diff_deg=float(yaw_m.yaw_diff_deg),
+        pelvis_yaw_error_pct=pelvis_yaw_error_pct,
+        pelvis_yaw_diff_deg=pelvis_yaw_diff_deg,
         score=score,
     )
 

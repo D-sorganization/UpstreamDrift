@@ -75,8 +75,32 @@ class EvidenceScriptValidation:
     valid: bool
 
 
-def _module_importable(module_name: str) -> bool:
-    return importlib.util.find_spec(module_name) is not None
+def module_source_exists(module_name: str, *, repo_root: Path) -> bool:
+    """Return True when *module_name* resolves to a ``.py`` file under *repo_root*."""
+    if not module_name.startswith("src."):
+        raise ValueError(f"expected src.* module name, got {module_name!r}")
+    rel = module_name.removeprefix("src.").replace(".", "/")
+    return (repo_root / "src" / f"{rel}.py").is_file()
+
+
+def _module_importable(module_name: str, *, repo_root: Path | None) -> bool:
+    if repo_root is not None:
+        return module_source_exists(module_name, repo_root=repo_root)
+    try:
+        return importlib.util.find_spec(module_name) is not None
+    except (ImportError, ModuleNotFoundError, AttributeError, ValueError):
+        return False
+
+
+def _resolve_repo_root(evidence_dir: Path, repo_root: Path | None) -> Path:
+    if repo_root is not None:
+        return repo_root
+    for parent in (evidence_dir, *evidence_dir.parents):
+        if (parent / "src").is_dir() and (parent / "pyproject.toml").is_file():
+            return parent
+    raise ValueError(
+        "repo_root could not be inferred; pass validate_evidence_run_dir(..., repo_root=...)"
+    )
 
 
 def load_manifest(evidence_dir: Path) -> EvidenceScriptManifest:
@@ -93,6 +117,7 @@ def validate_evidence_run_dir(
     repo_root: Path | None = None,
 ) -> EvidenceScriptValidation:
     """Fail closed unless the evidence script runs here or is explicitly archived."""
+    repo_root = _resolve_repo_root(evidence_dir, repo_root)
     manifest = load_manifest(evidence_dir)
     script_path = evidence_dir / manifest.script
     if not script_path.is_file():
@@ -105,7 +130,11 @@ def validate_evidence_run_dir(
         )
 
     if manifest.status == EvidenceScriptDisposition.ARCHIVED:
-        restored = [m for m in manifest.missing_modules if _module_importable(m)]
+        restored = [
+            m
+            for m in manifest.missing_modules
+            if _module_importable(m, repo_root=repo_root)
+        ]
         if restored:
             return EvidenceScriptValidation(
                 evidence_dir=evidence_dir,
@@ -128,7 +157,11 @@ def validate_evidence_run_dir(
             valid=True,
         )
 
-    missing = [m for m in manifest.missing_modules if not _module_importable(m)]
+    missing = [
+        m
+        for m in manifest.missing_modules
+        if not _module_importable(m, repo_root=repo_root)
+    ]
     if missing:
         return EvidenceScriptValidation(
             evidence_dir=evidence_dir,
@@ -138,7 +171,6 @@ def validate_evidence_run_dir(
             valid=False,
         )
 
-    _ = repo_root  # reserved for future PYTHONPATH checks
     return EvidenceScriptValidation(
         evidence_dir=evidence_dir,
         disposition=EvidenceScriptDisposition.RUNNABLE,
