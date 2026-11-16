@@ -113,6 +113,11 @@ def validate_csv_dataframe(
             f"CSV at {source} parsed to zero columns",
             expected_format="non-empty tabular CSV",
         )
+    if data.shape[0] == 0:
+        raise DataFormatError(
+            f"CSV at {source} parsed to zero rows",
+            expected_format="at least one data row",
+        )
     if required_columns:
         missing = [c for c in required_columns if c not in data.columns]
         if missing:
@@ -175,8 +180,8 @@ def validate_trajectory_array(
         The validated array (unchanged on success).
 
     Raises:
-        DataFormatError: If the array is not 2D, has too few columns, or
-            contains non-finite values.
+        DataFormatError: If the array is not 2D, has zero rows, has too few
+            columns, or contains non-finite values.
     """
     if array is None:
         raise ValueError("array must be provided")
@@ -191,6 +196,11 @@ def validate_trajectory_array(
             f"Trajectory at {source} has too few columns",
             expected_format=f">= {min_columns} columns",
             actual_format=f"{array.shape[1]} columns",
+        )
+    if array.shape[0] == 0:
+        raise DataFormatError(
+            f"Trajectory at {source} has zero rows",
+            expected_format="at least one trajectory sample",
         )
     if not np.issubdtype(array.dtype, np.number):
         raise DataFormatError(
