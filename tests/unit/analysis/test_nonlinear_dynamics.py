@@ -156,6 +156,7 @@ class TestRecurrenceMatrixSparseParity:
         assert reference.sum() > n
 
 
+@pytest.mark.unit
 class TestRQADeterminism:
     """DET counts diagonal lines in both triangles (Marwan et al. 2007)."""
 
