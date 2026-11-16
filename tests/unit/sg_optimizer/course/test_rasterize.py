@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from src.shared.python.sg_optimizer.course.rasterize import (
     LIE_CODES,
@@ -11,6 +12,8 @@ from src.shared.python.sg_optimizer.course.rasterize import (
     SyntheticHole,
     rasterize_synthetic,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_priority_water_overrides_fairway():
