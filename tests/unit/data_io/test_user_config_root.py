@@ -170,3 +170,22 @@ def test_partial_copy_is_discarded_and_retried(
     migrated_file = destination / "index.db" if directory else destination
     assert migrated_file.read_text(encoding="utf-8") == "complete legacy data"
     assert (new_root / ucr.MIGRATION_MARKER).exists()
+
+
+def test_failed_publish_cleans_staging_and_retries(
+    home: Path, new_root: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _seed(home, ".golf_modeling_suite", "preferences.json", "complete")
+
+    def fail_publish(source: Path, target: Path) -> Path:
+        raise PermissionError("destination unavailable")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "rename", fail_publish)
+        assert ucr.migrate_legacy_user_dirs(new_root, home=home) == []
+
+    assert list(new_root.iterdir()) == []
+    assert ucr.migrate_legacy_user_dirs(new_root, home=home) == [
+        new_root / "preferences.json"
+    ]
+    assert (new_root / "preferences.json").read_text(encoding="utf-8") == "complete"
