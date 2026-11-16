@@ -10,7 +10,7 @@
     },
     "skinned_both_back_rollp20": {
       "engine": "egl",
-      "fill": 0.692
+      "fill": 0.701
     },
     "skinned_both_butt_rollm20": {
       "engine": "egl",
@@ -26,15 +26,15 @@
     },
     "skinned_both_palm_rollm20": {
       "engine": "egl",
-      "fill": 0.701
+      "fill": 0.642
     },
     "skinned_both_palm_rollp00": {
       "engine": "egl",
-      "fill": 0.701
+      "fill": 0.666
     },
     "skinned_both_palm_rollp20": {
       "engine": "egl",
-      "fill": 0.701
+      "fill": 0.696
     },
     "skinned_both_thumb_side_rollm20": {
       "engine": "egl",
@@ -74,7 +74,7 @@
     },
     "skinned_lead_palm_rollm20": {
       "engine": "egl",
-      "fill": 0.696
+      "fill": 0.701
     },
     "skinned_lead_palm_rollp00": {
       "engine": "egl",
@@ -98,11 +98,11 @@
     },
     "skinned_trail_back_rollm20": {
       "engine": "egl",
-      "fill": 0.701
+      "fill": 0.612
     },
     "skinned_trail_back_rollp00": {
       "engine": "egl",
-      "fill": 0.701
+      "fill": 0.666
     },
     "skinned_trail_back_rollp20": {
       "engine": "egl",
@@ -130,7 +130,7 @@
     },
     "skinned_trail_palm_rollp20": {
       "engine": "egl",
-      "fill": 0.688
+      "fill": 0.701
     },
     "skinned_trail_thumb_side_rollm20": {
       "engine": "egl",
@@ -189,9 +189,9 @@
         "ring_prox": 66.3,
         "ring_side": -11.9,
         "thumb_dist": 4.2,
-        "thumb_press": 9.8,
-        "thumb_prox": 0.0,
-        "thumb_side": 35.0
+        "thumb_press": 15.7,
+        "thumb_prox": -8.8,
+        "thumb_side": 0.0
       },
       "max_penetration_mm": 0.0
     },
@@ -238,9 +238,9 @@
         "ring_prox": 66.3,
         "ring_side": -11.9,
         "thumb_dist": 4.2,
-        "thumb_press": 9.8,
-        "thumb_prox": 0.0,
-        "thumb_side": 35.0
+        "thumb_press": 15.7,
+        "thumb_prox": -8.8,
+        "thumb_side": 0.0
       },
       "max_penetration_mm": 0.0
     },
@@ -287,9 +287,9 @@
         "ring_prox": 66.3,
         "ring_side": -11.9,
         "thumb_dist": 4.2,
-        "thumb_press": 9.8,
-        "thumb_prox": 0.0,
-        "thumb_side": 35.0
+        "thumb_press": 15.7,
+        "thumb_prox": -8.8,
+        "thumb_side": 0.0
       },
       "max_penetration_mm": 0.0
     },
@@ -309,8 +309,8 @@
         "ring_dist": 0.0,
         "ring_mid": 0.0,
         "ring_prox": 0.0,
-        "thumb_dist": -0.0,
-        "thumb_prox": 0.0
+        "thumb_dist": 0.0,
+        "thumb_prox": -0.0
       },
       "degenerate": 0,
       "flipped": 0,
@@ -336,9 +336,9 @@
         "ring_prox": 66.3,
         "ring_side": -11.9,
         "thumb_dist": 4.2,
-        "thumb_press": 8.9,
-        "thumb_prox": 0.1,
-        "thumb_side": 75.0
+        "thumb_press": 3.4,
+        "thumb_prox": 5.3,
+        "thumb_side": -30.0
       },
       "max_penetration_mm": 0.0
     },
@@ -358,8 +358,8 @@
         "ring_dist": 0.0,
         "ring_mid": 0.0,
         "ring_prox": 0.0,
-        "thumb_dist": -0.0,
-        "thumb_prox": 0.0
+        "thumb_dist": 0.0,
+        "thumb_prox": -0.0
       },
       "degenerate": 0,
       "flipped": 0,
@@ -385,9 +385,9 @@
         "ring_prox": 66.3,
         "ring_side": -11.9,
         "thumb_dist": 4.2,
-        "thumb_press": 8.9,
-        "thumb_prox": 0.1,
-        "thumb_side": 75.0
+        "thumb_press": 3.4,
+        "thumb_prox": 5.3,
+        "thumb_side": -30.0
       },
       "max_penetration_mm": 0.0
     },
@@ -407,8 +407,8 @@
         "ring_dist": 0.0,
         "ring_mid": 0.0,
         "ring_prox": 0.0,
-        "thumb_dist": -0.0,
-        "thumb_prox": 0.0
+        "thumb_dist": 0.0,
+        "thumb_prox": -0.0
       },
       "degenerate": 0,
       "flipped": 0,
@@ -434,76 +434,76 @@
         "ring_prox": 66.3,
         "ring_side": -11.9,
         "thumb_dist": 4.2,
-        "thumb_press": 8.9,
-        "thumb_prox": 0.1,
-        "thumb_side": 75.0
+        "thumb_press": 3.4,
+        "thumb_prox": 5.3,
+        "thumb_side": -30.0
       },
       "max_penetration_mm": 0.0
     }
   },
   "pairs": {
     "rollm20": {
-      "forearm_spread_deg": 18.4,
+      "forearm_spread_deg": 18.3,
       "pair_penetration_mm": 0.0,
       "trail_contact_gaps_mm": {
         "hand": -0.0,
         "index_dist": 0.0,
         "index_mid": 0.0,
         "index_prox": 0.0,
-        "little_dist": 0.09,
-        "little_mid": 0.99,
-        "little_prox": 0.79,
+        "little_dist": 0.26,
+        "little_mid": 0.81,
+        "little_prox": 1.48,
         "middle_dist": 0.0,
         "middle_mid": 0.0,
         "middle_prox": 0.0,
         "palm": 0.0,
         "ring_dist": 0.0,
-        "ring_mid": 0.82,
-        "ring_prox": 0.65,
+        "ring_mid": 0.18,
+        "ring_prox": 0.01,
         "thumb_dist": 0.0,
         "thumb_prox": 0.0
       }
     },
     "rollp00": {
-      "forearm_spread_deg": 18.4,
+      "forearm_spread_deg": 18.3,
       "pair_penetration_mm": 0.0,
       "trail_contact_gaps_mm": {
         "hand": -0.0,
         "index_dist": 0.0,
         "index_mid": 0.0,
         "index_prox": 0.0,
-        "little_dist": 0.11,
-        "little_mid": 0.99,
-        "little_prox": 0.79,
+        "little_dist": 0.26,
+        "little_mid": 0.81,
+        "little_prox": 1.48,
         "middle_dist": 0.0,
         "middle_mid": 0.0,
         "middle_prox": 0.0,
         "palm": 0.0,
         "ring_dist": 0.0,
-        "ring_mid": 0.82,
-        "ring_prox": 0.65,
+        "ring_mid": 0.18,
+        "ring_prox": 0.01,
         "thumb_dist": 0.0,
         "thumb_prox": 0.0
       }
     },
     "rollp20": {
-      "forearm_spread_deg": 18.4,
+      "forearm_spread_deg": 18.3,
       "pair_penetration_mm": 0.0,
       "trail_contact_gaps_mm": {
         "hand": -0.0,
         "index_dist": 0.0,
         "index_mid": 0.0,
         "index_prox": 0.0,
-        "little_dist": 0.11,
-        "little_mid": 0.99,
-        "little_prox": 0.79,
+        "little_dist": 0.26,
+        "little_mid": 0.81,
+        "little_prox": 1.48,
         "middle_dist": 0.0,
         "middle_mid": 0.0,
         "middle_prox": 0.0,
         "palm": 0.0,
         "ring_dist": 0.0,
-        "ring_mid": 0.82,
-        "ring_prox": 0.65,
+        "ring_mid": 0.18,
+        "ring_prox": 0.01,
         "thumb_dist": 0.0,
         "thumb_prox": 0.0
       }
