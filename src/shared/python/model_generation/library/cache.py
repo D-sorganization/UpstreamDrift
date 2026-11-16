@@ -193,10 +193,8 @@ class ModelCache:
         Returns:
             Created CacheEntry
         """
-        # Check if cleanup needed
         if model_id is None:
             raise ValueError("model_id must be provided")
-        self._maybe_cleanup()
 
         # Always compute the checksum; integrity checking depends on it.
         checksum = None
@@ -217,6 +215,7 @@ class ModelCache:
 
         self._entries[model_id] = entry
         self._save_index()
+        self._maybe_cleanup()
 
         return entry
 
@@ -335,7 +334,7 @@ class ModelCache:
             self._cleanup()
 
     def _cleanup(self) -> None:
-        """Remove old entries to free space."""
+        """Remove eligible old LRU entries toward both size and count targets."""
         logger.info("Running cache cleanup...")
 
         # Sort by last accessed (oldest first)
@@ -347,7 +346,10 @@ class ModelCache:
 
         removed = 0
         for entry in sorted_entries:
-            if self.get_total_size() <= target_size:
+            if (
+                self.get_total_size() <= target_size
+                and len(self._entries) <= self.config.max_entries
+            ):
                 break
 
             # Don't remove recent files
