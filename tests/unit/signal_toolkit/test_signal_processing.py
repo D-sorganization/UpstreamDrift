@@ -144,6 +144,7 @@ class TestComputeSpectrogram:
 # ============================================================================
 
 
+@pytest.mark.unit
 class TestComputeSpectralArcLength:
     """Tests for Spectral Arc Length smoothness metric."""
 
