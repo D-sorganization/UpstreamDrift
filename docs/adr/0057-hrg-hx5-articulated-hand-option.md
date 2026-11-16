@@ -133,7 +133,7 @@ the result types differ (`material_rgba`, `skin_rgb`, `dict[str, Mesh]`). They
 cannot all merge. This amendment fixes one interface. Every track is kept and
 adopts it; there are no winners or losers.
 
-### A1. Package and scope
+### A1. Package and Scope
 
 - The package is `src/shared/python/model_appearance/hand_backends/`. It holds
   visual hand meshes only.
@@ -148,7 +148,7 @@ adopts it; there are no winners or losers.
   not import it, and no other PR edits or moves it. A backend may use it once
   it lands on `main`, through its `PosableHand` protocol.
 
-### A2. Backend protocol
+### A2. Backend Protocol
 
 A backend is a module that registers one `HandVisualBackend` record and one
 builder function.
@@ -252,7 +252,7 @@ and the capsule mesh stays the default drawn hand until a later decision.
 enabled. MyoHand stays research-only until HX6 (#13763) clears its geometry
 lineage (see the Decision above and acceptance item 6).
 
-### A4. Conformance contract
+### A4. Conformance Contract
 
 A parametrised test,
 `tests/unit/model_appearance/hand_backends/test_hand_backend_conformance.py`,
