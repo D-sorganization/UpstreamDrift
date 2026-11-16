@@ -27,6 +27,9 @@ Array = NDArray[np.float64]
 
 _FINGER_INDICES: tuple[int, ...] = (2, 3, 4, 5)
 _THUMB_BODIES: tuple[str, ...] = ("firstmc", "proximal_thumb", "distal_thumb")
+_FINGER_BODIES: tuple[str, ...] = tuple(
+    f"{p}{i}" for i in _FINGER_INDICES for p in ("proxph", "midph", "distph")
+)
 
 
 @dataclass(frozen=True)
@@ -297,21 +300,64 @@ def _finger_costs(
     return costs
 
 
-def _solve_fingers(
-    model: Any,
-    data: Any,
-    cache: _ModelCache,
+@dataclass(frozen=True)
+class _PoseCtx:
+    """Immutable MuJoCo workspace and grip mount shared by the digit solvers."""
+
+    model: Any
+    data: Any
+    cache: _ModelCache
+    rot: Array
+    trans: Array
+    locked: set[str]
+
+
+def _back_off_first_joint(
     q: dict[str, float],
-    rot: Array,
-    trans: Array,
+    joints: tuple[str, ...],
     locked: set[str],
+    limits: dict[str, tuple[float, float]],
+) -> bool:
+    """Extend the first unlocked joint in ``joints`` by one step; report a change."""
+    for jname in joints:
+        if jname in locked:
+            continue
+        lo, _ = limits[jname]
+        if q[jname] > lo + 0.02:
+            q[jname] = max(lo, q[jname] - 0.05)
+            return True
+    return False
+
+
+def _score_finger_row(
+    ctx: _PoseCtx,
+    cand: dict[str, float],
+    row: dict[int, tuple[float, float, float]],
+    target_r: float,
+    safe_r: float,
+    best_c: dict[int, float],
+    best_f: dict[int, tuple[float, float, float]],
+) -> None:
+    """Pose ``cand`` and keep each finger's row values where they lower its cost."""
+    _forward_fast(ctx.model, ctx.data, ctx.cache, cand)
+    placed = _placed_from_cache(
+        ctx.data, ctx.cache.sparse_geoms, ctx.rot, ctx.trans, _FINGER_BODIES
+    )
+    costs = _finger_costs(placed, target_r, safe_r)
+    for idx in _FINGER_INDICES:
+        if costs[idx] < best_c[idx]:
+            best_c[idx] = costs[idx]
+            best_f[idx] = row[idx]
+
+
+def _solve_fingers(
+    ctx: _PoseCtx,
+    q: dict[str, float],
     target_r: float,
     safe_r: float,
 ) -> None:
-    finger_bodies = tuple(
-        f"{p}{i}" for i in _FINGER_INDICES for p in ("proxph", "midph", "distph")
-    )
-    limits = cache.limits
+    locked = ctx.locked
+    limits = ctx.cache.limits
     if "mcp5_abduction" not in locked and "mcp5_abduction" in limits:
         lo5, hi5 = limits["mcp5_abduction"]
         q["mcp5_abduction"] = float(np.clip(0.10, lo5, hi5))
@@ -345,15 +391,7 @@ def _solve_fingers(
                     cand[f"pm{idx}_flexion"],
                     cand[f"md{idx}_flexion"],
                 ) = vals
-            _forward_fast(model, data, cache, cand)
-            placed = _placed_from_cache(
-                data, cache.sparse_geoms, rot, trans, finger_bodies
-            )
-            costs = _finger_costs(placed, target_r, safe_r)
-            for idx in _FINGER_INDICES:
-                if costs[idx] < best_c[idx]:
-                    best_c[idx] = costs[idx]
-                    best_f[idx] = row[idx]
+            _score_finger_row(ctx, cand, row, target_r, safe_r, best_c, best_f)
 
     for step in (0.16, 0.07, 0.03):
         for k_j, jstem in enumerate(("mcp", "pm", "md")):
@@ -370,15 +408,7 @@ def _solve_fingers(
                         cand[f"pm{idx}_flexion"],
                         cand[f"md{idx}_flexion"],
                     ) = row[idx]
-                _forward_fast(model, data, cache, cand)
-                placed = _placed_from_cache(
-                    data, cache.sparse_geoms, rot, trans, finger_bodies
-                )
-                costs = _finger_costs(placed, target_r, safe_r)
-                for idx in _FINGER_INDICES:
-                    if costs[idx] < best_c[idx]:
-                        best_c[idx] = costs[idx]
-                        best_f[idx] = row[idx]
+                _score_finger_row(ctx, cand, row, target_r, safe_r, best_c, best_f)
 
     for idx in _FINGER_INDICES:
         q[f"mcp{idx}_flexion"], q[f"pm{idx}_flexion"], q[f"md{idx}_flexion"] = best_f[
@@ -463,32 +493,28 @@ def _thumb_pose_cost(
 
 
 def _solve_thumb(
-    model: Any,
-    data: Any,
-    cache: _ModelCache,
+    pose: _PoseCtx,
     q: dict[str, float],
     spec_rh: GripSpec,
     side: HandSide,
-    rot: Array,
-    trans: Array,
-    locked: set[str],
     cfg: MyoHandVisualSettings,
     grip_radius_m: float,
 ) -> None:
     thumb_names = ("cmc_abduction", "cmc_flexion", "mp_flexion", "ip_flexion")
+    locked = pose.locked
     if all(n in locked for n in thumb_names):
         return
-    limits = cache.limits
+    limits = pose.cache.limits
     tgt_az = math.radians(
         spec_rh.resolved_thumb_azimuth_deg("trail" if side == "trail" else "lead")
     )
     ctx = _ThumbEvalCtx(
-        model=model,
-        data=data,
-        cache=cache,
+        model=pose.model,
+        data=pose.data,
+        cache=pose.cache,
         q_base=q,
-        rot=rot,
-        trans=trans,
+        rot=pose.rot,
+        trans=pose.trans,
         tgt_az=tgt_az,
         tgt_r=grip_radius_m + cfg.bone_target_clearance_m,
         safe_r=grip_radius_m + cfg.bone_safe_clearance_m,
@@ -557,67 +583,46 @@ def _relax_thumb_penetration(
         r_chord = min(_xy_segment_min_r(c_mc, c_px), _xy_segment_min_r(c_px, c_ds))
         if min(r_verts, r_chord) >= min_allowed:
             break
-        changed = False
-        for jname in thumb_joints:
-            if jname in locked:
-                continue
-            lo, _ = limits[jname]
-            if q[jname] > lo + 0.02:
-                q[jname] = max(lo, q[jname] - 0.05)
-                changed = True
-                break
-        if not changed:
+        if not _back_off_first_joint(q, thumb_joints, locked, limits):
             break
 
 
 def _relax_club_penetration(
-    model: Any,
-    data: Any,
-    cache: _ModelCache,
+    pose: _PoseCtx,
     q: dict[str, float],
-    rot: Array,
-    trans: Array,
-    locked: set[str],
     cfg: MyoHandVisualSettings,
     grip_radius_m: float,
 ) -> None:
     min_allowed = grip_radius_m - 0.5 * cfg.penetration_tolerance_m
-    limits = cache.limits
+    limits = pose.cache.limits
     for idx in _FINGER_INDICES:
         chain = (f"proxph{idx}", f"midph{idx}", f"distph{idx}")
         joints = (f"md{idx}_flexion", f"pm{idx}_flexion", f"mcp{idx}_flexion")
         for _ in range(8):
-            _forward_fast(model, data, cache, q)
-            pts = _placed_from_cache(data, cache.full_geoms, rot, trans, chain)
+            _forward_fast(pose.model, pose.data, pose.cache, q)
+            pts = _placed_from_cache(
+                pose.data, pose.cache.full_geoms, pose.rot, pose.trans, chain
+            )
             rmin = min(float(np.hypot(pts[b][:, 0], pts[b][:, 1]).min()) for b in chain)
             if rmin >= min_allowed:
                 break
-            changed = False
-            for jname in joints:
-                if jname in locked:
-                    continue
-                lo, _ = limits[jname]
-                if q[jname] > lo + 0.02:
-                    q[jname] = max(lo, q[jname] - 0.05)
-                    changed = True
-                    break
-            if not changed:
+            if not _back_off_first_joint(q, joints, pose.locked, limits):
                 break
     thumb_ctx = _ThumbEvalCtx(
-        model=model,
-        data=data,
-        cache=cache,
+        model=pose.model,
+        data=pose.data,
+        cache=pose.cache,
         q_base=q,
-        rot=rot,
-        trans=trans,
+        rot=pose.rot,
+        trans=pose.trans,
         tgt_az=0.0,
         tgt_r=grip_radius_m,
         safe_r=grip_radius_m,
         chord_guard_r=grip_radius_m,
         max_z_m=cfg.thumb_max_z_m,
     )
-    _relax_thumb_penetration(thumb_ctx, q, locked, min_allowed)
-    apply_joint_targets(model, data, q)
+    _relax_thumb_penetration(thumb_ctx, q, pose.locked, min_allowed)
+    apply_joint_targets(pose.model, pose.data, q)
 
 
 def solve_myohand_contact_pose(
@@ -650,31 +655,17 @@ def solve_myohand_contact_pose(
 
     target_r = grip_radius_m + cfg.bone_target_clearance_m
     safe_r = grip_radius_m + cfg.bone_safe_clearance_m
-    _solve_fingers(model, data, cache, q, rot, trans, locked_joints, target_r, safe_r)
-    _solve_thumb(
-        model,
-        data,
-        cache,
-        q,
-        spec_rh,
-        side,
-        rot,
-        trans,
-        locked_joints,
-        cfg,
-        grip_radius_m,
+    pose = _PoseCtx(
+        model=model,
+        data=data,
+        cache=cache,
+        rot=rot,
+        trans=trans,
+        locked=locked_joints,
     )
-    _relax_club_penetration(
-        model,
-        data,
-        cache,
-        q,
-        rot,
-        trans,
-        locked_joints,
-        cfg,
-        grip_radius_m,
-    )
+    _solve_fingers(pose, q, target_r, safe_r)
+    _solve_thumb(pose, q, spec_rh, side, cfg, grip_radius_m)
+    _relax_club_penetration(pose, q, cfg, grip_radius_m)
     return q, mount
 
 
