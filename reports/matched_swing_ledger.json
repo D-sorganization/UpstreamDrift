@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-14T12:05:26Z",
+  "generated_at": "2026-11-16T01:18:41Z",
   "rows": [
     {
       "acceptance": null,
@@ -675,6 +675,46 @@
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/grip_kinetics/receipt_full_window_conditioned.json",
       "sha256": "e98e79a8ba8a5ed7425fd27540add17a141de284bcbcf905edc490df724f2915"
+    },
+    {
+      "acceptance": {
+        "gates": [
+          {
+            "measured": 0.0,
+            "name": "grip_authoring_geometry",
+            "reason": "Unit tests gate apply_shaft_roll; strips are visual acceptance for #15138.",
+            "status": "passed",
+            "threshold": 0.0,
+            "unit": "deg"
+          }
+        ],
+        "horizon": "G0",
+        "is_physically_accepted": false,
+        "qualification_note": "Geometry preview evidence (HRG-GB1b #15138); not a forward-dynamics qualification.",
+        "status": "PASSED"
+      },
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
+      "candidate_sha": null,
+      "capture": "iron7",
+      "engine": "shared",
+      "horizon_s": null,
+      "lane": "grip_authoring",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "fd_address_to_impact_rmse_m": null,
+        "fd_after_impact_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "docs/development/full_body_models/evidence/grip_shaft_roll/receipt.json",
+      "sha256": "709b21aac3755bd3af7408df517889a42415e5e8e79f81e4760a8c4d1b865fcb"
     },
     {
       "acceptance": null,
@@ -6569,5 +6609,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 162
+  "total_receipts": 163
 }

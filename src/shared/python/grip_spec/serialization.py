@@ -59,6 +59,7 @@ def _hand_grip_from_dict(data: dict[str, Any]) -> HandGripSpec:
         thumb_azimuth_deg=float(
             data.get("thumb_azimuth_deg", LEGACY_LEAD_THUMB_AZIMUTH_DEG)
         ),
+        shaft_roll_deg=float(data.get("shaft_roll_deg", 0.0)),
         thumb_straightness=float(data.get("thumb_straightness", 1.0)),
         joint_coupling_overrides=tuple(
             (str(a), float(b))

@@ -16,6 +16,7 @@ from src.shared.python.grip_build.receipt import (
     BuildReceipt,
     BuildStageRecord,
     BuildStatus,
+    FullGripBuildResult,
     GripBuildResult,
 )
 from src.shared.python.grip_build.registry import (
@@ -201,6 +202,18 @@ class FlatHandCurlBuilder:
             return BuildStatus.GAP, contact_angle, final_clearance
         return BuildStatus.OK, contact_angle, final_clearance
 
+    def build_grip(
+        self,
+        spec: GripSpec,
+        *,
+        geometry: GripGeometry | None = None,
+        contact_model: ContactDistanceModel | None = None,
+    ) -> FullGripBuildResult:
+        from src.shared.python.grip_build.full_builder import build_full_grip
+
+        model = contact_model or self.contact_model
+        return build_full_grip(spec, geometry=geometry, contact_model=model)
+
 
 def _merge_status(current: BuildStatus, new: BuildStatus) -> BuildStatus:
     priority = {
@@ -226,5 +239,18 @@ def build_lead_fingers(
     )
 
 
+from src.shared.python.grip_build.full_builder import (  # noqa: E402
+    build_grip,
+    thumb_radial_azimuth_deg,
+)
+
 _default_builder = FlatHandCurlBuilder()
 register_grip_builder(DEFAULT_BUILDER_NAME, _default_builder)
+
+__all__ = [
+    "BUILDER_VERSION",
+    "FlatHandCurlBuilder",
+    "build_grip",
+    "build_lead_fingers",
+    "thumb_radial_azimuth_deg",
+]
