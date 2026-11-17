@@ -67,7 +67,11 @@ class GateResult:
 
 
 def is_verdict_accepted(gate_results: Sequence[GateResult]) -> bool:
-    """Return True iff at least one gate passed and all gates are acceptable."""
+    """Return True iff no gate failed and at least one kinematic gate passed.
+
+    DISCLOSED and NOT_APPLICABLE gates are acceptable but do not satisfy
+    qualification on their own; any FAILED gate rejects the verdict.
+    """
     return (
         len(gate_results) > 0
         and any(g.status == GateStatus.PASSED for g in gate_results)

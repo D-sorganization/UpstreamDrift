@@ -271,8 +271,8 @@ UpstreamDrift uses `structlog` for structured JSON logging throughout.
 
 ### D.6 Numerical Constants
 
-Key numerical constants defined in `src/shared/python/physics_constants.py`
-and `src/shared/python/constants.py`:
+Key numerical constants defined in `src/shared/python/core/physics_constants.py`
+and `src/shared/python/core/constants.py`:
 
 | Constant                      | Value      | Unit     | Source                   |
 | ----------------------------- | ---------- | -------- | ------------------------ |
@@ -448,7 +448,7 @@ All API error responses follow a consistent JSON structure:
 
 ### E.4 Exception Hierarchy
 
-The internal Python exception hierarchy in `src/shared/python/error_utils.py`:
+The internal Python exception hierarchy in `src/shared/python/core/error_utils.py`:
 
 ```
 GolfSuiteError (base)

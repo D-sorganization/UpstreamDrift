@@ -594,8 +594,8 @@ Full rule: [fleet-rules/agent-tiers.md](https://github.com/D-sorganization/Repos
 3. **If CI goes red, Runner Dashboard dispatches the fix (RD-1).** Do not revive the original session.
 4. **A follow-up hours later goes in a new session with a one-paragraph brief.**
 5. **Don't switch models mid-session (it throws away the prompt cache).**
-6. **PR size and stacking.** Every PR must stay under 500 changed lines. Target `main` directly; never stack PRs. Deletion-only PRs may exceed 500 lines.
-7. **Issue closure evidence.** Include `Closes #<issue>` on a real newline in PR descriptions (never literal `\n`). Never run `gh issue close` unless citing a verified merged PR `#<num>` in `--comment` or after applying an exempt label (`duplicate`, `wontfix`, `invalid`, `not-planned`, `roadmap`).
+6. **PR size and stacking.** ~500 lines is advisory, not a merge gate (#2822; 2026-11-06). Target `main` directly; never stack PRs.
+7. **Issue closure evidence.** Include `Closes #<issue>` on its own line in PR descriptions (not backslash-n). Never run `gh issue close` unless citing a verified merged PR `#<num>` in `--comment` or after applying an exempt label (`duplicate`, `wontfix`, `invalid`, `not-planned`, `roadmap`).
 
 <!-- END FLEET-MANAGED: pr-lifecycle -->
 
@@ -706,7 +706,7 @@ Full rule: [fleet-rules/runner-dashboard-rollout-handoff.md](https://github.com/
 
 ### Lane Rules v2
 
-Skip drained/hold repos, any-agent open-PR conflicts, and claims under 4h; else claim before code. One issue/PR, ≤500 lines (incl. generated/locks), max 2 CI-fix tries, stop on usage limits; branch prefix = lane id.
+Skip drained/hold repos, any-agent open-PR conflicts, and claims under 4h; else claim before code. One issue/PR, ~500 lines advisory (incl. generated/locks), max 2 CI-fix tries, stop on usage limits; branch prefix = lane id.
 
 Full rule: [fleet-rules/lane-rules-v2.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/lane-rules-v2.md) (synced from Repository_Management; edit the source there).
 

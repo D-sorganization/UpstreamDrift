@@ -271,18 +271,18 @@ Example:
 
 ### Key Files
 
-| File                                  | Purpose              |
-| ------------------------------------- | -------------------- |
-| `src/api/server.py`                   | FastAPI application  |
-| `src/api/utils/`                      | Shared utilities     |
-| `src/shared/python/contracts.py`      | DbC decorators       |
-| `src/shared/python/engine_manager.py` | Engine orchestration |
+| File                                              | Purpose              |
+| ------------------------------------------------- | -------------------- |
+| `src/api/server.py`                               | FastAPI application  |
+| `src/api/utils/`                                  | Shared utilities     |
+| `src/shared/python/contracts.py`                  | DbC decorators       |
+| `src/shared/python/engine_core/engine_manager.py` | Engine orchestration |
 
 ### Running Tests
 
 ```bash
 pytest tests/
-pytest tests/unit/test_api/ --cov=src/api
+pytest tests/unit/api/ --cov=src/api
 ```
 
 ---

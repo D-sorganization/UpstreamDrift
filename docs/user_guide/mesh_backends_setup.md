@@ -211,7 +211,7 @@ These are not suitable for the main CI pipeline.
 
 ### Proposed CI Workflow
 
-Create `.github/workflows/mesh-backends-test.yml`:
+Example standalone workflow file (e.g., `mesh-backends-test.yml`; in-repo unit/mocked E2E coverage runs via `.github/workflows/ci-standard.yml` on `tests/unit/tools/humanoid_character_builder/test_mesh_backends_e2e.py`):
 
 ```yaml
 name: Mesh Backends Test

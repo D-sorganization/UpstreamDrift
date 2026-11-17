@@ -17,8 +17,8 @@
   },
   "base_manifest_sha256": "c5ec40129d3b28368142eadfb33e8e1464f7c6e4d4505dd5a6d2f86870d4f569",
   "candidate_json_external_input": true,
-  "candidate_json_path": "/home/dieterolson/native_engine_parity_telemetry_20261012/mujoco_v1_candidate_lift_20261011_root_attempt2/returned81_candidate.json",
-  "candidate_lift_observation_path": "/home/dieterolson/native_engine_parity_telemetry_20261012/mujoco_v1_candidate_lift_20261011_root_attempt2/native-observation.json",
+  "candidate_json_path": "<owner-home>/native_engine_parity_telemetry_20261012/mujoco_v1_candidate_lift_20261011_root_attempt2/returned81_candidate.json",
+  "candidate_lift_observation_path": "<owner-home>/native_engine_parity_telemetry_20261012/mujoco_v1_candidate_lift_20261011_root_attempt2/native-observation.json",
   "candidate_lift_observation_sha256": "9986c0791134234f3d3b4e19b2784b48d3758965f1f5fbac23261211f5922ac3",
   "candidate_source_sha256": "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf",
   "contact_inventory_comparison": {
@@ -443,12 +443,12 @@
     "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
     "python": "3.12.12 (main, Oct 10 2025, 08:52:57) [GCC 11.4.0]",
     "source_imports": {
-      "bunkershot3d_package": "/home/dieterolson/native_engine_parity_20261011_final_50203626/src/bunkershot3d/__init__.py",
+      "bunkershot3d_package": "<owner-home>/native_engine_parity_20261011_final_50203626/src/bunkershot3d/__init__.py",
       "bunkershot3d_package_sha256": "16fdb491cba2e67ca3574c8341aa6a393ae613c3845271c43ab6b2ca8255b39f",
       "source_import_paths": [
-        "/home/dieterolson/native_engine_parity_20261011_final_50203626/src",
-        "/home/dieterolson/native_engine_parity_20261011_final_50203626/src/shared/python",
-        "/home/dieterolson/native_engine_parity_20261011_final_50203626"
+        "<owner-home>/native_engine_parity_20261011_final_50203626/src",
+        "<owner-home>/native_engine_parity_20261011_final_50203626/src/shared/python",
+        "<owner-home>/native_engine_parity_20261011_final_50203626"
       ]
     }
   },

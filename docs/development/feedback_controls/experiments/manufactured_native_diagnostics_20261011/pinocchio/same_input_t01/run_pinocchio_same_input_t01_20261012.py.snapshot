@@ -363,7 +363,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--repo-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     input_root = Path(
-        "/home/dieterolson/native_engine_parity_telemetry_20261012/"
+        "<owner-home>/native_engine_parity_telemetry_20261012/"
         "pinocchio_same_input_t01_inputs"
     )
     parser.add_argument(

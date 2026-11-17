@@ -46,7 +46,8 @@ def test_debug_endpoints_are_not_registered_in_production(
 
     app = local_server.create_local_app()
 
-    with TestClient(app, base_url="http://localhost") as client:
+    capability = {local_server.LAUNCHER_CSRF_HEADER: app.state.launcher_csrf_token}
+    with TestClient(app, base_url="http://localhost", headers=capability) as client:
         for endpoint in DEBUG_ENDPOINTS:
             response = client.get(endpoint)
             assert response.status_code == 404
@@ -62,6 +63,7 @@ def test_debug_endpoints_can_be_explicitly_enabled_in_production(
 
     app = local_server.create_local_app()
 
-    with TestClient(app, base_url="http://localhost") as client:
+    capability = {local_server.LAUNCHER_CSRF_HEADER: app.state.launcher_csrf_token}
+    with TestClient(app, base_url="http://localhost", headers=capability) as client:
         response = client.get("/api/debug/routes")
         assert response.status_code == 200

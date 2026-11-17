@@ -117,7 +117,7 @@ only reachable by changing the geometry.
 4. Simscape: update the model workspace lengths and rigid transforms to the
    same numbers and re-run the R2025b frame parity script so the upper body
    is qualified again; until then the new document is a candidate and every
-   receipt says so. MATLAB is not installed on DeskComputer.
+   receipt says so. MATLAB is not installed on <host>.
 5. Engines: MuJoCo, Drake and Pinocchio consume the document through their
    builders, so the same change propagates; rerun the FB-3 parity receipts.
 6. Inertia validation after the dynamics gate: peak vertical ground reaction
@@ -391,7 +391,7 @@ other arm.
   support polygon: True, 0.038 m from the polygon centroid.
 - **Same pose in every engine.** `evidence/setup_parity/verify_setup_parity.py`
   evaluates the fitted address (frame 0, by coordinate name) in MuJoCo here
-  and in Drake 1.57.0 and Pinocchio 4.1.0 on ControlTower from the
+  and in Drake 1.57.0 and Pinocchio 4.1.0 on <host> from the
   same document: Pinocchio 9e-16 m / 5e-08 rad, Drake 6.5e-06 m /
   7.3e-06 rad (URDF text precision) over 17 frames; gate 1e-5. The
   translation rule between models is the document's `coordinate_order`:

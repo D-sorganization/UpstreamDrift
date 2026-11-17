@@ -28,6 +28,8 @@ interface GripControlsProps {
 const SLIDERS: ReadonlyArray<readonly [keyof GripPicks, string, number, number, number]> = [
   ['lead_shaft_rotation', 'Lead Hand Rotation (deg, + Stronger)', -60, 60, 1],
   ['trail_shaft_rotation', 'Trail Hand Rotation (deg, + Stronger)', -60, 60, 1],
+  ['lead_shaft_roll', 'Lead Shaft Roll (deg, butt→head)', -180, 180, 1],
+  ['trail_shaft_roll', 'Trail Shaft Roll (deg, butt→head)', -180, 180, 1],
   ['lead_palm_diagonal', 'Lead Palm Diagonal (deg)', 5, 85, 1],
   ['trail_palm_diagonal', 'Trail Palm Diagonal (deg)', 5, 85, 1],
   ['hand_spacing', 'Hand Spacing (m)', 0.01, 0.2, 0.0025],
@@ -41,6 +43,8 @@ const VISUAL_SLIDERS: ReadonlyArray<readonly [keyof GripPicks, string, number, n
 const SLIDER_DEFAULT: Partial<Record<keyof GripPicks, number>> = {
   lead_shaft_rotation: 0,
   trail_shaft_rotation: 0,
+  lead_shaft_roll: 0,
+  trail_shaft_roll: 0,
   lead_palm_diagonal: 40,
   trail_palm_diagonal: 40,
   hand_spacing: 0.0762,

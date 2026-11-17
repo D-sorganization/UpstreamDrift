@@ -27,13 +27,12 @@ def _job(name: str) -> dict[str, Any]:
     return yaml.safe_load(SIZE_GATES.read_text(encoding="utf-8"))["jobs"][name]
 
 
-def _build_step(job: dict[str, Any]) -> dict[str, Any]:
-    (step,) = [
+def _build_steps(job: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
         step
         for step in job["steps"]
         if str(step.get("uses", "")).startswith("docker/build-push-action@")
     ]
-    return step
 
 
 @pytest.mark.parametrize("job_name", BUILD_JOBS)
@@ -41,14 +40,18 @@ def test_each_build_is_tagged_per_run(job_name: str) -> None:
     job = _job(job_name)
     image = job["env"]["IMAGE"]
 
+    build_steps = _build_steps(job)
+    assert build_steps, f"{job_name} must build an image"
     assert "${{ github.run_id }}" in image
     assert "${{ github.run_attempt }}" in image
-    assert _build_step(job)["with"]["tags"] == "${{ env.IMAGE }}"
+    for step in build_steps:
+        assert step["with"]["tags"] == "${{ env.IMAGE }}"
 
 
 @pytest.mark.parametrize("job_name", BUILD_JOBS)
 def test_each_build_carries_the_cleanup_label(job_name: str) -> None:
-    assert CI_LABEL in _build_step(_job(job_name))["with"]["labels"]
+    for step in _build_steps(_job(job_name)):
+        assert CI_LABEL in step["with"]["labels"]
 
 
 @pytest.mark.parametrize("job_name", BUILD_JOBS)

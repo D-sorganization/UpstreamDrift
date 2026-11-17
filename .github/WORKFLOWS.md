@@ -9,19 +9,12 @@ owners validate low-risk removals.
 ## Security Audit: `pull_request_target` Workflows (issue #5915)
 
 Audited 2026-10-24 (RM `docs/security/public-repo-exposure-audit-2026-10.md`).
-Two workflows use `pull_request_target`:
+One workflow uses `pull_request_target`:
 
 **`pr-body-lint.yml`** — trigger covers `opened/edited`. The job calls the
 SHA-pinned `Repository_Management` reusable workflow with read-only permissions
 and `report_only: true`; this caller file does not check out PR head code. ✅ Safe
 (report-only; RM #2427).
-
-**`Jules-Redundant-PR-Closer.yml`** — trigger covers `opened/reopened/synchronize/closed`
-from forks but does **not** check out the PR head ref. It only checks out
-`Repository_Management` at `ref: main`. Fork PRs route to `ubuntu-latest`; same-repo
-PRs use `d-sorg-fleet-docker`. The app token grants
-`contents:read / pull-requests:write / issues:write`; no secrets beyond the
-Jules app credentials are exposed. ✅ Safe.
 
 **`anti-phantom-merge.yml`** — uses `pull_request` only (including `labeled` /
 `unlabeled`). It checks out trusted **base** SHA only and reads PR files/commits via
@@ -86,12 +79,7 @@ guardrails until the active workflow count reaches the 25-workflow target:
 | humanoid-models-drift.yml            | pull_request                                              | @physics  | contents/pull-requests: read/write                          | KEEP: PARITY-MODEL-BUILD drift gate (issue #4094, spec §2.6).                                          | n/a                      |
 | maturin-movement-optimizer.yml       | push/pull_request/workflow_dispatch                       | @core     | contents: read                                              | KEEP: builds vendored movement_optimizer_core Rust wheel + runs parity non-skipped (#7604).            | n/a                      |
 | motion-matching-leaderboard.yml      | pull_request/workflow_dispatch                            | @physics  | contents/pull-requests: write                               | KEEP: cross-option motion-matching leaderboard reports.                                                | n/a                      |
-| Jules-Auto-Assign-Issues.yml         | issues/workflow_dispatch                                  | @triage   | issues: write                                               | KEEP: automated issue assignment.                                                                      | n/a                      |
-| Jules-Diff-Verifier.yml              | pull_request                                              | @core     | contents: read / pull-requests: write                       | KEEP: diff-substance check gate; blocks phantom Jules PRs from merging.                                | n/a                      |
-| Jules-Issue-Mention-Handler.yml      | issues/issue_comment/workflow_dispatch                    | @triage   | issues: write                                               | MERGE: mention-triggered issue routing.                                                                | n/a                      |
 | issue-closure-policy.yml             | issues                                                    | @core     | issues: write / pull-requests: read                         | KEEP: reopens epic/acceptance-criteria issues closed without a merged PR or wontfix.                   | n/a                      |
-| Jules-Redundant-Issue-Closer.yml     | issues/schedule/workflow_dispatch                         | @agents   | contents: read / issues: write                              | KEEP: close duplicate agent-created issues by normalized title.                                        | n/a                      |
-| Jules-Redundant-PR-Closer.yml        | pull_request_target/schedule/workflow_dispatch            | @agents   | contents: read / pull-requests/issues: write                | KEEP: close redundant agent PRs by fleet priority order.                                               | n/a                      |
 | Maintenance-Global-Control.yml       | workflow_dispatch                                         | @infra    | actions: write                                              | KEEP: global workflow control plane.                                                                   | n/a                      |
 | cross-engine-equivalence.yml         | pull_request/push/workflow_dispatch                       | @physics  | contents: read                                              | KEEP: PARITY-EQUIVALENCE plus Canonical Core conformance gate (issues #4096, #6780).                   | n/a                      |
 | cross-engine-leaderboard.yml         | pull_request/workflow_dispatch                            | @physics  | contents/pull-requests: write                               | KEEP: PARITY-LEADERBOARD result report (issue #4097).                                                  | n/a                      |
@@ -123,7 +111,6 @@ guardrails until the active workflow count reaches the 25-workflow target:
 | vendor-freshness.yml                 | schedule/workflow_dispatch                                | @infra    | contents/issues: write                                      | KEEP: vendored dependency freshness.                                                                   | n/a                      |
 | anti-phantom-merge.yml               | pull_request                                              | @infra    | contents: read                                              | KEEP: blocks merges that claim to fix an issue without changes that close it.                          | n/a                      |
 | issue-closure-policy.yml             | issues/pull_request                                       | @infra    | issues: write                                               | KEEP: enforces "no closure without evidence" policy on issue closes.                                   | n/a                      |
-| Jules-Diff-Verifier.yml              | pull_request                                              | @infra    | contents: read                                              | KEEP: anti-phantom-merge diff substance verifier.                                                      | anti-phantom-merge.yml   |
 | lint-workflow-files.yml              | pull_request                                              | @infra    | contents: read                                              | KEEP: lint .github/workflows/\*.yml for syntax + actionlint findings.                                  | n/a                      |
 | Stub-Introduction-Guard.yml          | pull_request                                              | @infra    | contents: read                                              | KEEP: rejects newly-introduced TRACKED_TASK/`pass`/`...` stubs.                                        | n/a                      |
 | Verify-Issue-Closure.yml             | issues                                                    | @infra    | issues: write                                               | KEEP: reopens issues closed without a merged PR (#641 fleet policy).                                   | issue-closure-policy.yml |
@@ -131,7 +118,6 @@ guardrails until the active workflow count reaches the 25-workflow target:
 | collate-changes.yml                  | push/workflow_dispatch                                    | @infra    | contents/pull-requests: write                               | KEEP: folds merged `changes/` fragments into SPEC.md and the dev log via a bot PR (RM#1976).           | n/a                      |
 | development-log-archive.yml          | schedule/workflow_dispatch                                | @infra    | contents/pull-requests: write                               | KEEP: nightly archiver for terminal dev-log rows via `development_log.py --archive` and a bot PR.      | n/a                      |
 | wizard-pack.yml                      | push/pull_request/workflow_dispatch                       | @core     | contents: read                                              | KEEP: builds and verifies Sidekick Drift Wizard SQLite knowledge pack artifact (#10943).               | n/a                      |
-| jules-push-pr-noise-disable.yml      | push/workflow_dispatch                                    | @infra    | actions: write                                              | KEEP: disable orphan Jules push/PR noise workflows after batch-1 retirement (#13575).                  | n/a                      |
 
 ## Engine and Conda Cache Contract (Issue #13579)
 

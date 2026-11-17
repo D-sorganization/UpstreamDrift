@@ -347,12 +347,9 @@ class TestProjectToFrictionCone:
         # Projected force should be inside cone
         assert cone.contains(projected), "Assertion failed: cone.contains(projected)"
 
-        # Normal component preserved
-        assert_allclose(np.dot(projected, cone.normal), 100.0)
-
-        # Tangential at limit
-        f_t = projected - 100.0 * cone.normal
-        assert_allclose(np.linalg.norm(f_t), 50.0, atol=1e-10)
+        # Euclidean projection onto ||f_t|| <= mu * f_n for [100, 0, 100], mu=0.5:
+        # alpha = (100 + 0.5*100) / (1 + 0.25) = 120 -> [60, 0, 120].
+        assert_allclose(projected, [60.0, 0.0, 120.0], atol=1e-10)
 
     def test_project_pulling_force(self) -> None:
         """Test projection of pulling (negative normal) force."""

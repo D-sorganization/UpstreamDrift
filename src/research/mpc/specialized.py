@@ -38,6 +38,8 @@ class CentroidalState:
     contact_forces: dict[str, NDArray[np.floating]]
 
 
+# Nominal adult bipedal mass [kg] used only when the engine exposes neither
+# get_total_mass() nor total_mass/mass attributes (override on the model).
 _DEFAULT_CENTROIDAL_MASS_KG = 50.0
 _MIN_CENTROIDAL_CONTACTS = 1
 _MAX_CENTROIDAL_CONTACTS = 4

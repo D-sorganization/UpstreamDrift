@@ -94,11 +94,16 @@ class TestRandomizer:
             "friction_scale",
             "damping_scale",
             "motor_scale",
-            "gravity",
             "action_delay",
             "observation_delay",
         ):
             assert key in rand
+        assert "gravity" not in rand
+
+        r_grav = DomainRandomizer(
+            FakeEngine(), DomainRandomizationConfig(randomize_gravity=True)
+        )
+        assert "gravity" in r_grav.randomize(seed=1)
 
     def test_reset_to_nominal(self) -> None:
         eng = FakeEngine()

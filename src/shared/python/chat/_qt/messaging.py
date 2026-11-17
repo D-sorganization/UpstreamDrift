@@ -22,7 +22,7 @@ from PyQt6 import sip
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QApplication, QFileDialog
 
-from shared.python.ui.owned_timer import restart_owned_single_shot
+from src.shared.python.ui.owned_timer import restart_owned_single_shot
 
 from . import exports as _exports
 from . import sessions as _sessions
@@ -34,6 +34,41 @@ logger = logging.getLogger(__name__)
 _SCROLL_DEFER_MS = 10
 _SCROLL_TIMER_NAME = "chat-scroll-to-bottom"
 MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024
+
+# Flip to True when slice 3.3 delivers file_upload server-side (#5727).
+FILE_UPLOAD_BACKEND_DELIVERED = False
+
+ATTACHMENT_PENDING_PREFIX = "[Attachment pending:"
+ATTACHMENT_REJECTED_PREFIX = "[Attachment not delivered:"
+ATTACHMENT_DEDUP_PREFIX = "[Attachment already selected (not delivered):"
+
+
+def attachment_bubble_implies_accepted(text: str) -> bool:
+    """Return True when bubble text claims the backend accepted an upload."""
+    return text.startswith("[Uploaded file") or text == "[Captured screenshot]"
+
+
+def format_attachment_pending_bubble(filename: str) -> str:
+    return f"{ATTACHMENT_PENDING_PREFIX} {filename}]"
+
+
+def format_attachment_deduplicated_bubble(filename: str, *, delivered: bool) -> str:
+    if delivered:
+        return f"[Uploaded file (deduplicated): {filename}]"
+    return f"{ATTACHMENT_DEDUP_PREFIX} {filename}]"
+
+
+def format_attachment_rejection_bubble(filename: str, detail: str) -> str:
+    return f"{ATTACHMENT_REJECTED_PREFIX} {filename}] {detail}"
+
+
+def format_attachment_accepted_bubble(filename: str) -> str:
+    return f"[Uploaded file: {filename}]"
+
+
+def file_upload_error_detail(detail: str) -> bool:
+    """Return True when the backend rejected a file_upload action."""
+    return "file_upload" in detail and "Unknown action" in detail
 
 
 @dataclass(frozen=True)
@@ -93,6 +128,34 @@ class MessagingMixin:
 
     # ── Input affordances ───────────────────────────────────────────
 
+    def _pending_attachment_bubbles(self) -> list[tuple[str, ChatMessageBubble]]:
+        pending = getattr(self, "_attachment_bubbles_pending_delivery", None)
+        if pending is None:
+            pending = []
+            self._attachment_bubbles_pending_delivery = pending
+        return pending
+
+    def _track_pending_attachment_bubble(
+        self, filename: str, bubble: ChatMessageBubble
+    ) -> None:
+        if FILE_UPLOAD_BACKEND_DELIVERED:
+            return
+        self._pending_attachment_bubbles().append((filename, bubble))
+
+    def _apply_file_upload_rejection(self, detail: str) -> bool:
+        """Update pending attachment bubbles when the backend rejects file_upload."""
+        if FILE_UPLOAD_BACKEND_DELIVERED:
+            return False
+        if not file_upload_error_detail(detail):
+            return False
+        pending = self._pending_attachment_bubbles()
+        if not pending:
+            return False
+        while pending:
+            filename, bubble = pending.pop(0)
+            bubble.set_content(format_attachment_rejection_bubble(filename, detail))
+        return True
+
     def _ingest_attachment_path(
         self, path: Path, max_bytes: int = MAX_ATTACHMENT_BYTES
     ) -> tuple[AttachmentIntakeEntry, bool]:
@@ -113,11 +176,19 @@ class MessagingMixin:
                     "content": b64,
                 }
             )
-            self._add_bubble("user", f"[Uploaded file: {entry.filename}]")
+            if FILE_UPLOAD_BACKEND_DELIVERED:
+                accepted = format_attachment_accepted_bubble(entry.filename)
+                self._add_bubble("user", accepted)
+            else:
+                bubble = self._add_bubble(
+                    "user", format_attachment_pending_bubble(entry.filename)
+                )
+                self._track_pending_attachment_bubble(entry.filename, bubble)
         else:
-            self._add_bubble(
-                "user", f"[Uploaded file (deduplicated): {entry.filename}]"
+            text = format_attachment_deduplicated_bubble(
+                entry.filename, delivered=FILE_UPLOAD_BACKEND_DELIVERED
             )
+            self._add_bubble("user", text)
         return entry, is_dup
 
     def attachment_manifest(self) -> list[dict[str, Any]]:
@@ -154,10 +225,14 @@ class MessagingMixin:
         buffer.open(QIODevice.OpenModeFlag.WriteOnly)
         pixmap.save(buffer, "PNG")
         b64 = base64.b64encode(ba.data()).decode("ascii")
-        self._send_ws(
-            {"action": "file_upload", "filename": "screenshot.png", "content": b64}
-        )
-        self._add_bubble("user", "[Captured screenshot]")
+        filename = "screenshot.png"
+        self._send_ws({"action": "file_upload", "filename": filename, "content": b64})
+        if FILE_UPLOAD_BACKEND_DELIVERED:
+            self._add_bubble("user", "[Captured screenshot]")
+        else:
+            pending_text = format_attachment_pending_bubble(filename)
+            bubble = self._add_bubble("user", pending_text)
+            self._track_pending_attachment_bubble(filename, bubble)
 
     def _on_mic_toggle(self) -> None:
         if self._voice_manager.is_recording:

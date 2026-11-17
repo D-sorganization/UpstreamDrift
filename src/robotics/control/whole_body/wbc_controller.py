@@ -47,6 +47,10 @@ class WBCConfig:
             engine ``floating_base_velocity_dofs`` attribute). When zero,
             contact dynamics are not over-constrained on actuated DOFs (torques
             remain free). Set explicitly when inference is ambiguous.
+        friction_coeff: Coulomb contact friction coefficient ``mu`` (dimensionless;
+            nominal dry rubber/floor default 0.5). Used with an inscribed pyramid.
+        max_contact_force: Symmetric component box bound ``[N]`` on contact force
+            decision variables for QP numerical conditioning (default 10000.0 N).
     """
 
     dt: float = 0.001
@@ -57,6 +61,8 @@ class WBCConfig:
     contact_force_regularization: float = 1e-4
     use_hierarchical: bool = True
     floating_base_dofs: int | None = None
+    friction_coeff: float = 0.5
+    max_contact_force: float = 10000.0
 
 
 @dataclass
@@ -694,9 +700,9 @@ class WholeBodyController:
 
         n_vars = n_v + n_contact_vars
 
-        # Friction cone constraints for contact forces
+        # Inscribed 4-face friction pyramid constraints for contact forces (||f_t|| <= mu * f_z)
         if n_contact_vars > 0:
-            mu = 0.5  # Default friction coefficient
+            mu_inscribed = self._config.friction_coeff / float(np.sqrt(2.0))
             n_contacts = n_contact_vars // 3
 
             for i in range(n_contacts):
@@ -707,12 +713,12 @@ class WholeBodyController:
                 constraints_lb.append(np.array([-np.inf]))
                 constraints_ub.append(np.array([0.0]))
 
-                # Friction pyramid constraints
-                for sign_x, sign_y in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+                # Inscribed pyramid faces: |f_x| + |f_y| <= sqrt(2) * mu_inscribed * f_z = mu * f_z
+                for sign_x, sign_y in [(1, 1), (1, -1), (-1, 1), (-1, -1)]:
                     A_row = np.zeros((1, n_vars))
-                    A_row[0, n_v + 3 * i] = sign_x
-                    A_row[0, n_v + 3 * i + 1] = sign_y
-                    A_row[0, n_v + 3 * i + 2] = -mu
+                    A_row[0, n_v + 3 * i] = sign_x / float(np.sqrt(2.0))
+                    A_row[0, n_v + 3 * i + 1] = sign_y / float(np.sqrt(2.0))
+                    A_row[0, n_v + 3 * i + 2] = -mu_inscribed
                     constraints_A.append(A_row)
                     constraints_lb.append(np.array([-np.inf]))
                     constraints_ub.append(np.array([0.0]))
@@ -764,8 +770,8 @@ class WholeBodyController:
             x_lb[:n_v] = np.maximum(x_lb[:n_v], qdd_lb_from_v)
             x_ub[:n_v] = np.minimum(x_ub[:n_v], qdd_ub_from_v)
 
-        # Contact force bounds for numerical stability
-        max_force = 10000.0
+        # Contact force bounds [N] for QP numerical conditioning (WBCConfig.max_contact_force)
+        max_force = self._config.max_contact_force
         if n_contact_vars > 0:
             x_lb[n_v:] = -max_force
             x_ub[n_v:] = max_force

@@ -66,7 +66,7 @@ manager = EngineManager()
 engine = manager.get_engine("mujoco")
 
 # 2. Load a model
-engine.load_model("src/shared/models/urdf/humanoid_7dof.urdf")
+engine.load_model("tests/fixtures/models/double_pendulum.urdf")
 
 # 3. Set initial conditions
 engine.reset()
@@ -286,7 +286,7 @@ from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.comparative_analysis import ComparativeAnalysis
 
 manager = EngineManager()
-model_path = "src/shared/models/urdf/humanoid_7dof.urdf"
+model_path = "tests/fixtures/models/double_pendulum.urdf"
 
 results = {}
 for engine_name in ["mujoco", "drake", "pinocchio"]:
@@ -466,7 +466,7 @@ Results can be exported in two formats:
   consumption and API responses.
 
 Export is available through the GUI (File > Export), the API (`/api/export/`
-endpoints), and programmatically via the `src/shared/python/export.py` module.
+endpoints), and programmatically via the `src/shared/python/data_io/export.py` module.
 
 ---
 
