@@ -304,7 +304,7 @@ def _write_evidence_receipt(
         ),
         "renders": records,
     }
-    (_OUT_DIR / "receipt.json").write_text(
+    (_OUT_DIR / "render_stats.json").write_text(
         json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
     )
     logging.basicConfig(level=logging.INFO, format="%(message)s")
