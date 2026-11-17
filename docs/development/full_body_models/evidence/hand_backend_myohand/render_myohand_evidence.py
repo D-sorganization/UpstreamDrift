@@ -32,6 +32,7 @@ from src.shared.python.model_appearance.hand_backends.skeleton_export import (
 OUT = Path(__file__).resolve().parent
 VIEWS = ("front", "side", "top", "grip_oblique")
 ROLLS = (0.0, -20.0, 20.0)
+SIZE_VARIANTS = (("small", 0.88), ("large", 1.15))
 
 
 def _zero_roll_spec(spec: GripSpec) -> GripSpec:
@@ -116,6 +117,20 @@ def main() -> None:
             fname = f"both_{view}_club_roll_{roll_tag}.png"
             render_scene_png(OUT / fname, meshes, view=view, settings=lit)
             artifacts.append(fname)
+
+    for tag, scale in SIZE_VARIANTS:
+        size = base.hand_size
+        spec = replace(
+            base,
+            hand_size=replace(
+                size, length_m=size.length_m * scale, breadth_m=size.breadth_m * scale
+            ),
+        )
+        fname = f"both_grip_oblique_size_{tag}.png"
+        render_scene_png(
+            OUT / fname, _scene_meshes(club, spec), view="grip_oblique", settings=lit
+        )
+        artifacts.append(fname)
 
     receipt = {
         "backend": "myohand_skeleton",
