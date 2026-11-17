@@ -30,11 +30,11 @@ The owner's report: the grip is misaligned from the clubface. Measured on the dr
 
 Capsule hands (default):
 
-![Capsule hands](https://raw.githubusercontent.com/D-sorganization/UpstreamDrift/EVIDENCE_SHA/docs/development/full_body_models/evidence/hands_on_club/mujoco_default_pose_capsule.png)
+![Capsule hands](https://raw.githubusercontent.com/D-sorganization/UpstreamDrift/e8d27ae6b0f768c0f5eac8c80f98fc751bd2663b/docs/development/full_body_models/evidence/hands_on_club/mujoco_default_pose_capsule.png)
 
 Skinned hands (`subject.hand_visual_backend: "skinned_human"`):
 
-![Skinned hands](https://raw.githubusercontent.com/D-sorganization/UpstreamDrift/EVIDENCE_SHA/docs/development/full_body_models/evidence/hands_on_club/mujoco_default_pose_skinned.png)
+![Skinned hands](https://raw.githubusercontent.com/D-sorganization/UpstreamDrift/e8d27ae6b0f768c0f5eac8c80f98fc751bd2663b/docs/development/full_body_models/evidence/hands_on_club/mujoco_default_pose_skinned.png)
 
 ### Harsh Self-Review of the Stills
 
