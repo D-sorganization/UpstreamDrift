@@ -373,7 +373,7 @@ def lofted_palm_slab(spec: PalmSlabSpec) -> tuple[Mesh, Array, float, float]:
     Returns ``(palm_mesh, mcp_surface_anchors_world, measured_cup_depth_m, palm_arc_length_m)``.
     """
     n_samples = 24
-    ts = np.linspace(0.0, 1.0, n_samples)
+    ts = np.linspace(0.0, 1.0, n_samples, dtype=np.float64)
     centers = np.array(
         [
             ((1.0 - t) ** 2) * spec.wrist_center
