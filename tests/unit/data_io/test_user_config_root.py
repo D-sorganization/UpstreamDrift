@@ -139,3 +139,53 @@ def test_user_config_path_joins_under_root() -> None:
 def test_user_config_path_rejects_escaping_paths(parts: tuple[str, ...]) -> None:
     with pytest.raises(ValueError):
         ucr.user_config_path(*parts)
+
+
+@pytest.mark.parametrize("directory", [False, True], ids=["file", "library"])
+def test_partial_copy_is_discarded_and_retried(
+    home: Path,
+    new_root: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    directory: bool,
+) -> None:
+    name = "library/index.db" if directory else "preferences.json"
+    source = _seed(home, ".golf_modeling_suite", name, "complete legacy data")
+    destination = new_root / ("library" if directory else "preferences.json")
+
+    def partial_copy(src: Path, dest: Path) -> None:
+        if directory:
+            dest.mkdir()
+            dest = dest / "index.db"
+        dest.write_text("partial", encoding="utf-8")
+        raise OSError("disk full after partial copy")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(ucr.shutil, "copytree" if directory else "copy2", partial_copy)
+        assert ucr.migrate_legacy_user_dirs(new_root, home=home) == []
+
+    assert not destination.exists()
+    assert list(new_root.iterdir()) == []
+    assert source.read_text(encoding="utf-8") == "complete legacy data"
+    assert ucr.migrate_legacy_user_dirs(new_root, home=home) == [destination]
+    migrated_file = destination / "index.db" if directory else destination
+    assert migrated_file.read_text(encoding="utf-8") == "complete legacy data"
+    assert (new_root / ucr.MIGRATION_MARKER).exists()
+
+
+def test_failed_publish_cleans_staging_and_retries(
+    home: Path, new_root: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _seed(home, ".golf_modeling_suite", "preferences.json", "complete")
+
+    def fail_publish(source: Path, target: Path) -> Path:
+        raise PermissionError("destination unavailable")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "rename", fail_publish)
+        assert ucr.migrate_legacy_user_dirs(new_root, home=home) == []
+
+    assert list(new_root.iterdir()) == []
+    assert ucr.migrate_legacy_user_dirs(new_root, home=home) == [
+        new_root / "preferences.json"
+    ]
+    assert (new_root / "preferences.json").read_text(encoding="utf-8") == "complete"
