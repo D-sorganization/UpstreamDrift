@@ -49,7 +49,7 @@ def _watertight(mesh: Any) -> bool:
 def test_two_windows_of_one_loft_meet_in_the_same_circle(cut: float) -> None:
     axis = Z / np.linalg.norm(Z)
     length = float(np.linalg.norm(Z))
-    whole = LoftOptions(end_scale=0.8, belly=(0.12, 0.28, 0.22))
+    whole = LoftOptions(end_scale=0.8, belly=(0.12, 0.28, 0.45))
     near = lofted_segment(
         np.zeros(3), cut * Z, 0.036, LoftOptions(**{**vars(whole), "window": (0, cut)})
     )
@@ -75,7 +75,7 @@ def test_two_windows_of_one_loft_meet_in_the_same_circle(cut: float) -> None:
 def test_the_belly_makes_the_loft_widest_near_its_position() -> None:
     axis = Z / np.linalg.norm(Z)
     mesh = lofted_segment(
-        np.zeros(3), Z, 0.036, LoftOptions(end_scale=0.8, belly=(0.12, 0.28, 0.22))
+        np.zeros(3), Z, 0.036, LoftOptions(end_scale=0.8, belly=(0.12, 0.28, 0.45))
     )
     radial = np.linalg.norm(
         mesh.vertices - np.outer(mesh.vertices @ axis, axis), axis=1
@@ -153,7 +153,68 @@ def test_the_forearm_bodies_share_one_circle_at_the_rotation_joint() -> None:
         assert _watertight(near) and _watertight(far)
 
 
+def _radii(mesh: Any, axis: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    along = mesh.vertices @ axis
+    return along, np.linalg.norm(mesh.vertices - np.outer(along, axis), axis=1)
+
+
+def test_capsule_ends_keep_the_radius_to_the_joint_and_round_beyond_it() -> None:
+    axis = Z / np.linalg.norm(Z)
+    length = float(np.linalg.norm(Z))
+    options = LoftOptions(end_scale=0.8, capsule_ends=True, taper_end=0.8)
+    mesh = lofted_segment(np.zeros(3), Z, 0.036, options)
+    along, radial = _radii(mesh, axis)
+    # A spindle is down to two thirds of its radius at the joint; this is not.
+    assert radial[np.abs(along) < 1e-9].max() == pytest.approx(0.036, abs=1e-9)
+    end = radial[np.abs(along - length) < 1e-9].max()
+    assert end == pytest.approx(0.8 * 0.036, abs=1e-9)
+    # The taper is finished at ``taper_end`` of the length.
+    late = (along > 0.8 * length) & (along <= length)
+    assert radial[late].max() == pytest.approx(0.8 * 0.036, abs=1e-9)
+    # Past each joint the skin is a ball about the joint: a neighbour turning
+    # about that joint cannot open a gap.
+    before, after = mesh.vertices[along < 0], mesh.vertices[along > length]
+    assert len(before) and len(after)
+    assert np.linalg.norm(before, axis=1).max() <= 0.036 + 1e-9
+    assert np.linalg.norm(after - Z, axis=1).max() <= 0.8 * 0.036 + 1e-9
+    assert along.min() == pytest.approx(-0.036, abs=1e-9)
+    assert along.max() == pytest.approx(length + 0.8 * 0.036, abs=1e-9)
+    assert _watertight(mesh) and mesh.volume() > 0
+    with pytest.raises(ValueError, match="taper_end"):
+        lofted_segment(np.zeros(3), Z, 0.036, LoftOptions(taper_end=0.0))
+
+
+def test_the_forearm_is_full_width_at_the_elbow_and_the_wrist() -> None:
+    spec = json.loads(SPEC.read_text(encoding="utf-8"))
+    skins = _forearm_skins(spec)
+    radius = library.PART_RADIUS_M["forearm"]
+    wrist = radius * library.distal_scale("forearm")
+    seen = set()
+    for joint in spec["joints"]:
+        upper, lower = joint["parent"], joint["child"]
+        if upper not in skins or lower not in skins:
+            continue
+        near, near_axis, _ = skins[upper]
+        far, far_axis, far_length = skins[lower]
+        along, radial = _radii(near, near_axis)
+        # Elbow: no pinched neck, and a ball about the joint beyond it.
+        assert radial[np.abs(along) < 1e-9].max() >= radius - 1e-9
+        beyond = near.vertices[along < 0]
+        assert np.linalg.norm(beyond, axis=1).max() <= radial.max() + 1e-9
+        along, radial = _radii(far, far_axis)
+        # Wrist: the tapered radius holds to the joint, then a ball.
+        at_wrist = radial[np.abs(along - far_length) < 1e-9].max()
+        assert at_wrist == pytest.approx(wrist, abs=1e-6)
+        tip = far.vertices[along > far_length] - far_length * far_axis
+        assert np.linalg.norm(tip, axis=1).max() <= wrist + 1e-6
+        seen.add(upper)
+    assert len(seen) == 2
+
+
 def test_forearm_shape_settings_are_validated() -> None:
+    assert "forearm" in library.CAPSULE_END_PARTS
+    assert 0.0 < library.taper_end("forearm") < 1.0
+    assert library.taper_end("thigh") == 1.0
     assert "forearm" in library.CONTINUOUS_PARTS
     gain, position, width = library.belly("forearm")
     assert gain > 0.0 and 0.0 < position < 0.5 and width > 0.0
