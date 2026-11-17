@@ -9,7 +9,7 @@ Hand work continues on subscription fleet agents (Claude Code on Brick, Antigrav
 
 ---
 
-## (a) Goal and quality bar
+## (A) Goal and Quality Bar
 
 **Goal:** Register the legacy **16-capsule** grip hand as `hand_backends/capsule.py` (unchanged behaviour) and add **`procedural_skin`**: anatomical-appearing skin built as **lofted surfaces** over the same `GripSpec` / joint inputs—not the implicit SDF sculpted track (`bc-dd40e13d`). Provide a **backend-neutral comparison harness** so Shadow, Allegro, MyoHand, skinned human, SDF, etc. can be compared side by side.
 
@@ -25,7 +25,7 @@ Hand work continues on subscription fleet agents (Claude Code on Brick, Antigrav
 
 ---
 
-## (b) Current state
+## (B) Current State
 
 ### Layout (`src/shared/python/model_appearance/hand_backends/`)
 
@@ -43,12 +43,12 @@ Hand work continues on subscription fleet agents (Claude Code on Brick, Antigrav
 | `sdf_meshing.py`      | SDF/tube helpers for **SDF sibling lane**; procedural_skin uses `tube_mesh_from_polyline` only.             |
 | `README.md`           | Short parallel-track notes.                                                                                 |
 
-### Key entry points
+### Key Entry Points
 
 - `build_hand_visual(grip_spec, side, joint_angles, grip_radius_m=..., settings=...)` per backend module and via `registry.build_hand_visual(backend_id, ...)`.
 - `procedural_skin.build_hand_visual`: builds capsule skeleton → scales polylines → tubes + palm shell → `concat_meshes` → optional `_enforce_minimum_radial_distance` (shaft clearance).
 
-### Settings (no literals in tests for acceptance bands—extend `HandAnthropometryReference` / `HandVisualSettings`)
+### Settings (No Literals in Tests for Acceptance Bands—Extend `HandAnthropometryReference` / `HandVisualSettings`)
 
 `HandAnthropometryReference` (defaults in `settings.py`):
 
@@ -77,7 +77,7 @@ python3 -m pytest tests/unit/model_appearance/hand_backends/ -q --timeout=120
 
 **Status at handoff:** 7/7 passing. Penetration tests pass; **no** scale/topology/pose acceptance tests yet (required next).
 
-### Evidence scripts
+### Evidence Scripts
 
 ```bash
 export QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg
@@ -100,7 +100,7 @@ python3 -m ruff format --check .
 
 ---
 
-## (c) What worked and what failed
+## (C) What Worked and What Failed
 
 ### Worked
 
@@ -111,7 +111,7 @@ python3 -m ruff format --check .
 - **Lofted finger tubes:** `tube_mesh_from_polyline` with radii from `anthropometry.finger_radius_*` — **in isolation**, proximal radius ≈ 9 mm (18 mm diameter) on middle-finger spline from capsule bake (verified in REPL at `7e7c1848`).
 - **Dead end documented:** Monolithic SDF union + marching cubes (whole hand) → rectangular palm blob, floating finger islands; abandoned for this lane.
 
-### Failed (visual and structural)
+### Failed (Visual and Structural)
 
 **Barb review of `7e7c1848` / `procedural_skin_lead_roll_+0.png` (worse than internal notes):**
 
@@ -138,11 +138,11 @@ python3 -m ruff format --check .
 
 ---
 
-## (d) Next steps (priority order) with acceptance tests
+## (D) Next Steps (Priority Order) With Acceptance Tests
 
 > Barb iteration-3 spec (fleet agent should implement TDD **red → green**). Cloud lane stopped before this rebuild.
 
-### 1. Scale tests first (RED, then fix geometry)
+### 1. Scale Tests First (RED, Then Fix Geometry)
 
 Add `tests/unit/model_appearance/hand_backends/test_procedural_skin_scale.py` (or extend settings with explicit bands):
 
@@ -183,13 +183,13 @@ One view per PNG **or** 2×2 grid, ≥1024 px, **tight** 70% fill (minimize `tig
 
 Keep `render_hand_backend_comparison.py` registry-driven; add new metrics fields only in a backward-compatible way.
 
-### 6. Documentation / epic
+### 6. Documentation / Epic
 
 Post learnings to [#15150](https://github.com/D-sorganization/UpstreamDrift/issues/15150) each iteration (`Refs #15150`). Record visual scores in PR body.
 
 ---
 
-## (e) Dependencies on other tracks
+## (E) Dependencies on Other Tracks
 
 | Track                            | Lane            | Proceed without it                                                                                                                                |
 | -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -201,7 +201,7 @@ Post learnings to [#15150](https://github.com/D-sorganization/UpstreamDrift/issu
 
 ---
 
-## (f) Licences and assets
+## (F) Licences and Assets
 
 - **This lane:** MIT-licensed repo code only; no third-party hand mesh, MANO, or SMPL-X assets.
 - **Optional:** `sdf_meshing.mesh_from_sdf` uses **scikit-image** `measure.marching_cubes` when installed (BSD-compatible dependency; not required for lofted path).
@@ -210,7 +210,7 @@ Post learnings to [#15150](https://github.com/D-sorganization/UpstreamDrift/issu
 
 ---
 
-## (g) Visual self-review procedure (mandatory after every change)
+## (G) Visual Self-Review Procedure (Mandatory After Every Change)
 
 1. Regenerate evidence:
 
@@ -248,7 +248,7 @@ Post learnings to [#15150](https://github.com/D-sorganization/UpstreamDrift/issu
 
 ---
 
-## Quick links
+## Quick Links
 
 - PR: https://github.com/D-sorganization/UpstreamDrift/pull/15146
 - Epic: https://github.com/D-sorganization/UpstreamDrift/issues/15150
