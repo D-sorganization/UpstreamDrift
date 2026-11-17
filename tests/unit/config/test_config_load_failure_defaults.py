@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
+import sys
 from typing import Any
 
 import pytest
@@ -15,6 +16,27 @@ from src.shared.python.config.config_utils import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize("load", [load_json_config, load_yaml_config])
+def test_integer_parser_limit_preserves_caller_default(
+    tmp_path: Path, load: Callable[..., dict[str, Any]]
+) -> None:
+    limit = getattr(sys, "get_int_max_str_digits", lambda: 0)()
+    if not limit:
+        pytest.skip("Python integer parsing digit limit is disabled")
+    target = tmp_path / "config"
+    original = '{"count": ' + "1" * (limit + 1) + "}"
+    target.write_text(original, encoding="utf-8")
+    default = {"mode": "safe"}
+
+    result = load(target, default=default)
+
+    assert result == default
+    assert result is not default
+    assert target.read_text(encoding="utf-8") == original
+    result["mode"] = "changed"
+    assert default == {"mode": "safe"}
 
 
 @pytest.mark.parametrize("load", [load_json_config, load_yaml_config])

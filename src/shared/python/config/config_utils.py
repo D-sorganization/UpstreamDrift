@@ -64,7 +64,8 @@ def load_json_config(
 
         with open(path_obj, encoding="utf-8") as f:
             config: dict[str, Any] = json.load(f)
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+    except (OSError, ValueError) as exc:
+        # JSON parsing also raises plain ValueError for integer digit limits.
         logger.error("Failed to load JSON configuration %s: %s", path_obj, exc)
         return default.copy() if default is not None else {}
 
@@ -142,7 +143,8 @@ def load_yaml_config(
 
         with open(path_obj, encoding="utf-8") as f:
             config = yaml.safe_load(f)
-    except (OSError, UnicodeError, yaml.YAMLError) as exc:
+    except (OSError, ValueError, yaml.YAMLError) as exc:
+        # YAML integer construction can hit Python's digit limit as well.
         logger.error("Failed to load YAML configuration %s: %s", path_obj, exc)
         return default.copy() if default is not None else {}
 
