@@ -167,9 +167,16 @@ class LoftOptions:
     # taper, belly and end rounding are those of the whole limb.
     window: tuple[float, float] = (0.0, 1.0)
     # Muscle belly ``(gain, position, width)``: the radius grows by ``gain``
-    # at ``position`` along the whole limb, falling off as a Gaussian of
-    # ``width`` (both fractions of its length). A gain of 0 is no belly.
+    # at ``position`` along the whole limb and falls to nothing (raised
+    # cosine) ``width`` away on either side (fractions of its length). A gain
+    # of 0 is no belly.
     belly: tuple[float, float, float] = (0.0, 0.5, 1.0)
+    # Ends of the whole limb (#15262). False: a spindle, already thinner at
+    # the joint. True: the radius holds to each joint and the skin beyond is a
+    # ball about the joint, so a neighbour turning there opens no gap.
+    capsule_ends: bool = False
+    # Fraction of the whole limb by which the taper has reached ``end_scale``.
+    taper_end: float = 1.0
 
 
 def _checked_shape(opts: LoftOptions) -> None:
@@ -184,22 +191,40 @@ def _checked_shape(opts: LoftOptions) -> None:
         raise ValueError("belly needs a finite gain >= 0 and a position in [0, 1]")
     if not (width > 0.0 and math.isfinite(width)):
         raise ValueError("belly width must be positive")
+    if not 0.0 < opts.taper_end <= 1.0:
+        raise ValueError("taper_end must be in (0, 1]")
+
+
+def _limb_scale(opts: LoftOptions, frac: float) -> float:
+    """Taper times belly at ``frac`` of the whole limb (clamped to [0, 1])."""
+    frac = min(1.0, max(0.0, frac))
+    gain, position, width = opts.belly
+    reach = min(1.0, abs(frac - position) / width)
+    swell = 1.0 + gain * math.cos(0.5 * math.pi * reach) ** 2
+    return swell * (1.0 + (opts.end_scale - 1.0) * min(1.0, frac / opts.taper_end))
 
 
 def _spindle_stations(
-    total: float, over: float, window: tuple[float, float], rings: int
+    total: float,
+    over: tuple[float, float],
+    window: tuple[float, float],
+    rings: int,
+    joint_rings: bool,
 ) -> tuple[Array, float, float]:
     """Stations along the whole limb inside ``window``, and its two poles.
 
-    An end of the window that is an end of the limb keeps the rounded
+    An end of the window that is an end of the limb keeps its rounded
     overshoot (pole ``over`` past it); an end inside the limb is a flat cut
-    (ring and pole at the cut).
+    (ring and pole at the cut). ``joint_rings`` (capsule ends) adds a ring
+    exactly at each joint, where the end starts to round.
     """
-    half = total / 2.0 + over
+    first, last = -over[0], total + over[1]
     theta = np.linspace(0.0, math.pi, rings + 2)[1:-1]
-    stations = total / 2.0 - half * np.cos(theta)
+    stations = 0.5 * (first + last) - 0.5 * (last - first) * np.cos(theta)
+    if joint_rings:
+        clear = (np.abs(stations) > 1e-9) & (np.abs(stations - total) > 1e-9)
+        stations = np.sort(np.append(stations[clear], [0.0, total]))
     low, high = window[0] * total, window[1] * total
-    first, last = -over, total + over
     if window[0] > 0.0:
         stations, first = np.append(low, stations[stations > low + 1e-9]), low
     if window[1] < 1.0:
@@ -254,19 +279,31 @@ def lofted_segment(
     # Whole-limb coordinates: this segment starts ``offset`` along the limb.
     total = length / (opts.window[1] - opts.window[0])
     offset = opts.window[0] * total
-    over = 0.5 * radius
-    half = total / 2.0 + over
-    gain, position, width = opts.belly
+    full = radius * thickness
+    ends = (full * _limb_scale(opts, 0.0), full * _limb_scale(opts, 1.0))
+    over = ends if opts.capsule_ends else (0.5 * radius, 0.5 * radius)
+    half = total / 2.0 + over[0]
 
     def profile(whole: float) -> float:
+        """Skin radius (m) at ``whole`` metres along the whole limb."""
+        if opts.capsule_ends:
+            past = max(-whole, whole - total, 0.0)
+            end = ends[0] if whole < 0.0 else ends[1]
+            scale = _limb_scale(opts, whole / total)
+            return (
+                math.sqrt(max(0.0, end * end - past * past)) if past else full * scale
+            )
         x = min(1.0, abs(whole - total / 2.0) / half)
-        frac = min(1.0, max(0.0, whole / total))
-        swell = 1.0 + gain * math.exp(-(((frac - position) / width) ** 2))
-        taper = 1.0 + (opts.end_scale - 1.0) * frac
-        return math.sqrt(max(0.0, 1.0 - x * x)) ** 0.55 * swell * taper
+        return (
+            full
+            * math.sqrt(max(0.0, 1.0 - x * x)) ** 0.55
+            * _limb_scale(opts, whole / total)
+        )
 
     if t0 == 0.0 and t1 == 1.0:
-        whole, first, last = _spindle_stations(total, over, opts.window, rings)
+        whole, first, last = _spindle_stations(
+            total, over, opts.window, rings, opts.capsule_ends
+        )
         stations, poles = whole - offset, (first - offset, last - offset)
     else:
         stations = np.linspace(t0 * length, t1 * length, rings)
@@ -275,7 +312,7 @@ def lofted_segment(
     ring_dirs = np.outer(np.cos(phi), u) + aspect * np.outer(np.sin(phi), v)
     verts: list[Array] = []
     for s in stations:
-        r = radius * thickness * profile(float(s) + offset)
+        r = profile(float(s) + offset)
         verts.extend(p0 + a * s + r * ring_dirs)
     face_list = _ring_faces(len(stations), sides)
     n = len(verts)

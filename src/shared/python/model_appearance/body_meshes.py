@@ -362,6 +362,8 @@ def _limb_segments(
                 library.limb_distal_scale(part),
                 window,
                 library.belly(part),
+                part in library.CAPSULE_END_PARTS,
+                library.taper_end(part),
             )
         )
     return out
@@ -538,6 +540,8 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
             end_scale=seg.end_scale,
             window=seg.window,
             belly=seg.belly,
+            capsule_ends=seg.capsule_ends,
+            taper_end=seg.taper_end,
             rings=library.LOFT_RINGS,
             sides=library.LOFT_SIDES,
             width_hint=hint,

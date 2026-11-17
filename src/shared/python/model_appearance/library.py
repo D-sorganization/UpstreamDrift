@@ -296,9 +296,25 @@ PART_DISTAL_SCALE: dict[str, float] = {"forearm": 0.8}
 # separate spindles there read as a second elbow.
 CONTINUOUS_PARTS: tuple[str, ...] = ("forearm",)
 # Muscle belly per part: (gain, position, width). The radius grows by ``gain``
-# at ``position`` along the whole part and falls off as a Gaussian of
-# ``width`` (fractions of its length). Visual only.
-PART_BELLY: dict[str, tuple[float, float, float]] = {"forearm": (0.12, 0.28, 0.22)}
+# at ``position`` along the whole part and falls to nothing ``width`` away
+# (fractions of its length). Visual only.
+PART_BELLY: dict[str, tuple[float, float, float]] = {"forearm": (0.12, 0.28, 0.45)}
+# Parts that keep their radius to each joint and end in a ball about the
+# joint (elbow and wrist blends, #15262) instead of a spindle's thin ends.
+CAPSULE_END_PARTS: tuple[str, ...] = ("forearm",)
+# Fraction of the part's length by which its taper has reached the distal
+# radius; the rest (the wrist) stays slim.
+PART_TAPER_END: dict[str, float] = {"forearm": 0.8}
+
+
+def taper_end(part: str) -> float:
+    """Fraction of ``part`` by which its taper is complete (1.0 = at the end)."""
+    value = PART_TAPER_END.get(part, 1.0)
+    if not 0.0 < value <= 1.0:
+        raise ValueError(f"taper end of {part!r} must be in (0, 1], got {value!r}")
+    return float(value)
+
+
 NO_BELLY = (0.0, 0.5, 1.0)
 
 
