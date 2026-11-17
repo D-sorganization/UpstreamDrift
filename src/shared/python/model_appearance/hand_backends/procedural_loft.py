@@ -104,8 +104,7 @@ def _dense_bone_polyline(joints: Array) -> Array:
 def lofted_anatomical_digit(
     spine_joints: Array,
     *,
-    base_radius_m: float,
-    tip_radius_m: float,
+    radii_m: tuple[float, float],
     initial_width_axis: Array,
     dorsal_hint: Array,
     sides: int,
@@ -113,7 +112,11 @@ def lofted_anatomical_digit(
     joint_fractions: tuple[float, float] = (0.48, 0.77),
     grip_floor_m: float = 0.0,
 ) -> Mesh:
-    """Watertight lofted finger/thumb with ellipsoidal caps and joint contour."""
+    """Watertight lofted finger/thumb with ellipsoidal caps and joint contour.
+
+    ``radii_m`` is ``(base_radius_m, tip_radius_m)``.
+    """
+    base_radius_m, tip_radius_m = radii_m
     control = _dense_bone_polyline(np.asarray(spine_joints, dtype=float))
     curve = catmull_rom_spline(control, max(44, 10 * len(control)))
     diffs = np.linalg.norm(np.diff(curve, axis=0), axis=1)
@@ -208,20 +211,28 @@ class PalmSlabSpec:
     distal_cap_shift_m: float = 0.0045
 
 
+@dataclass(frozen=True)
+class _PalmSectionFrame:
+    """Centre-line sample and orthonormal section axes for one palm ring."""
+
+    t: float
+    center: Array
+    tangent: Array
+    w_frame: Array
+    d_frame: Array
+
+
 def _palm_section_ring(
     spec: PalmSlabSpec,
-    *,
-    t: float,
-    center: Array,
-    tangent: Array,
-    w_frame: Array,
-    d_frame: Array,
+    frame: _PalmSectionFrame,
     angle_trig: tuple[Array, Array],
+    *,
     end_scale: float = 1.0,
     t_shift_m: float = 0.0,
 ) -> Array:
     """Compute one transverse ring of the metacarpal palm with knuckle & valley relief."""
     cos_p, sin_p = angle_trig
+    t = frame.t
     shape_exp_w = 0.94 - 0.06 * math.sin(math.pi * t)
     shape_exp_d = 0.72 - 0.06 * math.sin(math.pi * t)
     super_w = np.sign(cos_p) * (np.abs(cos_p) ** shape_exp_w)
@@ -271,12 +282,89 @@ def _palm_section_ring(
         + end_scale * (arch + cup_lift - edge_eminences * palmar_weight)
         + relief
     )
-    c_pos = center + tangent * t_shift_m
+    c_pos = frame.center + frame.tangent * t_shift_m
     return (
         c_pos[None, :]
-        + w_coords[:, None] * w_frame[None, :]
-        + d_coords[:, None] * d_frame[None, :]
+        + w_coords[:, None] * frame.w_frame[None, :]
+        + d_coords[:, None] * frame.d_frame[None, :]
     )
+
+
+def _palm_section_frames(
+    spec: PalmSlabSpec, ts: Array, centers: Array, tangents: Array
+) -> list[_PalmSectionFrame]:
+    """Transport-aligned orthonormal section frames prevent wrist Gram-Schmidt twist."""
+    n_samples = len(ts)
+    w_frames: list[Array] = [
+        _normalize(
+            spec.width_axis - float(np.dot(spec.width_axis, tangents[i])) * tangents[i]
+        )
+        for i in range(n_samples)
+    ]
+    cross_end = np.cross(tangents[-1], w_frames[-1])
+    sign_d = 1.0 if float(np.dot(cross_end, spec.dorsal_axis)) >= 0.0 else -1.0
+    d_frames: list[Array] = [
+        _normalize(sign_d * np.cross(tangents[i], w_frames[i]))
+        for i in range(n_samples)
+    ]
+    return [
+        _PalmSectionFrame(
+            t=float(ts[i]),
+            center=centers[i],
+            tangent=tangents[i],
+            w_frame=w_frames[i],
+            d_frame=d_frames[i],
+        )
+        for i in range(n_samples)
+    ]
+
+
+def _palm_rings(
+    spec: PalmSlabSpec,
+    frames: list[_PalmSectionFrame],
+    trig: tuple[Array, Array],
+    cap_steps: int,
+) -> list[Array]:
+    """Wrist dome cap, body sections and distal knuckle cap rings, proximal first."""
+    rings: list[Array] = []
+    for k in range(1, cap_steps):
+        ang = (k / cap_steps) * (0.5 * math.pi)
+        rings.append(
+            _palm_section_ring(
+                spec,
+                frames[0],
+                trig,
+                end_scale=math.sin(ang),
+                t_shift_m=-0.011 * math.cos(ang),
+            )
+        )
+    for frame in frames:
+        rings.append(_palm_section_ring(spec, frame, trig))
+    for k in range(cap_steps - 1, 0, -1):
+        ang = (k / cap_steps) * (0.5 * math.pi)
+        rings.append(
+            _palm_section_ring(
+                spec,
+                frames[-1],
+                trig,
+                end_scale=math.sin(ang),
+                t_shift_m=spec.distal_cap_shift_m * math.cos(ang),
+            )
+        )
+    return rings
+
+
+def _measured_cup_depth(
+    mid_ring: Array, mid_frame: _PalmSectionFrame, trig: tuple[Array, Array]
+) -> float:
+    """Palmar centre-vs-border depth of the mid-palm ring along the dorsal axis."""
+    cos_p, sin_p = trig
+    palmar_idx = np.where(sin_p < -0.55)[0]
+    center_idx = palmar_idx[np.argmin(np.abs(cos_p[palmar_idx]))]
+    border_idx = palmar_idx[np.argmax(np.abs(cos_p[palmar_idx]))]
+    rel_c = float(np.dot(mid_ring[center_idx] - mid_frame.center, mid_frame.d_frame))
+    rel_b = float(np.dot(mid_ring[border_idx] - mid_frame.center, mid_frame.d_frame))
+    return max(0.0, rel_c - rel_b)
 
 
 def lofted_palm_slab(spec: PalmSlabSpec) -> tuple[Mesh, Array, float, float]:
@@ -300,67 +388,10 @@ def lofted_palm_slab(spec: PalmSlabSpec) -> tuple[Mesh, Array, float, float]:
     phi = np.linspace(0.0, 2.0 * math.pi, spec.sides, endpoint=False)
     cos_p, sin_p = np.cos(phi), np.sin(phi)
     trig = (cos_p, sin_p)
+    frames = _palm_section_frames(spec, ts, centers, tangents)
 
-    # Transport-aligned orthonormal section frames prevent wrist Gram-Schmidt twist.
-    w_frames: list[Array] = [
-        _normalize(
-            spec.width_axis - float(np.dot(spec.width_axis, tangents[i])) * tangents[i]
-        )
-        for i in range(n_samples)
-    ]
-    cross_end = np.cross(tangents[-1], w_frames[-1])
-    sign_d = 1.0 if float(np.dot(cross_end, spec.dorsal_axis)) >= 0.0 else -1.0
-    d_frames: list[Array] = [
-        _normalize(sign_d * np.cross(tangents[i], w_frames[i]))
-        for i in range(n_samples)
-    ]
-
-    rings: list[Array] = []
     cap_steps = 4
-    for k in range(1, cap_steps):
-        ang = (k / cap_steps) * (0.5 * math.pi)
-        rings.append(
-            _palm_section_ring(
-                spec,
-                t=float(ts[0]),
-                center=centers[0],
-                tangent=tangents[0],
-                w_frame=w_frames[0],
-                d_frame=d_frames[0],
-                angle_trig=trig,
-                end_scale=math.sin(ang),
-                t_shift_m=-0.011 * math.cos(ang),
-            )
-        )
-    for i in range(n_samples):
-        rings.append(
-            _palm_section_ring(
-                spec,
-                t=float(ts[i]),
-                center=centers[i],
-                tangent=tangents[i],
-                w_frame=w_frames[i],
-                d_frame=d_frames[i],
-                angle_trig=trig,
-            )
-        )
-    for k in range(cap_steps - 1, 0, -1):
-        ang = (k / cap_steps) * (0.5 * math.pi)
-        rings.append(
-            _palm_section_ring(
-                spec,
-                t=float(ts[-1]),
-                center=centers[-1],
-                tangent=tangents[-1],
-                w_frame=w_frames[-1],
-                d_frame=d_frames[-1],
-                angle_trig=trig,
-                end_scale=math.sin(ang),
-                t_shift_m=spec.distal_cap_shift_m * math.cos(ang),
-            )
-        )
-
-    grid = np.asarray(rings, dtype=float)
+    grid = np.asarray(_palm_rings(spec, frames, trig, cap_steps), dtype=float)
     if spec.grip_floor_m > 0.0:
         grid = _clamp_radial_floor(grid.reshape(-1, 3), spec.grip_floor_m).reshape(
             grid.shape
@@ -373,27 +404,19 @@ def lofted_palm_slab(spec: PalmSlabSpec) -> tuple[Mesh, Array, float, float]:
     mesh = closed_grid_mesh(grid, top_pole, bot_pole)
 
     half_mcp_span = 0.5 * spec.mcp_span_fraction * spec.knuckle_width_m
+    distal = frames[-1]
     mcp_anchors = np.array(
         [
-            centers[-1]
-            + uf * half_mcp_span * w_frames[-1]
-            + (0.12 * spec.palm_thickness_m * (1.0 - uf * uf)) * d_frames[-1]
+            distal.center
+            + uf * half_mcp_span * distal.w_frame
+            + (0.12 * spec.palm_thickness_m * (1.0 - uf * uf)) * distal.d_frame
             for uf in spec.knuckle_u_fractions
         ],
         dtype=float,
     )
     palm_arc_length_m = float(np.sum(np.linalg.norm(np.diff(centers, axis=0), axis=1)))
     mid_ring = grid[(cap_steps - 1) + n_samples // 2]
-    palmar_idx = np.where(sin_p < -0.55)[0]
-    center_idx = palmar_idx[np.argmin(np.abs(cos_p[palmar_idx]))]
-    border_idx = palmar_idx[np.argmax(np.abs(cos_p[palmar_idx]))]
-    rel_c = float(
-        np.dot(mid_ring[center_idx] - centers[n_samples // 2], d_frames[n_samples // 2])
-    )
-    rel_b = float(
-        np.dot(mid_ring[border_idx] - centers[n_samples // 2], d_frames[n_samples // 2])
-    )
-    measured_cup = max(0.0, rel_c - rel_b)
+    measured_cup = _measured_cup_depth(mid_ring, frames[n_samples // 2], trig)
     return mesh, mcp_anchors, measured_cup, palm_arc_length_m
 
 

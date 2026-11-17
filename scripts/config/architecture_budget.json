@@ -894,69 +894,6 @@
       "issue": 13874,
       "reason": "Issue #13874: fit_swing_pinocchio executes end-to-end pinocchio trajectory fitting with analytical/FD Jacobians (173 lines > 100).",
       "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/shared/python/model_appearance/hand_backends/preview.py",
-      "symbol": "render_shaded_scene_rgb",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 15145,
-      "reason": "Issue #15145: render_shaded_scene_rgb \u2014 Lambert-shaded evidence renderer for the procedural hand comparison harness (111 lines > 100); split after the hand_backends revival (ADR-0057).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/shared/python/model_appearance/hand_backends/procedural_loft.py",
-      "symbol": "lofted_anatomical_digit",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 15145,
-      "reason": "Issue #15145: lofted_anatomical_digit \u2014 anatomical digit loft takes per-phalanx lengths, radii and flexion (9 params > 8); split after the hand_backends revival (ADR-0057).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/shared/python/model_appearance/hand_backends/procedural_loft.py",
-      "symbol": "_palm_section_ring",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 15145,
-      "reason": "Issue #15145: _palm_section_ring \u2014 palm cross-section ring needs width, thickness, arch and thenar terms (9 params > 8); split after the hand_backends revival (ADR-0057).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/shared/python/model_appearance/hand_backends/procedural_loft.py",
-      "symbol": "lofted_palm_slab",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 15145,
-      "reason": "Issue #15145: lofted_palm_slab \u2014 palm slab loft with thenar/hypothenar relief (116 lines > 100); split after the hand_backends revival (ADR-0057).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/shared/python/model_appearance/hand_backends/procedural_skin.py",
-      "symbol": "_build_canonical_hand",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 15145,
-      "reason": "Issue #15145: _build_canonical_hand \u2014 canonical procedural hand assembly: palm, four digits, thumb opposition and knuckle relief (309 lines > 100); split after the hand_backends revival (ADR-0057).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/shared/python/model_appearance/hand_backends/sdf_meshing.py",
-      "symbol": "sdf_cupped_palm",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 15145,
-      "reason": "Issue #15145: sdf_cupped_palm \u2014 cupped-palm SDF primitive parameters (9 params > 8); split after the hand_backends revival (ADR-0057).",
-      "expires_on": "2026-12-31"
-    },
-    {
-      "path": "scripts/render_hand_backend_roll_evidence.py",
-      "symbol": "render_roll_strip",
-      "rule": "function-lines",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 15145,
-      "reason": "Issue #15145: render_roll_strip \u2014 per-hand shaft-roll evidence strip renderer for the comparison harness (170 lines > 100); split after the hand_backends revival (ADR-0057).",
-      "expires_on": "2026-12-31"
     }
   ]
 }

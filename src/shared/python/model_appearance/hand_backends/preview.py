@@ -403,6 +403,83 @@ def _rasterize_ssaa(
     return best
 
 
+def _stack_drawables(
+    drawables: Sequence[
+        tuple[Mesh, tuple[float, float, float]]
+        | tuple[Mesh, tuple[float, float, float], float]
+    ],
+) -> tuple[Array, Array, NDArray[np.int64], Array, Array]:
+    """Concatenate vertices, welded normals, faces, face colours and specular."""
+    all_v, all_n, all_f, all_col, all_spec = [], [], [], [], []
+    base = 0
+    for item in drawables:
+        if len(item) == 2:
+            mesh, col = item
+            spec_p = 0.09
+        else:
+            mesh, col, spec_p = item
+        all_v.append(mesh.vertices)
+        all_n.append(_welded_vertex_normals(mesh))
+        all_f.append(mesh.faces + base)
+        nf = len(mesh.faces)
+        all_col.append(np.tile(col, (nf, 1)))
+        all_spec.append(np.full(nf, spec_p, dtype=np.float64))
+        base += len(mesh.vertices)
+    return (
+        np.vstack(all_v),
+        np.vstack(all_n),
+        np.vstack(all_f),
+        np.vstack(all_col),
+        np.concatenate(all_spec),
+    )
+
+
+def _shade_hits(
+    hit_pix: NDArray[np.int64],
+    tri_id: NDArray[np.int64],
+    faces: NDArray[np.int64],
+    screen_xy: tuple[Array, Array],
+    vnrm_cam: Array,
+    t_col: Array,
+    t_spec: Array,
+    w_ss: int,
+) -> Array:
+    """Key/fill/rim/specular colour of each hit pixel from interpolated normals."""
+    sx, sy = screen_xy
+    cx = (hit_pix % w_ss).astype(np.float64) + 0.5
+    cy = (hit_pix // w_ss).astype(np.float64) + 0.5
+    fh = faces[tri_id]
+    x0, y0 = sx[fh[:, 0]], sy[fh[:, 0]]
+    x1, y1 = sx[fh[:, 1]], sy[fh[:, 1]]
+    x2, y2 = sx[fh[:, 2]], sy[fh[:, 2]]
+    den = (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0)
+    inv_d = np.where(
+        np.abs(den) > 1e-8, 1.0 / np.where(np.abs(den) > 1e-8, den, 1.0), 0.0
+    )
+    w0 = np.clip(((x1 - cx) * (y2 - cy) - (y1 - cy) * (x2 - cx)) * inv_d, 0.0, 1.0)
+    w1 = np.clip(((x2 - cx) * (y0 - cy) - (y2 - cy) * (x0 - cx)) * inv_d, 0.0, 1.0)
+    w2 = np.clip(1.0 - w0 - w1, 0.0, 1.0)
+    n = (
+        w0[:, None] * vnrm_cam[fh[:, 0]]
+        + w1[:, None] * vnrm_cam[fh[:, 1]]
+        + w2[:, None] * vnrm_cam[fh[:, 2]]
+    )
+    n /= np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-12)
+    n = np.where((n[:, 2] < 0.0)[:, None], -n, n)
+    l_key = np.array([0.45, 0.55, 0.70], dtype=np.float64)
+    l_key /= float(np.linalg.norm(l_key))
+    l_fill = np.array([-0.65, -0.25, 0.68], dtype=np.float64)
+    l_fill /= float(np.linalg.norm(l_fill))
+    cam_dir = np.array([0.0, 0.0, 1.0], dtype=np.float64)
+    h_vec = (l_key + cam_dir) / float(np.linalg.norm(l_key + cam_dir))
+    ndotl_k = np.maximum(n @ l_key, 0.0)
+    ndotl_f = np.maximum(n @ l_fill, 0.0)
+    rim = np.power(1.0 - np.maximum(n[:, 2], 0.0), 2.4)
+    spec_i = np.power(np.maximum(n @ h_vec, 0.0), 34.0) * t_spec[tri_id]
+    shade = 0.27 + 0.65 * ndotl_k + 0.24 * ndotl_f + 0.08 * rim
+    return np.clip(t_col[tri_id] * shade[:, None] + spec_i[:, None], 0.0, 1.0)
+
+
 def render_shaded_scene_rgb(
     drawables: Sequence[
         tuple[Mesh, tuple[float, float, float]]
@@ -428,27 +505,9 @@ def render_shaded_scene_rgb(
     world_h = max(span_v, span_u / max(aspect, 1e-6)) / target_fill
     world_w = world_h * aspect
 
-    all_v, all_n, all_f, all_col, all_spec = [], [], [], [], []
-    base = 0
-    for item in drawables:
-        if len(item) == 2:
-            mesh, col = item
-            spec_p = 0.09
-        else:
-            mesh, col, spec_p = item
-        all_v.append(mesh.vertices)
-        all_n.append(_welded_vertex_normals(mesh))
-        all_f.append(mesh.faces + base)
-        nf = len(mesh.faces)
-        all_col.append(np.tile(col, (nf, 1)))
-        all_spec.append(np.full(nf, spec_p, dtype=np.float64))
-        base += len(mesh.vertices)
-
-    verts_cam = np.vstack(all_v) @ rot.T
-    vnrm_cam = np.vstack(all_n) @ rot.T
-    faces = np.vstack(all_f)
-    t_col = np.vstack(all_col)
-    t_spec = np.concatenate(all_spec)
+    verts, vnrm, faces, t_col, t_spec = _stack_drawables(drawables)
+    verts_cam = verts @ rot.T
+    vnrm_cam = vnrm @ rot.T
 
     ss = 2
     w_ss, h_ss = width_px * ss, height_px * ss
@@ -477,39 +536,8 @@ def render_shaded_scene_rgb(
     hit_pix = np.flatnonzero(best != 0)
     if len(hit_pix) > 0:
         tri_id = (best[hit_pix] & np.uint64(0xFFFFFFFF)).astype(np.int64) - 1
-        cx = (hit_pix % w_ss).astype(np.float64) + 0.5
-        cy = (hit_pix // w_ss).astype(np.float64) + 0.5
-        fh = faces[tri_id]
-        x0, y0 = sx[fh[:, 0]], sy[fh[:, 0]]
-        x1, y1 = sx[fh[:, 1]], sy[fh[:, 1]]
-        x2, y2 = sx[fh[:, 2]], sy[fh[:, 2]]
-        den = (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0)
-        inv_d = np.where(
-            np.abs(den) > 1e-8, 1.0 / np.where(np.abs(den) > 1e-8, den, 1.0), 0.0
-        )
-        w0 = np.clip(((x1 - cx) * (y2 - cy) - (y1 - cy) * (x2 - cx)) * inv_d, 0.0, 1.0)
-        w1 = np.clip(((x2 - cx) * (y0 - cy) - (y2 - cy) * (x0 - cx)) * inv_d, 0.0, 1.0)
-        w2 = np.clip(1.0 - w0 - w1, 0.0, 1.0)
-        n = (
-            w0[:, None] * vnrm_cam[fh[:, 0]]
-            + w1[:, None] * vnrm_cam[fh[:, 1]]
-            + w2[:, None] * vnrm_cam[fh[:, 2]]
-        )
-        n /= np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-12)
-        n = np.where((n[:, 2] < 0.0)[:, None], -n, n)
-        l_key = np.array([0.45, 0.55, 0.70], dtype=np.float64)
-        l_key /= float(np.linalg.norm(l_key))
-        l_fill = np.array([-0.65, -0.25, 0.68], dtype=np.float64)
-        l_fill /= float(np.linalg.norm(l_fill))
-        cam_dir = np.array([0.0, 0.0, 1.0], dtype=np.float64)
-        h_vec = (l_key + cam_dir) / float(np.linalg.norm(l_key + cam_dir))
-        ndotl_k = np.maximum(n @ l_key, 0.0)
-        ndotl_f = np.maximum(n @ l_fill, 0.0)
-        rim = np.power(1.0 - np.maximum(n[:, 2], 0.0), 2.4)
-        spec_i = np.power(np.maximum(n @ h_vec, 0.0), 34.0) * t_spec[tri_id]
-        shade = 0.27 + 0.65 * ndotl_k + 0.24 * ndotl_f + 0.08 * rim
-        img[hit_pix] = np.clip(
-            t_col[tri_id] * shade[:, None] + spec_i[:, None], 0.0, 1.0
+        img[hit_pix] = _shade_hits(
+            hit_pix, tri_id, faces, (sx, sy), vnrm_cam, t_col, t_spec, w_ss
         )
 
     ds = img.reshape(height_px, ss, width_px, ss, 3).mean(axis=(1, 3))

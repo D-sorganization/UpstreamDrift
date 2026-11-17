@@ -6,7 +6,7 @@ import argparse
 import json
 import logging
 import sys
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -67,11 +67,90 @@ def _hand_fill_fraction(
     return round(max(du, dv) / max(max(du, dv) / target_fill, 1e-9), 4)
 
 
+@dataclass(frozen=True)
+class _RollRenderJob:
+    """Output location and framing shared by every roll-strip frame."""
+
+    output_dir: Path
+    backend_id: str
+    panel_px: int
+    fill: float
+
+
+def _render_view(
+    job: _RollRenderJob,
+    drawables: list[Any],
+    focus: np.ndarray,
+    view: str,
+    label: str,
+) -> Image.Image:
+    rgb = render_shaded_scene_rgb(
+        drawables,
+        focus_vertices=focus,
+        view_rot=view_rotation(view),
+        width_px=job.panel_px,
+        height_px=job.panel_px,
+        target_fill=job.fill,
+    )
+    return _stamp_badge(Image.fromarray(rgb), label)
+
+
+def _save_frame(
+    job: _RollRenderJob,
+    img: Image.Image,
+    name: str,
+    focus: np.ndarray,
+    fill_view: str,
+) -> dict[str, Any]:
+    out = job.output_dir / name
+    img.save(out)
+    _LOG.info("Wrote %s", out)
+    return {
+        "file": out.name,
+        "width": img.width,
+        "height": img.height,
+        "hand_fill": _hand_fill_fraction(focus, view_rotation(fill_view), job.fill),
+        "club_in_frame": True,
+    }
+
+
+def _render_strip_and_iso(
+    job: _RollRenderJob,
+    drawables: list[Any],
+    focus: np.ndarray,
+    roll: float,
+    tag: str,
+    strip_tag: str,
+) -> list[dict[str, Any]]:
+    """Palm/back/side strip plus an iso frame; returns their receipts."""
+    bid = job.backend_id
+    strip = Image.new("RGB", (job.panel_px * len(VIEWS), job.panel_px), (244, 246, 249))
+    for idx, view in enumerate(VIEWS):
+        panel = _render_view(
+            job, drawables, focus, view, f"{bid} · {tag} · {view} ({roll:+.0f}°)"
+        )
+        strip.paste(panel, (idx * job.panel_px, 0))
+    strip_receipt = _save_frame(
+        job, strip, f"{bid}_{strip_tag}_roll_{roll:+.0f}.png", focus, "palm"
+    )
+    iso_img = _render_view(
+        job, drawables, focus, "iso", f"{bid} · {tag} · iso ({roll:+.0f}°)"
+    )
+    iso_receipt = _save_frame(
+        job, iso_img, f"{bid}_{tag}_iso_roll_{roll:+.0f}.png", focus, "iso"
+    )
+    return [strip_receipt, iso_receipt]
+
+
 def render_roll_strip(output_dir: Path, backend_id: str = "procedural_skin") -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     settings = DEFAULT_HAND_VISUAL_SETTINGS
-    panel_px = max(1024, settings.render_frame_px)
-    fill = settings.render_frame_fill
+    job = _RollRenderJob(
+        output_dir=output_dir,
+        backend_id=backend_id,
+        panel_px=max(1024, settings.render_frame_px),
+        fill=settings.render_frame_fill,
+    )
     club = club_context_drawables(DEFAULT_VISUAL_GRIP_RADIUS_M)
     receipts: list[dict[str, Any]] = []
 
@@ -88,62 +167,8 @@ def render_roll_strip(output_dir: Path, backend_id: str = "procedural_skin") -> 
             mesh = vis.mesh
             color = skin_tone_rgb(settings.skin_material_for_role(role))
             drawables = [(mesh, color, 0.09), *club]
-
-            strip = Image.new("RGB", (panel_px * len(VIEWS), panel_px), (244, 246, 249))
-            for idx, view in enumerate(VIEWS):
-                rot = view_rotation(view)
-                rgb = render_shaded_scene_rgb(
-                    drawables,
-                    focus_vertices=mesh.vertices,
-                    view_rot=rot,
-                    width_px=panel_px,
-                    height_px=panel_px,
-                    target_fill=fill,
-                )
-                panel = _stamp_badge(
-                    Image.fromarray(rgb),
-                    f"{backend_id} · {role} · {view} ({roll:+.0f}°)",
-                )
-                strip.paste(panel, (idx * panel_px, 0))
-            out_strip = output_dir / f"{backend_id}_{role}_roll_{roll:+.0f}.png"
-            strip.save(out_strip)
-            _LOG.info("Wrote %s", out_strip)
-            receipts.append(
-                {
-                    "file": out_strip.name,
-                    "width": strip.width,
-                    "height": strip.height,
-                    "hand_fill": _hand_fill_fraction(
-                        mesh.vertices, view_rotation("palm"), fill
-                    ),
-                    "club_in_frame": True,
-                }
-            )
-
-            iso_rgb = render_shaded_scene_rgb(
-                drawables,
-                focus_vertices=mesh.vertices,
-                view_rot=view_rotation("iso"),
-                width_px=panel_px,
-                height_px=panel_px,
-                target_fill=fill,
-            )
-            iso_img = _stamp_badge(
-                Image.fromarray(iso_rgb), f"{backend_id} · {role} · iso ({roll:+.0f}°)"
-            )
-            out_iso = output_dir / f"{backend_id}_{role}_iso_roll_{roll:+.0f}.png"
-            iso_img.save(out_iso)
-            _LOG.info("Wrote %s", out_iso)
-            receipts.append(
-                {
-                    "file": out_iso.name,
-                    "width": iso_img.width,
-                    "height": iso_img.height,
-                    "hand_fill": _hand_fill_fraction(
-                        mesh.vertices, view_rotation("iso"), fill
-                    ),
-                    "club_in_frame": True,
-                }
+            receipts += _render_strip_and_iso(
+                job, drawables, mesh.vertices, roll, role, role
             )
 
         both_verts: list[np.ndarray] = []
@@ -156,71 +181,14 @@ def render_roll_strip(output_dir: Path, backend_id: str = "procedural_skin") -> 
                 grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
                 settings=settings,
             )
-            rolled = vis.mesh
-            shared = mesh_in_shared_visual_frame(rolled, spec, role)
+            shared = mesh_in_shared_visual_frame(vis.mesh, spec, role)
             both_verts.append(shared.vertices)
             both_drawables.append(
                 (shared, skin_tone_rgb(settings.skin_material_for_role(role)), 0.09)
             )
-        focus_both = np.vstack(both_verts)
         both_drawables.extend(club)
-
-        strip_both = Image.new(
-            "RGB", (panel_px * len(VIEWS), panel_px), (244, 246, 249)
-        )
-        for idx, view in enumerate(VIEWS):
-            rot = view_rotation(view)
-            rgb = render_shaded_scene_rgb(
-                both_drawables,
-                focus_vertices=focus_both,
-                view_rot=rot,
-                width_px=panel_px,
-                height_px=panel_px,
-                target_fill=fill,
-            )
-            panel = _stamp_badge(
-                Image.fromarray(rgb), f"{backend_id} · both · {view} ({roll:+.0f}°)"
-            )
-            strip_both.paste(panel, (idx * panel_px, 0))
-        out_both = output_dir / f"{backend_id}_both_hands_roll_{roll:+.0f}.png"
-        strip_both.save(out_both)
-        _LOG.info("Wrote %s", out_both)
-        receipts.append(
-            {
-                "file": out_both.name,
-                "width": strip_both.width,
-                "height": strip_both.height,
-                "hand_fill": _hand_fill_fraction(
-                    focus_both, view_rotation("palm"), fill
-                ),
-                "club_in_frame": True,
-            }
-        )
-
-        both_iso_rgb = render_shaded_scene_rgb(
-            both_drawables,
-            focus_vertices=focus_both,
-            view_rot=view_rotation("iso"),
-            width_px=panel_px,
-            height_px=panel_px,
-            target_fill=fill,
-        )
-        both_iso = _stamp_badge(
-            Image.fromarray(both_iso_rgb), f"{backend_id} · both · iso ({roll:+.0f}°)"
-        )
-        out_both_iso = output_dir / f"{backend_id}_both_iso_roll_{roll:+.0f}.png"
-        both_iso.save(out_both_iso)
-        _LOG.info("Wrote %s", out_both_iso)
-        receipts.append(
-            {
-                "file": out_both_iso.name,
-                "width": both_iso.width,
-                "height": both_iso.height,
-                "hand_fill": _hand_fill_fraction(
-                    focus_both, view_rotation("iso"), fill
-                ),
-                "club_in_frame": True,
-            }
+        receipts += _render_strip_and_iso(
+            job, both_drawables, np.vstack(both_verts), roll, "both", "both_hands"
         )
 
     receipt_path = output_dir / f"{backend_id}_render_stats.json"
@@ -228,8 +196,8 @@ def render_roll_strip(output_dir: Path, backend_id: str = "procedural_skin") -> 
         json.dumps(
             {
                 "backend_id": backend_id,
-                "panel_px": panel_px,
-                "target_fill": fill,
+                "panel_px": job.panel_px,
+                "target_fill": job.fill,
                 "frames": receipts,
             },
             indent=2,

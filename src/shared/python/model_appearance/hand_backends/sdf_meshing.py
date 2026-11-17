@@ -56,36 +56,6 @@ def sdf_rounded_box(
     return outside + inside - corner_radius
 
 
-def sdf_cupped_palm(
-    p: np.ndarray,
-    *,
-    grip_radius_m: float,
-    z_lo: float,
-    z_hi: float,
-    palm_width_m: float,
-    palmar_clearance_m: float,
-    cup_depth_m: float,
-    transverse_arch_m: float,
-    dorsal_lift_m: float,
-) -> np.ndarray:
-    """Cupped metacarpal slab; negative inside flesh."""
-    z_mid = 0.5 * (z_lo + z_hi)
-    radial = grip_radius_m + palmar_clearance_m + cup_depth_m * 0.45
-    centre = np.array([radial + dorsal_lift_m * 0.35, 0.0, z_mid])
-    half = np.array([dorsal_lift_m * 0.65, palm_width_m * 0.5, (z_hi - z_lo) * 0.52])
-    d = sdf_rounded_box(p, centre, half, 0.005)
-    # Transverse arch: deepen V-centre
-    arch = transverse_arch_m * np.exp(
-        -((p[:, 2] - z_mid) ** 2) / (2.0 * ((z_hi - z_lo) * 0.35) ** 2)
-    )
-    d = d - arch * np.exp(-(p[:, 1] ** 2) / (2.0 * (palm_width_m * 0.22) ** 2))
-    # Keep palm outside grip bore
-    rho = np.hypot(p[:, 0], p[:, 1])
-    bore = grip_radius_m - 0.001 - rho
-    d = np.maximum(d, bore)
-    return d
-
-
 def sdf_thenar_mount(p: np.ndarray, centre: np.ndarray, radius_m: float) -> np.ndarray:
     return np.linalg.norm(p - centre, axis=1) - radius_m
 
@@ -210,7 +180,6 @@ __all__ = [
     "catmull_rom_spline",
     "combine_sdfs",
     "mesh_from_sdf",
-    "sdf_cupped_palm",
     "sdf_thenar_mount",
     "sdf_tapered_polyline",
     "tube_mesh_from_polyline",
