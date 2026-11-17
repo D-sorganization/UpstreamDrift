@@ -83,6 +83,24 @@ def _basis(result) -> tuple[np.ndarray, np.ndarray]:
     return rotation @ np.array([1.0, 0.0, 0.0]), rotation @ np.array([0.0, 0.0, -1.0])
 
 
+def _golfer_basis(side: str) -> tuple[np.ndarray, np.ndarray]:
+    """Basis that looks down on the top of the grip, as the golfer does.
+
+    The top of the grip (azimuth 0) takes the place of the back of the hand;
+    the lead hand is a mirror image, so its sideways direction is flipped.
+    """
+    sideways = -1.0 if side == "lead" else 1.0
+    return np.array([0.0, sideways, 0.0]), np.array([1.0, 0.0, 0.0])
+
+
+def _shots(flat_hand, side: str) -> list[tuple[str, str, tuple]]:
+    """``(frame name, renderer view, basis)`` of every view of one subject:
+    the hand-relative views, then the golfer's own view."""
+    golfer = SETTINGS["golfer_view"]
+    shots = [(view, view, _basis(flat_hand)) for view in SETTINGS["views"]]
+    return [*shots, (golfer["name"], golfer["renderer_view"], _golfer_basis(side))]
+
+
 def _roll_tag(roll_deg: float) -> str:
     return f"roll{'m' if roll_deg < 0 else 'p'}{abs(round(roll_deg)):02d}"
 
@@ -111,7 +129,6 @@ def main() -> int:
     radius = float(quality["grip_radius_m"])
     taper = default_settings().grip_taper
     drawing = _grip_drawing(render, quality)
-    views = tuple(SETTINGS["views"])
     report: dict[str, object] = {"frames": {}, "hands": {}, "pairs": {}}
 
     def skin(result) -> object:
@@ -165,14 +182,8 @@ def main() -> int:
                 },
                 **defects,
             }
-            for view in views:
-                shoot(
-                    f"skinned_{side}_{view}_{tag}",
-                    [skin(result)],
-                    view,
-                    _basis(flat[side]),
-                    side,
-                )
+            for name, view, basis in _shots(flat[side], side):
+                shoot(f"skinned_{side}_{name}_{tag}", [skin(result)], view, basis, side)
         # Both hands: the trail hand is posed around the grip and the lead hand.
         both = build_grip_hands(_spec(float(roll)), grip_radius_m=radius)
         report["pairs"][tag] = {
@@ -187,10 +198,8 @@ def main() -> int:
             },
         }
         pair = [skin(r) for r in both.values()]
-        for view in views:
-            shoot(
-                f"skinned_both_{view}_{tag}", pair, view, _basis(flat["lead"]), "lead"
-            )
+        for name, view, basis in _shots(flat["lead"], "lead"):
+            shoot(f"skinned_both_{name}_{tag}", pair, view, basis, "lead")
     (OUT / "render_manifest.json").write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )

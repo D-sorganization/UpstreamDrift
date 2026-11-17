@@ -1,5 +1,19 @@
 {
   "frame_px": 1024,
-  "views": ["palm", "back", "thumb_side", "butt"],
-  "rolls_deg": [-20.0, 0.0, 20.0]
+  "views": [
+    "palm",
+    "back",
+    "thumb_side",
+    "butt"
+  ],
+  "rolls_deg": [
+    -20.0,
+    0.0,
+    20.0
+  ],
+  "golfer_view": {
+    "name": "golfer",
+    "renderer_view": "back",
+    "_about": "The golfer's own view: looking down on the top of the grip (azimuth 0), butt toward the viewer. Drawn with the renderer's back view and a basis fixed in the club frame."
+  }
 }

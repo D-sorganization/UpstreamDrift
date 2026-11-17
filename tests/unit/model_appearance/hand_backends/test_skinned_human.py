@@ -525,7 +525,16 @@ def test_lead_and_trail_are_opposite_hands_on_opposite_sides() -> None:
     assert _chirality(lead) == -_chirality(trail) != 0.0
     # Right-handed golfer: the trail (right) hand's palm sits away from the
     # target (+y), the lead (left) hand's toward it.
-    assert trail.mesh.vertices[:, 1].mean() > 0.0 > lead.mesh.vertices[:, 1].mean()
+    # Measured on the palm's own skin: the fingers wrap round to the other
+    # side and the forearm hangs clear, so a mean over the whole hand says
+    # little about where the palm is.
+    palm_bones = ("wrist",) + tuple(f"meta_{finger}" for finger in FINGERS)
+
+    def palm_y(hand) -> float:
+        ids = hand.rest_asset.dominant_vertex_ids(palm_bones)
+        return float(hand.mesh.vertices[ids, 1].mean())
+
+    assert palm_y(trail) > 0.0 > palm_y(lead)
     assert np.linalg.det(trail.frame_from_rest[:3, :3]) == pytest.approx(1.0)
     assert np.linalg.det(lead.frame_from_rest[:3, :3]) == pytest.approx(-1.0)
 
@@ -607,6 +616,24 @@ def test_the_lead_heel_pad_comes_over_the_top_of_the_grip() -> None:
     azimuth = math.degrees(math.atan2(heel[nearest, 1], heel[nearest, 0]))
     limit = float(_Q["max_lead_heel_pad_azimuth_deg"])
     assert abs(azimuth) <= limit, f"heel pad at azimuth {azimuth:.0f}, not on top"
+
+
+def test_the_butt_of_the_club_stands_proud_of_the_lead_heel() -> None:
+    """Hogan's butt cap shows beyond the heel of the lead hand.
+
+    A heel pad that hangs past the end of the grip has nothing to press on,
+    so the cap's edge lies beyond the lowest heel skin that is over the grip.
+    """
+    lead = _hand("lead")
+    heel = lead.mesh.vertices[lead.rest_asset.dominant_vertex_ids(("wrist",))]
+    gap = np.linalg.norm(heel[:, :2], axis=1) - (_RADIUS + _TAPER * heel[:, 2])
+    over_grip = heel[gap <= float(_Q["lead_heel_over_grip_reach_m"])]
+    assert len(over_grip) > 0
+    cap_edge_z = -float(_Q["owner_lead_below_cap_edge_m"])
+    proud = float(over_grip[:, 2].min()) - cap_edge_z
+    assert proud >= float(_Q["min_butt_beyond_lead_heel_m"]), (
+        f"lead heel hangs {-proud * 1e3:.1f} mm past the butt of the club"
+    )
 
 
 @pytest.mark.parametrize("side", _SIDES)

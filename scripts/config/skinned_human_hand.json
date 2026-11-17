@@ -71,6 +71,10 @@
         0.0,
         115.0
       ],
+      "mcp.ring": [
+        0.0,
+        115.0
+      ],
       "pip": [
         0.0,
         115.0
@@ -205,7 +209,7 @@
         "thumb_meta",
         "thumb_prox"
       ],
-      "reach_m": 0.012,
+      "reach_m": 0.013,
       "clearance_m": 0.0003,
       "facing_full": 0.5,
       "smooth_iterations": 6,
