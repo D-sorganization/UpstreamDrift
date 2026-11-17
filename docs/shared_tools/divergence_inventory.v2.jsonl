@@ -1595,6 +1595,7 @@
 {"path": "motion_matching/execution/grip_rotation.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/execution/grip_selection.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/execution/mjx_export.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/execution/skinned_hand_wrists.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/execution/spec_builder.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/export.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/final_cost.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}

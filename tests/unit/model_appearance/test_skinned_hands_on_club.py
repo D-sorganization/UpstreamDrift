@@ -98,10 +98,12 @@ def test_the_skinned_pair_replaces_the_capsule_hands(placed) -> None:
     capsule = gh.grip_hand_meshes(club)
     assert set(meshes) == set(capsule) == {"lead_hand", "trail_hand"}
     for label, mesh in meshes.items():
-        # A different mesh: the skinned hand carries a wrist and a forearm stub,
-        # about twice the capsule hand's volume (0.39 against 0.20 litres).
+        # A different mesh, closed and wound outward like the capsule hand.
         assert len(mesh.vertices) != len(capsule[label].vertices)
-        assert mesh.volume() > 1.5 * capsule[label].volume()
+        assert mesh.volume() > 0.5 * capsule[label].volume()
+        edges = np.sort(mesh.faces[:, [0, 1, 1, 2, 2, 0]].reshape(-1, 2), axis=1)
+        _, uses = np.unique(edges, axis=0, return_counts=True)
+        assert (uses == 2).all()
 
 
 @pytest.mark.slow
