@@ -26,7 +26,7 @@ Refs #15253, Refs #15251, Refs #15150. Owner decision, 2026-11-17: move the mode
 
 The model is built from the revised spec. The pose is the model's default pose with the trail weld settled by stepping without gravity; the weld's position error after settling is under 1 mm.
 
-![Wrist joints moved](https://raw.githubusercontent.com/D-sorganization/UpstreamDrift/EVIDENCE_SHA/docs/development/full_body_models/evidence/hands_on_club/mujoco_wrists_moved.png)
+![Wrist joints moved](https://raw.githubusercontent.com/D-sorganization/UpstreamDrift/2edefcbe31d432bd6703e5faa91f1f3c4b4fd695/docs/development/full_body_models/evidence/hands_on_club/mujoco_wrists_moved.png)
 
 ### Harsh Self-Review of the Still
 
