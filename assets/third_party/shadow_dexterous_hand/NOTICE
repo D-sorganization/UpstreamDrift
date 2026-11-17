@@ -1,0 +1,5 @@
+Shadow Dexterous Hand E3M5 (visual meshes and MJCF)
+Copyright The Shadow Robot Company / MuJoCo Menagerie contributors
+Licensed under the Apache License, Version 2.0
+See LICENSE in this directory and the canonical runtime tree under
+src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/hand_assets/shadow_hand/

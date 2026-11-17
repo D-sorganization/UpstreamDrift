@@ -46,11 +46,16 @@ from src.shared.python.model_appearance.club_assembly import (
     clubface_vector,
 )
 from src.shared.python.model_appearance.geometry import Mesh
+from src.shared.python.grip_spec import GripSpec
 from src.shared.python.model_appearance.grip_hand_mesh import (
     DEFAULT_HAND_MESH_PARAMS,
     HandMeshParams,
     build_grip_hand_mesh,
 )
+from src.shared.python.model_appearance.hand_backends.registry import (
+    build_hand_visual as build_registered_hand_visual,
+)
+from src.shared.python.model_appearance.hand_backends.types import HandSide
 from src.shared.python.hand_size import (
     DEFAULT_HAND_LENGTH_M,
     hand_mesh_scale,
@@ -192,6 +197,34 @@ def _mesh_params(hand_length_m: float | None) -> HandMeshParams:
     return replace(DEFAULT_HAND_MESH_PARAMS, scale=hand_mesh_scale(length))
 
 
+def _grip_spec_for_pose(
+    pose: GripPose,
+    grip_spec: GripSpec | None,
+) -> GripSpec:
+    if grip_spec is not None:
+        return grip_spec
+    base = GripSpec.legacy()
+    projected = base.to_grip_pose()
+    if projected == pose:
+        return base
+    return replace(
+        base,
+        style=pose.style,
+        trigger_finger=pose.trigger_finger,
+        lead_below_butt_m=pose.lead_below_butt_m,
+        hand_spacing_m=pose.hand_spacing_m,
+        handedness=pose.handedness,
+        lead=replace(
+            base.lead,
+            shaft_roll_deg=float(pose.lead_shaft_roll_deg),
+        ),
+        trail=replace(
+            base.trail,
+            shaft_roll_deg=float(pose.trail_shaft_roll_deg),
+        ),
+    )
+
+
 def _placed_hand(
     club: ClubAssembly,
     hand: Hand,
@@ -199,21 +232,47 @@ def _placed_hand(
     *,
     hand_length_m: float | None = None,
     hands: ResolvedHandSpec | None = None,
+    grip_spec: GripSpec | None = None,
+    hand_backend: str | None = None,
 ) -> Mesh:
-    """One hand in the club frame, wrapped on the thickest grip radius it spans."""
+    """One hand in the club frame, wrapped on the thickest grip radius it spans.
+
+    ``hand_backend=None`` draws the capsule hand; a registered backend name
+    (ADR-0057 A3) draws that backend's visual mesh instead. Contact stays on
+    the capsule pads either way.
+    """
     params = _mesh_params(hand_length_m)
     depth = pose.distance_below_butt_m(hand)
-    nominal = build_grip_hand_mesh(
-        hand, grip_radius_m=grip_radius_at(club, depth), pose=pose, params=params
-    )
-    nearest, _ = nominal.on_grip_extent_below_butt_m()
-    radius = grip_radius_at(club, min(max(nearest, 0.0), club.grip_length_m))
-    baked = build_grip_hand_mesh(
-        hand, grip_radius_m=radius, pose=pose, params=params
-    ).mesh
+    if hand_backend is None:
+        nominal = build_grip_hand_mesh(
+            hand, grip_radius_m=grip_radius_at(club, depth), pose=pose, params=params
+        )
+        nearest, _ = nominal.on_grip_extent_below_butt_m()
+        radius = grip_radius_at(club, min(max(nearest, 0.0), club.grip_length_m))
+        baked = build_grip_hand_mesh(
+            hand, grip_radius_m=radius, pose=pose, params=params
+        ).mesh
+    else:
+        side: HandSide = "trail" if hand == Hand.TRAIL else "lead"
+        baked = build_registered_hand_visual(
+            _unrolled(_grip_spec_for_pose(pose, grip_spec)),
+            side,
+            None,
+            grip_radius_m=grip_radius_at(club, depth),
+            backend=hand_backend,
+        ).mesh
     frame = grip_hand_frame(club, hand, pose, hands=hands)
     vertices = baked.vertices @ frame[:3, :3].T + frame[:3, 3]
     return Mesh(vertices, baked.faces)
+
+
+def _unrolled(spec: GripSpec) -> GripSpec:
+    """``spec`` with zero shaft roll: :func:`grip_hand_frame` applies the roll."""
+    return replace(
+        spec,
+        lead=replace(spec.lead, shaft_roll_deg=0.0),
+        trail=replace(spec.trail, shaft_roll_deg=0.0),
+    )
 
 
 def grip_hand_meshes(
@@ -222,6 +281,8 @@ def grip_hand_meshes(
     *,
     hand_length_m: float | None = None,
     hands: ResolvedHandSpec | None = None,
+    grip_spec: GripSpec | None = None,
+    hand_backend: str | None = None,
 ) -> dict[str, Mesh]:
     """``{"lead_hand", "trail_hand"}`` meshes wrapped on ``club``'s grip.
 
@@ -234,7 +295,15 @@ def grip_hand_meshes(
     _check_club(club)
     _check_pose(pose)
     return {
-        label: _placed_hand(club, hand, pose, hand_length_m=hand_length_m, hands=hands)
+        label: _placed_hand(
+            club,
+            hand,
+            pose,
+            hand_length_m=hand_length_m,
+            hands=hands,
+            grip_spec=grip_spec,
+            hand_backend=hand_backend,
+        )
         for hand, label in HAND_PARTS.items()
     }
 
@@ -245,6 +314,8 @@ def assembly_meshes_with_hands(
     *,
     hand_length_m: float | None = None,
     hands: ResolvedHandSpec | None = None,
+    grip_spec: GripSpec | None = None,
+    hand_backend: str | None = None,
 ) -> dict[str, Mesh]:
     """Shaft, grip and head of :func:`assembly_meshes`, then both grip hands.
 
@@ -255,5 +326,12 @@ def assembly_meshes_with_hands(
         pose, hand_length_m = hands.pose, hands.hand_length_m
     return {
         **assembly_meshes(club),
-        **grip_hand_meshes(club, pose, hand_length_m=hand_length_m, hands=hands),
+        **grip_hand_meshes(
+            club,
+            pose,
+            hand_length_m=hand_length_m,
+            hands=hands,
+            grip_spec=grip_spec,
+            hand_backend=hand_backend,
+        ),
     }
