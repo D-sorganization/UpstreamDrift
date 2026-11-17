@@ -2,9 +2,91 @@
 
 Refs #15150 (epic), #15148. Stacked on `cursor/hrg-gb1b-shaft-roll-2882`. Auto-merge is not armed, on the owner's instruction.
 
-### Update at `4e8598b464` (2026-11-16): Club Under the Lead Heel Pad (65 mm)
+### Update at `f4f607338c` (2026-11-16): Butt Proud of the Heel, Golfer's-Eye View
 
-This section is the newest; where it disagrees with the sections below, this one is right. The owner answered decision 2 below with "Yes, go deeper".
+This section is the newest; where it disagrees with the sections below, this one is right.
+
+- **The butt of the club stands proud of the lead heel.** The lead heel pad hung 18 mm past the butt cap, so it had no grip to press on. `owner_lead_below_cap_edge_m` is 85 mm (was 60) and the evidence radius follows the taper there (10.9 mm, was 11.3). New test `test_the_butt_of_the_club_stands_proud_of_the_lead_heel` (`min_butt_beyond_lead_heel_m`, 2 mm).
+- **Ring-finger knuckle limit.** `curl.limits_deg` has `mcp.ring` at 115 degrees beside `mcp.little`: on the slimmer grip the ring finger otherwise bridged 2.5 mm off. Remove the key to switch it off.
+- **Palm pad reach 13 mm** (`correctives.palm_pad.reach_m`, was 12). At 14 mm the palm-cup test fails (the pad then does the cup's work) and from 14.5 mm the skin moves more than the 8 mm limit, so it stops at 13. Heel-pad ratchet `max_lead_heel_pad_gap_m` tightened from 9 to 7 mm.
+- **A fifth evidence view, `golfer`**: looking down on the top of the grip with the butt toward the viewer, the angle of the Hogan photographs (`evidence_settings.json`, `golfer_view`). 45 frames.
+- **One test restated.** `test_lead_and_trail_are_opposite_hands_on_opposite_sides` took the mean of every vertex, forearm and wrapped fingers included; with the palm across the top of the shaft the lead mean came to +0.05 mm. It now measures the palm's own skin (lead -19 mm, trail +34 mm), which is what its comment always said. No limit was changed.
+
+#### Measured at `f4f607338c`
+
+| Check | Now | At `4e8598b464` | Limit |
+| --- | --- | --- | --- |
+| Lead heel pad to the grip, nearest skin | 6.3 mm | 7.1 mm | 7 mm (ratchet) |
+| Lead heel skin past the butt of the club | none (cap edge 5 mm beyond) | 18 mm past | at least 2 mm inside |
+| Skin within 0.5 mm of the grip, lead and trail | 27.1 and 18.8 cm2 | 26.7 cm2 lead | at least 18 cm2 |
+| Lead ring and little first segments to the grip | 2.9 and 7.3 mm | 3.8 and 6.7 mm | none on first segments |
+| Fingertip to thumb pad, lead index, middle, ring, little | 4.4, 0.9, 4.5, 17.3 mm | not recorded | none |
+| Fingertip to thumb pad, trail index, middle, ring, little | 0.7, 1.2, 15.3, 30.7 mm | not recorded | none |
+| Pinched knuckle edges, lead and trail | 3 and 1 | 3 and 1 | 6 |
+| Flipped triangles | 0 | 0 | 0 |
+| Skin moved by correctives, lead and trail | 30.1 % and 32.2 % | 30.7 % and 31.5 % | 34 % |
+| Largest corrective shift | 6.9 mm | 6.3 mm | 8 mm |
+| Pair fault | 0.66 mm | 1.1 mm | parts checked at 1.0 and 1.5 mm |
+| One hand inside the other | 0.0 mm | 0.0 mm | 1.0 mm |
+| Forearms apart | 32 degrees | 32 | 15 to 50 |
+| Lead fingers off square to the shaft, middle and end segments | 16 to 49 degrees | 15 to 50 | none (soft rule) |
+
+Tests: 151 pass, 1 skipped, **2 expected failures** (see Blockers). The trail hand's contact area (18.8 cm2) is close to its 18 cm2 floor.
+
+#### Tried and Rejected: A Firmer Squeeze (Owner, Fourth Comment)
+
+The owner asked for a tighter grip, with the fingers pressing up under the meaty first segment of the lead thumb. The direct setting is `squeeze.finger_depth_m` (how far the finger pads press into the grip). None of it is committed:
+
+| `finger_depth_m` | Result |
+| --- | --- |
+| 2.5 mm (current) | Lead fingertips 4.4, 0.9, 4.5 mm from the thumb pad (index, middle, ring) |
+| 3.0 mm | Lead ring fingertip moves away, to 8.9 mm; little finger middle segment lifts to 1.4 mm |
+| 3.3 mm | Skin 4.1 mm inside the grip |
+| 4.0 mm | Index and middle under 1 mm from the pad, but 12 tests fail: finger bones inside the grip (limit 1.5 mm clear), trail ring and little fingers 4.3 mm apart, forearms 10 degrees closer |
+
+Squeeze depth is not the lever: the fingers are already on the grip, so pressing harder pushes bone into the club instead of closing the hand. Raising the end-joint limit (`dip` 85 to 100 degrees) moves the lead index 0.9 mm and nothing else. **Open, see Blockers**: what closes the opening is the thumb's base coming down onto the fingertips, which is the same pose decision as the thumb snug to the hand (owner decision 1).
+
+#### Honest Reading
+
+- In the golfer's-eye view the base of the lead palm now covers the top of the grip and the butt shows beyond it, as in the Hogan photographs. The heel pad's nearest skin is still 6 mm off the grip: it is over the grip, not pressed on.
+- **The grip does not yet look tight.** In the lead palm view the grip shows between the fingers and the palm, and the fingertips stop short of the thumb's pad.
+- **Fingers square to the shaft is not improved.** A uniform sideways swing of the fingers was tried and rejected: the finger roots splay and cross.
+- The forearm stubs end in a rounded cap and look odd in the pair frames; they are there to show direction only.
+
+#### Self-Review of the Frames at `f4f607338c` (Harsh; Out Of 5)
+
+I opened the roll 0 frames of the lead hand, the trail hand and the pair, and the pair at roll +20 and -20 (25 frames, five views each). **I did not open the single-hand roll frames** (20); the roll is tested as a rigid turn.
+
+| Criterion | Lead | Trail | Both | Note |
+| --- | --- | --- | --- | --- |
+| Reads as a hand on a real golf club | 4 | 4 | 4 | Unchanged |
+| Heel pad on top of the grip (Hogan) | 3 | n/a | 3 | The palm base covers the grip in the golfer and butt views and the cap stands proud. Still hovering 6 mm, so not a 4 |
+| Butt of the club beyond the hand | 4 | n/a | 4 | New; cap and 5 mm of grip show past the heel |
+| Grip looks tight, fingers under the thumb pad | 2 | 3 | 3 | New criterion from the owner's fourth comment. Lead palm view: the grip shows between fingers and palm, fingertips short of the pad |
+| Thumb snug to the hand | 2 | 2 | 3 | Unchanged: long straight thumbs, open notch; owner decision 1 |
+| Fingers square to the shaft | 2 | 3 | 2 | Unchanged: lead fingers visibly diagonal in the palm view |
+| Lead little finger on the grip | 3 | n/a | 3 | First segment 7.3 mm off; splayed from the others in the palm view |
+| Skin free of creases and folds | 4 | 4 | 4 | No flipped triangles |
+| Hands locked together | n/a | n/a | 4 | Trail ring and little fingers lie on the lead forefinger in all three rolls |
+
+#### MuJoCo Full-Swing Render: Spike, Not yet Wired
+
+The owner asked to see this grip on the club in a full swing. A scratch spike (not committed) put the pair from `build_grip_hands` on the club body of the MuJoCo full-body golfer in place of the capsule hands and rendered a still. The mesh path works unchanged (`grip_hands.grip_hand_meshes` to `club_chain_meshes` to the MuJoCo appearance layer): the golfer's hands are rigid on the club, so one pose serves the whole swing. Missing before a swing video:
+
+1. A switchable backend in `grip_hands` (capsule hands stay the default) with tests, and a cache: the pair takes seconds to solve.
+2. One grip geometry. The club assembly's grip is 11.36 mm at the lead hand and `golf_grip.json` gives 10.92 mm; the two also place the lead hand 58 mm apart along the grip.
+3. The wrist. The skinned hands carry a forearm stub pointing where the solved wrist put it; the golfer's forearms point elsewhere, so the stub must be cut and the hand turned to the model's wrist.
+4. A swing to replay. The reviewed MuJoCo bundle is fitted to a private capture; the public replay file has not been checked as an input.
+
+This is outside the two branches this session may push to, so it is not started.
+
+#### Forces and Pressures Later
+
+The skinned hand is visual only. Forces and pressures stay on the existing contact model (`src/shared/python/grip_contact/`: pad layout, Hunt-Crossley pad contact, force decomposition). Each skinned result already reports `bone_transforms` and `contact_gaps_m`. To show pressure on this skin later: both models must read one grip spec and one grip geometry (item 2 above), and each contact pad needs a named skin region (the rig's dominant-bone vertex sets already give one per segment) so a pad's force can be painted on its region.
+
+### Earlier Update at `4e8598b464` (2026-11-16): Club Under the Lead Heel Pad (65 mm)
+
+The owner answered decision 2 below with "Yes, go deeper".
 
 - **Lead club line 65 mm below the little-finger knuckle** (`owner_lead_heel_pad_depth_m`, was 45). The contract `pinky_palm_depth_range_m` now ends at 70 mm, not 45; the reason and the approval are recorded beside it in `hand_visual_quality.json`. This is the only limit that was widened.
 - **A joint limit for one finger.** `curl.limits_deg` takes `joint.finger` keys beside the joint-wide ones. The default sets `mcp.little` to 115 degrees: at the deep line the lead little finger otherwise stops at 95 degrees and bridges 5 mm off the grip. The joint-wide limit stays 95, so the other fingers and the trail hand pose as before. Remove the key to switch it off.
@@ -54,7 +136,7 @@ I opened the roll 0 frames of the lead hand, the trail hand and the pair, and th
 
 ### Earlier Update at `5344c9496d` (2026-11-16): Real Golf Grip, Hogan Review, Heel Pad, Thumb Base
 
-**The "State" list and the "Measured" table below it were taken at `d577971830` on a 14 mm cylinder and have not been re-measured line by line**; where they disagree with this section, this section is right. The images further down are from `4e8598b464`.
+**The "State" list and the "Measured" table below it were taken at `d577971830` on a 14 mm cylinder and have not been re-measured line by line**; where they disagree with this section, this section is right. The images further down are from `f4f607338c`.
 
 The owner supplied Ben Hogan reference photographs and three rounds of comments on 2026-11-16. What changed:
 
@@ -209,13 +291,13 @@ Each hand reads as a human hand holding a golf club, and the pair now reads as t
 - **Overlapped little finger.** It reaches the groove and touches both lead fingers, but it looks thin and a little clawed (side swing 30 degrees, at its limit).
 - **Lead thumb in the pair.** It is hidden under the trail palm, as in a real grip. The trail thumb shows in the back and thumb-side views.
 
-| | Palm | Back | Thumb side | Butt |
-| --- | --- | --- | --- | --- |
-| Lead | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_butt_rollp00.png?raw=true) |
-| Trail | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_butt_rollp00.png?raw=true) |
-| Both | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollp00.png?raw=true) |
-| Both, roll -20 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollm20.png?raw=true) |
-| Both, roll +20 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollp20.png?raw=true) |
+| | Palm | Back | Thumb side | Butt | Golfer |
+| --- | --- | --- | --- | --- | --- |
+| Lead | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_butt_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_golfer_rollp00.png?raw=true) |
+| Trail | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_butt_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_golfer_rollp00.png?raw=true) |
+| Both | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_golfer_rollp00.png?raw=true) |
+| Both, roll -20 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_golfer_rollm20.png?raw=true) |
+| Both, roll +20 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_golfer_rollp20.png?raw=true) |
 
 All 36 frames (1024 px, MuJoCo EGL through the shared renderer of #15154) and `render_manifest.json` are in `docs/development/full_body_models/evidence/hand_skinned_human/`.
 
@@ -248,6 +330,8 @@ All 36 frames (1024 px, MuJoCo EGL through the shared renderer of #15154) and `r
 
 - **CI.** After the merge of `main`, `code-quality` failed on two type errors (the scipy stubs that `main` now uses) and `unit-test-gate (1/2)` on a stale divergence inventory (four new hand modules). Both are fixed in this round: `code-quality` passes on `796707e4f5`; `unit-test-gate` was still running when this was written. The Fleet policy gate passes and is left alone as instructed.
 - **Coarse and fine skin solve apart (#15181).** `test_the_skin_is_subdivided_and_the_setting_switches_it_off` is a strict expected failure on both hands: on the 0.900 in grip the two solves differ by more than the 5 degree limit (lead `ring_prox` 6.3, trail `thumb_prox` 8.4, because the thumb's turn search finds its 45 degree line on one skin only). Sweeping heel depth and `toward_index_steps` only moved the failure. The limit is unchanged. This is a real open defect, not a tolerance change.
+- **Tighter grip, fingers under the lead thumb pad (owner, fourth comment).** Not done. Pressing the finger pads deeper puts finger bone inside the grip (table in the newest section). It needs the thumb's base brought down onto the fingertips, which is owner decision 1 (thumb at 45 degrees against thumb snug to the hand).
+- **MuJoCo full-swing render.** Spiked only; the wiring lives in `grip_hands` and the club assembly, outside the two branches this session may push to.
 - **Fleet claim.** The lease on #15148 ran out at 2026-11-16 18:14Z. Re-claiming returned 409 (`claim:claude` label present, no active lease); the label still marks the issue as this session's.
 
 ## Learnings
@@ -260,6 +344,10 @@ All 36 frames (1024 px, MuJoCo EGL through the shared renderer of #15154) and `r
 - On a thinner grip the two-hand settle has two near-equal answers and flips between them. Try several, score them, keep the best.
 - The lead wrist angle only moves the forearm, so it can restore the forearm spread without touching the pose.
 
+- Pressing the finger pads deeper does not tighten a grip whose fingers are already on the club: the bones go into the grip and neighbouring fingers move apart. A tighter look has to come from the pose (thumb base onto the fingertips), not from squeeze depth.
+- A hand placed so its heel hangs past the butt cap can never have the heel pressed on. Check where the hand is along the grip before working on the gap.
+- A mean over every vertex is not a measure of where the palm is; wrapped fingers and the forearm cancel it. Measure the named skin.
+- Reverting an experiment by hand and re-rendering gave byte-identical frames, so the evidence render is reproducible.
 - When a limit is missed by a little after a requested change, look for what the change took away before touching the limit. Contact area fell 1 cm2 because the thumb's base was now farther from its line; a deeper cup gave it back with margin.
 - A turn search over a pose that jumps must return the closest pose it tried, not the last. The last try sat on the wrong side of the jump, 20 degrees off.
 - Stop a search at "close enough" (4 degrees). It ends away from the jump, so tiny numeric differences no longer pick different poses, and it saves solves.

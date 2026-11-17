@@ -115,6 +115,22 @@ Targets of a hand live in `skinned_targets.py`.
   skin. Still open: the bulk of the heel pad (tenth percentile 17.6 mm) does
   not touch; the palm needs a fold along the club line in the pose. A
   stronger metacarpal arch makes it worse; less arch flips triangles.
+- At `f4f607338c` the lead hand sits 85 mm below the cap edge
+  (`owner_lead_below_cap_edge_m`) so the butt stands 5 mm proud of the heel;
+  the heel pad's nearest skin is 6.3 mm off the grip (ratchet 7 mm).
+  `correctives.palm_pad.reach_m` stops at 13 mm: 14 mm fails the palm-cup
+  test and 14.5 mm exceeds the 8 mm corrective shift limit. The evidence
+  has a fifth view, `golfer` (`evidence_settings.json`).
+- A tighter grip with the fingertips under the lead thumb's pad is open.
+  `squeeze.finger_depth_m` is not the lever: 3 mm moves the ring fingertip
+  away, 3.3 mm puts skin 4 mm inside the grip, 4 mm puts finger bone inside
+  the grip and fails 12 tests. It needs the thumb's base brought down onto
+  the fingertips (the thumb 45 degrees against snug decision).
+- MuJoCo full swing: a scratch spike showed the pair loads on the golfer's
+  club through `grip_hands.grip_hand_meshes`. Not wired: needs a switchable
+  backend in `grip_hands`, one grip geometry (club assembly 11.36 mm against
+  `golf_grip.json` 10.92 mm, hand 58 mm apart along the grip), the forearm
+  stub cut and turned to the model's wrist, a cache, and a swing bundle.
 - The fingers are 15 to 50 degrees off square to the shaft on their middle
   and end segments, worse on the lead hand since the club line went deeper
   (the diagonal line is what tilts them). The Hogan photographs show them
