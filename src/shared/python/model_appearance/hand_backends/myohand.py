@@ -280,7 +280,7 @@ def finger_pair_penetration_m(
 
     tree = cKDTree(meshes[body_b].vertices)
     dist, _ = tree.query(meshes[body_a].vertices, k=1)
-    return float(-dist.min())
+    return float(-np.asarray(dist).min())
 
 
 def mirror_y_vertices(mesh: Mesh) -> Mesh:
