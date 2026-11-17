@@ -177,7 +177,7 @@ class ModelCache:
         version: str | None = None,
     ) -> CacheEntry:
         """
-        Add a model to the cache.
+        Add a model, protecting it during this insertion's cleanup.
 
         A SHA-256 checksum is always computed: it is what lets ``get`` reject
         a corrupted entry, so making it optional would let a caller create
@@ -193,10 +193,8 @@ class ModelCache:
         Returns:
             Created CacheEntry
         """
-        # Check if cleanup needed
         if model_id is None:
             raise ValueError("model_id must be provided")
-        self._maybe_cleanup()
 
         # Always compute the checksum; integrity checking depends on it.
         checksum = None
@@ -217,6 +215,7 @@ class ModelCache:
 
         self._entries[model_id] = entry
         self._save_index()
+        self._maybe_cleanup(protected_model_id=model_id)
 
         return entry
 
@@ -325,17 +324,21 @@ class ModelCache:
             "cache_dir": str(self.config.cache_dir),
         }
 
-    def _maybe_cleanup(self) -> None:
-        """Run cleanup if cache is getting full."""
+    def _maybe_cleanup(self, protected_model_id: str | None = None) -> None:
+        """Run cleanup under capacity pressure, preserving the active insertion."""
         total_size = self.get_total_size()
         max_size = self.config.max_size_mb * 1024 * 1024
         threshold = max_size * self.config.cleanup_threshold
 
         if total_size > threshold or len(self._entries) > self.config.max_entries:
-            self._cleanup()
+            self._cleanup(protected_model_id=protected_model_id)
 
-    def _cleanup(self) -> None:
-        """Remove old entries to free space."""
+    def _cleanup(self, protected_model_id: str | None = None) -> None:
+        """Remove eligible old LRU entries toward both size and count targets.
+
+        Retain the active insertion and entries protected by minimum age.
+        Their overlapping paths inherit protection from deletion by another ID.
+        """
         logger.info("Running cache cleanup...")
 
         # Sort by last accessed (oldest first)
@@ -344,14 +347,31 @@ class ModelCache:
         min_age = time.time() - (self.config.min_age_days * 24 * 60 * 60)
         max_size = self.config.max_size_mb * 1024 * 1024
         target_size = max_size * 0.7  # Clean to 70%
+        protected_paths = {
+            entry.model_id: entry.local_path.resolve()
+            for entry in sorted_entries
+            if entry.model_id == protected_model_id or entry.cached_at > min_age
+        }
 
         removed = 0
         for entry in sorted_entries:
-            if self.get_total_size() <= target_size:
+            if (
+                self.get_total_size() <= target_size
+                and len(self._entries) <= self.config.max_entries
+            ):
                 break
 
-            # Don't remove recent files
-            if entry.cached_at > min_age:
+            # Keep the current insertion and files protected by minimum age.
+            if entry.model_id in protected_paths:
+                continue
+            # Removing a directory also removes descendants; removing a child
+            # can corrupt a retained directory model. Protect both directions.
+            entry_path = entry.local_path.resolve()
+            if any(
+                entry_path.is_relative_to(protected_path)
+                or protected_path.is_relative_to(entry_path)
+                for protected_path in protected_paths.values()
+            ):
                 continue
 
             self.remove(entry.model_id)
