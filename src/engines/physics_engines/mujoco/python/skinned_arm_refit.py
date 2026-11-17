@@ -130,6 +130,50 @@ def _arm_indices(order: list[str]) -> list[int]:
     ]
 
 
+def _checked(
+    spec_from: Mapping[str, Any],
+    spec_to: Mapping[str, Any],
+    q: Array,
+    alignment_weight: float,
+    also_free: Sequence[str],
+) -> tuple[Array, Any]:
+    """The start pose and the club, after the preconditions of the refit."""
+    order = list(spec_to["coordinate_order"])
+    start = np.asarray(q, dtype=float)
+    if order != list(spec_from["coordinate_order"]):
+        raise ValueError("the two specs do not share a coordinate order")
+    if start.shape != (len(order),) or not np.isfinite(start).all():
+        raise ValueError(f"q must hold {len(order)} finite coordinate values")
+    if not alignment_weight >= 0.0:
+        raise ValueError("alignment_weight must be non-negative")
+    unknown = [name for name in also_free if name not in order]
+    if unknown:
+        raise ValueError(f"also_free names unknown coordinates: {unknown}")
+    club = assembly_from_spec(spec_to)
+    if club is None:
+        raise ValueError("spec has no club to hold")
+    return start, club
+
+
+def _free_coordinates(
+    spec: Mapping[str, Any], also_free: Sequence[str]
+) -> tuple[list[int], Array, Array, Array]:
+    """Indices solved for, their bounds (rad) and their pull toward the start."""
+    order = list(spec["coordinate_order"])
+    free = sorted({*_arm_indices(order), *(order.index(n) for n in also_free)})
+    ranges = spec.get("coordinate_ranges_deg", {})
+    low, high = np.radians(
+        [ranges.get(order[i], (-180.0, 180.0)) for i in free], dtype=float
+    ).T
+    stay = np.array(
+        [
+            _SCAPULA_STAY_WEIGHT if _SCAPULA_KEY in order[i] else _STAY_WEIGHT
+            for i in free
+        ]
+    )
+    return free, low, high, stay
+
+
 def refit_arms_to_club(
     spec_from: Mapping[str, Any],
     spec_to: Mapping[str, Any],
@@ -159,17 +203,7 @@ def refit_arms_to_club(
     Postconditions: only arm and ``also_free`` coordinates differ from ``q``
     and each lies inside its ``coordinate_ranges_deg``.
     """
-    order = list(spec_to["coordinate_order"])
-    start = np.asarray(q, dtype=float)
-    if order != list(spec_from["coordinate_order"]):
-        raise ValueError("the two specs do not share a coordinate order")
-    if start.shape != (len(order),) or not np.isfinite(start).all():
-        raise ValueError(f"q must hold {len(order)} finite coordinate values")
-    if not alignment_weight >= 0.0:
-        raise ValueError("alignment_weight must be non-negative")
-    club = assembly_from_spec(spec_to)
-    if club is None:
-        raise ValueError("spec has no club to hold")
+    start, club = _checked(spec_from, spec_to, q, alignment_weight, also_free)
     source, target = _Model(spec_from), _Model(spec_to)
     source.pose(start)
     club_rotation, club_origin = source.club_frame()
@@ -177,14 +211,7 @@ def refit_arms_to_club(
         side: club_rotation @ along
         for side, (_, along) in forearm_reach_m(club).items()
     }
-    unknown = [name for name in also_free if name not in order]
-    if unknown:
-        raise ValueError(f"also_free names unknown coordinates: {unknown}")
-    arms = sorted({*_arm_indices(order), *(order.index(n) for n in also_free)})
-    ranges = spec_to.get("coordinate_ranges_deg", {})
-    low, high = np.radians(
-        [ranges.get(order[i], (-180.0, 180.0)) for i in arms], dtype=float
-    ).T
+    arms, low, high, stay = _free_coordinates(spec_to, also_free)
 
     def errors(x: Array) -> tuple[Array, Array, Array, Array]:
         pose = start.copy()
@@ -196,12 +223,6 @@ def refit_arms_to_club(
         return origin - club_origin, turn, gap, twist
 
     held = 1.0 if hold_club else 0.0
-    stay = np.array(
-        [
-            _SCAPULA_STAY_WEIGHT if _SCAPULA_KEY in order[i] else _STAY_WEIGHT
-            for i in arms
-        ]
-    )
 
     def residuals(x: Array, stiffness: float) -> Array:
         offset, turn, gap, twist = errors(x)
