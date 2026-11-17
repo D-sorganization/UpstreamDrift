@@ -2,9 +2,59 @@
 
 Refs #15150 (epic), #15148. Stacked on `cursor/hrg-gb1b-shaft-roll-2882`. Auto-merge is not armed, on the owner's instruction.
 
-### Update at `5344c9496d` (2026-11-16): Real Golf Grip, Hogan Review, Heel Pad, Thumb Base
+### Update at `4e8598b464` (2026-11-16): Club Under the Lead Heel Pad (65 mm)
 
-This section is current. **The "State" list and the "Measured" table below it were taken at `d577971830` on a 14 mm cylinder and have not been re-measured line by line**; where they disagree with this section, this section is right. The images further down are from `5344c9496d`.
+This section is the newest; where it disagrees with the sections below, this one is right. The owner answered decision 2 below with "Yes, go deeper".
+
+- **Lead club line 65 mm below the little-finger knuckle** (`owner_lead_heel_pad_depth_m`, was 45). The contract `pinky_palm_depth_range_m` now ends at 70 mm, not 45; the reason and the approval are recorded beside it in `hand_visual_quality.json`. This is the only limit that was widened.
+- **A joint limit for one finger.** `curl.limits_deg` takes `joint.finger` keys beside the joint-wide ones. The default sets `mcp.little` to 115 degrees: at the deep line the lead little finger otherwise stops at 95 degrees and bridges 5 mm off the grip. The joint-wide limit stays 95, so the other fingers and the trail hand pose as before. Remove the key to switch it off.
+- **Creases at the little knuckle.** The deep line pinched 16 skin edges there (limit 6). `correctives.crease_relax` now runs 96 passes over 3 rings (was 32 over 2) and `fold_relax` 32 passes (was 16). To keep the correctives local, `lift_out.bulge_rings` went from 3 to 2: correctives move 30.7 % of the lead skin and 31.5 % of the trail skin (limit 34 %, unchanged).
+- **Heel-pad ratchet tightened**: `max_lead_heel_pad_gap_m` 18 mm to 9 mm.
+- **One test restated, not loosened in a quality limit.** `test_the_palm_cups_so_the_thumb_base_lies_on_the_grip` asserted that without the palm cup the thumb's first segment is more than 5 mm off the grip. On the lead hand that is no longer true (2.6 mm uncupped, 0.3 mm cupped), because the deep line already brings the thumb base down. It now asserts the cup brings the segment at least 2 mm closer (`min_palm_cup_first_segment_approach_m`, new); the 5 mm limit on the cupped hand and the 10 mm thenar approach are unchanged.
+
+#### Measured at `4e8598b464`
+
+| Check | Now | At `5344c9496d` | Limit |
+| --- | --- | --- | --- |
+| Lead heel pad to the grip, nearest skin | 7.1 mm | 17.8 mm | 9 mm (ratchet) |
+| Lead heel pad, tenth percentile of its skin | 17.6 mm | not recorded | none |
+| Lead heel pad azimuth | 5 degrees from the top | 5 | 30 |
+| Skin within 0.5 mm of the grip, lead hand | 26.7 cm2 | 23.8 cm2 | at least 18 cm2 |
+| Lead little finger middle segment to the grip | under 1 mm | 1.4 mm | 1.5 mm |
+| Lead little finger first segment to the grip | 6.7 mm | 6.3 mm | none on first segments |
+| Pinched knuckle edges, lead and trail | 3 and 1 | 3 and 2 | 6 |
+| Flipped triangles | 0 | 0 | 0 |
+| Pair fault | 1.1 mm (little finger middle segment) | 0.87 mm | parts checked at 1.0 and 1.5 mm |
+| One hand inside the other | 0.0 mm | 0.0 mm | 1.0 mm |
+| Forearms apart | 32 degrees | 33 | 15 to 50 |
+| Lead fingers off square to the shaft, middle and end segments | 15 to 50 degrees | 17 to 43 | none (soft rule) |
+
+Tests: 150 pass, 1 skipped, **2 expected failures** (see Blockers).
+
+#### Honest Reading
+
+- The palm now lies across the top of the shaft and the heel pad's nearest skin is 7 mm from the grip. It still does not touch, and most of the pad is further off (tenth percentile 17.6 mm). Hogan's heel pad is pressed on. The remaining gap needs a palm fold along the club line in the pose, as described below.
+- **The fingers got worse against the "more perpendicular" request**: the diagonal club line is what tilts them, and the lead middle and ring fingers are now up to 50 degrees off square. These two owner requests pull against each other in this rig.
+- The trail hand's fault rose from 0.87 to 1.1 mm.
+
+#### Self-Review of the Frames at `4e8598b464` (Harsh; Out Of 5)
+
+I opened the roll 0 frames of the lead hand, the trail hand and the pair, and the pair at roll +20 and -20 (20 frames). **I did not open the single-hand roll frames** (16); the roll is tested as a rigid turn.
+
+| Criterion | Lead | Trail | Both | Note |
+| --- | --- | --- | --- | --- |
+| Reads as a hand on a real golf club | 4 | 4 | 4 | Unchanged |
+| Heel pad on top of the grip (Hogan) | 3 | n/a | 3 | Up from 2. In the butt view the heel of the hand now covers the grip and the cap sits against the pad; in the palm view the palm crosses the shaft. The pad still hovers; it is not pressed on |
+| Thumb base full on top | 4 | 4 | 4 | Unchanged |
+| Thumb snug to the hand | 2 | 2 | 3 | Unchanged: long straight thumbs, open notch; owner decision 1 |
+| Fingers square to the shaft | 2 | 3 | 2 | Lead down from 3: the lead fingers run visibly diagonal, most in the palm view |
+| Lead little finger on the grip | 3 | n/a | 3 | Its end segments are on the grip; the first segment stands 6.7 mm off and the finger looks splayed from the others in the palm view |
+| Skin free of creases and folds | 4 | 4 | 4 | No flipped triangles; the little knuckle is sharply bent (115 degrees) but smooth |
+| Hands locked together | n/a | n/a | 4 | Trail ring and little fingers lie on the lead forefinger in all three rolls |
+
+### Earlier Update at `5344c9496d` (2026-11-16): Real Golf Grip, Hogan Review, Heel Pad, Thumb Base
+
+**The "State" list and the "Measured" table below it were taken at `d577971830` on a 14 mm cylinder and have not been re-measured line by line**; where they disagree with this section, this section is right. The images further down are from `4e8598b464`.
 
 The owner supplied Ben Hogan reference photographs and three rounds of comments on 2026-11-16. What changed:
 
@@ -54,7 +104,7 @@ The cause is structural: this rig's palm does not fold along the club line. A re
 #### Owner Decisions Open
 
 1. **Thumbs at 45 degrees or snug on top?** At 45 degrees the thumb cannot also lie against the forefinger (the forefinger knuckle is on the other side of the grip). The knuckle mode closes the lead thumb to 23 mm and matches the "change of grip" photograph, but the trail hand then loses the grip (8.7 cm2) until it is retuned. An A/B image was sent to the owner.
-2. **Club deeper than 45 mm under the lead heel pad?** See above.
+2. ~~Club deeper than 45 mm under the lead heel pad?~~ Answered 2026-11-16: yes. Done at 65 mm, see the newest section.
 3. **Forefinger knuckle straighter** conflicts with `min_index_knuckle_flexion_deg` (15) and unseats the trail ring finger; unchanged.
 
 #### Not Verified, or Weak
@@ -161,11 +211,11 @@ Each hand reads as a human hand holding a golf club, and the pair now reads as t
 
 | | Palm | Back | Thumb side | Butt |
 | --- | --- | --- | --- | --- |
-| Lead | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_butt_rollp00.png?raw=true) |
-| Trail | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_butt_rollp00.png?raw=true) |
-| Both | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollp00.png?raw=true) |
-| Both, roll -20 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollm20.png?raw=true) |
-| Both, roll +20 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/5344c9496d77abd1be88ab4209b872d69779cd6f/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollp20.png?raw=true) |
+| Lead | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_butt_rollp00.png?raw=true) |
+| Trail | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_butt_rollp00.png?raw=true) |
+| Both | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollp00.png?raw=true) |
+| Both, roll -20 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollm20.png?raw=true) |
+| Both, roll +20 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/4e8598b4640451861607cd3d6065eb5f1a42f309/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollp20.png?raw=true) |
 
 All 36 frames (1024 px, MuJoCo EGL through the shared renderer of #15154) and `render_manifest.json` are in `docs/development/full_body_models/evidence/hand_skinned_human/`.
 
@@ -280,6 +330,9 @@ All 36 frames (1024 px, MuJoCo EGL through the shared renderer of #15154) and `r
 - A contact-area measure that counts skin inside the obstacle cannot tell pressing from penetrating. Pair it with the penetration check.
 - Solver speed is forward kinematics. Precomputed hinge matrices and skinning only the vertices a joint moves took a pair from 55 s to 14 s.
 - Never run Python from inside `hand_backends/`: its `types.py` shadows the standard library.
+- A joint limit shared by all fingers couples the hands: raising the knuckle limit for the lead little finger changed the trail hand's solve and its corrective footprint. Limits that one finger needs belong to that finger (`joint.finger` keys).
+- The 34 % locality limit on correctives is a budget shared by four correctives. Wider crease smoothing was paid for by a narrower press bulge, not by raising the limit.
+- A deeper club line and squarer fingers pull against each other in this rig: the diagonal line that puts the heel pad over the grip is what tilts the fingers.
 
 ### Next Steps
 
