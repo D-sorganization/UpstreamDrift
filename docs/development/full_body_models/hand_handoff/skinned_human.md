@@ -17,6 +17,8 @@ which is also the text for the PR description.
 | `.../hand_backends/skinned_pair.py` | Both hands on one club: `build_grip_hands` (trail hand closes up to the lead hand along the grip, then curls round the grip and the lead hand's skin; overlap grip) |
 | `.../hand_backends/correctives.py` | Switchable corrective shapes after skinning: fold relaxation, the palm pad, laying skin pressed into the grip flat on its surface with a small bulge beside it (`press_flat`), and relaxing creases pinched at the knuckles (owner-approved 2026-11-15). The solver closes the joints `squeeze.finger_depth_m` past first touch (#15179, #15180) |
 | `.../hand_backends/subdivision.py` | Loop subdivision of the skin mesh and its weights (`mesh.subdivision_levels`, 0 switches it off), with the nail edges kept sharp (`mesh.creases`); the grip is solved on the original vertices of the subdivided skin |
+| `.../hand_backends/golf_grip.py`, `scripts/config/golf_grip.json` | The real grip: standard taper and butt cap (`grip.shape`: `tapered` or `cylinder`) |
+| `.../hand_backends/rest_shape.py` | Tissue added to the rest mesh before subdivision (`mesh.fullness`; an empty list switches it off). Default: 4 mm on the back of the thumb's base |
 | `.../hand_backends/qa.py` | Contact, penetration, fold, anthropometry, pair and forearm metrics |
 | `scripts/config/skinned_human_hand.json` | Every pose setting |
 | `scripts/config/hand_visual_quality.json` | Every test tolerance and reference |
@@ -102,3 +104,17 @@ Targets of a hand live in `skinned_targets.py`.
   below 15 holds on single hands and unseats the trail ring finger in the pair.
 - In the pair the trail thumb's first segment is 5.5 mm off the grip, and the
   trail hand is erratic above 73 degrees of `pair.palm_cup_max_deg`.
+- The lead heel pad is 17.8 mm off the grip with the club 45 mm below the
+  little-finger knuckle (`owner_lead_heel_pad_depth_m`), the most that
+  `pinky_palm_depth_range_m` allows. Deeper (55 to 65 mm) looks right and
+  brings it to 12.5 and 7.4 mm, but takes the lead little finger 9 to 12 mm
+  off the grip and unseats the trail hand. A stronger metacarpal arch makes
+  it worse; a longer palm-pad reach moves a few vertices, not the pad. The
+  palm needs a fold along the club line in the pose.
+- The fingers are 17 to 43 degrees off square to the shaft on their middle
+  and end segments. The Hogan photographs show them nearly square.
+- The coarse-skin and fine-skin solves differ by more than 5 degrees on the
+  thin grip (lead `ring_prox`, trail `thumb_prox`): a strict expected
+  failure tied to #15181.
+- Do not wait on a background test run with `pgrep -f` of a pattern that is
+  also in the waiting command: it matches itself and never returns.
