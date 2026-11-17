@@ -63,7 +63,7 @@ def taubin_smooth(
     ).tocsr()
     degree = np.asarray(matrix.sum(axis=1)).ravel()
     degree[degree == 0.0] = 1.0
-    neighbor = sparse.diags(1.0 / degree) @ matrix
+    neighbor = sparse.csr_matrix(matrix.multiply((1.0 / degree)[:, np.newaxis]))
     smoothed = np.array(vertices, dtype=float, copy=True)
     for _ in range(iterations):
         smoothed = smoothed + lam * (neighbor @ smoothed - smoothed)
