@@ -268,6 +268,25 @@ PART_RADIUS_M: dict[str, float] = {
 PART_DISTAL_SCALE: dict[str, float] = {"forearm": 0.8}
 
 
+# Parts drawn as ONE shape across a joint that turns about the limb's own axis
+# (#15262): the forearm is two bodies joined by the pronation joint, and two
+# separate spindles there read as a second elbow.
+CONTINUOUS_PARTS: tuple[str, ...] = ("forearm",)
+# Muscle belly per part: (gain, position, width). The radius grows by ``gain``
+# at ``position`` along the whole part and falls off as a Gaussian of
+# ``width`` (fractions of its length). Visual only.
+PART_BELLY: dict[str, tuple[float, float, float]] = {"forearm": (0.12, 0.28, 0.22)}
+NO_BELLY = (0.0, 0.5, 1.0)
+
+
+def belly(part: str) -> tuple[float, float, float]:
+    """Muscle belly ``(gain, position, width)`` of ``part`` (gain 0 = none)."""
+    gain, position, width = PART_BELLY.get(part, NO_BELLY)
+    if not (gain >= 0.0 and 0.0 <= position <= 1.0 and width > 0.0):
+        raise ValueError(f"belly of {part!r} must have gain >= 0, width > 0")
+    return float(gain), float(position), float(width)
+
+
 def validate_distal_scale(scale: float) -> float:
     """Return ``scale`` if it is a finite taper factor in (0, 1], else raise."""
     if not (isinstance(scale, int | float) and 0.0 < scale <= 1.0):

@@ -256,6 +256,8 @@ class _Context:
     feet: Mapping[str, Sequence[foot.FootPart]] = field(default_factory=dict)
     #: Club parts per body (``club_chain_meshes``; chain shaft R6, #12686).
     club_parts: Mapping[str, Sequence[ClubPart]] = field(default_factory=dict)
+    #: Fraction of its whole limb each body of a continuous part draws (#15262).
+    windows: Mapping[str, tuple[float, float]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -265,9 +267,42 @@ class _Segment:
     radius: float
     aspect: float
     end_scale: float = 1.0
+    window: tuple[float, float] = library.FULL_COVERAGE
+    belly: tuple[float, float, float] = library.NO_BELLY
 
 
-def _limb_segments(part: str, caps: Sequence[Capsule], scale: float) -> list[_Segment]:
+def _limb_windows(
+    spec: Mapping[str, Any], by_body: Mapping[str, Sequence[Capsule]]
+) -> dict[str, tuple[float, float]]:
+    """The share of one limb drawn by each body of a continuous part.
+
+    Two bodies of the same ``library.CONTINUOUS_PARTS`` part joined by a
+    joint, each with one capsule, are the near and far lengths of one limb:
+    the parent draws ``(0, f)`` and the child ``(f, 1)``, ``f`` the parent's
+    share of the summed length.
+    """
+    out: dict[str, tuple[float, float]] = {}
+    for joint in spec.get("joints", ()):
+        near, far = joint.get("parent"), joint.get("child")
+        part = library.classify_body(near) if near in by_body else None
+        if part not in library.CONTINUOUS_PARTS or far not in by_body:
+            continue
+        if library.classify_body(far) != part:
+            continue
+        if len(by_body[near]) != 1 or len(by_body[far]) != 1:
+            continue
+        lengths = by_body[near][0].length_m(), by_body[far][0].length_m()
+        share = lengths[0] / sum(lengths)
+        out[near], out[far] = (0.0, share), (share, 1.0)
+    return out
+
+
+def _limb_segments(
+    part: str,
+    caps: Sequence[Capsule],
+    scale: float,
+    window: tuple[float, float] = library.FULL_COVERAGE,
+) -> list[_Segment]:
     out = []
     for cap in caps:
         radius = scale * (
@@ -284,6 +319,8 @@ def _limb_segments(part: str, caps: Sequence[Capsule], scale: float) -> list[_Se
                 radius,
                 aspect,
                 library.distal_scale(part),
+                window,
+                library.belly(part),
             )
         )
     return out
@@ -425,6 +462,8 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
         geometry.LoftOptions(
             aspect=seg.aspect,
             end_scale=seg.end_scale,
+            window=seg.window,
+            belly=seg.belly,
             rings=library.LOFT_RINGS,
             sides=library.LOFT_SIDES,
             width_hint=width_hint_for(ctx.sections, body, seg.start, seg.end),
@@ -506,7 +545,8 @@ def _meshes_for_body(
     elif part in TRUNK_PARTS:
         segments = [_trunk_segment(ctx, body, part, caps, scale)]
     else:
-        segments = _limb_segments(part, caps, scale)
+        window = ctx.windows.get(body, library.FULL_COVERAGE)
+        segments = _limb_segments(part, caps, scale, window)
     return _segment_meshes(ctx, body, part, segments)
 
 
@@ -540,6 +580,9 @@ def body_meshes(
     shapes: dict[str, list[Shape]] = {}
     for shape in skeleton.shapes:
         shapes.setdefault(shape.body, []).append(shape)
+    by_body: dict[str, list[Capsule]] = {}
+    for cap in skeleton.capsules:
+        by_body.setdefault(cap.body, []).append(cap)
     sections = body_sections(spec)
     ctx = _Context(
         doc,
@@ -551,10 +594,8 @@ def body_meshes(
         doc.head.enabled,
         foot.foot_parts(spec, sections, model=doc.foot.model),
         _club_parts(spec, doc, club),
+        _limb_windows(spec, by_body),
     )
-    by_body: dict[str, list[Capsule]] = {}
-    for cap in skeleton.capsules:
-        by_body.setdefault(cap.body, []).append(cap)
     out = [
         m for body, caps in by_body.items() for m in _meshes_for_body(ctx, body, caps)
     ]

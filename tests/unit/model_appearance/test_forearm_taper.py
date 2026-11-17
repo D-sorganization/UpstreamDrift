@@ -26,13 +26,25 @@ SPEC = (
 PRE_TAPER_FOREARM_RADIUS_M = 0.036
 
 
-def _radial_extent(spec: dict, lo: float, hi: float) -> list[float]:
-    """Max skin radius about the axis in the [lo, hi] length band, per forearm."""
+def _radial_extent(spec: dict, lo: float, hi: float, end: str) -> list[float]:
+    """Max skin radius about the axis in the [lo, hi] length band, per forearm.
+
+    A forearm is two bodies drawn as one shape (#15262): ``end="wrist"`` reads
+    the body that carries the wrist joint, ``end="elbow"`` the other one.
+    """
+    wrist_bodies = {
+        j["parent"]
+        for j in spec["joints"]
+        if library.classify_body(j["parent"]) == "forearm"
+        and library.classify_body(j["child"]) != "forearm"
+    }
     skeleton = derive_visual_skeleton(spec)
     meshes = body_meshes(spec, document_from_dict({"schema_version": "appearance-v1"}))
     out = []
     for cap in skeleton.capsules:
         if library.classify_body(cap.body) != "forearm":
+            continue
+        if (cap.body in wrist_bodies) != (end == "wrist"):
             continue
         p0, p1 = np.asarray(cap.start_m), np.asarray(cap.end_m)
         axis = (p1 - p0) / np.linalg.norm(p1 - p0)
@@ -52,14 +64,14 @@ def _radial_extent(spec: dict, lo: float, hi: float) -> list[float]:
 
 def test_distal_forearm_is_at_most_80_percent_of_the_old_radius() -> None:
     spec = json.loads(SPEC.read_text(encoding="utf-8"))
-    for r in _radial_extent(spec, 0.85, 0.95):
+    for r in _radial_extent(spec, 0.85, 0.95, "wrist"):
         assert r <= 0.8 * PRE_TAPER_FOREARM_RADIUS_M + 1e-9, r
 
 
 def test_distal_forearm_is_narrower_than_the_hand_and_the_proximal_end() -> None:
     spec = json.loads(SPEC.read_text(encoding="utf-8"))
-    distal = _radial_extent(spec, 0.85, 0.95)
-    proximal = _radial_extent(spec, 0.05, 0.15)
+    distal = _radial_extent(spec, 0.85, 0.95, "wrist")
+    proximal = _radial_extent(spec, 0.05, 0.15, "elbow")
     assert max(distal) < library.PART_RADIUS_M["hand"]
     for d, p in zip(distal, proximal, strict=True):
         assert p >= d
