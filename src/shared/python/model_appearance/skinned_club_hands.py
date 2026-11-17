@@ -11,8 +11,10 @@ hand's distance below the butt. Visual only: no force or contact model reads it.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import replace
 from functools import lru_cache
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -51,18 +53,23 @@ def owner_grip_spec(roll_deg: float = 0.0) -> GripSpec:
     below the edge of the butt cap. ``roll_deg`` turns both hands about the shaft.
     """
     base = GripSpec.legacy()
-    quality = load_hand_visual_quality()
+    quality: Mapping[str, Any] = load_hand_visual_quality()
     thumbs = quality["owner_thumb_azimuth_deg"]
-    lead_turn, trail_turn = (
-        {"shaft_roll_deg": float(roll_deg), "thumb_azimuth_deg": float(thumbs[side])}
-        for side in ("lead", "trail")
-    )
     heel = float(quality["owner_lead_heel_pad_depth_m"])
     below = float(quality["owner_lead_below_cap_edge_m"])
     return replace(
         base,
-        lead=replace(base.lead, pinky_side_palm_depth_m=heel, **lead_turn),
-        trail=replace(base.trail, **trail_turn),
+        lead=replace(
+            base.lead,
+            pinky_side_palm_depth_m=heel,
+            shaft_roll_deg=float(roll_deg),
+            thumb_azimuth_deg=float(thumbs["lead"]),
+        ),
+        trail=replace(
+            base.trail,
+            shaft_roll_deg=float(roll_deg),
+            thumb_azimuth_deg=float(thumbs["trail"]),
+        ),
         lead_below_butt_m=below + load_golf_grip().cap_height_m,
     )
 
@@ -84,7 +91,8 @@ def skinned_hand_frame(club: ClubAssembly) -> Array:
 @lru_cache(maxsize=1)
 def _pair() -> dict[str, HandVisualResult]:
     """The posed pair in its own grip frame; solving it takes seconds."""
-    radius = float(load_hand_visual_quality()["grip_radius_m"])
+    quality: Mapping[str, Any] = load_hand_visual_quality()
+    radius = float(quality["grip_radius_m"])
     return build_grip_hands(owner_grip_spec(), grip_radius_m=radius)
 
 
