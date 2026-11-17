@@ -331,9 +331,9 @@ def lofted_segment(
     across, deep = np.outer(np.cos(phi), u), np.outer(np.sin(phi), v)
     verts: list[Array] = []
     for s in stations:
-        whole = float(s) + offset
-        ring = across + _aspect_at(opts, whole / total) * deep
-        verts.extend(p0 + a * s + profile(whole) * ring)
+        at = float(s) + offset
+        ring = across + _aspect_at(opts, at / total) * deep
+        verts.extend(p0 + a * s + profile(at) * ring)
     face_list = _ring_faces(len(stations), sides)
     n = len(verts)
     verts += [p0 + a * poles[0], p0 + a * poles[1]]
