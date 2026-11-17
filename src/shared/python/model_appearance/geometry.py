@@ -162,6 +162,49 @@ class LoftOptions:
     width_hint: Array | None = None
     # Radius at the ``end`` over the radius at ``start`` (linear taper, 1 = none).
     end_scale: float = 1.0
+    # This segment is the fraction ``(from, to)`` of a longer limb drawn as one
+    # shape (#15262). An end inside the limb is cut flat on a round section;
+    # taper, belly and end rounding are those of the whole limb.
+    window: tuple[float, float] = (0.0, 1.0)
+    # Muscle belly ``(gain, position, width)``: the radius grows by ``gain``
+    # at ``position`` along the whole limb, falling off as a Gaussian of
+    # ``width`` (both fractions of its length). A gain of 0 is no belly.
+    belly: tuple[float, float, float] = (0.0, 0.5, 1.0)
+
+
+def _checked_shape(opts: LoftOptions) -> None:
+    """Preconditions of the whole-limb shape options (``ValueError``)."""
+    if not 0.0 < opts.end_scale <= 1.0:  # NaN fails too
+        raise ValueError("taper end_scale must be in (0, 1]")
+    w0, w1 = opts.window
+    if not 0.0 <= w0 < w1 <= 1.0:
+        raise ValueError("window must satisfy 0 <= from < to <= 1")
+    gain, position, width = opts.belly
+    if not (gain >= 0.0 and math.isfinite(gain) and 0.0 <= position <= 1.0):
+        raise ValueError("belly needs a finite gain >= 0 and a position in [0, 1]")
+    if not (width > 0.0 and math.isfinite(width)):
+        raise ValueError("belly width must be positive")
+
+
+def _spindle_stations(
+    total: float, over: float, window: tuple[float, float], rings: int
+) -> tuple[Array, float, float]:
+    """Stations along the whole limb inside ``window``, and its two poles.
+
+    An end of the window that is an end of the limb keeps the rounded
+    overshoot (pole ``over`` past it); an end inside the limb is a flat cut
+    (ring and pole at the cut).
+    """
+    half = total / 2.0 + over
+    theta = np.linspace(0.0, math.pi, rings + 2)[1:-1]
+    stations = total / 2.0 - half * np.cos(theta)
+    low, high = window[0] * total, window[1] * total
+    first, last = -over, total + over
+    if window[0] > 0.0:
+        stations, first = np.append(low, stations[stations > low + 1e-9]), low
+    if window[1] < 1.0:
+        stations, last = np.append(stations[stations < high - 1e-9], high), high
+    return stations, first, last
 
 
 def lofted_segment(
@@ -178,7 +221,8 @@ def lofted_segment(
     shorts and shoes. ``aspect`` is depth/width of the cross-section: the
     extent along ``width_hint`` (made perpendicular to the segment) is
     ``2 * radius * thickness`` and along ``segment x width`` it is ``aspect``
-    times that.
+    times that. ``window`` and ``belly`` draw the segment as part of a
+    longer limb (see :class:`LoftOptions`).
     Preconditions: finite points, positive length and radius; when
     ``aspect != 1`` an explicit ``width_hint`` at least
     ``MIN_WIDTH_AXIS_ANGLE_DEG`` from the segment axis (no world default).
@@ -195,8 +239,7 @@ def lofted_segment(
     length = float(np.linalg.norm(p1 - p0))
     if length <= 1e-9 or rings < 4 or sides < 6:
         raise ValueError("Segment needs positive length, rings >= 4, sides >= 6")
-    if not 0.0 < opts.end_scale <= 1.0:  # NaN fails too
-        raise ValueError("taper end_scale must be in (0, 1]")
+    _checked_shape(opts)
     if aspect != 1.0:
         require(
             width_hint is not None,
@@ -208,44 +251,40 @@ def lofted_segment(
         if width_hint is None
         else _width_frame(p1 - p0, np.asarray(width_hint, float))
     )
+    # Whole-limb coordinates: this segment starts ``offset`` along the limb.
+    total = length / (opts.window[1] - opts.window[0])
+    offset = opts.window[0] * total
     over = 0.5 * radius
-    half = length / 2.0 + over
-    centre = length / 2.0
+    half = total / 2.0 + over
+    gain, position, width = opts.belly
 
-    def profile(s: float) -> float:
-        x = min(1.0, abs(s - centre) / half)
-        return math.sqrt(max(0.0, 1.0 - x * x)) ** 0.55
+    def profile(whole: float) -> float:
+        x = min(1.0, abs(whole - total / 2.0) / half)
+        frac = min(1.0, max(0.0, whole / total))
+        swell = 1.0 + gain * math.exp(-(((frac - position) / width) ** 2))
+        taper = 1.0 + (opts.end_scale - 1.0) * frac
+        return math.sqrt(max(0.0, 1.0 - x * x)) ** 0.55 * swell * taper
 
-    closed = t0 == 0.0 and t1 == 1.0
-    if closed:
-        theta = np.linspace(0.0, math.pi, rings + 2)[1:-1]
-        stations = centre - half * np.cos(theta)
+    if t0 == 0.0 and t1 == 1.0:
+        whole, first, last = _spindle_stations(total, over, opts.window, rings)
+        stations, poles = whole - offset, (first - offset, last - offset)
     else:
         stations = np.linspace(t0 * length, t1 * length, rings)
+        poles = (float(stations[0]), float(stations[-1]))
     phi = np.linspace(0.0, 2.0 * math.pi, sides, endpoint=False)
     ring_dirs = np.outer(np.cos(phi), u) + aspect * np.outer(np.sin(phi), v)
     verts: list[Array] = []
     for s in stations:
-        frac = min(1.0, max(0.0, float(s) / length))
-        taper = 1.0 + (opts.end_scale - 1.0) * frac
-        r = radius * thickness * profile(float(s)) * taper
+        r = radius * thickness * profile(float(s) + offset)
         verts.extend(p0 + a * s + r * ring_dirs)
     face_list = _ring_faces(len(stations), sides)
     n = len(verts)
-    if closed:
-        verts += [p0 - a * over, p1 + a * over]
-        first = (len(stations) - 1) * sides
-        for j in range(sides):
-            j2 = (j + 1) % sides
-            face_list.append((n, j2, j))
-            face_list.append((n + 1, first + j, first + j2))
-    else:
-        verts += [p0 + a * stations[0], p0 + a * stations[-1]]
-        first = (len(stations) - 1) * sides
-        for j in range(sides):
-            j2 = (j + 1) % sides
-            face_list.append((n, j2, j))
-            face_list.append((n + 1, first + j, first + j2))
+    verts += [p0 + a * poles[0], p0 + a * poles[1]]
+    first_ring = (len(stations) - 1) * sides
+    for j in range(sides):
+        j2 = (j + 1) % sides
+        face_list.append((n, j2, j))
+        face_list.append((n + 1, first_ring + j, first_ring + j2))
     return _orient(
         np.asarray(verts, dtype=float), np.asarray(face_list, dtype=np.int64)
     )
