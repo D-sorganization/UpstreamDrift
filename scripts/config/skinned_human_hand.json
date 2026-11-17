@@ -13,6 +13,21 @@
   },
   "mesh": {
     "subdivision_levels": 1,
+    "fullness": [
+      {
+        "along_bone": "thumb_meta",
+        "bones": [
+          "wrist",
+          "thumb_meta",
+          "thumb_prox"
+        ],
+        "height_m": 0.004,
+        "centre": 0.0,
+        "half_span": 1.1,
+        "radius_m": 0.035,
+        "facing_full": 0.7
+      }
+    ],
     "creases": {
       "bones": [
         "thumb_dist",
@@ -200,7 +215,7 @@
   },
   "wrist": {
     "lead": {
-      "extension_deg": 0.0,
+      "extension_deg": 8.0,
       "ulnar_deviation_deg": 20.0
     },
     "trail": {

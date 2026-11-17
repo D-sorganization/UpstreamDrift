@@ -92,6 +92,7 @@ from src.shared.python.model_appearance.hand_backends.skinning import (
     scale_asset,
     vertex_normals,
 )
+from src.shared.python.model_appearance.hand_backends.rest_shape import filled_out
 from src.shared.python.model_appearance.hand_backends.subdivision import (
     original_resolution,
     sharp_edges,
@@ -160,7 +161,7 @@ def _sized_assets(
     vertices), which is what the grip is solved on: a contact found on it is a
     contact of the skin. With no subdivision the two are the same object.
     """
-    source = load_hand_cc0_asset().asset
+    source = filled_out(load_hand_cc0_asset().asset, settings.fullness)
     # Edges that are sharp in the source (the nails) stay sharp when subdivided.
     creases = sharp_edges(
         source.rest_vertices,

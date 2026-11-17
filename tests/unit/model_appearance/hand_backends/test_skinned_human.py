@@ -587,6 +587,24 @@ def test_club_lies_on_the_index_first_segment_and_below_the_pinky_base(
     assert np.isfinite(pip).all()
 
 
+def test_the_lead_heel_pad_comes_over_the_top_of_the_grip() -> None:
+    """Owner (2026-11-16): the underside of the lead palm sits on the shaft.
+
+    The club lies as deep under the heel pad as the pinky-depth contract
+    allows, so the heel of the hand is over the top of the grip and near it.
+    """
+    lead = _hand("lead")
+    heel = lead.mesh.vertices[lead.rest_asset.dominant_vertex_ids(("wrist",))]
+    gap = np.linalg.norm(heel[:, :2], axis=1) - (_RADIUS + _TAPER * heel[:, 2])
+    nearest = int(np.argmin(gap))
+    assert gap[nearest] <= float(_Q["max_lead_heel_pad_gap_m"]), (
+        f"lead heel pad {gap[nearest] * 1e3:.1f} mm off the grip"
+    )
+    azimuth = math.degrees(math.atan2(heel[nearest, 1], heel[nearest, 0]))
+    limit = float(_Q["max_lead_heel_pad_azimuth_deg"])
+    assert abs(azimuth) <= limit, f"heel pad at azimuth {azimuth:.0f}, not on top"
+
+
 @pytest.mark.parametrize("side", _SIDES)
 def test_fingers_wrap_and_the_palm_cups(side: str) -> None:
     angles = _hand(side).joint_angles

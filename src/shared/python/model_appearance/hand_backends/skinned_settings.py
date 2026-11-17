@@ -21,6 +21,9 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     PressSettings,
 )
 from src.shared.python.model_appearance.hand_backends.golf_grip import load_golf_grip
+from src.shared.python.model_appearance.hand_backends.rest_shape import (
+    FullnessSettings,
+)
 from src.shared.python.model_appearance.hand_backends.joint_angles import FINGERS
 from src.shared.python.model_appearance.hand_backends.posing import CurlSettings
 
@@ -42,6 +45,7 @@ class SkinnedHumanSettings:
     skin_rgb: tuple[float, float, float]
     breadth_band_m: float
     subdivision_levels: int
+    fullness: tuple[FullnessSettings, ...]
     crease_bones: tuple[str, ...]
     crease_min_fold_deg: float
     scale_limits: tuple[float, float]
@@ -182,6 +186,18 @@ def _fold_relax(raw: Mapping[str, Any]) -> FoldRelaxSettings:
         iterations=int(raw["iterations"]),
         rings=int(raw["rings"]),
         step=float(raw["step"]),
+    )
+
+
+def _fullness(raw: Mapping[str, Any]) -> FullnessSettings:
+    return FullnessSettings(
+        along_bone=str(raw["along_bone"]),
+        bones=tuple(str(bone) for bone in raw["bones"]),
+        height_m=float(raw["height_m"]),
+        centre=float(raw["centre"]),
+        half_span=float(raw["half_span"]),
+        radius_m=float(raw["radius_m"]),
+        facing_full=float(raw["facing_full"]),
     )
 
 
@@ -353,6 +369,7 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
         skin_rgb=(rgb[0], rgb[1], rgb[2]),
         breadth_band_m=float(anthro["breadth_band_m"]),
         subdivision_levels=_subdivision_levels(raw["mesh"]["subdivision_levels"]),
+        fullness=tuple(_fullness(pad) for pad in raw["mesh"]["fullness"]),
         crease_bones=tuple(str(b) for b in raw["mesh"]["creases"]["bones"]),
         crease_min_fold_deg=_positive(
             raw["mesh"]["creases"]["min_fold_deg"], "mesh.creases.min_fold_deg"
