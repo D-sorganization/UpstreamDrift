@@ -30,6 +30,7 @@ from src.shared.python.model_appearance.hand_backends.qa import (
     anthropometric_ratios,
     finger_side_gaps_m,
     forearm_spread_deg,
+    wrist_joint_m,
     grip_contact_area_m2,
     hand_pair_penetration_m,
     hand_to_finger_gaps_m,
@@ -67,21 +68,32 @@ _SIDES = ("lead", "trail")
 _CACHE: dict[tuple, object] = {}
 
 
+def _owner_thumb_deg(side: str) -> float:
+    """The owner's thumb line for ``side``, to its own side of the grip's top."""
+    return float(_Q["owner_thumb_azimuth_deg"][side])
+
+
 def _spec(
     roll_deg: float = 0.0, handedness: str = "right", thumb_deg: float | None = None
 ) -> GripSpec:
     """The legacy grip with the owner's thumb azimuth on both hands and the
     club under the heel pad of the lead hand."""
     base = GripSpec.legacy()
-    if thumb_deg is None:
-        thumb_deg = float(_Q["owner_thumb_azimuth_deg"])
-    turned = {"shaft_roll_deg": roll_deg, "thumb_azimuth_deg": thumb_deg}
+    lead_turn, trail_turn = (
+        {
+            "shaft_roll_deg": roll_deg,
+            "thumb_azimuth_deg": _owner_thumb_deg(side)
+            if thumb_deg is None
+            else thumb_deg,
+        }
+        for side in _SIDES
+    )
     heel = float(_Q["owner_lead_heel_pad_depth_m"])
     return dataclasses.replace(
         base,
         handedness=handedness,
-        lead=dataclasses.replace(base.lead, pinky_side_palm_depth_m=heel, **turned),
-        trail=dataclasses.replace(base.trail, **turned),
+        lead=dataclasses.replace(base.lead, pinky_side_palm_depth_m=heel, **lead_turn),
+        trail=dataclasses.replace(base.trail, **trail_turn),
     )
 
 
@@ -203,7 +215,7 @@ def test_the_skin_is_subdivided_and_the_setting_switches_it_off(side: str) -> No
     # The thumb is turned until it lies on its line, and that search answers
     # 15 degrees apart on the two skins of the trail hand (#15181): both must
     # still put the thumb on the line.
-    want = float(_Q["owner_thumb_azimuth_deg"]) * (1.0 if side == "lead" else -1.0)
+    want = _owner_thumb_deg(side) * (1.0 if side == "lead" else -1.0)
     for result in (fine, coarse):
         miss = abs(_thumb_azimuth_deg(result) - want)
         assert miss <= float(_Q["max_thumb_azimuth_error_deg"])
@@ -669,7 +681,7 @@ def test_the_thumbs_lie_on_their_own_sides_of_the_shaft(side: str) -> None:
     """Owner's grip: the lead thumb about 45 degrees to the away-from-target
     side of the top of the grip, the trail thumb as far to the target side,
     each along the shaft, on the grip and against its own hand (#15181)."""
-    want = float(_Q["owner_thumb_azimuth_deg"]) * (1.0 if side == "lead" else -1.0)
+    want = _owner_thumb_deg(side) * (1.0 if side == "lead" else -1.0)
     slack = float(_Q["max_thumb_azimuth_error_deg"])
     for hand in (_hand(side), _pair()[side]):
         assert abs(_thumb_azimuth_deg(hand) - want) <= slack
@@ -994,15 +1006,17 @@ def test_the_thumb_can_go_to_the_forefinger_tip_instead() -> None:
 
 
 def test_turning_the_thumb_can_be_switched_off() -> None:
-    raw = _thumb_settings(toward_index_max_deg=_UNTURNED)
-    plain = build_hand_visual(
-        _spec(), "trail", grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
+    """Shown on the legacy grip with the knuckle target: with the wrists over
+    the shaft (2026-11-17) the owner's thumb lines need no turn at all."""
+    turned = _legacy_thumb(
+        "trail", toward_index_target="knuckle", toward_index_max_deg=_KNUCKLE
+    )
+    plain = _legacy_thumb(
+        "trail", toward_index_target="knuckle", toward_index_max_deg=_UNTURNED
     )
     assert plain.joint_angles.as_mapping()["thumb_side"] == 0.0
-    assert abs(_hand("trail").joint_angles.as_mapping()["thumb_side"]) > 0.1
-    slack = float(_Q["max_thumb_azimuth_error_deg"])
-    want = -float(_Q["owner_thumb_azimuth_deg"])
-    assert abs(_thumb_azimuth_deg(plain) - want) > slack  # pressed off its line
+    assert abs(turned.joint_angles.as_mapping()["thumb_side"]) > 0.1
+    assert thumb_pinch_m(turned) < thumb_pinch_m(plain)  # the turn does the pinching
     for key, value in (
         ("toward_index_max_deg", {"lead": 0.0, "trail": -1.0}),
         ("toward_index_steps", 0),
@@ -1104,6 +1118,24 @@ def test_forearms_leave_the_club_on_the_golfers_side() -> None:
     pair = _pair()
     spread = forearm_spread_deg(pair["lead"], pair["trail"])
     assert low <= spread <= high, f"forearms {spread:.0f} deg apart"
+
+
+def test_the_wrists_sit_over_the_shaft_at_address() -> None:
+    """Owner, 2026-11-17: the lead wrist joint is almost centred over the
+    shaft, the trail wrist slightly to the trail side of it."""
+    pair = _pair()
+    lead, trail = (wrist_joint_m(pair[side]) for side in _SIDES)
+    assert lead[0] > 0.0 and trail[0] > 0.0, "a wrist is under the shaft"
+    limit = float(_Q["max_lead_wrist_offset_m"])
+    assert abs(lead[1]) <= limit, f"lead wrist {lead[1] * 1e3:.0f} mm off centre"
+    low, high = (float(v) for v in _Q["trail_wrist_offset_range_m"])
+    assert low <= trail[1] <= high, f"trail wrist {trail[1] * 1e3:.0f} mm to the side"
+
+
+def test_both_wrists_are_extended_at_address() -> None:
+    least = float(_Q["min_wrist_extension_deg"])
+    for side, (extension, _) in default_settings().wrist_deg:
+        assert extension >= least, f"{side} wrist extended {extension:.0f} deg"
 
 
 def test_pair_follows_per_hand_shaft_roll() -> None:

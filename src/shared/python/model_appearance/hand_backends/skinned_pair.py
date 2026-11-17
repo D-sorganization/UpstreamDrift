@@ -20,6 +20,11 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.grip_contact.contact_topology import GripStyle
+from src.shared.python.grip_spec.shaft_roll import (
+    APPEARANCE_GRIP_SHAFT_AXIS,
+    apply_shaft_roll,
+    resolved_shaft_roll_deg,
+)
 from src.shared.python.grip_spec.types import GripSpec
 from src.shared.python.model_appearance.hand_backends.joint_angles import FINGERS
 from src.shared.python.model_appearance.hand_backends.posing import (
@@ -268,6 +273,21 @@ def pair_fault_m(
     return max(seat, touch, 0.0)
 
 
+def _turned(hand: HandVisualResult, turn: NDArray[np.float64]) -> HandVisualResult:
+    """``hand`` turned rigidly about the shaft by the rotation ``turn``."""
+    frame = np.eye(4)
+    frame[:3, :3] = turn
+    normals = hand.vertex_normals
+    return dataclasses.replace(
+        hand,
+        mesh=dataclasses.replace(hand.mesh, vertices=hand.mesh.vertices @ turn.T),
+        vertex_normals=None if normals is None else normals @ turn.T,
+        frame_from_rest=None
+        if hand.frame_from_rest is None
+        else frame @ hand.frame_from_rest,
+    )
+
+
 def build_grip_hands(
     grip_spec: GripSpec,
     *,
@@ -295,6 +315,26 @@ def build_grip_hands(
     """
     _check_inputs(grip_spec, "lead", grip_radius_m)
     settings = settings or default_settings()
+    roll_deg = grip_spec.lead.shaft_roll_deg
+    if roll_deg:
+        # Solve with the lead hand unrolled and turn the answer: rolling both
+        # hands is then exactly a rigid turn, not a second, slightly different
+        # solve in a turned frame.
+        level = dataclasses.replace(
+            grip_spec,
+            lead=dataclasses.replace(grip_spec.lead, shaft_roll_deg=0.0),
+            trail=dataclasses.replace(
+                grip_spec.trail,
+                shaft_roll_deg=grip_spec.trail.shaft_roll_deg - roll_deg,
+            ),
+        )
+        solved = build_grip_hands(level, grip_radius_m=grip_radius_m, settings=settings)
+        turn = apply_shaft_roll(
+            np.eye(3),
+            APPEARANCE_GRIP_SHAFT_AXIS,
+            resolved_shaft_roll_deg(grip_spec, "lead"),
+        )[:3, :3]
+        return {side: _turned(hand, turn) for side, hand in solved.items()}
     scene = _LeadObstacle(grip_spec, grip_radius_m, settings)
 
     def posed(spacing_m: float) -> _SolvedHand:

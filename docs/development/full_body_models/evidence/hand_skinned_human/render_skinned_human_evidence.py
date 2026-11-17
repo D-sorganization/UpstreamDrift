@@ -65,14 +65,17 @@ def _spec(roll_deg: float) -> GripSpec:
     far to the target side."""
     base = GripSpec.legacy()
     quality = load_hand_visual_quality()
-    thumb = float(quality["owner_thumb_azimuth_deg"])
-    turned = {"shaft_roll_deg": roll_deg, "thumb_azimuth_deg": thumb}
+    thumbs = quality["owner_thumb_azimuth_deg"]
+    lead_turn, trail_turn = (
+        {"shaft_roll_deg": roll_deg, "thumb_azimuth_deg": float(thumbs[side])}
+        for side in ("lead", "trail")
+    )
     heel = float(quality["owner_lead_heel_pad_depth_m"])
     below = float(quality["owner_lead_below_cap_edge_m"])
     return dataclasses.replace(
         base,
-        lead=dataclasses.replace(base.lead, pinky_side_palm_depth_m=heel, **turned),
-        trail=dataclasses.replace(base.trail, **turned),
+        lead=dataclasses.replace(base.lead, pinky_side_palm_depth_m=heel, **lead_turn),
+        trail=dataclasses.replace(base.trail, **trail_turn),
         lead_below_butt_m=below + load_golf_grip().cap_height_m,
     )
 

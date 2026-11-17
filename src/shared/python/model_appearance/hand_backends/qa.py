@@ -398,6 +398,14 @@ def hand_pair_penetration_m(first: HandVisualResult, second: HandVisualResult) -
     )
 
 
+def wrist_joint_m(result: HandVisualResult) -> NDArray[np.float64]:
+    """The wrist joint centre in the club frame (z along the shaft, +x the top
+    of the grip, +y the trail side). This is the point a forearm attaches to."""
+    asset, transforms, frame = _audit_parts(result)
+    i = asset.bone_index("wrist")
+    return np.asarray((frame @ transforms[i] @ np.append(asset.bone_heads[i], 1.0))[:3])
+
+
 def forearm_spread_deg(first: HandVisualResult, second: HandVisualResult) -> float:
     """Angle between the two forearms seen along the shaft (from the butt)."""
 
