@@ -34,9 +34,40 @@ replay. Nothing here is acceptance of a full swing.
 import argparse
 import hashlib
 import json
+import sys
 import traceback
 from pathlib import Path
 from time import perf_counter
+
+_RUN_DIR = Path(__file__).resolve().parent
+_MANIFEST_PATH = _RUN_DIR / "evidence_script.json"
+
+
+def _exit_if_archived_manifest() -> None:
+    """Stop before native-only imports when ``evidence_script.json`` says archived."""
+    if not _MANIFEST_PATH.is_file():
+        return
+    data = json.loads(_MANIFEST_PATH.read_text(encoding="utf-8"))
+    if data.get("status") != "archived":
+        return
+    ref = str(data.get("required_git_ref", ""))
+    reason = str(
+        data.get(
+            "archived_reason",
+            "Pinocchio native replay modules are absent from main.",
+        )
+    )
+    sys.stderr.write(
+        "two_window_fit_101.py is archived on this branch (#15015).\n"
+        f"Restore git ref {ref} or merge branch {data.get('required_branch', '')!r}.\n"
+        f"{reason}\n"
+    )
+    for module_name in data.get("missing_modules") or []:
+        sys.stderr.write(f"  missing: {module_name}\n")
+    raise SystemExit(2)
+
+
+_exit_if_archived_manifest()
 
 import numpy as np
 

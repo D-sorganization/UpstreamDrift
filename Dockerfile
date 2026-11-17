@@ -41,7 +41,7 @@ ENV RUSTUP_HOME=/opt/rustup \
     PATH="/opt/cargo/bin:/opt/venv/bin:$PATH"
 # Download-init (no pipe) so a transient curl/DNS failure cannot feed an empty
 # script to sh and surface as exit 127 on rustc. Fleet builds have seen
-# Could not resolve host: sh.rustup.rs under concurrent image lanes.
+# Could not resolve host: sh.rustup.rs under concurrent image lanes (#13761).
 RUN set -eu; \
     for attempt in 1 2 3 4 5; do \
       if curl --proto '=https' --tlsv1.2 -fsS --retry 3 --retry-delay 5 --retry-all-errors \

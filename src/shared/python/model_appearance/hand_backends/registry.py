@@ -1,87 +1,135 @@
-"""Hand-visual backend registry for the SDF lane.
+"""The one registry of grip hand visual backends (ADR-0057 A3).
 
-Sibling lanes register their own ids on their own branches. This module
-registers ``sdf_hand`` only. ``build_hand_visual`` here is the dispatcher
-(backend id first); the SDF builder lives in :mod:`sdf_hand`.
+Backends register a :class:`HandVisualBackend`; the registry never chooses a
+default backend. Built-in backends register lazily: each module path in
+``_BUILTIN_BACKEND_MODULES`` is imported the first time the registry is read
+and its ``register()`` is called. Contact geometry is not handled here; it
+stays on the capsule pads. The shared poser (``posing.py``) is not part of
+this registry.
 """
 
 from __future__ import annotations
 
-from typing import Callable
+import importlib
+import re
+from collections.abc import Callable
+from dataclasses import dataclass, field
 
 from src.shared.python.grip_spec.types import GripSpec
-from src.shared.python.model_appearance.hand_backends.contract import (
+from src.shared.python.model_appearance.hand_backends.types import (
     HandJointAngles,
-    HandRole,
+    HandSide,
+    HandVisualResult,
 )
 
-Builder = Callable[..., object]
+HandVisualBuilder = Callable[..., HandVisualResult]
 
-_BACKENDS: dict[str, tuple[Builder, str]] = {}
+#: Backends that stay registered but opt-in until an owner decision clears
+#: them (MyoHand: HX6 #13763 geometry lineage).
+DISABLED_BY_DEFAULT: frozenset[str] = frozenset({"myohand"})
+
+_NAME_PATTERN = re.compile(r"^[a-z][a-z0-9]*(_[a-z0-9]+)*$")
+
+#: Module paths whose ``register()`` adds a built-in backend. Tracks append one.
+_BUILTIN_BACKEND_MODULES: tuple[str, ...] = ()
+
+_REGISTRY: dict[str, HandVisualBackend] = {}
+_builtins_loaded = False
 
 
-def register_backend(
-    backend_id: str,
-    build: Builder,
-    description: str,
-    *,
-    overwrite: bool = False,
-) -> None:
-    """Register ``build(grip_spec, side, joint_angles, **kwargs)``.
+@dataclass(frozen=True)
+class HandVisualBackend:
+    """One registered backend: a name, its builder and its metadata."""
 
-    Preconditions: a non-empty id and a callable. Re-registering the same id
-    raises ``ValueError`` unless ``overwrite`` is set.
+    name: str
+    builder: HandVisualBuilder
+    description: str = ""
+    capabilities: frozenset[str] = field(default_factory=frozenset)
+    default_enabled: bool = True
+
+    def __post_init__(self) -> None:
+        if not callable(self.builder):
+            raise TypeError(f"builder for {self.name!r} must be callable")
+        if not isinstance(self.capabilities, frozenset):
+            raise TypeError("capabilities must be a frozenset of strings")
+
+
+def register_hand_visual_backend(backend: HandVisualBackend) -> None:
+    """Add ``backend``.
+
+    Raises ``ValueError`` for a name that is not lower-case ``snake_case``, a
+    duplicate name, or an attempt to enable a backend in
+    :data:`DISABLED_BY_DEFAULT`.
     """
-    if not isinstance(backend_id, str) or not backend_id:
-        raise ValueError(f"backend_id must be a non-empty string, got {backend_id!r}")
-    if not callable(build):
-        raise TypeError("build must be callable")
-    if backend_id in _BACKENDS and not overwrite:
-        raise ValueError(f"hand backend {backend_id!r} is already registered")
-    _BACKENDS[backend_id] = (build, description)
+    if not isinstance(backend.name, str) or not _NAME_PATTERN.match(backend.name):
+        raise ValueError(
+            f"backend name must be lower-case snake_case, got {backend.name!r}"
+        )
+    if backend.name in _REGISTRY:
+        raise ValueError(f"backend {backend.name!r} already registered")
+    if backend.name in DISABLED_BY_DEFAULT and backend.default_enabled:
+        raise ValueError(
+            f"backend {backend.name!r} must be registered with default_enabled=False"
+        )
+    _REGISTRY[backend.name] = backend
 
 
-def registered_backend_ids() -> tuple[str, ...]:
-    """Sorted ids currently registered in this process."""
-    return tuple(sorted(_BACKENDS))
+def get_hand_visual_backend(name: str) -> HandVisualBackend:
+    """The backend called ``name``; ``KeyError`` lists the known names."""
+    _ensure_builtin_backends()
+    if name not in _REGISTRY:
+        raise KeyError(
+            f"unknown hand visual backend {name!r}; known: {sorted(_REGISTRY)}"
+        )
+    return _REGISTRY[name]
+
+
+def list_hand_visual_backends(*, include_disabled: bool = False) -> tuple[str, ...]:
+    """Sorted backend names; disabled backends only when asked for."""
+    _ensure_builtin_backends()
+    return tuple(
+        sorted(
+            name
+            for name, backend in _REGISTRY.items()
+            if include_disabled or backend.default_enabled
+        )
+    )
 
 
 def build_hand_visual(
-    backend_id: str,
     grip_spec: GripSpec,
-    side: HandRole,
-    joint_angles: HandJointAngles,
-    **kwargs: object,
-) -> object:
-    """Dispatch to a registered backend.
-
-    Unknown ids raise ``KeyError`` whose message contains ``unknown``.
-    """
-    try:
-        build, _description = _BACKENDS[backend_id]
-    except KeyError:
-        raise KeyError(f"unknown hand backend {backend_id!r}") from None
-    return build(grip_spec, side, joint_angles, **kwargs)
-
-
-def _build_sdf_hand(
-    grip_spec: GripSpec,
-    side: HandRole,
-    joint_angles: HandJointAngles,
-    **kwargs: object,
-) -> object:
-    from src.shared.python.model_appearance.hand_backends.sdf_hand import (
-        build_hand_visual as build_sdf,
+    side: HandSide,
+    joint_angles: HandJointAngles | None = None,
+    *,
+    grip_radius_m: float,
+    backend: str,
+    skin_rgb: tuple[float, float, float] | None = None,
+) -> HandVisualResult:
+    """Build one hand with the named backend (disabled backends build by name)."""
+    return get_hand_visual_backend(backend).builder(
+        grip_spec,
+        side,
+        joint_angles,
+        grip_radius_m=grip_radius_m,
+        skin_rgb=skin_rgb,
     )
 
-    return build_sdf(grip_spec, side, joint_angles, **kwargs)
+
+def _ensure_builtin_backends() -> None:
+    global _builtins_loaded
+    if _builtins_loaded:
+        return
+    _builtins_loaded = True
+    for module_path in _BUILTIN_BACKEND_MODULES:
+        importlib.import_module(module_path).register()
 
 
-register_backend(
-    "sdf_hand",
-    _build_sdf_hand,
-    "Implicit SDF sculpted hand (smooth-min bones, marching cubes)",
-)
-
-
-__all__ = ["build_hand_visual", "register_backend", "registered_backend_ids"]
+__all__ = [
+    "DISABLED_BY_DEFAULT",
+    "HandVisualBackend",
+    "HandVisualBuilder",
+    "build_hand_visual",
+    "get_hand_visual_backend",
+    "list_hand_visual_backends",
+    "register_hand_visual_backend",
+]
