@@ -217,7 +217,7 @@ def render_roll_strip(output_dir: Path, backend_id: str = "procedural_skin") -> 
             }
         )
 
-    receipt_path = output_dir / f"{backend_id}_receipt.json"
+    receipt_path = output_dir / f"{backend_id}_render_stats.json"
     receipt_path.write_text(
         json.dumps(
             {

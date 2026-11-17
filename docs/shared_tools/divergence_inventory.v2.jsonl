@@ -1363,6 +1363,7 @@
 {"path": "model_appearance/hand_backends/README.md", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/__init__.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/capsule.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/hand_backends/comparison.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/contract.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/joint_angles.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/metrics.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
