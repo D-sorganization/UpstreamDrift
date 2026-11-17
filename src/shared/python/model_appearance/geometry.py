@@ -177,6 +177,12 @@ class LoftOptions:
     capsule_ends: bool = False
     # Fraction of the whole limb by which the taper has reached ``end_scale``.
     taper_end: float = 1.0
+    # Depth/width of the section at the far end of the whole limb (a flat
+    # wrist, #15262). The section is ``aspect`` up to ``flatten_from`` of the
+    # limb and eases to ``end_aspect`` by ``taper_end``. ``None`` keeps
+    # ``aspect`` throughout.
+    end_aspect: float | None = None
+    flatten_from: float = 0.0
 
 
 def _checked_shape(opts: LoftOptions) -> None:
@@ -193,6 +199,19 @@ def _checked_shape(opts: LoftOptions) -> None:
         raise ValueError("belly width must be positive")
     if not 0.0 < opts.taper_end <= 1.0:
         raise ValueError("taper_end must be in (0, 1]")
+    if opts.end_aspect is not None and not (
+        opts.end_aspect > 0.0 and 0.0 <= opts.flatten_from < opts.taper_end
+    ):
+        raise ValueError("end_aspect needs a value > 0 and flatten_from < taper_end")
+
+
+def _aspect_at(opts: LoftOptions, frac: float) -> float:
+    """Depth/width of the section at ``frac`` of the whole limb."""
+    if opts.end_aspect is None:
+        return opts.aspect
+    span = opts.taper_end - opts.flatten_from
+    t = min(1.0, max(0.0, (frac - opts.flatten_from) / span))
+    return opts.aspect + (opts.end_aspect - opts.aspect) * t * t * (3.0 - 2.0 * t)
 
 
 def _limb_scale(opts: LoftOptions, frac: float) -> float:
@@ -265,7 +284,7 @@ def lofted_segment(
     if length <= 1e-9 or rings < 4 or sides < 6:
         raise ValueError("Segment needs positive length, rings >= 4, sides >= 6")
     _checked_shape(opts)
-    if aspect != 1.0:
+    if aspect != 1.0 or opts.end_aspect not in (None, aspect):
         require(
             width_hint is not None,
             "a non-round cross-section (aspect != 1) needs an explicit width_hint",
@@ -309,11 +328,12 @@ def lofted_segment(
         stations = np.linspace(t0 * length, t1 * length, rings)
         poles = (float(stations[0]), float(stations[-1]))
     phi = np.linspace(0.0, 2.0 * math.pi, sides, endpoint=False)
-    ring_dirs = np.outer(np.cos(phi), u) + aspect * np.outer(np.sin(phi), v)
+    across, deep = np.outer(np.cos(phi), u), np.outer(np.sin(phi), v)
     verts: list[Array] = []
     for s in stations:
-        r = profile(float(s) + offset)
-        verts.extend(p0 + a * s + r * ring_dirs)
+        whole = float(s) + offset
+        ring = across + _aspect_at(opts, whole / total) * deep
+        verts.extend(p0 + a * s + profile(whole) * ring)
     face_list = _ring_faces(len(stations), sides)
     n = len(verts)
     verts += [p0 + a * poles[0], p0 + a * poles[1]]
