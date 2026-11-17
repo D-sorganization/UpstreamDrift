@@ -17,7 +17,6 @@ The frames come from the shared renderer (``hand_backends/render.py``, PR
 from __future__ import annotations
 
 import argparse
-import dataclasses
 import json
 import os
 import sys
@@ -39,6 +38,7 @@ from src.shared.python.model_appearance.hand_backends.skinned_human import (
     build_hand_visual,
     default_settings,
 )
+from src.shared.python.model_appearance.skinned_club_hands import owner_grip_spec
 from src.shared.python.model_appearance.hand_backends.skinned_pair import (
     build_grip_hands,
 )
@@ -60,24 +60,8 @@ def _load_renderer(root: str | None):
 
 
 def _spec(roll_deg: float) -> GripSpec:
-    """The legacy grip with the owner's thumbs: the lead thumb that far to
-    the away-from-target side of the top of the grip, the trail thumb that
-    far to the target side."""
-    base = GripSpec.legacy()
-    quality = load_hand_visual_quality()
-    thumbs = quality["owner_thumb_azimuth_deg"]
-    lead_turn, trail_turn = (
-        {"shaft_roll_deg": roll_deg, "thumb_azimuth_deg": float(thumbs[side])}
-        for side in ("lead", "trail")
-    )
-    heel = float(quality["owner_lead_heel_pad_depth_m"])
-    below = float(quality["owner_lead_below_cap_edge_m"])
-    return dataclasses.replace(
-        base,
-        lead=dataclasses.replace(base.lead, pinky_side_palm_depth_m=heel, **lead_turn),
-        trail=dataclasses.replace(base.trail, **trail_turn),
-        lead_below_butt_m=below + load_golf_grip().cap_height_m,
-    )
+    """The owner's grip, both hands turned ``roll_deg`` about the shaft."""
+    return owner_grip_spec(roll_deg)
 
 
 def _basis(result) -> tuple[np.ndarray, np.ndarray]:

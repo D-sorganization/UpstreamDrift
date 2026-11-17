@@ -32,6 +32,8 @@
   "pair_penetration_tolerance_m": 0.001,
   "_owner_wrist_over_shaft": "Owner, 2026-11-17: at address the lead wrist joint is almost centred over the shaft and the trail wrist slightly to the trail side; both wrists slightly extended. Offsets are sideways distances from the plane through the shaft and the top of the grip.",
   "max_lead_wrist_offset_m": 0.008,
+  "_max_club_grip_sink_m": "#15251: on the golfer's club the skinned hands are posed on the standard golf grip but the club draws a fatter grip tube (11.8 to 10.5 mm radius), so the skin sinks into the tube: measured 0.97 mm lead, 1.89 mm trail. Tighten when the club draws the standard grip.",
+  "max_club_grip_sink_m": 0.002,
   "trail_wrist_offset_range_m": [
     0.015,
     0.05

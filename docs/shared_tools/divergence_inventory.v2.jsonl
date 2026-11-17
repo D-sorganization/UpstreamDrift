@@ -1384,6 +1384,7 @@
 {"path": "model_appearance/pelvis_width.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/schema.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/skinned_body.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/skinned_club_hands.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_generation/__init__.py", "classification": "diverged", "package": "model_generation", "spelling_only": false}
 {"path": "model_generation/_convenience.py", "classification": "diverged", "package": "model_generation", "spelling_only": true}
 {"path": "model_generation/_lazy_map.py", "classification": "diverged", "package": "model_generation", "spelling_only": false}
