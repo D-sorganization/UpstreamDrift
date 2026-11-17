@@ -49,7 +49,16 @@ def export_analysis_report(
 
     Returns:
         Path to the exported report file.
+
+    Raises:
+        ValueError: If the format is unsupported, before creating directories
+            or capturing provenance.
     """
+    if format_type not in ("json", "html"):
+        raise ValueError(
+            f"Unsupported report format {format_type!r}; expected 'json' or 'html'"
+        )
+
     report_dir.mkdir(parents=True, exist_ok=True)
 
     timestamp = timestamp_filename(utc=False)

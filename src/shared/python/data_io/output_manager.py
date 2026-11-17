@@ -355,7 +355,7 @@ class OutputManager:
         Args:
             analysis_data: Analysis results and metadata
             report_name: Report filename (without extension)
-            format_type: Report format (json, html, pdf)
+            format_type: Report format (json or html)
 
         Returns:
             Path to exported report
