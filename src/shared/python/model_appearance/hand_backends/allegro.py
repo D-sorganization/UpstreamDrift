@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -25,7 +26,7 @@ from src.shared.python.model_appearance.hand_backends.allegro_settings import (
 from src.shared.python.model_appearance.hand_backends.allegro_solver import (
     _baseline_qpos,
     _canonical_part_key,
-    _compute_mount_matrix,
+    _posed_base_mount,
     _forward_model,
     _hand_from_side,
     _iter_visible_geoms,
@@ -89,15 +90,11 @@ def _pose_and_mount(
         )
         return cfg, hand, solved.qpos, solved.mount_matrix
 
-    mujoco = _require_mujoco()
     model = _load_model(hand == Hand.TRAIL, handedness)
-    data = mujoco.MjData(model)
     qpos = apply_joint_angles(_baseline_qpos(model), model, joint_angles)
-    data.qpos[:] = qpos
-    mujoco.mj_forward(model, data)
-    base_mount = _compute_mount_matrix(
+    _, base_mount = _posed_base_mount(
         model,
-        data,
+        qpos,
         hand=hand,
         spec_hand=spec_hand,
         grip_spec=grip_spec,
@@ -116,6 +113,23 @@ def _pose_and_mount(
     mount[:3, :3] = r_mat @ base_mount[:3, :3]
     mount[:3, 3] = r_mat @ base_mount[:3, 3]
     return cfg, hand, qpos, mount
+
+
+def _posed_in_grip(
+    grip_spec: GripSpec,
+    side: HandSide,
+    joint_angles: JointAngles,
+    grip_radius_m: float | None,
+) -> tuple[AllegroHandVisualSettings, Array, float, Any, Any]:
+    """Pose one hand and return (cfg, mount, grip radius, model, forwarded data)."""
+    cfg, hand, qpos, mount = _pose_and_mount(
+        grip_spec, side, joint_angles, grip_radius_m=grip_radius_m
+    )
+    radius = (
+        cfg.grip_radius_nominal_m if grip_radius_m is None else float(grip_radius_m)
+    )
+    model, data = _forward_model(hand, qpos, grip_spec.handedness)
+    return cfg, mount, radius, model, data
 
 
 def allegro_mount_determinant(
@@ -187,13 +201,9 @@ def finger_pad_contact_gaps(
     joint_angles: JointAngles = None,
 ) -> dict[str, float]:
     """Compute pad-to-grip radial clearance across each digit's fingertip pad."""
-    cfg, hand, qpos, mount = _pose_and_mount(
-        grip_spec, side, joint_angles, grip_radius_m=grip_radius_m
+    cfg, mount, radius, model, data = _posed_in_grip(
+        grip_spec, side, joint_angles, grip_radius_m
     )
-    radius = (
-        cfg.grip_radius_nominal_m if grip_radius_m is None else float(grip_radius_m)
-    )
-    model, data = _forward_model(hand, qpos, grip_spec.handedness)
     gaps: dict[str, float] = {}
     for finger in _DIGIT_TAG:
         pts = _select_part_vertices(model, data, cfg, finger=finger, segments=("tip",))
@@ -210,13 +220,9 @@ def penetration_metrics(
     joint_angles: JointAngles = None,
 ) -> dict[str, float]:
     """Compute club radial penetration and minimum inter-finger clearance (m)."""
-    cfg, hand, qpos, mount = _pose_and_mount(
-        grip_spec, side, joint_angles, grip_radius_m=grip_radius_m
+    cfg, mount, radius, model, data = _posed_in_grip(
+        grip_spec, side, joint_angles, grip_radius_m
     )
-    radius = (
-        cfg.grip_radius_nominal_m if grip_radius_m is None else float(grip_radius_m)
-    )
-    model, data = _forward_model(hand, qpos, grip_spec.handedness)
     all_pts = _transform_to_grip_frame(
         _select_part_vertices(
             model,
@@ -242,7 +248,9 @@ def penetration_metrics(
     for i, a in enumerate(keys):
         tree_a = cKDTree(merged[a])
         for b in keys[i + 1 :]:
-            ff_gap = min(ff_gap, float(tree_a.query(merged[b], k=1)[0].min()))
+            ff_gap = min(
+                ff_gap, float(np.asarray(tree_a.query(merged[b], k=1)[0]).min())
+            )
     return {
         "club_penetration_m": club_pen,
         "finger_finger_gap_m": float(ff_gap),

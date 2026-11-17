@@ -568,7 +568,7 @@ light and a fill light. No wireframe as the only shading.
 ### Verification Command and Result
 
 - `pytest tests/unit/model_appearance -k allegro -v` -> **`24 passed, 625 deselected, 4 warnings`**.
-- `python docs/development/full_body_models/evidence/hand_backend_allegro/render_allegro_hand_evidence.py` regenerated all 27 `1024 px` PNGs and updated [receipt.json](../../../../docs/development/full_body_models/evidence/hand_backend_allegro/receipt.json) with identical `pad_gaps_by_roll_m` values across `-20`, `0`, and `+20` deg roll (`index`/`middle`/`ring` `<= 0.23 mm`, `thumb` `<= 2.88 mm`, club penetration `<= 0.19 mm`).
+- `python docs/development/full_body_models/evidence/hand_backend_allegro/render_allegro_hand_evidence.py` regenerated all 27 `1024 px` PNGs and updated [render_stats.json](../../../../docs/development/full_body_models/evidence/hand_backend_allegro/render_stats.json) with identical `pad_gaps_by_roll_m` values across `-20`, `0`, and `+20` deg roll (`index`/`middle`/`ring` `<= 0.23 mm`, `thumb` `<= 2.88 mm`, club penetration `<= 0.19 mm`).
 
 ### Honest Robot-Hand Limits and Next Integration
 

@@ -292,6 +292,36 @@ def _compute_mount_matrix(
     return mount
 
 
+def _posed_base_mount(
+    model: Any,
+    qpos: Array,
+    *,
+    hand: Hand,
+    spec_hand: HandGripSpec,
+    grip_spec: GripSpec,
+    grip_radius_m: float,
+    cfg: AllegroHandVisualSettings,
+    align_abduction: bool = False,
+) -> tuple[Any, Array]:
+    """Forward ``model`` at ``qpos``; return its data and the unrolled grip mount."""
+    mujoco = _require_mujoco()
+    data = mujoco.MjData(model)
+    data.qpos[:] = qpos
+    mujoco.mj_forward(model, data)
+    if align_abduction:
+        _align_finger_abduction(qpos, model, data, cfg)
+    mount = _compute_mount_matrix(
+        model,
+        data,
+        hand=hand,
+        spec_hand=spec_hand,
+        grip_spec=grip_spec,
+        grip_radius_m=grip_radius_m,
+        cfg=cfg,
+    )
+    return data, mount
+
+
 def _part_min_radial(
     model: Any,
     data: Any,
@@ -450,7 +480,7 @@ def _score_thumb_state(
     )
     min_r = float(_radial_xy(th_all).min())
     pen_pen = 1e5 * max(0.0, safe_r - min_r) ** 2
-    idx_gap = float(idx_tree.query(th_all, k=1)[0].min())
+    idx_gap = float(np.asarray(idx_tree.query(th_all, k=1)[0]).min())
     idx_pen = 500.0 * max(0.0, cfg.thumb_index_min_clearance_m - idx_gap) ** 2
     max_z_pen = 2e4 * max(0.0, float(th_all[:, 2].max()) - max_z_m) ** 2
     distal = _transform_to_grip_frame(
@@ -674,23 +704,18 @@ def solve_allegro_hand_qpos(
     """Solve curled 16-DOF Allegro qpos and proper grip-frame mount for one hand."""
     cfg = visual_settings() if settings is None else settings
     radius = _validate_grip_radius(grip_radius_m, cfg)
-    mujoco = _require_mujoco()
     handedness = grip_spec.handedness
     model = _load_model(hand == Hand.TRAIL, handedness)
-    data = mujoco.MjData(model)
     qpos = _baseline_qpos(model)
-    data.qpos[:] = qpos
-    mujoco.mj_forward(model, data)
-
-    _align_finger_abduction(qpos, model, data, cfg)
-    base_mount = _compute_mount_matrix(
+    data, base_mount = _posed_base_mount(
         model,
-        data,
+        qpos,
         hand=hand,
         spec_hand=spec_hand,
         grip_spec=grip_spec,
         grip_radius_m=radius,
         cfg=cfg,
+        align_abduction=True,
     )
 
     for finger in ("index", "middle", "ring"):

@@ -417,7 +417,7 @@ def build_evidence_receipt(
 
 
 def render_evidence_suite(out_dir: Path | None = None) -> dict[str, Any]:
-    """Render all 27 (mode x view x roll) Allegro PNGs and write receipt.json."""
+    """Render all 27 (mode x view x roll) Allegro PNGs and write render_stats.json."""
     target_dir = Path(__file__).resolve().parent if out_dir is None else out_dir
     spec = GripSpec.legacy()
     renders: list[dict[str, Any]] = []
@@ -439,7 +439,7 @@ def render_evidence_suite(out_dir: Path | None = None) -> dict[str, Any]:
                 renders.append(stats)
 
     receipt = build_evidence_receipt(renders, spec=spec, include_roll_audit=True)
-    (target_dir / "receipt.json").write_text(
+    (target_dir / "render_stats.json").write_text(
         json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
     )
     return receipt

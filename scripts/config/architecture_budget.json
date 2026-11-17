@@ -894,6 +894,33 @@
       "issue": 13874,
       "reason": "Issue #13874: fit_swing_pinocchio executes end-to-end pinocchio trajectory fitting with analytical/FD Jacobians (173 lines > 100).",
       "expires_on": "2026-12-31"
+    },
+    {
+      "path": "docs/development/full_body_models/evidence/hand_backend_allegro/render_allegro_hand_evidence.py",
+      "symbol": "render_single_view",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 15152,
+      "reason": "Issue #15152: render_single_view in the Allegro hand backend (104 lines > 100); split after the hand_backends revival (ADR-0057).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/model_appearance/hand_backends/allegro_solver.py",
+      "symbol": "_solve_joint_contact",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 15152,
+      "reason": "Issue #15152: _solve_joint_contact in the Allegro hand backend (11 params > 8); split after the hand_backends revival (ADR-0057).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/model_appearance/hand_backends/allegro_solver.py",
+      "symbol": "_score_thumb_state",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 15152,
+      "reason": "Issue #15152: _score_thumb_state in the Allegro hand backend (10 params > 8); split after the hand_backends revival (ADR-0057).",
+      "expires_on": "2026-12-31"
     }
   ]
 }
