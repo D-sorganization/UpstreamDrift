@@ -33,7 +33,7 @@ class DispersionEllipse:
 
 @dataclass(frozen=True)
 class ShotOption:
-    """The best aim for one club, its expected strokes and where it lands."""
+    """Best aim for one club: strokes-to-green under the solved value field."""
 
     club: str
     aim_deg: float

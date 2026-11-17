@@ -2754,6 +2754,51 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-14 | #15096 | Fix SwingMetricsMixin test harness after velocity delegation and add unit marker (#15095) |
+| 2026-11-14 | #15094 | Guard NP-05 lexical test against collated changelog fragment removal (#15093) |
+| 2026-11-14 | #15052 | SCI-10/12/13/14: shaft FEM scope docs, pendulum inertia param, static-opt cost, spatial ordering |
+| 2026-11-14 | #15054 | Hill f_v zero beyond Vmax; exponential activation substeps for mocap dt |
+| 2026-11-14 | #15056 | SO(3) quat_inverse_distance (relative-quaternion angle), interpolated ball-flight ground landing |
+| 2026-11-14 | #15051 | Align rigid-body off-center COR impulse with validator budget via club torque; solver integration test. |
+| 2026-11-14 | #15053 | Use transverse spin in Magnus/lift magnitude; document frame and parity fixtures (#15042). |
+| 2026-11-14 | #15049 | Evaluate constrained per-actuator columns at measured (q, v) with ZTCF baseline |
+| 2026-11-14 | #15048 | Fix turf contact impact: joule energy loss, receding guard, coupled friction-spin; release-safe mass/radius validation |
+| 2026-11-14 | #15069 | Quantize spatial model canonical hashes for cross-runtime manufactured authority parity, regenerate publication evidence, and re-pick optional-stack shooting defect floor after #14227 gravity alignment. |
+| 2026-11-14 | #15074 | Wave 0.1: independent triage of 67 budget exceptions that expired 2026-11-30 (measured sizes, regression tests). |
+| 2026-11-14 | #15073 | Agent API v1 conformance CI and FastMCP migration for ud-sim-mcp |
+| 2026-11-14 | #15061 | Expose ZTCF and golf-simulator golden capabilities via sim_run with REST/MCP parity and 64 KiB artifact spill. |
+| 2026-11-14 | #15079 | Align ZVCF user-manual formulas, _dynamics_interface q-shape docstring, and chapter 64 OpenSim geometry link |
+| 2026-11-14 | #15080 | Update user-guide install/launcher/examples docs, knowledge pack includes, and root README CLI/engine documentation for #15016. |
+| 2026-11-14 | #15063 | Link tile help to AffineDrift theory; register six provisional core calculations and dedupe registry blocker ids |
+| 2026-11-14 | #15037 | Fail-closed motion-matching gates; archive run-102 evidence script with restore ref. |
+| 2026-11-14 | #15035 | URDF/MJCF converter preserves joint and visual rotations; Simscape translation import matches export header. |
+| 2026-11-14 | #15036 | Fix Dempster/Zatsiorsky segment mass expansion and C3D export placeholder (part a) |
+| 2026-11-14 | #15025 | Fix WBC zero torques with contact and hierarchical task enforcement |
+| 2026-11-14 | #15026 | Correct putting slope rolling (5/7 g), unify stimp friction, impact club spin, flight spin sign docs, Rust air temperature K |
+| 2026-11-14 | #15081 | Track WSL/MATLAB/Docker child lifecycles, surface fast-fail stderr diagnostics without false Running state, log observer errors via narrow_catch, and add container naming/PID labels, port avoidance, stop-on-close, and startup orphan sweep. |
+| 2026-11-14 | #14956 | Managed local child-process lifecycle; concurrent stdout/stderr drain avoids pipe deadlock (Refs #14949). |
+| 2026-11-14 | #15004 | Wire UD_REQUIRE_ENGINES makereport hook and fail-closed JUnit floor |
+| 2026-11-14 | #15007 | MuJoCo/Pinocchio gravity-only shims, MuJoCo export definition_version, motion_matching export_stamp (#14943 follow-on); MuJoCo ZVCF at-state kernels treat tau as nv generalized force, not nu actuator ctrl (#15007 review) |
+| 2026-11-14 | #14973 | Regression tests for MuJoCo nu==nv control-at-state and pendulum counterfactual exports |
+| 2026-11-14 | #15005 | State-aware counterfactual defaults, simscape lifecycle, putting control (#14943 follow-up) |
+| 2026-11-14 | #14961 | EngineManager reloads LOADED engines; cleanup resets status (#14942). |
+| 2026-11-14 | #15017 | EngineManager reloads LOADED engines; cleanup resets status and closes active engine (#14942). |
+| 2026-11-14 | #14959 | AIP JSON-RPC stubs return not_implemented; capabilities self-check (#14940). |
+| 2026-11-14 | #14966 | MuJoCo canonical I/O: preserve imported qacc and data.time on round-trip; Wire canonical-v2 get/set on BasePhysicsEngine; checkpoint engine_type guard |
+| 2026-11-14 | #15038 | JaxSim canonical-v2 round-trip; rename velocity constant to SPATIAL_WRENCH_REPRESENTATION |
+| 2026-11-14 | #14960 | Committed evidence scan calls receipt taxonomy validation; missing fields and conflicts are tested (#14935). |
+| 2026-11-14 | #14825 | NP-09 policy input-output sensitivity at stated operating points (#14502) |
+| 2026-11-14 | #14834 | Event-relative time normalisation (101-point resampling) between named swing events |
+| 2026-11-14 | #14836 | GM-3 Cheetham X-factor stretch and kinematic sequence (#14426) |
+| 2026-11-14 | #14837 | GRF and COP observability, event-anchored peaks, and normalisation contracts (GM-2). |
+| 2026-11-14 | #15062 | Add Hill MTU joint actuator (agonist/antagonist, compliant tendon, linearisation API). |
+| 2026-11-14 | #15059 | ML-WS-4 native MuJoCo episode corpus generator, manifest hashes, and CI fixture |
+| 2026-11-14 | #15066 | NSX-98: document A(t)/B(t) assembly in derivative conformance harness |
+| 2026-11-14 | #15068 | NSX-95 campaign catalogue, JSON strategy mirror, first toy matched-CHS campaign |
+| 2026-11-14 | #15067 | NSX-94: commit cross-engine co-contraction trade-off evidence JSON and validation harness |
+| 2026-11-14 | #15065 | R9c: catalog MATLAB R2025b appearance acceptance as deferred; extend headless export and MATLAB consumer contract tests. |
+| 2026-11-14 | #15064 | Verify hip adduction and rotation torque capacities from Swake 2026 and Gonçalves 2021. |
+| 2026-11-14 | #14929 | Interim 30-day realtime shadow ledger sunset (#12046) so hygiene tests pass pending Tools migration |
 | 2026-11-12 | #15057 | README onboarding: venv-first install, toolchains, ud-sim, engines, layout tree. |
 | 2026-11-12 | #15031 | Renew or delete 67 budget exceptions expiring 2026-11-30 (Wave 0 #15028). |
 | 2026-11-12 | #15032 | Re-bootstrap pip with ensurepip before force-overlay-parity engine installs (#15027). |

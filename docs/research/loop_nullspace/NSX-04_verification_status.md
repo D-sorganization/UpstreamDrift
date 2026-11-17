@@ -28,9 +28,10 @@ Invariants enforced in CI:
 
 ## Open Work
 
-Per issue **#12553**: hip adduction and hip rotation anatomical slots are now
-`VERIFIED` (Swake 2026 male frontal-plane; Gonçalves 2021 Biodex rotation).
-MTP extension (negative) and virtual input slots remain open.
+Per issue **#12553**: all 16 anatomical lower-limb slots (hip adduction,
+hip rotation, subtalar, MTP) are either `VERIFIED` or explicitly `ASSUMED` with
+rationale — see `test_anatomical_torque_capacity_slots_resolved`.
+MTP toe extension (negative) and virtual input slots still lack primary literature.
 Hill-type muscle/tendon force–length data (board items UD-09/10) are tracked
 elsewhere (**#12723** / **#12593**), not in this issue.
 

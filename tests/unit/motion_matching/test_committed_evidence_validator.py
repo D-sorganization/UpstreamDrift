@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from src.shared.python.motion_matching.evidence_validator import (
+    gates_imply_accepted,
     load_waivers,
     validate_candidate_package,
     validate_committed_evidence,
@@ -21,12 +22,59 @@ pytestmark = pytest.mark.unit
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
-def test_seeded_candidate_flags_accepted_gate_mismatch() -> None:
+def test_gates_imply_accepted_requires_every_boolean_true() -> None:
+    assert gates_imply_accepted({"a": True, "b": True}) is True
+    assert gates_imply_accepted({"a": True, "b": False}) is False
+    assert gates_imply_accepted({}) is None
+
+
+def test_validate_candidate_package_rejects_accepted_true_with_partial_gates() -> None:
+    issues = validate_candidate_package(
+        "candidates/fake_partial.json",
+        {
+            "accepted": True,
+            "gates": {
+                "whole_window_pass": False,
+                "early_retention_pass": True,
+                "terminal_rmse_pass": False,
+                "clubhead_terminal_pass": False,
+                "pelvis_yaw_pass": False,
+            },
+            "gates_passed": "1/5",
+        },
+    )
+    consistency = [i for i in issues if i.rule == "accepted_gates_consistency"]
+    assert consistency
+    assert any("disagrees with gates" in issue.message for issue in consistency)
+
+
+def test_committed_seeded_candidate_honest_rejection() -> None:
+    """Committed MS-080s seeded package must not claim acceptance with 1/5 gates."""
     path = REPO_ROOT / "candidates" / "candidate_ms_080s_seeded_package.json"
     data = json.loads(path.read_text(encoding="utf-8"))
-    issues = validate_candidate_package(path.relative_to(REPO_ROOT).as_posix(), data)
-    assert issues
-    assert issues[0].rule == "accepted_gates_consistency"
+    rel = path.relative_to(REPO_ROOT).as_posix()
+    assert data["accepted"] is False
+    assert data["gates_passed"] == "1/5"
+    assert gates_imply_accepted(data["gates"]) is False
+    consistency = [
+        issue
+        for issue in validate_candidate_package(rel, data)
+        if issue.rule == "accepted_gates_consistency"
+    ]
+    assert consistency == []
+
+
+def test_all_committed_candidates_accepted_matches_gate_booleans() -> None:
+    for pkg in sorted((REPO_ROOT / "candidates").glob("*.json")):
+        data = json.loads(pkg.read_text(encoding="utf-8"))
+        gates = data.get("gates")
+        accepted = data.get("accepted")
+        implied = gates_imply_accepted(gates)
+        if implied is None:
+            continue
+        assert bool(accepted) == implied, (
+            f"{pkg.name}: accepted={accepted!r} but gates imply {implied!r}"
+        )
 
 
 def test_receipt_host_paths_flagged() -> None:
@@ -119,7 +167,6 @@ def test_committed_scan_fails_without_waivers(tmp_path: Path) -> None:
     )
     assert report.failed
     rules = {issue.rule for issue in report.issues}
-    assert "accepted_gates_consistency" in rules
     assert "host_absolute_provenance" in rules
 
 

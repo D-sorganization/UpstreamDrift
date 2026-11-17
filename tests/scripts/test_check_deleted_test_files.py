@@ -7,6 +7,7 @@ to the base branch after the PR branched.
 
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -393,6 +394,31 @@ def test_cli_malformed_allowlist_fails_closed(
 
     assert _run_cli(repo, tmp_path / "deleted.txt") == 1
     assert "::error::" in capsys.readouterr().err
+
+
+JULES_NOISE_RETIREMENT_TEST = "tests/ci/test_jules_push_pr_noise_retirement.py"
+
+
+def test_jules_push_pr_noise_retirement_deletion_is_reviewed() -> None:
+    """#13575's test deletion must be on the allowlist the merge queue enforces.
+
+    The deleted-test guard runs in the full-tier ``tests`` job, which
+    pull_request skips. A green PR can still be removed from the queue
+    until this path is recorded with its governing issue.
+    """
+    path = mod.REPO_ROOT / mod.DEFAULT_REVIEWED_DELETIONS
+    data = json.loads(path.read_text(encoding="utf-8"))
+    matches = [
+        entry
+        for entry in data["reviewed_deletions"]
+        if entry.get("path") == JULES_NOISE_RETIREMENT_TEST
+    ]
+    assert len(matches) == 1
+    assert matches[0]["issue"] == "#13575"
+    assert (
+        "test_retired_jules_noise_workflow_not_on_cancel_false_allowlist"
+        in (matches[0]["reason"])
+    )
 
 
 def test_load_reviewed_deletions_accepts_issue_url(tmp_path: Path) -> None:

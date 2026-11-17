@@ -107,7 +107,7 @@
   "segmented_rmse_m": 0.03232122025532201,
   "unsegmented_rmse_m": 0.03176370264354238,
   "optimizer_converged": true,
-  "accepted": true,
+  "accepted": false,
   "gates": {
     "whole_window_pass": false,
     "terminal_rmse_pass": false,

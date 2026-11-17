@@ -1,5 +1,6 @@
 {
   "method": "dempster_1955",
+  "table_kind": "coarse_eight_class",
   "citation": "Dempster, W.T. (1955). Space requirements of the seated operator. WADC Technical Report 55-159.",
   "length_ratio_citation": "Limb and interior trunk length ratios follow Drillis & Contini (1966) / Winter (2009), applied via humanoid_character_builder model geometry (#15014).",
   "segments": {
@@ -83,28 +84,5 @@
         "longitudinal": 0.124
       }
     }
-  },
-  "segment_name_map": {
-    "head": "head",
-    "neck": "trunk",
-    "thorax": "trunk",
-    "lumbar": "trunk",
-    "pelvis": "trunk",
-    "left_shoulder": "upper_arm",
-    "right_shoulder": "upper_arm",
-    "left_upper_arm": "upper_arm",
-    "right_upper_arm": "upper_arm",
-    "left_forearm": "forearm",
-    "right_forearm": "forearm",
-    "left_hand": "hand",
-    "right_hand": "hand",
-    "left_hip": "thigh",
-    "right_hip": "thigh",
-    "left_thigh": "thigh",
-    "right_thigh": "thigh",
-    "left_shin": "shank",
-    "right_shin": "shank",
-    "left_foot": "foot",
-    "right_foot": "foot"
   }
 }

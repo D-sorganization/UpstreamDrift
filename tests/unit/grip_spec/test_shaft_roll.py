@@ -102,6 +102,25 @@ def test_roll_axis_fixes_shaft_line_points() -> None:
         assert np.allclose(p, p2, atol=1e-12)
 
 
+def test_grip_hand_frame_shaft_column_unchanged_after_roll() -> None:
+    """Shaft roll spins the hand about the club Y shaft; grip axis must stay fixed."""
+    club = _iron7_club()
+    shaft = np.array([0.0, 1.0, 0.0])
+    for hand in (Hand.LEAD, Hand.TRAIL):
+        pose = GripSpec.legacy(
+            lead=HandGripSpec(shaft_roll_deg=15.0),
+            trail=HandGripSpec(shaft_roll_deg=-12.0),
+        ).to_grip_pose()
+        frame = grip_hand_frame(club, hand, pose)
+        assert np.allclose(frame[:3, 2], shaft, atol=1e-12)
+        zero = grip_hand_frame(
+            club,
+            hand,
+            replace(pose, lead_shaft_roll_deg=0.0, trail_shaft_roll_deg=0.0),
+        )
+        assert np.allclose(frame[:3, 3], zero[:3, 3], atol=1e-12)
+
+
 def test_left_handed_mirrors_shaft_roll_sign() -> None:
     spec = GripSpec.legacy(handedness="left", lead=HandGripSpec(shaft_roll_deg=10.0))
     assert resolved_shaft_roll_deg(spec, "lead") == pytest.approx(-10.0)
