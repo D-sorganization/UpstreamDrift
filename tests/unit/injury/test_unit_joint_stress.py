@@ -287,3 +287,28 @@ class TestNoSilentZeroDefaults:
         assert "shoulder torque" in result.unavailable_reason
         assert math.isnan(result.risk_score)
         assert math.isnan(result.peak_torsion)
+
+
+@pytest.mark.unit
+class TestHipRiskScoreBounds:
+    """The lead-side multiplier must not push risk_score past its 0-100 range."""
+
+    @staticmethod
+    def _hip(side: JointSide, rotation_deg: float, flexion_deg: float) -> JointStressResult:
+        t = np.linspace(0.0, 1.0, 3)
+        angles = {
+            "hip_rotation": np.radians(np.full(3, rotation_deg)),
+            "hip_flexion": np.radians(np.full(3, flexion_deg)),
+        }
+        return _make_analyzer().analyze_hip(angles, {}, {}, t, side)
+
+    def test_lead_hip_risk_score_is_capped_at_100(self) -> None:
+        # indicator = 70 + 0.5 * 130 = 135, so min(100, 85) * 1.2 would be 102.
+        result = self._hip(JointSide.LEAD, 70.0, 130.0)
+        assert result.impingement_risk is True
+        assert result.risk_score == pytest.approx(100.0)
+
+    def test_lead_hip_multiplier_still_applies_below_cap(self) -> None:
+        # indicator = 40 + 0.5 * 60 = 70 -> base 20, lead 24.
+        assert self._hip(JointSide.LEAD, 40.0, 60.0).risk_score == pytest.approx(24.0)
+        assert self._hip(JointSide.TRAIL, 40.0, 60.0).risk_score == pytest.approx(20.0)

@@ -396,9 +396,10 @@ class JointStressAnalyzer:
         else:
             result.risk_score = max(0, impingement_indicator - 50)
 
-        # Lead hip typically has higher internal rotation demand
+        # Lead hip typically has higher internal rotation demand; clamp after the
+        # multiplier so risk_score stays within its documented 0-100 range.
         if side == JointSide.LEAD:
-            result.risk_score *= 1.2
+            result.risk_score = min(100.0, result.risk_score * 1.2)
 
         result.rom_utilization = min(100, abs(max_internal - max_external) / 90 * 100)
 
