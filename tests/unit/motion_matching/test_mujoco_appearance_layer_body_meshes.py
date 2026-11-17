@@ -92,10 +92,10 @@ def test_non_trunk_bodies_match_the_pre_refactor_golden(stem, golden) -> None:
         for got, want in zip(now[body], entries, strict=True):
             assert got["label"] == want["label"], body
             assert got["material"] == want["material"], body
-            if library.classify_body(body) in library.CONTINUOUS_PARTS:
+            if library.classify_body(body) in ("upper_arm", "forearm"):
                 # Reshaped on purpose (#15262): the two forearm bodies draw
-                # one forearm; tests/unit/model_appearance/
-                # test_continuous_forearm.py holds the new shape.
+                # one forearm and both arm parts are 20 % thicker; tests/unit/
+                # model_appearance/test_continuous_forearm.py holds the shape.
                 continue
             assert got["n_vertices"] == want["n_vertices"], body
             np.testing.assert_allclose(got["bbox_min"], want["bbox_min"], atol=2e-6)

@@ -211,6 +211,46 @@ def test_the_forearm_is_full_width_at_the_elbow_and_the_wrist() -> None:
     assert len(seen) == 2
 
 
+def test_a_flat_far_end_eases_in_from_a_round_section() -> None:
+    axis = Z / np.linalg.norm(Z)
+    length = float(np.linalg.norm(Z))
+    width = np.array([1.0, 0.0, 0.0])
+    options = LoftOptions(
+        end_scale=0.66,
+        capsule_ends=True,
+        taper_end=0.8,
+        end_aspect=0.7,
+        flatten_from=0.55,
+        width_hint=width,
+        window=(0.5, 1.0),
+    )
+    mesh = lofted_segment(0.5 * Z, Z, 0.0432, options)
+    along = mesh.vertices @ axis
+    seam = mesh.vertices[np.abs(along - 0.5 * length) < 1e-9]
+    radii = np.linalg.norm(seam - np.outer(seam @ axis, axis), axis=1)
+    assert np.ptp(radii[radii > 1e-6]) <= SEAM_M  # round at the rotation joint
+    wrist = mesh.vertices[np.abs(along - length) < 1e-9]
+    end = 0.66 * 0.0432
+    assert np.abs(wrist @ width).max() == pytest.approx(end, abs=1e-9)
+    deep = np.cross(axis, width)
+    assert np.abs(wrist @ deep).max() == pytest.approx(0.7 * end, abs=1e-4)
+    assert _watertight(mesh) and mesh.volume() > 0
+    with pytest.raises(ValueError, match="width_hint"):
+        lofted_segment(np.zeros(3), Z, 0.04, LoftOptions(end_aspect=0.7))
+    with pytest.raises(ValueError, match="end_aspect"):
+        lofted_segment(
+            np.zeros(3), Z, 0.04, LoftOptions(end_aspect=0.7, flatten_from=1.0)
+        )
+
+
+def test_the_arms_are_a_fifth_thicker_and_the_wrist_is_not() -> None:
+    assert library.PART_RADIUS_M["upper_arm"] == pytest.approx(1.2 * 0.043)
+    assert library.PART_RADIUS_M["forearm"] == pytest.approx(1.2 * 0.036)
+    wrist = library.PART_RADIUS_M["forearm"] * library.distal_scale("forearm")
+    assert wrist <= 0.8 * 0.036
+    assert 0.5 <= library.PART_FLATTEN_FROM["forearm"] < library.taper_end("forearm")
+
+
 def test_forearm_shape_settings_are_validated() -> None:
     assert "forearm" in library.CAPSULE_END_PARTS
     assert 0.0 < library.taper_end("forearm") < 1.0

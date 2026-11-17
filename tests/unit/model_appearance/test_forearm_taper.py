@@ -78,7 +78,8 @@ def test_distal_forearm_is_narrower_than_the_hand_and_the_proximal_end() -> None
 
 
 def test_taper_scale_is_validated_and_defaults_to_none() -> None:
-    assert library.distal_scale("forearm") == pytest.approx(0.8)
+    # 0.8 before the forearm was thickened by 20 %; the wrist kept its size.
+    assert library.distal_scale("forearm") == pytest.approx(0.66)
     assert library.distal_scale("thigh") == 1.0
     for bad in (0.0, -0.5, 1.2, float("nan")):
         with pytest.raises(ValueError, match="taper"):

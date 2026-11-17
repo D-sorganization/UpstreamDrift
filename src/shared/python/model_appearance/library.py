@@ -254,9 +254,9 @@ PART_RULES: tuple[tuple[str, str], ...] = (
 PART_RADIUS_M: dict[str, float] = {
     "torso": 0.145,
     "pelvis": 0.125,
-    "upper_arm": 0.043,
+    "upper_arm": 0.0516,  # 20 % over the first 43 mm (owner, 2026-11-17)
     "shoulder": 0.05,
-    "forearm": 0.036,
+    "forearm": 0.0432,  # 20 % over the first 36 mm (owner, 2026-11-17)
     "hand": 0.042,
     "thigh": 0.078,
     "shin": 0.052,
@@ -264,8 +264,9 @@ PART_RADIUS_M: dict[str, float] = {
     "head": 0.095,
 }
 # Distal (far-end) radius over the proximal radius per part. Visual only (#13993):
-# the forearm narrows 20 % toward the wrist so it is no wider than the hand.
-PART_DISTAL_SCALE: dict[str, float] = {"forearm": 0.8}
+# the forearm narrows toward the wrist so it is no wider than the hand. The
+# wrist keeps the radius it had before the forearm was thickened (28.5 mm).
+PART_DISTAL_SCALE: dict[str, float] = {"forearm": 0.66}
 
 
 # Parts drawn as ONE shape across a joint that turns about the limb's own axis
@@ -282,6 +283,12 @@ CAPSULE_END_PARTS: tuple[str, ...] = ("forearm",)
 # Fraction of the part's length by which its taper has reached the distal
 # radius; the rest (the wrist) stays slim.
 PART_TAPER_END: dict[str, float] = {"forearm": 0.8}
+
+
+# Fraction of the part's length from which a flat far end (``end_aspect``)
+# starts to ease in; before it the section is round. Past the forearm's
+# rotation joint, which needs a round section.
+PART_FLATTEN_FROM: dict[str, float] = {"forearm": 0.55}
 
 
 def taper_end(part: str) -> float:
