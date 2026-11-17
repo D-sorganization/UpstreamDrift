@@ -63,7 +63,7 @@ The cause is structural: this rig's palm does not fold along the club line. A re
 - The new heel-pad limit is set 0.2 mm above the value reached. It records progress and will fail on any regression; it is not evidence that 18 mm is good. Hogan's heel pad is on the grip.
 - A lead-hand turn of `palm_centre_wrap_deg` to -10 closed the thumb to 24.6 mm but made a strong, un-Hogan grip and failed four tests; reverted.
 
-#### Self-Review of the Frames at `5344c9496d` (Harsh; Out of 5)
+#### Self-Review of the Frames at `5344c9496d` (Harsh; Out Of 5)
 
 I opened the roll 0 frames of the lead hand, the trail hand and the pair (12 frames). **I did not re-open the 24 roll frames this round**; the roll is tested as a rigid turn.
 
