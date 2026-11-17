@@ -6,6 +6,7 @@ import argparse
 import json
 import logging
 import sys
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -35,6 +36,11 @@ _LOG = logging.getLogger(__name__)
 ROLLS = (-20.0, 0.0, 20.0)
 VIEWS = ("palm", "back", "side")
 ROLES: tuple[HandSide, ...] = ("lead", "trail")
+SIZE_SKIN_VARIANTS = (
+    ("small", 0.88, "skin_1"),
+    ("base", 1.0, "skin_7"),
+    ("large", 1.15, "skin_tan"),
+)
 
 
 def _spec(roll_deg: float) -> GripSpec:
@@ -233,6 +239,58 @@ def render_roll_strip(output_dir: Path, backend_id: str = "procedural_skin") -> 
     )
 
 
+def render_size_skin_variants(
+    output_dir: Path, backend_id: str = "procedural_skin"
+) -> Path:
+    """Contact sheet: hand size (0.88x / 1x / 1.15x) and skin tone per row.
+
+    All panels share the large hand's framing so the size change stays visible.
+    """
+    base = _spec(0.0)
+    club = club_context_drawables(DEFAULT_VISUAL_GRIP_RADIUS_M)
+    rows: list[tuple[str, str, list[Any]]] = []
+    for tag, scale, skin in SIZE_SKIN_VARIANTS:
+        size = base.hand_size
+        spec = replace(
+            base,
+            hand_size=replace(
+                size, length_m=size.length_m * scale, breadth_m=size.breadth_m * scale
+            ),
+        )
+        meshes = [
+            build_for_comparison(
+                backend_id,
+                spec,
+                role,
+                grip_radius_m=DEFAULT_VISUAL_GRIP_RADIUS_M,
+                settings=DEFAULT_HAND_VISUAL_SETTINGS,
+            ).mesh
+            for role in ROLES
+        ]
+        rows.append((tag, skin, meshes))
+    panel_px = 512
+    sheet = Image.new("RGB", (panel_px * 2 * len(ROLES), panel_px * len(rows)))
+    for r, (tag, skin, meshes) in enumerate(rows):
+        for m, (role, mesh) in enumerate(zip(ROLES, meshes, strict=True)):
+            for v, view in enumerate(("palm", "iso")):
+                rgb = render_shaded_scene_rgb(
+                    [(mesh, skin_tone_rgb(skin), 0.09), *club],
+                    focus_vertices=rows[-1][2][m].vertices,
+                    view_rot=view_rotation(view),
+                    width_px=panel_px,
+                    height_px=panel_px,
+                    target_fill=0.6,
+                )
+                panel = _stamp_badge(
+                    Image.fromarray(rgb), f"{tag} · {role} · {view} · {skin}"
+                )
+                sheet.paste(panel, ((2 * m + v) * panel_px, r * panel_px))
+    out = output_dir / f"{backend_id}_size_skin_variants.png"
+    sheet.save(out)
+    _LOG.info("Wrote %s", out)
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
@@ -244,6 +302,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--backend", default="procedural_skin")
     args = parser.parse_args(argv)
     render_roll_strip(args.output_dir, args.backend)
+    render_size_skin_variants(args.output_dir, args.backend)
     return 0
 
 
