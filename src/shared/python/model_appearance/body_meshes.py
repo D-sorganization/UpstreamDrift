@@ -258,6 +258,8 @@ class _Context:
     club_parts: Mapping[str, Sequence[ClubPart]] = field(default_factory=dict)
     #: Fraction of its whole limb each body of a continuous part draws (#15262).
     windows: Mapping[str, tuple[float, float]] = field(default_factory=dict)
+    #: Forearm radius at the wrist, when the drawn hands set it (#15262).
+    wrist_radius_m: float | None = None
 
 
 @dataclass(frozen=True)
@@ -299,11 +301,32 @@ def _limb_windows(
     return out
 
 
+def _distal_scale(part: str, radius: float, wrist_radius_m: float | None) -> float:
+    """Taper of ``part``: the library's, or the drawn hands' wrist for a forearm."""
+    if part != "forearm" or wrist_radius_m is None:
+        return library.distal_scale(part)
+    return library.validate_distal_scale(min(1.0, wrist_radius_m / radius))
+
+
+def _skinned_wrist_radius_m(
+    spec: Mapping[str, Any], club: ClubAssembly | None
+) -> float | None:
+    """Wrist radius of the skinned hands, if the spec draws them on a club."""
+    backend = spec.get("subject", {}).get("hand_visual_backend")
+    if club is None or backend != "skinned_human":
+        return None
+    # Imported here: the skinned backend loads a mesh asset and a solver.
+    from src.shared.python.model_appearance.skinned_club_hands import wrist_radius_m
+
+    return wrist_radius_m(club)
+
+
 def _limb_segments(
     part: str,
     caps: Sequence[Capsule],
     scale: float,
     window: tuple[float, float] = library.FULL_COVERAGE,
+    wrist_radius_m: float | None = None,
 ) -> list[_Segment]:
     out = []
     for cap in caps:
@@ -320,7 +343,7 @@ def _limb_segments(
                 np.asarray(cap.end_m),
                 radius,
                 aspect,
-                library.distal_scale(part),
+                _distal_scale(part, radius, wrist_radius_m),
                 window,
                 library.belly(part),
                 part in library.CAPSULE_END_PARTS,
@@ -552,7 +575,7 @@ def _meshes_for_body(
         segments = [_trunk_segment(ctx, body, part, caps, scale)]
     else:
         window = ctx.windows.get(body, library.FULL_COVERAGE)
-        segments = _limb_segments(part, caps, scale, window)
+        segments = _limb_segments(part, caps, scale, window, ctx.wrist_radius_m)
     return _segment_meshes(ctx, body, part, segments)
 
 
@@ -601,6 +624,7 @@ def body_meshes(
         foot.foot_parts(spec, sections, model=doc.foot.model),
         _club_parts(spec, doc, club),
         _limb_windows(spec, by_body),
+        _skinned_wrist_radius_m(spec, club),
     )
     out = [
         m for body, caps in by_body.items() for m in _meshes_for_body(ctx, body, caps)
