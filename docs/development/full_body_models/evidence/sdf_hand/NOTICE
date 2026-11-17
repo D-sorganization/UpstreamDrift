@@ -1,0 +1,19 @@
+SDF hand evidence — licences
+
+This directory holds renders of the procedural SDF hand
+(src/shared/python/model_appearance/hand_backends/sdf_hand.py, issue #15155,
+epic #15150).
+
+The hand is generated in-repo from scripts/config/sdf_hand.json. No MANO,
+SMPL-X, or other third-party hand mesh is shipped or baked into these images.
+Contact physics stay on the existing capsules; these meshes are visual only.
+
+Runtime dependencies used to produce a mesh and a PNG:
+
+- NumPy — BSD-3-Clause
+- SciPy — BSD-3-Clause
+- scikit-image (marching cubes) — BSD-3-Clause
+- Matplotlib (PNG writer) — Matplotlib License (BSD-compatible)
+
+Skin colour is the repo skin_2 entry in src/config/appearance_defaults.json,
+not a scanned texture.

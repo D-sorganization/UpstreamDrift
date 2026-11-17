@@ -185,6 +185,9 @@ visualization = ["rerun-sdk>=0.15.0,<1.0.0"]
 # pyvista lazily and degrades with an install hint when it is absent, so the
 # default install stays matplotlib-only via src/tools/bunker_shot_gui/render3d.py.
 viz3d = ["pyvista>=0.44"]
+# Implicit SDF hand mesh (epic #15150 / #15155). Marching cubes imports
+# scikit-image lazily; SDF and pose tests run without this extra.
+sdf-hand = ["scikit-image>=0.22"]
 
 # Trajectory optimization backends (epic #8390 B3/#8398). Opt-in: the
 # CasADi swing backend degrades with an install hint when absent.
