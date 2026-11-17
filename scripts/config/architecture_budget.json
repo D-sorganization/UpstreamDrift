@@ -894,6 +894,78 @@
       "issue": 13874,
       "reason": "Issue #13874: fit_swing_pinocchio executes end-to-end pinocchio trajectory fitting with analytical/FD Jacobians (173 lines > 100).",
       "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/model_appearance/hand_backends/sdf_pose.py",
+      "symbol": "_pose_metacarpals_and_palm",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 15155,
+      "reason": "Issue #15155: _pose_metacarpals_and_palm \u2014 metacarpal arch and cupped palm posing for the SDF hand (187 lines > 100); split after the hand_backends revival (ADR-0057).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/model_appearance/hand_backends/sdf_pose.py",
+      "symbol": "_pose_metacarpals_and_palm",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 15155,
+      "reason": "Issue #15155: _pose_metacarpals_and_palm \u2014 metacarpal/palm posing needs mount, size, roll and cup terms (9 params > 8); split after the hand_backends revival (ADR-0057).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/model_appearance/hand_backends/sdf_pose.py",
+      "symbol": "_pose_thumb",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 15155,
+      "reason": "Issue #15155: _pose_thumb \u2014 thumb opposition and web-bridge posing for the SDF hand (178 lines > 100); split after the hand_backends revival (ADR-0057).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/model_appearance/hand_backends/sdf_pose.py",
+      "symbol": "_pose_thumb",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 15155,
+      "reason": "Issue #15155: _pose_thumb \u2014 thumb posing needs CMC/MP/IP angles plus web-bridge terms (13 params > 8); split after the hand_backends revival (ADR-0057).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/model_appearance/hand_backends/sdf_primitives.py",
+      "symbol": "cone_primitive",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 15155,
+      "reason": "Issue #15155: cone_primitive \u2014 capped-cone SDF primitive with per-end radii and blend terms (11 params > 8); split after the hand_backends revival (ADR-0057).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/model_appearance/hand_backends/sdf_settings.py",
+      "symbol": "load_sdf_hand_settings",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 15155,
+      "reason": "Issue #15155: load_sdf_hand_settings \u2014 flat settings loader with per-field validation for the SDF hand (158 lines > 100); split after the hand_backends revival (ADR-0057).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/model_appearance/hand_backends/sdf_pose.py",
+      "symbol": "_pose_fingers",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 15155,
+      "reason": "Issue #15155: _pose_fingers in the SDF sculpted hand backend (126 lines > 100); split after the hand_backends revival (ADR-0057).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/model_appearance/hand_backends/sdf_pose.py",
+      "symbol": "_pose_fingers",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 15155,
+      "reason": "Issue #15155: _pose_fingers in the SDF sculpted hand backend (12 params > 8); split after the hand_backends revival (ADR-0057).",
+      "expires_on": "2026-12-31"
     }
   ]
 }
