@@ -130,7 +130,7 @@ def main() -> None:
         "frame_fill": lit.frame_fill,
         "artifacts": sorted(artifacts),
     }
-    (OUT / "receipt.json").write_text(
+    (OUT / "render_stats.json").write_text(
         json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
     )
 
