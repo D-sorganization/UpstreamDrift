@@ -3,6 +3,12 @@
 Strictly separate from the through-the-bag swing model (spec pitfall #6).
 Accepts a ``GreenModel`` so that green-speed conditions modulate both
 make-% and leave-distance spread.
+
+The shot-pattern / Broadie-PGA-approach helper in
+``src/tools/shot_pattern_analysis/scoring.py`` (Equations 6–7 from
+`Broadie (2011) <https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf>`_)
+is a **different** one-putt curve. Do not expect its make-% to match this
+module's logistic; SG optimiser code should import from here only.
 """
 
 from __future__ import annotations
@@ -18,11 +24,13 @@ if TYPE_CHECKING:  # pragma: no cover - import cycle guard
     from src.shared.python.sg_optimizer.course.conditions import GreenModel
 
 
-# Logistic baseline fitted to Broadie's table A.5 (tour make-% by distance).
-# Form:  P_base(d) = sigmoid(alpha + beta * log(d_ft))
-# Values give ≈99 % at 3 ft, 50 % at ~8 ft, 7 % at 30 ft.
-_ALPHA = 6.0
-_BETA = -2.85
+# Logistic baseline: P_base(d) = sigmoid(α + β ln d_ft).
+# Calibrated so the tour make-% matches 50 % at 8 ft and 7 % at 30 ft exactly
+# (β = logit(0.07) / ln(30/8), α = −β ln 8). The same two-parameter curve gives
+# ≈87 % at 3 ft — the comment anchors 99 % / 50 % / 7 % cannot all be exact on
+# a log-distance logistic (see DV-14176 / putting_validation registry).
+_ALPHA = 4.069487809193094
+_BETA = -1.95700996042699
 
 
 def _baseline_make(distance_ft: float) -> float:

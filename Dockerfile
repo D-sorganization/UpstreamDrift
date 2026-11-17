@@ -4,7 +4,9 @@
 FROM python:3.12-slim@sha256:c2d8472b831337ab296a8ce652e1ba786e9e3034fc445dc58b50a7f5251f0003 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    PIP_RETRIES=10 \
+    PIP_DEFAULT_TIMEOUT=60
 
 # Build tools for packages that compile C extensions (cryptography, etc.)
 # `curl` + `pkg-config`/`libssl-dev` are also needed to install the Rust
@@ -37,9 +39,22 @@ ENV PATH="/opt/venv/bin:$PATH"
 ENV RUSTUP_HOME=/opt/rustup \
     CARGO_HOME=/opt/cargo \
     PATH="/opt/cargo/bin:/opt/venv/bin:$PATH"
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
-    | sh -s -- -y --profile minimal --default-toolchain 1.94.0 && \
-    rustc --version && cargo --version
+# Download-init (no pipe) so a transient curl/DNS failure cannot feed an empty
+# script to sh and surface as exit 127 on rustc. Fleet builds have seen
+# Could not resolve host: sh.rustup.rs under concurrent image lanes (#13761).
+RUN set -eu; \
+    for attempt in 1 2 3 4 5; do \
+      if curl --proto '=https' --tlsv1.2 -fsS --retry 3 --retry-delay 5 --retry-all-errors \
+          -o /tmp/rustup-init.sh https://sh.rustup.rs \
+          && sh /tmp/rustup-init.sh -y --profile minimal --default-toolchain 1.94.0 \
+          && rustc --version && cargo --version; then \
+        rm -f /tmp/rustup-init.sh; \
+        exit 0; \
+      fi; \
+      echo "rustup bootstrap attempt ${attempt} failed; retrying..." >&2; \
+      sleep $((attempt * 5)); \
+    done; \
+    exit 1
 
 RUN pip install --upgrade pip==26.2.1 && pip install maturin==1.13.3
 
@@ -50,8 +65,9 @@ ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 # the maturin build loop in .github/workflows/ci-standard.yml.
 COPY Cargo.toml /tmp/rust/Cargo.toml
 COPY rust_core /tmp/rust/rust_core
-RUN mkdir -p /wheels && \
-    cd /tmp/rust && \
+RUN set -eu; \
+    mkdir -p /wheels; \
+    cd /tmp/rust; \
     for crate in \
         rust_core/upstream-physics \
         rust_core/upstream-mocap-preproc \
@@ -60,9 +76,13 @@ RUN mkdir -p /wheels && \
         rust_core/upstream-motion-matching \
         rust_core/ai_backend; do \
         maturin build --release --features python \
-            -m "$crate/Cargo.toml" --out /wheels; \
-    done && \
-    ls -1 /wheels
+            -m "$crate/Cargo.toml" --out /wheels || exit 1; \
+    done; \
+    ls -1 /wheels; \
+    test -n "$(ls /wheels/upstream_physics-*.whl 2>/dev/null)" || { \
+        echo "upstream_physics wheel missing after maturin build" >&2; \
+        exit 1; \
+    }
 
 # Core API + physics stack from lockfile
 COPY requirements.lock /tmp/requirements.lock
@@ -99,7 +119,7 @@ RUN pip install \
     qpsolvers==4.7.0 \
     osqp==1.0.5 \
     meshcat==0.3.2 \
-    tornado==6.6 \
+    tornado==6.6.1 \
     "robot_descriptions==1.14.0" \
     "imageio[ffmpeg]==2.37.0" \
     "trimesh==4.9.0"
@@ -136,7 +156,7 @@ RUN set -eu; \
         waiver_flags="$(python /tmp/check_pip_audit_waivers.py \
             --waiver-file /tmp/pip_audit_waivers.json)"; \
         # shellcheck disable=SC2086 - intentional word-splitting of flags
-        python -m pip_audit $waiver_flags; \
+        python -m pip_audit --timeout 120 $waiver_flags; \
         pip uninstall -y pip-audit; \
     fi
 

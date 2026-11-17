@@ -8,6 +8,9 @@ from __future__ import annotations
 
 import os
 
+# Host OS name for pytest report formatting when tests mutate ``os.name`` (#15103).
+_HOST_OS_NAME = os.name
+
 # ---------------------------------------------------------------------------
 # Fleet Testing Standards §5: thread-safety + headless env vars.
 # Must be set BEFORE any heavy import (numpy, matplotlib, Qt, etc.) so that
@@ -19,6 +22,8 @@ os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
 os.environ.setdefault("MPLBACKEND", "Agg")
+os.environ.setdefault("MUJOCO_GL", "egl")
+os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 # ---------------------------------------------------------------------------
 # Issue #9220: generated run output must never land inside the checkout.
@@ -1071,48 +1076,54 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
 
 @pytest.hookimpl(trylast=True)
 def pytest_runtest_teardown(item: pytest.Item, nextitem: pytest.Item | None) -> None:
-    """Name the test that leaked a Qt stub, rather than its next-door neighbour.
+    """Qt stub guard plus headless GUI drain (#9188 / #14310).
 
     Runs ``trylast`` so it executes after pytest's own teardown hook, i.e.
     after every fixture finalizer that is due at this point — including the
     module-, class-, package- and session-scoped ones.  That makes the check
     independent of autouse fixture ordering.
     """
-    if not _qt_guard_armed:
-        return
+    try:
+        if not _qt_guard_armed:
+            return
 
-    after = _qt_module_snapshot()
-    deviates = after != _qt_baseline
-    if deviates and not _qt_dirty_since:
-        # First test at which the watched entries stopped matching the
-        # baseline: the prime suspect, recorded even though a wider scope may
-        # still legitimately restore them before the file ends.
-        _qt_dirty_since.append(item.nodeid)
-    elif not deviates:
+        after = _qt_module_snapshot()
+        deviates = after != _qt_baseline
+        if deviates and not _qt_dirty_since:
+            # First test at which the watched entries stopped matching the
+            # baseline: the prime suspect, recorded even though a wider scope may
+            # still legitimately restore them before the file ends.
+            _qt_dirty_since.append(item.nodeid)
+        elif not deviates:
+            _qt_dirty_since.clear()
+            return
+
+        current_file = item.nodeid.partition("::")[0]
+        if nextitem is not None and nextitem.nodeid.partition("::")[0] == current_file:
+            return  # still inside the same file; wider scopes may legitimately hold
+
+        problems, added_stubs = _diff_qt_modules(_qt_baseline, after)
+        if not problems:
+            _qt_dirty_since.clear()
+            return
+
+        culprit = _qt_dirty_since[0] if _qt_dirty_since else item.nodeid
+        _repair_qt_modules(_qt_baseline, added_stubs)
         _qt_dirty_since.clear()
-        return
+        pytest.fail(
+            f"Qt modules are still altered in sys.modules at the end of "
+            f"{current_file}.\nFirst test at which they diverged: {culprit}\n"
+            + "\n".join(problems)
+            + "\n\nThe stub outlived the file that installed it, so every test "
+            "collected after this one would import Qt names from the stub.\n"
+            + _QT_GUARD_REMEDY,
+            pytrace=False,
+        )
+    finally:
+        os.name = _HOST_OS_NAME
+        from tests.helpers.headless_gui_teardown import headless_test_teardown
 
-    current_file = item.nodeid.partition("::")[0]
-    if nextitem is not None and nextitem.nodeid.partition("::")[0] == current_file:
-        return  # still inside the same file; wider scopes may legitimately hold
-
-    problems, added_stubs = _diff_qt_modules(_qt_baseline, after)
-    if not problems:
-        _qt_dirty_since.clear()
-        return
-
-    culprit = _qt_dirty_since[0] if _qt_dirty_since else item.nodeid
-    _repair_qt_modules(_qt_baseline, added_stubs)
-    _qt_dirty_since.clear()
-    pytest.fail(
-        f"Qt modules are still altered in sys.modules at the end of "
-        f"{current_file}.\nFirst test at which they diverged: {culprit}\n"
-        + "\n".join(problems)
-        + "\n\nThe stub outlived the file that installed it, so every test "
-        "collected after this one would import Qt names from the stub.\n"
-        + _QT_GUARD_REMEDY,
-        pytrace=False,
-    )
+        headless_test_teardown()
 
 
 @pytest.fixture
@@ -1491,7 +1502,7 @@ def _skip_reason_is_missing_rust_wheel(reason: str) -> bool:
     )
 
 
-@pytest.hookimpl(hookwrapper=True)
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(
     item: pytest.Item, call: pytest.CallInfo[None]
 ) -> Generator[None, Any, None]:
@@ -1502,7 +1513,15 @@ def pytest_runtest_makereport(
     Postcondition: a skip caused by a missing Rust wheel becomes a failure so
     the wheel-installing CI lane cannot pass while silently skipping parity.
     """
-    outcome = yield
+    saved_os_name: str | None = None
+    if call.when == "call":
+        saved_os_name = os.name
+        os.name = _HOST_OS_NAME
+    try:
+        outcome = yield
+    finally:
+        if saved_os_name is not None:
+            os.name = saved_os_name
     report = outcome.get_result()
     if not report.skipped:
         return

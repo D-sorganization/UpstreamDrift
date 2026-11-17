@@ -1,0 +1,126 @@
+{
+  "acceptance": {
+    "gates": [
+      {
+        "measured": 0.0,
+        "name": "grip_authoring_geometry",
+        "reason": "Unit tests gate apply_shaft_roll; strips are visual acceptance for #15138.",
+        "status": "passed",
+        "threshold": 0.0,
+        "unit": "deg"
+      }
+    ],
+    "horizon": "G0",
+    "is_physically_accepted": false,
+    "qualification_note": "Geometry preview evidence (HRG-GB1b #15138); not a forward-dynamics qualification.",
+    "status": "PASSED"
+  },
+  "artifacts": {
+    "lead_butt_shaft_roll_strip.png": {
+      "panels": [
+        {
+          "hand": "lead",
+          "shaft_roll_deg": -15.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "butt"
+        },
+        {
+          "hand": "lead",
+          "shaft_roll_deg": 0.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "butt"
+        },
+        {
+          "hand": "lead",
+          "shaft_roll_deg": 15.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "butt"
+        }
+      ],
+      "path": "full_body_models/evidence/grip_shaft_roll/lead_butt_shaft_roll_strip.png"
+    },
+    "lead_side_shaft_roll_strip.png": {
+      "panels": [
+        {
+          "hand": "lead",
+          "shaft_roll_deg": -15.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "side"
+        },
+        {
+          "hand": "lead",
+          "shaft_roll_deg": 0.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "side"
+        },
+        {
+          "hand": "lead",
+          "shaft_roll_deg": 15.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "side"
+        }
+      ],
+      "path": "full_body_models/evidence/grip_shaft_roll/lead_side_shaft_roll_strip.png"
+    },
+    "trail_butt_shaft_roll_strip.png": {
+      "panels": [
+        {
+          "hand": "trail",
+          "shaft_roll_deg": -15.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "butt"
+        },
+        {
+          "hand": "trail",
+          "shaft_roll_deg": 0.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "butt"
+        },
+        {
+          "hand": "trail",
+          "shaft_roll_deg": 15.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "butt"
+        }
+      ],
+      "path": "full_body_models/evidence/grip_shaft_roll/trail_butt_shaft_roll_strip.png"
+    },
+    "trail_side_shaft_roll_strip.png": {
+      "panels": [
+        {
+          "hand": "trail",
+          "shaft_roll_deg": -15.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "side"
+        },
+        {
+          "hand": "trail",
+          "shaft_roll_deg": 0.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "side"
+        },
+        {
+          "hand": "trail",
+          "shaft_roll_deg": 15.0,
+          "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign",
+          "view": "side"
+        }
+      ],
+      "path": "full_body_models/evidence/grip_shaft_roll/trail_side_shaft_roll_strip.png"
+    }
+  },
+  "capture": "iron7",
+  "club": {
+    "alias": "iron7",
+    "length_m": 0.95
+  },
+  "engine": "shared",
+  "issue": 15138,
+  "lane": "grip_authoring",
+  "rolls_deg": [
+    -15.0,
+    0.0,
+    15.0
+  ],
+  "sign_convention": "RHR about shaft +Y (butt \u2192 head); LH mirrors sign"
+}

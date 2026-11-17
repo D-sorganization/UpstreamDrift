@@ -111,21 +111,21 @@ UNAVAILABLE_SERIES: dict[str, UnavailableSeries] = {
     for sid, qty, cite, table, pop, lic, band, reason in _UNAVAILABLE_ROWS
 }
 
-# Anchors quoted in the comment above ``_ALPHA`` in putting.py. They describe
-# the existing logistic; they are not the published table.
+# Anchors implied by the fitted logistic in putting.py (50 % / 7 % exact at 8 / 30
+# ft; 3 ft follows). Not a published Broadie table (DV-14176).
 AVAILABLE_SERIES: dict[str, ReferenceSeries] = {
     "sg_optimizer_documented_anchors": ReferenceSeries(
         series_id="sg_optimizer_documented_anchors",
         quantity=MAKE,
         provenance=Provenance(
-            citation=f"Code comment in {PUTTING_SOURCE_PATH} (not a published table)",
-            table="comment above _ALPHA: ~99% at 3 ft, ~50% at ~8 ft, ~7% at 30 ft",
+            citation=f"Fitted logistic in {PUTTING_SOURCE_PATH} (not a published table)",
+            table="sigmoid(α + β ln d_ft): 87.2% at 3 ft, 50% at 8 ft, 7% at 30 ft",
             value_units=MAKE.value,
             population="tour",
             license=PUB,
         ),
         distances_ft=(3.0, 8.0, 30.0),
-        values=(0.99, 0.50, 0.07),
+        values=(0.8720818432728388, 0.50, 0.07),
         validation_grade=False,
     ),
 }

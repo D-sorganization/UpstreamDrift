@@ -385,7 +385,7 @@
     "candidate_probe_sha256": "40c521457a251cf9b5c905a950a3806d9573ccf8a34e4a1a09d5e3948bedb2b1",
     "drake_model_module_sha256": "a60b02a1cd77f53a360f1259487049c60a364334981cdeca28c7052edab11f47",
     "geometry_observer_sha256": "a8ed9212f6f709a1ec21d63cbe6757eeef34a144537b7fbe3b0cdccb6106b870",
-    "pydrake_all_origin": "/home/dieterolson/native_engine_parity_20261011_final_50203626/.venv312/lib/python3.12/site-packages/pydrake/all.py",
+    "pydrake_all_origin": "<owner-home>/native_engine_parity_20261011_final_50203626/.venv312/lib/python3.12/site-packages/pydrake/all.py",
     "pydrake_all_sha256": "3543e0d87be54e8334200eb6c7680693702c422a7513667fe5f696fca6bf20d6",
     "pydrake_api_module": "pydrake.multibody.plant",
     "pydrake_package_init_sha256": "66a841e3e9d11d1dbcd1f030ee31c0b4983025ad26b0b98031606beb7e3f853c",
@@ -786,10 +786,10 @@
   "qualification": "none; one instantaneous manufactured-state diagnostic",
   "runtime": {
     "coordinate_acceleration_units": "source generalized-coordinate units per second squared",
-    "drake_adapter_origin": "/home/dieterolson/native_engine_parity_20261011_final_50203626/src/engines/physics_engines/drake/python/full_body_model.py",
+    "drake_adapter_origin": "<owner-home>/native_engine_parity_20261011_final_50203626/src/engines/physics_engines/drake/python/full_body_model.py",
     "drake_distribution_version": "1.57.0",
     "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
-    "pydrake_package_origin": "/home/dieterolson/native_engine_parity_20261011_final_50203626/.venv312/lib/python3.12/site-packages/pydrake/__init__.py",
+    "pydrake_package_origin": "<owner-home>/native_engine_parity_20261011_final_50203626/.venv312/lib/python3.12/site-packages/pydrake/__init__.py",
     "python": "3.12.12 (main, Oct 10 2025, 08:52:57) [GCC 11.4.0]"
   },
   "schema_version": "drake-candidate-lift-zero-effort-acceleration-v1",
@@ -820,9 +820,9 @@
     "tests/unit/motion_matching/test_pinocchio_full_body_builder.py": "3f99fa206f3ae7c28b69bb68a0a4dd945ae7cda1995c2becc6e3bc09c85905da"
   },
   "source_import_paths": [
-    "/home/dieterolson/native_engine_parity_20261011_final_50203626/src",
-    "/home/dieterolson/native_engine_parity_20261011_final_50203626/src/shared/python",
-    "/home/dieterolson/native_engine_parity_20261011_final_50203626"
+    "<owner-home>/native_engine_parity_20261011_final_50203626/src",
+    "<owner-home>/native_engine_parity_20261011_final_50203626/src/shared/python",
+    "<owner-home>/native_engine_parity_20261011_final_50203626"
   ],
   "status": "observed_one_zero_effort_acceleration"
 }

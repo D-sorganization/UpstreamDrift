@@ -59,7 +59,7 @@ line. `src/tools/golf_simulation_suite/gui.py` builds a `QMainWindow` with one
 
 ## Background
 
-Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/drift-is-the-past-control-is-the-present.html): *Drift Is the Past, Control Is the Present*.
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/drift-is-the-past-control-is-the-present.html): _Drift Is the Past, Control Is the Present_.
 
 ## Limitations
 
@@ -69,9 +69,11 @@ Theory and notation for this surface are on [AffineDrift](https://affinedrift.co
   solution, and not the output of any flight model in this repository. No
   quantity may be read off it for any purpose.
 - No inputs, no outputs, no physics, no persistence, no export.
-- The registry capabilities `full_simulation`, `parameter_sweep`, and
-  `batch_runs` are not implemented anywhere on either code path. There is no
-  sweep and no batch facility.
+- `src/config/launcher_manifest.json` scopes this tile's advertised
+  capabilities to `prototype_visualization` and `demo_inspection`; the legacy
+  `src/config/models.yaml` capabilities `full_simulation`, `parameter_sweep`,
+  and `batch_runs` are not implemented anywhere on either code path. There is
+  no sweep and no batch facility.
 - The registry description, "Complete golf simulation with ball flight physics
   and putting green", does not describe the current code.
 - PyVista and `pyvistaqt` are hard imports on the `__main__.py` path, so that

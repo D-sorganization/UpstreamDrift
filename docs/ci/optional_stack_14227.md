@@ -28,23 +28,24 @@ CI contract tests in `tests/ci/test_optional_stack_gravity_contract_14227.py`
 assert that this runbook, the builder, the constant, and the regression test
 stay wired.
 
-## Slice 2 — Manufactured Authority Regeneration (Owner-Blocked)
+## Slice 2 — Manufactured Authority and Rolling (Mechanical, on Main)
 
 Optional Stack jobs `articulated-manufactured-authority` and
-`articulated-manufactured-rolling` still fail when the publication authority
-committed on `main` does not match a deterministic regeneration from current
-model provenance (first regression around #13039 / #13839). **Agents must not
-fabricate or silently re-commit authority artifacts** to turn CI green.
+`articulated-manufactured-rolling` regressed when spatial model canonical hashes
+drifted (#13039 / #13839). **Agents must not fabricate or silently re-commit
+authority artifacts** to turn CI green.
 
-**Owner action required:**
+**Fix (merged on `main`):**
 
-1. Regenerate the manufactured publication authority from `main` using the
-   pinned authority environment documented in issue #14227.
-2. Re-run rolling conformance once the committed authority matches that
-   regeneration.
+- [#15069](https://github.com/D-sorganization/UpstreamDrift/pull/15069) stabilizes
+  spatial canonical hashing so deterministic authority candidates match the
+  committed publication authority again.
+- Scheduled run
+  [43383564368](https://github.com/D-sorganization/UpstreamDrift/actions/runs/43383564368)
+  (2026-11-13) and later show both manufactured jobs **green** on `main`.
 
-Until the owner lands that regeneration, Slice 2 remains red and is **not** a
-mechanical lane fix.
+If the authority lane regresses again, regeneration from the pinned environment
+in #14227 remains the owner publication path — not an agent baseline swap.
 
 ## Related — Multiple-Shooting Dynamics Premise (#14227 Item 3)
 
@@ -55,3 +56,36 @@ test re-picks material floors (0.01 rad, 1.0 rad/s) plus own-grid separation
 factors instead of the pre-#13799 absolute 0.1 rad / 10 rad/s ceilings.
 Further changes need a fresh measurement on current `main`, not blind threshold
 widening.
+
+## Slice 3 — Optional-Stack Launcher Processes API Mock Contract (Mechanical)
+
+Commit #14956 (`Part of #14949`) updated `LauncherService.get_running_processes()`
+in `src/api/services/launcher_service.py` to prefer
+`process_manager.list_processes()` when callable, which broke un-spec'd
+`MagicMock` `ProcessManager` fixtures in `tests/api/test_launcher_launch_api.py`
+and `tests/unit/api/services/test_launcher_service.py` (an auto-created
+`MagicMock.list_processes()` returned an empty iterable and shadowed
+`running_processes`), causing 5 Optional Stack API test failures in
+`TestProcessesEndpoint` and `TestLaunchLifecycle`.
+
+**Fix (merged on `main` via [#15089](https://github.com/D-sorganization/UpstreamDrift/pull/15089)):**
+
+- `LauncherService.get_running_processes()` only ingests sequence rows from
+  `list_processes()` whose `slot_name` is a `str`, and populates any remaining
+  entries from `running_processes` without re-polling slots already returned by
+  `list_processes()`.
+- Regression coverage in `tests/unit/api/test_launcher_service_processes_14227.py`
+  and existing tests in `tests/api/test_launcher_launch_api.py` and
+  `tests/unit/api/services/test_launcher_service.py`.
+
+## Scheduled Lane Status (Evidence on `main`)
+
+Latest scheduled Optional Stack on `main` before this runbook refresh:
+
+| Run | `optional-stack-check` | `articulated-manufactured-authority` | `articulated-manufactured-rolling` |
+| --- | --- | --- | --- |
+| [43569598549](https://github.com/D-sorganization/UpstreamDrift/actions/runs/43569598549) (2026-11-14) | Red — 5 API failures in `test_launcher_launch_api.py` (pre-#15089 merge) | Green | Green |
+
+After #15089 merged (2026-11-14), local verification of the Optional Stack API
+and launcher regression modules passes; the next scheduled run is the acceptance
+check for closing #14227.

@@ -68,13 +68,8 @@ def test_compare_to_series_uses_series_distances() -> None:
     assert result.max_abs_residual == 0.0
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="#14176: putting.py anchors (~99% at 3 ft, ~7% at 30 ft) disagree with "
-    "its logistic (94.6%, 2.4%); resolving needs Broadie table A.5.",
-)
 def test_existing_logistic_matches_its_documented_anchors() -> None:
-    """Self-consistency of the existing fit's comment; not a simulator calibration."""
+    """Self-consistency of the fitted logistic with the reference registry."""
     series = get_series("sg_optimizer_documented_anchors")
     result = compare_to_series(_baseline_make, series, tolerance=0.02)
     assert result.passed, result

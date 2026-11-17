@@ -64,7 +64,7 @@ through the matching reader (`anthropometrics.readers.read_urdf_inertial`).
 | `DempsterEstimator`   | Classic biomechanics baselines using Dempster cadaver mass/CoM/gyration ratios + Drillis–Contini/Winter lengths. | Dempster (1955); Drillis & Contini (1966) / Winter (2009) |
 | `ZatsiorskyEstimator` | Raw gamma-ray scanning inertia parameters from living subjects (e.g. for sensitivity analyses).                  | Zatsiorsky-Seluyanov (1985 / 2002)                        |
 
-All three implement the same `Estimator` API Protocol, **though they are not numerically interchangeable**: they reflect distinct study protocols (cadaver vs gamma-ray scanning of living subjects) and coarse-to-humanoid trunk partitioning conventions.
+All three implement the same `Estimator` Protocol and return the same 21-segment humanoid layout, **though they are not numerically interchangeable**: each table follows its own literature source and study protocol (cadaver measurements vs gamma-ray scanning of living subjects). Dempster (1955) and Zatsiorsky-Seluyanov (1985) publish eight coarse segment classes; `anthropometrics.estimators._humanoid_expansion` maps those classes onto the humanoid graph without the erroneous per-partition renormalisation from #15014.
 
 > **Note on `humanoid_character_builder` inertias:** `humanoid_character_builder` constructs skeleton geometry from model-geometry proportions (`_GEOMETRY`) rather than de Leva's published endpoint lengths, and applies de Leva's CoM and gyration fractions to those model-geometry lengths (`I = m * (k * L_model)^2`). Use `DeLevaEstimator` directly when you need inertia tensors evaluated strictly on de Leva endpoint lengths.
 
@@ -102,7 +102,7 @@ markers = {
 }
 defs = [
     SegmentDef(name="upper_arm_R", proximal="RSHO", distal="RELB"),
-    SegmentDef(name="forearm_R",   proximal="RELB", distal="RWRA"),
+    SegmentDef(name="forearm_R", proximal="RELB", distal="RWRA"),
 ]
 lengths = estimate_segment_lengths_from_markers(markers, defs)
 print(lengths)  # {'upper_arm_R': 0.30..., 'forearm_R': 0.25...}
@@ -128,7 +128,7 @@ I_cyl = inertia_from_cylinder(mass_kg=0.4, radius_m=0.02, length_m=0.30)
 # Solid ellipsoid with semi-axes (a, b, c) in metres.
 I_ell = inertia_from_ellipsoid(mass_kg=4.0, semi_axes_m=(0.05, 0.05, 0.20))
 # From radii of gyration (kx, ky, kz) about CoM.
-I_kg  = inertia_from_gyration_radii(mass_kg=4.0, gyration_m=(0.04, 0.04, 0.10))
+I_kg = inertia_from_gyration_radii(mass_kg=4.0, gyration_m=(0.04, 0.04, 0.10))
 ```
 
 Each helper returns a 3 × 3 ndarray that already satisfies the

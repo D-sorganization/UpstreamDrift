@@ -124,7 +124,8 @@ def test_compute_marker_metrics_missing_waist_fails_acceptance() -> None:
         pred, target, valid, time_s, labels, pelvis_yaw_weight=0.0
     )
     assert check_acceptance(metrics) is False
-    assert metrics.pelvis_yaw_error_pct == pytest.approx(100.0)
+    assert np.isnan(metrics.pelvis_yaw_error_pct)
+    assert np.isnan(metrics.pelvis_yaw_diff_deg)
 
 
 def test_reproduces_run102_uninterrupted_metrics_and_zero_parity() -> None:

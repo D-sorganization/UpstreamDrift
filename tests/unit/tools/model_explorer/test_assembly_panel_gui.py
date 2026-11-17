@@ -172,11 +172,16 @@ def test_drop_refreshes_the_editor_window_3d_preview(qtbot) -> None:
 
     window = URDFEditorWindow()
     qtbot.addWidget(window)
-    window.show()
-    assembly = window.frankenstein.assembly_panel
-    window.frankenstein.mode_tabs.setCurrentWidget(assembly)
-    _drop(assembly, "head", "neck")
-    assert "head_1__head" in window.visualization.urdf_content
-    assert window.urdf_content == window.visualization.urdf_content
-    assert "head_1__head" in window.code_editor.get_content()
-    window._is_modified = False  # avoid the modal "save changes?" dialog on close
+    try:
+        window.show()
+        assembly = window.frankenstein.assembly_panel
+        window.frankenstein.mode_tabs.setCurrentWidget(assembly)
+        _drop(assembly, "head", "neck")
+        assert "head_1__head" in window.visualization.urdf_content
+        assert window.urdf_content == window.visualization.urdf_content
+        assert "head_1__head" in window.code_editor.get_content()
+    finally:
+        window._is_modified = False  # avoid the modal "save changes?" dialog on close
+        window.visualization.clear()
+        window.close()
+        qtbot.wait(10)

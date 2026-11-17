@@ -1,6 +1,8 @@
 """Model Context Protocol (MCP) stdio adapter for headless simulation runs.
 
 Epic #14085 / Child Task #14092; FastMCP stdio transport (#15022).
+Conformance template ``required_tools`` is pinned against ``tool_specs()`` via
+``tests/unit/sim_run/test_agent_api_conformance_template.py``.
 Thin MCP adapter exposing simulation run service tools:
 describe_engines, submit_run, get_run, fetch_artifact; plus the putting-study
 tools optimize_putt, putting_misread_cost and putting_library_study (#14177,

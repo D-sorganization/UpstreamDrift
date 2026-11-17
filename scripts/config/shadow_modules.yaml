@@ -18,9 +18,9 @@
 #   * Entries may be REMOVED (the shadow was resolved). That is the goal.
 #   * Entries may NOT be ADDED without a deliberate policy exception — a new
 #     shadow means new divergence and must be justified in review.
-#   * Every entry MUST carry a positive-int `tracking_issue` and a parseable
-#     ISO `sunset_date`. Once a sunset date passes the guard fails, forcing the
-#     shadow to be resolved or the deadline to be renegotiated in the open.
+#   * Every entry MUST carry a positive-int `tracking_issue` and either a
+#     parseable ISO `sunset_date` (which fails once passed) or an `adr_ruling`
+#     path under `docs/adr/` for a permanent architectural split ruling.
 #
 # The correct way to clear an entry is to move the canonical implementation
 # into Tools, land it there, bump the `vendor/ud-tools` pin, delete the UD-side
@@ -108,18 +108,14 @@ shadows:
     tracking_issue: 5623
     sunset_date: "2026-12-31"
 
-  # Explicit provider-migration exception for review in #9916. UD's seven-file
-  # realtime facade predates the two-file Tools provider added in #5090;
-  # deleting it would remove publish/subscribe and registry APIs. No new UD
-  # source copy is added. Keep the split/pending-cleanup ruling and #8942
-  # migration visible; this entry does not claim the overlap is resolved.
-  # #8942 closed and the 2026-10-09 sunset expired with the facade still in
-  # place; the resolution (port or ADR split ruling) is tracked in #12046.
-  # #12046 was reopened after premature auto-close by #12048, and #14928 restored
-  # green CI on 2026-11-10 UTC by aligning sunset_date with the Q4 baseline.
+  # Explicit ADR-0061 split ruling (#12046). UD's realtime package owns the
+  # publish/subscribe facade, channel registry, protocol, and WebSocket
+  # integration, while Tools owns its standalone FileTransport provider (#5090).
+  # Governed permanently by docs/adr/0061-realtime-provider-split-ruling.md
+  # instead of a rolling sunset_date extension.
   realtime:
     tracking_issue: 12046
-    sunset_date: "2026-12-10"
+    adr_ruling: "docs/adr/0061-realtime-provider-split-ruling.md"
 
   # ── ADR-0046 Stage 1 canonical launch-monitor layer — CLEARED 2026-09-02 ──
   #

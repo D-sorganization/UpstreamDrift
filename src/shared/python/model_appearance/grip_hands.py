@@ -55,6 +55,7 @@ from src.shared.python.hand_size import (
     DEFAULT_HAND_LENGTH_M,
     hand_mesh_scale,
 )
+from src.shared.python.grip_spec.shaft_roll import appearance_frame_with_shaft_roll
 from src.shared.python.model_appearance.grip_pose import (
     DEFAULT_GRIP_POSE,
     GripPose,
@@ -183,7 +184,7 @@ def grip_hand_frame(
     frame[:3, 0], frame[:3, 1], frame[:3, 2] = x, y, _GRIP_AXIS
     butt = np.array([0.0, -club.length_m, club.axis_offset_m])
     frame[:3, 3] = butt + pose.distance_below_butt_m(hand) * _GRIP_AXIS
-    return frame
+    return appearance_frame_with_shaft_roll(frame, pose, hand)
 
 
 def _mesh_params(hand_length_m: float | None) -> HandMeshParams:

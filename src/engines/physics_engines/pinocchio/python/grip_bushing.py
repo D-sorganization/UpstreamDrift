@@ -186,7 +186,11 @@ class ClubOnBushings:
             pin.SE3.Identity(),
         )
         self.model, self.data = model, model.createData()
-        self._offsets = {s: interface.frame(s).matrix() for s in SIDES}
+        from src.shared.python.grip_spec.shaft_roll import (
+            grip_interface_offsets_with_shaft_roll,
+        )
+
+        self._offsets = grip_interface_offsets_with_shaft_roll(interface, grip_pose)
         self._hand_cache: dict[tuple[Any, float], dict[str, Any]] = {}
 
     @staticmethod

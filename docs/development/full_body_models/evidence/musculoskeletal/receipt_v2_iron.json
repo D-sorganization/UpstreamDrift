@@ -1,5 +1,5 @@
 {
-  "base_model": "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-msk2/shared/models/opensim/opensim-models/Models/Rajagopal/RajagopalLaiUhlrich2023.osim",
+  "base_model": "<owner-home>/Repositories/UpstreamDrift-worktrees/claude-msk2/shared/models/opensim/opensim-models/Models/Rajagopal/RajagopalLaiUhlrich2023.osim",
   "base_model_sha256": "8f30d0b64750b87eb7f705907862590535212b4afd7e919faa3fd7d1683d22ec",
   "body_origin_mismatch": {
     "at": "",

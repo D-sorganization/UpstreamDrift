@@ -1,4 +1,4 @@
-"""Runbook contract for CI Optional Stack slice 1 — Pinocchio gravity (#14227)."""
+"""Runbook contract for CI Optional Stack mechanical slices (#14227)."""
 
 from __future__ import annotations
 
@@ -12,6 +12,8 @@ _REPO = Path(__file__).resolve().parents[2]
 _RUNBOOK = _REPO / "docs" / "ci" / "optional_stack_14227.md"
 _MODEL_PROVIDER = _REPO / "src/shared/python/optimization/model_provider.py"
 _REGRESSION_TEST = _REPO / "tests/unit/optimization/test_model_provider.py"
+_LAUNCHER_SERVICE = _REPO / "src/api/services/launcher_service.py"
+_LAUNCHER_REGRESSION = _REPO / "tests/unit/api/test_launcher_service_processes_14227.py"
 
 
 def test_optional_stack_14227_runbook_exists() -> None:
@@ -26,11 +28,14 @@ def test_optional_stack_14227_runbook_exists() -> None:
         "test_pinocchio_model_uses_the_shared_gravity_constant",
         "model_provider.py",
         "Slice 2",
-        "Owner-Blocked",
+        "Slice 3",
+        "#15069",
+        "#15089",
         "must not",
+        "Scheduled Lane Status",
     ],
 )
-def test_runbook_names_gravity_fix_and_owner_blocked_slice(needle: str) -> None:
+def test_runbook_names_optional_stack_slices_and_evidence(needle: str) -> None:
     text = _RUNBOOK.read_text(encoding="utf-8")
     assert needle in text
 
@@ -46,3 +51,16 @@ def test_regression_test_symbol_is_present() -> None:
     text = _REGRESSION_TEST.read_text(encoding="utf-8")
     assert "def test_pinocchio_model_uses_the_shared_gravity_constant" in text
     assert "GRAVITY_M_S2" in text
+
+
+def test_launcher_service_filters_unspec_list_processes_rows() -> None:
+    text = _LAUNCHER_SERVICE.read_text(encoding="utf-8")
+    assert "def get_running_processes" in text
+    assert 'isinstance(row.get("slot_name"), str)' in text
+    assert "running_processes" in text
+
+
+def test_launcher_api_regression_module_exists() -> None:
+    assert _LAUNCHER_REGRESSION.is_file(), (
+        "tests/unit/api/test_launcher_service_processes_14227.py must guard slice 3"
+    )

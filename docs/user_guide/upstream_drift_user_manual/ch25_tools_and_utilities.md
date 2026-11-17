@@ -8,7 +8,7 @@ risk assessment, signal processing, and spatial algebra.
 
 ## 25.1 Model Generation
 
-The model generation subsystem (`src/tools/model_generation/`) is
+The model generation subsystem (`src/shared/python/model_generation/`) is
 organised into eight sub-packages:
 
 ```
@@ -156,7 +156,7 @@ previews and supports camera manipulation (orbit, pan, zoom).
 ## 25.3 Video Analyzer
 
 The video analysis pipeline (`src/tools/video_analyzer/` and
-`src/shared/python/video_pose_pipeline.py`) extracts pose data from
+`src/shared/python/gui_pkg/video_pose_pipeline.py`) extracts pose data from
 video recordings.
 
 ### 25.3.1 Pipeline Architecture
@@ -256,7 +256,7 @@ results = spinal_load_analysis.analyze_spinal_loads(
 
 ## 25.5 Signal Processing Toolkit
 
-The signal processing module (`src/shared/python/signal_processing.py`)
+The signal processing module (`src/shared/python/signal_toolkit/signal_processing.py`)
 provides a comprehensive set of functions for processing biomechanical
 time-series data.
 
@@ -331,7 +331,7 @@ performance.
 ## 25.6 Spatial Algebra
 
 Spatial algebra utilities are distributed across several modules in the
-codebase (primarily `src/shared/python/reference_frames.py` and the
+codebase (primarily `src/shared/python/spatial_algebra/reference_frames.py` and the
 plotting transforms module).
 
 ### 25.6.1 Rotation Matrices
@@ -472,11 +472,11 @@ link inertias in joint frames.
 | API Response Models      | `src/api/models/responses.py`                                                  |
 | JWT Security             | `src/api/auth/security.py`                                                     |
 | Motion Retargeting       | `src/learning/retargeting/retargeter.py`                                       |
-| Model Generation         | `src/tools/model_generation/`                                                  |
-| Inertia Primitives       | `src/tools/model_generation/inertia/primitives.py`                             |
+| Model Generation         | `src/shared/python/model_generation/`                                          |
+| Inertia Primitives       | `src/shared/python/model_generation/inertia/primitives.py`                     |
 | Model Explorer           | `src/tools/model_explorer/`                                                    |
 | Video Analyzer           | `src/tools/video_analyzer/`                                                    |
-| Video Pose Pipeline      | `src/shared/python/video_pose_pipeline.py`                                     |
-| Signal Processing        | `src/shared/python/signal_processing.py`                                       |
+| Video Pose Pipeline      | `src/shared/python/gui_pkg/video_pose_pipeline.py`                             |
+| Signal Processing        | `src/shared/python/signal_toolkit/signal_processing.py`                        |
 
 ---
