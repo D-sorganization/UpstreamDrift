@@ -1,0 +1,8 @@
+Wonik Allegro Hand V3 visual meshes and MJCF
+Copyright 2016 SimLab. Licensed under the BSD 2-Clause License (SPDX: BSD-2-Clause).
+The licence file in this directory is the Menagerie package licence.
+Individual STL headers contain no licence text. Some headers carry the
+CAD id "STLB ASM 218.00.00.0000".
+link_4.0.stl is not referenced by left_hand.xml or right_hand.xml.
+The kinematic tree has four fingers and 16 DOF. There is no little finger.
+Visual only. Grip contact in UpstreamDrift stays on procedural capsules.
