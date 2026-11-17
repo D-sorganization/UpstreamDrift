@@ -275,6 +275,23 @@ def _split_skin_and_tips(
     return out
 
 
+def _club_scene_items(
+    hand_verts: np.ndarray, radius: float, theme: _RenderTheme
+) -> list[tuple[Mesh, tuple[float, float, float, float]]]:
+    """Butt cap, grip and shaft cylinders spanning the hands' z extent."""
+    z_min = float(hand_verts[:, 2].min()) - theme.club_overhang_m * 0.45
+    z_max = float(hand_verts[:, 2].max()) + theme.club_overhang_m
+    butt_z0 = z_min - 0.015
+    butt_mesh = _cylinder_mesh(butt_z0, z_min, radius * 1.12)
+    grip_mesh = _cylinder_mesh(z_min, z_max * 0.65, radius)
+    shaft_mesh = _cylinder_mesh(z_max * 0.65, z_max + 0.12, radius * 0.48)
+    return [
+        (butt_mesh, theme.butt_cap_rgba),
+        (grip_mesh, theme.grip_rgba),
+        (shaft_mesh, theme.shaft_rgba),
+    ]
+
+
 def render_single_view(
     grip_spec: GripSpec,
     *,
@@ -317,18 +334,7 @@ def render_single_view(
         trail_z = float(vt[:, 2].mean())
 
     hand_verts = np.vstack(hand_verts_list)
-    z_min = float(hand_verts[:, 2].min()) - theme.club_overhang_m * 0.45
-    z_max = float(hand_verts[:, 2].max()) + theme.club_overhang_m
-    butt_z0 = z_min - 0.015
-    butt_mesh = _cylinder_mesh(butt_z0, z_min, radius * 1.12)
-    grip_mesh = _cylinder_mesh(z_min, z_max * 0.65, radius)
-    shaft_mesh = _cylinder_mesh(z_max * 0.65, z_max + 0.12, radius * 0.48)
-    scene_items = [
-        (butt_mesh, theme.butt_cap_rgba),
-        (grip_mesh, theme.grip_rgba),
-        (shaft_mesh, theme.shaft_rgba),
-        *hand_groups,
-    ]
+    scene_items = [*_club_scene_items(hand_verts, radius, theme), *hand_groups]
 
     right, cam_up, fwd = _camera_basis(view)
     origin = 0.5 * (hand_verts.min(axis=0) + hand_verts.max(axis=0))

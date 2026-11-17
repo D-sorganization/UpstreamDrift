@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 import os
 from collections.abc import Iterator, Mapping, Sequence
+from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Literal
 
@@ -345,21 +346,31 @@ def _part_min_radial(
     return float(_radial_xy(pts).min())
 
 
+@dataclass(frozen=True)
+class _JointContactStage:
+    """One finger joint driven until its segment touches the grip."""
+
+    jname: str
+    finger: str
+    eval_segments: tuple[str, ...]
+    guard_segments: tuple[str, ...]
+    grip_radius_m: float
+    target_offset_m: float = 0.0
+
+
 def _solve_joint_contact(
     qpos: Array,
     model: Any,
     data: Any,
     cfg: AllegroHandVisualSettings,
     *,
-    jname: str,
-    finger: str,
-    eval_segments: tuple[str, ...],
-    guard_segments: tuple[str, ...],
-    grip_radius_m: float,
+    stage: _JointContactStage,
     mount: Array,
-    target_offset_m: float = 0.0,
 ) -> None:
     mujoco = _require_mujoco()
+    jname, finger = stage.jname, stage.finger
+    eval_segments, guard_segments = stage.eval_segments, stage.guard_segments
+    grip_radius_m, target_offset_m = stage.grip_radius_m, stage.target_offset_m
     qidx = _joint_qpos_index(model, jname)
     jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, jname)
     lo = max(float(model.jnt_range[jid, 0]), float(qpos[qidx]))
@@ -459,19 +470,33 @@ def _align_finger_abduction(
     mujoco.mj_forward(model, data)
 
 
+def _joint_limits(model: Any, jname: str) -> tuple[float, float]:
+    mujoco = _require_mujoco()
+    jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, jname)
+    return float(model.jnt_range[jid, 0]), float(model.jnt_range[jid, 1])
+
+
+@dataclass(frozen=True)
+class _ThumbTargets:
+    """Distal-pad targets and guards scored by the thumb pose search."""
+
+    target_az: float
+    target_r: float
+    safe_r: float
+    z_target: float
+    max_z_m: float
+
+
 def _score_thumb_state(
     model: Any,
     data: Any,
     cfg: AllegroHandVisualSettings,
     mount: Array,
     idx_tree: cKDTree,
-    *,
-    target_az: float,
-    target_r: float,
-    safe_r: float,
-    z_target: float,
-    max_z_m: float,
+    targets: _ThumbTargets,
 ) -> float:
+    target_az, target_r, safe_r = targets.target_az, targets.target_r, targets.safe_r
+    z_target, max_z_m = targets.z_target, targets.max_z_m
     th_all = _transform_to_grip_frame(
         _select_part_vertices(
             model, data, cfg, finger="thumb", vertex_stride=cfg.solver_vertex_stride
@@ -542,21 +567,7 @@ def _solve_thumb_pose(
     )
     idx_tree = cKDTree(idx_pts[::3])
     q_indices = tuple(_joint_qpos_index(model, f"thj{k}") for k in range(4))
-    j_limits = tuple(
-        (
-            float(
-                model.jnt_range[
-                    mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, f"thj{k}"), 0
-                ]
-            ),
-            float(
-                model.jnt_range[
-                    mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, f"thj{k}"), 1
-                ]
-            ),
-        )
-        for k in range(4)
-    )
+    j_limits = tuple(_joint_limits(model, f"thj{k}") for k in range(4))
 
     q0_vals = np.linspace(j_limits[0][0], j_limits[0][1], cfg.thumb_coarse_grid_n)
     q1_vals = np.linspace(j_limits[1][0], j_limits[1][1], cfg.thumb_coarse_grid_n)
@@ -572,11 +583,13 @@ def _solve_thumb_pose(
             cfg,
             mount,
             idx_tree,
-            target_az=target_az,
-            target_r=target_r,
-            safe_r=safe_r,
-            z_target=z_target,
-            max_z_m=cfg.thumb_max_z_m,
+            _ThumbTargets(
+                target_az=target_az,
+                target_r=target_r,
+                safe_r=safe_r,
+                z_target=z_target,
+                max_z_m=cfg.thumb_max_z_m,
+            ),
         )
 
     coarse: list[tuple[float, tuple[float, float, float, float]]] = []
@@ -741,13 +754,15 @@ def solve_allegro_hand_qpos(
                 model,
                 data,
                 cfg,
-                jname=jname,
-                finger=finger,
-                eval_segments=eval_segs,
-                guard_segments=guard_segs,
-                grip_radius_m=radius,
+                stage=_JointContactStage(
+                    jname=jname,
+                    finger=finger,
+                    eval_segments=eval_segs,
+                    guard_segments=guard_segs,
+                    grip_radius_m=radius,
+                    target_offset_m=offset_m,
+                ),
                 mount=base_mount,
-                target_offset_m=offset_m,
             )
 
     _solve_thumb_pose(
