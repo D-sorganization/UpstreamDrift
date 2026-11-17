@@ -346,6 +346,12 @@ def _part_min_radial(
     return float(_radial_xy(pts).min())
 
 
+def _joint_limits(model: Any, jname: str) -> tuple[float, float]:
+    mujoco = _require_mujoco()
+    jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, jname)
+    return float(model.jnt_range[jid, 0]), float(model.jnt_range[jid, 1])
+
+
 @dataclass(frozen=True)
 class _JointContactStage:
     """One finger joint driven until its segment touches the grip."""
@@ -372,9 +378,8 @@ def _solve_joint_contact(
     eval_segments, guard_segments = stage.eval_segments, stage.guard_segments
     grip_radius_m, target_offset_m = stage.grip_radius_m, stage.target_offset_m
     qidx = _joint_qpos_index(model, jname)
-    jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, jname)
-    lo = max(float(model.jnt_range[jid, 0]), float(qpos[qidx]))
-    hi_lim = float(model.jnt_range[jid, 1])
+    lo_lim, hi_lim = _joint_limits(model, jname)
+    lo = max(lo_lim, float(qpos[qidx]))
     target_r = grip_radius_m + cfg.pad_clearance_m + target_offset_m
     init_guard_r = _part_min_radial(
         model, data, cfg, mount, finger=finger, segments=guard_segments
@@ -444,8 +449,7 @@ def _align_finger_abduction(
     for finger in ("index", "ring"):
         tag = _DIGIT_TAG[finger]
         qidx = _joint_qpos_index(model, f"{tag}j0")
-        jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, f"{tag}j0")
-        lo, hi = float(model.jnt_range[jid, 0]), float(model.jnt_range[jid, 1])
+        lo, hi = _joint_limits(model, f"{tag}j0")
         base_val = float(qpos[qidx])
         best_val = base_val
         best_dist = math.inf
@@ -468,12 +472,6 @@ def _align_finger_abduction(
         qpos[qidx] = best_val
     data.qpos[:] = qpos
     mujoco.mj_forward(model, data)
-
-
-def _joint_limits(model: Any, jname: str) -> tuple[float, float]:
-    mujoco = _require_mujoco()
-    jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, jname)
-    return float(model.jnt_range[jid, 0]), float(model.jnt_range[jid, 1])
 
 
 @dataclass(frozen=True)
