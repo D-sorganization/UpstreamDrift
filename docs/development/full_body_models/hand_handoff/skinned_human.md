@@ -115,6 +115,18 @@ Targets of a hand live in `skinned_targets.py`.
   skin. Still open: the bulk of the heel pad (tenth percentile 17.6 mm) does
   not touch; the palm needs a fold along the club line in the pose. A
   stronger metacarpal arch makes it worse; less arch flips triangles.
+- Wrists over the shaft (2026-11-17): `placement.palm_centre_wrap_deg` lead 15
+  and trail 10 put the lead wrist joint on the shaft plane and the trail
+  wrist 44 mm to the trail side (`qa.wrist_joint_m`). Trail 0 and 14 break
+  the pair (fault 4.7 and 7.6 mm). Thumb line is per hand
+  (`owner_thumb_azimuth_deg` lead 45, trail 20); 30 on both fails five tests.
+  The heel pad went from 6.3 to 7.7 mm for it (ratchet 8 mm, evidence on
+  #15150). `build_grip_hands` solves unrolled and turns the result.
+- MuJoCo golfer, measured by spike: hands 46 degrees round the shaft from the
+  clubface (`ADDRESS_SQUARE_FACE_ROLL_DEG` squares the head only;
+  `grip_hand_frame` turns the hands from the wrist's dorsal axis); skinned
+  wrist joints 57 mm from the model's wrist followers. Fix order is in the
+  PR body and needs the owner's go-ahead: it moves the wrist joints.
 - At `f4f607338c` the lead hand sits 85 mm below the cap edge
   (`owner_lead_below_cap_edge_m`) so the butt stands 5 mm proud of the heel;
   the heel pad's nearest skin is 6.3 mm off the grip (ratchet 7 mm).

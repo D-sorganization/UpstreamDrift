@@ -2,9 +2,83 @@
 
 Refs #15150 (epic), #15148. Stacked on `cursor/hrg-gb1b-shaft-roll-2882`. Auto-merge is not armed, on the owner's instruction.
 
-### Update at `f4f607338c` (2026-11-16): Butt Proud of the Heel, Golfer's-Eye View
+### Update at `81c38e59f7` (2026-11-17): Wrists Over the Shaft, Both Wrists Extended
 
-This section is the newest; where it disagrees with the sections below, this one is right.
+This section is the newest; where it disagrees with the sections below, this one is right. The owner's fifth comment asked for: the lead wrist joint almost centred over the shaft at address and the trail wrist slightly to the trail side; both wrists slightly extended; thumb and forefinger pinched; the grip square to the clubface; the hands joined to the forearms in the MuJoCo model; and said the forearm direction was limiting the grip.
+
+- **Wrists over the shaft.** The lead hand is turned 22 degrees about the shaft and the trail hand 27 degrees (`placement.palm_centre_wrap_deg`: lead 15, trail 10; both were 37). The lead wrist joint is now exactly over the shaft (it was 22 mm to the target side); the trail wrist is 44 mm to the trail side (was 74 mm). New measure `qa.wrist_joint_m` and test `test_the_wrists_sit_over_the_shaft_at_address` (`max_lead_wrist_offset_m` 8 mm, `trail_wrist_offset_range_m` 15 to 50 mm).
+- **Both wrists extended.** `wrist.lead.extension_deg` 15 (was 8), `wrist.trail.extension_deg` 20 (was 15); test `test_both_wrists_are_extended_at_address` (`min_wrist_extension_deg` 12). In this model the wrist bend turns the forearm about the wrist joint and leaves the hand where it is, so it does not by itself wrap the hand further.
+- **Forearm limit widened, on the owner's word.** `forearm_spread_range_deg` lower bound 15 to 5: with both wrists near the top of the shaft the forearms are 11 degrees apart seen from the butt.
+- **Thumb line per hand.** `owner_thumb_azimuth_deg` is now `{lead: 45, trail: 20}`. With the trail hand nearer the top its thumb could not reach 45 degrees (7.4 degrees short); it lies 20 degrees to the target side of the top.
+- **Shaft roll is exactly a rigid turn.** `build_grip_hands` solves the pair with the lead hand unrolled and turns the result. Before, a rolled pair was solved again in a turned frame and one skin dent on the trail little finger differed by 0.3 mm.
+- **Heel-pad ratchet 7 to 8 mm (a loosening; evidence on #15150).** Turning the lead hand to centre the wrist measures 7.7 mm, against 6.3 mm before. Hand turns from 12 to 22 degrees give 7.0 to 7.7 mm; none recovers 6.3.
+- **One test restated.** `test_turning_the_thumb_can_be_switched_off` used the default trail hand, which no longer needs a thumb turn. It now shows the switch on the legacy grip with the knuckle target.
+
+#### Measured at `81c38e59f7`
+
+| Check | Now | At `f4f607338c` | Limit |
+| --- | --- | --- | --- |
+| Lead wrist joint, sideways from the shaft | 0 mm | 22 mm to the target side | 8 mm |
+| Trail wrist joint, sideways from the shaft | 44 mm to the trail side | 74 mm | 15 to 50 mm |
+| Wrist extension, lead and trail | 15 and 20 degrees | 8 and 15 | at least 12 |
+| Forearms apart, seen from the butt | 11 degrees | 32 | 5 to 50 (was 15 to 50) |
+| Thumb joint to forefinger knuckle, lead and trail | 26.9 and 36.5 mm | 31.0 and 39.0 mm | none in this mode (skin touches at about 15) |
+| Thumb to its own hand, lead and trail | 1.6 and 2.0 mm | 1.8 and 1.9 mm | 3 mm |
+| Lead heel pad to the grip, nearest skin | 7.7 mm | 6.3 mm | 8 mm (was 7) |
+| Fingertip to thumb pad, lead index, middle, ring | 8.4, 1.4, 6.5 mm | 4.4, 0.9, 4.5 mm | none |
+| Fingertip to thumb pad, trail index, middle | 6.3, 2.4 mm | 0.7, 1.2 mm | none |
+| Skin within 0.5 mm of the grip, lead and trail | 26.2 and 18.2 cm2 | 27.1 and 18.8 cm2 | at least 18 cm2 |
+| Trail first segments to the grip in the pair, index and middle | 4.6 and 4.7 mm | not recorded | none on first segments |
+| Pinched knuckle edges, lead and trail | 3 and 1 | 3 and 1 | 6 |
+| Flipped triangles | 0 | 0 | 0 |
+| Skin moved by correctives, lead and trail | 30.3 % and 31.7 % | 30.1 % and 32.2 % | 34 % |
+| Pair fault | 0.69 mm | 0.66 mm | parts checked at 1.0 and 1.5 mm |
+
+Tests: 153 pass, 1 skipped, **2 expected failures** (see Blockers).
+
+#### Honest Reading
+
+- The wrists are where the owner asked. **The grip is not tighter for it**: the fingertips are further from the thumb pads than before (lead index 8.4 mm, was 4.4), the heel pad is 1.4 mm further off, and the trail hand's contact area is 0.2 cm2 above its floor.
+- **Pinch: partly.** The lead thumb joint is 4 mm nearer the forefinger knuckle. The full pinch setting (`thumb.toward_index_target: "knuckle"`) brings the lead to 16 mm, which is skin on skin, but it unseats the trail ring finger in the pair (fault 10 mm). A thumb line of 30 degrees on both hands fails five tests. Not solved.
+- The pair solve is brittle around the trail hand's turn: 10 degrees holds (fault 0.69 mm), 0 and 14 degrees do not (4.7 and 7.6 mm).
+
+#### Does the Wrist Work as a Universal Joint?
+
+Yes, as far as a picture needs. `wrist.<side>` has two angles, extension and ulnar deviation, about the wrist joint centre; the forearm turns and the hand stays. There is no twist: that belongs to the forearm, as the owner describes. `qa.wrist_joint_m(result)` gives the joint centre in the club frame, and the forearm bone gives its axis. The mesh still ends in a forearm stub with a rounded cap; cutting it at the wrist is still to do.
+
+The MuJoCo golfer already has the matching joints: forearm rotation about the forearm axis (`LFInput`, `RFInput`) and a two-axis wrist (`LWInputX`/`LWInputY`, `RWInputX`/`RWInputY`) between the forearm and the club.
+
+#### Clubface and Forearm Attachment in the MuJoCo Golfer: Measured, Not Fixed
+
+Measured with a scratch spike (not committed) on `full_body_spec_anthro_driver_v2.json`:
+
+- **The hands are 46 degrees round the shaft from the clubface.** The head is squared by its own constant (`ADDRESS_SQUARE_FACE_ROLL_DEG`, driver -37.92 degrees, `club_assembly.py`), because the fitted wrist constants leave the club body rolled open. The hands are turned separately, from the wrist joint's dorsal axis (`grip_hands.grip_hand_frame`). Nothing ties the top of the grip under the hands to the face. `GripSpec.shaft_roll_deg` exists for this and is 0 on this path; the MuJoCo path never sets it.
+- **The hand does not meet the forearm.** The model's lead wrist joint is 25 mm from the shaft axis, level with the middle of the hand. The skinned hand's wrist joint is 60 mm from the axis and 77 mm nearer the butt. Placed on the club, the two are 57 mm apart (75 mm once the hands are squared to the face).
+
+Proposed order of work, for the owner to confirm (it changes the model's kinematics, so the swing has to be fitted again):
+
+1. Make the grip the authority. The hand frame on the club comes from the clubface (top of the grip at right angles to the face), not from the wrist joint.
+2. Put each wrist joint on the club where the posed hand has it (`wrist_joint_m`), for both hands, in the spec.
+3. Cut the hand mesh at the wrist and draw the model's own forearm to it.
+4. Refit address and the swing with the arms reaching those wrists; the forearm rotation and two-axis wrist take up the difference.
+
+#### Self-Review of the Frames at `81c38e59f7` (Harsh; Out Of 5)
+
+I opened the roll 0 frames of the lead hand, the trail hand and the pair, and the pair at roll +20 and -20 (25 frames, five views each). **I did not open the single-hand roll frames** (20); the roll is now a rigid turn by construction.
+
+| Criterion | Lead | Trail | Both | Note |
+| --- | --- | --- | --- | --- |
+| Reads as a hand on a real golf club | 4 | 4 | 4 | Unchanged |
+| Wrist over the shaft at address | 4 | 3 | 4 | New. Golfer view: the lead forearm runs straight back from the top of the grip. The trail wrist is 44 mm to the side, at the wide end of "slightly" |
+| Wrists extended | 3 | 3 | 3 | New. The forearms tip back by 15 and 20 degrees; hard to read in these views, and the hand does not wrap further for it |
+| Heel pad on top of the grip (Hogan) | 3 | n/a | 3 | Covers the grip, hovers 7.7 mm (was 6.3) |
+| Grip looks tight, fingers under the thumb pad | 2 | 2 | 3 | Trail down from 3: its fingertips are now 6 mm from the thumb pad |
+| Thumb and forefinger pinched | 2 | 2 | 2 | Lead a little closer; the notch is still open on both. The trail thumb is long and straight down the top of the grip |
+| Fingers square to the shaft | 2 | 3 | 2 | Unchanged |
+| Skin free of creases and folds | 4 | 4 | 4 | No flipped triangles |
+| Hands locked together | n/a | n/a | 4 | Holds in all three rolls |
+
+### Earlier Update at `f4f607338c` (2026-11-16): Butt Proud of the Heel, Golfer's-Eye View
 
 - **The butt of the club stands proud of the lead heel.** The lead heel pad hung 18 mm past the butt cap, so it had no grip to press on. `owner_lead_below_cap_edge_m` is 85 mm (was 60) and the evidence radius follows the taper there (10.9 mm, was 11.3). New test `test_the_butt_of_the_club_stands_proud_of_the_lead_heel` (`min_butt_beyond_lead_heel_m`, 2 mm).
 - **Ring-finger knuckle limit.** `curl.limits_deg` has `mcp.ring` at 115 degrees beside `mcp.little`: on the slimmer grip the ring finger otherwise bridged 2.5 mm off. Remove the key to switch it off.
@@ -136,7 +210,7 @@ I opened the roll 0 frames of the lead hand, the trail hand and the pair, and th
 
 ### Earlier Update at `5344c9496d` (2026-11-16): Real Golf Grip, Hogan Review, Heel Pad, Thumb Base
 
-**The "State" list and the "Measured" table below it were taken at `d577971830` on a 14 mm cylinder and have not been re-measured line by line**; where they disagree with this section, this section is right. The images further down are from `f4f607338c`.
+**The "State" list and the "Measured" table below it were taken at `d577971830` on a 14 mm cylinder and have not been re-measured line by line**; where they disagree with this section, this section is right. The images further down are from `81c38e59f7`.
 
 The owner supplied Ben Hogan reference photographs and three rounds of comments on 2026-11-16. What changed:
 
@@ -293,11 +367,11 @@ Each hand reads as a human hand holding a golf club, and the pair now reads as t
 
 | | Palm | Back | Thumb side | Butt | Golfer |
 | --- | --- | --- | --- | --- | --- |
-| Lead | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_butt_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_golfer_rollp00.png?raw=true) |
-| Trail | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_butt_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_golfer_rollp00.png?raw=true) |
-| Both | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_golfer_rollp00.png?raw=true) |
-| Both, roll -20 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_golfer_rollm20.png?raw=true) |
-| Both, roll +20 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/f4f607338cc108c2a90b62e969beaa56995ad21e/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_golfer_rollp20.png?raw=true) |
+| Lead | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_butt_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_lead_golfer_rollp00.png?raw=true) |
+| Trail | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_butt_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_trail_golfer_rollp00.png?raw=true) |
+| Both | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollp00.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_golfer_rollp00.png?raw=true) |
+| Both, roll -20 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollm20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_golfer_rollm20.png?raw=true) |
+| Both, roll +20 | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_palm_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_back_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_thumb_side_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_butt_rollp20.png?raw=true) | ![](https://github.com/D-sorganization/UpstreamDrift/blob/81c38e59f76c8a3acff8fbcfa5dab42c51a41689/docs/development/full_body_models/evidence/hand_skinned_human/skinned_both_golfer_rollp20.png?raw=true) |
 
 All 36 frames (1024 px, MuJoCo EGL through the shared renderer of #15154) and `render_manifest.json` are in `docs/development/full_body_models/evidence/hand_skinned_human/`.
 
@@ -331,6 +405,8 @@ All 36 frames (1024 px, MuJoCo EGL through the shared renderer of #15154) and `r
 - **CI.** After the merge of `main`, `code-quality` failed on two type errors (the scipy stubs that `main` now uses) and `unit-test-gate (1/2)` on a stale divergence inventory (four new hand modules). Both are fixed in this round: `code-quality` passes on `796707e4f5`; `unit-test-gate` was still running when this was written. The Fleet policy gate passes and is left alone as instructed.
 - **Coarse and fine skin solve apart (#15181).** `test_the_skin_is_subdivided_and_the_setting_switches_it_off` is a strict expected failure on both hands: on the 0.900 in grip the two solves differ by more than the 5 degree limit (lead `ring_prox` 6.3, trail `thumb_prox` 8.4, because the thumb's turn search finds its 45 degree line on one skin only). Sweeping heel depth and `toward_index_steps` only moved the failure. The limit is unchanged. This is a real open defect, not a tolerance change.
 - **Tighter grip, fingers under the lead thumb pad (owner, fourth comment).** Not done. Pressing the finger pads deeper puts finger bone inside the grip (table in the newest section). It needs the thumb's base brought down onto the fingertips, which is owner decision 1 (thumb at 45 degrees against thumb snug to the hand).
+- **Clubface and forearm attachment in the MuJoCo golfer.** Measured (hands 46 degrees round the shaft from the face; wrists 57 mm from the model's wrist joints), not fixed. The fix moves the wrist joints on the club, so the swing must be refitted; order of work proposed in the newest section, waiting for the owner.
+- **Thumb and forefinger pinch.** Partly. The full pinch unseats the trail hand in the pair.
 - **MuJoCo full-swing render.** Spiked only; the wiring lives in `grip_hands` and the club assembly, outside the two branches this session may push to.
 - **Fleet claim.** The lease on #15148 ran out at 2026-11-16 18:14Z. Re-claiming returned 409 (`claim:claude` label present, no active lease); the label still marks the issue as this session's.
 
@@ -344,6 +420,10 @@ All 36 frames (1024 px, MuJoCo EGL through the shared renderer of #15154) and `r
 - On a thinner grip the two-hand settle has two near-equal answers and flips between them. Try several, score them, keep the best.
 - The lead wrist angle only moves the forearm, so it can restore the forearm spread without touching the pose.
 
+- Where the wrist sits round the shaft is set by turning the whole hand about the shaft. That turn is also what a clubface roll is: decide which one is the authority before wiring a hand to a club.
+- A thumb line fixed on the club moves against the hand when the hand is turned. Re-check every thumb measure after a hand turn.
+- If a result must be the same after a rigid turn, solve once and turn the result. Solving again in a turned frame let one skin dent flip on rounding (0.3 mm).
+- A wait loop that greps the process list for a name in its own command line never ends.
 - Pressing the finger pads deeper does not tighten a grip whose fingers are already on the club: the bones go into the grip and neighbouring fingers move apart. A tighter look has to come from the pose (thumb base onto the fingertips), not from squeeze depth.
 - A hand placed so its heel hangs past the butt cap can never have the heel pressed on. Check where the hand is along the grip before working on the gap.
 - A mean over every vertex is not a measure of where the palm is; wrapped fingers and the forearm cancel it. Measure the named skin.
