@@ -67,6 +67,10 @@
         0.0,
         95.0
       ],
+      "mcp.little": [
+        0.0,
+        115.0
+      ],
       "pip": [
         0.0,
         115.0
@@ -168,7 +172,7 @@
   },
   "correctives": {
     "fold_relax": {
-      "iterations": 16,
+      "iterations": 32,
       "rings": 3,
       "step": 0.5
     },
@@ -187,8 +191,8 @@
         "thumb_prox"
       ],
       "max_added_fold_deg": 45.0,
-      "iterations": 32,
-      "rings": 2,
+      "iterations": 96,
+      "rings": 3,
       "step": 0.5
     },
     "palm_pad": {
@@ -210,7 +214,7 @@
     "lift_out": {
       "max_depth_m": 0.004,
       "bulge_gain": 0.5,
-      "bulge_rings": 3
+      "bulge_rings": 2
     }
   },
   "wrist": {

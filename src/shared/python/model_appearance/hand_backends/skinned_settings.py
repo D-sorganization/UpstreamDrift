@@ -122,9 +122,27 @@ class SkinnedHumanSettings:
         lead thumb, so it cups only as far as ``pair.palm_cup_max_deg``."""
         return replace(self, palm_cup_max_deg=self.pair_palm_cup_max_deg)
 
-    def limit_rad(self, joint: str) -> tuple[float, float]:
-        low, high = dict(self.limits_deg)[joint]
+    def limit_rad(self, joint: str, finger: str = "") -> tuple[float, float]:
+        """Flexion range of ``joint``; ``finger``'s own (``joint.finger``) if set."""
+        limits = dict(self.limits_deg)
+        low, high = limits.get(f"{joint}.{finger}", limits[joint])
         return math.radians(low), math.radians(high)
+
+    def finger_limits_rad(self, finger: str) -> dict[str, tuple[float, float]]:
+        """Flexion range of each segment's joint for ``finger``."""
+        return {s: self.limit_rad(j, finger) for s, j in JOINT_OF_SEGMENT.items()}
+
+
+def _check_limit_keys(limits: Mapping) -> None:
+    """Every joint has a limit; other keys name ``joint.finger``."""
+    for joint in JOINT_OF_SEGMENT.values():
+        if joint not in limits:
+            raise ValueError(f"limits_deg missing joint {joint!r}")
+    for key in limits:
+        joint, _, finger = key.partition(".")
+        known = joint in JOINT_OF_SEGMENT.values() and finger in ("", *FINGERS)
+        if not known or key.endswith("."):
+            raise ValueError(f"limits_deg has no joint or finger for {key!r}")
 
 
 def _pair(raw: Any, name: str) -> tuple[float, float]:
@@ -362,9 +380,7 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
     for finger in FINGERS:
         if finger not in curl["arch_gain"] or finger not in curl["arch_limit_deg"]:
             raise ValueError(f"arch settings missing finger {finger!r}")
-    for joint in JOINT_OF_SEGMENT.values():
-        if joint not in curl["limits_deg"]:
-            raise ValueError(f"limits_deg missing joint {joint!r}")
+    _check_limit_keys(curl["limits_deg"])
     return SkinnedHumanSettings(
         skin_rgb=(rgb[0], rgb[1], rgb[2]),
         breadth_band_m=float(anthro["breadth_band_m"]),

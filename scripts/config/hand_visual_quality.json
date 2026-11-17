@@ -1,8 +1,8 @@
 {
   "grip_radius_m": 0.011292,
   "owner_lead_below_cap_edge_m": 0.06,
-  "owner_lead_heel_pad_depth_m": 0.045,
-  "max_lead_heel_pad_gap_m": 0.018,
+  "owner_lead_heel_pad_depth_m": 0.065,
+  "max_lead_heel_pad_gap_m": 0.009,
   "max_lead_heel_pad_azimuth_deg": 30.0,
   "contact_tolerance_m": 0.0015,
   "penetration_tolerance_m": 0.0005,
@@ -11,8 +11,9 @@
   "mirror_error_m": 1e-09,
   "pinky_palm_depth_range_m": [
     0.002,
-    0.045
+    0.07
   ],
+  "pinky_palm_depth_range_note": "Upper bound raised from 0.045 with the owner's approval (2026-11-16, 'Yes, go deeper'): Hogan lays the club under the lead heel pad, about 65 mm below the little-finger knuckle.",
   "anthropometric_tolerance": 0.15,
   "anthropometric_reference": {
     "breadth_over_length": 0.449,
@@ -42,6 +43,7 @@
   "min_bone_grip_clearance_m": 0.0015,
   "max_thumb_first_segment_median_gap_m": 0.005,
   "min_palm_cup_thenar_approach_m": 0.01,
+  "min_palm_cup_first_segment_approach_m": 0.002,
   "max_finger_side_gap_m": 0.002,
   "max_index_side_gap_m": 0.005,
   "max_pair_little_finger_gap_m": 0.001,

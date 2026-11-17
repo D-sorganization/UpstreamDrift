@@ -76,7 +76,6 @@ from src.shared.python.model_appearance.hand_backends.skinned_targets import (
     turned as _turned,
 )
 from src.shared.python.model_appearance.hand_backends.skinned_settings import (
-    JOINT_OF_SEGMENT as _JOINT_OF_SEGMENT,
     SETTINGS_PATH as SETTINGS_PATH,
     SkinnedHumanSettings as SkinnedHumanSettings,
     default_settings as default_settings,
@@ -440,7 +439,7 @@ def _finger_chains(
     pip_gain, dip_gain = settings.pip_per_mcp, settings.dip_per_pip
     chains = []
     for finger in FINGERS:
-        limits = {s: settings.limit_rad(_JOINT_OF_SEGMENT[s]) for s in _SEGMENTS}
+        limits = settings.finger_limits_rad(finger)
         prox, mid, dist = (f"{finger}_{s}" for s in _SEGMENTS)
         if finger == "index":
             low = min(max(limits["prox"][0], index_knuckle_rad), limits["prox"][1])

@@ -18,9 +18,9 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1515 | `src/shared/python/motion_matching/acceptance.py` |
 | 1319 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/runSimulation.m` |
 | 1200 | `src/engines/simscape/adapter.py` |
-| 1200 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1200 | `src/tools/shot_pattern_analysis/matched_lean_control.py` |
 | 1199 | `src/api/services/simulation_service.py` |
+| 1199 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1198 | `src/api/local_server.py` |
 | 1198 | `src/launchers/cross_engine_dashboard.py` |
 | 1198 | `src/tools/capture_rig/gui.py` |

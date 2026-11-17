@@ -309,7 +309,11 @@ def test_the_palm_cups_so_the_thumb_base_lies_on_the_grip(side: str) -> None:
     limit = float(_Q["max_thumb_first_segment_median_gap_m"])
     first = ("thumb_prox",)
     assert median_facing_grip_gap_m(cupped, first) <= limit
-    assert median_facing_grip_gap_m(flat, first) > limit
+    # With the club under the lead heel pad (#15150) the lead thumb is already
+    # near the grip uncupped, so the cup must bring it closer, not rescue it.
+    assert median_facing_grip_gap_m(flat, first) > median_facing_grip_gap_m(
+        cupped, first
+    ) + float(_Q["min_palm_cup_first_segment_approach_m"])
     base = ("thumb_meta",)
     closer = float(_Q["min_palm_cup_thenar_approach_m"])
     assert (
@@ -616,10 +620,9 @@ def test_fingers_wrap_and_the_palm_cups(side: str) -> None:
             f"{side} {finger} only curls {total:.0f} deg"
         )
         for joint, segment in (("mcp", "prox"), ("pip", "mid"), ("dip", "dist")):
-            low, high = dict(default_settings().limits_deg)[joint]
-            assert (
-                low - 1e-6 <= angles.flexion_deg(f"{finger}_{segment}") <= high + 1e-6
-            )
+            low, high = default_settings().limit_rad(joint, finger)
+            bend = math.radians(angles.flexion_deg(f"{finger}_{segment}"))
+            assert low - 1e-6 <= bend <= high + 1e-6
     assert angles.flexion_deg("meta_little") > angles.flexion_deg("meta_ring") > 0.0
 
 
@@ -661,6 +664,25 @@ def test_the_thumb_follows_the_spec_azimuth() -> None:
     for side, sign in (("lead", 1.0), ("trail", -1.0)):
         hand = build_hand_visual(spec, side, grip_radius_m=_RADIUS)
         assert abs(_thumb_azimuth_deg(hand) - sign * 20.0) <= slack, side
+
+
+def test_a_joint_limit_can_be_set_for_one_finger() -> None:
+    """``limits_deg`` takes ``joint.finger`` keys beside the joint-wide ones."""
+    raw = load_settings_mapping()
+    limits = {k: v for k, v in raw["curl"]["limits_deg"].items() if "." not in k}
+    raw["curl"] = {**raw["curl"], "limits_deg": {**limits, "mcp.little": [0.0, 20.0]}}
+    settings = settings_from_mapping(raw)
+    assert settings.limit_rad("mcp", "little") == (0.0, math.radians(20.0))
+    assert settings.limit_rad("mcp", "ring") == settings.limit_rad("mcp")
+    result = build_hand_visual(
+        _spec(), "trail", grip_radius_m=_RADIUS, settings=settings
+    )
+    assert result.joint_angles.flexion_deg("little_prox") <= 20.0 + 1e-6
+    assert _hand("trail").joint_angles.flexion_deg("little_prox") > 20.0
+    for key in ("mcp.pinky", "elbow", "elbow.little"):
+        raw["curl"]["limits_deg"] = {**limits, key: [0.0, 20.0]}
+        with pytest.raises(ValueError, match="limits_deg"):
+            settings_from_mapping(raw)
 
 
 def test_settings_drive_the_result() -> None:

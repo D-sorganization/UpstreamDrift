@@ -104,15 +104,21 @@ Targets of a hand live in `skinned_targets.py`.
   below 15 holds on single hands and unseats the trail ring finger in the pair.
 - In the pair the trail thumb's first segment is 5.5 mm off the grip, and the
   trail hand is erratic above 73 degrees of `pair.palm_cup_max_deg`.
-- The lead heel pad is 17.8 mm off the grip with the club 45 mm below the
-  little-finger knuckle (`owner_lead_heel_pad_depth_m`), the most that
-  `pinky_palm_depth_range_m` allows. Deeper (55 to 65 mm) looks right and
-  brings it to 12.5 and 7.4 mm, but takes the lead little finger 9 to 12 mm
-  off the grip and unseats the trail hand. A stronger metacarpal arch makes
-  it worse; a longer palm-pad reach moves a few vertices, not the pad. The
-  palm needs a fold along the club line in the pose.
-- The fingers are 17 to 43 degrees off square to the shaft on their middle
-  and end segments. The Hogan photographs show them nearly square.
+- The lead heel pad is 7.1 mm off the grip with the club 65 mm below the
+  little-finger knuckle (`owner_lead_heel_pad_depth_m`; the owner approved
+  going past the old 45 mm bound of `pinky_palm_depth_range_m` on
+  2026-11-16). The lead little finger needs `curl.limits_deg` key
+  `mcp.little` (115 degrees) to reach the grip there; `joint.finger` keys
+  override the joint-wide limit for one finger. The deep line creases the
+  skin at the little knuckle, so `crease_relax` runs 96 passes over 3 rings
+  and `lift_out.bulge_rings` is 2 to keep the correctives under 34 % of the
+  skin. Still open: the bulk of the heel pad (tenth percentile 17.6 mm) does
+  not touch; the palm needs a fold along the club line in the pose. A
+  stronger metacarpal arch makes it worse; less arch flips triangles.
+- The fingers are 15 to 50 degrees off square to the shaft on their middle
+  and end segments, worse on the lead hand since the club line went deeper
+  (the diagonal line is what tilts them). The Hogan photographs show them
+  nearly square.
 - The coarse-skin and fine-skin solves differ by more than 5 degrees on the
   thin grip (lead `ring_prox`, trail `thumb_prox`): a strict expected
   failure tied to #15181.
