@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import json
 import math
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Mapping
+from typing import Any, Mapping
 
 _REPO_ROOT = Path(__file__).resolve().parents[5]
 DEFAULT_SETTINGS_PATH = _REPO_ROOT / "scripts" / "config" / "sdf_hand.json"
@@ -224,18 +225,59 @@ def _load_thumb(raw: object) -> ThumbProfile:
     )
 
 
-def load_sdf_hand_settings(path: Path | None = None) -> SdfHandSettings:
-    """Load and validate the SDF hand settings file.
+_FIELD_VALIDATORS: tuple[tuple[str, Callable[[str, object], Any]], ...] = (
+    ("palm_width_m", _positive),
+    ("default_grip_radius_m", _positive),
+    ("pad_clearance_m", _finite),
+    ("contact_tolerance_m", _positive),
+    ("penetration_tolerance_m", _positive),
+    ("mcp_from_v_deg", _finite),
+    ("full_contact_palm_finger_depth", _positive),
+    ("open_hand_lift_m", _finite),
+    ("mc_tangent_weight", _positive),
+    ("mc_radial_weight", _positive),
+    ("transverse_arch_m", _finite),
+    ("longitudinal_arch_m", _finite),
+    ("palm_wrap_arc_rad", _positive),
+    ("palm_base_hover_m", _positive),
+    ("palm_axial_drop_m", _positive),
+    ("thumb_opposition_sweep_m", _finite),
+    ("bounds_pad_m", _positive),
+    ("grip_rgb", _vec3),
+    ("shaft_rgb", _vec3),
+    ("background_rgb", _vec3),
+    ("key_light", _vec3),
+    ("fill_light", _vec3),
+    ("fill_weight", _finite),
+    ("ambient", _finite),
+    ("shaft_radius_m", _positive),
+    ("shaft_extension_fraction", _finite),
+    ("knuckle_radius_fraction", _positive),
+    ("knuckle_dorsal_fraction", _finite),
+    ("crease_radius_fraction", _positive),
+    ("crease_depth_fraction", _finite),
+    ("crease_span_fraction", _positive),
+    ("nail_radii_m", _vec3),
+    ("nail_along_fraction", _finite),
+    ("thenar_radii_m", _vec3),
+    ("hypothenar_radii_m", _vec3),
+    ("web_radii_m", _vec3),
+    ("wrist_radii_m", _vec3),
+    ("palm_fill_radii_m", _vec3),
+    ("ellipsoid_support_margin_m", _positive),
+    ("legacy_club_cross_angle_deg", _finite),
+    ("cross_angle_mcp_tilt_gain", _finite),
+    ("overlap_little_lift_m", _finite),
+    ("palm_head_weight", _finite),
+    ("butt_extension_m", _positive),
+    ("finger_spread_deg", _finger_map),
+    ("transverse_arch_coeff", _finger_map),
+)
+"""Scalar fields validated in declaration order after the cross-field checks."""
 
-    Preconditions: the path exists and the JSON matches the schema.
-    Postcondition: the returned settings satisfy the module invariants.
-    """
-    source = DEFAULT_SETTINGS_PATH if path is None else Path(path)
-    if not source.is_file():
-        raise FileNotFoundError(f"SDF hand settings not found: {source}")
-    raw = json.loads(source.read_text(encoding="utf-8"))
-    if not isinstance(raw, dict):
-        raise ValueError("SDF hand settings must be a JSON object")
+
+def _cross_checked_fields(raw: dict[str, Any]) -> dict[str, Any]:
+    """Fields whose validation spans keys or bounds beyond a single number."""
     blends_raw = raw.get("blend_m")
     if not isinstance(blends_raw, dict) or set(blends_raw) != set(_BLENDS):
         raise ValueError(f"blend_m must map exactly {_BLENDS}")
@@ -280,105 +322,41 @@ def load_sdf_hand_settings(path: Path | None = None) -> SdfHandSettings:
     fill = _finite("frame_fill", raw.get("frame_fill"))
     if not 0.5 <= fill <= 0.9:
         raise ValueError(f"frame_fill must be in [0.5, 0.9], got {fill}")
+    return {
+        "blend_m": blends,
+        "fingers": fingers,
+        "hand_length_m": hand_length,
+        "taubin_lambda": lam,
+        "taubin_mu": mu,
+        "taubin_iterations": iterations,
+        "wrist_convergence": convergence,
+        "test_frame_px": test_frame,
+        "skin_material": skin,
+        "resolution": resolution,
+        "min_resolution": minimum,
+        "test_resolution": test_resolution,
+        "frame_px": frame_px,
+        "frame_fill": fill,
+    }
+
+
+def load_sdf_hand_settings(path: Path | None = None) -> SdfHandSettings:
+    """Load and validate the SDF hand settings file.
+
+    Preconditions: the path exists and the JSON matches the schema.
+    Postcondition: the returned settings satisfy the module invariants.
+    """
+    source = DEFAULT_SETTINGS_PATH if path is None else Path(path)
+    if not source.is_file():
+        raise FileNotFoundError(f"SDF hand settings not found: {source}")
+    raw = json.loads(source.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError("SDF hand settings must be a JSON object")
+    checked = _cross_checked_fields(raw)
+    scalars = {name: check(name, raw.get(name)) for name, check in _FIELD_VALIDATORS}
     return SdfHandSettings(
-        hand_length_m=hand_length,
-        palm_width_m=_positive("palm_width_m", raw.get("palm_width_m")),
-        default_grip_radius_m=_positive(
-            "default_grip_radius_m", raw.get("default_grip_radius_m")
-        ),
-        pad_clearance_m=_finite("pad_clearance_m", raw.get("pad_clearance_m")),
-        contact_tolerance_m=_positive(
-            "contact_tolerance_m", raw.get("contact_tolerance_m")
-        ),
-        penetration_tolerance_m=_positive(
-            "penetration_tolerance_m", raw.get("penetration_tolerance_m")
-        ),
-        mcp_from_v_deg=_finite("mcp_from_v_deg", raw.get("mcp_from_v_deg")),
-        full_contact_palm_finger_depth=_positive(
-            "full_contact_palm_finger_depth", raw.get("full_contact_palm_finger_depth")
-        ),
-        open_hand_lift_m=_finite("open_hand_lift_m", raw.get("open_hand_lift_m")),
-        mc_tangent_weight=_positive("mc_tangent_weight", raw.get("mc_tangent_weight")),
-        mc_radial_weight=_positive("mc_radial_weight", raw.get("mc_radial_weight")),
-        wrist_convergence=convergence,
-        transverse_arch_m=_finite("transverse_arch_m", raw.get("transverse_arch_m")),
-        longitudinal_arch_m=_finite(
-            "longitudinal_arch_m", raw.get("longitudinal_arch_m")
-        ),
-        palm_wrap_arc_rad=_positive("palm_wrap_arc_rad", raw.get("palm_wrap_arc_rad")),
-        palm_base_hover_m=_positive("palm_base_hover_m", raw.get("palm_base_hover_m")),
-        palm_axial_drop_m=_positive("palm_axial_drop_m", raw.get("palm_axial_drop_m")),
-        thumb_opposition_sweep_m=_finite(
-            "thumb_opposition_sweep_m", raw.get("thumb_opposition_sweep_m")
-        ),
-        blend_m=blends,
-        resolution=resolution,
-        test_resolution=test_resolution,
-        min_resolution=minimum,
-        bounds_pad_m=_positive("bounds_pad_m", raw.get("bounds_pad_m")),
-        taubin_iterations=iterations,
-        taubin_lambda=lam,
-        taubin_mu=mu,
-        frame_px=frame_px,
-        frame_fill=fill,
-        test_frame_px=test_frame,
-        skin_material=skin,
-        grip_rgb=_vec3("grip_rgb", raw.get("grip_rgb")),
-        shaft_rgb=_vec3("shaft_rgb", raw.get("shaft_rgb")),
-        background_rgb=_vec3("background_rgb", raw.get("background_rgb")),
-        key_light=_vec3("key_light", raw.get("key_light")),
-        fill_light=_vec3("fill_light", raw.get("fill_light")),
-        fill_weight=_finite("fill_weight", raw.get("fill_weight")),
-        ambient=_finite("ambient", raw.get("ambient")),
-        shaft_radius_m=_positive("shaft_radius_m", raw.get("shaft_radius_m")),
-        shaft_extension_fraction=_finite(
-            "shaft_extension_fraction", raw.get("shaft_extension_fraction")
-        ),
-        knuckle_radius_fraction=_positive(
-            "knuckle_radius_fraction", raw.get("knuckle_radius_fraction")
-        ),
-        knuckle_dorsal_fraction=_finite(
-            "knuckle_dorsal_fraction", raw.get("knuckle_dorsal_fraction")
-        ),
-        crease_radius_fraction=_positive(
-            "crease_radius_fraction", raw.get("crease_radius_fraction")
-        ),
-        crease_depth_fraction=_finite(
-            "crease_depth_fraction", raw.get("crease_depth_fraction")
-        ),
-        crease_span_fraction=_positive(
-            "crease_span_fraction", raw.get("crease_span_fraction")
-        ),
-        nail_radii_m=_vec3("nail_radii_m", raw.get("nail_radii_m")),
-        nail_along_fraction=_finite(
-            "nail_along_fraction", raw.get("nail_along_fraction")
-        ),
-        thenar_radii_m=_vec3("thenar_radii_m", raw.get("thenar_radii_m")),
-        hypothenar_radii_m=_vec3("hypothenar_radii_m", raw.get("hypothenar_radii_m")),
-        web_radii_m=_vec3("web_radii_m", raw.get("web_radii_m")),
-        wrist_radii_m=_vec3("wrist_radii_m", raw.get("wrist_radii_m")),
-        palm_fill_radii_m=_vec3("palm_fill_radii_m", raw.get("palm_fill_radii_m")),
-        ellipsoid_support_margin_m=_positive(
-            "ellipsoid_support_margin_m", raw.get("ellipsoid_support_margin_m")
-        ),
-        legacy_club_cross_angle_deg=_finite(
-            "legacy_club_cross_angle_deg", raw.get("legacy_club_cross_angle_deg")
-        ),
-        cross_angle_mcp_tilt_gain=_finite(
-            "cross_angle_mcp_tilt_gain", raw.get("cross_angle_mcp_tilt_gain")
-        ),
-        overlap_little_lift_m=_finite(
-            "overlap_little_lift_m", raw.get("overlap_little_lift_m")
-        ),
-        palm_head_weight=_finite("palm_head_weight", raw.get("palm_head_weight")),
-        butt_extension_m=_positive("butt_extension_m", raw.get("butt_extension_m")),
-        finger_spread_deg=_finger_map(
-            "finger_spread_deg", raw.get("finger_spread_deg")
-        ),
-        transverse_arch_coeff=_finger_map(
-            "transverse_arch_coeff", raw.get("transverse_arch_coeff")
-        ),
-        fingers=fingers,
+        **checked,
+        **scalars,
         thumb=_load_thumb(raw.get("thumb")),
         source_path=str(source),
     )

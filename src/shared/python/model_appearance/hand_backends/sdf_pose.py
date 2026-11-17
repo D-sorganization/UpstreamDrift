@@ -19,7 +19,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from src.shared.python.grip_contact.contact_topology import GripStyle
-from src.shared.python.grip_spec.types import GripSpec
+from src.shared.python.grip_spec.types import GripSpec, HandGripSpec
 from src.shared.python.hand_size import resolve_hand_breadth_m
 from src.shared.python.model_appearance.hand_backends.contract import (
     HAND_ROLES,
@@ -28,10 +28,13 @@ from src.shared.python.model_appearance.hand_backends.contract import (
 )
 from src.shared.python.model_appearance.hand_backends.sdf_field import Primitive
 from src.shared.python.model_appearance.hand_backends.sdf_primitives import (
+    Bone,
+    PoseFrame,
     add_crease,
+    add_finger_joints,
     add_knuckle,
+    add_nail,
     add_pad,
-    clear_of_grip_ellipsoid,
     cone_primitive,
     ellipsoid_primitive,
     measure_skeleton,
@@ -39,6 +42,7 @@ from src.shared.python.model_appearance.hand_backends.sdf_primitives import (
     radial_dir,
     scaled_radii,
     tangent_chain,
+    blend_thumb_bones,
     unit,
     vec3,
 )
@@ -69,21 +73,65 @@ class HandSkeleton:
     palm_width_m: float
 
 
+def _pose_finger(
+    primitives: list[Primitive],
+    frame: PoseFrame,
+    finger: str,
+    *,
+    mcp: float,
+    z: float,
+    finger_lift: float,
+) -> list[Bone]:
+    scale = frame.scale
+    profile = frame.settings.finger(finger)
+    lengths = tuple(length * scale for length in profile.phalanges_m)
+    radii = tuple((pair[0] * scale, pair[1] * scale) for pair in profile.radii_m)
+    contact_radius = radii[0][0]
+    tangent_radius = (
+        frame.grip_radius_m + frame.clearance + contact_radius + finger_lift
+    )
+    bones = tangent_chain(lengths, tangent_radius, mcp, z, frame.curl)
+    for bone_name, (start, end, outward), (radius0, radius1) in zip(
+        _PHALANX, bones, radii, strict=True
+    ):
+        palmar = -outward
+        primitives.append(
+            cone_primitive(
+                f"{finger}_{bone_name}",
+                finger,
+                "phalanx",
+                start,
+                end,
+                (radius0, radius1),
+                palmar,
+            )
+        )
+        add_pad(
+            primitives,
+            f"{finger}_{bone_name}",
+            finger,
+            start,
+            end,
+            radius0,
+            radius1,
+            contact_radius,
+        )
+    add_finger_joints(primitives, frame, finger, bones, radii)
+    add_nail(primitives, frame, finger, bones[2], lengths[2], radii[2][1])
+    return bones
+
+
 def _pose_fingers(
     primitives: list[Primitive],
+    frame: PoseFrame,
     *,
     grip_spec: GripSpec,
     side: HandRole,
-    settings: SdfHandSettings,
-    scale: float,
     breadth_ratio: float,
-    grip_radius_m: float,
-    clearance: float,
-    lift: float,
     v_azimuth: float,
-    curl: int,
     cross_delta_deg: float,
 ) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray], dict[str, np.ndarray]]:
+    settings, scale = frame.settings, frame.scale
     radii_used = {name: settings.finger(name).radii_m[0][0] * scale for name in _DIGITS}
     target_width = settings.palm_width_m * scale * breadth_ratio
     center_span = target_width - radii_used["index"] - radii_used["little"]
@@ -96,11 +144,7 @@ def _pose_fingers(
     outward_at: dict[str, np.ndarray] = {}
     palmar_at: dict[str, np.ndarray] = {}
     for finger in _DIGITS:
-        profile = settings.finger(finger)
-        lengths = tuple(length * scale for length in profile.phalanges_m)
-        radii = tuple((pair[0] * scale, pair[1] * scale) for pair in profile.radii_m)
-        contact_radius = radii[0][0]
-        finger_lift = lift
+        finger_lift = frame.lift
         if (
             side == "trail"
             and finger == "little"
@@ -108,111 +152,32 @@ def _pose_fingers(
             and grip_spec.lead != grip_spec.trail
         ):
             finger_lift += settings.overlap_little_lift_m * scale
-        tangent_radius = grip_radius_m + clearance + contact_radius + finger_lift
         spread = math.radians(settings.finger_spread_deg[finger])
         cross_shift = math.radians(
             _CROSS_PIVOT_WEIGHTS[finger]
             * cross_delta_deg
             * settings.cross_angle_mcp_tilt_gain
         )
-        mcp = v_azimuth + curl * (
+        mcp = v_azimuth + frame.curl * (
             math.radians(settings.mcp_from_v_deg) + spread + cross_shift
         )
-        bones = tangent_chain(lengths, tangent_radius, mcp, z_of[finger], curl)
+        bones = _pose_finger(
+            primitives, frame, finger, mcp=mcp, z=z_of[finger], finger_lift=finger_lift
+        )
         proximal_starts[finger] = bones[0][0]
         outward_at[finger] = bones[0][2]
         palmar_at[finger] = -bones[0][2]
-        for bone_name, (start, end, outward), (radius0, radius1) in zip(
-            _PHALANX, bones, radii, strict=True
-        ):
-            palmar = -outward
-            primitives.append(
-                cone_primitive(
-                    f"{finger}_{bone_name}",
-                    finger,
-                    "phalanx",
-                    start,
-                    end,
-                    radius0,
-                    radius1,
-                    palmar,
-                )
-            )
-            add_pad(
-                primitives,
-                f"{finger}_{bone_name}",
-                finger,
-                start,
-                end,
-                radius0,
-                radius1,
-                contact_radius,
-            )
-        joints = (
-            ("mcp", bones[0][0], radii[0][0], bones[0][1] - bones[0][0], bones[0][2]),
-            ("pip", bones[0][1], radii[0][1], bones[1][1] - bones[1][0], bones[1][2]),
-            ("dip", bones[1][1], radii[1][1], bones[2][1] - bones[2][0], bones[2][2]),
-        )
-        for label, centre, radius, axis, outward in joints:
-            palmar = -outward
-            add_knuckle(
-                primitives,
-                f"{finger}_{label}",
-                finger,
-                centre,
-                palmar,
-                radius,
-                settings,
-                scale,
-            )
-            if label != "mcp":
-                add_crease(
-                    primitives,
-                    f"{finger}_{label}_crease",
-                    centre,
-                    axis,
-                    palmar,
-                    radius,
-                    settings,
-                )
-        distal_start, distal_end, distal_out = bones[2]
-        distal_axis = unit(distal_end - distal_start)
-        nail_centre = (
-            distal_end
-            - distal_axis * (lengths[2] * settings.nail_along_fraction)
-            + distal_out * (radii[2][1] * 0.45)
-        )
-        primitives.append(
-            ellipsoid_primitive(
-                f"{finger}_nail",
-                finger,
-                "nail",
-                nail_centre,
-                distal_axis,
-                -distal_out,
-                scaled_radii(settings.nail_radii_m, scale),
-                blend="nail",
-            )
-        )
     return proximal_starts, outward_at, palmar_at
 
 
-def _pose_metacarpals_and_palm(
+def _metacarpal_bases(
     primitives: list[Primitive],
-    *,
-    proximal_starts: dict[str, np.ndarray],
-    outward_at: dict[str, np.ndarray],
-    palmar_at: dict[str, np.ndarray],
-    settings: SdfHandSettings,
-    scale: float,
-    grip_radius_m: float,
-    clearance: float,
-    margin_m: float,
-) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray]]:
+    frame: PoseFrame,
+    heads: dict[str, np.ndarray],
+) -> dict[str, np.ndarray]:
+    settings, scale = frame.settings, frame.scale
+    grip_radius_m, clearance = frame.grip_radius_m, frame.clearance
     bases: dict[str, np.ndarray] = {}
-    heads: dict[str, np.ndarray] = {
-        finger: proximal_starts[finger] for finger in _DIGITS
-    }
     centroid_z = float(np.mean([heads[name][2] for name in _DIGITS]))
     for finger in _DIGITS:
         profile = settings.finger(finger)
@@ -254,7 +219,18 @@ def _pose_metacarpals_and_palm(
             dtype=np.float64,
         )
         bases[finger] = head + unit(gathered - head) * length
+    return bases
 
+
+def _add_metacarpal_cones(
+    primitives: list[Primitive],
+    frame: PoseFrame,
+    bases: dict[str, np.ndarray],
+    heads: dict[str, np.ndarray],
+    outward_at: dict[str, np.ndarray],
+    palmar_at: dict[str, np.ndarray],
+) -> None:
+    settings, scale = frame.settings, frame.scale
     for finger in _DIGITS:
         profile = settings.finger(finger)
         base_r, head_r = (
@@ -281,8 +257,7 @@ def _pose_metacarpals_and_palm(
                 "metacarpal",
                 base,
                 mid,
-                base_r,
-                mid_r,
+                (base_r, mid_r),
                 palmar,
                 blend="palm",
             )
@@ -294,36 +269,41 @@ def _pose_metacarpals_and_palm(
                 "metacarpal",
                 mid,
                 head,
-                mid_r,
-                head_r,
+                (mid_r, head_r),
                 palmar,
                 blend="palm",
             )
         )
 
+
+def _add_hypothenar(
+    primitives: list[Primitive],
+    frame: PoseFrame,
+    bases: dict[str, np.ndarray],
+    heads: dict[str, np.ndarray],
+    palmar_at: dict[str, np.ndarray],
+) -> None:
+    scale = frame.scale
     little_mid_prim = next(
         prim for prim in primitives if prim.name == "little_metacarpal_head"
     )
     little_mid = 0.5 * (
         np.asarray(little_mid_prim.start) + np.asarray(little_mid_prim.end)
     )
-    hypothenar_radii = scaled_radii(settings.hypothenar_radii_m, scale)
+    hypothenar_radii = scaled_radii(frame.settings.hypothenar_radii_m, scale)
     hypothenar_along = unit(heads["little"] - bases["little"])
     primitives.append(
         ellipsoid_primitive(
             "hypothenar",
             "palm",
             "eminence",
-            clear_of_grip_ellipsoid(
+            frame.clear(
                 little_mid
                 + palmar_at["little"] * (0.003 * scale)
                 + np.array([0.0, 0.0, -0.005 * scale], dtype=np.float64),
                 hypothenar_along,
                 palmar_at["little"],
                 hypothenar_radii,
-                grip_radius_m,
-                clearance,
-                margin_m=margin_m,
             ),
             hypothenar_along,
             palmar_at["little"],
@@ -332,6 +312,15 @@ def _pose_metacarpals_and_palm(
         )
     )
 
+
+def _add_palm_and_wrist(
+    primitives: list[Primitive],
+    frame: PoseFrame,
+    bases: dict[str, np.ndarray],
+    heads: dict[str, np.ndarray],
+    palmar: np.ndarray,
+) -> None:
+    settings, scale = frame.settings, frame.scale
     mean_heads = sum(
         (heads[name] for name in _DIGITS), np.zeros(3, dtype=np.float64)
     ) / len(_DIGITS)
@@ -348,17 +337,9 @@ def _pose_metacarpals_and_palm(
             "palm_fill",
             "palm",
             "palm",
-            clear_of_grip_ellipsoid(
-                palm_raw,
-                palm_along,
-                palmar_at["middle"],
-                palm_radii,
-                grip_radius_m,
-                clearance,
-                margin_m=margin_m,
-            ),
+            frame.clear(palm_raw, palm_along, palmar, palm_radii),
             palm_along,
-            palmar_at["middle"],
+            palmar,
             palm_radii,
             blend="palm",
         )
@@ -368,86 +349,140 @@ def _pose_metacarpals_and_palm(
             "wrist",
             "palm",
             "wrist",
-            clear_of_grip_ellipsoid(
+            frame.clear(
                 0.92 * mean_bases + 0.08 * mean_heads,
                 palm_along,
-                palmar_at["middle"],
+                palmar,
                 wrist_radii,
-                grip_radius_m,
-                clearance,
-                margin_m=margin_m,
             ),
             palm_along,
-            palmar_at["middle"],
+            palmar,
             wrist_radii,
             blend="palm",
         )
     )
+
+
+def _pose_metacarpals_and_palm(
+    primitives: list[Primitive],
+    frame: PoseFrame,
+    *,
+    proximal_starts: dict[str, np.ndarray],
+    outward_at: dict[str, np.ndarray],
+    palmar_at: dict[str, np.ndarray],
+) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray]]:
+    heads: dict[str, np.ndarray] = {
+        finger: proximal_starts[finger] for finger in _DIGITS
+    }
+    bases = _metacarpal_bases(primitives, frame, heads)
+    _add_metacarpal_cones(primitives, frame, bases, heads, outward_at, palmar_at)
+    _add_hypothenar(primitives, frame, bases, heads, palmar_at)
+    _add_palm_and_wrist(primitives, frame, bases, heads, palmar_at["middle"])
     return bases, heads
+
+
+def _add_thumb_palm(
+    primitives: list[Primitive],
+    frame: PoseFrame,
+    *,
+    thumb_head: np.ndarray,
+    outward: np.ndarray,
+    bases: dict[str, np.ndarray],
+    proximal_starts: dict[str, np.ndarray],
+) -> None:
+    settings, scale = frame.settings, frame.scale
+    thumb = settings.thumb
+    palmar = -outward
+    index_base = 0.7 * bases["index"] + 0.3 * bases["middle"]
+    toward_index = index_base - thumb_head
+    if float(np.linalg.norm(toward_index)) < 1e-6:
+        toward_index = -outward
+    mc_dir = unit(toward_index - palmar * (0.008 * scale))
+    mc_length = thumb.metacarpal_m * scale
+    mc_base = thumb_head + mc_dir * mc_length
+    mc_r0, mc_r1 = (
+        thumb.metacarpal_radii_m[0] * scale,
+        thumb.metacarpal_radii_m[1] * scale,
+    )
+    primitives.append(
+        cone_primitive(
+            "thumb_metacarpal",
+            "thumb",
+            "metacarpal",
+            mc_base,
+            thumb_head,
+            (mc_r0, mc_r1),
+            palmar,
+            blend="joint",
+        )
+    )
+    thumb_mid = 0.5 * (mc_base + thumb_head)
+    thenar_radii = scaled_radii(settings.thenar_radii_m, scale)
+    primitives.append(
+        ellipsoid_primitive(
+            "thenar",
+            "thumb",
+            "eminence",
+            frame.clear(
+                thumb_mid + palmar * (0.003 * scale), mc_dir, palmar, thenar_radii
+            ),
+            mc_dir,
+            palmar,
+            thenar_radii,
+            blend="joint",
+        )
+    )
+    web_radii = scaled_radii(settings.web_radii_m, scale)
+    web_along = unit(
+        0.5 * (proximal_starts["index"] + proximal_starts["middle"]) - thumb_mid
+    )
+    web_centre = frame.clear(
+        0.45 * (0.5 * (thumb_head + proximal_starts["index"]))
+        + 0.55 * (0.5 * (thumb_mid + bases["index"])),
+        web_along,
+        palmar,
+        web_radii,
+    )
+    primitives.append(
+        ellipsoid_primitive(
+            "thumb_web",
+            "thumb",
+            "web",
+            web_centre,
+            web_along,
+            palmar,
+            web_radii,
+            blend="web",
+        )
+    )
 
 
 def _pose_thumb(
     primitives: list[Primitive],
+    frame: PoseFrame,
     *,
-    grip_spec: GripSpec,
-    side: HandRole,
+    hand: HandGripSpec,
     joint_angles: GripArticulation,
-    settings: SdfHandSettings,
-    scale: float,
-    grip_radius_m: float,
-    clearance: float,
-    lift: float,
-    curl: int,
     bases: dict[str, np.ndarray],
     proximal_starts: dict[str, np.ndarray],
-    margin_m: float,
 ) -> None:
-    hand = grip_spec.lead if side == "lead" else grip_spec.trail
+    settings, scale = frame.settings, frame.scale
     thumb = settings.thumb
     thumb_radii = tuple((pair[0] * scale, pair[1] * scale) for pair in thumb.radii_m)
     thumb_contact = max(thumb_radii[0][0], thumb_radii[1][0])
     thumb_azimuth = math.radians(hand.thumb_azimuth_deg)
     outward = radial_dir(thumb_azimuth)
     palmar = -outward
-    tangent_radius = grip_radius_m + clearance + thumb_contact + lift
-    centre_xy = tangent_radius * outward
-    stations = tuple(station * scale for station in thumb.stations_m)
-    tan_dir = float(curl) * np.cross(
-        np.array([0.0, 0.0, 1.0], dtype=np.float64), outward
-    )
-    sweep = settings.thumb_opposition_sweep_m * scale
-    tan_offsets = (-0.35 * sweep, 0.15 * sweep, 0.65 * sweep)
-    straight = [
-        (
-            centre_xy
-            + np.array([0.0, 0.0, stations[0]], dtype=np.float64)
-            + tan_dir * tan_offsets[0],
-            centre_xy
-            + np.array([0.0, 0.0, stations[1]], dtype=np.float64)
-            + tan_dir * tan_offsets[1],
-        ),
-        (
-            centre_xy
-            + np.array([0.0, 0.0, stations[1]], dtype=np.float64)
-            + tan_dir * tan_offsets[1],
-            centre_xy
-            + np.array([0.0, 0.0, stations[2]], dtype=np.float64)
-            + tan_dir * tan_offsets[2],
-        ),
-    ]
-    flexed = tangent_chain(
-        tuple(length * scale for length in thumb.phalanges_m),
-        tangent_radius,
-        thumb_azimuth,
-        0.0,
-        curl,
-    )
+    tangent_radius = frame.grip_radius_m + frame.clearance + thumb_contact + frame.lift
     straightness = min(1.0, max(0.0, joint_angles.thumb_straightness))
-    thumb_bones: list[tuple[np.ndarray, np.ndarray]] = []
-    for index, (start_s, end_s) in enumerate(straight):
-        start = straightness * start_s + (1.0 - straightness) * flexed[index][0]
-        end = straightness * end_s + (1.0 - straightness) * flexed[index][1]
-        thumb_bones.append((start, end))
+    thumb_bones = blend_thumb_bones(
+        frame,
+        thumb_azimuth=thumb_azimuth,
+        outward=outward,
+        tangent_radius=tangent_radius,
+        straightness=straightness,
+    )
+    for index, (start, end) in enumerate(thumb_bones):
         radius0, radius1 = thumb_radii[index]
         label = ("proximal", "distal")[index]
         primitives.append(
@@ -457,8 +492,7 @@ def _pose_thumb(
                 "phalanx",
                 start,
                 end,
-                radius0,
-                radius1,
+                (radius0, radius1),
                 palmar,
             )
         )
@@ -491,78 +525,35 @@ def _pose_thumb(
         thumb_radii[0][1],
         settings,
     )
-    index_base = 0.7 * bases["index"] + 0.3 * bases["middle"]
-    thumb_head = thumb_bones[0][0]
-    toward_index = index_base - thumb_head
-    if float(np.linalg.norm(toward_index)) < 1e-6:
-        toward_index = -outward
-    mc_dir = unit(toward_index - palmar * (0.008 * scale))
-    mc_length = thumb.metacarpal_m * scale
-    mc_base = thumb_head + mc_dir * mc_length
-    mc_r0, mc_r1 = (
-        thumb.metacarpal_radii_m[0] * scale,
-        thumb.metacarpal_radii_m[1] * scale,
+    _add_thumb_palm(
+        primitives,
+        frame,
+        thumb_head=thumb_bones[0][0],
+        outward=outward,
+        bases=bases,
+        proximal_starts=proximal_starts,
     )
-    primitives.append(
-        cone_primitive(
-            "thumb_metacarpal",
-            "thumb",
-            "metacarpal",
-            mc_base,
-            thumb_head,
-            mc_r0,
-            mc_r1,
-            palmar,
-            blend="joint",
-        )
-    )
-    thumb_mid = 0.5 * (mc_base + thumb_head)
-    thenar_radii = scaled_radii(settings.thenar_radii_m, scale)
-    primitives.append(
-        ellipsoid_primitive(
-            "thenar",
-            "thumb",
-            "eminence",
-            clear_of_grip_ellipsoid(
-                thumb_mid + palmar * (0.003 * scale),
-                mc_dir,
-                palmar,
-                thenar_radii,
-                grip_radius_m,
-                clearance,
-                margin_m=margin_m,
-            ),
-            mc_dir,
-            palmar,
-            thenar_radii,
-            blend="joint",
-        )
-    )
-    web_radii = scaled_radii(settings.web_radii_m, scale)
-    web_along = unit(
-        0.5 * (proximal_starts["index"] + proximal_starts["middle"]) - thumb_mid
-    )
-    web_centre = clear_of_grip_ellipsoid(
-        0.45 * (0.5 * (thumb_head + proximal_starts["index"]))
-        + 0.55 * (0.5 * (thumb_mid + bases["index"])),
-        web_along,
-        palmar,
-        web_radii,
-        grip_radius_m,
-        clearance,
-        margin_m=margin_m,
-    )
-    primitives.append(
-        ellipsoid_primitive(
-            "thumb_web",
-            "thumb",
-            "web",
-            web_centre,
-            web_along,
-            palmar,
-            web_radii,
-            blend="web",
-        )
+
+
+def _pose_frame(
+    grip_spec: GripSpec,
+    joint_angles: GripArticulation,
+    *,
+    grip_radius_m: float,
+    settings: SdfHandSettings,
+    curl: int,
+) -> PoseFrame:
+    scale = float(grip_spec.hand_size.length_m) / settings.hand_length_m
+    depth = joint_angles.palm_finger_depth / settings.full_contact_palm_finger_depth
+    contact = min(1.0, max(0.0, depth))
+    return PoseFrame(
+        settings=settings,
+        scale=scale,
+        grip_radius_m=grip_radius_m,
+        clearance=settings.pad_clearance_m * scale,
+        lift=(1.0 - contact) * settings.open_hand_lift_m * scale,
+        curl=curl,
+        margin_m=settings.ellipsoid_support_margin_m * scale,
     )
 
 
@@ -590,17 +581,17 @@ def pose_curl_to_contact(
     if not math.isfinite(grip_radius_m) or grip_radius_m <= 0.0:
         raise ValueError(f"grip_radius_m must be positive, got {grip_radius_m!r}")
 
-    scale = float(grip_spec.hand_size.length_m) / settings.hand_length_m
+    frame = _pose_frame(
+        grip_spec,
+        joint_angles,
+        grip_radius_m=grip_radius_m,
+        settings=settings,
+        curl=-1 if side == "lead" else 1,
+    )
     ref_breadth = resolve_hand_breadth_m(float(grip_spec.hand_size.length_m))
     breadth_ratio = float(grip_spec.hand_size.breadth_m) / ref_breadth
-    curl = -1 if side == "lead" else 1
     hand = grip_spec.lead if side == "lead" else grip_spec.trail
     v_azimuth = math.radians(hand.v_azimuth_deg)
-    depth = joint_angles.palm_finger_depth / settings.full_contact_palm_finger_depth
-    contact = min(1.0, max(0.0, depth))
-    lift = (1.0 - contact) * settings.open_hand_lift_m * scale
-    clearance = settings.pad_clearance_m * scale
-    margin_m = settings.ellipsoid_support_margin_m * scale
     cross_delta_deg = (
         float(joint_angles.club_cross_angle_deg) - settings.legacy_club_cross_angle_deg
     )
@@ -608,43 +599,27 @@ def pose_curl_to_contact(
     primitives: list[Primitive] = []
     proximal_starts, outward_at, palmar_at = _pose_fingers(
         primitives,
+        frame,
         grip_spec=grip_spec,
         side=side,
-        settings=settings,
-        scale=scale,
         breadth_ratio=breadth_ratio,
-        grip_radius_m=grip_radius_m,
-        clearance=clearance,
-        lift=lift,
         v_azimuth=v_azimuth,
-        curl=curl,
         cross_delta_deg=cross_delta_deg,
     )
     bases, _heads = _pose_metacarpals_and_palm(
         primitives,
+        frame,
         proximal_starts=proximal_starts,
         outward_at=outward_at,
         palmar_at=palmar_at,
-        settings=settings,
-        scale=scale,
-        grip_radius_m=grip_radius_m,
-        clearance=clearance,
-        margin_m=margin_m,
     )
     _pose_thumb(
         primitives,
-        grip_spec=grip_spec,
-        side=side,
+        frame,
+        hand=hand,
         joint_angles=joint_angles,
-        settings=settings,
-        scale=scale,
-        grip_radius_m=grip_radius_m,
-        clearance=clearance,
-        lift=lift,
-        curl=curl,
         bases=bases,
         proximal_starts=proximal_starts,
-        margin_m=margin_m,
     )
 
     dorsal_sum = sum(outward_at.values(), np.zeros(3, dtype=np.float64))
@@ -657,7 +632,7 @@ def pose_curl_to_contact(
         primitives=packed,
         grip_radius_m=float(grip_radius_m),
         side=side,
-        scale=scale,
+        scale=frame.scale,
         dorsal_hint=vec3(dorsal),
         hand_length_m=length_m,
         palm_width_m=width_m,

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from dataclasses import replace
+from dataclasses import dataclass, replace
 
 import numpy as np
 
@@ -119,27 +119,24 @@ def cone_primitive(
     kind: str,
     start: np.ndarray,
     end: np.ndarray,
-    radius0: float,
-    radius1: float,
+    radii: tuple[float, float],
     palmar: np.ndarray,
     *,
     blend: str = "joint",
-    operation: str = "union",
-    aspect: float = 1.0,
 ) -> Primitive:
-    """Create a tapered round-cone SDF primitive."""
+    """Create a tapered round-cone union primitive; ``radii`` is (start, end)."""
     return Primitive(
         name=name,
         group=group,
         kind=kind,
-        operation=operation,
+        operation="union",
         shape="cone",
         start=vec3(start),
         end=vec3(end),
-        radius0=float(radius0),
-        radius1=float(radius1),
+        radius0=float(radii[0]),
+        radius1=float(radii[1]),
         palmar=vec3(palmar),
-        aspect=aspect,
+        aspect=1.0,
         blend=blend,
         radii=(0.0, 0.0, 0.0),
     )
@@ -317,20 +314,170 @@ def add_crease(
     half = side * bone_radius * settings.crease_span_fraction
     depth = palmar * bone_radius * settings.crease_depth_fraction
     radius = max(bone_radius * settings.crease_radius_fraction, 0.001)
-    primitives.append(
-        cone_primitive(
-            name,
-            "crease",
-            "crease",
-            centre + depth - half,
-            centre + depth + half,
-            radius,
-            radius,
+    cutter = cone_primitive(
+        name,
+        "crease",
+        "crease",
+        centre + depth - half,
+        centre + depth + half,
+        (radius, radius),
+        palmar,
+        blend="crease",
+    )
+    primitives.append(replace(cutter, operation="subtract"))
+
+
+@dataclass(frozen=True)
+class PoseFrame:
+    """Scaled per-hand quantities shared by the finger, palm, and thumb posers."""
+
+    settings: SdfHandSettings
+    scale: float
+    grip_radius_m: float
+    clearance: float
+    lift: float
+    curl: int
+    margin_m: float
+
+    def clear(
+        self,
+        centre: np.ndarray,
+        along: np.ndarray,
+        palmar: np.ndarray,
+        radii: tuple[float, float, float],
+    ) -> np.ndarray:
+        """Push an ellipsoid centre clear of the grip with this hand's margins."""
+        return clear_of_grip_ellipsoid(
+            centre,
+            along,
             palmar,
-            blend="crease",
-            operation="subtract",
+            radii,
+            self.grip_radius_m,
+            self.clearance,
+            margin_m=self.margin_m,
+        )
+
+
+Bone = tuple[np.ndarray, np.ndarray, np.ndarray]
+
+
+def add_finger_joints(
+    primitives: list[Primitive],
+    frame: PoseFrame,
+    finger: str,
+    bones: list[Bone],
+    radii: tuple[tuple[float, float], ...],
+) -> None:
+    """Add knuckle bumps at MCP/PIP/DIP and flexion creases at PIP/DIP."""
+    joints = (
+        ("mcp", bones[0][0], radii[0][0], bones[0][1] - bones[0][0], bones[0][2]),
+        ("pip", bones[0][1], radii[0][1], bones[1][1] - bones[1][0], bones[1][2]),
+        ("dip", bones[1][1], radii[1][1], bones[2][1] - bones[2][0], bones[2][2]),
+    )
+    for label, centre, radius, axis, outward in joints:
+        palmar = -outward
+        add_knuckle(
+            primitives,
+            f"{finger}_{label}",
+            finger,
+            centre,
+            palmar,
+            radius,
+            frame.settings,
+            frame.scale,
+        )
+        if label != "mcp":
+            add_crease(
+                primitives,
+                f"{finger}_{label}_crease",
+                centre,
+                axis,
+                palmar,
+                radius,
+                frame.settings,
+            )
+
+
+def add_nail(
+    primitives: list[Primitive],
+    frame: PoseFrame,
+    finger: str,
+    distal: Bone,
+    distal_length: float,
+    distal_tip_radius: float,
+) -> None:
+    """Add the fingernail ellipsoid on the dorsal side of the distal phalanx."""
+    settings = frame.settings
+    distal_start, distal_end, distal_out = distal
+    distal_axis = unit(distal_end - distal_start)
+    nail_centre = (
+        distal_end
+        - distal_axis * (distal_length * settings.nail_along_fraction)
+        + distal_out * (distal_tip_radius * 0.45)
+    )
+    primitives.append(
+        ellipsoid_primitive(
+            f"{finger}_nail",
+            finger,
+            "nail",
+            nail_centre,
+            distal_axis,
+            -distal_out,
+            scaled_radii(settings.nail_radii_m, frame.scale),
+            blend="nail",
         )
     )
+
+
+def blend_thumb_bones(
+    frame: PoseFrame,
+    *,
+    thumb_azimuth: float,
+    outward: np.ndarray,
+    tangent_radius: float,
+    straightness: float,
+) -> list[tuple[np.ndarray, np.ndarray]]:
+    """Thumb phalanx axes blended from the straight to the flexed pose."""
+    thumb = frame.settings.thumb
+    scale = frame.scale
+    centre_xy = tangent_radius * outward
+    stations = tuple(station * scale for station in thumb.stations_m)
+    tan_dir = float(frame.curl) * np.cross(
+        np.array([0.0, 0.0, 1.0], dtype=np.float64), outward
+    )
+    sweep = frame.settings.thumb_opposition_sweep_m * scale
+    tan_offsets = (-0.35 * sweep, 0.15 * sweep, 0.65 * sweep)
+    straight = [
+        (
+            centre_xy
+            + np.array([0.0, 0.0, stations[0]], dtype=np.float64)
+            + tan_dir * tan_offsets[0],
+            centre_xy
+            + np.array([0.0, 0.0, stations[1]], dtype=np.float64)
+            + tan_dir * tan_offsets[1],
+        ),
+        (
+            centre_xy
+            + np.array([0.0, 0.0, stations[1]], dtype=np.float64)
+            + tan_dir * tan_offsets[1],
+            centre_xy
+            + np.array([0.0, 0.0, stations[2]], dtype=np.float64)
+            + tan_dir * tan_offsets[2],
+        ),
+    ]
+    flexed = tangent_chain(
+        tuple(length * scale for length in thumb.phalanges_m),
+        tangent_radius,
+        thumb_azimuth,
+        0.0,
+        frame.curl,
+    )
+    thumb_bones: list[tuple[np.ndarray, np.ndarray]] = []
+    for index, (start_s, end_s) in enumerate(straight):
+        start = straightness * start_s + (1.0 - straightness) * flexed[index][0]
+        end = straightness * end_s + (1.0 - straightness) * flexed[index][1]
+        thumb_bones.append((start, end))
+    return thumb_bones
 
 
 def measure_skeleton(primitives: tuple[Primitive, ...]) -> tuple[float, float]:
@@ -375,9 +522,14 @@ def mirror_y(
 
 
 __all__ = [
+    "Bone",
+    "PoseFrame",
     "add_crease",
+    "add_finger_joints",
     "add_knuckle",
+    "add_nail",
     "add_pad",
+    "blend_thumb_bones",
     "clear_of_grip_ellipsoid",
     "closest_axis_point",
     "cone_primitive",
