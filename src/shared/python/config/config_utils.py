@@ -54,14 +54,14 @@ def load_json_config(
         raise ValueError("path must be provided")
     path_obj = Path(path)
 
-    if not path_obj.exists():
-        if default is not None:
-            if create_if_missing:
-                save_json_config(path, default)
-            return default.copy()
-        return {}
-
     try:
+        if not path_obj.exists():
+            if default is not None:
+                if create_if_missing:
+                    save_json_config(path, default)
+                return default.copy()
+            return {}
+
         with open(path_obj, encoding="utf-8") as f:
             config: dict[str, Any] = json.load(f)
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
@@ -134,12 +134,12 @@ def load_yaml_config(
 
     path_obj = Path(path)
 
-    if not path_obj.exists():
-        if default is not None:
-            return default.copy()
-        return {}
-
     try:
+        if not path_obj.exists():
+            if default is not None:
+                return default.copy()
+            return {}
+
         with open(path_obj, encoding="utf-8") as f:
             config = yaml.safe_load(f)
     except (OSError, UnicodeError, yaml.YAMLError) as exc:

@@ -18,6 +18,28 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize("load", [load_json_config, load_yaml_config])
+def test_stat_permission_failure_preserves_caller_default(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    load: Callable[..., dict[str, Any]],
+) -> None:
+    target = tmp_path / "config"
+    default = {"mode": "safe"}
+
+    def inaccessible(path: Path) -> bool:
+        raise PermissionError("parent directory is not searchable")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "exists", inaccessible)
+        result = load(target, default=default)
+
+    assert result == default
+    assert result is not default
+    result["mode"] = "changed"
+    assert default == {"mode": "safe"}
+
+
+@pytest.mark.parametrize("load", [load_json_config, load_yaml_config])
 @pytest.mark.parametrize("failure", ["syntax", "encoding", "directory"])
 @pytest.mark.parametrize("custom_default", [False, True])
 def test_load_failure_returns_fresh_default_without_changing_inputs(

@@ -8,3 +8,5 @@ paths: "src/shared/python/config/config_utils.py,tests/unit/config/test_config_l
 ---
 
 14 regression cases failed before the fix; 83 related tests pass on supported Python 3.12 with exact Tools pin a47d83d6.
+
+File-existence permission errors also preserve the supplied default; JSON and YAML regressions cover inaccessible parent directories.
