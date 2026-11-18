@@ -161,7 +161,9 @@ def _hide_contact_spheres(default_root: ET.Element) -> None:
     """Make the ``contact`` default class fully transparent (not drawn).
 
     The geoms keep group 0 so the collision-geometry checks still see them.
+    Sites (contact and frame markers) get the same zero alpha by default.
     """
+    ET.SubElement(default_root, "site", rgba=_CONTACT_HIDDEN_RGBA)
     for cls in default_root.iter("default"):
         if cls.get("class") == "contact":
             for geom in cls.iter("geom"):
