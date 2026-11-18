@@ -84,17 +84,21 @@ def _wrap(lead, trail) -> np.ndarray:
 
 
 def _trial_settings():
-    """The default settings with the trail palm pads folded round the thumb."""
+    """The trail palm pads folded round the thumb, on the palm without its
+    fold joint: the trial pad values were measured on that palm (#15265), and
+    on the folded one they push the hands 1.15 mm into each other."""
     settings = default_settings()
     wide = dataclasses.replace(settings.palm_pad, **_Q["thumb_wrap_trial_pad"])
-    return dataclasses.replace(settings, pair_palm_wrap=wide)
+    flat = dataclasses.replace(settings.pair_palm_fold, max_deg=0.0)
+    return dataclasses.replace(settings, pair_palm_wrap=wide, pair_palm_fold=flat)
 
 
 @pytest.mark.xfail(
     strict=True,
-    reason="#15265: the palm touches the thumb's top line only (median share "
-    "0.17). Folding the pads round it needs 16.6 mm of skin movement, over "
-    "the 8 mm of max_corrective_shift_m; the palm needs a rig that cups.",
+    reason="#15265, #15270: with the palm fold joint the thenar side closes on "
+    "the thumb (stations under the middle of the palm 0.5 to 0.65) but the "
+    "median share is 0.20: the base and the tip of the thumb stay uncovered "
+    "on their flanks, and so does the flank on the little-finger side.",
 )
 def test_the_trail_palm_wraps_round_the_lead_thumb() -> None:
     """Owner ("cup the palm"): the palm folds down both flanks of the thumb,
@@ -105,6 +109,34 @@ def test_the_trail_palm_wraps_round_the_lead_thumb() -> None:
     assert float(np.median(shares)) >= float(_Q["min_thumb_wrap_share"]), (
         f"wrap share along the thumb: {np.round(shares, 2)}"
     )
+
+
+def test_the_palm_fold_joint_closes_the_palm_on_the_thumb() -> None:
+    """#15270: the fold joint brings more of the thumb into contact than the
+    same grip without it, without the hands overlapping and with the skin
+    still on its bones."""
+    settings = default_settings()
+    fold = settings.pair_palm_fold
+    assert fold.max_deg > 0.0, "the palm fold joint is switched off"
+    flat = dataclasses.replace(
+        settings, pair_palm_fold=dataclasses.replace(fold, max_deg=0.0)
+    )
+    without = build_grip_hands(_spec(), grip_radius_m=_RADIUS, settings=flat)
+    pair = _pair()
+    gain = float(
+        _wrap(pair["lead"], pair["trail"]).mean()
+        - _wrap(without["lead"], without["trail"]).mean()
+    )
+    assert gain >= float(_Q["min_palm_fold_wrap_gain"]), f"wrap gain {gain:.3f}"
+    # The fold is in the rest hand, so the bones carry it: the skin is moved
+    # off them no further than the correctives may move it.
+    assert not np.array_equal(
+        pair["trail"].rest_asset.rest_vertices,
+        without["trail"].rest_asset.rest_vertices,
+    )
+    assert skinning_residual_m(pair["trail"]) <= float(_Q["max_corrective_shift_m"])
+    depth = hand_pair_penetration_m(pair["lead"], pair["trail"])
+    assert depth <= float(_Q["pair_penetration_tolerance_m"])
 
 
 def test_the_palm_pads_can_be_set_to_fold_round_the_thumb() -> None:

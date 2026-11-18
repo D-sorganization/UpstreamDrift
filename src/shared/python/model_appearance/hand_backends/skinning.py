@@ -15,6 +15,8 @@ from dataclasses import dataclass, replace
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.model_appearance.hand_backends.joint_angles import FINGERS
+
 Array = NDArray[np.float64]
 IntArray = NDArray[np.int64]
 
@@ -202,3 +204,26 @@ def face_areas(vertices: Array, faces: NDArray[np.int64]) -> Array:
     return 0.5 * np.linalg.norm(
         np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0]), axis=1
     )
+
+
+#: The thumb's bones, base first.
+THUMB_BONES = ("thumb_meta", "thumb_prox", "thumb_dist")
+
+
+def asset_hand_length_m(asset: SkinnedHandAsset) -> float:
+    """Wrist joint to the tip of the middle finger skin, along the distal axis."""
+    tip = asset.dominant_vertex_ids(("middle_dist",))
+    return float(asset.rest_vertices[tip, 1].max())
+
+
+def asset_hand_breadth_m(asset: SkinnedHandAsset, band_m: float) -> float:
+    """Skin breadth across the knuckles (index to little), thumb excluded."""
+    knuckle_y = float(
+        np.mean([asset.bone_heads[asset.bone_index(f"{f}_prox")][1] for f in FINGERS])
+    )
+    verts = asset.rest_vertices
+    band = np.flatnonzero(np.abs(verts[:, 1] - knuckle_y) < band_m)
+    band = np.setdiff1d(band, asset.influenced_vertex_ids(THUMB_BONES))
+    if len(band) == 0:
+        raise ValueError("no skin found across the knuckles")
+    return float(np.ptp(verts[band, 0]))

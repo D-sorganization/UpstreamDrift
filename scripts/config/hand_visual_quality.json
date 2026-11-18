@@ -76,6 +76,8 @@
   "max_thumb_channel_gap_m": 0.0025,
   "_thumb_wrap": "Owner, 2026-11-17 (#15265, 'cup the palm'): the trail palm wraps round the lead thumb, not only touches its top line. Per station of thumb_channel_station_m, the share of the thumb's outer half (crown and both flanks) within thumb_wrap_contact_m of the trail skin; the median station is to reach min_thumb_wrap_share. NOT MET: measured 2026-11-17 the median is 0.17. With the palm pads settled as thumb_wrap_trial_pad (keys of pair.palm_wrap) it is 0.70, but palm skin then moves 16.6 mm from its bones (max_corrective_shift_m is 8 mm), so that is a trial, not the default. With the pads' travel capped at 8 mm it is 0.40, at 7 mm 0.32. The first three stations at the thumb's base stay at zero either way: the trail heel pad does not reach them.",
   "thumb_wrap_contact_m": 0.0015,
+  "_palm_fold_wrap_gain": "#15270: the least the palm fold joint must add to the mean thumb wrap share (all stations) over the same grip with pair.palm_fold.max_deg 0. Measured 2026-11-17: 0.20 without, 0.24 with; the stations under the middle of the palm rise from 0.40 to 0.50. min_thumb_wrap_share is still not met.",
+  "min_palm_fold_wrap_gain": 0.02,
   "min_thumb_wrap_share": 0.5,
   "thumb_wrap_trial_pad": {
     "reach_m": 0.03,

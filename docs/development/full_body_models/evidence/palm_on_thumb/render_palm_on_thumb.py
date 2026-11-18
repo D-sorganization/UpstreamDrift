@@ -1,4 +1,4 @@
-"""Stills and sections of the trail palm on the lead thumb (#15265).
+"""Stills and sections of the trail palm on the lead thumb (#15265, #15270).
 
 Usage, from the repository root, headless (the shared renderer of #15154 is
 read from ``--renderer-root`` until it is on this branch)::
@@ -8,11 +8,11 @@ read from ``--renderer-root`` until it is on this branch)::
         --renderer-root <checkout with hand_backends/render.py>
 
 Writes ``palm_on_thumb_stills.png`` and ``palm_on_thumb_sections.png`` beside
-this file. In both, the top row is the legacy trail cross angle, the middle
-row the owner's (``owner_trail_cross_angle_deg``), which is the default, and
-the bottom row a trial: the owner's with the palm pads folded round the thumb
-(``pair.palm_wrap`` set to ``thumb_wrap_trial_pad``; not the default, the skin
-moves too far from its bones). Stills: the golfer's view,
+this file. In both, the top row is the owner's grip without the palm fold
+joint (``pair.palm_fold.max_deg`` 0), the middle row with it, which is the
+default (#15270), and the bottom row a trial: the unfolded palm with its pads
+pushed round the thumb (``pair.palm_wrap`` set to ``thumb_wrap_trial_pad``;
+not the default, the skin moves too far from its bones). Stills: the golfer's view,
 then three views round the trail side. Sections: across the grip at stations
 toward the head, then along the grip through the lead thumb (lead red, trail
 blue, grip black). Gaps and wrap shares along the thumb go to standard output.
@@ -33,7 +33,6 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 from PIL import Image  # noqa: E402
 
-from src.shared.python.grip_spec.types import GripSpec  # noqa: E402
 from src.shared.python.model_appearance import hand_backends  # noqa: E402
 from src.shared.python.model_appearance.hand_backends.golf_grip import (  # noqa: E402
     load_golf_grip,
@@ -151,20 +150,17 @@ def main() -> int:
     quality = load_hand_visual_quality()
     radius = float(quality["grip_radius_m"])
     owner = owner_grip_spec()
-    legacy = dataclasses.replace(
-        owner,
-        trail=dataclasses.replace(
-            owner.trail,
-            club_cross_angle_deg=GripSpec.legacy().trail.club_cross_angle_deg,
-        ),
+    folded = default_settings()
+    unfolded = dataclasses.replace(
+        folded,
+        pair_palm_fold=dataclasses.replace(folded.pair_palm_fold, max_deg=0.0),
     )
-    flat = default_settings()
-    wide = dataclasses.replace(flat.palm_pad, **quality["thumb_wrap_trial_pad"])
-    cupped = dataclasses.replace(flat, pair_palm_wrap=wide)
+    wide = dataclasses.replace(folded.palm_pad, **quality["thumb_wrap_trial_pad"])
+    padded = dataclasses.replace(unfolded, pair_palm_wrap=wide)
     cases = (
-        ("legacy_flat", legacy, flat),
-        ("owner_flat", owner, flat),
-        ("owner_trial_cupped", owner, cupped),
+        ("owner_unfolded", owner, unfolded),
+        ("owner_palm_fold", owner, folded),
+        ("owner_trial_pads", owner, padded),
     )
     figure, axes = plt.subplots(len(cases), len(STATIONS_MM) + 1, figsize=(26, 13.5))
     rows, report = [], {}

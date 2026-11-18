@@ -83,7 +83,10 @@ from src.shared.python.model_appearance.hand_backends.skinned_settings import (
     settings_from_mapping as settings_from_mapping,
 )
 from src.shared.python.model_appearance.hand_backends.skinning import (
+    THUMB_BONES as _THUMB_BONES,
     SkinnedHandAsset,
+    asset_hand_breadth_m,
+    asset_hand_length_m,
     bone_transforms,
     flipped_face_ids,
     pose_vertices,
@@ -91,6 +94,7 @@ from src.shared.python.model_appearance.hand_backends.skinning import (
     scale_asset,
     vertex_normals,
 )
+from src.shared.python.model_appearance.hand_backends.palm_fold import fold_palm
 from src.shared.python.model_appearance.hand_backends.rest_shape import filled_out
 from src.shared.python.model_appearance.hand_backends.subdivision import (
     original_resolution,
@@ -104,7 +108,6 @@ Array = NDArray[np.float64]
 BACKEND_NAME = "skinned_human"
 _SEGMENTS = ("prox", "mid", "dist")
 _BREADTH_FIT_PASSES = 2
-_THUMB_BONES = ("thumb_meta", "thumb_prox", "thumb_dist")
 #: Side closing: each finger and the neighbour it closes on, middle outward.
 _SIDE_ORDER = (("ring", "middle"), ("little", "ring"), ("index", "middle"))
 _EYE3 = np.eye(3)
@@ -128,25 +131,6 @@ def _bone_mask(
 # --------------------------------------------------------------------------
 # Anthropometry
 # --------------------------------------------------------------------------
-
-
-def asset_hand_length_m(asset: SkinnedHandAsset) -> float:
-    """Wrist joint to the tip of the middle finger skin, along the distal axis."""
-    tip = asset.dominant_vertex_ids(("middle_dist",))
-    return float(asset.rest_vertices[tip, 1].max())
-
-
-def asset_hand_breadth_m(asset: SkinnedHandAsset, band_m: float) -> float:
-    """Skin breadth across the knuckles (index to little), thumb excluded."""
-    knuckle_y = float(
-        np.mean([asset.bone_heads[asset.bone_index(f"{f}_prox")][1] for f in FINGERS])
-    )
-    verts = asset.rest_vertices
-    band = np.flatnonzero(np.abs(verts[:, 1] - knuckle_y) < band_m)
-    band = np.setdiff1d(band, asset.influenced_vertex_ids(_THUMB_BONES))
-    if len(band) == 0:
-        raise ValueError("no skin found across the knuckles")
-    return float(np.ptp(verts[band, 0]))
 
 
 @lru_cache(maxsize=8)
@@ -890,6 +874,8 @@ class _Scene:
     groove: Callable[[Array], Array] | None = None
     #: Skin vertices of the other hand, which this hand's skin gives way to.
     skin_points: Array | None = None
+    #: Skin vertices of the other hand's thumb, which this palm folds round.
+    thumb_points: Array | None = None
 
 
 @dataclass(frozen=True)
@@ -1008,10 +994,19 @@ def _solve_right_hand(
         _close_fingers(hand, angles)
     if pair is not None and pair.groove is not None:
         _overlap_little_finger(hand, angles, pair.groove)
-    angles = wrap(start)
-    _cup_palm(hand, targets, angles, soft, thumb_radius_m)
     most = dict(settings.thumb_toward_index_max_deg)[side]
-    angles = _lay_thumb(hand, targets, angles, soft, thumb_radius_m, most)
+
+    def with_thumb(hand: _GripHand, angles: dict[str, float]) -> dict[str, float]:
+        _cup_palm(hand, targets, angles, soft, thumb_radius_m)
+        return _lay_thumb(hand, targets, angles, soft, thumb_radius_m, most)
+
+    angles = with_thumb(hand, wrap(start))
+    if pair is not None and pad is not None:
+        # Fold the palm round the other thumb, then lay the thumb from where
+        # the fold has taken its base (#15270).
+        flat = hand
+        hand, skin = fold_palm(hand, skin, angles, pair.thumb_points, pad)
+        angles = angles if hand is flat else with_thumb(hand, angles)
     _bend_wrist(hand, side)
     for bone, swing in hand.side.items():  # so given angles rebuild this pose
         angles[f"{bone.removesuffix('_prox')}{_SIDE_SUFFIX}"] = swing

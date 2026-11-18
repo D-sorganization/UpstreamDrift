@@ -167,6 +167,19 @@
     "palm_cup_max_deg": 70.0,
     "_palm_wrap": "Owner, 2026-11-17 (#15265, 'cup the palm'). For the hand that lies on the other hand, the keys given here replace those of correctives.palm_pad, so its palm pads can reach further and fold round the thumb under them. Empty: off, the pads settle as on a bare grip. It is off because folding the pads round the thumb (hand_visual_quality.json thumb_wrap_trial_pad) moves palm skin 16.6 mm from its bones, against max_corrective_shift_m of 8 mm; see #15265.",
     "palm_wrap": {},
+    "_palm_fold": "Owner, 2026-11-17 (#15270, 'build palm fold rig'). A fold joint across the palm of the hand that lies on the other hand's thumb: a hinge along that thumb (thumb_bones of the other hand), offset_m to the side of the first carried bone and below_thumb_m under the thumb's axis. Palm skin of bones turns about it, by nothing at the hinge and by the whole angle blend_m further out, fading out toward the fingers between the two fade fractions of the hand's length; the carried bones turn with it. The fold closes in step_deg steps up to max_deg and stops before the folding skin presses more than press_m further into the grip and the other hand than the unfolded palm does. max_deg 0: no fold, the hand is exactly the unfolded one. Measured 2026-11-17 on the owner's grip: press_m 0 gives no overlap of the hands and 6.9 mm of corrective skin travel (limit 8); press_m 0.002 gives 1.3 mm overlap and 10.8 mm travel, so it stays 0.",
+    "palm_fold": {
+      "max_deg": 45.0,
+      "step_deg": 2.5,
+      "offset_m": 0.008,
+      "blend_m": 0.012,
+      "below_thumb_m": 0.0125,
+      "fade": [0.4, 0.53],
+      "press_m": 0.0,
+      "bones": ["wrist", "meta_index", "meta_middle", "meta_ring", "meta_little"],
+      "carried": ["thumb_meta"],
+      "thumb_bones": ["thumb_prox", "thumb_dist"]
+    },
     "overlap_max_swing_deg": 30.0,
     "overlap_bias_m": 0.0025,
     "capsule_margin_m": 0.0006

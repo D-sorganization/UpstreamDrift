@@ -176,6 +176,14 @@ class _LeadObstacle:
         turn, shift = club_from_trail[:3, :3], club_from_trail[:3, 3]
         return (self._lead_skin - shift) @ np.linalg.inv(turn).T
 
+    def thumb_points(self, spacing_m: float) -> Array:
+        """The lead thumb's skin (``pair.palm_fold.thumb_bones``) in the trail
+        hand's build frame: what the trail palm folds round."""
+        fold = self.settings.pair_palm_fold
+        asset = self.lead.skin_asset
+        ids = asset.dominant_vertex_ids(fold.thumb_bones)
+        return self.skin_points(spacing_m)[ids]
+
     def groove(self, spacing_m: float) -> Callable[[Array], Array] | None:
         """Where the trail little finger overlaps, in the trail build frame.
 
@@ -342,6 +350,7 @@ def build_grip_hands(
             partial(scene.at, spacing_m),
             scene.groove(spacing_m),
             scene.skin_points(spacing_m),
+            scene.thumb_points(spacing_m),
         )
         return _solve_right_hand(
             grip_spec, "trail", scene.radius_at_m(spacing_m), settings, None, around

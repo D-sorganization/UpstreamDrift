@@ -21,6 +21,9 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     PressSettings,
 )
 from src.shared.python.model_appearance.hand_backends.golf_grip import load_golf_grip
+from src.shared.python.model_appearance.hand_backends.palm_fold import (
+    PalmFoldSettings,
+)
 from src.shared.python.model_appearance.hand_backends.rest_shape import (
     FullnessSettings,
 )
@@ -107,6 +110,7 @@ class SkinnedHumanSettings:
     pair_yield_clearance_m: float
     pair_palm_cup_max_deg: float
     pair_palm_wrap: PadConformSettings
+    pair_palm_fold: PalmFoldSettings
     frame_excluded_bones: tuple[str, ...]
     fold_relax: FoldRelaxSettings
     palm_pad: PadConformSettings
@@ -452,6 +456,7 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
         pair_palm_wrap=_palm_pad(
             {**raw["correctives"]["palm_pad"], **raw["pair"]["palm_wrap"]}
         ),
+        pair_palm_fold=PalmFoldSettings.from_mapping(raw["pair"]["palm_fold"]),
         **_side_close_fields(raw["side_close"]),
         squeeze_finger_depth_m=_non_negative(
             raw["squeeze"]["finger_depth_m"], "squeeze.finger_depth_m"
