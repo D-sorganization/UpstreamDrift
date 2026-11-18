@@ -162,6 +162,7 @@ def export_full_body_mjcf(
     with_head: bool = False,
     require_grip_binding: bool = False,
     neck_limits: bool = False,
+    show_contact_spheres: bool = False,
 ) -> tuple[str, dict[str, Any]]:
     """Export the full-body specification to MJCF with 41 scalar joints and contact sites.
 
@@ -178,6 +179,10 @@ def export_full_body_mjcf(
 
     ``neck_limits=True`` compiles the cited neck ROM (#14553) into ``NeckInput*``;
     off by default (necromatcher needs ``limited="false"`` and hashes that XML).
+
+    ``show_contact_spheres`` keeps the contact spheres in the drawn groups of
+    the visual layer; by default they are moved to the hidden group (the
+    geoms and sites stay in the model, only their drawing changes, #15280).
     """
     from src.shared.python.grip_contact.binding_manifest import (
         build_spec_grip_binding_manifest,
@@ -230,7 +235,13 @@ def export_full_body_mjcf(
         )
 
         visual_meta = attach_visual_layer(
-            root, elements, offsets, spec, appearance, with_head=with_head
+            root,
+            elements,
+            offsets,
+            spec,
+            appearance,
+            with_head=with_head,
+            show_contact_spheres=show_contact_spheres,
         )
 
     xml = ET.tostring(root, encoding="unicode")

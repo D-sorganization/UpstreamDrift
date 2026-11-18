@@ -38,6 +38,8 @@ _VISUAL_CLASS = "visual"
 # Centre-of-mass and frame spheres sit in a group the renderer hides by
 # default (groups 0 to 2 are shown); enable group 3 to inspect them.
 _MARKER_SPHERE_GROUP = "3"
+# Zero alpha: MuJoCo does not draw the geom; physics never reads rgba.
+_CONTACT_HIDDEN_RGBA = "0.5 0.5 0.5 0"
 
 
 def _numbers(values: Any) -> str:
@@ -155,6 +157,17 @@ def _attach_decorative_ball(
     return {"enabled": True, "position_m": position.tolist(), "source": source}
 
 
+def _hide_contact_spheres(default_root: ET.Element) -> None:
+    """Make the ``contact`` default class fully transparent (not drawn).
+
+    The geoms keep group 0 so the collision-geometry checks still see them.
+    """
+    for cls in default_root.iter("default"):
+        if cls.get("class") == "contact":
+            for geom in cls.iter("geom"):
+                geom.set("rgba", _CONTACT_HIDDEN_RGBA)
+
+
 def attach_visual_layer(
     root: ET.Element,
     elements: Mapping[str, ET.Element],
@@ -163,6 +176,7 @@ def attach_visual_layer(
     appearance: AppearanceDocument | None = None,
     *,
     with_head: bool = False,
+    show_contact_spheres: bool = False,
 ) -> dict[str, Any]:
     """Attach the shared skeleton to an MJCF document; returns a summary.
 
@@ -172,12 +186,15 @@ def attach_visual_layer(
 
     ``elements`` and ``offsets`` are the exporter's per-body MJCF elements and
     spec-body-to-MJCF-body transforms. Every added geom is class ``visual``:
-    group 1, zero contype/conaffinity, zero mass.
+    group 1, zero contype/conaffinity, zero mass. The contact spheres are
+    drawn only when ``show_contact_spheres`` is true (else alpha 0).
     """
     skeleton: VisualSkeleton = derive_visual_skeleton(spec)
     default_root = root.find("default")
     if default_root is None:
         default_root = ET.SubElement(root, "default")
+    if not show_contact_spheres:
+        _hide_contact_spheres(default_root)
     visual_default = ET.SubElement(
         default_root, "default", attrib={"class": _VISUAL_CLASS}
     )
