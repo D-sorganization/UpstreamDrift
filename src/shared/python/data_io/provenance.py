@@ -31,6 +31,7 @@ with open('results.csv', 'w') as f:
 import hashlib
 import subprocess
 import uuid
+from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -132,13 +133,15 @@ class ProvenanceInfo:
 
         Args:
             model_path: Optional path to model file (URDF, MJCF, etc.)
-            parameters: Optional analysis parameters to record
+            parameters: Optional analysis parameters, deep-copied at capture time
             engine_name: Optional physics engine name (e.g. MuJoCo, Drake, Pinocchio)
             run_id: Optional unique identifier for this simulation run
 
         Returns:
-            ProvenanceInfo with automatically captured metadata
+            ProvenanceInfo with automatically captured metadata and independent
+            parameter values. Later caller mutations cannot change this record.
         """
+        captured_parameters = deepcopy(parameters) if parameters is not None else {}
         now_utc = datetime.now(timezone.utc)  # noqa: UP017 (mypy compatibility)
         now_local = datetime.now().astimezone()
 
@@ -164,7 +167,7 @@ class ProvenanceInfo:
             run_id=run_id or str(uuid.uuid4()),
             model_file_path=model_path_str,
             model_file_hash=model_hash,
-            parameters=parameters or {},
+            parameters=captured_parameters,
             python_version=py_v,
             numpy_version=np_v,
             mujoco_version=mj_v,
