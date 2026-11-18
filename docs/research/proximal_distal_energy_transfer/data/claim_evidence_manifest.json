@@ -8252,8 +8252,8 @@
       ]
     },
     "src/shared/python/anthropometrics/estimators/from_de_leva.py": {
-      "sha256": "ef07007658b0e2dc8f8c310c366e8119074097a6d386a760847523ccb061104f",
-      "bytes": 4333,
+      "sha256": "e367e44eef3018623c01df1c84bd6b1555273220b3a19a573105f0549c209db6",
+      "bytes": 4672,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",

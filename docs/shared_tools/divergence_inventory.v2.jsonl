@@ -211,6 +211,7 @@
 {"path": "anthropometrics/estimators/_base.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/estimators/_humanoid_expansion.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/estimators/_json_loader.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
+{"path": "anthropometrics/estimators/_local_anthropometry.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/estimators/_ratio_table_estimate.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/estimators/from_de_leva.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/estimators/from_dempster.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
