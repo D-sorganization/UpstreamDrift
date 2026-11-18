@@ -92,11 +92,13 @@
     "trail": 0.023
   },
   "max_thumb_hand_gap_m": 0.003,
-  "_owner_thumb_azimuth_deg": "Per hand since 2026-11-17: with the trail wrist brought near the top of the shaft the trail thumb lies nearer the top too.",
+  "_owner_thumb_azimuth_deg": "Per hand since 2026-11-17. Trail raised from 20 to 40 on 2026-11-18 (#15278): the owner wants the right thumb more on the target side of the shaft. Measured at 35 and 45: no hand-to-hand penetration, pair fault 0.72 mm.",
   "owner_thumb_azimuth_deg": {
     "lead": 45.0,
-    "trail": 20.0
+    "trail": 40.0
   },
+  "_min_trail_thumb_target_side_deg": "Floor on the trail thumb's configured angle to the target side of the grip's top (#15278).",
+  "min_trail_thumb_target_side_deg": 35.0,
   "max_thumb_azimuth_error_deg": 5.0,
   "min_index_knuckle_flexion_deg": 15.0,
   "max_index_segment_gap_m": 0.004

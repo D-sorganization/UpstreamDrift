@@ -119,7 +119,7 @@ Targets of a hand live in `skinned_targets.py`.
   and trail 10 put the lead wrist joint on the shaft plane and the trail
   wrist 44 mm to the trail side (`qa.wrist_joint_m`). Trail 0 and 14 break
   the pair (fault 4.7 and 7.6 mm). Thumb line is per hand
-  (`owner_thumb_azimuth_deg` lead 45, trail 20); 30 on both fails five tests.
+  (`owner_thumb_azimuth_deg` lead 45, trail 40 since #15278; it was 20); 30 on both fails five tests.
   The heel pad went from 6.3 to 7.7 mm for it (ratchet 8 mm, evidence on
   #15150). `build_grip_hands` solves unrolled and turns the result.
 - MuJoCo golfer, measured by spike: hands 46 degrees round the shaft from the
