@@ -1,10 +1,17 @@
 """Drake :class:`PoseConventionAdapter` implementation.
 
-Drake reads URDF and represents a free-flyer's ``q`` vector as
-``[x, y, z, roll, pitch, yaw]`` followed by per-joint scalar positions
-in radians. This adapter assumes the canonical golfer layout: a 6-DOF
-pelvis prefix in ``[xyz, rpy]`` order, then one revolute slot per
-canonical joint.
+For 1-D vector arrays (``from_canonical`` / ``to_canonical``), this adapter
+uses the canonical 6-DOF pelvis prefix ``[x, y, z, rot_x, rot_y, rot_z]`` in
+radians followed by per-joint scalar positions in radians, matching an explicit
+prismatic-plus-``x->y->z`` revolute-chain URDF layout where pelvis orientation
+follows intrinsic XYZ Euler angles (``R = Rx * Ry * Rz``; degrees on the
+canonical side, radians on the engine side).
+
+This 6-DOF ``q`` layout is distinct from Drake's native floating-base
+representations: ``DrakeNativeState`` uses Drake's quaternion free-body layout
+``[qw, qx, qy, qz, x, y, z]`` via ``from_canonical_state`` /
+``to_canonical_state``, whereas Drake's ``RollPitchYaw`` /
+``RpyFloatingJoint`` uses extrinsic XYZ (``R = Rz * Ry * Rx``) with RPY slots.
 
 The implementation is mock-mode by design: the per-joint layout comes
 from a hardcoded fixture so the adapter works in CI without a Drake
@@ -12,10 +19,6 @@ wheel installed. If a real Drake ``MultibodyPlant`` is supplied as
 ``model``, the layout mapping must be passed explicitly via the
 ``model.joint_layout`` attribute (a dict-of-:class:`JointSlot`); we do
 not try to introspect Drake's plant from this adapter.
-
-Drake's RPY convention here is intrinsic XYZ in degrees-on-the-canonical
-side and radians-on-the-engine side; we do the deg <-> rad conversion at
-the boundary so the canonical-pose contract stays in degrees.
 """
 
 from __future__ import annotations
@@ -47,7 +50,7 @@ from src.shared.python.pose_interchange.dynamic_maps import (
 )
 from src.shared.python.pose_interchange.protocol import JointSlot
 
-_PELVIS_PREFIX = 6  # [x, y, z, roll, pitch, yaw]
+_PELVIS_PREFIX = 6  # [x, y, z, rot_x, rot_y, rot_z] (intrinsic XYZ revolute chain)
 _CANONICAL_V2_BASE_NQ = 7  # [xyz, quat_wxyz]
 _CANONICAL_V2_BASE_NV = 6  # [linear_world, angular_body]
 _DRAKE_QUATERNION_BASE_NQ = 7  # [quat_wxyz, xyz]

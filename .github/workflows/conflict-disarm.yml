@@ -41,6 +41,8 @@ jobs:
       dry_run: ${{ inputs.dry_run || 'true' }}
       exclude_prs: ${{ inputs.exclude_prs || '12634' }}
       runner: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    # The provider at this pin declares only these two key names (#15246); a key
+    # it does not declare fails the run at startup. They carry the rotated App.
     secrets:
-      FLEET_GENERAL_AGENT_APP_ID: ${{ secrets.FLEET_GENERAL_AGENT_APP_ID }}
-      FLEET_GENERAL_AGENT_APP_PRIVATE_KEY: ${{ secrets.FLEET_GENERAL_AGENT_APP_PRIVATE_KEY }}
+      JULES_APP_ID: ${{ secrets.FLEET_GENERAL_AGENT_APP_ID }}
+      JULES_APP_PRIVATE_KEY: ${{ secrets.FLEET_GENERAL_AGENT_APP_PRIVATE_KEY }}

@@ -7,6 +7,7 @@ and ``LIE_CODES`` are part of the Phase-1 contract and must not change.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import Literal
 
@@ -108,9 +109,22 @@ class LieRaster:
     tee: tuple[float, float]
 
     def world_to_index(self, x: float, y: float) -> tuple[int, int]:
-        ix = int((x - self.origin[0]) / self.resolution_yd)
-        iy = int((y - self.origin[1]) / self.resolution_yd)
+        """Grid cell containing ``(x, y)``; negative when below the origin.
+
+        Uses floor, not ``int()``: truncation toward zero would map the cell
+        just outside the low edge (``-1 < (x - x0) / res < 0``) onto cell 0.
+        """
+        ix = math.floor((x - self.origin[0]) / self.resolution_yd)
+        iy = math.floor((y - self.origin[1]) / self.resolution_yd)
         return ix, iy
+
+    def cell_indices(
+        self, x: NDArray[np.float64], y: NDArray[np.float64]
+    ) -> tuple[NDArray[np.int64], NDArray[np.int64]]:
+        """Vectorised :meth:`world_to_index` (same floor rule, same cells)."""
+        ix = np.floor((np.asarray(x) - self.origin[0]) / self.resolution_yd)
+        iy = np.floor((np.asarray(y) - self.origin[1]) / self.resolution_yd)
+        return ix.astype(np.int64), iy.astype(np.int64)
 
     def lie_at(self, x: float, y: float) -> int:
         nx, ny = self.codes.shape

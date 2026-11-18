@@ -16,8 +16,8 @@ Every colour is authored as non-linear **sRGB**, components in 0..1.
   and encodes for display; the UI passes hex strings unchanged.
 * No global linearisation is applied anywhere in the appearance layer.
 
-The default golfer is a light-skinned (``skin_2``) golfer with mid brown hair
-(``hair_brown``). Legacy names ``skin_light``/``skin_medium``/``skin_tan``/
+The default golfer is a light-skinned (``skin_2``) golfer with dirty blonde hair
+(``hair_dirty_blonde``). Legacy names ``skin_light``/``skin_medium``/``skin_tan``/
 ``skin_dark`` remain as exact aliases of palette swatches so saved documents
 still load unchanged.
 """

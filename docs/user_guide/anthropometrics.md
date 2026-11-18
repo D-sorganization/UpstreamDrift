@@ -58,19 +58,15 @@ through the matching reader (`anthropometrics.readers.read_urdf_inertial`).
 
 ### Pick the right estimator
 
-| Estimator             | When to use it                                                                       | Source                             |
-| --------------------- | ------------------------------------------------------------------------------------ | ---------------------------------- |
-| `DeLevaEstimator`     | Default. Sex-specific tables, modern measurement protocol, CoM on longitudinal axis. | de Leva (1996)                     |
-| `DempsterEstimator`   | Reproducing classic biomechanics studies that cite Dempster ratios.                  | Dempster (1955)                    |
-| `ZatsiorskyEstimator` | When you need Zatsiorsky-Seluyanov segment ratios (gamma-scanning of living subjects; not cadaver-derived). | Zatsiorsky-Seluyanov (1985) |
+| Estimator             | When to use it                                                                                                   | Source                                                    |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `DeLevaEstimator`     | Default. Sex-specific tables, modern gamma-ray protocol, CoM on longitudinal axis.                               | de Leva (1996)                                            |
+| `DempsterEstimator`   | Classic biomechanics baselines using Dempster cadaver mass/CoM/gyration ratios + Drillis–Contini/Winter lengths. | Dempster (1955); Drillis & Contini (1966) / Winter (2009) |
+| `ZatsiorskyEstimator` | Raw gamma-ray scanning inertia parameters from living subjects (e.g. for sensitivity analyses).                  | Zatsiorsky-Seluyanov (1985 / 2002)                        |
 
-All three implement the same `Estimator` Protocol and return the same
-21-segment humanoid layout, but **mass and inertia numbers are not
-interchangeable** — each table follows its own literature source. Dempster
-(1955) and Zatsiorsky-Seluyanov (1985) publish eight coarse segment classes;
-`anthropometrics.estimators._humanoid_expansion` maps those classes onto the
-humanoid graph without the erroneous per-partition renormalisation from
-#15014.
+All three implement the same `Estimator` Protocol and return the same 21-segment humanoid layout, **though they are not numerically interchangeable**: each table follows its own literature source and study protocol (cadaver measurements vs gamma-ray scanning of living subjects). Dempster (1955) and Zatsiorsky-Seluyanov (1985) publish eight coarse segment classes; `anthropometrics.estimators._humanoid_expansion` maps those classes onto the humanoid graph without the erroneous per-partition renormalisation from #15014.
+
+> **Note on `humanoid_character_builder` inertias:** `humanoid_character_builder` constructs skeleton geometry from model-geometry proportions (`_GEOMETRY`) rather than de Leva's published endpoint lengths, and applies de Leva's CoM and gyration fractions to those model-geometry lengths (`I = m * (k * L_model)^2`). Use `DeLevaEstimator` directly when you need inertia tensors evaluated strictly on de Leva endpoint lengths.
 
 ```python
 from anthropometrics.estimators import (
