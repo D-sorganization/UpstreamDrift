@@ -539,6 +539,7 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
             aspect=seg.aspect,
             end_scale=seg.end_scale,
             window=seg.window,
+            seam_tuck=library.SEAM_TUCK,
             belly=seg.belly,
             capsule_ends=seg.capsule_ends,
             taper_end=seg.taper_end,

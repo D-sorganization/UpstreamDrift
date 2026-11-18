@@ -289,20 +289,24 @@ PART_RADIUS_M: dict[str, float] = {
 # Distal (far-end) radius over the proximal radius per part. Visual only (#13993):
 # the forearm narrows toward the wrist so it is no wider than the hand. The
 # wrist keeps the radius it had before the forearm was thickened (28.5 mm).
-PART_DISTAL_SCALE: dict[str, float] = {"forearm": 0.66}
+PART_DISTAL_SCALE: dict[str, float] = {"forearm": 0.66, "upper_arm": 0.84}
 
 
 # Parts drawn as ONE shape across a joint that turns about the limb's own axis
 # (#15262): the forearm is two bodies joined by the pronation joint, and two
 # separate spindles there read as a second elbow.
 CONTINUOUS_PARTS: tuple[str, ...] = ("forearm",)
+# ``(length m, radius scale)``: past the joint each half runs on this far at
+# this fraction of the seam's radius, under the other half's skin, so the
+# seam is shaded as open skin and shows no line.
+SEAM_TUCK: tuple[float, float] = (0.006, 0.985)
 # Muscle belly per part: (gain, position, width). The radius grows by ``gain``
 # at ``position`` along the whole part and falls to nothing ``width`` away
 # (fractions of its length). Visual only.
 PART_BELLY: dict[str, tuple[float, float, float]] = {"forearm": (0.12, 0.28, 0.45)}
 # Parts that keep their radius to each joint and end in a ball about the
 # joint (elbow and wrist blends, #15262) instead of a spindle's thin ends.
-CAPSULE_END_PARTS: tuple[str, ...] = ("forearm",)
+CAPSULE_END_PARTS: tuple[str, ...] = ("forearm", "upper_arm")
 # Fraction of the part's length by which its taper has reached the distal
 # radius; the rest (the wrist) stays slim.
 PART_TAPER_END: dict[str, float] = {"forearm": 0.8}

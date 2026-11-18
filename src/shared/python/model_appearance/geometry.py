@@ -183,6 +183,11 @@ class LoftOptions:
     # ``aspect`` throughout.
     end_aspect: float | None = None
     flatten_from: float = 0.0
+    # ``(length m, radius scale)``: an end cut inside the limb (``window``)
+    # runs on this far at this fraction of the cut's radius, under the
+    # neighbour's skin, so the cut's rim is shaded as open skin and no line
+    # shows round the limb (#15262). Length 0 is a flat cut.
+    seam_tuck: tuple[float, float] = (0.0, 1.0)
 
 
 def _checked_shape(opts: LoftOptions) -> None:
@@ -199,6 +204,8 @@ def _checked_shape(opts: LoftOptions) -> None:
         raise ValueError("belly width must be positive")
     if not 0.0 < opts.taper_end <= 1.0:
         raise ValueError("taper_end must be in (0, 1]")
+    if not (opts.seam_tuck[0] >= 0.0 and 0.0 < opts.seam_tuck[1] <= 1.0):
+        raise ValueError("seam_tuck needs a length >= 0 and a scale in (0, 1]")
     if opts.end_aspect is not None and not (
         opts.end_aspect > 0.0 and 0.0 <= opts.flatten_from < opts.taper_end
     ):
@@ -229,13 +236,15 @@ def _spindle_stations(
     window: tuple[float, float],
     rings: int,
     joint_rings: bool,
+    tuck: float = 0.0,
 ) -> tuple[Array, float, float]:
     """Stations along the whole limb inside ``window``, and its two poles.
 
     An end of the window that is an end of the limb keeps its rounded
     overshoot (pole ``over`` past it); an end inside the limb is a flat cut
-    (ring and pole at the cut). ``joint_rings`` (capsule ends) adds a ring
-    exactly at each joint, where the end starts to round.
+    (ring and pole at the cut), or with ``tuck`` a ring at the cut and a
+    ring and pole ``tuck`` beyond it. ``joint_rings`` (capsule ends) adds a
+    ring exactly at each joint, where the end starts to round.
     """
     first, last = -over[0], total + over[1]
     theta = np.linspace(0.0, math.pi, rings + 2)[1:-1]
@@ -245,10 +254,36 @@ def _spindle_stations(
         stations = np.sort(np.append(stations[clear], [0.0, total]))
     low, high = window[0] * total, window[1] * total
     if window[0] > 0.0:
-        stations, first = np.append(low, stations[stations > low + 1e-9]), low
+        stations, first = np.append(low, stations[stations > low + 1e-9]), low - tuck
     if window[1] < 1.0:
-        stations, last = np.append(stations[stations < high - 1e-9], high), high
+        stations, last = np.append(stations[stations < high - 1e-9], high), high + tuck
+    if tuck > 0.0:
+        inner = [
+            x for x, cut in ((first, window[0] > 0.0), (last, window[1] < 1.0)) if cut
+        ]
+        stations = np.sort(np.append(stations, inner))
     return stations, first, last
+
+
+def _checked_loft(opts: LoftOptions, length: float, radius: float) -> float:
+    """Preconditions of :func:`lofted_segment` (``ValueError``); gives ``length``."""
+    if not math.isfinite(radius) or radius <= 0:
+        raise ValueError("radius, thickness and aspect must be positive")
+    if opts.thickness <= 0 or opts.aspect <= 0:
+        raise ValueError("radius, thickness and aspect must be positive")
+    t0, t1 = opts.coverage
+    if not 0.0 <= t0 < t1 <= 1.0:
+        raise ValueError("coverage must satisfy 0 <= start < end <= 1")
+    if length <= 1e-9 or opts.rings < 4 or opts.sides < 6:
+        raise ValueError("Segment needs positive length, rings >= 4, sides >= 6")
+    _checked_shape(opts)
+    if opts.aspect != 1.0 or opts.end_aspect not in (None, opts.aspect):
+        require(
+            opts.width_hint is not None,
+            "a non-round cross-section (aspect != 1) needs an explicit width_hint",
+            opts.aspect,
+        )
+    return length
 
 
 def lofted_segment(
@@ -272,24 +307,11 @@ def lofted_segment(
     ``MIN_WIDTH_AXIS_ANGLE_DEG`` from the segment axis (no world default).
     """
     opts = options or LoftOptions()
-    aspect, coverage, thickness = opts.aspect, opts.coverage, opts.thickness
+    aspect, thickness = opts.aspect, opts.thickness
     rings, sides, width_hint = opts.rings, opts.sides, opts.width_hint
     p0, p1 = _check_finite("start", start, 3), _check_finite("end", end, 3)
-    if not math.isfinite(radius) or radius <= 0 or thickness <= 0 or aspect <= 0:
-        raise ValueError("radius, thickness and aspect must be positive")
-    t0, t1 = coverage
-    if not 0.0 <= t0 < t1 <= 1.0:
-        raise ValueError("coverage must satisfy 0 <= start < end <= 1")
-    length = float(np.linalg.norm(p1 - p0))
-    if length <= 1e-9 or rings < 4 or sides < 6:
-        raise ValueError("Segment needs positive length, rings >= 4, sides >= 6")
-    _checked_shape(opts)
-    if aspect != 1.0 or opts.end_aspect not in (None, aspect):
-        require(
-            width_hint is not None,
-            "a non-round cross-section (aspect != 1) needs an explicit width_hint",
-            aspect,
-        )
+    length = _checked_loft(opts, float(np.linalg.norm(p1 - p0)), radius)
+    t0, t1 = opts.coverage
     u, v, a = (
         _frame(p1 - p0)
         if width_hint is None
@@ -321,7 +343,7 @@ def lofted_segment(
 
     if t0 == 0.0 and t1 == 1.0:
         whole, first, last = _spindle_stations(
-            total, over, opts.window, rings, opts.capsule_ends
+            total, over, opts.window, rings, opts.capsule_ends, opts.seam_tuck[0]
         )
         stations, poles = whole - offset, (first - offset, last - offset)
     else:
@@ -329,11 +351,18 @@ def lofted_segment(
         poles = (float(stations[0]), float(stations[-1]))
     phi = np.linspace(0.0, 2.0 * math.pi, sides, endpoint=False)
     across, deep = np.outer(np.cos(phi), u), np.outer(np.sin(phi), v)
+    cut = (
+        0.0 if opts.window[0] > 0.0 else -math.inf,
+        length if opts.window[1] < 1.0 else math.inf,
+    )
     verts: list[Array] = []
     for s in stations:
-        at = float(s) + offset
+        # A station past a cut (a tuck) keeps the cut's section, shrunk.
+        held = min(max(float(s), cut[0]), cut[1])
+        sink = 1.0 if abs(held - float(s)) < 1e-12 else opts.seam_tuck[1]
+        at = held + offset
         ring = across + _aspect_at(opts, at / total) * deep
-        verts.extend(p0 + a * s + profile(at) * ring)
+        verts.extend(p0 + a * s + sink * profile(at) * ring)
     face_list = _ring_faces(len(stations), sides)
     n = len(verts)
     verts += [p0 + a * poles[0], p0 + a * poles[1]]

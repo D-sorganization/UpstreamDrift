@@ -101,12 +101,14 @@ def test_bad_window_or_belly_is_refused(options: dict[str, Any]) -> None:
         lofted_segment(np.zeros(3), Z, 0.036, LoftOptions(**options))
 
 
-def _forearm_skins(spec: dict[str, Any]) -> dict[str, tuple[Any, np.ndarray, float]]:
-    """Skin mesh, unit axis and length of every forearm body."""
+def _forearm_skins(
+    spec: dict[str, Any], part: str = "forearm"
+) -> dict[str, tuple[Any, np.ndarray, float]]:
+    """Skin mesh, unit axis and length of every body of ``part``."""
     caps = {
         cap.body: cap
         for cap in derive_visual_skeleton(spec).capsules
-        if library.classify_body(cap.body) == "forearm"
+        if library.classify_body(cap.body) == part
     }
     doc = document_from_dict({"schema_version": "appearance-v1"})
     out = {}
@@ -137,8 +139,16 @@ def test_the_forearm_bodies_share_one_circle_at_the_rotation_joint() -> None:
         # Each capsule starts at its body origin; the seam ends the upper one.
         seam = _radius_at(near, near_length, near_axis)
         assert seam == pytest.approx(_radius_at(far, 0.0, far_axis), abs=SEAM_M)
-        assert float((near.vertices @ near_axis).max()) <= near_length + 1e-12
-        assert float((far.vertices @ far_axis).min()) >= -1e-12
+        # Past the seam each half only tucks under the other's skin.
+        tuck, sink = library.SEAM_TUCK
+        assert tuck > 0.0 and sink < 1.0
+        assert float((near.vertices @ near_axis).max()) == pytest.approx(
+            near_length + tuck
+        )
+        assert float((far.vertices @ far_axis).min()) == pytest.approx(-tuck)
+        assert _radius_at(near, near_length + tuck, near_axis) == pytest.approx(
+            sink * seam
+        )
         # Round sections, so the seam holds at every rotation about the axis.
         ring = near.vertices[np.abs(near.vertices @ near_axis - near_length) < 1e-9]
         radii = np.linalg.norm(ring - np.outer(ring @ near_axis, near_axis), axis=1)
@@ -259,3 +269,43 @@ def test_forearm_shape_settings_are_validated() -> None:
     gain, position, width = library.belly("forearm")
     assert gain > 0.0 and 0.0 < position < 0.5 and width > 0.0
     assert library.belly("thigh")[0] == 0.0
+
+
+def test_a_tucked_cut_continues_under_its_neighbour() -> None:
+    # A flat cut shares its rim with its end cap; the shading bends there and
+    # draws a line round the limb. A tucked cut runs on under the neighbour.
+    axis, length = Z / np.linalg.norm(Z), float(np.linalg.norm(Z))
+    seam, shape = 0.5 * length, {"end_scale": 0.8, "seam_tuck": (0.006, 0.98)}
+    near = lofted_segment(
+        np.zeros(3), 0.5 * Z, 0.036, LoftOptions(window=(0, 0.5), **shape)
+    )
+    far = lofted_segment(0.5 * Z, Z, 0.036, LoftOptions(window=(0.5, 1), **shape))
+    rim = _radius_at(near, seam, axis)
+    assert _radius_at(far, seam, axis) == pytest.approx(rim, abs=SEAM_M)
+    assert _radius_at(near, seam + 0.006, axis) == pytest.approx(0.98 * rim)
+    assert _radius_at(far, seam - 0.006, axis) == pytest.approx(0.98 * rim)
+    assert float((near.vertices @ axis).max()) == pytest.approx(seam + 0.006)
+    assert float((far.vertices @ axis).min()) == pytest.approx(seam - 0.006)
+    assert _watertight(near) and _watertight(far)
+    # An end of the whole limb is not a cut and is not tucked.
+    whole = lofted_segment(np.zeros(3), Z, 0.036, LoftOptions(**shape))
+    plain = lofted_segment(np.zeros(3), Z, 0.036, LoftOptions(end_scale=0.8))
+    assert whole.vertices == pytest.approx(plain.vertices)
+    for bad in ((-0.001, 0.98), (0.006, 0.0), (0.006, 1.1)):
+        with pytest.raises(ValueError, match="seam_tuck"):
+            lofted_segment(np.zeros(3), Z, 0.036, LoftOptions(seam_tuck=bad))
+
+
+def test_the_upper_arm_keeps_its_width_to_the_elbow() -> None:
+    # A spindle is two thirds of its radius at the joint: a neck above the
+    # elbow, then the full-width forearm.
+    spec = json.loads(SPEC.read_text(encoding="utf-8"))
+    at_elbow = library.PART_RADIUS_M["upper_arm"] * library.distal_scale("upper_arm")
+    assert at_elbow == pytest.approx(library.PART_RADIUS_M["forearm"], rel=0.02)
+    skins = _forearm_skins(spec, "upper_arm")
+    assert len(skins) == 2
+    for mesh, axis, length in skins.values():
+        along, radial = _radii(mesh, axis)
+        band = radial[(along > 0.9 * length) & (along <= length + 1e-9)]
+        assert band.min() >= 0.97 * at_elbow
+        assert band.max() <= 1.12 * at_elbow

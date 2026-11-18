@@ -44,7 +44,7 @@ def test_static_export_matches_tutorial(compiled, tutorial_text: str) -> None:
     doc = json.loads(text)
     claims = {
         filename: "tour_average_male_1f67a756.gltf",
-        str(len(text)): "333864",
+        str(len(text)): "333868",
         media_type: "model/gltf+json",
         str(len(doc["skins"][0]["joints"])): "24",
         str(doc["accessors"][0]["count"]): "3416",
