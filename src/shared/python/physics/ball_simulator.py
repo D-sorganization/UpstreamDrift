@@ -398,18 +398,18 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         drag_force_mag = aero_prefix * cd * (valid_speed**2)
         drag[:, mask] = -drag_force_mag * (valid_rel_vel / valid_speed)
 
-        # Magnus
-        cl = np.minimum(
-            MAX_LIFT_COEFFICIENT,
-            PENNER_LIFT_SCALE
-            * np.power(np.maximum(s_ratio, 0.0), PENNER_LIFT_EXPONENT),
-        )
-        magnus_force_mag = aero_prefix * cl * (valid_speed**2)
-
+        # Magnus: lift depends on the transverse spin ||w x v_hat|| (#15042).
         axis = spin_axis.reshape(3, 1)
         cross = np.cross(axis, valid_rel_vel / valid_speed, axis=0)
         cross_norm = np.sqrt(np.einsum("i...,i...->...", cross, cross))
         cross_mask = cross_norm > NUMERICAL_EPSILON
+
+        cl = np.minimum(
+            MAX_LIFT_COEFFICIENT,
+            PENNER_LIFT_SCALE
+            * np.power(np.maximum(s_ratio * cross_norm, 0.0), PENNER_LIFT_EXPONENT),
+        )
+        magnus_force_mag = aero_prefix * cl * (valid_speed**2)
 
         if np.any(cross_mask):
             factor = magnus_force_mag[cross_mask] / cross_norm[cross_mask]
@@ -439,7 +439,6 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
 
         s_ratio = (omega * self.ball.radius) / speed
         cd = self.ball.calculate_cd(s_ratio)
-        cl = self.ball.calculate_cl(s_ratio)
         aero_prefix = (
             0.5 * self.environment.air_density * self.ball.cross_sectional_area
         )
@@ -451,6 +450,9 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
             cross[0], cross[1], cross[2]
         )  # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm
         if cross_norm > NUMERICAL_EPSILON:
+            # Lift depends on the transverse spin ||w x v_hat|| (= w sin(theta));
+            # spin along the flight direction produces no Magnus force (#15042).
+            cl = self.ball.calculate_cl(s_ratio * cross_norm)
             magnus = (aero_prefix * cl * speed**2) * (cross / cross_norm)
 
         return drag, magnus

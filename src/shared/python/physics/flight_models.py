@@ -721,8 +721,6 @@ class WaterlooPennerModel(BallFlightModel):
             vu = v_rel / speed
             s = (omega_m * launch.ball_radius) / speed
             cd = cd0 + cd1 * s + cd2 * s**2
-            cl_val = cl0 + cl1 * s**cl2 if s > 0.0 else cl0
-            cl = min(cl_max, _capped_lift_coefficient(cl_val))
 
             acc = (
                 -(0.5 * launch.air_density * speed**2 * cd * area / launch.ball_mass)
@@ -732,6 +730,10 @@ class WaterlooPennerModel(BallFlightModel):
                 cross = np.cross(omega_v / omega_m, vu)
                 cross_norm = math.hypot(cross[0], cross[1], cross[2])
                 if cross_norm > NUMERICAL_EPSILON:
+                    # Lift uses the transverse spin ratio s*sin(theta) (#15042).
+                    s_t = s * cross_norm
+                    cl_val = cl0 + cl1 * s_t**cl2 if s_t > 0.0 else cl0
+                    cl = min(cl_max, _capped_lift_coefficient(cl_val))
                     acc += (
                         0.5
                         * launch.air_density
@@ -821,11 +823,12 @@ class MacDonaldHanzelyModel(BallFlightModel):
             acc = -k_drag * speed**2 * vu
 
             if omega > 0:
-                spin_ratio = omega * launch.ball_radius / speed
-                cl_eff = _spin_ratio_lift_coefficient(spin_ratio, self.cl)
                 cross = np.cross(spin_axis, vu)
                 cross_norm = math.hypot(cross[0], cross[1], cross[2])
                 if cross_norm > NUMERICAL_EPSILON:
+                    # Transverse spin ratio w R sin(theta) / v (#15042).
+                    spin_ratio = omega * launch.ball_radius * cross_norm / speed
+                    cl_eff = _spin_ratio_lift_coefficient(spin_ratio, self.cl)
                     acc += (
                         0.5
                         * launch.air_density
@@ -935,11 +938,12 @@ class ConstantCoefficientModel(BallFlightModel):
             acc = -k_drag * speed**2 * vu
 
             if omega > 0:
-                spin_ratio = omega * launch.ball_radius / speed
-                cl_eff = _spin_ratio_lift_coefficient(spin_ratio, self._spec.cl)
                 cross = np.cross(spin_axis, vu)
                 cross_norm = math.hypot(cross[0], cross[1], cross[2])
                 if cross_norm > NUMERICAL_EPSILON:
+                    # Transverse spin ratio w R sin(theta) / v (#15042).
+                    spin_ratio = omega * launch.ball_radius * cross_norm / speed
+                    cl_eff = _spin_ratio_lift_coefficient(spin_ratio, self._spec.cl)
                     acc += (
                         0.5
                         * launch.air_density
