@@ -480,8 +480,14 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
         hint = width_hint_for(ctx.sections, body, seg.start, seg.end)
     whole = extra.get("coverage", (0.0, 1.0)) == (0.0, 1.0)
     if seg.profile is not None and seg.profile_start is not None and whole:
+        if hint is None:
+            raise ValueError(f"torso body {body!r} has no width axis to loft on")
         frame = TorsoFrame(
-            seg.profile_start, seg.end, hint, seg.radius, seg.radius * seg.aspect
+            seg.profile_start,
+            seg.end,
+            np.asarray(hint, dtype=float),
+            seg.radius,
+            seg.radius * seg.aspect,
         )
         return torso_mesh(frame, seg.profile, thickness=extra.get("thickness", 1.0))
     return geometry.lofted_segment(
