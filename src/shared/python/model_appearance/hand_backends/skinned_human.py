@@ -96,6 +96,9 @@ from src.shared.python.model_appearance.hand_backends.skinning import (
 )
 from src.shared.python.model_appearance.hand_backends.palm_fold import fold_palm
 from src.shared.python.model_appearance.hand_backends.rest_shape import filled_out
+from src.shared.python.model_appearance.hand_backends.trigger_finger import (
+    spread_trigger_finger,
+)
 from src.shared.python.model_appearance.hand_backends.subdivision import (
     original_resolution,
     sharp_edges,
@@ -992,6 +995,7 @@ def _solve_right_hand(
         coarse = min(settings.wrap_scan_samples, settings.side_close_scan_samples)
         angles = wrap(start, coarse)
         _close_fingers(hand, angles)
+        spread_trigger_finger(hand, angles, side)
     if pair is not None and pair.groove is not None:
         _overlap_little_finger(hand, angles, pair.groove)
     most = dict(settings.thumb_toward_index_max_deg)[side]

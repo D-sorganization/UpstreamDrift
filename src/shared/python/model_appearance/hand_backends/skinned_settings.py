@@ -89,6 +89,7 @@ class SkinnedHumanSettings:
     side_close_gap_m: float
     side_close_index_gap_m: float
     side_close_scan_samples: int
+    side_close_trigger_spread_deg: tuple[tuple[str, float], ...]
     pair_capsule_radius_scale: float
     pair_palm_capsule_radius_scale: float
     pair_thumb_radius_scale: float
@@ -271,6 +272,10 @@ def _side_close_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
         ),
         "side_close_scan_samples": int(
             _non_negative(raw["scan_samples"], "side_close.scan_samples")
+        ),
+        "side_close_trigger_spread_deg": tuple(
+            (side, _non_negative(raw["trigger_spread_deg"][side], side))
+            for side in ("lead", "trail")
         ),
     }
 

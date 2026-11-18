@@ -99,6 +99,10 @@
   },
   "_min_trail_thumb_target_side_deg": "Floor on the trail thumb's configured angle to the target side of the grip's top (#15278).",
   "min_trail_thumb_target_side_deg": 35.0,
+  "_max_trail_thumb_past_index_joint_m": "Owner, 2026-11-18 (#15278): the trail thumb's tip is about level, along the shaft, with the centre of the forefinger's first joint. It is 23 mm past it with the fingers closed (not met; the test is an expected failure) and 8 mm with a 30 degree trigger spread.",
+  "max_trail_thumb_past_index_joint_m": 0.010,
+  "_trail_index_joint_azimuth_deg": "The centre of that joint lies on the away-from-target side of the shaft: degrees round from the grip's top, positive away from the target (#15278). The band is the quarter of the grip centred on its away-from-target side (90). Measured 121.8 with the fingers closed, 99.8 with a 30 degree trigger spread.",
+  "trail_index_joint_azimuth_deg": [45.0, 135.0],
   "max_thumb_azimuth_error_deg": 5.0,
   "min_index_knuckle_flexion_deg": 15.0,
   "max_index_segment_gap_m": 0.004

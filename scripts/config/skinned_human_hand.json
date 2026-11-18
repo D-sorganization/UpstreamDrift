@@ -111,7 +111,12 @@
     "max_deg": 20.0,
     "gap_m": 0.001,
     "index_gap_m": 0.003,
-    "scan_samples": 0
+    "scan_samples": 0,
+    "_trigger_spread_deg": "Owner, 2026-11-18 (#15278): a trigger forefinger, swung this many degrees away from the middle finger after the fingers close, so its first joint lies down the shaft nearer the thumb's tip. Off (0) for both hands until the owner decides: at 30 on the trail hand the joint is 15 mm further down the shaft (thumb tip 8 mm past it instead of 23) with no hand-to-hand penetration, but the forefinger is then 18.8 mm from the middle finger against max_neighbour_finger_gap of 5 mm, and on a lone hand its tip is 2.3 mm off the grip.",
+    "trigger_spread_deg": {
+      "lead": 0.0,
+      "trail": 0.0
+    }
   },
   "thumb": {
     "max_swing_deg": 120.0,
