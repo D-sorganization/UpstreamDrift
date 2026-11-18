@@ -165,6 +165,8 @@
     "yield_passes": 3,
     "yield_clearance_m": 0.0003,
     "palm_cup_max_deg": 70.0,
+    "_palm_wrap": "Owner, 2026-11-17 (#15265, 'cup the palm'). For the hand that lies on the other hand, the keys given here replace those of correctives.palm_pad, so its palm pads can reach further and fold round the thumb under them. Empty: off, the pads settle as on a bare grip. It is off because folding the pads round the thumb (hand_visual_quality.json thumb_wrap_trial_pad) moves palm skin 16.6 mm from its bones, against max_corrective_shift_m of 8 mm; see #15265.",
+    "palm_wrap": {},
     "overlap_max_swing_deg": 30.0,
     "overlap_bias_m": 0.0025,
     "capsule_margin_m": 0.0006
@@ -213,7 +215,8 @@
       "clearance_m": 0.0003,
       "facing_full": 0.5,
       "smooth_iterations": 6,
-      "passes": 2
+      "passes": 2,
+      "max_shift_m": 0.008
     },
     "lift_out": {
       "max_depth_m": 0.004,

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
 
@@ -418,13 +419,64 @@ def thumb_crown_gaps_m(
 
     Preconditions: ``station_m`` positive, ``min_facing`` in ``(0, 1)``.
     """
+    if not station_m > 0.0 or not 0.0 < min_facing < 1.0:
+        raise ValueError("station_m must be positive and min_facing in (0, 1)")
+    skin, facing, gap = _lead_thumb_against(lead, trail)
+    crown = facing >= min_facing
+    if not crown.any():
+        raise ValueError("no skin of the lead thumb faces away from the grip")
+    return _per_station(skin[crown, 2], station_m, gap[crown], np.min)
+
+
+def thumb_wrap_shares(
+    lead: HandVisualResult,
+    trail: HandVisualResult,
+    *,
+    station_m: float,
+    contact_m: float,
+) -> NDArray[np.float64]:
+    """How far round the lead thumb the trail palm lies, along the thumb.
+
+    The outer half of the lead thumb is the skin of its two free segments
+    whose normal points away from the grip axis at all: its crown and both
+    flanks. It is cut into stations ``station_m`` long along the grip, from
+    the thumb's base to its tip, and each station reports the share of its
+    outer-half skin vertices within ``contact_m`` of the trail hand's skin.
+    A flat palm laid on a round thumb touches the crown only and scores low;
+    a palm cupped round the thumb scores near one.
+
+    Preconditions: ``station_m`` and ``contact_m`` positive.
+    """
+    if not station_m > 0.0 or not contact_m > 0.0:
+        raise ValueError("station_m and contact_m must be positive")
+    skin, facing, gap = _lead_thumb_against(lead, trail)
+    outer = facing >= 0.0
+    if not outer.any():
+        raise ValueError("no skin of the lead thumb faces away from the grip")
+    touching = (gap[outer] <= contact_m).astype(np.float64)
+    return _per_station(skin[outer, 2], station_m, touching, np.mean)
+
+
+def _per_station(
+    along: NDArray[np.float64],
+    station_m: float,
+    values: NDArray[np.float64],
+    reduce: Callable[[NDArray[np.float64]], float],
+) -> NDArray[np.float64]:
+    station = np.floor((along - along.min()) / station_m).astype(int)
+    return np.array([reduce(values[station == k]) for k in np.unique(station)])
+
+
+def _lead_thumb_against(
+    lead: HandVisualResult, trail: HandVisualResult
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
+    """Skin of the lead thumb's free segments, how far each normal points away
+    from the grip axis (cosine), and each vertex's distance to the trail skin."""
     from src.shared.python.model_appearance.hand_backends.posing import skin_distance
     from src.shared.python.model_appearance.hand_backends.skinning import (
         vertex_normals,
     )
 
-    if not station_m > 0.0 or not 0.0 < min_facing < 1.0:
-        raise ValueError("station_m must be positive and min_facing in (0, 1)")
     asset, _, _ = _audit_parts(lead)
     ids = asset.dominant_vertex_ids(("thumb_prox", "thumb_dist"))
     skin = lead.mesh.vertices[ids]
@@ -432,16 +484,12 @@ def thumb_crown_gaps_m(
     radial = skin[:, :2] / np.maximum(
         np.linalg.norm(skin[:, :2], axis=1, keepdims=True), 1e-12
     )
-    crown = skin[np.einsum("ij,ij->i", normals[:, :2], radial) >= min_facing]
-    if len(crown) == 0:
-        raise ValueError("no skin of the lead thumb faces away from the grip")
     other = trail.mesh
     reach = float(np.ptp(np.r_[skin, other.vertices], axis=0).max())
     gap = skin_distance(
         other.vertices, vertex_normals(other.vertices, other.faces), reach
-    )(crown)
-    station = np.floor((crown[:, 2] - crown[:, 2].min()) / station_m).astype(int)
-    return np.array([gap[station == k].min() for k in np.unique(station)])
+    )(skin)
+    return skin, np.einsum("ij,ij->i", normals[:, :2], radial), gap
 
 
 def wrist_joint_m(result: HandVisualResult) -> NDArray[np.float64]:

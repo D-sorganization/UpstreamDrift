@@ -8,11 +8,14 @@ read from ``--renderer-root`` until it is on this branch)::
         --renderer-root <checkout with hand_backends/render.py>
 
 Writes ``palm_on_thumb_stills.png`` and ``palm_on_thumb_sections.png`` beside
-this file. In both, the top row is the legacy trail cross angle and the bottom
-row the owner's (``owner_trail_cross_angle_deg``). Stills: the golfer's view,
+this file. In both, the top row is the legacy trail cross angle, the middle
+row the owner's (``owner_trail_cross_angle_deg``), which is the default, and
+the bottom row a trial: the owner's with the palm pads folded round the thumb
+(``pair.palm_wrap`` set to ``thumb_wrap_trial_pad``; not the default, the skin
+moves too far from its bones). Stills: the golfer's view,
 then three views round the trail side. Sections: across the grip at stations
 toward the head, then along the grip through the lead thumb (lead red, trail
-blue, grip black). Gaps along the thumb are written to standard output.
+blue, grip black). Gaps and wrap shares along the thumb go to standard output.
 """
 
 from __future__ import annotations
@@ -37,10 +40,15 @@ from src.shared.python.model_appearance.hand_backends.golf_grip import (  # noqa
 )
 from src.shared.python.model_appearance.hand_backends.qa import (  # noqa: E402
     load_hand_visual_quality,
+    skinning_residual_m,
     thumb_crown_gaps_m,
+    thumb_wrap_shares,
 )
 from src.shared.python.model_appearance.hand_backends.skinned_pair import (  # noqa: E402
     build_grip_hands,
+)
+from src.shared.python.model_appearance.hand_backends.skinned_settings import (  # noqa: E402
+    default_settings,
 )
 from src.shared.python.model_appearance.skinned_club_hands import (  # noqa: E402
     owner_grip_spec,
@@ -150,10 +158,18 @@ def main() -> int:
             club_cross_angle_deg=GripSpec.legacy().trail.club_cross_angle_deg,
         ),
     )
-    figure, axes = plt.subplots(2, len(STATIONS_MM) + 1, figsize=(26, 9))
+    flat = default_settings()
+    wide = dataclasses.replace(flat.palm_pad, **quality["thumb_wrap_trial_pad"])
+    cupped = dataclasses.replace(flat, pair_palm_wrap=wide)
+    cases = (
+        ("legacy_flat", legacy, flat),
+        ("owner_flat", owner, flat),
+        ("owner_trial_cupped", owner, cupped),
+    )
+    figure, axes = plt.subplots(len(cases), len(STATIONS_MM) + 1, figsize=(26, 13.5))
     rows, report = [], {}
-    for row, (name, spec) in enumerate((("legacy", legacy), ("owner", owner))):
-        pair = build_grip_hands(spec, grip_radius_m=radius)
+    for row, (name, spec, settings) in enumerate(cases):
+        pair = build_grip_hands(spec, grip_radius_m=radius, settings=settings)
         _sections(axes[row], pair)
         rows.append(_stills(render, pair))
         gaps = thumb_crown_gaps_m(
@@ -165,6 +181,18 @@ def main() -> int:
         report[name] = {
             "trail_cross_angle_deg": spec.trail.club_cross_angle_deg,
             "thumb_gaps_mm": [round(1e3 * float(g), 1) for g in gaps],
+            "thumb_wrap_share": [
+                round(float(share), 2)
+                for share in thumb_wrap_shares(
+                    pair["lead"],
+                    pair["trail"],
+                    station_m=float(quality["thumb_channel_station_m"]),
+                    contact_m=float(quality["thumb_wrap_contact_m"]),
+                )
+            ],
+            "trail_skin_off_bones_mm": round(
+                1e3 * skinning_residual_m(pair["trail"]), 1
+            ),
             "trail_station_mm": round(
                 1e3 * float(pair["trail"].frame_from_rest[2, 3]), 1
             ),

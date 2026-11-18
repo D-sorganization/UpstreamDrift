@@ -106,6 +106,7 @@ class SkinnedHumanSettings:
     pair_yield_passes: int
     pair_yield_clearance_m: float
     pair_palm_cup_max_deg: float
+    pair_palm_wrap: PadConformSettings
     frame_excluded_bones: tuple[str, ...]
     fold_relax: FoldRelaxSettings
     palm_pad: PadConformSettings
@@ -121,6 +122,12 @@ class SkinnedHumanSettings:
         """These settings for the trail hand of a pair. Its palm lies on the
         lead thumb, so it cups only as far as ``pair.palm_cup_max_deg``."""
         return replace(self, palm_cup_max_deg=self.pair_palm_cup_max_deg)
+
+    def palm_pad_over(self, other_hand: bool) -> PadConformSettings:
+        """How the palm pads settle: on a bare grip as ``correctives.palm_pad``
+        says, over the other hand with the keys of ``pair.palm_wrap`` in place
+        of those, so the palm can be made to cup round the thumb it lies on."""
+        return self.pair_palm_wrap if other_hand else self.palm_pad
 
     def limit_rad(self, joint: str, finger: str = "") -> tuple[float, float]:
         """Flexion range of ``joint``; ``finger``'s own (``joint.finger``) if set."""
@@ -227,6 +234,7 @@ def _palm_pad(raw: Mapping[str, Any]) -> PadConformSettings:
         facing_full=float(raw["facing_full"]),
         smooth_iterations=int(raw["smooth_iterations"]),
         passes=int(raw["passes"]),
+        max_shift_m=float(raw["max_shift_m"]),
     )
 
 
@@ -441,6 +449,9 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
             str(bone) for bone in raw["framing"]["excluded_bones"]
         ),
         **_corrective_fields(raw["correctives"]),
+        pair_palm_wrap=_palm_pad(
+            {**raw["correctives"]["palm_pad"], **raw["pair"]["palm_wrap"]}
+        ),
         **_side_close_fields(raw["side_close"]),
         squeeze_finger_depth_m=_non_negative(
             raw["squeeze"]["finger_depth_m"], "squeeze.finger_depth_m"

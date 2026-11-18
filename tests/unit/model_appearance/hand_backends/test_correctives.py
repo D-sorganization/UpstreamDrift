@@ -175,6 +175,30 @@ def test_pad_conform_is_switched_off_by_zero_reach_or_zero_passes() -> None:
         np.testing.assert_array_equal(out, vertices)
 
 
+def test_pad_skin_travels_no_further_than_its_cap() -> None:
+    """Flesh shifts a few millimetres, not centimetres: with ``max_shift_m``
+    set, a wide reach and many passes still move no vertex further."""
+    vertices, faces = _ramp()
+    ids = np.arange(len(vertices), dtype=np.int64)
+    wide = dataclasses.replace(_PAD, reach_m=0.05, passes=12)
+    free = conform_pads(vertices, faces, ids, _floor, wide, _normals_down)
+    assert np.linalg.norm(free - vertices, axis=1).max() > 0.004
+    capped = conform_pads(
+        vertices,
+        faces,
+        ids,
+        _floor,
+        dataclasses.replace(wide, max_shift_m=0.002),
+        _normals_down,
+    )
+    shift = np.linalg.norm(capped - vertices, axis=1)
+    assert shift.max() <= 0.002 + 1e-12
+    assert shift.max() > 0.0019, "the cap should bind on this ramp"
+    assert (
+        _floor(capped) >= np.minimum(_floor(vertices), wide.clearance_m) - 1e-12
+    ).all()
+
+
 def test_bad_corrective_settings_raise() -> None:
     for bad in ((-1, 1, 0.5), (1, -1, 0.5), (1, 1, 0.0), (1, 1, 1.5)):
         with pytest.raises(ValueError):
@@ -185,6 +209,7 @@ def test_bad_corrective_settings_raise() -> None:
         {"facing_full": 0.0},
         {"smooth_iterations": -1},
         {"passes": -1},
+        {"max_shift_m": -0.001},
     ):
         with pytest.raises(ValueError):
             PadConformSettings(**{**_PAD.__dict__, **bad})

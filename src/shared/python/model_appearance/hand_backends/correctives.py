@@ -56,6 +56,8 @@ class PadConformSettings:
     ``smooth_iterations`` how often the displacement field is averaged over
     neighbours so the pad stays smooth, and ``passes`` how often the whole
     step repeats (smoothing spreads each pass, so one pass stops short).
+    ``max_shift_m`` is the furthest any vertex ends from where it started:
+    flesh shifts millimetres, however wide the reach.
     """
 
     bones: tuple[str, ...]
@@ -64,10 +66,11 @@ class PadConformSettings:
     facing_full: float
     smooth_iterations: int
     passes: int
+    max_shift_m: float = float("inf")
 
     def __post_init__(self) -> None:
-        if self.reach_m < 0.0 or self.clearance_m < 0.0:
-            raise ValueError("pad reach and clearance must not be negative")
+        if self.reach_m < 0.0 or self.clearance_m < 0.0 or self.max_shift_m < 0.0:
+            raise ValueError("pad reach, clearance and shift must not be negative")
         if not 0.0 < self.facing_full <= 1.0:
             raise ValueError("pad facing_full must be in (0, 1]")
         if self.smooth_iterations < 0 or self.passes < 0:
@@ -195,15 +198,20 @@ def conform_pads(
     """Settle pad skin onto the obstacle (see :class:`PadConformSettings`).
 
     ``vertex_normals(vertices)`` returns outward unit normals. Postconditions:
-    only ``pad_ids`` move; no moved vertex ends closer to the obstacle than
-    ``clearance_m`` unless it already was.
+    only ``pad_ids`` move, none further than ``max_shift_m``; no moved vertex
+    ends closer to the obstacle than ``clearance_m`` unless it already was.
     """
     out = np.array(vertices, dtype=np.float64)
     if settings.reach_m == 0.0 or settings.passes == 0 or len(pad_ids) == 0:
         return out
     neighbours = vertex_neighbours(faces, len(out))
+    start = out[pad_ids].copy()
     for _ in range(settings.passes):
         _conform_once(out, vertex_normals(out), neighbours, pad_ids, distance, settings)
+        shift = out[pad_ids] - start
+        length = np.linalg.norm(shift, axis=1, keepdims=True)
+        over = np.minimum(1.0, settings.max_shift_m / np.maximum(length, 1e-12))
+        out[pad_ids] = start + shift * over
     return out
 
 

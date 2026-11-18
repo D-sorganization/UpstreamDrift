@@ -1106,7 +1106,7 @@ def _corrected_skin(
         asset.faces,
         asset.dominant_vertex_ids(settings.palm_pad.bones),
         solved.palm_obstacle or solved.obstacle,
-        settings.palm_pad,
+        settings.palm_pad_over(solved.palm_obstacle is not None),
         lambda v: vertex_normals(v, asset.faces),
     )
     relaxable_mask = _bone_mask(
