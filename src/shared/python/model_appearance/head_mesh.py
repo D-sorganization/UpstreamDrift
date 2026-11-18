@@ -29,7 +29,9 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.model_appearance import head_cap, head_features, head_hair
 from src.shared.python.model_appearance.geometry import Mesh
+from src.shared.python.model_appearance.schema import HeadSettings
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 ASSET_DIR = REPO_ROOT / "assets" / "head_cc0"
@@ -119,8 +121,15 @@ def _default_asset() -> HeadAsset:
     return _load(ASSET_PATH, PROVENANCE_PATH)
 
 
-def build_mesh_parts(length_m: float, headwear: str) -> list[tuple[str, Mesh, str]]:
+def build_mesh_parts(
+    length_m: float, headwear: str, settings: HeadSettings | None = None
+) -> list[tuple[str, Mesh, str]]:
     """``(name, mesh, material role)`` of the mesh head scaled to ``length_m``.
+
+    With ``settings`` the head also gets eyes, lids, brows and a mouth seam
+    from :mod:`head_features`, and ``hair_style="short_crop"`` swaps the
+    asset's thin scalp shell for the haircut of :mod:`head_hair`; without
+    them (the legacy call) the asset's own parts are returned unchanged.
 
     Preconditions: positive finite length; ``headwear`` is ``"none"`` or
     ``"hair"`` (the asset has short hair only, a cap would not fit). The skin
@@ -137,9 +146,27 @@ def build_mesh_parts(length_m: float, headwear: str) -> list[tuple[str, Mesh, st
     out = [
         ("skin_mesh", Mesh(asset.skin.vertices * length_m, asset.skin.faces), "skin")
     ]
+    if settings is not None:
+        out += [
+            (name, Mesh(m.vertices * length_m, m.faces), role)
+            for name, m, role in head_features.face_parts(asset.skin)
+        ]
+    capped = settings is not None and settings.cap_style == "baseball_cap"
     if headwear == "hair":
-        hair = Mesh(asset.hair.vertices * length_m, asset.hair.faces)
-        out.append(("hair_mesh", hair, "headwear"))
+        crop = settings is not None and settings.hair_style == "short_crop"
+        unit = asset.hair
+        if settings is not None and (crop or capped):
+            # Under a cap the hair is cut flatter than the crown stands off.
+            under = head_cap.CapCrop().hair_under if capped else None
+            unit = head_hair.build_short_crop(asset.skin, settings.hair_part, under)
+        out.append(
+            ("hair_mesh", Mesh(unit.vertices * length_m, unit.faces), "headwear")
+        )
+    if settings is not None and capped:
+        out += [
+            (name, Mesh(m.vertices * length_m, m.faces), "cap")
+            for name, m in head_cap.build_cap(asset.skin, settings.cap_brim)
+        ]
     return out
 
 
