@@ -15,7 +15,7 @@ from __future__ import annotations
 import json
 import math
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -1051,22 +1051,23 @@ def build_hand_visual(
     *,
     grip_radius_m: float,
     settings: SkinnedHumanSettings | None = None,
+    skin_rgb: tuple[float, float, float] | None = None,
 ) -> HandVisualResult:
     """Skinned human hand mesh in the hand-grip frame.
 
     With ``joint_angles=None`` the hand is curled to contact for this spec;
-    explicit angles are applied as given (the hand is still seated flat on the
-    grip first, and may then penetrate it if the angles say so).
-
+    explicit angles are applied as given (the hand is seated flat on the grip
+    first, and may then penetrate it). ``skin_rgb`` replaces the settings'.
     Preconditions: ``grip_spec`` a :class:`GripSpec`; ``side`` lead or trail;
     ``grip_radius_m`` positive and finite. Postconditions: finite vertices;
-    outward-wound closed mesh; unit vertex normals; the hand is rolled about
-    the shaft by ``HandGripSpec.shaft_roll_deg``.
+    outward-wound closed unit-normal mesh, rolled by ``shaft_roll_deg``.
     """
     _check_inputs(grip_spec, side, grip_radius_m)
     if joint_angles is not None and not isinstance(joint_angles, HandJointAngles):
         raise TypeError("joint_angles must be HandJointAngles or None")
     settings = settings or default_settings()
+    if skin_rgb is not None:
+        settings = replace(settings, skin_rgb=skin_rgb)
     given = None if joint_angles is None else joint_angles.as_mapping()
     solved = _solve_right_hand(grip_spec, side, grip_radius_m, settings, given)
     return _result(solved, grip_spec, side, grip_radius_m, settings, 0.0)
@@ -1195,5 +1196,5 @@ def register() -> None:
     )
 
     register_hand_visual_backend(
-        HandVisualBackend(name=BACKEND_NAME, builder=build_hand_visual)
+        HandVisualBackend(BACKEND_NAME, build_hand_visual, "Skinned CC0 human hand")
     )
