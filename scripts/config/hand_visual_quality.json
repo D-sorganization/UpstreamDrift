@@ -35,7 +35,11 @@
   "_max_club_grip_sink_m": "#15251: on the golfer's club the skinned hands are posed on the standard golf grip but the club draws a fatter grip tube (11.8 to 10.5 mm radius), so the skin sinks into the tube: measured 0.97 mm lead, 1.89 mm trail. Tighten when the club draws the standard grip.",
   "max_club_grip_sink_m": 0.002,
   "_club_hand_forearm_cuff_m": "#15253: on the golfer's club the skinned hand is cut this far up the forearm from its wrist joint; the model's own forearm continues from there.",
-  "club_hand_forearm_cuff_m": 0.02,
+  "club_hand_forearm_cuff_m": 0.002,
+  "_forearm_wrist_margin": "#15264: size of the model forearm's wrist end over the skinned hand's wrist section; just over 1 so the forearm's skin covers the hand's cut edge.",
+  "forearm_wrist_margin": 1.05,
+  "_forearm_wrist_cap": "#15264: length of the forearm's rounded wrist end over its half depth. At 1 the end is round about the axis the hand flexes about, so the hand's cut edge stays covered as the wrist bends.",
+  "forearm_wrist_cap": 1.0,
   "trail_wrist_offset_range_m": [
     0.015,
     0.05

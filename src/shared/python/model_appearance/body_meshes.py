@@ -258,8 +258,8 @@ class _Context:
     club_parts: Mapping[str, Sequence[ClubPart]] = field(default_factory=dict)
     #: Fraction of its whole limb each body of a continuous part draws (#15262).
     windows: Mapping[str, tuple[float, float]] = field(default_factory=dict)
-    #: Forearm radius at the wrist, when the drawn hands set it (#15262).
-    wrist_radius_m: float | None = None
+    #: Wrist section per forearm body, when the drawn hands set it (#15264).
+    wrist_sections: Mapping[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -273,6 +273,11 @@ class _Segment:
     belly: tuple[float, float, float] = library.NO_BELLY
     capsule_ends: bool = False
     taper_end: float = 1.0
+    end_aspect: float | None = None
+    flatten_from: float = 0.0
+    width_hint: np.ndarray | None = None
+    end_cap: float = 1.0
+    end_shift: np.ndarray | None = None
 
 
 def _limb_windows(
@@ -301,24 +306,39 @@ def _limb_windows(
     return out
 
 
-def _distal_scale(part: str, radius: float, wrist_radius_m: float | None) -> float:
-    """Taper of ``part``: the library's, or the drawn hands' wrist for a forearm."""
-    if part != "forearm" or wrist_radius_m is None:
-        return library.distal_scale(part)
-    return library.validate_distal_scale(min(1.0, wrist_radius_m / radius))
+def _wrist_shape(part: str, radius: float, wrist: Any) -> dict[str, Any]:
+    """Far-end shape of a limb: the library taper, or the drawn hand's wrist.
+
+    ``wrist`` is a ``skinned_wrist_sections.WristSection`` in the body frame,
+    or ``None``. With one, the limb ends that wide and that deep, turned to
+    its width axis, the flat section easing in past the rotation joint.
+    """
+    if wrist is None:
+        return {"end_scale": library.distal_scale(part)}
+    scale = library.validate_distal_scale(min(1.0, wrist.half_width_m / radius))
+    return {
+        "end_scale": scale,
+        "end_aspect": wrist.half_depth_m / wrist.half_width_m,
+        "flatten_from": library.PART_FLATTEN_FROM.get(part, 0.0),
+        "width_hint": wrist.width_axis,
+        "end_cap": wrist.cap,
+        "end_shift": wrist.centre_m,
+    }
 
 
-def _skinned_wrist_radius_m(
+def _skinned_wrist_sections(
     spec: Mapping[str, Any], club: ClubAssembly | None
-) -> float | None:
-    """Wrist radius of the skinned hands, if the spec draws them on a club."""
+) -> Mapping[str, Any]:
+    """Wrist section per forearm body if the spec draws the skinned hands."""
     backend = spec.get("subject", {}).get("hand_visual_backend")
     if club is None or backend != "skinned_human":
-        return None
+        return {}
     # Imported here: the skinned backend loads a mesh asset and a solver.
-    from src.shared.python.model_appearance.skinned_club_hands import wrist_radius_m
+    from src.shared.python.model_appearance.skinned_wrist_sections import (
+        forearm_wrist_sections,
+    )
 
-    return wrist_radius_m(club)
+    return forearm_wrist_sections(spec, club)
 
 
 def _limb_segments(
@@ -326,7 +346,7 @@ def _limb_segments(
     caps: Sequence[Capsule],
     scale: float,
     window: tuple[float, float] = library.FULL_COVERAGE,
-    wrist_radius_m: float | None = None,
+    wrist: Any = None,
 ) -> list[_Segment]:
     out = []
     for cap in caps:
@@ -343,11 +363,11 @@ def _limb_segments(
                 np.asarray(cap.end_m),
                 radius,
                 aspect,
-                _distal_scale(part, radius, wrist_radius_m),
-                window,
-                library.belly(part),
-                part in library.CAPSULE_END_PARTS,
-                library.taper_end(part),
+                window=window,
+                belly=library.belly(part),
+                capsule_ends=part in library.CAPSULE_END_PARTS,
+                taper_end=library.taper_end(part),
+                **_wrist_shape(part, radius, wrist),
             )
         )
     return out
@@ -493,9 +513,17 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
             belly=seg.belly,
             capsule_ends=seg.capsule_ends,
             taper_end=seg.taper_end,
+            end_aspect=seg.end_aspect,
+            flatten_from=seg.flatten_from,
+            end_cap=seg.end_cap,
+            end_shift=seg.end_shift,
             rings=library.LOFT_RINGS,
             sides=library.LOFT_SIDES,
-            width_hint=width_hint_for(ctx.sections, body, seg.start, seg.end),
+            width_hint=(
+                seg.width_hint
+                if seg.width_hint is not None
+                else width_hint_for(ctx.sections, body, seg.start, seg.end)
+            ),
             **extra,
         ),
     )
@@ -575,7 +603,9 @@ def _meshes_for_body(
         segments = [_trunk_segment(ctx, body, part, caps, scale)]
     else:
         window = ctx.windows.get(body, library.FULL_COVERAGE)
-        segments = _limb_segments(part, caps, scale, window, ctx.wrist_radius_m)
+        segments = _limb_segments(
+            part, caps, scale, window, ctx.wrist_sections.get(body)
+        )
     return _segment_meshes(ctx, body, part, segments)
 
 
@@ -624,7 +654,7 @@ def body_meshes(
         foot.foot_parts(spec, sections, model=doc.foot.model),
         _club_parts(spec, doc, club),
         _limb_windows(spec, by_body),
-        _skinned_wrist_radius_m(spec, club),
+        _skinned_wrist_sections(spec, club),
     )
     out = [
         m for body, caps in by_body.items() for m in _meshes_for_body(ctx, body, caps)

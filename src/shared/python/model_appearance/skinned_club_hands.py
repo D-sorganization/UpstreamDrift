@@ -145,6 +145,20 @@ def _capped(vertices: Array, faces: NDArray[np.int64]) -> tuple[Array, NDArray]:
     return np.concatenate(points), np.concatenate([faces, np.array(fans)])
 
 
+def _flat_rim(
+    vertices: Array, faces: NDArray[np.int64], point: Array, normal: Array
+) -> Array:
+    """``vertices`` with every open-edge vertex moved along ``normal`` onto the
+    plane through ``point``, so a cut that dropped whole triangles ends in one
+    flat ring instead of a ragged edge."""
+    edges = np.concatenate([faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]])
+    paired = {(int(a), int(b)) for a, b in edges}
+    rim = sorted({a for a, b in paired if (b, a) not in paired})
+    out = vertices.copy()
+    out[rim] += np.outer((point - out[rim]) @ normal, normal)
+    return out
+
+
 def skinned_hand_meshes(
     club: ClubAssembly, *, cut_at_wrist: bool = True
 ) -> dict[str, Mesh]:
@@ -154,7 +168,8 @@ def skinned_hand_meshes(
     the club's drawn grip tube, which is up to about a millimetre fatter. With
     ``cut_at_wrist`` every triangle that reaches more than
     :func:`forearm_cuff_m` up the forearm from the wrist joint is dropped, so a
-    model's own forearm continues from the hand; the cut end is closed flat.
+    model's own forearm continues from the hand; the cut edge is moved onto
+    that plane and closed flat.
     """
     frame, pair = skinned_hand_frame(club), _pair()
     reach = forearm_reach_m(club)
@@ -166,32 +181,11 @@ def skinned_hand_meshes(
         if cut_at_wrist:
             wrist, along = reach[hand.value]
             keep = (vertices - wrist) @ along <= forearm_cuff_m()
-            vertices, faces = _capped(vertices, faces[keep[faces].all(axis=1)])
+            faces = faces[keep[faces].all(axis=1)]
+            rim = wrist + forearm_cuff_m() * along
+            vertices, faces = _capped(_flat_rim(vertices, faces, rim, along), faces)
         meshes[label] = Mesh(vertices, faces)
     return meshes
-
-
-#: Half length of the band of hand skin about the wrist joint that sizes the
-#: forearm's wrist end.
-_WRIST_BAND_M = 0.004
-
-
-def wrist_radius_m(club: ClubAssembly) -> float:
-    """Mean half extent of the skinned hands' skin at the wrist joint (m).
-
-    The hand's wrist is wider than it is thick; a round forearm end of this
-    radius sits between the two. Postcondition: positive.
-    """
-    meshes, extents = skinned_hand_meshes(club), []
-    for side, (wrist, along) in forearm_reach_m(club).items():
-        mesh = meshes[f"{side}_hand"]
-        rel = mesh.vertices[np.unique(mesh.faces)] - wrist
-        band = rel[np.abs(rel @ along) < _WRIST_BAND_M]
-        flat = band - np.outer(band @ along, along)
-        flat = flat - 0.5 * (flat.max(axis=0) + flat.min(axis=0))
-        _, axes = np.linalg.eigh(np.cov(flat.T))
-        extents += [float(np.abs(flat @ axes[:, i]).max()) for i in (1, 2)]
-    return float(np.mean(extents))
 
 
 def wrist_joints_m(club: ClubAssembly) -> dict[str, Array]:
