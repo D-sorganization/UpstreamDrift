@@ -15,18 +15,21 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from humanoid_character_builder.core.anthropometry import (
-    DE_LEVA_DATA,
-    _SEGMENT_NAME_MAP,
-    SegmentAnthropometry,
-)
-
 from .._subject_anthropometrics import SubjectAnthropometrics
 from .._types import Sex
 from ._base import SegmentRatios, build_subject_from_ratio_table
+from ._local_anthropometry import (
+    load_local_anthropometry_module,
+    verify_local_anthropometry_module as _verify_local_anthropometry_module,
+)
 
 if TYPE_CHECKING:
-    pass
+    from humanoid_character_builder.core.anthropometry import SegmentAnthropometry
+
+_ANTHROPOMETRY_MODULE = load_local_anthropometry_module(__name__)
+DE_LEVA_DATA = _ANTHROPOMETRY_MODULE.DE_LEVA_DATA
+_SEGMENT_NAME_MAP = _ANTHROPOMETRY_MODULE._SEGMENT_NAME_MAP
+SegmentAnthropometry = _ANTHROPOMETRY_MODULE.SegmentAnthropometry
 
 
 METHOD_NAME = "de_leva_1996"

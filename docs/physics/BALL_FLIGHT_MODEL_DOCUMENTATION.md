@@ -39,11 +39,11 @@ COR = (V_ball_after - V_club_after) / (V_club_before - V_ball_before)
 
 The suite provides three impact model types:
 
-| Model Type        | Fidelity | Use Case                            |
-| ----------------- | -------- | ----------------------------------- |
-| **Rigid Body**    | Low      | Fast analysis, real-time simulation |
-| **Spring-Damper** | Medium   | Finite-time contact, energy loss    |
-| **Finite Time**   | High     | Detailed impulse-momentum analysis  |
+| Model Type        | Fidelity | Use Case                                               |
+| ----------------- | -------- | ------------------------------------------------------ |
+| **Rigid Body**    | Low      | Fast analysis, real-time simulation                    |
+| **Spring-Damper** | Medium   | Finite-time contact, energy loss                       |
+| **Finite Time**   | Low–Med  | Instantaneous rigid-body impulse with labeled duration |
 
 ### 1.3 Spin Generation at Impact
 
@@ -279,7 +279,11 @@ Symbols: S = transverse spin parameter r·||ω × v̂||/v (dimensionless);
 The constants above govern the **core simulator**
 (`ball_properties.py` + `ball_simulator.py::BallFlightSimulator` and the
 enhanced/Rust engines) — the canonical trajectory authority pinned by this
-sheet.
+sheet. Note that `BallFlightSimulator` / `EnhancedBallFlightSimulator`
+integrate `cd_dimpled_sphere(Re, base_cd=0.25)` with exponential spin decay
+(`0.05 s^-1`, yielding ~227 m driver carry under benchmark conditions), whereas
+`BallProperties.calculate_cd` defines the polynomial helper and
+`WaterlooPennerModel` uses constant spin (`~247.5 m`).
 
 A second, deliberately distinct family lives in
 `src/shared/python/physics/flight_models.py` (the Multi-Model Ball Flight

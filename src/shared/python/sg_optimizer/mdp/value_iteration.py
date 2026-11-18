@@ -361,12 +361,7 @@ class HoleMDP:
             yn = cy + dy
 
             # Convert to indices.
-            ixn = ((xn - self.raster.origin[0]) / self.raster.resolution_yd).astype(
-                np.int32
-            )
-            iyn = ((yn - self.raster.origin[1]) / self.raster.resolution_yd).astype(
-                np.int32
-            )
+            ixn, iyn = self.raster.cell_indices(xn, yn)
 
             in_bounds = (ixn >= 0) & (ixn < nx) & (iyn >= 0) & (iyn < ny)
             ixn_c = np.clip(ixn, 0, nx - 1)

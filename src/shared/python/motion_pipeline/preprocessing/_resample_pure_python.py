@@ -6,9 +6,6 @@ Part of issue #4564. Frame-rate conversion with anti-aliasing.
 
 from __future__ import annotations
 
-
-import numpy as np
-
 from ..contracts import KeypointSequence, MarkerTrajectory
 from ._frame_arrays import (
     array_to_keypoint_frames_at_timestamps as _array_to_keypoint_frames_at_timestamps,

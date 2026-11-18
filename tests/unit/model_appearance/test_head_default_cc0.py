@@ -25,7 +25,7 @@ def test_default_head_model_is_cc0_mesh() -> None:
 
 @pytest.mark.unit
 def test_bare_document_resolves_cc0_head_with_hair() -> None:
-    assert _names(document_from_dict(BARE)) == CC0_PARTS
+    assert _names(document_from_dict(BARE)) >= CC0_PARTS  # plus eyes, brows, mouth
 
 
 @pytest.mark.unit

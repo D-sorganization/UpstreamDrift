@@ -35,7 +35,13 @@ def calculate_spin_lift_coefficient(s: float) -> float:
 
 @dataclass(frozen=True)
 class BallProperties:
-    """Physical properties of a golf ball (DRY-optimized)."""
+    """Physical properties of a golf ball (DRY-optimized).
+
+    ``cl0``, ``cl1``, and ``cl2`` are retained for parity-fixture serialization
+    only; :meth:`calculate_cl` uses the bounded Penner power law. Trajectory
+    integrators scale ``cd_dimpled_sphere`` with ``GOLF_BALL_DRAG_COEFFICIENT``
+    (0.25) rather than calling :meth:`calculate_cd`.
+    """
 
     mass: float = float(GOLF_BALL_MASS_KG)
     diameter: float = float(GOLF_BALL_DIAMETER_M)
