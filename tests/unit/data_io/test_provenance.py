@@ -5,6 +5,7 @@ from __future__ import annotations
 import io
 from pathlib import Path
 
+import numpy as np
 import pytest
 from src.shared.python.data_io.provenance import (
     ProvenanceInfo,
@@ -213,3 +214,48 @@ class TestAddProvenanceToCSV:
         csv_file.write_text("val\n42\n")
         result = add_provenance_to_csv(csv_file)
         assert isinstance(result, ProvenanceInfo)
+
+
+@pytest.mark.unit
+class TestCapturedParameterSnapshot:
+    @pytest.fixture(autouse=True)
+    def isolate_git_metadata(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(
+            ProvenanceInfo, "_get_git_info", staticmethod(lambda: (None, None, False))
+        )
+
+    def test_caller_mutations_do_not_change_captured_parameters(self) -> None:
+        settings = {"solver": {"dt": 0.01}, "samples": [1, 2]}
+        record = ProvenanceInfo.capture(parameters=settings)
+
+        settings["solver"]["dt"] = 0.5
+        settings["samples"].append(3)
+        settings["new"] = True
+
+        assert record.parameters == {"solver": {"dt": 0.01}, "samples": [1, 2]}
+
+    def test_numpy_parameters_preserve_values_and_dtype_independently(self) -> None:
+        samples = np.array([1, 2], dtype=np.int64)
+        record = ProvenanceInfo.capture(parameters={"samples": samples})
+        samples[0] = 99
+
+        captured = record.parameters["samples"]
+        np.testing.assert_array_equal(captured, np.array([1, 2], dtype=np.int64))
+        assert captured.dtype == samples.dtype
+        assert not np.shares_memory(captured, samples)
+
+    def test_export_uses_captured_settings_after_caller_mutation(
+        self, tmp_path: Path
+    ) -> None:
+        settings = {"solver": {"dt": 0.01}, "samples": [1, 2]}
+        record = ProvenanceInfo.capture(parameters=settings)
+        settings["solver"]["dt"] = 0.5
+        settings["samples"].append(3)
+        csv = tmp_path / "results.csv"
+        csv.write_text("time,value\n0,1\n", encoding="utf-8")
+
+        assert add_provenance_to_csv(csv, provenance=record) is record
+        exported = csv.read_text(encoding="utf-8")
+        assert "#   solver: {'dt': 0.01}" in exported
+        assert "#   samples: [1, 2]" in exported
+        assert exported.endswith("time,value\n0,1\n")

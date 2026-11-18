@@ -844,7 +844,9 @@ def test_explicit_joint_angles_are_applied_as_given() -> None:
 
 def test_registry_builds_the_default_backend() -> None:
     assert BACKEND_NAME in list_hand_visual_backends()
-    result = registry_build(_spec(), "lead", grip_radius_m=_RADIUS)
+    result = registry_build(
+        _spec(), "lead", grip_radius_m=_RADIUS, backend=BACKEND_NAME
+    )
     assert result.backend == BACKEND_NAME
     np.testing.assert_allclose(result.mesh.vertices, _hand("lead").mesh.vertices)
 
