@@ -9,7 +9,8 @@ Usage, from the repository root, headless::
 The bundle is a matched-swing bundle with ``spec`` (the spec's JSON bytes) and
 ``reference_q`` (frames by coordinates, radians and metres). Frame 0 is drawn.
 Rows: the unmoved model; the moved wrist joints with the same angles; the
-arms refitted alone; the arms refitted with the trunk free to straighten. Columns: whole golfer from two sides, then the
+arms refitted alone; the arms refitted with the trunk free; the arms refitted
+with the trunk at the address posture (#15277). Columns: whole golfer from two sides, then the
 hands from the side, the front and above.
 """
 
@@ -26,6 +27,7 @@ import numpy as np  # noqa: E402
 from PIL import Image  # noqa: E402
 
 from src.engines.physics_engines.mujoco.python.skinned_arm_refit import (  # noqa: E402
+    address_posture,
     refit_arms_to_club,
 )
 from src.shared.python.motion_matching.execution.skinned_hand_wrists import (  # noqa: E402
@@ -79,7 +81,14 @@ def main(bundle_path: str, out_path: str) -> None:
     moved = apply_skinned_hand_wrists(spec)
     arms_only = refit_arms_to_club(spec, moved, q)
     refit = refit_arms_to_club(spec, moved, q, also_free=TRUNK)
-    poses = ((spec, q), (moved, q), (moved, arms_only.q), (moved, refit.q))
+    posed = refit_arms_to_club(spec, moved, q, posture=address_posture())
+    poses = (
+        (spec, q),
+        (moved, q),
+        (moved, arms_only.q),
+        (moved, refit.q),
+        (moved, posed.q),
+    )
     rows = [_row(document, order, pose) for document, pose in poses]
     Image.fromarray(np.vstack(rows)).save(out_path)
     report = {
