@@ -97,7 +97,7 @@ from src.shared.python.model_appearance.hand_backends.skinning import (
 from src.shared.python.model_appearance.hand_backends.palm_fold import fold_palm
 from src.shared.python.model_appearance.hand_backends.rest_shape import filled_out
 from src.shared.python.model_appearance.hand_backends.trigger_finger import (
-    spread_trigger_finger,
+    wrap_trigger_finger,
 )
 from src.shared.python.model_appearance.hand_backends.subdivision import (
     original_resolution,
@@ -995,7 +995,6 @@ def _solve_right_hand(
         coarse = min(settings.wrap_scan_samples, settings.side_close_scan_samples)
         angles = wrap(start, coarse)
         _close_fingers(hand, angles)
-        spread_trigger_finger(hand, angles, side)
     if pair is not None and pair.groove is not None:
         _overlap_little_finger(hand, angles, pair.groove)
     most = dict(settings.thumb_toward_index_max_deg)[side]
@@ -1004,7 +1003,8 @@ def _solve_right_hand(
         _cup_palm(hand, targets, angles, soft, thumb_radius_m)
         return _lay_thumb(hand, targets, angles, soft, thumb_radius_m, most)
 
-    angles = with_thumb(hand, wrap(start))
+    wrapped = wrap_trigger_finger(hand, side, angles, soft, lambda: wrap(start))
+    angles = with_thumb(hand, wrapped)
     if pair is not None and pad is not None:
         # Fold the palm round the other thumb, then lay the thumb from where
         # the fold has taken its base (#15270).

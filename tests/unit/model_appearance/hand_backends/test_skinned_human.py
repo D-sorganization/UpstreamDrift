@@ -65,6 +65,8 @@ _Q = load_hand_visual_quality()
 _RADIUS = float(_Q["grip_radius_m"])
 _TAPER = default_settings().grip_taper
 _SIDES = ("lead", "trail")
+#: Hands whose forefinger is a trigger finger, judged in test_trigger_finger.
+_TRIGGER = {s for s, d in default_settings().side_close_trigger_spread_deg if d}
 _CACHE: dict[tuple, object] = {}
 
 
@@ -376,8 +378,8 @@ def test_the_forefinger_knuckle_flexes_and_the_finger_lies_on_its_neighbour(
     """The forefinger wraps with the others instead of hooking (#15182)."""
     hand = _hand(side)
     flexion = hand.joint_angles.flexion_deg("index_prox")
-    assert flexion >= float(_Q["min_index_knuckle_flexion_deg"]), flexion
-    for segment, gap in _index_gaps_m(hand).items():
+    assert flexion >= float(_Q["min_index_knuckle_flexion_deg"]) - 1e-9, flexion
+    for segment, gap in ({} if side in _TRIGGER else _index_gaps_m(hand)).items():
         assert gap <= float(_Q["max_index_segment_gap_m"]), (segment, gap)
 
 
@@ -419,6 +421,8 @@ def test_neighbouring_fingers_touch_along_the_grip(side: str) -> None:
     limit = float(_Q["max_finger_side_gap_m"])
     index_limit = float(_Q["max_index_side_gap_m"])
     for pair, gap in closed.items():
+        if side in _TRIGGER and pair.startswith("index"):
+            continue  # held apart on purpose (owner, 2026-11-18)
         most = index_limit if pair.startswith("index") else limit
         assert gap <= most, f"{side} {pair} {gap * 1e3:.1f} mm"
         assert gap > 0.0
@@ -981,6 +985,8 @@ def test_the_overlap_and_the_closing_up_can_be_switched_off() -> None:
 def _thumb_settings(**thumb: object):
     raw = copy.deepcopy(dict(load_settings_mapping()))
     raw["thumb"].update(thumb)
+    # These thumb alternatives pinch a closed forefinger, not a trigger finger.
+    raw["side_close"]["trigger_spread_deg"] = {"lead": 0.0, "trail": 0.0}
     return raw
 
 
