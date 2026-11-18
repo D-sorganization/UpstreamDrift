@@ -40,8 +40,7 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     PadConformSettings,
     conform_pads,
     PressSettings,
-    lift_out,
-    press_flat,
+    press_and_relax,
     sharpened_faces,
     relax_folds,
     yield_to_points,
@@ -1120,21 +1119,16 @@ def _corrected_skin(
         return found[relaxable[found]]
 
     skin = relax_folds(skin, asset.faces, creased, settings.crease_relax)
-    skin = press_flat(
+    # Pressed skin stays laid on what is held while the folds beside it relax.
+    skin = press_and_relax(
         skin,
         asset.faces,
         solved.obstacle,
         settings.press,
         lambda v: vertex_normals(v, asset.faces),
-    )
-    skin = relax_folds(
-        skin,
-        asset.faces,
         lambda v: flipped_face_ids(asset, transforms, (v - offset) @ rotation),
         settings.fold_relax,
     )
-    # Relaxing may have drawn skin back in: leave none inside what is held.
-    skin = lift_out(skin, solved.obstacle, max_depth_m=settings.press.max_depth_m)
     if solved.other_skin is None:
         return skin
     return yield_to_points(

@@ -120,6 +120,9 @@ Targets of a hand live in `skinned_targets.py`.
   wrist 44 mm to the trail side (`qa.wrist_joint_m`). Trail 0 and 14 break
   the pair (fault 4.7 and 7.6 mm). Thumb line is per hand
   (`owner_thumb_azimuth_deg` lead 45, trail 40 since #15278; it was 20); 30 on both fails five tests.
+  The trail forefinger is a trigger finger (`side_close.trigger_spread_deg`,
+  30; owner 2026-11-18): exempt from the fingers-touch limits, brought back
+  until its tip seats (12 on a lone hand), thumb tip 8 mm past its middle joint.
   The heel pad went from 6.3 to 7.7 mm for it (ratchet 8 mm, evidence on
   #15150). `build_grip_hands` solves unrolled and turns the result.
 - MuJoCo golfer, measured by spike: hands 46 degrees round the shaft from the

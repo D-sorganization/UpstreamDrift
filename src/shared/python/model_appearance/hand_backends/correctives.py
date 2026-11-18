@@ -22,6 +22,8 @@ IntArray = NDArray[np.int64]
 FoldedFaces = Callable[[Array], IntArray]
 Distance = Callable[[Array], Array]
 _GRADIENT_STEP_M = 1e-5
+#: Newton steps that put skin dragged off a surface back on it.
+_RESEAT_PASSES = 2
 
 
 @dataclass(frozen=True)
@@ -323,6 +325,35 @@ def press_flat(
     moved += short[:, None] * distance_gradient(distance, moved, _GRADIENT_STEP_M)
     out[beside] = moved
     return out
+
+
+def press_and_relax(
+    vertices: Array,
+    faces: IntArray,
+    distance: Distance,
+    press: PressSettings,
+    vertex_normals: Callable[[Array], Array],
+    folded: FoldedFaces,
+    fold_relax: FoldRelaxSettings,
+) -> Array:
+    """:func:`press_flat`, then :func:`relax_folds`, keeping pressed skin laid.
+
+    Relaxing a fold beside a contact patch moves the pressed skin next to it.
+    Postconditions: skin that was up to ``press.max_depth_m`` inside ends on
+    the surface, also where the relaxation moved it; no skin within that depth
+    is left inside; where the relaxation moved nothing the result is exactly
+    that of :func:`press_flat`.
+    """
+    laid = lift_out(vertices, distance, max_depth_m=press.max_depth_m)
+    flat = press_flat(vertices, faces, distance, press, vertex_normals)
+    out = relax_folds(flat, faces, folded, fold_relax)
+    pressed = np.linalg.norm(laid - vertices, axis=1) > 0.0
+    dragged = np.flatnonzero(pressed & (out != flat).any(axis=1))
+    for _ in range(_RESEAT_PASSES if len(dragged) else 0):
+        away = distance_gradient(distance, out[dragged], _GRADIENT_STEP_M)
+        out[dragged] -= distance(out[dragged])[:, None] * away
+    # Relaxing may have drawn other skin back in: leave none inside.
+    return lift_out(out, distance, max_depth_m=press.max_depth_m)
 
 
 def edge_folds(vertices: Array, faces: IntArray) -> tuple[Array, IntArray]:

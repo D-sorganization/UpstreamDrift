@@ -15,6 +15,7 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     distance_gradient,
     lift_out,
     yield_to_points,
+    press_and_relax,
     press_flat,
     relax_folds,
     sharpened_faces,
@@ -313,6 +314,27 @@ def test_pressed_skin_lies_flat_and_the_skin_beside_it_bulges_sideways() -> None
     neighbours = vertex_neighbours(faces, len(vertices))
     ring = {int(j) for i in np.flatnonzero(pressed) for j in neighbours[i]}
     assert set(np.flatnonzero(moved).tolist()) <= ring
+
+
+def test_pressed_skin_is_put_back_on_the_surface_after_folds_relax() -> None:
+    """Relaxing a fold beside a contact patch drags pressed skin off the
+    surface (seen at the bent joint of the trigger finger, #15278); it is put
+    back, and nothing changes when no fold is found."""
+    vertices, faces = _bowl(0.002)
+    press = PressSettings(max_depth_m=0.003, bulge_gain=0.5, bulge_rings=1)
+    relax = FoldRelaxSettings(iterations=1, rings=1, step=0.5)
+    pressed = np.flatnonzero(vertices[:, 2] < 0.0)
+    rim = [f for f, face in enumerate(faces) if 0 < np.isin(face, pressed).sum() < 3]
+    args = (vertices, faces, _floor, press)
+    dragged = relax_folds(
+        press_flat(*args, _down_normals(faces)), faces, lambda v: rim[:1], relax
+    )
+    assert np.abs(dragged[pressed, 2]).max() > 1e-6, "the case must drag skin off"
+    out = press_and_relax(*args, _down_normals(faces), lambda v: rim[:1], relax)
+    np.testing.assert_allclose(out[pressed, 2], 0.0, atol=1e-9)
+    assert out[:, 2].min() >= -1e-12
+    still = press_and_relax(*args, _down_normals(faces), lambda v: [], relax)
+    np.testing.assert_array_equal(still, press_flat(*args, _down_normals(faces)))
 
 
 def test_press_without_bulge_is_lift_out_and_bad_settings_raise() -> None:
