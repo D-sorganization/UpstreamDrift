@@ -87,6 +87,12 @@ MATERIALS: dict[str, Material] = {
     "cap_navy": Material(
         (0.12, 0.20, 0.45, 1.0), 0.85, texture=Texture("noise", noise=0.04)
     ),
+    "cap_black": Material(
+        (0.08, 0.08, 0.09, 1.0), 0.85, texture=Texture("noise", noise=0.04)
+    ),
+    "cap_red": Material(
+        (0.62, 0.10, 0.10, 1.0), 0.85, texture=Texture("noise", noise=0.04)
+    ),
     "eye_white": Material((0.96, 0.96, 0.94, 1.0), 0.2),
     "iris_dark": Material((0.10, 0.07, 0.05, 1.0), 0.15),
     "iris_blue_grey": Material((0.36, 0.47, 0.56, 1.0), 0.15),
@@ -427,6 +433,7 @@ def check_references(doc: AppearanceDocument) -> None:
         ("club_finish", doc.club_finish),
         ("ground_material", doc.environment.ground_material),
         ("head headwear_material", headwear_material_name(doc) or "skin_light"),
+        ("head cap_material", doc.head.cap_material),
         *(
             (f"segments[{i}]", r.material)
             for i, r in enumerate(doc.segments)

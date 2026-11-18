@@ -381,6 +381,8 @@ def part_material_name(part: HeadPart, doc: AppearanceDocument) -> str:
         if name is None:
             raise ValueError("Headwear part requested for a bare head")
         return name
+    if part.material == "cap":
+        return doc.head.cap_material
     if part.material == "iris":
         return _IRIS_MATERIAL[doc.head.eye_color]
     if part.material == "brow":  # the hair colour, darker

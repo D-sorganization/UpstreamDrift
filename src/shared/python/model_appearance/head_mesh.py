@@ -29,7 +29,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
-from src.shared.python.model_appearance import head_features, head_hair
+from src.shared.python.model_appearance import head_cap, head_features, head_hair
 from src.shared.python.model_appearance.geometry import Mesh
 from src.shared.python.model_appearance.schema import HeadSettings
 
@@ -151,16 +151,22 @@ def build_mesh_parts(
             (name, Mesh(m.vertices * length_m, m.faces), role)
             for name, m, role in head_features.face_parts(asset.skin)
         ]
+    capped = settings is not None and settings.cap_style == "baseball_cap"
     if headwear == "hair":
         crop = settings is not None and settings.hair_style == "short_crop"
-        unit = (
-            head_hair.build_short_crop(asset.skin, settings.hair_part)
-            if crop and settings is not None
-            else asset.hair
-        )
+        unit = asset.hair
+        if settings is not None and (crop or capped):
+            # Under a cap the hair is cut flatter than the crown stands off.
+            under = head_cap.CapCrop().hair_under if capped else None
+            unit = head_hair.build_short_crop(asset.skin, settings.hair_part, under)
         out.append(
             ("hair_mesh", Mesh(unit.vertices * length_m, unit.faces), "headwear")
         )
+    if settings is not None and capped:
+        out += [
+            (name, Mesh(m.vertices * length_m, m.faces), "cap")
+            for name, m in head_cap.build_cap(asset.skin, settings.cap_brim)
+        ]
     return out
 
 
