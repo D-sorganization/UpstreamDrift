@@ -1,0 +1,35 @@
+MyoHand visual meshes (UpstreamDrift hand_backends/myohand.py)
+================================================================
+
+Upstream source
+---------------
+- Repository: https://github.com/MyoHub/myo_sim
+- Pin (git submodule): 33f3ded946f55adbdcf963c99999587aadaf975f
+- SPDX license identifier on myo_sim distribution: Apache-2.0
+  (see shared/models/myosuite/myo_sim/LICENSE in this repository)
+
+Scientific lineage (informational; per upstream myo_sim/hand/README.md)
+-----------------------------------------------------------------------
+- MoBL upper extremity (simtk.org/projects/upexdyn): BSD 3-Clause with
+  non-commercial use terms in upstream OpenSim materials.
+- 2nd-Hand finger model (simtk.org/projects/hand_muscle): MIT (McFarland et al.,
+  2019).
+
+Skin / surface geometry
+-----------------------
+myo_sim does **not** ship a watertight skin mesh.  ``hand/assets/myohand_body.xml``
+uses ``class="skin"`` MuJoCo **capsule and ellipsoid** geoms for contact wrapping,
+not renderable surface STL.  This backend draws **bone STL meshes only** in bone
+colour as an anatomical skeleton reference.
+
+Research-only use
+-----------------
+MoBL upstream lineage carries non-commercial terms in OpenSim materials.  The
+``myohand`` registry entry is **research-only** and not the default production
+backend until HRG-HX6 #13763 owner sign-off.
+
+UpstreamDrift does not copy STL assets into src/; the visual backend loads the
+pinned submodule at runtime (same pattern as HRG-GS-M8, #13330).
+
+This NOTICE satisfies Apache-2.0 Section 4(d) attribution for derivative
+visual-backend code that references myo_sim mesh assets.
