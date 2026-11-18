@@ -398,3 +398,69 @@ def test_every_solid_has_its_com_measured_from_the_row_origin(upper: dict) -> No
         assert np.allclose(solid["com_m"], expected, atol=1e-12), (name, row.row_id)
         checked.add(match[0])
     assert checked == set(landmarks)
+
+
+def _solid_mass(doc: dict, suffix: str) -> float:
+    return sum(
+        s["mass_kg"]
+        for b in doc["bodies"]
+        for s in b["solids"]
+        if s["name"].endswith("/" + suffix)
+    )
+
+
+def test_the_shoulder_girdle_can_take_its_mass_from_the_upper_trunk() -> None:
+    """de Leva's upper trunk already holds the shoulder girdle, so the clavicle
+    links on their scapula joints double count it unless the trunk gives the
+    mass up (#15279). The links, their joints and their mass stay."""
+    native = json.loads(NATIVE.read_text())
+    plain = module.build_upper_body(native, stature_m=STATURE, mass_kg=MASS)
+    shared = module.build_upper_body(
+        native,
+        stature_m=STATURE,
+        mass_kg=MASS,
+        shoulder_girdle_mass=module.GIRDLE_MASS_FROM_UPPER_TRUNK,
+    )
+    table = segment_parameters(STATURE, MASS, "upper_trunk").mass_kg
+    girdle = _solid_mass(plain, "clavicle")
+    assert girdle > 0.5
+    assert _solid_mass(plain, "upper_trunk") == pytest.approx(table)
+    assert _solid_mass(shared, "clavicle") == pytest.approx(girdle)
+    assert _solid_mass(shared, "upper_trunk") + girdle == pytest.approx(table)
+    total = [
+        sum(s["mass_kg"] for b in d["bodies"] for s in b["solids"])
+        for d in (plain, shared)
+    ]
+    assert total[0] - total[1] == pytest.approx(girdle)
+    # Same joints and coordinates: the shoulder still moves from the scapula.
+    assert shared["joints"] == plain["joints"]
+    assert shared["coordinate_order"] == plain["coordinate_order"]
+    assert shared["subject"]["shoulder_girdle_mass"] == "from_upper_trunk"
+    # The default document is unchanged, byte for byte.
+    assert "shoulder_girdle_mass" not in plain["subject"]
+
+    # A lighter trunk solid keeps its shape: inertia scales with its mass.
+    def trunk(doc: dict) -> dict:
+        return next(
+            s
+            for b in doc["bodies"]
+            for s in b["solids"]
+            if s["name"].endswith("/upper_trunk")
+        )
+
+    ratio = trunk(shared)["mass_kg"] / trunk(plain)["mass_kg"]
+    np.testing.assert_allclose(
+        np.asarray(trunk(shared)["inertia_com_kg_m2"]),
+        ratio * np.asarray(trunk(plain)["inertia_com_kg_m2"]),
+    )
+    np.testing.assert_allclose(trunk(shared)["com_m"], trunk(plain)["com_m"])
+
+
+def test_an_unknown_shoulder_girdle_mass_rule_is_refused() -> None:
+    with pytest.raises(ValueError, match="shoulder_girdle_mass"):
+        module.build_upper_body(
+            json.loads(NATIVE.read_text()),
+            stature_m=STATURE,
+            mass_kg=MASS,
+            shoulder_girdle_mass="from_the_head",
+        )

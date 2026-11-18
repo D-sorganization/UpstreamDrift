@@ -499,8 +499,8 @@ def _export_json(
             asdict(prov_val) if isinstance(prov_val, ProvenanceInfo) else prov_val
         )
 
-    with open(output_path, "w") as f:
-        json.dump(json_data, f, indent=2)
+    # Validate the complete payload before replacing a previous recording.
+    _write_text_atomic(output_path, json.dumps(json_data, indent=2))
     return True
 
 

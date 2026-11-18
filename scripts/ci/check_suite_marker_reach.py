@@ -20,6 +20,10 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.ci.audit_suite_marker_reach import audit_suite_markers
 from scripts.ci.check_suite_marker_ratchet import iter_test_files
+from scripts.ci.check_unrun_suite_exclusions import (
+    CONFIG_PATH as UNRUN_EXCLUSIONS_CONFIG_PATH,
+    check_unrun_suite_exclusions,
+)
 from tests.helpers.suite_marker_reach import infer_directory_suite_marker
 from tests.support.suite_markers import BASELINE_PATH
 
@@ -64,6 +68,8 @@ def check_suite_marker_reach(
     baseline_path: pathlib.Path | None = None,
     selectability_floor: float = SELECTABILITY_FLOOR_PCT,
     directory_floor: float = DIRECTORY_REACH_FLOOR_PCT,
+    *,
+    check_repo_exclusions: bool | None = None,
 ) -> tuple[bool, str]:
     """Run all suite-marker reach checks and return (passed, message)."""
     dir_res = check_directory_reach(tests_root, directory_floor)
@@ -86,6 +92,18 @@ def check_suite_marker_reach(
             f"  Target met: False"
         )
         return False, msg
+
+    enforce_exclusions = (
+        check_repo_exclusions
+        if check_repo_exclusions is not None
+        else tests_root.resolve() == (REPO_ROOT / "tests").resolve()
+    )
+    if enforce_exclusions:
+        excl_ok, excl_msg = check_unrun_suite_exclusions(
+            REPO_ROOT, UNRUN_EXCLUSIONS_CONFIG_PATH
+        )
+        if not excl_ok:
+            return False, excl_msg
 
     msg = (
         f"Suite marker reach checks PASSED:\n"

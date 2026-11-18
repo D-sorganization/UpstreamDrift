@@ -4287,8 +4287,8 @@
   },
   "local_artifacts": {
     ".github/workflows/ci-optional-stack.yml": {
-      "sha256": "e5137e804bf0f22ec1cd8739e570056cef436494fbb16b015e1241987c641d11",
-      "bytes": 34796,
+      "sha256": "f33575d38610cf3a4af8327f5f952f6629516f07c0fa9087f66cef1336e07792",
+      "bytes": 35007,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",
@@ -8252,8 +8252,8 @@
       ]
     },
     "src/shared/python/anthropometrics/estimators/from_de_leva.py": {
-      "sha256": "ef07007658b0e2dc8f8c310c366e8119074097a6d386a760847523ccb061104f",
-      "bytes": 4333,
+      "sha256": "e367e44eef3018623c01df1c84bd6b1555273220b3a19a573105f0549c209db6",
+      "bytes": 4672,
       "referenced_by": [
         "PD-CLAIM-297",
         "PD-CLAIM-298",

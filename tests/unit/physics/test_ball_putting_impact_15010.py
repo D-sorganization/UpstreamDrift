@@ -179,3 +179,131 @@ class TestRustAirTemperatureUnits:
 
         env = EnvironmentalConditions(temperature=15.0)
         assert bs._air_temperature_kelvin(env) == pytest.approx(288.15, rel=1e-9)
+
+
+class TestRemainingHonestyCriteria15010:
+    """C4, C9, C10, C12, C13 regression tests for #15010."""
+
+    def test_simulators_expose_model_metadata_and_force_provider_parity(self) -> None:
+        from src.shared.python.physics.ball_flight_physics import (
+            BallFlightSimulator,
+            EnhancedBallFlightSimulator,
+            LaunchConditions,
+        )
+
+        expected_cl_max = {
+            BallFlightSimulator: bp.MAX_LIFT_COEFFICIENT,
+            EnhancedBallFlightSimulator: 0.25,
+        }
+        for cls in (BallFlightSimulator, EnhancedBallFlightSimulator):
+            meta = cls().model_metadata
+            assert meta["drag_model"] == "reynolds_dimpled_sphere"
+            assert meta["base_cd"] == pytest.approx(0.25)
+            assert meta["cl_max"] == pytest.approx(expected_cl_max[cls])
+            assert meta["spin_decay_rate"] == pytest.approx(0.05)
+
+        wp_set = fm.WATERLOO_PENNER_COEFFICIENTS
+        r_b = float(GOLF_BALL_RADIUS_M)
+        area = math.pi * r_b**2
+        omega0 = 2686.0 * 2.0 * math.pi / 60.0
+
+        def wp_force(
+            vel: np.ndarray, _spin: np.ndarray, _t: float, _pos: np.ndarray
+        ) -> np.ndarray:
+            v = float(np.linalg.norm(vel))
+            if v < 0.1:
+                return np.zeros(3)
+            s = r_b * omega0 / v
+            cd = wp_set.cd0 + wp_set.cd1 * s + wp_set.cd2 * s**2
+            cl = min(wp_set.cl_max, wp_set.lift_scale * s**wp_set.lift_exponent)
+            q = 0.5 * 1.225 * area * v**2
+            lift_dir = np.cross(np.array([0.0, -1.0, 0.0]), vel / v)
+            lift_dir /= float(np.linalg.norm(lift_dir))
+            return -(q * cd) * (vel / v) + (q * cl) * lift_dir
+
+        sim = EnhancedBallFlightSimulator(force_provider=wp_force)
+        traj = sim.simulate_trajectory(
+            LaunchConditions(74.66, math.radians(10.9), spin_rate=2686.0),
+            max_time=12.0,
+            dt=0.01,
+        )
+        enhanced_wp_carry = sim.analyze_trajectory(traj)["carry_distance"]
+        wp = fm.WaterlooPennerModel().simulate(
+            fm.UnifiedLaunchConditions(
+                ball_speed=74.66, launch_angle=math.radians(10.9), spin_rate=2686.0
+            ),
+            max_time=12.0,
+            dt=0.01,
+        )
+        assert enhanced_wp_carry == pytest.approx(wp.carry_distance, abs=1.0)
+
+    def test_constant_coeff_models_use_illustrative_citations(self) -> None:
+        fm.FlightModelRegistry.reset()
+        stale = {
+            "Nathan et al. (2018)",
+            "Ballantyne et al. (2012)",
+            "Cole (2016)",
+            "Rospie & Layton (2014)",
+            "Charry et al. (2017)",
+        }
+        for model in fm.FlightModelRegistry.get_all_models():
+            if isinstance(model, fm.ConstantCoefficientModel):
+                assert model.reference not in stale
+                assert "Illustrative" in model.reference
+
+    def test_air_density_local_ambient_temperature_mode(self) -> None:
+        from src.shared.python.physics.atmosphere import (
+            DRY_AIR_R_SPECIFIC_J_KG_K,
+            ISA_GRAVITY_M_S2,
+            ISA_LAPSE_RATE_K_PER_M,
+            ISA_P0_PA,
+            ISA_T0_K,
+            air_density,
+        )
+
+        rho_local = air_density(1600.0, 30.0, temperature_is_local=True)
+        t_isa = ISA_T0_K - ISA_LAPSE_RATE_K_PER_M * 1600.0
+        p_isa = ISA_P0_PA * (t_isa / ISA_T0_K) ** (
+            ISA_GRAVITY_M_S2 / (DRY_AIR_R_SPECIFIC_J_KG_K * ISA_LAPSE_RATE_K_PER_M)
+        )
+        assert rho_local == pytest.approx(
+            p_isa / (DRY_AIR_R_SPECIFIC_J_KG_K * (273.15 + 30.0)), rel=1e-9
+        )
+        assert rho_local < air_density(1600.0, 30.0, temperature_is_local=False)
+
+    def test_launch_conditions_from_imperial_converts_mph(self) -> None:
+        from src.shared.python.physics.ball_flight_physics import LaunchConditions
+
+        lc = LaunchConditions.from_imperial(167.0, 10.9, spin_rate_rpm=2686.0)
+        assert lc.velocity == pytest.approx(167.0 * 0.44704, rel=1e-9)
+
+    def test_off_center_high_friction_impact_does_not_reverse_tangential_slip(
+        self,
+    ) -> None:
+        from src.shared.python.physics.impact_model.contact_kinematics import (
+            impact_offset_vector_3d,
+        )
+
+        pre = PreImpactState(
+            clubhead_velocity=np.array([45.0, 0.0, 5.0]),
+            clubhead_angular_velocity=np.zeros(3),
+            clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+            ball_position=np.zeros(3),
+            ball_velocity=np.zeros(3),
+            ball_angular_velocity=np.zeros(3),
+            clubhead_mass=0.200,
+            clubhead_moi=4.5e-4,
+            impact_offset=np.array([0.020, 0.0]),
+        )
+        post = RigidBodyImpactModel().solve(
+            pre, ImpactParameters(cor=0.83, friction_coefficient=5.0)
+        )
+        n = pre.clubhead_orientation
+        r_c = impact_offset_vector_3d(pre)
+        v_club_c = post.clubhead_velocity + np.cross(
+            post.clubhead_angular_velocity, r_c
+        )
+        v_ball_c = post.ball_velocity - _R * np.cross(post.ball_angular_velocity, n)
+        slip_post = v_club_c - v_ball_c
+        slip_post -= np.dot(slip_post, n) * n
+        np.testing.assert_allclose(slip_post, np.zeros(3), atol=1e-9)
