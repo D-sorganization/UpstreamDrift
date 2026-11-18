@@ -154,6 +154,29 @@ def _add_trunk_coupling(root: ET.Element, spec: dict[str, Any]) -> None:
         )
 
 
+def _mjcf_root(spec: dict[str, Any]) -> ET.Element:
+    """The ``mujoco`` element with compiler, gravity and contact defaults.
+
+    Raises ``ValueError`` when the spec's gravity is not three finite numbers.
+    """
+    root = ET.Element("mujoco", model="full_body_golf")
+    ET.SubElement(
+        root, "compiler", angle="radian", autolimits="false", inertiafromgeom="false"
+    )
+    gravity = np.asarray(spec["gravity_m_s2"], dtype=float)
+    if gravity.shape != (3,) or not np.isfinite(gravity).all():
+        raise ValueError("Invalid full-body gravity")
+    option = ET.SubElement(root, "option", gravity=_numbers(gravity), jacobian="dense")
+    ET.SubElement(option, "flag", contact="disable")
+
+    default_root = ET.SubElement(root, "default")
+    default_contact = ET.SubElement(
+        default_root, "default", attrib={"class": "contact"}
+    )
+    ET.SubElement(default_contact, "geom", contype="0", conaffinity="0")
+    return root
+
+
 def export_full_body_mjcf(
     model_bytes: bytes,
     *,
@@ -207,22 +230,7 @@ def export_full_body_mjcf(
     if not isinstance(spec.get("contact"), dict):
         raise ValueError("Missing contact specification")
 
-    root = ET.Element("mujoco", model="full_body_golf")
-    ET.SubElement(
-        root, "compiler", angle="radian", autolimits="false", inertiafromgeom="false"
-    )
-    gravity = np.asarray(spec["gravity_m_s2"], dtype=float)
-    if gravity.shape != (3,) or not np.isfinite(gravity).all():
-        raise ValueError("Invalid full-body gravity")
-    option = ET.SubElement(root, "option", gravity=_numbers(gravity), jacobian="dense")
-    ET.SubElement(option, "flag", contact="disable")
-
-    default_root = ET.SubElement(root, "default")
-    default_contact = ET.SubElement(
-        default_root, "default", attrib={"class": "contact"}
-    )
-    ET.SubElement(default_contact, "geom", contype="0", conaffinity="0")
-
+    root = _mjcf_root(spec)
     elements, offsets = _build_full_body_kinematics(root, spec)
     if neck_limits:
         _limit_neck_joints(root)
