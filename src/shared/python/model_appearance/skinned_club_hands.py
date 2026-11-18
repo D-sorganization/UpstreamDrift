@@ -49,7 +49,9 @@ def owner_grip_spec(roll_deg: float = 0.0) -> GripSpec:
     The lead thumb sits ``owner_thumb_azimuth_deg.lead`` to the away-from-target
     side of the top of the grip and the trail thumb ``.trail`` to the target
     side; the club leaves the lead palm ``owner_lead_heel_pad_depth_m`` below
-    the little-finger knuckle; the lead hand is ``owner_lead_below_cap_edge_m``
+    the little-finger knuckle; it lies ``owner_trail_cross_angle_deg`` off
+    square across the trail hand, whose palm then rests on the lead thumb
+    (#15265); the lead hand is ``owner_lead_below_cap_edge_m``
     below the edge of the butt cap. ``roll_deg`` turns both hands about the shaft.
     """
     base = GripSpec.legacy()
@@ -69,6 +71,7 @@ def owner_grip_spec(roll_deg: float = 0.0) -> GripSpec:
             base.trail,
             shaft_roll_deg=float(roll_deg),
             thumb_azimuth_deg=float(thumbs["trail"]),
+            club_cross_angle_deg=float(quality["owner_trail_cross_angle_deg"]),
         ),
         lead_below_butt_m=below + load_golf_grip().cap_height_m,
     )

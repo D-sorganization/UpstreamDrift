@@ -398,6 +398,52 @@ def hand_pair_penetration_m(first: HandVisualResult, second: HandVisualResult) -
     )
 
 
+def thumb_crown_gaps_m(
+    lead: HandVisualResult,
+    trail: HandVisualResult,
+    *,
+    station_m: float,
+    min_facing: float,
+) -> NDArray[np.float64]:
+    """Gap from the crown of the lead thumb to the trail hand, along the thumb.
+
+    The crown is the skin of the lead thumb's two free segments whose normal
+    has at least ``min_facing`` of its length away from the grip axis: the
+    strip a palm laid over the thumb rests on. It is cut into stations
+    ``station_m`` long along the grip, from the thumb's base to its tip, and
+    each station reports the least signed distance from its crown to the trail
+    hand's skin (negative: inside it). A thumb lying in the channel of the
+    trail palm has every station near zero; a station the palm does not reach
+    reports how far off the palm is. Both results share one frame (a pair).
+
+    Preconditions: ``station_m`` positive, ``min_facing`` in ``(0, 1)``.
+    """
+    from src.shared.python.model_appearance.hand_backends.posing import skin_distance
+    from src.shared.python.model_appearance.hand_backends.skinning import (
+        vertex_normals,
+    )
+
+    if not station_m > 0.0 or not 0.0 < min_facing < 1.0:
+        raise ValueError("station_m must be positive and min_facing in (0, 1)")
+    asset, _, _ = _audit_parts(lead)
+    ids = asset.dominant_vertex_ids(("thumb_prox", "thumb_dist"))
+    skin = lead.mesh.vertices[ids]
+    normals = vertex_normals(lead.mesh.vertices, lead.mesh.faces)[ids]
+    radial = skin[:, :2] / np.maximum(
+        np.linalg.norm(skin[:, :2], axis=1, keepdims=True), 1e-12
+    )
+    crown = skin[np.einsum("ij,ij->i", normals[:, :2], radial) >= min_facing]
+    if len(crown) == 0:
+        raise ValueError("no skin of the lead thumb faces away from the grip")
+    other = trail.mesh
+    reach = float(np.ptp(np.r_[skin, other.vertices], axis=0).max())
+    gap = skin_distance(
+        other.vertices, vertex_normals(other.vertices, other.faces), reach
+    )(crown)
+    station = np.floor((crown[:, 2] - crown[:, 2].min()) / station_m).astype(int)
+    return np.array([gap[station == k].min() for k in np.unique(station)])
+
+
 def wrist_joint_m(result: HandVisualResult) -> NDArray[np.float64]:
     """The wrist joint centre in the club frame (z along the shaft, +x the top
     of the grip, +y the trail side). This is the point a forearm attaches to."""

@@ -76,8 +76,8 @@ def _owner_thumb_deg(side: str) -> float:
 def _spec(
     roll_deg: float = 0.0, handedness: str = "right", thumb_deg: float | None = None
 ) -> GripSpec:
-    """The legacy grip with the owner's thumb azimuth on both hands and the
-    club under the heel pad of the lead hand."""
+    """The legacy grip with the owner's thumb azimuth on both hands, the club
+    under the heel pad of the lead hand and across the trail hand."""
     base = GripSpec.legacy()
     lead_turn, trail_turn = (
         {
@@ -93,7 +93,11 @@ def _spec(
         base,
         handedness=handedness,
         lead=dataclasses.replace(base.lead, pinky_side_palm_depth_m=heel, **lead_turn),
-        trail=dataclasses.replace(base.trail, **trail_turn),
+        trail=dataclasses.replace(
+            base.trail,
+            club_cross_angle_deg=float(_Q["owner_trail_cross_angle_deg"]),
+            **trail_turn,
+        ),
     )
 
 
@@ -184,16 +188,20 @@ def _mean_edge_m(result) -> float:
     return float(np.linalg.norm(v[sides[:, 0]] - v[sides[:, 1]], axis=1).mean())
 
 
-@pytest.mark.xfail(
+_COARSE_FINE_APART = pytest.mark.xfail(
     strict=True,
     reason=(
-        "#15181: on the standard 0.900 in grip the coarse and fine skins solve "
-        "to poses more than 5 degrees apart (lead ring_prox 6.3 with the club "
-        "under the heel pad, trail thumb_prox 8.4: the thumb's turn search "
-        "finds its 45 degree line on one skin only). The limit is unchanged."
+        "#15181: on the standard 0.900 in grip the coarse and fine skins of the "
+        "lead hand solve to poses more than 5 degrees apart (ring_prox 6.3 with "
+        "the club under the heel pad). The limit is unchanged. The trail hand "
+        "agrees since the club lies across it as the owner has it (#15265)."
     ),
 )
-@pytest.mark.parametrize("side", _SIDES)
+
+
+@pytest.mark.parametrize(
+    "side", [pytest.param("lead", marks=_COARSE_FINE_APART), "trail"]
+)
 def test_the_skin_is_subdivided_and_the_setting_switches_it_off(side: str) -> None:
     """One Loop level by default (#15150): finer skin, same hand, same grip."""
     fine, coarse = _hand(side), _unsubdivided(side)
@@ -375,9 +383,16 @@ def test_the_forefinger_knuckle_flexes_and_the_finger_lies_on_its_neighbour(
 
 def test_a_trigger_finger_keeps_the_forefinger_apart() -> None:
     """With ``trigger_finger`` on, the forefinger is not pre-flexed (#15182)."""
-    spec = dataclasses.replace(_spec(), trigger_finger=True)
+    # The option is judged on the legacy lie of the club: laid further across
+    # the hand (the owner's trail hand, #15265) the knuckle flexes on its own.
+    across = GripSpec.legacy().trail.club_cross_angle_deg
+    wraps = _spec()
+    wraps = dataclasses.replace(
+        wraps, trail=dataclasses.replace(wraps.trail, club_cross_angle_deg=across)
+    )
+    spec = dataclasses.replace(wraps, trigger_finger=True)
     trigger = build_hand_visual(spec, "trail", grip_radius_m=_RADIUS)
-    wrapped = _hand("trail")
+    wrapped = build_hand_visual(wraps, "trail", grip_radius_m=_RADIUS)
     low = trigger.joint_angles.flexion_deg("index_prox")
     assert low < wrapped.joint_angles.flexion_deg("index_prox") - 5.0
     assert low < float(_Q["min_index_knuckle_flexion_deg"])
@@ -936,8 +951,11 @@ def test_the_overlap_and_the_closing_up_can_be_switched_off() -> None:
     apart = build_grip_hands(
         _spec(), grip_radius_m=_RADIUS, settings=settings_from_mapping(raw)
     )
-    ring = hand_to_finger_gaps_m(apart["trail"], _pair()["lead"], "index")["ring"]
-    assert ring > float(_Q["max_pair_ring_finger_gap_m"]), "no longer closed up"
+    # Laid across the club as the owner has it, the trail hand reaches the
+    # lead forefinger without being slid, so the ring finger's gap no longer
+    # tells the two apart (#15265); the little finger's overlap still does.
+    little = hand_to_finger_gaps_m(apart["trail"], _pair()["lead"], "middle")["little"]
+    assert little > 0.01, "the little finger still overlaps the lead hand"
     swing = _pair()["trail"].joint_angles.as_mapping()["little_side"]
     plain = apart["trail"].joint_angles.as_mapping()["little_side"]
     assert abs(swing - plain) > math.radians(10.0), "the overlap swings the finger"
