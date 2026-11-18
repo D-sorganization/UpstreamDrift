@@ -102,7 +102,9 @@ def grip_radius_at(club: ClubAssembly, distance_below_butt_m: float) -> float:
     return GRIP_BUTT_RADIUS_M + f * (GRIP_TIP_RADIUS_M - GRIP_BUTT_RADIUS_M)
 
 
-def _club_axes(club: ClubAssembly) -> tuple[Array, Array]:
+def face_square_axes(club: ClubAssembly) -> tuple[Array, Array]:
+    """(top of grip, trail side) unit axes, at right angles to the shaft and
+    squared to the clubface. ``ValueError`` if the face is parallel to the shaft."""
     normal = np.asarray(clubface_vector(club), dtype=float)
     normal = normal - float(normal @ _GRIP_AXIS) * _GRIP_AXIS
     size = float(np.linalg.norm(normal))
@@ -166,7 +168,7 @@ def grip_hand_frame(
     which the baked hand carries at azimuth ``a`` from ``x``, points along the
     wrist follower's dorsal axis projected off ``z`` (#14747; #13996 only put the
     dorsal axis on ``x``, leaving the drawn back 35 deg (lead) and 75 deg (trail)
-    away). Otherwise it falls back to ``_club_axes(club)``.
+    away). Otherwise it falls back to ``face_square_axes(club)``.
     """
     _check_club(club)
     if not isinstance(hand, Hand):
@@ -179,7 +181,7 @@ def grip_hand_frame(
         x = math.cos(a) * dorsal - math.sin(a) * tangent
         y = np.cross(_GRIP_AXIS, x)
     else:
-        x, y = _club_axes(club)
+        x, y = face_square_axes(club)
     frame = np.eye(4)
     frame[:3, 0], frame[:3, 1], frame[:3, 2] = x, y, _GRIP_AXIS
     butt = np.array([0.0, -club.length_m, club.axis_offset_m])
@@ -230,9 +232,19 @@ def grip_hand_meshes(
     clears it by at most ``grip_hand_mesh.MAX_PAD_CLEARANCE_M`` plus the
     taper across the hand (0.3 mm). Postcondition: closed, outward-wound
     meshes in the club-body frame.
+
+    With ``hands.visual_backend`` set to ``skinned_human`` the skinned human
+    pair of :mod:`skinned_club_hands` is drawn instead, squared to the clubface.
     """
     _check_club(club)
     _check_pose(pose)
+    if hands is not None and hands.visual_backend == "skinned_human":
+        # Imported here: the skinned backend loads a mesh asset and a solver.
+        from src.shared.python.model_appearance.skinned_club_hands import (
+            skinned_hand_meshes,
+        )
+
+        return skinned_hand_meshes(club)
     return {
         label: _placed_hand(club, hand, pose, hand_length_m=hand_length_m, hands=hands)
         for hand, label in HAND_PARTS.items()
