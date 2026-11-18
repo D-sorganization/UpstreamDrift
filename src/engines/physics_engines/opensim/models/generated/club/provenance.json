@@ -21,15 +21,15 @@
         },
         "generator": "src.shared.python.model_appearance.grip_hands",
         "sha256": {
-          "lead_hand": "a3edbaea367b1d6d205490b232ec31dc8892026bf4c905588e0bd09d0cf94aeb",
-          "trail_hand": "f9e4eb111eea5ae338e3f38334b4a1db99a3ce05ddff1dbac06c392a144da801"
+          "lead_hand": "7c3df6f4e53738cdd9f1a5a9ebbebe81c7ac4d27464f1705322d578500a0d87c",
+          "trail_hand": "ba6eab4aeccd98275a9f59ed571444cd8c76cb378bdb938aeb8047c4a2771608"
         }
       },
       "head_library_name": "Driver 10.5\u00b0",
       "head_source": "tools_parametric",
       "sha256": {
         "grip": "3d3497e3c6920fc697f39789b44e494322466415e13a9e505d1bb7ca0803e4dc",
-        "head": "f171d4d8d47a516bdf4485d4e926bf9c4f2c180893b65a50aa58f37d872e37b4",
+        "head": "57a0e0433001c57c449dfdd2e3f1ae3ce2017738f71a66f9c49fdcf31a7466fa",
         "shaft": "54ff22636c0e443c544107c22b42f852381690feeac59dc694268d678fcbeeea"
       },
       "spec_sha256": "9f15a045b588770c8e3eb6e8ce37f480f10a9e755fc6daf0a8b6d50edfcdea01"
@@ -55,15 +55,15 @@
         },
         "generator": "src.shared.python.model_appearance.grip_hands",
         "sha256": {
-          "lead_hand": "8318c6b1725474c33e22397a005aebd38bbe040e8d50b4fd8ecc5778a40c9079",
-          "trail_hand": "17335396ed7d4a85b2df00e15b072af2071257a68347d58a46509c49a239ff78"
+          "lead_hand": "f46526d2348370aa36d29721eb4dff95a5f0a9c3a2d9887e16682fb6f3915412",
+          "trail_hand": "a7964d1100385db446b87ea2ea006395070e0f3c1b1ca17df9a5180bf3d0c533"
         }
       },
       "head_library_name": "7-Iron",
       "head_source": "tools_parametric",
       "sha256": {
         "grip": "b2793b4abb56d89491dcb367f810993eb1b049ce3d9a36bdadd6635599a3ef6d",
-        "head": "55caa4004a6b1089f860a968053fb4b5f3ee281fac42356638d41246686dd9d0",
+        "head": "7f611cfbdbfc4a66d7c732c59959ac2fe80030955177ab77fcf167365d1e24e7",
         "shaft": "9bbe857b20acc00dd3ab138c3c732aa9516fefaadaa0bb0e04b7da21b485d5ff"
       },
       "spec_sha256": "9a14c1ecd38e71add368371d5f7085c9104130c239073f207722f0938bbd594f"

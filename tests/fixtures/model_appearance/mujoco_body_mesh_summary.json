@@ -96,9 +96,9 @@
       {
         "label": "lead_hand",
         "material": "mat_skin_2",
-        "n_vertices": 4960,
+        "n_vertices": 7844,
         "bbox_min": [-0.029392, -0.060055, -0.024161],
-        "bbox_max": [0.044401, 0.030845, 0.059223]
+        "bbox_max": [0.044401, 0.030845, 0.067816]
       },
       {
         "label": "shaft",
@@ -110,7 +110,7 @@
       {
         "label": "trail_hand",
         "material": "mat_skin_2",
-        "n_vertices": 4960,
+        "n_vertices": 6210,
         "bbox_min": [-0.03551, -0.015191, 0.013139],
         "bbox_max": [0.043752, 0.081174, 0.117938]
       }
@@ -443,9 +443,9 @@
       {
         "label": "lead_hand",
         "material": "mat_skin_2",
-        "n_vertices": 4960,
+        "n_vertices": 7844,
         "bbox_min": [-0.037498, -0.056688, -0.021005],
-        "bbox_max": [0.046009, 0.040599, 0.062366]
+        "bbox_max": [0.046599, 0.040599, 0.067268]
       },
       {
         "label": "shaft",
@@ -457,7 +457,7 @@
       {
         "label": "trail_hand",
         "material": "mat_skin_2",
-        "n_vertices": 4960,
+        "n_vertices": 6210,
         "bbox_min": [-0.005675, -0.017437, -0.002524],
         "bbox_max": [0.085661, 0.088917, 0.095651]
       }
@@ -790,7 +790,7 @@
       {
         "label": "lead_hand",
         "material": "mat_skin_2",
-        "n_vertices": 4960,
+        "n_vertices": 7812,
         "bbox_min": [-0.034514, -0.06275, -0.008018],
         "bbox_max": [0.04077, 0.024, 0.058818]
       },
@@ -804,7 +804,7 @@
       {
         "label": "trail_hand",
         "material": "mat_skin_2",
-        "n_vertices": 4960,
+        "n_vertices": 6210,
         "bbox_min": [-0.044477, -0.0023, -0.007701],
         "bbox_max": [0.040384, 0.1002, 0.06627]
       }

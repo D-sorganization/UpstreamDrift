@@ -199,11 +199,10 @@ def test_hands_wrap_the_grip_tube_without_entering_it(key, style) -> None:
 
 def test_lead_hand_is_above_the_trail_hand() -> None:
     club = _club("driver")
-    meshes = gh.grip_hand_meshes(club)
-    lead, _ = _radial(club, meshes["lead_hand"].vertices)
-    trail, _ = _radial(club, meshes["trail_hand"].vertices)
-    assert lead.mean() < trail.mean()
-    gap = trail.mean() - lead.mean()
+    lead_along, _ = _radial(club, gh.grip_hand_frame(club, Hand.LEAD)[:3, 3][None, :])
+    trail_along, _ = _radial(club, gh.grip_hand_frame(club, Hand.TRAIL)[:3, 3][None, :])
+    assert lead_along[0] < trail_along[0]
+    gap = trail_along[0] - lead_along[0]
     assert gap == pytest.approx(DEFAULT_GRIP_POSE.hand_spacing_m, abs=0.01)
 
 
