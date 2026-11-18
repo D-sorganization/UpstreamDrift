@@ -8,6 +8,11 @@ segment's frame over that solve
 kinematics and the address, solve again. Zero passes, the default, leaves the
 pipeline as it was.
 
+``--placement-max-move-m`` limits one pass; ``--placement-max-total-move-m``
+limits how far a marker may end from where calibration first placed it, over
+all passes (:func:`limit_total_moves`). A marker that keeps asking to move
+past that is reporting a model error, not a placement.
+
 Kinematics only: no body, joint, mass or mesh changes. Markers on the bodies
 named by ``--placement-keep-bodies`` (default the club, whose marker geometry
 is measured, not fitted) keep their placement.
@@ -36,6 +41,8 @@ MakeKinematics = Callable[[Mapping[str, tuple[str, Offset]]], Any]
 
 DEFAULT_PLACEMENT_PASSES = 0
 DEFAULT_KEEP_BODIES: tuple[str, ...] = ("Clubhead",)
+#: Furthest a marker may end from its first placement over all passes (m).
+DEFAULT_MAX_TOTAL_MOVE_M = 0.05
 #: Probe points that read a segment's frame: its origin and its three axes.
 _PROBES: tuple[tuple[str, Offset], ...] = (
     ("o", (0.0, 0.0, 0.0)),
@@ -74,6 +81,12 @@ def add_placement_arguments(parser: argparse.ArgumentParser) -> None:
         type=_move,
         default=defaults.max_move_m,
         help="furthest a marker may move on its segment in one pass (m)",
+    )
+    parser.add_argument(
+        "--placement-max-total-move-m",
+        type=_move,
+        default=DEFAULT_MAX_TOTAL_MOVE_M,
+        help="furthest a marker may end from its first placement over all passes (m)",
     )
     parser.add_argument(
         "--placement-keep-bodies",
@@ -199,14 +212,64 @@ def replaced_attachments(
     return out, report
 
 
+def limit_total_moves(
+    attachments: Attachments, first: Attachments, max_total_move_m: float | None
+) -> tuple[dict[str, tuple[str, Offset]], dict[str, Any]]:
+    """Attachments held within ``max_total_move_m`` of their ``first`` placement.
+
+    A marker further than the limit from its first offset is cut back to the
+    limit along the line from the first offset to where it is. ``None`` sets no
+    limit. The report gives each marker's distance from its first placement
+    after the cut and the markers that were cut.
+
+    Preconditions: the limit is non-negative or ``None``; every marker in
+    ``first`` is in ``attachments`` on the same segment (``ValueError``
+    otherwise).
+    Postconditions: ``attachments`` is not changed; markers absent from
+    ``first`` pass through; no reported distance exceeds the limit.
+    """
+    if max_total_move_m is not None and not max_total_move_m >= 0.0:
+        raise ValueError("max_total_move_m must be non-negative or None")
+    out: dict[str, tuple[str, Offset]] = {
+        label: (body, (float(o[0]), float(o[1]), float(o[2])))
+        for label, (body, o) in attachments.items()
+    }
+    distances: dict[str, float] = {}
+    limited: list[str] = []
+    for label, (body, start) in first.items():
+        if label not in out or out[label][0] != body:
+            raise ValueError(f"marker {label!r} is not on its first segment {body!r}")
+        origin = np.asarray(start, dtype=float)
+        move = np.asarray(out[label][1], dtype=float) - origin
+        length = float(np.linalg.norm(move))
+        if max_total_move_m is not None and length > max_total_move_m:
+            held = origin + move * (max_total_move_m / length)
+            out[label] = (body, (float(held[0]), float(held[1]), float(held[2])))
+            length = max_total_move_m
+            limited.append(label)
+        distances[label] = length
+    report = {
+        "max_total_move_m": max_total_move_m,
+        "limited": sorted(limited),
+        "markers": distances,
+    }
+    return out, report
+
+
 def replace_run_markers(
-    lane: Any, calibrated: Any, q: Array, args: argparse.Namespace
+    lane: Any,
+    calibrated: Any,
+    q: Array,
+    args: argparse.Namespace,
+    first: Attachments | None = None,
 ) -> tuple[Any, dict[str, Any]]:
     """One placement pass on a calibrated pipeline run.
 
     ``calibrated`` is the pipeline's calibration result; the copy returned has
     the new attachments and leg offsets, marker kinematics and simulator built
-    on them, and the address solved again from the old one.
+    on them, and the address solved again from the old one. ``first`` is the
+    placement before any pass; given, no marker ends further from it than
+    ``--placement-max-total-move-m`` and the report gains ``total_move``.
     """
     from src.shared.python.motion_matching import full_body_forward_dynamics as fs
 
@@ -220,6 +283,12 @@ def replace_run_markers(
         placement_settings(args),
         tuple(args.placement_keep_bodies),
     )
+    if first is not None:
+        attachments, report["total_move"] = limit_total_moves(
+            attachments,
+            first,
+            getattr(args, "placement_max_total_move_m", DEFAULT_MAX_TOTAL_MOVE_M),
+        )
     adapter, kin = lane.kinematics(
         calibrated.spec_bytes,
         attachments,

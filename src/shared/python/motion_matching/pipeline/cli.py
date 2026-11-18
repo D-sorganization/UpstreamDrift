@@ -1473,9 +1473,12 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     lane.posture_prior_weight = getattr(args, "ik_posture_prior_weight", 0.0)
     solved = _targets_and_solve(ctx, lane, cal_res, labels)
     placement_reports: list[dict[str, Any]] = []
+    first_placement = dict(cal_res.attachments)
     for _ in range(getattr(args, "placement_passes", 0)):
         # Markers re-placed from the swing just solved, then solved again.
-        cal_res, placed = replace_run_markers(lane, cal_res, solved[0], args)
+        cal_res, placed = replace_run_markers(
+            lane, cal_res, solved[0], args, first_placement
+        )
         placed["swing_marker_rms_before_m"] = float(np.sqrt(np.nanmean(solved[4] ** 2)))
         placement_reports.append(placed)
         solved = _targets_and_solve(ctx, lane, cal_res, labels)
