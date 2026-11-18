@@ -338,13 +338,15 @@ def blend_scale(garment: bool, part: str = "upper_arm") -> float:
 # Trunk solids (#15279): cross-sections of the abdomen and the thorax as
 # (along, width, depth), fractions of the body's length, half width and half
 # depth (``torso_profile``). The widest station is 1.0, so a trunk is exactly
-# as wide and as deep as its spec hint. Abdomen: lumbar joint to T12; thorax:
+# as wide and as deep as its spec hint, and width and depth scale alike
+# through the middle, so the mid section keeps the spec's aspect. Abdomen: lumbar joint to T12; thorax:
 # T12 to the shoulder line, then the slope up into the neck.
 TORSO_PROFILES: dict[str, tuple[tuple[float, float, float], ...]] = {
     "abdomen": (
         (-0.14, 0.93, 0.92),
         (0.0, 0.95, 0.96),
-        (0.45, 0.93, 1.0),
+        (0.3, 0.97, 0.97),
+        (0.6, 1.0, 1.0),
         (0.85, 1.0, 0.97),
         (1.05, 0.95, 0.93),
         (1.3, 0.62, 0.7),
@@ -353,7 +355,8 @@ TORSO_PROFILES: dict[str, tuple[tuple[float, float, float], ...]] = {
         (-0.32, 0.56, 0.66),
         (-0.1, 0.84, 0.92),
         (0.08, 0.89, 0.97),
-        (0.4, 0.93, 1.0),
+        (0.3, 0.95, 0.95),
+        (0.55, 1.0, 1.0),
         (0.72, 1.0, 0.98),
         (0.9, 0.99, 0.86),
         (1.02, 0.86, 0.7),
@@ -370,7 +373,7 @@ SHOULDER_START_FRACTION = 0.3  # the yoke starts this far along the link
 SHOULDER_UP_AXIS = (0.0, 0.0, 1.0)  # up, in the shoulder link's body frame
 # Deltoid (#15279): the blend at the shoulder joint is longer down the arm
 # than across it: (across, down the arm), in upper-arm radii.
-DELTOID_HALF_SIZES = (1.06, 1.7)
+DELTOID_HALF_SIZES = (1.0, 1.7)
 DELTOID_DROP = 0.8  # centre below the joint, in upper-arm radii
 
 
