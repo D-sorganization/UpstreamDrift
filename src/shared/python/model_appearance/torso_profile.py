@@ -80,7 +80,9 @@ class TorsoProfile:
         first = TorsoStation(lowest, float(width[0]), float(depth[0]))
         return dataclasses.replace(self, stations=(first, *kept))
 
-    def scales_at(self, along: Sequence[float] | Array) -> tuple[Array, Array]:
+    def scales_at(
+        self, along: Sequence[float] | NDArray[np.floating]
+    ) -> tuple[Array, Array]:
         """Width and depth scales at ``along``, smooth between the stations."""
         knots = [s.along for s in self.stations]
         width = PchipInterpolator(knots, [s.width for s in self.stations])
