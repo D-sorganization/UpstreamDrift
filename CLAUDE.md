@@ -6,8 +6,6 @@
 
 `CLAUDE.md` is the authoritative contributor and agent policy file.
 
-> **GAAI Fleet Member.** GAAI framework installed in `.gaai/`. Read `.gaai/core/GAAI.md` for full governance spec.
-> Rules: `@.gaai/core/contexts/rules/base.rules.md` and `@.gaai/project/contexts/rules/project.rules.md`
 > PRs target `main`. Use focused topic branches such as `fix/...`, `feat/...`, `chore/...`, or `claude/...`.
 
 ## Engineering Design Manual Authority
@@ -26,7 +24,7 @@ scientific, semantic, visual, accessibility, or publication approval.
 ## ⚠️ Multi-agent coordination — read before opening any PR
 
 This repo is part of the D-sorganization fleet. Multiple agents
-(`claude`, `codex`, `jules`, `local`, `gaai`, `maxwell-daemon`) and the
+(`claude`, `codex`, `jules`, `local`, `maxwell-daemon`) and the
 repo owner all touch this codebase. **Coordination is mandatory** to
 avoid the kind of duplicate-work collisions that have happened in the
 past.
@@ -62,7 +60,7 @@ Short version:
 3. **Do not modify or delete lease comments left by other agents.**
 
 4. **Priority order** (see `Repository_Management/shared_scripts/agent_identity.py`):
-   `user > maxwell-daemon > claude > codex > jules > local > gaai`. The
+   `user > maxwell-daemon > claude > codex > jules > local`. The
    Fleet agent identity policy defines the order; duplicate PR handling is
    managed by the Repository_Management tooling.
 
@@ -283,8 +281,6 @@ See issue #5623, #5619.
 
 ## Slash Commands
 
-- `/gaai-deliver` — Run Delivery Loop for next ready backlog item
-- `/gaai-status` — Show current backlog and memory state
 
 ## Closing issues — non-negotiable rule
 
