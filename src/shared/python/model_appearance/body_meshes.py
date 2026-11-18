@@ -256,6 +256,10 @@ class _Context:
     feet: Mapping[str, Sequence[foot.FootPart]] = field(default_factory=dict)
     #: Club parts per body (``club_chain_meshes``; chain shaft R6, #12686).
     club_parts: Mapping[str, Sequence[ClubPart]] = field(default_factory=dict)
+    #: Fraction of its whole limb each body of a continuous part draws (#15262).
+    windows: Mapping[str, tuple[float, float]] = field(default_factory=dict)
+    #: Wrist section per forearm body, when the drawn hands set it (#15264).
+    wrist_sections: Mapping[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -265,9 +269,85 @@ class _Segment:
     radius: float
     aspect: float
     end_scale: float = 1.0
+    window: tuple[float, float] = library.FULL_COVERAGE
+    belly: tuple[float, float, float] = library.NO_BELLY
+    capsule_ends: bool = False
+    taper_end: float = 1.0
+    end_aspect: float | None = None
+    flatten_from: float = 0.0
+    width_hint: np.ndarray | None = None
+    end_cap: float = 1.0
+    end_shift: np.ndarray | None = None
 
 
-def _limb_segments(part: str, caps: Sequence[Capsule], scale: float) -> list[_Segment]:
+def _limb_windows(
+    spec: Mapping[str, Any], by_body: Mapping[str, Sequence[Capsule]]
+) -> dict[str, tuple[float, float]]:
+    """The share of one limb drawn by each body of a continuous part.
+
+    Two bodies of the same ``library.CONTINUOUS_PARTS`` part joined by a
+    joint, each with one capsule, are the near and far lengths of one limb:
+    the parent draws ``(0, f)`` and the child ``(f, 1)``, ``f`` the parent's
+    share of the summed length.
+    """
+    out: dict[str, tuple[float, float]] = {}
+    for joint in spec.get("joints", ()):
+        near, far = joint.get("parent"), joint.get("child")
+        part = library.classify_body(near) if near in by_body else None
+        if part not in library.CONTINUOUS_PARTS or far not in by_body:
+            continue
+        if library.classify_body(far) != part:
+            continue
+        if len(by_body[near]) != 1 or len(by_body[far]) != 1:
+            continue
+        lengths = by_body[near][0].length_m(), by_body[far][0].length_m()
+        share = lengths[0] / sum(lengths)
+        out[near], out[far] = (0.0, share), (share, 1.0)
+    return out
+
+
+def _wrist_shape(part: str, radius: float, wrist: Any) -> dict[str, Any]:
+    """Far-end shape of a limb: the library taper, or the drawn hand's wrist.
+
+    ``wrist`` is a ``skinned_wrist_sections.WristSection`` in the body frame,
+    or ``None``. With one, the limb ends that wide and that deep, turned to
+    its width axis, the flat section easing in past the rotation joint.
+    """
+    if wrist is None:
+        return {"end_scale": library.distal_scale(part)}
+    scale = library.validate_distal_scale(min(1.0, wrist.half_width_m / radius))
+    return {
+        "end_scale": scale,
+        "end_aspect": wrist.half_depth_m / wrist.half_width_m,
+        "flatten_from": library.PART_FLATTEN_FROM.get(part, 0.0),
+        "width_hint": wrist.width_axis,
+        "end_cap": wrist.cap,
+        "end_shift": wrist.centre_m,
+    }
+
+
+def _skinned_wrist_sections(
+    spec: Mapping[str, Any], club: ClubAssembly | None
+) -> Mapping[str, Any]:
+    """Wrist section per forearm body if the spec draws the skinned hands."""
+    backend = spec.get("subject", {}).get("hand_visual_backend")
+    if club is None or backend != "skinned_human":
+        return {}
+    # Imported here: the skinned backend loads a mesh asset and a solver.
+    from src.shared.python.model_appearance.skinned_wrist_sections import (
+        forearm_wrist_sections,
+    )
+
+    return forearm_wrist_sections(spec, club)
+
+
+def _limb_segments(
+    part: str,
+    caps: Sequence[Capsule],
+    scale: float,
+    window: tuple[float, float] = library.FULL_COVERAGE,
+    wrist: Any = None,
+) -> list[_Segment]:
     out = []
     for cap in caps:
         radius = scale * (
@@ -283,7 +363,11 @@ def _limb_segments(part: str, caps: Sequence[Capsule], scale: float) -> list[_Se
                 np.asarray(cap.end_m),
                 radius,
                 aspect,
-                library.distal_scale(part),
+                window=window,
+                belly=library.belly(part),
+                capsule_ends=part in library.CAPSULE_END_PARTS,
+                taper_end=library.taper_end(part),
+                **_wrist_shape(part, radius, wrist),
             )
         )
     return out
@@ -425,9 +509,21 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
         geometry.LoftOptions(
             aspect=seg.aspect,
             end_scale=seg.end_scale,
+            window=seg.window,
+            belly=seg.belly,
+            capsule_ends=seg.capsule_ends,
+            taper_end=seg.taper_end,
+            end_aspect=seg.end_aspect,
+            flatten_from=seg.flatten_from,
+            end_cap=seg.end_cap,
+            end_shift=seg.end_shift,
             rings=library.LOFT_RINGS,
             sides=library.LOFT_SIDES,
-            width_hint=width_hint_for(ctx.sections, body, seg.start, seg.end),
+            width_hint=(
+                seg.width_hint
+                if seg.width_hint is not None
+                else width_hint_for(ctx.sections, body, seg.start, seg.end)
+            ),
             **extra,
         ),
     )
@@ -506,7 +602,10 @@ def _meshes_for_body(
     elif part in TRUNK_PARTS:
         segments = [_trunk_segment(ctx, body, part, caps, scale)]
     else:
-        segments = _limb_segments(part, caps, scale)
+        window = ctx.windows.get(body, library.FULL_COVERAGE)
+        segments = _limb_segments(
+            part, caps, scale, window, ctx.wrist_sections.get(body)
+        )
     return _segment_meshes(ctx, body, part, segments)
 
 
@@ -540,6 +639,9 @@ def body_meshes(
     shapes: dict[str, list[Shape]] = {}
     for shape in skeleton.shapes:
         shapes.setdefault(shape.body, []).append(shape)
+    by_body: dict[str, list[Capsule]] = {}
+    for cap in skeleton.capsules:
+        by_body.setdefault(cap.body, []).append(cap)
     sections = body_sections(spec)
     ctx = _Context(
         doc,
@@ -551,10 +653,9 @@ def body_meshes(
         doc.head.enabled,
         foot.foot_parts(spec, sections, model=doc.foot.model),
         _club_parts(spec, doc, club),
+        _limb_windows(spec, by_body),
+        _skinned_wrist_sections(spec, club),
     )
-    by_body: dict[str, list[Capsule]] = {}
-    for cap in skeleton.capsules:
-        by_body.setdefault(cap.body, []).append(cap)
     out = [
         m for body, caps in by_body.items() for m in _meshes_for_body(ctx, body, caps)
     ]

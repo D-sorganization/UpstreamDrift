@@ -1,0 +1,515 @@
+"""Quality metrics for hand visual meshes (tolerances come from settings)."""
+
+from __future__ import annotations
+
+import json
+from collections.abc import Callable
+from functools import lru_cache
+from pathlib import Path
+
+import numpy as np
+from numpy.typing import NDArray
+
+from src.shared.python.model_appearance.hand_backends.joint_angles import FINGERS
+from src.shared.python.model_appearance.hand_backends.skinning import (
+    SkinnedHandAsset,
+    degenerate_face_count,
+    face_areas,
+    flipped_face_ids,
+    pose_vertices,
+)
+from src.shared.python.model_appearance.hand_backends.types import HandVisualResult
+
+# Point-triangle pairs evaluated at once by the winding-number check (memory).
+_WINDING_CHUNK_ELEMENTS = 400_000
+_RAY_CHUNK_POINTS = 128
+
+QUALITY_PATH = (
+    Path(__file__).resolve().parents[5]
+    / "scripts"
+    / "config"
+    / "hand_visual_quality.json"
+)
+
+
+@lru_cache(maxsize=1)
+def load_hand_visual_quality() -> dict[str, object]:
+    """Test tolerances and anthropometric references. ``ValueError`` if missing."""
+    if not QUALITY_PATH.is_file():
+        raise ValueError(f"missing hand visual quality settings: {QUALITY_PATH}")
+    return json.loads(QUALITY_PATH.read_text(encoding="utf-8"))
+
+
+def max_grip_cylinder_penetration_m(
+    vertices: NDArray[np.float64], radius_m: float, taper: float = 0.0
+) -> float:
+    """Depth of the deepest vertex inside the grip about ``z`` (0 if none); the
+    grip is ``radius_m`` at ``z = 0`` and changes by ``taper`` per metre."""
+    rho = np.hypot(vertices[:, 0], vertices[:, 1]) - taper * vertices[:, 2]
+    return float(max(0.0, radius_m - rho.min()))
+
+
+def _grip_radius_m(
+    result: HandVisualResult, z_m: NDArray[np.float64]
+) -> NDArray[np.float64]:
+    """The grip's radius at heights ``z_m`` in the result's frame."""
+    if result.grip_radius_m is None:
+        raise ValueError("result carries no grip radius")
+    return np.asarray(result.grip_radius_m + result.grip_taper * z_m, dtype=float)
+
+
+def grip_contact_area_m2(result: HandVisualResult, within_m: float) -> float:
+    """Skin area lying on the grip: triangles with every corner no farther
+    than ``within_m`` from the grip cylinder about ``z``."""
+    if result.grip_radius_m is None:
+        raise ValueError("result carries no grip radius")
+    v, f = result.mesh.vertices, result.mesh.faces
+    gap = np.hypot(v[:, 0], v[:, 1]) - _grip_radius_m(result, v[:, 2])
+    near = (gap <= within_m)[f].all(axis=1)
+    tri = v[f[near]]
+    cross = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+    return float(0.5 * np.linalg.norm(cross, axis=1).sum())
+
+
+def median_facing_grip_gap_m(
+    result: HandVisualResult, bones: tuple[str, ...], min_facing: float = 0.3
+) -> float:
+    """Median gap to the grip of the skin of ``bones`` that faces the grip.
+
+    Skin faces the grip when its normal has at least ``min_facing`` of its
+    length toward the grip axis. Raises ``ValueError`` if none does.
+    """
+    if result.grip_radius_m is None or result.vertex_normals is None:
+        raise ValueError("result carries no grip radius or no vertex normals")
+    asset, _, _ = _audit_parts(result)
+    ids = asset.dominant_vertex_ids(bones)
+    v, n = result.mesh.vertices[ids], result.vertex_normals[ids]
+    rho = np.hypot(v[:, 0], v[:, 1])
+    inward = -(n[:, 0] * v[:, 0] + n[:, 1] * v[:, 1]) / np.maximum(rho, 1e-12)
+    facing = inward >= min_facing
+    if not facing.any():
+        raise ValueError(f"no skin of {bones} faces the grip")
+    return float(np.median((rho - _grip_radius_m(result, v[:, 2]))[facing]))
+
+
+def finger_side_gaps_m(result: HandVisualResult) -> dict[str, float]:
+    """Least skin distance between each pair of neighbouring fingers.
+
+    Keys are ``"index-middle"``, ``"middle-ring"`` and ``"ring-little"``. The
+    distance is from the middle and end segments of the first finger to any
+    skin of the second, between skin vertices.
+    """
+    from scipy.spatial import cKDTree
+
+    asset, _, _ = _audit_parts(result)
+    v = result.mesh.vertices
+    gaps: dict[str, float] = {}
+    for a, b in zip(FINGERS, FINGERS[1:], strict=False):
+        outer = asset.dominant_vertex_ids((f"{a}_mid", f"{a}_dist"))
+        other = asset.dominant_vertex_ids(
+            tuple(f"{b}_{s}" for s in ("prox", "mid", "dist"))
+        )
+        gaps[f"{a}-{b}"] = float(np.min(cKDTree(v[other]).query(v[outer])[0]))
+    return gaps
+
+
+def thumb_gaps_m(result: HandVisualResult) -> dict[str, float]:
+    """How close the thumb lies to the rest of its own hand, between skin
+    vertices: ``"index_tip"`` from the thumb's two free segments to the end
+    segment of the forefinger, ``"hand"`` from the thumb's first free segment
+    to the forefinger's first segment and the palm bone behind it."""
+    from scipy.spatial import cKDTree
+
+    asset, _, _ = _audit_parts(result)
+    v = result.mesh.vertices
+
+    def gap(mine: tuple[str, ...], theirs: tuple[str, ...]) -> float:
+        tree = cKDTree(v[asset.dominant_vertex_ids(theirs)])
+        return float(np.min(tree.query(v[asset.dominant_vertex_ids(mine)])[0]))
+
+    return {
+        "index_tip": gap(("thumb_prox", "thumb_dist"), ("index_dist",)),
+        "hand": gap(("thumb_prox",), ("index_prox", "meta_index")),
+    }
+
+
+def thumb_pinch_m(result: HandVisualResult) -> float:
+    """Distance from the thumb's end joint to the forefinger's knuckle, joint
+    centre to joint centre: how tightly the two are pinched into a V. Both
+    joints lie inside the flesh, so touching skin leaves about 15 mm."""
+    asset, transforms, _ = _audit_parts(result)
+
+    def joint(bone: str) -> NDArray[np.float64]:
+        i = asset.bone_index(bone)
+        return transforms[i][:3, :3] @ asset.bone_heads[i] + transforms[i][:3, 3]
+
+    return float(np.linalg.norm(joint("thumb_dist") - joint("index_prox")))
+
+
+def hand_to_finger_gaps_m(
+    hand: HandVisualResult, other: HandVisualResult, finger: str
+) -> dict[str, float]:
+    """Least skin distance from each finger of ``hand`` to ``finger`` of
+    ``other``, between skin vertices. Both results share one frame (a pair)."""
+    from scipy.spatial import cKDTree
+
+    def skin(result: HandVisualResult, name: str) -> NDArray[np.float64]:
+        asset, _, _ = _audit_parts(result)
+        bones = tuple(f"{name}_{s}" for s in ("prox", "mid", "dist"))
+        return result.mesh.vertices[asset.dominant_vertex_ids(bones)]
+
+    tree = cKDTree(skin(other, finger))
+    return {f: float(np.min(tree.query(skin(hand, f))[0])) for f in FINGERS}
+
+
+def segment_grip_gap_m(result: HandVisualResult, bone: str) -> float:
+    """Least distance from the skin of ``bone`` to the grip itself (radial,
+    against the taper); negative when that skin is inside the grip.
+
+    Precondition: the result carries a grip radius and ``bone`` owns skin.
+    """
+    if result.grip_radius_m is None:
+        raise ValueError("result carries no grip radius")
+    asset, _, _ = _audit_parts(result)
+    ids = asset.dominant_vertex_ids((bone,))
+    if len(ids) == 0:
+        raise ValueError(f"no skin follows {bone!r}")
+    skin = result.mesh.vertices[ids]
+    radius = _grip_radius_m(result, skin[:, 2])
+    return float(np.min(np.hypot(skin[:, 0], skin[:, 1]) - radius))
+
+
+def min_bone_grip_clearance_m(result: HandVisualResult, samples: int = 5) -> float:
+    """Least distance from a finger or thumb bone axis to the grip surface.
+
+    Negative means a bone lies inside the grip. Metacarpals and the forearm
+    are left out: they do not wrap the grip.
+    """
+    asset, transforms, frame = _audit_parts(result)
+    if result.grip_radius_m is None:
+        raise ValueError("result carries no grip radius")
+    least = np.inf
+    for i, name in enumerate(asset.bone_names):
+        if not name.endswith(("_prox", "_mid", "_dist")):
+            continue
+        t = np.linspace(0.0, 1.0, samples)[:, None]
+        rest = (1.0 - t) * asset.bone_heads[i] + t * asset.bone_tails[i]
+        posed = rest @ transforms[i][:3, :3].T + transforms[i][:3, 3]
+        club = posed @ frame[:3, :3].T + frame[:3, 3]
+        gap = np.hypot(club[:, 0], club[:, 1]) - _grip_radius_m(result, club[:, 2])
+        least = min(least, float(gap.min()))
+    return float(least)
+
+
+def skinning_defects(
+    result: HandVisualResult, *, min_area_m2: float
+) -> dict[str, float]:
+    """Degenerate and flipped triangles of a skinned result.
+
+    ``flipped`` counts triangles folded into the inner crease of a flexed
+    joint (see :func:`skinning.flipped_face_ids`); ``flipped_area_fraction``
+    is their share of the skin area.
+    """
+    asset, transforms, frame = _audit_parts(result)
+    # The mesh itself, taken back to the rest frame: correctives count too.
+    posed = (result.mesh.vertices - frame[:3, 3]) @ np.linalg.inv(frame[:3, :3]).T
+    flipped = flipped_face_ids(asset, transforms, posed)
+    areas = face_areas(posed, asset.faces)
+    return {
+        "degenerate": degenerate_face_count(
+            posed, asset.faces, min_area_m2=min_area_m2
+        ),
+        "flipped": int(len(flipped)),
+        "flipped_area_fraction": float(areas[flipped].sum() / areas.sum()),
+    }
+
+
+def pinched_edge_count(
+    result: HandVisualResult, bones: tuple[str, ...], max_added_fold_deg: float
+) -> int:
+    """Edges on skin led by ``bones`` that fold more than ``max_added_fold_deg``
+    beyond their fold at rest: creases skinning pinched into the skin."""
+    from src.shared.python.model_appearance.hand_backends.correctives import (
+        edge_folds,
+    )
+
+    asset, _, _ = _audit_parts(result)
+    now, pair = edge_folds(result.mesh.vertices, asset.faces)
+    rest, _ = edge_folds(asset.rest_vertices, asset.faces)
+    mask = np.zeros(len(asset.rest_vertices), dtype=bool)
+    mask[asset.dominant_vertex_ids(bones)] = True
+    inside = np.asarray(mask[asset.faces].all(axis=1))
+    both = inside[pair[:, 0]] & inside[pair[:, 1]]
+    return int(((now - rest > max_added_fold_deg) & both).sum())
+
+
+def skinning_residual_m(result: HandVisualResult) -> float:
+    """Largest distance between the mesh and pure LBS + one rigid frame.
+
+    Zero (to rounding) proves the hand was posed by joint rotation alone:
+    no vertex was pushed, clamped or inflated after skinning. With the
+    corrective shapes on it is the farthest any vertex was moved by them.
+    """
+    asset, transforms, frame = _audit_parts(result)
+    expected = pose_vertices(asset, transforms) @ frame[:3, :3].T + frame[:3, 3]
+    return float(np.abs(expected - result.mesh.vertices).max())
+
+
+def _audit_parts(
+    result: HandVisualResult,
+) -> tuple[SkinnedHandAsset, NDArray[np.float64], NDArray[np.float64]]:
+    if (
+        result.rest_asset is None
+        or result.bone_transforms is None
+        or result.frame_from_rest is None
+    ):
+        raise ValueError("result carries no skinning audit data")
+    return result.rest_asset, result.bone_transforms, result.frame_from_rest
+
+
+def anthropometric_ratios(
+    asset: SkinnedHandAsset, breadth_band_m: float
+) -> dict[str, float]:
+    """Ratios of a rest hand, to compare with the references in settings.
+
+    Lengths are joint-chain lengths (knuckle to tip; thumb from its base).
+    """
+    from src.shared.python.model_appearance.hand_backends.skinned_human import (
+        asset_hand_breadth_m,
+        asset_hand_length_m,
+    )
+
+    def chain(names: tuple[str, ...]) -> float:
+        ids = [asset.bone_index(n) for n in names]
+        return float(
+            np.linalg.norm(asset.bone_tails[ids] - asset.bone_heads[ids], axis=1).sum()
+        )
+
+    finger = {
+        f: chain(tuple(f"{f}_{s}" for s in ("prox", "mid", "dist"))) for f in FINGERS
+    }
+    thumb = chain(("thumb_meta", "thumb_prox", "thumb_dist"))
+    length = asset_hand_length_m(asset)
+    return {
+        "breadth_over_length": asset_hand_breadth_m(asset, breadth_band_m) / length,
+        "middle_finger_over_length": finger["middle"] / length,
+        "index_over_middle": finger["index"] / finger["middle"],
+        "ring_over_middle": finger["ring"] / finger["middle"],
+        "little_over_middle": finger["little"] / finger["middle"],
+        "thumb_over_middle": thumb / finger["middle"],
+    }
+
+
+def _winding_numbers(
+    points: NDArray[np.float64], vertices: NDArray[np.float64], faces: NDArray
+) -> NDArray[np.float64]:
+    """Winding number of a closed outward-wound mesh about each point."""
+    total = np.zeros(len(points))
+    per_chunk = max(1, _WINDING_CHUNK_ELEMENTS // max(1, len(faces)))
+    for chunk in np.array_split(
+        np.arange(len(points)), max(1, len(points) // per_chunk)
+    ):
+        rel = vertices[faces][None, :, :, :] - points[chunk][:, None, None, :]
+        a, b, c = rel[:, :, 0], rel[:, :, 1], rel[:, :, 2]
+        la, lb, lc = (np.linalg.norm(x, axis=2) for x in (a, b, c))
+        triple = np.einsum("ijk,ijk->ij", a, np.cross(b, c))
+        denom = (
+            la * lb * lc
+            + np.einsum("ijk,ijk->ij", a, b) * lc
+            + np.einsum("ijk,ijk->ij", b, c) * la
+            + np.einsum("ijk,ijk->ij", c, a) * lb
+        )
+        total[chunk] = np.arctan2(triple, denom).sum(axis=1) / (2.0 * np.pi)
+    return total
+
+
+def _edge_side(
+    start: NDArray[np.float64],
+    end: NDArray[np.float64],
+    point: NDArray[np.float64],
+    plane: tuple[int, int],
+) -> NDArray[np.float64]:
+    """Signed area of ``start -> end -> point`` projected on the ``plane`` axes."""
+    u, v = plane
+    return (end[..., u] - start[..., u]) * (point[..., v] - start[..., v]) - (
+        end[..., v] - start[..., v]
+    ) * (point[..., u] - start[..., u])
+
+
+def _ray_says_inside(
+    points: NDArray[np.float64], tri: NDArray[np.float64], axis: int
+) -> NDArray[np.bool_]:
+    """Whether a ray from each point along ``+axis`` crosses the closed mesh
+    an odd number of times. Fast, but a ray through an edge can miscount, so
+    it only preselects points for the exact winding number."""
+    u, v = (k for k in range(3) if k != axis)
+    order = np.argsort(points[:, u], kind="stable")
+    low, high = tri[:, :, u].min(axis=1), tri[:, :, u].max(axis=1)
+    inside = np.zeros(len(points), dtype=bool)
+    for chunk in np.array_split(order, max(1, len(order) // _RAY_CHUNK_POINTS)):
+        if len(chunk) == 0:
+            continue
+        p = points[chunk]
+        near = tri[(high >= p[:, u].min()) & (low <= p[:, u].max())]
+        a, b, c = near[None, :, 0], near[None, :, 1], near[None, :, 2]
+        q = p[:, None, :]
+        ab, bc, ca = (_edge_side(s, e, q, (u, v)) for s, e in ((a, b), (b, c), (c, a)))
+        area = ab + bc + ca
+        over = ((ab >= 0) & (bc >= 0) & (ca >= 0)) | ((ab <= 0) & (bc <= 0) & (ca <= 0))
+        over &= area != 0.0
+        safe = np.where(area == 0.0, 1.0, area)
+        height = (bc * a[..., axis] + ca * b[..., axis] + ab * c[..., axis]) / safe
+        inside[chunk] = (over & (height > q[..., axis])).sum(axis=1) % 2 == 1
+    return inside
+
+
+def _depth_inside_m(
+    points: NDArray[np.float64], vertices: NDArray[np.float64], faces: NDArray
+) -> float:
+    """How far the deepest of ``points`` lies inside the closed mesh (0 if none).
+
+    Depth is the distance to the nearest mesh vertex, edge midpoint or face
+    centre, so it overstates true depth by at most about half an edge length.
+    """
+    # A point outside the mesh's bounding box is outside the mesh; of the
+    # rest only those a ray test calls inside get the exact winding number.
+    low, high = vertices.min(axis=0), vertices.max(axis=0)
+    points = points[((points >= low) & (points <= high)).all(axis=1)]
+    tri = vertices[faces]
+    maybe = _ray_says_inside(points, tri, 2) | _ray_says_inside(points, tri, 1)
+    points = points[maybe]
+    inside = points[_winding_numbers(points, vertices, faces) > 0.5]
+    if len(inside) == 0:
+        return 0.0
+    tri = vertices[faces]
+    samples = np.vstack(
+        [vertices, tri.mean(axis=1)]
+        + [0.5 * (tri[:, i] + tri[:, (i + 1) % 3]) for i in range(3)]
+    )
+    gaps = np.linalg.norm(inside[:, None, :] - samples[None, :, :], axis=2)
+    return float(gaps.min(axis=1).max())
+
+
+def hand_pair_penetration_m(first: HandVisualResult, second: HandVisualResult) -> float:
+    """Deepest that either hand's skin vertices sit inside the other hand."""
+    a, b = first.mesh, second.mesh
+    return max(
+        _depth_inside_m(a.vertices, b.vertices, b.faces),
+        _depth_inside_m(b.vertices, a.vertices, a.faces),
+    )
+
+
+def thumb_crown_gaps_m(
+    lead: HandVisualResult,
+    trail: HandVisualResult,
+    *,
+    station_m: float,
+    min_facing: float,
+) -> NDArray[np.float64]:
+    """Gap from the crown of the lead thumb to the trail hand, along the thumb.
+
+    The crown is the skin of the lead thumb's two free segments whose normal
+    has at least ``min_facing`` of its length away from the grip axis: the
+    strip a palm laid over the thumb rests on. It is cut into stations
+    ``station_m`` long along the grip, from the thumb's base to its tip, and
+    each station reports the least signed distance from its crown to the trail
+    hand's skin (negative: inside it). A thumb lying in the channel of the
+    trail palm has every station near zero; a station the palm does not reach
+    reports how far off the palm is. Both results share one frame (a pair).
+
+    Preconditions: ``station_m`` positive, ``min_facing`` in ``(0, 1)``.
+    """
+    if not station_m > 0.0 or not 0.0 < min_facing < 1.0:
+        raise ValueError("station_m must be positive and min_facing in (0, 1)")
+    skin, facing, gap = _lead_thumb_against(lead, trail)
+    crown = facing >= min_facing
+    if not crown.any():
+        raise ValueError("no skin of the lead thumb faces away from the grip")
+    return _per_station(skin[crown, 2], station_m, gap[crown], np.min)
+
+
+def thumb_wrap_shares(
+    lead: HandVisualResult,
+    trail: HandVisualResult,
+    *,
+    station_m: float,
+    contact_m: float,
+) -> NDArray[np.float64]:
+    """How far round the lead thumb the trail palm lies, along the thumb.
+
+    The outer half of the lead thumb is the skin of its two free segments
+    whose normal points away from the grip axis at all: its crown and both
+    flanks. It is cut into stations ``station_m`` long along the grip, from
+    the thumb's base to its tip, and each station reports the share of its
+    outer-half skin vertices within ``contact_m`` of the trail hand's skin.
+    A flat palm laid on a round thumb touches the crown only and scores low;
+    a palm cupped round the thumb scores near one.
+
+    Preconditions: ``station_m`` and ``contact_m`` positive.
+    """
+    if not station_m > 0.0 or not contact_m > 0.0:
+        raise ValueError("station_m and contact_m must be positive")
+    skin, facing, gap = _lead_thumb_against(lead, trail)
+    outer = facing >= 0.0
+    if not outer.any():
+        raise ValueError("no skin of the lead thumb faces away from the grip")
+    touching = (gap[outer] <= contact_m).astype(np.float64)
+    return _per_station(skin[outer, 2], station_m, touching, np.mean)
+
+
+def _per_station(
+    along: NDArray[np.float64],
+    station_m: float,
+    values: NDArray[np.float64],
+    reduce: Callable[[NDArray[np.float64]], float],
+) -> NDArray[np.float64]:
+    station = np.floor((along - along.min()) / station_m).astype(int)
+    return np.array([reduce(values[station == k]) for k in np.unique(station)])
+
+
+def _lead_thumb_against(
+    lead: HandVisualResult, trail: HandVisualResult
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
+    """Skin of the lead thumb's free segments, how far each normal points away
+    from the grip axis (cosine), and each vertex's distance to the trail skin."""
+    from src.shared.python.model_appearance.hand_backends.posing import skin_distance
+    from src.shared.python.model_appearance.hand_backends.skinning import (
+        vertex_normals,
+    )
+
+    asset, _, _ = _audit_parts(lead)
+    ids = asset.dominant_vertex_ids(("thumb_prox", "thumb_dist"))
+    skin = lead.mesh.vertices[ids]
+    normals = vertex_normals(lead.mesh.vertices, lead.mesh.faces)[ids]
+    radial = skin[:, :2] / np.maximum(
+        np.linalg.norm(skin[:, :2], axis=1, keepdims=True), 1e-12
+    )
+    other = trail.mesh
+    reach = float(np.ptp(np.r_[skin, other.vertices], axis=0).max())
+    gap = skin_distance(
+        other.vertices, vertex_normals(other.vertices, other.faces), reach
+    )(skin)
+    return skin, np.einsum("ij,ij->i", normals[:, :2], radial), gap
+
+
+def wrist_joint_m(result: HandVisualResult) -> NDArray[np.float64]:
+    """The wrist joint centre in the club frame (z along the shaft, +x the top
+    of the grip, +y the trail side). This is the point a forearm attaches to."""
+    asset, transforms, frame = _audit_parts(result)
+    i = asset.bone_index("wrist")
+    return np.asarray((frame @ transforms[i] @ np.append(asset.bone_heads[i], 1.0))[:3])
+
+
+def forearm_spread_deg(first: HandVisualResult, second: HandVisualResult) -> float:
+    """Angle between the two forearms seen along the shaft (from the butt)."""
+
+    def proximal(result: HandVisualResult) -> NDArray[np.float64]:
+        asset, transforms, frame = _audit_parts(result)
+        i = asset.bone_index("forearm")
+        bone = asset.bone_heads[i] - asset.bone_tails[i]
+        direction = frame[:3, :3] @ transforms[i][:3, :3] @ bone
+        flat = direction[:2]
+        return flat / np.linalg.norm(flat)
+
+    cosine = float(np.clip(proximal(first) @ proximal(second), -1.0, 1.0))
+    return float(np.degrees(np.arccos(cosine)))

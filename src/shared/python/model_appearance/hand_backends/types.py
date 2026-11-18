@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 import numpy as np
 from numpy.typing import NDArray
@@ -13,6 +14,11 @@ from src.shared.python.model_appearance.hand_backends.joint_angles import (
     HandJointAngles,
     HandSide,
 )
+
+if TYPE_CHECKING:
+    from src.shared.python.model_appearance.hand_backends.skinning import (
+        SkinnedHandAsset,
+    )
 
 HAND_SIDES: tuple[HandSide, ...] = ("lead", "trail")
 
@@ -25,7 +31,11 @@ class HandVisualResult:
     needs. The optional fields let a caller audit the pose; ``contact_gaps_m``
     are visual gaps only, since contact stays on the capsule pads.
     ``frame_focus`` marks the vertices a renderer frames its camera on;
-    ``None`` means all of them.
+    ``None`` means all of them. Skinned backends also report what produced
+    every vertex: ``rest_asset``, ``bone_transforms`` and the rigid
+    ``frame_from_rest``. ``grip_taper`` is the change of the grip's radius
+    per metre of ``z`` (a golf grip narrows toward the head);
+    ``grip_radius_m`` is the radius at ``z = 0``.
     """
 
     backend: str
@@ -37,6 +47,10 @@ class HandVisualResult:
     joint_angles: HandJointAngles | None = None
     contact_gaps_m: dict[str, float] = field(default_factory=dict)
     frame_focus: NDArray[np.bool_] | None = None
+    grip_taper: float = 0.0
+    bone_transforms: NDArray[np.float64] | None = None
+    frame_from_rest: NDArray[np.float64] | None = None
+    rest_asset: SkinnedHandAsset | None = None
 
     def __post_init__(self) -> None:
         if self.side not in HAND_SIDES:
