@@ -14,14 +14,36 @@ from tests.support.suite_markers import (
     normalize_nodeid,
 )
 
+VERIFIED_UNIT_DIRECTORY_PREFIXES: tuple[str, ...] = (
+    "tests/headless/",
+    "tests/imports/",
+    "tests/installer/",
+    "tests/output/",
+    "tests/portfolio/",
+    "tests/security/",
+    "tests/wave10_assets_config/",
+)
+
 DIRECTORY_SUITE_MARKERS: tuple[tuple[str, str], ...] = (
     ("tests/unit/", "unit"),
     ("tests/integration/", "integration"),
+    *((prefix, "unit") for prefix in VERIFIED_UNIT_DIRECTORY_PREFIXES),
 )
 
 OPT_OUT_MARKER: str = "no_auto_suite_mark"
 AUTO_MARK_ENV_VAR: str = "UD_AUTO_MARK_BY_DIRECTORY"
 AUTO_MARK_INCLUDE_BASELINE_ENV_VAR: str = "UD_AUTO_MARK_INCLUDE_BASELINE"
+
+
+def is_verified_auto_mark_directory(nodeid_or_path: str) -> bool:
+    """Return True when *nodeid_or_path* lies in a verified unmarked unit dir."""
+    norm = str(nodeid_or_path).replace("\\", "/")
+    if norm.startswith("src/"):
+        return False
+    return any(
+        norm.startswith(prefix) or f"/{prefix}" in norm
+        for prefix in VERIFIED_UNIT_DIRECTORY_PREFIXES
+    )
 
 
 def infer_directory_suite_marker(nodeid_or_path: str) -> str | None:
@@ -103,7 +125,11 @@ def apply_directory_suite_auto_markers(
         ):
             continue
         nodeid = getattr(item, "nodeid", str(item))
-        if not inc_baseline and normalize_nodeid(nodeid) in baseline:
+        if (
+            not inc_baseline
+            and not is_verified_auto_mark_directory(nodeid)
+            and normalize_nodeid(nodeid) in baseline
+        ):
             continue
         inferred = infer_directory_suite_marker(nodeid)
         if inferred is not None:

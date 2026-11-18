@@ -23,14 +23,14 @@ def _luma(rgb: tuple[float, ...]) -> float:
     return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]
 
 
-def test_default_golfer_is_light_skin_with_mid_brown_hair() -> None:
+def test_default_golfer_is_light_skin_with_dirty_blonde_hair() -> None:
     doc = defaults.default_appearance()
     assert isinstance(doc, AppearanceDocument)
     assert doc.skin_tone == "skin_2"
-    assert library.headwear_material_name(doc) == "hair_brown"
-    r, g, b = library.MATERIALS["hair_brown"].base_color[:3]
-    assert r > g > b, "brown hair must be warm, not neutral"
-    assert 0.25 <= _luma((r, g, b)) <= 0.40, "mid brown must not render near-black"
+    assert library.headwear_material_name(doc) == "hair_dirty_blonde"
+    r, g, b = library.MATERIALS["hair_dirty_blonde"].base_color[:3]
+    assert r > g > b, "dirty blonde must be warm, not neutral"
+    assert 0.45 <= _luma((r, g, b)) <= 0.62, "dirty blonde is lighter than brown"
 
 
 def test_minimal_document_and_every_backend_share_the_contract() -> None:
@@ -78,6 +78,7 @@ def test_hair_palette_covers_the_requested_colours() -> None:
         "hair_auburn",
         "hair_blond",
         "hair_grey",
+        "hair_dirty_blonde",
     ]
     assert all(i in library.MATERIALS for i in ids)
 

@@ -48,10 +48,11 @@ class LaunchConditions:
         spin_rate_rpm: float = 0.0,
         spin_axis: np.ndarray | None = None,
     ) -> LaunchConditions:
-        """Build launch conditions from golf-facing units.
+        """Build launch conditions from SI speed + degree angles.
 
-        ``launch_angle_deg`` and ``azimuth_deg`` are converted to radians.
-        ``spin_rate_rpm`` is already the stored unit and is passed through.
+        ``velocity`` is in **m/s** (use :meth:`from_imperial` for mph).
+        ``launch_angle_deg`` and ``azimuth_deg`` are converted to radians;
+        ``spin_rate_rpm`` is passed through in RPM.
         """
         if not math.isfinite(velocity) or velocity < 0.0:
             raise ValueError(f"velocity must be finite and >= 0, got {velocity!r}")
@@ -70,6 +71,24 @@ class LaunchConditions:
             azimuth_angle=math.radians(azimuth_deg),
             spin_rate=float(spin_rate_rpm),
             spin_axis=axis,
+        )
+
+    @classmethod
+    def from_imperial(
+        cls,
+        ball_speed_mph: float,
+        launch_angle_deg: float,
+        azimuth_deg: float = 0.0,
+        spin_rate_rpm: float = 0.0,
+        spin_axis: np.ndarray | None = None,
+    ) -> LaunchConditions:
+        """Build launch conditions from imperial ball speed (mph) and degrees."""
+        return cls.from_user_units(
+            velocity=float(ball_speed_mph) * 0.44704,
+            launch_angle_deg=launch_angle_deg,
+            azimuth_deg=azimuth_deg,
+            spin_rate_rpm=spin_rate_rpm,
+            spin_axis=spin_axis,
         )
 
 
@@ -102,6 +121,7 @@ class EnvironmentalConditions:
         gravity: float = float(GRAVITY_M_S2),
         pressure_pa: float | None = None,
         relative_humidity: float = 0.0,
+        temperature_is_local: bool = False,
     ) -> EnvironmentalConditions:
         """Build an ``EnvironmentalConditions`` with ISA-derived density.
 
@@ -134,6 +154,7 @@ class EnvironmentalConditions:
                 altitude_m=altitude_m,
                 temperature_c=temperature_c,
                 pressure_pa=pressure_pa,
+                temperature_is_local=temperature_is_local,
             )
         else:
             rho = _humid_air_density(
@@ -141,6 +162,7 @@ class EnvironmentalConditions:
                 temperature_c=temperature_c,
                 relative_humidity=relative_humidity,
                 pressure_pa=pressure_pa,
+                temperature_is_local=temperature_is_local,
             )
         wind = (
             np.asarray(wind_velocity, dtype=float)
