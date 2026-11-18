@@ -15,6 +15,8 @@ from src.shared.python.data_io._async_io import (
 )
 from src.shared.python.data_io._format_handlers import OutputFormat
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(autouse=True)
 def _cleanup_executor():
@@ -142,3 +144,59 @@ def test_submit_background_save_default_error_logged(tmp_path: Path):
         metadata=None,
     )
     get_io_executor().shutdown(wait=True)
+
+
+@pytest.mark.parametrize("error_type", [OSError, PermissionError, FileNotFoundError])
+def test_async_save_reports_filesystem_error(tmp_path: Path, error_type):
+    error = error_type("output cannot be written")
+    received: list = []
+
+    def save(*args):
+        raise error
+
+    future = submit_async_save(
+        save,
+        {},
+        str(tmp_path / "out.csv"),
+        OutputFormat.CSV,
+        "mj",
+        None,
+        callback=received.append,
+    )
+    with pytest.raises(error_type, match="output cannot be written") as raised:
+        future.result(timeout=5)
+    assert raised.value is error
+    assert received == [error]
+
+
+@pytest.mark.parametrize("error_type", [OSError, PermissionError, FileNotFoundError])
+def test_background_save_reports_filesystem_error(tmp_path: Path, error_type):
+    error = error_type("output cannot be written")
+    received: list = []
+
+    def save(*args):
+        raise error
+
+    submit_background_save(
+        save,
+        {},
+        str(tmp_path / "out.csv"),
+        OutputFormat.CSV,
+        "mj",
+        None,
+        on_error=received.append,
+    )
+    shutdown_executor()
+    assert received == [error]
+
+
+def test_background_save_logs_filesystem_error_without_callback(tmp_path: Path, caplog):
+    def save(*args):
+        raise OSError("disk is full")
+
+    filename = str(tmp_path / "out.csv")
+    submit_background_save(save, {}, filename, OutputFormat.CSV, "mj", None)
+    shutdown_executor()
+    assert "background_save_failed" in caplog.text
+    assert filename in caplog.text
+    assert "disk is full" in caplog.text
