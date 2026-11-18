@@ -51,6 +51,7 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Active Epics and Slices (One Line Each; Detail in the Archive)
 
+- Output I/O #15189: `fix/async-save-io-errors` reports filesystem failures through async/background save callbacks and default logging; regression tests preserve the original future exception. Review through Barb's pipeline.
 - Import Utilities #15193: `fix/dotted-module-imports` resolves dotted names to the requested module and reads its own version for dependency checks. Review through Barb's pipeline.
 
 Canonical golfer Drake alignment (#13531, #13450; folded into the grip-lane consolidation): actuator count from `resolve_plant_n_actuators`, grip frames `mid_hands`/`club_head`; verify `tests/engines/drake/test_drake_fit_actuator_alignment_13531.py` and grip-resolution tests.
