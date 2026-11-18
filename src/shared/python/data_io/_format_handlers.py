@@ -41,7 +41,10 @@ def _make_json_serializer() -> Any:
         """Serialize numpy arrays, numbers, and datetimes to JSON-safe types."""
         if isinstance(obj, np.ndarray):
             return obj.tolist()
-        if isinstance(obj, np.integer | np.floating):
+        if isinstance(obj, np.integer):
+            # A float intermediary rounds integers beyond binary64 precision.
+            return int(obj)
+        if isinstance(obj, np.floating):
             return float(obj)
         if isinstance(obj, datetime):
             return format_datetime(obj, "iso")

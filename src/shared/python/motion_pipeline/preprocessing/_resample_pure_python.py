@@ -13,9 +13,10 @@ from ..contracts import KeypointSequence, MarkerTrajectory
 from ._frame_arrays import (
     array_to_keypoint_frames_at_timestamps as _array_to_keypoint_frames_at_timestamps,
     array_to_marker_frames_at_timestamps as _array_to_marker_frames_at_timestamps,
-    estimate_fps as _estimate_fps,
+    estimate_fps as _estimate_fps,  # noqa: F401  (re-exported for tests)
     keypoints_to_array as _keypoints_to_array,
     markers_to_array as _markers_to_array,
+    prepare_resample_inputs as _prepare_resample_inputs,
     vectorized_interp_axes as _vectorized_interp_axes,
 )
 
@@ -55,20 +56,9 @@ def _resample_keypoints(
     if len(seq.frames) < 2:
         return seq
 
-    # Auto-detect source FPS
-    if source_fps is None:
-        source_fps = _estimate_fps(seq.frames)
-
-    # Compute new timestamps
-    duration = seq.frames[-1].timestamp - seq.frames[0].timestamp
-    num_new_frames = int(duration * target_fps) + 1
-    new_timestamps = np.linspace(
-        seq.frames[0].timestamp, seq.frames[-1].timestamp, num_new_frames
+    source_fps, new_timestamps, data, timestamps = _prepare_resample_inputs(
+        seq.frames, target_fps, source_fps, _keypoints_to_array
     )
-
-    # Extract data arrays
-    data = _keypoints_to_array(seq.frames)
-    timestamps = np.array([f.timestamp for f in seq.frames])
 
     # Resample each keypoint dimension
     resampled_data = _vectorized_interp_axes(new_timestamps, timestamps, data)
@@ -100,20 +90,9 @@ def _resample_markers(
     if len(traj.frames) < 2:
         return traj
 
-    # Auto-detect source FPS
-    if source_fps is None:
-        source_fps = _estimate_fps(traj.frames)
-
-    # Compute new timestamps
-    duration = traj.frames[-1].timestamp - traj.frames[0].timestamp
-    num_new_frames = int(duration * target_fps) + 1
-    new_timestamps = np.linspace(
-        traj.frames[0].timestamp, traj.frames[-1].timestamp, num_new_frames
+    source_fps, new_timestamps, data, timestamps = _prepare_resample_inputs(
+        traj.frames, target_fps, source_fps, _markers_to_array
     )
-
-    # Extract data arrays
-    data = _markers_to_array(traj.frames)
-    timestamps = np.array([f.timestamp for f in traj.frames])
 
     # Resample each marker dimension
     resampled_data = _vectorized_interp_axes(new_timestamps, timestamps, data)
