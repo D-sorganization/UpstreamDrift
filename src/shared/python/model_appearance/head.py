@@ -42,6 +42,12 @@ DEFAULT_HEAD_LENGTH_M = 0.2429  # de Leva (1996) male head length, cervicale to 
 _RINGS, _SIDES = 26, 40
 _SKULL_CENTRE_Z, _SKULL_HALF = 0.58, (0.40, 0.31, 0.42)  # fractions of head length
 _AXIS = {"x": 0, "y": 1, "z": 2}
+_IRIS_MATERIAL = {
+    "blue_grey": "iris_blue_grey",
+    "hazel": "iris_hazel",
+    "brown": "iris_dark",
+}
+_ROLE_MATERIAL = {"pupil": "pupil_black", "lid": "lid_line"}
 FACE_PARTS = ("eye_l", "eye_r", "iris_l", "iris_r", "brow_l", "brow_r", "nose", "mouth")
 
 
@@ -327,7 +333,9 @@ def build_head_parts(
 
         return [
             HeadPart(name, mesh, material)
-            for name, mesh, material in head_mesh.build_mesh_parts(length, cfg.headwear)
+            for name, mesh, material in head_mesh.build_mesh_parts(
+                length, cfg.headwear, cfg
+            )
         ]
     parts = [_neck(length), HeadPart("skull", _skull(length), "skin")]
     parts += _face_parts(length) + _ears(length)
@@ -373,4 +381,9 @@ def part_material_name(part: HeadPart, doc: AppearanceDocument) -> str:
         if name is None:
             raise ValueError("Headwear part requested for a bare head")
         return name
-    return part.material
+    if part.material == "iris":
+        return _IRIS_MATERIAL[doc.head.eye_color]
+    if part.material == "brow":  # the hair colour, darker
+        brow = f"brow_{library.headwear_material_name(doc)}"
+        return brow if brow in library.MATERIALS else "brow_dark"
+    return _ROLE_MATERIAL.get(part.material, part.material)

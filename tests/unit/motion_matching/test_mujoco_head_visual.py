@@ -186,7 +186,11 @@ def test_cc0_mesh_head_loads_renders_and_keeps_physics_identical() -> None:
     xml, meta = _export(DRIVER, {"model": "cc0_mesh"})
     model = mujoco.MjModel.from_xml_string(xml)
     head = meta["visual_layer"]["head"]
-    assert head["parts"] == ["skin_mesh", "hair_mesh"] and head["mode"] == "body"
+    assert (
+        head["parts"][:1] == ["skin_mesh"]
+        and "hair_mesh" in head["parts"]
+        and head["mode"] == "body"
+    )
     plain = mujoco.MjModel.from_xml_string(
         exporter.export_full_body_mjcf(DRIVER.read_bytes())[0]
     )
