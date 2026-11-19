@@ -175,7 +175,7 @@ def test_trunk_ml_extent_is_the_spec_hint_semi_axis(built) -> None:
 def test_head_is_the_shared_cc0_head_in_its_body_frame(built) -> None:
     _, scene = built
     heads = [i for i in scene.items if i.label.startswith("head_")]
-    assert {"head_skin_mesh", "head_hair_mesh"} == {i.label for i in heads}
+    assert {"head_skin_mesh", "head_hair_mesh"} <= {i.label for i in heads}
     assert len({i.body for i in heads}) == 1 and heads[0].body.endswith("/Head")
 
 

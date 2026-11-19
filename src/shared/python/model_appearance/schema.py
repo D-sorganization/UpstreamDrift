@@ -134,6 +134,12 @@ class BallSettings:
 HEAD_AXES = ("+x", "-x", "+y", "-y", "+z", "-z")
 HEADWEAR = ("none", "hair", "cap")
 HEAD_MODELS = ("parametric", "cc0_mesh")
+HAIR_STYLES = ("short_crop", "dome")
+HAIR_PARTS = ("left", "right", "none")
+EYE_COLORS = ("blue_grey", "hazel", "brown")
+CAP_STYLES = ("none", "baseball_cap")
+CAP_BRIM_RANGE = (0.10, 0.80)  # brim length, head lengths
+DEFAULT_CAP_BRIM = 0.30
 BODY_MODELS = ("ellipsoid", "meshes")
 HEAD_OVERRIDE_FRAMES = ("parent", "world")
 
@@ -171,6 +177,19 @@ class HeadSettings:
     orientation_override: HeadOrientationOverride | None = None
     #: ``cc0_mesh`` (default, owner ruling #12949) or ``parametric`` (procedural).
     model: str = "cc0_mesh"
+    #: ``short_crop`` (tapered sides, volume on top; CC0 head only) or the thin
+    #: ``dome`` shell. The parametric head always draws the dome (#15276).
+    hair_style: str = "short_crop"
+    #: Side of the parting for ``short_crop``: ``left``, ``right`` or ``none``.
+    hair_part: str = "left"
+    #: Iris colour: ``blue_grey`` (default), ``hazel`` or ``brown``.
+    eye_color: str = "blue_grey"
+    #: ``none`` (default) or ``baseball_cap`` (CC0 head only; hair shows below).
+    cap_style: str = "none"
+    #: Library material of the cap (a colour); the brim shares it.
+    cap_material: str = "cap_navy"
+    #: Brim length in head lengths, within :data:`CAP_BRIM_RANGE`.
+    cap_brim: float = DEFAULT_CAP_BRIM
 
 
 @dataclass(frozen=True)
@@ -271,6 +290,22 @@ def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
         )
     if raw.get("forward_axis", "+x")[1] == raw.get("up_axis", "+z")[1]:
         raise ValueError("head forward_axis and up_axis must be different axes")
+    choices = {
+        "hair_style": HAIR_STYLES,
+        "hair_part": HAIR_PARTS,
+        "eye_color": EYE_COLORS,
+        "cap_style": CAP_STYLES,
+    }
+    picked = {k: raw.get(k, getattr(defaults, k)) for k in choices}
+    for key, value in picked.items():
+        if value not in choices[key]:
+            raise ValueError(f"head {key} must be one of {choices[key]}, got {value!r}")
+    brim = float(raw.get("cap_brim", defaults.cap_brim))
+    if not CAP_BRIM_RANGE[0] <= brim <= CAP_BRIM_RANGE[1]:
+        raise ValueError(f"head cap_brim must be within {CAP_BRIM_RANGE}, got {brim!r}")
+    model = _head_model(raw, defaults)
+    if picked["cap_style"] != "none" and model != "cc0_mesh":
+        raise ValueError("head cap_style needs the cc0_mesh head model")
     return HeadSettings(
         bool(raw.get("enabled", defaults.enabled)),
         raw.get("headwear", defaults.headwear),
@@ -279,7 +314,13 @@ def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
         raw.get("forward_axis", defaults.forward_axis),
         raw.get("up_axis", defaults.up_axis),
         override,
-        _head_model(raw, defaults),
+        model,
+        picked["hair_style"],
+        picked["hair_part"],
+        picked["eye_color"],
+        picked["cap_style"],
+        str(raw.get("cap_material", defaults.cap_material)),
+        brim,
     )
 
 
@@ -293,6 +334,16 @@ def _head_to_dict(head: HeadSettings) -> dict[str, Any]:
     }
     if head.model != HeadSettings().model:
         out["model"] = head.model
+    for key in (
+        "hair_style",
+        "hair_part",
+        "eye_color",
+        "cap_style",
+        "cap_material",
+        "cap_brim",
+    ):
+        if getattr(head, key) != getattr(HeadSettings(), key):
+            out[key] = getattr(head, key)
     if head.headwear_material is not None:
         out["headwear_material"] = head.headwear_material
     ovr = head.orientation_override

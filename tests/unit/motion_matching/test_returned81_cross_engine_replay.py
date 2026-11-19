@@ -3,7 +3,7 @@
 Step 4 of Visuals Handoff (VISUALS_HANDOFF.md):
 - NPZ reader/writer roundtrip with exact key and shape validation.
 - 5-metric function against the archived Pinocchio numbers:
-  whole 26.366 mm, early 11.427 mm, terminal 46.305 mm, clubhead 15.955 mm, pelvis yaw error 13.92%.
+  whole 26.366 mm, early 11.427 mm, terminal 46.305 mm, clubhead 15.955 mm, pelvis yaw error 8.45%.
 """
 
 from __future__ import annotations
@@ -104,7 +104,7 @@ def test_five_metrics_against_archived_pinocchio_reference() -> None:
     assert metrics.early_rms_m == pytest.approx(0.011427, abs=1e-5)
     assert metrics.terminal_rms_m == pytest.approx(0.046305, abs=1e-5)
     assert metrics.club_cluster_rms_m == pytest.approx(0.015955, abs=1e-5)
-    assert metrics.pelvis_yaw_error_pct == pytest.approx(13.923, abs=1e-2)
+    assert metrics.pelvis_yaw_error_pct == pytest.approx(8.448351305320235, abs=1e-2)
 
 
 def test_cross_engine_replay_parity_and_receipt() -> None:

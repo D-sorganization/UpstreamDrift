@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "intree_testpaths": {
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/option4_python_bridge/tests": {
+      "max_unmarked_tests": 10,
+      "reason": "MATLAB Engine (Python 3.9-3.12) bridge; --ignore'd in ci-standard.yml (#15106)."
+    },
+    "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/tests/unit": {
+      "max_unmarked_tests": 11,
+      "reason": "Unmarked legacy tests importing QtWebEngine hover_copy_browser widget (#15106)."
+    },
+    "src/engines/physics_engines/tests": {
+      "max_unmarked_tests": 6,
+      "reason": "Unmarked engine checkpointable tests importing mujoco_humanoid_golf QtWebEngine GUI (#15106)."
+    },
+    "src/shared/python/ai/tests": {
+      "max_unmarked_tests": 73,
+      "reason": "Unmarked legacy suite failing collection on SUITE_ROOT ImportError (#15106)."
+    },
+    "src/shared/python/calc_backend/tests": {
+      "max_unmarked_tests": 170,
+      "reason": "Unmarked legacy suite with pre-existing assertion failures on main (#15106)."
+    },
+    "src/shared/python/chat/tests": {
+      "max_unmarked_tests": 139,
+      "reason": "Unmarked legacy suite with Tools drift mismatch and QtWebSockets dependency (#15106)."
+    },
+    "src/shared/python/humanoid_character_builder/tests": {
+      "max_unmarked_tests": 156,
+      "reason": "Unmarked legacy suite requiring optional rtree and failing URDF contract checks (#15106)."
+    },
+    "src/shared/python/model_generation/tests": {
+      "max_unmarked_tests": 221,
+      "reason": "Unmarked legacy suite failing Tools editor drift and URDF precision checks (#15106)."
+    },
+    "src/shared/python/sidekick/process_calculators/scrubber/tests": {
+      "max_unmarked_tests": 3,
+      "reason": "Held Sidekick subtree under packaging hold; unmarked legacy tests (#15106)."
+    },
+    "src/shared/python/sidekick/tests": {
+      "max_unmarked_tests": 1080,
+      "reason": "Held Sidekick subtree under packaging hold; unmarked legacy tests (#15106)."
+    }
+  },
+  "tests_subdirs": {
+    "tests/examples": "Example runner suite --ignore'd in ci-standard.yml (#15106).",
+    "tests/launch_modes": "Launch QA integration matrix fails on ToolRegistry dual-import (#8966, #15106).",
+    "tests/observability": "Fails on ToolRegistry dual-import and uncached MediaPipe download (#15106).",
+    "tests/wave10_gap_audit": "Fails safe_eval AST whitelist assertions vs vendor/ud-tools (#15106)."
+  },
+  "suite_markers": {
+    "e2e": "Reserved nightly/release marker; 0 marked tests in repo (#15106).",
+    "gate": "Gate tests run via explicit paths or unit markers, not '-m gate' (#15106).",
+    "live_simulation": "Manual live simulation marker excluded from headless CI (#15106).",
+    "motion_pipeline": "Runs via tests/unit/motion_pipeline paths and unit markers (#15106).",
+    "perf": "Local microbenchmark marker excluded from default CI addopts (#15106).",
+    "scientific": "Curated files run by path; bulk '-m scientific' needs optional deps (#15106).",
+    "smoke": "Runs via explicit paths in ci-standard.yml and release.yml (#15106)."
+  }
+}

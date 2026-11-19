@@ -81,6 +81,12 @@ from src.shared.python.model_appearance.pelvis_width import (
     resolve_pelvis_width,
 )
 from src.shared.python.model_appearance.schema import AppearanceDocument, Material
+from src.shared.python.model_appearance.torso_profile import (
+    TorsoFrame,
+    TorsoProfile,
+    TorsoStation,
+    torso_mesh,
+)
 from src.shared.python.motion_matching.visual_skeleton import (
     Capsule,
     Shape,
@@ -107,6 +113,7 @@ _MAX_RADIUS_OVER_LENGTH = 0.6
 _BLEND_RINGS, _BLEND_SIDES = 14, 24
 # The pelvis skin cap is recessed under the garment cap (no coplanar z-fighting).
 _SKIN_CAP_INSET_M = 0.003
+_MIN_YOKE_SINE = 0.5  # a shoulder link nearer to upright than this stays round
 
 
 @dataclass(frozen=True)
@@ -256,6 +263,10 @@ class _Context:
     feet: Mapping[str, Sequence[foot.FootPart]] = field(default_factory=dict)
     #: Club parts per body (``club_chain_meshes``; chain shaft R6, #12686).
     club_parts: Mapping[str, Sequence[ClubPart]] = field(default_factory=dict)
+    #: Trunk bodies that carry a shoulder link: drawn with the thorax profile.
+    thorax: frozenset[str] = frozenset()
+    #: Parent body of each torso body that hangs from another torso body.
+    parents: Mapping[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -265,11 +276,39 @@ class _Segment:
     radius: float
     aspect: float
     end_scale: float = 1.0
+    #: Full-radius axis of a flattened limb whose body has no landmark section.
+    width_hint: np.ndarray | None = None
+    #: Trunk cross-sections and the joint plane they are measured from (#15279).
+    profile: TorsoProfile | None = None
+    profile_start: np.ndarray | None = None
+
+
+def _shoulder_segment(cap: Capsule, scale: float) -> _Segment:
+    """The shoulder link as a yoke: flat, and starting beside the neck (#15279)."""
+    start, end = np.asarray(cap.start_m), np.asarray(cap.end_m)
+    along = end - start
+    up = np.asarray(library.SHOULDER_UP_AXIS, dtype=float)
+    radius = scale * library.PART_RADIUS_M["shoulder"]
+    front = np.cross(up, along)
+    if np.linalg.norm(front) < _MIN_YOKE_SINE * np.linalg.norm(along):
+        # An upright link has no front-back axis from "up": keep it round.
+        return _Segment(start, end, radius, 1.0)
+    radius *= library.SHOULDER_RADIUS_SCALE
+    return _Segment(
+        start + library.SHOULDER_START_FRACTION * along,
+        end,
+        radius,
+        library.SHOULDER_ASPECT,
+        width_hint=front,
+    )
 
 
 def _limb_segments(part: str, caps: Sequence[Capsule], scale: float) -> list[_Segment]:
     out = []
     for cap in caps:
+        if part == "shoulder":
+            out.append(_shoulder_segment(cap, scale))
+            continue
         radius = scale * (
             cap.radius_m
             if part in ("club", "other")
@@ -283,7 +322,7 @@ def _limb_segments(part: str, caps: Sequence[Capsule], scale: float) -> list[_Se
                 np.asarray(cap.end_m),
                 radius,
                 aspect,
-                library.distal_scale(part),
+                library.limb_distal_scale(part),
             )
         )
     return out
@@ -306,7 +345,25 @@ def _trunk_segment(
     start, end = np.asarray(spine.start_m), np.asarray(spine.end_m)
     axis = (end - start) / spine.length_m()
     over = min(0.5 * radius, 0.5 * spine.length_m())  # keep a positive length
-    return _Segment(start + over * axis, end, radius, size.aspect)
+    profile = None
+    if size.source == "visual_hints" and part == "torso":
+        role = "thorax" if body in ctx.thorax else "abdomen"
+        profile = TorsoProfile(
+            tuple(TorsoStation(*row) for row in library.TORSO_PROFILES[role]),
+            library.TORSO_SQUARENESS,
+        )
+        if not ctx.shapes.get(ctx.parents.get(body, "")):
+            # Nothing drawn as a trunk solid under it (the pelvis ends at this
+            # joint plane): start there instead of tucking in.
+            profile = profile.clipped(0.0)
+    return _Segment(
+        start + over * axis,
+        end,
+        radius,
+        size.aspect,
+        profile=profile,
+        profile_start=start,
+    )
 
 
 @dataclass(frozen=True)
@@ -418,6 +475,21 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
             rings=library.LOFT_RINGS // 2,
             sides=library.LOFT_SIDES,
         )
+    hint = seg.width_hint
+    if hint is None:
+        hint = width_hint_for(ctx.sections, body, seg.start, seg.end)
+    whole = extra.get("coverage", (0.0, 1.0)) == (0.0, 1.0)
+    if seg.profile is not None and seg.profile_start is not None and whole:
+        if hint is None:
+            raise ValueError(f"torso body {body!r} has no width axis to loft on")
+        frame = TorsoFrame(
+            seg.profile_start,
+            seg.end,
+            np.asarray(hint, dtype=float),
+            seg.radius,
+            seg.radius * seg.aspect,
+        )
+        return torso_mesh(frame, seg.profile, thickness=extra.get("thickness", 1.0))
     return geometry.lofted_segment(
         seg.start,
         seg.end,
@@ -427,7 +499,7 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
             end_scale=seg.end_scale,
             rings=library.LOFT_RINGS,
             sides=library.LOFT_SIDES,
-            width_hint=width_hint_for(ctx.sections, body, seg.start, seg.end),
+            width_hint=hint,
             **extra,
         ),
     )
@@ -442,9 +514,15 @@ def _segment_meshes(
     for i, seg in enumerate(segments):
         out.append(BodyMesh(body, f"skin{i}", _loft(ctx, body, seg), base))
         if part in library.BLEND_PARTS:  # ball joint hides the segment seam
+            size = seg.radius * library.blend_scale(garment is not None, part)
+            across, down = (
+                library.DELTOID_HALF_SIZES if part == "upper_arm" else (1.0, 1.0)
+            )
+            along = (seg.end - seg.start) / np.linalg.norm(seg.end - seg.start)
+            drop = library.DELTOID_DROP * seg.radius if part == "upper_arm" else 0.0
             ball = geometry.ellipsoid_mesh(
-                seg.start,
-                np.full(3, seg.radius * library.blend_scale(garment is not None, part)),
+                seg.start + drop * along,
+                size * np.array([down, across, across]),
                 seg.end - seg.start,
                 rings=_BLEND_RINGS,
                 sides=_BLEND_SIDES,
@@ -472,6 +550,7 @@ def _foot_meshes(ctx: _Context, body: str) -> list[BodyMesh]:
     plan = (
         ("skin", "skin", base),
         ("garment", "garment", garment),
+        ("sole", "sole", library.SOLE_MATERIAL if garment else None),
         ("ankle", "ankle", shin or base),
     )
     out: list[BodyMesh] = []
@@ -521,6 +600,25 @@ def _club_parts(
     return club_meshes_by_body(spec, club, finish, doc)
 
 
+def _parents_of(spec: Mapping[str, Any], part: str) -> frozenset[str]:
+    """Bodies that carry a body of ``part`` (the thorax carries the shoulders)."""
+    return frozenset(
+        str(joint["parent"])
+        for joint in spec.get("joints", ())
+        if library.classify_body(str(joint.get("child", ""))) == part
+    )
+
+
+def _torso_parents(spec: Mapping[str, Any]) -> dict[str, str]:
+    """Parent of every torso body whose parent is a torso body too."""
+    return {
+        str(joint["child"]): str(joint["parent"])
+        for joint in spec.get("joints", ())
+        if library.classify_body(str(joint.get("child", ""))) == "torso"
+        and library.classify_body(str(joint.get("parent", ""))) == "torso"
+    }
+
+
 def body_meshes(
     spec: Mapping[str, Any],
     doc: AppearanceDocument,
@@ -551,6 +649,8 @@ def body_meshes(
         doc.head.enabled,
         foot.foot_parts(spec, sections, model=doc.foot.model),
         _club_parts(spec, doc, club),
+        _parents_of(spec, "shoulder"),
+        _torso_parents(spec),
     )
     by_body: dict[str, list[Capsule]] = {}
     for cap in skeleton.capsules:

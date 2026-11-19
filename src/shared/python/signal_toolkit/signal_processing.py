@@ -361,7 +361,8 @@ def compute_spectral_arc_length(
         data: Velocity profile
         fs: Sampling frequency
         pad_level: Zero padding level (power of 2)
-        fc: Cut-off frequency for normalization
+        fc: Maximum cut-off frequency (Hz); the effective cut-off is the
+            highest frequency <= fc whose magnitude reaches ``amp_th``
         amp_th: Amplitude threshold (fraction of peak)
 
     Returns:
@@ -406,26 +407,23 @@ def compute_spectral_arc_length(
     # We only need the positive part of spectrum up to fc
     spectrum_sel = spectrum_norm[:limit_idx]
 
-    # Select magnitudes above threshold
-    # Note: The original paper defines the support region based on amplitude threshold
-    # We apply it to filter out noise
-    if not np.any(spectrum_sel >= amp_th):
+    # Adaptive support (Balasubramanian et al. 2015, Eq. 6): keep the band
+    # between the first and last bin whose normalised magnitude reaches
+    # ``amp_th``. The frequency axis is then normalised by the width of that
+    # band, so the metric does not depend on ``fc`` once ``fc`` exceeds the
+    # signal bandwidth and noise-floor bins add no spurious arc length.
+    above = np.flatnonzero(spectrum_sel >= amp_th)
+    if above.size == 0:
+        return 0.0
+    support = spectrum_sel[above[0] : above[-1] + 1]
+    if support.size < 2:
         return 0.0
 
-    # Calculate gradient
-    # Optimization: Manual slicing is faster than np.diff
-    d_mag = spectrum_sel[1:] - spectrum_sel[:-1]
+    d_mag = support[1:] - support[:-1]
+    d_freq = 1.0 / (support.size - 1)
 
-    # Optimization: d_freq is constant (df / fc), so we use a scalar instead of an array.
-    # This avoids creating two arrays (freq_norm and d_freq) and performing N subtractions.
-    # freq_norm = freqs_sel / fc
-    # d_freq = freq_norm[1:] - freq_norm[:-1] = df / fc
-    d_freq = df / fc
-
-    # Arc length
-    sal = -np.hypot(
-        d_freq, d_mag
-    ).sum()  # ⚡ Bolt: np.hypot(..., ...).sum() is ~2.3x faster than np.sum(np.sqrt(a**2 + b**2)) for 1D arrays
+    # Arc length of the normalised magnitude spectrum
+    sal = -np.hypot(d_freq, d_mag).sum()
 
     result = float(sal)
     ensure(result <= 0, "SAL must be non-positive (arc length is negated)", result)

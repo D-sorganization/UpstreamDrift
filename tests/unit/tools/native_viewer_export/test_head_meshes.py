@@ -53,7 +53,7 @@ def test_cc0_mesh_head_obj_export_carries_skin_and_hair(tmp_path: Path) -> None:
         {"schema_version": "appearance-v1", "head": {"model": "cc0_mesh"}}
     )
     files = head_mesh_files(spec, tmp_path, doc)
-    assert {f.name for f in files} == {"skin_mesh", "hair_mesh"}
+    assert {f.name for f in files} >= {"skin_mesh", "hair_mesh"}
     assert all(f.body.endswith("/Head") and f.path.is_file() for f in files)
     colours = {f.name: f.rgba for f in files}
     assert colours["skin_mesh"] != colours["hair_mesh"]
@@ -67,7 +67,7 @@ def test_mujoco_default_appearance_resolves_cc0_head() -> None:
 
     doc = document_from_dict(APPEARANCE)
     names = {p.name for p in build_head_parts(0.2429, doc.head)}
-    assert names == {"skin_mesh", "hair_mesh"}
+    assert names >= {"skin_mesh", "hair_mesh"}
 
 
 @pytest.mark.unit
@@ -84,4 +84,4 @@ def test_meshcat_engines_default_appearance_resolves_cc0_head(engine: str) -> No
     assert module.default_appearance is not None
     doc = module.default_appearance()
     names = {p.name for p in build_head_parts(0.2429, doc.head)}
-    assert names == {"skin_mesh", "hair_mesh"}
+    assert names >= {"skin_mesh", "hair_mesh"}
