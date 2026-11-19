@@ -759,6 +759,23 @@ def _apply_kwarg_tibial_torsion(document: Any, kwargs: dict[str, Any]) -> Any:
     return apply_tibial_torsion(document, {"r": torsion, "l": torsion})
 
 
+def _provenance_notes(
+    club: str, club_markers_path: Path | None, leg_mass_kg: float | None
+) -> str:
+    """Provenance suffix naming the club marker file and any leg mass scaling."""
+    note = (
+        f"; {club} club markers from {club_markers_path.name} (#12210)"
+        if club_markers_path
+        else ""
+    )
+    if leg_mass_kg is not None:
+        note += (
+            f"; Rajagopal legs scaled to {leg_mass_kg:.3f} kg so the body "
+            "without the club matches the subject mass (#12199)"
+        )
+    return note
+
+
 def compose_anthropometric_document(
     stature_m: float = 1.80,
     mass_kg: float = 80.0,
@@ -831,17 +848,7 @@ def compose_anthropometric_document(
         club, kwargs.get("club_markers_path")
     )
     hub_h, markers = _extract_marker_seeds(upper, native_candidate_path, club_offsets)
-    club_note = (
-        f"; {club} club markers from {club_markers_path.name} (#12210)"
-        if club_markers_path
-        else ""
-    )
-    if leg_mass_kg is not None:
-        club_note += (
-            f"; Rajagopal legs scaled to {leg_mass_kg:.3f} kg so the body "
-            "without the club matches the subject mass (#12199)"
-        )
-
+    club_note = _provenance_notes(club, club_markers_path, leg_mass_kg)
     document = derive_full_body_spec(
         upper,
         extension,
