@@ -1,0 +1,77 @@
+{
+  "grip_radius_m": 0.010917,
+  "owner_lead_below_cap_edge_m": 0.085,
+  "owner_lead_heel_pad_depth_m": 0.065,
+  "_max_lead_heel_pad_gap_m": "A ratchet on the measured gap, not a target. 9 mm at 4e8598b464, 7 mm at f4f607338c (measured 6.3). 8 mm since 2026-11-17: turning the lead hand so its wrist is centred over the shaft (owner request) measures 7.7 mm; hand turns of 12 to 22 degrees give 7.0 to 7.7 mm.",
+  "max_lead_heel_pad_gap_m": 0.008,
+  "max_lead_heel_pad_azimuth_deg": 30.0,
+  "lead_heel_over_grip_reach_m": 0.02,
+  "min_butt_beyond_lead_heel_m": 0.002,
+  "contact_tolerance_m": 0.0015,
+  "penetration_tolerance_m": 0.0005,
+  "min_triangle_area_m2": 1e-10,
+  "shaft_roll_error_m": 1e-09,
+  "mirror_error_m": 1e-09,
+  "pinky_palm_depth_range_m": [
+    0.002,
+    0.07
+  ],
+  "pinky_palm_depth_range_note": "Upper bound raised from 0.045 with the owner's approval (2026-11-16, 'Yes, go deeper'): Hogan lays the club under the lead heel pad, about 65 mm below the little-finger knuckle.",
+  "anthropometric_tolerance": 0.15,
+  "anthropometric_reference": {
+    "breadth_over_length": 0.449,
+    "index_over_middle": 0.883,
+    "ring_over_middle": 0.956,
+    "little_over_middle": 0.757,
+    "thumb_over_middle": 1.127
+  },
+  "max_crease_fold_faces": 0,
+  "max_crease_fold_area_fraction": 0.0,
+  "anthropometric_reference_note": "breadth_over_length: ANSUR II pooled, as used by hand_size.py. Finger ratios are bone-chain lengths (knuckle to tip; thumb from its carpometacarpal joint) recalled from Buryanov and Kotiuch 2010 and NOT re-verified against the paper; treat as indicative until checked.",
+  "min_finger_total_curl_deg": 100.0,
+  "pair_penetration_tolerance_m": 0.001,
+  "_owner_wrist_over_shaft": "Owner, 2026-11-17: at address the lead wrist joint is almost centred over the shaft and the trail wrist slightly to the trail side; both wrists slightly extended. Offsets are sideways distances from the plane through the shaft and the top of the grip.",
+  "max_lead_wrist_offset_m": 0.008,
+  "trail_wrist_offset_range_m": [
+    0.015,
+    0.05
+  ],
+  "min_wrist_extension_deg": 12.0,
+  "_forearm_spread_range_deg": "Lower bound 15 to 5 on 2026-11-17: the owner said the forearm direction was limiting the grip and asked for both wrists over the shaft, which brings the forearms nearly parallel seen from the butt.",
+  "forearm_spread_range_deg": [
+    5.0,
+    50.0
+  ],
+  "thumb_pad_tolerance_m": 0.006,
+  "max_corrective_shift_m": 0.008,
+  "max_corrective_vertex_fraction": 0.34,
+  "min_palm_contact_vertices": 8,
+  "max_mean_edge_length_m": 0.004,
+  "max_subdivision_joint_change_deg": 5.0,
+  "max_pinched_knuckle_edges": 6,
+  "contact_band_m": 0.0005,
+  "min_grip_contact_area_m2": 0.0018,
+  "min_bone_grip_clearance_m": 0.0015,
+  "max_thumb_first_segment_median_gap_m": 0.005,
+  "min_palm_cup_thenar_approach_m": 0.01,
+  "min_palm_cup_first_segment_approach_m": 0.002,
+  "max_finger_side_gap_m": 0.002,
+  "max_index_side_gap_m": 0.005,
+  "max_pair_little_finger_gap_m": 0.001,
+  "max_pair_ring_finger_gap_m": 0.001,
+  "max_pair_little_groove_gap_m": 0.0015,
+  "max_trail_thumb_index_tip_gap_m": 0.0025,
+  "max_thumb_knuckle_distance_m": {
+    "lead": 0.026,
+    "trail": 0.023
+  },
+  "max_thumb_hand_gap_m": 0.003,
+  "_owner_thumb_azimuth_deg": "Per hand since 2026-11-17: with the trail wrist brought near the top of the shaft the trail thumb lies nearer the top too.",
+  "owner_thumb_azimuth_deg": {
+    "lead": 45.0,
+    "trail": 20.0
+  },
+  "max_thumb_azimuth_error_deg": 5.0,
+  "min_index_knuckle_flexion_deg": 15.0,
+  "max_index_segment_gap_m": 0.004
+}
