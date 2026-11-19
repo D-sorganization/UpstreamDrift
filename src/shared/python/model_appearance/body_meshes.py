@@ -360,10 +360,10 @@ def _limb_segments(
                 radius,
                 aspect,
                 library.limb_distal_scale(part),
-                window,
-                library.belly(part),
-                part in library.CAPSULE_END_PARTS,
-                library.taper_end(part),
+                window=window,
+                belly=library.belly(part),
+                capsule_ends=part in library.CAPSULE_END_PARTS,
+                taper_end=library.taper_end(part),
             )
         )
     return out
@@ -433,7 +433,7 @@ def _pelvis_plan(
     up, ml = section.trunk_up_axis(), section.ml_axis
     hjc = np.stack([marks.hjc_r, marks.hjc_l])
     z_hjc = hjc @ up
-    z_low = float(z_hjc.min())
+    z_low = float(np.min(z_hjc))
     top = float(marks.lumbar @ up - z_low)
     if top <= 0:
         raise ValueError(f"{marks.body}: the lumbar joint is not above the hip joints")
