@@ -8,7 +8,9 @@ eighteen arm coordinates again, by bounded least squares on the MuJoCo model:
 * the club frame returns to where the original pose had it;
 * the trail hand's weld closes;
 * with the freedom left over, each forearm turns toward the direction the
-  skinned hand's wrist is posed in (:func:`skinned_club_hands.forearm_reach_m`).
+  skinned hand's wrist is posed in (:func:`skinned_club_hands.forearm_reach_m`),
+  while each elbow's hinge axis is held near where the incoming pose had it, so
+  an upper arm cannot roll over to line a forearm up (#15297).
 
 Kinematics only. Nothing here says the refitted pose is a good address, and the
 angle left between a forearm and its hand is reported, not hidden.
@@ -20,7 +22,7 @@ import json
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, NamedTuple
 
 import mujoco
 import numpy as np
@@ -33,14 +35,20 @@ from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
 )
 from src.shared.python.model_appearance.club_assembly import assembly_from_spec
 from src.shared.python.model_appearance.skinned_club_hands import forearm_reach_m
+from src.shared.python.motion_matching.wrist_scapula_rom import WRIST_SCAPULA_ROM
 
 Array = NDArray[np.float64]
 
 #: A coordinate is an arm coordinate when it starts with ``L`` or ``R`` and
 #: carries one of these: elbow, forearm, scapula, shoulder, wrist.
 ARM_COORDINATE_KEYS = ("EInput", "FInput", "ScapInput", "SInput", "WInput")
-#: (wrist joint, elbow joint) whose anchors give each model forearm's line.
-_FOREARM_JOINTS = {"lead": ("LWInputX", "LEInput"), "trail": ("RWInputX", "REInput")}
+#: (wrist joint, elbow joint, upper-arm twist joint) of each arm. The anchors
+#: of the first two give the forearm's line; the last turns about the upper arm.
+_ARM_JOINTS = {
+    "lead": ("LWInputX", "LEInput", "LSInputZ"),
+    "trail": ("RWInputX", "REInput", "RSInputZ"),
+}
+_WRIST_KEY = "WInput"
 _SITE_ON_HAND, _SITE_ON_CLUB = "native_closure_a", "native_closure_b"
 #: Residual scales: a millimetre of position counts like 5 mrad of turn.
 _POSITION_SCALE_M, _TURN_SCALE_RAD = 1e-3, 5e-3
@@ -66,6 +74,40 @@ POSTURE_WEIGHT = 20.0
 
 
 @dataclass(frozen=True)
+class ArmRefitSettings:
+    """Weights and bounds of the refit that are not a call's own choice (#15297).
+
+    ``alignment_weight`` is the default pull of a forearm toward its hand's
+    (per radian, a millimetre of club error counting 1). ``twist_stay_weight``
+    pulls each elbow hinge axis toward its direction in the incoming pose (per
+    radian): at 2.0 the forearm pull moved an upper arm's twist by under 3
+    degrees where, unheld, it rolled one over by 70. ``evidence_wrist_bounds``
+    widens a wrist coordinate's range to the evidence range of #14795 where
+    the spec carries a narrower (legacy) one.
+    """
+
+    alignment_weight: float = 1.0
+    twist_stay_weight: float = 2.0
+    evidence_wrist_bounds: bool = True
+
+    def __post_init__(self) -> None:
+        for name in ("alignment_weight", "twist_stay_weight"):
+            value = float(getattr(self, name))
+            if not (math.isfinite(value) and value >= 0.0):
+                raise ValueError(f"{name} must be finite and non-negative")
+
+
+class _Choices(NamedTuple):
+    """The keyword choices of one :func:`refit_arms_to_club` call."""
+
+    alignment_weight: float | None = None
+    hold_club: bool = True
+    also_free: Sequence[str] = ()
+    posture: Mapping[str, float] | None = None
+    posture_weight: float = POSTURE_WEIGHT
+
+
+@dataclass(frozen=True)
 class ArmRefit:
     """A refitted pose and how well it holds.
 
@@ -73,7 +115,9 @@ class ArmRefit:
     closure are of the refitted pose; the ``*_before_*`` fields are the same
     quantities with the original coordinates on the new model.
     ``forearm_to_cuff_deg`` is the angle between each model forearm and the
-    forearm direction of the skinned hand it carries.
+    forearm direction of the skinned hand it carries. ``upper_arm_twist_deg``
+    is each upper arm's turn about its own long axis from the incoming pose,
+    positive in the sense of its twist coordinate (``*SInputZ``).
     """
 
     q: Array
@@ -84,6 +128,7 @@ class ArmRefit:
     club_offset_before_m: float
     closure_before_m: float
     forearm_to_cuff_deg: dict[str, float]
+    upper_arm_twist_deg: dict[str, float]
 
 
 class _Model:
@@ -124,14 +169,35 @@ class _Model:
     def forearm_lines(self) -> dict[str, Array]:
         """Unit direction from wrist joint to elbow joint, per hand, world."""
         lines = {}
-        for side, (wrist, elbow) in _FOREARM_JOINTS.items():
+        for side, (wrist, elbow, _) in _ARM_JOINTS.items():
             line = self.data.joint(elbow).xanchor - self.data.joint(wrist).xanchor
             lines[side] = line / np.linalg.norm(line)
         return lines
 
+    def upper_arms(self) -> dict[str, tuple[Array, Array]]:
+        """Per hand: unit twist axis of the upper arm and elbow hinge axis, world."""
+        return {
+            side: (
+                np.array(self.data.joint(twist).xaxis),
+                np.array(self.data.joint(elbow).xaxis),
+            )
+            for side, (_, elbow, twist) in _ARM_JOINTS.items()
+        }
+
 
 def _angle_deg(a: Array, b: Array) -> float:
     return float(np.degrees(np.arccos(np.clip(float(a @ b), -1.0, 1.0))))
+
+
+def _twist_deg(before: tuple[Array, Array], after: tuple[Array, Array]) -> float:
+    """Turn of an upper arm about its long axis between two poses, swing removed."""
+    frames = [
+        np.column_stack([long, hinge, np.cross(long, hinge)])
+        for long, hinge in (before, after)
+    ]
+    quat = Rotation.from_matrix(frames[1] @ frames[0].T).as_quat()  # x, y, z, w
+    angle = math.degrees(2.0 * math.atan2(float(quat[:3] @ before[0]), float(quat[3])))
+    return (angle + 180.0) % 360.0 - 180.0
 
 
 def _arm_indices(order: list[str]) -> list[int]:
@@ -146,21 +212,19 @@ def _checked(
     spec_from: Mapping[str, Any],
     spec_to: Mapping[str, Any],
     q: Array,
-    alignment_weight: float,
-    also_free: Sequence[str],
-    posture: Mapping[str, float],
-    posture_weight: float,
-) -> tuple[Array, Any]:
-    """The start pose and the club, after the preconditions of the refit."""
+    choices: _Choices,
+) -> tuple[Array, Any, dict[str, float]]:
+    """The start pose, the club and the posture, after the refit's preconditions."""
     order = list(spec_to["coordinate_order"])
     start = np.asarray(q, dtype=float)
+    posture = dict(choices.posture or {})
     if order != list(spec_from["coordinate_order"]):
         raise ValueError("the two specs do not share a coordinate order")
     if start.shape != (len(order),) or not np.isfinite(start).all():
         raise ValueError(f"q must hold {len(order)} finite coordinate values")
-    if not alignment_weight >= 0.0:
+    if choices.alignment_weight is not None and not choices.alignment_weight >= 0.0:
         raise ValueError("alignment_weight must be non-negative")
-    unknown = [name for name in also_free if name not in order]
+    unknown = [name for name in choices.also_free if name not in order]
     if unknown:
         raise ValueError(f"also_free names unknown coordinates: {unknown}")
     unknown = [name for name in posture if name not in order]
@@ -168,16 +232,16 @@ def _checked(
         raise ValueError(
             f"posture needs finite targets of known coordinates: {unknown}"
         )
-    if not posture_weight >= 0.0:
+    if not choices.posture_weight >= 0.0:
         raise ValueError("posture_weight must be non-negative")
     club = assembly_from_spec(spec_to)
     if club is None:
         raise ValueError("spec has no club to hold")
-    return start, club
+    return start, club, posture
 
 
 def _free_coordinates(
-    spec: Mapping[str, Any], also_free: Sequence[str]
+    spec: Mapping[str, Any], also_free: Sequence[str], evidence_wrists: bool
 ) -> tuple[list[int], Array, Array, Array]:
     """Indices solved for, their bounds (rad) and their pull toward the start."""
     order = list(spec["coordinate_order"])
@@ -187,6 +251,10 @@ def _free_coordinates(
         **spec.get("soft_limits_deg", {}),
         **spec.get("coordinate_ranges_deg", {}),
     }
+    for name, rom in WRIST_SCAPULA_ROM.items() if evidence_wrists else ():
+        if _WRIST_KEY in name and name in ranges:
+            low, high = ranges[name]
+            ranges[name] = (min(low, rom.lower_deg), max(high, rom.upper_deg))
     low, high = np.radians(
         [ranges.get(order[i], (-180.0, 180.0)) for i in free], dtype=float
     ).T
@@ -204,11 +272,15 @@ def _report(
     after: tuple[Array, Array, Array, Array],
     before: tuple[Array, Array],
     target: _Model,
-    cuffs: Mapping[str, Array],
+    aims: tuple[Mapping[str, Array], Mapping[str, tuple[Array, Array]]],
 ) -> ArmRefit:
-    """The refit's result; ``target`` is still posed at the solution."""
+    """The refit's result; ``target`` is still posed at the solution.
+
+    ``aims`` holds the cuff directions and the incoming pose's upper arms.
+    """
     offset, turn, gap, twist = after
-    lines = target.forearm_lines()
+    cuffs, incoming = aims
+    lines, upper = target.forearm_lines(), target.upper_arms()
     return ArmRefit(
         q=q,
         club_offset_m=float(np.linalg.norm(offset)),
@@ -219,6 +291,9 @@ def _report(
         closure_before_m=float(np.linalg.norm(before[1])),
         forearm_to_cuff_deg={
             side: _angle_deg(lines[side], cuffs[side]) for side in cuffs
+        },
+        upper_arm_twist_deg={
+            side: _twist_deg(incoming[side], upper[side]) for side in incoming
         },
     )
 
@@ -233,7 +308,7 @@ def refit_arms_to_club(
     spec_to: Mapping[str, Any],
     q: Array,
     *,
-    alignment_weight: float = 1.0,
+    alignment_weight: float | None = None,
     hold_club: bool = True,
     also_free: Sequence[str] = (),
     posture: Mapping[str, float] | None = None,
@@ -244,7 +319,9 @@ def refit_arms_to_club(
     The club's target is its frame on ``spec_from`` at ``q``, carried by the
     lead arm. ``alignment_weight`` scales the pull of each forearm toward its
     skinned hand's forearm direction (per radian, against a millimetre of
-    club error counted as 1); ``0`` leaves the spare freedom near ``q``.
+    club error counted as 1; ``None`` takes the settings' default); ``0``
+    leaves the spare freedom near ``q``. Either way each elbow's hinge axis is
+    held near its direction at ``q`` (``ArmRefitSettings.twist_stay_weight``).
     ``hold_club=False`` drops the club target, so both arms may carry the club
     to wherever the trail hand closes nearest ``q``: the way to close a pose
     that was never closed, such as a spec's address seed.
@@ -261,26 +338,51 @@ def refit_arms_to_club(
     every ``also_free`` and ``posture`` name is a coordinate, posture targets
     are finite and ``posture_weight >= 0`` (``ValueError`` otherwise).
     Postconditions: only arm, ``also_free`` and ``posture`` coordinates differ
-    from ``q``; each lies inside its ``coordinate_ranges_deg`` or, without
+    from ``q``; each lies inside its ``coordinate_ranges_deg`` (a wrist's
+    widened to its evidence range, see :class:`ArmRefitSettings`) or, without
     one, its ``soft_limits_deg``.
     """
-    posture = dict(posture or {})
-    start, club = _checked(
-        spec_from, spec_to, q, alignment_weight, also_free, posture, posture_weight
-    )
+    choices = _Choices(alignment_weight, hold_club, also_free, posture, posture_weight)
+    return _refit(ArmRefitSettings(), spec_from, spec_to, q, choices)
+
+
+def refit_arms_with(
+    settings: ArmRefitSettings,
+    spec_from: Mapping[str, Any],
+    spec_to: Mapping[str, Any],
+    q: Array,
+    **choices: Any,
+) -> ArmRefit:
+    """:func:`refit_arms_to_club`, with its keyword choices, under ``settings``."""
+    return _refit(settings, spec_from, spec_to, q, _Choices(**choices))
+
+
+def _refit(
+    settings: ArmRefitSettings,
+    spec_from: Mapping[str, Any],
+    spec_to: Mapping[str, Any],
+    q: Array,
+    choices: _Choices,
+) -> ArmRefit:
+    start, club, posture = _checked(spec_from, spec_to, q, choices)
+    alignment = choices.alignment_weight
+    alignment = settings.alignment_weight if alignment is None else alignment
     source, target = _Model(spec_from), _Model(spec_to)
     source.pose(start)
     club_rotation, club_origin = source.club_frame()
+    incoming = source.upper_arms()
     cuffs = {
         side: club_rotation @ along
         for side, (_, along) in forearm_reach_m(club).items()
     }
-    arms, low, high, stay = _free_coordinates(spec_to, (*also_free, *posture))
+    arms, low, high, stay = _free_coordinates(
+        spec_to, (*choices.also_free, *posture), settings.evidence_wrist_bounds
+    )
     order = list(spec_to["coordinate_order"])
     rest = start[arms].copy()  # where each solved coordinate is pulled to
     for name, angle in posture.items():
         at = arms.index(order.index(name))
-        rest[at], stay[at] = angle, posture_weight
+        rest[at], stay[at] = angle, choices.posture_weight
 
     def errors(x: Array) -> tuple[Array, Array, Array, Array]:
         pose = start.copy()
@@ -291,7 +393,7 @@ def refit_arms_to_club(
         gap, twist = target.closure()
         return origin - club_origin, turn, gap, twist
 
-    held = 1.0 if hold_club else 0.0
+    held = 1.0 if choices.hold_club else 0.0
 
     def residuals(x: Array, stiffness: float) -> Array:
         offset, turn, gap, twist = errors(x)
@@ -299,13 +401,16 @@ def refit_arms_to_club(
         # The difference of unit vectors grows with the angle all the way to
         # 180 degrees; a cross product would fall again past 90.
         pull = [lines[side] - cuffs[side] for side in sorted(cuffs)]
+        hinges = target.upper_arms()
+        roll = [hinges[side][1] - incoming[side][1] for side in sorted(incoming)]
         return np.concatenate(
             [
                 held * stiffness * offset / _POSITION_SCALE_M,
                 held * stiffness * turn / _TURN_SCALE_RAD,
                 stiffness * gap / _POSITION_SCALE_M,
                 stiffness * twist / _TURN_SCALE_RAD,
-                np.concatenate(pull) * alignment_weight,
+                np.concatenate(pull) * alignment,
+                np.concatenate(roll) * settings.twist_stay_weight,
                 (x - rest) * stay,
             ]
         )
@@ -327,4 +432,5 @@ def refit_arms_to_club(
     refitted = start.copy()
     refitted[arms] = solved.x
     after = errors(solved.x)
-    return _report(refitted, after, (offset_before, gap_before), target, cuffs)
+    before = (offset_before, gap_before)
+    return _report(refitted, after, before, target, (cuffs, incoming))

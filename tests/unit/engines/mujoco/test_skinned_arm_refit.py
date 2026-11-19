@@ -8,6 +8,7 @@ the pose had it, the trail hand closes on the grip and nothing else moves.
 
 from __future__ import annotations
 
+import copy
 import json
 from pathlib import Path
 from typing import Any
@@ -20,7 +21,9 @@ pytest.importorskip("mujoco")
 from src.engines.physics_engines.mujoco.python.skinned_arm_refit import (  # noqa: E402
     ARM_COORDINATE_KEYS,
     ArmRefit,
+    ArmRefitSettings,
     refit_arms_to_club,
+    refit_arms_with,
 )
 from src.shared.python.motion_matching.execution.skinned_hand_wrists import (  # noqa: E402
     apply_skinned_hand_wrists,
@@ -31,6 +34,13 @@ ROOT = Path(__file__).resolve().parents[4]
 SPEC = ROOT / "docs/development/full_body_models/full_body_spec_anthro_driver_v2.json"
 #: Position (m) and angle (deg) the solver must close to.
 TIGHT_M, TIGHT_DEG = 1e-4, 0.05
+#: An upper arm may turn this far (deg) about its own axis in a refit, and the
+#: two arms' turns may differ by this much (#15297).
+TWIST_DEG, TWIST_APART_DEG = 10.0, 10.0
+#: A refitted wrist coordinate stays this far (deg) inside its range.
+WRIST_MARGIN_DEG = 1.0
+#: Wrist ranges (deg) of specs built before the evidence ranges of #14795.
+LEGACY_WRIST_DEG = {"X": (-40.0, 25.0), "Y": (-70.0, 70.0)}
 
 
 @pytest.fixture(scope="module")
@@ -186,3 +196,71 @@ def test_the_address_posture_is_a_neutral_lower_back_and_a_slight_thoracic_bend(
     assert abs(deg["lumbar_flexion"]) <= 5.0
     assert 5.0 <= deg["thoracic_flexion"] <= 15.0
     assert refit.address_posture() == {k: np.radians(v) for k, v in deg.items()}
+
+
+@pytest.fixture(scope="module")
+def moved(base: dict[str, Any]) -> dict[str, Any]:
+    return apply_skinned_hand_wrists(base)
+
+
+@pytest.fixture(scope="module")
+def held(base: dict[str, Any], moved: dict[str, Any]) -> ArmRefit:
+    """The address seed closed on the skinned wrists: a pose those hands hold."""
+    order = base["coordinate_order"]
+    seed = np.zeros(len(order))
+    for name, degrees in base["address_seed_deg"].items():
+        seed[order.index(name)] = np.radians(degrees)
+    return refit_arms_to_club(base, moved, seed, alignment_weight=0.0, hold_club=False)
+
+
+def _wrists_deg(spec: dict[str, Any], fit: ArmRefit) -> dict[str, float]:
+    order = spec["coordinate_order"]
+    return {n: float(np.degrees(fit.q[order.index(n)])) for n in order if "WInput" in n}
+
+
+def test_the_forearm_pull_cannot_roll_an_upper_arm_over(moved, held) -> None:
+    """#15297: unheld, the forearm pull rolls an upper arm over by 66 degrees."""
+    fit = refit_arms_to_club(moved, moved, held.q)
+    assert fit.closure_m <= TIGHT_M and fit.club_offset_m <= TIGHT_M
+    twist = fit.upper_arm_twist_deg
+    for side in ("lead", "trail"):
+        assert abs(twist[side]) <= TWIST_DEG, twist
+    assert abs(twist["lead"] - twist["trail"]) <= TWIST_APART_DEG, twist
+    ranges = moved["coordinate_ranges_deg"]
+    for name, value in _wrists_deg(moved, fit).items():
+        low, high = ranges[name]
+        assert low + WRIST_MARGIN_DEG <= value <= high - WRIST_MARGIN_DEG, name
+    unheld = ArmRefitSettings(twist_stay_weight=0.0)
+    rolled = refit_arms_with(unheld, moved, moved, held.q).upper_arm_twist_deg
+    assert max(abs(turn) for turn in rolled.values()) > 3.0 * TWIST_DEG, rolled
+
+
+def test_legacy_wrist_ranges_are_widened_to_the_evidence_ranges(moved, held) -> None:
+    narrow = copy.deepcopy(moved)
+    ranges = narrow["coordinate_ranges_deg"]
+    wide = {name: tuple(ranges[name]) for name in ranges if "WInput" in name}
+    for name in wide:
+        ranges[name] = list(LEGACY_WRIST_DEG[name[-1]])
+    fit = refit_arms_to_club(moved, narrow, held.q)
+    assert fit.closure_m <= TIGHT_M and fit.club_offset_m <= TIGHT_M
+    # Room to move does not let an arm flip, and no wrist ends on a bound.
+    assert max(abs(turn) for turn in fit.upper_arm_twist_deg.values()) <= TWIST_DEG
+    wrists = _wrists_deg(narrow, fit)
+    for name, value in wrists.items():
+        low, high = wide[name]
+        assert low + WRIST_MARGIN_DEG <= value <= high - WRIST_MARGIN_DEG, name
+    # The pose needs a wrist past its legacy range, and the refit may use it.
+    assert any(v > LEGACY_WRIST_DEG[n[-1]][1] + 1.0 for n, v in wrists.items())
+    kept = refit_arms_with(
+        ArmRefitSettings(evidence_wrist_bounds=False), moved, narrow, held.q
+    )
+    for name, value in _wrists_deg(narrow, kept).items():
+        low, high = LEGACY_WRIST_DEG[name[-1]]
+        assert low - 1e-6 <= value <= high + 1e-6, name
+
+
+def test_bad_settings_are_refused() -> None:
+    for name in ("alignment_weight", "twist_stay_weight"):
+        for bad in (-1.0, float("nan")):
+            with pytest.raises(ValueError, match=name):
+                ArmRefitSettings(**{name: bad})
