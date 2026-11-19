@@ -348,7 +348,7 @@ def _wrist_shape(part: str, radius: float, wrist: Any) -> dict[str, Any]:
     its width axis, the flat section easing in past the rotation joint.
     """
     if wrist is None:
-        return {"end_scale": library.distal_scale(part)}
+        return {"end_scale": library.limb_distal_scale(part)}
     scale = library.validate_distal_scale(min(1.0, wrist.half_width_m / radius))
     return {
         "end_scale": scale,
@@ -640,6 +640,7 @@ def _foot_meshes(ctx: _Context, body: str) -> list[BodyMesh]:
     plan = (
         ("skin", "skin", base),
         ("garment", "garment", garment),
+        ("sole", "sole", library.SOLE_MATERIAL if garment else None),
         ("ankle", "ankle", shin or base),
     )
     out: list[BodyMesh] = []
