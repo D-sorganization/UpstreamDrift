@@ -74,6 +74,12 @@ def wrist_follower_dorsal_axis(
     return dorsal / norm
 
 
+#: Hands a spec can draw on the club (``subject.hand_visual_backend``): the
+#: capsule hands of ``grip_hand_mesh``, or the skinned human pair (#15251).
+HAND_VISUAL_BACKENDS = ("capsule", "skinned_human")
+DEFAULT_HAND_VISUAL_BACKEND = "capsule"
+
+
 @dataclass(frozen=True)
 class ResolvedHandSpec:
     """Grip pose (style, strength, handedness), hand length and grip geometry.
@@ -89,10 +95,17 @@ class ResolvedHandSpec:
     wrist_dorsal_axes: Mapping[Hand, tuple[float, float, float]] = field(
         default_factory=dict
     )
+    #: Which hands are drawn on the club: one of ``HAND_VISUAL_BACKENDS``.
+    visual_backend: str = DEFAULT_HAND_VISUAL_BACKEND
 
     def __post_init__(self) -> None:
         if not isinstance(self.pose, GripPose):
             raise TypeError(f"pose must be a GripPose, got {type(self.pose).__name__}")
+        if self.visual_backend not in HAND_VISUAL_BACKENDS:
+            raise ValueError(
+                f"hand_visual_backend must be one of {HAND_VISUAL_BACKENDS}, "
+                f"got {self.visual_backend!r}"
+            )
         object.__setattr__(
             self, "hand_length_m", validate_hand_length_m(self.hand_length_m)
         )
@@ -132,5 +145,10 @@ def resolved_hand_spec(spec_document: Mapping[str, Any]) -> ResolvedHandSpec:
         if axis is not None:
             dorsal_axes[hand] = (float(axis[0]), float(axis[1]), float(axis[2]))
     return ResolvedHandSpec(
-        pose=pose, hand_length_m=length, wrist_dorsal_axes=dorsal_axes
+        pose=pose,
+        hand_length_m=length,
+        wrist_dorsal_axes=dorsal_axes,
+        visual_backend=str(
+            subject.get("hand_visual_backend", DEFAULT_HAND_VISUAL_BACKEND)
+        ),
     )

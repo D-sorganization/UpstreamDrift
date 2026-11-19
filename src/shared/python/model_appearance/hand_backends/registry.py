@@ -33,6 +33,7 @@ _NAME_PATTERN = re.compile(r"^[a-z][a-z0-9]*(_[a-z0-9]+)*$")
 #: Module paths whose ``register()`` adds a built-in backend. Tracks append one.
 _BUILTIN_BACKEND_MODULES: tuple[str, ...] = (
     "src.shared.python.model_appearance.hand_backends.myohand",
+    "src.shared.python.model_appearance.hand_backends.skinned_human",
 )
 
 _REGISTRY: dict[str, HandVisualBackend] = {}
