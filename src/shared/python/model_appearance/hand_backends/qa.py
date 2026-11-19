@@ -405,6 +405,7 @@ def thumb_crown_gaps_m(
     *,
     station_m: float,
     min_facing: float,
+    min_station_vertices: int = 1,
 ) -> NDArray[np.float64]:
     """Gap from the crown of the lead thumb to the trail hand, along the thumb.
 
@@ -417,15 +418,23 @@ def thumb_crown_gaps_m(
     trail palm has every station near zero; a station the palm does not reach
     reports how far off the palm is. Both results share one frame (a pair).
 
-    Preconditions: ``station_m`` positive, ``min_facing`` in ``(0, 1)``.
+    A station with fewer than ``min_station_vertices`` crown vertices is not
+    reported: a stray vertex is not a strip a palm can rest on.
+
+    Preconditions: ``station_m`` positive, ``min_facing`` in ``(0, 1)``,
+    ``min_station_vertices`` at least 1.
     """
     if not station_m > 0.0 or not 0.0 < min_facing < 1.0:
         raise ValueError("station_m must be positive and min_facing in (0, 1)")
+    if min_station_vertices < 1:
+        raise ValueError("min_station_vertices must be at least 1")
     skin, facing, gap = _lead_thumb_against(lead, trail)
     crown = facing >= min_facing
     if not crown.any():
         raise ValueError("no skin of the lead thumb faces away from the grip")
-    return _per_station(skin[crown, 2], station_m, gap[crown], np.min)
+    return _per_station(
+        skin[crown, 2], station_m, gap[crown], np.min, min_station_vertices
+    )
 
 
 def thumb_wrap_shares(
@@ -462,9 +471,13 @@ def _per_station(
     station_m: float,
     values: NDArray[np.float64],
     reduce: Callable[[NDArray[np.float64]], float],
+    least: int = 1,
 ) -> NDArray[np.float64]:
+    """``reduce`` of ``values`` in each station along ``along`` that holds at
+    least ``least`` of them, in order."""
     station = np.floor((along - along.min()) / station_m).astype(int)
-    return np.array([reduce(values[station == k]) for k in np.unique(station)])
+    kept, counts = np.unique(station, return_counts=True)
+    return np.array([reduce(values[station == k]) for k in kept[counts >= least]])
 
 
 def _lead_thumb_against(

@@ -125,6 +125,13 @@ Targets of a hand live in `skinned_targets.py`.
   until its tip seats (12 on a lone hand), thumb tip 8 mm past its middle joint.
   The heel pad went from 6.3 to 7.7 mm for it (ratchet 8 mm, evidence on
   #15150). `build_grip_hands` solves unrolled and turns the result.
+  No thumb joint bends back past straight (owner 2026-11-19):
+  `thumb.mcp_limits_deg` starts at 0 (was -10; lead thumb sat at -9.3), floor
+  `min_thumb_joint_flexion_deg` measured on the posed bones.
+- Trail palm 13 mm off the grip: the seated hand is backed straight off the
+  lead thumb. Seating it tilted over the thumb closes it to 1 to 3 mm but the
+  ring finger then rides on the lead forefinger below about 95 mm hand
+  spacing (now 80). Not adopted; owner decision on spacing, see #15150.
 - MuJoCo golfer, measured by spike: hands 46 degrees round the shaft from the
   clubface (`ADDRESS_SQUARE_FACE_ROLL_DEG` squares the head only;
   `grip_hand_frame` turns the hands from the wrist's dorsal axis); skinned

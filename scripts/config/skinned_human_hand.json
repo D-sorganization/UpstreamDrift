@@ -127,8 +127,9 @@
       -35.0,
       60.0
     ],
+    "_mcp_limits_deg": "Owner, 2026-11-19 (#15278): the thumb's second segment cannot bend back past a straight line from its first, so the lower limit is 0 (it was -10); hand_visual_quality.json min_thumb_joint_flexion_deg holds the floor.",
     "mcp_limits_deg": [
-      -10.0,
+      0.0,
       50.0
     ],
     "ip_limits_deg": [

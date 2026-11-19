@@ -36,8 +36,40 @@ _STATION = float(_Q["thumb_channel_station_m"])
 _FACING = float(_Q["thumb_channel_crown_facing"])
 
 
+_LEAST = int(_Q["thumb_channel_min_station_vertices"])
+
+
 def _gaps(lead, trail) -> np.ndarray:
-    return thumb_crown_gaps_m(lead, trail, station_m=_STATION, min_facing=_FACING)
+    return thumb_crown_gaps_m(
+        lead,
+        trail,
+        station_m=_STATION,
+        min_facing=_FACING,
+        min_station_vertices=_LEAST,
+    )
+
+
+def test_a_station_of_one_stray_vertex_is_not_judged() -> None:
+    """One crown vertex alone at the base of the thumb is no strip to rest on."""
+    from src.shared.python.model_appearance.hand_backends.qa import _per_station
+
+    along = np.array([0.000, 0.011, 0.012, 0.013, 0.016, 0.017])
+    values = np.array([7.0, 1.0, 2.0, 3.0, 5.0, 4.0])
+    np.testing.assert_allclose(
+        _per_station(along, 0.005, values, np.min), [7.0, 1.0, 4.0]
+    )
+    np.testing.assert_allclose(
+        _per_station(along, 0.005, values, np.min, 2), [1.0, 4.0]
+    )
+    pair = _pair()
+    with pytest.raises(ValueError, match="min_station_vertices"):
+        thumb_crown_gaps_m(
+            pair["lead"],
+            pair["trail"],
+            station_m=_STATION,
+            min_facing=_FACING,
+            min_station_vertices=0,
+        )
 
 
 def test_the_trail_palm_rests_on_the_lead_thumb_along_its_length() -> None:

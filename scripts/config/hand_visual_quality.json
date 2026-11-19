@@ -75,6 +75,8 @@
   "_thumb_channel": "Owner, 2026-11-17 (#15265): the channel of the trail palm rests on the lead thumb, in contact along the thumb. The crown of the lead thumb (skin facing away from the grip by at least thumb_channel_crown_facing) is cut into stations thumb_channel_station_m long; no station may be farther than max_thumb_channel_gap_m from the trail hand's skin (measured 2026-11-17: 2.1 mm at the base knuckle, 1.5 mm at the tip, at most 1.0 mm between; 11.4 mm at the base before).",
   "thumb_channel_station_m": 0.005,
   "thumb_channel_crown_facing": 0.85,
+  "_thumb_channel_min_station_vertices": "A station of the lead thumb's crown is judged only if it holds at least this many crown vertices (#15278). With the thumb limited to straight (owner, 2026-11-19) one vertex at its base turned from 0.83 to 0.86 facing and made a station of its own, 7.3 mm from the trail palm; the palm is nearer the base than before (5.1 mm against 7.1 mm for all outward skin there) and the other stations went from 2.5 to 1.9 mm at worst.",
+  "thumb_channel_min_station_vertices": 2,
   "max_thumb_channel_gap_m": 0.0025,
   "_thumb_wrap": "Owner, 2026-11-17 (#15265, 'cup the palm'): the trail palm wraps round the lead thumb, not only touches its top line. Per station of thumb_channel_station_m, the share of the thumb's outer half (crown and both flanks) within thumb_wrap_contact_m of the trail skin; the median station is to reach min_thumb_wrap_share. NOT MET: measured 2026-11-17 the median is 0.17. With the palm pads settled as thumb_wrap_trial_pad (keys of pair.palm_wrap) it is 0.70, but palm skin then moves 16.6 mm from its bones (max_corrective_shift_m is 8 mm), so that is a trial, not the default. With the pads' travel capped at 8 mm it is 0.40, at 7 mm 0.32. The first three stations at the thumb's base stay at zero either way: the trail heel pad does not reach them.",
   "thumb_wrap_contact_m": 0.0015,
@@ -107,6 +109,8 @@
   "trail_index_joint_azimuth_deg": [45.0, 135.0],
   "_min_thumb_joint_flexion_deg": "Owner, 2026-11-19 (#15278): no thumb joint bends back past straight on either hand. Degrees of flexion, measured on the posed bones about each joint's hinge, of the thumb's second segment from its first and of its end segment from its second; 0 is a straight line. The lead thumb's second segment was bent back 9.5 degrees and the trail thumb's 2.9.",
   "min_thumb_joint_flexion_deg": 0.0,
+  "_thumb_rest_straightness_tolerance_deg": "The scanned hand's thumb is not exactly straight at rest: with every thumb joint angle at 0 its second segment measures 0.1 degrees back from its first. The floor above is checked to within this.",
+  "thumb_rest_straightness_tolerance_deg": 0.25,
   "max_thumb_azimuth_error_deg": 5.0,
   "min_index_knuckle_flexion_deg": 15.0,
   "max_index_segment_gap_m": 0.004

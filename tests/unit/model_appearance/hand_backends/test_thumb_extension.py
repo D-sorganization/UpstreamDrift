@@ -3,7 +3,7 @@
 Owner review 2026-11-19: the first and second joints of the left thumb looked
 hyperextended. The segment from the thumb's first joint (deep in the hand, near
 the wrist) to its second cannot bend back past a straight line, and neither
-can the joint after it, on either hand. The floor comes from
+can the joint after it, on either hand. The floor and its tolerance come from
 ``scripts/config/hand_visual_quality.json``.
 """
 
@@ -33,7 +33,6 @@ pytestmark = pytest.mark.unit
 _Q = load_hand_visual_quality()
 #: Each thumb joint, as the segment before it and the segment that turns on it.
 _THUMB_JOINTS = (("thumb_meta", "thumb_prox"), ("thumb_prox", "thumb_dist"))
-_SLACK_DEG = 1e-6
 
 
 def test_the_configured_thumb_limits_do_not_reach_past_straight() -> None:
@@ -49,6 +48,7 @@ def test_no_thumb_joint_bends_back_past_straight(side: str) -> None:
     of each segment from the one before it, about the joint's own hinge, with
     flexion positive. Checked on the hand alone and on the pair."""
     floor = float(_Q["min_thumb_joint_flexion_deg"])
+    slack = float(_Q["thumb_rest_straightness_tolerance_deg"])
     for name, hand in (("lone", _hand(side)), ("pair", _pair()[side])):
         marks = hand_landmarks(hand)
         for before, after in _THUMB_JOINTS:
@@ -56,6 +56,6 @@ def test_no_thumb_joint_bends_back_past_straight(side: str) -> None:
             assert outer.hinge_axis is not None
             turn = np.cross(inner.bone_axis, outer.bone_axis) @ outer.hinge_axis
             bend = math.degrees(math.atan2(turn, inner.bone_axis @ outer.bone_axis))
-            assert bend >= floor - _SLACK_DEG, (
+            assert bend >= floor - slack, (
                 f"{name} {side} {after} bends back {-bend:.1f} degrees"
             )
