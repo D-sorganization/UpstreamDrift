@@ -12,7 +12,7 @@ WORKFLOW_GLOB_PATTERNS = ("*.yml", "*.yaml")
 # (package-standalone-sidekick, release-sidekick-binary).
 # The 25-workflow consolidation target remains; see issue #3835.
 DEFAULT_MAX_ACTIVE_WORKFLOWS = 85
-AGENT_CONFIG_ROOTS = (".claude", ".gaai", ".agent", ".kiro", ".jules")
+AGENT_CONFIG_ROOTS = (".claude", ".agent", ".kiro", ".jules")
 INVENTORY_PATH = Path(".github/WORKFLOWS.md")
 AGENT_GOVERNANCE_PATH = Path("docs/development/agents/migration.md")
 AGENT_BUDGET_CONTRACT_HEADING = "## Agent Automation Budget Contract"

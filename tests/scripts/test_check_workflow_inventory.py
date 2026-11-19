@@ -59,10 +59,10 @@ def test_audit_repository_accepts_documented_workflows_and_agent_roots(
 ) -> None:
     _write(tmp_path / ".github" / "workflows" / "ci.yml", _workflow())
     _write_inventory(tmp_path, _inventory_row("ci.yml"))
-    _write(tmp_path / ".gaai" / "README.md", "# canonical\n")
+    _write(tmp_path / ".claude" / "README.md", "# canonical\n")
     _write_agent_governance(
         tmp_path,
-        "| .gaai/ | Canonical | @core | Authoritative GAAI root. |\n",
+        "| .claude/ | Canonical | @core | Authoritative agent root. |\n",
     )
 
     assert audit_repository(tmp_path, max_active_workflows=1) == []
@@ -119,18 +119,18 @@ def test_audit_repository_rejects_write_all_permissions(tmp_path: Path) -> None:
 def test_audit_repository_rejects_undocumented_agent_roots(tmp_path: Path) -> None:
     (tmp_path / ".github" / "workflows").mkdir(parents=True)
     _write_inventory(tmp_path, "")
-    _write(tmp_path / ".gaai" / "README.md", "# canonical\n")
-    _write(tmp_path / ".claude" / "README.md", "# mirror\n")
+    _write(tmp_path / ".claude" / "README.md", "# canonical\n")
+    _write(tmp_path / ".kiro" / "README.md", "# legacy\n")
     _write_agent_governance(
         tmp_path,
-        "| .gaai/ | Canonical | @core | Authoritative GAAI root. |\n",
+        "| .claude/ | Canonical | @core | Authoritative agent root. |\n",
     )
 
     findings = audit_repository(tmp_path, max_active_workflows=1)
 
     assert (
         "agent config root exists without docs/development/agents/migration.md row: "
-        ".claude/"
+        ".kiro/"
     ) in findings
 
 
