@@ -347,7 +347,7 @@ def lofted_segment(
         )
         stations, poles = whole - offset, (first - offset, last - offset)
     else:
-        stations = np.linspace(t0 * length, t1 * length, rings)
+        stations = np.linspace(t0 * length, t1 * length, rings, dtype=np.float64)
         poles = (float(stations[0]), float(stations[-1]))
     phi = np.linspace(0.0, 2.0 * math.pi, sides, endpoint=False)
     across, deep = np.outer(np.cos(phi), u), np.outer(np.sin(phi), v)
