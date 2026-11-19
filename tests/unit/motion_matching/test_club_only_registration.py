@@ -23,7 +23,6 @@ from src.shared.python.motion_matching.execution.club_only_registration import (
     derive_club_only_offsets,
     head_support_m,
 )
-
 from src.shared.python.motion_matching.ground_support import capture_to_native_world
 from src.shared.python.motion_matching.tour_capture_contract import load_tour_capture
 

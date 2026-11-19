@@ -1,11 +1,7 @@
 """Club marker registration from the club markers alone (#15296).
 
-The static-seed registration (``club_markers.DERIVATION_METHOD``) places the
-club cluster through a body-driven calibration, so it inherits the body
-model's error. This module places the same cluster in the ``Clubhead`` frame
-(origin at the head centre on the shaft axis, +x from the butt to the head)
-from the six club markers only. It is a kinematic registration, not a
-measurement of the club: see ``derive_club_only_offsets`` for what is assumed.
+Places the six-marker cluster in the ``Clubhead`` frame without a body-driven
+calibration. Kinematic only; ``derive_club_only_offsets`` states what is assumed.
 """
 
 from __future__ import annotations
