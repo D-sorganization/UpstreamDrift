@@ -26,6 +26,16 @@ SPEC = json.loads(SPEC_BYTES)
 DOC = document_from_dict({"schema_version": "appearance-v1"})
 
 
+ADDRESS = json.loads(
+    (
+        Path(__file__).resolve().parents[2]
+        / "fixtures"
+        / "model_appearance"
+        / "address_pose.json"
+    ).read_text()
+)
+
+
 def _scene(appearance: dict, pose: dict | None = None):
     mujoco = pytest.importorskip("mujoco")
     from src.tools.native_viewer_export.backends.mujoco_worker import build_scene_xml
@@ -45,6 +55,159 @@ def _vertices(mujoco, model, data, geom: int) -> np.ndarray:
     first, count = model.mesh_vertadr[mesh], model.mesh_vertnum[mesh]
     rot = data.geom_xmat[geom].reshape(3, 3)
     return model.mesh_vert[first : first + count] @ rot.T + data.geom_xpos[geom]
+
+
+def _heights() -> dict[str, float]:
+    """Highest trunk solid, yoke, and the chin, up from the neck point (metres)."""
+    mujoco, model, data = _scene(default_document_dict())
+    head = mujoco.mj_name2id(
+        model, mujoco.mjtObj.mjOBJ_BODY, "GolfSwing3D_Kinetic/Head"
+    )
+    frame, origin = data.xmat[head].reshape(3, 3), data.xpos[head]
+    out: dict[str, float] = {
+        "trunk": -9.0,
+        "front": -9.0,
+        "yoke": -9.0,
+        "cap": -9.0,
+        "chin": 9.0,
+    }
+    zone = ACCEPT.neck_zone_half_width * HEAD_M
+    for geom in range(model.ngeom):
+        name = model.geom(geom).name
+        if model.geom_type[geom] != mujoco.mjtGeom.mjGEOM_MESH or not name:
+            continue
+        body = model.body(model.geom_bodyid[geom]).name
+        local = (_vertices(mujoco, model, data, geom) - origin) @ frame
+        if name == "visual_head_skin_mesh":
+            face = local[local[:, 0] > 0.25 * HEAD_M]
+            out["chin"] = float(face[:, 2].min())
+        elif name.startswith("visual_vmesh") and ("skin" in name or "garment" in name):
+            key = "yoke" if "Hubto" in body else "trunk" if "COMRod" in body else ""
+            if "UpperArm" in body:
+                out["cap"] = max(out["cap"], float(local[:, 2].max()))
+            if key:  # the yoke counts where it meets the neck, not out at the cap
+                near = local[np.abs(local[:, 1]) <= zone] if key == "yoke" else local
+                if len(near):
+                    out[key] = max(out[key], float(near[:, 2].max()))
+                if key == "trunk":  # the collar's front, beside the sternum
+                    ahead = local[
+                        (local[:, 0] > 0.25 * HEAD_M) & (np.abs(local[:, 1]) < zone)
+                    ]
+                    out["front"] = max(out["front"], float(ahead[:, 2].max()))
+    return out
+
+
+def test_the_neck_is_visible_at_the_front_of_the_collar() -> None:
+    h = _heights()
+    visible = h["chin"] - h["front"]
+    assert visible >= ACCEPT.min_front_visible_neck * HEAD_M, h
+
+
+def test_the_collar_is_highest_at_the_back_and_slants_down_to_the_front() -> None:
+    h = _heights()
+    assert h["trunk"] <= ACCEPT.max_back_top_above_neck_point * HEAD_M, h
+    assert h["trunk"] - h["front"] >= ACCEPT.min_collar_slant * HEAD_M, h
+
+
+def test_the_upper_arm_does_not_rise_behind_the_shoulder_joint() -> None:
+    """The cap sits on the joint: nothing pokes up the neck side of it.
+
+    A T-pose height test would measure the arm lying sideways, so this is the
+    pose-independent form of "the cap top is below the neck point": with the
+    arm hanging, its overshoot behind the joint is exactly how far the cap
+    rises above the joint (itself 4 cm below the neck point).
+    """
+    caps = {
+        c.body: c
+        for c in derive_visual_skeleton(SPEC).capsules
+        if library.classify_body(c.body) == "upper_arm"
+    }
+    meshes = [
+        m
+        for m in body_meshes(SPEC, DOC)
+        if m.body in caps and m.label.startswith(("skin", "garment"))
+    ]
+    assert len(meshes) >= 4
+    for mesh in meshes:
+        cap = caps[mesh.body]
+        axis = (np.asarray(cap.end_m) - np.asarray(cap.start_m)) / cap.length_m()
+        behind = -((mesh.mesh_in_body_frame.vertices - np.asarray(cap.start_m)) @ axis)
+        allowed = ACCEPT.max_cap_behind_joint * library.PART_RADIUS_M["upper_arm"]
+        assert behind.max() <= allowed, (mesh.body, mesh.label, behind.max())
+
+
+def _address_cap_tops() -> dict[str, float]:
+    """Highest upper-arm and outboard yoke vertex, head frame, at address."""
+    mujoco, model, data = _scene(default_document_dict(), ADDRESS)
+    head = mujoco.mj_name2id(
+        model, mujoco.mjtObj.mjOBJ_BODY, "GolfSwing3D_Kinetic/Head"
+    )
+    frame, origin = data.xmat[head].reshape(3, 3), data.xpos[head]
+    zone = ACCEPT.neck_zone_half_width * HEAD_M
+    tops: dict[str, float] = {}
+    for geom in range(model.ngeom):
+        name = model.geom(geom).name
+        body = model.body(model.geom_bodyid[geom]).name
+        if not name.startswith("visual_vmesh") or not body.endswith(
+            ("LUpperArm", "RUpperArm", "HubtoLS", "HubtoRS")
+        ):
+            continue
+        local = (_vertices(mujoco, model, data, geom) - origin) @ frame
+        if "Hubto" in body:
+            local = local[np.abs(local[:, 1]) > zone]
+        if len(local):
+            tops[body[-9:] + name] = float(local[:, 2].max())
+    return tops
+
+
+def test_the_shoulder_caps_stay_below_the_neck_point_at_address() -> None:
+    tops = _address_cap_tops()
+    assert len(tops) >= 8, tops
+    limit = -ACCEPT.min_cap_below_neck_point * HEAD_M
+    assert max(tops.values()) <= limit, tops
+
+
+def _collar_ring(local: np.ndarray, sides: int = 28) -> np.ndarray:
+    return local[-2 - sides : -2]  # the top ring, just before the two poles
+
+
+def test_the_collar_opening_hugs_the_neck() -> None:
+    mujoco, model, data = _scene(default_document_dict())
+    head = mujoco.mj_name2id(
+        model, mujoco.mjtObj.mjOBJ_BODY, "GolfSwing3D_Kinetic/Head"
+    )
+    frame, origin = data.xmat[head].reshape(3, 3), data.xpos[head]
+    geom = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "visual_vmesh_2_garment0")
+    ring = _collar_ring((_vertices(mujoco, model, data, geom) - origin) @ frame)
+    x, y = ring[:, 0], ring[:, 1]
+    area = 0.5 * abs(float(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1))))
+    width, depth = _section_extent(_neck_part(), -0.05)
+    neck_area = math.pi / 4.0 * width * depth * HEAD_M**2
+    assert np.ptp(y) <= ACCEPT.max_opening_over_neck_width * width * HEAD_M
+    assert area <= ACCEPT.max_collar_area_over_neck * neck_area, (area, neck_area)
+
+
+def test_the_shirt_rises_from_the_shoulder_line_to_the_opening_without_a_lid() -> None:
+    mujoco, model, data = _scene(default_document_dict())
+    head = mujoco.mj_name2id(
+        model, mujoco.mjtObj.mjOBJ_BODY, "GolfSwing3D_Kinetic/Head"
+    )
+    frame, origin = data.xmat[head].reshape(3, 3), data.xpos[head]
+    geom = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "visual_vmesh_2_garment0")
+    local = (_vertices(mujoco, model, data, geom) - origin) @ frame
+    rings = local[:-2].reshape(-1, 28, 3)[-ACCEPT.collar_rings :]
+    ring_x = rings[-1, :, 0]
+    front = ring_x > ring_x.mean()  # the front half of the opening
+    rise = np.diff(rings[:, :, 2], axis=0)[:, front]
+    run = np.linalg.norm(np.diff(rings[:, :, :2], axis=0), axis=2)[:, front]
+    assert (rise / np.maximum(run, 1e-9)).min() >= ACCEPT.min_collar_wall_slope
+
+
+def test_no_trunk_or_yoke_rises_to_the_chin() -> None:
+    h = _heights()
+    margin = ACCEPT.min_cap_below_chin * HEAD_M
+    assert h["yoke"] <= h["chin"] - margin, h
+    assert h["trunk"] <= h["chin"] - margin, h
 
 
 def _neck_part():
@@ -95,6 +258,26 @@ def test_the_neck_scales_with_the_head() -> None:
     assert np.allclose(small["neck"].mesh.vertices, 0.8 * _neck_part().vertices)
 
 
+def test_the_trapezius_slopes_inside_its_band() -> None:
+    mujoco, model, data = _scene(default_document_dict())
+    head = mujoco.mj_name2id(
+        model, mujoco.mjtObj.mjOBJ_BODY, "GolfSwing3D_Kinetic/Head"
+    )
+    frame, origin = data.xmat[head].reshape(3, 3), data.xpos[head]
+    geom = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "visual_vmesh_2_skin0")
+    local = (_vertices(mujoco, model, data, geom) - origin) @ frame
+    rings = np.unique(np.round(local[:, 2], 4))
+    reach = np.array(
+        [np.abs(local[np.isclose(local[:, 2], z, atol=6e-5), 1]).max() for z in rings]
+    )
+    shoulder = rings[np.where(reach >= 0.97 * reach.max())[0].max()]
+    rise = rings.max() - shoulder
+    run = reach[rings == shoulder][0] - reach[rings == rings.max()][0]
+    angle = math.degrees(math.atan2(rise, run))
+    low, high = ACCEPT.slope_deg_band
+    assert low <= angle <= high, angle
+
+
 def test_mass_properties_do_not_depend_on_the_visual_neck() -> None:
     _, with_head, _ = _scene(default_document_dict())
     bare = {**default_document_dict(), "head": {"enabled": False}}
@@ -109,6 +292,17 @@ def test_the_parametric_head_keeps_its_own_neck() -> None:
     assert build_neck_parts(HEAD_M, HeadSettings(model="parametric")) == []
     with pytest.raises(ValueError, match="positive"):
         build_neck_parts(0.0)
+
+
+def _top_ring(pose: dict | None) -> np.ndarray:
+    mujoco, model, data = _scene(default_document_dict(), pose)
+    head = mujoco.mj_name2id(
+        model, mujoco.mjtObj.mjOBJ_BODY, "GolfSwing3D_Kinetic/Head"
+    )
+    frame, origin = data.xmat[head].reshape(3, 3), data.xpos[head]
+    geom = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "visual_vmesh_2_garment0")
+    local = (_vertices(mujoco, model, data, geom) - origin) @ frame
+    return local[:-2].reshape(-1, 28, 3)[-1]  # metres, head frame
 
 
 def _head_skin() -> np.ndarray:
@@ -141,6 +335,12 @@ def test_the_neck_enters_the_head_without_a_step_at_the_jaw() -> None:
         reach = np.abs(skin[np.abs(skin[:, 2] - z) < 0.006 * HEAD_M * 4, 1]).max()
         past = np.abs(neck_v[np.abs(neck_v[:, 2] - z) < 1e-3, 1]).max() - reach
         assert past <= ACCEPT.max_neck_past_head_m, (z, past)
+
+
+def test_the_neck_goes_below_the_shirt_opening_all_round() -> None:
+    neck_z = _neck_part().vertices[:-2, 2].min()
+    for pose in (None, ADDRESS):
+        assert neck_z < _top_ring(pose)[:, 2].min(), pose
 
 
 def test_the_neck_is_one_skin_part() -> None:

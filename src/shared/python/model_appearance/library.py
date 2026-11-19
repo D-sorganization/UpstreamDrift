@@ -373,7 +373,8 @@ def blend_scale(garment: bool, part: str = "upper_arm") -> float:
 # depth (``torso_profile``). The widest station is 1.0, so a trunk is exactly
 # as wide and as deep as its spec hint, and width and depth scale alike
 # through the middle, so the mid section keeps the spec's aspect. Abdomen: lumbar joint to T12; thorax:
-# T12 to the shoulder line, then the slope up into the neck.
+# T12 to the shoulder line, then the trapezius slope up to the neck base, which
+# ends well under the jaw so the neck solid (``neck``) shows above it (#15292).
 TORSO_PROFILES: dict[str, tuple[tuple[float, ...], ...]] = {
     "abdomen": (
         (-0.14, 0.93, 0.92),
@@ -390,11 +391,13 @@ TORSO_PROFILES: dict[str, tuple[tuple[float, ...], ...]] = {
         (0.08, 0.89, 0.97),
         (0.3, 0.95, 0.95),
         (0.55, 1.0, 1.0),
-        (0.72, 1.0, 0.98),
-        (0.9, 0.99, 0.86),
-        (1.02, 0.86, 0.7),
-        (1.12, 0.5, 0.56),
-        (1.2, 0.3, 0.46),
+        (0.7, 1.0, 0.98),
+        (0.8, 0.995, 0.95, 0.07),
+        (0.87, 0.98, 0.9, 0.12),
+        (0.92, 0.9, 0.8, 0.153),
+        (0.945, 0.7, 0.66, 0.153),
+        (0.965, 0.5, 0.56, 0.153),
+        (0.98, 0.38, 0.5, 0.153),
     ),
 }
 TORSO_RINGS = 18
@@ -405,16 +408,16 @@ TORSO_SQUARENESS = 2.6  # superellipse exponent of a trunk cross-section
 SHOULDER_ASPECT = 0.85  # up-down over front-back extent of the yoke
 SHOULDER_RADIUS_SCALE = 1.1  # front-back half extent over the part radius
 SHOULDER_END_SCALE = 1.0  # yoke radius at the shoulder joint, over the neck end
-SHOULDER_DROOP = 0.0  # neck end of the yoke below the link, in radii (#15292)
+SHOULDER_DROOP = 0.5  # neck end of the yoke below the link, in radii (#15292)
 SHOULDER_START_FRACTION = 0.3  # the yoke starts this far along the link
-SHOULDER_END_SINK = 0.0  # the yoke ends this far below the joint, in radii (#15292)
+SHOULDER_END_SINK = 0.8  # the yoke ends this far below the joint, in radii (#15292)
 SHOULDER_UP_AXIS = (0.0, 0.0, 1.0)  # up, in the shoulder link's body frame
 # Deltoid (#15279): the blend at the shoulder joint is longer down the arm
 # than across it: (across, down the arm), in upper-arm radii.
 DELTOID_HALF_SIZES = (0.9, 1.3)
-UPPER_ARM_SKIN_TIP_INSET = 0.0  # skin tip meets the sleeve start, in radii (#15292)
-UPPER_ARM_START_INSET = 0.0  # the loft's tip sits at the joint, in radii (#15292)
-DELTOID_DROP = 1.25  # centre below the joint, in upper-arm radii
+UPPER_ARM_SKIN_TIP_INSET = 0.5  # skin tip meets the sleeve start, in radii (#15292)
+UPPER_ARM_START_INSET = 0.5  # the loft's tip sits at the joint, in radii (#15292)
+DELTOID_DROP = 1.25
 
 
 # Pelvis solid (HRG-C1, #13164): lofted on the hip landmarks, see

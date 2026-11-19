@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import json
 from pathlib import Path
 from typing import Any
@@ -12,6 +13,7 @@ import pytest
 from src.shared.python.model_appearance import document_from_dict, library
 from src.shared.python.model_appearance.body_meshes import BodyMesh, body_meshes
 from src.shared.python.model_appearance.cross_section import body_sections
+from src.shared.python.model_appearance.skinned_body import spec_body_poses
 from src.shared.python.model_appearance.torso_profile import (
     TorsoFrame,
     TorsoProfile,
@@ -103,6 +105,23 @@ def _meshes(part: str, label: str) -> list[BodyMesh]:
     ]
 
 
+def _shoulder_line_height(body: str, up: np.ndarray) -> float:
+    """Height of the shoulder joints along ``up`` in the thorax body frame."""
+    poses = spec_body_poses(SPEC)
+    joints = [
+        j for j in SPEC["joints"] if library.classify_body(j["child"]) == "upper_arm"
+    ]
+    world = np.mean(
+        [
+            (poses[j["parent"]] @ np.asarray(j["parent_to_base"], float))[:3, 3]
+            for j in joints
+        ],
+        axis=0,
+    )
+    pose = poses[body]
+    return float((pose[:3, :3].T @ (world - pose[:3, 3])) @ up)
+
+
 def test_the_trunk_keeps_its_width_at_its_joints() -> None:
     """A spindle pinches to nothing at both ends: two of them are a snowman."""
     sections = body_sections(SPEC)
@@ -120,7 +139,13 @@ def test_the_trunk_keeps_its_width_at_its_joints() -> None:
         height = verts @ up
         low, high = np.asarray(cap.start_m) @ up, np.asarray(cap.end_m) @ up
         widest = np.abs(verts @ section.ml_axis).max()
-        for plane in (min(low, high), max(low, high)):
+        # The upper plane is the shoulder line (the shoulder joints' height):
+        # the collar is slanted now, so the spine-end plane is no longer a
+        # width plane of the thorax (#15292).
+        planes = [min(low, high), max(low, high)]
+        if skin.body.endswith("COMRod"):
+            planes[1] = _shoulder_line_height(skin.body, up)
+        for plane in planes:
             band = np.abs(height - plane) < 0.02
             assert band.any(), f"{skin.body}: no skin at its joint plane"
             width = np.abs(verts[band] @ section.ml_axis).max()
@@ -150,8 +175,13 @@ def test_the_shoulder_link_is_a_yoke_flatter_than_it_is_deep() -> None:
     up = np.asarray(library.SHOULDER_UP_AXIS)
     for link in links:
         verts = link.mesh_in_body_frame.vertices
-        tall = float(np.ptp(verts @ up))
-        deep = float(np.ptp(verts[:, 0]))
+        # Its own axis frame: the droop tilts the whole yoke, not its section
+        # (the tilt is the longest principal axis, so it is excluded here).
+        _, _, axes = np.linalg.svd(verts - verts.mean(axis=0), full_matrices=False)
+        deep_axis = axes[1 + int(np.argmax(np.abs(axes[1:, 0])))]
+        tall_axis = axes[1 + int(np.argmin(np.abs(axes[1:, 0])))]
+        tall = float(np.ptp(verts @ tall_axis))
+        deep = float(np.ptp(verts @ deep_axis))
         assert tall == pytest.approx(library.SHOULDER_ASPECT * deep, rel=0.05)
         # It starts beside the neck, not at the middle of the chest.
         assert np.abs(verts[:, 1]).min() > 0.02
@@ -176,3 +206,22 @@ def test_a_profile_clipped_at_its_joint_plane_keeps_its_section_there() -> None:
     assert clipped.stations[0].width == pytest.approx(float(width[0]))
     assert clipped.stations[0].depth == pytest.approx(float(depth[0]))
     assert _PROFILE.clipped(-0.5) is _PROFILE
+
+
+def test_a_station_slant_drops_the_front_and_keeps_the_back() -> None:
+    flat = torso_mesh(_FRAME, _PROFILE)
+    slanted_profile = TorsoProfile(
+        (*_PROFILE.stations[:2], dataclasses.replace(_PROFILE.stations[2], slant=0.4)),
+        squareness=2.6,
+    )
+    frame = dataclasses.replace(_FRAME, front_axis=np.array([1.0, 0.0, 0.0]))
+    slanted = torso_mesh(frame, slanted_profile)
+    top = slanted.vertices[:-2][-slanted_profile.sides :]
+    flat_top = flat.vertices[:-2][-slanted_profile.sides :]
+    drop = flat_top[:, 2] - top[:, 2]
+    assert drop[np.argmax(top[:, 0])] == pytest.approx(0.4 * 0.25, rel=1e-6)
+    assert drop[np.argmin(top[:, 0])] == pytest.approx(0.0, abs=1e-9)
+    assert np.all(drop >= -1e-12)
+    mirrored = slanted.vertices * np.array([1.0, -1.0, 1.0])
+    for point in mirrored[::7]:
+        assert np.linalg.norm(slanted.vertices - point, axis=1).min() < 1e-9
