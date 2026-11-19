@@ -41,7 +41,7 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     conform_pads,
     PressSettings,
     press_and_relax,
-    sharpened_faces,
+    sharpening,
     relax_folds,
     yield_to_points,
 )
@@ -52,6 +52,9 @@ from src.shared.python.model_appearance.hand_backends.joint_angles import (
     FINGERS,
     HandJointAngles,
     HandSide,
+)
+from src.shared.python.model_appearance.hand_backends.pose_kinematics import (
+    PoseKinematics,
 )
 from src.shared.python.model_appearance.hand_backends.posing import (
     CoupledJoint,
@@ -117,7 +120,6 @@ _BREADTH_FIT_PASSES = 2
 #: Side closing: each finger and the neighbour it closes on, middle outward.
 _SIDE_ORDER = (("ring", "middle"), ("little", "ring"), ("index", "middle"))
 _EYE3 = np.eye(3)
-_EYE4 = np.eye(4)
 #: Virtual hinge at the thumb base that presses the thumb onto the grip.
 THUMB_PRESS = "thumb_press"
 
@@ -192,21 +194,8 @@ class _GripHand:
         self.placement = np.eye(4)
         self.press_axis = np.array([1.0, 0.0, 0.0])
         self._index = {name: i for i, name in enumerate(asset.bone_names)}
-        self._parents = [int(p) for p in asset.bone_parents]
-        axes = asset.flex_axes
-        k = np.zeros((len(axes), 3, 3))
-        k[:, 0, 1], k[:, 0, 2] = -axes[:, 2], axes[:, 1]
-        k[:, 1, 0], k[:, 1, 2] = axes[:, 2], -axes[:, 0]
-        k[:, 2, 0], k[:, 2, 1] = -axes[:, 1], axes[:, 0]
-        self._hinge_k, self._hinge_kk = k, k @ k
-        # Linear blend skinning as one matrix product: weights times [v, 1].
-        homogeneous = np.hstack(
-            [asset.rest_vertices, np.ones((len(asset.rest_vertices), 1))]
-        )
-        dense = asset.dense_weights()
-        self._blend = (dense[:, :, None] * homogeneous[:, None, :]).reshape(
-            len(dense), -1
-        )
+        self._pose = PoseKinematics(asset)
+        self._kept: list[tuple] = [(None,)] * len(self._index)
         self._segment: dict[str, NDArray[np.int64]] = {}
         self.fixed: dict[str, Array] = self._adduction()
         # Rigid moves applied to a bone before its own rotation (palm cup).
@@ -252,59 +241,58 @@ class _GripHand:
             for bone, swing in self.side.items()
         }
 
-    def _hinge(self, i: int, angle: float) -> Array:
-        """Rodrigues rotation about bone ``i``'s flexion axis (precomputed)."""
-        k, kk = self._hinge_k[i], self._hinge_kk[i]
-        return _EYE3 + math.sin(angle) * k + (1.0 - math.cos(angle)) * kk
+    def _rotation(self, name: str, angles: Mapping[str, float]) -> Array | None:
+        """A bone's rotation about its head: what is fixed, then its hinge,
+        its sideways swing and the thumb press; ``None`` if it has none."""
+        i = self._index[name]
+        rest = float(self.asset.rest_flexion_rad[i])
+        out = self.fixed.get(name)
+        if name in angles and angles[name] - rest != 0.0:
+            hinge = self._pose.hinge(i, angles[name] - rest)
+            out = hinge if out is None else out @ hinge
+        if name in self.side:
+            lean = held_swing_rad(
+                self.side[name], angles.get(name, rest), self.settings
+            )
+            swing = rotation_about_axis(self._side_axis[name], lean)
+            out = swing if out is None else out @ swing
+        if name == "thumb_meta" and THUMB_PRESS in angles:
+            press = rotation_about_axis(self.press_axis, angles[THUMB_PRESS])
+            out = press @ (_EYE3 if out is None else out)
+        return out
 
     def rotations(self, angles: Mapping[str, float]) -> dict[str, Array]:
-        asset = self.asset
-        out = dict(self.fixed)
-        for name, angle in angles.items():
-            if name == THUMB_PRESS or name.endswith(_SIDE_SUFFIX):
-                continue
-            i = self._index[name]
-            delta = angle - float(asset.rest_flexion_rad[i])
-            if delta == 0.0:
-                continue
-            hinge = self._hinge(i, delta)
-            out[name] = out[name] @ hinge if name in out else hinge
-        for name, lean in self.side_swings(angles).items():
-            swing = rotation_about_axis(self._side_axis[name], lean)
-            out[name] = out[name] @ swing if name in out else swing
-        if THUMB_PRESS in angles:
-            press = rotation_about_axis(self.press_axis, angles[THUMB_PRESS])
-            out["thumb_meta"] = press @ out.get("thumb_meta", _EYE3)
-        return out
+        every = ((name, self._rotation(name, angles)) for name in self._index)
+        return {name: rotation for name, rotation in every if rotation is not None}
+
+    def _world(self, angles: Mapping[str, float]) -> Array:
+        """Forward kinematics, in an array that the next pose overwrites. A
+        bone's rotation is made again only when an angle or a matrix it is
+        made of has changed (matrices are replaced, never changed in place)."""
+        get, fixed, side = angles.get, self.fixed.get, self.side.get
+        axes, kept = self._side_axis.get, self._kept
+        press = (get(THUMB_PRESS), id(self.press_axis))
+        rotations = []
+        for i, name in enumerate(self._index):
+            parts = (fixed(name), axes(name), self.press_axis)
+            thumb = press if name == "thumb_meta" else None
+            key = (get(name), side(name), thumb, id(parts[0]), id(parts[1]))
+            if kept[i][0] != key:  # ``parts`` are kept so that no id is reused
+                kept[i] = (key, self._rotation(name, angles), parts)
+            rotations.append(kept[i][1])
+        return self._pose.world(rotations, [self.offsets.get(n) for n in self._index])
 
     def transforms(self, angles: Mapping[str, float]) -> Array:
         """Forward kinematics; equal to ``skinning.bone_transforms`` of
         :meth:`rotations` (a unit test holds the two together)."""
-        rotations = self.rotations(angles)
-        heads, parents = self.asset.bone_heads, self._parents
-        out = np.empty((len(parents), 4, 4))
-        for i, name in enumerate(self.asset.bone_names):
-            rot, offset = rotations.get(name), self.offsets.get(name)
-            if rot is None and offset is None:
-                out[i] = _EYE4 if parents[i] < 0 else out[parents[i]]
-                continue
-            local = _EYE4.copy()
-            if rot is not None:
-                local[:3, :3] = rot
-                local[:3, 3] = heads[i] - rot @ heads[i]
-            if offset is not None:
-                local = offset @ local
-            out[i] = local if parents[i] < 0 else out[parents[i]] @ local
-        return out
+        return self._world(angles).copy()
 
     def points(
         self, angles: Mapping[str, float], ids: NDArray[np.int64] | None = None
     ) -> Array:
         """Skinned vertices in the grip frame (same as ``pose_vertices``);
         only vertices ``ids`` when given."""
-        stacked = self.transforms(angles)[:, :3, :].transpose(0, 2, 1).reshape(-1, 3)
-        blend = self._blend if ids is None else self._blend[ids]
-        local = blend @ stacked
+        local = self._pose.skinned(self._world(angles), ids)
         return local @ self.placement[:3, :3].T + self.placement[:3, 3]
 
     def segment_ids(self, bone: str) -> NDArray[np.int64]:
@@ -326,7 +314,7 @@ class _GripHand:
         """Posed head (or tail) of ``bone`` in the grip frame."""
         i = self.asset.bone_index(bone)
         rest = self.asset.bone_tails[i] if tail else self.asset.bone_heads[i]
-        t = self.transforms(angles)[i]
+        t = self._world(angles)[i]
         local = t[:3, :3] @ rest + t[:3, 3]
         return self.placement[:3, :3] @ local + self.placement[:3, 3]
 
@@ -1115,9 +1103,11 @@ def _corrected_skin(
     )
     relaxable = np.asarray(relaxable_mask[asset.faces].all(axis=1))
 
+    limit = settings.crease_relax_max_added_fold_deg
+    sharpened = sharpening(asset.rest_vertices, asset.faces, limit)
+
     def creased(v: Array) -> NDArray[np.int64]:
-        limit = settings.crease_relax_max_added_fold_deg
-        found = sharpened_faces(v, asset.rest_vertices, asset.faces, limit)
+        found = sharpened(v)
         return found[relaxable[found]]
 
     skin = relax_folds(skin, asset.faces, creased, settings.crease_relax)

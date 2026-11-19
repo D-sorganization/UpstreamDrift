@@ -14,7 +14,8 @@ from __future__ import annotations
 import dataclasses
 import logging
 from collections.abc import Callable
-from functools import partial
+from functools import lru_cache, partial
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -56,6 +57,8 @@ from src.shared.python.model_appearance.hand_backends.types import HandVisualRes
 
 Array = NDArray[np.float64]
 logger = logging.getLogger(__name__)
+#: Posed pairs kept in a process (see :func:`_solved_pair`).
+_PAIR_MEMO_SIZE = 4
 
 
 def _bone_capsules(
@@ -281,6 +284,25 @@ def pair_fault_m(
     return max(seat, touch, 0.0)
 
 
+def _copied(hand: HandVisualResult) -> HandVisualResult:
+    """``hand`` with arrays and a gap table of its own, for a caller to change.
+
+    Only its rest asset is shared: a frozen record, the one every hand of that
+    size is posed from.
+    """
+    skin = hand.mesh
+    own: dict[str, Any] = {
+        "mesh": dataclasses.replace(
+            skin, vertices=skin.vertices.copy(), faces=skin.faces.copy()
+        )
+    }
+    for field in dataclasses.fields(hand):
+        held = getattr(hand, field.name)
+        if isinstance(held, np.ndarray | dict):
+            own[field.name] = held.copy()
+    return dataclasses.replace(hand, **own)
+
+
 def _turned(hand: HandVisualResult, turn: NDArray[np.float64]) -> HandVisualResult:
     """``hand`` turned rigidly about the shaft by the rotation ``turn``."""
     frame = np.eye(4)
@@ -343,6 +365,21 @@ def build_grip_hands(
             resolved_shaft_roll_deg(grip_spec, "lead"),
         )[:3, :3]
         return {side: _turned(hand, turn) for side, hand in solved.items()}
+    solved = _solved_pair(grip_spec, float(grip_radius_m), settings)
+    return {side: _copied(hand) for side, hand in solved.items()}
+
+
+@lru_cache(maxsize=_PAIR_MEMO_SIZE)
+def _solved_pair(
+    grip_spec: GripSpec, grip_radius_m: float, settings: SkinnedHumanSettings
+) -> dict[str, HandVisualResult]:
+    """:func:`build_grip_hands` of a grip whose lead hand is not rolled.
+
+    The last ``_PAIR_MEMO_SIZE`` pairs posed in this process are kept, by grip
+    spec, grip radius and settings (all frozen values, compared by value), so
+    posing the same pair again costs nothing. What is kept is never handed
+    out: callers get :func:`_copied` hands.
+    """
     scene = _LeadObstacle(grip_spec, grip_radius_m, settings)
 
     def posed(spacing_m: float) -> _SolvedHand:

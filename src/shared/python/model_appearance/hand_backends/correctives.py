@@ -104,13 +104,31 @@ def vertex_neighbours(faces: IntArray, vertex_count: int) -> list[IntArray]:
     pairs = np.concatenate(
         [faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]]
     ).astype(np.int64)
-    both = np.unique(np.concatenate([pairs, pairs[:, ::-1]]), axis=0)
-    starts = np.searchsorted(both[:, 0], np.arange(vertex_count + 1))
-    return [both[starts[i] : starts[i + 1], 1] for i in range(vertex_count)]
+    # Each directed edge as one number, so that sorting them is one plain sort.
+    both = np.unique(pairs @ np.array([[vertex_count, 1], [1, vertex_count]]))
+    ends = both % vertex_count
+    starts = np.searchsorted(both // vertex_count, np.arange(vertex_count + 1))
+    return [ends[starts[i] : starts[i + 1]] for i in range(vertex_count)]
 
 
 def _neighbour_mean(values: Array, neighbours: list[IntArray], ids: IntArray) -> Array:
-    return np.array([values[neighbours[i]].mean(axis=0) for i in ids])
+    """Mean of each of ``ids``' neighbours' ``values``.
+
+    Rows of values are added one neighbour after another, as ``mean(axis=0)``
+    adds them, for all vertices with the same number of neighbours at once.
+    """
+    if values.ndim != 2:  # a run of scalars is summed in another order
+        return np.array([values[neighbours[i]].mean(axis=0) for i in ids])
+    counts = np.array([len(neighbours[i]) for i in ids], dtype=np.int64)
+    out = np.full((len(ids), values.shape[1]), np.nan)
+    for count in np.unique(counts[counts > 0]):
+        rows = np.flatnonzero(counts == count)
+        index = np.array([neighbours[i] for i in ids[rows]])
+        total = values[index[:, 0]]
+        for k in range(1, count):
+            total = total + values[index[:, k]]
+        out[rows] = total / count
+    return out
 
 
 def _grown(seed: IntArray, neighbours: list[IntArray], rings: int) -> IntArray:
@@ -356,16 +374,24 @@ def press_and_relax(
     return lift_out(out, distance, max_depth_m=press.max_depth_m)
 
 
-def edge_folds(vertices: Array, faces: IntArray) -> tuple[Array, IntArray]:
-    """Fold angle (degrees between the two face normals) of every interior
-    edge, and the two faces that meet there."""
+def edge_pairs(faces: IntArray) -> IntArray:
+    """The two faces that meet at every interior edge, ``(E, 2)``."""
     sides = np.sort(
         np.concatenate([faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]]), axis=1
     )
     order = np.lexsort((sides[:, 1], sides[:, 0]))
     sides, face = sides[order], np.tile(np.arange(len(faces)), 3)[order]
     paired = np.flatnonzero((sides[:-1] == sides[1:]).all(axis=1))
-    pair = np.column_stack([face[paired], face[paired + 1]])
+    return np.column_stack([face[paired], face[paired + 1]])
+
+
+def edge_folds(
+    vertices: Array, faces: IntArray, pair: IntArray | None = None
+) -> tuple[Array, IntArray]:
+    """Fold angle (degrees between the two face normals) of every interior
+    edge, and the two faces that meet there (``pair``: :func:`edge_pairs` of
+    ``faces``, if it is already known)."""
+    pair = edge_pairs(faces) if pair is None else pair
     normal = np.cross(
         vertices[faces[:, 1]] - vertices[faces[:, 0]],
         vertices[faces[:, 2]] - vertices[faces[:, 0]],
@@ -386,8 +412,18 @@ def sharpened_faces(
     edge that is sharp at rest (a nail) is not reported. Use it as the
     ``folded`` argument of :func:`relax_folds`.
     """
+    return sharpening(rest, faces, max_added_fold_deg)(posed)
+
+
+def sharpening(rest: Array, faces: IntArray, max_added_fold_deg: float) -> FoldedFaces:
+    """:func:`sharpened_faces` of any pose of one rest mesh: the edge pairs
+    and the folds at rest are worked out once, not for every pose."""
     if max_added_fold_deg <= 0.0:
         raise ValueError("max_added_fold_deg must be positive")
-    now, pair = edge_folds(posed, faces)
-    before, _ = edge_folds(rest, faces)
-    return np.unique(pair[now - before > max_added_fold_deg]).astype(np.int64)
+    before, pair = edge_folds(rest, faces)
+
+    def found(posed: Array) -> IntArray:
+        now, _ = edge_folds(posed, faces, pair)
+        return np.unique(pair[now - before > max_added_fold_deg]).astype(np.int64)
+
+    return found

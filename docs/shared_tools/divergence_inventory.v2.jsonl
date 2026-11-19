@@ -1375,6 +1375,7 @@
 {"path": "model_appearance/hand_backends/mujoco_extract.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/myohand.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/palm_fold.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/hand_backends/pose_kinematics.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/posing.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/qa.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/registration.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}

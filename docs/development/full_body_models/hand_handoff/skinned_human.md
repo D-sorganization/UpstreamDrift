@@ -13,6 +13,7 @@ which is also the text for the PR description.
 | `assets/hand_cc0/` | MakeHuman right-hand extract (`hand_cc0.npz`), builder, NOTICE, PROVENANCE |
 | `src/shared/python/model_appearance/hand_backends/skinning.py` | Asset type, hierarchical linear blend skinning, triangle checks |
 | `.../hand_backends/posing.py` | Shared curl-to-contact posing for any backend (`PosableHand`) |
+| `.../hand_backends/pose_kinematics.py` | Forward kinematics and skinning that redo only the bones a pose changed, equal bit for bit to a hand that keeps nothing. The curl search also skips the skin search for points a grid shows to be out of reach, and `build_grip_hands` keeps the last 4 posed pairs in the process (key: grip spec, grip radius, settings) and hands out copies |
 | `.../hand_backends/skinned_human.py` | This backend: `build_hand_visual`, `solve_grip_joint_angles`, settings loader |
 | `.../hand_backends/skinned_pair.py` | Both hands on one club: `build_grip_hands` (trail hand closes up to the lead hand along the grip, then curls round the grip and the lead hand's skin; overlap grip) |
 | `.../hand_backends/correctives.py` | Switchable corrective shapes after skinning: fold relaxation, the palm pad, laying skin pressed into the grip flat on its surface with a small bulge beside it (`press_flat`), and relaxing creases pinched at the knuckles (owner-approved 2026-11-15). The solver closes the joints `squeeze.finger_depth_m` past first touch (#15179, #15180) |

@@ -208,6 +208,49 @@ def capsule_union_distance(
     return distance
 
 
+#: The grid that tells far points from near ones: cells per reach, the share
+#: by which a cell is widened so that rounding cannot hide a vertex, and the
+#: most cells it may have (a larger grid is not built; every point is searched).
+_FAR_GRID_CELLS_PER_REACH = 4
+_FAR_GRID_SLACK = 1e-6
+_FAR_GRID_MAX_CELLS = 4_000_000
+
+
+def may_reach(vertices: Array, reach_m: float) -> Callable[[Array], NDArray[np.bool_]]:
+    """A test that flags the points that may lie within ``reach_m`` of a vertex.
+
+    Postcondition: a point that is not flagged is farther than ``reach_m``
+    from every one of ``vertices``, so a search of that reach finds nothing
+    for it. Space is cut into cells a little over ``reach_m`` divided by
+    ``_FAR_GRID_CELLS_PER_REACH`` wide. A vertex ``d`` cells from a point's
+    cell along an axis is at least ``|d| - 1`` cells from the point along it,
+    and a point is flagged when those least distances to some vertex's cell
+    do not add up, squared, to more than the reach.
+    """
+    steps = _FAR_GRID_CELLS_PER_REACH
+    cell = reach_m * (1.0 + _FAR_GRID_SLACK) / steps
+    if not math.isfinite(cell):
+        return lambda points: np.ones(len(points), dtype=bool)
+    low = vertices.min(axis=0) - (steps + 2) * cell  # a margin of empty cells
+    at = ((vertices - low) / cell).astype(np.int64)
+    shape = at.max(axis=0) + steps + 3
+    if int(np.prod(shape)) > _FAR_GRID_MAX_CELLS:
+        return lambda points: np.ones(len(points), dtype=bool)
+    strides = np.array([shape[1] * shape[2], shape[2], 1])
+    least = np.maximum(np.abs(np.arange(-steps - 1, steps + 2)) - 1, 0) ** 2
+    ball = least[:, None, None] + least[:, None] + least <= steps**2
+    around = (np.argwhere(ball) - (steps + 1)) @ strides
+    flat, top = np.zeros(int(np.prod(shape)), dtype=bool), shape - 1.0
+    flat[(np.unique(at @ strides)[:, None] + around).ravel()] = True
+
+    def flagged(points: Array) -> NDArray[np.bool_]:
+        # Outside the grid (or not a number) is its outermost, empty, cells.
+        where = np.fmin(np.fmax((points - low) / cell, 0.0), top)
+        return np.asarray(flat[where.astype(np.int64) @ strides])
+
+    return flagged
+
+
 def skin_distance(
     vertices: Array, normals: Array, reach_m: float = math.inf
 ) -> ObstacleDistance:
@@ -230,14 +273,20 @@ def skin_distance(
         raise ValueError("skin reach_m must be positive")
     tree = cKDTree(v)
     spacing = float(np.median(np.asarray(tree.query(v, k=2)[0])[:, 1]))
+    close = may_reach(v, reach_m)
 
     def distance(points: Array) -> Array:
-        found = tree.query(points, distance_upper_bound=reach_m)
+        # Only points that may be within reach are searched for: the others
+        # would come back unfound, and are reported ``reach_m`` away as they are.
+        asked = np.flatnonzero(close(points))
+        if len(asked) == 0:
+            return np.full(len(points), reach_m)
+        found = tree.query(points[asked], distance_upper_bound=reach_m)
         reach, nearest = np.asarray(found[0]), np.asarray(found[1])
-        near = np.isfinite(reach)
-        nearest = nearest[near]
+        hit = np.isfinite(reach)
+        near, nearest = asked[hit], nearest[hit]
         height = np.einsum("ij,ij->i", points[near] - v[nearest], n[nearest])
-        size = np.maximum(np.abs(height), reach[near] - spacing)
+        size = np.maximum(np.abs(height), reach[hit] - spacing)
         out = np.full(len(points), reach_m)
         out[near] = np.where(height < 0.0, -size, size)
         return out
@@ -268,9 +317,13 @@ def _curl_joint(
     segment = np.searchsorted(watched, hand.segment_ids(joint.bone))
     moved = np.searchsorted(watched, hand.moved_ids(joint.bone))
 
+    seen: dict[float, tuple[float, float]] = {}
+
     def clearances(angle: float) -> tuple[float, float]:
-        d = obstacle(hand.points(_apply(joint, angle, angles), watched))
-        return float(d[segment].min()), float(d[moved].min())
+        if angle not in seen:  # the angle settled on was tried on the way
+            d = obstacle(hand.points(_apply(joint, angle, angles), watched))
+            seen[angle] = float(d[segment].min()), float(d[moved].min())
+        return seen[angle]
 
     def free(angle: float) -> bool:
         return clearances(angle)[1] >= -settings.penetration_allowance_m
@@ -354,12 +407,14 @@ def _chain_cost(
     angles: Mapping[str, float],
 ) -> tuple[float, float]:
     """(contact shortfall in metres, largest fraction of a joint's range used)."""
-    distance = obstacle(hand.points(angles))
     wanted = chain.must_touch or tuple(joint.bone for joint in chain.joints)
+    # A point's distance is its own: only the skin that is judged is asked for.
+    skin = hand.points(angles)
     shortfall = sum(
         max(
             0.0,
-            float(distance[hand.segment_ids(b)].min()) - settings.contact_tolerance_m,
+            float(obstacle(skin[hand.segment_ids(b)]).min())
+            - settings.contact_tolerance_m,
         )
         for b in wanted
     )
@@ -418,7 +473,7 @@ def wrap_to_contact(
                     candidate, _ = _curl_joint(
                         hand, joint, obstacle, settings, candidate
                     )
-                clear = float(obstacle(hand.points(candidate))[moved].min())
+                clear = float(obstacle(hand.points(candidate)[moved]).min())
                 if clear < -settings.penetration_allowance_m:
                     continue
                 cost = _chain_cost(hand, chain, wanted, settings, candidate)
