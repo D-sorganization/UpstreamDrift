@@ -33,7 +33,7 @@ from src.shared.python.motion_matching.anthropometry import (
     de_leva_table_dict,
     de_leva_table_sha256,
 )
-from src.shared.python.motion_matching.club_models import CLUBS
+from src.shared.python.motion_matching.club_models import CLUBS, ClubSpec
 from src.shared.python.motion_matching.club_shaft_chain import (
     DEFAULT_SHAFT_MODEL,
     SHAFT_MODELS,
@@ -45,6 +45,9 @@ from src.shared.python.motion_matching.execution.assets import (
     get_club_markers,
     get_native_geometry_spec,
     get_opensim_model,
+)
+from src.shared.python.motion_matching.execution.subject_preset import (
+    load_subject_preset,
 )
 from src.shared.python.motion_matching.execution.club_markers import (
     CLUB_MARKER_BODY,
@@ -716,7 +719,7 @@ def _annotate_document(
 
 
 def with_shaft_model(
-    document: dict[str, Any], club: str, shaft_model: str | None
+    document: dict[str, Any], club: str | ClubSpec, shaft_model: str | None
 ) -> dict[str, Any]:
     """Apply the ``club.shaft.model`` flag (#12686); ``"rigid"`` is the default.
 
@@ -732,7 +735,8 @@ def with_shaft_model(
         raise ValueError(f"shaft_model must be one of {SHAFT_MODELS}, got {model!r}")
     if model == "rigid":
         return document
-    return apply_shaft_chain(document, build_shaft_chain(CLUBS[club]))
+    spec = CLUBS[club] if isinstance(club, str) else club
+    return apply_shaft_chain(document, build_shaft_chain(spec))
 
 
 @dataclass(frozen=True)
@@ -776,6 +780,24 @@ def _provenance_notes(
     return note
 
 
+def _club_spec(club: str, kwargs: Mapping[str, Any]) -> ClubSpec:
+    """The catalogue club, or the ``club_spec`` kwarg restating it (#15296)."""
+    spec: ClubSpec = kwargs.get("club_spec") or CLUBS[club]
+    if spec.name != club:
+        raise ValueError(f"club_spec is a {spec.name!r}, not the {club!r} asked for")
+    if kwargs.get("club_butt_to_sole_m") and "club_spec" not in kwargs:
+        raise ValueError("club_butt_to_sole_m records a club_spec and needs one")
+    return spec
+
+
+def _record_preset(upper: dict[str, Any], kwargs: Mapping[str, Any]) -> None:
+    """Name the preset in ``subject`` and the butt to sole length in ``club``."""
+    if kwargs.get("subject_preset"):
+        upper["subject"]["subject_preset"] = kwargs["subject_preset"]
+    if kwargs.get("club_butt_to_sole_m"):
+        upper["club"]["butt_to_sole_m"] = float(kwargs["club_butt_to_sole_m"])
+
+
 def compose_anthropometric_document(
     stature_m: float = 1.80,
     mass_kg: float = 80.0,
@@ -809,6 +831,9 @@ def compose_anthropometric_document(
     ``build_upper_body``'s rule for the clavicle links' mass, which validates it
     (``ValueError`` naming ``GIRDLE_MASS_RULES``) and records a non-default rule
     in ``subject``, so in the document and the build receipt.
+    ``subject_preset.SubjectPreset`` kwargs (#15296): ``club_spec`` restates
+    ``club`` (same name, ``ValueError`` otherwise) and
+    ``shoulder_below_cervicale_m`` is ``build_upper_body``'s.
     """
     native_path = native_path or get_native_geometry_spec(None)
     osim_path = osim_path or get_opensim_model(None)
@@ -818,6 +843,7 @@ def compose_anthropometric_document(
         _LIFT_UPPER_RANGES_DEG if not kwargs.get("mirror_arm", True) else None
     )
     native = json.loads(native_path.read_text(encoding="utf-8"))
+    club_spec = _club_spec(club, kwargs)
     upper = build_upper_body(
         native,
         stature_m=stature_m,
@@ -825,7 +851,7 @@ def compose_anthropometric_document(
         trunk_scale=float(kwargs.get("trunk_scale", 1.0)),
         arm_scale=float(kwargs.get("arm_scale", 1.0)),
         shoulder_scale=float(kwargs.get("shoulder_scale", 1.0)),
-        club=CLUBS[club],
+        club=club_spec,
         grip_roll_deg=float(kwargs.get("grip_roll_deg", 0.0)),
         grip_rotation_deg={
             "L": kwargs.get("lead_grip_rotation") or GRIP_ROTATION_DEG["L"],
@@ -834,7 +860,9 @@ def compose_anthropometric_document(
         scale_hand_mass=match_subject_mass,
         upper_ranges_deg=upper_ranges,
         shoulder_girdle_mass=kwargs.get("shoulder_girdle_mass", GIRDLE_MASS_ADDED),
+        shoulder_below_cervicale_m=kwargs.get("shoulder_below_cervicale_m"),
     )
+    _record_preset(upper, kwargs)
 
     hip_frame = next(f for f in upper["frames"] if f["name"] == "Hip")
     leg_mass_kg = (
@@ -861,7 +889,7 @@ def compose_anthropometric_document(
         ),
     )
     _annotate_document(document, upper, kwargs.get("mirror_arm", True))
-    document = with_shaft_model(document, club, kwargs.get("shaft_model"))
+    document = with_shaft_model(document, club_spec, kwargs.get("shaft_model"))
     document = _apply_kwarg_tibial_torsion(document, kwargs)
     return AnthropometricDocument(
         document=document,
@@ -936,13 +964,20 @@ def build_anthropometric_spec(
     return paths
 
 
-def build_parser() -> argparse.ArgumentParser:
+def build_parser(preset: Mapping[str, Any] | None = None) -> argparse.ArgumentParser:
+    """The command line; ``preset`` values replace the defaults they name."""
+    preset = dict(preset or {})
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--subject-preset",
+        default=None,
+        help="evidence/subject_presets/<name>.json or a file; flags override it",
+    )
     parser.add_argument("--native", type=Path, required=True)
     parser.add_argument("--osim", type=Path, required=True)
     parser.add_argument("--native-candidate", type=Path, required=True)
-    parser.add_argument("--stature", type=float, required=True)
-    parser.add_argument("--mass", type=float, required=True)
+    parser.add_argument("--stature", type=float, required="stature" not in preset)
+    parser.add_argument("--mass", type=float, required="mass" not in preset)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--trunk-scale", type=float, default=1.0)
     parser.add_argument("--arm-scale", type=float, default=1.0)
@@ -995,12 +1030,32 @@ def build_parser() -> argparse.ArgumentParser:
         help="where the clavicle links' mass comes from (#15279, #15150)",
     )
     add_grip_arguments(parser, physical=True)
+    parser.set_defaults(**preset)
     return parser
 
 
+# Command-line destination -> builder kwarg a subject preset gives a default for.
+_PRESET_FLAGS = {"stature": "stature_m", "mass": "mass_kg", "club": "club"} | {
+    "club_markers": "club_markers_path",
+    **{k: k for k in ("trunk_scale", "arm_scale", "shoulder_scale")},
+}
+
+
+def _preset_kwargs(argv: Sequence[str] | None) -> dict[str, Any]:
+    """Builder kwargs of the ``--subject-preset`` named in ``argv``, if any."""
+    probe = argparse.ArgumentParser(add_help=False)
+    probe.add_argument("--subject-preset", default=None)
+    name = probe.parse_known_args(argv)[0].subject_preset
+    return load_subject_preset(name).builder_kwargs() if name else {}
+
+
 def main(argv: Sequence[str] | None = None) -> int:
-    parser = build_parser()
+    preset = _preset_kwargs(argv)
+    flags = {k: preset.pop(v) for k, v in _PRESET_FLAGS.items() if preset}
+    parser = build_parser(flags)
     args = parser.parse_args(argv)
+    if flags and args.club != flags["club"]:
+        parser.error(f"--club must be the preset's {flags['club']!r}")
     build_anthropometric_spec(
         native_path=args.native,
         osim_path=args.osim,
@@ -1025,6 +1080,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         tibial_torsion_offset_deg=args.tibial_torsion,
         shoulder_girdle_mass=args.shoulder_girdle_mass,
         grip_overrides=overrides_from_args(args),
+        **preset,
     )
     return 0
 

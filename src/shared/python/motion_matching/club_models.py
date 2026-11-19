@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 
 import numpy as np
@@ -35,7 +35,7 @@ class ClubSpec:
     """Typical values for one club type; lengths in metres, masses in kg."""
 
     name: str
-    length_m: float  # butt end to sole along the shaft
+    length_m: float  # butt end to the head centre along the shaft (sole_offset_m)
     head_mass_kg: float
     shaft_mass_kg: float
     grip_mass_kg: float
@@ -139,6 +139,48 @@ def from_database(club_id: str) -> ClubSpec:
         head_half_size_m=half,
         head_gyration_m=(0.85 * k_vertical, k_vertical, k_vertical),
     )
+
+
+def sole_offset_m(
+    club: ClubSpec, shaft_elevation_deg: float, head_roll_deg: float
+) -> float:
+    """Distance along the shaft from the head centre to the ground (#15296).
+
+    ``length_m`` ends at the head centre; a club is sold by its length to the
+    sole. With the head ellipsoid resting on level ground, the shaft
+    ``shaft_elevation_deg`` above it and the ground normal turned
+    ``head_roll_deg`` about the shaft from the club body +z toward +x, the
+    shaft axis meets the ground this far beyond the head centre. Raises
+    ``ValueError`` unless 0 < elevation <= 90 and the roll is finite.
+    """
+    if not 0.0 < shaft_elevation_deg <= 90.0:  # also refuses NaN
+        raise ValueError(f"shaft elevation must be in (0, 90], {shaft_elevation_deg}")
+    if not math.isfinite(head_roll_deg):
+        raise ValueError(f"head roll must be finite, got {head_roll_deg}")
+    elevation, roll = math.radians(shaft_elevation_deg), math.radians(head_roll_deg)
+    level = math.cos(elevation)
+    up = (level * math.sin(roll), -math.sin(elevation), level * math.cos(roll))
+    support = math.hypot(
+        *(h * u for h, u in zip(club.head_half_size_m, up, strict=True))
+    )
+    return support / math.sin(elevation)
+
+
+def with_butt_to_sole_length(
+    club: ClubSpec, butt_to_sole_m: float, sole_offset: float
+) -> ClubSpec:
+    """``club`` with its length stated butt to sole along the shaft (#15296).
+
+    ``sole_offset`` is :func:`sole_offset_m` for the address lie. Raises
+    ``ValueError`` when the head centre would not lie beyond the grip.
+    """
+    length = butt_to_sole_m - sole_offset
+    if not math.isfinite(length) or sole_offset < 0 or length <= club.grip_length_m:
+        raise ValueError(
+            f"butt to sole length {butt_to_sole_m} m with a {sole_offset} m sole "
+            f"offset leaves no shaft below the {club.grip_length_m} m grip"
+        )
+    return replace(club, length_m=length)
 
 
 def _placement(translation: tuple[float, float, float]) -> list[list[float]]:

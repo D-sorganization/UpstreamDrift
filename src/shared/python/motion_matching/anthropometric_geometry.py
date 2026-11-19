@@ -296,8 +296,13 @@ def build_upper_body(
     handedness: str = DEFAULT_HANDEDNESS,
     upper_ranges_deg: Mapping[str, tuple[float, float]] | None = None,
     shoulder_girdle_mass: str = GIRDLE_MASS_ADDED,
+    shoulder_below_cervicale_m: float | None = None,
 ) -> dict[str, Any]:
     """Return the anthropometric upper-body document for a subject.
+
+    ``shoulder_below_cervicale_m`` (finite, >= 0; #15296) is the drop of the
+    shoulder joints below the neck joint; ``None`` is the default
+    ``SHOULDER_BELOW_CERVICALE_M``, any other value is recorded in ``subject``.
 
     ``handedness`` (``"right"`` or ``"left"``, validated) is written to
     ``subject.handedness`` only when it is not the default, so a right-handed
@@ -360,6 +365,11 @@ def build_upper_body(
     hand_breadth_m = resolve_hand_breadth_m(hand_length_m)
     if trunk_scale <= 0 or arm_scale <= 0 or shoulder_scale <= 0:
         raise ValueError("Scale factors must be positive")
+    drop = SHOULDER_BELOW_CERVICALE_M
+    if shoulder_below_cervicale_m is not None:
+        drop = float(shoulder_below_cervicale_m)
+    if not 0.0 <= drop < float("inf"):  # also refuses NaN
+        raise ValueError("shoulder_below_cervicale_m must be finite and >= 0")
     if tuple(native_dict["coordinate_order"]) != COORDINATES:
         raise ValueError("Native document must carry the 27 native coordinates")
     if isinstance(club, str):
@@ -378,7 +388,7 @@ def build_upper_body(
 
     trunk = segment_parameters(stature_m, mass_kg, "trunk").length_m * trunk_scale
     pelvis_h = PELVIS_HEIGHT_FRACTION * trunk
-    hub_h = trunk - SHOULDER_BELOW_CERVICALE_M - pelvis_h  # L5/S1 to shoulder centre
+    hub_h = trunk - drop - pelvis_h  # L5/S1 to shoulder centre
     cervicale_h = trunk - pelvis_h
     head_len = segment_parameters(stature_m, mass_kg, "head").length_m
     clav = BIACROMIAL_FRACTION_OF_STATURE * stature_m * shoulder_scale / 2
@@ -663,6 +673,11 @@ def build_upper_body(
                 {}
                 if shoulder_girdle_mass == GIRDLE_MASS_ADDED
                 else {"shoulder_girdle_mass": shoulder_girdle_mass}
+            ),
+            **(
+                {}
+                if drop == SHOULDER_BELOW_CERVICALE_M
+                else {"shoulder_below_cervicale_m": drop}
             ),
         },
         "coordinate_ranges_deg": {
