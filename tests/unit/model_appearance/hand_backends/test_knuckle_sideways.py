@@ -20,7 +20,7 @@ from src.shared.python.model_appearance.hand_backends import skinned_human
 from src.shared.python.model_appearance.hand_backends.joint_angles import FINGERS
 from src.shared.python.model_appearance.hand_backends.knuckle_sideways import (
     sideways_limit_rad,
-    split_swing_rad,
+    held_swing_rad,
 )
 from src.shared.python.model_appearance.hand_backends.skinned_settings import (
     default_settings,
@@ -35,8 +35,8 @@ from tests.unit.model_appearance.hand_backends.test_skinned_human import (
 
 pytestmark = pytest.mark.unit
 
-#: The anatomical knuckle; ``side_close.spread_in_palm`` is still off by default.
-_SETTINGS = dataclasses.replace(default_settings(), side_close_spread_in_palm=True)
+#: The anatomical knuckle; ``side_close.limit_by_flexion`` is still off by default.
+_SETTINGS = dataclasses.replace(default_settings(), side_close_limit_by_flexion=True)
 _ASSET = skinned_human._sized_assets(0.19, 0.085, _SETTINGS)[0]
 _MOST = math.radians(_SETTINGS.side_close_knuckle_max_deg)
 _FLEXED = math.radians(_SETTINGS.side_close_flexed_at_deg)
@@ -56,16 +56,15 @@ def test_the_sideways_range_shrinks_as_the_knuckle_flexes() -> None:
         sideways_limit_rad(math.nan, _SETTINGS)
 
 
-def test_a_swing_is_a_turn_in_the_palm_with_a_lean_that_holds_it_in_range() -> None:
+def test_a_swing_is_held_to_the_range_of_the_knuckle_as_it_is_flexed() -> None:
     asked = math.radians(20.0)
-    assert split_swing_rad(asked, 0.0, _SETTINGS) == pytest.approx((0.0, asked))
+    assert held_swing_rad(asked, 0.0, _SETTINGS) == pytest.approx(asked)
     for flexion in (0.3, 0.8, _FLEXED, 1.9):
-        lean, turn = split_swing_rad(-asked, flexion, _SETTINGS)
-        assert turn == pytest.approx(-asked), "the fit keeps the whole spread"
-        sideways = turn * math.cos(flexion) + lean
-        assert abs(sideways) <= sideways_limit_rad(flexion, _SETTINGS) + 1e-12
-    # Past the straight-finger range the swing is held.
-    assert split_swing_rad(2.0 * _MOST, 0.0, _SETTINGS)[1] == pytest.approx(_MOST)
+        held = held_swing_rad(-asked, flexion, _SETTINGS)
+        most = sideways_limit_rad(flexion, _SETTINGS)
+        assert held == pytest.approx(-min(asked, most)), "same side, inside the range"
+    # Past the straight-finger range the swing is held, too.
+    assert held_swing_rad(2.0 * _MOST, 0.0, _SETTINGS) == pytest.approx(_MOST)
 
 
 def _sideways_deg(hand: skinned_human._GripHand, flexion: float) -> float:
@@ -94,15 +93,15 @@ def test_a_swing_asked_of_a_bent_knuckle_is_held_to_its_range(sign: float) -> No
             assert leaning == pytest.approx(asked, abs=0.05)
 
 
-def test_with_the_setting_off_the_whole_swing_is_a_lean() -> None:
+def test_with_the_setting_off_the_swing_is_as_asked() -> None:
     asked = math.radians(20.0)
-    assert split_swing_rad(asked, _FLEXED, default_settings()) == (asked, 0.0)
+    assert held_swing_rad(asked, _FLEXED, default_settings()) == asked
 
 
 @pytest.mark.xfail(
     strict=True,
     reason="#15278: the gripping hands still lean bent knuckles sideways; "
-    "spread_in_palm stays off until the trail hand's seat is refitted",
+    "limit_by_flexion stays off until the trail hand's seat is refitted",
 )
 @pytest.mark.parametrize("side", ["lead", "trail"])
 def test_no_knuckle_of_a_gripping_hand_moves_sideways_past_its_range(side: str) -> None:

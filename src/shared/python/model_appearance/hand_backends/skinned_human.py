@@ -46,7 +46,7 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     yield_to_points,
 )
 from src.shared.python.model_appearance.hand_backends.knuckle_sideways import (
-    split_swing_rad,
+    held_swing_rad,
 )
 from src.shared.python.model_appearance.hand_backends.joint_angles import (
     FINGERS,
@@ -213,7 +213,7 @@ class _GripHand:
         self.offsets: dict[str, Array] = {}
         # Sideways swing of a finger at its knuckle, radians (side closing).
         self.side: dict[str, float] = {}
-        self._side_axis, self._spread_axis = {}, {}  # type: tuple[dict, dict]
+        self._side_axis: dict[str, Array] = {}
         self._moved: dict[str, NDArray[np.int64]] = {}
 
     def _adduction(self) -> dict[str, Array]:
@@ -242,17 +242,13 @@ class _GripHand:
             return
         axis = np.cross(self.asset.flex_axes[self._index[bone]], self.direction(bone))
         self.side[bone] = swing
-        self._side_axis[bone] = axis = axis / np.linalg.norm(axis)
-        i = self._index[bone]  # the spread's axis stands on the straight finger
-        self._spread_axis[bone] = self._hinge(i, -self.asset.rest_flexion_rad[i]) @ axis
+        self._side_axis[bone] = axis / np.linalg.norm(axis)
 
-    def side_swings(self, angles: Mapping[str, float]) -> dict[str, tuple]:
-        """Each swung knuckle's sideways ``(lean, turn)`` (:mod:`knuckle_sideways`)."""
+    def side_swings(self, angles: Mapping[str, float]) -> dict[str, float]:
+        """Each swung knuckle's sideways swing as its flexion lets it be."""
         rest, at = self.asset.rest_flexion_rad, self._index
         return {
-            bone: split_swing_rad(
-                swing, angles.get(bone, rest[at[bone]]), self.settings
-            )
+            bone: held_swing_rad(swing, angles.get(bone, rest[at[bone]]), self.settings)
             for bone, swing in self.side.items()
         }
 
@@ -273,10 +269,9 @@ class _GripHand:
                 continue
             hinge = self._hinge(i, delta)
             out[name] = out[name] @ hinge if name in out else hinge
-        for name, (lean, turn) in self.side_swings(angles).items():
-            axis, set_ = self._side_axis[name], self.fixed.get(name, _EYE3)
-            plane = set_ @ rotation_about_axis(self._spread_axis[name], turn) @ set_.T
-            out[name] = plane @ out.get(name, _EYE3) @ rotation_about_axis(axis, lean)
+        for name, lean in self.side_swings(angles).items():
+            swing = rotation_about_axis(self._side_axis[name], lean)
+            out[name] = out[name] @ swing if name in out else swing
         if THUMB_PRESS in angles:
             press = rotation_about_axis(self.press_axis, angles[THUMB_PRESS])
             out["thumb_meta"] = press @ out.get("thumb_meta", _EYE3)
@@ -1018,7 +1013,7 @@ def _solve_right_hand(
         hand, skin = fold_palm(hand, skin, angles, pair.thumb_points, pad)
         angles = angles if hand is flat else with_thumb(hand, angles)
     _bend_wrist(hand, side)
-    for bone, swing in hand.side.items():  # so given angles rebuild this pose
+    for bone, swing in hand.side_swings(angles).items():  # these rebuild the pose
         angles[f"{bone.removesuffix('_prox')}{_SIDE_SUFFIX}"] = swing
     return _SolvedHand(hand, angles, targets, obstacle, skin, pad, points)
 

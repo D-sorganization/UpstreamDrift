@@ -25,7 +25,7 @@ class SidewaysSettings(Protocol):
     @property
     def side_close_flexed_at_deg(self) -> float: ...
     @property
-    def side_close_spread_in_palm(self) -> bool: ...
+    def side_close_limit_by_flexion(self) -> bool: ...
 
 
 def sideways_limit_rad(flexion_rad: float, settings: SidewaysSettings) -> float:
@@ -43,29 +43,20 @@ def sideways_limit_rad(flexion_rad: float, settings: SidewaysSettings) -> float:
     return math.radians(settings.side_close_knuckle_max_deg) * (1.0 - lost)
 
 
-def split_swing_rad(
+def held_swing_rad(
     swing_rad: float, flexion_rad: float, settings: SidewaysSettings
-) -> tuple[float, float]:
-    """``swing_rad`` as ``(lean, turn)`` for a knuckle flexed ``flexion_rad``.
+) -> float:
+    """``swing_rad`` as a knuckle flexed ``flexion_rad`` can take it.
 
-    ``turn`` swings the finger about the axis the knuckle spreads on, which is
-    fixed in the palm: a straight finger moves sideways by all of it, a finger
-    flexed a right angle only turns the plane it bends in, which is how fingers
-    converge as they curl. ``lean`` tips the flexed finger sideways off that
-    path; it is only ever the correction that keeps the sideways movement,
-    ``turn * cos(flexion) + lean``, inside :func:`sideways_limit_rad`.
-    Postconditions: ``turn`` is ``swing_rad`` held to the straight-finger
-    range; ``lean`` is zero for a straight finger, so it swings as asked.
-    With ``side_close.spread_in_palm`` off the whole swing is a lean, as the
-    fit was first tuned (#15278 records why that is still the default).
+    Postconditions: with ``side_close.limit_by_flexion`` on, the swing held
+    inside :func:`sideways_limit_rad`, on the side asked; with it off, the
+    swing as asked, as the fit was first tuned (#15278 records why that is
+    still the default).
     """
-    if not settings.side_close_spread_in_palm:
-        return swing_rad, 0.0
-    full = math.radians(settings.side_close_knuckle_max_deg)
-    turn = min(full, max(-full, swing_rad))
+    if not settings.side_close_limit_by_flexion:
+        return swing_rad
     most = sideways_limit_rad(flexion_rad, settings)
-    sideways = turn * math.cos(flexion_rad)
-    return min(most, max(-most, sideways)) - sideways, turn
+    return min(most, max(-most, swing_rad))
 
 
-__all__ = ["SidewaysSettings", "sideways_limit_rad", "split_swing_rad"]
+__all__ = ["SidewaysSettings", "held_swing_rad", "sideways_limit_rad"]

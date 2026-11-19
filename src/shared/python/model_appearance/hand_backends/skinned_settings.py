@@ -94,7 +94,7 @@ class SkinnedHumanSettings:
     side_close_knuckle_max_deg: float
     side_close_flexed_share: float
     side_close_flexed_at_deg: float
-    side_close_spread_in_palm: bool
+    side_close_limit_by_flexion: bool
     pair_capsule_radius_scale: float
     pair_palm_capsule_radius_scale: float
     pair_thumb_radius_scale: float
@@ -269,7 +269,7 @@ def _corrective_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
 
 def _flag(value: Any) -> bool:
     if not isinstance(value, bool):
-        raise TypeError("side_close.spread_in_palm must be true or false")
+        raise TypeError("side_close.limit_by_flexion must be true or false")
     return value
 
 
@@ -305,7 +305,7 @@ def _side_close_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
         "side_close_flexed_at_deg": _positive(
             raw["flexed_at_deg"], "side_close.flexed_at_deg"
         ),
-        "side_close_spread_in_palm": _flag(raw["spread_in_palm"]),
+        "side_close_limit_by_flexion": _flag(raw["limit_by_flexion"]),
     }
 
 
