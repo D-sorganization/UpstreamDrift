@@ -129,3 +129,60 @@ def test_bad_input_is_refused(base) -> None:
         refit_arms_to_club(
             base, base, np.zeros(len(base["coordinate_order"])), alignment_weight=-1.0
         )
+
+
+def test_a_posture_puts_the_bend_in_the_thoracic_joint_not_the_lumbar(
+    base, closed
+) -> None:
+    """Owner request (#15277): a neutral lower back and a slight thoracic bend.
+
+    Left free with no posture, the trunk arches at the lumbar joint to line
+    the forearms up; a posture names where each trunk joint should sit.
+    """
+    order = base["coordinate_order"]
+    moved = apply_skinned_hand_wrists(base)
+    posture = {"lumbar_flexion": np.radians(2.0), "thoracic_flexion": np.radians(10.0)}
+    posed = refit_arms_to_club(base, moved, closed.q, posture=posture)
+    assert posed.club_offset_m <= TIGHT_M
+    assert posed.closure_m <= TIGHT_M
+    for name, target in posture.items():
+        got = posed.q[order.index(name)]
+        assert abs(np.degrees(got - target)) < 1.0, (name, np.degrees(got))
+    changed = {order[i] for i in np.flatnonzero(posed.q != closed.q)}
+    assert all(
+        name in posture or any(key in name for key in ARM_COORDINATE_KEYS)
+        for name in changed
+    )
+
+
+def test_a_freed_trunk_joint_stays_inside_its_soft_limits(base, closed) -> None:
+    order = base["coordinate_order"]
+    moved = apply_skinned_hand_wrists(base)
+    far = {"thoracic_flexion": np.radians(80.0)}  # well past the 30 degree limit
+    posed = refit_arms_to_club(base, moved, closed.q, posture=far)
+    low, high = base["soft_limits_deg"]["thoracic_flexion"]
+    got = np.degrees(posed.q[order.index("thoracic_flexion")])
+    assert low - 1e-6 <= got <= high + 1e-6
+
+
+def test_a_bad_posture_is_refused(base) -> None:
+    q = np.zeros(len(base["coordinate_order"]))
+    with pytest.raises(ValueError, match="posture"):
+        refit_arms_to_club(base, base, q, posture={"no_such_joint": 0.0})
+    with pytest.raises(ValueError, match="posture"):
+        refit_arms_to_club(base, base, q, posture={"lumbar_flexion": float("nan")})
+    with pytest.raises(ValueError, match="posture_weight"):
+        refit_arms_to_club(
+            base, base, q, posture={"lumbar_flexion": 0.0}, posture_weight=-1.0
+        )
+
+
+def test_the_address_posture_is_a_neutral_lower_back_and_a_slight_thoracic_bend() -> (
+    None
+):
+    from src.engines.physics_engines.mujoco.python import skinned_arm_refit as refit
+
+    deg = refit.ADDRESS_POSTURE_DEG
+    assert abs(deg["lumbar_flexion"]) <= 5.0
+    assert 5.0 <= deg["thoracic_flexion"] <= 15.0
+    assert refit.address_posture() == {k: np.radians(v) for k, v in deg.items()}
