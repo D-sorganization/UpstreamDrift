@@ -63,9 +63,9 @@ class TestEnsureImports:
 
 class TestLazyImport:
     def test_returns_requested_dotted_module(self) -> None:
-        from xml.etree import ElementTree
+        import urllib.parse
 
-        assert lazy_import("xml.etree.ElementTree") is ElementTree
+        assert lazy_import("urllib.parse") is urllib.parse
 
     def test_returns_module(self) -> None:
         mod = lazy_import("sys")
