@@ -61,7 +61,9 @@ def thumb_capsules(
         raise ValueError("radial_unit must be non-zero")
     radial = radial / norm
     centre = (grip_radius_m + pad + r) * radial
-    z0, z1, z2 = (scale * s for s in mesh.thumb_stations_m)
+    # Builder contact capsules keep the legacy shaft-aligned stations; the
+    # visual thumb wrap (``thumb_stations_m``) is appearance only (ADR-0057).
+    z0, z1, z2 = (scale * s for s in mesh.thumb_patch_axis_stations_m)
     offsets = (z0, z1, z2)
     direction = np.array([0.0, 0.0, 1.0], dtype=np.float64)
     origin = centre + np.array([0.0, 0.0, offsets[0] + axial_shift_m])

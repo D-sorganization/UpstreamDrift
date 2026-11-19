@@ -1,0 +1,69 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage[margin=1in]{geometry}
+\title{Grip Hand Surface Penetration Diagnostic}
+\author{UpstreamDrift: Appearance-Only Research Reference}
+\date{2026-11-19}
+\begin{document}
+\maketitle
+\section{Scope, Frame, and Assumptions}
+This editable standalone reference accompanies PR 15142 and issue 15141;
+it is separate from the canonical engineering design manual.
+Input coordinates are metres in the hand-grip frame: the origin is the hand
+centre on the shaft, $z$ points toward the club head, and $x,y$ span the
+grip cross-section. Appearance meshes are not physical contact capsules.
+Input target surfaces must have finite vertices, nondegenerate triangles,
+and exactly two oppositely directed incident faces per edge. Global winding
+reversal is allowed. The diagnostic assumes a non-self-intersecting boundary;
+the edge checks alone do not establish that assumption.
+\section{Containment and Distance}
+For query $q$ and target triangle vectors $a,b,c$ measured from $q$, let
+\[
+ \omega=2\operatorname{atan2}\left(a\cdot(b\times c),
+ |a||b||c|+(a\cdot b)|c|+(b\cdot c)|a|+(c\cdot a)|b|\right).
+\]
+The point is inside when $|\sum\omega|>2\pi$. Its unsigned distance $d$
+is the minimum over all triangle faces and edges: use orthogonal plane
+projection when it lies inside a triangle, otherwise the closest point on
+each clamped edge segment. Signed distance is $-d$ inside, $+d$ outside.
+Face contact has zero distance. Work is one query point against all target
+triangles at a time, with no convex-hull substitution or vertex-distance proxy.
+For a source vertex set $V$, the reported fraction is
+\[
+ f=|V|^{-1}\sum_{q\in V}[s(q)<-0.002\;\mathrm{m}].
+\]
+For the two thumb surfaces the minimum signed distance implements containment
+in either surface. The configured fraction limits remain 0.02 for the index
+versus thumb and 0.11 for proximal phalanges versus palm or dorsum.
+The depth threshold is explicit; shallow intersections are not claimed absent.
+\section{Failure and Correction}
+At source head \texttt{7e06e287f5}, the vertex-proximity guard passes despite
+lead middle proximal vertices reaching 6.271 mm into the dorsum. The new
+signed-distance regression fails on both hands: maximum deep fraction is
+0.147619, above 0.11. Analytic cube tests distinguish a deeply interior point,
+outside points, edge distance, and face contact. A concave L prism verifies
+that a notch inside the convex hull is still outside the actual surface.
+Reversed global winding preserves distances; open surfaces are refused.
+
+Moving the rounded palm and dorsum sweep ends ten degrees back from the MCP
+azimuth removes their deep overlap with proximal capsules at the tested
+nominal geometry. The finger generators, poses and physical capsule parameters
+are unchanged. Palm summaries and both OpenSim hand asset copies are rebaked.
+This is a visual shell construction adjustment, not an anthropometric fit.
+\section{Reproduction and Limits}
+Run the unit files \texttt{test\_mesh\_penetration.py} and
+\texttt{test\_grip\_hand\_part\_penetration.py} with pytest under Python 3.12,
+with the pinned Tools submodule initialised. The latter covers both hands at
+12.7, 14.0 and 14.5 mm grip radii using the default overlap pose.
+Run \texttt{render\_grip\_hand\_evidence.py --write-receipt} with the Agg
+backend for the static views. Each additional acceptance-view canvas is
+1200 square pixels, includes the grip, and uses three camera views at each
+visual roll of $-20,0,+20$ degrees. These are visual roll offsets, not
+independently qualified physical shaft-roll states.
+
+Vertex sampling does not bound triangle-interior penetration or establish
+intersection volume. Other grip styles, parameter extremes, native runtime
+acceptance, anatomical quality, human visual approval, and independent review
+remain separate gates. No physical or full-epic acceptance follows from a
+passing diagnostic or an image. Compilation of this reference is not asserted.
+\end{document}

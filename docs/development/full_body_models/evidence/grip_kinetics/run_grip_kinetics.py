@@ -411,11 +411,18 @@ def render_clip(
                 ),
             )
             draw_glyphs_3d(ax, build_glyphs(frame, style))
-            half = 0.3
-            ax.set_xlim(mid[0] - half, mid[0] + half)
-            ax.set_ylim(mid[1] - half, mid[1] + half)
-            ax.set_zlim(mid[2] - half, mid[2] + half)
-            ax.set_box_aspect((1, 1, 1))
+            from src.shared.python.model_appearance.grip_preview_matplotlib import (
+                apply_equal_axis_limits,
+            )
+
+            crop_pts = np.vstack(
+                [
+                    np.vstack([butt, head, mid]),
+                    run.grip_point_m["L"][i],
+                    run.grip_point_m["R"][i],
+                ]
+            )
+            apply_equal_axis_limits(ax, crop_pts, centre=mid)
             ax.view_init(elev=15, azim=-70)
             ax.set_title(
                 f"{title}: t = {run.time_s[i]:.3f} s\n"

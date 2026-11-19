@@ -1,0 +1,8 @@
+{
+  "part_penetration_depth_m": 0.002,
+  "max_part_penetration_fraction": {
+    "lead_index_distal_in_thumb": 0.02,
+    "lead_index_middle_in_thumb": 0.02,
+    "proximal_in_palm_or_dorsum": 0.11
+  }
+}

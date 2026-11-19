@@ -1,0 +1,167 @@
+{
+  "tag": "after",
+  "legacy_camera": false,
+  "stills": {
+    "after_lead_palm.png": {
+      "half_x_m": 0.048600000000000004,
+      "half_y_m": 0.04859999999999998,
+      "half_z_m": 0.048600000000000004,
+      "equal_aspect": true
+    },
+    "after_lead_back.png": {
+      "half_x_m": 0.048600000000000004,
+      "half_y_m": 0.04859999999999998,
+      "half_z_m": 0.048600000000000004,
+      "equal_aspect": true
+    },
+    "after_lead_side.png": {
+      "half_x_m": 0.048600000000000004,
+      "half_y_m": 0.04859999999999998,
+      "half_z_m": 0.048600000000000004,
+      "equal_aspect": true
+    },
+    "after_trail_palm.png": {
+      "half_x_m": 0.048600000000000004,
+      "half_y_m": 0.04859999999999998,
+      "half_z_m": 0.048600000000000004,
+      "equal_aspect": true
+    },
+    "after_trail_back.png": {
+      "half_x_m": 0.048600000000000004,
+      "half_y_m": 0.04859999999999998,
+      "half_z_m": 0.048600000000000004,
+      "equal_aspect": true
+    },
+    "after_trail_side.png": {
+      "half_x_m": 0.048600000000000004,
+      "half_y_m": 0.04859999999999998,
+      "half_z_m": 0.048600000000000004,
+      "equal_aspect": true
+    },
+    "after_grip_region.png": {
+      "half_x_m": 0.135,
+      "half_y_m": 0.135,
+      "half_z_m": 0.135,
+      "equal_aspect": true
+    }
+  },
+  "acceptance_views": {
+    "acceptance_palm_roll_-20.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": -20,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    },
+    "acceptance_back_roll_-20.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": -20,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    },
+    "acceptance_side_roll_-20.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": -20,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    },
+    "acceptance_palm_roll_+0.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": 0,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    },
+    "acceptance_back_roll_+0.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": 0,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    },
+    "acceptance_side_roll_+0.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": 0,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    },
+    "acceptance_palm_roll_+20.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": 20,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    },
+    "acceptance_back_roll_+20.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": 20,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    },
+    "acceptance_side_roll_+20.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": 20,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    }
+  }
+}
