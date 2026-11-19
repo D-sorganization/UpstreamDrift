@@ -35,7 +35,7 @@ from tests.unit.model_appearance.hand_backends.test_skinned_human import (
     _pair,
 )
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.xdist_group("skinned_hand_backends")]
 
 _Q = load_hand_visual_quality()
 
