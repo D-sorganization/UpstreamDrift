@@ -211,3 +211,21 @@ re-execution was deferred on this workstation due to ~2 GB free disk.
 1. **Path-Anchored Metrics:** Every metric cited in documentation must use explicit path-anchored references: `path/to/receipt.json#field.path`.
 2. **Honest Distinctions:** Cite `anthro_driver_seeds/receipt.json` (9.5 mm / 29.5 mm / 99.3 mm) and `anthro_iron_seeds_zmp/receipt.json` (11.3 mm / 30.7 mm / 74.9 mm) as the calibrated tour match, with the replay sensitivity recorded in the #13037 paragraph of §2A. 5.1 mm / 27.3 mm / 74.6 mm (`anthro_driver_shoot_g025`) and 4.4 mm / 28.6 mm / 144.0 mm (`anthro_iron_zmp`) are pre-HO-8 numbers produced with widened leg bounds; cite them only as history. When citing nominal baseline performance without static-trial calibration, cite `anthro_driver/receipt.json` (42.4 mm / 47.0 mm / 63.1 mm); the nominal 7-iron receipt records a known trajectory-IK failure (#12030).
 3. **Automated Enforcement:** Continuous validation is enforced by `tests/unit/motion_matching/test_handoff_numbers_match_receipts.py`.
+
+## 6. Driver Club Marker Registrations (#15296)
+
+Two `club-markers/1` files place the same six-marker driver cluster in the `Clubhead` frame. Both are kinematic registrations. Neither is a measurement of the club, and neither is physical or scientific acceptance. `evidence/club_markers/driver.json` is the default (static-seed calibration of the whole body, #12221); `evidence/club_markers/driver_club_only.json` is selected by `--club-markers club_only` and is derived from the club markers alone (`execution/club_only_registration.py`, settings stored in the file's source; `tests/unit/motion_matching/test_club_only_registration.py` regenerates it).
+
+**Circularity of the Default.** The static-seed calibration moves the club cluster to fit a body-driven pose, so the club placement inherits the body model's error and cannot then be used to judge it. The committed documents and the default builder output still use `driver.json`; nothing changes unless the alternative is selected.
+
+**Club-Only Rule.** Shape: mean marker positions over the first 10 frames (the club moves 0.5 mm in that window). Shaft axis: the line through `Marker_3:3:3` and `Marker_3:3:1`. It is the only pair whose line passes the head (93 mm from the head-triad centroid; the other two pairs pass 369 and 431 mm away); `Marker_3:3:2` is 33.8 mm off it. Along-shaft datum: the model head ellipsoid (`club_models.DRIVER.head_half_size_m`, centred on the axis) has its lowest point on the capture ground (z = 0) at address. Roll: the head-triad centroid azimuth about the shaft is a setting (3.92 deg), which keeps the roll of `driver.json`.
+
+**Measured on `data/C3D_TA_Driver.c3d`** (club placed on its six markers by a rigid fit; address frame 0, impact frame 476):
+
+| Quantity                                                    | `driver.json`  | `driver_club_only.json` |
+| ----------------------------------------------------------- | -------------- | ----------------------- |
+| `Marker_3:3:3` / `Marker_3:3:1` distance from the club axis | 70.5 / 78.0 mm | 0.0 / 0.0 mm (by rule)  |
+| Model head lowest point at address                          | 43.7 mm        | 0.0 mm (by rule)        |
+| Model head lowest point at impact                           | 62.9 mm        | 23.8 mm (not tuned)     |
+
+**What the Club Markers Cannot Identify.** Roll about the shaft relative to the model face, the standoff of the two shaft markers from the true axis (about a shaft radius plus a marker radius, unmeasured), the hover of the head at address (10 mm of hover moves the club 14 mm along the shaft) and the butt end: no marker is on it, so club length is not identifiable. With the head soled the shaft axis meets the ground 63.7 mm beyond the model head centre, so the model butt is 1219.7 mm from that point while `DRIVER.length_m` is 1.156 m. Whether the model club is long by that amount depends on the real club's length and on which point its length is measured to; neither is recorded. The wrist-top markers sit 94 mm (lead) and 165 mm (trail) inside the model butt at address. The club length is unchanged.

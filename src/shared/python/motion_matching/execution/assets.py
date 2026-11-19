@@ -128,18 +128,21 @@ def get_club_markers(club: str, path: Path | str | None = None) -> Path | None:
 
     Precondition: if path is supplied, it must exist.
     Resolution order:
-    1. Explicit path if provided.
+    1. Explicit path if provided, or a registration name: ``club_only`` is
+       ``evidence/club_markers/<club>_club_only.json`` (#15296).
     2. ``evidence/club_markers/<club>.json`` in the repository checkout.
     Returns ``None`` when the club has no file: the native candidate's
     ``Clubhead`` cluster then applies, which is valid for the driver only.
     """
+    folder = DEFAULT_FULL_BODY / "evidence/club_markers"
     if path is not None:
-        p = Path(path)
-        if p.is_file():
-            return p
+        named = folder / f"{club}_{path}.json"
+        for p in (Path(path), named):
+            if p.is_file():
+                return p
         raise FileNotFoundError(f"Explicit club marker file not found: {path}")
 
-    default_path = DEFAULT_FULL_BODY / "evidence/club_markers" / f"{club}.json"
+    default_path = folder / f"{club}.json"
     return default_path if default_path.is_file() else None
 
 
