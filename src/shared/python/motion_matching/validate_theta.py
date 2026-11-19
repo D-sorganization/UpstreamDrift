@@ -34,7 +34,8 @@ __all__ = [
     "validate_theta",
 ]
 
-# A polynomial torque has 7 coefficients per joint (A..G for t^0..t^6).
+# A polynomial torque has 7 coefficients per joint (canonical ascending A..G for t^0..t^6).
+# Descending polyval arrays [c_6..c_0] in constrained_sextic.py use the reversed order.
 COEFFS_PER_JOINT: int = 7
 
 # Default per-letter bound table, keyed by single-character A..G.

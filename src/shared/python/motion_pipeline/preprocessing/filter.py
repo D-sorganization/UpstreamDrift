@@ -55,6 +55,11 @@ def apply_filter(
     """
     Apply filter to motion capture data.
 
+    Note on ``cutoff=6.0`` Hz: this default comes from low-speed gait/posture
+    analysis and significantly attenuates high-speed golf downswing kinematics.
+    For golf swings, choose a higher cut-off (typically 12-20+ Hz, justified by
+    residual or spectral analysis).
+
     Args:
         data: Input keypoint sequence or marker trajectory
         filter_type: Type of filter to apply

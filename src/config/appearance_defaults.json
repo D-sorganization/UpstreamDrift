@@ -4,7 +4,7 @@
   "default": {
     "skin_tone": "skin_2",
     "headwear": "hair",
-    "headwear_material": "hair_brown",
+    "headwear_material": "hair_dirty_blonde",
     "clothing": "golf_polo_trousers",
     "club_finish": "satin_steel"
   },
@@ -129,7 +129,7 @@
         0.17
       ],
       "hex": "#734a2b",
-      "description": "Mid brown (the default golfer)",
+      "description": "Mid brown",
       "roughness": 0.8,
       "noise": 0.05
     },
@@ -180,6 +180,18 @@
       "description": "Grey",
       "roughness": 0.8,
       "noise": 0.05
+    },
+    {
+      "id": "hair_dirty_blonde",
+      "srgb": [
+        0.66,
+        0.54,
+        0.36
+      ],
+      "hex": "#a88a5c",
+      "description": "Dirty blonde, dark blonde with a warm tone (the default golfer)",
+      "roughness": 0.8,
+      "noise": 0.0
     }
   ]
 }

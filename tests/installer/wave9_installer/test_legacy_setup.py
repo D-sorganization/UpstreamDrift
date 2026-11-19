@@ -333,15 +333,16 @@ class TestMain:
         main_env.system.return_value = "Windows"
         # Force relative_to to fail by changing get_repo_root after path resolution.
         # Replace the launch script's relative_to with one that raises.
-        original_path_cls = pathlib.Path
+        original_path_cls = type(main_env.tmp_path)
 
-        class _AbsolutePath(original_path_cls):  # type: ignore[misc]
+        class _AbsolutePath(original_path_cls):  # type: ignore[misc,valid-type]
             def relative_to(self, *args: object, **kwargs: object):
                 raise ValueError("not relative")
 
         # Patch only the launch script creation by monkeypatching get_repo_root to
         # return a path object whose joined launch script returns an _AbsolutePath.
         fake_root = _AbsolutePath(main_env.tmp_path)
+        assert issubclass(type(fake_root), type(main_env.tmp_path))
         monkeypatch.setattr(legacy_setup, "get_repo_root", lambda: fake_root)
         assert legacy_setup.main() == 0
         target = main_env.shortcut.call_args.kwargs["target_script"]

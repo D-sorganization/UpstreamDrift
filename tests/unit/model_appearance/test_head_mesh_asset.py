@@ -67,7 +67,7 @@ def test_asset_size_budget() -> None:
 
 def test_head_slot_loads_the_mesh_with_skin_and_short_hair() -> None:
     parts = _by_name(build_head_parts(LENGTH, MESH))
-    assert set(parts) == {"skin_mesh", "hair_mesh"}
+    assert {"skin_mesh", "hair_mesh"} <= set(parts)  # plus the face features
     assert parts["skin_mesh"].material == "skin"
     assert parts["hair_mesh"].material == "headwear"
     assert len(parts["skin_mesh"].mesh.faces) > 4000
@@ -75,7 +75,8 @@ def test_head_slot_loads_the_mesh_with_skin_and_short_hair() -> None:
 
 def test_bare_head_has_no_hair_and_cap_is_refused() -> None:
     bare = build_head_parts(LENGTH, HeadSettings(model="cc0_mesh", headwear="none"))
-    assert [p.name for p in bare] == ["skin_mesh"]
+    assert "skin_mesh" in {p.name for p in bare}
+    assert "hair_mesh" not in {p.name for p in bare}
     with pytest.raises(ValueError, match="cap"):
         build_head_parts(LENGTH, HeadSettings(model="cc0_mesh", headwear="cap"))
 
@@ -111,7 +112,10 @@ def test_face_points_forward_in_the_canonical_frame() -> None:
 
 
 def test_hair_sits_on_the_crown_above_the_brow_and_outside_the_skull() -> None:
-    parts = _by_name(build_head_parts(LENGTH, MESH))
+    # The asset's own thin shell is the ``dome`` style; ``short_crop`` hair
+    # (the default, #15276) reaches the nape and is covered in its own tests.
+    dome = HeadSettings(model="cc0_mesh", hair_style="dome")
+    parts = _by_name(build_head_parts(LENGTH, dome))
     hair, skin = parts["hair_mesh"].mesh.vertices, parts["skin_mesh"].mesh.vertices
     assert hair[:, 2].max() > skin[:, 2].max()  # covers the crown
     forehead = skin[(skin[:, 0] > 0.30 * LENGTH) & (np.abs(skin[:, 1]) < 0.02)]

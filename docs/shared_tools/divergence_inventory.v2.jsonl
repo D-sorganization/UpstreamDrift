@@ -190,6 +190,7 @@
 {"path": "anatomical_angles/golf_aliases.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
 {"path": "anatomical_angles/hand_frame.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
 {"path": "anatomical_angles/limbs.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
+{"path": "anatomical_angles/swing_wrist_readout.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
 {"path": "anatomical_angles/terms.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
 {"path": "anatomical_angles/trunk_events.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
 {"path": "anatomical_angles/trunk_pelvis.py", "classification": "ud-only", "package": "anatomical_angles", "spelling_only": false}
@@ -211,6 +212,7 @@
 {"path": "anthropometrics/estimators/_base.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/estimators/_humanoid_expansion.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/estimators/_json_loader.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
+{"path": "anthropometrics/estimators/_local_anthropometry.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/estimators/_ratio_table_estimate.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/estimators/from_de_leva.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
 {"path": "anthropometrics/estimators/from_dempster.py", "classification": "ud-only", "package": "anthropometrics", "spelling_only": false}
@@ -1388,6 +1390,9 @@
 {"path": "model_appearance/hand_backends/types.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_spec.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/head.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/head_cap.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/head_features.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/head_hair.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/head_mesh.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/library.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/mesh_io.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
@@ -1395,6 +1400,7 @@
 {"path": "model_appearance/schema.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/skinned_body.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/skinned_club_hands.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/torso_profile.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_generation/__init__.py", "classification": "diverged", "package": "model_generation", "spelling_only": false}
 {"path": "model_generation/_convenience.py", "classification": "diverged", "package": "model_generation", "spelling_only": true}
 {"path": "model_generation/_lazy_map.py", "classification": "diverged", "package": "model_generation", "spelling_only": false}
@@ -1709,6 +1715,7 @@
 {"path": "motion_matching/loaders/excel.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/loaders/matlab_dataset.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/loaders/synthetic.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/marker_arm_sizing.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/marker_calibration.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/marker_kinematics.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/marker_projection.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1765,6 +1772,7 @@
 {"path": "motion_matching/pipeline/release_cutoff.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/pipeline/replay_post_impact.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/pipeline/replay_sensitivity.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/pipeline/swing_placement.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/pipeline/trajectory_optimiser.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/pipeline/turn_split.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/pipeline/weld_projection.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1831,6 +1839,7 @@
 {"path": "motion_matching/surrogate/train_10k.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/surrogate/validate.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/swing_evaluator.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/swing_marker_placement.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/synthesize_target_from_coefficients.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/target.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/tibial_torsion.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
