@@ -298,9 +298,10 @@ def _shoulder_segment(cap: Capsule, scale: float) -> _Segment:
     droop = -library.SHOULDER_DROOP * radius * up  # the neck end hangs lower
     return _Segment(
         start + library.SHOULDER_START_FRACTION * along + droop,
-        end,
+        end - library.SHOULDER_END_SINK * radius * up,
         radius,
         library.SHOULDER_ASPECT,
+        library.SHOULDER_END_SCALE,
         width_hint=front,
     )
 
@@ -523,7 +524,12 @@ def _segment_meshes(
     garment = library.garment_name_for(ctx.doc, body)
     out = []
     for i, seg in enumerate(segments):
-        out.append(BodyMesh(body, f"skin{i}", _loft(ctx, body, seg), base))
+        skin_seg = seg
+        if part == "upper_arm":  # no skin dome poking out of the sleeve's flat start
+            axis = (seg.end - seg.start) / np.linalg.norm(seg.end - seg.start)
+            tip = library.UPPER_ARM_SKIN_TIP_INSET * seg.radius * axis
+            skin_seg = dataclasses.replace(seg, start=seg.start + tip)
+        out.append(BodyMesh(body, f"skin{i}", _loft(ctx, body, skin_seg), base))
         if part in library.BLEND_PARTS:  # ball joint hides the segment seam
             size = seg.radius * library.blend_scale(garment is not None, part)
             across, down = (

@@ -26,13 +26,26 @@ SPEC = json.loads(SPEC_BYTES)
 DOC = document_from_dict({"schema_version": "appearance-v1"})
 
 
-def _scene(appearance: dict):
+ADDRESS = json.loads(
+    (
+        Path(__file__).resolve().parents[2]
+        / "fixtures"
+        / "model_appearance"
+        / "address_pose.json"
+    ).read_text()
+)
+
+
+def _scene(appearance: dict, pose: dict | None = None):
     mujoco = pytest.importorskip("mujoco")
     from src.tools.native_viewer_export.backends.mujoco_worker import build_scene_xml
 
     xml, _ = build_scene_xml(SPEC_BYTES, appearance)
     model = mujoco.MjModel.from_xml_string(xml)
     data = mujoco.MjData(model)
+    for name, value in (pose or {}).items():
+        joint = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name)
+        data.qpos[model.jnt_qposadr[joint]] = value
     mujoco.mj_forward(model, data)
     return mujoco, model, data
 
@@ -121,6 +134,72 @@ def test_the_upper_arm_does_not_rise_behind_the_shoulder_joint() -> None:
         behind = -((mesh.mesh_in_body_frame.vertices - np.asarray(cap.start_m)) @ axis)
         allowed = ACCEPT.max_cap_behind_joint * library.PART_RADIUS_M["upper_arm"]
         assert behind.max() <= allowed, (mesh.body, mesh.label, behind.max())
+
+
+def _address_cap_tops() -> dict[str, float]:
+    """Highest upper-arm and outboard yoke vertex, head frame, at address."""
+    mujoco, model, data = _scene(default_document_dict(), ADDRESS)
+    head = mujoco.mj_name2id(
+        model, mujoco.mjtObj.mjOBJ_BODY, "GolfSwing3D_Kinetic/Head"
+    )
+    frame, origin = data.xmat[head].reshape(3, 3), data.xpos[head]
+    zone = ACCEPT.neck_zone_half_width * HEAD_M
+    tops: dict[str, float] = {}
+    for geom in range(model.ngeom):
+        name = model.geom(geom).name
+        body = model.body(model.geom_bodyid[geom]).name
+        if not name.startswith("visual_vmesh") or not body.endswith(
+            ("LUpperArm", "RUpperArm", "HubtoLS", "HubtoRS")
+        ):
+            continue
+        local = (_vertices(mujoco, model, data, geom) - origin) @ frame
+        if "Hubto" in body:
+            local = local[np.abs(local[:, 1]) > zone]
+        if len(local):
+            tops[body[-9:] + name] = float(local[:, 2].max())
+    return tops
+
+
+def test_the_shoulder_caps_stay_below_the_neck_point_at_address() -> None:
+    tops = _address_cap_tops()
+    assert len(tops) >= 8, tops
+    limit = -ACCEPT.min_cap_below_neck_point * HEAD_M
+    assert max(tops.values()) <= limit, tops
+
+
+def _collar_ring(local: np.ndarray, sides: int = 28) -> np.ndarray:
+    return local[-2 - sides : -2]  # the top ring, just before the two poles
+
+
+def test_the_collar_opening_hugs_the_neck() -> None:
+    mujoco, model, data = _scene(default_document_dict())
+    head = mujoco.mj_name2id(
+        model, mujoco.mjtObj.mjOBJ_BODY, "GolfSwing3D_Kinetic/Head"
+    )
+    frame, origin = data.xmat[head].reshape(3, 3), data.xpos[head]
+    geom = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "visual_vmesh_2_garment0")
+    ring = _collar_ring((_vertices(mujoco, model, data, geom) - origin) @ frame)
+    x, y = ring[:, 0], ring[:, 1]
+    area = 0.5 * abs(float(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1))))
+    width, depth = _section_extent(_neck_part(), -0.05)
+    neck_area = math.pi / 4.0 * width * depth * HEAD_M**2
+    assert np.ptp(y) <= ACCEPT.max_opening_over_neck_width * width * HEAD_M
+    assert area <= ACCEPT.max_collar_area_over_neck * neck_area, (area, neck_area)
+
+
+def test_the_shirt_rises_from_the_shoulder_line_to_the_opening_without_a_lid() -> None:
+    mujoco, model, data = _scene(default_document_dict())
+    head = mujoco.mj_name2id(
+        model, mujoco.mjtObj.mjOBJ_BODY, "GolfSwing3D_Kinetic/Head"
+    )
+    frame, origin = data.xmat[head].reshape(3, 3), data.xpos[head]
+    geom = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "visual_vmesh_2_garment0")
+    local = (_vertices(mujoco, model, data, geom) - origin) @ frame
+    rings = local[:-2].reshape(-1, 28, 3)[-ACCEPT.collar_rings :]
+    front = rings[-1, :, 0] > 0.0  # the front half of the collar
+    rise = np.diff(rings[:, :, 2], axis=0)[:, front]
+    run = np.linalg.norm(np.diff(rings[:, :, :2], axis=0), axis=2)[:, front]
+    assert (rise / np.maximum(run, 1e-9)).min() >= ACCEPT.min_collar_wall_slope
 
 
 def test_no_trunk_or_yoke_rises_to_the_chin() -> None:

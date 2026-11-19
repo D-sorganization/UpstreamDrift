@@ -179,15 +179,15 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/HubtoLS": [
       {
-        "bbox_max": [0.059324, 0.226153, 0.038162],
-        "bbox_min": [-0.059324, 0.02727, -0.093162],
+        "bbox_max": [0.059324, 0.223376, 0.01663],
+        "bbox_min": [-0.059324, 0.030046, -0.08813],
         "label": "garment0",
         "material": "mat_polo_navy",
         "n_vertices": 794
       },
       {
-        "bbox_max": [0.054929, 0.225472, 0.035469],
-        "bbox_min": [-0.054929, 0.02795, -0.090469],
+        "bbox_max": [0.054929, 0.223226, 0.013038],
+        "bbox_min": [-0.054929, 0.030196, -0.084538],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -195,15 +195,15 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/HubtoRS": [
       {
-        "bbox_max": [0.059324, -0.02727, 0.093162],
-        "bbox_min": [-0.059324, -0.226153, -0.038162],
+        "bbox_max": [0.059324, -0.030046, 0.08813],
+        "bbox_min": [-0.059324, -0.223376, -0.01663],
         "label": "garment0",
         "material": "mat_polo_navy",
         "n_vertices": 794
       },
       {
-        "bbox_max": [0.054929, -0.02795, 0.090469],
-        "bbox_min": [-0.054929, -0.225472, -0.035469],
+        "bbox_max": [0.054929, -0.030196, 0.084538],
+        "bbox_min": [-0.054929, -0.223226, -0.013038],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -225,7 +225,7 @@
         "n_vertices": 794
       },
       {
-        "bbox_max": [0.042945, 0.042945, 0.0],
+        "bbox_max": [0.042945, 0.042945, -0.0215],
         "bbox_min": [-0.042945, -0.042945, -0.325852],
         "label": "skin0",
         "material": "mat_skin_2",
@@ -267,7 +267,7 @@
       },
       {
         "bbox_max": [0.042945, 0.042945, 0.325852],
-        "bbox_min": [-0.042945, -0.042945, 0.0],
+        "bbox_min": [-0.042945, -0.042945, 0.0215],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -554,15 +554,15 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/HubtoLS": [
       {
-        "bbox_max": [0.059324, 0.226153, 0.038162],
-        "bbox_min": [-0.059324, 0.02727, -0.093162],
+        "bbox_max": [0.059324, 0.223376, 0.01663],
+        "bbox_min": [-0.059324, 0.030046, -0.08813],
         "label": "garment0",
         "material": "mat_polo_navy",
         "n_vertices": 794
       },
       {
-        "bbox_max": [0.054929, 0.225472, 0.035469],
-        "bbox_min": [-0.054929, 0.02795, -0.090469],
+        "bbox_max": [0.054929, 0.223226, 0.013038],
+        "bbox_min": [-0.054929, 0.030196, -0.084538],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -570,15 +570,15 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/HubtoRS": [
       {
-        "bbox_max": [0.059324, -0.02727, 0.093162],
-        "bbox_min": [-0.059324, -0.226153, -0.038162],
+        "bbox_max": [0.059324, -0.030046, 0.08813],
+        "bbox_min": [-0.059324, -0.223376, -0.01663],
         "label": "garment0",
         "material": "mat_polo_navy",
         "n_vertices": 794
       },
       {
-        "bbox_max": [0.054929, -0.02795, 0.090469],
-        "bbox_min": [-0.054929, -0.225472, -0.035469],
+        "bbox_max": [0.054929, -0.030196, 0.084538],
+        "bbox_min": [-0.054929, -0.223226, -0.013038],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -600,7 +600,7 @@
         "n_vertices": 794
       },
       {
-        "bbox_max": [0.042945, 0.042945, 0.0],
+        "bbox_max": [0.042945, 0.042945, -0.0215],
         "bbox_min": [-0.042945, -0.042945, -0.325852],
         "label": "skin0",
         "material": "mat_skin_2",
@@ -642,7 +642,7 @@
       },
       {
         "bbox_max": [0.042945, 0.042945, 0.325852],
-        "bbox_min": [-0.042945, -0.042945, 0.0],
+        "bbox_min": [-0.042945, -0.042945, 0.0215],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -962,7 +962,7 @@
       },
       {
         "bbox_max": [0.3898, 0.042945, 0.042945],
-        "bbox_min": [0.0, -0.042945, -0.042945],
+        "bbox_min": [0.0215, -0.042945, -0.042945],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -1003,7 +1003,7 @@
       },
       {
         "bbox_max": [0.3898, 0.042945, 0.042945],
-        "bbox_min": [0.0, -0.042945, -0.042945],
+        "bbox_min": [0.0215, -0.042945, -0.042945],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
