@@ -386,14 +386,14 @@ TORSO_PROFILES: dict[str, tuple[tuple[float, float, float], ...]] = {
 TORSO_SQUARENESS = 2.6  # superellipse exponent of a trunk cross-section
 # Shoulder link (#15279): a yoke from the neck side to the shoulder joint,
 # flatter than it is deep, not a ball. Depth axis is the link's up axis.
-SHOULDER_ASPECT = 0.72  # up-down over front-back extent of the yoke
+SHOULDER_ASPECT = 0.85  # up-down over front-back extent of the yoke
 SHOULDER_RADIUS_SCALE = 1.1  # front-back half extent over the part radius
 SHOULDER_START_FRACTION = 0.3  # the yoke starts this far along the link
 SHOULDER_UP_AXIS = (0.0, 0.0, 1.0)  # up, in the shoulder link's body frame
 # Deltoid (#15279): the blend at the shoulder joint is longer down the arm
 # than across it: (across, down the arm), in upper-arm radii.
-DELTOID_HALF_SIZES = (1.0, 1.7)
-DELTOID_DROP = 0.8  # centre below the joint, in upper-arm radii
+DELTOID_HALF_SIZES = (0.9, 1.3)
+DELTOID_DROP = 1.25  # centre below the joint, in upper-arm radii
 
 
 # Pelvis solid (HRG-C1, #13164): lofted on the hip landmarks, see
