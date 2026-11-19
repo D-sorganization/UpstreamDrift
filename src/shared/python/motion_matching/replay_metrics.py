@@ -7,7 +7,7 @@ Evaluates:
 2. early_rms_m: root mean square marker error over valid samples with time_s <= 0.60 s.
 3. terminal_rms_m: root mean square marker error on the final frame across valid markers.
 4. club_cluster_rms_m: root mean square error on the final frame for clubhead/shaft markers.
-5. pelvis_yaw_error_pct: relative pelvis heading error percentage at terminal frame from WaistLeft -> WaistRight.
+5. pelvis_yaw_error_pct: pelvis heading error at terminal frame (|Δyaw| vs a fixed 90° reference).
 """
 
 from __future__ import annotations
@@ -24,6 +24,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.motion_matching.evidence_integrity import is_real_sha256
+from src.shared.python.motion_matching.pelvis_yaw import compute_pelvis_yaw_metrics
 
 Array: TypeAlias = NDArray[np.float64]
 BoolArray: TypeAlias = NDArray[np.bool_]
@@ -570,17 +571,17 @@ def compute_replay_five_metrics(
     else:
         club_cluster_rms_m = float("nan")
 
-    # 5. Pelvis yaw error pct
+    # 5. Pelvis yaw error pct (rotation-invariant; #15015 C7)
     if "WaistLeft" in marker_labels and "WaistRight" in marker_labels:
         wl_i = marker_labels.index("WaistLeft")
         wr_i = marker_labels.index("WaistRight")
         if term_val[wl_i] and term_val[wr_i]:
-            vp = pred[-1, wr_i, :2] - pred[-1, wl_i, :2]
-            vt = target[-1, wr_i, :2] - target[-1, wl_i, :2]
-            yaw_t = float(np.degrees(np.arctan2(vt[1], vt[0])))
-            yaw_p = float(np.degrees(np.arctan2(vp[1], vp[0])))
-            diff_deg = float((yaw_p - yaw_t + 180.0) % 360.0 - 180.0)
-            pelvis_yaw_error_pct = float(abs(diff_deg) / max(abs(yaw_t), 1.0) * 100.0)
+            term_pred = pred[-1, (wl_i, wr_i), :]
+            term_target = target[-1, (wl_i, wr_i), :]
+            yaw_m = compute_pelvis_yaw_metrics(term_pred, term_target, wl_i=0, wr_i=1)
+            pelvis_yaw_error_pct = (
+                float(yaw_m.pelvis_yaw_error_pct) if yaw_m.valid else float("nan")
+            )
         else:
             pelvis_yaw_error_pct = float("nan")
     else:

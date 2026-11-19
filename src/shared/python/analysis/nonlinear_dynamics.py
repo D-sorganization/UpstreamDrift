@@ -263,11 +263,17 @@ class NonlinearDynamicsMixin:
             return None
 
         # Use the ndarray reduction directly to avoid general dispatch overhead.
-        n_recurrence_points = int(recurrence_matrix.sum()) - N
+        # Exclude the main diagonal by its actual content: cross-recurrence
+        # matrices need not have ones there.
+        n_recurrence_points = int(recurrence_matrix.sum()) - int(
+            np.trace(recurrence_matrix)
+        )
         rr = n_recurrence_points / (N * N - N) if N > 1 else 0.0
 
         diagonal_lengths: list[int] = []
-        for k in range(1, N):
+        # Both triangles: the denominator counts points on both sides of the
+        # main diagonal, so counting lines on one side caps DET at 0.5.
+        for k in (*range(1, N), *range(-(N - 1), 0)):
             diag = np.diagonal(recurrence_matrix, offset=k)
             d = np.concatenate((np.array([0]), diag, np.array([0])))
             diffs = np.diff(d)

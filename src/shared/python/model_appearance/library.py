@@ -87,11 +87,24 @@ MATERIALS: dict[str, Material] = {
     "cap_navy": Material(
         (0.12, 0.20, 0.45, 1.0), 0.85, texture=Texture("noise", noise=0.04)
     ),
+    "cap_black": Material(
+        (0.08, 0.08, 0.09, 1.0), 0.85, texture=Texture("noise", noise=0.04)
+    ),
+    "cap_red": Material(
+        (0.62, 0.10, 0.10, 1.0), 0.85, texture=Texture("noise", noise=0.04)
+    ),
     "eye_white": Material((0.96, 0.96, 0.94, 1.0), 0.2),
     "iris_dark": Material((0.10, 0.07, 0.05, 1.0), 0.15),
+    "iris_blue_grey": Material((0.36, 0.47, 0.56, 1.0), 0.15),
+    "iris_hazel": Material((0.46, 0.34, 0.14, 1.0), 0.15),
+    "pupil_black": Material((0.02, 0.02, 0.02, 1.0), 0.1),
+    "lid_line": Material((0.20, 0.12, 0.09, 1.0), 0.6),
+    "lip_seam": Material((0.50, 0.24, 0.24, 1.0), 0.5),
     "brow_dark": Material((0.14, 0.09, 0.06, 1.0), 0.9),
     "lip_pink": Material((0.62, 0.30, 0.30, 1.0), 0.5),
     "shoe_white": Material((0.92, 0.92, 0.90, 1.0), 0.4),
+    "shoe_leather": Material((0.72, 0.72, 0.71, 1.0), 0.45),
+    "shoe_sole": Material((0.11, 0.11, 0.12, 1.0), 0.8),
     "shoe_black": Material((0.06, 0.06, 0.07, 1.0), 0.35),
     "glove_white": Material((0.95, 0.95, 0.94, 1.0), 0.7),
     "grip_rubber": Material((0.08, 0.08, 0.09, 1.0), 0.95),
@@ -135,10 +148,18 @@ for _swatch in defaults.skin_palette():
 for _legacy, _target in defaults.skin_aliases().items():
     MATERIALS[_legacy] = MATERIALS[_target]
 for _hair in defaults.hair_palette():
+    # noise 0 means flat: MuJoCo multiplies a texture into the material colour,
+    # which squares it and turns a light blonde into brown (#15276).
     MATERIALS[_hair["id"]] = Material(
         (*_hair["srgb"], 1.0),
         _hair["roughness"],
-        texture=Texture("noise", noise=_hair["noise"]),
+        texture=Texture("noise", noise=_hair["noise"]) if _hair["noise"] else None,
+    )
+# Eyebrows match the hair but darker: one derived material per hair colour.
+BROW_DARKEN = 0.62
+for _hair in defaults.hair_palette():
+    MATERIALS[f"brow_{_hair['id']}"] = Material(
+        (*(c * BROW_DARKEN for c in _hair["srgb"]), 1.0), 0.9
     )
 CLUB_FINISHES = ("satin_steel", "chrome", "graphite", "black_pvd")
 
@@ -147,6 +168,8 @@ PANTS_PART = "thigh"
 # Owner ruling (#12685): the default outfit is charcoal trousers, one trouser
 # token for the pelvis and both legs, hip to ankle, in every engine.
 TROUSERS_MATERIAL = "trousers_charcoal"
+# Dark outsole drawn under every shoe upper (#15280).
+SOLE_MATERIAL = "shoe_sole"
 
 
 def _outfit(top: str, pants: str, shoes: str, *, full_length: bool) -> dict[str, str]:
@@ -172,7 +195,7 @@ CLOTHING: dict[str, dict[str, str]] = {
         "polo_navy", "shorts_khaki", "shoe_white", full_length=False
     ),
     "golf_polo_trousers": _outfit(
-        "polo_white", TROUSERS_MATERIAL, "shoe_black", full_length=True
+        "polo_white", TROUSERS_MATERIAL, "shoe_leather", full_length=True
     ),
 }
 if DEFAULT_CLOTHING not in CLOTHING:  # pragma: no cover - import-time invariant
@@ -275,6 +298,16 @@ def validate_distal_scale(scale: float) -> float:
     return float(scale)
 
 
+# Leg taper of the lofted body (#15280): the thigh ends as wide as the shin starts
+# (0.078 * 0.68 ~ 0.052) and the shin ends at the ankle stub (0.052 * 0.70 ~ 0.036).
+LEG_DISTAL_SCALE: dict[str, float] = {"thigh": 0.68, "shin": 0.70}
+
+
+def limb_distal_scale(part: str) -> float:
+    """Distal-over-proximal radius of a lofted limb: leg taper, else ``distal_scale``."""
+    return validate_distal_scale(LEG_DISTAL_SCALE.get(part, distal_scale(part)))
+
+
 def distal_scale(part: str) -> float:
     """Distal-over-proximal radius of ``part`` (1.0 = no taper)."""
     return validate_distal_scale(PART_DISTAL_SCALE.get(part, 1.0))
@@ -333,6 +366,48 @@ def blend_scale(garment: bool, part: str = "upper_arm") -> float:
     """
     base = HIP_BLEND_RADIUS_SCALE if part == "thigh" else BLEND_RADIUS_SCALE
     return base * (GARMENT_THICKNESS if garment else 1.0)
+
+
+# Trunk solids (#15279): cross-sections of the abdomen and the thorax as
+# (along, width, depth), fractions of the body's length, half width and half
+# depth (``torso_profile``). The widest station is 1.0, so a trunk is exactly
+# as wide and as deep as its spec hint, and width and depth scale alike
+# through the middle, so the mid section keeps the spec's aspect. Abdomen: lumbar joint to T12; thorax:
+# T12 to the shoulder line, then the slope up into the neck.
+TORSO_PROFILES: dict[str, tuple[tuple[float, float, float], ...]] = {
+    "abdomen": (
+        (-0.14, 0.93, 0.92),
+        (0.0, 0.95, 0.96),
+        (0.3, 0.97, 0.97),
+        (0.6, 1.0, 1.0),
+        (0.85, 1.0, 0.97),
+        (1.05, 0.95, 0.93),
+        (1.3, 0.62, 0.7),
+    ),
+    "thorax": (
+        (-0.32, 0.56, 0.66),
+        (-0.1, 0.84, 0.92),
+        (0.08, 0.89, 0.97),
+        (0.3, 0.95, 0.95),
+        (0.55, 1.0, 1.0),
+        (0.72, 1.0, 0.98),
+        (0.9, 0.99, 0.86),
+        (1.02, 0.86, 0.7),
+        (1.12, 0.5, 0.56),
+        (1.2, 0.3, 0.46),
+    ),
+}
+TORSO_SQUARENESS = 2.6  # superellipse exponent of a trunk cross-section
+# Shoulder link (#15279): a yoke from the neck side to the shoulder joint,
+# flatter than it is deep, not a ball. Depth axis is the link's up axis.
+SHOULDER_ASPECT = 0.85  # up-down over front-back extent of the yoke
+SHOULDER_RADIUS_SCALE = 1.1  # front-back half extent over the part radius
+SHOULDER_START_FRACTION = 0.3  # the yoke starts this far along the link
+SHOULDER_UP_AXIS = (0.0, 0.0, 1.0)  # up, in the shoulder link's body frame
+# Deltoid (#15279): the blend at the shoulder joint is longer down the arm
+# than across it: (across, down the arm), in upper-arm radii.
+DELTOID_HALF_SIZES = (0.9, 1.3)
+DELTOID_DROP = 1.25  # centre below the joint, in upper-arm radii
 
 
 # Pelvis solid (HRG-C1, #13164): lofted on the hip landmarks, see
@@ -414,6 +489,7 @@ def check_references(doc: AppearanceDocument) -> None:
         ("club_finish", doc.club_finish),
         ("ground_material", doc.environment.ground_material),
         ("head headwear_material", headwear_material_name(doc) or "skin_light"),
+        ("head cap_material", doc.head.cap_material),
         *(
             (f"segments[{i}]", r.material)
             for i, r in enumerate(doc.segments)
