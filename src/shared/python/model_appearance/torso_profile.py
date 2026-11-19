@@ -33,12 +33,15 @@ class TorsoStation:
     ``along`` is the fraction of the way from the body's lower joint plane
     (0) to its upper end (1); values outside 0..1 tuck the solid into its
     neighbours. ``width`` and ``depth`` scale the body's half width and half
-    depth.
+    depth. ``slant`` is how far the front of the section drops along the
+    axis, as a fraction of the segment length (0 at the back, which stays; it
+    needs a :attr:`TorsoFrame.front_axis`): a slanted collar.
     """
 
     along: float
     width: float
     depth: float
+    slant: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -56,6 +59,8 @@ class TorsoProfile:
 
     def __post_init__(self) -> None:
         values = [(s.along, s.width, s.depth) for s in self.stations]
+        if any(not math.isfinite(s.slant) or s.slant < 0.0 for s in self.stations):
+            raise ValueError("torso profile slants must be finite and not negative")
         if len(values) < 3 or not np.isfinite(np.asarray(values)).all():
             raise ValueError("torso profile needs at least three finite stations")
         if any(b[0] <= a[0] for a, b in zip(values, values[1:], strict=False)):
@@ -90,6 +95,12 @@ class TorsoProfile:
         at = np.clip(np.asarray(along, dtype=float), knots[0], knots[-1])
         return np.asarray(width(at)), np.asarray(depth(at))
 
+    def slants_at(self, along: Sequence[float] | NDArray[np.floating]) -> Array:
+        """Front drop (fraction of the length) at ``along``, smooth between."""
+        knots = [s.along for s in self.stations]
+        slant = PchipInterpolator(knots, [s.slant for s in self.stations])
+        return np.asarray(slant(np.clip(np.asarray(along, float), knots[0], knots[-1])))
+
 
 @dataclass(frozen=True)
 class TorsoFrame:
@@ -100,6 +111,8 @@ class TorsoFrame:
     width_axis: Array
     half_width: float
     half_depth: float
+    #: Which way is front (any length); ``None`` ignores every station slant.
+    front_axis: Array | None = None
 
 
 def _unit_section(squareness: float, sides: int) -> tuple[Array, Array]:
@@ -144,22 +157,29 @@ def torso_mesh(
         raise ValueError("torso width axis must not lie along the segment")
     width = width / np.linalg.norm(width)
     depth = np.cross(axis, width)
+    front_sign = 0.0
+    if frame.front_axis is not None:
+        front_sign = float(np.sign(depth @ np.asarray(frame.front_axis, float)))
     lowest, highest = profile.stations[0].along, profile.stations[-1].along
     along = np.linspace(lowest, highest, profile.rings)
     scale_w, scale_d = profile.scales_at(along)
     unit_w, unit_d = _unit_section(profile.squareness, profile.sides)
+    slants = profile.slants_at(along) * length
+    towards_front = np.clip(0.5 * (1.0 + front_sign * unit_d), 0.0, 1.0)
+    drop = towards_front**2 * (3.0 - 2.0 * towards_front)  # smoothstep, 0 at back
     rows = [
         start
         + t * length * axis
         + thickness * frame.half_width * w * np.outer(unit_w, width)
         + thickness * frame.half_depth * d * np.outer(unit_d, depth)
-        for t, w, d in zip(along, scale_w, scale_d, strict=True)
+        - np.outer(drop * q, axis)
+        for t, w, d, q in zip(along, scale_w, scale_d, slants, strict=True)
     ]
     rows[-1] = rows[-1] - cap_inset_m * axis
     return closed_grid_mesh(
         np.asarray(rows),
         start + lowest * length * axis,
-        start + highest * length * axis - cap_inset_m * axis,
+        start + highest * length * axis - (cap_inset_m + 0.5 * slants[-1]) * axis,
     )
 
 

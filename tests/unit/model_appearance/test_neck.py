@@ -9,7 +9,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from src.shared.python.model_appearance import neck
+from src.shared.python.model_appearance import document_from_dict, library, neck
+from src.shared.python.model_appearance.body_meshes import body_meshes
+from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
 from src.shared.python.model_appearance.head import build_neck_parts
 from src.shared.python.model_appearance.defaults import default_document_dict
 from src.shared.python.model_appearance.schema import HeadSettings
@@ -20,6 +22,8 @@ MODELS = Path(__file__).resolve().parents[3] / "docs/development/full_body_model
 SPEC_BYTES = (MODELS / "full_body_spec_anthro_driver.json").read_bytes()
 HEAD_M = 0.2429
 ACCEPT = neck.NECK_ACCEPTANCE
+SPEC = json.loads(SPEC_BYTES)
+DOC = document_from_dict({"schema_version": "appearance-v1"})
 
 
 def _scene(appearance: dict):
@@ -47,8 +51,14 @@ def _heights() -> dict[str, float]:
         model, mujoco.mjtObj.mjOBJ_BODY, "GolfSwing3D_Kinetic/Head"
     )
     frame, origin = data.xmat[head].reshape(3, 3), data.xpos[head]
-    out: dict[str, float] = {"trunk": -9.0, "yoke": -9.0, "chin": 9.0}
-    zone = ACCEPT.neck_zone_half_width_head_fraction * HEAD_M
+    out: dict[str, float] = {
+        "trunk": -9.0,
+        "front": -9.0,
+        "yoke": -9.0,
+        "cap": -9.0,
+        "chin": 9.0,
+    }
+    zone = ACCEPT.neck_zone_half_width * HEAD_M
     for geom in range(model.ngeom):
         name = model.geom(geom).name
         if model.geom_type[geom] != mujoco.mjtGeom.mjGEOM_MESH or not name:
@@ -60,22 +70,62 @@ def _heights() -> dict[str, float]:
             out["chin"] = float(face[:, 2].min())
         elif name.startswith("visual_vmesh") and ("skin" in name or "garment" in name):
             key = "yoke" if "Hubto" in body else "trunk" if "COMRod" in body else ""
+            if "UpperArm" in body:
+                out["cap"] = max(out["cap"], float(local[:, 2].max()))
             if key:  # the yoke counts where it meets the neck, not out at the cap
                 near = local[np.abs(local[:, 1]) <= zone] if key == "yoke" else local
                 if len(near):
                     out[key] = max(out[key], float(near[:, 2].max()))
+                if key == "trunk":  # the collar's front, beside the sternum
+                    ahead = local[
+                        (local[:, 0] > 0.25 * HEAD_M) & (np.abs(local[:, 1]) < zone)
+                    ]
+                    out["front"] = max(out["front"], float(ahead[:, 2].max()))
     return out
 
 
-def test_the_neck_is_visible_between_the_trunk_and_the_chin() -> None:
+def test_the_neck_is_visible_at_the_front_of_the_collar() -> None:
     h = _heights()
-    visible = h["chin"] - h["trunk"]
-    assert visible >= ACCEPT.min_visible_neck_head_fraction * HEAD_M, h
+    visible = h["chin"] - h["front"]
+    assert visible >= ACCEPT.min_front_visible_neck * HEAD_M, h
 
 
-def test_no_trunk_yoke_or_cap_rises_to_the_chin() -> None:
+def test_the_collar_is_highest_at_the_back_and_slants_down_to_the_front() -> None:
     h = _heights()
-    margin = ACCEPT.min_cap_below_chin_head_fraction * HEAD_M
+    assert h["trunk"] <= ACCEPT.max_back_top_above_neck_point * HEAD_M, h
+    assert h["trunk"] - h["front"] >= ACCEPT.min_collar_slant * HEAD_M, h
+
+
+def test_the_upper_arm_does_not_rise_behind_the_shoulder_joint() -> None:
+    """The cap sits on the joint: nothing pokes up the neck side of it.
+
+    A T-pose height test would measure the arm lying sideways, so this is the
+    pose-independent form of "the cap top is below the neck point": with the
+    arm hanging, its overshoot behind the joint is exactly how far the cap
+    rises above the joint (itself 4 cm below the neck point).
+    """
+    caps = {
+        c.body: c
+        for c in derive_visual_skeleton(SPEC).capsules
+        if library.classify_body(c.body) == "upper_arm"
+    }
+    meshes = [
+        m
+        for m in body_meshes(SPEC, DOC)
+        if m.body in caps and m.label.startswith(("skin", "garment"))
+    ]
+    assert len(meshes) >= 4
+    for mesh in meshes:
+        cap = caps[mesh.body]
+        axis = (np.asarray(cap.end_m) - np.asarray(cap.start_m)) / cap.length_m()
+        behind = -((mesh.mesh_in_body_frame.vertices - np.asarray(cap.start_m)) @ axis)
+        allowed = ACCEPT.max_cap_behind_joint * library.PART_RADIUS_M["upper_arm"]
+        assert behind.max() <= allowed, (mesh.body, mesh.label, behind.max())
+
+
+def test_no_trunk_or_yoke_rises_to_the_chin() -> None:
+    h = _heights()
+    margin = ACCEPT.min_cap_below_chin * HEAD_M
     assert h["yoke"] <= h["chin"] - margin, h
     assert h["trunk"] <= h["chin"] - margin, h
 
@@ -105,6 +155,22 @@ def test_the_neck_solid_mirrors_left_to_right_and_leans_forward() -> None:
     lean = math.degrees(math.atan2(axis[0], axis[2]))
     assert 5.0 <= lean <= 35.0, lean  # the top is forward of the base
     assert mesh.vertices[:, 2].min() < 0.0  # it reaches down below the neck point
+
+
+def _section_extent(mesh, height: float) -> tuple[float, float]:
+    """Width and depth (head lengths) of the neck near ``height`` head lengths."""
+    band = np.abs(mesh.vertices[:-2, 2] / HEAD_M - height) < 0.03
+    ring = mesh.vertices[:-2][band] / HEAD_M
+    return float(np.ptp(ring[:, 1])), float(np.ptp(ring[:, 0]))
+
+
+def test_the_neck_is_a_slim_column_without_a_base_bulge() -> None:
+    mesh = _neck_part()
+    width, depth = _section_extent(mesh, -0.05)
+    assert ACCEPT.neck_width[0] <= width <= ACCEPT.neck_width[1], width
+    assert ACCEPT.neck_depth[0] <= depth <= ACCEPT.neck_depth[1], depth
+    base_width, _ = _section_extent(mesh, -0.25)
+    assert base_width <= ACCEPT.max_base_bulge * width, (base_width, width)
 
 
 def test_the_neck_scales_with_the_head() -> None:

@@ -281,6 +281,7 @@ class _Segment:
     #: Trunk cross-sections and the joint plane they are measured from (#15279).
     profile: TorsoProfile | None = None
     profile_start: np.ndarray | None = None
+    front_axis: np.ndarray | None = None  # slants the profile's collar (#15292)
 
 
 def _shoulder_segment(cap: Capsule, scale: float) -> _Segment:
@@ -317,10 +318,14 @@ def _limb_segments(part: str, caps: Sequence[Capsule], scale: float) -> list[_Se
         )
         radius = min(radius, _MAX_RADIUS_OVER_LENGTH * cap.length_m())
         aspect = library.PART_ASPECT.get(part, 1.0)
+        start, end = np.asarray(cap.start_m), np.asarray(cap.end_m)
+        if part == "upper_arm":  # the spindle's tip, not its middle, is the joint
+            axis = (end - start) / cap.length_m()
+            start = start + library.UPPER_ARM_START_INSET * radius * axis
         out.append(
             _Segment(
-                np.asarray(cap.start_m),
-                np.asarray(cap.end_m),
+                start,
+                end,
                 radius,
                 aspect,
                 library.limb_distal_scale(part),
@@ -339,7 +344,8 @@ def _trunk_segment(
     chest then begins at the lumbar plane where the pelvis solid ends.
     """
     spine = max(caps, key=lambda c: c.length_m())  # first wins on a tie
-    size = _section_size(part, ctx.shapes.get(body, ()), ctx.sections.get(body))
+    section = ctx.sections.get(body)
+    size = _section_size(part, ctx.shapes.get(body, ()), section)
     radius = scale * size.radius_m
     if size.source == "library_default":
         radius = min(radius, _MAX_RADIUS_OVER_LENGTH * spine.length_m())
@@ -364,6 +370,7 @@ def _trunk_segment(
         size.aspect,
         profile=profile,
         profile_start=start,
+        front_axis=section.front_axis if section is not None else None,
     )
 
 
@@ -489,6 +496,7 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
             np.asarray(hint, dtype=float),
             seg.radius,
             seg.radius * seg.aspect,
+            seg.front_axis,
         )
         thickness = extra.get("thickness", 1.0)
         inset = _SKIN_CAP_INSET_M if thickness == 1.0 else 0.0

@@ -31,18 +31,17 @@ from src.shared.python.model_appearance.torso_profile import (
 class NeckSettings:
     """Neck solid, in head lengths from the neck point (z up, x forward)."""
 
-    base_height: float = -0.34  # axis start (inside the trunk top)
+    base_height: float = -0.46  # axis start (inside the slanted collar)
     top_height: float = 0.13  # axis end (inside the head's neck stub)
-    base_forward: float = -0.04  # axis start, forward of the neck point
-    top_forward: float = 0.12  # axis end: the forward lean of the neck
-    half_width: float = 0.27  # base half width (left-right)
-    half_depth: float = 0.27  # base half depth (front-back)
+    base_forward: float = -0.02  # axis start, forward of the neck point
+    top_forward: float = 0.14  # axis end: the forward lean of the neck
+    half_width: float = 0.25  # base half width: 12 cm across for a 1.75 m man
+    half_depth: float = 0.23  # base half depth: 11 cm front to back
     #: (along, width, depth): sections as fractions of the base half extents.
     stations: tuple[tuple[float, float, float], ...] = (
         (0.0, 1.0, 1.0),
-        (0.5, 1.0, 1.0),
-        (0.72, 1.02, 1.0),  # the neck point: covers the head asset's flared base
-        (1.0, 0.64, 0.64),
+        (0.7, 1.0, 1.0),
+        (1.0, 0.82, 0.82),
     )
     squareness: float = 2.2
 
@@ -58,19 +57,30 @@ class NeckSettings:
 class NeckAcceptance:
     """Acceptance floors of the look of the neck (fractions of head length).
 
-    ``min_visible_neck_head_fraction``: chin to the highest trunk vertex;
-    ``min_cap_below_chin_head_fraction``: the highest yoke or trunk vertex
-    below the chin (yoke: within ``neck_zone_half_width_head_fraction`` of the
-    neck; the deltoid cap sits on the fixed shoulder joint); ``slope_deg_band``: the trapezius, from the shoulder line
-    up to the neck base. Anthropometry (visible neck 8 to 11 cm, a third of
-    the head height) is the aim; the floors are what the default model's
-    fixed neck joint allows (see the REPORT for #15292).
+    The collar is slanted: highest at the back, at the neck point (C7), and
+    lower at the front (suprasternal notch). ``min_front_visible_neck``: chin
+    to the front of the trunk top (anthropometry: 8 to 11 cm of a 24 cm head);
+    ``max_back_top_above_neck_point``: the back of the trunk top;
+    ``min_collar_slant``: back top minus front top; ``max_cap_behind_joint``:
+    how far the upper arm may extend behind its shoulder joint, in arm radii
+    (the joint is 4 cm below C7, so a cap on the joint is 3 cm or more below
+    the neck point once the arm hangs); ``min_cap_below_chin`` and
+    ``neck_zone_half_width``: the yoke near the neck stays below the chin;
+    ``slope_deg_band``: the trapezius, shoulder line up to the neck base;
+    ``neck_width`` / ``neck_depth`` (bands) and ``max_base_bulge`` (base over
+    mid width) describe the neck column, 12 by 11 cm for a 1.75 m man.
     """
 
-    min_visible_neck_head_fraction: float = 0.15
-    min_cap_below_chin_head_fraction: float = 0.08
-    neck_zone_half_width_head_fraction: float = 0.5  # where the yoke meets the neck
+    min_front_visible_neck: float = 0.30
+    max_back_top_above_neck_point: float = 0.05
+    min_collar_slant: float = 0.20
+    max_cap_behind_joint: float = 0.1  # arm radii the cap may rise past its joint
+    min_cap_below_chin: float = 0.08
+    neck_zone_half_width: float = 0.5
     slope_deg_band: tuple[float, float] = (10.0, 40.0)
+    neck_width: tuple[float, float] = (0.45, 0.55)
+    neck_depth: tuple[float, float] = (0.38, 0.50)
+    max_base_bulge: float = 1.12
 
 
 NECK_ACCEPTANCE = NeckAcceptance()
