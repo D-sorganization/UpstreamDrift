@@ -95,6 +95,11 @@ class NeckAcceptance:
     neck_width: tuple[float, float] = (0.45, 0.55)
     neck_depth: tuple[float, float] = (0.38, 0.50)
     max_base_bulge: float = 1.12
+    max_opening_off_axis_m: float = 0.003  # top ring centre to neck axis (default)
+    opening_gap_m: tuple[float, float] = (0.002, 0.009)  # ring to neck skin, all round
+    max_neck_ahead_of_opening_m: float = (
+        0.014  # at address (28 mm before; 8 mm unreachable)
+    )
 
 
 NECK_ACCEPTANCE = NeckAcceptance()

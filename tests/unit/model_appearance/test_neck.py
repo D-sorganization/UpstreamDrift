@@ -196,7 +196,8 @@ def test_the_shirt_rises_from_the_shoulder_line_to_the_opening_without_a_lid() -
     geom = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "visual_vmesh_2_garment0")
     local = (_vertices(mujoco, model, data, geom) - origin) @ frame
     rings = local[:-2].reshape(-1, 28, 3)[-ACCEPT.collar_rings :]
-    front = rings[-1, :, 0] > 0.0  # the front half of the collar
+    ring_x = rings[-1, :, 0]
+    front = ring_x > ring_x.mean()  # the front half of the opening
     rise = np.diff(rings[:, :, 2], axis=0)[:, front]
     run = np.linalg.norm(np.diff(rings[:, :, :2], axis=0), axis=2)[:, front]
     assert (rise / np.maximum(run, 1e-9)).min() >= ACCEPT.min_collar_wall_slope
@@ -321,3 +322,50 @@ def test_the_parametric_head_keeps_its_own_neck() -> None:
     assert build_neck_parts(HEAD_M, HeadSettings(model="parametric")) == []
     with pytest.raises(ValueError, match="positive"):
         build_neck_parts(0.0)
+
+
+def _neck_samples() -> np.ndarray:
+    """Dense points on the neck surface (every face, 8 barycentric points)."""
+    mesh = _neck_part()
+    tri = mesh.vertices[mesh.faces]
+    w = np.array([(i, j) for i in range(9) for j in range(9 - i)]) / 8.0
+    return np.concatenate(
+        [np.einsum("fvc,v->fc", tri, [a, b, 1 - a - b]) for a, b in w]
+    )
+
+
+def _top_ring(pose: dict | None) -> np.ndarray:
+    mujoco, model, data = _scene(default_document_dict(), pose)
+    head = mujoco.mj_name2id(
+        model, mujoco.mjtObj.mjOBJ_BODY, "GolfSwing3D_Kinetic/Head"
+    )
+    frame, origin = data.xmat[head].reshape(3, 3), data.xpos[head]
+    geom = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "visual_vmesh_2_garment0")
+    local = (_vertices(mujoco, model, data, geom) - origin) @ frame
+    return local[:-2].reshape(-1, 28, 3)[-1]  # metres, head frame
+
+
+def test_the_shirt_opening_is_centred_on_the_neck_axis() -> None:
+    cfg = neck.NeckSettings()
+    base = HEAD_M * np.array([cfg.base_forward, 0.0, cfg.base_height])
+    top = HEAD_M * np.array([cfg.top_forward, 0.0, cfg.top_height])
+    axis = (top - base) / np.linalg.norm(top - base)
+    offset = _top_ring(None).mean(axis=0) - base
+    off_axis = np.linalg.norm(offset - (offset @ axis) * axis)
+    assert off_axis <= ACCEPT.max_opening_off_axis_m, off_axis
+
+
+def test_the_shirt_opening_is_an_even_gap_round_the_neck() -> None:
+    samples = _neck_samples()
+    gap = np.array([np.linalg.norm(samples - v, axis=1).min() for v in _top_ring(None)])
+    low, high = ACCEPT.opening_gap_m
+    assert low <= gap.min() and gap.max() <= high, (gap.min(), gap.max())
+
+
+def test_at_address_the_neck_does_not_stick_out_of_the_opening_front() -> None:
+    ring = _top_ring(ADDRESS)
+    front = ring[np.argmin(ring[:, 2])]
+    samples = _neck_samples()
+    near = samples[np.abs(samples[:, 2] - front[2]) < 0.01]
+    ahead = float(near[:, 0].max() - front[0])
+    assert ahead <= ACCEPT.max_neck_ahead_of_opening_m, ahead

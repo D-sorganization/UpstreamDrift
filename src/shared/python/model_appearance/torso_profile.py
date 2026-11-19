@@ -44,6 +44,9 @@ class TorsoStation:
     slant: float = 0.0
     #: Superellipse exponent here; 0 keeps the profile's (rounder at a collar).
     squareness: float = 0.0
+    #: Whole section shifted to the front, as a fraction of the segment length
+    #: (needs a :attr:`TorsoFrame.front_axis`): centres the collar on the neck.
+    forward: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -108,6 +111,12 @@ class TorsoProfile:
         values = [s.squareness or self.squareness for s in self.stations]
         at = np.clip(np.asarray(along, float), knots[0], knots[-1])
         return np.asarray(PchipInterpolator(knots, values)(at))
+
+    def forwards_at(self, along: Sequence[float] | NDArray[np.floating]) -> Array:
+        """Forward shift (fraction of the length) at ``along``, smooth between."""
+        knots = [s.along for s in self.stations]
+        shift = PchipInterpolator(knots, [s.forward for s in self.stations])
+        return np.asarray(shift(np.clip(np.asarray(along, float), knots[0], knots[-1])))
 
     def slants_at(self, along: Sequence[float] | NDArray[np.floating]) -> Array:
         """Front drop (fraction of the length) at ``along``, smooth between."""
@@ -188,21 +197,26 @@ def torso_mesh(
     scale_w, scale_d = profile.scales_at(along)
     sections = [_unit_section(q, profile.sides) for q in profile.squareness_at(along)]
     slants = profile.slants_at(along) * length
+    shifts = np.outer(profile.forwards_at(along) * length, depth * front_sign)
     rows = [
         start
         + t * length * axis
         + thickness * frame.half_width * w * np.outer(uw, width)
         + thickness * frame.half_depth * d * np.outer(ud, depth)
         - np.outer(_front_drop(ud, front_sign) * q, axis)
-        for t, w, d, q, (uw, ud) in zip(
-            along, scale_w, scale_d, slants, sections, strict=True
+        + shift
+        for t, w, d, q, shift, (uw, ud) in zip(
+            along, scale_w, scale_d, slants, shifts, sections, strict=True
         )
     ]
     rows[-1] = rows[-1] - cap_inset_m * axis
     return closed_grid_mesh(
         np.asarray(rows),
         start + lowest * length * axis,
-        start + highest * length * axis - (cap_inset_m + 0.5 * slants[-1]) * axis,
+        start
+        + highest * length * axis
+        - (cap_inset_m + 0.5 * slants[-1]) * axis
+        + shifts[-1],
     )
 
 

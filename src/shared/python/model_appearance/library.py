@@ -375,10 +375,16 @@ def blend_scale(garment: bool, part: str = "upper_arm") -> float:
 # through the middle, so the mid section keeps the spec's aspect. Abdomen: lumbar joint to T12; thorax:
 # T12 to the shoulder line, then the trapezius slope up to the neck base, which
 # ends well under the jaw so the neck solid (``neck``) shows above it (#15292).
+# The collar opening shifts forward this fraction of the thorax length, so it is
+# centred on the neck, which leans forward of the trunk axis (#15292).
+THORAX_COLLAR_FORWARD = 0.032
+
+
 def _shoulder_dome(
     joint: tuple[float, float, float],
     neck: tuple[float, float, float],
     slant: float,
+    forward: float = 0.0,
     steps: int = 6,
     wall_share: float = 0.7,
 ) -> tuple[tuple[float, ...], ...]:
@@ -395,7 +401,8 @@ def _shoulder_dome(
         along = joint[0] + (neck[0] - joint[0]) * u
         width = joint[1] + (neck[1] - joint[1]) * k
         depth = joint[2] + (neck[2] - joint[2]) * k
-        rows.append((along, width, depth, slant, 2.4 - 0.4 * u))
+        shift = forward * u * u * (3.0 - 2.0 * u)  # eases in from the shoulder line
+        rows.append((along, width, depth, slant, 2.4 - 0.4 * u, shift))
     return tuple(rows)
 
 
@@ -418,7 +425,9 @@ TORSO_PROFILES: dict[str, tuple[tuple[float, ...], ...]] = {
         (0.7, 1.0, 0.98),
         (0.8, 0.97, 0.93, 0.07),
         (0.87, 0.91, 0.86, 0.12),
-        *_shoulder_dome((0.92, 0.85, 0.78), (0.98, 0.38, 0.5), 0.153),
+        *_shoulder_dome(
+            (0.92, 0.85, 0.78), (0.98, 0.38, 0.5), 0.153, THORAX_COLLAR_FORWARD
+        ),
     ),
 }
 TORSO_RINGS = 18
