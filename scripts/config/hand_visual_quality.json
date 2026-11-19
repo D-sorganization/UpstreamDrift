@@ -105,6 +105,8 @@
   "max_trail_thumb_past_index_joint_m": 0.010,
   "_trail_index_joint_azimuth_deg": "The centre of that joint lies on the away-from-target side of the shaft: degrees round from the grip's top, positive away from the target (#15278). The band is the quarter of the grip centred on its away-from-target side (90). Measured 121.8 with the fingers closed, 99.8 with a 30 degree trigger spread.",
   "trail_index_joint_azimuth_deg": [45.0, 135.0],
+  "_min_thumb_joint_flexion_deg": "Owner, 2026-11-19 (#15278): no thumb joint bends back past straight on either hand. Degrees of flexion, measured on the posed bones about each joint's hinge, of the thumb's second segment from its first and of its end segment from its second; 0 is a straight line. The lead thumb's second segment was bent back 9.5 degrees and the trail thumb's 2.9.",
+  "min_thumb_joint_flexion_deg": 0.0,
   "max_thumb_azimuth_error_deg": 5.0,
   "min_index_knuckle_flexion_deg": 15.0,
   "max_index_segment_gap_m": 0.004
