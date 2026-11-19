@@ -11,8 +11,9 @@ hand's distance below the butt. Visual only: no force or contact model reads it.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from functools import lru_cache
 from typing import Any
 
@@ -41,6 +42,52 @@ from src.shared.python.model_appearance.hand_backends.types import HandVisualRes
 Array = NDArray[np.float64]
 
 _GRIP_AXIS = np.array([0.0, 1.0, 0.0])  # butt -> head in the club-body frame
+#: Half length of the band of hand skin about the wrist joint that is read.
+_BAND_M = 0.004
+#: Distance from the cut plane within which a vertex is on the cut rim.
+_RIM_M = 1e-9
+
+
+@dataclass(frozen=True)
+class WristBlend:
+    """Widening of a drawn hand's wrist to meet a forearm of human girth (#15299).
+
+    The scanned hand's wrist is thinner than a man's. Its cut rim is drawn
+    ``rim_scale`` times its own size about the centre of its section, which
+    is brought to within ``max_centre_shift_m`` of the wrist joint; both ease
+    to nothing ``length_m`` down the hand.
+    """
+
+    rim_scale: float
+    length_m: float
+    max_centre_shift_m: float
+
+    def centred(self, centre: Array) -> Array:
+        """``centre`` (off the wrist joint) pulled within the allowed shift."""
+        return centre * min(1.0, self.max_centre_shift_m / np.linalg.norm(centre))
+
+    def __post_init__(self) -> None:
+        if not 1.0 <= self.rim_scale <= 1.5:
+            raise ValueError(
+                "forearm_wrist_margin over cover must be in [1, 1.5], "
+                f"got {self.rim_scale}"
+            )
+        if not (math.isfinite(self.length_m) and self.length_m > 0.0):
+            raise ValueError(f"hand_blend_m must be positive, got {self.length_m}")
+        if not self.max_centre_shift_m > 0.0:
+            raise ValueError("max_centre_shift_m must be positive")
+
+
+def wrist_blend() -> WristBlend:
+    """The widening of the drawn hands' wrists, from the quality settings."""
+    quality: Mapping[str, Any] = load_hand_visual_quality()
+    shape = quality["forearm_wrist_shape"]
+    margin, cover = float(quality["forearm_wrist_margin"]), float(shape["cover"])
+    if not 0.9 <= cover <= margin:
+        raise ValueError(f"cover must be in [0.9, forearm_wrist_margin], got {cover}")
+    return WristBlend(
+        margin / cover, float(shape["hand_blend_m"]), float(shape["max_centre_shift_m"])
+    )
 
 
 def owner_grip_spec(roll_deg: float = 0.0) -> GripSpec:
@@ -162,8 +209,48 @@ def _flat_rim(
     return out
 
 
+def wrist_section(rel: Array, along: Array) -> tuple[float, float, Array, Array]:
+    """Half width, half depth, width axis and centre of a hand's wrist skin.
+
+    ``rel`` are skin points from the wrist joint and ``along`` the unit
+    direction up the forearm; the points within ``_BAND_M`` of the joint are
+    read. The centre is the middle of the section, off the joint, in its plane.
+    """
+    band = rel[np.abs(rel @ along) < _BAND_M]
+    flat = band - np.outer(band @ along, along)
+    _, axes = np.linalg.eigh(np.cov(flat.T))
+    wide, deep = axes[:, 2], axes[:, 1]
+    (w0, w1), (d0, d1) = ((np.min(flat @ k), np.max(flat @ k)) for k in (wide, deep))
+    centre = 0.5 * (w0 + w1) * wide + 0.5 * (d0 + d1) * deep
+    return float(0.5 * (w1 - w0)), float(0.5 * (d1 - d0)), wide, centre
+
+
+def _widened_wrist(rel: Array, along: Array, blend: WristBlend) -> Array:
+    """Skin points ``rel`` (from the wrist joint) grown about the wrist's axis.
+
+    The cut rim lands on the ellipse of the hand's own wrist section,
+    ``blend.rim_scale`` times its size, so a forearm ending in that ellipse
+    stands the same distance off the rim all the way round. The growth eases
+    smoothly to none ``blend.length_m`` down the hand, which keeps its own
+    shape past its first centimetres. Postcondition: no point moves along
+    the arm.
+    """
+    height = rel @ along
+    half_width, half_depth, wide, centre = wrist_section(rel, along)
+    flat = rel - np.outer(height, along) - centre
+    x, y = flat @ wide / half_width, flat @ np.cross(along, wide) / half_depth
+    angle, reach = np.arctan2(y, x), np.hypot(x, y)  # reach 1: on the ellipse
+    rim = np.flatnonzero(np.abs(height - forearm_cuff_m()) < _RIM_M)
+    rim = rim[np.argsort(angle[rim])]
+    rim_reach = np.interp(angle, angle[rim], reach[rim], period=2.0 * np.pi)
+    t = np.clip((forearm_cuff_m() - height) / blend.length_m, 0.0, 1.0)
+    ease = (1.0 - t * t * (3.0 - 2.0 * t))[:, None]
+    grown = (blend.rim_scale / rim_reach - 1.0)[:, None] * flat
+    return rel + ease * (grown + blend.centred(centre) - centre)
+
+
 def skinned_hand_meshes(
-    club: ClubAssembly, *, cut_at_wrist: bool = True
+    club: ClubAssembly, *, cut_at_wrist: bool = True, widen_wrist: bool = True
 ) -> dict[str, Mesh]:
     """``{"lead_hand", "trail_hand"}`` skinned meshes in the club-body frame.
 
@@ -172,7 +259,8 @@ def skinned_hand_meshes(
     ``cut_at_wrist`` every triangle that reaches more than
     :func:`forearm_cuff_m` up the forearm from the wrist joint is dropped, so a
     model's own forearm continues from the hand; the cut edge is moved onto
-    that plane and closed flat.
+    that plane and closed flat. With ``widen_wrist`` as well the cut hand's
+    wrist is widened by :func:`wrist_blend` to a human girth (#15299).
     """
     frame, pair = skinned_hand_frame(club), _pair()
     reach = forearm_reach_m(club)
@@ -186,7 +274,13 @@ def skinned_hand_meshes(
             keep = (vertices - wrist) @ along <= forearm_cuff_m()
             faces = faces[keep[faces].all(axis=1)]
             rim = wrist + forearm_cuff_m() * along
-            vertices, faces = _capped(_flat_rim(vertices, faces, rim, along), faces)
+            vertices = _flat_rim(vertices, faces, rim, along)
+            if widen_wrist:
+                drawn = np.unique(faces)
+                vertices[drawn] = wrist + _widened_wrist(
+                    vertices[drawn] - wrist, along, wrist_blend()
+                )
+            vertices, faces = _capped(vertices, faces)
         meshes[label] = Mesh(vertices, faces)
     return meshes
 
