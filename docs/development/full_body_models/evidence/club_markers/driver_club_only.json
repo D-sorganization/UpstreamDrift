@@ -1,0 +1,93 @@
+{
+  "body": "Clubhead",
+  "club": "driver",
+  "head_triad_edges_m": [
+    0.05203762184272342,
+    0.09233492605599099,
+    0.0957355573880168
+  ],
+  "offsets_m": {
+    "Marker_2:2:1": [
+      0.016109468921546785,
+      0.04576600225749334,
+      0.02068804107974026
+    ],
+    "Marker_2:2:2": [
+      0.061729787678856,
+      0.11141025942796201,
+      -0.02552187762592504
+    ],
+    "Marker_2:2:3": [
+      0.0722332913860833,
+      0.12325220465122366,
+      0.024049876733264416
+    ],
+    "Marker_3:3:1": [
+      -0.6670901855573049,
+      2.1063566488403099e-16,
+      -1.538078992309245e-17
+    ],
+    "Marker_3:3:2": [
+      -0.7399961653274324,
+      0.02286414256425274,
+      0.024927027286872357
+    ],
+    "Marker_3:3:3": [
+      -0.7882801907345711,
+      2.36543898031462e-16,
+      -1.821390792938386e-18
+    ]
+  },
+  "schema": "club-markers/1",
+  "source": {
+    "capture": "driver",
+    "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+    "method": "club markers alone: shaft axis through the two on-shaft markers, model head soled on the ground at address, roll set by the head-triad azimuth setting",
+    "settings": {
+      "address_frames": 10,
+      "ground_height_m": 0.0,
+      "head_axes": [
+        [
+          0.0,
+          0.17364817766693033,
+          -0.984807753012208
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          -0.984807753012208,
+          -0.17364817766693033
+        ]
+      ],
+      "head_centroid_azimuth_deg": 3.92,
+      "head_half_size_m": [
+        0.06,
+        0.032,
+        0.05
+      ],
+      "head_labels": [
+        "Marker_2:2:1",
+        "Marker_2:2:2",
+        "Marker_2:2:3"
+      ],
+      "hover_m": 0.0,
+      "max_axis_marker_distance_m": 0.02,
+      "min_frames": 30,
+      "min_roll_radius_m": 0.01,
+      "min_shaft_elevation_deg": 10.0,
+      "other_labels": [
+        "Marker_3:3:2"
+      ],
+      "rigid_rms_tolerance_m": 0.006,
+      "shaft_axis_labels": [
+        "Marker_3:3:3",
+        "Marker_3:3:1"
+      ],
+      "still_tolerance_m": 0.002
+    }
+  }
+}
