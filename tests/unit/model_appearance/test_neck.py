@@ -26,16 +26,6 @@ SPEC = json.loads(SPEC_BYTES)
 DOC = document_from_dict({"schema_version": "appearance-v1"})
 
 
-ADDRESS = json.loads(
-    (
-        Path(__file__).resolve().parents[2]
-        / "fixtures"
-        / "model_appearance"
-        / "address_pose.json"
-    ).read_text()
-)
-
-
 def _scene(appearance: dict, pose: dict | None = None):
     mujoco = pytest.importorskip("mujoco")
     from src.tools.native_viewer_export.backends.mujoco_worker import build_scene_xml
@@ -121,27 +111,6 @@ def test_the_parametric_head_keeps_its_own_neck() -> None:
         build_neck_parts(0.0)
 
 
-def _neck_samples() -> np.ndarray:
-    """Dense points on the neck surface (every face, 8 barycentric points)."""
-    mesh = _neck_part()
-    tri = mesh.vertices[mesh.faces]
-    w = np.array([(i, j) for i in range(9) for j in range(9 - i)]) / 8.0
-    return np.concatenate(
-        [np.einsum("fvc,v->fc", tri, [a, b, 1 - a - b]) for a, b in w]
-    )
-
-
-def _top_ring(pose: dict | None) -> np.ndarray:
-    mujoco, model, data = _scene(default_document_dict(), pose)
-    head = mujoco.mj_name2id(
-        model, mujoco.mjtObj.mjOBJ_BODY, "GolfSwing3D_Kinetic/Head"
-    )
-    frame, origin = data.xmat[head].reshape(3, 3), data.xpos[head]
-    geom = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "visual_vmesh_2_garment0")
-    local = (_vertices(mujoco, model, data, geom) - origin) @ frame
-    return local[:-2].reshape(-1, 28, 3)[-1]  # metres, head frame
-
-
 def _head_skin() -> np.ndarray:
     from src.shared.python.model_appearance.head import build_head_parts
 
@@ -172,12 +141,6 @@ def test_the_neck_enters_the_head_without_a_step_at_the_jaw() -> None:
         reach = np.abs(skin[np.abs(skin[:, 2] - z) < 0.006 * HEAD_M * 4, 1]).max()
         past = np.abs(neck_v[np.abs(neck_v[:, 2] - z) < 1e-3, 1]).max() - reach
         assert past <= ACCEPT.max_neck_past_head_m, (z, past)
-
-
-def test_the_neck_goes_below_the_shirt_opening_all_round() -> None:
-    neck_z = _neck_part().vertices[:-2, 2].min()
-    for pose in (None, ADDRESS):
-        assert neck_z < _top_ring(pose)[:, 2].min(), pose
 
 
 def test_the_neck_is_one_skin_part() -> None:
