@@ -48,6 +48,8 @@ class WristSection:
     #: False on the near body of a two-body forearm: it only narrows toward
     #: this section and draws none of the flat, shifted wrist end itself.
     shapes_end: bool = True
+    #: Muscle belly ``(gain, position, width)`` of the forearm that ends here.
+    belly: tuple[float, float, float] = library.NO_BELLY
 
 
 def wrist_margin() -> float:
@@ -84,6 +86,21 @@ def wrist_taper_end() -> float:
     if not library.PART_FLATTEN_FROM["forearm"] < end <= 1.0:
         raise ValueError(f"taper_end must be past the flattening and <= 1, got {end}")
     return end
+
+
+def forearm_belly() -> tuple[float, float, float]:
+    """Muscle belly ``(gain, position, width)`` of a forearm that ends in a
+    skinned hand (a setting): fullest a third of the way down, nothing added
+    at the elbow, like a relaxed human forearm (#15299).
+    """
+    quality: Mapping[str, Any] = load_hand_visual_quality()
+    gain, position, width = map(float, quality["forearm_wrist_shape"]["belly"])
+    if not (0.0 <= gain <= 0.5 and 0.0 < position < 1.0 and width > 0.0):
+        raise ValueError(
+            f"belly needs 0 <= gain <= 0.5, 0 < position < 1 and width > 0, "
+            f"got {(gain, position, width)}"
+        )
+    return gain, position, width
 
 
 def hand_wrist_sections(club: ClubAssembly) -> dict[str, WristSection]:
@@ -200,5 +217,6 @@ def forearm_wrist_sections(
             min(1.0, wrist_cap() * section.half_depth_m / section.half_width_m),
             centre,
             wrist_taper_end(),
+            belly=forearm_belly(),
         )
     return out

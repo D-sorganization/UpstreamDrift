@@ -126,7 +126,6 @@ def test_the_forearm_narrows_all_the_way_to_the_wrist(profiles) -> None:
     flat = float(SHAPE["constant_girth_tolerance_m"])
     for where, girth in profiles.values():
         belly = int(girth.argmax())
-        assert where[belly] < -0.5 * abs(where[0])  # the belly is by the elbow
         steps = np.diff(girth[belly:])
         assert steps.max() <= flat  # never wider again toward the wrist
         narrowest = where[np.flatnonzero(girth <= girth.min() + flat)[0]]
@@ -147,6 +146,21 @@ def test_the_wrist_has_the_girth_of_a_human_wrist(skinned, profiles) -> None:
     low, high = (float(k) * norm for k in SHAPE["girth_band"])
     for _, girth in profiles.values():
         assert low <= girth.min() <= high
+
+
+def test_the_forearm_is_fullest_in_its_upper_third(skinned, profiles) -> None:
+    # ANSUR II male forearm circumference (flexed), scaled by stature; a
+    # relaxed forearm lies between its 5th percentile and its mean.
+    norm = float(SHAPE["belly_norm_girth_m"]) * (
+        float(skinned["subject"]["stature_m"]) / float(SHAPE["norm_stature_m"])
+    )
+    low, high = (float(k) * norm for k in SHAPE["belly_girth_band"])
+    near, far = (float(k) for k in SHAPE["belly_from_elbow"])
+    for where, girth in profiles.values():
+        length = STATION_M * len(girth)
+        assert near <= 1.0 + where[girth.argmax()] / length <= far
+        assert low <= girth.max() <= high
+        assert girth[0] < girth.max() - 0.01  # the elbow is thinner than the belly
 
 
 def _polar(section: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -195,6 +209,7 @@ def test_only_the_forearm_and_the_hands_change(skinned, monkeypatch) -> None:
     old_quality["forearm_wrist_shape"] = {
         **SHAPE,
         "taper_end": library.taper_end("forearm"),
+        "belly": library.belly("forearm"),
     }
     for module in (sch, sws):
         monkeypatch.setattr(module, "load_hand_visual_quality", lambda: old_quality)
@@ -215,10 +230,17 @@ def test_only_the_forearm_and_the_hands_change(skinned, monkeypatch) -> None:
 
 
 def test_bad_wrist_shape_settings_are_refused(monkeypatch) -> None:
-    for key, bad in (("taper_end", 0.0), ("cover", 0.5), ("hand_blend_m", 0.0)):
+    for key, bad in (
+        ("taper_end", 0.0),
+        ("cover", 0.5),
+        ("hand_blend_m", 0.0),
+        ("belly", [0.2, 0.0, 0.3]),
+    ):
         quality = {"forearm_wrist_margin": 1.2, "forearm_wrist_shape": {**SHAPE}}
         quality["forearm_wrist_shape"][key] = bad
         for module in (sch, sws):
             monkeypatch.setattr(module, "load_hand_visual_quality", lambda q=quality: q)
         with pytest.raises(ValueError, match=key):
-            sws.wrist_taper_end() if key == "taper_end" else sch.wrist_blend()
+            {"taper_end": sws.wrist_taper_end, "belly": sws.forearm_belly}.get(
+                key, sch.wrist_blend
+            )()
