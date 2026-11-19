@@ -162,6 +162,128 @@ class LoftOptions:
     width_hint: Array | None = None
     # Radius at the ``end`` over the radius at ``start`` (linear taper, 1 = none).
     end_scale: float = 1.0
+    # This segment is the fraction ``(from, to)`` of a longer limb drawn as one
+    # shape (#15262). An end inside the limb is cut flat on a round section;
+    # taper, belly and end rounding are those of the whole limb.
+    window: tuple[float, float] = (0.0, 1.0)
+    # Muscle belly ``(gain, position, width)``: the radius grows by ``gain``
+    # at ``position`` along the whole limb and falls to nothing (raised
+    # cosine) ``width`` away on either side (fractions of its length). A gain
+    # of 0 is no belly.
+    belly: tuple[float, float, float] = (0.0, 0.5, 1.0)
+    # Ends of the whole limb (#15262). False: a spindle, already thinner at
+    # the joint. True: the radius holds to each joint and the skin beyond is a
+    # ball about the joint, so a neighbour turning there opens no gap.
+    capsule_ends: bool = False
+    # Fraction of the whole limb by which the taper has reached ``end_scale``.
+    taper_end: float = 1.0
+    # Depth/width of the section at the far end of the whole limb (a flat
+    # wrist, #15262). The section is ``aspect`` up to ``flatten_from`` of the
+    # limb and eases to ``end_aspect`` by ``taper_end``. ``None`` keeps
+    # ``aspect`` throughout.
+    end_aspect: float | None = None
+    flatten_from: float = 0.0
+    # ``(length m, radius scale)``: an end cut inside the limb (``window``)
+    # runs on this far at this fraction of the cut's radius, under the
+    # neighbour's skin, so the cut's rim is shaded as open skin and no line
+    # shows round the limb (#15262). Length 0 is a flat cut.
+    seam_tuck: tuple[float, float] = (0.0, 1.0)
+
+
+def _checked_shape(opts: LoftOptions) -> None:
+    """Preconditions of the whole-limb shape options (``ValueError``)."""
+    if not 0.0 < opts.end_scale <= 1.0:  # NaN fails too
+        raise ValueError("taper end_scale must be in (0, 1]")
+    w0, w1 = opts.window
+    if not 0.0 <= w0 < w1 <= 1.0:
+        raise ValueError("window must satisfy 0 <= from < to <= 1")
+    gain, position, width = opts.belly
+    if not (gain >= 0.0 and math.isfinite(gain) and 0.0 <= position <= 1.0):
+        raise ValueError("belly needs a finite gain >= 0 and a position in [0, 1]")
+    if not (width > 0.0 and math.isfinite(width)):
+        raise ValueError("belly width must be positive")
+    if not 0.0 < opts.taper_end <= 1.0:
+        raise ValueError("taper_end must be in (0, 1]")
+    if not (opts.seam_tuck[0] >= 0.0 and 0.0 < opts.seam_tuck[1] <= 1.0):
+        raise ValueError("seam_tuck needs a length >= 0 and a scale in (0, 1]")
+    if opts.end_aspect is not None and not (
+        opts.end_aspect > 0.0 and 0.0 <= opts.flatten_from < opts.taper_end
+    ):
+        raise ValueError("end_aspect needs a value > 0 and flatten_from < taper_end")
+
+
+def _aspect_at(opts: LoftOptions, frac: float) -> float:
+    """Depth/width of the section at ``frac`` of the whole limb."""
+    if opts.end_aspect is None:
+        return opts.aspect
+    span = opts.taper_end - opts.flatten_from
+    t = min(1.0, max(0.0, (frac - opts.flatten_from) / span))
+    return opts.aspect + (opts.end_aspect - opts.aspect) * t * t * (3.0 - 2.0 * t)
+
+
+def _limb_scale(opts: LoftOptions, frac: float) -> float:
+    """Taper times belly at ``frac`` of the whole limb (clamped to [0, 1])."""
+    frac = min(1.0, max(0.0, frac))
+    gain, position, width = opts.belly
+    reach = min(1.0, abs(frac - position) / width)
+    swell = 1.0 + gain * math.cos(0.5 * math.pi * reach) ** 2
+    return swell * (1.0 + (opts.end_scale - 1.0) * min(1.0, frac / opts.taper_end))
+
+
+def _spindle_stations(
+    total: float,
+    over: tuple[float, float],
+    window: tuple[float, float],
+    rings: int,
+    joint_rings: bool,
+    tuck: float = 0.0,
+) -> tuple[Array, float, float]:
+    """Stations along the whole limb inside ``window``, and its two poles.
+
+    An end of the window that is an end of the limb keeps its rounded
+    overshoot (pole ``over`` past it); an end inside the limb is a flat cut
+    (ring and pole at the cut), or with ``tuck`` a ring at the cut and a
+    ring and pole ``tuck`` beyond it. ``joint_rings`` (capsule ends) adds a
+    ring exactly at each joint, where the end starts to round.
+    """
+    first, last = -over[0], total + over[1]
+    theta = np.linspace(0.0, math.pi, rings + 2)[1:-1]
+    stations = 0.5 * (first + last) - 0.5 * (last - first) * np.cos(theta)
+    if joint_rings:
+        clear = (np.abs(stations) > 1e-9) & (np.abs(stations - total) > 1e-9)
+        stations = np.sort(np.append(stations[clear], [0.0, total]))
+    low, high = window[0] * total, window[1] * total
+    if window[0] > 0.0:
+        stations, first = np.append(low, stations[stations > low + 1e-9]), low - tuck
+    if window[1] < 1.0:
+        stations, last = np.append(stations[stations < high - 1e-9], high), high + tuck
+    if tuck > 0.0:
+        inner = [
+            x for x, cut in ((first, window[0] > 0.0), (last, window[1] < 1.0)) if cut
+        ]
+        stations = np.sort(np.append(stations, inner))
+    return stations, first, last
+
+
+def _checked_loft(opts: LoftOptions, length: float, radius: float) -> float:
+    """Preconditions of :func:`lofted_segment` (``ValueError``); gives ``length``."""
+    if not math.isfinite(radius) or radius <= 0:
+        raise ValueError("radius, thickness and aspect must be positive")
+    if opts.thickness <= 0 or opts.aspect <= 0:
+        raise ValueError("radius, thickness and aspect must be positive")
+    t0, t1 = opts.coverage
+    if not 0.0 <= t0 < t1 <= 1.0:
+        raise ValueError("coverage must satisfy 0 <= start < end <= 1")
+    if length <= 1e-9 or opts.rings < 4 or opts.sides < 6:
+        raise ValueError("Segment needs positive length, rings >= 4, sides >= 6")
+    _checked_shape(opts)
+    if opts.aspect != 1.0 or opts.end_aspect not in (None, opts.aspect):
+        require(
+            opts.width_hint is not None,
+            "a non-round cross-section (aspect != 1) needs an explicit width_hint",
+            opts.aspect,
+        )
+    return length
 
 
 def lofted_segment(
@@ -178,74 +300,77 @@ def lofted_segment(
     shorts and shoes. ``aspect`` is depth/width of the cross-section: the
     extent along ``width_hint`` (made perpendicular to the segment) is
     ``2 * radius * thickness`` and along ``segment x width`` it is ``aspect``
-    times that.
+    times that. ``window`` and ``belly`` draw the segment as part of a
+    longer limb (see :class:`LoftOptions`).
     Preconditions: finite points, positive length and radius; when
     ``aspect != 1`` an explicit ``width_hint`` at least
     ``MIN_WIDTH_AXIS_ANGLE_DEG`` from the segment axis (no world default).
     """
     opts = options or LoftOptions()
-    aspect, coverage, thickness = opts.aspect, opts.coverage, opts.thickness
+    aspect, thickness = opts.aspect, opts.thickness
     rings, sides, width_hint = opts.rings, opts.sides, opts.width_hint
     p0, p1 = _check_finite("start", start, 3), _check_finite("end", end, 3)
-    if not math.isfinite(radius) or radius <= 0 or thickness <= 0 or aspect <= 0:
-        raise ValueError("radius, thickness and aspect must be positive")
-    t0, t1 = coverage
-    if not 0.0 <= t0 < t1 <= 1.0:
-        raise ValueError("coverage must satisfy 0 <= start < end <= 1")
-    length = float(np.linalg.norm(p1 - p0))
-    if length <= 1e-9 or rings < 4 or sides < 6:
-        raise ValueError("Segment needs positive length, rings >= 4, sides >= 6")
-    if not 0.0 < opts.end_scale <= 1.0:  # NaN fails too
-        raise ValueError("taper end_scale must be in (0, 1]")
-    if aspect != 1.0:
-        require(
-            width_hint is not None,
-            "a non-round cross-section (aspect != 1) needs an explicit width_hint",
-            aspect,
-        )
+    length = _checked_loft(opts, float(np.linalg.norm(p1 - p0)), radius)
+    t0, t1 = opts.coverage
     u, v, a = (
         _frame(p1 - p0)
         if width_hint is None
         else _width_frame(p1 - p0, np.asarray(width_hint, float))
     )
-    over = 0.5 * radius
-    half = length / 2.0 + over
-    centre = length / 2.0
+    # Whole-limb coordinates: this segment starts ``offset`` along the limb.
+    total = length / (opts.window[1] - opts.window[0])
+    offset = opts.window[0] * total
+    full = radius * thickness
+    ends = (full * _limb_scale(opts, 0.0), full * _limb_scale(opts, 1.0))
+    over = ends if opts.capsule_ends else (0.5 * radius, 0.5 * radius)
+    half = total / 2.0 + over[0]
 
-    def profile(s: float) -> float:
-        x = min(1.0, abs(s - centre) / half)
-        return math.sqrt(max(0.0, 1.0 - x * x)) ** 0.55
+    def profile(whole: float) -> float:
+        """Skin radius (m) at ``whole`` metres along the whole limb."""
+        if opts.capsule_ends:
+            past = max(-whole, whole - total, 0.0)
+            end = ends[0] if whole < 0.0 else ends[1]
+            scale = _limb_scale(opts, whole / total)
+            return (
+                math.sqrt(max(0.0, end * end - past * past)) if past else full * scale
+            )
+        x = min(1.0, abs(whole - total / 2.0) / half)
+        return (
+            full
+            * math.sqrt(max(0.0, 1.0 - x * x)) ** 0.55
+            * _limb_scale(opts, whole / total)
+        )
 
-    closed = t0 == 0.0 and t1 == 1.0
-    if closed:
-        theta = np.linspace(0.0, math.pi, rings + 2)[1:-1]
-        stations = centre - half * np.cos(theta)
+    if t0 == 0.0 and t1 == 1.0:
+        whole, first, last = _spindle_stations(
+            total, over, opts.window, rings, opts.capsule_ends, opts.seam_tuck[0]
+        )
+        stations, poles = whole - offset, (first - offset, last - offset)
     else:
-        stations = np.linspace(t0 * length, t1 * length, rings)
+        stations = np.linspace(t0 * length, t1 * length, rings, dtype=np.float64)
+        poles = (float(stations[0]), float(stations[-1]))
     phi = np.linspace(0.0, 2.0 * math.pi, sides, endpoint=False)
-    ring_dirs = np.outer(np.cos(phi), u) + aspect * np.outer(np.sin(phi), v)
+    across, deep = np.outer(np.cos(phi), u), np.outer(np.sin(phi), v)
+    cut = (
+        0.0 if opts.window[0] > 0.0 else -math.inf,
+        length if opts.window[1] < 1.0 else math.inf,
+    )
     verts: list[Array] = []
     for s in stations:
-        frac = min(1.0, max(0.0, float(s) / length))
-        taper = 1.0 + (opts.end_scale - 1.0) * frac
-        r = radius * thickness * profile(float(s)) * taper
-        verts.extend(p0 + a * s + r * ring_dirs)
+        # A station past a cut (a tuck) keeps the cut's section, shrunk.
+        held = min(max(float(s), cut[0]), cut[1])
+        sink = 1.0 if abs(held - float(s)) < 1e-12 else opts.seam_tuck[1]
+        at = held + offset
+        ring = across + _aspect_at(opts, at / total) * deep
+        verts.extend(p0 + a * s + sink * profile(at) * ring)
     face_list = _ring_faces(len(stations), sides)
     n = len(verts)
-    if closed:
-        verts += [p0 - a * over, p1 + a * over]
-        first = (len(stations) - 1) * sides
-        for j in range(sides):
-            j2 = (j + 1) % sides
-            face_list.append((n, j2, j))
-            face_list.append((n + 1, first + j, first + j2))
-    else:
-        verts += [p0 + a * stations[0], p0 + a * stations[-1]]
-        first = (len(stations) - 1) * sides
-        for j in range(sides):
-            j2 = (j + 1) % sides
-            face_list.append((n, j2, j))
-            face_list.append((n + 1, first + j, first + j2))
+    verts += [p0 + a * poles[0], p0 + a * poles[1]]
+    first_ring = (len(stations) - 1) * sides
+    for j in range(sides):
+        j2 = (j + 1) % sides
+        face_list.append((n, j2, j))
+        face_list.append((n + 1, first_ring + j, first_ring + j2))
     return _orient(
         np.asarray(verts, dtype=float), np.asarray(face_list, dtype=np.int64)
     )

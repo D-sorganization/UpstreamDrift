@@ -267,6 +267,8 @@ class _Context:
     thorax: frozenset[str] = frozenset()
     #: Parent body of each torso body that hangs from another torso body.
     parents: Mapping[str, str] = field(default_factory=dict)
+    #: Fraction of its whole limb each body of a continuous part draws (#15262).
+    windows: Mapping[str, tuple[float, float]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -281,6 +283,10 @@ class _Segment:
     #: Trunk cross-sections and the joint plane they are measured from (#15279).
     profile: TorsoProfile | None = None
     profile_start: np.ndarray | None = None
+    window: tuple[float, float] = library.FULL_COVERAGE
+    belly: tuple[float, float, float] = library.NO_BELLY
+    capsule_ends: bool = False
+    taper_end: float = 1.0
 
 
 def _shoulder_segment(cap: Capsule, scale: float) -> _Segment:
@@ -303,7 +309,38 @@ def _shoulder_segment(cap: Capsule, scale: float) -> _Segment:
     )
 
 
-def _limb_segments(part: str, caps: Sequence[Capsule], scale: float) -> list[_Segment]:
+def _limb_windows(
+    spec: Mapping[str, Any], by_body: Mapping[str, Sequence[Capsule]]
+) -> dict[str, tuple[float, float]]:
+    """The share of one limb drawn by each body of a continuous part.
+
+    Two bodies of the same ``library.CONTINUOUS_PARTS`` part joined by a
+    joint, each with one capsule, are the near and far lengths of one limb:
+    the parent draws ``(0, f)`` and the child ``(f, 1)``, ``f`` the parent's
+    share of the summed length.
+    """
+    out: dict[str, tuple[float, float]] = {}
+    for joint in spec.get("joints", ()):
+        near, far = joint.get("parent"), joint.get("child")
+        part = library.classify_body(near) if near in by_body else None
+        if part not in library.CONTINUOUS_PARTS or far not in by_body:
+            continue
+        if library.classify_body(far) != part:
+            continue
+        if len(by_body[near]) != 1 or len(by_body[far]) != 1:
+            continue
+        lengths = by_body[near][0].length_m(), by_body[far][0].length_m()
+        share = lengths[0] / sum(lengths)
+        out[near], out[far] = (0.0, share), (share, 1.0)
+    return out
+
+
+def _limb_segments(
+    part: str,
+    caps: Sequence[Capsule],
+    scale: float,
+    window: tuple[float, float] = library.FULL_COVERAGE,
+) -> list[_Segment]:
     out = []
     for cap in caps:
         if part == "shoulder":
@@ -323,6 +360,10 @@ def _limb_segments(part: str, caps: Sequence[Capsule], scale: float) -> list[_Se
                 radius,
                 aspect,
                 library.limb_distal_scale(part),
+                window=window,
+                belly=library.belly(part),
+                capsule_ends=part in library.CAPSULE_END_PARTS,
+                taper_end=library.taper_end(part),
             )
         )
     return out
@@ -392,7 +433,7 @@ def _pelvis_plan(
     up, ml = section.trunk_up_axis(), section.ml_axis
     hjc = np.stack([marks.hjc_r, marks.hjc_l])
     z_hjc = hjc @ up
-    z_low = float(z_hjc.min())
+    z_low = float(np.min(z_hjc))
     top = float(marks.lumbar @ up - z_low)
     if top <= 0:
         raise ValueError(f"{marks.body}: the lumbar joint is not above the hip joints")
@@ -497,6 +538,11 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
         geometry.LoftOptions(
             aspect=seg.aspect,
             end_scale=seg.end_scale,
+            window=seg.window,
+            seam_tuck=library.SEAM_TUCK,
+            belly=seg.belly,
+            capsule_ends=seg.capsule_ends,
+            taper_end=seg.taper_end,
             rings=library.LOFT_RINGS,
             sides=library.LOFT_SIDES,
             width_hint=hint,
@@ -585,7 +631,8 @@ def _meshes_for_body(
     elif part in TRUNK_PARTS:
         segments = [_trunk_segment(ctx, body, part, caps, scale)]
     else:
-        segments = _limb_segments(part, caps, scale)
+        window = ctx.windows.get(body, library.FULL_COVERAGE)
+        segments = _limb_segments(part, caps, scale, window)
     return _segment_meshes(ctx, body, part, segments)
 
 
@@ -638,6 +685,9 @@ def body_meshes(
     shapes: dict[str, list[Shape]] = {}
     for shape in skeleton.shapes:
         shapes.setdefault(shape.body, []).append(shape)
+    by_body: dict[str, list[Capsule]] = {}
+    for cap in skeleton.capsules:
+        by_body.setdefault(cap.body, []).append(cap)
     sections = body_sections(spec)
     ctx = _Context(
         doc,
@@ -651,10 +701,8 @@ def body_meshes(
         _club_parts(spec, doc, club),
         _parents_of(spec, "shoulder"),
         _torso_parents(spec),
+        _limb_windows(spec, by_body),
     )
-    by_body: dict[str, list[Capsule]] = {}
-    for cap in skeleton.capsules:
-        by_body.setdefault(cap.body, []).append(cap)
     out = [
         m for body, caps in by_body.items() for m in _meshes_for_body(ctx, body, caps)
     ]
