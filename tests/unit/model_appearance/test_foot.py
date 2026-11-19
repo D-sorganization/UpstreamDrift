@@ -296,6 +296,8 @@ def test_shoe_colour_stays_a_garment(meshes: list[BodyMesh]) -> None:
     for m in _parts(meshes, "calcn_r", "garment") + _parts(meshes, "toes_r", ""):
         if m.label.startswith("garment"):
             assert m.material_name == garment
+        elif m.label.startswith("sole"):
+            assert m.material_name == library.SOLE_MATERIAL
         else:
             assert m.material_name == DOC.skin_tone
 

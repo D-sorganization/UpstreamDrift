@@ -46,9 +46,11 @@ def set_seeds(seed: int = DEFAULT_SEED, *, validate: bool = True) -> None:
 
     Args:
         seed: Random seed value (default: 42)
-        validate: If True, validate seed is within valid range
+        validate: If True, validate seed is within valid range. Seed type
+            is always validated before any random state is changed.
 
     Raises:
+        TypeError: If seed is not an integer; all RNG states remain unchanged.
         ValueError: If validate=True and seed is out of valid range
 
     Example:
@@ -59,6 +61,8 @@ def set_seeds(seed: int = DEFAULT_SEED, *, validate: bool = True) -> None:
 
         # Now all random operations are deterministic
     """
+    if not isinstance(seed, int):
+        raise TypeError(f"Seed must be an integer, got {type(seed).__name__}")
     if validate and not (0 <= seed <= MAX_SEED):
         raise ValueError(
             f"Seed must be an expected non-negative integer between 0 and {MAX_SEED}, got {seed}"
