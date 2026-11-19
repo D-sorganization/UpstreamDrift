@@ -42,20 +42,22 @@ def test_the_configured_thumb_limits_do_not_reach_past_straight() -> None:
     assert settings.thumb_ip_limits_deg[0] >= floor
 
 
+@pytest.mark.parametrize("name", ["lone", "pair"])
 @pytest.mark.parametrize("side", ["lead", "trail"])
-def test_no_thumb_joint_bends_back_past_straight(side: str) -> None:
+def test_no_thumb_joint_bends_back_past_straight(side: str, name: str) -> None:
     """Measured on the posed bones, not read from the joint angles: the bend
     of each segment from the one before it, about the joint's own hinge, with
-    flexion positive. Checked on the hand alone and on the pair."""
+    flexion positive. Checked on the hand alone and on the pair, one posing
+    per test so no test outlasts the unit gate's time limit."""
     floor = float(_Q["min_thumb_joint_flexion_deg"])
     slack = float(_Q["thumb_rest_straightness_tolerance_deg"])
-    for name, hand in (("lone", _hand(side)), ("pair", _pair()[side])):
-        marks = hand_landmarks(hand)
-        for before, after in _THUMB_JOINTS:
-            inner, outer = marks.joint(before), marks.joint(after)
-            assert outer.hinge_axis is not None
-            turn = np.cross(inner.bone_axis, outer.bone_axis) @ outer.hinge_axis
-            bend = math.degrees(math.atan2(turn, inner.bone_axis @ outer.bone_axis))
-            assert bend >= floor - slack, (
-                f"{name} {side} {after} bends back {-bend:.1f} degrees"
-            )
+    hand = _hand(side) if name == "lone" else _pair()[side]
+    marks = hand_landmarks(hand)
+    for before, after in _THUMB_JOINTS:
+        inner, outer = marks.joint(before), marks.joint(after)
+        assert outer.hinge_axis is not None
+        turn = np.cross(inner.bone_axis, outer.bone_axis) @ outer.hinge_axis
+        bend = math.degrees(math.atan2(turn, inner.bone_axis @ outer.bone_axis))
+        assert bend >= floor - slack, (
+            f"{name} {side} {after} bends back {-bend:.1f} degrees"
+        )

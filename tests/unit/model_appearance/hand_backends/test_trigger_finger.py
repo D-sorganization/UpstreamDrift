@@ -139,7 +139,10 @@ def test_without_side_closing_there_is_no_trigger_finger() -> None:
     assert hand.side["index_prox"] == 0.0 and hand.wraps == 1
 
 
-def test_the_trigger_finger_stands_apart_and_its_tip_stays_on_the_grip() -> None:
+@pytest.mark.parametrize("name", ["lone", "pair"])
+def test_the_trigger_finger_stands_apart_and_its_tip_stays_on_the_grip(
+    name: str,
+) -> None:
     """Owner, 2026-11-18: the trigger finger is exempt from the rule that
     neighbouring fingers touch. On the pair it is held apart within the
     configured band. A lone hand's finger is brought back until its tip seats,
@@ -149,11 +152,11 @@ def test_the_trigger_finger_stands_apart_and_its_tip_stays_on_the_grip() -> None
     low, high = (float(v) for v in _Q["trigger_index_side_gap_m"])
     assert low > closed_most
     floors = {"lone": closed_most, "pair": low}
-    for name, hand in (("lone", _hand("trail")), ("pair", _pair()["trail"])):
-        gap = finger_side_gaps_m(hand)["index-middle"]
-        assert floors[name] < gap <= high, f"{name} index-middle {gap * 1e3:.1f} mm"
-        tip = hand.contact_gaps_m["index_dist"]
-        assert tip <= float(_Q["contact_tolerance_m"]), f"{name} tip {tip * 1e3:.2f}"
+    hand = _hand("trail") if name == "lone" else _pair()["trail"]
+    gap = finger_side_gaps_m(hand)["index-middle"]
+    assert floors[name] < gap <= high, f"{name} index-middle {gap * 1e3:.1f} mm"
+    tip = hand.contact_gaps_m["index_dist"]
+    assert tip <= float(_Q["contact_tolerance_m"]), f"{name} tip {tip * 1e3:.2f}"
 
 
 def test_the_trail_thumb_tip_is_about_level_with_the_forefinger_joint() -> None:
