@@ -22,6 +22,8 @@ from defusedxml import ElementTree as ET
 
 from src.shared.python.motion_matching.arm_mirror import mirror_document_arm
 from src.shared.python.motion_matching.anthropometric_geometry import (
+    GIRDLE_MASS_ADDED,
+    GIRDLE_MASS_RULES,
     GRIP_ROTATION_DEG,
     LEG_VISUAL_RADIUS_M,
     build_upper_body,
@@ -785,6 +787,11 @@ def compose_anthropometric_document(
     with :func:`scale_leg_mass` so body mass without the club equals ``mass_kg``
     (#12199, #12300); the legs carry what the upper body does not. Raises
     ``ValueError`` when the upper body alone reaches ``mass_kg``; see :func:`_apply_kwarg_tibial_torsion`.
+
+    ``shoulder_girdle_mass`` (kwarg, default ``GIRDLE_MASS_ADDED``; #15150) is
+    ``build_upper_body``'s rule for the clavicle links' mass, which validates it
+    (``ValueError`` naming ``GIRDLE_MASS_RULES``) and records a non-default rule
+    in ``subject``, so in the document and the build receipt.
     """
     native_path = native_path or get_native_geometry_spec(None)
     osim_path = osim_path or get_opensim_model(None)
@@ -809,6 +816,7 @@ def compose_anthropometric_document(
         },
         scale_hand_mass=match_subject_mass,
         upper_ranges_deg=upper_ranges,
+        shoulder_girdle_mass=kwargs.get("shoulder_girdle_mass", GIRDLE_MASS_ADDED),
     )
 
     hip_frame = next(f for f in upper["frames"] if f["name"] == "Hip")
@@ -973,6 +981,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="club-markers/1 file (default evidence/club_markers/<club>.json)",
     )
+    parser.add_argument(
+        "--shoulder-girdle-mass",
+        choices=GIRDLE_MASS_RULES,
+        default=GIRDLE_MASS_ADDED,
+        help="where the clavicle links' mass comes from (#15279, #15150)",
+    )
     add_grip_arguments(parser, physical=True)
     return parser
 
@@ -1002,6 +1016,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         club_markers_path=args.club_markers,
         shaft_model=args.shaft_model,
         tibial_torsion_offset_deg=args.tibial_torsion,
+        shoulder_girdle_mass=args.shoulder_girdle_mass,
         grip_overrides=overrides_from_args(args),
     )
     return 0
