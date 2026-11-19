@@ -188,7 +188,22 @@ in flexion and extension, cannot rotate and have limited lateral motion.
   about its own length; the trail ring finger stopped flexing at its knuckle
   and stood 10.7 mm off. Also: more spacing passes (2.8 mm fault at 83 mm);
   a 1 mm forefinger gap; lead forefinger knuckle preshape of 40 to 85 degrees.
-- Next: the trail palm stands about 13 mm off the grip over the lead thumb, so
-  its fingers reach round from too far out (first bones 7 to 14 mm off) and
-  the ring finger comes down on the lead forefinger. Seating the palm closer
-  is the lever left; then turn the setting on and drop the marker.
+- Disproved: seating the trail palm closer. Letting it press 3, 5 or 8 mm
+  into the lead hand's skin (owner approved 5 mm) leaves the ring finger
+  further off (5.6, 6.4, 7.9 mm) and unseats the trail thumb.
+  `pair.palm_capsule_radius_scale` does nothing while `pair.obstacle` is
+  `skin`.
+- Disproved: trail cross angle 35 degrees with 25 degrees of ulnar deviation
+  and the limit on. It seats every finger, but 15 tests fail: the trail heel
+  leaves the lead thumb (18.6 mm against 2.5), the little finger leaves its
+  groove (4.5 mm), the thumb tip passes the forefinger joint by 17.8 mm.
+- A part limit has no sweet spot: `flexed_share` 0.33, 0.45, 0.55 leave the
+  trail ring finger 3.6, 2.6, 1.9 mm off (limit 1.5).
+- The lead hand's cross angle changes nothing; `owner_lead_heel_pad_depth_m`
+  sets its seat. Its middle and ring fingers wind 46 to 49 degrees off square
+  to the shaft, the trail hand's 40 to 44; the squarer trail hand that seats
+  winds 25. The lead forefinger's 20 degree swing is on a knuckle bent only
+  21 degrees, which the limit allows: its crook is not the swing alone.
+- Open: with anatomical knuckles the palm-on-thumb seat and the ring finger
+  beside the lead forefinger do not both hold. Untried: a shallower lead heel
+  pad (squarer lead fingers), which is an owner setting.
