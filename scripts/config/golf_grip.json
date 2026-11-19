@@ -1,0 +1,29 @@
+{
+  "_about": "Outside dimensions of a golf grip, for the visual hand model (epic #15150, #15185). Distances are measured from the edge of the butt cap toward the club head. Only the two diameter stations are published figures; every key listed in `unverified` is a typical value that no cited source confirms.",
+  "_sources": [
+    "https://golfwrx.com/280523/getting-the-right-grip-size-time-after-time/ (men's standard: 0.900 in at 2 in below the edge of the grip cap, 0.780 in at 6 in)",
+    "https://www.mitchellgolf.com/golf-grip-size-guide/ (the 2 in measuring station; standard 0.900 in, midsize 0.960 in, jumbo 1.020 in; ladies 0.850 in)",
+    "https://www.valuegolf.com/blog/post/golf-grip-size-chart-which-is-best-for-you (size chart)"
+  ],
+  "size": "mens_standard",
+  "sizes": {
+    "mens_standard": {
+      "diameter_stations_m": [
+        [0.0508, 0.02286],
+        [0.1524, 0.019812]
+      ]
+    }
+  },
+  "length_m": 0.2667,
+  "cap_diameter_m": 0.0266,
+  "cap_height_m": 0.005,
+  "cap_round_m": 0.002,
+  "vent_diameter_m": 0.0024,
+  "unverified": [
+    "length_m",
+    "cap_diameter_m",
+    "cap_height_m",
+    "cap_round_m",
+    "vent_diameter_m"
+  ]
+}
