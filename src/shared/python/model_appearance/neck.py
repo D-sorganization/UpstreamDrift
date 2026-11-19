@@ -63,14 +63,36 @@ class NeckSettings:
 class NeckAcceptance:
     """Acceptance floors of the look of the neck (fractions of head length).
 
+    The collar is slanted: highest at the back, at the neck point (C7), and
+    lower at the front (suprasternal notch). ``min_front_visible_neck``: chin
+    to the front of the trunk top (anthropometry: 8 to 11 cm of a 24 cm head);
+    ``max_back_top_above_neck_point``: the back of the trunk top;
+    ``min_collar_slant``: back top minus front top; ``max_opening_over_neck_width`` and
+    ``max_collar_area_over_neck``: the crew-neck opening hugs the neck (no
+    scoop, no flat lid); ``min_cap_below_neck_point``: shoulder cap and yoke
+    tops below the neck point at the address pose (head frame);
+    ``max_cap_behind_joint``:
+    how far the upper arm may extend behind its shoulder joint, in arm radii
+    (the joint is 4 cm below C7, so a cap on the joint is 3 cm or more below
+    the neck point once the arm hangs); ``min_cap_below_chin`` and
+    ``neck_zone_half_width``: the yoke near the neck stays below the chin;
+    ``slope_deg_band``: the trapezius, shoulder line up to the neck base;
     ``neck_width`` / ``neck_depth`` (bands) and ``max_base_bulge`` (base over
     mid width) describe the neck column, 12 by 11 cm for a 1.75 m man.
-    ``max_neck_fill``: section area over bounding box (round, not boxy);
-    ``neck_over_head_width`` at ``neck_mid_height``; ``max_neck_past_head_m``:
-    how far the neck may stand outside the head skin above
-    ``neck_head_overlap_from`` (no step at the jaw).
     """
 
+    min_front_visible_neck: float = 0.30
+    max_back_top_above_neck_point: float = 0.05
+    min_collar_slant: float = 0.20
+    max_opening_over_neck_width: float = 1.4  # collar opening / neck, across
+    max_collar_area_over_neck: float = 1.8  # collar opening / neck, area (no lid)
+    collar_rings: int = 5  # rings from the shoulder line up to the opening
+    min_collar_wall_slope: float = 0.27  # rise over run of the shirt there (15 deg)
+    min_cap_below_neck_point: float = 0.04  # caps and yoke at address (1 cm)
+    max_cap_behind_joint: float = 0.1  # arm radii the cap may rise past its joint
+    min_cap_below_chin: float = 0.08
+    neck_zone_half_width: float = 0.5
+    slope_deg_band: tuple[float, float] = (10.0, 40.0)
     neck_width: tuple[float, float] = (0.45, 0.55)
     neck_depth: tuple[float, float] = (0.38, 0.50)
     max_base_bulge: float = 1.12

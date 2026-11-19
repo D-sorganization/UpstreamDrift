@@ -502,7 +502,9 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
             seg.radius * seg.aspect,
             seg.front_axis,
         )
-        return torso_mesh(frame, seg.profile, thickness=extra.get("thickness", 1.0))
+        thickness = extra.get("thickness", 1.0)
+        inset = _SKIN_CAP_INSET_M if thickness == 1.0 else 0.0
+        return torso_mesh(frame, seg.profile, thickness=thickness, cap_inset_m=inset)
     return geometry.lofted_segment(
         seg.start,
         seg.end,
