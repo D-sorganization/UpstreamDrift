@@ -65,7 +65,8 @@ the centre is $c = \bar p - (\bar p\!\cdot\!\hat u)\hat u + z_{\min}\hat u$ with
 $\bar p=(p_r+p_l)/2$, $z_{\min}=\min_i p_i\!\cdot\!\hat u$ (widest level). The
 solid runs $\delta=r_{\mathrm{thigh}}$ below $c$ and is cut flat at the lumbar
 plane, height $T = p_L\!\cdot\!\hat u - z_{\min}$; the upper half-height is
-$T/\sqrt{1-\kappa^2}$ with waist ratio $\kappa=0.75$. Half width
+$T/\sqrt{1-\kappa^2}$ with waist ratio $\kappa=0.86$ (\#15299: no notch under
+the shirt hem). Half width
 $W=\max\bigl(\rho,\ \max_i (|(p_i-\bar p)\!\cdot\!\hat m| + r_{\mathrm{thigh}} + 0.01)
 /\sqrt{1-\ell_i^2}\bigr)$ with $\ell_i$ the HJC's height over the widest level
 in upper half-heights; half depth is the hint AP semi-axis. The chest's lower
@@ -237,10 +238,34 @@ gives $\rho = 0.185\times1.71/2 = 0.1582$\,m (a \emph{half} width; full
 shoulder-line chest width $0.316$\,m) and $\alpha = 0.6486$.
 The thorax profile (\texttt{library.TORSO\_PROFILES}, \#15299) scales that hint
 per station: $1.04$ at the chest (breadth $0.329$\,m, as wide as the hips),
-$0.87$ at the waist, and above the chest the depth shrinks while the section
-shifts forward, so only the back comes in and runs into the back of the neck.
-The chest depth stays $0.205$\,m, below the ANSUR~II norm ($0.235$ to
-$0.250$\,m at this stature): the lead arm crosses the chest front at address.
+$0.95$ at the waist (breadth $0.296$\,m; pass one $0.276$\,m), and above the
+chest the depth shrinks while the section shifts forward, so only the back
+comes in and runs into the back of the neck. Second pass (\#15299): the neck
+joint is on the trunk axis and the head is not tilted forward at address, so
+the hunch was the solid, centred on the axis under a neck that leans forward.
+The stations from the waist up now shift forward by $0.011$ to $0.038$ of the
+thorax length: the upper back is $0.095$\,m behind the axis (was $0.103$) and
+the chest front $0.119$\,m ahead (was $0.103$). Chest depth is $0.2146$\,m,
+the most that
+\texttt{test\_trunk\_and\_pelvis\_extents\_equal\_the\_spec\_hint\_semi\_axes}
+allows on the $0.2052$\,m hint ($\pm5\,\%$); the ANSUR norm ($0.228$ to
+$0.243$\,m at this stature) needs a deeper \texttt{visual\_hints} thorax in the
+spec, not a deeper profile here.
+
+\paragraph{Shoulders Follow the Joints.} Nothing about the shoulders is placed
+by a constant height. \texttt{body\_meshes.\_neck\_rises} reads, per shoulder
+link, how far the neck joint is above the shoulder joints (the difference of
+the thorax capsule lengths, $h$; $0.040$\,m in this spec, $0.095$\,m with the
+\#15296 subject preset). With yoke radius $r$: the yoke axis starts
+$1.35\,r$ below the neck point beside the neck and ends
+$\min(h/r-1.35,\,-0.1)\,r$ above the joint, $0.5\,r$ short of it, tapering to
+$0.85$ (aspect $0.72$), so it slopes like a trapezius by as much as the joints
+are lowered. The deltoid ball ($0.9\times1.6$ arm radii) sits
+$\max(0.9,\ 1.25-(h-0.73\,r)/r_a)$ arm radii down the arm, and the sleeve
+starts at its centre. \texttt{TorsoProfile.with\_shoulder} moves the thorax
+stations with the shoulder line ($0.9135$ of the thorax length here), keeping
+both ends. Tests run at both joint settings. Before and after:
+\texttt{evidence/torso\_shoulders/torso\_shoulders\_pass\_two\_before\_after.png}.
 Acceptance bands: \texttt{torso\_profile.TorsoAcceptance}.
 
 \subsection{Outfit and Coverage}

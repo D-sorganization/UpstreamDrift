@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import dataclasses
 import functools
 import math
@@ -10,18 +11,28 @@ import numpy as np
 import pytest
 
 from src.shared.python.model_appearance import library
+from src.shared.python.model_appearance.body_meshes import body_meshes
 from src.shared.python.model_appearance.defaults import default_document_dict
 from src.shared.python.model_appearance.torso_profile import (
     TORSO_ACCEPTANCE as ACCEPT,
 )
-from src.shared.python.model_appearance.torso_profile import TorsoAcceptance
-from tests.unit.model_appearance.test_neck import ADDRESS, HEAD_M, SPEC, _scene
+from src.shared.python.model_appearance.torso_profile import (
+    TorsoAcceptance,
+    TorsoProfile,
+    TorsoStation,
+)
+from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
+from tests.unit.model_appearance.test_neck import ADDRESS, DOC, HEAD_M, SPEC, _scene
 
 pytestmark = pytest.mark.unit
 
 STATURE_M = float(SPEC["subject"]["stature_m"])
 POSES = {"hang": {"LSInputY": math.pi / 2, "RSInputY": math.pi / 2}, "address": ADDRESS}
 UP = np.array([0.0, 0.0, 1.0])
+# Shoulder joints as the spec has them, and as the subject preset moves them
+# (#15296): (metres lower below the neck joint, half-spacing scale).
+LOWERED_M, SPACING = 0.055, 180.0 / 175.0
+JOINTS = {"current": (0.0, 1.0), "lowered": (LOWERED_M, SPACING)}
 Solid = tuple[str, str, np.ndarray, np.ndarray]
 
 
@@ -123,7 +134,90 @@ def test_the_trunk_breadths_are_inside_the_anthropometric_bands() -> None:
 def test_the_torso_tapers_from_the_shoulders_to_the_waist() -> None:
     got = _breadths()
     assert got["bideltoid"] > got["chest"] > got["waist"], got
+    assert got["waist"] >= ACCEPT.min_waist_over_chest * got["chest"], got
     assert got["chest"] >= ACCEPT.min_chest_over_hip * got["hip"], got
+
+
+def test_the_chest_stands_forward_of_the_trunk_axis() -> None:
+    """The neck leans forward of the axis: a trunk centred on it reads hunched."""
+    front_back = _thorax_rings("hang", "skin")[:, :, 0]
+    assert front_back.max() >= -ACCEPT.min_chest_ahead * front_back.min()
+
+
+def _yokes(joints: str) -> tuple[np.ndarray, float, float]:
+    """Left yoke vertices in its own frame; neck height there; joint offset."""
+    lower, spacing = JOINTS[joints]
+    spec, reach = copy.deepcopy(SPEC), 0.0
+    for joint in spec["joints"]:
+        part = library.classify_body(joint["child"])
+        if part == "shoulder":
+            joint["parent_to_base"][2][3] -= lower
+        elif part == "upper_arm":
+            joint["parent_to_base"][1][3] *= spacing
+            reach = abs(joint["parent_to_base"][1][3])
+    thorax = [
+        c.length_m()
+        for c in derive_visual_skeleton(spec).capsules
+        if c.body.endswith("COMRod")
+    ]
+    skins = [
+        m.mesh_in_body_frame.vertices
+        for m in body_meshes(spec, DOC)
+        if library.classify_body(m.body) == "shoulder" and m.label.startswith("skin")
+    ]
+    left = max(skins, key=lambda v: float(v[:, 1].max()))
+    return left, max(thorax) - min(thorax), reach
+
+
+def _yoke_tops(joints: str) -> tuple[float, float]:
+    """Top of the yoke beside the neck and at the joint, below the neck point."""
+    verts, rise, reach = _yokes(joints)
+    inner = verts[verts[:, 1] < ACCEPT.yoke_ends[0] * reach][:, 2].max()
+    outer = verts[verts[:, 1] > ACCEPT.yoke_ends[1] * reach][:, 2].max()
+    return float(rise - inner), float(rise - outer)
+
+
+def test_the_yoke_hangs_from_the_neck_wherever_the_shoulder_joints_sit() -> None:
+    (inner, outer), (low_inner, low_outer) = (_yoke_tops(j) for j in JOINTS)
+    assert abs(low_inner - inner) <= ACCEPT.max_yoke_neck_shift * LOWERED_M
+    gain = (low_outer - low_inner) - (outer - inner)
+    assert gain >= ACCEPT.min_trapezius_gain * LOWERED_M, gain
+
+
+@pytest.mark.parametrize("joints", list(JOINTS))
+def test_the_yoke_reaches_the_shoulder_joint_and_never_above_the_neck(
+    joints: str,
+) -> None:
+    verts, rise, reach = _yokes(joints)
+    assert verts[:, 1].max() == pytest.approx(reach, rel=ACCEPT.norm_tolerance)
+    assert verts[:, 2].max() < rise
+
+
+def test_the_deltoid_climbs_as_the_neck_clears_it() -> None:
+    radius = library.PART_RADIUS_M["upper_arm"]
+    default = library.deltoid_drop_m(radius, None)
+    assert default == pytest.approx(library.DELTOID_DROP * radius)
+    drops = [library.deltoid_drop_m(radius, r) for r in np.linspace(0.0, 0.3, 13)]
+    assert all(a >= b for a, b in zip(drops, drops[1:], strict=False))
+    assert drops[-1] == pytest.approx(library.DELTOID_MIN_DROP * radius)
+
+
+def test_moving_the_shoulder_line_keeps_the_trunk_ends_and_its_width() -> None:
+    rows = library.TORSO_PROFILES["thorax"]
+    profile = TorsoProfile(tuple(TorsoStation(*row) for row in rows))
+    line = library.THORAX_SHOULDER_ALONG
+    assert profile.with_shoulder(line, line) == profile
+    moved = profile.with_shoulder(line, line * (1.0 - ACCEPT.min_trapezius_gain))
+    ends = [(p.stations[0].along, p.stations[-1].along) for p in (profile, moved)]
+    assert ends[0] == pytest.approx(ends[1])
+    alongs = [s.along for s in moved.stations]
+    assert alongs == sorted(alongs)
+    assert max(s.width for s in moved.stations) == max(
+        s.width for s in profile.stations
+    )
+    for bad in (0.0, profile.stations[-1].along):
+        with pytest.raises(ValueError, match="shoulder line"):
+            profile.with_shoulder(line, bad)
 
 
 def test_the_back_has_no_hump_between_the_thorax_and_the_neck() -> None:
