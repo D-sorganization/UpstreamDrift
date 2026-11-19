@@ -359,6 +359,9 @@ def _trunk_segment(
         profile = TorsoProfile(
             tuple(TorsoStation(*row) for row in library.TORSO_PROFILES[role]),
             library.TORSO_SQUARENESS,
+            rings=library.TORSO_RINGS,
+            fine_from=library.TORSO_FINE_FROM,
+            fine_rings=library.TORSO_FINE_RINGS,
         )
         if not ctx.shapes.get(ctx.parents.get(body, "")):
             # Nothing drawn as a trunk solid under it (the pelvis ends at this

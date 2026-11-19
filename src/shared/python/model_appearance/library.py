@@ -375,6 +375,30 @@ def blend_scale(garment: bool, part: str = "upper_arm") -> float:
 # through the middle, so the mid section keeps the spec's aspect. Abdomen: lumbar joint to T12; thorax:
 # T12 to the shoulder line, then the trapezius slope up to the neck base, which
 # ends well under the jaw so the neck solid (``neck``) shows above it (#15292).
+def _shoulder_dome(
+    joint: tuple[float, float, float],
+    neck: tuple[float, float, float],
+    slant: float,
+    steps: int = 6,
+    wall_share: float = 0.7,
+) -> tuple[tuple[float, ...], ...]:
+    """Stations from the shoulder line (along, width, depth) up to the neck.
+
+    The section narrows at ``wall_share`` of the average rate at first and ever
+    faster towards the neck, so the shirt is a rounded slope, steep at the
+    shoulder line and flattening towards the neck, not a shelf.
+    """
+    rows = []
+    for i in range(steps + 1):
+        u = i / steps
+        k = wall_share * u + (1.0 - wall_share) * u * u
+        along = joint[0] + (neck[0] - joint[0]) * u
+        width = joint[1] + (neck[1] - joint[1]) * k
+        depth = joint[2] + (neck[2] - joint[2]) * k
+        rows.append((along, width, depth, slant, 2.4 - 0.4 * u))
+    return tuple(rows)
+
+
 TORSO_PROFILES: dict[str, tuple[tuple[float, ...], ...]] = {
     "abdomen": (
         (-0.14, 0.93, 0.92),
@@ -392,14 +416,13 @@ TORSO_PROFILES: dict[str, tuple[tuple[float, ...], ...]] = {
         (0.3, 0.95, 0.95),
         (0.55, 1.0, 1.0),
         (0.7, 1.0, 0.98),
-        (0.8, 0.995, 0.95, 0.07),
-        (0.87, 0.98, 0.9, 0.12),
-        (0.92, 0.9, 0.8, 0.153),
-        (0.945, 0.7, 0.66, 0.153),
-        (0.965, 0.5, 0.56, 0.153),
-        (0.98, 0.38, 0.5, 0.153),
+        (0.8, 0.97, 0.93, 0.07),
+        (0.87, 0.91, 0.86, 0.12),
+        *_shoulder_dome((0.92, 0.85, 0.78), (0.98, 0.38, 0.5), 0.153),
     ),
 }
+TORSO_RINGS = 18
+TORSO_FINE_FROM, TORSO_FINE_RINGS = 0.9, 14  # the shoulder dome is sampled finely
 TORSO_SQUARENESS = 2.6  # superellipse exponent of a trunk cross-section
 # Shoulder link (#15279): a yoke from the neck side to the shoulder joint,
 # flatter than it is deep, not a ball. Depth axis is the link's up axis.

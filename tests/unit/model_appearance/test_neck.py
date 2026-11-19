@@ -202,6 +202,36 @@ def test_the_shirt_rises_from_the_shoulder_line_to_the_opening_without_a_lid() -
     assert (rise / np.maximum(run, 1e-9)).min() >= ACCEPT.min_collar_wall_slope
 
 
+def _garment_rings() -> np.ndarray:
+    mujoco, model, data = _scene(default_document_dict())
+    head = mujoco.mj_name2id(
+        model, mujoco.mjtObj.mjOBJ_BODY, "GolfSwing3D_Kinetic/Head"
+    )
+    frame, origin = data.xmat[head].reshape(3, 3), data.xpos[head]
+    geom = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, "visual_vmesh_2_garment0")
+    local = (_vertices(mujoco, model, data, geom) - origin) @ frame
+    return local[:-2].reshape(-1, 28, 3)  # 28 sides, rings bottom to top
+
+
+def test_the_shirt_top_is_a_dome_not_a_shelf() -> None:
+    rings = _garment_rings()
+    height = rings[:, :, 2].mean(axis=1)
+    above = rings[height >= ACCEPT.shoulder_line_height * HEAD_M]
+    side = np.abs(above[:, 0, 1])  # the side meridian, outward distance
+    rise = np.diff(above[:, 0, 2])
+    angles = np.degrees(np.arctan2(rise, np.maximum(-np.diff(side), 1e-9)))
+    assert angles.min() >= ACCEPT.min_collar_side_angle_deg, angles
+    assert np.abs(np.diff(angles)).max() <= ACCEPT.max_collar_kink_deg, angles
+
+
+def test_the_collar_outline_has_no_sharp_corner() -> None:
+    for ring in _garment_rings()[-ACCEPT.rounded_collar_rings :]:
+        x, y = ring[:, 0], ring[:, 1]
+        area = 0.5 * abs(float(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1))))
+        fill = area / (np.ptp(x) * np.ptp(y))  # 0.785 is an ellipse, 1 a box
+        assert fill <= ACCEPT.max_collar_fill, fill
+
+
 def test_no_trunk_or_yoke_rises_to_the_chin() -> None:
     h = _heights()
     margin = ACCEPT.min_cap_below_chin * HEAD_M

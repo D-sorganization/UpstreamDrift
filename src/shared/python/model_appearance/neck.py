@@ -80,6 +80,11 @@ class NeckAcceptance:
     min_collar_slant: float = 0.20
     max_opening_over_neck_width: float = 1.4  # collar opening / neck, across
     max_collar_area_over_neck: float = 1.8  # collar opening / neck, area (no lid)
+    shoulder_line_height: float = -0.45  # rings above this, head lengths below C7
+    min_collar_side_angle_deg: float = 15.0  # side meridian above it, from level
+    max_collar_kink_deg: float = 20.0  # slope change between ring steps
+    rounded_collar_rings: int = 1  # top rings that must be round, not boxy
+    max_collar_fill: float = 0.82  # ring area / bounding box (ellipse 0.785)
     collar_rings: int = 5  # rings from the shoulder line up to the opening
     min_collar_wall_slope: float = 0.27  # rise over run of the shirt there (15 deg)
     min_cap_below_neck_point: float = 0.04  # caps and yoke at address (1 cm)

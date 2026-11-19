@@ -42,6 +42,8 @@ class TorsoStation:
     width: float
     depth: float
     slant: float = 0.0
+    #: Superellipse exponent here; 0 keeps the profile's (rounder at a collar).
+    squareness: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -56,9 +58,14 @@ class TorsoProfile:
     squareness: float = 2.0
     rings: int = 18
     sides: int = 28
+    #: Extra rings from ``fine_from`` up to the top (a finely sampled dome).
+    fine_from: float = 1.0
+    fine_rings: int = 0
 
     def __post_init__(self) -> None:
         values = [(s.along, s.width, s.depth) for s in self.stations]
+        if any(s.squareness != 0.0 and s.squareness < 2.0 for s in self.stations):
+            raise ValueError("torso station squareness must be 0 or at least 2")
         if any(not math.isfinite(s.slant) or s.slant < 0.0 for s in self.stations):
             raise ValueError("torso profile slants must be finite and not negative")
         if len(values) < 3 or not np.isfinite(np.asarray(values)).all():
@@ -95,6 +102,13 @@ class TorsoProfile:
         at = np.clip(np.asarray(along, dtype=float), knots[0], knots[-1])
         return np.asarray(width(at)), np.asarray(depth(at))
 
+    def squareness_at(self, along: Sequence[float] | NDArray[np.floating]) -> Array:
+        """Superellipse exponent at ``along``, smooth between the stations."""
+        knots = [s.along for s in self.stations]
+        values = [s.squareness or self.squareness for s in self.stations]
+        at = np.clip(np.asarray(along, float), knots[0], knots[-1])
+        return np.asarray(PchipInterpolator(knots, values)(at))
+
     def slants_at(self, along: Sequence[float] | NDArray[np.floating]) -> Array:
         """Front drop (fraction of the length) at ``along``, smooth between."""
         knots = [s.along for s in self.stations]
@@ -124,6 +138,12 @@ def _unit_section(squareness: float, sides: int) -> tuple[Array, Array]:
         np.sign(cos) * np.abs(cos) ** power,
         np.sign(sin) * np.abs(sin) ** power,
     )
+
+
+def _front_drop(unit_d: Array, front_sign: float) -> Array:
+    """0 at the back, 1 at the front of a section (smoothstep between)."""
+    towards_front = np.clip(0.5 * (1.0 + front_sign * unit_d), 0.0, 1.0)
+    return np.asarray(towards_front**2 * (3.0 - 2.0 * towards_front))
 
 
 def torso_mesh(
@@ -162,18 +182,21 @@ def torso_mesh(
         front_sign = float(np.sign(depth @ np.asarray(frame.front_axis, float)))
     lowest, highest = profile.stations[0].along, profile.stations[-1].along
     along = np.linspace(lowest, highest, profile.rings)
+    if profile.fine_rings:
+        fine = np.linspace(max(profile.fine_from, lowest), highest, profile.fine_rings)
+        along = np.unique(np.concatenate([along, fine]))
     scale_w, scale_d = profile.scales_at(along)
-    unit_w, unit_d = _unit_section(profile.squareness, profile.sides)
+    sections = [_unit_section(q, profile.sides) for q in profile.squareness_at(along)]
     slants = profile.slants_at(along) * length
-    towards_front = np.clip(0.5 * (1.0 + front_sign * unit_d), 0.0, 1.0)
-    drop = towards_front**2 * (3.0 - 2.0 * towards_front)  # smoothstep, 0 at back
     rows = [
         start
         + t * length * axis
-        + thickness * frame.half_width * w * np.outer(unit_w, width)
-        + thickness * frame.half_depth * d * np.outer(unit_d, depth)
-        - np.outer(drop * q, axis)
-        for t, w, d, q in zip(along, scale_w, scale_d, slants, strict=True)
+        + thickness * frame.half_width * w * np.outer(uw, width)
+        + thickness * frame.half_depth * d * np.outer(ud, depth)
+        - np.outer(_front_drop(ud, front_sign) * q, axis)
+        for t, w, d, q, (uw, ud) in zip(
+            along, scale_w, scale_d, slants, sections, strict=True
+        )
     ]
     rows[-1] = rows[-1] - cap_inset_m * axis
     return closed_grid_mesh(
