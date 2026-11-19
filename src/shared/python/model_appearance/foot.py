@@ -86,7 +86,11 @@ HINGE_OVERLAP_M = 0.014
 HINGE_INSET_M = 0.0008
 SKIN_INSET_M = 0.002  # the bare foot sits this far inside the shoe
 SOLE_BEVEL_M = 0.007
-ANKLE_RADIUS_M = 0.036
+SOLE_THICKNESS_M = 0.022  # outsole plus midsole slab, dark band under the upper
+SOLE_WELT_M = 0.003  # the sole slab stands proud of the upper wall by this
+_WELT_FADE_M = 0.004  # half width over which the welt grows from the shoe ends
+ANKLE_RADIUS_M = 0.034  # inside the trouser cuff (shin end 0.036 * 1.08)
+ANKLE_RISE_M = 0.05  # stub top reaches this far up into the shin, hiding its bulge
 ANKLE_DEPTH_M = 0.040  # stub bottom above the sole plane, inside the shoe
 _TIP_EPS_M = 1e-4
 _STATIONS = 46
@@ -246,13 +250,21 @@ def _shell(
     a_lo: float,
     a_hi: float,
     inset: Callable[[float], float],
+    slab: bool = False,
 ) -> geometry.Mesh:
-    """Closed shell of the last between two stations along forward."""
+    """Closed shell of the last between two stations along forward.
+
+    ``slab`` builds the sole instead: the last cut off at ``SOLE_THICKNESS_M``
+    and widened by ``SOLE_WELT_M`` so the sole edge reads under the upper.
+    """
     lateral = -basis.medial_sign  # lateral offset -> signed +left coordinate
     grid = []
     for s in np.linspace(0.0, 1.0, _STATIONS):
         a = a_lo + (a_hi - a_lo) * 0.5 * (1.0 - math.cos(math.pi * s))
         wl, wm, height = last.section(a)
+        if slab:
+            welt = SOLE_WELT_M * min(1.0, wl / _WELT_FADE_M)
+            wl, wm, height = wl + welt, wm + welt, min(height, SOLE_THICKNESS_M)
         ring = _ring(wl, wm, height, inset(a))
         base = basis.fwd * a
         sole = last.sole_y
@@ -382,7 +394,8 @@ def _ankle_stub(
     bottom = ankle - basis.up * (
         float(ankle @ basis.up) - (last.sole_y + ANKLE_DEPTH_M)
     )
-    pts = _to_body(poses, roles["calcn"], roles["talus"], np.stack([ankle, bottom]))
+    top = ankle + basis.up * ANKLE_RISE_M
+    pts = _to_body(poses, roles["calcn"], roles["talus"], np.stack([top, bottom]))
     return geometry.lofted_segment(
         pts[0],
         pts[1],
@@ -418,6 +431,9 @@ def _build_side(
         base: float,
     ) -> geometry.Mesh:
         return _shell(last, basis, a_lo, a_hi, lambda a: base + ramp(a))
+
+    def build_sole(a_lo: float, a_hi: float, ramp: Callable[[float], float]) -> Any:
+        return _shell(last, basis, a_lo, a_hi, ramp, slab=True)
 
     def frame_out(body: str, mesh: geometry.Mesh) -> geometry.Mesh:
         return geometry.Mesh(
@@ -458,6 +474,7 @@ def _build_side(
                 "skin", frame_out(body, build(s_lo, s_hi, lambda a: 0.0, SKIN_INSET_M))
             ),
             FootPart("garment", frame_out(body, build(a_lo, a_hi, ramp, 0.0))),
+            FootPart("sole", frame_out(body, build_sole(a_lo, a_hi, ramp))),
         )
     if "talus" in roles:
         out[roles["talus"]] = (

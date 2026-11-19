@@ -322,7 +322,7 @@ def _limb_segments(part: str, caps: Sequence[Capsule], scale: float) -> list[_Se
                 np.asarray(cap.end_m),
                 radius,
                 aspect,
-                library.distal_scale(part),
+                library.limb_distal_scale(part),
             )
         )
     return out
@@ -550,6 +550,7 @@ def _foot_meshes(ctx: _Context, body: str) -> list[BodyMesh]:
     plan = (
         ("skin", "skin", base),
         ("garment", "garment", garment),
+        ("sole", "sole", library.SOLE_MATERIAL if garment else None),
         ("ankle", "ankle", shin or base),
     )
     out: list[BodyMesh] = []
