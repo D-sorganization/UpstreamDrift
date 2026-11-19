@@ -25,6 +25,11 @@ from src.shared.python.motion_matching.execution.club_markers import (
     ClubMarkers,
     Offset,
 )
+from src.shared.python.motion_matching.ground_support import capture_to_native_world
+from src.shared.python.motion_matching.tour_capture_contract import (
+    capture_kind,
+    load_tour_capture,
+)
 
 CLUB_ONLY_METHOD = (
     "club markers alone: shaft axis through the two on-shaft markers, model head "
@@ -197,14 +202,6 @@ def club_only_markers_from_capture(
     Missing samples become NaN and the capture is turned z-up. The source
     block records the method, the capture's name and SHA-256 and the settings.
     """
-    from src.shared.python.motion_matching.ground_support import (
-        capture_to_native_world,
-    )
-    from src.shared.python.motion_matching.tour_capture_contract import (
-        capture_kind,
-        load_tour_capture,
-    )
-
     settings = settings or ClubOnlySettings()
     capture = load_tour_capture(Path(capture_path))
     labels = sorted(

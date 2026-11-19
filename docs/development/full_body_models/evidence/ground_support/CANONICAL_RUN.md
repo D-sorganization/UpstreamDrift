@@ -216,9 +216,9 @@ re-execution was deferred on this workstation due to ~2 GB free disk.
 
 Two `club-markers/1` files place the same six-marker driver cluster in the `Clubhead` frame. Both are kinematic registrations. Neither is a measurement of the club, and neither is physical or scientific acceptance.
 
-| File                                         | Selected by                                           | How the cluster is placed                                                                        |
-| -------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `evidence/club_markers/driver.json`          | default                                               | static-seed calibration of the whole body (#12221)                                               |
+| File                                          | Selected by                                            | How the cluster is placed                                                                        |
+| --------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| `evidence/club_markers/driver.json`           | default                                                | static-seed calibration of the whole body (#12221)                                               |
 | `evidence/club_markers/driver_club_only.json` | `--club-markers club_only` (`assets.get_club_markers`) | club markers alone (`execution/club_only_registration.py`, settings stored in the file's source) |
 
 **Circularity of the Default.** The static-seed calibration moves the club cluster to fit a body-driven pose, so the club placement inherits the body model's error and cannot then be used to judge it. The committed documents and the default builder output still use `driver.json`; nothing changes unless the alternative is selected.
@@ -227,13 +227,13 @@ Two `club-markers/1` files place the same six-marker driver cluster in the `Club
 
 **Measured on `data/C3D_TA_Driver.c3d`** (club placed on its six markers by a rigid fit; address frame 0, impact frame 476):
 
-| Quantity                                                  | `driver.json` | `driver_club_only.json` |
-| --------------------------------------------------------- | ------------- | ----------------------- |
+| Quantity                                                    | `driver.json`  | `driver_club_only.json` |
+| ----------------------------------------------------------- | -------------- | ----------------------- |
 | `Marker_3:3:3` / `Marker_3:3:1` distance from the club axis | 70.5 / 78.0 mm | 0.0 / 0.0 mm (by rule)  |
-| Model head lowest point at address                        | 43.7 mm       | 0.0 mm (by rule)        |
-| Model head lowest point at impact                         | 62.9 mm       | 23.8 mm (not tuned)     |
-| Shaft elevation at address                                | 44.0 deg      | 45.5 deg                |
-| Six-marker rigid residual RMS, 605 complete frames        | 2.30 mm       | 2.30 mm                 |
+| Model head lowest point at address                          | 43.7 mm        | 0.0 mm (by rule)        |
+| Model head lowest point at impact                           | 62.9 mm        | 23.8 mm (not tuned)     |
+| Shaft elevation at address                                  | 44.0 deg       | 45.5 deg                |
+| Six-marker rigid residual RMS, 605 complete frames          | 2.30 mm        | 2.30 mm                 |
 
 The rigid residual is the same because both files hold the same cluster shape; it cannot rank the two. Inter-marker distances change by 2.26 mm RMS over the swing (12.7 mm at most), which is shaft bend and noise.
 

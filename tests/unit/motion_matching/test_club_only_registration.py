@@ -24,6 +24,9 @@ from src.shared.python.motion_matching.execution.club_only_registration import (
     head_support_m,
 )
 
+from src.shared.python.motion_matching.ground_support import capture_to_native_world
+from src.shared.python.motion_matching.tour_capture_contract import load_tour_capture
+
 pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -167,13 +170,6 @@ def _head_lowest_m(offsets: dict, labels: list[str], world: np.ndarray) -> float
 
 def test_committed_file_is_the_capture_derivation_and_soles_the_head() -> None:
     pytest.importorskip("ezc3d")
-    from src.shared.python.motion_matching.ground_support import (
-        capture_to_native_world,
-    )
-    from src.shared.python.motion_matching.tour_capture_contract import (
-        load_tour_capture,
-    )
-
     committed = load_club_markers(CLUB_ONLY_MARKERS)
     derived = club_only_markers_from_capture(CAPTURE, club="driver", settings=SETTINGS)
     assert derived.source == committed.source
