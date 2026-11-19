@@ -160,6 +160,7 @@ def attach_head_visual(
     body, pose, length, source = placed
     canonical = dataclasses.replace(cfg, forward_axis="+x", up_axis="+z")
     parts = head_model.build_head_parts(length, canonical)
+    parts += head_model.build_neck_parts(length, canonical)
     assets = _registry(root, doc)
     override = cfg.orientation_override
     if override is None:

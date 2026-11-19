@@ -59,6 +59,9 @@ class BodySection:
     body: str
     ml_axis: Array  # mediolateral, from the landmarks (sign is irrelevant)
     depth_axis: Array  # the thin semi-axis: AP for the trunk, up for the foot
+    #: Forward (anterior) unit vector of a trunk body that carries the head,
+    #: along the head frame's x axis (#15292); ``None`` when it is unknown.
+    front_axis: Array | None = None
 
     def trunk_up_axis(self) -> Array:
         """Unit vertical of a trunk body (``depth x ML``), in its own frame.
@@ -153,6 +156,10 @@ class _Landmarks:
         return self.poses[body][:3, :3].T @ world_vector
 
 
+def _is_head(body: str) -> bool:
+    return classify_body(body) == "head"
+
+
 def _section(marks: _Landmarks, body: str, part: str) -> BodySection:
     """ML and depth axes of one non-round body, in its own frame."""
     if part in FOOT_PARTS:
@@ -176,7 +183,13 @@ def _section(marks: _Landmarks, body: str, part: str) -> BodySection:
         depth_world = _unit(np.cross(ml_world, marks.up), f"{body} AP axis")
         ml_world = _unit(np.cross(marks.up, depth_world), f"{body} ML axis")
     ml, depth = marks.to_body(body, ml_world), marks.to_body(body, depth_world)
-    return BodySection(body, ml, depth)
+    front = None
+    heads = [j for j in marks.joints if j["parent"] == body and _is_head(j["child"])]
+    if part in TRUNK_PARTS and heads:
+        ahead = float(depth_world @ marks.poses[heads[0]["child"]][:3, 0])
+        if abs(ahead) > 0.5:  # the head faces along the AP axis
+            front = float(np.sign(ahead)) * depth
+    return BodySection(body, ml, depth, front)
 
 
 def body_sections(spec: Mapping[str, Any]) -> dict[str, BodySection]:
