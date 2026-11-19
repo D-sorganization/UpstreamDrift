@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from dataclasses import replace
 from pathlib import Path
 from typing import Literal
 
@@ -150,6 +151,52 @@ def render_all(out_dir: Path, *, legacy_camera: bool) -> dict[str, object]:
     receipt["stills"][grip_name] = _render_grip_region(
         out_dir / grip_name, legacy_camera=legacy_camera
     )
+    if not legacy_camera:
+        receipt["acceptance_views"] = _render_acceptance_views(out_dir)
+    return receipt
+
+
+def _render_acceptance_views(out_dir: Path) -> dict[str, object]:
+    """Three fixed views at each visual hand roll, with club in every frame.
+
+    These static appearance views do not establish physical contact or human
+    visual approval. Save exact 1200-pixel squares rather than tight crops.
+    """
+    receipt: dict[str, object] = {}
+    for roll in (-20, 0, 20):
+        pose = replace(
+            DEFAULT_GRIP_POSE, lead_roll_offset_deg=roll, trail_roll_offset_deg=roll
+        )
+        parts = assembly_meshes_with_hands(_club(), pose)
+        hands = concat_meshes(parts["lead_hand"], parts["trail_hand"])
+        points = hands.vertices
+        for view, (elev, azim) in _VIEWS.items():
+            fig = plt.figure(figsize=(8, 8), dpi=150)
+            ax = fig.add_subplot(111, projection="3d")
+            ax.set_position([0.04, 0.04, 0.92, 0.86])
+            add_mesh_preview(ax, hands)
+            add_mesh_preview(
+                ax,
+                parts["grip"],
+                style=GripMeshPreviewStyle(base_rgb=(0.15, 0.17, 0.19)),
+            )
+            apply_equal_axis_limits(ax, points)
+            ax.set_box_aspect((1, 1, 1), zoom=1.3)
+            ax.view_init(elev=elev, azim=azim)
+            ax.set_axis_off()
+            ax.set_title(
+                f"Grip Hands: {view.title()} View, Visual Roll {roll:+d} Degrees"
+            )
+            name = f"acceptance_{view}_roll_{roll:+d}.png"
+            fig.savefig(out_dir / name, facecolor="white")
+            x, y, z = axis_half_widths(ax)
+            receipt[name] = {
+                "pixels": [1200, 1200],
+                "roll_deg": roll,
+                "half_widths_m": [x, y, z],
+                "club_present": True,
+            }
+            plt.close(fig)
     return receipt
 
 

@@ -44,5 +44,124 @@
       "half_z_m": 0.135,
       "equal_aspect": true
     }
+  },
+  "acceptance_views": {
+    "acceptance_palm_roll_-20.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": -20,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    },
+    "acceptance_back_roll_-20.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": -20,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    },
+    "acceptance_side_roll_-20.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": -20,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    },
+    "acceptance_palm_roll_+0.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": 0,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    },
+    "acceptance_back_roll_+0.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": 0,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    },
+    "acceptance_side_roll_+0.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": 0,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    },
+    "acceptance_palm_roll_+20.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": 20,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    },
+    "acceptance_back_roll_+20.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": 20,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    },
+    "acceptance_side_roll_+20.png": {
+      "pixels": [
+        1200,
+        1200
+      ],
+      "roll_deg": 20,
+      "half_widths_m": [
+        0.07489799999999996,
+        0.07489800000000002,
+        0.07489799999999996
+      ],
+      "club_present": true
+    }
   }
 }

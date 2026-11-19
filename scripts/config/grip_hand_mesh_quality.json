@@ -1,5 +1,5 @@
 {
-  "part_vertex_clearance_m": 0.002,
+  "part_penetration_depth_m": 0.002,
   "max_part_penetration_fraction": {
     "lead_index_distal_in_thumb": 0.02,
     "lead_index_middle_in_thumb": 0.02,

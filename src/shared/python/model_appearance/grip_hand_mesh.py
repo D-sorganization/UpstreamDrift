@@ -96,6 +96,9 @@ _SOLVER_MAX_ITERATIONS: int = 5
 _SOLVER_TOLERANCE_M: float = 1e-6
 #: Symmetric interior barrel ring stations in (0, 1) ensuring continuous azimuthal vertex coverage.
 _PHALANX_BARREL_STATIONS: tuple[float, ...] = (0.2, 0.4, 0.6, 0.8)
+#: End the rounded palm/dorsum before the MCP capsule root. Their rounded
+#: end caps otherwise bury the proximal capsules several millimetres deep.
+_KNUCKLE_SHELL_INSET_RAD: float = math.radians(10.0)
 
 
 @dataclass(frozen=True)
@@ -325,7 +328,9 @@ def _rounded_block(
     sec_r = np.sign(c) * np.abs(c) ** 0.5  # superellipse, exponent 4
     sec_z = np.sign(s) * np.abs(s) ** 0.5
     lo, hi = min(theta), max(theta)
-    n_mid = max(8, math.ceil(math.degrees(hi - lo) / 4.0))
+    # Mirrored sweeps can straddle an exact integer by floating-point noise.
+    # Resolve the same angular sampling count for either winding direction.
+    n_mid = max(8, math.ceil(round(math.degrees(hi - lo) / 4.0, 12)))
     end_scale = (0.55, 0.85, 0.97)
     pad = 0.5 * h_r / r_c  # angular reach of the rounded ends
     sweep = [(lo - pad * (1.0 - f), f) for f in end_scale]
@@ -450,7 +455,8 @@ def build_grip_hand_mesh(
     inset = params.palm_axial_inset_fraction
     z_lo = min(stack.values()) - k * params.finger_radius_m["little"] * inset
     z_hi = max(stack.values()) + k * params.finger_radius_m["index"] * inset
-    parts += _palm_strip("", radius, (v, mcp), (z_lo, z_hi), params, dorsum=True)
+    shell_end = mcp - curl * _KNUCKLE_SHELL_INSET_RAD
+    parts += _palm_strip("", radius, (v, shell_end), (z_lo, z_hi), params, dorsum=True)
     roll_deg = placement.v_azimuth_deg - NEUTRAL_V_AZIMUTH_DEG
     thumb_azimuth_deg = placement.thumb_offset_deg + roll_deg
     thumb_azimuth = math.radians(thumb_azimuth_deg)
