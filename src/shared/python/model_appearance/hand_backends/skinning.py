@@ -89,6 +89,17 @@ def rotation_about_axis(axis: Array, angle_rad: float) -> Array:
     return np.eye(3) + np.sin(angle_rad) * k + (1.0 - np.cos(angle_rad)) * (k @ k)
 
 
+def clamped_rotation(source: Array, target: Array, max_rad: float) -> Array:
+    """Smallest rotation turning ``source`` toward ``target``, at most ``max_rad``."""
+    a = source / np.linalg.norm(source)
+    b = target / np.linalg.norm(target)
+    axis = np.cross(a, b)
+    norm = float(np.linalg.norm(axis))
+    if norm < 1e-9:
+        return np.eye(3)
+    return rotation_about_axis(axis, min(max_rad, np.arctan2(norm, float(a @ b))))
+
+
 def bone_transforms(asset: SkinnedHandAsset, rotations: Mapping[str, Array]) -> Array:
     """Forward kinematics: ``(B, 4, 4)`` rest-to-posed transform of every bone.
 

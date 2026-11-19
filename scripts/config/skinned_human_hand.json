@@ -118,7 +118,13 @@
       "trail": 30.0
     },
     "_trigger_back_off_deg": "The spread is a most: a finger whose tip will not seat on the grip (curl.contact_tolerance_m) is brought back this many degrees at a time. On the pair the trail tip seats at the full 30; on a lone trail hand it hangs 2.3 mm off at 30 and is brought back to 12.",
-    "trigger_back_off_deg": 6.0
+    "trigger_back_off_deg": 6.0,
+    "_spread_in_palm": "Owner, 2026-11-19 (#15278): a finger bends in flexion and extension, cannot rotate, and has limited lateral motion. On: the fit's sideways spread is a turn about the knuckle's spreading axis, fixed in the palm, so on a bent knuckle it turns the plane the finger bends in (fingers converge as they curl), and what sideways movement is left is held inside the range below. Off: the whole spread tips the flexed finger sideways, which leans knuckles bent 90 to 115 degrees by 15 to 20 degrees (the crooked lead forefinger the owner saw). Still off: with it on the lead hand alone is sound, but the trail hand no longer seats at the owner's cross angle (ring finger 10 mm off the grip, 10 fit checks fail), because the lean was what steered its ring finger round the lead forefinger. Turning it on waits for the trail hand's seat to be refitted.",
+    "spread_in_palm": false,
+    "_knuckle_max_deg": "With spread_in_palm on: a knuckle may move sideways at most knuckle_max_deg with the finger straight; the range falls linearly to flexed_share of that once the knuckle is flexed flexed_at_deg (its collateral ligaments tighten as it bends).",
+    "knuckle_max_deg": 30.0,
+    "flexed_share": 0.2,
+    "flexed_at_deg": 90.0
   },
   "thumb": {
     "max_swing_deg": 120.0,

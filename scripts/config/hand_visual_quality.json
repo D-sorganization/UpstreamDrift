@@ -76,6 +76,8 @@
   "thumb_channel_station_m": 0.005,
   "thumb_channel_crown_facing": 0.85,
   "_thumb_channel_min_station_vertices": "A station of the lead thumb's crown is judged only if it holds at least this many crown vertices (#15278). With the thumb limited to straight (owner, 2026-11-19) one vertex at its base turned from 0.83 to 0.86 facing and made a station of its own, 7.3 mm from the trail palm; the palm is nearer the base than before (5.1 mm against 7.1 mm for all outward skin there) and the other stations went from 2.5 to 1.9 mm at worst.",
+  "_knuckle_sideways_tolerance_deg": "Slack on the measured sideways movement of a flexed knuckle against its configured range (side_close in skinned_human_hand.json): the spread and the correction are two turns about different axes and only add exactly for small angles.",
+  "knuckle_sideways_tolerance_deg": 0.5,
   "thumb_channel_min_station_vertices": 2,
   "max_thumb_channel_gap_m": 0.0025,
   "_thumb_wrap": "Owner, 2026-11-17 (#15265, 'cup the palm'): the trail palm wraps round the lead thumb, not only touches its top line. Per station of thumb_channel_station_m, the share of the thumb's outer half (crown and both flanks) within thumb_wrap_contact_m of the trail skin; the median station is to reach min_thumb_wrap_share. NOT MET: measured 2026-11-17 the median is 0.17. With the palm pads settled as thumb_wrap_trial_pad (keys of pair.palm_wrap) it is 0.70, but palm skin then moves 16.6 mm from its bones (max_corrective_shift_m is 8 mm), so that is a trial, not the default. With the pads' travel capped at 8 mm it is 0.40, at 7 mm 0.32. The first three stations at the thumb's base stay at zero either way: the trail heel pad does not reach them.",

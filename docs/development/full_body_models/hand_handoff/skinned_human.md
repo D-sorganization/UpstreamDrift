@@ -162,3 +162,32 @@ Targets of a hand live in `skinned_targets.py`.
   failure tied to #15181.
 - Do not wait on a background test run with `pgrep -f` of a pattern that is
   also in the waiting command: it matches itself and never returns.
+
+## Knuckle Sideways Range (#15278)
+
+Owner review 2026-11-19: the lead forefinger had a crooked kink; fingers bend
+in flexion and extension, cannot rotate and have limited lateral motion.
+
+- Audit: each finger's three hinge axes are parallel and square to its bones
+  to about 2 degrees. The fault is the fit's sideways swing at the knuckle,
+  15 to 20 degrees on knuckles bent 90 to 115 degrees.
+- `knuckle_sideways.py` and `side_close.spread_in_palm`: the spread becomes a
+  turn about the knuckle's spreading axis, fixed in the palm, so a bent
+  finger's bending plane turns (fingers converge as they curl) and the
+  sideways movement left is held inside `knuckle_max_deg`, falling to
+  `flexed_share` of that by `flexed_at_deg`.
+- Off by default. With it on the lead hand alone has no leaning fingers
+  (`evidence/trail_hand/lead_knuckle_spread_before_after.png`, top off,
+  bottom on) but its forefinger stands 5.1 mm from the middle finger, and the
+  trail hand does not seat at the owner's 52.7 degree cross angle: its ring
+  finger lands on the lead forefinger (10 mm off the grip, 10 fit checks
+  fail). The lean was steering it round that finger.
+- Tried and rejected: trail cross angle 25 or 35 degrees (seats, hands 8 mm
+  closer, but the forearm leaves the shaft nearly square); more spacing
+  passes (2.8 mm fault at 83 mm); a 1 mm forefinger gap (no change).
+- Next: the lead forefinger's first bone lies along the grip (knuckle bent 18
+  degrees), so the finger sits 36 mm up the shaft from the middle finger and
+  takes the trail ring finger's place. Bringing it against the middle finger
+  frees that place, lets the hands close up, and puts the trail ring finger
+  against it, which is what the owner asked for. Then turn the setting on
+  and drop the expected-failure marker in `test_knuckle_sideways.py`.

@@ -91,6 +91,10 @@ class SkinnedHumanSettings:
     side_close_scan_samples: int
     side_close_trigger_spread_deg: tuple[tuple[str, float], ...]
     side_close_trigger_back_off_deg: float
+    side_close_knuckle_max_deg: float
+    side_close_flexed_share: float
+    side_close_flexed_at_deg: float
+    side_close_spread_in_palm: bool
     pair_capsule_radius_scale: float
     pair_palm_capsule_radius_scale: float
     pair_thumb_radius_scale: float
@@ -263,6 +267,19 @@ def _corrective_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def _flag(value: Any) -> bool:
+    if not isinstance(value, bool):
+        raise TypeError("side_close.spread_in_palm must be true or false")
+    return value
+
+
+def _share(value: Any) -> float:
+    share = float(value)
+    if not 0.0 <= share <= 1.0:
+        raise ValueError("side_close.flexed_share must be within 0..1")
+    return share
+
+
 def _side_close_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
     """The ``side_close`` section as :class:`SkinnedHumanSettings` fields."""
     return {
@@ -281,6 +298,14 @@ def _side_close_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
         "side_close_trigger_back_off_deg": _positive(
             raw["trigger_back_off_deg"], "side_close.trigger_back_off_deg"
         ),
+        "side_close_knuckle_max_deg": _non_negative(
+            raw["knuckle_max_deg"], "side_close.knuckle_max_deg"
+        ),
+        "side_close_flexed_share": _share(raw["flexed_share"]),
+        "side_close_flexed_at_deg": _positive(
+            raw["flexed_at_deg"], "side_close.flexed_at_deg"
+        ),
+        "side_close_spread_in_palm": _flag(raw["spread_in_palm"]),
     }
 
 

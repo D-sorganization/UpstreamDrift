@@ -45,6 +45,9 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     relax_folds,
     yield_to_points,
 )
+from src.shared.python.model_appearance.hand_backends.knuckle_sideways import (
+    split_swing_rad,
+)
 from src.shared.python.model_appearance.hand_backends.joint_angles import (
     FINGERS,
     HandJointAngles,
@@ -87,6 +90,7 @@ from src.shared.python.model_appearance.hand_backends.skinning import (
     asset_hand_breadth_m,
     asset_hand_length_m,
     bone_transforms,
+    clamped_rotation,
     flipped_face_ids,
     pose_vertices,
     rotation_about_axis,
@@ -209,7 +213,7 @@ class _GripHand:
         self.offsets: dict[str, Array] = {}
         # Sideways swing of a finger at its knuckle, radians (side closing).
         self.side: dict[str, float] = {}
-        self._side_turn: dict[str, Array] = {}
+        self._side_axis, self._spread_axis = {}, {}  # type: tuple[dict, dict]
         self._moved: dict[str, NDArray[np.int64]] = {}
 
     def _adduction(self) -> dict[str, Array]:
@@ -231,14 +235,26 @@ class _GripHand:
 
     def swing_sideways(self, bone: str | None, swing: float = 0.0) -> None:
         """Swing finger ``bone`` sideways at its knuckle by ``swing`` radians,
-        about the axis across its flexion axis. ``None`` clears every swing."""
+        about the axis across its flexion axis; a bent knuckle takes less of
+        it (:mod:`knuckle_sideways`). ``None`` clears every swing."""
         if bone is None:
             self.side.clear()
-            self._side_turn.clear()
             return
         axis = np.cross(self.asset.flex_axes[self._index[bone]], self.direction(bone))
         self.side[bone] = swing
-        self._side_turn[bone] = rotation_about_axis(axis / np.linalg.norm(axis), swing)
+        self._side_axis[bone] = axis = axis / np.linalg.norm(axis)
+        i = self._index[bone]  # the spread's axis stands on the straight finger
+        self._spread_axis[bone] = self._hinge(i, -self.asset.rest_flexion_rad[i]) @ axis
+
+    def side_swings(self, angles: Mapping[str, float]) -> dict[str, tuple]:
+        """Each swung knuckle's sideways ``(lean, turn)`` (:mod:`knuckle_sideways`)."""
+        rest, at = self.asset.rest_flexion_rad, self._index
+        return {
+            bone: split_swing_rad(
+                swing, angles.get(bone, rest[at[bone]]), self.settings
+            )
+            for bone, swing in self.side.items()
+        }
 
     def _hinge(self, i: int, angle: float) -> Array:
         """Rodrigues rotation about bone ``i``'s flexion axis (precomputed)."""
@@ -257,8 +273,10 @@ class _GripHand:
                 continue
             hinge = self._hinge(i, delta)
             out[name] = out[name] @ hinge if name in out else hinge
-        for name, turn in self._side_turn.items():
-            out[name] = out[name] @ turn if name in out else turn
+        for name, (lean, turn) in self.side_swings(angles).items():
+            axis, set_ = self._side_axis[name], self.fixed.get(name, _EYE3)
+            plane = set_ @ rotation_about_axis(self._spread_axis[name], turn) @ set_.T
+            out[name] = plane @ out.get(name, _EYE3) @ rotation_about_axis(axis, lean)
         if THUMB_PRESS in angles:
             press = rotation_about_axis(self.press_axis, angles[THUMB_PRESS])
             out["thumb_meta"] = press @ out.get("thumb_meta", _EYE3)
@@ -465,17 +483,6 @@ def _arch_from_knuckles(
     }
 
 
-def _clamped_rotation(source: Array, target: Array, max_rad: float) -> Array:
-    """Smallest rotation turning ``source`` toward ``target``, at most ``max_rad``."""
-    a = source / np.linalg.norm(source)
-    b = target / np.linalg.norm(target)
-    axis = np.cross(a, b)
-    norm = float(np.linalg.norm(axis))
-    if norm < 1e-9:
-        return np.eye(3)
-    return rotation_about_axis(axis, min(max_rad, math.atan2(norm, float(a @ b))))
-
-
 def _bone_skin_radius(asset: SkinnedHandAsset, bone_name: str) -> float:
     """Median distance from a bone to the skin it mostly moves."""
     i = asset.bone_index(bone_name)
@@ -515,7 +522,7 @@ def _aim_thumb(
     lateral = float(np.hypot(rho * c - base[0], rho * s - base[1]))
     rise = math.sqrt(max(reach**2 - lateral**2, 0.0))
     goal = np.array([rho * c, rho * s, base[2] + rise])
-    swing = _clamped_rotation(
+    swing = clamped_rotation(
         tip - base, goal - base, math.radians(settings.thumb_max_swing_deg)
     )
     thumb_dir = swing @ (tip - base)
