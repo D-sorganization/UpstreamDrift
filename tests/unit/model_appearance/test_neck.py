@@ -369,3 +369,49 @@ def test_at_address_the_neck_does_not_stick_out_of_the_opening_front() -> None:
     near = samples[np.abs(samples[:, 2] - front[2]) < 0.01]
     ahead = float(near[:, 0].max() - front[0])
     assert ahead <= ACCEPT.max_neck_ahead_of_opening_m, ahead
+
+
+def _head_skin() -> np.ndarray:
+    from src.shared.python.model_appearance.head import build_head_parts
+
+    parts = {p.name: p for p in build_head_parts(HEAD_M, HeadSettings())}
+    return parts["skin_mesh"].mesh.vertices
+
+
+def test_the_neck_section_is_round_not_boxy() -> None:
+    rings = _neck_part().vertices[:-2].reshape(-1, 36, 3)
+    for ring in rings:
+        x, y = ring[:, 0], ring[:, 1]
+        area = 0.5 * abs(float(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1))))
+        assert area / (np.ptp(x) * np.ptp(y)) <= ACCEPT.max_neck_fill
+
+
+def test_the_neck_is_narrower_than_the_head_at_mid_height() -> None:
+    width, _ = _section_extent(_neck_part(), ACCEPT.neck_mid_height)
+    head = np.ptp(_head_skin()[:, 1]) / HEAD_M
+    low, high = ACCEPT.neck_over_head_width
+    assert low <= width / head <= high, (width, head)
+
+
+def test_the_neck_enters_the_head_without_a_step_at_the_jaw() -> None:
+    skin, neck_v = _head_skin(), _neck_part().vertices[:-2]
+    for z in np.unique(np.round(neck_v[:, 2], 3)):
+        if z < ACCEPT.neck_head_overlap_from * HEAD_M:
+            continue
+        reach = np.abs(skin[np.abs(skin[:, 2] - z) < 0.006 * HEAD_M * 4, 1]).max()
+        past = np.abs(neck_v[np.abs(neck_v[:, 2] - z) < 1e-3, 1]).max() - reach
+        assert past <= ACCEPT.max_neck_past_head_m, (z, past)
+
+
+def test_the_neck_goes_below_the_shirt_opening_all_round() -> None:
+    neck_z = _neck_part().vertices[:-2, 2].min()
+    for pose in (None, ADDRESS):
+        assert neck_z < _top_ring(pose)[:, 2].min(), pose
+
+
+def test_the_neck_is_one_skin_part() -> None:
+    from src.shared.python.model_appearance.head import build_head_parts
+
+    names = [p.name for p in build_head_parts(HEAD_M, HeadSettings())]
+    names += [p.name for p in build_neck_parts(HEAD_M, HeadSettings())]
+    assert names.count("neck") == 1

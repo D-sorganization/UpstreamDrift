@@ -35,15 +35,21 @@ class NeckSettings:
     top_height: float = 0.13  # axis end (inside the head's neck stub)
     base_forward: float = -0.02  # axis start, forward of the neck point
     top_forward: float = 0.14  # axis end: the forward lean of the neck
-    half_width: float = 0.25  # base half width: 12 cm across for a 1.75 m man
-    half_depth: float = 0.23  # base half depth: 11 cm front to back
-    #: (along, width, depth): sections as fractions of the base half extents.
+    half_width: float = 0.27  # base half width: 13 cm across for a 1.75 m man
+    half_depth: float = 0.24  # base half depth: 11.7 cm front to back
+    #: (along, width, depth): sections as fractions of the base half extents. The
+    #: neck narrows up to the head's own neck stub (0.35 head lengths at the jaw)
+    #: and eases wider towards the collar; it is 11 to 12.5 cm across mid-height.
     stations: tuple[tuple[float, float, float], ...] = (
         (0.0, 1.0, 1.0),
-        (0.7, 1.0, 1.0),
-        (1.0, 0.82, 0.82),
+        (0.35, 0.93, 0.93),
+        (0.55, 0.86, 0.86),
+        (0.69, 0.83, 0.83),
+        (0.78, 0.78, 0.78),
+        (0.86, 0.69, 0.69),
+        (1.0, 0.6, 0.6),
     )
-    squareness: float = 2.2
+    squareness: float = 2.0
 
     def __post_init__(self) -> None:
         values = (self.base_height, self.top_height, self.base_forward)
@@ -95,11 +101,14 @@ class NeckAcceptance:
     neck_width: tuple[float, float] = (0.45, 0.55)
     neck_depth: tuple[float, float] = (0.38, 0.50)
     max_base_bulge: float = 1.12
+    max_neck_fill: float = 0.79  # neck section area / bounding box (ellipse 0.785)
+    neck_mid_height: float = -0.12  # where the neck width over head width is read
+    neck_over_head_width: tuple[float, float] = (0.64, 0.72)
+    max_neck_past_head_m: float = 0.002  # neck above the jaw, outside the head skin
+    neck_head_overlap_from: float = 0.04  # head lengths up from the neck point
     max_opening_off_axis_m: float = 0.003  # top ring centre to neck axis (default)
     opening_gap_m: tuple[float, float] = (0.002, 0.009)  # ring to neck skin, all round
-    max_neck_ahead_of_opening_m: float = (
-        0.014  # at address (28 mm before; 8 mm unreachable)
-    )
+    max_neck_ahead_of_opening_m: float = 0.015  # at address (28 mm before round six)
 
 
 NECK_ACCEPTANCE = NeckAcceptance()

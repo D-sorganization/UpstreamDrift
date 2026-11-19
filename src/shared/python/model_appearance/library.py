@@ -377,7 +377,7 @@ def blend_scale(garment: bool, part: str = "upper_arm") -> float:
 # ends well under the jaw so the neck solid (``neck``) shows above it (#15292).
 # The collar opening shifts forward this fraction of the thorax length, so it is
 # centred on the neck, which leans forward of the trunk axis (#15292).
-THORAX_COLLAR_FORWARD = 0.032
+THORAX_COLLAR_FORWARD = 0.034
 
 
 def _shoulder_dome(
@@ -426,7 +426,7 @@ TORSO_PROFILES: dict[str, tuple[tuple[float, ...], ...]] = {
         (0.8, 0.97, 0.93, 0.07),
         (0.87, 0.91, 0.86, 0.12),
         *_shoulder_dome(
-            (0.92, 0.85, 0.78), (0.98, 0.38, 0.5), 0.153, THORAX_COLLAR_FORWARD
+            (0.92, 0.85, 0.78), (0.98, 0.38, 0.46), 0.153, THORAX_COLLAR_FORWARD
         ),
     ),
 }
