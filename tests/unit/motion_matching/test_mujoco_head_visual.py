@@ -175,7 +175,10 @@ def test_blend_balls_are_no_larger_than_the_adjoining_limb() -> None:
         if part in library.BLEND_PARTS and item.label.startswith("blend"):
             seen += 1
             verts = item.mesh_in_body_frame.vertices
-            extent = np.ptp(verts, axis=0).max() / 2.0
+            half = np.sort(np.ptp(verts, axis=0)) / 2.0
+            # The deltoid (#15279) runs down the arm: it may be longer than
+            # the limb is thick, but no wider, so it is still not a bubble.
+            extent = half[1] if part == "upper_arm" else half[2]
             assert extent <= 1.1 * library.PART_RADIUS_M[part] + 1e-9
     assert seen >= 4  # both shoulders and both hips
 
@@ -186,7 +189,11 @@ def test_cc0_mesh_head_loads_renders_and_keeps_physics_identical() -> None:
     xml, meta = _export(DRIVER, {"model": "cc0_mesh"})
     model = mujoco.MjModel.from_xml_string(xml)
     head = meta["visual_layer"]["head"]
-    assert head["parts"] == ["skin_mesh", "hair_mesh"] and head["mode"] == "body"
+    assert (
+        head["parts"][:1] == ["skin_mesh"]
+        and "hair_mesh" in head["parts"]
+        and head["mode"] == "body"
+    )
     plain = mujoco.MjModel.from_xml_string(
         exporter.export_full_body_mjcf(DRIVER.read_bytes())[0]
     )

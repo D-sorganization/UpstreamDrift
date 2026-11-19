@@ -34,7 +34,7 @@ import math
 # ISA standard atmosphere constants
 # ---------------------------------------------------------------------------
 
-#: Sea-level standard temperature [K] (15 C).
+#: Sea-level ISA standard temperature [K] (15 C; distinct from NIST 20 C lab ambient in physics_constants).
 ISA_T0_K: float = 288.15
 
 #: Sea-level standard pressure [Pa].
@@ -68,56 +68,14 @@ MIN_VALID_TEMPERATURE_C: float = -50.0
 MAX_VALID_TEMPERATURE_C: float = 60.0
 
 
-def air_density(
+def _isa_pressure_and_temp_k(
     altitude_m: float,
-    temperature_c: float = 15.0,
-    pressure_pa: float | None = None,
-) -> float:
-    """Return air density [kg/m^3] from the ISA-troposphere model.
-
-    Uses the standard atmosphere relations valid up to ~11 km, which more
-    than covers any golf course on earth::
-
-        T(z) = T0 - L * z
-        p(z) = p0 * (T(z) / T0) ** (g / (R_specific * L))
-        rho  = p / (R_specific * T)
-
-    where the ground reference (z = 0) is taken at the supplied
-    ``temperature_c`` rather than the ISA standard 15 C, so that hot or cold
-    days at the same altitude produce different densities.
-
-    Parameters
-    ----------
-    altitude_m
-        Altitude above mean sea level, in metres. Must lie within
-        [``MIN_VALID_ALTITUDE_M``, ``MAX_VALID_ALTITUDE_M``].
-    temperature_c
-        Ground (sea-level reference) temperature in degrees Celsius. Must
-        lie within [``MIN_VALID_TEMPERATURE_C``, ``MAX_VALID_TEMPERATURE_C``].
-        Defaults to 15 C (ISA standard).
-    pressure_pa
-        Optional override for the sea-level reference pressure in pascals.
-        When ``None`` (the default), the ISA standard value of 101 325 Pa
-        is used.
-
-    Returns
-    -------
-    float
-        Air density in kg/m^3.
-
-    Raises
-    ------
-    TypeError
-        If any argument is not a real number.
-    ValueError
-        If altitude or temperature fall outside the validated ranges, or if
-        ``pressure_pa`` is non-positive.
-
-    Postconditions
-    --------------
-    Returned density is strictly positive and, at sea-level / 15 C / 101325
-    Pa, equals 1.225 kg/m^3 within 0.005 kg/m^3.
-    """
+    temperature_c: float,
+    pressure_pa: float | None,
+    *,
+    temperature_is_local: bool,
+) -> tuple[float, float]:
+    """Validate inputs and return ``(pressure_pa, temperature_k)`` at altitude."""
     if not isinstance(altitude_m, (int, float)) or isinstance(altitude_m, bool):
         raise TypeError("altitude_m must be a real number")
     if not isinstance(temperature_c, (int, float)) or isinstance(temperature_c, bool):
@@ -126,12 +84,10 @@ def air_density(
         not isinstance(pressure_pa, (int, float)) or isinstance(pressure_pa, bool)
     ):
         raise TypeError("pressure_pa must be a real number or None")
-
-    if math.isnan(altitude_m) or math.isinf(altitude_m):
+    if not math.isfinite(altitude_m):
         raise ValueError("altitude_m must be finite")
-    if math.isnan(temperature_c) or math.isinf(temperature_c):
+    if not math.isfinite(temperature_c):
         raise ValueError("temperature_c must be finite")
-
     if altitude_m < MIN_VALID_ALTITUDE_M or altitude_m > MAX_VALID_ALTITUDE_M:
         raise ValueError(
             f"altitude_m={altitude_m} is outside the supported range "
@@ -145,23 +101,47 @@ def air_density(
             f"temperature_c={temperature_c} is outside the supported range "
             f"[{MIN_VALID_TEMPERATURE_C}, {MAX_VALID_TEMPERATURE_C}] C"
         )
-
     p0 = ISA_P0_PA if pressure_pa is None else float(pressure_pa)
     if p0 <= 0:
         raise ValueError("pressure_pa must be positive when provided")
 
-    t0 = float(temperature_c) + 273.15  # ground temperature in Kelvin
     lapse = ISA_LAPSE_RATE_K_PER_M
+    exponent = ISA_GRAVITY_M_S2 / (DRY_AIR_R_SPECIFIC_J_KG_K * lapse)
+    if temperature_is_local:
+        t_at_alt = float(temperature_c) + 273.15
+        t_isa = ISA_T0_K - lapse * float(altitude_m)
+        if t_at_alt <= 0 or t_isa <= 0:
+            raise ValueError("Computed temperature at altitude is non-positive")
+        return p0 * (t_isa / ISA_T0_K) ** exponent, t_at_alt
+    t0 = float(temperature_c) + 273.15
     t_at_alt = t0 - lapse * float(altitude_m)
     if t_at_alt <= 0:
-        # Should not happen inside the validated altitude range, but guard
-        # against pathological lapse-induced negative absolute temperatures.
         raise ValueError(
             "Computed temperature at altitude is non-positive; check inputs"
         )
+    return p0 * (t_at_alt / t0) ** exponent, t_at_alt
 
-    exponent = ISA_GRAVITY_M_S2 / (DRY_AIR_R_SPECIFIC_J_KG_K * lapse)
-    pressure_at_alt = p0 * (t_at_alt / t0) ** exponent
+
+def air_density(
+    altitude_m: float,
+    temperature_c: float = 15.0,
+    pressure_pa: float | None = None,
+    *,
+    temperature_is_local: bool = False,
+) -> float:
+    """Return air density [kg/m^3] from the ISA-troposphere model.
+
+    When ``temperature_is_local`` is ``False`` (default), ``temperature_c`` is
+    the sea-level reference temperature ``T0`` and lapses with altitude; pass
+    ``temperature_is_local=True`` to supply local ambient temperature at ``altitude_m``
+    under standard ISA barometric pressure.
+    """
+    pressure_at_alt, t_at_alt = _isa_pressure_and_temp_k(
+        altitude_m,
+        temperature_c,
+        pressure_pa,
+        temperature_is_local=temperature_is_local,
+    )
     return pressure_at_alt / (DRY_AIR_R_SPECIFIC_J_KG_K * t_at_alt)
 
 
@@ -189,6 +169,8 @@ def humid_air_density(
     temperature_c: float = 15.0,
     relative_humidity: float = 0.0,
     pressure_pa: float | None = None,
+    *,
+    temperature_is_local: bool = False,
 ) -> float:
     """Return moist-air density [kg/m^3] for ball-flight calculations.
 
@@ -210,45 +192,15 @@ def humid_air_density(
             altitude_m=altitude_m,
             temperature_c=temperature_c,
             pressure_pa=pressure_pa,
+            temperature_is_local=temperature_is_local,
         )
 
-    if not isinstance(altitude_m, (int, float)) or isinstance(altitude_m, bool):
-        raise TypeError("altitude_m must be a real number")
-    if not math.isfinite(altitude_m):
-        raise ValueError("altitude_m must be finite")
-    if altitude_m < MIN_VALID_ALTITUDE_M or altitude_m > MAX_VALID_ALTITUDE_M:
-        raise ValueError(
-            f"altitude_m={altitude_m} is outside the supported range "
-            f"[{MIN_VALID_ALTITUDE_M}, {MAX_VALID_ALTITUDE_M}] metres"
-        )
-
-    if not isinstance(temperature_c, (int, float)) or isinstance(temperature_c, bool):
-        raise TypeError("temperature_c must be a real number")
-    if math.isnan(temperature_c) or math.isinf(temperature_c):
-        raise ValueError("temperature_c must be finite")
-    if (
-        temperature_c < MIN_VALID_TEMPERATURE_C
-        or temperature_c > MAX_VALID_TEMPERATURE_C
-    ):
-        raise ValueError(
-            f"temperature_c={temperature_c} is outside the supported range "
-            f"[{MIN_VALID_TEMPERATURE_C}, {MAX_VALID_TEMPERATURE_C}] C"
-        )
-
-    p0 = ISA_P0_PA if pressure_pa is None else float(pressure_pa)
-    if p0 <= 0:
-        raise ValueError("pressure_pa must be positive when provided")
-
-    t0 = float(temperature_c) + 273.15
-    lapse = ISA_LAPSE_RATE_K_PER_M
-    t_at_alt = t0 - lapse * float(altitude_m)
-    if t_at_alt <= 0:
-        raise ValueError(
-            "Computed temperature at altitude is non-positive; check inputs"
-        )
-
-    exponent = ISA_GRAVITY_M_S2 / (DRY_AIR_R_SPECIFIC_J_KG_K * lapse)
-    pressure_at_alt = p0 * (t_at_alt / t0) ** exponent
+    pressure_at_alt, t_at_alt = _isa_pressure_and_temp_k(
+        altitude_m,
+        temperature_c,
+        pressure_pa,
+        temperature_is_local=temperature_is_local,
+    )
     vapor_pressure = rh * saturation_vapor_pressure_pa(t_at_alt - 273.15)
     vapor_pressure = min(vapor_pressure, pressure_at_alt)
     dry_pressure = pressure_at_alt - vapor_pressure
@@ -271,11 +223,8 @@ MAX_VALID_REYNOLDS: float = 1.0e7
 # representative of dimpled golf-ball measurements compiled by Bearman &
 # Harvey (1976) and reviewed in Mehta (1985); they are not meant to be a
 # manufacturer-specific calibration.
-_RE_PRECRITICAL: float = 4.0e4  # plateau before drag crisis begins
 _CD_PRECRITICAL: float = 0.50  # subcritical / pre-crisis Cd for dimpled sphere
 _RE_MIN_CD: float = 7.0e4  # log-Re centre of the drag-crisis transition
-_CD_MIN: float = 0.22  # minimum Cd in the trans/super-critical regime
-_RE_HIGH: float = 1.0e7  # high-Re asymptote
 _CD_HIGH: float = 0.30  # high-Re asymptote Cd
 
 # Width parameter for the tanh transition (in log10(Re) units).
@@ -320,9 +269,9 @@ def cd_dimpled_sphere(reynolds: float, base_cd: float = 0.21) -> float:
         Reynolds number based on ball diameter and free-stream speed. Must
         lie within ``[MIN_VALID_REYNOLDS, MAX_VALID_REYNOLDS]``.
     base_cd
-        Post-crisis floor Cd. Positive values are clamped into ``[0.18, 0.30]``
-        to keep the curve in the empirically observed envelope; exactly zero
-        returns ``0`` so callers can deliberately disable drag.
+        Post-crisis floor Cd. Defaults to 0.21 (zero-spin polynomial baseline);
+        ``DragModel`` and ``BallFlightSimulator`` pass ``GOLF_BALL_DRAG_COEFFICIENT``
+        (0.25). Positive values are clamped into ``[0.18, 0.30]``, and 0 disables drag.
 
     Returns
     -------
