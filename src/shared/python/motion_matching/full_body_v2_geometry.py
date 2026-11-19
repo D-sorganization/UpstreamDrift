@@ -381,7 +381,8 @@ def spec_mass_properties(
 
 
 _EXCESS_SOLIDS = {
-    "clavicle_links_not_in_de_leva": (("clavicle",), ()),
+    # Net of what the upper trunk gave up for them (zero when it gave it all).
+    "clavicle_links_not_in_de_leva": (("clavicle", "upper_trunk"), ("upper_trunk",)),
     "hands_native_mass": (("LHand", "RHand"), ("hand", "hand")),
     "hand_standoffs": (("LHandStandoff", "RHandStandoff"), ()),
     "lower_limbs_rajagopal": (

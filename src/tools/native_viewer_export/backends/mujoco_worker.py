@@ -43,19 +43,26 @@ APPEARANCE = {**default_document_dict(), "ball": {"enabled": False}}
 
 
 def build_scene_xml(
-    spec_bytes: bytes, appearance: Mapping[str, Any] | None = None
+    spec_bytes: bytes,
+    appearance: Mapping[str, Any] | None = None,
+    show_contact_spheres: bool = False,
 ) -> tuple[str, dict[str, Any]]:
     """Full-body MJCF with the appearance document (body, club, scene).
 
     ``appearance`` is the resolved document of the job (``None``: the contract
-    default); the exporter's own ball stays off either way.
+    default); the exporter's own ball stays off either way. Contact spheres
+    stay out of the drawing unless ``show_contact_spheres`` is true.
 
     Postcondition: the returned summary's ``visual_layer`` records the mesh
     count and whether the club assembly was attached.
     """
     document = {**(APPEARANCE if appearance is None else appearance)}
     document["ball"] = {"enabled": False}
-    return export_full_body_mjcf(spec_bytes, appearance=document_from_dict(document))
+    return export_full_body_mjcf(
+        spec_bytes,
+        appearance=document_from_dict(document),
+        show_contact_spheres=show_contact_spheres,
+    )
 
 
 def grow_offscreen_buffer(model: Any, width: int, height: int) -> None:
