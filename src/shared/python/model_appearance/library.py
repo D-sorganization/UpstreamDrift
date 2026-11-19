@@ -373,7 +373,8 @@ def blend_scale(garment: bool, part: str = "upper_arm") -> float:
 # depth (``torso_profile``). The widest station is 1.0, so a trunk is exactly
 # as wide and as deep as its spec hint, and width and depth scale alike
 # through the middle, so the mid section keeps the spec's aspect. Abdomen: lumbar joint to T12; thorax:
-# T12 to the shoulder line, then the slope up into the neck.
+# T12 to the shoulder line, then the trapezius slope up to the neck base, which
+# ends well under the jaw so the neck solid (``neck``) shows above it (#15292).
 TORSO_PROFILES: dict[str, tuple[tuple[float, float, float], ...]] = {
     "abdomen": (
         (-0.14, 0.93, 0.92),
@@ -391,10 +392,10 @@ TORSO_PROFILES: dict[str, tuple[tuple[float, float, float], ...]] = {
         (0.3, 0.95, 0.95),
         (0.55, 1.0, 1.0),
         (0.72, 1.0, 0.98),
-        (0.9, 0.99, 0.86),
-        (1.02, 0.86, 0.7),
-        (1.12, 0.5, 0.56),
-        (1.2, 0.3, 0.46),
+        (0.82, 0.98, 0.92),
+        (0.87, 0.8, 0.78),
+        (0.91, 0.58, 0.64),
+        (0.935, 0.38, 0.5),
     ),
 }
 TORSO_SQUARENESS = 2.6  # superellipse exponent of a trunk cross-section
@@ -402,6 +403,7 @@ TORSO_SQUARENESS = 2.6  # superellipse exponent of a trunk cross-section
 # flatter than it is deep, not a ball. Depth axis is the link's up axis.
 SHOULDER_ASPECT = 0.85  # up-down over front-back extent of the yoke
 SHOULDER_RADIUS_SCALE = 1.1  # front-back half extent over the part radius
+SHOULDER_DROOP = 0.5  # neck end of the yoke below the link, in radii (#15292)
 SHOULDER_START_FRACTION = 0.3  # the yoke starts this far along the link
 SHOULDER_UP_AXIS = (0.0, 0.0, 1.0)  # up, in the shoulder link's body frame
 # Deltoid (#15279): the blend at the shoulder joint is longer down the arm

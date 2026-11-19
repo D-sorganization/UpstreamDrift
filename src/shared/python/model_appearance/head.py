@@ -344,6 +344,26 @@ def build_head_parts(
     return parts
 
 
+def build_neck_parts(
+    length_m: float, settings: HeadSettings | None = None
+) -> list[HeadPart]:
+    """The visual neck the CC0 head lacks, canonical frame (#15292).
+
+    The parametric head draws its own neck, so it gets none here. Kept apart
+    from :func:`build_head_parts`, whose triangle budget is the head's own.
+    Preconditions: positive finite head length. Postcondition: at most one
+    closed, positive-volume ``neck`` part scaled with ``length_m``.
+    """
+    from src.shared.python.model_appearance import neck
+
+    if not math.isfinite(length_m) or length_m <= 0:
+        raise ValueError("Head length must be a positive finite number")
+    cfg = settings or HeadSettings()
+    if cfg.model != "cc0_mesh":
+        return []
+    return [HeadPart("neck", neck.build_neck(length_m * cfg.scale), "skin")]
+
+
 def head_frame_in_body(
     anchor: HeadAnchor, settings: HeadSettings | None = None
 ) -> Array:

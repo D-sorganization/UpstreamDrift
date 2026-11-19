@@ -114,7 +114,11 @@ def _unit_section(squareness: float, sides: int) -> tuple[Array, Array]:
 
 
 def torso_mesh(
-    frame: TorsoFrame, profile: TorsoProfile, *, thickness: float = 1.0
+    frame: TorsoFrame,
+    profile: TorsoProfile,
+    *,
+    thickness: float = 1.0,
+    cap_inset_m: float = 0.0,
 ) -> Mesh:
     """The closed solid of ``profile`` on ``frame``.
 
@@ -123,13 +127,15 @@ def torso_mesh(
     same solid, thicker). Postconditions: closed, positive volume; at a
     station the half width is ``thickness * half_width * station.width`` along
     the width axis and likewise in depth; the solid is mirror-symmetric about
-    the plane through the axis normal to the width axis.
+    the plane through the axis normal to the width axis. ``cap_inset_m >= 0``
+    lowers the top ring and pole along the axis, so a skin solid's flat top
+    sits under its garment's (no coplanar z-fighting at an open neckline).
     """
     start, end = np.asarray(frame.start, float), np.asarray(frame.end, float)
     axis = end - start
     length = float(np.linalg.norm(axis))
     extents = (frame.half_width, frame.half_depth, thickness, length)
-    if not (np.isfinite(extents).all() and min(extents) > 0.0):
+    if not (np.isfinite(extents).all() and min(extents) > 0.0 and cap_inset_m >= 0.0):
         raise ValueError("torso frame needs positive finite length and extents")
     axis = axis / length
     width = np.asarray(frame.width_axis, float)
@@ -149,10 +155,11 @@ def torso_mesh(
         + thickness * frame.half_depth * d * np.outer(unit_d, depth)
         for t, w, d in zip(along, scale_w, scale_d, strict=True)
     ]
+    rows[-1] = rows[-1] - cap_inset_m * axis
     return closed_grid_mesh(
         np.asarray(rows),
         start + lowest * length * axis,
-        start + highest * length * axis,
+        start + highest * length * axis - cap_inset_m * axis,
     )
 
 

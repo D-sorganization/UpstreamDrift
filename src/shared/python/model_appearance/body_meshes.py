@@ -294,8 +294,9 @@ def _shoulder_segment(cap: Capsule, scale: float) -> _Segment:
         # An upright link has no front-back axis from "up": keep it round.
         return _Segment(start, end, radius, 1.0)
     radius *= library.SHOULDER_RADIUS_SCALE
+    droop = -library.SHOULDER_DROOP * radius * up  # the neck end hangs lower
     return _Segment(
-        start + library.SHOULDER_START_FRACTION * along,
+        start + library.SHOULDER_START_FRACTION * along + droop,
         end,
         radius,
         library.SHOULDER_ASPECT,
@@ -489,7 +490,9 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
             seg.radius,
             seg.radius * seg.aspect,
         )
-        return torso_mesh(frame, seg.profile, thickness=extra.get("thickness", 1.0))
+        thickness = extra.get("thickness", 1.0)
+        inset = _SKIN_CAP_INSET_M if thickness == 1.0 else 0.0
+        return torso_mesh(frame, seg.profile, thickness=thickness, cap_inset_m=inset)
     return geometry.lofted_segment(
         seg.start,
         seg.end,
