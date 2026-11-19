@@ -281,6 +281,7 @@ class _Segment:
     #: Trunk cross-sections and the joint plane they are measured from (#15279).
     profile: TorsoProfile | None = None
     profile_start: np.ndarray | None = None
+    front_axis: np.ndarray | None = None  # slants the profile's collar (#15292)
 
 
 def _shoulder_segment(cap: Capsule, scale: float) -> _Segment:
@@ -294,11 +295,13 @@ def _shoulder_segment(cap: Capsule, scale: float) -> _Segment:
         # An upright link has no front-back axis from "up": keep it round.
         return _Segment(start, end, radius, 1.0)
     radius *= library.SHOULDER_RADIUS_SCALE
+    droop = -library.SHOULDER_DROOP * radius * up  # the neck end hangs lower
     return _Segment(
-        start + library.SHOULDER_START_FRACTION * along,
-        end,
+        start + library.SHOULDER_START_FRACTION * along + droop,
+        end - library.SHOULDER_END_SINK * radius * up,
         radius,
         library.SHOULDER_ASPECT,
+        library.SHOULDER_END_SCALE,
         width_hint=front,
     )
 
@@ -316,10 +319,14 @@ def _limb_segments(part: str, caps: Sequence[Capsule], scale: float) -> list[_Se
         )
         radius = min(radius, _MAX_RADIUS_OVER_LENGTH * cap.length_m())
         aspect = library.PART_ASPECT.get(part, 1.0)
+        start, end = np.asarray(cap.start_m), np.asarray(cap.end_m)
+        if part == "upper_arm":  # the spindle's tip, not its middle, is the joint
+            axis = (end - start) / cap.length_m()
+            start = start + library.UPPER_ARM_START_INSET * radius * axis
         out.append(
             _Segment(
-                np.asarray(cap.start_m),
-                np.asarray(cap.end_m),
+                start,
+                end,
                 radius,
                 aspect,
                 library.limb_distal_scale(part),
@@ -338,7 +345,8 @@ def _trunk_segment(
     chest then begins at the lumbar plane where the pelvis solid ends.
     """
     spine = max(caps, key=lambda c: c.length_m())  # first wins on a tie
-    size = _section_size(part, ctx.shapes.get(body, ()), ctx.sections.get(body))
+    section = ctx.sections.get(body)
+    size = _section_size(part, ctx.shapes.get(body, ()), section)
     radius = scale * size.radius_m
     if size.source == "library_default":
         radius = min(radius, _MAX_RADIUS_OVER_LENGTH * spine.length_m())
@@ -351,6 +359,9 @@ def _trunk_segment(
         profile = TorsoProfile(
             tuple(TorsoStation(*row) for row in library.TORSO_PROFILES[role]),
             library.TORSO_SQUARENESS,
+            rings=library.TORSO_RINGS,
+            fine_from=library.TORSO_FINE_FROM,
+            fine_rings=library.TORSO_FINE_RINGS,
         )
         if not ctx.shapes.get(ctx.parents.get(body, "")):
             # Nothing drawn as a trunk solid under it (the pelvis ends at this
@@ -363,6 +374,7 @@ def _trunk_segment(
         size.aspect,
         profile=profile,
         profile_start=start,
+        front_axis=section.front_axis if section is not None else None,
     )
 
 
@@ -488,6 +500,7 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
             np.asarray(hint, dtype=float),
             seg.radius,
             seg.radius * seg.aspect,
+            seg.front_axis,
         )
         return torso_mesh(frame, seg.profile, thickness=extra.get("thickness", 1.0))
     return geometry.lofted_segment(
@@ -512,7 +525,12 @@ def _segment_meshes(
     garment = library.garment_name_for(ctx.doc, body)
     out = []
     for i, seg in enumerate(segments):
-        out.append(BodyMesh(body, f"skin{i}", _loft(ctx, body, seg), base))
+        skin_seg = seg
+        if part == "upper_arm":  # no skin dome poking out of the sleeve's flat start
+            axis = (seg.end - seg.start) / np.linalg.norm(seg.end - seg.start)
+            tip = library.UPPER_ARM_SKIN_TIP_INSET * seg.radius * axis
+            skin_seg = dataclasses.replace(seg, start=seg.start + tip)
+        out.append(BodyMesh(body, f"skin{i}", _loft(ctx, body, skin_seg), base))
         if part in library.BLEND_PARTS:  # ball joint hides the segment seam
             size = seg.radius * library.blend_scale(garment is not None, part)
             across, down = (
