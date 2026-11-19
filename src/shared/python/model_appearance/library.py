@@ -370,21 +370,26 @@ def blend_scale(garment: bool, part: str = "upper_arm") -> float:
 
 # Trunk solids (#15279): cross-sections of the abdomen and the thorax as
 # (along, width, depth), fractions of the body's length, half width and half
-# depth (``torso_profile``). The widest station is 1.0, so a trunk is exactly
-# as wide and as deep as its spec hint, and width and depth scale alike
-# through the middle, so the mid section keeps the spec's aspect. Abdomen: lumbar joint to T12; thorax:
-# T12 to the shoulder line, then the trapezius slope up to the neck base, which
-# ends well under the jaw so the neck solid (``neck``) shows above it (#15292).
+# depth (``torso_profile``). A station of 1.0 is as wide and as deep as the
+# spec hint. Abdomen: lumbar joint to T12; thorax: T12 to the shoulder line,
+# then the trapezius slope up to the neck base, which ends well under the jaw
+# so the neck solid (``neck``) shows above it (#15292). The thorax (#15299) is
+# 1.04 wide from the chest to the armpit (as wide as the hips) and narrows
+# to the waist.
+# Above the chest only its BACK comes in: the depth shrinks while the section
+# shifts forward, so the upper back runs into the back of the neck with no
+# shelf (a hump at address), and the front stays where the arms cross it.
 # The collar opening shifts forward this fraction of the thorax length, so it is
 # centred on the neck, which leans forward of the trunk axis (#15292).
 THORAX_COLLAR_FORWARD = 0.034
+THORAX_SHOULDER_FORWARD = 0.033  # the same shift at the shoulder line (#15299)
 
 
 def _shoulder_dome(
     joint: tuple[float, float, float],
     neck: tuple[float, float, float],
     slant: float,
-    forward: float = 0.0,
+    forward: tuple[float, float] = (0.0, 0.0),
     steps: int = 6,
     wall_share: float = 0.7,
 ) -> tuple[tuple[float, ...], ...]:
@@ -392,7 +397,8 @@ def _shoulder_dome(
 
     The section narrows at ``wall_share`` of the average rate at first and ever
     faster towards the neck, so the shirt is a rounded slope, steep at the
-    shoulder line and flattening towards the neck, not a shelf.
+    shoulder line and flattening towards the neck, not a shelf. ``forward``
+    is the section's forward shift at the shoulder line and at the neck.
     """
     rows = []
     for i in range(steps + 1):
@@ -401,7 +407,8 @@ def _shoulder_dome(
         along = joint[0] + (neck[0] - joint[0]) * u
         width = joint[1] + (neck[1] - joint[1]) * k
         depth = joint[2] + (neck[2] - joint[2]) * k
-        shift = forward * u * u * (3.0 - 2.0 * u)  # eases in from the shoulder line
+        ease = u * u * (3.0 - 2.0 * u)  # eases in from the shoulder line
+        shift = forward[0] + (forward[1] - forward[0]) * ease
         rows.append((along, width, depth, slant, 2.4 - 0.4 * u, shift))
     return tuple(rows)
 
@@ -420,13 +427,17 @@ TORSO_PROFILES: dict[str, tuple[tuple[float, ...], ...]] = {
         (-0.32, 0.56, 0.66),
         (-0.1, 0.84, 0.92),
         (0.08, 0.89, 0.97),
-        (0.3, 0.95, 0.95),
-        (0.55, 1.0, 1.0),
-        (0.7, 1.0, 0.98),
-        (0.8, 0.97, 0.93, 0.07),
-        (0.87, 0.91, 0.86, 0.12),
+        (0.3, 0.94, 0.96),
+        (0.5, 1.04, 1.0),
+        (0.62, 1.04, 0.97, 0.0, 0.0, 0.007),
+        (0.72, 1.04, 0.893, 0.0, 0.0, 0.018),
+        (0.8, 1.02, 0.815, 0.07, 0.0, 0.027),
+        (0.87, 0.91, 0.733, 0.12, 0.0, 0.03),
         *_shoulder_dome(
-            (0.92, 0.85, 0.78), (0.98, 0.38, 0.46), 0.153, THORAX_COLLAR_FORWARD
+            (0.92, 0.85, 0.63),
+            (0.98, 0.38, 0.46),
+            0.153,
+            (THORAX_SHOULDER_FORWARD, THORAX_COLLAR_FORWARD),
         ),
     ),
 }
