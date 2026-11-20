@@ -98,11 +98,21 @@ class StageSettings:
     #: model or pose error, not a placement. ``None``: only ``bound_sigmas``.
     #: Head markers are exempt: they sit on a cap, not on the skull landmarks.
     offset_reach_m: float | None = None
+    #: Labels containing one of these stay at their seed. The leg markers are
+    #: already calibrated under the lane's own stance model, which the swing
+    #: solve uses again; an adjustment made without it can undo that.
+    hold: tuple[str, ...] = ()
     #: The stage stops when a step gains under a millionth of the cost: the
     #: core's default asks for more digits than marker data carry.
     solver: BundleSettings = field(
         default_factory=lambda: BundleSettings(tolerance=1e-6, max_iterations=100)
     )
+
+    def sigma(self, label: str) -> tuple[float, float, float]:
+        """Prior sigma of ``label``: ``offset_sigma`` unless it is held."""
+        if any(part in label for part in self.hold):
+            return (0.0, 0.0, 0.0)
+        return offset_sigma(label)
 
 
 def offset_sigma(label: str) -> tuple[float, float, float]:
@@ -246,7 +256,7 @@ def build_problem(
         observations=np.asarray(lane.points)[list(frames)][:, columns],
         valid=np.asarray(lane.valid)[list(frames)][:, columns],
         offset_seeds=np.array([attachments[label][1] for label in labels], float),
-        offset_sigmas=np.array([offset_sigma(label) for label in labels]),
+        offset_sigmas=np.array([settings.sigma(label) for label in labels]),
         pose_start=poses,
         pose_bounds=(lower, upper),
         pose_prior=(poses, np.tile(sigmas, (len(frames), 1))),
@@ -295,7 +305,7 @@ def stage_report(
         "offsets_on_bound": [[labels[m], "xyz"[a]] for m, a in result.on_bound],
         "weakly_identified_markers": [labels[m] for m in result.weakly_identified],
         "weak_information_ratios": list(result.weak_information_ratios),
-        "free_markers": [label for label in labels if any(offset_sigma(label))],
+        "free_markers": [label for label in labels if any(settings.sigma(label))],
         "offset_sigmas_m": {key: list(value) for key, value in OFFSET_SIGMAS_M.items()},
         "settings": asdict(settings),
     }
@@ -329,6 +339,12 @@ def add_bundle_arguments(parser: argparse.ArgumentParser) -> None:
         nargs="*",
         default=[],
         help="marker labels left out of the adjustment and scored afterwards",
+    )
+    parser.add_argument(
+        "--bundle-hold",
+        nargs="*",
+        default=[],
+        help="markers whose label contains one of these stay at their seed",
     )
     parser.add_argument(
         "--bundle-start",
@@ -370,6 +386,7 @@ def stage_settings(args: argparse.Namespace) -> StageSettings | None:
         anchor_frames=tuple(args.bundle_anchor_frames),
         held_out=tuple(args.bundle_held_out),
         start=args.bundle_start,
+        hold=tuple(args.bundle_hold),
         address_repeats=args.bundle_address_repeats,
         offset_reach_m=None if reach is None else 1e-3 * reach,
         pose_prior_weight=None if prior is None else prior[0],

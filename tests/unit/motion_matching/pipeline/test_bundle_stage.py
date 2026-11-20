@@ -202,6 +202,11 @@ def test_the_flag_carries_frames_and_held_out_markers_and_the_sole_is_stated() -
     assert asked.offset_reach_m == pytest.approx(0.035)
     assert (asked.pose_prior_weight, asked.spin_prior_weight) == (0.1, 3.0)
     assert asked.solver.tolerance == 1e-6
+    held = stage_settings(
+        parser.parse_args(["--bundle-adjust", "--bundle-hold", "Toe"])
+    )
+    assert held.hold == ("Toe",) and held.sigma("LToeIn") == (0.0, 0.0, 0.0)
+    assert held.sigma("LKneeOut") == OFFSET_SIGMAS_M["KneeOut"]
     # nothing held out: no kinematics are built for an empty marker set
     assert held_out_rms_mm(SimpleNamespace(), {}, (0,), np.zeros((1, 2))) == {}
     document = json.loads(SPEC.read_text(encoding="utf-8"))
