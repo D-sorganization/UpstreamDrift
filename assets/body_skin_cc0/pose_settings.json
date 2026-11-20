@@ -11,6 +11,7 @@
     "trail_protracted_110_mm_and_lowered": 16.0
   },
   "rigid_step_floor_mm": 40.0,
+  "neck_test_turn_rad": 0.6,
   "sources": {
     "shoulder_follow": "Share of the upper arm's motion the deltoid group takes; 0.3 from the #15299 prototype (0, 0.3 and 0.6 differ little by eye).",
     "smoothing_iterations": "Largest change of an edge length on the acromion path at 110 mm protraction: 34.0 mm with the stored weights, 16.6 mm after 5 passes, 12.7 mm after 15, 10.8 mm after 40 (2026-11-20). Fifteen takes most of the gain and leaves the rib cage alone.",
