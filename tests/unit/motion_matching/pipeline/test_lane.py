@@ -167,3 +167,84 @@ def test_restart_report_validates_against_the_receipt_schema(policy: str) -> Non
     assert block.policy == policy
     with pytest.raises(ValidationError):
         IkRestartPolicyReceipt.model_validate({**lane.restart_report(), "margin_m": -1})
+
+
+def test_trajectory_convergence_settings_are_opt_in() -> None:
+    """Iterations and the spin prior of the full-capture solve (#15296): the
+    default leaves the solver's own cap and the document's prior untouched."""
+    from src.shared.python.motion_matching.pipeline.cli import build_parser
+    from src.shared.python.motion_matching.pipeline.constants import (
+        SPIN_COORDINATES,
+        SPIN_PRIOR,
+    )
+
+    lane = _synthetic_lane()
+    lane.prior_weights = dict.fromkeys(SPIN_COORDINATES, SPIN_PRIOR)
+    args = build_parser().parse_args([])
+    assert (args.ik_iterations, args.ik_spin_prior_weight) == (None, None)
+    lane.set_trajectory_convergence(args.ik_iterations, args.ik_spin_prior_weight)
+    assert "iterations" not in lane.restart_settings()
+    assert lane.convergence_report() == {}  # a default receipt is unchanged
+    assert set(lane.prior_weights.values()) == {SPIN_PRIOR}
+    args = build_parser().parse_args(
+        ["--ik-iterations", "300", "--ik-spin-prior-weight", "0.001"]
+    )
+    lane.set_trajectory_convergence(args.ik_iterations, args.ik_spin_prior_weight)
+    assert lane.restart_settings()["iterations"] == 300
+    assert "iterations" not in lane.restart_settings(consecutive=False)
+    assert lane.prior_weights == dict.fromkeys(SPIN_COORDINATES, 0.001)
+    assert lane.convergence_report() == {"iterations": 300, "spin_prior_weight": 0.001}
+    with pytest.raises(ValueError, match="iterations"):
+        lane.set_trajectory_convergence(0, None)
+    with pytest.raises(ValueError, match="spin prior"):
+        lane.set_trajectory_convergence(None, -1.0)
+
+
+def test_free_stance_slide_is_opt_in_and_keeps_the_feet_on_the_ground() -> None:
+    """``--ik-free-stance-slide`` (#15296): the full-capture solve keeps the
+    stance spheres on the ground but no longer anchors them where they first
+    touched; calibration subsets and the default stay planted."""
+    from src.shared.python.motion_matching.pipeline.address_feet import planted_stance
+    from src.shared.python.motion_matching.pipeline.cli import build_parser
+
+    lane = _synthetic_lane()
+    assert build_parser().parse_args([]).ik_free_stance_slide is False
+    assert lane.stance_settings() == planted_stance(lane)
+    assert lane.convergence_report() == {}
+    args = build_parser().parse_args(["--ik-free-stance-slide"])
+    lane.stance_slide = args.ik_free_stance_slide
+    free = lane.stance_settings()
+    assert free["flat_feet_per_frame"] is lane.stance
+    assert (free["plant_stance"], free["anchor_stance_at_init"]) == (False, False)
+    assert lane.stance_settings(consecutive=False) == planted_stance(lane)
+    assert lane.convergence_report() == {"free_stance_slide": True}
+
+
+def test_girdle_range_is_an_opt_in_tightening() -> None:
+    """``--ik-girdle-range-deg`` (#15296): the four shoulder-girdle coordinates
+    are bounded about neutral in every solve that reads the lane's bounds; the
+    default adds no bound, and a range wider than the document's is refused."""
+    from src.shared.python.motion_matching.pipeline.cli import build_parser
+    from src.shared.python.motion_matching.pipeline.lane import GIRDLE_COORDINATES
+
+    lane = _synthetic_lane()
+    before = dict(lane.bounds)
+    assert build_parser().parse_args([]).ik_girdle_range_deg is None
+    lane.set_girdle_range(None)
+    assert lane.bounds == before
+    assert lane.convergence_report() == {}
+    args = build_parser().parse_args(["--ik-girdle-range-deg", "12"])
+    lane.set_girdle_range(args.ik_girdle_range_deg)
+    assert set(GIRDLE_COORDINATES) == {
+        "LScapInputX",
+        "LScapInputY",
+        "RScapInputX",
+        "RScapInputY",
+    }
+    for name in GIRDLE_COORDINATES:
+        assert lane.bounds[name] == pytest.approx((-np.radians(12), np.radians(12)))
+    assert {k: v for k, v in lane.bounds.items() if k in before} == before
+    assert lane.convergence_report() == {"girdle_range_deg": 12.0}
+    for bad in (0.0, -3.0, 20.5, float("nan")):
+        with pytest.raises(ValueError, match="girdle range"):
+            lane.set_girdle_range(bad)

@@ -216,6 +216,7 @@ def best_address(
         bounds |= {
             name: (float(np.radians(lo)), float(np.radians(hi)))
             for name, (lo, hi) in NEUTRAL_BOUNDS_DEG.items()
+            if name in kin.coordinate_order
         }
     balance = ADDRESS_BALANCE_WEIGHT if lane.anthropometric else 0.0
     if lane.anthropometric:

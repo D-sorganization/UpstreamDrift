@@ -101,6 +101,7 @@ from src.shared.python.motion_matching.pipeline.gaze_tracking import (
 )
 from src.shared.python.motion_matching.pipeline.lane import (
     Lane,
+    add_trajectory_convergence_arguments,
     configure_lane,
     document_seed,
     expand_stance_for_width,
@@ -447,6 +448,7 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     add_turn_split_arguments(parser)
+    add_trajectory_convergence_arguments(parser)
     add_hip_zero_twist_argument(parser)
     add_knee_flexion_argument(parser)
     add_marker_selection_argument(parser)
@@ -1392,6 +1394,7 @@ def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
     if args.bound_wrists or (fitted_grip(base_spec) and not args.free_wrists):
         lane.bounds |= wrist_bounds()
         ctx.log.info("wrists and forearms bounded to the human ranges in the IK")
+    lane.set_girdle_range(getattr(args, "ik_girdle_range_deg", None))
 
     lane.gaze_weight = float(getattr(args, "gaze_weight", 0.0))
 
@@ -1456,6 +1459,11 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         getattr(args, "ik_restart_policy", DEFAULT_IK_RESTART_POLICY)
     )
     lane.posture_prior_weight = getattr(args, "ik_posture_prior_weight", 0.0)
+    lane.set_trajectory_convergence(
+        getattr(args, "ik_iterations", None),
+        getattr(args, "ik_spin_prior_weight", None),
+    )
+    lane.stance_slide = bool(getattr(args, "ik_free_stance_slide", False))
     lane.set_turn_split(
         cal_res.attachments,
         getattr(args, "thorax_weight", DEFAULT_THORAX_WEIGHT),
@@ -1510,6 +1518,8 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     lane.select_release_cutoff(cal_res.kin, cal_res.scaled_spec, q_ref)
     _attach_face_report(ik_report, lane, cal_res, (q_ik, q_ref), args.face_weight)
     ik_report["restart_policy"] = lane.restart_report()
+    if lane.convergence_report():
+        ik_report["trajectory_convergence"] = lane.convergence_report()
     if turn_split_active(lane):
         ik_report["turn_split"] = turn_split_report(lane)
     _save_ik_trajectory(ctx, lane, q_ik, q_ref, errors, ref_errors)
