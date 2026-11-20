@@ -73,6 +73,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1100 | `src/shared/python/motion_matching/club_only/control_replay.py` |
 | 1098 | `src/tools/shot_pattern_analysis/matched_supplement_pipeline.py` |
 | 1096 | `src/learning/retargeting/retargeter.py` |
+| 1091 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 1089 | `src/shared/python/motion_pipeline/contracts.py` |
 | 1084 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py` |
 | 1078 | `src/engines/physics_engines/drake/python/full_body_model.py` |
@@ -96,7 +97,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1036 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py` |
 | 1036 | `src/tools/bunker_shot_gui/report.py` |
 | 1035 | `src/engines/physics_engines/opensim/python/opensim_physics_engine.py` |
-| 1035 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 1034 | `src/shared/python/motion_matching/pipeline/receipt_components.py` |
 | 1032 | `src/launchers/launcher_ui_setup.py` |
 | 1022 | `src/tools/bunker_shot_gui/render3d.py` |
@@ -231,6 +231,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 813 | `src/engines/physics_engines/drake/python/src/drake_golf_model.py` |
 | 813 | `src/tools/model_explorer/urdf_code_editor.py` |
 | 812 | `src/engines/physics_engines/opensim/python/tour_matching/model_variants.py` |
+| 812 | `src/shared/python/model_appearance/body_meshes.py` |
 | 812 | `src/shared/python/motion_matching/club_only/ui_integration.py` |
 | 812 | `src/tools/starting_pose_matcher/live_view_controller.py` |
 | 811 | `src/engines/physics_engines/drake/python/src/pose_editor_tab.py` |
@@ -238,7 +239,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 810 | `src/shared/python/humanoid_character_builder/mesh/mesh_processor.py` |
 | 809 | `src/shared/python/model_generation/converters/urdf_parser.py` |
 | 809 | `src/shared/python/pose_editor/widgets.py` |
-| 807 | `src/shared/python/model_appearance/body_meshes.py` |
 | 806 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_main_application.py` |
 | 806 | `src/launchers/_launcher_navigation_ui.py` |
 | 804 | `src/shared/python/spine/movement_variants.py` |

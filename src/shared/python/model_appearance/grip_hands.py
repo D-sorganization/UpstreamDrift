@@ -244,7 +244,7 @@ def grip_hand_meshes(
             skinned_hand_meshes,
         )
 
-        return skinned_hand_meshes(club)
+        return skinned_hand_meshes(club, with_ball=True)
     return {
         label: _placed_hand(club, hand, pose, hand_length_m=hand_length_m, hands=hands)
         for hand, label in HAND_PARTS.items()
