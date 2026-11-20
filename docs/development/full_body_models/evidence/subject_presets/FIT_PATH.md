@@ -111,5 +111,9 @@ it was 100 %.
   pin; it is the largest single address error in this run.
 - Bring the multi-frame marker-offset adjustment into the repository if its
   accuracy is to be claimed from a repository command.
+- `pipeline/bundle_adjustment.py` now holds that adjustment as an engine-free
+  core (`solve_bundle`) tested on a synthetic chain only. No fit command calls
+  it yet, so every number above stands and the experiment column is still not
+  reproducible from the repository.
 - `LATERAL_SEEDS_M` in the hip calibration is a literal that does not follow
   the preset's leg seeds, and `execution.driver` ignores `--address-only`.
