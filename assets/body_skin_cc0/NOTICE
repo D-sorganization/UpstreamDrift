@@ -1,0 +1,23 @@
+CC0 continuous body skin (epic #15150, #15299).
+
+`body_skin_cc0.npz` is derived, by `build_body_skin.py` with
+`skin_settings.json`, from MakeHuman files that are all CC0 1.0
+(public-domain dedication); see `../head_cc0/LICENSE.CC0.txt` and
+`../head_cc0/SOURCE_LICENSE_STATEMENT.txt`. `PROVENANCE.json` lists the
+SHA-256 of every source file and morph target read.
+
+Source repository: https://github.com/makehumancommunity/makehuman
+Source commit: a8bc2d54ff0ac92e78ff71431b1023eda42bf482
+
+| File | Role | Licence marker |
+| --- | --- | --- |
+| makehuman/data/3dobjs/base.obj | hm08 base mesh; body faces below the neck without hands and feet | CC0 (MakeHuman asset licence) |
+| makehuman/data/rigs/default.mhskel | bones, joints and hierarchy | `"license": "CC0"` in the file |
+| makehuman/data/rigs/default_weights.mhw | skin weights | `"license": "CC0"` in the file |
+| makehuman/data/targets/macrodetails/** | macro morph targets of the athletic male mix | CC0 (MakeHuman asset licence) |
+
+Changes made: macro morph applied, uniform scale to the reference stature,
+change of frame (hip-midpoint origin; x forward, y left, z up), quads split
+into triangles, head, hands and feet removed, bone weights summed into the
+bone groups of `skin_settings.json`, at most four influences kept per vertex,
+positions and weights quantised. Appearance only; no physics input.
