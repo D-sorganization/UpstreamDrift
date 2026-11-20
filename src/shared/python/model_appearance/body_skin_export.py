@@ -13,8 +13,9 @@ model's bodies and gives each body its bind pose in the fitted rest space:
   weights, and linear blend skinning with them (the engine's rule);
 * ``blend_wrists``: the forearm's end shared with the body that carries the
   hand, so the skin's end ring stays under a rigid hand's cuff at any wrist bend;
-* ``narrow_head_base``: the rigid head model's base held round the neck axis, so
-  a turned head does not push it out of the skin's neck and the collar.
+* ``narrow_head_base``: the rigid head model's base held round the neck axis and
+  drawn down the neck, so a turned head does not push it out of the skin's neck
+  and the collar and no view passes under it into the open neck.
 
 Body frames are ``Rigid`` poses (body frame to world) keyed by role:
 ``pelvis``, ``thorax``, ``head`` and, per side, ``girdle``, ``upper_arm``,
@@ -85,6 +86,7 @@ _BONES = {
     "shank": ("knee", "ankle"),
 }
 _ANCHORS = {"pelvis": "hip_mid", "head": "neck", "girdle": "girdle"}
+_HEAD_BASE = ("height_m", "front_m", "side_m", "back_m", "drop_m")
 
 
 @dataclass(frozen=True)
@@ -99,12 +101,13 @@ class ExportSettings:
     wrist_blend_length_m: float = 0.0
     wrist_blend_full_m: float = 0.0
     head_base_height_m: float = 0.0
-    head_base_radius_m: float = 0.0
+    head_base_front_m: float = 0.0
+    head_base_side_m: float = 0.0
+    head_base_back_m: float = 0.0
+    head_base_drop_m: float = 0.0
 
     def __post_init__(self) -> None:
-        height, radius = self.head_base_height_m, self.head_base_radius_m
-        if height < 0.0 or (height > 0.0 and not radius > 0.0):
-            raise ValueError("head_base needs height_m >= 0 and, with it, radius_m > 0")
+        self._check_head_base()
         follow = list(self.spine_follow)
         if len(follow) != len(SPINE_GROUPS) or follow != sorted(follow):
             raise ValueError("spine_follow must hold three rising shares")
@@ -117,6 +120,20 @@ class ExportSettings:
         length, full = self.wrist_blend_length_m, self.wrist_blend_full_m
         if length < 0.0 or (length > 0.0 and not 0.0 <= full < length):
             raise ValueError("wrist_blend needs 0 <= full_m < length_m, or length_m 0")
+
+    def _check_head_base(self) -> None:
+        """``TypeError`` for a head_base value that is no number, ``ValueError``
+        unless height and drop are >= 0 and, with a height, each limit > 0."""
+        limits = (self.head_base_front_m, self.head_base_side_m, self.head_base_back_m)
+        height, drop = self.head_base_height_m, self.head_base_drop_m
+        for value in (height, drop, *limits):
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise TypeError("head_base values must be numbers (metres)")
+        if height < 0.0 or drop < 0.0 or (height > 0.0 and not min(limits) > 0.0):
+            raise ValueError(
+                "head_base needs height_m >= 0, drop_m >= 0 and, with a height, "
+                "front_m, side_m and back_m > 0"
+            )
 
 
 @dataclass(frozen=True)
@@ -140,8 +157,7 @@ def load_export_settings(path: Path | None = None) -> ExportSettings:
         covered_parts=tuple(raw["covered_parts"]),
         wrist_blend_length_m=float(raw["wrist_blend_length_m"]),
         wrist_blend_full_m=float(raw["wrist_blend_full_m"]),
-        head_base_height_m=float(raw["head_base"]["height_m"]),
-        head_base_radius_m=float(raw["head_base"]["radius_m"]),
+        **{f"head_base_{key}": float(raw["head_base"][key]) for key in _HEAD_BASE},
     )
 
 
@@ -416,23 +432,34 @@ def blend_wrists(
 def narrow_head_base(vertices: Array, settings: ExportSettings) -> Array:
     """Head-model ``vertices`` with the base held inside the skin's neck.
 
-    ``vertices`` are ``(N, 3)`` in the head frame: origin on the neck joint, z
-    up the neck. The head model is rigid while the skin's neck only shares the
-    head's turn, so a base wider one way than the other comes out of the neck
-    and the collar when the head turns. A vertex below ``head_base_height_m``
-    is moved straight towards the neck axis until it lies within
-    ``head_base_radius_m`` of it. Postcondition: every height, and every vertex
-    at or above that height or within the radius, is unchanged. Raises
-    ``ValueError`` for another shape.
+    ``vertices`` are ``(N, 3)`` in the head frame: origin on the neck joint, x
+    forward, z up the neck. The head model is rigid while the skin's neck only
+    shares the head's turn, so a wide base comes out of the neck and the collar
+    when the head turns; a base held in a small circle leaves an open slot
+    behind the skin's rim under the jaw. A vertex below ``head_base_height_m``
+    is moved straight towards the neck axis onto an ellipse: half width
+    ``head_base_side_m``, depth ``head_base_front_m`` forward and
+    ``head_base_back_m`` behind. It is then drawn down the neck by
+    ``head_base_drop_m`` on and under the joint plane, falling linearly to
+    nothing at that height, so a view over the rim meets the base. Postcondition:
+    a vertex at or above that height is unchanged, and no vertex leaves its
+    vertical plane through the axis. Raises ``ValueError`` for another shape.
     """
     points = np.asarray(vertices, dtype=float)
     if points.ndim != 2 or points.shape[1] != 3:
         raise ValueError("vertices must be (N, 3)")
-    reach = np.linalg.norm(points[:, :2], axis=1)
-    held = points[:, 2] < settings.head_base_height_m
-    held &= reach > settings.head_base_radius_m
     out = points.copy()
-    out[held, :2] *= (settings.head_base_radius_m / reach[held])[:, None]
+    height = settings.head_base_height_m
+    low = points[:, 2] < height
+    if not height > 0.0 or not low.any():
+        return out
+    forward = points[:, 0] > 0.0
+    depth = np.where(forward, settings.head_base_front_m, settings.head_base_back_m)
+    reach = np.hypot(points[:, 0] / depth, points[:, 1] / settings.head_base_side_m)
+    held = low & (reach > 1.0)
+    out[held, :2] /= reach[held, None]
+    share = 1.0 - np.clip(points[low, 2] / height, 0.0, 1.0)
+    out[low, 2] -= settings.head_base_drop_m * share
     return out
 
 

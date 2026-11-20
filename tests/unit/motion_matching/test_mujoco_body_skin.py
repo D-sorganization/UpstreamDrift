@@ -50,6 +50,9 @@ WRIST_LIMITS = json.loads((fit.ASSET_DIR / "export_settings.json").read_text())[
 HEAD_BASE = json.loads((fit.ASSET_DIR / "export_settings.json").read_text())[
     "head_base_limits"
 ]
+HEAD_JOIN = json.loads((fit.ASSET_DIR / "export_settings.json").read_text())[
+    "head_join_limits"
+]
 SETTINGS = export.load_export_settings()
 DOCUMENT = document_from_dict({"schema_version": "appearance-v1"})
 LAYERS = ("skin", "shirt", "trousers")
@@ -175,12 +178,13 @@ def test_the_surface_survives_swing_like_poses(
         layer.posed_skin_layers(loft, mujoco.MjData(loft))
 
 
-def _head_base(model: Any, pose: dict[str, float]) -> tuple[Any, Any, Any]:
-    """The head shell's base at ``pose``: its vertices, their radius about the
-    neck axis, and the posed data."""
+def _head_shell(model: Any, pose: dict[str, float]) -> tuple[Any, Any, Any, Any]:
+    """The head shell at ``pose``: its vertices in the world and in the head
+    frame, its faces, and the posed data."""
     geom = model.geom("visual_head_skin_mesh")
     shell = model.mesh(geom.dataid[0])
     local = model.mesh_vert[shell.vertadr[0] : shell.vertadr[0] + shell.vertnum[0]]
+    faces = model.mesh_face[shell.faceadr[0] : shell.faceadr[0] + shell.facenum[0]]
     data = mujoco.MjData(model)
     for name, value in pose.items():
         data.qpos[model.joint(name).qposadr[0]] = value
@@ -188,8 +192,50 @@ def _head_base(model: Any, pose: dict[str, float]) -> tuple[Any, Any, Any]:
     world = data.geom_xpos[geom.id] + local @ data.geom_xmat[geom.id].reshape(3, 3).T
     head = geom.bodyid[0]
     in_head = (world - data.xpos[head]) @ data.xmat[head].reshape(3, 3)
+    return world, in_head, faces, data
+
+
+def _head_base(model: Any, pose: dict[str, float]) -> tuple[Any, Any, Any]:
+    """The head shell's base at ``pose``: its vertices in the world and in the
+    head frame, and the posed data."""
+    world, in_head, _, data = _head_shell(model, pose)
     low = in_head[:, 2] < HEAD_BASE["below_m"]
-    return world[low], np.linalg.norm(in_head[low, :2], axis=1), data
+    return world[low], in_head[low], data
+
+
+def _rim_cover(model: Any, pose: dict[str, float]) -> Any:
+    """Cover angle (degrees) of each front vertex of the skin's neck rim.
+
+    In the head frame (z up the neck, x forward) a sight line passes over a rim
+    vertex and dips towards the neck axis. It meets the head shell if it dips
+    less than the steepest line from the vertex to a shell point nearer the axis
+    in the same direction (within ``window_deg``); a steeper one passes under the
+    shell's base into the open neck. That steepest dip is the vertex's cover.
+    """
+    _, shell, faces, data = _head_shell(model, pose)
+    skin, skin_faces = layer.posed_skin_layers(model, data)["body_skin_skin"]
+    head = model.geom("visual_head_skin_mesh").bodyid[0]
+    skin = (skin - data.xpos[head]) @ data.xmat[head].reshape(3, 3)
+    edges = mesh.boundary_edges(skin_faces)
+    graph = coo_matrix((np.ones(len(edges)), edges.T), shape=(len(skin),) * 2)
+    part = connected_components(graph, directed=False)[1]
+    loops = [np.flatnonzero(part == k) for k in np.unique(part[edges.ravel()])]
+    rim = skin[max(loops, key=lambda ids: skin[ids, 2].mean())]  # the top opening
+    sides = [shell[faces[:, [i, i - 1]]].mean(axis=1) for i in range(3)]
+    wall = np.vstack([shell, *sides])
+    wall_turn = np.degrees(np.arctan2(wall[:, 1], wall[:, 0]))
+    wall_reach = np.hypot(wall[:, 0], wall[:, 1])
+    turn = np.degrees(np.arctan2(rim[:, 1], rim[:, 0]))
+    cover = []
+    for point, at in zip(rim, turn, strict=True):
+        if abs(at) > HEAD_JOIN["sector_deg"]:
+            continue
+        reach = np.hypot(point[0], point[1])
+        near = np.abs((wall_turn - at + 180.0) % 360.0 - 180.0)
+        inner = (near <= HEAD_JOIN["window_deg"]) & (wall_reach < reach - 1e-4)
+        dip = (point[2] - wall[inner, 2]) / (reach - wall_reach[inner])
+        cover.append(np.degrees(np.arctan(dip.max())))
+    return np.array(cover)
 
 
 @pytest.mark.parametrize("name", ["top", "finish"])
@@ -203,16 +249,36 @@ def test_the_head_base_stays_inside_the_neck_at_a_swing_head_turn(
     for joint, change in SWING[name].items():
         pose[joint] = pose.get(joint, 0.0) + change
     for turn in (HEAD_BASE["turn_rad"], -HEAD_BASE["turn_rad"]):
-        base, radius, data = _head_base(model, pose | {"NeckInputZ": turn})
+        base, held, data = _head_base(model, pose | {"NeckInputZ": turn})
         skin, faces = layer.posed_skin_layers(model, data)["body_skin_skin"]
         near = cKDTree(skin).query(base)[1]
         normals = mesh.vertex_normals(skin, faces)[near]
         outside = np.einsum("ij,ij->i", base - skin[near], normals).max()
         assert len(base) > 50 and outside <= HEAD_BASE["outside_m"], (turn, outside)
-        assert radius.max() <= SETTINGS.head_base_radius_m + 1e-6
+        front, back = SETTINGS.head_base_front_m, SETTINGS.head_base_back_m
+        depth = np.where(held[:, 0] > 0.0, front, back)
+        inside = np.hypot(held[:, 0] / depth, held[:, 1] / SETTINGS.head_base_side_m)
+        assert inside.max() <= 1.0 + 1e-4
     assert SETTINGS.head_base_height_m == HEAD_BASE["below_m"]
     # the loft body keeps the head model's own, wider base under its neck column
-    assert _head_base(loft, pose)[1].max() > 1.5 * SETTINGS.head_base_radius_m
+    wide = np.abs(_head_base(loft, pose)[1][:, 1]).max()
+    assert wide > 1.5 * SETTINGS.head_base_side_m
+
+
+@pytest.mark.parametrize("name", sorted(SWING))
+def test_the_head_base_covers_the_skins_neck_rim_at_the_front(
+    name: str, skinned: tuple[Any, Any]
+) -> None:
+    """Under the jaw the skin's neck ends in an open rim round the head model's
+    neck stub. A base held too far in, or ending level with the rim, lets a view
+    from the front pass between the two and out through the back of the neck."""
+    pose = dict(ADDRESS)
+    for joint, change in SWING[name].items():
+        pose[joint] = pose.get(joint, 0.0) + change
+    cover = _rim_cover(skinned[0], pose)
+    assert len(cover) >= 10
+    assert cover.mean() >= HEAD_JOIN["mean_cover_deg"], cover.mean()
+    assert cover.min() >= HEAD_JOIN["least_cover_deg"], cover.min()
 
 
 def test_the_forearms_end_under_the_skinned_hands_wrists() -> None:
