@@ -218,3 +218,33 @@ def test_free_stance_slide_is_opt_in_and_keeps_the_feet_on_the_ground() -> None:
     assert (free["plant_stance"], free["anchor_stance_at_init"]) == (False, False)
     assert lane.stance_settings(consecutive=False) == planted_stance(lane)
     assert lane.convergence_report() == {"free_stance_slide": True}
+
+
+def test_girdle_range_is_an_opt_in_tightening() -> None:
+    """``--ik-girdle-range-deg`` (#15296): the four shoulder-girdle coordinates
+    are bounded about neutral in every solve that reads the lane's bounds; the
+    default adds no bound, and a range wider than the document's is refused."""
+    from src.shared.python.motion_matching.pipeline.cli import build_parser
+    from src.shared.python.motion_matching.pipeline.lane import GIRDLE_COORDINATES
+
+    lane = _synthetic_lane()
+    before = dict(lane.bounds)
+    assert build_parser().parse_args([]).ik_girdle_range_deg is None
+    lane.set_girdle_range(None)
+    assert lane.bounds == before
+    assert lane.convergence_report() == {}
+    args = build_parser().parse_args(["--ik-girdle-range-deg", "12"])
+    lane.set_girdle_range(args.ik_girdle_range_deg)
+    assert set(GIRDLE_COORDINATES) == {
+        "LScapInputX",
+        "LScapInputY",
+        "RScapInputX",
+        "RScapInputY",
+    }
+    for name in GIRDLE_COORDINATES:
+        assert lane.bounds[name] == pytest.approx((-np.radians(12), np.radians(12)))
+    assert {k: v for k, v in lane.bounds.items() if k in before} == before
+    assert lane.convergence_report() == {"girdle_range_deg": 12.0}
+    for bad in (0.0, -3.0, 20.5, float("nan")):
+        with pytest.raises(ValueError, match="girdle range"):
+            lane.set_girdle_range(bad)

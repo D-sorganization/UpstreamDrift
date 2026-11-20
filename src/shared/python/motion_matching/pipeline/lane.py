@@ -326,6 +326,14 @@ def configure_lane(lane: Lane, document: dict[str, Any]) -> None:
         lane.marker_weights = {}
 
 
+#: Shoulder-girdle coordinates and the widest symmetric range every document
+#: girdle range contains (the narrowest document limit is 20 degrees).
+GIRDLE_COORDINATES: tuple[str, ...] = tuple(
+    f"{s}ScapInput{a}" for s in ("L", "R") for a in ("X", "Y")
+)
+GIRDLE_RANGE_MAX_DEG: float = 20.0
+
+
 class Lane:
     """Capture, ground, stance and bounds shared by every stage."""
 
@@ -407,6 +415,7 @@ class Lane:
         #: Iteration cap of each full-capture pose solve; None keeps the solver's.
         self.ik_iterations: int | None = None
         self.stance_slide = False
+        self.girdle_range_deg: float | None = None
         self.spin_prior_override: float | None = None
         #: Last pre-contact capture frame (GCV-20); the reference low-pass is
         #: split there. None filters across impact (no club triad observed).
@@ -493,6 +502,27 @@ class Lane:
             if name in order
         }
 
+    def set_girdle_range(self, range_deg: float | None) -> None:
+        """Bound ``GIRDLE_COORDINATES`` to +/- ``range_deg`` about neutral
+        (#15296, off by default) in every solve that reads the lane's bounds.
+
+        Unbounded, the girdle absorbs the static gap between the skeleton and
+        the shoulder markers (the trail shoulder joint sat about 105 mm from
+        neutral all swing); bounded, the marker offsets and the thorax take it.
+        The range must lie inside every document girdle range, so it can only
+        tighten: raises ``ValueError`` outside ``(0, GIRDLE_RANGE_MAX_DEG]``.
+        """
+        if range_deg is None:
+            return
+        if not 0.0 < range_deg <= GIRDLE_RANGE_MAX_DEG:
+            raise ValueError(
+                f"girdle range must be in (0, {GIRDLE_RANGE_MAX_DEG}] deg, "
+                f"got {range_deg}"
+            )
+        self.girdle_range_deg = float(range_deg)
+        limit = float(np.radians(range_deg))
+        self.bounds |= dict.fromkeys(GIRDLE_COORDINATES, (-limit, limit))
+
     def stance_settings(self, consecutive: bool = True) -> dict[str, Any]:
         """Stance keywords of a solve. With ``stance_slide`` (#15296, off by
         default) the full-capture solve keeps the stance spheres on the ground
@@ -510,6 +540,7 @@ class Lane:
             "iterations": self.ik_iterations,
             "spin_prior_weight": self.spin_prior_override,
             "free_stance_slide": True if self.stance_slide else None,
+            "girdle_range_deg": self.girdle_range_deg,
         }
         return {key: value for key, value in opted.items() if value is not None}
 
@@ -913,7 +944,17 @@ def probe_pink_capability() -> tuple[bool, dict[str, Any]]:
 
 def add_trajectory_convergence_arguments(parser: Any) -> None:
     """``--ik-iterations``, ``--ik-spin-prior-weight`` and
-    ``--ik-free-stance-slide`` (#15296), all off by default."""
+    ``--ik-free-stance-slide`` and ``--ik-girdle-range-deg`` (#15296), all
+    off by default."""
+    parser.add_argument(
+        "--ik-girdle-range-deg",
+        type=float,
+        default=None,
+        help=(
+            "bound the four shoulder-girdle coordinates to +/- this many degrees "
+            "about neutral in every solve (default: the document's ranges)"
+        ),
+    )
     parser.add_argument(
         "--ik-free-stance-slide",
         action="store_true",
