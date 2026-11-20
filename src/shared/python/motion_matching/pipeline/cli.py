@@ -1501,6 +1501,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         getattr(args, "ik_iterations", None),
         getattr(args, "ik_spin_prior_weight", None),
     )
+    lane.stance_slide = bool(getattr(args, "ik_free_stance_slide", False))
     lane.set_turn_split(
         cal_res.attachments,
         getattr(args, "thorax_weight", DEFAULT_THORAX_WEIGHT),
