@@ -38,6 +38,12 @@ from src.shared.python.model_appearance.hand_backends.qa import (
 from src.shared.python.model_appearance.hand_backends.skinned_pair import (
     build_grip_hands,
 )
+from src.shared.python.model_appearance.hand_backends.skinned_settings import (
+    SkinnedHumanSettings,
+    default_settings,
+    load_settings_mapping,
+    settings_from_mapping,
+)
 from src.shared.python.model_appearance.hand_backends.types import HandVisualResult
 
 
@@ -136,15 +142,88 @@ def _ball(rim: Array, along: Array, wide: Array, ball: WristBall) -> Mesh:
     return Mesh(points, faces)
 
 
-def owner_grip_spec(roll_deg: float = 0.0) -> GripSpec:
+@dataclass(frozen=True)
+class TrailSeat:
+    """A named seat of the trail hand on the grip (#15150): how far off square
+    the club lies across the hand, and the bend of its drawn wrist, degrees."""
+
+    name: str
+    club_cross_angle_deg: float
+    wrist_extension_deg: float
+    wrist_ulnar_deviation_deg: float
+
+    def __post_init__(self) -> None:
+        angles = (
+            self.club_cross_angle_deg,
+            self.wrist_extension_deg,
+            self.wrist_ulnar_deviation_deg,
+        )
+        if not all(math.isfinite(angle) for angle in angles):
+            raise ValueError(f"trail seat {self.name!r} needs finite angles")
+        if not 0.0 <= self.club_cross_angle_deg < 90.0:
+            raise ValueError("the club lies 0 to 90 degrees across the trail hand")
+
+
+def trail_seat(name: str | None = None) -> TrailSeat:
+    """The trail hand's seat ``name`` of ``owner_trail_seats``.
+
+    ``None`` is the seat named by ``owner_trail_seat``. What a seat leaves out
+    is ``owner_trail_cross_angle_deg`` and ``wrist.trail`` of the hand settings.
+    Preconditions: ``name`` is a string in the table (``TypeError`` /
+    ``ValueError`` otherwise). Postcondition: finite angles, validated.
+    """
+    quality: Mapping[str, Any] = load_hand_visual_quality()
+    if name is None:
+        name = str(quality["owner_trail_seat"])
+    if not isinstance(name, str):
+        raise TypeError("a trail seat is named by a string")
+    seats: Mapping[str, Mapping[str, Any]] = quality["owner_trail_seats"]
+    if name not in seats:
+        raise ValueError(f"no trail seat named {name!r}; have {sorted(seats)}")
+    seat, wrist = seats[name], load_settings_mapping()["wrist"]["trail"]
+    cross = seat.get("club_cross_angle_deg", quality["owner_trail_cross_angle_deg"])
+    return TrailSeat(
+        name=name,
+        club_cross_angle_deg=float(cross),
+        wrist_extension_deg=float(
+            seat.get("wrist_extension_deg", wrist["extension_deg"])
+        ),
+        wrist_ulnar_deviation_deg=float(
+            seat.get("wrist_ulnar_deviation_deg", wrist["ulnar_deviation_deg"])
+        ),
+    )
+
+
+def seat_settings(seat: TrailSeat) -> SkinnedHumanSettings:
+    """The hand settings with the trail wrist bent as ``seat`` has it.
+
+    Precondition: ``seat`` is a :class:`TrailSeat`. Postcondition: the default
+    settings themselves when the seat bends the wrist as they do; else a copy
+    that differs in the trail wrist alone.
+    """
+    if not isinstance(seat, TrailSeat):
+        raise TypeError("seat_settings needs a TrailSeat")
+    bend = (seat.wrist_extension_deg, seat.wrist_ulnar_deviation_deg)
+    if dict(default_settings().wrist_deg)["trail"] == bend:
+        return default_settings()
+    raw = load_settings_mapping()
+    raw["wrist"]["trail"] = {
+        **raw["wrist"]["trail"],
+        "extension_deg": bend[0],
+        "ulnar_deviation_deg": bend[1],
+    }
+    return settings_from_mapping(raw)
+
+
+def owner_grip_spec(roll_deg: float = 0.0, seat: str | None = None) -> GripSpec:
     """The legacy grip with the owner's settings from ``hand_visual_quality``.
 
     The lead thumb sits ``owner_thumb_azimuth_deg.lead`` to the away-from-target
     side of the top of the grip and the trail thumb ``.trail`` to the target
     side; the club leaves the lead palm ``owner_lead_heel_pad_depth_m`` below
-    the little-finger knuckle; it lies ``owner_trail_cross_angle_deg`` off
-    square across the trail hand, whose palm then rests on the lead thumb
-    (#15265); the lead hand is ``owner_lead_below_cap_edge_m``
+    the little-finger knuckle; it lies as far off square across the trail hand
+    as the trail seat ``seat`` has it (:func:`trail_seat`; #15265, #15150); the
+    lead hand is ``owner_lead_below_cap_edge_m``
     below the edge of the butt cap. ``roll_deg`` turns both hands about the shaft.
     """
     base = GripSpec.legacy()
@@ -164,7 +243,7 @@ def owner_grip_spec(roll_deg: float = 0.0) -> GripSpec:
             base.trail,
             shaft_roll_deg=float(roll_deg),
             thumb_azimuth_deg=float(thumbs["trail"]),
-            club_cross_angle_deg=float(quality["owner_trail_cross_angle_deg"]),
+            club_cross_angle_deg=trail_seat(seat).club_cross_angle_deg,
         ),
         lead_below_butt_m=below + load_golf_grip().cap_height_m,
     )
@@ -184,12 +263,24 @@ def skinned_hand_frame(club: ClubAssembly) -> Array:
     return frame
 
 
+def build_seated_pair(seat: str | None = None) -> dict[str, HandVisualResult]:
+    """The posed pair with the trail hand in seat ``seat``, in its grip frame.
+
+    Precondition: as :func:`trail_seat`. Postcondition: as
+    :func:`skinned_pair.build_grip_hands`; solving it takes seconds.
+    """
+    quality: Mapping[str, Any] = load_hand_visual_quality()
+    return build_grip_hands(
+        owner_grip_spec(seat=seat),
+        grip_radius_m=float(quality["grip_radius_m"]),
+        settings=seat_settings(trail_seat(seat)),
+    )
+
+
 @lru_cache(maxsize=1)
 def _pair() -> dict[str, HandVisualResult]:
-    """The posed pair in its own grip frame; solving it takes seconds."""
-    quality: Mapping[str, Any] = load_hand_visual_quality()
-    radius = float(quality["grip_radius_m"])
-    return build_grip_hands(owner_grip_spec(), grip_radius_m=radius)
+    """The posed pair of the configured seat (``owner_trail_seat``)."""
+    return build_seated_pair()
 
 
 def forearm_cuff_m() -> float:
