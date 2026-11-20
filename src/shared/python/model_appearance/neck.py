@@ -33,10 +33,10 @@ class NeckSettings:
 
     base_height: float = -0.46  # axis start (inside the slanted collar)
     top_height: float = 0.13  # axis end (inside the head's neck stub)
-    base_forward: float = -0.02  # axis start, forward of the neck point
+    base_forward: float = -0.025  # axis start, forward of the neck point
     top_forward: float = 0.14  # axis end: the forward lean of the neck
-    half_width: float = 0.27  # base half width: 13 cm across for a 1.75 m man
-    half_depth: float = 0.24  # base half depth: 11.7 cm front to back
+    half_width: float = 0.27  # base half width: 13.9 cm across for a 1.75 m man
+    half_depth: float = 0.232  # base half depth: 11.9 cm front to back at 1.75 m
     #: (along, width, depth): sections as fractions of the base half extents. The
     #: neck narrows up to the head's own neck stub (0.35 head lengths at the jaw)
     #: and eases wider towards the collar; it is 11 to 12.5 cm across mid-height.
