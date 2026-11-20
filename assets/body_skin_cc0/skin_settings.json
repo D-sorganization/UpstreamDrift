@@ -20,7 +20,8 @@
     "quantum_m": "0.1 mm, the head asset's order of precision; int16 then spans +/-3.27 m, more than the body.",
     "weight_levels": "uint8 skin weights, the hand asset's precision (1/255).",
     "max_influences": "Four influences per vertex, as in assets/hand_cc0.",
-    "cut_weight": "A face belongs to the hands or feet when their bones carry at least half of its mean weight (the hand asset's cut); those parts and the head stay separate models."
+    "neck_cut_m": "The skin is kept to 90 mm above the neck joint (the #15299 prototype's value), under the jaw of the separate head model, so a collar has a neck to close on and the neck can bend with the head. Faces the head bones own (cut_roots) stay with the head model: jaw and chin would add 1,900 triangles, past the budget. The four neck and head groups let the skinning step share that length between thorax and head.",
+    "cut_weight": "A face belongs to the hands, feet or head when their bones carry at least half of its mean weight (the hand asset's cut); those parts and the head stay separate models."
   },
   "landmarks": {
     "neck": "neck01",
@@ -38,13 +39,18 @@
     "wrist_r": "wrist.R"
   },
   "neck_plane": "neck",
-  "cut_roots": ["wrist.L", "wrist.R", "foot.L", "foot.R"],
+  "neck_cut_m": 0.09,
+  "cut_roots": ["wrist.L", "wrist.R", "foot.L", "foot.R", "head"],
   "central_groups": {
     "pelvis": ["root", "pelvis.L", "pelvis.R"],
     "spine05": ["spine05"],
     "spine04": ["spine04"],
     "spine03": ["spine03"],
-    "thorax": ["spine02", "spine01", "breast.L", "breast.R", "neck01"]
+    "thorax": ["spine02", "spine01", "breast.L", "breast.R"],
+    "neck_lower": ["neck01"],
+    "neck_middle": ["neck02"],
+    "neck_upper": ["neck03"],
+    "head": ["head"]
   },
   "side_groups": {
     "clavicle": ["clavicle"],

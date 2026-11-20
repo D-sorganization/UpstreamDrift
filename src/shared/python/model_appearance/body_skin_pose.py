@@ -4,7 +4,8 @@ Rigid per-body meshes cannot keep a shirt continuous over the shoulder when the
 girdle moves: the sleeve cap rides on the girdle link and steps away from the
 trunk. Here every vertex is a weighted blend (linear blend skinning) of the
 thorax, the girdle link, a deltoid group that follows part of the upper arm's
-motion, and the upper arm, so the surface stretches instead of stepping.
+motion, and the upper arm, so the surface stretches instead of stepping. The
+neck above the neck joint is shared the same way between thorax and head.
 
 ``smooth_shoulder_weights`` relaxes MakeHuman's weights around the shoulder
 joints; ``shoulder_transforms`` turns the three body motions into group
@@ -32,6 +33,8 @@ from src.shared.python.model_appearance.body_skin_fit import (
 )
 
 Array = NDArray[np.float64]
+#: Neck groups from the neck joint up; ``neck_follow`` holds one share for each.
+NECK_GROUPS = ("neck_lower", "neck_middle", "neck_upper")
 Edges = NDArray[np.int64]
 
 
@@ -64,8 +67,14 @@ class PoseSettings:
     acromion_half_width_m: float
     acromion_inner_m: float
     acromion_reach_m: float
+    neck_follow: tuple[float, ...]
 
     def __post_init__(self) -> None:
+        follow = tuple(self.neck_follow)
+        if len(follow) != len(NECK_GROUPS) or list(follow) != sorted(follow):
+            raise ValueError("neck_follow must hold three rising shares")
+        if not 0.0 <= follow[0] <= follow[-1] <= 1.0:
+            raise ValueError("neck_follow must lie in [0, 1]")
         if not 0.0 <= self.shoulder_follow <= 1.0:
             raise ValueError("shoulder_follow must lie in [0, 1]")
         if self.smoothing_iterations < 0:
@@ -80,7 +89,8 @@ class PoseSettings:
 def load_pose_settings(path: Path | None = None) -> PoseSettings:
     """Read ``pose_settings.json``; raises ``ValueError`` for invalid values."""
     raw = json.loads((path or ASSET_DIR / "pose_settings.json").read_text())
-    return PoseSettings(**{f.name: raw[f.name] for f in fields(PoseSettings)})
+    values = {f.name: raw[f.name] for f in fields(PoseSettings)}
+    return PoseSettings(**values | {"neck_follow": tuple(raw["neck_follow"])})
 
 
 def mesh_edges(faces: NDArray[np.int64]) -> Edges:
@@ -131,14 +141,19 @@ def shoulder_transforms(
     """Group transforms of trunk, girdle and arms from the body motions.
 
     ``motions`` holds ``thorax`` and, per side, ``girdle_l/r``, ``upper_arm_l/r``
-    and optionally ``forearm_l/r`` (default: the upper arm's). The clavicle
+    and optionally ``forearm_l/r`` (default: the upper arm's) and ``head``
+    (default: the thorax's). Each neck group turns its ``neck_follow`` share of
+    the way from the thorax to the head about the neck joint. The clavicle
     group rides the girdle link; the deltoid (``shoulder``) group turns
     ``shoulder_follow`` of the way from the girdle to the upper arm about the
     shoulder joint. Raises ``ValueError`` when a motion is missing.
     """
     try:
         out = dict.fromkeys(("pelvis", "spine05", "spine04", "spine03"), IDENTITY)
-        out["thorax"] = motions["thorax"]
+        out["thorax"] = thorax = motions["thorax"]
+        out["head"] = head = motions.get("head", thorax)
+        for group, share in zip(NECK_GROUPS, settings.neck_follow, strict=True):
+            out[group] = blend(thorax, head, share, fitted.joints["neck"])
         for side, _ in SIDES:
             girdle, arm = motions[f"girdle_{side}"], motions[f"upper_arm_{side}"]
             joint = fitted.joints[f"shoulder_{side}"]

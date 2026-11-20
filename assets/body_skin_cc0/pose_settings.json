@@ -5,18 +5,24 @@
   "acromion_half_width_m": 0.025,
   "acromion_inner_m": 0.04,
   "acromion_reach_m": 0.1,
+  "neck_follow": [0.2, 0.5, 0.8],
   "step_limits_mm": {
     "trail_protracted_50_mm": 8.0,
     "trail_protracted_110_mm": 16.0,
     "trail_protracted_110_mm_and_lowered": 16.0
   },
   "rigid_step_floor_mm": 40.0,
+  "neck_test_turn_rad": 0.6,
+  "neck_step_limit_mm": 22.0,
+  "neck_rim_lag_limit_mm": 32.0,
   "sources": {
     "shoulder_follow": "Share of the upper arm's motion the deltoid group takes; 0.3 from the #15299 prototype (0, 0.3 and 0.6 differ little by eye).",
     "smoothing_iterations": "Largest change of an edge length on the acromion path at 110 mm protraction: 34.0 mm with the stored weights, 16.6 mm after 5 passes, 12.7 mm after 15, 10.8 mm after 40 (2026-11-20). Fifteen takes most of the gain and leaves the rib cage alone.",
     "smoothing_radius_m": "About one shoulder half-spacing (0.18 m on the tour-average subject): the girdle, not the sternum or the elbow.",
     "acromion": "A 50 mm thick frontal strip through the shoulder joint, from 40 mm off the midline (outside the neck) to 100 mm beyond and below the joint (the sleeve cap); 105 edges, mean length 23 mm.",
     "step_limits_mm": "Measured 5.6, 12.7 and 12.6 mm on the three girdle poses of tests/fixtures/model_appearance/girdle_poses.json, with margin for a subject of another size. A rigid mesh per body steps 45 to 113 mm on the same path.",
+    "neck_follow": "Share of the head's motion relative to the thorax taken by the lower, middle and upper neck group (the head group takes all of it). 0.2, 0.5 and 0.8 are the #15299 prototype's values, which keep the collar still on the thorax. Measured 2026-11-20 with the head turned 0.6 rad about the vertical and then 0.6 rad about the lateral axis: the rim that meets the head model falls 26.9 mm behind the head (it moves 82 mm) against 45.3 mm for a neck that stays on the thorax, and the largest change of an edge length above the neck joint is 18.0 mm. Shares of 0.5, 0.8 and 1.0 give 14.0 mm and 13.7 mm but turn the collar half way with the head.",
+    "neck_limits": "neck_step_limit_mm and neck_rim_lag_limit_mm bound the two measured values at neck_test_turn_rad with margin for a subject of another size.",
     "rigid_step_floor_mm": "The criterion must tell the two apart: one body per vertex steps at least 45 mm on every pose."
   }
 }
