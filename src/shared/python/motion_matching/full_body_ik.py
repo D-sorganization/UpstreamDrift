@@ -1098,9 +1098,10 @@ class BaseFullBodyIK:
             if opts.locked_per_frame is not None:
                 f_opts["locked"] = opts.locked_per_frame[k]
             extra = opts.posture_prior_per_frame
-            if extra is not None and extra[k]:
+            added = extra[k] if extra is not None else None
+            if added:
                 own = f_opts.get("posture_prior") or {}
-                f_opts["posture_prior"] = {**own, **extra[k]}
+                f_opts["posture_prior"] = {**own, **added}
 
             fit = self.solve_pose(
                 targets[k],
