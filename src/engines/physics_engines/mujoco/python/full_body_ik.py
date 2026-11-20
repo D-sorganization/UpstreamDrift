@@ -29,6 +29,10 @@ from src.shared.python.motion_matching.full_body_ik import (
 )
 from src.shared.python.motion_matching.marker_calibration import Pose
 from src.shared.python.motion_matching.marker_kinematics import MarkerLinearization
+from src.shared.python.motion_matching.stance_anchor import (
+    SoftAnchor,
+    soft_anchor_rows,
+)
 
 Array: TypeAlias = NDArray[np.float64]
 Attachment = tuple[str, tuple[float, float, float]]
@@ -433,6 +437,7 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         jacs: list[Array],
         targets: Mapping[str, Array],
         weight: float,
+        soft: SoftAnchor | None = None,
     ) -> None:
         if weight <= 0 or not targets:
             return
@@ -442,8 +447,14 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
             site = self._spheres[name][0]
             jp = np.zeros((3, nv))
             self._mj.mj_jacSite(self.model, self.data, jp, None, site)
-            rows.append(w * (self.data.site_xpos[site] - target))
-            jacs.append(w * jp[:, self._dof])
+            gap = self.data.site_xpos[site] - target
+            row, slope = (
+                (w * gap, w * jp[:, self._dof])
+                if soft is None
+                else soft_anchor_rows(gap, jp[:, self._dof], soft)
+            )
+            rows.append(row)
+            jacs.append(slope)
 
     def _append_balance(
         self, rows: list[Array], jacs: list[Array], ground: GroundPlane, weight: float
