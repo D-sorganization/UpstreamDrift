@@ -18,6 +18,7 @@ from src.shared.python.motion_matching.club_models import (
     CLUBS,
     ClubSpec,
     sole_offset_m,
+    sole_point_m,
     with_butt_to_sole_length,
 )
 from src.shared.python.motion_matching.execution.assets import DEFAULT_FULL_BODY
@@ -100,6 +101,11 @@ class SubjectPreset:
         )
         return with_butt_to_sole_length(base, self.club_butt_to_sole_m, offset)
 
+    def club_sole_point_m(self) -> tuple[float, float, float]:
+        """The sole in the club-body frame at this preset's address lie."""
+        lie = (self.club_shaft_elevation_deg, self.club_head_roll_deg)
+        return sole_point_m(CLUBS[self.club], *lie)
+
     def builder_kwargs(self) -> dict[str, Any]:
         """Keyword arguments for ``compose_anthropometric_document``."""
         kwargs = {k: getattr(self, k) for k in SETTINGS if not k.startswith("club_")}
@@ -108,6 +114,7 @@ class SubjectPreset:
             "club_markers_path": self.club_markers,
             "club_spec": self.club_spec(),
             "club_butt_to_sole_m": self.club_butt_to_sole_m,
+            "club_sole_point_m": self.club_sole_point_m(),
             "subject_preset": self.name,
             "marker_seed_overrides": dict(self.marker_seeds) or None,
             "dropped_markers": sorted(self.dropped_markers) or None,
