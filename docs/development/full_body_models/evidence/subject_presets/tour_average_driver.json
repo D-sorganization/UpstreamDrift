@@ -40,23 +40,23 @@
   "marker_seeds": {
     "WaistLeft": {
       "body": "Hip",
-      "offset_m": [0.045, 0.1725, 0.165],
-      "provenance": "belt at iliac-crest level 165 mm above the hip joint centres, not ASIS; side markers measured 345 mm apart"
+      "offset_m": [0.045, 0.1725, 0.11],
+      "provenance": "belt 110 mm above the hip joint centres with the 441 mm thigh (fits at 110-118 mm; 165 mm went with the stored 399 mm thigh), not ASIS; side markers measured 345 mm apart"
     },
     "WaistRight": {
       "body": "Hip",
-      "offset_m": [0.045, -0.1725, 0.165],
-      "provenance": "belt at iliac-crest level 165 mm above the hip joint centres, not ASIS; side markers measured 345 mm apart"
+      "offset_m": [0.045, -0.1725, 0.11],
+      "provenance": "belt 110 mm above the hip joint centres with the 441 mm thigh (fits at 110-118 mm; 165 mm went with the stored 399 mm thigh), not ASIS; side markers measured 345 mm apart"
     },
     "WaistLBack": {
       "body": "Hip",
-      "offset_m": [-0.102, 0.0845, 0.165],
-      "provenance": "belt at iliac-crest level 165 mm above the hip joint centres, not ASIS; back markers measured 169 mm apart, 147 mm behind the side line"
+      "offset_m": [-0.102, 0.0845, 0.11],
+      "provenance": "belt 110 mm above the hip joint centres with the 441 mm thigh (fits at 110-118 mm; 165 mm went with the stored 399 mm thigh), not ASIS; back markers measured 169 mm apart, 147 mm behind the side line"
     },
     "WaistRBack": {
       "body": "Hip",
-      "offset_m": [-0.102, -0.0845, 0.165],
-      "provenance": "belt at iliac-crest level 165 mm above the hip joint centres, not ASIS; back markers measured 169 mm apart, 147 mm behind the side line"
+      "offset_m": [-0.102, -0.0845, 0.11],
+      "provenance": "belt 110 mm above the hip joint centres with the 441 mm thigh (fits at 110-118 mm; 165 mm went with the stored 399 mm thigh), not ASIS; back markers measured 169 mm apart, 147 mm behind the side line"
     },
     "BackTop": {
       "body": "Spine",
