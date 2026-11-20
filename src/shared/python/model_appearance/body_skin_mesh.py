@@ -33,6 +33,34 @@ def vertex_areas(vertices: Array, faces: Faces) -> Array:
     return areas
 
 
+def _face_cross(vertices: Array, faces: Faces) -> Array:
+    a, b, c = (vertices[faces[:, k]] for k in range(3))
+    return np.asarray(np.cross(b - a, c - a), dtype=float)
+
+
+def folded_faces(vertices: Array, faces: Faces) -> NDArray[np.bool_]:
+    """Faces turned against the surface around them: inverted by a pose.
+
+    A face is folded when its normal points against the sum of the
+    area-weighted normals of its three vertices.
+    """
+    around = vertex_normals(vertices, faces)[faces].sum(axis=1)
+    facing = np.einsum("ij,ij->i", _face_cross(vertices, faces), around)
+    return np.asarray(facing <= 0.0)
+
+
+def area_ratio(rest: Array, posed: Array, faces: Faces) -> Array:
+    """Area of each face of ``posed`` over its area in ``rest``.
+
+    Precondition: both surfaces hold the same vertices in the same order.
+    """
+    if rest.shape != posed.shape:
+        raise ValueError("rest and posed must hold the same vertices")
+    before = np.linalg.norm(_face_cross(rest, faces), axis=1)
+    after = np.linalg.norm(_face_cross(posed, faces), axis=1)
+    return np.asarray(after / np.maximum(before, 1e-18))
+
+
 def boundary_edges(faces: Faces) -> Faces:
     """Directed edges ``(E, 2)`` that belong to one face only."""
     edges = np.vstack([faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]])

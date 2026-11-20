@@ -4,7 +4,9 @@
   "bind_pose": {"LSInputY": 1.5708, "RSInputY": 1.5708},
   "bind_stretch_limit_m": 0.03,
   "covered_parts": ["pelvis", "torso", "shoulder", "upper_arm", "forearm", "thigh", "shin"],
+  "swing_limits": {"area_ratio": 2.0, "stretched_share": 0.065, "folded_share": 0.008},
   "sources": {
+    "swing_limits": "Bounds on the drawn surface at the swing-like poses of tests/fixtures/model_appearance/swing_poses.json, against the bind pose: the share of a layer's faces whose area changes by more than area_ratio either way, and the share turned against the surface around them. Measured 2026-11-20 on the default and the showpiece profile: at most 4.97 % stretched (shirt at the top, under the arms) and 0.52 % folded (shirt, 0.45 % of it at address already, on the garment hems). The bounds hold the present state with margin for another subject; they are not a quality target: single faces at the trouser hip crease and under the arm change area up to 26 times.",
     "covered_parts": "Body parts (model_appearance.library classes) whose loft meshes the skin replaces; hands, head, feet and club keep their own models, and the head model's neck is left out because the skin has one.",
     "spine_follow": "Share of the thorax's motion relative to the pelvis taken by the spine05, spine04 and spine03 group (the rest stays with the pelvis). 0.1, 0.45 and 0.8 are the #15299 prototype's values: the waistband stays on the pelvis and the lower ribs turn with the chest.",
     "weight_floor": "A body share under 0.0001 of a vertex is dropped and the rest renormalised; it moves a vertex less than 0.1 mm per metre of relative body motion and keeps the bone lists short.",
