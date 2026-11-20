@@ -180,3 +180,35 @@ def attach_body_skin(
         summary["bones"][name] = len(bones)
         summary["vertices"][name] = len(layer.vertices)
     return summary
+
+
+def posed_skin_layers(model: Any, data: Any) -> dict[str, tuple[Any, Any]]:
+    """Vertices ``(N, 3)`` and faces ``(F, 3)`` of each skin at the pose in ``data``.
+
+    The surface MuJoCo draws, from its own scene update; no renderer is needed.
+    Precondition: ``mj_forward`` has run on ``data``. Raises ``ValueError`` for a
+    model without a skin.
+    """
+    import mujoco
+
+    if model.nskin == 0:
+        raise ValueError("the model has no skin")
+    scene = mujoco.MjvScene(model, maxgeom=model.ngeom + 1)
+    mujoco.mjv_updateScene(
+        model,
+        data,
+        mujoco.MjvOption(),
+        mujoco.MjvPerturb(),
+        mujoco.MjvCamera(),
+        mujoco.mjtCatBit.mjCAT_ALL,
+        scene,
+    )
+    flat = np.array(scene.skinvert, dtype=float).reshape(-1, 3)
+    layers = {}
+    for index in range(model.nskin):
+        skin = model.skin(index)
+        first, count = int(scene.skinvertadr[index]), int(scene.skinvertnum[index])
+        face, faces = int(skin.faceadr[0]), int(skin.facenum[0])
+        triangles = np.array(model.skin_face[face : face + faces], dtype=np.int64)
+        layers[skin.name] = (flat[first : first + count], triangles)
+    return layers

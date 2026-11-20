@@ -37,3 +37,19 @@ def test_open_edges_normals_and_relaxation_of_a_fan() -> None:
     moved = mesh.relax(points, faces, fixed, 1.0)
     assert np.allclose(moved[0], 0.0) and np.array_equal(moved[1:], rim)
     assert np.array_equal(mesh.relax(points, faces, ~fixed | fixed, 1.0), points)
+
+
+def test_folded_and_stretched_faces_of_a_posed_sheet() -> None:
+    points = np.array([[0.0, 0, 0], [1, 0, 0], [2, 0, 0], [0, 1, 0], [1, 1, 0]])
+    points = np.vstack([points, [[2.0, 1, 0]]])
+    faces = np.array([[0, 1, 3], [1, 4, 3], [1, 2, 4], [2, 5, 4]])
+    assert not mesh.folded_faces(points, faces).any()
+    assert np.allclose(mesh.area_ratio(points, points, faces), 1.0)
+    posed = points.copy()
+    posed[5] = [0.9, 0.2, 0.0]  # the corner pulled back across its own face
+    assert mesh.folded_faces(posed, faces).tolist() == [False, False, False, True]
+    wide = points * [3.0, 1.0, 1.0]
+    assert np.allclose(mesh.area_ratio(points, wide, faces), 3.0)
+    assert not mesh.folded_faces(wide[:, [1, 0, 2]], faces[:, ::-1]).any()
+    with pytest.raises(ValueError):
+        mesh.area_ratio(points, points[:4], faces)
