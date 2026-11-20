@@ -343,3 +343,33 @@ def test_held_out_scatter_ignores_the_seed_and_grows_with_wrong_poses(model) -> 
     wrong = held_out_scatter_mm(model.lane, anywhere, frames, model.poses + noise)
     assert wrong["RKneeOut"] > 1.0
     assert held_out_scatter_mm(model.lane, {}, frames, model.poses) == {}
+
+
+@pytest.mark.requires_mujoco
+def test_planted_spheres_are_held_where_the_first_frame_puts_them(model) -> None:
+    ground = model.lane.ground
+    spheres = sorted(model.kin.sphere_ground_points(model.poses[0], ground))
+    names = spheres[:2]
+    stance = [tuple(names)] + [(names[0],)] * (FRAMES - 1)  # the second lifts
+    lane = SimpleNamespace(**{**vars(model.lane), "stance": stance})
+    plain, _, _ = build_problem(lane, model.attachments, model.poses, EVERY)
+    planted, _, _ = build_problem(
+        lane,
+        model.attachments,
+        model.poses,
+        dataclasses.replace(EVERY, plant_sigma_m=0.005),
+    )
+    extra = len(planted.constraint(0, model.poses[0])) - len(
+        plain.constraint(0, model.poses[0])
+    )
+    assert extra == 3 * len(spheres)  # one row triple per sphere of the model
+    assert np.allclose(planted.constraint(0, model.poses[0])[-extra:], 0.0)
+    here = model.kin.sphere_ground_points(model.poses[2], ground)
+    home = model.kin.sphere_ground_points(model.poses[0], ground)
+    slide = (here[names[0]] - home[names[0]]) * [1.0, 1.0, 0.0] / 0.005
+    rows = planted.constraint(2, model.poses[2])[-extra:].reshape(-1, 3)
+    assert np.allclose(rows[0], slide) and np.abs(slide).max() > 0.0
+    assert np.allclose(rows[1:], 0.0)  # lifted or never in stance: not planted
+    assert stage_settings(
+        cli.build_parser().parse_args(["--bundle-adjust", "--bundle-plant-mm", "5"])
+    ).plant_sigma_m == pytest.approx(0.005)

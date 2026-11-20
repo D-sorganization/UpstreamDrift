@@ -106,6 +106,11 @@ class StageSettings:
     #: markers at a tenth, the shoulder-girdle split), so the offsets are fitted
     #: under the weights the swing solve then applies to them.
     lane_weights: bool = False
+    #: Residual scale of a stance sphere sliding from where the first frame's
+    #: start pose puts it, metres, while it stays in stance: the swing solve
+    #: plants the feet, so offsets fitted with sliding feet do not fit it.
+    #: ``None`` leaves the feet free to slide.
+    plant_sigma_m: float | None = None
     #: The stage stops when a step gains under a millionth of the cost: the
     #: core's default asks for more digits than marker data carry.
     solver: BundleSettings = field(
@@ -177,15 +182,47 @@ class BodyKinematics:
         return np.concatenate([slopes[:, 0], 0.5 * turning], axis=1)
 
 
+def _planted(
+    lane: Any, bodies: BodyKinematics, frames: Sequence[int], start: np.ndarray
+) -> tuple[dict[str, np.ndarray], list[frozenset[str]]]:
+    """Where ``start`` (the first frame's pose) puts each stance sphere, and
+    the spheres still planted at each of ``frames``: in stance at every
+    capture frame up to it, as the swing solve drops a lifted sphere's plant."""
+    home = bodies.kin.sphere_ground_points(start, lane.ground)
+    still, kept = set(lane.stance[frames[0]]) & set(home), []
+    for stance in lane.stance[frames[0] : max(frames) + 1]:
+        still &= set(stance)
+        kept.append(frozenset(still))
+    return home, [kept[k - frames[0]] for k in frames]
+
+
 def _constraint(
     lane: Any,
     bodies: BodyKinematics,
     frames: Sequence[int],
     settings: StageSettings,
-    sole: tuple[str, Sequence[float]] | None,
+    extras: tuple[tuple[str, Sequence[float]] | None, np.ndarray],
 ) -> Callable[[int, np.ndarray], np.ndarray]:
     """Weld and ground residuals of a frame; at the first frame also the
-    height of ``sole`` (body, point) above the ground, when one is given."""
+    height of the sole point ``extras[0]`` (body, point) above the ground,
+    when one is given; with ``plant_sigma_m`` also the slide of every planted
+    sphere from where ``extras[1]`` (the first frame's start pose) puts it."""
+    sole, start = extras
+    normal = np.asarray(lane.ground.normal, float)
+    home, planted = (
+        ({}, [])
+        if settings.plant_sigma_m is None
+        else _planted(lane, bodies, frames, start)
+    )
+
+    def slide(k: int, pose: np.ndarray) -> np.ndarray:
+        here = bodies.kin.sphere_ground_points(pose, lane.ground)
+        rows = np.zeros((len(home), 3))
+        for i, name in enumerate(sorted(home)):
+            if name in planted[k]:
+                gap = here[name] - home[name]
+                rows[i] = (gap - (gap @ normal) * normal) / settings.plant_sigma_m
+        return rows.ravel()
 
     def residual(k: int, pose: np.ndarray) -> np.ndarray:
         options = ConstraintOptions(
@@ -198,13 +235,17 @@ def _constraint(
             ground_scale_m=settings.ground_sigma_m,
             pinned_spheres=tuple(lane.stance[frames[k]]),
         )
-        rows = bodies.kin.constraint_residual_jacobian(pose, options).residual
-        if sole is None:
-            return np.asarray(rows)
-        frame = bodies.frames(pose)[bodies.bodies.index(sole[0])]
-        point = frame[:3, 3] + frame[:3, :3] @ np.asarray(sole[1], float)
-        height = point @ np.asarray(lane.ground.normal) - lane.ground.height_m
-        return np.append(rows, (k == 0) * height / settings.ground_sigma_m)
+        rows = np.asarray(
+            bodies.kin.constraint_residual_jacobian(pose, options).residual
+        )
+        if sole is not None:
+            frame = bodies.frames(pose)[bodies.bodies.index(sole[0])]
+            point = frame[:3, 3] + frame[:3, :3] @ np.asarray(sole[1], float)
+            height = point @ normal - lane.ground.height_m
+            rows = np.append(rows, (k == 0) * height / settings.ground_sigma_m)
+        return (
+            rows if settings.plant_sigma_m is None else np.append(rows, slide(k, pose))
+        )
 
     return residual
 
@@ -270,7 +311,7 @@ def build_problem(
         pose_start=poses,
         pose_bounds=(lower, upper),
         pose_prior=(poses, np.tile(sigmas, (len(frames), 1))),
-        constraint=_constraint(lane, bodies, frames, settings, sole),
+        constraint=_constraint(lane, bodies, frames, settings, (sole, poses[0])),
         body_jacobian=bodies.twists,
         offset_reach=reach,
         marker_weights=_marker_weights(lane, labels) if settings.lane_weights else None,
@@ -358,6 +399,12 @@ def add_bundle_arguments(parser: argparse.ArgumentParser) -> None:
         help="markers whose label contains one of these stay at their seed",
     )
     parser.add_argument(
+        "--bundle-plant-mm",
+        type=float,
+        default=None,
+        help="residual scale of a planted stance sphere sliding, mm (default: free)",
+    )
+    parser.add_argument(
         "--bundle-lane-weights",
         action="store_true",
         help="weigh markers in the adjustment as the inverse kinematics does",
@@ -397,6 +444,7 @@ def stage_settings(args: argparse.Namespace) -> StageSettings | None:
     if not getattr(args, "bundle_adjust", False):
         return None
     reach, prior = args.bundle_offset_reach_mm, args.bundle_pose_prior
+    plant = args.bundle_plant_mm
     return StageSettings(
         frame_stride=args.bundle_stride,
         anchor_frames=tuple(args.bundle_anchor_frames),
@@ -404,6 +452,7 @@ def stage_settings(args: argparse.Namespace) -> StageSettings | None:
         start=args.bundle_start,
         hold=tuple(args.bundle_hold),
         lane_weights=args.bundle_lane_weights,
+        plant_sigma_m=None if plant is None else 1e-3 * plant,
         address_repeats=args.bundle_address_repeats,
         offset_reach_m=None if reach is None else 1e-3 * reach,
         pose_prior_weight=None if prior is None else prior[0],
