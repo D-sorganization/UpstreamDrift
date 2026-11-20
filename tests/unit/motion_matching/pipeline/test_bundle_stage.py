@@ -21,6 +21,7 @@ from src.shared.python.motion_matching.pipeline.bundle_stage import (
     add_bundle_arguments,
     adjusted_attachments,
     build_problem,
+    held_out_rms_mm,
     offset_sigma,
     select_frames,
     stage_report,
@@ -193,6 +194,8 @@ def test_the_flag_carries_frames_and_held_out_markers_and_the_sole_is_stated() -
         frame_stride=30, anchor_frames=(391, 476), held_out=("RKneeOut",)
     )
     assert stage_settings(parser.parse_args([])) is None
+    # nothing held out: no kinematics are built for an empty marker set
+    assert held_out_rms_mm(SimpleNamespace(), {}, (0,), np.zeros((1, 2))) == {}
     document = json.loads(SPEC.read_text(encoding="utf-8"))
     assert stated_sole(document) is None  # no stated point: the origin is not assumed
     club = {**document.get("club", {}), "sole_point_m": [0.01, 0.0, -0.02]}

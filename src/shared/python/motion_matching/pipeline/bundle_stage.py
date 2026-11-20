@@ -322,10 +322,12 @@ class Adjustment:
     report: dict[str, Any]
 
 
-def _held_out_rms_mm(
+def held_out_rms_mm(
     lane: Any, seeds: Attachments, frames: Sequence[int], poses: np.ndarray
 ) -> dict[str, float]:
     """RMS of each marker in ``seeds`` at ``poses`` of ``frames``, millimetres."""
+    if not seeds:
+        return {}
     kin = lane.plant.create_ik(dict(seeds))
     model = np.array([kin.marker_linearization(pose).positions for pose in poses])
     out = {}
@@ -357,7 +359,7 @@ def adjust(
     result = solve_bundle(problem, settings.solver)
     fitted = adjusted_attachments(attachments, labels, result)
     held = {name: attachments[name] for name in settings.held_out}
-    scores = [_held_out_rms_mm(lane, held, frames, q) for q in (start, result.poses)]
+    scores = [held_out_rms_mm(lane, held, frames, q) for q in (start, result.poses)]
     shift = np.linalg.norm(result.offsets - problem.offset_seeds, axis=1)
     report = stage_report(result, labels, frames, settings) | {
         "offset_shift_mm": dict(zip(labels, (1e3 * shift).tolist(), strict=True)),
