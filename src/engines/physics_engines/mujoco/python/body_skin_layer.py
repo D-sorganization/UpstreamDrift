@@ -4,7 +4,9 @@ With ``subject.body_visual_backend`` set to ``skinned_cc0`` the appearance
 layer leaves out the loft meshes of trunk, arms and legs and this module adds
 one ``<deformable><skin>`` per layer (skin, shirt, trousers) instead. Each
 skin vertex is a weighted blend of the model's own rigid bodies, so the
-surface stays continuous over every joint.
+surface stays continuous over every joint. A skinned hand is rigid on the
+club; the forearm's end is blended to the body that hand moves with, so the
+wrist stays closed under the hand's cuff at any bend (``hand_binds``).
 
 The stored skin is fitted to the subject's joint centres, which are read from
 the model itself at the bind pose (``export_settings.json``: arms hanging),
@@ -92,15 +94,37 @@ def _untextured(root: ET.Element, name: str) -> None:
                 material.attrib.pop(key, None)
 
 
+def spec_turns(
+    spec: Mapping[str, Any],
+    roles: Mapping[str, str],
+    frames: Mapping[str, pose.Rigid],
+    coordinates: Mapping[str, float],
+) -> dict[str, Any]:
+    """Per role, the rotation from the model body's frame to the spec body's.
+
+    The exporter re-frames bodies (the trail forearm is half a turn about its
+    x axis from the spec's). ``frames`` are the model's at ``coordinates``.
+    """
+    from src.shared.python.model_appearance.skinned_body import spec_body_poses
+
+    posed = spec_body_poses(spec, dict(coordinates))
+    return {
+        role: posed[body][:3, :3].T @ frames[role].rotation
+        for role, body in roles.items()
+    }
+
+
 def wrist_rings(
     spec: Mapping[str, Any],
     club: ClubAssembly | None,
     roles: Mapping[str, str],
     binds: Mapping[str, pose.Rigid],
+    turns: Mapping[str, Any],
 ) -> dict[str, fit.WristRing]:
     """Each skinned hand's wrist section in the fitted rest space, by side.
 
-    Empty unless the spec draws the skinned hands on a club.
+    ``turns`` are :func:`spec_turns`: the sections are in the spec's forearm
+    frames. Empty unless the spec draws the skinned hands on a club.
     """
     from src.shared.python.model_appearance.skinned_wrist_sections import (
         forearm_wrist_sections,
@@ -111,7 +135,8 @@ def wrist_rings(
     for side, _ in fit.SIDES:
         section = sections.get(roles[f"forearm_{side}"])
         if section is not None:
-            turn = binds[f"forearm_{side}"].rotation
+            forearm = f"forearm_{side}"
+            turn = binds[forearm].rotation @ turns[forearm].T
             rings[side] = fit.WristRing(
                 section.half_width_m,
                 section.half_depth_m,
@@ -119,6 +144,38 @@ def wrist_rings(
                 turn @ section.centre_m,
             )
     return rings
+
+
+def hand_binds(
+    spec: Mapping[str, Any],
+    club: ClubAssembly | None,
+    roles: Mapping[str, str],
+    binds: Mapping[str, pose.Rigid],
+    turns: Mapping[str, Any],
+    joints: Mapping[str, Any],
+) -> dict[str, pose.Rigid]:
+    """Bind pose, by side, of the body each skinned hand is rigid with.
+
+    In the fitted rest space, on the wrist joint of ``joints``, turned as at
+    the straight wrist the forearm's end is shaped at (``turns`` are
+    :func:`spec_turns`); the forearm's end is blended to it
+    (``export.blend_wrists``). Empty unless the spec draws the skinned hands
+    on a club.
+    """
+    from src.shared.python.model_appearance.skinned_wrist_sections import (
+        straight_hand_turns,
+    )
+
+    straight = straight_hand_turns(spec, club)
+    hands = {}
+    for side, _ in fit.SIDES:
+        forearm, hand = f"forearm_{side}", f"hand_{side}"
+        turn = straight.get(roles[forearm])
+        if turn is not None:
+            relative = turns[forearm].T @ turn @ turns[hand]
+            wrist = np.asarray(joints[f"wrist_{side}"], float)
+            hands[side] = pose.Rigid(binds[forearm].rotation @ relative, wrist)
+    return hands
 
 
 def attach_body_skin(
@@ -145,14 +202,17 @@ def attach_body_skin(
     fitting = fit.load_fit_settings(profile=profile)
     fitted = fit.fit_body_skin(skin, export.subject_lengths(frames), fitting)
     binds = export.bind_poses(frames, fitted)
-    rings = wrist_rings(spec, club, roles, binds)
+    turns = spec_turns(spec, roles, frames, settings.bind_pose)
+    rings = wrist_rings(spec, club, roles, binds, turns)
     fitted = fit.match_wrists(skin, fitted, rings, fitting)
+    hands = hand_binds(spec, club, roles, binds, turns, fitted.joints)
     weights = pose.smooth_shoulder_weights(skin, fitted, posing)
     layers = dress.dress_skin(skin, fitted, weights, dress.load_dress_settings())
     shares = export.group_shares(skin.groups, posing, settings)
     deformable = ET.SubElement(root, "deformable")
     summary: dict[str, Any] = {"bodies": roles, "bones": {}, "vertices": {}}
     summary["wrists_matched"] = sorted(rings)
+    summary["wrists_blended"] = sorted(hands) if settings.wrist_blend_length_m else []
     for name, layer in layers.items():
         material = material_for(_layer_material(doc, roles, name))
         if name == "skin":
@@ -166,6 +226,7 @@ def attach_body_skin(
             face=" ".join(str(int(i)) for i in layer.faces.ravel()),
         )
         bones = export.skin_bones(layer.weights, skin.groups, shares, binds, settings)
+        bones = export.blend_wrists(bones, layer.vertices, binds, hands, settings)
         for bone in bones:
             x, y, z, w = Rotation.from_matrix(bone.bind.rotation).as_quat()
             ET.SubElement(
