@@ -30,6 +30,7 @@ from src.engines.physics_engines.mujoco.python.appearance_layer import _Assets
 from src.engines.physics_engines.mujoco.python.native_mjcf import _pose
 from src.shared.python.core.physics_constants import GRAVITY_M_S2
 from src.shared.python.model_appearance import head as head_model
+from src.shared.python.model_appearance.body_skin_export import body_skin_enabled
 from src.shared.python.model_appearance.schema import AppearanceDocument
 
 HEAD_MOCAP_BODY = "visual_head"
@@ -161,7 +162,8 @@ def attach_head_visual(
     body, pose, length, source = placed
     canonical = dataclasses.replace(cfg, forward_axis="+x", up_axis="+z")
     parts = head_model.build_head_parts(length, canonical)
-    parts += head_model.build_neck_parts(length, canonical)
+    if not body_skin_enabled(spec):  # the skinned body has its own neck (#15299)
+        parts += head_model.build_neck_parts(length, canonical)
     assets = _registry(root, doc)
     override = cfg.orientation_override
     if override is None:

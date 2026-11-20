@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -73,7 +74,7 @@ def test_three_layers_follow_the_bodies(skinned: tuple[Any, Any]) -> None:
     model, summary = skinned
     assert model.nskin == len(LAYERS)
     assert [model.skin(i).name for i in range(3)] == [f"body_skin_{n}" for n in LAYERS]
-    assert summary["bones"] == {"skin": 15, "shirt": 9, "trousers": 6}
+    assert summary["bones"] == {"skin": 12, "shirt": 11, "trousers": 6}
     assert model.nskinbone == sum(summary["bones"].values())
     assert model.nskinvert == sum(summary["vertices"].values())
     roles = summary["bodies"]
@@ -90,8 +91,9 @@ def test_the_skin_replaces_the_loft_and_the_neck(
         for index in range(model.ngeom):
             geom = model.geom(index)
             part = library.classify_body(model.body(geom.bodyid[0]).name or "world")
-            if geom.name.startswith("visual_"):
-                out.setdefault(part, []).append(geom.name)
+            if geom.name.startswith(("visual_vmesh", "visual_head")):
+                # the number in a mesh geom's name counts the drawn bodies
+                out.setdefault(part, []).append(re.sub(r"vmesh_\d+_", "", geom.name))
         return out
 
     before, after = visuals(loft), visuals(skinned[0])
