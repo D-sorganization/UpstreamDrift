@@ -1,0 +1,53 @@
+{
+  "issue": 15296,
+  "status": "software-path evidence; not an acceptance of the address fit",
+  "code": "main @ 669e075e8c plus this change (uncommitted when run)",
+  "capture": "data/C3D_TA_Driver.c3d",
+  "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+  "preset": "tour_average_driver",
+  "preset_sha256": "4cb924de2353716a1f87eee67953a4c242480f848420581e91a108316b93e34a",
+  "base_spec_sha256": "f7441ad90ca46aa40f2309f755f3c076f9602f61f747688a556ef21d6af50449",
+  "spec_sha256": "af4e0ccf415a91e4b71bd40098f2503998b092ddbc036aff9fb513ce84f4d62e",
+  "flags": "--capture driver --skip-hip-calibration --static-seeds --fix-club-markers",
+  "frames_fitted_of_capture": [654, 654],
+  "elapsed_s": 3168,
+  "marker_selection": {
+    "leg_seeds": "document",
+    "dropped_markers": ["Marker_0:0:0", "Uname*36", "Uname*37", "Uname*38"]
+  },
+  "phase_frames": { "address": [0, 0], "to_top": [0, 388], "to_impact": [0, 476], "whole_swing": [0, 653] },
+  "address_stage_rms_mm": { "seed_offsets": 55.76, "static_trial": 31.84, "calibrated": 34.16, "calibrated_club": 68.67 },
+  "ik_rms_mm": {
+    "all": [15.69, 24.36, 26.57, 29.74],
+    "pelvis": [16.31, 16.28, 16.82, 20.22],
+    "trunk": [5.8, 25.4, 27.83, 32.59],
+    "head": [0.96, 18.84, 19.77, 25.98],
+    "arms": [15.92, 30.94, 33.13, 37.15],
+    "club": [22.79, 26.6, 31.44, 32.6],
+    "thigh": [14.62, 25.13, 26.13, 23.66],
+    "shank": [6.61, 9.48, 10.4, 13.38],
+    "foot": [16.15, 17.44, 17.93, 22.4]
+  },
+  "dynamics_rms_mm": 109.48,
+  "address_angles_deg": {
+    "knee_angle_l": -18.4,
+    "knee_angle_r": -20.5,
+    "hip_flexion_l": 31.1,
+    "hip_flexion_r": 36.9,
+    "LEInput": -18.8,
+    "REInput": -15.5,
+    "LWInputX": -35.9,
+    "LWInputY": 30.6,
+    "RWInputX": -32.3,
+    "RWInputY": -28.1
+  },
+  "club_head_origin_above_ground_mm": { "address": 44.6, "impact": 86.9 },
+  "frames_on_a_limit_pct": { "tolerance_deg": 0.1, "any": 65.7, "to_impact": 53.0, "address": 0.0 },
+  "builtin_leg_seeds_before_change": {
+    "address_stage_calibrated_rms_mm": 31.82,
+    "ik_rms_mm_all": [15.0, 22.1, 24.34, 27.6],
+    "dynamics_rms_mm": 118.11,
+    "frames_on_a_limit_pct": 100.0
+  },
+  "experiment_not_reproducible_from_repository_commands": { "rms_mm_all": [7.7, 7.9, 9.4, 11.5] }
+}
