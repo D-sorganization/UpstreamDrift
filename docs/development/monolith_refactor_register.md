@@ -13,8 +13,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 4849 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/Dataset_GUI.m` |
 | 4082 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/main_scripts/golf_swing_analysis_gui.m` |
 | 4074 | `src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/2D GUI/main_scripts/golf_swing_analysis_gui.m` |
+| 1592 | `src/shared/python/motion_matching/pipeline/cli.py` |
 | 1591 | `src/shared/python/motion_matching/full_body_forward_dynamics.py` |
-| 1535 | `src/shared/python/motion_matching/pipeline/cli.py` |
 | 1515 | `src/shared/python/motion_matching/acceptance.py` |
 | 1319 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/runSimulation.m` |
 | 1200 | `src/engines/simscape/adapter.py` |
@@ -49,9 +49,9 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1165 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py` |
 | 1164 | `src/shared/python/physics/terrain_representation.py` |
 | 1162 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
+| 1159 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 1153 | `src/tools/motion_matching/gui.py` |
 | 1150 | `src/tools/bunker_shot_gui/gui.py` |
-| 1149 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 1147 | `src/api/routes/launch_monitor_analytics.py` |
 | 1146 | `src/engines/physics_engines/myosuite/python/myohand_bilateral_adapter.py` |
 | 1146 | `src/engines/physics_engines/myosuite/python/native_direct_model_replay.py` |
@@ -119,6 +119,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 983 | `src/shared/python/motion_matching/multi_engine_torque_allocator.py` |
 | 981 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
 | 981 | `src/shared/python/workspace/necromatcher_video.py` |
+| 979 | `src/shared/python/motion_matching/pipeline/lane.py` |
 | 975 | `src/api/routes/simulation_ws.py` |
 | 975 | `src/shared/python/motion_matching/pipeline/dynamics.py` |
 | 974 | `src/launchers/embedded_host.py` |
@@ -143,8 +144,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 948 | `src/shared/python/sidekick/process_calculators/acid_gas_dewpoint_calculator.py` |
 | 948 | `src/shared/python/signal_toolkit/signal_processing.py` |
 | 947 | `src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/visualization/SkeletonPlotter.m` |
+| 945 | `src/shared/python/motion_matching/pipeline/address.py` |
 | 944 | `src/shared/python/engine_core/cross_engine_validator.py` |
-| 944 | `src/shared/python/motion_matching/pipeline/address.py` |
 | 943 | `src/bunkershot3d/solvers/shot.py` |
 | 943 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_match_export.m` |
 | 942 | `src/shared/python/estimation/dime_dynamics_window.py` |
@@ -183,8 +184,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 875 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py` |
 | 874 | `src/shared/python/tour_baselines/qualification.py` |
 | 873 | `src/shared/python/model_appearance/body_meshes.py` |
-| 873 | `src/shared/python/model_appearance/body_meshes.py` |
-| 873 | `src/shared/python/model_appearance/body_meshes.py` |
 | 873 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py` |
 | 870 | `src/shared/python/model_generation/cli/main.py` |
 | 868 | `src/shared/python/workspace/necromatcher_video_jobs.py` |
@@ -194,7 +193,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 864 | `src/tools/shot_pattern_analysis/matched_report_plots.py` |
 | 864 | `src/tools/simulation_backends_launcher/gui.py` |
 | 862 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py` |
-| 861 | `src/shared/python/motion_matching/pipeline/lane.py` |
 | 859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m` |
 | 857 | `src/shared/python/injury/spinal_load_analysis.py` |
 | 853 | `src/shared/python/ai/gui/assistant_panel.py` |
