@@ -35,26 +35,15 @@ from pathlib import Path
 
 import numpy as np
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "makehuman_cc0"))
+
+from mh_rig_io import read_obj_groups  # noqa: E402
+
 NL = chr(10)
 QUANTUM = 1e-4  # head lengths per integer step (about 24 micrometres)
 NECK_JOINT = np.array([0.0, 5.89025, 0.06805])  # MakeHuman ``joint-neck`` centre
 HAIR_THICKNESS_DM = (0.03, 0.07)  # hairline .. crown, in MakeHuman decimetres
 OUT = Path(__file__).with_name("head_cc0.npz")
-
-
-def read_obj(path: Path) -> tuple[np.ndarray, dict[str, list[list[int]]]]:
-    verts: list[list[float]] = []
-    groups: dict[str, list[list[int]]] = {}
-    current = ""
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if line.startswith("v "):
-            verts.append([float(t) for t in line.split()[1:4]])
-        elif line.startswith("g "):
-            current = line.split()[1]
-            groups.setdefault(current, [])
-        elif line.startswith("f "):
-            groups[current].append([int(t.split("/")[0]) - 1 for t in line.split()[1:]])
-    return np.asarray(verts, dtype=float), groups
 
 
 def triangulate(quads: list[list[int]]) -> np.ndarray:
@@ -104,7 +93,7 @@ def hairline_y(z: np.ndarray) -> np.ndarray:
 
 
 def build(base_obj: Path) -> dict[str, np.ndarray]:
-    v, groups = read_obj(base_obj)
+    v, groups = read_obj_groups(base_obj)
     head_faces = [f for f in groups["body"] if v[f][:, 1].mean() >= NECK_JOINT[1]]
     tris = triangulate(head_faces)
     used = np.unique(tris)
@@ -168,7 +157,7 @@ def main(argv: list[str]) -> int:
         same = all(np.array_equal(have[k], arrays[k]) for k in arrays)
         sys.stdout.write(("asset content matches" if same else "DIFFERS") + NL)
         return 0 if same else 1
-    np.savez_compressed(OUT, **arrays)
+    np.savez_compressed(OUT, **arrays)  # type: ignore[arg-type]
     sys.stdout.write(f"wrote {OUT} ({OUT.stat().st_size} bytes)" + NL)
     return 0
 
