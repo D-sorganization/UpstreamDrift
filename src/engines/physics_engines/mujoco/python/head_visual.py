@@ -128,7 +128,8 @@ def _place(
     anchor = head_model.resolve_head_anchor(spec)
     if anchor is not None:
         pose = offsets[anchor.body] @ head_model.head_frame_in_body(anchor, doc.head)
-        return anchor.body, pose, anchor.length_m, anchor.source
+        length = head_model.drawn_head_length(spec, anchor, doc.head)
+        return anchor.body, pose, length, anchor.source
     gravity = np.asarray(
         spec.get("gravity_m_s2", [0.0, 0.0, -float(GRAVITY_M_S2)]), dtype=float
     )

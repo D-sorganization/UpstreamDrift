@@ -1,15 +1,20 @@
 """Read MakeHuman's CC0 base mesh, default skeleton and skin weights (build-time only).
 
-Nothing here runs at import time of the application: ``build_hand_asset.py`` uses
-it once to derive ``hand_cc0.npz``. All three inputs are CC0 (see ``NOTICE``):
+Shared by every builder that derives an asset from MakeHuman (#15299): the hand
+(``assets/hand_cc0``), the head (``assets/head_cc0``) and the body sections
+(``assets/body_cc0``). Nothing here runs at import time of the application. All
+three inputs are CC0 (see ``assets/hand_cc0/NOTICE``):
 
 * ``makehuman/data/3dobjs/base.obj`` (hm08 base mesh, quads);
 * ``makehuman/data/rigs/default.mhskel`` (bones, joint helper-vertex lists);
 * ``makehuman/data/rigs/default_weights.mhw`` (per-bone ``[vertex, weight]``).
+
+Morph targets are read by ``mh_targets``.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -48,7 +53,7 @@ BODY_GROUP = "body"
 
 @dataclass(frozen=True)
 class MakeHumanRig:
-    """The parts of the MakeHuman default rig that the hand build needs."""
+    """Base mesh, default skeleton and skin weights of MakeHuman."""
 
     vertices: Array  # (N, 3) base mesh, MakeHuman units
     body_quads: NDArray[np.int64]  # (Q, 4) faces of the ``body`` group
@@ -81,10 +86,19 @@ class MakeHumanRig:
         return self.bones[bone]
 
 
-def read_base_obj(path: Path) -> tuple[Array, NDArray[np.int64]]:
-    """Vertices and the quads of the ``body`` group of ``base.obj``."""
+def sha256_file(path: Path) -> str:
+    """Hex SHA-256 of the bytes of ``path`` (provenance of a source file)."""
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def read_obj_groups(path: Path) -> tuple[Array, dict[str, list[list[int]]]]:
+    """Vertices and the faces of every group of a Wavefront ``.obj``.
+
+    Postcondition: faces are zero-based vertex index lists of any size, in file
+    order, under the group they follow (``""`` before the first ``g`` line).
+    """
     vertices: list[list[float]] = []
-    quads: list[list[int]] = []
+    groups: dict[str, list[list[int]]] = {}
     group = ""
     with path.open(encoding="utf-8") as handle:
         for line in handle:
@@ -92,14 +106,22 @@ def read_base_obj(path: Path) -> tuple[Array, NDArray[np.int64]]:
                 vertices.append([float(x) for x in line.split()[1:4]])
             elif line.startswith("g "):
                 group = line.split()[1]
-            elif line.startswith("f ") and group == BODY_GROUP:
+                groups.setdefault(group, [])
+            elif line.startswith("f "):
                 corners = [int(tok.split("/")[0]) - 1 for tok in line.split()[1:]]
-                if len(corners) != 4:
-                    raise ValueError("base.obj body group must be all quads")
-                quads.append(corners)
-    if not vertices or not quads:
+                groups.setdefault(group, []).append(corners)
+    return np.asarray(vertices, dtype=float), groups
+
+
+def read_base_obj(path: Path) -> tuple[Array, NDArray[np.int64]]:
+    """Vertices and the quads of the ``body`` group of ``base.obj``."""
+    vertices, groups = read_obj_groups(path)
+    quads = groups.get(BODY_GROUP, [])
+    if any(len(corners) != 4 for corners in quads):
+        raise ValueError("base.obj body group must be all quads")
+    if not len(vertices) or not quads:
         raise ValueError(f"{path} holds no body mesh")
-    return np.asarray(vertices, dtype=float), np.asarray(quads, dtype=np.int64)
+    return vertices, np.asarray(quads, dtype=np.int64)
 
 
 def load_makehuman_rig(makehuman_root: Path) -> MakeHumanRig:

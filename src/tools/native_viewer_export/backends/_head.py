@@ -21,7 +21,10 @@ from src.shared.python.model_appearance import (
     place_parts,
     resolve_head_anchor,
 )
-from src.shared.python.model_appearance.head import part_material_name
+from src.shared.python.model_appearance.head import (
+    drawn_head_length,
+    part_material_name,
+)
 from src.shared.python.model_appearance.schema import AppearanceDocument
 
 
@@ -50,7 +53,7 @@ def head_mesh_files(
     materials = library_materials(doc)
     directory.mkdir(parents=True, exist_ok=True)
     parts = place_parts(
-        build_head_parts(anchor.length_m, doc.head),
+        build_head_parts(drawn_head_length(spec, anchor, doc.head), doc.head),
         head_frame_in_body(anchor, doc.head),
     )
     out = []

@@ -12,7 +12,11 @@ import pytest
 from src.shared.python.model_appearance import document_from_dict, library, neck
 from src.shared.python.model_appearance.body_meshes import body_meshes
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
-from src.shared.python.model_appearance.head import build_neck_parts
+from src.shared.python.model_appearance.head import (
+    build_neck_parts,
+    drawn_head_length,
+    resolve_head_anchor,
+)
 from src.shared.python.model_appearance.defaults import default_document_dict
 from src.shared.python.model_appearance.schema import HeadSettings
 
@@ -20,9 +24,9 @@ pytestmark = pytest.mark.unit
 
 MODELS = Path(__file__).resolve().parents[3] / "docs/development/full_body_models"
 SPEC_BYTES = (MODELS / "full_body_spec_anthro_driver.json").read_bytes()
-HEAD_M = 0.2429
 ACCEPT = neck.NECK_ACCEPTANCE
 SPEC = json.loads(SPEC_BYTES)
+HEAD_M = drawn_head_length(SPEC, resolve_head_anchor(SPEC))  # as drawn (#15299)
 DOC = document_from_dict({"schema_version": "appearance-v1"})
 
 
