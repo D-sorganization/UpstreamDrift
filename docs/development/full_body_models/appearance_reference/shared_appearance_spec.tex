@@ -354,6 +354,43 @@ through the override, document, default precedence.
 \texttt{physics\_spec\_sha256} are unchanged. Tests cover handedness
 $\times$ glove $\times$ every clothing preset.
 
+\subsection{Shoulder Slope (\#15299)}
+\paragraph{Defect.} The thorax profile put its shoulder dome at a fixed share
+of the thorax length, but the shoulder joints sit at $0.80$ of it on the
+tour-average subject and at $0.91$ on the default one. On the tour-average
+subject the shirt fell $18$\,mm per centimetre just inside the joint (a
+$50^\circ$ cliff after a $27^\circ$ slope) onto a shelf $2$\,mm above the
+joint; on the default subject the shoulder link stood $15$\,mm proud of the
+shirt beside the neck (a strap).
+\paragraph{Model.} \texttt{torso\_profile.ShoulderSlope} rebuilds the thorax
+widths above the chest on the subject's own shoulder line. With the joint a
+drop $d$ under the neck point and stature scale $k = h / 1.82$, the point of
+the shoulder is $r = \min(0.035k, \max(0, d - 0.062k))$ above the joint
+centre. The half width runs straight from the collar to the point at no less
+than $19^\circ$, capped at $1.04$ of the thorax half width, then rounds into
+the chest; sections above the corner use exponents $2.35$ to $2.0$ (chest
+$2.6$). The shoulder link is drawn with its top $0.1$ radii under that point
+and its neck end $0.1$ radii lower, and the deltoid cap's upper tip is at the
+point. Depth, collar slant and forward shift are unchanged.
+\paragraph{Result.} Hang pose, shirt top above the joint centre.
+Tour-average: $78, 62, 48, 41, 38, 33, 30, 17$\,mm at $60, 100, 140, 160, 170,
+180, 200, 220$\,mm from the midline (before: $78, 64, 48, 29, 11, 2, -9,
+-22$); mean slope $19.8^\circ$ (before $26.9^\circ$); bideltoid breadth
+$481$\,mm and shirt depth $220$\,mm under the shoulders, both unchanged.
+Default: the link is $14$\,mm under the shirt beside the neck (before $5$ to
+$15$\,mm proud); its joints are only $40$\,mm under the neck point, so its
+shoulder line stays nearly level ($11^\circ$).
+\paragraph{Open: Shoulder-Girdle Motion.} Every solid is rigid on one body.
+\texttt{tests/fixtures/model\_appearance/girdle\_poses.json} adds trail
+shoulder-link protraction of $50$ and $110$\,mm to the address pose. The share
+of the sleeve cap inside the thorax and shoulder link falls from $0.31$ to
+$0.25$ and $0.20$: the cap stands in front of the chest. An ellipsoid on the
+link and a copy of the shirt's shoulder corner on the link were tried and
+rejected (lumps at the neutral pose, or a crumpled surface); a surface blended
+between the thorax and the link is needed. The strict expected-failure test
+\texttt{test\_the\_sleeve\_cap\_stays\_set\_in\_the\_shirt\_as\_the\_girdle\_moves}
+holds the reproduction.
+
 \subsection{Limitations}
 \begin{itemize}
 \item The skinned glTF body (\texttt{skinned\_body}) still sizes its trunk from

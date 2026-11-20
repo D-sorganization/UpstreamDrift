@@ -187,6 +187,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 873 | `src/shared/python/model_appearance/body_meshes.py` |
 | 873 | `src/shared/python/model_appearance/body_meshes.py` |
 | 873 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py` |
+| 872 | `src/shared/python/model_appearance/body_meshes.py` |
 | 870 | `src/shared/python/model_generation/cli/main.py` |
 | 868 | `src/shared/python/workspace/necromatcher_video_jobs.py` |
 | 867 | `src/api/services/chat_service.py` |
@@ -223,7 +224,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 833 | `src/shared/python/ui/qt/widgets/signal_toolkit_ui_mixin.py` |
 | 831 | `src/bunkershot3d/solvers/envelope.py` |
 | 831 | `src/bunkershot3d/solvers/mpm/constitutive.py` |
-| 831 | `src/shared/python/model_appearance/body_meshes.py` |
 | 831 | `src/tools/starting_pose_matcher/gui_builders_mixin.py` |
 | 830 | `src/research/deformable/objects.py` |
 | 830 | `src/shared/python/motion_pipeline/preprocessing/gap_fill.py` |

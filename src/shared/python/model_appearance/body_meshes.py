@@ -84,6 +84,7 @@ from src.shared.python.model_appearance.pelvis_width import (
 )
 from src.shared.python.model_appearance.schema import AppearanceDocument, Material
 from src.shared.python.model_appearance.torso_profile import (
+    SHOULDER_SLOPE,
     TorsoFrame,
     TorsoProfile,
     TorsoStation,
@@ -275,6 +276,8 @@ class _Context:
     parents: Mapping[str, str] = field(default_factory=dict)
     #: Height of the neck point above each shoulder link, metres (#15299).
     neck_rise: Mapping[str, float] = field(default_factory=dict)
+    #: Top of the shoulder above its joint centre, metres (``ShoulderSlope``).
+    acromion_rise_m: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -303,11 +306,11 @@ class _Segment:
     front_axis: np.ndarray | None = None  # slants the profile's collar (#15292)
 
 
-def _shoulder_segment(cap: Capsule, scale: float, rise_m: float | None) -> _Segment:
-    """The shoulder link as a yoke: flat, from beside the neck down to the joint.
+def _shoulder_segment(cap: Capsule, scale: float, rise_m: float = 0.0) -> _Segment:
+    """The shoulder link as a yoke: flat, and starting beside the neck (#15279).
 
-    ``rise_m`` is the height of the neck point above the link (``None``: the
-    library default); both ends of the yoke hang from the neck point (#15299).
+    Its top at the joint is ``rise_m`` above the joint centre: the point of
+    the shoulder, level with the end of the thorax slope (#15299).
     """
     start, end = np.asarray(cap.start_m), np.asarray(cap.end_m)
     along = end - start
@@ -318,17 +321,16 @@ def _shoulder_segment(cap: Capsule, scale: float, rise_m: float | None) -> _Segm
         # An upright link has no front-back axis from "up": keep it round.
         return _Segment(start, end, radius, 1.0)
     radius *= library.SHOULDER_RADIUS_SCALE
-    rise = library.SHOULDER_DEFAULT_RISE if rise_m is None else rise_m / radius
-    outer = min(
-        rise - library.SHOULDER_JOINT_END_BELOW_NECK, library.SHOULDER_JOINT_END_LIFT
-    )
+    # The joint end's top is the point of the shoulder; the neck end hangs lower.
+    sink = (
+        rise_m - (library.SHOULDER_ASPECT + library.SHOULDER_END_SINK) * radius
+    ) * up
     return _Segment(
         start
         + library.SHOULDER_START_FRACTION * along
-        + (rise - library.SHOULDER_NECK_END_BELOW_NECK) * radius * up,
-        end
-        - library.SHOULDER_END_INSET * radius * along / np.linalg.norm(along)
-        + outer * radius * up,
+        + sink
+        - library.SHOULDER_DROOP * radius * up,
+        end + sink,
         radius,
         library.SHOULDER_ASPECT,
         library.SHOULDER_END_SCALE,
@@ -440,7 +442,7 @@ def _limb_segments(
     window: tuple[float, float] = library.FULL_COVERAGE,
     wrist: Any = None,
     front: np.ndarray | None = None,
-    rise_m: float | None = None,
+    rise_m: float = 0.0,
 ) -> list[_Segment]:
     out = []
     for cap in caps:
@@ -500,8 +502,14 @@ def _trunk_segment(
     profile = None
     if size.source == "visual_hints" and part == "torso":
         role = "thorax" if body in ctx.thorax else "abdomen"
+        rows = tuple(TorsoStation(*row) for row in library.TORSO_PROFILES[role])
+        line = min(c.length_m() for c in caps) / spine.length_m()
+        if role == "thorax" and line < 1.0:  # its own shoulder line (#15299)
+            lift = SHOULDER_SLOPE.lift(ctx.subject.get("stature_m"))
+            rise = (ctx.acromion_rise_m + lift) / spine.length_m()
+            rows = SHOULDER_SLOPE.stations(rows, line, rise, spine.length_m() / radius)
         profile = TorsoProfile(
-            tuple(TorsoStation(*row) for row in library.TORSO_PROFILES[role]),
+            rows,
             library.TORSO_SQUARENESS,
             rings=library.TORSO_RINGS,
             fine_from=library.TORSO_FINE_FROM,
@@ -706,8 +714,10 @@ def _segment_meshes(
                 library.DELTOID_HALF_SIZES if part == "upper_arm" else (1.0, 1.0)
             )
             along = (seg.end - seg.start) / np.linalg.norm(seg.end - seg.start)
-            if part == "upper_arm":
-                drop = library.deltoid_drop_m(seg.radius, ctx.neck_rise.get(body))
+            drop = 0.0
+            if part == "upper_arm":  # its upper tip is the point of the shoulder
+                inset = library.UPPER_ARM_START_INSET * seg.radius
+                drop = down * size - inset - ctx.acromion_rise_m
             ball = geometry.ellipsoid_mesh(
                 seg.start + drop * along + out_m,
                 size * np.array([down, across, across]),
@@ -792,7 +802,7 @@ def _meshes_for_body(
             window,
             ctx.wrist_sections.get(body),
             front,
-            ctx.neck_rise.get(body),
+            ctx.acromion_rise_m,
         )
         if section is None and part == "upper_arm":  # no elbow hinge: round
             segments = [dataclasses.replace(s, aspect=1.0) for s in segments]
@@ -827,6 +837,17 @@ def _torso_parents(spec: Mapping[str, Any]) -> dict[str, str]:
         if library.classify_body(str(joint.get("child", ""))) == "torso"
         and library.classify_body(str(joint.get("parent", ""))) == "torso"
     }
+
+
+def _acromion_rise(
+    by_body: Mapping[str, Sequence[Capsule]],
+    thorax: frozenset[str],
+    subject: Mapping[str, Any],
+) -> float:
+    """Top of the shoulder above its joint: from how far the joint is under the neck."""
+    lengths = [c.length_m() for body in sorted(thorax) for c in by_body.get(body, ())]
+    drop = max(lengths) - min(lengths) if lengths else 0.0
+    return SHOULDER_SLOPE.rise(drop, subject.get("stature_m"))
 
 
 def body_meshes(
@@ -864,9 +885,10 @@ def body_meshes(
         _club_parts(spec, doc, club),
         _limb_windows(spec, by_body),
         _skinned_wrist_sections(spec, club),
-        _parents_of(spec, "shoulder"),
+        thorax := _parents_of(spec, "shoulder"),
         _torso_parents(spec),
         _neck_rises(spec, by_body),
+        _acromion_rise(by_body, thorax, spec.get("subject", {})),
     )
     out = [
         m for body, caps in by_body.items() for m in _meshes_for_body(ctx, body, caps)

@@ -593,7 +593,9 @@ TORSO_SQUARENESS = 2.6  # superellipse exponent of a trunk cross-section
 # flatter than it is deep, not a ball. Depth axis is the link's up axis.
 SHOULDER_ASPECT = 0.72  # up-down over front-back extent of the yoke
 SHOULDER_RADIUS_SCALE = 1.1  # front-back half extent over the part radius
-SHOULDER_END_SCALE = 0.85  # yoke radius at the shoulder joint, over the neck end
+SHOULDER_END_SCALE = 1.0  # yoke radius at the shoulder joint, over the neck end
+SHOULDER_DROOP = 0.1  # neck end of the yoke below its joint end, in radii (#15299)
+SHOULDER_END_SINK = 0.1  # yoke top under the point of the shoulder, in radii (#15299)
 SHOULDER_START_FRACTION = 0.3  # the yoke starts this far along the link
 # The yoke hangs from the NECK point (#15299), in yoke radii, so it slopes like a
 # trapezius by as much as the shoulder joints sit below the neck (a fit setting).
