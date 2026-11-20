@@ -219,24 +219,33 @@ def model_joints(frames: Mapping[str, Rigid]) -> dict[str, Array]:
 
 
 def subject_lengths(frames: Mapping[str, Rigid]) -> SegmentLengths:
-    """The subject's segment lengths; a limb length is the mean of both sides."""
+    """The subject's segment lengths; each limb also with its two side lengths.
+
+    A limb's one length is the mean of both sides; ``sides`` holds the two, so
+    the fit puts every knee, ankle, elbow and wrist on its own model joint.
+    """
     joints = model_joints(frames)
 
     def span(first: str, second: str) -> float:
         return float(np.linalg.norm(joints[first] - joints[second]))
 
-    def limb(first: str, second: str) -> float:
-        return 0.5 * sum(span(f"{first}_{s}", f"{second}_{s}") for s, _ in SIDES)
+    def limb(first: str, second: str) -> tuple[float, float]:
+        left, right = (span(f"{first}_{s}", f"{second}_{s}") for s, _ in SIDES)
+        return left, right
 
+    sides = {
+        "upper_arm": limb("shoulder", "elbow"),
+        "forearm": limb("elbow", "wrist"),
+        "thigh": limb("hip", "knee"),
+        "shank": limb("knee", "ankle"),
+    }
     return SegmentLengths(
         hip_half_spacing=0.5 * span("hip_l", "hip_r"),
         shoulder_half_spacing=0.5 * span("shoulder_l", "shoulder_r"),
         shoulder_height=0.5 * sum(span(f"girdle_{s}", "hip_mid") for s, _ in SIDES),
         neck_height=span("neck", "hip_mid"),
-        upper_arm=limb("shoulder", "elbow"),
-        forearm=limb("elbow", "wrist"),
-        thigh=limb("hip", "knee"),
-        shank=limb("knee", "ankle"),
+        **{name: 0.5 * sum(pair) for name, pair in sides.items()},
+        sides=sides,
     )
 
 

@@ -13,6 +13,9 @@
   "thigh_back_below_hip_m": 0.02,
   "thigh_back_fade_m": 0.1,
   "thigh_back_front_m": 0.05,
+  "wrist_match_from_m": 0.11,
+  "wrist_match_full_m": 0.035,
+  "wrist_under_m": 0.002,
   "profiles": {
     "showpiece": {
       "shoulder_anchor_m": [0.0, 0.0, 0.025],
@@ -35,6 +38,8 @@
     "thigh_back_rise_fraction": "The shift grows from the knee and is whole from this fraction of the thigh length above the knee (mid-thigh).",
     "thigh_back_below_hip_m": "The shift is whole up to 20 mm below the hip joints.",
     "thigh_back_fade_m": "From there it fades to nothing over 100 mm, so the belly above the groin stays put.",
-    "thigh_back_front_m": "Only skin ahead of the hip joint moves; the shift is whole from 50 mm ahead of it, so the back of the thigh and the buttock keep their place."
+    "thigh_back_front_m": "Only skin ahead of the hip joint moves; the shift is whole from 50 mm ahead of it, so the back of the thigh and the buttock keep their place.",
+    "wrist_match": "With the skinned hands drawn, the forearm's section turns into the hand's wrist section (model_appearance.skinned_wrist_sections, the section the hand's widened rim lies just under) from wrist_match_from_m (110 mm) before the wrist joint and is that section from wrist_match_full_m (35 mm) before it, under the hand's forearm cuff; the #15299 prototype's values (2026-11-20 review).",
+    "wrist_under_m": "The skin lies 2 mm inside that section, so the hand's cuff covers it. Without the match the skin's wrist differs from the section by more than 2 mm round the ring (a visible step under the cuff)."
   }
 }
