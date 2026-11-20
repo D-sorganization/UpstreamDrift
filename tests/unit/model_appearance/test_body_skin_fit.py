@@ -158,10 +158,39 @@ def test_default_settings_ignore_the_profiles() -> None:
 def test_showpiece_profile_changes_only_its_named_settings() -> None:
     plain, tuned = fit.load_fit_settings(), fit.load_fit_settings(profile="showpiece")
     changes = {"shoulder_anchor_m": (0.0, 0.0, 0.025)}
-    changes |= {"thorax_front_scale": 0.92, "thigh_back_m": 0.02}
+    changes |= {"thorax_front_scale": 0.92, "thigh_back_m": 0.02, "slim_share": 1.0}
     assert dataclasses.replace(plain, **changes) == tuned  # type: ignore[arg-type]
     assert plain.thorax_front_scale == 1.0 and plain.thigh_back_m == 0.0
     _assert_subject_lengths(fit.fit_body_skin(SKIN, _subject(), tuned).joints)
+
+
+def test_slim_share_mixes_the_slim_build_in_before_the_fit() -> None:
+    assert PLAIN.slim_share == 0.0
+    assert SKIN.rest(0.0) is SKIN.vertices
+    assert np.allclose(SKIN.rest(0.5), SKIN.vertices + 0.5 * SKIN.slim_offset)
+    base = fit.fit_body_skin(SKIN, _subject(), PLAIN)
+    lean = fit.fit_body_skin(
+        SKIN, _subject(), dataclasses.replace(PLAIN, slim_share=1.0)
+    )
+    _assert_subject_lengths(lean.joints)
+    for name, joint in lean.joints.items():  # the same subject, the same joints
+        assert np.array_equal(joint, base.joints[name]), name
+
+    def girth(fitted: fit.FittedSkin, low: float, high: float) -> tuple[float, float]:
+        band = (fitted.vertices[:, 2] > low) & (fitted.vertices[:, 2] < high)
+        band &= _limb_weight(("upperarm", "forearm")) < 0.5
+        box = np.ptp(fitted.vertices[band], axis=0)
+        return float(box[0]), float(box[1])
+
+    chest_low = base.joints["shoulder_l"][2] - 0.2
+    for low, high in ((chest_low, chest_low + 0.1), (0.05, 0.15)):  # chest, waist
+        depth, breadth = girth(base, low, high)
+        lean_depth, lean_breadth = girth(lean, low, high)
+        assert lean_depth < depth - 0.004 and lean_breadth < breadth - 0.004
+    with pytest.raises(ValueError, match="slim_share"):
+        dataclasses.replace(PLAIN, slim_share=1.5)
+    with pytest.raises(ValueError, match="slim_share"):
+        SKIN.rest(-0.1)
 
 
 def _limb_weight(prefixes: tuple[str, ...]) -> np.ndarray:

@@ -10,7 +10,10 @@ stature; the ``body`` faces that are not hands, feet or head, up to ``neck_cut_m
 the neck joint, are
 kept as one triangle surface; MakeHuman's skin weights are summed into the bone
 groups of the settings (a bone outside every group joins its nearest listed
-ancestor); the joint landmarks of the runtime fit are stored. Stored frame:
+ancestor); the joint landmarks of the runtime fit are stored. The same vertices
+of the slim mix (``slim`` in the settings) are stored as offsets from the
+athletic ones, for the runtime fit to mix in; its joint landmarks must be the
+athletic ones (the muscle and weight targets move no joint). Stored frame:
 hip-midpoint origin, x forward, y left, z up. Appearance only, no physics.
 """
 
@@ -118,12 +121,14 @@ def build(makehuman_root: Path, settings: dict[str, Any]) -> tuple[dict, list]:
     outward facing and each weight row sums to ``weight_levels``.
     """
     mixes = json.loads((REPO / settings["mix_settings"]).read_text())["mixes"]
-    rig, used = morphed_rig(
-        load_makehuman_rig(makehuman_root),
-        makehuman_root,
-        macro_mix(mixes[settings["mix"]]),
-    )
+    base = load_makehuman_rig(makehuman_root)
+    mix = mixes[settings["mix"]]
+    rig, used = morphed_rig(base, makehuman_root, macro_mix(mix))
     vertices, marks = to_model_frame(rig, settings)
+    lean, lean_used = morphed_rig(
+        base, makehuman_root, macro_mix({**mix, **settings["slim"]["mix"]})
+    )
+    lean_vertices, lean_marks = to_model_frame(lean, settings)
     owner = bone_to_group(rig, {"cut": settings["cut_roots"], "kept": ["root"]})
     cut_bones = tuple(bone for bone, index in owner.items() if index == 0)
     cut = dense_weights(rig, cut_bones).sum(axis=1)
@@ -155,7 +160,11 @@ def build(makehuman_root: Path, settings: dict[str, Any]) -> tuple[dict, list]:
         "weight_value": value,
         "landmarks": np.rint(marks / quantum).astype("<i2"),
     }
-    return arrays, used
+    slim = np.rint(lean_vertices[ids] / quantum) - stored
+    arrays["slim_offset"] = slim.astype("<i2")
+    if not np.array_equal(np.rint(lean_marks / quantum), arrays["landmarks"]):
+        raise ValueError("the slim mix moves a joint landmark")
+    return arrays, [used, lean_used]
 
 
 def provenance(root: Path, settings: dict[str, Any], used: list) -> dict[str, Any]:
@@ -163,7 +172,7 @@ def provenance(root: Path, settings: dict[str, Any], used: list) -> dict[str, An
     return {
         "asset": OUT.name,
         "asset_sha256": hashlib.sha256(OUT.read_bytes()).hexdigest(),
-        "asset_description": "Athletic male MakeHuman body skin without head, hands and feet, as one triangle surface with group skin weights and joint landmarks; int16 multiples of quantum_m, origin at the hip midpoint, x forward, y left, z up.",
+        "asset_description": "Athletic male MakeHuman body skin without head, hands and feet, as one triangle surface with group skin weights and joint landmarks, and the offsets of the same vertices to a slim build; int16 multiples of quantum_m, origin at the hip midpoint, x forward, y left, z up.",
         "quantum_m": settings["quantum_m"],
         "licence": "CC0-1.0",
         "licence_file": "../head_cc0/LICENSE.CC0.txt",
@@ -175,7 +184,10 @@ def provenance(root: Path, settings: dict[str, Any], used: list) -> dict[str, An
             for name in settings["source_files"]
         },
         "morph_targets": {
-            t["path"]: f"{t['weight']} x sha256 {t['sha256']}" for t in used
+            t["path"]: f"{t['weight']} x sha256 {t['sha256']}" for t in used[0]
+        },
+        "slim_morph_targets": {
+            t["path"]: f"{t['weight']} x sha256 {t['sha256']}" for t in used[1]
         },
         "author": "MakeHuman Team (copyright holders at the CC0 release: Data Collection AB, Joel Palmius, Jonas Hauquier)",
         "download_date": settings["download_date"],
