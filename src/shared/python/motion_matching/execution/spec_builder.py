@@ -928,7 +928,6 @@ def compose_anthropometric_document(
         shoulder_below_cervicale_m=kwargs.get("shoulder_below_cervicale_m"),
     )
     _record_preset(upper, kwargs)
-
     hip_frame = next(f for f in upper["frames"] if f["name"] == "Hip")
     leg_mass_kg = (
         mass_kg - _body_mass_without_club(upper) if match_subject_mass else None
