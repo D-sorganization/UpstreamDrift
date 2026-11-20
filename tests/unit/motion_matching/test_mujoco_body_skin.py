@@ -212,6 +212,14 @@ def test_the_surface_survives_swing_like_poses(
         layer.posed_skin_layers(loft, mujoco.MjData(loft))
 
 
+def _shell(model: Any, data: Any) -> Any:
+    """The head shell's vertices in the world at the posed ``data``."""
+    geom = model.geom("visual_head_skin_mesh")
+    shell = model.mesh(geom.dataid[0])
+    local = model.mesh_vert[shell.vertadr[0] : shell.vertadr[0] + shell.vertnum[0]]
+    return data.geom_xpos[geom.id] + local @ data.geom_xmat[geom.id].reshape(3, 3).T
+
+
 def _head_base(model: Any, pose: dict[str, float]) -> tuple[Any, Any, Any]:
     """The head shell's base at ``pose``: its vertices, their radius about the
     neck axis, and the posed data."""
@@ -250,6 +258,35 @@ def test_the_head_base_stays_inside_the_neck_at_a_swing_head_turn(
     assert SETTINGS.head_base_height_m == HEAD_BASE["below_m"]
     # the loft body keeps the head model's own, wider base under its neck column
     assert _head_base(loft, pose)[1].max() > 1.5 * SETTINGS.head_base_radius_m
+
+
+@pytest.mark.parametrize("name", ["address", "top", "finish"])
+def test_the_head_stub_stays_inside_the_neck_up_to_the_jaw_line(
+    name: str, skinned: tuple[Any, Any]
+) -> None:
+    """The head model's neck stub is the skin's neck drawn a second time; left
+    in place the two walls cut each other in a ragged line under the jaw and
+    behind the ear. Under the jaw line it is held round the neck axis, inside
+    the skin at every head turn."""
+    model = skinned[0]
+    geom = model.geom("visual_head_skin_mesh")
+    pose = dict(ADDRESS)
+    for joint, change in SWING[name].items():
+        pose[joint] = pose.get(joint, 0.0) + change
+    for turn in (0.0, HEAD_BASE["turn_rad"], -HEAD_BASE["turn_rad"]):
+        data = _head_base(model, pose | {"NeckInputZ": turn})[2]
+        world = _shell(model, data)
+        head = geom.bodyid[0]
+        local = (world - data.xpos[head]) @ data.xmat[head].reshape(3, 3)
+        line = SETTINGS.head_base_jaw_height_m - HEAD_BASE["jaw_below_m"]
+        stub = local[:, 2] < line - SETTINGS.head_base_jaw_slope * local[:, 0]
+        assert stub.sum() > 100 and local[stub, 2].max() > 2.0 * HEAD_BASE["below_m"]
+        skin, faces = layer.posed_skin_layers(model, data)["body_skin_skin"]
+        near = cKDTree(skin).query(world[stub])[1]
+        normals = mesh.vertex_normals(skin, faces)[near]
+        outside = np.einsum("ij,ij->i", world[stub] - skin[near], normals).max()
+        assert outside <= HEAD_BASE["outside_m"], (turn, outside)
+    assert HEAD_BASE["jaw_below_m"] >= SETTINGS.head_base_flare_m
 
 
 def _meets(origin: Any, rays: Any, vertices: Any, faces: Any) -> Any:

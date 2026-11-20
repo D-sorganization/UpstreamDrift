@@ -13,8 +13,9 @@ model's bodies and gives each body its bind pose in the fitted rest space:
   weights, and linear blend skinning with them (the engine's rule);
 * ``blend_wrists``: the forearm's end shared with the body that carries the
   hand, so the skin's end ring stays under a rigid hand's cuff at any wrist bend;
-* ``narrow_head_base``: the rigid head model's base held round the neck axis, so
-  a turned head does not push it out of the skin's neck and the collar.
+* ``narrow_head_base``: the rigid head model's base, and its neck stub up to
+  the jaw line, held round the neck axis: a turned head does not push it out of
+  the skin's neck and the collar, and the stub does not lie in the skin's wall.
 
 Body frames are ``Rigid`` poses (body frame to world) keyed by role:
 ``pelvis``, ``thorax``, ``head`` and, per side, ``girdle``, ``upper_arm``,
@@ -100,11 +101,19 @@ class ExportSettings:
     wrist_blend_full_m: float = 0.0
     head_base_height_m: float = 0.0
     head_base_radius_m: float = 0.0
+    head_base_jaw_height_m: float = 0.0
+    head_base_jaw_slope: float = 0.0
+    head_base_flare_m: float = 0.0
 
     def __post_init__(self) -> None:
         height, radius = self.head_base_height_m, self.head_base_radius_m
         if height < 0.0 or (height > 0.0 and not radius > 0.0):
             raise ValueError("head_base needs height_m >= 0 and, with it, radius_m > 0")
+        jaw, flare = self.head_base_jaw_height_m, self.head_base_flare_m
+        if min(jaw, flare, self.head_base_jaw_slope) < 0.0 or (jaw > 0.0) != (
+            flare > 0.0
+        ):
+            raise ValueError("head_base jaw needs jaw_height_m and flare_m, none < 0")
         follow = list(self.spine_follow)
         if len(follow) != len(SPINE_GROUPS) or follow != sorted(follow):
             raise ValueError("spine_follow must hold three rising shares")
@@ -142,6 +151,9 @@ def load_export_settings(path: Path | None = None) -> ExportSettings:
         wrist_blend_full_m=float(raw["wrist_blend_full_m"]),
         head_base_height_m=float(raw["head_base"]["height_m"]),
         head_base_radius_m=float(raw["head_base"]["radius_m"]),
+        head_base_jaw_height_m=float(raw["head_base"]["jaw_height_m"]),
+        head_base_jaw_slope=float(raw["head_base"]["jaw_slope"]),
+        head_base_flare_m=float(raw["head_base"]["flare_m"]),
     )
 
 
@@ -417,22 +429,36 @@ def narrow_head_base(vertices: Array, settings: ExportSettings) -> Array:
     """Head-model ``vertices`` with the base held inside the skin's neck.
 
     ``vertices`` are ``(N, 3)`` in the head frame: origin on the neck joint, z
-    up the neck. The head model is rigid while the skin's neck only shares the
-    head's turn, so a base wider one way than the other comes out of the neck
-    and the collar when the head turns. A vertex below ``head_base_height_m``
-    is moved straight towards the neck axis until it lies within
-    ``head_base_radius_m`` of it. Postcondition: every height, and every vertex
-    at or above that height or within the radius, is unchanged. Raises
-    ``ValueError`` for another shape.
+    up the neck, x forward. The head model is rigid while the skin's neck only
+    shares the head's turn, so a base wider one way than the other comes out of
+    the neck and the collar when the head turns. A vertex below
+    ``head_base_height_m`` is moved straight towards the neck axis until it lies
+    within ``head_base_radius_m`` of it. The model's neck stub above that is the
+    same wall as the skin's neck, a few millimetres from it, and the two cut
+    each other in a ragged line; so the hold goes on up to the jaw line, the
+    plane ``head_base_jaw_height_m`` above the joint on the axis that drops
+    ``head_base_jaw_slope`` per metre forward, and lets go smoothly over the
+    ``head_base_flare_m`` below it. Postcondition: every height, and every
+    vertex within the radius or at or above both that height and the jaw line,
+    is unchanged; no vertex moves outward. Raises ``ValueError`` for another
+    shape.
     """
     points = np.asarray(vertices, dtype=float)
     if points.ndim != 2 or points.shape[1] != 3:
         raise ValueError("vertices must be (N, 3)")
+    if settings.head_base_height_m == 0.0:
+        return points.copy()
     reach = np.linalg.norm(points[:, :2], axis=1)
-    held = points[:, 2] < settings.head_base_height_m
-    held &= reach > settings.head_base_radius_m
+    share = (points[:, 2] < settings.head_base_height_m).astype(float)
+    if settings.head_base_flare_m > 0.0:
+        jaw = settings.head_base_jaw_height_m
+        under = jaw - settings.head_base_jaw_slope * points[:, 0] - points[:, 2]
+        part = np.clip(under / settings.head_base_flare_m, 0.0, 1.0)
+        share = np.maximum(share, part * part * (3.0 - 2.0 * part))
+    held = (reach > settings.head_base_radius_m) & (share > 0.0)
     out = points.copy()
-    out[held, :2] *= (settings.head_base_radius_m / reach[held])[:, None]
+    pull = settings.head_base_radius_m / reach[held] - 1.0
+    out[held, :2] *= (1.0 + share[held] * pull)[:, None]
     return out
 
 

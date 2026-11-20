@@ -209,16 +209,36 @@ def test_the_head_base_is_held_round_the_neck_axis() -> None:
     wide = np.column_stack([3.0 * radius * np.cos(ring), 2.0 * radius * np.sin(ring)])
     low = np.column_stack([wide, np.full(16, 0.5 * height)])
     inner = np.column_stack([0.2 * wide, np.full(16, 0.5 * height)])
-    high = np.column_stack([wide, np.full(16, height)])
+    jaw, slope = SETTINGS.head_base_jaw_height_m, SETTINGS.head_base_jaw_slope
+    flare = SETTINGS.head_base_flare_m
+    assert jaw > height and flare > 0.0 and slope > 0.0
+    high = np.column_stack([wide, jaw - slope * wide[:, 0]])  # on the jaw line
+    high[:, 2] = np.maximum(high[:, 2], height)
     held = export.narrow_head_base(np.vstack([low, inner, high]), SETTINGS)
     inward = held[:16, :2] / radius  # straight towards the axis
     assert np.allclose(inward, wide / np.linalg.norm(wide, axis=1)[:, None])
     assert np.array_equal(held[:16, 2], low[:, 2])
     assert np.array_equal(held[16:], np.vstack([inner, high]))
+    # under the jaw line the stub is held too, whole from flare_m below it
+    side = np.array([[0.0, 2.0 * radius, jaw - f * flare] for f in (1.0, 0.5, 0.0)])
+    front = side[:, [1, 0, 2]] - [0.0, 0.0, slope * 2.0 * radius]
+    for stub in (side, front[front[:, 2] >= height]):
+        reach = np.linalg.norm(export.narrow_head_base(stub, SETTINGS)[:, :2], axis=1)
+        assert np.allclose(reach[[0, -1]], [radius, 2.0 * radius])
+        assert np.all(np.diff(reach) > 0.0) and len(stub) == 3
+    plain = dataclasses.replace(
+        SETTINGS, head_base_jaw_height_m=0.0, head_base_flare_m=0.0
+    )
+    assert np.array_equal(export.narrow_head_base(side, plain), side)
     off = dataclasses.replace(SETTINGS, head_base_height_m=0.0)
     assert np.array_equal(export.narrow_head_base(low, off), low)
     with pytest.raises(ValueError, match="vertices"):
         export.narrow_head_base(low[:, :2], SETTINGS)
-    for change in ({"head_base_height_m": -0.01}, {"head_base_radius_m": 0.0}):
+    for change in (
+        {"head_base_height_m": -0.01},
+        {"head_base_radius_m": 0.0},
+        {"head_base_flare_m": 0.0},
+        {"head_base_jaw_slope": -0.1},
+    ):
         with pytest.raises(ValueError, match="head_base"):
             dataclasses.replace(SETTINGS, **change)
