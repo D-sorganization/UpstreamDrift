@@ -141,6 +141,55 @@ def test_the_forearm_ends_in_a_clean_closed_ring_before_the_wrist(side: str) -> 
     assert steps == len(edges)  # a single closed loop
 
 
+def _hems(layer: dress.Layer) -> list[tuple[np.ndarray, np.ndarray]]:
+    """Each hem, highest first: its rim on the skin and its cloth edge, in loop order."""
+    edges = dress.boundary_edges(layer.faces)
+    fold = layer.faces[-2 * len(edges) : -len(edges)]  # (next, cloth, rim) per edge
+    cloth = dict(zip(fold[:, 2].tolist(), fold[:, 1].tolist(), strict=True))
+    follow, hems = dict(edges.tolist()), []
+    while follow:
+        walk, loop = next(iter(follow)), []
+        while walk in follow:
+            loop.append(walk)
+            walk = follow.pop(walk)
+        edge = [cloth[rim] for rim in loop]
+        hems.append((layer.vertices[loop], layer.vertices[edge]))
+    return sorted(hems, key=lambda hem: -float(hem[0][:, 2].mean()))
+
+
+def _roughness_mm(loop: np.ndarray) -> float:
+    """Largest distance of a closed loop's points from its low-harmonic fit."""
+    step = np.linalg.norm(loop - np.roll(loop, 1, axis=0), axis=1)
+    turn = 2.0 * np.pi * np.cumsum(step) / step.sum()
+    waves = range(1, LIMITS["hem_harmonics"] + 1)
+    basis = [np.ones(len(loop))] + [
+        f(k * turn) for k in waves for f in (np.cos, np.sin)
+    ]
+    design = np.column_stack(basis)
+    smooth = design @ np.linalg.lstsq(design, loop, rcond=None)[0]
+    return 1.0e3 * float(np.linalg.norm(loop - smooth, axis=1).max())
+
+
+@pytest.mark.parametrize("profile", [None, "showpiece"])
+def test_the_collar_is_a_smooth_line(profile: str | None) -> None:
+    fitted = fit.fit_body_skin(SKIN, _subject(), fit.load_fit_settings(profile=profile))
+    shirt = dress.dress_skin(SKIN, fitted, SKIN.weights, SETTINGS)["shirt"]
+    rim, edge = _hems(shirt)[0]
+    assert rim[:, 2].min() > fitted.joints["shoulder_l"][2]  # the collar, not a sleeve
+    assert _roughness_mm(rim) <= LIMITS["collar_roughness_mm"]
+    assert _roughness_mm(edge) <= LIMITS["collar_roughness_mm"]
+
+
+def test_each_sleeve_hem_sits_on_the_arm() -> None:
+    hems = _hems(LAYERS["shirt"])
+    assert len(hems) == 4  # collar, two sleeves, tail
+    for rim, edge in hems[1:3]:
+        assert abs(rim[:, 1].mean()) > FITTED.joints["shoulder_l"][1]  # on an arm
+        stand = 1.0e3 * np.linalg.norm(edge - rim, axis=1)
+        assert stand.max() <= LIMITS["sleeve_hem_stand_mm"]
+        assert stand.min() >= 1.0e3 * SETTINGS.sleeve_hug_m - 0.5
+
+
 def _front(layer: dress.Layer) -> np.ndarray:
     """Shirt surface samples (vertices and face centres) ahead of the hip joints."""
     points = np.vstack([layer.vertices, layer.vertices[layer.faces].mean(axis=1)])
@@ -249,6 +298,8 @@ def test_each_trouser_leg_stands_off_the_shank(side: str) -> None:
         {"leg_tube_m": (0.07, -0.01)},
         {"leg_tube_rise": 0.0},
         {"sleeve_cap_passes": -1},
+        {"sleeve_hug_m": 0.0},
+        {"sleeve_hug_gain": -0.1},
     ],
 )
 def test_invalid_settings_and_weights_raise(change: dict[str, object]) -> None:
