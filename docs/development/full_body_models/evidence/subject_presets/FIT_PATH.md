@@ -121,6 +121,17 @@ it was 100 %.
   swing solve then uses the adjusted attachments. Its receipt block is
   `address.bundle_adjustment`. Every number above is from runs without the
   flag.
+- First run with `--bundle-adjust --bundle-anchor-frames 391 476` appended to
+  the fit command (35 frames, one run, software-path evidence only): marker RMS
+  17.1 / 14.9 / 16.5 / 18.8 mm over the same four spans, against 15.7 / 24.4 /
+  26.6 / 29.7 mm without the flag. It does not reach the experiment. The
+  adjustment did not converge in its 200 iterations, six offsets ended on their
+  three-sigma bounds, shoulder and back markers moved 50 to 80 mm from their
+  seeds, the shank worsened (13.4 to 23.0 mm whole swing) and the prior share
+  of the cost was 0.07. A second run holding out `BackTop`, `RKneeOut` and
+  `LUArmHigh` scored them worse at the adjusted poses than at the start poses
+  (22 to 79, 20 to 53 and 40 to 60 mm), so the adjusted attachments are not yet
+  validated and the stage stays off by default.
   It eliminates each frame's pose block, takes exact offset derivatives and
   accepts loop-closure residuals. On a synthetic 30-hinge, 35-frame, 30-marker
   chain it converged in 21 iterations (56 to 93 s on a loaded four-core host,
