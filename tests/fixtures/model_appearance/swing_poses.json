@@ -44,5 +44,10 @@
       "hip_rotation_l": -0.5,
       "NeckInputZ": 0.5
     }
+  },
+  "skinned_hand_wrists_description": "Wrist coordinates (radians, not changes) of full_body_spec_anthro_driver.json with the skinned hands rigid on the club, at which the hands are turned against the forearms as at the top of the downswing and the finish of a fitted driver swing: the lead hand 62 to 66 degrees, the trail hand 96 to 100 degrees (bends with a twist about the forearm).",
+  "skinned_hand_wrists": {
+    "top": {"LWInputX": 0.16, "LWInputY": -0.95, "RWInputX": -2.6, "RWInputY": 2.44},
+    "finish": {"LWInputX": 0.23, "LWInputY": -0.37, "RWInputX": -2.48, "RWInputY": 2.36}
   }
 }

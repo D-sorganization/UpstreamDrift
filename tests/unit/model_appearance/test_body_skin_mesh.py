@@ -53,3 +53,26 @@ def test_folded_and_stretched_faces_of_a_posed_sheet() -> None:
     assert not mesh.folded_faces(wide[:, [1, 0, 2]], faces[:, ::-1]).any()
     with pytest.raises(ValueError):
         mesh.area_ratio(points, points[:4], faces)
+
+
+def test_inward_thickness_is_the_depth_of_a_tube() -> None:
+    turn = np.linspace(0.0, 2.0 * np.pi, 24, endpoint=False)
+    ring = np.column_stack([0.03 * np.cos(turn), 0.03 * np.sin(turn)])
+    rows = [np.column_stack([ring, np.full(24, z)]) for z in (0.0, 0.02, 0.04)]
+    quads = [
+        (r * 24 + i, r * 24 + (i + 1) % 24, r * 24 + 24 + (i + 1) % 24, r * 24 + 24 + i)
+        for r in range(2)
+        for i in range(24)
+    ]
+    faces = np.array([t for a, b, c, d in quads for t in ((a, b, c), (a, c, d))])
+    tube, middle = np.vstack(rows), np.arange(24, 48)
+    depth = mesh.inward_thickness(tube, faces, middle)
+    assert depth == pytest.approx(0.06, rel=0.02)
+    flat = tube * [1.0, 0.5, 1.0]  # pressed to half its depth one way
+    pressed = mesh.inward_thickness(flat, faces, middle)
+    assert pressed.max() == pytest.approx(0.06, rel=0.02)
+    assert pressed.min() == pytest.approx(0.03, rel=0.1)  # normals of the facets
+    far = mesh.inward_thickness(tube, faces[:1], np.array([40]))
+    assert np.isinf(far).all()
+    with pytest.raises(ValueError, match="ids"):
+        mesh.inward_thickness(tube, faces, np.array([72]))

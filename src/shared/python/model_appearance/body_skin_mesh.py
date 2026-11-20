@@ -1,6 +1,7 @@
 """Triangle-mesh steps shared by the CC0 body skin layers (#15299).
 
-Normals, open edges, one Laplacian pass and an exact cut on a level set, on
+Normals, open edges, depth under the surface, one Laplacian pass and an exact
+cut on a level set, on
 plain ``(N, 3)`` and ``(F, 3)`` arrays. Appearance only.
 """
 
@@ -59,6 +60,34 @@ def area_ratio(rest: Array, posed: Array, faces: Faces) -> Array:
     before = np.linalg.norm(_face_cross(rest, faces), axis=1)
     after = np.linalg.norm(_face_cross(posed, faces), axis=1)
     return np.asarray(after / np.maximum(before, 1e-18))
+
+
+def inward_thickness(vertices: Array, faces: Faces, ids: NDArray[np.int64]) -> Array:
+    """Depth of the body under each vertex of ``ids``: how far it is along the
+    inward vertex normal to the surface on the other side.
+
+    A limb wrung or folded by a pose is thinner there than at rest. Infinite
+    where the normal meets no face. Raises ``ValueError`` for an unknown vertex.
+    """
+    if len(ids) and not 0 <= int(np.min(ids)) <= int(np.max(ids)) < len(vertices):
+        raise ValueError("ids must index vertices")
+    inward = -vertex_normals(vertices, faces)[ids]
+    corner = vertices[faces[:, 0]]
+    first, second = (vertices[faces[:, k]] - corner for k in (1, 2))
+    depth = np.full(len(ids), np.inf)
+    for row, (start, ray) in enumerate(zip(vertices[ids], inward, strict=True)):
+        across = np.cross(ray, second)
+        scale = np.einsum("ij,ij->i", first, across)
+        scale = np.where(np.abs(scale) > 1e-18, scale, np.inf)
+        offset = start - corner
+        u = np.einsum("ij,ij->i", offset, across) / scale
+        around = np.cross(offset, first)
+        v = around @ ray / scale
+        reach = np.einsum("ij,ij->i", second, around) / scale
+        hit = (u >= 0.0) & (v >= 0.0) & (u + v <= 1.0) & (reach > 1e-6)
+        if hit.any():
+            depth[row] = reach[hit].min()
+    return depth
 
 
 def boundary_edges(faces: Faces) -> Faces:
