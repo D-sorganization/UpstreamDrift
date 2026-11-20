@@ -41,14 +41,12 @@ REPO = HERE.parents[1]
 SETTINGS_PATH = HERE / "skin_settings.json"
 OUT = HERE / "body_skin_cc0.npz"
 PROVENANCE_PATH = HERE / "PROVENANCE.json"
-SIDES = ("L", "R")
-NL = "\n"
 
 
 def group_bones(settings: dict[str, Any]) -> dict[str, list[str]]:
     """Group name to its listed MakeHuman bones, central groups first."""
     groups = {name: list(bones) for name, bones in settings["central_groups"].items()}
-    for side in SIDES:
+    for side in ("L", "R"):
         for name, bones in settings["side_groups"].items():
             groups[f"{name}_{side.lower()}"] = [f"{bone}.{side}" for bone in bones]
     return groups
@@ -199,12 +197,12 @@ def main(argv: list[str]) -> int:
         same = same and json.loads(PROVENANCE_PATH.read_text()) == provenance(
             root, settings, used
         )
-        sys.stdout.write(("asset content matches" if same else "DIFFERS") + NL)
+        sys.stdout.write(("asset content matches" if same else "DIFFERS") + "\n")
         return 0 if same else 1
     np.savez_compressed(OUT, **arrays)
     record = provenance(root, settings, used)
     PROVENANCE_PATH.write_text(json.dumps(record, indent=2) + NL, encoding="utf-8")
-    sys.stdout.write(f"wrote {OUT.name} ({OUT.stat().st_size} bytes)" + NL)
+    sys.stdout.write(f"wrote {OUT.name} ({OUT.stat().st_size} bytes)" + "\n")
     return 0
 
 
