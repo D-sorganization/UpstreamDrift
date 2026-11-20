@@ -326,6 +326,33 @@ def test_each_trouser_leg_hangs_close_to_the_shank(side: str) -> None:
         assert 0.0 < 1.0e3 * (mean[0] - mean[1]) <= limit
 
 
+@pytest.mark.parametrize("profile", [None, "showpiece"])
+def test_each_trouser_hem_hangs_below_the_bare_ankle(profile: str | None) -> None:
+    """No bare skin shows under a trouser leg: its hem is the leg's level end."""
+    fitted = fit.fit_body_skin(SKIN, _subject(), fit.load_fit_settings(profile=profile))
+    layers = dress.dress_skin(SKIN, fitted, SKIN.weights, SETTINGS)
+    hems, bare = _hems(layers["trousers"]), layers["skin"].vertices
+    assert len(hems) == 3  # waist, two legs
+    for rim, edge in hems[1:]:
+        side = "l" if edge[:, 1].mean() > 0.0 else "r"
+        knee, ankle = fitted.joints[f"knee_{side}"], fitted.joints[f"ankle_{side}"]
+        bone = ankle - knee
+        length_mm = 1.0e3 * float(np.linalg.norm(bone))
+        share = [(points - knee) @ bone / (bone @ bone) for points in (bare, rim, edge)]
+        off = [
+            np.linalg.norm(points - knee - np.outer(along, bone), axis=1)
+            for points, along in zip((bare, rim, edge), share, strict=True)
+        ]
+        near = (share[0] > 0.5) & (off[0] < LIMITS["ankle_reach_m"])
+        lowest = share[0][near].max(initial=-np.inf)
+        assert length_mm * (lowest - share[1].min()) <= LIMITS["bare_ankle_mm"]
+        # one level line across the shank, below the ankle joint, on the leg's tube
+        assert np.allclose(share[1], SETTINGS.trouser_end_fraction)
+        level = length_mm * np.abs(share[2] - SETTINGS.trouser_end_fraction)
+        assert level.max() <= LIMITS["hem_level_mm"]
+        assert off[2].min() >= SETTINGS.leg_tube_m[1] - 1.0e-9
+
+
 @pytest.mark.parametrize(
     "change",
     [
@@ -338,6 +365,7 @@ def test_each_trouser_leg_hangs_close_to_the_shank(side: str) -> None:
         {"sleeve_cap_passes": -1},
         {"sleeve_hug_m": 0.0},
         {"sleeve_hug_gain": -0.1},
+        {"ankle_end_fraction": 1.0},
     ],
 )
 def test_invalid_settings_and_weights_raise(change: dict[str, object]) -> None:
