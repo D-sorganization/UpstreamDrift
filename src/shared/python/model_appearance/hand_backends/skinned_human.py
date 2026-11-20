@@ -100,6 +100,10 @@ from src.shared.python.model_appearance.hand_backends.skinning import (
     scale_asset,
     vertex_normals,
 )
+from src.shared.python.model_appearance.hand_backends.knuckle_sideways import (
+    abduct_knuckles,
+    hold_knuckles_in_range,
+)
 from src.shared.python.model_appearance.hand_backends.metacarpal_arch import (
     set_metacarpal_arch,
 )
@@ -515,6 +519,32 @@ def _overlap_little_finger(
     hand.swing_sideways(bone, 0.5 * (low + high))
 
 
+def _wrap_swung(
+    hand: _GripHand,
+    side: str,
+    closed: Mapping[str, float],
+    obstacle: ObstacleDistance,
+    wrap: Callable[[], dict[str, float]],
+) -> dict[str, float]:
+    """Wrap the fingers of hand ``side`` once its knuckles are swung as set.
+
+    The knuckles ``side_close.knuckle_abduction_deg`` names for the hand are
+    abducted on the closed pose ``closed`` (#15329), the fingers wrapped with
+    the trigger finger held apart, and the abducted knuckles then held inside
+    their range as flexed, wrapping again, ``abduction_hold_passes`` at most.
+    Postcondition: with no knuckle named, as ``wrap_trigger_finger`` alone.
+    """
+    settings = hand.settings
+    abducted = dict(dict(settings.side_close_knuckle_abduction_deg)[side])
+    abduct_knuckles(hand, closed, abducted)
+    wrapped = wrap_trigger_finger(hand, side, closed, obstacle, wrap)
+    for _ in range(settings.side_close_abduction_hold_passes if abducted else 0):
+        if not hold_knuckles_in_range(hand, wrapped, abducted):
+            break  # every abducted knuckle is inside its range as now flexed
+        wrapped = wrap()
+    return wrapped
+
+
 def _held_thumb(settings: SkinnedHumanSettings) -> dict[str, float]:
     """Flexion a short thumb's two free joints are held at (radians); empty
     for a thumb held at none (``thumb.held_flexion_deg_of``)."""
@@ -853,7 +883,7 @@ def _solve_right_hand(
         _cup_palm(hand, targets, angles, soft, thumb_radius_m)
         return _lay_thumb(hand, targets, angles, soft, thumb_radius_m, most)
 
-    wrapped = wrap_trigger_finger(hand, side, angles, soft, lambda: wrap(start))
+    wrapped = _wrap_swung(hand, side, angles, soft, lambda: wrap(start))
     angles = with_thumb(hand, wrapped)
     if pair is not None and pad is not None:
         # Fold the palm round the other thumb, then lay the thumb from where
