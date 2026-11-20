@@ -36,6 +36,8 @@ Array = NDArray[np.float64]
 #: Neck groups from the neck joint up; ``neck_follow`` holds one share for each.
 NECK_GROUPS = ("neck_lower", "neck_middle", "neck_upper")
 Edges = NDArray[np.int64]
+#: Side groups that, with the thorax, share the arm's turn against the trunk.
+GIRDLE_GROUPS = ("clavicle", "shoulder", "upperarm_proximal", "upperarm_distal")
 
 
 @dataclass(frozen=True)
@@ -72,6 +74,7 @@ class PoseSettings:
     acromion_inner_m: float
     acromion_reach_m: float
     neck_follow: tuple[float, ...]
+    girdle_smoothing_iterations: int = 0
 
     def __post_init__(self) -> None:
         follow = tuple(self.neck_follow)
@@ -81,8 +84,8 @@ class PoseSettings:
             raise ValueError("neck_follow must lie in [0, 1]")
         if not 0.0 <= self.shoulder_follow <= 1.0:
             raise ValueError("shoulder_follow must lie in [0, 1]")
-        if self.smoothing_iterations < 0:
-            raise ValueError("smoothing_iterations must not be negative")
+        if min(self.smoothing_iterations, self.girdle_smoothing_iterations) < 0:
+            raise ValueError("smoothing iterations must not be negative")
         for name in ("smoothing_radius_m", "acromion_half_width_m", "acromion_reach_m"):
             if not getattr(self, name) > 0.0:
                 raise ValueError(f"{name} must be positive")
@@ -103,6 +106,17 @@ def mesh_edges(faces: NDArray[np.int64]) -> Edges:
     return np.unique(np.sort(pairs, axis=1), axis=0)
 
 
+def _relax(weights: Array, edges: Edges, free: NDArray[np.bool_]) -> Array:
+    """One pass: each ``free`` vertex moves half way to the mean of its neighbours."""
+    count = np.bincount(edges.ravel(), minlength=len(weights))[:, None]
+    total = np.zeros_like(weights)
+    np.add.at(total, edges[:, 0], weights[edges[:, 1]])
+    np.add.at(total, edges[:, 1], weights[edges[:, 0]])
+    out = weights.copy()
+    out[free] = 0.5 * weights[free] + 0.5 * (total / count)[free]
+    return out
+
+
 def smooth_shoulder_weights(
     skin: BodySkin, fitted: FittedSkin, settings: PoseSettings
 ) -> Array:
@@ -110,7 +124,11 @@ def smooth_shoulder_weights(
 
     Each pass moves a vertex half way to the mean of its neighbours; vertices
     farther than ``smoothing_radius_m`` from both shoulder joints keep the
-    stored weights. Postcondition: rows still sum to one.
+    stored weights. ``girdle_smoothing_iterations`` further passes then relax
+    only how a vertex shares its ``GIRDLE_GROUPS`` weight among those groups
+    (thorax, clavicle, deltoid, upper arm): the arm's turn against the trunk
+    is spread over more skin, and what the vertex gives the neck, the spine or
+    the forearm is untouched. Postcondition: rows still sum to one.
     """
     edges = mesh_edges(skin.faces)
     reach = np.min(
@@ -121,14 +139,22 @@ def smooth_shoulder_weights(
         axis=0,
     )
     free = reach < settings.smoothing_radius_m
-    count = np.bincount(edges.ravel(), minlength=len(skin.vertices))[:, None]
     weights = skin.weights.copy()
     for _ in range(settings.smoothing_iterations):
-        total = np.zeros_like(weights)
-        np.add.at(total, edges[:, 0], weights[edges[:, 1]])
-        np.add.at(total, edges[:, 1], weights[edges[:, 0]])
-        weights[free] = 0.5 * weights[free] + 0.5 * (total / count)[free]
-    return weights / weights.sum(axis=1, keepdims=True)
+        weights = _relax(weights, edges, free)
+    weights = weights / weights.sum(axis=1, keepdims=True)
+    girdle = [
+        index
+        for index, group in enumerate(skin.groups)
+        if group == "thorax" or group.rpartition("_")[0] in GIRDLE_GROUPS
+    ]
+    part = weights[:, girdle]
+    whole = part.sum(axis=1, keepdims=True)
+    for _ in range(settings.girdle_smoothing_iterations):
+        part = _relax(part, edges, free)
+        part *= whole / np.maximum(part.sum(axis=1, keepdims=True), 1e-300)
+    weights[:, girdle] = part
+    return weights
 
 
 def blend(first: Rigid, second: Rigid, share: float, pivot: Array) -> Rigid:
