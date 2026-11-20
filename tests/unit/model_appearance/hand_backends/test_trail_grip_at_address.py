@@ -114,3 +114,11 @@ def test_the_heel_of_the_trail_palm_is_at_the_base_of_the_lead_thumb() -> None:
     heel = _measured().heel_to_lead_thumb_base_m
     most = float(_T["max_heel_to_lead_thumb_base_m"])
     assert heel <= most, f"heel {heel * 1e3:.1f} mm from the lead thumb's base"
+
+
+def test_the_heel_of_the_trail_palm_is_at_the_knuckle_of_the_lead_thumb() -> None:
+    """Item 4 against the joint that shows (#15150 option 1): the thumb's base
+    joint is buried in the lead palm, where no trail palm can reach it."""
+    heel = _measured().heel_to_lead_thumb_knuckle_m
+    most = float(_T["max_heel_to_lead_thumb_knuckle_m"])
+    assert heel <= most, f"heel {heel * 1e3:.1f} mm from the lead thumb's knuckle"
