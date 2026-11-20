@@ -59,8 +59,7 @@ def _across(rel: np.ndarray, axis: np.ndarray) -> np.ndarray:
 
 
 def _cut(mesh: Any, origin: np.ndarray, axis: np.ndarray) -> np.ndarray:
-    """Points where the plane through ``origin`` across ``axis`` cuts the mesh,
-    as (x, y) in that plane."""
+    """Where the plane through ``origin`` across ``axis`` cuts the mesh, (x, y)."""
     v, f = mesh.vertices, mesh.faces
     height = (v - origin) @ axis
     points = []
@@ -97,8 +96,7 @@ def _forearms(spec: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 
 def _girths(arm: dict[str, Any]) -> tuple[np.ndarray, np.ndarray]:
-    """Distance from the wrist joint (m, negative up the arm) and skin girth (m)
-    at stations down the forearm, each body cut across its own axis."""
+    """Distance from the wrist joint (m, negative up the arm) and skin girth (m)."""
     lengths = [cap.length_m() for cap in arm["caps"]]
     where, girths = [], []
     for cap, skin, before in zip(
