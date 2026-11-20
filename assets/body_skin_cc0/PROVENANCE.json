@@ -1,6 +1,6 @@
 {
   "asset": "body_skin_cc0.npz",
-  "asset_sha256": "e3efafe9a33cfc1e28785cea6f605486a521a380137910427bcffa32d979c26f",
+  "asset_sha256": "f1e0756fc81516df8560b8c15bf188b9f55c48ff76a1dd2ce13e45d4603f43a4",
   "asset_description": "Athletic male MakeHuman body skin without head, hands and feet, as one triangle surface with group skin weights and joint landmarks; int16 multiples of quantum_m, origin at the hip midpoint, x forward, y left, z up.",
   "quantum_m": 0.0001,
   "licence": "CC0-1.0",

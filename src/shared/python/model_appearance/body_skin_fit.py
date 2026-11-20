@@ -36,7 +36,7 @@ PointMap = Callable[[Array], Array]
 ASSET_DIR = Path(__file__).resolve().parents[4] / "assets" / "body_skin_cc0"
 SIDES: tuple[tuple[str, float], ...] = (("l", 1.0), ("r", -1.0))
 ARM_GROUPS = ("clavicle", "shoulder", "upperarm", "forearm")
-TRUNK_GROUPS = ("pelvis", "spine", "thorax")
+TRUNK_GROUPS = ("pelvis", "spine", "thorax", "neck", "head")
 #: Groups the chest scale leaves alone (the arm below the deltoid, the legs).
 THORAX_EXEMPT_GROUPS = ("upperarm_distal", "forearm", "thigh", "shank")
 #: Smallest chest scale accepted: a fifth off MakeHuman's chest depth.
