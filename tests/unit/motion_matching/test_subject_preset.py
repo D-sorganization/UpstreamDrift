@@ -107,7 +107,7 @@ def test_the_preset_body_has_the_stated_joint_to_joint_lengths(built: Any) -> No
     assert 0.178 <= half_spacing <= 0.182
     assert _joint(document, "RUpperArm")[1] == pytest.approx(-half_spacing)
     assert neck - hub == pytest.approx(0.095)
-    assert 0.650 <= mid_hip_to_neck <= 0.665 + 1e-4
+    assert mid_hip_to_neck == pytest.approx(0.623, abs=0.001)
     subject = document["subject"]
     assert subject["shoulder_below_cervicale_m"] == 0.095
     assert subject["subject_preset"] == NAME

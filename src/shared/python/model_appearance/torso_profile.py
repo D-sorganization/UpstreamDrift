@@ -95,6 +95,47 @@ class TorsoProfile:
         first = TorsoStation(lowest, float(width[0]), float(depth[0]))
         return dataclasses.replace(self, stations=(first, *kept))
 
+    def with_shoulder(self, reference: float, along: float) -> TorsoProfile:
+        """This profile with its shoulder line moved from ``reference`` to ``along``.
+
+        Stations below the line keep their share of the way up to it, the ones
+        above it their share of the way from it to the top: the chest follows
+        the shoulder joints down and the slope to the neck grows longer. Slants
+        scale with their station's height; above the widest station the widths
+        stretch with the slope, never past the widest, so the slope stays even.
+        Precondition: both lie strictly between 0 and the top station.
+        Postcondition: same ends; unchanged when ``along`` is ``reference``.
+        """
+        top = self.stations[-1].along
+        if not (0.0 < reference < top and 0.0 < along < top):
+            raise ValueError("the shoulder line must lie inside the torso profile")
+        if along == reference:
+            return self
+
+        def move(at: float) -> float:
+            if at <= reference:  # nothing moves at or below the joint plane
+                return at * along / reference if at > 0.0 else at
+            return along + (at - reference) * (top - along) / (top - reference)
+
+        widest = max(s.width for s in self.stations)
+        crest = max(i for i, s in enumerate(self.stations) if s.width == widest)
+        neck = self.stations[-1].width
+        stretch = max(1.0, (top - along) / (top - reference))
+        stations = tuple(
+            dataclasses.replace(
+                s,
+                along=move(s.along),
+                slant=s.slant * (move(s.along) / s.along if s.along > 0.0 else 1.0),
+                width=s.width
+                if i <= crest
+                else min(widest, neck + (s.width - neck) * stretch),
+            )
+            for i, s in enumerate(self.stations)
+        )
+        return dataclasses.replace(
+            self, stations=stations, fine_from=move(self.fine_from)
+        )
+
     def scales_at(
         self, along: Sequence[float] | NDArray[np.floating]
     ) -> tuple[Array, Array]:
@@ -133,7 +174,8 @@ class TorsoAcceptance:
     ``norm_tolerance``: ANSUR II male means (Gordon et al. 2014, mean stature
     1.756 m) scaled by stature, which for a 1.82 m man are a chest breadth of
     330 to 350 mm, bideltoid 500 to 520, waist 310 to 330 and hip 345 to 360.
-    ``min_chest_over_hip``: the chest is about as wide as the hips.
+    ``min_chest_over_hip``: the chest is about as wide as the hips, and the
+    waist at least ``min_waist_over_chest`` of the chest (norm about 0.96).
     ``min_chest_depth`` is a floor, NOT the norm (250 to 265 mm, 0.137 to
     0.146 of stature): at address the lead arm lies across the chest front, so
     a chest of the norm depth swallows it; ``max_forearm_in_chest`` (forearm
@@ -145,6 +187,12 @@ class TorsoAcceptance:
     ``max_back_jump``: its largest forward jump within ``jump_window`` (a shelf
     under the neck); ``max_neck_ahead_of_back``: how far the back of the neck
     base is in front of the upper back's own line through ``back_tangent``.
+    ``min_chest_ahead``: chest front over upper back, both from the trunk axis.
+
+    Shoulders, with the shoulder joints lowered below the neck by some length:
+    the yoke top beside the neck (inside ``yoke_ends[0]`` of the joint offset)
+    moves at most ``max_yoke_neck_shift`` of it, and the top at the joint
+    (beyond ``yoke_ends[1]``) falls at least ``min_trapezius_gain`` of it.
     """
 
     chest_breadth: tuple[float, float] = (0.181, 0.192)
@@ -153,7 +201,12 @@ class TorsoAcceptance:
     hip_breadth: tuple[float, float] = (0.190, 0.198)
     norm_tolerance: float = 0.06
     min_chest_over_hip: float = 0.97
-    min_chest_depth: float = 0.118
+    min_chest_depth: float = 0.124
+    min_waist_over_chest: float = 0.88
+    min_chest_ahead: float = 1.15
+    yoke_ends: tuple[float, float] = (0.4, 0.85)
+    max_yoke_neck_shift: float = 0.2
+    min_trapezius_gain: float = 0.3
     # 1.0 before the skinned-hand forearm (#15288), which alone reads 1.0004 on
     # the unchanged torso; the deeper chest here reads 1.154 (49.9 mm).
     max_forearm_in_chest: float = 1.2
@@ -173,6 +226,7 @@ class TorsoAcceptance:
             self.hip_breadth,
             self.back_span,
             self.back_tangent,
+            self.yoke_ends,
         )
         if any(not low < high for low, high in bands):
             raise ValueError("torso acceptance bands must rise from low to high")
@@ -186,6 +240,10 @@ class TorsoAcceptance:
             self.jump_window,
             self.max_back_jump,
             self.max_neck_ahead_of_back,
+            self.min_waist_over_chest,
+            self.min_chest_ahead,
+            self.max_yoke_neck_shift,
+            self.min_trapezius_gain,
         )
         if not (np.isfinite(limits).all() and min(limits) > 0.0):
             raise ValueError("torso acceptance limits must be positive and finite")
