@@ -231,3 +231,84 @@ def test_the_neck_above_the_joint_rides_the_trunk_and_keeps_its_height() -> None
     assert (
         abs(fitted_top - stored_top) < 0.005
     )  # a shift above the joint, not a stretch
+
+
+def test_a_limb_can_be_fitted_to_each_side_on_its_own() -> None:
+    sides = {"thigh": (0.431, 0.447), "forearm": (0.280, 0.287)}
+    joints = fit.fit_body_skin(
+        SKIN, dataclasses.replace(_subject(), sides=sides), PLAIN
+    ).joints
+    for name, near, far in (("thigh", "hip", "knee"), ("forearm", "elbow", "wrist")):
+        for side, want in zip("lr", sides[name], strict=True):
+            got = np.linalg.norm(joints[f"{far}_{side}"] - joints[f"{near}_{side}"])
+            assert abs(got - want) <= RESIDUAL_M, (name, side)
+    with pytest.raises(ValueError, match="tail"):
+        dataclasses.replace(_subject(), sides={"tail": (0.1, 0.1)})
+    with pytest.raises(ValueError, match="thigh"):
+        dataclasses.replace(_subject(), sides={"thigh": (0.4, -0.4)})
+
+
+def _ring(side: str, fitted: fit.FittedSkin) -> fit.WristRing:
+    """A wrist 52 mm wide and 36 mm deep, 5 mm off the joint, askew to the bone."""
+    sign = dict(fit.SIDES)[side]
+    return fit.WristRing(0.026, 0.018, np.array([0.9, 0.3 * sign, 0.3]), OFF_M)
+
+
+OFF_M = np.array([0.004, 0.0, 0.003])
+
+
+def _wrist_radii(
+    vertices: np.ndarray, fitted: fit.FittedSkin, side: str
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Per forearm vertex: reach before the wrist, radius and the ring's radius."""
+    ring = _ring(side, fitted)
+    elbow, wrist = fitted.joints[f"elbow_{side}"], fitted.joints[f"wrist_{side}"]
+    axis = (wrist - elbow) / np.linalg.norm(wrist - elbow)
+    width = ring.width_axis - (ring.width_axis @ axis) * axis
+    width /= np.linalg.norm(width)
+    off = ring.centre_m - (ring.centre_m @ axis) * axis
+    columns = [g.startswith("forearm") and g.endswith(side) for g in SKIN.groups]
+    mine = SKIN.weights[:, columns].sum(axis=1) > 0.5
+    local = vertices[mine] - wrist
+    radial = local - np.outer(local @ axis, axis) - off
+    radius = np.linalg.norm(radial, axis=1)
+    cosine = radial @ width / radius
+    sine = np.sqrt(np.clip(1.0 - cosine**2, 0.0, None))
+    target = 1.0 / np.hypot(cosine / ring.half_width_m, sine / ring.half_depth_m)
+    return -(local @ axis), radius, target
+
+
+def test_the_forearm_ends_just_under_the_hand_wrist_section() -> None:
+    settings = fit.load_fit_settings()
+    fitted = fit.fit_body_skin(SKIN, _subject(), settings)
+    rings = {side: _ring(side, fitted) for side, _ in fit.SIDES}
+    matched = fit.match_wrists(SKIN, fitted, rings, settings)
+    assert matched.joints is fitted.joints
+    for side, _ in fit.SIDES:
+        before, plain, target = _wrist_radii(fitted.vertices, fitted, side)
+        _, radius, _ = _wrist_radii(matched.vertices, fitted, side)
+        end = before < settings.wrist_match_full_m
+        assert end.sum() >= 20
+        # Radius step from the hand's section down to the forearm skin.
+        step = (target - radius)[end]
+        assert np.abs(step - settings.wrist_under_m).max() < 2.0e-4, side
+        assert np.abs((target - plain)[end]).max() > 2.0e-3  # unmatched: a step
+        far = before > settings.wrist_match_from_m
+        assert np.abs(radius - plain)[far].max() < 1.0e-12
+    moved = np.linalg.norm(matched.vertices - fitted.vertices, axis=1) > 0.0
+    forearm = [g.startswith("forearm") for g in SKIN.groups]
+    assert (SKIN.weights[moved][:, forearm].sum(axis=1) > 0.5).all()
+    assert fit.match_wrists(SKIN, fitted, {}, settings) is fitted
+
+
+def test_an_invalid_wrist_ring_or_side_raises() -> None:
+    settings = fit.load_fit_settings()
+    fitted = fit.fit_body_skin(SKIN, _subject(), settings)
+    with pytest.raises(ValueError, match="half_depth_m"):
+        fit.WristRing(0.02, 0.0, np.array([1.0, 0, 0]), np.zeros(3))
+    with pytest.raises(ValueError, match="width_axis"):
+        fit.WristRing(0.02, 0.02, np.zeros(3), np.zeros(3))
+    with pytest.raises(ValueError, match="side"):
+        fit.match_wrists(SKIN, fitted, {"x": _ring("l", fitted)}, settings)
+    with pytest.raises(ValueError, match="wrist_match_full_m"):
+        dataclasses.replace(settings, wrist_match_full_m=0.2)

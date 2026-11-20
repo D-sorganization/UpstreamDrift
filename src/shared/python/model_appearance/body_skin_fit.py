@@ -23,8 +23,8 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-from collections.abc import Callable
-from dataclasses import dataclass, fields
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass, field, fields
 from pathlib import Path
 
 import numpy as np
@@ -35,6 +35,9 @@ Array = NDArray[np.float64]
 PointMap = Callable[[Array], Array]
 ASSET_DIR = Path(__file__).resolve().parents[4] / "assets" / "body_skin_cc0"
 SIDES: tuple[tuple[str, float], ...] = (("l", 1.0), ("r", -1.0))
+SIDE_NAMES = tuple(side for side, _ in SIDES)
+#: Limb segments of ``SegmentLengths`` that may differ between the sides.
+LIMBS = ("upper_arm", "forearm", "thigh", "shank")
 ARM_GROUPS = ("clavicle", "shoulder", "upperarm", "forearm")
 TRUNK_GROUPS = ("pelvis", "spine", "thorax", "neck", "head")
 #: Groups the chest scale leaves alone (the arm below the deltoid, the legs).
@@ -54,7 +57,11 @@ def _positive(owner: object, names: tuple[str, ...]) -> None:
 
 @dataclass(frozen=True)
 class SegmentLengths:
-    """A subject's joint-centre geometry in metres (heights from the hip midpoint)."""
+    """A subject's joint-centre geometry in metres (heights from the hip midpoint).
+
+    ``sides`` holds a limb's own (left, right) lengths where the two differ;
+    a limb without an entry has its one length on both sides.
+    """
 
     hip_half_spacing: float
     shoulder_half_spacing: float
@@ -64,11 +71,23 @@ class SegmentLengths:
     forearm: float
     thigh: float
     shank: float
+    sides: Mapping[str, tuple[float, float]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        _positive(self, tuple(f.name for f in fields(self)))
+        _positive(self, tuple(f.name for f in fields(self) if f.name != "sides"))
         if self.neck_height <= self.shoulder_height:
             raise ValueError("neck_height must exceed shoulder_height")
+        for name, pair in self.sides.items():
+            if name not in LIMBS:
+                raise ValueError(f"{name} is not a limb segment")
+            if len(pair) != 2 or not all(math.isfinite(v) and v > 0.0 for v in pair):
+                raise ValueError(f"{name} needs two positive side lengths")
+
+    def limb(self, name: str, side: str) -> float:
+        """Length of limb segment ``name`` on side ``l`` or ``r``."""
+        if name in self.sides:
+            return float(self.sides[name][SIDE_NAMES.index(side)])
+        return float(getattr(self, name))
 
 
 @dataclass(frozen=True)
@@ -89,8 +108,16 @@ class FitSettings:
     thigh_back_below_hip_m: float
     thigh_back_fade_m: float
     thigh_back_front_m: float
+    wrist_match_from_m: float
+    wrist_match_full_m: float
+    wrist_under_m: float
 
     def __post_init__(self) -> None:
+        _positive(self, ("wrist_match_full_m",))
+        if not self.wrist_match_full_m < self.wrist_match_from_m:
+            raise ValueError("wrist_match_full_m must be less than wrist_match_from_m")
+        if not 0.0 <= self.wrist_under_m <= MAX_CORRECTION_M:
+            raise ValueError(f"wrist_under_m outside [0, {MAX_CORRECTION_M}]")
         _positive(self, ("hip_back_plateau_m", "hip_back_rise_m", "trunk_margin_m"))
         _positive(self, ("thorax_front_start_m", "thorax_front_rise_m"))
         _positive(self, ("thigh_back_fade_m", "thigh_back_front_m"))
@@ -113,6 +140,25 @@ class FitSettings:
             )
         if not self.warp_extent_m > self.trunk_margin_m:
             raise ValueError("warp_extent_m must exceed trunk_margin_m")
+
+
+@dataclass(frozen=True)
+class WristRing:
+    """A hand's wrist section in the fitted rest space, metres.
+
+    Half width along ``width_axis`` and half depth across it; ``centre_m`` is
+    the section's centre off the wrist joint.
+    """
+
+    half_width_m: float
+    half_depth_m: float
+    width_axis: Array
+    centre_m: Array
+
+    def __post_init__(self) -> None:
+        _positive(self, ("half_width_m", "half_depth_m"))
+        if not np.linalg.norm(self.width_axis) > 0.0:
+            raise ValueError("width_axis must not be zero")
 
 
 @dataclass(frozen=True)
@@ -267,18 +313,18 @@ def _group_maps(
         maps[f"clavicle_{side}"] = maps[f"shoulder_{side}"] = girdle
         joints[f"hip_{side}"] = hip = hip_mid + lateral * lengths.hip_half_spacing
         chain = (
-            ("upperarm", "shoulder", "elbow", shoulder, lengths.upper_arm),
-            ("forearm", "elbow", "wrist", None, lengths.forearm),
-            ("thigh", "hip", "knee", hip, lengths.thigh),
-            ("shank", "knee", "ankle", None, lengths.shank),
+            ("upperarm", "shoulder", "elbow", shoulder, "upper_arm"),
+            ("forearm", "elbow", "wrist", None, "forearm"),
+            ("thigh", "hip", "knee", hip, "thigh"),
+            ("shank", "knee", "ankle", None, "shank"),
         )
         end = shoulder
-        for group, near, far_name, start, length in chain:
+        for group, near, far_name, start, limb in chain:
             maps[f"{group}_{side}"], end = _stretch(
                 marks[f"{near}_{side}"],
                 marks[f"{far_name}_{side}"],
                 end if start is None else start,
-                length,
+                lengths.limb(limb, side),
             )
             joints[f"{far_name}_{side}"] = end
     return maps, joints
@@ -358,3 +404,44 @@ def fit_body_skin(
         )
     _sagittal_corrections(vertices, skin, joints, settings)
     return FittedSkin(vertices=vertices, joints=joints, maps=maps)
+
+
+def match_wrists(
+    skin: BodySkin,
+    fitted: FittedSkin,
+    rings: Mapping[str, WristRing],
+    settings: FitSettings,
+) -> FittedSkin:
+    """Shape each forearm's wrist end to lie just under its hand's wrist section.
+
+    ``rings`` holds the hand's section per side (``l``, ``r``). Over the last
+    ``wrist_match_from_m`` of the forearm the skin's section turns into the
+    ring's ellipse made ``wrist_under_m`` smaller, whole from
+    ``wrist_match_full_m`` before the wrist joint, so the hand's cuff lies
+    over it without a step. Only forearm vertices move, across the bone; the
+    joints stay. Raises ``ValueError`` for a side the skin does not have.
+    """
+    if not rings:
+        return fitted
+    vertices = fitted.vertices.copy()
+    for side, ring in rings.items():
+        if side not in SIDE_NAMES:
+            raise ValueError(f"side must be one of {SIDE_NAMES}, got {side!r}")
+        elbow, wrist = fitted.joints[f"elbow_{side}"], fitted.joints[f"wrist_{side}"]
+        axis, reach = _unit(wrist - elbow), float(np.linalg.norm(wrist - elbow))
+        width = _unit(ring.width_axis - (ring.width_axis @ axis) * axis)
+        columns = [g.startswith("forearm") and g.endswith(side) for g in skin.groups]
+        mine = skin.weights[:, columns].sum(axis=1) > 0.5
+        along = (vertices[mine] - elbow) @ axis
+        span = settings.wrist_match_from_m - settings.wrist_match_full_m
+        share = _smoothstep((along - reach + settings.wrist_match_from_m) / span)
+        off = ring.centre_m - (ring.centre_m @ axis) * axis
+        centre = elbow + np.outer(along, axis) + np.outer(share, off)
+        radial = vertices[mine] - centre
+        radius = np.maximum(np.linalg.norm(radial, axis=1), 1.0e-9)
+        cosine = np.clip(radial @ width / radius, -1.0, 1.0)
+        sine = np.sqrt(1.0 - cosine**2)
+        target = 1.0 / np.hypot(cosine / ring.half_width_m, sine / ring.half_depth_m)
+        gain = 1.0 + share * ((target - settings.wrist_under_m) / radius - 1.0)
+        vertices[mine] = centre + radial * gain[:, None]
+    return FittedSkin(vertices=vertices, joints=fitted.joints, maps=fitted.maps)

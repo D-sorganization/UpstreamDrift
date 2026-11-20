@@ -30,6 +30,8 @@ LEFT = {
     "foot": (-0.01, 0.088, -0.83),
 }
 RESIDUAL_M, BONES_OF_THE_BODY = 1.0e-9, 15  # pelvis, thorax, head, six per side
+#: Each skin knee, ankle, elbow and wrist on its own model joint: a micrometre.
+SIDE_RESIDUAL_M = 1.0e-6
 
 
 def _frames(turn: np.ndarray | None = None) -> dict[str, pose.Rigid]:
@@ -97,6 +99,21 @@ def test_each_bone_carries_its_fitted_joints_onto_the_model(turn: object) -> Non
         near = export.bone_joints(role)[0]
         carried = frames[role].apply(bind.inverse().apply(rest[near]))
         assert np.linalg.norm(carried - model[near]) < RESIDUAL_M, role
+
+
+def test_each_side_is_fitted_to_its_own_limb_lengths() -> None:
+    frames = dict(FRAMES)
+    for role, shift in (("shank_r", 0.012), ("foot_r", 0.005), ("hand_l", -0.007)):
+        frames[role] = pose.Rigid(np.eye(3), FRAMES[role].translation + [0, 0, shift])
+    lengths = export.subject_lengths(frames)
+    assert lengths.limb("thigh", "r") == pytest.approx(lengths.thigh - 0.006, abs=1e-4)
+    fitted = fit.fit_body_skin(SKIN, lengths, fit.load_fit_settings())
+    model = export.model_joints(frames)
+    rest = export.rest_joints(fitted, model)
+    for role, bind in export.bind_poses(frames, fitted).items():
+        for joint in export.bone_joints(role):
+            carried = frames[role].apply(bind.inverse().apply(rest[joint]))
+            assert np.linalg.norm(carried - model[joint]) < SIDE_RESIDUAL_M, joint
 
 
 def test_bones_keep_every_vertex_whole_and_drop_small_weights() -> None:
