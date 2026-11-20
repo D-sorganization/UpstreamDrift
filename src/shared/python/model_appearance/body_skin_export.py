@@ -10,7 +10,9 @@ model's bodies and gives each body its bind pose in the fitted rest space:
 * ``bind_poses``: each body's pose in the fitted rest space, its proximal joint
   on the fitted joint and its bone along the fitted bone;
 * ``skin_bones`` and ``pose_bones``: one layer's per-body vertex lists and
-  weights, and linear blend skinning with them (the engine's rule).
+  weights, and linear blend skinning with them (the engine's rule);
+* ``blend_wrists``: the forearm's end shared with the body that carries the
+  hand, so the skin's end ring stays under a rigid hand's cuff at any wrist bend.
 
 Body frames are ``Rigid`` poses (body frame to world) keyed by role:
 ``pelvis``, ``thorax``, ``head`` and, per side, ``girdle``, ``upper_arm``,
@@ -92,6 +94,8 @@ class ExportSettings:
     bind_pose: Mapping[str, float]
     bind_stretch_limit_m: float
     covered_parts: tuple[str, ...]
+    wrist_blend_length_m: float = 0.0
+    wrist_blend_full_m: float = 0.0
 
     def __post_init__(self) -> None:
         follow = list(self.spine_follow)
@@ -103,6 +107,9 @@ class ExportSettings:
             raise ValueError("weight_floor outside [0, 0.5)")
         if not self.bind_stretch_limit_m > 0.0:
             raise ValueError("bind_stretch_limit_m must be positive")
+        length, full = self.wrist_blend_length_m, self.wrist_blend_full_m
+        if length < 0.0 or (length > 0.0 and not 0.0 <= full < length):
+            raise ValueError("wrist_blend needs 0 <= full_m < length_m, or length_m 0")
 
 
 @dataclass(frozen=True)
@@ -124,6 +131,8 @@ def load_export_settings(path: Path | None = None) -> ExportSettings:
         bind_pose={str(k): float(v) for k, v in raw["bind_pose"].items()},
         bind_stretch_limit_m=float(raw["bind_stretch_limit_m"]),
         covered_parts=tuple(raw["covered_parts"]),
+        wrist_blend_length_m=float(raw["wrist_blend_length_m"]),
+        wrist_blend_full_m=float(raw["wrist_blend_full_m"]),
     )
 
 
@@ -351,6 +360,48 @@ def skin_bones(
         if len(ids):
             bones.append(SkinBone(role, binds[role], ids, body[ids, index]))
     return tuple(bones)
+
+
+def blend_wrists(
+    bones: Sequence[SkinBone],
+    vertices: Array,
+    binds: Mapping[str, Rigid],
+    hands: Mapping[str, Rigid],
+    settings: ExportSettings,
+) -> tuple[SkinBone, ...]:
+    """``bones`` with each forearm's end shared with the body of its hand.
+
+    ``hands`` holds, per side (``l``, ``r``), the bind pose of the body that
+    carries the hand, its origin on the wrist joint; ``vertices`` are the
+    layer's, in the fitted rest space. Over the last ``wrist_blend_length_m``
+    before the wrist joint a vertex of the forearm's two bodies passes
+    smoothly to a ``hand_<side>`` bone, which holds it whole from
+    ``wrist_blend_full_m`` before the joint. Postcondition: every vertex keeps
+    its total weight, and with a zero length (or no hand) the bones are
+    returned unchanged. Raises ``ValueError`` for an unknown side.
+    """
+    length = settings.wrist_blend_length_m
+    span = length - settings.wrist_blend_full_m
+    out = list(bones)
+    for side, hand in hands.items():
+        if f"elbow_{side}" not in binds:
+            raise ValueError(f"the skin has no forearm on side {side!r}")
+        if length == 0.0:
+            continue
+        axis = hand.translation - binds[f"elbow_{side}"].translation
+        before = (hand.translation - vertices) @ axis / np.linalg.norm(axis)
+        t = np.clip((length - before) / span, 0.0, 1.0)
+        share, taken = t * t * (3.0 - 2.0 * t), np.zeros(len(vertices))
+        for index, bone in enumerate(out):
+            if bone.role in (f"forearm_{side}", f"elbow_{side}"):
+                ids, part = bone.vertex_ids, share[bone.vertex_ids]
+                taken[ids] += bone.weights * part
+                stays = part < 1.0
+                weights = (bone.weights * (1.0 - part))[stays]
+                out[index] = SkinBone(bone.role, bone.bind, ids[stays], weights)
+        moved = np.flatnonzero(taken)
+        out.append(SkinBone(f"hand_{side}", hand, moved, taken[moved]))
+    return tuple(bone for bone in out if len(bone.vertex_ids))
 
 
 def pose_bones(

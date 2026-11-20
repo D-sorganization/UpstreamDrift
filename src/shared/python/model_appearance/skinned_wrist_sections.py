@@ -219,6 +219,28 @@ def straight_wrists(
     }
 
 
+def straight_hand_turns(
+    spec: Mapping[str, Any], club: ClubAssembly | None
+) -> dict[str, Array]:
+    """Per forearm body: the rotation from the frame of the body its hand is
+    rigid with (the club; for the trail hand the body welded to the club) to
+    the forearm's, at the pose of :func:`straight_wrists`, where the forearm's
+    end is shaped to the hand. Empty without skinned hands on a club.
+    """
+    backend = spec.get("subject", {}).get("hand_visual_backend")
+    if club is None or backend != "skinned_human":
+        return {}
+    closure = spec.get("closure", {})
+    weld = np.asarray(closure["placement_a"], float) @ np.linalg.inv(
+        np.asarray(closure["placement_b"], float)
+    )
+    from_hand_body = {"lead": np.eye(3), "trail": weld[:3, :3].T}
+    return {
+        body: to_forearm @ from_hand_body[side]
+        for side, (body, to_forearm) in straight_wrists(spec, club).items()
+    }
+
+
 def forearm_wrist_sections(
     spec: Mapping[str, Any], club: ClubAssembly | None
 ) -> dict[str, WristSection]:
