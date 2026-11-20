@@ -1,0 +1,7 @@
+{
+  "description": "Turns of an upper arm against its shoulder-girdle link, as rotation vectors (radians) in the skin's rest frame (x forward, y to the subject's left, z up), about the shoulder joint. Rounded from a fitted driver swing: the trail arm at the top of the backswing (77 degrees in all, 65 about the arm) and the lead arm at the finish (85 degrees, 83 about the arm).",
+  "turns": {
+    "trail_top": {"side": "r", "rotvec_rad": [0.27, -1.25, -0.4]},
+    "lead_finish": {"side": "l", "rotvec_rad": [-0.02, -1.17, 0.91]}
+  }
+}
