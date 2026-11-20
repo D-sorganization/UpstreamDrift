@@ -12,7 +12,9 @@ model's bodies and gives each body its bind pose in the fitted rest space:
 * ``skin_bones`` and ``pose_bones``: one layer's per-body vertex lists and
   weights, and linear blend skinning with them (the engine's rule);
 * ``blend_wrists``: the forearm's end shared with the body that carries the
-  hand, so the skin's end ring stays under a rigid hand's cuff at any wrist bend.
+  hand, so the skin's end ring stays under a rigid hand's cuff at any wrist bend;
+* ``narrow_head_base``: the rigid head model's base held round the neck axis, so
+  a turned head does not push it out of the skin's neck and the collar.
 
 Body frames are ``Rigid`` poses (body frame to world) keyed by role:
 ``pelvis``, ``thorax``, ``head`` and, per side, ``girdle``, ``upper_arm``,
@@ -96,8 +98,13 @@ class ExportSettings:
     covered_parts: tuple[str, ...]
     wrist_blend_length_m: float = 0.0
     wrist_blend_full_m: float = 0.0
+    head_base_height_m: float = 0.0
+    head_base_radius_m: float = 0.0
 
     def __post_init__(self) -> None:
+        height, radius = self.head_base_height_m, self.head_base_radius_m
+        if height < 0.0 or (height > 0.0 and not radius > 0.0):
+            raise ValueError("head_base needs height_m >= 0 and, with it, radius_m > 0")
         follow = list(self.spine_follow)
         if len(follow) != len(SPINE_GROUPS) or follow != sorted(follow):
             raise ValueError("spine_follow must hold three rising shares")
@@ -133,6 +140,8 @@ def load_export_settings(path: Path | None = None) -> ExportSettings:
         covered_parts=tuple(raw["covered_parts"]),
         wrist_blend_length_m=float(raw["wrist_blend_length_m"]),
         wrist_blend_full_m=float(raw["wrist_blend_full_m"]),
+        head_base_height_m=float(raw["head_base"]["height_m"]),
+        head_base_radius_m=float(raw["head_base"]["radius_m"]),
     )
 
 
@@ -402,6 +411,29 @@ def blend_wrists(
         moved = np.flatnonzero(taken)
         out.append(SkinBone(f"hand_{side}", hand, moved, taken[moved]))
     return tuple(bone for bone in out if len(bone.vertex_ids))
+
+
+def narrow_head_base(vertices: Array, settings: ExportSettings) -> Array:
+    """Head-model ``vertices`` with the base held inside the skin's neck.
+
+    ``vertices`` are ``(N, 3)`` in the head frame: origin on the neck joint, z
+    up the neck. The head model is rigid while the skin's neck only shares the
+    head's turn, so a base wider one way than the other comes out of the neck
+    and the collar when the head turns. A vertex below ``head_base_height_m``
+    is moved straight towards the neck axis until it lies within
+    ``head_base_radius_m`` of it. Postcondition: every height, and every vertex
+    at or above that height or within the radius, is unchanged. Raises
+    ``ValueError`` for another shape.
+    """
+    points = np.asarray(vertices, dtype=float)
+    if points.ndim != 2 or points.shape[1] != 3:
+        raise ValueError("vertices must be (N, 3)")
+    reach = np.linalg.norm(points[:, :2], axis=1)
+    held = points[:, 2] < settings.head_base_height_m
+    held &= reach > settings.head_base_radius_m
+    out = points.copy()
+    out[held, :2] *= (settings.head_base_radius_m / reach[held])[:, None]
+    return out
 
 
 def pose_bones(

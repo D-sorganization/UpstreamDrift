@@ -200,3 +200,25 @@ def test_the_forearm_end_follows_a_bent_hand() -> None:
     with pytest.raises(ValueError, match="side"):
         binds = export.bind_poses(FRAMES, FITTED)
         export.blend_wrists((), FITTED.vertices, binds, {"x": binds["head"]}, SETTINGS)
+
+
+def test_the_head_base_is_held_round_the_neck_axis() -> None:
+    height, radius = SETTINGS.head_base_height_m, SETTINGS.head_base_radius_m
+    assert radius > 0.0 and height > 0.0
+    ring = np.linspace(0.0, 2.0 * np.pi, 16, endpoint=False)
+    wide = np.column_stack([3.0 * radius * np.cos(ring), 2.0 * radius * np.sin(ring)])
+    low = np.column_stack([wide, np.full(16, 0.5 * height)])
+    inner = np.column_stack([0.2 * wide, np.full(16, 0.5 * height)])
+    high = np.column_stack([wide, np.full(16, height)])
+    held = export.narrow_head_base(np.vstack([low, inner, high]), SETTINGS)
+    inward = held[:16, :2] / radius  # straight towards the axis
+    assert np.allclose(inward, wide / np.linalg.norm(wide, axis=1)[:, None])
+    assert np.array_equal(held[:16, 2], low[:, 2])
+    assert np.array_equal(held[16:], np.vstack([inner, high]))
+    off = dataclasses.replace(SETTINGS, head_base_height_m=0.0)
+    assert np.array_equal(export.narrow_head_base(low, off), low)
+    with pytest.raises(ValueError, match="vertices"):
+        export.narrow_head_base(low[:, :2], SETTINGS)
+    for change in ({"head_base_height_m": -0.01}, {"head_base_radius_m": 0.0}):
+        with pytest.raises(ValueError, match="head_base"):
+            dataclasses.replace(SETTINGS, **change)

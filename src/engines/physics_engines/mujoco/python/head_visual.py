@@ -30,7 +30,11 @@ from src.engines.physics_engines.mujoco.python.appearance_layer import _Assets
 from src.engines.physics_engines.mujoco.python.native_mjcf import _pose
 from src.shared.python.core.physics_constants import GRAVITY_M_S2
 from src.shared.python.model_appearance import head as head_model
-from src.shared.python.model_appearance.body_skin_export import body_skin_enabled
+from src.shared.python.model_appearance.body_skin_export import (
+    body_skin_enabled,
+    load_export_settings,
+    narrow_head_base,
+)
 from src.shared.python.model_appearance.schema import AppearanceDocument
 
 HEAD_MOCAP_BODY = "visual_head"
@@ -140,6 +144,12 @@ def _place(
     return found[0], found[1], found[2], "torso"
 
 
+def _in_skin_neck(part: head_model.HeadPart) -> head_model.HeadPart:
+    """``part`` (canonical head frame) with its base held inside the skin's neck."""
+    held = narrow_head_base(part.mesh.vertices, load_export_settings())
+    return dataclasses.replace(part, mesh=dataclasses.replace(part.mesh, vertices=held))
+
+
 def attach_head_visual(
     root: ET.Element,
     elements: Mapping[str, ET.Element],
@@ -162,7 +172,9 @@ def attach_head_visual(
     body, pose, length, source = placed
     canonical = dataclasses.replace(cfg, forward_axis="+x", up_axis="+z")
     parts = head_model.build_head_parts(length, canonical)
-    if not body_skin_enabled(spec):  # the skinned body has its own neck (#15299)
+    if body_skin_enabled(spec):  # the skinned body has its own neck (#15299)
+        parts = [_in_skin_neck(part) for part in parts]
+    else:
         parts += head_model.build_neck_parts(length, canonical)
     assets = _registry(root, doc)
     override = cfg.orientation_override
