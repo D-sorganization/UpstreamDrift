@@ -325,8 +325,10 @@ def _aim_thumb(
     """
     settings, asset = hand.settings, hand.asset
     hand.fixed.pop("thumb_meta", None)  # each aim starts from the rest thumb
-    # Aim from the thumb's rest shape, whatever thumb angles come later.
+    # Aim from the thumb's rest shape, whatever thumb angles come later; a
+    # short thumb is aimed as the bent shape it is held in.
     angles = {k: v for k, v in angles.items() if not k.startswith("thumb")}
+    angles.update(_held_thumb(settings))
     grip_from_rest = hand.placement[:3, :3]
     base = hand.joint_position("thumb_meta", angles)
     tip = hand.joint_position("thumb_dist", angles, tail=True)
@@ -513,12 +515,25 @@ def _overlap_little_finger(
     hand.swing_sideways(bone, 0.5 * (low + high))
 
 
+def _held_thumb(settings: SkinnedHumanSettings) -> dict[str, float]:
+    """Flexion a short thumb's two free joints are held at (radians); empty
+    for a thumb held at none (``thumb.held_flexion_deg_of``)."""
+    held = settings.thumb_held_flexion_deg
+    if not any(held):
+        return {}
+    bones = ("thumb_prox", "thumb_dist")
+    return {b: math.radians(v) for b, v in zip(bones, held, strict=True)}
+
+
 def _thumb_chain(
     settings: SkinnedHumanSettings, targets: _RightHandTargets
 ) -> CurlChain:
     low, high = (math.radians(v) for v in settings.thumb_press_range_deg)
     mcp_low, mcp_high = (math.radians(v) for v in settings.thumb_mcp_limits_deg)
     ip_low, ip_high = (math.radians(v) for v in settings.thumb_ip_limits_deg)
+    held = _held_thumb(settings)
+    mcp_low = max(mcp_low, held.get("thumb_prox", mcp_low))
+    ip_low = max(ip_low, held.get("thumb_dist", ip_low))
     straight = math.radians(settings.thumb_straight_ip_limit_deg)
     blend = targets.thumb_straightness
     mcp_high = max(mcp_low, blend * straight + (1.0 - blend) * mcp_high)
@@ -530,7 +545,8 @@ def _thumb_chain(
             CurlJoint("thumb_prox", mcp_low, mcp_high, mcp_low),
             CurlJoint("thumb_dist", ip_low, ip_high, ip_low),
         ),
-        must_touch=("thumb_prox", "thumb_dist"),
+        # A thumb held bent arches off the grip: only its end pad can touch.
+        must_touch=("thumb_dist",) if held else ("thumb_prox", "thumb_dist"),
     )
 
 
@@ -574,6 +590,8 @@ def _lay_thumb(
     bend = min(targets.thumb_straightness, settings.thumb_toward_index_straightness)
     gap_m = settings.thumb_index_gap_m
     lifted = math.radians(settings.thumb_press_range_deg[0]) + 1e-9
+    # A short thumb is pressed down already bent, not bent after it lands.
+    angles = {**angles, **_held_thumb(settings)}
 
     def around(points: Array) -> Array:
         return np.minimum(obstacle(points), finger(points))
@@ -739,8 +757,9 @@ def _arched_hand(
     asset: SkinnedHandAsset, settings: SkinnedHumanSettings, side: str, paired: bool
 ) -> tuple[_GripHand, SkinnedHumanSettings]:
     """The hand to pose, its set rays arched, and the settings to pose it by:
-    those of hand ``side`` (its set arch and its own thumb target)."""
+    those of hand ``side`` (its set arch, thumb target and short thumb)."""
     settings = settings.with_set_arch(side).with_thumb_target(side)
+    settings = settings.with_short_thumb(side)
     hand = _GripHand(asset, settings.beside_other_hand() if paired else settings)
     set_metacarpal_arch(hand, side)
     return hand, settings

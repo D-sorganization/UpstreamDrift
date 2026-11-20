@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 from functools import lru_cache
 from pathlib import Path
@@ -89,6 +89,8 @@ class SkinnedHumanSettings:
     thumb_azimuth_close_rad: float
     thumb_toward_index_target: str
     thumb_target_of: tuple[tuple[str, str], ...]
+    thumb_held_flexion_of: tuple[tuple[str, tuple[float, float]], ...]
+    thumb_held_flexion_deg: tuple[float, float]
     side_close_max_deg: float
     side_close_gap_m: float
     side_close_index_gap_m: float
@@ -154,6 +156,19 @@ class SkinnedHumanSettings:
         if target == self.thumb_toward_index_target:
             return self
         return replace(self, thumb_toward_index_target=target)
+
+    def with_short_thumb(self, side: str) -> SkinnedHumanSettings:
+        """These settings for hand ``side``, whose thumb is held as far flexed
+        as ``thumb.held_flexion_deg_of`` names for it (a short thumb).
+        Precondition: ``side`` is lead or trail (``ValueError``).
+        Postcondition: ``self`` itself if that hand's thumb is held no further
+        than these settings already hold it."""
+        if side not in _HANDS:
+            raise ValueError(f"side must be one of {_HANDS}, got {side!r}")
+        held = dict(self.thumb_held_flexion_of).get(side, self.thumb_held_flexion_deg)
+        if held == self.thumb_held_flexion_deg:
+            return self
+        return replace(self, thumb_held_flexion_deg=held)
 
     def beside_other_hand(self) -> SkinnedHumanSettings:
         """These settings for the trail hand of a pair. Its palm lies on the
@@ -353,6 +368,27 @@ def _thumb_target_of(raw: Any) -> tuple[tuple[str, str], ...]:
     )
 
 
+def _thumb_held_flexion_of(
+    thumb: Mapping[str, Any],
+) -> tuple[tuple[str, tuple[float, float]], ...]:
+    """``thumb.held_flexion_deg_of``: per hand, the least flexion of the
+    thumb's knuckle and end joint, each within that joint's limits."""
+    raw, name = thumb["held_flexion_deg_of"], "thumb.held_flexion_deg_of"
+    if not isinstance(raw, Mapping):
+        raise TypeError(f"{name} must be a mapping")
+    limits = [_pair(thumb[key], key) for key in ("mcp_limits_deg", "ip_limits_deg")]
+    held = []
+    for side, angles in raw.items():
+        if isinstance(angles, (str, bytes)) or not isinstance(angles, Sequence):
+            raise TypeError(f"{name} needs two angles for a hand")
+        knuckle, end = (float(angle) for angle in angles)  # two, or ValueError
+        for angle, (_, most) in zip((knuckle, end), limits, strict=True):
+            if not 0.0 <= angle <= most:
+                raise ValueError(f"{name}: {angle} is outside 0 to {most} degrees")
+        held.append((_one_of(side, _HANDS, name), (knuckle, end)))
+    return tuple(held)
+
+
 PAIR_OBSTACLES = ("skin", "capsules")
 PAIR_SPACING_PICKS = ("best", "last")
 
@@ -449,6 +485,8 @@ def _thumb_turn_fields(thumb: Mapping) -> dict[str, Any]:
             thumb["toward_index_target"], THUMB_TARGETS, "thumb.toward_index_target"
         ),
         "thumb_target_of": _thumb_target_of(thumb["toward_index_target_of"]),
+        "thumb_held_flexion_of": _thumb_held_flexion_of(thumb),
+        "thumb_held_flexion_deg": (0.0, 0.0),
     }
 
 
