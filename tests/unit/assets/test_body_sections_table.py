@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import subprocess
+import runpy
 import sys
 from pathlib import Path
 
@@ -60,16 +60,15 @@ def test_every_segment_is_normalised_the_way_a_loft_reads_it(mix: str) -> None:
     assert measured["head"]["menton_to_vertex_mm"] > measured["head"]["breadth_mm"]
 
 
-def test_table_rebuilds_from_the_pinned_makehuman_tree() -> None:
+def test_table_rebuilds_from_the_pinned_makehuman_tree(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Needs the pinned MakeHuman tree: set ``MAKEHUMAN_ROOT`` to its checkout."""
     root = os.environ.get("MAKEHUMAN_ROOT", "")
     if not root or not (Path(root) / TABLE["sources"][0]["path"]).is_file():
         pytest.skip("MAKEHUMAN_ROOT does not point at a MakeHuman checkout")
     script = str(BODY / "build_body_sections.py")
-    done = subprocess.run(
-        [sys.executable, script, root, "--check"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    assert done.returncode == 0, done.stdout + done.stderr
+    monkeypatch.setattr(sys, "argv", [script, root, "--check"])
+    with pytest.raises(SystemExit) as done:
+        runpy.run_path(script, run_name="__main__")
+    assert done.value.code in (0, None)
