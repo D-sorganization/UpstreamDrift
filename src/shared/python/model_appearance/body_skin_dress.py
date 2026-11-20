@@ -8,7 +8,9 @@ a second rig. Each hem is folded back onto the skin, and the bare skin is kept
 collar is measured from the line where the skin crosses the neck joint's
 height, not from the mesh edges about it, and collar and sleeve hems are held
 close to the skin (``neck_hug_m``, ``sleeve_hug_m``). The forearm ends on a plane ``wrist_cut_m`` before the wrist joint: a clean ring
-for the separate hand model's cuff to lie over.
+for the separate hand model's cuff to lie over. The neck's open end is drawn in
+under the head model and closed with a plug that moves with that end
+(``neck_cap``), so the join follows the skin and cannot open when the head turns.
 
 Three steps keep the anatomy from showing through the cloth: the chest of the
 body itself is evened out (``chest``), the shirt is pulled taut over the chest
@@ -27,6 +29,8 @@ from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
+from scipy.sparse import coo_matrix
+from scipy.sparse.csgraph import connected_components
 from scipy.spatial import cKDTree
 
 from src.shared.python.model_appearance.body_skin_mesh import (
@@ -86,6 +90,24 @@ class ChestSettings:
 
 
 @dataclass(frozen=True)
+class NeckCapSettings:
+    """The plug on the neck's end under the head; ``apex_height_m`` 0: none."""
+
+    apex_forward_m: float
+    apex_height_m: float
+    tuck_m: float
+    tuck_span_m: float
+    lip_m: float
+    lip_passes: int
+
+    def __post_init__(self) -> None:
+        if self.apex_height_m < 0.0 or not self.tuck_span_m > 0.0:
+            raise ValueError("neck_cap needs apex_height_m >= 0 and tuck_span_m > 0")
+        if min(self.tuck_m, self.lip_m, self.lip_passes) < 0:
+            raise ValueError("neck_cap needs tuck_m, lip_m and lip_passes >= 0")
+
+
+@dataclass(frozen=True)
 class DressSettings:
     """Named cut and ease settings; sources live in ``dress_settings.json``."""
 
@@ -113,6 +135,7 @@ class DressSettings:
     sleeve_cap_passes: int
     leg_tube_m: tuple[float, float]
     leg_tube_rise: float
+    neck_cap: NeckCapSettings
 
     def __post_init__(self) -> None:
         if len(self.leg_tube_m) != 2 or min(self.leg_tube_m) < 0.0:
@@ -157,6 +180,7 @@ def load_dress_settings(path: Path | None = None) -> DressSettings:
     for name in ("tuck_ease_m", "tuck_band_m", "waistband_span_m", "leg_tube_m"):
         values[name] = tuple(values[name])
     values["chest"] = ChestSettings(**values["chest"])
+    values["neck_cap"] = NeckCapSettings(**values["neck_cap"])
     return DressSettings(**values)
 
 
@@ -387,6 +411,60 @@ def _fold(body: Array, cloth_points: Array, faces: Faces) -> Layer:
     )
 
 
+def close_neck(layer: Layer, neck: Array, cap: NeckCapSettings) -> Layer:
+    """``layer`` with its open neck end drawn in and closed by a plug of its own.
+
+    The end is the loop of open edges that reaches highest (z up); it must
+    reach above the neck joint ``neck``. The plug's point lies
+    ``apex_forward_m`` ahead of and ``apex_height_m`` above the joint, inside
+    the head model. The end ring is moved ``tuck_m`` straight towards it, the
+    skin about the ring less (smoothstep, none from ``tuck_span_m`` off the
+    ring). The plug is a second ring, the end ring evened out along the loop
+    (``lip_passes``) and set ``lip_m`` further towards the point, and the
+    point; all of it carries the end ring's mean weights, so it follows the
+    neck's end as one piece and cannot fold in itself when the head turns.
+    Postcondition: that loop is closed with three faces per open edge; weights
+    and faces of the layer's own vertices are kept. Raises ``ValueError`` for
+    a layer without such an end.
+    """
+    if cap.apex_height_m == 0.0:
+        return layer
+    points, count = layer.vertices, len(layer.vertices)
+    edges = boundary_edges(layer.faces)
+    graph = coo_matrix((np.ones(len(edges)), edges.T), shape=(count, count))
+    loop = connected_components(graph, directed=False)[1][edges[:, 0]]
+    top = int(np.argmax(points[edges[:, 0], 2])) if len(edges) else 0
+    if not len(edges) or points[edges[top, 0], 2] <= neck[2]:
+        raise ValueError("the layer has no open end above the neck joint")
+    edges = edges[loop == loop[top]]
+    ring, lip = np.unique(edges, return_inverse=True)
+    first, second = edges.T
+    before, after = lip.reshape(-1, 2).T
+    apex = np.asarray(neck, float) + (cap.apex_forward_m, 0.0, cap.apex_height_m)
+    reach = cKDTree(points[ring]).query(points)[0]
+    share = np.clip(1.0 - reach / cap.tuck_span_m, 0.0, 1.0)
+    towards = apex - points
+    towards /= np.linalg.norm(towards, axis=1, keepdims=True)
+    step = cap.tuck_m * share * share * (3.0 - 2.0 * share)
+    drawn = points + step[:, None] * towards
+    rim: Array = drawn[ring]
+    for _ in range(cap.lip_passes):  # evened out along the loop
+        ahead, behind = np.empty_like(rim), np.empty_like(rim)
+        ahead[before], behind[after] = rim[after], rim[before]
+        rim = 0.5 * rim + 0.25 * (ahead + behind)
+    inward = apex - rim
+    rim = rim + cap.lip_m * inward / np.linalg.norm(inward, axis=1, keepdims=True)
+    whole = layer.weights[ring].mean(axis=0, keepdims=True)
+    tip = np.full(len(edges), count + len(ring))
+    before, after = before + count, after + count
+    closing = [(second, first, before), (second, before, after), (after, before, tip)]
+    return Layer(
+        np.vstack([drawn, rim, apex]),
+        np.vstack([layer.weights, np.repeat(whole, len(ring) + 1, axis=0)]),
+        np.vstack([layer.faces, *(np.column_stack(face) for face in closing)]),
+    )
+
+
 def dress_skin(
     skin: BodySkin, fitted: FittedSkin, weights: Array, settings: DressSettings
 ) -> dict[str, Layer]:
@@ -405,7 +483,8 @@ def dress_skin(
     bare = settings.skin_margin_m - np.maximum(cut.shirt, cut.trousers)
     bare = np.minimum(bare, cut.wrist)  # a clean ring instead of the stored ragged rim
     part, faces = clip_mesh(body, skin.faces, bare)
-    layers = {"skin": Layer(part[:, :3], part[:, 3:-width], faces)}
+    bare_skin = Layer(part[:, :3], part[:, 3:-width], faces)
+    layers = {"skin": close_neck(bare_skin, fitted.joints["neck"], settings.neck_cap)}
     for name, level in (("shirt", cut.shirt), ("trousers", cut.trousers)):
         part, faces = clip_mesh(body, skin.faces, level)
         here = _Fields(*part[:, -width:].T)

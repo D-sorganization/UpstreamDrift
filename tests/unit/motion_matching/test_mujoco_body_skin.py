@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import dataclasses
 import json
 import re
 from pathlib import Path
@@ -53,6 +54,9 @@ WRIST_LIMITS = json.loads((fit.ASSET_DIR / "export_settings.json").read_text())[
 ]
 HEAD_BASE = json.loads((fit.ASSET_DIR / "export_settings.json").read_text())[
     "head_base_limits"
+]
+NECK_PLUG = json.loads((fit.ASSET_DIR / "dress_settings.json").read_text())["limits"][
+    "neck_plug"
 ]
 SETTINGS = export.load_export_settings()
 DOCUMENT = document_from_dict({"schema_version": "appearance-v1"})
@@ -217,6 +221,85 @@ def test_the_head_base_stays_inside_the_neck_at_a_swing_head_turn(
     assert SETTINGS.head_base_height_m == HEAD_BASE["below_m"]
     # the loft body keeps the head model's own, wider base under its neck column
     assert _head_base(loft, pose)[1].max() > 1.5 * SETTINGS.head_base_radius_m
+
+
+def _meets(origin: Any, rays: Any, vertices: Any, faces: Any) -> Any:
+    """Whether each ray from ``origin`` meets a triangle (Moeller and Trumbore)."""
+    corner, one, two = (vertices[faces[:, i]] for i in range(3))
+    one, two, off = one - corner, two - corner, origin - corner
+    across = np.cross(rays[:, None], two[None])
+    det = (one[None] * across).sum(axis=2)
+    det = np.where(np.abs(det) < 1e-14, 1e-14, det)
+    turned = np.cross(off, one)
+    u = (off[None] * across).sum(axis=2) / det
+    v = (rays[:, None] * turned[None]).sum(axis=2) / det
+    ahead = (two * turned).sum(axis=1)[None] / det > 0.0
+    return ((u >= 0.0) & (v >= 0.0) & (u + v <= 1.0) & ahead).any(axis=1)
+
+
+def _open_end(model: Any, pose: dict[str, float]) -> tuple[float, Any, Any]:
+    """Length of open skin edge by the head that no shirt covers, the posed
+    surface and the posed data."""
+    data = _head_base(model, pose)[2]
+    posed = layer.posed_skin_layers(model, data)
+    skin, faces = posed["body_skin_skin"]
+    first, second = mesh.boundary_edges(faces).T
+    middle = 0.5 * (skin[first] + skin[second])
+    head = data.xpos[model.geom("visual_head_skin_mesh").bodyid[0]]
+    bare = cKDTree(posed["body_skin_shirt"][0]).query(middle)[0] > NECK_PLUG["bare_m"]
+    bare &= np.linalg.norm(middle - head, axis=1) < NECK_PLUG["reach_m"]
+    return (
+        float(np.linalg.norm(skin[first] - skin[second], axis=1)[bare].sum()),
+        posed,
+        data,
+    )
+
+
+@pytest.mark.parametrize("name", ["address", "top", "finish"])
+def test_the_neck_plug_closes_the_join_at_head_turns(
+    name: str, skinned: tuple[Any, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """No open skin edge is left under the head at any head turn, and the plug
+    that closes it stays inside the neck, clear of the collar, its point
+    covered by the head model."""
+    plain = layer.dress.load_dress_settings()
+    cap = dataclasses.replace(plain.neck_cap, apex_height_m=0.0)
+    plain = dataclasses.replace(plain, neck_cap=cap)
+    monkeypatch.setattr(layer.dress, "load_dress_settings", lambda: plain)
+    open_model = mujoco.MjModel.from_xml_string(_export(export.SKINNED_BACKEND)[0])
+    model, geom = skinned[0], skinned[0].geom("visual_head_skin_mesh")
+    shell = model.mesh(geom.dataid[0])
+    local = model.mesh_vert[shell.vertadr[0] : shell.vertadr[0] + shell.vertnum[0]]
+    shell_faces = model.mesh_face[
+        shell.faceadr[0] : shell.faceadr[0] + shell.facenum[0]
+    ]
+    step = np.arange(NECK_PLUG["rays"]) + 0.5
+    rise = step / len(step)
+    ring = np.sqrt(1.0 - rise**2)
+    up = np.column_stack([ring * np.cos(2.4 * step), ring * np.sin(2.4 * step), rise])
+    pose = dict(ADDRESS)
+    for joint, change in SWING[name].items():
+        pose[joint] = pose.get(joint, 0.0) + change
+    for turn in NECK_PLUG["turns_rad"]:
+        turned = pose | {"NeckInputZ": turn}
+        assert _open_end(open_model, turned)[0] >= NECK_PLUG["open_end_m"], turn
+        length, posed, data = _open_end(model, turned)
+        assert length == 0.0, (turn, length)
+        skin, faces = posed["body_skin_skin"]
+        count = len(skin) - int((faces == len(skin) - 1).any(axis=1).sum()) - 1
+        plug, own = skin[count:], faces[(faces < count).all(axis=1)]
+        assert len(plug) > 40 and len(own) == open_model.skin("body_skin_skin").facenum
+        near = cKDTree(skin[:count]).query(plug)[1]
+        normals = mesh.vertex_normals(skin, own)[near]
+        outside = np.einsum("ij,ij->i", plug - skin[near], normals).max()
+        assert outside <= NECK_PLUG["outside_m"], (turn, outside)
+        collar = cKDTree(posed["body_skin_shirt"][0]).query(plug)[0].min()
+        assert collar >= NECK_PLUG["collar_m"], (turn, collar)
+        frame = data.geom_xmat[geom.id].reshape(3, 3)
+        world = data.geom_xpos[geom.id] + local @ frame.T
+        head = data.xmat[geom.bodyid[0]].reshape(3, 3)
+        assert _meets(plug[-1], up @ head.T, world, shell_faces).all(), turn
+        assert cKDTree(world).query(plug[-1])[0] >= NECK_PLUG["apex_depth_m"], turn
 
 
 def test_the_forearms_end_under_the_skinned_hands_wrists() -> None:
