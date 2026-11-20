@@ -271,6 +271,8 @@ class _Context:
     thorax: frozenset[str] = frozenset()
     #: Parent body of each torso body that hangs from another torso body.
     parents: Mapping[str, str] = field(default_factory=dict)
+    #: Height of the neck point above each shoulder link, metres (#15299).
+    neck_rise: Mapping[str, float] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -295,8 +297,12 @@ class _Segment:
     front_axis: np.ndarray | None = None  # slants the profile's collar (#15292)
 
 
-def _shoulder_segment(cap: Capsule, scale: float) -> _Segment:
-    """The shoulder link as a yoke: flat, and starting beside the neck (#15279)."""
+def _shoulder_segment(cap: Capsule, scale: float, rise_m: float | None) -> _Segment:
+    """The shoulder link as a yoke: flat, from beside the neck down to the joint.
+
+    ``rise_m`` is the height of the neck point above the link (``None``: the
+    library default); both ends of the yoke hang from the neck point (#15299).
+    """
     start, end = np.asarray(cap.start_m), np.asarray(cap.end_m)
     along = end - start
     up = np.asarray(library.SHOULDER_UP_AXIS, dtype=float)
@@ -306,10 +312,17 @@ def _shoulder_segment(cap: Capsule, scale: float) -> _Segment:
         # An upright link has no front-back axis from "up": keep it round.
         return _Segment(start, end, radius, 1.0)
     radius *= library.SHOULDER_RADIUS_SCALE
-    droop = -library.SHOULDER_DROOP * radius * up  # the neck end hangs lower
+    rise = library.SHOULDER_DEFAULT_RISE if rise_m is None else rise_m / radius
+    outer = min(
+        rise - library.SHOULDER_JOINT_END_BELOW_NECK, library.SHOULDER_JOINT_END_LIFT
+    )
     return _Segment(
-        start + library.SHOULDER_START_FRACTION * along + droop,
-        end - library.SHOULDER_END_SINK * radius * up,
+        start
+        + library.SHOULDER_START_FRACTION * along
+        + (rise - library.SHOULDER_NECK_END_BELOW_NECK) * radius * up,
+        end
+        - library.SHOULDER_END_INSET * radius * along / np.linalg.norm(along)
+        + outer * radius * up,
         radius,
         library.SHOULDER_ASPECT,
         library.SHOULDER_END_SCALE,
@@ -392,17 +405,37 @@ def _skinned_wrist_sections(
     return sections
 
 
+def _neck_rises(
+    spec: Mapping[str, Any], caps: Mapping[str, Sequence[Capsule]]
+) -> dict[str, float]:
+    """Height of the neck point above each shoulder link (metres).
+
+    The trunk body that carries the shoulders has a capsule up to the neck and
+    one up to each shoulder link: the difference of their lengths.
+    """
+    out = {}
+    for joint in spec.get("joints", ()):
+        lengths = [c.length_m() for c in caps.get(str(joint.get("parent", "")), ())]
+        if library.classify_body(str(joint.get("child", ""))) == "shoulder" and lengths:
+            out[str(joint["child"])] = max(lengths) - min(lengths)
+    for joint in spec.get("joints", ()):  # the arm hangs from its shoulder link
+        if str(joint.get("parent", "")) in out:
+            out.setdefault(str(joint["child"]), out[str(joint["parent"])])
+    return out
+
+
 def _limb_segments(
     part: str,
     caps: Sequence[Capsule],
     scale: float,
     window: tuple[float, float] = library.FULL_COVERAGE,
     wrist: Any = None,
+    rise_m: float | None = None,
 ) -> list[_Segment]:
     out = []
     for cap in caps:
         if part == "shoulder":
-            out.append(_shoulder_segment(cap, scale))
+            out.append(_shoulder_segment(cap, scale, rise_m))
             continue
         radius = scale * (
             cap.radius_m
@@ -457,6 +490,10 @@ def _trunk_segment(
             fine_from=library.TORSO_FINE_FROM,
             fine_rings=library.TORSO_FINE_RINGS,
         )
+        if role == "thorax" and len(caps) > 1:  # shortest capsule: shoulder line
+            line = min(c.length_m() for c in caps) / spine.length_m()
+            reference = library.THORAX_SHOULDER_ALONG
+            profile = profile.with_shoulder(reference, min(line, reference))
         if not ctx.shapes.get(ctx.parents.get(body, "")):
             # Nothing drawn as a trunk solid under it (the pelvis ends at this
             # joint plane): start there instead of tucking in.
@@ -628,6 +665,7 @@ def _segment_meshes(
     base = library.material_name_for(ctx.doc, body)
     garment = library.garment_name_for(ctx.doc, body)
     out = []
+    drop = 0.0
     for i, seg in enumerate(segments):
         skin_seg = seg
         if part == "upper_arm":  # no skin dome poking out of the sleeve's flat start
@@ -641,7 +679,8 @@ def _segment_meshes(
                 library.DELTOID_HALF_SIZES if part == "upper_arm" else (1.0, 1.0)
             )
             along = (seg.end - seg.start) / np.linalg.norm(seg.end - seg.start)
-            drop = library.DELTOID_DROP * seg.radius if part == "upper_arm" else 0.0
+            if part == "upper_arm":
+                drop = library.deltoid_drop_m(seg.radius, ctx.neck_rise.get(body))
             ball = geometry.ellipsoid_mesh(
                 seg.start + drop * along,
                 size * np.array([down, across, across]),
@@ -652,6 +691,9 @@ def _segment_meshes(
             out.append(BodyMesh(body, f"blend{i}", ball, garment or base))
         if garment is not None:
             band = library.garment_coverage(ctx.doc.clothing, part)
+            start = drop / float(np.linalg.norm(seg.end - seg.start))
+            if band[0] < start < band[1]:  # a sleeve starts at the cap's widest ring
+                band = (start, band[1])
             mesh = _loft(
                 ctx, body, seg, coverage=band, thickness=library.GARMENT_THICKNESS
             )
@@ -709,7 +751,12 @@ def _meshes_for_body(
     else:
         window = ctx.windows.get(body, library.FULL_COVERAGE)
         segments = _limb_segments(
-            part, caps, scale, window, ctx.wrist_sections.get(body)
+            part,
+            caps,
+            scale,
+            window,
+            ctx.wrist_sections.get(body),
+            ctx.neck_rise.get(body),
         )
     return _segment_meshes(ctx, body, part, segments)
 
@@ -781,6 +828,7 @@ def body_meshes(
         _skinned_wrist_sections(spec, club),
         _parents_of(spec, "shoulder"),
         _torso_parents(spec),
+        _neck_rises(spec, by_body),
     )
     out = [
         m for body, caps in by_body.items() for m in _meshes_for_body(ctx, body, caps)
