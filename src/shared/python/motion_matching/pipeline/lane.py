@@ -18,6 +18,7 @@ from src.shared.python.motion_matching.club_observability import (
 )
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
+from src.shared.python.motion_matching.knee_axial_rotation import knee_axial_bounds_rad
 from src.shared.python.motion_matching.pipeline.address_feet import planted_stance
 from src.shared.python.motion_matching.pipeline.plant import (
     MatchingPlant,
@@ -317,7 +318,7 @@ def configure_lane(lane: Lane, document: dict[str, Any]) -> None:
     """Document-dependent solver settings: declared ranges, the spin priors and
     address constraints of anthropometric documents, full head weight when a
     neck carries the head."""
-    lane.bounds |= document_bounds(document)
+    lane.bounds |= document_bounds(document) | knee_axial_bounds_rad(document)
     if "address_seed_deg" in document:
         lane.anthropometric = True
         lane.prior_weights = dict.fromkeys(SPIN_COORDINATES, SPIN_PRIOR)
