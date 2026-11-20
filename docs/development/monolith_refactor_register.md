@@ -232,6 +232,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 813 | `src/engines/physics_engines/drake/python/src/drake_golf_model.py` |
 | 813 | `src/tools/model_explorer/urdf_code_editor.py` |
 | 812 | `src/engines/physics_engines/opensim/python/tour_matching/model_variants.py` |
+| 812 | `src/shared/python/model_appearance/body_meshes.py` |
 | 812 | `src/shared/python/motion_matching/club_only/ui_integration.py` |
 | 812 | `src/tools/starting_pose_matcher/live_view_controller.py` |
 | 811 | `src/engines/physics_engines/drake/python/src/pose_editor_tab.py` |
