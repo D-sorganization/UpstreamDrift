@@ -15,7 +15,10 @@ under the head model and closed with a plug that moves with that end
 Three steps keep the anatomy from showing through the cloth: the chest of the
 body itself is evened out (``chest``), the shirt is pulled taut over the chest
 and the sleeve caps (relaxed down to its floor ease), and each trouser leg is
-held off the leg by a tube of at least ``leg_tube_m`` about the shank.
+held off the leg by a tube of at least ``leg_tube_m`` about the shank. The
+leg's ragged end about the ankle is first drawn down to one level
+(``ankle_end_fraction``), so the trouser hem is a level line that hangs over
+the shoe's collar and no bare ankle shows under it.
 
 The shirt is draped first and the trousers' top is set on the normals through
 its cloth, ``waist_gap_m`` outside it, so the tucked shirt and the waistband
@@ -28,7 +31,7 @@ are in ``assets/body_skin_cc0/dress_settings.json``. Appearance only; opt-in.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, fields, replace
 from pathlib import Path
 
 import numpy as np
@@ -122,6 +125,7 @@ class DressSettings:
     tuck_m: float
     sleeve_fraction: float
     trouser_end_fraction: float
+    ankle_end_fraction: float
     collar_gap_m: float
     collar_front_drop_m: float
     collar_front_reach_m: float
@@ -156,9 +160,10 @@ class DressSettings:
         for name in positive:
             if not getattr(self, name) > 0.0:
                 raise ValueError(f"{name} must be positive")
-        for name in ("sleeve_fraction", "trouser_end_fraction"):
-            if not 0.0 < getattr(self, name) <= 1.0:
-                raise ValueError(f"{name} must lie in (0, 1]")
+        if not 0.0 < self.sleeve_fraction <= 1.0:
+            raise ValueError("sleeve_fraction must lie in (0, 1]")
+        if not 0.0 < self.trouser_end_fraction < self.ankle_end_fraction:
+            raise ValueError("need 0 < trouser_end_fraction < ankle_end_fraction")
         if min(self.collar_front_drop_m, self.neck_hug_gain, self.sleeve_hug_gain) < 0:
             raise ValueError("collar_front_drop_m and the hug gains must be >= 0")
         for name in ("tuck_ease_m", "tuck_band_m", "waistband_span_m"):
@@ -202,6 +207,7 @@ class _Fields:
     ahead: Array  # forward of the trunk axis, metres
     chest: Array  # 1 on the chest front, 0 off it
     cap: Array  # 1 within sleeve_cap_m of a shoulder joint
+    ankle: Array  # positive up the leg from the trouser hem (the last field)
 
     def stack(self) -> Array:
         return np.column_stack([getattr(self, f.name) for f in fields(self)])
@@ -221,6 +227,28 @@ def _limb(
         along[mine] = ((fitted.vertices - start) @ axis)[mine]
         owned |= mine
     return owned, along
+
+
+def _level_ankles(
+    skin: BodySkin, fitted: FittedSkin, settings: DressSettings
+) -> FittedSkin:
+    """``fitted`` with each leg's open end moved along the shank to one level.
+
+    The stored skin ends about the ankle in a ragged rim; its vertices are set
+    ``ankle_end_fraction`` of the shank from the knee, each at its own distance
+    from the shank axis, so a trouser leg cut above it has a level hem.
+    """
+    owned, _ = _limb(skin, fitted, LEG, ("knee", "ankle"))
+    rim = np.zeros(len(owned), dtype=bool)
+    rim[boundary_edges(skin.faces)] = True
+    vertices = fitted.vertices.copy()
+    for side, sign in SIDES:
+        knee, ankle = fitted.joints[f"knee_{side}"], fitted.joints[f"ankle_{side}"]
+        bone = ankle - knee
+        end = rim & owned & (sign * vertices[:, 1] > 0.0)
+        share = (vertices[end] - knee) @ bone / float(bone @ bone)
+        vertices[end] += np.outer(settings.ankle_end_fraction - share, bone)
+    return replace(fitted, vertices=vertices)
 
 
 def _neck_line(skin: BodySkin, fitted: FittedSkin) -> tuple[Array, Array, Array]:
@@ -307,6 +335,7 @@ def _fields(skin: BodySkin, fitted: FittedSkin, settings: DressSettings) -> _Fie
         ahead,
         front * trunk,
         cap,
+        np.where(leg, trousers, 1.0),
     )
 
 
@@ -333,7 +362,8 @@ def _even_chest(
 
 
 def shaped_body(skin: BodySkin, fitted: FittedSkin, settings: DressSettings) -> Array:
-    """The fitted body as it is dressed: its chest front evened out."""
+    """The fitted body as it is dressed: chest front evened out, ankles level."""
+    fitted = _level_ankles(skin, fitted, settings)
     cut = _fields(skin, fitted, settings)
     return _even_chest(fitted.vertices, skin.faces, cut, settings.chest)
 
@@ -509,6 +539,7 @@ def dress_skin(
     """
     if weights.shape != skin.weights.shape:
         raise ValueError("weights must be (vertices, groups) of the skin")
+    fitted = _level_ankles(skin, fitted, settings)
     cut = _fields(skin, fitted, settings)
     shaped = _even_chest(fitted.vertices, skin.faces, cut, settings.chest)
     body = np.column_stack([shaped, weights, cut.stack()])
@@ -516,6 +547,7 @@ def dress_skin(
     bare = settings.skin_margin_m - np.maximum(cut.shirt, cut.trousers)
     bare = np.minimum(bare, cut.wrist)  # a clean ring instead of the stored ragged rim
     part, faces = clip_mesh(body, skin.faces, bare)
+    part, faces = clip_mesh(part, faces, part[:, -1])  # ankle: none under the hem
     bare_skin = Layer(part[:, :3], part[:, 3:-width], faces)
     layers = {"skin": close_neck(bare_skin, fitted.joints["neck"], settings.neck_cap)}
     under = np.column_stack([shaped, np.zeros(len(shaped))])

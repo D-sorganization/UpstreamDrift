@@ -162,18 +162,67 @@ def _surface(model: Any, pose: dict[str, float]) -> dict[str, tuple[Any, Any]]:
     return layer.posed_skin_layers(model, data)
 
 
+def _profile_model(profile: str | None) -> Any:
+    spec = copy.deepcopy(SPEC)
+    spec["subject"] |= {"body_visual_backend": export.SKINNED_BACKEND}
+    if profile:
+        spec["subject"]["body_skin_profile"] = profile
+    xml = exporter.export_full_body_mjcf(json.dumps(spec).encode(), appearance=DOCUMENT)
+    return mujoco.MjModel.from_xml_string(xml[0])
+
+
+@pytest.mark.parametrize("profile", [None, "showpiece"])
+def test_no_bare_ankle_shows_between_trouser_hem_and_shoe(profile: str | None) -> None:
+    """Each trouser leg ends below the leg's bare skin and on the shoe's collar."""
+    model, limits = _profile_model(profile), DRESS["limits"]
+    for name in sorted(SWING):
+        data = mujoco.MjData(model)
+        for joint, value in ADDRESS.items():
+            data.qpos[model.joint(joint).qposadr[0]] = value
+        for joint, change in SWING[name].items():
+            data.qpos[model.joint(joint).qposadr[0]] += change
+        mujoco.mj_forward(model, data)
+        posed = layer.posed_skin_layers(model, data)
+        for side in fit.SIDE_NAMES:
+            knee, ankle = (
+                data.body(f"tibia_{side}").xpos,
+                data.body(f"talus_{side}").xpos,
+            )
+            bone = ankle - knee
+
+            def down(points: Any, bone: Any = bone, knee: Any = knee) -> Any:
+                """Millimetres along the shank past the ankle joint, near the leg."""
+                along = (points - knee) @ bone / (bone @ bone)
+                off = np.linalg.norm(points - knee - np.outer(along, bone), axis=1)
+                keep = (along > 0.5) & (off < limits["ankle_reach_m"])
+                return 1.0e3 * float(np.linalg.norm(bone)) * (along[keep] - 1.0)
+
+            shoe = model.geom(
+                next(
+                    g
+                    for g in range(model.ngeom)
+                    if model.body(model.geom_bodyid[g]).name == f"calcn_{side}"
+                    and "garment" in model.geom(g).name
+                )
+            )
+            mesh_id = int(shoe.dataid[0])
+            first, count = model.mesh_vertadr[mesh_id], model.mesh_vertnum[mesh_id]
+            upper = model.mesh_vert[first : first + count]
+            upper = upper @ data.geom_xmat[shoe.id].reshape(3, 3).T
+            hem = float(down(posed["body_skin_trousers"][0]).max())
+            skin = down(posed["body_skin_skin"][0]).max(initial=-np.inf)
+            collar = float(down(upper + data.geom_xpos[shoe.id]).min())
+            assert skin - hem <= limits["bare_ankle_mm"], (name, side)
+            assert hem - collar >= limits["shoe_overlap_mm"], (name, side)
+
+
 @pytest.mark.parametrize("profile", [None, "showpiece"])
 def test_the_tucked_shirt_stays_inside_the_trousers_through_a_swing(
     profile: str | None,
 ) -> None:
     """Each trouser vertex set over the tucked shirt stays outside it when the
     trunk turns and the hips bend; draped apart, the shirt came through."""
-    spec = copy.deepcopy(SPEC)
-    spec["subject"] |= {"body_visual_backend": export.SKINNED_BACKEND}
-    if profile:
-        spec["subject"]["body_skin_profile"] = profile
-    xml = exporter.export_full_body_mjcf(json.dumps(spec).encode(), appearance=DOCUMENT)
-    model = mujoco.MjModel.from_xml_string(xml[0])
+    model = _profile_model(profile)
     rest = _surface(model, dict(SETTINGS.bind_pose))
     cloth, faces = rest["body_skin_trousers"]
     tail = rest["body_skin_shirt"][0][:, 2].min()  # the shirt's hem, in the trousers
