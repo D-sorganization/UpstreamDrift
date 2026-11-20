@@ -6,7 +6,8 @@ Usage: ``MAKEHUMAN_ROOT=CHECKOUT python assets/body_skin_cc0/build_body_skin.py
 build is deterministic (quantised integers).
 
 The athletic male mix shared with the body sections is scaled to the reference
-stature; the ``body`` faces below the neck plane that are not hands or feet are
+stature; the ``body`` faces that are not hands, feet or head, up to ``neck_cut_m`` above
+the neck joint, are
 kept as one triangle surface; MakeHuman's skin weights are summed into the bone
 groups of the settings (a bone outside every group joins its nearest listed
 ancestor); the joint landmarks of the runtime fit are stored. Stored frame:
@@ -128,6 +129,7 @@ def build(makehuman_root: Path, settings: dict[str, Any]) -> tuple[dict, list]:
     cut = dense_weights(rig, cut_bones).sum(axis=1)
     quads = rig.body_quads
     neck_z = marks[list(settings["landmarks"]).index(settings["neck_plane"]), 2]
+    neck_z += settings["neck_cut_m"]
     keep = (vertices[quads][:, :, 2].mean(axis=1) < neck_z) & (
         cut[quads].mean(axis=1) < settings["cut_weight"]
     )

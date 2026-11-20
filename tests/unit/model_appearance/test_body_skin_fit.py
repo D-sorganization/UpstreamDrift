@@ -228,4 +228,6 @@ def test_the_neck_above_the_joint_rides_the_trunk_and_keeps_its_height() -> None
     stored_top = SKIN.vertices[:, 2].max() - SKIN.landmarks["neck"][2]
     fitted_top = fitted.vertices[:, 2].max() - fitted.joints["neck"][2]
     assert stored_top > cut / 2
-    assert abs(fitted_top - stored_top) < 0.005  # a shift above the joint, not a stretch
+    assert (
+        abs(fitted_top - stored_top) < 0.005
+    )  # a shift above the joint, not a stretch
