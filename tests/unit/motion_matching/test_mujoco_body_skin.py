@@ -52,6 +52,7 @@ SWING_LIMITS = json.loads((fit.ASSET_DIR / "export_settings.json").read_text())[
 WRIST_LIMITS = json.loads((fit.ASSET_DIR / "export_settings.json").read_text())[
     "wrist_limits"
 ]
+DRESS = json.loads((fit.ASSET_DIR / "dress_settings.json").read_text())
 HEAD_BASE = json.loads((fit.ASSET_DIR / "export_settings.json").read_text())[
     "head_base_limits"
 ]
@@ -156,6 +157,34 @@ def _surface(model: Any, pose: dict[str, float]) -> dict[str, tuple[Any, Any]]:
         data.qpos[model.joint(name).qposadr[0]] = value
     mujoco.mj_forward(model, data)
     return layer.posed_skin_layers(model, data)
+
+
+@pytest.mark.parametrize("profile", [None, "showpiece"])
+def test_the_tucked_shirt_stays_inside_the_trousers_through_a_swing(
+    profile: str | None,
+) -> None:
+    """Each trouser vertex set over the tucked shirt stays outside it when the
+    trunk turns and the hips bend; draped apart, the shirt came through."""
+    spec = copy.deepcopy(SPEC)
+    spec["subject"] |= {"body_visual_backend": export.SKINNED_BACKEND}
+    if profile:
+        spec["subject"]["body_skin_profile"] = profile
+    xml = exporter.export_full_body_mjcf(json.dumps(spec).encode(), appearance=DOCUMENT)
+    model = mujoco.MjModel.from_xml_string(xml[0])
+    rest = _surface(model, dict(SETTINGS.bind_pose))
+    cloth, faces = rest["body_skin_trousers"]
+    tail = rest["body_skin_shirt"][0][:, 2].min()  # the shirt's hem, in the trousers
+    over = np.flatnonzero(cloth[:, 2] > tail + 0.01)
+    over = np.setdiff1d(over, mesh.boundary_edges(faces))  # not the folded rim
+    assert len(over) > 60
+    for name in sorted(SWING):
+        pose = dict(ADDRESS)
+        for joint, change in SWING[name].items():
+            pose[joint] = pose.get(joint, 0.0) + change
+        posed = _surface(model, pose)
+        shirt, trousers = posed["body_skin_shirt"], posed["body_skin_trousers"]
+        margin = 1.0e3 * mesh.surface_height(trousers[0][over], *shirt)
+        assert margin.min() >= DRESS["limits"]["tucked_margin_posed_mm"], name
 
 
 @pytest.mark.parametrize("name", sorted(SWING))

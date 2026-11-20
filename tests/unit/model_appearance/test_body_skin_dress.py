@@ -290,9 +290,46 @@ def test_each_trouser_leg_stands_off_the_shank(side: str) -> None:
     assert np.array_equal(points[above], plain_points[above])
 
 
+@pytest.mark.parametrize("profile", [None, "showpiece"])
+def test_the_trousers_stand_off_the_tucked_shirt(profile: str | None) -> None:
+    fitted = fit.fit_body_skin(SKIN, _subject(), fit.load_fit_settings(profile=profile))
+    layers = dress.dress_skin(SKIN, fitted, SKIN.weights, SETTINGS)
+    trousers, shirt = layers["trousers"], layers["shirt"]
+    cover = np.setdiff1d(np.arange(len(trousers.vertices)), _rim(trousers))
+    points = trousers.vertices[cover]
+    tail = fitted.joints["hip_l"][2] + SETTINGS.waist_height_m - SETTINGS.tuck_m
+    band = points[points[:, 2] > tail + 0.01]  # over the shirt, clear of its hem
+    assert len(band) > 60
+    margin = 1.0e3 * mesh.surface_height(band, shirt.vertices, shirt.faces)
+    assert margin.min() >= LIMITS["tucked_margin_mm"]
+    assert margin.max() <= 1.0e3 * (SETTINGS.waist_gap_m + SETTINGS.trousers.ease_m)
+    with pytest.raises(ValueError, match="points"):
+        mesh.surface_height(band[:, :2], shirt.vertices, shirt.faces)
+
+
+@pytest.mark.parametrize("side", ["l", "r"])
+def test_each_trouser_leg_hangs_close_to_the_shank(side: str) -> None:
+    knee, ankle = FITTED.joints[f"knee_{side}"], FITTED.joints[f"ankle_{side}"]
+    bone = ankle - knee
+
+    def radii(points: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        points = points[np.sign(points[:, 1]) == dict(fit.SIDES)[side]]
+        share = (points - knee) @ bone / (bone @ bone)
+        return share, np.linalg.norm(points - knee - np.outer(share, bone), axis=1)
+
+    layer = LAYERS["trousers"]
+    cover = np.setdiff1d(np.arange(len(layer.vertices)), _rim(layer))
+    cloth, skin = radii(layer.vertices[cover]), radii(FITTED.vertices)
+    spans = ((0.3, 0.7), (0.7, SETTINGS.trouser_end_fraction))
+    for (low, high), limit in zip(spans, LIMITS["shank_slack_mm"], strict=True):
+        mean = [r[(s > low) & (s < high)].mean() for s, r in (cloth, skin)]
+        assert 0.0 < 1.0e3 * (mean[0] - mean[1]) <= limit
+
+
 @pytest.mark.parametrize(
     "change",
     [
+        {"waist_gap_m": 0.0},
         {"skin_margin_m": 0.0},
         {"sleeve_fraction": 1.5},
         {"wrist_cut_m": 0.0},
