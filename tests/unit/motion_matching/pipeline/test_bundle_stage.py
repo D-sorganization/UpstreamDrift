@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -22,10 +23,12 @@ from src.shared.python.motion_matching.pipeline.bundle_stage import (
     adjusted_attachments,
     build_problem,
     held_out_rms_mm,
+    held_out_scatter_mm,
     offset_sigma,
     select_frames,
     stage_report,
     stage_settings,
+    start_poses,
     stated_sole,
 )
 from src.shared.python.motion_matching.pipeline.constants import SPEC
@@ -194,6 +197,23 @@ def test_the_flag_carries_frames_and_held_out_markers_and_the_sole_is_stated() -
         frame_stride=30, anchor_frames=(391, 476), held_out=("RKneeOut",)
     )
     assert stage_settings(parser.parse_args([])) is None
+    more = ["--bundle-start", "consecutive", "--bundle-address-repeats", "8"]
+    more += ["--bundle-offset-reach-mm", "35", "--bundle-pose-prior", "0.1", "3"]
+    asked = stage_settings(parser.parse_args(["--bundle-adjust", *more]))
+    assert (asked.start, asked.address_repeats) == ("consecutive", 8)
+    assert asked.offset_reach_m == pytest.approx(0.035)
+    assert (asked.pose_prior_weight, asked.spin_prior_weight) == (0.1, 3.0)
+    assert asked.solver.tolerance == 1e-6
+    held = stage_settings(
+        parser.parse_args(["--bundle-adjust", "--bundle-hold", "Toe"])
+    )
+    assert not held.lane_weights
+    alike = stage_settings(
+        parser.parse_args(["--bundle-adjust", "--bundle-lane-weights"])
+    )
+    assert alike.lane_weights
+    assert held.hold == ("Toe",) and held.sigma("LToeIn") == (0.0, 0.0, 0.0)
+    assert held.sigma("LKneeOut") == OFFSET_SIGMAS_M["KneeOut"]
     # nothing held out: no kinematics are built for an empty marker set
     assert held_out_rms_mm(SimpleNamespace(), {}, (0,), np.zeros((1, 2))) == {}
     document = json.loads(SPEC.read_text(encoding="utf-8"))
@@ -254,3 +274,102 @@ def test_the_flag_hands_the_swing_solve_the_adjusted_attachments(
     # the held-out marker took no part, and the adjusted poses still explain it
     assert block["held_out_rms_mm"]["RKneeOut"]["adjusted"] < 1.0
     assert json.dumps(block)
+
+
+@pytest.mark.requires_mujoco
+def test_reach_address_repeats_and_pose_prior_are_settings(model) -> None:
+    settings = StageSettings(
+        frame_stride=1,
+        address_repeats=3,
+        offset_reach_m=0.035,
+        pose_prior_weight=0.1,
+        spin_prior_weight=3.0,
+    )
+    start = np.vstack([model.poses[:1]] * 2 + [model.poses])
+    prob, labels, frames = build_problem(model.lane, model.attachments, start, settings)
+    assert frames == (0, 0, 0, 1, 2, 3, 4) and len(prob.observations) == FRAMES + 2
+    reach = dict(zip(labels, prob.offset_reach.max(axis=1).tolist(), strict=True))
+    assert reach["LShoulderTop"] == 0.035 and reach["HeadTop"] == np.inf
+    order = list(model.kin.coordinate_order)
+    sigma = prob.pose_prior[1][0]
+    assert sigma[order.index("LSInputZ")] == pytest.approx(1 / 3.0)
+    assert sigma[order.index("LEInput")] == pytest.approx(10.0)
+    assert prob.marker_weights is None
+    lane = SimpleNamespace(
+        **vars(model.lane),
+        marker_weights={"HeadTop": 0.1},
+        split_marker_weights={"LShoulderTop": 0.3},
+    )
+    weighed = dataclasses.replace(settings, lane_weights=True)
+    alike, _, _ = build_problem(lane, model.attachments, start, weighed)
+    weight = dict(zip(labels, alike.marker_weights.tolist(), strict=True))
+    assert (weight["HeadTop"], weight["LShoulderTop"]) == (0.1, 0.3)
+    assert weight["RKneeOut"] == 1.0
+    with pytest.raises(ValueError, match="address_repeats"):
+        build_problem(
+            model.lane, model.attachments, start, StageSettings(address_repeats=0)
+        )
+
+
+def test_start_poses_never_see_a_held_out_marker_and_may_be_consecutive() -> None:
+    seen: dict[str, Any] = {}
+
+    def trajectory(self, kin, q, frames=None):
+        seen.update(valid=self.valid.copy(), frames=frames)
+        return np.zeros((6, 2)) + q, []
+
+    lane = type("FakeLane", (), {"trajectory": trajectory})()
+    lane.labels, lane.valid = ("a", "b"), np.ones((6, 2), bool)
+    lane.points = np.zeros((6, 2, 3))
+    settings = StageSettings(frame_stride=2, held_out=("b",), start="consecutive")
+    poses = start_poses(lane, "kin", np.array([0.1, 0.2]), settings)
+    assert poses.shape == (3, 2) and seen["frames"] is None
+    assert seen["valid"][:, 0].all() and not seen["valid"][:, 1].any()
+    assert lane.valid.all()  # the lane itself is untouched
+    start_poses(lane, "kin", np.zeros(2), StageSettings(frame_stride=2))
+    assert seen["frames"] == [0, 2, 4]
+    with pytest.raises(ValueError, match="start"):
+        start_poses(lane, "kin", np.zeros(2), StageSettings(start="other"))
+
+
+@pytest.mark.requires_mujoco
+def test_held_out_scatter_ignores_the_seed_and_grows_with_wrong_poses(model) -> None:
+    body = model.attachments["RKneeOut"][0]
+    anywhere = {"RKneeOut": (body, (0.3, 0.2, 0.1))}
+    frames = tuple(range(FRAMES))
+    exact = held_out_scatter_mm(model.lane, anywhere, frames, model.poses)
+    assert exact["RKneeOut"] < 1e-6  # the capture is rigid on the true poses
+    noise = np.random.default_rng(0).normal(0.0, 0.02, model.poses.shape)
+    wrong = held_out_scatter_mm(model.lane, anywhere, frames, model.poses + noise)
+    assert wrong["RKneeOut"] > 1.0
+    assert held_out_scatter_mm(model.lane, {}, frames, model.poses) == {}
+
+
+@pytest.mark.requires_mujoco
+def test_planted_spheres_are_held_where_the_first_frame_puts_them(model) -> None:
+    ground = model.lane.ground
+    spheres = sorted(model.kin.sphere_ground_points(model.poses[0], ground))
+    names = spheres[:2]
+    stance = [tuple(names)] + [(names[0],)] * (FRAMES - 1)  # the second lifts
+    lane = SimpleNamespace(**{**vars(model.lane), "stance": stance})
+    plain, _, _ = build_problem(lane, model.attachments, model.poses, EVERY)
+    planted, _, _ = build_problem(
+        lane,
+        model.attachments,
+        model.poses,
+        dataclasses.replace(EVERY, plant_sigma_m=0.005),
+    )
+    extra = len(planted.constraint(0, model.poses[0])) - len(
+        plain.constraint(0, model.poses[0])
+    )
+    assert extra == 3 * len(spheres)  # one row triple per sphere of the model
+    assert np.allclose(planted.constraint(0, model.poses[0])[-extra:], 0.0)
+    here = model.kin.sphere_ground_points(model.poses[2], ground)
+    home = model.kin.sphere_ground_points(model.poses[0], ground)
+    slide = (here[names[0]] - home[names[0]]) * [1.0, 1.0, 0.0] / 0.005
+    rows = planted.constraint(2, model.poses[2])[-extra:].reshape(-1, 3)
+    assert np.allclose(rows[0], slide) and np.abs(slide).max() > 0.0
+    assert np.allclose(rows[1:], 0.0)  # lifted or never in stance: not planted
+    assert stage_settings(
+        cli.build_parser().parse_args(["--bundle-adjust", "--bundle-plant-mm", "5"])
+    ).plant_sigma_m == pytest.approx(0.005)
