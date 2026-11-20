@@ -348,13 +348,21 @@ def _wrist_shape(part: str, radius: float, wrist: Any) -> dict[str, Any]:
 
     ``wrist`` is a ``skinned_wrist_sections.WristSection`` in the body frame,
     or ``None``. With one, the limb ends that wide and that deep, turned to
-    its width axis, the flat section easing in past the rotation joint.
+    its width axis, the flat section easing in past the rotation joint, and
+    narrows to it by the wrist's own ``taper_end``, with its ``belly`` (#15299).
     """
     if wrist is None:
-        return {"end_scale": library.limb_distal_scale(part)}
+        return {
+            "end_scale": library.limb_distal_scale(part),
+            "taper_end": library.taper_end(part),
+            "belly": library.belly(part),
+        }
     scale = library.validate_distal_scale(min(1.0, wrist.half_width_m / radius))
+    taper = {"end_scale": scale, "taper_end": wrist.taper_end, "belly": wrist.belly}
+    if not wrist.shapes_end:
+        return taper
     return {
-        "end_scale": scale,
+        **taper,
         "end_aspect": wrist.half_depth_m / wrist.half_width_m,
         "flatten_from": library.PART_FLATTEN_FROM.get(part, 0.0),
         "width_hint": wrist.width_axis,
@@ -375,7 +383,13 @@ def _skinned_wrist_sections(
         forearm_wrist_sections,
     )
 
-    return forearm_wrist_sections(spec, club)
+    sections = dict(forearm_wrist_sections(spec, club))
+    for joint in spec.get("joints", ()):
+        far = sections.get(joint["child"])
+        if far is not None and library.classify_body(joint["parent"]) == "forearm":
+            # The near length of the same limb narrows to the same wrist (#15299).
+            sections[joint["parent"]] = dataclasses.replace(far, shapes_end=False)
+    return sections
 
 
 def _limb_segments(
@@ -408,9 +422,7 @@ def _limb_segments(
                 radius,
                 aspect,
                 window=window,
-                belly=library.belly(part),
                 capsule_ends=part in library.CAPSULE_END_PARTS,
-                taper_end=library.taper_end(part),
                 **_wrist_shape(part, radius, wrist),
             )
         )
