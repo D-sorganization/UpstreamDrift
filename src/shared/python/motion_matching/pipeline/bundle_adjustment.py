@@ -246,8 +246,12 @@ def solve_bundle(prob: BundleProblem, settings: BundleSettings) -> BundleResult:
     lower, upper = (np.asarray(b, float) for b in prob.pose_bounds)
     frames, n_q = prob.pose_start.shape
     sigma, tolerance = settings.marker_sigma_m, settings.tolerance
+
+    def residual(x: Array) -> Array:
+        return np.concatenate(_terms(prob, sigma, x))
+
     solution = least_squares(
-        lambda x: np.concatenate(_terms(prob, sigma, x)),
+        residual,
         np.concatenate([np.clip(prob.pose_start, lower, upper).ravel(), seeds.ravel()]),
         jac_sparsity=_sparsity(prob),
         bounds=(
