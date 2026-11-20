@@ -147,6 +147,8 @@
     "palm_cup_step_deg": 2.0,
     "palm_cup_pivot_fraction": 1.0,
     "toward_index_target": "azimuth",
+    "_toward_index_target_of": "#15329: a hand named here has its thumb laid to this target instead of toward_index_target (one of azimuth, knuckle, fingertip); none named, so both hands are drawn as before. trail knuckle closes the trail thumb on its forefinger's knuckle, the V of a real grip: measured on the square_on_thumb pair it moves only the trail thumb, but the palm pad then stands 4.4 mm into the lead hand, and fingertip puts the hands 1.18 mm into each other (pair_penetration_tolerance_m 1.0 mm), which is why neither is set. The trigger forefinger is side_close.trigger_spread_deg; capping its knuckle's flexion to hook it changes nothing (the knuckle is flexed 27 to 33 degrees, the finger stops on the grip).",
+    "toward_index_target_of": {},
     "toward_index_max_deg": {
       "lead": 60.0,
       "trail": 60.0

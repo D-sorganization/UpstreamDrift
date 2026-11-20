@@ -738,8 +738,9 @@ def _segment_gaps(
 def _arched_hand(
     asset: SkinnedHandAsset, settings: SkinnedHumanSettings, side: str, paired: bool
 ) -> tuple[_GripHand, SkinnedHumanSettings]:
-    """The hand to pose, its set rays arched, and the settings to pose it by."""
-    settings = settings.with_set_arch(side)
+    """The hand to pose, its set rays arched, and the settings to pose it by:
+    those of hand ``side`` (its set arch and its own thumb target)."""
+    settings = settings.with_set_arch(side).with_thumb_target(side)
     hand = _GripHand(asset, settings.beside_other_hand() if paired else settings)
     set_metacarpal_arch(hand, side)
     return hand, settings

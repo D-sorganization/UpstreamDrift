@@ -88,6 +88,7 @@ class SkinnedHumanSettings:
     thumb_knuckle_distance_m: float
     thumb_azimuth_close_rad: float
     thumb_toward_index_target: str
+    thumb_target_of: tuple[tuple[str, str], ...]
     side_close_max_deg: float
     side_close_gap_m: float
     side_close_index_gap_m: float
@@ -141,6 +142,18 @@ class SkinnedHumanSettings:
             return self
         gains = tuple((ray, 0.0 if ray in held else g) for ray, g in self.arch_gain)
         return replace(self, arch_gain=gains)
+
+    def with_thumb_target(self, side: str) -> SkinnedHumanSettings:
+        """These settings for hand ``side``, whose thumb is laid to the target
+        ``thumb.toward_index_target_of`` names for it. Precondition: ``side``
+        is lead or trail (``ValueError``). Postcondition: ``self`` itself if
+        that hand is named no target of its own."""
+        if side not in _HANDS:
+            raise ValueError(f"side must be one of {_HANDS}, got {side!r}")
+        target = dict(self.thumb_target_of).get(side, self.thumb_toward_index_target)
+        if target == self.thumb_toward_index_target:
+            return self
+        return replace(self, thumb_toward_index_target=target)
 
     def beside_other_hand(self) -> SkinnedHumanSettings:
         """These settings for the trail hand of a pair. Its palm lies on the
@@ -326,6 +339,20 @@ def _side_close_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
 #: What stands in for the lead hand when the trail hand is posed around it.
 #: What the thumb's turn brings it to (``thumb.toward_index_target``).
 THUMB_TARGETS = ("azimuth", "knuckle", "fingertip")
+_HANDS = ("lead", "trail")
+
+
+def _thumb_target_of(raw: Any) -> tuple[tuple[str, str], ...]:
+    """``thumb.toward_index_target_of``: a thumb target for a hand of its own."""
+    if not isinstance(raw, Mapping):
+        raise TypeError("thumb.toward_index_target_of must be a mapping")
+    name = "thumb.toward_index_target_of"
+    return tuple(
+        (_one_of(side, _HANDS, name), _one_of(target, THUMB_TARGETS, name))
+        for side, target in raw.items()
+    )
+
+
 PAIR_OBSTACLES = ("skin", "capsules")
 PAIR_SPACING_PICKS = ("best", "last")
 
@@ -421,6 +448,7 @@ def _thumb_turn_fields(thumb: Mapping) -> dict[str, Any]:
         "thumb_toward_index_target": _one_of(
             thumb["toward_index_target"], THUMB_TARGETS, "thumb.toward_index_target"
         ),
+        "thumb_target_of": _thumb_target_of(thumb["toward_index_target_of"]),
     }
 
 
