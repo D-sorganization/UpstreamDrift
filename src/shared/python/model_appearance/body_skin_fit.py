@@ -111,8 +111,11 @@ class FitSettings:
     wrist_match_from_m: float
     wrist_match_full_m: float
     wrist_under_m: float
+    slim_share: float
 
     def __post_init__(self) -> None:
+        if not 0.0 <= self.slim_share <= 1.0:
+            raise ValueError("slim_share outside [0, 1]")
         _positive(self, ("wrist_match_full_m",))
         if not self.wrist_match_full_m < self.wrist_match_from_m:
             raise ValueError("wrist_match_full_m must be less than wrist_match_from_m")
@@ -163,13 +166,26 @@ class WristRing:
 
 @dataclass(frozen=True)
 class BodySkin:
-    """The stored skin: metres, dense ``(N, groups)`` weights, named landmarks."""
+    """The stored skin: metres, dense ``(N, groups)`` weights, named landmarks.
+
+    ``slim_offset`` carries the stored build to the slim one (same mesh and
+    joints, a leaner macro mix); :meth:`rest` mixes it in.
+    """
 
     vertices: Array
     faces: NDArray[np.int64]
     weights: Array
     groups: tuple[str, ...]
     landmarks: dict[str, Array]
+    slim_offset: Array
+
+    def rest(self, slim_share: float) -> Array:
+        """Rest vertices with ``slim_share`` of the slim build mixed in."""
+        if not 0.0 <= slim_share <= 1.0:
+            raise ValueError("slim_share outside [0, 1]")
+        if slim_share == 0.0:
+            return self.vertices
+        return self.vertices + slim_share * self.slim_offset
 
 
 @dataclass(frozen=True)
@@ -229,6 +245,7 @@ def load_body_skin() -> BodySkin:
         np.add.at(weights, (rows, data["weight_index"]), data["weight_value"])
         marks = data["landmarks"] * quantum
         return BodySkin(
+            slim_offset=data["slim_offset"] * quantum,
             vertices=data["vertices"] * quantum,
             faces=data["faces"].astype(np.int64),
             weights=weights / settings["weight_levels"],
@@ -386,7 +403,10 @@ def fit_body_skin(
     Postcondition: every distance between fitted joints equals the subject's
     segment length, and each segment's map carries its two landmarks onto them.
     The faces and weights of ``skin`` apply unchanged to the result.
+    ``settings.slim_share`` of the slim build is mixed into the stored skin
+    first; the maps then apply to that mixed rest shape.
     """
+    rest = skin.rest(settings.slim_share)
     marks = {name: point.copy() for name, point in skin.landmarks.items()}
     forward, outward, up = settings.shoulder_anchor_m
     for side, sign in SIDES:
@@ -399,9 +419,7 @@ def fit_body_skin(
         key = "trunk" if trunk else f"{group.split('_')[0]}_{group[-1]}"
         maps[group] = prefix_maps[key]
         used = skin.weights[:, column] > 0.0
-        vertices[used] += skin.weights[used, column, None] * maps[group](
-            skin.vertices[used]
-        )
+        vertices[used] += skin.weights[used, column, None] * maps[group](rest[used])
     _sagittal_corrections(vertices, skin, joints, settings)
     return FittedSkin(vertices=vertices, joints=joints, maps=maps)
 

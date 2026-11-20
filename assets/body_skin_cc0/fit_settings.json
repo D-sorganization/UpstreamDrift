@@ -16,11 +16,13 @@
   "wrist_match_from_m": 0.11,
   "wrist_match_full_m": 0.035,
   "wrist_under_m": 0.002,
+  "slim_share": 0.0,
   "profiles": {
     "showpiece": {
       "shoulder_anchor_m": [0.0, 0.0, 0.025],
       "thorax_front_scale": 0.92,
-      "thigh_back_m": 0.02
+      "thigh_back_m": 0.02,
+      "slim_share": 1.0
     }
   },
   "sources": {
@@ -39,6 +41,7 @@
     "thigh_back_below_hip_m": "The shift is whole up to 20 mm below the hip joints.",
     "thigh_back_fade_m": "From there it fades to nothing over 100 mm, so the belly above the groin stays put.",
     "thigh_back_front_m": "Only skin ahead of the hip joint moves; the shift is whole from 50 mm ahead of it, so the back of the thigh and the buttock keep their place.",
+    "slim_share": "Share of the stored slim build (skin_settings.json: slim) mixed into the stored athletic build before the fit; 0 keeps the athletic build. The showpiece profile uses 1: the slimmer build mix its shoulder, chest and thigh values were measured with in the #15299 prototype.",
     "wrist_match": "With the skinned hands drawn, the forearm's section turns into the hand's wrist section (model_appearance.skinned_wrist_sections, the section the hand's widened rim lies just under) from wrist_match_from_m (110 mm) before the wrist joint and is that section from wrist_match_full_m (35 mm) before it, under the hand's forearm cuff; the #15299 prototype's values (2026-11-20 review).",
     "wrist_under_m": "The skin lies 2 mm inside that section, so the hand's cuff covers it. Without the match the skin's wrist differs from the section by more than 2 mm round the ring (a visible step under the cuff)."
   }
