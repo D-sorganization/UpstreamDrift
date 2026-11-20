@@ -14,6 +14,7 @@ import pytest
 from src.engines.physics_engines.mujoco.python import body_skin_layer as layer
 from src.engines.physics_engines.mujoco.python import full_body_mjcf as exporter
 from src.shared.python.model_appearance import body_skin_fit as fit
+from src.shared.python.model_appearance import body_skin_mesh as mesh
 from src.shared.python.model_appearance import club_assembly as ca
 from src.shared.python.model_appearance import skinned_wrist_sections as sws
 from src.shared.python.model_appearance import body_skin_export as export
@@ -31,6 +32,12 @@ SPEC = json.loads(
 ADDRESS = json.loads(
     (ROOT / "tests/fixtures/model_appearance/address_pose.json").read_text()
 )
+SWING = json.loads(
+    (ROOT / "tests/fixtures/model_appearance/swing_poses.json").read_text()
+)["changes_from_address"]
+SWING_LIMITS = json.loads((fit.ASSET_DIR / "export_settings.json").read_text())[
+    "swing_limits"
+]
 SETTINGS = export.load_export_settings()
 DOCUMENT = document_from_dict({"schema_version": "appearance-v1"})
 LAYERS = ("skin", "shirt", "trousers")
@@ -121,6 +128,39 @@ def test_the_skinned_model_steps_at_swing_poses(skinned: tuple[Any, Any]) -> Non
         mujoco.mj_step(model, data)
         assert np.isfinite(data.qpos).all() and np.isfinite(data.xpos).all()
         assert not data.warning.number.any()
+
+
+def _surface(model: Any, pose: dict[str, float]) -> dict[str, tuple[Any, Any]]:
+    data = mujoco.MjData(model)
+    for name, value in pose.items():
+        data.qpos[model.joint(name).qposadr[0]] = value
+    mujoco.mj_forward(model, data)
+    return layer.posed_skin_layers(model, data)
+
+
+@pytest.mark.parametrize("name", sorted(SWING))
+def test_the_surface_survives_swing_like_poses(
+    name: str, loft: Any, skinned: tuple[Any, Any]
+) -> None:
+    model = skinned[0]
+    pose = dict(ADDRESS)
+    for joint, change in SWING[name].items():
+        pose[joint] = pose.get(joint, 0.0) + change
+    rest = _surface(model, dict(SETTINGS.bind_pose))
+    posed = _surface(model, pose)
+    assert sorted(posed) == sorted(f"body_skin_{n}" for n in LAYERS)
+    band = SWING_LIMITS["area_ratio"]
+    for layer_name, (vertices, faces) in posed.items():
+        assert np.isfinite(vertices).all() and len(faces) > 1000
+        ratio = mesh.area_ratio(rest[layer_name][0], vertices, faces)
+        stretched = float(((ratio > band) | (ratio < 1.0 / band)).mean())
+        folded = float(mesh.folded_faces(vertices, faces).mean())
+        assert stretched <= SWING_LIMITS["stretched_share"], (layer_name, stretched)
+        assert folded <= SWING_LIMITS["folded_share"], (layer_name, folded)
+    moved = posed["body_skin_shirt"][0] - rest["body_skin_shirt"][0]
+    assert np.linalg.norm(moved, axis=1).max() > 0.1
+    with pytest.raises(ValueError, match="no skin"):
+        layer.posed_skin_layers(loft, mujoco.MjData(loft))
 
 
 def test_the_forearms_end_under_the_skinned_hands_wrists() -> None:

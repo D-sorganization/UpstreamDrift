@@ -1,0 +1,48 @@
+{
+  "description": "Swing-like joint configurations for surface checks: changes of model coordinates (radians) added to address_pose.json. They are not fitted to a swing and close no grip; each turns the pelvis, the trunk, the arms and the legs about as far as that phase of a swing does.",
+  "changes_from_address": {
+    "address": {},
+    "top": {
+      "HipInputZ": 0.7,
+      "TorsoInput": 1.0,
+      "SpineInputX": 0.15,
+      "LSInputX": -0.6,
+      "LSInputY": -0.5,
+      "LScapInputY": 0.35,
+      "RSInputY": 0.5,
+      "RSInputZ": 0.8,
+      "REInput": -1.5,
+      "LEInput": -0.2,
+      "knee_angle_l": -0.25,
+      "hip_rotation_r": 0.3,
+      "hip_rotation_l": 0.3,
+      "NeckInputZ": -0.6
+    },
+    "impact": {
+      "HipInputZ": -0.7,
+      "TorsoInput": -0.35,
+      "SpineInputY": 0.2,
+      "LEInput": 0.1,
+      "REInput": -0.2,
+      "knee_angle_r": -0.3,
+      "hip_rotation_l": -0.3,
+      "hip_rotation_r": -0.3,
+      "RScapInputY": 0.3
+    },
+    "finish": {
+      "HipInputZ": -1.4,
+      "TorsoInput": -0.9,
+      "SpineInputX": -0.25,
+      "LEInput": -1.7,
+      "REInput": -1.0,
+      "LSInputX": 0.9,
+      "LSInputY": -0.4,
+      "RSInputX": -0.9,
+      "RSInputY": -0.3,
+      "knee_angle_r": -0.9,
+      "hip_flexion_r": -0.7,
+      "hip_rotation_l": -0.5,
+      "NeckInputZ": 0.5
+    }
+  }
+}
