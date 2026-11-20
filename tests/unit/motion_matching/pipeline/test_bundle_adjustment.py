@@ -253,9 +253,9 @@ def test_converges_at_the_size_of_the_driver_fit_within_budget() -> None:
         pose_start=poses + rng.normal(0.0, 0.03, poses.shape),
         pose_bounds=(np.full(hinges, -2.0), np.full(hinges, 2.0)),
     )
-    started = time.perf_counter()
+    started = time.process_time()  # processor time: the host's load is not ours
     result = solve_bundle(prob, BundleSettings(marker_sigma_m=0.002))
-    assert time.perf_counter() - started < PROBE_BUDGET_S
+    assert time.process_time() - started < PROBE_BUDGET_S
     assert result.converged
     assert result.rms_m < 0.002 * np.sqrt(3.0)
     assert np.abs(result.offsets - truth).max() < PRIOR_SIGMA_M
@@ -272,3 +272,20 @@ def test_offset_reach_caps_the_bound_and_progress_is_logged(caplog) -> None:
     assert "bundle iteration" in caplog.text
     with pytest.raises(ValueError, match="offset_reach"):
         problem(offset_reach=np.full(SEEDS.shape, -1.0))[0].check(BundleSettings())
+
+
+def test_a_marker_weight_scales_its_residual_and_shields_the_fit() -> None:
+    prob, truth, poses = problem()
+    wild = np.array(prob.observations)
+    wild[:, 0] += np.random.default_rng(1).normal(0.0, 0.02, wild[:, 0].shape)
+    trusted = dataclasses.replace(prob, observations=wild)
+    weights = np.array([1e-6, 1.0, 1.0, 1.0, 1.0, 1.0])
+    shielded = dataclasses.replace(trusted, marker_weights=weights)
+    settings = BundleSettings(marker_sigma_m=NOISE_M)
+    plain, fit = solve_bundle(trusted, settings), solve_bundle(shielded, settings)
+    assert np.abs(fit.offsets[1:3] - truth[1:3]).max() < 0.002
+    assert np.abs(fit.poses[:, 0] - poses[:, 0]).max() < 0.01
+    assert fit.data_chi2 < 0.1 * plain.data_chi2
+    assert fit.per_marker_rms_m[0] > 0.01  # the reported error stays unweighted
+    with pytest.raises(ValueError, match="marker_weights"):
+        dataclasses.replace(prob, marker_weights=-weights).check(settings)
