@@ -503,12 +503,20 @@ class SplitEllipsoid:
     half_up: float
     half_down: float
     top: float
+    # The buttock (#15299): behind the widest plane (``back`` is the unit
+    # direction) the depth is times ``back_scale`` and the outline is a
+    # superellipse of exponent ``back_square`` (2 = ellipse). Both are full
+    # from the lower pole to the widest level and ease out to nothing at the
+    # flat cap, so the belt line keeps its section.
+    back: Array | None = None
+    back_scale: float = 1.0
+    back_square: float = 2.0
 
 
 def split_ellipsoid_mesh(
     shape: SplitEllipsoid, *, thickness: float = 1.0, rings: int = 14, sides: int = 24
 ) -> Mesh:
-    """Closed convex mesh of ``shape``; ``thickness`` scales width and depth only.
+    """Closed mesh of ``shape``; ``thickness`` scales width and depth only.
 
     Preconditions: finite inputs, positive sizes, ``0 < top <= half_up``,
     even ``sides`` (left/right mirror symmetry), ``rings >= 4``. Postcondition:
@@ -525,6 +533,11 @@ def split_ellipsoid_mesh(
         raise ValueError("top must satisfy 0 < top <= half_up")
     if sides < 6 or sides % 2 or rings < 4:
         raise ValueError("need even sides >= 6 and rings >= 4")
+    bulged = (shape.back_scale, shape.back_square) != (1.0, 2.0)
+    if not (shape.back_scale > 0.0 and 2.0 <= shape.back_square <= 8.0):
+        raise ValueError("back_scale must be > 0 and back_square in [2, 8]")
+    if bulged and shape.back is None:
+        raise ValueError("a back bulge needs the back direction")
     a = up / np.linalg.norm(up)
     u = wid - np.dot(wid, a) * a
     if np.linalg.norm(u) < 1e-9:
@@ -535,11 +548,21 @@ def split_ellipsoid_mesh(
     top_angle = math.asin(shape.top / shape.half_up)
     angles = np.concatenate([lower, np.linspace(0.0, top_angle, rings)])[::-1]
     phi = np.linspace(0.0, 2.0 * math.pi, sides, endpoint=False)
-    plane = np.outer(np.cos(phi), u * shape.half_width * thickness) + np.outer(
-        np.sin(phi), v * shape.half_depth * thickness
-    )
+    cos, sin = np.cos(phi), np.sin(phi)
+    behind = np.zeros(sides, dtype=bool)
+    if bulged:
+        behind = sin * float(v @ _check_finite("back", shape.back, 3)) > 1e-12
     grid = np.empty((len(angles), sides, 3))
     for k, ang in enumerate(angles):
         height = math.sin(ang) * (shape.half_up if ang > 0 else shape.half_down)
+        # 1 at the hips, 0 at the cap, and nearly gone by the belt line
+        full = (1.0 - (max(height, 0.0) / shape.top) ** 2) ** 2
+        power = 2.0 / (2.0 + (shape.back_square - 2.0) * full)
+        deep = np.where(behind, 1.0 + (shape.back_scale - 1.0) * full, 1.0)
+        across = np.where(behind, np.sign(cos) * np.abs(cos) ** power, cos)
+        along = np.where(behind, np.sign(sin) * np.abs(sin) ** power, sin) * deep
+        plane = np.outer(across, u * shape.half_width * thickness) + np.outer(
+            along, v * shape.half_depth * thickness
+        )
         grid[k] = c + a * height + math.cos(ang) * plane
     return closed_grid_mesh(grid, c + a * shape.top, c - a * shape.half_down)
