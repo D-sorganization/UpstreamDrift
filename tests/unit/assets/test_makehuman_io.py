@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
+import runpy
 import sys
 from pathlib import Path
 
@@ -170,7 +170,9 @@ def test_morphed_rig_moves_skin_and_joints_and_records_hashes(tmp_path: Path) ->
         mh_targets.morphed_rig(rig, tree, {"macrodetails/none.target": 1.0})
 
 
-def test_hand_and_head_assets_rebuild_from_the_shared_reader() -> None:
+def test_hand_and_head_assets_rebuild_from_the_shared_reader(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Needs the pinned MakeHuman tree: set ``MAKEHUMAN_ROOT`` to its checkout."""
     root = os.environ.get("MAKEHUMAN_ROOT", "")
     base = Path(root) / "makehuman" / "data" / "3dobjs" / "base.obj"
@@ -180,10 +182,7 @@ def test_hand_and_head_assets_rebuild_from_the_shared_reader() -> None:
         (ASSETS / "hand_cc0" / "build_hand_asset.py", Path(root)),
         (ASSETS / "head_cc0" / "build_head_asset.py", base),
     ):
-        done = subprocess.run(
-            [sys.executable, str(script), str(source), "--check"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        assert done.returncode == 0, done.stdout + done.stderr
+        monkeypatch.setattr(sys, "argv", [str(script), str(source), "--check"])
+        with pytest.raises(SystemExit) as done:
+            runpy.run_path(str(script), run_name="__main__")
+        assert done.value.code == 0, script.name
