@@ -161,6 +161,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 907 | `src/unreal_integration/mesh_loader.py` |
 | 903 | `src/shared/python/motion_matching/club_only/body_candidates.py` |
 | 902 | `src/tools/capture_rig/reference_comparison.py` |
+| 900 | `src/shared/python/model_appearance/body_meshes.py` |
 | 897 | `src/shared/python/motion_matching/surrogate/compact/training.py` |
 | 896 | `src/bunkershot3d/solvers/mpm/ballreach.py` |
 | 896 | `src/launchers/launcher_layout_manager.py` |
@@ -179,7 +180,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 884 | `src/shared/python/estimation/dime_learned_initializers.py` |
 | 883 | `src/shared/python/config/model_pack_manifest.py` |
 | 883 | `src/shared/python/model_generation/converters/mjcf_converter.py` |
-| 881 | `src/shared/python/model_appearance/body_meshes.py` |
 | 879 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/visualization/SkeletonPlotter.m` |
 | 878 | `src/shared/python/grip_contact/simscape_grip_topology.py` |
 | 875 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py` |
