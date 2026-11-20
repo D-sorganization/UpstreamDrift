@@ -55,7 +55,23 @@
   },
   "preshape": {
     "finger_adduction_fraction": 1.0,
-    "index_knuckle_flexion_deg": 15.0
+    "index_knuckle_flexion_deg": 15.0,
+    "_curl_plane_turn_deg": "Owner, 2026-11-19 (#15150): the club lies diagonally across the trail palm and the fingers still wrap it nearer square, because each finger is turned at its knuckle and not because the hand turns. curl_plane_turn_deg is that turn per hand and finger, in degrees about the palm's normal, taken at the knuckle before the finger flexes, so the plane the finger curls in turns with it; positive squares the trail fingers. curl_plane_turn_max_deg is the most any turn may be: a knuckle's sideways play is about 20 to 30 degrees in all with the finger straight (recalled from anatomy texts, NOT verified against a source). Read it for what it is: at a knuckle flexed 70 to 100 degrees, as these are, the turn is mostly (its sine, over nine tenths) a twist of the finger about its own length, which the #15278 note on side_close says a finger cannot make. It is the freedom tried and dropped there, taken up again because the owner chose to angle the fingers across the palm, and the trail values are what the standing bounds allow, not what a reference grip needs: 25 on every finger measured 26 and 22 degrees off square for the middle and ring fingers, these measure 34 and 30 (48 and 48 with no turn). Middle 20 or more turns one skin triangle inside out at the middle knuckle of the paired hand (max_crease_fold_faces 0); ring and little 25 put the trial palm pads 1.04 mm into the lead hand (pair_penetration_tolerance_m 1.0 mm); a turned forefinger moves a finger joint 5.6 to 15 degrees between the coarse and the subdivided skin (max_subdivision_joint_change_deg 5). The lead hand is not turned.",
+    "curl_plane_turn_max_deg": 25.0,
+    "curl_plane_turn_deg": {
+      "lead": {
+        "index": 0.0,
+        "middle": 0.0,
+        "ring": 0.0,
+        "little": 0.0
+      },
+      "trail": {
+        "index": 0.0,
+        "middle": 15.0,
+        "ring": 20.0,
+        "little": 20.0
+      }
+    }
   },
   "curl": {
     "step_deg": 2.0,
@@ -257,7 +273,7 @@
       "ulnar_deviation_deg": 20.0
     },
     "trail": {
-      "extension_deg": 20.0,
+      "extension_deg": 23.0,
       "ulnar_deviation_deg": 10.0
     }
   }

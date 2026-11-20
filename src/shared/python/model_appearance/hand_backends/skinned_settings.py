@@ -27,6 +27,10 @@ from src.shared.python.model_appearance.hand_backends.palm_fold import (
 from src.shared.python.model_appearance.hand_backends.rest_shape import (
     FullnessSettings,
 )
+from src.shared.python.model_appearance.hand_backends.curl_plane import (
+    CurlPlaneTurns,
+    curl_plane_turns,
+)
 from src.shared.python.model_appearance.hand_backends.joint_angles import FINGERS
 from src.shared.python.model_appearance.hand_backends.posing import CurlSettings
 
@@ -61,6 +65,8 @@ class SkinnedHumanSettings:
     seat_iterations: int
     finger_adduction_fraction: float
     index_knuckle_flexion_deg: float
+    curl_plane_turn_max_deg: float
+    curl_plane_turn_deg: CurlPlaneTurns
     curl: CurlSettings
     limits_deg: tuple[tuple[str, tuple[float, float]], ...]
     pip_per_mcp: float
@@ -454,6 +460,10 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
         ),
         index_knuckle_flexion_deg=_non_negative(
             pre["index_knuckle_flexion_deg"], "index_knuckle_flexion_deg"
+        ),
+        curl_plane_turn_max_deg=float(pre["curl_plane_turn_max_deg"]),
+        curl_plane_turn_deg=curl_plane_turns(
+            pre["curl_plane_turn_deg"], float(pre["curl_plane_turn_max_deg"])
         ),
         curl=CurlSettings(
             step_rad=math.radians(float(curl["step_deg"])),

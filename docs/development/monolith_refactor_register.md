@@ -32,8 +32,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1195 | `src/launchers/model_card.py` |
 | 1195 | `src/launchers/upstream_drift_launcher.py` |
 | 1195 | `src/tools/shot_pattern_analysis/matched_supplement_figures.py` |
+| 1189 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1185 | `src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m` |
-| 1185 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1184 | `src/bunkershot3d/ball/splash.py` |
 | 1183 | `src/engines/physics_engines/opensim/python/msk_lift_ik_id.py` |
 | 1182 | `src/launchers/launcher_model_handlers.py` |

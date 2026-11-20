@@ -41,9 +41,10 @@ def test_the_measures_need_a_lead_and_a_trail_hand() -> None:
         trail_grip_measures(pair["trail"], pair["lead"])
 
 
-_WRIST_NOT_MET = "#15150: owner's target, not met. Past about 22 degrees the wrist "
-_WRIST_NOT_MET += "crease's relaxing moves finger skin more than the 2.3 nm that "
-_WRIST_NOT_MET += "test_wrist_bend_turns_the_forearm_and_leaves_the_hand_alone allows."
+_WRIST_NOT_MET = "#15150: owner's target, not met: 23 degrees drawn, 25 asked. Past "
+_WRIST_NOT_MET += "23 the wrist crease's relaxing moves finger skin more than "
+_WRIST_NOT_MET += "test_wrist_bend_turns_the_forearm_and_leaves_the_hand_alone allows "
+_WRIST_NOT_MET += "(24 misses by 0.03 nm, 25 by 0.2 nm, 30 by 1.1 nm)."
 
 
 @pytest.mark.xfail(strict=True, reason=_WRIST_NOT_MET)
@@ -80,10 +81,12 @@ def test_the_trail_grip_is_no_further_from_the_reference_than_measured() -> None
     assert heel <= float(most["heel_to_lead_thumb_base_m"]), f"{heel * 1e3:.1f} mm"
 
 
-_NOT_MET = "#15150: owner's target, not met. Squaring the trail fingers carries "
-_NOT_MET += "the palm down the shaft off the base of the lead thumb "
-_NOT_MET += "(max_thumb_channel_gap_m) while the ring finger stays beside the lead "
-_NOT_MET += "forefinger; see _trail_grip in hand_visual_quality.json."
+_NOT_MET = "#15150: owner's target, not met. The fingers' curl planes are turned "
+_NOT_MET += "as far as the standing bounds allow (preshape.curl_plane_turn_deg) and "
+_NOT_MET += "the palm, which sets the knuckles and the heel, is not moved: squaring "
+_NOT_MET += "it carries it off the base of the lead thumb (max_thumb_channel_gap_m) "
+_NOT_MET += "while the ring finger stays beside the lead forefinger; see _trail_grip "
+_NOT_MET += "in hand_visual_quality.json."
 
 
 @pytest.mark.xfail(strict=True, reason=_NOT_MET)
