@@ -571,6 +571,9 @@ def _pelvis_plan(
         half_up,
         half_down,
         top,
+        back=None if marks.front is None else -marks.front,
+        back_scale=1.0 if marks.front is None else library.PELVIS_BACK_SCALE,
+        back_square=2.0 if marks.front is None else library.PELVIS_BACK_SQUARE,
     )
     return shape, width
 

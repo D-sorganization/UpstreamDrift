@@ -282,7 +282,7 @@ PART_RADIUS_M: dict[str, float] = {
     "shoulder": 0.05,
     "forearm": 0.0432,  # 20 % over the first 36 mm (owner, 2026-11-17)
     "hand": 0.042,
-    "thigh": 0.102,  # spindle parameter: the widest section is about 0.87 of it
+    "thigh": 0.0998,  # spindle parameter: the widest section is about 0.87 of it
     "shin": 0.058,  # radius at the knee (capsule ends)
     "foot": 0.040,
     "head": 0.095,
@@ -354,8 +354,14 @@ LEG_DISTAL_SCALE: dict[str, float] = {"thigh": 0.70, "shin": 0.62}
 # quadriceps sit ahead of the hip-knee line and the calf behind the shin.
 LIMB_REFERENCE_STATURE_M = 1.82
 STATURE_SCALED_PARTS: tuple[str, ...] = ("thigh", "shin")
+# The thigh's bow was (0.30, 0.35, 0.60), the CC0 body's offsets about its own
+# leg pivot. That pivot is a rig pivot (114 mm from the midline, 60 % of the
+# way back through the thigh), not a hip joint centre, so the drawn thigh sat
+# 20 mm ahead of the pelvis with the joint at its back (owner, 2026-11-19:
+# upper front of the thigh too far forward). Now the joint is mid-depth at the
+# groin and the quadriceps bow ahead of the hip-knee line from mid-thigh down.
 PART_OFFSET: dict[str, tuple[float, float, float]] = {
-    "thigh": (0.30, 0.35, 0.60),
+    "thigh": (0.18, 0.40, 0.40),
     "shin": (-0.53, 0.34, 0.46),
 }
 NO_OFFSET = (0.0, 0.5, 1.0)
@@ -400,7 +406,7 @@ PART_ASPECT: dict[str, float] = {
     "torso": 0.72,
     "pelvis": 0.78,
     "foot": 0.7,
-    "thigh": 1.06,
+    "thigh": 1.105,
 }
 GARMENT_THICKNESS = 1.08
 # Fractional extent of a garment along the segment: (start, end). Partial
@@ -598,12 +604,20 @@ def deltoid_drop_m(radius_m: float, rise_m: float | None) -> float:
 # Width is ``pelvis_width`` (HRG-C4); the lower pole hangs below the MEAN HJC.
 PELVIS_CROTCH_DROP_M = 0.078  # pole below the mean HJC height; not the thigh radius
 PELVIS_MIN_BELOW_HJC_M = 0.025  # the lowest HJC keeps at least this much solid below
+# The buttock (#15299, owner 2026-11-19: the behind 5-10 % bigger): depth of the
+# pelvis behind the hip joints over its depth ahead of them, and the
+# superellipse exponent of its back outline (two cheeks are squarer than an
+# ellipse). 1.08 and 3.5 give +8 % reach behind the joints and +6 % girth at
+# the hips; both ease out to the belt line (``geometry.SplitEllipsoid``).
+PELVIS_BACK_SCALE = 1.08
+PELVIS_BACK_SQUARE = 3.5
 # Half width of the flat cap at the lumbar plane over the widest half width
 # (#15299, owner 2026-11-19: wider at the pelvis, to match the markers). The CC0
 # athletic male body (1.82 m) is 156 mm wide at the belt line against the
 # 179 mm hip-breadth prior, and the capture's belt markers are 172.5 mm from
-# the midline. Was 0.75; the torso second pass settled on 0.86.
-PELVIS_WAIST_RATIO = 0.86
+# the midline. Was 0.75; 0.87 keeps the waistband within 5 mm of the shirt hem
+# of the torso's second pass (which used 0.86).
+PELVIS_WAIST_RATIO = 0.87
 
 
 GARMENT_PARTS = ("torso", "pelvis", "shoulder", "upper_arm", "thigh", "shin")
