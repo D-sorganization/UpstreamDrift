@@ -11,6 +11,8 @@
   "collar_front_reach_m": 0.06,
   "neck_hug_m": 0.005,
   "neck_hug_gain": 0.5,
+  "sleeve_hug_m": 0.005,
+  "sleeve_hug_gain": 0.2,
   "tuck_ease_m": [0.012, 0.004],
   "tuck_band_m": [0.03, 0.05],
   "waistband_m": 0.006,
@@ -31,6 +33,9 @@
     "cap_radius_m": 0.1,
     "crease_mm": 0.3,
     "plain_crease_mm": 1.0,
+    "hem_harmonics": 6,
+    "collar_roughness_mm": 2.5,
+    "sleeve_hem_stand_mm": 5.5,
     "chest_depth_heights_m": [0.39, 0.47],
     "chest_depth_mm": {"default": [262.0, 251.0], "showpiece": [233.0, 205.0]}
   },
@@ -42,14 +47,15 @@
     "waist_height_m": "Waistband top 110 mm above the hip midpoint along the trunk axis; the shirt is tucked tuck_m (60 mm) below it.",
     "sleeve_fraction": "A short sleeve ends half way down the upper arm.",
     "trouser_end_fraction": "The trouser leg ends at 97 % of the shank, on the shoe collar.",
-    "collar": "The collar line runs collar_gap_m (12 mm) below the neck-joint ring of the skin and collar_front_drop_m (30 mm) lower in front, reached collar_front_reach_m (60 mm) ahead of the ring centre.",
+    "collar": "The collar line runs collar_gap_m (12 mm) from the line where the stored skin crosses the neck joint's height (the exact crossing on each face, not the mesh edges about it, whose zigzag of one edge length the hem used to repeat) and collar_front_drop_m (30 mm) lower in front, reached collar_front_reach_m (60 mm) ahead of that line's centre along a smoothstep, so the hem has no corner where the drop starts or ends.",
     "neck_hug": "At the collar the shirt is held to neck_hug_m (5 mm) off the skin; the allowed ease grows by neck_hug_gain per metre below the collar line.",
+    "sleeve_hug": "At the sleeve end the shirt is held to sleeve_hug_m (5 mm, the same as at the collar) off the arm, and the allowed ease grows by sleeve_hug_gain (0.2) per metre up the sleeve, back to the full ease 25 mm above the hem: the hem sits on the arm, and its folded edge is 5 mm wide instead of a 10 mm ring standing off it (2026-11-20 close-up review).",
     "tuck": "From tuck_band_m[0] (30 mm) above the waistband the shirt ease is capped at tuck_ease_m[0] (12 mm), falling over tuck_band_m[1] (50 mm) to tuck_ease_m[1] (4 mm) under the trousers.",
     "wrist_cut_m": "The stored skin ends where MakeHuman's hand weights take over, a ragged rim from 8.2 mm before to 10.2 mm past the wrist joint (measured on the default subject, 2026-11-20). Cutting on a plane 10 mm before the joint clears all of it; the hand model's forearm cuff reaches about 60 mm up the forearm and covers the ring.",
     "chest": "The chest front of the trunk: from chest.from_m (130 mm, 20 mm above the waistband top so the hem keeps its line) above the hip midpoint to above_shoulders_m (40 mm) above the shoulder joints, half_width_m (170 mm) either side of the midline, from ahead_m (30 mm) ahead of the trunk axis, each edge ramped over edge_m (30 mm). There the body is moved fore and aft to its area-weighted mean depth within smooth_sigma_m (35 mm, about half a pectoral) and the shirt is relaxed for tent_passes (60) passes, never under its floor ease: the creases between and under the pectorals fill, as taut cloth does. The #15299 prototype's values (2026-11-20 review).",
     "sleeve_cap": "Within sleeve_cap_m (110 mm, the deltoid) of a shoulder joint the shirt is relaxed the same way for sleeve_cap_passes (20) passes, which takes the crease between deltoid and chest off the sleeve cap.",
     "leg_tube": "Each trouser leg is held at least leg_tube_m[0] (78 mm) off the shank axis at the knee and leg_tube_m[1] (66 mm) at the ankle, falling to nothing leg_tube_rise (0.5) shank lengths above the knee: a straight leg instead of cloth that follows calf and ankle (bare shank radius 30 to 60 mm on the 1.82 m subject). The #15299 prototype's values.",
-    "limits": "Test bounds, measured 2026-11-20 on the 1.82 m reference subject (tests/unit/model_appearance/test_body_skin_dress.py). Pectoral relief: how far the shirt over a pectoral (pectoral_span_m off the midline) stands ahead of the shirt on the sternum, the largest over relief_heights_m above the hip midpoint: 0.6 mm (default fit) and 0.8 mm (showpiece) against 11.1 and 9.9 mm without the chest steps. Crease: largest depth of a shirt vertex under the mean of its neighbours, on the chest and within cap_radius_m of a shoulder joint: 0.03 mm against 1.3 and 1.0 mm. Chest depth: fore-aft extent of the shirt within 50 mm of the midline at chest_depth_heights_m, measured 257 and 246 mm (default fit) and 228 and 200 mm (showpiece, with its slim build; 243 and 225 mm before the slim build was mixed in), 7 to 9 mm less than without the chest steps.",
+    "limits": "Test bounds, measured 2026-11-20 on the 1.82 m reference subject (tests/unit/model_appearance/test_body_skin_dress.py). Pectoral relief: how far the shirt over a pectoral (pectoral_span_m off the midline) stands ahead of the shirt on the sternum, the largest over relief_heights_m above the hip midpoint: 0.6 mm (default fit) and 0.8 mm (showpiece) against 11.1 and 9.9 mm without the chest steps. Crease: largest depth of a shirt vertex under the mean of its neighbours, on the chest and within cap_radius_m of a shoulder joint: 0.03 mm against 1.3 and 1.0 mm. Chest depth: fore-aft extent of the shirt within 50 mm of the midline at chest_depth_heights_m, measured 257 and 246 mm (default fit) and 228 and 200 mm (showpiece, with its slim build; 243 and 225 mm before the slim build was mixed in), 7 to 9 mm less than without the chest steps. Hem roughness: largest distance of a hem loop's points from its fit with hem_harmonics (6) harmonics of arc length; the collar measured 2.0 and 2.1 mm (default fit, rim and cloth edge) and 1.8 and 1.9 mm (showpiece), against 4.6 and 4.9 mm and 4.4 and 4.8 mm when the collar was measured from the mesh edges. Sleeve hem stand: distance of the cloth edge from its rim on the arm, 5.0 to 5.1 mm against 10.0 mm before the sleeve hug.",
     "waistband": "The trousers' floor ease grows by waistband_m (6 mm) from waistband_span_m[0] (70 mm) below the waistband top over waistband_span_m[1] (40 mm), so the band always covers the tucked shirt."
   }
 }
