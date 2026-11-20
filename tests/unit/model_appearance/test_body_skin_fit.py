@@ -130,6 +130,12 @@ def test_shoulder_anchor_lowers_the_skin_over_the_joint() -> None:
         {"shoulder_anchor_m": (0.0, 0.0, 0.5)},
         {"shoulder_anchor_m": (0.0, float("nan"), 0.0)},
         {"trunk_margin_m": 0.0},
+        {"thorax_front_scale": 1.1},
+        {"thorax_front_scale": 0.5},
+        {"thorax_front_rise_m": 0.0},
+        {"thigh_back_m": 0.2},
+        {"thigh_back_rise_fraction": 1.5},
+        {"thigh_back_fade_m": 0.0},
         {"warp_extent_m": 0.1},
     ],
 )
@@ -149,11 +155,58 @@ def test_default_settings_ignore_the_profiles() -> None:
     assert fit.load_fit_settings().shoulder_anchor_m == (0.0, 0.0, 0.0)
 
 
-def test_showpiece_profile_only_raises_the_shoulder_anchor() -> None:
+def test_showpiece_profile_changes_only_its_named_settings() -> None:
     plain, tuned = fit.load_fit_settings(), fit.load_fit_settings(profile="showpiece")
-    assert tuned.shoulder_anchor_m == (0.0, 0.0, 0.025)
-    assert dataclasses.replace(tuned, shoulder_anchor_m=(0.0, 0.0, 0.0)) == plain
+    changes = {"shoulder_anchor_m": (0.0, 0.0, 0.025)}
+    changes |= {"thorax_front_scale": 0.92, "thigh_back_m": 0.02}
+    assert dataclasses.replace(plain, **changes) == tuned  # type: ignore[arg-type]
+    assert plain.thorax_front_scale == 1.0 and plain.thigh_back_m == 0.0
     _assert_subject_lengths(fit.fit_body_skin(SKIN, _subject(), tuned).joints)
+
+
+def _limb_weight(prefixes: tuple[str, ...]) -> np.ndarray:
+    return SKIN.weights[:, [g.startswith(prefixes) for g in SKIN.groups]].sum(axis=1)
+
+
+def test_thorax_front_scale_flattens_the_chest_and_nothing_else() -> None:
+    flat = dataclasses.replace(PLAIN, thorax_front_scale=0.9)
+    base = fit.fit_body_skin(SKIN, _subject(), PLAIN)
+    moved = fit.fit_body_skin(SKIN, _subject(), flat)
+    shift = moved.vertices - base.vertices
+    assert np.allclose(shift[:, 1:], 0.0) and np.all(shift[:, 0] <= 1e-12)
+    hip_mid = 0.5 * (base.joints["hip_l"] + base.joints["hip_r"])
+    axis = (base.joints["neck"] - hip_mid) / np.linalg.norm(
+        base.joints["neck"] - hip_mid
+    )
+    along = (base.vertices - hip_mid) @ axis
+    ahead = base.vertices[:, 0] - (hip_mid[0] + along * axis[0])
+    trunk = _limb_weight(fit.THORAX_EXEMPT_GROUPS) == 0.0
+    full = trunk & (along > flat.thorax_front_start_m + flat.thorax_front_rise_m)
+    chest = full & (ahead > 0.05)
+    assert chest.sum() > 50 and np.allclose(shift[chest, 0], -0.1 * ahead[chest])
+    assert np.allclose(shift[(ahead <= 0.0) | (along < flat.thorax_front_start_m)], 0.0)
+    for name, point in base.joints.items():
+        assert np.array_equal(point, moved.joints[name]), name
+
+
+def test_thigh_back_moves_the_thigh_front_back_and_nothing_else() -> None:
+    back = dataclasses.replace(PLAIN, thigh_back_m=0.02)
+    base = fit.fit_body_skin(SKIN, _subject(), PLAIN)
+    moved = fit.fit_body_skin(SKIN, _subject(), back)
+    shift = moved.vertices - base.vertices
+    assert np.allclose(shift[:, 1:], 0.0) and np.all(shift[:, 0] <= 1e-12)
+    hip, knee = base.joints["hip_l"], base.joints["knee_l"]
+    height, ahead = base.vertices[:, 2], base.vertices[:, 0] - hip[0]
+    middle = knee[2] + back.thigh_back_rise_fraction * (hip[2] - knee[2])
+    thigh = _limb_weight(("thigh",)) >= 1.0 - 1e-9
+    band = thigh & (height > middle) & (height < hip[2] - back.thigh_back_below_hip_m)
+    front = band & (ahead > back.thigh_back_front_m)
+    assert front.sum() > 20 and np.allclose(shift[front, 0], -0.02)
+    top = hip[2] - back.thigh_back_below_hip_m + back.thigh_back_fade_m
+    still = (ahead <= 0.0) | (height < knee[2]) | (height > top)
+    assert np.allclose(shift[still | (_limb_weight(("thigh",)) == 0.0)], 0.0)
+    for name, point in base.joints.items():
+        assert np.array_equal(point, moved.joints[name]), name
 
 
 def test_unknown_profile_or_profile_field_raises(tmp_path: Path) -> None:
