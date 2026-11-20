@@ -198,7 +198,7 @@ def _marker_errors(prob: BundleProblem, k: int, pose: Array, offsets: Array) -> 
 
 def _gain(prob: BundleProblem, sigma: float) -> Array:
     """Residual per metre of each marker's error ``(M, 1)``: root weight over sigma."""
-    weights = np.ones(len(prob.marker_bodies))
+    weights: Array = np.ones(len(prob.marker_bodies))
     if prob.marker_weights is not None:
         weights = np.asarray(prob.marker_weights, float)
     return np.sqrt(weights)[:, None] / sigma
