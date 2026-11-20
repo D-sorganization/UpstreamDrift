@@ -1,0 +1,33 @@
+{
+  "shirt": {"ease_m": 0.01, "min_ease_m": 0.006, "smoothing_passes": 8, "relax_passes": 0},
+  "trousers": {"ease_m": 0.01, "min_ease_m": 0.005, "smoothing_passes": 0, "relax_passes": 30},
+  "skin_margin_m": 0.004,
+  "waist_height_m": 0.11,
+  "tuck_m": 0.06,
+  "sleeve_fraction": 0.5,
+  "trouser_end_fraction": 0.97,
+  "collar_gap_m": 0.012,
+  "collar_front_drop_m": 0.03,
+  "collar_front_reach_m": 0.06,
+  "neck_hug_m": 0.005,
+  "neck_hug_gain": 0.5,
+  "tuck_ease_m": [0.012, 0.004],
+  "tuck_band_m": [0.03, 0.05],
+  "waistband_m": 0.006,
+  "waistband_span_m": [0.07, 0.04],
+  "wrist_cut_m": 0.01,
+  "sources": {
+    "origin": "All values are those of the #15299 prototype's accepted look (2026-11-20 review) on the 1.82 m tour-average subject; lengths in metres.",
+    "shirt": "A polo 10 mm off the skin and never closer than 6 mm; eight Taubin passes take the muscle relief off the cloth without shrinking it.",
+    "trousers": "10 mm off the skin, never closer than 5 mm, relaxed over 30 passes so the cloth bridges the crotch and the knee.",
+    "skin_margin_m": "The bare skin continues 4 mm under each hem so bending opens no gap.",
+    "waist_height_m": "Waistband top 110 mm above the hip midpoint along the trunk axis; the shirt is tucked tuck_m (60 mm) below it.",
+    "sleeve_fraction": "A short sleeve ends half way down the upper arm.",
+    "trouser_end_fraction": "The trouser leg ends at 97 % of the shank, on the shoe collar.",
+    "collar": "The collar line runs collar_gap_m (12 mm) below the neck-joint ring of the skin and collar_front_drop_m (30 mm) lower in front, reached collar_front_reach_m (60 mm) ahead of the ring centre.",
+    "neck_hug": "At the collar the shirt is held to neck_hug_m (5 mm) off the skin; the allowed ease grows by neck_hug_gain per metre below the collar line.",
+    "tuck": "From tuck_band_m[0] (30 mm) above the waistband the shirt ease is capped at tuck_ease_m[0] (12 mm), falling over tuck_band_m[1] (50 mm) to tuck_ease_m[1] (4 mm) under the trousers.",
+    "wrist_cut_m": "The stored skin ends where MakeHuman's hand weights take over, a ragged rim from 8.2 mm before to 10.2 mm past the wrist joint (measured on the default subject, 2026-11-20). Cutting on a plane 10 mm before the joint clears all of it; the hand model's forearm cuff reaches about 60 mm up the forearm and covers the ring.",
+    "waistband": "The trousers' floor ease grows by waistband_m (6 mm) from waistband_span_m[0] (70 mm) below the waistband top over waistband_span_m[1] (40 mm), so the band always covers the tucked shirt."
+  }
+}
