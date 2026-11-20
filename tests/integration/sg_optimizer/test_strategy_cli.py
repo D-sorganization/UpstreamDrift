@@ -59,3 +59,39 @@ def test_html_option_writes_the_view(tmp_path) -> None:
     assert rc == 0
     body = page.read_text(encoding="utf-8")
     assert "<ellipse" in body and "strokes to green" in body
+
+
+@pytest.mark.parametrize(
+    ("extra", "expected_headline", "terminal_note"),
+    [
+        (
+            (),
+            "Expected strokes to green",
+            "green ends the hole (putting is not modelled)",
+        ),
+        (
+            ("--pin-only",),
+            "Expected strokes to pin cell",
+            "pin cell only (value depends on raster resolution)",
+        ),
+    ],
+    ids=("green-terminal", "pin-only"),
+)
+def test_strategy_cli_text_and_html_headlines_match_the_terminal(
+    tmp_path, extra: tuple[str, ...], expected_headline: str, terminal_note: str
+) -> None:
+    page = tmp_path / "view.html"
+    rc, text = _run(tmp_path, *extra, "--html", str(page))
+    assert rc == 0
+    html = page.read_text(encoding="utf-8")
+    outputs = {"text": text, "HTML": html}
+    incorrect = [
+        surface
+        for surface, output in outputs.items()
+        if expected_headline not in output or terminal_note not in output
+    ]
+    assert not incorrect, f"wrong terminal headline or note in: {incorrect}"
+    if extra:
+        assert all(
+            "Expected strokes to green" not in output for output in outputs.values()
+        )

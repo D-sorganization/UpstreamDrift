@@ -51,6 +51,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1162 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
 | 1153 | `src/tools/motion_matching/gui.py` |
 | 1150 | `src/tools/bunker_shot_gui/gui.py` |
+| 1149 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 1147 | `src/api/routes/launch_monitor_analytics.py` |
 | 1146 | `src/engines/physics_engines/myosuite/python/myohand_bilateral_adapter.py` |
 | 1146 | `src/engines/physics_engines/myosuite/python/native_direct_model_replay.py` |
@@ -73,7 +74,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1100 | `src/shared/python/motion_matching/club_only/control_replay.py` |
 | 1098 | `src/tools/shot_pattern_analysis/matched_supplement_pipeline.py` |
 | 1096 | `src/learning/retargeting/retargeter.py` |
-| 1091 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 1089 | `src/shared/python/motion_pipeline/contracts.py` |
 | 1084 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py` |
 | 1078 | `src/engines/physics_engines/drake/python/full_body_model.py` |
@@ -182,6 +182,9 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 878 | `src/shared/python/grip_contact/simscape_grip_topology.py` |
 | 875 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py` |
 | 874 | `src/shared/python/tour_baselines/qualification.py` |
+| 873 | `src/shared/python/model_appearance/body_meshes.py` |
+| 873 | `src/shared/python/model_appearance/body_meshes.py` |
+| 873 | `src/shared/python/model_appearance/body_meshes.py` |
 | 873 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py` |
 | 870 | `src/shared/python/model_generation/cli/main.py` |
 | 868 | `src/shared/python/workspace/necromatcher_video_jobs.py` |
@@ -194,7 +197,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 861 | `src/shared/python/motion_matching/pipeline/lane.py` |
 | 859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m` |
 | 857 | `src/shared/python/injury/spinal_load_analysis.py` |
-| 855 | `src/shared/python/model_appearance/body_meshes.py` |
 | 853 | `src/shared/python/ai/gui/assistant_panel.py` |
 | 853 | `src/shared/python/chat/_chat_dock_widget_qt.py` |
 | 853 | `src/shared/python/sidekick/process_calculators/constants.py` |

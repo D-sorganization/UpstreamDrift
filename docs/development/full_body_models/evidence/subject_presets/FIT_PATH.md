@@ -5,7 +5,7 @@ capture from the `tour_average_driver` subject preset, the exact commands, and
 what one run of those commands gave. It is software-path evidence only: the
 numbers below do not meet the address target of the epic and nothing here is a
 physical acceptance. Machine-readable values are in
-[`tour_average_driver_fit_receipt.json`](tour_average_driver_fit_receipt.json).
+[`tour_average_driver_fit_summary.json`](tour_average_driver_fit_summary.json).
 
 ## Entry Points
 

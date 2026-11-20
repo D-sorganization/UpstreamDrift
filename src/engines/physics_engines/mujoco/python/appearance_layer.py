@@ -142,7 +142,10 @@ def _texture_attrs(name: str, material: Material, plane: bool) -> dict[str, str]
     elif tex.kind == "gradient":
         attrs["builtin"] = "gradient"
     else:  # noise, or a file fallback that has no procedural form
+        # MuJoCo fills the bottom face of a flat cube texture with rgb2, which
+        # drew a lighter patch on every solid (#15299); only the marks take b.
         attrs["builtin"] = "flat"
+        attrs["rgb2"] = _rgb(a)
         attrs["mark"] = "random"
         attrs["markrgb"] = _rgb(b)
         attrs["random"] = _nums(max(0.005, tex.noise))

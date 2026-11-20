@@ -238,6 +238,42 @@ def test_pin_only_mode_is_stated() -> None:
     assert "pin cell only" in render_html(view)
 
 
+@pytest.mark.parametrize(
+    ("green_terminal", "expected_headline", "terminal_note"),
+    [
+        (
+            True,
+            "Expected strokes to green",
+            "green ends the hole (putting is not modelled)",
+        ),
+        (
+            False,
+            "Expected strokes to pin cell",
+            "pin cell only (value depends on raster resolution)",
+        ),
+    ],
+    ids=("green-terminal", "pin-only"),
+)
+def test_text_and_html_headlines_match_the_terminal(
+    green_terminal: bool, expected_headline: str, terminal_note: str
+) -> None:
+    base = _one_option_view(0.0)
+    view = StrategyView(
+        base.hole,
+        base.tour_strokes,
+        base.personal_strokes,
+        base.options,
+        green_terminal=green_terminal,
+    )
+    outputs = (render_text(view), render_html(view))
+    missing = [
+        surface
+        for surface, output in zip(("text", "HTML"), outputs, strict=True)
+        if expected_headline not in output or terminal_note not in output
+    ]
+    assert not missing, f"wrong terminal headline or note in: {missing}"
+
+
 def _capped_tour(monkeypatch: pytest.MonkeyPatch) -> None:
     """Make the tour solve report a large residual; the player solve is real."""
     import dataclasses

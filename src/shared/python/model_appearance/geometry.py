@@ -190,6 +190,16 @@ class LoftOptions:
     # limb, eased in between ``flatten_from`` and ``taper_end``; its part
     # along the limb is ignored (#15264).
     end_shift: Array | None = None
+    # Sideways bow ``(vector_m, position, width)`` of the centreline (#15299):
+    # the sections move by ``vector_m`` at ``position`` along the whole limb,
+    # falling to nothing ``width`` away like ``belly`` (a calf behind the
+    # shin). The vector's part along the limb is ignored.
+    offset: tuple[Array, float, float] | None = None
+    # Radius at the near joint over the limb's radius, easing to the full
+    # radius by ``start_until`` of the whole limb (an elbow no wider than the
+    # upper arm it meets, #15299). 1 is no narrowing.
+    start_scale: float = 1.0
+    start_until: float = 1.0
 
 
 def _checked_shape(opts: LoftOptions) -> None:
@@ -206,8 +216,15 @@ def _checked_shape(opts: LoftOptions) -> None:
         raise ValueError("belly width must be positive")
     if not 0.0 < opts.taper_end <= 1.0:
         raise ValueError("taper_end must be in (0, 1]")
+    if not (0.0 < opts.start_scale <= 1.0 and 0.0 < opts.start_until <= 1.0):
+        raise ValueError("start_scale and start_until must be in (0, 1]")
     if not 0.0 < opts.end_cap <= 1.0:
         raise ValueError("end_cap must be in (0, 1]")
+    if opts.offset is not None:
+        vector, position, width = opts.offset
+        _check_finite("offset vector", vector, 3)
+        if not (0.0 <= position <= 1.0 and width > 0.0 and math.isfinite(width)):
+            raise ValueError("offset needs a position in [0, 1] and a width > 0")
     if opts.end_shift is not None and not opts.flatten_from < opts.taper_end:
         raise ValueError("end_shift needs flatten_from < taper_end")
     if opts.end_aspect is not None and not (
@@ -236,7 +253,10 @@ def _limb_scale(opts: LoftOptions, frac: float) -> float:
     gain, position, width = opts.belly
     reach = min(1.0, abs(frac - position) / width)
     swell = 1.0 + gain * math.cos(0.5 * math.pi * reach) ** 2
-    return swell * (1.0 + (opts.end_scale - 1.0) * min(1.0, frac / opts.taper_end))
+    t = min(1.0, frac / opts.start_until)
+    near = opts.start_scale + (1.0 - opts.start_scale) * t * t * (3.0 - 2.0 * t)
+    taper = 1.0 + (opts.end_scale - 1.0) * min(1.0, frac / opts.taper_end)
+    return swell * near * taper
 
 
 def _spindle_stations(
@@ -362,10 +382,15 @@ def lofted_segment(
     shift = np.zeros(3) if opts.end_shift is None else np.asarray(opts.end_shift)
     shift = shift - (shift @ a) * a
 
+    bow, bow_at, bow_width = opts.offset or (np.zeros(3), 0.5, 1.0)
+    bow = np.asarray(bow, dtype=float) - (np.asarray(bow, dtype=float) @ a) * a
+
     def centre(s: float) -> Array:
         """Centreline point ``s`` metres along this segment."""
-        lean = 0.0 if opts.end_shift is None else _ease(opts, (s + offset) / total)
-        return p0 + a * s + lean * shift
+        frac = (s + offset) / total
+        lean = 0.0 if opts.end_shift is None else _ease(opts, frac)
+        reach = min(1.0, abs(frac - bow_at) / bow_width)
+        return p0 + a * s + lean * shift + math.cos(0.5 * math.pi * reach) ** 2 * bow
 
     verts: list[Array] = []
     for s in stations:

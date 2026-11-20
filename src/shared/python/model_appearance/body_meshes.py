@@ -19,7 +19,8 @@ Frame contract (DbC)
     the chest.
 
 Sizing rule
-    Limbs, hands, feet and the head use ``library.PART_RADIUS_M``. The trunk
+    Limbs, hands, feet and the head use ``library.PART_RADIUS_M``; the leg radii
+    scale with the subject stature (``library.stature_scale``). The trunk
     (torso, pelvis) is ONE lofted solid per body along its longest capsule
     (joint origin to the farthest child joint), sized from the spec's own
     ``visual_hints`` ellipsoids: radius = the largest mediolateral (ML)
@@ -291,6 +292,9 @@ class _Segment:
     width_hint: np.ndarray | None = None
     end_cap: float = 1.0
     end_shift: np.ndarray | None = None
+    offset: tuple[np.ndarray, float, float] | None = None  # centreline bow
+    start_scale: float = 1.0
+    start_until: float = 1.0
     #: Trunk cross-sections and the joint plane they are measured from (#15279).
     profile: TorsoProfile | None = None
     profile_start: np.ndarray | None = None
@@ -372,6 +376,7 @@ def _wrist_shape(part: str, radius: float, wrist: Any) -> dict[str, Any]:
         }
     scale = library.validate_distal_scale(min(1.0, wrist.half_width_m / radius))
     taper = {"end_scale": scale, "taper_end": wrist.taper_end, "belly": wrist.belly}
+    taper["start_scale"], taper["start_until"] = wrist.elbow
     if not wrist.shapes_end:
         return taper
     return {
@@ -430,6 +435,7 @@ def _limb_segments(
     scale: float,
     window: tuple[float, float] = library.FULL_COVERAGE,
     wrist: Any = None,
+    front: np.ndarray | None = None,
     rise_m: float | None = None,
 ) -> list[_Segment]:
     out = []
@@ -445,6 +451,10 @@ def _limb_segments(
         radius = min(radius, _MAX_RADIUS_OVER_LENGTH * cap.length_m())
         aspect = library.PART_ASPECT.get(part, 1.0)
         start, end = np.asarray(cap.start_m), np.asarray(cap.end_m)
+        shift, at, width = library.offset(part)
+        bow = (
+            None if front is None or not shift else (shift * radius * front, at, width)
+        )
         if part == "upper_arm":  # the spindle's tip, not its middle, is the joint
             axis = (end - start) / cap.length_m()
             start = start + library.UPPER_ARM_START_INSET * radius * axis
@@ -456,6 +466,7 @@ def _limb_segments(
                 aspect,
                 window=window,
                 capsule_ends=part in library.CAPSULE_END_PARTS,
+                offset=bow,
                 **_wrist_shape(part, radius, wrist),
             )
         )
@@ -651,6 +662,9 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
             flatten_from=seg.flatten_from,
             end_cap=seg.end_cap,
             end_shift=seg.end_shift,
+            offset=seg.offset,
+            start_scale=seg.start_scale,
+            start_until=seg.start_until,
             rings=library.LOFT_RINGS,
             sides=library.LOFT_SIDES,
             width_hint=hint,
@@ -750,12 +764,16 @@ def _meshes_for_body(
         segments = [_trunk_segment(ctx, body, part, caps, scale)]
     else:
         window = ctx.windows.get(body, library.FULL_COVERAGE)
+        scale *= library.stature_scale(part, ctx.subject.get("stature_m"))
+        section = ctx.sections.get(body)
+        front = section.depth_axis if part in library.LEG_PARTS and section else None
         segments = _limb_segments(
             part,
             caps,
             scale,
             window,
             ctx.wrist_sections.get(body),
+            front,
             ctx.neck_rise.get(body),
         )
     return _segment_meshes(ctx, body, part, segments)
