@@ -53,6 +53,10 @@ class Rigid:
     def apply(self, points: Array) -> Array:
         return points @ self.rotation.T + self.translation
 
+    def inverse(self) -> Rigid:
+        """The motion that undoes this one."""
+        return Rigid(self.rotation.T, -self.rotation.T @ self.translation)
+
 
 IDENTITY = Rigid(np.eye(3), np.zeros(3))
 
