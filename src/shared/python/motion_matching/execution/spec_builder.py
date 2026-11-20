@@ -46,6 +46,9 @@ from src.shared.python.motion_matching.execution.assets import (
     get_native_geometry_spec,
     get_opensim_model,
 )
+from src.shared.python.motion_matching.execution.marker_seed_overrides import (
+    apply_marker_seed_overrides,
+)
 from src.shared.python.motion_matching.execution.subject_preset import (
     load_subject_preset,
 )
@@ -648,6 +651,35 @@ def _club_marker_offsets(
     return markers.offsets_m, resolved
 
 
+def _seeded_markers(
+    upper: dict[str, Any],
+    extension: LowerLimbExtension,
+    club: str,
+    native_candidate_path: Path,
+    kwargs: Mapping[str, Any],
+) -> tuple[float, Mapping[str, MarkerAttachment], Path | None]:
+    """Hub height, marker seeds and the club marker file of a build.
+
+    ``marker_seed_overrides`` and ``dropped_markers`` (kwargs, #15296) are
+    ``marker_seed_overrides.apply_marker_seed_overrides``'s; ``None`` keeps
+    the builder's own seeds.
+    """
+    offsets, club_path = _club_marker_offsets(club, kwargs.get("club_markers_path"))
+    hub_h, markers = _extract_marker_seeds(upper, native_candidate_path, offsets)
+    joints = [*upper["joints"], *(j.as_document() for j in extension.joints)]
+    return (
+        hub_h,
+        apply_marker_seed_overrides(
+            markers,
+            kwargs.get("marker_seed_overrides"),
+            kwargs.get("dropped_markers"),
+            joints,
+            upper["frames"],
+        ),
+        club_path,
+    )
+
+
 def _write_outputs(
     document: dict[str, Any],
     output_dir: Path,
@@ -796,6 +828,8 @@ def _record_preset(upper: dict[str, Any], kwargs: Mapping[str, Any]) -> None:
         upper["subject"]["subject_preset"] = kwargs["subject_preset"]
     if kwargs.get("club_butt_to_sole_m"):
         upper["club"]["butt_to_sole_m"] = float(kwargs["club_butt_to_sole_m"])
+    if kwargs.get("dropped_markers"):
+        upper["subject"]["dropped_markers"] = sorted(kwargs["dropped_markers"])
 
 
 def compose_anthropometric_document(
@@ -832,8 +866,8 @@ def compose_anthropometric_document(
     (``ValueError`` naming ``GIRDLE_MASS_RULES``) and records a non-default rule
     in ``subject``, so in the document and the build receipt.
     ``subject_preset.SubjectPreset`` kwargs (#15296): ``club_spec`` restates
-    ``club`` (same name, ``ValueError`` otherwise) and
-    ``shoulder_below_cervicale_m`` is ``build_upper_body``'s.
+    ``club`` (same name, ``ValueError`` otherwise),
+    ``shoulder_below_cervicale_m`` is ``build_upper_body``'s; :func:`_seeded_markers`.
     """
     native_path = native_path or get_native_geometry_spec(None)
     osim_path = osim_path or get_opensim_model(None)
@@ -872,10 +906,9 @@ def compose_anthropometric_document(
         osim_path, stature_m, hip_frame, leg_mass_kg
     )
     contact = _create_contact_spec()
-    club_offsets, club_markers_path = _club_marker_offsets(
-        club, kwargs.get("club_markers_path")
+    hub_h, markers, club_markers_path = _seeded_markers(
+        upper, extension, club, native_candidate_path, kwargs
     )
-    hub_h, markers = _extract_marker_seeds(upper, native_candidate_path, club_offsets)
     club_note = _provenance_notes(club, club_markers_path, leg_mass_kg)
     document = derive_full_body_spec(
         upper,
