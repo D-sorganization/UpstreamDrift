@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
+import json
 
 import numpy as np
 import pytest
@@ -17,6 +18,7 @@ pytestmark = pytest.mark.unit
 SKIN = fit.load_body_skin()
 POSE = pose.load_pose_settings()
 SETTINGS = export.load_export_settings()
+WRIST = json.loads((fit.ASSET_DIR / "export_settings.json").read_text())["wrist_limits"]
 #: Body origins (metres) of a 1.71 m golfer with the arms hanging; left side.
 CENTRAL = {"pelvis": (0, 0, 0), "thorax": (0, 0, 0.138), "head": (0, 0, 0.601)}
 LEFT = {
@@ -143,3 +145,58 @@ def test_the_skin_at_the_bind_pose_spans_the_model_joints() -> None:
         centre = posed[arm].mean(axis=0)
         assert sign * centre[1] == pytest.approx(0.195, abs=0.02)
         assert model[f"wrist_{side}"][2] < centre[2] < model[f"elbow_{side}"][2]
+
+
+def _end_ring_shift(settings: export.ExportSettings) -> float:
+    """Largest distance (m) of a forearm's end off the place its hand carries
+    it to, over both sides and the wrist bent four ways."""
+    binds = export.bind_poses(FRAMES, FITTED)
+    bones = export.skin_bones(SKIN.weights, SKIN.groups, SHARES, binds, settings)
+    hands = {
+        side: pose.Rigid(np.eye(3), FITTED.joints[f"wrist_{side}"])
+        for side, _ in fit.SIDES
+    }
+    blended = export.blend_wrists(bones, FITTED.vertices, binds, hands, settings)
+    if settings.wrist_blend_length_m == 0.0:
+        assert blended == bones  # off: the bones of the skin as they were
+    rest = {**binds, **{f"hand_{side}": hand for side, hand in hands.items()}}
+    assert np.allclose(
+        export.pose_bones(FITTED.vertices, blended, rest), FITTED.vertices
+    )
+    bend, worst = np.radians(WRIST["bend_deg"]), 0.0
+    for side, hand in hands.items():
+        wrist = hand.translation
+        bone = wrist - FITTED.joints[f"elbow_{side}"]
+        ids = next(b for b in bones if b.role == f"forearm_{side}").vertex_ids
+        along = (FITTED.vertices[ids] - wrist) @ bone / np.linalg.norm(bone)
+        ring = ids[along > -SETTINGS.wrist_blend_full_m]  # the end, held whole
+        assert len(ring) > 10
+        total = np.zeros(len(SKIN.vertices))
+        for one in blended:
+            np.add.at(total, one.vertex_ids, one.weights)
+        assert np.allclose(total, 1.0)
+        for rotvec in ((bend, 0, 0), (-bend, 0, 0), (0, bend, 0), (0, -bend, 0)):
+            turn = Rotation.from_rotvec(rotvec).as_matrix()
+            frames = {**rest, f"hand_{side}": pose.Rigid(turn, wrist)}
+            posed = export.pose_bones(FITTED.vertices, blended, frames)
+            carried = wrist + (FITTED.vertices[ring] - wrist) @ turn.T
+            shift = np.linalg.norm(posed[ring] - carried, axis=1).max()
+            worst = max(worst, float(shift))
+            moved = np.linalg.norm(posed - FITTED.vertices, axis=1)
+            far = (FITTED.vertices - wrist) @ bone / np.linalg.norm(bone)
+            assert moved[far < -settings.wrist_blend_length_m - 1e-9].max() < 1e-12
+    return worst
+
+
+def test_the_forearm_end_follows_a_bent_hand() -> None:
+    assert _end_ring_shift(SETTINGS) <= WRIST["end_shift_m"]
+    off = dataclasses.replace(SETTINGS, wrist_blend_length_m=0.0)
+    assert _end_ring_shift(off) > 10.0 * WRIST["end_shift_m"]
+    for length, full in ((-0.01, 0.0), (0.05, 0.05), (0.05, -0.01)):
+        with pytest.raises(ValueError, match="wrist_blend"):
+            dataclasses.replace(
+                SETTINGS, wrist_blend_length_m=length, wrist_blend_full_m=full
+            )
+    with pytest.raises(ValueError, match="side"):
+        binds = export.bind_poses(FRAMES, FITTED)
+        export.blend_wrists((), FITTED.vertices, binds, {"x": binds["head"]}, SETTINGS)

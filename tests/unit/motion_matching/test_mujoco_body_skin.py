@@ -10,6 +10,9 @@ from typing import Any
 
 import numpy as np
 import pytest
+from scipy.sparse import coo_matrix
+from scipy.sparse.csgraph import connected_components
+from scipy.spatial import cKDTree
 
 from src.engines.physics_engines.mujoco.python import body_skin_layer as layer
 from src.engines.physics_engines.mujoco.python import full_body_mjcf as exporter
@@ -19,6 +22,9 @@ from src.shared.python.model_appearance import club_assembly as ca
 from src.shared.python.model_appearance import skinned_wrist_sections as sws
 from src.shared.python.model_appearance import body_skin_export as export
 from src.shared.python.model_appearance import document_from_dict, library
+from src.shared.python.motion_matching.execution.skinned_hand_wrists import (
+    apply_skinned_hand_wrists,
+)
 
 mujoco = pytest.importorskip("mujoco")
 pytestmark = pytest.mark.unit
@@ -37,6 +43,9 @@ SWING = json.loads(
 )["changes_from_address"]
 SWING_LIMITS = json.loads((fit.ASSET_DIR / "export_settings.json").read_text())[
     "swing_limits"
+]
+WRIST_LIMITS = json.loads((fit.ASSET_DIR / "export_settings.json").read_text())[
+    "wrist_limits"
 ]
 SETTINGS = export.load_export_settings()
 DOCUMENT = document_from_dict({"schema_version": "appearance-v1"})
@@ -174,8 +183,10 @@ def test_the_forearms_end_under_the_skinned_hands_wrists() -> None:
     skin = fit.load_body_skin()
     fitted = fit.fit_body_skin(skin, export.subject_lengths(frames), settings)
     binds = export.bind_poses(frames, fitted)
-    assert layer.wrist_rings(SPEC, club, roles, binds) == {}  # other hands
-    rings = layer.wrist_rings(spec, club, roles, binds)
+    turns = layer.spec_turns(spec, roles, frames, SETTINGS.bind_pose)
+    assert layer.wrist_rings(SPEC, club, roles, binds, turns) == {}  # other hands
+    assert layer.hand_binds(SPEC, club, roles, binds, turns, fitted.joints) == {}
+    rings = layer.wrist_rings(spec, club, roles, binds, turns)
     sections = sws.forearm_wrist_sections(spec, club)
     assert sorted(rings) == ["l", "r"] and len(sections) == 2
     matched = fit.match_wrists(skin, fitted, rings, settings)
@@ -194,3 +205,82 @@ def test_the_forearms_end_under_the_skinned_hands_wrists() -> None:
         # off its two half axes.
         assert radius.max() <= ring.half_width_m - settings.wrist_under_m + 3e-4
         assert radius.min() >= ring.half_depth_m - settings.wrist_under_m - 3e-4
+
+
+@pytest.fixture(scope="module")
+def on_club() -> tuple[Any, dict[str, Any], Any]:
+    """The skinned body with the skinned hands rigid on the club, the wrist
+    joints on the hands' (and the same model with the loft body)."""
+    spec = copy.deepcopy(SPEC)
+    spec["subject"]["hand_visual_backend"] = "skinned_human"
+    spec = apply_skinned_hand_wrists(spec)
+    models = []
+    for backend in (export.LOFT_BACKEND, export.SKINNED_BACKEND):
+        spec["subject"]["body_visual_backend"] = backend
+        xml, summary = exporter.export_full_body_mjcf(
+            json.dumps(spec).encode(), appearance=DOCUMENT
+        )
+        models.append(mujoco.MjModel.from_xml_string(xml))
+    return models[1], summary["visual_layer"]["body_skin"], models[0]
+
+
+def _hand_vertices(model: Any, data: Any, label: str) -> Any:
+    """World vertices of a drawn hand proper: its largest connected part."""
+    geom = next(g for g in range(model.ngeom) if model.geom(g).name.endswith(label))
+    mesh = model.mesh(model.geom_dataid[geom])
+    count = int(mesh.vertnum[0])
+    faces = model.mesh_face[mesh.faceadr[0] : mesh.faceadr[0] + mesh.facenum[0]]
+    ends = faces[:, [0, 1]].ravel(), faces[:, [1, 2]].ravel()
+    graph = coo_matrix((np.ones(len(ends[0])), ends), shape=(count, count))
+    part = connected_components(graph, directed=False)[1]
+    used = np.unique(faces)
+    used = used[part[used] == np.bincount(part[used]).argmax()]
+    local = model.mesh_vert[mesh.vertadr[0] : mesh.vertadr[0] + count][used]
+    return data.geom_xpos[geom] + local @ data.geom_xmat[geom].reshape(3, 3).T
+
+
+def test_the_forearm_ends_stay_under_the_hands_on_the_club(
+    skinned: tuple[Any, Any], on_club: tuple[Any, Any, Any]
+) -> None:
+    model, summary, loft = on_club
+    assert summary["wrists_blended"] == ["l", "r"] and not skinned[1]["wrists_blended"]
+    assert summary["bones"]["skin"] == skinned[1]["bones"]["skin"] + 2
+    for name in ("nq", "nv", "nbody", "njnt", "nu", "neq"):
+        assert getattr(model, name) == getattr(loft, name), name
+    for name in ("body_mass", "body_inertia", "body_pos", "body_quat", "body_ipos"):
+        assert np.array_equal(getattr(model, name), getattr(loft, name)), name
+    rest = _surface(model, dict(SETTINGS.bind_pose))["body_skin_skin"][0]
+    bend, band = np.radians(WRIST_LIMITS["bend_deg"]), SWING_LIMITS["area_ratio"]
+    last = model.skin_boneadr[0] + summary["bones"]["skin"]
+    for side, prefix, label in (("l", "L", "lead_hand"), ("r", "R", "trail_hand")):
+        hand = model.body(summary["bodies"][f"hand_{side}"]).id
+        bone = next(b for b in range(last) if model.skin_bonebodyid[b] == hand)
+        first, count = model.skin_bonevertadr[bone], model.skin_bonevertnum[bone]
+        whole = model.skin_bonevertweight[first : first + count] == 1.0
+        ring = model.skin_bonevertid[first : first + count][whole]
+        assert len(ring) >= 40  # the end ring and the row behind it
+        seen = []
+        for x, y in ((0, 0), (bend, 0), (-bend, 0), (0, bend), (0, -bend)):
+            data = mujoco.MjData(model)
+            for joint, value in ADDRESS.items():
+                data.qpos[model.joint(joint).qposadr[0]] = value
+            data.qpos[model.joint(f"{prefix}WInputX").qposadr[0]] += x
+            data.qpos[model.joint(f"{prefix}WInputY").qposadr[0]] += y
+            mujoco.mj_forward(model, data)
+            vertices, faces = layer.posed_skin_layers(model, data)["body_skin_skin"]
+            turn = data.xmat[hand].reshape(3, 3)
+            seen.append((vertices[ring] - data.xpos[hand]) @ turn)  # in the hand
+            ratio = mesh.area_ratio(rest, vertices, faces)
+            stretched = float(((ratio > band) | (ratio < 1.0 / band)).mean())
+            folded = float(mesh.folded_faces(vertices, faces).mean())
+            assert stretched <= SWING_LIMITS["stretched_share"], (side, x, y)
+            assert folded <= SWING_LIMITS["folded_share"], (side, x, y)
+        shift = max(np.linalg.norm(one - seen[0], axis=1).max() for one in seen[1:])
+        assert shift <= WRIST_LIMITS["end_shift_m"], (side, shift)
+        points = _hand_vertices(model, data, label)
+        if side == "r":  # drawn on the club: carried to where the grip weld holds
+            a, b = (data.site(f"native_closure_{k}") for k in "ab")
+            turn = b.xmat.reshape(3, 3) @ a.xmat.reshape(3, 3).T
+            points = a.xpos + (points - b.xpos) @ turn
+        gap = cKDTree(points).query(vertices[ring])[0].max()
+        assert gap <= WRIST_LIMITS["end_to_hand_m"], (side, gap)
