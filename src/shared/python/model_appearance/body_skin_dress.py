@@ -5,7 +5,9 @@ sleeve end, waist, trouser end) and moved outward along the surface normal by
 a named ease, so they inherit the skin weights and follow every joint without
 a second rig. Each hem is folded back onto the skin, and the bare skin is kept
 ``skin_margin_m`` under the cloth so no gap opens when the body bends. The
-forearm ends on a plane ``wrist_cut_m`` before the wrist joint: a clean ring
+collar is measured from the line where the skin crosses the neck joint's
+height, not from the mesh edges about it, and collar and sleeve hems are held
+close to the skin (``neck_hug_m``, ``sleeve_hug_m``). The forearm ends on a plane ``wrist_cut_m`` before the wrist joint: a clean ring
 for the separate hand model's cuff to lie over.
 
 Three steps keep the anatomy from showing through the cloth: the chest of the
@@ -99,6 +101,8 @@ class DressSettings:
     collar_front_reach_m: float
     neck_hug_m: float
     neck_hug_gain: float
+    sleeve_hug_m: float
+    sleeve_hug_gain: float
     tuck_ease_m: tuple[float, float]
     tuck_band_m: tuple[float, float]
     waistband_m: float
@@ -119,7 +123,7 @@ class DressSettings:
             raise ValueError("sleeve_cap_passes must not be negative")
         positive: tuple[str, ...]
         positive = ("skin_margin_m", "waist_height_m", "tuck_m", "collar_gap_m")
-        positive += ("wrist_cut_m",)
+        positive += ("wrist_cut_m", "sleeve_hug_m")
         positive += ("collar_front_reach_m", "neck_hug_m", "waistband_m")
         for name in positive:
             if not getattr(self, name) > 0.0:
@@ -127,8 +131,8 @@ class DressSettings:
         for name in ("sleeve_fraction", "trouser_end_fraction"):
             if not 0.0 < getattr(self, name) <= 1.0:
                 raise ValueError(f"{name} must lie in (0, 1]")
-        if self.collar_front_drop_m < 0.0 or self.neck_hug_gain < 0.0:
-            raise ValueError("collar_front_drop_m and neck_hug_gain must be >= 0")
+        if min(self.collar_front_drop_m, self.neck_hug_gain, self.sleeve_hug_gain) < 0:
+            raise ValueError("collar_front_drop_m and the hug gains must be >= 0")
         for name in ("tuck_ease_m", "tuck_band_m", "waistband_span_m"):
             pair = getattr(self, name)
             if len(pair) != 2 or min(pair) <= 0.0:
@@ -190,19 +194,40 @@ def _limb(
     return owned, along
 
 
+def _neck_line(skin: BodySkin, fitted: FittedSkin) -> tuple[Array, Array, Array]:
+    """Where the skin crosses the neck joint's height: segment ends and heights.
+
+    One segment per face the height cuts, placed on the fitted body, and each
+    stored vertex's height over the joint. Raises ``ValueError`` without a neck.
+    """
+    over = skin.vertices[:, 2] - skin.landmarks["neck"][2]
+    high = over > 0.0
+    cut = skin.faces[high[skin.faces].any(axis=1) & ~high[skin.faces].all(axis=1)]
+    if not len(cut):
+        raise ValueError("the skin has no neck above the neck joint")
+    first, second = cut, np.roll(cut, -1, axis=1)
+    share = over[first] / np.where(
+        high[first] != high[second], over[first] - over[second], 1.0
+    )
+    points = fitted.vertices[first]
+    points = points + share[:, :, None] * (fitted.vertices[second] - points)
+    ends = points[high[first] != high[second]].reshape(-1, 2, 3)  # two per face
+    return ends[:, 0], ends[:, 1], over
+
+
 def _collar(skin: BodySkin, fitted: FittedSkin, settings: DressSettings) -> Array:
     """Distance below the collar line: a loop round the neck base, lower in front."""
-    high = skin.vertices[skin.faces][:, :, 2].mean(axis=1) >= skin.landmarks["neck"][2]
-    upper, lower = (np.zeros(len(skin.vertices), dtype=bool) for _ in range(2))
-    upper[skin.faces[high]] = True
-    lower[skin.faces[~high]] = True
-    ring = fitted.vertices[upper & lower]
-    if not len(ring):
-        raise ValueError("the skin has no neck above the neck joint")
-    distance = np.asarray(cKDTree(ring).query(fitted.vertices)[0], dtype=float)
-    distance[upper & ~lower] *= -1.0
-    ahead = (fitted.vertices[:, 0] - ring[:, 0].mean()) / settings.collar_front_reach_m
-    drop = settings.collar_front_drop_m * np.clip(ahead, 0.0, 1.0)
+    start, end, over = _neck_line(skin, fitted)
+    span = end - start
+    offset = fitted.vertices[:, None, :] - start[None, :, :]
+    share = np.einsum("vsk,sk->vs", offset, span) / np.maximum((span**2).sum(1), 1e-18)
+    nearest = offset - np.clip(share, 0.0, 1.0)[:, :, None] * span[None, :, :]
+    distance = np.linalg.norm(nearest, axis=2).min(axis=1)
+    distance[over > 0.0] *= -1.0
+    centre = 0.5 * float((start[:, 0] + end[:, 0]).mean())
+    ahead = (fitted.vertices[:, 0] - centre) / settings.collar_front_reach_m
+    ahead = np.clip(ahead, 0.0, 1.0)
+    drop = settings.collar_front_drop_m * ahead**2 * (3.0 - 2.0 * ahead)  # no corner
     return distance - settings.collar_gap_m - drop
 
 
@@ -398,6 +423,9 @@ def dress_skin(
             cap[tucked] = (loose - (loose - tight) * band)[tucked]
             hug = settings.neck_hug_m + settings.neck_hug_gain * here.collar
             cap = np.minimum(cap, np.maximum(hug, settings.neck_hug_m))
+            sleeve = settings.sleeve_hug_m + settings.sleeve_hug_gain * here.shirt
+            arm = here.trunk < 0.5
+            cap[arm] = np.minimum(cap, np.maximum(sleeve, settings.sleeve_hug_m))[arm]
             floor = np.minimum(floor, cap)
         else:  # the waistband stands off the tucked shirt
             below, rise = settings.waistband_span_m
