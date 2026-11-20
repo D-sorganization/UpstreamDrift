@@ -102,6 +102,7 @@ from src.shared.python.motion_matching.pipeline.gaze_tracking import (
 from src.shared.python.motion_matching.pipeline.lane import (
     Lane,
     add_trajectory_convergence_arguments,
+    apply_stance_arguments,
     configure_lane,
     document_seed,
     expand_stance_for_width,
@@ -1502,7 +1503,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         getattr(args, "ik_iterations", None),
         getattr(args, "ik_spin_prior_weight", None),
     )
-    lane.stance_slide = bool(getattr(args, "ik_free_stance_slide", False))
+    apply_stance_arguments(lane, args)
     lane.set_turn_split(
         cal_res.attachments,
         getattr(args, "thorax_weight", DEFAULT_THORAX_WEIGHT),

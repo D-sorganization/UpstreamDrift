@@ -38,6 +38,7 @@ from src.shared.python.motion_matching.ik_types import (
     solve_full_body_ik_trajectory_with_report,
 )
 from src.shared.python.motion_matching.marker_calibration import Offsets, Pose
+from src.shared.python.motion_matching.stance_anchor import SoftAnchor
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 from src.shared.python.motion_matching.trajectory_ik_options import (
     TrajectoryIkOptions,
@@ -101,6 +102,11 @@ class SolvePoseOptions:
     #: Penalise the club-body sole (spec origin) hovering above ``ground`` (#12969).
     club_sole_weight: float = 0.0
     empty_marker_rms: float = float("nan")
+    #: Soft stance anchor (#15296, ``stance_anchor.SoftAnchor``): weight of a
+    #: planted sphere's in-plane slide (``None``: the legacy anchor at
+    #: ``ground_weight``) and the slide left free of it, metres.
+    anchor_weight: float | None = None
+    anchor_slide_m: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -135,6 +141,17 @@ class SolveTrajectoryOptions:
     #: index, so a perturbation that changes which earlier frames restarted
     #: cannot shift the jitter of every later frame.
     restart_seed_per_frame: bool = False
+
+
+def soft_anchor(opts: SolvePoseOptions, ground: Any) -> SoftAnchor | None:
+    """The soft anchor rule ``opts`` asks for; ``None`` keeps the legacy one."""
+    if opts.anchor_weight is None and opts.anchor_slide_m == 0.0:
+        return None
+    slide = opts.ground_weight if opts.anchor_weight is None else opts.anchor_weight
+    try:
+        return SoftAnchor(ground.normal, opts.ground_weight, slide, opts.anchor_slide_m)
+    except ValueError as exc:
+        raise ValueError(f"anchor_weight and anchor_slide_m: {exc}") from exc
 
 
 def _rotation_error(r_a: Array, r_b: Array) -> Array:
@@ -576,8 +593,9 @@ class BaseFullBodyIK:
         jacs: list[Array],
         planted: Any,
         weight: float,
+        soft: SoftAnchor | None = None,
     ) -> None:
-        """Append planted stance foot anchor rows."""
+        """Append planted stance foot anchor rows (``soft``: the #15296 rule)."""
 
     def _append_balance(
         self,
@@ -855,7 +873,9 @@ class BaseFullBodyIK:
         self._append_closure(rows, jacs, opts.closure_weight, rot_w)
         self._append_ground(rows, jacs, ground, opts.ground_weight, prep.pinned)
         self._append_club_sole(rows, jacs, ground, opts.club_sole_weight)
-        self._append_anchors(rows, jacs, prep.planted, opts.ground_weight)
+        soft = soft_anchor(opts, ground)  # only the MuJoCo kinematics take one
+        extra = () if soft is None else (soft,)
+        self._append_anchors(rows, jacs, prep.planted, opts.ground_weight, *extra)
         self._append_balance(rows, jacs, ground, opts.balance_weight)
         self._append_com_target(rows, jacs, ground, prep.com_goal)
         self._append_axes(rows, jacs, prep.axes)

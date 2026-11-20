@@ -220,6 +220,53 @@ def test_free_stance_slide_is_opt_in_and_keeps_the_feet_on_the_ground() -> None:
     assert lane.convergence_report() == {"free_stance_slide": True}
 
 
+def test_soft_stance_anchor_is_an_opt_in_setting() -> None:
+    """``--ik-stance-anchor-weight`` and ``--ik-stance-slide-mm`` (#15296): the
+    full-capture solve keeps its plant but lets a planted sphere slide; the
+    default, calibration subsets and the receipt of a default run are unchanged."""
+    from src.shared.python.motion_matching.pipeline.address_feet import planted_stance
+    from src.shared.python.motion_matching.pipeline.cli import build_parser
+    from src.shared.python.motion_matching.pipeline.lane import apply_stance_arguments
+
+    lane = _synthetic_lane()
+    args = build_parser().parse_args([])
+    assert (args.ik_stance_anchor_weight, args.ik_stance_slide_mm) == (None, None)
+    apply_stance_arguments(lane, args)
+    assert lane.stance_settings() == planted_stance(lane)
+    assert lane.convergence_report() == {}
+    args = build_parser().parse_args(
+        ["--ik-stance-anchor-weight", "10", "--ik-stance-slide-mm", "5"]
+    )
+    apply_stance_arguments(lane, args)
+    soft = lane.stance_settings()
+    assert soft == planted_stance(lane) | {
+        "anchor_weight": 10.0,
+        "anchor_slide_m": pytest.approx(0.005),
+    }
+    assert lane.stance_settings(consecutive=False) == planted_stance(lane)
+    assert lane.convergence_report() == {
+        "stance_anchor_weight": 10.0,
+        "stance_slide_mm": 5.0,
+    }
+    only_slide = _synthetic_lane()
+    only_slide.set_stance_anchor(None, 8.0)
+    assert only_slide.stance_settings() == planted_stance(only_slide) | {
+        "anchor_slide_m": pytest.approx(0.008)
+    }
+    for weight, slide in ((-1.0, None), (None, -2.0), (float("nan"), None)):
+        with pytest.raises(ValueError, match="stance anchor"):
+            lane.set_stance_anchor(weight, slide)
+    both = build_parser().parse_args(
+        ["--ik-free-stance-slide", "--ik-stance-slide-mm", "5"]
+    )
+    with pytest.raises(ValueError, match="free-stance-slide"):
+        apply_stance_arguments(_synthetic_lane(), both)
+    free = build_parser().parse_args(["--ik-free-stance-slide"])
+    slid = _synthetic_lane()
+    apply_stance_arguments(slid, free)
+    assert slid.stance_slide is True
+
+
 def test_girdle_range_is_an_opt_in_tightening() -> None:
     """``--ik-girdle-range-deg`` (#15296): the four shoulder-girdle coordinates
     are bounded about neutral in every solve that reads the lane's bounds; the

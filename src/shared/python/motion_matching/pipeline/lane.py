@@ -414,6 +414,8 @@ class Lane:
         #: Iteration cap of each full-capture pose solve; None keeps the solver's.
         self.ik_iterations: int | None = None
         self.stance_slide = False
+        #: Soft stance anchor keywords of the full-capture solve (#15296).
+        self.stance_anchor: dict[str, float] = {}
         self.girdle_range_deg: float | None = None
         self.spin_prior_override: float | None = None
         #: Last pre-contact capture frame (GCV-20); the reference low-pass is
@@ -529,9 +531,31 @@ class Lane:
         times stiffer than a marker and the capture's feet roll and pivot by
         10 to 25 mm in the downswing. Calibration subsets stay planted."""
         stance = planted_stance(self)
-        if not (consecutive and self.stance_slide):
+        if not consecutive:
             return stance
+        if not self.stance_slide:
+            return stance | self.stance_anchor
         return stance | {"plant_stance": False, "anchor_stance_at_init": False}
+
+    def set_stance_anchor(self, weight: float | None, slide_mm: float | None) -> None:
+        """Soften the stance anchor of the full-capture solve (#15296, off by
+        default): ``weight`` is that of a planted sphere's in-plane slide (1 is
+        a marker; the legacy anchor is the ground weight, 100) and ``slide_mm``
+        the slide left free of it. The sphere stays on the ground at the ground
+        weight either way; a sphere the capture lifts is released as before.
+        Raises ``ValueError`` on a negative or non-finite value."""
+        given = {"anchor_weight": weight, "anchor_slide_m": slide_mm}
+        for value in given.values():
+            if value is not None and not (np.isfinite(value) and value >= 0):
+                raise ValueError(
+                    f"stance anchor weight and slide must be finite and >= 0: {given}"
+                )
+        scale = {"anchor_weight": 1.0, "anchor_slide_m": 1e-3}
+        self.stance_anchor = {
+            key: scale[key] * float(value)
+            for key, value in given.items()
+            if value is not None
+        }
 
     def convergence_report(self) -> dict[str, Any]:
         """Receipt block of ``set_trajectory_convergence``; empty when not opted in."""
@@ -539,6 +563,12 @@ class Lane:
             "iterations": self.ik_iterations,
             "spin_prior_weight": self.spin_prior_override,
             "free_stance_slide": True if self.stance_slide else None,
+            "stance_anchor_weight": self.stance_anchor.get("anchor_weight"),
+            "stance_slide_mm": (
+                None
+                if "anchor_slide_m" not in self.stance_anchor
+                else 1e3 * self.stance_anchor["anchor_slide_m"]
+            ),
             "girdle_range_deg": self.girdle_range_deg,
         }
         return {key: value for key, value in opted.items() if value is not None}
@@ -963,6 +993,24 @@ def add_trajectory_convergence_arguments(parser: Any) -> None:
         ),
     )
     parser.add_argument(
+        "--ik-stance-anchor-weight",
+        type=float,
+        default=None,
+        help=(
+            "full-capture solve: weight of a planted stance sphere's in-plane "
+            "slide, 1 being a marker (default: the ground weight, 100)"
+        ),
+    )
+    parser.add_argument(
+        "--ik-stance-slide-mm",
+        type=float,
+        default=None,
+        help=(
+            "full-capture solve: slide of a planted stance sphere from where it "
+            "first touched that is left free, millimetres (default: 0)"
+        ),
+    )
+    parser.add_argument(
         "--ik-iterations",
         type=int,
         default=None,
@@ -977,3 +1025,15 @@ def add_trajectory_convergence_arguments(parser: Any) -> None:
             "full-capture solve (default: the document's)"
         ),
     )
+
+
+def apply_stance_arguments(lane: Lane, args: Any) -> None:
+    """Hand ``lane`` the stance flags of ``args`` (#15296). Raises
+    ``ValueError`` when the free slide and a soft anchor are both asked for:
+    the free slide has no anchor to soften."""
+    weight = getattr(args, "ik_stance_anchor_weight", None)
+    slide_mm = getattr(args, "ik_stance_slide_mm", None)
+    lane.stance_slide = bool(getattr(args, "ik_free_stance_slide", False))
+    if lane.stance_slide and not (weight is None and slide_mm is None):
+        raise ValueError("--ik-free-stance-slide excludes the soft anchor flags")
+    lane.set_stance_anchor(weight, slide_mm)
