@@ -28,6 +28,8 @@ from src.shared.python.motion_matching.execution.marker_seed_overrides import (
 SCHEMA = "subject-preset/1"
 PRESET_FOLDER = DEFAULT_FULL_BODY / "evidence/subject_presets"
 _POSITIVE = ("stature_m", "mass_kg", "trunk_scale", "arm_scale", "shoulder_scale")
+#: Settings a preset may leave out: the builder then keeps its own value.
+OPTIONAL = ("thigh_length_m", "shank_length_m", "hip_half_spacing_m")
 _TEXT = ("name", "club", "club_markers")
 
 
@@ -54,6 +56,11 @@ class SubjectPreset:
     club_shaft_elevation_deg: float
     club_head_roll_deg: float
     club_markers: str
+    #: Hip to knee and knee to ankle joint centres, both legs, m (optional).
+    thigh_length_m: float | None = None
+    shank_length_m: float | None = None
+    #: Half the distance between the hip joint centres, m (optional).
+    hip_half_spacing_m: float | None = None
     provenance: Mapping[str, str] = field(default_factory=dict, compare=False)
     marker_seeds: Mapping[str, Mapping[str, Any]] = field(default_factory=dict)
     dropped_markers: Mapping[str, str] = field(default_factory=dict)
@@ -61,12 +68,16 @@ class SubjectPreset:
     def __post_init__(self) -> None:
         for key in ("name", *SETTINGS):
             value = getattr(self, key)
+            if value is None and key in OPTIONAL:
+                continue
             if key in _TEXT:
                 if not isinstance(value, str) or not value:
                     raise TypeError(f"{key} must be a non-empty string")
             elif isinstance(value, bool) or not isinstance(value, (int, float)):
                 raise TypeError(f"{key} must be a number, got {value!r}")
-            elif not math.isfinite(value) or (key in _POSITIVE and value <= 0):
+            elif not math.isfinite(value) or (
+                key in (*_POSITIVE, *OPTIONAL) and value <= 0
+            ):
                 raise ValueError(f"{key} must be finite and positive, got {value}")
         if self.shoulder_below_cervicale_m < 0:
             raise ValueError("shoulder_below_cervicale_m must be >= 0")
@@ -123,7 +134,9 @@ def load_subject_preset(name: Path | str) -> SubjectPreset:
     if raw.get("schema") != SCHEMA:
         raise ValueError(f"schema must be {SCHEMA!r}, got {raw.get('schema')!r}")
     settings, provenance = raw.get("settings", {}), raw.get("provenance", {})
-    if missing := sorted(set(SETTINGS) - set(settings)):
+    absent = set(OPTIONAL) - set(settings)
+    provenance = {**dict.fromkeys(absent, "not set"), **provenance}
+    if missing := sorted(set(SETTINGS) - absent - set(settings)):
         raise ValueError(f"settings missing: {missing}")
     if unknown := sorted(set(settings) - set(SETTINGS)):
         raise ValueError(f"unknown settings: {unknown}")

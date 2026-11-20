@@ -16,6 +16,7 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 from scipy.optimize import least_squares
+from scipy.spatial.transform import Rotation
 
 from src.shared.python.model_appearance import library
 from src.shared.python.model_appearance import skinned_club_hands as sch
@@ -49,6 +50,9 @@ class WristSection:
     shapes_end: bool = True
     #: Muscle belly ``(gain, position, width)`` of the forearm that ends here.
     belly: tuple[float, float, float] = library.NO_BELLY
+    #: Radius at the elbow over the limb's radius, and the fraction of the
+    #: forearm by which it is back to the full radius.
+    elbow: tuple[float, float] = (1.0, 1.0)
 
 
 def wrist_margin() -> float:
@@ -92,6 +96,36 @@ def forearm_belly() -> tuple[float, float, float]:
     if not (0.0 <= gain <= 0.5 and 0.0 < position < 1.0 and width > 0.0):
         raise ValueError(f"belly gain, position or width out of range: {gain=}")
     return gain, position, width
+
+
+def forearm_elbow() -> tuple[float, float]:
+    """``(scale, until)`` of a skinned-hand forearm's elbow (a setting): its
+    radius at the elbow joint over the library radius, so its ball about the
+    elbow hides in the upper arm, and the fraction of its length by which it
+    is back to the full radius (#15299).
+    """
+    quality: Mapping[str, Any] = load_hand_visual_quality()
+    scale, until = map(float, quality["forearm_wrist_shape"]["elbow"])
+    if not (0.5 <= scale <= 1.0 and 0.0 < until <= 0.5):
+        raise ValueError(
+            f"elbow needs 0.5 <= scale <= 1 and 0 < until <= 0.5, got {(scale, until)}"
+        )
+    return scale, until
+
+
+def reference_twist_deg() -> dict[str, float]:
+    """Per hand: turn about the forearm's line, from the wrist-straight pose,
+    of the pose its wrist end is shaped at (a setting, #15299)."""
+    quality: Mapping[str, Any] = load_hand_visual_quality()
+    twist = {
+        side: float(angle)
+        for side, angle in quality["forearm_wrist_shape"]["reference_twist_deg"].items()
+    }
+    if set(twist) != {"lead", "trail"} or max(map(abs, twist.values())) > 45.0:
+        raise ValueError(
+            f"reference_twist_deg needs lead and trail within 45 degrees, got {twist}"
+        )
+    return twist
 
 
 def hand_wrist_sections(club: ClubAssembly) -> dict[str, WristSection]:
@@ -142,7 +176,8 @@ def straight_wrists(
     spec: Mapping[str, Any], club: ClubAssembly
 ) -> dict[str, tuple[str, Array]]:
     """Per hand: its forearm body and the rotation from the club frame to it
-    with the wrist straight (#15299).
+    at the pose the forearm's wrist end is shaped at (#15299): the wrist
+    straight, then turned :func:`reference_twist_deg` about the forearm.
 
     The spec's zero pose bends both wrists about 50 degrees, so a forearm end
     shaped there sits turned and off centre under the hand. Straight is where
@@ -172,7 +207,16 @@ def straight_wrists(
         return np.concatenate(parts)
 
     angles = least_squares(miss, np.zeros(len(names))).x
-    return _wrist_bodies(spec, dict(zip(names, map(float, angles), strict=True)))
+    straight = _wrist_bodies(spec, dict(zip(names, map(float, angles), strict=True)))
+    twist = reference_twist_deg()
+    return {
+        side: (
+            body,
+            Rotation.from_rotvec(np.radians(twist[side]) * axes[body]).as_matrix()
+            @ turn,
+        )
+        for side, (body, turn) in straight.items()
+    }
 
 
 def forearm_wrist_sections(
@@ -202,5 +246,6 @@ def forearm_wrist_sections(
             centre,
             wrist_taper_end(),
             belly=forearm_belly(),
+            elbow=forearm_elbow(),
         )
     return out
