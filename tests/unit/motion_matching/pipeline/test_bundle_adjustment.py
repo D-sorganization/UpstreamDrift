@@ -259,3 +259,16 @@ def test_converges_at_the_size_of_the_driver_fit_within_budget() -> None:
     assert result.converged
     assert result.rms_m < 0.002 * np.sqrt(3.0)
     assert np.abs(result.offsets - truth).max() < PRIOR_SIGMA_M
+
+
+def test_offset_reach_caps_the_bound_and_progress_is_logged(caplog) -> None:
+    shift = np.zeros_like(SEEDS)
+    shift[0, 0] = 0.030
+    prob, _, _ = problem(shift=shift, offset_reach=np.full(SEEDS.shape, 0.004))
+    with caplog.at_level("INFO"):
+        result = solve_bundle(prob, BundleSettings(marker_sigma_m=NOISE_M))
+    assert np.abs(result.offsets - SEEDS).max() <= 0.004 + 1e-12
+    assert (0, 0) in result.on_bound
+    assert "bundle iteration" in caplog.text
+    with pytest.raises(ValueError, match="offset_reach"):
+        problem(offset_reach=np.full(SEEDS.shape, -1.0))[0].check(BundleSettings())

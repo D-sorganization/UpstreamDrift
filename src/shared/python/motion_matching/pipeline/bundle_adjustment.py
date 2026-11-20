@@ -13,14 +13,16 @@ callable. Nothing here is a physical acceptance of a fit.
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
-from functools import partial
 from dataclasses import dataclass, fields
+from functools import partial
 from typing import Any
 
 import numpy as np
 
 Array = np.ndarray
+LOG = logging.getLogger(__name__)
 #: pose ``(n_q,)`` -> world frames of every body ``(n_bodies, 4, 4)``.
 ForwardKinematics = Callable[[Array], Array]
 
@@ -52,6 +54,10 @@ class BundleSettings:
     #: this many linearisations (the second is not convergence).
     tolerance: float = 1e-10
     max_iterations: int = 200
+    #: After every step each frame's pose is settled at the current offsets by
+    #: up to this many of its own damped steps (variable projection: a frame
+    #: far from its optimum otherwise sets the damping for all); 0 turns it off.
+    inner_iterations: int = 10
     #: Levenberg-Marquardt damping: start, growth on a refused step and decay
     #: on an accepted one (*experiment*: 5 and 3), range, and diagonal floor.
     damping_start: float = 1e-3
@@ -94,6 +100,9 @@ class BundleProblem:
     pose_prior: tuple[Array, Array] | None = None
     constraint: Callable[[int, Array], Array] | None = None
     body_jacobian: Callable[[Array], Array] | None = None
+    #: Farthest each offset component may move from its seed, metres ``(M, 3)``;
+    #: the hard bound is the smaller of this and ``bound_sigmas`` sigmas.
+    offset_reach: Array | None = None
 
     def check(self, settings: BundleSettings) -> None:
         """Raise ``TypeError`` / ``ValueError`` unless the problem is well formed."""
@@ -128,6 +137,11 @@ class BundleProblem:
                 raise ValueError(f"{name} must be finite (observations: where valid)")
         if not np.all(np.asarray(self.offset_sigmas) >= 0):
             raise ValueError("offset_sigmas must not be negative (0 holds)")
+        reach = self.offset_reach
+        if reach is not None and (
+            np.shape(reach) != (markers, 3) or not np.all(np.asarray(reach) >= 0)
+        ):
+            raise ValueError(f"offset_reach must be ({markers}, 3) and not negative")
         if not np.all(self.pose_bounds[0] <= self.pose_bounds[1]):
             raise ValueError("pose_bounds must have lower <= upper")
         if self.pose_prior is not None:
@@ -291,6 +305,44 @@ def _schur_step(
     return np.array([-(part[:, -1] + part[:, :-1] @ step) for part in solved]), step
 
 
+def _settle(
+    prob: BundleProblem, settings: BundleSettings, state: tuple[Array, Array], k: int
+) -> Array:
+    """Frame ``k``'s pose at its own optimum for the offsets of ``state``."""
+    pose, offsets = state
+    lower, upper = (np.asarray(b, float) for b in prob.pose_bounds)
+    damping = settings.damping_start
+    for _ in range(settings.inner_iterations):
+        block = _linearise(prob, settings, k, (pose, offsets))
+        residual, by_pose, _ = _with_pose_prior(prob, k, pose, block)
+        by_pose = by_pose * _free(pose, by_pose.T @ residual, lower, upper)
+        hessian, cost = by_pose.T @ by_pose, residual @ residual
+        while damping <= settings.damping_max:
+            lifted = damping * np.diag(np.diag(hessian) + settings.damping_floor)
+            step = np.linalg.solve(hessian + lifted, by_pose.T @ residual)
+            trial = np.clip(pose - step, lower, upper)
+            block = _linearise(prob, settings, k, (trial, offsets))
+            after = _with_pose_prior(prob, k, trial, block)[0]
+            if after @ after < cost:
+                break
+            damping *= settings.damping_up
+        else:
+            return pose
+        pose = trial
+        damping = max(damping / settings.damping_down, settings.damping_min)
+        if cost - after @ after < settings.tolerance * cost:
+            break
+    return pose
+
+
+def _settled(
+    prob: BundleProblem, settings: BundleSettings, poses: Array, offsets: Array
+) -> Array:
+    return np.array(
+        [_settle(prob, settings, (pose, offsets), k) for k, pose in enumerate(poses)]
+    )
+
+
 def _minimise(
     prob: BundleProblem,
     settings: BundleSettings,
@@ -306,8 +358,9 @@ def _minimise(
     sigma, weights = settings.marker_sigma_m, _prior_weights(prob).ravel()
     poses = np.clip(np.asarray(prob.pose_start, float), lower, upper)
     offsets = np.array(prob.offset_seeds, float)
+    poses = _settled(prob, settings, poses, offsets)
     cost, damping = _cost(prob, sigma, poses, offsets), settings.damping_start
-    for _ in range(settings.max_iterations):
+    for iteration in range(settings.max_iterations):
         blocks = []
         pull = (offsets - prob.offset_seeds).ravel() * weights
         gradient = weights * pull
@@ -323,8 +376,8 @@ def _minimise(
             turn, shift = _schur_step(
                 blocks, (pull, weights * free), damping, settings.damping_floor
             )
-            trial = np.clip(poses + turn, lower, upper)
             moved = np.clip(offsets + shift.reshape(-1, 3), low, high)
+            trial = _settled(prob, settings, np.clip(poses + turn, lower, upper), moved)
             lowered = _cost(prob, sigma, trial, moved)
             if lowered < cost:
                 break
@@ -334,6 +387,7 @@ def _minimise(
         gain, cost = (cost - lowered) / cost, lowered
         poses, offsets = trial, moved
         damping = max(damping / settings.damping_down, settings.damping_min)
+        LOG.info("bundle iteration %d: cost %.3f, gain %.2e", iteration, cost, gain)
         if gain < settings.tolerance:
             return poses, offsets, True
     return poses, offsets, False
@@ -387,6 +441,8 @@ def solve_bundle(prob: BundleProblem, settings: BundleSettings) -> BundleResult:
     prob.check(settings)
     seeds = np.asarray(prob.offset_seeds, float)
     reach = settings.bound_sigmas * np.asarray(prob.offset_sigmas, float)
+    if prob.offset_reach is not None:
+        reach = np.minimum(reach, np.asarray(prob.offset_reach, float))
     lower, upper = (np.asarray(b, float) for b in prob.pose_bounds)
     poses, offsets, converged = _minimise(
         prob, settings, (lower, upper, seeds - reach, seeds + reach)
