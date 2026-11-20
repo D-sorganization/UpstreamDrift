@@ -126,6 +126,75 @@ class TorsoProfile:
 
 
 @dataclass(frozen=True)
+class TorsoAcceptance:
+    """Acceptance bands of the look of the trunk (#15299).
+
+    Breadths are (low, high) fractions of stature, each widened by
+    ``norm_tolerance``: ANSUR II male means (Gordon et al. 2014, mean stature
+    1.756 m) scaled by stature, which for a 1.82 m man are a chest breadth of
+    330 to 350 mm, bideltoid 500 to 520, waist 310 to 330 and hip 345 to 360.
+    ``min_chest_over_hip``: the chest is about as wide as the hips.
+    ``min_chest_depth`` is a floor, NOT the norm (250 to 265 mm, 0.137 to
+    0.146 of stature): at address the lead arm lies across the chest front, so
+    a chest of the norm depth swallows it; ``max_forearm_in_chest`` (forearm
+    radii a forearm may sink into the shirt at address) guards that.
+
+    The back silhouette is read every ``back_step`` over ``back_span`` (head
+    lengths about the neck point: mid-thorax to mid-neck). ``max_back_bump``:
+    its largest distance behind its own chord, over the chord (a hump);
+    ``max_back_jump``: its largest forward jump within ``jump_window`` (a shelf
+    under the neck); ``max_neck_ahead_of_back``: how far the back of the neck
+    base is in front of the upper back's own line through ``back_tangent``.
+    """
+
+    chest_breadth: tuple[float, float] = (0.181, 0.192)
+    bideltoid_breadth: tuple[float, float] = (0.275, 0.286)
+    waist_breadth: tuple[float, float] = (0.170, 0.181)
+    hip_breadth: tuple[float, float] = (0.190, 0.198)
+    norm_tolerance: float = 0.06
+    min_chest_over_hip: float = 0.97
+    min_chest_depth: float = 0.118
+    # 1.0 before the skinned-hand forearm (#15288), which alone reads 1.0004 on
+    # the unchanged torso; the deeper chest here reads 1.154 (49.9 mm).
+    max_forearm_in_chest: float = 1.2
+    back_span: tuple[float, float] = (-0.9, 0.08)
+    back_step: float = 0.02
+    max_back_bump: float = 0.08
+    jump_window: float = 0.08
+    max_back_jump: float = 0.11
+    back_tangent: tuple[float, float] = (-0.36, -0.16)
+    max_neck_ahead_of_back: float = 0.06
+
+    def __post_init__(self) -> None:
+        bands = (
+            self.chest_breadth,
+            self.bideltoid_breadth,
+            self.waist_breadth,
+            self.hip_breadth,
+            self.back_span,
+            self.back_tangent,
+        )
+        if any(not low < high for low, high in bands):
+            raise ValueError("torso acceptance bands must rise from low to high")
+        limits = (
+            self.norm_tolerance,
+            self.min_chest_over_hip,
+            self.min_chest_depth,
+            self.max_forearm_in_chest,
+            self.back_step,
+            self.max_back_bump,
+            self.jump_window,
+            self.max_back_jump,
+            self.max_neck_ahead_of_back,
+        )
+        if not (np.isfinite(limits).all() and min(limits) > 0.0):
+            raise ValueError("torso acceptance limits must be positive and finite")
+
+
+TORSO_ACCEPTANCE = TorsoAcceptance()
+
+
+@dataclass(frozen=True)
 class TorsoFrame:
     """Where a trunk solid sits: its axis and its two half extents (metres)."""
 
@@ -220,4 +289,11 @@ def torso_mesh(
     )
 
 
-__all__ = ["TorsoFrame", "TorsoProfile", "TorsoStation", "torso_mesh"]
+__all__ = [
+    "TORSO_ACCEPTANCE",
+    "TorsoAcceptance",
+    "TorsoFrame",
+    "TorsoProfile",
+    "TorsoStation",
+    "torso_mesh",
+]

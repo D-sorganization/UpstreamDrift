@@ -235,6 +235,13 @@ $\alpha=\texttt{PART\_ASPECT}$, \texttt{source = library\_default}, with the
 clamp. For the anthropometric captures (stature $1.71$\,m) the thorax hint
 gives $\rho = 0.185\times1.71/2 = 0.1582$\,m (a \emph{half} width; full
 shoulder-line chest width $0.316$\,m) and $\alpha = 0.6486$.
+The thorax profile (\texttt{library.TORSO\_PROFILES}, \#15299) scales that hint
+per station: $1.04$ at the chest (breadth $0.329$\,m, as wide as the hips),
+$0.87$ at the waist, and above the chest the depth shrinks while the section
+shifts forward, so only the back comes in and runs into the back of the neck.
+The chest depth stays $0.205$\,m, below the ANSUR~II norm ($0.235$ to
+$0.250$\,m at this stature): the lead arm crosses the chest front at address.
+Acceptance bands: \texttt{torso\_profile.TorsoAcceptance}.
 
 \subsection{Outfit and Coverage}
 Owner ruling (\#12685): the default outfit is charcoal trousers.

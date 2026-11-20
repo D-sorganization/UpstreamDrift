@@ -21,6 +21,9 @@ from src.shared.python.motion_matching.club_models import (
     with_butt_to_sole_length,
 )
 from src.shared.python.motion_matching.execution.assets import DEFAULT_FULL_BODY
+from src.shared.python.motion_matching.execution.marker_seed_overrides import (
+    validate_marker_seed_overrides,
+)
 
 SCHEMA = "subject-preset/1"
 PRESET_FOLDER = DEFAULT_FULL_BODY / "evidence/subject_presets"
@@ -36,6 +39,8 @@ class SubjectPreset:
 
     ``club_butt_to_sole_m`` is the retail club length; the two club angles
     describe the soled head at address (``club_models.sole_offset_m``).
+    ``marker_seeds`` (``marker_seed_overrides``) and ``dropped_markers`` (label
+    to reason) are optional; every entry needs a provenance line.
     Raises ``ValueError`` / ``TypeError`` for a value outside its domain.
     """
 
@@ -57,6 +62,8 @@ class SubjectPreset:
     #: Half the distance between the hip joint centres, m (optional).
     hip_half_spacing_m: float | None = None
     provenance: Mapping[str, str] = field(default_factory=dict, compare=False)
+    marker_seeds: Mapping[str, Mapping[str, Any]] = field(default_factory=dict)
+    dropped_markers: Mapping[str, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         for key in ("name", *SETTINGS):
@@ -79,6 +86,11 @@ class SubjectPreset:
         if not 0.0 < self.club_shaft_elevation_deg <= 90.0:
             raise ValueError("club_shaft_elevation_deg must be in (0, 90]")
         self.club_spec()  # refuses a butt to sole length the head cannot take
+        validate_marker_seed_overrides(self.marker_seeds, self.dropped_markers)
+        lines = {k: v.get("provenance") for k, v in self.marker_seeds.items()}
+        lines.update(self.dropped_markers)
+        if blank := sorted(k for k, v in lines.items() if not str(v or "").strip()):
+            raise ValueError(f"markers without a provenance line: {blank}")
 
     def club_spec(self) -> ClubSpec:
         """The catalogue club at this preset's butt to sole length."""
@@ -97,12 +109,13 @@ class SubjectPreset:
             "club_spec": self.club_spec(),
             "club_butt_to_sole_m": self.club_butt_to_sole_m,
             "subject_preset": self.name,
+            "marker_seed_overrides": dict(self.marker_seeds) or None,
+            "dropped_markers": sorted(self.dropped_markers) or None,
         }
 
 
-SETTINGS = tuple(
-    f.name for f in fields(SubjectPreset) if f.name not in ("name", "provenance")
-)
+_BLOCKS = ("name", "provenance", "marker_seeds", "dropped_markers")
+SETTINGS = tuple(f.name for f in fields(SubjectPreset) if f.name not in _BLOCKS)
 
 
 def subject_preset_path(name: Path | str) -> Path:
@@ -115,7 +128,8 @@ def subject_preset_path(name: Path | str) -> Path:
 
 def load_subject_preset(name: Path | str) -> SubjectPreset:
     """A validated ``subject-preset/1`` file by name or path (``ValueError`` for a
-    wrong schema, a missing or unknown setting or one without provenance)."""
+    wrong schema, a missing or unknown setting or one without provenance).
+    The ``marker_seeds`` and ``dropped_markers`` blocks are optional."""
     raw = json.loads(subject_preset_path(name).read_text(encoding="utf-8"))
     if raw.get("schema") != SCHEMA:
         raise ValueError(f"schema must be {SCHEMA!r}, got {raw.get('schema')!r}")
@@ -131,5 +145,7 @@ def load_subject_preset(name: Path | str) -> SubjectPreset:
     return SubjectPreset(
         name=str(raw.get("name", "")),
         provenance={k: str(provenance[k]) for k in SETTINGS},
+        marker_seeds=raw.get("marker_seeds", {}),
+        dropped_markers=raw.get("dropped_markers", {}),
         **settings,
     )

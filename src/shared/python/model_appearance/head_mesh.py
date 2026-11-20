@@ -121,6 +121,54 @@ def _default_asset() -> HeadAsset:
     return _load(ASSET_PATH, PROVENANCE_PATH)
 
 
+@dataclass(frozen=True)
+class HeadLandmarkSettings:
+    """Where the size landmarks are read off the skin, in head lengths."""
+
+    midline_half_band: float = 0.02  # |y| of the mid-sagittal profile
+    chin_min_forward: float = 0.40  # the chin is ahead of this; the throat is not
+    skull_band: tuple[float, float] = (0.60, 0.75)  # heights above the ears
+    glabella_band: tuple[float, float] = (0.58, 0.64)  # heights between the brows
+
+
+@dataclass(frozen=True)
+class HeadProportions:
+    """Sizes of the asset in head lengths (neck joint to vertex is 1)."""
+
+    menton_to_vertex: float  # chin underside to the top of the skull
+    breadth: float  # widest skull above the ears
+    length: float  # glabella to the back of the skull
+
+
+def head_proportions(
+    asset: HeadAsset | None = None, settings: HeadLandmarkSettings | None = None
+) -> HeadProportions:
+    """Measure the head on the skin mesh (#15299); nothing here is a literal.
+
+    The asset's unit is its neck joint to its vertex, which is no standard
+    anthropometric length; menton to vertex is, so the drawn head is sized by
+    it. Postconditions: every size is positive and at most one head length.
+    """
+    cfg = settings or HeadLandmarkSettings()
+    v = (asset or _default_asset()).skin.vertices
+    mid = v[np.abs(v[:, 1]) <= cfg.midline_half_band]
+    chin = mid[mid[:, 0] >= cfg.chin_min_forward]
+    skull = v[(v[:, 2] >= cfg.skull_band[0]) & (v[:, 2] <= cfg.skull_band[1])]
+    brow = mid[
+        (mid[:, 2] >= cfg.glabella_band[0]) & (mid[:, 2] <= cfg.glabella_band[1])
+    ]
+    if min(len(chin), len(skull), len(brow)) == 0:
+        raise ValueError("head mesh has no chin, skull or brow vertices to measure")
+    out = HeadProportions(
+        float(v[:, 2].max() - chin[:, 2].min()),
+        float(np.ptp(skull[:, 1])),
+        float(brow[:, 0].max() - v[:, 0].min()),
+    )
+    if not all(0.0 < x <= 1.0 for x in (out.menton_to_vertex, out.breadth, out.length)):
+        raise ValueError(f"head mesh proportions are out of range: {out}")
+    return out
+
+
 def build_mesh_parts(
     length_m: float, headwear: str, settings: HeadSettings | None = None
 ) -> list[tuple[str, Mesh, str]]:
