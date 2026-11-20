@@ -226,7 +226,7 @@ def _linearise(
         moved = twist[:, :3] + np.cross(twist[:, 3:], arm, axis=1)
     residual = [_marker_errors(prob, k, pose, offsets).ravel() / sigma]
     by_pose = [(moved * seen[:, None, None]).reshape(-1, len(pose)) / sigma]
-    by_offset = np.zeros((offsets.size, offsets.size))
+    by_offset: Array = np.zeros((offsets.size, offsets.size))
     for m in np.flatnonzero(seen):
         by_offset[3 * m : 3 * m + 3, 3 * m : 3 * m + 3] = rotations[m] / sigma
     if prob.constraint is not None:
