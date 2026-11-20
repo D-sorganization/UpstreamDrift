@@ -90,6 +90,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1053 | `src/tools/tour_matching_viewer/core.py` |
 | 1050 | `src/engines/physics_engines/opensim/python/spine/inverse_dynamics.py` |
 | 1047 | `src/shared/python/force_overlay/glyphs.py` |
+| 1046 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1042 | `src/shared/python/grip_contact/matlab_kernel.py` |
 | 1040 | `src/bunkershot3d/solvers/mpm/order_of_accuracy.py` |
 | 1040 | `src/tools/tour_matching_viewer/gui.py` |
@@ -99,7 +100,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1035 | `src/engines/physics_engines/opensim/python/opensim_physics_engine.py` |
 | 1034 | `src/shared/python/motion_matching/pipeline/receipt_components.py` |
 | 1032 | `src/launchers/launcher_ui_setup.py` |
-| 1026 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1022 | `src/tools/bunker_shot_gui/render3d.py` |
 | 1021 | `src/tools/bunker_shot_gui/slices.py` |
 | 1020 | `src/shared/python/optimization/casadi_backend.py` |
