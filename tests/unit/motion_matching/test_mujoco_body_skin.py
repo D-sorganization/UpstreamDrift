@@ -11,7 +11,11 @@ from typing import Any
 import numpy as np
 import pytest
 
+from src.engines.physics_engines.mujoco.python import body_skin_layer as layer
 from src.engines.physics_engines.mujoco.python import full_body_mjcf as exporter
+from src.shared.python.model_appearance import body_skin_fit as fit
+from src.shared.python.model_appearance import club_assembly as ca
+from src.shared.python.model_appearance import skinned_wrist_sections as sws
 from src.shared.python.model_appearance import body_skin_export as export
 from src.shared.python.model_appearance import document_from_dict, library
 
@@ -117,3 +121,36 @@ def test_the_skinned_model_steps_at_swing_poses(skinned: tuple[Any, Any]) -> Non
         mujoco.mj_step(model, data)
         assert np.isfinite(data.qpos).all() and np.isfinite(data.xpos).all()
         assert not data.warning.number.any()
+
+
+def test_the_forearms_end_under_the_skinned_hands_wrists() -> None:
+    spec = copy.deepcopy(SPEC)
+    spec["subject"]["hand_visual_backend"] = "skinned_human"
+    club = ca.assembly_from_spec(spec)
+    by_body = layer.reference_frames(spec, SETTINGS.bind_pose)
+    roles = export.body_roles(spec, {b: f.translation for b, f in by_body.items()})
+    frames = {role: by_body[body] for role, body in roles.items()}
+    settings = fit.load_fit_settings()
+    skin = fit.load_body_skin()
+    fitted = fit.fit_body_skin(skin, export.subject_lengths(frames), settings)
+    binds = export.bind_poses(frames, fitted)
+    assert layer.wrist_rings(SPEC, club, roles, binds) == {}  # other hands
+    rings = layer.wrist_rings(spec, club, roles, binds)
+    sections = sws.forearm_wrist_sections(spec, club)
+    assert sorted(rings) == ["l", "r"] and len(sections) == 2
+    matched = fit.match_wrists(skin, fitted, rings, settings)
+    for side, ring in rings.items():
+        section = sections[roles[f"forearm_{side}"]]
+        assert ring.half_width_m == section.half_width_m > ring.half_depth_m
+        elbow, wrist = (fitted.joints[f"{j}_{side}"] for j in ("elbow", "wrist"))
+        bone = (wrist - elbow) / np.linalg.norm(wrist - elbow)
+        assert abs(float(ring.width_axis @ bone)) < 0.2  # across the forearm
+        columns = [g == f"forearm_distal_{side}" for g in skin.groups]
+        end = skin.weights[:, columns].sum(axis=1) > 0.5
+        end &= (matched.vertices - wrist) @ bone > -settings.wrist_match_full_m
+        off = matched.vertices[end] - wrist - ring.centre_m
+        radius = np.linalg.norm(off - np.outer(off @ bone, bone), axis=1)
+        # The ring lies inside the hand's section, by the named 2 mm at most
+        # off its two half axes.
+        assert radius.max() <= ring.half_width_m - settings.wrist_under_m + 3e-4
+        assert radius.min() >= ring.half_depth_m - settings.wrist_under_m - 3e-4

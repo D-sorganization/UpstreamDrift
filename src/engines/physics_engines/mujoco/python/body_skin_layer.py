@@ -31,6 +31,7 @@ from src.shared.python.model_appearance import body_skin_export as export
 from src.shared.python.model_appearance import body_skin_fit as fit
 from src.shared.python.model_appearance import body_skin_pose as pose
 from src.shared.python.model_appearance import library
+from src.shared.python.model_appearance.club_assembly import ClubAssembly
 from src.shared.python.model_appearance.schema import AppearanceDocument
 
 #: Layer -> the role whose garment (or bare skin) material it wears.
@@ -91,17 +92,48 @@ def _untextured(root: ET.Element, name: str) -> None:
                 material.attrib.pop(key, None)
 
 
+def wrist_rings(
+    spec: Mapping[str, Any],
+    club: ClubAssembly | None,
+    roles: Mapping[str, str],
+    binds: Mapping[str, pose.Rigid],
+) -> dict[str, fit.WristRing]:
+    """Each skinned hand's wrist section in the fitted rest space, by side.
+
+    Empty unless the spec draws the skinned hands on a club.
+    """
+    from src.shared.python.model_appearance.skinned_wrist_sections import (
+        forearm_wrist_sections,
+    )
+
+    sections = forearm_wrist_sections(spec, club)
+    rings = {}
+    for side, _ in fit.SIDES:
+        section = sections.get(roles[f"forearm_{side}"])
+        if section is not None:
+            turn = binds[f"forearm_{side}"].rotation
+            rings[side] = fit.WristRing(
+                section.half_width_m,
+                section.half_depth_m,
+                turn @ section.width_axis,
+                turn @ section.centre_m,
+            )
+    return rings
+
+
 def attach_body_skin(
     root: ET.Element,
     elements: Mapping[str, ET.Element],
     material_for: Callable[[str], str],
     doc: AppearanceDocument,
     spec: Mapping[str, Any],
+    club: ClubAssembly | None = None,
 ) -> dict[str, Any]:
     """Add the skin, shirt and trousers skins to ``root``; returns a summary.
 
     ``elements`` are the exporter's MJCF bodies by spec name and
-    ``material_for`` registers a library material and returns its MJCF name.
+    ``material_for`` registers a library material and returns its MJCF name;
+    with the skinned hands of ``club`` the forearms end in the hands' wrists.
     Postcondition: only ``<deformable>`` and material assets are added.
     """
     settings, posing = export.load_export_settings(), pose.load_pose_settings()
@@ -110,15 +142,17 @@ def attach_body_skin(
     frames = {role: by_body[body] for role, body in roles.items()}
     skin = fit.load_body_skin()
     profile = spec.get("subject", {}).get("body_skin_profile")
-    fitted = fit.fit_body_skin(
-        skin, export.subject_lengths(frames), fit.load_fit_settings(profile=profile)
-    )
+    fitting = fit.load_fit_settings(profile=profile)
+    fitted = fit.fit_body_skin(skin, export.subject_lengths(frames), fitting)
+    binds = export.bind_poses(frames, fitted)
+    rings = wrist_rings(spec, club, roles, binds)
+    fitted = fit.match_wrists(skin, fitted, rings, fitting)
     weights = pose.smooth_shoulder_weights(skin, fitted, posing)
     layers = dress.dress_skin(skin, fitted, weights, dress.load_dress_settings())
-    binds = export.bind_poses(frames, fitted)
     shares = export.group_shares(skin.groups, posing, settings)
     deformable = ET.SubElement(root, "deformable")
     summary: dict[str, Any] = {"bodies": roles, "bones": {}, "vertices": {}}
+    summary["wrists_matched"] = sorted(rings)
     for name, layer in layers.items():
         material = material_for(_layer_material(doc, roles, name))
         if name == "skin":
