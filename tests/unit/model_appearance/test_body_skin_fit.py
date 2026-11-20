@@ -218,3 +218,14 @@ def test_unknown_profile_or_profile_field_raises(tmp_path: Path) -> None:
     path.write_text(json.dumps(raw))
     with pytest.raises(ValueError, match="not a fit setting"):
         fit.load_fit_settings(path, profile="bad")
+
+
+def test_the_neck_above_the_joint_rides_the_trunk_and_keeps_its_height() -> None:
+    cut = json.loads((fit.ASSET_DIR / "skin_settings.json").read_text())["neck_cut_m"]
+    fitted = fit.fit_body_skin(SKIN, _subject(), fit.load_fit_settings())
+    for name in ("neck_lower", "neck_middle", "neck_upper", "head"):
+        assert fitted.maps[name] is fitted.maps["thorax"]
+    stored_top = SKIN.vertices[:, 2].max() - SKIN.landmarks["neck"][2]
+    fitted_top = fitted.vertices[:, 2].max() - fitted.joints["neck"][2]
+    assert stored_top > cut / 2
+    assert abs(fitted_top - stored_top) < 0.005  # a shift above the joint, not a stretch

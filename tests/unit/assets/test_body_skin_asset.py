@@ -75,6 +75,32 @@ def test_weights_are_normalised_over_the_named_groups() -> None:
     assert np.all(total == SETTINGS["weight_levels"])
 
 
+#: The neck is cut by whole quads, so its rim may stand one quad off the plane.
+NECK_RIM_SLACK_M = 0.02
+NECK_GROUPS = ("neck_lower", "neck_middle", "neck_upper", "head")
+
+
+def test_neck_is_kept_to_the_cut_height_in_its_own_groups() -> None:
+    arrays, marks = _arrays(), _landmarks_m()
+    central = list(SETTINGS["central_groups"])
+    assert tuple(central[-len(NECK_GROUPS) :]) == NECK_GROUPS
+    assert "neck01" not in SETTINGS["central_groups"]["thorax"]
+    cut = SETTINGS["neck_cut_m"]
+    assert cut > 0.0
+    vertices = arrays["vertices"] * SETTINGS["quantum_m"]
+    top = float(vertices[:, 2].max()) - float(marks["neck"][2])
+    assert abs(top - cut) <= NECK_RIM_SLACK_M
+    columns = [central.index(name) for name in NECK_GROUPS]
+    share = np.zeros(len(vertices))
+    for slot in range(SETTINGS["max_influences"]):
+        hit = np.isin(arrays["weight_index"][:, slot], columns)
+        share += hit * arrays["weight_value"][:, slot] / SETTINGS["weight_levels"]
+    above = vertices[:, 2] > marks["neck"][2] + NECK_RIM_SLACK_M
+    assert above.sum() > 20 and share[above].min() > 0.5
+    below = vertices[:, 2] < marks["shoulder_l"][2] - cut
+    assert share[below].max() == 0.0
+
+
 def test_landmarks_sit_inside_the_skin_and_are_symmetric() -> None:
     marks = _landmarks_m()
     vertices = _arrays()["vertices"] * SETTINGS["quantum_m"]
