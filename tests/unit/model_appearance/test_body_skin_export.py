@@ -29,8 +29,7 @@ LEFT = {
     "shank": (-0.008, 0.086, -0.4),
     "foot": (-0.01, 0.088, -0.83),
 }
-RESIDUAL_M = 1.0e-9
-BONES_OF_THE_BODY = 15  # pelvis, thorax, head and six per side
+RESIDUAL_M, BONES_OF_THE_BODY = 1.0e-9, 15  # pelvis, thorax, head, six per side
 
 
 def _frames(turn: np.ndarray | None = None) -> dict[str, pose.Rigid]:
