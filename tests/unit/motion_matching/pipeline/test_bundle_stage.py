@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -12,16 +13,24 @@ import pytest
 
 from src.shared.python.grip_contact import load_coordinate_swing
 from src.shared.python.motion_matching.contact_law import GroundPlane
+from src.shared.python.motion_matching.pipeline import cli
 from src.shared.python.motion_matching.pipeline.bundle_adjustment import solve_bundle
 from src.shared.python.motion_matching.pipeline.bundle_stage import (
     OFFSET_SIGMAS_M,
     StageSettings,
+    add_bundle_arguments,
     adjusted_attachments,
     build_problem,
+    held_out_rms_mm,
     offset_sigma,
     select_frames,
     stage_report,
+    stage_settings,
+    stated_sole,
 )
+from src.shared.python.motion_matching.pipeline.constants import SPEC
+from src.shared.python.motion_matching.pipeline.marker_selection import select_markers
+from src.shared.python.motion_matching.tour_capture_contract import TOUR_CAPTURE
 
 pytestmark = [pytest.mark.unit]
 ROOT = Path(__file__).resolve().parents[4]
@@ -159,3 +168,89 @@ def test_frame_selection_and_the_sigma_table() -> None:
     assert offset_sigma("HeadFront") == (0.040, 0.040, 0.040)
     assert offset_sigma("LWristTop") == OFFSET_SIGMAS_M["WristTop"]
     assert offset_sigma("Marker_2:2:1") == (0.0, 0.0, 0.0)  # club markers are held
+
+
+def test_the_flag_is_off_by_default_and_a_default_run_is_untouched(
+    tmp_path, monkeypatch
+) -> None:
+    calibrated = SimpleNamespace(address_report={})  # any further read would raise
+    monkeypatch.setattr(cli, "_calibrate_and_scale", lambda *args: calibrated)
+    monkeypatch.setattr(cli, "get_plant", lambda engine, spec: object())
+    argv = ["--spec", str(SPEC), "--out", str(tmp_path), "--foot-progression", "off"]
+    args = cli.build_parser().parse_args(argv)
+    assert args.bundle_adjust is False and stage_settings(args) is None
+    run = cli.calibrate_run(args)
+    assert run.cal_res is calibrated and calibrated.address_report == {}
+    document = json.loads(SPEC.read_text(encoding="utf-8"))
+    assert run.labels == select_markers(document, TOUR_CAPTURE.labels).labels
+
+
+def test_the_flag_carries_frames_and_held_out_markers_and_the_sole_is_stated() -> None:
+    parser = argparse.ArgumentParser()
+    add_bundle_arguments(parser)
+    argv = ["--bundle-adjust", "--bundle-stride", "30", "--bundle-held-out", "RKneeOut"]
+    args = parser.parse_args([*argv, "--bundle-anchor-frames", "391", "476"])
+    assert stage_settings(args) == StageSettings(
+        frame_stride=30, anchor_frames=(391, 476), held_out=("RKneeOut",)
+    )
+    assert stage_settings(parser.parse_args([])) is None
+    # nothing held out: no kinematics are built for an empty marker set
+    assert held_out_rms_mm(SimpleNamespace(), {}, (0,), np.zeros((1, 2))) == {}
+    document = json.loads(SPEC.read_text(encoding="utf-8"))
+    assert stated_sole(document) is None  # no stated point: the origin is not assumed
+    club = {**document.get("club", {}), "sole_point_m": [0.01, 0.0, -0.02]}
+    body, point = stated_sole({**document, "club": club})
+    assert body.endswith("Clubface Vector") and point == (0.01, 0.0, -0.02)
+
+
+@pytest.mark.requires_mujoco
+@pytest.mark.slow
+def test_the_flag_hands_the_swing_solve_the_adjusted_attachments(
+    model, monkeypatch
+) -> None:
+    seeds: dict[str, Any] = dict(model.attachments)
+    body, offset = seeds["LElbowOut"]
+    seeds["LElbowOut"] = (body, (offset[0] + 0.010, offset[1], offset[2] - 0.008))
+    built: dict[str, Any] = {}
+
+    def kinematics(spec_bytes, attachments, *, ik_backend):
+        built.update(attachments=attachments, backend=ik_backend)
+        return "adapter", "swing kin"
+
+    lane = SimpleNamespace(
+        **vars(model.lane),
+        trajectory=lambda kin, q, frames: (model.poses[list(frames)], []),
+        kinematics=kinematics,
+        best_address=lambda kin, q: SimpleNamespace(q=q, kin=kin),
+    )
+    recorded: list[Any] = []
+    monkeypatch.setattr(
+        cli, "record_calibrated_address", lambda *a, **k: recorded.append(a)
+    )
+    monkeypatch.setattr(cli.fs, "FullBodySimulator", lambda adapter: ("sim", adapter))
+    fields = dict.fromkeys(cli._CalibrateAndScaleResult.__dataclass_fields__)
+    fields |= {"address_report": {}, "attachments": seeds, "kin": model.kin}
+    fields |= {"address2": SimpleNamespace(q=model.poses[0]), "scaled_spec": {}}
+    fields |= {"offsets": {"RKneeOut": seeds["RKneeOut"]}, "spec_bytes": b"spec"}
+    before = cli._CalibrateAndScaleResult(**fields)
+    argv = ["--bundle-adjust", "--bundle-stride", "1", "--bundle-held-out", "RKneeOut"]
+    parser = argparse.ArgumentParser()
+    add_bundle_arguments(parser)
+    after = cli._bundle_adjust(parser.parse_args(argv), lane, model.lane.labels, before)
+    assert after.attachments is built["attachments"] and built["backend"] == "lm"
+    assert (after.adapter, after.kin, after.sim) == (
+        "adapter",
+        "swing kin",
+        ("sim", "adapter"),
+    )
+    assert after.address2.kin == "swing kin" and len(recorded) == 1
+    moved = np.subtract(after.attachments["LElbowOut"][1], offset)
+    assert np.abs(moved).max() < 0.005 and after.offsets == {
+        "RKneeOut": seeds["RKneeOut"]
+    }
+    block = after.address_report["bundle_adjustment"]
+    assert block["converged"] and block["club_sole_point"] is None
+    assert block["offset_shift_mm"]["LElbowOut"] > 5.0
+    # the held-out marker took no part, and the adjusted poses still explain it
+    assert block["held_out_rms_mm"]["RKneeOut"]["adjusted"] < 1.0
+    assert json.dumps(block)
