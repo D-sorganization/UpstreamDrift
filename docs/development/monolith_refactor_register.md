@@ -33,7 +33,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1195 | `src/launchers/upstream_drift_launcher.py` |
 | 1195 | `src/tools/shot_pattern_analysis/matched_supplement_figures.py` |
 | 1185 | `src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m` |
-| 1185 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1184 | `src/bunkershot3d/ball/splash.py` |
 | 1183 | `src/engines/physics_engines/opensim/python/msk_lift_ik_id.py` |
 | 1182 | `src/launchers/launcher_model_handlers.py` |
@@ -99,6 +98,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1035 | `src/engines/physics_engines/opensim/python/opensim_physics_engine.py` |
 | 1034 | `src/shared/python/motion_matching/pipeline/receipt_components.py` |
 | 1032 | `src/launchers/launcher_ui_setup.py` |
+| 1026 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1022 | `src/tools/bunker_shot_gui/render3d.py` |
 | 1021 | `src/tools/bunker_shot_gui/slices.py` |
 | 1020 | `src/shared/python/optimization/casadi_backend.py` |
