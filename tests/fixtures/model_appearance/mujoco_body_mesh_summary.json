@@ -131,18 +131,18 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": [
       {
-        "bbox_max": [0.110666, 0.17061, 0.541698],
-        "bbox_min": [-0.110666, -0.17061, 0.0],
+        "bbox_max": [0.115037, 0.177662, 0.453359],
+        "bbox_min": [-0.114786, -0.177662, 0.0],
         "label": "garment0",
         "material": "mat_polo_navy",
-        "n_vertices": 794
+        "n_vertices": 870
       },
       {
-        "bbox_max": [0.102468, 0.157972, 0.541698],
-        "bbox_min": [-0.102468, -0.157972, 0.0],
+        "bbox_max": [0.106525, 0.164502, 0.450512],
+        "bbox_min": [-0.106274, -0.164502, 0.0],
         "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 870
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso": [
@@ -179,15 +179,15 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/HubtoLS": [
       {
-        "bbox_max": [0.059324, 0.223376, 0.01663],
-        "bbox_min": [-0.059324, 0.030046, -0.08813],
+        "bbox_max": [0.059324, 0.222418, -0.004349],
+        "bbox_min": [-0.059324, 0.031004, -0.105651],
         "label": "garment0",
         "material": "mat_polo_navy",
         "n_vertices": 794
       },
       {
-        "bbox_max": [0.054929, 0.223226, 0.013038],
-        "bbox_min": [-0.054929, 0.030196, -0.084538],
+        "bbox_max": [0.054929, 0.222418, -0.008043],
+        "bbox_min": [-0.054929, 0.031004, -0.101957],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -195,15 +195,15 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/HubtoRS": [
       {
-        "bbox_max": [0.059324, -0.030046, 0.08813],
-        "bbox_min": [-0.059324, -0.223376, -0.01663],
+        "bbox_max": [0.059324, -0.031004, 0.105651],
+        "bbox_min": [-0.059324, -0.222418, 0.004349],
         "label": "garment0",
         "material": "mat_polo_navy",
         "n_vertices": 794
       },
       {
-        "bbox_max": [0.054929, -0.030196, 0.084538],
-        "bbox_min": [-0.054929, -0.223226, -0.013038],
+        "bbox_max": [0.054929, -0.031004, 0.101957],
+        "bbox_min": [-0.054929, -0.222418, 0.008043],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -211,8 +211,8 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/LUpperArm": [
       {
-        "bbox_max": [0.054495, 0.05693, -0.005694],
-        "bbox_min": [-0.054495, -0.05206, -0.163991],
+        "bbox_max": [0.054495, 0.05693, 0.0],
+        "bbox_min": [-0.054495, -0.05206, -0.158297],
         "label": "blend0",
         "material": "mat_polo_navy",
         "n_vertices": 338
@@ -234,26 +234,26 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid": [
       {
-        "bbox_max": [0.032929, 0.032929, 0.018],
-        "bbox_min": [-0.032929, -0.032929, -0.163262],
+        "bbox_max": [0.044821, 0.044821, 0.044821],
+        "bbox_min": [-0.044821, -0.044821, -0.145262],
         "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 470
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm": [
       {
-        "bbox_max": [0.032929, 0.032929, 0.018],
-        "bbox_min": [-0.032929, -0.032929, -0.163262],
+        "bbox_max": [0.036132, 0.036132, 0.0],
+        "bbox_min": [-0.036132, -0.036132, -0.173774],
         "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 470
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/RUpperArm": [
       {
-        "bbox_max": [0.054495, 0.05206, 0.163991],
-        "bbox_min": [-0.054495, -0.05693, 0.005694],
+        "bbox_max": [0.054495, 0.05206, 0.158297],
+        "bbox_min": [-0.054495, -0.05693, 0.0],
         "label": "blend0",
         "material": "mat_polo_navy",
         "n_vertices": 338
@@ -275,20 +275,20 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1": [
       {
-        "bbox_max": [0.032929, 0.032929, 0.018],
-        "bbox_min": [-0.032929, -0.032929, -0.163262],
+        "bbox_max": [0.044821, 0.044821, 0.044821],
+        "bbox_min": [-0.044821, -0.044821, -0.145262],
         "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 470
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm": [
       {
-        "bbox_max": [0.032929, 0.032929, 0.163262],
-        "bbox_min": [-0.032929, -0.032929, -0.018],
+        "bbox_max": [0.036132, 0.036132, 0.173774],
+        "bbox_min": [-0.036132, -0.036132, 0.0],
         "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 470
       }
     ],
     "talus_l": [
@@ -506,18 +506,18 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod": [
       {
-        "bbox_max": [0.110666, 0.17061, 0.541698],
-        "bbox_min": [-0.110666, -0.17061, 0.0],
+        "bbox_max": [0.115037, 0.177662, 0.453359],
+        "bbox_min": [-0.114786, -0.177662, 0.0],
         "label": "garment0",
         "material": "mat_polo_navy",
-        "n_vertices": 794
+        "n_vertices": 870
       },
       {
-        "bbox_max": [0.102468, 0.157972, 0.541698],
-        "bbox_min": [-0.102468, -0.157972, 0.0],
+        "bbox_max": [0.106525, 0.164502, 0.450512],
+        "bbox_min": [-0.106274, -0.164502, 0.0],
         "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 870
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso": [
@@ -554,15 +554,15 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/HubtoLS": [
       {
-        "bbox_max": [0.059324, 0.223376, 0.01663],
-        "bbox_min": [-0.059324, 0.030046, -0.08813],
+        "bbox_max": [0.059324, 0.222418, -0.004349],
+        "bbox_min": [-0.059324, 0.031004, -0.105651],
         "label": "garment0",
         "material": "mat_polo_navy",
         "n_vertices": 794
       },
       {
-        "bbox_max": [0.054929, 0.223226, 0.013038],
-        "bbox_min": [-0.054929, 0.030196, -0.084538],
+        "bbox_max": [0.054929, 0.222418, -0.008043],
+        "bbox_min": [-0.054929, 0.031004, -0.101957],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -570,15 +570,15 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/HubtoRS": [
       {
-        "bbox_max": [0.059324, -0.030046, 0.08813],
-        "bbox_min": [-0.059324, -0.223376, -0.01663],
+        "bbox_max": [0.059324, -0.031004, 0.105651],
+        "bbox_min": [-0.059324, -0.222418, 0.004349],
         "label": "garment0",
         "material": "mat_polo_navy",
         "n_vertices": 794
       },
       {
-        "bbox_max": [0.054929, -0.030196, 0.084538],
-        "bbox_min": [-0.054929, -0.223226, -0.013038],
+        "bbox_max": [0.054929, -0.031004, 0.101957],
+        "bbox_min": [-0.054929, -0.222418, 0.008043],
         "label": "skin0",
         "material": "mat_skin_2",
         "n_vertices": 794
@@ -586,8 +586,8 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/LUpperArm": [
       {
-        "bbox_max": [0.054495, 0.05693, -0.005694],
-        "bbox_min": [-0.054495, -0.05206, -0.163991],
+        "bbox_max": [0.054495, 0.05693, 0.0],
+        "bbox_min": [-0.054495, -0.05206, -0.158297],
         "label": "blend0",
         "material": "mat_polo_navy",
         "n_vertices": 338
@@ -609,26 +609,26 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid": [
       {
-        "bbox_max": [0.032929, 0.032929, 0.018],
-        "bbox_min": [-0.032929, -0.032929, -0.163262],
+        "bbox_max": [0.044821, 0.044821, 0.044821],
+        "bbox_min": [-0.044821, -0.044821, -0.145262],
         "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 470
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm": [
       {
-        "bbox_max": [0.032929, 0.032929, 0.018],
-        "bbox_min": [-0.032929, -0.032929, -0.163262],
+        "bbox_max": [0.036132, 0.036132, 0.0],
+        "bbox_min": [-0.036132, -0.036132, -0.173774],
         "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 470
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/RUpperArm": [
       {
-        "bbox_max": [0.054495, 0.05206, 0.163991],
-        "bbox_min": [-0.054495, -0.05693, 0.005694],
+        "bbox_max": [0.054495, 0.05206, 0.158297],
+        "bbox_min": [-0.054495, -0.05693, 0.0],
         "label": "blend0",
         "material": "mat_polo_navy",
         "n_vertices": 338
@@ -650,20 +650,20 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1": [
       {
-        "bbox_max": [0.032929, 0.032929, 0.018],
-        "bbox_min": [-0.032929, -0.032929, -0.163262],
+        "bbox_max": [0.044821, 0.044821, 0.044821],
+        "bbox_min": [-0.044821, -0.044821, -0.145262],
         "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 470
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm": [
       {
-        "bbox_max": [0.032929, 0.032929, 0.163262],
-        "bbox_min": [-0.032929, -0.032929, -0.018],
+        "bbox_max": [0.036132, 0.036132, 0.173774],
+        "bbox_min": [-0.036132, -0.036132, 0.0],
         "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 470
       }
     ],
     "talus_l": [
@@ -947,8 +947,8 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/LUpperArm": [
       {
-        "bbox_max": [0.17454, 0.055408, 0.058],
-        "bbox_min": [0.00606, -0.060592, -0.058],
+        "bbox_max": [0.13348, 0.055408, 0.058],
+        "bbox_min": [-0.035, -0.060592, -0.058],
         "label": "blend0",
         "material": "mat_polo_navy",
         "n_vertices": 338
@@ -970,26 +970,26 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Left Elbow Joint/Spherical Solid": [
       {
-        "bbox_max": [0.1704, 0.03292, 0.03292],
-        "bbox_min": [-0.018, -0.03292, -0.03292],
+        "bbox_max": [0.1524, 0.044821, 0.044821],
+        "bbox_min": [-0.044821, -0.044821, -0.044821],
         "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 470
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm": [
       {
-        "bbox_max": [0.03292, 0.03292, 0.1704],
-        "bbox_min": [-0.03292, -0.03292, -0.018],
+        "bbox_max": [0.036132, 0.036132, 0.180912],
+        "bbox_min": [-0.036132, -0.036132, 0.0],
         "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 470
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/RUpperArm": [
       {
-        "bbox_max": [0.17454, 0.055408, 0.058],
-        "bbox_min": [0.00606, -0.060592, -0.058],
+        "bbox_max": [0.13348, 0.055408, 0.058],
+        "bbox_min": [-0.035, -0.060592, -0.058],
         "label": "blend0",
         "material": "mat_polo_navy",
         "n_vertices": 338
@@ -1011,20 +1011,20 @@
     ],
     "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1": [
       {
-        "bbox_max": [0.1704, 0.03292, 0.03292],
-        "bbox_min": [-0.018, -0.03292, -0.03292],
+        "bbox_max": [0.1524, 0.044821, 0.044821],
+        "bbox_min": [-0.044821, -0.044821, -0.044821],
         "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 470
       }
     ],
     "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm": [
       {
-        "bbox_max": [0.03292, 0.03292, 0.1704],
-        "bbox_min": [-0.03292, -0.03292, -0.018],
+        "bbox_max": [0.036132, 0.036132, 0.180912],
+        "bbox_min": [-0.036132, -0.036132, 0.0],
         "label": "skin0",
         "material": "mat_skin_2",
-        "n_vertices": 794
+        "n_vertices": 470
       }
     ],
     "talus_l": [
