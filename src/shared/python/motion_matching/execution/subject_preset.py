@@ -22,6 +22,9 @@ from src.shared.python.motion_matching.club_models import (
     with_butt_to_sole_length,
 )
 from src.shared.python.motion_matching.execution.assets import DEFAULT_FULL_BODY
+from src.shared.python.motion_matching.knee_axial_rotation import (
+    resolve_knee_axial_range,
+)
 from src.shared.python.motion_matching.execution.marker_seed_overrides import (
     validate_marker_seed_overrides,
 )
@@ -30,7 +33,12 @@ SCHEMA = "subject-preset/1"
 PRESET_FOLDER = DEFAULT_FULL_BODY / "evidence/subject_presets"
 _POSITIVE = ("stature_m", "mass_kg", "trunk_scale", "arm_scale", "shoulder_scale")
 #: Settings a preset may leave out: the builder then keeps its own value.
-OPTIONAL = ("thigh_length_m", "shank_length_m", "hip_half_spacing_m")
+OPTIONAL = (
+    "thigh_length_m",
+    "shank_length_m",
+    "hip_half_spacing_m",
+    "knee_axial_rotation_deg",
+)
 _TEXT = ("name", "club", "club_markers")
 
 
@@ -62,6 +70,8 @@ class SubjectPreset:
     shank_length_m: float | None = None
     #: Half the distance between the hip joint centres, m (optional).
     hip_half_spacing_m: float | None = None
+    #: Opt-in knee axial rotation, +- this many deg (``knee_axial_rotation``).
+    knee_axial_rotation_deg: float | None = None
     provenance: Mapping[str, str] = field(default_factory=dict, compare=False)
     marker_seeds: Mapping[str, Mapping[str, Any]] = field(default_factory=dict)
     dropped_markers: Mapping[str, str] = field(default_factory=dict)
@@ -86,6 +96,7 @@ class SubjectPreset:
             raise ValueError(f"club must be one of {sorted(CLUBS)}, got {self.club!r}")
         if not 0.0 < self.club_shaft_elevation_deg <= 90.0:
             raise ValueError("club_shaft_elevation_deg must be in (0, 90]")
+        resolve_knee_axial_range(self.knee_axial_rotation_deg)
         self.club_spec()  # refuses a butt to sole length the head cannot take
         validate_marker_seed_overrides(self.marker_seeds, self.dropped_markers)
         lines = {k: v.get("provenance") for k, v in self.marker_seeds.items()}

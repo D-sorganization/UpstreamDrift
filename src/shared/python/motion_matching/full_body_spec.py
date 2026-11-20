@@ -30,6 +30,9 @@ from src.shared.python.motion_matching.full_body_schema import (
     TrunkTopology,
     full_body_schema,
 )
+from src.shared.python.motion_matching.knee_axial_rotation import (
+    validate_knee_axial_rotation,
+)
 from src.shared.python.motion_matching.tibial_torsion import validate_tibial_torsion
 from src.shared.python.motion_matching.tour_capture_contract import tracked_labels
 
@@ -499,6 +502,7 @@ def validate_full_body_structure(document: Mapping[str, Any]) -> None:
     ):
         raise ValueError("Provenance is required")
     validate_tibial_torsion(document)
+    validate_knee_axial_rotation(document)
 
 
 #: The v1 trunk, declared once: a twist about pelvis z then a universal joint,

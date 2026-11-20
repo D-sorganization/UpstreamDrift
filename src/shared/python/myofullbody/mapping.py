@@ -24,6 +24,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from src.shared.python.contracts import require
+from src.shared.python.motion_matching.knee_axial_rotation import require_hinge_knee
 from src.shared.python.myofullbody import anatomy
 from src.shared.python.myofullbody.couplings import JointCoupling
 from src.shared.python.myofullbody.ik import OrientationFit, Starts, solve_orientations
@@ -163,6 +164,7 @@ class MyoMapper:
         require(rom_policy in ROM_POLICIES, f"rom_policy must be one of {ROM_POLICIES}")
         self.rom_policy = rom_policy
         self.spec = SpecKinematics(spec_bytes)
+        require_hinge_knee(self.spec.coordinate_order, "MyoFullBody mapping")
         self.model = myo_model
         self.data = mujoco.MjData(myo_model)
         self.coupling = JointCoupling.from_model(myo_model)
