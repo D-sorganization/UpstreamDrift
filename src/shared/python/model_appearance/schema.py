@@ -140,6 +140,13 @@ EYE_COLORS = ("blue_grey", "hazel", "brown")
 CAP_STYLES = ("none", "baseball_cap")
 CAP_BRIM_RANGE = (0.10, 0.80)  # brim length, head lengths
 DEFAULT_CAP_BRIM = 0.30
+#: ``stature``: menton to vertex is ``height_over_stature`` of the subject's
+#: stature (#15299); ``segment_length``: the spec's head segment length.
+HEAD_SIZINGS = ("stature", "segment_length")
+#: Adult male menton to top of head over stature: 232 mm of 1.756 m (Gordon et
+#: al. 1989, 1988 US Army survey), a head of 1 : 7.6.
+DEFAULT_HEAD_HEIGHT_OVER_STATURE = 0.132
+HEAD_HEIGHT_OVER_STATURE_RANGE = (0.10, 0.16)
 BODY_MODELS = ("ellipsoid", "meshes")
 HEAD_OVERRIDE_FRAMES = ("parent", "world")
 
@@ -190,6 +197,10 @@ class HeadSettings:
     cap_material: str = "cap_navy"
     #: Brim length in head lengths, within :data:`CAP_BRIM_RANGE`.
     cap_brim: float = DEFAULT_CAP_BRIM
+    #: One of :data:`HEAD_SIZINGS`; ``segment_length`` is the size before #15299.
+    sizing: str = "stature"
+    #: Drawn menton to vertex over stature, in :data:`HEAD_HEIGHT_OVER_STATURE_RANGE`.
+    height_over_stature: float = DEFAULT_HEAD_HEIGHT_OVER_STATURE
 
 
 @dataclass(frozen=True)
@@ -295,6 +306,7 @@ def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
         "hair_part": HAIR_PARTS,
         "eye_color": EYE_COLORS,
         "cap_style": CAP_STYLES,
+        "sizing": HEAD_SIZINGS,
     }
     picked = {k: raw.get(k, getattr(defaults, k)) for k in choices}
     for key, value in picked.items():
@@ -303,6 +315,10 @@ def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
     brim = float(raw.get("cap_brim", defaults.cap_brim))
     if not CAP_BRIM_RANGE[0] <= brim <= CAP_BRIM_RANGE[1]:
         raise ValueError(f"head cap_brim must be within {CAP_BRIM_RANGE}, got {brim!r}")
+    ratio = float(raw.get("height_over_stature", defaults.height_over_stature))
+    low, high = HEAD_HEIGHT_OVER_STATURE_RANGE
+    if not low <= ratio <= high:
+        raise ValueError(f"head height_over_stature must be within {low} to {high}")
     model = _head_model(raw, defaults)
     if picked["cap_style"] != "none" and model != "cc0_mesh":
         raise ValueError("head cap_style needs the cc0_mesh head model")
@@ -321,6 +337,8 @@ def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
         picked["cap_style"],
         str(raw.get("cap_material", defaults.cap_material)),
         brim,
+        picked["sizing"],
+        ratio,
     )
 
 
@@ -341,6 +359,8 @@ def _head_to_dict(head: HeadSettings) -> dict[str, Any]:
         "cap_style",
         "cap_material",
         "cap_brim",
+        "sizing",
+        "height_over_stature",
     ):
         if getattr(head, key) != getattr(HeadSettings(), key):
             out[key] = getattr(head, key)

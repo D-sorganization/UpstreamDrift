@@ -129,6 +129,32 @@ def resolve_head_anchor(spec: Mapping[str, Any]) -> HeadAnchor | None:
     return None
 
 
+def drawn_head_length(
+    spec: Mapping[str, Any], anchor: HeadAnchor, settings: HeadSettings | None = None
+) -> float:
+    """Length the head is drawn at, before ``HeadSettings.scale`` (#15299).
+
+    With ``sizing="stature"`` the CC0 head's menton to vertex, measured on its
+    mesh, is ``height_over_stature`` of ``spec.subject.stature_m``, so the head
+    is in proportion at every stature. ``sizing="segment_length"``, the
+    parametric head or a spec that records no stature keep ``anchor.length_m``.
+    Visual only: the anchor, the head segment and its mass properties are not
+    touched. Preconditions: a recorded stature is positive and finite.
+    Postcondition: a positive finite length.
+    """
+    cfg = settings or HeadSettings()
+    stature = (spec.get("subject") or {}).get("stature_m")
+    if cfg.sizing != "stature" or cfg.model != "cc0_mesh" or stature is None:
+        return anchor.length_m
+    stature = float(stature)
+    if not math.isfinite(stature) or stature <= 0:
+        raise ValueError(f"subject stature_m must be positive, got {stature!r}")
+    from src.shared.python.model_appearance import head_mesh
+
+    fraction = head_mesh.head_proportions().menton_to_vertex
+    return cfg.height_over_stature * stature / fraction
+
+
 def _skull_point(direction: NDArray[np.float64], length: float) -> Array:
     """Point on the deformed skull for a unit direction (canonical frame)."""
     hx, hy, hz = (f * length for f in _SKULL_HALF)
