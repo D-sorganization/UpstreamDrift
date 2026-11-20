@@ -403,6 +403,9 @@ class Lane:
         self.restart_policy = DEFAULT_IK_RESTART_POLICY
         #: Weight of the address-pose posture prior (#12042); 0 disables it.
         self.posture_prior_weight = 0.0
+        #: Iteration cap of each full-capture pose solve; None keeps the solver's.
+        self.ik_iterations: int | None = None
+        self.spin_prior_override: float | None = None
         #: Last pre-contact capture frame (GCV-20); the reference low-pass is
         #: split there. None filters across impact (no club triad observed).
         self.impact_index: int | None = None
@@ -429,6 +432,27 @@ class Lane:
             raise ValueError(f"Unknown restart policy {policy!r}; expected {known}")
         self.restart_policy = policy
 
+    def set_trajectory_convergence(
+        self, iterations: int | None, spin_prior_weight: float | None
+    ) -> None:
+        """Opt-in convergence settings of the full-capture solve (#15296).
+
+        ``iterations`` caps each frame's pose solve (the solver's own cap of 60
+        stops fast frames short of their optimum); ``spin_prior_weight``
+        replaces the weight that ties each spin coordinate to the previous
+        frame (at 360 Hz the document's weight makes fast forearm rotation
+        lag). ``None`` leaves either unchanged. Raises ``ValueError`` for a
+        cap under 1 or a negative weight.
+        """
+        if iterations is not None and iterations < 1:
+            raise ValueError(f"trajectory IK iterations must be >= 1, got {iterations}")
+        if spin_prior_weight is not None and not spin_prior_weight >= 0:
+            raise ValueError(f"spin prior weight must be >= 0, got {spin_prior_weight}")
+        self.ik_iterations = iterations
+        self.spin_prior_override = spin_prior_weight
+        if spin_prior_weight is not None:
+            self.prior_weights = dict.fromkeys(self.prior_weights, spin_prior_weight)
+
     def restart_settings(self, consecutive: bool = True) -> dict[str, Any]:
         """``solve_trajectory`` restart keywords for the active policy.
 
@@ -436,7 +460,8 @@ class Lane:
         are not one sample apart, so the joint-speed bound does not apply.
         """
         policy = self.restart_policy if consecutive else "free"
-        return {
+        capped = consecutive and self.ik_iterations is not None
+        return ({"iterations": self.ik_iterations} if capped else {}) | {
             "restarts": 0 if policy == "off" else TRAJECTORY_RESTARTS,
             "restart_threshold_m": TRAJECTORY_RESTART_THRESHOLD_M,
             "restart_margin_m": TRAJECTORY_RESTART_MARGIN_M,
@@ -465,6 +490,14 @@ class Lane:
             for name in POSTURE_PRIOR_COORDINATES
             if name in order
         }
+
+    def convergence_report(self) -> dict[str, Any]:
+        """Receipt block of ``set_trajectory_convergence``; empty when not opted in."""
+        opted = {
+            "iterations": self.ik_iterations,
+            "spin_prior_weight": self.spin_prior_override,
+        }
+        return {key: value for key, value in opted.items() if value is not None}
 
     def restart_report(self) -> dict[str, Any]:
         """Receipt block naming the restart policy and its bound (#12042)."""
@@ -862,3 +895,22 @@ def probe_pink_capability() -> tuple[bool, dict[str, Any]]:
         msg = f"Required packages unavailable: {', '.join(missing)}"
         return False, {"available": False, "missing": missing, "reason": msg}
     return True, {"available": True, "missing": [], "reason": "ok"}
+
+
+def add_trajectory_convergence_arguments(parser: Any) -> None:
+    """``--ik-iterations`` and ``--ik-spin-prior-weight`` (#15296), both off."""
+    parser.add_argument(
+        "--ik-iterations",
+        type=int,
+        default=None,
+        help="iteration cap of each full-capture pose solve (default: the solver's 60)",
+    )
+    parser.add_argument(
+        "--ik-spin-prior-weight",
+        type=float,
+        default=None,
+        help=(
+            "weight tying each arm spin coordinate to the previous frame in the "
+            "full-capture solve (default: the document's)"
+        ),
+    )

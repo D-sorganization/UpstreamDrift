@@ -167,3 +167,34 @@ def test_restart_report_validates_against_the_receipt_schema(policy: str) -> Non
     assert block.policy == policy
     with pytest.raises(ValidationError):
         IkRestartPolicyReceipt.model_validate({**lane.restart_report(), "margin_m": -1})
+
+
+def test_trajectory_convergence_settings_are_opt_in() -> None:
+    """Iterations and the spin prior of the full-capture solve (#15296): the
+    default leaves the solver's own cap and the document's prior untouched."""
+    from src.shared.python.motion_matching.pipeline.cli import build_parser
+    from src.shared.python.motion_matching.pipeline.constants import (
+        SPIN_COORDINATES,
+        SPIN_PRIOR,
+    )
+
+    lane = _synthetic_lane()
+    lane.prior_weights = dict.fromkeys(SPIN_COORDINATES, SPIN_PRIOR)
+    args = build_parser().parse_args([])
+    assert (args.ik_iterations, args.ik_spin_prior_weight) == (None, None)
+    lane.set_trajectory_convergence(args.ik_iterations, args.ik_spin_prior_weight)
+    assert "iterations" not in lane.restart_settings()
+    assert lane.convergence_report() == {}  # a default receipt is unchanged
+    assert set(lane.prior_weights.values()) == {SPIN_PRIOR}
+    args = build_parser().parse_args(
+        ["--ik-iterations", "300", "--ik-spin-prior-weight", "0.001"]
+    )
+    lane.set_trajectory_convergence(args.ik_iterations, args.ik_spin_prior_weight)
+    assert lane.restart_settings()["iterations"] == 300
+    assert "iterations" not in lane.restart_settings(consecutive=False)
+    assert lane.prior_weights == dict.fromkeys(SPIN_COORDINATES, 0.001)
+    assert lane.convergence_report() == {"iterations": 300, "spin_prior_weight": 0.001}
+    with pytest.raises(ValueError, match="iterations"):
+        lane.set_trajectory_convergence(0, None)
+    with pytest.raises(ValueError, match="spin prior"):
+        lane.set_trajectory_convergence(None, -1.0)
