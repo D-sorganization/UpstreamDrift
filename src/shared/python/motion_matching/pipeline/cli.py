@@ -101,6 +101,7 @@ from src.shared.python.motion_matching.pipeline.gaze_tracking import (
 )
 from src.shared.python.motion_matching.pipeline.lane import (
     Lane,
+    add_trajectory_convergence_arguments,
     configure_lane,
     document_seed,
     expand_stance_for_width,
@@ -133,6 +134,7 @@ from src.shared.python.motion_matching.pipeline.reference import (
 from src.shared.python.motion_matching.pipeline.weld_projection import (
     weld_consistent_track,
 )
+from src.shared.python.motion_matching.pipeline import bundle_stage
 from src.shared.python.motion_matching.pipeline.marker_selection import (
     DEFAULT_LEG_SEED_SOURCE,
     add_marker_selection_argument,
@@ -447,9 +449,11 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     add_turn_split_arguments(parser)
+    add_trajectory_convergence_arguments(parser)
     add_hip_zero_twist_argument(parser)
     add_knee_flexion_argument(parser)
     add_marker_selection_argument(parser)
+    bundle_stage.add_bundle_arguments(parser)
     return parser
 
 
@@ -1360,6 +1364,42 @@ class CalibratedRun:
     provenance: BaseSpecProvenance | None = None
 
 
+def _bundle_adjust(
+    args: argparse.Namespace,
+    lane: Lane,
+    labels: tuple[str, ...],
+    cal: _CalibrateAndScaleResult,
+) -> _CalibrateAndScaleResult:
+    """Opt-in marker-offset bundle adjustment (#15296): the calibration with
+    adjusted attachments and rebuilt kinematics; ``cal`` itself without the flag."""
+    settings = bundle_stage.stage_settings(args)
+    if settings is None:
+        return cal
+    sole = bundle_stage.stated_sole(cal.scaled_spec)
+    fitted = bundle_stage.adjust(
+        lane, cal.kin, cal.attachments, cal.address2.q, settings, sole
+    )
+    adapter, kin = lane.kinematics(
+        cal.spec_bytes, fitted.attachments, ik_backend=getattr(args, "ik_backend", "lm")
+    )
+    sim = fs.FullBodySimulator(adapter)
+    address = lane.best_address(kin, fitted.address_q)
+    report = cal.address_report
+    record_calibrated_address(
+        report, sim, kin, address, lane, labels, adapter, spec=cal.scaled_spec
+    )
+    report["bundle_adjustment"] = fitted.report
+    return replace(
+        cal,
+        adapter=adapter,
+        kin=kin,
+        sim=sim,
+        address2=address,
+        attachments=fitted.attachments,
+        offsets={label: fitted.attachments[label] for label in cal.offsets},
+    )
+
+
 @precondition(lambda args: args is not None, "args must not be None")
 def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
     """Run the pipeline through the calibrated address (no trajectory or dynamics)."""
@@ -1392,12 +1432,14 @@ def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
     if args.bound_wrists or (fitted_grip(base_spec) and not args.free_wrists):
         lane.bounds |= wrist_bounds()
         ctx.log.info("wrists and forearms bounded to the human ranges in the IK")
+    lane.set_girdle_range(getattr(args, "ik_girdle_range_deg", None))
 
     lane.gaze_weight = float(getattr(args, "gaze_weight", 0.0))
 
     cal_res = _calibrate_and_scale(ctx, lane, base_spec, upper_base, upper, labels)
     if chosen.report():  # only a non-default selection: default receipts keep
         cal_res.address_report["marker_selection"] = chosen.report()
+    cal_res = _bundle_adjust(args, lane, labels, cal_res)
     return CalibratedRun(ctx, lane, base_spec, labels, cal_res, provenance)
 
 
@@ -1456,6 +1498,11 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         getattr(args, "ik_restart_policy", DEFAULT_IK_RESTART_POLICY)
     )
     lane.posture_prior_weight = getattr(args, "ik_posture_prior_weight", 0.0)
+    lane.set_trajectory_convergence(
+        getattr(args, "ik_iterations", None),
+        getattr(args, "ik_spin_prior_weight", None),
+    )
+    lane.stance_slide = bool(getattr(args, "ik_free_stance_slide", False))
     lane.set_turn_split(
         cal_res.attachments,
         getattr(args, "thorax_weight", DEFAULT_THORAX_WEIGHT),
@@ -1510,6 +1557,8 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     lane.select_release_cutoff(cal_res.kin, cal_res.scaled_spec, q_ref)
     _attach_face_report(ik_report, lane, cal_res, (q_ik, q_ref), args.face_weight)
     ik_report["restart_policy"] = lane.restart_report()
+    if lane.convergence_report():
+        ik_report["trajectory_convergence"] = lane.convergence_report()
     if turn_split_active(lane):
         ik_report["turn_split"] = turn_split_report(lane)
     _save_ik_trajectory(ctx, lane, q_ik, q_ref, errors, ref_errors)

@@ -1,0 +1,375 @@
+"""Lane adapter of the marker-offset bundle adjustment (#15296)."""
+
+from __future__ import annotations
+
+import argparse
+import dataclasses
+import json
+from pathlib import Path
+from types import SimpleNamespace
+from typing import Any
+
+import numpy as np
+import pytest
+
+from src.shared.python.grip_contact import load_coordinate_swing
+from src.shared.python.motion_matching.contact_law import GroundPlane
+from src.shared.python.motion_matching.pipeline import cli
+from src.shared.python.motion_matching.pipeline.bundle_adjustment import solve_bundle
+from src.shared.python.motion_matching.pipeline.bundle_stage import (
+    OFFSET_SIGMAS_M,
+    StageSettings,
+    add_bundle_arguments,
+    adjusted_attachments,
+    build_problem,
+    held_out_rms_mm,
+    held_out_scatter_mm,
+    offset_sigma,
+    select_frames,
+    stage_report,
+    stage_settings,
+    start_poses,
+    stated_sole,
+)
+from src.shared.python.motion_matching.pipeline.constants import SPEC
+from src.shared.python.motion_matching.pipeline.marker_selection import select_markers
+from src.shared.python.motion_matching.tour_capture_contract import TOUR_CAPTURE
+
+pytestmark = [pytest.mark.unit]
+ROOT = Path(__file__).resolve().parents[4]
+EVIDENCE = ROOT / "docs/development/full_body_models/evidence/ground_support"
+FIXTURES = ROOT / "tests/fixtures/club_face"
+FRAMES = 5
+EVERY = StageSettings(frame_stride=1)
+CLUB = "Marker_2:2:1"
+#: Closure weight that shuts the weld far below its 0.5 mm residual scale.
+WELD = 1e8
+
+
+@pytest.fixture(scope="module")
+def model() -> SimpleNamespace:
+    """The committed driver model, its attachments and a lane of five frames
+    whose capture is the model's own markers along the fixture swing."""
+    pytest.importorskip("mujoco")
+    from src.engines.physics_engines.mujoco.python.full_body_ik import (
+        FullBodyMarkerKinematics,
+    )
+    from src.engines.physics_engines.mujoco.python.overlay_source import (
+        MujocoOverlaySource,
+    )
+
+    spec_path = EVIDENCE / "anthro_driver" / "full_body_spec_hipcal_scaled.json"
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    receipt = json.loads((EVIDENCE / "anthro_driver" / "receipt.json").read_text())
+    attachments = {
+        label: (entry["body"], tuple(entry["offset_m"]))
+        for label, entry in receipt["ik"]["attachments_m"].items()
+    }
+    source = MujocoOverlaySource(spec_path.read_bytes())
+    kin = FullBodyMarkerKinematics(source, attachments)
+    swing = load_coordinate_swing(
+        FIXTURES / "swing_q_driver.npz",
+        FIXTURES / "address_poses.json",
+        "driver",
+        spec["coordinate_order"],
+    )
+    height = float(spec["contact"]["ground"].get("height_m") or 0.0)
+    ground = GroundPlane(normal=(0.0, 0.0, 1.0), height_m=height)
+    seen = np.ones(len(attachments), bool)
+    poses = np.array(
+        [  # the fixture swing is another model's: close this model's grip weld
+            kin.solve_pose(
+                kin.marker_positions(q), seen, q, ground=ground, closure_weight=WELD
+            ).q
+            for q in swing.q[np.linspace(0, len(swing.q) - 1, FRAMES).astype(int)]
+        ]
+    )
+    lane = SimpleNamespace(
+        labels=tuple(attachments),
+        points=np.array([kin.marker_positions(pose) for pose in poses]),
+        valid=np.ones((FRAMES, len(attachments)), bool),
+        ground=ground,
+        stance=[()] * FRAMES,
+        bounds={},
+        prior_weights={},
+        plant=SimpleNamespace(
+            create_ik=lambda probes: FullBodyMarkerKinematics(source, probes)
+        ),
+    )
+    return SimpleNamespace(lane=lane, kin=kin, attachments=attachments, poses=poses)
+
+
+@pytest.mark.requires_mujoco
+def test_fk_and_twists_reproduce_the_lane_markers_at_the_reference_pose(model) -> None:
+    prob, labels, frames = build_problem(
+        model.lane, model.attachments, model.poses, EVERY
+    )
+    assert labels == model.lane.labels and frames == tuple(range(FRAMES))
+    pose = model.poses[0]
+    native = model.kin.marker_linearization(pose)
+    bodies = prob.fk(pose)[prob.marker_bodies]
+    arms = np.einsum("mij,mj->mi", bodies[:, :3, :3], prob.offset_seeds)
+    assert np.abs(arms + bodies[:, :3, 3] - native.positions).max() < 1e-9
+    twists = prob.body_jacobian(pose)[prob.marker_bodies]
+    slopes = twists[:, :3] + np.cross(twists[:, 3:], arms[:, :, None], axis=1)
+    assert np.abs(slopes - native.jacobian).max() < 1e-9
+
+
+@pytest.mark.requires_mujoco
+def test_constraint_rows_and_the_stated_sole_point(model) -> None:
+    prob, _, _ = build_problem(model.lane, model.attachments, model.poses, EVERY)
+    rows = prob.constraint(0, model.poses[0])
+    assert rows.shape == prob.constraint(3, model.poses[3]).shape
+    assert np.isfinite(rows).all() and len(rows) > 6
+    body = model.attachments[CLUB][0]
+    sole = (body, (0.0, 0.0, 0.05))
+    stated, _, _ = build_problem(
+        model.lane, model.attachments, model.poses, EVERY, sole
+    )
+    frame = stated.fk(model.poses[0])[
+        sorted({b for b, _ in model.attachments.values()}).index(body)
+    ]
+    height = (frame[:3, 3] + frame[:3, :3] @ sole[1])[2] - model.lane.ground.height_m
+    assert stated.constraint(0, model.poses[0])[-1] == pytest.approx(height / 0.005)
+    assert stated.constraint(3, model.poses[3])[-1] == 0.0
+    assert len(stated.constraint(0, model.poses[0])) == len(rows) + 1
+
+
+@pytest.mark.requires_mujoco
+@pytest.mark.slow
+def test_adjustment_moves_a_misplaced_seed_back_and_reports_it(model) -> None:
+    seeds: dict[str, Any] = dict(model.attachments)
+    body, offset = seeds["LElbowOut"]
+    seeds["LElbowOut"] = (body, (offset[0] + 0.010, offset[1], offset[2] - 0.008))
+    settings = StageSettings(frame_stride=1, held_out=("RKneeOut",))
+    prob, labels, frames = build_problem(model.lane, seeds, model.poses, settings)
+    assert "RKneeOut" not in labels
+    result = solve_bundle(prob, settings.solver)
+    fitted = adjusted_attachments(seeds, labels, result)
+    # five frames against a 12 mm prior cannot undo it all: over half comes back
+    assert np.abs(np.subtract(fitted["LElbowOut"][1], offset)).max() < 0.005
+    assert fitted["RKneeOut"] == seeds["RKneeOut"]
+    held = labels.index(CLUB)
+    assert np.array_equal(result.offsets[held], prob.offset_seeds[held])
+    report = stage_report(result, labels, frames, settings)
+    assert report["converged"] and report["rms_mm"] < 1.0
+    assert CLUB not in report["free_markers"]
+    assert not {CLUB} & set(report["weakly_identified_markers"])
+    assert json.dumps(report)
+
+
+def test_frame_selection_and_the_sigma_table() -> None:
+    settings = StageSettings(anchor_frames=(391, 476))
+    frames = select_frames(654, settings)
+    assert frames[:3] == (0, 20, 40) and {391, 476} <= set(frames)
+    assert len(frames) == 35 and list(frames) == sorted(set(frames))
+    with pytest.raises(ValueError, match="anchor frame"):
+        select_frames(100, StageSettings(anchor_frames=(100,)))
+    with pytest.raises(ValueError, match="frame_stride"):
+        select_frames(100, StageSettings(frame_stride=0))
+    # head markers: full weight, 40 mm (the experiment's tenth weight let the prior win)
+    assert offset_sigma("HeadFront") == (0.040, 0.040, 0.040)
+    assert offset_sigma("LWristTop") == OFFSET_SIGMAS_M["WristTop"]
+    assert offset_sigma("Marker_2:2:1") == (0.0, 0.0, 0.0)  # club markers are held
+
+
+def test_the_flag_is_off_by_default_and_a_default_run_is_untouched(
+    tmp_path, monkeypatch
+) -> None:
+    calibrated = SimpleNamespace(address_report={})  # any further read would raise
+    monkeypatch.setattr(cli, "_calibrate_and_scale", lambda *args: calibrated)
+    monkeypatch.setattr(cli, "get_plant", lambda engine, spec: object())
+    argv = ["--spec", str(SPEC), "--out", str(tmp_path), "--foot-progression", "off"]
+    args = cli.build_parser().parse_args(argv)
+    assert args.bundle_adjust is False and stage_settings(args) is None
+    run = cli.calibrate_run(args)
+    assert run.cal_res is calibrated and calibrated.address_report == {}
+    document = json.loads(SPEC.read_text(encoding="utf-8"))
+    assert run.labels == select_markers(document, TOUR_CAPTURE.labels).labels
+
+
+def test_the_flag_carries_frames_and_held_out_markers_and_the_sole_is_stated() -> None:
+    parser = argparse.ArgumentParser()
+    add_bundle_arguments(parser)
+    argv = ["--bundle-adjust", "--bundle-stride", "30", "--bundle-held-out", "RKneeOut"]
+    args = parser.parse_args([*argv, "--bundle-anchor-frames", "391", "476"])
+    assert stage_settings(args) == StageSettings(
+        frame_stride=30, anchor_frames=(391, 476), held_out=("RKneeOut",)
+    )
+    assert stage_settings(parser.parse_args([])) is None
+    more = ["--bundle-start", "consecutive", "--bundle-address-repeats", "8"]
+    more += ["--bundle-offset-reach-mm", "35", "--bundle-pose-prior", "0.1", "3"]
+    asked = stage_settings(parser.parse_args(["--bundle-adjust", *more]))
+    assert (asked.start, asked.address_repeats) == ("consecutive", 8)
+    assert asked.offset_reach_m == pytest.approx(0.035)
+    assert (asked.pose_prior_weight, asked.spin_prior_weight) == (0.1, 3.0)
+    assert asked.solver.tolerance == 1e-6
+    held = stage_settings(
+        parser.parse_args(["--bundle-adjust", "--bundle-hold", "Toe"])
+    )
+    assert not held.lane_weights
+    alike = stage_settings(
+        parser.parse_args(["--bundle-adjust", "--bundle-lane-weights"])
+    )
+    assert alike.lane_weights
+    assert held.hold == ("Toe",) and held.sigma("LToeIn") == (0.0, 0.0, 0.0)
+    assert held.sigma("LKneeOut") == OFFSET_SIGMAS_M["KneeOut"]
+    # nothing held out: no kinematics are built for an empty marker set
+    assert held_out_rms_mm(SimpleNamespace(), {}, (0,), np.zeros((1, 2))) == {}
+    document = json.loads(SPEC.read_text(encoding="utf-8"))
+    assert stated_sole(document) is None  # no stated point: the origin is not assumed
+    club = {**document.get("club", {}), "sole_point_m": [0.01, 0.0, -0.02]}
+    body, point = stated_sole({**document, "club": club})
+    assert body.endswith("Clubface Vector") and point == (0.01, 0.0, -0.02)
+
+
+@pytest.mark.requires_mujoco
+@pytest.mark.slow
+def test_the_flag_hands_the_swing_solve_the_adjusted_attachments(
+    model, monkeypatch
+) -> None:
+    seeds: dict[str, Any] = dict(model.attachments)
+    body, offset = seeds["LElbowOut"]
+    seeds["LElbowOut"] = (body, (offset[0] + 0.010, offset[1], offset[2] - 0.008))
+    built: dict[str, Any] = {}
+
+    def kinematics(spec_bytes, attachments, *, ik_backend):
+        built.update(attachments=attachments, backend=ik_backend)
+        return "adapter", "swing kin"
+
+    lane = SimpleNamespace(
+        **vars(model.lane),
+        trajectory=lambda kin, q, frames: (model.poses[list(frames)], []),
+        kinematics=kinematics,
+        best_address=lambda kin, q: SimpleNamespace(q=q, kin=kin),
+    )
+    recorded: list[Any] = []
+    monkeypatch.setattr(
+        cli, "record_calibrated_address", lambda *a, **k: recorded.append(a)
+    )
+    monkeypatch.setattr(cli.fs, "FullBodySimulator", lambda adapter: ("sim", adapter))
+    fields = dict.fromkeys(cli._CalibrateAndScaleResult.__dataclass_fields__)
+    fields |= {"address_report": {}, "attachments": seeds, "kin": model.kin}
+    fields |= {"address2": SimpleNamespace(q=model.poses[0]), "scaled_spec": {}}
+    fields |= {"offsets": {"RKneeOut": seeds["RKneeOut"]}, "spec_bytes": b"spec"}
+    before = cli._CalibrateAndScaleResult(**fields)
+    argv = ["--bundle-adjust", "--bundle-stride", "1", "--bundle-held-out", "RKneeOut"]
+    parser = argparse.ArgumentParser()
+    add_bundle_arguments(parser)
+    after = cli._bundle_adjust(parser.parse_args(argv), lane, model.lane.labels, before)
+    assert after.attachments is built["attachments"] and built["backend"] == "lm"
+    assert (after.adapter, after.kin, after.sim) == (
+        "adapter",
+        "swing kin",
+        ("sim", "adapter"),
+    )
+    assert after.address2.kin == "swing kin" and len(recorded) == 1
+    moved = np.subtract(after.attachments["LElbowOut"][1], offset)
+    assert np.abs(moved).max() < 0.005 and after.offsets == {
+        "RKneeOut": seeds["RKneeOut"]
+    }
+    block = after.address_report["bundle_adjustment"]
+    assert block["converged"] and block["club_sole_point"] is None
+    assert block["offset_shift_mm"]["LElbowOut"] > 5.0
+    # the held-out marker took no part, and the adjusted poses still explain it
+    assert block["held_out_rms_mm"]["RKneeOut"]["adjusted"] < 1.0
+    assert json.dumps(block)
+
+
+@pytest.mark.requires_mujoco
+def test_reach_address_repeats_and_pose_prior_are_settings(model) -> None:
+    settings = StageSettings(
+        frame_stride=1,
+        address_repeats=3,
+        offset_reach_m=0.035,
+        pose_prior_weight=0.1,
+        spin_prior_weight=3.0,
+    )
+    start = np.vstack([model.poses[:1]] * 2 + [model.poses])
+    prob, labels, frames = build_problem(model.lane, model.attachments, start, settings)
+    assert frames == (0, 0, 0, 1, 2, 3, 4) and len(prob.observations) == FRAMES + 2
+    reach = dict(zip(labels, prob.offset_reach.max(axis=1).tolist(), strict=True))
+    assert reach["LShoulderTop"] == 0.035 and reach["HeadTop"] == np.inf
+    order = list(model.kin.coordinate_order)
+    sigma = prob.pose_prior[1][0]
+    assert sigma[order.index("LSInputZ")] == pytest.approx(1 / 3.0)
+    assert sigma[order.index("LEInput")] == pytest.approx(10.0)
+    assert prob.marker_weights is None
+    lane = SimpleNamespace(
+        **vars(model.lane),
+        marker_weights={"HeadTop": 0.1},
+        split_marker_weights={"LShoulderTop": 0.3},
+    )
+    weighed = dataclasses.replace(settings, lane_weights=True)
+    alike, _, _ = build_problem(lane, model.attachments, start, weighed)
+    weight = dict(zip(labels, alike.marker_weights.tolist(), strict=True))
+    assert (weight["HeadTop"], weight["LShoulderTop"]) == (0.1, 0.3)
+    assert weight["RKneeOut"] == 1.0
+    with pytest.raises(ValueError, match="address_repeats"):
+        build_problem(
+            model.lane, model.attachments, start, StageSettings(address_repeats=0)
+        )
+
+
+def test_start_poses_never_see_a_held_out_marker_and_may_be_consecutive() -> None:
+    seen: dict[str, Any] = {}
+
+    def trajectory(self, kin, q, frames=None):
+        seen.update(valid=self.valid.copy(), frames=frames)
+        return np.zeros((6, 2)) + q, []
+
+    lane = type("FakeLane", (), {"trajectory": trajectory})()
+    lane.labels, lane.valid = ("a", "b"), np.ones((6, 2), bool)
+    lane.points = np.zeros((6, 2, 3))
+    settings = StageSettings(frame_stride=2, held_out=("b",), start="consecutive")
+    poses = start_poses(lane, "kin", np.array([0.1, 0.2]), settings)
+    assert poses.shape == (3, 2) and seen["frames"] is None
+    assert seen["valid"][:, 0].all() and not seen["valid"][:, 1].any()
+    assert lane.valid.all()  # the lane itself is untouched
+    start_poses(lane, "kin", np.zeros(2), StageSettings(frame_stride=2))
+    assert seen["frames"] == [0, 2, 4]
+    with pytest.raises(ValueError, match="start"):
+        start_poses(lane, "kin", np.zeros(2), StageSettings(start="other"))
+
+
+@pytest.mark.requires_mujoco
+def test_held_out_scatter_ignores_the_seed_and_grows_with_wrong_poses(model) -> None:
+    body = model.attachments["RKneeOut"][0]
+    anywhere = {"RKneeOut": (body, (0.3, 0.2, 0.1))}
+    frames = tuple(range(FRAMES))
+    exact = held_out_scatter_mm(model.lane, anywhere, frames, model.poses)
+    assert exact["RKneeOut"] < 1e-6  # the capture is rigid on the true poses
+    noise = np.random.default_rng(0).normal(0.0, 0.02, model.poses.shape)
+    wrong = held_out_scatter_mm(model.lane, anywhere, frames, model.poses + noise)
+    assert wrong["RKneeOut"] > 1.0
+    assert held_out_scatter_mm(model.lane, {}, frames, model.poses) == {}
+
+
+@pytest.mark.requires_mujoco
+def test_planted_spheres_are_held_where_the_first_frame_puts_them(model) -> None:
+    ground = model.lane.ground
+    spheres = sorted(model.kin.sphere_ground_points(model.poses[0], ground))
+    names = spheres[:2]
+    stance = [tuple(names)] + [(names[0],)] * (FRAMES - 1)  # the second lifts
+    lane = SimpleNamespace(**{**vars(model.lane), "stance": stance})
+    plain, _, _ = build_problem(lane, model.attachments, model.poses, EVERY)
+    planted, _, _ = build_problem(
+        lane,
+        model.attachments,
+        model.poses,
+        dataclasses.replace(EVERY, plant_sigma_m=0.005),
+    )
+    extra = len(planted.constraint(0, model.poses[0])) - len(
+        plain.constraint(0, model.poses[0])
+    )
+    assert extra == 3 * len(spheres)  # one row triple per sphere of the model
+    assert np.allclose(planted.constraint(0, model.poses[0])[-extra:], 0.0)
+    here = model.kin.sphere_ground_points(model.poses[2], ground)
+    home = model.kin.sphere_ground_points(model.poses[0], ground)
+    slide = (here[names[0]] - home[names[0]]) * [1.0, 1.0, 0.0] / 0.005
+    rows = planted.constraint(2, model.poses[2])[-extra:].reshape(-1, 3)
+    assert np.allclose(rows[0], slide) and np.abs(slide).max() > 0.0
+    assert np.allclose(rows[1:], 0.0)  # lifted or never in stance: not planted
+    assert stage_settings(
+        cli.build_parser().parse_args(["--bundle-adjust", "--bundle-plant-mm", "5"])
+    ).plant_sigma_m == pytest.approx(0.005)
