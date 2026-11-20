@@ -89,6 +89,11 @@ from src.shared.python.motion_matching.range_of_motion import (
     UPPER_RANGES_DEG,
     as_document,
 )
+from src.shared.python.motion_matching.knee_axial_rotation import (
+    DEFAULT_KNEE_AXIAL_RANGE_DEG,
+    KNEE_AXIAL_KEY,
+    apply_knee_axial_rotation,
+)
 from src.shared.python.motion_matching.tibial_torsion import (
     DEFAULT_TIBIAL_TORSION_OFFSET_DEG,
     apply_tibial_torsion,
@@ -893,6 +898,7 @@ def compose_anthropometric_document(
     ``subject_preset.SubjectPreset`` kwargs (#15296): ``club_spec`` restates
     ``club`` (same name, ``ValueError`` otherwise),
     ``shoulder_below_cervicale_m`` is ``build_upper_body``'s; :func:`_seeded_markers`.
+    ``knee_axial_rotation_deg`` (default off) is ``apply_knee_axial_rotation``'s.
     """
     native_path = native_path or get_native_geometry_spec(None)
     osim_path = osim_path or get_opensim_model(None)
@@ -949,6 +955,7 @@ def compose_anthropometric_document(
     _annotate_document(document, upper, kwargs.get("mirror_arm", True))
     document = with_shaft_model(document, club_spec, kwargs.get("shaft_model"))
     document = _apply_kwarg_tibial_torsion(document, kwargs)
+    document = apply_knee_axial_rotation(document, kwargs.get(KNEE_AXIAL_KEY))
     return AnthropometricDocument(
         document=document,
         subject=upper["subject"],
@@ -1087,6 +1094,14 @@ def build_parser(preset: Mapping[str, Any] | None = None) -> argparse.ArgumentPa
         default=GIRDLE_MASS_ADDED,
         help="where the clavicle links' mass comes from (#15279, #15150)",
     )
+    parser.add_argument(
+        "--knee-axial-rotation",
+        type=float,
+        nargs="?",
+        const=DEFAULT_KNEE_AXIAL_RANGE_DEG[1],
+        default=None,
+        help="opt-in knee axial rotation, +- deg (off unless given; #15296)",
+    )
     add_grip_arguments(parser, physical=True)
     parser.set_defaults(**preset)
     return parser
@@ -1096,6 +1111,7 @@ def build_parser(preset: Mapping[str, Any] | None = None) -> argparse.ArgumentPa
 _PRESET_FLAGS = {"stature": "stature_m", "mass": "mass_kg", "club": "club"} | {
     "club_markers": "club_markers_path",
     **{k: k for k in ("trunk_scale", "arm_scale", "shoulder_scale")},
+    "knee_axial_rotation": KNEE_AXIAL_KEY,
 }
 
 
@@ -1138,6 +1154,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         tibial_torsion_offset_deg=args.tibial_torsion,
         shoulder_girdle_mass=args.shoulder_girdle_mass,
         grip_overrides=overrides_from_args(args),
+        **{KNEE_AXIAL_KEY: args.knee_axial_rotation},
         **preset,
     )
     return 0
