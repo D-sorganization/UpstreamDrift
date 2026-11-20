@@ -141,6 +141,9 @@ class SolveTrajectoryOptions:
     #: index, so a perturbation that changes which earlier frames restarted
     #: cannot shift the jitter of every later frame.
     restart_seed_per_frame: bool = False
+    #: Further ``posture_prior`` entries of single frames (#15296): one mapping
+    #: or ``None`` per capture frame, added to the solve's own posture prior.
+    posture_prior_per_frame: Sequence[Mapping[str, Any] | None] | None = None
 
 
 def soft_anchor(opts: SolvePoseOptions, ground: Any) -> SoftAnchor | None:
@@ -873,9 +876,8 @@ class BaseFullBodyIK:
         self._append_closure(rows, jacs, opts.closure_weight, rot_w)
         self._append_ground(rows, jacs, ground, opts.ground_weight, prep.pinned)
         self._append_club_sole(rows, jacs, ground, opts.club_sole_weight)
-        soft = soft_anchor(opts, ground)  # only the MuJoCo kinematics take one
-        extra = () if soft is None else (soft,)
-        self._append_anchors(rows, jacs, prep.planted, opts.ground_weight, *extra)
+        soft = soft_anchor(opts, ground)
+        self._append_anchors(rows, jacs, prep.planted, opts.ground_weight, soft)
         self._append_balance(rows, jacs, ground, opts.balance_weight)
         self._append_com_target(rows, jacs, ground, prep.com_goal)
         self._append_axes(rows, jacs, prep.axes)
@@ -1042,6 +1044,11 @@ class BaseFullBodyIK:
             and len(opts.locked_per_frame) != targets_arr.shape[0]
         ):
             raise ValueError("locked_per_frame needs one entry per capture frame")
+        if (
+            opts.posture_prior_per_frame is not None
+            and len(opts.posture_prior_per_frame) != targets_arr.shape[0]
+        ):
+            raise ValueError("posture_prior_per_frame needs one entry per frame")
         return targets_arr, mask, indices, prior
 
     def solve_trajectory(
@@ -1090,6 +1097,10 @@ class BaseFullBodyIK:
                 f_opts["com_target"] = opts.com_targets_per_frame[k]
             if opts.locked_per_frame is not None:
                 f_opts["locked"] = opts.locked_per_frame[k]
+            extra = opts.posture_prior_per_frame
+            if extra is not None and extra[k]:
+                own = f_opts.get("posture_prior") or {}
+                f_opts["posture_prior"] = {**own, **extra[k]}
 
             fit = self.solve_pose(
                 targets[k],
