@@ -406,6 +406,7 @@ class Lane:
         self.posture_prior_weight = 0.0
         #: Iteration cap of each full-capture pose solve; None keeps the solver's.
         self.ik_iterations: int | None = None
+        self.stance_slide = False
         self.spin_prior_override: float | None = None
         #: Last pre-contact capture frame (GCV-20); the reference low-pass is
         #: split there. None filters across impact (no club triad observed).
@@ -492,11 +493,23 @@ class Lane:
             if name in order
         }
 
+    def stance_settings(self, consecutive: bool = True) -> dict[str, Any]:
+        """Stance keywords of a solve. With ``stance_slide`` (#15296, off by
+        default) the full-capture solve keeps the stance spheres on the ground
+        but does not anchor them where they first touched: the anchor is 100
+        times stiffer than a marker and the capture's feet roll and pivot by
+        10 to 25 mm in the downswing. Calibration subsets stay planted."""
+        stance = planted_stance(self)
+        if not (consecutive and self.stance_slide):
+            return stance
+        return stance | {"plant_stance": False, "anchor_stance_at_init": False}
+
     def convergence_report(self) -> dict[str, Any]:
         """Receipt block of ``set_trajectory_convergence``; empty when not opted in."""
         opted = {
             "iterations": self.ik_iterations,
             "spin_prior_weight": self.spin_prior_override,
+            "free_stance_slide": True if self.stance_slide else None,
         }
         return {key: value for key, value in opted.items() if value is not None}
 
@@ -810,7 +823,7 @@ class Lane:
             ground=self.ground,
             frames=frames,
             prior_weight=PRIOR,
-            **planted_stance(self),
+            **self.stance_settings(consecutive=frames is None),
             bounds=self.bounds,
             marker_weights={**self.marker_weights, **self.split_marker_weights},
             prior_weights=self.prior_weights,
@@ -899,7 +912,16 @@ def probe_pink_capability() -> tuple[bool, dict[str, Any]]:
 
 
 def add_trajectory_convergence_arguments(parser: Any) -> None:
-    """``--ik-iterations`` and ``--ik-spin-prior-weight`` (#15296), both off."""
+    """``--ik-iterations``, ``--ik-spin-prior-weight`` and
+    ``--ik-free-stance-slide`` (#15296), all off by default."""
+    parser.add_argument(
+        "--ik-free-stance-slide",
+        action="store_true",
+        help=(
+            "full-capture solve: keep the stance spheres on the ground without "
+            "anchoring them where they first touched (default: anchored)"
+        ),
+    )
     parser.add_argument(
         "--ik-iterations",
         type=int,

@@ -198,3 +198,23 @@ def test_trajectory_convergence_settings_are_opt_in() -> None:
         lane.set_trajectory_convergence(0, None)
     with pytest.raises(ValueError, match="spin prior"):
         lane.set_trajectory_convergence(None, -1.0)
+
+
+def test_free_stance_slide_is_opt_in_and_keeps_the_feet_on_the_ground() -> None:
+    """``--ik-free-stance-slide`` (#15296): the full-capture solve keeps the
+    stance spheres on the ground but no longer anchors them where they first
+    touched; calibration subsets and the default stay planted."""
+    from src.shared.python.motion_matching.pipeline.address_feet import planted_stance
+    from src.shared.python.motion_matching.pipeline.cli import build_parser
+
+    lane = _synthetic_lane()
+    assert build_parser().parse_args([]).ik_free_stance_slide is False
+    assert lane.stance_settings() == planted_stance(lane)
+    assert lane.convergence_report() == {}
+    args = build_parser().parse_args(["--ik-free-stance-slide"])
+    lane.stance_slide = args.ik_free_stance_slide
+    free = lane.stance_settings()
+    assert free["flat_feet_per_frame"] is lane.stance
+    assert (free["plant_stance"], free["anchor_stance_at_init"]) == (False, False)
+    assert lane.stance_settings(consecutive=False) == planted_stance(lane)
+    assert lane.convergence_report() == {"free_stance_slide": True}
