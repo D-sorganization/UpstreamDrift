@@ -114,6 +114,29 @@ def test_landmarks_sit_inside_the_skin_and_are_symmetric() -> None:
     assert np.ptp(vertices[:, 2]) < SETTINGS["stature_m"]
 
 
+def _volume(vertices: np.ndarray, faces: np.ndarray) -> float:
+    a, b, c = (vertices[faces[:, k]] for k in range(3))
+    return float(np.einsum("ij,ij->", a, np.cross(b, c)) / 6.0)
+
+
+def test_the_slim_build_is_stored_as_a_bounded_offset() -> None:
+    arrays, slim = _arrays(), SETTINGS["slim"]
+    quantum = SETTINGS["quantum_m"]
+    assert arrays["slim_offset"].shape == arrays["vertices"].shape
+    offset = arrays["slim_offset"] * quantum
+    reach = np.linalg.norm(offset, axis=1)
+    assert slim["min_offset_m"] < reach.max() <= slim["max_offset_m"]
+    faces = arrays["faces"].astype(np.int64)
+    base = arrays["vertices"] * quantum
+    ratio = _volume(base + offset, faces) / _volume(base, faces)
+    low, high = slim["volume_ratio_bounds"]
+    assert low <= ratio <= high
+    slim_points = base + offset
+    slack = SETTINGS["reference_fit"]["symmetry_mm"] / 1000.0
+    assert abs(slim_points[:, 1].max() + slim_points[:, 1].min()) <= slack
+    assert PROVENANCE["slim_morph_targets"] != PROVENANCE["morph_targets"]
+
+
 def test_fit_scales_to_the_reference_joint_centres_stay_in_bounds() -> None:
     marks = _landmarks_m()
     low, high = SETTINGS["reference_fit"]["scale_bounds"]
