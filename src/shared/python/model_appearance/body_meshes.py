@@ -709,7 +709,12 @@ def _segment_meshes(
             if band[0] < start < band[1]:  # a sleeve starts at the cap's widest ring
                 band = (start, band[1])
             mesh = _loft(
-                ctx, body, seg, coverage=band, thickness=library.GARMENT_THICKNESS
+                ctx,
+                body,
+                seg,
+                coverage=band,
+                thickness=library.GARMENT_THICKNESS,
+                drape=library.garment_drape(ctx.doc.clothing, part),
             )
             out.append(BodyMesh(body, f"garment{i}", mesh, garment))
     return out
