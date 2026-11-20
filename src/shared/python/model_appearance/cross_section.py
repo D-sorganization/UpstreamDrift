@@ -282,5 +282,6 @@ def pelvis_landmarks(spec: Mapping[str, Any]) -> dict[str, PelvisLandmarks]:
             np.asarray(j["parent_to_base"], dtype=np.float64)[:3, 3]
             for j in (*hips, spine[0])
         ]
-        out[body] = PelvisLandmarks(body, *origin, _feet_forward(spec, body, hips))
+        front = _feet_forward(spec, body, hips)
+        out[body] = PelvisLandmarks(body, origin[0], origin[1], origin[2], front)
     return out

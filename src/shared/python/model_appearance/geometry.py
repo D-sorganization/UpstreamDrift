@@ -550,7 +550,7 @@ def split_ellipsoid_mesh(
     phi = np.linspace(0.0, 2.0 * math.pi, sides, endpoint=False)
     cos, sin = np.cos(phi), np.sin(phi)
     behind = np.zeros(sides, dtype=bool)
-    if bulged:
+    if bulged and shape.back is not None:
         behind = sin * float(v @ _check_finite("back", shape.back, 3)) > 1e-12
     grid = np.empty((len(angles), sides, 3))
     for k, ang in enumerate(angles):
