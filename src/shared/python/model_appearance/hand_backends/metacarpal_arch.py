@@ -190,7 +190,8 @@ def set_metacarpal_arch(hand: _ArchedHand, side: str) -> None:
     Postconditions: with nothing set for ``side`` the hand is untouched;
     otherwise each set ray carries its rotation before any other of its own.
     """
-    for ray, angles in hand.settings.metacarpal_arch.of(side).items():
+    arch = hand.settings.metacarpal_arch
+    for ray, angles in arch.of(side).items():
         flexion, deviation = (math.radians(angle) for angle in angles)
         turn = arch_rotation(hand.asset, ray, flexion, deviation)
         bone = f"meta_{ray}"
