@@ -20,6 +20,7 @@ from src.shared.python.motion_matching.pipeline.bundle_stage import (
     OFFSET_SIGMAS_M,
     StageSettings,
     add_bundle_arguments,
+    address_pose_prior,
     adjusted_attachments,
     build_problem,
     held_out_rms_mm,
@@ -373,3 +374,56 @@ def test_planted_spheres_are_held_where_the_first_frame_puts_them(model) -> None
     assert stage_settings(
         cli.build_parser().parse_args(["--bundle-adjust", "--bundle-plant-mm", "5"])
     ).plant_sigma_m == pytest.approx(0.005)
+
+
+@pytest.mark.requires_mujoco
+def test_address_pose_prior_is_a_setting_on_the_address_frames(model) -> None:
+    """``--bundle-address-pose`` (#15296): a coordinate's target and sigma
+    replace the joint prior on every copy of the address frame, nowhere else;
+    the swing solve gets the same targets for its first frame."""
+    plain = StageSettings(frame_stride=1, address_repeats=2)
+    assert plain.address_pose == ()
+    posed = dataclasses.replace(
+        plain, address_pose=(("LEInput", -5.0, 5.0), ("RSInputZ", 0.0, 15.0))
+    )
+    start = np.vstack([model.poses[:1], model.poses])
+    base, _, frames = build_problem(model.lane, model.attachments, start, plain)
+    prob, _, _ = build_problem(model.lane, model.attachments, start, posed)
+    order = list(model.kin.coordinate_order)
+    elbow, spin = order.index("LEInput"), order.index("RSInputZ")
+    mean, sigma = prob.pose_prior
+    assert frames[:3] == (0, 0, 1)
+    assert np.allclose(mean[:2, elbow], np.radians(-5.0))
+    assert np.allclose(sigma[:2, elbow], np.radians(5.0))
+    assert np.allclose(mean[:2, spin], 0.0)
+    assert np.allclose(sigma[:2, spin], np.radians(15.0))
+    rest = np.ones(mean.shape, bool)
+    rest[:2, [elbow, spin]] = False
+    assert np.array_equal(mean[rest], base.pose_prior[0][rest])
+    assert np.array_equal(sigma[rest], base.pose_prior[1][rest])
+    swing = address_pose_prior(posed)
+    assert swing["LEInput"] == pytest.approx(
+        (np.radians(-5.0), (0.010 / np.radians(5.0)) ** 2)
+    )
+    assert address_pose_prior(plain) == {}
+    for bad in (("Nope", 0.0, 5.0), ("LEInput", 0.0, 0.0), ("LEInput", np.nan, 5.0)):
+        with pytest.raises(ValueError, match="address pose"):
+            build_problem(
+                model.lane,
+                model.attachments,
+                start,
+                dataclasses.replace(plain, address_pose=(bad,)),
+            )
+    parser = cli.build_parser()
+    args = parser.parse_args(
+        ["--bundle-adjust", "--bundle-address-pose", "LEInput:-5:5", "REInput:-20:10"]
+    )
+    assert stage_settings(args).address_pose == (
+        ("LEInput", -5.0, 5.0),
+        ("REInput", -20.0, 10.0),
+    )
+    assert stage_settings(parser.parse_args(["--bundle-adjust"])).address_pose == ()
+    with pytest.raises(ValueError, match="address pose"):
+        stage_settings(
+            parser.parse_args(["--bundle-adjust", "--bundle-address-pose", "LEInput:5"])
+        )

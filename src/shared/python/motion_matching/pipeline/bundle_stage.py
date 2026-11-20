@@ -111,6 +111,12 @@ class StageSettings:
     #: plants the feet, so offsets fitted with sliding feet do not fit it.
     #: ``None`` leaves the feet free to slide.
     plant_sigma_m: float | None = None
+    #: Pose targets of the address frame: (coordinate, target deg, sigma deg).
+    #: Markers alone leave the elbow flexion and the humeral axial rotation of
+    #: an address pose weakly decided, so the adjustment can buy marker fit
+    #: with a bent lead arm (*experiment*: ``LEInput`` -5 +/- 5, ``REInput``
+    #: -20 +/- 10, ``LSInputZ`` and ``RSInputZ`` 0 +/- 15). Empty: none.
+    address_pose: tuple[tuple[str, float, float], ...] = ()
     #: The stage stops when a step gains under a millionth of the cost: the
     #: core's default asks for more digits than marker data carry.
     solver: BundleSettings = field(
@@ -250,6 +256,35 @@ def _constraint(
     return residual
 
 
+def _address_pose(
+    settings: StageSettings, order: Sequence[str], frames: Sequence[int]
+) -> tuple[list[int], list[int], np.ndarray]:
+    """Rows (every copy of the first frame), columns and (target, sigma) in
+    radians of ``settings.address_pose``. Raises ``ValueError`` on an unknown
+    coordinate, a non-finite target or a sigma that is not positive."""
+    for name, target, sigma in settings.address_pose:
+        if name not in order or not (np.isfinite(target) and 0 < sigma < np.inf):
+            raise ValueError(
+                f"address pose needs a model coordinate, a finite target and a "
+                f"positive sigma, got {(name, target, sigma)}"
+            )
+    rows = [row for row, frame in enumerate(frames) if frame == frames[0]]
+    columns = [order.index(name) for name, _, _ in settings.address_pose]
+    values = [entry[1:] for entry in settings.address_pose]
+    return rows, columns, np.radians(np.reshape(values, (-1, 2)))
+
+
+def address_pose_prior(settings: StageSettings) -> dict[str, tuple[float, float]]:
+    """``settings.address_pose`` as the swing solve's posture prior:
+    ``{coordinate: (target_rad, weight)}``, the weight being that of a squared
+    residual in metres (the adjustment's marker sigma over the pose sigma)."""
+    scale = settings.solver.marker_sigma_m
+    return {
+        name: (float(np.radians(target)), float((scale / np.radians(sigma)) ** 2))
+        for name, target, sigma in settings.address_pose
+    }
+
+
 def _marker_weights(lane: Any, labels: Sequence[str]) -> np.ndarray:
     """The lane's inverse-kinematics weight of every label (one when unset)."""
     weights = {**lane.marker_weights, **lane.split_marker_weights}
@@ -296,6 +331,9 @@ def build_problem(
     if settings.spin_prior_weight is not None:
         spin = [order.index(name) for name in SPIN_COORDINATES if name in order]
         sigmas[spin] = 1.0 / settings.spin_prior_weight
+    mean, spread = poses.copy(), np.tile(sigmas, (len(frames), 1))
+    rows, held, target = _address_pose(settings, order, frames)
+    mean[np.ix_(rows, held)], spread[np.ix_(rows, held)] = target[:, 0], target[:, 1]
     reach = np.full((len(labels), 3), np.inf)
     if settings.offset_reach_m is not None:
         body = [not label.startswith("Head") for label in labels]
@@ -310,7 +348,7 @@ def build_problem(
         offset_sigmas=np.array([settings.sigma(label) for label in labels]),
         pose_start=poses,
         pose_bounds=(lower, upper),
-        pose_prior=(poses, np.tile(sigmas, (len(frames), 1))),
+        pose_prior=(mean, spread),
         constraint=_constraint(lane, bodies, frames, settings, (sole, poses[0])),
         body_jacobian=bodies.twists,
         offset_reach=reach,
@@ -405,6 +443,14 @@ def add_bundle_arguments(parser: argparse.ArgumentParser) -> None:
         help="residual scale of a planted stance sphere sliding, mm (default: free)",
     )
     parser.add_argument(
+        "--bundle-address-pose",
+        nargs="*",
+        default=[],
+        metavar="COORDINATE:DEG:SIGMA_DEG",
+        help="pose targets of the address frame in the adjustment and on the "
+        "first frame of the swing solve, such as LEInput:-5:5 (default: none)",
+    )
+    parser.add_argument(
         "--bundle-lane-weights",
         action="store_true",
         help="weigh markers in the adjustment as the inverse kinematics does",
@@ -439,6 +485,14 @@ def add_bundle_arguments(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def _pose_target(item: str) -> tuple[str, float, float]:
+    """``COORDINATE:DEG:SIGMA_DEG`` as a tuple; ``ValueError`` otherwise."""
+    parts = item.split(":")
+    if len(parts) != 3:
+        raise ValueError(f"address pose must be COORDINATE:DEG:SIGMA_DEG, got {item}")
+    return parts[0], float(parts[1]), float(parts[2])
+
+
 def stage_settings(args: argparse.Namespace) -> StageSettings | None:
     """Settings of the run ``args`` asks for; ``None`` without the flag."""
     if not getattr(args, "bundle_adjust", False):
@@ -454,6 +508,9 @@ def stage_settings(args: argparse.Namespace) -> StageSettings | None:
         lane_weights=args.bundle_lane_weights,
         plant_sigma_m=None if plant is None else 1e-3 * plant,
         address_repeats=args.bundle_address_repeats,
+        address_pose=tuple(
+            _pose_target(item) for item in getattr(args, "bundle_address_pose", [])
+        ),
         offset_reach_m=None if reach is None else 1e-3 * reach,
         pose_prior_weight=None if prior is None else prior[0],
         spin_prior_weight=None if prior is None else prior[1],
@@ -564,6 +621,7 @@ def adjust(
         1e3 * result.rms_m,
     )
     fitted = adjusted_attachments(attachments, labels, result)
+    lane.address_pose_prior = address_pose_prior(settings)  # swing solve, frame 0
     held = {name: attachments[name] for name in settings.held_out}
     scores = [held_out_rms_mm(lane, held, frames, q) for q in (start, result.poses)]
     loose = [held_out_scatter_mm(lane, held, frames, q) for q in (start, result.poses)]

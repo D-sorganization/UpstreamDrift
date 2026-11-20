@@ -70,11 +70,7 @@ def test_settings_are_checked() -> None:
         soft_anchor_rows(np.zeros(2), np.eye(3), SoftAnchor(UP, 1.0, 1.0, 0.0))
 
 
-@pytest.mark.requires_mujoco
-def test_a_planted_heel_slides_no_farther_than_the_allowance() -> None:
-    """The markers ask for a 5 cm shift: the legacy anchor holds the heel, the
-    soft anchor lets it go the allowance and no farther, a zero weight frees
-    it, and the heel stays on the ground throughout."""
+def _kinematics():  # type: ignore[no-untyped-def]
     pytest.importorskip("mujoco")
     from src.engines.physics_engines.mujoco.python import full_body_markers as module
     from src.engines.physics_engines.mujoco.python.full_body_model import (
@@ -89,9 +85,18 @@ def test_a_planted_heel_slides_no_farther_than_the_allowance() -> None:
     }
     attachments["LToeOut"] = ("calcn_l", (0.16, 0.0, -0.04))
     attachments["LAnkleOut"] = ("talus_l", (0.0, 0.0, 0.05))
-    kin = module.FullBodyMarkerKinematics(
+    return module.FullBodyMarkerKinematics(
         NativeMujocoFullBodyModel(SPEC.read_bytes()), attachments
     )
+
+
+@pytest.mark.requires_mujoco
+def test_a_planted_heel_slides_no_farther_than_the_allowance() -> None:
+    """The markers ask for a 5 cm shift: the legacy anchor holds the heel, the
+    soft anchor lets it go the allowance and no farther, a zero weight frees
+    it, and the heel stays on the ground throughout."""
+    kin = _kinematics()
+    attachments = kin.labels
     q_up = np.zeros(len(kin.coordinate_order))
     q_up[2] = 1.0
     common = {
@@ -125,3 +130,38 @@ def test_a_planted_heel_slides_no_farther_than_the_allowance() -> None:
     for bad in ({"anchor_slide_m": -1.0}, {"anchor_weight": -1.0}):
         with pytest.raises(ValueError, match="anchor"):
             kin.solve_trajectory(targets, seen, q_a, **common, **bad)
+
+
+@pytest.mark.requires_mujoco
+def test_a_posture_prior_can_be_given_for_single_frames() -> None:
+    """``posture_prior_per_frame`` (#15296) adds its targets on the frames
+    that name some, on top of the solve's own posture prior."""
+    kin = _kinematics()
+    order = list(kin.coordinate_order)
+    q0 = np.zeros(len(order))
+    q0[2] = 1.0
+    targets = np.stack([kin.marker_positions(q0)] * 2)
+    seen = np.ones(targets.shape[:2], dtype=bool)
+    name = "TorsoInput"
+    common = {
+        "ground": GROUND,
+        "closure_weight": 0.0,
+        "ground_weight": 0.0,
+        "prior_weight": 1e-9,
+    }
+    plain, _ = kin.solve_trajectory(targets, seen, q0, **common)
+    held, _ = kin.solve_trajectory(
+        targets,
+        seen,
+        q0,
+        posture_prior_per_frame=[{name: (0.3, 1e6)}, None],
+        **common,
+    )
+    column = order.index(name)
+    assert abs(plain[0, column]) < 0.02
+    assert held[0, column] == pytest.approx(0.3, abs=0.02)
+    assert abs(held[1, column] - 0.3) > 0.1
+    with pytest.raises(ValueError, match="posture_prior_per_frame"):
+        kin.solve_trajectory(
+            targets, seen, q0, posture_prior_per_frame=[None], **common
+        )

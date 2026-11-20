@@ -259,12 +259,26 @@ def test_soft_stance_anchor_is_an_opt_in_setting() -> None:
     both = build_parser().parse_args(
         ["--ik-free-stance-slide", "--ik-stance-slide-mm", "5"]
     )
-    with pytest.raises(ValueError, match="free-stance-slide"):
-        apply_stance_arguments(_synthetic_lane(), both)
-    free = build_parser().parse_args(["--ik-free-stance-slide"])
     slid = _synthetic_lane()
-    apply_stance_arguments(slid, free)
-    assert slid.stance_slide is True
+    apply_stance_arguments(slid, both)  # free first solve, soft re-solve
+    assert slid.stance_settings()["plant_stance"] is False
+    assert "anchor_slide_m" not in slid.stance_settings()
+    assert slid.stance_anchor == {"anchor_slide_m": pytest.approx(0.005)}
+
+
+def test_address_pose_prior_reaches_only_the_first_frame_of_the_swing_solve() -> None:
+    """The bundle stage's address pose targets (#15296) enter the full-capture
+    solve on its first frame; without them, and in a calibration subset,
+    nothing is passed."""
+    lane = _synthetic_lane()
+    assert lane.address_pose_prior == {}
+    assert lane.address_pose_frames(None) is None
+    lane.address_pose_prior = {"LEInput": (-0.09, 0.013)}
+    per_frame = lane.address_pose_frames(None)
+    assert per_frame is not None and len(per_frame) == lane.frames
+    assert per_frame[0] == {"LEInput": (-0.09, 0.013)}
+    assert set(per_frame[1:]) == {None}
+    assert lane.address_pose_frames([0, 5]) is None
 
 
 def test_girdle_range_is_an_opt_in_tightening() -> None:

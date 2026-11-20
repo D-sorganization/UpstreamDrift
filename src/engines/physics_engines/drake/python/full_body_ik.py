@@ -417,7 +417,10 @@ class DrakeFullBodyIK(BaseFullBodyIK):
         jacs: list[Array],
         targets: Mapping[str, Array],
         weight: float,
+        soft: Any = None,
     ) -> None:
+        if soft is not None:  # #15296: implemented for the MuJoCo kinematics
+            raise ValueError("the soft stance anchor needs the MuJoCo kinematics")
         if weight <= 0 or not targets:
             return
         w = np.sqrt(weight)
