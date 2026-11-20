@@ -1,13 +1,7 @@
 """A forearm that tapers to a wrist of human girth at the wrist joint (#15299).
 
-With the skinned hands drawn the forearm ended in a 53 mm by 36 mm stalk, 142 mm
-round and 55 mm long, so its narrowest point sat 55 mm above the wrist joint.
-A human forearm narrows all the way to the wrist, and the wrist of a man 1.71 m
-tall is about 171 mm round (ANSUR II male wrist circumference: mean 175.9 mm,
-5th to 95th percentile 162 to 191 mm, at a mean stature of 1756.2 mm).
-
-Every bound here is a setting of ``forearm_wrist_shape`` in
-``scripts/config/hand_visual_quality.json``. Appearance only.
+ANSUR II male wrist circumference: mean 175.9 mm, 5th to 95th percentile 162 to
+191 mm. Bounds are ``forearm_wrist_shape`` settings. Appearance only.
 """
 
 from __future__ import annotations
