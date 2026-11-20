@@ -182,11 +182,11 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 878 | `src/shared/python/grip_contact/simscape_grip_topology.py` |
 | 875 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py` |
 | 874 | `src/shared/python/tour_baselines/qualification.py` |
+| 873 | `src/shared/python/model_appearance/body_meshes.py` |
+| 873 | `src/shared/python/model_appearance/body_meshes.py` |
+| 873 | `src/shared/python/model_appearance/body_meshes.py` |
 | 873 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py` |
 | 870 | `src/shared/python/model_generation/cli/main.py` |
-| 868 | `src/shared/python/model_appearance/body_meshes.py` |
-| 868 | `src/shared/python/model_appearance/body_meshes.py` |
-| 868 | `src/shared/python/model_appearance/body_meshes.py` |
 | 868 | `src/shared/python/workspace/necromatcher_video_jobs.py` |
 | 867 | `src/api/services/chat_service.py` |
 | 866 | `src/engines/feedback_observation_qualification.py` |

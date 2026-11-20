@@ -195,6 +195,11 @@ class LoftOptions:
     # falling to nothing ``width`` away like ``belly`` (a calf behind the
     # shin). The vector's part along the limb is ignored.
     offset: tuple[Array, float, float] | None = None
+    # Radius at the near joint over the limb's radius, easing to the full
+    # radius by ``start_until`` of the whole limb (an elbow no wider than the
+    # upper arm it meets, #15299). 1 is no narrowing.
+    start_scale: float = 1.0
+    start_until: float = 1.0
 
 
 def _checked_shape(opts: LoftOptions) -> None:
@@ -211,6 +216,8 @@ def _checked_shape(opts: LoftOptions) -> None:
         raise ValueError("belly width must be positive")
     if not 0.0 < opts.taper_end <= 1.0:
         raise ValueError("taper_end must be in (0, 1]")
+    if not (0.0 < opts.start_scale <= 1.0 and 0.0 < opts.start_until <= 1.0):
+        raise ValueError("start_scale and start_until must be in (0, 1]")
     if not 0.0 < opts.end_cap <= 1.0:
         raise ValueError("end_cap must be in (0, 1]")
     if opts.offset is not None:
@@ -246,7 +253,10 @@ def _limb_scale(opts: LoftOptions, frac: float) -> float:
     gain, position, width = opts.belly
     reach = min(1.0, abs(frac - position) / width)
     swell = 1.0 + gain * math.cos(0.5 * math.pi * reach) ** 2
-    return swell * (1.0 + (opts.end_scale - 1.0) * min(1.0, frac / opts.taper_end))
+    t = min(1.0, frac / opts.start_until)
+    near = opts.start_scale + (1.0 - opts.start_scale) * t * t * (3.0 - 2.0 * t)
+    taper = 1.0 + (opts.end_scale - 1.0) * min(1.0, frac / opts.taper_end)
+    return swell * near * taper
 
 
 def _spindle_stations(
