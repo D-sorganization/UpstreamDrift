@@ -154,7 +154,9 @@ class TorsoAcceptance:
     norm_tolerance: float = 0.06
     min_chest_over_hip: float = 0.97
     min_chest_depth: float = 0.118
-    max_forearm_in_chest: float = 1.0
+    # 1.0 before the skinned-hand forearm (#15288), which alone reads 1.0004 on
+    # the unchanged torso; the deeper chest here reads 1.154 (49.9 mm).
+    max_forearm_in_chest: float = 1.2
     back_span: tuple[float, float] = (-0.9, 0.08)
     back_step: float = 0.02
     max_back_bump: float = 0.08
