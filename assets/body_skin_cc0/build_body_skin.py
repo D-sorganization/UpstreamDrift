@@ -201,7 +201,7 @@ def main(argv: list[str]) -> int:
         return 0 if same else 1
     np.savez_compressed(OUT, **arrays)
     record = provenance(root, settings, used)
-    PROVENANCE_PATH.write_text(json.dumps(record, indent=2) + NL, encoding="utf-8")
+    PROVENANCE_PATH.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
     sys.stdout.write(f"wrote {OUT.name} ({OUT.stat().st_size} bytes)" + "\n")
     return 0
 
