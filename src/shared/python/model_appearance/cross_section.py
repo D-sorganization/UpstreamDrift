@@ -26,7 +26,7 @@ nothing here touches mass, inertia or joint frames.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -248,6 +248,20 @@ class PelvisLandmarks:
     hjc_r: Array  # the two hip joint origins (sides are not assigned)
     hjc_l: Array
     lumbar: Array  # origin of the first torso child joint (the lumbar plane)
+    #: Forward unit vector, the way the feet point; ``None`` without toe joints.
+    front: Array | None = None
+
+
+def _feet_forward(
+    spec: Mapping[str, Any], body: str, hips: Sequence[Mapping[str, Any]]
+) -> Array | None:
+    """Mean horizontal toe direction of the two legs, in the frame of ``body``."""
+    marks = _Landmarks(spec)
+    try:
+        toes = sum(marks.toe_axis(marks.foot_below(j["child"])) for j in hips)
+        return marks.to_body(body, _unit(toes - (toes @ marks.up) * marks.up, body))
+    except ValueError:  # no toe joints: the front is unknown, nothing is guessed
+        return None
 
 
 def pelvis_landmarks(spec: Mapping[str, Any]) -> dict[str, PelvisLandmarks]:
@@ -268,5 +282,5 @@ def pelvis_landmarks(spec: Mapping[str, Any]) -> dict[str, PelvisLandmarks]:
             np.asarray(j["parent_to_base"], dtype=np.float64)[:3, 3]
             for j in (*hips, spine[0])
         ]
-        out[body] = PelvisLandmarks(body, origin[0], origin[1], origin[2])
+        out[body] = PelvisLandmarks(body, *origin, _feet_forward(spec, body, hips))
     return out
