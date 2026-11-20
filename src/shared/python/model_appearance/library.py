@@ -465,11 +465,15 @@ def blend_scale(garment: bool, part: str = "upper_arm") -> float:
 # to the waist.
 # Above the chest only its BACK comes in: the depth shrinks while the section
 # shifts forward, so the upper back runs into the back of the neck with no
-# shelf (a hump at address), and the front stays where the arms cross it.
+# shelf (a hump at address). From the waist up the sections also sit forward
+# of the trunk axis (the sixth entry, in thorax lengths), under a neck that
+# leans forward: a chest centred on the axis reads as a hunch. Its depth is
+# bounded by the spec hint (+5 %) and by the lead arm across it at address.
 # The collar opening shifts forward this fraction of the thorax length, so it is
 # centred on the neck, which leans forward of the trunk axis (#15292).
 THORAX_COLLAR_FORWARD = 0.034
-THORAX_SHOULDER_FORWARD = 0.033  # the same shift at the shoulder line (#15299)
+THORAX_SHOULDER_FORWARD = 0.038  # the same shift at the shoulder line (#15299)
+THORAX_SHOULDER_ALONG = 0.9135  # shoulder joints' height the stations are tuned at
 
 
 def _shoulder_dome(
@@ -512,16 +516,16 @@ TORSO_PROFILES: dict[str, tuple[tuple[float, ...], ...]] = {
     ),
     "thorax": (
         (-0.32, 0.56, 0.66),
-        (-0.1, 0.84, 0.92),
-        (0.08, 0.89, 0.97),
-        (0.3, 0.94, 0.96),
-        (0.5, 1.04, 1.04),
-        (0.62, 1.04, 0.97, 0.0, 0.0, 0.007),
-        (0.72, 1.04, 0.893, 0.0, 0.0, 0.018),
-        (0.8, 1.02, 0.815, 0.07, 0.0, 0.027),
-        (0.87, 0.91, 0.733, 0.12, 0.0, 0.03),
+        (-0.1, 0.9, 0.87),
+        (0.08, 0.95, 0.906, 0.0, 0.0, 0.011),
+        (0.3, 0.97, 0.955, 0.0, 2.15, 0.011),
+        (0.5, 1.04, 1.02, 0.0, 2.15, 0.02),
+        (0.62, 1.04, 1.04, 0.0, 2.3, 0.028),
+        (0.72, 1.04, 0.936, 0.0, 0.0, 0.026),
+        (0.8, 1.02, 0.858, 0.07, 0.0, 0.035),
+        (0.87, 0.91, 0.775, 0.12, 0.0, 0.038),
         *_shoulder_dome(
-            (0.92, 0.85, 0.63),
+            (0.92, 0.85, 0.707),
             (0.98, 0.38, 0.46),
             0.153,
             (THORAX_SHOULDER_FORWARD, THORAX_COLLAR_FORWARD),
@@ -533,19 +537,32 @@ TORSO_FINE_FROM, TORSO_FINE_RINGS = 0.9, 14  # the shoulder dome is sampled fine
 TORSO_SQUARENESS = 2.6  # superellipse exponent of a trunk cross-section
 # Shoulder link (#15279): a yoke from the neck side to the shoulder joint,
 # flatter than it is deep, not a ball. Depth axis is the link's up axis.
-SHOULDER_ASPECT = 0.85  # up-down over front-back extent of the yoke
+SHOULDER_ASPECT = 0.72  # up-down over front-back extent of the yoke
 SHOULDER_RADIUS_SCALE = 1.1  # front-back half extent over the part radius
-SHOULDER_END_SCALE = 1.0  # yoke radius at the shoulder joint, over the neck end
-SHOULDER_DROOP = 0.5  # neck end of the yoke below the link, in radii (#15292)
+SHOULDER_END_SCALE = 0.85  # yoke radius at the shoulder joint, over the neck end
 SHOULDER_START_FRACTION = 0.3  # the yoke starts this far along the link
-SHOULDER_END_SINK = 0.8  # the yoke ends this far below the joint, in radii (#15292)
+# The yoke hangs from the NECK point (#15299), in yoke radii, so it slopes like a
+# trapezius by as much as the shoulder joints sit below the neck (a fit setting).
+SHOULDER_NECK_END_BELOW_NECK = 1.35  # yoke axis beside the neck
+SHOULDER_JOINT_END_BELOW_NECK = 1.35  # yoke axis at the joint, never above ...
+SHOULDER_JOINT_END_LIFT = -0.1  # ... this height over the joint itself
+SHOULDER_END_INSET = 0.5  # the yoke stops short of the joint: its tip is in the cap
+SHOULDER_DEFAULT_RISE = 0.73  # neck above the joints when the spec does not say
 SHOULDER_UP_AXIS = (0.0, 0.0, 1.0)  # up, in the shoulder link's body frame
 # Deltoid (#15279): the blend at the shoulder joint is longer down the arm
 # than across it: (across, down the arm), in upper-arm radii.
-DELTOID_HALF_SIZES = (0.9, 1.3)
+DELTOID_HALF_SIZES = (0.9, 1.6)
 UPPER_ARM_SKIN_TIP_INSET = 0.5  # skin tip meets the sleeve start, in radii (#15292)
 UPPER_ARM_START_INSET = 0.5  # the loft's tip sits at the joint, in radii (#15292)
-DELTOID_DROP = 1.25
+DELTOID_DROP = 1.25  # ball centre down the arm at the default neck rise, arm radii
+DELTOID_MIN_DROP = 0.9  # the ball climbs as the neck clears it, to this (#15299)
+
+
+def deltoid_drop_m(radius_m: float, rise_m: float | None) -> float:
+    """How far down the arm the deltoid ball sits for a neck ``rise_m`` above."""
+    default = SHOULDER_DEFAULT_RISE * SHOULDER_RADIUS_SCALE * PART_RADIUS_M["shoulder"]
+    climb = 0.0 if rise_m is None else rise_m - default
+    return max(DELTOID_MIN_DROP * radius_m, DELTOID_DROP * radius_m - climb)
 
 
 # Pelvis solid (HRG-C1, #13164): lofted on the hip landmarks, see
@@ -553,7 +570,7 @@ DELTOID_DROP = 1.25
 # Width is ``pelvis_width`` (HRG-C4); the lower pole hangs below the MEAN HJC.
 PELVIS_CROTCH_DROP_M = 0.078  # pole below the mean HJC height; not the thigh radius
 PELVIS_MIN_BELOW_HJC_M = 0.025  # the lowest HJC keeps at least this much solid below
-PELVIS_WAIST_RATIO = 0.75  # flat cap at the lumbar plane / widest half width
+PELVIS_WAIST_RATIO = 0.86  # flat cap at the lumbar plane / widest half width
 
 
 GARMENT_PARTS = ("torso", "pelvis", "shoulder", "upper_arm", "thigh", "shin")

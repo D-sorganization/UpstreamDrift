@@ -51,6 +51,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1162 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
 | 1153 | `src/tools/motion_matching/gui.py` |
 | 1150 | `src/tools/bunker_shot_gui/gui.py` |
+| 1149 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 1147 | `src/api/routes/launch_monitor_analytics.py` |
 | 1146 | `src/engines/physics_engines/myosuite/python/myohand_bilateral_adapter.py` |
 | 1146 | `src/engines/physics_engines/myosuite/python/native_direct_model_replay.py` |
@@ -62,7 +63,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1128 | `src/tools/starting_pose_matcher/gui_main_widget.py` |
 | 1127 | `src/shared/python/swing_comparison/metrics.py` |
 | 1125 | `src/tools/bunker_shot_gui/model.py` |
-| 1124 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 1120 | `src/shared/python/motion_matching/full_body_ik.py` |
 | 1118 | `src/motion_capture/rig/__main__.py` |
 | 1115 | `src/bunkershot3d/ball/qualification.py` |
@@ -184,6 +184,9 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 874 | `src/shared/python/tour_baselines/qualification.py` |
 | 873 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py` |
 | 870 | `src/shared/python/model_generation/cli/main.py` |
+| 868 | `src/shared/python/model_appearance/body_meshes.py` |
+| 868 | `src/shared/python/model_appearance/body_meshes.py` |
+| 868 | `src/shared/python/model_appearance/body_meshes.py` |
 | 868 | `src/shared/python/workspace/necromatcher_video_jobs.py` |
 | 867 | `src/api/services/chat_service.py` |
 | 866 | `src/engines/feedback_observation_qualification.py` |
@@ -226,9 +229,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 822 | `src/engines/physics_engines/mujoco/python/grip_lab_adapter.py` |
 | 822 | `src/shared/python/gui_pkg/help_system.py` |
 | 822 | `src/tools/capture_rig/layout_editor.py` |
-| 819 | `src/shared/python/model_appearance/body_meshes.py` |
-| 819 | `src/shared/python/model_appearance/body_meshes.py` |
-| 819 | `src/shared/python/model_appearance/body_meshes.py` |
 | 819 | `src/shared/python/model_generation/converters/simscape/simscape_converter.py` |
 | 815 | `src/engines/physics_engines/mujoco/python/native_full_body_replay.py` |
 | 813 | `src/engines/physics_engines/drake/python/src/drake_golf_model.py` |
