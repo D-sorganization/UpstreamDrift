@@ -37,6 +37,10 @@ ASSET_DIR = Path(__file__).resolve().parents[4] / "assets" / "body_skin_cc0"
 SIDES: tuple[tuple[str, float], ...] = (("l", 1.0), ("r", -1.0))
 ARM_GROUPS = ("clavicle", "shoulder", "upperarm", "forearm")
 TRUNK_GROUPS = ("pelvis", "spine", "thorax")
+#: Groups the chest scale leaves alone (the arm below the deltoid, the legs).
+THORAX_EXEMPT_GROUPS = ("upperarm_distal", "forearm", "thigh", "shank")
+#: Smallest chest scale accepted: a fifth off MakeHuman's chest depth.
+MIN_THORAX_FRONT_SCALE = 0.8
 #: Largest correction accepted, metres: a third of the pelvis depth at 1.82 m.
 MAX_CORRECTION_M = 0.06
 
@@ -77,9 +81,29 @@ class FitSettings:
     shoulder_anchor_m: tuple[float, float, float]
     trunk_margin_m: float
     warp_extent_m: float
+    thorax_front_scale: float
+    thorax_front_start_m: float
+    thorax_front_rise_m: float
+    thigh_back_m: float
+    thigh_back_rise_fraction: float
+    thigh_back_below_hip_m: float
+    thigh_back_fade_m: float
+    thigh_back_front_m: float
 
     def __post_init__(self) -> None:
         _positive(self, ("hip_back_plateau_m", "hip_back_rise_m", "trunk_margin_m"))
+        _positive(self, ("thorax_front_start_m", "thorax_front_rise_m"))
+        _positive(self, ("thigh_back_fade_m", "thigh_back_front_m"))
+        if not MIN_THORAX_FRONT_SCALE <= self.thorax_front_scale <= 1.0:
+            raise ValueError(
+                f"thorax_front_scale outside [{MIN_THORAX_FRONT_SCALE}, 1]"
+            )
+        if not 0.0 <= self.thigh_back_m <= MAX_CORRECTION_M:
+            raise ValueError(f"thigh_back_m outside [0, {MAX_CORRECTION_M}]")
+        if not 0.0 < self.thigh_back_rise_fraction <= 1.0:
+            raise ValueError("thigh_back_rise_fraction outside (0, 1]")
+        if not self.thigh_back_below_hip_m >= 0.0:
+            raise ValueError("thigh_back_below_hip_m must not be negative")
         if not 0.0 <= self.hip_back_m <= MAX_CORRECTION_M:
             raise ValueError(f"hip_back_m outside [0, {MAX_CORRECTION_M}]")
         anchor = np.asarray(self.shoulder_anchor_m, dtype=float)
@@ -260,6 +284,54 @@ def _group_maps(
     return maps, joints
 
 
+def _group_weight(skin: BodySkin, prefixes: tuple[str, ...]) -> Array:
+    columns = [group.startswith(prefixes) for group in skin.groups]
+    return np.clip(skin.weights[:, columns].sum(axis=1), 0.0, 1.0)
+
+
+def _sagittal_corrections(
+    vertices: Array, skin: BodySkin, joints: dict[str, Array], settings: FitSettings
+) -> None:
+    """Move ``vertices`` fore and aft in place: chest, thigh front, then hips.
+
+    Each correction changes x only and leaves the fitted joints where they are.
+    """
+    hip_mid = 0.5 * (joints["hip_l"] + joints["hip_r"])
+    hip_z, knee_z = joints["hip_l"][2], joints["knee_l"][2]
+    if settings.thorax_front_scale != 1.0:
+        axis = _unit(joints["neck"] - hip_mid)
+        along = (vertices - hip_mid) @ axis
+        ahead = vertices[:, 0] - (hip_mid[0] + along * axis[0])
+        window = _smoothstep(
+            (along - settings.thorax_front_start_m) / settings.thorax_front_rise_m
+        ) * (1.0 - _group_weight(skin, THORAX_EXEMPT_GROUPS))
+        gain = (settings.thorax_front_scale - 1.0) * window
+        vertices[:, 0] += gain * np.clip(ahead, 0.0, None)
+    if settings.thigh_back_m:
+        height, ahead = vertices[:, 2], vertices[:, 0] - joints["hip_l"][0]
+        rise = settings.thigh_back_rise_fraction * (hip_z - knee_z)
+        fade = (height - hip_z + settings.thigh_back_below_hip_m) / (
+            settings.thigh_back_fade_m
+        )
+        window = _smoothstep((height - knee_z) / rise) * (1.0 - _smoothstep(fade))
+        window *= _smoothstep(ahead / settings.thigh_back_front_m)
+        vertices[:, 0] -= (
+            settings.thigh_back_m * window * _group_weight(skin, ("thigh",))
+        )
+    if settings.hip_back_m:
+        hip_z, knee_z = joints["hip_l"][2], joints["knee_l"][2]
+        height = vertices[:, 2]
+        window = _smoothstep((height - knee_z) / (hip_z - knee_z)) * (
+            1.0
+            - _smoothstep(
+                (height - hip_z - settings.hip_back_plateau_m)
+                / settings.hip_back_rise_m
+            )
+        )
+        arm = _group_weight(skin, ARM_GROUPS)
+        vertices[:, 0] -= settings.hip_back_m * window * (1.0 - arm)
+
+
 def fit_body_skin(
     skin: BodySkin, lengths: SegmentLengths, settings: FitSettings
 ) -> FittedSkin:
@@ -284,18 +356,5 @@ def fit_body_skin(
         vertices[used] += skin.weights[used, column, None] * maps[group](
             skin.vertices[used]
         )
-    if settings.hip_back_m:
-        hip_z, knee_z = joints["hip_l"][2], joints["knee_l"][2]
-        height = vertices[:, 2]
-        window = _smoothstep((height - knee_z) / (hip_z - knee_z)) * (
-            1.0
-            - _smoothstep(
-                (height - hip_z - settings.hip_back_plateau_m)
-                / settings.hip_back_rise_m
-            )
-        )
-        arm = skin.weights[:, [g.startswith(ARM_GROUPS) for g in skin.groups]].sum(
-            axis=1
-        )
-        vertices[:, 0] -= settings.hip_back_m * window * (1.0 - np.clip(arm, 0.0, 1.0))
+    _sagittal_corrections(vertices, skin, joints, settings)
     return FittedSkin(vertices=vertices, joints=joints, maps=maps)
