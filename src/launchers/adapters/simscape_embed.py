@@ -73,45 +73,64 @@ def _ensure_root_package() -> ModuleType:
     return root
 
 
+def _execute_apps_package() -> ModuleType:
+    """Execute the apps package ``__init__`` under its synthetic name.
+
+    Returns:
+        The freshly executed package module, cached in ``sys.modules``.
+
+    Raises:
+        ImportError: If the package files are missing or the import spec
+            cannot be built.
+    """
+    root = _ensure_root_package()
+    init_path = _APPS_DIR / "__init__.py"
+    if not init_path.is_file():
+        raise ImportError(f"Simscape apps package not found at {init_path}")
+    spec = importlib.util.spec_from_file_location(
+        APPS_PACKAGE_NAME,
+        init_path,
+        submodule_search_locations=[str(_APPS_DIR)],
+    )
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Could not build an import spec for {init_path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[APPS_PACKAGE_NAME] = module
+    try:
+        spec.loader.exec_module(module)
+    except BaseException:
+        sys.modules.pop(APPS_PACKAGE_NAME, None)
+        raise
+    root.apps = module  # type: ignore[attr-defined]
+    return module
+
+
 def load_simscape_apps_package() -> ModuleType:
     """Load (or return the cached) Simscape ``apps`` package.
 
+    A cached package is executed again when the ``c3d_viewer`` tool is no
+    longer registered, so a registry that was reset after the first import
+    is repaired instead of reported as a failed registration (#15333).
+
     Returns:
-        The loaded package module.
+        The loaded package module. Postcondition: the ``c3d_viewer`` tool
+        is registered.
 
     Raises:
         ImportError: If the package files are missing, the import spec
             cannot be built, or executing the package failed to register
             the ``c3d_viewer`` tool (a silent-registration regression).
     """
+    from src.shared.python.launcher_embed import get_embeddable_tool
+
     module = sys.modules.get(APPS_PACKAGE_NAME)
-    if module is None:
-        root = _ensure_root_package()
-        init_path = _APPS_DIR / "__init__.py"
-        if not init_path.is_file():
-            raise ImportError(f"Simscape apps package not found at {init_path}")
-        spec = importlib.util.spec_from_file_location(
-            APPS_PACKAGE_NAME,
-            init_path,
-            submodule_search_locations=[str(_APPS_DIR)],
-        )
-        if spec is None or spec.loader is None:
-            raise ImportError(f"Could not build an import spec for {init_path}")
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[APPS_PACKAGE_NAME] = module
-        try:
-            spec.loader.exec_module(module)
-        except BaseException:
-            sys.modules.pop(APPS_PACKAGE_NAME, None)
-            raise
-        root.apps = module  # type: ignore[attr-defined]
+    if module is None or get_embeddable_tool(TOOL_ID) is None:
+        module = _execute_apps_package()
 
     # The apps package registers its adapter best-effort (it suppresses
     # ImportError so the engine keeps working without the launcher on
     # sys.path). From the launcher's side that silence is a bug, not a
     # feature — surface it as a loud ImportError so bootstrap records it.
-    from src.shared.python.launcher_embed import get_embeddable_tool
-
     if get_embeddable_tool(TOOL_ID) is None:
         raise ImportError(
             f"Simscape apps package loaded but did not register {TOOL_ID!r}; "
