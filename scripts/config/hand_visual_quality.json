@@ -17,8 +17,28 @@
       "club_cross_angle_deg": 30.0,
       "wrist_ulnar_deviation_deg": 30.0,
       "palm_centre_wrap_deg": 22.0
+    },
+    "arched_square": {
+      "club_cross_angle_deg": 20.0,
+      "wrist_ulnar_deviation_deg": 30.0,
+      "palm_centre_wrap_deg": 22.0,
+      "metacarpal_arch": {
+        "middle": {
+          "flexion_deg": 0.0,
+          "ulnar_deviation_deg": 4.0
+        },
+        "ring": {
+          "flexion_deg": 0.0,
+          "ulnar_deviation_deg": 7.0
+        },
+        "little": {
+          "flexion_deg": 0.0,
+          "ulnar_deviation_deg": 13.0
+        }
+      }
     }
   },
+  "_arched_square": "#15329, 2026-11-20: square_on_thumb with the club laid 20 degrees across the hand and the middle, ring and little metacarpals leaned 4, 7 and 13 degrees toward the little finger (the whole radial-ulnar arcs of El-Shennawy et al. 2001, see metacarpal_arch in skinned_human_hand.json), so each finger's curl plane turns with its ray; a seat may now set metacarpal_arch for the trail hand. Measured: middle and ring curl planes 11.5 and 18.4 degrees off square (25.1 and 30.0 with square_on_thumb), forefinger 27.9 (42.3), knuckle line 4.6, middle and ring knuckles 3.0 and 4.0 mm off the shaft line (5.7 and 10.0), heel 15.8 mm from the lead thumb's knuckle, hands 0.00 mm inside each other, little and ring fingers 0.9 and 0.6 mm from the lead forefinger. GIVEN UP: the trail palm ends short of the lead thumb's tip, crown gap 12.6 mm at the tip end (5.6 and 8.3 at the two stations before it, 2.7 at the knuckle end, under 1.5 between; 4.8 with square_on_thumb, bound 2.5), which is why it is not the default; the ring curl plane is past the 15 degrees issue #15329 asks. What was tried, same day. Flexing the ring and little rays (13 and 26 degrees) lifts the thumb side of the palm off the lead thumb: at 30 degrees across, crown gap 10.1 mm and curl planes 31.2 and 34.2, worse on both; so the seat leans the rays and does not flex them. Leaning the ring and little rays alone at 30, 26 and 24 degrees across: the ring finger swings 20 degrees back toward the middle finger (side_close.max_deg) and its curl plane stays at 30.6 to 34.1; with the middle ray leaned as well it closes at 9 degrees, but not at every angle (24 across: still 20 and 30.7). Across the angle with all three rays leaned: 24 gives 15.0/30.7 and a 4.3 mm gap, 23 with the palm rolled 24 gives 14.0/19.5 with knuckles 5.6 and 8.0 mm off and a 6.2 mm gap, 22 gives 13.0/18.9 with knuckles 4.0 and 5.9 and a 9.7 mm gap; at 22 the palm rolled 26 or 18 loses the ring finger (29.7) and at 18 the hands part by 13.6 mm. Flexing the index ray 11 degrees parts the hands (11.8 mm). The settle of the pair is not smooth in any of these settings, so each number holds for its own setting only. NOT FIT TO BE THE DEFAULT ON THE FITTED GOLFER: the squarer hand carries the trail wrist 18, 25 and 37 mm from where the capture has it (14, 13 and 25 with square_on_thumb), and the refit of the arms on the showpiece swing then straightens the trail elbow to its limit at address (5 degrees, margin 0; 26.9 with square_on_thumb) and turns the trail forearm to its limit at impact (-90, margin 0); top and finish keep 24 degrees or more on every wrist, forearm and elbow coordinate. WHY THE ELBOW LOCKS, measured 2026-11-20 (#15329): it is not reach and not a branch of the forearm's rotation. The arm is 580.2 mm long straight; the capture has the trail wrist 573.4 mm from the shoulder at address and this seat puts it 566.0 mm from that shoulder, nearer, not farther. With the refit's pull of the forearm toward the drawn forearm switched off (alignment_weight 0) the elbow keeps 30.3 degrees and the forearm is 17.3 degrees off the drawn one: the drawn forearm of a wrist bent 20 and 30 degrees points where only a straight arm reaches. Starting the refit from the default seat's solution, or from three other forearm rotations, ends on the same locked elbow; the forearm's rotation then wanders (-18 to -48 degrees) because at a straight elbow it turns about the same line as the upper arm. Turning the drawn forearm alone (the hand does not move with the wrist's bend): wrist_extension_deg 25 leaves the elbow 23.0 degrees, 30 leaves 27.4, 35 leaves 30.8; wrist_ulnar_deviation_deg 35 at extension 20 is still locked and 40 leaves 23.7 but the forearm's rotation only 14.2. Built with wrist_extension_deg 30 the hand measures the same and the refit keeps, at address, top, impact and finish, elbow 27.4, 29.0, 48.9 and 68.1 degrees, wrist 24.4 and 54.5, 37.4 and 79.4, 17.0 and 29.7, 46.0 and 28.6, forearm rotation 49.8, 30.6, 0.0 and 33.4. The forearm at its limit at impact is not this seat's doing: the default seat and square_on_thumb have it there too (margin 0.0 on the same frame). The seat is left at 20 degrees: the lead thumb's bare tip is what keeps it from use, and a short lead thumb does not cover it (thumb.held_flexion_deg_of in skinned_human_hand.json).",
   "_max_lead_heel_pad_gap_m": "A ratchet on the measured gap, not a target. 9 mm at 4e8598b464, 7 mm at f4f607338c (measured 6.3). 8 mm since 2026-11-17: turning the lead hand so its wrist is centred over the shaft (owner request) measures 7.7 mm; hand turns of 12 to 22 degrees give 7.0 to 7.7 mm.",
   "max_lead_heel_pad_gap_m": 0.008,
   "max_lead_heel_pad_azimuth_deg": 30.0,
@@ -86,6 +106,12 @@
   },
   "_forearm_wrist_cap": "#15264: length of the forearm's rounded wrist end over its half depth. At 1 the end is round about the axis the hand flexes about, so the hand's cut edge stays covered as the wrist bends. 1.0 until the second pass of #15299: that ball reached 22.6 mm past the joint and stood proud of the hand as a lip. 0.15 ends the forearm 3.4 mm past the joint; the drawn hand's own ball (forearm_wrist_shape.ball) now keeps the wrist closed.",
   "forearm_wrist_cap": 0.15,
+  "_metacarpal_arch_skin": "#15329: how far the set metacarpal arch (metacarpal_arch in skinned_human_hand.json) may stretch the hand's skin, as the length of a triangle edge over its length without the arch, by linear blend skinning alone on the sized hand, flat and with the knuckles flexed 70 degrees; no triangle may turn over. edge_stretch_range covers every edge, palm_edge_stretch_range the skin of palm_bones. Measured 2026-11-20: every ray at its limit 0.57 to 2.45 (palm 0.80 to 1.54); ring 13/7 with little 26/13, the steepest two-ray arch the settings allow, 0.61 to 3.08 (palm 0.88 to 1.75). The longest edges are in the web between two knuckles, where the hand's skin weights change from one finger to the next within a few triangles; the arch coupled to the knuckles, which every hand already has, measures 0.41 to 2.39 there. A web edge three times its length is a stretched web, not a smooth one: the bound records what this hand does, it does not call it good.",
+  "metacarpal_arch_skin": {
+    "edge_stretch_range": [0.55, 3.2],
+    "palm_edge_stretch_range": [0.75, 1.8],
+    "palm_bones": ["wrist", "meta_index", "meta_middle", "meta_ring", "meta_little"]
+  },
   "trail_wrist_offset_range_m": [0.015, 0.05],
   "min_wrist_extension_deg": 12.0,
   "_trail_grip": "Owner, 2026-11-19 (#15150): the trail hand at address against a reference grip, measured by trail_grip_qa.trail_grip_measures in the pair's grip frame. ALL FIVE TARGETS ARE NOT MET by the default seat (the square_wrap seat of owner_trail_seats meets the knuckle-line and knuckle-offset targets; max_heel_to_lead_thumb_knuckle_m, the heel against the lead thumb's knuckle that shows instead of the buried base joint, is met by the default seat at 15.0 mm); each one met so far breaks a bound that stands, so nothing drawn was changed and measured_most ratchets what is measured. wrist_extension_band_deg: the trail wrist is arched (extended) this far; 20 to 35 degrees is recalled as usual at address and NOT verified against a source. Measured 20.0 (wrist.trail.extension_deg in skinned_human_hand.json). At 30 the wrist crease's relaxing moves 38 skin vertices of the little finger's first segment by up to 4.9 nm, and test_wrist_bend_turns_the_forearm_and_leaves_the_hand_alone allows 2.3 nm (1.8 nm at 20); about 22 degrees is the most that passes. max_wrap_tilt_deg: most the middle and ring fingers' curl planes may stand off square to the shaft; max_knuckle_line_to_shaft_deg: the same for the line of the knuckles (a real grip keeps a small diagonal). Measured 48.4 and 47.7 degrees, line 38.5 degrees. max_knuckle_lateral_offset_m: the middle and ring knuckles lie this near the plane through the shaft and the target line, behind the shaft. Measured 8.8 and 22.4 mm to the underside. placement.palm_centre_wrap_deg.trail 0 for 10 brings them to 2.0 and 16.8 mm but the little finger then stands 1.22 mm off the lead forefinger (max_pair_little_finger_gap_m 1.0 mm), the palm-fold wrap gain falls to 0.0095 (min_palm_fold_wrap_gain 0.02) and the folded pads go 1.22 mm into the lead hand (pair_penetration_tolerance_m 1.0 mm); 5 still fails the first. max_heel_to_lead_thumb_base_m: the heel of the trail palm is this near the lead thumb's base joint, which lies about 12 mm under the lead hand's skin. Measured 35.7 mm. Squareness and the heel cannot both be met with the ring finger beside the lead forefinger: owner_trail_cross_angle_deg 40 gives tilt 38 and 40 degrees, knuckles 3 and 13 mm off, but leaves the first 10 mm of the lead thumb's crown 8.9 and 5.2 mm from the palm (max_thumb_channel_gap_m is 2.5 mm) and the heel 46.6 mm from the joint; 30 gives tilt 29 degrees, knuckle line 16 degrees, knuckles 1.5 and 4.7 mm off, the first 20 mm of the crown up to 19 mm away and the heel 55.5 mm away. At 30 with the ring finger riding the lead forefinger (pair.grip_fingers index and middle, max_spacing_close_m 0.05) the hand sits 20 mm higher: tilt 27 and 29 degrees, knuckles 1.9 and 3.0 mm off, every crown station within 2.5 mm, heel 34.9 mm, no hand-to-hand penetration; that candidate was not run through the test suite. Tried and dropped the same day: turning each finger's curl plane at its knuckle (it is over nine tenths a twist of the finger about its own length, which a finger cannot make). Also measured with the ring finger kept beside the lead forefinger, wrist extended 30 and ulnar-deviated 25 to 30 degrees: cross angle 25 gives tilt 24.5 and 27.8 degrees, knuckle line 14.8 degrees, knuckles 3.9 and 0.6 mm off, but the heel is 54.4 mm from the joint and the first stations of the lead thumb's crown are 18.6, 14.0 and 8.2 mm from the palm (max_thumb_channel_gap_m 2.5 mm); 35 gives 33.6 and 32.9 degrees, heel 56.2 mm, crown 19.3 mm; 49 gives 45.1 and 43.1 degrees, crown 1.8 mm, heel 37.0 mm (no nearer than drawn). The heel's nearest skin stays 33 to 54 mm down the shaft from the joint in every one of some thirty settings built, the ring finger riding or not, because the lead forefinger stops the trail fingers and a squarer hand reaches less far up the shaft; the heel target is not reachable by the placement settings. Wrist: with no curl-plane turn 22 degrees already misses the wrist-bend test's tolerance (by 0.5 nm; 23 by 0.8 nm, 25 by 1.3 nm), so 20 stays. Figure: docs/development/full_body_models/evidence/appearance/hands/trail_grip_at_address_candidates.png.",
@@ -115,6 +141,17 @@
         "wrap_tilt": "25.1 and 30.0 deg, forefinger 42.3",
         "knuckle_lateral_offset": "5.7 and 10.0 mm",
         "thumb_crown_gap": "4.8 mm"
+      }
+    },
+    "arched_square": {
+      "max_index_wrap_tilt_deg": 32.0,
+      "max_thumb_crown_gap_m": 0.014,
+      "issue_max_wrap_tilt_deg": 15.0,
+      "measured": {
+        "wrap_tilt": "11.5 and 18.4 deg",
+        "index_wrap_tilt": "27.9 deg",
+        "thumb_crown_gap": "12.6 mm",
+        "wrist_extension": "20.0 deg"
       }
     },
     "measured_most": {
