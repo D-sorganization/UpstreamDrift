@@ -11,6 +11,7 @@ from scipy.spatial import cKDTree
 
 from src.shared.python.model_appearance import body_skin_dress as dress
 from src.shared.python.model_appearance import body_skin_fit as fit
+from src.shared.python.model_appearance import body_skin_mesh as mesh
 from src.shared.python.model_appearance import body_skin_pose as pose
 from tests.unit.model_appearance.test_body_skin_fit import _subject
 
@@ -313,3 +314,51 @@ def test_invalid_settings_and_weights_raise(change: dict[str, object]) -> None:
         dataclasses.replace(SETTINGS.chest, tent_passes=-1)
     with pytest.raises(ValueError):
         dress.dress_skin(SKIN, FITTED, SKIN.weights[:, :3], SETTINGS)
+
+
+def _neck_end(layer: dress.Layer) -> np.ndarray:
+    """Open edges of a skin layer that lie wholly above the neck joint."""
+    edges = dress.boundary_edges(layer.faces)
+    above = layer.vertices[edges, 2] > FITTED.joints["neck"][2]
+    return np.asarray(edges[above.all(axis=1)])
+
+
+def test_the_skin_neck_is_drawn_in_and_closed_by_a_plug_of_its_own() -> None:
+    """The neck's open end is closed by a plug that moves with that end."""
+    cap = SETTINGS.neck_cap
+    off = dataclasses.replace(cap, apex_height_m=0.0)
+    plain = dataclasses.replace(SETTINGS, neck_cap=off)
+    open_skin = dress.dress_skin(SKIN, FITTED, SKIN.weights, plain)["skin"]
+    closed, count = LAYERS["skin"], len(open_skin.vertices)
+    assert dress.close_neck(open_skin, FITTED.joints["neck"], off) is open_skin
+    ring = np.unique(_neck_end(open_skin))
+    assert len(ring) >= 40 and len(_neck_end(closed)) == 0
+    assert len(closed.vertices) == count + len(ring) + 1
+    apex = FITTED.joints["neck"] + (cap.apex_forward_m, 0.0, cap.apex_height_m)
+    assert np.allclose(closed.vertices[-1], apex)
+    # the plug carries the end ring's mean weights: one piece, moving with the end
+    assert np.array_equal(closed.weights[:count], open_skin.weights)
+    assert np.allclose(closed.weights[count:], open_skin.weights[ring].mean(axis=0))
+    assert np.allclose(closed.weights.sum(axis=1), 1.0)
+    # the rim is drawn tuck_m towards that point, the skin tuck_span_m off it not
+    step = closed.vertices[:count] - open_skin.vertices
+    moved = np.linalg.norm(step, axis=1)
+    reach = cKDTree(open_skin.vertices[ring]).query(open_skin.vertices)[0]
+    assert np.allclose(moved[ring], cap.tuck_m) and moved.max() <= cap.tuck_m + 1e-12
+    assert not moved[reach >= cap.tuck_span_m].any()
+    assert (((apex - open_skin.vertices[ring]) * step[ring]).sum(axis=1) > 0.0).all()
+    assert not moved[np.setdiff1d(_rim(open_skin), ring)].any()  # collar, wrists
+    # the plug's ring lies nearer the point than the rim, at least lip_m on average
+    near = np.linalg.norm(closed.vertices[count:-1] - apex, axis=1)
+    rim = np.linalg.norm(closed.vertices[ring] - apex, axis=1)
+    assert near.max() < rim.max() and (rim - near).mean() >= cap.lip_m
+    # three faces per open edge, none turned against the neck it closes
+    plug = (closed.faces >= count).any(axis=1)
+    assert plug.sum() == 3 * len(_neck_end(open_skin))
+    assert np.array_equal(closed.faces[~plug], open_skin.faces)
+    assert not mesh.folded_faces(closed.vertices, closed.faces)[plug].any()
+    with pytest.raises(ValueError, match="no open end"):
+        dress.close_neck(open_skin, FITTED.joints["neck"] + (0.0, 0.0, 1.0), cap)
+    for change in ({"apex_height_m": -0.01}, {"tuck_span_m": 0.0}, {"lip_passes": -1}):
+        with pytest.raises(ValueError, match="neck_cap"):
+            dataclasses.replace(cap, **change)
