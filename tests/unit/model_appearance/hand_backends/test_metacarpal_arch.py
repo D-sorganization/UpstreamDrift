@@ -18,12 +18,20 @@ from src.shared.python.model_appearance.hand_backends.joint_angles import FINGER
 from src.shared.python.model_appearance.hand_backends.metacarpal_arch import (
     MetacarpalArchSettings,
     arch_rotation,
+    edge_stretch,
     set_metacarpal_arch,
+)
+from src.shared.python.model_appearance.hand_backends.qa import (
+    load_hand_visual_quality,
 )
 from src.shared.python.model_appearance.hand_backends.skinned_settings import (
     default_settings,
     load_settings_mapping,
     settings_from_mapping,
+)
+from src.shared.python.model_appearance.hand_backends.skinning import (
+    flipped_face_count,
+    pose_vertices,
 )
 
 pytestmark = pytest.mark.unit
@@ -150,6 +158,42 @@ def test_a_set_ray_gives_up_the_arch_coupled_to_its_knuckle() -> None:
     assert arch["meta_ring"] == 0.0 and arch["meta_little"] > 0.0
 
 
+@_ARCHES
+def test_the_palm_skin_follows_the_arch_without_folding_or_tearing(arch: dict) -> None:
+    quality = load_hand_visual_quality()["metacarpal_arch_skin"]
+    hand = _hand(_settings(arch))
+    palm = np.zeros(len(_ASSET.rest_vertices), dtype=bool)
+    palm[_ASSET.dominant_vertex_ids(quality["palm_bones"])] = True
+    palm_faces = palm[_ASSET.faces].all(axis=1)
+    for knuckle_deg in (0.0, 70.0):
+        angles = skinned_human._straight_angles()
+        angles.update({f"{f}_prox": math.radians(knuckle_deg) for f in FINGERS})
+        world = hand.transforms(angles)
+        posed = pose_vertices(_ASSET, world)
+        assert flipped_face_count(_ASSET, world, posed) == 0
+        plain = skinned_human._GripHand(_ASSET, _SETTINGS)
+        before = pose_vertices(_ASSET, plain.transforms(angles))
+        stretch = edge_stretch(before, posed, _ASSET.faces)
+        for key, edges in (
+            ("edge_stretch_range", stretch),
+            ("palm_edge_stretch_range", stretch[palm_faces]),
+        ):
+            low, high = quality[key]
+            assert low <= edges.min() and edges.max() <= high, (
+                f"{key}: {edges.min():.2f} to {edges.max():.2f} at {knuckle_deg}"
+            )
+        moved = np.linalg.norm(posed - before, axis=1)
+        carried = [
+            _ASSET.bone_names[i]
+            for ray in arch
+            for i in _ASSET.descendants(f"meta_{ray}")
+        ]
+        still = np.setdiff1d(
+            np.arange(len(posed)), _ASSET.influenced_vertex_ids(carried)
+        )
+        assert len(still) > 0 and moved[still].max() < 1e-12
+
+
 @pytest.mark.parametrize(
     "trail",
     (
@@ -176,6 +220,8 @@ def test_bad_arch_inputs_are_refused() -> None:
         arch_rotation(_ASSET, "thumb", 0.1, 0.0)
     with pytest.raises(ValueError):
         arch_rotation(_ASSET, "ring", math.inf, 0.0)
+    with pytest.raises(ValueError):
+        edge_stretch(np.zeros((3, 3)), np.zeros((4, 3)), _ASSET.faces)
     raw = copy.deepcopy(_RAW_ARCH)
     raw["limits_deg"]["ring"]["flexion"] = [1.0, 20.0]
     with pytest.raises(ValueError):
