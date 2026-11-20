@@ -662,7 +662,12 @@ def _segment_meshes(
         if garment is not None:
             band = library.garment_coverage(ctx.doc.clothing, part)
             mesh = _loft(
-                ctx, body, seg, coverage=band, thickness=library.GARMENT_THICKNESS
+                ctx,
+                body,
+                seg,
+                coverage=band,
+                thickness=library.GARMENT_THICKNESS,
+                drape=library.garment_drape(ctx.doc.clothing, part),
             )
             out.append(BodyMesh(body, f"garment{i}", mesh, garment))
     return out

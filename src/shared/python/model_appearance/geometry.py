@@ -195,6 +195,10 @@ class LoftOptions:
     # falling to nothing ``width`` away like ``belly`` (a calf behind the
     # shin). The vector's part along the limb is ignored.
     offset: tuple[Array, float, float] | None = None
+    # Cloth ease ``(near, far, from)`` (#15299): the radius is times ``near``
+    # up to ``from`` of the whole limb and grows evenly to ``far`` at its far
+    # end (a trouser leg that hangs loose below a fitted thigh).
+    drape: tuple[float, float, float] = (1.0, 1.0, 0.0)
 
 
 def _checked_shape(opts: LoftOptions) -> None:
@@ -213,6 +217,11 @@ def _checked_shape(opts: LoftOptions) -> None:
         raise ValueError("taper_end must be in (0, 1]")
     if not 0.0 < opts.end_cap <= 1.0:
         raise ValueError("end_cap must be in (0, 1]")
+    near, far, begin = opts.drape
+    if not (near > 0.0 and far > 0.0 and math.isfinite(near + far)):
+        raise ValueError("drape needs finite factors > 0")
+    if not 0.0 <= begin < 1.0:
+        raise ValueError("drape must start in [0, 1) of the limb")
     if opts.offset is not None:
         vector, position, width = opts.offset
         _check_finite("offset vector", vector, 3)
@@ -241,11 +250,13 @@ def _ease(opts: LoftOptions, frac: float) -> float:
 
 
 def _limb_scale(opts: LoftOptions, frac: float) -> float:
-    """Taper times belly at ``frac`` of the whole limb (clamped to [0, 1])."""
+    """Taper times belly times drape at ``frac`` of the whole limb (clamped)."""
     frac = min(1.0, max(0.0, frac))
     gain, position, width = opts.belly
     reach = min(1.0, abs(frac - position) / width)
     swell = 1.0 + gain * math.cos(0.5 * math.pi * reach) ** 2
+    near, far, begin = opts.drape
+    swell *= near + (far - near) * max(0.0, (frac - begin) / (1.0 - begin))
     return swell * (1.0 + (opts.end_scale - 1.0) * min(1.0, frac / opts.taper_end))
 
 
