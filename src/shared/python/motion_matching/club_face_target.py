@@ -467,18 +467,23 @@ def model_face_normals(
 
 
 def model_club_soles(kin: Any, q: Array, spec: Mapping[str, Any]) -> Array:
-    """World club-body sole (spec origin) per row of ``q``.
+    """World club sole per row of ``q``.
 
-    The club-body frame origin is the sole point on the shaft axis
-    (:mod:`model_appearance.club_assembly`). Raises ``ValueError`` when the
-    spec has no club or ``q`` is not ``(frames, coordinates)``.
+    The document's ``club.sole_point_m`` in the club-body frame (#15296), else
+    that frame's origin (#12969). Raises ``ValueError`` when the spec has no
+    club, states a bad sole point or ``q`` is not ``(frames, coordinates)``.
     """
+    from src.shared.python.motion_matching.club_models import document_sole_point_m
+
     rows = np.asarray(q, dtype=float)
     if rows.ndim != 2:
         raise ValueError("q must be (frames, coordinates)")
     _, club_body = require_club_assembly(spec)
     poses = [kin.body_poses(row, [club_body])[club_body] for row in rows]
-    return np.array([pos for _, pos in poses], dtype=float)
+    local = document_sole_point_m(spec)
+    if local is None:
+        return np.array([pos for _, pos in poses], dtype=float)
+    return np.array([pos + rot @ np.asarray(local) for rot, pos in poses], dtype=float)
 
 
 def sole_height_above_ground_m(

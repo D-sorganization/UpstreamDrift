@@ -8,6 +8,10 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.motion_matching import club_face_target as cft
+from src.shared.python.motion_matching.club_models import (
+    HEAD_HEIGHT_M,
+    document_sole_point_m,
+)
 from src.shared.python.motion_matching.pipeline.constants import (
     CLUB_SOLE_GROUND_TOLERANCE_M,
 )
@@ -39,13 +43,25 @@ def club_sole_report(
     height_m = club_sole_height_m(kin, q, spec, ground)
     if height_m is None:
         return {"available": False, "reason": "spec has no club body"}
-    return {
+    report: dict[str, Any] = {
         "available": True,
         "measurement_point": "club_body_origin",
         "height_above_ground_m": height_m,
         "tolerance_m": CLUB_SOLE_GROUND_TOLERANCE_M,
         "within_tolerance": height_m <= CLUB_SOLE_GROUND_TOLERANCE_M,
     }
+    sole_point = document_sole_point_m(spec)
+    if sole_point is None:  # no stated sole: the club-body origin (#12969)
+        return report
+    _, body = cft.require_club_assembly(spec)
+    rotation, origin = kin.body_poses(np.asarray(q, dtype=float), [body])[body]
+    centre = origin + rotation @ np.array([0.0, 0.0, HEAD_HEIGHT_M])
+    report["measurement_point"] = "club_sole_point"  # the stated sole (#15296)
+    report["sole_point_m"] = list(sole_point)
+    for key, point in (("head_centre", centre), ("club_body_origin", origin)):
+        height = cft.sole_height_above_ground_m(point, ground)
+        report[f"{key}_height_above_ground_m"] = height
+    return report
 
 
 def assert_club_sole_at_ground(

@@ -14,8 +14,8 @@ physical acceptance. Machine-readable values are in
    seeds into `marker_attachments` and its dropped labels into
    `subject.dropped_markers`.
 2. `execution/driver.py` (`main`) or `pipeline/cli.py` (`main`) runs the fit.
-   The driver always runs the whole pipeline; only `pipeline.cli` honours
-   `--address-only`.
+   Both stop after the calibrated address under `--address-only` and write
+   `address_report.json`.
 3. `pipeline/cli.py::calibrate_run` loads the capture and calls
    `pipeline/marker_selection.py::select_markers`, which decides the fitted
    labels, the fixed upper-body attachments and the leg seeds.
@@ -35,7 +35,11 @@ physical acceptance. Machine-readable values are in
 - **Dropped markers.** Labels in `subject.dropped_markers` are left out of the
   attachments and of the fitted labels. A label that is not in the capture, or
   that the leg calibration needs, is refused.
-- **Unchanged default.** The committed documents carry neither, so their
+- **Club sole.** `club.sole_point_m` is the club-body point the address solve
+  rests on the ground: the lowest point of the head ellipsoid in the preset's
+  address lie (`club_models.sole_point_m` from `club_shaft_elevation_deg` and
+  `club_head_roll_deg`). Without it the pin stays the club-body origin.
+- **Unchanged default.** The committed documents carry none of these, so their
   selection and receipts are unchanged; any other selection is recorded as
   `address.marker_selection` in the receipt.
 
@@ -92,6 +96,28 @@ Y 30.6, −28.1. The club head body origin is 44.6 mm above the ground at frame
 65.7 % of frames (53.0 % to impact, none at address); with the built-in seeds
 it was 100 %.
 
+## Address Stage With the Sole Pin
+
+Two `pipeline.cli --address-only` runs with the flags above, on this change
+merged with `main` at `c2161d36e0`: the preset document, and the same document
+without `club.sole_point_m` (the origin pin). Marker RMS in millimetres from
+`address_report.json`; the whole-swing table above was not rerun.
+
+| Stage or Segment        | Origin Pin | Sole Pin   |
+| ----------------------- | ---------- | ---------- |
+| Static trial, all       | 30.8       | 13.0       |
+| Calibrated address, all | 31.6       | 16.0       |
+| Club                    | 67.8       | 23.5       |
+| Pelvis                  | 6.8        | 14.6       |
+| Trunk                   | 3.7        | 9.3        |
+| Head                    | 3.7        | 7.1        |
+| Left arm, right arm     | 19.4, 22.4 | 15.7, 18.0 |
+| Left leg, right leg     | 6.9, 16.2  | 9.2, 16.2  |
+
+With the sole pin the sole is 0.04 mm above the ground, the head centre 43.4 mm
+(45.4 mm in the registration lie) and the club-body origin 74.2 mm. The club is
+still 23.5 mm off and the pelvis, trunk and head fit worse: target not met.
+
 ## Why the Repository Fit Differs From the Experiment
 
 - The experiment frees all 28 body-marker offsets in a 35-frame bundle
@@ -99,17 +125,18 @@ it was 100 %.
   one address frame (static trial) and calibrates only the eight leg offsets.
 - The experiment used the coupled-trunk model with the skinned-hand wrist; the
   preset document builds the earlier trunk.
-- The pipeline's address solve pins the `Clubhead` body origin to the ground as
-  the club sole. The preset's club registration treats that origin as the head
-  centre, about 50 mm above the ground, so the address club segment is forced
-  about 68 mm off its markers.
+- The whole-swing run above pinned the club-body origin to the ground as the
+  sole. It is 64 mm from the head centre (the `Clubhead` frame origin) across
+  the shaft and, in the preset's club registration, above it at address, which
+  forced the club about 68 mm off its markers; the sole point is pinned now.
 - The experiment's final leg lengths are not in the preset on `main`.
 
 ## Open Items
 
-- Decide the `Clubhead` origin convention (sole or head centre) for the address
-  pin; it is the largest single address error in this run.
+- Rerun the whole pipeline with the sole pin; the swing table predates it.
+- The sole point is exact only in the registration lie, whose roll about the
+  shaft is a setting the club markers cannot identify.
 - Bring the multi-frame marker-offset adjustment into the repository if its
   accuracy is to be claimed from a repository command.
 - `LATERAL_SEEDS_M` in the hip calibration is a literal that does not follow
-  the preset's leg seeds, and `execution.driver` ignores `--address-only`.
+  the preset's leg seeds.

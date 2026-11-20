@@ -33,7 +33,12 @@ from src.shared.python.motion_matching.anthropometry import (
     de_leva_table_dict,
     de_leva_table_sha256,
 )
-from src.shared.python.motion_matching.club_models import CLUBS, ClubSpec
+from src.shared.python.motion_matching.club_models import (
+    CLUBS,
+    SOLE_POINT_SOURCE,
+    ClubSpec,
+    checked_sole_point_m,
+)
 from src.shared.python.motion_matching.club_shaft_chain import (
     DEFAULT_SHAFT_MODEL,
     SHAFT_MODELS,
@@ -848,11 +853,16 @@ def _club_spec(club: str, kwargs: Mapping[str, Any]) -> ClubSpec:
 
 
 def _record_preset(upper: dict[str, Any], kwargs: Mapping[str, Any]) -> None:
-    """Name the preset in ``subject`` and the butt to sole length in ``club``."""
+    """Name the preset in ``subject``; butt to sole length and the sole point
+    (the address ground pin, ``checked_sole_point_m``) in ``club``."""
     if kwargs.get("subject_preset"):
         upper["subject"]["subject_preset"] = kwargs["subject_preset"]
     if kwargs.get("club_butt_to_sole_m"):
         upper["club"]["butt_to_sole_m"] = float(kwargs["club_butt_to_sole_m"])
+    if kwargs.get("club_sole_point_m") is not None:
+        point = checked_sole_point_m(kwargs["club_sole_point_m"])
+        upper["club"]["sole_point_m"] = list(point)
+        upper["club"]["sole_point_source"] = SOLE_POINT_SOURCE
     if kwargs.get("dropped_markers"):
         upper["subject"]["dropped_markers"] = sorted(kwargs["dropped_markers"])
 
