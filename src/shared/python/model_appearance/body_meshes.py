@@ -20,7 +20,8 @@ Frame contract (DbC)
 
 Sizing rule
     Limbs, hands, feet and the head use ``library.PART_RADIUS_M``; the leg radii
-    scale with the subject stature (``library.stature_scale``). The trunk
+    and the upper arm scale with the subject stature (``library.stature_scale``);
+    the deltoid cap has its own radius (``library.DELTOID_RADIUS_M``). The trunk
     (torso, pelvis) is ONE lofted solid per body along its longest capsule
     (joint origin to the farthest child joint), sized from the spec's own
     ``visual_hints`` ellipsoids: radius = the largest mediolateral (ML)
@@ -291,6 +292,7 @@ class _Segment:
     end_cap: float = 1.0
     end_shift: np.ndarray | None = None
     offset: tuple[np.ndarray, float, float] | None = None  # centreline bow
+    cap_radius: float | None = None  # ball at the near joint, if not ``radius``
     #: Trunk cross-sections and the joint plane they are measured from (#15279).
     profile: TorsoProfile | None = None
     profile_start: np.ndarray | None = None
@@ -358,6 +360,8 @@ def _wrist_shape(part: str, radius: float, wrist: Any) -> dict[str, Any]:
             "end_scale": library.limb_distal_scale(part),
             "taper_end": library.taper_end(part),
             "belly": library.belly(part),
+            "end_aspect": library.PART_END_ASPECT.get(part),
+            "flatten_from": library.PART_FLATTEN_FROM.get(part, 0.0),
         }
     scale = library.validate_distal_scale(min(1.0, wrist.half_width_m / radius))
     taper = {"end_scale": scale, "taper_end": wrist.taper_end, "belly": wrist.belly}
@@ -419,7 +423,8 @@ def _limb_segments(
         bow = (
             None if front is None or not shift else (shift * radius * front, at, width)
         )
-        if part == "upper_arm":  # the spindle's tip, not its middle, is the joint
+        arm = part == "upper_arm"
+        if arm:  # the spindle's tip, not its middle, is the joint
             axis = (end - start) / cap.length_m()
             start = start + library.UPPER_ARM_START_INSET * radius * axis
         out.append(
@@ -431,6 +436,7 @@ def _limb_segments(
                 window=window,
                 capsule_ends=part in library.CAPSULE_END_PARTS,
                 offset=bow,
+                cap_radius=library.deltoid_radius_m(scale) if arm else None,
                 **_wrist_shape(part, radius, wrist),
             )
         )
@@ -645,14 +651,18 @@ def _segment_meshes(
             skin_seg = dataclasses.replace(seg, start=seg.start + tip)
         out.append(BodyMesh(body, f"skin{i}", _loft(ctx, body, skin_seg), base))
         if part in library.BLEND_PARTS:  # ball joint hides the segment seam
-            size = seg.radius * library.blend_scale(garment is not None, part)
+            size = library.blend_scale(garment is not None, part) * (
+                seg.cap_radius or seg.radius
+            )
+            section = ctx.sections.get(body) if part == "upper_arm" else None
+            out_m = library.DELTOID_OUTWARD * size * section.ml_axis if section else 0.0
             across, down = (
                 library.DELTOID_HALF_SIZES if part == "upper_arm" else (1.0, 1.0)
             )
             along = (seg.end - seg.start) / np.linalg.norm(seg.end - seg.start)
             drop = library.DELTOID_DROP * seg.radius if part == "upper_arm" else 0.0
             ball = geometry.ellipsoid_mesh(
-                seg.start + drop * along,
+                seg.start + drop * along + out_m,
                 size * np.array([down, across, across]),
                 seg.end - seg.start,
                 rings=_BLEND_RINGS,
@@ -723,6 +733,8 @@ def _meshes_for_body(
         segments = _limb_segments(
             part, caps, scale, window, ctx.wrist_sections.get(body), front
         )
+        if section is None and part == "upper_arm":  # no elbow hinge: round
+            segments = [dataclasses.replace(s, aspect=1.0) for s in segments]
     return _segment_meshes(ctx, body, part, segments)
 
 

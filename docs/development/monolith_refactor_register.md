@@ -219,6 +219,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 833 | `src/shared/python/ui/qt/widgets/signal_toolkit_ui_mixin.py` |
 | 831 | `src/bunkershot3d/solvers/envelope.py` |
 | 831 | `src/bunkershot3d/solvers/mpm/constitutive.py` |
+| 831 | `src/shared/python/model_appearance/body_meshes.py` |
 | 831 | `src/tools/starting_pose_matcher/gui_builders_mixin.py` |
 | 830 | `src/research/deformable/objects.py` |
 | 830 | `src/shared/python/motion_pipeline/preprocessing/gap_fill.py` |
@@ -226,9 +227,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 822 | `src/engines/physics_engines/mujoco/python/grip_lab_adapter.py` |
 | 822 | `src/shared/python/gui_pkg/help_system.py` |
 | 822 | `src/tools/capture_rig/layout_editor.py` |
-| 819 | `src/shared/python/model_appearance/body_meshes.py` |
-| 819 | `src/shared/python/model_appearance/body_meshes.py` |
-| 819 | `src/shared/python/model_appearance/body_meshes.py` |
 | 819 | `src/shared/python/model_generation/converters/simscape/simscape_converter.py` |
 | 815 | `src/engines/physics_engines/mujoco/python/native_full_body_replay.py` |
 | 813 | `src/engines/physics_engines/drake/python/src/drake_golf_model.py` |
