@@ -11,6 +11,8 @@ come from its public constraint linearisation.
 from __future__ import annotations
 
 import argparse
+import copy
+import logging
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
 from typing import Any
@@ -25,7 +27,12 @@ from src.shared.python.motion_matching.pipeline.bundle_adjustment import (
     BundleSettings,
     solve_bundle,
 )
-from src.shared.python.motion_matching.pipeline.constants import PRIOR
+from src.shared.python.motion_matching.pipeline.constants import (
+    PRIOR,
+    SPIN_COORDINATES,
+)
+
+LOG = logging.getLogger(__name__)
 
 Attachments = Mapping[str, tuple[str, Sequence[float]]]
 Point = tuple[float, float, float]
@@ -75,7 +82,27 @@ class StageSettings:
     ground_sigma_m: float = 0.005
     #: Labels left out of the adjustment and scored afterwards (held-out check).
     held_out: tuple[str, ...] = ()
-    solver: BundleSettings = field(default_factory=BundleSettings)
+    #: The address frame enters this many times (*experiment*: 8), so the
+    #: adjustment cannot buy the swing with the address.
+    address_repeats: int = 1
+    #: Start poses: ``strided`` solves only the selected frames, ``consecutive``
+    #: solves every capture frame in order and picks the selected ones.
+    start: str = "strided"
+    #: Residual per radian a coordinate (a spin coordinate) leaves its start
+    #: pose (*experiment*: 0.1 and 3.0); ``None`` keeps the lane's own prior.
+    pose_prior_weight: float | None = None
+    spin_prior_weight: float | None = None
+    #: Farthest a body marker may sit from its seed along one axis, metres. A
+    #: skin or garment marker placed on a named landmark is within a few
+    #: centimetres of it; a larger fitted offset is the adjustment absorbing a
+    #: model or pose error, not a placement. ``None``: only ``bound_sigmas``.
+    #: Head markers are exempt: they sit on a cap, not on the skull landmarks.
+    offset_reach_m: float | None = None
+    #: The stage stops when a step gains under a millionth of the cost: the
+    #: core's default asks for more digits than marker data carry.
+    solver: BundleSettings = field(
+        default_factory=lambda: BundleSettings(tolerance=1e-6, max_iterations=100)
+    )
 
 
 def offset_sigma(label: str) -> tuple[float, float, float]:
@@ -182,7 +209,10 @@ def build_problem(
     ``sole`` is the club's ground point as (body, point in the body frame);
     ``None`` adds no club-ground term (the body origin is never assumed).
     """
+    if settings.address_repeats < 1:
+        raise ValueError("address_repeats must be at least 1")
     frames = select_frames(len(lane.points), settings)
+    frames = (frames[0],) * (settings.address_repeats - 1) + frames
     poses = np.asarray(poses, float)
     if len(poses) != len(frames):
         raise ValueError(f"poses must have one row per frame ({len(frames)})")
@@ -199,7 +229,16 @@ def build_problem(
         lower[order.index(name)], upper[order.index(name)] = low, high
     for name in bodies.kin.shaft_rest_coordinates():
         lower[order.index(name)] = upper[order.index(name)] = 0.0
-    weights = np.array([lane.prior_weights.get(name, PRIOR) for name in order])
+    sigmas = np.array([lane.prior_weights.get(name, PRIOR) ** -0.5 for name in order])
+    if settings.pose_prior_weight is not None:
+        sigmas = np.full(len(order), 1.0 / settings.pose_prior_weight)
+    if settings.spin_prior_weight is not None:
+        spin = [order.index(name) for name in SPIN_COORDINATES if name in order]
+        sigmas[spin] = 1.0 / settings.spin_prior_weight
+    reach = np.full((len(labels), 3), np.inf)
+    if settings.offset_reach_m is not None:
+        body = [not label.startswith("Head") for label in labels]
+        reach[body] = settings.offset_reach_m
     columns = [lane.labels.index(label) for label in labels]
     problem = BundleProblem(
         fk=bodies.frames,
@@ -210,9 +249,10 @@ def build_problem(
         offset_sigmas=np.array([offset_sigma(label) for label in labels]),
         pose_start=poses,
         pose_bounds=(lower, upper),
-        pose_prior=(poses, np.tile(weights**-0.5, (len(frames), 1))),
+        pose_prior=(poses, np.tile(sigmas, (len(frames), 1))),
         constraint=_constraint(lane, bodies, frames, settings, sole),
         body_jacobian=bodies.twists,
+        offset_reach=reach,
     )
     return problem, labels, frames
 
@@ -290,16 +330,50 @@ def add_bundle_arguments(parser: argparse.ArgumentParser) -> None:
         default=[],
         help="marker labels left out of the adjustment and scored afterwards",
     )
+    parser.add_argument(
+        "--bundle-start",
+        choices=("strided", "consecutive"),
+        default=default.start,
+        help="start poses: inverse kinematics of the selected frames only, or "
+        "of every capture frame in order",
+    )
+    parser.add_argument(
+        "--bundle-address-repeats",
+        type=int,
+        default=default.address_repeats,
+        help="how many times the address frame enters the adjustment",
+    )
+    parser.add_argument(
+        "--bundle-offset-reach-mm",
+        type=float,
+        default=None,
+        help="farthest a body marker may move from its seed along one axis",
+    )
+    parser.add_argument(
+        "--bundle-pose-prior",
+        type=float,
+        nargs=2,
+        default=None,
+        metavar=("WEIGHT", "SPIN_WEIGHT"),
+        help="residual per radian a coordinate (a spin coordinate) leaves its "
+        "start pose; default: the lane's own prior",
+    )
 
 
 def stage_settings(args: argparse.Namespace) -> StageSettings | None:
     """Settings of the run ``args`` asks for; ``None`` without the flag."""
     if not getattr(args, "bundle_adjust", False):
         return None
+    reach, prior = args.bundle_offset_reach_mm, args.bundle_pose_prior
     return StageSettings(
         frame_stride=args.bundle_stride,
         anchor_frames=tuple(args.bundle_anchor_frames),
         held_out=tuple(args.bundle_held_out),
+        start=args.bundle_start,
+        address_repeats=args.bundle_address_repeats,
+        offset_reach_m=None if reach is None else 1e-3 * reach,
+        pose_prior_weight=None if prior is None else prior[0],
+        spin_prior_weight=None if prior is None else prior[1],
     )
 
 
@@ -339,6 +413,23 @@ def held_out_rms_mm(
     return out
 
 
+def start_poses(
+    lane: Any, kin: Any, q_start: np.ndarray, settings: StageSettings
+) -> np.ndarray:
+    """Start pose of every selected frame from the lane's inverse kinematics
+    with the seed attachments. Held-out markers are hidden from it, so their
+    score at these poses is a fair baseline."""
+    if settings.start not in ("strided", "consecutive"):
+        raise ValueError("start must be 'strided' or 'consecutive'")
+    frames = list(select_frames(len(lane.points), settings))
+    blind = copy.copy(lane)
+    blind.valid = np.array(lane.valid, bool)
+    blind.valid[:, [lane.labels.index(name) for name in settings.held_out]] = False
+    if settings.start == "strided":
+        return np.asarray(blind.trajectory(kin, q_start, frames=frames)[0])
+    return np.asarray(blind.trajectory(kin, q_start)[0])[frames]
+
+
 def adjust(
     lane: Any,
     kin: Any,
@@ -349,14 +440,20 @@ def adjust(
 ) -> Adjustment:
     """Adjust ``attachments`` over the selected frames of ``lane``.
 
-    Start poses are the lane's own strided inverse kinematics from ``q_start``
-    with the seed attachments. A held-out marker keeps its seed; it is scored at
-    the start poses (which fitted it) and at the adjusted poses (which did not).
+    Start poses are ``start_poses``. A held-out marker keeps its seed; it is
+    scored at the start poses and at the adjusted poses, neither of which
+    fitted it.
     """
-    frames = select_frames(len(lane.points), settings)
-    start, _ = lane.trajectory(kin, q_start, frames=list(frames))
-    problem, labels, _ = build_problem(lane, attachments, start, settings, sole)
+    start = start_poses(lane, kin, q_start, settings)
+    start = np.vstack([start[:1]] * (settings.address_repeats - 1) + [start])
+    problem, labels, frames = build_problem(lane, attachments, start, settings, sole)
+    LOG.info("bundle adjustment: %d frames, %d markers", len(frames), len(labels))
     result = solve_bundle(problem, settings.solver)
+    LOG.info(
+        "bundle adjustment: converged %s, RMS %.1f mm",
+        result.converged,
+        1e3 * result.rms_m,
+    )
     fitted = adjusted_attachments(attachments, labels, result)
     held = {name: attachments[name] for name in settings.held_out}
     scores = [held_out_rms_mm(lane, held, frames, q) for q in (start, result.poses)]
