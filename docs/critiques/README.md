@@ -20,3 +20,4 @@ Cadence: Bi-weekly, 1st and 3rd Friday.
 | ---------- | --------------------------------------------------------- | -------- |
 | 2026-09-25 | Neural motion model cards and tour baseline qualification | 6        |
 | 2026-10-23 | Physical grip-contact calibration and validation         | 3        |
+| 2026-11-20 | Grip epic #15122: builder clearance, grip-loss evaluator  | 5        |
