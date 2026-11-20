@@ -17,8 +17,28 @@
       "club_cross_angle_deg": 30.0,
       "wrist_ulnar_deviation_deg": 30.0,
       "palm_centre_wrap_deg": 22.0
+    },
+    "arched_square": {
+      "club_cross_angle_deg": 20.0,
+      "wrist_ulnar_deviation_deg": 30.0,
+      "palm_centre_wrap_deg": 22.0,
+      "metacarpal_arch": {
+        "middle": {
+          "flexion_deg": 0.0,
+          "ulnar_deviation_deg": 4.0
+        },
+        "ring": {
+          "flexion_deg": 0.0,
+          "ulnar_deviation_deg": 7.0
+        },
+        "little": {
+          "flexion_deg": 0.0,
+          "ulnar_deviation_deg": 13.0
+        }
+      }
     }
   },
+  "_arched_square": "#15329, 2026-11-20: square_on_thumb with the club laid 20 degrees across the hand and the middle, ring and little metacarpals leaned 4, 7 and 13 degrees toward the little finger (the whole radial-ulnar arcs of El-Shennawy et al. 2001, see metacarpal_arch in skinned_human_hand.json), so each finger's curl plane turns with its ray; a seat may now set metacarpal_arch for the trail hand. Measured: middle and ring curl planes 11.5 and 18.4 degrees off square (25.1 and 30.0 with square_on_thumb), forefinger 27.9 (42.3), knuckle line 4.6, middle and ring knuckles 3.0 and 4.0 mm off the shaft line (5.7 and 10.0), heel 15.8 mm from the lead thumb's knuckle, hands 0.00 mm inside each other, little and ring fingers 0.9 and 0.6 mm from the lead forefinger. GIVEN UP: the trail palm ends short of the lead thumb's tip, crown gap 12.6 mm at the tip end (5.6 and 8.3 at the two stations before it, 2.7 at the knuckle end, under 1.5 between; 4.8 with square_on_thumb, bound 2.5), which is why it is not the default; the ring curl plane is past the 15 degrees issue #15329 asks. What was tried, same day. Flexing the ring and little rays (13 and 26 degrees) lifts the thumb side of the palm off the lead thumb: at 30 degrees across, crown gap 10.1 mm and curl planes 31.2 and 34.2, worse on both; so the seat leans the rays and does not flex them. Leaning the ring and little rays alone at 30, 26 and 24 degrees across: the ring finger swings 20 degrees back toward the middle finger (side_close.max_deg) and its curl plane stays at 30.6 to 34.1; with the middle ray leaned as well it closes at 9 degrees, but not at every angle (24 across: still 20 and 30.7). Across the angle with all three rays leaned: 24 gives 15.0/30.7 and a 4.3 mm gap, 23 with the palm rolled 24 gives 14.0/19.5 with knuckles 5.6 and 8.0 mm off and a 6.2 mm gap, 22 gives 13.0/18.9 with knuckles 4.0 and 5.9 and a 9.7 mm gap; at 22 the palm rolled 26 or 18 loses the ring finger (29.7) and at 18 the hands part by 13.6 mm. Flexing the index ray 11 degrees parts the hands (11.8 mm). The settle of the pair is not smooth in any of these settings, so each number holds for its own setting only. NOT FIT TO BE THE DEFAULT ON THE FITTED GOLFER: the squarer hand carries the trail wrist 18, 25 and 37 mm from where the capture has it (14, 13 and 25 with square_on_thumb), and the refit of the arms on the showpiece swing then straightens the trail elbow to its limit at address (5 degrees, margin 0; 26.9 with square_on_thumb) and turns the trail forearm to its limit at impact (-90, margin 0); top and finish keep 24 degrees or more on every wrist, forearm and elbow coordinate.",
   "_max_lead_heel_pad_gap_m": "A ratchet on the measured gap, not a target. 9 mm at 4e8598b464, 7 mm at f4f607338c (measured 6.3). 8 mm since 2026-11-17: turning the lead hand so its wrist is centred over the shaft (owner request) measures 7.7 mm; hand turns of 12 to 22 degrees give 7.0 to 7.7 mm.",
   "max_lead_heel_pad_gap_m": 0.008,
   "max_lead_heel_pad_azimuth_deg": 30.0,
@@ -121,6 +141,17 @@
         "wrap_tilt": "25.1 and 30.0 deg, forefinger 42.3",
         "knuckle_lateral_offset": "5.7 and 10.0 mm",
         "thumb_crown_gap": "4.8 mm"
+      }
+    },
+    "arched_square": {
+      "max_index_wrap_tilt_deg": 32.0,
+      "max_thumb_crown_gap_m": 0.014,
+      "issue_max_wrap_tilt_deg": 15.0,
+      "measured": {
+        "wrap_tilt": "11.5 and 18.4 deg",
+        "index_wrap_tilt": "27.9 deg",
+        "thumb_crown_gap": "12.6 mm",
+        "wrist_extension": "20.0 deg"
       }
     },
     "measured_most": {
