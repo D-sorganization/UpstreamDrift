@@ -61,7 +61,6 @@ from src.shared.python.motion_matching.pipeline.constants import (
     DEFAULT_IK_RESTART_POLICY,
     DEFAULT_MJX_ITERATIONS,
     IK_RESTART_POLICIES,
-    LEG_SEEDS,
     REFERENCE_CUTOFF_HZ,
     SHOOTING_RELAXATION,
     SPEC,
@@ -134,9 +133,15 @@ from src.shared.python.motion_matching.pipeline.reference import (
 from src.shared.python.motion_matching.pipeline.weld_projection import (
     weld_consistent_track,
 )
+from src.shared.python.motion_matching.pipeline.marker_selection import (
+    DEFAULT_LEG_SEED_SOURCE,
+    add_marker_selection_argument,
+    select_markers,
+)
 from src.shared.python.motion_matching.pipeline.plant import (
     get_plant,
 )
+from src.shared.python.motion_matching.tour_capture_contract import load_tour_capture
 
 logger = logging.getLogger(__name__)
 
@@ -444,6 +449,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_turn_split_arguments(parser)
     add_hip_zero_twist_argument(parser)
     add_knee_flexion_argument(parser)
+    add_marker_selection_argument(parser)
     return parser
 
 
@@ -1360,15 +1366,15 @@ def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
     ctx = _init_pipeline(args)
     base_spec = json.loads(Path(args.spec).read_text(encoding="utf-8"))
     upper_base = json.loads(UPPER_SPEC.read_text(encoding="utf-8"))
-    upper = {
-        label: (a["body"], tuple(a["offset_m"]))
-        for label, a in base_spec["marker_attachments"].items()
-        if a["offset_m"] is not None
-    }
-    labels = tuple({**upper, **LEG_SEEDS})
+    capture = load_tour_capture(ctx.c3d_path)
+    chosen = select_markers(
+        base_spec, capture.labels, getattr(args, "leg_seeds", DEFAULT_LEG_SEED_SOURCE)
+    )
+    upper, labels = chosen.attachments, chosen.labels
 
     plant = get_plant(ctx.engine, base_spec)
-    lane = Lane(labels, ctx.c3d_path, plant=plant)
+    lane = Lane(labels, ctx.c3d_path, capture=capture, plant=plant)
+    lane.document_leg_seeds = chosen.leg_seeds
     configure_lane(lane, base_spec)
     mode = getattr(args, "foot_progression", "off")
     lane.feet = build_foot_targets(lane, mode)
@@ -1390,6 +1396,8 @@ def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
     lane.gaze_weight = float(getattr(args, "gaze_weight", 0.0))
 
     cal_res = _calibrate_and_scale(ctx, lane, base_spec, upper_base, upper, labels)
+    if chosen.report():  # only a non-default selection: default receipts keep
+        cal_res.address_report["marker_selection"] = chosen.report()
     return CalibratedRun(ctx, lane, base_spec, labels, cal_res, provenance)
 
 
