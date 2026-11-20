@@ -57,6 +57,10 @@ from src.shared.python.motion_matching.execution.club_markers import (
     Offset,
     load_club_markers,
 )
+from src.shared.python.motion_matching.execution.osim_leg_lengths import (
+    positive_length_m,
+    scale_leg_lengths,
+)
 from src.shared.python.motion_matching.execution.grip_selection import (
     GripOverrides,
     add_grip_arguments,
@@ -524,19 +528,39 @@ def _build_aligned_leg_extension(
     stature_m: float,
     hip_frame: dict[str, Any],
     leg_mass_kg: float | None = None,
+    settings: Mapping[str, Any] | None = None,
 ) -> tuple[Any, list[str], float]:
-    bodies, joints = read_osim(osim_path)
+    """Aligned legs, the conversion notes and the hip half spacing, m.
+
+    ``settings`` (#15296, each optional, m): ``thigh_length_m`` and
+    ``shank_length_m`` are ``osim_leg_lengths.scale_leg_lengths``'s, and
+    ``hip_half_spacing_m`` is half the distance between the hip joint centres
+    instead of ``pelvis_alignment_for``'s stature fraction. Without them the
+    legs are the OpenSim file's stored lengths, which do not follow stature.
+    """
+    settings = settings or {}
+    thigh, shank = settings.get("thigh_length_m"), settings.get("shank_length_m")
+    bodies, joints = scale_leg_lengths(*read_osim(osim_path), thigh, shank)
     if leg_mass_kg is not None:
         bodies = scale_leg_mass(bodies, leg_mass_kg)
     rotation, hip_half = pelvis_alignment_for(stature_m)
+    if settings.get("hip_half_spacing_m") is not None:
+        hip_half = positive_length_m(
+            "hip_half_spacing_m", settings["hip_half_spacing_m"]
+        )
+    stated = "".join(
+        f"; {name} scaled to {value:.4f} m on both sides"
+        for name, value in (("thigh", thigh), ("shank", shank))
+        if value is not None
+    )
     hips = np.array(
         [joints["hip_r"]["parent_translation"], joints["hip_l"]["parent_translation"]]
     )
     mid = rotation @ hips.mean(axis=0)
     alignment = transform(rotation, -mid)
     extension, notes = leg_extension(
-        bodies,
-        joints,
+        dict(bodies),
+        dict(joints),
         hip_frame["body"],
         np.asarray(hip_frame["placement"]) @ alignment,
         frozenset(s for s, sign in hip_axis_signs(osim_path).items() if sign < 0),
@@ -561,7 +585,8 @@ def _build_aligned_leg_extension(
         extension.bodies,
         edges,
         extension.provenance
-        + "; hip centres at the subject hip half width on the pelvis frame",
+        + "; hip centres at the subject hip half width on the pelvis frame"
+        + stated,
     )
     return extension, notes, hip_half
 
@@ -903,7 +928,7 @@ def compose_anthropometric_document(
         mass_kg - _body_mass_without_club(upper) if match_subject_mass else None
     )
     extension, notes, hip_half = _build_aligned_leg_extension(
-        osim_path, stature_m, hip_frame, leg_mass_kg
+        osim_path, stature_m, hip_frame, leg_mass_kg, kwargs
     )
     contact = _create_contact_spec()
     hub_h, markers, club_markers_path = _seeded_markers(
