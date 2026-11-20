@@ -5,9 +5,19 @@
   "shoulder_anchor_m": [0.0, 0.0, 0.0],
   "trunk_margin_m": 0.15,
   "warp_extent_m": 0.6,
+  "thorax_front_scale": 1.0,
+  "thorax_front_start_m": 0.16,
+  "thorax_front_rise_m": 0.15,
+  "thigh_back_m": 0.0,
+  "thigh_back_rise_fraction": 0.5,
+  "thigh_back_below_hip_m": 0.02,
+  "thigh_back_fade_m": 0.1,
+  "thigh_back_front_m": 0.05,
   "profiles": {
     "showpiece": {
-      "shoulder_anchor_m": [0.0, 0.0, 0.025]
+      "shoulder_anchor_m": [0.0, 0.0, 0.025],
+      "thorax_front_scale": 0.92,
+      "thigh_back_m": 0.02
     }
   },
   "sources": {
@@ -17,6 +27,14 @@
     "shoulder_anchor_m": "Where the model shoulder joint sits in the skin relative to MakeHuman's upperarm01 head: forward, outward, up. Zero keeps MakeHuman's joint.",
     "trunk_margin_m": "The axial trunk warp returns to a pure shift 150 mm below the hip joints and above the neck joint, so crotch and neck keep their shape.",
     "warp_extent_m": "Outer knots of the trunk warp, beyond any stored vertex (0.6 m from the hip midpoint and from the neck joint).",
-    "profiles": "Named overrides, applied only when asked for by name; the default fit ignores them. showpiece: the stored shoulder landmark is raised 25 mm, which lowers the skin over the model shoulder joint. In the #15299 prototype at 1.82 m, together with a slimmer build mix, the clothed shoulder top stood 78 mm above the joint 140 mm from the midline, against 123 mm before and 51 mm for the loft (2026-11-20 review)."
+    "profiles": "Named overrides, applied only when asked for by name; the default fit ignores them. showpiece: the stored shoulder landmark is raised 25 mm, which lowers the skin over the model shoulder joint (in the #15299 prototype at 1.82 m, together with a slimmer build mix, the clothed shoulder top stood 78 mm above the joint 140 mm from the midline, against 123 mm before and 51 mm for the loft; 2026-11-20 review); the chest and thigh values are explained under their settings.",
+    "thorax_front_scale": "Scale of the chest's depth ahead of the trunk axis (hip midpoint to neck joint); 1 keeps MakeHuman's chest. The showpiece profile uses 0.92: in the #15299 prototype at 1.82 m, together with a slimmer build mix, the clothed upper chest was 208 mm deep against 263 mm before and 191 mm for the loft.",
+    "thorax_front_start_m": "The chest scale starts 160 mm above the hip midpoint, 20 mm above the lumbar joint of the 1.82 m reference golfer (143 mm), so the belly keeps its depth.",
+    "thorax_front_rise_m": "It reaches full strength over the next 150 mm, at the lower ribs.",
+    "thigh_back_m": "How far the front of the thigh is moved back; 0 keeps MakeHuman's thigh. The showpiece profile uses 20 mm: in the #15299 prototype the clothed thigh front stood 96, 86 and 88 mm ahead of the hip joint at 50, 100 and 200 mm below it, against 111, 110 and 112 mm before and 77, 71 and 68 mm for the loft.",
+    "thigh_back_rise_fraction": "The shift grows from the knee and is whole from this fraction of the thigh length above the knee (mid-thigh).",
+    "thigh_back_below_hip_m": "The shift is whole up to 20 mm below the hip joints.",
+    "thigh_back_fade_m": "From there it fades to nothing over 100 mm, so the belly above the groin stays put.",
+    "thigh_back_front_m": "Only skin ahead of the hip joint moves; the shift is whole from 50 mm ahead of it, so the back of the thigh and the buttock keep their place."
   }
 }
