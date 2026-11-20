@@ -53,7 +53,7 @@ def chain_twists(pose: np.ndarray) -> np.ndarray:
     return out
 
 
-def tip_height(pose: np.ndarray) -> np.ndarray:
+def tip_height(frame: int, pose: np.ndarray) -> np.ndarray:
     """A closed loop: the tip of link two (as long as link one) slides on y = 0."""
     return np.array([np.sin(pose[0]) + np.sin(pose.sum())]) * LINK_M / WELD_SIGMA_M
 
@@ -157,7 +157,7 @@ def test_gauge_direction_is_reported_weak_and_left_at_the_prior() -> None:
 @pytest.mark.parametrize(
     ("changes", "error", "message"),
     [
-        ({"offset_sigmas": np.zeros((6, 3))}, ValueError, "offset_sigmas"),
+        ({"offset_sigmas": np.full((6, 3), -1.0)}, ValueError, "offset_sigmas"),
         ({"offset_seeds": np.full((6, 3), np.nan)}, ValueError, "offset_seeds"),
         ({"marker_bodies": np.zeros(5, int)}, ValueError, "marker_bodies"),
         ({"valid": np.ones((8, 5), bool)}, ValueError, "valid"),
@@ -191,13 +191,31 @@ def test_constraint_keeps_the_loop_closed_and_fixes_the_gauge() -> None:
     poses = np.column_stack([first, -2.0 * first])  # sin(a) + sin(-a) = 0
     prob, truth, _ = problem(keep=SPARSE, poses=poses, constraint=tip_height)
     result = solve_bundle(prob, BundleSettings(marker_sigma_m=NOISE_M))
-    tip = np.array([tip_height(pose)[0] * WELD_SIGMA_M for pose in result.poses])
+    tip = np.array([tip_height(0, pose)[0] * WELD_SIGMA_M for pose in result.poses])
     assert np.abs(tip).max() < 2.0 * WELD_SIGMA_M
     assert result.converged and result.weakly_identified == ()
     assert np.abs(result.offsets[3] - truth[3]).max() < 0.003
     assert 0.0 < result.constraint_chi2 < result.data_chi2
     with pytest.raises(TypeError, match="constraint"):
         solve_bundle(dataclasses.replace(prob, constraint=1.0), BundleSettings())
+
+
+def test_zero_sigma_holds_a_marker_and_equal_bounds_hold_a_coordinate() -> None:
+    prob, _, _ = problem()
+    sigmas = prob.offset_sigmas.copy()
+    sigmas[4] = 0.0
+    start = prob.pose_start.copy()
+    start[:, 1] = 0.3
+    bounds = (np.array([-np.pi, 0.3]), np.array([np.pi, 0.3]))
+    held = dataclasses.replace(
+        prob, offset_sigmas=sigmas, pose_start=start, pose_bounds=bounds
+    )
+    result = solve_bundle(held, BundleSettings(marker_sigma_m=NOISE_M))
+    assert np.array_equal(result.offsets[4], SEEDS[4])
+    assert np.all(result.poses[:, 1] == 0.3)
+    assert 4 not in result.weakly_identified
+    assert all(marker != 4 for marker, _ in result.on_bound)
+    assert np.isfinite(result.offset_prior_chi2)
 
 
 @pytest.mark.slow

@@ -14,6 +14,7 @@ callable. Nothing here is a physical acceptance of a fit.
 from __future__ import annotations
 
 from collections.abc import Callable
+from functools import partial
 from dataclasses import dataclass, fields
 from typing import Any
 
@@ -72,9 +73,10 @@ class BundleProblem:
 
     ``observations`` ``(K, M, 3)`` are world positions, read only where
     ``valid`` ``(K, M)``. ``offset_seeds`` ``(M, 3)`` are both the start and the
-    prior mean, ``offset_sigmas`` ``(M, 3)`` the prior sigmas. ``pose_prior`` is
+    prior mean, ``offset_sigmas`` ``(M, 3)`` the prior sigmas (0 holds that
+    component at its seed); equal pose bounds hold a coordinate. ``pose_prior`` is
     ``(mean, sigma)``, both ``(K, n_q)``; an infinite sigma is no prior.
-    ``constraint`` maps a pose to already-scaled residuals of fixed length
+    ``constraint`` maps (frame, pose) to already-scaled residuals of fixed length
     (loop closure, ground contact). ``body_jacobian`` maps a pose to
     ``(n_bodies, 6, n_q)``: world velocity of each body origin (rows 0-2)
     and world angular velocity (3-5) per unit pose rate; without it the pose
@@ -90,7 +92,7 @@ class BundleProblem:
     pose_start: Array
     pose_bounds: tuple[Array, Array]
     pose_prior: tuple[Array, Array] | None = None
-    constraint: Callable[[Array], Array] | None = None
+    constraint: Callable[[int, Array], Array] | None = None
     body_jacobian: Callable[[Array], Array] | None = None
 
     def check(self, settings: BundleSettings) -> None:
@@ -124,10 +126,10 @@ class BundleProblem:
         for name in ("offset_seeds", "offset_sigmas", "pose_start", "observations"):
             if not np.all(np.isfinite(finite[name][0])):
                 raise ValueError(f"{name} must be finite (observations: where valid)")
-        if not np.all(np.asarray(self.offset_sigmas) > 0):
-            raise ValueError("offset_sigmas must be positive")
-        if not np.all(self.pose_bounds[0] < self.pose_bounds[1]):
-            raise ValueError("pose_bounds must have lower < upper")
+        if not np.all(np.asarray(self.offset_sigmas) >= 0):
+            raise ValueError("offset_sigmas must not be negative (0 holds)")
+        if not np.all(self.pose_bounds[0] <= self.pose_bounds[1]):
+            raise ValueError("pose_bounds must have lower <= upper")
         if self.pose_prior is not None:
             mean, sigma = self.pose_prior
             if np.shape(mean) != (frames, n_q) or np.shape(sigma) != (frames, n_q):
@@ -176,13 +178,21 @@ def _marker_errors(prob: BundleProblem, k: int, pose: Array, offsets: Array) -> 
 def _terms(prob: BundleProblem, sigma: float, poses: Array, offsets: Array) -> Any:
     """Residual blocks: data, constraint, offset prior, pose prior."""
     data = [_marker_errors(prob, k, pose, offsets) for k, pose in enumerate(poses)]
-    closed = [] if prob.constraint is None else [prob.constraint(p) for p in poses]
-    prior = (offsets - prob.offset_seeds) / prob.offset_sigmas
+    closed: list[Array] = []
+    if prob.constraint is not None:
+        closed = [prob.constraint(k, pose) for k, pose in enumerate(poses)]
+    prior = (offsets - prob.offset_seeds) * _prior_weights(prob)
     out = [np.ravel(data) / sigma, np.ravel(closed), prior.ravel()]
     if prob.pose_prior is None:
         return [*out, np.zeros(0)]
     mean, pose_sigma = prob.pose_prior
     return [*out, ((poses - mean) / pose_sigma)[np.isfinite(pose_sigma)]]
+
+
+def _prior_weights(prob: BundleProblem) -> Array:
+    """One over the offset prior sigma; zero where a component is held."""
+    sigmas = np.asarray(prob.offset_sigmas, float)
+    return np.divide(1.0, sigmas, out=np.zeros_like(sigmas), where=sigmas > 0)
 
 
 def _cost(prob: BundleProblem, sigma: float, poses: Array, offsets: Array) -> float:
@@ -230,7 +240,7 @@ def _linearise(
     for m in np.flatnonzero(seen):
         by_offset[3 * m : 3 * m + 3, 3 * m : 3 * m + 3] = rotations[m] / sigma
     if prob.constraint is not None:
-        closed, closed_slope = _difference(prob.constraint, pose, step)
+        closed, closed_slope = _difference(partial(prob.constraint, k), pose, step)
         residual.append(closed)
         by_pose.append(closed_slope)
         by_offset = np.vstack([by_offset, np.zeros((len(closed), offsets.size))])
@@ -293,7 +303,7 @@ def _minimise(
     ``max_iterations`` is not convergence.
     """
     lower, upper, low, high = box
-    sigma, weights = settings.marker_sigma_m, 1.0 / np.ravel(prob.offset_sigmas)
+    sigma, weights = settings.marker_sigma_m, _prior_weights(prob).ravel()
     poses = np.clip(np.asarray(prob.pose_start, float), lower, upper)
     offsets = np.array(prob.offset_seeds, float)
     cost, damping = _cost(prob, sigma, poses, offsets), settings.damping_start
@@ -348,16 +358,17 @@ def _offset_information(
         reduced = by_offset - basis @ (basis.T @ by_offset)
         info += reduced.T @ reduced
     scale = np.asarray(prob.offset_sigmas, float).ravel()
-    return info * np.outer(scale, scale)
+    return (info * np.outer(scale, scale))[np.ix_(scale > 0, scale > 0)]
 
 
 def _weak_directions(
-    information: Array, settings: BundleSettings
+    information: Array, owners: Array, settings: BundleSettings
 ) -> tuple[tuple[int, ...], tuple[float, ...]]:
+    """Markers (``owners`` of each free component) loading a weak direction."""
     values, vectors = np.linalg.eigh(information)
     weak = values < settings.weak_information_ratio
-    shape = (len(values) // 3, 3, int(weak.sum()))
-    loading = (vectors[:, weak] ** 2).reshape(shape).sum(axis=1)
+    loading = np.zeros((int(owners.max(initial=-1)) + 1, int(weak.sum())))
+    np.add.at(loading, owners, vectors[:, weak] ** 2)
     named = np.flatnonzero((loading >= settings.weak_loading_share).any(axis=1))
     return tuple(int(m) for m in named), tuple(float(v) for v in values[weak])
 
@@ -385,9 +396,12 @@ def solve_bundle(prob: BundleProblem, settings: BundleSettings) -> BundleResult:
         [_marker_errors(prob, k, q, offsets) for k, q in enumerate(poses)]
     )
     valid = np.asarray(prob.valid, bool)
-    pinned = np.abs(np.abs(offsets - seeds) - reach) <= settings.bound_atol_m
+    free = np.asarray(prob.offset_sigmas) > 0
+    pinned = free & (np.abs(np.abs(offsets - seeds) - reach) <= settings.bound_atol_m)
     weak, ratios = _weak_directions(
-        _offset_information(prob, settings, poses, offsets), settings
+        _offset_information(prob, settings, poses, offsets),
+        np.repeat(np.arange(len(seeds)), 3)[free.ravel()],
+        settings,
     )
     return BundleResult(
         offsets=offsets,
