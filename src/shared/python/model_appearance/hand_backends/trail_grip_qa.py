@@ -27,6 +27,8 @@ from src.shared.python.model_appearance.hand_backends.types import HandVisualRes
 
 #: The bone whose joint is the base of the thumb, in the heel of the palm.
 THUMB_BASE_BONE = "thumb_meta"
+#: The bone whose joint is the thumb's knuckle, the lowest joint that shows.
+THUMB_KNUCKLE_BONE = "thumb_prox"
 _FOREARM_BONE = "forearm"
 #: Bones whose skin is the palm, the heel included.
 _PALM_BONES = (WRIST_BONE, *(f"meta_{finger}" for finger in FINGERS))
@@ -44,7 +46,9 @@ class TrailGripMeasures:
     through the shaft and the target line (toward the top of the grip
     positive) and its distance behind the shaft, away from the target.
     ``heel_to_lead_thumb_base_m``: least distance from the trail palm's skin to
-    the lead thumb's base joint. ``wrist_below_lead_thumb_base_m``: the trail
+    the lead thumb's base joint, which lies buried in the lead palm;
+    ``heel_to_lead_thumb_knuckle_m``: the same to the thumb's knuckle, the
+    lowest joint of it that shows (#15150 option 1). ``wrist_below_lead_thumb_base_m``: the trail
     wrist joint's station along the shaft past that joint, toward the head.
     """
 
@@ -54,6 +58,7 @@ class TrailGripMeasures:
     knuckle_lateral_m: Mapping[str, float]
     knuckle_behind_m: Mapping[str, float]
     heel_to_lead_thumb_base_m: float
+    heel_to_lead_thumb_knuckle_m: float
     wrist_below_lead_thumb_base_m: float
 
 
@@ -102,7 +107,9 @@ def trail_grip_measures(
         if hinge is None:
             raise ValueError(f"the {finger} finger has no hinge to measure")
         tilts[finger] = _to_shaft_deg(hinge)
-    base = hand_landmarks(lead).joint(THUMB_BASE_BONE).origin_m
+    thumb = hand_landmarks(lead)
+    base = thumb.joint(THUMB_BASE_BONE).origin_m
+    knuckle = thumb.joint(THUMB_KNUCKLE_BONE).origin_m
     palm = trail.mesh.vertices[asset.dominant_vertex_ids(_PALM_BONES)]
     wrist = marks.joint(WRIST_BONE).origin_m
     return TrailGripMeasures(
@@ -112,8 +119,16 @@ def trail_grip_measures(
         knuckle_lateral_m={f: float(p[0]) for f, p in knuckles.items()},
         knuckle_behind_m={f: float(p[1]) for f, p in knuckles.items()},
         heel_to_lead_thumb_base_m=float(np.linalg.norm(palm - base, axis=1).min()),
+        heel_to_lead_thumb_knuckle_m=float(
+            np.linalg.norm(palm - knuckle, axis=1).min()
+        ),
         wrist_below_lead_thumb_base_m=float(wrist[2] - base[2]),
     )
 
 
-__all__ = ["THUMB_BASE_BONE", "TrailGripMeasures", "trail_grip_measures"]
+__all__ = [
+    "THUMB_BASE_BONE",
+    "THUMB_KNUCKLE_BONE",
+    "TrailGripMeasures",
+    "trail_grip_measures",
+]
