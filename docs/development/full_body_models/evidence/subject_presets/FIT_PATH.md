@@ -115,5 +115,10 @@ it was 100 %.
   core (`solve_bundle`) tested on a synthetic chain only. No fit command calls
   it yet, so every number above stands and the experiment column is still not
   reproducible from the repository.
+  It eliminates each frame's pose block, takes exact offset derivatives and
+  accepts loop-closure residuals. On a synthetic 30-hinge, 35-frame, 30-marker
+  chain it converged in 21 iterations (56 to 93 s on a loaded four-core host,
+  most of it the test's own Python kinematics); a `scipy` trust-region solve
+  with the same derivatives did not converge in 200 evaluations (316 s).
 - `LATERAL_SEEDS_M` in the hip calibration is a literal that does not follow
   the preset's leg seeds, and `execution.driver` ignores `--address-only`.
