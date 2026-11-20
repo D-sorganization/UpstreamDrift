@@ -412,6 +412,23 @@ GARMENT_COVERAGE: dict[str, tuple[float, float]] = {
 }
 FULL_COVERAGE = (0.0, 1.0)
 LEG_PARTS = ("thigh", "shin")
+# Ease of full-length trousers over ``GARMENT_THICKNESS``: (near, far, from),
+# see ``geometry.LoftOptions.drape`` (#15299, owner 2026-11-19: the drawn legs
+# 10-20 % larger). The skin keeps the measured girths; the cloth is fitted on
+# the upper thigh, where the two legs must clear each other, and from
+# ``TROUSER_FITTED_TO`` of the thigh loosens to ``TROUSER_EASE`` at the knee.
+# The shin keeps that to ``TROUSER_HEM_FROM`` (below the calf) and then hangs
+# off the calf to ``TROUSER_HEM_EASE`` at the ankle: a hem about 330 mm round
+# at 1.82 m, a slim-cut golf trouser, not a legging.
+TROUSER_EASE = 1.14
+TROUSER_FITTED_TO = 0.40
+TROUSER_HEM_EASE = 1.34
+TROUSER_HEM_FROM = 0.45
+TROUSER_DRAPE: dict[str, tuple[float, float, float]] = {
+    "thigh": (1.0, TROUSER_EASE, TROUSER_FITTED_TO),
+    "shin": (TROUSER_EASE, TROUSER_HEM_EASE, TROUSER_HEM_FROM),
+}
+NO_DRAPE = (1.0, 1.0, 0.0)
 
 
 def is_full_length(preset: str) -> bool:
@@ -432,6 +449,17 @@ def garment_coverage(preset: str, part: str) -> tuple[float, float]:
     if is_full_length(preset) and part in LEG_PARTS:
         return FULL_COVERAGE
     return GARMENT_COVERAGE.get(part, FULL_COVERAGE)
+
+
+def garment_drape(preset: str, part: str) -> tuple[float, float, float]:
+    """Cloth ease ``(near, far, from)`` of ``part`` under clothing ``preset``.
+
+    Only the legs of full-length trousers drape; everything else is
+    ``NO_DRAPE``. Precondition: a known preset (``ValueError``).
+    """
+    if is_full_length(preset) and part in LEG_PARTS:
+        return TROUSER_DRAPE.get(part, NO_DRAPE)
+    return NO_DRAPE
 
 
 # Segment smoothness: loft resolution, and ball blends where limbs meet the trunk.
@@ -570,7 +598,13 @@ def deltoid_drop_m(radius_m: float, rise_m: float | None) -> float:
 # Width is ``pelvis_width`` (HRG-C4); the lower pole hangs below the MEAN HJC.
 PELVIS_CROTCH_DROP_M = 0.078  # pole below the mean HJC height; not the thigh radius
 PELVIS_MIN_BELOW_HJC_M = 0.025  # the lowest HJC keeps at least this much solid below
-PELVIS_WAIST_RATIO = 0.86  # flat cap at the lumbar plane / widest half width
+# Half width of the flat cap at the lumbar plane over the widest half width
+# (#15299, owner 2026-11-19: wider at the pelvis, to match the markers). The CC0
+# athletic male body (1.82 m) is 156 mm wide at the belt line against the
+# 179 mm hip-breadth prior, and the capture's belt markers are 172.5 mm from
+# the midline. Was 0.75; 0.87 keeps the waistband within 5 mm of the shirt hem
+# of the torso's second pass (which used 0.86).
+PELVIS_WAIST_RATIO = 0.87
 
 
 GARMENT_PARTS = ("torso", "pelvis", "shoulder", "upper_arm", "thigh", "shin")

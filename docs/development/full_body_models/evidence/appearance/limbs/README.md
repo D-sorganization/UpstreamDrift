@@ -28,7 +28,48 @@ At 0.28 of the shin the skin reaches 98 mm behind the knee-ankle line and
 standing and 10.3 mm at address along the hip line (1.82 m; 3.3 mm and 10.2 mm
 at 1.71 m).
 
+## Hips at the Belt Line and Trouser Ease
+
+Visual only, and only the drawn surface: joint spacing, segment lengths and the
+skin of the legs are unchanged. Owner feedback asked for hips "a little wider
+at the pelvis to match the markers" and legs "about 10-20% larger". The skin
+girths above already match the measured body within 2 %, so the legs are made
+larger where they are seen: the trousers now hang with ease instead of lying on
+the skin like leggings. Settings in `library.py`: `PELVIS_WAIST_RATIO`
+0.86 to 0.87 (0.75 before the torso's second pass, #15310), which keeps the
+waistband within 5 mm of the shirt hem, and new `TROUSER_EASE` 1.14, `TROUSER_FITTED_TO` 0.40,
+`TROUSER_HEM_EASE` 1.34, `TROUSER_HEM_FROM` 0.45 (`TROUSER_DRAPE`,
+`garment_drape`). Shorts are not draped.
+
+![Hips and Trouser Legs, Before and After](hips_trousers_before_after_tour_average.png)
+
+Half widths and girths in mm, tour-average golfer (1.82 m). The belt markers of
+the driver capture (`data/C3D_TA_Driver.c3d`, `WaistLeft` to `WaistRight`) are
+344.9 mm apart at address, 172.5 mm from the midline.
+
+| Quantity | Reference | Before | After |
+| --- | --- | --- | --- |
+| Pelvis skin half width, top of pelvis | 156 (measured body) | 155.3 | 157.0 |
+| Trousers half width, top of pelvis | 172.5 (marker centres) | 166.5 | 168.4 |
+| Pelvis skin half width, hip joint level | 174 (measured body) | 179.3 | 179.3 |
+| Trousers girth, thigh at 0.35 | | 626.5 | 626.5 |
+| Trousers girth, thigh at 0.95 (knee) | | 422.6 | 475.8 |
+| Trousers girth, shin at 0.28 (calf) | | 427.7 | 487.2 |
+| Trousers girth, shin at 0.84 (ankle) | | 247.0 | 314.9 |
+
+The marker centres now stand 4 mm outside the cloth at the top of the pelvis
+(6 mm before; 27 mm at the ratio of 0.75). The trouser legs of the built
+1.71 m subject clear each other by 3.3 mm at the thigh and 17.4 mm at the shin
+when standing.
+
 ## Limitations
+
+- The trousers stay fitted on the upper thigh (no added ease at 0.35): the
+  3.3 mm standing clearance leaves no room without moving the hip joints.
+- The drawn pelvis section is symmetric about the hip line; the measured body
+  carries more of its depth in front. The hem flares by 2 % below the ankle.
+- The acceptance for this section is
+  `tests/unit/model_appearance/test_hip_and_trouser_shape.py`.
 
 - The thigh is 4 mm narrower side to side than measured (90 mm half width,
   not 94 mm) so the trousers do not interpenetrate when standing.
