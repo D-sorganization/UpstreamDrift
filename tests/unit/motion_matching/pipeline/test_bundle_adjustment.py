@@ -53,7 +53,7 @@ def chain_twists(pose: np.ndarray) -> np.ndarray:
     return out
 
 
-def tip_height(pose: np.ndarray) -> np.ndarray:
+def tip_height(frame: int, pose: np.ndarray) -> np.ndarray:
     """A closed loop: the tip of link two (as long as link one) slides on y = 0."""
     return np.array([np.sin(pose[0]) + np.sin(pose.sum())]) * LINK_M / WELD_SIGMA_M
 
@@ -157,7 +157,7 @@ def test_gauge_direction_is_reported_weak_and_left_at_the_prior() -> None:
 @pytest.mark.parametrize(
     ("changes", "error", "message"),
     [
-        ({"offset_sigmas": np.zeros((6, 3))}, ValueError, "offset_sigmas"),
+        ({"offset_sigmas": np.full((6, 3), -1.0)}, ValueError, "offset_sigmas"),
         ({"offset_seeds": np.full((6, 3), np.nan)}, ValueError, "offset_seeds"),
         ({"marker_bodies": np.zeros(5, int)}, ValueError, "marker_bodies"),
         ({"valid": np.ones((8, 5), bool)}, ValueError, "valid"),
@@ -191,13 +191,31 @@ def test_constraint_keeps_the_loop_closed_and_fixes_the_gauge() -> None:
     poses = np.column_stack([first, -2.0 * first])  # sin(a) + sin(-a) = 0
     prob, truth, _ = problem(keep=SPARSE, poses=poses, constraint=tip_height)
     result = solve_bundle(prob, BundleSettings(marker_sigma_m=NOISE_M))
-    tip = np.array([tip_height(pose)[0] * WELD_SIGMA_M for pose in result.poses])
+    tip = np.array([tip_height(0, pose)[0] * WELD_SIGMA_M for pose in result.poses])
     assert np.abs(tip).max() < 2.0 * WELD_SIGMA_M
     assert result.converged and result.weakly_identified == ()
     assert np.abs(result.offsets[3] - truth[3]).max() < 0.003
     assert 0.0 < result.constraint_chi2 < result.data_chi2
     with pytest.raises(TypeError, match="constraint"):
         solve_bundle(dataclasses.replace(prob, constraint=1.0), BundleSettings())
+
+
+def test_zero_sigma_holds_a_marker_and_equal_bounds_hold_a_coordinate() -> None:
+    prob, _, _ = problem()
+    sigmas = prob.offset_sigmas.copy()
+    sigmas[4] = 0.0
+    start = prob.pose_start.copy()
+    start[:, 1] = 0.3
+    bounds = (np.array([-np.pi, 0.3]), np.array([np.pi, 0.3]))
+    held = dataclasses.replace(
+        prob, offset_sigmas=sigmas, pose_start=start, pose_bounds=bounds
+    )
+    result = solve_bundle(held, BundleSettings(marker_sigma_m=NOISE_M))
+    assert np.array_equal(result.offsets[4], SEEDS[4])
+    assert np.all(result.poses[:, 1] == 0.3)
+    assert 4 not in result.weakly_identified
+    assert all(marker != 4 for marker, _ in result.on_bound)
+    assert np.isfinite(result.offset_prior_chi2)
 
 
 @pytest.mark.slow
@@ -235,9 +253,39 @@ def test_converges_at_the_size_of_the_driver_fit_within_budget() -> None:
         pose_start=poses + rng.normal(0.0, 0.03, poses.shape),
         pose_bounds=(np.full(hinges, -2.0), np.full(hinges, 2.0)),
     )
-    started = time.perf_counter()
+    started = time.process_time()  # processor time: the host's load is not ours
     result = solve_bundle(prob, BundleSettings(marker_sigma_m=0.002))
-    assert time.perf_counter() - started < PROBE_BUDGET_S
+    assert time.process_time() - started < PROBE_BUDGET_S
     assert result.converged
     assert result.rms_m < 0.002 * np.sqrt(3.0)
     assert np.abs(result.offsets - truth).max() < PRIOR_SIGMA_M
+
+
+def test_offset_reach_caps_the_bound_and_progress_is_logged(caplog) -> None:
+    shift = np.zeros_like(SEEDS)
+    shift[0, 0] = 0.030
+    prob, _, _ = problem(shift=shift, offset_reach=np.full(SEEDS.shape, 0.004))
+    with caplog.at_level("INFO"):
+        result = solve_bundle(prob, BundleSettings(marker_sigma_m=NOISE_M))
+    assert np.abs(result.offsets - SEEDS).max() <= 0.004 + 1e-12
+    assert (0, 0) in result.on_bound
+    assert "bundle iteration" in caplog.text
+    with pytest.raises(ValueError, match="offset_reach"):
+        problem(offset_reach=np.full(SEEDS.shape, -1.0))[0].check(BundleSettings())
+
+
+def test_a_marker_weight_scales_its_residual_and_shields_the_fit() -> None:
+    prob, truth, poses = problem()
+    wild = np.array(prob.observations)
+    wild[:, 0] += np.random.default_rng(1).normal(0.0, 0.02, wild[:, 0].shape)
+    trusted = dataclasses.replace(prob, observations=wild)
+    weights = np.array([1e-6, 1.0, 1.0, 1.0, 1.0, 1.0])
+    shielded = dataclasses.replace(trusted, marker_weights=weights)
+    settings = BundleSettings(marker_sigma_m=NOISE_M)
+    plain, fit = solve_bundle(trusted, settings), solve_bundle(shielded, settings)
+    assert np.abs(fit.offsets[1:3] - truth[1:3]).max() < 0.002
+    assert np.abs(fit.poses[:, 0] - poses[:, 0]).max() < 0.01
+    assert fit.data_chi2 < 0.1 * plain.data_chi2
+    assert fit.per_marker_rms_m[0] > 0.01  # the reported error stays unweighted
+    with pytest.raises(ValueError, match="marker_weights"):
+        dataclasses.replace(prob, marker_weights=-weights).check(settings)
