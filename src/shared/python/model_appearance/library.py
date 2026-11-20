@@ -605,7 +605,7 @@ SHOULDER_DEFAULT_RISE = 0.73  # neck above the joints when the spec does not say
 SHOULDER_UP_AXIS = (0.0, 0.0, 1.0)  # up, in the shoulder link's body frame
 # Deltoid (#15279): the blend at the shoulder joint is longer down the arm
 # than across it: (across, down the arm), in upper-arm radii.
-DELTOID_HALF_SIZES = (0.9, 1.6)
+DELTOID_HALF_SIZES = (0.9, 1.3)
 UPPER_ARM_SKIN_TIP_INSET = 0.5  # skin tip meets the sleeve start, in radii (#15292)
 UPPER_ARM_START_INSET = 0.5  # the loft's tip sits at the joint, in radii (#15292)
 DELTOID_DROP = 1.25  # ball centre down the arm at the default neck rise, arm radii
