@@ -9,6 +9,7 @@ then the part is mapped to a material through the clothing preset.
 
 from __future__ import annotations
 
+import math
 from fnmatch import fnmatchcase
 from types import MappingProxyType
 from typing import TYPE_CHECKING
@@ -281,8 +282,8 @@ PART_RADIUS_M: dict[str, float] = {
     "shoulder": 0.05,
     "forearm": 0.0432,  # 20 % over the first 36 mm (owner, 2026-11-17)
     "hand": 0.042,
-    "thigh": 0.078,
-    "shin": 0.052,
+    "thigh": 0.102,  # spindle parameter: the widest section is about 0.87 of it
+    "shin": 0.058,  # radius at the knee (capsule ends)
     "foot": 0.040,
     "head": 0.095,
 }
@@ -299,13 +300,16 @@ CONTINUOUS_PARTS: tuple[str, ...] = ("forearm",)
 # Muscle belly per part: (gain, position, width). The radius grows by ``gain``
 # at ``position`` along the whole part and falls to nothing ``width`` away
 # (fractions of its length). Visual only.
-PART_BELLY: dict[str, tuple[float, float, float]] = {"forearm": (0.12, 0.28, 0.45)}
+PART_BELLY: dict[str, tuple[float, float, float]] = {
+    "forearm": (0.12, 0.28, 0.45),
+    "shin": (0.29, 0.38, 0.40),  # the calf (#15299)
+}
 # Parts that keep their radius to each joint and end in a ball about the
 # joint (elbow and wrist blends, #15262) instead of a spindle's thin ends.
-CAPSULE_END_PARTS: tuple[str, ...] = ("forearm",)
+CAPSULE_END_PARTS: tuple[str, ...] = ("forearm", "shin")
 # Fraction of the part's length by which its taper has reached the distal
 # radius; the rest (the wrist) stays slim.
-PART_TAPER_END: dict[str, float] = {"forearm": 0.8}
+PART_TAPER_END: dict[str, float] = {"forearm": 0.8, "shin": 0.85}
 
 
 # Fraction of the part's length from which a flat far end (``end_aspect``)
@@ -340,9 +344,44 @@ def validate_distal_scale(scale: float) -> float:
     return float(scale)
 
 
-# Leg taper of the lofted body (#15280): the thigh ends as wide as the shin starts
-# (0.078 * 0.68 ~ 0.052) and the shin ends at the ankle stub (0.052 * 0.70 ~ 0.036).
-LEG_DISTAL_SCALE: dict[str, float] = {"thigh": 0.68, "shin": 0.70}
+# Leg taper of the lofted body (#15280, #15299): the thigh ends about as wide as
+# the shin starts and the shin ends at the ankle stub (0.058 * 0.62 ~ 0.036).
+LEG_DISTAL_SCALE: dict[str, float] = {"thigh": 0.70, "shin": 0.62}
+# Leg shape from the sections of a CC0 athletic male body, 1.82 m tall (#15299,
+# visual only). The leg radii above are that body's and scale with the subject's
+# stature. ``PART_OFFSET`` bows a part's centreline forward: (shift over the
+# part radius, position, width), the last two as in ``PART_BELLY``. The
+# quadriceps sit ahead of the hip-knee line and the calf behind the shin.
+LIMB_REFERENCE_STATURE_M = 1.82
+STATURE_SCALED_PARTS: tuple[str, ...] = ("thigh", "shin")
+PART_OFFSET: dict[str, tuple[float, float, float]] = {
+    "thigh": (0.30, 0.35, 0.60),
+    "shin": (-0.53, 0.34, 0.46),
+}
+NO_OFFSET = (0.0, 0.5, 1.0)
+
+
+def stature_scale(part: str, stature_m: float | None) -> float:
+    """Radius factor of ``part`` for a subject ``stature_m`` tall (1.0 = as drawn).
+
+    Only ``STATURE_SCALED_PARTS`` scale; ``None`` (no subject stature) is 1.0.
+    Precondition: a finite stature > 0 (``TypeError`` / ``ValueError``).
+    """
+    if stature_m is None or part not in STATURE_SCALED_PARTS:
+        return 1.0
+    if isinstance(stature_m, bool) or not isinstance(stature_m, int | float):
+        raise TypeError(f"stature must be a number, got {stature_m!r}")
+    if not (math.isfinite(stature_m) and stature_m > 0.0):
+        raise ValueError(f"stature must be finite and positive, got {stature_m!r}")
+    return float(stature_m) / LIMB_REFERENCE_STATURE_M
+
+
+def offset(part: str) -> tuple[float, float, float]:
+    """Forward bow ``(shift over radius, position, width)`` of ``part`` (0 = none)."""
+    shift, position, width = PART_OFFSET.get(part, NO_OFFSET)
+    if not (math.isfinite(shift) and 0.0 <= position <= 1.0 and width > 0.0):
+        raise ValueError(f"offset of {part!r} needs a position in [0, 1], width > 0")
+    return float(shift), float(position), float(width)
 
 
 def limb_distal_scale(part: str) -> float:
@@ -356,7 +395,13 @@ def distal_scale(part: str) -> float:
 
 
 # Depth/width aspect of the cross-section (1 = round).
-PART_ASPECT: dict[str, float] = {"torso": 0.72, "pelvis": 0.78, "foot": 0.7}
+# The thigh is deeper than wide so the two thighs clear each other (#15299).
+PART_ASPECT: dict[str, float] = {
+    "torso": 0.72,
+    "pelvis": 0.78,
+    "foot": 0.7,
+    "thigh": 1.06,
+}
 GARMENT_THICKNESS = 1.08
 # Fractional extent of a garment along the segment: (start, end). Partial
 # bands are flat-capped; (0, 1) is a closed spindle that encloses the skin.
@@ -495,7 +540,7 @@ DELTOID_DROP = 1.25
 # Pelvis solid (HRG-C1, #13164): lofted on the hip landmarks, see
 # ``body_meshes._pelvis_segment``.
 # Width is ``pelvis_width`` (HRG-C4); the lower pole hangs below the MEAN HJC.
-PELVIS_CROTCH_DROP_M = PART_RADIUS_M["thigh"]  # pole below the mean HJC height
+PELVIS_CROTCH_DROP_M = 0.078  # pole below the mean HJC height; not the thigh radius
 PELVIS_MIN_BELOW_HJC_M = 0.025  # the lowest HJC keeps at least this much solid below
 PELVIS_WAIST_RATIO = 0.75  # flat cap at the lumbar plane / widest half width
 
