@@ -150,8 +150,8 @@ def test_the_preset_legs_are_the_stated_lengths_and_symmetric() -> None:
 def test_a_preset_may_leave_the_leg_settings_out(tmp_path: Path) -> None:
     raw = _raw()
     for key in presets.OPTIONAL:
-        raw["settings"].pop(key)
-        raw["provenance"].pop(key)
+        raw["settings"].pop(key, None)
+        raw["provenance"].pop(key, None)
     preset = _load(tmp_path, raw)
     kwargs = preset.builder_kwargs()
     assert all(getattr(preset, key) is None for key in presets.OPTIONAL)
