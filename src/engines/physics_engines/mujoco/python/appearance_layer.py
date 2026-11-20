@@ -284,7 +284,7 @@ def attach_appearance(
         )
 
         extra["body_skin"] = attach_body_skin(
-            root, elements, assets.material, doc, spec
+            root, elements, assets.material, doc, spec, club
         )
     return {
         **extra,
