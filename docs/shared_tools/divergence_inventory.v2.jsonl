@@ -1367,7 +1367,6 @@
 {"path": "model_appearance/hand_backends/assets/myohand/NOTICE", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/contact_solver.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/correctives.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
-{"path": "model_appearance/hand_backends/curl_plane.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/golf_grip.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/hand_asset.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/hand_backends/joint_angles.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}

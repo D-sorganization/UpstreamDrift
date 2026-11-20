@@ -45,9 +45,6 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     relax_folds,
     yield_to_points,
 )
-from src.shared.python.model_appearance.hand_backends.curl_plane import (
-    turn_curl_planes,
-)
 from src.shared.python.model_appearance.hand_backends.knuckle_sideways import (
     held_swing_rad,
 )
@@ -921,7 +918,6 @@ def _solve_right_hand(
     size = spec.hand_size
     solve, skin = _sized_assets(size.length_m, size.breadth_m, settings)
     hand = _GripHand(solve, settings.beside_other_hand() if paired else settings)
-    turn_curl_planes(hand.fixed, dict(dict(settings.curl_plane_turn_deg)[side]))
     targets = _targets(spec, side, settings)
     deepest = max(settings.squeeze_finger_depth_m, settings.squeeze_palm_depth_m)
     if deepest >= grip_radius_m:
