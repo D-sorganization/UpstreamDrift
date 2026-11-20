@@ -115,10 +115,26 @@ class FittedSkin:
         return self.maps[group](np.asarray(points, dtype=float))
 
 
-def load_fit_settings(path: Path | None = None) -> FitSettings:
-    """Read ``fit_settings.json``; raises ``ValueError`` for invalid values."""
+def load_fit_settings(
+    path: Path | None = None, profile: str | None = None
+) -> FitSettings:
+    """Read ``fit_settings.json``, optionally with one named profile applied.
+
+    A profile overrides named settings; without one the stored defaults are
+    returned unchanged. Raises ``ValueError`` for an unknown profile, a profile
+    entry that is not a fit setting, or invalid values.
+    """
     raw = json.loads((path or ASSET_DIR / "fit_settings.json").read_text())
-    values = {f.name: raw[f.name] for f in fields(FitSettings)}
+    names = {f.name for f in fields(FitSettings)}
+    values = {name: raw[name] for name in names}
+    if profile is not None:
+        profiles = raw.get("profiles", {})
+        if profile not in profiles:
+            raise ValueError(f"unknown fit profile {profile!r}")
+        extra = sorted(set(profiles[profile]) - names)
+        if extra:
+            raise ValueError(f"{extra[0]} in profile {profile!r} is not a fit setting")
+        values.update(profiles[profile])
     anchor = values.pop("shoulder_anchor_m")
     if len(anchor) != 3:
         raise ValueError("shoulder_anchor_m must hold three values")
