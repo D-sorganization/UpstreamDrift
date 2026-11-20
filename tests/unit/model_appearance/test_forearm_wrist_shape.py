@@ -19,6 +19,7 @@ from typing import Any
 import numpy as np
 import pytest
 from scipy.spatial import ConvexHull
+from scipy.spatial.transform import Rotation
 
 from src.shared.python.model_appearance import club_assembly as ca
 from src.shared.python.model_appearance import document_from_dict, library
@@ -26,6 +27,7 @@ from src.shared.python.model_appearance import skinned_club_hands as sch
 from src.shared.python.model_appearance import skinned_wrist_sections as sws
 from src.shared.python.model_appearance.body_meshes import body_meshes
 from src.shared.python.model_appearance.hand_backends.qa import (
+    _winding_numbers,
     load_hand_visual_quality,
 )
 from src.shared.python.motion_matching.execution.skinned_hand_wrists import (
@@ -235,12 +237,106 @@ def test_bad_wrist_shape_settings_are_refused(monkeypatch) -> None:
         ("cover", 0.5),
         ("hand_blend_m", 0.0),
         ("belly", [0.2, 0.0, 0.3]),
+        ("ball", {"flexion_deg": 45.0, "deviation_deg": 30.0, "steps": 0}),
+        ("elbow", [1.2, 0.2]),
+        ("reference_twist_deg", {"lead": 120.0, "trail": 0.0}),
     ):
         quality = {"forearm_wrist_margin": 1.2, "forearm_wrist_shape": {**SHAPE}}
         quality["forearm_wrist_shape"][key] = bad
         for module in (sch, sws):
             monkeypatch.setattr(module, "load_hand_visual_quality", lambda q=quality: q)
         with pytest.raises(ValueError, match=key):
-            {"taper_end": sws.wrist_taper_end, "belly": sws.forearm_belly}.get(
-                key, sch.wrist_blend
-            )()
+            {
+                "taper_end": sws.wrist_taper_end,
+                "belly": sws.forearm_belly,
+                "ball": sch.wrist_ball,
+                "elbow": sws.forearm_elbow,
+                "reference_twist_deg": sws.reference_twist_deg,
+            }.get(key, sch.wrist_blend)()
+
+
+@pytest.fixture(scope="module")
+def junctions(skinned) -> dict[str, dict[str, Any]]:
+    """Per hand: the forearm's far skin and the drawn hand with its wrist ball,
+    and where each sits (forearm frame and club frame)."""
+    club = ca.assembly_from_spec(skinned)
+    hands = {label: mesh for (_, label), mesh in _meshes(skinned).items()}
+    reach, out = sch.forearm_reach_m(club), {}
+    wide = sws.forearm_wrist_sections(skinned, club)
+    for side, arm in _forearms(skinned).items():
+        cap = arm["caps"][1]
+        out[side] = {
+            "skin": arm["skins"][1],
+            "end": np.asarray(cap.end_m),
+            "axis": np.subtract(cap.end_m, cap.start_m) / cap.length_m(),
+            "wide": wide[cap.body].width_axis,
+            "hand": hands[f"{side}_hand"],
+            "reach": reach[side],
+            "turn": arm["to_forearm"],
+        }
+    return out
+
+
+def _inside(points: np.ndarray, vertices: np.ndarray, faces: np.ndarray) -> np.ndarray:
+    return _winding_numbers(points, vertices, faces) > 0.5
+
+
+def test_the_forearm_ends_at_the_wrist_joint(junctions) -> None:
+    # The solid added 22.6 mm to the forearm beyond its joint-to-joint length.
+    for j in junctions.values():
+        past = (j["skin"].vertices - j["end"]) @ j["axis"]
+        assert 0.0 < past.max() <= float(SHAPE["max_past_joint_m"])
+
+
+def test_the_wrist_stays_closed_as_it_bends(junctions) -> None:
+    step = float(SHAPE["max_bent_step_m"])
+    for j in junctions.values():
+        skin, (wrist, _) = j["skin"].vertices, j["reach"]
+        end = skin[(skin - j["end"]) @ j["axis"] >= -1e-9]  # from the joint on
+        inward = end.mean(axis=0) - end
+        inward /= np.maximum(np.linalg.norm(inward, axis=1), 1e-12)[:, None]
+        for flexion, deviation in SHAPE["bends_deg"]:
+            bend = Rotation.from_rotvec(
+                np.radians(flexion) * j["wide"]
+                + np.radians(deviation) * np.cross(j["axis"], j["wide"])
+            ).as_matrix()
+            hand = (j["hand"].vertices - wrist) @ (bend @ j["turn"]).T + j["end"]
+            # No point of the forearm's end stands ``step`` outside the hand.
+            assert _inside(end + step * inward, hand, j["hand"].faces).all()
+
+
+def test_the_wrist_ball_hides_in_the_shaped_forearm(junctions) -> None:
+    proud = float(SHAPE["max_ball_proud_m"])
+    for j in junctions.values():
+        wrist, along = j["reach"]
+        drawn = j["hand"].vertices[np.unique(j["hand"].faces)]
+        ball = drawn[(drawn - wrist) @ along > sch.forearm_cuff_m() + 1e-9]
+        assert len(ball) > 0  # the drawn hand carries a ball above its cut rim
+        rel = (ball - wrist) @ j["turn"].T
+        skin = j["skin"].vertices - j["end"]
+        out = rel - skin[skin @ j["axis"] >= -1e-9].mean(
+            axis=0
+        )  # off the skin's centre
+        out -= np.outer(out @ j["axis"], j["axis"])
+        out /= np.maximum(np.linalg.norm(out, axis=1), 1e-12)[:, None]
+        points = rel + j["end"] - proud * out
+        assert _inside(points, j["skin"].vertices, j["skin"].faces).all()
+
+
+def test_the_elbow_shows_no_collar(skinned) -> None:
+    # The forearm's ball about the elbow stood 7 mm outside the upper arm.
+    skins = _meshes(skinned)
+    caps = {c.body: c for c in derive_visual_skeleton(skinned).capsules}
+    parents = {j["child"]: j["parent"] for j in skinned["joints"]}
+    for arm in _forearms(skinned).values():
+        near = arm["caps"][0]
+        upper = caps[parents[near.body]]
+        radius = []
+        for cap, skin, at, sign in (
+            (upper, skins[upper.body, "skin0"], upper.end_m, -1.0),
+            (near, arm["skins"][0], near.start_m, 1.0),
+        ):
+            axis = np.subtract(cap.end_m, cap.start_m) / cap.length_m()
+            section = _cut(skin, at + sign * 1e-6 * axis, axis)
+            radius.append(np.hypot(*section.T).max())
+        assert radius[1] <= radius[0] + float(SHAPE["max_elbow_step_m"])

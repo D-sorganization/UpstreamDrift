@@ -289,6 +289,8 @@ class _Segment:
     width_hint: np.ndarray | None = None
     end_cap: float = 1.0
     end_shift: np.ndarray | None = None
+    start_scale: float = 1.0
+    start_until: float = 1.0
     #: Trunk cross-sections and the joint plane they are measured from (#15279).
     profile: TorsoProfile | None = None
     profile_start: np.ndarray | None = None
@@ -356,6 +358,7 @@ def _wrist_shape(part: str, radius: float, wrist: Any) -> dict[str, Any]:
         }
     scale = library.validate_distal_scale(min(1.0, wrist.half_width_m / radius))
     taper = {"end_scale": scale, "taper_end": wrist.taper_end, "belly": wrist.belly}
+    taper["start_scale"], taper["start_until"] = wrist.elbow
     if not wrist.shapes_end:
         return taper
     return {
@@ -599,6 +602,8 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
             flatten_from=seg.flatten_from,
             end_cap=seg.end_cap,
             end_shift=seg.end_shift,
+            start_scale=seg.start_scale,
+            start_until=seg.start_until,
             rings=library.LOFT_RINGS,
             sides=library.LOFT_SIDES,
             width_hint=hint,

@@ -19,6 +19,8 @@ from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
+from scipy.spatial import ConvexHull
+from scipy.spatial.transform import Rotation
 
 from src.shared.python.grip_spec.types import GripSpec
 from src.shared.python.model_appearance.club_assembly import ClubAssembly
@@ -88,6 +90,57 @@ def wrist_blend() -> WristBlend:
     return WristBlend(
         margin / cover, float(shape["hand_blend_m"]), float(shape["max_centre_shift_m"])
     )
+
+
+@dataclass(frozen=True)
+class WristBall:
+    """Wrist range (degrees either way) that the drawn hand's wrist ball
+    covers, and the poses taken per half range (#15299)."""
+
+    flexion_deg: float
+    deviation_deg: float
+    steps: int
+
+    def __post_init__(self) -> None:
+        angles = (self.flexion_deg, self.deviation_deg)
+        if not (all(0.0 < a <= 90.0 for a in angles) and 1 <= self.steps <= 12):
+            raise ValueError(
+                f"ball needs angles in (0, 90] and 1 <= steps <= 12, got {self}"
+            )
+
+
+def wrist_ball() -> WristBall:
+    """The drawn hands' wrist ball, from the quality settings."""
+    quality: Mapping[str, Any] = load_hand_visual_quality()
+    ball = quality["forearm_wrist_shape"]["ball"]
+    return WristBall(
+        float(ball["flexion_deg"]), float(ball["deviation_deg"]), int(ball["steps"])
+    )
+
+
+def _ball(rim: Array, along: Array, wide: Array, ball: WristBall) -> Mesh:
+    """Convex hull of a hand's cut rim swept through the wrist's range.
+
+    ``rim`` are the rim's points from the wrist joint, ``along`` the unit
+    direction up the forearm and ``wide`` the wrist's width axis. Only what
+    lies on or above the rim's plane is kept, so the hand below is untouched;
+    the solid fills the wrist under a forearm that ends at the joint, at any
+    bend within the range. Postcondition: closed, wound outward.
+    """
+    grid = np.linspace(-1.0, 1.0, 2 * ball.steps + 1)
+    flex = np.radians(ball.flexion_deg) * wide
+    deviate = np.radians(ball.deviation_deg) * np.cross(along, wide)
+    turns = [f * flex + d * deviate for f in grid for d in grid if f * f + d * d <= 1.0]
+    swept = np.einsum(
+        "kij,nj->kni", Rotation.from_rotvec(turns).as_matrix(), rim
+    ).reshape(-1, 3)
+    swept = swept[swept @ along >= (rim @ along).min() - _RIM_M]
+    hull = ConvexHull(swept)
+    points, faces = swept[hull.vertices], np.searchsorted(hull.vertices, hull.simplices)
+    a, b, c = (points[faces[:, k]] for k in range(3))
+    inward = np.einsum("ij,ij->i", np.cross(b - a, c - a), hull.equations[:, :3]) < 0
+    faces[inward] = faces[inward][:, ::-1]
+    return Mesh(points, faces)
 
 
 def owner_grip_spec(roll_deg: float = 0.0) -> GripSpec:
@@ -250,7 +303,11 @@ def _widened_wrist(rel: Array, along: Array, blend: WristBlend) -> Array:
 
 
 def skinned_hand_meshes(
-    club: ClubAssembly, *, cut_at_wrist: bool = True, widen_wrist: bool = True
+    club: ClubAssembly,
+    *,
+    cut_at_wrist: bool = True,
+    widen_wrist: bool = True,
+    with_ball: bool = False,
 ) -> dict[str, Mesh]:
     """``{"lead_hand", "trail_hand"}`` skinned meshes in the club-body frame.
 
@@ -261,6 +318,7 @@ def skinned_hand_meshes(
     model's own forearm continues from the hand; the cut edge is moved onto
     that plane and closed flat. With ``widen_wrist`` as well the cut hand's
     wrist is widened by :func:`wrist_blend` to a human girth (#15299).
+    ``with_ball`` adds the :func:`wrist_ball` solid above the cut, for drawing.
     """
     frame, pair = skinned_hand_frame(club), _pair()
     reach = forearm_reach_m(club)
@@ -280,7 +338,13 @@ def skinned_hand_meshes(
                 vertices[drawn] = wrist + _widened_wrist(
                     vertices[drawn] - wrist, along, wrist_blend()
                 )
+            rel = vertices[np.unique(faces)] - wrist
+            rim = rel[np.abs(rel @ along - forearm_cuff_m()) < _RIM_M]
             vertices, faces = _capped(vertices, faces)
+            if with_ball:
+                ball = _ball(rim, along, wrist_section(rel, along)[2], wrist_ball())
+                faces = np.concatenate([faces, ball.faces + len(vertices)])
+                vertices = np.concatenate([vertices, wrist + ball.vertices])
         meshes[label] = Mesh(vertices, faces)
     return meshes
 
