@@ -134,6 +134,7 @@ from src.shared.python.motion_matching.pipeline.reference import (
 from src.shared.python.motion_matching.pipeline.weld_projection import (
     weld_consistent_track,
 )
+from src.shared.python.motion_matching.pipeline import bundle_stage
 from src.shared.python.motion_matching.pipeline.marker_selection import (
     DEFAULT_LEG_SEED_SOURCE,
     add_marker_selection_argument,
@@ -452,6 +453,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_hip_zero_twist_argument(parser)
     add_knee_flexion_argument(parser)
     add_marker_selection_argument(parser)
+    bundle_stage.add_bundle_arguments(parser)
     return parser
 
 
@@ -1362,6 +1364,42 @@ class CalibratedRun:
     provenance: BaseSpecProvenance | None = None
 
 
+def _bundle_adjust(
+    args: argparse.Namespace,
+    lane: Lane,
+    labels: tuple[str, ...],
+    cal: _CalibrateAndScaleResult,
+) -> _CalibrateAndScaleResult:
+    """Opt-in marker-offset bundle adjustment (#15296): the calibration with
+    adjusted attachments and rebuilt kinematics; ``cal`` itself without the flag."""
+    settings = bundle_stage.stage_settings(args)
+    if settings is None:
+        return cal
+    sole = bundle_stage.stated_sole(cal.scaled_spec)
+    fitted = bundle_stage.adjust(
+        lane, cal.kin, cal.attachments, cal.address2.q, settings, sole
+    )
+    adapter, kin = lane.kinematics(
+        cal.spec_bytes, fitted.attachments, ik_backend=getattr(args, "ik_backend", "lm")
+    )
+    sim = fs.FullBodySimulator(adapter)
+    address = lane.best_address(kin, fitted.address_q)
+    report = cal.address_report
+    record_calibrated_address(
+        report, sim, kin, address, lane, labels, adapter, spec=cal.scaled_spec
+    )
+    report["bundle_adjustment"] = fitted.report
+    return replace(
+        cal,
+        adapter=adapter,
+        kin=kin,
+        sim=sim,
+        address2=address,
+        attachments=fitted.attachments,
+        offsets={label: fitted.attachments[label] for label in cal.offsets},
+    )
+
+
 @precondition(lambda args: args is not None, "args must not be None")
 def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
     """Run the pipeline through the calibrated address (no trajectory or dynamics)."""
@@ -1401,6 +1439,7 @@ def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
     cal_res = _calibrate_and_scale(ctx, lane, base_spec, upper_base, upper, labels)
     if chosen.report():  # only a non-default selection: default receipts keep
         cal_res.address_report["marker_selection"] = chosen.report()
+    cal_res = _bundle_adjust(args, lane, labels, cal_res)
     return CalibratedRun(ctx, lane, base_spec, labels, cal_res, provenance)
 
 
