@@ -428,6 +428,8 @@ def blend_scale(garment: bool, part: str = "upper_arm") -> float:
 # centred on the neck, which leans forward of the trunk axis (#15292).
 THORAX_COLLAR_FORWARD = 0.034
 THORAX_SHOULDER_FORWARD = 0.038  # the same shift at the shoulder line (#15299)
+THORAX_DOME_SQUARENESS = (2.1, 2.0)  # at the shoulder line, at the neck (#15299)
+THORAX_NECK_STUB_ALONG = 0.955  # the slope ends here; a short neck stub tops it
 THORAX_SHOULDER_ALONG = 0.9135  # shoulder joints' height the stations are tuned at
 
 
@@ -437,7 +439,7 @@ def _shoulder_dome(
     slant: float,
     forward: tuple[float, float] = (0.0, 0.0),
     steps: int = 6,
-    wall_share: float = 0.7,
+    wall_share: float = 0.9,
 ) -> tuple[tuple[float, ...], ...]:
     """Stations from the shoulder line (along, width, depth) up to the neck.
 
@@ -446,7 +448,7 @@ def _shoulder_dome(
     shoulder line and flattening towards the neck, not a shelf. ``forward``
     is the section's forward shift at the shoulder line and at the neck.
     """
-    rows = []
+    rows, low = [], THORAX_DOME_SQUARENESS[0]
     for i in range(steps + 1):
         u = i / steps
         k = wall_share * u + (1.0 - wall_share) * u * u
@@ -455,7 +457,8 @@ def _shoulder_dome(
         depth = joint[2] + (neck[2] - joint[2]) * k
         ease = u * u * (3.0 - 2.0 * u)  # eases in from the shoulder line
         shift = forward[0] + (forward[1] - forward[0]) * ease
-        rows.append((along, width, depth, slant, 2.4 - 0.4 * u, shift))
+        square = low + (THORAX_DOME_SQUARENESS[1] - low) * u
+        rows.append((along, width, depth, slant, square, shift))
     return tuple(rows)
 
 
@@ -476,33 +479,48 @@ TORSO_PROFILES: dict[str, tuple[tuple[float, ...], ...]] = {
         (0.3, 0.97, 0.955, 0.0, 2.15, 0.011),
         (0.5, 1.04, 1.02, 0.0, 2.15, 0.02),
         (0.62, 1.04, 1.04, 0.0, 2.3, 0.028),
-        (0.72, 1.04, 0.936, 0.0, 0.0, 0.026),
-        (0.8, 1.02, 0.858, 0.07, 0.0, 0.035),
-        (0.87, 0.91, 0.775, 0.12, 0.0, 0.038),
+        (0.72, 1.04, 0.936, 0.0, 2.4, 0.026),
+        (0.8, 1.02, 0.858, 0.07, 2.25, 0.035),
+        (0.87, 0.885, 0.775, 0.12, 2.1, 0.038),
         *_shoulder_dome(
-            (0.92, 0.85, 0.707),
-            (0.98, 0.38, 0.46),
+            (0.89, 0.84, 0.77),
+            (0.94, 0.462, 0.62),
             0.153,
             (THORAX_SHOULDER_FORWARD, THORAX_COLLAR_FORWARD),
         ),
+        (THORAX_NECK_STUB_ALONG, 0.4, 0.48, 0.153, 2.0, THORAX_COLLAR_FORWARD),
+        (0.98, 0.368, 0.46, 0.153, 2.0, THORAX_COLLAR_FORWARD),
     ),
 }
+# A thorax standing on the pelvis is the whole trunk (#15299): waist, lumbar
+# hollow and belly follow the measured CC0 body (appearance reference, "Trunk
+# Sections"). THORAX_WAIST is the lumbar-plane section the pelvis is lofted to.
+THORAX_WAIST = (0.0, 0.935, 0.858, 0.0, 2.0, 0.037)
+TRUNK_CHEST_FROM = 5  # first thorax station kept by the trunk profile
+TORSO_PROFILES["trunk"] = (
+    THORAX_WAIST,
+    (0.13, 0.92, 0.858, 0.0, 2.1, 0.04),
+    (0.3, 0.955, 0.931, 0.0, 2.0, 0.0335),
+    (0.5, 1.04, 1.002, 0.0, 2.0, 0.0254),
+    *TORSO_PROFILES["thorax"][TRUNK_CHEST_FROM:],
+)
 TORSO_RINGS = 18
 TORSO_FINE_FROM, TORSO_FINE_RINGS = 0.9, 14  # the shoulder dome is sampled finely
 TORSO_SQUARENESS = 2.6  # superellipse exponent of a trunk cross-section
 # Shoulder link (#15279): a yoke from the neck side to the shoulder joint,
 # flatter than it is deep, not a ball. Depth axis is the link's up axis.
 SHOULDER_ASPECT = 0.72  # up-down over front-back extent of the yoke
-SHOULDER_RADIUS_SCALE = 1.1  # front-back half extent over the part radius
-SHOULDER_END_SCALE = 0.85  # yoke radius at the shoulder joint, over the neck end
+SHOULDER_RADIUS_SCALE = 0.9  # front-back half extent over the part radius
+SHOULDER_END_SCALE = 0.6  # yoke radius at the shoulder joint, over the neck end
 SHOULDER_START_FRACTION = 0.3  # the yoke starts this far along the link
 # The yoke hangs from the NECK point (#15299), in yoke radii, so it slopes like a
 # trapezius by as much as the shoulder joints sit below the neck (a fit setting).
-SHOULDER_NECK_END_BELOW_NECK = 1.35  # yoke axis beside the neck
-SHOULDER_JOINT_END_BELOW_NECK = 1.35  # yoke axis at the joint, never above ...
+SHOULDER_NECK_END_BELOW_NECK = 1.6  # yoke axis beside the neck
+SHOULDER_JOINT_END_BELOW_NECK = 1.3  # yoke axis at the joint, never above ...
 SHOULDER_JOINT_END_LIFT = -0.1  # ... this height over the joint itself
 SHOULDER_END_INSET = 0.5  # the yoke stops short of the joint: its tip is in the cap
-SHOULDER_DEFAULT_RISE = 0.73  # neck above the joints when the spec does not say
+# neck above the joints when the spec does not say
+SHOULDER_DEFAULT_RISE = 0.803 / SHOULDER_RADIUS_SCALE
 SHOULDER_UP_AXIS = (0.0, 0.0, 1.0)  # up, in the shoulder link's body frame
 # Deltoid (#15279): the blend at the shoulder joint is longer down the arm
 # than across it: (across, down the arm), in upper-arm radii.
@@ -526,6 +544,17 @@ def deltoid_drop_m(radius_m: float, rise_m: float | None) -> float:
 PELVIS_CROTCH_DROP_M = PART_RADIUS_M["thigh"]  # pole below the mean HJC height
 PELVIS_MIN_BELOW_HJC_M = 0.025  # the lowest HJC keeps at least this much solid below
 PELVIS_WAIST_RATIO = 0.86  # flat cap at the lumbar plane / widest half width
+# Under a trunk solid the cap IS its lowest section (#15299): the ratio rises to
+# its half width, within PELVIS_WAIST_RATIO (the containment assumes it) and
+# this. Sections below: (level, depth scale, forward shift in half depths);
+# level -1 is the lower pole, 0 the hip joints (centred: the containment holds).
+PELVIS_MAX_WAIST_RATIO = 0.97
+PELVIS_SECTIONS = (
+    (-1.0, 1.0, -0.05),
+    (-0.5, 1.05, -0.03),
+    (0.0, 0.99, 0.0),
+    (0.5, 1.0, 0.09),
+)
 
 
 GARMENT_PARTS = ("torso", "pelvis", "shoulder", "upper_arm", "thigh", "shin")

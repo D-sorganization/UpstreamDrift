@@ -81,6 +81,7 @@ from src.shared.python.model_appearance.pelvis_width import (
     resolve_pelvis_width,
 )
 from src.shared.python.model_appearance.schema import AppearanceDocument, Material
+from src.shared.python.model_appearance.skinned_body import spec_body_poses
 from src.shared.python.model_appearance.torso_profile import (
     TorsoFrame,
     TorsoProfile,
@@ -273,6 +274,8 @@ class _Context:
     parents: Mapping[str, str] = field(default_factory=dict)
     #: Height of the neck point above each shoulder link, metres (#15299).
     neck_rise: Mapping[str, float] = field(default_factory=dict)
+    #: Lowest section of the trunk solid standing on each pelvis (#15299).
+    waists: Mapping[str, _Waist] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -482,7 +485,9 @@ def _trunk_segment(
     over = min(0.5 * radius, 0.5 * spine.length_m())  # keep a positive length
     profile = None
     if size.source == "visual_hints" and part == "torso":
-        role = "thorax" if body in ctx.thorax else "abdomen"
+        on_pelvis = not ctx.shapes.get(ctx.parents.get(body, ""))
+        chest = "trunk" if on_pelvis else "thorax"
+        role = chest if body in ctx.thorax else "abdomen"
         profile = TorsoProfile(
             tuple(TorsoStation(*row) for row in library.TORSO_PROFILES[role]),
             library.TORSO_SQUARENESS,
@@ -490,7 +495,7 @@ def _trunk_segment(
             fine_from=library.TORSO_FINE_FROM,
             fine_rings=library.TORSO_FINE_RINGS,
         )
-        if role == "thorax" and len(caps) > 1:  # shortest capsule: shoulder line
+        if body in ctx.thorax and len(caps) > 1:  # shortest capsule: shoulder line
             line = min(c.length_m() for c in caps) / spine.length_m()
             reference = library.THORAX_SHOULDER_ALONG
             profile = profile.with_shoulder(reference, min(line, reference))
@@ -516,12 +521,62 @@ class _PelvisSegment(_Segment):
     shape: geometry.SplitEllipsoid | None = None
 
 
+@dataclass(frozen=True)
+class _Waist:
+    """Lowest section of the trunk solid over a pelvis, in the pelvis frame."""
+
+    front: np.ndarray
+    centre: np.ndarray
+    half_width: float
+    half_depth: float
+
+
+def _waists(
+    spec: Mapping[str, Any],
+    doc: AppearanceDocument,
+    sections: Mapping[str, BodySection],
+    shapes: Mapping[str, Sequence[Shape]],
+    by_body: Mapping[str, Sequence[Capsule]],
+) -> dict[str, _Waist]:
+    """The waist section per pelvis that a hinted trunk solid stands on.
+
+    Postcondition: an entry only under a trunk solid with a front and hints.
+    """
+    parent = {str(j["child"]): str(j["parent"]) for j in spec.get("joints", ())}
+    out: dict[str, _Waist] = {}
+    for body, section in sections.items():
+        if section.front_axis is None or not shapes.get(body) or body not in by_body:
+            continue
+        below = parent.get(body, "")
+        while library.classify_body(below) == "torso" and not shapes.get(below):
+            below = parent.get(below, "")
+        if library.classify_body(below) != "pelvis" or below not in sections:
+            continue
+        poses = spec_body_poses(spec)
+        to_pelvis = np.linalg.inv(poses[below]) @ poses[body]
+        spine = max(by_body[body], key=lambda c: c.length_m())
+        size = _section_size("torso", shapes[body], section)
+        rule = library.rule_for_body(doc, body)
+        radius = size.radius_m * (1.0 if rule is None else rule.radius_scale)
+        _, wide, deep, _, _, forward = library.THORAX_WAIST
+        shift = forward * spine.length_m() * section.front_axis
+        start = np.asarray(spine.start_m) + shift
+        out[below] = _Waist(
+            to_pelvis[:3, :3] @ section.front_axis,
+            to_pelvis[:3, :3] @ start + to_pelvis[:3, 3],
+            wide * radius,
+            deep * radius * size.aspect,
+        )
+    return out
+
+
 def _pelvis_plan(
     marks: PelvisLandmarks,
     section: BodySection,
     size: SectionSize,
     scale: float,
     subject: Mapping[str, Any],
+    waist: _Waist | None = None,
 ) -> tuple[geometry.SplitEllipsoid, PelvisWidth]:
     """Hip-centred solid from the lower pole up to the lumbar plane (HRG-C4).
 
@@ -531,6 +586,8 @@ def _pelvis_plan(
     Half depth: the hint AP semi-axis. The lower pole is
     ``PELVIS_CROTCH_DROP_M`` below the *mean* HJC height, so vertical HJC
     asymmetry does not stretch it; the top is cut flat at the lumbar plane.
+    Under a trunk solid (``waist``) the cap is that solid's lowest section and
+    the sections below follow ``library.PELVIS_SECTIONS``.
     """
     up, ml = section.trunk_up_axis(), section.ml_axis
     hjc = np.stack([marks.hjc_r, marks.hjc_l])
@@ -551,16 +608,23 @@ def _pelvis_plan(
     )
     pole = float(z_hjc.mean()) - library.PELVIS_CROTCH_DROP_M
     half_down = max(z_low - pole, library.PELVIS_MIN_BELOW_HJC_M)
+    half_width = scale * width.width_m / 2.0
+    half_depth = scale * size.radius_m * size.aspect
     shape = geometry.SplitEllipsoid(
-        centre,
-        up,
-        ml,
-        scale * width.width_m / 2.0,
-        scale * size.radius_m * size.aspect,
-        half_up,
-        half_down,
-        top,
+        centre, up, ml, half_width, half_depth, half_up, half_down, top
     )
+    if waist is not None:
+        low, high = library.PELVIS_WAIST_RATIO, library.PELVIS_MAX_WAIST_RATIO
+        ratio = min(max(waist.half_width / half_width, low), high)
+        rows = [(at, d, f * half_depth) for at, d, f in library.PELVIS_SECTIONS]
+        ahead = float((waist.centre - centre) @ waist.front)
+        cap = (1.0, waist.half_depth / (ratio * half_depth), ahead)
+        shape = dataclasses.replace(
+            shape,
+            half_up=top / math.sqrt(1.0 - ratio**2),
+            front=waist.front,
+            sections=(*rows, cap),
+        )
     return shape, width
 
 
@@ -568,8 +632,9 @@ def _pelvis_shape(
     ctx: _Context, body: str, size: SectionSize, scale: float
 ) -> geometry.SplitEllipsoid:
     """The pelvis solid of ``body`` (see :func:`_pelvis_plan`)."""
+    waist = ctx.waists.get(body)
     shape, _ = _pelvis_plan(
-        ctx.pelvis[body], ctx.sections[body], size, scale, ctx.subject
+        ctx.pelvis[body], ctx.sections[body], size, scale, ctx.subject, waist
     )
     return shape
 
@@ -829,6 +894,7 @@ def body_meshes(
         _parents_of(spec, "shoulder"),
         _torso_parents(spec),
         _neck_rises(spec, by_body),
+        _waists(spec, doc, sections, shapes, by_body),
     )
     out = [
         m for body, caps in by_body.items() for m in _meshes_for_body(ctx, body, caps)

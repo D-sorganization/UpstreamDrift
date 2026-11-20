@@ -14,9 +14,11 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
+from scipy.interpolate import PchipInterpolator
 
 from src.shared.python.core.contracts import ensure, require
 
@@ -467,6 +469,11 @@ class SplitEllipsoid:
     half_up: float
     half_down: float
     top: float
+    #: Which way is front, and (level, depth scale, forward shift in metres)
+    #: sections, lowest first: level -1 is the lower pole, 0 the widest level
+    #: and 1 the flat cap. Empty: a plain centred ellipsoid.
+    front: Array | None = None
+    sections: tuple[tuple[float, float, float], ...] = ()
 
 
 def split_ellipsoid_mesh(
@@ -478,6 +485,8 @@ def split_ellipsoid_mesh(
     even ``sides`` (left/right mirror symmetry), ``rings >= 4``. Postcondition:
     positive volume, symmetric about the plane through ``centre`` normal to
     ``width``; the highest point is the flat cap at ``centre + top * up``.
+    With ``sections`` (at least two, rising levels, positive scales, a
+    ``front`` axis) each ring is that much deeper and shifted to the front.
     """
     c = _check_finite("centre", shape.centre, 3)
     up = _check_finite("up", shape.up, 3)
@@ -502,8 +511,34 @@ def split_ellipsoid_mesh(
     plane = np.outer(np.cos(phi), u * shape.half_width * thickness) + np.outer(
         np.sin(phi), v * shape.half_depth * thickness
     )
+    section = _split_sections(shape, a, u)
     grid = np.empty((len(angles), sides, 3))
     for k, ang in enumerate(angles):
         height = math.sin(ang) * (shape.half_up if ang > 0 else shape.half_down)
-        grid[k] = c + a * height + math.cos(ang) * plane
-    return closed_grid_mesh(grid, c + a * shape.top, c - a * shape.half_down)
+        level = height / (shape.top if ang > 0 else shape.half_down)
+        deep, forward = section(level)
+        ring = plane + np.outer(plane @ v, (deep - 1.0) * v)
+        grid[k] = c + a * height + math.cos(ang) * ring + forward
+    top, pole = c + a * shape.top + section(1.0)[1], c - a * shape.half_down
+    return closed_grid_mesh(grid, top, pole + section(-1.0)[1])
+
+
+def _split_sections(shape: SplitEllipsoid, up: Array, width: Array) -> Any:
+    """Level -> (depth scale, forward shift vector) of ``shape``."""
+    if not shape.sections:
+        return lambda level: (1.0, np.zeros(3))
+    rows = np.asarray(shape.sections, dtype=float)
+    front = np.zeros(3) if shape.front is None else np.asarray(shape.front, float)
+    front = front - (front @ up) * up - (front @ width) * width
+    ok = rows.ndim == 2 and len(rows) >= 2 and rows.shape[1] == 3
+    ok = ok and bool(np.isfinite(rows).all() and (np.diff(rows[:, 0]) > 0).all())
+    if not (ok and rows[:, 1].min() > 0 and np.linalg.norm(front) > 1e-9):
+        raise ValueError("sections need a front axis, rising levels, positive scales")
+    front = front / np.linalg.norm(front)
+    curve = PchipInterpolator(rows[:, 0], rows[:, 1:])
+
+    def at(level: float) -> tuple[float, Array]:
+        deep, shift = curve(min(max(level, rows[0, 0]), rows[-1, 0]))
+        return float(deep), float(shift) * front
+
+    return at

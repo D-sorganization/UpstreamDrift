@@ -153,6 +153,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 932 | `src/shared/python/model_generation/library/model_library.py` |
 | 924 | `src/research/differentiable/engine.py` |
 | 922 | `src/shared/python/shadow_tracker/service.py` |
+| 921 | `src/shared/python/model_appearance/body_meshes.py` |
 | 919 | `src/bunkershot3d/vandv/ledger.py` |
 | 916 | `src/tools/bunker_shot_gui/export.py` |
 | 913 | `src/engines/physics_engines/opensim/python/tour_matching/native_diagnostic_contract.py` |
@@ -194,7 +195,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 861 | `src/shared/python/motion_matching/pipeline/lane.py` |
 | 859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m` |
 | 857 | `src/shared/python/injury/spinal_load_analysis.py` |
-| 855 | `src/shared/python/model_appearance/body_meshes.py` |
 | 853 | `src/shared/python/ai/gui/assistant_panel.py` |
 | 853 | `src/shared/python/chat/_chat_dock_widget_qt.py` |
 | 853 | `src/shared/python/sidekick/process_calculators/constants.py` |

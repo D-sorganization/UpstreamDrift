@@ -71,7 +71,16 @@ $W=\max\bigl(\rho,\ \max_i (|(p_i-\bar p)\!\cdot\!\hat m| + r_{\mathrm{thigh}} +
 /\sqrt{1-\ell_i^2}\bigr)$ with $\ell_i$ the HJC's height over the widest level
 in upper half-heights; half depth is the hint AP semi-axis. The chest's lower
 tip is its joint origin, so the two solids meet at the lumbar plane without
-overlap. The thigh blend ball is $0.95\,r_{\mathrm{thigh}}$ ($\le1.05$ with the
+overlap. Under a hinted trunk solid (\#15299) the cap \emph{is} that solid's
+lowest section: $\kappa$ becomes its half width over $W$ (held in $0.86$,
+which the containment assumes, to $0.97$; $0.879$ here), and each ring at level $\lambda$ ($-1$ lower pole, $0$
+hip joints, $1$ cap) is scaled in depth and shifted forward by
+\texttt{library.PELVIS\_SECTIONS} (monotone cubic between rows; the cap row
+is computed from the trunk section, the shift in hint half depths): full
+buttock below the hip joints (depth $1.05$ at $\lambda=-0.5$), centred on the
+hip joints at $\lambda=0$ (so the containment above holds) and leaning
+forward from there to the waist. A pelvis without such a trunk solid keeps the plain ellipsoid. The
+thigh blend ball is $0.95\,r_{\mathrm{thigh}}$ ($\le1.05$ with the
 garment). Visual only: compiled masses, inertias, joints and equality
 constraints are unchanged (\texttt{test\_pelvis\_loft.py}, the compiled-array
 test in \texttt{test\_mujoco\_appearance\_layer\_body\_meshes.py}).
@@ -254,16 +263,36 @@ allows on the $0.2052$\,m hint ($\pm5\,\%$); the ANSUR norm ($0.228$ to
 $0.243$\,m at this stature) needs a deeper \texttt{visual\_hints} thorax in the
 spec, not a deeper profile here.
 
+\paragraph{Trunk Sections (\#15299).} A CC0 athletic male body (MakeHuman, sliced at $1.82$\,m;
+\texttt{assets/body\_cc0/body\_sections.json}) has, from the vertical through
+the hip joints, its back at $-93$ (hips), $-51$ (top of the pelvis) and $-91$\,mm (chest), its front at $138$ to $166$\,mm, and half widths $174$,
+$145$ (waist) and $183$\,mm. A thorax standing on the pelvis uses the \texttt{trunk} profile: stations $(t,w,d,\cdot,n,f)$ at $t=0$
+(\texttt{THORAX\_WAIST}), $0.13$, $0.3$ and $0.5$ replace the lower thorax stations ($w,d$ in hint semi-axes, $n$ the superellipse exponent, $2.0$ here,
+$f$ the forward shift in lengths $L$); front and back are $fL\pm d\,\alpha\rho$.
+For this spec the skin goes, before $\to$ after (mm): waist half width $150\to146$, back $-88\to-70$, front $98\to106$; top of the pelvis back
+$-86\to-72$, front $86\to106$; hips $\pm98\to\pm97$; chest ($-93$, $119$)
+unchanged; lumbar hollow $24$\,mm (body $38$\,mm; a shirt hangs across it);
+forearm depth at address $49.7\to49.5$\,mm. Not reached: the measured chest
+and pelvis depths ($0.237$, $0.217$\,m at $1.71$\,m) exceed the hint bounds
+($0.2154$, $0.2064$\,m); the measured waist over chest ($0.79$) is below
+\texttt{min\_waist\_over\_chest} $=0.88$ (drawn $0.885$). Open: the rounded top leaves the thorax $0.74$ of its widest at the shoulder line (existing bound $0.8$). The join step is at
+most $3$\,mm towards five directions. Shoulders: the collar slant drops only
+the front half of a section, the exponents above the chest fall $2.4$,
+$2.25$, $2.1$ to $2.0$ (were $2.6$, $2.4$), the slope ($t=0.89$ on, a fillet from $0.94$) ends at $t=0.955$ under
+a neck stub, a moved shoulder line no longer widens the dome, and the yoke is
+$0.9$ part radii deep (was $1.1$). Standing, the yoke stood about $21$ and
+$27$\,mm outside the hull of thorax and arms (cut by height, by depth); now $0$ (bound $2$\,mm). Figure: \texttt{evidence/torso\_shoulders/trunk\_sections\_before\_after.png}.
+
 \paragraph{Shoulders Follow the Joints.} Nothing about the shoulders is placed
 by a constant height. \texttt{body\_meshes.\_neck\_rises} reads, per shoulder
 link, how far the neck joint is above the shoulder joints (the difference of
 the thorax capsule lengths, $h$; $0.040$\,m in this spec, $0.095$\,m with the
 \#15296 subject preset). With yoke radius $r$: the yoke axis starts
-$1.35\,r$ below the neck point beside the neck and ends
-$\min(h/r-1.35,\,-0.1)\,r$ above the joint, $0.5\,r$ short of it, tapering to
-$0.85$ (aspect $0.72$), so it slopes like a trapezius by as much as the joints
+$1.6\,r$ below the neck point beside the neck and ends
+$\min(h/r-1.3,\,-0.1)\,r$ above the joint, $0.5\,r$ short of it, tapering to
+$0.6$ (aspect $0.72$), so it slopes like a trapezius by as much as the joints
 are lowered. The deltoid ball ($0.9\times1.6$ arm radii) sits
-$\max(0.9,\ 1.25-(h-0.73\,r)/r_a)$ arm radii down the arm, and the sleeve
+$\max(0.9,\ 1.25-(h-0.040)/r_a)$ arm radii down the arm, and the sleeve
 starts at its centre. \texttt{TorsoProfile.with\_shoulder} moves the thorax
 stations with the shoulder line ($0.9135$ of the thorax length here), keeping
 both ends. Tests run at both joint settings. Before and after:

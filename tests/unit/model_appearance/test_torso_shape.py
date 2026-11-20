@@ -9,6 +9,7 @@ import math
 
 import numpy as np
 import pytest
+from scipy.spatial import ConvexHull
 
 from src.shared.python.model_appearance import library
 from src.shared.python.model_appearance.body_meshes import body_meshes
@@ -76,22 +77,26 @@ def _thorax_rings(pose: str, label: str) -> np.ndarray:
     return _verts(pose, "torso", label)[-2 - 28 * 31 : -2].reshape(31, 28, 3)
 
 
-def _back(height_m: float) -> float:
-    """Rearmost point of trunk, yokes, neck and head at a height (standing)."""
-    solids, _, _ = _solids("hang")
-    rear = []
-    for body, _, verts, faces in solids:
-        if library.classify_body(body) not in ("torso", "shoulder", "head"):
+def _cut(
+    height_m: float, parts: tuple[str, ...], label: str = "", axis: int = 2
+) -> np.ndarray:
+    """Where the standing ``label`` solids of ``parts`` cross a height (or x)."""
+    points = [np.zeros((0, 3))]
+    for body, name, verts, faces in _solids("hang")[0]:
+        if library.classify_body(body) not in parts or label not in name:
             continue
-        side = verts[:, 2] - height_m
+        side = verts[:, axis] - height_m
         for a, b in ((0, 1), (1, 2), (2, 0)):
             sa, sb = side[faces[:, a]], side[faces[:, b]]
             hit = sa * sb < 0.0
             t = (sa[hit] / (sa[hit] - sb[hit]))[:, None]
-            rear.extend(
-                (verts[faces[hit, a]] * (1 - t) + verts[faces[hit, b]] * t)[:, 0]
-            )
-    return float(min(rear))
+            points.append(verts[faces[hit, a]] * (1 - t) + verts[faces[hit, b]] * t)
+    return np.vstack(points)
+
+
+def _back(height_m: float) -> float:
+    """Rearmost point of trunk, yokes, neck and head at a height (standing)."""
+    return float(_cut(height_m, ("torso", "shoulder", "head"))[:, 0].min())
 
 
 @functools.cache
@@ -136,6 +141,48 @@ def test_the_torso_tapers_from_the_shoulders_to_the_waist() -> None:
     assert got["bideltoid"] > got["chest"] > got["waist"], got
     assert got["waist"] >= ACCEPT.min_waist_over_chest * got["chest"], got
     assert got["chest"] >= ACCEPT.min_chest_over_hip * got["hip"], got
+
+
+def test_the_waist_is_drawn_in_under_the_chest() -> None:
+    got = _breadths()
+    assert got["waist"] <= ACCEPT.max_waist_over_chest * got["chest"], got
+
+
+def _trunk_backs() -> tuple[float, float, float, float]:
+    """Skin behind the trunk axis: buttock, waist, chest; and the waist front."""
+    pelvis, rings = _verts("hang", "pelvis", "skin"), _thorax_rings("hang", "skin")
+    rear = -rings[:, :, 0].min(axis=1)
+    waist = int(rear[: int(np.ptp(rings[:, :, 1], axis=1).argmax())].argmin())
+    front = float(rings[waist, :, 0].max())
+    return float(-pelvis[:, 0].min()), float(rear[waist]), float(rear.max()), front
+
+
+def test_the_back_hollows_at_the_waist_and_the_belly_stands_forward() -> None:
+    buttock, waist, chest, front = _trunk_backs()
+    hollow = min(buttock, chest) - waist
+    assert hollow >= ACCEPT.min_lumbar_hollow * STATURE_M, (buttock, waist, chest)
+    assert front >= ACCEPT.min_waist_front_over_back * waist, (front, waist)
+
+
+def test_the_buttock_stays_full_below_the_hip_joints() -> None:
+    pelvis = _verts("hang", "pelvis", "skin")
+    hips = float(pelvis[np.abs(pelvis[:, 1]).argmax(), 2])  # the widest level
+    below = _cut(0.5 * (hips + float(pelvis[:, 2].min())), ("pelvis",), "skin")
+    level = _cut(hips - 1e-4, ("pelvis",), "skin")
+    assert below[:, 0].min() <= ACCEPT.min_buttock_fullness * level[:, 0].min()
+
+
+@pytest.mark.parametrize("label", ["skin", "garment"])
+def test_the_pelvis_meets_the_chest_without_a_ledge(label: str) -> None:
+    """Flank, front, back and the two corners agree across the lumbar plane."""
+    pelvis = _verts("hang", "pelvis", label)
+    top = pelvis[pelvis[:, 2] > pelvis[:, 2].max() - 1e-6]
+    ring = _thorax_rings("hang", label)[0]
+    assert abs(float(ring[:, 2].mean() - top[:, 2].mean())) <= ACCEPT.max_join_gap_m
+    for angle in np.radians(ACCEPT.join_directions_deg):
+        way = np.array([math.cos(angle), math.sin(angle), 0.0])
+        step = abs(float((ring @ way).max() - (top @ way).max()))
+        assert step <= ACCEPT.max_join_step_m, (label, angle, step)
 
 
 def test_the_chest_stands_forward_of_the_trunk_axis() -> None:
@@ -200,6 +247,28 @@ def test_the_deltoid_climbs_as_the_neck_clears_it() -> None:
     drops = [library.deltoid_drop_m(radius, r) for r in np.linspace(0.0, 0.3, 13)]
     assert all(a >= b for a, b in zip(drops, drops[1:], strict=False))
     assert drops[-1] == pytest.approx(library.DELTOID_MIN_DROP * radius)
+
+
+def test_the_thorax_rounds_off_above_the_chest() -> None:
+    rows = library.TORSO_PROFILES["thorax"]
+    deepest = max(range(len(rows)), key=lambda i: rows[i][2])
+    square = [row[4] or library.TORSO_SQUARENESS for row in rows[deepest + 1 :]]
+    assert max(square) <= ACCEPT.max_shoulder_squareness
+    assert square == sorted(square, reverse=True)
+
+
+@pytest.mark.parametrize("axis", [0, 2])
+def test_the_yoke_does_not_stand_proud_of_the_shirt(axis: int) -> None:
+    """No bar, ridge or bump: cut by depth (0) and by height (2), it stays in."""
+    yoke = _verts("hang", "shoulder", "garment")[:, axis]
+    high = min(yoke.max(), _verts("hang", "upper_arm")[:, 2].max() if axis else 1.0)
+    keep = [i for i in range(3) if i != axis]
+    for at in np.linspace(yoke.min(), high, ACCEPT.yoke_cuts + 2)[1:-1]:
+        arms = _cut(at, ("upper_arm",), "", axis)
+        shirt = np.vstack([_cut(at, ("torso",), "garment", axis), arms])[:, keep]
+        hull = ConvexHull(shirt).equations
+        cut = _cut(at, ("shoulder",), "garment", axis)[:, keep]
+        assert (cut @ hull[:, :2].T + hull[:, 2]).max() <= ACCEPT.max_yoke_proud_m
 
 
 def test_moving_the_shoulder_line_keeps_the_trunk_ends_and_its_width() -> None:

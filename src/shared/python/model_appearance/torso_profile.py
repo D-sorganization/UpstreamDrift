@@ -92,17 +92,18 @@ class TorsoProfile:
         if len(kept) == len(self.stations):
             return self
         width, depth = self.scales_at([lowest])
-        first = TorsoStation(lowest, float(width[0]), float(depth[0]))
+        square, ahead = self.squareness_at([lowest])[0], self.forwards_at([lowest])[0]
+        cut = map(float, (width[0], depth[0], 0, square, ahead))
+        first = TorsoStation(lowest, *cut)
         return dataclasses.replace(self, stations=(first, *kept))
 
     def with_shoulder(self, reference: float, along: float) -> TorsoProfile:
         """This profile with its shoulder line moved from ``reference`` to ``along``.
 
         Stations below the line keep their share of the way up to it, the ones
-        above it their share of the way from it to the top: the chest follows
-        the shoulder joints down and the slope to the neck grows longer. Slants
-        scale with their station's height; above the widest station the widths
-        stretch with the slope, never past the widest, so the slope stays even.
+        above it their share of the way from it to the last but one (the neck
+        stub keeps its height): the chest follows the shoulder joints down and
+        the slope grows longer, like a trapezius. Slants scale with height.
         Precondition: both lie strictly between 0 and the top station.
         Postcondition: same ends; unchanged when ``along`` is ``reference``.
         """
@@ -111,26 +112,22 @@ class TorsoProfile:
             raise ValueError("the shoulder line must lie inside the torso profile")
         if along == reference:
             return self
+        stub = max(self.stations[-2].along, reference)
 
         def move(at: float) -> float:
             if at <= reference:  # nothing moves at or below the joint plane
                 return at * along / reference if at > 0.0 else at
-            return along + (at - reference) * (top - along) / (top - reference)
+            if at >= stub:
+                return at
+            return along + (at - reference) * (stub - along) / (stub - reference)
 
-        widest = max(s.width for s in self.stations)
-        crest = max(i for i, s in enumerate(self.stations) if s.width == widest)
-        neck = self.stations[-1].width
-        stretch = max(1.0, (top - along) / (top - reference))
         stations = tuple(
             dataclasses.replace(
                 s,
                 along=move(s.along),
                 slant=s.slant * (move(s.along) / s.along if s.along > 0.0 else 1.0),
-                width=s.width
-                if i <= crest
-                else min(widest, neck + (s.width - neck) * stretch),
             )
-            for i, s in enumerate(self.stations)
+            for s in self.stations
         )
         return dataclasses.replace(
             self, stations=stations, fine_from=move(self.fine_from)
@@ -189,6 +186,17 @@ class TorsoAcceptance:
     base is in front of the upper back's own line through ``back_tangent``.
     ``min_chest_ahead``: chest front over upper back, both from the trunk axis.
 
+    Trunk sections (appearance reference): the waist is at most
+    ``max_waist_over_chest`` of the chest; its back stands ``min_lumbar_hollow``
+    (of stature) ahead of the chest's and the buttock's, its front at least
+    ``min_waist_front_over_back`` times as far from the axis; halfway below the
+    hip joints the buttock keeps ``min_buttock_fullness`` of its depth. At the
+    lumbar plane pelvis and chest differ by at most ``max_join_step_m`` towards
+    ``join_directions_deg`` (0 is the front), ``max_join_gap_m`` apart. Above
+    its deepest station the thorax is never squarer than
+    ``max_shoulder_squareness``; in ``yoke_cuts`` cuts by height and by depth a
+    yoke is at most ``max_yoke_proud_m`` outside the hull of thorax and arms.
+
     Shoulders, with the shoulder joints lowered below the neck by some length:
     the yoke top beside the neck (inside ``yoke_ends[0]`` of the joint offset)
     moves at most ``max_yoke_neck_shift`` of it, and the top at the joint
@@ -204,6 +212,16 @@ class TorsoAcceptance:
     min_chest_depth: float = 0.124
     min_waist_over_chest: float = 0.88
     min_chest_ahead: float = 1.15
+    max_waist_over_chest: float = 0.895
+    min_lumbar_hollow: float = 0.012
+    min_waist_front_over_back: float = 1.35
+    min_buttock_fullness: float = 0.93
+    max_join_step_m: float = 0.003
+    max_join_gap_m: float = 0.01
+    join_directions_deg: tuple[float, ...] = (0.0, 45.0, 90.0, 135.0, 180.0)
+    max_shoulder_squareness: float = 2.4
+    max_yoke_proud_m: float = 0.002
+    yoke_cuts: int = 8
     yoke_ends: tuple[float, float] = (0.4, 0.85)
     max_yoke_neck_shift: float = 0.2
     min_trapezius_gain: float = 0.3
@@ -244,6 +262,15 @@ class TorsoAcceptance:
             self.min_chest_ahead,
             self.max_yoke_neck_shift,
             self.min_trapezius_gain,
+            self.max_waist_over_chest - self.min_waist_over_chest,
+            self.min_lumbar_hollow,
+            self.min_waist_front_over_back,
+            self.min_buttock_fullness,
+            self.max_join_step_m,
+            self.max_join_gap_m,
+            self.max_shoulder_squareness - 2.0,
+            self.max_yoke_proud_m,
+            self.yoke_cuts,
         )
         if not (np.isfinite(limits).all() and min(limits) > 0.0):
             raise ValueError("torso acceptance limits must be positive and finite")
@@ -277,8 +304,8 @@ def _unit_section(squareness: float, sides: int) -> tuple[Array, Array]:
 
 
 def _front_drop(unit_d: Array, front_sign: float) -> Array:
-    """0 at the back, 1 at the front of a section (smoothstep between)."""
-    towards_front = np.clip(0.5 * (1.0 + front_sign * unit_d), 0.0, 1.0)
+    """0 over the back half (the sides keep their height), 1 at the front."""
+    towards_front = np.clip(front_sign * unit_d, 0.0, 1.0)
     return np.asarray(towards_front**2 * (3.0 - 2.0 * towards_front))
 
 

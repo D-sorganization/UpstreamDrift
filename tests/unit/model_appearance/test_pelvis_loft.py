@@ -11,6 +11,7 @@ line, running from below the HJCs up to the lumbar-joint plane.
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -191,6 +192,17 @@ def test_split_ellipsoid_rejects_bad_preconditions() -> None:
     assert mesh.volume() > 0
     assert float(mesh.vertices[:, 2].max()) == pytest.approx(0.2)
     assert float(mesh.vertices[:, 2].min()) == pytest.approx(-0.08)
-    for patch in ({"top": 0.4}, {"half_width": -1.0}, {"width": base["up"]}):
+    rows = ((-1.0, 1.0, 0.0), (0.0, 1.2, 0.01), (1.0, 0.5, 0.03))
+    front = {"front": np.array([1.0, 0.0, 0.0]), "sections": rows}
+    shape = geometry.SplitEllipsoid(**{**base, **front})
+    verts = geometry.split_ellipsoid_mesh(shape).vertices
+    cap, hips = verts[verts[:, 2] > 0.2 - 1e-9], verts[np.abs(verts[:, 2]) < 1e-9]
+    assert float(np.abs(verts[:, 1]).max()) == pytest.approx(0.2)
+    assert (hips[:, 0].min(), hips[:, 0].max()) == pytest.approx((-0.11, 0.13))
+    reach = 0.1 * 0.5 * math.sqrt(1.0 - (0.2 / 0.3) ** 2)
+    span = (0.03 - reach, 0.03 + reach)
+    assert (cap[:, 0].min(), cap[:, 0].max()) == pytest.approx(span)
+    bad = ({"sections": rows}, {**front, "sections": rows[::-1]})
+    for patch in ({"top": 0.4}, {"half_width": -1.0}, {"width": base["up"]}, *bad):
         with pytest.raises(ValueError):
             geometry.split_ellipsoid_mesh(geometry.SplitEllipsoid(**{**base, **patch}))
