@@ -378,6 +378,32 @@ def test_the_head_base_covers_the_skins_neck_rim_at_the_front(
     assert cover.min() >= HEAD_JOIN["least_cover_deg"], cover.min()
 
 
+@pytest.mark.parametrize("name", ["address", "top", "finish"])
+def test_the_head_stub_stays_inside_the_neck_up_to_the_jaw_line(
+    name: str, skinned: tuple[Any, Any]
+) -> None:
+    """The head model's neck stub is the skin's neck drawn a second time; left
+    in place the two walls cut each other in a ragged line under the jaw and
+    behind the ear. Between the base and the jaw line it is held round the neck
+    axis, inside the skin at every head turn."""
+    model = skinned[0]
+    pose = dict(ADDRESS)
+    for joint, change in SWING[name].items():
+        pose[joint] = pose.get(joint, 0.0) + change
+    line = SETTINGS.head_base_jaw_height_m - HEAD_BASE["jaw_below_m"]
+    for turn in (0.0, HEAD_BASE["turn_rad"], -HEAD_BASE["turn_rad"]):
+        world, local, _, data = _head_shell(model, pose | {"NeckInputZ": turn})
+        stub = local[:, 2] < line - SETTINGS.head_base_jaw_slope * local[:, 0]
+        stub &= local[:, 2] >= HEAD_BASE["below_m"]  # the base has its own check
+        assert stub.sum() > 30 and local[stub, 2].max() > 2.0 * HEAD_BASE["below_m"]
+        skin, faces = layer.posed_skin_layers(model, data)["body_skin_skin"]
+        near = cKDTree(skin).query(world[stub])[1]
+        normals = mesh.vertex_normals(skin, faces)[near]
+        outside = np.einsum("ij,ij->i", world[stub] - skin[near], normals).max()
+        assert outside <= HEAD_BASE["outside_m"], (turn, outside)
+    assert HEAD_BASE["jaw_below_m"] >= SETTINGS.head_base_flare_m
+
+
 def _meets(origin: Any, rays: Any, vertices: Any, faces: Any) -> Any:
     """Whether each ray from ``origin`` meets a triangle (Moeller and Trumbore)."""
     corner, one, two = (vertices[faces[:, i]] for i in range(3))

@@ -15,7 +15,8 @@ model's bodies and gives each body its bind pose in the fitted rest space:
   hand, so the skin's end ring stays under a rigid hand's cuff at any wrist bend;
 * ``narrow_head_base``: the rigid head model's base held round the neck axis and
   drawn down the neck, so a turned head does not push it out of the skin's neck
-  and the collar and no view passes under it into the open neck.
+  and the collar and no view passes under it into the open neck; its neck stub
+  is held the same way up to the jaw line, so it does not lie in the skin's wall.
 
 Body frames are ``Rigid`` poses (body frame to world) keyed by role:
 ``pelvis``, ``thorax``, ``head`` and, per side, ``girdle``, ``upper_arm``,
@@ -87,6 +88,7 @@ _BONES = {
 }
 _ANCHORS = {"pelvis": "hip_mid", "head": "neck", "girdle": "girdle"}
 _HEAD_BASE = ("height_m", "front_m", "side_m", "back_m", "drop_m")
+_HEAD_BASE_JAW = ("jaw_height_m", "jaw_slope", "flare_m")
 
 
 @dataclass(frozen=True)
@@ -105,6 +107,9 @@ class ExportSettings:
     head_base_side_m: float = 0.0
     head_base_back_m: float = 0.0
     head_base_drop_m: float = 0.0
+    head_base_jaw_height_m: float = 0.0
+    head_base_jaw_slope: float = 0.0
+    head_base_flare_m: float = 0.0
 
     def __post_init__(self) -> None:
         self._check_head_base()
@@ -126,13 +131,21 @@ class ExportSettings:
         unless height and drop are >= 0 and, with a height, each limit > 0."""
         limits = (self.head_base_front_m, self.head_base_side_m, self.head_base_back_m)
         height, drop = self.head_base_height_m, self.head_base_drop_m
-        for value in (height, drop, *limits):
+        jaw = (self.head_base_jaw_height_m, self.head_base_flare_m)
+        for value in (height, drop, *limits, *jaw, self.head_base_jaw_slope):
             if isinstance(value, bool) or not isinstance(value, (int, float)):
                 raise TypeError("head_base values must be numbers (metres)")
         if height < 0.0 or drop < 0.0 or (height > 0.0 and not min(limits) > 0.0):
             raise ValueError(
                 "head_base needs height_m >= 0, drop_m >= 0 and, with a height, "
                 "front_m, side_m and back_m > 0"
+            )
+        if min(*jaw, self.head_base_jaw_slope) < 0.0 or (jaw[0] > 0.0) != (
+            jaw[1] > 0.0
+        ):
+            raise ValueError(
+                "head_base needs jaw_height_m, jaw_slope and flare_m >= 0, and "
+                "jaw_height_m and flare_m together or neither"
             )
 
 
@@ -157,7 +170,10 @@ def load_export_settings(path: Path | None = None) -> ExportSettings:
         covered_parts=tuple(raw["covered_parts"]),
         wrist_blend_length_m=float(raw["wrist_blend_length_m"]),
         wrist_blend_full_m=float(raw["wrist_blend_full_m"]),
-        **{f"head_base_{key}": float(raw["head_base"][key]) for key in _HEAD_BASE},
+        **{
+            f"head_base_{key}": float(raw["head_base"][key])
+            for key in _HEAD_BASE + _HEAD_BASE_JAW
+        },
     )
 
 
@@ -441,8 +457,15 @@ def narrow_head_base(vertices: Array, settings: ExportSettings) -> Array:
     ``head_base_side_m``, depth ``head_base_front_m`` forward and
     ``head_base_back_m`` behind. It is then drawn down the neck by
     ``head_base_drop_m`` on and under the joint plane, falling linearly to
-    nothing at that height, so a view over the rim meets the base. Postcondition:
-    a vertex at or above that height is unchanged, and no vertex leaves its
+    nothing at that height, so a view over the rim meets the base. The model's
+    neck stub above that height is the skin's neck drawn a second time, a few
+    millimetres from it, and the two cut each other in a ragged line; so the
+    hold onto the ellipse goes on up to the jaw line, the plane
+    ``head_base_jaw_height_m`` above the joint on the axis that drops
+    ``head_base_jaw_slope`` per metre forward, and lets go smoothly over the
+    ``head_base_flare_m`` below it (``head_base_flare_m`` 0: no hold above the
+    base). Postcondition: a vertex at or above both that height and the jaw
+    line is unchanged, no vertex moves away from the axis, and none leaves its
     vertical plane through the axis. Raises ``ValueError`` for another shape.
     """
     points = np.asarray(vertices, dtype=float)
@@ -450,14 +473,20 @@ def narrow_head_base(vertices: Array, settings: ExportSettings) -> Array:
         raise ValueError("vertices must be (N, 3)")
     out = points.copy()
     height = settings.head_base_height_m
-    low = points[:, 2] < height
-    if not height > 0.0 or not low.any():
+    if not height > 0.0:
         return out
+    low = points[:, 2] < height
+    hold = low.astype(float)
+    if settings.head_base_flare_m > 0.0:
+        line = settings.head_base_jaw_height_m
+        under = line - settings.head_base_jaw_slope * points[:, 0] - points[:, 2]
+        part = np.clip(under / settings.head_base_flare_m, 0.0, 1.0)
+        hold = np.maximum(hold, part * part * (3.0 - 2.0 * part))
     forward = points[:, 0] > 0.0
     depth = np.where(forward, settings.head_base_front_m, settings.head_base_back_m)
     reach = np.hypot(points[:, 0] / depth, points[:, 1] / settings.head_base_side_m)
-    held = low & (reach > 1.0)
-    out[held, :2] /= reach[held, None]
+    held = (hold > 0.0) & (reach > 1.0)
+    out[held, :2] *= (1.0 + hold[held] * (1.0 / reach[held] - 1.0))[:, None]
     share = 1.0 - np.clip(points[low, 2] / height, 0.0, 1.0)
     out[low, 2] -= settings.head_base_drop_m * share
     return out
