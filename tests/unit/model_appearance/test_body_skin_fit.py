@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import dataclasses
 import json
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -142,3 +143,25 @@ def test_invalid_subject_raises() -> None:
         dataclasses.replace(_subject(), thigh=0.0)
     with pytest.raises(ValueError):
         dataclasses.replace(_subject(), neck_height=0.4)  # below the shoulder line
+
+
+def test_default_settings_ignore_the_profiles() -> None:
+    assert fit.load_fit_settings().shoulder_anchor_m == (0.0, 0.0, 0.0)
+
+
+def test_showpiece_profile_only_raises_the_shoulder_anchor() -> None:
+    plain, tuned = fit.load_fit_settings(), fit.load_fit_settings(profile="showpiece")
+    assert tuned.shoulder_anchor_m == (0.0, 0.0, 0.025)
+    assert dataclasses.replace(tuned, shoulder_anchor_m=(0.0, 0.0, 0.0)) == plain
+    _assert_subject_lengths(fit.fit_body_skin(SKIN, _subject(), tuned).joints)
+
+
+def test_unknown_profile_or_profile_field_raises(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="unknown fit profile"):
+        fit.load_fit_settings(profile="missing")
+    raw = json.loads((fit.ASSET_DIR / "fit_settings.json").read_text())
+    raw["profiles"] = {"bad": {"not_a_setting": 1.0}}
+    path = tmp_path / "fit_settings.json"
+    path.write_text(json.dumps(raw))
+    with pytest.raises(ValueError, match="not a fit setting"):
+        fit.load_fit_settings(path, profile="bad")
