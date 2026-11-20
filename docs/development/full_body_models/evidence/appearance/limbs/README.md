@@ -26,12 +26,104 @@ At 0.28 of the shin the skin reaches 98 mm behind the knee-ankle line and
 29 mm ahead of it (measured 96 and 34); at 0.35 of the thigh, 122 mm ahead and
 68 mm behind (measured 124 and 65). The trousers clear each other by 3.4 mm
 standing and 10.3 mm at address along the hip line (1.82 m; 3.3 mm and 10.2 mm
-at 1.71 m).
+at 1.71 m). The thigh's fore and aft seat and these clearances were changed
+again; see Hip Seat, Thigh Front and Buttock below.
+
+## Hips at the Belt Line and Trouser Ease
+
+Visual only, and only the drawn surface: joint spacing, segment lengths and the
+skin of the legs are unchanged. Owner feedback asked for hips "a little wider
+at the pelvis to match the markers" and legs "about 10-20% larger". The skin
+girths above already match the measured body within 2 %, so the legs are made
+larger where they are seen: the trousers now hang with ease instead of lying on
+the skin like leggings. Settings in `library.py`: `PELVIS_WAIST_RATIO`
+0.75 to 0.84 (0.87 since the hip-seat change below), and new `TROUSER_EASE` 1.14, `TROUSER_FITTED_TO` 0.40,
+`TROUSER_HEM_EASE` 1.34, `TROUSER_HEM_FROM` 0.45 (`TROUSER_DRAPE`,
+`garment_drape`). Shorts are not draped.
+
+![Hips and Trouser Legs, Before and After](hips_trousers_before_after_tour_average.png)
+
+Half widths and girths in mm, tour-average golfer (1.82 m). The belt markers of
+the driver capture (`data/C3D_TA_Driver.c3d`, `WaistLeft` to `WaistRight`) are
+344.9 mm apart at address, 172.5 mm from the midline.
+
+| Quantity | Reference | Before | After |
+| --- | --- | --- | --- |
+| Pelvis skin half width, top of pelvis | 156 (measured body) | 136.5 | 157.0 |
+| Trousers half width, top of pelvis | 172.5 (marker centres) | 145.2 | 168.4 |
+| Pelvis skin half width, hip joint level | 174 (measured body) | 179.3 | 179.3 |
+| Trousers girth, thigh at 0.35 | | 626.5 | 626.5 |
+| Trousers girth, thigh at 0.95 (knee) | | 422.6 | 475.8 |
+| Trousers girth, shin at 0.28 (calf) | | 427.7 | 487.2 |
+| Trousers girth, shin at 0.84 (ankle) | | 247.0 | 314.9 |
+
+The side marker centres now stand 4 mm outside the cloth at the top of the
+pelvis (27 mm before) and the back marker centres 7 mm outside it. The trouser
+legs clear each other by 2.1 mm at the thigh and 18.1 mm at the shin when
+standing. The "After" pelvis values are with `PELVIS_WAIST_RATIO` 0.87.
+
+## Hip Seat, Thigh Front and Buttock
+
+Visual only; the hip joints are not moved. Owner feedback (2026-11-19): the
+upper front of the thighs too pronounced and far forward, the hip sockets too
+far forward on the pelvis or the femur top too far back in the thigh, and the
+behind 5-10 % bigger. Measured ahead of and behind the hip-knee line in a
+20 mm strip through the joint, the drawn thigh had the joint 60-66 % of the
+way back through its depth while the pelvis was centred on the joint, so the
+thigh stood 31 mm ahead of the pelvis. The thigh offsets had been copied from
+the CC0 body about its own leg pivot, which is a rig pivot (114 mm from the
+midline against 95 mm fitted), not a hip joint centre. The thigh is re-seated
+and the pelvis gets a buttock behind the joints. Settings in `library.py`:
+`PART_OFFSET["thigh"]` (0.30, 0.35, 0.60) to (0.18, 0.40, 0.40),
+`PART_RADIUS_M["thigh"]` 0.102 to 0.0998 with `PART_ASPECT["thigh"]` 1.06 to
+1.105 (same girth; the thighs still clear), new `PELVIS_BACK_SCALE` 1.08 and
+`PELVIS_BACK_SQUARE` 3.5, and `PELVIS_WAIST_RATIO` 0.86 to 0.87.
+
+![Hip Seat, Thigh Front and Buttock, Before and After](hip_seat_buttock_before_after_tour_average.png)
+
+Skin, standing, mm, tour-average golfer (1.82 m). "Measured" is the CC0 body
+about its rig pivot: its whole depths are comparable, its split is not.
+
+| Below the hip joint | Front, before | Front, after | Back, before | Back, after | Whole depth, after | Whole depth, measured |
+| --- | --- | --- | --- | --- | --- | --- |
+| 35 | 106 | 92 | 71 | 88 | 180 | 210 |
+| 70 | 116 | 100 | 70 | 88 | 188 | 203 |
+| 110 | 123 | 109 | 67 | 85 | 194 | 192 |
+| 150 | 125 | 113 | 65 | 80 | 193 | 189 |
+| 200 | 121 | 112 | 65 | 78 | 190 | 187 |
+
+| Pelvis at the hip joints | Before | After | Measured |
+| --- | --- | --- | --- |
+| Front of the joints, side outline | 105 | 105 | 139 |
+| Behind the joints, side outline | 105 | 113 | 94 |
+| Behind the joints, through the joint | 92 | 109 | 86 |
+| Girth | 906 | 960 | |
+
+The behind is 8 % bigger in reach behind the joints and 6 % in girth. Thigh
+girths are unchanged (579, 386 mm at 0.35 and 0.95). The trousers clear each
+other by 2.1 mm standing and 10.7 mm at address.
 
 ## Limitations
 
-- The thigh is 4 mm narrower side to side than measured (90 mm half width,
+- The trousers stay fitted on the upper thigh (no added ease at 0.35): the
+  2.1 mm standing clearance leaves no room without moving the hip joints.
+- At the fitted belt height (110 mm above the hip joints) the cloth is 9 mm
+  wider than the side marker centres are apart; where those markers are seeded,
+  45 mm ahead of the hip line, it is narrower than they are.
+- The hem flares by 2 % below the ankle.
+- The acceptance for this section is
+  `tests/unit/model_appearance/test_hip_and_trouser_shape.py`.
+
+- The thigh is 6 mm narrower side to side than measured (88 mm half width,
   not 94 mm) so the trousers do not interpenetrate when standing.
+- The hip joint is 51-58 % of the way back through the upper thigh; it cannot
+  go further forward while `test_leg_shape.py` keeps the front of the thigh at
+  0.35 at least 1.3 times its back (now 1.33).
+- The pelvis is still 15 mm shallower than the measured body at the hip joints
+  and has no hollow at the lower back, so the buttock reads as a broad seat
+  with a shelf above the thigh when the hip is bent.
+- Where the hip joint lies fore and aft in the pelvis is set by the marker fit
+  from assumed belt positions; this capture has no markers that measure it.
 - The leg lengths do not change with stature in the built spec (thigh 401 mm,
   shin 439 mm in both subjects), so the 1.82 m golfer's thigh is shorter than
   the measured body's 439 mm.

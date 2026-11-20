@@ -577,6 +577,9 @@ def _pelvis_plan(
         half_up,
         half_down,
         top,
+        back=None if marks.front is None else -marks.front,
+        back_scale=1.0 if marks.front is None else library.PELVIS_BACK_SCALE,
+        back_square=2.0 if marks.front is None else library.PELVIS_BACK_SQUARE,
     )
     return shape, width
 
@@ -719,7 +722,12 @@ def _segment_meshes(
             if band[0] < start < band[1]:  # a sleeve starts at the cap's widest ring
                 band = (start, band[1])
             mesh = _loft(
-                ctx, body, seg, coverage=band, thickness=library.GARMENT_THICKNESS
+                ctx,
+                body,
+                seg,
+                coverage=band,
+                thickness=library.GARMENT_THICKNESS,
+                drape=library.garment_drape(ctx.doc.clothing, part),
             )
             out.append(BodyMesh(body, f"garment{i}", mesh, garment))
     return out

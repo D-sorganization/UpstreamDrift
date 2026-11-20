@@ -195,6 +195,10 @@ class LoftOptions:
     # falling to nothing ``width`` away like ``belly`` (a calf behind the
     # shin). The vector's part along the limb is ignored.
     offset: tuple[Array, float, float] | None = None
+    # Cloth ease ``(near, far, from)`` (#15299): the radius is times ``near``
+    # up to ``from`` of the whole limb and grows evenly to ``far`` at its far
+    # end (a trouser leg that hangs loose below a fitted thigh).
+    drape: tuple[float, float, float] = (1.0, 1.0, 0.0)
     # Radius at the near joint over the limb's radius, easing to the full
     # radius by ``start_until`` of the whole limb (an elbow no wider than the
     # upper arm it meets, #15299). 1 is no narrowing.
@@ -220,6 +224,11 @@ def _checked_shape(opts: LoftOptions) -> None:
         raise ValueError("start_scale and start_until must be in (0, 1]")
     if not 0.0 < opts.end_cap <= 1.0:
         raise ValueError("end_cap must be in (0, 1]")
+    near, far, begin = opts.drape
+    if not (near > 0.0 and far > 0.0 and math.isfinite(near + far)):
+        raise ValueError("drape needs finite factors > 0")
+    if not 0.0 <= begin < 1.0:
+        raise ValueError("drape must start in [0, 1) of the limb")
     if opts.offset is not None:
         vector, position, width = opts.offset
         _check_finite("offset vector", vector, 3)
@@ -248,11 +257,13 @@ def _ease(opts: LoftOptions, frac: float) -> float:
 
 
 def _limb_scale(opts: LoftOptions, frac: float) -> float:
-    """Taper times belly at ``frac`` of the whole limb (clamped to [0, 1])."""
+    """Taper times belly times drape at ``frac`` of the whole limb (clamped)."""
     frac = min(1.0, max(0.0, frac))
     gain, position, width = opts.belly
     reach = min(1.0, abs(frac - position) / width)
     swell = 1.0 + gain * math.cos(0.5 * math.pi * reach) ** 2
+    low, high, begin = opts.drape
+    swell *= low + (high - low) * max(0.0, (frac - begin) / (1.0 - begin))
     t = min(1.0, frac / opts.start_until)
     near = opts.start_scale + (1.0 - opts.start_scale) * t * t * (3.0 - 2.0 * t)
     taper = 1.0 + (opts.end_scale - 1.0) * min(1.0, frac / opts.taper_end)
@@ -492,12 +503,20 @@ class SplitEllipsoid:
     half_up: float
     half_down: float
     top: float
+    # The buttock (#15299): behind the widest plane (``back`` is the unit
+    # direction) the depth is times ``back_scale`` and the outline is a
+    # superellipse of exponent ``back_square`` (2 = ellipse). Both are full
+    # from the lower pole to the widest level and ease out to nothing at the
+    # flat cap, so the belt line keeps its section.
+    back: Array | None = None
+    back_scale: float = 1.0
+    back_square: float = 2.0
 
 
 def split_ellipsoid_mesh(
     shape: SplitEllipsoid, *, thickness: float = 1.0, rings: int = 14, sides: int = 24
 ) -> Mesh:
-    """Closed convex mesh of ``shape``; ``thickness`` scales width and depth only.
+    """Closed mesh of ``shape``; ``thickness`` scales width and depth only.
 
     Preconditions: finite inputs, positive sizes, ``0 < top <= half_up``,
     even ``sides`` (left/right mirror symmetry), ``rings >= 4``. Postcondition:
@@ -514,6 +533,11 @@ def split_ellipsoid_mesh(
         raise ValueError("top must satisfy 0 < top <= half_up")
     if sides < 6 or sides % 2 or rings < 4:
         raise ValueError("need even sides >= 6 and rings >= 4")
+    bulged = (shape.back_scale, shape.back_square) != (1.0, 2.0)
+    if not (shape.back_scale > 0.0 and 2.0 <= shape.back_square <= 8.0):
+        raise ValueError("back_scale must be > 0 and back_square in [2, 8]")
+    if bulged and shape.back is None:
+        raise ValueError("a back bulge needs the back direction")
     a = up / np.linalg.norm(up)
     u = wid - np.dot(wid, a) * a
     if np.linalg.norm(u) < 1e-9:
@@ -524,11 +548,21 @@ def split_ellipsoid_mesh(
     top_angle = math.asin(shape.top / shape.half_up)
     angles = np.concatenate([lower, np.linspace(0.0, top_angle, rings)])[::-1]
     phi = np.linspace(0.0, 2.0 * math.pi, sides, endpoint=False)
-    plane = np.outer(np.cos(phi), u * shape.half_width * thickness) + np.outer(
-        np.sin(phi), v * shape.half_depth * thickness
-    )
+    cos, sin = np.cos(phi), np.sin(phi)
+    behind = np.zeros(sides, dtype=bool)
+    if bulged:
+        behind = sin * float(v @ _check_finite("back", shape.back, 3)) > 1e-12
     grid = np.empty((len(angles), sides, 3))
     for k, ang in enumerate(angles):
         height = math.sin(ang) * (shape.half_up if ang > 0 else shape.half_down)
+        # 1 at the hips, 0 at the cap, and nearly gone by the belt line
+        full = (1.0 - (max(height, 0.0) / shape.top) ** 2) ** 2
+        power = 2.0 / (2.0 + (shape.back_square - 2.0) * full)
+        deep = np.where(behind, 1.0 + (shape.back_scale - 1.0) * full, 1.0)
+        across = np.where(behind, np.sign(cos) * np.abs(cos) ** power, cos)
+        along = np.where(behind, np.sign(sin) * np.abs(sin) ** power, sin) * deep
+        plane = np.outer(across, u * shape.half_width * thickness) + np.outer(
+            along, v * shape.half_depth * thickness
+        )
         grid[k] = c + a * height + math.cos(ang) * plane
     return closed_grid_mesh(grid, c + a * shape.top, c - a * shape.half_down)
