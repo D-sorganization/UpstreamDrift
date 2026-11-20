@@ -23,6 +23,16 @@ def vertex_normals(vertices: Array, faces: Faces) -> Array:
     return normals / np.maximum(length, 1e-12)
 
 
+def vertex_areas(vertices: Array, faces: Faces) -> Array:
+    """Surface area per vertex: a third of each face it belongs to."""
+    a, b, c = (vertices[faces[:, k]] for k in range(3))
+    share = np.linalg.norm(np.cross(b - a, c - a), axis=1) / 6.0
+    areas = np.zeros(len(vertices))
+    for k in range(3):
+        np.add.at(areas, faces[:, k], share)
+    return areas
+
+
 def boundary_edges(faces: Faces) -> Faces:
     """Directed edges ``(E, 2)`` that belong to one face only."""
     edges = np.vstack([faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]])

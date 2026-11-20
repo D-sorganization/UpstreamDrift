@@ -16,6 +16,24 @@
   "waistband_m": 0.006,
   "waistband_span_m": [0.07, 0.04],
   "wrist_cut_m": 0.01,
+  "chest": {"from_m": 0.13, "above_shoulders_m": 0.04, "half_width_m": 0.17, "ahead_m": 0.03, "edge_m": 0.03, "smooth_sigma_m": 0.035, "tent_passes": 60},
+  "sleeve_cap_m": 0.11,
+  "sleeve_cap_passes": 20,
+  "leg_tube_m": [0.078, 0.066],
+  "leg_tube_rise": 0.5,
+  "limits": {
+    "relief_heights_m": [0.34, 0.37, 0.40, 0.43, 0.46],
+    "band_half_m": 0.012,
+    "sternum_half_m": 0.015,
+    "pectoral_span_m": [0.04, 0.12],
+    "pectoral_relief_mm": 2.0,
+    "plain_relief_mm": 8.0,
+    "cap_radius_m": 0.1,
+    "crease_mm": 0.3,
+    "plain_crease_mm": 1.0,
+    "chest_depth_heights_m": [0.39, 0.47],
+    "chest_depth_mm": {"default": [262.0, 251.0], "showpiece": [248.0, 230.0]}
+  },
   "sources": {
     "origin": "All values are those of the #15299 prototype's accepted look (2026-11-20 review) on the 1.82 m tour-average subject; lengths in metres.",
     "shirt": "A polo 10 mm off the skin and never closer than 6 mm; eight Taubin passes take the muscle relief off the cloth without shrinking it.",
@@ -28,6 +46,10 @@
     "neck_hug": "At the collar the shirt is held to neck_hug_m (5 mm) off the skin; the allowed ease grows by neck_hug_gain per metre below the collar line.",
     "tuck": "From tuck_band_m[0] (30 mm) above the waistband the shirt ease is capped at tuck_ease_m[0] (12 mm), falling over tuck_band_m[1] (50 mm) to tuck_ease_m[1] (4 mm) under the trousers.",
     "wrist_cut_m": "The stored skin ends where MakeHuman's hand weights take over, a ragged rim from 8.2 mm before to 10.2 mm past the wrist joint (measured on the default subject, 2026-11-20). Cutting on a plane 10 mm before the joint clears all of it; the hand model's forearm cuff reaches about 60 mm up the forearm and covers the ring.",
+    "chest": "The chest front of the trunk: from chest.from_m (130 mm, 20 mm above the waistband top so the hem keeps its line) above the hip midpoint to above_shoulders_m (40 mm) above the shoulder joints, half_width_m (170 mm) either side of the midline, from ahead_m (30 mm) ahead of the trunk axis, each edge ramped over edge_m (30 mm). There the body is moved fore and aft to its area-weighted mean depth within smooth_sigma_m (35 mm, about half a pectoral) and the shirt is relaxed for tent_passes (60) passes, never under its floor ease: the creases between and under the pectorals fill, as taut cloth does. The #15299 prototype's values (2026-11-20 review).",
+    "sleeve_cap": "Within sleeve_cap_m (110 mm, the deltoid) of a shoulder joint the shirt is relaxed the same way for sleeve_cap_passes (20) passes, which takes the crease between deltoid and chest off the sleeve cap.",
+    "leg_tube": "Each trouser leg is held at least leg_tube_m[0] (78 mm) off the shank axis at the knee and leg_tube_m[1] (66 mm) at the ankle, falling to nothing leg_tube_rise (0.5) shank lengths above the knee: a straight leg instead of cloth that follows calf and ankle (bare shank radius 30 to 60 mm on the 1.82 m subject). The #15299 prototype's values.",
+    "limits": "Test bounds, measured 2026-11-20 on the 1.82 m reference subject (tests/unit/model_appearance/test_body_skin_dress.py). Pectoral relief: how far the shirt over a pectoral (pectoral_span_m off the midline) stands ahead of the shirt on the sternum, the largest over relief_heights_m above the hip midpoint: 0.6 mm (default fit) and 0.8 mm (showpiece) against 11.1 and 9.9 mm without the chest steps. Crease: largest depth of a shirt vertex under the mean of its neighbours, on the chest and within cap_radius_m of a shoulder joint: 0.03 mm against 1.3 and 1.0 mm. Chest depth: fore-aft extent of the shirt within 50 mm of the midline at chest_depth_heights_m, measured 257 and 246 mm (default fit) and 243 and 225 mm (showpiece), 9 mm less than without the chest steps.",
     "waistband": "The trousers' floor ease grows by waistband_m (6 mm) from waistband_span_m[0] (70 mm) below the waistband top over waistband_span_m[1] (40 mm), so the band always covers the tucked shirt."
   }
 }
