@@ -1349,6 +1349,7 @@
 {"path": "model_appearance/appearance_v1.schema.json", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/ball.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/body_meshes.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/body_skin_fit.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_assembly.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_chain_meshes.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_face.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
@@ -1619,7 +1620,9 @@
 {"path": "motion_matching/execution/driver.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/execution/grip_rotation.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/execution/grip_selection.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/execution/marker_seed_overrides.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/execution/mjx_export.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/execution/osim_leg_lengths.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/execution/skinned_hand_wrists.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/execution/spec_builder.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/execution/subject_preset.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1706,6 +1709,7 @@
 {"path": "motion_matching/jobs/service.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/joint_club_pose_refit.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/kinematic_smoothing.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/knee_axial_rotation.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/knot_gradient_optimiser.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/leaderboard.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/ledger.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1765,6 +1769,7 @@
 {"path": "motion_matching/pipeline/gaze_tracking.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/pipeline/lane.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/pipeline/leg_marker_constraints.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/pipeline/marker_selection.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/pipeline/plant.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/pipeline/plants/__init__.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/pipeline/plants/drake_plant.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}

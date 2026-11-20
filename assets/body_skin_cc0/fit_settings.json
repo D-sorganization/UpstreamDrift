@@ -1,0 +1,16 @@
+{
+  "hip_back_m": 0.02,
+  "hip_back_plateau_m": 0.05,
+  "hip_back_rise_m": 0.25,
+  "shoulder_anchor_m": [0.0, 0.0, 0.0],
+  "trunk_margin_m": 0.15,
+  "warp_extent_m": 0.6,
+  "sources": {
+    "hip_back_m": "MakeHuman's rig hip joint sits behind the middle of the flesh (128 mm of skin ahead, 87 mm behind at 1.82 m). Moving the skin 20 mm back about the model hip joint puts the buttock 121 mm behind the joint, 7 % more than the loft's 113 mm (owner: 5 to 10 % bigger) and takes 20 mm off the thigh front (#15299 prototype, 2026-11-19).",
+    "hip_back_plateau_m": "The correction stays whole to 50 mm above the hip joints so the buttock crest moves with the thigh root.",
+    "hip_back_rise_m": "It fades to nothing over the next 250 mm, below the rib cage, and from the hip joints down to the knees, so chest and shank keep their place over the skeleton.",
+    "shoulder_anchor_m": "Where the model shoulder joint sits in the skin relative to MakeHuman's upperarm01 head: forward, outward, up. Zero keeps MakeHuman's joint.",
+    "trunk_margin_m": "The axial trunk warp returns to a pure shift 150 mm below the hip joints and above the neck joint, so crotch and neck keep their shape.",
+    "warp_extent_m": "Outer knots of the trunk warp, beyond any stored vertex (0.6 m from the hip midpoint and from the neck joint)."
+  }
+}

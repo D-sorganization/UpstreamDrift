@@ -31,7 +31,7 @@ from typing import Any
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "makehuman_cc0"))
 
 from mh_rig_io import (  # noqa: E402
     FOREARM_BONES,

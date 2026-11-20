@@ -1,0 +1,111 @@
+{
+  "source_repository": "https://github.com/makehumancommunity/makehuman",
+  "source_commit": "a8bc2d54ff0ac92e78ff71431b1023eda42bf482",
+  "source_files": [
+    "makehuman/data/3dobjs/base.obj",
+    "makehuman/data/rigs/default.mhskel",
+    "makehuman/data/rigs/default_weights.mhw"
+  ],
+  "makehuman_unit_m": 0.1,
+  "stature_m": 1.82,
+  "min_weight": 0.5,
+  "front": [0.0, 0.0, 1.0],
+  "up": [0.0, 1.0, 0.0],
+  "fit": {
+    "hull_samples": 240,
+    "squareness_bounds": [1.2, 8.0]
+  },
+  "mixes": {
+    "neutral": null,
+    "male_athletic": {
+      "male": 1.0,
+      "muscle": 0.75,
+      "weight": 0.7,
+      "height": 0.5,
+      "ethnic": {
+        "african": 0.3333333333333333,
+        "asian": 0.3333333333333333,
+        "caucasian": 0.3333333333333333
+      }
+    }
+  },
+  "segments": {
+    "torso": {
+      "start": "spine05/head",
+      "end": "neck01/head",
+      "slice_bones": [
+        "root",
+        "spine0*",
+        "pelvis.*",
+        "upperleg01.*",
+        "breast.*",
+        "clavicle.*",
+        "shoulder01.*",
+        "neck01"
+      ],
+      "along": [-0.12, 1.0],
+      "stations": 17,
+      "reach": 2.0
+    },
+    "neck": {
+      "start": "neck01/head",
+      "end": "head/head",
+      "slice_bones": ["neck0*", "head", "jaw"],
+      "along": [0.1, 0.5],
+      "stations": 5,
+      "reach": 0.75
+    },
+    "upper_arm": {
+      "start": "upperarm01.R/head",
+      "end": "lowerarm01.R/head",
+      "slice_bones": ["shoulder01.R", "upperarm0*.R", "lowerarm01.R"],
+      "along": [0.1, 0.95],
+      "stations": 9,
+      "reach": 0.5
+    },
+    "forearm": {
+      "start": "lowerarm01.R/head",
+      "end": "wrist.R/head",
+      "slice_bones": ["upperarm02.R", "lowerarm0*.R", "wrist.R"],
+      "along": [0.05, 0.95],
+      "stations": 9,
+      "reach": 0.5
+    },
+    "thigh": {
+      "start": "upperleg01.R/head",
+      "end": "lowerleg01.R/head",
+      "slice_bones": ["upperleg0*.R", "lowerleg01.R"],
+      "along": [0.2, 0.95],
+      "stations": 9,
+      "reach": 0.5
+    },
+    "shank": {
+      "start": "lowerleg01.R/head",
+      "end": "foot.R/head",
+      "slice_bones": ["upperleg02.R", "lowerleg0*.R", "foot.R"],
+      "along": [0.05, 0.95],
+      "stations": 9,
+      "reach": 0.5
+    }
+  },
+  "shoulder": {
+    "neck_base": "neck01/head",
+    "joint": "upperarm01.R/head",
+    "arm_end": "lowerarm01.R/head",
+    "bones": [
+      "spine01",
+      "neck01",
+      "clavicle.R",
+      "shoulder01.R",
+      "upperarm01.R"
+    ],
+    "cap_bones": ["shoulder01.R", "upperarm01.R"],
+    "slope_from": 0.4,
+    "steps": 7,
+    "window": 0.1
+  },
+  "head": {
+    "jaw_bones": ["jaw"],
+    "skull_from": 0.62
+  }
+}

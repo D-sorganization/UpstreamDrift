@@ -502,14 +502,19 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         return int(self._mj.mj_name2id(self.model, mjt_obj.mjOBJ_BODY, name))
 
     def _club_sole_world(self) -> Array:
-        """World sole point (spec club-body origin) at the current ``data`` pose."""
+        """World sole at the current ``data`` pose: the stated sole point
+        (#15296), else the spec club-body origin (#12969)."""
         name = self._club_body_name()
         if name is None:
             raise ValueError("model has no club body")
         body_id = self._club_body_id(name)
         frame = self.adapter.body_frames[name]
         rot_mj = self.data.xmat[body_id].reshape(3, 3)
-        return self.data.xpos[body_id] + rot_mj @ frame[:3, 3]
+        local = frame[:3, 3]
+        stated = self.adapter.club_sole_point_m
+        if stated is not None:
+            local = local + frame[:3, :3] @ np.asarray(stated)
+        return self.data.xpos[body_id] + rot_mj @ local
 
     def _append_club_sole(
         self,

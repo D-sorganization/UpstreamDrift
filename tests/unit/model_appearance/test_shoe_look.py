@@ -51,7 +51,6 @@ def test_every_foot_gets_a_sole_shell_in_the_sole_material() -> None:
 
 
 def test_leg_tapers_meet_at_the_knee_and_ankle() -> None:
-    thigh_end = library.PART_RADIUS_M["thigh"] * library.limb_distal_scale("thigh")
-    shin_start = library.PART_RADIUS_M["shin"]
-    assert abs(thigh_end - shin_start) < 0.005  # no step at the knee
+    # The knee join is measured on the drawn sections in test_leg_shape (#15299).
+    assert library.limb_distal_scale("shin") < library.limb_distal_scale("thigh") < 1
     assert library.limb_distal_scale("forearm") == library.distal_scale("forearm")

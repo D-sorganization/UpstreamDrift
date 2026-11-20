@@ -18,6 +18,7 @@ from src.shared.python.motion_matching.club_observability import (
 )
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
+from src.shared.python.motion_matching.knee_axial_rotation import knee_axial_bounds_rad
 from src.shared.python.motion_matching.pipeline.address_feet import planted_stance
 from src.shared.python.motion_matching.pipeline.plant import (
     MatchingPlant,
@@ -38,7 +39,6 @@ from src.shared.python.motion_matching.pipeline.constants import (
     IK_RESTART_POLICIES,
     IK_UNBOUNDED,
     LEG_LABELS,
-    LEG_SEEDS,
     POSTURE_PRIOR_COORDINATES,
     PRIOR,
     RESTART_MAX_JOINT_SPEED_RAD_S,
@@ -54,6 +54,9 @@ from src.shared.python.motion_matching.pipeline.constants import (
     WRIST_COORDINATES,
     rate_from_times,
     square_forefoot_seeds,
+)
+from src.shared.python.motion_matching.pipeline.marker_selection import (
+    base_leg_seeds,
 )
 from src.shared.python.motion_matching.range_of_motion import (
     HUMAN_RANGES_DEG,
@@ -315,7 +318,7 @@ def configure_lane(lane: Lane, document: dict[str, Any]) -> None:
     """Document-dependent solver settings: declared ranges, the spin priors and
     address constraints of anthropometric documents, full head weight when a
     neck carries the head."""
-    lane.bounds |= document_bounds(document)
+    lane.bounds |= document_bounds(document) | knee_axial_bounds_rad(document)
     if "address_seed_deg" in document:
         lane.anthropometric = True
         lane.prior_weights = dict.fromkeys(SPIN_COORDINATES, SPIN_PRIOR)
@@ -386,6 +389,8 @@ class Lane:
         self.gaze_plan: Any = None
         #: Address toe-out targets (OSV-4); None keeps the legacy behaviour.
         self.feet: Any = None
+        #: Leg seeds the document carries (#15296); None: built-in LEG_SEEDS.
+        self.document_leg_seeds: Mapping[str, Any] | None = None
         #: Address knee-flexion targets (R4, #12684); None keeps the legacy fit.
         self.knees: Any = None
         #: Per-frame club-face orientation targets (OSV-10); None: marker-only.
@@ -642,9 +647,8 @@ class Lane:
 
     def leg_seeds(self) -> dict[str, tuple[str, Sequence[float]]]:
         """Leg marker seeds; forefoot markers squared when foot progression is on."""
-        if self.feet is None:
-            return dict(LEG_SEEDS)
-        return dict(square_forefoot_seeds(LEG_SEEDS))
+        seeds = base_leg_seeds(self)
+        return dict(seeds if self.feet is None else square_forefoot_seeds(seeds))
 
     @property
     def rate_hz(self) -> float:

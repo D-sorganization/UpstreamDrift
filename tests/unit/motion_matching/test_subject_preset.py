@@ -13,6 +13,7 @@ import pytest
 from src.shared.python.motion_matching import anthropometric_geometry as geometry
 from src.shared.python.motion_matching import club_models
 from src.shared.python.motion_matching.execution import assets, spec_builder
+from src.shared.python.motion_matching.execution import marker_seed_overrides as seeds
 from src.shared.python.motion_matching.execution import subject_preset as module
 
 pytestmark = pytest.mark.unit
@@ -50,6 +51,11 @@ def _set(**values: Any) -> Any:
     return lambda raw: raw["settings"].update(values)
 
 
+def _seed(label: str, **values: Any) -> Any:
+    entry = {"body": "Head", "offset_m": [0.0, 0.0, 0.1], "provenance": "test"}
+    return lambda raw: raw["marker_seeds"].update({label: {**entry, **values}})
+
+
 @pytest.mark.parametrize(
     ("change", "message"),
     [
@@ -66,6 +72,16 @@ def _set(**values: Any) -> Any:
         (lambda raw: raw["settings"].pop("mass_kg"), "missing.*mass_kg"),
         (lambda raw: raw.update(schema="subject-preset/0"), "schema"),
         (lambda raw: raw["provenance"].update(mass_kg=" "), "provenance.*mass_kg"),
+        (_seed("Nose"), "unknown marker seed.*Nose"),
+        (_seed("Marker_2:2:1"), "unknown marker seed.*Marker_2:2:1"),
+        (_seed("HeadTop", offset_m=[0.0, float("nan"), 0.1]), "offset_m"),
+        (_seed("HeadTop", offset_m=[0.0, 0.1]), "offset_m"),
+        (_seed("HeadTop", provenance=" "), "provenance.*HeadTop"),
+        (_seed("HeadTop", anchor=""), "anchor.*HeadTop"),
+        (_seed("HeadTop", offset_mm=[1, 2, 3]), "HeadTop.*offset_mm"),
+        (lambda raw: raw["dropped_markers"].update(Nose="x"), "dropped.*Nose"),
+        (lambda raw: raw["dropped_markers"].update(HeadTop="x"), "both.*HeadTop"),
+        (lambda raw: raw["dropped_markers"].update({"Uname*36": ""}), "provenance"),
     ],
 )
 def test_a_bad_preset_file_is_refused(
@@ -91,11 +107,70 @@ def test_the_preset_body_has_the_stated_joint_to_joint_lengths(built: Any) -> No
     assert 0.178 <= half_spacing <= 0.182
     assert _joint(document, "RUpperArm")[1] == pytest.approx(-half_spacing)
     assert neck - hub == pytest.approx(0.095)
-    assert 0.650 <= mid_hip_to_neck <= 0.665 + 1e-4
+    assert mid_hip_to_neck == pytest.approx(0.623, abs=0.001)
     subject = document["subject"]
     assert subject["shoulder_below_cervicale_m"] == 0.095
     assert subject["subject_preset"] == NAME
     assert (subject["stature_m"], subject["mass_kg"]) == (1.82, 78.0)
+
+
+def test_the_preset_seeds_follow_the_placement_review(built: Any) -> None:
+    document, raw = built.document, _raw()
+    at = {
+        label: np.array(a["offset_m"])
+        for label, a in document["marker_attachments"].items()
+    }
+    assert set(raw["marker_seeds"]) == set(seeds.SEEDABLE_LABELS)
+    assert at["HeadFront"] - at["HeadTop"] == pytest.approx([0.142, 0.0, -0.065])
+    assert at["HeadSide"] - at["HeadTop"] == pytest.approx([-0.009, 0.088, -0.100])
+    assert at["WaistLeft"][1] == -at["WaistRight"][1] == 0.1725  # belt, not ASIS
+    assert at["WaistLBack"][1] == -at["WaistRBack"][1] == 0.0845
+    assert at["WaistLBack"][0] - at["WaistLeft"][0] == pytest.approx(-0.147)
+    neck, hub = _joint(document, "Head")[2], _joint(document, "HubtoLS")[2]
+    assert at["BackTop"][2] == pytest.approx(neck - 0.030)  # not hub + 0.02
+    assert at["BackTop"][2] - (hub + 0.02) == pytest.approx(0.045)
+    assert at["BackLeft"] - at["BackTop"] == pytest.approx([-0.010, 0.090, -0.180])
+    assert at["BackRight"][1] == -at["BackLeft"][1]
+    elbow = _joint(document, "Spherical Solid")
+    assert at["LElbowOut"] == pytest.approx(elbow + [0.0, 0.040, 0.0])
+    assert at["LUArmHigh"][2] / elbow[2] == pytest.approx(0.60, abs=0.002)
+    wrist = _joint(document, "Club/Clubface Vector")
+    assert at["LWristTop"] == pytest.approx(wrist + [0.028, 0.0, 0.025])
+    assert at["RWristTop"] == pytest.approx(at["LWristTop"])
+    assert abs(at["LShoulderTop"][1]) == 0.165 and at["RShoulderBack"][1] == -0.150
+    assert at["RToeOut"] == pytest.approx([0.175, 0.010, 0.065])  # on calcn_r
+    assert at["RKneeOut"][2] - at["LKneeOut"][2] == pytest.approx(0.110, abs=0.006)
+    dropped = ["Marker_0:0:0", "Uname*36", "Uname*37", "Uname*38"]
+    assert document["subject"]["dropped_markers"] == dropped
+    assert not set(dropped) & set(at)
+    preset = module.load_subject_preset(NAME)
+    assert all(s["provenance"].strip() for s in preset.marker_seeds.values())
+
+
+def test_seed_overrides_anchor_to_a_joint_and_drop_markers() -> None:
+    base = {
+        label: spec_builder.MarkerAttachment("Hip", (0.0, 0.0, 0.0))
+        for label in seeds.SEEDABLE_LABELS
+    }
+    assert seeds.apply_marker_seed_overrides(base, None, None, [], []) is base
+    frames = [{"name": "Spine", "body": "rod", "placement": np.eye(4).tolist()}]
+    joint = {"parent": "rod", "child": "skull", "parent_to_base": np.eye(4)}
+    joint["parent_to_base"][:3, 3] = [0.0, 0.0, 0.5]
+    override = {"BackTop": {"body": "Spine", "offset_m": [-0.1, 0, -0.03]}}
+    plain = seeds.apply_marker_seed_overrides(base, override, None, [joint], frames)
+    assert plain["BackTop"].offset_m == (-0.1, 0.0, -0.03)
+    override["BackTop"]["anchor"] = "skull"
+    out = seeds.apply_marker_seed_overrides(
+        base, override, ["HeadTop", "Uname*36"], [joint], frames
+    )
+    assert out["BackTop"] == spec_builder.MarkerAttachment("Spine", (-0.1, 0.0, 0.47))
+    assert set(base) - set(out) == {"HeadTop"} and base["BackTop"].body == "Hip"
+    with pytest.raises(ValueError, match="no joint from 'Spine' to anchor 'skull'"):
+        seeds.apply_marker_seed_overrides(base, override, None, [], frames)
+    with pytest.raises(ValueError, match="both.*BackTop"):
+        seeds.apply_marker_seed_overrides(base, override, ["BackTop"], [], [])
+    with pytest.raises(ValueError, match="unknown marker seed"):
+        seeds.apply_marker_seed_overrides(base, {"Nose": {}}, None, [], [])
 
 
 def test_the_preset_club_is_45_inches_butt_to_sole(built: Any) -> None:
@@ -156,10 +231,14 @@ def test_the_default_build_does_not_change() -> None:
         shoulder_below_cervicale_m=geometry.SHOULDER_BELOW_CERVICALE_M,
         club_spec=club_models.CLUBS["driver"],
         subject_preset=None,
+        marker_seed_overrides=None,
+        dropped_markers=None,
     ).document
     assert json.dumps(plain, sort_keys=True) == json.dumps(explicit, sort_keys=True)
     assert "butt_to_sole_m" not in plain["club"]
     assert not {"shoulder_below_cervicale_m", "subject_preset"} & set(plain["subject"])
+    assert "dropped_markers" not in plain["subject"]
+    assert plain["marker_attachments"]["LToeIn"]["offset_m"] is None
     assert geometry.SHOULDER_BELOW_CERVICALE_M == 0.04
 
 

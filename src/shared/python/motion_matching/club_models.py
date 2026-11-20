@@ -28,6 +28,14 @@ CLUB_BODY_SUFFIX = "Clubface Vector"
 HAND_STANDOFF_SUFFIX = "RHandStandoff"
 HEAD_HEIGHT_M = 0.064  # Clubhead frame above the club body origin (native)
 WRIST_TO_BUTT_M = 0.032  # native: wrist joint 32 mm below the butt end
+#: Farthest a stated sole point may lie from the head centre: no catalogue head
+#: (``HEAD_SHAPES``) has a half size above 0.060 m, so twice that is generous.
+SOLE_POINT_MAX_FROM_HEAD_CENTRE_M = 0.12
+#: Where a preset-built ``club.sole_point_m`` comes from (#15296).
+SOLE_POINT_SOURCE = (
+    "club_models.sole_point_m: lowest point of the catalogue head ellipsoid in the "
+    "address lie of the subject preset (club_shaft_elevation_deg, club_head_roll_deg)"
+)
 
 
 @dataclass(frozen=True)
@@ -141,6 +149,20 @@ def from_database(club_id: str) -> ClubSpec:
     )
 
 
+Point = tuple[float, float, float]
+
+
+def _address_ground_normal(shaft_elevation_deg: float, head_roll_deg: float) -> Point:
+    """Ground normal in the club-body frame for an address lie (#15296)."""
+    if not 0.0 < shaft_elevation_deg <= 90.0:  # also refuses NaN
+        raise ValueError(f"shaft elevation must be in (0, 90], {shaft_elevation_deg}")
+    if not math.isfinite(head_roll_deg):
+        raise ValueError(f"head roll must be finite, got {head_roll_deg}")
+    elevation, roll = math.radians(shaft_elevation_deg), math.radians(head_roll_deg)
+    level = math.cos(elevation)
+    return (level * math.sin(roll), -math.sin(elevation), level * math.cos(roll))
+
+
 def sole_offset_m(
     club: ClubSpec, shaft_elevation_deg: float, head_roll_deg: float
 ) -> float:
@@ -153,17 +175,54 @@ def sole_offset_m(
     shaft axis meets the ground this far beyond the head centre. Raises
     ``ValueError`` unless 0 < elevation <= 90 and the roll is finite.
     """
-    if not 0.0 < shaft_elevation_deg <= 90.0:  # also refuses NaN
-        raise ValueError(f"shaft elevation must be in (0, 90], {shaft_elevation_deg}")
-    if not math.isfinite(head_roll_deg):
-        raise ValueError(f"head roll must be finite, got {head_roll_deg}")
-    elevation, roll = math.radians(shaft_elevation_deg), math.radians(head_roll_deg)
-    level = math.cos(elevation)
-    up = (level * math.sin(roll), -math.sin(elevation), level * math.cos(roll))
+    up = _address_ground_normal(shaft_elevation_deg, head_roll_deg)
     support = math.hypot(
         *(h * u for h, u in zip(club.head_half_size_m, up, strict=True))
     )
-    return support / math.sin(elevation)
+    return support / math.sin(math.radians(shaft_elevation_deg))
+
+
+def sole_point_m(
+    club: ClubSpec, shaft_elevation_deg: float, head_roll_deg: float
+) -> Point:
+    """The sole in the club-body frame: the head's lowest point at address.
+
+    The point of the head ellipsoid (centre ``(0, 0, HEAD_HEIGHT_M)``) on level
+    ground in the lie of :func:`sole_offset_m` (same ``ValueError``); a fixed
+    body point, exact in that lie only.
+    """
+    up = _address_ground_normal(shaft_elevation_deg, head_roll_deg)
+    half = club.head_half_size_m
+    support = math.hypot(*(h * u for h, u in zip(half, up, strict=True)))
+    x, y, z = (-h * h * u / support for h, u in zip(half, up, strict=True))
+    return (x, y, z + HEAD_HEIGHT_M)
+
+
+def checked_sole_point_m(value: Any) -> Point:
+    """``value`` as a club-body sole point (#15296); ``ValueError`` unless it is
+    three finite numbers within ``SOLE_POINT_MAX_FROM_HEAD_CENTRE_M`` of the head
+    centre ``(0, 0, HEAD_HEIGHT_M)``."""
+    if not isinstance(value, (list, tuple)) or len(value) != 3:
+        raise ValueError(f"club sole_point_m must be a 3-vector, got {value!r}")
+    if not all(type(v) in (int, float) and math.isfinite(v) for v in value):
+        raise ValueError(f"club sole_point_m must be finite numbers, got {value!r}")
+    x, y, z = (float(v) for v in value)
+    reach = math.sqrt(x * x + y * y + (z - HEAD_HEIGHT_M) ** 2)
+    if reach > SOLE_POINT_MAX_FROM_HEAD_CENTRE_M:
+        raise ValueError(
+            f"club sole_point_m {value!r} is {reach:.3f} m from the head centre; it "
+            f"must be within {SOLE_POINT_MAX_FROM_HEAD_CENTRE_M} m of the head centre"
+        )
+    return (x, y, z)
+
+
+def document_sole_point_m(spec: Mapping[str, Any]) -> Point | None:
+    """``club.sole_point_m`` of a document (:func:`checked_sole_point_m`), or
+    ``None`` when it states none: the address pin stays the origin (#12969)."""
+    club = spec.get("club")
+    if not isinstance(club, Mapping) or club.get("sole_point_m") is None:
+        return None
+    return checked_sole_point_m(club["sole_point_m"])
 
 
 def with_butt_to_sole_length(
