@@ -32,7 +32,7 @@ def _landmarks_m() -> dict[str, np.ndarray]:
     return dict(zip(SETTINGS["landmarks"], points, strict=True))
 
 
-def test_provenance_matches_the_committed_asset() -> None:
+def test_provenance_matches_the_asset_and_records_no_local_path() -> None:
     digest = hashlib.sha256(ASSET.read_bytes()).hexdigest()
     assert PROVENANCE["asset_sha256"] == digest
     assert PROVENANCE["licence"] == "CC0-1.0"
@@ -41,15 +41,11 @@ def test_provenance_matches_the_committed_asset() -> None:
     for name in (PROVENANCE["licence_file"], PROVENANCE["licence_statement_file"]):
         assert (FOLDER / name).resolve().is_file()
     assert (FOLDER / "NOTICE").is_file()
-
-
-def test_no_absolute_or_private_paths_are_recorded() -> None:
     for name in ("PROVENANCE.json", "skin_settings.json", "NOTICE", SCRIPT.name):
         text = (FOLDER / name).read_text(encoding="utf-8")
         for marker in ("/home/", "/tmp/", "/Users/", ":\\", "~/"):
             assert marker not in text, f"{name} holds {marker!r}"
-    for entry in PROVENANCE["morph_targets"]:
-        assert not Path(entry["path"]).is_absolute()
+    assert not any(Path(p).is_absolute() for p in PROVENANCE["morph_targets"])
 
 
 def test_mesh_is_one_connected_surface_within_budget() -> None:
@@ -70,7 +66,8 @@ def test_mesh_is_one_connected_surface_within_budget() -> None:
 
 def test_weights_are_normalised_over_the_named_groups() -> None:
     arrays = _arrays()
-    groups = PROVENANCE["groups"]
+    sides = 2 * len(SETTINGS["side_groups"])
+    groups = range(len(SETTINGS["central_groups"]) + sides)
     assert arrays["weight_index"].shape[1] == SETTINGS["max_influences"]
     assert int(arrays["weight_index"].max()) < len(groups)
     assert set(np.unique(arrays["weight_index"])) == set(range(len(groups)))

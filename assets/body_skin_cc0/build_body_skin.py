@@ -1,35 +1,20 @@
-#!/usr/bin/env python3
 """Derive the continuous CC0 body skin from MakeHuman (#15299).
 
-Usage::
+Usage: ``MAKEHUMAN_ROOT=CHECKOUT python assets/body_skin_cc0/build_body_skin.py
+[--check]``, where the checkout is the MakeHuman tree at the commit pinned in
+``skin_settings.json``. Its location is never written to the outputs. The
+build is deterministic (quantised integers).
 
-    MAKEHUMAN_ROOT=PATH/TO/makehuman-checkout \
-        python assets/body_skin_cc0/build_body_skin.py [--check]
-
-The checkout is the MakeHuman source tree at the commit pinned in
-``skin_settings.json``; its location is read from the environment and is never
-written to the outputs. The script is deterministic: the same inputs give the
-same array content (quantised integers) and the same ``PROVENANCE.json``.
-
-What it does
-    1. Morphs the hm08 base mesh with the athletic male mix shared with the
-       body sections and scales it to the reference stature.
-    2. Keeps the ``body`` faces below the neck plane that do not belong to the
-       hands or feet, as one triangle surface: trunk, shoulder girdle, arms to
-       the wrists, pelvis and legs to the ankles.
-    3. Sums MakeHuman's skin weights into the named bone groups of the
-       settings (a bone outside every group joins its nearest listed ancestor),
-       keeps the strongest influences and quantises them.
-    4. Stores the joint landmarks the runtime fit needs.
-
-Stored frame: origin at the hip midpoint, x forward, y left, z up, in
-``quantum_m`` steps. The MakeHuman frame is y up, z forward, +x the
-character's left. Appearance only: nothing here feeds a physics model.
+The athletic male mix shared with the body sections is scaled to the reference
+stature; the ``body`` faces below the neck plane that are not hands or feet are
+kept as one triangle surface; MakeHuman's skin weights are summed into the bone
+groups of the settings (a bone outside every group joins its nearest listed
+ancestor); the joint landmarks of the runtime fit are stored. Stored frame:
+hip-midpoint origin, x forward, y left, z up. Appearance only, no physics.
 """
 
 from __future__ import annotations
 
-import argparse
 import hashlib
 import json
 import os
@@ -86,29 +71,11 @@ def bone_to_group(rig: MakeHumanRig, groups: dict[str, list[str]]) -> dict[str, 
     return out
 
 
-def descendants(rig: MakeHumanRig, roots: list[str]) -> tuple[str, ...]:
-    """``roots`` and every bone below them."""
-    found = set(roots)
-    grew = True
-    while grew:
-        more = {b for b in rig.bones if rig.bone_parent(b) in found} - found
-        grew = bool(more)
-        found |= more
-    return tuple(sorted(found))
-
-
 def to_model_frame(rig: MakeHumanRig, settings: dict[str, Any]) -> tuple[Array, Array]:
     """Vertices and landmarks in metres: hip midpoint origin, x fwd, y left, z up."""
     body = np.unique(rig.body_quads)
     scale = settings["stature_m"] / float(np.ptp(rig.vertices[body, 1]))
-    marks = np.array(
-        [
-            rig.bone_head(spec.split("/")[0])
-            if spec.endswith("/head")
-            else rig.bone_tail(spec.split("/")[0])
-            for spec in settings["landmarks"].values()
-        ]
-    )
+    marks = np.array([rig.bone_head(b) for b in settings["landmarks"].values()])
     names = list(settings["landmarks"])
     origin = 0.5 * (marks[names.index("hip_l")] + marks[names.index("hip_r")])
 
@@ -158,7 +125,8 @@ def build(makehuman_root: Path, settings: dict[str, Any]) -> tuple[dict, list]:
         macro_mix(mixes[settings["mix"]]),
     )
     vertices, marks = to_model_frame(rig, settings)
-    cut_bones = descendants(rig, settings["cut_roots"])
+    owner = bone_to_group(rig, {"cut": settings["cut_roots"], "kept": ["root"]})
+    cut_bones = tuple(bone for bone, index in owner.items() if index == 0)
     cut = dense_weights(rig, cut_bones).sum(axis=1)
     quads = rig.body_quads
     neck_z = marks[list(settings["landmarks"]).index(settings["neck_plane"]), 2]
@@ -197,8 +165,6 @@ def provenance(root: Path, settings: dict[str, Any], used: list) -> dict[str, An
         "asset_sha256": hashlib.sha256(OUT.read_bytes()).hexdigest(),
         "asset_description": "Athletic male MakeHuman body skin without head, hands and feet, as one triangle surface with group skin weights and joint landmarks; int16 multiples of quantum_m, origin at the hip midpoint, x forward, y left, z up.",
         "quantum_m": settings["quantum_m"],
-        "groups": list(group_bones(settings)),
-        "landmarks": list(settings["landmarks"]),
         "licence": "CC0-1.0",
         "licence_file": "../head_cc0/LICENSE.CC0.txt",
         "licence_statement_file": "../head_cc0/SOURCE_LICENSE_STATEMENT.txt",
@@ -208,7 +174,9 @@ def provenance(root: Path, settings: dict[str, Any], used: list) -> dict[str, An
             name: sha256_file(root.joinpath(*name.split("/")))
             for name in settings["source_files"]
         },
-        "morph_targets": used,
+        "morph_targets": {
+            t["path"]: f"{t['weight']} x sha256 {t['sha256']}" for t in used
+        },
         "author": "MakeHuman Team (copyright holders at the CC0 release: Data Collection AB, Joel Palmius, Jonas Hauquier)",
         "download_date": settings["download_date"],
         "derivation": "assets/body_skin_cc0/build_body_skin.py with skin_settings.json (deterministic).",
@@ -216,16 +184,14 @@ def provenance(root: Path, settings: dict[str, Any], used: list) -> dict[str, An
 
 
 def main(argv: list[str]) -> int:
-    ap = argparse.ArgumentParser(description=__doc__.split(NL)[0])
-    ap.add_argument("--check", action="store_true", help="compare with the asset")
-    args = ap.parse_args(argv)
+    check = argv == ["--check"]
     root_text = os.environ.get("MAKEHUMAN_ROOT")
     if not root_text:
         raise SystemExit("set MAKEHUMAN_ROOT to the MakeHuman checkout")
     root = Path(root_text)
     settings = json.loads(SETTINGS_PATH.read_text())
     arrays, used = build(root, settings)
-    if args.check:
+    if check:
         with np.load(OUT) as have:
             same = set(have.files) == set(arrays) and all(
                 np.array_equal(have[k], arrays[k]) for k in arrays

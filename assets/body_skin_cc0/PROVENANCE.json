@@ -3,46 +3,6 @@
   "asset_sha256": "e3efafe9a33cfc1e28785cea6f605486a521a380137910427bcffa32d979c26f",
   "asset_description": "Athletic male MakeHuman body skin without head, hands and feet, as one triangle surface with group skin weights and joint landmarks; int16 multiples of quantum_m, origin at the hip midpoint, x forward, y left, z up.",
   "quantum_m": 0.0001,
-  "groups": [
-    "pelvis",
-    "spine05",
-    "spine04",
-    "spine03",
-    "thorax",
-    "clavicle_l",
-    "shoulder_l",
-    "upperarm_proximal_l",
-    "upperarm_distal_l",
-    "forearm_proximal_l",
-    "forearm_distal_l",
-    "thigh_proximal_l",
-    "thigh_distal_l",
-    "shank_l",
-    "clavicle_r",
-    "shoulder_r",
-    "upperarm_proximal_r",
-    "upperarm_distal_r",
-    "forearm_proximal_r",
-    "forearm_distal_r",
-    "thigh_proximal_r",
-    "thigh_distal_r",
-    "shank_r"
-  ],
-  "landmarks": [
-    "neck",
-    "hip_l",
-    "hip_r",
-    "knee_l",
-    "knee_r",
-    "ankle_l",
-    "ankle_r",
-    "shoulder_l",
-    "shoulder_r",
-    "elbow_l",
-    "elbow_r",
-    "wrist_l",
-    "wrist_r"
-  ],
   "licence": "CC0-1.0",
   "licence_file": "../head_cc0/LICENSE.CC0.txt",
   "licence_statement_file": "../head_cc0/SOURCE_LICENSE_STATEMENT.txt",
@@ -53,43 +13,15 @@
     "makehuman/data/rigs/default.mhskel": "99f179bce0aa850b45d4191a1d0d234c5851f881c057439470ded3bddf729a24",
     "makehuman/data/rigs/default_weights.mhw": "0f3641d651ae3d00ad6b4ccee43142edb109d3bd909d27d9e4139ef1beed8625"
   },
-  "morph_targets": [
-    {
-      "path": "makehuman/data/targets/macrodetails/african-male-young.target",
-      "sha256": "894abc1fbb3d28543a51fef16f89d5d4bdf9aa2e1534413339811a3d47818b7d",
-      "weight": 0.3333333333333333
-    },
-    {
-      "path": "makehuman/data/targets/macrodetails/asian-male-young.target",
-      "sha256": "ed2e8c191cb6b87b4a2d97c80486acb2604fa549316c7aa2a738a5d5a14334dc",
-      "weight": 0.3333333333333333
-    },
-    {
-      "path": "makehuman/data/targets/macrodetails/caucasian-male-young.target",
-      "sha256": "70e228ba7164737dae664454394536fc5935fa48d333c1a97d77e2dc6eacc5f5",
-      "weight": 0.3333333333333333
-    },
-    {
-      "path": "makehuman/data/targets/macrodetails/universal-male-young-averagemuscle-averageweight.target",
-      "sha256": "4ba5396ddabda448ece15650a566fbebfbb10239256ccb201e8f883429e12249",
-      "weight": 0.30000000000000004
-    },
-    {
-      "path": "makehuman/data/targets/macrodetails/universal-male-young-averagemuscle-maxweight.target",
-      "sha256": "3e77ff5a07a9b870db5226507e1cf8a295f0e09c109fb72142770f5f50427b5e",
-      "weight": 0.19999999999999996
-    },
-    {
-      "path": "makehuman/data/targets/macrodetails/universal-male-young-maxmuscle-averageweight.target",
-      "sha256": "c171ff9cc95e96273beb3e3b1969a01988c2d4982ebc6fe04bf81cf72ee3b295",
-      "weight": 0.30000000000000004
-    },
-    {
-      "path": "makehuman/data/targets/macrodetails/universal-male-young-maxmuscle-maxweight.target",
-      "sha256": "95392741389537889a37dc67a7d8453c93b30f27131e3e622bee3f30d1d8738c",
-      "weight": 0.19999999999999996
-    }
-  ],
+  "morph_targets": {
+    "makehuman/data/targets/macrodetails/african-male-young.target": "0.3333333333333333 x sha256 894abc1fbb3d28543a51fef16f89d5d4bdf9aa2e1534413339811a3d47818b7d",
+    "makehuman/data/targets/macrodetails/asian-male-young.target": "0.3333333333333333 x sha256 ed2e8c191cb6b87b4a2d97c80486acb2604fa549316c7aa2a738a5d5a14334dc",
+    "makehuman/data/targets/macrodetails/caucasian-male-young.target": "0.3333333333333333 x sha256 70e228ba7164737dae664454394536fc5935fa48d333c1a97d77e2dc6eacc5f5",
+    "makehuman/data/targets/macrodetails/universal-male-young-averagemuscle-averageweight.target": "0.30000000000000004 x sha256 4ba5396ddabda448ece15650a566fbebfbb10239256ccb201e8f883429e12249",
+    "makehuman/data/targets/macrodetails/universal-male-young-averagemuscle-maxweight.target": "0.19999999999999996 x sha256 3e77ff5a07a9b870db5226507e1cf8a295f0e09c109fb72142770f5f50427b5e",
+    "makehuman/data/targets/macrodetails/universal-male-young-maxmuscle-averageweight.target": "0.30000000000000004 x sha256 c171ff9cc95e96273beb3e3b1969a01988c2d4982ebc6fe04bf81cf72ee3b295",
+    "makehuman/data/targets/macrodetails/universal-male-young-maxmuscle-maxweight.target": "0.19999999999999996 x sha256 95392741389537889a37dc67a7d8453c93b30f27131e3e622bee3f30d1d8738c"
+  },
   "author": "MakeHuman Team (copyright holders at the CC0 release: Data Collection AB, Joel Palmius, Jonas Hauquier)",
   "download_date": "2026-10-16",
   "derivation": "assets/body_skin_cc0/build_body_skin.py with skin_settings.json (deterministic)."

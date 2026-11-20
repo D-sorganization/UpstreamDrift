@@ -1,5 +1,4 @@
 {
-  "issue": 15299,
   "source_repository": "https://github.com/makehumancommunity/makehuman",
   "source_commit": "a8bc2d54ff0ac92e78ff71431b1023eda42bf482",
   "source_files": [
@@ -24,19 +23,19 @@
     "cut_weight": "A face belongs to the hands or feet when their bones carry at least half of its mean weight (the hand asset's cut); those parts and the head stay separate models."
   },
   "landmarks": {
-    "neck": "neck01/head",
-    "hip_l": "upperleg01.L/head",
-    "hip_r": "upperleg01.R/head",
-    "knee_l": "lowerleg01.L/head",
-    "knee_r": "lowerleg01.R/head",
-    "ankle_l": "foot.L/head",
-    "ankle_r": "foot.R/head",
-    "shoulder_l": "upperarm01.L/head",
-    "shoulder_r": "upperarm01.R/head",
-    "elbow_l": "lowerarm01.L/head",
-    "elbow_r": "lowerarm01.R/head",
-    "wrist_l": "wrist.L/head",
-    "wrist_r": "wrist.R/head"
+    "neck": "neck01",
+    "hip_l": "upperleg01.L",
+    "hip_r": "upperleg01.R",
+    "knee_l": "lowerleg01.L",
+    "knee_r": "lowerleg01.R",
+    "ankle_l": "foot.L",
+    "ankle_r": "foot.R",
+    "shoulder_l": "upperarm01.L",
+    "shoulder_r": "upperarm01.R",
+    "elbow_l": "lowerarm01.L",
+    "elbow_r": "lowerarm01.R",
+    "wrist_l": "wrist.L",
+    "wrist_r": "wrist.R"
   },
   "neck_plane": "neck",
   "cut_roots": ["wrist.L", "wrist.R", "foot.L", "foot.R"],
@@ -59,7 +58,7 @@
     "shank": ["lowerleg01"]
   },
   "reference_fit": {
-    "source": "Segment lengths between joint centres of the MuJoCo export of the tour-average driver subject at 1.82 m (hang pose), measured 2026-11-19 for the #15299 prototype. They bound how far the runtime fit has to move the stored mesh; they are not physics inputs.",
+    "source": "Segment lengths between joint centres of the MuJoCo export of the tour-average driver subject at 1.82 m (hang pose), measured 2026-11-19 for the #15299 prototype. They bound how far the runtime fit has to move the stored mesh; they are not physics inputs. Scale bounds: the prototype fit scales run from 0.829 (hip spacing) to 1.120 (upper arm), and beyond the bounds the smooth weights no longer hide the stretch. Symmetry: the base mesh and the macro targets are mirror symmetric, so two quanta of slack.",
     "segments_mm": {
       "hip_spacing": ["hip_l", "hip_r", 189.2],
       "shoulder_spacing": ["shoulder_l", "shoulder_r", 360.0],
@@ -69,9 +68,7 @@
       "shank": ["knee_l", "ankle_l", 433.0]
     },
     "scale_bounds": [0.8, 1.15],
-    "scale_bounds_source": "Prototype measurement: fit scales run from 0.829 (hip spacing) to 1.120 (upper arm); outside these bounds the smooth weights no longer hide the stretch.",
-    "symmetry_mm": 0.2,
-    "symmetry_source": "The base mesh and the macro targets are mirror symmetric; two quanta of slack."
+    "symmetry_mm": 0.2
   },
   "budget": {
     "max_triangles": 8000,
