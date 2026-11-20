@@ -21,6 +21,9 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     PressSettings,
 )
 from src.shared.python.model_appearance.hand_backends.golf_grip import load_golf_grip
+from src.shared.python.model_appearance.hand_backends.knuckle_sideways import (
+    ABDUCTED_FINGERS,
+)
 from src.shared.python.model_appearance.hand_backends.metacarpal_arch import (
     MetacarpalArchSettings,
 )
@@ -101,6 +104,11 @@ class SkinnedHumanSettings:
     side_close_flexed_share: float
     side_close_flexed_at_deg: float
     side_close_limit_by_flexion: bool
+    side_close_knuckle_abduction_deg: tuple[
+        tuple[str, tuple[tuple[str, float], ...]], ...
+    ]
+    side_close_abduction_hold_margin_deg: float
+    side_close_abduction_hold_passes: int
     pair_capsule_radius_scale: float
     pair_palm_capsule_radius_scale: float
     pair_thumb_radius_scale: float
@@ -322,6 +330,26 @@ def _share(value: Any) -> float:
     return share
 
 
+def _knuckle_abduction(
+    raw: Mapping[str, Any],
+) -> tuple[tuple[str, tuple[tuple[str, float], ...]], ...]:
+    """``side_close.knuckle_abduction_deg``: per hand, the fingers abducted
+    toward the little finger after the sideways closing, each by 0 to
+    ``knuckle_max_deg`` degrees; a finger named is also held in its range."""
+    name, most = "side_close.knuckle_abduction_deg", float(raw["knuckle_max_deg"])
+    hands = raw["knuckle_abduction_deg"]
+    if not isinstance(hands, Mapping) or set(hands) != set(_HANDS):
+        raise ValueError(f"{name} must name the hands {_HANDS}")
+    out = []
+    for side in _HANDS:
+        fingers = tuple((str(f), float(deg)) for f, deg in hands[side].items())
+        for finger, deg in fingers:
+            if finger not in ABDUCTED_FINGERS or not 0.0 <= deg <= most:
+                raise ValueError(f"{name}.{side}: {finger!r} {deg} is not allowed")
+        out.append((side, fingers))
+    return tuple(out)
+
+
 def _side_close_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
     """The ``side_close`` section as :class:`SkinnedHumanSettings` fields."""
     return {
@@ -348,6 +376,13 @@ def _side_close_fields(raw: Mapping[str, Any]) -> dict[str, Any]:
             raw["flexed_at_deg"], "side_close.flexed_at_deg"
         ),
         "side_close_limit_by_flexion": _flag(raw["limit_by_flexion"]),
+        "side_close_knuckle_abduction_deg": _knuckle_abduction(raw),
+        "side_close_abduction_hold_margin_deg": _non_negative(
+            raw["abduction_hold_margin_deg"], "side_close.abduction_hold_margin_deg"
+        ),
+        "side_close_abduction_hold_passes": int(
+            _positive(raw["abduction_hold_passes"], "side_close.abduction_hold_passes")
+        ),
     }
 
 

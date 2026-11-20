@@ -12,7 +12,11 @@ linearly to a share of that by a set flexion; every number is a setting
 from __future__ import annotations
 
 import math
-from typing import Protocol
+from collections.abc import Iterable, Mapping
+from typing import Any, Protocol
+
+#: The fingers a hand may be set to abduct (``side_close.knuckle_abduction_deg``).
+ABDUCTED_FINGERS = ("middle", "ring", "little")
 
 
 class SidewaysSettings(Protocol):
@@ -26,6 +30,19 @@ class SidewaysSettings(Protocol):
     def side_close_flexed_at_deg(self) -> float: ...
     @property
     def side_close_limit_by_flexion(self) -> bool: ...
+
+
+class _Knuckles(Protocol):
+    """A posable hand whose fingers swing sideways at their knuckles."""
+
+    side: dict[str, float]
+
+    @property
+    def settings(self) -> Any: ...
+
+    def swing_sideways(self, bone: str | None, swing: float = 0.0) -> None: ...
+
+    def joint_position(self, bone: str, angles: Mapping[str, float]) -> Any: ...
 
 
 def sideways_limit_rad(flexion_rad: float, settings: SidewaysSettings) -> float:
@@ -59,4 +76,68 @@ def held_swing_rad(
     return min(most, max(-most, swing_rad))
 
 
-__all__ = ["SidewaysSettings", "held_swing_rad", "sideways_limit_rad"]
+def abduct_knuckles(
+    hand: _Knuckles, angles: Mapping[str, float], abduction_deg: Mapping[str, float]
+) -> None:
+    """Swing each finger of ``abduction_deg`` toward the little finger by its
+    degrees, on top of the swing the sideways closing left it (#15329).
+
+    Preconditions: every finger is one of :data:`ABDUCTED_FINGERS` and its
+    angle is finite and not negative (``ValueError``). Postconditions: an empty
+    mapping leaves the hand untouched; a finger's swing is its swing on entry
+    plus its angle, toward the side that carries its end joint along the line
+    from the forefinger's knuckle to the little finger's.
+    """
+    for finger, degrees in abduction_deg.items():
+        if finger not in ABDUCTED_FINGERS:
+            raise ValueError(f"knuckle abduction is of {ABDUCTED_FINGERS}: {finger!r}")
+        if not (math.isfinite(degrees) and degrees >= 0.0):
+            raise ValueError("knuckle abduction must be finite and not negative")
+    if not abduction_deg:
+        return
+    probe = hand.settings.curl.step_rad
+    across = hand.joint_position("little_prox", angles)
+    across = across - hand.joint_position("index_prox", angles)
+    for finger, degrees in abduction_deg.items():
+        bone, closed = f"{finger}_prox", hand.side.get(f"{finger}_prox", 0.0)
+
+        def along(swing: float, bone: str = bone, finger: str = finger) -> float:
+            hand.swing_sideways(bone, swing)
+            return float(hand.joint_position(f"{finger}_dist", angles) @ across)
+
+        toward = 1.0 if along(closed + probe) > along(closed - probe) else -1.0
+        hand.swing_sideways(bone, closed + toward * math.radians(degrees))
+
+
+def hold_knuckles_in_range(
+    hand: _Knuckles, angles: Mapping[str, float], fingers: Iterable[str]
+) -> bool:
+    """Bring the swing of each of ``fingers`` inside the range its knuckle has
+    as ``angles`` flex it, less ``side_close.abduction_hold_margin_deg``.
+
+    Postconditions: no named finger swings further than
+    :func:`sideways_limit_rad` of its knuckle less the margin (never below
+    zero); a swing already inside is untouched; ``True`` if any was moved,
+    after which the fingers want wrapping again.
+    """
+    settings = hand.settings
+    margin = math.radians(settings.side_close_abduction_hold_margin_deg)
+    moved = False
+    for finger in fingers:
+        bone = f"{finger}_prox"
+        swing = hand.side.get(bone, 0.0)
+        most = max(0.0, sideways_limit_rad(angles[bone], settings) - margin)
+        if abs(swing) > most:
+            hand.swing_sideways(bone, math.copysign(most, swing))
+            moved = True
+    return moved
+
+
+__all__ = [
+    "ABDUCTED_FINGERS",
+    "SidewaysSettings",
+    "abduct_knuckles",
+    "held_swing_rad",
+    "hold_knuckles_in_range",
+    "sideways_limit_rad",
+]

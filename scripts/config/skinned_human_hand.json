@@ -124,7 +124,14 @@
     "_knuckle_max_deg": "With limit_by_flexion on: a knuckle may swing sideways at most knuckle_max_deg with the finger straight; the range falls linearly to flexed_share of that once the knuckle is flexed flexed_at_deg (its collateral ligaments tighten as it bends).",
     "knuckle_max_deg": 30.0,
     "flexed_share": 0.2,
-    "flexed_at_deg": 90.0
+    "flexed_at_deg": 90.0,
+    "_knuckle_abduction_deg": "Owner, 2026-11-20 (#15329): per hand, fingers (middle, ring, little) swung at the knuckle toward the little finger by this many degrees on top of the sideways closing, so their curl planes turn squarer to the shaft (about 0.47 degrees of tilt per degree). A finger named here, even at 0, is then held inside the knuckle's flexion-dependent sideways range above (knuckle_max_deg, flexed_share, flexed_at_deg) less abduction_hold_margin_deg, whatever limit_by_flexion says, and the fingers are wrapped again, at most abduction_hold_passes times. Empty for both hands: nothing changes. The trail seat covered_square sets the trail hand's.",
+    "knuckle_abduction_deg": {
+      "lead": {},
+      "trail": {}
+    },
+    "abduction_hold_margin_deg": 0.5,
+    "abduction_hold_passes": 4
   },
   "thumb": {
     "max_swing_deg": 120.0,
