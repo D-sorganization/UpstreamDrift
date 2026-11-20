@@ -122,7 +122,8 @@ def test_the_skin_at_the_bind_pose_spans_the_model_joints() -> None:
     change = pose.edge_length_change(FITTED.vertices, posed, edges)
     assert np.abs(change).max() < SETTINGS.bind_stretch_limit_m
     for side, sign in fit.SIDES:  # the forearm skin surrounds the model forearm
-        arm = SKIN.weights[:, SKIN.groups.index(f"forearm_distal_{side}")] > 0.9
+        ends = [f"forearm_{end}_{side}" for end in ("proximal", "distal")]
+        arm = SKIN.weights[:, [SKIN.groups.index(g) for g in ends]].sum(axis=1) > 0.9
         centre = posed[arm].mean(axis=0)
         assert sign * centre[1] == pytest.approx(0.195, abs=0.02)
         assert model[f"wrist_{side}"][2] < centre[2] < model[f"elbow_{side}"][2]
