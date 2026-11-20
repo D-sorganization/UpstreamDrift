@@ -200,3 +200,41 @@ def test_the_forearm_end_follows_a_bent_hand() -> None:
     with pytest.raises(ValueError, match="side"):
         binds = export.bind_poses(FRAMES, FITTED)
         export.blend_wrists((), FITTED.vertices, binds, {"x": binds["head"]}, SETTINGS)
+
+
+def test_the_head_base_is_held_round_the_neck_axis() -> None:
+    height, side = SETTINGS.head_base_height_m, SETTINGS.head_base_side_m
+    front, back = SETTINGS.head_base_front_m, SETTINGS.head_base_back_m
+    drop = SETTINGS.head_base_drop_m
+    assert height > 0.0 and front >= side > 0.0 and back > 0.0 and drop > 0.0
+    ring = np.linspace(0.0, 2.0 * np.pi, 16, endpoint=False)
+    wide = np.column_stack([3.0 * front * np.cos(ring), 3.0 * side * np.sin(ring)])
+    low = np.column_stack([wide, np.full(16, 0.5 * height)])
+    inner = np.column_stack([0.1 * wide, np.full(16, -0.01)])
+    high = np.column_stack([wide, np.full(16, height)])
+    held = export.narrow_head_base(np.vstack([low, inner, high]), SETTINGS)
+    depth = np.where(wide[:, 0] > 0.0, front, back)  # forward is +x
+    on_limit = np.hypot(held[:16, 0] / depth, held[:16, 1] / side)
+    assert np.allclose(on_limit, 1.0)  # an ellipse each way, straight to the axis
+    turned = held[:16, 0] * wide[:, 1] - held[:16, 1] * wide[:, 0]
+    assert np.allclose(turned, 0.0, atol=1e-12)
+    assert (np.einsum("ij,ij->i", held[:16, :2], wide) > 0.0).all()
+    assert np.allclose(held[[0, 4, 8], :2], [[front, 0], [0, side], [-back, 0]])
+    # the base is drawn down the neck: by half the drop at half the height,
+    # by all of it on and under the joint plane, sideways position kept
+    assert np.allclose(held[:16, 2], low[:, 2] - 0.5 * drop)
+    assert np.allclose(held[16:32, 2], inner[:, 2] - drop)
+    assert np.array_equal(held[16:32, :2], inner[:, :2])
+    assert np.array_equal(held[32:], high)
+    flat = dataclasses.replace(SETTINGS, head_base_drop_m=0.0)
+    assert np.array_equal(export.narrow_head_base(inner, flat), inner)
+    off = dataclasses.replace(SETTINGS, head_base_height_m=0.0)
+    assert np.array_equal(export.narrow_head_base(inner, off), inner)
+    with pytest.raises(ValueError, match="vertices"):
+        export.narrow_head_base(low[:, :2], SETTINGS)
+    names = ("height", "front", "side", "back", "drop")
+    for name, bad in zip(names, (-0.01, 0.0, 0.0, -0.03, -0.001), strict=True):
+        with pytest.raises(ValueError, match="head_base"):
+            dataclasses.replace(SETTINGS, **{f"head_base_{name}_m": bad})
+    with pytest.raises(TypeError, match="head_base"):
+        dataclasses.replace(SETTINGS, head_base_side_m="0.03")
