@@ -1432,6 +1432,7 @@ def calibrate_run(args: argparse.Namespace) -> CalibratedRun:
     if args.bound_wrists or (fitted_grip(base_spec) and not args.free_wrists):
         lane.bounds |= wrist_bounds()
         ctx.log.info("wrists and forearms bounded to the human ranges in the IK")
+    lane.set_girdle_range(getattr(args, "ik_girdle_range_deg", None))
 
     lane.gaze_weight = float(getattr(args, "gaze_weight", 0.0))
 
