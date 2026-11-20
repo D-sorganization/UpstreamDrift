@@ -112,9 +112,15 @@ it was 100 %.
 - Bring the multi-frame marker-offset adjustment into the repository if its
   accuracy is to be claimed from a repository command.
 - `pipeline/bundle_adjustment.py` now holds that adjustment as an engine-free
-  core (`solve_bundle`) tested on a synthetic chain only. No fit command calls
-  it yet, so every number above stands and the experiment column is still not
-  reproducible from the repository.
+  core (`solve_bundle`), and `pipeline/bundle_stage.py` builds its problem from
+  a pipeline lane. The fit commands above take it as an opt-in stage:
+  `--bundle-adjust` (off by default; a run without it is unchanged), with
+  `--bundle-stride` (20), `--bundle-anchor-frames` and `--bundle-held-out`.
+  The stage runs after the leg calibration, adjusts the body-marker attachments
+  under the sigma table `OFFSET_SIGMAS_M`, holds the club markers, and the
+  swing solve then uses the adjusted attachments. Its receipt block is
+  `address.bundle_adjustment`. Every number above is from runs without the
+  flag.
   It eliminates each frame's pose block, takes exact offset derivatives and
   accepts loop-closure residuals. On a synthetic 30-hinge, 35-frame, 30-marker
   chain it converged in 21 iterations (56 to 93 s on a loaded four-core host,

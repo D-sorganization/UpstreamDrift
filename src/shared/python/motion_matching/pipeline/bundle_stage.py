@@ -10,21 +10,25 @@ come from its public constraint linearisation.
 
 from __future__ import annotations
 
+import argparse
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
 import numpy as np
 
+from src.shared.python.motion_matching.club_face_target import require_club_assembly
 from src.shared.python.motion_matching.constraint_kinematics import ConstraintOptions
 from src.shared.python.motion_matching.pipeline.bundle_adjustment import (
     BundleProblem,
     BundleResult,
     BundleSettings,
+    solve_bundle,
 )
 from src.shared.python.motion_matching.pipeline.constants import PRIOR
 
 Attachments = Mapping[str, tuple[str, Sequence[float]]]
+Point = tuple[float, float, float]
 
 #: Prior sigma of a marker's offset along its body's x, y, z axes, metres, by
 #: label suffix (or prefix for the head). Values are those of the experiment in
@@ -215,7 +219,7 @@ def build_problem(
 
 def adjusted_attachments(
     attachments: Attachments, labels: Sequence[str], result: BundleResult
-) -> dict[str, tuple[str, tuple[float, float, float]]]:
+) -> dict[str, tuple[str, Point]]:
     """``attachments`` with the fitted labels moved to the adjusted offsets."""
     out = {
         label: (body, (float(o[0]), float(o[1]), float(o[2])))
@@ -255,3 +259,113 @@ def stage_report(
         "offset_sigmas_m": {key: list(value) for key, value in OFFSET_SIGMAS_M.items()},
         "settings": asdict(settings),
     }
+
+
+def add_bundle_arguments(parser: argparse.ArgumentParser) -> None:
+    """Add the opt-in ``--bundle-adjust`` stage and its settings."""
+    default = StageSettings()
+    parser.add_argument(
+        "--bundle-adjust",
+        action="store_true",
+        help="adjust the body-marker attachments over frames of the whole "
+        "capture before the swing solve (#15296); off by default, and a run "
+        "without it is unchanged",
+    )
+    parser.add_argument(
+        "--bundle-stride",
+        type=int,
+        default=default.frame_stride,
+        help="every this many capture frames enter the adjustment",
+    )
+    parser.add_argument(
+        "--bundle-anchor-frames",
+        type=int,
+        nargs="*",
+        default=[],
+        help="further frames to include, such as the top and impact",
+    )
+    parser.add_argument(
+        "--bundle-held-out",
+        nargs="*",
+        default=[],
+        help="marker labels left out of the adjustment and scored afterwards",
+    )
+
+
+def stage_settings(args: argparse.Namespace) -> StageSettings | None:
+    """Settings of the run ``args`` asks for; ``None`` without the flag."""
+    if not getattr(args, "bundle_adjust", False):
+        return None
+    return StageSettings(
+        frame_stride=args.bundle_stride,
+        anchor_frames=tuple(args.bundle_anchor_frames),
+        held_out=tuple(args.bundle_held_out),
+    )
+
+
+def stated_sole(spec: Mapping[str, Any]) -> tuple[str, Point] | None:
+    """The club's ground point as (club body, ``club.sole_point_m``) when the
+    document states one; ``None`` otherwise, never the body origin."""
+    point = (spec.get("club") or {}).get("sole_point_m")
+    if point is None:
+        return None
+    x, y, z = (float(value) for value in point)
+    return require_club_assembly(spec)[1], (x, y, z)
+
+
+@dataclass(frozen=True)
+class Adjustment:
+    """Adjusted ``attachments``, the adjusted address pose and the receipt block."""
+
+    attachments: dict[str, tuple[str, Point]]
+    address_q: np.ndarray
+    report: dict[str, Any]
+
+
+def _held_out_rms_mm(
+    lane: Any, seeds: Attachments, frames: Sequence[int], poses: np.ndarray
+) -> dict[str, float]:
+    """RMS of each marker in ``seeds`` at ``poses`` of ``frames``, millimetres."""
+    kin = lane.plant.create_ik(dict(seeds))
+    model = np.array([kin.marker_linearization(pose).positions for pose in poses])
+    out = {}
+    for column, label in enumerate(seeds):
+        seen = lane.labels.index(label)
+        valid = np.asarray(lane.valid)[list(frames), seen]
+        gap = model[:, column] - np.asarray(lane.points)[list(frames), seen]
+        out[label] = 1e3 * float(np.sqrt(np.mean(np.sum(gap[valid] ** 2, axis=1))))
+    return out
+
+
+def adjust(
+    lane: Any,
+    kin: Any,
+    attachments: Attachments,
+    q_start: np.ndarray,
+    settings: StageSettings,
+    sole: tuple[str, Sequence[float]] | None = None,
+) -> Adjustment:
+    """Adjust ``attachments`` over the selected frames of ``lane``.
+
+    Start poses are the lane's own strided inverse kinematics from ``q_start``
+    with the seed attachments. A held-out marker keeps its seed; it is scored at
+    the start poses (which fitted it) and at the adjusted poses (which did not).
+    """
+    frames = select_frames(len(lane.points), settings)
+    start, _ = lane.trajectory(kin, q_start, frames=list(frames))
+    problem, labels, _ = build_problem(lane, attachments, start, settings, sole)
+    result = solve_bundle(problem, settings.solver)
+    fitted = adjusted_attachments(attachments, labels, result)
+    held = {name: attachments[name] for name in settings.held_out}
+    scores = [_held_out_rms_mm(lane, held, frames, q) for q in (start, result.poses)]
+    shift = np.linalg.norm(result.offsets - problem.offset_seeds, axis=1)
+    report = stage_report(result, labels, frames, settings) | {
+        "offset_shift_mm": dict(zip(labels, (1e3 * shift).tolist(), strict=True)),
+        "per_frame_rms_mm": (1e3 * result.per_frame_rms_m).tolist(),
+        "held_out_rms_mm": {
+            name: {"start": scores[0][name], "adjusted": scores[1][name]}
+            for name in held
+        },
+        "club_sole_point": None if sole is None else [sole[0], list(sole[1])],
+    }
+    return Adjustment(fitted, result.poses[0], report)
