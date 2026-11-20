@@ -103,6 +103,8 @@ class BundleProblem:
     #: Farthest each offset component may move from its seed, metres ``(M, 3)``;
     #: the hard bound is the smaller of this and ``bound_sigmas`` sigmas.
     offset_reach: Array | None = None
+    #: Weight of each marker's squared residual ``(M,)``; ``None`` is all one.
+    marker_weights: Array | None = None
 
     def check(self, settings: BundleSettings) -> None:
         """Raise ``TypeError`` / ``ValueError`` unless the problem is well formed."""
@@ -142,6 +144,11 @@ class BundleProblem:
             np.shape(reach) != (markers, 3) or not np.all(np.asarray(reach) >= 0)
         ):
             raise ValueError(f"offset_reach must be ({markers}, 3) and not negative")
+        weights = self.marker_weights
+        if weights is not None and (
+            np.shape(weights) != (markers,) or not np.all(np.asarray(weights) >= 0)
+        ):
+            raise ValueError(f"marker_weights must be ({markers},) and not negative")
         if not np.all(self.pose_bounds[0] <= self.pose_bounds[1]):
             raise ValueError("pose_bounds must have lower <= upper")
         if self.pose_prior is not None:
@@ -189,14 +196,25 @@ def _marker_errors(prob: BundleProblem, k: int, pose: Array, offsets: Array) -> 
     return np.where(prob.valid[k][:, None], model - prob.observations[k], 0.0)
 
 
+def _gain(prob: BundleProblem, sigma: float) -> Array:
+    """Residual per metre of each marker's error ``(M, 1)``: root weight over sigma."""
+    weights = np.ones(len(prob.marker_bodies))
+    if prob.marker_weights is not None:
+        weights = np.asarray(prob.marker_weights, float)
+    return np.sqrt(weights)[:, None] / sigma
+
+
 def _terms(prob: BundleProblem, sigma: float, poses: Array, offsets: Array) -> Any:
     """Residual blocks: data, constraint, offset prior, pose prior."""
-    data = [_marker_errors(prob, k, pose, offsets) for k, pose in enumerate(poses)]
+    gain = _gain(prob, sigma)
+    data = [
+        gain * _marker_errors(prob, k, pose, offsets) for k, pose in enumerate(poses)
+    ]
     closed: list[Array] = []
     if prob.constraint is not None:
         closed = [prob.constraint(k, pose) for k, pose in enumerate(poses)]
     prior = (offsets - prob.offset_seeds) * _prior_weights(prob)
-    out = [np.ravel(data) / sigma, np.ravel(closed), prior.ravel()]
+    out = [np.ravel(data), np.ravel(closed), prior.ravel()]
     if prob.pose_prior is None:
         return [*out, np.zeros(0)]
     mean, pose_sigma = prob.pose_prior
@@ -234,11 +252,8 @@ def _linearise(
     ``body_jacobian`` when the problem has one, else from differences of ``fk``.
     """
     pose, offsets = state
-    sigma, step, bodies = (
-        settings.marker_sigma_m,
-        settings.pose_fd_step,
-        prob.marker_bodies,
-    )
+    step, bodies = settings.pose_fd_step, prob.marker_bodies
+    gain = _gain(prob, settings.marker_sigma_m)
     seen = np.asarray(prob.valid[k], bool)
     rotations = np.asarray(prob.fk(pose))[bodies][:, :3, :3]
     if prob.body_jacobian is None:
@@ -248,11 +263,12 @@ def _linearise(
         twist = np.asarray(prob.body_jacobian(pose), float)[bodies]
         arm = np.einsum("mij,mj->mi", rotations, offsets)[:, :, None]
         moved = twist[:, :3] + np.cross(twist[:, 3:], arm, axis=1)
-    residual = [_marker_errors(prob, k, pose, offsets).ravel() / sigma]
-    by_pose = [(moved * seen[:, None, None]).reshape(-1, len(pose)) / sigma]
+    residual = [(gain * _marker_errors(prob, k, pose, offsets)).ravel()]
+    scaled = moved * (gain * seen[:, None])[:, :, None]
+    by_pose = [scaled.reshape(-1, len(pose))]
     by_offset = np.zeros((offsets.size, offsets.size))
     for m in np.flatnonzero(seen):
-        by_offset[3 * m : 3 * m + 3, 3 * m : 3 * m + 3] = rotations[m] / sigma
+        by_offset[3 * m : 3 * m + 3, 3 * m : 3 * m + 3] = rotations[m] * gain[m, 0]
     if prob.constraint is not None:
         closed, closed_slope = _difference(partial(prob.constraint, k), pose, step)
         residual.append(closed)
@@ -272,6 +288,21 @@ def _with_pose_prior(prob: BundleProblem, k: int, pose: Array, block: Any) -> An
         np.vstack([block[1], np.eye(len(pose))[rows] / sigmas[rows, None]]),
         np.vstack([block[2], np.zeros((len(rows), block[2].shape[1]))]),
     )
+
+
+def _frame_cost(
+    prob: BundleProblem, settings: BundleSettings, state: tuple[Array, Array], k: int
+) -> float:
+    """Frame ``k``'s share of the cost at ``state`` (pose, offsets): no slopes."""
+    pose, offsets = state
+    gain = _gain(prob, settings.marker_sigma_m)
+    rows = [(gain * _marker_errors(prob, k, pose, offsets)).ravel()]
+    if prob.constraint is not None:
+        rows.append(np.asarray(prob.constraint(k, pose), float))
+    if prob.pose_prior is not None:
+        mean, sigmas = prob.pose_prior[0][k], prob.pose_prior[1][k]
+        rows.append(((pose - mean) / sigmas)[np.isfinite(sigmas)])
+    return float(sum(row @ row for row in rows))
 
 
 def _free(value: Array, gradient: Array, lower: Array, upper: Array) -> Array:
@@ -321,16 +352,15 @@ def _settle(
             lifted = damping * np.diag(np.diag(hessian) + settings.damping_floor)
             step = np.linalg.solve(hessian + lifted, by_pose.T @ residual)
             trial = np.clip(pose - step, lower, upper)
-            block = _linearise(prob, settings, k, (trial, offsets))
-            after = _with_pose_prior(prob, k, trial, block)[0]
-            if after @ after < cost:
+            after = _frame_cost(prob, settings, (trial, offsets), k)
+            if after < cost:
                 break
             damping *= settings.damping_up
         else:
             return pose
         pose = trial
         damping = max(damping / settings.damping_down, settings.damping_min)
-        if cost - after @ after < settings.tolerance * cost:
+        if cost - after < settings.tolerance * cost:
             break
     return pose
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -22,6 +23,7 @@ from src.shared.python.motion_matching.pipeline.bundle_stage import (
     adjusted_attachments,
     build_problem,
     held_out_rms_mm,
+    held_out_scatter_mm,
     offset_sigma,
     select_frames,
     stage_report,
@@ -205,6 +207,11 @@ def test_the_flag_carries_frames_and_held_out_markers_and_the_sole_is_stated() -
     held = stage_settings(
         parser.parse_args(["--bundle-adjust", "--bundle-hold", "Toe"])
     )
+    assert not held.lane_weights
+    alike = stage_settings(
+        parser.parse_args(["--bundle-adjust", "--bundle-lane-weights"])
+    )
+    assert alike.lane_weights
     assert held.hold == ("Toe",) and held.sigma("LToeIn") == (0.0, 0.0, 0.0)
     assert held.sigma("LKneeOut") == OFFSET_SIGMAS_M["KneeOut"]
     # nothing held out: no kinematics are built for an empty marker set
@@ -287,6 +294,17 @@ def test_reach_address_repeats_and_pose_prior_are_settings(model) -> None:
     sigma = prob.pose_prior[1][0]
     assert sigma[order.index("LSInputZ")] == pytest.approx(1 / 3.0)
     assert sigma[order.index("LEInput")] == pytest.approx(10.0)
+    assert prob.marker_weights is None
+    lane = SimpleNamespace(
+        **vars(model.lane),
+        marker_weights={"HeadTop": 0.1},
+        split_marker_weights={"LShoulderTop": 0.3},
+    )
+    weighed = dataclasses.replace(settings, lane_weights=True)
+    alike, _, _ = build_problem(lane, model.attachments, start, weighed)
+    weight = dict(zip(labels, alike.marker_weights.tolist(), strict=True))
+    assert (weight["HeadTop"], weight["LShoulderTop"]) == (0.1, 0.3)
+    assert weight["RKneeOut"] == 1.0
     with pytest.raises(ValueError, match="address_repeats"):
         build_problem(
             model.lane, model.attachments, start, StageSettings(address_repeats=0)
@@ -312,3 +330,16 @@ def test_start_poses_never_see_a_held_out_marker_and_may_be_consecutive() -> Non
     assert seen["frames"] == [0, 2, 4]
     with pytest.raises(ValueError, match="start"):
         start_poses(lane, "kin", np.zeros(2), StageSettings(start="other"))
+
+
+@pytest.mark.requires_mujoco
+def test_held_out_scatter_ignores_the_seed_and_grows_with_wrong_poses(model) -> None:
+    body = model.attachments["RKneeOut"][0]
+    anywhere = {"RKneeOut": (body, (0.3, 0.2, 0.1))}
+    frames = tuple(range(FRAMES))
+    exact = held_out_scatter_mm(model.lane, anywhere, frames, model.poses)
+    assert exact["RKneeOut"] < 1e-6  # the capture is rigid on the true poses
+    noise = np.random.default_rng(0).normal(0.0, 0.02, model.poses.shape)
+    wrong = held_out_scatter_mm(model.lane, anywhere, frames, model.poses + noise)
+    assert wrong["RKneeOut"] > 1.0
+    assert held_out_scatter_mm(model.lane, {}, frames, model.poses) == {}

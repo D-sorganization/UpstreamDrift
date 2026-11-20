@@ -102,6 +102,10 @@ class StageSettings:
     #: already calibrated under the lane's own stance model, which the swing
     #: solve uses again; an adjustment made without it can undo that.
     hold: tuple[str, ...] = ()
+    #: Weigh each marker as the lane's own inverse kinematics does (head cap
+    #: markers at a tenth, the shoulder-girdle split), so the offsets are fitted
+    #: under the weights the swing solve then applies to them.
+    lane_weights: bool = False
     #: The stage stops when a step gains under a millionth of the cost: the
     #: core's default asks for more digits than marker data carry.
     solver: BundleSettings = field(
@@ -205,6 +209,12 @@ def _constraint(
     return residual
 
 
+def _marker_weights(lane: Any, labels: Sequence[str]) -> np.ndarray:
+    """The lane's inverse-kinematics weight of every label (one when unset)."""
+    weights = {**lane.marker_weights, **lane.split_marker_weights}
+    return np.array([float(weights.get(label, 1.0)) for label in labels])
+
+
 def build_problem(
     lane: Any,
     attachments: Attachments,
@@ -263,6 +273,7 @@ def build_problem(
         constraint=_constraint(lane, bodies, frames, settings, sole),
         body_jacobian=bodies.twists,
         offset_reach=reach,
+        marker_weights=_marker_weights(lane, labels) if settings.lane_weights else None,
     )
     return problem, labels, frames
 
@@ -347,6 +358,11 @@ def add_bundle_arguments(parser: argparse.ArgumentParser) -> None:
         help="markers whose label contains one of these stay at their seed",
     )
     parser.add_argument(
+        "--bundle-lane-weights",
+        action="store_true",
+        help="weigh markers in the adjustment as the inverse kinematics does",
+    )
+    parser.add_argument(
         "--bundle-start",
         choices=("strided", "consecutive"),
         default=default.start,
@@ -387,6 +403,7 @@ def stage_settings(args: argparse.Namespace) -> StageSettings | None:
         held_out=tuple(args.bundle_held_out),
         start=args.bundle_start,
         hold=tuple(args.bundle_hold),
+        lane_weights=args.bundle_lane_weights,
         address_repeats=args.bundle_address_repeats,
         offset_reach_m=None if reach is None else 1e-3 * reach,
         pose_prior_weight=None if prior is None else prior[0],
@@ -427,6 +444,32 @@ def held_out_rms_mm(
         valid = np.asarray(lane.valid)[list(frames), seen]
         gap = model[:, column] - np.asarray(lane.points)[list(frames), seen]
         out[label] = 1e3 * float(np.sqrt(np.mean(np.sum(gap[valid] ** 2, axis=1))))
+    return out
+
+
+def held_out_scatter_mm(
+    lane: Any, seeds: Attachments, frames: Sequence[int], poses: np.ndarray
+) -> dict[str, float]:
+    """How far each marker in ``seeds`` wanders in its own body frame over
+    ``poses`` of ``frames``, RMS about its mean, millimetres.
+
+    A skin marker is nearly rigid on its segment, so better poses give less
+    scatter. The seed takes no part (only its body does): the score stays fair
+    when the adjustment moves the marker's neighbours in common mode.
+    """
+    if not seeds:
+        return {}
+    bodies = BodyKinematics(lane.plant, sorted({body for body, _ in seeds.values()}))
+    world = np.array([bodies.frames(pose) for pose in poses])
+    out = {}
+    for label, (body, _) in seeds.items():
+        seen = lane.labels.index(label)
+        valid = np.asarray(lane.valid)[list(frames), seen]
+        frame = world[valid, bodies.bodies.index(body)]
+        gap = np.asarray(lane.points)[list(frames), seen][valid] - frame[:, :3, 3]
+        local = np.einsum("kji,kj->ki", frame[:, :3, :3], gap)
+        spread = np.sum((local - local.mean(axis=0)) ** 2, axis=1)
+        out[label] = 1e3 * float(np.sqrt(np.mean(spread)))
     return out
 
 
@@ -474,6 +517,7 @@ def adjust(
     fitted = adjusted_attachments(attachments, labels, result)
     held = {name: attachments[name] for name in settings.held_out}
     scores = [held_out_rms_mm(lane, held, frames, q) for q in (start, result.poses)]
+    loose = [held_out_scatter_mm(lane, held, frames, q) for q in (start, result.poses)]
     shift = np.linalg.norm(result.offsets - problem.offset_seeds, axis=1)
     report = stage_report(result, labels, frames, settings) | {
         "offset_shift_mm": dict(zip(labels, (1e3 * shift).tolist(), strict=True)),
@@ -481,6 +525,9 @@ def adjust(
         "held_out_rms_mm": {
             name: {"start": scores[0][name], "adjusted": scores[1][name]}
             for name in held
+        },
+        "held_out_scatter_mm": {
+            name: {"start": loose[0][name], "adjusted": loose[1][name]} for name in held
         },
         "club_sole_point": None if sole is None else [sole[0], list(sole[1])],
     }
