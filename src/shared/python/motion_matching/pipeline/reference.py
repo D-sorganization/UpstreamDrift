@@ -317,6 +317,7 @@ def consistency_resolve(
         prior_weight=prior_weight,
         iterations=iterations,
         **planted_stance(lane),
+        **getattr(lane, "stance_anchor", {}),  # soft anchor (#15296); default {}
         prior_trajectory=q_smooth,
         bounds=lane.bounds,
         axis_targets_per_frame=merge_axis_targets(
