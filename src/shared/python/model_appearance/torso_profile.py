@@ -195,6 +195,130 @@ TORSO_ACCEPTANCE = TorsoAcceptance()
 
 
 @dataclass(frozen=True)
+class ShoulderSlope:
+    """The top of the thorax, from the neck to the point of the shoulder (#15299).
+
+    The shoulder joint is not at the same height under the neck in every
+    subject, so the slope is built on the subject's own shoulder line instead
+    of a fixed share of the thorax. The point of the shoulder (acromion) is
+    ``acromion_below_neck_m`` under the neck point at ``reference_stature_m``,
+    held to ``rise_m`` (low, high) above the joint centre. The thorax runs
+    straight from the collar to its own width there: ``max_point_width`` (of
+    its half width), or less where the line would be flatter than
+    ``min_slope_deg``. Under the point it rounds over ``corner`` ((share of
+    the length below the point, wider by), highest first) into the chest,
+    ``chest_below`` under the point. ``squareness`` is the exponent of those
+    sections, from the corner to the collar (2 is an ellipse): rounder than
+    the chest, so the upper back has no edges. ``point_lift_m``
+    is how far the collar's slant drops the slope: the thorax point is set that
+    much higher. The point stays ``collar_clear`` (share of the collar-to-joint
+    height) under the collar. Visual only.
+    """
+
+    acromion_below_neck_m: float = 0.062
+    reference_stature_m: float = 1.82
+    rise_m: tuple[float, float] = (0.0, 0.035)
+    point_lift_m: float = 0.015
+    max_point_width: float = 1.04
+    min_slope_deg: float = 19.0
+    corner: tuple[tuple[float, float], ...] = (
+        (0.012, 0.07),
+        (0.025, 0.125),
+        (0.08, 0.185),
+    )
+    chest_below: float = 0.16
+    slope_knots: int = 3
+    squareness: tuple[float, float] = (2.35, 2.0)
+    collar_clear: float = 0.25
+
+    def __post_init__(self) -> None:
+        low, high = self.rise_m
+        if min(self.acromion_below_neck_m, self.reference_stature_m) <= 0.0:
+            raise ValueError("shoulder slope lengths must be positive")
+        if not (math.isfinite(high) and high >= low >= 0.0 <= self.point_lift_m):
+            raise ValueError("shoulder rise must be 0 <= low <= high, lift >= 0")
+        if not 0.0 < self.collar_clear < 1.0:
+            raise ValueError("the point of the shoulder must stay under the collar")
+        if not (self.max_point_width > 0.0 and 0.0 < self.min_slope_deg < 90.0):
+            raise ValueError("shoulder slope needs a width > 0, an angle in (0, 90)")
+        below = [share for share, _ in self.corner]
+        if below != sorted(below) or not (below and self.chest_below > below[-1]):
+            raise ValueError("shoulder corner must deepen down to the chest")
+        if self.slope_knots < 1 or min(self.squareness) < 2.0:
+            raise ValueError("shoulder slope needs knots >= 1 and squareness >= 2")
+
+    def rise(self, drop_m: float, stature_m: float | None = None) -> float:
+        """Top of the shoulder above its joint, for a joint ``drop_m`` under the neck."""
+        scale = (stature_m or self.reference_stature_m) / self.reference_stature_m
+        if not (math.isfinite(drop_m) and drop_m >= 0.0 and scale > 0.0):
+            raise ValueError("shoulder drop must be >= 0 and the stature positive")
+        low, high = (scale * limit for limit in self.rise_m)
+        return min(high, max(low, drop_m - scale * self.acromion_below_neck_m))
+
+    def lift(self, stature_m: float | None = None) -> float:
+        """Thorax point above the top of the shoulder (m): the collar slant's drop."""
+        return (
+            self.point_lift_m
+            * (stature_m or self.reference_stature_m)
+            / (self.reference_stature_m)
+        )
+
+    def stations(
+        self,
+        base: Sequence[TorsoStation],
+        shoulder: float,
+        rise: float,
+        slenderness: float,
+    ) -> tuple[TorsoStation, ...]:
+        """``base`` with its widths above the chest rebuilt on the shoulder line.
+
+        ``shoulder`` is the joints' share of the thorax length, ``rise`` the
+        point of the shoulder above it (same unit) and ``slenderness`` the
+        length over the half width. Depth, slant and forward shift stay those
+        of ``base`` at the same height, and the corner is never narrower than
+        ``base``. Postcondition: widths never grow
+        upwards from the chest; the last station is the collar of ``base``.
+        """
+        collar = base[-1]
+        if not (0.0 < shoulder < collar.along and rise >= 0.0 and slenderness > 0.0):
+            raise ValueError("shoulder line must lie inside the thorax profile")
+        clear = self.collar_clear * (collar.along - shoulder)
+        point = min(shoulder + rise, collar.along - clear)
+        run = (collar.along - point) * slenderness
+        reach = run / math.tan(math.radians(self.min_slope_deg))
+        width = max(collar.width, min(self.max_point_width, collar.width + reach))
+        chest = max(station.width for station in base)
+        at = [s.along for s in base]
+        knots = [(point - self.chest_below, chest)]
+        for below, wider in self.corner[::-1]:  # never narrower than ``base``
+            was = float(np.interp(point - below, at, [s.width for s in base]))
+            knots.append((point - below, min(chest, max(was, width + wider))))
+        for i in range(self.slope_knots + 1):
+            u = i / self.slope_knots
+            knots.append(
+                (point + u * (collar.along - point), width + u * (collar.width - width))
+            )
+        rows = [s for s in base if s.along < knots[0][0]]
+        corner = point - self.corner[-1][0]
+        for along, wide in knots:
+            depth, slant, forward = (
+                float(np.interp(along, at, [getattr(s, name) for s in base]))
+                for name in ("depth", "slant", "forward")
+            )
+            square = 0.0  # the profile's own squareness, below the corner
+            if along >= corner:
+                u = (along - corner) / (collar.along - corner)
+                square = self.squareness[0] + u * (
+                    self.squareness[1] - self.squareness[0]
+                )
+            rows.append(TorsoStation(along, wide, depth, slant, square, forward))
+        return tuple(rows)
+
+
+SHOULDER_SLOPE = ShoulderSlope()
+
+
+@dataclass(frozen=True)
 class TorsoFrame:
     """Where a trunk solid sits: its axis and its two half extents (metres)."""
 
@@ -290,7 +414,9 @@ def torso_mesh(
 
 
 __all__ = [
+    "SHOULDER_SLOPE",
     "TORSO_ACCEPTANCE",
+    "ShoulderSlope",
     "TorsoAcceptance",
     "TorsoFrame",
     "TorsoProfile",

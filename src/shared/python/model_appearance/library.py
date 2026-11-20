@@ -556,16 +556,15 @@ TORSO_SQUARENESS = 2.6  # superellipse exponent of a trunk cross-section
 SHOULDER_ASPECT = 0.85  # up-down over front-back extent of the yoke
 SHOULDER_RADIUS_SCALE = 1.1  # front-back half extent over the part radius
 SHOULDER_END_SCALE = 1.0  # yoke radius at the shoulder joint, over the neck end
-SHOULDER_DROOP = 0.5  # neck end of the yoke below the link, in radii (#15292)
+SHOULDER_DROOP = 0.1  # neck end of the yoke below its joint end, in radii (#15299)
+SHOULDER_END_SINK = 0.1  # yoke top under the point of the shoulder, in radii (#15299)
 SHOULDER_START_FRACTION = 0.3  # the yoke starts this far along the link
-SHOULDER_END_SINK = 0.8  # the yoke ends this far below the joint, in radii (#15292)
 SHOULDER_UP_AXIS = (0.0, 0.0, 1.0)  # up, in the shoulder link's body frame
 # Deltoid (#15279): the blend at the shoulder joint is longer down the arm
 # than across it: (across, down the arm), in upper-arm radii.
 DELTOID_HALF_SIZES = (0.9, 1.3)
 UPPER_ARM_SKIN_TIP_INSET = 0.5  # skin tip meets the sleeve start, in radii (#15292)
 UPPER_ARM_START_INSET = 0.5  # the loft's tip sits at the joint, in radii (#15292)
-DELTOID_DROP = 1.25
 
 
 # Pelvis solid (HRG-C1, #13164): lofted on the hip landmarks, see
