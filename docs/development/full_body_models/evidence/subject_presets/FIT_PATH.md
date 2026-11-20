@@ -157,6 +157,9 @@ calibration; a run without `--bundle-adjust` is unchanged. Its receipt block is
 | `--ik-spin-prior-weight` | 0.1 | Previous-frame tie of the six arm spin coordinates |
 | `--ik-free-stance-slide` | off | Stance spheres stay on the ground but are not anchored |
 | `--ik-girdle-range-deg` | document ranges | Symmetric bound of the four girdle coordinates |
+| `--ik-stance-anchor-weight` | ground weight (100) | In-plane weight of a planted sphere's anchor, relative to a marker's 1 |
+| `--ik-stance-slide-mm` | 0 | In-plane slide of a planted sphere that costs nothing |
+| `--bundle-address-pose COORDINATE:DEG:SIGMA_DEG` | none | Pose targets on the address frame of the adjustment and on the first frame of the swing solve |
 
 The coupled-trunk `full-body-v2` document with skinned-hand wrists is derived
 from the preset build with `derive_showpiece_v2` and
@@ -223,7 +226,8 @@ What the runs show:
   (15.0 to 12.8 mm). The pose prior, the start poses, the iteration cap and
   the spin prior are each under 0.5 mm.
 - A 35 mm offset reach made the fit worse and put more offsets on the bound.
-- Free ankle and toe markers cost the shank about 10 mm in the swing solve:
+- Free ankle and toe markers cost the shank about 10 mm in the anchored swing
+  solve (a later section revisits this with the free-slide solve):
   the feet hardly move, so a foot marker's offset and the foot's position are
   not separable. They are held (`--bundle-hold Ankle Toe`).
 - With the stance anchor off, the largest slide of a sphere while in stance
@@ -277,12 +281,12 @@ repository stage (`pipeline/bundle_stage.py`) sets it up:
 | Offset sigmas, bound | Same table, three sigma | Same table (head 40 mm instead of 25 / 20 / 25), three sigma | A 35 mm reach made the fit worse (`--bundle-offset-reach-mm 35`) |
 | Marker weights | Head 0.1, one shoulder marker 0.3, others 1 | All 1; `--bundle-lane-weights` applies the lane's, which are all 1 in this lane | None |
 | Frames | Every 20th, top and impact, the address frame eight times | Every 20th plus `--bundle-anchor-frames`; `--bundle-address-repeats` | Eight repeats: address 13.9 to 12.6 mm; sixteen with the pose prior: no further gain |
-| Address pose prior | Elbow flexion and humeral rotation targets on the address frame | None | Not ported |
+| Address pose prior | Elbow flexion and humeral rotation targets on the address frame | `--bundle-address-pose`, off by default | Lead elbow at address -30.5 to -14.2 degrees, address unchanged (8.2 to 8.1 mm), whole swing 12.8 to 13.1 mm; see the section below |
 | Pose prior | 0.1 per radian (spin 3.0) about the current iterate: zero at the solution | The lane's joint prior about the start poses; `--bundle-pose-prior 0.1 3` | 19.2 to 18.8 mm whole swing |
 | Start poses | An earlier whole-swing fit | The lane's strided inverse kinematics; `--bundle-start consecutive` | No change (identical to 0.1 mm) |
 | Solver | Inner pose fit to convergence per frame, Gauss-Newton on the offsets, stop at a relative gain of 1e-4 | Schur-complement Levenberg-Marquardt with the same inner pose settling, stop at 1e-6 | Converges in about a dozen outer steps; before the settling it had not in 200 |
 | Residual scales | Marker 10 mm, weld 0.5 mm and 5 mrad, ground 5 mm | The same | None |
-| Leg markers | Free, with the stance spheres on the ground | Free by default; `--bundle-hold` keeps named ones | Freeing ankle and toe markers cost the shank about 10 mm in the swing solve |
+| Leg markers | Free, with the stance spheres on the ground | Free by default; `--bundle-hold` keeps named ones | Freeing ankle and toe markers cost the shank about 10 mm in the anchored swing solve; with the free-slide solve and the anchored re-solve they gain 1.0 mm whole swing (see below) |
 | Club markers | Fixed to the club registration | Fixed (`--fix-club-markers`), sole point on the ground at address | None |
 | Whole-swing fit after it | Raw per-frame marker fit with the experiment's own solver and weights | The pipeline's trajectory solve: planted feet, face-orientation target, joint prior, then smoothing and dynamics | The stance anchor (100 times stiffer than a marker) costs 4 to 13 mm from the top onward: `--ik-free-stance-slide` gives 15.0 to 12.8 mm whole swing. The iteration cap (`--ik-iterations 200`) is worth 0.1 mm, the spin prior (`--ik-spin-prior-weight 0.001`) 0.4 mm |
 
@@ -290,6 +294,116 @@ The experiment's own offsets ended 21 to 98 mm from its seeds with three
 components on a bound, so offsets of that size are not a defect of the port:
 they are whole clusters moving together, which is how either fit absorbs the
 gap between the skeleton and the subject.
+
+## Soft Stance Anchor, Address Pose Prior and Free Foot Markers
+
+The full-capture solve writes two trajectories. `q` is the first solve;
+`q_ref` is the consistency re-solve about the smoothed first solve, which
+always plants the stance spheres. The four numbers of the tables above are
+`q`. With `--ik-free-stance-slide` the first solve slides and the re-solve is
+anchored, so **`q_ref` is the planted trajectory and the one to render**.
+
+The soft anchor (`motion_matching/stance_anchor.py`) keeps the normal row of a
+planted sphere at the ground weight and replaces the in-plane rows: a slide
+inside `--ik-stance-slide-mm` costs nothing, the excess is penalised at
+`--ik-stance-anchor-weight`. It applies to the anchored solves (the first solve
+without the free slide, the re-solve always); stance detection still releases
+a sphere that leaves the ground. The MuJoCo kinematics implement it; the Drake
+kinematics refuse the setting.
+
+All runs: v2 model, H8 and `--ik-spin-prior-weight 0.001` unless stated, one
+run each, adjustment converged with no offset on a bound. "Slide" is the
+largest in-plane displacement of a sphere from its first-frame position while
+the capture has it in stance: lead and trail foot up to impact, then after
+impact the lead heel, the lead forefoot and toe, and the trail forefoot and
+toe. Millimetres.
+
+| Run | Trajectory | Address | To Top | To Impact | Whole | Slide to Impact | Slide After Impact |
+| --- | ---------- | ------- | ------ | --------- | ----- | --------------- | ------------------ |
+| Anchored (H8) | `q` | 9.5 | 10.6 | 13.1 | 15.0 | 1.4, 1.5 | 1.3, 34.5, 5.9 |
+| Free slide (S) | `q` | 8.2 | 9.7 | 11.0 | 12.8 | 21.3, 28.4 | 39.1, 38.4, 47.1 |
+| S | `q_ref` | 8.1 | 9.7 | 11.2 | 13.4 | 2.8, 2.2 | 4.4, 35.3, 5.2 |
+| Slide 3 mm | `q` | 8.8 | 10.4 | 12.8 | 14.5 | 6.1, 6.3 | 6.4, 34.9, 8.9 |
+| Slide 5 mm | `q` | 8.6 | 10.2 | 12.5 | 14.3 | 9.9, 10.0 | 9.8, 35.0, 9.7 |
+| Slide 8 mm | `q` | 8.4 | 9.9 | 12.2 | 14.0 | 13.6, 15.5 | 11.8, 36.6, 12.6 |
+| Slide 12 mm | `q` | 8.3 | 9.7 | 11.6 | 13.6 | 17.3, 22.4 | 15.2, 37.3, 14.8 |
+| Weight 10 | `q` | 9.0 | 10.7 | 12.2 | 13.9 | 4.9, 3.3 | 7.6, 40.0, 14.5 |
+| Weight 10, slide 5 mm | `q` | 8.6 | 10.2 | 11.7 | 13.4 | 10.5, 11.8 | 13.7, 37.9, 14.2 |
+| Weight 1 | `q` | 8.5 | 10.1 | 11.4 | 13.1 | 13.8, 16.9 | 27.4, 40.9, 33.8 |
+| Weight 1, slide 5 mm | `q` | 8.3 | 9.8 | 11.2 | 12.9 | 15.2, 21.3 | 30.0, 38.7, 34.1 |
+| S, slide 2 mm | `q_ref` | 8.1 | 9.6 | 11.1 | 13.3 | 3.4, 4.2 | 5.3, 35.6, 5.8 |
+| S, slide 3 mm | `q_ref` | 8.1 | 9.6 | 11.1 | 13.2 | 4.4, 5.4 | 6.0, 35.9, 6.1 |
+| S, slide 4 mm | `q_ref` | 8.1 | 9.5 | 11.0 | 13.1 | 6.6, 9.4 | 6.6, 36.2, 6.4 |
+| S, weight 10 | `q_ref` | 8.1 | 9.5 | 11.0 | 13.1 | 7.4, 8.5 | 8.7, 39.0, 11.6 |
+| S, weight 10, slide 2 mm | `q_ref` | 8.1 | 9.5 | 11.0 | 13.0 | 7.9, 9.3 | 9.7, 39.1, 13.0 |
+| S, slide 3 mm, girdle 15 | `q_ref` | 8.1 | 9.7 | 11.5 | 14.3 | 4.5, 4.9 | 5.2, 35.6, 6.4 |
+| S, slide 3 mm, girdle 12 | `q_ref` | 8.1 | 9.8 | 11.6 | 14.6 | 4.5, 4.7 | 5.2, 35.7, 6.4 |
+| S, slide 3 mm, girdle 8 | `q_ref` | 8.3 | 10.3 | 12.0 | 15.2 | 4.3, 4.5 | 5.1, 35.8, 6.4 |
+| S, no `--bundle-hold` (F) | `q` | 7.3 | 8.4 | 9.9 | 11.7 | 23.0, 21.5 | 32.6, 32.0, 42.3 |
+| F | `q_ref` | 7.1 | 8.5 | 10.2 | 12.2 | 3.2, 1.6 | 1.0, 27.8, 3.2 |
+| F, slide 3 mm | `q_ref` | 7.1 | 8.3 | 10.0 | 12.0 | 4.6, 4.1 | 3.7, 29.3, 4.4 |
+| F, girdle 15 | `q_ref` | 7.2 | 8.7 | 10.6 | 13.4 | 3.1, 1.6 | 0.9, 27.1, 2.6 |
+| F, girdle 12 | `q_ref` | 7.2 | 8.8 | 10.7 | 13.6 | 3.1, 1.5 | 1.0, 27.1, 2.4 |
+| F, `--bundle-plant-mm 5` | `q_ref` | 7.1 | 9.1 | 10.6 | 12.6 | 2.8, 1.1 | 3.4, 32.8, 5.6 |
+| F, `--bundle-plant-mm 2` | `q_ref` | 7.1 | 9.3 | 10.8 | 12.8 | 3.5, 1.2 | 3.2, 32.7, 5.3 |
+| Hold `Toe` only, plant 5 mm | `q_ref` | 8.0 | 9.8 | 11.3 | 13.3 | 3.4, 2.4 | 3.0, 33.5, 4.6 |
+
+- Softening the first solve trades fit against slide almost linearly; no
+  setting there comes within 0.5 mm of the free-slide fit with a slide under
+  8 mm. The visible slide reaches about twice the allowance, because the
+  anchor is taken at the start pose, not at the solved one.
+- The free first solve followed by the anchored re-solve gives both: 13.2 mm
+  with at most 5.4 mm of slide up to impact at a 3 mm allowance.
+- The lead forefoot and toe move 27 to 40 mm after impact in every run, the
+  rigid anchor included: the capture releases them and re-plants them while
+  the lead toe markers travel about 100 mm in the plane. Up to impact the
+  capture's own toe markers travel 10 to 20 mm and the ankle markers 15 to
+  49 mm, so the foot rolls on a planted sole.
+- Freeing the ankle and toe markers in the adjustment is worth 1.2 mm with
+  this pair of solves (13.4 to 12.2 mm), at shifts of 11 to 27 mm that the
+  adjustment reports as weakly identified. This reverses the finding of the
+  anchored-only runs above.
+- Shoulder excursion is unchanged by the stance settings (trail 83 to 138 mm
+  without a girdle bound; 66, 53 and 35 mm at most with 15, 12 and 8 degrees).
+- Forward-dynamics tracking stays at 63 to 75 mm; the dynamics stage was not
+  changed.
+
+Address pose prior (`--bundle-address-pose LEInput:-5:5 REInput:-20:10
+LSInputZ:0:15 RSInputZ:0:15`, the experiment's targets), free slide, `q`:
+
+| Run | Address | To Top | To Impact | Whole | `LEInput` | `REInput` | `LSInputZ` | `RSInputZ` | Arm Markers at Address |
+| --- | ------- | ------ | --------- | ----- | --------- | --------- | ---------- | ---------- | ---------------------- |
+| S | 8.2 | 9.7 | 11.0 | 12.8 | -30.5 | -19.0 | 14.8 | -19.4 | 11.6 |
+| S, four targets | 8.1 | 9.7 | 11.1 | 13.1 | -14.2 | -19.3 | 12.3 | -16.2 | 10.8 |
+| S, no lead-elbow target | 8.1 | 9.7 | 11.0 | 12.9 | -31.1 | – | – | – | 11.4 |
+| F, four targets | 7.2 | 8.5 | 10.0 | 11.9 | -14.2 | -19.3 | 12.6 | -16.2 | – |
+
+Coordinates at the first frame, degrees. The prior halves the lead-elbow
+flexion at address (the experiment ends at 14.7 degrees) and moves the humeral
+rotations 2 to 3 degrees; the address RMS does not move and the whole swing
+costs 0.1 to 0.3 mm. Whether a straight lead arm is wanted is the owner's
+decision; the setting stays off.
+
+Remaining gap of run F (`q_ref`) to the experiment's whole-swing fit, same
+markers, same frames (experiment 7.8 / 7.9 / 9.5 / 11.6 mm):
+
+| Segment | Address, Repository / Experiment | To Impact | Whole | Share of the Squared Gap (%) |
+| ------- | -------------------------------- | --------- | ----- | ---------------------------- |
+| Upper arm | 12.8 / 10.0 | 14.2 / 10.4 | 17.1 / 13.0 | 105 |
+| Foot | 2.6 / 2.4 | 8.9 / 7.1 | 11.7 / 7.6 | 67 |
+| Thigh | 5.2 / 2.9 | 12.2 / 7.8 | 14.2 / 8.4 | 56 |
+| Shank | 1.9 / 1.4 | 8.0 / 4.0 | 11.2 / 5.2 | 42 |
+| Club | 5.5 / 5.9 | 11.3 / 10.6 | 12.6 / 11.4 | 35 |
+| Wrist | 12.1 / 7.5 | 11.4 / 10.5 | 12.6 / 11.2 | 14 |
+| Pelvis | 3.6 / 2.4 | 5.3 / 5.3 | 7.4 / 6.6 | 10 |
+| Trunk | 6.4 / 5.8 | 9.6 / 9.4 | 11.3 / 11.3 | 0 |
+| Shoulder | 8.1 / 8.5 | 11.0 / 11.6 | 12.9 / 14.3 | -25 |
+| Head | 4.8 / 17.0 | 4.5 / 12.1 | 6.3 / 18.4 | -191 |
+
+The next largest term is the upper arm (`UArmHigh` and `ElbowOut`, both
+sides), then the legs, where the experiment has no stance constraint at all.
+The experiment weights the head markers 0.1 and so carries 18.4 mm there; a
+like-for-like comparison would need the same weights.
 
 ## Open Items
 

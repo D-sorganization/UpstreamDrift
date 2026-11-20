@@ -415,6 +415,9 @@ class Lane:
         #: Iteration cap of each full-capture pose solve; None keeps the solver's.
         self.ik_iterations: int | None = None
         self.stance_slide = False
+        #: Address pose targets of the bundle stage (#15296): ``{coordinate:
+        #: (target_rad, weight)}`` on the first frame of the full-capture solve.
+        self.address_pose_prior: dict[str, tuple[float, float]] = {}
         #: Soft stance anchor keywords of the full-capture solve (#15296).
         self.stance_anchor: dict[str, float] = {}
         self.girdle_range_deg: float | None = None
@@ -539,11 +542,13 @@ class Lane:
         return stance | {"plant_stance": False, "anchor_stance_at_init": False}
 
     def set_stance_anchor(self, weight: float | None, slide_mm: float | None) -> None:
-        """Soften the stance anchor of the full-capture solve (#15296, off by
-        default): ``weight`` is that of a planted sphere's in-plane slide (1 is
-        a marker; the legacy anchor is the ground weight, 100) and ``slide_mm``
-        the slide left free of it. The sphere stays on the ground at the ground
-        weight either way; a sphere the capture lifts is released as before.
+        """Soften the stance anchor of the full-capture solve and of its
+        consistency re-solve (#15296, off by default): ``weight`` is that of a
+        planted sphere's in-plane slide (1 is a marker; the legacy anchor is
+        the ground weight, 100) and ``slide_mm`` the slide left free of it. The
+        sphere stays on the ground at the ground weight either way; a sphere
+        the capture lifts is released as before. With ``stance_slide`` the
+        first solve has no anchor and only the re-solve is softened.
         Raises ``ValueError`` on a negative or non-finite value."""
         given = {"anchor_weight": weight, "anchor_slide_m": slide_mm}
         for value in given.values():
@@ -557,6 +562,16 @@ class Lane:
             for key, value in given.items()
             if value is not None
         }
+
+    def address_pose_frames(
+        self, frames: Sequence[int] | None
+    ) -> list[dict[str, tuple[float, float]] | None] | None:
+        """``address_pose_prior`` on the first frame of a full-capture solve;
+        ``None`` without targets or for a calibration subset."""
+        if frames is not None or not self.address_pose_prior:
+            return None
+        rest: list[dict[str, tuple[float, float]] | None] = [None] * (self.frames - 1)
+        return [dict(self.address_pose_prior), *rest]
 
     def convergence_report(self) -> dict[str, Any]:
         """Receipt block of ``set_trajectory_convergence``; empty when not opted in."""
@@ -892,6 +907,7 @@ class Lane:
                 axis_targets, self.face_targets, self.thorax_targets
             ),
             posture_prior=None if frames else self.posture_prior(kin, q_start),
+            posture_prior_per_frame=self.address_pose_frames(frames),
             **self.restart_settings(consecutive=frames is None),
         )
 
@@ -998,8 +1014,8 @@ def add_trajectory_convergence_arguments(parser: Any) -> None:
         type=float,
         default=None,
         help=(
-            "full-capture solve: weight of a planted stance sphere's in-plane "
-            "slide, 1 being a marker (default: the ground weight, 100)"
+            "full-capture solve and its consistency re-solve: weight of a planted "
+            "stance sphere's in-plane slide, 1 being a marker (default: 100)"
         ),
     )
     parser.add_argument(
@@ -1007,8 +1023,8 @@ def add_trajectory_convergence_arguments(parser: Any) -> None:
         type=float,
         default=None,
         help=(
-            "full-capture solve: slide of a planted stance sphere from where it "
-            "first touched that is left free, millimetres (default: 0)"
+            "full-capture solve and its consistency re-solve: slide of a planted "
+            "stance sphere from its anchor that is left free, mm (default: 0)"
         ),
     )
     parser.add_argument(
@@ -1029,12 +1045,10 @@ def add_trajectory_convergence_arguments(parser: Any) -> None:
 
 
 def apply_stance_arguments(lane: Lane, args: Any) -> None:
-    """Hand ``lane`` the stance flags of ``args`` (#15296). Raises
-    ``ValueError`` when the free slide and a soft anchor are both asked for:
-    the free slide has no anchor to soften."""
-    weight = getattr(args, "ik_stance_anchor_weight", None)
-    slide_mm = getattr(args, "ik_stance_slide_mm", None)
+    """Hand ``lane`` the stance flags of ``args`` (#15296): the free slide of
+    the first full-capture solve and the soft anchor of every planted one."""
     lane.stance_slide = bool(getattr(args, "ik_free_stance_slide", False))
-    if lane.stance_slide and not (weight is None and slide_mm is None):
-        raise ValueError("--ik-free-stance-slide excludes the soft anchor flags")
-    lane.set_stance_anchor(weight, slide_mm)
+    lane.set_stance_anchor(
+        getattr(args, "ik_stance_anchor_weight", None),
+        getattr(args, "ik_stance_slide_mm", None),
+    )
