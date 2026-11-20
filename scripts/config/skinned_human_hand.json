@@ -1,0 +1,264 @@
+{
+  "skin_rgb": [
+    0.8,
+    0.62,
+    0.52
+  ],
+  "anthropometry": {
+    "breadth_band_m": 0.008,
+    "scale_limits": [
+      0.7,
+      1.4
+    ]
+  },
+  "mesh": {
+    "subdivision_levels": 1,
+    "fullness": [
+      {
+        "along_bone": "thumb_meta",
+        "bones": [
+          "wrist",
+          "thumb_meta",
+          "thumb_prox"
+        ],
+        "height_m": 0.004,
+        "centre": 0.0,
+        "half_span": 1.1,
+        "radius_m": 0.035,
+        "facing_full": 0.7
+      }
+    ],
+    "creases": {
+      "bones": [
+        "thumb_dist",
+        "index_dist",
+        "middle_dist",
+        "ring_dist",
+        "little_dist"
+      ],
+      "min_fold_deg": 40.0
+    }
+  },
+  "grip": {
+    "shape": "tapered"
+  },
+  "placement": {
+    "palm_contact_azimuth_offset_deg": 55.0,
+    "palm_centre_wrap_deg": {
+      "lead": 15.0,
+      "trail": 10.0
+    },
+    "index_station_at_spec_zero": 0.45,
+    "seat_max_tilt_deg": 30.0,
+    "seat_max_travel_m": 0.07,
+    "seat_iterations": 32
+  },
+  "preshape": {
+    "finger_adduction_fraction": 1.0,
+    "index_knuckle_flexion_deg": 15.0
+  },
+  "curl": {
+    "step_deg": 2.0,
+    "bisection_steps": 22,
+    "contact_tolerance_m": 0.001,
+    "penetration_allowance_m": 0.0003,
+    "limits_deg": {
+      "mcp": [
+        0.0,
+        95.0
+      ],
+      "mcp.little": [
+        0.0,
+        115.0
+      ],
+      "mcp.ring": [
+        0.0,
+        115.0
+      ],
+      "pip": [
+        0.0,
+        115.0
+      ],
+      "dip": [
+        0.0,
+        85.0
+      ]
+    },
+    "synergy": {
+      "pip_per_mcp": 0.0,
+      "dip_per_pip": 0.3
+    },
+    "wrap_scan_samples": 16,
+    "arch_passes": 2,
+    "arch_gain": {
+      "index": 0.0,
+      "middle": 0.0,
+      "ring": 0.2,
+      "little": 0.4
+    },
+    "arch_limit_deg": {
+      "index": 0.0,
+      "middle": 0.0,
+      "ring": 13.0,
+      "little": 26.0
+    }
+  },
+  "squeeze": {
+    "finger_depth_m": 0.0025,
+    "palm_depth_m": 0.0015
+  },
+  "side_close": {
+    "max_deg": 20.0,
+    "gap_m": 0.001,
+    "index_gap_m": 0.003,
+    "scan_samples": 0,
+    "_trigger_spread_deg": "Owner, 2026-11-18 (#15278): a trigger forefinger, held up to this many degrees away from the middle finger after the fingers close, so its first joint lies down the shaft nearer the thumb's tip. Owner's decision the same day: on for the trail hand, and that finger is exempt from the rule that neighbouring fingers touch. At 30 the joint is 15 mm further down the shaft (thumb tip 8 mm past it instead of 23) with no hand-to-hand penetration. The lead forefinger stays closed.",
+    "trigger_spread_deg": {
+      "lead": 0.0,
+      "trail": 30.0
+    },
+    "_trigger_back_off_deg": "The spread is a most: a finger whose tip will not seat on the grip (curl.contact_tolerance_m) is brought back this many degrees at a time. On the pair the trail tip seats at the full 30; on a lone trail hand it hangs 2.3 mm off at 30 and is brought back to 12.",
+    "trigger_back_off_deg": 6.0,
+    "_limit_by_flexion": "Owner, 2026-11-19 (#15278): a finger bends in flexion and extension, cannot rotate, and has limited lateral motion. On: the fit's sideways swing at a knuckle is held inside the range below, which shrinks as the knuckle flexes. Off: a knuckle bent 90 to 115 degrees is leant sideways by 15 to 20 degrees (the crooked lead forefinger the owner saw). Still off: with it on the lead hand alone leaves its little finger 3.7 mm off the grip, and on the pair at the owner's 52.7 degree cross angle the trail ring finger rides the lead forefinger 4.5 mm off the grip. The trail hand seats (fault under 1 mm, hands 2 mm closer) at 25 to 35 degrees, but its forearm then leaves the shaft nearly square, more than wrist deviation can take back. Tried and dropped: turning the finger's bending plane instead of leaning it (twists the finger; trail ring finger 10.7 mm off).",
+    "limit_by_flexion": false,
+    "_knuckle_max_deg": "With limit_by_flexion on: a knuckle may swing sideways at most knuckle_max_deg with the finger straight; the range falls linearly to flexed_share of that once the knuckle is flexed flexed_at_deg (its collateral ligaments tighten as it bends).",
+    "knuckle_max_deg": 30.0,
+    "flexed_share": 0.2,
+    "flexed_at_deg": 90.0
+  },
+  "thumb": {
+    "max_swing_deg": 120.0,
+    "max_twist_deg": 60.0,
+    "press_range_deg": [
+      -35.0,
+      60.0
+    ],
+    "_mcp_limits_deg": "Owner, 2026-11-19 (#15278): the thumb's second segment cannot bend back past a straight line from its first, so the lower limit is 0 (it was -10); hand_visual_quality.json min_thumb_joint_flexion_deg holds the floor.",
+    "mcp_limits_deg": [
+      0.0,
+      50.0
+    ],
+    "ip_limits_deg": [
+      0.0,
+      70.0
+    ],
+    "straight_ip_limit_deg": 12.0,
+    "palm_cup_max_deg": 90.0,
+    "palm_cup_step_deg": 2.0,
+    "palm_cup_pivot_fraction": 1.0,
+    "toward_index_target": "azimuth",
+    "toward_index_max_deg": {
+      "lead": 60.0,
+      "trail": 60.0
+    },
+    "knuckle_distance_m": 0.016,
+    "toward_index_steps": 8,
+    "azimuth_tolerance_deg": 4.0,
+    "toward_index_straightness": 1.0,
+    "index_gap_m": 0.001
+  },
+  "pair": {
+    "capsule_radius_scale": 0.75,
+    "palm_capsule_radius_scale": 1.0,
+    "thumb_radius_scale": 1.0,
+    "grip_fingers": [
+      "index",
+      "middle",
+      "ring"
+    ],
+    "max_spacing_adjust_m": 0.03,
+    "max_spacing_close_m": 0.03,
+    "finger_gap_m": 0.0006,
+    "spacing_passes": 3,
+    "spacing_pick": "best",
+    "final_slide_max_m": 0.004,
+    "obstacle": "skin",
+    "skin_margin_m": 0.0,
+    "skin_reach_m": 0.015,
+    "yield_max_depth_m": 0.003,
+    "yield_passes": 3,
+    "yield_clearance_m": 0.0003,
+    "palm_cup_max_deg": 70.0,
+    "_palm_wrap": "Owner, 2026-11-17 (#15265, 'cup the palm'). For the hand that lies on the other hand, the keys given here replace those of correctives.palm_pad, so its palm pads can reach further and fold round the thumb under them. Empty: off, the pads settle as on a bare grip. It is off because folding the pads round the thumb (hand_visual_quality.json thumb_wrap_trial_pad) moves palm skin 16.6 mm from its bones, against max_corrective_shift_m of 8 mm; see #15265.",
+    "palm_wrap": {},
+    "_palm_fold": "Owner, 2026-11-17 (#15270, 'build palm fold rig'). A fold joint across the palm of the hand that lies on the other hand's thumb: a hinge along that thumb (thumb_bones of the other hand), offset_m to the side of the first carried bone and below_thumb_m under the thumb's axis. Palm skin of bones turns about it, by nothing at the hinge and by the whole angle blend_m further out, fading out toward the fingers between the two fade fractions of the hand's length; the carried bones turn with it. The fold closes in step_deg steps up to max_deg and stops before the folding skin presses more than press_m further into the grip and the other hand than the unfolded palm does. max_deg 0: no fold, the hand is exactly the unfolded one. Measured 2026-11-17 on the owner's grip: press_m 0 gives no overlap of the hands and 6.9 mm of corrective skin travel (limit 8); press_m 0.002 gives 1.3 mm overlap and 10.8 mm travel, so it stays 0.",
+    "palm_fold": {
+      "max_deg": 45.0,
+      "step_deg": 2.5,
+      "offset_m": 0.008,
+      "blend_m": 0.012,
+      "below_thumb_m": 0.0125,
+      "fade": [0.4, 0.53],
+      "press_m": 0.0,
+      "bones": ["wrist", "meta_index", "meta_middle", "meta_ring", "meta_little"],
+      "carried": ["thumb_meta"],
+      "thumb_bones": ["thumb_prox", "thumb_dist"]
+    },
+    "overlap_max_swing_deg": 30.0,
+    "overlap_bias_m": 0.0025,
+    "capsule_margin_m": 0.0006
+  },
+  "framing": {
+    "excluded_bones": [
+      "forearm"
+    ]
+  },
+  "correctives": {
+    "fold_relax": {
+      "iterations": 32,
+      "rings": 3,
+      "step": 0.5
+    },
+    "crease_relax": {
+      "bones": [
+        "wrist",
+        "meta_index",
+        "meta_middle",
+        "meta_ring",
+        "meta_little",
+        "index_prox",
+        "middle_prox",
+        "ring_prox",
+        "little_prox",
+        "thumb_meta",
+        "thumb_prox"
+      ],
+      "max_added_fold_deg": 45.0,
+      "iterations": 96,
+      "rings": 3,
+      "step": 0.5
+    },
+    "palm_pad": {
+      "bones": [
+        "wrist",
+        "meta_index",
+        "meta_middle",
+        "meta_ring",
+        "meta_little",
+        "thumb_meta",
+        "thumb_prox"
+      ],
+      "reach_m": 0.013,
+      "clearance_m": 0.0003,
+      "facing_full": 0.5,
+      "smooth_iterations": 6,
+      "passes": 2,
+      "max_shift_m": 0.008
+    },
+    "lift_out": {
+      "max_depth_m": 0.004,
+      "bulge_gain": 0.5,
+      "bulge_rings": 2
+    }
+  },
+  "wrist": {
+    "lead": {
+      "extension_deg": 15.0,
+      "ulnar_deviation_deg": 20.0
+    },
+    "trail": {
+      "extension_deg": 20.0,
+      "ulnar_deviation_deg": 10.0
+    }
+  }
+}

@@ -277,9 +277,9 @@ PART_RULES: tuple[tuple[str, str], ...] = (
 PART_RADIUS_M: dict[str, float] = {
     "torso": 0.145,
     "pelvis": 0.125,
-    "upper_arm": 0.043,
+    "upper_arm": 0.0516,  # 20 % over the first 43 mm (owner, 2026-11-17)
     "shoulder": 0.05,
-    "forearm": 0.036,
+    "forearm": 0.0432,  # 20 % over the first 36 mm (owner, 2026-11-17)
     "hand": 0.042,
     "thigh": 0.078,
     "shin": 0.052,
@@ -287,8 +287,50 @@ PART_RADIUS_M: dict[str, float] = {
     "head": 0.095,
 }
 # Distal (far-end) radius over the proximal radius per part. Visual only (#13993):
-# the forearm narrows 20 % toward the wrist so it is no wider than the hand.
-PART_DISTAL_SCALE: dict[str, float] = {"forearm": 0.8}
+# the forearm narrows toward the wrist so it is no wider than the hand. The
+# wrist keeps the radius it had before the forearm was thickened (28.5 mm).
+PART_DISTAL_SCALE: dict[str, float] = {"forearm": 0.66}
+
+
+# Parts drawn as ONE shape across a joint that turns about the limb's own axis
+# (#15262): the forearm is two bodies joined by the pronation joint, and two
+# separate spindles there read as a second elbow.
+CONTINUOUS_PARTS: tuple[str, ...] = ("forearm",)
+# Muscle belly per part: (gain, position, width). The radius grows by ``gain``
+# at ``position`` along the whole part and falls to nothing ``width`` away
+# (fractions of its length). Visual only.
+PART_BELLY: dict[str, tuple[float, float, float]] = {"forearm": (0.12, 0.28, 0.45)}
+# Parts that keep their radius to each joint and end in a ball about the
+# joint (elbow and wrist blends, #15262) instead of a spindle's thin ends.
+CAPSULE_END_PARTS: tuple[str, ...] = ("forearm",)
+# Fraction of the part's length by which its taper has reached the distal
+# radius; the rest (the wrist) stays slim.
+PART_TAPER_END: dict[str, float] = {"forearm": 0.8}
+
+
+# Fraction of the part's length from which a flat far end (``end_aspect``)
+# starts to ease in; before it the section is round. Past the forearm's
+# rotation joint, which needs a round section.
+PART_FLATTEN_FROM: dict[str, float] = {"forearm": 0.55}
+
+
+def taper_end(part: str) -> float:
+    """Fraction of ``part`` by which its taper is complete (1.0 = at the end)."""
+    value = PART_TAPER_END.get(part, 1.0)
+    if not 0.0 < value <= 1.0:
+        raise ValueError(f"taper end of {part!r} must be in (0, 1], got {value!r}")
+    return float(value)
+
+
+NO_BELLY = (0.0, 0.5, 1.0)
+
+
+def belly(part: str) -> tuple[float, float, float]:
+    """Muscle belly ``(gain, position, width)`` of ``part`` (gain 0 = none)."""
+    gain, position, width = PART_BELLY.get(part, NO_BELLY)
+    if not (gain >= 0.0 and 0.0 <= position <= 1.0 and width > 0.0):
+        raise ValueError(f"belly of {part!r} must have gain >= 0, width > 0")
+    return float(gain), float(position), float(width)
 
 
 def validate_distal_scale(scale: float) -> float:
