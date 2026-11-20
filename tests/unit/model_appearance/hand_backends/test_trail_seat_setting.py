@@ -58,6 +58,18 @@ def test_the_square_seat_turns_the_hand_and_bends_the_wrist() -> None:
     assert wrists["lead"] == dict(default_settings().wrist_deg)["lead"]
 
 
+def test_a_seat_may_roll_the_palm_about_the_shaft() -> None:
+    """``square_on_thumb`` rolls the palm round the grip onto the lead thumb;
+    the seats that say nothing keep the hand settings' roll."""
+    usual = dict(default_settings().palm_centre_wrap_deg)
+    assert sch.trail_seat(_OLD).palm_centre_wrap_deg == usual["trail"]
+    assert sch.trail_seat(_NEW).palm_centre_wrap_deg == usual["trail"]
+    rolled = sch.trail_seat("square_on_thumb")
+    assert rolled.palm_centre_wrap_deg > usual["trail"]
+    wraps = dict(sch.seat_settings(rolled).palm_centre_wrap_deg)
+    assert wraps == {"lead": usual["lead"], "trail": rolled.palm_centre_wrap_deg}
+
+
 def test_a_seat_that_is_not_in_the_table_is_refused() -> None:
     with pytest.raises(ValueError, match="no trail seat named"):
         sch.trail_seat("hammer")
@@ -137,11 +149,84 @@ _COVER += "max_thumb_channel_gap_m and stays the default."
 
 @pytest.mark.xfail(strict=True, reason=_COVER)
 def test_the_square_seat_palm_lies_on_the_lead_thumb(square) -> None:
+    assert _crown_gap_m(square) <= float(_Q["max_thumb_channel_gap_m"])
+
+
+# -- square_on_thumb: square_wrap with the palm rolled back onto the lead thumb
+
+_R = cast(dict[str, Any], _T["square_on_thumb"])
+_ROLLED = _R["measured"]
+
+
+@pytest.fixture(scope="module")
+def rolled() -> dict[str, HandVisualResult]:
+    return sch.build_seated_pair("square_on_thumb")
+
+
+@pytest.fixture(scope="module")
+def rolled_measured(rolled: dict[str, HandVisualResult]) -> TrailGripMeasures:
+    return trail_grip_measures(rolled["lead"], rolled["trail"])
+
+
+def _crown_gap_m(pair: dict[str, HandVisualResult]) -> float:
     gaps = thumb_crown_gaps_m(
-        square["lead"],
-        square["trail"],
+        pair["lead"],
+        pair["trail"],
         station_m=float(_Q["thumb_channel_station_m"]),
         min_facing=float(_Q["thumb_channel_crown_facing"]),
         min_station_vertices=int(_Q["thumb_channel_min_station_vertices"]),
     )
-    assert float(max(gaps)) <= float(_Q["max_thumb_channel_gap_m"])
+    return float(max(gaps))
+
+
+def test_the_rolled_seat_wraps_the_fingers_squarer(rolled_measured) -> None:
+    tilts = rolled_measured.wrap_tilt_deg
+    assert all(tilts[f] <= float(_R["max_wrap_tilt_deg"]) for f in _HOLDING), tilts
+    assert tilts["index"] <= float(_R["max_index_wrap_tilt_deg"]), tilts
+    line = rolled_measured.knuckle_line_to_shaft_deg
+    assert line <= float(_T["max_knuckle_line_to_shaft_deg"]), f"{line:.1f} deg"
+
+
+def test_the_rolled_seat_lays_the_palm_back_on_the_lead_thumb(
+    rolled, rolled_measured
+) -> None:
+    """The heel meets the owner's target at the thumb's knuckle; the crown gap
+    is held to the seat's own bound and the hands stay out of each other."""
+    heel = rolled_measured.heel_to_lead_thumb_knuckle_m
+    assert heel <= float(_T["max_heel_to_lead_thumb_knuckle_m"]), f"{heel * 1e3:.1f}"
+    gap = _crown_gap_m(rolled)
+    assert gap <= float(_R["max_thumb_crown_gap_m"]), f"{gap * 1e3:.1f} mm"
+    deep = hand_pair_penetration_m(rolled["lead"], rolled["trail"])
+    assert deep <= float(_Q["pair_penetration_tolerance_m"]), f"{deep * 1e3:.2f} mm"
+
+
+def test_the_rolled_seat_holds_the_knuckles_near_the_shaft_line(
+    rolled_measured,
+) -> None:
+    most = float(_R["max_knuckle_lateral_offset_m"])
+    for finger in _HOLDING:
+        off = rolled_measured.knuckle_lateral_m[finger]
+        assert abs(off) <= most, f"trail {finger} knuckle {off * 1e3:.1f} mm off"
+        assert rolled_measured.knuckle_behind_m[finger] > 0.0
+
+
+_ROLL = "#15150: owner's targets, not met by square_on_thumb: curl planes "
+_ROLL += f"{_ROLLED['wrap_tilt']}; knuckles {_ROLLED['knuckle_lateral_offset']} "
+_ROLL += f"off the shaft line; lead thumb crown gap {_ROLLED['thumb_crown_gap']}."
+
+
+@pytest.mark.xfail(strict=True, reason=_ROLL)
+def test_the_rolled_seat_wraps_square(rolled_measured) -> None:
+    most = float(_T["max_wrap_tilt_deg"])
+    assert all(rolled_measured.wrap_tilt_deg[f] <= most for f in _HOLDING)
+
+
+@pytest.mark.xfail(strict=True, reason=_ROLL)
+def test_the_rolled_seat_knuckles_are_on_the_shaft_line(rolled_measured) -> None:
+    most = float(_T["max_knuckle_lateral_offset_m"])
+    assert all(abs(rolled_measured.knuckle_lateral_m[f]) <= most for f in _HOLDING)
+
+
+@pytest.mark.xfail(strict=True, reason=_ROLL)
+def test_the_rolled_seat_palm_covers_the_whole_lead_thumb(rolled) -> None:
+    assert _crown_gap_m(rolled) <= float(_Q["max_thumb_channel_gap_m"])
