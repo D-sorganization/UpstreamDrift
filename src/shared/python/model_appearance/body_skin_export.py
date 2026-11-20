@@ -4,16 +4,13 @@ An engine skin (MuJoCo ``<skin>``) blends rigid bodies, not the pose module's
 group transforms. This module turns the stored skin groups into shares of the
 model's bodies and gives each body its bind pose in the fitted rest space:
 
-* ``group_shares``: which bodies a group follows (a spine group is shared
-  between pelvis and thorax, a neck group between thorax and head, the deltoid
-  between girdle and upper arm; every other group rides one body);
-* ``subject_lengths``: the subject's joint-centre geometry from the model's
-  body frames at the bind pose;
-* ``bind_poses``: per body, the pose it has in the fitted rest space, placed
-  so its proximal joint lies on the fitted joint and its bone along the
-  fitted bone;
-* ``skin_bones``: the per-body vertex lists and weights of one layer;
-* ``pose_bones``: linear blend skinning with those bones (the engine's rule).
+* ``group_shares``: the bodies a group follows (spine groups share pelvis and
+  thorax, neck groups thorax and head, the deltoid girdle and upper arm);
+* ``subject_lengths``: the subject's geometry from the body frames at the bind pose;
+* ``bind_poses``: each body's pose in the fitted rest space, its proximal joint
+  on the fitted joint and its bone along the fitted bone;
+* ``skin_bones`` and ``pose_bones``: one layer's per-body vertex lists and
+  weights, and linear blend skinning with them (the engine's rule).
 
 Body frames are ``Rigid`` poses (body frame to world) keyed by role:
 ``pelvis``, ``thorax``, ``head`` and, per side, ``girdle``, ``upper_arm``,
