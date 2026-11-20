@@ -38,9 +38,13 @@ SPEC = json.loads(
 ADDRESS = json.loads(
     (ROOT / "tests/fixtures/model_appearance/address_pose.json").read_text()
 )
-SWING = json.loads(
+SWING_FILE = json.loads(
     (ROOT / "tests/fixtures/model_appearance/swing_poses.json").read_text()
-)["changes_from_address"]
+)
+SWING, SWING_WRISTS = (
+    SWING_FILE["changes_from_address"],
+    SWING_FILE["skinned_hand_wrists"],
+)
 SWING_LIMITS = json.loads((fit.ASSET_DIR / "export_settings.json").read_text())[
     "swing_limits"
 ]
@@ -301,7 +305,7 @@ def test_the_forearm_ends_stay_under_the_hands_on_the_club(
         first, count = model.skin_bonevertadr[bone], model.skin_bonevertnum[bone]
         whole = model.skin_bonevertweight[first : first + count] == 1.0
         ring = model.skin_bonevertid[first : first + count][whole]
-        assert len(ring) >= 40  # the end ring and the row behind it
+        assert len(ring) >= 40  # the end ring
         seen = []
         for x, y in ((0, 0), (bend, 0), (-bend, 0), (0, bend), (0, -bend)):
             data = mujoco.MjData(model)
@@ -327,3 +331,41 @@ def test_the_forearm_ends_stay_under_the_hands_on_the_club(
             points = a.xpos + (points - b.xpos) @ turn
         gap = cKDTree(points).query(vertices[ring])[0].max()
         assert gap <= WRIST_LIMITS["end_to_hand_m"], (side, gap)
+
+
+@pytest.mark.parametrize("name", sorted(SWING_WRISTS))
+def test_the_forearms_keep_their_depth_at_a_swing_wrist(
+    name: str, on_club: tuple[Any, Any, Any]
+) -> None:
+    """The hands are turned 60 to 100 degrees against the forearms in a
+    swing; the forearm must not be wrung thin behind the wrist there."""
+    model, summary, _ = on_club
+    pose = dict(ADDRESS) | SWING_WRISTS[name]
+    for joint, change in SWING[name].items():
+        pose[joint] = pose.get(joint, 0.0) + change
+    posed, faces = _surface(model, pose)["body_skin_skin"]
+    rest = np.array(model.skin_vert[: len(posed)], dtype=float)  # straight wrists
+    near, far = WRIST_LIMITS["depth_band_m"]
+    assert near < SETTINGS.wrist_blend_length_m < far  # the band spans the blend
+    thin = {}
+    for side in ("l", "r"):
+        arm, joint = np.zeros(len(rest), dtype=bool), {}
+        for bone in range(model.skin_bonenum[0]):  # the first skin's bones
+            for role in ("elbow", "forearm", "hand"):
+                body = model.body(summary["bodies"][f"{role}_{side}"]).id
+                if model.skin_bonebodyid[bone] == body:
+                    first, count = (
+                        model.skin_bonevertadr[bone],
+                        model.skin_bonevertnum[bone],
+                    )
+                    arm[model.skin_bonevertid[first : first + count]] = True
+                    joint[role] = model.skin_bonebindpos[bone]
+        along = joint["hand"] - joint["elbow"]
+        before = (joint["hand"] - rest) @ along / np.linalg.norm(along)
+        part = faces[arm[faces].all(axis=1)]
+        ids = np.flatnonzero(arm & (before > near) & (before < far))
+        depth = mesh.inward_thickness(rest, part, ids)
+        ratio = mesh.inward_thickness(posed, part, ids) / depth
+        assert len(ids) > 40 and np.isfinite(depth).all(), side
+        thin[side] = float(np.quantile(ratio, WRIST_LIMITS["thin_share"]))
+    assert min(thin.values()) >= WRIST_LIMITS["depth_ratio"], thin
