@@ -907,6 +907,16 @@ def _segment_gaps(
     return gaps
 
 
+def _arched_hand(
+    asset: SkinnedHandAsset, settings: SkinnedHumanSettings, side: str, paired: bool
+) -> tuple[_GripHand, SkinnedHumanSettings]:
+    """The hand to pose, its set rays arched, and the settings to pose it by."""
+    settings = settings.with_set_arch(side)
+    hand = _GripHand(asset, settings.beside_other_hand() if paired else settings)
+    set_metacarpal_arch(hand, side)
+    return hand, settings
+
+
 def _solve_right_hand(
     spec: GripSpec,
     side: HandSide,
@@ -920,9 +930,7 @@ def _solve_right_hand(
     paired = pair is not None
     size = spec.hand_size
     solve, skin = _sized_assets(size.length_m, size.breadth_m, settings)
-    settings = settings.with_set_arch(side)
-    hand = _GripHand(solve, settings.beside_other_hand() if paired else settings)
-    set_metacarpal_arch(hand, side)
+    hand, settings = _arched_hand(solve, settings, side, paired)
     targets = _targets(spec, side, settings)
     deepest = max(settings.squeeze_finger_depth_m, settings.squeeze_palm_depth_m)
     if deepest >= grip_radius_m:
