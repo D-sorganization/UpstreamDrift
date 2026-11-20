@@ -21,6 +21,7 @@ import pytest
 
 from scripts import address_knee_engine_check as chk
 from src.shared.python.motion_matching import address_knee
+from src.shared.python.motion_matching import knee_axial_rotation as kar
 from src.shared.python.motion_matching.address_knee import (
     CANONICAL_KNEE_FLEXION,
     KNEE_FLEX_BAND_DEG,
@@ -257,13 +258,14 @@ def test_build_knee_targets_without_waist_markers_uses_the_prior() -> None:
 # ------------------------------------------------------------- model side
 
 
-def _spec_kin(capture: str = "driver"):
+def _spec_kin(capture: str = "driver", knee_axial_deg: float | None = None):
     pytest.importorskip("mujoco")
     from src.shared.python.motion_matching.pipeline.constants import REPO_ROOT
     from src.shared.python.motion_matching.pipeline.plant import get_plant
 
     path = REPO_ROOT / "docs/development/full_body_models" / _CANONICAL[capture]
     document = json.loads(path.read_text(encoding="utf-8"))
+    document = kar.apply_knee_axial_rotation(document, knee_axial_deg)
     return document, get_plant("mujoco", document).create_ik(dict(LEG_SEEDS))
 
 
@@ -360,12 +362,31 @@ def test_posture_prior_targets_the_coordinate_of_the_requested_flexion() -> None
         assert flex == pytest.approx(15.0, abs=0.05)
 
 
+@pytest.mark.parametrize("turn_deg", [-20.0, -10.0, 0.0, 20.0])
+def test_flexion_sign_ignores_the_opt_in_knee_axial_rotation(turn_deg: float) -> None:
+    """#15296: a turned shank must not flip or blur the hinge's flexion sign."""
+    from src.shared.python.motion_matching.pipeline.lane import document_seed
+
+    document, kin = _spec_kin(knee_axial_deg=20.0)
+    q, names = document_seed(document, kin), list(kin.coordinate_order)
+    for name in kar.knee_axial_coordinates():
+        q[names.index(name)] = np.radians(turn_deg)
+    q[[names.index("knee_angle_r"), names.index("knee_angle_l")]] = np.radians(-2.0)
+    for side in _SIDES:
+        assert address_knee.flexion_sign(kin, q, side) == -1.0
+    address_knee.assert_no_hyperextension(kin, q)  # 2 deg flexed, not extended
+    tight = address_knee.no_hyperextension_bounds(kin, q, {})
+    assert tight["knee_angle_l"][1] == 0.0 and tight["knee_angle_r"][1] == 0.0
+
+
 # ------------------------------------------------- address solve (real lane)
 
 
-@pytest.mark.parametrize("capture", ["driver", "iron"])
+@pytest.mark.parametrize(
+    ("capture", "knee_axial_deg"), [("driver", None), ("iron", None), ("driver", 20.0)]
+)
 def test_prior_mode_address_knees_land_in_the_owner_band(
-    capture: str, monkeypatch: pytest.MonkeyPatch
+    capture: str, knee_axial_deg: float | None, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """One address solve on the canonical capture frame 0 in ``prior`` mode.
 
@@ -384,6 +405,7 @@ def test_prior_mode_address_knees_land_in_the_owner_band(
 
     pytest.importorskip("mujoco")
     spec, lane = _capture_inputs(capture)
+    spec = kar.apply_knee_axial_rotation(spec, knee_axial_deg)  # opt-in, #15296
     configure_lane(lane, spec)
     spec = address_mod._calibrate_ground_height(spec, lane.ground.height_m)
     upper = {
@@ -401,6 +423,10 @@ def test_prior_mode_address_knees_land_in_the_owner_band(
     for side in _SIDES:
         assert abs(knees[side] - KNEE_FLEX_PRIOR_DEG) <= KNEE_FLEX_BAND_DEG, knees
     address_knee.assert_no_hyperextension(kin, fit.q)
+    for name, (low, high) in kar.knee_axial_bounds_rad(spec).items():
+        assert (
+            low - 1e-9 <= fit.q[list(kin.coordinate_order).index(name)] <= high + 1e-9
+        )
 
 
 # ---------------------------------------------- legacy modes stay unchanged
