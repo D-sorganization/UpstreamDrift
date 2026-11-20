@@ -559,8 +559,8 @@ def _build_aligned_leg_extension(
     mid = rotation @ hips.mean(axis=0)
     alignment = transform(rotation, -mid)
     extension, notes = leg_extension(
-        bodies,
-        joints,
+        dict(bodies),
+        dict(joints),
         hip_frame["body"],
         np.asarray(hip_frame["placement"]) @ alignment,
         frozenset(s for s, sign in hip_axis_signs(osim_path).items() if sign < 0),
