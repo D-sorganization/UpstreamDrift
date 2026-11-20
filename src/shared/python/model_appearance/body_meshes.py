@@ -273,6 +273,8 @@ class _Context:
     parents: Mapping[str, str] = field(default_factory=dict)
     #: Height of the neck point above each shoulder link, metres (#15299).
     neck_rise: Mapping[str, float] = field(default_factory=dict)
+    #: Parts a skinned body draws instead of these meshes (#15299).
+    skinned_parts: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -406,6 +408,15 @@ def _skinned_wrist_sections(
             # The near length of the same limb narrows to the same wrist (#15299).
             sections[joint["parent"]] = dataclasses.replace(far, shapes_end=False)
     return sections
+
+
+def _skinned_parts() -> frozenset[str]:
+    # Imported here: only an emitter that draws the skinned body needs it.
+    from src.shared.python.model_appearance.body_skin_export import (
+        load_export_settings,
+    )
+
+    return frozenset(load_export_settings().covered_parts)
 
 
 def _neck_rises(
@@ -740,6 +751,8 @@ def _meshes_for_body(
     if rule is not None and rule.mesh == "none":
         return []
     part = library.classify_body(body)
+    if part in ctx.skinned_parts:
+        return []  # drawn by the skinned body (an engine skin, not a mesh)
     if part == "head" and ctx.head_enabled:
         return []  # drawn by the shared head: skull, face, ears and neck
     if part == "hand" and ctx.club is not None and library.is_grip_hand_standoff(body):
@@ -800,6 +813,8 @@ def body_meshes(
     spec: Mapping[str, Any],
     doc: AppearanceDocument,
     club: ClubAssembly | None = None,
+    *,
+    body_skin: bool = False,
 ) -> list[BodyMesh]:
     """Skin, garment, blend, shoe (and, with ``club``, club) meshes per body.
 
@@ -808,7 +823,8 @@ def body_meshes(
     ``cross_section.body_sections`` needs. Postconditions: deterministic;
     every mesh in :data:`SPEC_BODY_FRAME`; every material resolvable; bodies
     in visual-skeleton order. The head body is omitted while the parametric
-    head is enabled.
+    head is enabled. With ``body_skin`` (an emitter that draws the skinned body,
+    ``body_skin_export``) the parts that skin covers get no mesh.
     """
     library.check_references(doc)
     skeleton = derive_visual_skeleton(spec)
@@ -834,6 +850,7 @@ def body_meshes(
         _parents_of(spec, "shoulder"),
         _torso_parents(spec),
         _neck_rises(spec, by_body),
+        _skinned_parts() if body_skin else frozenset(),
     )
     out = [
         m for body, caps in by_body.items() for m in _meshes_for_body(ctx, body, caps)
@@ -850,9 +867,11 @@ def resolve_appearance(
     doc: AppearanceDocument,
     club: ClubAssembly | None = None,
     head_mesh: MeshReference | None = None,
+    *,
+    body_skin: bool = False,
 ) -> ResolvedAppearance:
     """The engine-neutral resolution an emitter translates (see module doc)."""
-    meshes = tuple(body_meshes(spec, doc, club))
+    meshes = tuple(body_meshes(spec, doc, club, body_skin=body_skin))
     known = library.library_materials(doc)
     materials = {m.material_name: known[m.material_name] for m in meshes}
     if head_mesh is None and doc.head.enabled and doc.head.model == "cc0_mesh":

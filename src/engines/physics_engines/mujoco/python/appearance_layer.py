@@ -27,6 +27,7 @@ from src.shared.python.model_appearance.body_meshes import (
     club_meshes,
     resolve_appearance,
 )
+from src.shared.python.model_appearance.body_skin_export import body_skin_enabled
 from src.shared.python.model_appearance.club_assembly import ClubAssembly
 from src.shared.python.model_appearance.club_chain_meshes import club_meshes_by_body
 from src.shared.python.model_appearance.schema import (
@@ -273,10 +274,20 @@ def attach_appearance(
         )
     assets = _Assets(root, doc)
     ground_material = _add_environment(root, assets, doc)
-    garments = _attach_body_meshes(
-        assets, elements, offsets, resolve_appearance(spec, doc, club)
-    )
+    skinned = body_skin_enabled(spec)
+    resolved = resolve_appearance(spec, doc, club, body_skin=skinned)
+    garments = _attach_body_meshes(assets, elements, offsets, resolved)
+    extra = {}
+    if skinned:  # default off: the loft body (#15299)
+        from src.engines.physics_engines.mujoco.python.body_skin_layer import (
+            attach_body_skin,
+        )
+
+        extra["body_skin"] = attach_body_skin(
+            root, elements, assets.material, doc, spec
+        )
     return {
+        **extra,
         "appearance": doc.name,
         "meshes": assets.n_meshes,
         "garments": garments,

@@ -24,12 +24,14 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from typing import Any
 from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation
 
+from src.shared.python.model_appearance import library
 from src.shared.python.model_appearance.body_skin_fit import (
     ASSET_DIR,
     SIDES,
@@ -43,6 +45,10 @@ from src.shared.python.model_appearance.body_skin_pose import (
 )
 
 Array = NDArray[np.float64]
+#: Values of ``subject.body_visual_backend``; the loft body is the default.
+LOFT_BACKEND, SKINNED_BACKEND = "loft", "skinned_cc0"
+_ARM: tuple[str, ...] = ("girdle", "upper_arm", "elbow", "forearm", "hand")
+_LEG: tuple[str, ...] = ("thigh", "shank", "foot")
 SPINE_GROUPS = ("spine05", "spine04", "spine03")
 #: Side group -> the body role it rides (the deltoid group is shared instead).
 _SIDE_BONES = {
@@ -85,6 +91,7 @@ class ExportSettings:
     weight_floor: float
     bind_pose: Mapping[str, float]
     bind_stretch_limit_m: float
+    covered_parts: tuple[str, ...]
 
     def __post_init__(self) -> None:
         follow = list(self.spine_follow)
@@ -116,7 +123,55 @@ def load_export_settings(path: Path | None = None) -> ExportSettings:
         weight_floor=float(raw["weight_floor"]),
         bind_pose={str(k): float(v) for k, v in raw["bind_pose"].items()},
         bind_stretch_limit_m=float(raw["bind_stretch_limit_m"]),
+        covered_parts=tuple(raw["covered_parts"]),
     )
+
+
+def body_skin_enabled(spec: Mapping[str, Any]) -> bool:
+    """Whether ``subject.body_visual_backend`` asks for the skinned body."""
+    backend = spec.get("subject", {}).get("body_visual_backend", LOFT_BACKEND)
+    if backend not in (LOFT_BACKEND, SKINNED_BACKEND):
+        raise ValueError(
+            f"body_visual_backend must be {LOFT_BACKEND!r} or {SKINNED_BACKEND!r}"
+        )
+    return bool(backend == SKINNED_BACKEND)
+
+
+def body_roles(spec: Mapping[str, Any], origins: Mapping[str, Array]) -> dict[str, str]:
+    """Body name per role, from the joint tree and the body classes.
+
+    ``origins`` are the body origins at the bind pose (y to the subject's
+    left). The thorax is the body that carries the head; an arm hangs from
+    each shoulder link on it and a leg from each thigh on the pelvis. Raises
+    ``ValueError`` when the tree lacks one of them.
+    """
+    children: dict[str, list[str]] = {}
+    for joint in spec.get("joints", ()):
+        children.setdefault(str(joint["parent"]), []).append(str(joint["child"]))
+
+    def kids(body: str, part: str) -> list[str]:
+        return [c for c in children.get(body, ()) if library.classify_body(c) == part]
+
+    try:
+        thorax, head = next(
+            (b, kids(b, "head")[0]) for b in children if kids(b, "head")
+        )
+        pelvis = next(b for b in children if library.classify_body(b) == "pelvis")
+        roles = {"pelvis": pelvis, "thorax": thorax, "head": head}
+        limbs = [(_ARM, b) for b in kids(thorax, "shoulder")]
+        limbs += [(_LEG, b) for b in kids(pelvis, "thigh")]
+        for names, body in limbs:
+            chain = [body]
+            while len(chain) < len(names):
+                chain.append(children[chain[-1]][0])
+            left = origins[chain[-1]][1] > origins[pelvis][1]
+            roles |= {
+                f"{n}_{'l' if left else 'r'}": b
+                for n, b in zip(names, chain, strict=True)
+            }
+    except (StopIteration, KeyError, IndexError) as missing:
+        raise ValueError("the spec lacks a body the skin follows") from missing
+    return roles
 
 
 def group_shares(

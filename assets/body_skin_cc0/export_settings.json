@@ -3,7 +3,9 @@
   "weight_floor": 0.0001,
   "bind_pose": {"LSInputY": 1.5708, "RSInputY": 1.5708},
   "bind_stretch_limit_m": 0.03,
+  "covered_parts": ["pelvis", "torso", "shoulder", "upper_arm", "forearm", "thigh", "shin"],
   "sources": {
+    "covered_parts": "Body parts (model_appearance.library classes) whose loft meshes the skin replaces; hands, head, feet and club keep their own models, and the head model's neck is left out because the skin has one.",
     "spine_follow": "Share of the thorax's motion relative to the pelvis taken by the spine05, spine04 and spine03 group (the rest stays with the pelvis). 0.1, 0.45 and 0.8 are the #15299 prototype's values: the waistband stays on the pelvis and the lower ribs turn with the chest.",
     "weight_floor": "A body share under 0.0001 of a vertex is dropped and the rest renormalised; it moves a vertex less than 0.1 mm per metre of relative body motion and keeps the bone lists short.",
     "bind_pose": "Model coordinates (radians; every other coordinate zero) of the pose the bones are bound in: both arms hanging at the side, the closest model pose to the stored skin's rest pose, so the turn from one to the other is small and carries almost no twist about a bone.",
