@@ -136,6 +136,19 @@ def _head_turned(settings: pose.PoseSettings, head: pose.Rigid | None) -> np.nda
     return pose.pose_skin(FITTED.vertices, SKIN.weights, SKIN.groups, moves)
 
 
+_SIDES = np.vstack([SKIN.faces[:, pair] for pair in ([0, 1], [1, 2], [2, 0])])
+_OPEN, _COUNT = np.unique(np.sort(_SIDES, axis=1), axis=0, return_counts=True)
+#: Vertices of the open rim where the neck meets the separate head model.
+NECK_RIM = np.unique(_OPEN[_COUNT == 1])
+NECK_RIM = NECK_RIM[FITTED.vertices[NECK_RIM, 2] > NECK[2]]
+
+
+def _rim_lag_mm(posed: np.ndarray, head: pose.Rigid) -> float:
+    """How far the rim falls behind the head it has to meet."""
+    lag = posed[NECK_RIM] - head.apply(FITTED.vertices[NECK_RIM])
+    return 1000.0 * float(np.linalg.norm(lag, axis=1).max())
+
+
 def _neck_step_mm(posed: np.ndarray) -> float:
     change = pose.edge_length_change(FITTED.vertices, posed, NECK_EDGES)
     return 1000.0 * float(change.max())
@@ -148,14 +161,12 @@ def test_the_neck_shares_a_head_turn_between_thorax_and_head() -> None:
     assert np.allclose(_head_turned(SETTINGS, None), FITTED.vertices, atol=1e-12)
     below = FITTED.vertices[:, 2] < FITTED.joints["shoulder_l"][2] - 0.1
     assert np.allclose(posed[below], FITTED.vertices[below], atol=1e-12)
-    top = SKIN.weights[:, SKIN.groups.index("head")] > 0.99
-    if top.any():
-        assert np.allclose(posed[top], head.apply(FITTED.vertices[top]), atol=1e-12)
     stiff = dataclasses.replace(SETTINGS, neck_follow=(0.0, 0.0, 0.0))
-    assert len(NECK_EDGES) > 100
-    step = _neck_step_mm(posed)
-    assert step <= RAW["neck_step_limit_mm"]
-    assert step < 0.75 * _neck_step_mm(_head_turned(stiff, head))
+    assert len(NECK_EDGES) > 100 and len(NECK_RIM) > 20
+    assert _neck_step_mm(posed) <= RAW["neck_step_limit_mm"]
+    lag = _rim_lag_mm(posed, head)
+    assert lag <= RAW["neck_rim_lag_limit_mm"]
+    assert lag < 0.75 * _rim_lag_mm(_head_turned(stiff, head), head)
 
 
 @pytest.mark.parametrize("follow", [(0.5, 0.2, 0.8), (0.2, 0.5, 1.2), (0.2, 0.5)])
