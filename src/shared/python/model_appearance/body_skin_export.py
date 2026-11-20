@@ -43,7 +43,6 @@ from src.shared.python.model_appearance.body_skin_pose import (
 )
 
 Array = NDArray[np.float64]
-Shares = Mapping[str, Mapping[str, float]]
 SPINE_GROUPS = ("spine05", "spine04", "spine03")
 #: Side group -> the body role it rides (the deltoid group is shared instead).
 _SIDE_BONES = {
@@ -263,7 +262,7 @@ def bind_poses(frames: Mapping[str, Rigid], fitted: FittedSkin) -> dict[str, Rig
 def skin_bones(
     weights: Array,
     groups: Sequence[str],
-    shares: Shares,
+    shares: Mapping[str, Mapping[str, float]],
     binds: Mapping[str, Rigid],
     settings: ExportSettings,
 ) -> tuple[SkinBone, ...]:
