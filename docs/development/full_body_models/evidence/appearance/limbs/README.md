@@ -35,7 +35,46 @@ at 1.71 m).
 - The leg lengths do not change with stature in the built spec (thigh 401 mm,
   shin 439 mm in both subjects), so the 1.82 m golfer's thigh is shorter than
   the measured body's 439 mm.
-- The upper arm is not changed here; it still measures 322 mm at its middle
-  against 355 mm measured.
 - The acceptance is `tests/unit/model_appearance/test_leg_shape.py`; a picture
   is not a physical acceptance.
+
+## Upper Arm, Deltoid Cap and Neck
+
+Visual only, as above. The upper arm scales with stature, is deeper than wide
+(`PART_ASPECT`, about the elbow's hinge axis from `cross_section`), holds its
+width to the elbow (`PART_BELLY`, `PART_END_ASPECT`) and carries a deltoid cap
+with its own radius (`DELTOID_RADIUS_M`, `DELTOID_OUTWARD`). The neck is wider
+and its throat fuller (`neck.NeckSettings`).
+
+![Arms and Neck Before and After, Tour-Average Golfer](arms_neck_before_after_tour_average.png)
+
+Girth of the drawn skin in mm; the neck is a level cut 0.12 head lengths below
+the neck point.
+
+| Section | Measured (1.82 m) | Before (1.82 m) | After (1.82 m) | Before (1.71 m) | After (1.71 m) |
+| --- | --- | --- | --- | --- | --- |
+| Upper arm at 0.525 | 355 | 322 | 348 | 322 | 328 |
+| Upper arm at 0.95 (elbow) | 310 | 263 | 295 | 262 | 274 |
+| Neck under the jaw | 391 to 431 | 361 | 380 | 339 | 357 |
+
+The deltoid cap is 116 mm across at 1.82 m (100 mm before; 150 mm measured)
+and the shoulders 481 mm across (471 mm before). The deepest a sleeve sits
+inside the shirt is 37.5 mm standing (37.4 mm before) and 99.4 mm at address
+(99.4 mm before) at 1.82 m, and 34.2 mm and 95.8 mm at 1.71 m (37.4 mm and
+99.4 mm before). The neck clears the collar opening by 2.9 mm standing
+(5.2 mm before) and stays 1.1 mm inside the jaw. The cap's drop down the arm
+is counted in cap radii, so the larger cap stays below the neck point at
+address. The table, the cap and the sleeve depths are measured on the base
+with the legs (#15309) and the chest (#15310) in; the shoulder breadth, the
+collar and jaw clearances and the neck limits below are from the base before
+them and are not re-measured.
+
+### Limits of the Arm and Neck
+
+- The neck stops short of the measured girth: its width is held by the neck
+  to head ratio (0.716 of at most 0.72), the collar gap (2 mm) and the throat
+  line at address (14.3 mm of at most 15 mm ahead of the collar).
+- The deltoid cap is a ball, smaller than measured, so the sleeve does not
+  balloon; it still shows as a dome on the sleeve from the side.
+- The acceptance is `tests/unit/model_appearance/test_arm_neck_shape.py`; a
+  picture is not a physical acceptance.

@@ -15,6 +15,8 @@ frame.
   lateral z axis.
 - **Leg** (thigh, shin): depth is forward, the horizontal direction its foot
   points; ML is ``up x forward`` (#15299).
+- **Upper arm**: ML is the elbow's hinge axis, signed away from the neck, so
+  the biceps and triceps lie along the depth axis (#15299).
 
 The depth (thin, ``aspect``) axis is anteroposterior for the trunk
 (``ML x up``) and up for the foot (the shoe is wider than it is tall). Every
@@ -51,6 +53,8 @@ __all__ = [
 TRUNK_PARTS = frozenset({"torso", "pelvis"})
 FOOT_PARTS = frozenset({"foot"})
 LEG_PARTS = frozenset({"thigh", "shin"})
+ARM_PARTS = frozenset({"upper_arm"})
+_TURN_AXIS = {"Rx": 0, "Ry": 1, "Rz": 2}
 # Landmark axes closer than this to "up" cannot define a horizontal ML/AP pair.
 _MIN_TILT_FROM_UP_DEG = 45.0
 
@@ -167,12 +171,31 @@ class _Landmarks:
         return self.poses[body][:3, :3].T @ world_vector
 
 
+def _arm_section(marks: _Landmarks, body: str) -> BodySection | None:
+    """Upper arm: ML is the elbow's hinge axis, pointing away from the neck.
+
+    ``None`` (the arm stays round) unless its one child joint is a hinge.
+    """
+    elbows = [j for j in marks.joints if j["parent"] == body]
+    turns = [p["primitive"] for j in elbows for p in j.get("primitives", ())]
+    if len(elbows) != 1 or len(turns) != 1 or turns[0] not in _TURN_AXIS:
+        return None
+    base = np.asarray(elbows[0]["parent_to_base"], dtype=np.float64)
+    ml = _unit(base[:3, _TURN_AXIS[turns[0]]], f"{body} elbow axis")
+    depth = _unit(np.cross(ml, base[:3, 3]), f"{body} elbow axis vs arm")
+    parent = marks.poses[marks.parent_of[body]][:3, 3]
+    outward = marks.to_body(body, marks.poses[body][:3, 3] - parent)
+    return BodySection(body, ml if float(ml @ outward) >= 0.0 else -ml, depth)
+
+
 def _is_head(body: str) -> bool:
     return classify_body(body) == "head"
 
 
-def _section(marks: _Landmarks, body: str, part: str) -> BodySection:
+def _section(marks: _Landmarks, body: str, part: str) -> BodySection | None:
     """ML and depth axes of one non-round body, in its own frame."""
+    if part in ARM_PARTS:
+        return _arm_section(marks, body)
     if part in FOOT_PARTS:
         long_axis = marks.toe_axis(body)
         ml_world = _unit(np.cross(marks.up, long_axis), f"{body} foot axis vs up")
@@ -228,7 +251,8 @@ def body_sections(spec: Mapping[str, Any]) -> dict[str, BodySection]:
     if not wanted:
         return {}
     marks = _Landmarks(spec)
-    sections = {name: _section(marks, name, part) for name, part in wanted}
+    found = {name: _section(marks, name, part) for name, part in wanted}
+    sections = {name: section for name, section in found.items() if section}
     for section in sections.values():
         ensure(
             abs(float(np.linalg.norm(section.ml_axis)) - 1.0) < 1e-9

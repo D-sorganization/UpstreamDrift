@@ -303,6 +303,7 @@ CONTINUOUS_PARTS: tuple[str, ...] = ("forearm",)
 PART_BELLY: dict[str, tuple[float, float, float]] = {
     "forearm": (0.12, 0.28, 0.45),
     "shin": (0.29, 0.38, 0.40),  # the calf (#15299)
+    "upper_arm": (0.10, 0.95, 0.30),  # it holds its width down to the elbow
 }
 # Parts that keep their radius to each joint and end in a ball about the
 # joint (elbow and wrist blends, #15262) instead of a spindle's thin ends.
@@ -315,7 +316,10 @@ PART_TAPER_END: dict[str, float] = {"forearm": 0.8, "shin": 0.85}
 # Fraction of the part's length from which a flat far end (``end_aspect``)
 # starts to ease in; before it the section is round. Past the forearm's
 # rotation joint, which needs a round section.
-PART_FLATTEN_FROM: dict[str, float] = {"forearm": 0.55}
+PART_FLATTEN_FROM: dict[str, float] = {"forearm": 0.55, "upper_arm": 0.5}
+# Depth/width at the far end of a part whose section changes along it: the
+# upper arm is nearly round at the elbow, where the forearm takes over (#15299).
+PART_END_ASPECT: dict[str, float] = {"upper_arm": 1.04}
 
 
 def taper_end(part: str) -> float:
@@ -353,7 +357,22 @@ LEG_DISTAL_SCALE: dict[str, float] = {"thigh": 0.70, "shin": 0.62}
 # part radius, position, width), the last two as in ``PART_BELLY``. The
 # quadriceps sit ahead of the hip-knee line and the calf behind the shin.
 LIMB_REFERENCE_STATURE_M = 1.82
-STATURE_SCALED_PARTS: tuple[str, ...] = ("thigh", "shin")
+STATURE_SCALED_PARTS: tuple[str, ...] = ("thigh", "shin", "upper_arm")
+# Deltoid cap (#15299): radius of the ball at the shoulder at the reference
+# stature, its own setting, so the arm radius does not size the shoulder, and
+# how far its centre sits outside the arm's axis, in cap radii (the deltoid
+# lies on the outside of the joint). ``DELTOID_HALF_SIZES`` shapes it.
+DELTOID_RADIUS_M = 0.060
+DELTOID_OUTWARD = 0.04
+
+
+def deltoid_radius_m(scale: float) -> float:
+    """Deltoid cap radius (m) at stature ``scale``; raises on bad settings."""
+    if not (scale > 0.0 and DELTOID_RADIUS_M > 0.0 and 0.0 <= DELTOID_OUTWARD < 1.0):
+        raise ValueError("deltoid radius and scale must be > 0, outward in [0, 1)")
+    return scale * DELTOID_RADIUS_M
+
+
 PART_OFFSET: dict[str, tuple[float, float, float]] = {
     "thigh": (0.30, 0.35, 0.60),
     "shin": (-0.53, 0.34, 0.46),
@@ -401,6 +420,7 @@ PART_ASPECT: dict[str, float] = {
     "pelvis": 0.78,
     "foot": 0.7,
     "thigh": 1.06,
+    "upper_arm": 1.16,  # biceps ahead of and triceps behind the bone (#15299)
 }
 GARMENT_THICKNESS = 1.08
 # Fractional extent of a garment along the segment: (start, end). Partial

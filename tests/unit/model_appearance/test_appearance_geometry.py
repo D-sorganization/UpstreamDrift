@@ -186,8 +186,8 @@ def test_width_axes_come_from_spec_landmarks(spec_path) -> None:
     assert set(sections) == non_round and non_round
     for name, section in sections.items():
         assert abs(float(np.dot(section.ml_axis, section.depth_axis))) < 1e-9
-        if classify_body(name) in LEG_PARTS:
-            continue  # a leg faces the way its foot points (test_leg_shape)
+        if classify_body(name) in (*LEG_PARTS, "upper_arm"):
+            continue  # a leg faces its foot (test_leg_shape), an arm its elbow
         ml = _landmark_ml(spec, name)
         assert _angle_deg(section.ml_axis, ml) < 5.0, name
     for name in ("calcn_r", "calcn_l"):  # the OpenSim calcn lateral axis is z
