@@ -197,8 +197,26 @@ def set_metacarpal_arch(hand: _ArchedHand, side: str) -> None:
         hand.fixed[bone] = turn @ hand.fixed[bone] if bone in hand.fixed else turn
 
 
+def edge_stretch(
+    before: Array, after: Array, faces: NDArray[np.int64]
+) -> NDArray[np.float64]:
+    """Length of every triangle edge in ``after`` over its length in ``before``.
+
+    Precondition: two vertex arrays of one shape. Postcondition: ``(F, 3)``.
+    """
+    if before.shape != after.shape:
+        raise ValueError("edge_stretch needs two poses of one mesh")
+    ends = (faces, np.roll(faces, -1, axis=1))
+    was, now = (
+        np.linalg.norm(points[ends[0]] - points[ends[1]], axis=2)
+        for points in (before, after)
+    )
+    return np.asarray(now / was)
+
+
 __all__ = [
     "MetacarpalArchSettings",
     "arch_rotation",
+    "edge_stretch",
     "set_metacarpal_arch",
 ]
