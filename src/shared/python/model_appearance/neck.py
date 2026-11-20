@@ -35,19 +35,21 @@ class NeckSettings:
     top_height: float = 0.13  # axis end (inside the head's neck stub)
     base_forward: float = -0.025  # axis start, forward of the neck point
     top_forward: float = 0.14  # axis end: the forward lean of the neck
-    half_width: float = 0.27  # base half width: 13.9 cm across for a 1.75 m man
+    half_width: float = 0.28  # base half width: 14.4 cm across for a 1.75 m man
     half_depth: float = 0.232  # base half depth: 11.9 cm front to back at 1.75 m
     #: (along, width, depth): sections as fractions of the base half extents. The
     #: neck narrows up to the head's own neck stub (0.35 head lengths at the jaw)
-    #: and eases wider towards the collar; it is 11 to 12.5 cm across mid-height.
-    stations: tuple[tuple[float, float, float], ...] = (
+    #: and eases wider towards the collar; it is 11.5 to 13 cm across mid-height.
+    #: A sixth entry moves a section forward (base half depths): the throat is
+    #: full under the jaw while the nape keeps its line inside the collar (#15299).
+    stations: tuple[tuple[float, ...], ...] = (
         (0.0, 1.0, 1.0),
         (0.35, 0.93, 0.93),
-        (0.55, 0.86, 0.86),
-        (0.69, 0.83, 0.83),
-        (0.78, 0.78, 0.78),
-        (0.86, 0.69, 0.69),
-        (1.0, 0.6, 0.6),
+        (0.55, 0.86, 0.92, 0.0, 0.0, 0.006),
+        (0.69, 0.83, 0.90, 0.0, 0.0, 0.008),
+        (0.78, 0.78, 0.84, 0.0, 0.0, 0.006),
+        (0.86, 0.67, 0.71, 0.0, 0.0, 0.002),
+        (1.0, 0.58, 0.6),
     )
     squareness: float = 2.0
 
@@ -130,6 +132,7 @@ def build_neck(length_m: float, settings: NeckSettings | None = None) -> Mesh:
         np.array([0.0, 1.0, 0.0]),
         length_m * cfg.half_width,
         length_m * cfg.half_depth,
+        np.array([1.0, 0.0, 0.0]),
     )
     profile = TorsoProfile(
         tuple(TorsoStation(*row) for row in cfg.stations),
