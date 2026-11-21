@@ -244,6 +244,14 @@ python3 -m src.tools.native_viewer_export --bundle driver.npz --swing driver \
   it is labelled "closest approach, no contact" with the miss distance; with
   `closest_approach_fallback` a swing with no detected impact uses its closest
   approach as the reference instant and says so.
+  `--ball-flight` (or `--ball-flight-settings PATH`; default off) flies the
+  ball from the impact frame in playback time with a persistent shot tracer,
+  adds the flight numbers to the HUD and holds the clip on the last pose until
+  the ball has landed. Ball and tracer are a 2D overlay projected through the
+  view preset camera (MuJoCo's 45 degree lens; views that follow the grip are
+  left alone). `--views down_the_line_flight --no-grid` is the wide
+  down-the-line view (`golf_view_presets/flight_view.json`) that keeps the
+  flight in the picture.
 - `overlay.py`: overlay feed built from `force_overlay.bundle_provider`.
 - `overlay2d.py`: pinhole projection for the OpenSim 2D glyphs.
 - `backends/`: one module per engine plus shared helpers.

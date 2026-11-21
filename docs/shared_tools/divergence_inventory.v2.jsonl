@@ -906,6 +906,7 @@
 {"path": "golf_simulator/session.py", "classification": "ud-only", "package": "golf_simulator", "spelling_only": false}
 {"path": "golf_view_presets/__init__.py", "classification": "ud-only", "package": "golf_view_presets", "spelling_only": false}
 {"path": "golf_view_presets/adapters.py", "classification": "ud-only", "package": "golf_view_presets", "spelling_only": false}
+{"path": "golf_view_presets/flight_view.json", "classification": "ud-only", "package": "golf_view_presets", "spelling_only": false}
 {"path": "golf_view_presets/framing.py", "classification": "ud-only", "package": "golf_view_presets", "spelling_only": false}
 {"path": "golf_view_presets/presets.py", "classification": "ud-only", "package": "golf_view_presets", "spelling_only": false}
 {"path": "golf_viz/__init__.py", "classification": "ud-only", "package": "golf_viz", "spelling_only": false}

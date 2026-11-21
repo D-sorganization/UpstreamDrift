@@ -18,7 +18,9 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+import json
 import math
+from pathlib import Path
 from types import MappingProxyType
 
 import numpy as np
@@ -92,6 +94,11 @@ class ViewPreset:
         return look - float(distance_m) * self.view_direction()
 
 
+#: wide down-the-line view that keeps a ball flight in the picture (#15150)
+_FLIGHT_VIEW = json.loads(
+    Path(__file__).with_name("flight_view.json").read_text(encoding="utf-8")
+)
+
 VIEW_ORDER: tuple[str, ...] = ("face_on", "down_the_line", "overhead", "oblique")
 
 VIEW_PRESETS = MappingProxyType(
@@ -109,6 +116,13 @@ VIEW_PRESETS = MappingProxyType(
             "oblique", "Oblique (rear, target side)", 135.0, -14.0, 3.95
         ),
         # Not part of VIEW_ORDER (the 2x2 grid stays four views): request it by name.
+        "down_the_line_flight": ViewPreset(
+            "down_the_line_flight",
+            "Down-the-line (wide, ball flight)",
+            _FLIGHT_VIEW["azimuth_deg"],
+            _FLIGHT_VIEW["elevation_deg"],
+            _FLIGHT_VIEW["default_distance_m"],
+        ),
         "hands_closeup": ViewPreset(
             "hands_closeup",
             "Hands close-up (follows the grip midpoint)",

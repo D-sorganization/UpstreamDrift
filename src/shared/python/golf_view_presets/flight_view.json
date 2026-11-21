@@ -1,0 +1,10 @@
+{
+  "azimuth_deg": -90.0,
+  "elevation_deg": -3.0,
+  "default_distance_m": 7.0,
+  "sources": {
+    "azimuth_deg": "Viewing direction heading: -90 looks down the target line from behind the golfer, as the down_the_line view does.",
+    "elevation_deg": "Viewing direction elevation. -3 is flatter than the -8 of down_the_line, so the apex of a driver flight stays below the top of a 16:9 frame.",
+    "default_distance_m": "Camera distance from the look-at point. 7 m (down_the_line: 3.75 m) leaves the golfer about a third of the frame height and room for a flight that curves 30 degrees off line."
+  }
+}

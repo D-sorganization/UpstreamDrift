@@ -71,11 +71,13 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1103 | `src/shared/python/config/model_source_providers.py` |
 | 1102 | `src/launchers/launcher_dialogs.py` |
 | 1100 | `src/shared/python/motion_matching/club_only/control_replay.py` |
+| 1100 | `src/tools/native_viewer_export/core.py` |
+| 1100 | `src/tools/native_viewer_export/core.py` |
+| 1100 | `src/tools/native_viewer_export/core.py` |
 | 1098 | `src/tools/shot_pattern_analysis/matched_supplement_pipeline.py` |
 | 1096 | `src/learning/retargeting/retargeter.py` |
 | 1089 | `src/shared/python/motion_pipeline/contracts.py` |
 | 1084 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py` |
-| 1085 | `src/tools/native_viewer_export/core.py` |
 | 1078 | `src/engines/physics_engines/drake/python/full_body_model.py` |
 | 1076 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1073 | `src/shared/python/sidekick/calculators/thermo/steam_engine.py` |
@@ -158,8 +160,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 916 | `src/tools/bunker_shot_gui/export.py` |
 | 913 | `src/engines/physics_engines/opensim/python/tour_matching/native_diagnostic_contract.py` |
 | 908 | `src/engines/physics_engines/opensim/python/grip_contact_osim_sim.py` |
+| 907 | `src/shared/python/model_appearance/body_meshes.py` |
 | 907 | `src/unreal_integration/mesh_loader.py` |
-| 903 | `src/shared/python/model_appearance/body_meshes.py` |
 | 903 | `src/shared/python/motion_matching/club_only/body_candidates.py` |
 | 902 | `src/tools/capture_rig/reference_comparison.py` |
 | 897 | `src/shared/python/motion_matching/surrogate/compact/training.py` |

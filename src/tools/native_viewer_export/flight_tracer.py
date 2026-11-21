@@ -4,14 +4,16 @@ From the impact frame on the ball leaves the tee along the carry trajectory of
 the repository impact and ball-flight model
 (``impact_parameters.flight_report``), launched from the clubhead state the
 impact card reads. The flight is a model prediction from kinematic impact
-conditions, not a measurement. This module holds the flight in swing time and
-world coordinates and the validated overlay options, read from
-``flight_tracer_settings.json`` (see its ``sources``).
+conditions, not a measurement. Ball and tracer are drawn on every fixed view
+tile through a pinhole camera matching the view preset: a 2D overlay, so the
+body never hides them. The clip is held on its last pose until the ball has
+landed. Options are read from ``flight_tracer_settings.json`` (see ``sources``).
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, replace
 import json
 import math
 from pathlib import Path
@@ -19,23 +21,29 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import NDArray
+from PIL import Image, ImageDraw
 
+from src.shared.python.golf_view_presets import get_view_preset
 from src.shared.python.impact_parameters import ClubheadSeries
 from src.shared.python.impact_parameters.flight_report import (
     FlightSummary,
     flight_for_impact,
 )
 from src.tools.native_viewer_export import impact_card
+from src.tools.native_viewer_export.overlay2d import pinhole_for_view
 
 if TYPE_CHECKING:
     from src.shared.python.impact_parameters.target_frame import TargetFrame
     from src.tools.native_viewer_export.ball import BallPlacement
+    from src.tools.native_viewer_export.core import ExportSettings, SwingInput
 
 Array = NDArray[np.float64]
+Image8 = NDArray[np.uint8]
 SETTINGS_PATH = Path(__file__).with_name("flight_tracer_settings.json")
 ON_TEE, IN_FLIGHT, LANDED = "on tee", "in flight", "landed"
 NO_IMPACT, MODEL = "no impact detected", "model prediction"
 OUTSIDE = "outside the model validity envelope"
+club_series = impact_card._club_series
 
 
 def _channels(value: Any, count: int, name: str) -> tuple[int, ...]:
@@ -97,6 +105,43 @@ def load_tracer_settings(path: Path | None = None) -> TracerSettings:
         if "argument" not in str(exc):
             raise
         raise ValueError(f"flight tracer settings: {exc}") from exc
+
+
+def project(camera: Any, points_m: Array, near_clip_m: float) -> tuple[Array, Array]:
+    """Pixel ``(u, v)`` and camera depth of world points through ``camera``.
+
+    A point nearer than ``near_clip_m`` to the camera plane (or behind it) has
+    a ``nan`` pixel.
+    """
+    local = camera.camera_from_world(np.asarray(points_m, dtype=float))
+    depth = local[:, 2]
+    safe = np.where(depth > near_clip_m, depth, np.nan)
+    k = camera.matrix
+    u = k[0, 0] * local[:, 0] / safe + k[0, 2]
+    v = k[1, 1] * local[:, 1] / safe + k[1, 2]
+    return np.column_stack([u, v]), depth
+
+
+def draw_trace(
+    tile: Image8, camera: Any, points_m: Array, radius_m: float, style: TracerSettings
+) -> Image8:
+    """``tile`` with the tracer through ``points_m`` and the ball at the last one.
+
+    Returns a new array; points behind the camera are left out.
+    """
+    pixels, depth = project(camera, points_m, style.near_clip_m)
+    seen: np.ndarray = np.asarray(np.isfinite(pixels).all(axis=1), dtype=bool)
+    image = Image.fromarray(tile)
+    pen = ImageDraw.Draw(image, "RGBA")
+    line = [(float(u), float(v)) for u, v in pixels[seen]]
+    if len(line) > 1:
+        pen.line(line, fill=style.tracer_color_rgba, width=style.tracer_width_px)
+    if seen[-1]:
+        projected = float(camera.matrix[1, 1]) * radius_m / float(depth[-1])
+        r = max(float(style.min_ball_radius_px), projected)
+        u, v = line[-1]
+        pen.ellipse([u - r, v - r, u + r, v + r], fill=(*style.ball_color_rgb, 255))
+    return np.asarray(image, dtype=np.uint8)
 
 
 @dataclass(frozen=True)
@@ -171,6 +216,63 @@ class FlightPlayback:
         phase = LANDED if since >= self.duration_s else IN_FLIGHT
         return (f"Ball flight ({self.status}): {phase}", *self.lines)
 
+    def held(self, shown: SwingInput, feed: Any, step_s: float) -> tuple[Any, Any]:
+        """``shown`` with its last pose repeated until the ball has landed.
+
+        Frames are added every ``step_s`` of swing time up to landing plus
+        ``landing_hold_s``, at most ``max_hold_s``; ``feed`` then repeats its
+        last frame. Unchanged without a flight. Raises ``ValueError`` for a
+        step that is not positive.
+        """
+        if not (math.isfinite(step_s) and step_s > 0.0):
+            raise ValueError(f"step_s must be positive, got {step_s}")
+        times = shown.sample_times_s
+        if self.path_m is None or times is None:
+            return shown, feed
+        style = self.settings
+        landed = self.impact_time_s + self.duration_s + style.landing_hold_s
+        end = min(landed, times[-1] + style.max_hold_s)
+        extra = math.ceil((end - times[-1]) / step_s - 1e-9)
+        if extra <= 0:
+            return shown, feed
+        last = shown.n_states - 1
+        more = tuple(times[-1] + step_s * (i + 1) for i in range(extra))
+        q = np.concatenate([shown.q, np.repeat(shown.q[-1:], extra, axis=0)])
+        v = shown.v
+        if v is not None:  # the held pose is at rest
+            v = np.concatenate([v, np.zeros((extra, v.shape[1]))])
+        held = replace(shown, q=q, v=v, sample_times_s=(*times, *more))
+        if feed is not None:
+            source = feed.frame_at
+            feed = replace(feed, frame_at=lambda i: source(min(int(i), last)))
+        return held, feed
+
+    def draw(
+        self,
+        tiles: Mapping[str, Image8],
+        time_s: float,
+        lookat_m: Sequence[float],
+        distance_m: float | None,
+    ) -> dict[str, Image8]:
+        """``tiles`` (per view) with the ball and tracer at ``time_s``.
+
+        A view that follows a moving target is left as it is (its camera is
+        not the fixed one projected here).
+        """
+        points = self.flown(time_s)
+        out = dict(tiles)
+        if points is None:
+            return out
+        fov = math.radians(self.settings.fov_y_deg)
+        for view, tile in tiles.items():
+            preset = get_view_preset(view)
+            if preset.tracks is not None:
+                continue
+            size = (int(tile.shape[1]), int(tile.shape[0]))
+            camera = pinhole_for_view(preset, lookat_m, distance_m, fov, size)
+            out[view] = draw_trace(tile, camera, points, self.radius_m, self.settings)
+        return out
+
 
 def playback_from_flight(
     flight: FlightSummary,
@@ -222,3 +324,27 @@ def playback_from_series(
     state = impact_card.contact_index(series, impact_time_s) - 1
     flight = flight_for_impact(series, state, frame)
     return playback_from_flight(flight, frame, impact_time_s, ball, settings)
+
+
+def flight_for_export(
+    swing: SwingInput, settings: ExportSettings
+) -> FlightPlayback | None:
+    """The export's ball flight, or ``None`` when the option is off.
+
+    Without a known impact time or a placed ball, or when the models fail, the
+    playback has no path and its status states the reason.
+    """
+    config: Any = settings.ball_flight
+    if config is None:
+        return None
+    impact = settings.impact_time_s
+    if impact is None:
+        if not swing.has_impact_provenance:
+            return FlightPlayback(config, NO_IMPACT)
+        impact = swing.impact_time_s
+    if swing.ball is None:
+        return FlightPlayback(config, "no ball placed")
+    try:
+        return playback_from_series(club_series(swing), impact, swing.ball, config)
+    except impact_card._EXPECTED_ERRORS as exc:
+        return FlightPlayback(config, f"unavailable: {exc}")

@@ -4,23 +4,36 @@ from __future__ import annotations
 
 from dataclasses import replace
 import json
+import math
 from pathlib import Path
 
 import numpy as np
 import pytest
 
+from src.shared.python.golf_view_presets import (
+    VIEW_ORDER,
+    get_view_preset,
+    mujoco_camera_params,
+)
 from src.shared.python.impact_parameters import ClubheadSeries
 from src.shared.python.impact_parameters.flight_report import FlightSummary
 from src.shared.python.impact_parameters.target_frame import TargetFrame
-from src.tools.native_viewer_export import flight_tracer as tracer
+from src.shared.python.motion_matching.same_input import InputBundle
+from src.tools.native_viewer_export import cli, flight_tracer as tracer
 from src.tools.native_viewer_export.ball import BallPlacement
+from src.tools.native_viewer_export.core import (
+    ExportSettings,
+    SwingInput,
+    export_swing,
+)
+from src.tools.native_viewer_export.overlay2d import pinhole_for_view
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
 DEFAULTS = tracer.load_tracer_settings()
 BALL = BallPlacement((1.0, -0.2, 0.03), 0.021335, "test")
 FRAME = TargetFrame(target_dir=(0.0, -1.0, 0.0))  # target -Y, left of it +X
-IMPACT_S = 1.0
+IMPACT_S, LOOKAT = 1.0, (1.0, 0.0, 0.9)
 REASON = "impact spin exceeds the driver validity envelope (6464 rpm); more text"
 
 
@@ -46,6 +59,10 @@ def _flight(valid: bool = True) -> FlightSummary:
 
 def _playback(settings: tracer.TracerSettings = DEFAULTS, valid: bool = True):
     return tracer.playback_from_flight(_flight(valid), FRAME, IMPACT_S, BALL, settings)
+
+
+def _tile() -> np.ndarray:
+    return np.full((360, 640, 3), 40, np.uint8)
 
 
 def test_settings_file_is_validated(tmp_path: Path) -> None:
@@ -155,3 +172,200 @@ def test_bad_input_is_rejected() -> None:
         replace(flight, times_s=np.arange(3.0))
     with pytest.raises(ValueError, match="start at 0"):
         replace(flight, times_s=np.asarray(flight.times_s) + 1.0)
+
+
+@pytest.mark.parametrize(
+    ("view", "point"),
+    [("down_the_line", (1.4, -8.0, 2.5)), ("face_on", (1.5, -1.5, 1.6))],
+)
+def test_projection_matches_the_mujoco_camera(view: str, point: tuple) -> None:
+    mujoco = pytest.importorskip("mujoco")
+    position = " ".join(str(c) for c in point)
+    model = mujoco.MjModel.from_xml_string(
+        '<mujoco><worldbody><light pos="0 0 9"/><geom type="sphere" size="0.1" '
+        f'pos="{position}" rgba="1 0 0 1"/></worldbody></mujoco>'
+    )
+    data = mujoco.MjData(model)
+    mujoco.mj_forward(model, data)
+    camera = mujoco.MjvCamera()
+    camera.type = mujoco.mjtCamera.mjCAMERA_FREE
+    mujoco_camera_params(view, LOOKAT, None).apply_to(camera)
+    renderer = mujoco.Renderer(model, 240, 320)
+    try:
+        renderer.update_scene(data, camera=camera)
+        image = renderer.render().copy()
+    finally:
+        renderer.close()
+    rows, cols = np.nonzero(image[:, :, 0] > 10)  # red sphere on black
+    assert rows.size > 4  # the sphere is in the picture
+    fov = math.radians(DEFAULTS.fov_y_deg)
+    pinhole = pinhole_for_view(view, LOOKAT, None, fov, (320, 240))
+    pixels, depth = tracer.project(pinhole, np.array([point]), DEFAULTS.near_clip_m)
+    assert pixels[0] == pytest.approx((cols.mean() + 0.5, rows.mean() + 0.5), abs=1.0)
+    assert depth[0] > 0.0
+
+
+def test_draw_adds_the_tracer_and_ball_to_fixed_views_only() -> None:
+    flight = _playback()
+    tiles = {"down_the_line": _tile(), "hands_closeup": _tile()}
+    before = flight.draw(tiles, IMPACT_S - 0.1, LOOKAT, None)
+    assert all((before[name] == 40).all() for name in tiles)
+    out = flight.draw(tiles, IMPACT_S + 2.0, LOOKAT, None)
+    assert (tiles["down_the_line"] == 40).all()  # the input tile is not drawn on
+    assert (out["hands_closeup"] == 40).all()  # tracking view: left alone
+    drawn = out["down_the_line"]
+    red, white = DEFAULTS.tracer_color_rgba[:3], DEFAULTS.ball_color_rgb
+    assert (drawn == red).all(axis=2).sum() > 30
+    fov = math.radians(DEFAULTS.fov_y_deg)
+    pinhole = pinhole_for_view("down_the_line", LOOKAT, None, fov, (640, 360))
+    points = flight.flown(IMPACT_S + 2.0)
+    assert points is not None
+    pixels, _ = tracer.project(pinhole, points, DEFAULTS.near_clip_m)
+    u, v = (int(round(c)) for c in pixels[-1])
+    assert tuple(drawn[v, u]) == white  # the ball sits on the end of the trace
+    tee_u, tee_v = (int(round(c)) for c in pixels[0])
+    assert tuple(drawn[tee_v, tee_u]) == red  # the trace starts at the tee
+    behind = np.array([[1.0, 50.0, 1.0], [1.0, 60.0, 1.0]])  # behind the camera
+    clean = tracer.draw_trace(_tile(), pinhole, behind, 0.02, DEFAULTS)
+    assert (clean == 40).all()
+
+
+def test_flight_view_keeps_the_whole_flight_in_the_picture() -> None:
+    wide, plain = (
+        get_view_preset("down_the_line_flight"),
+        get_view_preset("down_the_line"),
+    )
+    assert wide.azimuth_deg == plain.azimuth_deg and wide.tracks is None
+    assert wide.default_distance_m > plain.default_distance_m
+    assert "down_the_line_flight" not in VIEW_ORDER  # the 2x2 grid stays four views
+    points = _playback().flown(99.0)
+    assert points is not None
+    fov = math.radians(DEFAULTS.fov_y_deg)
+
+    def inside(view: str) -> np.ndarray:
+        pinhole = pinhole_for_view(view, LOOKAT, None, fov, (1280, 720))
+        pixels, _ = tracer.project(pinhole, points, DEFAULTS.near_clip_m)
+        return (pixels >= 0).all(axis=1) & (pixels < (1280, 720)).all(axis=1)
+
+    assert inside("down_the_line_flight").all()
+    assert not inside("down_the_line").all()  # the close view loses the apex
+
+
+# --- export loop ---------------------------------------------------------------
+
+
+class _Writer:
+    def __init__(self, sink: list[np.ndarray]) -> None:
+        self.append_data = sink.append
+
+    def close(self) -> None:
+        pass
+
+
+class _Backend:
+    engine = "fake"
+
+    def unavailable_reason(self) -> None:
+        return None
+
+    def render(self, swing, settings, indices, overlay):
+        for _k in indices:
+            yield {v: _tile() for v in settings.views}
+
+
+def _swing() -> SwingInput:
+    names, q = ("A", "B"), np.zeros((21, 2))
+    spec = json.dumps({"coordinate_order": list(names)}).encode()
+    zeros = np.zeros((20, 2))
+    bundle = InputBundle(spec, names, 0.01, q[0], q[0], zeros, q, q.copy(), "mujoco")
+    return SwingInput(bundle, q, "driver", "Driver", "mujoco")
+
+
+def _settings(**overrides: object) -> ExportSettings:
+    base = ExportSettings(views=("face_on",), multiview=False, width=640, height=360)
+    return replace(base, speeds=(1.0,), ball=False, **overrides)  # type: ignore[arg-type]
+
+
+def _frames(tmp_path: Path, **overrides: object) -> list[np.ndarray]:
+    sink: list[np.ndarray] = []
+    export_swing(
+        _Backend(),
+        _swing(),
+        _settings(**overrides),
+        tmp_path,
+        writer_factory=lambda path, fps: _Writer(sink),
+    )
+    return sink
+
+
+def _short_flight() -> tracer.FlightPlayback:
+    """Half a second of flight from an impact 0.1 s into the 0.2 s test swing."""
+    t = np.linspace(0.0, 0.5, 26)
+    local = np.column_stack([4.0 * t, 0.0 * t, 2.0 * t * (0.5 - t)])
+    flight = replace(_flight(), trajectory_m=local, times_s=t, flight_time_s=0.5)
+    return tracer.playback_from_flight(flight, FRAME, 0.1, BALL, DEFAULTS)
+
+
+def test_export_flies_the_ball_and_holds_the_clip_until_it_lands(
+    tmp_path: Path, monkeypatch
+) -> None:
+    plain = _frames(tmp_path, impact_time_s=0.1, hud=False)
+    monkeypatch.setattr(tracer, "flight_for_export", lambda *_: _short_flight())
+    frames = _frames(tmp_path, impact_time_s=0.1, hud=False, ball_flight=DEFAULTS)
+    fps = ExportSettings().fps
+    # swing ends at 0.2 s; landing 0.6 s plus the landing hold, in real time
+    extra = math.ceil((0.4 + DEFAULTS.landing_hold_s) * fps - 1e-9)
+    assert len(plain) == 0.2 * fps + 1 and len(frames) == len(plain) + extra
+    impact_frame = math.ceil(0.1 * fps - 1e-9)
+    assert all((f == 40).all() for f in frames[:impact_frame])  # ball on the tee
+    assert all((f != 40).any() for f in frames[impact_frame + 1 :])
+    landed = math.ceil(0.6 * fps) + 1
+    assert (frames[landed - 3] != frames[landed]).any()  # still moving, then at rest
+    assert all((f == frames[-1]).all() for f in frames[landed:])
+    with_hud = _frames(tmp_path, impact_time_s=0.1, ball_flight=DEFAULTS)
+    plain_hud = _frames(tmp_path, impact_time_s=0.1)
+    assert (with_hud[0] != plain_hud[0]).any()  # "Ball flight: on tee" before impact
+
+
+def test_export_is_unchanged_with_the_option_off(tmp_path: Path, monkeypatch) -> None:
+    def boom(*args: object) -> None:
+        raise AssertionError("no flight may be computed when the option is off")
+
+    assert ExportSettings().ball_flight is None
+    plain = _frames(tmp_path, impact_time_s=0.1)
+    monkeypatch.setattr(tracer, "flight_for_export", boom)
+    off = _frames(tmp_path, impact_time_s=0.1, ball_flight=None)
+    assert len(off) == len(plain)
+    assert all((a == b).all() for a, b in zip(off, plain, strict=True))
+
+
+def test_export_without_a_flight_says_why_and_adds_no_frames(tmp_path: Path) -> None:
+    unknown = tracer.flight_for_export(_swing(), _settings(ball_flight=DEFAULTS))
+    assert unknown is not None
+    assert unknown.hud_lines(0.1) == ("Ball flight: no impact detected",)
+    timed = _settings(ball_flight=DEFAULTS, impact_time_s=0.1)
+    no_ball = tracer.flight_for_export(_swing(), timed)
+    assert no_ball is not None and no_ball.hud_lines(0.1)[0].endswith("no ball placed")
+    failed = tracer.flight_for_export(replace(_swing(), ball=BALL), timed)
+    assert failed is not None  # the two-coordinate test specification has no club
+    assert failed.hud_lines(0.1)[0].startswith("Ball flight: unavailable")
+    frames = _frames(tmp_path, impact_time_s=0.1, ball_flight=DEFAULTS, hud=False)
+    assert len(frames) == 13 and all((f == 40).all() for f in frames)
+    with pytest.raises(ValueError, match="step_s"):
+        _short_flight().held(_swing(), None, 0.0)
+
+
+def test_cli_flags_turn_the_flight_on(tmp_path: Path) -> None:
+    base = ["--bundle", "b.npz", "--out", str(tmp_path), "--swing", "s"]
+    parser = cli.build_parser()
+    assert cli.build_settings(parser.parse_args(base)).ball_flight is None
+    flags = [*base, "--ball-flight", "--no-grid", "--views", "down_the_line_flight"]
+    on = cli.build_settings(parser.parse_args(flags))
+    assert on.ball_flight == DEFAULTS and on.views == ("down_the_line_flight",)
+    custom = tmp_path / "tracer.json"
+    raw = json.loads(tracer.SETTINGS_PATH.read_text(encoding="utf-8"))
+    custom.write_text(json.dumps({**raw, "tracer_width_px": 5}), encoding="utf-8")
+    picked = cli.build_settings(
+        parser.parse_args([*base, "--ball-flight-settings", str(custom)])
+    )
+    assert picked.ball_flight == replace(DEFAULTS, tracer_width_px=5)
