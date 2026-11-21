@@ -130,7 +130,7 @@ def draw_trace(
     Returns a new array; points behind the camera are left out.
     """
     pixels, depth = project(camera, points_m, style.near_clip_m)
-    seen = np.isfinite(pixels).all(axis=1)
+    seen: np.ndarray = np.asarray(np.isfinite(pixels).all(axis=1), dtype=bool)
     image = Image.fromarray(tile)
     pen = ImageDraw.Draw(image, "RGBA")
     line = [(float(u), float(v)) for u, v in pixels[seen]]
