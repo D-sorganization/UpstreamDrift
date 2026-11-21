@@ -21,6 +21,7 @@ from src.shared.python.body_part_viz.force_colors import (
 from src.shared.python.body_part_viz.skin_load_settings import (
     load_skin_load_settings,
 )
+from src.shared.python.force_overlay.palette import ELLIPSOID_COLOR_MODES
 from src.shared.python.golf_view_presets import VIEW_ORDER
 from src.shared.python.model_appearance.appearance_selection import (
     AppearanceOverrides,
@@ -99,7 +100,9 @@ def _add_ellipsoid_arguments(p: argparse.ArgumentParser) -> None:
         "--mobility-points",
         default="hands",
         metavar="SELECTOR",
-        help="points for mobility overlays (default: hands; HCM-5, #14006)",
+        help="points for mobility overlays: comma-separated groups (hands, wrists, "
+        "elbows, shoulders, pelvis, feet, club) or point names such as clubhead "
+        "(default: hands; HCM-5, #14006, #15150)",
     )
     p.add_argument(
         "--max-mobility-points",
@@ -114,6 +117,13 @@ def _add_ellipsoid_arguments(p: argparse.ArgumentParser) -> None:
         default=None,
         metavar="MAX_COND",
         help="condition threshold to suppress ill-conditioned ellipsoids (HCM-5, #14006)",
+    )
+    p.add_argument(
+        "--ellipsoid-color-by",
+        choices=ELLIPSOID_COLOR_MODES,
+        default=ELLIPSOID_COLOR_MODES[0],
+        help="what an ellipsoid colour encodes: its point (default) or its kind, "
+        "so mobility and effective-mass differ at one point (#15150)",
     )
 
 
@@ -490,6 +500,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         mobility_points=mobility_points,
         max_mobility_points=max_mobility_points,
         mobility_condition_cutoff=mobility_condition_cutoff,
+        ellipsoid_color_by=getattr(args, "ellipsoid_color_by", "point"),
         multiview=not args.no_grid,
         grip=args.grip,
         hud=not args.no_hud,
@@ -541,6 +552,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     mobility_points=settings.mobility_points,
                     max_mobility_points=settings.max_mobility_points,
                     mobility_condition_cutoff=settings.mobility_condition_cutoff,
+                    ellipsoid_color_by=settings.ellipsoid_color_by,
                     axial_impact_blackout=args.axial_impact_blackout,
                 ),
             ),

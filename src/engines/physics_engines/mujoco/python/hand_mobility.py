@@ -441,6 +441,32 @@ class HandMobilitySource(MujocoOverlaySource):
             )
         return out
 
+    def _point_world(
+        self, point: Any, coordinates: Mapping[str, float]
+    ) -> tuple[np.ndarray, int]:
+        """World position and body id of a declarative point (state already set).
+
+        A hand point is that hand's grip point on the club. Any other point is
+        its anchor in the specification's frame of its body, mapped into the
+        MuJoCo body frame by ``body_frames`` (an MJCF body sits at its joint
+        follower frame, #15150). Raises ``ValueError`` for an unknown body.
+        """
+        if point.group == "hands":
+            role = "lead" if "lead" in point.name else "trail"
+            return self.grip_point_world(role, coordinates), self._club_body
+        mj = self._mj
+        body_id = mj.mj_name2id(self.model, mj.mjtObj.mjOBJ_BODY, point.body)
+        if body_id < 0:
+            raise ValueError(
+                f"mobility point {point.name!r} names unknown body {point.body!r}"
+            )
+        anchor = np.asarray(point.anchor_local, dtype=float)
+        to_body = self.body_frames.get(point.body)
+        if to_body is not None:
+            anchor = to_body[:3, :3] @ anchor + to_body[:3, 3]
+        rot = np.asarray(self.data.xmat[body_id], dtype=float).reshape(3, 3)
+        return self.data.xpos[body_id] + rot @ anchor, body_id
+
     def point_mobility(
         self,
         point: Any,
@@ -462,14 +488,7 @@ class HandMobilitySource(MujocoOverlaySource):
 
         limits, coords = torque_limits or self._torque_limits, self._set_state(q, v)
         mj, model, data = self._mj, self.model, self.data
-        role = "lead" if "lead" in point.name else "trail"
-        if point.group == "hands":
-            pt_world, body_id = self.grip_point_world(role, coords), self._club_body
-        else:
-            bid = mj.mj_name2id(model, mj.mjtObj.mjOBJ_BODY, point.body)
-            body_id = bid if bid >= 0 else self._club_body
-            rot, pos = data.xmat[body_id].reshape(3, 3), data.xpos[body_id]
-            pt_world = pos + rot @ np.asarray(point.anchor_local, dtype=float)
+        pt_world, body_id = self._point_world(point, coords)
 
         jacp, mass, closure = self._task_matrices(
             pt_world, mode == "constrained", body_id=body_id

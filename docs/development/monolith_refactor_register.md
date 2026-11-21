@@ -59,11 +59,11 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1136 | `src/engines/feedback_native_execution.py` |
 | 1134 | `src/shared/python/shadow_tracker/segmentation.py` |
 | 1134 | `src/tools/model_explorer/model_library.py` |
+| 1132 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py` |
 | 1129 | `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py` |
 | 1128 | `src/tools/starting_pose_matcher/gui_main_widget.py` |
 | 1127 | `src/shared/python/swing_comparison/metrics.py` |
 | 1125 | `src/tools/bunker_shot_gui/model.py` |
-| 1123 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py` |
 | 1118 | `src/motion_capture/rig/__main__.py` |
 | 1115 | `src/bunkershot3d/ball/qualification.py` |
 | 1113 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/PostProcessingModule.m` |
@@ -76,11 +76,12 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1098 | `src/tools/shot_pattern_analysis/matched_supplement_pipeline.py` |
 | 1096 | `src/learning/retargeting/retargeter.py` |
 | 1089 | `src/shared/python/motion_pipeline/contracts.py` |
+| 1085 | `src/tools/native_viewer_export/core.py` |
 | 1078 | `src/engines/physics_engines/drake/python/full_body_model.py` |
 | 1076 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1073 | `src/shared/python/sidekick/calculators/thermo/steam_engine.py` |
 | 1072 | `src/shared/python/grip_contact/binding.py` |
-| 1069 | `src/tools/native_viewer_export/core.py` |
+| 1069 | `src/shared/python/force_overlay/glyphs.py` |
 | 1068 | `src/shared/python/physics/flight_models.py` |
 | 1066 | `src/tools/bunker_shot_gui/crosstier.py` |
 | 1065 | `src/shared/python/pendulum_simulator/gui/toolstrip_widget.py` |
@@ -91,7 +92,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1053 | `src/shared/python/motion_matching/pinocchio_g2_g3.py` |
 | 1053 | `src/tools/tour_matching_viewer/core.py` |
 | 1050 | `src/engines/physics_engines/opensim/python/spine/inverse_dynamics.py` |
-| 1047 | `src/shared/python/force_overlay/glyphs.py` |
 | 1042 | `src/shared/python/grip_contact/matlab_kernel.py` |
 | 1040 | `src/bunkershot3d/solvers/mpm/order_of_accuracy.py` |
 | 1040 | `src/tools/tour_matching_viewer/gui.py` |
