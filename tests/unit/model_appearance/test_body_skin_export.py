@@ -211,7 +211,11 @@ def test_the_head_base_is_held_round_the_neck_axis() -> None:
     wide = np.column_stack([3.0 * front * np.cos(ring), 3.0 * side * np.sin(ring)])
     low = np.column_stack([wide, np.full(16, 0.5 * height)])
     inner = np.column_stack([0.1 * wide, np.full(16, -0.01)])
-    high = np.column_stack([wide, np.full(16, height)])
+    jaw, slope = SETTINGS.head_base_jaw_height_m, SETTINGS.head_base_jaw_slope
+    flare = SETTINGS.head_base_flare_m
+    assert jaw > height and flare > 0.0 and slope > 0.0
+    high = np.column_stack([wide, jaw - slope * wide[:, 0]])  # on the jaw line
+    high[:, 2] = np.maximum(high[:, 2], height)
     held = export.narrow_head_base(np.vstack([low, inner, high]), SETTINGS)
     depth = np.where(wide[:, 0] > 0.0, front, back)  # forward is +x
     on_limit = np.hypot(held[:16, 0] / depth, held[:16, 1] / side)
@@ -226,6 +230,16 @@ def test_the_head_base_is_held_round_the_neck_axis() -> None:
     assert np.allclose(held[16:32, 2], inner[:, 2] - drop)
     assert np.array_equal(held[16:32, :2], inner[:, :2])
     assert np.array_equal(held[32:], high)
+    # under the jaw line the stub is held too, whole from flare_m below it
+    stub = np.array([[0.0, 2.0 * side, jaw - f * flare] for f in (1.0, 0.5, 0.0)])
+    assert stub[:, 2].min() >= height
+    reach = np.abs(export.narrow_head_base(stub, SETTINGS)[:, 1])
+    assert np.allclose(reach[[0, -1]], [side, 2.0 * side])
+    assert np.all(np.diff(reach) > 0.0)
+    plain = dataclasses.replace(
+        SETTINGS, head_base_jaw_height_m=0.0, head_base_flare_m=0.0
+    )
+    assert np.array_equal(export.narrow_head_base(stub, plain), stub)
     flat = dataclasses.replace(SETTINGS, head_base_drop_m=0.0)
     assert np.array_equal(export.narrow_head_base(inner, flat), inner)
     off = dataclasses.replace(SETTINGS, head_base_height_m=0.0)
@@ -236,5 +250,8 @@ def test_the_head_base_is_held_round_the_neck_axis() -> None:
     for name, bad in zip(names, (-0.01, 0.0, 0.0, -0.03, -0.001), strict=True):
         with pytest.raises(ValueError, match="head_base"):
             dataclasses.replace(SETTINGS, **{f"head_base_{name}_m": bad})
+    for change in ({"head_base_flare_m": 0.0}, {"head_base_jaw_slope": -0.1}):
+        with pytest.raises(ValueError, match="head_base"):
+            dataclasses.replace(SETTINGS, **change)
     with pytest.raises(TypeError, match="head_base"):
         dataclasses.replace(SETTINGS, head_base_side_m="0.03")
