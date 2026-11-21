@@ -55,6 +55,8 @@ class ViewPreset:
     #: Moving target the camera follows (``"grip_midpoint"``), or ``None`` for a
     #: fixed look-at point (GCV-10, #11716).
     tracks: str | None = None
+    #: World offset added to the shared look-at point (``flight_view_high.json``)
+    lookat_offset_m: tuple[float, float, float] = (0.0, 0.0, 0.0)
 
     def __post_init__(self) -> None:
         if not self.name or not self.label:
@@ -65,6 +67,18 @@ class ViewPreset:
             raise ValueError("elevation_deg must lie strictly inside (-90, 90)")
         if not (math.isfinite(self.default_distance_m) and self.default_distance_m > 0):
             raise ValueError("default_distance_m must be positive and finite")
+        try:
+            offset = check_point3(self.lookat_offset_m, "lookat_offset_m")
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                f"lookat_offset_m must be a finite 3-vector: {exc}"
+            ) from exc
+        object.__setattr__(self, "lookat_offset_m", tuple(float(v) for v in offset))
+
+    def shifted_lookat(self, lookat_m: Sequence[float] | Array) -> Array:
+        """The look-at point of this preset for the shared ``lookat_m``."""
+        look = check_point3(lookat_m, "lookat_m")
+        return np.asarray(look + np.asarray(self.lookat_offset_m), dtype=np.float64)
 
     def view_direction(self) -> Array:
         """Unit vector from the camera toward the look-at point (world frame)."""
@@ -99,6 +113,11 @@ _FLIGHT_VIEW = json.loads(
     Path(__file__).with_name("flight_view.json").read_text(encoding="utf-8")
 )
 
+#: raised, pulled-back down-the-line view that shows the whole flight (#15150)
+_FLIGHT_HIGH = json.loads(
+    Path(__file__).with_name("flight_view_high.json").read_text(encoding="utf-8")
+)
+
 VIEW_ORDER: tuple[str, ...] = ("face_on", "down_the_line", "overhead", "oblique")
 
 VIEW_PRESETS = MappingProxyType(
@@ -122,6 +141,14 @@ VIEW_PRESETS = MappingProxyType(
             _FLIGHT_VIEW["azimuth_deg"],
             _FLIGHT_VIEW["elevation_deg"],
             _FLIGHT_VIEW["default_distance_m"],
+        ),
+        "down_the_line_flight_high": ViewPreset(
+            "down_the_line_flight_high",
+            "Down-the-line (raised, whole ball flight)",
+            _FLIGHT_HIGH["azimuth_deg"],
+            _FLIGHT_HIGH["elevation_deg"],
+            _FLIGHT_HIGH["default_distance_m"],
+            lookat_offset_m=tuple(_FLIGHT_HIGH["lookat_offset_m"]),
         ),
         "hands_closeup": ViewPreset(
             "hands_closeup",
@@ -160,7 +187,7 @@ def tracked_lookats(
     Raises:
         ValueError: if ``static_lookat_m`` is not a finite 3-vector.
     """
-    checked = check_point3(static_lookat_m, "static_lookat_m")
+    checked = preset.shifted_lookat(static_lookat_m)
     static = (float(checked[0]), float(checked[1]), float(checked[2]))
     out: list[tuple[float, float, float]] = []
     held = static

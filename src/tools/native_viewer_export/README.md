@@ -284,7 +284,12 @@ python3 -m src.tools.native_viewer_export --bundle driver.npz --swing driver \
   view preset camera (MuJoCo's 45 degree lens; views that follow the grip are
   left alone). `--views down_the_line_flight --no-grid` is the wide
   down-the-line view (`golf_view_presets/flight_view.json`, 4.6 m from the
-  golfer) that keeps the flight in the picture. The MuJoCo ground patch is
+  golfer) that keeps the flight in the picture. `--views
+  down_the_line_flight_high` is a raised, pulled-back variant
+  (`golf_view_presets/flight_view_high.json`: camera 3 m up and 9.5 m behind
+  the golfer, pitched down 11 degrees at a look-at point on the ground down the
+  target line) that gives the ground track real screen height; every number is
+  in the JSON. The MuJoCo ground patch is
   `ground_half_extent_m` wide each way (`backends/scene_extent_settings.json`),
   so the ball lands on visible turf.
   The MuJoCo worker also renders scene depth from the impact on, so the golfer

@@ -32,7 +32,7 @@ def _resolve(
     distance_m: float | None,
 ) -> tuple[ViewPreset, Array, float]:
     p = get_view_preset(preset) if isinstance(preset, str) else preset
-    look = check_point3(lookat_m, "lookat_m")
+    look = p.shifted_lookat(lookat_m)
     dist = p.default_distance_m if distance_m is None else float(distance_m)
     p.camera_position(look, dist)  # validates the distance
     return p, look, dist

@@ -55,7 +55,9 @@ def pinhole_for_view(
         camera_id=f"preset_{preset.name}",
         matrix=matrix,
         rotation_world_from_camera=rotation,
-        translation_world_from_camera_m=preset.camera_position(lookat_m, dist),
+        translation_world_from_camera_m=preset.camera_position(
+            preset.shifted_lookat(lookat_m), dist
+        ),
         image_size_px=(width, height),
     )
 

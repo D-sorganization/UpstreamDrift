@@ -1,0 +1,12 @@
+{
+  "azimuth_deg": -90.0,
+  "elevation_deg": -11.0,
+  "default_distance_m": 15.72,
+  "lookat_offset_m": [0.0, -5.93, -0.9],
+  "sources": {
+    "azimuth_deg": "Viewing direction heading: -90 looks down the target line (world -Y) from behind the golfer, as down_the_line_flight does.",
+    "elevation_deg": "Camera pitch. -11 puts the horizon 191 px below the top of a 1280x720 frame, so the apex of a 207 m, 18 m carry stays inside the frame and the landing sits below the horizon.",
+    "default_distance_m": "Distance from the shifted look-at point to the camera. 15.72 m along the -11 degree pitch puts the camera 3 m up and 9.5 m behind the golfer.",
+    "lookat_offset_m": "World offset added to the shared look-at point (the golfer, 1.0 0.0 0.9). It aims the camera at the ground about 5.9 m down the target line, which keeps the golfer 157 px tall with the feet at row 459, above the HUD rows, and puts the whole flight above it. The 45 degree lens of the viewer is fixed by the export, so field of view is not a setting here: with it, no camera keeps the golfer 150 px tall above the HUD rows and puts the landing more than about 13 px below the horizon."
+  }
+}
