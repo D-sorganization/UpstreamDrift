@@ -103,6 +103,8 @@ def test_limits_json_documents_ball_impact_exclusion_and_regenerates_limit():
 def test_material_geom_uses_scene_colour_base_for_scalar_shading():
     import mujoco
 
+    from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
+
     xml = """
     <mujoco>
       <asset>
@@ -117,52 +119,76 @@ def test_material_geom_uses_scene_colour_base_for_scalar_shading():
     """
     model = mujoco.MjModel.from_xml_string(xml)
     data = mujoco.MjData(model)
-    scene = mujoco.MjvScene(model, maxgeom=32)
     mujoco.mj_forward(model, data)
-    mujoco.mjv_updateScene(
-        model,
-        data,
-        mujoco.MjvOption(),
-        None,
-        mujoco.MjvCamera(),
-        mujoco.mjtCatBit.mjCAT_ALL,
-        scene,
-    )
+
+    def _fresh_scene() -> mujoco.MjvScene:
+        scene = mujoco.MjvScene(model, maxgeom=32)
+        mujoco.mjv_updateScene(
+            model,
+            data,
+            mujoco.MjvOption(),
+            None,
+            mujoco.MjvCamera(),
+            mujoco.mjtCatBit.mjCAT_ALL,
+            scene,
+        )
+        return scene
+
+    scene = _fresh_scene()
     scene_base = tuple(float(v) for v in scene.geoms[0].rgba[:3])
     model_rgba = tuple(float(v) for v in model.geom_rgba[0][:3])
     assert scene_base != pytest.approx(model_rgba)
 
+    sample = 400.0
     replace_scale = default_net_power_color_scale(1000.0)
-    shaded = replace(replace_scale, enabled=True, blend_mode="replace")
+    shaded_replace = replace(replace_scale, enabled=True, blend_mode="replace")
     tinted = replace(replace_scale, enabled=True, opacity=0.5, blend_mode="tint")
+    expected_replace = shaded_replace.shade_rgb(sample, scene_base)
+    expected_tint = tinted.shade_rgb(sample, scene_base)
+    wrong_replace = shaded_replace.shade_rgb(sample, model_rgba)
+    assert expected_replace is not None and expected_tint is not None
+    assert wrong_replace is not None
+    assert expected_replace != pytest.approx(wrong_replace)
 
-    scene_replace = mujoco.MjvScene(model, maxgeom=32)
-    mujoco.mjv_updateScene(
-        model,
-        data,
-        mujoco.MjvOption(),
-        None,
-        mujoco.MjvCamera(),
-        mujoco.mjtCatBit.mjCAT_ALL,
-        scene_replace,
+    scene_replace = _fresh_scene()
+    apply_mujoco_scalar_scene_colors(
+        model, scene_replace, {"rod": sample}, shaded_replace
     )
-    apply_mujoco_scalar_scene_colors(model, scene_replace, {"rod": 400.0}, shaded)
     replace_rgb = tuple(float(v) for v in scene_replace.geoms[0].rgba[:3])
-    assert replace_rgb != pytest.approx(scene_base)
+    assert replace_rgb == pytest.approx(expected_replace)
+    assert replace_rgb != pytest.approx(wrong_replace)
 
-    scene_tint = mujoco.MjvScene(model, maxgeom=32)
-    mujoco.mjv_updateScene(
-        model,
-        data,
-        mujoco.MjvOption(),
-        None,
-        mujoco.MjvCamera(),
-        mujoco.mjtCatBit.mjCAT_ALL,
-        scene_tint,
-    )
-    apply_mujoco_scalar_scene_colors(model, scene_tint, {"rod": 400.0}, tinted)
+    scene_tint = _fresh_scene()
+    apply_mujoco_scalar_scene_colors(model, scene_tint, {"rod": sample}, tinted)
     tint_rgb = tuple(float(v) for v in scene_tint.geoms[0].rgba[:3])
-    assert tint_rgb != pytest.approx(replace_rgb)
+    assert tint_rgb == pytest.approx(expected_tint)
+    wrong_tint = tinted.shade_rgb(sample, model_rgba)
+    assert wrong_tint is not None
+    assert tint_rgb != pytest.approx(wrong_tint)
+
+    force_scale = ForceColorScale(
+        enabled=True,
+        tension_limit_n=500.0,
+        compression_limit_n=500.0,
+        opacity=0.75,
+        blend_mode="replace",
+    )
+    force_sample = 200.0
+    expected_force = force_scale.shade_rgb(force_sample, scene_base)
+    wrong_force = force_scale.shade_rgb(force_sample, model_rgba)
+    assert expected_force is not None and wrong_force is not None
+    assert expected_force != pytest.approx(wrong_force)
+
+    scene_force = _fresh_scene()
+    apply_mujoco_scene_colors(
+        model,
+        scene_force,
+        AxialLoadFrame(0.0, {"rod": force_sample}, "t"),
+        force_scale,
+    )
+    force_rgb = tuple(float(v) for v in scene_force.geoms[0].rgba[:3])
+    assert force_rgb == pytest.approx(expected_force)
+    assert force_rgb != pytest.approx(wrong_force)
 
 
 def test_interface_frame_builds_presentation_with_gravity_and_clipping():
@@ -348,7 +374,7 @@ def test_gravity_power_nonzero_under_gravity():
     qvel = np.array([-0.3])
     qacc = np.zeros(1)
     frame = MujocoInterfacePowerAnalyzer(model).frame_at(qpos, qvel, qacc)
-    assert abs(frame.segments[0].gravity_power_w) > 1.0
+    assert frame.segments[0].gravity_power_w == pytest.approx(6.0, abs=0.05)
     assert frame.segments[0].external_power_w == pytest.approx(0.0)
 
 

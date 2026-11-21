@@ -184,13 +184,13 @@ class SimRenderingMixin:
         if self.meshcat_adapter is None or self.data is None:
             return
         self.meshcat_adapter.update(self.data)
-        ke_scale = getattr(self, "stored_ke_color_scale", None)
-        if ke_scale is not None:
-            self.meshcat_adapter.update_stored_ke_colors(ke_values, ke_scale)
         if net_power_scale is not None:
             self.meshcat_adapter.update_net_power_colors(
                 net_power_frame, net_power_scale
             )
+        ke_scale = getattr(self, "stored_ke_color_scale", None)
+        if ke_scale is not None:
+            self.meshcat_adapter.update_stored_ke_colors(ke_values, ke_scale)
         if scale is not None:
             self.meshcat_adapter.update_force_colors(axial_frame, scale)
         self.meshcat_adapter.draw_glyphs(glyphs)
