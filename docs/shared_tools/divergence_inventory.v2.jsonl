@@ -321,8 +321,10 @@
 {"path": "body_part_viz/force_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/force_display.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/meshcat_force_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/meshcat_scalar_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/mujoco_axial_loads.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/mujoco_force_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/mujoco_scalar_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/mujoco_segment_angular_momentum.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/mujoco_skin_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/overlay_options.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
@@ -331,8 +333,10 @@
 {"path": "body_part_viz/renderers/matplotlib_renderer.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/renderers/projective_renderer.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/renderers/pyqtgl_renderer.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/scalar_display.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/scalar_shading.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/segment_angular_momentum.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/segment_ke_settings.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/series_validation.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/shapes/__init__.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/shapes/_mesh_decimation.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
@@ -2544,6 +2548,7 @@
 {"path": "segment_kinetic_energy/disclaimer.py", "classification": "ud-only", "package": "segment_kinetic_energy", "spelling_only": false}
 {"path": "segment_kinetic_energy/render_globes.py", "classification": "ud-only", "package": "segment_kinetic_energy", "spelling_only": false}
 {"path": "segment_kinetic_energy/series.py", "classification": "ud-only", "package": "segment_kinetic_energy", "spelling_only": false}
+{"path": "segment_kinetic_energy/shading.py", "classification": "ud-only", "package": "segment_kinetic_energy", "spelling_only": false}
 {"path": "sg_optimizer/AGENTS.md", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/README.md", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/__init__.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}

@@ -10,9 +10,11 @@ import numpy as np
 
 from src.engines.physics_engines.mujoco.python.visual_layer import add_scene_marker
 from src.shared.python.segment_kinetic_energy.contracts import (
-    PEAK_HIGHLIGHT_FRACTION,
     SegmentKineticEnergyFrame,
     SegmentKineticEnergyPeak,
+)
+from src.shared.python.segment_kinetic_energy.shading import (
+    REFERENCE_SWING_PEAK_SEGMENT_KE_J,
 )
 from src.shared.python.segment_kinetic_energy.render_globes import (
     globe_rgba_for_ke,
@@ -56,34 +58,22 @@ def add_ke_globes_to_scene(
     max_radius_m: float = 0.22,
 ) -> GlobeDrawReceipt:
     peak_by_body = _peak_lookup(peaks)
-    ref_peak = max(peak_by_body.values(), default=0.0)
-    if ref_peak <= 0.0:
-        ref_peak = max((s.total_j for s in frame.segments), default=0.0)
+    ref_peak = max(
+        REFERENCE_SWING_PEAK_SEGMENT_KE_J,
+        max(peak_by_body.values(), default=0.0),
+    )
     globes = 0
-    highlights = 0
     for seg in frame.segments:
         if seg.total_j <= 0.0:
             continue
-        peak_j = peak_by_body.get(seg.body, seg.total_j)
-        at_peak = seg.total_j >= PEAK_HIGHLIGHT_FRACTION * peak_j and peak_j > 0.0
         radius = radius_for_ke(
             seg.total_j, reference_peak_j=ref_peak, max_radius_m=max_radius_m
         )
-        rgba = globe_rgba_for_ke(
-            seg.total_j, reference_peak_j=ref_peak, at_peak=at_peak
-        )
+        rgba = globe_rgba_for_ke(seg.total_j, reference_peak_j=ref_peak)
         add_scene_marker(scene, np.asarray(seg.com_m, dtype=float), radius, rgba)
         globes += 1
-        if at_peak:
-            add_scene_marker(
-                scene,
-                np.asarray(seg.com_m, dtype=float),
-                radius * 1.18,
-                (rgba[0], rgba[1], rgba[2], min(0.25, rgba[3])),
-            )
-            highlights += 1
     return GlobeDrawReceipt(
-        globes_drawn=globes, peak_highlights=highlights, axes_drawn=0, plates_drawn=0
+        globes_drawn=globes, peak_highlights=0, axes_drawn=0, plates_drawn=0
     )
 
 
