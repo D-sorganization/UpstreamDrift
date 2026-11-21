@@ -4,7 +4,9 @@ The clothes are the body surface itself, cut on smooth level sets (collar,
 sleeve end, waist, trouser end) and moved outward along the surface normal by
 a named ease, so they inherit the skin weights and follow every joint without
 a second rig. Each hem is folded back onto the skin, and the bare skin is kept
-``skin_margin_m`` under the cloth so no gap opens when the body bends. The
+``skin_margin_m`` under the cloth so no gap opens when the body bends; the
+shirt's hem lines are edges of the bare skin too (``hem_seam``), so a rim and
+the skin under it are the same vertices and cannot part at a pose. The
 collar is measured from the line where the skin crosses the neck joint's
 height, not from the mesh edges about it, and collar and sleeve hems are held
 close to the skin (``neck_hug_m``, ``sleeve_hug_m``). The forearm ends on a plane ``wrist_cut_m`` before the wrist joint: a clean ring
@@ -45,6 +47,7 @@ from src.shared.python.model_appearance.body_skin_mesh import (
     boundary_edges,
     clip_mesh,
     relax,
+    split_mesh,
     vertex_areas,
     vertex_normals,
 )
@@ -145,8 +148,11 @@ class DressSettings:
     leg_tube_m: tuple[float, float]
     leg_tube_rise: float
     neck_cap: NeckCapSettings
+    hem_seam: bool = True
 
     def __post_init__(self) -> None:
+        if not isinstance(self.hem_seam, bool):
+            raise ValueError("hem_seam must be true or false")
         if len(self.leg_tube_m) != 2 or min(self.leg_tube_m) < 0.0:
             raise ValueError("leg_tube_m must hold two radii, none negative")
         if not (self.leg_tube_rise > 0.0 and self.sleeve_cap_m > 0.0):
@@ -544,9 +550,12 @@ def dress_skin(
     shaped = _even_chest(fitted.vertices, skin.faces, cut, settings.chest)
     body = np.column_stack([shaped, weights, cut.stack()])
     width = len(fields(_Fields))
-    bare = settings.skin_margin_m - np.maximum(cut.shirt, cut.trousers)
-    bare = np.minimum(bare, cut.wrist)  # a clean ring instead of the stored ragged rim
-    part, faces = clip_mesh(body, skin.faces, bare)
+    hem = np.maximum(cut.shirt, cut.trousers)  # positive under a garment
+    bare = np.minimum(settings.skin_margin_m - hem, cut.wrist)  # a clean wrist ring
+    part, faces = np.column_stack([body, bare]), skin.faces
+    if settings.hem_seam:  # the shirt's hem lines as edges: its rims' own vertices
+        part, faces = split_mesh(part, faces, cut.shirt)
+    part, faces = clip_mesh(part[:, :-1], faces, part[:, -1])
     part, faces = clip_mesh(part, faces, part[:, -1])  # ankle: none under the hem
     bare_skin = Layer(part[:, :3], part[:, 3:-width], faces)
     layers = {"skin": close_neck(bare_skin, fitted.joints["neck"], settings.neck_cap)}
