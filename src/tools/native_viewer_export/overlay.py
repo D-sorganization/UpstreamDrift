@@ -18,6 +18,7 @@ from numpy.typing import NDArray
 
 from src.shared.python.force_overlay.bundle_provider import BundleOverlayProvider
 from src.shared.python.force_overlay.glyphs import EllipsoidGlyph
+from src.tools.native_viewer_export.ellipsoid_panel import KIND_FIELDS, PanelRow
 from src.tools.native_viewer_export.core import (
     BackendUnavailable,
     OverlayFeed,
@@ -225,10 +226,10 @@ def _semi_axes_series(
 
 def _ellipsoid_feed_factory(
     swing: SwingInput, engine: str, opts: OverlayOptions, active: Sequence[str]
-) -> Callable[[SwingInput], tuple[Any, Any]]:
+) -> Callable[[SwingInput], tuple[Any, Any, Any]]:
     """Feed builder for any re-sampling of ``swing``, on ``swing``'s scale."""
 
-    def ellipsoids_for(shown: SwingInput) -> tuple[Any, Any]:
+    def ellipsoids_for(shown: SwingInput) -> tuple[Any, Any, Any]:
         return _build_hand_ellipsoid_feed(
             shown,
             active,
@@ -257,9 +258,11 @@ def _build_hand_ellipsoid_feed(
     ellipsoid_color_by: str = "point",
     scale_from: SwingInput | None = None,
 ) -> tuple[
-    Callable[[int], tuple[EllipsoidGlyph, ...]], Callable[[int], tuple[str, ...]]
+    Callable[[int], tuple[EllipsoidGlyph, ...]],
+    Callable[[int], tuple[str, ...]],
+    Callable[[int], tuple[PanelRow, ...]],
 ]:
-    """Build ellipsoid glyph emitter and HUD capability formatter.
+    """Build ellipsoid glyph emitter, HUD capability formatter and panel rows.
 
     Index ``k`` of either is evaluated at the pose ``swing.q[k]``. The display
     scale of each kind comes from the states of ``scale_from`` (default
@@ -278,9 +281,7 @@ def _build_hand_ellipsoid_feed(
 
     spec_dict = json.loads(swing.bundle.spec_bytes)
     resolved_pts = resolve_intersection_points(
-        spec_dict,
-        selection.points,
-        max_points=selection.max_points,
+        spec_dict, selection.points, max_points=selection.max_points
     )
 
     _hm_cache: dict[tuple[bool, int], Any] = {}
@@ -341,7 +342,33 @@ def _build_hand_ellipsoid_feed(
     hud_fn = _build_hand_hud_lines_fn(
         _get_hm, resolved_pts, active_ellipsoids, scales, mobility_condition_cutoff
     )
-    return hand_ellipsoids_fn, hud_fn
+    return (
+        hand_ellipsoids_fn,
+        hud_fn,
+        _build_panel_rows_fn(_get_hm, resolved_pts, mobility_condition_cutoff),
+    )
+
+
+def _build_panel_rows_fn(
+    get_hm: Callable[[int], dict[str, Any]],
+    points: Sequence[Any],
+    condition_cutoff: float | None,
+) -> Callable[[int], tuple[PanelRow, ...]]:
+    """Side-panel rows per frame: largest radii and condition of each point."""
+
+    def rows_fn(index: int) -> tuple[PanelRow, ...]:
+        hm_map, rows = get_hm(index), []
+        for pt in points:
+            hm = _lookup_point_mobility(hm_map, pt)
+            if hm is None or (condition_cutoff and hm.condition > condition_cutoff):
+                continue
+            mobility, mass = (
+                max(_extract_physical_radii(hm, k)[1]) for k in KIND_FIELDS
+            )
+            rows.append(PanelRow(pt.name, mobility, mass, float(hm.condition)))
+        return tuple(rows)
+
+    return rows_fn
 
 
 def _resolve_active_ellipsoids(
@@ -460,10 +487,10 @@ def build_overlay_feed(
     active_ellipsoids = _resolve_active_ellipsoids(
         opts.hand_mobility, opts.interface_ellipsoids
     )
-    hand_ellipsoids_fn = hand_hud_lines_fn = ellipsoids_for = None
+    hand_ellipsoids_fn = hand_hud_lines_fn = ellipsoids_for = panel_rows_fn = None
     if active_ellipsoids:
         ellipsoids_for = _ellipsoid_feed_factory(swing, engine, opts, active_ellipsoids)
-        hand_ellipsoids_fn, hand_hud_lines_fn = ellipsoids_for(swing)
+        hand_ellipsoids_fn, hand_hud_lines_fn, panel_rows_fn = ellipsoids_for(swing)
 
     feed = OverlayFeed(
         provider.frame_at,
@@ -474,6 +501,7 @@ def build_overlay_feed(
         show_palm_thumb=effective_palm_thumb,
         hand_ellipsoids=hand_ellipsoids_fn,
         hand_hud_lines=hand_hud_lines_fn,
+        hand_panel_rows=panel_rows_fn,
         ellipsoids_for=ellipsoids_for,
     )
     return feed, lookat
