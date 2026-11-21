@@ -96,6 +96,14 @@ python3 -m src.tools.native_viewer_export \
   clip of that many swing seconds centred on impact.
 - `--stride` is deprecated (alias for one fixed index step; warns).
 - The HUD shows playback speed and milliseconds from impact.
+- A HUD line wider than the frame wraps onto further rows at its ` | `
+  separators (`compositor.wrap_hud_line`), so the per-point ellipsoid lines are
+  never cut at the frame edge.
+- Mobility and capability ellipsoids are evaluated at the pose of the frame they
+  are drawn on (`OverlayFeed.following`), not at a source state: a clip frame is
+  a time sample, so frame `k` is not source state `k`. Their display scale is
+  fixed once from the source states and shared by every clip. A feed whose
+  ellipsoids cannot be evaluated at the clip frames is refused (`ValueError`).
 
 Environment: `NATIVE_VIEWER_CHROMIUM` (Chromium executable; a full Playwright
 build renders much faster than the headless shell), and

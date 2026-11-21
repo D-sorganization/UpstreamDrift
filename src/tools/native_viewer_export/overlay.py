@@ -218,10 +218,17 @@ def _build_hand_ellipsoid_feed(
     engine: str = "mujoco",
     selection: MobilitySelection = MobilitySelection(),
     ellipsoid_color_by: str = "point",
+    scale_from: SwingInput | None = None,
 ) -> tuple[
     Callable[[int], tuple[EllipsoidGlyph, ...]], Callable[[int], tuple[str, ...]]
 ]:
-    """Build ellipsoid glyph emitter and HUD capability formatter."""
+    """Build ellipsoid glyph emitter and HUD capability formatter.
+
+    Index ``k`` of either is evaluated at the pose ``swing.q[k]``. The display
+    scale of each kind comes from the states of ``scale_from`` (default
+    ``swing``), so the clips re-sampled from one source share it (#15150).
+    """
+    scale_swing = swing if scale_from is None else scale_from
     pick_color = _ellipsoid_color_picker(ellipsoid_color_by)
     mobility_condition_cutoff = selection.condition_cutoff
     from src.shared.python.force_overlay.ellipsoid_display import (
@@ -239,27 +246,28 @@ def _build_hand_ellipsoid_feed(
         max_points=selection.max_points,
     )
 
-    _hm_cache: dict[int, Any] = {}
+    _hm_cache: dict[tuple[bool, int], Any] = {}
 
-    def _get_hm(idx: int) -> dict[str, Any]:
-        if idx not in _hm_cache:
-            if hasattr(swing, "segment_mobility_at"):
-                _hm_cache[idx] = swing.segment_mobility_at(
+    def _get_hm(idx: int, of: SwingInput = swing) -> dict[str, Any]:
+        key = (of is swing, idx)
+        if key not in _hm_cache:
+            if hasattr(of, "segment_mobility_at"):
+                _hm_cache[key] = of.segment_mobility_at(
                     idx, points=resolved_pts, mode=hand_mobility_mode, engine=engine
                 )
             else:
-                _hm_cache[idx] = swing.hand_mobility_at(
+                _hm_cache[key] = of.hand_mobility_at(
                     idx, mode=hand_mobility_mode, engine=engine
                 )
-        return _hm_cache[idx]
+        return _hm_cache[key]
 
     builders: dict[str, EllipsoidDisplayBuilder] = {}
     scales: dict[str, EllipsoidDisplayScale] = {}
-    stride = max(1, swing.n_states // 20)
+    stride = max(1, scale_swing.n_states // 20)
     for kind in active_ellipsoids:
         semi_axes_series: list[list[float]] = []
-        for idx in range(0, swing.n_states, stride):
-            hm_sample = _get_hm(idx)
+        for idx in range(0, scale_swing.n_states, stride):
+            hm_sample = _get_hm(idx, scale_swing)
             for pt in resolved_pts:
                 hm = _lookup_point_mobility(hm_sample, pt)
                 if hm is not None:
@@ -422,22 +430,26 @@ def build_overlay_feed(
     active_ellipsoids = _resolve_active_ellipsoids(
         opts.hand_mobility, opts.interface_ellipsoids
     )
-    hand_ellipsoids_fn = None
-    hand_hud_lines_fn = None
+    hand_ellipsoids_fn = hand_hud_lines_fn = ellipsoids_for = None
     if active_ellipsoids:
-        hand_ellipsoids_fn, hand_hud_lines_fn = _build_hand_ellipsoid_feed(
-            swing,
-            active_ellipsoids,
-            opts.hand_mobility_mode,
-            opts.ellipsoid_scale,
-            engine=engine,
-            selection=MobilitySelection(
-                opts.mobility_points,
-                opts.max_mobility_points,
-                opts.mobility_condition_cutoff,
-            ),
-            ellipsoid_color_by=opts.ellipsoid_color_by,
-        )
+
+        def ellipsoids_for(shown: SwingInput) -> tuple[Any, Any]:
+            return _build_hand_ellipsoid_feed(
+                shown,
+                active_ellipsoids,
+                opts.hand_mobility_mode,
+                opts.ellipsoid_scale,
+                engine=engine,
+                selection=MobilitySelection(
+                    opts.mobility_points,
+                    opts.max_mobility_points,
+                    opts.mobility_condition_cutoff,
+                ),
+                ellipsoid_color_by=opts.ellipsoid_color_by,
+                scale_from=swing,
+            )
+
+        hand_ellipsoids_fn, hand_hud_lines_fn = ellipsoids_for(swing)
 
     feed = OverlayFeed(
         provider.frame_at,
@@ -448,6 +460,7 @@ def build_overlay_feed(
         show_palm_thumb=effective_palm_thumb,
         hand_ellipsoids=hand_ellipsoids_fn,
         hand_hud_lines=hand_hud_lines_fn,
+        ellipsoids_for=ellipsoids_for,
     )
     return feed, lookat
 

@@ -57,6 +57,8 @@ def load_hud_layout(path: Path | None = None) -> HudLayout:
 
 
 HUD_LAYOUT = load_hud_layout()
+#: separator of the entries of one HUD line; long lines wrap at it
+HUD_SEPARATOR = " | "
 
 
 def _font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
@@ -174,6 +176,26 @@ def hud_line_boxes(
     """
     origins = _hud_origins(shape, len(lines), size)
     return [text_box(t, xy, size) for t, xy in zip(lines, origins, strict=True)]
+
+
+def wrap_hud_line(text: str, width_px: int, size: int) -> list[str]:
+    """``text`` as rows that fit a frame ``width_px`` wide, split at ``HUD_SEPARATOR``.
+
+    Rows are filled in order and joined by the separator they were split at, so
+    joining the rows gives ``text`` back. An entry wider than the frame cannot
+    be split and keeps a row of its own.
+    """
+    margin = HUD_LAYOUT.edge_margin_px
+    rows: list[str] = []
+    row = ""
+    for entry in text.split(HUD_SEPARATOR):
+        longer = entry if not row else row + HUD_SEPARATOR + entry
+        if row and text_box(longer, (margin, 0), size)[2] > width_px - margin:
+            rows.append(row)
+            row = entry
+        else:
+            row = longer
+    return [*rows, row]
 
 
 def draw_label(
@@ -444,12 +466,19 @@ def draw_text_panel(
 
 
 def draw_hud(img: Image8, hud: HudInfo, *, size: int = HUD_SIZE_PX) -> Image8:
-    """Draw the HUD lines along the bottom edge of ``img``."""
+    """Draw the HUD lines along the bottom edge of ``img``.
+
+    A line wider than the frame continues on the next row (:func:`wrap_hud_line`).
+    """
     _check_image(img)
-    lines = hud.lines()
+    width = int(img.shape[1])
+    rows = [
+        (row, i == 0)
+        for i, line in enumerate(hud.lines())
+        for row in wrap_hud_line(line, width, size)
+    ]
     out = img
-    for i, (line, xy) in enumerate(
-        zip(lines, _hud_origins(img.shape, len(lines), size), strict=True)
-    ):
-        out = draw_label(out, line, xy, size=size, fill=_WHITE if i == 0 else _YELLOW)
+    origins = _hud_origins(img.shape, len(rows), size)
+    for (row, head), xy in zip(rows, origins, strict=True):
+        out = draw_label(out, row, xy, size=size, fill=_WHITE if head else _YELLOW)
     return out
