@@ -26,6 +26,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.model_appearance.club_assembly import (
+    HEAD_PARTS,
     SHAFT_BUTT_RADIUS_FRACTION,
     SHAFT_TIP_RADIUS_FRACTION,
     ClubAssembly,
@@ -115,9 +116,9 @@ def chain_layout(spec: Mapping[str, Any]) -> ShaftChainLayout | None:
 
 def _shaft_span(club: ClubAssembly) -> tuple[float, float]:
     """Club-frame ``y`` of the drawn shaft: (grip end, hosel top)."""
-    return -(club.length_m - club.grip_length_m), -load_club_head(
-        club.head_alias
-    ).hosel_top_m
+    head = load_club_head(club.head_alias)
+    top = club.head_slide_m - head.hosel_top_m
+    return -(club.length_m - club.grip_length_m), top
 
 
 def shaft_piece_meshes(club: ClubAssembly, layout: ShaftChainLayout) -> dict[str, Mesh]:
@@ -137,6 +138,8 @@ def shaft_piece_meshes(club: ClubAssembly, layout: ShaftChainLayout) -> dict[str
 
     spans = [(layout.club_body, grip_y, layout.links[0].start_y_m)]
     spans += [(link.body, link.start_y_m, link.end_y_m) for link in layout.links]
+    tip_body, tip_start, tip_end = spans[-1]  # the tip link carries a slid head
+    spans[-1] = (tip_body, tip_start, max(tip_end, top_y))
     z = club.axis_offset_m
     out: dict[str, Mesh] = {}
     for body, low, high in spans:
@@ -190,11 +193,13 @@ def club_meshes_by_body(
     out[layout.club_body] += [
         (label, mesh, club_part_material(label, finish, doc))
         for label, mesh in parts.items()
-        if label not in ("shaft", "head")
+        if label != "shaft" and label not in HEAD_PARTS
     ]
     for i, link in enumerate(layout.links):
         out[link.body] = [(f"shaft_link{i}", pieces[link.body], shaft_material)]
-    out[layout.tip_link].append(
-        ("head", parts["head"], club_part_material("head", finish, doc))
-    )
+    out[layout.tip_link] += [
+        (label, parts[label], club_part_material(label, finish, doc))
+        for label in HEAD_PARTS
+        if label in parts
+    ]
     return out

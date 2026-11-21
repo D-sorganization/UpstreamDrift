@@ -18,6 +18,7 @@ from src.shared.python.spatial_algebra.segment_intersection import (
 )
 from src.tools.native_viewer_export import cli
 from src.tools.native_viewer_export.overlay import (
+    MobilitySelection,
     OverlayOptions,
     _build_hand_ellipsoid_feed,
 )
@@ -92,21 +93,20 @@ def test_overlay_feed_and_cli_options() -> None:
         q=np.zeros((10, 1)),
         segment_mobility_at=seg_mob,
     )
-    g_fn, h_fn = _build_hand_ellipsoid_feed(
+    g_fn, h_fn, _ = _build_hand_ellipsoid_feed(
         swing,  # type: ignore[arg-type]
         active_ellipsoids=("mobility",),
         hand_mobility_mode="constrained",
         ellipsoid_scale="auto",
-        mobility_points="wrists",
+        selection=MobilitySelection("wrists"),
     )
     assert len(g_fn(0)) == 2 and "Lead_wrist" in h_fn(0)[0]
-    g_cut, h_cut = _build_hand_ellipsoid_feed(
+    g_cut, h_cut, _ = _build_hand_ellipsoid_feed(
         swing,  # type: ignore[arg-type]
         active_ellipsoids=("mobility",),
         hand_mobility_mode="constrained",
         ellipsoid_scale="auto",
-        mobility_points="wrists",
-        mobility_condition_cutoff=10.0,
+        selection=MobilitySelection("wrists", condition_cutoff=10.0),
     )
     assert len(g_cut(0)) == 1 and "Trail_wrist" not in h_cut(0)[0]
 
@@ -129,3 +129,18 @@ def test_overlay_feed_and_cli_options() -> None:
     )
     assert opts.mobility_points == "elbows" and opts.max_mobility_points == 6
     assert opts.mobility_condition_cutoff == 200.0
+
+
+def test_feet_group_resolves_from_contact_spheres(anthro_spec: dict) -> None:
+    """The skinned golfer declares feet as contact spheres, not points (#15150)."""
+    feet = resolve_intersection_points(anthro_spec, selector="feet")
+    assert [p.name for p in feet] == ["lead_foot", "trail_foot"]
+    assert [p.body for p in feet] == ["calcn_l", "calcn_r"]
+    assert all(p.group == "feet" for p in feet)
+    assert feet[0].anchor_local == pytest.approx((0.1333333, -0.0066667, 0.0), abs=1e-6)
+
+
+def test_empty_group_fails_loudly(anthro_spec: dict) -> None:
+    bare = {k: v for k, v in anthro_spec.items() if k != "contact"}
+    with pytest.raises(ValueError, match=r"'feet'.*lead_foot.*trail_foot"):
+        resolve_intersection_points(bare, selector="feet")

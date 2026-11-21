@@ -415,6 +415,10 @@ forward-dynamics matching. Design reference:
   and legs, hip to ankle via `garment_coverage`); grey plain palette:
   `library.PLAIN_PALETTE` / `plain_rgba`. Reference:
   `docs/development/full_body_models/appearance_reference/shared_appearance_spec.tex`.
+- `club_face_marking` (#15150) — opt-in score lines and face colour for the drawn
+  head (`club_face_marking_settings.json`, default off). Reuses `club_head_mesh`
+  for the face normal and centre; adds `head_face` / `face_lines` parts that
+  follow the head on a chain shaft. OpenSim STL assets keep three parts.
 - `grip_pose` — the one two-hand grip definition (`DEFAULT_GRIP_POSE`, lead above trail, positions mirroring the spec `GripInterface`, spacing, V angles, overlap/interlock/ten-finger, `HAND_GRIP_ANCHOR_IN_HAND_M`). Engines import it; never keep per-engine hand offsets. Residual series: `grip_contact.closure_series` (`GripClosureSeries`, unavailable is `None`, never zero); report: `python3 -m scripts.grip_closure_report`.
 - `grip_hand_mesh` / `grip_hands` — curled-finger hand meshes wrapped on the grip
   (`build_grip_hand_mesh`, hand-grip frame) and their placement on a `ClubAssembly`

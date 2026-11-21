@@ -9,14 +9,22 @@ Everything here is visual only; masses and inertias stay as specified.
 
 from __future__ import annotations
 
+import dataclasses
 import math
 from collections.abc import Mapping
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import Any
 
 import numpy as np
 
 from src.shared.python.model_appearance import library
+from src.shared.python.model_appearance.club_face_marking import (
+    FaceMarkingSettings,
+    load_face_marking_settings,
+    marked_head_parts,
+)
+from src.shared.python.model_appearance.club_head_seat import head_slide_m
 from src.shared.python.model_appearance.club_head_mesh import (
     DEFAULT_AXIS_OFFSET_M,
     club_face_normal,
@@ -57,7 +65,11 @@ PART_MATERIALS = {
     "shaft": None,
     "grip": "grip_rubber",
     "head": None,
+    "head_face": "club_face",  # face marking only (club_face_marking)
+    "face_lines": "club_score_lines",
 }
+#: Parts that ride the head (and follow it onto a chain shaft's tip link).
+HEAD_PARTS = ("head", "head_face", "face_lines")
 HAND_PART_ROLES = {"lead_hand": Hand.LEAD, "trail_hand": Hand.TRAIL}
 
 
@@ -84,10 +96,15 @@ class ClubAssembly:
     shaft_radius_m: float
     axis_offset_m: float = DEFAULT_AXIS_OFFSET_M
     face_roll_deg: float = 0.0  # head roll about the shaft axis (club frame)
+    head_slide_m: float = 0.0  # drawn head moved down the shaft (club_head_seat)
+    #: Face marking of the drawn head; ``None`` draws it as built.
+    face_marking: FaceMarkingSettings | None = None
 
     def __post_init__(self) -> None:
         if not math.isfinite(self.face_roll_deg):
             raise ValueError("face_roll_deg must be finite")
+        if not math.isfinite(self.head_slide_m):
+            raise ValueError("head_slide_m must be finite")
         for name in ("length_m", "grip_length_m", "shaft_radius_m"):
             value = getattr(self, name)
             if not math.isfinite(value) or value <= 0.0:
@@ -136,18 +153,38 @@ def assembly_from_spec(spec: Mapping[str, Any]) -> ClubAssembly | None:
         else DEFAULT_AXIS_OFFSET_M
     )
     roll = club.get("face_roll_deg", ADDRESS_SQUARE_FACE_ROLL_DEG.get(alias, 0.0))
-    return ClubAssembly(alias, length, grip, 0.0065, offset, float(roll))
+    slide = head_slide_m(club, length)
+    marking = _face_marking_for(club)
+    return ClubAssembly(
+        alias, length, grip, 0.0065, offset, float(roll), slide, marking
+    )
+
+
+def _face_marking_for(club: Mapping[str, Any]) -> FaceMarkingSettings | None:
+    """Spec ``face_marking`` over the settings file; ``None`` when off."""
+    base = load_face_marking_settings()
+    over = club.get("face_marking")
+    if over:
+        base = dataclasses.replace(base, **dict(over))
+    return base if base.face_marking else None
+
+
+@lru_cache(maxsize=8)
+def _marked_parts(alias: str, settings: FaceMarkingSettings) -> dict[str, Mesh]:
+    return marked_head_parts(load_club_head(alias), settings)
 
 
 def assembly_meshes(club: ClubAssembly) -> dict[str, Mesh]:
     """``{"shaft", "grip", "head"}`` meshes in the club-body frame.
 
     The head mesh includes the hosel; the shaft runs from the hosel top to the
-    grip. Postcondition: every mesh is closed with outward winding.
+    grip. The head, and the shaft tip with it, sit ``head_slide_m`` down the
+    shaft. Postcondition: every mesh is closed with outward winding.
     """
     head = load_club_head(club.head_alias)
     z = club.axis_offset_m
-    shaft_top = -head.hosel_top_m
+    slide = np.array([0.0, club.head_slide_m, 0.0])
+    shaft_top = club.head_slide_m - head.hosel_top_m
     grip_top = -(club.length_m - club.grip_length_m)
     shaft = tapered_tube(
         np.array([0.0, shaft_top, z]),
@@ -161,13 +198,19 @@ def assembly_meshes(club: ClubAssembly) -> dict[str, Mesh]:
         GRIP_TIP_RADIUS_M,
         GRIP_BUTT_RADIUS_M,
     )
-    return {
-        "shaft": shaft,
-        "grip": grip,
-        "head": club_frame_mesh(
+    out = {"shaft": shaft, "grip": grip}
+    if club.face_marking is None:
+        seated = club_frame_mesh(
             head, axis_offset_m=z, face_roll_deg=club.face_roll_deg
-        ),
-    }
+        )
+        out["head"] = Mesh(seated.vertices + slide, seated.faces)
+        return out
+    for label, part in _marked_parts(club.head_alias, club.face_marking).items():
+        moved = head_points_to_club(
+            head, part.vertices, axis_offset_m=z, face_roll_deg=club.face_roll_deg
+        )
+        out[label] = Mesh(moved + slide, part.faces)
+    return out
 
 
 def clubface_vector(club: ClubAssembly) -> np.ndarray:
@@ -182,17 +225,18 @@ def clubface_vector(club: ClubAssembly) -> np.ndarray:
 def clubface_centre(club: ClubAssembly) -> np.ndarray:
     """Face-centre point (where the ball is struck) in the club-body frame.
 
-    Same placement and roll as the rendered head, so it is the point every
-    engine's head mesh shows at the middle of the face.
+    Same placement, roll and slide as the rendered head, so it is the point
+    every engine's head mesh shows at the middle of the face.
     """
     head = load_club_head(club.head_alias)
     centre = face_centre(head.head_mesh)[None, :]
-    return head_points_to_club(
+    seated = head_points_to_club(
         head,
         centre,
         axis_offset_m=club.axis_offset_m,
         face_roll_deg=club.face_roll_deg,
     )[0]
+    return np.asarray(seated + [0.0, club.head_slide_m, 0.0], dtype=float)
 
 
 def club_body_name(spec: Mapping[str, Any]) -> str | None:

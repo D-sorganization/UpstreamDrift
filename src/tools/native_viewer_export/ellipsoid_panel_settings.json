@@ -1,0 +1,24 @@
+{
+  "layout": "panel",
+  "position": "auto",
+  "opacity": 0.62,
+  "font_height_divisor": 45,
+  "min_font_px": 11,
+  "title": "Ellipsoid Radii",
+  "units_label": "Units",
+  "units": {"mobility": "kg^-1/2", "effective-mass": "kg^1/2"},
+  "headers": {"mobility": "Mobility", "effective-mass": "Eff. Mass", "condition": "Cond."},
+  "legend": {"mobility": "Mobility Ellipsoid", "effective-mass": "Force Ellipsoid"},
+  "radius_decimals": 2,
+  "condition_decimals": 1,
+  "sources": {
+    "layout": "'panel': compact side table; 'text': the former wrapped HUD rows (the old layout).",
+    "position": "'left', 'right' or 'auto' = opposite the impact factors panel (left when that is off); on a shared edge it stacks below that panel, hud_layout_settings.json panel_gap_px apart.",
+    "opacity": "Darkening under the panel (0.62 as the impact factors panel).",
+    "font_height_divisor": "Font size = frame height over this (45, as the impact factors panel).",
+    "min_font_px": "Smallest font; a panel that does not fit above the bottom HUD rows shrinks to it, then loses its last lines.",
+    "headers": "Column headers by kind ('effective-mass' is the force ellipsoid) and for the condition; units: the unit row (as the display scale).",
+    "legend": "Legend entry per kind (shown with --ellipsoid-color-by kind, in the kind's colour).",
+    "radius_decimals": "Decimals of a radius (condition_decimals: of a condition)."
+  }
+}

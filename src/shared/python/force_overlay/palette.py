@@ -18,6 +18,10 @@ __all__ = [
     "hex_to_rgba",
     "HAND_ELLIPSOID_PALETTE",
     "hand_ellipsoid_rgba",
+    "ELLIPSOID_COLOR_MODES",
+    "ELLIPSOID_KIND_PALETTE",
+    "ellipsoid_kind_rgba",
+    "require_ellipsoid_color_mode",
 ]
 
 # Official palette registered for force overlay wrench categories.
@@ -132,3 +136,37 @@ def hand_ellipsoid_rgba(hand: str) -> tuple[float, float, float, float]:
         raise ValueError(
             f"hand must be one of {sorted(HAND_ELLIPSOID_PALETTE)}, got {hand!r}"
         ) from None
+
+
+#: What an export ellipsoid's colour encodes (#15150): its ``point`` (the
+#: default, unchanged behaviour) or its ``kind``. With two kinds drawn at one
+#: point the point colour cannot tell them apart; ``kind`` can.
+ELLIPSOID_COLOR_MODES: Final[tuple[str, ...]] = ("point", "kind")
+
+#: Semi-transparent RGBA per ellipsoid kind, used when colouring by kind
+#: (#15150). Okabe-Ito hues: sky blue, vermillion, bluish green, reddish purple.
+ELLIPSOID_KIND_PALETTE: Final[dict[str, tuple[float, float, float, float]]] = {
+    "mobility": (0.337, 0.706, 0.914, 0.45),
+    "effective-mass": (0.835, 0.369, 0.0, 0.45),
+    "acceleration-capacity": (0.0, 0.620, 0.451, 0.45),
+    "force-capacity": (0.800, 0.475, 0.655, 0.45),
+}
+
+
+def ellipsoid_kind_rgba(kind: str) -> tuple[float, float, float, float]:
+    """Return the RGBA of ellipsoid ``kind`` (raises ``ValueError`` if unknown)."""
+    try:
+        return ELLIPSOID_KIND_PALETTE[kind]
+    except KeyError:
+        raise ValueError(
+            f"ellipsoid kind must be one of {sorted(ELLIPSOID_KIND_PALETTE)}, got {kind!r}"
+        ) from None
+
+
+def require_ellipsoid_color_mode(mode: str) -> str:
+    """Return ``mode`` if it is a known colour mode (raises ``ValueError``)."""
+    if mode not in ELLIPSOID_COLOR_MODES:
+        raise ValueError(
+            f"ellipsoid_color_by must be one of {ELLIPSOID_COLOR_MODES}, got {mode!r}"
+        )
+    return mode

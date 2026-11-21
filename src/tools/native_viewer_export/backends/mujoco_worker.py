@@ -13,6 +13,9 @@ colours (``_skin_shading``); otherwise the model is the exported one.
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import dataclass
+import json
+import math
 import os
 from pathlib import Path
 import sys
@@ -29,6 +32,10 @@ from src.shared.python.motion_matching.same_input import InputBundle
 from src.tools.native_viewer_export.backends._ball import draw_job_ball
 from src.tools.native_viewer_export.backends._scene_overlays import (
     apply_scene_overlays,
+)
+from src.tools.native_viewer_export.backends._sun_light import (
+    add_sun,
+    load_sun_light,
 )
 from src.tools.native_viewer_export.backends._skin_shading import (
     compile_shaded_model,
@@ -70,11 +77,60 @@ def build_scene_xml(
     )
 
 
+SCENE_EXTENT_PATH = Path(__file__).with_name("scene_extent_settings.json")
+
+
+@dataclass(frozen=True)
+class SceneExtent:
+    """Validated ``scene_extent_settings.json`` (``ValueError`` when invalid)."""
+
+    ground_half_extent_m: float
+
+    def __post_init__(self) -> None:
+        if not (
+            math.isfinite(self.ground_half_extent_m) and self.ground_half_extent_m > 0
+        ):
+            raise ValueError("ground_half_extent_m must be positive and finite")
+
+
+def load_scene_extent(path: Path | None = None) -> SceneExtent:
+    """Read the scene extent settings (``KeyError`` for a missing key)."""
+    raw = json.loads((path or SCENE_EXTENT_PATH).read_text(encoding="utf-8"))
+    return SceneExtent(float(raw["ground_half_extent_m"]))
+
+
+def widen_ground(model: Any, half_extent_m: float) -> None:
+    """Make the ``visual_floor`` plane ``half_extent_m`` wide each way.
+
+    A model without that plane is left alone. Raises ``ValueError`` for an
+    extent that is not positive and finite.
+    """
+    SceneExtent(half_extent_m)
+    floor = model.geom("visual_floor") if "visual_floor" in _geom_names(model) else None
+    if floor is not None:
+        floor.size[:2] = half_extent_m
+
+
+def _geom_names(model: Any) -> set[str]:
+    return {model.geom(i).name for i in range(model.ngeom)}
+
+
 def grow_offscreen_buffer(model: Any, width: int, height: int) -> None:
     """Enlarge ``model``'s offscreen framebuffer (default 640x480) to fit a frame."""
     buffer = model.vis.global_
     buffer.offwidth = max(width, int(buffer.offwidth))
     buffer.offheight = max(height, int(buffer.offheight))
+
+
+def write_depth(renderer: Any, job: WorkerJob, view: str, position: int) -> None:
+    """Save the scene depth (metres) of the current scene where the job asks for it."""
+    if not job.depth_positions or not job.depth_positions[position]:
+        return
+    renderer.enable_depth_rendering()
+    try:
+        np.save(job.depth_path(view, position), renderer.render().copy())
+    finally:
+        renderer.disable_depth_rendering()
 
 
 def main(job_path: str) -> None:
@@ -85,10 +141,12 @@ def main(job_path: str) -> None:
     bundle = InputBundle.load(Path(job.bundle_path))
     q = np.load(job.q_path)
     xml, _ = build_scene_xml(bundle.spec_bytes, job.appearance)
+    xml = add_sun(xml, load_sun_light())  # even light on the far ground
     axial_frames, shading = job.load_axial_frames(), job.load_shading()
     model, skin = compile_shaded_model(xml, axial_frames, shading)
     # the default offscreen buffer is 640x480; grow it to the requested size
     grow_offscreen_buffer(model, job.width, job.height)
+    widen_ground(model, load_scene_extent().ground_half_extent_m)
     data = mujoco.MjData(model)
     adr = [model.joint(n).qposadr[0] for n in bundle.coordinate_order]
     glyph_sets = job.load_glyph_sets()
@@ -116,6 +174,7 @@ def main(job_path: str) -> None:
                 )
                 draw_job_ball(renderer.scene, job, pos)
                 np.save(job.frame_path(view, pos), renderer.render().copy())
+                write_depth(renderer, job, view, pos)
     finally:
         renderer.close()
 

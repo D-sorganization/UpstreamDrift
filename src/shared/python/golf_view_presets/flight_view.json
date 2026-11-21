@@ -1,0 +1,10 @@
+{
+  "azimuth_deg": -90.0,
+  "elevation_deg": -3.0,
+  "default_distance_m": 4.6,
+  "sources": {
+    "azimuth_deg": "Viewing direction heading: -90 looks down the target line from behind the golfer, as the down_the_line view does.",
+    "elevation_deg": "Viewing direction elevation. -3 is flatter than the -8 of down_the_line, so the apex of a driver flight stays below the top of a 16:9 frame.",
+    "default_distance_m": "Camera distance from the look-at point. 4.6 m (down_the_line: 3.75 m; first pass was 7 m, which left the golfer 0.31 of the frame height) fills about 0.47 of a 16:9 frame with the golfer. The flight stays inside the frame because its angle off the camera axis hardly depends on this distance: the apex of a 20 m, 160 m carry sits 35 px below the top edge of a 1280x720 frame (test_flight_view_keeps_the_whole_flight_in_the_picture)."
+  }
+}

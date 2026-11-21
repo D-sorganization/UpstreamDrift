@@ -31,10 +31,20 @@ from __future__ import annotations
 
 from ._types import FittedShape
 from .axial_loads import AxialLoadFrame, AxialLoadProvider
+from .segment_angular_momentum import (
+    SegmentAngularMomentumFrame,
+    SegmentAngularMomentumProvider,
+    SegmentGroupCatalog,
+)
 from .bindings import BindingKind, MarkerBinding
 from .contracts import BodyPartShape, ColorOverrideRenderer, ShapeFitter, ShapeRenderer
 from .force_colors import ForceColorScale
 from .force_display import ForceColorDisplay, SegmentLoadSeries
+from .scalar_shading import (
+    ScalarColorLegend,
+    ScalarColorScale,
+    SegmentScalarSeries,
+)
 from .persistence import (
     SCHEMA_VERSION,
     SegmentVizSet,
@@ -52,11 +62,17 @@ __all__ = [
     "BindingKind",
     "AxialLoadFrame",
     "AxialLoadProvider",
+    "SegmentAngularMomentumFrame",
+    "SegmentAngularMomentumProvider",
+    "SegmentGroupCatalog",
     "BodyPartShape",
     "ColorOverrideRenderer",
     "ForceColorDisplay",
     "ForceColorScale",
+    "ScalarColorLegend",
+    "ScalarColorScale",
     "SegmentLoadSeries",
+    "SegmentScalarSeries",
     "FittedShape",
     "MarkerBinding",
     "SegmentVizSet",

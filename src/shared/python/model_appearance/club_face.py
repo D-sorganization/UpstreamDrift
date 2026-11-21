@@ -11,6 +11,7 @@ from __future__ import annotations
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 
@@ -112,6 +113,19 @@ def impact_frame(
     )
 
 
+def nearest_on_path(points: np.ndarray, target: np.ndarray) -> tuple[Any, Any]:
+    """Per straight segment of ``points`` ``(n, 3)``: the fraction ``s`` in
+    ``[0, 1]`` along it and the point on it closest to ``target``."""
+    start, step = points[:-1], np.diff(points, axis=0)
+    length2 = np.einsum("ij,ij->i", step, step)
+    s = np.clip(
+        np.einsum("ij,ij->i", target - start, step) / np.maximum(length2, 1e-18),
+        0.0,
+        1.0,
+    )
+    return s, start + s[:, None] * step
+
+
 def ball_passage(
     time: Sequence[float] | np.ndarray,
     clubhead: np.ndarray,
@@ -143,14 +157,7 @@ def ball_passage(
         raise ValueError("tolerances must be positive")
     top = top_of_backswing_index(t, head)
     ball = head[0]
-    start, step = head[top:-1], np.diff(head[top:], axis=0)
-    length2 = np.einsum("ij,ij->i", step, step)
-    s = np.clip(
-        np.einsum("ij,ij->i", ball - start, step) / np.maximum(length2, 1e-18),
-        0.0,
-        1.0,
-    )
-    closest = start + s[:, None] * step
+    s, closest = nearest_on_path(head[top:], ball)
     gap = np.linalg.norm(closest - ball, axis=1)
     gap[np.abs(closest[:, 2] - ball[2]) > height_tol_m] = np.inf
     j = int(np.argmin(gap))
