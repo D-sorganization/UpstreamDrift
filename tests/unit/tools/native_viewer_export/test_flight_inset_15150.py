@@ -182,11 +182,12 @@ def test_flight_coordinates_match_the_model_frame() -> None:
 
 def test_curve_stays_inside_its_plots_for_any_exaggeration() -> None:
     rect = _rect()
-    play = _playback()
-    local = fi.flight_coordinates(play.path_m, play.axes_m)
-    extent = (local[-1, 0], play.apex_m, np.abs(local[:, 1]).max())
+    assert rect is not None
+    t = np.linspace(0.0, 1.0, 40)
+    local = np.column_stack([180.0 * t, 25.0 * np.sin(3 * t), 12.0 * 4 * t * (1 - t)])
+    extent = (local[-1, 0], 12.0, np.abs(local[:, 1]).max())
     for exag in (None, 1.0, 6.0, 500.0):
-        cfg = replace(LOUD, vertical_exaggeration=exag)
+        cfg = replace(ON, vertical_exaggeration=exag)
         profile, plan = fi.plots_for(rect, cfg, 16, extent)
         for plot, vertical in ((profile, local[:, 2]), (plan, local[:, 1])):
             pix = plot.pixels(local[:, 0], vertical)
