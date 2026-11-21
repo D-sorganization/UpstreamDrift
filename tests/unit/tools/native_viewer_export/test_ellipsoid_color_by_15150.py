@@ -18,6 +18,7 @@ from src.tools.native_viewer_export import cli
 from src.tools.native_viewer_export.core import ELLIPSOID_KINDS, ExportSettings
 from src.tools.native_viewer_export.overlay import (
     OverlayOptions,
+    MobilitySelection,
     _build_hand_ellipsoid_feed,
 )
 
@@ -52,7 +53,7 @@ def _colours(**extra: Any) -> dict[str, set[tuple[float, ...]]]:
         active_ellipsoids=KINDS,
         hand_mobility_mode="constrained",
         ellipsoid_scale="auto",
-        mobility_points="wrists",
+        selection=MobilitySelection("wrists"),
         **extra,
     )
     glyphs = glyph_fn(0)
