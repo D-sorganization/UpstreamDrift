@@ -1,4 +1,4 @@
-"""Score lines, face colour and smoothing for the drawn club head (#15150).
+"""Score lines and face colour for the drawn club head (#15150).
 
 ``club_face_marking_settings.json`` beside this module names the choices; the
 defaults leave the head exactly as :mod:`club_head_mesh` builds it. Nothing
@@ -27,7 +27,6 @@ from src.shared.python.model_appearance.geometry import Mesh, concat_meshes
 
 Array = NDArray[np.float64]
 SETTINGS_PATH = Path(__file__).with_name("club_face_marking_settings.json")
-MAX_SUBDIVISIONS = 3
 _SAMPLE_STEP_M = 0.0015
 _N_STEPS = 60  # samples each side of the face centre along the toe axis
 _RAY_START_M = 0.03
@@ -42,9 +41,6 @@ _KEYS = (
     "face_rgba",
     "line_rgba",
     "face_normal_cos",
-    "subdivisions",
-    "crease_angle_deg",
-    "max_triangles",
 )
 
 
@@ -74,20 +70,15 @@ class FaceMarkingSettings:
     face_rgba: tuple[float, ...]
     line_rgba: tuple[float, ...]
     face_normal_cos: float
-    subdivisions: int
-    crease_angle_deg: float
-    max_triangles: int
 
     def __post_init__(self) -> None:
         if not isinstance(self.face_marking, bool):
             raise ValueError("face_marking must be true or false")
-        for name in ("score_line_count", "subdivisions", "max_triangles"):
+        for name in ("score_line_count",):
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, int) or value < 0:
                 raise ValueError(f"{name} must be an integer of at least 0")
-        if self.subdivisions > MAX_SUBDIVISIONS:
-            raise ValueError(f"subdivisions must not exceed {MAX_SUBDIVISIONS}")
-        for name in ("score_line_spacing_m", "score_line_width_m", "crease_angle_deg"):
+        for name in ("score_line_spacing_m", "score_line_width_m"):
             _positive(getattr(self, name), name)
         _positive(self.score_line_height_m, "score_line_height_m")
         for name in ("centre_clear_width_m", "edge_margin_m"):
@@ -103,7 +94,7 @@ class FaceMarkingSettings:
     @property
     def active(self) -> bool:
         """True when the drawn head differs from the one as built."""
-        return self.face_marking or self.subdivisions > 0
+        return self.face_marking
 
 
 def load_face_marking_settings(path: Path | None = None) -> FaceMarkingSettings:
@@ -112,7 +103,7 @@ def load_face_marking_settings(path: Path | None = None) -> FaceMarkingSettings:
     return FaceMarkingSettings(*(raw[key] for key in _KEYS))
 
 
-# ------------------------------------------------------------------ smoothing
+# ------------------------------------------------------------------ helpers
 
 
 def _face_normals(mesh: Mesh) -> tuple[Array, Array]:
@@ -122,84 +113,11 @@ def _face_normals(mesh: Mesh) -> tuple[Array, Array]:
     return cross / np.maximum(area[:, None], 1e-18), 0.5 * area
 
 
-def _edge_end_normals(
-    mesh: Mesh, ends: Array, edge_dir: Array, fn: Array, area: Array, cos_min: float
-) -> Array:
-    """Per edge end: area-weighted mean normal of the faces at the vertex that
-    lie within the crease angle of the edge's own normal ``edge_dir``."""
-    flat = mesh.faces.ravel()
-    order = np.argsort(flat, kind="stable")
-    degree = np.bincount(flat, minlength=len(mesh.vertices))
-    start = np.concatenate([[0], np.cumsum(degree)[:-1]])
-    count = degree[ends]
-    owner = np.repeat(np.arange(len(ends)), count)
-    offset = np.arange(count.sum()) - np.repeat(np.cumsum(count) - count, count)
-    face = order[start[ends][owner] + offset] // 3
-    keep = np.einsum("ij,ij->i", fn[face], edge_dir[owner]) > cos_min
-    out = np.zeros((len(ends), 3))
-    np.add.at(out, owner[keep], fn[face[keep]] * area[face[keep], None])
-    norm = np.linalg.norm(out, axis=1)
-    return np.where(
-        norm[:, None] > 1e-12, out / np.maximum(norm, 1e-12)[:, None], edge_dir
-    )
-
-
-def _subdivide_once(mesh: Mesh, crease_deg: float) -> Mesh:
-    verts, faces = mesh.vertices, mesh.faces
-    fn, area = _face_normals(mesh)
-    half = faces[:, [0, 1, 1, 2, 2, 0]].reshape(-1, 2)
-    key = np.sort(half, axis=1)
-    edges, inverse = np.unique(key, axis=0, return_inverse=True)
-    inverse = np.asarray(inverse).reshape(-1)
-    face_of = np.repeat(np.arange(len(faces)), 3)
-    summed = np.zeros((len(edges), 3))
-    np.add.at(summed, inverse, fn[face_of])
-    length = np.linalg.norm(summed, axis=1)
-    edge_dir = summed / np.maximum(length, 1e-12)[:, None]
-    cos_c = math.cos(math.radians(crease_deg))
-    smooth = (length**2 - 2.0) / 2.0 > cos_c  # dot of the two face normals
-    ends = np.concatenate([edges[:, 0], edges[:, 1]])
-    normals = _edge_end_normals(
-        mesh, ends, np.vstack([edge_dir, edge_dir]), fn, area, cos_c
-    )
-    na, nb = normals[: len(edges)], normals[len(edges) :]
-    va, vb = verts[edges[:, 0]], verts[edges[:, 1]]
-    mid = 0.5 * (va + vb)
-    pa = mid - np.einsum("ij,ij->i", mid - va, na)[:, None] * na
-    pb = mid - np.einsum("ij,ij->i", mid - vb, nb)[:, None] * nb
-    new = np.where(smooth[:, None], 0.5 * (pa + pb), mid)
-    m = (inverse + len(verts)).reshape(-1, 3)
-    a, b, c = faces[:, 0], faces[:, 1], faces[:, 2]
-    tris = np.vstack(
-        [
-            np.column_stack([a, m[:, 0], m[:, 2]]),
-            np.column_stack([b, m[:, 1], m[:, 0]]),
-            np.column_stack([c, m[:, 2], m[:, 1]]),
-            m[:, [0, 1, 2]],
-        ]
-    )
-    return Mesh(np.vstack([verts, new]), tris.astype(np.int64))
-
-
 def _compact(mesh: Mesh) -> Mesh:
     """``mesh`` without the vertices no face uses."""
     used, inverse = np.unique(mesh.faces, return_inverse=True)
     faces = np.asarray(inverse, dtype=np.int64).reshape(mesh.faces.shape)
     return Mesh(mesh.vertices[used], faces)
-
-
-def smooth_head_body(mesh: Mesh, settings: FaceMarkingSettings) -> Mesh:
-    """``mesh`` after up to ``settings.subdivisions`` shape-keeping passes.
-
-    A pass that would push the triangle count past ``max_triangles`` is not
-    run; the input is never reduced. Original vertices keep their positions.
-    """
-    out = mesh
-    for _ in range(settings.subdivisions):
-        if 4 * len(out.faces) > settings.max_triangles:
-            break
-        out = _subdivide_once(out, settings.crease_angle_deg)
-    return out
 
 
 # ------------------------------------------------------------- face and lines
@@ -330,10 +248,9 @@ def marked_head_parts(
     """Head-frame ``head`` (body without face, plus hosel), and with face
     marking ``head_face`` and ``face_lines`` parts, per ``settings``.
 
-    The body is smoothed first; face triangles are those of the smoothed body.
     The hosel is the one :func:`load_club_head` built.
     """
-    body = smooth_head_body(head.head_mesh, settings)
+    body = head.head_mesh
     hosel = Mesh(
         head.mesh.vertices[len(head.head_mesh.vertices) :],
         head.mesh.faces[len(head.head_mesh.faces) :] - len(head.head_mesh.vertices),

@@ -415,9 +415,9 @@ forward-dynamics matching. Design reference:
   and legs, hip to ankle via `garment_coverage`); grey plain palette:
   `library.PLAIN_PALETTE` / `plain_rgba`. Reference:
   `docs/development/full_body_models/appearance_reference/shared_appearance_spec.tex`.
-- `club_face_marking` (#15150) — opt-in score lines, a face colour and shape-keeping
-  smoothing of the drawn club head, set in `club_face_marking_settings.json`
-  (`load_face_marking_settings`; default `face_marking: false`, `subdivisions: 0`
+- `club_face_marking` (#15150) — opt-in score lines and a face colour
+  on the drawn club head, set in `club_face_marking_settings.json`
+  (`load_face_marking_settings`; default `face_marking: false`
   leaves the head as built). It reuses the head from `club_head_mesh`: the face
   normal and centre are `measured_face_normal` / `face_centre`, never re-derived.
   `ClubAssembly.face_marking` (or a spec `club.face_marking` mapping) adds the

@@ -56,8 +56,6 @@ def test_defaults_leave_the_head_as_built() -> None:
         ("centre_clear_width_m", -0.001),
         ("face_rgba", (1.0, 2.0, 0.0, 1.0)),
         ("face_normal_cos", 1.0),
-        ("subdivisions", 4),
-        ("max_triangles", -5),
         ("face_marking", "yes"),
     ],
 )
@@ -129,21 +127,6 @@ def test_materials_exist_and_differ_from_the_crown() -> None:
         assert ca.club_part_material(label, "satin_steel", None) in library.MATERIALS
 
 
-def test_smoothing_keeps_vertices_and_respects_the_triangle_budget() -> None:
-    head = load_club_head("driver")
-    base = len(head.head_mesh.faces)
-    once = fm.smooth_head_body(head.head_mesh, _on(subdivisions=1))
-    assert len(once.faces) == 4 * base
-    assert np.array_equal(
-        once.vertices[: len(head.head_mesh.vertices)], head.head_mesh.vertices
-    )
-    assert abs(once.volume() / head.head_mesh.volume() - 1.0) < 0.02
-    capped = fm.smooth_head_body(head.head_mesh, _on(subdivisions=3))
-    assert len(capped.faces) <= 12000
-    tight = fm.smooth_head_body(head.head_mesh, _on(subdivisions=3, max_triangles=base))
-    assert len(tight.faces) == base
-
-
 def test_spec_override_turns_marking_on() -> None:
     spec = json.loads(SPEC.read_text(encoding="utf-8"))
     spec["club"] = {
@@ -153,3 +136,33 @@ def test_spec_override_turns_marking_on() -> None:
     club = ca.assembly_from_spec(spec)
     assert club.face_marking.score_line_count == 5
     assert "face_lines" in ca.assembly_meshes(club)
+
+
+def test_marking_parts_follow_the_head_onto_the_chain_tip_link() -> None:
+    from src.shared.python.model_appearance import document_from_dict
+    from src.shared.python.model_appearance.club_chain_meshes import (
+        chain_layout,
+        club_meshes_by_body,
+    )
+    from src.shared.python.motion_matching.club_models import DRIVER
+    from src.shared.python.motion_matching.club_shaft_chain import (
+        apply_shaft_chain,
+        build_shaft_chain,
+    )
+
+    spec = json.loads(
+        (
+            ROOT
+            / "docs/development/full_body_models/evidence/ground_support"
+            / "anthro_driver_seeds/full_body_spec_hipcal_scaled.json"
+        ).read_text(encoding="utf-8")
+    )
+    spec = apply_shaft_chain(spec, build_shaft_chain(DRIVER))
+    club = dataclasses.replace(ca.assembly_from_spec(spec), face_marking=_on())
+    layout = chain_layout(spec)
+    doc = document_from_dict({"schema_version": "appearance-v1"})
+    by_body = club_meshes_by_body(spec, club, "satin_steel", doc)
+    labels = {b: [p[0] for p in parts] for b, parts in by_body.items()}
+    for label in ("head", "head_face", "face_lines"):
+        assert label in labels[layout.tip_link]
+        assert sum(label in ls for ls in labels.values()) == 1

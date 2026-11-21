@@ -98,7 +98,7 @@ class ClubAssembly:
     axis_offset_m: float = DEFAULT_AXIS_OFFSET_M
     face_roll_deg: float = 0.0  # head roll about the shaft axis (club frame)
     head_slide_m: float = 0.0  # drawn head moved down the shaft (club_head_seat)
-    #: Face marking / smoothing of the drawn head; ``None`` draws it as built.
+    #: Face marking of the drawn head; ``None`` draws it as built.
     face_marking: FaceMarkingSettings | None = None
 
     def __post_init__(self) -> None:
