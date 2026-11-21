@@ -19,7 +19,9 @@ def test_render_once_applies_stored_ke_before_axial_force() -> None:
     force_pos = source.index("_apply_axial_scene_colors")
     assert ke_pos < force_pos
 
-    mesh_source = inspect.getsource(mixin_mod.SimRenderingMixin._update_meshcat_frame_overlays)
+    mesh_source = inspect.getsource(
+        mixin_mod.SimRenderingMixin._update_meshcat_frame_overlays
+    )
     ke_mesh = mesh_source.index("update_stored_ke_colors")
     force_mesh = mesh_source.index("update_force_colors")
     assert ke_mesh < force_mesh
