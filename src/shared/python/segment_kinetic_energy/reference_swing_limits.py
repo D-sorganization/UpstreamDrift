@@ -57,7 +57,7 @@ def _preprocess_swing_q(q: np.ndarray, *, dt: float) -> np.ndarray:
     filtered = filtfilt(b, a, despiked, axis=0)
     if filtered.shape[0] <= 2 * _EDGE_TRIM_FRAMES:
         raise ValueError("swing too short for edge trimming")
-    return filtered[_EDGE_TRIM_FRAMES : -_EDGE_TRIM_FRAMES]
+    return filtered[_EDGE_TRIM_FRAMES:-_EDGE_TRIM_FRAMES]
 
 
 def _mujoco_engine_provider(spec_bytes: bytes):
@@ -93,7 +93,7 @@ def compute_reference_swing_peak_segment_ke_j(repo_root: Path | None = None) -> 
     dt = float(swing.time_s[1] - swing.time_s[0]) if len(swing.time_s) > 1 else 0.001
     q_proc = _preprocess_swing_q(q, dt=dt)
     qvel = np.gradient(q_proc, dt, axis=0, edge_order=2)
-    times = np.asarray(swing.time_s, dtype=float)[_EDGE_TRIM_FRAMES : -_EDGE_TRIM_FRAMES]
+    times = np.asarray(swing.time_s, dtype=float)[_EDGE_TRIM_FRAMES:-_EDGE_TRIM_FRAMES]
 
     provider = _mujoco_engine_provider(spec_path.read_bytes())
     peak = 0.0
