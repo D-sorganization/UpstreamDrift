@@ -36,6 +36,7 @@ from .physics_engine import MuJoCoPhysicsEngine
 from .sim_camera_mixin import SimCameraMixin
 from .sim_force_color_mixin import SimForceColorMixin
 from .sim_rendering_mixin import SimRenderingMixin
+from .sim_segment_ke_mixin import SimSegmentKeMixin
 from .telemetry import TelemetryRecorder
 
 logger = get_logger(__name__)
@@ -71,6 +72,7 @@ class ModelLoaderThread(QtCore.QThread):
 class MuJoCoSimWidget(  # type: ignore[misc]
     SimCameraMixin,
     SimForceColorMixin,
+    SimSegmentKeMixin,
     SimRenderingMixin,
     QtWidgets.QWidget,
 ):
@@ -86,12 +88,14 @@ class MuJoCoSimWidget(  # type: ignore[misc]
     loading_started = QtCore.pyqtSignal()
     loading_finished = QtCore.pyqtSignal(bool)
     force_legend_changed = QtCore.pyqtSignal(str)
+    ke_legend_changed = QtCore.pyqtSignal(str)
 
     def _init_visualization_toggles(self) -> None:
         from src.shared.python.body_part_viz import ForceColorScale
 
         self.axial_color_scale = ForceColorScale()
         self._init_force_color_hub()
+        self._init_segment_ke_shading()
         self.force_legend_text = ""
         self.show_force_vectors = False
         self.show_torque_vectors = False
@@ -225,6 +229,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
         self.loader_thread: ModelLoaderThread | None = None
         self.restore_force_overlay_settings()
+        self.restore_segment_ke_settings()
 
     @property
     def model(self) -> mujoco.MjModel | None:
@@ -696,10 +701,12 @@ class MuJoCoSimWidget(  # type: ignore[misc]
             self._prev_body_ts.clear()
 
     def set_segment_ke_globe_visualization(self, enabled: bool) -> None:
-        """Toggle COM-centered segment kinetic-energy globes (#15389)."""
+        """Toggle KE proxy debug globes (#15396)."""
         self.show_segment_ke_globes = enabled
         if not enabled:
             self._segment_ke_peak_state.clear()
+        self._persist_segment_ke_state()
+        self._render_once()
 
     def reset_segment_ke_peak_tracking(self) -> None:
         """Clear running peak KE used for globe highlight scaling."""

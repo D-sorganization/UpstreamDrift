@@ -14,6 +14,8 @@ import numpy as np
 from src.shared.python.biomechanics.biomechanics_data import BiomechanicalData
 from src.shared.python.body_part_viz import AxialLoadFrame, ForceColorScale
 from src.shared.python.body_part_viz.meshcat_force_colors import MeshcatForceColors
+from src.shared.python.body_part_viz.meshcat_scalar_colors import MeshcatScalarColors
+from src.shared.python.body_part_viz.scalar_shading import ScalarColorScale
 from src.shared.python.force_overlay.glyphs import GlyphSet
 from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
     MeshcatGlyphRenderer,
@@ -22,10 +24,11 @@ from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.plot_style.color_utils import rgba_to_hex
 
+from .meshcat_geom_loader import build_meshcat_color_bindings
+
 try:
     import meshcat
     import meshcat.geometry as g
-    import meshcat.transformations as tf
 except ImportError:
     meshcat = None
 
@@ -39,6 +42,7 @@ class MuJoCoMeshcatAdapter:
 
     def __init__(self, model: mujoco.MjModel | None = None) -> None:
         self._force_colors: MeshcatForceColors | None = None
+        self._scalar_colors: MeshcatScalarColors | None = None
         self._glyph_renderer: MeshcatGlyphRenderer | None = None
         if meshcat is None:
             logger.warning("Meshcat not installed. Visualization disabled.")
@@ -76,103 +80,18 @@ class MuJoCoMeshcatAdapter:
         if self.vis is not None:
             webbrowser.open(self.vis.url())
 
-    def load_model_geometry(self) -> None:  # noqa: C901
-        """
-        Parses MuJoCo model geoms and creates corresponding Meshcat objects.
-        """
+    def load_model_geometry(self) -> None:
+        """Parse MuJoCo geoms into MeshCat visuals and colour-binding tables."""
         if self.vis is None or self.model is None:
             return
-
-        model = self.model
         self.vis["visuals"].delete()
-        color_bindings: dict[str, dict[str, list[float]]] = {}
-
-        # Iterate over all geometries
-        for i in range(model.ngeom):
-            # geom properties
-            gtype = model.geom_type[i]
-            size = model.geom_size[i]
-            rgba = model.geom_rgba[i]
-
-            # Material/Color
-            material = g.MeshPhongMaterial(
-                color=self._rgba_to_int(rgba), opacity=rgba[3]
-            )  # noqa: E501
-
-            shape = None
-
-            if gtype == mujoco.mjtGeom.mjGEOM_SPHERE:
-                shape = g.Sphere(radius=size[0])
-            elif gtype == mujoco.mjtGeom.mjGEOM_CAPSULE:
-                # Meshcat has no capsule, approximate with Cylinder + 2 Spheres?
-                # Or just Cylinder for now to keep it fast.
-                # size[0] = radius, size[1] = half-length
-                shape = g.Cylinder(height=size[1] * 2, radius=size[0])
-            elif gtype == mujoco.mjtGeom.mjGEOM_CYLINDER:
-                shape = g.Cylinder(height=size[1] * 2, radius=size[0])
-            elif gtype == mujoco.mjtGeom.mjGEOM_BOX:
-                # size is half-extents
-                shape = g.Box(lengths=size * 2)
-            elif gtype == mujoco.mjtGeom.mjGEOM_PLANE:
-                # Infinite plane - approximate with large box/plane
-                shape = g.Box([20, 20, 0.01])
-            elif gtype == mujoco.mjtGeom.mjGEOM_MESH:
-                # Loading meshes is complex (need to get vertices from model.mesh_*)
-                # For now, approximate with Box or Sphere based on rbound
-                shape = g.Sphere(radius=model.geom_rbound[i])
-            else:
-                # Fallback
-                shape = g.Sphere(radius=0.1)
-
-            if shape:
-                name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, i)
-                if not name:
-                    name = f"geom_{i}"
-
-                # If capsule/cylinder, MuJoCo defines them along Z axis.
-                # If using Cylinder, we might need rotation correction depending on
-                # meshcat convention (usually Y-axis aligned?)
-                # Meshcat Cylinder is along Y axis by default? No, usually Y.
-                # Let's check: Three.js cylinder is geometry aligned with the Y axis.
-                # MuJoCo cylinder is Z axis.
-                # So we need to rotate 90 deg around X.
-                if gtype in [
-                    mujoco.mjtGeom.mjGEOM_CYLINDER,
-                    mujoco.mjtGeom.mjGEOM_CAPSULE,
-                ]:
-                    # We will wrap it in a node that rotates
-                    self.vis["visuals"][name]["geometry"].set_object(shape, material)
-                    # Rotate geometry to align Y (meshcat) with Z (mujoco)
-                    # Rotate -90 deg around X?
-                    # Actually we update the PARENT transform in update(),
-                    # which sets the Z-axis orientation.
-                    # But the SHAPE itself needs to be pre-rotated if the local
-                    # frame mismatch exists.
-                    rotation_matrix = tf.rotation_matrix(np.pi / 2, [1, 0, 0])
-                    self.vis["visuals"][name]["geometry"].set_transform(rotation_matrix)
-                else:
-                    self.vis["visuals"][name].set_object(shape, material)
-
-                body = mujoco.mj_id2name(
-                    model, mujoco.mjtObj.mjOBJ_BODY, model.geom_bodyid[i]
-                )
-                if body:
-                    suffix = (
-                        "/geometry"
-                        if gtype
-                        in (
-                            mujoco.mjtGeom.mjGEOM_CYLINDER,
-                            mujoco.mjtGeom.mjGEOM_CAPSULE,
-                        )
-                        else ""
-                    )
-                    path = f"visuals/{name}{suffix}/<object>"
-                    # Match the quantized RGB actually submitted in the material.
-                    color_bindings.setdefault(body, {})[path] = [
-                        *(int(c * 255) / 255 for c in rgba[:3]),
-                        float(rgba[3]),
-                    ]
+        color_bindings = build_meshcat_color_bindings(
+            self.vis, self.model, rgba_to_int=self._rgba_to_int
+        )
         self._force_colors = MeshcatForceColors(
+            self._set_color_property, color_bindings
+        )
+        self._scalar_colors = MeshcatScalarColors(
             self._set_color_property, color_bindings
         )
 
@@ -186,6 +105,15 @@ class MuJoCoMeshcatAdapter:
         """Share the native view's qualified loads and color settings."""
         if self._force_colors is not None:
             self._force_colors.apply(frame, scale)
+
+    def update_stored_ke_colors(
+        self,
+        values: dict[str, float | None] | None,
+        scale: ScalarColorScale,
+    ) -> None:
+        """Apply stored kinetic-energy scalar shading in MeshCat."""
+        if self._scalar_colors is not None:
+            self._scalar_colors.apply(values, scale)
 
     def update(self, data: mujoco.MjData) -> None:
         """
@@ -221,46 +149,30 @@ class MuJoCoMeshcatAdapter:
         self.vis["overlays/segment_ke"].delete()
         if frame is None:
             return
-        from src.shared.python.segment_kinetic_energy.contracts import (
-            PEAK_HIGHLIGHT_FRACTION,
-        )
         from src.shared.python.segment_kinetic_energy.render_globes import (
             globe_rgba_for_ke,
             radius_for_ke,
         )
+        from src.shared.python.segment_kinetic_energy.shading import (
+            REFERENCE_SWING_PEAK_SEGMENT_KE_J,
+        )
 
-        peak_by_body = {p.body: p.peak_total_j for p in peaks}
-        ref_peak = max(peak_by_body.values(), default=0.0)
-        if ref_peak <= 0.0:
-            ref_peak = max((s.total_j for s in frame.segments), default=0.0)
+        ref_peak = REFERENCE_SWING_PEAK_SEGMENT_KE_J
         for index, seg in enumerate(frame.segments):
             if seg.total_j <= 0.0:
                 continue
-            peak_j = peak_by_body.get(seg.body, seg.total_j)
-            at_peak = seg.total_j >= PEAK_HIGHLIGHT_FRACTION * peak_j and peak_j > 0.0
             radius = radius_for_ke(seg.total_j, reference_peak_j=ref_peak)
-            rgba = globe_rgba_for_ke(
-                seg.total_j, reference_peak_j=ref_peak, at_peak=at_peak
-            )
+            rgba = globe_rgba_for_ke(seg.total_j, reference_peak_j=ref_peak)
             path = f"overlays/segment_ke/{index}"
             material = g.MeshPhongMaterial(
                 color=rgba_to_hex(rgba),
-                opacity=float(rgba[3]),
-                transparent=True,
+                opacity=1.0,
+                transparent=False,
             )
             self.vis[path].set_object(g.Sphere(radius), material)
             transform = np.eye(4)
             transform[:3, 3] = np.asarray(seg.com_m, dtype=float)
             self.vis[path].set_transform(transform)
-            if at_peak:
-                glow = f"overlays/segment_ke/glow_{index}"
-                glow_mat = g.MeshPhongMaterial(
-                    color=rgba_to_hex(rgba),
-                    opacity=min(0.3, float(rgba[3])),
-                    transparent=True,
-                )
-                self.vis[glow].set_object(g.Sphere(radius * 1.2), glow_mat)
-                self.vis[glow].set_transform(transform)
 
     def draw_glyphs(self, glyphs: GlyphSet | None) -> None:
         """Draw force/torque glyphs through the shared MeshCat renderer.
