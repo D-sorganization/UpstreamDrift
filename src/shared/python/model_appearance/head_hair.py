@@ -13,12 +13,17 @@ swept fringe at the front and an optional parting. Every number is a field of
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from dataclasses import dataclass
+from functools import lru_cache
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
+from scipy.interpolate import PchipInterpolator
 
 from src.shared.python.model_appearance.geometry import Array, Mesh
+from src.shared.python.model_appearance.head_features import face_settings
 
 _PART_SIGN = {"left": 1.0, "right": -1.0, "none": 0.0}
 
@@ -67,18 +72,27 @@ class HairCrop:
     part_width: float = 0.014
     part_depth: float = 0.35  # fraction of thickness removed in the groove
     heavy_side_gain: float = 0.18  # extra volume swept over the parted side
+    cut_steps: int = 0  # bisections placing a cut point on the curved hairline
 
 
 def _clip_above(
-    v: Array, n: Array, faces: NDArray[np.int64], s: Array
+    v: Array,
+    n: Array,
+    faces: NDArray[np.int64],
+    s: Array,
+    exact: tuple[Callable[[Array], float], int] | None = None,
 ) -> tuple[Array, Array, NDArray[np.int64]]:
     """Faces clipped to ``s > 0``, cut exactly where ``s`` crosses zero.
 
     Returns the vertices and normals extended by the cut points and the new
     triangles (winding preserved). A cut point is shared by the faces on both
     sides of its edge, so the clipped surface stays a manifold with a smooth
-    hairline instead of a staircase of whole triangles.
+    hairline instead of a staircase of whole triangles. ``s`` is linear along
+    an edge only for a straight line; ``exact`` (the level function and a
+    number of bisections) puts each cut point on the curved line itself, which
+    a 10 mm scalp edge otherwise misses by millimetres (a saw-tooth).
     """
+    level, steps = exact or ((lambda _point: 0.0), 0)
     cuts: dict[tuple[int, int], int] = {}
     new_v: list[Array] = []
     new_n: list[Array] = []
@@ -87,6 +101,11 @@ def _clip_above(
         key = (min(inside, outside), max(inside, outside))
         if key not in cuts:
             t = s[inside] / (s[inside] - s[outside])
+            low, high = 0.0, 1.0
+            for _ in range(steps):
+                t = 0.5 * (low + high)
+                ahead = level(v[inside] + t * (v[outside] - v[inside])) > 0.0
+                low, high = (t, high) if ahead else (low, t)
             pos = v[inside] + t * (v[outside] - v[inside])
             nrm = n[inside] + t * (n[outside] - n[inside])
             cuts[key] = len(v) + len(new_v)
@@ -112,6 +131,26 @@ def _clip_above(
     return verts, norms, np.asarray(out, dtype=np.int64)
 
 
+def _scalp(
+    skin: Mesh, cfg: HairCrop, part: str
+) -> tuple[Array, Array, NDArray[np.int64]]:
+    """Scalp above the hairline: vertices, normals and faces, cut on the line."""
+    if cfg.cut_steps < 0:
+        raise ValueError("hair cut_steps must not be negative")
+    v, n = skin.vertices, _vertex_normals(skin)
+    _, line = _thickness(cfg, v, part)
+
+    def above(p: Array) -> float:
+        azimuth = np.arctan2(p[1], p[0] - cfg.centre_x)
+        return float(p[2] - hairline_height(cfg, azimuth))
+
+    exact = (above, cfg.cut_steps) if cfg.cut_steps else None
+    v, n, faces = _clip_above(v, n, skin.faces, v[:, 2] - line, exact)
+    if len(faces) == 0:
+        raise ValueError("haircut covers no scalp faces; check the hairline")
+    return v, n, faces
+
+
 def _vertex_normals(mesh: Mesh) -> Array:
     tri = mesh.vertices[mesh.faces]
     face_n = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
@@ -126,10 +165,50 @@ def _smooth(x: NDArray[np.float64]) -> NDArray[np.float64]:
     return t * t * (3.0 - 2.0 * t)
 
 
+@lru_cache(maxsize=8)
+def _hairline(points: tuple[tuple[float, float], ...]) -> tuple[Any, Array]:
+    pts = np.asarray(points, dtype=float)
+    return PchipInterpolator(pts[:, 0], pts[:, 1]), pts[[0, -1], 0]
+
+
+def load_hair_crop() -> HairCrop:
+    """The haircut of ``face_settings.json`` (its ``hair`` section over the defaults)."""
+    try:
+        return HairCrop(**face_settings("hair"))
+    except TypeError as unknown:
+        raise ValueError(f"unknown hair setting: {unknown}") from unknown
+
+
 def hairline_height(crop: HairCrop, azimuth: NDArray[np.float64]) -> Array:
-    """Hairline height at azimuths (radians); mirrors about the midline."""
-    pts = np.asarray(crop.hairline, dtype=float)
-    return np.interp(np.abs(azimuth), pts[:, 0], pts[:, 1])
+    """Hairline height at azimuths (radians); mirrors about the midline.
+
+    A monotone cubic through the control points: it passes through each one
+    without overshoot and has no corner there (#15299).
+    """
+    line, (first, last) = _hairline(tuple(map(tuple, crop.hairline)))
+    return line(np.clip(np.abs(azimuth), first, last))
+
+
+def hairline_turns_deg(
+    skin: Mesh, part: str, step_rad: float, crop: HairCrop | None = None
+) -> Array:
+    """Turning angles (degrees) along the cut hairline of ``skin``.
+
+    The rim points of the cut are averaged in azimuth bins ``step_rad`` wide
+    and the closed line through the bin centres is walked. Preconditions: a
+    positive finite step. Postcondition: one angle per occupied bin.
+    """
+    if not math.isfinite(step_rad) or step_rad <= 0.0:
+        raise ValueError("the hairline step must be a positive angle")
+    cfg = crop or load_hair_crop()
+    v, _, faces = _scalp(skin, cfg, part)
+    rim = v[open_rim(faces)]
+    bins = np.floor(np.arctan2(rim[:, 1], rim[:, 0] - cfg.centre_x) / step_rad)
+    centres = np.array([rim[bins == b].mean(axis=0) for b in np.unique(bins)])
+    seg = np.roll(centres, -1, axis=0) - centres
+    seg /= np.linalg.norm(seg, axis=1, keepdims=True) + 1e-12
+    cos = np.einsum("ij,ij->i", seg, np.roll(seg, -1, axis=0))
+    return np.degrees(np.arccos(np.clip(cos, -1.0, 1.0)))
 
 
 def _thickness(crop: HairCrop, v: Array, part: str) -> tuple[Array, Array]:
@@ -171,12 +250,8 @@ def build_short_crop(
     """
     if part not in _PART_SIGN:
         raise ValueError(f"hair part must be one of {tuple(_PART_SIGN)}, got {part!r}")
-    cfg = crop or HairCrop()
-    v0, n0 = skin.vertices, _vertex_normals(skin)
-    _, line0 = _thickness(cfg, v0, part)
-    v, n, faces = _clip_above(v0, n0, skin.faces, v0[:, 2] - line0)
-    if len(faces) == 0:
-        raise ValueError("haircut covers no scalp faces; check the hairline")
+    cfg = crop or load_hair_crop()
+    v, n, faces = _scalp(skin, cfg, part)
     thick, _ = _thickness(cfg, v, part)
     return closed_shell(v, n, faces, thick, cfg.off_skin, cfg.rim_thickness)
 
