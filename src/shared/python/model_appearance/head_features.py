@@ -2,9 +2,9 @@
 
 The MakeHuman head carries sculpted lids, nose, lips and ears but no eyeballs
 or colour breaks, so it reads as a blank mannequin. These parts are built in
-head-length units from :class:`FaceLandmarks` and conformed to the local skin
-surface with a nearest-vertex lookup, so each sits on the face without
-floating or sinking. Visual only, like the rest of the head.
+head-length units from :class:`FaceLandmarks`; brows and mouth are conformed
+to the local skin surface, and the eyeballs sit behind the open lids. Visual
+only, like the rest of the head.
 """
 
 from __future__ import annotations
@@ -237,8 +237,9 @@ def face_parts(
 ) -> list[tuple[str, Mesh, str]]:
     """``(name, mesh, material role)`` of eyes, lids, brows and mouth.
 
-    ``skin`` is the unit head-length skin mesh. Postcondition: every mesh is a
-    closed ellipsoid of positive volume, left (y > 0) and right mirrored.
+    ``skin`` is the unit head-length skin mesh. Postcondition: one entry per
+    part and side, left (y > 0) and right; each eye is an eyeball seated behind
+    the lid margins with iris and pupil proud of it (``face_settings.json``).
     """
     m = marks or load_face_landmarks()
     surf = FaceSurface(skin)
