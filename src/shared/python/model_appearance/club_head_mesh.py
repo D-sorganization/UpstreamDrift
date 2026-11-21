@@ -38,6 +38,11 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.model_appearance.club_head_shape import (
+    blended_hosel,
+    load_head_shape_settings,
+    round_head_body,
+)
 from src.shared.python.model_appearance.club_shaft_mesh import tapered_tube
 from src.shared.python.model_appearance.geometry import Mesh, concat_meshes
 
@@ -269,12 +274,20 @@ def load_club_head(name: str) -> ClubHeadMesh:
     if triangles is None:
         triangles = triangles_from_committed_stl(library_name)
         source = "committed_stl"
-    head = _weld(triangles)
+    raw = _weld(triangles)
     loft, lie = _spec_angles(library_name)
-    sole = _sole_point(head.vertices)
+    # The seat, the hosel top and the face come from the body as built, so
+    # rounding the body never moves the shaft end, the sole point or the face.
+    sole = _sole_point(raw.vertices)
     direction = shaft_direction_head(lie)
-    t_top = _hosel_top(sole, direction, head.vertices, _club_type(library_name))
-    hosel = _hosel(sole, direction, t_top)
+    club_type = _club_type(library_name)
+    t_top = _hosel_top(sole, direction, raw.vertices, club_type)
+    shape = load_head_shape_settings()
+    if club_type in shape.shaped_club_types:
+        head = round_head_body(raw, measured_face_normal(raw), shape)
+        hosel = blended_hosel(head, sole, direction, t_top, shape)
+    else:
+        head, hosel = raw, _hosel(sole, direction, t_top)
     return ClubHeadMesh(
         library_name,
         source,
