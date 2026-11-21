@@ -25,6 +25,7 @@ from src.tools.native_viewer_export.landing_marker import rgba_channels
 
 Array = NDArray[np.float64]
 Rect = tuple[int, int, int, int]
+Box = tuple[float, float, float, float]
 SETTINGS_PATH = Path(__file__).with_name("flight_inset_settings.json")
 POSITIONS = ("top_right", "top_left", "bottom_right", "bottom_left")
 _RGBA = (
@@ -229,3 +230,74 @@ def flight_coordinates(
         raise ValueError("path_m must be (n, 3) and axes_m (3, 3)")
     origin = path[0] if origin_m is None else np.asarray(origin_m, dtype=float)
     return (path - origin) @ axes.T  # type: ignore[no-any-return]
+
+
+@dataclass(frozen=True)
+class Plot:
+    """One plot area and its scales: pixels = origin + metres * scale."""
+
+    box: Box
+    origin_x: float
+    origin_y: float
+    scale_x: float
+    scale_y: float
+
+    def pixels(self, down_m: Array, up_m: Array) -> Array:
+        """Pixel ``(u, v)`` rows of down-range and vertical metres (up is -v)."""
+        return np.column_stack(
+            [
+                self.origin_x + np.asarray(down_m) * self.scale_x,
+                self.origin_y - np.asarray(up_m) * self.scale_y,
+            ]
+        )
+
+
+def _gain(exaggeration: float | None, scale_x: float, fit: float) -> float:
+    """Vertical scale: ``exaggeration`` times ``scale_x`` but never beyond ``fit``."""
+    return fit if exaggeration is None else min(exaggeration * scale_x, fit)
+
+
+def plots_for(
+    rect: Rect,
+    settings: FlightInsetSettings,
+    font_px: int,
+    extent_m: tuple[float, float, float],
+) -> tuple[Plot, Plot]:
+    """Profile and plan plots of the inset in ``rect`` for a flight.
+
+    ``extent_m`` is (down-range end, apex height, largest lateral offset). Both
+    plots share the down-range scale. The curve fits inside its plot by
+    construction (postcondition), whatever the exaggeration.
+    """
+    down, apex, lateral = (max(float(v), 1e-6) for v in extent_m)
+    x0, y0, x1, y1 = (float(v) for v in rect)
+    pad, title = float(settings.padding_px), font_px * 1.4
+    r = float(max(settings.marker_radius_px, settings.dot_radius_px)) + 1.0
+    inner = y1 - y0 - 3 * pad
+    split = y0 + pad + inner * settings.profile_share
+    left, right = x0 + pad + r, x1 - pad - r
+    scale_x = (right - left) / down
+    exag = settings.vertical_exaggeration
+    top = y0 + pad + title
+    base = split - r - font_px * 1.4  # room beneath the ground line for the carry
+    fit = (base - top - font_px * 1.5) / apex
+    profile = Plot(
+        (x0 + pad, top, x1 - pad, split),
+        left,
+        base,
+        scale_x,
+        _gain(exag, scale_x, max(fit, 1e-6)),
+    )
+    low = split + pad + title
+    bottom = y1 - pad
+    half = max(lateral, settings.min_lateral_half_span_m)
+    mid = (low + bottom) / 2.0
+    fit_plan = ((bottom - low) / 2.0 - r) / half
+    plan = Plot(
+        (x0 + pad, low, x1 - pad, bottom),
+        left,
+        mid,
+        scale_x,
+        _gain(exag, scale_x, max(fit_plan, 1e-6)),
+    )
+    return profile, plan
