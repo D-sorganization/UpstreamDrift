@@ -34,7 +34,7 @@
     "club_shaft_elevation_deg": "shaft axis elevation at address in the club-only registration of the driver capture",
     "club_head_roll_deg": "ground normal about the shaft at address in the club-only registration; follows its roll setting, which the club markers cannot identify",
     "club_markers": "club-only registration evidence/club_markers/driver_club_only.json; head-frame offsets do not depend on club length",
-    "marker_seeds": "GEARS marker placement review of the driver capture posted on #15296: review geometry, not fitted offsets; starting values for a calibration",
+    "marker_seeds": "Marker placement review posted on #15296: review geometry, not fitted offsets; starting values for a calibration",
     "dropped_markers": "same review; labels that carry no body or club information"
   },
   "marker_seeds": {
