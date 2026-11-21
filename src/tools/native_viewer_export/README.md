@@ -225,11 +225,15 @@ python3 -m src.tools.native_viewer_export --bundle driver.npz --swing driver \
 
 - `core.py`: settings, clip plans (speeds, impact window), the backend protocol,
   `export_swing`; frame timing lives in `src/shared/python/video_timing`.
-- `compositor.py`: labelled 2x2 grid, HUD text and the impact card panel.
+- `compositor.py`: labelled 2x2 grid, HUD text and the impact card panel. Text
+  lines are spaced by their outlined height and the panels start below the view
+  label, so neither can overlap (`hud_layout_settings.json`).
 - `impact_card.py`: one impact card per swing from the displayed pose.
 - `flight_tracer.py`: the ball flight of a swing in swing time and world
   coordinates (#15150), launched by the repository impact and ball-flight
-  model from the clubhead state the impact card reads. It is a model
+  model from the clubhead state the impact card reads: the state where the
+  face reaches the ball (`impact_state.py`), and the tracer starts at that
+  instant, not at the sample before it. It is a model
   prediction from kinematic impact conditions, not a measurement; a flight
   the model flags as outside its validity envelope is not shown unless
   `draw_invalid_flight` is set. Options: `flight_tracer_settings.json`.
@@ -250,8 +254,10 @@ python3 -m src.tools.native_viewer_export --bundle driver.npz --swing driver \
   the ball has landed. Ball and tracer are a 2D overlay projected through the
   view preset camera (MuJoCo's 45 degree lens; views that follow the grip are
   left alone). `--views down_the_line_flight --no-grid` is the wide
-  down-the-line view (`golf_view_presets/flight_view.json`) that keeps the
-  flight in the picture.
+  down-the-line view (`golf_view_presets/flight_view.json`, 4.6 m from the
+  golfer) that keeps the flight in the picture. The MuJoCo ground patch is
+  `ground_half_extent_m` wide each way (`backends/scene_extent_settings.json`),
+  so the ball lands on visible turf.
 - `overlay.py`: overlay feed built from `force_overlay.bundle_provider`.
 - `overlay2d.py`: pinhole projection for the OpenSim 2D glyphs.
 - `backends/`: one module per engine plus shared helpers.

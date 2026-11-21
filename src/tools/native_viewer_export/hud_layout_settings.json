@@ -1,0 +1,14 @@
+{
+  "stroke_px": 2,
+  "line_gap_px": 3,
+  "edge_margin_px": 6,
+  "label_origin_px": [8, 6],
+  "panel_gap_px": 8,
+  "sources": {
+    "stroke_px": "Outline width of HUD and label text (px). Part of the pixel box of a text line, so lines are spaced by their outlined height.",
+    "line_gap_px": "Clear pixels between the outlined boxes of two HUD lines. First-pass flight clips (2026-11-21) set lines 4 px apart (font size + 4) although the outlined glyphs of a 16 px font are 22 px tall.",
+    "edge_margin_px": "Clear pixels between the HUD block and the frame bottom edge.",
+    "label_origin_px": "Top-left corner of the view label (the original literal of the export loop).",
+    "panel_gap_px": "Clear pixels between the view label and the impact panels, which start below it so a left-hand panel cannot cover the label."
+  }
+}

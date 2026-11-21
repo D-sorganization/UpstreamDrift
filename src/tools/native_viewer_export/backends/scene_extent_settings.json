@@ -1,0 +1,6 @@
+{
+  "ground_half_extent_m": 400.0,
+  "sources": {
+    "ground_half_extent_m": "Half side of the square ground patch (m). The exported scene ends its turf 3 m from the golfer, so a wide down-the-line view showed the patch edge and no horizon (first-pass flight clips, 2026-11-21). 400 m reaches past the carry of a long drive (about 250 m) and its roll with room to spare; the turf texture is uniform in world units, so a larger patch adds tiles, not stretch."
+  }
+}

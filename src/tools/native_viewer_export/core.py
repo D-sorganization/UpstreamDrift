@@ -47,7 +47,7 @@ from src.tools.native_viewer_export.compositor import (
     compose_grid,
     draw_hud,
     draw_impact_card,
-    draw_label,
+    draw_view_label,
     event_caption_for_time,
 )
 from src.tools.native_viewer_export import flight_tracer
@@ -985,7 +985,7 @@ def _export_clip(
                 extra_lines=extra_lines,
             )
             labelled = {
-                v: draw_label(tiles[v], get_view_preset(v).label, (8, 6))
+                v: draw_view_label(tiles[v], get_view_preset(v).label)
                 if settings.hud
                 else tiles[v]
                 for v in settings.views
