@@ -1,5 +1,1435 @@
 # Development Log Archive — 2026
 
+### DL-#13991 · Docs: ADR-0060 OpenSim Scaling and Fit Plan (#13991)
+
+- **State:** shipped
+- **Shipped:** 2026-11-06
+- **Owner:** unassigned
+- **Issue:** #13991
+- **Branch:** cursor/opensim-scaling-panel-plan-13991-94df
+- **PR:** #14803
+- **Paths:** see #14803
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`320872fc`; collated from changes/13991-docs-adr-0060-opensim-scaling-and-fit-pl.md)
+- **Summary:** docs: ADR-0060 OpenSim scaling and fit plan (#13991)
+
+### DL-#14419 · Avoid Merge_Group Changed-Paths Checkout Hang and Sync Admission Publisher
+
+- **State:** shipped
+- **Shipped:** 2026-11-05
+- **Owner:** unassigned
+- **Issue:** #14419
+- **Branch:** fix/14419-merge-group-checkout-depth
+- **PR:** #14420
+- **Paths:** see #14420
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`d100e477`; collated from changes/14419-avoid-merge-group-changed-paths-checkout.md)
+- **Summary:** Avoid merge_group changed-paths checkout hang and sync admission publisher
+
+### DL-#14417 · Sync the Admission Publisher Workflow and Provenance Digest With the Canonical Provider
+
+- **State:** shipped
+- **Shipped:** 2026-11-05
+- **Owner:** unassigned
+- **Issue:** #14417
+- **Branch:** codex/14417-admission-publisher-sync
+- **PR:** #14418
+- **Paths:** see #14418
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`982d34d5`; collated from changes/14417-sync-the-admission-publisher-workflow-an.md)
+- **Summary:** Sync the admission publisher workflow and provenance digest with the canonical provider
+
+### DL-#14429 · Avoid OpenSim Classify Checkout Hang With Shallow Fetch
+
+- **State:** shipped
+- **Shipped:** 2026-11-05
+- **Owner:** unassigned
+- **Issue:** #14429
+- **Branch:** agy/14429-opensim-classify-shallow-checkout
+- **PR:** #14430
+- **Paths:** see #14430
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`a9657f01`; collated from changes/14429-avoid-opensim-classify-checkout-hang-wit.md)
+- **Summary:** Avoid OpenSim classify checkout hang with shallow fetch
+
+### DL-#14535 · Size-Aware Development-Log Archiver: Archive Oldest Terminal Entries When the Log Nears the Byte Cap
+
+- **State:** shipped
+- **Shipped:** 2026-11-05
+- **Owner:** unassigned
+- **Issue:** #14535
+- **Branch:** claude-ct/14535-devlog-size-trigger
+- **PR:** #14592
+- **Paths:** see #14592
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`8c6f82c1`; collated from changes/14535-size-aware-development-log-archiver-arch.md)
+- **Summary:** Size-aware development-log archiver: archive oldest terminal entries when the log nears the byte cap
+
+### DL-#14274 · Config/Secret Separation and Upgrade/Rollback Guarantees
+
+- **State:** shipped
+- **Shipped:** 2026-11-05
+- **Owner:** unassigned
+- **Issue:** #14274
+- **Branch:** feat/14274-config-secrets
+- **PR:** #14414, #14403
+- **Paths:** see #14414
+- **Started:** 2026-11-03
+- **Last verified:** 2026-11-05 (`b281ba3e`; collated from changes/14274-root-dockerignore-secret-contract.md)
+- **Summary:** Config/secret separation and upgrade/rollback guarantees
+
+### DL-#14176 · Add Putting Reference Data and Validation Harness
+
+- **State:** shipped
+- **Shipped:** 2026-11-07
+- **Owner:** unassigned
+- **Issue:** #14176
+- **Branch:** claude/putting-validation-14176
+- **PR:** #14198, #14232, #14827
+- **Paths:** see #14198
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-07 (`4ef29833`; collated from changes/14176-putting-make-rate-calibration.md)
+- **Summary:** Add Putting Reference Data and Validation Harness
+
+### DL-#14763 · SHOW-A18: ROM Diagnostic Decomposing A2 Trail-Wrist Excursions Against Pre-A2 Capture and G2 Options
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14763
+- **Branch:** merged via #14886
+- **PR:** #14886
+- **Paths:** see #14886
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`38cfcf83`; collated from changes/14763-show-a18-rwinputy-range.md)
+- **Summary:** SHOW-A18: ROM diagnostic decomposing A2 trail-wrist excursions against pre-A2 capture and G2 options
+- **Next step:** Shipped in PR #14886.
+
+### DL-#14796 · SHOW-A20: Refit Capture Club Pose per Trail-Grip Option Removing Copy-Grip Bias
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14796
+- **Branch:** merged via #14883
+- **PR:** #14883
+- **Paths:** see #14883
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`3ee20382`; collated from changes/14796-show-a20-refit-club-pose.md)
+- **Summary:** SHOW-A20: refit capture club pose per trail-grip option removing copy-grip bias
+- **Next step:** Shipped in PR #14883.
+
+### DL-#14797 · SHOW-A21: Evidence-Based Grip Guards (Dorsal Separation >= 90 Deg and Trail V-Offset Bound in [-75, 75] Deg Grounded in Biomechanical Literature and Tour Data)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14797
+- **Branch:** merged via #14882
+- **PR:** #14882
+- **Paths:** see #14882
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`29f9fac0`; collated from changes/14797-evidence-grip-guards.md)
+- **Summary:** SHOW-A21: evidence-based grip guards (dorsal separation >= 90 deg and trail V-offset bound in [-75, 75] deg grounded in biomechanical literature and tour data)
+- **Next step:** Shipped in PR #14882.
+
+### DL-#14734 · SHOW-A9: Refit Best-Match MuJoCo Driver on A7 Grip + A8 Trunk Spec; Record Candidate Receipt and Baseline Comparison
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14734
+- **Branch:** merged via #14878
+- **PR:** #14878
+- **Paths:** see #14878
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`f304efdc`; collated from changes/14734-show-a9-mujoco-refit.md)
+- **Summary:** SHOW-A9: Refit best-match MuJoCo driver on A7 grip + A8 trunk spec; record candidate receipt and baseline comparison
+- **Next step:** Shipped in PR #14878.
+
+### DL-#14738 · Fleet Grip Guard: PR-Tier Test That Every Model and Binding Reads 15° ± 1° Under A7 Convention (SHOW-A13, #14738)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14738
+- **Branch:** merged via #14875
+- **PR:** #14875
+- **Paths:** see #14875
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`62a43192`; collated from changes/14738-show-a13-fleet-grip-guard.md)
+- **Summary:** Fleet grip guard: PR-tier test that every model and binding reads 15° ± 1° under A7 convention (SHOW-A13, #14738)
+- **Next step:** Shipped in PR #14875.
+
+### DL-#14737 · Apply A7 Grip Roll Zero to Drake, Pinocchio, OpenSim and MyoSuite via the Shared Metric
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14737
+- **Branch:** merged via #14873
+- **PR:** #14873
+- **Paths:** see #14873
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`6823740b`; collated from changes/14737-show-a12-cross-engine-grip.md)
+- **Summary:** Apply A7 grip roll zero to Drake, Pinocchio, OpenSim and MyoSuite via the shared metric
+- **Next step:** Shipped in PR #14873.
+
+### DL-#14736 · SHOW-A11: Validate Active MuJoCo Spec and Grip Bindings Against A7 Grip Roll Convention (+15 Deg Neutral)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14736
+- **Branch:** merged via #14869
+- **PR:** #14869
+- **Paths:** see #14869
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`910c29fa`; collated from changes/14736-show-a11-apply-a7-grip-convention.md)
+- **Summary:** SHOW-A11: Validate active MuJoCo spec and grip bindings against A7 grip roll convention (+15 deg neutral)
+- **Next step:** Shipped in PR #14869.
+
+### DL-#14428 · Add GM-5 Posture, Translation, Club-at-Impact, and Han Et Al. (2019) GRF Pivoting Moment Metrics.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14428
+- **Branch:** merged via #14832
+- **PR:** #14832
+- **Paths:** see #14832
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`56341fdd`; collated from changes/14428-gm5-posture-impact-metrics.md)
+- **Summary:** Add GM-5 posture, translation, club-at-impact, and Han et al. (2019) GRF pivoting moment metrics.
+- **Next step:** Shipped in PR #14832.
+
+### DL-#14424 · Split Address-Relative and Target-Line/Lab-Frame Shoulder and Hip Turn Conventions With Declared Segment Proxies and Chu 2010 Event Reporting (GM-1C).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14424
+- **Branch:** merged via #14863
+- **PR:** #14863
+- **Paths:** see #14863
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`19999b17`; collated from changes/14424-gm1c-shoulder-hip-turn-conventions.md)
+- **Summary:** Split address-relative and target-line/lab-frame shoulder and hip turn conventions with declared segment proxies and Chu 2010 event reporting (GM-1c).
+- **Next step:** Shipped in PR #14863.
+
+### DL-#14731 · Re-Zero Grip Roll to the Owner's A7 Convention: Wrists on Top of Shaft, + CCW Toward Target
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14731
+- **Branch:** merged via #14865
+- **PR:** #14865
+- **Paths:** see #14865
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`f01bfcee`; collated from changes/14731-grip-roll-zero-a7-convention.md)
+- **Summary:** Re-zero grip roll to the owner's A7 convention: wrists on top of shaft, + CCW toward target
+- **Next step:** Shipped in PR #14865.
+
+### DL-#14786 · Optional-Stack CI Runs Loop_Nullspace Snapshot vs Spatial Fixture With Real Pinocchio
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14786
+- **Branch:** merged via #14788
+- **PR:** #14788
+- **Paths:** see #14788
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`f88d28a2`; collated from changes/14786-optional-stack-ci-runs-loop-nullspace-sn.md)
+- **Summary:** Optional-stack CI runs loop_nullspace snapshot vs spatial fixture with real pinocchio
+- **Next step:** Shipped in PR #14788.
+
+### DL-#14753 · SHOW-A17: Mirror the Right Arm in Full_Body_Spec_Anthro_Iron7 and Regenerate Its Two Ground-Support Receipts
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14753
+- **Branch:** merged via #14862
+- **PR:** #14862
+- **Paths:** see #14862
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`b6e846e1`; collated from changes/14753-show-a17-mirror-the-right-arm-in-full-bo.md)
+- **Summary:** SHOW-A17: mirror the right arm in full_body_spec_anthro_iron7 and regenerate its two ground-support receipts
+- **Next step:** Shipped in PR #14862.
+
+### DL-#14747 · Orient the Drawn Grip Hands From the Wrist Follower Frames: The Drawn Dorsum Shell Now Lies on the Wrist Dorsal Axis (Was 35 Deg Lead / 75 Deg Trail Off)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14747
+- **Branch:** merged via #14858
+- **PR:** #14858
+- **Paths:** see #14858
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`e14357ac`; collated from changes/14747-orient-the-drawn-grip-hands-from-the-wri.md)
+- **Summary:** Orient the drawn grip hands from the wrist follower frames: the drawn dorsum shell now lies on the wrist dorsal axis (was 35 deg lead / 75 deg trail off)
+- **Next step:** Shipped in PR #14858.
+
+### DL-#14732 · SHOW-A8: V2 Lumbar+Thoracic Trunk Into Best-Match Mujoco_Driver Model With Styled Render
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14732
+- **Branch:** merged via #14855
+- **PR:** #14855
+- **Paths:** see #14855
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`6392e761`; collated from changes/14732-show-a8-v2-trunk-best-match.md)
+- **Summary:** SHOW-A8: v2 lumbar+thoracic trunk into best-match mujoco_driver model with styled render
+- **Next step:** Shipped in PR #14855.
+
+### DL-#13882 · Catalog Exact Existing Regression Nodes and Merged Provenance for Six Resolved Board Findings
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13882
+- **Branch:** merged via #14842
+- **PR:** #14842
+- **Paths:** see #14842
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`f46f90ed`; collated from changes/13882-regression-catalog.md)
+- **Summary:** Catalog exact existing regression nodes and merged provenance for six resolved board findings
+- **Next step:** Shipped in PR #14842.
+
+### DL-#14751 · G2: Trail-Hand Grip Option (B15) With Explicit 15 Deg Alpha and Widened Trail V-Offset Bound
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14751
+- **Branch:** merged via #14819
+- **PR:** #14819
+- **Paths:** see #14819
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`832f01c9`; collated from changes/14751-g2-trail-hand-grip-option-b15-with-expli.md)
+- **Summary:** G2: trail-hand grip option (b15) with explicit 15 deg alpha and widened trail V-offset bound
+- **Next step:** Shipped in PR #14819.
+
+### DL-#12983 · Reload Pinocchio in OpenSim Dynamics Parity When Unit Mocks Left Stubs in Sys.Modules
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12983
+- **Branch:** merged via #14843
+- **PR:** #14843
+- **Paths:** see #14843
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`1c58d8d3`; collated from changes/12983-reload-pinocchio-in-opensim-dynamics-par.md)
+- **Summary:** Reload pinocchio in OpenSim dynamics parity when unit mocks left stubs in sys.modules
+- **Next step:** Shipped in PR #14843.
+
+### DL-#14743 · TableShotModel Reads the Dispersion Cell for the Shot's Lie and the Conditions' Wind/Slope Bins (CourseConditions Gains Wind/Slope, Default Calm/Flat); Absent Wind/Slope Bins Are Rejected Instead of Silently Using Calm/Flat.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14743
+- **Branch:** merged via #14784
+- **PR:** #14784
+- **Paths:** see #14784
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-07 (`b85eb218`; collated from changes/14743-tableshotmodel-reads-the-dispersion-cell.md)
+- **Summary:** TableShotModel reads the dispersion cell for the shot's lie and the conditions' wind/slope bins (CourseConditions gains wind/slope, default calm/flat); absent wind/slope bins are rejected instead of silently using calm/flat.
+- **Next step:** Shipped in PR #14784.
+
+### DL-#14816 · SHOW-B3b: Omit Ground_Model From Carry-Only Dispersion Tables and Deduplicate Runout Entry Points
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14816
+- **Branch:** merged via #14833
+- **PR:** #14833
+- **Paths:** see #14833
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`a425584c`; collated from changes/14816-carry-table-provenance.md)
+- **Summary:** SHOW-B3b: omit ground_model from carry-only dispersion tables and deduplicate runout entry points
+- **Next step:** Shipped in PR #14833.
+
+### DL-#14501 · NP-08: Offline SVD-Direction Ablation vs High-Frequency Jitter Benchmark (#14501)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14501
+- **Branch:** merged via #14823
+- **PR:** #14823
+- **Paths:** see #14823
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`d4e3a4eb`; collated from changes/14501-np08-svd-jitter-ablation.md)
+- **Summary:** NP-08: offline SVD-direction ablation vs high-frequency jitter benchmark (#14501)
+- **Next step:** Shipped in PR #14823.
+
+### DL-#14423 · Map X-Factor Variants to Literature Families and Add Publish Payload + Unit Tests (GM-1B).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14423
+- **Branch:** merged via #14818
+- **PR:** #14818
+- **Paths:** see #14818
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`f0cfeb27`; collated from changes/14423-map-x-factor-variants-to-literature-fami.md)
+- **Summary:** Map X-factor variants to literature families and add publish payload + unit tests (GM-1b).
+- **Next step:** Shipped in PR #14818.
+
+### DL-#13884 · Controller Synergy Audit Slice 1: ControllerAuditSpec, #13837 Trace Adapter and ControllerAuditReport (UCM, TNC Fail-Closed Below 30 Trials, Null-Space Gain Norm) With an Analytic Lyapunov Golden
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13884
+- **Branch:** merged via #14768
+- **PR:** #14768, #14856
+- **Paths:** see #14768
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-07 (`2f7dab23`; collated from changes/13884-controller-synergy-audit-slice-2-minimum.md)
+- **Summary:** Controller synergy audit slice 1: ControllerAuditSpec, #13837 trace adapter and ControllerAuditReport (UCM, TNC fail-closed below 30 trials, null-space gain norm) with an analytic Lyapunov golden
+- **Next step:** Shipped in PR #14768.
+
+### DL-#14812 · Rewrite Pose_Studio Test_Widgets Against Real Qt Widgets With Qapp Fixture (#14812)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14812
+- **Branch:** merged via #14815
+- **PR:** #14815
+- **Paths:** see #14815
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`5d662cbb`; collated from changes/14812-pose-studio-test-widgets.md)
+- **Summary:** rewrite pose_studio test_widgets against real Qt widgets with qapp fixture (#14812)
+- **Next step:** Shipped in PR #14815.
+
+### DL-#14810 · Pose_Studio Test_Gui Requests a Real QApplication via an Autouse Qapp Fixture, so It No Longer Crashes an Xdist Worker When No QApplication Exists Yet
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14810
+- **Branch:** merged via #14811
+- **PR:** #14811
+- **Paths:** see #14811
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`02450ff9`; collated from changes/14810-pose-studio-test-gui-requests-a-real-qap.md)
+- **Summary:** pose_studio test_gui requests a real QApplication via an autouse qapp fixture, so it no longer crashes an xdist worker when no QApplication exists yet
+- **Next step:** Shipped in PR #14811.
+
+### DL-#14807 · Drake UI Abort Regression Tests Request Qapp via an Autouse Fixture, so They No Longer Crash an Xdist Worker When No QApplication Exists Yet
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14807
+- **Branch:** merged via #14808
+- **PR:** #14808
+- **Paths:** see #14808
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`26bb158a`; collated from changes/14807-drake-ui-abort-regression-tests-request.md)
+- **Summary:** Drake UI abort regression tests request qapp via an autouse fixture, so they no longer crash an xdist worker when no QApplication exists yet
+- **Next step:** Shipped in PR #14808.
+
+### DL-#14767 · Leaderboard Freshness Gate Moved to Scripts/Ci/check_leaderboard_freshness.py; a PR That Changes No Motion_Matching Solver Input Passes Despite a Squash-Orphaned Git_Head, Solver Changes Still Need a Rerun.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14767
+- **Branch:** merged via #14783
+- **PR:** #14783
+- **Paths:** see #14783
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`7031b228`; collated from changes/14767-leaderboard-freshness-gate-moved-to-scri.md)
+- **Summary:** Leaderboard freshness gate moved to scripts/ci/check_leaderboard_freshness.py; a PR that changes no motion_matching solver input passes despite a squash-orphaned git_head, solver changes still need a rerun.
+- **Next step:** Shipped in PR #14783.
+
+### DL-#14756 · P5: Parity Report Candidate Resolution Fails Closed; Canonical Checksum/Schema/Manifest Failures Never Fall Through to Legacy Loading, Legacy Numeric Archives Detected Explicitly, No Allow_Pickle=True
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14756
+- **Branch:** merged via #14770
+- **PR:** #14770
+- **Paths:** see #14770
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`3e727f85`; collated from changes/14756-p5-parity-report-candidate-resolution-fa.md)
+- **Summary:** P5: parity report candidate resolution fails closed; canonical checksum/schema/manifest failures never fall through to legacy loading, legacy numeric archives detected explicitly, no allow_pickle=True
+- **Next step:** Shipped in PR #14770.
+
+### DL-#14744 · Strategy CLI: --Shot-Table / --Shot-Model Inject the Selected Shot Model Into the Personal Solve and Report Its Provenance in Text and HTML
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14744
+- **Branch:** merged via #14793
+- **PR:** #14793
+- **Paths:** see #14793
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`87681255`; collated from changes/14744-strategy-cli-shot-table-shot-model-injec.md)
+- **Summary:** strategy CLI: --shot-table / --shot-model inject the selected shot model into the personal solve and report its provenance in text and HTML
+- **Next step:** Shipped in PR #14793.
+
+### DL-#14633 · Re-Base HX Grip Alpha to Face-On Zero at Flagship Address; Preserve Fitted Euler Triples.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14633
+- **Branch:** merged via #14639
+- **PR:** #14639
+- **Paths:** see #14639
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`25a0c0a6`; collated from changes/14633-re-base-hx-grip-alpha-to-face-on-zero-at.md)
+- **Summary:** Re-base HX grip alpha to face-on zero at flagship address; preserve fitted Euler triples.
+- **Next step:** Shipped in PR #14639.
+
+### DL-#14621 · Flight Model Validity: Launch Spin Cap, Trajectory Guard, Pipeline Metadata
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14621
+- **Branch:** merged via #14641
+- **PR:** #14641
+- **Paths:** see #14641
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`74f43930`; collated from changes/14621-flight-model-validity-launch-spin-cap-tr.md)
+- **Summary:** Flight model validity: launch spin cap, trajectory guard, pipeline metadata
+- **Next step:** Shipped in PR #14641.
+
+### DL-#14503 · NP-10 Offline Weight Inspector and Lexical CI Guardrail (#14503)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14503
+- **Branch:** merged via #14817
+- **PR:** #14817
+- **Paths:** see #14817
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`c0739cf2`; collated from changes/14503-np10-weight-inspector.md)
+- **Summary:** NP-10 offline weight inspector and lexical CI guardrail (#14503)
+- **Next step:** Shipped in PR #14817.
+
+### DL-#14405 · Bump PR Body Lint Caller Pin to the Post-RM#2697 Reusable Workflow (RM#2427)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14405
+- **Branch:** merged via #14791
+- **PR:** #14791
+- **Paths:** see #14791
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`2c971605`; collated from changes/14405-bump-pr-body-lint-caller-pin-to-the-post.md)
+- **Summary:** Bump PR Body Lint caller pin to the post-RM#2697 reusable workflow (RM#2427)
+- **Next step:** Shipped in PR #14791.
+
+### DL-#12583 · NSX-55: Document DV-12583 as Present on Main, Add Catalog Regression Test, Fix Publication_Gate Checklist
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12583
+- **Branch:** merged via #14806
+- **PR:** #14806
+- **Paths:** see #14806
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`c32c76dc`; collated from changes/12583-nsx55-dv-catalog-gate-and-publication-checklis.md)
+- **Summary:** NSX-55: document DV-12583 as present on main, add catalog regression test, fix publication_gate checklist
+- **Next step:** Shipped in PR #14806.
+
+### DL-#14771 · Ground-Support Segment-Scale Tie-Break, Receipt Canonical Compare (#14771)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14771
+- **Branch:** merged via #14777
+- **PR:** #14777
+- **Paths:** see #14777
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`d0705fe6`; collated from changes/14771-ground-support-segment-scale-tie-break-r.md)
+- **Summary:** Ground-support segment-scale tie-break, receipt canonical compare (#14771)
+- **Next step:** Shipped in PR #14777.
+
+### DL-#14757 · NSX-13 Spatial-Fixture Test Double Builds the R11 Shaft Springs Like NativePinocchioModel (Rigid Club), so Test_Snapshot_vs_Spatial_Fixture Is Green Again
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14757
+- **Branch:** merged via #14759
+- **PR:** #14759
+- **Paths:** see #14759
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`a2cba942`; collated from changes/14757-nsx-13-spatial-fixture-test-double-build.md)
+- **Summary:** NSX-13 spatial-fixture test double builds the R11 shaft springs like NativePinocchioModel (rigid club), so test_snapshot_vs_spatial_fixture is green again
+- **Next step:** Shipped in PR #14759.
+
+### DL-#14746 · SHOW-G1: Mirror the Right-Arm Joint Axes in Driver V1/V2 (R Scapula, Shoulder, Forearm, Wrist) so Positive L and R Coordinates Give Mirrored Motion
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14746
+- **Branch:** merged via #14762
+- **PR:** #14762
+- **Paths:** see #14762
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`a4765a14`; collated from changes/14746-show-g1-mirror-the-right-arm-joint-axes.md)
+- **Summary:** SHOW-G1: mirror the right-arm joint axes in driver v1/v2 (R scapula, shoulder, forearm, wrist) so positive L and R coordinates give mirrored motion
+- **Next step:** Shipped in PR #14762.
+
+### DL-#14741 · Add PR Size Gate Workflow and Git Numstat Checker (500-Line Cap, Exemptions).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14741
+- **Branch:** merged via #14774
+- **PR:** #14774, #14820
+- **Paths:** see #14774
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`f46eba70`; collated from changes/14741-pr-size-advisory-bdb9.md)
+- **Summary:** Add PR size gate workflow and git numstat checker (500-line cap, exemptions).
+- **Next step:** Shipped in PR #14774.
+
+### DL-#14478 · NP-03/04 Toy MLP Rank-1 Edit and LoRA Comparator (#14478 #14479)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14478
+- **Branch:** merged via #14778
+- **PR:** #14778
+- **Paths:** see #14778
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`716ce0bc`; collated from changes/14478-np-03-04-toy-mlp-rank-1-edit-and-lora-co.md)
+- **Summary:** NP-03/04 toy MLP rank-1 edit and LoRA comparator (#14478 #14479)
+- **Next step:** Shipped in PR #14778.
+
+### DL-#14422 · Add Pydantic Golf Metric-Definitions Registry Schema (GM-1a) With Filter Descriptor.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14422
+- **Branch:** merged via #14776
+- **PR:** #14776
+- **Paths:** see #14776
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`78676865`; collated from changes/14422-add-pydantic-golf-metric-definitions-reg.md)
+- **Summary:** Add Pydantic golf metric-definitions registry schema (GM-1a) with filter descriptor.
+- **Next step:** Shipped in PR #14776.
+
+### DL-#12721 · Xfail Placeholder for Anthro Noise-Aware Receipt (#12721)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12721
+- **Branch:** merged via #14779
+- **PR:** #14779
+- **Paths:** see #14779
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`7bf79325`; collated from changes/12721-xfail-placeholder-for-anthro-noise-aware.md)
+- **Summary:** xfail placeholder for anthro noise-aware receipt (#12721)
+- **Next step:** Shipped in PR #14779.
+
+### DL-#12719 · Event_Outcome_Rows Refuses a Near-Grazing Impact (Transversality Below GRAZING_TRANSVERSALITY) Instead of Returning Unreliable Linear Rows
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12719
+- **Branch:** merged via #14782
+- **PR:** #14782
+- **Paths:** see #14782
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`05fb6000`; collated from changes/12719-event-outcome-rows-refuses-a-near-grazin.md)
+- **Summary:** event_outcome_rows refuses a near-grazing impact (transversality below GRAZING_TRANSVERSALITY) instead of returning unreliable linear rows
+- **Next step:** Shipped in PR #14782.
+
+### DL-#14748 · Native_Viewer_Export CLI Explains a Foreign Shared Package Shadowing the Vendored Tools Tree
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14748
+- **Branch:** merged via #14769
+- **PR:** #14769, #14809
+- **Paths:** see #14769
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-07 (`f111638e`; collated from changes/14748-native-viewer-export-bootstrap-imports-a.md)
+- **Summary:** native_viewer_export CLI explains a foreign shared package shadowing the vendored Tools tree
+- **Next step:** Shipped in PR #14769.
+
+### DL-#14739 · Simscape Grip Docs State the SHOW-A7 Grip Zero (#14731); a MATLAB Test Checks the Gs3dx Topology Frames; the R2025b Address-Roll Check Is Cataloged as Deferred
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14739
+- **Branch:** merged via #14772
+- **PR:** #14772
+- **Paths:** see #14772
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`90c8e841`; collated from changes/14739-simscape-grip-docs-state-the-show-a7-gri.md)
+- **Summary:** Simscape grip docs state the SHOW-A7 grip zero (#14731); a MATLAB test checks the gs3dx topology frames; the R2025b address-roll check is cataloged as deferred
+- **Next step:** Shipped in PR #14772.
+
+### DL-#12684 · Pin the R4 Capture-Mode Address Knee on the Canonical Receipts and Record Their Marker RMS Before/After (Acceptance 6)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12684
+- **Branch:** merged via #14758
+- **PR:** #14758
+- **Paths:** see #14758
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`410d9f58`; collated from changes/12684-pin-the-r4-capture-mode-address-knee-on.md)
+- **Summary:** Pin the R4 capture-mode address knee on the canonical receipts and record their marker RMS before/after (acceptance 6)
+- **Next step:** Shipped in PR #14758.
+
+### DL-#13044 · OSL-7 Predictive Deadlift Receipt Now Records the Tracked Comparison as Unavailable (Non-Converged Solve) via a No-Solve --Refresh-Comparison Mode; lift_models.tex Notes the Exploratory Status.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13044
+- **Branch:** merged via #14766
+- **PR:** #14766
+- **Paths:** see #14766
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`8065fb0f`; collated from changes/13044-osl-7-predictive-deadlift-receipt-now-re.md)
+- **Summary:** OSL-7 predictive deadlift receipt now records the tracked comparison as unavailable (non-converged solve) via a no-solve --refresh-comparison mode; lift_models.tex notes the exploratory status.
+- **Next step:** Shipped in PR #14766.
+
+### DL-#14749 · Fix Lod-Quality-Gate Regression: TableShotModel Asks DispersionTable.Club_Label Instead of Reaching Into Provenance (Law of Demeter)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14749
+- **Branch:** merged via #14752
+- **PR:** #14752
+- **Paths:** see #14752
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`5a89fb4d`; collated from changes/14749-fix-lod-quality-gate-regression-tablesho.md)
+- **Summary:** Fix lod-quality-gate regression: TableShotModel asks DispersionTable.club_label instead of reaching into provenance (Law of Demeter)
+- **Next step:** Shipped in PR #14752.
+
+### DL-#14703 · Putting Studio: Exact Imperial Ft Factor, a Parity Test for the Core Green Edge Clamp, and Locked Slope Sliders That Read the Core Green's Slope at the Ball
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14703
+- **Branch:** merged via #14709
+- **PR:** #14709
+- **Paths:** see #14709
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`c179ec77`; collated from changes/14703-putting-studio-exact-imperial-ft-factor.md)
+- **Summary:** Putting studio: exact imperial ft factor, a parity test for the core green edge clamp, and locked slope sliders that read the core green's slope at the ball
+- **Next step:** Shipped in PR #14709.
+
+### DL-#13779 · Knot_Gradient_Optimiser: Lbfgs_Minimise Records a Per-Evaluation Objective Versus Gradient Timing Split and the Projected-Gradient Norm (Per Evaluation and at SciPy's Final Point) so a Max_Iterations Stop Is Diagnosable; Results Are Pinned Bit-for-Bit
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13779
+- **Branch:** merged via #14723
+- **PR:** #14723, #14775
+- **Paths:** see #14723
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`3d68d51d`; collated from changes/13779-mjx-l-bfgs-parameter-scale-scipy-ftol-gt.md)
+- **Summary:** knot_gradient_optimiser: lbfgs_minimise records a per-evaluation objective versus gradient timing split and the projected-gradient norm (per evaluation and at SciPy's final point) so a max_iterations stop is diagnosable; results are pinned bit-for-bit
+- **Next step:** Shipped in PR #14723.
+
+### DL-#13057 · Lifting: The Four Strict Residual-Gate Xfails (Deadlift, Bench Press, Snatch, Clean and Jerk) Now Cite #13057, the Hip and Pelvis Rebuild That Owns the Residual Excess, Instead Of #13041
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13057
+- **Branch:** merged via #14730
+- **PR:** #14730, #14802
+- **Paths:** see #14730
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-06 (`9569ef7e`; collated from changes/13057-osl-14-scoping-osl-scoping-osl14-fixture.md)
+- **Summary:** lifting: the four strict residual-gate xfails (deadlift, bench press, snatch, clean and jerk) now cite #13057, the hip and pelvis rebuild that owns the residual excess, instead of #13041
+- **Next step:** Shipped in PR #14730.
+
+### DL-#14698 · Add the Lighthouse Mobile Baseline Receipt (Loopback Fixture Server and Egress Proxy, Report Validator, CI Steps on the Fleet Runner) as the Follow-Up to #14270; Scores Informational, No Threshold.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14698
+- **Branch:** merged via #14717
+- **PR:** #14717, #14813
+- **Paths:** see #14717
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-06 (`a5fb78f4`; collated from changes/14698-ci-lighthouse-mobile-baseline-runs-in-it.md)
+- **Summary:** Add the Lighthouse mobile baseline receipt (loopback fixture server and egress proxy, report validator, CI steps on the fleet runner) as the follow-up to #14270; scores informational, no threshold.
+- **Next step:** Shipped in PR #14717.
+
+### DL-#14610 · SHOW-B3b: Bounce/Roll Rest Positions (Sg_Runout_V1) on the B6 Slope Bins, CRN Lie Modifier for Dispersion Tables
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14610
+- **Branch:** merged via #14708
+- **PR:** #14708, #14726, #14642
+- **Paths:** see #14708
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-06 (`ac859070`; collated from changes/14610-show-b3b-dispersion-ground-runout.md)
+- **Summary:** SHOW-B3b: bounce/roll rest positions (sg_runout_v1) on the B6 slope bins, CRN lie modifier for dispersion tables
+- **Next step:** Shipped in PR #14708.
+
+### DL-#12769 · SPN-14a: Fixture_Peak_Spread_Table Serialises Law Drive Residuals and Lumbar Compression Spreads; the Invented-Fixture Table Is Committed as a CI Golden (Tests/Fixtures/Spine/Spn14a_Fixture_Peaks.Json)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12769
+- **Branch:** merged via #14716
+- **PR:** #14716
+- **Paths:** see #14716
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`6bcba0c7`; collated from changes/12769-spn14a-fixture-golden.md)
+- **Summary:** SPN-14a: fixture_peak_spread_table serialises law drive residuals and lumbar compression spreads; the invented-fixture table is committed as a CI golden (tests/fixtures/spine/spn14a_fixture_peaks.json)
+- **Next step:** Shipped in PR #14716.
+
+### DL-#14452 · Putting Parity Matrix: Units.React and Units.Tauri Move to Present, Citing the React Units Selector That #14458 Landed (PR #14489); No Putting Gaps Remain in the Matrix (Part Of #14452)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14452
+- **Branch:** merged via #14712
+- **PR:** #14712
+- **Paths:** see #14712
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`5eee5589`; collated from changes/14452-units-matrix-cell.md)
+- **Summary:** putting parity matrix: units.react and units.tauri move to present, citing the React units selector that #14458 landed (PR #14489); no putting gaps remain in the matrix (Part of #14452)
+- **Next step:** Shipped in PR #14712.
+
+### DL-#14702 · Putting_Dynamics: The Post-Impact Hop Reflects the Vertical Speed Relative to the Green, so a Downhill Putt Settles in Under 0.1 s Instead of Skipping for About 5 s; the Studio Long-Downhill Read Is Back in Core Parity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14702
+- **Branch:** merged via #14705
+- **PR:** #14705
+- **Paths:** see #14705
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`b76beaa7`; collated from changes/14702-downhill-hop.md)
+- **Summary:** putting_dynamics: the post-impact hop reflects the vertical speed relative to the green, so a downhill putt settles in under 0.1 s instead of skipping for about 5 s; the studio long-downhill read is back in core parity
+- **Next step:** Shipped in PR #14705.
+
+### DL-#12691 · R11: Per-Engine Chain-Shaft Impact-Window Receipt and Overlay Now Cover Drake and Pinocchio, With an Engine-Free Gate
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12691
+- **Branch:** merged via #14692
+- **PR:** #14692, #14773
+- **Paths:** see #14692
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-06 (`7e843383`; collated from changes/12691-manual-ch-67-quotes-the-five-engine-r11.md)
+- **Summary:** R11: per-engine chain-shaft impact-window receipt and overlay now cover drake and pinocchio, with an engine-free gate
+- **Next step:** Shipped in PR #14692.
+
+### DL-#12567 · NSX-24: Unify ContactForceAllocator and MultiEngineTorqueAllocator on Allocate_Contact_Frame Conic Path
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12567
+- **Branch:** merged via #14699
+- **PR:** #14699
+- **Paths:** see #14699
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`ef08fbcb`; collated from changes/12567-nsx-24-unify-contactforceallocator-and-m.md)
+- **Summary:** NSX-24: unify ContactForceAllocator and MultiEngineTorqueAllocator on allocate_contact_frame conic path
+- **Next step:** Shipped in PR #14699.
+
+### DL-#14677 · Sg_Optimizer: Common Random Numbers for an Injected ShotOutcomeModel so the Scalar Backup Converges
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14677
+- **Branch:** merged via #14688
+- **PR:** #14688
+- **Paths:** see #14688
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`fe666fa5`; collated from changes/14677-sg-optimizer-common-random-numbers-for-a.md)
+- **Summary:** sg_optimizer: common random numbers for an injected ShotOutcomeModel so the scalar backup converges
+- **Next step:** Shipped in PR #14688.
+
+### DL-#14650 · Putting Studio: Batch Strokes Gained, the E(d) Chart and the Optimal Pace Read the Core's Solved Player E(d) From Core_Sg.Js (Service_Sg.Sg_Study, Tour-Average Player, Side-Slope Grid), Replacing the Hand-Tuned Comeback Fit
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14650
+- **Branch:** merged via #14689
+- **PR:** #14689, #14695
+- **Paths:** see #14689
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`37294a10`; collated from changes/14650-studio-pace.md)
+- **Summary:** Putting studio: batch strokes gained, the E(d) chart and the optimal pace read the core's solved player E(d) from core_sg.js (service_sg.sg_study, tour-average player, side-slope grid), replacing the hand-tuned comeback fit
+- **Next step:** Shipped in PR #14689.
+
+### DL-#14649 · Putting Studio: Auto-Solve Runs solveAimCore, a Port of the Core Solve_Aim (Pace Bisection and Heading Secant) Golden-Pinned to the Core Read on the Core Greens, and the Batch Strikes at the Solved Head Speed While the Read Is Current
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14649
+- **Branch:** merged via #14683
+- **PR:** #14683, #14678
+- **Paths:** see #14683
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`032b2de4`; collated from changes/14649-studio-roll.md)
+- **Summary:** Putting studio: Auto-Solve runs solveAimCore, a port of the core solve_aim (pace bisection and heading secant) golden-pinned to the core read on the core greens, and the batch strikes at the solved head speed while the read is current
+- **Next step:** Shipped in PR #14683.
+
+### DL-#14572 · SHOW-B8: Strategy CLI and HTML View With Tour vs Personal Strokes, Shot Options and Dispersion Ellipses
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14572
+- **Branch:** merged via #14659
+- **PR:** #14659
+- **Paths:** see #14659
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`8b83fe3b`; collated from changes/14572-show-b8-strategy-cli-and-view.md)
+- **Summary:** SHOW-B8: strategy CLI and HTML view with tour vs personal strokes, shot options and dispersion ellipses
+- **Next step:** Shipped in PR #14659.
+
+### DL-#14551 · Neutral Address Grip: Flagship Driver Grip Set to the HX-Canonical Grip (Alpha -10.73, Psi 40, Gamma 0) so Both Hands Read 15 Deg Face-On (Was 98/108 Deg); Address and Swing Fixtures Re-Solved. Deferred to A6 (#14555): At Address the RW Wrist Reads -41.8 Deg (Range -40..25) and the Driver Swing Leaves the Wrist Ranges (RWInputY 691 Frames to -130 Deg, RWInputX 66 Frames, LWInputY 216 Frames); Numbers in Neutral_Grip.Json. Capture-Matching Receipts Keep Chaining to Full_Body_Spec_Anthro_Driver_Capture.Json (The Pre-A2 Fitted Grip, Fitted to the Capture and Not a Grip Recommendation): On the Neutral Grip the Seeds Receipt Fails the Gates (IK Closure 3.9 -> 76.8 mm vs 5 mm, IK RMS 29.5 -> 55.3 mm, Backswing Min Weight Fraction 0.0 BW, Address-to-Impact 64 mm vs 34 mm), the A6 Problem Statement
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14551
+- **Branch:** merged via #14644
+- **PR:** #14644
+- **Paths:** see #14644
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`1b514e12`; collated from changes/14551-neutral-address-grip-15-deg.md)
+- **Summary:** Neutral address grip: flagship driver grip set to the HX-canonical grip (alpha -10.73, psi 40, gamma 0) so both hands read 15 deg face-on (was 98/108 deg); address and swing fixtures re-solved. Deferred to A6 (#14555): at address the RW wrist reads -41.8 deg (range -40..25) and the driver swing leaves the wrist ranges (RWInputY 691 frames to -130 deg, RWInputX 66 frames, LWInputY 216 frames); numbers in neutral_grip.json. Capture-matching receipts keep chaining to full_body_spec_anthro_driver_capture.json (the pre-A2 fitted grip, fitted to the capture and not a grip recommendation): on the neutral grip the seeds receipt fails the gates (IK closure 3.9 -> 76.8 mm vs 5 mm, IK RMS 29.5 -> 55.3 mm, backswing min weight fraction 0.0 BW, address-to-impact 64 mm vs 34 mm), the A6 problem statement
+- **Next step:** Shipped in PR #14644.
+
+### DL-#14648 · Putting Studio: Green Type Selector for Every Core Green Preset (Undulating Included), Height Grids Generated From GreenSpec Into Core_Greens.Js and Read With the Core Bilinear Lookup
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14648
+- **Branch:** merged via #14676
+- **PR:** #14676
+- **Paths:** see #14676
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`42b69064`; collated from changes/14648-studio-greens.md)
+- **Summary:** Putting studio: Green Type selector for every core green preset (undulating included), height grids generated from GreenSpec into core_greens.js and read with the core bilinear lookup
+- **Next step:** Shipped in PR #14676.
+
+### DL-#14660 · SG Optimizer: Common Random Numbers and Pin-Relative Aims so HoleMDP Value Iteration Converges (Cap Is a Safety Bound Only)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14660
+- **Branch:** merged via #14663
+- **PR:** #14663
+- **Paths:** see #14663
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`6780ce16`; collated from changes/14660-sg-mdp-common-random-numbers.md)
+- **Summary:** SG optimizer: common random numbers and pin-relative aims so HoleMDP value iteration converges (cap is a safety bound only)
+- **Next step:** Shipped in PR #14663.
+
+### DL-#14449 · Cross-Frontend Putting Golden: Shared-Core Fixture, React/Tauri Replay Parity Tests and a Generated Parity Report
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14449
+- **Branch:** merged via #14666
+- **PR:** #14666
+- **Paths:** see #14666
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`300f194e`; collated from changes/14449-cross-frontend-putting-golden-shared-cor.md)
+- **Summary:** Cross-frontend putting golden: shared-core fixture, React/Tauri replay parity tests and a generated parity report
+- **Next step:** Shipped in PR #14666.
+
+### DL-#14647 · Putting Studio: The Skid-to-Roll Transition Ends Where the Core Simulate_Strike Skid Ends for the Ball Speed, and the Telemetry Shows the Core Launch Angle
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14647
+- **Branch:** merged via #14662
+- **PR:** #14662, #14667
+- **Paths:** see #14662
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`33a3f33f`; collated from changes/14647-studio-heel-toe-strike.md)
+- **Summary:** Putting studio: the skid-to-roll transition ends where the core simulate_strike skid ends for the ball speed, and the telemetry shows the core launch angle
+- **Next step:** Shipped in PR #14662.
+
+### DL-#14600 · Head-CG Offset (Opt-In) and Toe_Down_m Shaft Metric for the C4 Shaft State (Refs #14600)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14600
+- **Branch:** merged via #14658
+- **PR:** #14658, #14674
+- **Paths:** see #14658
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`7ecb8022`; collated from changes/14600-shaft-axis-from-chain.md)
+- **Summary:** Head-CG offset (opt-in) and toe_down_m shaft metric for the C4 shaft state (Refs #14600)
+- **Next step:** Shipped in PR #14658.
+
+### DL-#14496 · Clarify the Fixed-State ZTCF Drift and ZVCF Control Component Definitions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14496
+- **Branch:** merged via #14498
+- **PR:** #14498
+- **Paths:** see #14498
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`b9398531`; collated from changes/14496-clarify-the-fixed-state-ztcf-drift-and-z.md)
+- **Summary:** Clarify the fixed-state ZTCF drift and ZVCF control component definitions
+- **Next step:** Shipped in PR #14498.
+
+### DL-#12688 · R9a: Commit Drake and Pinocchio MeshCat Appearance Stills and Evidence Test (#12688)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12688
+- **Branch:** merged via #14395
+- **PR:** #14395
+- **Paths:** see #14395
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`ec12acb9`; collated from changes/12688-regenerate-matched-swing-ledger-after-r9.md)
+- **Summary:** R9a: commit Drake and Pinocchio MeshCat appearance stills and evidence test (#12688)
+- **Next step:** Shipped in PR #14395.
+
+### DL-#14646 · Putting Studio: A Metric/Imperial Selector; Distance, Speed and Strike Labels Come From the Shared Units Table Generated Into Core_Units.Js
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14646
+- **Branch:** merged via #14654
+- **PR:** #14654, #14671
+- **Paths:** see #14654
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`ea6d0a4d`; collated from changes/14646-units-api.md)
+- **Summary:** Putting studio: a Metric/Imperial selector; distance, speed and strike labels come from the shared units table generated into core_units.js
+- **Next step:** Shipped in PR #14654.
+
+### DL-#14640 · Replace Wall-Clock Speed-Up Ratio in Test_Topology_Contact_Batched With a Deterministic Per-Pair Kernel Call Count
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14640
+- **Branch:** merged via #14651
+- **PR:** #14651
+- **Paths:** see #14651
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`2c4bed1a`; collated from changes/14640-replace-wall-clock-speed-up-ratio-in-tes.md)
+- **Summary:** Replace wall-clock speed-up ratio in test_topology_contact_batched with a deterministic per-pair kernel call count
+- **Next step:** Shipped in PR #14651.
+
+### DL-#14495 · Align MuJoCo Counterfactuals Zvcf() and the MATLAB ZVCF Comments With the Control-Component Contract
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14495
+- **Branch:** merged via #14636
+- **PR:** #14636
+- **Paths:** see #14636
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`96bb31ae`; collated from changes/14495-align-mujoco-counterfactuals-zvcf-and-th.md)
+- **Summary:** Align MuJoCo counterfactuals zvcf() and the MATLAB ZVCF comments with the control-component contract
+- **Next step:** Shipped in PR #14636.
+
+### DL-#14472 · React/Tauri Putting Page: Saved Scenarios and Comparison Over the Shared Core, Golden-Pinned (Part 1 Of #14472)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14472
+- **Branch:** merged via #14637
+- **PR:** #14637, #14656
+- **Paths:** see #14637
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`b2c6da6c`; collated from changes/14472-react-tauri-putting-page-export-and-impo.md)
+- **Summary:** React/Tauri putting page: saved scenarios and comparison over the shared core, golden-pinned (part 1 of #14472)
+- **Next step:** Shipped in PR #14637.
+
+### DL-#14630 · Putting: The Strokes Gained Chart Title Fits the Phone-Width Window and the Holed Check Box Reads on the Dark Controls Panel
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14630
+- **Branch:** merged via #14645
+- **PR:** #14645
+- **Paths:** see #14645
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`43ee052d`; collated from changes/14630-sg-panel-phone-polish.md)
+- **Summary:** Putting: the Strokes Gained chart title fits the phone-width window and the Holed check box reads on the dark controls panel
+- **Next step:** Shipped in PR #14645.
+
+### DL-#14570 · SHOW-B6: Slope/Stance Bins and Wind Bins in the Dispersion Tables (slope_wind_bins.py), Labelled Assumptions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14570
+- **Branch:** merged via #14628
+- **PR:** #14628
+- **Paths:** see #14628
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`1558c825`; collated from changes/14570-show-b6-slope-stance-bins-and-wind-bins.md)
+- **Summary:** SHOW-B6: slope/stance bins and wind bins in the dispersion tables (slope_wind_bins.py), labelled assumptions
+- **Next step:** Shipped in PR #14628.
+
+### DL-#14563 · SHOW-C7 Flight Report and Measured-Swing Flight Card (Part Of #14563)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14563
+- **Branch:** merged via #14620
+- **PR:** #14620, #14670
+- **Paths:** see #14620
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`a3a1276e`; collated from changes/14563-c7-slice-2-address-pose-stills-capture-f.md)
+- **Summary:** SHOW-C7 flight report and measured-swing flight card (Part of #14563)
+- **Next step:** Shipped in PR #14620.
+
+### DL-#14632 · Drake IK Now Implements the Club-Sole Ground Term (Base Was a No-Op), Fixing the 126.7 mm Address Hover
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14632
+- **Branch:** merged via #14634
+- **PR:** #14634
+- **Paths:** see #14634
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`d58c3d44`; collated from changes/14632-drake-ik-now-implements-the-club-sole-gr.md)
+- **Summary:** Drake IK now implements the club-sole ground term (base was a no-op), fixing the 126.7 mm address hover
+- **Next step:** Shipped in PR #14634.
+
+### DL-#14568 · SHOW-B4: Physics Backend on Dispersion Tables, EB Shrinkage, Personalised vs Tour Strategy
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14568
+- **Branch:** merged via #14623
+- **PR:** #14623
+- **Paths:** see #14623
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`9b8b8625`; collated from changes/14568-show-b4-physics-backend-on-dispersion-ta.md)
+- **Summary:** SHOW-B4: physics backend on dispersion tables, EB shrinkage, personalised vs tour strategy
+- **Next step:** Shipped in PR #14623.
+
+### DL-#14617 · Putting Simulator: The Counter-Torque Panel Bounds the Gust Input by the Core's GUST_RANGE_NM Instead of the Preload Range
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14617
+- **Branch:** merged via #14626
+- **PR:** #14626
+- **Paths:** see #14626
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`1a513ea5`; collated from changes/14617-torque-gust-spin-range.md)
+- **Summary:** Putting simulator: the counter-torque panel bounds the gust input by the core's GUST_RANGE_NM instead of the preload range
+- **Next step:** Shipped in PR #14626.
+
+### DL-#14451 · Add Npm Run Tauri:Artifact: A Local Tauri Installer Named With Version and Commit, Plus a Sha256 File, Never Published
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14451
+- **Branch:** merged via #14624
+- **PR:** #14624
+- **Paths:** see #14624
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`84d828e2`; collated from changes/14451-add-npm-run-tauri-artifact-a-local-tauri.md)
+- **Summary:** Add npm run tauri:artifact: a local Tauri installer named with version and commit, plus a sha256 file, never published
+- **Next step:** Shipped in PR #14624.
+
+### DL-#14562 · SHOW-C6 Shot-Shape Presets, Ball-Flight Curvature Sign Tests and Swing-Variant Artefact With Run Identity
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14562
+- **Branch:** merged via #14618
+- **PR:** #14618, #14686
+- **Paths:** see #14618
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`46a51da5`; collated from changes/14562-name-shot-presets-by-face-to-path-d30-is.md)
+- **Summary:** SHOW-C6 shot-shape presets, ball-flight curvature sign tests and swing-variant artefact with run identity
+- **Next step:** Shipped in PR #14618.
+
+### DL-#14471 · Putting Analytics: Versioned Setup Document (The Studio's Schema_Version 4.0.0) With Export/Import (Studio Exports Load Their Green and Distance), Named Scenarios With Their Dispersion Result and a Comparison Against the First, as a Shared Service and /Scenario, /Scenario-Compare, /Setup-Export and /Setup-Import Routes
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14471
+- **Branch:** merged via #14615
+- **PR:** #14615, #14629
+- **Paths:** see #14615
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`392a57d0`; collated from changes/14471-putting-scenarios-desktop.md)
+- **Summary:** Putting analytics: versioned setup document (the studio's schema_version 4.0.0) with export/import (studio exports load their green and distance), named scenarios with their dispersion result and a comparison against the first, as a shared service and /scenario, /scenario-compare, /setup-export and /setup-import routes
+- **Next step:** Shipped in PR #14615.
+
+### DL-#14571 · SHOW-B7: Fit a SkillFamily From Launch-Monitor Shot Data, Shrunk Toward a Preset
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14571
+- **Branch:** merged via #14616
+- **PR:** #14616
+- **Paths:** see #14616
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`f2deca76`; collated from changes/14571-show-b7-fit-a-skillfamily-from-launch-mo.md)
+- **Summary:** SHOW-B7: fit a SkillFamily from launch-monitor shot data, shrunk toward a preset
+- **Next step:** Shipped in PR #14616.
+
+### DL-#14569 · SHOW-B5: Parametric Lie/Rough Impact-Condition Modifier (Physics/lie_interaction.py) With Labelled Assumptions
+
+- **State:** shipped
+- **Owner:** fleet-orchestrator
+- **Issue:** #14569
+- **Branch:** desk/show-neck/14569-lie-interaction
+- **PR:** #14613, #14852
+- **Paths:** see #14613
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-07 (`684daf6b`; collated from changes/14569-b5-the-lie-spin-factor-now-reaches-the-b.md)
+- **Summary:** SHOW-B5: parametric lie/rough impact-condition modifier (physics/lie_interaction.py) with labelled assumptions
+- **Next step:** Shipped in PR #14613.
+
+### DL-#14470 · React Putting Simulator Gains the Counter-Torque Stabilization Explorer (Sliders, Putter Preset, Hand-Couple Chart, Impact Readouts) Over the Core /Counter-Torque Route
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14470
+- **Branch:** merged via #14611
+- **PR:** #14611
+- **Paths:** see #14611
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`162c2aef`; collated from changes/14470-react-putting-simulator-gains-the-counte.md)
+- **Summary:** React putting simulator gains the counter-torque stabilization explorer (sliders, putter preset, hand-couple chart, impact readouts) over the core /counter-torque route
+- **Next step:** Shipped in PR #14611.
+
+### DL-#14567 · SHOW-B3: Cached, Versioned MC Dispersion Tables (CRN) + Pipeline Landing Adapter
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14567
+- **Branch:** merged via #14608
+- **PR:** #14608
+- **Paths:** see #14608
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`25f3520a`; collated from changes/14567-show-b3-cached-versioned-mc-dispersion-t.md)
+- **Summary:** SHOW-B3: cached, versioned MC dispersion tables (CRN) + pipeline landing adapter
+- **Next step:** Shipped in PR #14608.
+
+### DL-#14561 · SHOW-C5 Speed Continuation 100-125 Mph With Pareto Front and Binding Report
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14561
+- **Branch:** merged via #14606
+- **PR:** #14606, #14673, #14681, #14721, #14722
+- **Paths:** see #14606
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`c64cb10c`; collated from changes/14561-show-c5-ladder-binding-report-classes-ev.md)
+- **Summary:** SHOW-C5 speed continuation 100-125 mph with Pareto front and binding report
+- **Next step:** Shipped in PR #14606.
+
+### DL-#14550 · Add Golf-Language Face-On Address Grip Roll Metric (0 Deg Vertical, + Strong) With Flagship Measurement and Overlay Render
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14550
+- **Branch:** merged via #14601
+- **PR:** #14601
+- **Paths:** see #14601
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`986b3224`; collated from changes/14550-add-golf-language-face-on-address-grip-r.md)
+- **Summary:** Add golf-language face-on address grip roll metric (0 deg vertical, + strong) with flagship measurement and overlay render
+- **Next step:** Shipped in PR #14601.
+
+### DL-#14560 · SHOW-C4: Shaft_State_Series Reports MuJoCo Chain-Shaft Tip Deflection, Lead/Droop, Deflection Rate and Strain Energy Through Impact, With R11-Window Evidence on the Best-Fit Driver
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14560
+- **Branch:** merged via #14598
+- **PR:** #14598
+- **Paths:** see #14598
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`1760fe35`; collated from changes/14560-show-c4-shaft-state-series-reports-mujoc.md)
+- **Summary:** SHOW-C4: shaft_state_series reports MuJoCo chain-shaft tip deflection, lead/droop, deflection rate and strain energy through impact, with R11-window evidence on the best-fit driver
+- **Next step:** Shipped in PR #14598.
+
+### DL-#14554 · SHOW-A5: Trunk Observability Report (Marker Jacobian SVD), ADR-0059 and Coupled-by-Default Showpiece Spec
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14554
+- **Branch:** merged via #14603
+- **PR:** #14603
+- **Paths:** see #14603
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`513127ec`; collated from changes/14554-show-a5-trunk-observability-report-marke.md)
+- **Summary:** SHOW-A5: trunk observability report (marker Jacobian SVD), ADR-0059 and coupled-by-default showpiece spec
+- **Next step:** Shipped in PR #14603.
+
+### DL-#14553 · SHOW-A4: Cited Neck ROM (neck_rom.py, Single Source for Range_of_Motion) Enforced as MJCF Joint Limits on NeckInput X/Y/Z
+
+- **State:** shipped
+- **Owner:** fleet-orchestrator
+- **Issue:** #14553
+- **Branch:** desk/show-neck/14553-neck-segment
+- **PR:** #14578
+- **Paths:** see #14578
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`00e1e9ff`; collated from changes/14553-show-a4-neck-rom.md)
+- **Summary:** SHOW-A4: cited neck ROM (neck_rom.py, single source for range_of_motion) enforced as MJCF joint limits on NeckInput X/Y/Z
+- **Next step:** Shipped in PR #14578.
+
+### DL-#14595 · CI Standard Sets PIP_RETRIES=10 and PIP_DEFAULT_TIMEOUT=60 Workflow-Wide and Passes Pip-Audit --Timeout 60, so Transient PyPI Read Timeouts No Longer Fail CI
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14595
+- **Branch:** merged via #14597
+- **PR:** #14597
+- **Paths:** see #14597
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`807605a6`; collated from changes/14595-ci-standard-sets-pip-retries-10-and-pip.md)
+- **Summary:** CI Standard sets PIP_RETRIES=10 and PIP_DEFAULT_TIMEOUT=60 workflow-wide and passes pip-audit --timeout 60, so transient PyPI read timeouts no longer fail CI
+- **Next step:** Shipped in PR #14597.
+
+### DL-#14566 · SHOW-B2: SkillFamily Schema (Impact-Condition Mean/Cov + Provenance), Assumption-Marked Presets, Registry, PlayerProfile Link
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14566
+- **Branch:** merged via #14590
+- **PR:** #14590
+- **Paths:** see #14590
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`8e6506c8`; collated from changes/14566-show-b2-skillfamily-schema-impact-condit.md)
+- **Summary:** SHOW-B2: SkillFamily schema (impact-condition mean/cov + provenance), assumption-marked presets, registry, PlayerProfile link
+- **Next step:** Shipped in PR #14590.
+
+### DL-#14530 · Putting Green Simulator: The Ud.Putt_Scene/1 Export Writes and Reads Impact_Toe_m (Optional on Read, Default 0.0, Range-Checked Against IMPACT_TOE_RANGE_M), so a Toe or Heel Strike Round-Trips
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14530
+- **Branch:** merged via #14594
+- **PR:** #14594
+- **Paths:** see #14594
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`eaa7b7ac`; collated from changes/14530-scene-export-impact-toe.md)
+- **Summary:** Putting Green Simulator: the ud.putt_scene/1 export writes and reads impact_toe_m (optional on read, default 0.0, range-checked against IMPACT_TOE_RANGE_M), so a toe or heel strike round-trips
+- **Next step:** Shipped in PR #14594.
+
+### DL-#14450 · React Web UI: One Command (Npm Run Local) Builds From the Lockfile and Serves It Through the API From a Clean Checkout; CI Build Check Runs the Same Clean-Build Check; README Run Steps; a Test Bars Paid-API Hosts and Keys
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14450
+- **Branch:** merged via #14593
+- **PR:** #14593
+- **Paths:** see #14593
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`69ae6718`; collated from changes/14450-react-web-ui-one-command-npm-run-local-b.md)
+- **Summary:** React web UI: one command (npm run local) builds from the lockfile and serves it through the API from a clean checkout; CI Build Check runs the same clean-build check; README run steps; a test bars paid-API hosts and keys
+- **Next step:** Shipped in PR #14593.
+
+### DL-#14559 · SHOW-C3a: SplineTorqueControl Piecewise-Linear Torque Parameterisation
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14559
+- **Branch:** merged via #14589
+- **PR:** #14589, #14596, #14625, #14638, #14653, #14655, #14680, #14685, #14693
+- **Paths:** see #14589
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`d865f3c3`; collated from changes/14559-show-c3c-d32-assumption-limited-vs-proba.md)
+- **Summary:** SHOW-C3a: SplineTorqueControl piecewise-linear torque parameterisation
+- **Next step:** Shipped in PR #14589.
+
+### DL-#14552 · SHOW-A3: Optional Lumbar:Thoracic Regional-Split Coupling (Trunk_Coupling, Off by Default) for the Full-Body-V2 Trunk, MuJoCo Joint Equalities, and Trunk Joint-Tree/Mass/ROM Contract Tests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14552
+- **Branch:** merged via #14577
+- **PR:** #14577
+- **Paths:** see #14577
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`0cecc8f7`; collated from changes/14552-show-a3-optional-lumbar-thoracic-regiona.md)
+- **Summary:** SHOW-A3: optional lumbar:thoracic regional-split coupling (trunk_coupling, off by default) for the full-body-v2 trunk, MuJoCo joint equalities, and trunk joint-tree/mass/ROM contract tests
+- **Next step:** Shipped in PR #14577.
+
+### DL-#14466 · Putting API: POST /Solve-Aim-3D Solves the Pace and Line That Hole a /Simulate-3D Putt on That Route's Own Surface and Head (Core Solve_Aim, Like the Desktop Auto-Solve); the 3-D Request Models Move to Src/Api/Models/putting_green_requests.py
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14466
+- **Branch:** merged via #14588
+- **PR:** #14588, #14604
+- **Paths:** see #14588
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`416c462c`; collated from changes/14466-react-putting-simulator-gains-the-deskto.md)
+- **Summary:** Putting API: POST /solve-aim-3d solves the pace and line that hole a /simulate-3d putt on that route's own surface and head (core solve_aim, like the desktop Auto-Solve); the 3-D request models move to src/api/models/putting_green_requests.py
+- **Next step:** Shipped in PR #14588.
+
+### DL-#14441 · WSCG Update Manuscript Draft on the Best-Match MuJoCo ZTCF/ZVCF Run, Citing the Pinned Run_Id
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14441
+- **Branch:** merged via #14584
+- **PR:** #14584
+- **Paths:** see #14584
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`c82e3803`; collated from changes/14441-wscg-update-manuscript-draft-on-the-best.md)
+- **Summary:** WSCG update manuscript draft on the best-match MuJoCo ZTCF/ZVCF run, citing the pinned run_id
+- **Next step:** Shipped in PR #14584.
+
+### DL-#14565 · SHOW-B1: ShotOutcomeModel Protocol + Backend Registry; Tour Baseline Is the Default Quick_Sg Backend
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14565
+- **Branch:** merged via #14581
+- **PR:** #14581
+- **Paths:** see #14581
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`950bedd8`; collated from changes/14565-show-b1-shotoutcomemodel-protocol-backen.md)
+- **Summary:** SHOW-B1: ShotOutcomeModel protocol + backend registry; tour baseline is the default quick_sg backend
+- **Next step:** Shipped in PR #14581.
+
+### DL-#14558 · SHOW-C2: ImpactConditions + Evaluate_Rollout Facade for Optimiser Loops (Face, Path, AoA, Speed, Strike) Over Impact_Parameters
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14558
+- **Branch:** merged via #14579
+- **PR:** #14579
+- **Paths:** see #14579
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`ddf355e4`; collated from changes/14558-show-c2-impactconditions-evaluate-rollou.md)
+- **Summary:** SHOW-C2: ImpactConditions + evaluate_rollout facade for optimiser loops (face, path, AoA, speed, strike) over impact_parameters
+- **Next step:** Shipped in PR #14579.
+
+### DL-#14557 · SHOW-C1: ImpactTarget, TrustRegion and PhysiologicalEnvelope Contracts (Impact_Optimization Package; Face:Path 10:1; NSX-04 Torque Limits; Cited Velocity YAML)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14557
+- **Branch:** merged via #14580
+- **PR:** #14580, #14707
+- **Paths:** see #14580
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`3e6b8f9b`; collated from changes/14557-source-skilled-male-peak-angular-velocit.md)
+- **Summary:** SHOW-C1: ImpactTarget, TrustRegion and PhysiologicalEnvelope contracts (impact_optimization package; face:path 10:1; NSX-04 torque limits; cited velocity YAML)
+- **Next step:** Shipped in PR #14580.
+
+### DL-#14464 · Putting API: /Simulate-3D Accepts the Core Green Shape (Green: GreenShapeRequest, a Preset or Slope, Tier and Bumps) and Rolls on Its GreenSpec Height Field, Reporting That Spec's Grade and Aspect, and Strikes Along Aim_Heading_Deg (Was Always +X), so the React Page Can Send the Core Presets and an Aimed Putt
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14464
+- **Branch:** merged via #14583
+- **PR:** #14583, #14586
+- **Paths:** see #14583
+- **Started:** 2026-11-05
+- **Last verified:** 2026-11-05 (`f2db11cc`; collated from changes/14464-react-putting-page-green-type-selector-o.md)
+- **Summary:** Putting API: /simulate-3d accepts the core green shape (green: GreenShapeRequest, a preset or slope, tier and bumps) and rolls on its GreenSpec height field, reporting that spec's grade and aspect, and strikes along aim_heading_deg (was always +x), so the React page can send the core presets and an aimed putt
+- **Next step:** Shipped in PR #14583.
+
+### DL-#14469 · Putting Dynamics: Counter-Torque Stabilization Model (Two-Hand Couples, Off-Plane Preload, Noise, Gust, Lie, Putter) in the Shared Core, Reading the Shared Putter Presets, Drift-Gated Against the Studio
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14469
+- **Branch:** merged via #14548
+- **PR:** #14548, #14602, #14609
+- **Paths:** see #14548
+- **Started:** 2026-11-04
+- **Last verified:** 2026-11-05 (`c39d2c75`; collated from changes/14469-putting-counter-torque-desktop.md)
+- **Summary:** Putting dynamics: counter-torque stabilization model (two-hand couples, off-plane preload, noise, gust, lie, putter) in the shared core, reading the shared putter presets, drift-gated against the studio
+- **Next step:** Shipped in PR #14548.
+
 ### DL-#14434 · RUN-4: Ud-Sim Reproduce Reruns a Stored Run From Its Model File With the Recorded Seed and Parameters, Compares Each Output Within an Absolute Tolerance and Reports Engine Version Mismatches; the Run Store Now Closes Copied Files and Reports Corrupt Records Cleanly
 
 - **State:** shipped
