@@ -804,14 +804,18 @@ def _meshes_for_body(
 
 
 def _club_parts(
-    spec: Mapping[str, Any], doc: AppearanceDocument, club: ClubAssembly | None
+    spec: Mapping[str, Any],
+    doc: AppearanceDocument,
+    club: ClubAssembly | None,
+    body_skin: bool,
 ) -> dict[str, list[ClubPart]]:
-    """Club parts per body, in the club body's finish (empty without a club)."""
+    """Club parts per body, in the club body's finish (empty without a club);
+    with ``body_skin`` the hands end under the skinned forearms."""
     body = club_body_name(spec)
     if club is None or body is None:
         return {}
     finish = library.material_name_for(doc, body)
-    return club_meshes_by_body(spec, club, finish, doc)
+    return club_meshes_by_body(spec, club, finish, doc, body_skin=body_skin)
 
 
 def _parents_of(spec: Mapping[str, Any], part: str) -> frozenset[str]:
@@ -868,7 +872,7 @@ def body_meshes(
         spec.get("subject", {}),
         doc.head.enabled,
         foot.foot_parts(spec, sections, model=doc.foot.model),
-        _club_parts(spec, doc, club),
+        _club_parts(spec, doc, club, body_skin),
         _limb_windows(spec, by_body),
         _skinned_wrist_sections(spec, club),
         _parents_of(spec, "shoulder"),

@@ -92,6 +92,49 @@ def wrist_blend() -> WristBlend:
 
 
 @dataclass(frozen=True)
+class WristSleeve:
+    """End of a drawn hand under a skinned forearm (#15299). The forearm's skin
+    ends ``seam_m`` up the arm from the wrist joint and is rigid with the hand
+    there; the hand keeps its own forearm skin ``lap_m`` further and from the
+    seam up lies on the forearm's wrist section (``scale`` times its own),
+    ``inset_m`` inside it, so the two meet without a step."""
+
+    seam_m: float
+    lap_m: float
+    inset_m: float
+    #: Width of the end cap's outer ring, which keeps the rim shaded as skin.
+    cap_lip_m: float
+    scale: float
+
+    def __post_init__(self) -> None:
+        if not 0.0 < self.seam_m <= 0.03:
+            raise ValueError(f"seam_m must be in (0, 0.03], got {self.seam_m}")
+        if not 0.0 <= self.lap_m <= 0.005:
+            raise ValueError(f"lap_m must be in [0, 0.005], got {self.lap_m}")
+        if not 0.0 <= self.inset_m <= 0.005:
+            raise ValueError(f"inset_m must be in [0, 0.005], got {self.inset_m}")
+        if not 0.0 <= self.cap_lip_m <= 0.002:
+            raise ValueError(f"cap_lip_m must be in [0, 0.002], got {self.cap_lip_m}")
+
+    def cut_m(self) -> float:
+        """Distance up the forearm from the wrist joint at which the hand ends."""
+        return self.seam_m + self.lap_m
+
+
+def wrist_sleeve() -> WristSleeve:
+    """The drawn hands' end under a skinned forearm, from the quality settings."""
+    quality: Mapping[str, Any] = load_hand_visual_quality()
+    sleeve = quality["forearm_wrist_shape"]["sleeve"]
+    return WristSleeve(
+        float(sleeve["seam_m"]),
+        float(sleeve["lap_m"]),
+        float(sleeve["inset_m"]),
+        float(sleeve["cap_lip_m"]),
+        float(quality["forearm_wrist_margin"]),
+    )
+
+
+@dataclass(frozen=True)
 class WristBall:
     """Wrist range (degrees either way) that the drawn hand's wrist ball
     covers, and the poses taken per half range (#15299)."""
@@ -344,21 +387,56 @@ def forearm_reach_m(club: ClubAssembly) -> dict[str, tuple[Array, Array]]:
     return reach
 
 
-def _capped(vertices: Array, faces: NDArray[np.int64]) -> tuple[Array, NDArray]:
-    """Close every open edge loop of a mesh with a fan about the loop's centre."""
+def _open_loops(faces: NDArray[np.int64]) -> list[list[int]]:
+    """Every open edge loop of a mesh, as vertex indices in face order."""
     edges = np.concatenate([faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]])
     paired = {(int(a), int(b)) for a, b in edges}
     following = {a: b for a, b in paired if (b, a) not in paired}
-    points, fans = [vertices], []
-    count = len(vertices)
+    loops = []
     while following:
         start, nxt = following.popitem()
         loop = [start]
         while nxt != start:
             loop.append(nxt)
             nxt = following.pop(nxt)
-        points.append(vertices[loop].mean(axis=0, keepdims=True))
-        fans += [(loop[(k + 1) % len(loop)], loop[k], count) for k in range(len(loop))]
+        loops.append(loop)
+    return loops
+
+
+def _ring_onto(
+    loop: list[int], count: int, fans: list[tuple[int, int, int]]
+) -> list[int]:
+    """Join ``loop`` to a new ring of as many vertices, numbered from ``count``."""
+    n = len(loop)
+    inner = list(range(count, count + n))
+    for k in range(n):
+        j = (k + 1) % n
+        fans += [(loop[j], loop[k], inner[k]), (loop[j], inner[k], inner[j])]
+    return inner
+
+
+def _capped(
+    vertices: Array,
+    faces: NDArray[np.int64],
+    lip_m: float = 0.0,
+) -> tuple[Array, NDArray]:
+    """Close every open edge loop of a mesh with a fan about the loop's centre.
+
+    With ``lip_m`` the fan starts from a second ring that far inside the loop,
+    so the loop's own vertices are shaded as the wall they end, not as the cap.
+    """
+    points: list[Array] = [vertices]
+    fans: list[tuple[int, int, int]] = []
+    count = len(vertices)
+    for loop in _open_loops(faces):
+        rim, n = vertices[loop], len(loop)
+        centre = rim.mean(axis=0)
+        if lip_m > 0.0:
+            reach = np.linalg.norm(rim - centre, axis=1, keepdims=True)
+            points.append(rim - lip_m * (rim - centre) / reach)
+            loop, count = _ring_onto(loop, count, fans), count + n
+        points.append(centre[None])
+        fans += [(loop[(k + 1) % n], loop[k], count) for k in range(n)]
         count += 1
     if not fans:
         return vertices, faces
@@ -413,12 +491,66 @@ def _widened_wrist(rel: Array, along: Array, blend: WristBlend) -> Array:
     return rel + ease * (grown + blend.centred(centre) - centre)
 
 
+def _sleeved_wrist(
+    rel: Array, along: Array, section: tuple[Any, ...], sleeve: WristSleeve
+) -> Array:
+    """Skin points ``rel`` (from the wrist joint) shaped to end under a skinned
+    forearm.
+
+    ``section`` is the hand's own :func:`wrist_section`. From the seam up a
+    point lies on the forearm's wrist section, ``sleeve.inset_m`` inside it;
+    below the seam that eases to none over the wrist blend's length.
+    Postcondition: no point moves along the arm.
+    """
+    half_width, half_depth, wide, centre = section
+    height, blend = rel @ along, wrist_blend()
+    flat = rel - np.outer(height, along) - centre
+    x, y = flat @ wide, flat @ np.cross(along, wide)
+    radius = np.maximum(np.hypot(x, y), _RIM_M)
+    target = sleeve.scale * radius / np.hypot(x / half_width, y / half_depth)
+    gain = (target - sleeve.inset_m) / radius - 1.0
+    t = np.clip((sleeve.seam_m - height) / blend.length_m, 0.0, 1.0)
+    ease = (1.0 - t * t * (3.0 - 2.0 * t))[:, None]
+    return rel + ease * (gain[:, None] * flat + blend.centred(centre) - centre)
+
+
+def _cut_hand(
+    vertices: Array, faces: NDArray[np.int64], reach: tuple[Array, Array], height: float
+) -> tuple[Array, NDArray[np.int64]]:
+    """A hand without the triangles that reach more than ``height`` up the
+    forearm (``reach``: wrist joint and direction), its cut edge moved onto
+    that plane."""
+    wrist, along = reach
+    keep = (vertices - wrist) @ along <= height
+    faces = faces[keep[faces].all(axis=1)]
+    return _flat_rim(vertices, faces, wrist + height * along, along), faces
+
+
+def _sleeved_hand(
+    vertices: Array, faces: NDArray[np.int64], reach: tuple[Array, Array]
+) -> tuple[Array, NDArray]:
+    """A hand cut and shaped to end under a skinned forearm (:class:`WristSleeve`),
+    closed flat. Its own section is read as the forearm's end is sized from it:
+    on the hand cut at :func:`forearm_cuff_m`."""
+    wrist, along = reach
+    cuffed, short = _cut_hand(vertices, faces, reach, forearm_cuff_m())
+    section = wrist_section(cuffed[np.unique(short)] - wrist, along)
+    sleeve = wrist_sleeve()
+    vertices, faces = _cut_hand(vertices, faces, reach, sleeve.cut_m())
+    drawn = np.unique(faces)
+    vertices[drawn] = wrist + _sleeved_wrist(
+        vertices[drawn] - wrist, along, section, sleeve
+    )
+    return _capped(vertices, faces, sleeve.cap_lip_m)
+
+
 def skinned_hand_meshes(
     club: ClubAssembly,
     *,
     cut_at_wrist: bool = True,
     widen_wrist: bool = True,
     with_ball: bool = False,
+    sleeve: bool = False,
 ) -> dict[str, Mesh]:
     """``{"lead_hand", "trail_hand"}`` skinned meshes in the club-body frame.
 
@@ -430,6 +562,8 @@ def skinned_hand_meshes(
     that plane and closed flat. With ``widen_wrist`` as well the cut hand's
     wrist is widened by :func:`wrist_blend` to a human girth (#15299).
     ``with_ball`` adds the :func:`wrist_ball` solid above the cut, for drawing.
+    With ``sleeve`` the hand ends under a skinned forearm instead
+    (:class:`WristSleeve`): cut further up, flush with that skin, no ball.
     """
     frame, pair = skinned_hand_frame(club), _pair()
     reach = forearm_reach_m(club)
@@ -438,12 +572,13 @@ def skinned_hand_meshes(
         mesh = pair[hand.value].mesh
         vertices = mesh.vertices @ frame[:3, :3].T + frame[:3, 3]
         faces = mesh.faces
-        if cut_at_wrist:
+        if sleeve:
+            vertices, faces = _sleeved_hand(vertices, faces, reach[hand.value])
+        elif cut_at_wrist:
             wrist, along = reach[hand.value]
-            keep = (vertices - wrist) @ along <= forearm_cuff_m()
-            faces = faces[keep[faces].all(axis=1)]
-            rim = wrist + forearm_cuff_m() * along
-            vertices = _flat_rim(vertices, faces, rim, along)
+            vertices, faces = _cut_hand(
+                vertices, faces, reach[hand.value], forearm_cuff_m()
+            )
             if widen_wrist:
                 drawn = np.unique(faces)
                 vertices[drawn] = wrist + _widened_wrist(

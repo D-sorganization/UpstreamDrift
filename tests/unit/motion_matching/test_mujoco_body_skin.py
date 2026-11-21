@@ -509,8 +509,8 @@ def on_club() -> tuple[Any, dict[str, Any], Any]:
     return models[1], summary["visual_layer"]["body_skin"], models[0]
 
 
-def _hand_vertices(model: Any, data: Any, label: str) -> Any:
-    """World vertices of a drawn hand proper: its largest connected part."""
+def _hand_vertices(model: Any, data: Any, label: str, proper: bool = True) -> Any:
+    """World vertices of a drawn hand; ``proper``: of its largest connected part."""
     geom = next(g for g in range(model.ngeom) if model.geom(g).name.endswith(label))
     mesh = model.mesh(model.geom_dataid[geom])
     count = int(mesh.vertnum[0])
@@ -519,7 +519,8 @@ def _hand_vertices(model: Any, data: Any, label: str) -> Any:
     graph = coo_matrix((np.ones(len(ends[0])), ends), shape=(count, count))
     part = connected_components(graph, directed=False)[1]
     used = np.unique(faces)
-    used = used[part[used] == np.bincount(part[used]).argmax()]
+    if proper:
+        used = used[part[used] == np.bincount(part[used]).argmax()]
     local = model.mesh_vert[mesh.vertadr[0] : mesh.vertadr[0] + count][used]
     return data.geom_xpos[geom] + local @ data.geom_xmat[geom].reshape(3, 3).T
 
@@ -569,6 +570,62 @@ def test_the_forearm_ends_stay_under_the_hands_on_the_club(
             points = a.xpos + (points - b.xpos) @ turn
         gap = cKDTree(points).query(vertices[ring])[0].max()
         assert gap <= WRIST_LIMITS["end_to_hand_m"], (side, gap)
+
+
+def _across_ring(points: Any, ring: Any) -> tuple[Any, Any, Any]:
+    """``points`` about the plane of ``ring``: height past it and, in it, the
+    angle and the distance from the ring's centre (the first row is the ring's)."""
+    centre = ring.mean(axis=0)
+    axes = np.linalg.svd(ring - centre)[2]
+    rel = np.concatenate([ring, points]) - centre
+    return (
+        rel @ axes[2],
+        np.arctan2(rel @ axes[1], rel @ axes[0]),
+        np.hypot(rel @ axes[0], rel @ axes[1]),
+    )
+
+
+@pytest.mark.parametrize("name", [None, *sorted(SWING_WRISTS)])
+def test_the_hands_meet_the_forearm_ends_without_a_step(
+    name: str | None, on_club: tuple[Any, Any, Any]
+) -> None:
+    """At the address and with the wrists bent and turned as in a swing: the
+    drawn hand ends on the forearm skin's end ring, as wide as it all round,
+    and no part of it stands past that ring up the forearm."""
+    model, summary, _ = on_club
+    pose = dict(ADDRESS) | (SWING_WRISTS[name] if name else {})
+    data = mujoco.MjData(model)
+    for joint, value in pose.items():
+        data.qpos[model.joint(joint).qposadr[0]] = value
+    mujoco.mj_forward(model, data)
+    vertices = layer.posed_skin_layers(model, data)["body_skin_skin"][0]
+    last = model.skin_boneadr[0] + summary["bones"]["skin"]
+    for side, label in (("l", "lead_hand"), ("r", "trail_hand")):
+        hand = model.body(summary["bodies"][f"hand_{side}"]).id
+        bone = next(b for b in range(last) if model.skin_bonebodyid[b] == hand)
+        first, count = model.skin_bonevertadr[bone], model.skin_bonevertnum[bone]
+        whole = model.skin_bonevertweight[first : first + count] == 1.0
+        ring = vertices[model.skin_bonevertid[first : first + count][whole]]
+        parts = [_hand_vertices(model, data, label, proper) for proper in (0, 1)]
+        if side == "r":  # drawn on the club: carried to where the grip weld holds
+            a, b = (data.site(f"native_closure_{k}") for k in "ab")
+            turn = b.xmat.reshape(3, 3) @ a.xmat.reshape(3, 3).T
+            parts = [a.xpos + (points - b.xpos) @ turn for points in parts]
+        height, angle, radius = _across_ring(np.concatenate(parts), ring)
+        n, split = len(ring), len(ring) + len(parts[0])
+        if height[split:].mean() > 0.0:  # the hand lies below the ring's plane
+            height = -height
+        past = float(height[n:].max())  # any part of the hand, up the forearm
+        assert past <= WRIST_LIMITS["join_past_m"], (side, past)
+        assert height[split:].max() >= -WRIST_LIMITS["join_past_m"], side
+        order = np.argsort(angle[:n])
+        rim = np.flatnonzero(height[split:] >= -WRIST_LIMITS["join_past_m"]) + split
+        rim = rim[radius[rim] > 0.5 * radius[:n].min()]  # not the end cap's centre
+        skin = np.interp(
+            angle[rim], angle[:n][order], radius[:n][order], period=2 * np.pi
+        )
+        step = float(np.abs(radius[rim] - skin).max())
+        assert len(rim) >= 12 and step <= WRIST_LIMITS["join_step_m"], (side, step)
 
 
 @pytest.mark.parametrize("name", sorted(SWING_WRISTS))
