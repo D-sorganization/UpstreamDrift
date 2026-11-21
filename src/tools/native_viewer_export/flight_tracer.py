@@ -31,6 +31,11 @@ from src.shared.python.impact_parameters.flight_report import (
     flight_for_impact,
 )
 from src.tools.native_viewer_export import flight_depth, impact_card, landing_marker
+from src.tools.native_viewer_export.flight_inset import (
+    FlightInsetSettings,
+    load_inset_settings,
+    shows_inset,
+)
 from src.tools.native_viewer_export.landing_marker import LandingMarkerSettings
 from src.tools.native_viewer_export.impact_state import series_at_contact
 from src.tools.native_viewer_export.overlay2d import pinhole_for_view
@@ -77,6 +82,7 @@ class TracerSettings:
     occlusion_tolerance_fraction: float = 0.005
     occlusion_step_px: float = 3.0
     landing_marker: LandingMarkerSettings | None = None
+    inset: FlightInsetSettings | None = None  # flight_inset_settings.json
 
     def __post_init__(self) -> None:
         rgba = _channels(self.tracer_color_rgba, 4, "tracer_color_rgba")
@@ -118,6 +124,8 @@ def load_tracer_settings(path: Path | None = None) -> TracerSettings:
     if marker is not None:
         marker = {k: tuple(v) if isinstance(v, list) else v for k, v in marker.items()}
         document["landing_marker"] = LandingMarkerSettings(**marker)
+    beside = (path or SETTINGS_PATH).with_name("flight_inset_settings.json")
+    document["inset"] = load_inset_settings(beside if beside.is_file() else None)
     try:
         return TracerSettings(**document)
     except TypeError as exc:
@@ -189,6 +197,11 @@ class FlightPlayback:
     radius_m: float = 0.0
     lines: tuple[str, ...] = ()
     carry_m: float | None = None
+    #: target-frame axes (target, left, up) rows, the model's apex height and
+    #: right-positive side offset: the numbers the flight inset shows
+    axes_m: Array | None = None
+    apex_m: float | None = None
+    lateral_m: float | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.settings, TracerSettings):
@@ -304,8 +317,46 @@ class FlightPlayback:
             depth = (depth_m or {}).get(view)
             if depth is None and self.settings.occlude_by_scene:
                 self._warn_once(view)
-            out[view] = self._paint(tile, camera, points, depth, landed)
+            label = not shows_inset(self.settings.inset, view)
+            out[view] = self._paint(tile, camera, points, depth, landed, label)
         return out
+
+    def grid_tiles(
+        self,
+        tiles: Mapping[str, Image8],
+        time_s: float,
+        lookat_m: Sequence[float],
+        distance_m: float | None,
+    ) -> dict[str, Image8]:
+        """``tiles`` for the composed grid: the carry label an inset replaces.
+
+        A single view with the inset states the carry there; the grid draws no
+        inset, so its tile gets the ring label back (once landed).
+        """
+        out = dict(tiles)
+        landed = time_s - self.impact_time_s >= self.duration_s
+        if self.path_m is None or not landed:
+            return out
+        fov = math.radians(self.settings.fov_y_deg)
+        for view, tile in tiles.items():
+            if not shows_inset(self.settings.inset, view):
+                continue
+            size = (int(tile.shape[1]), int(tile.shape[0]))
+            camera = pinhole_for_view(
+                get_view_preset(view), lookat_m, distance_m, fov, size
+            )
+            out[view] = self._label(tile, camera)
+        return out
+
+    def _label(self, tile: Image8, camera: Any) -> Image8:
+        """``tile`` with the carry label beside the ring (where configured)."""
+        style = self.settings
+        if style.landing_marker is None or self.path_m is None:
+            return tile
+        if self.carry_m is None:
+            return tile
+        end = self.path_m[-1]
+        return landing_marker.paint_label(tile, camera, end, style, self.carry_m)
 
     def _warn_once(self, view: str) -> None:
         if not self.__dict__.setdefault("_warned", False):
@@ -313,20 +364,26 @@ class FlightPlayback:
             logger.warning("scene depth unavailable (%s): tracer over the scene", view)
 
     def _paint(
-        self, tile: Image8, camera: Any, points: Array, depth: Any, landed: bool
+        self,
+        tile: Image8,
+        camera: Any,
+        points: Array,
+        depth: Any,
+        landed: bool,
+        label: bool = True,
     ) -> Image8:
-        """One tile: landing marker beneath, then the tracer and ball."""
+        """One tile: landing marker beneath, then the tracer and ball.
+
+        ``label`` False leaves the carry label out (an inset states it).
+        """
         style, marker = self.settings, self.settings.landing_marker
         if marker is not None and self.path_m is not None:
             ring = landed or marker.when == "from_start"
             hide = occlusion_for(style, depth)
             tile = landing_marker.paint_track(tile, camera, points, style, hide, landed)
             tile = landing_marker.paint(tile, camera, self.path_m[-1], style, ring)
-            if landed and self.carry_m is not None:
-                end = self.path_m[-1]
-                tile = landing_marker.paint_label(
-                    tile, camera, end, style, self.carry_m
-                )
+            if landed and label:
+                tile = self._label(tile, camera)
         return draw_trace(tile, camera, points, self.radius_m, style, depth)
 
 
@@ -369,6 +426,9 @@ def playback_from_flight(
         ball.radius_m,
         lines,
         flight.carry_m,
+        axes,
+        flight.max_height_m,
+        flight.lateral_m,
     )
 
 
@@ -421,3 +481,18 @@ def flight_for_export(
         return playback_from_series(club_series(swing), impact, swing.ball, config)
     except impact_card._EXPECTED_ERRORS as exc:
         return FlightPlayback(config, f"unavailable: {exc}")
+
+
+def grid_cells(
+    flight: FlightPlayback | None,
+    tiles: Mapping[str, Image8],
+    time_s: float,
+    settings: Any,
+) -> Mapping[str, Image8]:
+    """Tiles for the composed grid: ``tiles`` itself when there is no flight.
+
+    ``settings`` supplies the export's ``lookat_m`` and ``distance_m``.
+    """
+    if flight is None:
+        return tiles
+    return flight.grid_tiles(tiles, time_s, settings.lookat_m, settings.distance_m)

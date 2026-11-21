@@ -26,6 +26,11 @@ from src.shared.python.body_part_viz.segment_net_power import (
 from src.shared.python.core.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.segment_kinetic_energy import SEGMENT_KE_PROXY_DISCLAIMER
+from src.shared.python.segment_kinetic_energy.shading import (
+    KE_COMPONENTS,
+    KE_PROXY_GLOBE_LABEL,
+    STORED_KINETIC_ENERGY_VIEW_LABEL,
+)
 from src.shared.python.theme.style_constants import Styles
 
 from ..._camera_presets import CAMERA_PRESETS, camera_preset
@@ -367,6 +372,7 @@ class VisualizationTab(QtWidgets.QWidget):
         self._create_torque_scale_controls(force_layout)
         self._create_force_scale_controls(force_layout)
         self._create_grf_style_controls(force_layout)
+        self._create_stored_ke_shading_controls(force_layout)
         self._create_segment_ke_globe_controls(force_layout)
         self._create_net_power_controls(force_layout)
         self._create_advanced_vector_overlays(force_layout)
@@ -374,49 +380,48 @@ class VisualizationTab(QtWidgets.QWidget):
         self.show_contacts_cb = QtWidgets.QCheckBox("MuJoCo native contact debug")
         self.show_contacts_cb.stateChanged.connect(self.on_show_contacts_changed)
         force_layout.addWidget(self.show_contacts_cb)
-        self._connect_force_legend_to_status_bar()
-        self._connect_net_power_legend_to_status_bar()
+        self._connect_overlay_legends_to_status_bar()
 
         ellipsoid_group = self._create_ellipsoid_group()
 
         return force_group, ellipsoid_group
 
-    def _connect_force_legend_to_status_bar(self) -> None:
-        """Show the force overlay legend line in the status bar while it is on."""
-        status_bar = getattr(self.window(), "statusBar", None)
-        signal = getattr(self.sim_widget, "force_legend_changed", None)
-        if status_bar is None or signal is None:
-            return
-        signal.connect(lambda text: self._update_status_bar_legends(force=text))
-
-    def _connect_net_power_legend_to_status_bar(self) -> None:
-        status_bar = getattr(self.window(), "statusBar", None)
-        signal = getattr(self.sim_widget, "net_power_legend_changed", None)
-        if status_bar is None or signal is None:
-            return
-        signal.connect(lambda text: self._update_status_bar_legends(net_power=text))
-
-    def _update_status_bar_legends(
-        self,
-        *,
-        force: str | None = None,
-        net_power: str | None = None,
-    ) -> None:
+    def _connect_overlay_legends_to_status_bar(self) -> None:
+        """Show force, stored-KE, and net-power legend lines in the status bar."""
         status_bar = getattr(self.window(), "statusBar", None)
         if status_bar is None:
             return
-        if not hasattr(self, "_legend_lines"):
-            self._legend_lines = {"force": "", "net_power": ""}
-        if force is not None:
-            self._legend_lines["force"] = force
-        if net_power is not None:
-            self._legend_lines["net_power"] = net_power
-        combined = "  ·  ".join(
-            text
-            for text in (self._legend_lines["net_power"], self._legend_lines["force"])
-            if text
-        )
-        status_bar().showMessage(combined)
+        force_signal = getattr(self.sim_widget, "force_legend_changed", None)
+        ke_signal = getattr(self.sim_widget, "ke_legend_changed", None)
+        net_signal = getattr(self.sim_widget, "net_power_legend_changed", None)
+        self._legend_lines = {"force": "", "ke": "", "net_power": ""}
+
+        def _refresh(
+            *,
+            force: str | None = None,
+            ke: str | None = None,
+            net_power: str | None = None,
+        ) -> None:
+            if force is not None:
+                self._legend_lines["force"] = force
+            if ke is not None:
+                self._legend_lines["ke"] = ke
+            if net_power is not None:
+                self._legend_lines["net_power"] = net_power
+            combined = " · ".join(
+                text
+                for key in ("net_power", "ke", "force")
+                for text in (self._legend_lines.get(key, ""),)
+                if text
+            )
+            status_bar().showMessage(combined)
+
+        if force_signal is not None:
+            force_signal.connect(lambda text: _refresh(force=text))
+        if ke_signal is not None:
+            ke_signal.connect(lambda text: _refresh(ke=text))
+        if net_signal is not None:
+            net_signal.connect(lambda text: _refresh(net_power=text))
 
     def _create_force_checkboxes(self, force_layout: QtWidgets.QVBoxLayout) -> None:
         if force_layout is None:
@@ -524,14 +529,111 @@ class VisualizationTab(QtWidgets.QWidget):
         force_scale_layout.addRow("", self.force_scale_label)
         force_layout.addLayout(force_scale_layout)
 
+    def _create_stored_ke_shading_controls(
+        self, force_layout: QtWidgets.QVBoxLayout
+    ) -> None:
+        if force_layout is None:
+            raise ValueError("force_layout must be provided")
+        from src.shared.python.body_part_viz.scalar_shading import ScalarColorScale
+
+        self.show_stored_ke_cb = QtWidgets.QCheckBox(STORED_KINETIC_ENERGY_VIEW_LABEL)
+        self.show_stored_ke_cb.setObjectName("stored_kinetic_energy_enabled")
+        self.show_stored_ke_cb.setToolTip(
+            "Shade segment surfaces by stored kinetic energy (J) with fixed cividis "
+            "limits across the swing."
+        )
+        scale = getattr(self.sim_widget, "stored_ke_color_scale", None)
+        if isinstance(scale, ScalarColorScale) and scale.enabled:
+            self.show_stored_ke_cb.setChecked(True)
+        self.show_stored_ke_cb.stateChanged.connect(self._on_stored_ke_enabled_changed)
+        force_layout.addWidget(self.show_stored_ke_cb)
+
+        form = QtWidgets.QFormLayout()
+        self.stored_ke_mode_combo = QtWidgets.QComboBox()
+        for mode in KE_COMPONENTS:
+            self.stored_ke_mode_combo.addItem(mode.replace("_", " ").title(), mode)
+        current_mode = getattr(self.sim_widget, "stored_ke_component_mode", "total")
+        if current_mode not in KE_COMPONENTS:
+            current_mode = "total"
+        idx = self.stored_ke_mode_combo.findData(current_mode)
+        if isinstance(idx, int) and idx >= 0:
+            self.stored_ke_mode_combo.setCurrentIndex(idx)
+        self.stored_ke_mode_combo.currentIndexChanged.connect(
+            self._on_stored_ke_mode_changed
+        )
+        form.addRow("KE component:", self.stored_ke_mode_combo)
+
+        self.stored_ke_sqrt_cb = QtWidgets.QCheckBox("Sqrt display scale (ticks in J)")
+        if isinstance(scale, ScalarColorScale):
+            self.stored_ke_sqrt_cb.setChecked(scale.display_transform == "sqrt")
+        self.stored_ke_sqrt_cb.stateChanged.connect(self._on_stored_ke_sqrt_changed)
+        form.addRow("", self.stored_ke_sqrt_cb)
+
+        from src.shared.python.segment_kinetic_energy.shading import (
+            REFERENCE_SWING_PEAK_SEGMENT_KE_J,
+        )
+
+        self.stored_ke_high_limit_spin = QtWidgets.QDoubleSpinBox()
+        self.stored_ke_high_limit_spin.setDecimals(1)
+        self.stored_ke_high_limit_spin.setMinimum(1.0)
+        self.stored_ke_high_limit_spin.setMaximum(1e7)
+        self.stored_ke_high_limit_spin.setSuffix(" J")
+        self.stored_ke_high_limit_spin.setToolTip(
+            "Upper colour-scale limit (J) for stored kinetic-energy shading."
+        )
+        high = (
+            float(scale.high_limit)
+            if isinstance(scale, ScalarColorScale)
+            else float(REFERENCE_SWING_PEAK_SEGMENT_KE_J)
+        )
+        self.stored_ke_high_limit_spin.setValue(high)
+        self.stored_ke_high_limit_spin.valueChanged.connect(
+            self._on_stored_ke_high_limit_changed
+        )
+        form.addRow("KE high limit:", self.stored_ke_high_limit_spin)
+        force_layout.addLayout(form)
+
+    def _on_stored_ke_enabled_changed(self, state: int) -> None:
+        from dataclasses import replace
+
+        scale = getattr(self.sim_widget, "stored_ke_color_scale", None)
+        if scale is None:
+            return
+        enabled = state == QtCore.Qt.CheckState.Checked.value
+        self.sim_widget.set_stored_ke_color_scale(replace(scale, enabled=enabled))
+
+    def _on_stored_ke_mode_changed(self, index: int) -> None:
+        mode = self.stored_ke_mode_combo.itemData(index)
+        if isinstance(mode, str):
+            self.sim_widget.set_stored_ke_component_mode(mode)
+
+    def _on_stored_ke_sqrt_changed(self, state: int) -> None:
+        from dataclasses import replace
+
+        scale = getattr(self.sim_widget, "stored_ke_color_scale", None)
+        if scale is None:
+            return
+        transform = "sqrt" if state == QtCore.Qt.CheckState.Checked.value else "linear"
+        self.sim_widget.set_stored_ke_color_scale(
+            replace(scale, display_transform=transform)
+        )
+
+    def _on_stored_ke_high_limit_changed(self, value: float) -> None:
+        from dataclasses import replace
+
+        scale = getattr(self.sim_widget, "stored_ke_color_scale", None)
+        if scale is None or value <= 0.0:
+            return
+        self.sim_widget.set_stored_ke_color_scale(
+            replace(scale, high_limit=float(value))
+        )
+
     def _create_segment_ke_globe_controls(
         self, force_layout: QtWidgets.QVBoxLayout
     ) -> None:
         if force_layout is None:
             raise ValueError("force_layout must be provided")
-        self.show_segment_ke_globes_cb = QtWidgets.QCheckBox(
-            "Segment Kinetic-Energy Globes"
-        )
+        self.show_segment_ke_globes_cb = QtWidgets.QCheckBox(KE_PROXY_GLOBE_LABEL)
         self.show_segment_ke_globes_cb.setToolTip(SEGMENT_KE_PROXY_DISCLAIMER)
         self._restore_checkbox(
             self.show_segment_ke_globes_cb,

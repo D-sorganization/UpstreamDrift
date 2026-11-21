@@ -63,8 +63,6 @@ class MujocoSegmentKineticEnergyProvider:
             trans_j = float(ke_trans[i])
             rot_j = float(ke_rot[i])
             total_j = trans_j + rot_j
-            if total_j <= 0.0:
-                continue
             segments.append(
                 SegmentKineticEnergySample(
                     body=name,

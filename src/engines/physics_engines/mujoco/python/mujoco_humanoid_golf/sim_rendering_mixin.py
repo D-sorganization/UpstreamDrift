@@ -114,6 +114,7 @@ class SimRenderingMixin:
         net_power_frame, net_power_scale = self._apply_net_power_scene_colors(
             iface_frame
         )
+        ke_values = self._apply_stored_ke_scene_colors()
         axial_frame, scale = self._apply_axial_scene_colors()
 
         # One provider sample per frame feeds both the native and MeshCat views.
@@ -148,7 +149,12 @@ class SimRenderingMixin:
         if self.meshcat_adapter:
             try:
                 self._update_meshcat_frame_overlays(
-                    glyphs, axial_frame, scale, net_power_frame, net_power_scale
+                    glyphs,
+                    axial_frame,
+                    scale,
+                    ke_values,
+                    net_power_frame,
+                    net_power_scale,
                 )
             except (RuntimeError, ValueError, AttributeError) as exc:
                 logger.debug("Counterfactual vector rendering failed: %s", exc)
@@ -170,6 +176,7 @@ class SimRenderingMixin:
         glyphs: GlyphSet | None,
         axial_frame: Any,
         scale: Any,
+        ke_values: dict[str, float | None] | None,
         net_power_frame: Any,
         net_power_scale: Any,
     ) -> None:
@@ -177,6 +184,9 @@ class SimRenderingMixin:
         if self.meshcat_adapter is None or self.data is None:
             return
         self.meshcat_adapter.update(self.data)
+        ke_scale = getattr(self, "stored_ke_color_scale", None)
+        if ke_scale is not None:
+            self.meshcat_adapter.update_stored_ke_colors(ke_values, ke_scale)
         if net_power_scale is not None:
             self.meshcat_adapter.update_net_power_colors(
                 net_power_frame, net_power_scale
@@ -316,6 +326,40 @@ class SimRenderingMixin:
                 frame = None
                 logger.debug("Axial force display unavailable: %s", exc)
         return frame, scale
+
+    def _apply_stored_ke_scene_colors(
+        self: Any,
+    ) -> dict[str, float | None] | None:
+        from src.shared.python.body_part_viz.mujoco_scalar_colors import (
+            apply_mujoco_scalar_scene_colors,
+        )
+
+        getter = getattr(self, "_current_stored_ke_values", None)
+        if not callable(getter):
+            return None
+        values = getter()
+        scale = getattr(self, "stored_ke_color_scale", None)
+        if scale is None or not scale.enabled or values is None:
+            setter = getattr(self, "set_stored_ke_clipped_segments", None)
+            if callable(setter):
+                setter(frozenset())
+            return values
+        clipped: set[str] = set()
+        try:
+            apply_mujoco_scalar_scene_colors(
+                self.model,
+                self.renderer.scene,
+                values,
+                scale,
+                clipped_segments=clipped,
+            )
+        except (TypeError, ValueError, RuntimeError) as exc:
+            logger.debug("Stored KE shading unavailable: %s", exc)
+            clipped.clear()
+        setter = getattr(self, "set_stored_ke_clipped_segments", None)
+        if callable(setter):
+            setter(frozenset(clipped))
+        return values
 
     @staticmethod
     def _euler_from_matrix(mat: np.ndarray) -> tuple[float, float, float]:

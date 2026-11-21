@@ -125,10 +125,10 @@ class FactorsPanel:
         if not math.isfinite(time_s):
             raise ValueError("time_s must be finite")
         if self.impact_time_s is None:
-            return [("Status", self.status), *self.settings.blank_rows]
+            return [*_status_lines(self.status), *self.settings.blank_rows]
         if time_s >= self.impact_time_s:
-            return [("Status", self.status), *self.frozen]
-        return [("Status", BEFORE), *self._live_rows(time_s)]
+            return [*_status_lines(self.status), *self.frozen]
+        return [*_status_lines(BEFORE), *self._live_rows(time_s)]
 
     def _live_rows(self, time_s: float) -> Lines:
         """Rows of the source sample nearest ``time_s`` (blank if not computable)."""
@@ -153,7 +153,10 @@ class FactorsPanel:
         cfg = self.settings
         size = max(cfg.min_font_px, int(shape[0]) // cfg.font_height_divisor)
         reserve = (cfg.blank_text, cfg.widest_value)
-        widest = [("Status", max(BEFORE, self.status, key=len), False)]
+        widest = [
+            (lab, val, False)
+            for lab, val in _status_lines(max(BEFORE, self.status, key=len))
+        ]
         widest += [
             (lab, max(val, *reserve, key=len), False) for lab, val in self.frozen
         ]
@@ -171,6 +174,12 @@ class FactorsPanel:
         return compositor.draw_text_panel(
             img, box, size, TITLE, lines, self.settings.opacity
         )
+
+
+def _status_lines(status: str) -> Lines:
+    """``status`` wrapped over lines (never cut), the first one labelled."""
+    wrapped = compositor._wrap_reason(status)
+    return tuple(("Status" if i == 0 else "", text) for i, text in enumerate(wrapped))
 
 
 def _rows(card: ImpactCard, settings: FactorSettings) -> Lines:
@@ -262,6 +271,6 @@ def factors_for_export(
             impact = swing.impact_time_s
         panel = panel_from_series(series, impact, swing.ball, config, detected=known)
     except impact_card._EXPECTED_ERRORS as exc:
-        reason = compositor._short(f"unavailable: {exc}")
+        reason = f"unavailable: {exc}"
         return no_impact_panel(config, reason), settings
     return panel, settings

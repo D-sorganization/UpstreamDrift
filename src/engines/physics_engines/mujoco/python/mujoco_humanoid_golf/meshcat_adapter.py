@@ -42,7 +42,7 @@ class MuJoCoMeshcatAdapter:
 
     def __init__(self, model: mujoco.MjModel | None = None) -> None:
         self._force_colors: MeshcatForceColors | None = None
-        self._net_power_colors: MeshcatScalarColors | None = None
+        self._scalar_colors: MeshcatScalarColors | None = None
         self._glyph_renderer: MeshcatGlyphRenderer | None = None
         if meshcat is None:
             logger.warning("Meshcat not installed. Visualization disabled.")
@@ -91,7 +91,7 @@ class MuJoCoMeshcatAdapter:
         self._force_colors = MeshcatForceColors(
             self._set_color_property, color_bindings
         )
-        self._net_power_colors = MeshcatScalarColors(
+        self._scalar_colors = MeshcatScalarColors(
             self._set_color_property, color_bindings
         )
 
@@ -106,12 +106,21 @@ class MuJoCoMeshcatAdapter:
         if self._force_colors is not None:
             self._force_colors.apply(frame, scale)
 
+    def update_stored_ke_colors(
+        self,
+        values: dict[str, float | None] | None,
+        scale: ScalarColorScale,
+    ) -> None:
+        """Apply stored kinetic-energy scalar shading in MeshCat."""
+        if self._scalar_colors is not None:
+            self._scalar_colors.apply(values, scale)
+
     def update_net_power_colors(
         self, frame: Any | None, scale: ScalarColorScale
     ) -> None:
-        if self._net_power_colors is not None:
-            values = None if frame is None else getattr(frame, "values", None)
-            self._net_power_colors.apply(values, scale)
+        values = None if frame is None else getattr(frame, "values", None)
+        if self._scalar_colors is not None:
+            self._scalar_colors.apply(values, scale)
 
     def update(self, data: mujoco.MjData) -> None:
         """
@@ -147,46 +156,30 @@ class MuJoCoMeshcatAdapter:
         self.vis["overlays/segment_ke"].delete()
         if frame is None:
             return
-        from src.shared.python.segment_kinetic_energy.contracts import (
-            PEAK_HIGHLIGHT_FRACTION,
-        )
         from src.shared.python.segment_kinetic_energy.render_globes import (
             globe_rgba_for_ke,
             radius_for_ke,
         )
+        from src.shared.python.segment_kinetic_energy.shading import (
+            REFERENCE_SWING_PEAK_SEGMENT_KE_J,
+        )
 
-        peak_by_body = {p.body: p.peak_total_j for p in peaks}
-        ref_peak = max(peak_by_body.values(), default=0.0)
-        if ref_peak <= 0.0:
-            ref_peak = max((s.total_j for s in frame.segments), default=0.0)
+        ref_peak = REFERENCE_SWING_PEAK_SEGMENT_KE_J
         for index, seg in enumerate(frame.segments):
             if seg.total_j <= 0.0:
                 continue
-            peak_j = peak_by_body.get(seg.body, seg.total_j)
-            at_peak = seg.total_j >= PEAK_HIGHLIGHT_FRACTION * peak_j and peak_j > 0.0
             radius = radius_for_ke(seg.total_j, reference_peak_j=ref_peak)
-            rgba = globe_rgba_for_ke(
-                seg.total_j, reference_peak_j=ref_peak, at_peak=at_peak
-            )
+            rgba = globe_rgba_for_ke(seg.total_j, reference_peak_j=ref_peak)
             path = f"overlays/segment_ke/{index}"
             material = g.MeshPhongMaterial(
                 color=rgba_to_hex(rgba),
-                opacity=float(rgba[3]),
-                transparent=True,
+                opacity=1.0,
+                transparent=False,
             )
             self.vis[path].set_object(g.Sphere(radius), material)
             transform = np.eye(4)
             transform[:3, 3] = np.asarray(seg.com_m, dtype=float)
             self.vis[path].set_transform(transform)
-            if at_peak:
-                glow = f"overlays/segment_ke/glow_{index}"
-                glow_mat = g.MeshPhongMaterial(
-                    color=rgba_to_hex(rgba),
-                    opacity=min(0.3, float(rgba[3])),
-                    transparent=True,
-                )
-                self.vis[glow].set_object(g.Sphere(radius * 1.2), glow_mat)
-                self.vis[glow].set_transform(transform)
 
     def draw_glyphs(self, glyphs: GlyphSet | None) -> None:
         """Draw force/torque glyphs through the shared MeshCat renderer.

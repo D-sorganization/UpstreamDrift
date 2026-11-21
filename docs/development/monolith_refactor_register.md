@@ -17,6 +17,9 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1591 | `src/shared/python/motion_matching/full_body_forward_dynamics.py` |
 | 1515 | `src/shared/python/motion_matching/acceptance.py` |
 | 1319 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/runSimulation.m` |
+| 1273 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py` |
+| 1273 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py` |
+| 1273 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py` |
 | 1200 | `src/engines/simscape/adapter.py` |
 | 1200 | `src/tools/shot_pattern_analysis/matched_lean_control.py` |
 | 1199 | `src/api/services/simulation_service.py` |
@@ -32,13 +35,15 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1195 | `src/launchers/model_card.py` |
 | 1195 | `src/launchers/upstream_drift_launcher.py` |
 | 1195 | `src/tools/shot_pattern_analysis/matched_supplement_figures.py` |
+| 1192 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
+| 1192 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
+| 1192 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
 | 1185 | `src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m` |
-| 1185 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
 | 1184 | `src/bunkershot3d/ball/splash.py` |
 | 1183 | `src/engines/physics_engines/opensim/python/msk_lift_ik_id.py` |
+| 1183 | `src/tools/native_viewer_export/core.py` |
 | 1182 | `src/launchers/launcher_model_handlers.py` |
 | 1181 | `src/shared/python/grip_contact/parity.py` |
-| 1180 | `src/tools/native_viewer_export/core.py` |
 | 1178 | `src/engines/physics_engines/pinocchio/python/full_body_fit.py` |
 | 1175 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 1174 | `src/shared/python/lifting/bundles.py` |
@@ -48,7 +53,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1167 | `src/launchers/settings_dialog.py` |
 | 1166 | `src/shared/python/analysis/orchestrator.py` |
 | 1165 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py` |
-| 1165 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py` |
 | 1164 | `src/shared/python/physics/terrain_representation.py` |
 | 1162 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
 | 1153 | `src/tools/motion_matching/gui.py` |
@@ -150,6 +154,9 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 943 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_match_export.m` |
 | 942 | `src/shared/python/estimation/dime_dynamics_window.py` |
 | 938 | `src/robotics/control/whole_body/wbc_controller.py` |
+| 936 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py` |
+| 936 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py` |
+| 936 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py` |
 | 934 | `src/shared/python/sidekick/ui/tools_sidebar/os_terminal.py` |
 | 932 | `src/shared/python/model_generation/library/model_library.py` |
 | 924 | `src/research/differentiable/engine.py` |
@@ -167,7 +174,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 896 | `src/launchers/launcher_layout_manager.py` |
 | 895 | `src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py` |
 | 892 | `src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/2D GUI/visualization/SkeletonPlotter.m` |
-| 892 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py` |
 | 892 | `src/tools/matched_swing_browser/gui.py` |
 | 890 | `src/engines/physics_engines/opensim/python/msk_lift_predictive.py` |
 | 890 | `src/shared/python/sidekick/process_calculators/scrubber_calculator.py` |
