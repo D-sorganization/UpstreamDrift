@@ -34,6 +34,8 @@ SURFACE_TOL, AREA_RTOL, NEAREST = 1e-6, 1e-6, 24
 # neighbour_majority turns 487.2 rad over 8.59 m of border, iso_line 152.7 rad
 # over 5.68 m; twelve flat closed loops cannot turn less than 75.4 rad.
 TURNING_RATIO, LENGTH_RATIO = 0.4, 0.75
+# Weights at a cut vertex that should be equal are equal to rounding.
+EQUAL_WEIGHT_TOL = 1e-9
 
 
 def _strip(seam_at: int | None = None):
@@ -316,6 +318,71 @@ def test_a_crossing_near_a_vertex_snaps_to_it_and_three_segments_meet_at_a_centr
     assert centred.tolist() == [[0, 1, 2]] and sorted(parts) == [0, 0, 1, 1, 2, 2]
     points = np.vstack([corners, mids, corners.mean(axis=0)])
     assert np.allclose(_areas(points[kept]), 1 / 12)  # six equal parts, none lost
+
+
+def _one_face_cut(field: np.ndarray, snap: float | None = None):
+    """The iso-line cut of one flat face with ``field`` as its unsmoothed weights.
+
+    Returns the cut faces, their segments, and each cut vertex's weights, read
+    from its place on the face (the weights are linear over it).
+    """
+    corners = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+    names = " ".join(str(v) for v in range(len(corners)))
+    bones = tuple(
+        (
+            ET.fromstring(f'<bone body="b{n}" bindpos="0 0 0" vertid="{names}"/>'),
+            np.arange(len(corners)),
+            column,
+        )
+        for n, column in enumerate(field.T)
+    )
+    skin = pieces._Skin(bones[0][0], corners, np.array([[0, 1, 2]]), None, bones)
+    settings = dataclasses.replace(
+        SETTINGS,
+        cut_smooth_rounds=0,
+        cut_snap_fraction=SETTINGS.cut_snap_fraction if snap is None else snap,
+    )
+    cut, parts = pieces._iso_cut(skin, field, settings)
+    x, y = cut.vertices[:, 0], cut.vertices[:, 1]
+    return cut.faces, parts, np.column_stack([1 - x - y, x, y]) @ field
+
+
+def test_three_segments_meet_where_their_three_weights_are_equal():
+    # Review of #15388: the centroid of this face holds (0.367, 0.4, 0.233).
+    field = np.array([[0.9, 0.1, 0.0], [0.1, 0.9, 0.0], [0.1, 0.2, 0.7]])
+    faces, parts, held = _one_face_cut(field)
+    assert len(held) == 7 and len(faces) == 6  # 3 corners, 3 crossings, 1 junction
+    assert np.ptp(held[-1]) < EQUAL_WEIGHT_TOL  # the junction: all three equal
+    for crossing in held[3:6]:  # an edge crossing: its two segments equal
+        low, high = np.sort(crossing)[-2:]
+        assert high - low < EQUAL_WEIGHT_TOL
+    middles = held[faces].mean(axis=1)  # each triangle's weights at its centroid
+    assert parts.tolist() == middles.argmax(axis=1).tolist()
+    assert sorted(parts) == [0, 0, 1, 1, 2, 2]
+
+
+def test_a_junction_off_the_face_or_undefined_is_put_inside_it():
+    snap = SETTINGS.cut_snap_fraction
+    # The three equal-weight lines meet beyond the edge 0-1 (segment 2 leads all
+    # along its middle): the junction is put on the inner triangle whose corners
+    # hold 1 - 2 snap, as near that edge as the snap fraction allows.
+    beyond = np.array([[0.5, 0.0, 0.45], [0.0, 0.5, 0.45], [0.0, 0.0, 0.5]])
+    exact = pieces._junctions(np.array([[0, 1, 2]]), beyond, np.arange(3), snap)
+    assert np.allclose(exact, [[(1 - snap) / 2, (1 - snap) / 2, snap]])
+    faces, parts, held = _one_face_cut(beyond)
+    assert np.allclose(held[-1], exact[0] @ beyond) and sorted(set(parts)) == [0, 1, 2]
+    # Parallel equal-weight lines never meet: the centroid, as before the fix.
+    never = np.array([[0.5, 0.375, 0.0], [0.25, 0.375, 0.25], [0.0, 0.375, 0.5]])
+    middle = pieces._junctions(np.array([[0, 1, 2]]), never, np.arange(3), snap)
+    assert np.allclose(middle, 1 / 3)
+    # A junction nearer an edge than the snap fraction is moved in to it, so no
+    # triangle of the fan is a sliver; one further in is left where it is.
+    field = np.array([[0.9, 0.1, 0.0], [0.1, 0.9, 0.0], [0.1, 0.2, 0.7]])
+    free = pieces._junctions(np.array([[0, 1, 2]]), field, np.arange(3), snap)
+    wide = free.min() + snap  # a snap fraction this junction is within
+    moved = pieces._junctions(np.array([[0, 1, 2]]), field, np.arange(3), wide)
+    assert np.isclose(moved.min(), wide) and np.allclose(moved.sum(axis=1), 1.0)
+    assert np.allclose(free @ field, (free @ field)[0, 0], atol=EQUAL_WEIGHT_TOL)
 
 
 def test_the_golfers_borders_are_much_less_ragged_along_the_iso_line(golfer):

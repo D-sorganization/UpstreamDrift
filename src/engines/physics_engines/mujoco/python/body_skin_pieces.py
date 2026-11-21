@@ -278,8 +278,9 @@ def _cut_faces(
 
     A face in one segment stays. A face in two gives its lone corner a triangle
     and the other two a quadrilateral, halved along the diagonal that leaves the
-    larger smallest triangle. A face in three is fanned about a new centre
-    vertex (index ``len(vertices)`` onward; returned as the faces they centre).
+    larger smallest triangle. A face in three is fanned about a new junction
+    vertex (index ``len(vertices)`` onward; returned as the faces they lie in,
+    for ``_junctions`` to place).
     Triangles that a snapped crossing closed to a line are left out.
     """
     mine = labels[faces]
@@ -310,12 +311,47 @@ def _cut_faces(
     return out[real], out_part[real], faces[three]
 
 
+def _junctions(faces: Ints, field: Floats, labels: Ints, snap: float) -> Floats:
+    """Per three-segment face, its corners' shares of the point the borders meet at.
+
+    ``field`` is linear over a face, so the three corners' segments have equal
+    weight at one point: the shares ``b`` with ``b @ (w0 - w1) = 0``,
+    ``b @ (w1 - w2) = 0`` and ``b.sum() = 1``, where ``wj`` is the weight of
+    corner ``j``'s segment at the three corners. Two cases have no such point
+    to use, and are settled here:
+
+    * The two lines are parallel (or the solution is not finite): the centroid.
+    * The point is off the face, or nearer an edge than ``snap``: negative
+      shares are dropped and the rest rescaled, on the inner triangle whose
+      corners hold ``1 - 2 * snap``. The junction then lies on that triangle's
+      side facing the point, so the borders still run from their equal-weight
+      edge crossings towards it, and no triangle of the fan is a sliver.
+
+    Preconditions: ``faces`` is ``(K, 3)`` with three different ``labels`` per
+    row; ``0 < snap``. Postconditions: every row sums to one and holds no share
+    under ``min(snap, 1 / 3)``; a row whose equal-weight point has every share
+    at ``snap`` or more is that point, unmoved.
+    """
+    floor = min(snap, 1 / _CORNERS)
+    room = 1 - _CORNERS * floor
+    held: Any = field[faces[:, :, None], labels[faces][:, None, :]]
+    normal: Any = np.cross(held[..., 0] - held[..., 1], held[..., 1] - held[..., 2])
+    with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
+        inner: Any = (normal / normal.sum(axis=1, keepdims=True) - floor) / room
+    inner = np.clip(inner, 0.0, None)
+    inner[~np.isfinite(inner).all(axis=1)] = 1 / _CORNERS
+    share: Floats = floor + room * inner / inner.sum(axis=1, keepdims=True)
+    return share
+
+
 def _iso_cut(
     skin: _Skin, weights: Floats, settings: PieceSettings
 ) -> tuple[_Skin, Ints]:
     """``skin`` with its faces split where two segments' weights are equal.
 
-    Returns the refined skin and each of its faces' segment. Postconditions:
+    Returns the refined skin and each of its faces' segment. Three segments in
+    one face meet where their three weights are equal (``_junctions``).
+    Postconditions:
     the old vertices and bones keep their indices; every new vertex is a fixed
     weighted mean of the corners of one old face, in texture coordinate and, by
     one bone of its own per bone of those corners, in position at every pose;
@@ -333,7 +369,8 @@ def _iso_cut(
     count = len(skin.vertices)
     faces, parts, centred = _cut_faces(blend(skin.vertices), skin.faces, labels, cross)
     corners = np.concatenate([corners, centred])
-    share = np.concatenate([share, np.full(centred.shape, 1 / _CORNERS)])
+    meet = _junctions(centred, field, labels, settings.cut_snap_fraction)
+    share = np.concatenate([share, meet])
     rest = blend(skin.vertices)
     bones = list(skin.bones)
     for bone, ids, held in skin.bones:
