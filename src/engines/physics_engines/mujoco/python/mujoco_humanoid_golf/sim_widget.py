@@ -33,8 +33,8 @@ from .control_system import ControlSystem, ControlType
 from .interactive_manipulation import InteractiveManipulator
 from .meshcat_adapter import MuJoCoMeshcatAdapter
 from .physics_engine import MuJoCoPhysicsEngine
-from .sim_camera_mixin import SimCameraMixin
 from .sim_angmom_mixin import SimAngMomMixin
+from .sim_camera_mixin import SimCameraMixin
 from .sim_force_color_mixin import SimForceColorMixin
 from .sim_rendering_mixin import SimRenderingMixin
 from .telemetry import TelemetryRecorder

@@ -10,6 +10,7 @@ used during humanoid golf simulations.
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
 from PyQt6 import QtCore, QtGui, QtWidgets
@@ -377,7 +378,12 @@ class VisualizationTab(QtWidgets.QWidget):
         from src.shared.python.body_part_viz.angular_momentum_glyphs import (
             DEFAULT_MAX_LENGTH_M,
             DEFAULT_SCALE_M_PER_NMS,
+            AngularMomentumArrowStyle,
         )
+
+        style = getattr(self.sim_widget, "angmom_arrow_style", None)
+        if not isinstance(style, AngularMomentumArrowStyle):
+            style = AngularMomentumArrowStyle()
 
         group = QtWidgets.QGroupBox("Angular Momentum (H)")
         layout = QtWidgets.QVBoxLayout(group)
@@ -392,7 +398,6 @@ class VisualizationTab(QtWidgets.QWidget):
             self.show_angmom_cb,
             getattr(self.sim_widget, "show_angular_momentum_arrows", None),
         )
-        self.show_angmom_cb.stateChanged.connect(self.on_angmom_overlay_changed)
         layout.addWidget(self.show_angmom_cb)
 
         form = QtWidgets.QFormLayout()
@@ -403,43 +408,43 @@ class VisualizationTab(QtWidgets.QWidget):
             ("spin_only", "Spin only (Iω, with arc sense)"),
         ):
             self.angmom_mode_combo.addItem(label, mode)
-        self.angmom_mode_combo.currentIndexChanged.connect(self.on_angmom_overlay_changed)
+        mode_idx = self.angmom_mode_combo.findData(style.display_mode)
+        if mode_idx >= 0:
+            self.angmom_mode_combo.setCurrentIndex(mode_idx)
         form.addRow("Display:", self.angmom_mode_combo)
 
         self.angmom_scale_spin = QtWidgets.QDoubleSpinBox()
         self.angmom_scale_spin.setDecimals(6)
-        self.angmom_scale_spin.setRange(1e-6, 0.01)
-        self.angmom_scale_spin.setSingleStep(2.5e-5)
+        self.angmom_scale_spin.setRange(1e-6, 0.05)
+        self.angmom_scale_spin.setSingleStep(5e-4)
         self.angmom_scale_spin.setValue(
-            getattr(
-                getattr(self.sim_widget, "angmom_arrow_style", None),
-                "scale_m_per_nms",
-                DEFAULT_SCALE_M_PER_NMS,
-            )
+            style.scale_m_per_nms or DEFAULT_SCALE_M_PER_NMS
         )
-        self.angmom_scale_spin.setToolTip("Fixed metres per (N·m·s); held for the swing")
-        self.angmom_scale_spin.valueChanged.connect(self.on_angmom_overlay_changed)
+        self.angmom_scale_spin.setToolTip(
+            "Fixed metres per (N·m·s); held for the swing"
+        )
         form.addRow("Scale (m / N·m·s):", self.angmom_scale_spin)
 
         self.angmom_max_len_spin = QtWidgets.QDoubleSpinBox()
         self.angmom_max_len_spin.setRange(0.1, 5.0)
         self.angmom_max_len_spin.setDecimals(2)
         self.angmom_max_len_spin.setSuffix(" m")
-        self.angmom_max_len_spin.setValue(
-            getattr(
-                getattr(self.sim_widget, "angmom_arrow_style", None),
-                "max_length_m",
-                DEFAULT_MAX_LENGTH_M,
-            )
-        )
-        self.angmom_max_len_spin.valueChanged.connect(self.on_angmom_overlay_changed)
+        self.angmom_max_len_spin.setValue(style.max_length_m or DEFAULT_MAX_LENGTH_M)
         form.addRow("Length cap:", self.angmom_max_len_spin)
 
         layout.addLayout(form)
 
         self.show_angmom_spin_cb = QtWidgets.QCheckBox("Also draw spin component (Iω)")
-        self.show_angmom_spin_cb.stateChanged.connect(self.on_angmom_overlay_changed)
+        self.show_angmom_spin_cb.setChecked(style.show_spin_component)
         layout.addWidget(self.show_angmom_spin_cb)
+
+        self.show_angmom_cb.stateChanged.connect(self.on_angmom_overlay_changed)
+        self.angmom_mode_combo.currentIndexChanged.connect(
+            self.on_angmom_overlay_changed
+        )
+        self.angmom_scale_spin.valueChanged.connect(self.on_angmom_overlay_changed)
+        self.angmom_max_len_spin.valueChanged.connect(self.on_angmom_overlay_changed)
+        self.show_angmom_spin_cb.stateChanged.connect(self.on_angmom_overlay_changed)
         return group
 
     def _connect_force_legend_to_status_bar(self) -> None:
@@ -940,7 +945,11 @@ class VisualizationTab(QtWidgets.QWidget):
             AngularMomentumArrowStyle,
         )
 
-        style = AngularMomentumArrowStyle(
+        base = getattr(self.sim_widget, "angmom_arrow_style", None)
+        if not isinstance(base, AngularMomentumArrowStyle):
+            base = AngularMomentumArrowStyle()
+        style = replace(
+            base,
             scale_m_per_nms=self.angmom_scale_spin.value(),
             max_length_m=self.angmom_max_len_spin.value(),
             display_mode=str(self.angmom_mode_combo.currentData()),

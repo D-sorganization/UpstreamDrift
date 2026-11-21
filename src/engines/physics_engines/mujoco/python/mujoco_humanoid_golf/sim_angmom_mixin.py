@@ -37,7 +37,10 @@ class SimAngMomMixin:
         self._restoring_angmom_settings = False
 
     def set_angular_momentum_overlay(
-        self: Any, *, enabled: bool | None = None, style: AngularMomentumArrowStyle | None = None
+        self: Any,
+        *,
+        enabled: bool | None = None,
+        style: AngularMomentumArrowStyle | None = None,
     ) -> None:
         changed = False
         if enabled is not None and enabled != self.show_angular_momentum_arrows:
@@ -98,3 +101,10 @@ class SimAngMomMixin:
         self: Any, force_glyphs: GlyphSet | None, angmom_glyphs: GlyphSet | None
     ) -> GlyphSet | None:
         return merge_glyph_sets(force_glyphs, angmom_glyphs)
+
+    def _build_overlay_glyphs(self: Any) -> GlyphSet | None:
+        """Force/torque plus optional angular-momentum arrows for this frame."""
+        return self._merge_overlay_glyphs(
+            self._build_force_glyphs(),
+            self._build_angular_momentum_glyphs(),
+        )

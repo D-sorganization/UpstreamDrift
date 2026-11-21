@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-import importlib
+import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -48,7 +49,9 @@ def _frame() -> SegmentAngularMomentumFrame:
             "arm": (1.0, 1.0, 0.0),
             "club": (0.5, 0.0, 0.0),
         },
-        spin_only_nm_s=dict.fromkeys(("pelvis", "torso", "thigh", "arm", "club"), (0.0, 0.0, 0.0)),
+        spin_only_nm_s=dict.fromkeys(
+            ("pelvis", "torso", "thigh", "arm", "club"), (0.0, 0.0, 0.0)
+        ),
         groups_nm_s={
             "legs": (0.0, 0.0, 1.0),
             "pelvis": (4.0, 0.0, 0.0),
@@ -80,11 +83,76 @@ def test_groups_mode_draws_six_arrows() -> None:
     assert len(glyphs.torque_arcs) == 0
 
 
-def test_arrow_length_respects_fixed_scale_and_cap() -> None:
+def test_arrow_length_equals_h_times_scale_when_in_range() -> None:
+    style = AngularMomentumArrowStyle(
+        scale_m_per_nms=0.05,
+        max_length_m=2.0,
+        min_draw_length_m=0.001,
+    )
+    magnitude_nms = 3.0
+    anchors = {"whole_body": (0.0, 0.0, 0.0)}
+    frame = SegmentAngularMomentumFrame(
+        time_s=0.0,
+        reference_point=REFERENCE_POINT,
+        frame="world",
+        units=UNITS_ANGMOM,
+        source="fixture",
+        contribution_nm_s={},
+        spin_only_nm_s={},
+        groups_nm_s={
+            "legs": None,
+            "pelvis": None,
+            "torso": None,
+            "arms": None,
+            "club": None,
+        },
+        whole_body_nm_s=(magnitude_nms, 0.0, 0.0),
+    )
+    glyphs = build_angular_momentum_glyphs(
+        frame, style=style, anchors_m=anchors, enabled=True
+    )
+    assert glyphs is not None
+    arrow = glyphs.arrows[0]
+    length = float(np.linalg.norm(np.subtract(arrow.tip_m, arrow.tail_m)))
+    assert length == pytest.approx(magnitude_nms * style.scale_m_per_nms)
+    assert arrow.clamped is False
+
+
+def test_arrow_omitted_below_min_draw_length() -> None:
+    style = AngularMomentumArrowStyle(
+        scale_m_per_nms=1e-4,
+        min_draw_length_m=0.05,
+        max_length_m=1.0,
+    )
+    anchors = {"whole_body": (0.0, 0.0, 0.0)}
+    frame = SegmentAngularMomentumFrame(
+        time_s=0.0,
+        reference_point=REFERENCE_POINT,
+        frame="world",
+        units=UNITS_ANGMOM,
+        source="fixture",
+        contribution_nm_s={},
+        spin_only_nm_s={},
+        groups_nm_s={
+            "legs": None,
+            "pelvis": None,
+            "torso": None,
+            "arms": None,
+            "club": None,
+        },
+        whole_body_nm_s=(10.0, 0.0, 0.0),
+    )
+    glyphs = build_angular_momentum_glyphs(
+        frame, style=style, anchors_m=anchors, enabled=True
+    )
+    assert glyphs is None
+
+
+def test_arrow_length_respects_max_cap() -> None:
     style = AngularMomentumArrowStyle(
         scale_m_per_nms=0.1,
         max_length_m=0.5,
-        min_length_m=0.02,
+        min_draw_length_m=0.001,
     )
     anchors = {"whole_body": (0.0, 0.0, 0.0)}
     frame = SegmentAngularMomentumFrame(
@@ -112,6 +180,42 @@ def test_arrow_length_respects_fixed_scale_and_cap() -> None:
     length = float(np.linalg.norm(np.subtract(arrow.tip_m, arrow.tail_m)))
     assert length == pytest.approx(0.5)
     assert arrow.clamped is True
+
+
+def test_per_segment_threshold_top_n_and_count_cap() -> None:
+    contributions = {f"seg{i}": (float(i + 1), 0.0, 0.0) for i in range(12)}
+    frame = SegmentAngularMomentumFrame(
+        time_s=0.0,
+        reference_point=REFERENCE_POINT,
+        frame="world",
+        units=UNITS_ANGMOM,
+        source="fixture",
+        contribution_nm_s=contributions,
+        spin_only_nm_s=contributions,
+        groups_nm_s={
+            "legs": None,
+            "pelvis": None,
+            "torso": None,
+            "arms": None,
+            "club": None,
+        },
+        whole_body_nm_s=(78.0, 0.0, 0.0),
+    )
+    style = AngularMomentumArrowStyle(
+        display_mode="per_segment",
+        per_segment_threshold_nms=5.0,
+        per_segment_top_n=3,
+        per_segment_max_count=2,
+        scale_m_per_nms=0.01,
+        min_draw_length_m=0.001,
+    )
+    anchors = {name: (0.0, 0.0, float(i) * 0.1) for i, name in enumerate(contributions)}
+    glyphs = build_angular_momentum_glyphs(
+        frame, style=style, anchors_m=anchors, enabled=True
+    )
+    assert glyphs is not None
+    labels = {a.label for a in glyphs.arrows}
+    assert labels == {"angmom:seg11", "angmom:seg10"}
 
 
 def test_spin_only_mode_adds_arc_not_in_groups_mode() -> None:
@@ -147,13 +251,21 @@ def test_spin_only_mode_adds_arc_not_in_groups_mode() -> None:
     assert spin.torque_arcs
 
 
-def test_legend_contains_reference_frame_and_units() -> None:
+def test_legend_contains_reference_frame_units_and_calibration() -> None:
     text = angular_momentum_legend_line(AngularMomentumArrowStyle())
     assert "whole body com" in text.lower()
     assert "world" in text
     assert UNITS_ANGMOM in text
+    assert "FULL_BODY" in text
     ref = 1.0 / DEFAULT_SCALE_M_PER_NMS
-    assert str(int(ref)) in text
+    assert f"{ref:.1f}" in text
+
+
+def test_spin_only_legend_notes_schematic_arc_radii() -> None:
+    text = angular_momentum_legend_line(
+        AngularMomentumArrowStyle(display_mode="spin_only")
+    )
+    assert "schematic" in text.lower()
 
 
 def test_settings_round_trip() -> None:
@@ -162,7 +274,9 @@ def test_settings_round_trip() -> None:
         parse_angular_momentum_state,
     )
 
-    style = AngularMomentumArrowStyle(display_mode="per_segment", show_spin_component=True)
+    style = AngularMomentumArrowStyle(
+        display_mode="per_segment", show_spin_component=True
+    )
     blob = dump_angular_momentum_state(True, style)
     enabled, parsed = parse_angular_momentum_state(blob)
     assert enabled is True
@@ -170,22 +284,70 @@ def test_settings_round_trip() -> None:
     assert parsed.show_spin_component is True
 
 
-def test_merge_glyph_sets_concatenates_arrows() -> None:
-    empty = GlyphSet(time_s=0.0, arrows=(), torque_arcs=(), legend=LegendSpec())
+def test_merge_glyph_sets_concatenates_arrows_and_keeps_primary_time() -> None:
+    primary = GlyphSet(
+        time_s=1.25,
+        arrows=(),
+        torque_arcs=(),
+        legend=LegendSpec(engine="force", source_labels=(), scale_mode="fixed"),
+    )
     one = build_angular_momentum_glyphs(
         _frame(),
         style=AngularMomentumArrowStyle(display_mode="groups"),
-        anchors_m={"whole_body": (0.0, 0.0, 1.0), **dict.fromkeys(("legs", "pelvis", "torso", "arms", "club"), (0.0, 0.0, 1.0))},
+        anchors_m={
+            "whole_body": (0.0, 0.0, 1.0),
+            **dict.fromkeys(
+                ("legs", "pelvis", "torso", "arms", "club"), (0.0, 0.0, 1.0)
+            ),
+        },
         enabled=True,
     )
-    merged = merge_glyph_sets(empty, one)
+    merged = merge_glyph_sets(primary, one)
     assert merged is not None
+    assert merged.time_s == pytest.approx(1.25)
     assert len(merged.arrows) == len(one.arrows)
 
 
-def test_headless_glyphs_module_has_no_matplotlib() -> None:
-    mod = importlib.import_module("src.shared.python.body_part_viz.angular_momentum_glyphs")
-    source_path = mod.__file__
-    assert source_path is not None
-    text = Path(source_path).read_text(encoding="utf-8")
-    assert "matplotlib" not in text
+def test_angular_momentum_glyphs_module_has_no_matplotlib() -> None:
+    script = """
+import sys
+class NoRendering:
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname.split('.')[0] in ('matplotlib', 'PyQt6', 'pyqtgraph'):
+            raise ImportError('Rendering package imported: ' + fullname)
+sys.meta_path.insert(0, NoRendering())
+from src.shared.python.body_part_viz.angular_momentum_glyphs import (
+    AngularMomentumArrowStyle,
+    build_angular_momentum_glyphs,
+)
+from src.shared.python.body_part_viz.segment_angular_momentum import (
+    REFERENCE_POINT,
+    UNITS_ANGMOM,
+    SegmentAngularMomentumFrame,
+)
+frame = SegmentAngularMomentumFrame(
+    time_s=0.0,
+    reference_point=REFERENCE_POINT,
+    frame='world',
+    units=UNITS_ANGMOM,
+    source='headless',
+    contribution_nm_s={},
+    spin_only_nm_s={},
+    groups_nm_s={'legs': None, 'pelvis': None, 'torso': None, 'arms': None, 'club': None},
+    whole_body_nm_s=(1.0, 0.0, 0.0),
+)
+glyphs = build_angular_momentum_glyphs(
+    frame,
+    style=AngularMomentumArrowStyle(),
+    anchors_m={'whole_body': (0.0, 0.0, 0.0)},
+    enabled=True,
+)
+assert glyphs is not None
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=Path(__file__).resolve().parents[3],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr

@@ -6,7 +6,18 @@ from collections.abc import Iterable
 
 from .segment_angular_momentum import SegmentGroupCatalog
 
-_LEGS = ("thigh", "shank", "foot", "leg", "ankle", "knee", "femur", "tibia", "toe")
+_LEGS = (
+    "thigh",
+    "shin",
+    "shank",
+    "foot",
+    "leg",
+    "ankle",
+    "knee",
+    "femur",
+    "tibia",
+    "toe",
+)
 _TORSO = (
     "torso",
     "trunk",
@@ -23,6 +34,10 @@ _TORSO = (
 _ARMS = (
     "arm",
     "hand",
+    "finger",
+    "thumb",
+    "palm",
+    "phalan",
     "wrist",
     "elbow",
     "shoulder",
@@ -32,6 +47,11 @@ _ARMS = (
     "radius",
     "ulna",
     "forearm",
+)
+
+# Bodies excluded from the five-group partition (still counted in whole-body H).
+GROUP_EXCLUSIONS: frozenset[str] = frozenset(
+    {"ball", "golf_ball", "club_ball", "world"}
 )
 
 
@@ -68,3 +88,14 @@ def infer_segment_group_catalog(body_names: Iterable[str]) -> SegmentGroupCatalo
         arms=frozenset(arms),
         club=frozenset(club),
     )
+
+
+def catalog_member_for_body(catalog: SegmentGroupCatalog, name: str) -> str | None:
+    """Return the group key owning ``name``, or ``None`` when unassigned / excluded."""
+    lower = name.lower()
+    if lower in GROUP_EXCLUSIONS or any(x in lower for x in GROUP_EXCLUSIONS):
+        return None
+    for group, members in catalog.as_mapping().items():
+        if name in members:
+            return group
+    return None

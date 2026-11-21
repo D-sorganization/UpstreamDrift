@@ -112,10 +112,7 @@ class SimRenderingMixin:
 
         axial_frame, scale = self._apply_axial_scene_colors()
 
-        # One provider sample per frame feeds both the native and MeshCat views.
-        force_glyphs = self._build_force_glyphs()
-        angmom_glyphs = self._build_angular_momentum_glyphs()
-        glyphs = self._merge_overlay_glyphs(force_glyphs, angmom_glyphs)
+        glyphs = self._build_overlay_glyphs()
         self._render_force_glyphs(self.renderer.scene, glyphs)
 
         try:

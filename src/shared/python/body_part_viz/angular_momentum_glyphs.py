@@ -17,8 +17,8 @@ from src.shared.python.force_overlay.glyphs import (
     GlyphSet,
     LegendSpec,
     TorqueArcGlyph,
-    _compute_arc_basis,
     _hex_to_rgba,
+    arc_polyline_with_head,
 )
 
 from .segment_angular_momentum import (
@@ -33,10 +33,15 @@ from .segment_angular_momentum import (
 DisplayMode = Literal["groups", "per_segment", "spin_only"]
 
 # Fixed visual scale, held constant for the whole swing (not per-frame autoscaled).
-# Metres of arrow length per (N·m·s) of |H|; 4000 N·m·s maps to 1.0 m.
-DEFAULT_SCALE_M_PER_NMS: float = 2.5e-4
+# Metres of arrow length per (N·m·s) of |H|.
+# Calibrated 2026-11-21 on FULL_BODY_GOLF_SWING_XML: 2000 random states with
+# qvel_i ~ N(0, 0.4 rad/s); p99 ||H_whole|| = 56.1 N·m·s → 0.65 m arrow length.
+DEFAULT_SCALE_M_PER_NMS: float = 0.01159
+SCALE_CALIBRATION_REFERENCE_NMS: float = 56.1
+SCALE_CALIBRATION_TARGET_LENGTH_M: float = 0.65
 DEFAULT_MAX_LENGTH_M: float = 1.2
-DEFAULT_MIN_LENGTH_M: float = 0.04
+# Arrows shorter than this are omitted (never lengthened to a visibility floor).
+DEFAULT_MIN_DRAW_LENGTH_M: float = 0.002
 DEFAULT_SHAFT_RADIUS_M: float = 0.01
 DEFAULT_PER_SEGMENT_THRESHOLD_NMS: float = 2.0
 DEFAULT_PER_SEGMENT_TOP_N: int = 8
@@ -69,7 +74,7 @@ class AngularMomentumArrowStyle:
     """Fixed-length scale and caps for angular-momentum arrows."""
 
     scale_m_per_nms: float = DEFAULT_SCALE_M_PER_NMS
-    min_length_m: float = DEFAULT_MIN_LENGTH_M
+    min_draw_length_m: float = DEFAULT_MIN_DRAW_LENGTH_M
     max_length_m: float = DEFAULT_MAX_LENGTH_M
     shaft_radius_m: float = DEFAULT_SHAFT_RADIUS_M
     head_length_ratio: float = 0.22
@@ -85,7 +90,7 @@ class AngularMomentumArrowStyle:
     def __post_init__(self) -> None:
         for name in (
             "scale_m_per_nms",
-            "min_length_m",
+            "min_draw_length_m",
             "max_length_m",
             "shaft_radius_m",
             "head_length_ratio",
@@ -98,8 +103,8 @@ class AngularMomentumArrowStyle:
                 raise TypeError(f"{name} must be numeric")
             if not math.isfinite(val) or val <= 0.0:
                 raise ValueError(f"{name} must be finite and positive")
-        if self.min_length_m >= self.max_length_m:
-            raise ValueError("min_length_m must be < max_length_m")
+        if self.min_draw_length_m >= self.max_length_m:
+            raise ValueError("min_draw_length_m must be < max_length_m")
         if self.display_mode not in ("groups", "per_segment", "spin_only"):
             raise ValueError(f"invalid display_mode {self.display_mode!r}")
         if not isinstance(self.per_segment_top_n, int) or self.per_segment_top_n < 1:
@@ -115,7 +120,7 @@ class AngularMomentumArrowStyle:
     def to_dict(self) -> dict[str, Any]:
         return {
             "scale_m_per_nms": self.scale_m_per_nms,
-            "min_length_m": self.min_length_m,
+            "min_draw_length_m": self.min_draw_length_m,
             "max_length_m": self.max_length_m,
             "shaft_radius_m": self.shaft_radius_m,
             "head_length_ratio": self.head_length_ratio,
@@ -131,20 +136,35 @@ class AngularMomentumArrowStyle:
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> AngularMomentumArrowStyle:
+        payload = dict(data)
+        if "min_length_m" in payload and "min_draw_length_m" not in payload:
+            payload["min_draw_length_m"] = payload.pop("min_length_m")
         allowed = set(cls.__dataclass_fields__)
-        unknown = set(data) - allowed
+        unknown = set(payload) - allowed
         if unknown:
-            raise ValueError(f"Unknown AngularMomentumArrowStyle keys: {sorted(unknown)}")
-        return cls(**{k: data[k] for k in allowed if k in data})
+            raise ValueError(
+                f"Unknown AngularMomentumArrowStyle keys: {sorted(unknown)}"
+            )
+        return cls(**{k: payload[k] for k in allowed if k in payload})
 
 
 def angular_momentum_legend_line(style: AngularMomentumArrowStyle) -> str:
     """Reference frame label and fixed scale for the status bar / legend."""
     ref_h = 1.0 / style.scale_m_per_nms
     mode = style.display_mode.replace("_", " ")
+    arc_note = (
+        "; spin arcs are schematic (rotation sense only, not |H| scale)"
+        if style.display_mode == "spin_only"
+        else ""
+    )
+    calib = (
+        f"calibrated vs FULL_BODY p99 {SCALE_CALIBRATION_REFERENCE_NMS:.0f} {UNITS_ANGMOM}"
+        f" → {SCALE_CALIBRATION_TARGET_LENGTH_M:.2f} m; "
+    )
     return (
         f"H about {REFERENCE_POINT.replace('_', ' ')}, {FRAME_WORLD} frame; "
-        f"{UNITS_ANGMOM}; scale {ref_h:.0f} {UNITS_ANGMOM} = 1 m ({mode})"
+        f"{UNITS_ANGMOM}; {calib}"
+        f"scale {ref_h:.1f} {UNITS_ANGMOM} = 1 m ({mode}){arc_note}"
     )
 
 
@@ -166,8 +186,10 @@ def _build_straight_arrow(
     vx, vy, vz = vector_nm_s
     h_hat = (vx / mag, vy / mag, vz / mag)
     raw_len = mag * style.scale_m_per_nms
+    if raw_len < style.min_draw_length_m:
+        return None
     clamped = raw_len > style.max_length_m
-    length = max(style.min_length_m, min(raw_len, style.max_length_m))
+    length = min(raw_len, style.max_length_m)
     px, py, pz = anchor_m
     tip = (px + length * h_hat[0], py + length * h_hat[1], pz + length * h_hat[2])
     head_len = style.head_length_ratio * length
@@ -205,34 +227,17 @@ def _build_spin_arc(
     if mag <= 0.0:
         return None
     axis = (spin_nm_s[0] / mag, spin_nm_s[1] / mag, spin_nm_s[2] / mag)
-    radius = min(style.max_length_m * 0.35, max(style.min_length_m, mag * style.scale_m_per_nms * 0.5))
-    u, v = _compute_arc_basis(axis)
-    cx, cy, cz = center_m
-    pts: list[tuple[float, float, float]] = []
-    sweep = style.spin_arc_sweep_rad
-    n_seg = style.spin_arc_segments
-    for i in range(n_seg + 1):
-        theta = sweep * (i / n_seg)
-        pts.append(
-            (
-                cx + radius * (math.cos(theta) * u[0] + math.sin(theta) * v[0]),
-                cy + radius * (math.cos(theta) * u[1] + math.sin(theta) * v[1]),
-                cz + radius * (math.cos(theta) * u[2] + math.sin(theta) * v[2]),
-            )
-        )
-    head_tip = pts[-1]
-    cos_last = math.cos(sweep)
-    sin_last = math.sin(sweep)
-    tangent = (
-        -sin_last * u[0] + cos_last * v[0],
-        -sin_last * u[1] + cos_last * v[1],
-        -sin_last * u[2] + cos_last * v[2],
-    )
+    radius = min(style.max_length_m * 0.35, mag * style.scale_m_per_nms * 0.5)
+    if radius < style.min_draw_length_m * 0.5:
+        return None
     head_len = style.head_length_ratio * radius * 2.0
-    head_base = (
-        head_tip[0] - head_len * tangent[0],
-        head_tip[1] - head_len * tangent[1],
-        head_tip[2] - head_len * tangent[2],
+    polyline_m, head_tip, head_base = arc_polyline_with_head(
+        center_m,
+        axis,
+        radius,
+        style.spin_arc_sweep_rad,
+        style.spin_arc_segments,
+        head_len,
     )
     rgba = _hex_to_rgba(color_hex)
     return TorqueArcGlyph(
@@ -241,7 +246,7 @@ def _build_spin_arc(
         center_m=center_m,
         axis_unit=axis,
         radius_m=radius,
-        polyline_m=tuple(pts),
+        polyline_m=polyline_m,
         head_tip_m=head_tip,
         head_base_m=head_base,
         rgba=rgba,
@@ -400,7 +405,7 @@ def merge_glyph_sets(
         return secondary
     if secondary is None:
         return primary
-    time_s = primary.time_s if primary.time_s == secondary.time_s else secondary.time_s
+    time_s = primary.time_s
     clamped = primary.legend.clamped_labels + secondary.legend.clamped_labels
     legend = LegendSpec(
         engine=primary.legend.engine,
