@@ -86,6 +86,52 @@ def draw_line(
             pen.line([(float(u), float(v)) for u, v in pixels[a:b]], colour, width_px)
 
 
+@dataclass(frozen=True)
+class BallShading:
+    """Sphere shading of the ball disc (meanings: ``flight_tracer_settings.json``)."""
+
+    shaded: bool
+    light_dir: tuple[float, ...]
+    ambient: float
+    highlight_strength: float
+    highlight_size: float
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.shaded, bool):
+            raise TypeError("ball_shading shaded must be true or false")
+        light = tuple(float(c) for c in self.light_dir)
+        if len(light) != 3 or not all(math.isfinite(c) for c in light):
+            raise ValueError("ball_shading light_dir must be 3 finite numbers")
+        if math.sqrt(sum(c * c for c in light)) <= 0.0:
+            raise ValueError("ball_shading light_dir must not be the zero vector")
+        object.__setattr__(self, "light_dir", light)
+        for name in ("ambient", "highlight_strength"):
+            if not 0.0 <= getattr(self, name) <= 1.0:
+                raise ValueError(f"ball_shading {name} must lie in 0..1")
+        if not 0.0 < self.highlight_size <= 1.0:
+            raise ValueError("ball_shading highlight_size must lie in (0, 1]")
+
+
+def _shade(
+    colour: tuple[int, ...],
+    shading: BallShading,
+    nx: NDArray[Any],
+    ny: NDArray[Any],
+    nz: NDArray[Any],
+) -> NDArray[np.uint8]:
+    """RGB (rows, cols, 3) of a sphere of ``colour`` with unit normals ``n``."""
+    light = np.array(shading.light_dir) / np.linalg.norm(shading.light_dir)
+    lambert = np.clip(nx * light[0] + ny * light[1] + nz * light[2], 0.0, None)
+    level = shading.ambient + (1.0 - shading.ambient) * lambert
+    half = light + np.array([0.0, 0.0, 1.0])  # viewer looks along -z
+    half /= np.linalg.norm(half)
+    angle = np.arccos(np.clip(nx * half[0] + ny * half[1] + nz * half[2], -1.0, 1.0))
+    glint = np.clip(1.0 - angle / (shading.highlight_size * math.pi / 2), 0.0, 1.0)
+    rgb = np.asarray(colour[:3], dtype=float) * level[..., None]
+    rgb += 255.0 * shading.highlight_strength * glint[..., None] ** 2
+    return np.clip(np.rint(rgb), 0, 255).astype(np.uint8)
+
+
 def draw_ball(
     image: Image.Image,
     centre_px: tuple[float, float],
@@ -93,12 +139,15 @@ def draw_ball(
     colour: tuple[int, ...],
     sphere: tuple[float, float],
     occlusion: Occlusion | None,
+    shading: BallShading | None = None,
 ) -> None:
     """Paint the ball disc, leaving out each pixel the scene is nearer than.
 
     ``sphere`` is the (camera depth of the centre, radius) in metres; the ball's
     own surface is nearer than its centre, so a scene ball or club touching it
-    does not hide it. Without ``occlusion`` the whole disc is painted.
+    does not hide it. Without ``occlusion`` the whole disc is painted. A
+    ``shading`` that is on lights the disc as a sphere; the covered pixels are
+    the same either way.
     """
     depth_c, radius_m = sphere
     if not (radius_px > 0.0 and radius_m > 0.0 and depth_c > 0.0):
@@ -121,7 +170,12 @@ def draw_ball(
         slack = occlusion.tolerance_m + occlusion.fraction * front
         inside &= np.asarray(scene >= front - slack, dtype=bool)
     mask = Image.fromarray((inside * 255).astype(np.uint8))
-    image.paste(tuple(colour), (box[0], box[1]), mask)
+    fill: Any = tuple(colour)
+    if shading is not None and shading.shaded:
+        nx, ny = (cols - u) / radius_px, (rows - v) / radius_px
+        nz = np.sqrt(np.clip(1.0 - rho2, 0.0, 1.0))
+        fill = Image.fromarray(_shade(colour, shading, nx, ny, nz), "RGB")
+    image.paste(fill, (box[0], box[1]), mask)
 
 
 def depth_request(swing: Any, settings: Any, indices: Any) -> list[bool] | None:

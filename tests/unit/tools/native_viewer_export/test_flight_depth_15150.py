@@ -23,7 +23,9 @@ from src.tools.native_viewer_export.core import export_swing
 from src.tools.native_viewer_export.overlay2d import pinhole_for_view
 from tests.unit.tools.native_viewer_export import test_flight_tracer as base
 
-D, IMPACT_S, LOOKAT = base.DEFAULTS, base.IMPACT_S, base.LOOKAT
+# flat ball: these tests count pixels of the exact ball colour (shading: its own file)
+D = replace(base.DEFAULTS, ball_shading=None)
+IMPACT_S, LOOKAT = base.IMPACT_S, base.LOOKAT
 _playback, _tile = base._playback, base._tile
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
@@ -54,8 +56,8 @@ def test_occlusion_densifies_and_tests_the_depth_under_each_point() -> None:
 
 
 def test_tracer_and_ball_hidden_per_view_else_one_warning(caplog) -> None:
-    tiles, t, flight = {"down_the_line": _tile()}, IMPACT_S + 2.0, _playback()
-    plain = _playback().draw(tiles, t, LOOKAT, None)["down_the_line"]
+    tiles, t, flight = {"down_the_line": _tile()}, IMPACT_S + 2.0, _playback(D)
+    plain = _playback(D).draw(tiles, t, LOOKAT, None)["down_the_line"]
     caplog.clear()
     with caplog.at_level(logging.WARNING):
         flight.draw(tiles, t, LOOKAT, None, depth_m={})
