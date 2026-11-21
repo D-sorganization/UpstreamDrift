@@ -131,6 +131,13 @@ central finite difference of that velocity, then the `cfrc_int` reaction at the
 proximal section projected on the segment axis). The torque arcs and the shading
 come from one evaluation per frame (`ForceTorqueFrame.axial_loads`).
 
+A skinned body (`subject.body_visual_backend: skinned_cc0`) is drawn from
+MuJoCo skins, which are not scene geoms. With shading on, the MuJoCo worker
+cuts each skin into one piece per segment and colours the pieces per frame
+(`backends/_skin_shading.py`, #15150); the pelvis pieces take the lumbar load
+and hair, eyes, brows and lips keep their colour (`skin_load_settings.json`).
+With shading off, or zero opacity, the skins are not cut.
+
 | Option                                       | Meaning                                                                                                        |
 | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `--shading-opacity 0..1`                     | strength (default 0.6; 0 is identical to off)                                                                  |
