@@ -105,6 +105,7 @@ MATERIALS: dict[str, Material] = {
     "lip_pink": Material((0.62, 0.30, 0.30, 1.0), 0.5),
     "shoe_white": Material((0.92, 0.92, 0.90, 1.0), 0.4),
     "shoe_leather": Material((0.72, 0.72, 0.71, 1.0), 0.45),
+    "shoe_saddle": Material((0.50, 0.48, 0.45, 1.0), 0.5),
     "shoe_sole": Material((0.11, 0.11, 0.12, 1.0), 0.8),
     "shoe_black": Material((0.06, 0.06, 0.07, 1.0), 0.35),
     "glove_white": Material((0.95, 0.95, 0.94, 1.0), 0.7),
@@ -171,6 +172,7 @@ PANTS_PART = "thigh"
 TROUSERS_MATERIAL = "trousers_charcoal"
 # Dark outsole drawn under every shoe upper (#15280).
 SOLE_MATERIAL = "shoe_sole"
+SADDLE_MATERIAL = "shoe_saddle"  # heel counter and saddle band (#15299)
 
 
 def _outfit(top: str, pants: str, shoes: str, *, full_length: bool) -> dict[str, str]:
