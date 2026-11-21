@@ -35,6 +35,7 @@ from .meshcat_adapter import MuJoCoMeshcatAdapter
 from .physics_engine import MuJoCoPhysicsEngine
 from .sim_camera_mixin import SimCameraMixin
 from .sim_force_color_mixin import SimForceColorMixin
+from .sim_net_power_mixin import SimNetPowerMixin
 from .sim_rendering_mixin import SimRenderingMixin
 from .telemetry import TelemetryRecorder
 
@@ -71,6 +72,7 @@ class ModelLoaderThread(QtCore.QThread):
 class MuJoCoSimWidget(  # type: ignore[misc]
     SimCameraMixin,
     SimForceColorMixin,
+    SimNetPowerMixin,
     SimRenderingMixin,
     QtWidgets.QWidget,
 ):
@@ -92,6 +94,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
         self.axial_color_scale = ForceColorScale()
         self._init_force_color_hub()
+        self._init_net_power_state()
         self.force_legend_text = ""
         self.show_force_vectors = False
         self.show_torque_vectors = False
@@ -225,6 +228,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
         self.loader_thread: ModelLoaderThread | None = None
         self.restore_force_overlay_settings()
+        self.restore_net_power_overlay_settings()
 
     @property
     def model(self) -> mujoco.MjModel | None:

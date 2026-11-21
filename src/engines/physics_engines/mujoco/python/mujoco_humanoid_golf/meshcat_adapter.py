@@ -14,6 +14,11 @@ import numpy as np
 from src.shared.python.biomechanics.biomechanics_data import BiomechanicalData
 from src.shared.python.body_part_viz import AxialLoadFrame, ForceColorScale
 from src.shared.python.body_part_viz.meshcat_force_colors import MeshcatForceColors
+from src.shared.python.body_part_viz.meshcat_segment_scalar_colors import (
+    MeshcatSegmentScalarColors,
+)
+from src.shared.python.body_part_viz.scalar_shading import ScalarColorScale
+from src.shared.python.body_part_viz.segment_scalar_frame import SegmentScalarFrame
 from src.shared.python.force_overlay.glyphs import GlyphSet
 from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
     MeshcatGlyphRenderer,
@@ -39,6 +44,7 @@ class MuJoCoMeshcatAdapter:
 
     def __init__(self, model: mujoco.MjModel | None = None) -> None:
         self._force_colors: MeshcatForceColors | None = None
+        self._net_power_colors: MeshcatSegmentScalarColors | None = None
         self._glyph_renderer: MeshcatGlyphRenderer | None = None
         if meshcat is None:
             logger.warning("Meshcat not installed. Visualization disabled.")
@@ -175,6 +181,9 @@ class MuJoCoMeshcatAdapter:
         self._force_colors = MeshcatForceColors(
             self._set_color_property, color_bindings
         )
+        self._net_power_colors = MeshcatSegmentScalarColors(
+            self._set_color_property, color_bindings
+        )
 
     def _set_color_property(self, path: str, prop: str, value: list[float]) -> None:
         if self.vis is not None:
@@ -186,6 +195,15 @@ class MuJoCoMeshcatAdapter:
         """Share the native view's qualified loads and color settings."""
         if self._force_colors is not None:
             self._force_colors.apply(frame, scale)
+
+    def update_net_power_colors(
+        self, frame: SegmentScalarFrame | None, scale: ScalarColorScale
+    ) -> None:
+        if self._net_power_colors is not None:
+            if frame is None or not scale.enabled:
+                self._net_power_colors.apply(None, scale)
+            else:
+                self._net_power_colors.apply(frame, scale)
 
     def update(self, data: mujoco.MjData) -> None:
         """

@@ -7,6 +7,7 @@ from typing import Any
 
 from .axial_loads import AxialLoadFrame
 from .force_colors import ForceColorScale
+from .mujoco_segment_scene_colors import apply_segment_body_geom_shading
 
 
 def unshaded_geom_ids(model: Any, prefixes: Collection[str]) -> frozenset[int]:
@@ -58,19 +59,17 @@ def apply_mujoco_scene_colors(
         raise TypeError("scale must be ForceColorScale")
     if frame is not None and not isinstance(frame, AxialLoadFrame):
         raise TypeError("frame must be AxialLoadFrame or None")
-    if not scale.enabled or frame is None:
+    if frame is None:
         return
-    for index in range(scene.ngeom):
-        geom = scene.geoms[index]
-        if (
-            geom.objtype != mujoco.mjtObj.mjOBJ_GEOM
-            or not 0 <= geom.objid < model.ngeom
-            or geom.objid in keep_geoms
-        ):
-            continue
-        body = model.geom_bodyid[geom.objid]
-        name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body)
-        base = tuple(float(channel) for channel in geom.rgba[:3])
-        rgb = scale.shade_rgb(frame.values_n.get(name), base)
-        if rgb is not None:
-            geom.rgba[:3] = rgb
+
+    def shade(force: float | None, base: tuple[float, float, float]):
+        return scale.shade_rgb(force, base)
+
+    apply_segment_body_geom_shading(
+        model,
+        scene,
+        frame.values_n,
+        shade,
+        keep_geoms=keep_geoms,
+        enabled=scale.enabled,
+    )

@@ -34,10 +34,10 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1195 | `src/tools/shot_pattern_analysis/matched_supplement_figures.py` |
 | 1185 | `src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m` |
 | 1184 | `src/bunkershot3d/ball/splash.py` |
+| 1184 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
 | 1183 | `src/engines/physics_engines/opensim/python/msk_lift_ik_id.py` |
 | 1182 | `src/launchers/launcher_model_handlers.py` |
 | 1181 | `src/shared/python/grip_contact/parity.py` |
-| 1180 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
 | 1180 | `src/tools/native_viewer_export/core.py` |
 | 1178 | `src/engines/physics_engines/pinocchio/python/full_body_fit.py` |
 | 1175 | `src/shared/python/motion_matching/execution/spec_builder.py` |
@@ -58,6 +58,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1146 | `src/engines/physics_engines/myosuite/python/native_direct_model_replay.py` |
 | 1146 | `src/tools/model_explorer/model_loader_dialog.py` |
 | 1136 | `src/engines/feedback_native_execution.py` |
+| 1135 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py` |
 | 1134 | `src/shared/python/shadow_tracker/segmentation.py` |
 | 1134 | `src/tools/model_explorer/model_library.py` |
 | 1129 | `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py` |
@@ -67,8 +68,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1118 | `src/motion_capture/rig/__main__.py` |
 | 1115 | `src/bunkershot3d/ball/qualification.py` |
 | 1113 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/PostProcessingModule.m` |
+| 1112 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py` |
 | 1110 | `src/tools/shot_pattern_analysis/academic_plots.py` |
-| 1107 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py` |
 | 1106 | `src/shared/python/motion_matching/leaderboard.py` |
 | 1103 | `src/shared/python/config/model_source_providers.py` |
 | 1102 | `src/launchers/launcher_dialogs.py` |
@@ -85,7 +86,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1065 | `src/shared/python/pendulum_simulator/gui/toolstrip_widget.py` |
 | 1064 | `src/shared/python/grip_contact/contact_topology.py` |
 | 1063 | `src/bunkershot3d/metrics/divot.py` |
-| 1063 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py` |
 | 1054 | `src/shared/python/motion_matching/pipeline/lane.py` |
 | 1053 | `src/engines/model_inventory.py` |
 | 1053 | `src/shared/python/motion_matching/pinocchio_g2_g3.py` |
@@ -181,6 +181,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 883 | `src/shared/python/config/model_pack_manifest.py` |
 | 883 | `src/shared/python/model_generation/converters/mjcf_converter.py` |
 | 879 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/visualization/SkeletonPlotter.m` |
+| 878 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py` |
 | 878 | `src/shared/python/grip_contact/simscape_grip_topology.py` |
 | 875 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py` |
 | 874 | `src/shared/python/tour_baselines/qualification.py` |
@@ -228,7 +229,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 822 | `src/shared/python/gui_pkg/help_system.py` |
 | 822 | `src/tools/capture_rig/layout_editor.py` |
 | 819 | `src/shared/python/model_generation/converters/simscape/simscape_converter.py` |
-| 816 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py` |
 | 815 | `src/engines/physics_engines/mujoco/python/native_full_body_replay.py` |
 | 813 | `src/engines/physics_engines/drake/python/src/drake_golf_model.py` |
 | 813 | `src/tools/model_explorer/urdf_code_editor.py` |

@@ -1,0 +1,18 @@
+{
+  "symmetric_limit_w": 1365.3464980386332,
+  "source": "tests/fixtures/club_face/swing_q_driver.npz",
+  "sample_count": 20976,
+  "raw_peak_w": 13584.2924390397,
+  "percentile": 98.0,
+  "max_physical_w": 25000.0,
+  "fixture": "tests/fixtures/club_face/swing_q_driver.npz",
+  "exclude_frame_ranges": [
+    [
+      661,
+      664
+    ]
+  ],
+  "frames_used": 878,
+  "filter_hz": 12.0,
+  "trim_frames": 15
+}

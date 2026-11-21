@@ -20,6 +20,7 @@ from src.shared.python.body_part_viz.force_color_controls import (
 )
 from src.shared.python.core.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.body_part_viz.segment_net_power import SEGMENT_NET_POWER_LABEL
 from src.shared.python.segment_kinetic_energy import SEGMENT_KE_PROXY_DISCLAIMER
 from src.shared.python.theme.style_constants import Styles
 
@@ -363,6 +364,7 @@ class VisualizationTab(QtWidgets.QWidget):
         self._create_force_scale_controls(force_layout)
         self._create_grf_style_controls(force_layout)
         self._create_segment_ke_globe_controls(force_layout)
+        self._create_net_power_controls(force_layout)
         self._create_advanced_vector_overlays(force_layout)
 
         self.show_contacts_cb = QtWidgets.QCheckBox("MuJoCo native contact debug")
@@ -505,6 +507,53 @@ class VisualizationTab(QtWidgets.QWidget):
             self.on_show_segment_ke_globes_changed
         )
         force_layout.addWidget(self.show_segment_ke_globes_cb)
+
+    def _create_net_power_controls(self, force_layout: QtWidgets.QVBoxLayout) -> None:
+        if force_layout is None:
+            raise ValueError("force_layout must be provided")
+        self.show_net_power_shading_cb = QtWidgets.QCheckBox(SEGMENT_NET_POWER_LABEL)
+        self.show_net_power_shading_cb.setToolTip(
+            "Diverging segment shading for mechanical energy rate (watts)"
+        )
+        scale = getattr(self.sim_widget, "net_power_color_scale", None)
+        stored = bool(getattr(scale, "enabled", False))
+        self._restore_checkbox(self.show_net_power_shading_cb, stored)
+        self.show_net_power_shading_cb.stateChanged.connect(
+            self.on_show_net_power_shading_changed
+        )
+        force_layout.addWidget(self.show_net_power_shading_cb)
+
+        self.show_interface_transfer_cb = QtWidgets.QCheckBox(
+            "Interface transfer markers"
+        )
+        self.show_interface_transfer_cb.setToolTip(
+            "Robertson–Winter interface power glyphs on parent/child joints"
+        )
+        self._restore_checkbox(
+            self.show_interface_transfer_cb,
+            getattr(self.sim_widget, "show_interface_power_glyphs", None),
+        )
+        self.show_interface_transfer_cb.stateChanged.connect(
+            self.on_show_interface_transfer_changed
+        )
+        force_layout.addWidget(self.show_interface_transfer_cb)
+
+    def on_show_net_power_shading_changed(self, state: int) -> None:
+        if state is None:
+            raise ValueError("state must be provided")
+        require(self.sim_widget is not None, "sim_widget is set")
+        enabled = state == QtCore.Qt.CheckState.Checked.value
+        from dataclasses import replace
+
+        scale = self.sim_widget.net_power_color_scale
+        self.sim_widget.set_net_power_color_scale(replace(scale, enabled=enabled))
+
+    def on_show_interface_transfer_changed(self, state: int) -> None:
+        if state is None:
+            raise ValueError("state must be provided")
+        require(self.sim_widget is not None, "sim_widget is set")
+        enabled = state == QtCore.Qt.CheckState.Checked.value
+        self.sim_widget.set_interface_power_glyphs(enabled)
 
     def on_show_segment_ke_globes_changed(self, state: int) -> None:
         if state is None:

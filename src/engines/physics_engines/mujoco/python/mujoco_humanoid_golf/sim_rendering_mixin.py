@@ -110,11 +110,13 @@ class SimRenderingMixin:
                 scene_option=self.scene_option,
             )
 
+        net_power_frame, net_power_scale = self._apply_net_power_scene_colors()
         axial_frame, scale = self._apply_axial_scene_colors()
 
         # One provider sample per frame feeds both the native and MeshCat views.
         glyphs = self._build_force_glyphs()
         self._render_force_glyphs(self.renderer.scene, glyphs)
+        self._render_interface_power_glyphs(self.renderer.scene)
         self._render_segment_ke_globes(self.renderer.scene)
 
         try:
@@ -142,7 +144,9 @@ class SimRenderingMixin:
 
         if self.meshcat_adapter:
             try:
-                self._update_meshcat_frame_overlays(glyphs, axial_frame, scale)
+                self._update_meshcat_frame_overlays(
+                    glyphs, axial_frame, scale, net_power_frame, net_power_scale
+                )
             except (RuntimeError, ValueError, AttributeError) as exc:
                 logger.debug("Counterfactual vector rendering failed: %s", exc)
 
@@ -159,12 +163,21 @@ class SimRenderingMixin:
         self.label.setPixmap(pixmap)
 
     def _update_meshcat_frame_overlays(
-        self: Any, glyphs: GlyphSet | None, axial_frame: Any, scale: Any
+        self: Any,
+        glyphs: GlyphSet | None,
+        axial_frame: Any,
+        scale: Any,
+        net_power_frame: Any,
+        net_power_scale: Any,
     ) -> None:
         """Push one frame of glyphs, segment KE globes, and vector overlays to MeshCat."""
         if self.meshcat_adapter is None or self.data is None:
             return
         self.meshcat_adapter.update(self.data)
+        if net_power_scale is not None:
+            self.meshcat_adapter.update_net_power_colors(
+                net_power_frame, net_power_scale
+            )
         if scale is not None:
             self.meshcat_adapter.update_force_colors(axial_frame, scale)
         self.meshcat_adapter.draw_glyphs(glyphs)
@@ -223,6 +236,55 @@ class SimRenderingMixin:
                 "will be black. The GL context is likely invalid.",
                 frame_stats(rgb),
             )
+
+    def _apply_net_power_scene_colors(self: Any) -> tuple[Any, Any]:
+        from src.shared.python.body_part_viz.mujoco_force_colors import (
+            unshaded_geom_ids,
+        )
+        from src.shared.python.body_part_viz.mujoco_segment_scene_colors import (
+            apply_mujoco_scalar_scene_colors,
+        )
+        from src.shared.python.body_part_viz.segment_net_power import (
+            net_power_frame_from_interface,
+        )
+
+        scale = getattr(self, "net_power_color_scale", None)
+        if scale is None or not scale.enabled:
+            self._refresh_net_power_legend()
+            return None, scale
+        try:
+            iface = self.engine.get_interface_power_frame()
+            if iface is None:
+                self._refresh_net_power_legend()
+                return None, scale
+            presentation = net_power_frame_from_interface(iface, scale)
+            keep = unshaded_geom_ids(self.model, ())
+            apply_mujoco_scalar_scene_colors(
+                self.model,
+                self.renderer.scene,
+                presentation.segment_frame.values,
+                scale,
+                keep_geoms=keep,
+            )
+            self._refresh_net_power_legend()
+            return presentation.segment_frame, scale
+        except (TypeError, ValueError, RuntimeError) as exc:
+            logger.debug("Net-power display unavailable: %s", exc)
+            self._refresh_net_power_legend()
+            return None, scale
+
+    def _render_interface_power_glyphs(self: Any, scene: Any) -> None:
+        if not getattr(self, "show_interface_power_glyphs", False):
+            return
+        try:
+            iface = self.engine.get_interface_power_frame()
+        except (TypeError, ValueError, RuntimeError):
+            return
+        if iface is None:
+            return
+        from .interface_power_scene import add_interface_power_glyphs_to_scene
+
+        add_interface_power_glyphs_to_scene(self.model, self.data, scene, iface)
 
     def _apply_axial_scene_colors(self: Any) -> tuple[Any, Any]:
         """Sample the optional force capability once for native and web renderers."""
