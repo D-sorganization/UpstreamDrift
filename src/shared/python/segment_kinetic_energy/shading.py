@@ -14,12 +14,14 @@ STORED_KINETIC_ENERGY_VIEW_LABEL: Final[str] = "Stored kinetic energy"
 KE_PROXY_GLOBE_LABEL: Final[str] = "KE proxy"
 KE_COMPONENTS: Final[tuple[str, ...]] = ("total", "translational", "rotational")
 
-# Peak per-segment total KE (J) on the tour-average anthro driver swing
-# (tests/fixtures/club_face/swing_q_driver.npz + full_body_spec_anthro_driver.json).
-# Velocity comes from q after median-5 despike, 20 Hz zero-phase Butterworth low-pass,
-# and 10-frame edge trim (see reference_swing_limits.compute_reference_swing_peak_segment_ke_j).
-# Raw finite-differenced q spikes near frames 661–664 in the fixture; preprocessing
-# yields club peak ~486 J near frame 670. Regression-tested in test_reference_limits.py.
+# Nominal fixed shading high limit (~500 J) on the tour-average anthro driver swing
+# (swing_q_driver.npz + full_body_spec_anthro_driver.json). Velocities use q after
+# median-5 despike, 20 Hz zero-phase Butterworth low-pass on pre- and post-contact
+# segments separately, excluding ±25 frames around ball impact (661–664 at
+# t ≈ 1.322–1.328 s per provenance.json). The measured impact-aware envelope is
+# computed in reference_swing_limits (~467 J with ±25 impact gate); this constant
+# is the fixed cividis ceiling (~486 J club scale, ~500 J rounded).
+# See test_reference_limits.py.
 REFERENCE_SWING_PEAK_SEGMENT_KE_J: Final[float] = 486.2931353365707
 
 
