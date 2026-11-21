@@ -221,6 +221,11 @@ python3 -m src.tools.native_viewer_export --bundle driver.npz --swing driver \
   `export_swing`; frame timing lives in `src/shared/python/video_timing`.
 - `compositor.py`: labelled 2x2 grid, HUD text and the impact card panel.
 - `impact_card.py`: one impact card per swing from the displayed pose.
+- `impact_factors.py`: the optional impact factors panel (#15150,
+  `ExportSettings.impact_factors`, default off): the card's rows in a panel of
+  one fixed size on every frame, blank before impact and frozen at their impact
+  values from the impact frame to the end of the clip; it replaces the card.
+  Options and their meaning are in `impact_factors_settings.json`.
 - `overlay.py`: overlay feed built from `force_overlay.bundle_provider`.
 - `overlay2d.py`: pinhole projection for the OpenSim 2D glyphs.
 - `backends/`: one module per engine plus shared helpers.
