@@ -311,7 +311,8 @@ def test_export_flies_the_ball_and_holds_the_clip_until_it_lands(
 ) -> None:
     plain = _frames(tmp_path, impact_time_s=0.1, hud=False)
     monkeypatch.setattr(tracer, "flight_for_export", lambda *_: _short_flight())
-    frames = _frames(tmp_path, impact_time_s=0.1, hud=False, ball_flight=DEFAULTS)
+    bare = replace(DEFAULTS, inset=None)  # the inset has its own tests
+    frames = _frames(tmp_path, impact_time_s=0.1, hud=False, ball_flight=bare)
     fps = ExportSettings().fps
     # swing ends at 0.2 s; landing 0.6 s plus the landing hold, in real time
     extra = math.ceil((0.4 + DEFAULTS.landing_hold_s) * fps - 1e-9)

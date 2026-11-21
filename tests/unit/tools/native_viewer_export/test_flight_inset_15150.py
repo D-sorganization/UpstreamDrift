@@ -195,8 +195,8 @@ def test_curve_stays_inside_its_plots_for_any_exaggeration() -> None:
             assert (pix[:, 1] >= y0).all() and (pix[:, 1] <= y1).all()
     true = fi.plots_for(rect, replace(LOUD, vertical_exaggeration=1.0), 16, extent)
     assert true[0].scale_y == pytest.approx(true[0].scale_x)
-    tall = fi.plots_for(rect, replace(LOUD, vertical_exaggeration=2.0), 16, extent)
-    assert tall[0].scale_y == pytest.approx(2.0 * tall[0].scale_x)
+    tall = fi.plots_for(rect, replace(LOUD, vertical_exaggeration=1.5), 16, extent)
+    assert tall[0].scale_y == pytest.approx(1.5 * tall[0].scale_x)
 
 
 def test_reveal_follows_the_tracer_and_labels_persist() -> None:
