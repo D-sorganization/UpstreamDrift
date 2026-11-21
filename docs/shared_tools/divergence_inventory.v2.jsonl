@@ -1358,6 +1358,8 @@
 {"path": "model_appearance/ball.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/ball_strike.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/ball_strike_settings.json", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/ball_tee.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/ball_tee_settings.json", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/body_meshes.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/body_skin_dress.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/body_skin_export.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
