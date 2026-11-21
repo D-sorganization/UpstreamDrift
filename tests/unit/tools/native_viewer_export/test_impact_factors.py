@@ -229,7 +229,10 @@ def test_export_without_a_known_impact_says_no_impact(monkeypatch) -> None:
         _swing(), _settings(impact_factors=DEFAULTS, impact_time_s=IMPACT_S)
     )
     assert failed is not None and failed.lines_at(0.19)[0][1].startswith("unavailable")
-    assert all(v == DEFAULTS.blank_text for _, v in failed.lines_at(0.19)[-5:])
+    assert all(
+        v == DEFAULTS.blank_text
+        for _, v in failed.lines_at(0.19)[-len(DEFAULTS.blank_rows) :]
+    )
 
 
 def test_long_failure_reason_is_shown_in_full_wrapped(
