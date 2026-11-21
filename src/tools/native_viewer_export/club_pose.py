@@ -20,13 +20,13 @@ import numpy as np
 from numpy.typing import NDArray
 
 Array = NDArray[np.float64]
-#: Shaft direction toward the grip in the spec club-body frame (club_models).
-GRIP_DIRECTION_BODY = np.array([0.0, -1.0, 0.0])
+#: Heel-to-toe direction in the head frame (club_head_mesh: the shaft leans to -z).
+TOE_HEAD = np.array([0.0, 0.0, 1.0])
 
 
 @dataclass(frozen=True)
 class FaceWorld:
-    """World face centre and unit axes; ``toe x normal = grip`` (right-handed)."""
+    """World face centre and unit axes; ``toe x normal = grip`` (toward the crown)."""
 
     centre_m: Array
     normal: Array
@@ -53,6 +53,8 @@ class ClubPoseModel:
         )
         from src.shared.python.model_appearance.club_head_mesh import (
             club_face_normal,
+            face_roll_rotation,
+            head_to_club_rotation,
             load_club_head,
         )
         from src.shared.python.model_appearance.grip_hands import grip_hand_frame
@@ -70,6 +72,9 @@ class ClubPoseModel:
         square = ADDRESS_SQUARE_FACE_ROLL_DEG.get(club.head_alias, 0.0)
         head = load_club_head(club.head_alias)
         self._square_normal_body = club_face_normal(head, square)
+        # heel-to-toe line of the drawn (rolled) head in the club-body frame
+        roll = face_roll_rotation(club.face_roll_deg)
+        self._toe_body = roll @ head_to_club_rotation(head) @ TOE_HEAD
         self._source = MujocoOverlaySource(spec_bytes)
         lead = grip_hand_frame(club, Hand.LEAD)[:3, 3]
         trail = grip_hand_frame(club, Hand.TRAIL)[:3, 3]
@@ -94,7 +99,8 @@ class ClubPoseModel:
 
     def face_world(self, coords: Mapping[str, float]) -> FaceWorld:
         """World face centre, normal, toe and grip axes at ``coords``."""
-        return face_axes(self.body_world(coords), self._centre_body, self._normal_body)
+        body = self.body_world(coords)
+        return face_axes(body, self._centre_body, self._normal_body, self._toe_body)
 
     def address_square_normal_world(self, coords: Mapping[str, float]) -> Array:
         """World face normal the head would have with its address-square roll.
@@ -131,20 +137,26 @@ def face_roll_calibrated_spec_bytes(
     return json.dumps(spec).encode("utf-8")
 
 
-def face_axes(body: Array, centre_body: Array, normal_body: Array) -> FaceWorld:
+def face_axes(
+    body: Array, centre_body: Array, normal_body: Array, toe_body: Array
+) -> FaceWorld:
     """Face axes in world from the club-body pose.
 
-    The grip axis is the shaft direction (body -y) made orthogonal to the
-    normal; the toe axis completes ``toe x normal = grip``.
+    The toe axis is ``toe_body``, the heel-to-toe line of the head (club-body
+    frame), with its part along the normal removed and normalised. The shaft
+    is not used: it leans ``90 deg - lie`` from that line, which turned a
+    strike offset by 34 deg on the driver (#15150). ``toe x normal`` is the
+    grip axis (toward the crown). Raises ``ValueError`` when ``toe_body`` is
+    parallel to the face normal.
     """
     rot = body[:3, :3]
     normal = rot @ normal_body
     normal = normal / np.linalg.norm(normal)
-    shaft = rot @ GRIP_DIRECTION_BODY
-    toe = np.cross(normal, shaft)
+    toe = rot @ toe_body
+    toe = toe - float(toe @ normal) * normal
     length = float(np.linalg.norm(toe))
     if length < 1e-9:
-        raise ValueError("face normal is parallel to the shaft")
+        raise ValueError("face toe line is parallel to the face normal")
     toe = toe / length
     grip = np.asarray(np.cross(toe, normal), dtype=np.float64)
     return FaceWorld(rot @ centre_body + body[:3, 3], normal, toe, grip)

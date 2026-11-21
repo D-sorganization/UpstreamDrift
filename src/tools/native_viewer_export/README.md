@@ -326,7 +326,7 @@ reason, never zero. Impact Location (toe, high) uses the decorative ball
 (`SwingInput.ball`, passed explicitly by `export_swing`): the contact point is the
 ball surface point facing the club, `ball_centre - radius * n_face` at the impact
 sample, and toe/high are its offsets from the face centre along the face toe axis
-(positive toward the toe) and `toe x normal`; the card records
+(positive toward the toe) and `toe x normal` (positive toward the crown). The toe axis is the head's own heel-to-toe line (head frame +z, rolled with the drawn head) projected into the face plane, never derived from the shaft, which leans about 34 deg from it on the driver; the card records
 `extras.ball_source` (the placement source, e.g. `address_geometry`). With the
 address-geometry ball this is the offset from the address face line, not a
 measured contact. A contact more than 50 mm (`MAX_FACE_OFFSET_M`) from the face
