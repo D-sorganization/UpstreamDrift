@@ -97,6 +97,9 @@ class ResolvedHandSpec:
     )
     #: Which hands are drawn on the club: one of ``HAND_VISUAL_BACKENDS``.
     visual_backend: str = DEFAULT_HAND_VISUAL_BACKEND
+    #: The emitter draws the skinned body: a skinned hand ends in a sleeve under
+    #: the forearm's skin (``skinned_club_hands.WristSleeve``), with no wrist ball.
+    forearm_skin: bool = False
 
     def __post_init__(self) -> None:
         if not isinstance(self.pose, GripPose):

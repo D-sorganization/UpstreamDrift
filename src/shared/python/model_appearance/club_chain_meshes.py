@@ -18,6 +18,7 @@ nothing here touches mass, inertia or joints.
 
 from __future__ import annotations
 
+import dataclasses
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
@@ -156,14 +157,20 @@ def club_meshes_by_body(
     club: ClubAssembly,
     finish: str,
     doc: AppearanceDocument,
+    *,
+    body_skin: bool = False,
 ) -> dict[str, list[ClubPart]]:
     """Club parts per spec body (module docstring), in each body's spec frame.
+
+    With ``body_skin`` (the emitter draws the skinned body) skinned hands end
+    under the forearms' skin (``ResolvedHandSpec.forearm_skin``).
 
     Rigid shaft: every part on the club body, in ``assembly_meshes_with_hands``
     order. Chain shaft: shaft pieces labelled ``shaft`` (club body) and
     ``shaft_link<i>``; the head on the tip link. Every label is unique.
     """
-    parts = assembly_meshes_with_hands(club, hands=resolved_hand_spec(spec))
+    hands = dataclasses.replace(resolved_hand_spec(spec), forearm_skin=body_skin)
+    parts = assembly_meshes_with_hands(club, hands=hands)
     layout = chain_layout(spec)
     if layout is None:
         body = club_body_name(spec)

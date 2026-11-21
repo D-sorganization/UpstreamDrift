@@ -247,6 +247,46 @@ def test_bad_wrist_shape_settings_are_refused(monkeypatch) -> None:
             }.get(key, sch.wrist_blend)()
 
 
+def test_under_a_skinned_forearm_the_hand_ends_in_a_sleeve(skinned) -> None:
+    """Its own forearm skin up to the seam, on the forearm's wrist section."""
+    club, sleeve = ca.assembly_from_spec(skinned), sch.wrist_sleeve()
+    margin, blend = sws.wrist_margin(), sch.wrist_blend()
+    meshes = sch.skinned_hand_meshes(club, sleeve=True)
+    own = sws.hand_wrist_sections(club)
+    for side, (wrist, along) in sch.forearm_reach_m(club).items():
+        mesh, section = meshes[f"{side}_hand"], own[side]
+        edges = np.sort(mesh.faces[:, [0, 1, 1, 2, 2, 0]].reshape(-1, 2), axis=1)
+        assert (np.unique(edges, axis=0, return_counts=True)[1] == 2).all()  # closed
+        rel = mesh.vertices[np.unique(mesh.faces)] - wrist
+        height = rel @ along
+        assert height.max() == pytest.approx(sleeve.seam_m + sleeve.lap_m, abs=1e-9)
+        flat = rel - np.outer(height, along) - blend.centred(section.centre_m)
+        x, y = flat @ section.width_axis, flat @ np.cross(along, section.width_axis)
+        radius = np.hypot(x, y)
+        ring = (height >= sleeve.seam_m) & (radius > 0.5 * section.half_depth_m)
+        want = margin / np.hypot(
+            x[ring] / radius[ring] / section.half_width_m,
+            y[ring] / radius[ring] / section.half_depth_m,
+        )
+        assert ring.sum() >= 12
+        slack = 1.5 * sleeve.cap_lip_m  # the cap's ring lies just inside the rim
+        assert radius[ring] == pytest.approx(want - sleeve.inset_m, abs=slack)
+
+
+def test_bad_sleeve_settings_are_refused(monkeypatch) -> None:
+    for key, bad in (
+        ("seam_m", 0.0),
+        ("lap_m", -0.001),
+        ("inset_m", 0.02),
+        ("cap_lip_m", 0.01),
+    ):
+        shape = {**SHAPE, "sleeve": {**SHAPE["sleeve"], key: bad}}
+        quality = {"forearm_wrist_margin": 1.2, "forearm_wrist_shape": shape}
+        monkeypatch.setattr(sch, "load_hand_visual_quality", lambda q=quality: q)
+        with pytest.raises(ValueError, match=key):
+            sch.wrist_sleeve()
+
+
 @pytest.fixture(scope="module")
 def junctions(skinned) -> dict[str, dict[str, Any]]:
     """Per hand: the forearm's far skin and the drawn hand with its wrist ball,
