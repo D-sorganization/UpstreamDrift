@@ -216,10 +216,10 @@ def _smoothed(skin: _Skin, weights: Floats, settings: PieceSettings) -> Floats:
     key = np.round(skin.vertices, settings.weld_decimals)
     _, welded = np.unique(key, axis=0, return_inverse=True)
     welded = welded.ravel()
-    ends = np.sort(welded[skin.faces][:, _EDGES], axis=2).reshape(-1, 2)
-    ends = np.unique(ends, axis=0)
-    ends = np.concatenate([ends, ends[:, ::-1]])
-    field = np.zeros((int(welded.max()) + 1, weights.shape[1]))
+    pairs: Any = np.sort(welded[skin.faces][:, _EDGES], axis=2).reshape(-1, 2)
+    pairs = np.unique(pairs, axis=0)
+    ends: Any = np.concatenate([pairs, pairs[:, ::-1]])
+    field: Any = np.zeros((int(welded.max()) + 1, weights.shape[1]))
     np.add.at(field, welded, weights)
     field /= np.bincount(welded)[:, None]
     near = np.bincount(ends[:, 0], minlength=len(field))[:, None] + 1
