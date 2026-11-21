@@ -21,6 +21,8 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 if TYPE_CHECKING:
     import mujoco
 
+    from .interface_power import MujocoInterfacePowerAnalyzer
+
 logger = get_logger(__name__)
 
 
@@ -138,6 +140,7 @@ class PowerFlowAnalyzer:
         active = dof_damping > 0
         self._diss_damping = dof_damping[active]
         self._diss_dofadr = np.arange(nv, dtype=np.int64)[active]
+        self._interface_power: MujocoInterfacePowerAnalyzer | None = None
 
     def _compute_work_decomposition(
         self,
@@ -454,9 +457,9 @@ class PowerFlowAnalyzer:
         """Robertson–Winter interface power per segment (``F · v + M · ω``, #15390)."""
         from .interface_power import MujocoInterfacePowerAnalyzer
 
-        return MujocoInterfacePowerAnalyzer(self.model).frame_at(
-            qpos, qvel, qacc, time_s=time_s
-        )
+        if self._interface_power is None or self._interface_power.model is not self.model:
+            self._interface_power = MujocoInterfacePowerAnalyzer(self.model)
+        return self._interface_power.frame_at(qpos, qvel, qacc, time_s=time_s)
 
     def _compute_body_joint_power(
         self, body_id: int, tau: np.ndarray, qvel: np.ndarray

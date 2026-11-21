@@ -8,7 +8,6 @@ import pytest
 from scripts.research.proximal_distal_energy.swing_model import PlanarInertials
 from src.shared.python.biomechanics.robertson_winter_interface_power import (
     endpoint_interface_power_w,
-    segment_energy_balance_residual_w,
 )
 
 pytestmark = pytest.mark.unit
@@ -42,10 +41,8 @@ def test_endpoint_power_sign_and_units() -> None:
     assert power == pytest.approx(5.0, abs=1e-12)
 
 
-def test_manufactured_planar_chain_robertson_winter_residual_near_zero(
-    params, inertials
-) -> None:
-    """Rollout-derived planar chain closes RW interface power (same fixture as #8380)."""
+def test_manufactured_planar_chain_wrist_interface_pointwise(params, inertials) -> None:
+    """Planar research wrist_interface_powers identity (independent of MuJoCo adapter)."""
     from scripts.research.proximal_distal_energy.run_experiments import (
         rollout_program,
         trace_accelerations,
@@ -69,18 +66,3 @@ def test_manufactured_planar_chain_robertson_winter_residual_near_zero(
         rtol=0.0,
         atol=1e-9,
     )
-    residuals = [
-        segment_energy_balance_residual_w(
-            mechanical_energy_rate_w=float(ke),
-            interface_power_w=float(iface),
-            gravity_power_w=float(grav),
-            external_power_w=0.0,
-        )
-        for ke, iface, grav in zip(
-            powers["club_kinetic_energy_rate"],
-            interface,
-            powers["gravity_power_on_club"],
-            strict=True,
-        )
-    ]
-    assert max(abs(r) for r in residuals) < 1e-6

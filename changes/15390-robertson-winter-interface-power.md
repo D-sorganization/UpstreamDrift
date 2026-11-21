@@ -7,8 +7,7 @@ branch: "cursor/rw-interface-power-15390-a314"
 ---
 
 Add engine-agnostic interface-power contracts and endpoint-power helper; MuJoCo
-computes equivalent joint reaction power (planar m a − m g method) with
-dE/dt residual per segment. PowerFlowAnalyzer exposes
-``compute_interface_power_frame`` beside existing τ·q̇ joint power; kinematic
-sequence planned-note resolved. Segment KE globes (#15389) remain kinematic, not
-flow.
+reads ``cfrc_int`` after ``mj_rnePostConstraint``, shifts wrench to joint centers,
+and sums per-joint RW power per segment against finite-difference d(KE+PE)/dt.
+PowerFlowAnalyzer exposes ``compute_interface_power_frame`` beside τ·q̇ joint power.
+Segment KE globes (#15389) remain kinematic, not flow.
