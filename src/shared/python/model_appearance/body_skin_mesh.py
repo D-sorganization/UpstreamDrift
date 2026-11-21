@@ -1,7 +1,7 @@
 """Triangle-mesh steps shared by the CC0 body skin layers (#15299).
 
-Normals, open edges, depth under the surface, one Laplacian pass and an exact
-cut on a level set, on
+Normals, open edges, depth under the surface, height over a surface, one
+Laplacian pass and an exact cut on a level set, on
 plain ``(N, 3)`` and ``(F, 3)`` arrays. Appearance only.
 """
 
@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import numpy as np
 from numpy.typing import NDArray
+from scipy.spatial import cKDTree
 
 Array = NDArray[np.float64]
 Faces = NDArray[np.int64]
@@ -88,6 +89,25 @@ def inward_thickness(vertices: Array, faces: Faces, ids: NDArray[np.int64]) -> A
         if hit.any():
             depth[row] = reach[hit].min()
     return depth
+
+
+def surface_height(points: Array, vertices: Array, faces: Faces) -> Array:
+    """Signed height of ``points`` over a surface, at its nearest sample.
+
+    The surface is sampled at its vertices, edge midpoints and face centres;
+    the height is measured along the sample's normal, positive outside. Raises
+    ``ValueError`` for points that are not ``(N, 3)``.
+    """
+    if points.ndim != 2 or points.shape[1] != 3:
+        raise ValueError("points must be (N, 3)")
+    normals = vertex_normals(vertices, faces)
+    picks = [faces[:, [k]] for k in range(3)] + [faces[:, [0, 1]], faces[:, [1, 2]]]
+    picks += [faces[:, [2, 0]], faces]
+    where = np.vstack([vertices[pick].mean(axis=1) for pick in picks])
+    facing = np.vstack([normals[pick].mean(axis=1) for pick in picks])
+    facing /= np.maximum(np.linalg.norm(facing, axis=1, keepdims=True), 1e-12)
+    nearest = cKDTree(where).query(points)[1]
+    return np.asarray(np.einsum("ij,ij->i", points - where[nearest], facing[nearest]))
 
 
 def boundary_edges(faces: Faces) -> Faces:

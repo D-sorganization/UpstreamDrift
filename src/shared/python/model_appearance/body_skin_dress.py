@@ -17,6 +17,10 @@ body itself is evened out (``chest``), the shirt is pulled taut over the chest
 and the sleeve caps (relaxed down to its floor ease), and each trouser leg is
 held off the leg by a tube of at least ``leg_tube_m`` about the shank.
 
+The shirt is draped first and the trousers' top is set on the normals through
+its cloth, ``waist_gap_m`` outside it, so the tucked shirt and the waistband
+move as one sheet when the trunk turns and the hips bend.
+
 ``dress_skin`` returns the layers in the fitted rest pose; values and sources
 are in ``assets/body_skin_cc0/dress_settings.json``. Appearance only; opt-in.
 """
@@ -129,6 +133,7 @@ class DressSettings:
     tuck_band_m: tuple[float, float]
     waistband_m: float
     waistband_span_m: tuple[float, float]
+    waist_gap_m: float
     wrist_cut_m: float
     chest: ChestSettings
     sleeve_cap_m: float
@@ -147,7 +152,7 @@ class DressSettings:
         positive: tuple[str, ...]
         positive = ("skin_margin_m", "waist_height_m", "tuck_m", "collar_gap_m")
         positive += ("wrist_cut_m", "sleeve_hug_m")
-        positive += ("collar_front_reach_m", "neck_hug_m", "waistband_m")
+        positive += ("collar_front_reach_m", "neck_hug_m", "waistband_m", "waist_gap_m")
         for name in positive:
             if not getattr(self, name) > 0.0:
                 raise ValueError(f"{name} must be positive")
@@ -373,6 +378,34 @@ def _leg_tubes(
     return out
 
 
+def _worn(shaped: Array, part: Array, draped: Array) -> Array:
+    """Per body vertex: the shirt's cloth over it (else the skin), and whether worn."""
+    gap, index = cKDTree(part[:, :3]).query(shaped)
+    worn = np.asarray(gap) == 0.0  # the shirt's uncut vertices are the body's rows
+    return np.column_stack([np.where(worn[:, None], draped[index], shaped), worn])
+
+
+def _over_shirt(
+    cloth: Array, under: Array, outward: Array, here: _Fields, settings: DressSettings
+) -> Array:
+    """The trousers' top held ``waist_gap_m`` outside the tucked shirt.
+
+    From ``waistband_span_m[0]`` below the waistband top each vertex is
+    put on the normal through the shirt's cloth over the same body point
+    (``under``: that point and whether a shirt is worn there, interpolated on
+    the cuts), at least the gap outside it, and below the shirt's tail outside
+    the tail's ease too. Both garments carry that point's skin weights, so they
+    move together when posed: the shirt stays tucked in (bounds in the tests).
+    """
+    band = here.height > settings.waist_height_m - settings.waistband_span_m[0]
+    base, worn = under[:, :3], under[:, 3]
+    need = settings.waist_gap_m + (1.0 - worn) * settings.tuck_ease_m[1]
+    depth = np.einsum("ij,ij->i", cloth - base, outward)
+    out = cloth.copy()
+    out[band] = (base + outward * np.maximum(depth, need)[:, None])[band]
+    return out
+
+
 def _drape(points: Array, faces: Faces, cloth: ClothSettings, bounds: Array) -> Array:
     """The cut body ``points`` offset outward by ``bounds`` (ease, floor, cap)."""
     ease, floor, cap = bounds.T
@@ -485,8 +518,10 @@ def dress_skin(
     part, faces = clip_mesh(body, skin.faces, bare)
     bare_skin = Layer(part[:, :3], part[:, 3:-width], faces)
     layers = {"skin": close_neck(bare_skin, fitted.joints["neck"], settings.neck_cap)}
+    under = np.column_stack([shaped, np.zeros(len(shaped))])
     for name, level in (("shirt", cut.shirt), ("trousers", cut.trousers)):
-        part, faces = clip_mesh(body, skin.faces, level)
+        part, faces = clip_mesh(np.column_stack([body, under]), skin.faces, level)
+        part, lining = part[:, :-4], part[:, -4:]
         here = _Fields(*part[:, -width:].T)
         cloth: ClothSettings = getattr(settings, name)
         ease = np.full(len(part), cloth.ease_m)
@@ -523,7 +558,10 @@ def dress_skin(
                 draped = _taut(
                     draped, part[:, :3], faces, free & inner, (floor, passes)
                 )
+            under = _worn(shaped, part, draped)
         else:
             draped = _leg_tubes(draped, here, fitted, settings)
+            outward = vertex_normals(part[:, :3], faces)
+            draped = _over_shirt(draped, lining, outward, here, settings)
         layers[name] = _fold(part, draped, faces)
     return layers
