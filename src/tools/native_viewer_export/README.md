@@ -68,6 +68,14 @@ python3 -m src.tools.native_viewer_export \
   is a display placement: no joint angle or club dimension changes, and the
   face is not squared. A swing that misses by more than `max_shift_m` keeps the
   address ball and records why.
+  A ball that rests more than `min_gap_m` above the ground (a driver ball) gets a
+  tee (#15150): a peg from the ground to a cup under the ball, drawn from
+  `model_appearance/ball_tee.py` and `ball_tee_settings.json` (`enabled`,
+  `min_gap_m`, `shaft_radius_m`, `cup_radius_m`, `cup_height_m`, `rgba`). The
+  tee is render geometry only (no collision, no mass), is not hidden at impact
+  and stays standing when the ball leaves; a ball on the turf gets none. MuJoCo
+  and MyoSuite draw it in the render scene; Drake, Pinocchio and OpenSim draw
+  no tee yet.
   When neither exists (no club, ungrounded first state, no MuJoCo) no ball is
   drawn and the reason is logged and returned in `ExportResult.ball`
   (`{"unavailable": reason}`, printed by the CLI); a placement is recorded with
@@ -88,6 +96,36 @@ python3 -m src.tools.native_viewer_export \
   clip of that many swing seconds centred on impact.
 - `--stride` is deprecated (alias for one fixed index step; warns).
 - The HUD shows playback speed and milliseconds from impact.
+- A HUD line wider than the frame wraps onto further rows at its ` | `
+  separators (`compositor.wrap_hud_line`), so the per-point ellipsoid lines are
+  never cut at the frame edge.
+- Mobility and capability ellipsoids are evaluated at the pose of the frame they
+  are drawn on (`OverlayFeed.following`), not at a source state: a clip frame is
+  a time sample, so frame `k` is not source state `k`. Their display scale is
+  fixed once from the source states and shared by every clip. A feed whose
+  ellipsoids cannot be evaluated at the clip frames is refused (`ValueError`).
+- A bundle whose every effort is zero is a kinematic replay
+  (`kinematic_replay.py`): its contact wrenches are not applied forces, so force
+  and torque vectors are hidden unless `--force-vectors` or `--torque-vectors` is
+  passed, with one warning and the HUD note "Kinematic Replay: Forces Not Shown".
+  The efforts decide, not a provenance label (the writers share none).
+- The ellipsoid values are a compact side panel (`ellipsoid_panel.py`, drawn by
+  the impact factors panel's renderer): a row per point with its largest
+  mobility and effective-mass radii and condition number, a units row and, with
+  `--ellipsoid-color-by kind`, a legend. It sits opposite the impact factors
+  panel, stacks below it on a shared edge and stays above the bottom HUD rows;
+  layout `text` in its settings file restores them.
+- Ellipsoid visibility (`ellipsoid_visibility.py`, `ellipsoid_visibility_settings.json`,
+  `--ellipsoid-visibility-settings JSON`): `scale_grouping` `per_kind` (one display
+  scale per kind, the clubhead sets it; sizes comparable between points) or
+  `per_point` (each point's largest radius maps to `target_radius_m`, the former
+  literal 0.09 m; sizes are **not comparable between points**, so the panel adds a
+  "Scaled Per Point" footer). `outer_alpha` is the alpha of the larger ellipsoid
+  when two kinds share a centre, so the inner one shows (1 = off).
+  `min_semi_axis_m` floors a displayed semi-axis (0 = off); a floored axis is **not
+  to scale**, the glyph is a visibility aid along it. The packaged file ships
+  `per_point`, 0.09 m, alpha 0.35 and a 0.03 m floor; the code defaults of
+  `EllipsoidDisplayScale` are unchanged.
 
 Environment: `NATIVE_VIEWER_CHROMIUM` (Chromium executable; a full Playwright
 build renders much faster than the headless shell), and
@@ -95,6 +133,19 @@ build renders much faster than the headless shell), and
 
 The OpenSim backend only ever runs under `xvfb-run` and refuses to start when
 `NATIVE_VIEWER_XVFB` is missing or `DISPLAY` is a real display.
+
+## Contact Frame and Sun Light
+
+- **Contact frame (#15150).** With a known impact time and a face that reaches
+  the ball (`impact_state.series_at_contact`) the exporter renders a frame at
+  exactly the contact instant (`FrameSchedule(extra_times_s=...)`); the HUD's
+  "ms from impact", the impact panel and the tracer count from it, and the ball
+  stays on its tee through that frame. `--contact-hold-frames N` repeats it N
+  more frames (default: 24 in an impact-window clip, 0 in full-speed clips).
+- **Sun light (MuJoCo).** `backends/sun_light_settings.json` adds a directional
+  light (direction, colour, intensity, shadow; `enabled: false` removes it) so the
+  400 m ground is lit to the horizon. Default look change: the near turf is
+  brighter (about 1.9x mean level) and the golfer's shadow fainter.
 
 ## Appearance Flags
 
@@ -225,13 +276,60 @@ python3 -m src.tools.native_viewer_export --bundle driver.npz --swing driver \
 
 - `core.py`: settings, clip plans (speeds, impact window), the backend protocol,
   `export_swing`; frame timing lives in `src/shared/python/video_timing`.
-- `compositor.py`: labelled 2x2 grid, HUD text and the impact card panel.
+- `compositor.py`: labelled 2x2 grid, HUD text and the impact card panel. Text
+  lines are spaced by their outlined height and the panels start below the view
+  label, so neither can overlap (`hud_layout_settings.json`).
 - `impact_card.py`: one impact card per swing from the displayed pose.
+- `flight_tracer.py`: the ball flight of a swing in swing time and world
+  coordinates (#15150), launched by the repository impact and ball-flight
+  model from the clubhead state the impact card reads: the state where the
+  face reaches the ball (`impact_state.py`), and the tracer starts at that
+  instant, not at the sample before it. It is a model
+  prediction from kinematic impact conditions, not a measurement; a flight
+  the model flags as outside its validity envelope is not shown unless
+  `draw_invalid_flight` is set. Options: `flight_tracer_settings.json`.
 - `impact_factors.py`: the optional impact factors panel (#15150,
   `ExportSettings.impact_factors`, default off): the card's rows in a panel of
   one fixed size on every frame, blank before impact and frozen at their impact
   values from the impact frame to the end of the clip; it replaces the card.
   Options and their meaning are in `impact_factors_settings.json`.
+  `--impact-factors` turns it on and `--impact-factors-settings PATH` reads
+  another settings file (`pre_impact: live` shows the extractor's value at the
+  frame on screen until impact). A face that passes the ball without touching
+  it is labelled "closest approach, no contact" with the miss distance; with
+  `closest_approach_fallback` a swing with no detected impact uses its closest
+  approach as the reference instant and says so.
+  `--ball-flight` (or `--ball-flight-settings PATH`; default off) flies the
+  ball from the impact frame in playback time with a persistent shot tracer,
+  adds the flight numbers to the HUD and holds the clip on the last pose until
+  the ball has landed. Ball and tracer are a 2D overlay projected through the
+  view preset camera (MuJoCo's 45 degree lens; views that follow the grip are
+  left alone). `--views down_the_line_flight --no-grid` is the wide
+  down-the-line view (`golf_view_presets/flight_view.json`, 4.6 m from the
+  golfer) that keeps the flight in the picture. The MuJoCo ground patch is
+  `ground_half_extent_m` wide each way (`backends/scene_extent_settings.json`),
+  so the ball lands on visible turf.
+  The MuJoCo worker also renders scene depth from the impact on, so the golfer
+  hides the tracer and ball where nearer to the camera (`occlude_by_scene`, on
+  by default; without depth a warning is logged). `landing_marker` draws a
+  ground ring at the landing point; its optional aids are a `ground_track`
+  (the flight path on the ground, revealed with the tracer), a `drop_line` from
+  the ball to the ground while in flight and a `carry_label` (the flight
+  model's carry, unit and format from the settings) once landed.
+  `ExportResult.ball` reports the contact
+  instant as `hide_after_s`.
+- `flight_inset.py`: opt-in 2D flight inset (#15150), a broadcast-style panel
+  that makes a long carry readable from behind the golfer: a side profile
+  (height against down-range distance, the vertical scale exaggerated by
+  `vertical_exaggeration`, 1 for true aspect) with the apex and carry labelled,
+  and a plan view (lateral offset against down-range distance, target line,
+  landing offset such as "15 m R"). Both are revealed with the tracer, with a
+  dot at the ball; once landed the full curve and labels stay. The numbers
+  are the flight model's. It starts below the view label, stacks below the impact
+  factors panel (or ellipsoid panel) on its edge, stays above the HUD rows and
+  shrinks, or is not drawn, when no room is left. Off unless
+  `flight_inset_settings.json` sets `enabled` (position, size, margins, colours,
+  line widths, label formats, units and font scale are all settings there).
 - `overlay.py`: overlay feed built from `force_overlay.bundle_provider`.
 - `overlay2d.py`: pinhole projection for the OpenSim 2D glyphs.
 - `backends/`: one module per engine plus shared helpers.
@@ -291,17 +389,22 @@ computes it once per swing, on the unresampled source states (identical for
 every speed clip), from the displayed pose `q`: `club_pose.ClubPoseModel` (shared
 with the decorative ball) places the spec club body through MuJoCo and gives the
 true face centre, normal, toe and grip axes; `np.gradient` of the face-centre
-positions gives the velocity; `extract_impact_parameters` (impact state = last
-sample before the impact time) gives the rows. The specification has no target
+positions gives the velocity; `extract_impact_parameters` gives the rows. With a
+ball the impact state is the club where its face reaches the ball
+(`impact_state.series_at_contact`, settings in `impact_state_settings.json`): a
+fit of the samples before contact carried to the contact instant, so no row is
+read a sample early or across the strike (`extras.impact_state`); without a ball
+it is the last sample before the impact time. The specification has no target
 line, so the target direction is the horizontal part of the address (state 0)
-face normal (face square at address, as `plan_gaze` does), right-handed, Z-up;
+face normal of the address-square head (as `plan_gaze` does; it does not turn
+with the head roll that is drawn), right-handed, Z-up;
 the card records `extras.target_source = "address_face_normal"`, so face angle
 and path are relative to that assumed line. Unavailable rows show "unavailable" and a
 reason, never zero. Impact Location (toe, high) uses the decorative ball
 (`SwingInput.ball`, passed explicitly by `export_swing`): the contact point is the
 ball surface point facing the club, `ball_centre - radius * n_face` at the impact
 sample, and toe/high are its offsets from the face centre along the face toe axis
-(positive toward the toe) and `toe x normal`; the card records
+(positive toward the toe) and `toe x normal` (positive toward the crown). The toe axis is the head's own heel-to-toe line (head frame +z, rolled with the drawn head) projected into the face plane, never derived from the shaft, which leans about 34 deg from it on the driver; the card records
 `extras.ball_source` (the placement source, e.g. `address_geometry`). With the
 address-geometry ball this is the offset from the address face line, not a
 measured contact. A contact more than 50 mm (`MAX_FACE_OFFSET_M`) from the face

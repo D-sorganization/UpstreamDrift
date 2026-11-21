@@ -292,6 +292,7 @@
 {"path": "biomechanics/myosuite_adapter.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/plot_traces.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/posture_impact_metrics.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
+{"path": "biomechanics/robertson_winter_interface_power.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/rust_muscle.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/shallowing/__init__.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/shallowing/hand_path_plane.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
@@ -335,7 +336,9 @@
 {"path": "body_part_viz/renderers/matplotlib_renderer.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/renderers/projective_renderer.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/renderers/pyqtgl_renderer.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/scalar_shading.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/segment_angular_momentum.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/series_validation.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/shapes/__init__.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/shapes/_mesh_decimation.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/shapes/_mesh_io.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
@@ -908,6 +911,7 @@
 {"path": "golf_simulator/session.py", "classification": "ud-only", "package": "golf_simulator", "spelling_only": false}
 {"path": "golf_view_presets/__init__.py", "classification": "ud-only", "package": "golf_view_presets", "spelling_only": false}
 {"path": "golf_view_presets/adapters.py", "classification": "ud-only", "package": "golf_view_presets", "spelling_only": false}
+{"path": "golf_view_presets/flight_view.json", "classification": "ud-only", "package": "golf_view_presets", "spelling_only": false}
 {"path": "golf_view_presets/framing.py", "classification": "ud-only", "package": "golf_view_presets", "spelling_only": false}
 {"path": "golf_view_presets/presets.py", "classification": "ud-only", "package": "golf_view_presets", "spelling_only": false}
 {"path": "golf_viz/__init__.py", "classification": "ud-only", "package": "golf_viz", "spelling_only": false}
@@ -1359,6 +1363,8 @@
 {"path": "model_appearance/ball.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/ball_strike.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/ball_strike_settings.json", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/ball_tee.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/ball_tee_settings.json", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/body_meshes.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/body_skin_dress.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/body_skin_export.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
@@ -1368,6 +1374,8 @@
 {"path": "model_appearance/club_assembly.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_chain_meshes.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_face.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/club_face_marking.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/club_face_marking_settings.json", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_head_mesh.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_head_seat.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_head_seat_settings.json", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
@@ -2536,6 +2544,11 @@
 {"path": "security/secure_subprocess.py", "classification": "ud-only", "package": "security", "spelling_only": false}
 {"path": "security/security_utils.py", "classification": "ud-only", "package": "security", "spelling_only": false}
 {"path": "security/subprocess_utils.py", "classification": "ud-only", "package": "security", "spelling_only": false}
+{"path": "segment_kinetic_energy/__init__.py", "classification": "ud-only", "package": "segment_kinetic_energy", "spelling_only": false}
+{"path": "segment_kinetic_energy/contracts.py", "classification": "ud-only", "package": "segment_kinetic_energy", "spelling_only": false}
+{"path": "segment_kinetic_energy/disclaimer.py", "classification": "ud-only", "package": "segment_kinetic_energy", "spelling_only": false}
+{"path": "segment_kinetic_energy/render_globes.py", "classification": "ud-only", "package": "segment_kinetic_energy", "spelling_only": false}
+{"path": "segment_kinetic_energy/series.py", "classification": "ud-only", "package": "segment_kinetic_energy", "spelling_only": false}
 {"path": "sg_optimizer/AGENTS.md", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/README.md", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/__init__.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}

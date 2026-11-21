@@ -2,21 +2,28 @@
 
 A fixed-size panel drawn on every frame of a clip: the launch-monitor rows of
 the shared impact card (:mod:`impact_card`, computed by ``impact_parameters``
-from the displayed clubhead series), blank before impact and frozen at their
-impact values from the impact frame to the end of the clip. Options are read
-from ``impact_factors_settings.json`` (see its ``sources``). Without a known
-impact the panel says so and shows no numbers.
+from the displayed clubhead series), blank or live before impact and frozen at
+their impact values from the impact frame to the end of the clip. Options are
+read from ``impact_factors_settings.json`` (see its ``sources``). Without a
+known impact the panel says so and shows no numbers; a face that passes the
+ball without touching it is labelled "closest approach, no contact".
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field, replace
 import json
 import math
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from src.shared.python.impact_parameters import ClubheadSeries, ImpactParameters
+import numpy as np
+
+from src.shared.python.impact_parameters import (
+    ClubheadSeries,
+    ImpactParameters,
+    extract_impact_parameters,
+)
 from src.shared.python.impact_parameters.panel_model import (
     ImpactCard,
     build_impact_card,
@@ -30,7 +37,10 @@ if TYPE_CHECKING:
 SETTINGS_PATH = Path(__file__).with_name("impact_factors_settings.json")
 TITLE = "Impact Factors"
 BEFORE, AT_IMPACT, NO_IMPACT = "before impact", "at impact", "no impact detected"
+NO_CONTACT = "closest approach, no contact"
+NOT_DETECTED = "closest approach (impact not detected)"
 POSITIONS = ("right", "left")
+PRE_IMPACT_MODES = ("blank", "live")
 Lines = tuple[tuple[str, str], ...]
 club_series = impact_card._club_series  # the card's own face series
 
@@ -48,6 +58,7 @@ ROW_LABELS = _row_labels()
 class FactorSettings:
     """Validated ``impact_factors_settings.json`` (``TypeError``/``ValueError``)."""
 
+    pre_impact: str
     blank_text: str
     rows: tuple[str, ...]
     position: str
@@ -55,8 +66,13 @@ class FactorSettings:
     font_height_divisor: int
     min_font_px: int
     widest_value: str
+    closest_approach_fallback: bool
 
     def __post_init__(self) -> None:
+        if self.pre_impact not in PRE_IMPACT_MODES:
+            raise ValueError(f"pre_impact must be one of {PRE_IMPACT_MODES}")
+        if not isinstance(self.closest_approach_fallback, bool):
+            raise TypeError("closest_approach_fallback must be true or false")
         if isinstance(self.rows, str):
             raise TypeError("rows must be a list of row keys")
         object.__setattr__(self, "rows", tuple(self.rows))
@@ -95,6 +111,8 @@ class FactorsPanel:
     impact_time_s: float | None
     status: str
     frozen: Lines
+    series: ClubheadSeries | None = None  # source of the live rows
+    _live: dict[int, Lines] = field(default_factory=dict, compare=False, repr=False)
 
     def __post_init__(self) -> None:
         if not isinstance(self.settings, FactorSettings):
@@ -110,7 +128,26 @@ class FactorsPanel:
             return [("Status", self.status), *self.settings.blank_rows]
         if time_s >= self.impact_time_s:
             return [("Status", self.status), *self.frozen]
-        return [("Status", BEFORE), *self.settings.blank_rows]
+        return [("Status", BEFORE), *self._live_rows(time_s)]
+
+    def _live_rows(self, time_s: float) -> Lines:
+        """Rows of the source sample nearest ``time_s`` (blank if not computable)."""
+        if self.settings.pre_impact != "live" or self.series is None:
+            return self.settings.blank_rows
+        index = int(np.argmin(np.abs(self.series.times_s - time_s)))
+        if index not in self._live:
+            try:
+                params = extract_impact_parameters(
+                    self.series,
+                    impact_card.address_target_frame(self.series),
+                    impact_index=index,
+                    use_tools=False,
+                )
+                rows = _rows(build_impact_card(params), self.settings)
+            except ValueError:  # e.g. club head slower than the extractor minimum
+                rows = self.settings.blank_rows
+            self._live[index] = rows
+        return self._live[index]
 
     def _box(self, shape: tuple[int, ...]) -> tuple[tuple[int, int, int, int], int]:
         cfg = self.settings
@@ -147,41 +184,84 @@ def no_impact_panel(settings: FactorSettings, status: str = NO_IMPACT) -> Factor
     return FactorsPanel(settings, None, status, settings.blank_rows)
 
 
+def closest_approach(
+    series: ClubheadSeries, ball: BallPlacement
+) -> tuple[float, float]:
+    """``(time_s, gap_m)`` of the face centre's closest pass of the ball centre.
+
+    The face-centre path is piecewise linear; only segments after the top of
+    the backswing count (at address the face rests beside the ball).
+    """
+    from src.shared.python.model_appearance.club_face import top_of_backswing_index
+
+    t, head = series.times_s, np.asarray(series.face_center_m, dtype=float)
+    try:
+        top = top_of_backswing_index(t, head)
+    except ValueError:
+        top = 0
+    centre = np.asarray(ball.position_m, dtype=float)
+    start, step = head[top:-1], np.diff(head[top:], axis=0)
+    length2 = np.maximum(np.einsum("ij,ij->i", step, step), 1e-18)
+    s = np.clip(np.einsum("ij,ij->i", centre - start, step) / length2, 0.0, 1.0)
+    gap = np.linalg.norm(start + s[:, None] * step - centre, axis=1)
+    j = int(np.argmin(gap))
+    k = top + j
+    return float(t[k] + s[j] * (t[k + 1] - t[k])), float(gap[j])
+
+
 def panel_from_series(
     series: ClubheadSeries,
     impact_time_s: float,
     ball: BallPlacement | None,
     settings: FactorSettings,
+    *,
+    detected: bool = True,
 ) -> FactorsPanel:
     """Panel of ``series`` with the impact card rows frozen at ``impact_time_s``.
 
-    Raises ``TypeError``/``ValueError`` for bad settings, a non-finite time or
-    a series the impact card cannot be computed from.
+    With a ``ball`` whose contact point lies off the face the status reads
+    "closest approach, no contact" with the miss distance (face centre to ball
+    centre); ``detected=False`` marks an instant that is only the closest
+    approach. Raises ``TypeError``/``ValueError`` for bad settings, a
+    non-finite time or a series the impact card cannot be computed from.
     """
     if not isinstance(settings, FactorSettings):
         raise TypeError("settings must be a FactorSettings")
     card = impact_card.card_from_series(series, impact_time_s, ball)
-    return FactorsPanel(settings, impact_time_s, AT_IMPACT, _rows(card, settings))
+    location = next(row for row in card.rows if row.key == "impact_location")
+    status = AT_IMPACT if detected else NOT_DETECTED
+    if ball is not None and str(location.reason).startswith(impact_card.OFF_FACE):
+        miss_mm = closest_approach(series, ball)[1] * 1000.0
+        status = f"{NO_CONTACT} (miss {miss_mm:.0f} mm)"
+    return FactorsPanel(settings, impact_time_s, status, _rows(card, settings), series)
 
 
 def factors_for_export(
     swing: SwingInput, settings: ExportSettings
-) -> FactorsPanel | None:
-    """The export's panel, or ``None`` when the option or the HUD is off.
+) -> tuple[FactorsPanel | None, ExportSettings]:
+    """The export's panel (``None`` when off) and the settings to export with.
 
     Without a known impact time (none set, none in the bundle) the panel says
-    "no impact detected"; any failure gives a panel stating the reason. Neither
-    shows a number.
+    "no impact detected", unless the closest-approach fallback is on: then that
+    instant becomes the impact time of the returned settings and the panel is
+    labelled so. Any failure gives a panel stating the reason, without numbers.
     """
     config: Any = settings.impact_factors
     if config is None or not settings.hud:
-        return None
-    impact = settings.impact_time_s
-    if impact is None:
-        if not swing.has_impact_provenance:
-            return no_impact_panel(config)
-        impact = swing.impact_time_s
+        return None, settings
+    known = settings.impact_time_s is not None or swing.has_impact_provenance
     try:
-        return panel_from_series(club_series(swing), impact, swing.ball, config)
+        series = club_series(swing)
+        if not known:
+            if not config.closest_approach_fallback or swing.ball is None:
+                return no_impact_panel(config), settings
+            when = closest_approach(series, swing.ball)[0]
+            settings = replace(settings, impact_time_s=when)
+        impact = settings.impact_time_s
+        if impact is None:
+            impact = swing.impact_time_s
+        panel = panel_from_series(series, impact, swing.ball, config, detected=known)
     except impact_card._EXPECTED_ERRORS as exc:
-        return no_impact_panel(config, compositor._short(f"unavailable: {exc}"))
+        reason = compositor._short(f"unavailable: {exc}")
+        return no_impact_panel(config, reason), settings
+    return panel, settings

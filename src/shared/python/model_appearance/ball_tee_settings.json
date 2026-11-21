@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "min_gap_m": 0.01,
+  "shaft_radius_m": 0.0025,
+  "cup_radius_m": 0.011,
+  "cup_height_m": 0.006,
+  "rgba": [0.93, 0.78, 0.45, 1.0],
+  "sources": {
+    "enabled": "Draw a tee under a ball that rests above the ground. Visual only: the tee is a render object with no collision and no mass, drawn where the ball geometry is drawn, and it stays standing when the ball leaves.",
+    "min_gap_m": "Smallest height of the underside of the ball above the ground that gets a tee. 0.01 m is a display judgement: below it the ball reads as lying on the turf. A driver ball is teed up to 0.1016 m (ball_strike_settings.json), so it always passes.",
+    "shaft_radius_m": "Radius of the peg. 0.0025 m is a 5 mm peg, the order of a standard wooden tee shaft; a display size, not a measurement.",
+    "cup_radius_m": "Radius of the flat cup that carries the ball. 0.011 m is a display size, about half the ball radius; it must be smaller than the ball radius so the rim of the cup touches the ball.",
+    "cup_height_m": "Height of the cup (the wider top of the tee). 0.006 m is a display size; it is cut to the tee height when the ball is low.",
+    "rgba": "Wood colour of the tee."
+  }
+}

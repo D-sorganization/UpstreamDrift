@@ -114,6 +114,7 @@ class SimRenderingMixin:
 
         glyphs = self._build_overlay_glyphs()
         self._render_force_glyphs(self.renderer.scene, glyphs)
+        self._render_segment_ke_globes(self.renderer.scene)
 
         try:
             rgb = self.renderer.render()
@@ -140,31 +141,7 @@ class SimRenderingMixin:
 
         if self.meshcat_adapter:
             try:
-                self.meshcat_adapter.update(self.data)
-                if scale is not None:
-                    self.meshcat_adapter.update_force_colors(axial_frame, scale)
-                self.meshcat_adapter.draw_glyphs(glyphs)
-
-                if self.show_induced_vectors:
-                    self.meshcat_adapter.draw_induced_vectors(
-                        self.data,
-                        self.latest_bio_data,
-                        self.induced_vector_source,
-                        self.torque_scale,
-                    )
-                else:
-                    self.meshcat_adapter.draw_induced_vectors(self.data, None, "")
-
-                if self.show_cf_vectors:
-                    self.meshcat_adapter.draw_cf_vectors(
-                        self.data,
-                        self.latest_bio_data,
-                        self.cf_vector_type,
-                        self.torque_scale,
-                    )
-                else:
-                    self.meshcat_adapter.draw_cf_vectors(self.data, None, "")
-
+                self._update_meshcat_frame_overlays(glyphs, axial_frame, scale)
             except (RuntimeError, ValueError, AttributeError) as exc:
                 logger.debug("Counterfactual vector rendering failed: %s", exc)
 
@@ -179,6 +156,50 @@ class SimRenderingMixin:
         pixmap = QtGui.QPixmap.fromImage(image)
 
         self.label.setPixmap(pixmap)
+
+    def _update_meshcat_frame_overlays(
+        self: Any, glyphs: GlyphSet | None, axial_frame: Any, scale: Any
+    ) -> None:
+        """Push one frame of glyphs, segment KE globes, and vector overlays to MeshCat."""
+        if self.meshcat_adapter is None or self.data is None:
+            return
+        self.meshcat_adapter.update(self.data)
+        if scale is not None:
+            self.meshcat_adapter.update_force_colors(axial_frame, scale)
+        self.meshcat_adapter.draw_glyphs(glyphs)
+        self._meshcat_draw_segment_ke_globes()
+
+        if self.show_induced_vectors:
+            self.meshcat_adapter.draw_induced_vectors(
+                self.data,
+                self.latest_bio_data,
+                self.induced_vector_source,
+                self.torque_scale,
+            )
+        else:
+            self.meshcat_adapter.draw_induced_vectors(self.data, None, "")
+
+        if self.show_cf_vectors:
+            self.meshcat_adapter.draw_cf_vectors(
+                self.data,
+                self.latest_bio_data,
+                self.cf_vector_type,
+                self.torque_scale,
+            )
+        else:
+            self.meshcat_adapter.draw_cf_vectors(self.data, None, "")
+
+    def _meshcat_draw_segment_ke_globes(self: Any) -> None:
+        if self.meshcat_adapter is None:
+            return
+        if not getattr(self, "show_segment_ke_globes", False):
+            self.meshcat_adapter.draw_ke_globes(None, ())
+            return
+        frame = self._current_segment_ke_frame()
+        if frame is None:
+            self.meshcat_adapter.draw_ke_globes(None, ())
+            return
+        self.meshcat_adapter.draw_ke_globes(frame, self._segment_ke_peaks_tuple())
 
     def _check_first_frame(self: Any, rgb: Any) -> None:
         """Post-condition on the first frame after a model load (UD #12884).
@@ -413,6 +434,44 @@ class SimRenderingMixin:
             line = f"{line} | {angmom_line}" if line else angmom_line
         self._set_force_legend(line)
         return glyphs
+
+    def _current_segment_ke_frame(self: Any) -> Any | None:
+        if not getattr(self, "show_segment_ke_globes", False):
+            return None
+        if self.engine is None or self.data is None:
+            return None
+        frame = self.engine.get_segment_kinetic_energy_frame()
+        if frame is None:
+            return None
+        state: dict[str, tuple[float, float]] = getattr(
+            self, "_segment_ke_peak_state", {}
+        )
+        for seg in frame.segments:
+            prev_j, _ = state.get(seg.body, (0.0, 0.0))
+            if seg.total_j >= prev_j:
+                state[seg.body] = (seg.total_j, frame.time_s)
+        self._segment_ke_peak_state = state
+        return frame
+
+    def _segment_ke_peaks_tuple(self: Any) -> tuple[Any, ...]:
+        from src.shared.python.segment_kinetic_energy import SegmentKineticEnergyPeak
+
+        state: dict[str, tuple[float, float]] = getattr(
+            self, "_segment_ke_peak_state", {}
+        )
+        return tuple(
+            SegmentKineticEnergyPeak(body=b, peak_total_j=j, peak_time_s=t)
+            for b, (j, t) in sorted(state.items())
+        )
+
+    def _render_segment_ke_globes(self: Any, scene: Any) -> None:
+        from mujoco_humanoid_golf.ke_globe_scene import add_ke_globes_to_scene
+
+        frame = self._current_segment_ke_frame()
+        if frame is None or scene is None:
+            return
+        peaks = self._segment_ke_peaks_tuple()
+        add_ke_globes_to_scene(scene, frame, peaks)
 
     def _render_force_glyphs(
         self: Any, scene: Any, glyphs: GlyphSet | None = None

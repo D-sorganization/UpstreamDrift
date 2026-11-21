@@ -1,18 +1,22 @@
 {
+  "pre_impact": "blank",
   "blank_text": "--",
   "rows": ["clubhead_speed", "club_path_deg", "face_angle_deg", "face_to_path_deg", "attack_angle_deg", "dynamic_loft_deg", "impact_location"],
   "position": "right",
+  "closest_approach_fallback": false,
   "opacity": 0.62,
   "font_height_divisor": 45,
   "min_font_px": 11,
   "widest_value": "+000.0 mph",
   "sources": {
-    "blank_text": "Text of a row before the impact frame, and of every row when no impact is known. Rows are blank before impact because face angle, path, attack angle and loft are defined at impact: their values at the top of the backswing are large numbers that mean nothing and draw the eye from the swing. From the impact frame on the impact values are frozen and stay to the end of the clip.",
+    "pre_impact": "What the rows show before the impact frame: 'blank' (blank_text) or 'live' (the same extractor evaluated at the frame being shown). Blank is the default: face angle, path, attack angle and loft are defined at impact, and their values at the top of the backswing are large numbers that mean nothing and draw the eye from the swing. From the impact frame on the impact values are frozen and stay to the end of the clip in both modes.",
+    "blank_text": "Text of a row that has no value yet, and of every row when no impact is known.",
     "rows": "Card rows shown, in order, by the key of impact_parameters.panel_model.build_impact_card (which also gives labels and units). Unknown keys are refused.",
     "position": "Frame edge the panel sits on: right or left.",
+    "closest_approach_fallback": "When the export knows no impact time (none given, none in the bundle, the detector found none): false shows 'no impact detected' and no numbers; true takes the instant after the top of the backswing at which the face centre is closest to the ball as the reference instant and labels the panel 'closest approach'. A face that passes the ball without touching it (strike point further than impact_card.MAX_FACE_OFFSET_M from the face centre) is always labelled 'closest approach, no contact' with the miss distance (face centre to ball centre).",
     "opacity": "Darkening of the picture under the panel, 0 (none) to 1 (black); 0.62 is the impact card's value.",
     "font_height_divisor": "Font size is the frame height divided by this (45, as the impact card).",
     "min_font_px": "Smallest font size in pixels (11, as the impact card).",
-    "widest_value": "Text the panel width is reserved for in every row, so the panel keeps one size whatever the values are."
+    "widest_value": "Text the panel width is reserved for in every row, so live values cannot change the panel size."
   }
 }

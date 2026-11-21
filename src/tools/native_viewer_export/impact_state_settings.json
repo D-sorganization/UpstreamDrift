@@ -1,0 +1,12 @@
+{
+  "stencil_samples": 6,
+  "fit_order": 3,
+  "search_window_s": 0.02,
+  "max_extrapolation_steps": 1.5,
+  "sources": {
+    "stencil_samples": "Number of samples, ending at the last one whose face plane has not reached the ball, that the club state at contact is carried from. Chosen with fit_order on the matched driver swing of 2026-11-20 (360 Hz, head 51 m/s, face turning 7 deg per sample) by predicting each of the ten samples before contact from the samples before it, a full step ahead (contact needs 0.3 of a step): 6 samples with a third-order fit miss the face centre by 2.6 mm and the face normal by 0.45 deg on average, and their velocity agrees with the central difference of the samples within 0.35 deg and 0.3 m/s. 4 samples miss by 6.4 mm and 1.05 deg; 8 give 2.2 mm and 0.30 deg but reach 22 ms back into the downswing.",
+    "fit_order": "Order of the polynomial in time fitted to the face centre and to each face axis over the stencil. 3, because lower orders are biased on a curved path: on a uniform circular arc of 1.2 m radius at 42 rad/s sampled at 360 Hz a second-order fit of 5 samples reads the speed 3.1 % high and the direction 0.36 deg off, a third-order fit of 6 samples 0.1 % and 0.21 deg; on the matched swing the second-order fit read 52.2 m/s against 51.0 m/s for the last chord before contact. A straight line (1) reads the path of the middle of the stencil, 5 deg early. Must be less than stencil_samples.",
+    "search_window_s": "Half width of the time window round the impact time in which the face is looked for reaching the ball. 0.02 s is the window of the strike placement of the ball (model_appearance/ball_strike_settings.json), so the card looks where the ball was placed.",
+    "max_extrapolation_steps": "Furthest the state before contact is carried forward, in sample steps after the last sample before contact. A head that is not slowed reaches the ball within one step; 1.5 allows for a fit that lags slightly. Beyond it no contact state is claimed and the card keeps the last sample before the impact time."
+  }
+}

@@ -57,6 +57,8 @@ class FlightSummary:
     total_unavailable: str = TOTAL_UNAVAILABLE
     valid: bool = True
     invalid_reason: str = ""
+    #: seconds after launch of each ``trajectory_m`` point (``None``: not recorded)
+    times_s: np.ndarray | None = None
 
 
 def _invalid_reason(path: np.ndarray) -> str:
@@ -123,6 +125,7 @@ def flight_for_impact(
         trajectory_m=path,
         valid=not reason,
         invalid_reason=reason,
+        times_s=np.array([p.time for p in result.trajectory], dtype=float),
     )
     ensure(math.isfinite(summary.carry_m), "carry must be finite", summary.carry_m)
     return summary

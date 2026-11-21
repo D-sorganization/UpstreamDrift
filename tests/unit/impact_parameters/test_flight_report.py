@@ -73,6 +73,10 @@ def test_flight_for_impact_is_plausible_and_carry_only():
     assert 5.0 < summary.launch_deg < 25.0
     assert summary.ball_speed_mph > 100.0
     assert summary.total_m is None and "bounce" in summary.total_unavailable
+    times = summary.times_s  # one time per trajectory point, launch to landing
+    assert times is not None and times.shape == summary.trajectory_m.shape[:1]
+    assert times[0] == 0.0 and (times[1:] > times[:-1]).all()
+    assert times[-1] == pytest.approx(summary.flight_time_s, abs=0.02)
 
 
 def test_open_face_sends_the_ball_right_of_target():

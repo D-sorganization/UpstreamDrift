@@ -16,6 +16,9 @@ from typing import TYPE_CHECKING
 
 from src.shared.python.core.handedness import lead_side, trail_side
 from src.shared.python.model_appearance import defaults
+from src.shared.python.model_appearance.club_face_marking import (
+    load_face_marking_settings,
+)
 from src.shared.python.motion_matching.club_models import HAND_STANDOFF_SUFFIX
 from src.shared.python.model_appearance.grip_pose import Hand
 from src.shared.python.model_appearance.schema import (
@@ -66,6 +69,8 @@ def _skin(rgb: tuple[float, float, float]) -> Material:
     )
 
 
+_MARKING = load_face_marking_settings()  # club face and score line colours
+
 MATERIALS: dict[str, Material] = {
     "polo_navy": Material(
         (0.16, 0.27, 0.55, 1.0), 0.85, texture=Texture("noise", noise=0.04)
@@ -110,6 +115,8 @@ MATERIALS: dict[str, Material] = {
     "shoe_black": Material((0.06, 0.06, 0.07, 1.0), 0.35),
     "glove_white": Material((0.95, 0.95, 0.94, 1.0), 0.7),
     "grip_rubber": Material((0.08, 0.08, 0.09, 1.0), 0.95),
+    "club_face": Material(_MARKING.face_rgba, 0.4, 1.0),
+    "club_score_lines": Material(_MARKING.line_rgba, 0.6, 0.0),
     "satin_steel": Material((0.46, 0.48, 0.52, 1.0), 0.5, 1.0),
     "chrome": Material((0.86, 0.88, 0.92, 1.0), 0.08, 1.0),
     "graphite": Material((0.10, 0.11, 0.13, 1.0), 0.35, 0.6),

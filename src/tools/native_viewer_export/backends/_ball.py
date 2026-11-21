@@ -13,6 +13,11 @@ from typing import Any, Protocol
 
 import numpy as np
 
+from src.shared.python.model_appearance.ball_tee import (
+    BallTee,
+    default_ball_tee_settings,
+    tee_for_ball,
+)
 from src.tools.native_viewer_export.ball import BALL_RGBA, BallPlacement
 from src.tools.native_viewer_export.core import SwingInput
 
@@ -30,18 +35,53 @@ def ball_visibility(swing: SwingInput, indices: Sequence[int]) -> list[bool] | N
     return [placement.visible_at(swing.time_s(k)) for k in indices]
 
 
+def placement_tee(placement: BallPlacement) -> BallTee | None:
+    """The tee under ``placement`` per the shipped tee settings, or ``None``."""
+    return tee_for_ball(
+        placement.position_m,
+        placement.radius_m,
+        default_ball_tee_settings(),
+        placement.ground_height_m,
+    )
+
+
+def _add_tee_to_scene(scene: Any, tee: BallTee) -> None:
+    """Append the tee cylinders to a render scene (never to a model)."""
+    import mujoco
+
+    for part in tee.parts:
+        if scene.ngeom >= scene.maxgeom:
+            return
+        mujoco.mjv_initGeom(
+            scene.geoms[scene.ngeom],
+            int(mujoco.mjtGeom.mjGEOM_CYLINDER),
+            np.array([part.radius_m, 0.5 * part.length_m, 0.0]),
+            np.asarray(part.centre_m, dtype=np.float64),
+            np.eye(3).ravel(),
+            np.asarray(tee.rgba, dtype=np.float32),
+        )
+        scene.ngeom += 1
+
+
 def draw_job_ball(scene: Any, job: Any, position: int) -> bool:
     """Append the job's ball to a MuJoCo render ``scene`` when visible there.
 
-    ``job`` is a :class:`WorkerJob`; returns whether a sphere was added.
+    ``job`` is a :class:`WorkerJob`; returns whether a sphere was added. A
+    lifted ball's tee (#15150) is drawn at every position, also after the ball
+    is hidden at impact: it stays standing.
     """
-    if job.ball is None or not job.ball_visible or not job.ball_visible[position]:
+    if job.ball is None:
+        return False
+    placement = BallPlacement.from_dict(job.ball)
+    tee = placement_tee(placement)
+    if tee is not None:
+        _add_tee_to_scene(scene, tee)
+    if not job.ball_visible or not job.ball_visible[position]:
         return False
     from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs import (
         add_ball_to_scene,
     )
 
-    placement = BallPlacement.from_dict(job.ball)
     return add_ball_to_scene(scene, placement.position_m, placement.radius_m, BALL_RGBA)
 
 

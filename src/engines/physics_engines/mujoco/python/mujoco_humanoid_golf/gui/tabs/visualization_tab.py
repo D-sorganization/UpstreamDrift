@@ -21,6 +21,7 @@ from src.shared.python.body_part_viz.force_color_controls import (
 )
 from src.shared.python.core.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.segment_kinetic_energy import SEGMENT_KE_PROXY_DISCLAIMER
 from src.shared.python.theme.style_constants import Styles
 
 from ..._camera_presets import CAMERA_PRESETS, camera_preset
@@ -363,6 +364,7 @@ class VisualizationTab(QtWidgets.QWidget):
         self._create_torque_scale_controls(force_layout)
         self._create_force_scale_controls(force_layout)
         self._create_grf_style_controls(force_layout)
+        self._create_segment_ke_globe_controls(force_layout)
         self._create_advanced_vector_overlays(force_layout)
 
         self.show_contacts_cb = QtWidgets.QCheckBox("MuJoCo native contact debug")
@@ -560,6 +562,31 @@ class VisualizationTab(QtWidgets.QWidget):
         force_scale_layout.addRow("Force Scale:", self.force_scale_slider)
         force_scale_layout.addRow("", self.force_scale_label)
         force_layout.addLayout(force_scale_layout)
+
+    def _create_segment_ke_globe_controls(
+        self, force_layout: QtWidgets.QVBoxLayout
+    ) -> None:
+        if force_layout is None:
+            raise ValueError("force_layout must be provided")
+        self.show_segment_ke_globes_cb = QtWidgets.QCheckBox(
+            "Segment Kinetic-Energy Globes"
+        )
+        self.show_segment_ke_globes_cb.setToolTip(SEGMENT_KE_PROXY_DISCLAIMER)
+        self._restore_checkbox(
+            self.show_segment_ke_globes_cb,
+            getattr(self.sim_widget, "show_segment_ke_globes", None),
+        )
+        self.show_segment_ke_globes_cb.stateChanged.connect(
+            self.on_show_segment_ke_globes_changed
+        )
+        force_layout.addWidget(self.show_segment_ke_globes_cb)
+
+    def on_show_segment_ke_globes_changed(self, state: int) -> None:
+        if state is None:
+            raise ValueError("state must be provided")
+        require(self.sim_widget is not None, "sim_widget is set")
+        enabled = state == QtCore.Qt.CheckState.Checked.value
+        self.sim_widget.set_segment_ke_globe_visualization(enabled)
 
     def _create_grf_style_controls(self, force_layout: QtWidgets.QVBoxLayout) -> None:
         """Arrow scale mode, reference length and group toggles (GCV-4, #11710)."""

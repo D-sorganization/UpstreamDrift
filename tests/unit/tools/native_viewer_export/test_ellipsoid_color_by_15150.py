@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from types import SimpleNamespace
 from typing import Any
 
@@ -16,6 +17,9 @@ from src.shared.python.force_overlay.palette import (
 )
 from src.tools.native_viewer_export import cli
 from src.tools.native_viewer_export.core import ELLIPSOID_KINDS, ExportSettings
+from src.tools.native_viewer_export.ellipsoid_visibility import (
+    load_visibility_settings,
+)
 from src.tools.native_viewer_export.overlay import (
     OverlayOptions,
     MobilitySelection,
@@ -48,12 +52,16 @@ def _swing() -> SimpleNamespace:
 
 
 def _colours(**extra: Any) -> dict[str, set[tuple[float, ...]]]:
-    glyph_fn, _ = _build_hand_ellipsoid_feed(
+    glyph_fn, _, _ = _build_hand_ellipsoid_feed(
         _swing(),  # type: ignore[arg-type]
         active_ellipsoids=KINDS,
         hand_mobility_mode="constrained",
         ellipsoid_scale="auto",
-        selection=MobilitySelection("wrists"),
+        # colour only: no nested-alpha fade (outer_alpha 1)
+        selection=MobilitySelection(
+            "wrists",
+            visibility=replace(load_visibility_settings(), outer_alpha=1.0),
+        ),
         **extra,
     )
     glyphs = glyph_fn(0)
