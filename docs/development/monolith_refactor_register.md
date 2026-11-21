@@ -36,8 +36,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1184 | `src/bunkershot3d/ball/splash.py` |
 | 1184 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
 | 1183 | `src/engines/physics_engines/opensim/python/msk_lift_ik_id.py` |
+| 1183 | `src/tools/native_viewer_export/core.py` |
 | 1182 | `src/launchers/launcher_model_handlers.py` |
-| 1182 | `src/tools/native_viewer_export/core.py` |
 | 1181 | `src/shared/python/grip_contact/parity.py` |
 | 1178 | `src/engines/physics_engines/pinocchio/python/full_body_fit.py` |
 | 1175 | `src/shared/python/motion_matching/execution/spec_builder.py` |
@@ -49,8 +49,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1166 | `src/shared/python/analysis/orchestrator.py` |
 | 1165 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py` |
 | 1164 | `src/shared/python/physics/terrain_representation.py` |
+| 1162 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py` |
 | 1162 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
-| 1159 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py` |
 | 1153 | `src/tools/motion_matching/gui.py` |
 | 1152 | `src/shared/python/motion_matching/full_body_ik.py` |
 | 1150 | `src/tools/bunker_shot_gui/gui.py` |
@@ -64,8 +64,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1129 | `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py` |
 | 1128 | `src/tools/starting_pose_matcher/gui_main_widget.py` |
 | 1127 | `src/shared/python/swing_comparison/metrics.py` |
-| 1126 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py` |
-| 1126 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py` |
 | 1126 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py` |
 | 1125 | `src/tools/bunker_shot_gui/model.py` |
 | 1118 | `src/motion_capture/rig/__main__.py` |
