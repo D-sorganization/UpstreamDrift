@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 from src.shared.python.body_part_viz.force_colors import ForceColorScale
 from src.shared.python.force_overlay.conversions import restrict_frame
 from src.shared.python.force_overlay.glyphs import ForceGlyphStyle, GlyphSet
+from src.shared.python.force_overlay.palette import require_ellipsoid_color_mode
 from src.shared.python.force_overlay.renderers.meshcat_glyphs import legend_text
 from src.shared.python.grip_contact.palm_thumb import PALM_THUMB_LABEL
 from src.shared.python.golf_view_presets import (
@@ -177,6 +178,8 @@ class ExportSettings:
     mobility_points: str = "hands"
     max_mobility_points: int = 8
     mobility_condition_cutoff: float | None = None
+    #: ellipsoid colour encodes the point (default) or the kind (#15150)
+    ellipsoid_color_by: str = "point"
 
     @property
     def shading_enabled(self) -> bool:
@@ -279,6 +282,7 @@ class ExportSettings:
             and self.mobility_condition_cutoff <= 0.0
         ):
             raise ValueError("mobility_condition_cutoff must be positive")
+        require_ellipsoid_color_mode(self.ellipsoid_color_by)
 
     def effective_speeds(self, dt_s: float) -> tuple[float, ...]:
         """Speeds to export; a deprecated ``stride`` maps to its equivalent speed."""

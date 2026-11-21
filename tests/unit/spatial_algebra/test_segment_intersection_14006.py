@@ -18,6 +18,7 @@ from src.shared.python.spatial_algebra.segment_intersection import (
 )
 from src.tools.native_viewer_export import cli
 from src.tools.native_viewer_export.overlay import (
+    MobilitySelection,
     OverlayOptions,
     _build_hand_ellipsoid_feed,
 )
@@ -97,7 +98,7 @@ def test_overlay_feed_and_cli_options() -> None:
         active_ellipsoids=("mobility",),
         hand_mobility_mode="constrained",
         ellipsoid_scale="auto",
-        mobility_points="wrists",
+        selection=MobilitySelection("wrists"),
     )
     assert len(g_fn(0)) == 2 and "Lead_wrist" in h_fn(0)[0]
     g_cut, h_cut = _build_hand_ellipsoid_feed(
@@ -105,8 +106,7 @@ def test_overlay_feed_and_cli_options() -> None:
         active_ellipsoids=("mobility",),
         hand_mobility_mode="constrained",
         ellipsoid_scale="auto",
-        mobility_points="wrists",
-        mobility_condition_cutoff=10.0,
+        selection=MobilitySelection("wrists", condition_cutoff=10.0),
     )
     assert len(g_cut(0)) == 1 and "Trail_wrist" not in h_cut(0)[0]
 
