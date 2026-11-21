@@ -36,7 +36,9 @@ class PowerFlowResult:
         joint_work_drift: Work from drift components [nv] (Joules)
         joint_work_control: Work from control components [nv] (Joules)
         joint_work_total: Total work [nv] (Joules)
-        segment_kinetic_energy: Kinetic energy per segment [nbody] (Joules)
+        segment_kinetic_energy: Total kinetic energy per segment [nbody] (Joules)
+        segment_ke_translational: Translational KE per segment [nbody] (Joules)
+        segment_ke_rotational: Rotational KE per segment [nbody] (Joules)
         segment_potential_energy: Potential energy per segment [nbody] (Joules)
         total_mechanical_energy: Sum of KE + PE (Joules)
         power_in: Power input from actuators (Watts)
@@ -52,6 +54,8 @@ class PowerFlowResult:
     joint_work_control: np.ndarray
     joint_work_total: np.ndarray
     segment_kinetic_energy: np.ndarray
+    segment_ke_translational: np.ndarray
+    segment_ke_rotational: np.ndarray
     segment_potential_energy: np.ndarray
     total_mechanical_energy: float
     power_in: float
@@ -158,7 +162,7 @@ class PowerFlowAnalyzer:
 
     def _compute_segment_energies(
         self, qvel: np.ndarray
-    ) -> tuple[np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Per-body kinetic and gravitational potential energy.
 
         Both halves are evaluated at the body centre of mass, and the
@@ -173,6 +177,8 @@ class PowerFlowAnalyzer:
         import mujoco
 
         segment_ke = np.zeros(self.model.nbody)
+        segment_ke_trans = np.zeros(self.model.nbody)
+        segment_ke_rot = np.zeros(self.model.nbody)
         segment_pe = np.zeros(self.model.nbody)
 
         # Full gravity vector: do not assume it points along -Z.
@@ -198,13 +204,15 @@ class PowerFlowAnalyzer:
             ke_linear = 0.5 * mass * np.dot(com_vel, com_vel)
             # ⚡ Bolt: np.vdot avoids temporary allocations for element-wise squares
             ke_rotational = 0.5 * np.vdot(inertia, ang_vel_body * ang_vel_body)
+            segment_ke_trans[i] = ke_linear
+            segment_ke_rot[i] = ke_rotational
             segment_ke[i] = ke_linear + ke_rotational
 
             # xipos is the body COM; xpos is the body frame origin.
             com_pos_world = np.asarray(self._data.xipos[i], dtype=np.float64)
             segment_pe[i] = -mass * float(np.dot(gravity, com_pos_world))
 
-        return segment_ke, segment_pe
+        return segment_ke, segment_ke_trans, segment_ke_rot, segment_pe
 
     def _compute_energy_conservation_residual(
         self,
@@ -295,7 +303,9 @@ class PowerFlowAnalyzer:
             self._compute_work_decomposition(tau, qvel, dt, tau_drift, tau_control)
         )  # noqa: E501
 
-        segment_ke, segment_pe = self._compute_segment_energies(qvel)
+        segment_ke, segment_ke_trans, segment_ke_rot, segment_pe = (
+            self._compute_segment_energies(qvel)
+        )
         total_me = float(np.sum(segment_ke) + np.sum(segment_pe))
 
         power_in = float(np.sum(np.maximum(joint_powers, 0)))
@@ -310,6 +320,8 @@ class PowerFlowAnalyzer:
             joint_work_control=joint_work_control,
             joint_work_total=joint_work_total,
             segment_kinetic_energy=segment_ke,
+            segment_ke_translational=segment_ke_trans,
+            segment_ke_rotational=segment_ke_rot,
             segment_potential_energy=segment_pe,
             total_mechanical_energy=total_me,
             power_in=power_in,

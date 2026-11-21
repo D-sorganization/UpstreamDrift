@@ -52,6 +52,7 @@ from src.tools.native_viewer_export.compositor import (
 )
 from src.tools.native_viewer_export import flight_tracer
 from src.tools.native_viewer_export import contact_frame
+from src.tools.native_viewer_export import ellipsoid_panel as ellipsoid_hud
 from src.tools.native_viewer_export import impact_factors as factors_panel
 from src.tools.native_viewer_export.impact_card import impact_card_for
 from src.tools.native_viewer_export.shading import shading_legend
@@ -185,6 +186,7 @@ class ExportSettings:
     mobility_condition_cutoff: float | None = None
     #: ellipsoid colour encodes the point (default) or the kind (#15150)
     ellipsoid_color_by: str = "point"
+    ellipsoid_panel: Any = None  # ``PanelSettings``; ``None``: packaged file
     #: a vector flag was passed: a kinematic replay still draws vectors
     vectors_requested: bool = False
     #: video frames the frame on the contact instant is repeated (#15150);
@@ -637,8 +639,11 @@ class OverlayFeed:
     hand_ellipsoids: Callable[[int], tuple[Any, ...]] | None = None
     #: hand capability/mobility HUD text lines generator (HCM-3, #14004)
     hand_hud_lines: Callable[[int], tuple[str, ...]] | None = None
-    #: ``(hand_ellipsoids, hand_hud_lines)`` evaluated at the poses of a swing
-    ellipsoids_for: Callable[[Any], tuple[Any, Any]] | None = None
+    hand_panel_rows: Callable[[int], tuple[Any, ...]] | None = (
+        None  # PanelRow per frame
+    )
+    #: ``(hand_ellipsoids, hand_hud_lines, hand_panel_rows)`` at the poses of a swing
+    ellipsoids_for: Callable[[Any], tuple[Any, Any, Any]] | None = None
     #: HUD note when force/torque vectors are withheld (``kinematic_replay``)
     forces_note: str = ""
     _frames: dict[int, Any] = field(
@@ -667,8 +672,10 @@ class OverlayFeed:
                 "the overlay feed has ellipsoids indexed by source state and no "
                 "ellipsoids_for to evaluate them at the clip frames"
             )
-        glyphs, lines = self.ellipsoids_for(swing)
-        return replace(feed, hand_ellipsoids=glyphs, hand_hud_lines=lines)
+        glyphs, lines, rows = self.ellipsoids_for(swing)
+        return replace(
+            feed, hand_ellipsoids=glyphs, hand_hud_lines=lines, hand_panel_rows=rows
+        )
 
     def held_after(self, last: int) -> OverlayFeed:
         """This feed repeating frame ``last`` (glyphs and HUD) at every later index."""
@@ -681,6 +688,7 @@ class OverlayFeed:
             frame_at=clamp(self.frame_at),
             hand_ellipsoids=clamp(self.hand_ellipsoids),
             hand_hud_lines=clamp(self.hand_hud_lines),
+            hand_panel_rows=clamp(self.hand_panel_rows),
         )
 
     def glyphs_at(self, index: int) -> GlyphSet:
@@ -722,6 +730,11 @@ class OverlayFeed:
     def axial_at(self, index: int) -> Any:
         """``AxialLoadFrame`` of state ``index``, or ``None`` when not computed."""
         return getattr(self._frame(index), "axial_loads", None)
+
+    def legend_for(self, glyphs: GlyphSet | None) -> str:
+        """The legend row; none on a replay that draws no vectors (#15150)."""
+        drawn = glyphs is not None and (glyphs.arrows or glyphs.torque_arcs)
+        return "" if self.forces_note and not drawn else self.legend(glyphs)
 
     @staticmethod
     def legend(glyphs: GlyphSet | None) -> str:
@@ -956,6 +969,7 @@ class ClipOverlays:
     card: ImpactCard | None = None
     strip: StripRenderer | None = None
     factors: factors_panel.FactorsPanel | None = None
+    ellipsoids: ellipsoid_hud.EllipsoidPanel | None = None
 
 
 def _swing_event_caption(swing: SwingInput, time_s: float, impact_s: float) -> str:
@@ -1019,7 +1033,7 @@ def _export_clip(
             if glyphs is not None:
                 glyph_counts.append(len(glyphs.arrows) + len(glyphs.torque_arcs))
             t = shown.time_s(k)
-            extra_lines = shown_feed.hud_lines_at(k) if shown_feed is not None else ()
+            extra_lines = ellipsoid_hud.hud_lines(overlays, shown_feed, k)
             if flight is not None:
                 depth = getattr(tiles, "depth_m", None)
                 args = (t, settings.lookat_m, settings.distance_m, depth)
@@ -1029,7 +1043,9 @@ def _export_clip(
                 t,
                 viewer,
                 swing.club,
-                OverlayFeed.legend(glyphs),
+                shown_feed.legend_for(glyphs)
+                if shown_feed is not None
+                else OverlayFeed.legend(glyphs),
                 speed=plan.speed,
                 ms_from_impact=(t - impact) * 1000.0,
                 shading_legend=shading_legend(settings.shading)
@@ -1059,6 +1075,7 @@ def _export_clip(
                 outputs = {n: draw_impact_card(f, card) for n, f in outputs.items()}
             if factors is not None:
                 outputs = {n: factors.draw(f, t) for n, f in outputs.items()}
+            outputs = ellipsoid_hud.draw_all(overlays, shown_feed, k, hud, outputs)
             if strip is not None:  # cursor at this frame's swing time
                 outputs = {n: strip.draw(f, t) for n, f in outputs.items()}
             for name, frame in outputs.items():
@@ -1135,6 +1152,7 @@ def export_swing(
     if settings.ball_flight is not None:
         flight = flight_tracer.flight_for_export(swing, settings)
         overlays = replace(overlays or ClipOverlays(), flight=flight)
+    overlays = ellipsoid_hud.with_panel(overlays, settings, feed, factors)
     for plan in plans:
         clip_paths, frames, glyphs = _export_clip(
             backend, swing, settings, plan, out_dir, feed, factory, overlays
