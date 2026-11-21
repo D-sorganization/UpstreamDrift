@@ -225,6 +225,25 @@ def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_impact_factor_arguments(p: argparse.ArgumentParser) -> None:
+    """Impact factors panel flags (#15150)."""
+    p.add_argument(
+        "--impact-factors",
+        action="store_true",
+        help="draw the impact factors panel (club speed, path, face, face to "
+        "path, attack angle, loft, strike point) on every frame; the values "
+        "freeze at impact and stay to the end of the clip (default: off)",
+    )
+    p.add_argument(
+        "--impact-factors-settings",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help="settings file of the impact factors panel (turns it on; default "
+        "impact_factors_settings.json beside the tool)",
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="python -m src.tools.native_viewer_export",
@@ -320,21 +339,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="do not draw the decorative golf ball (shown until impact)",
     )
-    p.add_argument(
-        "--impact-factors",
-        action="store_true",
-        help="draw the impact factors panel (club speed, path, face, face to "
-        "path, attack angle, loft, strike point) on every frame; the values "
-        "freeze at impact and stay to the end of the clip (default: off)",
-    )
-    p.add_argument(
-        "--impact-factors-settings",
-        type=Path,
-        default=None,
-        metavar="PATH",
-        help="settings file of the impact factors panel (turns it on; default "
-        "impact_factors_settings.json beside the tool)",
-    )
+    _add_impact_factor_arguments(p)
     p.add_argument("--no-grid", action="store_true", help="skip the 2x2 clip")
     add_appearance_arguments(p)
     add_grip_arguments(p, physical=True)
