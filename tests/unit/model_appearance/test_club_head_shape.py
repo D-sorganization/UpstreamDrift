@@ -154,3 +154,28 @@ def test_settings_file_documents_every_key() -> None:
     raw = json.loads(shape.SETTINGS_PATH.read_text(encoding="utf-8"))
     names = sorted(f.name for f in dataclasses.fields(shape.HeadShapeSettings))
     assert sorted(k for k in raw if k != "sources") == names == sorted(raw["sources"])
+
+
+def _club_dynamics(shaped: bool, monkeypatch) -> tuple[list[float], list[tuple]]:
+    mujoco = pytest.importorskip("mujoco")
+    from src.tools.native_viewer_export.backends.mujoco_worker import build_scene_xml
+
+    spec = shape.SETTINGS_PATH.parents[4] / "docs/development/full_body_models"
+    spec = spec / "full_body_spec_anthro_driver.json"
+    cfg = shape.load_head_shape_settings()
+    cfg = dataclasses.replace(cfg, shaped_club_types=("Driver",) if shaped else ())
+    chm.load_club_head.cache_clear()
+    monkeypatch.setattr(chm, "load_head_shape_settings", lambda: cfg)
+    m = mujoco.MjModel.from_xml_string(build_scene_xml(spec.read_bytes())[0])
+    chm.load_club_head.cache_clear()
+    i = next(k for k in range(m.nbody) if m.body(k).name.endswith("Clubface Vector"))
+    body = [m.body_mass[i], *m.body_inertia[i], *m.body_ipos[i], *m.body_iquat[i]]
+    flags = zip(m.geom_bodyid, m.geom_contype, m.geom_conaffinity, strict=True)
+    return [float(x) for x in body], [(c, a) for b, c, a in flags if b == i]
+
+
+def test_shaped_head_is_visual_only_in_the_mujoco_model(monkeypatch) -> None:
+    plain, plain_geoms = _club_dynamics(False, monkeypatch)
+    shaped, shaped_geoms = _club_dynamics(True, monkeypatch)
+    assert shaped == plain  # explicit <inertial>: mass, inertia, ipos, iquat
+    assert shaped_geoms == plain_geoms and set(shaped_geoms) == {(0, 0)}  # no contact
