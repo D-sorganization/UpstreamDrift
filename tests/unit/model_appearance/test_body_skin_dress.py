@@ -246,6 +246,51 @@ def test_the_shirt_is_taut_over_the_chest_and_the_sleeve_caps(region: str) -> No
     assert creased >= LIMITS["plain_crease_mm"]
 
 
+def _armpit_folds(fitted: fit.FittedSkin, passes: int) -> tuple[int, float]:
+    """Folded shirt faces in the armpits and the sharpest angle between two there.
+
+    The armpit is the settings' sphere under each shoulder joint, less the cloth
+    within ``armpit_hem_clear_m`` of an open edge; ``passes`` bridge it.
+    """
+    tent = dataclasses.replace(SETTINGS.armpit, tent_passes=passes)
+    settings = dataclasses.replace(SETTINGS, armpit=tent)
+    shirt = dress.dress_skin(SKIN, fitted, SKIN.weights, settings)["shirt"]
+    points, faces = shirt.vertices, shirt.faces
+    hip_mid = 0.5 * (fitted.joints["hip_l"] + fitted.joints["hip_r"])
+    axis = fitted.joints["neck"] - hip_mid
+    drop = tent.below_m * axis / np.linalg.norm(axis)
+    reach = [
+        np.linalg.norm(points - fitted.joints[f"shoulder_{side}"] + drop, axis=1)
+        for side in "lr"
+    ]
+    near = np.min(reach, axis=0) < tent.radius_m
+    near &= cKDTree(points[_rim(shirt)]).query(points)[0] > LIMITS["armpit_hem_clear_m"]
+    patch = faces[near[faces].all(axis=1)]
+    assert len(patch) > 100
+    folded = mesh.folded_faces(points, faces)[near[faces].all(axis=1)]
+    half = np.sort(np.vstack([patch[:, [0, 1]], patch[:, [1, 2]], patch[:, [2, 0]]]), 1)
+    order = np.lexsort(half.T[::-1])
+    half, owner = half[order], np.tile(np.arange(len(patch)), 3)[order]
+    twin = (half[1:] == half[:-1]).all(axis=1)
+    a, b, c = (points[patch[:, k]] for k in range(3))
+    normal = np.cross(b - a, c - a)
+    normal /= np.linalg.norm(normal, axis=1, keepdims=True)
+    turn = np.einsum("ij,ij->i", normal[owner[:-1][twin]], normal[owner[1:][twin]])
+    return int(folded.sum()), float(np.degrees(np.arccos(np.clip(turn, -1, 1))).max())
+
+
+@pytest.mark.parametrize("profile", [None, "showpiece"])
+def test_the_shirt_bridges_the_armpit_without_folded_faces(profile: str | None) -> None:
+    fitted = fit.fit_body_skin(SKIN, _subject(), fit.load_fit_settings(profile=profile))
+    folded, sharpest = _armpit_folds(fitted, SETTINGS.armpit.tent_passes)
+    assert folded == 0
+    assert sharpest <= LIMITS["armpit_fold_deg"]
+    if profile == "showpiece":  # the offset alone turns the fold's cloth inside out
+        plain_folded, plain_sharpest = _armpit_folds(fitted, 0)
+        assert plain_folded >= LIMITS["armpit_plain_folded"]
+        assert plain_sharpest >= LIMITS["armpit_plain_fold_deg"]
+
+
 @pytest.mark.parametrize("profile", [None, "showpiece"])
 def test_the_standing_chest_of_the_shirt_stays_within_its_depth(
     profile: str | None,
@@ -377,6 +422,10 @@ def test_invalid_settings_and_weights_raise(change: dict[str, object]) -> None:
         dataclasses.replace(SETTINGS.chest, edge_m=0.0)
     with pytest.raises(ValueError, match="passes"):
         dataclasses.replace(SETTINGS.chest, tent_passes=-1)
+    with pytest.raises(ValueError, match="armpit tent_passes"):
+        dataclasses.replace(SETTINGS.armpit, tent_passes=-1)
+    with pytest.raises(ValueError, match="armpit below_m"):
+        dataclasses.replace(SETTINGS.armpit, radius_m=0.0)
     with pytest.raises(ValueError):
         dress.dress_skin(SKIN, FITTED, SKIN.weights[:, :3], SETTINGS)
 
