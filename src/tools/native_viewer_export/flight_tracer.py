@@ -345,10 +345,10 @@ class FlightPlayback:
             camera = pinhole_for_view(
                 get_view_preset(view), lookat_m, distance_m, fov, size
             )
-            out[view] = self._label(tile, camera)
+            out[view] = self._label(tile, camera, grid=True)
         return out
 
-    def _label(self, tile: Image8, camera: Any) -> Image8:
+    def _label(self, tile: Image8, camera: Any, grid: bool = False) -> Image8:
         """``tile`` with the carry label beside the ring (where configured)."""
         style = self.settings
         if style.landing_marker is None or self.path_m is None:
@@ -356,7 +356,9 @@ class FlightPlayback:
         if self.carry_m is None:
             return tile
         end = self.path_m[-1]
-        return landing_marker.paint_label(tile, camera, end, style, self.carry_m)
+        return landing_marker.paint_label(
+            tile, camera, end, style, self.carry_m, grid=grid
+        )
 
     def _warn_once(self, view: str) -> None:
         if not self.__dict__.setdefault("_warned", False):

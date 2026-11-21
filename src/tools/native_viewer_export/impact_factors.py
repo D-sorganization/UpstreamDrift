@@ -40,6 +40,7 @@ BEFORE, AT_IMPACT, NO_IMPACT = "before impact", "at impact", "no impact detected
 NO_CONTACT = "closest approach, no contact"
 NOT_DETECTED = "closest approach (impact not detected)"
 POSITIONS = ("right", "left")
+GRID_ANCHORS = ("bottom_right", "bottom_left", "top_right", "top_left")
 PRE_IMPACT_MODES = ("blank", "live")
 Lines = tuple[tuple[str, str], ...]
 club_series = impact_card._club_series  # the card's own face series
@@ -67,6 +68,9 @@ class FactorSettings:
     min_font_px: int
     widest_value: str
     closest_approach_fallback: bool
+    grid_anchor: str = "bottom_right"
+    grid_font_height_divisor: int = 90
+    grid_min_font_px: int = 16
 
     def __post_init__(self) -> None:
         if self.pre_impact not in PRE_IMPACT_MODES:
@@ -84,6 +88,21 @@ class FactorSettings:
             raise ValueError("opacity must lie in [0, 1]")
         if min(self.font_height_divisor, self.min_font_px) < 1:
             raise ValueError("font_height_divisor and min_font_px must be positive")
+        if self.grid_anchor not in GRID_ANCHORS:
+            raise ValueError(f"grid_anchor must be one of {GRID_ANCHORS}")
+        for name in ("grid_font_height_divisor", "grid_min_font_px"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise TypeError(f"{name} must be an integer")
+            if value < 1:
+                raise ValueError(f"{name} must be positive")
+
+    @property
+    def grid_layout(self) -> compositor.GridLayout:
+        """The panel placement in a composed 2x2 grid frame."""
+        return compositor.GridLayout(
+            self.grid_anchor, self.grid_font_height_divisor, self.grid_min_font_px
+        )
 
     @property
     def blank_rows(self) -> Lines:
@@ -149,10 +168,9 @@ class FactorsPanel:
             self._live[index] = rows
         return self._live[index]
 
-    def _box(self, shape: tuple[int, ...]) -> tuple[tuple[int, int, int, int], int]:
-        cfg = self.settings
-        size = max(cfg.min_font_px, int(shape[0]) // cfg.font_height_divisor)
-        reserve = (cfg.blank_text, cfg.widest_value)
+    def _widest(self) -> list[tuple[str, str, bool]]:
+        """Lines at their widest values: the panel size never depends on time."""
+        reserve = (self.settings.blank_text, self.settings.widest_value)
         widest = [
             (lab, val, False)
             for lab, val in _status_lines(max(BEFORE, self.status, key=len))
@@ -160,20 +178,68 @@ class FactorsPanel:
         widest += [
             (lab, max(val, *reserve, key=len), False) for lab, val in self.frozen
         ]
-        return compositor.text_panel_box(shape, TITLE, widest, cfg.position, size)
+        return widest
 
-    def bbox(self, shape: tuple[int, ...]) -> tuple[int, int, int, int]:
-        """Pixel box ``(x0, y0, x1, y1)`` of the panel in a frame of ``shape``."""
-        return self._box(shape)[0]
+    def _box(
+        self, shape: tuple[int, ...], grid: bool = False
+    ) -> tuple[tuple[int, int, int, int], int]:
+        cfg = self.settings
+        if grid:
+            return self._grid_box(shape)
+        size = max(cfg.min_font_px, int(shape[0]) // cfg.font_height_divisor)
+        return compositor.text_panel_box(
+            shape, TITLE, self._widest(), cfg.position, size
+        )
 
-    def draw(self, img: compositor.Image8, time_s: float) -> compositor.Image8:
+    def _grid_box(
+        self, shape: tuple[int, ...]
+    ) -> tuple[tuple[int, int, int, int], int]:
+        """Box in the ``grid_anchor`` tile corner of a composed 2x2 frame."""
+        layout = self.settings.grid_layout
+        return compositor.grid_text_panel_box(shape, TITLE, self._widest(), layout)
+
+    def bbox(
+        self, shape: tuple[int, ...], grid: bool = False
+    ) -> tuple[int, int, int, int]:
+        """Pixel box ``(x0, y0, x1, y1)`` of the panel in a frame of ``shape``.
+
+        ``grid`` places it in the ``grid_anchor`` tile of a composed 2x2 frame.
+        """
+        return self._box(shape, grid)[0]
+
+    def draw(
+        self, img: compositor.Image8, time_s: float, grid: bool = False
+    ) -> compositor.Image8:
         """Copy of ``img`` with the panel at ``time_s``; only :meth:`bbox` changes."""
-        box, size = self._box(img.shape)
+        box, size = self._box(img.shape, grid)
         blank = self.settings.blank_text
         lines = [(lab, val, val == blank) for lab, val in self.lines_at(time_s)]
         return compositor.draw_text_panel(
             img, box, size, TITLE, lines, self.settings.opacity
         )
+
+    def draw_all(
+        self, outputs: dict[str, compositor.Image8], time_s: float, grid_view: str
+    ) -> dict[str, compositor.Image8]:
+        """``outputs`` with the panel on each; the ``grid_view`` one gets the grid layout."""
+        return {
+            name: self.draw(frame, time_s, grid=name == grid_view)
+            for name, frame in outputs.items()
+        }
+
+
+def draw_card_all(
+    outputs: dict[str, compositor.Image8], card: Any, grid_view: str
+) -> dict[str, compositor.Image8]:
+    """``outputs`` with the impact card on each; the ``grid_view`` one gets the
+    grid placement of ``impact_factors_settings.json``."""
+    layout = load_factor_settings().grid_layout
+    return {
+        name: compositor.draw_impact_card(
+            frame, card, grid=layout if name == grid_view else None
+        )
+        for name, frame in outputs.items()
+    }
 
 
 def _status_lines(status: str) -> Lines:
