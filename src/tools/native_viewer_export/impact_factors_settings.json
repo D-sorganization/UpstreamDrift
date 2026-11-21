@@ -7,6 +7,9 @@
   "opacity": 0.62,
   "font_height_divisor": 45,
   "min_font_px": 11,
+  "grid_anchor": "bottom_right",
+  "grid_font_height_divisor": 90,
+  "grid_min_font_px": 16,
   "widest_value": "+000.0 mph",
   "sources": {
     "pre_impact": "What the rows show before the impact frame: 'blank' (blank_text) or 'live' (the same extractor evaluated at the frame being shown). Blank is the default: face angle, path, attack angle and loft are defined at impact, and their values at the top of the backswing are large numbers that mean nothing and draw the eye from the swing. From the impact frame on the impact values are frozen and stay to the end of the clip in both modes.",
@@ -17,6 +20,9 @@
     "opacity": "Darkening of the picture under the panel, 0 (none) to 1 (black); 0.62 is the impact card's value.",
     "font_height_divisor": "Font size is the frame height divided by this (45, as the impact card).",
     "min_font_px": "Smallest font size in pixels (11, as the impact card).",
+    "grid_anchor": "Where the panel (this one, and the impact card a clip draws when this panel is off) sits in the composed 2x2 grid export; single-view exports use position. The corner of the grid: bottom_right, bottom_left, top_right or top_left, so the panel lies inside one tile's corner and never spans two. bottom_right is the oblique tile's lower right: in the 1280x720 four-view clip of the reviewed driver swing it was empty ground at impact and through the follow-through and finish, while the top corners hold the down-the-line golfer, whom a frame-sized panel covered completely.",
+    "grid_font_height_divisor": "Grid font size is the composed frame height divided by this: 90 gives the size a single view has at its own height (tile height over 45), i.e. the panel shrinks from the frame-sized 32 px to the HUD text size.",
+    "grid_min_font_px": "Smallest grid font size in pixels, and the size the panel falls back to when it does not fit its tile; 16 is the HUD text size (compositor.HUD_SIZE_PX), so the panel text is never smaller than the HUD text.",
     "widest_value": "Text the panel width is reserved for in every row, so live values cannot change the panel size."
   }
 }

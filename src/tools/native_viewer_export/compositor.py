@@ -12,7 +12,7 @@ import json
 import math
 from pathlib import Path
 import textwrap
-from typing import Any
+from typing import Any, NamedTuple
 
 import numpy as np
 from numpy.typing import NDArray
@@ -441,21 +441,72 @@ def text_panel_box(
     return (x0, y0, x0 + box_w, min(height, y0 + box_h)), size
 
 
+class GridLayout(NamedTuple):
+    """Placement of a text panel in the composed 2x2 grid (see ``grid_anchor``,
+    ``grid_font_height_divisor`` and ``grid_min_font_px`` in
+    ``impact_factors_settings.json``)."""
+
+    anchor: str
+    font_height_divisor: int
+    min_font_px: int
+
+
+def grid_text_panel_box(
+    shape: tuple[int, ...],
+    title: str,
+    lines: Sequence[tuple[str, Cells, bool]],
+    layout: GridLayout,
+) -> tuple[tuple[int, int, int, int], int]:
+    """Pixel box and font size of a panel in the ``layout.anchor`` tile corner.
+
+    The font is the larger of ``layout.min_font_px`` and the frame height over
+    ``layout.font_height_divisor``; it shrinks to the minimum until the box
+    fits inside its tile, and the box is clipped to that tile.
+    """
+    height, width = int(shape[0]), int(shape[1])
+    tile_w, tile_h = width // 2, height // 2
+    top = max(layout.min_font_px, height // layout.font_height_divisor)
+    for size in range(top, layout.min_font_px - 1, -1):
+        x0, y0, x1, y1 = text_panel_box(shape, title, lines, "right", size)[0]
+        margin = width - x1
+        if x1 - x0 <= tile_w - 2 * margin and y1 - y0 <= tile_h - 2 * margin:
+            break
+    box_w = min(x1 - x0, tile_w - 2 * margin)
+    box_h = min(y1 - y0, tile_h - 2 * margin)
+    left = width - margin - box_w if layout.anchor.endswith("right") else margin
+    up = height - margin - box_h if layout.anchor.startswith("bottom") else y0
+    return (left, up, left + box_w, up + box_h), size
+
+
 def _card_metrics(
-    shape: tuple[int, ...], card: Any, position: str
+    shape: tuple[int, ...], card: Any, position: str, grid: GridLayout | None = None
 ) -> tuple[tuple[int, int, int, int], int, list[tuple[str, str, bool]]]:
     lines = _card_lines(card)
+    if grid is not None:
+        return (*grid_text_panel_box(shape, _CARD_TITLE, lines, grid), lines)
     return (*text_panel_box(shape, _CARD_TITLE, lines, position), lines)
 
 
 def impact_card_bbox(
-    shape: tuple[int, ...], card: Any, *, position: str = "right"
+    shape: tuple[int, ...],
+    card: Any,
+    *,
+    position: str = "right",
+    grid: GridLayout | None = None,
 ) -> tuple[int, int, int, int]:
-    """Pixel box ``(x0, y0, x1, y1)`` the card panel occupies in a frame of ``shape``."""
-    return _card_metrics(shape, card, position)[0]
+    """Pixel box ``(x0, y0, x1, y1)`` the card panel occupies in a frame of ``shape``.
+
+    ``grid`` places it in a tile corner of a composed 2x2 frame instead."""
+    return _card_metrics(shape, card, position, grid)[0]
 
 
-def draw_impact_card(img: Image8, card: Any, *, position: str = "right") -> Image8:
+def draw_impact_card(
+    img: Image8,
+    card: Any,
+    *,
+    position: str = "right",
+    grid: GridLayout | None = None,
+) -> Image8:
     """Return a copy of ``img`` with the GCV-17 impact card panel drawn on it.
 
     ``card`` is the shared :class:`ImpactCard`; rows whose ``value`` is ``None``
@@ -466,7 +517,7 @@ def draw_impact_card(img: Image8, card: Any, *, position: str = "right") -> Imag
     _check_image(img)
     if not hasattr(card, "rows") or not hasattr(card, "available"):
         raise TypeError("card must be an ImpactCard")
-    box, size, lines = _card_metrics(img.shape, card, position)
+    box, size, lines = _card_metrics(img.shape, card, position, grid)
     return draw_text_panel(img, box, size, _CARD_TITLE, lines)
 
 

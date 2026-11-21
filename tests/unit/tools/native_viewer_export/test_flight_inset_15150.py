@@ -252,7 +252,7 @@ def _labelled_play(monkeypatch, enabled: bool):
         monkeypatch.setattr(tr.landing_marker, name, lambda tile, *a: tile)
     monkeypatch.setattr(tr, "draw_trace", lambda tile, *a: tile)
 
-    def label(tile, *a):
+    def label(tile, *a, **kw):
         called.append(1)
         return tile
 
