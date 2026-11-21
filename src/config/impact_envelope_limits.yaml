@@ -6,11 +6,16 @@
 # in this file; every entry carries a citation record and a verification
 # status.
 #
-# STATUS (SHOW-C1 #14557): entries marked SOURCED_WITH_ASSUMED_MARGIN take the
-# highest full-text-verified group-mean peak for skilled male golfers (driver)
-# and multiply by a stated 2x margin; they are NOT "VERIFIED" (the margin is an
-# assumption), so they still surface as assumed_velocity_slots. Sources are
-# listed in each citation (id, table/page, population, observed value).
+# STATUS (SHOW-C1 #14557, D38): entries marked SOURCED_WITH_ASSUMED_MARGIN take
+# a full-text-verified group-mean peak for skilled golfers (driver; Myers 2008
+# does not state sex) and set the limit to
+#   max(2 x mean, (mean + 3 SD) x 125 / study club speed),
+# so a plausible 125 mph golfer is not capped by a 2x margin on a high-variance
+# joint.  Both terms, the study speed and its basis, and the winning term are
+# recorded in each citation.  They are NOT "VERIFIED" (the margin and the
+# speed scaling are assumptions), so they still surface as
+# assumed_velocity_slots.  The tests check every limit against the recorded
+# in-window peaks of the driver_v2 bundle (steps 1225..1325).
 # Remaining UNVERIFIED entries: every such value is an UNVERIFIED population prior, set
 # deliberately generous (well above reported golf peak segment speeds) so a
 # velocity limit never masks a binding torque limit.  Replace a value only
