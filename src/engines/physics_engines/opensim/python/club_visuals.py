@@ -71,6 +71,8 @@ def _write_stls(
     """Write each mesh to its path; returns the sha256 of every file."""
     digests: dict[str, str] = {}
     for part, mesh in meshes.items():
+        if part not in paths:  # face marking parts are not in the STL asset set
+            continue
         payload = stl_bytes(mesh, f"{alias} {part}; club frame; units=m")
         paths[part].write_bytes(payload)
         digests[part] = hashlib.sha256(payload).hexdigest()

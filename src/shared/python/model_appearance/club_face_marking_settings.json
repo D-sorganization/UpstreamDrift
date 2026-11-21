@@ -1,0 +1,30 @@
+{
+  "face_marking": false,
+  "score_line_count": 11,
+  "score_line_spacing_m": 0.0035,
+  "score_line_width_m": 0.0009,
+  "score_line_height_m": 0.00015,
+  "centre_clear_width_m": 0.024,
+  "edge_margin_m": 0.004,
+  "face_rgba": [0.55, 0.57, 0.62, 1.0],
+  "line_rgba": [0.1, 0.1, 0.11, 1.0],
+  "face_normal_cos": 0.9,
+  "subdivisions": 0,
+  "crease_angle_deg": 35.0,
+  "max_triangles": 12000,
+  "sources": {
+    "face_marking": "Draws horizontal score lines on the drawn driver or iron face and gives the face its own colour (#15150, owner request 2026-11-21). false (default) keeps the drawn head exactly as it was. Visual only: the contact face, the face centre, mass and inertia do not move; the lines are thin ribbons lifted score_line_height_m off the head surface and the face colour recolours existing head triangles.",
+    "score_line_count": "Number of lines. 11 is a display judgement for a driver face about 55 mm high; real faces carry 8 to 16 grooves.",
+    "score_line_spacing_m": "Pitch between line centres, up the face. 3.5 mm is a display judgement (a roughly 38 mm tall set of lines on a driver face), not a measured groove pitch; the Rules of Golf limit the groove spacing to at least three times the groove width.",
+    "score_line_width_m": "Drawn width of one line, 0.9 mm. A display value chosen to stay visible at 1280 px in a close-up while keeping the 3 x width spacing rule; not a measured groove width.",
+    "score_line_height_m": "Lift of each ribbon along the face normal above the head surface, 0.15 mm, so it does not z-fight with the face.",
+    "centre_clear_width_m": "Width along the toe axis of the line-free zone about the face centre. 24 mm is a display judgement for the sweet-spot window; lines run from this zone to the face edge on each side.",
+    "edge_margin_m": "Distance the line ends keep from the face edge, 4 mm, a display judgement.",
+    "face_rgba": "Face colour (RGBA, 0 to 1). Slightly lighter than the satin steel crown so the face reads in close renders.",
+    "line_rgba": "Score line colour (RGBA, 0 to 1).",
+    "face_normal_cos": "A head triangle is face when its normal has at least this cosine with the face normal of the existing head geometry (0.9 is about 26 degrees). The driver face bulge and roll stay inside it; the crown and sole do not.",
+    "subdivisions": "Smoothing passes (0 to 3) over the head body, 0 (default) leaves the mesh as built. Each pass splits every triangle in four with Phong tessellation: original vertices stay where they are and each new vertex moves on to the tangent planes of its edge ends, so the shape is kept and the facets on the crown fade. Edges sharper than crease_angle_deg are not rounded.",
+    "crease_angle_deg": "Edges whose faces meet at more than this angle stay sharp under subdivision; 35 degrees keeps the face edge, sole edge and hosel joins.",
+    "max_triangles": "Largest triangle count of the drawn head body (hosel excluded). Subdivision passes that would exceed it are not run, so the budget always holds; the starting mesh is never reduced."
+  }
+}
