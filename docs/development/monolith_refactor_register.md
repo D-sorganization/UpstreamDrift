@@ -22,7 +22,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1199 | `src/api/services/simulation_service.py` |
 | 1198 | `src/api/local_server.py` |
 | 1198 | `src/launchers/cross_engine_dashboard.py` |
-| 1198 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1198 | `src/tools/capture_rig/gui.py` |
 | 1197 | `src/bunkershot3d/solvers/mpm/verification.py` |
 | 1197 | `src/launchers/launcher_diagnostics.py` |
@@ -100,6 +99,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1035 | `src/engines/physics_engines/opensim/python/opensim_physics_engine.py` |
 | 1034 | `src/shared/python/motion_matching/pipeline/receipt_components.py` |
 | 1032 | `src/launchers/launcher_ui_setup.py` |
+| 1026 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1022 | `src/tools/bunker_shot_gui/render3d.py` |
 | 1021 | `src/tools/bunker_shot_gui/slices.py` |
 | 1020 | `src/shared/python/optimization/casadi_backend.py` |
