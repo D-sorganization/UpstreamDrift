@@ -137,6 +137,15 @@ def _on_face_only(params: ImpactParameters) -> ImpactParameters:
     return replace(params, toe_mm=None, high_mm=None, unavailable=unavailable)
 
 
+def contact_index(series: ClubheadSeries, impact_time_s: float) -> int:
+    """First sample at or after ``impact_time_s`` (at least 1, at most the last).
+
+    The clubhead state of the impact is the sample before it.
+    """
+    later = np.nonzero(series.times_s >= impact_time_s)[0]
+    return max(int(later[0]) if later.size else len(series) - 1, 1)
+
+
 def card_from_series(
     series: ClubheadSeries,
     impact_time_s: float,
@@ -155,8 +164,7 @@ def card_from_series(
     """
     if not math.isfinite(impact_time_s):
         raise ValueError(f"impact_time_s must be finite, got {impact_time_s}")
-    later = np.nonzero(series.times_s >= impact_time_s)[0]
-    contact = max(int(later[0]) if later.size else len(series) - 1, 1)
+    contact = contact_index(series, impact_time_s)
     observation = None
     if ball is not None:
         # the extractor's impact state is the last pre-contact sample

@@ -221,6 +221,12 @@ python3 -m src.tools.native_viewer_export --bundle driver.npz --swing driver \
   `export_swing`; frame timing lives in `src/shared/python/video_timing`.
 - `compositor.py`: labelled 2x2 grid, HUD text and the impact card panel.
 - `impact_card.py`: one impact card per swing from the displayed pose.
+- `flight_tracer.py`: the ball flight of a swing in swing time and world
+  coordinates (#15150), launched by the repository impact and ball-flight
+  model from the clubhead state the impact card reads. It is a model
+  prediction from kinematic impact conditions, not a measurement; a flight
+  the model flags as outside its validity envelope is not shown unless
+  `draw_invalid_flight` is set. Options: `flight_tracer_settings.json`.
 - `overlay.py`: overlay feed built from `force_overlay.bundle_provider`.
 - `overlay2d.py`: pinhole projection for the OpenSim 2D glyphs.
 - `backends/`: one module per engine plus shared helpers.
