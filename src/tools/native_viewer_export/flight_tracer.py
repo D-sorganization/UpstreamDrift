@@ -481,3 +481,18 @@ def flight_for_export(
         return playback_from_series(club_series(swing), impact, swing.ball, config)
     except impact_card._EXPECTED_ERRORS as exc:
         return FlightPlayback(config, f"unavailable: {exc}")
+
+
+def grid_cells(
+    flight: FlightPlayback | None,
+    tiles: Mapping[str, Image8],
+    time_s: float,
+    settings: Any,
+) -> Mapping[str, Image8]:
+    """Tiles for the composed grid: ``tiles`` itself when there is no flight.
+
+    ``settings`` supplies the export's ``lookat_m`` and ``distance_m``.
+    """
+    if flight is None:
+        return tiles
+    return flight.grid_tiles(tiles, time_s, settings.lookat_m, settings.distance_m)
