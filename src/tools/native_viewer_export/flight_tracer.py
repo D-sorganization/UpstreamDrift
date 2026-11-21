@@ -334,7 +334,8 @@ class FlightPlayback:
             hide = occlusion_for(style, depth)
             tile = landing_marker.paint_track(tile, camera, points, style, hide, landed)
             tile = landing_marker.paint(tile, camera, self.path_m[-1], style, ring)
-            if landed and self.carry_m is not None:
+            inset = style.inset is not None and style.inset.enabled  # shows carry
+            if landed and self.carry_m is not None and not inset:
                 end = self.path_m[-1]
                 tile = landing_marker.paint_label(
                     tile, camera, end, style, self.carry_m

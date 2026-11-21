@@ -383,6 +383,12 @@ def inset_data(flight: FlightPlayback, time_s: float) -> InsetData | None:
     return InsetData(shown, full, apex, carry, lateral, landed, points is not None)
 
 
+def _apex_pixel(profile: Plot, data: InsetData) -> Array:
+    """Pixel ``(u, v)`` of the flight's highest point in the profile plot."""
+    top = int(np.argmax(data.full[:, 2]))
+    return profile.pixels(data.full[top : top + 1, 0], data.full[top : top + 1, 2])[0]
+
+
 def _fmt(settings: FlightInsetSettings, name: str, **values: Any) -> str:
     return str(getattr(settings, name).format(unit=settings.unit, **values))
 
@@ -413,9 +419,7 @@ def _draw_plots(
         _dot(pen, pix[-1], cfg.dot_radius_px, cfg.dot_color_rgba)
     marker = cfg.marker_radius_px
     if data.passed_apex:
-        top = int(np.argmax(data.full[:, 2]))
-        apex = profile.pixels(data.full[top : top + 1, 0], data.full[top : top + 1, 2])
-        _dot(pen, apex[0], marker, cfg.marker_color_rgba)
+        _dot(pen, _apex_pixel(profile, data), marker, cfg.marker_color_rgba)
     if data.landed:
         for pix in (a_pix, p_pix):
             _dot(pen, pix[-1], marker, cfg.marker_color_rgba)
@@ -436,19 +440,10 @@ def _draw_labels(
         xy = (plot.box[0], plot.box[1] - font_px * 1.4)
         image = _text(image, title, xy, font_px, cfg.title_color_rgb)
     if data.passed_apex:
-        top = int(np.argmax(data.full[:, 2]))
-        u, v = profile.pixels(data.full[top : top + 1, 0], data.full[top : top + 1, 2])[
-            0
-        ]
+        u, v = _apex_pixel(profile, data)
         text = _fmt(cfg, "apex_label_format", apex=data.apex_m * scale)
-        image = _text(
-            image,
-            text,
-            (u, v - gap - font_px * 1.4),
-            font_px,
-            cfg.text_color_rgb,
-            "centre",
-        )
+        xy = (u, v - gap - font_px * 1.4)
+        image = _text(image, text, xy, font_px, cfg.text_color_rgb, "centre")
     if data.landed:
         end = data.full[-1]
         u, v = profile.pixels(end[:1], end[2:])[0]
@@ -469,10 +464,8 @@ def _draw_labels(
 
 def font_px_for(shape: tuple[int, ...], settings: FlightInsetSettings) -> int:
     """Label size in pixels for a frame of ``shape`` (at least 9)."""
-    return max(
-        9,
-        int(round(int(shape[0]) * settings.font_height_fraction * settings.font_scale)),
-    )
+    scaled = int(shape[0]) * settings.font_height_fraction * settings.font_scale
+    return max(9, round(scaled))
 
 
 def paint(
@@ -494,11 +487,7 @@ def paint(
     data = inset_data(flight, time_s)
     if data is None or (not data.started and settings.hide_before_launch):
         return img
-    extent = (
-        float(data.full[:, 0].max()),
-        data.apex_m,
-        float(np.abs(data.full[:, 1]).max()),
-    )
+    extent = (data.full[:, 0].max(), data.apex_m, np.abs(data.full[:, 1]).max())
     size = font_px_for(img.shape, settings)
     plots = plots_for((0, 0, x1 - x0, y1 - y0), settings, size, extent)
     region = img[y0:y1, x0:x1].astype(np.float32) * (1.0 - settings.opacity)

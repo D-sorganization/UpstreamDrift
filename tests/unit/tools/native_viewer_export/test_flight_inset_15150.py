@@ -242,3 +242,17 @@ def test_labels_use_the_model_numbers_and_units() -> None:
     assert fi.inset_data(none, 1.0) is None
     frame = _frame()
     assert fi.paint(frame, none, 1.0, _rect(), LOUD) is frame
+
+
+@pytest.mark.parametrize("enabled", [True, False])
+def test_ring_carry_label_yields_to_the_inset(monkeypatch, enabled: bool) -> None:
+    marker = tr.LandingMarkerSettings(carry_label=True)
+    cfg = replace(OTHER, landing_marker=marker, inset=replace(LOUD, enabled=enabled))
+    called: list[int] = []
+    for name in ("paint_track", "paint"):
+        monkeypatch.setattr(tr.landing_marker, name, lambda tile, *a: tile)
+    monkeypatch.setattr(tr, "draw_trace", lambda tile, *a: tile)
+    monkeypatch.setattr(tr.landing_marker, "paint_label", lambda *a: called.append(1))
+    play = _playback(cfg)
+    play._paint(_frame(), None, play.path_m, None, True)
+    assert bool(called) is (not enabled)
