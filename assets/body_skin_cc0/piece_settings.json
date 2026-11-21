@@ -1,0 +1,14 @@
+{
+  "border_rounds": 8,
+  "border_votes": 2,
+  "weld_decimals": 6,
+  "number_digits": 9,
+  "dropped_material_keys": ["texture", "texrepeat", "texuniform"],
+  "sources": {
+    "border_rounds": "Largest number of straightening rounds over the per-bone cut of a skin. With none, the cut follows single mesh faces and shows as a saw-tooth edge where one segment's colour meets the next (seen 2026-11-20 at the lower edge of the pelvis on the skinned golfer). Eight rounds were used for the #15150 review clips; the rounds stop sooner when nothing changes. The borders are straighter after them, not straight. 0 switches straightening off.",
+    "border_votes": "A face takes another label when this many of its three edge neighbours share it. 2 is the smallest majority of three; 3 moves only a face wholly surrounded by one other label. Under 2 no single label would win.",
+    "weld_decimals": "Vertices equal to this many decimals of a metre (6: one micrometre) count as one when faces are joined into neighbours, so vertices doubled along a texture seam do not make a border.",
+    "number_digits": "Significant digits of the vertex positions, texture coordinates and bone weights written for each piece; 9 keeps a float32 value exactly.",
+    "dropped_material_keys": "Attributes left out of each piece's copy of the skin's material. A piece is given one flat colour per frame, and a texture would be multiplied into it."
+  }
+}
