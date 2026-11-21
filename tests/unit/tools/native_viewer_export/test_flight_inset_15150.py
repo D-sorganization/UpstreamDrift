@@ -299,3 +299,69 @@ def test_shows_inset_needs_enabled_and_a_fixed_view() -> None:
 
 def test_composed_grid_gets_no_inset() -> None:
     assert fi._fixed("down_the_line_flight") and not fi._fixed("2x2")
+
+
+_WINDOW = (base.IMPACT_S - 0.15, base.IMPACT_S + 0.15)
+
+
+def _clip_overlays(settings=OTHER):
+    return ClipOverlays(flight=_playback(settings))
+
+
+def _inset_state(overlays: ClipOverlays | None) -> bool:
+    flight = overlays.flight  # type: ignore[union-attr]
+    return fi.shows_inset(flight.settings.inset, "down_the_line_flight")
+
+
+def test_inset_is_suppressed_on_an_impact_window_length_clip() -> None:
+    impact = base.IMPACT_S
+    short = fi.for_clip(_clip_overlays(), (impact - 0.15, impact + 0.15))
+    assert not _inset_state(short)
+
+
+def test_inset_is_kept_on_a_full_flight_clip() -> None:
+    impact = base.IMPACT_S
+    kept = fi.for_clip(_clip_overlays(), None)  # held until landing
+    assert _inset_state(kept)
+    assert kept.flight.settings.inset is LOUD  # type: ignore[union-attr]
+    assert fi.for_clip(None, (0.0, 1.0)) is None
+    bare = ClipOverlays()
+    assert fi.for_clip(bare, (0.0, 1.0)) is bare
+
+
+def test_clip_decision_does_not_change_with_the_frame() -> None:
+    overlays = fi.for_clip(_clip_overlays(), _WINDOW)
+    hud_times = (0.0, base.IMPACT_S - 0.1, base.IMPACT_S, base.IMPACT_S + 0.14)
+    frame = _frame()
+    for t in hud_times:
+        hud = compositor.HudInfo(t, "MuJoCo", "Driver", "")
+        shown = fi.draw_all(overlays, None, 0, hud, {"down_the_line_flight": frame})
+        assert shown["down_the_line_flight"] is frame
+
+
+def test_min_flight_fraction_shown_is_validated(tmp_path: Path) -> None:
+    assert 0.0 < ON.min_flight_fraction_shown <= 1.0
+    for bad in (0.0, -0.1, 1.5, float("nan"), True, "0.5"):
+        with pytest.raises((ValueError, TypeError), match="min_flight_fraction_shown"):
+            replace(ON, min_flight_fraction_shown=bad)
+    document = json.loads(fi.SETTINGS_PATH.read_text(encoding="utf-8"))
+    assert "min_flight_fraction_shown" in document["sources"]
+    document["min_flight_fraction_shown"] = 0.25
+    path = tmp_path / "flight_inset_settings.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    assert fi.load_inset_settings(path).min_flight_fraction_shown == 0.25
+
+
+def test_suppressed_clip_gets_the_ring_label_back(monkeypatch) -> None:
+    play, called = _labelled_play(monkeypatch, True)
+    overlays = fi.for_clip(ClipOverlays(flight=play), _WINDOW)
+    shown = overlays.flight  # type: ignore[union-attr]
+    shown.draw({"down_the_line_flight": _frame()}, 9.0, (1.0, 0.0, 0.9), 5.0)
+    assert called  # no inset on this clip, so the carry ring label is drawn
+
+
+def test_a_long_enough_window_keeps_the_inset() -> None:
+    impact = base.IMPACT_S
+    half = fi.for_clip(_clip_overlays(), (impact, impact + 2.0))  # 0.5 of 4 s
+    assert _inset_state(half)
+    assert not _inset_state(fi.for_clip(_clip_overlays(), (impact, impact + 1.9)))

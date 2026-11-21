@@ -14,7 +14,7 @@ Options: ``flight_inset_settings.json`` (see ``sources``).
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import json
 import math
 from pathlib import Path
@@ -67,6 +67,8 @@ def _positive(
 def _fraction(settings: object, names: Sequence[str]) -> None:
     for name in names:
         value = getattr(settings, name)
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise TypeError(f"{name} must be a number")
         if not (math.isfinite(value) and 0.0 < value <= 1.0):
             raise ValueError(f"{name} must lie in (0, 1]")
 
@@ -88,6 +90,7 @@ class FlightInsetSettings:
     vertical_exaggeration: float | None = 6.0
     min_lateral_half_span_m: float = 15.0
     hide_before_launch: bool = False
+    min_flight_fraction_shown: float = 0.5
     curve_color_rgba: tuple[int, ...] = (255, 70, 40, 255)
     curve_width_px: int = 3
     ground_color_rgba: tuple[int, ...] = (200, 200, 200, 200)
@@ -148,7 +151,7 @@ class FlightInsetSettings:
         )
         _positive(self, ("unit_scale",), float)
         _fraction(self, ("width_fraction", "height_fraction", "min_height_fraction"))
-        _fraction(self, ("profile_share",))
+        _fraction(self, ("profile_share", "min_flight_fraction_shown"))
         if self.min_height_fraction > self.height_fraction:
             raise ValueError("min_height_fraction must not exceed height_fraction")
         if not (math.isfinite(self.opacity) and 0.0 <= self.opacity <= 1.0):
@@ -546,6 +549,31 @@ def draw_all(
         if rect is not None:
             out[name] = paint(frame, flight, hud.time_s, rect, cfg)
     return out
+
+
+def for_clip(
+    overlays: ClipOverlays | None, window: tuple[float, float] | None
+) -> ClipOverlays | None:
+    """``overlays`` with the inset switched off for a clip too short for it.
+
+    Decided once per clip, not per frame. ``window`` is the clip's swing-time
+    window (an impact-window clip) or ``None`` for a clip held until the ball
+    lands, which always keeps the inset. A windowed clip keeps it only when its
+    last frame reaches ``min_flight_fraction_shown`` of the flight time after
+    impact; otherwise the plots would be empty lines hiding the club. Switching
+    it off also gives the ring carry label back, as before the inset existed.
+    """
+    flight = None if overlays is None else overlays.flight
+    cfg = None if flight is None else flight.settings.inset
+    if window is None or flight is None or cfg is None or not cfg.enabled:
+        return overlays
+    if flight.duration_s <= 0.0:
+        return overlays
+    shown = (window[1] - flight.impact_time_s) / flight.duration_s
+    if shown >= cfg.min_flight_fraction_shown:
+        return overlays
+    quiet = replace(flight.settings, inset=replace(cfg, enabled=False))
+    return replace(overlays, flight=replace(flight, settings=quiet))  # type: ignore[type-var]
 
 
 def shows_inset(cfg: FlightInsetSettings | None, view: str) -> bool:

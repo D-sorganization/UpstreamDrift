@@ -49,8 +49,7 @@ from src.tools.native_viewer_export.compositor import (
     draw_view_label,
     event_caption_for_time,
 )
-from src.tools.native_viewer_export import flight_tracer
-from src.tools.native_viewer_export import contact_frame
+from src.tools.native_viewer_export import contact_frame, flight_tracer
 from src.tools.native_viewer_export import ellipsoid_panel as ellipsoid_hud
 from src.tools.native_viewer_export import flight_inset
 from src.tools.native_viewer_export import impact_factors as factors_panel
@@ -1156,8 +1155,9 @@ def export_swing(
         overlays = replace(overlays or ClipOverlays(), flight=flight)
     overlays = ellipsoid_hud.with_panel(overlays, settings, feed, factors)
     for plan in plans:
+        clip = flight_inset.for_clip(overlays, plan.window)
         clip_paths, frames, glyphs = _export_clip(
-            backend, swing, settings, plan, out_dir, feed, factory, overlays
+            backend, swing, settings, plan, out_dir, feed, factory, clip
         )
         paths.update(clip_paths)
         counts[plan.suffix] = frames
