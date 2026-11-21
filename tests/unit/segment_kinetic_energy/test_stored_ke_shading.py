@@ -16,6 +16,8 @@ from src.shared.python.segment_kinetic_energy.contracts import (
     SegmentKineticEnergySample,
 )
 from src.shared.python.segment_kinetic_energy.shading import (
+    KE_PROXY_GLOBE_LABEL,
+    REFERENCE_SWING_PEAK_SEGMENT_KE_J,
     component_values_j,
     default_stored_ke_color_scale,
     format_stored_ke_legend,
@@ -81,6 +83,33 @@ def test_settings_persistence_round_trip() -> None:
     assert loaded_scale == scale
     assert mode == "rotational"
     assert toggles["show_ke_proxy_globes"] is True
+
+
+def test_high_limit_j_persists_round_trip() -> None:
+    custom = 12345.6
+    scale = replace(default_stored_ke_color_scale(), enabled=True, high_limit=custom)
+    text = dump_segment_ke_state(scale, mode="total", toggles={})
+    loaded, _, _ = parse_segment_ke_state(text)
+    assert loaded.high_limit == pytest.approx(custom)
+
+
+def test_legend_lists_clipped_segments() -> None:
+    scale = replace(default_stored_ke_color_scale(), enabled=True)
+    line = format_stored_ke_legend(
+        scale, mode="total", clipped_segments=frozenset({"a"})
+    )
+    assert "clipped" in line.lower()
+    assert "a" in line
+
+
+def test_default_high_limit_matches_reference_swing() -> None:
+    scale = default_stored_ke_color_scale()
+    assert scale.high_limit == pytest.approx(REFERENCE_SWING_PEAK_SEGMENT_KE_J)
+
+
+def test_ke_proxy_globe_label_exposed() -> None:
+    strings = ui_strings_for_ke_view()
+    assert strings["proxy_globe_label"] == KE_PROXY_GLOBE_LABEL
 
 
 def test_ke_view_strings_never_use_transfer_wording() -> None:

@@ -43,11 +43,10 @@ def test_globe_rgba_tiny_positive_matches_colormap_zero() -> None:
     assert rgba[:3] == pytest.approx(zero)
 
 
-def test_globe_rgba_nan_uses_colormap_zero_path() -> None:
+def test_globe_rgba_nan_uses_base_colour() -> None:
     ref = 100.0
-    zero = _zero_rgb(ke_scalar_color_scale(ref))
     rgba = globe_rgba_for_ke(float("nan"), reference_peak_j=ref)
-    assert rgba[:3] == pytest.approx(zero)
+    assert rgba[:3] == pytest.approx((0.15, 0.35, 0.95))
 
 
 def test_globe_rgba_positive_uses_colormap_path() -> None:

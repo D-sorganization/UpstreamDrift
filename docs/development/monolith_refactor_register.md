@@ -37,6 +37,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1184 | `src/bunkershot3d/ball/splash.py` |
 | 1183 | `src/engines/physics_engines/opensim/python/msk_lift_ik_id.py` |
 | 1182 | `src/launchers/launcher_model_handlers.py` |
+| 1181 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py` |
 | 1181 | `src/shared/python/grip_contact/parity.py` |
 | 1180 | `src/tools/native_viewer_export/core.py` |
 | 1178 | `src/engines/physics_engines/pinocchio/python/full_body_fit.py` |
@@ -48,7 +49,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1167 | `src/launchers/settings_dialog.py` |
 | 1166 | `src/shared/python/analysis/orchestrator.py` |
 | 1165 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py` |
-| 1164 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py` |
 | 1164 | `src/shared/python/physics/terrain_representation.py` |
 | 1162 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
 | 1153 | `src/tools/motion_matching/gui.py` |
@@ -193,6 +193,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 864 | `src/tools/shot_pattern_analysis/matched_report_plots.py` |
 | 864 | `src/tools/simulation_backends_launcher/gui.py` |
 | 862 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py` |
+| 860 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py` |
 | 859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m` |
 | 857 | `src/shared/python/injury/spinal_load_analysis.py` |
 | 853 | `src/shared/python/ai/gui/assistant_panel.py` |
@@ -200,7 +201,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 853 | `src/shared/python/sidekick/process_calculators/constants.py` |
 | 852 | `src/engines/physics_engines/opensim/python/tour_matching/native_muscle_effort_adapter.py` |
 | 849 | `src/tools/training_controller/gui.py` |
-| 848 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py` |
 | 848 | `src/shared/python/motion_matching/club_only/reproduction.py` |
 | 847 | `src/api/routes/bunker_workbench.py` |
 | 846 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_render.m` |

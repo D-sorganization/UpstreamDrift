@@ -14,9 +14,11 @@ STORED_KINETIC_ENERGY_VIEW_LABEL: Final[str] = "Stored kinetic energy"
 KE_PROXY_GLOBE_LABEL: Final[str] = "KE proxy"
 KE_COMPONENTS: Final[tuple[str, ...]] = ("total", "translational", "rotational")
 
-# Peak total segment KE (J) on the recorded GS3DX tour-average reference swing.
-# Regression-tested in tests/unit/segment_kinetic_energy/test_reference_limits.py.
-REFERENCE_SWING_PEAK_SEGMENT_KE_J: Final[float] = 4.975150543899781
+# Peak total segment KE (J) on the tour-average anthro driver swing
+# (tests/fixtures/club_face/swing_q_driver.npz on full_body_spec_anthro_driver.json).
+# Recomputed via reference_swing_limits.compute_reference_swing_peak_segment_ke_j();
+# regression-tested in tests/unit/segment_kinetic_energy/test_reference_limits.py.
+REFERENCE_SWING_PEAK_SEGMENT_KE_J: Final[float] = 14931.485758486757
 
 
 def default_stored_ke_color_scale(
@@ -65,17 +67,30 @@ def component_values_j(
     return values
 
 
-def format_stored_ke_legend(scale: ScalarColorScale, *, mode: str) -> str:
+def format_stored_ke_legend(
+    scale: ScalarColorScale,
+    *,
+    mode: str,
+    clipped_segments: frozenset[str] | None = None,
+) -> str:
     """Build a status-bar legend line (no transfer wording)."""
     if not scale.enabled:
         return ""
     legend = scale.legend_descriptor()
     transform = legend.display_transform
+    clipped = clipped_segments or frozenset()
+    clip_note = ""
+    if clipped:
+        if len(clipped) <= 4:
+            names = ", ".join(sorted(clipped))
+            clip_note = f"; clipped: {names}"
+        else:
+            clip_note = f"; clipped: {len(clipped)} segments"
     return (
         f"{STORED_KINETIC_ENERGY_VIEW_LABEL} ({mode}): "
         f"{legend.low_limit:.1f}–{legend.high_limit:.1f} {legend.units}, "
         f"map {legend.colormap_id}, scale {transform}; "
-        f"{legend.saturation_note}"
+        f"{legend.saturation_note}{clip_note}"
     )
 
 

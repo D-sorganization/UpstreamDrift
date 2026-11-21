@@ -110,8 +110,8 @@ class SimRenderingMixin:
                 scene_option=self.scene_option,
             )
 
-        axial_frame, scale = self._apply_axial_scene_colors()
         ke_values = self._apply_stored_ke_scene_colors()
+        axial_frame, scale = self._apply_axial_scene_colors()
 
         # One provider sample per frame feeds both the native and MeshCat views.
         glyphs = self._build_force_glyphs()
@@ -172,11 +172,11 @@ class SimRenderingMixin:
         if self.meshcat_adapter is None or self.data is None:
             return
         self.meshcat_adapter.update(self.data)
-        if scale is not None:
-            self.meshcat_adapter.update_force_colors(axial_frame, scale)
         ke_scale = getattr(self, "stored_ke_color_scale", None)
         if ke_scale is not None:
             self.meshcat_adapter.update_stored_ke_colors(ke_values, ke_scale)
+        if scale is not None:
+            self.meshcat_adapter.update_force_colors(axial_frame, scale)
         self.meshcat_adapter.draw_glyphs(glyphs)
         self._meshcat_draw_segment_ke_globes()
 
@@ -264,13 +264,25 @@ class SimRenderingMixin:
         values = getter()
         scale = getattr(self, "stored_ke_color_scale", None)
         if scale is None or not scale.enabled or values is None:
+            setter = getattr(self, "set_stored_ke_clipped_segments", None)
+            if callable(setter):
+                setter(frozenset())
             return values
+        clipped: set[str] = set()
         try:
             apply_mujoco_scalar_scene_colors(
-                self.model, self.renderer.scene, values, scale
+                self.model,
+                self.renderer.scene,
+                values,
+                scale,
+                clipped_segments=clipped,
             )
         except (TypeError, ValueError, RuntimeError) as exc:
             logger.debug("Stored KE shading unavailable: %s", exc)
+            clipped.clear()
+        setter = getattr(self, "set_stored_ke_clipped_segments", None)
+        if callable(setter):
+            setter(frozenset(clipped))
         return values
 
     @staticmethod

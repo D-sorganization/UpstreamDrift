@@ -48,3 +48,26 @@ def test_scalar_shading_changes_scene_rgb():
     apply_mujoco_scalar_scene_colors(model, scene, {"rod": 75.0}, scale)
     after = [float(v) for v in scene.geoms[0].rgba]
     assert after != pytest.approx(base)
+
+
+def test_scalar_shading_marks_saturated_segments() -> None:
+    model, scene = _scene()
+    scale = ScalarColorScale(
+        enabled=True,
+        scale_kind="sequential",
+        units="J",
+        colormap_id="cividis",
+        low_limit=0.0,
+        high_limit=10.0,
+    )
+    clipped: set[str] = set()
+    apply_mujoco_scalar_scene_colors(
+        model, scene, {"rod": 100.0}, scale, clipped_segments=clipped
+    )
+    assert "rod" in clipped
+
+    clipped.clear()
+    apply_mujoco_scalar_scene_colors(
+        model, scene, {"rod": 5.0}, scale, clipped_segments=clipped
+    )
+    assert "rod" not in clipped

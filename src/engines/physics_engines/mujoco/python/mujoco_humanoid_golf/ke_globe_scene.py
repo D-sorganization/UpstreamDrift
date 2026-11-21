@@ -13,12 +13,12 @@ from src.shared.python.segment_kinetic_energy.contracts import (
     SegmentKineticEnergyFrame,
     SegmentKineticEnergyPeak,
 )
-from src.shared.python.segment_kinetic_energy.shading import (
-    REFERENCE_SWING_PEAK_SEGMENT_KE_J,
-)
 from src.shared.python.segment_kinetic_energy.render_globes import (
     globe_rgba_for_ke,
     radius_for_ke,
+)
+from src.shared.python.segment_kinetic_energy.shading import (
+    REFERENCE_SWING_PEAK_SEGMENT_KE_J,
 )
 
 __all__ = [
@@ -57,11 +57,8 @@ def add_ke_globes_to_scene(
     *,
     max_radius_m: float = 0.22,
 ) -> GlobeDrawReceipt:
-    peak_by_body = _peak_lookup(peaks)
-    ref_peak = max(
-        REFERENCE_SWING_PEAK_SEGMENT_KE_J,
-        max(peak_by_body.values(), default=0.0),
-    )
+    _peak_lookup(peaks)
+    ref_peak = REFERENCE_SWING_PEAK_SEGMENT_KE_J
     globes = 0
     for seg in frame.segments:
         if seg.total_j <= 0.0:

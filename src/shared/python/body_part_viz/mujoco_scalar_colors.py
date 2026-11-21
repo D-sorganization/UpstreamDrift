@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Collection, Mapping
+from collections.abc import Collection, Mapping, MutableSet
 from typing import Any
 
+from .mujoco_segment_scene_colors import apply_mujoco_segment_scene_colors
 from .mujoco_force_colors import unshaded_geom_ids
 from .scalar_shading import ScalarColorScale
 
@@ -16,6 +17,7 @@ def apply_mujoco_scalar_scene_colors(
     scale: ScalarColorScale,
     *,
     keep_geoms: Collection[int] = frozenset(),
+    clipped_segments: MutableSet[str] | None = None,
 ) -> None:
     """Apply fixed-limit scalar shading after each native ``update_scene``."""
     import mujoco
@@ -28,20 +30,19 @@ def apply_mujoco_scalar_scene_colors(
         raise TypeError("values must be a mapping or None")
     if not scale.enabled or values is None:
         return
-    for index in range(scene.ngeom):
-        geom = scene.geoms[index]
-        if (
-            geom.objtype != mujoco.mjtObj.mjOBJ_GEOM
-            or not 0 <= geom.objid < model.ngeom
-            or geom.objid in keep_geoms
-        ):
-            continue
-        body = model.geom_bodyid[geom.objid]
-        name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body)
-        base = tuple(float(channel) for channel in geom.rgba[:3])
-        rgb = scale.shade_rgb(values.get(name), base)
-        if rgb is not None:
-            geom.rgba[:3] = rgb
+
+    def _saturated(sample: float | None) -> bool:
+        return scale.evaluate(sample, "#000000").saturated
+
+    apply_mujoco_segment_scene_colors(
+        model,
+        scene,
+        values,
+        lambda sample, base: scale.shade_rgb(sample, base),
+        keep_geoms=keep_geoms,
+        clipped_segments=clipped_segments,
+        saturation_flag=_saturated,
+    )
 
 
 __all__ = ["apply_mujoco_scalar_scene_colors", "unshaded_geom_ids"]

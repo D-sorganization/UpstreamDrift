@@ -535,8 +535,10 @@ class VisualizationTab(QtWidgets.QWidget):
         for mode in KE_COMPONENTS:
             self.stored_ke_mode_combo.addItem(mode.replace("_", " ").title(), mode)
         current_mode = getattr(self.sim_widget, "stored_ke_component_mode", "total")
+        if current_mode not in KE_COMPONENTS:
+            current_mode = "total"
         idx = self.stored_ke_mode_combo.findData(current_mode)
-        if idx >= 0:
+        if isinstance(idx, int) and idx >= 0:
             self.stored_ke_mode_combo.setCurrentIndex(idx)
         self.stored_ke_mode_combo.currentIndexChanged.connect(
             self._on_stored_ke_mode_changed
@@ -548,6 +550,29 @@ class VisualizationTab(QtWidgets.QWidget):
             self.stored_ke_sqrt_cb.setChecked(scale.display_transform == "sqrt")
         self.stored_ke_sqrt_cb.stateChanged.connect(self._on_stored_ke_sqrt_changed)
         form.addRow("", self.stored_ke_sqrt_cb)
+
+        from src.shared.python.segment_kinetic_energy.shading import (
+            REFERENCE_SWING_PEAK_SEGMENT_KE_J,
+        )
+
+        self.stored_ke_high_limit_spin = QtWidgets.QDoubleSpinBox()
+        self.stored_ke_high_limit_spin.setDecimals(1)
+        self.stored_ke_high_limit_spin.setMinimum(1.0)
+        self.stored_ke_high_limit_spin.setMaximum(1e7)
+        self.stored_ke_high_limit_spin.setSuffix(" J")
+        self.stored_ke_high_limit_spin.setToolTip(
+            "Upper colour-scale limit (J) for stored kinetic-energy shading."
+        )
+        high = (
+            float(scale.high_limit)
+            if isinstance(scale, ScalarColorScale)
+            else float(REFERENCE_SWING_PEAK_SEGMENT_KE_J)
+        )
+        self.stored_ke_high_limit_spin.setValue(high)
+        self.stored_ke_high_limit_spin.valueChanged.connect(
+            self._on_stored_ke_high_limit_changed
+        )
+        form.addRow("KE high limit:", self.stored_ke_high_limit_spin)
         force_layout.addLayout(form)
 
     def _on_stored_ke_enabled_changed(self, state: int) -> None:
@@ -573,6 +598,16 @@ class VisualizationTab(QtWidgets.QWidget):
         transform = "sqrt" if state == QtCore.Qt.CheckState.Checked.value else "linear"
         self.sim_widget.set_stored_ke_color_scale(
             replace(scale, display_transform=transform)
+        )
+
+    def _on_stored_ke_high_limit_changed(self, value: float) -> None:
+        from dataclasses import replace
+
+        scale = getattr(self.sim_widget, "stored_ke_color_scale", None)
+        if scale is None or value <= 0.0:
+            return
+        self.sim_widget.set_stored_ke_color_scale(
+            replace(scale, high_limit=float(value))
         )
 
     def _create_segment_ke_globe_controls(

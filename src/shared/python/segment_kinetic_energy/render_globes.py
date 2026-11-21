@@ -61,10 +61,10 @@ def globe_rgba_for_ke(
     *,
     reference_peak_j: float,
 ) -> tuple[float, float, float, float]:
-    scale = ke_scalar_color_scale(reference_peak_j)
     sample = sample_for_globe_ke(ke_j)
     if sample is None:
-        sample = 0.0
+        return (*_GLOBE_BASE_RGB, 1.0)
+    scale = ke_scalar_color_scale(reference_peak_j)
     shaded = scale.shade_rgb(sample, _GLOBE_BASE_RGB)
     if shaded is None:
         shaded = _GLOBE_BASE_RGB

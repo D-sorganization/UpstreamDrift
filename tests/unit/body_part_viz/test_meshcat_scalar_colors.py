@@ -31,5 +31,6 @@ def test_meshcat_scalar_colors_apply_and_restore() -> None:
     adapter.apply({"rod": 5.0}, scale)
     assert calls and calls[-1][0] == "/a/<object>"
     assert calls[-1][2][3] == 1.0
+    count_after_apply = len(calls)
     adapter.apply({"rod": None}, scale)
-    assert calls[-1][2] == [1.0, 1.0, 0.0, 1.0]
+    assert len(calls) == count_after_apply
