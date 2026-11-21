@@ -16,8 +16,10 @@ under the head model and closed with a plug that moves with that end
 
 Three steps keep the anatomy from showing through the cloth: the chest of the
 body itself is evened out (``chest``), the shirt is pulled taut over the chest
-and the sleeve caps (relaxed down to its floor ease), and each trouser leg is
-held off the leg by a tube of at least ``leg_tube_m`` about the shank. The
+and the sleeve caps (relaxed down to its floor ease) and bridges the armpit
+(``armpit``: moved out along the normals alone, the cloth's two sides cross in
+that fold and the shirt is inside out there before any pose), and each trouser
+leg is held off the leg by a tube of at least ``leg_tube_m`` about the shank. The
 leg's ragged end about the ankle is first drawn down to one level
 (``ankle_end_fraction``), so the trouser hem is a level line that hangs over
 the shoe's collar and no bare ankle shows under it.
@@ -100,6 +102,21 @@ class ChestSettings:
 
 
 @dataclass(frozen=True)
+class ArmpitSettings:
+    """The armpit: where the shirt bridges the fold; ``tent_passes`` 0: no bridge."""
+
+    below_m: float
+    radius_m: float
+    tent_passes: int
+
+    def __post_init__(self) -> None:
+        if not (self.below_m > 0.0 and self.radius_m > 0.0):
+            raise ValueError("armpit below_m and radius_m must be positive")
+        if self.tent_passes < 0:
+            raise ValueError("armpit tent_passes must not be negative")
+
+
+@dataclass(frozen=True)
 class NeckCapSettings:
     """The plug on the neck's end under the head; ``apex_height_m`` 0: none."""
 
@@ -145,6 +162,7 @@ class DressSettings:
     chest: ChestSettings
     sleeve_cap_m: float
     sleeve_cap_passes: int
+    armpit: ArmpitSettings
     leg_tube_m: tuple[float, float]
     leg_tube_rise: float
     neck_cap: NeckCapSettings
@@ -196,6 +214,7 @@ def load_dress_settings(path: Path | None = None) -> DressSettings:
     for name in ("tuck_ease_m", "tuck_band_m", "waistband_span_m", "leg_tube_m"):
         values[name] = tuple(values[name])
     values["chest"] = ChestSettings(**values["chest"])
+    values["armpit"] = ArmpitSettings(**values["armpit"])
     values["neck_cap"] = NeckCapSettings(**values["neck_cap"])
     return DressSettings(**values)
 
@@ -213,6 +232,7 @@ class _Fields:
     ahead: Array  # forward of the trunk axis, metres
     chest: Array  # 1 on the chest front, 0 off it
     cap: Array  # 1 within sleeve_cap_m of a shoulder joint
+    pit: Array  # 1 within armpit.radius_m of the point armpit.below_m under one
     ankle: Array  # positive up the leg from the trouser hem (the last field)
 
     def stack(self) -> Array:
@@ -331,6 +351,12 @@ def _fields(skin: BodySkin, fitted: FittedSkin, settings: DressSettings) -> _Fie
         for side, _ in SIDES
     ]
     cap = (np.min(spans, axis=0) < settings.sleeve_cap_m).astype(float)
+    drop = settings.armpit.below_m * unit
+    spans = [
+        np.linalg.norm(fitted.vertices - joints[f"shoulder_{side}"] + drop, axis=1)
+        for side, _ in SIDES
+    ]
+    pit = (np.min(spans, axis=0) < settings.armpit.radius_m).astype(float)
     return _Fields(
         height,
         trunk.astype(float),
@@ -341,6 +367,7 @@ def _fields(skin: BodySkin, fitted: FittedSkin, settings: DressSettings) -> _Fie
         ahead,
         front * trunk,
         cap,
+        pit,
         np.where(leg, trousers, 1.0),
     )
 
@@ -595,6 +622,7 @@ def dress_skin(
             for free, passes in (
                 (here.chest > 0.0, settings.chest.tent_passes),
                 (here.cap > 0.5, settings.sleeve_cap_passes),
+                (here.pit > 0.5, settings.armpit.tent_passes),
             ):
                 draped = _taut(
                     draped, part[:, :3], faces, free & inner, (floor, passes)
