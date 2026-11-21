@@ -83,6 +83,7 @@ class TracerSettings:
     occlusion_step_px: float = 3.0
     landing_marker: LandingMarkerSettings | None = None
     inset: FlightInsetSettings | None = None  # flight_inset_settings.json
+    ball_shading: flight_depth.BallShading | None = None
 
     def __post_init__(self) -> None:
         rgba = _channels(self.tracer_color_rgba, 4, "tracer_color_rgba")
@@ -124,6 +125,9 @@ def load_tracer_settings(path: Path | None = None) -> TracerSettings:
     if marker is not None:
         marker = {k: tuple(v) if isinstance(v, list) else v for k, v in marker.items()}
         document["landing_marker"] = LandingMarkerSettings(**marker)
+    shading = document.pop("ball_shading", None)
+    if shading is not None:
+        document["ball_shading"] = flight_depth.BallShading(**shading)
     beside = (path or SETTINGS_PATH).with_name("flight_inset_settings.json")
     document["inset"] = load_inset_settings(beside if beside.is_file() else None)
     try:
@@ -174,7 +178,13 @@ def draw_trace(
         centre = (float(pixels[-1, 0]), float(pixels[-1, 1]))
         sphere = (float(depth[-1]), radius_m)
         flight_depth.draw_ball(
-            image, centre, r, style.ball_color_rgb, sphere, occlusion
+            image,
+            centre,
+            r,
+            style.ball_color_rgb,
+            sphere,
+            occlusion,
+            style.ball_shading,
         )
     return np.asarray(image, dtype=np.uint8)
 

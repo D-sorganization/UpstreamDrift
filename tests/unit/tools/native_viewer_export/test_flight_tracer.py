@@ -206,7 +206,7 @@ def test_projection_matches_the_mujoco_camera(view: str, point: tuple) -> None:
 
 
 def test_draw_adds_the_tracer_and_ball_to_fixed_views_only() -> None:
-    flight = _playback()
+    flight = _playback(replace(DEFAULTS, ball_shading=None))  # flat: exact colour
     tiles = {"down_the_line": _tile(), "hands_closeup": _tile()}
     before = flight.draw(tiles, IMPACT_S - 0.1, LOOKAT, None)
     assert all((before[name] == 40).all() for name in tiles)
