@@ -1,37 +1,33 @@
-"""Apply per-segment scalar shading on a native MuJoCo scene (#15395, #15399)."""
+"""Shared MuJoCo scene-geom iteration for per-segment colour overlays."""
 
 from __future__ import annotations
 
-from collections.abc import Callable, Collection, Mapping
+from collections.abc import Callable, Collection, Mapping, MutableSet
 from typing import Any
 
-from .scalar_shading import ScalarColorScale
 
-__all__ = [
-    "apply_mujoco_scalar_scene_colors",
-    "apply_segment_body_geom_shading",
-    "model_geom_base_rgb",
-]
-
-_RGB = tuple[float, float, float]
-_ShadeFn = Callable[[float | None, _RGB], tuple[float, float, float] | None]
-
-
-def model_geom_base_rgb(model: Any, geom_id: int) -> _RGB:
-    """Model-authored RGB for one geom (stable under intermediate overlays)."""
+def apply_mujoco_segment_scene_colors(
+    model: Any,
+    scene: Any,
+    values: Mapping[str, float | None] | None,
+    shade_rgb: Callable[
+        [float | None, tuple[float, float, float]],
+        tuple[float, float, float] | None,
+    ],
+    *,
+    keep_geoms: Collection[int] = frozenset(),
+    clipped_segments: MutableSet[str] | None = None,
+    saturation_flag: Callable[[float | None], bool] | None = None,
+) -> None:
+    """Tint scene geoms by body name; optional ``clipped_segments`` collects saturated IDs."""
     import mujoco
 
-    if not isinstance(model, mujoco.MjModel):
-        raise TypeError("model must be a native MuJoCo MjModel")
-    if not 0 <= geom_id < model.ngeom:
-        raise ValueError("geom_id out of range")
-    rgba = model.geom_rgba[geom_id]
-    return float(rgba[0]), float(rgba[1]), float(rgba[2])
-
-
-def _iter_body_geoms(model: Any, scene: Any, keep_geoms: Collection[int]):
-    import mujoco
-
+    if not isinstance(model, mujoco.MjModel) or not isinstance(scene, mujoco.MjvScene):
+        raise TypeError("model and scene must be native MuJoCo objects")
+    if values is not None and not isinstance(values, Mapping):
+        raise TypeError("values must be a mapping or None")
+    if values is None:
+        return
     for index in range(scene.ngeom):
         geom = scene.geoms[index]
         if (
@@ -44,48 +40,21 @@ def _iter_body_geoms(model: Any, scene: Any, keep_geoms: Collection[int]):
         name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body)
         if not name:
             continue
-        yield name, geom, model_geom_base_rgb(model, geom.objid)
-
-
-def apply_segment_body_geom_shading(
-    model: Any,
-    scene: Any,
-    values: Mapping[str, float | None],
-    shade: _ShadeFn,
-    *,
-    keep_geoms: Collection[int],
-    enabled: bool,
-) -> None:
-    if not enabled:
-        return
-    for name, geom, base in _iter_body_geoms(model, scene, keep_geoms):
-        rgb = shade(values.get(name), base)
+        base: tuple[float, float, float] = (
+            float(geom.rgba[0]),
+            float(geom.rgba[1]),
+            float(geom.rgba[2]),
+        )
+        sample = values.get(name)
+        rgb = shade_rgb(sample, base)
         if rgb is not None:
             geom.rgba[:3] = rgb
+            if (
+                clipped_segments is not None
+                and saturation_flag is not None
+                and saturation_flag(sample)
+            ):
+                clipped_segments.add(name)
 
 
-def apply_mujoco_scalar_scene_colors(
-    model: Any,
-    scene: Any,
-    frame_values: Mapping[str, float | None] | None,
-    scale: ScalarColorScale,
-    *,
-    keep_geoms: Collection[int] = frozenset(),
-) -> None:
-    """Recolour body geoms from a scalar map; next ``update_scene`` restores bases."""
-    import mujoco
-
-    if not isinstance(model, mujoco.MjModel) or not isinstance(scene, mujoco.MjvScene):
-        raise TypeError("model and scene must be native MuJoCo objects")
-    if not isinstance(scale, ScalarColorScale):
-        raise TypeError("scale must be ScalarColorScale")
-    if frame_values is not None and not isinstance(frame_values, Mapping):
-        raise TypeError("frame_values must be a mapping or None")
-
-    def shade(sample: float | None, base: _RGB):
-        return scale.shade_rgb(sample, base)
-
-    values = {} if frame_values is None else frame_values
-    apply_segment_body_geom_shading(
-        model, scene, values, shade, keep_geoms=keep_geoms, enabled=scale.enabled
-    )
+__all__ = ["apply_mujoco_segment_scene_colors"]

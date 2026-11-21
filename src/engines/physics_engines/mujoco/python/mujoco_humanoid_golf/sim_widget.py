@@ -88,6 +88,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
     loading_started = QtCore.pyqtSignal()
     loading_finished = QtCore.pyqtSignal(bool)
     force_legend_changed = QtCore.pyqtSignal(str)
+    net_power_legend_changed = QtCore.pyqtSignal(str)
 
     def _init_visualization_toggles(self) -> None:
         from src.shared.python.body_part_viz import ForceColorScale

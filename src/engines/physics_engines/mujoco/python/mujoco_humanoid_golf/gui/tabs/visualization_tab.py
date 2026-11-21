@@ -371,6 +371,7 @@ class VisualizationTab(QtWidgets.QWidget):
         self.show_contacts_cb.stateChanged.connect(self.on_show_contacts_changed)
         force_layout.addWidget(self.show_contacts_cb)
         self._connect_force_legend_to_status_bar()
+        self._connect_net_power_legend_to_status_bar()
 
         ellipsoid_group = self._create_ellipsoid_group()
 
@@ -382,7 +383,34 @@ class VisualizationTab(QtWidgets.QWidget):
         signal = getattr(self.sim_widget, "force_legend_changed", None)
         if status_bar is None or signal is None:
             return
-        signal.connect(lambda text: status_bar().showMessage(text))
+        signal.connect(lambda text: self._update_status_bar_legends(force=text))
+
+    def _connect_net_power_legend_to_status_bar(self) -> None:
+        status_bar = getattr(self.window(), "statusBar", None)
+        signal = getattr(self.sim_widget, "net_power_legend_changed", None)
+        if status_bar is None or signal is None:
+            return
+        signal.connect(lambda text: self._update_status_bar_legends(net_power=text))
+
+    def _update_status_bar_legends(
+        self,
+        *,
+        force: str | None = None,
+        net_power: str | None = None,
+    ) -> None:
+        status_bar = getattr(self.window(), "statusBar", None)
+        if status_bar is None:
+            return
+        if not hasattr(self, "_legend_lines"):
+            self._legend_lines = {"force": "", "net_power": ""}
+        if force is not None:
+            self._legend_lines["force"] = force
+        if net_power is not None:
+            self._legend_lines["net_power"] = net_power
+        combined = "  ·  ".join(
+            text for text in (self._legend_lines["net_power"], self._legend_lines["force"]) if text
+        )
+        status_bar().showMessage(combined)
 
     def _create_force_checkboxes(self, force_layout: QtWidgets.QVBoxLayout) -> None:
         if force_layout is None:
@@ -537,6 +565,31 @@ class VisualizationTab(QtWidgets.QWidget):
             self.on_show_interface_transfer_changed
         )
         force_layout.addWidget(self.show_interface_transfer_cb)
+
+        limit_row = QtWidgets.QHBoxLayout()
+        limit_row.addWidget(QtWidgets.QLabel("Net-power ±W limit:"))
+        self.net_power_limit_spin = QtWidgets.QDoubleSpinBox()
+        self.net_power_limit_spin.setRange(1.0, 100_000.0)
+        self.net_power_limit_spin.setDecimals(1)
+        self.net_power_limit_spin.setSingleStep(50.0)
+        scale = getattr(self.sim_widget, "net_power_color_scale", None)
+        if scale is not None:
+            self.net_power_limit_spin.setValue(abs(float(scale.high_limit)))
+        self.net_power_limit_spin.valueChanged.connect(self.on_net_power_limit_changed)
+        limit_row.addWidget(self.net_power_limit_spin, stretch=1)
+        force_layout.addLayout(limit_row)
+
+    def on_net_power_limit_changed(self, value: float) -> None:
+        from dataclasses import replace
+
+        limit = float(value)
+        if limit <= 0.0:
+            return
+        require(self.sim_widget is not None, "sim_widget is set")
+        scale = self.sim_widget.net_power_color_scale
+        self.sim_widget.set_net_power_color_scale(
+            replace(scale, low_limit=-limit, high_limit=limit)
+        )
 
     def on_show_net_power_shading_changed(self, state: int) -> None:
         if state is None:

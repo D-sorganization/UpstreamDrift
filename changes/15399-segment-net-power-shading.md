@@ -6,6 +6,6 @@ next_step: "CI quality-gate on PR."
 branch: "cursor/segment-net-power-shading-15399-4895"
 ---
 
-Add shared scalar scene-colour helpers, MuJoCo/MeshCat net-power shading ahead of
-force shading (byte-identical axial colours), Robertson–Winter interface markers,
-and default ±W limits from filtered ``swing_q_driver.npz`` (frames 661–664 excluded).
+Align scalar shading with #15427 scene-colour base API; net-power before force;
+gravity vs xfrc bookkeeping; status-bar legend + editable ±W limits;
+ball-impact exclusion ±25 frames around 661–664 on ``swing_q_driver.npz``.

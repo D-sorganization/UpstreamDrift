@@ -1,19 +1,14 @@
-"""MeshCat transport for quantity-agnostic segment scalar shading (#15399)."""
+"""Shared MeshCat leaf bindings for per-segment colour overlays."""
 
 from __future__ import annotations
 
 import math
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Mapping, MutableSet, Sequence
 from numbers import Real
 
-from .scalar_shading import ScalarColorScale
-from .segment_scalar_frame import SegmentScalarFrame
 
-__all__ = ["MeshcatSegmentScalarColors"]
-
-
-class MeshcatSegmentScalarColors:
-    """Colour explicitly bound leaf objects from per-segment scalars."""
+class MeshcatSegmentColorBindings:
+    """Colour explicitly bound leaf objects; optional restore on missing samples."""
 
     def __init__(
         self,
@@ -34,7 +29,7 @@ class MeshcatSegmentScalarColors:
                 raise ValueError(
                     "bindings require nonempty segment IDs and object maps"
                 )
-            copied = {}
+            copied: dict[str, tuple[float, ...]] = {}
             for path, rgba in objects.items():
                 if (
                     not isinstance(path, str)
@@ -47,7 +42,7 @@ class MeshcatSegmentScalarColors:
                     isinstance(v, bool)
                     or not isinstance(v, Real)
                     or not math.isfinite(v)
-                    or not 0.0 <= float(v) <= 1.0
+                    or not 0.0 <= float(v) <= 1
                     for v in values
                 ):
                     raise ValueError(
@@ -58,20 +53,39 @@ class MeshcatSegmentScalarColors:
             self._bindings[segment] = copied
         self._overridden: set[str] = set()
 
-    def apply(self, frame: SegmentScalarFrame | None, scale: ScalarColorScale) -> None:
-        """Apply synchronous scalars, or restore previously overridden colors."""
-        if not isinstance(scale, ScalarColorScale):
-            raise TypeError("scale must be ScalarColorScale")
-        if frame is not None and not isinstance(frame, SegmentScalarFrame):
-            raise TypeError("frame must be SegmentScalarFrame or None")
-        values = None if frame is None else frame.values
+    def apply_map(
+        self,
+        values: Mapping[str, float | None] | None,
+        shade_rgb: Callable[
+            [float | None, tuple[float, float, float]],
+            tuple[float, float, float] | None,
+        ],
+        *,
+        restore_on_missing: bool,
+        clipped_segments: MutableSet[str] | None = None,
+        saturation_flag: Callable[[float | None], bool] | None = None,
+    ) -> None:
         for segment, objects in self._bindings.items():
             sample = None if values is None else values.get(segment)
             for path, base in objects.items():
-                rgb = scale.shade_rgb(sample, base[:3])
+                base_rgb: tuple[float, float, float] = (
+                    float(base[0]),
+                    float(base[1]),
+                    float(base[2]),
+                )
+                rgb = shade_rgb(sample, base_rgb)
                 if rgb is not None:
                     self._setter(path, "color", [*rgb, base[3]])
                     self._overridden.add(path)
-                elif path in self._overridden:
+                    if (
+                        clipped_segments is not None
+                        and saturation_flag is not None
+                        and saturation_flag(sample)
+                    ):
+                        clipped_segments.add(segment)
+                elif restore_on_missing and path in self._overridden:
                     self._setter(path, "color", list(base))
                     self._overridden.remove(path)
+
+
+__all__ = ["MeshcatSegmentColorBindings"]

@@ -53,24 +53,30 @@ class MujocoInterfacePowerAnalyzer:
         mujoco.mj_rnePostConstraint(model, scratch)
         return model, scratch
 
+    def _body_com_kinematics(
+        self, scratch: mujoco.MjData, body_id: int, qvel: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
+        import mujoco
+
+        model = self._model
+        jacp = np.zeros((3, model.nv))
+        jacr = np.zeros((3, model.nv))
+        mujoco.mj_jacBodyCom(model, scratch, jacp, jacr, body_id)
+        return jacp @ qvel, jacr @ qvel
+
     def _body_mechanical_energy(
         self,
         scratch: mujoco.MjData,
         body_id: int,
         qvel: np.ndarray,
     ) -> float:
-        import mujoco
 
         model = self._model
         mass = float(model.body(body_id).mass[0])
         if mass <= 0.0:
             return 0.0
         gravity = np.asarray(model.opt.gravity, dtype=np.float64)
-        jacp = np.zeros((3, model.nv))
-        jacr = np.zeros((3, model.nv))
-        mujoco.mj_jacBodyCom(model, scratch, jacp, jacr, body_id)
-        com_vel = jacp @ qvel
-        ang_vel_world = jacr @ qvel
+        com_vel, ang_vel_world = self._body_com_kinematics(scratch, body_id, qvel)
         rot = np.asarray(scratch.ximat[body_id], dtype=np.float64).reshape(3, 3)
         ang_vel_body = rot.T @ ang_vel_world
         inertia = np.asarray(model.body(body_id).inertia, dtype=np.float64)
@@ -118,17 +124,21 @@ class MujocoInterfacePowerAnalyzer:
             power += float(scratch.qfrc_actuator[dof] * qvel[dof])
         return power
 
+    def _body_gravity_power(
+        self, scratch: mujoco.MjData, body_id: int, qvel: np.ndarray
+    ) -> float:
+        model = self._model
+        mass = float(model.body(body_id).mass[0])
+        if mass <= 0.0:
+            return 0.0
+        gravity = np.asarray(model.opt.gravity, dtype=np.float64)
+        com_vel, _ = self._body_com_kinematics(scratch, body_id, qvel)
+        return float(mass * np.dot(gravity, com_vel))
+
     def _body_external_power(
         self, scratch: mujoco.MjData, body_id: int, qvel: np.ndarray
     ) -> float:
-        import mujoco
-
-        model = self._model
-        jacp = np.zeros((3, model.nv))
-        jacr = np.zeros((3, model.nv))
-        mujoco.mj_jacBodyCom(model, scratch, jacp, jacr, body_id)
-        com_vel = jacp @ qvel
-        ang_vel = jacr @ qvel
+        com_vel, ang_vel = self._body_com_kinematics(scratch, body_id, qvel)
         wrench = scratch.xfrc_applied[body_id]
         return float(np.dot(wrench[:3], com_vel) + np.dot(wrench[3:], ang_vel))
 
@@ -200,6 +210,7 @@ class MujocoInterfacePowerAnalyzer:
             )
             total_iface = float(iface_on_body.get(body_id, 0.0))
             actuator = self._body_actuator_power(scratch, body_id, qvel_a)
+            gravity = self._body_gravity_power(scratch, body_id, qvel_a)
             external = self._body_external_power(scratch, body_id, qvel_a)
             me_rate = self._finite_difference_me_rate(qpos, qvel, qacc, body_id)
             residual = segment_energy_balance_residual_w(
@@ -214,6 +225,7 @@ class MujocoInterfacePowerAnalyzer:
                     body_index=body_id,
                     mass_kg=mass,
                     total_interface_power_w=total_iface,
+                    gravity_power_w=gravity,
                     external_power_w=external,
                     actuator_power_w=actuator,
                     mechanical_energy_rate_w=me_rate,

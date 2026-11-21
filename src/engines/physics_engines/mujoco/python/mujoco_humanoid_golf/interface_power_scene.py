@@ -25,11 +25,10 @@ class InterfacePowerDrawReceipt:
 def _joint_anchor(model: Any, data: Any, joint_index: int) -> np.ndarray:
     import mujoco
 
-    joint = model.joint(joint_index)
-    body = int(joint.bodyid[0])
-    if body <= 0:
-        return np.asarray(data.xpos[0], dtype=float)
-    return np.asarray(data.xpos[body], dtype=float)
+    if not 0 <= joint_index < model.njnt:
+        raise ValueError("joint_index out of range")
+    mujoco.mj_forward(model, data)
+    return np.asarray(data.xanchor[joint_index], dtype=float)
 
 
 def add_interface_power_glyphs_to_scene(

@@ -322,9 +322,11 @@
 {"path": "body_part_viz/force_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/force_display.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/meshcat_force_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
-{"path": "body_part_viz/meshcat_segment_scalar_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/meshcat_scalar_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/meshcat_segment_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/mujoco_axial_loads.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/mujoco_force_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/mujoco_scalar_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/mujoco_segment_angular_momentum.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/mujoco_segment_scene_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/mujoco_skin_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}

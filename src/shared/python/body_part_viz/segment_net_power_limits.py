@@ -12,15 +12,34 @@ import numpy as np
 
 __all__ = [
     "DEFAULT_EXCLUDE_FRAME_RANGES",
+    "DEFAULT_IMPACT_CORE_FRAMES",
+    "DEFAULT_FILTER_HZ",
+    "DEFAULT_IMPACT_MARGIN_FRAMES",
+    "DEFAULT_PERCENTILE",
+    "DEFAULT_TRIM_FRAMES",
+    "ImpactExclusionNote",
     "LimitDerivation",
     "derive_symmetric_limit_w",
+    "impact_exclusion_ranges",
+    "trajectory_mechanical_rates",
+    "write_limits_json",
 ]
 
-DEFAULT_EXCLUDE_FRAME_RANGES: tuple[tuple[int, int], ...] = ((661, 664),)
+# Ball-impact window on swing_q_driver.npz (t ≈ 1.322–1.328 s @ 500 Hz).
+DEFAULT_IMPACT_CORE_FRAMES: tuple[tuple[int, int], ...] = ((661, 664),)
+DEFAULT_IMPACT_MARGIN_FRAMES = 25
 DEFAULT_TRIM_FRAMES = 15
 DEFAULT_FILTER_HZ = 12.0
 DEFAULT_PERCENTILE = 98.0
 DEFAULT_MAX_PHYSICAL_W = 25_000.0
+
+
+@dataclass(frozen=True)
+class ImpactExclusionNote:
+    core_frames: tuple[tuple[int, int], ...]
+    margin_frames: int
+    excluded_ranges: tuple[tuple[int, int], ...]
+    note: str
 
 
 @dataclass(frozen=True)
@@ -30,6 +49,32 @@ class LimitDerivation:
     sample_count: int
     raw_peak_w: float
     metadata: dict[str, Any]
+
+
+def impact_exclusion_ranges(
+    core: Sequence[tuple[int, int]],
+    *,
+    margin: int,
+) -> tuple[tuple[int, int], ...]:
+    if margin < 0:
+        raise ValueError("margin must be nonnegative")
+    merged: list[tuple[int, int]] = []
+    for lo, hi in core:
+        merged.append((lo - margin, hi + margin))
+    merged.sort()
+    compact: list[tuple[int, int]] = []
+    for lo, hi in merged:
+        if not compact or lo > compact[-1][1] + 1:
+            compact.append((lo, hi))
+        else:
+            compact[-1] = (compact[-1][0], max(compact[-1][1], hi))
+    return tuple(compact)
+
+
+DEFAULT_EXCLUDE_FRAME_RANGES: tuple[tuple[int, int], ...] = impact_exclusion_ranges(
+    DEFAULT_IMPACT_CORE_FRAMES,
+    margin=DEFAULT_IMPACT_MARGIN_FRAMES,
+)
 
 
 def _in_excluded(index: int, ranges: Sequence[tuple[int, int]]) -> bool:
@@ -50,21 +95,6 @@ def _zero_phase_lowpass(
     return np.asarray(filtfilt(b, a, q, axis=0, padlen=padlen), dtype=np.float64)
 
 
-def _despike_median(q: np.ndarray, *, window: int = 5) -> np.ndarray:
-    if q.shape[0] < window:
-        return q
-    half = window // 2
-    out = q.copy()
-    for axis in range(q.shape[1]):
-        column = q[:, axis]
-        for idx in range(half, len(column) - half):
-            window_vals = column[idx - half : idx + half + 1]
-            med = float(np.median(window_vals))
-            if abs(column[idx] - med) > 6.0 * float(np.std(window_vals) + 1e-9):
-                out[idx, axis] = med
-    return out
-
-
 def derive_symmetric_limit_w(
     rates_w: Iterable[float],
     *,
@@ -77,11 +107,10 @@ def derive_symmetric_limit_w(
     if not samples:
         raise ValueError("rates_w must contain at least one finite sample")
     raw_peak = float(max(samples))
-    cap = min(raw_peak, float(max_physical_w))
     limit = float(np.percentile(samples, percentile))
-    limit = min(limit, cap)
+    limit = min(limit, float(max_physical_w))
     if limit <= 0.0:
-        limit = max(cap, 1.0)
+        limit = max(raw_peak, 1.0)
     return LimitDerivation(
         symmetric_limit_w=limit,
         source=source,
@@ -103,8 +132,9 @@ def trajectory_mechanical_rates(
     trim_frames: int = DEFAULT_TRIM_FRAMES,
     filter_hz: float = DEFAULT_FILTER_HZ,
 ) -> tuple[list[float], int]:
-    q = _despike_median(np.asarray(q_traj, dtype=np.float64))
-    q = _zero_phase_lowpass(q, sample_hz=sample_hz, cutoff_hz=filter_hz)
+    q = _zero_phase_lowpass(
+        np.asarray(q_traj, dtype=np.float64), sample_hz=sample_hz, cutoff_hz=filter_hz
+    )
     dt = 1.0 / sample_hz
     qvel = np.gradient(q, dt, axis=0)
     qacc = np.gradient(qvel, dt, axis=0)

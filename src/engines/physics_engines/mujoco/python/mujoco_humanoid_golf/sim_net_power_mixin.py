@@ -11,8 +11,8 @@ from src.shared.python.body_part_viz.net_power_settings import (
 )
 from src.shared.python.body_part_viz.scalar_shading import ScalarColorScale
 from src.shared.python.body_part_viz.segment_net_power import (
-    SEGMENT_NET_POWER_LABEL,
     default_net_power_color_scale,
+    format_net_power_legend,
     net_power_frame_from_interface,
 )
 
@@ -30,6 +30,7 @@ class SimNetPowerMixin:
         self.show_interface_power_glyphs = False
         self._restoring_net_power_settings = False
         self._net_power_legend_text = ""
+        self._cached_net_power_presentation = None
 
     def set_net_power_color_scale(self: Any, scale: ScalarColorScale) -> None:
         if not isinstance(scale, ScalarColorScale):
@@ -71,26 +72,32 @@ class SimNetPowerMixin:
         finally:
             self._restoring_net_power_settings = False
 
-    def _refresh_net_power_legend(self: Any) -> None:
+    def _set_net_power_legend(self: Any, text: str) -> None:
+        if text == getattr(self, "_net_power_legend_text", ""):
+            return
+        self._net_power_legend_text = text
+        signal = getattr(self, "net_power_legend_changed", None)
+        if signal is not None:
+            signal.emit(text)
+
+    def _refresh_net_power_legend(
+        self: Any, presentation: Any | None = None, *, labels: tuple[str, ...] = ()
+    ) -> None:
         if not self.net_power_color_scale.enabled:
-            self._net_power_legend_text = ""
+            self._set_net_power_legend("")
             return
-        try:
-            iface = self.engine.get_interface_power_frame()
-        except (TypeError, ValueError, RuntimeError):
-            self._net_power_legend_text = ""
-            return
-        if iface is None:
-            self._net_power_legend_text = ""
-            return
-        presentation = net_power_frame_from_interface(
-            iface, self.net_power_color_scale
+        if presentation is None:
+            try:
+                iface = self.engine.get_interface_power_frame()
+            except (TypeError, ValueError, RuntimeError):
+                self._set_net_power_legend("")
+                return
+            if iface is None:
+                self._set_net_power_legend("")
+                return
+            presentation = net_power_frame_from_interface(
+                iface, self.net_power_color_scale
+            )
+        self._set_net_power_legend(
+            format_net_power_legend(presentation, interface_labels=labels)
         )
-        legend = presentation.legend
-        parts = [
-            SEGMENT_NET_POWER_LABEL,
-            f"{legend.low_limit:.0f} … {legend.high_limit:.0f} {legend.units}",
-            legend.saturation_note,
-            *presentation.extras.summary_lines(),
-        ]
-        self._net_power_legend_text = " | ".join(parts)

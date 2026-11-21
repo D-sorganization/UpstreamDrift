@@ -110,13 +110,16 @@ class SimRenderingMixin:
                 scene_option=self.scene_option,
             )
 
-        net_power_frame, net_power_scale = self._apply_net_power_scene_colors()
+        iface_frame = self._current_interface_power_frame()
+        net_power_frame, net_power_scale = self._apply_net_power_scene_colors(
+            iface_frame
+        )
         axial_frame, scale = self._apply_axial_scene_colors()
 
         # One provider sample per frame feeds both the native and MeshCat views.
         glyphs = self._build_force_glyphs()
         self._render_force_glyphs(self.renderer.scene, glyphs)
-        self._render_interface_power_glyphs(self.renderer.scene)
+        self._render_interface_power_glyphs(self.renderer.scene, iface_frame)
         self._render_segment_ke_globes(self.renderer.scene)
 
         try:
@@ -237,11 +240,20 @@ class SimRenderingMixin:
                 frame_stats(rgb),
             )
 
-    def _apply_net_power_scene_colors(self: Any) -> tuple[Any, Any]:
+    def _current_interface_power_frame(self: Any) -> Any:
+        if self.engine is None:
+            return None
+        try:
+            return self.engine.get_interface_power_frame()
+        except (TypeError, ValueError, RuntimeError) as exc:
+            logger.debug("Interface power sample unavailable: %s", exc)
+            return None
+
+    def _apply_net_power_scene_colors(self: Any, iface: Any) -> tuple[Any, Any]:
         from src.shared.python.body_part_viz.mujoco_force_colors import (
             unshaded_geom_ids,
         )
-        from src.shared.python.body_part_viz.mujoco_segment_scene_colors import (
+        from src.shared.python.body_part_viz.mujoco_scalar_colors import (
             apply_mujoco_scalar_scene_colors,
         )
         from src.shared.python.body_part_viz.segment_net_power import (
@@ -253,7 +265,6 @@ class SimRenderingMixin:
             self._refresh_net_power_legend()
             return None, scale
         try:
-            iface = self.engine.get_interface_power_frame()
             if iface is None:
                 self._refresh_net_power_legend()
                 return None, scale
@@ -266,25 +277,28 @@ class SimRenderingMixin:
                 scale,
                 keep_geoms=keep,
             )
-            self._refresh_net_power_legend()
+            self._cached_net_power_presentation = presentation
+            self._refresh_net_power_legend(presentation)
             return presentation.segment_frame, scale
         except (TypeError, ValueError, RuntimeError) as exc:
             logger.debug("Net-power display unavailable: %s", exc)
             self._refresh_net_power_legend()
             return None, scale
 
-    def _render_interface_power_glyphs(self: Any, scene: Any) -> None:
-        if not getattr(self, "show_interface_power_glyphs", False):
-            return
-        try:
-            iface = self.engine.get_interface_power_frame()
-        except (TypeError, ValueError, RuntimeError):
-            return
-        if iface is None:
-            return
-        from .interface_power_scene import add_interface_power_glyphs_to_scene
+    def _render_interface_power_glyphs(
+        self: Any, scene: Any, iface: Any | None = None
+    ) -> None:
+        labels: tuple[str, ...] = ()
+        if getattr(self, "show_interface_power_glyphs", False) and iface is not None:
+            from .interface_power_scene import add_interface_power_glyphs_to_scene
 
-        add_interface_power_glyphs_to_scene(self.model, self.data, scene, iface)
+            receipt = add_interface_power_glyphs_to_scene(
+                self.model, self.data, scene, iface
+            )
+            labels = receipt.labels
+        presentation = getattr(self, "_cached_net_power_presentation", None)
+        if presentation is not None or labels:
+            self._refresh_net_power_legend(presentation, labels=labels)
 
     def _apply_axial_scene_colors(self: Any) -> tuple[Any, Any]:
         """Sample the optional force capability once for native and web renderers."""

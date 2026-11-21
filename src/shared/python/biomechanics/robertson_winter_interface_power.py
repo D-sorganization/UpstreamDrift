@@ -42,6 +42,7 @@ class InterfacePowerSegment:
     body_index: int
     mass_kg: float
     total_interface_power_w: float
+    gravity_power_w: float
     external_power_w: float
     actuator_power_w: float
     mechanical_energy_rate_w: float
@@ -88,6 +89,9 @@ def segment_energy_balance_residual_w(
     external_power_w: float,
     actuator_power_w: float = 0.0,
 ) -> float:
-    """``d(KE+PE)/dt − (interface + external + actuator)`` [W]."""
+    """``d(KE+PE)/dt − (interface + applied + actuator)`` [W].
+
+    Gravity power (``m·g·v_com``) is reported separately and is not subtracted here.
+    """
     accounted = interface_power_w + external_power_w + actuator_power_w
     return float(mechanical_energy_rate_w - accounted)

@@ -20,6 +20,8 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.interface_po
 )
 from src.shared.python.body_part_viz.segment_net_power_limits import (  # noqa: E402
     DEFAULT_EXCLUDE_FRAME_RANGES,
+    DEFAULT_IMPACT_CORE_FRAMES,
+    DEFAULT_IMPACT_MARGIN_FRAMES,
     derive_symmetric_limit_w,
     trajectory_mechanical_rates,
     write_limits_json,
@@ -66,6 +68,12 @@ def main() -> int:
         derivation,
         fixture="tests/fixtures/club_face/swing_q_driver.npz",
         exclude_frame_ranges=list(DEFAULT_EXCLUDE_FRAME_RANGES),
+        impact_core_frames=list(DEFAULT_IMPACT_CORE_FRAMES),
+        impact_margin_frames=DEFAULT_IMPACT_MARGIN_FRAMES,
+        impact_note=(
+            "Frames 661–664 are the recorded ball-impact window "
+            "(t≈1.322–1.328 s); ±margin frames are dropped before filtering."
+        ),
         frames_used=used_frames,
         filter_hz=12.0,
         trim_frames=15,

@@ -19,6 +19,7 @@ SEGMENT_NET_POWER_LABEL: Final[str] = "dE/dt (net power)"
 SEGMENT_NET_POWER_UNITS: Final[str] = "W"
 INTERFACE_TRANSFER_LABEL: Final[str] = "Interface transfer"
 JOINT_COORDINATE_POWER_LABEL: Final[str] = "Joint coordinate power (tau·qdot)"
+NET_POWER_COLORMAP_ID: Final[str] = "brown-teal"
 
 # Color-blind-safe diverging endpoints (distinct from tension/compression red/blue).
 NET_POWER_LOW_COLOR: Final[str] = "#a6611a"
@@ -32,6 +33,7 @@ _LIMITS_PATH = (
 __all__ = [
     "INTERFACE_TRANSFER_LABEL",
     "JOINT_COORDINATE_POWER_LABEL",
+    "NET_POWER_COLORMAP_ID",
     "NET_POWER_HIGH_COLOR",
     "NET_POWER_LOW_COLOR",
     "NET_POWER_NEUTRAL_COLOR",
@@ -40,6 +42,7 @@ __all__ = [
     "NetPowerLegendExtras",
     "SegmentNetPowerPresentation",
     "default_net_power_color_scale",
+    "format_net_power_legend",
     "interface_edge_label",
     "load_default_symmetric_limit_w",
     "net_power_frame_from_interface",
@@ -48,22 +51,24 @@ __all__ = [
 
 @dataclass(frozen=True)
 class NetPowerLegendExtras:
-    """Gravity power and balance residual shown beside the colour bar."""
+    """Gravity, applied-force power and balance residual beside the colour bar."""
 
     gravity_power_w: float
+    applied_force_power_w: float
     max_balance_residual_w: float
     clipped_segments: tuple[str, ...]
 
     def summary_lines(self) -> tuple[str, ...]:
-        lines = (
-            f"Gravity power (applied): {self.gravity_power_w:.2f} W",
-            f"Max |energy-balance residual|: {self.max_balance_residual_w:.2f} W",
-        )
+        lines = [
+            f"Gravity power (m·g·v_com): {self.gravity_power_w:.2f} W",
+            f"Applied-force power (xfrc): {self.applied_force_power_w:.2f} W",
+            f"Max |d(KE+PE)/dt balance residual|: {self.max_balance_residual_w:.2f} W",
+        ]
         if self.clipped_segments:
             names = ", ".join(self.clipped_segments[:5])
             extra = " …" if len(self.clipped_segments) > 5 else ""
-            lines += (f"Saturated segments: {names}{extra}",)
-        return lines
+            lines.append(f"Saturated segments: {names}{extra}")
+        return tuple(lines)
 
 
 @dataclass(frozen=True)
@@ -105,7 +110,7 @@ def default_net_power_color_scale(
         low_color=NET_POWER_LOW_COLOR,
         high_color=NET_POWER_HIGH_COLOR,
         neutral_color=NET_POWER_NEUTRAL_COLOR,
-        colormap_id="cividis",
+        colormap_id=NET_POWER_COLORMAP_ID,
         opacity=0.82,
         blend_mode="replace",
     )
@@ -133,24 +138,45 @@ def net_power_frame_from_interface(
     segment_frame = SegmentScalarFrame(
         time_s=interface.time_s,
         values=values,
-        source=("Robertson-Winter segment mechanical energy rate d(KE+PE)/dt (#15390)"),
+        source=("Robertson-Winter segment d(KE+PE)/dt (#15390)"),
         units=SEGMENT_NET_POWER_UNITS,
         quantity_label=SEGMENT_NET_POWER_LABEL,
     )
-    gravity = sum(seg.external_power_w for seg in interface.segments)
+    gravity = sum(seg.gravity_power_w for seg in interface.segments)
+    applied = sum(seg.external_power_w for seg in interface.segments)
     residual = max(
         (abs(seg.balance_residual_w) for seg in interface.segments),
         default=0.0,
     )
     clipped = _clipped_segments(interface, scale)
     legend = scale.legend_descriptor()
-    extras = NetPowerLegendExtras(gravity, residual, clipped)
+    extras = NetPowerLegendExtras(gravity, applied, residual, clipped)
     return SegmentNetPowerPresentation(
         segment_frame=segment_frame,
         interface_frame=interface,
         legend=legend,
         extras=extras,
     )
+
+
+def format_net_power_legend(
+    presentation: SegmentNetPowerPresentation,
+    *,
+    interface_labels: tuple[str, ...] = (),
+) -> str:
+    legend = presentation.legend
+    parts = [
+        SEGMENT_NET_POWER_LABEL,
+        f"{legend.low_limit:.0f} … {legend.high_limit:.0f} {legend.units}",
+        f"colormap {NET_POWER_COLORMAP_ID}",
+        legend.saturation_note,
+        *presentation.extras.summary_lines(),
+    ]
+    if interface_labels:
+        preview = "; ".join(interface_labels[:3])
+        extra = " …" if len(interface_labels) > 3 else ""
+        parts.append(f"{INTERFACE_TRANSFER_LABEL}: {preview}{extra}")
+    return " | ".join(parts)
 
 
 def interface_edge_label(joint: InterfacePowerJointSample) -> str:
