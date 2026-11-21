@@ -2530,6 +2530,11 @@
 {"path": "security/secure_subprocess.py", "classification": "ud-only", "package": "security", "spelling_only": false}
 {"path": "security/security_utils.py", "classification": "ud-only", "package": "security", "spelling_only": false}
 {"path": "security/subprocess_utils.py", "classification": "ud-only", "package": "security", "spelling_only": false}
+{"path": "segment_kinetic_energy/__init__.py", "classification": "ud-only", "package": "segment_kinetic_energy", "spelling_only": false}
+{"path": "segment_kinetic_energy/contracts.py", "classification": "ud-only", "package": "segment_kinetic_energy", "spelling_only": false}
+{"path": "segment_kinetic_energy/disclaimer.py", "classification": "ud-only", "package": "segment_kinetic_energy", "spelling_only": false}
+{"path": "segment_kinetic_energy/render_globes.py", "classification": "ud-only", "package": "segment_kinetic_energy", "spelling_only": false}
+{"path": "segment_kinetic_energy/series.py", "classification": "ud-only", "package": "segment_kinetic_energy", "spelling_only": false}
 {"path": "sg_optimizer/AGENTS.md", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/README.md", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
 {"path": "sg_optimizer/__init__.py", "classification": "ud-only", "package": "sg_optimizer", "spelling_only": false}
