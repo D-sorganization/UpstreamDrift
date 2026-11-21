@@ -9,6 +9,19 @@
   "landing_hold_s": 1.0,
   "max_hold_s": 8.0,
   "draw_invalid_flight": false,
+  "occlude_by_scene": true,
+  "occlusion_tolerance_m": 0.02,
+  "occlusion_tolerance_fraction": 0.005,
+  "occlusion_step_px": 3.0,
+  "landing_marker": {
+    "when": "at_landing",
+    "ground_z_m": 0.0,
+    "radius_m": 3.0,
+    "min_radius_px": 10,
+    "min_aspect": 0.35,
+    "color_rgba": [255, 220, 40, 255],
+    "line_width_px": 3
+  },
   "sources": {
     "tracer_color_rgba": "Tracer line colour and opacity (0-255 each).",
     "tracer_width_px": "Tracer line width in pixels of one view tile.",
@@ -19,6 +32,11 @@
     "near_clip_m": "Points closer to the camera plane than this are not drawn.",
     "landing_hold_s": "Seconds the clip continues after the ball lands.",
     "max_hold_s": "Upper bound on the swing time added after the last pose to show the flight.",
-    "draw_invalid_flight": "false: a flight the model flags as outside its validity envelope is not drawn and the reason is shown. true: it is drawn and labelled as outside the envelope (for inspection only)."
+    "draw_invalid_flight": "false: a flight the model flags as outside its validity envelope is not drawn and the reason is shown. true: it is drawn and labelled as outside the envelope (for inspection only).",
+    "occlude_by_scene": "true: the golfer and club hide the tracer and ball where nearer to the camera (needs the renderer's depth image; without it the overlay is drawn over everything and a warning is logged); false: always over everything.",
+    "occlusion_tolerance_m": "Metres by which the scene may be nearer than a tracer point before it hides it (depth noise; the tracer starts on the tee).",
+    "occlusion_tolerance_fraction": "Extra tolerance as a fraction of the point's distance (depth precision falls with distance).",
+    "occlusion_step_px": "Tracer segments are split into pieces of at most this many pixels for the depth test.",
+    "landing_marker": "Object (null turns the marker off): when (at_landing or from_start); ground_z_m ground height; radius_m ring radius; min_radius_px and min_aspect keep the ring readable at distance (a marker size, not the landing area); the scene never hides the ring; color_rgba, line_width_px."
   }
 }

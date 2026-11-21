@@ -5,9 +5,9 @@ the repository impact and ball-flight model
 (``impact_parameters.flight_report``), launched from the clubhead state the
 impact card reads. The flight is a model prediction from kinematic impact
 conditions, not a measurement. Ball and tracer are drawn on every fixed view
-tile through a pinhole camera matching the view preset: a 2D overlay, so the
-body never hides them. The clip is held on its last pose until the ball has
-landed. Options are read from ``flight_tracer_settings.json`` (see ``sources``).
+tile through a pinhole camera matching the view preset: a 2D overlay that the
+scene depth (``flight_depth``) lets the golfer hide, with a ``landing_marker`` on
+the ground. The clip is held on its last pose until the ball has landed. Options are read from ``flight_tracer_settings.json`` (see ``sources``).
 """
 
 from __future__ import annotations
@@ -15,6 +15,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 import json
+import logging
 import math
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -29,7 +30,8 @@ from src.shared.python.impact_parameters.flight_report import (
     FlightSummary,
     flight_for_impact,
 )
-from src.tools.native_viewer_export import impact_card
+from src.tools.native_viewer_export import flight_depth, impact_card, landing_marker
+from src.tools.native_viewer_export.landing_marker import LandingMarkerSettings
 from src.tools.native_viewer_export.impact_state import series_at_contact
 from src.tools.native_viewer_export.overlay2d import pinhole_for_view
 
@@ -40,6 +42,7 @@ if TYPE_CHECKING:
 
 Array = NDArray[np.float64]
 Image8 = NDArray[np.uint8]
+logger = logging.getLogger(__name__)
 SETTINGS_PATH = Path(__file__).with_name("flight_tracer_settings.json")
 ON_TEE, IN_FLIGHT, LANDED = "on tee", "in flight", "landed"
 NO_IMPACT, MODEL = "no impact detected", "model prediction"
@@ -69,6 +72,11 @@ class TracerSettings:
     landing_hold_s: float
     max_hold_s: float
     draw_invalid_flight: bool
+    occlude_by_scene: bool = True
+    occlusion_tolerance_m: float = 0.02
+    occlusion_tolerance_fraction: float = 0.005
+    occlusion_step_px: float = 3.0
+    landing_marker: LandingMarkerSettings | None = None
 
     def __post_init__(self) -> None:
         rgba = _channels(self.tracer_color_rgba, 4, "tracer_color_rgba")
@@ -89,8 +97,14 @@ class TracerSettings:
                 continue
             if not (math.isfinite(value) and value >= 0.0):
                 raise ValueError(f"{name} must be finite and not negative")
-        if not isinstance(self.draw_invalid_flight, bool):
-            raise TypeError("draw_invalid_flight must be true or false")
+        for name in ("draw_invalid_flight", "occlude_by_scene"):
+            if not isinstance(getattr(self, name), bool):
+                raise TypeError(f"{name} must be true or false")
+        for name in ("occlusion_tolerance_m", "occlusion_tolerance_fraction"):
+            if not (math.isfinite(getattr(self, name)) and getattr(self, name) >= 0.0):
+                raise ValueError(f"{name} must be finite and not negative")
+        if not self.occlusion_step_px > 0.0:
+            raise ValueError("occlusion_step_px must be positive")
 
 
 def load_tracer_settings(path: Path | None = None) -> TracerSettings:
@@ -100,6 +114,10 @@ def load_tracer_settings(path: Path | None = None) -> TracerSettings:
     """
     document = json.loads((path or SETTINGS_PATH).read_text(encoding="utf-8"))
     document.pop("sources", None)
+    marker = document.pop("landing_marker", None)
+    if marker is not None:
+        marker = {k: tuple(v) if isinstance(v, list) else v for k, v in marker.items()}
+        document["landing_marker"] = LandingMarkerSettings(**marker)
     try:
         return TracerSettings(**document)
     except TypeError as exc:
@@ -108,39 +126,47 @@ def load_tracer_settings(path: Path | None = None) -> TracerSettings:
         raise ValueError(f"flight tracer settings: {exc}") from exc
 
 
-def project(camera: Any, points_m: Array, near_clip_m: float) -> tuple[Array, Array]:
-    """Pixel ``(u, v)`` and camera depth of world points through ``camera``.
+project = flight_depth.project
 
-    A point nearer than ``near_clip_m`` to the camera plane (or behind it) has
-    a ``nan`` pixel.
-    """
-    local = camera.camera_from_world(np.asarray(points_m, dtype=float))
-    depth = local[:, 2]
-    safe = np.where(depth > near_clip_m, depth, np.nan)
-    k = camera.matrix
-    u = k[0, 0] * local[:, 0] / safe + k[0, 2]
-    v = k[1, 1] * local[:, 1] / safe + k[1, 2]
-    return np.column_stack([u, v]), depth
+
+def occlusion_for(style: TracerSettings, depth_m: Array | None) -> Any:
+    """The depth test for one tile, or ``None`` without scene depth or when off."""
+    if depth_m is None or not style.occlude_by_scene:
+        return None
+    tol, frac = style.occlusion_tolerance_m, style.occlusion_tolerance_fraction
+    step = style.occlusion_step_px
+    return flight_depth.Occlusion(
+        np.asarray(depth_m), tol, frac, step, style.near_clip_m
+    )
 
 
 def draw_trace(
-    tile: Image8, camera: Any, points_m: Array, radius_m: float, style: TracerSettings
+    tile: Image8,
+    camera: Any,
+    points_m: Array,
+    radius_m: float,
+    style: TracerSettings,
+    depth_m: Array | None = None,
 ) -> Image8:
     """``tile`` with the tracer through ``points_m`` and the ball at the last one.
 
-    Returns a new array; points behind the camera are left out.
+    Points behind the camera, and (with ``depth_m``, metres per pixel, and
+    ``occlude_by_scene``) points behind the scene surface, are left out.
     """
-    pixels, depth = project(camera, points_m, style.near_clip_m)
-    seen: np.ndarray = np.asarray(np.isfinite(pixels).all(axis=1), dtype=bool)
+    occlusion = occlusion_for(style, depth_m)
     image = Image.fromarray(tile)
     pen = ImageDraw.Draw(image, "RGBA")
-    line = [(float(u), float(v)) for u, v in pixels[seen]]
-    if len(line) > 1:
-        pen.line(line, fill=style.tracer_color_rgba, width=style.tracer_width_px)
-    if seen[-1]:
+    colour, near = style.tracer_color_rgba, style.near_clip_m
+    width = style.tracer_width_px
+    flight_depth.draw_line(pen, camera, points_m, colour, width, near, occlusion)
+    pixels, depth = project(camera, points_m[-1:], near)
+    shown = bool(np.isfinite(pixels).all())
+    if shown and occlusion is not None:
+        shown = bool(occlusion.visible(camera, points_m[-1:])[1][0])
+    if shown:
         projected = float(camera.matrix[1, 1]) * radius_m / float(depth[-1])
         r = max(float(style.min_ball_radius_px), projected)
-        u, v = line[-1]
+        u, v = (float(c) for c in pixels[-1])
         pen.ellipse([u - r, v - r, u + r, v + r], fill=(*style.ball_color_rgb, 255))
     return np.asarray(image, dtype=np.uint8)
 
@@ -254,16 +280,18 @@ class FlightPlayback:
         time_s: float,
         lookat_m: Sequence[float],
         distance_m: float | None,
+        depth_m: Mapping[str, Array] | None = None,
     ) -> dict[str, Image8]:
         """``tiles`` (per view) with the ball and tracer at ``time_s``.
 
-        A view that follows a moving target is left as it is (its camera is
-        not the fixed one projected here).
+        A view that follows a moving target is left as it is. ``depth_m`` is the
+        scene depth per view; a view without it is drawn over the scene.
         """
         points = self.flown(time_s)
         out = dict(tiles)
         if points is None:
             return out
+        landed = time_s - self.impact_time_s >= self.duration_s
         fov = math.radians(self.settings.fov_y_deg)
         for view, tile in tiles.items():
             preset = get_view_preset(view)
@@ -271,8 +299,26 @@ class FlightPlayback:
                 continue
             size = (int(tile.shape[1]), int(tile.shape[0]))
             camera = pinhole_for_view(preset, lookat_m, distance_m, fov, size)
-            out[view] = draw_trace(tile, camera, points, self.radius_m, self.settings)
+            depth = (depth_m or {}).get(view)
+            if depth is None and self.settings.occlude_by_scene:
+                self._warn_once(view)
+            out[view] = self._paint(tile, camera, points, depth, landed)
         return out
+
+    def _warn_once(self, view: str) -> None:
+        if not self.__dict__.setdefault("_warned", False):
+            self.__dict__["_warned"] = True
+            logger.warning("scene depth unavailable (%s): tracer over the scene", view)
+
+    def _paint(
+        self, tile: Image8, camera: Any, points: Array, depth: Any, landed: bool
+    ) -> Image8:
+        """One tile: landing marker beneath, then the tracer and ball."""
+        style, marker = self.settings, self.settings.landing_marker
+        if marker is not None and self.path_m is not None:
+            ring = landed or marker.when == "from_start"
+            tile = landing_marker.paint(tile, camera, self.path_m[-1], style, ring)
+        return draw_trace(tile, camera, points, self.radius_m, style, depth)
 
 
 def playback_from_flight(
