@@ -40,7 +40,11 @@ def apply_mujoco_segment_scene_colors(
         name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body)
         if not name:
             continue
-        base = tuple(float(channel) for channel in geom.rgba[:3])
+        base: tuple[float, float, float] = (
+            float(geom.rgba[0]),
+            float(geom.rgba[1]),
+            float(geom.rgba[2]),
+        )
         sample = values.get(name)
         rgb = shade_rgb(sample, base)
         if rgb is not None:

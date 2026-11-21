@@ -44,12 +44,6 @@ class GlobeDrawReceipt:
     plates_drawn: int
 
 
-def _peak_lookup(
-    peaks: Sequence[SegmentKineticEnergyPeak],
-) -> dict[str, float]:
-    return {p.body: p.peak_total_j for p in peaks}
-
-
 def add_ke_globes_to_scene(
     scene: Any,
     frame: SegmentKineticEnergyFrame,
@@ -57,7 +51,6 @@ def add_ke_globes_to_scene(
     *,
     max_radius_m: float = 0.22,
 ) -> GlobeDrawReceipt:
-    _peak_lookup(peaks)
     ref_peak = REFERENCE_SWING_PEAK_SEGMENT_KE_J
     globes = 0
     for seg in frame.segments:

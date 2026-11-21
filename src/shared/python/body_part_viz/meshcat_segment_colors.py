@@ -68,7 +68,12 @@ class MeshcatSegmentColorBindings:
         for segment, objects in self._bindings.items():
             sample = None if values is None else values.get(segment)
             for path, base in objects.items():
-                rgb = shade_rgb(sample, base[:3])
+                base_rgb: tuple[float, float, float] = (
+                    float(base[0]),
+                    float(base[1]),
+                    float(base[2]),
+                )
+                rgb = shade_rgb(sample, base_rgb)
                 if rgb is not None:
                     self._setter(path, "color", [*rgb, base[3]])
                     self._overridden.add(path)

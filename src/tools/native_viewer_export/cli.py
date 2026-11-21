@@ -46,6 +46,12 @@ from src.tools.native_viewer_export.core import (
     ExportSettings,
     parse_ellipsoid_scale,
 )
+from src.tools.native_viewer_export.ellipsoid_panel import load_panel_settings
+from src.tools.native_viewer_export.ellipsoid_visibility import (
+    VisibilitySettings,
+    load_visibility_settings,
+    panel_note,
+)
 from src.tools.native_viewer_export.flight_tracer import load_tracer_settings
 from src.tools.native_viewer_export.impact_factors import load_factor_settings
 from src.tools.native_viewer_export.overlay import OverlayOptions, build_overlay_feed
@@ -126,6 +132,15 @@ def _add_ellipsoid_arguments(p: argparse.ArgumentParser) -> None:
         default=ELLIPSOID_COLOR_MODES[0],
         help="what an ellipsoid colour encodes: its point (default) or its kind, "
         "so mobility and effective-mass differ at one point (#15150)",
+    )
+    p.add_argument(
+        "--ellipsoid-visibility-settings",
+        type=Path,
+        default=None,
+        metavar="JSON",
+        help="ellipsoid scale grouping (per_kind/per_point), nested alpha and "
+        "minimum semi-axis (default: ellipsoid_visibility_settings.json beside "
+        "the tool; #15150)",
     )
 
 
@@ -510,6 +525,20 @@ def build_shading(args: argparse.Namespace) -> ForceColorScale | None:
     )
 
 
+def _visibility_of(args: argparse.Namespace) -> VisibilitySettings | None:
+    """Visibility settings of ``--ellipsoid-visibility-settings``, else ``None``."""
+    path = getattr(args, "ellipsoid_visibility_settings", None)
+    return None if path is None else load_visibility_settings(path)
+
+
+def _panel_for(args: argparse.Namespace) -> Any:
+    """Panel settings whose footer follows the visibility file; ``None`` without it."""
+    visibility = _visibility_of(args)
+    if visibility is None:
+        return None
+    return replace(load_panel_settings(), note=panel_note(visibility))
+
+
 def build_settings(args: argparse.Namespace) -> ExportSettings:
     """``ExportSettings`` from parsed arguments (raises ``ValueError``)."""
     base = ExportSettings.preview() if args.preset == "preview" else ExportSettings()
@@ -537,6 +566,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
     mobility_condition_cutoff = getattr(args, "mobility_condition_cutoff", None)
     return replace(
         base,
+        ellipsoid_panel=_panel_for(args),
         views=tuple(v for v in args.views.split(",") if v),
         width=width,
         height=height,
@@ -619,6 +649,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     max_mobility_points=settings.max_mobility_points,
                     mobility_condition_cutoff=settings.mobility_condition_cutoff,
                     ellipsoid_color_by=settings.ellipsoid_color_by,
+                    visibility=_visibility_of(args),
                     axial_impact_blackout=args.axial_impact_blackout,
                 ),
             ),

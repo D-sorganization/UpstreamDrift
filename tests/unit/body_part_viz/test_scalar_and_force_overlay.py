@@ -97,3 +97,21 @@ def test_meshcat_force_and_ke_overlay_force_wins() -> None:
     force_adapter.apply(frame, force)
     both = _bytes_rgb(tuple(colors[-1][:3]))
     assert both == force_only
+
+
+def test_mujoco_ke_disabled_restores_scene_base_after_refresh() -> None:
+    model, scene = _scene()
+    base = [float(v) for v in scene.geoms[0].rgba[:3]]
+    ke_scale = ScalarColorScale(
+        enabled=True,
+        scale_kind="sequential",
+        units="J",
+        colormap_id="cividis",
+        low_limit=0.0,
+        high_limit=100.0,
+    )
+    apply_mujoco_scalar_scene_colors(model, scene, {"rod": 50.0}, ke_scale)
+    assert list(scene.geoms[0].rgba[:3]) != pytest.approx(base)
+
+    _, scene2 = _scene()
+    assert list(scene2.geoms[0].rgba[:3]) == pytest.approx(base)

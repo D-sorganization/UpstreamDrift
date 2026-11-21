@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 from src.shared.python.segment_kinetic_energy.reference_swing_limits import (
+    WHOLE_BODY_KE_SANITY_J,
     assert_reference_constant_matches_swing,
     compute_reference_swing_peak_segment_ke_j,
 )
@@ -25,3 +26,11 @@ def test_reference_peak_matches_recorded_driver_swing(
 
 def test_reference_constant_guard() -> None:
     assert_reference_constant_matches_swing()
+
+
+def test_preprocessed_swing_whole_body_ke_stays_below_sanity(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("MUJOCO_GL", "disable")
+    peak = compute_reference_swing_peak_segment_ke_j()
+    assert peak < WHOLE_BODY_KE_SANITY_J

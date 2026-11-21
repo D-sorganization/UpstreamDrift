@@ -14,11 +14,13 @@ STORED_KINETIC_ENERGY_VIEW_LABEL: Final[str] = "Stored kinetic energy"
 KE_PROXY_GLOBE_LABEL: Final[str] = "KE proxy"
 KE_COMPONENTS: Final[tuple[str, ...]] = ("total", "translational", "rotational")
 
-# Peak total segment KE (J) on the tour-average anthro driver swing
-# (tests/fixtures/club_face/swing_q_driver.npz on full_body_spec_anthro_driver.json).
-# Recomputed via reference_swing_limits.compute_reference_swing_peak_segment_ke_j();
-# regression-tested in tests/unit/segment_kinetic_energy/test_reference_limits.py.
-REFERENCE_SWING_PEAK_SEGMENT_KE_J: Final[float] = 14931.485758486757
+# Peak per-segment total KE (J) on the tour-average anthro driver swing
+# (tests/fixtures/club_face/swing_q_driver.npz + full_body_spec_anthro_driver.json).
+# Velocity comes from q after median-5 despike, 20 Hz zero-phase Butterworth low-pass,
+# and 10-frame edge trim (see reference_swing_limits.compute_reference_swing_peak_segment_ke_j).
+# Raw finite-differenced q spikes near frames 661–664 in the fixture; preprocessing
+# yields club peak ~486 J near frame 670. Regression-tested in test_reference_limits.py.
+REFERENCE_SWING_PEAK_SEGMENT_KE_J: Final[float] = 486.2931353365707
 
 
 def default_stored_ke_color_scale(

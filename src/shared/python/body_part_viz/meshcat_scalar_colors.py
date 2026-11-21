@@ -30,7 +30,7 @@ class MeshcatScalarColors(MeshcatSegmentColorBindings):
         self.apply_map(
             active_values,
             lambda sample, base: scale.shade_rgb(sample, base),
-            restore_on_missing=False,
+            restore_on_missing=True,
             clipped_segments=clipped_segments,
             saturation_flag=_saturated,
         )
