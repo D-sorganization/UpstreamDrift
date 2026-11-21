@@ -101,7 +101,8 @@ class EllipsoidPanel:
         """``left`` or ``right``: the setting, or opposite the factors panel."""
         if self.settings.position != "auto":
             return self.settings.position
-        other = self.factors is not None and self.factors.settings.position == "left"
+        factors_settings = None if self.factors is None else self.factors.settings
+        other = factors_settings is not None and factors_settings.position == "left"
         return "right" if other else "left"
 
     def lines(self, rows: tuple[PanelRow, ...]) -> list[Line]:

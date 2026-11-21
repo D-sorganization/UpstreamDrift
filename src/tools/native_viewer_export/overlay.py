@@ -281,9 +281,7 @@ def _build_hand_ellipsoid_feed(
 
     spec_dict = json.loads(swing.bundle.spec_bytes)
     resolved_pts = resolve_intersection_points(
-        spec_dict,
-        selection.points,
-        max_points=selection.max_points,
+        spec_dict, selection.points, max_points=selection.max_points
     )
 
     _hm_cache: dict[tuple[bool, int], Any] = {}
