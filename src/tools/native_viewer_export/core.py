@@ -185,6 +185,8 @@ class ExportSettings:
     mobility_condition_cutoff: float | None = None
     #: ellipsoid colour encodes the point (default) or the kind (#15150)
     ellipsoid_color_by: str = "point"
+    #: a vector flag was passed: a kinematic replay still draws vectors
+    vectors_requested: bool = False
     #: video frames the frame on the contact instant is repeated (#15150);
     #: ``None``: the ``contact_frame_settings.json`` default of the clip kind
     contact_hold_frames: int | None = None
@@ -637,6 +639,8 @@ class OverlayFeed:
     hand_hud_lines: Callable[[int], tuple[str, ...]] | None = None
     #: ``(hand_ellipsoids, hand_hud_lines)`` evaluated at the poses of a swing
     ellipsoids_for: Callable[[Any], tuple[Any, Any]] | None = None
+    #: HUD note when force/torque vectors are withheld (``kinematic_replay``)
+    forces_note: str = ""
     _frames: dict[int, Any] = field(
         default_factory=dict, init=False, repr=False, compare=False
     )
@@ -710,10 +714,10 @@ class OverlayFeed:
         return gs
 
     def hud_lines_at(self, index: int) -> tuple[str, ...]:
-        """HUD capability/mobility text lines at frame ``index`` (HCM-3, #14004)."""
-        if self.hand_hud_lines is not None:
-            return self.hand_hud_lines(index)
-        return ()
+        """HUD capability/mobility text lines at frame ``index`` (HCM-3, #14004),
+        then the forces note."""
+        lines = () if self.hand_hud_lines is None else self.hand_hud_lines(index)
+        return (*lines, self.forces_note) if self.forces_note else lines
 
     def axial_at(self, index: int) -> Any:
         """``AxialLoadFrame`` of state ``index``, or ``None`` when not computed."""

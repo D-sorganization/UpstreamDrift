@@ -104,6 +104,11 @@ python3 -m src.tools.native_viewer_export \
   a time sample, so frame `k` is not source state `k`. Their display scale is
   fixed once from the source states and shared by every clip. A feed whose
   ellipsoids cannot be evaluated at the clip frames is refused (`ValueError`).
+- A bundle whose every effort is zero is a kinematic replay
+  (`kinematic_replay.py`): its contact wrenches are not applied forces, so force
+  and torque vectors are hidden unless `--force-vectors` or `--torque-vectors` is
+  passed, with one warning and the HUD note "Kinematic Replay: Forces Not Shown".
+  The efforts decide, not a provenance label (the writers share none).
 
 Environment: `NATIVE_VIEWER_CHROMIUM` (Chromium executable; a full Playwright
 build renders much faster than the headless shell), and
