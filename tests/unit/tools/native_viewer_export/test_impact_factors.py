@@ -229,7 +229,30 @@ def test_export_without_a_known_impact_says_no_impact(monkeypatch) -> None:
         _swing(), _settings(impact_factors=DEFAULTS, impact_time_s=IMPACT_S)
     )
     assert failed is not None and failed.lines_at(0.19)[0][1].startswith("unavailable")
-    assert all(v == DEFAULTS.blank_text for _, v in failed.lines_at(0.19)[1:])
+    assert all(
+        v == DEFAULTS.blank_text
+        for _, v in failed.lines_at(0.19)[-len(DEFAULTS.blank_rows) :]
+    )
+
+
+def test_long_failure_reason_is_shown_in_full_wrapped(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    message = " ".join(f"word{i}" for i in range(30)) + " finalword"
+
+    def boom(*_args: object, **_kwargs: object) -> None:
+        raise ValueError(message)
+
+    monkeypatch.setattr(factors, "club_series", boom)
+    panel, _ = factors.factors_for_export(
+        _swing(), _settings(impact_factors=DEFAULTS, impact_time_s=IMPACT_S)
+    )
+    assert panel is not None
+    lines = panel.lines_at(0.19)
+    shown = " ".join(value for _, value in lines[: -len(DEFAULTS.blank_rows)])
+    assert shown == f"unavailable: {message}"
+    assert len(lines) > 1 + len(DEFAULTS.blank_rows)
+    assert len(panel.lines_at(0.0)) == len(lines)
 
 
 def test_cli_flags_turn_the_panel_on(tmp_path: Path) -> None:
