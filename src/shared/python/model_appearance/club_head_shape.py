@@ -78,9 +78,6 @@ def load_head_shape_settings(path: Path | None = None) -> HeadShapeSettings:
     return HeadShapeSettings(*(raw[f.name] for f in fields(HeadShapeSettings)))
 
 
-# ----------------------------------------------------------------- the body
-
-
 def _face_pin_vertices(mesh: Mesh, normal: Array, cos_min: float) -> NDArray[np.bool_]:
     """Mask of the vertices of the face-plate triangles (never moved)."""
     tri = mesh.vertices[mesh.faces]
@@ -128,9 +125,6 @@ def round_head_body(mesh: Mesh, face_normal: Array, s: HeadShapeSettings) -> Mes
     return Mesh(verts, mesh.faces)
 
 
-# ----------------------------------------------------------------- the hosel
-
-
 def axis_contact_param(
     body: Mesh, sole: Array, direction: Array, t_top: float, reach: float
 ) -> float:
@@ -154,11 +148,10 @@ def hosel_stations(
 ) -> list[tuple[float, float]]:
     """``(t, radius)`` hosel profile along the axis.
 
-    A rounded base inside the heel, a collar of ``hosel_flare_radius_m`` at the
-    last head contact, a fairing down to ``hosel_radius_m``, a short cylinder
-    and a shoulder to ``hosel_top_radius_m`` under the shaft. Postcondition:
-    ``t`` strictly rising, ending at ``t_top`` with the shaft tip radius.
-    Raises ``ValueError`` when the span above the contact is too short.
+    Base inside the heel, flare collar at the last head contact, fairing to
+    ``hosel_radius_m``, short cylinder, shoulder to the shaft tip radius.
+    Postcondition: ``t`` strictly rising, ending at ``t_top``. ``ValueError``
+    when the span above the contact is too short.
     """
     t_low = max(0.0, t_contact - s.hosel_base_blend_m)
     t_fair = t_top - s.hosel_shoulder_height_m - s.hosel_cylinder_length_m
@@ -176,13 +169,8 @@ def hosel_stations(
     w = 0.5 * (1.0 - np.cos(np.pi * x))  # cosine ease: flat slope at both ends
     out: list[tuple[float, float]] = []
     for t0, t1, r0, r1 in legs:
-        pts = list(
-            zip(
-                (t0 + (t1 - t0) * x).tolist(),
-                (r0 + (r1 - r0) * w).tolist(),
-                strict=True,
-            )
-        )
+        ts, rs = t0 + (t1 - t0) * x, r0 + (r1 - r0) * w
+        pts = list(zip(ts.tolist(), rs.tolist(), strict=True))
         out += pts[1:] if out else pts
     return out
 
