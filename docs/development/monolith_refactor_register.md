@@ -158,8 +158,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 916 | `src/tools/bunker_shot_gui/export.py` |
 | 913 | `src/engines/physics_engines/opensim/python/tour_matching/native_diagnostic_contract.py` |
 | 908 | `src/engines/physics_engines/opensim/python/grip_contact_osim_sim.py` |
-| 907 | `src/shared/python/model_appearance/body_meshes.py` |
 | 907 | `src/unreal_integration/mesh_loader.py` |
+| 903 | `src/shared/python/model_appearance/body_meshes.py` |
 | 903 | `src/shared/python/motion_matching/club_only/body_candidates.py` |
 | 902 | `src/tools/capture_rig/reference_comparison.py` |
 | 897 | `src/shared/python/motion_matching/surrogate/compact/training.py` |

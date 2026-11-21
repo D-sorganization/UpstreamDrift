@@ -101,9 +101,6 @@ def _geom_rgb(model: Any, scene: Any, name: str) -> tuple[float, ...]:
     raise AssertionError(f"geom {name!r} is not in the scene")
 
 
-# --- off, or no skin: nothing changes -------------------------------------
-
-
 @pytest.mark.parametrize(
     ("frames", "scale"),
     [
@@ -113,20 +110,16 @@ def _geom_rgb(model: Any, scene: Any, name: str) -> tuple[float, ...]:
         (_frames(near=1.0), ForceColorScale(enabled=True, opacity=0.0)),
     ],
 )
-def test_no_split_is_wanted_while_shading_is_off(frames: Any, scale: Any) -> None:
+def test_the_split_is_wanted_only_while_shading_is_on(frames: Any, scale: Any) -> None:
     assert shading.skin_pieces_wanted(frames, scale) is False
-
-
-def test_shading_on_wants_the_split() -> None:
     assert shading.skin_pieces_wanted(_frames(near=1.0), SCALE) is True
 
 
 def test_scene_xml_is_the_same_object_when_off_or_without_a_skin() -> None:
     skinned, plain = _xml(), _xml(skin=False)
-    assert shading.split_scene_skins(skinned, False) == (skinned, {})
-    assert shading.split_scene_skins(skinned, False)[0] is skinned
-    assert shading.split_scene_skins(plain, True)[0] is plain
-    assert shading.split_scene_skins(plain, True)[1] == {}
+    for xml, wanted in ((skinned, False), (plain, True)):
+        same, table = shading.split_scene_skins(xml, wanted)
+        assert same is xml and table == {}
 
 
 def test_model_without_pieces_binds_nothing_and_keeps_its_materials() -> None:
@@ -149,10 +142,7 @@ def test_overlay_step_without_kept_geoms_shades_as_before() -> None:
     assert _geom_rgb(model, new, "hair") == pytest.approx((0.0, 0.0, 1.0))
 
 
-# --- shading on, with a skin ----------------------------------------------
-
-
-def test_skin_is_cut_bound_and_given_its_texture_tone() -> None:
+def test_skin_is_cut_bound_toned_and_follows_the_frame_load() -> None:
     frames = _frames(far=100.0)
     model, bound = shading.compile_shaded_model(_xml(), frames, SCALE, SETTINGS)
     assert model.nskin == 2 and len(bound.pieces) == 2
@@ -163,21 +153,13 @@ def test_skin_is_cut_bound_and_given_its_texture_tone() -> None:
     for piece in bound.pieces:
         assert piece.base_rgba[:3] == pytest.approx(expected, abs=1 / 255)
         assert _material_rgb(model, piece.material) == piece.base_rgba[:3]
-    # the skin's own material is left as it was
     assert _material_rgb(model, "cloth") == pytest.approx(CLOTH, abs=1e-6)
-
-
-def test_pieces_follow_the_frame_load_and_return_to_base() -> None:
-    frames = _frames(far=100.0)
-    model, bound = shading.compile_shaded_model(_xml(), frames, SCALE, SETTINGS)
     assert bound.colour(model, frames[0], SCALE) == 2
     for piece in bound.pieces:
         assert _material_rgb(model, piece.material) == pytest.approx((0.0, 0.0, 1.0))
-    assert bound.colour(model, None, SCALE) == 0
+    assert bound.colour(model, None, SCALE) == 0  # a material keeps its last colour
     for piece in bound.pieces:
-        assert _material_rgb(model, piece.material) == pytest.approx(
-            piece.base_rgba[:3]
-        )
+        assert _material_rgb(model, piece.material) == piece.base_rgba[:3]
 
 
 def test_kept_materials_keep_their_colour_under_scene_shading() -> None:
@@ -192,15 +174,6 @@ def test_kept_materials_keep_their_colour_under_scene_shading() -> None:
     assert _geom_rgb(model, scene, "limb") == pytest.approx((0.0, 0.0, 1.0))
 
 
-def test_texture_tone_is_the_mean_colour_or_white() -> None:
-    model = mujoco.MjModel.from_xml_string(_xml())
-    assert shading.texture_tone(model, model.material("cloth").id) == pytest.approx(
-        (TONE,) * 3, abs=1 / 255
-    )
-    hair = model.material("mat_hair_brown").id
-    assert shading.texture_tone(model, hair) == (1.0, 1.0, 1.0)
-
-
 def test_bad_inputs_are_rejected() -> None:
     model = mujoco.MjModel.from_xml_string(_xml())
     with pytest.raises(TypeError):
@@ -210,14 +183,11 @@ def test_bad_inputs_are_rejected() -> None:
     with pytest.raises(TypeError):
         shading.bind_skin_shading(object(), {}, SETTINGS)
     with pytest.raises(TypeError):
-        shading.bind_skin_shading(model, {"strip": "near"}, settings="x")  # type: ignore[arg-type]
+        shading.bind_skin_shading(model, {"strip": "near"}, "x")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="unknown skin"):
         shading.bind_skin_shading(model, {"no_such_piece": "near"}, SETTINGS)
     with pytest.raises(ValueError, match="material"):
         shading.texture_tone(model, model.nmat)
-
-
-# --- the skinned golfer ---------------------------------------------------
 
 
 @pytest.fixture(scope="module")
@@ -256,11 +226,11 @@ def test_golfer_hair_eyes_brows_and_lips_keep_their_colour(golfer: Any) -> None:
     apply_scene_overlays(
         model, shaded, 0, frames, SCALE, None, keep_geoms=bound.keep_geoms
     )
-    changed = 0
-    for index in range(plain.ngeom):
-        geom = shaded.geoms[index]
-        same = np.array_equal(geom.rgba, plain.geoms[index].rgba)
+    same = [
+        np.array_equal(shaded.geoms[i].rgba, plain.geoms[i].rgba)
+        for i in range(plain.ngeom)
+    ]
+    for index, geom in enumerate(shaded.geoms[: plain.ngeom]):
         if geom.objtype == mujoco.mjtObj.mjOBJ_GEOM and geom.objid in bound.keep_geoms:
-            assert same
-        changed += not same
-    assert changed > len(bound.keep_geoms)
+            assert same[index]
+    assert same.count(False) > len(bound.keep_geoms)

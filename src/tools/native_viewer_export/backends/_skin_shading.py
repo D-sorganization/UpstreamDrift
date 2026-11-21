@@ -7,14 +7,13 @@ each piece to the body whose load colours it, with the load alias of
 ``skin_load_settings.json``, and writes the piece colours before each scene
 update (``mujoco_skin_colors``). Hair, eyes, brows and lips keep their colour.
 
-With shading off, or a model without a skin, nothing here changes the export:
-the MJCF string is returned as it came and nothing is bound. Display only.
+With shading off, or a model without a skin, the MJCF string is returned as
+it came and nothing is bound. Display only.
 
-A piece's material has no texture, while the skin's own material is drawn
-multiplied by its texture. Each piece's base colour is therefore multiplied by
-the mean colour of that texture once, so a piece without a load is drawn in
-the tone of the uncut skin (checked on the appearance layer's flat cube
-textures; their random marks are not reproduced).
+A piece's material has no texture, while the skin's own is drawn multiplied
+by its texture. Each piece's base colour is therefore multiplied once by that
+texture's mean colour, so an unloaded piece keeps the tone of the uncut skin
+(checked on the appearance layer's flat cube textures, without their marks).
 """
 
 from __future__ import annotations
@@ -36,15 +35,6 @@ from src.shared.python.body_part_viz.skin_load_settings import (
     aliased_load_bodies,
     load_skin_load_settings,
 )
-
-__all__ = [
-    "SkinShading",
-    "bind_skin_shading",
-    "compile_shaded_model",
-    "skin_pieces_wanted",
-    "split_scene_skins",
-    "texture_tone",
-]
 
 _SKIN_TAG = "<skin"
 _WHITE = (1.0, 1.0, 1.0)
@@ -148,8 +138,7 @@ def _restore_texture_tones(model: Any, piece_bodies: Mapping[str, str]) -> None:
         if own < 0:
             continue  # skin_piece_bindings reports the missing material
         name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_MATERIAL, own)
-        # split_skins names a piece <skin>__seg<n>, its material
-        # <material>__seg__<skin>__<n>
+        # split_skins: piece <skin>__seg<n> wears <material>__seg__<skin>__<n>
         parent, _, index = piece.rpartition("__seg")
         source = name.removesuffix(f"__seg__{parent}__{index}")
         worn = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_MATERIAL, source)
