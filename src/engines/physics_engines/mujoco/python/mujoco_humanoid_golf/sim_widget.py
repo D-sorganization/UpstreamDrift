@@ -128,6 +128,9 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.visible_frames: set[int] = set()
         self.visible_coms: set[int] = set()
 
+        self.show_segment_ke_globes = False
+        self._segment_ke_peak_state: dict[str, tuple[float, float]] = {}
+
     def _init_scene_options(self) -> None:
         self.scene_option = mujoco.MjvOption()
         mujoco.mjv_defaultOption(self.scene_option)
@@ -691,6 +694,16 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.show_live_screw = screw
         if not screw:
             self._prev_body_ts.clear()
+
+    def set_segment_ke_globe_visualization(self, enabled: bool) -> None:
+        """Toggle COM-centered segment kinetic-energy globes (#15389)."""
+        self.show_segment_ke_globes = enabled
+        if not enabled:
+            self._segment_ke_peak_state.clear()
+
+    def reset_segment_ke_peak_tracking(self) -> None:
+        """Clear running peak KE used for globe highlight scaling."""
+        self._segment_ke_peak_state.clear()
 
     def set_force_visualization(
         self, enabled: bool, scale: float | None = None

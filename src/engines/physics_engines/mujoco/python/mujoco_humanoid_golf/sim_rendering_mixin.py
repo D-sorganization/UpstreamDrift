@@ -115,6 +115,7 @@ class SimRenderingMixin:
         # One provider sample per frame feeds both the native and MeshCat views.
         glyphs = self._build_force_glyphs()
         self._render_force_glyphs(self.renderer.scene, glyphs)
+        self._render_segment_ke_globes(self.renderer.scene)
 
         try:
             rgb = self.renderer.render()
@@ -145,6 +146,16 @@ class SimRenderingMixin:
                 if scale is not None:
                     self.meshcat_adapter.update_force_colors(axial_frame, scale)
                 self.meshcat_adapter.draw_glyphs(glyphs)
+                if getattr(self, "show_segment_ke_globes", False):
+                    frame = self._current_segment_ke_frame()
+                    if frame is not None:
+                        self.meshcat_adapter.draw_ke_globes(
+                            frame, self._segment_ke_peaks_tuple()
+                        )
+                    else:
+                        self.meshcat_adapter.draw_ke_globes(None, ())
+                else:
+                    self.meshcat_adapter.draw_ke_globes(None, ())
 
                 if self.show_induced_vectors:
                     self.meshcat_adapter.draw_induced_vectors(
@@ -410,6 +421,44 @@ class SimRenderingMixin:
         )
         self._set_force_legend("" if glyphs is None else legend_text(glyphs))
         return glyphs
+
+    def _current_segment_ke_frame(self: Any) -> Any | None:
+        if not getattr(self, "show_segment_ke_globes", False):
+            return None
+        if self.engine is None or self.data is None:
+            return None
+        frame = self.engine.get_segment_kinetic_energy_frame()
+        if frame is None:
+            return None
+        state: dict[str, tuple[float, float]] = getattr(
+            self, "_segment_ke_peak_state", {}
+        )
+        for seg in frame.segments:
+            prev_j, _ = state.get(seg.body, (0.0, 0.0))
+            if seg.total_j >= prev_j:
+                state[seg.body] = (seg.total_j, frame.time_s)
+        self._segment_ke_peak_state = state
+        return frame
+
+    def _segment_ke_peaks_tuple(self: Any) -> tuple[Any, ...]:
+        from src.shared.python.segment_kinetic_energy import SegmentKineticEnergyPeak
+
+        state: dict[str, tuple[float, float]] = getattr(
+            self, "_segment_ke_peak_state", {}
+        )
+        return tuple(
+            SegmentKineticEnergyPeak(body=b, peak_total_j=j, peak_time_s=t)
+            for b, (j, t) in sorted(state.items())
+        )
+
+    def _render_segment_ke_globes(self: Any, scene: Any) -> None:
+        from mujoco_humanoid_golf.ke_globe_scene import add_ke_globes_to_scene
+
+        frame = self._current_segment_ke_frame()
+        if frame is None or scene is None:
+            return
+        peaks = self._segment_ke_peaks_tuple()
+        add_ke_globes_to_scene(scene, frame, peaks)
 
     def _render_force_glyphs(
         self: Any, scene: Any, glyphs: GlyphSet | None = None

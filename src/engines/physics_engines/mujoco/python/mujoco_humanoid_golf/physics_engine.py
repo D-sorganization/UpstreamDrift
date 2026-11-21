@@ -91,6 +91,7 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
         self.data: mujoco.MjData | None = None
         self.xml_path: str | None = None
         self._force_torque_source: Any | None = None
+        self._segment_ke_provider: Any | None = None
 
     @property
     def is_initialized(self) -> bool:
@@ -407,6 +408,28 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
             self._force_torque_source = MujocoForceTorqueSource(self.model)
         return self._force_torque_source.sample(
             self.data, include_gravity=include_gravity
+        )
+
+    def get_segment_kinetic_energy_frame(
+        self, *, time_s: float | None = None
+    ) -> Any | None:
+        """Return the current per-segment kinetic-energy overlay frame (#15389)."""
+        if self.model is None or self.data is None:
+            return None
+        if (
+            self._segment_ke_provider is None
+            or self._segment_ke_provider.model is not self.model
+        ):
+            from .segment_kinetic_energy_provider import (
+                MujocoSegmentKineticEnergyProvider,
+            )
+
+            self._segment_ke_provider = MujocoSegmentKineticEnergyProvider(self.model)
+        t = self.data.time if time_s is None else time_s
+        return self._segment_ke_provider.frame_at(
+            self.data.qpos,
+            self.data.qvel,
+            time_s=float(t),
         )
 
     def get_contact_forces(self) -> np.ndarray:
