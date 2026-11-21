@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -210,6 +210,43 @@ def _ellipsoid_color_picker(
     )
 
 
+def _semi_axes_series(
+    samples: Iterable[Any], points: Sequence[Any], kind: str
+) -> list[list[float]]:
+    """Physical semi-axes of ``kind`` at ``points`` over the sampled states."""
+    series: list[list[float]] = []
+    for sample in samples:
+        for pt in points:
+            hm = _lookup_point_mobility(sample, pt)
+            if hm is not None:
+                series.append(list(_extract_physical_radii(hm, kind)[1]))
+    return series
+
+
+def _ellipsoid_feed_factory(
+    swing: SwingInput, engine: str, opts: OverlayOptions, active: Sequence[str]
+) -> Callable[[SwingInput], tuple[Any, Any]]:
+    """Feed builder for any re-sampling of ``swing``, on ``swing``'s scale."""
+
+    def ellipsoids_for(shown: SwingInput) -> tuple[Any, Any]:
+        return _build_hand_ellipsoid_feed(
+            shown,
+            active,
+            opts.hand_mobility_mode,
+            opts.ellipsoid_scale,
+            engine=engine,
+            selection=MobilitySelection(
+                opts.mobility_points,
+                opts.max_mobility_points,
+                opts.mobility_condition_cutoff,
+            ),
+            ellipsoid_color_by=opts.ellipsoid_color_by,
+            scale_from=swing,
+        )
+
+    return ellipsoids_for
+
+
 def _build_hand_ellipsoid_feed(
     swing: SwingInput,
     active_ellipsoids: Sequence[str],
@@ -261,26 +298,19 @@ def _build_hand_ellipsoid_feed(
                 )
         return _hm_cache[key]
 
-    builders: dict[str, EllipsoidDisplayBuilder] = {}
     scales: dict[str, EllipsoidDisplayScale] = {}
     stride = max(1, scale_swing.n_states // 20)
     for kind in active_ellipsoids:
-        semi_axes_series: list[list[float]] = []
-        for idx in range(0, scale_swing.n_states, stride):
-            hm_sample = _get_hm(idx, scale_swing)
-            for pt in resolved_pts:
-                hm = _lookup_point_mobility(hm_sample, pt)
-                if hm is not None:
-                    _, r = _extract_physical_radii(hm, kind)
-                    semi_axes_series.append(list(r))
-        scale = EllipsoidDisplayScale.compute(
-            semi_axes_series,
+        sampled = (
+            _get_hm(i, scale_swing) for i in range(0, scale_swing.n_states, stride)
+        )
+        scales[kind] = EllipsoidDisplayScale.compute(
+            _semi_axes_series(sampled, resolved_pts, kind),
             target_radius_m=0.09,
             kind=kind,
             mode=ellipsoid_scale,
         )
-        scales[kind] = scale
-        builders[kind] = EllipsoidDisplayBuilder(scale)
+    builders = {kind: EllipsoidDisplayBuilder(s) for kind, s in scales.items()}
 
     def hand_ellipsoids_fn(index: int) -> tuple[EllipsoidGlyph, ...]:
         hm_map = _get_hm(index)
@@ -432,23 +462,7 @@ def build_overlay_feed(
     )
     hand_ellipsoids_fn = hand_hud_lines_fn = ellipsoids_for = None
     if active_ellipsoids:
-
-        def ellipsoids_for(shown: SwingInput) -> tuple[Any, Any]:
-            return _build_hand_ellipsoid_feed(
-                shown,
-                active_ellipsoids,
-                opts.hand_mobility_mode,
-                opts.ellipsoid_scale,
-                engine=engine,
-                selection=MobilitySelection(
-                    opts.mobility_points,
-                    opts.max_mobility_points,
-                    opts.mobility_condition_cutoff,
-                ),
-                ellipsoid_color_by=opts.ellipsoid_color_by,
-                scale_from=swing,
-            )
-
+        ellipsoids_for = _ellipsoid_feed_factory(swing, engine, opts, active_ellipsoids)
         hand_ellipsoids_fn, hand_hud_lines_fn = ellipsoids_for(swing)
 
     feed = OverlayFeed(
