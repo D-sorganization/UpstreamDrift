@@ -2,6 +2,7 @@
   "shirt": {"ease_m": 0.01, "min_ease_m": 0.006, "smoothing_passes": 8, "relax_passes": 0},
   "trousers": {"ease_m": 0.01, "min_ease_m": 0.005, "smoothing_passes": 0, "relax_passes": 30},
   "skin_margin_m": 0.004,
+  "hem_seam": true,
   "waist_height_m": 0.11,
   "tuck_m": 0.05,
   "sleeve_fraction": 0.5,
@@ -47,6 +48,7 @@
     "hem_level_mm": 2.0,
     "shoe_overlap_mm": 15.0,
     "ankle_reach_m": 0.1,
+    "hem_seam_mm": 0.001,
     "chest_depth_heights_m": [0.39, 0.47],
     "chest_depth_mm": {"default": [262.0, 251.0], "showpiece": [233.0, 205.0]}
   },
@@ -55,6 +57,7 @@
     "shirt": "A polo 10 mm off the skin and never closer than 6 mm; eight Taubin passes take the muscle relief off the cloth without shrinking it.",
     "trousers": "10 mm off the skin, never closer than 5 mm, relaxed over 30 passes so the cloth bridges the crotch and the knee.",
     "skin_margin_m": "The bare skin continues 4 mm under each hem so bending opens no gap.",
+    "hem_seam": "A hem's rim is the garment's cut line, laid on the skin; the bare skin was cut 4 mm further under the cloth (skin_margin_m), so the rim's points lay inside the skin's faces, not on its vertices. Blend skinning is not linear along an edge whose ends carry different weights, so a posed rim left the posed faces: on a fitted driver swing (showpiece profile, MuJoCo skin, 2026-11-20) the collar rim stood 0.27 to 0.29 mm off the skin between the top and impact with the girdle weights relaxed (pose_settings.json, girdle_smoothing_iterations 45) against 0.15 to 0.16 mm without (0.31 mm at address either way), and a camera level with the hem looked under it into the shirt: 32 see-through pixels in 220 neck close-ups (every 12th frame, four directions, 480 px at 0.6 m) against 7 without the relaxed weights, all but 2 of them on a hem's rim, most on the collar's. A wider margin made it worse (12 mm: 70 pixels), a rim sunk 0.5 mm under the skin hid it (2 pixels). With hem_seam the bare skin is split on the shirt's hem lines before it is cut (the trouser hem is the skin's own end already), so each rim vertex and rim edge of the collar and the sleeve hems is a vertex and an edge of the skin with the same weights, and the two cannot part at any pose: 0.00 mm, 2 pixels (both at a hand, none at the neck). The skin's surface and its end under the cloth are unchanged; it gains the rims' vertices (1500 to 1734 vertices on the default subject). false: the skin as before. limits.hem_seam_mm bounds the largest distance from a rim vertex of the collar and the sleeve hems to the nearest skin vertex with the trail girdle protracted 110 mm and the head turned 0.6 rad (measured 0 with the seam, 7.8 mm without, where the skin has no vertex on the line).",
     "waist_height_m": "Waistband top 110 mm above the hip midpoint along the trunk axis; the shirt is tucked tuck_m (50 mm) below it: at 60 mm the tail reached the crease of the hip, where the thigh's cloth turns into it when the hip bends, and showed through the trousers at address and impact (2026-11-20).",
     "sleeve_fraction": "A short sleeve ends half way down the upper arm.",
     "trouser_end_fraction": "The trouser leg ends 1.05 shank lengths below the knee, 22 mm below the ankle joint on the 1.82 m subject: a trouser that breaks on the shoe (see ankle_end).",
