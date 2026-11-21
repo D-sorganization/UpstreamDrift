@@ -412,7 +412,9 @@ class VisualizationTab(QtWidgets.QWidget):
         if net_power is not None:
             self._legend_lines["net_power"] = net_power
         combined = "  ·  ".join(
-            text for text in (self._legend_lines["net_power"], self._legend_lines["force"]) if text
+            text
+            for text in (self._legend_lines["net_power"], self._legend_lines["force"])
+            if text
         )
         status_bar().showMessage(combined)
 

@@ -82,7 +82,9 @@ def test_string_labels_use_transfer_only_on_interface_edge():
 def test_limits_json_documents_ball_impact_exclusion_and_regenerates_limit():
     payload = json.loads(LIMITS.read_text(encoding="utf-8"))
     assert payload["fixture"] == "tests/fixtures/club_face/swing_q_driver.npz"
-    assert payload["impact_core_frames"] == [list(pair) for pair in DEFAULT_IMPACT_CORE_FRAMES]
+    assert payload["impact_core_frames"] == [
+        list(pair) for pair in DEFAULT_IMPACT_CORE_FRAMES
+    ]
     assert payload["exclude_frame_ranges"] == [
         list(pair) for pair in DEFAULT_EXCLUDE_FRAME_RANGES
     ]
@@ -318,7 +320,9 @@ def test_two_link_energy_balance_against_independent_finite_difference():
             + segment.external_power_w
             + segment.actuator_power_w
         )
-        assert independent_rate == pytest.approx(segment.mechanical_energy_rate_w, abs=0.05)
+        assert independent_rate == pytest.approx(
+            segment.mechanical_energy_rate_w, abs=0.05
+        )
         assert abs(independent_rate - accounted) <= 0.01
         assert abs(segment.balance_residual_w) <= 0.01
 
@@ -350,7 +354,9 @@ def test_gravity_power_nonzero_under_gravity():
 
 def test_derive_limit_from_samples_is_stable():
     samples = [float(v) for v in range(1, 200)]
-    derived = derive_symmetric_limit_w(samples, source="synthetic", sample_count=len(samples))
+    derived = derive_symmetric_limit_w(
+        samples, source="synthetic", sample_count=len(samples)
+    )
     assert derived.symmetric_limit_w == pytest.approx(
         float(np.percentile(samples, 98.0))
     )

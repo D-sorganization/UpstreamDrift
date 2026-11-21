@@ -32,7 +32,9 @@ from src.shared.python.grip_contact import load_coordinate_swing  # noqa: E402
 def main() -> int:
     import mujoco
 
-    spec_path = ROOT / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+    spec_path = (
+        ROOT / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+    )
     spec_bytes = spec_path.read_bytes()
     spec = json.loads(spec_bytes)
     names = spec["coordinate_order"]
