@@ -90,9 +90,9 @@ def test_tee_has_no_collision_and_leaves_the_model_alone() -> None:
     _ball.draw_job_ball(scene, _job(LIFTED, [True, True]), 0)
     assert model.ngeom == 0 and model.nbody == nbody
     assert float(model.body_subtreemass[0]) == mass
-    # render geoms name no model object: nothing the contact engine can see
-    unknown = int(mujoco.mjtObj.mjOBJ_UNKNOWN)
-    assert all(int(g.objtype) == unknown for g in _cylinders(mujoco, scene))
+    # the tee lives in the render scene only; the contact engine reads the
+    # model, which gained no geom, so nothing can collide with it
+    assert len(_cylinders(mujoco, scene)) == 2
 
 
 def test_tee_stays_when_ball_leaves() -> None:
