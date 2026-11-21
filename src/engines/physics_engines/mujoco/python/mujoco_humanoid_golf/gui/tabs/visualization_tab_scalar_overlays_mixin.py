@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from PyQt6 import QtCore, QtWidgets
 
@@ -30,7 +30,8 @@ class VisualizationTabScalarOverlaysMixin:
 
     def _connect_overlay_legends_to_status_bar(self) -> None:
         """Show force, stored-KE, and net-power legend lines in the status bar."""
-        status_bar = getattr(self.window(), "statusBar", None)
+        host = cast(QtWidgets.QWidget, self)
+        status_bar = getattr(host.window(), "statusBar", None)
         if status_bar is None:
             return
         force_signal = getattr(self.sim_widget, "force_legend_changed", None)
