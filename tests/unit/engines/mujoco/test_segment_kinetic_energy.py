@@ -85,8 +85,12 @@ class TestMujocoSegmentKeProvider:
     def test_provider_frame_matches_analyzer_split(self) -> None:
         model = _arm_model()
         provider = MujocoSegmentKineticEnergyProvider(model)
+        analyzer = PowerFlowAnalyzer(model)
         qpos = np.array([0.2, 0.5])
         qvel = np.array([2.0, -1.0])
+        qacc = np.zeros(model.nv)
+        tau = np.zeros(model.nv)
+        result = analyzer.compute_power_flow(qpos, qvel, qacc, tau)
         frame = provider.frame_at(qpos, qvel, time_s=0.05)
         assert frame.engine == "mujoco"
         assert frame.system_kinetic_j is not None
@@ -94,6 +98,22 @@ class TestMujocoSegmentKeProvider:
         assert summed == pytest.approx(
             frame.system_kinetic_j, rel=MUJOCO_SYSTEM_KE_RTOL, abs=MUJOCO_SYSTEM_KE_ATOL
         )
+        assert summed == pytest.approx(
+            float(np.sum(result.segment_kinetic_energy)),
+            rel=MUJOCO_SYSTEM_KE_RTOL,
+            abs=MUJOCO_SYSTEM_KE_ATOL,
+        )
+        for seg in frame.segments:
+            idx = seg.body_index
+            assert seg.translational_j == pytest.approx(
+                float(result.segment_ke_translational[idx]), rel=1e-12, abs=1e-12
+            )
+            assert seg.rotational_j == pytest.approx(
+                float(result.segment_ke_rotational[idx]), rel=1e-12, abs=1e-12
+            )
+            assert seg.total_j == pytest.approx(
+                float(result.segment_kinetic_energy[idx]), rel=1e-12, abs=1e-12
+            )
 
     def test_time_series_peaks_track_maxima(self) -> None:
         model = _arm_model()

@@ -142,41 +142,7 @@ class SimRenderingMixin:
 
         if self.meshcat_adapter:
             try:
-                self.meshcat_adapter.update(self.data)
-                if scale is not None:
-                    self.meshcat_adapter.update_force_colors(axial_frame, scale)
-                self.meshcat_adapter.draw_glyphs(glyphs)
-                if getattr(self, "show_segment_ke_globes", False):
-                    frame = self._current_segment_ke_frame()
-                    if frame is not None:
-                        self.meshcat_adapter.draw_ke_globes(
-                            frame, self._segment_ke_peaks_tuple()
-                        )
-                    else:
-                        self.meshcat_adapter.draw_ke_globes(None, ())
-                else:
-                    self.meshcat_adapter.draw_ke_globes(None, ())
-
-                if self.show_induced_vectors:
-                    self.meshcat_adapter.draw_induced_vectors(
-                        self.data,
-                        self.latest_bio_data,
-                        self.induced_vector_source,
-                        self.torque_scale,
-                    )
-                else:
-                    self.meshcat_adapter.draw_induced_vectors(self.data, None, "")
-
-                if self.show_cf_vectors:
-                    self.meshcat_adapter.draw_cf_vectors(
-                        self.data,
-                        self.latest_bio_data,
-                        self.cf_vector_type,
-                        self.torque_scale,
-                    )
-                else:
-                    self.meshcat_adapter.draw_cf_vectors(self.data, None, "")
-
+                self._update_meshcat_frame_overlays(glyphs, axial_frame, scale)
             except (RuntimeError, ValueError, AttributeError) as exc:
                 logger.debug("Counterfactual vector rendering failed: %s", exc)
 
@@ -191,6 +157,50 @@ class SimRenderingMixin:
         pixmap = QtGui.QPixmap.fromImage(image)
 
         self.label.setPixmap(pixmap)
+
+    def _update_meshcat_frame_overlays(
+        self: Any, glyphs: GlyphSet | None, axial_frame: Any, scale: Any
+    ) -> None:
+        """Push one frame of glyphs, segment KE globes, and vector overlays to MeshCat."""
+        if self.meshcat_adapter is None or self.data is None:
+            return
+        self.meshcat_adapter.update(self.data)
+        if scale is not None:
+            self.meshcat_adapter.update_force_colors(axial_frame, scale)
+        self.meshcat_adapter.draw_glyphs(glyphs)
+        self._meshcat_draw_segment_ke_globes()
+
+        if self.show_induced_vectors:
+            self.meshcat_adapter.draw_induced_vectors(
+                self.data,
+                self.latest_bio_data,
+                self.induced_vector_source,
+                self.torque_scale,
+            )
+        else:
+            self.meshcat_adapter.draw_induced_vectors(self.data, None, "")
+
+        if self.show_cf_vectors:
+            self.meshcat_adapter.draw_cf_vectors(
+                self.data,
+                self.latest_bio_data,
+                self.cf_vector_type,
+                self.torque_scale,
+            )
+        else:
+            self.meshcat_adapter.draw_cf_vectors(self.data, None, "")
+
+    def _meshcat_draw_segment_ke_globes(self: Any) -> None:
+        if self.meshcat_adapter is None:
+            return
+        if not getattr(self, "show_segment_ke_globes", False):
+            self.meshcat_adapter.draw_ke_globes(None, ())
+            return
+        frame = self._current_segment_ke_frame()
+        if frame is None:
+            self.meshcat_adapter.draw_ke_globes(None, ())
+            return
+        self.meshcat_adapter.draw_ke_globes(frame, self._segment_ke_peaks_tuple())
 
     def _check_first_frame(self: Any, rgb: Any) -> None:
         """Post-condition on the first frame after a model load (UD #12884).
