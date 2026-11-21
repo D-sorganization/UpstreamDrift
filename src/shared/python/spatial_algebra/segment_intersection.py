@@ -19,6 +19,8 @@ _GROUPS = (
     ("feet", (0.85, 0.50, 0.15, 0.80), ("lead_foot", "trail_foot")),
     ("club", (0.85, 0.85, 0.85, 0.80), ("clubhead",)),
 )
+#: contact-sphere name suffixes that identify the (left, right) foot (#15150)
+FOOT_SPHERE_SIDE_SUFFIXES = (("_l", "left"), ("_r", "right"))
 #: specification frame of the clubhead point (#15150)
 CLUBHEAD_FRAME = "Clubhead"
 POINT_GROUPS: dict[str, tuple[str, ...]] = {g[0]: g[2] for g in _GROUPS}
@@ -74,6 +76,38 @@ def _extract_anchor(f: Mapping[str, Any]) -> tuple[float, float, float]:
     return (float(raw[0]), float(raw[1]), float(raw[2]))
 
 
+def _sphere_position(sph: Mapping[str, Any]) -> tuple[float, float, float]:
+    raw = sph.get("position_m", (0.0, 0.0, 0.0))
+    return (float(raw[0]), float(raw[1]), float(raw[2]))
+
+
+def _feet_from_spheres(
+    spheres: Sequence[Mapping[str, Any]], lead: str, trail: str
+) -> list[IntersectionPoint]:
+    """One foot point per side: centroid of that foot's contact spheres (#15150).
+
+    The skinned golfer declares ``contact.spheres`` (heel/forefoot/toe per
+    foot, named ``*_l`` / ``*_r``) instead of ``contact.points``. The left foot
+    takes the ``lead`` role label and the right the ``trail`` one, as the other
+    left/right frames do.
+    """
+    roles = {"left": lead, "right": trail}
+    by_side: dict[str, list[Mapping[str, Any]]] = {}
+    for sph in spheres:
+        name = str(sph.get("name", "")).lower()
+        for suffix, side in FOOT_SPHERE_SIDE_SUFFIXES:
+            if name.endswith(suffix) and sph.get("body"):
+                by_side.setdefault(side, []).append(sph)
+    out: list[IntersectionPoint] = []
+    for side, group in by_side.items():
+        anchors = [_sphere_position(g) for g in group]
+        cx, cy, cz = (sum(a[i] for a in anchors) / len(anchors) for i in range(3))
+        out.append(
+            _pt(f"{roles[side]}_foot", "feet", str(group[0]["body"]), (cx, cy, cz))
+        )
+    return out
+
+
 def extract_intersection_points(
     spec: Mapping[str, Any],
 ) -> dict[str, IntersectionPoint]:
@@ -119,7 +153,8 @@ def extract_intersection_points(
         )
 
     # 3. Feet from contact parameters
-    for p in spec.get("contact", {}).get("points", []):
+    contact = spec.get("contact", {})
+    for p in contact.get("points", []):
         pn = p.get("name", "").lower()
         fk: str | None = (
             "lead_foot"
@@ -130,6 +165,8 @@ def extract_intersection_points(
         )
         if fk and fk not in pts:
             pts[fk] = _pt(fk, "feet", p.get("body", fk), _extract_anchor(p))
+    for foot in _feet_from_spheres(contact.get("spheres", []), lead, trail):
+        pts.setdefault(foot.name, foot)
 
     # 4. Clubhead from its specification frame (#15150)
     if CLUBHEAD_FRAME in frames:
@@ -159,8 +196,14 @@ def resolve_intersection_points(
                 f"unknown mobility point {tok!r}; available: {sorted(all_pts)}"
             )
         items = list(all_pts) if tok == "all" else POINT_GROUPS.get(tok, (tok,))
-        for name in items:
-            if name in all_pts and name not in names:
+        found = [n for n in items if n in all_pts]
+        if tok in POINT_GROUPS and not found:
+            raise ValueError(
+                f"mobility point group {tok!r} resolved to no points; "
+                f"names tried: {list(items)}; available: {sorted(all_pts)}"
+            )
+        for name in found:
+            if name not in names:
                 names.append(name)
     res = [all_pts[n] for n in names]
     return res[:max_points] if max_points and max_points > 0 else res
