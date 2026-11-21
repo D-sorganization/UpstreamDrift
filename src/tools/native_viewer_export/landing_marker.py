@@ -58,6 +58,8 @@ class LandingMarkerSettings:
     carry_label_outline_rgba: tuple[int, ...] = (0, 0, 0, 255)
     carry_label_outline_px: int = 2
     carry_label_gap_px: int = 8
+    grid_carry_label_margin_px: int = 12
+    grid_carry_label_keep_out: tuple[float, ...] | None = (0.25, 0.1, 0.75, 0.9)
 
     def __post_init__(self) -> None:
         if self.when not in WHEN:
@@ -90,6 +92,7 @@ class LandingMarkerSettings:
         for name in ("carry_label_outline_px", "carry_label_gap_px"):
             if not isinstance(getattr(self, name), int) or getattr(self, name) < 0:
                 raise ValueError(f"{name} must be a non-negative integer")
+        self._validate_grid_label()
         if not (math.isfinite(self.carry_label_scale) and self.carry_label_scale > 0):
             raise ValueError("carry_label_scale must be positive and finite")
         if not isinstance(self.carry_label_unit, str):
@@ -98,6 +101,24 @@ class LandingMarkerSettings:
             self.carry_label_format.format(carry=1.0, unit=self.carry_label_unit)
         except (KeyError, IndexError, ValueError, AttributeError) as exc:
             raise ValueError(f"carry_label_format is not usable: {exc!r}") from exc
+
+    def _validate_grid_label(self) -> None:
+        margin = self.grid_carry_label_margin_px
+        if isinstance(margin, bool) or not isinstance(margin, int):
+            raise TypeError("grid_carry_label_margin_px must be an integer")
+        if margin < 0:
+            raise ValueError("grid_carry_label_margin_px must not be negative")
+        keep = self.grid_carry_label_keep_out
+        if keep is None:
+            return
+        ok = isinstance(keep, (list, tuple)) and len(keep) == 4
+        ok = ok and all(isinstance(c, (int, float)) and 0 <= c <= 1 for c in keep)
+        if not ok or not (keep[0] < keep[2] and keep[1] < keep[3]):
+            raise ValueError(
+                "grid_carry_label_keep_out must be null or (x0, y0, x1, y1) "
+                "fractions of the tile in 0..1 with x0 < x1 and y0 < y1"
+            )
+        object.__setattr__(self, "grid_carry_label_keep_out", tuple(map(float, keep)))
 
 
 def rgba_channels(value: object, name: str) -> tuple[int, ...]:
@@ -201,10 +222,14 @@ def paint_label(
     landing_m: Array,
     style: TracerSettings,
     carry_m: float,
+    grid: bool = False,
 ) -> Image8:
     """``tile`` with the carry label centred beneath the landing ring.
 
     The label is kept inside the tile. The scene never hides it, like the ring.
+    In a ``grid`` tile it also keeps ``grid_carry_label_margin_px`` clear of the
+    tile edges and is left out when it would cover the tile's central subject
+    (``grid_carry_label_keep_out``): the HUD and other tiles still state it.
     """
     m, near = style.landing_marker, style.near_clip_m
     if m is None or not m.carry_label:
@@ -225,11 +250,13 @@ def paint_label(
     left, top, right, bottom = pen.textbbox(
         (0, 0), text, font=font, stroke_width=stroke
     )
-    x = float(
-        np.clip(u - (right - left) / 2.0, 0, max(0, image.width - (right - left)))
-    )
+    gap = m.grid_carry_label_margin_px if grid else 0
+    width, height = right - left, bottom - top
+    x = float(np.clip(u - width / 2.0, gap, max(gap, image.width - width - gap)))
     y = v + ring_r * m.min_aspect + m.carry_label_gap_px
-    y = float(np.clip(y, 0, max(0, image.height - (bottom - top))))
+    y = float(np.clip(y, gap, max(gap, image.height - height - gap)))
+    if grid and _covers_subject(m, (x, y, x + width, y + height), image.size):
+        return tile
     pen.text(
         (x - left, y - top),
         text,
@@ -239,3 +266,21 @@ def paint_label(
         stroke_fill=m.carry_label_outline_rgba,
     )
     return np.asarray(image, dtype=np.uint8)
+
+
+def _covers_subject(
+    m: LandingMarkerSettings,
+    box: tuple[float, float, float, float],
+    size: tuple[int, int],
+) -> bool:
+    """Whether the label ``box`` meets the keep-out rectangle of a tile of ``size``."""
+    keep = m.grid_carry_label_keep_out
+    if keep is None:
+        return False
+    kx0, ky0, kx1, ky1 = (
+        keep[0] * size[0],
+        keep[1] * size[1],
+        keep[2] * size[0],
+        keep[3] * size[1],
+    )
+    return box[0] < kx1 and kx0 < box[2] and box[1] < ky1 and ky0 < box[3]

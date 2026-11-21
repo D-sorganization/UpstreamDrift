@@ -46,7 +46,6 @@ from src.tools.native_viewer_export.compositor import (
     HudInfo,
     compose_grid,
     draw_hud,
-    draw_impact_card,
     draw_view_label,
     event_caption_for_time,
 )
@@ -1074,9 +1073,9 @@ def _export_clip(
                 grid = compose_grid([cells[v] for v in settings.views])
                 outputs[GRID_VIEW] = draw_hud(grid, hud) if settings.hud else grid
             if show_card:
-                outputs = {n: draw_impact_card(f, card) for n, f in outputs.items()}
+                outputs = factors_panel.draw_card_all(outputs, card, GRID_VIEW)
             if factors is not None:
-                outputs = {n: factors.draw(f, t) for n, f in outputs.items()}
+                outputs = factors.draw_all(outputs, t, GRID_VIEW)
             outputs = ellipsoid_hud.draw_all(overlays, shown_feed, k, hud, outputs)
             outputs = flight_inset.draw_all(overlays, shown_feed, k, hud, outputs)
             if strip is not None:  # cursor at this frame's swing time

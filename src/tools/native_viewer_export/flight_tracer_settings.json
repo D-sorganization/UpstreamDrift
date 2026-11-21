@@ -13,6 +13,17 @@
     255
   ],
   "min_ball_radius_px": 2,
+  "ball_shading": {
+    "shaded": true,
+    "light_dir": [
+      -0.45,
+      -0.6,
+      0.66
+    ],
+    "ambient": 0.45,
+    "highlight_strength": 0.0,
+    "highlight_size": 0.35
+  },
   "fov_y_deg": 45.0,
   "near_clip_m": 0.05,
   "landing_hold_s": 1.0,
@@ -70,7 +81,9 @@
       255
     ],
     "carry_label_outline_px": 3,
-    "carry_label_gap_px": 10
+    "carry_label_gap_px": 10,
+    "grid_carry_label_margin_px": 12,
+    "grid_carry_label_keep_out": [0.25, 0.1, 0.75, 0.9]
   },
   "sources": {
     "tracer_color_rgba": "Tracer line colour and opacity (0-255 each).",
@@ -78,6 +91,7 @@
     "fade_after_s": "Seconds of flight after which the older part of the tracer is no longer drawn; null keeps the whole trace to the end of the clip.",
     "ball_color_rgb": "Colour of the ball in flight (the ball on the tee is the scene's own ball).",
     "min_ball_radius_px": "Smallest drawn ball radius, so a distant ball stays visible; a nearer ball is drawn at its projected size.",
+    "ball_shading": "Object (null turns it off): lights the flying ball as a sphere instead of a flat disc; the pixels it covers and the scene occlusion are unchanged. shaded false gives the flat disc. light_dir is the direction toward the light in the image frame (x right, y down, z toward the viewer; any non-zero length); ambient 0-1 is the brightness fraction on the unlit side (the colour is multiplied by ambient + (1 - ambient) * Lambert term); highlight_strength 0-1 adds white at the specular spot (0 = none) and highlight_size (0-1] is its angular radius as a fraction of 90 degrees.",
     "fov_y_deg": "Vertical field of view of the viewer camera the overlay is projected through. 45 is the MuJoCo free-camera default the native export uses; another viewer needs its own value or the overlay will not line up.",
     "near_clip_m": "Points closer to the camera plane than this are not drawn.",
     "landing_hold_s": "Seconds the clip continues after the ball lands.",
@@ -87,6 +101,6 @@
     "occlusion_tolerance_m": "Metres by which the scene may be nearer than a tracer point before it hides it (depth noise; the tracer starts on the tee).",
     "occlusion_tolerance_fraction": "Extra tolerance as a fraction of the point's distance (depth precision falls with distance).",
     "occlusion_step_px": "Tracer segments are split into pieces of at most this many pixels for the depth test.",
-    "landing_marker": "Object (null turns the marker off): when (at_landing or from_start); ground_z_m ground height; radius_m ring radius; min_radius_px and min_aspect keep the ring readable at distance (a marker size, not the landing area); the scene never hides the ring; color_rgba, line_width_px. Aids (each off by default in code, on here): ground_track draws the flight path projected onto the ground (ground_track_color_rgba, ground_track_width_px), revealed with the tracer; drop_line draws a vertical line from the ball to the ground while in flight; occlude_track lets the scene hide both (the far ground is too coarse in the depth image, so off here); carry_label writes the carry the flight model reports under the ring once landed, as carry_label_format ({carry} = carry times carry_label_scale, {unit} = carry_label_unit, e.g. yd with scale 1.0936), in carry_label_size_px with an outline of carry_label_outline_px, carry_label_gap_px beneath the ring."
+    "landing_marker": "Object (null turns the marker off): when (at_landing or from_start); ground_z_m ground height; radius_m ring radius; min_radius_px and min_aspect keep the ring readable at distance (a marker size, not the landing area); the scene never hides the ring; color_rgba, line_width_px. Aids (each off by default in code, on here): ground_track draws the flight path projected onto the ground (ground_track_color_rgba, ground_track_width_px), revealed with the tracer; drop_line draws a vertical line from the ball to the ground while in flight; occlude_track lets the scene hide both (the far ground is too coarse in the depth image, so off here); carry_label writes the carry the flight model reports under the ring once landed, as carry_label_format ({carry} = carry times carry_label_scale, {unit} = carry_label_unit, e.g. yd with scale 1.0936), in carry_label_size_px with an outline of carry_label_outline_px, carry_label_gap_px beneath the ring. In a tile of the composed grid the label also keeps grid_carry_label_margin_px clear of the tile edges (a label at the edge of a tile read as cut off) and is left out when it would cover the tile's central subject: grid_carry_label_keep_out is the rectangle (x0, y0, x1, y1) as fractions of the tile where the golfer stands (null never leaves it out); the HUD line and any tile whose label clears the rectangle still state the carry. Single views keep the plain clamp."
   }
 }
