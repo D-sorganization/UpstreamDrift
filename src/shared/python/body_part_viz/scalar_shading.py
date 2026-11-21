@@ -8,7 +8,10 @@ from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass, fields
 from functools import lru_cache
 from numbers import Integral, Real
-from typing import Any, Final
+from typing import TYPE_CHECKING, Any, Final
+
+if TYPE_CHECKING:
+    from .force_colors import ForceColorScale
 
 from .series_validation import (
     coerce_finite_real_fields,
@@ -421,30 +424,24 @@ class ScalarColorScale:
 
 
 @lru_cache(maxsize=128)
-def _cached_scalar_for_force(
-    enabled: bool,
-    tension_limit_n: float,
-    compression_limit_n: float,
-    deadband_n: float,
-    tension_color: str,
-    compression_color: str,
-    neutral_color: str,
-    opacity: float,
-    blend_mode: str,
-) -> ScalarColorScale:
+def _cached_scalar_for_force(scale: ForceColorScale) -> ScalarColorScale:
+    from .force_colors import ForceColorScale
+
+    if not isinstance(scale, ForceColorScale):
+        raise TypeError("scale must be ForceColorScale")
     return ScalarColorScale(
-        enabled=enabled,
+        enabled=scale.enabled,
         scale_kind="diverging",
         units="N",
         sign_convention="tension-positive",
-        positive_limit=tension_limit_n,
-        negative_limit=compression_limit_n,
-        deadband=deadband_n,
-        high_color=tension_color,
-        low_color=compression_color,
-        neutral_color=neutral_color,
-        opacity=opacity,
-        blend_mode=blend_mode,
+        positive_limit=scale.tension_limit_n,
+        negative_limit=scale.compression_limit_n,
+        deadband=scale.deadband_n,
+        high_color=scale.tension_color,
+        low_color=scale.compression_color,
+        neutral_color=scale.neutral_color,
+        opacity=scale.opacity,
+        blend_mode=scale.blend_mode,
         display_transform="linear",
     )
 
@@ -454,17 +451,7 @@ def scalar_for_force_color_scale(scale: Any) -> ScalarColorScale:
 
     if not isinstance(scale, ForceColorScale):
         raise TypeError("scale must be ForceColorScale")
-    return _cached_scalar_for_force(
-        scale.enabled,
-        scale.tension_limit_n,
-        scale.compression_limit_n,
-        scale.deadband_n,
-        scale.tension_color,
-        scale.compression_color,
-        scale.neutral_color,
-        scale.opacity,
-        scale.blend_mode,
-    )
+    return _cached_scalar_for_force(scale)
 
 
 def shade_outcome_hex(
