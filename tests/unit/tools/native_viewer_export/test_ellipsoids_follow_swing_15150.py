@@ -220,3 +220,42 @@ def test_held_frames_repeat_the_last_ellipsoids(
     for name, centre in want.items():
         assert np.array_equal(got[name], centre), name
     assert held_feed.hud_lines_at(held.n_states - 1) == feed.hud_lines_at(last)
+
+
+def test_scale_grouping_sizes_points_alike_and_fades_the_outer_kind(
+    swing: SwingInput,
+) -> None:
+    """Per point every point peaks near the target; per kind they differ."""
+    from dataclasses import replace
+
+    from src.tools.native_viewer_export.ellipsoid_visibility import (
+        load_visibility_settings,
+    )
+    from src.tools.native_viewer_export.overlay import (
+        MobilitySelection,
+        _build_hand_ellipsoid_feed,
+    )
+
+    def peaks(grouping: str, alpha: float = 1.0) -> dict[str, float]:
+        vis = replace(
+            load_visibility_settings(), scale_grouping=grouping, outer_alpha=alpha
+        )
+        feed, _, _ = _build_hand_ellipsoid_feed(
+            swing,
+            ["mobility"],
+            "constrained",
+            "auto",
+            selection=MobilitySelection("hands,feet,club", visibility=vis),
+        )
+        out: dict[str, float] = {}
+        for i in range(swing.n_states):
+            for g in feed(i):
+                out[g.label] = max(out.get(g.label, 0.0), max(g.radii))
+        return out
+
+    own, shared = peaks("per_point"), peaks("per_kind")
+    assert own.keys() == shared.keys() and len(own) >= 3
+    spread = {
+        k: max(v.values()) / min(v.values()) for k, v in (("pp", own), ("pk", shared))
+    }
+    assert spread["pp"] < 1.2 < spread["pk"]  # per point: every point ~ the target

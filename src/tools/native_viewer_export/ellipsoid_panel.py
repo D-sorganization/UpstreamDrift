@@ -5,7 +5,8 @@ HUD text rows that covered the clubhead and ball: a row per point (largest
 mobility and effective-mass radius, condition number), a units row and, with
 colour-by-kind, a legend. It sits opposite the impact factors panel, stacks
 below it on a shared edge and stays above the bottom HUD rows. Options:
-``ellipsoid_panel_settings.json`` (layout ``"text"`` restores the HUD rows).
+``ellipsoid_panel_settings.json`` (layout ``"text"`` restores the HUD rows). A footer row says when the
+sizes are scaled per point (``ellipsoid_visibility.py``).
 """
 
 from __future__ import annotations
@@ -18,6 +19,10 @@ from typing import TYPE_CHECKING, Any
 
 from src.shared.python.force_overlay.palette import ellipsoid_kind_rgba
 from src.tools.native_viewer_export import compositor
+from src.tools.native_viewer_export.ellipsoid_visibility import (
+    load_visibility_settings,
+    panel_note,
+)
 
 if TYPE_CHECKING:
     from src.tools.native_viewer_export.core import ClipOverlays, ExportSettings
@@ -47,6 +52,9 @@ class PanelSettings:
     legend: dict[str, str]
     radius_decimals: int
     condition_decimals: int
+    #: footer row under the table; ``None``: the visibility settings' note (it
+    #: says the sizes are scaled per point), ``""``: no footer
+    note: str | None = None
 
     def __post_init__(self) -> None:
         if self.layout not in LAYOUTS or self.position not in POSITIONS:
@@ -118,6 +126,8 @@ class EllipsoidPanel:
             )
             cond = _text(row.condition, cfg.condition_decimals)
             out.append((row.label.replace("_", " ").title(), (*radii, cond), False))
+        if cfg.note:
+            out.append((cfg.note, "", False))
         if self.by_kind:
             out += [(cfg.legend[k], "", False) for k in self.kinds]
         return out
@@ -175,6 +185,8 @@ def with_panel(
     """``overlays`` with the export's panel; unchanged (HUD text rows stay) when
     the layout is ``text``, the HUD is off, or the feed has no rows or kinds."""
     cfg = export.ellipsoid_panel or load_panel_settings()
+    if cfg.note is None:
+        cfg = replace(cfg, note=panel_note(load_visibility_settings()))
     kinds = tuple(k for k in KIND_FIELDS if k in export.interface_ellipsoids)
     has_rows = getattr(feed, "hand_panel_rows", None) is not None
     if cfg.layout != "panel" or not (export.hud and has_rows and kinds):
