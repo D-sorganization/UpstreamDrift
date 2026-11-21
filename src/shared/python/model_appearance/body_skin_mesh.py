@@ -1,7 +1,7 @@
 """Triangle-mesh steps shared by the CC0 body skin layers (#15299).
 
 Normals, open edges, depth under the surface, height over a surface, one
-Laplacian pass and an exact cut on a level set, on
+Laplacian pass, an exact cut on a level set and a split along one, on
 plain ``(N, 3)`` and ``(F, 3)`` arrays. Appearance only.
 """
 
@@ -150,7 +150,7 @@ def clip_mesh(columns: Array, faces: Faces, level: Array) -> tuple[Array, Faces]
     rows: list[Array] = []
 
     def cut(i: int, j: int) -> int:
-        key = (min(i, j), max(i, j))
+        key = i, j = (min(i, j), max(i, j))  # one order: the same row from either side
         if key not in made:
             share = level[i] / (level[i] - level[j])
             made[key] = len(columns) + len(made)
@@ -171,3 +171,21 @@ def clip_mesh(columns: Array, faces: Faces, level: Array) -> tuple[Array, Faces]
         raise ValueError("the level set keeps no face")
     ids, inverse = np.unique(kept, return_inverse=True)
     return np.vstack([columns, *rows])[ids], inverse.reshape(-1, 3)
+
+
+def split_mesh(columns: Array, faces: Faces, level: Array) -> tuple[Array, Faces]:
+    """The whole mesh with the line ``level == 0`` made edges of its own.
+
+    Both sides of :func:`clip_mesh` on that line, joined in the vertices they
+    share on it, so the surface is unchanged and stays one sheet. The rows on
+    the line are those ``clip_mesh`` makes for the same ``level``: a layer cut
+    there meets this mesh in common vertices and edges, at any pose. Raises
+    ``ValueError`` when the sizes disagree or the line leaves one side empty.
+    """
+    above, upper = clip_mesh(columns, faces, level)
+    below, lower = clip_mesh(columns, faces, -np.asarray(level, dtype=float))
+    apart, twin = cKDTree(above).query(below)
+    ids = np.where(np.asarray(apart) == 0.0, twin, len(above) + np.arange(len(below)))
+    joined = np.vstack([upper, ids[lower]])
+    kept, inverse = np.unique(joined, return_inverse=True)
+    return np.vstack([above, below])[kept], inverse.reshape(-1, 3)
