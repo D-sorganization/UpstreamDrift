@@ -635,6 +635,8 @@ class OverlayFeed:
     hand_ellipsoids: Callable[[int], tuple[Any, ...]] | None = None
     #: hand capability/mobility HUD text lines generator (HCM-3, #14004)
     hand_hud_lines: Callable[[int], tuple[str, ...]] | None = None
+    #: ``(hand_ellipsoids, hand_hud_lines)`` evaluated at the poses of a swing
+    ellipsoids_for: Callable[[Any], tuple[Any, Any]] | None = None
     _frames: dict[int, Any] = field(
         default_factory=dict, init=False, repr=False, compare=False
     )
@@ -643,6 +645,39 @@ class OverlayFeed:
         if index not in self._frames:
             self._frames[index] = self.frame_at(index)
         return self._frames[index]
+
+    def following(self, swing: Any, source_index: Callable[[int], int]) -> OverlayFeed:
+        """This feed for the frames of ``swing``, a re-sampling of its source (#15150).
+
+        Frame ``k`` reads the source frame ``source_index(k)`` (forces are not
+        interpolated); ellipsoids are evaluated at the pose of ``swing`` state
+        ``k``, so they sit on the body that frame shows. Raises ``ValueError``
+        when the feed has ellipsoids it cannot evaluate at another swing.
+        """
+        source = self.frame_at
+        feed = replace(self, frame_at=lambda i: source(source_index(int(i))))
+        if self.hand_ellipsoids is None and self.hand_hud_lines is None:
+            return feed
+        if self.ellipsoids_for is None:
+            raise ValueError(
+                "the overlay feed has ellipsoids indexed by source state and no "
+                "ellipsoids_for to evaluate them at the clip frames"
+            )
+        glyphs, lines = self.ellipsoids_for(swing)
+        return replace(feed, hand_ellipsoids=glyphs, hand_hud_lines=lines)
+
+    def held_after(self, last: int) -> OverlayFeed:
+        """This feed repeating frame ``last`` (glyphs and HUD) at every later index."""
+
+        def clamp(fn: Any) -> Any:
+            return None if fn is None else (lambda i: fn(min(int(i), last)))
+
+        return replace(
+            self,
+            frame_at=clamp(self.frame_at),
+            hand_ellipsoids=clamp(self.hand_ellipsoids),
+            hand_hud_lines=clamp(self.hand_hud_lines),
+        )
 
     def glyphs_at(self, index: int) -> GlyphSet:
         build = self.build
@@ -862,8 +897,8 @@ def _resampled(
 ) -> tuple[SwingInput, OverlayFeed | None]:
     """Swing re-sampled at the plan's frame times, with a matching overlay feed.
 
-    Poses are interpolated; glyphs come from the nearest source sample (forces
-    are not interpolated).
+    Poses are interpolated; force glyphs come from the nearest source sample
+    (forces are not interpolated) and ellipsoids from the frame's own pose.
     """
     known = settings.impact_time_s is not None or swing.has_impact_provenance
     contact = impact_time_s(swing, settings) if known else None
@@ -888,8 +923,7 @@ def _resampled(
     )
     if feed is None:
         return resampled, None
-    source = feed.frame_at
-    return resampled, replace(feed, frame_at=lambda i: source(int(nearest[i])))
+    return resampled, feed.following(resampled, lambda i: int(nearest[i]))
 
 
 def _strip_outcome(

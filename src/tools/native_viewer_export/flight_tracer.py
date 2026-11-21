@@ -248,7 +248,7 @@ class FlightPlayback:
 
         Frames are added every ``step_s`` of swing time up to landing plus
         ``landing_hold_s``, at most ``max_hold_s``; ``feed`` then repeats its
-        last frame. Unchanged without a flight. Raises ``ValueError`` for a
+        last frame, ellipsoids and HUD lines included. Unchanged without a flight. Raises ``ValueError`` for a
         step that is not positive.
         """
         if not (math.isfinite(step_s) and step_s > 0.0):
@@ -269,10 +269,7 @@ class FlightPlayback:
         if v is not None:  # the held pose is at rest
             v = np.concatenate([v, np.zeros((extra, v.shape[1]))])
         held = replace(shown, q=q, v=v, sample_times_s=(*times, *more))
-        if feed is not None:
-            source = feed.frame_at
-            feed = replace(feed, frame_at=lambda i: source(min(int(i), last)))
-        return held, feed
+        return held, None if feed is None else feed.held_after(last)
 
     def draw(
         self,
