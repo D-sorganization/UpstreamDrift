@@ -62,6 +62,12 @@ python3 -m src.tools.native_viewer_export \
   `bundle:ball_impact`, the ball every replay strikes), else the address
   geometry (MuJoCo FK of the first state, face centre and normal through
   `model_appearance.ball.ball_position_at_address`, source `address_geometry`).
+  With the `strike` placement of `model_appearance/ball_strike_settings.json`
+  (#15150, the default) that ball is then moved to where the face centre passes
+  nearest it around impact (source `strike_geometry`, record key `strike`). It
+  is a display placement: no joint angle or club dimension changes, and the
+  face is not squared. A swing that misses by more than `max_shift_m` keeps the
+  address ball and records why.
   When neither exists (no club, ungrounded first state, no MuJoCo) no ball is
   drawn and the reason is logged and returned in `ExportResult.ball`
   (`{"unavailable": reason}`, printed by the CLI); a placement is recorded with
@@ -227,6 +233,11 @@ python3 -m src.tools.native_viewer_export --bundle driver.npz --swing driver \
   prediction from kinematic impact conditions, not a measurement; a flight
   the model flags as outside its validity envelope is not shown unless
   `draw_invalid_flight` is set. Options: `flight_tracer_settings.json`.
+- `impact_factors.py`: the optional impact factors panel (#15150,
+  `ExportSettings.impact_factors`, default off): the card's rows in a panel of
+  one fixed size on every frame, blank before impact and frozen at their impact
+  values from the impact frame to the end of the clip; it replaces the card.
+  Options and their meaning are in `impact_factors_settings.json`.
 - `overlay.py`: overlay feed built from `force_overlay.bundle_provider`.
 - `overlay2d.py`: pinhole projection for the OpenSim 2D glyphs.
 - `backends/`: one module per engine plus shared helpers.

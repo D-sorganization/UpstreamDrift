@@ -254,17 +254,25 @@ def _card_lines(card: Any) -> list[tuple[str, str, bool]]:
     return lines
 
 
-def _card_metrics(
-    shape: tuple[int, ...], card: Any, position: str
-) -> tuple[tuple[int, int, int, int], int, list[tuple[str, str, bool]]]:
+def text_panel_box(
+    shape: tuple[int, ...],
+    title: str,
+    lines: Sequence[tuple[str, str, bool]],
+    position: str = "right",
+    size: int | None = None,
+) -> tuple[tuple[int, int, int, int], int]:
+    """Pixel box and font size of a panel holding ``title`` and ``lines``.
+
+    The box is as wide as the widest ``(label, value, dimmed)`` line, clipped
+    to the frame; ``size`` defaults to the frame height over 45 (at least 11).
+    """
     if position not in _CARD_POSITIONS:
         raise ValueError(f"position must be one of {_CARD_POSITIONS}, got {position!r}")
     height, width = int(shape[0]), int(shape[1])
-    size = max(11, height // 45)
+    size = max(11, height // 45) if size is None else size
     font = _font(size)
     pad, line_h = size // 2 + 2, size + 6
-    lines = _card_lines(card)
-    title_w = font.getlength(_CARD_TITLE)
+    title_w = font.getlength(title)
     text_w = max(
         title_w,
         *(
@@ -277,7 +285,14 @@ def _card_metrics(
     margin = max(6, width // 80)
     x0 = width - margin - box_w if position == "right" else margin
     y0 = margin
-    return (x0, y0, x0 + box_w, y0 + box_h), size, lines
+    return (x0, y0, x0 + box_w, y0 + box_h), size
+
+
+def _card_metrics(
+    shape: tuple[int, ...], card: Any, position: str
+) -> tuple[tuple[int, int, int, int], int, list[tuple[str, str, bool]]]:
+    lines = _card_lines(card)
+    return (*text_panel_box(shape, _CARD_TITLE, lines, position), lines)
 
 
 def impact_card_bbox(
@@ -298,14 +313,28 @@ def draw_impact_card(img: Image8, card: Any, *, position: str = "right") -> Imag
     _check_image(img)
     if not hasattr(card, "rows") or not hasattr(card, "available"):
         raise TypeError("card must be an ImpactCard")
-    (x0, y0, x1, y1), size, lines = _card_metrics(img.shape, card, position)
-    out = img.copy()
-    region = out[y0:y1, x0:x1].astype(np.float32) * (1.0 - _CARD_ALPHA)
+    box, size, lines = _card_metrics(img.shape, card, position)
+    return draw_text_panel(img, box, size, _CARD_TITLE, lines)
+
+
+def draw_text_panel(
+    img: Image8,
+    box: tuple[int, int, int, int],
+    size: int,
+    title: str,
+    lines: Sequence[tuple[str, str, bool]],
+    alpha: float = _CARD_ALPHA,
+) -> Image8:
+    """Copy of ``img`` with a darkened panel in ``box``: ``title``, then one
+    ``(label, value, dimmed)`` line each. Only pixels inside ``box`` change."""
+    _check_image(img)
+    (x0, y0, x1, y1), out = box, img.copy()
+    region = out[y0:y1, x0:x1].astype(np.float32) * (1.0 - alpha)
     pil = Image.fromarray(region.astype(np.uint8))
     draw = ImageDraw.Draw(pil)
     font = _font(size)
     pad, line_h = size // 2 + 2, size + 6
-    draw.text((pad, pad), _CARD_TITLE, font=font, fill=_YELLOW)
+    draw.text((pad, pad), title, font=font, fill=_YELLOW)
     for i, (label, value, unavailable) in enumerate(lines, start=1):
         y = pad + i * line_h
         colour = _CARD_GREY if unavailable else _WHITE

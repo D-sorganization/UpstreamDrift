@@ -1,0 +1,6 @@
+{
+  "seat": "head_centre",
+  "sources": {
+    "seat": "Where the drawn club head sits along the shaft axis. The spec club length ends at the head centre (motion_matching.club_models: the centre of the head ellipsoid the fit rests on the ground at address), while the head mesh is placed by its sole point on the shaft axis (model_appearance.club_head_mesh). \"head_centre\" (default, unchanged) puts that sole point at the head centre, so the drawn head sits one sole offset up the shaft from the head the fit grounded. \"sole_on_shaft_axis\" (#15150) slides the drawn head, its face centre and the shaft tip down the shaft by the spec's own butt_to_sole_m minus length_m, so the sole point lies where the shaft axis meets the ground at address. Measured on the matched driver swing of 2026-11-20: sole offset 63.7 mm; lowest head vertex at address 39.9 mm above the ground before and 5.3 mm below it after; the three captured head markers 6.1 mm inside to 28.8 mm off the head surface before and 5.8 mm inside to 7.0 mm off it after. Visual only: no mass, inertia, joint or fitted angle changes. A spec that states no butt_to_sole_m cannot use the second seat."
+  }
+}
