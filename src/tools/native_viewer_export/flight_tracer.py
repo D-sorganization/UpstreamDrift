@@ -160,14 +160,14 @@ def draw_trace(
     width = style.tracer_width_px
     flight_depth.draw_line(pen, camera, points_m, colour, width, near, occlusion)
     pixels, depth = project(camera, points_m[-1:], near)
-    shown = bool(np.isfinite(pixels).all())
-    if shown and occlusion is not None:
-        shown = bool(occlusion.visible(camera, points_m[-1:])[1][0])
-    if shown:
+    if np.isfinite(pixels).all():
         projected = float(camera.matrix[1, 1]) * radius_m / float(depth[-1])
         r = max(float(style.min_ball_radius_px), projected)
-        u, v = (float(c) for c in pixels[-1])
-        pen.ellipse([u - r, v - r, u + r, v + r], fill=(*style.ball_color_rgb, 255))
+        centre = (float(pixels[-1, 0]), float(pixels[-1, 1]))
+        sphere = (float(depth[-1]), radius_m)
+        flight_depth.draw_ball(
+            image, centre, r, style.ball_color_rgb, sphere, occlusion
+        )
     return np.asarray(image, dtype=np.uint8)
 
 
