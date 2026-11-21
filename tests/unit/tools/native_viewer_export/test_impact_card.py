@@ -480,3 +480,29 @@ def test_fixture_series_uses_the_true_face() -> None:
     assert len(series) == swing.n_states
     assert np.isfinite(series.velocity_mps).all()
     assert np.allclose(np.linalg.norm(np.asarray(series.face_normal), axis=1), 1.0)
+
+
+def test_strike_between_samples_through_the_face_centre_reads_zero_zero() -> None:
+    """An open face meets the ball between samples: travel is not a toe miss (#15150)."""
+    from src.shared.python.impact_parameters import ClubheadSeries
+    from src.shared.python.model_appearance.ball_strike import strike_ball_centre
+    from src.tools.native_viewer_export.ball import BallPlacement
+
+    t = np.arange(0.0, 0.2, 0.001)
+    rows = (len(t), 1)
+    normal = [np.cos(np.radians(15.0)), np.sin(np.radians(15.0)), 0.0]
+    series = ClubheadSeries(
+        times_s=t,
+        face_center_m=np.outer(40.0 * t, [1.0, 0.0, 0.0]),  # 40 mm between samples
+        velocity_mps=np.tile([40.0, 0.0, 0.0], rows),
+        face_normal=np.tile(normal, rows),
+        toe_axis=np.tile([0.0, 0.0, -1.0], rows),
+        grip_axis=np.tile([0.0, 0.0, 1.0], rows),
+    )
+    limits = {"max_tee_height_m": 1.0, "max_shift_m": 0.15, "ground_height_m": -1.0}
+    past = [40.0 * 0.15 + 0.030, 0.0, 0.0]  # 30 mm past the sample at 0.15 s
+    path = (t, series.face_center_m, series.face_normal)
+    strike = strike_ball_centre(*path, past, **limits)
+    ball = BallPlacement(strike.centre_m, _RADIUS, "strike_geometry")
+    card = impact_card.card_from_series(series, strike.contact_time_s, ball)
+    assert _toe_high(card) == pytest.approx((0.0, 0.0), abs=0.5)

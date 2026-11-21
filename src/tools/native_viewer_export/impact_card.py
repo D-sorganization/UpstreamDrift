@@ -44,9 +44,15 @@ TARGET_SOURCE = "address_face_normal"
 #: wider than half the face height of every club, so a contact further out
 #: lies off the face (the model face passed the ball without striking it).
 MAX_FACE_OFFSET_M = 0.050
+#: The contact point is carried along the head velocity only when the face
+#: closes on the ball at more than this fraction of the head speed (a numerical
+#: guard against a face moving edge-on; no physical quantity).
+MIN_CLOSING_FRACTION = 0.1
 #: Failures that become an "unavailable" reason rather than an exception
 #: (``BackendUnavailable`` is a ``RuntimeError``).
 _EXPECTED_ERRORS = (ValueError, KeyError, RuntimeError, OSError, TypeError)
+#: start of the reason given for a contact point that lies off the face
+OFF_FACE = "ball contact off the face"
 
 
 def _backend_unavailable(message: str) -> Exception:
@@ -104,7 +110,10 @@ def ball_contact_point(
 
     ``ball_centre - radius * n_face``: the face normal points from the face to
     the ball, so the ball surface point facing the club lies one radius back
-    along the normal. Raises ``ValueError`` without a face normal series.
+    along the normal, carried back along the head velocity onto the face plane
+    of the sample (#15150): the sample lies up to one step of head travel short
+    of the ball, and an open face would read that travel as a toe or heel
+    miss. Raises ``ValueError`` without a face normal series.
     """
     if series.face_normal is None:
         raise ValueError("face normal unobservable: no ball contact point")
@@ -112,8 +121,14 @@ def ball_contact_point(
     length = float(np.linalg.norm(normal))
     if length < 1e-9:
         raise ValueError("face normal has zero length: no ball contact point")
-    centre = np.asarray(ball.position_m, dtype=float)
-    return centre - ball.radius_m * normal / length
+    unit = normal / length
+    point = np.asarray(ball.position_m, dtype=float) - ball.radius_m * unit
+    velocity = np.asarray(series.velocity_mps[index], dtype=float)
+    closing = float(velocity @ unit)
+    if closing > MIN_CLOSING_FRACTION * float(np.linalg.norm(velocity)):
+        gap = float((point - np.asarray(series.face_center_m[index])) @ unit)
+        point = point - velocity * (gap / closing)
+    return point
 
 
 def _on_face_only(params: ImpactParameters) -> ImpactParameters:
@@ -129,7 +144,7 @@ def _on_face_only(params: ImpactParameters) -> ImpactParameters:
     if math.hypot(params.toe_mm, params.high_mm) <= MAX_FACE_OFFSET_M * 1000.0:
         return params
     reason = (
-        f"ball contact off the face (toe {params.toe_mm:+.0f} mm, high "
+        f"{OFF_FACE} (toe {params.toe_mm:+.0f} mm, high "
         f"{params.high_mm:+.0f} mm from the face centre): the model face misses "
         "the ball"
     )

@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 from src.shared.python.body_part_viz.force_colors import ForceColorScale
 from src.shared.python.force_overlay.conversions import restrict_frame
 from src.shared.python.force_overlay.glyphs import ForceGlyphStyle, GlyphSet
+from src.shared.python.force_overlay.palette import require_ellipsoid_color_mode
 from src.shared.python.force_overlay.renderers.meshcat_glyphs import legend_text
 from src.shared.python.grip_contact.palm_thumb import PALM_THUMB_LABEL
 from src.shared.python.golf_view_presets import (
@@ -50,6 +51,7 @@ from src.tools.native_viewer_export.compositor import (
     event_caption_for_time,
 )
 from src.tools.native_viewer_export import flight_tracer
+from src.tools.native_viewer_export import impact_factors as factors_panel
 from src.tools.native_viewer_export.impact_card import impact_card_for
 from src.tools.native_viewer_export.shading import shading_legend
 from src.tools.native_viewer_export.inset_strip import (
@@ -146,6 +148,9 @@ class ExportSettings:
     #: GCV-19 inset plot strip with a time cursor (GRF in BW and CoP; with ``grip``
     #: the net grip force and couple instead); needs the overlay feed
     inset_strip: bool = False
+    #: fixed-size impact factors panel on every frame, frozen from impact on
+    #: (an ``impact_factors.FactorSettings``; ``None`` = off; replaces the card)
+    impact_factors: Any = None
     ball: bool = True  # decorative golf ball until impact (GCV-13, #11719)
     #: ball flight with a shot tracer from impact on, the clip held until the
     #: ball lands (a ``flight_tracer.TracerSettings``; ``None`` = off)
@@ -177,6 +182,8 @@ class ExportSettings:
     mobility_points: str = "hands"
     max_mobility_points: int = 8
     mobility_condition_cutoff: float | None = None
+    #: ellipsoid colour encodes the point (default) or the kind (#15150)
+    ellipsoid_color_by: str = "point"
 
     @property
     def shading_enabled(self) -> bool:
@@ -279,6 +286,7 @@ class ExportSettings:
             and self.mobility_condition_cutoff <= 0.0
         ):
             raise ValueError("mobility_condition_cutoff must be positive")
+        require_ellipsoid_color_mode(self.ellipsoid_color_by)
 
     def effective_speeds(self, dt_s: float) -> tuple[float, ...]:
         """Speeds to export; a deprecated ``stride`` maps to its equivalent speed."""
@@ -893,6 +901,7 @@ class ClipOverlays:
     flight: flight_tracer.FlightPlayback | None = None
     card: ImpactCard | None = None
     strip: StripRenderer | None = None
+    factors: factors_panel.FactorsPanel | None = None
 
 
 def _swing_event_caption(swing: SwingInput, time_s: float, impact_s: float) -> str:
@@ -928,6 +937,7 @@ def _export_clip(
 ) -> tuple[dict[str, Path], int, list[int]]:
     card = overlays.card if overlays is not None else None
     strip = overlays.strip if overlays is not None else None
+    factors = overlays.factors if overlays is not None else None
     engine = backend.engine
     shown, shown_feed = _resampled(swing, feed, settings, plan)
     flight = overlays.flight if overlays is not None else None
@@ -981,6 +991,7 @@ def _export_clip(
                 for v in settings.views
             }
             show_card = card is not None and settings.hud and t >= impact
+            show_card = show_card and factors is None  # the panel replaces it
             outputs = {
                 v: draw_hud(labelled[v], hud) if settings.hud else labelled[v]
                 for v in settings.views
@@ -990,6 +1001,8 @@ def _export_clip(
                 outputs[GRID_VIEW] = draw_hud(grid, hud) if settings.hud else grid
             if show_card:
                 outputs = {n: draw_impact_card(f, card) for n, f in outputs.items()}
+            if factors is not None:
+                outputs = {n: factors.draw(f, t) for n, f in outputs.items()}
             if strip is not None:  # cursor at this frame's swing time
                 outputs = {n: strip.draw(f, t) for n, f in outputs.items()}
             for name, frame in outputs.items():
@@ -1032,6 +1045,9 @@ def export_swing(
     swing, ball_record = attach_ball(
         swing, settings, getattr(backend, "ball_limitation", None)
     )
+    factors = None
+    if settings.impact_factors is not None:
+        factors, settings = factors_panel.factors_for_export(swing, settings)
     plans = clip_plans(swing, settings)
     out_dir.mkdir(parents=True, exist_ok=True)
     factory = writer_factory or functools.partial(imageio_writer, crf=settings.crf)
@@ -1050,8 +1066,8 @@ def export_swing(
         StripRenderer(strip_outcome) if isinstance(strip_outcome, StripSeries) else None
     )
     overlays = (
-        ClipOverlays(card=card, strip=strip)
-        if card is not None or strip is not None
+        ClipOverlays(card=card, strip=strip, factors=factors)
+        if card is not None or strip is not None or factors is not None
         else None
     )
     if settings.ball_flight is not None:

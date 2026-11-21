@@ -17,6 +17,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.model_appearance import library
+from src.shared.python.model_appearance.club_head_seat import head_slide_m
 from src.shared.python.model_appearance.club_head_mesh import (
     DEFAULT_AXIS_OFFSET_M,
     club_face_normal,
@@ -84,10 +85,13 @@ class ClubAssembly:
     shaft_radius_m: float
     axis_offset_m: float = DEFAULT_AXIS_OFFSET_M
     face_roll_deg: float = 0.0  # head roll about the shaft axis (club frame)
+    head_slide_m: float = 0.0  # drawn head moved down the shaft (club_head_seat)
 
     def __post_init__(self) -> None:
         if not math.isfinite(self.face_roll_deg):
             raise ValueError("face_roll_deg must be finite")
+        if not math.isfinite(self.head_slide_m):
+            raise ValueError("head_slide_m must be finite")
         for name in ("length_m", "grip_length_m", "shaft_radius_m"):
             value = getattr(self, name)
             if not math.isfinite(value) or value <= 0.0:
@@ -136,18 +140,21 @@ def assembly_from_spec(spec: Mapping[str, Any]) -> ClubAssembly | None:
         else DEFAULT_AXIS_OFFSET_M
     )
     roll = club.get("face_roll_deg", ADDRESS_SQUARE_FACE_ROLL_DEG.get(alias, 0.0))
-    return ClubAssembly(alias, length, grip, 0.0065, offset, float(roll))
+    slide = head_slide_m(club, length)
+    return ClubAssembly(alias, length, grip, 0.0065, offset, float(roll), slide)
 
 
 def assembly_meshes(club: ClubAssembly) -> dict[str, Mesh]:
     """``{"shaft", "grip", "head"}`` meshes in the club-body frame.
 
     The head mesh includes the hosel; the shaft runs from the hosel top to the
-    grip. Postcondition: every mesh is closed with outward winding.
+    grip. The head, and the shaft tip with it, sit ``head_slide_m`` down the
+    shaft. Postcondition: every mesh is closed with outward winding.
     """
     head = load_club_head(club.head_alias)
     z = club.axis_offset_m
-    shaft_top = -head.hosel_top_m
+    slide = np.array([0.0, club.head_slide_m, 0.0])
+    shaft_top = club.head_slide_m - head.hosel_top_m
     grip_top = -(club.length_m - club.grip_length_m)
     shaft = tapered_tube(
         np.array([0.0, shaft_top, z]),
@@ -161,12 +168,11 @@ def assembly_meshes(club: ClubAssembly) -> dict[str, Mesh]:
         GRIP_TIP_RADIUS_M,
         GRIP_BUTT_RADIUS_M,
     )
+    seated = club_frame_mesh(head, axis_offset_m=z, face_roll_deg=club.face_roll_deg)
     return {
         "shaft": shaft,
         "grip": grip,
-        "head": club_frame_mesh(
-            head, axis_offset_m=z, face_roll_deg=club.face_roll_deg
-        ),
+        "head": Mesh(seated.vertices + slide, seated.faces),
     }
 
 
@@ -182,17 +188,18 @@ def clubface_vector(club: ClubAssembly) -> np.ndarray:
 def clubface_centre(club: ClubAssembly) -> np.ndarray:
     """Face-centre point (where the ball is struck) in the club-body frame.
 
-    Same placement and roll as the rendered head, so it is the point every
-    engine's head mesh shows at the middle of the face.
+    Same placement, roll and slide as the rendered head, so it is the point
+    every engine's head mesh shows at the middle of the face.
     """
     head = load_club_head(club.head_alias)
     centre = face_centre(head.head_mesh)[None, :]
-    return head_points_to_club(
+    seated = head_points_to_club(
         head,
         centre,
         axis_offset_m=club.axis_offset_m,
         face_roll_deg=club.face_roll_deg,
     )[0]
+    return np.asarray(seated + [0.0, club.head_slide_m, 0.0], dtype=float)
 
 
 def club_body_name(spec: Mapping[str, Any]) -> str | None:

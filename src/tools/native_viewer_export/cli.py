@@ -21,6 +21,7 @@ from src.shared.python.body_part_viz.force_colors import (
 from src.shared.python.body_part_viz.skin_load_settings import (
     load_skin_load_settings,
 )
+from src.shared.python.force_overlay.palette import ELLIPSOID_COLOR_MODES
 from src.shared.python.golf_view_presets import VIEW_ORDER
 from src.shared.python.model_appearance.appearance_selection import (
     AppearanceOverrides,
@@ -46,6 +47,7 @@ from src.tools.native_viewer_export.core import (
     parse_ellipsoid_scale,
 )
 from src.tools.native_viewer_export.flight_tracer import load_tracer_settings
+from src.tools.native_viewer_export.impact_factors import load_factor_settings
 from src.tools.native_viewer_export.overlay import OverlayOptions, build_overlay_feed
 from src.tools.native_viewer_export.runner import ExportJob, run_export
 
@@ -100,7 +102,9 @@ def _add_ellipsoid_arguments(p: argparse.ArgumentParser) -> None:
         "--mobility-points",
         default="hands",
         metavar="SELECTOR",
-        help="points for mobility overlays (default: hands; HCM-5, #14006)",
+        help="points for mobility overlays: comma-separated groups (hands, wrists, "
+        "elbows, shoulders, pelvis, feet, club) or point names such as clubhead "
+        "(default: hands; HCM-5, #14006, #15150)",
     )
     p.add_argument(
         "--max-mobility-points",
@@ -115,6 +119,13 @@ def _add_ellipsoid_arguments(p: argparse.ArgumentParser) -> None:
         default=None,
         metavar="MAX_COND",
         help="condition threshold to suppress ill-conditioned ellipsoids (HCM-5, #14006)",
+    )
+    p.add_argument(
+        "--ellipsoid-color-by",
+        choices=ELLIPSOID_COLOR_MODES,
+        default=ELLIPSOID_COLOR_MODES[0],
+        help="what an ellipsoid colour encodes: its point (default) or its kind, "
+        "so mobility and effective-mass differ at one point (#15150)",
     )
 
 
@@ -215,6 +226,50 @@ def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_impact_factor_arguments(p: argparse.ArgumentParser) -> None:
+    """Impact factors panel flags (#15150)."""
+    p.add_argument(
+        "--impact-factors",
+        action="store_true",
+        help="draw the impact factors panel (club speed, path, face, face to "
+        "path, attack angle, loft, strike point) on every frame; the values "
+        "freeze at impact and stay to the end of the clip (default: off)",
+    )
+    p.add_argument(
+        "--impact-factors-settings",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help="settings file of the impact factors panel (turns it on; default "
+        "impact_factors_settings.json beside the tool)",
+    )
+
+
+def _add_ball_flight_arguments(p: argparse.ArgumentParser) -> None:
+    """Ball flight and shot tracer flags (#15150)."""
+    p.add_argument(
+        "--ball-flight",
+        action="store_true",
+        help="from impact on fly the ball along the model-predicted carry "
+        "trajectory with a shot tracer and hold the clip until it lands; the "
+        "down_the_line_flight view keeps the flight in the picture (default: off)",
+    )
+    p.add_argument(
+        "--ball-flight-settings",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help="settings file of the ball flight and tracer (turns it on; default "
+        "flight_tracer_settings.json beside the tool)",
+    )
+
+
+def _add_clip_overlay_arguments(p: argparse.ArgumentParser) -> None:
+    """Optional clip overlay flags: impact factors panel and ball flight."""
+    _add_impact_factor_arguments(p)
+    _add_ball_flight_arguments(p)
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="python -m src.tools.native_viewer_export",
@@ -310,22 +365,8 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="do not draw the decorative golf ball (shown until impact)",
     )
+    _add_clip_overlay_arguments(p)
     p.add_argument("--no-grid", action="store_true", help="skip the 2x2 clip")
-    p.add_argument(
-        "--ball-flight",
-        action="store_true",
-        help="from impact on fly the ball along the model-predicted carry "
-        "trajectory with a shot tracer and hold the clip until it lands; the "
-        "down_the_line_flight view keeps the flight in the picture (default: off)",
-    )
-    p.add_argument(
-        "--ball-flight-settings",
-        type=Path,
-        default=None,
-        metavar="PATH",
-        help="settings file of the ball flight and tracer (turns it on; default "
-        "flight_tracer_settings.json beside the tool)",
-    )
     add_appearance_arguments(p)
     add_grip_arguments(p, physical=True)
     return p
@@ -506,11 +547,15 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         mobility_points=mobility_points,
         max_mobility_points=max_mobility_points,
         mobility_condition_cutoff=mobility_condition_cutoff,
+        ellipsoid_color_by=getattr(args, "ellipsoid_color_by", "point"),
         multiview=not args.no_grid,
         grip=args.grip,
         hud=not args.no_hud,
         event_captions=bool(getattr(args, "event_captions", False)),
         ball=not args.no_ball,
+        impact_factors=load_factor_settings(args.impact_factors_settings)
+        if args.impact_factors or args.impact_factors_settings is not None
+        else None,
         appearance=build_appearance(args),
         ball_flight=load_tracer_settings(args.ball_flight_settings)
         if args.ball_flight or args.ball_flight_settings is not None
@@ -560,6 +605,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     mobility_points=settings.mobility_points,
                     max_mobility_points=settings.max_mobility_points,
                     mobility_condition_cutoff=settings.mobility_condition_cutoff,
+                    ellipsoid_color_by=settings.ellipsoid_color_by,
                     axial_impact_blackout=args.axial_impact_blackout,
                 ),
             ),

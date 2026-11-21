@@ -44,6 +44,8 @@ class OverlayOptions:
     mobility_points: str = "hands"
     max_mobility_points: int = 8
     mobility_condition_cutoff: float | None = None
+    #: ellipsoid colour encodes the point (default) or the kind (#15150)
+    ellipsoid_color_by: str = "point"
     #: blank axial loads around ball impact (skin_load_settings.json default)
     axial_impact_blackout: bool = True
 
@@ -176,19 +178,52 @@ def _build_hand_hud_lines_fn(
     return hand_hud_lines_fn
 
 
+RGBA = tuple[float, float, float, float]
+
+
+@dataclass(frozen=True)
+class MobilitySelection:
+    """Which mobility points the ellipsoid feed samples, and how many (#15150)."""
+
+    points: str = "hands"
+    max_points: int = 8
+    condition_cutoff: float | None = None
+
+
+def _ellipsoid_color_picker(
+    color_by: str,
+) -> Callable[[Any, str, RGBA], RGBA]:
+    """Colour rule of an export ellipsoid: by ``"point"`` or by ``"kind"`` (#15150).
+
+    Raises ``ValueError`` for any other ``color_by``. The returned function
+    maps ``(point, kind, fallback_rgba)`` to the glyph RGBA.
+    """
+    from src.shared.python.force_overlay.palette import (
+        ellipsoid_kind_rgba,
+        require_ellipsoid_color_mode,
+    )
+
+    if require_ellipsoid_color_mode(color_by) == "kind":
+        return lambda _point, kind, _fallback: ellipsoid_kind_rgba(kind)
+    return lambda point, _kind, fallback: (
+        point.color if point.color is not None else fallback
+    )
+
+
 def _build_hand_ellipsoid_feed(
     swing: SwingInput,
     active_ellipsoids: Sequence[str],
     hand_mobility_mode: str,
     ellipsoid_scale: str,
     engine: str = "mujoco",
-    mobility_points: str = "hands",
-    max_mobility_points: int = 8,
-    mobility_condition_cutoff: float | None = None,
+    selection: MobilitySelection = MobilitySelection(),
+    ellipsoid_color_by: str = "point",
 ) -> tuple[
     Callable[[int], tuple[EllipsoidGlyph, ...]], Callable[[int], tuple[str, ...]]
 ]:
     """Build ellipsoid glyph emitter and HUD capability formatter."""
+    pick_color = _ellipsoid_color_picker(ellipsoid_color_by)
+    mobility_condition_cutoff = selection.condition_cutoff
     from src.shared.python.force_overlay.ellipsoid_display import (
         EllipsoidDisplayBuilder,
         EllipsoidDisplayScale,
@@ -200,8 +235,8 @@ def _build_hand_ellipsoid_feed(
     spec_dict = json.loads(swing.bundle.spec_bytes)
     resolved_pts = resolve_intersection_points(
         spec_dict,
-        mobility_points,
-        max_points=max_mobility_points,
+        selection.points,
+        max_points=selection.max_points,
     )
 
     _hm_cache: dict[int, Any] = {}
@@ -259,7 +294,7 @@ def _build_hand_ellipsoid_feed(
                     "trail" if "trail" in pt.name else "lead",
                     label=f"{pt.name} {kind}",
                 )
-                c = pt.color if pt.color is not None else disp.rgba
+                c = pick_color(pt, kind, disp.rgba)
                 glyphs_list.append(
                     EllipsoidGlyph(disp.centre, disp.axes, disp.radii, c, disp.label)
                 )
@@ -396,9 +431,12 @@ def build_overlay_feed(
             opts.hand_mobility_mode,
             opts.ellipsoid_scale,
             engine=engine,
-            mobility_points=opts.mobility_points,
-            max_mobility_points=opts.max_mobility_points,
-            mobility_condition_cutoff=opts.mobility_condition_cutoff,
+            selection=MobilitySelection(
+                opts.mobility_points,
+                opts.max_mobility_points,
+                opts.mobility_condition_cutoff,
+            ),
+            ellipsoid_color_by=opts.ellipsoid_color_by,
         )
 
     feed = OverlayFeed(
