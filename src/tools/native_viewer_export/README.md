@@ -291,10 +291,15 @@ computes it once per swing, on the unresampled source states (identical for
 every speed clip), from the displayed pose `q`: `club_pose.ClubPoseModel` (shared
 with the decorative ball) places the spec club body through MuJoCo and gives the
 true face centre, normal, toe and grip axes; `np.gradient` of the face-centre
-positions gives the velocity; `extract_impact_parameters` (impact state = last
-sample before the impact time) gives the rows. The specification has no target
+positions gives the velocity; `extract_impact_parameters` gives the rows. With a
+ball the impact state is the club where its face reaches the ball
+(`impact_state.series_at_contact`, settings in `impact_state_settings.json`): a
+fit of the samples before contact carried to the contact instant, so no row is
+read a sample early or across the strike (`extras.impact_state`); without a ball
+it is the last sample before the impact time. The specification has no target
 line, so the target direction is the horizontal part of the address (state 0)
-face normal (face square at address, as `plan_gaze` does), right-handed, Z-up;
+face normal of the address-square head (as `plan_gaze` does; it does not turn
+with the head roll that is drawn), right-handed, Z-up;
 the card records `extras.target_source = "address_face_normal"`, so face angle
 and path are relative to that assumed line. Unavailable rows show "unavailable" and a
 reason, never zero. Impact Location (toe, high) uses the decorative ball

@@ -46,9 +46,14 @@ class ClubPoseModel:
             MujocoOverlaySource,
         )
         from src.shared.python.model_appearance.club_assembly import (
+            ADDRESS_SQUARE_FACE_ROLL_DEG,
             assembly_from_spec,
             clubface_centre,
             clubface_vector,
+        )
+        from src.shared.python.model_appearance.club_head_mesh import (
+            club_face_normal,
+            load_club_head,
         )
         from src.shared.python.model_appearance.grip_hands import grip_hand_frame
         from src.shared.python.model_appearance.grip_pose import Hand
@@ -62,6 +67,9 @@ class ClubPoseModel:
         self.head_alias: str = club.head_alias  # club head name, e.g. "driver"
         self._centre_body = np.asarray(clubface_centre(club), dtype=float)
         self._normal_body = np.asarray(clubface_vector(club), dtype=float)
+        square = ADDRESS_SQUARE_FACE_ROLL_DEG.get(club.head_alias, 0.0)
+        head = load_club_head(club.head_alias)
+        self._square_normal_body = club_face_normal(head, square)
         self._source = MujocoOverlaySource(spec_bytes)
         lead = grip_hand_frame(club, Hand.LEAD)[:3, 3]
         trail = grip_hand_frame(club, Hand.TRAIL)[:3, 3]
@@ -87,6 +95,16 @@ class ClubPoseModel:
     def face_world(self, coords: Mapping[str, float]) -> FaceWorld:
         """World face centre, normal, toe and grip axes at ``coords``."""
         return face_axes(self.body_world(coords), self._centre_body, self._normal_body)
+
+    def address_square_normal_world(self, coords: Mapping[str, float]) -> Array:
+        """World face normal the head would have with its address-square roll.
+
+        The target line of a spec is where this face points at address; the
+        head roll that is drawn (``face_roll_deg``) is a display choice and
+        may leave the address face open or closed (#15150).
+        """
+        normal = self.body_world(coords)[:3, :3] @ self._square_normal_body
+        return np.asarray(normal / np.linalg.norm(normal), dtype=np.float64)
 
 
 def face_roll_calibrated_spec_bytes(
