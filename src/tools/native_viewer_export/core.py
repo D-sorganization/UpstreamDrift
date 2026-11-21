@@ -49,6 +49,7 @@ from src.tools.native_viewer_export.compositor import (
     draw_label,
     event_caption_for_time,
 )
+from src.tools.native_viewer_export import flight_tracer
 from src.tools.native_viewer_export.impact_card import impact_card_for
 from src.tools.native_viewer_export.shading import shading_legend
 from src.tools.native_viewer_export.inset_strip import (
@@ -146,6 +147,9 @@ class ExportSettings:
     #: the net grip force and couple instead); needs the overlay feed
     inset_strip: bool = False
     ball: bool = True  # decorative golf ball until impact (GCV-13, #11719)
+    #: ball flight with a shot tracer from impact on, the clip held until the
+    #: ball lands (a ``flight_tracer.TracerSettings``; ``None`` = off)
+    ball_flight: Any = None
     grip: bool = False  # hands/grip overlay (GCV-10); hands_closeup tracks it
     lookat_m: tuple[float, float, float] = (1.0, 0.0, 0.9)
     distance_m: float | None = None
@@ -886,6 +890,7 @@ def _strip_outcome(
 class ClipOverlays:
     """Optional per-frame HUD overlays (impact card, synchronised strip)."""
 
+    flight: flight_tracer.FlightPlayback | None = None
     card: ImpactCard | None = None
     strip: StripRenderer | None = None
 
@@ -925,6 +930,10 @@ def _export_clip(
     strip = overlays.strip if overlays is not None else None
     engine = backend.engine
     shown, shown_feed = _resampled(swing, feed, settings, plan)
+    flight = overlays.flight if overlays is not None else None
+    if flight is not None and plan.window is None:  # hold until the ball lands
+        step_s = plan.speed / settings.fps
+        shown, shown_feed = flight.held(shown, shown_feed, step_s)
     indices = list(range(shown.n_states))
     names = [*settings.views, *([GRID_VIEW] if settings.multiview else [])]
     paths = {
@@ -947,6 +956,9 @@ def _export_clip(
                 glyph_counts.append(len(glyphs.arrows) + len(glyphs.torque_arcs))
             t = shown.time_s(k)
             extra_lines = shown_feed.hud_lines_at(k) if shown_feed is not None else ()
+            if flight is not None:
+                tiles = flight.draw(tiles, t, settings.lookat_m, settings.distance_m)
+                extra_lines = (*extra_lines, *flight.hud_lines(t))
             hud = HudInfo(
                 t,
                 viewer,
@@ -1042,6 +1054,9 @@ def export_swing(
         if card is not None or strip is not None
         else None
     )
+    if settings.ball_flight is not None:
+        flight = flight_tracer.flight_for_export(swing, settings)
+        overlays = replace(overlays or ClipOverlays(), flight=flight)
     for plan in plans:
         clip_paths, frames, glyphs = _export_clip(
             backend, swing, settings, plan, out_dir, feed, factory, overlays
