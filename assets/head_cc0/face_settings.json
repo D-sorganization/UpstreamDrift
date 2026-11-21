@@ -1,6 +1,10 @@
 {
   "schema_version": "head-face-settings-v1",
   "units": "Head lengths (neck plane to vertex is 1) unless a name ends in _deg.",
+  "notes": {
+    "max_total_triangles": "Raised 12,000 -> 32,000 by owner decision 2026-11-21 (#15299) for hair on a refined scalp. Measured: head 11,890 -> 30,254 triangles (hair 1,696 -> 20,060; margin 1,746); hairline turning 34.5 -> 27.0 deg; plain outline turning, front 17.2 -> 4.8 deg and profile 22.4 -> 5.1 deg; comb ridge 0.58 -> 3.66 vertices per period.",
+    "lining_splits": "2026-11-20 (#15299): the hair shell's surface next to the skin is never seen and took half its triangles (10,030 of 20,060). It now keeps the scalp's own faces (lining_splits 0) and a strip along the hairline joins it to the refined outer surface: 20,060 -> 10,878 hair triangles at the old settings (lined_hair_max_share: lined over fully lined, measured 0.52). The freed triangles go to the outer surface: refine_edge 0.026 -> 0.018 (longest crown edge 0.026 -> 0.020), hair 21,036, head 31,230 of 32,000. With them comb_wavelength 0.095 -> 0.075 (3.74 vertices per ridge), comb_amplitude 0.005 -> 0.006, and the combing fades over crown_from_z 0.66 to 0.88 instead of 0.78 to 0.88, so the ridges run down the back of the crown instead of stopping on a line. fringe_thickness 0.045 -> 0.035 over fringe_band 0.02 -> 0.05 takes the rolled lip off the forehead; rim_thickness 0.0025 -> 0.0012 lowers the step at the nape. The finer rim reads the hairline's own peak over the ear (29.6 deg, over hairline_max_turn_deg), so the point behind it is raised 0.575 -> 0.585: 23.7 deg (the unrefined cut then has 1,688 triangles, was 1,696; unrefined_hair_triangles records it). Plain outline turning 4.1 deg front, 5.3 deg profile."
+  },
   "face": {
     "eye_y": 0.124,
     "eye_z": 0.538,
@@ -26,13 +30,25 @@
   "hair": {
     "hairline": [
       [0.0, 0.80], [0.5, 0.79], [0.75, 0.745], [0.95, 0.64], [1.10, 0.575],
-      [1.25, 0.565], [1.45, 0.60], [1.62, 0.615], [1.78, 0.575], [1.95, 0.47],
+      [1.25, 0.565], [1.45, 0.60], [1.62, 0.615], [1.78, 0.585], [1.95, 0.47],
       [2.10, 0.40], [2.30, 0.36], [2.60, 0.335], [2.90, 0.318],
       [3.141592653589793, 0.31]
     ],
-    "comb_amplitude": 0.005,
-    "rim_thickness": 0.0015,
-    "cut_steps": 16
+    "comb_amplitude": 0.006,
+    "comb_wavelength": 0.075,
+    "crown_from_z": 0.66,
+    "crown_band": 0.22,
+    "part_width": 0.028,
+    "part_depth": 0.30,
+    "fringe_thickness": 0.035,
+    "fringe_band": 0.05,
+    "off_skin": 0.003,
+    "rim_thickness": 0.0012,
+    "cut_steps": 16,
+    "refine_splits": 4,
+    "refine_edge": 0.018,
+    "refine_curve": 0.75,
+    "lining_splits": 0
   },
   "checks": {
     "view_elevations_deg": [0.0, 30.0, 45.0],
@@ -44,6 +60,13 @@
     "brow_max_proud": 0.008,
     "brow_max_end_ratio": 0.6,
     "hairline_step_rad": 0.05,
-    "hairline_max_turn_deg": 35.0
+    "hairline_max_turn_deg": 28.5,
+    "max_total_triangles": 32000,
+    "unrefined_hair_triangles": 1688,
+    "outline_step_rad": 0.02,
+    "outline_views": [[0.0, 0.55, -1.1, 1.1], [0.1, 0.55, -2.0, 0.6]],
+    "outline_max_turn_deg": [6.0, 6.5],
+    "comb_min_ridge_vertices": 3.5,
+    "lined_hair_max_share": 0.55
   }
 }

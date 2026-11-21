@@ -117,6 +117,66 @@ def test_hairline_has_no_corners(skin) -> None:
         head_hair.hairline_turns_deg(skin, "left", 0.0)
 
 
+def test_refinement_is_a_setting_and_zero_leaves_the_scalp_as_it_was(skin) -> None:
+    crop = head_hair.load_hair_crop()
+    coarse = head_hair.build_short_crop(skin, "left", replace(crop, refine_splits=0))
+    assert len(coarse.faces) == CHECKS["unrefined_hair_triangles"]
+    fine = head_hair.build_short_crop(skin, "left", crop)
+    assert crop.refine_splits > 0 and len(fine.faces) > 4 * len(coarse.faces)
+    for bad in ({"refine_splits": -1}, {"refine_edge": -0.1}, {"refine_curve": 1.5}):
+        with pytest.raises(ValueError):
+            head_hair.build_short_crop(skin, "left", replace(crop, **bad))
+
+
+def _closed(faces) -> bool:
+    edges = np.concatenate([faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]])
+    twins, counts = np.unique(np.sort(edges, axis=1), axis=0, return_counts=True)
+    directed = {(int(a), int(b)) for a, b in edges}
+    return bool((counts == 2).all()) and all((b, a) in directed for a, b in directed)
+
+
+def test_the_hidden_lining_is_coarse_and_the_shell_stays_closed(skin) -> None:
+    """The surface next to the skin is never seen; it keeps the scalp's own
+    faces and is zipped to the refined outer surface along the hairline."""
+    crop = head_hair.load_hair_crop()
+    assert 0 <= crop.lining_splits < crop.refine_splits
+    whole = replace(crop, lining_splits=crop.refine_splits)
+    for part in ("left", "none"):
+        lined = head_hair.build_short_crop(skin, part, crop)
+        full = head_hair.build_short_crop(skin, part, whole)
+        assert _closed(lined.faces) and lined.volume() > 0.0
+        share = len(lined.faces) / len(full.faces)
+        assert share <= CHECKS["lined_hair_max_share"], (part, share)
+        for axis, view in enumerate(CHECKS["outline_views"]):  # same outer surface
+            step = CHECKS["outline_step_rad"]
+            seen = head_hair.outline_turns_deg(lined, axis, step, view)
+            assert np.allclose(
+                seen, head_hair.outline_turns_deg(full, axis, step, view), atol=1e-6
+            )
+    with pytest.raises(ValueError, match="lining_splits"):
+        head_hair.build_short_crop(skin, "left", replace(crop, lining_splits=-1))
+
+
+def test_refined_hair_has_a_smooth_outline_and_resolved_comb_ridges(skin) -> None:
+    crop = head_hair.load_hair_crop()
+    plain = replace(crop, comb_amplitude=0.0)  # the shape under the combed relief
+    step, bounds = CHECKS["outline_step_rad"], CHECKS["outline_max_turn_deg"]
+    for axis, view in enumerate(CHECKS["outline_views"]):
+        fine = head_hair.build_short_crop(skin, "none", plain)
+        turn = head_hair.outline_turns_deg(fine, axis, step, view).max()
+        assert turn <= bounds[axis], (axis, turn)
+        coarse = head_hair.build_short_crop(
+            skin, "none", replace(plain, refine_splits=0)
+        )
+        assert head_hair.outline_turns_deg(coarse, axis, step, view).max() > 2.0 * turn
+    ridge = head_hair.comb_ridge_vertices(skin, "left")
+    assert ridge >= CHECKS["comb_min_ridge_vertices"], ridge
+    with pytest.raises(ValueError):
+        head_hair.outline_turns_deg(fine, 2, step, view)
+    with pytest.raises(ValueError):
+        head_hair.outline_turns_deg(fine, 0, step, (0.0, 0.5, 0.0, step))
+
+
 def test_face_wears_the_body_skin_material_and_hair_is_smooth_shaded() -> None:
     pytest.importorskip("mujoco")
     from src.engines.physics_engines.mujoco.python import full_body_mjcf
