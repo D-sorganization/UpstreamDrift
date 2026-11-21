@@ -536,7 +536,7 @@ def draw_all(
         return outputs
     out = dict(outputs)
     for name, frame in outputs.items():
-        if not _fixed(name):
+        if not shows_inset(cfg, name):
             continue
         limit = ellipsoid_panel.hud_top_px(frame.shape, hud)
         obstacles = obstacles_for(overlays, feed, index, frame.shape, limit)
@@ -546,6 +546,11 @@ def draw_all(
         if rect is not None:
             out[name] = paint(frame, flight, hud.time_s, rect, cfg)
     return out
+
+
+def shows_inset(cfg: FlightInsetSettings | None, view: str) -> bool:
+    """Whether ``view`` gets the inset: enabled, on a fixed-camera preset view."""
+    return cfg is not None and cfg.enabled and _fixed(view)
 
 
 def _fixed(view: str) -> bool:

@@ -10,6 +10,7 @@ import pytest
 from src.shared.python.impact_parameters.panel_model import CardRow, ImpactCard
 from src.tools.native_viewer_export import core, impact_card
 from src.tools.native_viewer_export.compositor import (
+    _card_lines,
     draw_impact_card,
     impact_card_bbox,
 )
@@ -115,6 +116,47 @@ def test_unavailable_card_draws_reason_panel() -> None:
     )
     out = draw_impact_card(_blank(), card)
     assert (out != _blank()).any()
+
+
+SMASH_REASON = "needs an impact model ball speed and its calibration status"
+
+
+def _smash_card(reason: str = SMASH_REASON) -> ImpactCard:
+    row = CardRow("smash_factor", "Smash Factor", "", None, reason=reason)
+    return ImpactCard(
+        units="mph",
+        impact_time_s=1.0,
+        impact_time_source="provided",
+        frame={},
+        rows=(row,),
+        d_plane={},
+    )
+
+
+def test_long_reason_wraps_whole_words_without_ellipsis() -> None:
+    lines = _card_lines(_smash_card())
+    reason = [text for text, value, _ in lines[1:] if not value]
+    assert len(reason) >= 2
+    assert all("..." not in text and "\u2026" not in text for text in reason)
+    assert " ".join(part.strip() for part in reason) == SMASH_REASON
+    assert all(len(text) <= 46 for text in reason)
+    long_word = _card_lines(_smash_card("x" * 60))
+    assert long_word[1][0].strip() == "x" * 60  # never cut
+
+
+def test_wrapped_reason_fits_the_panel_and_grows_its_height() -> None:
+    shape = (720, 1280, 3)
+    short = impact_card_bbox(shape, _smash_card("no ball"))
+    wrapped = impact_card_bbox(shape, _smash_card())
+    assert wrapped[3] - wrapped[1] > short[3] - short[1]
+    from src.tools.native_viewer_export import compositor as comp
+
+    box, size, lines = comp._card_metrics(shape, _smash_card(), "right")
+    font = comp._font(size)
+    pad = size // 2 + 2
+    assert all(
+        font.getlength(text) <= box[2] - box[0] - 2 * pad for text, _, _ in lines
+    )
 
 
 def test_draw_rejects_bad_input() -> None:

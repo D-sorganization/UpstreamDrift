@@ -1070,7 +1070,8 @@ def _export_clip(
                 for v in settings.views
             }
             if settings.multiview:
-                grid = compose_grid([labelled[v] for v in settings.views])
+                cells = flight_tracer.grid_cells(flight, labelled, t, settings)
+                grid = compose_grid([cells[v] for v in settings.views])
                 outputs[GRID_VIEW] = draw_hud(grid, hud) if settings.hud else grid
             if show_card:
                 outputs = {n: draw_impact_card(f, card) for n, f in outputs.items()}
