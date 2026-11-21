@@ -79,6 +79,12 @@ def test_the_covered_seat_sets_the_trail_knuckles_and_nothing_else() -> None:
     assert sch.seat_settings(sch.trail_seat()) is usual
 
 
+# Building this seat's pair holds the knuckles in range over several wraps and
+# takes over a minute, past the default lane's per-test limit, so every test
+# that needs the built pair runs in the slow lane.
+_BUILT = pytest.mark.slow
+
+
 @pytest.fixture(scope="module")
 def covered() -> dict[str, HandVisualResult]:
     return sch.build_seated_pair(_SEAT)
@@ -89,6 +95,7 @@ def measured(covered: dict[str, HandVisualResult]) -> TrailGripMeasures:
     return trail_grip_measures(covered["lead"], covered["trail"])
 
 
+@_BUILT
 def test_the_covered_seat_keeps_the_palm_over_the_lead_thumb(
     covered: dict[str, HandVisualResult], measured: TrailGripMeasures
 ) -> None:
@@ -106,6 +113,7 @@ def test_the_covered_seat_keeps_the_palm_over_the_lead_thumb(
     assert max(gaps) <= float(_Q["max_thumb_channel_gap_m"]), f"{max(gaps) * 1e3:.1f}"
 
 
+@_BUILT
 def test_the_covered_seat_wraps_the_holding_fingers_squarer_than_the_default(
     measured: TrailGripMeasures,
 ) -> None:
@@ -120,6 +128,7 @@ def test_the_covered_seat_wraps_the_holding_fingers_squarer_than_the_default(
     assert measured.wrist_extension_deg >= _T["wrist_extension_band_deg"][0] - 1e-6
 
 
+@_BUILT
 def test_the_covered_seat_keeps_the_hands_seated_and_out_of_each_other(
     covered: dict[str, HandVisualResult],
 ) -> None:
@@ -133,6 +142,7 @@ def test_the_covered_seat_keeps_the_hands_seated_and_out_of_each_other(
     assert ring <= float(_Q["max_pair_ring_finger_gap_m"]), "ring beside forefinger"
 
 
+@_BUILT
 def test_the_covered_seat_swings_no_holding_knuckle_past_its_range(
     covered: dict[str, HandVisualResult],
 ) -> None:
@@ -151,6 +161,7 @@ _LITTLE = "#15329: not met by covered_square: the little finger lies on the lead
 _LITTLE += f"middle finger, {_WAS['little_to_lead_forefinger']} off the forefinger."
 
 
+@_BUILT
 @pytest.mark.xfail(strict=True, reason=_LITTLE)
 def test_the_covered_seat_little_finger_touches_the_lead_forefinger(
     covered: dict[str, HandVisualResult],
@@ -165,6 +176,7 @@ _SQUARE = (
 _SQUARE += f"; knuckles {_WAS['knuckle_lateral_offset']} off the shaft line."
 
 
+@_BUILT
 @pytest.mark.xfail(strict=True, reason=_SQUARE)
 def test_the_covered_seat_meets_the_owner_square_targets(
     measured: TrailGripMeasures,

@@ -95,7 +95,8 @@ def abduct_knuckles(
             raise ValueError("knuckle abduction must be finite and not negative")
     if not abduction_deg:
         return
-    probe = hand.settings.curl.step_rad
+    curl = hand.settings.curl
+    probe = curl.step_rad  # the curl's own step, a setting
     across = hand.joint_position("little_prox", angles)
     across = across - hand.joint_position("index_prox", angles)
     for finger, degrees in abduction_deg.items():
