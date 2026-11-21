@@ -549,8 +549,8 @@ def draw_all(
 
 
 def _fixed(view: str) -> bool:
-    """A named view with a fixed camera; the grid (not a preset) counts as fixed."""
+    """A preset view with a fixed camera; the composed 2x2 grid is not one."""
     try:
         return get_view_preset(view).tracks is None
     except (KeyError, ValueError):
-        return True
+        return False

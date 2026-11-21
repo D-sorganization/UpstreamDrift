@@ -256,3 +256,6 @@ def test_ring_carry_label_yields_to_the_inset(monkeypatch, enabled: bool) -> Non
     play = _playback(cfg)
     play._paint(_frame(), None, play.path_m, None, True)
     assert bool(called) is (not enabled)
+
+def test_composed_grid_gets_no_inset() -> None:
+    assert fi._fixed("down_the_line_flight") and not fi._fixed("2x2")
