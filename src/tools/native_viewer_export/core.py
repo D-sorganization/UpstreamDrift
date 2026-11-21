@@ -187,6 +187,8 @@ class ExportSettings:
     #: ellipsoid colour encodes the point (default) or the kind (#15150)
     ellipsoid_color_by: str = "point"
     ellipsoid_panel: Any = None  # ``PanelSettings``; ``None``: packaged file
+    #: a vector flag was passed: a kinematic replay still draws vectors
+    vectors_requested: bool = False
     #: video frames the frame on the contact instant is repeated (#15150);
     #: ``None``: the ``contact_frame_settings.json`` default of the clip kind
     contact_hold_frames: int | None = None
@@ -642,6 +644,8 @@ class OverlayFeed:
     )
     #: ``(hand_ellipsoids, hand_hud_lines, hand_panel_rows)`` at the poses of a swing
     ellipsoids_for: Callable[[Any], tuple[Any, Any, Any]] | None = None
+    #: HUD note when force/torque vectors are withheld (``kinematic_replay``)
+    forces_note: str = ""
     _frames: dict[int, Any] = field(
         default_factory=dict, init=False, repr=False, compare=False
     )
@@ -718,14 +722,19 @@ class OverlayFeed:
         return gs
 
     def hud_lines_at(self, index: int) -> tuple[str, ...]:
-        """HUD capability/mobility text lines at frame ``index`` (HCM-3, #14004)."""
-        if self.hand_hud_lines is not None:
-            return self.hand_hud_lines(index)
-        return ()
+        """HUD capability/mobility text lines at frame ``index`` (HCM-3, #14004),
+        then the forces note."""
+        lines = () if self.hand_hud_lines is None else self.hand_hud_lines(index)
+        return (*lines, self.forces_note) if self.forces_note else lines
 
     def axial_at(self, index: int) -> Any:
         """``AxialLoadFrame`` of state ``index``, or ``None`` when not computed."""
         return getattr(self._frame(index), "axial_loads", None)
+
+    def legend_for(self, glyphs: GlyphSet | None) -> str:
+        """The legend row; none on a replay that draws no vectors (#15150)."""
+        drawn = glyphs is not None and (glyphs.arrows or glyphs.torque_arcs)
+        return "" if self.forces_note and not drawn else self.legend(glyphs)
 
     @staticmethod
     def legend(glyphs: GlyphSet | None) -> str:
@@ -1034,7 +1043,9 @@ def _export_clip(
                 t,
                 viewer,
                 swing.club,
-                OverlayFeed.legend(glyphs),
+                shown_feed.legend_for(glyphs)
+                if shown_feed is not None
+                else OverlayFeed.legend(glyphs),
                 speed=plan.speed,
                 ms_from_impact=(t - impact) * 1000.0,
                 shading_legend=shading_legend(settings.shading)
