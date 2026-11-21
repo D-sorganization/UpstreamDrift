@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import math
 from pathlib import Path
@@ -18,9 +19,11 @@ from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.ball import (
     SOURCE_ADDRESS,
     SOURCE_BUNDLE,
+    SOURCE_STRIKE,
     BallPlacement,
     address_ball,
     attach_ball,
+    strike_ball,
 )
 from src.tools.native_viewer_export.core import ExportSettings, SwingInput
 from tests.support.real_engines import real_module
@@ -34,10 +37,14 @@ def _placement(hide: float | None = 1.0) -> BallPlacement:
     return BallPlacement((0.5, 0.1, 0.02), BALL_RADIUS_M, "test", hide)
 
 
-def _fixture_swing(club: str = "driver", spec: dict[str, Any] | None = None):
+def _fixture_swing(
+    club: str = "driver", spec: dict[str, Any] | None = None, returning: bool = False
+):
     spec_doc = spec or json.loads((FIXTURES / f"spec_{club}.json").read_text())
     with np.load(FIXTURES / f"swing_q_{club}.npz") as data:
-        q = np.asarray(data["q"], dtype=float)[:6]
+        full = np.asarray(data["q"], dtype=float)
+    # returning: address, then the takeaway replayed backwards to the ball
+    q = np.vstack([full[:1], full[300::-15]]) if returning else full[:6]
     names = tuple(spec_doc["coordinate_order"])
     bundle = InputBundle(
         spec_bytes=json.dumps(spec_doc).encode(),
@@ -287,6 +294,53 @@ def test_attach_ball_records_backend_limitation() -> None:
     assert record is not None and record["limitation"] == note
     _, plain = attach_ball(swing, ExportSettings())
     assert plain is not None and "limitation" not in plain
+
+
+def _strike_settings(**changes: Any) -> Any:
+    from src.shared.python.model_appearance import ball_strike
+
+    return dataclasses.replace(ball_strike.load_ball_strike_settings(), **changes)
+
+
+def test_driver_ball_is_teed_where_the_face_centre_passes() -> None:
+    pytest.importorskip("mujoco")
+    swing = _fixture_swing("driver", returning=True)
+    impact = swing.time_s(swing.n_states - 1)
+    placed, record = attach_ball(swing, ExportSettings(impact_time_s=impact))
+    assert placed.ball is not None and record is not None
+    assert placed.ball.source == SOURCE_STRIKE
+    strike = record["strike"]
+    assert "display placement" in strike["note"]
+    assert placed.ball.hide_after_s == strike["contact_time_s"] <= impact
+    nominal = address_ball(swing, impact)
+    assert isinstance(nominal, BallPlacement)
+    moved = np.asarray(placed.ball.position_m) - np.asarray(nominal.position_m)
+    assert moved == pytest.approx(strike["shift_m"])
+    # the fixture face centre is far above the ground, so the tee limit holds it
+    limit = _strike_settings().tee_limit_m("driver")
+    assert strike["tee_height_m"] == pytest.approx(limit)
+    assert strike["height_limited_m"] < 0.0
+    # the club came back to its address place (the pass nearest the ball on the
+    # ground lies a few millimetres before the address pose itself)
+    assert np.hypot(*moved[:2]) < 5e-3
+
+
+def test_address_setting_and_a_far_miss_keep_the_address_ball(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    pytest.importorskip("mujoco")
+    swing = _fixture_swing("driver", returning=True)
+    nominal = address_ball(swing, 0.021)
+    target = "src.tools.native_viewer_export.ball.load_ball_strike_settings"
+    monkeypatch.setattr(target, lambda: _strike_settings(placement="address"))
+    kept, record = attach_ball(swing, ExportSettings(impact_time_s=0.021))
+    assert kept.ball == nominal and record == nominal.to_dict()
+    monkeypatch.setattr(target, lambda: _strike_settings(max_shift_m=0.01))
+    recorded = BallPlacement(nominal.position_m, BALL_RADIUS_M, SOURCE_BUNDLE, 0.021)
+    assert strike_ball(swing, recorded, 0.021) == (recorded, None)  # never moved
+    kept, record = attach_ball(swing, ExportSettings(impact_time_s=0.021))
+    assert kept.ball == nominal and record is not None
+    assert "more than the 0.010 m limit" in record["strike"]["unavailable"]
 
 
 # --- worker plumbing ---------------------------------------------------------
