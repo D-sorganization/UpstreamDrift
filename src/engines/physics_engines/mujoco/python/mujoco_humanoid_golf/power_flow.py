@@ -67,7 +67,9 @@ class PowerFlowResult:
 class InterSegmentTransfer:
     """Inter-segment power transfer analysis.
 
-    Tracks how power flows from parent to child segments through joints.
+    Joint torques times ``qvel`` (actuator/coordinate power), **not** Robertson–Winter
+    endpoint interface power. Use :meth:`PowerFlowAnalyzer.compute_interface_power_frame`
+    for ``F · v + M · ω`` flow accounting (#15390).
 
     Attributes:
         segment_name: Name of the segment
@@ -440,6 +442,21 @@ class PowerFlowAnalyzer:
             )
 
         return transfers
+
+    def compute_interface_power_frame(
+        self,
+        qpos: np.ndarray,
+        qvel: np.ndarray,
+        qacc: np.ndarray,
+        *,
+        time_s: float = 0.0,
+    ):
+        """Robertson–Winter interface power per segment (``F · v + M · ω``, #15390)."""
+        from .interface_power import MujocoInterfacePowerAnalyzer
+
+        return MujocoInterfacePowerAnalyzer(self.model).frame_at(
+            qpos, qvel, qacc, time_s=time_s
+        )
 
     def _compute_body_joint_power(
         self, body_id: int, tau: np.ndarray, qvel: np.ndarray
