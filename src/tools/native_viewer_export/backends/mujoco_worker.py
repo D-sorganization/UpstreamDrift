@@ -122,6 +122,17 @@ def grow_offscreen_buffer(model: Any, width: int, height: int) -> None:
     buffer.offheight = max(height, int(buffer.offheight))
 
 
+def write_depth(renderer: Any, job: WorkerJob, view: str, position: int) -> None:
+    """Save the scene depth (metres) of the current scene where the job asks for it."""
+    if not job.depth_positions or not job.depth_positions[position]:
+        return
+    renderer.enable_depth_rendering()
+    try:
+        np.save(job.depth_path(view, position), renderer.render().copy())
+    finally:
+        renderer.disable_depth_rendering()
+
+
 def main(job_path: str) -> None:
     os.environ.setdefault("MUJOCO_GL", "egl")
     import mujoco
@@ -163,6 +174,7 @@ def main(job_path: str) -> None:
                 )
                 draw_job_ball(renderer.scene, job, pos)
                 np.save(job.frame_path(view, pos), renderer.render().copy())
+                write_depth(renderer, job, view, pos)
     finally:
         renderer.close()
 

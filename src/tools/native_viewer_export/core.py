@@ -983,7 +983,9 @@ def _export_clip(
             t = shown.time_s(k)
             extra_lines = shown_feed.hud_lines_at(k) if shown_feed is not None else ()
             if flight is not None:
-                tiles = flight.draw(tiles, t, settings.lookat_m, settings.distance_m)
+                depth = getattr(tiles, "depth_m", None)
+                args = (t, settings.lookat_m, settings.distance_m, depth)
+                tiles = flight.draw(tiles, *args)
                 extra_lines = (*extra_lines, *flight.hud_lines(t))
             hud = HudInfo(
                 t,
@@ -1065,6 +1067,8 @@ def export_swing(
         swing, contact = contact_frame.refine(swing, impact_time_s(swing, settings))
         if contact is not None:  # frames, HUD and panels count from contact
             settings = replace(settings, impact_time_s=contact)
+            if ball_record is not None and "hide_after_s" in ball_record:
+                ball_record = {**ball_record, "hide_after_s": contact}
     factors = None
     if settings.impact_factors is not None:
         factors, settings = factors_panel.factors_for_export(swing, settings)
