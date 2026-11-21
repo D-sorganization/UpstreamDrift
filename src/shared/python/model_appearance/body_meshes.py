@@ -748,6 +748,9 @@ def _foot_meshes(ctx: _Context, body: str) -> list[BodyMesh]:
         ("skin", "skin", base),
         ("garment", "garment", garment),
         ("sole", "sole", library.SOLE_MATERIAL if garment else None),
+        ("saddle", "saddle", library.SADDLE_MATERIAL if garment else None),
+        ("lace", "lace", garment),
+        ("trim", "trim", garment),
         ("ankle", "ankle", shin or base),
     )
     out: list[BodyMesh] = []
