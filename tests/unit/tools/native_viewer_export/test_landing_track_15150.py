@@ -34,7 +34,7 @@ CAMERA = pinhole_for_view(WIDE, LOOKAT, None, math.radians(45.0), SIZE)
 
 def _style(**changes):
     marker = replace(D.landing_marker, **{**SOLID, **changes})
-    return replace(D, landing_marker=marker)
+    return replace(D, landing_marker=marker, inset=None)  # inset owns the carry
 
 
 def _draw(style, t, depth=None, playback=None):
