@@ -62,11 +62,16 @@ Array = NDArray[np.float64]
 
 @dataclass(frozen=True)
 class BaselineBand:
-    """What counts as a physical baseline impact (assumed bounds, see module)."""
+    """What counts as a physical baseline impact (assumed bounds, see module).
+
+    ``max_abs_face_deg=None`` leaves the face free: the baseline face is then
+    neither required nor checked (the capture never observed it, so the
+    optimiser outputs it); speed and path stay checked.
+    """
 
     speed_mph_min: float = 100.0
     speed_mph_max: float = 120.0
-    max_abs_face_deg: float = 25.0
+    max_abs_face_deg: float | None = 25.0
     max_abs_path_deg: float = 15.0
 
     def __post_init__(self) -> None:
@@ -74,20 +79,26 @@ class BaselineBand:
             0.0 < self.speed_mph_min < self.speed_mph_max,
             "need 0 < speed_mph_min < speed_mph_max",
         )
-        require(self.max_abs_face_deg > 0.0, "max_abs_face_deg must be > 0")
+        require(
+            self.max_abs_face_deg is None or self.max_abs_face_deg > 0.0,
+            "max_abs_face_deg must be > 0 or None",
+        )
         require(self.max_abs_path_deg > 0.0, "max_abs_path_deg must be > 0")
 
 
 def require_physical_baseline(impact: MeasuredImpact, band: BaselineBand) -> None:
     """Fail closed unless the baseline impact is inside ``band``."""
     face, path = impact.face_deg, impact.path_deg
+    free = band.max_abs_face_deg is None
     require(
-        face is not None and path is not None,
+        path is not None and (free or face is not None),
         "baseline impact: face and path must be available",
     )
     ok = (
         band.speed_mph_min <= impact.speed_mph <= band.speed_mph_max
-        and abs(face) <= band.max_abs_face_deg  # type: ignore[arg-type]
+        and (
+            band.max_abs_face_deg is None or abs(face) <= band.max_abs_face_deg  # type: ignore[arg-type]
+        )
         and abs(path) <= band.max_abs_path_deg  # type: ignore[arg-type]
     )
     require(
