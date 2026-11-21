@@ -31,6 +31,10 @@ from src.shared.python.impact_parameters.flight_report import (
     flight_for_impact,
 )
 from src.tools.native_viewer_export import flight_depth, impact_card, landing_marker
+from src.tools.native_viewer_export.flight_inset import (
+    FlightInsetSettings,
+    load_inset_settings,
+)
 from src.tools.native_viewer_export.landing_marker import LandingMarkerSettings
 from src.tools.native_viewer_export.impact_state import series_at_contact
 from src.tools.native_viewer_export.overlay2d import pinhole_for_view
@@ -77,6 +81,7 @@ class TracerSettings:
     occlusion_tolerance_fraction: float = 0.005
     occlusion_step_px: float = 3.0
     landing_marker: LandingMarkerSettings | None = None
+    inset: FlightInsetSettings | None = None  # flight_inset_settings.json
 
     def __post_init__(self) -> None:
         rgba = _channels(self.tracer_color_rgba, 4, "tracer_color_rgba")
@@ -118,6 +123,8 @@ def load_tracer_settings(path: Path | None = None) -> TracerSettings:
     if marker is not None:
         marker = {k: tuple(v) if isinstance(v, list) else v for k, v in marker.items()}
         document["landing_marker"] = LandingMarkerSettings(**marker)
+    beside = (path or SETTINGS_PATH).with_name("flight_inset_settings.json")
+    document["inset"] = load_inset_settings(beside if beside.is_file() else None)
     try:
         return TracerSettings(**document)
     except TypeError as exc:
@@ -189,6 +196,11 @@ class FlightPlayback:
     radius_m: float = 0.0
     lines: tuple[str, ...] = ()
     carry_m: float | None = None
+    #: target-frame axes (target, left, up) rows, the model's apex height and
+    #: right-positive side offset: the numbers the flight inset shows
+    axes_m: Array | None = None
+    apex_m: float | None = None
+    lateral_m: float | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.settings, TracerSettings):
@@ -322,7 +334,8 @@ class FlightPlayback:
             hide = occlusion_for(style, depth)
             tile = landing_marker.paint_track(tile, camera, points, style, hide, landed)
             tile = landing_marker.paint(tile, camera, self.path_m[-1], style, ring)
-            if landed and self.carry_m is not None:
+            inset = style.inset is not None and style.inset.enabled  # shows carry
+            if landed and self.carry_m is not None and not inset:
                 end = self.path_m[-1]
                 tile = landing_marker.paint_label(
                     tile, camera, end, style, self.carry_m
@@ -369,6 +382,9 @@ def playback_from_flight(
         ball.radius_m,
         lines,
         flight.carry_m,
+        axes,
+        flight.max_height_m,
+        flight.lateral_m,
     )
 
 

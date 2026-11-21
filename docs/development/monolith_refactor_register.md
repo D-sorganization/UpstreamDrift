@@ -36,6 +36,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1184 | `src/bunkershot3d/ball/splash.py` |
 | 1183 | `src/engines/physics_engines/opensim/python/msk_lift_ik_id.py` |
 | 1182 | `src/launchers/launcher_model_handlers.py` |
+| 1182 | `src/tools/native_viewer_export/core.py` |
 | 1181 | `src/shared/python/grip_contact/parity.py` |
 | 1180 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
 | 1180 | `src/tools/native_viewer_export/core.py` |

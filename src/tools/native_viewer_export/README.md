@@ -318,6 +318,18 @@ python3 -m src.tools.native_viewer_export --bundle driver.npz --swing driver \
   model's carry, unit and format from the settings) once landed.
   `ExportResult.ball` reports the contact
   instant as `hide_after_s`.
+- `flight_inset.py`: opt-in 2D flight inset (#15150), a broadcast-style panel
+  that makes a long carry readable from behind the golfer: a side profile
+  (height against down-range distance, the vertical scale exaggerated by
+  `vertical_exaggeration`, 1 for true aspect) with the apex and carry labelled,
+  and a plan view (lateral offset against down-range distance, target line,
+  landing offset such as "15 m R"). Both are revealed with the tracer, with a
+  dot at the ball; once landed the full curve and labels stay. The numbers
+  are the flight model's. It starts below the view label, stacks below the impact
+  factors panel (or ellipsoid panel) on its edge, stays above the HUD rows and
+  shrinks, or is not drawn, when no room is left. Off unless
+  `flight_inset_settings.json` sets `enabled` (position, size, margins, colours,
+  line widths, label formats, units and font scale are all settings there).
 - `overlay.py`: overlay feed built from `force_overlay.bundle_provider`.
 - `overlay2d.py`: pinhole projection for the OpenSim 2D glyphs.
 - `backends/`: one module per engine plus shared helpers.
