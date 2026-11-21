@@ -1,0 +1,24 @@
+{
+  "tracer_color_rgba": [255, 70, 40, 255],
+  "tracer_width_px": 3,
+  "fade_after_s": null,
+  "ball_color_rgb": [255, 255, 255],
+  "min_ball_radius_px": 2,
+  "fov_y_deg": 45.0,
+  "near_clip_m": 0.05,
+  "landing_hold_s": 1.0,
+  "max_hold_s": 8.0,
+  "draw_invalid_flight": false,
+  "sources": {
+    "tracer_color_rgba": "Tracer line colour and opacity (0-255 each).",
+    "tracer_width_px": "Tracer line width in pixels of one view tile.",
+    "fade_after_s": "Seconds of flight after which the older part of the tracer is no longer drawn; null keeps the whole trace to the end of the clip.",
+    "ball_color_rgb": "Colour of the ball in flight (the ball on the tee is the scene's own ball).",
+    "min_ball_radius_px": "Smallest drawn ball radius, so a distant ball stays visible; a nearer ball is drawn at its projected size.",
+    "fov_y_deg": "Vertical field of view of the viewer camera the overlay is projected through. 45 is the MuJoCo free-camera default the native export uses; another viewer needs its own value or the overlay will not line up.",
+    "near_clip_m": "Points closer to the camera plane than this are not drawn.",
+    "landing_hold_s": "Seconds the clip continues after the ball lands.",
+    "max_hold_s": "Upper bound on the swing time added after the last pose to show the flight.",
+    "draw_invalid_flight": "false: a flight the model flags as outside its validity envelope is not drawn and the reason is shown. true: it is drawn and labelled as outside the envelope (for inspection only)."
+  }
+}
