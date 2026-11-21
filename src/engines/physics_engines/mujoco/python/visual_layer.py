@@ -17,6 +17,7 @@ from typing import Any
 
 import numpy as np
 
+from src.engines.physics_engines.mujoco.python import scene_lighting
 from src.shared.python.model_appearance import library
 from src.shared.python.model_appearance.ball import BALL_RADIUS_M, resolve_ball_visual
 from src.shared.python.model_appearance.club_assembly import (
@@ -311,24 +312,9 @@ def attach_visual_layer(
             else {"rgba": _rgba("floor")}
         ),
     )
-    up = normal * 3.0
-    ET.SubElement(
-        world,
-        "light",
-        name="visual_key",
-        pos=_numbers(up + np.array([1.5, -1.5, 0.0])),
-        dir=_numbers(-(up + np.array([1.5, -1.5, 0.0]))),
-        diffuse="0.8 0.8 0.8",
-        castshadow="true" if appearance is not None else "false",
-    )
-    ET.SubElement(
-        world,
-        "light",
-        name="visual_fill",
-        pos=_numbers(up + np.array([-2.0, 1.0, 0.0])),
-        dir=_numbers(-(up + np.array([-2.0, 1.0, 0.0]))),
-        diffuse="0.4 0.4 0.4",
-    )
+    lighting = scene_lighting.load_scene_lighting()
+    rig = lighting.plain if appearance is None else lighting.studio
+    lights = scene_lighting.add_lights(world, normal, rig)
     ET.SubElement(
         world,
         "camera",
@@ -337,19 +323,6 @@ def attach_visual_layer(
         mode="targetbody",
         target=next(e.get("name", "") for k, e in elements.items() if k != "world"),
     )
-    lights = 2
-    if appearance is not None:
-        rim = up + np.array([0.0, 2.5, 0.0])
-        ET.SubElement(
-            world,
-            "light",
-            name="visual_rim",
-            pos=_numbers(rim),
-            dir=_numbers(-rim),
-            diffuse="0.45 0.47 0.55",
-            castshadow="false",
-        )
-        lights = 3
     return {
         **appearance_meta,
         "capsules": len(skeleton.capsules),
