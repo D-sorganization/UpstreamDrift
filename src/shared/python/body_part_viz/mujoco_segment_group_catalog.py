@@ -17,6 +17,13 @@ _LEGS = (
     "femur",
     "tibia",
     "toe",
+    "talus",
+    "calcan",
+)
+_CLUB = (
+    "shaft",
+    "hosel",
+    "grip",
 )
 _TORSO = (
     "torso",
@@ -70,8 +77,10 @@ def infer_segment_group_catalog(body_names: Iterable[str]) -> SegmentGroupCatalo
     for name in body_names:
         if not name:
             continue
+        if is_excluded_body_name(name):
+            continue
         lower = name.lower()
-        if "club" in lower:
+        if "club" in lower or _matches(name, _CLUB):
             club.add(name)
         elif _matches(name, _LEGS):
             legs.add(name)
@@ -90,10 +99,14 @@ def infer_segment_group_catalog(body_names: Iterable[str]) -> SegmentGroupCatalo
     )
 
 
+def is_excluded_body_name(name: str) -> bool:
+    """True when ``name`` is an explicit exclusion (exact body id, not a substring)."""
+    return name.lower() in GROUP_EXCLUSIONS
+
+
 def catalog_member_for_body(catalog: SegmentGroupCatalog, name: str) -> str | None:
     """Return the group key owning ``name``, or ``None`` when unassigned / excluded."""
-    lower = name.lower()
-    if lower in GROUP_EXCLUSIONS or any(x in lower for x in GROUP_EXCLUSIONS):
+    if is_excluded_body_name(name):
         return None
     for group, members in catalog.as_mapping().items():
         if name in members:

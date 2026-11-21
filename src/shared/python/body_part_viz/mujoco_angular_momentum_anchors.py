@@ -13,7 +13,9 @@ if TYPE_CHECKING:
     import mujoco
 
 
-def body_com_positions(model: mujoco.MjModel, data: mujoco.MjData) -> dict[str, tuple[float, float, float]]:
+def body_com_positions(
+    model: mujoco.MjModel, data: mujoco.MjData
+) -> dict[str, tuple[float, float, float]]:
     """World-frame COM per named body (excludes world and unnamed bodies)."""
     out: dict[str, tuple[float, float, float]] = {}
     for body_id in range(1, model.nbody):

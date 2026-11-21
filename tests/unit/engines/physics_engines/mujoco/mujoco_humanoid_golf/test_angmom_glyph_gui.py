@@ -17,9 +17,13 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_angmom_mixin import (
     SimAngMomMixin,
 )
-from src.shared.python.body_part_viz.angular_momentum_glyphs import AngularMomentumArrowStyle
+from src.shared.python.body_part_viz.angular_momentum_glyphs import (
+    AngularMomentumArrowStyle,
+)
 from src.shared.python.body_part_viz.segment_angular_momentum import SegmentGroupCatalog
-from src.shared.python.force_overlay.renderers.meshcat_glyphs import MeshcatGlyphRenderer
+from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
+    MeshcatGlyphRenderer,
+)
 from tests.unit.force_overlay.test_meshcat_glyphs import RecordingFakeSink
 
 pytestmark = pytest.mark.unit

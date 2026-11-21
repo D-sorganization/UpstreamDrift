@@ -8,16 +8,14 @@ import mujoco
 import numpy as np
 import pytest
 
-from src.engines.physics_engines.mujoco._golf_swing_full_body_xml import (
-    FULL_BODY_GOLF_SWING_XML,
-)
+from src.engines.physics_engines.mujoco import golf_swing_models_xml
 from src.shared.python.body_part_viz.mujoco_segment_angular_momentum import (
     MujocoSegmentAngularMomentumProvider,
 )
 from src.shared.python.body_part_viz.mujoco_segment_group_catalog import (
-    GROUP_EXCLUSIONS,
     catalog_member_for_body,
     infer_segment_group_catalog,
+    is_excluded_body_name,
 )
 
 pytestmark = [pytest.mark.unit, pytest.mark.requires_mujoco]
@@ -26,6 +24,20 @@ _GOLFER_XML = (
     Path(__file__).resolve().parents[3]
     / "src/engines/physics_engines/mujoco/models/generated/golfer.xml"
 )
+
+
+def _golf_model_cases() -> list[pytest.ParamSpec]:
+    cases: list[pytest.ParamSpec] = []
+    for export in golf_swing_models_xml.__all__:
+        xml = getattr(golf_swing_models_xml, export, None)
+        if not isinstance(xml, str) or not xml.lstrip().startswith("<mujoco"):
+            continue
+        cases.append(pytest.param(xml, export, id=export))
+    if _GOLFER_XML.is_file():
+        cases.append(
+            pytest.param(_GOLFER_XML.read_text(encoding="utf-8"), "golfer", id="golfer")
+        )
+    return cases
 
 
 def _body_names(model: mujoco.MjModel) -> list[str]:
@@ -47,25 +59,7 @@ def _massive_bodies(model: mujoco.MjModel) -> list[str]:
     return names
 
 
-def _is_excluded_body(name: str) -> bool:
-    lower = name.lower()
-    return lower in GROUP_EXCLUSIONS or any(tok in lower for tok in GROUP_EXCLUSIONS)
-
-
-@pytest.mark.parametrize(
-    ("xml", "label"),
-    (
-        (FULL_BODY_GOLF_SWING_XML, "full_body"),
-        pytest.param(
-            _GOLFER_XML.read_text(encoding="utf-8"),
-            "golfer",
-            marks=pytest.mark.skipif(
-                not _GOLFER_XML.is_file(),
-                reason="generated golfer.xml missing",
-            ),
-        ),
-    ),
-)
+@pytest.mark.parametrize(("xml", "label"), _golf_model_cases())
 def test_golf_catalog_covers_massive_bodies_and_groups_sum_to_whole_body(
     xml: str, label: str
 ) -> None:
@@ -80,7 +74,7 @@ def test_golf_catalog_covers_massive_bodies_and_groups_sum_to_whole_body(
     for name in _massive_bodies(model):
         group = catalog_member_for_body(catalog, name)
         if group is None:
-            assert _is_excluded_body(name), (
+            assert is_excluded_body_name(name), (
                 f"{label}: massive body {name!r} is neither grouped nor excluded"
             )
         else:
@@ -104,7 +98,7 @@ def test_golf_catalog_covers_massive_bodies_and_groups_sum_to_whole_body(
     excluded = [
         np.asarray(vec, dtype=float)
         for name, vec in frame.contribution_nm_s.items()
-        if vec is not None and _is_excluded_body(name)
+        if vec is not None and is_excluded_body_name(name)
     ]
     partition_sum = sum(parts + excluded, start=np.zeros(3))
     np.testing.assert_allclose(

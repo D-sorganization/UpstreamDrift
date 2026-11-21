@@ -37,9 +37,7 @@ def _key(engine: str) -> str:
     return f"{SCHEMA_KEY}/{engine.strip()}"
 
 
-def dump_angular_momentum_state(
-    enabled: bool, style: AngularMomentumArrowStyle
-) -> str:
+def dump_angular_momentum_state(enabled: bool, style: AngularMomentumArrowStyle) -> str:
     if not isinstance(enabled, bool):
         raise TypeError("enabled must be bool")
     if not isinstance(style, AngularMomentumArrowStyle):

@@ -34,8 +34,9 @@ DisplayMode = Literal["groups", "per_segment", "spin_only"]
 
 # Fixed visual scale, held constant for the whole swing (not per-frame autoscaled).
 # Metres of arrow length per (N·m·s) of |H|.
-# Calibrated 2026-11-21 on FULL_BODY_GOLF_SWING_XML: 2000 random states with
-# qvel_i ~ N(0, 0.4 rad/s); p99 ||H_whole|| = 56.1 N·m·s → 0.65 m arrow length.
+# Calibration (seed 15398): rng = np.random.default_rng(15398); 2000 states on
+# FULL_BODY_GOLF_SWING_XML; random qpos in [-0.2, 0.2]; qvel_i ~ N(0, 0.4 rad/s);
+# p99 ||H_whole|| = 56.1 N·m·s → DEFAULT_SCALE = 0.65 m / 56.1 N·m·s.
 DEFAULT_SCALE_M_PER_NMS: float = 0.01159
 SCALE_CALIBRATION_REFERENCE_NMS: float = 56.1
 SCALE_CALIBRATION_TARGET_LENGTH_M: float = 0.65
