@@ -5,7 +5,9 @@ The specification is exported once with the shared MuJoCo appearance document
 ground, sky and lights) and rendered with the golf view presets. The rollout
 ``q`` is mapped to ``qpos`` through the bundle's coordinate order, so the
 pose shown is the same-input pose every other engine displays. 3D force and
-torque glyphs are added to the MuJoCo scene before each render.
+torque glyphs are added to the MuJoCo scene before each render. With segment
+shading on, a body skin is cut into per-segment pieces that take the load
+colours (``_skin_shading``); otherwise the model is the exported one.
 """
 
 from __future__ import annotations
@@ -27,6 +29,9 @@ from src.shared.python.motion_matching.same_input import InputBundle
 from src.tools.native_viewer_export.backends._ball import draw_job_ball
 from src.tools.native_viewer_export.backends._scene_overlays import (
     apply_scene_overlays,
+)
+from src.tools.native_viewer_export.backends._skin_shading import (
+    compile_shaded_model,
 )
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.backends.myosuite_worker import make_camera
@@ -80,13 +85,13 @@ def main(job_path: str) -> None:
     bundle = InputBundle.load(Path(job.bundle_path))
     q = np.load(job.q_path)
     xml, _ = build_scene_xml(bundle.spec_bytes, job.appearance)
-    model = mujoco.MjModel.from_xml_string(xml)
+    axial_frames, shading = job.load_axial_frames(), job.load_shading()
+    model, skin = compile_shaded_model(xml, axial_frames, shading)
     # the default offscreen buffer is 640x480; grow it to the requested size
     grow_offscreen_buffer(model, job.width, job.height)
     data = mujoco.MjData(model)
     adr = [model.joint(n).qposadr[0] for n in bundle.coordinate_order]
     glyph_sets = job.load_glyph_sets()
-    axial_frames, shading = job.load_axial_frames(), job.load_shading()
     if axial_frames is not None and shading is not None:
         log_coverage("mujoco", *mujoco_scene_coverage(model, axial_frames))
     cams = {v: make_camera(mujoco, v, job) for v in job.views}
@@ -95,11 +100,19 @@ def main(job_path: str) -> None:
         for pos, k in enumerate(job.indices):
             data.qpos[adr] = q[k]
             mujoco.mj_forward(model, data)
+            if axial_frames is not None and shading is not None:
+                skin.colour(model, axial_frames[pos], shading)
             for view in job.views:
                 cams[view].lookat[:] = job.lookat_for(view, pos)
                 renderer.update_scene(data, camera=cams[view])
                 apply_scene_overlays(
-                    model, renderer.scene, pos, axial_frames, shading, glyph_sets
+                    model,
+                    renderer.scene,
+                    pos,
+                    axial_frames,
+                    shading,
+                    glyph_sets,
+                    keep_geoms=skin.keep_geoms,
                 )
                 draw_job_ball(renderer.scene, job, pos)
                 np.save(job.frame_path(view, pos), renderer.render().copy())
