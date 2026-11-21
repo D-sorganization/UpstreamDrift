@@ -268,6 +268,14 @@ def _add_clip_overlay_arguments(p: argparse.ArgumentParser) -> None:
     """Optional clip overlay flags: impact factors panel and ball flight."""
     _add_impact_factor_arguments(p)
     _add_ball_flight_arguments(p)
+    p.add_argument(
+        "--contact-hold-frames",
+        type=int,
+        default=None,
+        metavar="N",
+        help="repeat the contact-instant frame N more times "
+        "(default: contact_frame_settings.json)",
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -341,14 +349,6 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="SECONDS",
         help="impact time in the swing; default: bundle provenance impact_time_s, "
         "else the last sample",
-    )
-    p.add_argument(
-        "--contact-hold-frames",
-        type=int,
-        default=None,
-        metavar="N",
-        help="repeat the contact-instant frame N more times "
-        "(default: contact_frame_settings.json)",
     )
     p.add_argument(
         "--preset",
