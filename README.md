@@ -31,6 +31,12 @@ web interface and a desktop application over the top.
 - **Status**: actively developed. MuJoCo is the supported engine; other engines
   carry the support levels stated in [Engine Support](#engine-support).
 
+- **Cross-engine verification:** Compare MuJoCo, Drake, Pinocchio, OpenSim, and MyoSuite results on shared model definitions.
+- **Dynamics & kinematics:** Run forward/inverse dynamics, inverse kinematics, and trajectory optimization.
+- **Motion-capture retargeting:** Replay and analyze swing captures against biomechanical golfer models.
+- **Interactive & batch workflows:** Explore models in the desktop app or web UI and export native comparison clips.
+- **Automated validation:** Reproducible physics and unit test suites across Windows, macOS, and Linux.
+
 ## Contents
 
 | Section                                       | Purpose                                  |
