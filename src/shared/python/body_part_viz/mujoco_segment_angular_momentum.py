@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 
 def default_root_body_id(model: mujoco.MjModel) -> int:
-    """Return the lightest non-world body that roots the mechanism (default 1)."""
+    """First massive body id (legacy subtree checks); not used as H reference COM."""
     for body_id in range(1, model.nbody):
         if float(model.body(body_id).mass[0]) > 0.0:
             return body_id
@@ -31,15 +31,39 @@ def whole_body_com_kinematics(
     data: mujoco.MjData,
     qvel: np.ndarray,
     *,
-    root_body_id: int,
+    root_body_id: int | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Whole-body COM position and velocity from the MuJoCo subtree field."""
+    """Mass-weighted COM position and velocity of all massive bodies (ball excluded).
+
+    ``root_body_id`` is ignored (kept for call-site compatibility); multi-tree golf
+    models must not use a single kinematic subtree as the whole-body reference.
+    """
+    del root_body_id
     import mujoco
 
-    mujoco.mj_subtreeVel(model, data)
-    com = np.asarray(data.subtree_com[root_body_id], dtype=float)
-    linvel = np.asarray(data.subtree_linvel[root_body_id], dtype=float)
-    return com, linvel
+    from .mujoco_segment_group_catalog import is_excluded_body_name
+
+    total_mass = 0.0
+    weighted_pos = np.zeros(3, dtype=float)
+    weighted_vel = np.zeros(3, dtype=float)
+    qvel_arr = np.asarray(qvel, dtype=float)
+    for body_id in range(1, model.nbody):
+        name = model.body(body_id).name or ""
+        mass = float(model.body(body_id).mass[0])
+        if mass <= 0.0:
+            continue
+        if is_excluded_body_name(name):
+            continue
+        pos = np.asarray(data.xipos[body_id], dtype=float)
+        jacp = np.zeros((3, model.nv))
+        mujoco.mj_jacBodyCom(model, data, jacp, None, body_id)
+        vel = jacp @ qvel_arr
+        weighted_pos += mass * pos
+        weighted_vel += mass * vel
+        total_mass += mass
+    if total_mass <= 0.0:
+        raise ValueError("no massive bodies qualify for whole-body COM")
+    return weighted_pos / total_mass, weighted_vel / total_mass
 
 
 def mujoco_subtree_angular_momentum(
@@ -89,23 +113,22 @@ class MujocoSegmentAngularMomentumProvider:
             raise ValueError("model and data must be provided")
         if not isinstance(catalog, SegmentGroupCatalog):
             raise TypeError("catalog must be a SegmentGroupCatalog")
-        if root_body_id is None:
-            root_body_id = default_root_body_id(model)
-        if root_body_id < 1 or root_body_id >= model.nbody:
-            raise ValueError("root_body_id must name a non-world body")
         self.model = model
         self.data = data
         self.catalog = catalog
         self.time_s = float(time_s)
-        self.root_body_id = int(root_body_id)
+        if root_body_id is not None:
+            if root_body_id < 1 or root_body_id >= model.nbody:
+                raise ValueError("root_body_id must name a non-world body")
+            self.root_body_id = int(root_body_id)
+        else:
+            self.root_body_id = default_root_body_id(model)
 
     def get_segment_angular_momentum(self) -> SegmentAngularMomentumFrame | None:
         contributions: dict[str, np.ndarray | None] = {}
         spin_only: dict[str, np.ndarray | None] = {}
         qvel = np.asarray(self.data.qvel, dtype=float)
-        ref_com, ref_vel = whole_body_com_kinematics(
-            self.model, self.data, qvel, root_body_id=self.root_body_id
-        )
+        ref_com, ref_vel = whole_body_com_kinematics(self.model, self.data, qvel)
         qualified = False
         for body_id in range(1, self.model.nbody):
             name = self.model.body(body_id).name

@@ -33,6 +33,7 @@ from .control_system import ControlSystem, ControlType
 from .interactive_manipulation import InteractiveManipulator
 from .meshcat_adapter import MuJoCoMeshcatAdapter
 from .physics_engine import MuJoCoPhysicsEngine
+from .sim_angmom_mixin import SimAngMomMixin
 from .sim_camera_mixin import SimCameraMixin
 from .sim_force_color_mixin import SimForceColorMixin
 from .sim_rendering_mixin import SimRenderingMixin
@@ -72,6 +73,7 @@ class ModelLoaderThread(QtCore.QThread):
 class MuJoCoSimWidget(  # type: ignore[misc]
     SimCameraMixin,
     SimForceColorMixin,
+    SimAngMomMixin,
     SimSegmentKeMixin,
     SimRenderingMixin,
     QtWidgets.QWidget,
@@ -179,6 +181,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.camera_name = "side"
 
         self._init_visualization_toggles()
+        self._init_angmom_overlay_state()
 
         self.enable_live_analysis = False
         self.latest_bio_data: BiomechanicalData | None = None
@@ -229,6 +232,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
         self.loader_thread: ModelLoaderThread | None = None
         self.restore_force_overlay_settings()
+        self.restore_angmom_overlay_settings()
         self.restore_segment_ke_settings()
 
     @property
