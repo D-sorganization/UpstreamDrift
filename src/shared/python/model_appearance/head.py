@@ -48,6 +48,7 @@ _IRIS_MATERIAL = {
     "brown": "iris_dark",
 }
 _ROLE_MATERIAL = {"pupil": "pupil_black", "lid": "lid_line"}
+HAIR_PART = "hair_mesh"  # the haircut of the CC0 head, shaded without creases
 FACE_PARTS = ("eye_l", "eye_r", "iris_l", "iris_r", "brow_l", "brow_r", "nose", "mouth")
 
 
