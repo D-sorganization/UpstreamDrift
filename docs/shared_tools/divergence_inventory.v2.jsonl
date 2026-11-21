@@ -330,6 +330,8 @@
 {"path": "body_part_viz/renderers/matplotlib_renderer.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/renderers/projective_renderer.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/renderers/pyqtgl_renderer.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/scalar_shading.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/series_validation.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/shapes/__init__.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/shapes/_mesh_decimation.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/shapes/_mesh_io.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
