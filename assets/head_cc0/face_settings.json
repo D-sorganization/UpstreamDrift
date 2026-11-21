@@ -1,6 +1,9 @@
 {
   "schema_version": "head-face-settings-v1",
   "units": "Head lengths (neck plane to vertex is 1) unless a name ends in _deg.",
+  "notes": {
+    "max_total_triangles": "Raised 12,000 -> 32,000 by owner decision 2026-11-21 (#15299) for hair on a refined scalp. Measured: head 11,890 -> 30,254 triangles (hair 1,696 -> 20,060; margin 1,746); hairline turning 34.5 -> 27.0 deg; plain outline turning, front 17.2 -> 4.8 deg and profile 22.4 -> 5.1 deg; comb ridge 0.58 -> 3.66 vertices per period."
+  },
   "face": {
     "eye_y": 0.124,
     "eye_z": 0.538,
@@ -31,8 +34,16 @@
       [3.141592653589793, 0.31]
     ],
     "comb_amplitude": 0.005,
-    "rim_thickness": 0.0015,
-    "cut_steps": 16
+    "comb_wavelength": 0.095,
+    "part_width": 0.028,
+    "part_depth": 0.30,
+    "fringe_thickness": 0.045,
+    "off_skin": 0.003,
+    "rim_thickness": 0.0025,
+    "cut_steps": 16,
+    "refine_splits": 4,
+    "refine_edge": 0.026,
+    "refine_curve": 0.75
   },
   "checks": {
     "view_elevations_deg": [0.0, 30.0, 45.0],
@@ -44,6 +55,12 @@
     "brow_max_proud": 0.008,
     "brow_max_end_ratio": 0.6,
     "hairline_step_rad": 0.05,
-    "hairline_max_turn_deg": 35.0
+    "hairline_max_turn_deg": 28.5,
+    "max_total_triangles": 32000,
+    "unrefined_hair_triangles": 1696,
+    "outline_step_rad": 0.02,
+    "outline_views": [[0.0, 0.55, -1.1, 1.1], [0.1, 0.55, -2.0, 0.6]],
+    "outline_max_turn_deg": [6.0, 6.5],
+    "comb_min_ridge_vertices": 3.5
   }
 }

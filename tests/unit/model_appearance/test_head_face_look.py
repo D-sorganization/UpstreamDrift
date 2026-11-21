@@ -117,6 +117,37 @@ def test_hairline_has_no_corners(skin) -> None:
         head_hair.hairline_turns_deg(skin, "left", 0.0)
 
 
+def test_refinement_is_a_setting_and_zero_leaves_the_scalp_as_it_was(skin) -> None:
+    crop = head_hair.load_hair_crop()
+    coarse = head_hair.build_short_crop(skin, "left", replace(crop, refine_splits=0))
+    assert len(coarse.faces) == CHECKS["unrefined_hair_triangles"]
+    fine = head_hair.build_short_crop(skin, "left", crop)
+    assert crop.refine_splits > 0 and len(fine.faces) > 4 * len(coarse.faces)
+    for bad in ({"refine_splits": -1}, {"refine_edge": -0.1}, {"refine_curve": 1.5}):
+        with pytest.raises(ValueError):
+            head_hair.build_short_crop(skin, "left", replace(crop, **bad))
+
+
+def test_refined_hair_has_a_smooth_outline_and_resolved_comb_ridges(skin) -> None:
+    crop = head_hair.load_hair_crop()
+    plain = replace(crop, comb_amplitude=0.0)  # the shape under the combed relief
+    step, bounds = CHECKS["outline_step_rad"], CHECKS["outline_max_turn_deg"]
+    for axis, view in enumerate(CHECKS["outline_views"]):
+        fine = head_hair.build_short_crop(skin, "none", plain)
+        turn = head_hair.outline_turns_deg(fine, axis, step, view).max()
+        assert turn <= bounds[axis], (axis, turn)
+        coarse = head_hair.build_short_crop(
+            skin, "none", replace(plain, refine_splits=0)
+        )
+        assert head_hair.outline_turns_deg(coarse, axis, step, view).max() > 2.0 * turn
+    ridge = head_hair.comb_ridge_vertices(skin, "left")
+    assert ridge >= CHECKS["comb_min_ridge_vertices"], ridge
+    with pytest.raises(ValueError):
+        head_hair.outline_turns_deg(fine, 2, step, view)
+    with pytest.raises(ValueError):
+        head_hair.outline_turns_deg(fine, 0, step, (0.0, 0.5, 0.0, step))
+
+
 def test_face_wears_the_body_skin_material_and_hair_is_smooth_shaded() -> None:
     pytest.importorskip("mujoco")
     from src.engines.physics_engines.mujoco.python import full_body_mjcf

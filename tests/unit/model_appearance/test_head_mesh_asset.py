@@ -11,6 +11,7 @@ from src.shared.python.model_appearance import (
     build_head_parts,
     document_from_dict,
     document_to_dict,
+    head_features,
     head_mesh,
     resolve_head_anchor,
 )
@@ -24,7 +25,8 @@ SPECS = ROOT / "docs/development/full_body_models"
 LENGTH = 0.2429
 MESH = HeadSettings(model="cc0_mesh")
 MAX_ASSET_BYTES = 150_000  # measured 63 kB; keep the repo light
-MAX_TOTAL_TRIANGLES = 12_000  # measured ~9.4k; 60 fps renders keep their cost
+# The budget and its measurement record live in assets/head_cc0/face_settings.json.
+MAX_TOTAL_TRIANGLES = head_features.face_settings("checks")["max_total_triangles"]
 
 
 def _by_name(parts):
