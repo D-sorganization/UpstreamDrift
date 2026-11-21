@@ -88,6 +88,30 @@ class ClubPoseModel:
         return face_axes(self.body_world(coords), self._centre_body, self._normal_body)
 
 
+def face_roll_calibrated_spec_bytes(
+    spec_bytes: bytes, address_coords: Mapping[str, float], mode: str | None = None
+) -> bytes:
+    """``spec_bytes`` with the head roll of the face roll calibration ``mode``.
+
+    ``mode`` defaults to ``face_roll_calibration_settings.json``. The default
+    ``address_square`` returns ``spec_bytes`` itself; ``design_loft_at_address``
+    solves the roll from this spec's own club-body pose at ``address_coords``
+    (#15150). Only the drawn head and its face turn about the shaft: the
+    club-body pose and every joint angle are unchanged. Raises as
+    ``ClubPoseModel`` and ``spec_with_face_roll_calibration``.
+    """
+    from src.shared.python.model_appearance import face_roll_calibration as frc
+
+    chosen = frc.validate_mode(
+        frc.load_face_roll_settings().mode if mode is None else mode
+    )
+    if chosen == frc.ADDRESS_SQUARE:
+        return spec_bytes
+    body = ClubPoseModel(spec_bytes).body_world(address_coords)
+    spec = frc.spec_with_face_roll_calibration(json.loads(spec_bytes), body, chosen)
+    return json.dumps(spec).encode("utf-8")
+
+
 def face_axes(body: Array, centre_body: Array, normal_body: Array) -> FaceWorld:
     """Face axes in world from the club-body pose.
 
