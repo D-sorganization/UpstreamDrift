@@ -18,6 +18,9 @@ from src.shared.python.body_part_viz.force_colors import (
     DEFAULT_TENSION_COLOR,
     ForceColorScale,
 )
+from src.shared.python.body_part_viz.skin_load_settings import (
+    load_skin_load_settings,
+)
 from src.shared.python.golf_view_presets import VIEW_ORDER
 from src.shared.python.model_appearance.appearance_selection import (
     AppearanceOverrides,
@@ -142,6 +145,14 @@ def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
         "measured contact; unloaded frames draw nothing; default: off)",
     )
     _add_ellipsoid_arguments(p)
+    p.add_argument(
+        "--axial-impact-blackout",
+        action=argparse.BooleanOptionalAction,
+        default=load_skin_load_settings().axial_impact_blackout,
+        help="leave segments unshaded around ball impact, whose force is not "
+        "modelled (default: skin_load_settings.json; off shades them from the "
+        "motion alone)",
+    )
     shade = p.add_argument_group(
         "segment shading",
         "Translucent tension/compression shading of the golfer's segments "
@@ -530,6 +541,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     mobility_points=settings.mobility_points,
                     max_mobility_points=settings.max_mobility_points,
                     mobility_condition_cutoff=settings.mobility_condition_cutoff,
+                    axial_impact_blackout=args.axial_impact_blackout,
                 ),
             ),
         )

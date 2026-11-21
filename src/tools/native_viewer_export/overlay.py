@@ -44,6 +44,8 @@ class OverlayOptions:
     mobility_points: str = "hands"
     max_mobility_points: int = 8
     mobility_condition_cutoff: float | None = None
+    #: blank axial loads around ball impact (skin_load_settings.json default)
+    axial_impact_blackout: bool = True
 
 
 def _grip_source(swing: SwingInput, engine: str, mujoco_source: Any) -> tuple[Any, str]:
@@ -335,7 +337,8 @@ def build_overlay_feed(
     closure wrench is solved from the bundle efforts and injected; around ball
     impact (``impact_time_s``, default the shared detector's; frames within one
     bundle step) the loads are unavailable, as the impact impulse is not
-    modelled (#13179). Options in ``options`` (or ``palm_thumb``) configure
+    modelled (#13179), unless ``options.axial_impact_blackout`` is off: the
+    loads there then come from the motion alone (#15150). Options in ``options`` (or ``palm_thumb``) configure
     vector kinds (``show_force``, ``show_torque``), palm-thumb normal force
     (HRG-H1, #13189), and hand mobility/force interface ellipsoids (HCM-3, #14004).
 
@@ -369,7 +372,9 @@ def build_overlay_feed(
         provider.with_grip(grip_source, grip_name)
     if axial:
         provider.with_axial_loads(source)
-        impact = _impact_or_none(swing) if impact_time_s is None else impact_time_s
+        impact = None
+        if opts.axial_impact_blackout:
+            impact = _impact_or_none(swing) if impact_time_s is None else impact_time_s
         if impact is not None:
             provider.with_axial_impact_window(impact, float(swing.bundle.dt_s))
     if effective_palm_thumb:
