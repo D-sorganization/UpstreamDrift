@@ -6,9 +6,16 @@ cuts every ``<skin>`` of an MJCF tree into one skin per bone body. Each face
 goes to the body that holds most of its three vertices' weight, and each piece
 keeps every bone and weight of its vertices, so the drawn surface is unchanged.
 Each piece gets its own untextured copy of the skin's material, which a
-renderer can recolour. The cut follows the mesh faces, so its border is
-straightened by neighbour-majority rounds. Settings are read from
-``assets/body_skin_cc0/piece_settings.json``. Appearance only; opt-in.
+renderer can recolour. With ``border_method`` ``neighbour_majority`` the cut
+follows the mesh faces and its border is straightened by neighbour-majority
+rounds. With ``iso_line`` the faces between two segments are split along the
+line where the two segments' weights are equal, so the border is a continuous
+line through the faces. A vertex put on an edge takes the edge's position and
+texture coordinate there and gets bones of its own, bound so that it stays on
+the straight edge between the two skinned ends at every pose (blending the two
+ends' weights instead would bow it off the edge). Settings are read from
+``assets/body_skin_cc0/piece_settings.json``.
+Appearance only; opt-in.
 
 Limits: vertex normals at a cut edge come from one piece alone, so smooth
 lighting can show the cut, and a skin with ``inflate`` (which moves vertices
@@ -43,26 +50,35 @@ Floats = NDArray[np.float64]
 _EDGES = ((0, 1), (1, 2), (2, 0))  # the vertex slots of a triangle's three edges
 _CORNERS = len(_EDGES)
 _OWN = ("name", "material", "vertex", "face", "texcoord")  # rewritten per piece
+_ISO, _MAJORITY = "iso_line", "neighbour_majority"
 
 
 @dataclass(frozen=True)
 class PieceSettings:
     """Settings of the cut (``piece_settings.json``; see its ``sources``)."""
 
+    border_method: str
     border_rounds: int
     border_votes: int
+    cut_smooth_rounds: int
+    cut_snap_fraction: float
     weld_decimals: int
     number_digits: int
     dropped_material_keys: tuple[str, ...]
 
     def __post_init__(self) -> None:
         """``TypeError`` for a non-integer, ``ValueError`` for one out of range."""
-        for name in ("border_rounds", "border_votes", "weld_decimals", "number_digits"):
+        whole = ("border_rounds", "border_votes", "weld_decimals", "number_digits")
+        for name in (*whole, "cut_smooth_rounds"):
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, int):
                 raise TypeError(f"{name} must be an integer")
         if self.border_rounds < 0 or self.weld_decimals < 0 or self.number_digits < 1:
             raise ValueError("rounds and decimals must be >= 0, digits >= 1")
+        if self.border_method not in (_ISO, _MAJORITY):
+            raise ValueError(f"border_method must be {_ISO!r} or {_MAJORITY!r}")
+        if self.cut_smooth_rounds < 0 or not 0.0 < self.cut_snap_fraction < 0.5:
+            raise ValueError("smooth rounds must be >= 0, snap fraction in (0, 0.5)")
         if not _CORNERS / 2 < self.border_votes <= _CORNERS:
             raise ValueError("border_votes must be a majority of a face's three edges")
 
@@ -71,8 +87,11 @@ def load_piece_settings(path: Path | None = None) -> PieceSettings:
     """Read ``piece_settings.json``; raises ``ValueError`` for invalid values."""
     raw = json.loads((path or ASSET_DIR / "piece_settings.json").read_text())
     return PieceSettings(
+        border_method=raw["border_method"],
         border_rounds=raw["border_rounds"],
         border_votes=raw["border_votes"],
+        cut_smooth_rounds=raw["cut_smooth_rounds"],
+        cut_snap_fraction=raw["cut_snap_fraction"],
         weld_decimals=raw["weld_decimals"],
         number_digits=raw["number_digits"],
         dropped_material_keys=tuple(raw["dropped_material_keys"]),
@@ -188,6 +207,187 @@ def _text(values: Any, digits: int) -> str:
     return " ".join(format(float(v), f".{digits}g") for v in np.ravel(values))
 
 
+def _smoothed(skin: _Skin, weights: Floats, settings: PieceSettings) -> Floats:
+    """``weights`` averaged with each vertex's edge neighbours, once per round.
+
+    Only the place of the cut is read from the result. Vertices doubled along a
+    seam are joined first, so both copies get one value.
+    """
+    key = np.round(skin.vertices, settings.weld_decimals)
+    _, welded = np.unique(key, axis=0, return_inverse=True)
+    welded = welded.ravel()
+    pairs: Any = np.sort(welded[skin.faces][:, _EDGES], axis=2).reshape(-1, 2)
+    pairs = np.unique(pairs, axis=0)
+    ends: Any = np.concatenate([pairs, pairs[:, ::-1]])
+    field: Any = np.zeros((int(welded.max()) + 1, weights.shape[1]))
+    np.add.at(field, welded, weights)
+    field /= np.bincount(welded)[:, None]
+    near = np.bincount(ends[:, 0], minlength=len(field))[:, None] + 1
+    for _ in range(settings.cut_smooth_rounds):
+        total = field.copy()
+        np.add.at(total, ends[:, 0], field[ends[:, 1]])
+        field = total / near
+    return np.asarray(field[welded], float)
+
+
+def _crossings(
+    faces: Ints, field: Floats, snap: float
+) -> tuple[Ints, Ints, Ints, Floats]:
+    """Where the border crosses each face edge.
+
+    Returns each vertex's segment (its largest ``field`` column), per face edge
+    the vertex the border crosses it at (``-1`` where both ends share a
+    segment), and the new vertices as ``(M, 3)`` old vertices and their shares.
+    A crossing within ``snap`` of an end of its edge is that end, so no sliver
+    is cut. An edge is read from its lower segment to its higher one, so both
+    copies of an edge doubled along a seam cross at one place.
+    """
+    labels = field.argmax(axis=1)
+    ends = faces[:, _EDGES]
+    turned = labels[ends[..., 0]] > labels[ends[..., 1]]
+    ends = np.where(turned[..., None], ends[..., ::-1], ends).reshape(-1, 2)
+    pairs, edge = np.unique(ends, axis=0, return_inverse=True)
+    first, second = pairs[:, 0], pairs[:, 1]
+    low, high = labels[first], labels[second]
+    lead = field[first, low] - field[first, high]
+    trail = field[second, high] - field[second, low]
+    span = lead + trail
+    along = np.where(span > 0, lead / np.where(span > 0, span, 1.0), 0.5)
+    at = np.full(len(pairs), -1, np.int64)
+    crossed = low != high
+    at[crossed & (along < snap)] = first[crossed & (along < snap)]
+    at[crossed & (along > 1 - snap)] = second[crossed & (along > 1 - snap)]
+    fresh = crossed & (at < 0)
+    at[fresh] = len(field) + np.arange(int(fresh.sum()))
+    corners = np.column_stack([first, second, second])[fresh]
+    share = np.column_stack([1 - along, along, np.zeros(len(along))])[fresh]
+    return labels, at[edge.reshape(-1, _CORNERS)], corners, share
+
+
+def _least_area(vertices: Floats, faces: Ints) -> Floats:
+    """Per row of ``(K, T, 3)`` triangles, the area of its smallest one."""
+    a, b, c = (vertices[faces[..., k]] for k in range(_CORNERS))
+    areas: Floats = np.linalg.norm(np.cross(b - a, c - a), axis=-1).min(axis=-1)
+    return areas
+
+
+def _cut_faces(
+    vertices: Floats, faces: Ints, labels: Ints, cross: Ints
+) -> tuple[Ints, Ints, Ints]:
+    """Faces split along their crossings: new faces, their segments, centres.
+
+    A face in one segment stays. A face in two gives its lone corner a triangle
+    and the other two a quadrilateral, halved along the diagonal that leaves the
+    larger smallest triangle. A face in three is fanned about a new junction
+    vertex (index ``len(vertices)`` onward; returned as the faces they lie in,
+    for ``_junctions`` to place).
+    Triangles that a snapped crossing closed to a line are left out.
+    """
+    mine = labels[faces]
+    same = mine == np.roll(mine, -1, axis=1)  # corner k and the next share one
+    lone = np.where(same[:, 1], 0, np.where(same[:, 2], 1, 2))
+    turn = (lone[:, None] + np.arange(_CORNERS)) % _CORNERS
+    rows = np.arange(len(faces))[:, None]
+    v, c, part = faces[rows, turn], cross[rows, turn], mine[rows, turn]
+    kinds = _CORNERS - same.sum(axis=1)  # 0: one segment, 2: two, 3: three
+    two, three = kinds == 2, np.flatnonzero(kinds == _CORNERS)
+    v0, v1, v2, p, q = (x[two] for x in (v[:, 0], v[:, 1], v[:, 2], c[:, 0], c[:, 2]))
+    wide = np.array([[p, v1, q], [v1, v2, q]]).transpose(2, 0, 1)
+    tall = np.array([[p, v1, v2], [p, v2, q]]).transpose(2, 0, 1)
+    pick = _least_area(vertices, wide) >= _least_area(vertices, tall)
+    halves = np.where(pick[:, None, None], wide, tall)
+    centre = len(vertices) + np.arange(len(three))
+    fan, fan_part = [], []
+    for k in range(_CORNERS):
+        corner, after, before = v[three, k], c[three, k], c[three, k - 1]
+        fan += [np.stack([corner, after, centre], 1)]
+        fan += [np.stack([corner, centre, before], 1)]
+        fan_part += [part[three, k]] * 2
+    cut = [faces[kinds == 0], np.stack([v0, p, q], 1), halves[:, 0], halves[:, 1]]
+    segments = [mine[kinds == 0, 0], part[two, 0], part[two, 1], part[two, 1]]
+    out = np.concatenate(cut + fan)
+    out_part = np.concatenate(segments + fan_part)
+    real = (out != np.roll(out, -1, axis=1)).all(axis=1)
+    return out[real], out_part[real], faces[three]
+
+
+def _junctions(faces: Ints, field: Floats, labels: Ints, snap: float) -> Floats:
+    """Per three-segment face, its corners' shares of the point the borders meet at.
+
+    ``field`` is linear over a face, so the three corners' segments have equal
+    weight at one point: the shares ``b`` with ``b @ (w0 - w1) = 0``,
+    ``b @ (w1 - w2) = 0`` and ``b.sum() = 1``, where ``wj`` is the weight of
+    corner ``j``'s segment at the three corners. Two cases have no such point
+    to use, and are settled here:
+
+    * The two lines are parallel (or the solution is not finite): the centroid.
+    * The point is off the face, or nearer an edge than ``snap``: negative
+      shares are dropped and the rest rescaled, on the inner triangle whose
+      corners hold ``1 - 2 * snap``. The junction then lies on that triangle's
+      side facing the point, so the borders still run from their equal-weight
+      edge crossings towards it, and no triangle of the fan is a sliver.
+
+    Preconditions: ``faces`` is ``(K, 3)`` with three different ``labels`` per
+    row; ``0 < snap``. Postconditions: every row sums to one and holds no share
+    under ``min(snap, 1 / 3)``; a row whose equal-weight point has every share
+    at ``snap`` or more is that point, unmoved.
+    """
+    floor = min(snap, 1 / _CORNERS)
+    room = 1 - _CORNERS * floor
+    held: Any = field[faces[:, :, None], labels[faces][:, None, :]]
+    normal: Any = np.cross(held[..., 0] - held[..., 1], held[..., 1] - held[..., 2])
+    with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
+        inner: Any = (normal / normal.sum(axis=1, keepdims=True) - floor) / room
+    inner = np.clip(inner, 0.0, None)
+    inner[~np.isfinite(inner).all(axis=1)] = 1 / _CORNERS
+    share: Floats = floor + room * inner / inner.sum(axis=1, keepdims=True)
+    return share
+
+
+def _iso_cut(
+    skin: _Skin, weights: Floats, settings: PieceSettings
+) -> tuple[_Skin, Ints]:
+    """``skin`` with its faces split where two segments' weights are equal.
+
+    Returns the refined skin and each of its faces' segment. Three segments in
+    one face meet where their three weights are equal (``_junctions``).
+    Postconditions:
+    the old vertices and bones keep their indices; every new vertex is a fixed
+    weighted mean of the corners of one old face, in texture coordinate and, by
+    one bone of its own per bone of those corners, in position at every pose;
+    so the new faces cover the old ones exactly, posed or not.
+    """
+    field = _smoothed(skin, weights, settings)
+    labels, cross, corners, share = _crossings(
+        skin.faces, field, settings.cut_snap_fraction
+    )
+
+    def blend(values: Floats) -> Floats:
+        mix = share.reshape(share.shape + (1,) * (values.ndim - 1))
+        return np.concatenate([values, (values[corners] * mix).sum(axis=1)])
+
+    count = len(skin.vertices)
+    faces, parts, centred = _cut_faces(blend(skin.vertices), skin.faces, labels, cross)
+    corners = np.concatenate([corners, centred])
+    meet = _junctions(centred, field, labels, settings.cut_snap_fraction)
+    share = np.concatenate([share, meet])
+    rest = blend(skin.vertices)
+    bones = list(skin.bones)
+    for bone, ids, held in skin.bones:
+        dense = np.zeros(count)
+        np.add.at(dense, ids, held)
+        pull = dense[corners] * share
+        weight = pull.sum(axis=1)
+        bind = _numbers(bone, "bindpos", _CORNERS).ravel()
+        for new in np.flatnonzero(weight):
+            rides = pull[new] @ skin.vertices[corners[new]] / weight[new]
+            at = _text(bind + rest[count + new] - rides, settings.number_digits)
+            own = ET.Element("bone", {**dict(bone.items()), "bindpos": at})
+            bones.append((own, np.array([count + new]), weight[new : new + 1]))
+    texcoord = None if skin.texcoord is None else blend(skin.texcoord)
+    return _Skin(skin.node, rest, faces, texcoord, tuple(bones)), parts
+
+
 def _piece(skin: _Skin, faces: Ints, name: str, material: str, digits: int) -> Any:
     """The ``<skin>`` of ``faces``, with every bone share of its vertices."""
     keep = np.unique(faces)
@@ -247,8 +447,11 @@ def split_skins(
         weights = np.zeros((len(skin.vertices), len(bodies)))
         for bone, ids, share in skin.bones:
             np.add.at(weights[:, bodies.index(str(bone.get("body")))], ids, share)
-        labels = face_segments(skin.faces, weights)
-        labels = straighten_borders(skin.vertices, skin.faces, labels, settings)
+        if settings.border_method == _ISO:
+            skin, labels = _iso_cut(skin, weights, settings)
+        else:
+            labels = face_segments(skin.faces, weights)
+            labels = straighten_borders(skin.vertices, skin.faces, labels, settings)
         at = list(parent).index(node)
         parent.remove(node)
         for index, body in enumerate(bodies):

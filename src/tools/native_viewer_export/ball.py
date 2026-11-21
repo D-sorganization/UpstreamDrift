@@ -19,6 +19,10 @@ Placement policy, in order:
 
 ``address_ball`` returns a reason string instead of a placement when neither is
 available -- it never invents a zero position.
+
+With the ``strike`` placement of ``model_appearance/ball_strike_settings.json``
+(#15150) :func:`strike_ball` then moves that ball to where the face centre
+passes nearest it around impact: a display placement, no joint angle changes.
 """
 
 from __future__ import annotations
@@ -34,6 +38,10 @@ from src.shared.python.model_appearance.ball import (
     BALL_RADIUS_M,
     resolve_ball_visual,
 )
+from src.shared.python.model_appearance.ball_strike import (
+    load_ball_strike_settings,
+    strike_ball_centre,
+)
 from src.tools.native_viewer_export.club_pose import ClubPoseModel
 from src.tools.native_viewer_export.core import (
     ExportSettings,
@@ -45,6 +53,11 @@ logger = logging.getLogger(__name__)
 
 SOURCE_BUNDLE = "bundle:ball_impact"
 SOURCE_ADDRESS = "address_geometry"
+SOURCE_STRIKE = "strike_geometry"
+STRIKE_NOTE = (
+    "display placement: the ball is drawn where the face centre of the replayed "
+    "swing passes; it is not a measured or simulated ball"
+)
 BALL_RGBA = (0.97, 0.97, 0.95, 1.0)
 #: A clubhead centre this far above the ground is not an address stance.
 MAX_ADDRESS_HEIGHT_M = 0.5
@@ -185,6 +198,46 @@ def address_ball(swing: SwingInput, impact_time_s: float | None) -> BallPlacemen
     )
 
 
+def strike_ball(
+    swing: SwingInput, nominal: BallPlacement, impact_time_s: float
+) -> tuple[BallPlacement, dict[str, Any] | None]:
+    """``nominal`` moved to where the face centre strikes, plus the record.
+
+    The record is ``None`` under the ``address`` setting and for a recorded
+    ball (never moved), ``{"unavailable": reason}`` when the swing does not
+    pass the ball (``nominal`` is kept), else the strike record. A moved ball
+    has source :data:`SOURCE_STRIKE` and is hidden from its contact time.
+    """
+    settings = load_ball_strike_settings()
+    if settings.placement != "strike" or nominal.source != SOURCE_ADDRESS:
+        return nominal, None
+    try:
+        model = ClubPoseModel(swing.bundle.spec_bytes)
+        times = np.array([swing.time_s(i) for i in range(swing.n_states)])
+        rows = np.nonzero(np.abs(times - impact_time_s) <= settings.search_window_s)[0]
+        names = swing.bundle.coordinate_order
+        faces = [
+            model.face_world(dict(zip(names, map(float, swing.q[i]), strict=True)))
+            for i in rows
+        ]
+        strike = strike_ball_centre(
+            times[rows],
+            np.array([face.centre_m for face in faces]).reshape(-1, 3),
+            np.array([face.normal for face in faces]).reshape(-1, 3),
+            nominal.position_m,
+            max_tee_height_m=settings.tee_limit_m(model.head_alias),
+            max_shift_m=settings.max_shift_m,
+            ground_height_m=model.ground_height_m,
+            radius_m=nominal.radius_m,
+        )
+    except (ImportError, ValueError, KeyError) as exc:
+        return nominal, {"unavailable": f"strike placement unavailable: {exc}"}
+    moved = BallPlacement(
+        strike.centre_m, nominal.radius_m, SOURCE_STRIKE, strike.contact_time_s
+    )
+    return moved, {**strike.to_dict(), "note": STRIKE_NOTE}
+
+
 def attach_ball(
     swing: SwingInput, settings: ExportSettings, limitation: str | None = None
 ) -> tuple[SwingInput, dict[str, Any] | None]:
@@ -193,17 +246,24 @@ def attach_ball(
     The record is ``None`` when ``settings.ball`` is off, the placement dict
     when available (with a ``limitation`` note when the backend cannot honour
     hide-after-impact), else ``{"unavailable": reason}`` (also logged). A ball
-    already on ``swing`` is kept so a caller can supply a measured one.
+    already on ``swing`` is kept so a caller can supply a measured one; a
+    computed one goes through :func:`strike_ball` (record key ``strike``).
     """
     if not settings.ball:
         return replace(swing, ball=None), None
     placed: BallPlacement | str | None = swing.ball
+    strike: dict[str, Any] | None = None
     if placed is None:
-        placed = address_ball(swing, resolve_impact_time_s(swing, settings))
+        impact = resolve_impact_time_s(swing, settings)
+        placed = address_ball(swing, impact)
+        if isinstance(placed, BallPlacement):
+            placed, strike = strike_ball(swing, placed, impact)
     if isinstance(placed, str):
         logger.warning("no golf ball drawn: %s", placed)
         return replace(swing, ball=None), {"unavailable": placed}
     record = placed.to_dict()
+    if strike is not None:
+        record["strike"] = strike
     if limitation:
         record["limitation"] = limitation
     return replace(swing, ball=placed), record
