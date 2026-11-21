@@ -3,7 +3,8 @@
 The haircut is a closed shell built from the skin's own scalp faces: an inner
 surface half a millimetre off the skin, an outer surface offset along the skin
 normal by a thickness field, and the two welded along the hairline where the
-thickness is zero. Short back and sides come from a hairline that drops from
+thickness is zero. The inner surface is hidden, so it may keep fewer faces than
+the outer one (``lining_splits``); a strip along the hairline then joins them. Short back and sides come from a hairline that drops from
 the forehead through the temples and over the ear to the nape and from a
 thickness that grows from a tapered fade at the sides to volume on top, a
 swept fringe at the front and an optional parting. Every number is a field of
@@ -14,7 +15,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import lru_cache
 from typing import Any
 
@@ -76,6 +77,7 @@ class HairCrop:
     refine_splits: int = 0  # rounds of midpoint splits of the scalp under the hair
     refine_edge: float = 0.0  # an edge no longer than this is left whole
     refine_curve: float = 0.75  # share of the normal-curved bulge a midpoint takes
+    lining_splits: int = 0  # split rounds of the hidden surface next to the skin
 
 
 def _turned(faces: NDArray[np.int64], first: NDArray[np.int64]) -> NDArray[np.int64]:
@@ -181,8 +183,10 @@ def _scalp(
     skin: Mesh, cfg: HairCrop, part: str
 ) -> tuple[Array, Array, NDArray[np.int64]]:
     """Scalp above the hairline: vertices, normals and faces, cut on the line."""
-    if cfg.cut_steps < 0 or cfg.refine_splits < 0:
-        raise ValueError("hair cut_steps and refine_splits must not be negative")
+    if min(cfg.cut_steps, cfg.refine_splits, cfg.lining_splits) < 0:
+        raise ValueError(
+            "hair cut_steps, refine_splits and lining_splits must not be negative"
+        )
     if not 0.0 <= cfg.refine_curve <= 1.0 or not 0.0 <= cfg.refine_edge < 1.0:
         raise ValueError("hair refine_curve and refine_edge must lie in 0..1")
     v, n, faces = skin.vertices, _vertex_normals(skin), skin.faces
@@ -348,7 +352,80 @@ def build_short_crop(
     cfg = crop or load_hair_crop()
     v, n, faces = _scalp(skin, cfg, part)
     thick, _ = _thickness(cfg, v, part)
-    return closed_shell(v, n, faces, thick, cfg.off_skin, cfg.rim_thickness)
+    if cfg.lining_splits >= cfg.refine_splits:
+        return closed_shell(v, n, faces, thick, cfg.off_skin, cfg.rim_thickness)
+    under = _scalp(skin, replace(cfg, refine_splits=cfg.lining_splits), part)
+    return _lined_shell((v, n, faces), thick, under, cfg)
+
+
+def _rim_loop(faces: NDArray[np.int64]) -> NDArray[np.int64]:
+    """The open boundary of ``faces`` as one loop of vertices, in face winding."""
+    edges = np.concatenate([faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]])
+    size = int(edges.max()) + 1
+    twin = edges[:, 1] * size + edges[:, 0]
+    start, end = edges[~np.isin(edges[:, 0] * size + edges[:, 1], twin)].T
+    after = dict(zip(start.tolist(), end.tolist(), strict=True))
+    loop = [int(start[0])]
+    while after.get(loop[-1], loop[0]) != loop[0]:
+        loop.append(after[loop[-1]])
+    if len(after) != len(start) or len(loop) != len(start):
+        raise ValueError("the hairline must be one simple loop to line the hair")
+    return np.asarray(loop, dtype=np.int64)
+
+
+def _zip(top: Array, low: Array) -> NDArray[np.int64]:
+    """Triangles ``(top, top, low)`` and ``(top, low, low)`` between two loops.
+
+    ``top`` and ``low`` are ``(N, 3)`` and ``(M, 3)`` points of two closed
+    lines that run the same way round. Starting at the closest pair, the strip
+    advances on whichever line gives the shorter new edge. Postcondition:
+    ``N + M`` triangles of indices into ``vstack([top, low])``, each loop edge
+    used once.
+    """
+    first = int(np.linalg.norm(low - top[0], axis=1).argmin())
+    i = j = 0
+    strip: list[tuple[int, int, int]] = []
+    while i < len(top) or j < len(low):
+        a, b = i % len(top), (i + 1) % len(top)
+        c, e = (first + j) % len(low), (first + j + 1) % len(low)
+        ahead = np.linalg.norm(top[b] - low[c]) <= np.linalg.norm(low[e] - top[a])
+        if j == len(low) or (i < len(top) and ahead):
+            strip.append((b, a, len(top) + c))
+            i += 1
+        else:
+            strip.append((a, len(top) + c, len(top) + e))
+            j += 1
+    return np.asarray(strip, dtype=np.int64)
+
+
+def _lined_shell(
+    scalp: tuple[Array, Array, NDArray[np.int64]],
+    thick: Array,
+    under: tuple[Array, Array, NDArray[np.int64]],
+    cfg: HairCrop,
+) -> Mesh:
+    """Closed shell: the refined outer surface over a coarse hidden lining.
+
+    ``scalp`` and ``under`` are the cut scalp (vertices, normals, faces) at the
+    outer surface's and the lining's refinement; both end on the hairline. The
+    lining lies ``off_skin`` off the skin and is never seen, so it keeps few
+    faces; a strip along the hairline joins the two rims. Postcondition: a
+    closed manifold wound outward.
+    """
+    parts = []
+    for (v, n, faces), lift in ((scalp, thick), (under, None)):
+        loop = _rim_loop(faces)
+        used, compact = np.unique(faces, return_inverse=True)
+        height = np.zeros(len(v)) if lift is None else lift.copy()
+        height[loop] = 0.0 if lift is None else cfg.rim_thickness
+        points = v + (cfg.off_skin + height)[:, None] * n
+        rim = np.searchsorted(used, loop)
+        parts.append((points[used], compact.reshape(-1, 3), rim))
+    (outer, top_faces, top_rim), (inner, low_faces, low_rim) = parts
+    strip = _zip(outer[top_rim], inner[low_rim])
+    ids = np.concatenate([top_rim, low_rim + len(outer)])
+    shell = [top_faces, low_faces[:, ::-1] + len(outer), ids[strip]]
+    return Mesh(np.vstack([outer, inner]), np.vstack(shell).astype(np.int64))
 
 
 def open_rim(faces: NDArray[np.int64]) -> NDArray[np.int64]:

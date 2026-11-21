@@ -128,6 +128,35 @@ def test_refinement_is_a_setting_and_zero_leaves_the_scalp_as_it_was(skin) -> No
             head_hair.build_short_crop(skin, "left", replace(crop, **bad))
 
 
+def _closed(faces) -> bool:
+    edges = np.concatenate([faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]])
+    twins, counts = np.unique(np.sort(edges, axis=1), axis=0, return_counts=True)
+    directed = {(int(a), int(b)) for a, b in edges}
+    return bool((counts == 2).all()) and all((b, a) in directed for a, b in directed)
+
+
+def test_the_hidden_lining_is_coarse_and_the_shell_stays_closed(skin) -> None:
+    """The surface next to the skin is never seen; it keeps the scalp's own
+    faces and is zipped to the refined outer surface along the hairline."""
+    crop = head_hair.load_hair_crop()
+    assert 0 <= crop.lining_splits < crop.refine_splits
+    whole = replace(crop, lining_splits=crop.refine_splits)
+    for part in ("left", "none"):
+        lined = head_hair.build_short_crop(skin, part, crop)
+        full = head_hair.build_short_crop(skin, part, whole)
+        assert _closed(lined.faces) and lined.volume() > 0.0
+        share = len(lined.faces) / len(full.faces)
+        assert share <= CHECKS["lined_hair_max_share"], (part, share)
+        for axis, view in enumerate(CHECKS["outline_views"]):  # same outer surface
+            step = CHECKS["outline_step_rad"]
+            seen = head_hair.outline_turns_deg(lined, axis, step, view)
+            assert np.allclose(
+                seen, head_hair.outline_turns_deg(full, axis, step, view), atol=1e-6
+            )
+    with pytest.raises(ValueError, match="lining_splits"):
+        head_hair.build_short_crop(skin, "left", replace(crop, lining_splits=-1))
+
+
 def test_refined_hair_has_a_smooth_outline_and_resolved_comb_ridges(skin) -> None:
     crop = head_hair.load_hair_crop()
     plain = replace(crop, comb_amplitude=0.0)  # the shape under the combed relief
