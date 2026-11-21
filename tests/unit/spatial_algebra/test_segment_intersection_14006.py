@@ -93,7 +93,7 @@ def test_overlay_feed_and_cli_options() -> None:
         q=np.zeros((10, 1)),
         segment_mobility_at=seg_mob,
     )
-    g_fn, h_fn = _build_hand_ellipsoid_feed(
+    g_fn, h_fn, _ = _build_hand_ellipsoid_feed(
         swing,  # type: ignore[arg-type]
         active_ellipsoids=("mobility",),
         hand_mobility_mode="constrained",
@@ -101,7 +101,7 @@ def test_overlay_feed_and_cli_options() -> None:
         selection=MobilitySelection("wrists"),
     )
     assert len(g_fn(0)) == 2 and "Lead_wrist" in h_fn(0)[0]
-    g_cut, h_cut = _build_hand_ellipsoid_feed(
+    g_cut, h_cut, _ = _build_hand_ellipsoid_feed(
         swing,  # type: ignore[arg-type]
         active_ellipsoids=("mobility",),
         hand_mobility_mode="constrained",

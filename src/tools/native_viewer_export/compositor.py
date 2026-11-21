@@ -369,10 +369,26 @@ def _card_lines(card: Any) -> list[tuple[str, str, bool]]:
     return lines
 
 
+#: a panel line's value: a text, or the cells of a table row (right-aligned columns)
+Cells = str | Sequence[str]
+
+
+def _cells(value: Cells) -> tuple[str, ...]:
+    return (value,) if isinstance(value, str) else tuple(value)
+
+
+def _column_widths(font: Any, lines: Sequence[tuple[str, Cells, bool]]) -> list[float]:
+    rows = [_cells(v) for _, v, _ in lines]
+    return [
+        max(font.getlength(r[j]) for r in rows if len(r) > j)
+        for j in range(max(map(len, rows), default=0))
+    ]
+
+
 def text_panel_box(
     shape: tuple[int, ...],
     title: str,
-    lines: Sequence[tuple[str, str, bool]],
+    lines: Sequence[tuple[str, Cells, bool]],
     position: str = "right",
     size: int | None = None,
 ) -> tuple[tuple[int, int, int, int], int]:
@@ -387,13 +403,17 @@ def text_panel_box(
     size = max(11, height // 45) if size is None else size
     font = _font(size)
     pad, line_h = size // 2 + 2, size + 6
-    title_w = font.getlength(title)
+    cols = _column_widths(font, lines)
+    table_w = sum(cols) + pad * (len(cols) - 1)
+    wide = [
+        table_w if not isinstance(v, str) else font.getlength(v) for _, v, _ in lines
+    ]
     text_w = max(
-        title_w,
-        *(
-            font.getlength(label) + font.getlength(value) + 2 * pad
-            for label, value, _ in lines
-        ),
+        [font.getlength(title)]
+        + [
+            font.getlength(ln[0]) + w + 2 * pad
+            for ln, w in zip(lines, wide, strict=True)
+        ]
     )
     box_w = min(width, int(text_w + 2 * pad))
     box_h = min(height, int(2 * pad + line_h * (len(lines) + 1)))
@@ -437,11 +457,13 @@ def draw_text_panel(
     box: tuple[int, int, int, int],
     size: int,
     title: str,
-    lines: Sequence[tuple[str, str, bool]],
+    lines: Sequence[tuple[str, Cells, bool]],
     alpha: float = _CARD_ALPHA,
+    label_colours: Sequence[tuple[int, int, int] | None] = (),
 ) -> Image8:
     """Copy of ``img`` with a darkened panel in ``box``: ``title``, then one
-    ``(label, value, dimmed)`` line each. Only pixels inside ``box`` change."""
+    ``(label, value, dimmed)`` line each. Only pixels inside ``box`` change.
+    A value of cells is drawn as columns; ``label_colours`` colour the labels."""
     _check_image(img)
     (x0, y0, x1, y1), out = box, img.copy()
     region = out[y0:y1, x0:x1].astype(np.float32) * (1.0 - alpha)
@@ -450,14 +472,19 @@ def draw_text_panel(
     font = _font(size)
     pad, line_h = size // 2 + 2, size + 6
     draw.text((pad, pad), title, font=font, fill=_YELLOW)
+    rights, edge = [], float(x1 - x0 - pad)
+    for width in reversed(_column_widths(font, lines)):
+        rights.append(edge)
+        edge -= width + pad
     for i, (label, value, unavailable) in enumerate(lines, start=1):
         y = pad + i * line_h
         colour = _CARD_GREY if unavailable else _WHITE
+        colour = next(iter(label_colours[i - 1 : i]), None) or colour
         draw.text((pad, y), label, font=font, fill=colour)
-        if value:
+        for cell, right in zip(reversed(_cells(value)), rights, strict=False):
             draw.text(
-                (x1 - x0 - pad - font.getlength(value), y),
-                value,
+                (right - font.getlength(cell), y),
+                cell,
                 font=font,
                 fill=_YELLOW if unavailable else _WHITE,
             )

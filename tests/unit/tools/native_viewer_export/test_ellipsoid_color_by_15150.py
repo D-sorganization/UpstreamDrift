@@ -48,7 +48,7 @@ def _swing() -> SimpleNamespace:
 
 
 def _colours(**extra: Any) -> dict[str, set[tuple[float, ...]]]:
-    glyph_fn, _ = _build_hand_ellipsoid_feed(
+    glyph_fn, _, _ = _build_hand_ellipsoid_feed(
         _swing(),  # type: ignore[arg-type]
         active_ellipsoids=KINDS,
         hand_mobility_mode="constrained",

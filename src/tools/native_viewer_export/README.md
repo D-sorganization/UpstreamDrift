@@ -104,6 +104,12 @@ python3 -m src.tools.native_viewer_export \
   a time sample, so frame `k` is not source state `k`. Their display scale is
   fixed once from the source states and shared by every clip. A feed whose
   ellipsoids cannot be evaluated at the clip frames is refused (`ValueError`).
+- The ellipsoid values are a compact side panel (`ellipsoid_panel.py`, drawn by
+  the impact factors panel's renderer): a row per point with its largest
+  mobility and effective-mass radii and condition number, a units row and, with
+  `--ellipsoid-color-by kind`, a legend. It sits opposite the impact factors
+  panel, stacks below it on a shared edge and stays above the bottom HUD rows;
+  layout `text` in its settings file restores them.
 
 Environment: `NATIVE_VIEWER_CHROMIUM` (Chromium executable; a full Playwright
 build renders much faster than the headless shell), and
