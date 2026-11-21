@@ -68,8 +68,7 @@ PART_MATERIALS = {
     "head_face": "club_face",  # face marking only (club_face_marking)
     "face_lines": "club_score_lines",
 }
-#: Parts that ride the head body, in the head's frame (they follow the tip link
-#: of a chain shaft with the head).
+#: Parts that ride the head (and follow it onto a chain shaft's tip link).
 HEAD_PARTS = ("head", "head_face", "face_lines")
 HAND_PART_ROLES = {"lead_hand": Hand.LEAD, "trail_hand": Hand.TRAIL}
 
@@ -162,13 +161,12 @@ def assembly_from_spec(spec: Mapping[str, Any]) -> ClubAssembly | None:
 
 
 def _face_marking_for(club: Mapping[str, Any]) -> FaceMarkingSettings | None:
-    """The spec club block's ``face_marking`` mapping laid over the settings
-    file, or ``None`` when the drawn head stays as built."""
+    """Spec ``face_marking`` over the settings file; ``None`` when off."""
     base = load_face_marking_settings()
     over = club.get("face_marking")
     if over:
         base = dataclasses.replace(base, **dict(over))
-    return base if base.active else None
+    return base if base.face_marking else None
 
 
 @lru_cache(maxsize=8)
