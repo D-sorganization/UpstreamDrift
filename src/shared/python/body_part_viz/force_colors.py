@@ -13,6 +13,8 @@ from dataclasses import asdict, dataclass, fields
 from numbers import Real
 from typing import Any, Final
 
+from .series_validation import coerce_finite_real_fields
+
 DEFAULT_TENSION_COLOR: Final[str] = "#0000ff"
 DEFAULT_COMPRESSION_COLOR: Final[str] = "#ff0000"
 DEFAULT_NEUTRAL_COLOR: Final[str] = "#ffffff"
@@ -55,15 +57,11 @@ class ForceColorScale:
     def __post_init__(self) -> None:
         if not isinstance(self.enabled, bool):
             raise TypeError("enabled must be bool")
-        for name in ("tension_limit_n", "compression_limit_n", "deadband_n"):
-            value = getattr(self, name)
-            if isinstance(value, bool) or not isinstance(value, Real):
-                raise TypeError(f"{name} must be a real number")
-            if not math.isfinite(value):
-                raise ValueError(f"{name} must be finite")
-            object.__setattr__(self, name, float(value))
-        if self.deadband_n < 0:
-            raise ValueError("deadband_n must be nonnegative")
+        coerce_finite_real_fields(
+            self,
+            ("tension_limit_n", "compression_limit_n", "deadband_n"),
+            nonnegative=("deadband_n",),
+        )
         if min(self.tension_limit_n, self.compression_limit_n) <= self.deadband_n:
             raise ValueError("both limits must exceed deadband_n")
         if isinstance(self.opacity, bool) or not isinstance(self.opacity, Real):
@@ -84,9 +82,9 @@ class ForceColorScale:
             object.__setattr__(self, name, value.lower())
 
     def _scalar_scale(self):  # noqa: ANN202 — lazy import avoids cycle at load time
-        from .scalar_shading import ScalarColorScale
+        from .scalar_shading import scalar_for_force_color_scale
 
-        return ScalarColorScale.from_force_color_scale(self)
+        return scalar_for_force_color_scale(self)
 
     @staticmethod
     def _check_force(force_n: float | Real | None) -> None:

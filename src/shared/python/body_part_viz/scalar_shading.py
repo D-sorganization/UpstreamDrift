@@ -6,13 +6,18 @@ import math
 import re
 from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass, fields
+from functools import lru_cache
 from numbers import Integral, Real
-from types import MappingProxyType
 from typing import Any, Final
 
-from ..plot_style import ColormapId
+from .series_validation import (
+    coerce_finite_real_fields,
+    normalize_segment_samples,
+    validate_strictly_increasing_times,
+)
 
 DEFAULT_NEUTRAL_COLOR: Final[str] = "#ffffff"
+DEFAULT_SEQ_COLORMAP_ID: Final[str] = "viridis"
 SCALE_KINDS: Final[tuple[str, ...]] = ("sequential", "diverging")
 DISPLAY_TRANSFORMS: Final[tuple[str, ...]] = ("linear", "sqrt")
 SIGN_CONVENTIONS: Final[tuple[str, ...]] = (
@@ -22,6 +27,7 @@ SIGN_CONVENTIONS: Final[tuple[str, ...]] = (
 )
 BLEND_MODES: Final[tuple[str, ...]] = ("replace", "tint")
 _SATURATION_NOTE: Final[str] = "Values beyond limits use endpoint colour (saturated)."
+_COLORMAP_CACHE: dict[str, Any] = {}
 
 __all__ = [
     "BLEND_MODES",
@@ -32,6 +38,7 @@ __all__ = [
     "ScalarColorScale",
     "SegmentScalarSeries",
     "ShadeOutcome",
+    "scalar_for_force_color_scale",
     "shade_outcome_hex",
 ]
 
@@ -98,35 +105,12 @@ class SegmentScalarSeries:
             raise ValueError(f"sign_convention must be one of {SIGN_CONVENTIONS}")
         if not isinstance(self.source, str) or not self.source.strip():
             raise ValueError("source must describe the scalar producer")
-        times = tuple(self.time_s)
-        if not times or any(
-            isinstance(t, bool) or not isinstance(t, Real) or not math.isfinite(t)
-            for t in times
-        ):
-            raise ValueError("time_s must contain finite real sample times")
-        if any(right <= left for left, right in zip(times, times[1:], strict=False)):
-            raise ValueError("time_s must be strictly increasing")
-        if not isinstance(self.values, Mapping):
-            raise TypeError("values must be a segment-to-samples mapping")
-        copied: dict[str, tuple[float | None, ...]] = {}
-        for segment, samples in self.values.items():
-            if not isinstance(segment, str) or not segment.strip():
-                raise ValueError("segment identifiers must be nonempty strings")
-            series = tuple(samples)
-            if len(series) != len(times):
-                raise ValueError(f"{segment}: sample count must match time_s")
-            if any(
-                value is not None
-                and (isinstance(value, bool) or not isinstance(value, Real))
-                for value in series
-            ):
-                raise TypeError("samples must be real numbers or None")
-            copied[segment] = tuple(
-                float(value) if value is not None and math.isfinite(value) else None
-                for value in series
-            )
-        object.__setattr__(self, "time_s", tuple(float(t) for t in times))
-        object.__setattr__(self, "values", MappingProxyType(copied))
+        times = validate_strictly_increasing_times(self.time_s)
+        copied = normalize_segment_samples(
+            times, self.values, segment_value_label="sample count"
+        )
+        object.__setattr__(self, "time_s", times)
+        object.__setattr__(self, "values", copied)
 
     def value_at(self, segment: str, frame_idx: int) -> float | None:
         if isinstance(frame_idx, bool) or not isinstance(frame_idx, Integral):
@@ -145,7 +129,7 @@ class ScalarColorScale:
     scale_kind: str = "sequential"
     units: str = "1"
     sign_convention: str = "unsigned"
-    colormap_id: str = ColormapId.VIRIDIS.value
+    colormap_id: str = DEFAULT_SEQ_COLORMAP_ID
     low_limit: float = 0.0
     high_limit: float = 1.0
     negative_limit: float | None = None
@@ -182,15 +166,11 @@ class ScalarColorScale:
         object.__setattr__(self, "opacity", float(self.opacity))
 
     def _validate_limits_and_colors(self) -> None:
-        for name in ("low_limit", "high_limit", "deadband"):
-            value = getattr(self, name)
-            if isinstance(value, bool) or not isinstance(value, Real):
-                raise TypeError(f"{name} must be a real number")
-            if not math.isfinite(value):
-                raise ValueError(f"{name} must be finite")
-            object.__setattr__(self, name, float(value))
-        if self.deadband < 0:
-            raise ValueError("deadband must be nonnegative")
+        coerce_finite_real_fields(
+            self,
+            ("low_limit", "high_limit", "deadband"),
+            nonnegative=("deadband",),
+        )
         for name in ("low_color", "high_color", "neutral_color"):
             object.__setattr__(
                 self, name, _validate_opaque_hex(name, getattr(self, name))
@@ -198,6 +178,8 @@ class ScalarColorScale:
         if self.scale_kind == "sequential":
             if self.sign_convention != "unsigned":
                 raise ValueError("sequential scales require unsigned sign_convention")
+            if self.low_limit < 0:
+                raise ValueError("sequential low_limit must be nonnegative")
             if self.high_limit <= self.low_limit:
                 raise ValueError("high_limit must exceed low_limit")
             return
@@ -226,31 +208,29 @@ class ScalarColorScale:
 
     @classmethod
     def from_force_color_scale(cls, scale: Any) -> ScalarColorScale:
-        from .force_colors import ForceColorScale
+        return scalar_for_force_color_scale(scale)
 
-        if not isinstance(scale, ForceColorScale):
-            raise TypeError("scale must be ForceColorScale")
-        return cls(
-            enabled=scale.enabled,
-            scale_kind="diverging",
-            units="N",
-            sign_convention="tension-positive",
-            positive_limit=scale.tension_limit_n,
-            negative_limit=scale.compression_limit_n,
-            deadband=scale.deadband_n,
-            high_color=scale.tension_color,
-            low_color=scale.compression_color,
-            neutral_color=scale.neutral_color,
-            opacity=scale.opacity,
-            blend_mode=scale.blend_mode,
-        )
-
-    def _transform(self, value: float) -> float:
+    def _transform_magnitude(self, magnitude: float) -> float:
         if self.display_transform == "linear":
-            return value
-        if value == 0.0:
-            return 0.0
-        return math.copysign(math.sqrt(abs(value)), value)
+            return magnitude
+        return math.sqrt(max(0.0, magnitude))
+
+    def _magnitude_fraction(self, magnitude: float, limit: float) -> tuple[float, bool]:
+        if magnitude <= self.deadband:
+            return 0.0, False
+        saturated = magnitude > limit
+        span = self._transform_magnitude(limit) - self._transform_magnitude(
+            self.deadband
+        )
+        if span <= 0:
+            raise ValueError("limit must exceed deadband after display transform")
+        capped = min(
+            self._transform_magnitude(magnitude), self._transform_magnitude(limit)
+        )
+        fraction = min(
+            1.0, max(0.0, (capped - self._transform_magnitude(self.deadband)) / span)
+        )
+        return fraction, saturated
 
     def _display_limits(self) -> tuple[float, float]:
         if (
@@ -295,43 +275,40 @@ class ScalarColorScale:
 
     def _tension_positive_endpoint(self, value: float) -> tuple[str, float, bool]:
         magnitude = abs(value)
-        saturated = False
         if magnitude <= self.deadband:
             return self.neutral_color, 0.0, False
         if value > 0:
             assert self.positive_limit is not None
             limit = self.positive_limit
             endpoint = self.high_color
-            saturated = magnitude > limit
         else:
             assert self.negative_limit is not None
             limit = self.negative_limit
             endpoint = self.low_color
-            saturated = magnitude > limit
-        span = limit - self.deadband
-        fraction = min(1.0, (min(magnitude, limit) - self.deadband) / span)
+        fraction, saturated = self._magnitude_fraction(magnitude, limit)
         return endpoint, fraction, saturated
 
     def _signed_center_endpoint(self, value: float) -> tuple[str, float, bool]:
         if abs(value) <= self.deadband:
             return self.neutral_color, 0.0, False
         if value > 0:
-            limit, endpoint = self.high_limit, self.high_color
+            limit = self.high_limit
+            endpoint = self.high_color
+            magnitude = value
         else:
-            limit, endpoint = self.low_limit, self.low_color
-            value, limit = abs(value), abs(limit)
-        saturated = value > abs(limit)
-        span = abs(limit) - self.deadband
-        fraction = min(1.0, (min(value, abs(limit)) - self.deadband) / span)
+            limit = abs(self.low_limit)
+            endpoint = self.low_color
+            magnitude = abs(value)
+        fraction, saturated = self._magnitude_fraction(magnitude, limit)
         return endpoint, fraction, saturated
 
     def _resolve_load_rgb(self, endpoint: str, fraction: float) -> tuple[int, int, int]:
         return _hex_channels(_lerp_hex(self.neutral_color, endpoint, fraction))
 
     def _sequential_hex(self, value: float) -> tuple[str, bool]:
-        transformed = self._transform(value)
-        lo = self._transform(self.low_limit)
-        hi = self._transform(self.high_limit)
+        transformed = self._transform_magnitude(value)
+        lo = self._transform_magnitude(self.low_limit)
+        hi = self._transform_magnitude(self.high_limit)
         saturated = value < self.low_limit or value > self.high_limit
         if hi <= lo:
             raise ValueError("invalid sequential limits after transform")
@@ -339,12 +316,16 @@ class ScalarColorScale:
         return self._sample_colormap(t), saturated
 
     def _sample_colormap(self, position: float) -> str:
-        from matplotlib import colormaps
+        cmap = _COLORMAP_CACHE.get(self.colormap_id)
+        if cmap is None:
+            from matplotlib import colormaps
 
-        from ..plot_style.colormaps import resolve_colormap_alias
+            from ..plot_style.colormaps import ColormapId, resolve_colormap_alias
 
-        cmap_key = resolve_colormap_alias(ColormapId(self.colormap_id))
-        rgba = colormaps[str(cmap_key.value)](position)
+            cmap_key = resolve_colormap_alias(ColormapId(self.colormap_id))
+            cmap = colormaps[str(cmap_key.value)]
+            _COLORMAP_CACHE[self.colormap_id] = cmap
+        rgba = cmap(position)
         return "#" + "".join(f"{int(round(channel * 255)):02x}" for channel in rgba[:3])
 
     def evaluate(self, sample: float | Real | None, base_color: str) -> ShadeOutcome:
@@ -437,6 +418,53 @@ class ScalarColorScale:
                 f"unknown scalar-color settings: {sorted(unknown, key=str)}"
             )
         return cls(**settings)
+
+
+@lru_cache(maxsize=128)
+def _cached_scalar_for_force(
+    enabled: bool,
+    tension_limit_n: float,
+    compression_limit_n: float,
+    deadband_n: float,
+    tension_color: str,
+    compression_color: str,
+    neutral_color: str,
+    opacity: float,
+    blend_mode: str,
+) -> ScalarColorScale:
+    return ScalarColorScale(
+        enabled=enabled,
+        scale_kind="diverging",
+        units="N",
+        sign_convention="tension-positive",
+        positive_limit=tension_limit_n,
+        negative_limit=compression_limit_n,
+        deadband=deadband_n,
+        high_color=tension_color,
+        low_color=compression_color,
+        neutral_color=neutral_color,
+        opacity=opacity,
+        blend_mode=blend_mode,
+        display_transform="linear",
+    )
+
+
+def scalar_for_force_color_scale(scale: Any) -> ScalarColorScale:
+    from .force_colors import ForceColorScale
+
+    if not isinstance(scale, ForceColorScale):
+        raise TypeError("scale must be ForceColorScale")
+    return _cached_scalar_for_force(
+        scale.enabled,
+        scale.tension_limit_n,
+        scale.compression_limit_n,
+        scale.deadband_n,
+        scale.tension_color,
+        scale.compression_color,
+        scale.neutral_color,
+        scale.opacity,
+        scale.blend_mode,
+    )
 
 
 def shade_outcome_hex(

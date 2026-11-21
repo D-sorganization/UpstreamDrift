@@ -2,16 +2,13 @@
 
 from __future__ import annotations
 
+import json
 import math
-from itertools import product
 from pathlib import Path
 
 import pytest
 
-from src.shared.python.body_part_viz.force_colors import (
-    BLEND_MODES,
-    ForceColorScale,
-)
+from src.shared.python.body_part_viz.force_colors import ForceColorScale
 from src.shared.python.body_part_viz.scalar_shading import (
     DISPLAY_TRANSFORMS,
     SCALE_KINDS,
@@ -20,7 +17,6 @@ from src.shared.python.body_part_viz.scalar_shading import (
     SegmentScalarSeries,
     shade_outcome_hex,
 )
-from src.shared.python.plot_style import ColormapId
 
 pytestmark = pytest.mark.unit
 
@@ -65,6 +61,8 @@ def test_scalar_scale_invalid_limits_units_sign():
         ScalarColorScale(display_transform="log")
     with pytest.raises(ValueError):
         ScalarColorScale(scale_kind="sequential", low_limit=10, high_limit=10)
+    with pytest.raises(ValueError, match="low_limit must be nonnegative"):
+        ScalarColorScale(scale_kind="sequential", low_limit=-1, high_limit=10)
 
 
 def test_diverging_endpoint_maps_zero_to_neutral():
@@ -80,6 +78,35 @@ def test_diverging_endpoint_maps_zero_to_neutral():
     )
     assert scale.color(0.0, "#123456") == "#ffffff"
     assert shade_outcome_hex(scale, 0.0, "#123456").saturated is False
+
+
+def test_diverging_sqrt_changes_mapped_colour():
+    linear = ScalarColorScale(
+        enabled=True,
+        scale_kind="diverging",
+        sign_convention="signed-zero-center",
+        low_limit=-100.0,
+        high_limit=100.0,
+        low_color="#ff0000",
+        high_color="#0000ff",
+        neutral_color="#ffffff",
+        display_transform="linear",
+    )
+    sqrt_scale = ScalarColorScale(
+        enabled=True,
+        scale_kind="diverging",
+        sign_convention="signed-zero-center",
+        low_limit=-100.0,
+        high_limit=100.0,
+        low_color="#ff0000",
+        high_color="#0000ff",
+        neutral_color="#ffffff",
+        display_transform="sqrt",
+    )
+    assert linear.color(25.0, "#000000") == "#bfbfff"
+    assert sqrt_scale.color(25.0, "#000000") == "#8080ff"
+    assert linear.color(50.0, "#000000") == "#8080ff"
+    assert sqrt_scale.color(50.0, "#000000") == "#4b4bff"
 
 
 def test_diverging_saturation_flag_beyond_limits():
@@ -116,25 +143,25 @@ def test_sequential_viridis_golden():
     scale = ScalarColorScale(
         enabled=True,
         scale_kind="sequential",
-        colormap_id=ColormapId.VIRIDIS.value,
+        colormap_id="viridis",
         low_limit=0.0,
         high_limit=100.0,
         units="J",
         sign_convention="unsigned",
     )
-    mid = scale.color(50.0, "#000000")
-    assert mid.startswith("#") and len(mid) == 7
-    high = scale.color(100.0, "#000000")
-    assert high != mid
+    assert scale.color(0.0, "#000000") == "#440154"
+    assert scale.color(50.0, "#000000") == "#21918c"
+    assert scale.color(100.0, "#000000") == "#fde725"
     clipped = shade_outcome_hex(scale, 200.0, "#000000")
     assert clipped.saturated is True
+    assert clipped.color == "#fde725"
 
 
 def test_sqrt_transform_ticks_in_physical_units():
     linear = ScalarColorScale(
         enabled=True,
         scale_kind="sequential",
-        colormap_id=ColormapId.CIVIDIS.value,
+        colormap_id="cividis",
         low_limit=0.0,
         high_limit=100.0,
         display_transform="linear",
@@ -143,7 +170,7 @@ def test_sqrt_transform_ticks_in_physical_units():
     sqrt_scale = ScalarColorScale(
         enabled=True,
         scale_kind="sequential",
-        colormap_id=ColormapId.CIVIDIS.value,
+        colormap_id="cividis",
         low_limit=0.0,
         high_limit=100.0,
         display_transform="sqrt",
@@ -196,45 +223,18 @@ def test_legend_descriptor_carries_saturation_marker():
     assert legend.saturation_note
 
 
-FORCE_GRID = [
-    -10_000.0,
-    -2_000.0,
-    -500.0,
-    -200.0,
-    -100.0,
-    -50.0,
-    0.0,
-    50.0,
-    100.0,
-    200.0,
-    500.0,
-    2_000.0,
-    10_000.0,
-]
-
-
-@pytest.mark.parametrize(
-    ("blend_mode", "opacity", "force_n"),
-    [
-        (blend, opacity, force)
-        for blend, opacity, force in product(BLEND_MODES, (1.0, 0.5, 0.0), FORCE_GRID)
-    ],
-)
-def test_force_colors_byte_identical_via_scalar_adapter(blend_mode, opacity, force_n):
-    """ForceColorScale must match pre-refactor RGB for every grid point."""
-    base = "#336699"
-    kwargs = {
-        "enabled": True,
-        "opacity": opacity,
-        "blend_mode": blend_mode,
-        "tension_limit_n": 1000.0,
-        "compression_limit_n": 1000.0,
-        "deadband_n": 0.0,
-    }
-    force = ForceColorScale(**kwargs)
-    scalar = ScalarColorScale.from_force_color_scale(force)
-    assert force.color(force_n, base) == scalar.color(force_n, base)
-    assert force.shade_hex(force_n, base) == scalar.shade_hex(force_n, base)
+def test_force_matches_main_regression_goldens():
+    path = Path(__file__).resolve().parents[3] / "schemas/force-color-examples.json"
+    for case in json.loads(path.read_text())["regression_cases"]:
+        scale = ForceColorScale.from_dict(case["settings"])
+        method = case["method"]
+        base = case["base_color"]
+        if method == "color":
+            assert scale.color(case["force_n"], base) == case["expected"]
+        elif method == "shade_hex":
+            assert scale.shade_hex(case["force_n"], base) == case["expected"]
+        else:
+            raise AssertionError(f"unknown regression method {method!r}")
 
 
 def test_force_to_dict_unchanged_after_wrap():
@@ -244,8 +244,6 @@ def test_force_to_dict_unchanged_after_wrap():
 
 def test_cross_runtime_force_examples_still_pass():
     path = Path(__file__).resolve().parents[3] / "schemas/force-color-examples.json"
-    import json
-
     data = json.loads(path.read_text())
     for case in data["cases"]:
         scale = ForceColorScale.from_dict(case["settings"])
