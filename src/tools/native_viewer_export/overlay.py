@@ -44,6 +44,8 @@ class OverlayOptions:
     mobility_points: str = "hands"
     max_mobility_points: int = 8
     mobility_condition_cutoff: float | None = None
+    #: ellipsoid colour encodes the point (default) or the kind (#15150)
+    ellipsoid_color_by: str = "point"
     #: blank axial loads around ball impact (skin_load_settings.json default)
     axial_impact_blackout: bool = True
 
@@ -176,6 +178,26 @@ def _build_hand_hud_lines_fn(
     return hand_hud_lines_fn
 
 
+def _ellipsoid_color_picker(
+    color_by: str,
+) -> Callable[[Any, str, tuple[float, ...]], tuple[float, ...]]:
+    """Colour rule of an export ellipsoid: by ``"point"`` or by ``"kind"`` (#15150).
+
+    Raises ``ValueError`` for any other ``color_by``. The returned function
+    maps ``(point, kind, fallback_rgba)`` to the glyph RGBA.
+    """
+    from src.shared.python.force_overlay.palette import (
+        ellipsoid_kind_rgba,
+        require_ellipsoid_color_mode,
+    )
+
+    if require_ellipsoid_color_mode(color_by) == "kind":
+        return lambda _point, kind, _fallback: ellipsoid_kind_rgba(kind)
+    return lambda point, _kind, fallback: (
+        point.color if point.color is not None else fallback
+    )
+
+
 def _build_hand_ellipsoid_feed(
     swing: SwingInput,
     active_ellipsoids: Sequence[str],
@@ -185,10 +207,12 @@ def _build_hand_ellipsoid_feed(
     mobility_points: str = "hands",
     max_mobility_points: int = 8,
     mobility_condition_cutoff: float | None = None,
+    ellipsoid_color_by: str = "point",
 ) -> tuple[
     Callable[[int], tuple[EllipsoidGlyph, ...]], Callable[[int], tuple[str, ...]]
 ]:
     """Build ellipsoid glyph emitter and HUD capability formatter."""
+    pick_color = _ellipsoid_color_picker(ellipsoid_color_by)
     from src.shared.python.force_overlay.ellipsoid_display import (
         EllipsoidDisplayBuilder,
         EllipsoidDisplayScale,
@@ -259,7 +283,7 @@ def _build_hand_ellipsoid_feed(
                     "trail" if "trail" in pt.name else "lead",
                     label=f"{pt.name} {kind}",
                 )
-                c = pt.color if pt.color is not None else disp.rgba
+                c = pick_color(pt, kind, disp.rgba)
                 glyphs_list.append(
                     EllipsoidGlyph(disp.centre, disp.axes, disp.radii, c, disp.label)
                 )
@@ -399,6 +423,7 @@ def build_overlay_feed(
             mobility_points=opts.mobility_points,
             max_mobility_points=opts.max_mobility_points,
             mobility_condition_cutoff=opts.mobility_condition_cutoff,
+            ellipsoid_color_by=opts.ellipsoid_color_by,
         )
 
     feed = OverlayFeed(
