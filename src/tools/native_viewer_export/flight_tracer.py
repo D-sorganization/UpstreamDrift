@@ -30,6 +30,7 @@ from src.shared.python.impact_parameters.flight_report import (
     flight_for_impact,
 )
 from src.tools.native_viewer_export import impact_card
+from src.tools.native_viewer_export.impact_state import series_at_contact
 from src.tools.native_viewer_export.overlay2d import pinhole_for_view
 
 if TYPE_CHECKING:
@@ -317,13 +318,23 @@ def playback_from_series(
 ) -> FlightPlayback:
     """Flight launched from the clubhead state the impact card reads.
 
-    That is the last sample before ``impact_time_s``. Raises what the impact
-    and flight models raise for a series they cannot use.
+    That is the state where the face reaches the ball
+    (:func:`impact_state.series_at_contact`) and the flight starts at that
+    instant, so the tracer leaves the ball as the face meets it. Without a
+    contact state (the face does not reach the ball) it is the last sample
+    before ``impact_time_s``, started at ``impact_time_s``. Raises what the
+    impact and flight models raise for a series they cannot use.
     """
     frame = impact_card.address_target_frame(series)
-    state = impact_card.contact_index(series, impact_time_s) - 1
-    flight = flight_for_impact(series, state, frame)
-    return playback_from_flight(flight, frame, impact_time_s, ball, settings)
+    contact = series_at_contact(series, ball.position_m, ball.radius_m, impact_time_s)
+    if contact is None:
+        state = impact_card.contact_index(series, impact_time_s) - 1
+        flight = flight_for_impact(series, state, frame)
+        return playback_from_flight(flight, frame, impact_time_s, ball, settings)
+    moved, state = contact
+    flight = flight_for_impact(moved, state, frame)
+    start_s = float(moved.times_s[state])
+    return playback_from_flight(flight, frame, start_s, ball, settings)
 
 
 def flight_for_export(

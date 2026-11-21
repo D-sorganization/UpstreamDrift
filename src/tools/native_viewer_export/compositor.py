@@ -8,7 +8,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+import json
 import math
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -21,6 +23,40 @@ LABEL_SIZE_PX = 18
 HUD_SIZE_PX = 16
 _WHITE = (255, 255, 255)
 _YELLOW = (255, 235, 90)
+
+
+LAYOUT_PATH = Path(__file__).with_name("hud_layout_settings.json")
+
+
+@dataclass(frozen=True)
+class HudLayout:
+    """Validated ``hud_layout_settings.json`` (``ValueError`` when invalid)."""
+
+    stroke_px: int
+    line_gap_px: int
+    edge_margin_px: int
+    label_origin_px: tuple[int, int]
+    panel_gap_px: int
+
+    def __post_init__(self) -> None:
+        values = [self.stroke_px, self.line_gap_px, self.edge_margin_px]
+        values += [*self.label_origin_px, self.panel_gap_px]
+        if not all(isinstance(v, int) and v >= 0 for v in values):
+            raise ValueError("HUD layout values must be integers, not negative")
+
+
+def load_hud_layout(path: Path | None = None) -> HudLayout:
+    """Read the HUD layout settings (``KeyError`` for a missing key)."""
+    raw = json.loads((path or LAYOUT_PATH).read_text(encoding="utf-8"))
+    keys = ("stroke_px", "line_gap_px", "edge_margin_px", "panel_gap_px")
+    origin = tuple(raw["label_origin_px"])
+    return HudLayout(
+        **{k: raw[k] for k in keys},
+        label_origin_px=origin,  # type: ignore[arg-type]
+    )
+
+
+HUD_LAYOUT = load_hud_layout()
 
 
 def _font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
@@ -88,6 +124,58 @@ def compose_grid(tiles: Sequence[Image8], cols: int = 2) -> Image8:
     return out
 
 
+def _line_extent(size: int) -> tuple[int, int]:
+    """Top and bottom of an outlined text line below its origin (``Ag|``)."""
+    box = _font(size).getbbox("Ag|", stroke_width=HUD_LAYOUT.stroke_px)
+    return math.floor(box[1]), math.ceil(box[3])
+
+
+def text_box(text: str, xy: tuple[int, int], size: int) -> tuple[int, int, int, int]:
+    """Pixel box ``(x0, y0, x1, y1)`` of outlined ``text`` drawn at ``xy``.
+
+    The height is that of the tallest and lowest glyphs (``Ag|``), so every line
+    of one size is as tall as the others and boxes can be stacked.
+    """
+    top, bottom = _line_extent(size)
+    box = _font(size).getbbox(text, stroke_width=HUD_LAYOUT.stroke_px)
+    x0, x1 = math.floor(xy[0] + box[0]), math.ceil(xy[0] + box[2])
+    return (x0, xy[1] + top, x1, xy[1] + bottom)
+
+
+def view_label_box(shape: tuple[int, ...], text: str) -> tuple[int, int, int, int]:
+    """Pixel box of the view label ``text`` in a frame of ``shape``."""
+    x0, y0, x1, y1 = text_box(text, HUD_LAYOUT.label_origin_px, LABEL_SIZE_PX)
+    return (x0, y0, min(x1, int(shape[1])), y1)
+
+
+def draw_view_label(img: Image8, text: str) -> Image8:
+    """Copy of ``img`` with the view label ``text`` at its layout position."""
+    return draw_label(img, text, HUD_LAYOUT.label_origin_px)
+
+
+def _hud_origins(
+    shape: tuple[int, ...], count: int, size: int
+) -> list[tuple[int, int]]:
+    """Text origins of ``count`` HUD lines stacked up from the bottom edge."""
+    top, bottom = _line_extent(size)
+    pitch = bottom - top + HUD_LAYOUT.line_gap_px
+    last = int(shape[0]) - HUD_LAYOUT.edge_margin_px - bottom
+    x = HUD_LAYOUT.edge_margin_px
+    return [(x, last - pitch * (count - 1 - i)) for i in range(count)]
+
+
+def hud_line_boxes(
+    shape: tuple[int, ...], lines: Sequence[str], size: int
+) -> list[tuple[int, int, int, int]]:
+    """Boxes of HUD ``lines``, top line first, as :func:`draw_hud` draws them.
+
+    Postcondition: consecutive boxes are ``line_gap_px`` apart, so none
+    overlaps another.
+    """
+    origins = _hud_origins(shape, len(lines), size)
+    return [text_box(t, xy, size) for t, xy in zip(lines, origins, strict=True)]
+
+
 def draw_label(
     img: Image8,
     text: str,
@@ -103,7 +191,12 @@ def draw_label(
         return out
     pil = Image.fromarray(out)
     ImageDraw.Draw(pil).text(
-        xy, text, font=_font(size), fill=fill, stroke_width=2, stroke_fill=(0, 0, 0)
+        xy,
+        text,
+        font=_font(size),
+        fill=fill,
+        stroke_width=HUD_LAYOUT.stroke_px,
+        stroke_fill=(0, 0, 0),
     )
     return np.asarray(pil).copy()
 
@@ -284,8 +377,8 @@ def text_panel_box(
     box_h = min(height, int(2 * pad + line_h * (len(lines) + 1)))
     margin = max(6, width // 80)
     x0 = width - margin - box_w if position == "right" else margin
-    y0 = margin
-    return (x0, y0, x0 + box_w, y0 + box_h), size
+    y0 = max(margin, view_label_box(shape, "")[3] + HUD_LAYOUT.panel_gap_px)
+    return (x0, y0, x0 + box_w, min(height, y0 + box_h)), size
 
 
 def _card_metrics(
@@ -354,16 +447,9 @@ def draw_hud(img: Image8, hud: HudInfo, *, size: int = HUD_SIZE_PX) -> Image8:
     """Draw the HUD lines along the bottom edge of ``img``."""
     _check_image(img)
     lines = hud.lines()
-    pad = 6
-    line_h = size + 4
-    y = img.shape[0] - pad - line_h * len(lines)
     out = img
-    for i, line in enumerate(lines):
-        out = draw_label(
-            out,
-            line,
-            (pad, y + i * line_h),
-            size=size,
-            fill=_WHITE if i == 0 else _YELLOW,
-        )
+    for i, (line, xy) in enumerate(
+        zip(lines, _hud_origins(img.shape, len(lines), size), strict=True)
+    ):
+        out = draw_label(out, line, xy, size=size, fill=_WHITE if i == 0 else _YELLOW)
     return out
