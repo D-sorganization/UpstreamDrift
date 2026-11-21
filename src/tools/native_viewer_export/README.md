@@ -62,6 +62,12 @@ python3 -m src.tools.native_viewer_export \
   `bundle:ball_impact`, the ball every replay strikes), else the address
   geometry (MuJoCo FK of the first state, face centre and normal through
   `model_appearance.ball.ball_position_at_address`, source `address_geometry`).
+  With the `strike` placement of `model_appearance/ball_strike_settings.json`
+  (#15150, the default) that ball is then moved to where the face centre passes
+  nearest it around impact (source `strike_geometry`, record key `strike`). It
+  is a display placement: no joint angle or club dimension changes, and the
+  face is not squared. A swing that misses by more than `max_shift_m` keeps the
+  address ball and records why.
   When neither exists (no club, ungrounded first state, no MuJoCo) no ball is
   drawn and the reason is logged and returned in `ExportResult.ball`
   (`{"unavailable": reason}`, printed by the CLI); a placement is recorded with
