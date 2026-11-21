@@ -97,3 +97,23 @@ def test_flight_coordinates_use_the_target_frame() -> None:
     assert np.allclose(fi.flight_coordinates(path, axes, path[1])[0], [-10, 0, -5])
     with pytest.raises(ValueError, match="axes_m"):
         fi.flight_coordinates(path, np.eye(2))
+
+
+def test_curve_stays_inside_its_plots_for_any_exaggeration() -> None:
+    rect = _rect()
+    assert rect is not None
+    t = np.linspace(0.0, 1.0, 40)
+    local = np.column_stack([180.0 * t, 25.0 * np.sin(3 * t), 12.0 * 4 * t * (1 - t)])
+    extent = (local[-1, 0], 12.0, np.abs(local[:, 1]).max())
+    for exag in (None, 1.0, 6.0, 500.0):
+        cfg = replace(ON, vertical_exaggeration=exag)
+        profile, plan = fi.plots_for(rect, cfg, 16, extent)
+        for plot, vertical in ((profile, local[:, 2]), (plan, local[:, 1])):
+            pix = plot.pixels(local[:, 0], vertical)
+            x0, y0, x1, y1 = plot.box
+            assert (pix[:, 0] >= x0).all() and (pix[:, 0] <= x1).all()
+            assert (pix[:, 1] >= y0).all() and (pix[:, 1] <= y1).all()
+    true = fi.plots_for(rect, replace(ON, vertical_exaggeration=1.0), 16, extent)
+    assert true[0].scale_y == pytest.approx(true[0].scale_x)
+    tall = fi.plots_for(rect, replace(ON, vertical_exaggeration=1.5), 16, extent)
+    assert tall[0].scale_y == pytest.approx(1.5 * tall[0].scale_x)
