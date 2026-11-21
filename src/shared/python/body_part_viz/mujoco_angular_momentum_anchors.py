@@ -60,9 +60,7 @@ def angular_momentum_anchors(
     """Anchors for whole-body, five groups, and every named body."""
     del root_body_id
     anchors = body_com_positions(model, data)
-    com, _ = whole_body_com_kinematics(
-        model, data, np.asarray(data.qvel, dtype=float)
-    )
+    com, _ = whole_body_com_kinematics(model, data, np.asarray(data.qvel, dtype=float))
     anchors["whole_body"] = (float(com[0]), float(com[1]), float(com[2]))
     for group, members in catalog.as_mapping().items():
         group_com = _mass_weighted_com(model, data, members)
