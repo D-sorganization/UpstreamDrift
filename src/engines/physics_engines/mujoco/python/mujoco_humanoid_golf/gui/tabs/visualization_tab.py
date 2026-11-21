@@ -18,9 +18,13 @@ from src.shared.python.body_part_viz.force_color_controls import (
     ForceColorHub,
     InlineForceColorControls,
 )
+from src.shared.python.body_part_viz.scalar_shading import ScalarColorScale
+from src.shared.python.body_part_viz.segment_net_power import (
+    SEGMENT_NET_POWER_LABEL,
+    default_net_power_color_scale,
+)
 from src.shared.python.core.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.shared.python.body_part_viz.segment_net_power import SEGMENT_NET_POWER_LABEL
 from src.shared.python.segment_kinetic_energy import SEGMENT_KE_PROXY_DISCLAIMER
 from src.shared.python.theme.style_constants import Styles
 
@@ -536,6 +540,10 @@ class VisualizationTab(QtWidgets.QWidget):
         )
         force_layout.addWidget(self.show_segment_ke_globes_cb)
 
+    def _sim_net_power_scale(self) -> ScalarColorScale | None:
+        scale = getattr(self.sim_widget, "net_power_color_scale", None)
+        return scale if isinstance(scale, ScalarColorScale) else None
+
     def _create_net_power_controls(self, force_layout: QtWidgets.QVBoxLayout) -> None:
         if force_layout is None:
             raise ValueError("force_layout must be provided")
@@ -543,8 +551,8 @@ class VisualizationTab(QtWidgets.QWidget):
         self.show_net_power_shading_cb.setToolTip(
             "Diverging segment shading for mechanical energy rate (watts)"
         )
-        scale = getattr(self.sim_widget, "net_power_color_scale", None)
-        stored = bool(getattr(scale, "enabled", False))
+        scale = self._sim_net_power_scale()
+        stored = bool(scale is not None and scale.enabled)
         self._restore_checkbox(self.show_net_power_shading_cb, stored)
         self.show_net_power_shading_cb.stateChanged.connect(
             self.on_show_net_power_shading_changed
@@ -572,9 +580,8 @@ class VisualizationTab(QtWidgets.QWidget):
         self.net_power_limit_spin.setRange(1.0, 100_000.0)
         self.net_power_limit_spin.setDecimals(1)
         self.net_power_limit_spin.setSingleStep(50.0)
-        scale = getattr(self.sim_widget, "net_power_color_scale", None)
-        if scale is not None:
-            self.net_power_limit_spin.setValue(abs(float(scale.high_limit)))
+        scale = self._sim_net_power_scale() or default_net_power_color_scale()
+        self.net_power_limit_spin.setValue(abs(float(scale.high_limit)))
         self.net_power_limit_spin.valueChanged.connect(self.on_net_power_limit_changed)
         limit_row.addWidget(self.net_power_limit_spin, stretch=1)
         force_layout.addLayout(limit_row)
@@ -586,10 +593,10 @@ class VisualizationTab(QtWidgets.QWidget):
         if limit <= 0.0:
             return
         require(self.sim_widget is not None, "sim_widget is set")
-        scale = self.sim_widget.net_power_color_scale
-        self.sim_widget.set_net_power_color_scale(
-            replace(scale, low_limit=-limit, high_limit=limit)
-        )
+        scale = self._sim_net_power_scale() or default_net_power_color_scale()
+        setter = getattr(self.sim_widget, "set_net_power_color_scale", None)
+        if callable(setter):
+            setter(replace(scale, low_limit=-limit, high_limit=limit))
 
     def on_show_net_power_shading_changed(self, state: int) -> None:
         if state is None:
@@ -598,8 +605,10 @@ class VisualizationTab(QtWidgets.QWidget):
         enabled = state == QtCore.Qt.CheckState.Checked.value
         from dataclasses import replace
 
-        scale = self.sim_widget.net_power_color_scale
-        self.sim_widget.set_net_power_color_scale(replace(scale, enabled=enabled))
+        scale = self._sim_net_power_scale() or default_net_power_color_scale()
+        setter = getattr(self.sim_widget, "set_net_power_color_scale", None)
+        if callable(setter):
+            setter(replace(scale, enabled=enabled))
 
     def on_show_interface_transfer_changed(self, state: int) -> None:
         if state is None:
