@@ -76,6 +76,8 @@ class BallPlacement:
     radius_m: float
     source: str
     hide_after_s: float | None = None
+    #: Ground height under the ball (m); the tee of a lifted ball stands on it.
+    ground_height_m: float = 0.0
 
     def __post_init__(self) -> None:
         try:
@@ -96,18 +98,25 @@ class BallPlacement:
             if not math.isfinite(hide):
                 raise ValueError("hide_after_s must be finite or None")
             object.__setattr__(self, "hide_after_s", hide)
+        ground = float(self.ground_height_m)
+        if not math.isfinite(ground):
+            raise ValueError("ground_height_m must be finite")
+        object.__setattr__(self, "ground_height_m", ground)
 
     def visible_at(self, t_s: float) -> bool:
         """Whether the ball is drawn at swing time ``t_s`` (until impact)."""
         return self.hide_after_s is None or t_s <= self.hide_after_s
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        doc: dict[str, Any] = {
             "position_m": list(self.position_m),
             "radius_m": self.radius_m,
             "source": self.source,
             "hide_after_s": self.hide_after_s,
         }
+        if self.ground_height_m:
+            doc["ground_height_m"] = self.ground_height_m
+        return doc
 
     @classmethod
     def from_dict(cls, doc: dict[str, Any]) -> BallPlacement:
@@ -116,6 +125,7 @@ class BallPlacement:
             doc["radius_m"],
             doc["source"],
             doc.get("hide_after_s"),
+            doc.get("ground_height_m", 0.0),
         )
 
 
@@ -190,11 +200,13 @@ def address_ball(swing: SwingInput, impact_time_s: float | None) -> BallPlacemen
         pos, source = recorded, SOURCE_BUNDLE
     else:
         pos, source = placed
+    ground = float(pos[2]) - BALL_RADIUS_M if source == SOURCE_ADDRESS else 0.0
     return BallPlacement(
         (float(pos[0]), float(pos[1]), float(pos[2])),
         BALL_RADIUS_M,
         source,
         impact_time_s,
+        ground,
     )
 
 
@@ -233,7 +245,11 @@ def strike_ball(
     except (ImportError, ValueError, KeyError) as exc:
         return nominal, {"unavailable": f"strike placement unavailable: {exc}"}
     moved = BallPlacement(
-        strike.centre_m, nominal.radius_m, SOURCE_STRIKE, strike.contact_time_s
+        strike.centre_m,
+        nominal.radius_m,
+        SOURCE_STRIKE,
+        strike.contact_time_s,
+        nominal.ground_height_m,
     )
     return moved, {**strike.to_dict(), "note": STRIKE_NOTE}
 

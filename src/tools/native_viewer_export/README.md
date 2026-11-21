@@ -68,6 +68,14 @@ python3 -m src.tools.native_viewer_export \
   is a display placement: no joint angle or club dimension changes, and the
   face is not squared. A swing that misses by more than `max_shift_m` keeps the
   address ball and records why.
+  A ball that rests more than `min_gap_m` above the ground (a driver ball) gets a
+  tee (#15150): a peg from the ground to a cup under the ball, drawn from
+  `model_appearance/ball_tee.py` and `ball_tee_settings.json` (`enabled`,
+  `min_gap_m`, `shaft_radius_m`, `cup_radius_m`, `cup_height_m`, `rgba`). The
+  tee is render geometry only (no collision, no mass), is not hidden at impact
+  and stays standing when the ball leaves; a ball on the turf gets none. MuJoCo
+  and MyoSuite draw it in the render scene; Drake, Pinocchio and OpenSim draw
+  no tee yet.
   When neither exists (no club, ungrounded first state, no MuJoCo) no ball is
   drawn and the reason is logged and returned in `ExportResult.ball`
   (`{"unavailable": reason}`, printed by the CLI); a placement is recorded with
