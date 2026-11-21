@@ -55,9 +55,7 @@ def _repo_root(explicit: Path | None) -> Path:
 def _impact_frame_index(times: np.ndarray, repo_root: Path) -> int:
     prov_path = repo_root / SWING_PROVENANCE_FIXTURE
     payload = json.loads(prov_path.read_text(encoding="utf-8"))
-    impact_t = float(
-        payload["clubs"][SWING_CLUB]["impact_split"]["impact_time_s"]
-    )
+    impact_t = float(payload["clubs"][SWING_CLUB]["impact_split"]["impact_time_s"])
     times = np.asarray(times, dtype=float)
     index = int(np.argmin(np.abs(times - impact_t)))
     if not math.isfinite(times[index]):
