@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Collection, Mapping, MutableSet
 from typing import Any
 
+
 def apply_mujoco_segment_scene_colors(
     model: Any,
     scene: Any,
