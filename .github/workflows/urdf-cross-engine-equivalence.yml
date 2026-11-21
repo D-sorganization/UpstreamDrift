@@ -14,6 +14,9 @@ on:
       - "src/shared/python/humanoid_character_builder/**"
       - "tests/integration/test_urdf_engine_loadability.py"
       - "tests/integration/test_urdf_cross_engine_fk.py"
+      - "tests/cross_engine/test_tree_equivalence_14756.py"
+      - "src/shared/python/model_generation/tree_equivalence.py"
+      - "**/*.urdf"
       - ".github/workflows/urdf-cross-engine-equivalence.yml"
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -21,6 +24,9 @@ on:
       - "src/shared/python/humanoid_character_builder/**"
       - "tests/integration/test_urdf_engine_loadability.py"
       - "tests/integration/test_urdf_cross_engine_fk.py"
+      - "tests/cross_engine/test_tree_equivalence_14756.py"
+      - "src/shared/python/model_generation/tree_equivalence.py"
+      - "**/*.urdf"
       - ".github/workflows/urdf-cross-engine-equivalence.yml"
   workflow_dispatch:
 
@@ -160,6 +166,7 @@ jobs:
           python3 -m pytest \
             tests/integration/test_urdf_engine_loadability.py \
             tests/integration/test_urdf_cross_engine_fk.py \
+            tests/cross_engine/test_tree_equivalence_14756.py \
             -v -rs --tb=short -p no:xvfb \
             --junitxml=test-results/urdf-cross-engine-equivalence-junit.xml
 
