@@ -4,7 +4,7 @@ Every bound is read from ``assets/head_cc0/face_settings.json``.
 """
 
 import json
-import xml.etree.ElementTree as ET
+from defusedxml import ElementTree as ET
 from dataclasses import replace
 from pathlib import Path
 
@@ -127,7 +127,7 @@ def test_face_wears_the_body_skin_material_and_hair_is_smooth_shaded() -> None:
     xml, _ = full_body_mjcf.export_full_body_mjcf(
         json.dumps(spec).encode(), appearance=defaults.default_appearance()
     )
-    root = ET.fromstring(xml)  # noqa: S314 - XML built by this repository
+    root = ET.fromstring(xml)
     geoms = {g.get("name"): g for g in root.iter("geom")}
     body = next(s for s in root.iter("skin") if s.get("name") == "body_skin_skin")
     assert geoms["visual_head_skin_mesh"].get("material") == body.get("material")
