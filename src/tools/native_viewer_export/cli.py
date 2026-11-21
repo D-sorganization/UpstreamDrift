@@ -343,6 +343,14 @@ def build_parser() -> argparse.ArgumentParser:
         "else the last sample",
     )
     p.add_argument(
+        "--contact-hold-frames",
+        type=int,
+        default=None,
+        metavar="N",
+        help="repeat the contact-instant frame N more times "
+        "(default: contact_frame_settings.json)",
+    )
+    p.add_argument(
         "--preset",
         choices=("hq", "preview"),
         default="hq",
@@ -535,6 +543,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         stride=args.stride,
         impact_time_s=args.impact_time,
         impact_window_s=args.impact_window,
+        contact_hold_frames=getattr(args, "contact_hold_frames", None),
         overlays=not args.no_overlay,
         shading=build_shading(args),
         force_vectors=args.force_vectors,

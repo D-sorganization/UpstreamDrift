@@ -51,6 +51,7 @@ from src.tools.native_viewer_export.compositor import (
     event_caption_for_time,
 )
 from src.tools.native_viewer_export import flight_tracer
+from src.tools.native_viewer_export import contact_frame
 from src.tools.native_viewer_export import impact_factors as factors_panel
 from src.tools.native_viewer_export.impact_card import impact_card_for
 from src.tools.native_viewer_export.shading import shading_legend
@@ -184,6 +185,9 @@ class ExportSettings:
     mobility_condition_cutoff: float | None = None
     #: ellipsoid colour encodes the point (default) or the kind (#15150)
     ellipsoid_color_by: str = "point"
+    #: video frames the frame on the contact instant is repeated (#15150);
+    #: ``None``: the ``contact_frame_settings.json`` default of the clip kind
+    contact_hold_frames: int | None = None
 
     @property
     def shading_enabled(self) -> bool:
@@ -216,6 +220,8 @@ class ExportSettings:
                 raise ValueError(f"{name} must be finite")
         if self.impact_window_s is not None and self.impact_window_s <= 0.0:
             raise ValueError("impact_window_s must be positive")
+        if self.contact_hold_frames is not None:
+            contact_frame.hold_count(self.contact_hold_frames, windowed=False)
 
     def __post_init__(self) -> None:
         if not self.views:
@@ -859,16 +865,26 @@ def _resampled(
     Poses are interpolated; glyphs come from the nearest source sample (forces
     are not interpolated).
     """
+    known = settings.impact_time_s is not None or swing.has_impact_provenance
+    contact = impact_time_s(swing, settings) if known else None
     schedule = FrameSchedule(
-        swing.source_times_s, settings.fps, plan.speed, plan.window
+        swing.source_times_s,
+        settings.fps,
+        plan.speed,
+        plan.window,
+        extra_times_s=() if contact is None else (contact,),
     )
     times = schedule.sample_times_s
-    nearest = schedule.nearest_indices()
+    hold = contact_frame.hold_count(
+        settings.contact_hold_frames, windowed=plan.window is not None
+    )
+    rows = contact_frame.hold_order(times, contact, hold)  # contact frame held
+    nearest = schedule.nearest_indices()[rows]
     resampled = replace(
         swing,
-        q=schedule.interpolate(swing.q),
-        v=schedule.interpolate(swing.v) if swing.v is not None else None,
-        sample_times_s=tuple(float(t) for t in times),
+        q=schedule.interpolate(swing.q)[rows],
+        v=schedule.interpolate(swing.v)[rows] if swing.v is not None else None,
+        sample_times_s=tuple(float(t) for t in times[rows]),
     )
     if feed is None:
         return resampled, None
@@ -1045,6 +1061,10 @@ def export_swing(
     swing, ball_record = attach_ball(
         swing, settings, getattr(backend, "ball_limitation", None)
     )
+    if settings.impact_time_s is not None or swing.has_impact_provenance:
+        swing, contact = contact_frame.refine(swing, impact_time_s(swing, settings))
+        if contact is not None:  # frames, HUD and panels count from contact
+            settings = replace(settings, impact_time_s=contact)
     factors = None
     if settings.impact_factors is not None:
         factors, settings = factors_panel.factors_for_export(swing, settings)

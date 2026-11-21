@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.motion_matching.same_input import InputBundle
-from src.tools.native_viewer_export import cli
+from src.tools.native_viewer_export import cli, contact_frame
 from src.tools.native_viewer_export.compositor import HudInfo
 from src.tools.native_viewer_export.core import (
     HQ_CRF,
@@ -166,7 +166,10 @@ def test_impact_window_adds_slow_motion_clip(tmp_path: Path) -> None:
     clip = backend.swings[1]
     times = np.asarray(clip.sample_times_s)
     assert times[0] == pytest.approx(0.2)
-    np.testing.assert_allclose(np.diff(times), 0.1 / 60)
+    # held contact frame repeats its time; the distinct times keep the 0.1x step
+    held = contact_frame.hold_count(None, windowed=True)
+    assert int(np.count_nonzero(times == 0.25)) == 1 + held
+    np.testing.assert_allclose(np.diff(np.unique(times)), 0.1 / 60)
     assert times[-1] <= 0.3 + 1e-9
     assert result.frames_by_suffix["_impact_0p1x"] == len(times)
 

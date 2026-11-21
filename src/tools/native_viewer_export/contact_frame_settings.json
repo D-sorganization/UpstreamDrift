@@ -1,0 +1,8 @@
+{
+  "impact_window_hold_frames": 24,
+  "full_speed_hold_frames": 0,
+  "sources": {
+    "impact_window_hold_frames": "Video frames the frame on the contact instant is repeated in an impact-window clip. At 60 fps and 0.1x each frame is 1/600 s of swing, so 24 frames hold the face on the ball for 0.4 s of video, long enough to read the face against the ball and the tee (review renders, 2026-11-21: with no hold the frame labelled +0.0 ms lasted 17 ms of video and the viewer saw the head short of the ball and then no ball).",
+    "full_speed_hold_frames": "Frames the contact frame is repeated in a full-speed or slowed clip. 0: a held frame in a real-time clip reads as a stutter; the contact frame is still rendered, once, at its own time."
+  }
+}

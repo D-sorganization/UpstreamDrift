@@ -96,6 +96,19 @@ build renders much faster than the headless shell), and
 The OpenSim backend only ever runs under `xvfb-run` and refuses to start when
 `NATIVE_VIEWER_XVFB` is missing or `DISPLAY` is a real display.
 
+## Contact Frame and Sun Light
+
+- **Contact frame (#15150).** With a known impact time and a face that reaches
+  the ball (`impact_state.series_at_contact`) the exporter renders a frame at
+  exactly the contact instant (`FrameSchedule(extra_times_s=...)`); the HUD's
+  "ms from impact", the impact panel and the tracer count from it, and the ball
+  stays on its tee through that frame. `--contact-hold-frames N` repeats it N
+  more frames (default: 24 in an impact-window clip, 0 in full-speed clips).
+- **Sun light (MuJoCo).** `backends/sun_light_settings.json` adds a directional
+  light (direction, colour, intensity, shadow; `enabled: false` removes it) so the
+  400 m ground is lit to the horizon. Default look change: the near turf is
+  brighter (about 1.9x mean level) and the golfer's shadow fainter.
+
 ## Appearance Flags
 
 The golfer's look can be chosen per export (HRG-B2, #13167); without any of

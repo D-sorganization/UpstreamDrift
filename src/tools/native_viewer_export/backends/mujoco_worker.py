@@ -33,6 +33,10 @@ from src.tools.native_viewer_export.backends._ball import draw_job_ball
 from src.tools.native_viewer_export.backends._scene_overlays import (
     apply_scene_overlays,
 )
+from src.tools.native_viewer_export.backends._sun_light import (
+    add_sun,
+    load_sun_light,
+)
 from src.tools.native_viewer_export.backends._skin_shading import (
     compile_shaded_model,
 )
@@ -126,6 +130,7 @@ def main(job_path: str) -> None:
     bundle = InputBundle.load(Path(job.bundle_path))
     q = np.load(job.q_path)
     xml, _ = build_scene_xml(bundle.spec_bytes, job.appearance)
+    xml = add_sun(xml, load_sun_light())  # even light on the far ground
     axial_frames, shading = job.load_axial_frames(), job.load_shading()
     model, skin = compile_shaded_model(xml, axial_frames, shading)
     # the default offscreen buffer is 640x480; grow it to the requested size
