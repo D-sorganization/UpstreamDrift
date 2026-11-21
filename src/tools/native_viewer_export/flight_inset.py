@@ -1,12 +1,14 @@
-"""Settings, layout and geometry of the flight inset (#15150).
+"""Flight inset of native export flight clips (#15150).
 
 From behind the golfer a long carry is foreshortened onto the horizon, so the
-3D tracer cannot be read. The opt-in 2D inset shows the same flight as a side
-profile (height against down-range distance, vertical scale exaggerated by a
-setting) and a plan view (lateral offset against down-range distance). This
-module holds the validated options, the placement of the inset clear of the
-impact panels and the HUD rows, and the flight in target-frame coordinates.
-Nothing is drawn yet. Options: flight_inset_settings.json (see sources).
+3D tracer cannot be read. This opt-in 2D panel, like a broadcast shot tracer
+graphic, shows the same flight twice: a side profile (height against down-range
+distance, vertical scale exaggerated by a setting) and a plan view (lateral
+offset against down-range distance with the target line). Both are revealed in
+step with the tracer and keep the full curve and labels once landed. The
+numbers (carry, apex, side offset) are the flight model's, never recomputed.
+The panel is placed clear of the view label, the impact panels and the HUD rows.
+Options: ``flight_inset_settings.json`` (see ``sources``).
 """
 
 from __future__ import annotations
@@ -16,14 +18,23 @@ from dataclasses import dataclass
 import json
 import math
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import NDArray
+from PIL import Image, ImageDraw
 
+from src.shared.python.golf_view_presets import get_view_preset
+from src.tools.native_viewer_export import compositor, ellipsoid_panel
 from src.tools.native_viewer_export.landing_marker import rgba_channels
 
+if TYPE_CHECKING:
+    from src.tools.native_viewer_export.compositor import HudInfo
+    from src.tools.native_viewer_export.core import ClipOverlays
+    from src.tools.native_viewer_export.flight_tracer import FlightPlayback
+
 Array = NDArray[np.float64]
+Image8 = NDArray[np.uint8]
 Rect = tuple[int, int, int, int]
 Box = tuple[float, float, float, float]
 SETTINGS_PATH = Path(__file__).with_name("flight_inset_settings.json")
@@ -301,3 +312,250 @@ def plots_for(
         _gain(exag, scale_x, max(fit_plan, 1e-6)),
     )
     return profile, plan
+
+
+def _text(
+    image: Image8,
+    text: str,
+    xy: tuple[float, float],
+    size: int,
+    colour: tuple[int, ...],
+    anchor: str = "left",
+) -> Image8:
+    """Outlined ``text`` by the HUD renderer, ``xy`` its left/centre/right top."""
+    box = compositor.text_box(text, (0, 0), size)
+    width = box[2] - box[0]
+    shift = {"left": 0.0, "centre": width / 2.0, "right": float(width)}[anchor]
+    x = min(max(xy[0] - shift, 0.0), max(0.0, image.shape[1] - width - 2.0))
+    y = min(max(xy[1], 0.0), max(0.0, image.shape[0] - (box[3] - box[1]) - 1.0))
+    rgb = (int(colour[0]), int(colour[1]), int(colour[2]))
+    return compositor.draw_label(image, text, (int(x), int(y)), size=size, fill=rgb)
+
+
+def _line(
+    pen: ImageDraw.ImageDraw, pts: Array, colour: tuple[int, ...], w: int
+) -> None:
+    if len(pts) > 1:
+        pen.line([(float(u), float(v)) for u, v in pts], fill=colour, width=w)
+        for u, v in pts[[0, -1]]:  # round caps hide the joint gaps
+            pen.ellipse([u - w / 2, v - w / 2, u + w / 2, v + w / 2], fill=colour)
+
+
+def _dot(pen: ImageDraw.ImageDraw, xy: Array, r: int, colour: tuple[int, ...]) -> None:
+    u, v = float(xy[0]), float(xy[1])
+    pen.ellipse([u - r, v - r, u + r, v + r], fill=colour)
+
+
+@dataclass(frozen=True)
+class InsetData:
+    """What the inset shows at one time, in metres from the launch point."""
+
+    revealed: Array
+    full: Array
+    apex_m: float
+    carry_m: float
+    lateral_m: float
+    landed: bool
+    started: bool = True
+
+    @property
+    def passed_apex(self) -> bool:
+        """The revealed curve has reached the highest point of the flight."""
+        return self.started and bool(
+            self.revealed[:, 2].max() >= self.full[:, 2].max() - 1e-9
+        )
+
+
+def inset_data(flight: FlightPlayback, time_s: float) -> InsetData | None:
+    """The inset data of ``flight`` at ``time_s`` (nothing revealed before launch).
+
+    ``None`` when the flight has no drawable path or no model numbers.
+    """
+    path, axes = flight.path_m, flight.axes_m
+    numbers = (flight.carry_m, flight.apex_m, flight.lateral_m)
+    if path is None or axes is None or any(n is None for n in numbers):
+        return None
+    full = flight_coordinates(path, axes)
+    points = flight.flown(time_s)
+    landed = time_s - flight.impact_time_s >= flight.duration_s
+    shown = full[:1] if points is None else flight_coordinates(points, axes, path[0])
+    carry, apex, lateral = (float(n or 0.0) for n in numbers)
+    return InsetData(shown, full, apex, carry, lateral, landed, points is not None)
+
+
+def _apex_pixel(profile: Plot, data: InsetData) -> Array:
+    """Pixel ``(u, v)`` of the flight's highest point in the profile plot."""
+    top = int(np.argmax(data.full[:, 2]))
+    return profile.pixels(data.full[top : top + 1, 0], data.full[top : top + 1, 2])[0]
+
+
+def _fmt(settings: FlightInsetSettings, name: str, **values: Any) -> str:
+    return str(getattr(settings, name).format(unit=settings.unit, **values))
+
+
+def _draw_plots(
+    pen: ImageDraw.ImageDraw,
+    plots: tuple[Plot, Plot],
+    data: InsetData,
+    cfg: FlightInsetSettings,
+) -> None:
+    """Axes, curves, markers and the ball dot of both plots onto ``pen``."""
+    profile, plan = plots
+    left, right = profile.box[0], profile.box[2]
+    base = (profile.origin_y, plan.origin_y)
+    pen.line(
+        [(left, base[0]), (right, base[0])], cfg.ground_color_rgba, cfg.ground_width_px
+    )
+    pen.line(
+        [(left, base[1]), (right, base[1])],
+        cfg.target_line_color_rgba,
+        cfg.target_line_width_px,
+    )
+    down, left_m, up = (data.revealed[:, i] for i in range(3))
+    a_pix = profile.pixels(down, up)
+    p_pix = plan.pixels(down, left_m)
+    for pix in (a_pix, p_pix) if data.started else ():
+        _line(pen, pix, cfg.curve_color_rgba, cfg.curve_width_px)
+        _dot(pen, pix[-1], cfg.dot_radius_px, cfg.dot_color_rgba)
+    marker = cfg.marker_radius_px
+    if data.passed_apex:
+        _dot(pen, _apex_pixel(profile, data), marker, cfg.marker_color_rgba)
+    if data.landed:
+        for pix in (a_pix, p_pix):
+            _dot(pen, pix[-1], marker, cfg.marker_color_rgba)
+
+
+def _draw_labels(
+    image: Image8,
+    plots: tuple[Plot, Plot],
+    data: InsetData,
+    cfg: FlightInsetSettings,
+    font_px: int,
+) -> Image8:
+    """Titles and, as the flight earns them, the apex, carry and side labels."""
+    profile, plan = plots
+    scale = cfg.unit_scale
+    gap = float(cfg.marker_radius_px + 3)
+    for plot, title in ((profile, cfg.profile_title), (plan, cfg.plan_title)):
+        xy = (plot.box[0], plot.box[1] - font_px * 1.4)
+        image = _text(image, title, xy, font_px, cfg.title_color_rgb)
+    if data.passed_apex:
+        u, v = _apex_pixel(profile, data)
+        text = _fmt(cfg, "apex_label_format", apex=data.apex_m * scale)
+        xy = (u, v - gap - font_px * 1.4)
+        image = _text(image, text, xy, font_px, cfg.text_color_rgb, "centre")
+    if data.landed:
+        end = data.full[-1]
+        u, v = profile.pixels(end[:1], end[2:])[0]
+        text = _fmt(cfg, "carry_label_format", carry=data.carry_m * scale)
+        xy = (u + gap, v + gap)
+        image = _text(image, text, xy, font_px, cfg.text_color_rgb, "right")
+        u, v = plan.pixels(end[:1], end[1:2])[0]
+        side = cfg.side_left_text if data.lateral_m < 0.0 else cfg.side_right_text
+        text = _fmt(
+            cfg, "side_label_format", side=abs(data.lateral_m) * scale, direction=side
+        )
+        # on the empty side of the target line, away from the curve
+        above = plan.origin_y - font_px * 1.4 - gap
+        y = above if data.lateral_m >= 0.0 else plan.origin_y + gap
+        image = _text(image, text, (u + gap, y), font_px, cfg.text_color_rgb, "right")
+    return image
+
+
+def font_px_for(shape: tuple[int, ...], settings: FlightInsetSettings) -> int:
+    """Label size in pixels for a frame of ``shape`` (at least 9)."""
+    scaled = int(shape[0]) * settings.font_height_fraction * settings.font_scale
+    return max(9, round(scaled))
+
+
+def paint(
+    img: Image8,
+    flight: FlightPlayback,
+    time_s: float,
+    rect: Rect,
+    settings: FlightInsetSettings,
+) -> Image8:
+    """Copy of ``img`` with the inset of ``flight`` at ``time_s`` in ``rect``.
+
+    Only pixels inside ``rect`` change. Before launch the axes are empty (or
+    nothing is drawn with ``hide_before_launch``). Raises ``ValueError`` for a
+    ``rect`` outside the frame.
+    """
+    x0, y0, x1, y1 = rect
+    if not (0 <= x0 < x1 <= img.shape[1] and 0 <= y0 < y1 <= img.shape[0]):
+        raise ValueError(f"rect {rect} lies outside the frame {img.shape[:2]}")
+    data = inset_data(flight, time_s)
+    if data is None or (not data.started and settings.hide_before_launch):
+        return img
+    extent = (data.full[:, 0].max(), data.apex_m, np.abs(data.full[:, 1]).max())
+    size = font_px_for(img.shape, settings)
+    plots = plots_for((0, 0, x1 - x0, y1 - y0), settings, size, extent)
+    region = img[y0:y1, x0:x1].astype(np.float32) * (1.0 - settings.opacity)
+    pil = Image.fromarray(region.astype(np.uint8))
+    _draw_plots(ImageDraw.Draw(pil, "RGBA"), plots, data, settings)
+    crop = _draw_labels(np.asarray(pil), plots, data, settings, size)
+    out = img.copy()
+    out[y0:y1, x0:x1] = crop
+    return out
+
+
+def obstacles_for(
+    overlays: ClipOverlays,
+    feed: Any,
+    index: int,
+    shape: tuple[int, ...],
+    limit_px: int,
+) -> list[Rect]:
+    """Boxes of the panels drawn in a frame of ``shape``: factors or card, ellipsoids."""
+    boxes: list[Rect] = []
+    if overlays.factors is not None:
+        boxes.append(overlays.factors.bbox(shape))
+    elif overlays.card is not None:
+        boxes.append(compositor.impact_card_bbox(shape, overlays.card))
+    panel = overlays.ellipsoids
+    if panel is not None and feed is not None:
+        boxes.append(panel.fit(shape, feed.hand_panel_rows(index), limit_px)[0])
+    return boxes
+
+
+def draw_all(
+    overlays: ClipOverlays | None,
+    feed: Any,
+    index: int,
+    hud: HudInfo,
+    outputs: dict[str, Image8],
+) -> dict[str, Image8]:
+    """``outputs`` with the flight inset of frame ``index`` where it is enabled.
+
+    Fixed views only (a view that follows a target has no flight). The inset
+    sits below the view label, clear of the impact panels and above the HUD rows.
+    """
+    flight = None if overlays is None else overlays.flight
+    cfg = None if flight is None else flight.settings.inset
+    if overlays is None or flight is None or cfg is None or not cfg.enabled:
+        return outputs
+    out = dict(outputs)
+    for name, frame in outputs.items():
+        if not shows_inset(cfg, name):
+            continue
+        limit = ellipsoid_panel.hud_top_px(frame.shape, hud)
+        obstacles = obstacles_for(overlays, feed, index, frame.shape, limit)
+        top = compositor.view_label_box(frame.shape, "")[3]
+        top += compositor.HUD_LAYOUT.panel_gap_px
+        rect = layout_rect(frame.shape, cfg, obstacles, top, limit)
+        if rect is not None:
+            out[name] = paint(frame, flight, hud.time_s, rect, cfg)
+    return out
+
+
+def shows_inset(cfg: FlightInsetSettings | None, view: str) -> bool:
+    """Whether ``view`` gets the inset: enabled, on a fixed-camera preset view."""
+    return cfg is not None and cfg.enabled and _fixed(view)
+
+
+def _fixed(view: str) -> bool:
+    """A preset view with a fixed camera; the composed 2x2 grid is not one."""
+    try:
+        return get_view_preset(view).tracks is None
+    except (KeyError, ValueError):
+        return False

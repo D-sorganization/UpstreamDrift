@@ -53,6 +53,7 @@ from src.tools.native_viewer_export.compositor import (
 from src.tools.native_viewer_export import flight_tracer
 from src.tools.native_viewer_export import contact_frame
 from src.tools.native_viewer_export import ellipsoid_panel as ellipsoid_hud
+from src.tools.native_viewer_export import flight_inset
 from src.tools.native_viewer_export import impact_factors as factors_panel
 from src.tools.native_viewer_export.impact_card import impact_card_for
 from src.tools.native_viewer_export.shading import shading_legend
@@ -1069,13 +1070,15 @@ def _export_clip(
                 for v in settings.views
             }
             if settings.multiview:
-                grid = compose_grid([labelled[v] for v in settings.views])
+                cells = flight_tracer.grid_cells(flight, labelled, t, settings)
+                grid = compose_grid([cells[v] for v in settings.views])
                 outputs[GRID_VIEW] = draw_hud(grid, hud) if settings.hud else grid
             if show_card:
                 outputs = {n: draw_impact_card(f, card) for n, f in outputs.items()}
             if factors is not None:
                 outputs = {n: factors.draw(f, t) for n, f in outputs.items()}
             outputs = ellipsoid_hud.draw_all(overlays, shown_feed, k, hud, outputs)
+            outputs = flight_inset.draw_all(overlays, shown_feed, k, hud, outputs)
             if strip is not None:  # cursor at this frame's swing time
                 outputs = {n: strip.draw(f, t) for n, f in outputs.items()}
             for name, frame in outputs.items():
