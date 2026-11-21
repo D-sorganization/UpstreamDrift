@@ -2,14 +2,18 @@
 
 The MakeHuman head carries sculpted lids, nose, lips and ears but no eyeballs
 or colour breaks, so it reads as a blank mannequin. These parts are built in
-head-length units from :class:`FaceLandmarks` and conformed to the local skin
-surface with a nearest-vertex lookup, so each sits on the face without
-floating or sinking. Visual only, like the rest of the head.
+head-length units from :class:`FaceLandmarks`; brows and mouth are conformed
+to the local skin surface, and the eyeballs sit behind the open lids. Visual
+only, like the rest of the head.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import json
+from dataclasses import dataclass, fields
+from functools import lru_cache
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
@@ -17,22 +21,47 @@ from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
 from src.shared.python.model_appearance.geometry import Array, Mesh, ellipsoid_mesh
 
 _X, _Y = np.array([1.0, 0.0, 0.0]), np.array([0.0, 1.0, 0.0])
+SETTINGS_PATH = (
+    Path(__file__).resolve().parents[4] / "assets/head_cc0/face_settings.json"
+)
+_RING = np.array([[0.0, 0.0], [1, 0], [-1, 0], [0, 1], [0, -1]])  # cover stencil
+
+
+@lru_cache(maxsize=1)
+def _settings() -> dict[str, Any]:
+    return json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
+
+
+def _frozen(value: Any) -> Any:
+    return tuple(_frozen(v) for v in value) if isinstance(value, list) else value
+
+
+def face_settings(section: str) -> dict[str, Any]:
+    """One section (``face``, ``hair`` or ``checks``) of ``face_settings.json``."""
+    data = _settings()
+    if not isinstance(data.get(section), dict):
+        raise ValueError(f"{SETTINGS_PATH.name} has no section {section!r}")
+    return {key: _frozen(value) for key, value in data[section].items()}
 
 
 @dataclass(frozen=True)
 class FaceLandmarks:
     """Feature placement in head lengths (x forward, y left, z up).
 
-    The sculpted lids of the CC0 head are nearly closed, so the eye is a thin
-    white almond conformed to the face with the iris, pupil and an upper lid
-    line standing proud of it, each by its own lift off the skin.
+    The sculpted lids of the CC0 head are open over an empty socket, so the
+    eye is a ball seated behind them with the iris and the pupil each proud of
+    the layer under it by its own lift; a lash line follows the upper lid.
+    The values in use are those of ``face_settings.json``
+    (:func:`load_face_landmarks`); a non-finite number, a size that is not
+    positive or a negative lift raises ``ValueError``.
     """
 
     eye_y: float = 0.118  # half the pupillary distance, from the sculpted slit
     eye_z: float = 0.532
-    eye_half: tuple[float, float, float] = (0.006, 0.060, 0.030)  # x, y, z
-    eye_lift: float = 0.004
-    eye_smooth: float = 3.0  # wide stencil; eye parts are rigid, not conformed
+    eye_radius: float = 0.048  # the eyeball
+    eye_inset: float = 0.006  # eyeball front behind the lid margins
+    eye_cover: float = 0.016  # the lid margins are the skin's front this near
+    strip_cover: float = 0.003  # the same reach for the lid line and the brow
     iris_half: tuple[float, float, float] = (0.006, 0.020, 0.020)
     iris_drop: float = 0.003  # iris centre below the eye centre
     iris_lift: float = 0.008
@@ -40,14 +69,104 @@ class FaceLandmarks:
     pupil_lift: float = 0.0115
     lid_rise: float = 0.022  # upper lid line above the eye centre
     lid_half: tuple[float, float, float] = (0.005, 0.050, 0.005)
+    lid_arch: float = 0.0  # ends drop by this fraction of the half length
     lid_lift: float = 0.0085
     brow_rise: float = 0.070
     brow_half: tuple[float, float, float] = (0.010, 0.072, 0.012)
     brow_tilt: float = 0.16  # outer end rises by this fraction of its length
+    brow_arch: float = 0.0
+    brow_taper: float = 0.0  # share of its height the outer end loses
     brow_lift: float = 0.004
     mouth_z: float = 0.276
     mouth_half: tuple[float, float, float] = (0.008, 0.075, 0.006)
     mouth_lift: float = 0.003
+
+    def __post_init__(self) -> None:
+        for item in fields(self):
+            value = np.atleast_1d(np.asarray(getattr(self, item.name), dtype=float))
+            sized = item.name.endswith(("_half", "_cover", "_radius"))
+            if not np.isfinite(value).all() or (sized and (value <= 0.0).any()):
+                raise ValueError(f"face setting {item.name} is not a valid size")
+            if item.name.endswith(("_lift", "_inset")) and (value < 0.0).any():
+                raise ValueError(f"face setting {item.name} must not be negative")
+
+
+def load_face_landmarks() -> FaceLandmarks:
+    """The face of ``face_settings.json`` (its ``face`` section over the defaults)."""
+    try:
+        return FaceLandmarks(**face_settings("face"))
+    except TypeError as unknown:
+        raise ValueError(f"unknown face setting: {unknown}") from unknown
+
+
+def barycentric(triangles: Array, point: Array) -> Array:
+    """Barycentric weights of a 2-D ``point`` in each of ``(n, 3, 2)`` triangles.
+
+    A degenerate triangle gets negative weights, so it never contains a point.
+    """
+    a, b, c = (triangles[:, k] - point for k in range(3))
+    areas = np.stack(
+        [
+            b[:, 0] * c[:, 1] - b[:, 1] * c[:, 0],
+            c[:, 0] * a[:, 1] - c[:, 1] * a[:, 0],
+            a[:, 0] * b[:, 1] - a[:, 1] * b[:, 0],
+        ],
+        axis=1,
+    )
+    total = areas.sum(axis=1, keepdims=True)
+    return np.where(np.abs(total) > 1e-14, areas / np.where(total, total, 1.0), -1.0)
+
+
+def front_depth(mesh: Mesh, points_yz: Array) -> Array:
+    """Front-most x of ``mesh`` on the x lines through ``points_yz`` (nan off it)."""
+    points = np.asarray(points_yz, dtype=float).reshape(-1, 2)
+    tri = mesh.vertices[mesh.faces]
+    low, high = tri[:, :, 1:3].min(axis=1), tri[:, :, 1:3].max(axis=1)
+    near = (high >= points.min(axis=0)).all(axis=1) & (low <= points.max(axis=0)).all(1)
+    tri = tri[near]
+    out = np.full(len(points), np.nan)
+    for i, point in enumerate(points):
+        weights = barycentric(tri[:, :, 1:3], point)
+        hit = (weights >= 0.0).all(axis=1)
+        if hit.any():
+            out[i] = (weights[hit] * tri[hit, :, 0]).sum(axis=1).max()
+    return out
+
+
+def _on_cover(skin: Mesh, mesh: Mesh, lift: float, radius: float) -> Mesh:
+    """``mesh`` (built about x = 0) laid ``lift`` proud of the skin's cover.
+
+    The cover at a point is the skin's highest front within ``radius``, so a
+    part never sinks under a sculpted lid or ridge next to it.
+    """
+    yz = mesh.vertices[:, 1:3]
+    cover = np.nanmax([front_depth(skin, yz + radius * o) for o in _RING], axis=0)
+    if not np.isfinite(cover).all():
+        raise ValueError("a face part reaches beyond the skin of the face")
+    out = mesh.vertices.copy()
+    out[:, 0] += cover + lift
+    return Mesh(out, mesh.faces)
+
+
+def _strip(
+    centre_yz: tuple[float, float],
+    half: tuple[float, float, float],
+    sign: float,
+    shape: tuple[float, float, float],
+) -> Mesh:
+    """Strip along y about x = 0; ``shape`` is ``(tilt, arch, taper)``.
+
+    The outer end rises by ``tilt`` and both ends drop by ``arch`` (fractions
+    of the half length); the outer end loses ``taper`` of its height.
+    """
+    tilt, arch, taper = shape
+    mesh = _blob(np.array([0.0, *centre_yz]), half, _Y)
+    v = mesh.vertices.copy()
+    s = sign * (v[:, 1] - centre_yz[0]) / half[1]
+    thin = 1.0 - taper * np.clip(0.5 * (s + 1.0), 0.0, 1.0)
+    v[:, 2] = centre_yz[1] + (v[:, 2] - centre_yz[1]) * thin
+    v[:, 2] += half[1] * (tilt * s - arch * s * s)
+    return Mesh(v, mesh.faces)
 
 
 class FaceSurface:
@@ -118,38 +237,47 @@ def face_parts(
 ) -> list[tuple[str, Mesh, str]]:
     """``(name, mesh, material role)`` of eyes, lids, brows and mouth.
 
-    ``skin`` is the unit head-length skin mesh. Postcondition: every mesh is a
-    closed ellipsoid of positive volume, left (y > 0) and right mirrored.
+    ``skin`` is the unit head-length skin mesh. Postcondition: one entry per
+    part and side, left (y > 0) and right; each eye is an eyeball seated behind
+    the lid margins with iris and pupil proud of it (``face_settings.json``).
     """
-    m = marks or FaceLandmarks()
+    m = marks or load_face_landmarks()
     surf = FaceSurface(skin)
+    front = Mesh(skin.vertices, skin.faces[(skin.vertices[skin.faces, 0] > 0).all(1)])
 
-    def decal(centre_yz, half, axis, lift, scale=1.0):
-        c = np.array([surf.depth(centre_yz[0], centre_yz[1], scale), *centre_yz])
-        if scale != 1.0:  # rigid: the sculpted lids are too coarse to follow
-            return _blob(c + _X * lift, half, axis)
+    def decal(centre_yz, half, axis, lift):
+        c = np.array([surf.depth(centre_yz[0], centre_yz[1]), *centre_yz])
         return surf.conform(_blob(c, half, axis), c, lift)
 
     out: list[tuple[str, Mesh, str]] = []
     for side, sign in (("l", 1.0), ("r", -1.0)):
         y, z = sign * m.eye_y, m.eye_z
+        lids = front_depth(front, np.array([y, z]) + m.eye_cover * _RING)
+        if not np.isfinite(lids).any():
+            raise ValueError("the eye centre is off the skin of the face")
+        apex = float(np.nanmax(lids)) - m.eye_inset  # front of the eyeball
+        ball = ellipsoid_mesh(
+            np.array([apex - m.eye_radius, y, z]),
+            np.full(3, m.eye_radius),
+            _X,
+            rings=6,
+            sides=12,
+            width_hint=_Y,
+        )
+        out.append((f"eye_{side}", ball, "eye_white"))
+        for name, half, lift in (
+            ("iris", m.iris_half, m.iris_lift),
+            ("pupil", m.pupil_half, m.pupil_lift),
+        ):
+            centre = np.array([apex + lift - half[0], y, z - m.iris_drop])
+            out.append((f"{name}_{side}", _blob(centre, half, _X), name))
+        lid = _strip((y, z + m.lid_rise), m.lid_half, sign, (0.0, m.lid_arch, 0.0))
         out.append(
-            (
-                f"eye_{side}",
-                decal((y, z), m.eye_half, _X, m.eye_lift, m.eye_smooth),
-                "eye_white",
-            )
+            (f"lid_{side}", _on_cover(front, lid, m.lid_lift, m.strip_cover), "lid")
         )
-        iris = decal((y, z - m.iris_drop), m.iris_half, _X, m.iris_lift, m.eye_smooth)
-        out.append((f"iris_{side}", iris, "iris"))
-        pupil = decal(
-            (y, z - m.iris_drop), m.pupil_half, _X, m.pupil_lift, m.eye_smooth
-        )
-        out.append((f"pupil_{side}", pupil, "pupil"))
-        lid = decal((y, z + m.lid_rise), m.lid_half, _Y, m.lid_lift, m.eye_smooth)
-        out.append((f"lid_{side}", lid, "lid"))
-        tilt = np.array([0.0, 1.0, sign * m.brow_tilt])  # outer end rises
-        brow = decal((y, z + m.brow_rise), m.brow_half, tilt, m.brow_lift)
+        shape = (m.brow_tilt, m.brow_arch, m.brow_taper)
+        brow = _strip((y, z + m.brow_rise), m.brow_half, sign, shape)
+        brow = _on_cover(front, brow, m.brow_lift, m.strip_cover)
         out.append((f"brow_{side}", brow, "brow"))
     mouth = decal((0.0, m.mouth_z), m.mouth_half, _Y, m.mouth_lift)
     out.append(("mouth", mouth, "lip_seam"))
