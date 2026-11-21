@@ -59,6 +59,7 @@ class ClubPoseModel:
         if club is None or frame is None:
             raise ValueError("spec has no club body")
         self._placement_inv = np.linalg.inv(np.asarray(frame["placement"], dtype=float))
+        self.head_alias: str = club.head_alias  # club head name, e.g. "driver"
         self._centre_body = np.asarray(clubface_centre(club), dtype=float)
         self._normal_body = np.asarray(clubface_vector(club), dtype=float)
         self._source = MujocoOverlaySource(spec_bytes)
