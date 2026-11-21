@@ -18,6 +18,7 @@ pytestmark = pytest.mark.unit
 
 FIXTURE = Path(__file__).resolve().parents[2] / "fixtures" / "model_appearance"
 GIRDLE = json.loads((FIXTURE / "girdle_poses.json").read_text())["poses"]
+TURNS = json.loads((FIXTURE / "shoulder_turns.json").read_text())["turns"]
 RAW = json.loads((fit.ASSET_DIR / "pose_settings.json").read_text())
 SETTINGS = pose.load_pose_settings()
 SKIN = fit.load_body_skin()
@@ -63,13 +64,58 @@ def test_no_step_between_shirt_and_sleeve_cap_on_the_girdle_poses(name: str) -> 
     assert _step_mm(one_body, girdle) >= RAW["rigid_step_floor_mm"]
 
 
+def _turn_stretch_mm(settings: pose.PoseSettings, name: str) -> float:
+    """Largest change of an edge length round a shoulder whose arm is turned."""
+    side, joint = TURNS[name]["side"], FITTED.joints[f"shoulder_{TURNS[name]['side']}"]
+    turn = Rotation.from_rotvec(TURNS[name]["rotvec_rad"]).as_matrix()
+    motions = dict.fromkeys(("thorax", "girdle_l", "girdle_r"), STILL)
+    motions |= {"upper_arm_l": STILL, "upper_arm_r": STILL}
+    motions[f"upper_arm_{side}"] = pose.Rigid.about(turn, joint)
+    moves = pose.shoulder_transforms(motions, FITTED, settings)
+    weights = pose.smooth_shoulder_weights(SKIN, FITTED, settings)
+    posed = pose.pose_skin(FITTED.vertices, weights, SKIN.groups, moves)
+    near = np.linalg.norm(FITTED.vertices - joint, axis=1)
+    edges = pose.mesh_edges(SKIN.faces)
+    edges = edges[(near[edges] < RAW["arm_turn_patch_radius_m"]).all(axis=1)]
+    assert len(edges) > 500
+    return 1000.0 * float(pose.edge_length_change(FITTED.vertices, posed, edges).max())
+
+
+@pytest.mark.parametrize("name", sorted(TURNS))
+def test_a_turned_arm_stretches_the_shoulder_less_with_the_girdle_passes(
+    name: str,
+) -> None:
+    assert SETTINGS.girdle_smoothing_iterations > 0
+    plain = dataclasses.replace(SETTINGS, girdle_smoothing_iterations=0)
+    stretch = _turn_stretch_mm(SETTINGS, name)
+    assert stretch <= RAW["arm_turn_stretch_limits_mm"][name]
+    assert stretch < _turn_stretch_mm(plain, name)
+
+
+def test_the_girdle_passes_leave_the_other_groups_alone() -> None:
+    plain = dataclasses.replace(SETTINGS, girdle_smoothing_iterations=0)
+    before = pose.smooth_shoulder_weights(SKIN, FITTED, plain)
+    after = pose.smooth_shoulder_weights(SKIN, FITTED, SETTINGS)
+    girdle = np.array(
+        [
+            g == "thorax" or g.rpartition("_")[0] in pose.GIRDLE_GROUPS
+            for g in SKIN.groups
+        ]
+    )
+    assert np.allclose(after[:, ~girdle], before[:, ~girdle], atol=1e-12)
+    assert np.allclose(after[:, girdle].sum(axis=1), before[:, girdle].sum(axis=1))
+    assert not np.allclose(after[:, girdle], before[:, girdle], atol=1e-3)
+
+
 def test_smoothing_is_local_and_keeps_the_weights_normalised() -> None:
     smooth = pose.smooth_shoulder_weights(SKIN, FITTED, SETTINGS)
     assert np.allclose(smooth.sum(axis=1), 1.0) and smooth.min() >= 0.0
     far = FITTED.vertices[:, 2] < FITTED.joints["hip_l"][2]
     assert np.allclose(smooth[far], SKIN.weights[far], atol=1e-12)
     assert not np.array_equal(smooth, SKIN.weights)
-    none = dataclasses.replace(SETTINGS, smoothing_iterations=0)
+    none = dataclasses.replace(
+        SETTINGS, smoothing_iterations=0, girdle_smoothing_iterations=0
+    )
     assert np.allclose(pose.smooth_shoulder_weights(SKIN, FITTED, none), SKIN.weights)
 
 
@@ -106,6 +152,7 @@ def test_the_arm_stays_on_the_shoulder_joint_and_the_other_side_is_still() -> No
     [
         {"shoulder_follow": 1.5},
         {"smoothing_iterations": -1},
+        {"girdle_smoothing_iterations": -1},
         {"smoothing_radius_m": 0.0},
         {"acromion_half_width_m": -0.01},
         {"acromion_inner_m": -0.01},
