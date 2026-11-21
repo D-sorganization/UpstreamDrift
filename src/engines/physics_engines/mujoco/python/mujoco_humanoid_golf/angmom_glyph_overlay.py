@@ -13,7 +13,6 @@ from src.shared.python.body_part_viz.mujoco_angular_momentum_anchors import (
 )
 from src.shared.python.body_part_viz.mujoco_segment_angular_momentum import (
     MujocoSegmentAngularMomentumProvider,
-    default_root_body_id,
 )
 from src.shared.python.force_overlay.glyphs import GlyphSet
 
@@ -37,14 +36,13 @@ def build_angmom_overlay_glyphs(
     if not enabled:
         return None
     time_s = float(data.time)
-    root_body_id = default_root_body_id(model)
     provider = MujocoSegmentAngularMomentumProvider(
-        model, data, catalog=catalog, time_s=time_s, root_body_id=root_body_id
+        model, data, catalog=catalog, time_s=time_s
     )
     frame = provider.get_segment_angular_momentum()
     if frame is None:
         return None
-    anchors = angular_momentum_anchors(model, data, catalog, root_body_id=root_body_id)
+    anchors = angular_momentum_anchors(model, data, catalog)
     return build_angular_momentum_glyphs(
         frame,
         style=style,

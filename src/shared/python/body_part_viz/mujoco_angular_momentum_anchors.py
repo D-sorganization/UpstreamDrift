@@ -55,12 +55,13 @@ def angular_momentum_anchors(
     data: mujoco.MjData,
     catalog: SegmentGroupCatalog,
     *,
-    root_body_id: int,
+    root_body_id: int | None = None,
 ) -> dict[str, tuple[float, float, float]]:
     """Anchors for whole-body, five groups, and every named body."""
+    del root_body_id
     anchors = body_com_positions(model, data)
     com, _ = whole_body_com_kinematics(
-        model, data, np.asarray(data.qvel, dtype=float), root_body_id=root_body_id
+        model, data, np.asarray(data.qvel, dtype=float)
     )
     anchors["whole_body"] = (float(com[0]), float(com[1]), float(com[2]))
     for group, members in catalog.as_mapping().items():
