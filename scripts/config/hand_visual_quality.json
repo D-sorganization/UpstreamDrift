@@ -4,7 +4,7 @@
   "owner_lead_heel_pad_depth_m": 0.065,
   "_owner_trail_cross_angle_deg": "Owner, 2026-11-17 (#15265): the club lies this far off square across the trail hand, so its heel pad reaches back over the lead thumb and the hands sit closer. The legacy grip has 40. Swept 2026-11-17 from 40 to 59: below 52 the base of the thumb is left uncovered, above 54 the hands pass through each other or a finger leaves its seat.",
   "owner_trail_cross_angle_deg": 52.7,
-  "_owner_trail_seats": "Epic #15150, 2026-11-20: the trail hand's seat on the grip is one of owner_trail_seats, named by owner_trail_seat. Each seat overrides club_cross_angle_deg (default owner_trail_cross_angle_deg) and the drawn trail wrist's wrist_extension_deg and wrist_ulnar_deviation_deg (default wrist.trail in skinned_human_hand.json). palm_on_thumb is the seat of #15265, unchanged and the default. square_wrap lays the club 30 degrees across the hand so the rigid fingers wrap squarer, and bends the wrist 25 degrees toward the little finger so the fitted forearm (about 35 degrees to the shaft at address) still meets the cuff: measured middle and ring curl planes 28.8 and 29.5 degrees off square (48.4 and 47.7 before), forefinger 39.6 (54.4), knuckle line 16.4 (38.5), middle and ring knuckles 1.5 and 4.7 mm off the shaft line (8.8 and 22.4), finger pads on the grip, hands 0.00 mm inside each other. GIVEN UP: the palm leaves the base of the lead thumb, crown gap 19.0 mm at the knuckle end against max_thumb_channel_gap_m 2.5 mm (1.9 before) and heel 30.2 mm from the lead thumb's knuckle (15.0 before), which is why it is not the default. Measured across the angle: 42 gives 39.7/37.1 degrees and a 10.7 mm gap, 35 gives 33.6/32.9 and 19.3 mm, 25 gives 24.5/27.8 and 18.6 mm, 15 gives 12.2/13.7 with the ring pad 1.0 mm off the grip and the forearm 30 degrees off the cuff. Refit of the arms on the showpiece address frame with square_wrap: forearm 3.5 degrees off the cuff (1.0 before), trail elbow 17.4 degrees inside its range, trail wrist coordinates 27 and 51 degrees inside theirs; with the wrist left at 10 degrees the elbow locks at its limit.",
+  "_owner_trail_seats": "Epic #15150, 2026-11-20: the trail hand's seat on the grip is one of owner_trail_seats, named by owner_trail_seat. Each seat overrides club_cross_angle_deg (default owner_trail_cross_angle_deg) and the drawn trail wrist's wrist_extension_deg and wrist_ulnar_deviation_deg (default wrist.trail in skinned_human_hand.json). palm_on_thumb is the seat of #15265, unchanged and the default. square_wrap lays the club 30 degrees across the hand so the rigid fingers wrap squarer, and bends the wrist 25 degrees toward the little finger so the fitted forearm (about 35 degrees to the shaft at address) still meets the cuff: measured middle and ring curl planes 28.8 and 29.5 degrees off square (48.4 and 47.7 before), forefinger 39.6 (54.4), knuckle line 16.4 (38.5), middle and ring knuckles 1.5 and 4.7 mm off the shaft line (8.8 and 22.4), finger pads on the grip, hands 0.00 mm inside each other. GIVEN UP: the palm leaves the base of the lead thumb, crown gap 19.0 mm at the knuckle end against max_thumb_channel_gap_m 2.5 mm (1.9 before) and heel 30.2 mm from the lead thumb's knuckle (15.0 before), which is why it is not the default. Measured across the angle: 42 gives 39.7/37.1 degrees and a 10.7 mm gap, 35 gives 33.6/32.9 and 19.3 mm, 25 gives 24.5/27.8 and 18.6 mm, 15 gives 12.2/13.7 with the ring pad 1.0 mm off the grip and the forearm 30 degrees off the cuff. Refit of the arms on the showpiece address frame with square_wrap: forearm 3.5 degrees off the cuff (1.0 before), trail elbow 17.4 degrees inside its range, trail wrist coordinates 27 and 51 degrees inside theirs; with the wrist left at 10 degrees the elbow locks at its limit. covered_square (#15329, owner 2026-11-20: on the rigid palm the trail palm over the lead thumb wins over fingers square to the shaft) is the squarest seat found that still covers the thumb: club 32.5 degrees across the hand, palm rolled 26 degrees, the set metacarpal arch of arched_square, the middle knuckle abducted toward the little finger and the middle and ring knuckles held inside their flexion-dependent sideways range (side_close.knuckle_abduction_deg; 12.2 and 11.2 degrees of swing against ranges of 12.8 and 11.7), wrist arched 30 degrees. Measured: palm 40.0 mm from the lead thumb's base joint (35.7 on palm_on_thumb), thumb crown gap 1.9 mm (1.9), middle and ring curl planes 19.8 and 28.5 degrees off square (48.4 and 47.7), forefinger 37.9 (54.4), knuckle line 15.9 (38.5), hands 0.00 mm inside each other, pair fault 0.58 mm, ring finger 0.6 mm from the lead forefinger. GIVEN UP: the little finger lies on the lead middle finger, 3.6 mm off the lead forefinger (0.9); the first segments of the middle and ring fingers stand 9 and 14 mm off the grip (7 and 3); the middle knuckle is 12.1 mm off the shaft line (8.8) and the ring 18.5 (22.4). Searched 2026-11-20 over cross angle 28 to 52.7, roll 10 to 30 and abduction: at 28 to 31 degrees the thumb crown gap is 3.0 to 6.1 mm and at 34 to 36 degrees 2.8 to 4.1 mm; with the ring knuckle abducted too the palm leaves the thumb (heel 45 to 57 mm, crown gap 7 to 20 mm); holding the default seat's knuckles in range leaves its ring finger off its seat (pair fault 8.5 mm), so the default keeps its over-range swings. Not the default.",
   "_square_on_thumb": "Second pass, 2026-11-20 (#15150): square_wrap with the palm rolled 22 degrees round the grip (palm_centre_wrap_deg, 10 otherwise) so that it lies back on the lead thumb. Measured: middle and ring curl planes 25.1 and 30.0 degrees off square, forefinger 42.3, knuckle line 15.5; lead thumb crown gap 4.8 mm at the knuckle end and under 1.3 mm from the next station on (19.0 with square_wrap, bound 2.5); heel 17.5 mm from the lead thumb's knuckle; hands 0.00 mm inside each other; ring finger 0.8 mm from the lead forefinger. GIVEN UP: the roll carries the middle and ring knuckles 5.7 and 10.0 mm to the underside of the shaft line (target 5). The roll does not act smoothly: at 17 and 20 degrees the pair settles further down the grip with the gap at 15.4 and 11.0 mm, at 25 the hands are 0.49 mm inside each other. Also measured and not adopted: index_contact_station 0.4 (ring pad 7 mm off), pair.palm_fold.max_deg 80 (no change: the fold already stops on contact), and letting the ring finger overlap too (pair.grip_fingers index and middle: curl planes 27.1/28.6, knuckles 1.9/3.0 mm, crown gap 2.5 mm, which meets every target but breaks the owner's rule that the ring finger lies beside the lead forefinger). Not the default.",
   "owner_trail_seat": "palm_on_thumb",
   "owner_trail_seats": {
@@ -35,6 +35,30 @@
           "flexion_deg": 0.0,
           "ulnar_deviation_deg": 13.0
         }
+      }
+    },
+    "covered_square": {
+      "club_cross_angle_deg": 32.5,
+      "wrist_extension_deg": 30.0,
+      "wrist_ulnar_deviation_deg": 30.0,
+      "palm_centre_wrap_deg": 26.0,
+      "metacarpal_arch": {
+        "middle": {
+          "flexion_deg": 0.0,
+          "ulnar_deviation_deg": 4.0
+        },
+        "ring": {
+          "flexion_deg": 0.0,
+          "ulnar_deviation_deg": 7.0
+        },
+        "little": {
+          "flexion_deg": 0.0,
+          "ulnar_deviation_deg": 13.0
+        }
+      },
+      "knuckle_abduction_deg": {
+        "middle": 15.0,
+        "ring": 0.0
       }
     }
   },
@@ -153,6 +177,21 @@
         "index_wrap_tilt": "27.9 deg",
         "thumb_crown_gap": "12.6 mm",
         "wrist_extension": "20.0 deg"
+      }
+    },
+    "covered_square": {
+      "max_heel_to_lead_thumb_base_m": 0.0405,
+      "max_wrap_tilt_deg": {
+        "middle": 22.0,
+        "ring": 30.0
+      },
+      "min_wrap_tilt_gain_deg": 18.0,
+      "measured": {
+        "wrap_tilt": "19.8 and 28.5 deg",
+        "knuckle_lateral_offset": "12.1 and 18.5 mm",
+        "little_to_lead_forefinger": "3.6 mm",
+        "heel_to_lead_thumb_base": "40.0 mm",
+        "thumb_crown_gap": "1.9 mm"
       }
     },
     "measured_most": {

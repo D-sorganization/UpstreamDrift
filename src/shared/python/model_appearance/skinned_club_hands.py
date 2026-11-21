@@ -191,7 +191,9 @@ class TrailSeat:
     the club lies across the hand, the bend of its drawn wrist and how far the
     palm's centre is rolled round the grip from where the grip puts it, degrees;
     and the set arch of its metacarpals (#15329), per ray its flexion and its
-    lean toward the little finger, as ``metacarpal_arch`` of the hand settings."""
+    lean toward the little finger, as ``metacarpal_arch`` of the hand settings;
+    and the knuckles it abducts toward the little finger and holds in their
+    sideways range, as ``side_close.knuckle_abduction_deg`` of the same."""
 
     name: str
     club_cross_angle_deg: float
@@ -199,6 +201,7 @@ class TrailSeat:
     wrist_ulnar_deviation_deg: float
     palm_centre_wrap_deg: float
     metacarpal_arch: tuple[tuple[str, tuple[float, float]], ...] = ()
+    knuckle_abduction_deg: tuple[tuple[str, float], ...] = ()
 
     def __post_init__(self) -> None:
         angles = (
@@ -218,8 +221,8 @@ def trail_seat(name: str | None = None) -> TrailSeat:
 
     ``None`` is the seat named by ``owner_trail_seat``. What a seat leaves out
     is ``owner_trail_cross_angle_deg``, and ``wrist.trail``,
-    ``placement.palm_centre_wrap_deg.trail`` and ``metacarpal_arch.trail`` of
-    the hand settings.
+    ``placement.palm_centre_wrap_deg.trail``, ``metacarpal_arch.trail`` and
+    ``side_close.knuckle_abduction_deg.trail`` of the hand settings.
     Preconditions: ``name`` is a string in the table (``TypeError`` /
     ``ValueError`` otherwise). Postcondition: finite angles, validated.
     """
@@ -236,6 +239,8 @@ def trail_seat(name: str | None = None) -> TrailSeat:
     wrap = hand["placement"]["palm_centre_wrap_deg"]["trail"]
     cross = seat.get("club_cross_angle_deg", quality["owner_trail_cross_angle_deg"])
     arch = seat.get("metacarpal_arch", hand["metacarpal_arch"]["trail"])
+    usual_swings = hand["side_close"]["knuckle_abduction_deg"]["trail"]
+    swings = seat.get("knuckle_abduction_deg", usual_swings)
     return TrailSeat(
         name=name,
         club_cross_angle_deg=float(cross),
@@ -250,6 +255,7 @@ def trail_seat(name: str | None = None) -> TrailSeat:
             (str(ray), (float(a["flexion_deg"]), float(a["ulnar_deviation_deg"])))
             for ray, a in arch.items()
         ),
+        knuckle_abduction_deg=tuple((str(f), float(d)) for f, d in swings.items()),
     )
 
 
@@ -260,7 +266,7 @@ def seat_settings(seat: TrailSeat) -> SkinnedHumanSettings:
     settings accept (``ValueError`` otherwise). Postcondition: the default
     settings themselves when the seat has what they have; else a copy that
     differs in the trail wrist's bend, the trail palm's roll and the trail
-    hand's set metacarpal arch alone.
+    hand's set metacarpal arch and abducted knuckles alone.
     """
     if not isinstance(seat, TrailSeat):
         raise TypeError("seat_settings needs a TrailSeat")
@@ -268,9 +274,14 @@ def seat_settings(seat: TrailSeat) -> SkinnedHumanSettings:
     usual = default_settings()
     same_wrap = dict(usual.palm_centre_wrap_deg)["trail"] == seat.palm_centre_wrap_deg
     same_arch = dict(usual.metacarpal_arch.hands)["trail"] == seat.metacarpal_arch
+    swings = dict(usual.side_close_knuckle_abduction_deg)["trail"]
+    same_arch = same_arch and swings == seat.knuckle_abduction_deg
     if dict(usual.wrist_deg)["trail"] == bend and same_wrap and same_arch:
         return usual
     raw = load_settings_mapping()
+    raw["side_close"]["knuckle_abduction_deg"]["trail"] = dict(
+        seat.knuckle_abduction_deg
+    )
     raw["metacarpal_arch"] = {
         **raw["metacarpal_arch"],
         "trail": {

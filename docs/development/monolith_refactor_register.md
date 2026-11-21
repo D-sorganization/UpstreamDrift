@@ -76,6 +76,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1089 | `src/shared/python/motion_pipeline/contracts.py` |
 | 1084 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py` |
 | 1078 | `src/engines/physics_engines/drake/python/full_body_model.py` |
+| 1076 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1073 | `src/shared/python/sidekick/calculators/thermo/steam_engine.py` |
 | 1072 | `src/shared/python/grip_contact/binding.py` |
 | 1069 | `src/tools/native_viewer_export/core.py` |
@@ -90,7 +91,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1053 | `src/tools/tour_matching_viewer/core.py` |
 | 1050 | `src/engines/physics_engines/opensim/python/spine/inverse_dynamics.py` |
 | 1047 | `src/shared/python/force_overlay/glyphs.py` |
-| 1046 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1042 | `src/shared/python/grip_contact/matlab_kernel.py` |
 | 1040 | `src/bunkershot3d/solvers/mpm/order_of_accuracy.py` |
 | 1040 | `src/tools/tour_matching_viewer/gui.py` |
