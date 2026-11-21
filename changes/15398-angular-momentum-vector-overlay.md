@@ -3,7 +3,7 @@ issue: 15398
 summary: "S4: straight angular-momentum arrows (whole-body + groups, fixed scale) for MuJoCo/MeshCat"
 ---
 
-## Scale calibration (B1)
+## Scale Calibration (B1)
 
 Default `DEFAULT_SCALE_M_PER_NMS = 0.01159` m/(N·m·s) is fixed for the whole swing (not per-frame autoscaled).
 
