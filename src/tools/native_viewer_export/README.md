@@ -110,6 +110,17 @@ python3 -m src.tools.native_viewer_export \
   `--ellipsoid-color-by kind`, a legend. It sits opposite the impact factors
   panel, stacks below it on a shared edge and stays above the bottom HUD rows;
   layout `text` in its settings file restores them.
+- Ellipsoid visibility (`ellipsoid_visibility.py`, `ellipsoid_visibility_settings.json`,
+  `--ellipsoid-visibility-settings JSON`): `scale_grouping` `per_kind` (one display
+  scale per kind, the clubhead sets it; sizes comparable between points) or
+  `per_point` (each point's largest radius maps to `target_radius_m`, the former
+  literal 0.09 m; sizes are **not comparable between points**, so the panel adds a
+  "Scaled Per Point" footer). `outer_alpha` is the alpha of the larger ellipsoid
+  when two kinds share a centre, so the inner one shows (1 = off).
+  `min_semi_axis_m` floors a displayed semi-axis (0 = off); a floored axis is **not
+  to scale**, the glyph is a visibility aid along it. The packaged file ships
+  `per_point`, 0.09 m, alpha 0.35 and a 0.03 m floor; the code defaults of
+  `EllipsoidDisplayScale` are unchanged.
 
 Environment: `NATIVE_VIEWER_CHROMIUM` (Chromium executable; a full Playwright
 build renders much faster than the headless shell), and

@@ -19,6 +19,12 @@ from numpy.typing import NDArray
 from src.shared.python.force_overlay.bundle_provider import BundleOverlayProvider
 from src.shared.python.force_overlay.glyphs import EllipsoidGlyph
 from src.tools.native_viewer_export.ellipsoid_panel import KIND_FIELDS, PanelRow
+from src.tools.native_viewer_export.ellipsoid_visibility import (
+    VisibilitySettings,
+    fade_outer,
+    group_scales,
+    load_visibility_settings,
+)
 from src.tools.native_viewer_export.core import (
     BackendUnavailable,
     OverlayFeed,
@@ -47,6 +53,8 @@ class OverlayOptions:
     mobility_condition_cutoff: float | None = None
     #: ellipsoid colour encodes the point (default) or the kind (#15150)
     ellipsoid_color_by: str = "point"
+    #: ellipsoid scale grouping, nested alpha and floor; ``None``: packaged file
+    visibility: VisibilitySettings | None = None
     #: blank axial loads around ball impact (skin_load_settings.json default)
     axial_impact_blackout: bool = True
 
@@ -184,11 +192,13 @@ RGBA = tuple[float, float, float, float]
 
 @dataclass(frozen=True)
 class MobilitySelection:
-    """Which mobility points the ellipsoid feed samples, and how many (#15150)."""
+    """Which mobility points the ellipsoid feed samples, how many, and how its
+    glyphs are sized and shaded (``visibility``: ``None`` = packaged file; #15150)."""
 
     points: str = "hands"
     max_points: int = 8
     condition_cutoff: float | None = None
+    visibility: VisibilitySettings | None = None
 
 
 def _ellipsoid_color_picker(
@@ -240,6 +250,7 @@ def _ellipsoid_feed_factory(
                 opts.mobility_points,
                 opts.max_mobility_points,
                 opts.mobility_condition_cutoff,
+                opts.visibility,
             ),
             ellipsoid_color_by=opts.ellipsoid_color_by,
             scale_from=swing,
@@ -265,16 +276,13 @@ def _build_hand_ellipsoid_feed(
     """Build ellipsoid glyph emitter, HUD capability formatter and panel rows.
 
     Index ``k`` of either is evaluated at the pose ``swing.q[k]``. The display
-    scale of each kind comes from the states of ``scale_from`` (default
+    scale of each kind (and point, per ``selection.visibility``) comes from the
+    states of ``scale_from`` (default
     ``swing``), so the clips re-sampled from one source share it (#15150).
     """
     scale_swing = swing if scale_from is None else scale_from
     pick_color = _ellipsoid_color_picker(ellipsoid_color_by)
     mobility_condition_cutoff = selection.condition_cutoff
-    from src.shared.python.force_overlay.ellipsoid_display import (
-        EllipsoidDisplayBuilder,
-        EllipsoidDisplayScale,
-    )
     from src.shared.python.spatial_algebra.segment_intersection import (
         resolve_intersection_points,
     )
@@ -299,54 +307,81 @@ def _build_hand_ellipsoid_feed(
                 )
         return _hm_cache[key]
 
-    scales: dict[str, EllipsoidDisplayScale] = {}
+    vis = selection.visibility or load_visibility_settings()
     stride = max(1, scale_swing.n_states // 20)
-    for kind in active_ellipsoids:
-        sampled = (
-            _get_hm(i, scale_swing) for i in range(0, scale_swing.n_states, stride)
+    sampled = [_get_hm(i, scale_swing) for i in range(0, scale_swing.n_states, stride)]
+    scales = {
+        kind: group_scales(
+            {pt.name: _semi_axes_series(sampled, [pt], kind) for pt in resolved_pts},
+            kind,
+            ellipsoid_scale,
+            vis,
         )
-        scales[kind] = EllipsoidDisplayScale.compute(
-            _semi_axes_series(sampled, resolved_pts, kind),
-            target_radius_m=0.09,
-            kind=kind,
-            mode=ellipsoid_scale,
-        )
-    builders = {kind: EllipsoidDisplayBuilder(s) for kind, s in scales.items()}
-
-    def hand_ellipsoids_fn(index: int) -> tuple[EllipsoidGlyph, ...]:
-        hm_map = _get_hm(index)
-        glyphs_list: list[EllipsoidGlyph] = []
-        for kind in active_ellipsoids:
-            builder = builders[kind]
-            for pt in resolved_pts:
-                hm = _lookup_point_mobility(hm_map, pt)
-                if hm is None or (
-                    mobility_condition_cutoff is not None
-                    and hm.condition > mobility_condition_cutoff
-                ):
-                    continue
-                axes, radii_phys = _extract_physical_radii(hm, kind)
-                disp = builder.build_glyph(
-                    hm.centre,
-                    axes,
-                    radii_phys,
-                    "trail" if "trail" in pt.name else "lead",
-                    label=f"{pt.name} {kind}",
-                )
-                c = pick_color(pt, kind, disp.rgba)
-                glyphs_list.append(
-                    EllipsoidGlyph(disp.centre, disp.axes, disp.radii, c, disp.label)
-                )
-        return tuple(glyphs_list)
-
+        for kind in active_ellipsoids
+    }
+    hand_ellipsoids_fn = _build_glyph_fn(
+        _get_hm,
+        resolved_pts,
+        active_ellipsoids,
+        scales,
+        (pick_color, vis),
+        mobility_condition_cutoff,
+    )
     hud_fn = _build_hand_hud_lines_fn(
-        _get_hm, resolved_pts, active_ellipsoids, scales, mobility_condition_cutoff
+        _get_hm,
+        resolved_pts,
+        active_ellipsoids,
+        {kind: next(iter(by_pt.values()), None) for kind, by_pt in scales.items()},
+        mobility_condition_cutoff,
     )
     return (
         hand_ellipsoids_fn,
         hud_fn,
         _build_panel_rows_fn(_get_hm, resolved_pts, mobility_condition_cutoff),
     )
+
+
+def _build_glyph_fn(
+    get_hm: Callable[[int], dict[str, Any]],
+    points: Sequence[Any],
+    kinds: Sequence[str],
+    scales: dict[str, dict[str, Any]],
+    style: tuple[Callable[[Any, str, RGBA], RGBA], VisibilitySettings],
+    condition_cutoff: float | None = None,
+) -> Callable[[int], tuple[EllipsoidGlyph, ...]]:
+    """Glyph emitter of the display ``scales`` (kind, point name), styled by
+    ``style`` = (colour rule, visibility settings): flooring, nested alpha."""
+    pick_color, vis = style
+    builders = {
+        (kind, name): vis.builder(scale)
+        for kind, by_point in scales.items()
+        for name, scale in by_point.items()
+    }
+
+    def glyphs_at(index: int) -> tuple[EllipsoidGlyph, ...]:
+        hm_map, out = get_hm(index), []
+        for kind in kinds:
+            for pt in points:
+                hm = _lookup_point_mobility(hm_map, pt)
+                if hm is None or (
+                    condition_cutoff is not None and hm.condition > condition_cutoff
+                ):
+                    continue
+                axes, radii = _extract_physical_radii(hm, kind)
+                disp = builders[(kind, pt.name)].build_glyph(
+                    hm.centre,
+                    axes,
+                    radii,
+                    "trail" if "trail" in pt.name else "lead",
+                    label=f"{pt.name} {kind}",
+                )
+                rgba = pick_color(pt, kind, disp.rgba)
+                out.append(
+                    EllipsoidGlyph(disp.centre, disp.axes, disp.radii, rgba, disp.label)
+                )
+        return fade_outer(out, vis.outer_alpha)
+
+    return glyphs_at
 
 
 def _build_panel_rows_fn(
