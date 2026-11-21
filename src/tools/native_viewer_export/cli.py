@@ -46,6 +46,8 @@ from src.tools.native_viewer_export.core import (
     ExportSettings,
     parse_ellipsoid_scale,
 )
+from src.tools.native_viewer_export.flight_tracer import load_tracer_settings
+from src.tools.native_viewer_export.impact_factors import load_factor_settings
 from src.tools.native_viewer_export.overlay import OverlayOptions, build_overlay_feed
 from src.tools.native_viewer_export.runner import ExportJob, run_export
 
@@ -224,6 +226,58 @@ def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_impact_factor_arguments(p: argparse.ArgumentParser) -> None:
+    """Impact factors panel flags (#15150)."""
+    p.add_argument(
+        "--impact-factors",
+        action="store_true",
+        help="draw the impact factors panel (club speed, path, face, face to "
+        "path, attack angle, loft, strike point) on every frame; the values "
+        "freeze at impact and stay to the end of the clip (default: off)",
+    )
+    p.add_argument(
+        "--impact-factors-settings",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help="settings file of the impact factors panel (turns it on; default "
+        "impact_factors_settings.json beside the tool)",
+    )
+
+
+def _add_ball_flight_arguments(p: argparse.ArgumentParser) -> None:
+    """Ball flight and shot tracer flags (#15150)."""
+    p.add_argument(
+        "--ball-flight",
+        action="store_true",
+        help="from impact on fly the ball along the model-predicted carry "
+        "trajectory with a shot tracer and hold the clip until it lands; the "
+        "down_the_line_flight view keeps the flight in the picture (default: off)",
+    )
+    p.add_argument(
+        "--ball-flight-settings",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help="settings file of the ball flight and tracer (turns it on; default "
+        "flight_tracer_settings.json beside the tool)",
+    )
+
+
+def _add_clip_overlay_arguments(p: argparse.ArgumentParser) -> None:
+    """Optional clip overlay flags: impact factors panel and ball flight."""
+    _add_impact_factor_arguments(p)
+    _add_ball_flight_arguments(p)
+    p.add_argument(
+        "--contact-hold-frames",
+        type=int,
+        default=None,
+        metavar="N",
+        help="repeat the contact-instant frame N more times "
+        "(default: contact_frame_settings.json)",
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="python -m src.tools.native_viewer_export",
@@ -319,6 +373,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="do not draw the decorative golf ball (shown until impact)",
     )
+    _add_clip_overlay_arguments(p)
     p.add_argument("--no-grid", action="store_true", help="skip the 2x2 clip")
     add_appearance_arguments(p)
     add_grip_arguments(p, physical=True)
@@ -488,6 +543,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         stride=args.stride,
         impact_time_s=args.impact_time,
         impact_window_s=args.impact_window,
+        contact_hold_frames=getattr(args, "contact_hold_frames", None),
         overlays=not args.no_overlay,
         shading=build_shading(args),
         force_vectors=args.force_vectors,
@@ -506,7 +562,13 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         hud=not args.no_hud,
         event_captions=bool(getattr(args, "event_captions", False)),
         ball=not args.no_ball,
+        impact_factors=load_factor_settings(args.impact_factors_settings)
+        if args.impact_factors or args.impact_factors_settings is not None
+        else None,
         appearance=build_appearance(args),
+        ball_flight=load_tracer_settings(args.ball_flight_settings)
+        if args.ball_flight or args.ball_flight_settings is not None
+        else None,
         **(
             {"impact_speed": args.impact_speed} if args.impact_speed is not None else {}
         ),

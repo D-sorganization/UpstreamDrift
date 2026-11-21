@@ -17,6 +17,7 @@ import numpy as np
 from src.shared.python.force_overlay.glyphs import GlyphSet
 from src.tools.native_viewer_export.backends._ball import ball_visibility
 from src.tools.native_viewer_export.backends._worker_job import WorkerJob
+from src.tools.native_viewer_export.flight_depth import depth_request
 from src.tools.native_viewer_export.shading import frames_to_json
 from src.tools.native_viewer_export.core import (
     ExportSettings,
@@ -117,6 +118,7 @@ def stage_job(
         appearance=settings.appearance,
         axial_path=str(axial_path) if axial_path else None,
         shading=shading,
+        depth_positions=depth_request(swing, settings, indices),
     )
 
 
@@ -140,10 +142,25 @@ def run_worker(
         raise RuntimeError(f"render worker failed (rc={proc.returncode}):\n{tail}")
 
 
+class FrameTiles(dict[str, Image8]):
+    """``{view: RGB frame}`` that also carries the scene depth per view (metres)."""
+
+    def __init__(self, tiles: dict[str, Image8]) -> None:
+        super().__init__(tiles)
+        self.depth_m: dict[str, np.ndarray] = {}
+
+
 def read_frames(job: WorkerJob) -> Iterator[dict[str, Image8]]:
-    """Yield the worker's frames in index order."""
+    """Yield the worker's frames in index order, with depth where it wrote any."""
+    wanted = job.depth_positions
     for pos in range(len(job.indices)):
-        yield {v: np.load(job.frame_path(v, pos)) for v in job.views}
+        tiles = FrameTiles({v: np.load(job.frame_path(v, pos)) for v in job.views})
+        if wanted and wanted[pos]:
+            paths = {v: job.depth_path(v, pos) for v in job.views}
+            tiles.depth_m.update(
+                {v: np.load(p) for v, p in paths.items() if p.exists()}
+            )
+        yield tiles
 
 
 def render_in_worker(

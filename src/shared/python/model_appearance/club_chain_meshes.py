@@ -26,6 +26,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.model_appearance.club_assembly import (
+    HEAD_PARTS,
     SHAFT_BUTT_RADIUS_FRACTION,
     SHAFT_TIP_RADIUS_FRACTION,
     ClubAssembly,
@@ -192,11 +193,13 @@ def club_meshes_by_body(
     out[layout.club_body] += [
         (label, mesh, club_part_material(label, finish, doc))
         for label, mesh in parts.items()
-        if label not in ("shaft", "head")
+        if label != "shaft" and label not in HEAD_PARTS
     ]
     for i, link in enumerate(layout.links):
         out[link.body] = [(f"shaft_link{i}", pieces[link.body], shaft_material)]
-    out[layout.tip_link].append(
-        ("head", parts["head"], club_part_material("head", finish, doc))
-    )
+    out[layout.tip_link] += [
+        (label, parts[label], club_part_material(label, finish, doc))
+        for label in HEAD_PARTS
+        if label in parts
+    ]
     return out

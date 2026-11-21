@@ -331,7 +331,9 @@
 {"path": "body_part_viz/renderers/matplotlib_renderer.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/renderers/projective_renderer.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/renderers/pyqtgl_renderer.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/scalar_shading.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/segment_angular_momentum.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/series_validation.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/shapes/__init__.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/shapes/_mesh_decimation.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/shapes/_mesh_io.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
@@ -904,6 +906,7 @@
 {"path": "golf_simulator/session.py", "classification": "ud-only", "package": "golf_simulator", "spelling_only": false}
 {"path": "golf_view_presets/__init__.py", "classification": "ud-only", "package": "golf_view_presets", "spelling_only": false}
 {"path": "golf_view_presets/adapters.py", "classification": "ud-only", "package": "golf_view_presets", "spelling_only": false}
+{"path": "golf_view_presets/flight_view.json", "classification": "ud-only", "package": "golf_view_presets", "spelling_only": false}
 {"path": "golf_view_presets/framing.py", "classification": "ud-only", "package": "golf_view_presets", "spelling_only": false}
 {"path": "golf_view_presets/presets.py", "classification": "ud-only", "package": "golf_view_presets", "spelling_only": false}
 {"path": "golf_viz/__init__.py", "classification": "ud-only", "package": "golf_viz", "spelling_only": false}
@@ -1355,6 +1358,8 @@
 {"path": "model_appearance/ball.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/ball_strike.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/ball_strike_settings.json", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/ball_tee.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/ball_tee_settings.json", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/body_meshes.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/body_skin_dress.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/body_skin_export.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
@@ -1364,6 +1369,8 @@
 {"path": "model_appearance/club_assembly.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_chain_meshes.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_face.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/club_face_marking.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/club_face_marking_settings.json", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_head_mesh.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_head_seat.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_head_seat_settings.json", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}

@@ -11,7 +11,7 @@ import pytest
 
 from src.shared.python.impact_parameters import ClubheadSeries
 from src.shared.python.motion_matching.same_input import InputBundle
-from src.tools.native_viewer_export import impact_factors as factors
+from src.tools.native_viewer_export import cli, impact_factors as factors
 from src.tools.native_viewer_export.ball import BallPlacement
 from src.tools.native_viewer_export.core import (
     ExportSettings,
@@ -50,6 +50,11 @@ def test_settings_file_is_validated() -> None:
     wanted = {"clubhead_speed", "club_path_deg", "face_angle_deg", "face_to_path_deg"}
     wanted |= {"attack_angle_deg", "dynamic_loft_deg", "impact_location"}
     assert wanted <= set(DEFAULTS.rows)
+    assert DEFAULTS.pre_impact == "blank" and not DEFAULTS.closest_approach_fallback
+    with pytest.raises(ValueError, match="pre_impact"):
+        replace(DEFAULTS, pre_impact="sometimes")
+    with pytest.raises(TypeError, match="closest_approach_fallback"):
+        replace(DEFAULTS, closest_approach_fallback="yes")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="rows"):
         replace(DEFAULTS, rows=("clubhead_speed", "launch_code"))
     with pytest.raises(TypeError, match="rows"):
@@ -86,6 +91,30 @@ def test_panel_size_is_the_same_on_every_frame() -> None:
     assert box[0] > 320 and box[3] <= 360
     left = replace(panel, settings=replace(DEFAULTS, position="left"))
     assert left.bbox(_blank().shape)[2] < 320
+
+
+def test_live_mode_shows_changing_values_before_impact() -> None:
+    live = replace(DEFAULTS, pre_impact="live")
+    panel = factors.panel_from_series(_series(), IMPACT_S, BALL, live)
+    early, later = dict(panel.lines_at(0.06)), dict(panel.lines_at(0.09))
+    assert early["Clubhead Speed"].endswith("mph")
+    assert early["Clubhead Speed"] == later["Clubhead Speed"]  # steady 40 m/s
+    assert dict(panel.lines_at(0.01))["Clubhead Speed"] != early["Clubhead Speed"]
+    assert dict(panel.lines_at(0.2)) == dict(panel.lines_at(IMPACT_S))  # frozen
+    blank = factors.panel_from_series(_series(), IMPACT_S, BALL, DEFAULTS)
+    assert panel.bbox(_blank().shape) == blank.bbox(_blank().shape)
+
+
+def test_a_face_that_passes_the_ball_is_labelled_no_contact() -> None:
+    series = _series(height_m=0.10)
+    time_s, gap_m = factors.closest_approach(series, BALL)
+    assert time_s == pytest.approx(IMPACT_S, abs=1e-3)
+    assert gap_m == pytest.approx(0.10, abs=1e-3)
+    panel = factors.panel_from_series(series, IMPACT_S, BALL, DEFAULTS)
+    assert panel.lines_at(1.0)[0][1] == "closest approach, no contact (miss 100 mm)"
+    assert dict(panel.lines_at(1.0))["Clubhead Speed"].endswith("mph")
+    touching = factors.panel_from_series(_series(), IMPACT_S, BALL, DEFAULTS)
+    assert touching.lines_at(1.0)[0][1] == "at impact"
 
 
 def test_no_impact_says_so_and_shows_no_numbers() -> None:
@@ -184,11 +213,34 @@ def test_export_is_unchanged_with_the_option_off(tmp_path: Path, monkeypatch) ->
 
 def test_export_without_a_known_impact_says_no_impact(monkeypatch) -> None:
     monkeypatch.setattr(factors, "club_series", lambda swing: _series())
-    panel = factors.factors_for_export(_swing(), _settings(impact_factors=DEFAULTS))
+    plain = _settings(impact_factors=DEFAULTS)
+    panel, used = factors.factors_for_export(_swing(), plain)
     assert panel is not None and panel.lines_at(0.19)[0][1] == "no impact detected"
+    assert used is plain
+    fallback = _settings(
+        impact_factors=replace(DEFAULTS, closest_approach_fallback=True)
+    )
+    panel, used = factors.factors_for_export(replace(_swing(), ball=BALL), fallback)
+    assert used.impact_time_s == pytest.approx(IMPACT_S, abs=2e-3)
+    assert panel is not None and panel.lines_at(0.0)[0][1] == "before impact"
+    assert panel.lines_at(1.0)[0][1] == "closest approach (impact not detected)"
     monkeypatch.undo()  # the two-coordinate test specification has no club
-    failed = factors.factors_for_export(
+    failed, _ = factors.factors_for_export(
         _swing(), _settings(impact_factors=DEFAULTS, impact_time_s=IMPACT_S)
     )
     assert failed is not None and failed.lines_at(0.19)[0][1].startswith("unavailable")
     assert all(v == DEFAULTS.blank_text for _, v in failed.lines_at(0.19)[1:])
+
+
+def test_cli_flags_turn_the_panel_on(tmp_path: Path) -> None:
+    base = ["--bundle", "b.npz", "--out", str(tmp_path), "--swing", "s"]
+    parser = cli.build_parser()
+    assert cli.build_settings(parser.parse_args(base)).impact_factors is None
+    on = cli.build_settings(parser.parse_args([*base, "--impact-factors"]))
+    assert on.impact_factors == DEFAULTS
+    custom = tmp_path / "factors.json"
+    raw = json.loads(factors.SETTINGS_PATH.read_text(encoding="utf-8"))
+    custom.write_text(json.dumps({**raw, "pre_impact": "live"}), encoding="utf-8")
+    flags = [*base, "--impact-factors-settings", str(custom)]
+    picked = cli.build_settings(parser.parse_args(flags))
+    assert picked.impact_factors == replace(DEFAULTS, pre_impact="live")
