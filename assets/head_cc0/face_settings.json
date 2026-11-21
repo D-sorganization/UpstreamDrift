@@ -1,0 +1,66 @@
+{
+  "schema_version": "head-face-settings-v1",
+  "units": "Head lengths (neck plane to vertex is 1) unless a name ends in _deg.",
+  "notes": {
+    "max_total_triangles": "Raised 12,000 -> 32,000 by owner decision 2026-11-21 (#15299) for hair on a refined scalp. Measured: head 11,890 -> 30,254 triangles (hair 1,696 -> 20,060; margin 1,746); hairline turning 34.5 -> 27.0 deg; plain outline turning, front 17.2 -> 4.8 deg and profile 22.4 -> 5.1 deg; comb ridge 0.58 -> 3.66 vertices per period."
+  },
+  "face": {
+    "eye_y": 0.124,
+    "eye_z": 0.538,
+    "eye_radius": 0.048,
+    "eye_inset": 0.006,
+    "eye_cover": 0.016,
+    "strip_cover": 0.003,
+    "iris_half": [0.004, 0.021, 0.021],
+    "iris_drop": 0.0,
+    "iris_lift": 0.0015,
+    "pupil_half": [0.003, 0.009, 0.009],
+    "pupil_lift": 0.003,
+    "lid_half": [0.002, 0.046, 0.003],
+    "lid_rise": 0.015,
+    "lid_arch": 0.29,
+    "lid_lift": 0.001,
+    "brow_half": [0.003, 0.070, 0.015],
+    "brow_tilt": 0.06,
+    "brow_arch": 0.10,
+    "brow_taper": 0.5,
+    "brow_lift": 0.002
+  },
+  "hair": {
+    "hairline": [
+      [0.0, 0.80], [0.5, 0.79], [0.75, 0.745], [0.95, 0.64], [1.10, 0.575],
+      [1.25, 0.565], [1.45, 0.60], [1.62, 0.615], [1.78, 0.575], [1.95, 0.47],
+      [2.10, 0.40], [2.30, 0.36], [2.60, 0.335], [2.90, 0.318],
+      [3.141592653589793, 0.31]
+    ],
+    "comb_amplitude": 0.005,
+    "comb_wavelength": 0.095,
+    "part_width": 0.028,
+    "part_depth": 0.30,
+    "fringe_thickness": 0.045,
+    "off_skin": 0.003,
+    "rim_thickness": 0.0025,
+    "cut_steps": 16,
+    "refine_splits": 4,
+    "refine_edge": 0.026,
+    "refine_curve": 0.75
+  },
+  "checks": {
+    "view_elevations_deg": [0.0, 30.0, 45.0],
+    "view_hidden_share": 0.5,
+    "max_pupil_hidden": [0.0, 0.15, 0.5],
+    "max_iris_hidden": [0.25, 0.7, 0.8],
+    "min_white_seen": 0.05,
+    "min_layer_gap": 0.001,
+    "brow_max_proud": 0.008,
+    "brow_max_end_ratio": 0.6,
+    "hairline_step_rad": 0.05,
+    "hairline_max_turn_deg": 28.5,
+    "max_total_triangles": 32000,
+    "unrefined_hair_triangles": 1696,
+    "outline_step_rad": 0.02,
+    "outline_views": [[0.0, 0.55, -1.1, 1.1], [0.1, 0.55, -2.0, 0.6]],
+    "outline_max_turn_deg": [6.0, 6.5],
+    "comb_min_ridge_vertices": 3.5
+  }
+}

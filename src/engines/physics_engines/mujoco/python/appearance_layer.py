@@ -101,14 +101,17 @@ class _Assets:
         self._made.add(key)
         return mat_name
 
-    def mesh(self, name: str, mesh: geometry.Mesh) -> None:
-        ET.SubElement(
+    def mesh(self, name: str, mesh: geometry.Mesh, smooth: bool = False) -> None:
+        """Add a mesh asset; ``smooth`` shades it without creases (hair)."""
+        node = ET.SubElement(
             self.asset,
             "mesh",
             name=name,
             vertex=_nums(mesh.vertices),
             face=" ".join(str(int(i)) for i in mesh.faces.ravel()),
         )
+        if smooth:
+            node.set("smoothnormal", "true")
         self.n_meshes += 1
 
 

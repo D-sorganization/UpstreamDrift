@@ -190,7 +190,7 @@ def attach_head_visual(
         )
     for part in parts:
         mesh_name = f"vmesh_head_{part.name}"
-        assets.mesh(mesh_name, part.mesh)
+        assets.mesh(mesh_name, part.mesh, smooth=part.name == head_model.HAIR_PART)
         material = head_model.part_material_name(part, doc)
         ET.SubElement(
             target,
