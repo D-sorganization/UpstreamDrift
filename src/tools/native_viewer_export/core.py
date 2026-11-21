@@ -1031,7 +1031,7 @@ def export_swing(
     )
     factors = None
     if settings.impact_factors is not None:
-        factors = factors_panel.factors_for_export(swing, settings)
+        factors, settings = factors_panel.factors_for_export(swing, settings)
     plans = clip_plans(swing, settings)
     out_dir.mkdir(parents=True, exist_ok=True)
     factory = writer_factory or functools.partial(imageio_writer, crf=settings.crf)

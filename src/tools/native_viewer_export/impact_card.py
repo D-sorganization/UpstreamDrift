@@ -47,6 +47,8 @@ MAX_FACE_OFFSET_M = 0.050
 #: Failures that become an "unavailable" reason rather than an exception
 #: (``BackendUnavailable`` is a ``RuntimeError``).
 _EXPECTED_ERRORS = (ValueError, KeyError, RuntimeError, OSError, TypeError)
+#: start of the reason given for a contact point that lies off the face
+OFF_FACE = "ball contact off the face"
 
 
 def _backend_unavailable(message: str) -> Exception:
@@ -129,7 +131,7 @@ def _on_face_only(params: ImpactParameters) -> ImpactParameters:
     if math.hypot(params.toe_mm, params.high_mm) <= MAX_FACE_OFFSET_M * 1000.0:
         return params
     reason = (
-        f"ball contact off the face (toe {params.toe_mm:+.0f} mm, high "
+        f"{OFF_FACE} (toe {params.toe_mm:+.0f} mm, high "
         f"{params.high_mm:+.0f} mm from the face centre): the model face misses "
         "the ball"
     )

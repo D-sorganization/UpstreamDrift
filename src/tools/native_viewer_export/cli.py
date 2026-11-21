@@ -45,6 +45,7 @@ from src.tools.native_viewer_export.core import (
     ExportSettings,
     parse_ellipsoid_scale,
 )
+from src.tools.native_viewer_export.impact_factors import load_factor_settings
 from src.tools.native_viewer_export.overlay import OverlayOptions, build_overlay_feed
 from src.tools.native_viewer_export.runner import ExportJob, run_export
 
@@ -309,6 +310,21 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="do not draw the decorative golf ball (shown until impact)",
     )
+    p.add_argument(
+        "--impact-factors",
+        action="store_true",
+        help="draw the impact factors panel (club speed, path, face, face to "
+        "path, attack angle, loft, strike point) on every frame; the values "
+        "freeze at impact and stay to the end of the clip (default: off)",
+    )
+    p.add_argument(
+        "--impact-factors-settings",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help="settings file of the impact factors panel (turns it on; default "
+        "impact_factors_settings.json beside the tool)",
+    )
     p.add_argument("--no-grid", action="store_true", help="skip the 2x2 clip")
     add_appearance_arguments(p)
     add_grip_arguments(p, physical=True)
@@ -495,6 +511,9 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         hud=not args.no_hud,
         event_captions=bool(getattr(args, "event_captions", False)),
         ball=not args.no_ball,
+        impact_factors=load_factor_settings(args.impact_factors_settings)
+        if args.impact_factors or args.impact_factors_settings is not None
+        else None,
         appearance=build_appearance(args),
         **(
             {"impact_speed": args.impact_speed} if args.impact_speed is not None else {}

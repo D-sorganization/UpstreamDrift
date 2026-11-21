@@ -226,6 +226,12 @@ python3 -m src.tools.native_viewer_export --bundle driver.npz --swing driver \
   one fixed size on every frame, blank before impact and frozen at their impact
   values from the impact frame to the end of the clip; it replaces the card.
   Options and their meaning are in `impact_factors_settings.json`.
+  `--impact-factors` turns it on and `--impact-factors-settings PATH` reads
+  another settings file (`pre_impact: live` shows the extractor's value at the
+  frame on screen until impact). A face that passes the ball without touching
+  it is labelled "closest approach, no contact" with the miss distance; with
+  `closest_approach_fallback` a swing with no detected impact uses its closest
+  approach as the reference instant and says so.
 - `overlay.py`: overlay feed built from `force_overlay.bundle_provider`.
 - `overlay2d.py`: pinhole projection for the OpenSim 2D glyphs.
 - `backends/`: one module per engine plus shared helpers.
