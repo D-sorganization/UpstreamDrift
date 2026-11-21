@@ -80,7 +80,7 @@ class LandingMarkerSettings:
             "carry_label_color_rgba",
             "carry_label_outline_rgba",
         ):
-            object.__setattr__(self, name, _rgba(getattr(self, name), name))
+            object.__setattr__(self, name, rgba_channels(getattr(self, name), name))
         for name in ("ground_track_width_px", "drop_line_width_px"):
             if not isinstance(getattr(self, name), int) or getattr(self, name) < 1:
                 raise ValueError(f"{name} must be a positive integer")
@@ -100,7 +100,7 @@ class LandingMarkerSettings:
             raise ValueError(f"carry_label_format is not usable: {exc!r}") from exc
 
 
-def _rgba(value: object, name: str) -> tuple[int, ...]:
+def rgba_channels(value: object, name: str) -> tuple[int, ...]:
     if not isinstance(value, (list, tuple)) or len(value) != 4:
         raise TypeError(f"{name} must be 4 integers")
     if not all(isinstance(c, int) and 0 <= c <= 255 for c in value):

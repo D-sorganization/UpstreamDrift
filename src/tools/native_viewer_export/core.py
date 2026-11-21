@@ -53,6 +53,7 @@ from src.tools.native_viewer_export.compositor import (
 from src.tools.native_viewer_export import flight_tracer
 from src.tools.native_viewer_export import contact_frame
 from src.tools.native_viewer_export import ellipsoid_panel as ellipsoid_hud
+from src.tools.native_viewer_export import flight_inset
 from src.tools.native_viewer_export import impact_factors as factors_panel
 from src.tools.native_viewer_export.impact_card import impact_card_for
 from src.tools.native_viewer_export.shading import shading_legend
@@ -1065,6 +1066,7 @@ def _export_clip(
             if factors is not None:
                 outputs = {n: factors.draw(f, t) for n, f in outputs.items()}
             outputs = ellipsoid_hud.draw_all(overlays, shown_feed, k, hud, outputs)
+            outputs = flight_inset.draw_all(overlays, shown_feed, k, hud, outputs)
             if strip is not None:  # cursor at this frame's swing time
                 outputs = {n: strip.draw(f, t) for n, f in outputs.items()}
             for name, frame in outputs.items():
