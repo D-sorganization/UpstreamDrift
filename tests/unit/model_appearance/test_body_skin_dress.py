@@ -8,12 +8,14 @@ import json
 import numpy as np
 import pytest
 from scipy.spatial import cKDTree
+from scipy.spatial.transform import Rotation
 
 from src.shared.python.model_appearance import body_skin_dress as dress
 from src.shared.python.model_appearance import body_skin_fit as fit
 from src.shared.python.model_appearance import body_skin_mesh as mesh
 from src.shared.python.model_appearance import body_skin_pose as pose
 from tests.unit.model_appearance.test_body_skin_fit import _subject
+from tests.unit.model_appearance.test_body_skin_pose import GIRDLE, RAW, _girdle
 
 pytestmark = pytest.mark.unit
 
@@ -191,6 +193,48 @@ def test_each_sleeve_hem_sits_on_the_arm() -> None:
         assert stand.min() >= 1.0e3 * SETTINGS.sleeve_hug_m - 0.5
 
 
+def _hem_gap_mm(settings: dress.DressSettings) -> tuple[float, int]:
+    """Largest distance from a rim vertex of the collar and the sleeve hems to
+    the nearest vertex of the bare skin, and how many rim vertices were measured.
+
+    Posed with the relaxed shoulder weights, the trail girdle protracted
+    110 mm and the head turned ``neck_test_turn_rad``.
+    """
+    posing = pose.load_pose_settings()
+    weights = pose.smooth_shoulder_weights(SKIN, FITTED, posing)
+    layers = dress.dress_skin(SKIN, FITTED, weights, settings)
+    girdle = _girdle(GIRDLE["trail_protracted_110_mm"])
+    turn = Rotation.from_euler("z", RAW["neck_test_turn_rad"]).as_matrix()
+    motions = {"thorax": pose.IDENTITY, "girdle_l": pose.IDENTITY}
+    motions |= {"upper_arm_l": pose.IDENTITY, "girdle_r": girdle, "upper_arm_r": girdle}
+    motions["head"] = pose.Rigid.about(turn, FITTED.joints["neck"])
+    moves = pose.shoulder_transforms(motions, FITTED, posing)
+    posed = {
+        name: pose.pose_skin(
+            layers[name].vertices, layers[name].weights, SKIN.groups, moves
+        )
+        for name in ("skin", "shirt")
+    }
+    rim = _rim(layers["shirt"])
+    rim = rim[
+        layers["shirt"].vertices[rim, 2] > SETTINGS.waist_height_m
+    ]  # not the tail
+    gap = cKDTree(posed["skin"]).query(posed["shirt"][rim])[0]
+    return 1.0e3 * float(gap.max()), len(rim)
+
+
+def test_each_hem_rim_stays_on_the_skins_own_vertices_at_a_turned_pose() -> None:
+    """Blend skinning is not linear along an edge: a rim that only lies in the
+    skin's faces at rest lifts off them when the girdle and the head turn, and
+    a camera looks under the hem into the shirt. With the hem line made edges
+    of the skin itself, rim and skin move as the same vertices."""
+    gap, count = _hem_gap_mm(SETTINGS)
+    assert count > 90  # collar and both sleeves
+    assert gap <= LIMITS["hem_seam_mm"]
+    apart, _ = _hem_gap_mm(dataclasses.replace(SETTINGS, hem_seam=False))
+    assert apart > 1.0e3 * LIMITS["hem_seam_mm"]  # the check tells the two apart
+
+
 def _front(layer: dress.Layer) -> np.ndarray:
     """Shirt surface samples (vertices and face centres) ahead of the hip joints."""
     points = np.vstack([layer.vertices, layer.vertices[layer.faces].mean(axis=1)])
@@ -366,6 +410,7 @@ def test_each_trouser_hem_hangs_below_the_bare_ankle(profile: str | None) -> Non
         {"sleeve_hug_m": 0.0},
         {"sleeve_hug_gain": -0.1},
         {"ankle_end_fraction": 1.0},
+        {"hem_seam": 1},
     ],
 )
 def test_invalid_settings_and_weights_raise(change: dict[str, object]) -> None:

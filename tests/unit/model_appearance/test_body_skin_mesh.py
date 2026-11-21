@@ -25,6 +25,29 @@ def test_clip_mesh_cuts_on_the_level_set() -> None:
         mesh.clip_mesh(points, faces, np.ones(3))
 
 
+def test_split_mesh_keeps_the_whole_mesh_and_makes_the_level_set_edges() -> None:
+    points = np.array([[0.0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]])
+    faces = np.array([[0, 1, 2], [1, 3, 2]])
+    level = 0.25 - points[:, 0]
+    whole, split = mesh.split_mesh(points, faces, level)
+    area = np.cross(
+        whole[split[:, 1]] - whole[split[:, 0]], whole[split[:, 2]] - whole[split[:, 0]]
+    )
+    assert np.isclose(0.5 * area[:, 2].sum(), 1.0) and (area[:, 2] > 0).all()
+    assert len(whole) == 7 and len(mesh.boundary_edges(split)) == 6  # one sheet
+    on_line = np.isclose(whole[:, 0], 0.25)
+    assert on_line.sum() == 3
+    crossing = (whole[split][:, :, 0].min(axis=1) < 0.25 - 1e-9) & (
+        whole[split][:, :, 0].max(axis=1) > 0.25 + 1e-9
+    )
+    assert not crossing.any()  # no face lies across the line
+    kept, _ = mesh.clip_mesh(points, faces, level)
+    line = kept[np.isclose(kept[:, 0], 0.25)]
+    assert all((whole == row).all(axis=1).any() for row in line)  # the same rows
+    with pytest.raises(ValueError):
+        mesh.split_mesh(points, faces, np.ones(4))
+
+
 def test_open_edges_normals_and_relaxation_of_a_fan() -> None:
     rim = np.array([[1.0, 0, 0], [0, 1, 0], [-1, 0, 0], [0, -1, 0]])
     points = np.vstack([[[0.3, 0.2, 0.0]], rim])
