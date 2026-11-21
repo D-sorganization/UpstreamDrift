@@ -19,6 +19,7 @@ from numpy.typing import NDArray
 from src.shared.python.force_overlay.bundle_provider import BundleOverlayProvider
 from src.shared.python.force_overlay.glyphs import EllipsoidGlyph
 from src.tools.native_viewer_export.ellipsoid_panel import KIND_FIELDS, PanelRow
+from src.tools.native_viewer_export.kinematic_replay import NOTE, vector_visibility
 from src.tools.native_viewer_export.core import (
     BackendUnavailable,
     OverlayFeed,
@@ -49,6 +50,8 @@ class OverlayOptions:
     ellipsoid_color_by: str = "point"
     #: blank axial loads around ball impact (skin_load_settings.json default)
     axial_impact_blackout: bool = True
+    #: the user passed a vector flag, so a kinematic replay still draws vectors
+    forces_requested: bool = False
 
 
 def _grip_source(swing: SwingInput, engine: str, mujoco_source: Any) -> tuple[Any, str]:
@@ -453,8 +456,7 @@ def build_overlay_feed(
             f"mujoco is not available for overlays: {exc}"
         ) from exc
     opts = options or OverlayOptions()
-    show_force = opts.show_force
-    show_torque = opts.show_torque
+    visibility = vector_visibility(swing.bundle, opts)
     effective_palm_thumb = palm_thumb or opts.palm_thumb
 
     source = MujocoOverlaySource(swing.bundle.spec_bytes)
@@ -496,8 +498,9 @@ def build_overlay_feed(
         provider.frame_at,
         style,
         grip_analyses=provider.grip_analyses if grip else None,
-        show_force=show_force,
-        show_torque=show_torque,
+        show_force=visibility.show_force,
+        show_torque=visibility.show_torque,
+        forces_note=NOTE if visibility.hidden else "",
         show_palm_thumb=effective_palm_thumb,
         hand_ellipsoids=hand_ellipsoids_fn,
         hand_hud_lines=hand_hud_lines_fn,
