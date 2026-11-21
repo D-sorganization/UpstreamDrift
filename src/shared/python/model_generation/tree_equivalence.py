@@ -16,9 +16,10 @@ import numpy as np
 from numpy.typing import ArrayLike
 
 from src.shared.python.contracts import ensure, require
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 from src.shared.python.model_generation.core.types import Joint, JointType, Link
 
-GRAVITY = np.array([0.0, 0.0, -9.81])
+GRAVITY = np.array([0.0, 0.0, -float(GRAVITY_M_S2)])
 _MOVING = (JointType.REVOLUTE, JointType.CONTINUOUS)
 
 
