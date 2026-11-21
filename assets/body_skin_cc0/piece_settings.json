@@ -1,12 +1,18 @@
 {
+  "border_method": "iso_line",
   "border_rounds": 8,
   "border_votes": 2,
+  "cut_smooth_rounds": 4,
+  "cut_snap_fraction": 0.05,
   "weld_decimals": 6,
   "number_digits": 9,
   "dropped_material_keys": ["texture", "texrepeat", "texuniform"],
   "sources": {
-    "border_rounds": "Largest number of straightening rounds over the per-bone cut of a skin. With none, the cut follows single mesh faces and shows as a saw-tooth edge where one segment's colour meets the next (seen 2026-11-20 at the lower edge of the pelvis on the skinned golfer). Eight rounds were used for the #15150 review clips; the rounds stop sooner when nothing changes. The borders are straighter after them, not straight. 0 switches straightening off.",
-    "border_votes": "A face takes another label when this many of its three edge neighbours share it. 2 is the smallest majority of three; 3 moves only a face wholly surrounded by one other label. Under 2 no single label would win.",
+    "border_method": "How the border between two segments' pieces is drawn. \"iso_line\" splits the faces that lie between two segments along the line where the two segments' weights are equal, so the border runs straight through the faces; \"neighbour_majority\" gives each whole face to one segment and tidies with the rounds below (the method before 2026-11-20, kept for comparison). Measured 2026-11-20 on the skinned golfer's 12 borders: the borders turn 487 rad over 8.59 m with neighbour_majority and 153 rad over 5.68 m with iso_line (12 flat closed loops cannot turn less than 75 rad).",
+    "border_rounds": "Largest number of straightening rounds over the per-bone cut of a skin. With none, the cut follows single mesh faces and shows as a saw-tooth edge where one segment's colour meets the next (seen 2026-11-20 at the lower edge of the pelvis on the skinned golfer). Eight rounds were used for the #15150 review clips; the rounds stop sooner when nothing changes. The borders are straighter after them, not straight. 0 switches straightening off. Read by neighbour_majority only.",
+    "border_votes": "A face takes another label when this many of its three edge neighbours share it. 2 is the smallest majority of three; 3 moves only a face wholly surrounded by one other label. Under 2 no single label would win. Read by neighbour_majority only.",
+    "cut_smooth_rounds": "iso_line only. Times each vertex's weights are averaged with its edge neighbours' before the line of equal weight is found; the skin itself keeps its weights. Near a border the two weights are both about one half and nearly level, so small unevenness moves the line by a whole face. On the golfer the borders turn 202 rad with 0 rounds, 156 with 1, 154 with 2, 153 with 4 and 137 with 8 (at this snap fraction); 4 was used for the 2026-11-20 review stills, where the notches seen with 0 are gone. 0 uses the weights as they are.",
+    "cut_snap_fraction": "iso_line only. A crossing nearer an end of its edge than this fraction of the edge is put on that end, so no sliver is cut: a cut triangle keeps at least this fraction squared of its face's area. 0.05 of the golfer's 2 to 3 cm faces moves the border by about 1 mm at most; 0.1 and 0.2 made it more ragged (176 and 196 rad with one smoothing round against 156). Must be above 0 and below 0.5.",
     "weld_decimals": "Vertices equal to this many decimals of a metre (6: one micrometre) count as one when faces are joined into neighbours, so vertices doubled along a texture seam do not make a border.",
     "number_digits": "Significant digits of the vertex positions, texture coordinates and bone weights written for each piece; 9 keeps a float32 value exactly.",
     "dropped_material_keys": "Attributes left out of each piece's copy of the skin's material. A piece is given one flat colour per frame, and a texture would be multiplied into it."

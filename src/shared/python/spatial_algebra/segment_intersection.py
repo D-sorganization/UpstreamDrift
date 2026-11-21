@@ -17,7 +17,10 @@ _GROUPS = (
     ("shoulders", (0.95, 0.30, 0.30, 0.80), ("lead_shoulder", "trail_shoulder")),
     ("pelvis", (0.75, 0.30, 0.95, 0.80), ("pelvis",)),
     ("feet", (0.85, 0.50, 0.15, 0.80), ("lead_foot", "trail_foot")),
+    ("club", (0.85, 0.85, 0.85, 0.80), ("clubhead",)),
 )
+#: specification frame of the clubhead point (#15150)
+CLUBHEAD_FRAME = "Clubhead"
 POINT_GROUPS: dict[str, tuple[str, ...]] = {g[0]: g[2] for g in _GROUPS}
 GROUP_COLORS: dict[str, tuple[float, float, float, float]] = {
     g[0]: g[1] for g in _GROUPS
@@ -26,6 +29,10 @@ GROUP_COLORS: dict[str, tuple[float, float, float, float]] = {
 
 @dataclass(frozen=True)
 class IntersectionPoint:
+    """A named point on a body. ``anchor_local`` [m] is given in the
+    specification's frame of ``body`` (the frame ``placement`` poses are in),
+    which is not the MuJoCo body frame; the engine source maps it (#15150)."""
+
     name: str
     group: str
     body: str
@@ -123,6 +130,13 @@ def extract_intersection_points(
         )
         if fk and fk not in pts:
             pts[fk] = _pt(fk, "feet", p.get("body", fk), _extract_anchor(p))
+
+    # 4. Clubhead from its specification frame (#15150)
+    if CLUBHEAD_FRAME in frames:
+        f = frames[CLUBHEAD_FRAME]
+        pts["clubhead"] = _pt(
+            "clubhead", "club", f.get("body", CLUBHEAD_FRAME), _extract_anchor(f)
+        )
     return pts
 
 
