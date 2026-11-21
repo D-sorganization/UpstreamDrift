@@ -198,9 +198,14 @@ def with_panel(
 
 
 def hud_lines(overlays: ClipOverlays | None, feed: Any, index: int) -> tuple[str, ...]:
-    """HUD text lines of frame ``index``: none while the panel shows them."""
+    """HUD text lines of frame ``index``: only the replay note while the panel
+    shows the rest."""
     shown = overlays is not None and overlays.ellipsoids is not None
-    return () if feed is None or shown else feed.hud_lines_at(index)  # type: ignore[no-any-return]
+    if feed is None:
+        return ()
+    if shown:  # the panel replaces the text rows; the replay note stays
+        return (feed.forces_note,) if feed.forces_note else ()
+    return feed.hud_lines_at(index)  # type: ignore[no-any-return]
 
 
 def hud_top_px(shape: tuple[int, ...], hud: compositor.HudInfo) -> int:

@@ -154,14 +154,16 @@ def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
     p.add_argument(
         "--force-vectors",
         action=argparse.BooleanOptionalAction,
-        default=True,
-        help="draw straight force arrows (default: on)",
+        default=None,
+        help="draw straight force arrows (default: on, except on a kinematic "
+        "replay with zero efforts, where only this flag draws them)",
     )
     p.add_argument(
         "--torque-vectors",
         action=argparse.BooleanOptionalAction,
-        default=True,
-        help="draw curling joint-torque arcs (default: on)",
+        default=None,
+        help="draw curling joint-torque arcs (default: on, except on a kinematic "
+        "replay with zero efforts, where only this flag draws them)",
     )
     p.add_argument(
         "--palm-thumb-force",
@@ -576,8 +578,9 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         contact_hold_frames=getattr(args, "contact_hold_frames", None),
         overlays=not args.no_overlay,
         shading=build_shading(args),
-        force_vectors=args.force_vectors,
-        torque_vectors=args.torque_vectors,
+        force_vectors=args.force_vectors is not False,
+        torque_vectors=args.torque_vectors is not False,
+        vectors_requested=args.force_vectors is True or args.torque_vectors is True,
         palm_thumb_force=args.palm_thumb_force,
         interface_ellipsoids=tuple(ellipsoids),
         ellipsoid_scale=ellipsoid_scale,
@@ -635,6 +638,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 grip=settings.grip,
                 axial=settings.shading_enabled,
                 options=OverlayOptions(
+                    forces_requested=settings.vectors_requested,
                     show_force=settings.force_vectors,
                     show_torque=settings.torque_vectors,
                     palm_thumb=settings.palm_thumb_force,

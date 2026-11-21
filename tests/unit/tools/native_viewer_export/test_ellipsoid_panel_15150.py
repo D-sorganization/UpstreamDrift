@@ -106,3 +106,28 @@ def test_feed_carries_rows_and_the_panel_replaces_the_text_rows() -> None:
     text = replace(export, ellipsoid_panel=replace(SETTINGS, layout="text"))
     for other, settings in ((feed, text), (OverlayFeed(lambda i: None), export)):
         assert ep.with_panel(None, settings, other, None) is None  # HUD rows stay
+
+
+def test_replay_note_survives_the_panel_and_text_layout_is_unchanged() -> None:
+    note = "Kinematic Replay: Forces Not Shown"
+    plain, replay = _feed(), replace(_feed(), forces_note=note)
+    shown = ep.with_panel(None, ExportSettings(interface_ellipsoids=BOTH), plain, None)
+    assert ep.hud_lines(shown, replay, 1) == (note,)  # panel shown + replay
+    assert ep.hud_lines(shown, plain, 1) == ()  # panel shown, not a replay
+    assert ep.hud_lines(None, replay, 1) == ("hud 1", note)  # text layout
+    assert ep.hud_lines(None, plain, 1) == ("hud 1",)
+
+
+def test_legend_row_is_dropped_only_when_a_replay_draws_no_vectors(
+    monkeypatch,
+) -> None:
+    from types import SimpleNamespace as NS
+
+    monkeypatch.setattr(OverlayFeed, "legend", staticmethod(lambda g: "Ref Force"))
+    bare = NS(arrows=(), torque_arcs=(), ellipsoids=())
+    drawn = NS(arrows=(1,), torque_arcs=(), ellipsoids=())
+    plain = _feed()
+    replay = replace(plain, forces_note="note")
+    assert replay.legend_for(None) == "" and replay.legend_for(bare) == ""
+    assert replay.legend_for(drawn) == plain.legend_for(drawn) == "Ref Force"
+    assert plain.legend_for(bare) == "Ref Force"
