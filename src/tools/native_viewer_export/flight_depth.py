@@ -12,7 +12,7 @@ from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
-from PIL import ImageDraw
+from PIL import Image, ImageDraw
 
 Array = NDArray[np.float64]
 
@@ -84,6 +84,44 @@ def draw_line(
     for a, b in zip(edges[::2], edges[1::2], strict=True):
         if b - a > 1:
             pen.line([(float(u), float(v)) for u, v in pixels[a:b]], colour, width_px)
+
+
+def draw_ball(
+    image: Image.Image,
+    centre_px: tuple[float, float],
+    radius_px: float,
+    colour: tuple[int, ...],
+    sphere: tuple[float, float],
+    occlusion: Occlusion | None,
+) -> None:
+    """Paint the ball disc, leaving out each pixel the scene is nearer than.
+
+    ``sphere`` is the (camera depth of the centre, radius) in metres; the ball's
+    own surface is nearer than its centre, so a scene ball or club touching it
+    does not hide it. Without ``occlusion`` the whole disc is painted.
+    """
+    depth_c, radius_m = sphere
+    if not (radius_px > 0.0 and radius_m > 0.0 and depth_c > 0.0):
+        raise ValueError("ball radii and depth must be positive")
+    u, v = centre_px
+    box = (
+        max(int(math.floor(u - radius_px)), 0),
+        max(int(math.floor(v - radius_px)), 0),
+        min(int(math.ceil(u + radius_px)) + 1, image.width),
+        min(int(math.ceil(v + radius_px)) + 1, image.height),
+    )
+    if box[0] >= box[2] or box[1] >= box[3]:
+        return
+    cols, rows = np.meshgrid(np.arange(box[0], box[2]), np.arange(box[1], box[3]))
+    rho2 = ((cols - u) ** 2 + (rows - v) ** 2) / radius_px**2
+    inside = rho2 <= 1.0
+    if occlusion is not None:
+        front = depth_c - radius_m * np.sqrt(np.clip(1.0 - rho2, 0.0, 1.0))
+        scene = occlusion.depth_m[box[1] : box[3], box[0] : box[2]]
+        slack = occlusion.tolerance_m + occlusion.fraction * front
+        inside &= np.asarray(scene >= front - slack, dtype=bool)
+    mask = Image.fromarray((inside * 255).astype(np.uint8))
+    image.paste(tuple(colour), (box[0], box[1]), mask)
 
 
 def depth_request(swing: Any, settings: Any, indices: Any) -> list[bool] | None:
