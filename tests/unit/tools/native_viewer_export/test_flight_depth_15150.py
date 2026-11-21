@@ -142,3 +142,36 @@ def test_export_result_records_the_hide_time_actually_used(
         base._Backend(), swing, settings, tmp_path, writer_factory=factory
     )
     assert done.ball is not None and done.ball["hide_after_s"] == 0.123
+
+
+def _ball_scene(near_side: str) -> tuple[np.ndarray, np.ndarray, float]:
+    """Tile, depth with the club nearer on one side of the ball, and the ball's u."""
+    spot = np.array([LOOKAT, LOOKAT], dtype=float)
+    pix, depth = tr.project(CAM, spot, 0.05)
+    u = int(round(pix[0, 0]))
+    scene = _depth(float(depth[0]) + 5.0)  # open ground far behind the ball
+    if near_side == "left":
+        scene[:, :u] = float(depth[0]) - 1.0
+    else:
+        scene[:, u:] = float(depth[0]) - 1.0
+    return spot, scene, float(u)
+
+
+def test_ball_marker_is_clipped_where_the_club_is_nearer() -> None:
+    spot, scene, u = _ball_scene("left")
+    radius = 0.1  # large enough to span many pixels
+    out = tr.draw_trace(_tile(), CAM, spot, radius, D, scene)
+    cols = np.nonzero((out == D.ball_color_rgb).all(axis=2).any(axis=0))[0]
+    assert cols.size > 5 and cols.min() >= u  # only the far-side half is painted
+    whole = tr.draw_trace(_tile(), CAM, spot, radius, D, _depth(1e3))
+    wide = np.nonzero((whole == D.ball_color_rgb).all(axis=2).any(axis=0))[0]
+    assert wide.min() < u - 3 and wide.size > 1.6 * cols.size
+
+
+def test_ball_marker_clipping_follows_the_setting() -> None:
+    spot, scene, _ = _ball_scene("right")
+    off = replace(D, occlude_by_scene=False)
+    free = tr.draw_trace(_tile(), CAM, spot, 0.1, off, scene)
+    clipped = tr.draw_trace(_tile(), CAM, spot, 0.1, D, scene)
+    assert _count(clipped, D.ball_color_rgb) < _count(free, D.ball_color_rgb)
+    assert _count(clipped, D.ball_color_rgb) > 0
