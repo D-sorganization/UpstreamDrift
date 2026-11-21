@@ -260,5 +260,35 @@
       "extension_deg": 20.0,
       "ulnar_deviation_deg": 10.0
     }
+  },
+  "_metacarpal_arch": "#15329 (epic #15150): a set arch of the metacarpals. Per hand and per ray (index, middle, ring, little): flexion_deg turns the ray about its base toward the palm and ulnar_deviation_deg leans it toward the little finger, as one rotation whose axis lies across the ray, so no ray and no finger turns about its own length. A ray set here gives up the arch coupled to its knuckle (curl.arch_gain), so the set angles are its whole movement. Empty: nothing is set and every hand is drawn as before. limits_deg is the most a ray may be set, either way.",
+  "metacarpal_arch": {
+    "_source": "El-Shennawy M, Nakamura K, Patterson RM, Viegas SF. Three-dimensional kinematic analysis of the second through fifth carpometacarpal joints. J Hand Surg Am 2001;26(6):1030-5, doi 10.1053/jhsu.2001.28761. Abstract read 2026-11-20: overall flexion-extension arcs of the second to fifth joints 11, 7, 20 and 27 degrees; radial-ulnar deviation 2, 4, 7 and 13 degrees; pronation-supination 5, 5, 27 and 22 degrees (not used: no ray turns about its own length here). These are whole arcs; the abstract does not say how each divides about the flat hand, so the whole arc is allowed either way, which is generous for a movement one way. The full paper was not read.",
+    "_limits_deg": "Range each ray may be set in. Flexion is toward the palm only. The ring and little rays lean toward the little finger only and the index ray toward the thumb only, which is how the arch spreads the knuckles; leaning the other way folds the skin between the knuckles of this hand (measured on the sized hand, flat: ring -7 folds 4 triangles, little -13 folds 6).",
+    "limits_deg": {
+      "index": {
+        "flexion": [0.0, 11.0],
+        "ulnar_deviation": [-2.0, 0.0]
+      },
+      "middle": {
+        "flexion": [0.0, 7.0],
+        "ulnar_deviation": [0.0, 4.0]
+      },
+      "ring": {
+        "flexion": [0.0, 20.0],
+        "ulnar_deviation": [0.0, 7.0]
+      },
+      "little": {
+        "flexion": [0.0, 27.0],
+        "ulnar_deviation": [0.0, 13.0]
+      }
+    },
+    "_max_neighbour_step_deg": "The most two neighbouring rays may differ by (a ray that is not set counts as 0). Not from the source: it is what this hand's skin between two knuckles takes without folding. Measured on the sized hand, flat, by linear blend skinning alone: ring flexed 20 beside a still middle ray folds 2 triangles and stretches an edge 4.0 times; ring 13 with little 26, each 13 past its neighbour, folds none and stretches 2.4 times, which is what the coupled arch already does. The source also says the fifth joint's flexion depends on the fourth's.",
+    "max_neighbour_step_deg": {
+      "flexion": 13.0,
+      "ulnar_deviation": 7.0
+    },
+    "lead": {},
+    "trail": {}
   }
 }

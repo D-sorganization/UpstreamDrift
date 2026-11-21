@@ -21,6 +21,9 @@ from src.shared.python.model_appearance.hand_backends.correctives import (
     PressSettings,
 )
 from src.shared.python.model_appearance.hand_backends.golf_grip import load_golf_grip
+from src.shared.python.model_appearance.hand_backends.metacarpal_arch import (
+    MetacarpalArchSettings,
+)
 from src.shared.python.model_appearance.hand_backends.palm_fold import (
     PalmFoldSettings,
 )
@@ -127,6 +130,17 @@ class SkinnedHumanSettings:
     crease_relax_bones: tuple[str, ...]
     crease_relax_max_added_fold_deg: float
     wrist_deg: tuple[tuple[str, tuple[float, float]], ...]
+    metacarpal_arch: MetacarpalArchSettings
+
+    def with_set_arch(self, side: str) -> SkinnedHumanSettings:
+        """These settings for hand ``side``: a ray whose arch is set
+        (``metacarpal_arch``) gives up the arch coupled to its knuckle.
+        Postcondition: ``self`` itself if no ray of that hand is set."""
+        held = self.metacarpal_arch.of(side)
+        if not held:
+            return self
+        gains = tuple((ray, 0.0 if ray in held else g) for ray, g in self.arch_gain)
+        return replace(self, arch_gain=gains)
 
     def beside_other_hand(self) -> SkinnedHumanSettings:
         """These settings for the trail hand of a pair. Its palm lies on the
@@ -508,6 +522,7 @@ def settings_from_mapping(raw: Mapping[str, Any]) -> SkinnedHumanSettings:
             )
             for side in ("lead", "trail")
         ),
+        metacarpal_arch=MetacarpalArchSettings.from_mapping(raw["metacarpal_arch"]),
     )
 
 

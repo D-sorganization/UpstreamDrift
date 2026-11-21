@@ -20,6 +20,7 @@ from typing import Any
 
 import numpy as np
 
+from src.engines.physics_engines.mujoco.python import scene_lighting
 from src.shared.python.model_appearance import geometry, library
 from src.shared.python.model_appearance.body_meshes import (
     SPEC_BODY_FRAME,
@@ -208,17 +209,10 @@ def _add_environment(
         offwidth=str(OFFSCREEN_SIZE[0]),
         offheight=str(OFFSCREEN_SIZE[1]),
     )
-    ET.SubElement(
-        visual,
-        "headlight",
-        ambient="0.55 0.55 0.58" if lit else "0.7 0.7 0.7",
-        diffuse="0.35 0.35 0.35" if lit else "0.2 0.2 0.2",
-        specular="0.05 0.05 0.05",
-    )
-    ET.SubElement(visual, "quality", shadowsize="4096", offsamples="8")
+    lighting = scene_lighting.load_scene_lighting()
+    scene_lighting.add_render_quality(visual, lighting, "studio" if lit else "flat")
     haze = _rgb(env.sky_bottom) + " 1"
     ET.SubElement(visual, "rgba", haze=haze)
-    ET.SubElement(visual, "map", haze="0.25", znear="0.02", zfar="40")
     return assets.material(env.ground_material, plane=True)
 
 
