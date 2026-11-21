@@ -34,6 +34,7 @@ from src.tools.native_viewer_export import flight_depth, impact_card, landing_ma
 from src.tools.native_viewer_export.flight_inset import (
     FlightInsetSettings,
     load_inset_settings,
+    shows_inset,
 )
 from src.tools.native_viewer_export.landing_marker import LandingMarkerSettings
 from src.tools.native_viewer_export.impact_state import series_at_contact
@@ -316,8 +317,46 @@ class FlightPlayback:
             depth = (depth_m or {}).get(view)
             if depth is None and self.settings.occlude_by_scene:
                 self._warn_once(view)
-            out[view] = self._paint(tile, camera, points, depth, landed)
+            label = not shows_inset(self.settings.inset, view)
+            out[view] = self._paint(tile, camera, points, depth, landed, label)
         return out
+
+    def grid_tiles(
+        self,
+        tiles: Mapping[str, Image8],
+        time_s: float,
+        lookat_m: Sequence[float],
+        distance_m: float | None,
+    ) -> dict[str, Image8]:
+        """``tiles`` for the composed grid: the carry label an inset replaces.
+
+        A single view with the inset states the carry there; the grid draws no
+        inset, so its tile gets the ring label back (once landed).
+        """
+        out = dict(tiles)
+        landed = time_s - self.impact_time_s >= self.duration_s
+        if self.path_m is None or not landed:
+            return out
+        fov = math.radians(self.settings.fov_y_deg)
+        for view, tile in tiles.items():
+            if not shows_inset(self.settings.inset, view):
+                continue
+            size = (int(tile.shape[1]), int(tile.shape[0]))
+            camera = pinhole_for_view(
+                get_view_preset(view), lookat_m, distance_m, fov, size
+            )
+            out[view] = self._label(tile, camera)
+        return out
+
+    def _label(self, tile: Image8, camera: Any) -> Image8:
+        """``tile`` with the carry label beside the ring (where configured)."""
+        style = self.settings
+        if style.landing_marker is None or self.path_m is None:
+            return tile
+        if self.carry_m is None:
+            return tile
+        end = self.path_m[-1]
+        return landing_marker.paint_label(tile, camera, end, style, self.carry_m)
 
     def _warn_once(self, view: str) -> None:
         if not self.__dict__.setdefault("_warned", False):
@@ -325,21 +364,26 @@ class FlightPlayback:
             logger.warning("scene depth unavailable (%s): tracer over the scene", view)
 
     def _paint(
-        self, tile: Image8, camera: Any, points: Array, depth: Any, landed: bool
+        self,
+        tile: Image8,
+        camera: Any,
+        points: Array,
+        depth: Any,
+        landed: bool,
+        label: bool = True,
     ) -> Image8:
-        """One tile: landing marker beneath, then the tracer and ball."""
+        """One tile: landing marker beneath, then the tracer and ball.
+
+        ``label`` False leaves the carry label out (an inset states it).
+        """
         style, marker = self.settings, self.settings.landing_marker
         if marker is not None and self.path_m is not None:
             ring = landed or marker.when == "from_start"
             hide = occlusion_for(style, depth)
             tile = landing_marker.paint_track(tile, camera, points, style, hide, landed)
             tile = landing_marker.paint(tile, camera, self.path_m[-1], style, ring)
-            inset = style.inset is not None and style.inset.enabled  # shows carry
-            if landed and self.carry_m is not None and not inset:
-                end = self.path_m[-1]
-                tile = landing_marker.paint_label(
-                    tile, camera, end, style, self.carry_m
-                )
+            if landed and label:
+                tile = self._label(tile, camera)
         return draw_trace(tile, camera, points, self.radius_m, style, depth)
 
 

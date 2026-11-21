@@ -11,6 +11,7 @@ from dataclasses import dataclass
 import json
 import math
 from pathlib import Path
+import textwrap
 from typing import Any
 
 import numpy as np
@@ -340,6 +341,19 @@ def _short(reason: str) -> str:
     return reason[: _CARD_REASON_CHARS - 3].rstrip() + "..."
 
 
+def _wrap_reason(reason: str, indent: str = "") -> list[str]:
+    """``reason`` as lines of at most ``_CARD_REASON_CHARS`` characters.
+
+    Lines break between words (a word wider than a line keeps its own line),
+    each led by ``indent``; the text is never cut or abbreviated.
+    """
+    width = max(1, _CARD_REASON_CHARS - len(indent))
+    words = textwrap.wrap(
+        reason, width=width, break_long_words=False, break_on_hyphens=False
+    )
+    return [indent + line for line in words or [""]]
+
+
 def _card_value_text(row: Any) -> str:
     """Value text of a card row; ``None`` is shown as unavailable, never as 0."""
     if row.value is None:
@@ -360,12 +374,16 @@ def _card_lines(card: Any) -> list[tuple[str, str, bool]]:
     """``(label, value, unavailable)`` lines of ``card`` (reasons as sub-lines)."""
     if not card.available or not card.rows:
         reason = str(card.reason or "no rows")
-        return [("Unavailable", "", True), (_short(reason), "", True)]
+        return [("Unavailable", "", True)] + [
+            (line, "", True) for line in _wrap_reason(reason)
+        ]
     lines: list[tuple[str, str, bool]] = []
     for row in card.rows:
         lines.append((row.label, _card_value_text(row), row.value is None))
         if row.value is None and row.reason:
-            lines.append(("  " + _short(str(row.reason)), "", True))
+            lines.extend(
+                (line, "", True) for line in _wrap_reason(str(row.reason), "  ")
+            )
     return lines
 
 

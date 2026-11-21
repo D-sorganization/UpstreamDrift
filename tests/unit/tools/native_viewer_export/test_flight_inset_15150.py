@@ -244,18 +244,57 @@ def test_labels_use_the_model_numbers_and_units() -> None:
     assert fi.paint(frame, none, 1.0, _rect(), LOUD) is frame
 
 
-@pytest.mark.parametrize("enabled", [True, False])
-def test_ring_carry_label_yields_to_the_inset(monkeypatch, enabled: bool) -> None:
+def _labelled_play(monkeypatch, enabled: bool):
     marker = tr.LandingMarkerSettings(carry_label=True)
     cfg = replace(OTHER, landing_marker=marker, inset=replace(LOUD, enabled=enabled))
     called: list[int] = []
     for name in ("paint_track", "paint"):
         monkeypatch.setattr(tr.landing_marker, name, lambda tile, *a: tile)
     monkeypatch.setattr(tr, "draw_trace", lambda tile, *a: tile)
-    monkeypatch.setattr(tr.landing_marker, "paint_label", lambda *a: called.append(1))
-    play = _playback(cfg)
-    play._paint(_frame(), None, play.path_m, None, True)
-    assert bool(called) is (not enabled)
+
+    def label(tile, *a):
+        called.append(1)
+        return tile
+
+    monkeypatch.setattr(tr.landing_marker, "paint_label", label)
+    return _playback(cfg), called
+
+
+@pytest.mark.parametrize(("enabled", "drawn"), [(True, False), (False, True)])
+def test_fixed_view_label_yields_only_to_a_drawn_inset(
+    monkeypatch, enabled: bool, drawn: bool
+) -> None:
+    play, called = _labelled_play(monkeypatch, enabled)
+    tile = np.full((360, 640, 3), 40, np.uint8)
+    t = play.impact_time_s + play.duration_s + 1.0
+    play.draw({"down_the_line_flight": tile}, t, (0.0, 0.0, 1.0), 3.0)
+    assert bool(called) is drawn
+
+
+@pytest.mark.parametrize("enabled", [True, False])
+def test_grid_tile_always_gets_the_carry_label(monkeypatch, enabled: bool) -> None:
+    """The composed grid draws no inset, so its flight tile states the carry."""
+    play, called = _labelled_play(monkeypatch, enabled)
+    tile = np.full((360, 640, 3), 40, np.uint8)
+    t = play.impact_time_s + play.duration_s + 1.0
+    drawn = play.draw({"down_the_line_flight": tile}, t, (0.0, 0.0, 1.0), 3.0)
+    before = len(called)
+    play.grid_tiles(drawn, t, (0.0, 0.0, 1.0), 3.0)
+    assert len(called) - before == (1 if enabled else 0)  # disabled: drawn already
+
+
+def test_grid_label_waits_for_the_landing(monkeypatch) -> None:
+    play, called = _labelled_play(monkeypatch, True)
+    tile = np.full((360, 640, 3), 40, np.uint8)
+    play.grid_tiles({"down_the_line_flight": tile}, 0.0, (0.0, 0.0, 1.0), 3.0)
+    assert not called
+
+
+def test_shows_inset_needs_enabled_and_a_fixed_view() -> None:
+    assert fi.shows_inset(LOUD, "down_the_line_flight")
+    assert not fi.shows_inset(LOUD, "2x2")
+    assert not fi.shows_inset(replace(LOUD, enabled=False), "down_the_line_flight")
+    assert not fi.shows_inset(None, "down_the_line_flight")
 
 
 def test_composed_grid_gets_no_inset() -> None:
