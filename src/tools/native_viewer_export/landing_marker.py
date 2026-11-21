@@ -1,20 +1,26 @@
-"""Landing marker and ground track of the shot tracer (#15150).
+"""Landing marker, ground track and carry label of the shot tracer (#15150).
 
 A ground ring at the landing point puts a far landing on the turf instead of
-the horizon. The ring has a minimum screen size: a marker
-size, not the landing area. Options: ``flight_tracer_settings.json``.
+the horizon. The ring has a minimum screen size: a marker size, not the landing
+area. Optional aids make the landing readable in a wide clip: the ground track
+(the flight path projected onto the ground, revealed with the tracer), a drop
+line from the ball to its ground point while in flight, and a carry label once
+landed. The label shows the carry the flight model reports, never a recomputed
+one. Options: ``flight_tracer_settings.json``.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import lru_cache
 import math
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import NDArray
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
+from src.tools.native_viewer_export import flight_depth
 from src.tools.native_viewer_export.flight_depth import project
 
 if TYPE_CHECKING:
@@ -36,6 +42,22 @@ class LandingMarkerSettings:
     min_aspect: float = 0.35
     color_rgba: tuple[int, ...] = (255, 220, 40, 255)
     line_width_px: int = 3
+    ground_track: bool = False
+    ground_track_color_rgba: tuple[int, ...] = (255, 220, 40, 120)
+    ground_track_width_px: int = 2
+    drop_line: bool = False
+    drop_line_color_rgba: tuple[int, ...] = (255, 255, 255, 110)
+    drop_line_width_px: int = 1
+    occlude_track: bool = True
+    carry_label: bool = False
+    carry_label_format: str = "Carry {carry:.0f} {unit}"
+    carry_label_unit: str = "m"
+    carry_label_scale: float = 1.0
+    carry_label_size_px: int = 22
+    carry_label_color_rgba: tuple[int, ...] = (255, 255, 255, 255)
+    carry_label_outline_rgba: tuple[int, ...] = (0, 0, 0, 255)
+    carry_label_outline_px: int = 2
+    carry_label_gap_px: int = 8
 
     def __post_init__(self) -> None:
         if self.when not in WHEN:
@@ -46,6 +68,44 @@ class LandingMarkerSettings:
         for name in ("min_radius_px", "line_width_px"):
             if not isinstance(getattr(self, name), int) or getattr(self, name) < 1:
                 raise ValueError(f"{name} must be a positive integer")
+        self._validate_aids()
+
+    def _validate_aids(self) -> None:
+        for name in ("ground_track", "drop_line", "occlude_track", "carry_label"):
+            if not isinstance(getattr(self, name), bool):
+                raise TypeError(f"{name} must be true or false")
+        for name in (
+            "ground_track_color_rgba",
+            "drop_line_color_rgba",
+            "carry_label_color_rgba",
+            "carry_label_outline_rgba",
+        ):
+            object.__setattr__(self, name, _rgba(getattr(self, name), name))
+        for name in ("ground_track_width_px", "drop_line_width_px"):
+            if not isinstance(getattr(self, name), int) or getattr(self, name) < 1:
+                raise ValueError(f"{name} must be a positive integer")
+        for name in ("carry_label_size_px",):
+            if not isinstance(getattr(self, name), int) or getattr(self, name) < 1:
+                raise ValueError(f"{name} must be a positive integer")
+        for name in ("carry_label_outline_px", "carry_label_gap_px"):
+            if not isinstance(getattr(self, name), int) or getattr(self, name) < 0:
+                raise ValueError(f"{name} must be a non-negative integer")
+        if not (math.isfinite(self.carry_label_scale) and self.carry_label_scale > 0):
+            raise ValueError("carry_label_scale must be positive and finite")
+        if not isinstance(self.carry_label_unit, str):
+            raise TypeError("carry_label_unit must be a string")
+        try:
+            self.carry_label_format.format(carry=1.0, unit=self.carry_label_unit)
+        except (KeyError, IndexError, ValueError, AttributeError) as exc:
+            raise ValueError(f"carry_label_format is not usable: {exc!r}") from exc
+
+
+def _rgba(value: object, name: str) -> tuple[int, ...]:
+    if not isinstance(value, (list, tuple)) or len(value) != 4:
+        raise TypeError(f"{name} must be 4 integers")
+    if not all(isinstance(c, int) and 0 <= c <= 255 for c in value):
+        raise ValueError(f"{name} channels must be integers in 0..255")
+    return tuple(value)
 
 
 def _ground(points_m: Array, z_m: float) -> Array:
@@ -77,4 +137,105 @@ def paint(
         r = max(float(m.min_radius_px), camera.matrix[1, 1] * m.radius_m / depth)
         box = [u - r, v - r * m.min_aspect, u + r, v + r * m.min_aspect]
         pen.ellipse(box, outline=m.color_rgba, width=m.line_width_px)
+    return np.asarray(image, dtype=np.uint8)
+
+
+def ground_track_points(path_m: Array, z_m: float) -> Array:
+    """``path_m`` projected straight down onto the ground height ``z_m``.
+
+    Raises ``ValueError`` for a path that is not finite.
+    """
+    path = np.asarray(path_m, dtype=float)
+    if not np.isfinite(path).all():
+        raise ValueError("path_m must be finite")
+    return _ground(path, z_m)
+
+
+def carry_text(marker: LandingMarkerSettings, carry_m: float) -> str:
+    """The carry label text: the reported carry in the configured unit."""
+    if not (math.isfinite(carry_m) and carry_m >= 0.0):
+        raise ValueError(f"carry_m must be finite and not negative, got {carry_m}")
+    carry = carry_m * marker.carry_label_scale
+    return marker.carry_label_format.format(carry=carry, unit=marker.carry_label_unit)
+
+
+def paint_track(
+    tile: Image8,
+    camera: Any,
+    points_m: Array,
+    style: TracerSettings,
+    occlusion: flight_depth.Occlusion | None,
+    landed: bool,
+) -> Image8:
+    """``tile`` with the ground track of ``points_m`` and, in flight, the drop line.
+
+    ``points_m`` are the tracer's world points (last = the ball), so the track
+    is revealed in step with the tracer. ``occlusion`` (scene depth of the tile,
+    or ``None``) hides what is behind the scene, as for the tracer.
+    """
+    m, near = style.landing_marker, style.near_clip_m
+    if m is None or not (m.ground_track or m.drop_line):
+        return tile
+    occlusion = occlusion if m.occlude_track else None
+    image = Image.fromarray(tile)
+    pen = ImageDraw.Draw(image, "RGBA")
+    ground = ground_track_points(points_m, m.ground_z_m)
+    if m.ground_track and len(ground) > 1:
+        colour, width = m.ground_track_color_rgba, m.ground_track_width_px
+        flight_depth.draw_line(pen, camera, ground, colour, width, near, occlusion)
+    if m.drop_line and not landed:
+        drop = np.vstack([np.asarray(points_m, dtype=float)[-1:], ground[-1:]])
+        colour, width = m.drop_line_color_rgba, m.drop_line_width_px
+        flight_depth.draw_line(pen, camera, drop, colour, width, near, occlusion)
+    return np.asarray(image, dtype=np.uint8)
+
+
+@lru_cache(maxsize=8)
+def _font(size_px: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    return ImageFont.load_default(size=size_px)
+
+
+def paint_label(
+    tile: Image8,
+    camera: Any,
+    landing_m: Array,
+    style: TracerSettings,
+    carry_m: float,
+) -> Image8:
+    """``tile`` with the carry label centred beneath the landing ring.
+
+    The label is kept inside the tile. The scene never hides it, like the ring.
+    """
+    m, near = style.landing_marker, style.near_clip_m
+    if m is None or not m.carry_label:
+        return tile
+    (u, v), depth = (
+        a[0] for a in project(camera, _ground(landing_m, m.ground_z_m), near)
+    )
+    if not np.isfinite(u):
+        return tile
+    ring_r = max(float(m.min_radius_px), camera.matrix[1, 1] * m.radius_m / depth)
+    image = Image.fromarray(tile)
+    pen = ImageDraw.Draw(image, "RGBA")
+    text, font, stroke = (
+        carry_text(m, carry_m),
+        _font(m.carry_label_size_px),
+        m.carry_label_outline_px,
+    )
+    left, top, right, bottom = pen.textbbox(
+        (0, 0), text, font=font, stroke_width=stroke
+    )
+    x = float(
+        np.clip(u - (right - left) / 2.0, 0, max(0, image.width - (right - left)))
+    )
+    y = v + ring_r * m.min_aspect + m.carry_label_gap_px
+    y = float(np.clip(y, 0, max(0, image.height - (bottom - top))))
+    pen.text(
+        (x - left, y - top),
+        text,
+        font=font,
+        fill=m.carry_label_color_rgba,
+        stroke_width=stroke,
+        stroke_fill=m.carry_label_outline_rgba,
+    )
     return np.asarray(image, dtype=np.uint8)

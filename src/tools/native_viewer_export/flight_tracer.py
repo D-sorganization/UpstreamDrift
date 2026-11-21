@@ -188,10 +188,15 @@ class FlightPlayback:
     path_m: Array | None = None
     radius_m: float = 0.0
     lines: tuple[str, ...] = ()
+    carry_m: float | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.settings, TracerSettings):
             raise TypeError("settings must be a TracerSettings")
+        if self.carry_m is not None and not (
+            math.isfinite(self.carry_m) and self.carry_m >= 0.0
+        ):
+            raise ValueError("carry_m must be finite and not negative")
         if self.path_m is None:
             return
         times, path = np.asarray(self.times_s), np.asarray(self.path_m)
@@ -314,7 +319,14 @@ class FlightPlayback:
         style, marker = self.settings, self.settings.landing_marker
         if marker is not None and self.path_m is not None:
             ring = landed or marker.when == "from_start"
+            hide = occlusion_for(style, depth)
+            tile = landing_marker.paint_track(tile, camera, points, style, hide, landed)
             tile = landing_marker.paint(tile, camera, self.path_m[-1], style, ring)
+            if landed and self.carry_m is not None:
+                end = self.path_m[-1]
+                tile = landing_marker.paint_label(
+                    tile, camera, end, style, self.carry_m
+                )
         return draw_trace(tile, camera, points, self.radius_m, style, depth)
 
 
@@ -349,7 +361,14 @@ def playback_from_flight(
     status = MODEL if flight.valid else f"{MODEL}, {OUTSIDE}"
     start = np.asarray(times, dtype=float) - float(times[0])
     return FlightPlayback(
-        settings, status, impact_time_s, start, path, ball.radius_m, lines
+        settings,
+        status,
+        impact_time_s,
+        start,
+        path,
+        ball.radius_m,
+        lines,
+        flight.carry_m,
     )
 
 
