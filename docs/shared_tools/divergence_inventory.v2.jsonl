@@ -307,6 +307,8 @@
 {"path": "body_part_viz/__init__.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/_types.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/anatomical_visuals.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/angular_momentum_glyphs.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/angular_momentum_settings.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/asset_library.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/axial_loads.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/bindings.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
@@ -321,9 +323,11 @@
 {"path": "body_part_viz/force_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/force_display.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/meshcat_force_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/mujoco_angular_momentum_anchors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/mujoco_axial_loads.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/mujoco_force_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/mujoco_segment_angular_momentum.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/mujoco_segment_group_catalog.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/mujoco_skin_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/overlay_options.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/persistence.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}

@@ -112,8 +112,7 @@ class SimRenderingMixin:
 
         axial_frame, scale = self._apply_axial_scene_colors()
 
-        # One provider sample per frame feeds both the native and MeshCat views.
-        glyphs = self._build_force_glyphs()
+        glyphs = self._build_overlay_glyphs()
         self._render_force_glyphs(self.renderer.scene, glyphs)
 
         try:
@@ -392,7 +391,7 @@ class SimRenderingMixin:
         is then not called) or the engine has no frame.
         """
         if not (self.show_force_vectors or self.show_torque_vectors):
-            self._set_force_legend("")
+            self._set_force_legend(self._angmom_legend_line())
             return None
         body_name = None
         if self.isolate_forces_visualization and self.manipulator:
@@ -408,7 +407,11 @@ class SimRenderingMixin:
             body_name=body_name,
             style_options=getattr(self, "force_style_options", None),
         )
-        self._set_force_legend("" if glyphs is None else legend_text(glyphs))
+        line = "" if glyphs is None else legend_text(glyphs)
+        angmom_line = self._angmom_legend_line()
+        if angmom_line:
+            line = f"{line} | {angmom_line}" if line else angmom_line
+        self._set_force_legend(line)
         return glyphs
 
     def _render_force_glyphs(
