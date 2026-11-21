@@ -296,7 +296,11 @@ python3 -m src.tools.native_viewer_export --bundle driver.npz --swing driver \
   The MuJoCo worker also renders scene depth from the impact on, so the golfer
   hides the tracer and ball where nearer to the camera (`occlude_by_scene`, on
   by default; without depth a warning is logged). `landing_marker` draws a
-  ground ring at the landing point. `ExportResult.ball` reports the contact
+  ground ring at the landing point; its optional aids are a `ground_track`
+  (the flight path on the ground, revealed with the tracer), a `drop_line` from
+  the ball to the ground while in flight and a `carry_label` (the flight
+  model's carry, unit and format from the settings) once landed.
+  `ExportResult.ball` reports the contact
   instant as `hide_after_s`.
 - `overlay.py`: overlay feed built from `force_overlay.bundle_provider`.
 - `overlay2d.py`: pinhole projection for the OpenSim 2D glyphs.
