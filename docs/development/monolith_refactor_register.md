@@ -75,11 +75,11 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1098 | `src/tools/shot_pattern_analysis/matched_supplement_pipeline.py` |
 | 1096 | `src/learning/retargeting/retargeter.py` |
 | 1089 | `src/shared/python/motion_pipeline/contracts.py` |
+| 1085 | `src/tools/native_viewer_export/core.py` |
 | 1078 | `src/engines/physics_engines/drake/python/full_body_model.py` |
 | 1076 | `src/shared/python/model_appearance/hand_backends/skinned_human.py` |
 | 1073 | `src/shared/python/sidekick/calculators/thermo/steam_engine.py` |
 | 1072 | `src/shared/python/grip_contact/binding.py` |
-| 1069 | `src/tools/native_viewer_export/core.py` |
 | 1068 | `src/shared/python/physics/flight_models.py` |
 | 1066 | `src/tools/bunker_shot_gui/crosstier.py` |
 | 1065 | `src/shared/python/pendulum_simulator/gui/toolstrip_widget.py` |

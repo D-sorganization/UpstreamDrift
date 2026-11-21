@@ -5,8 +5,11 @@ hand's grip point on the club: ``J`` is the *absolute* point-velocity Jacobian
 (``mj_jac``), ``A`` the inverse mass matrix (``Jc=None``, "loop released") or
 the closure projector (``constrained``, both hands on the club) from
 ``spatial_algebra.operational_space.mobility_matrix``.  The mass matrix is
-MuJoCo's full ``M`` including dof armature; the closure Jacobian is the one
-the native model defines (``_evaluate_weld_closure``).  The reciprocal
+MuJoCo's full ``M`` including dof armature.  The mobility's closure Jacobian
+is the rigid weld's relative twist with both bodies taken at one point
+(``_weld_closure_jacobian``, #15150): it equals the native model's
+``_evaluate_weld_closure`` where the closure sites coincide and, unlike it,
+stays a rigid weld where they do not.  The reciprocal
 eigenvalues are *effective masses* [kg], an inertial property, not a force
 capacity.  Only the explicit rigid closure is used, never the compliant MJCF
 weld equality.
@@ -127,6 +130,12 @@ class HandMobilitySource(MujocoOverlaySource):
             "welded to the club in v2 golfer, so lead and trail share one rigid body)"
         )
         self._torque_limits = self._resolve_torque_limits(torque_limits, spec)
+        order = list(self.coordinate_order)
+        joints = [model.joint(int(j)).name for j in model.dof_jntid]
+        if sorted(joints) != sorted(order):
+            raise ValueError("model dofs are not the specification's coordinates")
+        #: index in ``coordinate_order`` of each model dof (#15150)
+        self._dof_coordinate = np.array([order.index(name) for name in joints])
 
     def _resolve_torque_limits(
         self,
@@ -281,12 +290,36 @@ class HandMobilitySource(MujocoOverlaySource):
         mj.mj_jac(model, data, jacp, jacr, point, bid)
         jac = jacp if rows == 3 else np.vstack((jacp, jacr))
         mass = full_mass_matrix(mj, model, data)
-        closure = (
-            _evaluate_weld_closure(mj, model, data, self._closure)[0]
-            if constrained
-            else None
-        )
+        closure = self._weld_closure_jacobian() if constrained else None
         return jac, mass, closure
+
+    def _weld_closure_jacobian(self) -> np.ndarray:
+        """6 x nv relative twist Jacobian of the grip weld (state already set).
+
+        Both welded bodies are taken at the first closure site, so a motion in
+        the null space moves them as one rigid body wherever the two sites are;
+        rows are [linear; angular] in the world frame.
+        """
+        mj, model, data = self._mj, self.model, self.data
+        point = np.array(data.site_xpos[self._closure[0]], dtype=float)
+        twists = []
+        for site in self._closure:
+            jac = np.zeros((6, model.nv))
+            mj.mj_jac(
+                model, data, jac[:3], jac[3:], point, int(model.site_bodyid[site])
+            )
+            twists.append(jac)
+        return twists[0] - twists[1]
+
+    def _limit_args(
+        self, limits: TorqueLimits
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """``(B, tau_lo, tau_hi)`` with the rows of ``B`` in the model's dof order.
+
+        Limits are built in ``coordinate_order``; the Jacobian and mass matrix
+        are in MuJoCo's own dof order, which need not match it (#15150).
+        """
+        return limits.B[self._dof_coordinate], limits.tau_lo, limits.tau_hi
 
     def _mobility_at(
         self, point: np.ndarray, rows: int, constrained: bool
@@ -326,7 +359,7 @@ class HandMobilitySource(MujocoOverlaySource):
         J, M, Jc, limits = self._capacity_task(
             q, hand, mode, torque_limits, "acceleration"
         )
-        return acceleration_capacity(J, M, limits.B, limits.tau_lo, limits.tau_hi, Jc)
+        return acceleration_capacity(J, M, *self._limit_args(limits), Jc)
 
     def force_capacity(
         self,
@@ -338,7 +371,7 @@ class HandMobilitySource(MujocoOverlaySource):
     ) -> CapacityEllipsoid:
         """Dynamically consistent force-capacity ellipsoid at ``hand``'s grip point [N]."""
         J, M, Jc, limits = self._capacity_task(q, hand, mode, torque_limits, "force")
-        return force_capacity(J, M, limits.B, limits.tau_lo, limits.tau_hi, Jc)
+        return force_capacity(J, M, *self._limit_args(limits), Jc)
 
     def hand_mobility(
         self,
@@ -382,10 +415,8 @@ class HandMobilitySource(MujocoOverlaySource):
             f_cap: CapacityEllipsoid | None = None
             if limits is not None:
                 J, M, Jc = self._task_matrices(point, mode == "constrained")
-                acc_cap = acceleration_capacity(
-                    J, M, limits.B, limits.tau_lo, limits.tau_hi, Jc
-                )
-                f_cap = force_capacity(J, M, limits.B, limits.tau_lo, limits.tau_hi, Jc)
+                acc_cap = acceleration_capacity(J, M, *self._limit_args(limits), Jc)
+                f_cap = force_capacity(J, M, *self._limit_args(limits), Jc)
 
             drift_acc: np.ndarray | None = None
             jdot_v: np.ndarray | None = None
@@ -410,6 +441,32 @@ class HandMobilitySource(MujocoOverlaySource):
             )
         return out
 
+    def _point_world(
+        self, point: Any, coordinates: Mapping[str, float]
+    ) -> tuple[np.ndarray, int]:
+        """World position and body id of a declarative point (state already set).
+
+        A hand point is that hand's grip point on the club. Any other point is
+        its anchor in the specification's frame of its body, mapped into the
+        MuJoCo body frame by ``body_frames`` (an MJCF body sits at its joint
+        follower frame, #15150). Raises ``ValueError`` for an unknown body.
+        """
+        if point.group == "hands":
+            role = "lead" if "lead" in point.name else "trail"
+            return self.grip_point_world(role, coordinates), self._club_body
+        mj = self._mj
+        body_id = mj.mj_name2id(self.model, mj.mjtObj.mjOBJ_BODY, point.body)
+        if body_id < 0:
+            raise ValueError(
+                f"mobility point {point.name!r} names unknown body {point.body!r}"
+            )
+        anchor = np.asarray(point.anchor_local, dtype=float)
+        to_body = self.body_frames.get(point.body)
+        if to_body is not None:
+            anchor = to_body[:3, :3] @ anchor + to_body[:3, 3]
+        rot = np.asarray(self.data.xmat[body_id], dtype=float).reshape(3, 3)
+        return self.data.xpos[body_id] + rot @ anchor, body_id
+
     def point_mobility(
         self,
         point: Any,
@@ -431,14 +488,7 @@ class HandMobilitySource(MujocoOverlaySource):
 
         limits, coords = torque_limits or self._torque_limits, self._set_state(q, v)
         mj, model, data = self._mj, self.model, self.data
-        role = "lead" if "lead" in point.name else "trail"
-        if point.group == "hands":
-            pt_world, body_id = self.grip_point_world(role, coords), self._club_body
-        else:
-            bid = mj.mj_name2id(model, mj.mjtObj.mjOBJ_BODY, point.body)
-            body_id = bid if bid >= 0 else self._club_body
-            rot, pos = data.xmat[body_id].reshape(3, 3), data.xpos[body_id]
-            pt_world = pos + rot @ np.asarray(point.anchor_local, dtype=float)
+        pt_world, body_id = self._point_world(point, coords)
 
         jacp, mass, closure = self._task_matrices(
             pt_world, mode == "constrained", body_id=body_id
@@ -447,14 +497,12 @@ class HandMobilitySource(MujocoOverlaySource):
         lam, dual = velocity_ellipsoid(w), force_ellipsoid(w)
         eig, mass_eff = np.maximum(lam.radii**2, 0.0), dual.radii**2
         acc_cap = (
-            acceleration_capacity(
-                jacp, mass, limits.B, limits.tau_lo, limits.tau_hi, closure
-            )
+            acceleration_capacity(jacp, mass, *self._limit_args(limits), closure)
             if limits is not None
             else None
         )
         f_cap = (
-            force_capacity(jacp, mass, limits.B, limits.tau_lo, limits.tau_hi, closure)
+            force_capacity(jacp, mass, *self._limit_args(limits), closure)
             if limits is not None
             else None
         )
