@@ -968,8 +968,11 @@ class VisualizationTab(QtWidgets.QWidget):
 
     def on_angmom_overlay_changed(self, *_args: object) -> None:
         require(self.sim_widget is not None, "sim_widget is set")
+        from typing import cast
+
         from src.shared.python.body_part_viz.angular_momentum_glyphs import (
             AngularMomentumArrowStyle,
+            DisplayMode,
         )
 
         base = getattr(self.sim_widget, "angmom_arrow_style", None)
@@ -979,7 +982,7 @@ class VisualizationTab(QtWidgets.QWidget):
             base,
             scale_m_per_nms=self.angmom_scale_spin.value(),
             max_length_m=self.angmom_max_len_spin.value(),
-            display_mode=str(self.angmom_mode_combo.currentData()),
+            display_mode=cast(DisplayMode, self.angmom_mode_combo.currentData()),
             show_spin_component=self.show_angmom_spin_cb.isChecked(),
         )
         self.sim_widget.set_angular_momentum_overlay(
