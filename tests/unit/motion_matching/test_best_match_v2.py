@@ -8,6 +8,7 @@ consumes the derived ``full_body_spec_anthro_driver_v2.json`` with q migrated by
 from __future__ import annotations
 
 import json
+from types import SimpleNamespace
 from pathlib import Path
 
 import numpy as np
@@ -16,6 +17,7 @@ import pytest
 from src.shared.python.model_appearance.body_meshes import body_meshes
 from src.shared.python.model_appearance.defaults import default_appearance
 from src.shared.python.motion_matching.best_match_v2 import (
+    migrate_bundle,
     migrate_q_to_v2,
     trunk_segments,
 )
@@ -82,3 +84,48 @@ def test_migration_keeps_non_trunk_coordinates_and_fills_the_trunk() -> None:
 def test_migration_refuses_a_q_that_is_not_in_v1_coordinate_order() -> None:
     with pytest.raises(ValueError, match="coordinate_order"):
         migrate_q_to_v2(V1, V2, np.zeros((2, 3)), ["a", "b", "c"])
+
+
+def test_bundle_migration_rejects_different_embedded_model(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    from src.shared.python.motion_matching.same_input import InputBundle
+
+    changed = dict(V1)
+    changed["subject"] = {**V1["subject"], "mass_kg": 999.0}
+    loaded = SimpleNamespace(
+        spec_bytes=json.dumps(changed).encode(),
+        reference_q=np.zeros((2, len(V1["coordinate_order"]))),
+        coordinate_order=tuple(V1["coordinate_order"]),
+        dt_s=0.001,
+    )
+    monkeypatch.setattr(InputBundle, "load", lambda _path: loaded)
+    v1_path, v2_path = tmp_path / "v1.json", tmp_path / "v2.json"
+    v1_path.write_text(json.dumps(V1), encoding="utf-8")
+    v2_path.write_text(json.dumps(V2), encoding="utf-8")
+    with pytest.raises(ValueError, match="embedded.*spec"):
+        migrate_bundle(tmp_path / "input.npz", v1_path, v2_path, tmp_path / "out.npz")
+
+
+def test_bundle_migration_accepts_equivalent_spec_serialization(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    from src.shared.python.motion_matching.same_input import InputBundle, reference
+
+    loaded = SimpleNamespace(
+        spec_bytes=json.dumps(V1, indent=2).encode(),
+        reference_q=np.zeros((2, len(V1["coordinate_order"]))),
+        coordinate_order=tuple(V1["coordinate_order"]),
+        dt_s=0.001,
+    )
+    monkeypatch.setattr(InputBundle, "load", lambda _path: loaded)
+    output = tmp_path / "out.npz"
+    generated = SimpleNamespace(save=lambda path: path.write_bytes(b"test"))
+    monkeypatch.setattr(
+        reference, "generate_reference_bundle", lambda *a, **k: generated
+    )
+    v1_path, v2_path = tmp_path / "v1.json", tmp_path / "v2.json"
+    v1_path.write_text(json.dumps(V1), encoding="utf-8")
+    v2_path.write_text(json.dumps(V2), encoding="utf-8")
+    assert migrate_bundle(tmp_path / "input.npz", v1_path, v2_path, output) == output
+    assert output.read_bytes() == b"test"

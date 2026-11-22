@@ -1,0 +1,45 @@
+\documentclass{article}
+\usepackage{amsmath}
+\title{Controller-Based Swing Optimization: Research Reference}
+\begin{document}
+\maketitle
+\section{Scope and Conventions}
+This editable research reference concerns the controller-based driver swing
+optimization in issue 15493. Length, time, angle and torque are expressed in
+metres, seconds, radians and newton metres unless otherwise stated. Coordinate
+order, frames, model hashes and runtime must be recorded for each actual run.
+The kinematic match is not itself a forward-dynamics validation.
+
+\section{Control and Admission}
+The intended controller is
+\[
+ \tau_{\rm cmd}=\tau_{\rm ff,ref}+\delta\tau_{\rm ff}
+ +K_p(q_{\rm ref}-q)+K_d(\dot q_{\rm ref}-\dot q),
+\]
+with fixed gains and a smooth, bounded feedforward residual. Feasibility
+must be checked against total applied torque, anatomical motion and speed,
+including feedback and integration-stage behavior. Unavailable or assumed
+limits must be identified; an incomplete envelope cannot certify feasibility.
+The existing computed-torque tracker is a different controller.
+
+\section{Contact and Flight}
+Impact requires an approaching, bracketed signed-distance root on the finite
+modeled face and the simulated event state $(t^*,q^*,\dot q^*)$. A face-centre
+closest-approach heuristic is not that event. Missed contact must have a
+finite smooth penalty. Prescribed-launch flight checks are separate from
+swing-to-impact checks. Carry is distance to first ground contact and does not
+include unvalidated rollout.
+
+\section{Evidence and Limitations}
+The accompanying README records the prescribed-launch regression and the
+separate tracking experiments. The renderer-pinned input embeds a calibrated
+v1 model different from the committed v1 migration source. Its recorded
+reference is a feedback rollout; the original tracking target is separate.
+On the committed v2 model, the migrated initial state fails closure projection.
+The largest initial residual component is 2.44519, in a mixed translation and
+rotation residual vector; it is not a distance in metres. Matching coordinate
+names does not establish model or closure equivalence. The exact model requires
+an appropriately validated refit or another justified mapping. No accepted
+optimized result is established. Extend this reference with geometry, solver
+settings, sources, reproduction commands and margins as evidence is obtained.
+\end{document}
