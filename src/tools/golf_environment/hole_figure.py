@@ -106,7 +106,7 @@ def write_hole_figure(
     side.set_ylabel("height (m)")
     side.set_xlabel("down-range from tee (m); lateral and height exaggerated")
     plan.set_title(
-        "Plan view, tee on the left, golfer's right is down",
+        "Plan View, Tee on the Left, Golfer's Right Is Down",
         fontsize=fig_s["title_font_size"],
     )
     plan.legend(
