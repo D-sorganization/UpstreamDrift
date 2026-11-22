@@ -57,7 +57,13 @@ torque glyphs come from the nearest source sample.
 All engines use the same four presets (golfer faces -X, target line -Y for a
 right-handed golfer): face-on, down-the-line, overhead and oblique. The
 look-at point defaults to the golfer's centre of mass at address, at 0.9 m
-height.
+height (`camera_framing_settings.json`).
+
+For a club other than a teed driver, set the framing: `--camera-height 0.6`
+lowers only the look-at height, `--camera-lookat X,Y,Z` (metres, world frame)
+replaces the whole point and wins over the automatic one, and
+`--camera-distance 3.5` sets the camera distance. Without these flags the
+framing is unchanged.
 
 ## Overlays
 

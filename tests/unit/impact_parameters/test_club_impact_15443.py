@@ -89,5 +89,7 @@ def test_flight_for_impact_uses_the_club() -> None:
     from tests.unit.impact_parameters.test_flight_report import FRAME, _series
 
     plain = fr.flight_for_impact(_series(speed=40.0), 1, FRAME)
-    iron = fr.flight_for_impact(_series(speed=40.0), 1, FRAME, club_impact_for("iron7"))
+    iron = fr.flight_for_impact(
+        _series(speed=40.0), 1, FRAME, club_impact=club_impact_for("iron7")
+    )
     assert iron.ball_speed_mph > plain.ball_speed_mph

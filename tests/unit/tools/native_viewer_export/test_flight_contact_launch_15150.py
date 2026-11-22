@@ -148,12 +148,13 @@ def test_flight_passes_club_and_strike_offset(monkeypatch) -> None:
     series, ball = _struck()
     seen = {}
 
-    def fake(series_in, index, frame, club=None, offset=None):
-        seen.update(club=club, offset=offset)
+    def fake(series_in, index, frame, club=None, club_impact=None, offset=None):
+        seen.update(club=club, club_impact=club_impact, offset=offset)
         return _flight()
 
     monkeypatch.setattr(tracer, "flight_for_impact", fake)
     iron = club_impact_for("iron7")
-    tracer.playback_from_series(series, 0.1, ball, DEFAULTS, iron)
-    assert seen["club"] is iron
+    tracer.playback_from_series(series, 0.1, ball, DEFAULTS, "7-Iron", iron)
+    assert seen["club"] == "7-Iron"
+    assert seen["club_impact"] is iron
     assert seen["offset"] is None or len(seen["offset"]) == 2
