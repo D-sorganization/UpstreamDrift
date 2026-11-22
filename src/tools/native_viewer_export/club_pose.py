@@ -85,7 +85,11 @@ class ClubPoseModel:
         return float(self.spec["contact"]["ground"].get("height_m") or 0.0)
 
     def body_world(self, coords: Mapping[str, float]) -> Array:
-        """World 4x4 of the spec club-body frame at ``coords``."""
+        """World 4x4 of the frame of the body carrying the head at ``coords``.
+
+        The club body for a rigid shaft, the tip link for a chain shaft: both
+        use the club-body axes, so the face expressed in them stays valid.
+        """
         site = self._source.frame_poses(dict(coords))["Clubhead"]
         return np.asarray(site @ self._placement_inv, dtype=float)
 
@@ -93,9 +97,12 @@ class ClubPoseModel:
         """World point midway between the lead and trail hands on the grip.
 
         Kinematic only (default grip pose on the club body at ``coords``); it
-        does not depend on any force overlay.
+        does not depend on any force overlay. The grip stays on the club
+        body, so with a chain shaft it is read from the grip weld (the club
+        body), never from :meth:`body_world`, which follows the bent tip link.
         """
-        return np.asarray(self.body_world(coords) @ self._grip_midpoint_body)[:3]
+        rotation, origin = self._source.club_frame_world(dict(coords))
+        return np.asarray(rotation @ self._grip_midpoint_body[:3] + origin)
 
     def face_world(self, coords: Mapping[str, float]) -> FaceWorld:
         """World face centre, normal, toe and grip axes at ``coords``."""
