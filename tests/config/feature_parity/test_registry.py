@@ -169,6 +169,25 @@ class TestLauncherTileCoverage:
         uncovered = sorted(family - registry.covered_tile_ids)
         assert not uncovered, f"models.yaml tiles with no registry entry: {uncovered}"
 
+    @pytest.mark.unit
+    def test_every_visible_models_yaml_tile_is_covered(
+        self, registry: FeatureParityRegistry
+    ) -> None:
+        """Every non-hidden models.yaml tile needs a registry entry (#15150)."""
+        import yaml
+
+        with open(REPO_ROOT / "src/config/models.yaml", encoding="utf-8") as f:
+            tiles = yaml.safe_load(f)["models"]
+        uncovered = sorted(
+            t["id"]
+            for t in tiles
+            if not t.get("hidden") and t["id"] not in registry.covered_tile_ids
+        )
+        assert not uncovered, (
+            f"models.yaml tiles with no feature_parity.json entry: {uncovered}. "
+            "Add or extend an entry listing them in 'tiles'."
+        )
+
     def test_covered_tiles_reference_real_manifest_ids(
         self, registry: FeatureParityRegistry, manifest_tiles: list
     ) -> None:
