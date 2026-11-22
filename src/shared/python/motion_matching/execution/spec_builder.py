@@ -38,6 +38,7 @@ from src.shared.python.motion_matching.club_models import (
     SOLE_POINT_SOURCE,
     ClubSpec,
     checked_sole_point_m,
+    recorded_club,
 )
 from src.shared.python.motion_matching.club_shaft_chain import (
     DEFAULT_SHAFT_MODEL,
@@ -813,7 +814,7 @@ def with_shaft_model(
     chosen = checked_shaft_options(model, options)
     if model == "rigid":
         return document
-    spec = CLUBS[club] if isinstance(club, str) else club
+    spec = recorded_club(document, club) if isinstance(club, str) else club
     return apply_shaft_chain(document, build_shaft_chain(spec, **chosen))
 
 
