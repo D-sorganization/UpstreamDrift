@@ -23,6 +23,9 @@ markers and checked against the physics code by
 
 ## Validation Boundary
 
+What the pipeline does not model is listed in
+[`FLIGHT_AND_IMPACT_SHORTCOMINGS_REGISTER.md`](FLIGHT_AND_IMPACT_SHORTCOMINGS_REGISTER.md).
+
 The focused tests verify that:
 
 - aerodynamic coefficient and force calculations remain finite for ordinary
