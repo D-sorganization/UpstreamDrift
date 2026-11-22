@@ -121,11 +121,13 @@ def _explorer_tab(launcher: Any) -> Any:
 
 
 def _wait_for_results(explorer: Any) -> None:
+    """Spin events until the queued background load has started and finished."""
     deadline = time.monotonic() + LOAD_DEADLINE_S
     while explorer.results_frame_count == 0 and time.monotonic() < deadline:
         QApplication.processEvents()
         time.sleep(0.05)
     assert explorer.results_frame_count > 0, "default matched swing never loaded"
+    assert explorer.wait_for_results_load(LOAD_DEADLINE_S), "load did not finish"
 
 
 def test_launcher_opens_explorer_plays_and_switches_matched_swings(
@@ -162,7 +164,8 @@ def test_launcher_opens_explorer_plays_and_switches_matched_swings(
     assert [a.text() for a in actions] == user_setting
     before = (panel.title_label.text(), count)
     actions[1].trigger()
-    QApplication.processEvents()
+    assert explorer.is_loading_results, "the switch must load in the background"
+    assert explorer.wait_for_results_load(LOAD_DEADLINE_S)
     panel = explorer.playback_panel
     assert panel.title_label.text().startswith(user_setting[1])
     assert (panel.title_label.text(), panel.session.frame_count) != before

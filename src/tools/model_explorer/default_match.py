@@ -128,7 +128,7 @@ def schedule_default_match(widget: object) -> bool:
     """Queue ``widget.load_default_match()`` for the next event-loop turn.
 
     Used by the launcher right after it docks the Model Explorer, so the tab
-    paints before the (blocking) load. Returns False when ``widget`` has no
+    paints before the load starts (it runs in the background). Returns False when ``widget`` has no
     such method; Qt is imported lazily to keep this module Qt-free.
     """
     loader = getattr(widget, "load_default_match", None)

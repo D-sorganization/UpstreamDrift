@@ -161,6 +161,7 @@ class ResultsSession:
         self._source = source
         self._current_frame = 0
         self._playback: Any | None = None
+        self._scene_xml: str | None = None
 
     @classmethod
     def load(cls, path: str | Path, engine: str | None = None) -> ResultsSession:
@@ -230,6 +231,22 @@ class ResultsSession:
             )
         self._current_frame = index
 
+    def prepare_scene(self) -> None:
+        """Build the golfer scene now (slow, GL-free: fine on a worker thread).
+
+        :meth:`playback` then only creates the renderer. ``ValueError`` for a
+        marker archive.
+        """
+        pose = self.pose_source
+        if pose is None:
+            raise ValueError("marker archives have no model pose to play back")
+        if self._scene_xml is None:
+            from src.tools.model_explorer.golfer_playback import (
+                build_golfer_scene_xml,
+            )
+
+            self._scene_xml = build_golfer_scene_xml(pose)
+
     def playback(self) -> Any:
         """The shared :class:`GolferPlayback` of a joint-space run (lazy).
 
@@ -241,7 +258,7 @@ class ResultsSession:
         if self._playback is None:
             from src.tools.model_explorer.golfer_playback import GolferPlayback
 
-            self._playback = GolferPlayback(pose)
+            self._playback = GolferPlayback(pose, scene_xml=self._scene_xml)
         return self._playback
 
     def export_video(self, out_path: str | Path, *, stride: int = 5) -> Path:

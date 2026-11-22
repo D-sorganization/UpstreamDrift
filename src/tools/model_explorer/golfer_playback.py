@@ -32,6 +32,8 @@ __all__ = [
     "DEFAULT_SIZE",
     "GolferPlayback",
     "TimeSeries",
+    "build_golfer_scene_xml",
+    "club_head_speed",
     "results_time_series",
 ]
 
@@ -68,8 +70,10 @@ def _translational(spec: dict[str, Any]) -> set[str]:
     return names
 
 
-def _club_head_speed(source: PoseFrameSource) -> TimeSeries | None:
+def club_head_speed(source: PoseFrameSource) -> TimeSeries | None:
     """Face-centre speed (mph) from MuJoCo FK, or ``None`` without a club.
+
+    GL-free, so it may run on a worker thread (see ``results_loader_worker``).
 
     Uses the repository's one club-head measurement point, the rendered face
     centre carried by the spec ``Clubhead`` frame (``club_face_target``).
@@ -115,7 +119,7 @@ def results_time_series(
     """
     series: dict[str, TimeSeries] = {}
     if with_club:
-        club = _club_head_speed(source)
+        club = club_head_speed(source)
         if club is not None:
             series[club.name] = club
     linear = _translational(source.spec)
@@ -128,15 +132,30 @@ def results_time_series(
     return series
 
 
+def build_golfer_scene_xml(source: PoseFrameSource) -> str:
+    """MJCF of the golfer for ``source``: the slow, GL-free part of a load."""
+    from src.tools.native_viewer_export.backends.mujoco_worker import (
+        build_scene_xml,
+    )
+
+    xml, _ = build_scene_xml(source.spec_bytes)
+    return xml
+
+
 class GolferPlayback:
     """Offscreen MuJoCo renders of a run on the shared-appearance golfer.
 
     Raises ``ImportError`` without MuJoCo and :class:`ResultsSchemaError`
-    when a run coordinate has no joint in the exported model.
+    when a run coordinate has no joint in the exported model. A prebuilt
+    ``scene_xml`` skips the build; create it on the thread that renders.
     """
 
     def __init__(
-        self, source: PoseFrameSource, size: tuple[int, int] = DEFAULT_SIZE
+        self,
+        source: PoseFrameSource,
+        size: tuple[int, int] = DEFAULT_SIZE,
+        *,
+        scene_xml: str | None = None,
     ) -> None:
         width, height = size
         if width < 16 or height < 16:
@@ -144,14 +163,13 @@ class GolferPlayback:
         import mujoco
 
         from src.tools.native_viewer_export.backends.mujoco_worker import (
-            build_scene_xml,
             grow_offscreen_buffer,
         )
 
         self._mj = mujoco
         self.source = source
         self.size = (int(width), int(height))
-        xml, _ = build_scene_xml(source.spec_bytes)
+        xml = scene_xml if scene_xml is not None else build_golfer_scene_xml(source)
         self._model = mujoco.MjModel.from_xml_string(xml)
         grow_offscreen_buffer(self._model, *self.size)
         self._data = mujoco.MjData(self._model)

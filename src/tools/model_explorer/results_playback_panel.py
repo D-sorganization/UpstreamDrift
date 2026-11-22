@@ -93,6 +93,7 @@ class ResultsPlaybackPanel(QWidget):
     """3D golfer view, timeline, plots and export for one loaded run.
 
     Precondition: ``session.pose_source`` is not ``None`` (``ValueError``).
+    Club-head speed arrives later from the loader via :meth:`add_series`.
     """
 
     def __init__(self, session: ResultsSession, parent: QWidget | None = None):
@@ -103,7 +104,8 @@ class ResultsPlaybackPanel(QWidget):
         self.session = session
         self._pose = pose
         self._playback = session.playback()
-        self.series: dict[str, TimeSeries] = results_time_series(pose)
+        self.series: dict[str, TimeSeries] = results_time_series(pose, with_club=False)
+        self._channel_chosen = False
         self._clock = PlaybackClock(pose.time_s)
         self._now: Callable[[], float] = time.monotonic
         self._timer = QTimer(self)
@@ -147,6 +149,7 @@ class ResultsPlaybackPanel(QWidget):
         self.channel_combo = QComboBox()
         self.channel_combo.addItems(list(self.series))
         self.channel_combo.currentTextChanged.connect(self._draw_plot)
+        self.channel_combo.activated.connect(self._mark_channel_chosen)
         row.addWidget(self.channel_combo, 1)
         column.addLayout(row)
         self.canvas = MplCanvas(width=6, height=2.4, dpi=90)
@@ -287,7 +290,26 @@ class ResultsPlaybackPanel(QWidget):
         """Plot channel ``name``; ``ValueError`` when the run has no such channel."""
         if name not in self.series:
             raise ValueError(f"no channel {name!r}; have {sorted(self.series)}")
+        self._channel_chosen = True
         self.channel_combo.setCurrentText(name)
+
+    def _mark_channel_chosen(self, _index: int) -> None:
+        self._channel_chosen = True
+
+    def add_series(self, series: TimeSeries) -> None:
+        """Put a late channel first; plot it unless the user chose another."""
+        if series.values.shape != (self._pose.frame_count,):
+            raise ValueError(f"{series.name} must have one sample per frame")
+        shown = self.channel_combo.currentText()
+        if series.name not in self.series:
+            self.channel_combo.blockSignals(True)
+            self.channel_combo.insertItem(0, series.name)
+            self.channel_combo.blockSignals(False)
+        self.series = {series.name: series, **self.series}
+        if not self._channel_chosen:
+            self.channel_combo.setCurrentIndex(0)  # redraws when it changes
+        if shown == series.name:
+            self._draw_plot(series.name)  # same channel, new values
 
     # ---- export -----------------------------------------------------------
 
