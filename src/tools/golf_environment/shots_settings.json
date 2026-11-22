@@ -1,12 +1,13 @@
 {
-  "sources": "Illustrative only, not a surveyed course: a 380 m par 4 with a 35 m fairway and a 15 m green radius so that driver carries of about 170 to 210 m land on the fairway. Colours are chosen for contrast on the fairway green; trace and figure sizes are display choices.",
+  "sources": "Illustrative only, not surveyed courses. Par 4: 380 m with a 35 m fairway and a 15 m green radius so that driver carries of about 170 to 210 m land on the fairway. Par 3: 160 m (about 175 yd), 30 m fairway and a 12 m green radius, reached by a 7-iron carrying 155 to 165 m on the matched iron swing with the club rolled about 10 degrees closed in the hands. Par 5: 480 m, 35 m fairway, 15 m green radius. Lengths are metres (--hole-length takes the display unit). Colours are chosen for contrast on the fairway green; trace and figure sizes are display choices.",
   "hole": {
-    "name": "Illustrative Par 4",
-    "par": 4,
-    "length_m": 380.0,
+    "default": "par4",
     "metres_per_yard": 0.9144,
-    "fairway_width_m": 35.0,
-    "green_radius_m": 15.0
+    "presets": {
+      "par3": {"name": "Illustrative Par 3", "par": 3, "length_m": 160.0, "fairway_width_m": 30.0, "green_radius_m": 12.0},
+      "par4": {"name": "Illustrative Par 4", "par": 4, "length_m": 380.0, "fairway_width_m": 35.0, "green_radius_m": 15.0},
+      "par5": {"name": "Illustrative Par 5", "par": 5, "length_m": 480.0, "fairway_width_m": 35.0, "green_radius_m": 15.0}
+    }
   },
   "shot_colours_rgba": [
     [0.85, 0.1, 0.1, 1.0],
@@ -15,7 +16,6 @@
     [0.9, 0.5, 0.0, 1.0],
     [0.55, 0.1, 0.7, 1.0]
   ],
-  "decimals": 0,
   "figure": {
     "width_in": 12.0,
     "height_in": 8.0,

@@ -57,25 +57,36 @@ class HoleShot:
 def load_shots_settings(path: Path | None = None) -> dict[str, Any]:
     """Read ``shots_settings.json`` (``KeyError`` if a section is missing)."""
     raw = json.loads((path or SETTINGS_PATH).read_text(encoding="utf-8"))
-    missing = {"sources", "hole", "shot_colours_rgba", "decimals", "figure"} - set(raw)
+    missing = {"sources", "hole", "shot_colours_rgba", "figure"} - set(raw)
     if missing:
         raise KeyError(f"shots settings lack {sorted(missing)}")
     return dict(raw)
 
 
-def hole_from_settings(settings: dict[str, Any]) -> Any:
+def hole_from_settings(
+    settings: dict[str, Any], preset: str | None = None, length_m: float | None = None
+) -> Any:
     """A ``CourseHole`` whose pin lies ``length_m`` down the +x axis from the tee.
 
-    Imports the Qt module lazily so the rest of this module stays Qt-free.
+    ``preset`` names an entry of ``settings["hole"]["presets"]`` (default: the
+    ``default`` entry); ``length_m`` (metres) overrides its length. Raises
+    ``ValueError`` for an unknown preset or a length that is not positive and
+    finite. Imports the Qt module lazily so the rest stays Qt-free.
     """
     from src.tools.golf_environment.gui import CourseHole
 
-    spec = settings["hole"]
-    length = float(spec["length_m"])
+    block = settings["hole"]
+    name = preset or block["default"]
+    if name not in block["presets"]:
+        raise ValueError(f"hole must be one of {sorted(block['presets'])}, not {name}")
+    spec = block["presets"][name]
+    length = float(spec["length_m"] if length_m is None else length_m)
+    if not math.isfinite(length) or length <= 0.0:
+        raise ValueError(f"hole length must be positive and finite, got {length}")
     return CourseHole(
         str(spec["name"]),
         int(spec["par"]),
-        round(length / float(spec["metres_per_yard"])),
+        round(length / float(block["metres_per_yard"])),
         pin_position=(length, 0.0, 0.0),
         fairway_width=float(spec["fairway_width_m"]),
         green_radius=float(spec["green_radius_m"]),

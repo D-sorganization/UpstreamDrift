@@ -18,6 +18,11 @@ from typing import Any, Sequence
 import numpy as np
 
 from src.tools.golf_environment import shots as sh
+from src.tools.native_viewer_export.display_units import (
+    DISTANCE_UNITS,
+    DisplayUnits,
+    load_display_units,
+)
 
 logger = logging.getLogger(__name__)
 CARD_KEYS = {"face_angle_deg": "face_deg", "club_path_deg": "path_deg"}
@@ -86,7 +91,60 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--ball-shift", type=float, action="append", default=None)
     p.add_argument("--labels", default=None, help="comma-separated, one per roll")
     p.add_argument("--out", type=Path, required=True)
+    presets = sh.load_shots_settings()["hole"]["presets"]
+    p.add_argument("--hole", choices=sorted(presets), default=None, help="preset")
+    p.add_argument(
+        "--hole-length",
+        type=float,
+        default=None,
+        help="tee-to-pin length in the --distance-unit (overrides the preset)",
+    )
+    p.add_argument("--distance-unit", choices=DISTANCE_UNITS, default=None)
     return p
+
+
+def resolve_units(distance_unit: str | None) -> DisplayUnits:
+    """Display units from the settings file, with ``distance_unit`` if given."""
+    units = load_display_units()
+    return replace(units, distance_unit=distance_unit) if distance_unit else units
+
+
+def resolve_hole(
+    args: argparse.Namespace, settings: dict[str, Any], units: DisplayUnits
+) -> Any:
+    """Hole of ``--hole`` and ``--hole-length`` (given in ``units``, stored in m)."""
+    length_m = None
+    if args.hole_length is not None:
+        length_m = args.hole_length / units.distance_scale
+    return sh.hole_from_settings(settings, preset=args.hole, length_m=length_m)
+
+
+def shots_table(
+    labels: Sequence[str],
+    results: Sequence[tuple[Any, dict[str, Any]]],
+    hole: Any,
+    units: DisplayUnits,
+    settings: dict[str, Any],
+) -> dict[str, Any]:
+    """JSON record: SI values (``*_m``) plus the unit names of the figure."""
+    tee = np.asarray(hole.tee_position, dtype=float)
+    pin = np.asarray(hole.pin_position, dtype=float)
+    return {
+        "hole_sources": settings["sources"],
+        "hole": {
+            "name": hole.name,
+            "par": hole.par,
+            "length_m": float(np.linalg.norm(pin[:2] - tee[:2])),
+        },
+        "units": {
+            "distance_values": "m",
+            "angle_values": "deg",
+            "display_distance_unit": units.distance_unit,
+        },
+        "shots": [
+            {"label": lab, **row} for lab, (_, row) in zip(labels, results, strict=True)
+        ],
+    }
 
 
 def _per_shot(values: list[float] | None, count: int, name: str) -> list[float]:
@@ -110,7 +168,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     palette = settings["shot_colours_rgba"]
     if len(labels) != len(rolls) or len(rolls) > len(palette):
         raise ValueError("need one label per roll and at most one colour per roll")
-    hole = sh.hole_from_settings(settings)
+    units = resolve_units(args.distance_unit)
+    hole = resolve_hole(args, settings, units)
     results = [
         flight_for_roll(args.bundle, args.swing, args.club, r, s)
         for r, s in zip(rolls, shifts, strict=True)
@@ -119,13 +178,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         [f for f, _ in results], hole, labels, [tuple(c) for c in palette[: len(rolls)]]
     )
     args.out.mkdir(parents=True, exist_ok=True)
-    write_hole_figure(shots, hole, args.out / "hole_shots.png", settings)
-    table = {
-        "hole_sources": settings["sources"],
-        "shots": [
-            {"label": lab, **row} for lab, (_, row) in zip(labels, results, strict=True)
-        ],
-    }
+    write_hole_figure(shots, hole, args.out / "hole_shots.png", settings, units)
+    table = shots_table(labels, results, hole, units, settings)
     (args.out / "hole_shots.json").write_text(json.dumps(table, indent=2))
     for entry in table["shots"]:
         logger.info("%s", entry)
