@@ -3,13 +3,15 @@
 :class:`ResultsLoader` builds the golfer scene (the slow grip-hand solve) and
 then the club-head speed in a ``QThread``: ``loaded(session)`` lets the GUI
 thread create the renderer (it owns the GL context) and show the first frame,
-``club_ready(series)`` follows; ``failed(message)`` replaces ``loaded`` for an
-unplayable archive and ``finished`` always comes last.
+``club_ready(series)`` follows. ``progress(text)`` first says whether the
+scene is built or read from the scene cache; ``failed(message)`` replaces
+``loaded`` for an unplayable archive and ``finished`` always comes last.
 """
 
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -19,6 +21,10 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.motion_matching.video_frame_source import VideoSourceError
 from src.tools.model_explorer.golfer_playback import club_head_speed
 from src.tools.model_explorer.results_session import ResultsSession
+from src.tools.model_explorer.scene_cache import (
+    SCENE_BUILDING_MESSAGE,
+    SCENE_CACHED_MESSAGE,
+)
 
 __all__ = ["LOAD_ERRORS", "ResultsLoadSettings", "ResultsLoader", "prepare_results"]
 
@@ -46,14 +52,20 @@ class ResultsLoadSettings:
             raise ValueError(f"progress_width_px must be positive: {self}")
 
 
-def prepare_results(path: Path, engine: str | None) -> ResultsSession:
+def prepare_results(
+    path: Path, engine: str | None, report: Callable[[str], None] | None = None
+) -> ResultsSession:
     """Read ``path`` and build its golfer scene (Qt- and GL-free, any thread).
 
+    ``report`` hears whether the scene is built or read from the scene cache.
     Raises one of :data:`LOAD_ERRORS` when the archive cannot be shown.
     """
     session = ResultsSession.load(path, engine)
     if session.pose_source is not None:
         try:
+            if report is not None:
+                cached = session.scene_is_cached()
+                report(SCENE_CACHED_MESSAGE if cached else SCENE_BUILDING_MESSAGE)
             session.prepare_scene()
         except BaseException:
             session.close()
@@ -65,6 +77,7 @@ class ResultsLoader(QThread):
     """One background load of ``path``; create it on the GUI thread."""
 
     loaded = pyqtSignal(object)
+    progress = pyqtSignal(str)
     club_ready = pyqtSignal(object)
     failed = pyqtSignal(str)
 
@@ -77,7 +90,7 @@ class ResultsLoader(QThread):
 
     def run(self) -> None:
         try:
-            session = prepare_results(self.path, self._engine)
+            session = prepare_results(self.path, self._engine, self.progress.emit)
         except LOAD_ERRORS as exc:
             logger.warning("Could not load results %s: %s", self.path, exc)
             self.failed.emit(str(exc) or type(exc).__name__)

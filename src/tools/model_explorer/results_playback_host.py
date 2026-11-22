@@ -81,6 +81,7 @@ class ResultsPlaybackHostMixin:
         self._live_loaders().add(loader)
         loader.loaded.connect(lambda s, ld=loader: self._on_loaded(ld, s, heading))
         loader.club_ready.connect(lambda c, ld=loader: self._on_club(ld, c))
+        loader.progress.connect(lambda text, ld=loader: self._on_progress(ld, text))
         loader.failed.connect(lambda text, ld=loader: self._on_load_failed(ld, text))
         loader.finished.connect(lambda ld=loader: self._on_loader_finished(ld))
         self._results_message = None
@@ -159,6 +160,10 @@ class ResultsPlaybackHostMixin:
         )
         pending = "; computing club-head speed\u2026" if panel is not None else ""
         self.status_bar.showMessage(self._results_message + pending)
+
+    def _on_progress(self, loader: ResultsLoader, text: str) -> None:
+        if loader is self._results_loader:
+            self.status_bar.showMessage(text)
 
     def _on_club(self, loader: ResultsLoader, series: Any) -> None:
         if loader is self._results_loader and self.playback_panel is not None:

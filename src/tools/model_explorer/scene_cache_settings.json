@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "directory": "",
+  "directory_env": "UD_SCENE_CACHE_DIR",
+  "max_bytes": 536870912,
+  "compress_level": 1,
+  "key_packages": ["mujoco", "numpy", "scipy", "trimesh"],
+  "sibling_data_suffixes": [".json", ".npz"],
+  "digest_memo_min_age_s": 2.0
+}
