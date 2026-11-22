@@ -62,6 +62,16 @@ assumed anchors and the available zero-tolerance ROM bounds did not converge:
 marker RMS was 107.70--112.14 mm on 33 valid markers and closure translation
 was 3.16--3.61 mm. The available ROM table omits shoulder Euler components;
 this bounded experiment does not prove that no feasible fit exists.
+A subsequent 24-case first-frame sensitivity sweep varied four seeds, solver
+and assumed stance anchoring without changing the committed model. No case was
+classified converged by the repository: 12 reached the LM iteration cap and
+12 were classified at a bound, although SciPy reported success for 11 of the
+12 bounded TRF cases. The best unanchored TRF case had 69.41 mm RMS on 33
+valid markers, 3.69 mm closure translation, and foot-sphere heights from
+0.69 mm below to 2.11 mm above the inferred ground. The alternative anchors
+were assumptions, and the finite sweep does not prove infeasibility. The LM
+path clips trial states to named bounds, which is not a constrained-optimality
+certificate; shoulder Euler anatomy remains unassessed.
 An exploratory calibrated v2 derivative can be built using the source
 receipt's hip-center landmarks and the existing pelvis relocation. Its
 migrated initial state closes to numerical precision, with 5.44 mm RMS
@@ -131,6 +141,18 @@ effort is the requested controller's post-saturation total torque. Plan and
 stage records are produced by the same integrator, and neither they nor the
 sampled audit prove completeness against an independent actuator inventory or
 continuous-time bounds.
+
+The current v2 envelope has 44 non-translation slots; three are pelvis root
+rotations that the integrator zeroes, not 44 independent actuators. All 44
+velocity bounds carry assumption flags (35 unverified, nine sourced with an
+assumed margin). Of 41 non-root torque slots, 16 are assumed. The envelope
+also contains soft trunk limits and unbounded root rotations. Group-level
+studies such as [Liu et al.](https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0331051)
+do not directly provide subject-specific limits for every model coordinate.
+The [Anderson et al. torque study](https://stacks.cdc.gov/view/cdc/188754/cdc_188754_DS1.pdf)
+illustrates posture and velocity dependence that a fixed torque ceiling does
+not capture. The existing anatomical-angle modules require calibrated segment
+frames and do not establish complete v2 mappings or direct anatomical rates.
 
 To reproduce the historical sampled-limit counts from the repository root:
 
