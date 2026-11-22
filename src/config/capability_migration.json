@@ -2110,6 +2110,18 @@
       "evidence": "src/tools/golf_simulator/gui.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
+    "tools.golf_environment": {
+      "id": "tools.golf_environment",
+      "name": "Golf Environment",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/golf_environment/gui.py",
+      "acceptance_owner": "tests/config/feature_parity/test_registry.py"
+    },
     "tools.launch_monitor_analytics": {
       "id": "tools.launch_monitor_analytics",
       "name": "Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends",
