@@ -241,6 +241,18 @@ full row rank; the window had free endpoints, the weights and transferred
 marker map were exploratory, and 18 coordinates lacked named ROM bounds.
 This establishes numerical convergence only for these five frames, not
 whole-swing smoothness, dynamics or anatomical feasibility.
+The same construction over nine frames reached a time limit, then converged
+after restarting from its saved, independently checked iterate. The restart
+used the same objective and bounds; its initial weld Jacobian had full row
+rank. Independent final maxima were 6.674e-8 mm weld translation and
+3.381e-10 rad rotation, with no named-bound excess. Peak within-window angular
+finite-difference speed was 12.05 rad/s and maximum coordinate displacement
+from the original seed was 0.2791 rad. This is still a free-ended window fit;
+its joins to the rest of the swing and all missing physical gates remain
+unverified. Subsequent join checks found angular finite-difference speeds of
+92--96 rad/s at the two boundaries against either the original or filtered
+neighboring reference states. The window cannot be spliced into either track
+as a smooth reference.
 A soft face-axis target inferred from observed head-marker orientation was
 available in 476 of 477 pre-impact frames, but not at the dropout frame; no
 target was imputed there. At continuity weight 0.1, adding face weight 3.0
