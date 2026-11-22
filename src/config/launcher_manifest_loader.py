@@ -37,7 +37,6 @@ from src.config.capability_state import (
     resolve_canonical_display_name,
 )
 from src.shared.python.config.maturity_scale import meets_min_maturity
-from src.shared.python.config.typed_settings import get_settings
 from src.config.engine_probe_cache import is_cached_engine_runtime_available
 from src.launchers.launcher_provider_compatibility import is_engine_runtime_available
 from src.shared.python.config.model_pack_manifest import LauncherPresentationMetadata
@@ -1129,9 +1128,13 @@ class LauncherManifest:
         Raises:
             ValueError: ``min_maturity`` is not a canonical maturity level.
         """
-        floor = (
-            min_maturity if min_maturity is not None else get_settings().min_maturity
-        )
+        if min_maturity is None:
+            # Lazy: the settings module needs pydantic-settings, which light
+            # importers of src.config (the capability atlas job) do not install.
+            from src.shared.python.config.typed_settings import get_settings
+
+            min_maturity = get_settings().min_maturity
+        floor = min_maturity
         return [t for t in self.visible_tiles if meets_min_maturity(t.maturity, floor)]
 
     @property
