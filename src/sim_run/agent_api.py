@@ -54,6 +54,8 @@ _AGENT_CAPABILITY_TOOLS = (
     "run_golf_simulator_golden_shot",
     "native_export_describe",
     "native_export_validate",
+    "native_export_run",
+    "native_export_status",
 )
 
 

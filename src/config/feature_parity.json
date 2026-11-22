@@ -27,7 +27,7 @@
       "web": null,
       "status": "gap",
       "issue": 15150,
-      "notes": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL) and writes mp4 files (epic #11673); it has no PyQt6 window and no tile. Web status: only the read-side contract exists, POST /native-export/describe and /native-export/validate over REST and MCP (#15467, reusing the CLI request schema). No browser page and no route renders or serves a clip yet; an async run job is proposed in the still-open #15476 and is not counted here. Appearance flags (--appearance, --skin-tone, --hair, --clothing, --top-color, --bottom-color, --glove; HRG-B2, #13167, HRG-G1, #13186) resolve CLI over document over contract defaults and travel to every worker; --visual-grip-strength, --lead-roll-offset, --trail-roll-offset and --grip-thumb-offset-deg (HRG-GR4, #13205, HRG-A2, #13166) are picture-only and go in the appearance sidecar's grip block, while a physical grip flag (--grip-preset, --grip-style, --lead-shaft-rotation, ...; HRG-GS-G1, #13346) is refused with a message pointing to spec_builder, which writes the new model revision; the matching interactive controls are tracked under tools.character_builder; whole-system interface capability and mobility ellipsoids (--interface-ellipsoid {mobility,effective-mass,acceleration-capacity,force-capacity}, --ellipsoid-scale {auto,fixed:<m>}, --drift-arrow; CAP-6, #14038, #14046), with --hand-mobility supported as an alias and --hand-mobility-mode {constrained,unconstrained} (HCM-3, #14004).",
+      "notes": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL) and writes mp4 files (epic #11673); it has no PyQt6 window and no tile. Web status: agents describe, validate and queue exports over REST and MCP (/tools/agent-sim-run/native-export/{describe,validate,run,status}; #15467, #15476, reusing the CLI request schema); a run returns a job id and its status carries the clip manifest. No browser page renders, plays or downloads a clip yet. Appearance flags (--appearance, --skin-tone, --hair, --clothing, --top-color, --bottom-color, --glove; HRG-B2, #13167, HRG-G1, #13186) resolve CLI over document over contract defaults and travel to every worker; --visual-grip-strength, --lead-roll-offset, --trail-roll-offset and --grip-thumb-offset-deg (HRG-GR4, #13205, HRG-A2, #13166) are picture-only and go in the appearance sidecar's grip block, while a physical grip flag (--grip-preset, --grip-style, --lead-shaft-rotation, ...; HRG-GS-G1, #13346) is refused with a message pointing to spec_builder, which writes the new model revision; the matching interactive controls are tracked under tools.character_builder; whole-system interface capability and mobility ellipsoids (--interface-ellipsoid {mobility,effective-mass,acceleration-capacity,force-capacity}, --ellipsoid-scale {auto,fixed:<m>}, --drift-arrow; CAP-6, #14038, #14046), with --hand-mobility supported as an alias and --hand-mobility-mode {constrained,unconstrained} (HCM-3, #14004).",
       "tiles": []
     },
     "tools.golf_environment": {
@@ -132,7 +132,7 @@
       "api": "src/api/routes/putting_green.py",
       "web": "ui/src/pages/PuttingGreen.tsx",
       "status": "parity",
-      "tiles": ["putting_green"],
+      "tiles": ["putting_green", "putting_green_gui"],
       "notes": "The web page has a Metric/Imperial units selector over the shared units.py convention; ui/src/utils/units.golden.json is checked from both sides (#14458)."
     },
     "tools.putting_analytics": {
@@ -336,7 +336,10 @@
         "motion_target_preview",
         "starting_pose_matcher",
         "motion_pipeline",
-        "shadow_tracker"
+        "shadow_tracker",
+        "c3d_viewer",
+        "openpose_analysis",
+        "mediapipe_analysis"
       ],
       "notes": "Web has both the 2D SVG skeleton and an R3F 3D skeleton view (MocapSkeleton3D, auto-selected when frames carry depth) plus live pose/canonical streaming via WS /realtime/subscribe (#8406)."
     },
@@ -611,7 +614,7 @@
       "status": "exempt",
       "reason": "Desktop documentation browser; desktop-only candidate pending #7460.",
       "pending_decision": true,
-      "tiles": ["project_map"]
+      "tiles": ["project_map", "library_tool"]
     },
     "engines.dashboards": {
       "title": "Per-engine interactive dashboards (Drake, JaxSim, MuJoCo, Pinocchio)",
@@ -636,7 +639,7 @@
       "status": "exempt",
       "reason": "Desktop biomechanics dashboards; desktop-only candidate pending #7460.",
       "pending_decision": true,
-      "tiles": ["biomech_exercise", "injury_analysis"]
+      "tiles": ["biomech_exercise", "injury_analysis", "biomech_gait", "biomech_sit_to_stand"]
     },
     "lifting.five_lift_viewing": {
       "title": "Weightlifting viewing and analysis for the five lifts (squat, deadlift, bench press, snatch, clean and jerk): lift selection, barbell, hand-force and GRF overlays, plots",
@@ -700,6 +703,76 @@
       "status": "parity",
       "tiles": ["anatomical_event_table"],
       "notes": "HRG-E4 (#13175). Both surfaces render the event-table export document (anatomical_angles.event_table.to_json_dict) as text through one view: anatomical_angles/event_table_view.py on the desktop and its mirror eventTableView.ts on the web. The golden fixture ui/src/components/analysis/anatomicalEventTable/fixtures/eventTableView.json is the shared export of one bundle plus the exact cells, and the PyQt and vitest suites both assert it, so the values are identical. The web table now fetches its document from POST /api/biomechanics/anatomical-event-table (#13538, on main) through ui/src/api/anatomicalEventTable.ts and the AnatomicalEventTableFromApi container, which requests format json. The anatomical_event_table launcher tile hosts it on both surfaces: the desktop dock (src/tools/anatomical_event_table) opens an event-table JSON export, the body the route returns, and the web tile routes to the Analysis Tools page, which computes it from pasted calibrated frames through the route (#14128). Neither surface substitutes sample data."
+    },
+    "simulation.ball_flight_simulator": {
+      "title": "Ball Flight Simulator tool",
+      "pyqt": "src/tools/ball_flight_gui/gui.py",
+      "api": "src/api/routes/ball_flight.py",
+      "web": "ui/src/pages/BallFlight.tsx",
+      "status": "parity",
+      "tiles": [
+        "ball_flight_simulator"
+      ],
+      "notes": "The desktop ball-flight simulator and the web BallFlight page both drive the flight-model registry; the web page reaches it through the /tools/ball-flight API routes (#15150 E9)."
+    },
+    "sidekick.chat_panel": {
+      "title": "Sidekick chat assistant panel",
+      "pyqt": "src/shared/python/ai/gui/assistant_panel.py",
+      "api": "src/api/routes/chat_ws.py",
+      "web": "ui/src/components/ui/ChatPanel.tsx",
+      "status": "parity",
+      "tiles": [
+        "sidekick"
+      ],
+      "notes": "Desktop assistant panel and the web ChatPanel both talk to the shared Sidekick chat protocol (the web over the /ws/chat WebSocket route). The OS terminal, REPL, Jupyter and skills integration stays in sidekick.terminal_repl_jupyter_skills (#15150 E9)."
+    },
+    "simulation.swing_flight_pipeline": {
+      "title": "Swing-to-flight pipeline tool",
+      "pyqt": "src/tools/swing_flight_pipeline/gui.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 15150,
+      "tiles": [
+        "swing_flight_pipeline"
+      ],
+      "notes": "No API route or React page serves the swing-to-flight pipeline yet (#15150 E9)."
+    },
+    "matching.tour_matching_viewer": {
+      "title": "Tour matching viewer",
+      "pyqt": "src/tools/tour_matching_viewer/__main__.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 15150,
+      "tiles": [
+        "tour_matching_viewer"
+      ],
+      "notes": "3D replay of matching candidates against tour capture is desktop-only; the web only lists the tile in workspaceNavigation.ts (#15150 E9)."
+    },
+    "tools.training_controller": {
+      "title": "Training controller tool",
+      "pyqt": "src/tools/training_controller/__main__.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 15150,
+      "tiles": [
+        "training_controller"
+      ],
+      "notes": "No API route or React page exists for the training controller (#15150 E9)."
+    },
+    "biomech.physics_informed_models": {
+      "title": "Physics-informed biomechanics models",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 15150,
+      "tiles": [
+        "pinn_pure_rigid",
+        "pinn_hybrid"
+      ],
+      "notes": "Engine-type tiles with no launcher path of their own; the web useEngineStore references them but no page runs them (#15150 E9)."
     }
   }
 }

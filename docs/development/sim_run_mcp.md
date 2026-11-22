@@ -25,7 +25,10 @@ transport via `src.sim_run.mcp_fastmcp`) for local agents (Grok Bot, Claude Desk
    exporter's request schema derived from its parser (groups, maturity, defaults) and a
    request check returning the equivalent command line; REST
    ``/tools/agent-sim-run/native-export/{describe,validate}`` requires a Bearer token in
-   remote mode. Rendering (`run`) is not exposed yet.
+   remote mode.
+7. `native_export_run` / `native_export_status` (Refs #15150): queue a validated export and
+   return a job id at once; status is queued, running, succeeded with the clip manifest or
+   failed with the error. REST ``/tools/agent-sim-run/native-export/{run,status}``.
 
 ## Host Configuration
 
