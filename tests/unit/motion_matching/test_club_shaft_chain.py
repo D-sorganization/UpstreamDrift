@@ -295,3 +295,34 @@ def test_chain_spec_is_refused_for_engines_without_chain_support(engine: str) ->
     for supported in ("mujoco", "opensim", "myosuite", "drake", "pinocchio"):
         require_engine_support(doc, supported)
     require_engine_support(_club_document(DRIVER), engine)  # rigid: any engine
+
+
+@pytest.mark.parametrize("name", ["driver", "iron7"])
+def test_with_shaft_model_by_name_follows_a_preset_club_length(name: str) -> None:
+    """A club named by string finds its solids when the document restates a
+    preset length (the catalogue length alone would not match them)."""
+    from dataclasses import replace
+
+    from src.shared.python.motion_matching.club_models import CLUBS
+    from src.shared.python.motion_matching.execution.spec_builder import (
+        with_shaft_model,
+    )
+
+    preset = replace(CLUBS[name], length_m=CLUBS[name].length_m - 0.03)
+    doc = _club_document(preset)
+    doc["club"] = {"name": name, "length_m": preset.length_m}
+    chained = with_shaft_model(doc, name, "chain")
+    assert shaft_model(chained) == "chain"
+    assert chained["club"]["shaft"]["club_body"] == f"Test{CLUB_BODY_SUFFIX}"
+    # The catalogue club is still used for a document that records no length.
+    plain = _club_document(CLUBS[name])
+    assert shaft_model(with_shaft_model(plain, name, "chain")) == "chain"
+
+
+def test_recorded_club_refuses_unknown_or_foreign_records() -> None:
+    from src.shared.python.motion_matching.club_models import recorded_club
+
+    with pytest.raises(ValueError, match="unknown club"):
+        recorded_club({}, "putter")
+    with pytest.raises(ValueError, match="not 'driver'"):
+        recorded_club({"club": {"name": "iron7"}}, "driver")
