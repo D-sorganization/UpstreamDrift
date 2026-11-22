@@ -24,6 +24,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.physics.rust_kernel import kernel_is_usable
 from src.shared.python.physics.ball_properties import (
     MAX_LIFT_COEFFICIENT,
     PENNER_LIFT_EXPONENT,
@@ -51,7 +52,8 @@ try:
     import upstream_physics as _rust  # type: ignore[import-untyped]
 
     _RUST_AVAILABLE = bool(
-        hasattr(_rust, "AerodynamicsEngine")
+        kernel_is_usable(_rust)
+        and hasattr(_rust, "AerodynamicsEngine")
         and hasattr(_rust, "AeroEngineConfig")
         and hasattr(_rust, "AeroBallProperties")
         and hasattr(_rust, "AirProperties")

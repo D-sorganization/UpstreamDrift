@@ -31,13 +31,50 @@ logger = get_logger(__name__)
 
 # ── Try importing the Rust wheel ──────────────────────────────────────────────
 
+#: Minimum ``PHYSICS_REVISION`` this module accepts.  It must equal the
+#: ``PHYSICS_REVISION`` const in ``rust_core/upstream-physics/src/lib.rs``
+#: (enforced by ``tests/unit/physics/test_rust_kernel_version_guard.py``).
+#: A wheel built before the attribute existed reads as revision 0.
+#: 2: spin-dependent drag (#15460).
+MIN_PHYSICS_REVISION = 2
+
+_REBUILD_HINT = (
+    "maturin develop (or maturin build --features python --release) "
+    "in rust_core/upstream-physics"
+)
+
+
+def kernel_is_usable(module: Any) -> bool:
+    """Return True when ``module`` has ``PHYSICS_REVISION >= MIN_PHYSICS_REVISION``.
+
+    Shared by every facade that imports ``upstream_physics``.  Postcondition:
+    never raises; when the kernel is stale it logs one warning naming the
+    installed and required revisions and the rebuild command, and returns False.
+    """
+    installed = getattr(module, "PHYSICS_REVISION", 0)
+    if isinstance(installed, int) and installed >= MIN_PHYSICS_REVISION:
+        return True
+    logger.warning(
+        "upstream_physics physics revision %s is older than the required %s "
+        "(it lacks recent physics such as spin-dependent drag) - using the "
+        "pure-Python fallback. Rebuild with: %s",
+        installed,
+        MIN_PHYSICS_REVISION,
+        _REBUILD_HINT,
+    )
+    return False
+
+
 _RUST_AVAILABLE = False
 
 try:
     import upstream_physics as _rust  # type: ignore[import-untyped]
 
-    _RUST_AVAILABLE = True
-    logger.info("upstream_physics Rust kernel loaded successfully")
+    if kernel_is_usable(_rust):
+        _RUST_AVAILABLE = True
+        logger.info("upstream_physics Rust kernel loaded successfully")
+    else:
+        _rust = None  # type: ignore[assignment]
 except ImportError:
     _rust = None  # type: ignore[assignment]
     logger.warning(
@@ -48,7 +85,11 @@ except ImportError:
 
 
 def is_rust_available() -> bool:
-    """Return True if the Rust physics kernel is available."""
+    """Return True if a current Rust physics kernel is available.
+
+    Postcondition: never raises.  False when the wheel is missing or older
+    than ``MIN_PHYSICS_REVISION``; callers then use the Python fallback.
+    """
     return _RUST_AVAILABLE
 
 

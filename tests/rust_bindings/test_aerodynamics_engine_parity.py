@@ -172,6 +172,12 @@ class TestAerodynamicsEngineParity:
     def test_driver_trajectory_matches_public_simulator(self) -> None:
         """Driver launch parity guards the public Rust-backed simulator."""
         rust = pytest.importorskip("upstream_physics")
+        from src.shared.python.physics.rust_kernel import (
+            is_rust_available as kernel_is_current,
+        )
+
+        if not kernel_is_current():
+            pytest.skip("upstream_physics older than rust_kernel.MIN_PHYSICS_REVISION")
         from src.shared.python.physics.ball_flight_physics import (
             BallProperties,
             EnvironmentalConditions,
