@@ -85,6 +85,16 @@ def test_fixture_rows_carry_source_and_confidence() -> None:
         assert set(shot.get("xfail", {})) <= set(_METRICS), shot["id"]
 
 
+def test_fixture_cites_a_fetched_published_table() -> None:
+    """The fixture names its publisher, URLs, year and access date (#15443)."""
+    source = _DATA["tour_table_source"]
+    for key in ("title", "publisher", "year", "accessed", "notes"):
+        assert source[key].strip(), key
+    assert source["urls"] and all(u.startswith("https://") for u in source["urls"])
+    for shot in _DATA["shots"]:
+        assert "from memory" not in (shot["source"] + shot["confidence"]), shot["id"]
+
+
 @pytest.mark.parametrize(("shot", "metric"), _cases())
 def test_reference_shot_within_band(shot: dict[str, Any], metric: str) -> None:
     """The simulated metric lies inside the published reference band."""

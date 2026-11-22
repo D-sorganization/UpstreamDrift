@@ -169,9 +169,30 @@ Sizes quoted from tests are the band a test asserts, not a published value.
 - **Instead:** `cd_spinning_ball` in
   `rust_core/upstream-physics/src/aerodynamics.rs` adds `0.18 * S` (Smits and
   Smith 1994), extrapolated beyond the S <= 0.3 wind-tunnel range for wedges.
-- **Effect:** the pitching-wedge reference row carries 127.3 yd against 136 yd,
-  minus 6.4 %, a **strict expected failure** (`xfail(strict=True)`) in
-  `tests/unit/physics/test_reference_shots_15443.py`.
+- **Effect:** both wedge reference rows fall short; each is a **strict
+  expected failure** (`xfail(strict=True)`) in
+  `tests/unit/physics/test_reference_shots_15443.py`. The 6-iron and 7-iron
+  rows that earlier disagreed by about 6 % came from memory; the sourced
+  rows below replace them and all irons from the 5-iron to the 9-iron pass.
+
+  | Row | Metric | Reference | Model | Band | Result |
+  | --- | --- | --- | --- | --- | --- |
+  | PGA driver | carry yd | 275 | 265.5 | 261.2 to 288.8 | pass |
+  | LPGA driver | carry yd | 218 | 216.5 | 207.1 to 228.9 | pass |
+  | PGA 5-iron | carry yd | 194 | 197.4 | 184.3 to 203.7 | pass |
+  | PGA 6-iron | carry yd | 183 | 184.5 | 173.8 to 192.2 | pass |
+  | PGA 7-iron | carry yd | 172 | 168.0 | 163.4 to 180.6 | pass |
+  | PGA 8-iron | carry yd | 160 | 155.6 | 152.0 to 168.0 | pass |
+  | PGA 9-iron | carry yd | 148 | 142.4 | 140.6 to 155.4 | pass |
+  | PGA wedge | carry yd | 136 | 127.3 | 129.2 to 142.8 | strict xfail |
+  | LPGA 7-iron | carry yd | 141 | 137.9 | 133.9 to 148.1 | pass |
+  | LPGA wedge | carry yd | 107 | 99.5 | 101.7 to 112.3 | strict xfail |
+  | LPGA wedge | apex yd | 23 | 19.3 | 19.6 to 26.4 | strict xfail |
+
+  Apex and descent pass on every other row (the 5-iron descent, 45.3 deg
+  against a 45.0 lower bound, and the LPGA 7-iron apex, 22.3 yd against 22.1,
+  are within 0.3 of the edge). The carry error grows with spin and falls with
+  ball speed, consistent with the spin-drag extrapolation.
 - **Tracking:** #15443 (F1).
 
 ## Rollout and Reference Coverage
@@ -195,11 +216,12 @@ Sizes quoted from tests are the band a test asserts, not a published value.
 
 ### Launch-Monitor Reference Coverage
 
-- **Missing:** reference data beyond five tour-average rows.
+- **Missing:** reference data beyond ten tour-average rows.
 - **Instead:** `tests/unit/physics/reference_shots_15443.json` holds PGA driver,
-  LPGA driver, 6-iron, 7-iron and pitching wedge (Trackman 2019 averages); it
-  bands carry, apex and descent only, and several values are recorded as
-  approximate or from memory. There are no woods, hybrids, long irons or lob
+  5-iron to pitching wedge and LPGA driver, 7-iron and pitching wedge, all read
+  from the published Trackman tour-average tables (citation, access date and
+  URLs are in its `tour_table_source` block); it bands carry, apex and descent
+  only. There are no woods, hybrids, long irons or lob
   wedges, no side or spin-axis data, no roll or total reference, and no
   impact-model reference table (club delivery to ball data). The older bands in
   `tests/unit/physics/test_trackman_benchmarks.py` are wide (driver 238 to 290
