@@ -31,6 +31,13 @@ from src.shared.python.impact_parameters.flight_report import (
     flight_for_impact,
 )
 from src.tools.native_viewer_export import flight_depth, impact_card, landing_marker
+from src.tools.native_viewer_export.display_units import (
+    METRIC,
+    DisplayUnits,
+    distance_text,
+    load_display_units,
+    speed_text,
+)
 from src.tools.native_viewer_export.flight_inset import (
     FlightInsetSettings,
     load_inset_settings,
@@ -84,6 +91,7 @@ class TracerSettings:
     landing_marker: LandingMarkerSettings | None = None
     inset: FlightInsetSettings | None = None  # flight_inset_settings.json
     ball_shading: flight_depth.BallShading | None = None
+    display_units: DisplayUnits = METRIC  # load_tracer_settings: display_units.py
 
     def __post_init__(self) -> None:
         rgba = _channels(self.tracer_color_rgba, 4, "tracer_color_rgba")
@@ -114,22 +122,35 @@ class TracerSettings:
             raise ValueError("occlusion_step_px must be positive")
 
 
-def load_tracer_settings(path: Path | None = None) -> TracerSettings:
+def load_tracer_settings(
+    path: Path | None = None, units: DisplayUnits | None = None
+) -> TracerSettings:
     """Settings from ``path`` (default: the file beside this module).
+
+    Distance labels (HUD, inset, carry label) use ``units`` (default: the
+    ``display_units_settings.json`` beside this module): its unit replaces the
+    ``unit`` entries of the inset and the carry label.
 
     Raises ``ValueError``/``TypeError`` for a missing, unknown or bad entry.
     """
+    units = units or load_display_units()
     document = json.loads((path or SETTINGS_PATH).read_text(encoding="utf-8"))
     document.pop("sources", None)
+    document["display_units"] = units
     marker = document.pop("landing_marker", None)
     if marker is not None:
         marker = {k: tuple(v) if isinstance(v, list) else v for k, v in marker.items()}
+        marker["carry_label_unit"] = units.distance_unit
+        marker["carry_label_scale"] = units.distance_scale
         document["landing_marker"] = LandingMarkerSettings(**marker)
     shading = document.pop("ball_shading", None)
     if shading is not None:
         document["ball_shading"] = flight_depth.BallShading(**shading)
     beside = (path or SETTINGS_PATH).with_name("flight_inset_settings.json")
-    document["inset"] = load_inset_settings(beside if beside.is_file() else None)
+    inset = load_inset_settings(beside if beside.is_file() else None)
+    document["inset"] = replace(
+        inset, unit=units.distance_unit, unit_scale=units.distance_scale
+    )
     try:
         return TracerSettings(**document)
     except TypeError as exc:
@@ -215,6 +236,7 @@ class FlightPlayback:
     #: launch angle (degrees) and spin (rpm) of the model flight, for summaries
     launch_deg: float | None = None
     spin_rpm: float | None = None
+    ball_speed_mph: float | None = None  # of the impact solve; the smash factor's
 
     def __post_init__(self) -> None:
         if not isinstance(self.settings, TracerSettings):
@@ -234,6 +256,11 @@ class FlightPlayback:
             raise ValueError("times_s must start at 0 and increase")
         if not (math.isfinite(self.impact_time_s) and self.radius_m > 0.0):
             raise ValueError("impact_time_s must be finite and radius_m positive")
+
+    def display_unit_names(self) -> dict[str, str]:
+        """Unit names of the labels (for the manifest, whose values stay SI)."""
+        units = self.settings.display_units
+        return {"distance": units.distance_unit, "speed": units.speed_unit}
 
     @property
     def duration_s(self) -> float:
@@ -402,6 +429,22 @@ class FlightPlayback:
         return draw_trace(tile, camera, points, self.radius_m, style, depth)
 
 
+def _flight_lines(
+    flight: FlightSummary, side: str, units: DisplayUnits
+) -> tuple[str, str]:
+    """The two HUD lines of ``flight``; distances and speed in ``units``."""
+    speed = speed_text(flight.ball_speed_mph, units)
+    carry = distance_text(flight.carry_m, units)
+    apex = distance_text(flight.max_height_m, units)
+    offset = distance_text(abs(flight.lateral_m), units)
+    return (
+        f"Ball {speed}   Launch {flight.launch_deg:.1f} deg"
+        f"   Spin {flight.spin_rpm:.0f} rpm",
+        f"Carry {carry}   Apex {apex}   Side {offset} {side}"
+        f"   Time {flight.flight_time_s:.1f} s",
+    )
+
+
 def playback_from_flight(
     flight: FlightSummary,
     frame: TargetFrame,
@@ -424,12 +467,7 @@ def playback_from_flight(
     if times is None:
         times = np.linspace(0.0, flight.flight_time_s, len(path))
     side = "left" if flight.lateral_m < 0.0 else "right"
-    lines = (
-        f"Ball {flight.ball_speed_mph:.0f} mph   Launch {flight.launch_deg:.1f} deg"
-        f"   Spin {flight.spin_rpm:.0f} rpm",
-        f"Carry {flight.carry_m:.0f} m   Apex {flight.max_height_m:.0f} m   Side "
-        f"{abs(flight.lateral_m):.0f} m {side}   Time {flight.flight_time_s:.1f} s",
-    )
+    lines = _flight_lines(flight, side, settings.display_units)
     status = MODEL if flight.valid else f"{MODEL}, {OUTSIDE}"
     start = np.asarray(times, dtype=float) - float(times[0])
     return FlightPlayback(
@@ -446,7 +484,27 @@ def playback_from_flight(
         flight.lateral_m,
         flight.launch_deg,
         flight.spin_rpm,
+        flight.ball_speed_mph,
     )
+
+
+def with_model_smash(overlays: Any) -> Any:
+    """``overlays`` whose impact card and factors panel show the model smash factor.
+
+    The ball speed is that of the flight (the impact solve that drives the
+    tracer); without a flight path or a ball speed ``overlays`` is returned
+    unchanged and the rows keep their "unavailable" reason.
+    """
+    flight = None if overlays is None else overlays.flight
+    speed = None if flight is None else flight.ball_speed_mph
+    if speed is None:
+        return overlays
+    card, factors = overlays.card, overlays.factors
+    if card is not None:
+        card = impact_card.with_model_smash(card, speed)
+    if factors is not None:
+        factors = factors.with_model_smash(speed)
+    return replace(overlays, card=card, factors=factors)
 
 
 def playback_from_series(
@@ -454,6 +512,7 @@ def playback_from_series(
     impact_time_s: float,
     ball: BallPlacement,
     settings: TracerSettings,
+    club: str | None = None,
 ) -> FlightPlayback:
     """Flight launched from the clubhead state the impact card reads.
 
@@ -468,10 +527,10 @@ def playback_from_series(
     contact = series_at_contact(series, ball.position_m, ball.radius_m, impact_time_s)
     if contact is None:
         state = impact_card.contact_index(series, impact_time_s) - 1
-        flight = flight_for_impact(series, state, frame)
+        flight = flight_for_impact(series, state, frame, club)
         return playback_from_flight(flight, frame, impact_time_s, ball, settings)
     moved, state = contact
-    flight = flight_for_impact(moved, state, frame)
+    flight = flight_for_impact(moved, state, frame, club)
     start_s = float(moved.times_s[state])
     return playback_from_flight(flight, frame, start_s, ball, settings)
 
@@ -495,7 +554,9 @@ def flight_for_export(
     if swing.ball is None:
         return FlightPlayback(config, "no ball placed")
     try:
-        return playback_from_series(club_series(swing), impact, swing.ball, config)
+        return playback_from_series(
+            club_series(swing), impact, swing.ball, config, swing.club
+        )
     except impact_card._EXPECTED_ERRORS as exc:
         return FlightPlayback(config, f"unavailable: {exc}")
 

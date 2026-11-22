@@ -18,14 +18,19 @@ from src.shared.python.core.physics_constants import (
     AIR_DENSITY_SEA_LEVEL_KG_M3,
     AIR_VISCOSITY_KG_M_S,
     GOLF_BALL_CROSS_SECTIONAL_AREA_M2,
-    GOLF_BALL_DRAG_COEFFICIENT,
     GOLF_BALL_LIFT_COEFFICIENT,
+    GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT,
     GOLF_BALL_RADIUS_M,
 )
-from src.shared.python.physics.atmosphere import cd_dimpled_sphere
+from src.shared.python.physics.atmosphere import cd_spinning_ball
 from src.shared.python.physics.ball_properties import calculate_spin_lift_coefficient
 
-_DEFAULT_DRAG_COEFFICIENT = float(GOLF_BALL_DRAG_COEFFICIENT)
+_DEFAULT_DRAG_COEFFICIENT = float(GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT)
+
+
+def _norm(vector: np.ndarray) -> float:
+    """Euclidean norm via ``math.sqrt(dot)``."""
+    return float(math.sqrt(np.dot(vector, vector)))
 
 
 def _as_vector3(name: str, value: np.ndarray) -> np.ndarray:
@@ -69,7 +74,7 @@ class DragModel:
 
     def __init__(
         self,
-        base_coefficient: float = float(GOLF_BALL_DRAG_COEFFICIENT),
+        base_coefficient: float = _DEFAULT_DRAG_COEFFICIENT,
         ball_area: float = float(GOLF_BALL_CROSS_SECTIONAL_AREA_M2),
         ball_radius: float = float(GOLF_BALL_RADIUS_M),
         reynolds_correction: bool = True,
@@ -87,12 +92,15 @@ class DragModel:
         self,
         velocity: np.ndarray,
         air_density: float = float(AIR_DENSITY_SEA_LEVEL_KG_M3),
+        spin: np.ndarray | None = None,
     ) -> np.ndarray:
         """Calculate drag force.
 
         Args:
             velocity: Ball velocity relative to air [m/s]
             air_density: Air density [kg/m^3]
+            spin: Angular velocity [rad/s]; its transverse part raises Cd
+                through the kernel's spin term (#15443). ``None`` means no spin.
 
         Returns:
             Drag force vector [N]
@@ -104,7 +112,11 @@ class DragModel:
         if speed < 1e-10:
             return np.zeros_like(velocity_vector)
 
-        cd = self._effective_coefficient_from_speed(speed, air_density)
+        spin_ratio = 0.0
+        if spin is not None:
+            transverse = np.cross(_as_vector3("spin", spin), velocity_vector)
+            spin_ratio = self.ball_radius * _norm(transverse) / (speed * speed)
+        cd = self._effective_coefficient_from_speed(speed, air_density, spin_ratio)
         force_magnitude = 0.5 * air_density * cd * self.ball_area * speed * speed
         return -force_magnitude * velocity_vector / speed
 
@@ -137,8 +149,9 @@ class DragModel:
         self,
         speed: float,
         air_density: float,
+        spin_ratio: float = 0.0,
     ) -> float:
-        """Return the Reynolds-corrected drag coefficient for a known speed."""
+        """Return the Reynolds- and spin-corrected Cd for a known speed."""
         if not self.reynolds_correction:
             return self.base_coefficient
 
@@ -148,8 +161,9 @@ class DragModel:
         # Clamp to the model's supported range; outside it the underlying
         # correlation extrapolation is meaningless for golf balls.
         re_clamped = max(1.0e3, min(1.0e7, re))
-        cd = cd_dimpled_sphere(
+        cd = cd_spinning_ball(
             re_clamped,
+            spin_ratio,
             base_cd=_DEFAULT_DRAG_COEFFICIENT,
         )
         return cd * self.base_coefficient / _DEFAULT_DRAG_COEFFICIENT

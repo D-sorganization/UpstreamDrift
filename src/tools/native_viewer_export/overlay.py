@@ -18,6 +18,7 @@ from numpy.typing import NDArray
 
 from src.shared.python.force_overlay.bundle_provider import BundleOverlayProvider
 from src.shared.python.force_overlay.glyphs import EllipsoidGlyph
+from src.tools.native_viewer_export.camera_framing import default_lookat_height_m
 from src.tools.native_viewer_export.ellipsoid_panel import KIND_FIELDS, PanelRow
 from src.tools.native_viewer_export.ellipsoid_visibility import (
     VisibilitySettings,
@@ -34,8 +35,6 @@ from src.tools.native_viewer_export.core import (
 )
 
 logger = logging.getLogger(__name__)
-
-LOOKAT_HEIGHT_M = 0.9
 
 
 @dataclass(frozen=True)
@@ -518,7 +517,7 @@ def build_overlay_feed(
         _apply_palm_thumb(provider, source, swing.bundle.spec_bytes)
     names = swing.bundle.coordinate_order
     com = source.center_of_mass_m(dict(zip(names, map(float, swing.q[0]), strict=True)))
-    lookat = (float(com[0]), float(com[1]), LOOKAT_HEIGHT_M)
+    lookat = (float(com[0]), float(com[1]), default_lookat_height_m())
     style = default_glyph_style(body_mass_kg=float(source.total_mass_kg))
 
     active_ellipsoids = _resolve_active_ellipsoids(

@@ -1,0 +1,6 @@
+{
+  "default_lookat_height_m": 0.9,
+  "sources": {
+    "default_lookat_height_m": "Height of the automatic look-at point above the turf when overlays are on (the x and y come from the golfer's centre of mass at address). 0.9 m is roughly the standing hip-to-belt height and frames a teed driver. A shorter club with the ball on the turf sits lower in the frame, so pass --camera-height (or --camera-lookat) to lower it; the default is kept so existing exports render unchanged."
+  }
+}

@@ -30,6 +30,11 @@ from __future__ import annotations
 
 import math
 
+from src.shared.python.core.physics_constants import (
+    GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT,
+    GOLF_BALL_SPIN_DRAG_SLOPE,
+)
+
 # ---------------------------------------------------------------------------
 # ISA standard atmosphere constants
 # ---------------------------------------------------------------------------
@@ -332,6 +337,30 @@ def cd_dimpled_sphere(reynolds: float, base_cd: float = 0.21) -> float:
     return max(0.15, min(0.55, cd))
 
 
+def cd_spinning_ball(
+    reynolds: float,
+    spin_ratio: float,
+    base_cd: float = float(GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT),
+) -> float:
+    """Return the drag coefficient of a spinning golf ball (#15443).
+
+    ``Cd = cd_dimpled_sphere(reynolds, base_cd) + k * spin_ratio`` with
+    ``k = GOLF_BALL_SPIN_DRAG_SLOPE`` (see its ``source``). Mirrors
+    ``cd_spinning_ball`` in ``rust_core/upstream-physics/src/aerodynamics.rs``.
+    Preconditions: ``spin_ratio`` (``r * omega_transverse / v``) a finite real
+    ``>= 0`` (else TypeError/ValueError), ``reynolds`` as for
+    :func:`cd_dimpled_sphere`. Postcondition: ``0`` when ``base_cd == 0``.
+    """
+    if not isinstance(spin_ratio, (int, float)) or isinstance(spin_ratio, bool):
+        raise TypeError("spin_ratio must be a real number")
+    if not math.isfinite(spin_ratio) or spin_ratio < 0:
+        raise ValueError("spin_ratio must be a finite non-negative number")
+    cd_reynolds = cd_dimpled_sphere(reynolds, base_cd)
+    if cd_reynolds == 0.0:
+        return 0.0
+    return cd_reynolds + float(GOLF_BALL_SPIN_DRAG_SLOPE) * float(spin_ratio)
+
+
 __all__ = [
     "MIN_VALID_ALTITUDE_M",
     "MAX_VALID_ALTITUDE_M",
@@ -348,6 +377,7 @@ __all__ = [
     "WATER_VAPOR_R_SPECIFIC_J_KG_K",
     "air_density",
     "cd_dimpled_sphere",
+    "cd_spinning_ball",
     "humid_air_density",
     "saturation_vapor_pressure_pa",
 ]
