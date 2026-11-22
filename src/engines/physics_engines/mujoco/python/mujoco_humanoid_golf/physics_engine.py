@@ -93,6 +93,8 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
         self._force_torque_source: Any | None = None
         self._segment_ke_provider: Any | None = None
         self._interface_power: Any | None = None
+        self._segment_group_catalog: Any | None = None
+        self._segment_catalog_model: mujoco.MjModel | None = None
 
     @property
     def is_initialized(self) -> bool:
@@ -486,6 +488,22 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
             time_s=float(self.data.time),
         )
 
+    def segment_group_catalog(self):
+        """Heuristic legs/pelvis/torso/arms/club catalog for the loaded model."""
+        from src.shared.python.body_part_viz.mujoco_segment_group_catalog import (
+            infer_segment_group_catalog,
+        )
+
+        if self.model is None:
+            return None
+        if (
+            self._segment_group_catalog is None
+            or self._segment_catalog_model is not self.model
+        ):
+            names = [self.model.body(i).name for i in range(1, self.model.nbody)]
+            self._segment_group_catalog = infer_segment_group_catalog(names)
+            self._segment_catalog_model = self.model
+        return self._segment_group_catalog
     def get_ground_reaction_breakdown(self) -> GroundReactionBreakdown | None:
         """The current foot-ground reaction breakdown, or None when unloaded.
 

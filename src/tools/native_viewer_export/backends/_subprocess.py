@@ -119,6 +119,7 @@ def stage_job(
         axial_path=str(axial_path) if axial_path else None,
         shading=shading,
         depth_positions=depth_request(swing, settings, indices),
+        lighting=settings.lighting.to_dict() if settings.lighting else None,
     )
 
 

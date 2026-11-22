@@ -41,6 +41,38 @@ def test_spinning_rod_about_com_matches_inertial_spin_term() -> None:
     np.testing.assert_allclose(contrib, spin, rtol=0, atol=1e-12)
 
 
+def test_displaced_com_with_relative_velocity_uses_com_offset() -> None:
+    """Omitting r_C must change H when r_C, r_i, and v_i−v_C are all nonzero (#15400)."""
+    r_c = np.array([0.2, 0.0, 0.0])
+    v_c = np.array([1.0, 0.5, 0.0])
+    r_i = np.array([0.5, 0.3, 0.1])
+    v_i = np.array([2.0, -0.2, 0.4])
+    kw = {
+        "com_world": r_i,
+        "com_vel_world": v_i,
+        "ang_vel_world": np.zeros(3),
+        "inertia_principal": np.ones(3) * 0.1,
+        "rot_body_to_world": np.eye(3),
+        "mass": 2.0,
+        "reference_com_vel_world": v_c,
+    }
+    about_com, _ = body_angular_momentum_about_point(
+        reference_com_world=r_c,
+        **kw,
+    )
+    wrong_ref, _ = body_angular_momentum_about_point(
+        reference_com_world=np.zeros(3),
+        **kw,
+    )
+    np.testing.assert_allclose(
+        about_com,
+        np.cross(r_i - r_c, 2.0 * (v_i - v_c)),
+        rtol=0,
+        atol=1e-12,
+    )
+    assert not np.allclose(about_com, wrong_ref, rtol=0, atol=1e-9)
+
+
 def test_offset_translating_point_mass_orbital_term() -> None:
     r_c = np.zeros(3)
     v_c = np.array([2.0, 0.0, 0.0])

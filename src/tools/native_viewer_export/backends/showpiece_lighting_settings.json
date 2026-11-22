@@ -1,0 +1,20 @@
+{
+  "lights": [
+    {"name": "key_1", "direction": [0.51838, -0.55442, -0.65108], "diffuse": [0.095, 0.095, 0.095], "specular": [0.03, 0.03, 0.03], "castshadow": true},
+    {"name": "key_2", "direction": [0.53727, -0.52223, -0.66228], "diffuse": [0.095, 0.095, 0.095], "specular": [0.03, 0.03, 0.03], "castshadow": true},
+    {"name": "key_3", "direction": [0.56463, -0.52793, -0.63442], "diffuse": [0.095, 0.095, 0.095], "specular": [0.03, 0.03, 0.03], "castshadow": true},
+    {"name": "key_4", "direction": [0.54528, -0.56098, -0.62287], "diffuse": [0.095, 0.095, 0.095], "specular": [0.03, 0.03, 0.03], "castshadow": true},
+    {"name": "fill", "direction": [0.60365, -0.50652, -0.61566], "diffuse": [0.1, 0.0976, 0.0905], "specular": [0.1, 0.1, 0.1], "castshadow": false},
+    {"name": "rim", "direction": [-0.73443, 0.42402, -0.52992], "diffuse": [0.36, 0.38, 0.45], "specular": [0.1, 0.1, 0.1], "castshadow": false},
+    {"name": "front", "direction": [0.93055, 0.33869, -0.13917], "diffuse": [0.12, 0.12, 0.12], "specular": [0.1, 0.1, 0.1], "castshadow": false}
+  ],
+  "headlight": {"ambient": [0.627, 0.632, 0.648], "diffuse": [0.15, 0.15, 0.15], "specular": [0.05, 0.05, 0.05]},
+  "shadow": {"shadowsize": 16384, "shadowclip": 1.0, "extent_m": 3.0},
+  "ground": {"texture_gain": 1.6, "checker_contrast": 0.35, "reflectance": 0.0},
+  "sources": {
+    "lights": "The lights of the matched golfer showpiece clips (round 14, 2026-11-21), which replace the scene's own three spot lights and the export sun. Every light is directional (direction of travel, world frame, z up), so level ground is as bright at the horizon as at the tee. The key is four weak shadow-casting lights a degree or two apart: MuJoCo has no soft shadows, and four offset hard shadows give the cast shadow a graded edge. The warm fill beside the key and the cool rim from behind the trail side shape the body without a second shadow; the low front light lifts the face and the hands. Diffuse and specular are linear RGB in [0, 1].",
+    "headlight": "Camera headlight of the showpiece clips: a high ambient term (the face read dark below it in round 13) and a weak diffuse term. Specular is the studio value of the scene.",
+    "shadow": "shadowsize is the shadow map edge in texels (power of two). extent_m is the model extent MuJoCo scales the shadow map and clip planes by, and shadowclip the half width of a directional light's map in extents: 1.0 x 3 m keeps the whole swing inside the map at about 0.4 mm per texel, where the smaller map drew saw-tooth shadow edges on skin.",
+    "ground": "texture_gain multiplies the two checker colours of the ground texture (clipped to 1); 1.6 was chosen on the showpiece stills so the turf reads as mown grass under the weaker direct light. checker_contrast is the share of the difference between the two checker colours that is kept (0.35: the squares stay readable as a ground cue without flicker in motion). reflectance 0 stops the turf mirroring the shoes."
+  }
+}

@@ -49,8 +49,7 @@ from src.tools.native_viewer_export.compositor import (
     draw_view_label,
     event_caption_for_time,
 )
-from src.tools.native_viewer_export import flight_tracer
-from src.tools.native_viewer_export import contact_frame
+from src.tools.native_viewer_export import contact_frame, flight_tracer
 from src.tools.native_viewer_export import ellipsoid_panel as ellipsoid_hud
 from src.tools.native_viewer_export import flight_inset
 from src.tools.native_viewer_export import impact_factors as factors_panel
@@ -101,16 +100,13 @@ def parse_ellipsoid_scale(text: str) -> str:
         return "auto"
     if cleaned.startswith("fixed:"):
         raw = cleaned[len("fixed:") :].strip()
+        bad = f"--ellipsoid-scale fixed:<m> requires a positive finite number of metres, got {text!r}"
         try:
             val = float(raw)
         except ValueError:
-            raise ValueError(
-                f"--ellipsoid-scale fixed:<m> requires a positive finite number of metres, got {text!r}"
-            ) from None
+            raise ValueError(bad) from None
         if not (math.isfinite(val) and val > 0.0):
-            raise ValueError(
-                f"--ellipsoid-scale fixed:<m> requires a positive finite number of metres, got {text!r}"
-            )
+            raise ValueError(bad)
         return f"fixed:{val:g}"
     raise ValueError(f"--ellipsoid-scale must be 'auto' or 'fixed:<m>', got {text!r}")
 
@@ -187,6 +183,7 @@ class ExportSettings:
     #: ellipsoid colour encodes the point (default) or the kind (#15150)
     ellipsoid_color_by: str = "point"
     ellipsoid_panel: Any = None  # ``PanelSettings``; ``None``: packaged file
+    lighting: Any = None  # MuJoCo scene ``LightingSettings``; ``None``: studio
     #: a vector flag was passed: a kinematic replay still draws vectors
     vectors_requested: bool = False
     #: video frames the frame on the contact instant is repeated (#15150);
@@ -1156,8 +1153,9 @@ def export_swing(
         overlays = replace(overlays or ClipOverlays(), flight=flight)
     overlays = ellipsoid_hud.with_panel(overlays, settings, feed, factors)
     for plan in plans:
+        clip = flight_inset.for_clip(overlays, plan.window)
         clip_paths, frames, glyphs = _export_clip(
-            backend, swing, settings, plan, out_dir, feed, factory, overlays
+            backend, swing, settings, plan, out_dir, feed, factory, clip
         )
         paths.update(clip_paths)
         counts[plan.suffix] = frames
