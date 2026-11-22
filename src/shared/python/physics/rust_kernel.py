@@ -16,7 +16,6 @@ Principles:
 
 from __future__ import annotations
 
-import importlib.metadata
 from dataclasses import dataclass
 from typing import Any
 
@@ -32,11 +31,12 @@ logger = get_logger(__name__)
 
 # ── Try importing the Rust wheel ──────────────────────────────────────────────
 
-#: Minimum ``upstream_physics`` version this module accepts.  It must equal the
-#: crate version in ``rust_core/upstream-physics/Cargo.toml`` (enforced by
-#: ``tests/unit/physics/test_rust_kernel_version_guard.py``).  Bump both when
-#: the kernel's physics changes (2.2.0: spin-dependent drag, #15460).
-MIN_KERNEL_VERSION = "2.2.0"
+#: Minimum ``PHYSICS_REVISION`` this module accepts.  It must equal the
+#: ``PHYSICS_REVISION`` const in ``rust_core/upstream-physics/src/lib.rs``
+#: (enforced by ``tests/unit/physics/test_rust_kernel_version_guard.py``).
+#: A wheel built before the attribute existed reads as revision 0.
+#: 2: spin-dependent drag (#15460).
+MIN_PHYSICS_REVISION = 2
 
 _REBUILD_HINT = (
     "maturin develop (or maturin build --features python --release) "
@@ -44,45 +44,22 @@ _REBUILD_HINT = (
 )
 
 
-def _version_tuple(version: str | None) -> tuple[int, ...] | None:
-    """Parse ``"2.2.0"`` into ``(2, 2, 0)``; ``None`` if unparseable."""
-    parts = (version or "").split(".")[:3]
-    if len(parts) < 2 or not all(p.isdigit() for p in parts):
-        return None
-    return tuple(int(p) for p in parts)
-
-
-def _installed_kernel_version(module: Any) -> str | None:
-    """Return the installed wheel version, or ``None`` when it is unknown."""
-    try:
-        return importlib.metadata.version("upstream-physics")
-    except importlib.metadata.PackageNotFoundError:
-        return getattr(module, "__version__", None)
-
-
-def _kernel_is_current(installed: str | None) -> bool:
-    """True when ``installed`` is at least ``MIN_KERNEL_VERSION``."""
-    have = _version_tuple(installed)
-    need = _version_tuple(MIN_KERNEL_VERSION)
-    return have is not None and need is not None and have >= need
-
-
 def kernel_is_usable(module: Any) -> bool:
-    """Return True when ``module`` is a kernel at least ``MIN_KERNEL_VERSION``.
+    """Return True when ``module`` has ``PHYSICS_REVISION >= MIN_PHYSICS_REVISION``.
 
     Shared by every facade that imports ``upstream_physics``.  Postcondition:
     never raises; when the kernel is stale it logs one warning naming the
-    installed and required versions and the rebuild command, and returns False.
+    installed and required revisions and the rebuild command, and returns False.
     """
-    installed = _installed_kernel_version(module)
-    if _kernel_is_current(installed):
+    installed = getattr(module, "PHYSICS_REVISION", 0)
+    if isinstance(installed, int) and installed >= MIN_PHYSICS_REVISION:
         return True
     logger.warning(
-        "upstream_physics %s is older than the required %s (it lacks "
-        "recent physics such as spin-dependent drag) - using the "
+        "upstream_physics physics revision %s is older than the required %s "
+        "(it lacks recent physics such as spin-dependent drag) - using the "
         "pure-Python fallback. Rebuild with: %s",
-        installed or "of unknown version",
-        MIN_KERNEL_VERSION,
+        installed,
+        MIN_PHYSICS_REVISION,
         _REBUILD_HINT,
     )
     return False
@@ -111,7 +88,7 @@ def is_rust_available() -> bool:
     """Return True if a current Rust physics kernel is available.
 
     Postcondition: never raises.  False when the wheel is missing or older
-    than ``MIN_KERNEL_VERSION``; callers then use the Python fallback.
+    than ``MIN_PHYSICS_REVISION``; callers then use the Python fallback.
     """
     return _RUST_AVAILABLE
 

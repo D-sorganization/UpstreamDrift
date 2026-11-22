@@ -177,7 +177,7 @@ class TestAerodynamicsEngineParity:
         )
 
         if not kernel_is_current():
-            pytest.skip("upstream_physics older than rust_kernel.MIN_KERNEL_VERSION")
+            pytest.skip("upstream_physics older than rust_kernel.MIN_PHYSICS_REVISION")
         from src.shared.python.physics.ball_flight_physics import (
             BallProperties,
             EnvironmentalConditions,

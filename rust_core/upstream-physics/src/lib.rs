@@ -94,9 +94,20 @@ fn calculate_impact_py(
         .map_err(pyo3::exceptions::PyValueError::new_err)
 }
 
+/// Physics revision of this kernel, exported to Python as `PHYSICS_REVISION`.
+///
+/// Bump this whenever kernel physics changes (the release version is locked
+/// to the project version, so it cannot flag stale wheels).  Python's
+/// `rust_kernel.MIN_PHYSICS_REVISION` must be raised to match.
+/// 2: spin-dependent drag (#15460).
+#[cfg(feature = "python")]
+const PHYSICS_REVISION: u32 = 2;
+
 #[cfg(feature = "python")]
 #[pymodule]
 fn upstream_physics(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add("PHYSICS_REVISION", PHYSICS_REVISION)?;
+
     // RK4 Integrator
     m.add_class::<rk4::IntegratorConfig>()?;
     m.add_class::<rk4::IntegrationResult>()?;
