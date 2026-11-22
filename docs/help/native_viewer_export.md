@@ -124,7 +124,7 @@ out.
 - **What it is not:** Not part of the dynamics model, and not the captured
   ball. Moving it with `--ball-position-shift` is a display choice.
 
-## Claims Not To Make
+## Claims Not to Make
 
 - Do not call torques, ground forces, grip forces, or palm-thumb forces measured.
 - Do not say a ground force came from force plates.
