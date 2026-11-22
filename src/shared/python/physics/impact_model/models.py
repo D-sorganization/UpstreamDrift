@@ -306,7 +306,7 @@ class SpringDamperImpactModel(ImpactModel):
         self.dt = dt
 
     @precondition(
-        lambda self, x_ball, v_ball, x_club, v_club, n, m_club, penetration, params, damping: (
+        lambda self, x_ball, v_ball, x_club, v_club, n, m_club, penetration, gains: (
             m_club > 0
         ),
         "Clubhead mass must be positive",
@@ -320,13 +320,16 @@ class SpringDamperImpactModel(ImpactModel):
         n: np.ndarray,
         m_club: float,
         penetration: float,
-        params: ImpactParameters,
-        damping: float,
+        gains: tuple[float, float],
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-        """Advance positions and velocities during one contact time step."""
+        """Advance positions and velocities during one contact time step.
+
+        ``gains`` is ``(stiffness [N/m], damping [N*s/m])``.
+        """
+        stiffness, damping = gains
         max_force = 1e5  # [N] max contact force
         v_rel_normal = np.dot(v_ball - v_club, n)
-        f_spring = params.contact_stiffness * penetration
+        f_spring = stiffness * penetration
         f_damper = -damping * v_rel_normal
         f_magnitude = max(0.0, min(f_spring + f_damper, max_force))
         f_contact = f_magnitude * n
@@ -337,6 +340,34 @@ class SpringDamperImpactModel(ImpactModel):
         x_b = x_ball + v_b * self.dt
         x_c = x_club + v_c * self.dt
         return x_b, v_b, x_c, v_c
+
+    @staticmethod
+    def _apply_friction(
+        pre_state: PreImpactState,
+        params: ImpactParameters,
+        n: np.ndarray,
+        v_ball: np.ndarray,
+        v_club: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Tangential Coulomb impulse sized by the integrated normal impulse.
+
+        Returns the ball and club velocities and the ball spin after the impulse.
+        """
+        m_ball, m_club = GOLF_BALL_MASS_KG, pre_state.clubhead_mass
+        j_normal = float(np.dot(v_ball - pre_state.ball_velocity, n)) * m_ball
+        v_rel = pre_impact_contact_relative_velocity(pre_state)
+        j_tangent = RigidBodyImpactModel()._compute_friction_impulse(
+            pre_state,
+            v_rel,
+            float(np.dot(v_rel, n)),
+            n,
+            j_normal,
+            params.friction_coefficient,
+        )
+        spin = pre_state.ball_angular_velocity + (
+            GOLF_BALL_RADIUS_M / GOLF_BALL_MOMENT_OF_INERTIA_KG_M2
+        ) * np.cross(j_tangent, n)
+        return v_ball + j_tangent / m_ball, v_club - j_tangent / m_club, spin
 
     @precondition(
         lambda self, pre_state, params: params.contact_stiffness > 0,
@@ -377,10 +408,13 @@ class SpringDamperImpactModel(ImpactModel):
         x_club: np.ndarray = np.zeros(3)
         v_club: np.ndarray = pre_state.clubhead_velocity.copy()
 
-        damping = kelvin_voigt_damping_for_cor(
+        gains = (
             params.contact_stiffness,
-            m_ball * m_club / (m_ball + m_club),
-            params.cor,
+            kelvin_voigt_damping_for_cor(
+                params.contact_stiffness,
+                m_ball * m_club / (m_ball + m_club),
+                params.cor,
+            ),
         )
         contact_time = 0.0
         max_time = 0.005  # 5 ms max contact time [s]
@@ -398,8 +432,7 @@ class SpringDamperImpactModel(ImpactModel):
                     n,
                     m_club,
                     -gap,
-                    params,
-                    damping,
+                    gains,
                 )
                 contact_time += self.dt
             elif contact_time > 0:
@@ -414,22 +447,9 @@ class SpringDamperImpactModel(ImpactModel):
                 if np.dot(x_ball - x_club, n) - GOLF_BALL_RADIUS_M < 0:
                     continue
 
-        # Tangential Coulomb impulse sized by the integrated normal impulse.
-        j_normal = float(np.dot(v_ball - pre_state.ball_velocity, n)) * m_ball
-        v_rel = pre_impact_contact_relative_velocity(pre_state)
-        j_tangent = RigidBodyImpactModel()._compute_friction_impulse(
-            pre_state,
-            v_rel,
-            float(np.dot(v_rel, n)),
-            n,
-            j_normal,
-            params.friction_coefficient,
+        v_ball, v_club, ball_spin = self._apply_friction(
+            pre_state, params, n, v_ball, v_club
         )
-        v_ball = v_ball + j_tangent / m_ball
-        v_club = v_club - j_tangent / m_club
-        ball_spin = pre_state.ball_angular_velocity + (
-            GOLF_BALL_RADIUS_M / GOLF_BALL_MOMENT_OF_INERTIA_KG_M2
-        ) * np.cross(j_tangent, n)
 
         # Energy calculation
         ke_ball_pre = (
