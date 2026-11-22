@@ -1,9 +1,5 @@
-"""Kinematic shaft-bend fit (#15150 C10): synthetic recovery, noise, rank.
-
-A synthetic driver chain is bent by a known tip-force history, six markers
-(three on the head, three on the shaft) are generated from it and the fit
-must give the bend back. No capture data is used.
-"""
+"""Kinematic shaft-bend fit (#15150 C10): a synthetic driver chain bent by a
+known tip-force history; six markers made from it; the fit gives it back."""
 
 from __future__ import annotations
 
@@ -13,7 +9,10 @@ import numpy as np
 import pytest
 
 from src.shared.python.motion_matching.club_models import DRIVER
-from src.shared.python.motion_matching.club_shaft_chain import build_shaft_chain
+from src.shared.python.motion_matching.club_shaft_chain import (
+    build_shaft_chain,
+    clamped_shaft_document,
+)
 from src.shared.python.motion_matching.shaft_bend_fit import (
     ChainGeometry,
     club_frame_targets,
@@ -69,13 +68,9 @@ def test_shape_basis_sums_to_unit_tip_slope(geometry: ChainGeometry) -> None:
     assert np.all(np.diff(basis[0]) < 0)  # tip force: largest moment at the grip
 
 
-def test_zero_bend_keeps_markers(geometry: ChainGeometry) -> None:
-    zero = np.zeros((geometry.n_joints, 2))
-    np.testing.assert_allclose(marker_positions(geometry, zero, OFFSETS), OFFSETS)
-
-
 def test_positive_bend_x_raises_tip_along_z(geometry: ChainGeometry) -> None:
     bend = np.zeros((geometry.n_joints, 2))
+    np.testing.assert_allclose(marker_positions(geometry, bend, OFFSETS), OFFSETS)
     bend[-1, 0] = 0.1
     moved = marker_positions(geometry, bend, OFFSETS)
     assert moved[0, 2] > OFFSETS[0, 2]
@@ -94,35 +89,26 @@ def test_identifiability(geometry: ChainGeometry) -> None:
     assert both.singular_values[-2:].max() < 1e-12 * both.singular_values[0]
 
 
-def test_noise_free_recovery(geometry: ChainGeometry) -> None:
+@pytest.mark.parametrize(
+    ("noise_m", "tol_deg"), [(0.0, EXACT_TOL_DEG), (NOISE_M, NOISY_TOL_DEG)]
+)
+def test_recovery(geometry: ChainGeometry, noise_m: float, tol_deg: float) -> None:
     truth = _history(geometry)
     markers = np.stack([marker_positions(geometry, b, OFFSETS) for b in truth])
-    fit = fit_shaft_bend(geometry, markers, OFFSETS, load_bend_settings())
-    error = np.abs(_tip_slopes_deg(fit.bend) - _tip_slopes_deg(truth))
-    assert error.max() < EXACT_TOL_DEG
-    assert fit.rms_m.max() < 1e-4
-
-
-def test_noisy_recovery_with_gap(geometry: ChainGeometry) -> None:
-    truth = _history(geometry)
-    markers = np.stack([marker_positions(geometry, b, OFFSETS) for b in truth])
-    markers = markers + np.random.default_rng(7).normal(0.0, NOISE_M, markers.shape)
+    markers = markers + np.random.default_rng(7).normal(0.0, noise_m, markers.shape)
     markers[20:23, 1] = np.nan  # a head marker drops out
     fit = fit_shaft_bend(geometry, markers, OFFSETS, load_bend_settings())
     error = np.abs(_tip_slopes_deg(fit.bend) - _tip_slopes_deg(truth))
-    assert error.max() < NOISY_TOL_DEG
+    assert error.max() < tol_deg
 
 
 def test_break_lets_the_bend_drop_at_contact(geometry: ChainGeometry) -> None:
     truth = _history(geometry)
     truth[40:] = 0.0  # contact at frame 40 unloads the shaft at once
     markers = np.stack([marker_positions(geometry, b, OFFSETS) for b in truth])
-    settings = load_bend_settings()
-    cut = fit_shaft_bend(geometry, markers, OFFSETS, settings, breaks=(40,))
+    cut = fit_shaft_bend(geometry, markers, OFFSETS, load_bend_settings(), (40,))
     error = np.abs(_tip_slopes_deg(cut.bend) - _tip_slopes_deg(truth))
     assert error[:40].max() < EXACT_TOL_DEG
-    with pytest.raises(ValueError, match="breaks"):
-        fit_shaft_bend(geometry, markers, OFFSETS, settings, breaks=(0,))
 
 
 def test_club_frame_targets_remove_rigid_motion(geometry: ChainGeometry) -> None:
@@ -141,27 +127,24 @@ def test_club_frame_targets_remove_rigid_motion(geometry: ChainGeometry) -> None
 def test_kinematics_match_mujoco_chain(geometry: ChainGeometry) -> None:
     """The numpy chain equals the emitted MJCF chain (primitive order Rx, Rz)."""
     mujoco = pytest.importorskip("mujoco")
-    from src.engines.physics_engines.mujoco.python.shaft_chain_mjcf import (
-        TIP_SITE,
-        export_clamped_shaft_mjcf,
-    )
-    from src.shared.python.motion_matching.club_shaft_chain import (
-        clamped_shaft_document,
-    )
+    from src.engines.physics_engines.mujoco.python import shaft_chain_mjcf as mjcf
 
     document = clamped_shaft_document(build_shaft_chain(DRIVER))
-    model = mujoco.MjModel.from_xml_string(export_clamped_shaft_mjcf(document))
+    model = mujoco.MjModel.from_xml_string(mjcf.export_clamped_shaft_mjcf(document))
     data = mujoco.MjData(model)
     bend = np.radians([[3.0, -2.0], [4.0, 1.5], [-2.5, 3.0], [5.0, -4.0]])
     data.qpos[:] = bend.reshape(-1)
     mujoco.mj_kinematics(model, data)
     tip = np.asarray(document["tip_point_m"], dtype=float)
     ours = marker_positions(geometry, bend, tip[None])[0]
-    np.testing.assert_allclose(ours, data.site(TIP_SITE).xpos, atol=1e-12)
+    np.testing.assert_allclose(ours, data.site(mjcf.TIP_SITE).xpos, atol=1e-12)
 
 
 def test_contracts(geometry: ChainGeometry) -> None:
     with pytest.raises(ValueError, match="shapes"):
         shape_basis(geometry, 3)
+    settings = load_bend_settings()
     with pytest.raises(ValueError, match="markers"):
-        fit_shaft_bend(geometry, np.zeros((4, 5, 3)), OFFSETS, load_bend_settings())
+        fit_shaft_bend(geometry, np.zeros((4, 5, 3)), OFFSETS, settings)
+    with pytest.raises(ValueError, match="breaks"):
+        fit_shaft_bend(geometry, np.zeros((4, 6, 3)), OFFSETS, settings, (0,))

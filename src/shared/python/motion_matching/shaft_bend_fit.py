@@ -1,23 +1,17 @@
 """Kinematic shaft-bend fit of the chain shaft to club markers (#15150 C10).
 
-A rigid club fitted to markers on both the head and the shaft turns the head
-part of the way toward the shaft markers when the real shaft is bent, so the
-face reads less loft than the head markers carry. This module keeps the club
-(grip) body where the body fit put it and solves, over the whole trajectory,
-for the bend coordinates of the chain shaft
-(:mod:`club_shaft_chain`: joints ``Rx`` then ``Rz`` about the club ``x`` and
-``z`` axes at ``(0, y_i, HEAD_HEIGHT_M)``) that carry the head markers onto
-their targets while the shaft markers stay on theirs.
+A rigid club fitted to head and shaft markers splits a real shaft bend between
+them. Keeping the club (grip) body fixed, this solves over the whole trajectory
+for the bend of the :mod:`club_shaft_chain` joints (``Rx`` then ``Rz`` about
+club ``x`` and ``z`` at ``(0, y_i, HEAD_HEIGHT_M)``) that carries the head
+markers onto their targets while the shaft markers stay on theirs.
 
-Identifiability: per bending plane a rigid head-marker triad sees two numbers,
-the tip slope and the tip offset; the chain has one bending coordinate per
-joint per plane, so the remaining joint combinations are unobservable (a
-shaft marker just past joint 0 sees that joint weakly). Torsion is not fitted:
-the default chain has no twist coordinate and the head-triad roll about the
-shaft is confounded with the face-roll calibration. The bend is therefore
-parameterised by static beam shapes (:func:`shape_basis`) whose amplitudes are
-tip slopes, bounded and smoothed by the named settings in
-``shaft_bend_fit_settings.json``. Purely kinematic: no spring, mass or effort.
+Identifiability (:func:`observability`): per plane a rigid head triad sees the
+tip slope and tip offset only, and a shaft marker past joint 0 adds that joint
+weakly; torsion is not fitted (no chain twist coordinate; the head-triad roll
+is confounded with the face-roll calibration). The bend is therefore a sum of
+static beam shapes (:func:`shape_basis`) whose amplitudes are tip slopes,
+bounded and smoothed by ``shaft_bend_fit_settings.json``. Kinematic only.
 """
 
 from __future__ import annotations
@@ -55,17 +49,16 @@ class BendSettings:
     solver_tolerance: float
 
     def __post_init__(self) -> None:
-        if self.shapes_per_plane not in range(1, MAX_SHAPES + 1):
-            raise ValueError(f"shapes_per_plane must be 1..{MAX_SHAPES}")
         weights = (self.smoothness_weight_m_per_rad, self.ridge_weight_m_per_rad)
-        if not all(math.isfinite(w) and w >= 0 for w in weights):
-            raise ValueError("regularisation weights must be finite and >= 0")
-        if not 0 < self.max_tip_slope_deg < 90:
-            raise ValueError("max_tip_slope_deg must lie in (0, 90)")
-        if not (0 < self.rank_relative_tolerance < 1 and self.solver_tolerance > 0):
-            raise ValueError("tolerances must be positive (rank tolerance < 1)")
-        if self.solver_max_nfev < 1:
-            raise ValueError("solver_max_nfev must be positive")
+        if not (
+            self.shapes_per_plane in range(1, MAX_SHAPES + 1)
+            and all(math.isfinite(w) and w >= 0 for w in weights)
+            and 0 < self.max_tip_slope_deg < 90
+            and 0 < self.rank_relative_tolerance < 1
+            and self.solver_tolerance > 0
+            and self.solver_max_nfev >= 1
+        ):
+            raise ValueError(f"invalid shaft-bend settings: {self}")
 
 
 def load_bend_settings(path: Path | None = None) -> BendSettings:
@@ -229,22 +222,13 @@ class BendFit:
 
 
 def _sparsity(frames: int, markers: int, n_par: int) -> Any:
-    from scipy.sparse import lil_matrix
+    """Jacobian pattern: markers per frame, second differences, ridge."""
+    from scipy import sparse
 
-    rows = frames * markers * 3 + max(frames - 2, 0) * n_par + frames * n_par
-    pattern = lil_matrix((rows, frames * n_par), dtype=int)
-    for k in range(frames):
-        block = slice(k * markers * 3, (k + 1) * markers * 3)
-        pattern[block, k * n_par : (k + 1) * n_par] = 1
-    base = frames * markers * 3
-    for k in range(frames - 2):
-        for p in range(n_par):
-            for j in range(3):
-                pattern[base + k * n_par + p, (k + j) * n_par + p] = 1
-    base += max(frames - 2, 0) * n_par
-    for c in range(frames * n_par):
-        pattern[base + c, c] = 1
-    return pattern
+    blocks = sparse.kron(sparse.eye(frames), np.ones((markers * 3, n_par)))
+    stencil = sparse.diags([1, 1, 1], [0, 1, 2], shape=(max(frames - 2, 0), frames))
+    smooth = sparse.kron(stencil, sparse.eye(n_par))
+    return sparse.vstack([blocks, smooth, sparse.eye(frames * n_par)]).tolil()
 
 
 def fit_shaft_bend(
@@ -287,25 +271,18 @@ def fit_shaft_bend(
         amps = x.reshape(frames, n_par)
         error = (_positions(geometry, bend_of(x), offsets) - goal) * valid[..., None]
         smooth = (amps[2:] - 2.0 * amps[1:-1] + amps[:-2]) * keep[:, None]
-        return np.concatenate(
-            [
-                error.reshape(-1),
-                settings.smoothness_weight_m_per_rad * smooth.reshape(-1),
-                settings.ridge_weight_m_per_rad * x,
-            ]
-        )
+        smooth = settings.smoothness_weight_m_per_rad * smooth.reshape(-1)
+        ridge = settings.ridge_weight_m_per_rad * x
+        return np.concatenate([error.reshape(-1), smooth, ridge])
 
     bound = math.radians(settings.max_tip_slope_deg)
-    tol = settings.solver_tolerance
     result = least_squares(
         residuals,
         np.zeros(frames * n_par),
         jac_sparsity=_sparsity(frames, len(offsets), n_par),
         bounds=(-bound, bound),
-        ftol=tol,
-        xtol=tol,
-        gtol=tol,
         max_nfev=settings.solver_max_nfev,
+        **dict.fromkeys(("ftol", "xtol", "gtol"), settings.solver_tolerance),
     )
     bend = bend_of(result.x)
     error = np.linalg.norm(_positions(geometry, bend, offsets) - targets, axis=2)
@@ -313,11 +290,5 @@ def fit_shaft_bend(
     with np.errstate(invalid="ignore", divide="ignore"):
         rms = np.sqrt(squared.sum(1) / valid.sum(1))
         marker_rms = np.sqrt(squared.sum(0) / valid.sum(0))
-    return BendFit(
-        result.x.reshape(frames, n_par),
-        bend,
-        rms,
-        marker_rms,
-        bool(result.success),
-        str(result.message),
-    )
+    amplitudes = result.x.reshape(frames, n_par)
+    return BendFit(amplitudes, bend, rms, marker_rms, result.success, result.message)
