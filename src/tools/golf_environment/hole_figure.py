@@ -66,26 +66,9 @@ def _draw_shots(
         kw = {"color": shot.colour, "lw": fig["line_width"], "zorder": 5}
         plan.plot(x, y, label=_legend_label(shot, decimals), **kw)
         side.plot(x, z, **kw)
-        for ax, v in ((plan, y[-1]), (side, z[-1])):
-            ax.plot(
-                x[-1],
-                v,
-                "o",
-                ms=fig["landing_marker_size"],
-                mfc=shot.colour,
-                mec="white",
-                zorder=7,
-            )
-        apex = int(np.argmax(z))
-        side.annotate(
-            f"{z[apex]:.0f} m",
-            (x[apex], z[apex]),
-            xytext=(0, 5),
-            textcoords="offset points",
-            ha="center",
-            color=shot.colour,
-            fontsize=fig["font_size"],
-        )
+        dot = {"ms": fig["landing_marker_size"], "mfc": shot.colour, "mec": "white"}
+        plan.plot(x[-1], y[-1], "o", zorder=7, **dot)
+        side.plot(x[-1], z[-1], "o", zorder=7, **dot)
 
 
 def write_hole_figure(
@@ -109,9 +92,6 @@ def write_hole_figure(
         sharex=True,
         figsize=(fig_s["width_in"], fig_s["height_in"]),
         dpi=fig_s["dpi"],
-        gridspec_kw={
-            "height_ratios": [fig_s["plan_height_ratio"], fig_s["side_height_ratio"]]
-        },
     )
     plan.set_facecolor(fig_s["rough_rgb"])
     _draw_hole(plan, hole, fig_s, length)

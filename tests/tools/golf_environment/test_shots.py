@@ -94,4 +94,3 @@ def test_settings_load_with_sources_and_colours() -> None:
     settings = sh.load_shots_settings()
     assert settings["sources"] and settings["hole"]["length_m"] > 200.0
     assert all(len(c) == 4 for c in settings["shot_colours_rgba"])
-
