@@ -1,0 +1,24 @@
+{
+  "order": ["experimental", "prototype", "beta", "stable"],
+  "deprecated": "deprecated",
+  "default_min_maturity": "deprecated",
+  "chip_hidden_levels": ["stable"],
+  "status_to_maturity": {
+    "experimental": "experimental",
+    "unadvertised_experimental": "experimental",
+    "alpha": "experimental",
+    "planned": "experimental",
+    "prototype": "prototype",
+    "beta": "beta",
+    "deprecated": "deprecated",
+    "ready": "stable",
+    "gui_ready": "stable",
+    "engine_ready": "stable",
+    "release_ready": "stable",
+    "available": "stable",
+    "stable": "stable",
+    "external": "stable",
+    "utility": "stable"
+  },
+  "sources": "One ordered maturity scale for the launcher loader, the launcher API and the desktop tile chip. 'order' runs lowest to highest. 'deprecated' is a lifecycle end state, not a rung: it ranks below every rung, so it is shown only when min_maturity is 'deprecated', and any higher floor hides it. The default floor is 'deprecated', which shows every tile that is shown today. 'status_to_maturity' reconciles the models.yaml status vocabulary (ready, beta, broken, ...) with maturity by mapping, for tiles that declare no maturity; a status absent from the map (for example broken or unavailable, which describe runtime health rather than maturity) falls back to 'stable' so the filter never hides a tile by guessing. 'chip_hidden_levels' lists levels that draw no chip because stable is the unremarkable case."
+}
