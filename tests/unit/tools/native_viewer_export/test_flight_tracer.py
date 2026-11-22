@@ -20,6 +20,7 @@ from src.shared.python.impact_parameters.flight_report import FlightSummary
 from src.shared.python.impact_parameters.target_frame import TargetFrame
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.tools.native_viewer_export import cli, flight_tracer as tracer
+from src.tools.native_viewer_export.contact_verdict import ContactVerdict
 from src.tools.native_viewer_export.ball import BallPlacement
 from src.tools.native_viewer_export.core import (
     ExportSettings,
@@ -156,7 +157,10 @@ def test_flight_starts_from_the_state_the_impact_card_reads(monkeypatch) -> None
         return _flight()
 
     monkeypatch.setattr(tracer, "flight_for_impact", fake)
-    flight = tracer.playback_from_series(series, 0.1, BALL, DEFAULTS)
+    # BALL lies 0.2 m off the face (a miss): the verdict is forced to contact
+    # so the last-sample launch path stays covered
+    hit = ContactVerdict(contact=True)
+    flight = tracer.playback_from_series(series, 0.1, BALL, DEFAULTS, verdict=hit)
     assert seen == [(99, (1.0, 0.0, 0.0))]  # last sample before the impact time
     end = flight.flown(99.0)
     assert end is not None and end[-1, 0] == pytest.approx(1.0 + 160.0)  # along +X
