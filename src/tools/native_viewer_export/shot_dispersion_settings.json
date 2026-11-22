@@ -15,6 +15,32 @@
     "base_club_roll_deg": "Mean club roll in the hands (degrees) the random variation is added to; 0 replays the matched swing as measured.",
     "base_ball_shift_m": "Mean ball shift along the target line (metres, positive toward the target) the random variation is added to.",
     "ellipse_sigma": "Ellipse of the landing points drawn at this many standard deviations (1 = one sigma, from the sample covariance).",
-    "min_points_for_ellipse": "A covariance needs at least three landing points to be a meaningful ellipse; fewer draw no ellipse."
+    "min_points_for_ellipse": "A covariance needs at least three landing points to be a meaningful ellipse; fewer draw no ellipse.",
+    "plot": "Presentation only: colours, sizes and resolution of the dispersion figure; margin_fraction pads the plan and profile limits; the zoom panel shows only the landing points at equal scale (zoom_margin_fraction of their spread, at least zoom_min_half_width_m) so the ellipse is readable."
+  },
+  "plot": {
+    "dpi": 130,
+    "figsize_in": [
+      16.0,
+      8.0
+    ],
+    "colormap": "tab10",
+    "trace_linewidth": 1.8,
+    "landing_marker_size": 60,
+    "landing_marker_edge": "black",
+    "ellipse_edge_color": "black",
+    "ellipse_linewidth": 2.0,
+    "target_line_color": "grey",
+    "tee_marker_size": 70,
+    "font_size": 11,
+    "table_font_size": 11,
+    "table_row_scale": 1.6,
+    "title_font_size": 13,
+    "grid_alpha": 0.3,
+    "title": "Shot Dispersion from Small Random Variations",
+    "zoom_margin_fraction": 0.25,
+    "zoom_min_half_width_m": 0.5,
+    "zoom_title": "Landing Points (Equal Scale)",
+    "margin_fraction": 0.1
   }
 }
