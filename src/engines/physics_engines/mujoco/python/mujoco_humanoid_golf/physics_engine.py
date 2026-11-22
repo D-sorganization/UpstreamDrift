@@ -92,6 +92,7 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
         self.xml_path: str | None = None
         self._force_torque_source: Any | None = None
         self._segment_ke_provider: Any | None = None
+        self._interface_power: Any | None = None
         self._segment_group_catalog: Any | None = None
         self._segment_catalog_model: mujoco.MjModel | None = None
 
@@ -459,6 +460,33 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
         """Return qualified current rod reactions, or None for unavailable models."""
         frame = self.get_force_torque_frame()
         return None if frame is None else frame.axial_loads
+
+    def get_interface_power_frame(self) -> Any | None:
+        """Robertson–Winter interface power at the current state (#15390, #15399)."""
+        if self.model is None or self.data is None:
+            return None
+        if (
+            self._interface_power is None
+            or self._interface_power.model is not self.model
+        ):
+            from .interface_power import MujocoInterfacePowerAnalyzer
+
+            self._interface_power = MujocoInterfacePowerAnalyzer(self.model)
+        qacc = np.asarray(self.data.qacc, dtype=np.float64)
+        if not np.isfinite(qacc).all():
+            import mujoco
+
+            scratch = mujoco.MjData(self.model)
+            scratch.qpos[:] = self.data.qpos
+            scratch.qvel[:] = self.data.qvel
+            mujoco.mj_forward(self.model, scratch)
+            qacc = np.asarray(scratch.qacc, dtype=np.float64)
+        return self._interface_power.frame_at(
+            np.asarray(self.data.qpos, dtype=np.float64),
+            np.asarray(self.data.qvel, dtype=np.float64),
+            qacc,
+            time_s=float(self.data.time),
+        )
 
     def segment_group_catalog(self):
         """Heuristic legs/pelvis/torso/arms/club catalog for the loaded model."""

@@ -110,11 +110,16 @@ class SimRenderingMixin:
                 scene_option=self.scene_option,
             )
 
+        iface_frame = self._current_interface_power_frame()
+        net_power_frame, net_power_scale = self._apply_net_power_scene_colors(
+            iface_frame
+        )
         ke_values = self._apply_stored_ke_scene_colors()
         axial_frame, scale = self._apply_axial_scene_colors()
 
         glyphs = self._build_overlay_glyphs()
         self._render_force_glyphs(self.renderer.scene, glyphs)
+        self._render_interface_power_glyphs(self.renderer.scene, iface_frame)
         self._render_segment_ke_globes(self.renderer.scene)
 
         try:
@@ -143,7 +148,12 @@ class SimRenderingMixin:
         if self.meshcat_adapter:
             try:
                 self._update_meshcat_frame_overlays(
-                    glyphs, axial_frame, scale, ke_values
+                    glyphs,
+                    axial_frame,
+                    scale,
+                    ke_values,
+                    net_power_frame,
+                    net_power_scale,
                 )
             except (RuntimeError, ValueError, AttributeError) as exc:
                 logger.debug("Counterfactual vector rendering failed: %s", exc)
@@ -166,11 +176,17 @@ class SimRenderingMixin:
         axial_frame: Any,
         scale: Any,
         ke_values: dict[str, float | None] | None,
+        net_power_frame: Any,
+        net_power_scale: Any,
     ) -> None:
         """Push one frame of glyphs, segment KE globes, and vector overlays to MeshCat."""
         if self.meshcat_adapter is None or self.data is None:
             return
         self.meshcat_adapter.update(self.data)
+        if net_power_scale is not None:
+            self.meshcat_adapter.update_net_power_colors(
+                net_power_frame, net_power_scale
+            )
         ke_scale = getattr(self, "stored_ke_color_scale", None)
         if ke_scale is not None:
             self.meshcat_adapter.update_stored_ke_colors(ke_values, ke_scale)
@@ -232,6 +248,66 @@ class SimRenderingMixin:
                 "will be black. The GL context is likely invalid.",
                 frame_stats(rgb),
             )
+
+    def _current_interface_power_frame(self: Any) -> Any:
+        if self.engine is None:
+            return None
+        try:
+            return self.engine.get_interface_power_frame()
+        except (TypeError, ValueError, RuntimeError) as exc:
+            logger.debug("Interface power sample unavailable: %s", exc)
+            return None
+
+    def _apply_net_power_scene_colors(self: Any, iface: Any) -> tuple[Any, Any]:
+        from src.shared.python.body_part_viz.mujoco_force_colors import (
+            unshaded_geom_ids,
+        )
+        from src.shared.python.body_part_viz.mujoco_scalar_colors import (
+            apply_mujoco_scalar_scene_colors,
+        )
+        from src.shared.python.body_part_viz.segment_net_power import (
+            net_power_frame_from_interface,
+        )
+
+        scale = getattr(self, "net_power_color_scale", None)
+        if scale is None or not scale.enabled:
+            self._refresh_net_power_legend()
+            return None, scale
+        try:
+            if iface is None:
+                self._refresh_net_power_legend()
+                return None, scale
+            presentation = net_power_frame_from_interface(iface, scale)
+            keep = unshaded_geom_ids(self.model, ())
+            apply_mujoco_scalar_scene_colors(
+                self.model,
+                self.renderer.scene,
+                presentation.segment_frame.values,
+                scale,
+                keep_geoms=keep,
+            )
+            self._cached_net_power_presentation = presentation
+            self._refresh_net_power_legend(presentation)
+            return presentation.segment_frame, scale
+        except (TypeError, ValueError, RuntimeError) as exc:
+            logger.debug("Net-power display unavailable: %s", exc)
+            self._refresh_net_power_legend()
+            return None, scale
+
+    def _render_interface_power_glyphs(
+        self: Any, scene: Any, iface: Any | None = None
+    ) -> None:
+        labels: tuple[str, ...] = ()
+        if getattr(self, "show_interface_power_glyphs", False) and iface is not None:
+            from .interface_power_scene import add_interface_power_glyphs_to_scene
+
+            receipt = add_interface_power_glyphs_to_scene(
+                self.model, self.data, scene, iface
+            )
+            labels = receipt.labels
+        presentation = getattr(self, "_cached_net_power_presentation", None)
+        if presentation is not None or labels:
+            self._refresh_net_power_legend(presentation, labels=labels)
 
     def _apply_axial_scene_colors(self: Any) -> tuple[Any, Any]:
         """Sample the optional force capability once for native and web renderers."""
