@@ -699,6 +699,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         open_swing_action.setToolTip("Play a run from the swing datastore")
         open_swing_action.triggered.connect(self.open_swing_result)
         file_menu.addAction(open_swing_action)
+        self.add_matched_swing_menu(file_menu)
 
         load_results_action = QAction("Load &Results...", self)
         load_results_action.triggered.connect(self.open_results)
