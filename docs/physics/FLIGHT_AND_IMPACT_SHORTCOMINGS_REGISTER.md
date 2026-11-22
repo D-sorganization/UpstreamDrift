@@ -173,6 +173,50 @@ Sizes quoted from tests are the band a test asserts, not a published value.
   minus 6.4 %, a **strict expected failure** (`xfail(strict=True)`) in
   `tests/unit/physics/test_reference_shots_15443.py`.
 - **Tracking:** #15443 (F1).
+- **F1 investigation (no kernel change):** wind-tunnel points, digitised with
+  their sources, are in `tests/unit/physics/wind_tunnel_drag_15443.json`. The
+  drag laws below were fitted to those points only; the five launch-monitor
+  rows were the held-out test. Launch spin ratios run from 0.08 (driver) to
+  0.46 (wedge), so the wedge flies above the measured range from launch on.
+
+| Re | Choi 2006 Cd | Current Cd at S = 0 | Fitted to Choi |
+| --- | --- | --- | --- |
+| 5e4 | 0.483 | 0.459 | 0.503 |
+| 7e4 | 0.428 | 0.351 | 0.428 |
+| 9e4 | 0.214 | 0.263 | 0.227 |
+| 1e5 | 0.204 | 0.240 | 0.208 |
+| 2.2e5 | 0.230 | 0.210 | 0.230 |
+
+  The current crisis is too broad (rms 0.034 against Choi). Refitting its
+  centre, width, floor and recovery centre to Choi gives centre 7.59e4,
+  width 0.065 decade, floor 0.187 and recovery centre 2.81e5 (rms 0.008),
+  and it matches the Lyu 2018 check (0.50 at 5e4, 0.21 at 1e5). The Bearman
+  and Harvey spin data fit a linear spin term of 0.159 through their
+  zero-spin value, 0.237 with a free intercept, or a hinge of 0.299 above
+  S 0.088 (rms 0.0008). Held-out carries (yd) with the Choi-fitted
+  Reynolds curve:
+
+| Spin term | PGA driver | LPGA driver | 6-iron | 7-iron | Wedge | Rows out |
+| --- | --- | --- | --- | --- | --- | --- |
+| Current law, 0.18 S | 265.5 | 216.5 | 190.1 | 168.0 | 127.3 | wedge carry |
+| 0.18 S | 266.3 | 220.2 | 190.7 | 169.0 | 127.5 | wedge carry |
+| 0.159 S | 268.3 | 221.8 | 193.9 | 172.1 | 130.2 | 6-iron carry |
+| 0.237 S, intercept | 272.7 | 224.6 | 188.6 | 165.9 | 123.4 | wedge carry |
+| Hinge 0.299 | 276.7 | 227.4 | 184.9 | 161.5 | 118.6 | 7-iron, wedge carry |
+| Reference | 275 | 218 | 183 | 172 | 136 | bands 5 % |
+
+  **Result:** no drag law fitted to the wind-tunnel data clears the wedge
+  carry band without pushing another row out. The 6-iron (4 % long) needs
+  more high-spin drag and the wedge (6 % short) needs less, and the measured
+  spin data rise more steeply above S 0.1, not less. Holding the spin term
+  flat above S 0.3, the end of the measured range, puts the 6-iron 6 % long.
+  Swapping in the Bearman and Harvey lift curve makes the drivers and the
+  wedge worse. The wedge row stays a strict expected failure. The Choi crisis
+  fit keeps the other 14 cases inside their bands and moves the iron and
+  wedge descents closer to the reference (6-iron 47.8 to 50.3 degrees), but
+  it was not applied because the slice could not flip the expected failure.
+  Remaining suspects: the 6-iron and wedge rows are recorded from memory,
+  and lift and drag above S 0.3 are unmeasured in these sources.
 
 ## Rollout and Reference Coverage
 
