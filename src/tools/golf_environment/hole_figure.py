@@ -230,6 +230,7 @@ def build_hole_figure(
     settings: dict[str, Any],
     units: DisplayUnits | None = None,
     label_at_landing: bool = False,
+    subtitle: str | None = None,
 ) -> tuple[Any, Any, Any]:
     """The figure and its (plan, profile) axes; the caller saves and closes it.
 
@@ -237,10 +238,13 @@ def build_hole_figure(
     each shot gets a box at its rest point stating carry, side, roll and total
     (the roll lines only for shots with a roll), inside the plan axes and clear
     of the legend and of each other. Shots with a roll also draw it on the
-    ground in both views. Without roll and label the figure is as before.
+    ground in both views. ``subtitle`` (non-empty) is a second title line, e.g.
+    the aim line. Without roll, label and subtitle the figure is as before.
     """
     if not shots:
         raise ValueError("at least one shot is required")
+    if subtitle is not None and not subtitle.strip():
+        raise ValueError("subtitle must not be empty")
     fig_s = settings["figure"]
     units = units or load_display_units()
     scale = units.distance_scale
@@ -273,8 +277,9 @@ def build_hole_figure(
     plan.set_ylabel(lateral)
     side.set_ylabel(height)
     side.set_xlabel(down_range)
+    title = "Plan View, Tee on the Left, Golfer's Right Is Down"
     plan.set_title(
-        "Plan View, Tee on the Left, Golfer's Right Is Down",
+        title if subtitle is None else f"{title}\n{subtitle}",
         fontsize=fig_s["title_font_size"],
     )
     plan.legend(
@@ -296,6 +301,7 @@ def write_hole_figure(
     settings: dict[str, Any],
     units: DisplayUnits | None = None,
     label_at_landing: bool = False,
+    subtitle: str | None = None,
 ) -> Path:
     """Write a PNG with plan view (top) and side profile (bottom); return ``path``.
 
@@ -304,7 +310,9 @@ def write_hole_figure(
     axis is in ``units`` (default: the display-units settings, yards). See
     :func:`build_hole_figure` for the roll segment and ``label_at_landing``.
     """
-    fig, _, _ = build_hole_figure(shots, hole, settings, units, label_at_landing)
+    fig, _, _ = build_hole_figure(
+        shots, hole, settings, units, label_at_landing, subtitle
+    )
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path)
     plt.close(fig)
