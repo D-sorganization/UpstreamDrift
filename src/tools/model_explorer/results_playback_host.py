@@ -22,6 +22,7 @@ from PyQt6.QtWidgets import (
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 
+from .default_match import MatchScenario, default_match, match_scenarios
 from .results_session import ResultsSession
 
 logger = get_logger(__name__)
@@ -39,6 +40,7 @@ class ResultsPlaybackHostMixin:
     visualization_widget: Any
     status_bar: Any
     export_video_action: Any
+    matched_swing_menu: Any
 
     # Provided by MainWidget (the File > Open Swing Result handler).
     open_results: Callable[[], None]
@@ -120,6 +122,40 @@ class ResultsPlaybackHostMixin:
         if ok and choice:
             run = runs[labels.index(choice)]
             self.load_results(run.path, run.engine)
+
+    def load_match_scenario(self, scenario: MatchScenario) -> bool:
+        """Open a matched swing and name it (and whether it is a demo) on screen."""
+        if not self.load_results(scenario.path):
+            return False
+        if self.playback_panel is not None:
+            self.playback_panel.set_heading(scenario.label)
+        frames = 0 if self._results is None else self._results.frame_count
+        self.status_bar.showMessage(f"Matched swing: {scenario.label}, {frames} frames")
+        return True
+
+    def load_default_match(self) -> bool:
+        """Open the default matched swing; False (with a status hint) if none."""
+        scenario = default_match()
+        if scenario is None:
+            self.status_bar.showMessage("No matched swing: see UD_DEFAULT_MATCH_BUNDLE")
+        return scenario is not None and self.load_match_scenario(scenario)
+
+    def add_matched_swing_menu(self, file_menu: Any) -> None:
+        """File > Open Matched Swing, listing the configured swings on open."""
+        self.matched_swing_menu = menu = file_menu.addMenu("Open &Matched Swing")
+        menu.aboutToShow.connect(self.refresh_matched_swing_menu)
+        self.refresh_matched_swing_menu()
+
+    def refresh_matched_swing_menu(self) -> None:
+        """Rebuild the matched-swing menu from the current configuration."""
+        menu = self.matched_swing_menu
+        menu.clear()
+        for scenario in match_scenarios():
+            action = menu.addAction(scenario.label)
+            action.setToolTip(str(scenario.path))
+            action.triggered.connect(
+                lambda _=False, s=scenario: self.load_match_scenario(s)
+            )
 
     @staticmethod
     def _playback_panel_for(session: ResultsSession) -> Any | None:

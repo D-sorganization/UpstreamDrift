@@ -191,6 +191,10 @@ class ResultsPlaybackPanel(QWidget):
         row.addWidget(self.export_button)
         return row
 
+    def set_heading(self, name: str) -> None:
+        """Prefix the panel title with what was opened (e.g. a demo label)."""
+        self.title_label.setText(f"{name}: {self.session.title}")
+
     # ---- playback ---------------------------------------------------------
 
     @property

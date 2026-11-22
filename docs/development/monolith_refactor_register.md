@@ -23,13 +23,13 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1199 | `src/launchers/model_card.py` |
 | 1198 | `src/api/local_server.py` |
 | 1198 | `src/launchers/cross_engine_dashboard.py` |
+| 1198 | `src/launchers/launcher_simulation.py` |
+| 1197 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 1198 | `src/tools/capture_rig/gui.py` |
 | 1197 | `src/bunkershot3d/solvers/mpm/verification.py` |
 | 1197 | `src/launchers/launcher_diagnostics.py` |
-| 1197 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 1196 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
 | 1196 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py` |
-| 1196 | `src/launchers/launcher_simulation.py` |
 | 1196 | `src/shared/python/grip_contact/topology_contact.py` |
 | 1195 | `src/launchers/launcher_process_manager.py` |
 | 1195 | `src/launchers/upstream_drift_launcher.py` |
@@ -195,8 +195,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 864 | `src/tools/shot_pattern_analysis/matched_report_plots.py` |
 | 864 | `src/tools/simulation_backends_launcher/gui.py` |
 | 862 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py` |
+| 860 | `src/tools/model_explorer/gui.py` |
 | 859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m` |
-| 859 | `src/tools/model_explorer/gui.py` |
 | 857 | `src/shared/python/injury/spinal_load_analysis.py` |
 | 853 | `src/shared/python/ai/gui/assistant_panel.py` |
 | 853 | `src/shared/python/chat/_chat_dock_widget_qt.py` |
