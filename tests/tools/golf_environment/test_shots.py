@@ -92,5 +92,7 @@ def test_add_shots_to_renderer_uses_add_trajectory() -> None:
 
 def test_settings_load_with_sources_and_colours() -> None:
     settings = sh.load_shots_settings()
-    assert settings["sources"] and settings["hole"]["length_m"] > 200.0
+    assert (
+        settings["sources"] and settings["hole"]["presets"]["par4"]["length_m"] > 200.0
+    )
     assert all(len(c) == 4 for c in settings["shot_colours_rgba"])

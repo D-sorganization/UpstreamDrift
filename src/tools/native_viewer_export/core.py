@@ -153,6 +153,7 @@ class ExportSettings:
     #: ball flight with a shot tracer from impact on, the clip held until the
     #: ball lands (a ``flight_tracer.TracerSettings``; ``None`` = off)
     ball_flight: Any = None
+    speed_unit: str | None = None  # card/panel speed unit (None: units settings)
     grip: bool = False  # hands/grip overlay (GCV-10); hands_closeup tracks it
     lookat_m: tuple[float, float, float] = (1.0, 0.0, 0.9)
     distance_m: float | None = None
@@ -865,6 +866,7 @@ class ExportResult:
     impact_card: dict[str, Any] | str | None = None
     #: ball provenance: placement dict, or {'unavailable': reason}; None if disabled
     ball: dict[str, Any] | None = None
+    flight: dict[str, Any] | None = None  # SI flight values + display unit names
     #: inset strip record (``StripSeries.record()``) or the reason it is
     #: unavailable; None when the strip is off
     inset_strip: dict[str, Any] | str | None = None
@@ -1147,7 +1149,9 @@ def export_swing(
     counts: dict[str, int] = {}
     glyph_counts: list[int] = []
     outcome = (
-        impact_card_for(swing, impact_time_s(swing, settings), swing.ball)
+        impact_card_for(
+            swing, impact_time_s(swing, settings), swing.ball, settings.speed_unit
+        )
         if settings.impact_card and settings.hud
         else None
     )
@@ -1161,9 +1165,8 @@ def export_swing(
         if card is not None or strip is not None or factors is not None
         else None
     )
-    if settings.ball_flight is not None:
-        flight = flight_tracer.flight_for_export(swing, settings)
-        overlays = replace(overlays or ClipOverlays(), flight=flight)
+    overlays = flight_tracer.attach_flight(overlays, swing, settings)
+    factors = overlays.factors if overlays is not None else factors
     overlays = ellipsoid_hud.with_panel(overlays, settings, feed, factors)
     for plan in plans:
         clip = flight_inset.for_clip(overlays, plan.window)
@@ -1185,6 +1188,7 @@ def export_swing(
             else (outcome if isinstance(outcome, str) else None)
         ),
         ball=ball_record,
+        flight=flight_tracer.manifest_record(overlays),
         inset_strip=(
             strip_outcome.record()
             if isinstance(strip_outcome, StripSeries)

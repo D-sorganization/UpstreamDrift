@@ -142,3 +142,46 @@ def test_contracts(geometry: ChainGeometry) -> None:
         fit_shaft_bend(geometry, np.zeros((4, 5, 3)), OFFSETS, settings)
     with pytest.raises(ValueError, match="breaks"):
         fit_shaft_bend(geometry, np.zeros((4, 6, 3)), OFFSETS, settings, (0,))
+
+
+def _two_shape_fit(
+    geometry: ChainGeometry, x_amplitudes_deg: tuple[float, float]
+) -> tuple[np.ndarray, np.ndarray]:
+    """Fit three identical frames bent by two x-plane shapes; max slope 20 deg."""
+    base = load_bend_settings()
+    settings = type(base)(
+        shapes_per_plane=2,
+        smoothness_weight_m_per_rad=0.0,
+        ridge_weight_m_per_rad=0.0,
+        max_tip_slope_deg=20.0,
+        rank_relative_tolerance=base.rank_relative_tolerance,
+        solver_max_nfev=1000,
+        solver_tolerance=1e-12,
+    )
+    basis = shape_basis(geometry, 2)
+    amps = np.radians(x_amplitudes_deg)
+    bend = np.zeros((geometry.n_joints, 2))
+    bend[:, 0] = amps[0] * basis[0] + amps[1] * basis[1]
+    markers = np.tile(marker_positions(geometry, bend, OFFSETS), (3, 1, 1))
+    fit = fit_shaft_bend(geometry, markers, OFFSETS, settings)
+    return np.degrees(fit.amplitudes), np.degrees(fit.bend.sum(axis=1))
+
+
+def test_same_sign_amplitudes_clamp_at_combined_tip_slope(
+    geometry: ChainGeometry,
+) -> None:
+    """Two 15 deg shapes sum to 30 deg: the 20 deg maximum is on the sum."""
+    amplitudes, slopes = _two_shape_fit(geometry, (15.0, 15.0))
+    assert np.all(np.abs(slopes[:, 0]) <= 20.0 + 1e-9)
+    assert np.all(np.abs(amplitudes[:, :2].sum(axis=1)) <= 20.0 + 1e-9)
+    np.testing.assert_allclose(slopes[:, 0], 20.0, atol=1e-6)
+
+
+def test_opposing_amplitudes_with_small_sum_stay_allowed(
+    geometry: ChainGeometry,
+) -> None:
+    """25 and -10 deg individually exceed 20 deg but sum to an allowed 15 deg."""
+    amplitudes, slopes = _two_shape_fit(geometry, (25.0, -10.0))
+    np.testing.assert_allclose(slopes[:, 0], 15.0, atol=1e-6)
+    np.testing.assert_allclose(amplitudes[:, 0], 25.0, atol=1e-3)
+    np.testing.assert_allclose(amplitudes[:, 1], -10.0, atol=1e-3)

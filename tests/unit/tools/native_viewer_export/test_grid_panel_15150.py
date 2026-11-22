@@ -69,9 +69,9 @@ def test_grid_box_shrinks_to_fit_a_small_tile() -> None:
 
 def test_single_view_box_is_unchanged() -> None:
     panel = _panel()
-    assert panel.bbox(TILE) == (860, 38, 1264, 256)  # as on main
+    assert panel.bbox(TILE) == (860, 38, 1264, 278)  # +1 smash row
     assert panel.bbox(TILE) == panel.bbox(TILE, grid=False)
-    assert panel.bbox(GRID) == (1746, 38, 2528, 416)  # grid frame, grid=False
+    assert panel.bbox(GRID) == (1746, 38, 2528, 454)  # grid frame, grid=False
 
 
 def test_draw_all_changes_only_pixels_inside_each_boxes() -> None:
