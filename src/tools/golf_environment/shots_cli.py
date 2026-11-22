@@ -51,7 +51,13 @@ def flight_for_roll(
     if contact is not None:
         settings = replace(settings, impact_time_s=contact)
     playback = flight_tracer.flight_for_export(swing, settings)
-    if playback is None or playback.path_m is None:
+    if (
+        playback is None
+        or playback.path_m is None
+        or playback.carry_m is None
+        or playback.lateral_m is None
+        or playback.axes_m is None
+    ):
         raise ValueError(f"no flight: {getattr(playback, 'status', 'unavailable')}")
     path, axes = np.asarray(playback.path_m), np.asarray(playback.axes_m)
     flight = sh.TargetFlight(

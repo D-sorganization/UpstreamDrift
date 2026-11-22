@@ -123,7 +123,7 @@ def shots_on_hole(
         out.append(
             HoleShot(
                 str(label),
-                tuple(colour),
+                colour,
                 path,
                 float(flight.carry_m),
                 float(flight.lateral_m),
