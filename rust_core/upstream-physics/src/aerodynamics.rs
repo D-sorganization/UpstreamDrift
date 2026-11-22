@@ -38,6 +38,15 @@ const DRAG_CRISIS_RECOVERY_RE: f64 = 7.0e5;
 const MAX_LIFT_COEFFICIENT: f64 = 0.26;
 const PENNER_LIFT_SCALE: f64 = 0.70;
 const PENNER_LIFT_EXPONENT: f64 = 0.645;
+/// Zero-spin post-crisis drag floor of a production ball (#15443). Lyu,
+/// Kensrud, Smith & Tosaya 2018 (Proceedings 2(6):238): 13 production balls
+/// in still air, non-spinning Cd close to 0.2 at Re 1e5. Mirrors Python
+/// `GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT`.
+pub const DEFAULT_POST_CRISIS_CD: f64 = 0.20;
+/// Linear drag rise per unit spin ratio S (#15443). Smits & Smith 1994
+/// `CD2 = 0.18`; Bearman & Harvey 1976 and LES studies give 0.13-0.25.
+/// Mirrors Python `GOLF_BALL_SPIN_DRAG_SLOPE`.
+pub const CD_SPIN_SLOPE: f64 = 0.18;
 
 /// Transverse spin rate ||ω × v̂|| [rad/s] used for Magnus/lift magnitude.
 ///
@@ -132,7 +141,7 @@ pub struct AeroBallProperties {
     pub radius: f64,
     /// Cross-sectional area [m²]
     pub area: f64,
-    /// Baseline drag coefficient (turbulent regime)
+    /// Zero-spin post-crisis drag floor; the kernel adds the spin term
     pub drag_coefficient: f64,
     /// Spin decay time constant [1/s]
     pub spin_decay_rate: f64,
@@ -146,7 +155,7 @@ impl Default for AeroBallProperties {
             mass: 0.04593,
             radius,
             area: std::f64::consts::PI * radius * radius,
-            drag_coefficient: 0.25,
+            drag_coefficient: DEFAULT_POST_CRISIS_CD,
             spin_decay_rate: 0.05,
         }
     }
@@ -231,7 +240,7 @@ pub fn compute_aero_forces(
         .expect("invalid aerodynamic ball properties");
     air.validate().expect("invalid air properties");
 
-    let drag = compute_drag(velocity, ball, air);
+    let drag = compute_drag(velocity, spin, ball, air);
     // Legacy lift slot stays zero: combined kernels emit one spin force in `magnus`.
     let lift = Vector3::zero();
     let magnus = compute_magnus(velocity, spin, ball, air);
@@ -241,15 +250,22 @@ pub fn compute_aero_forces(
 
 /// Compute drag force opposing motion.
 ///
-/// F_drag = -0.5 * ρ * Cd * A * |v|² * v̂
+/// F_drag = -0.5 * ρ * Cd(Re, S) * A * |v|² * v̂ with the transverse spin
+/// ratio S of `spin` (see [`cd_spinning_ball`]).
 #[must_use]
-pub fn compute_drag(velocity: &Vector3, ball: &AeroBallProperties, air: &AirProperties) -> Vector3 {
+pub fn compute_drag(
+    velocity: &Vector3,
+    spin: &Vector3,
+    ball: &AeroBallProperties,
+    air: &AirProperties,
+) -> Vector3 {
     let speed = velocity.magnitude();
     if speed < 1e-6 {
         return Vector3::new(0.0, 0.0, 0.0);
     }
 
-    let cd = compute_drag_coefficient(speed, ball, air);
+    let spin_ratio = spin_parameter_transverse(velocity, spin, ball.radius, speed);
+    let cd = compute_drag_coefficient(speed, spin_ratio, ball, air);
     let f_mag = 0.5 * air.density * cd * ball.area * speed * speed;
 
     // Opposite to velocity direction
@@ -343,16 +359,43 @@ pub fn compute_magnus(
     )
 }
 
-/// Compute drag coefficient based on Reynolds number.
+/// Compute drag coefficient from Reynolds number and spin ratio.
 ///
 /// Golf ball dimples reduce drag at high Re through turbulent boundary
-/// layer transition.
+/// layer transition; spin adds drag linearly (see [`cd_spinning_ball`]).
 #[must_use]
-pub fn compute_drag_coefficient(speed: f64, ball: &AeroBallProperties, air: &AirProperties) -> f64 {
+pub fn compute_drag_coefficient(
+    speed: f64,
+    spin_ratio: f64,
+    ball: &AeroBallProperties,
+    air: &AirProperties,
+) -> f64 {
     let re = air.density * speed * (2.0 * ball.radius) / air.viscosity;
     let clamped_re = re.clamp(MIN_VALID_REYNOLDS, MAX_VALID_REYNOLDS);
-    cd_dimpled_sphere(clamped_re, ball.drag_coefficient)
+    cd_spinning_ball(clamped_re, spin_ratio.max(0.0), ball.drag_coefficient)
         .expect("clamped Reynolds number and validated ball Cd must be accepted")
+}
+
+/// Drag coefficient of a spinning golf ball (#15443).
+///
+/// `Cd = cd_dimpled_sphere(Re, base_cd) + CD_SPIN_SLOPE * S`. Mirrors
+/// `src.shared.python.physics.atmosphere.cd_spinning_ball`.
+///
+/// # Design by Contract
+/// ## Preconditions
+/// - as [`cd_dimpled_sphere`]; `spin_ratio` finite and non-negative
+///
+/// ## Postconditions
+/// - zero when `base_cd == 0`, else the Reynolds curve plus the spin term
+pub fn cd_spinning_ball(reynolds: f64, spin_ratio: f64, base_cd: f64) -> Result<f64, String> {
+    if !spin_ratio.is_finite() || spin_ratio < 0.0 {
+        return Err("spin_ratio must be finite and non-negative".to_string());
+    }
+    let cd = cd_dimpled_sphere(reynolds, base_cd)?;
+    if cd == 0.0 {
+        return Ok(0.0);
+    }
+    Ok(cd + CD_SPIN_SLOPE * spin_ratio)
 }
 
 fn smoothstep_tanh(x: f64, x0: f64, width: f64) -> f64 {
@@ -497,7 +540,7 @@ impl AirProperties {
 #[pyo3::prelude::pymethods]
 impl AeroBallProperties {
     #[new]
-    #[pyo3(signature = (mass=0.04593, radius=0.02135, drag_coefficient=0.25, spin_decay_rate=0.05))]
+    #[pyo3(signature = (mass=0.04593, radius=0.02135, drag_coefficient=DEFAULT_POST_CRISIS_CD, spin_decay_rate=0.05))]
     fn py_new(
         mass: f64,
         radius: f64,
@@ -550,6 +593,14 @@ mod tests {
 
     fn default_ball() -> AeroBallProperties {
         AeroBallProperties::default()
+    }
+
+    /// Ball on the pre-#15443 0.25 floor, for anchors calibrated on it.
+    fn legacy_floor_ball() -> AeroBallProperties {
+        AeroBallProperties {
+            drag_coefficient: 0.25,
+            ..default_ball()
+        }
     }
 
     fn default_air() -> AirProperties {
@@ -620,7 +671,7 @@ mod tests {
         let v = Vector3::new(50.0, 0.0, 0.0);
         let ball = default_ball();
         let air = default_air();
-        let drag = compute_drag(&v, &ball, &air);
+        let drag = compute_drag(&v, &Vector3::zero(), &ball, &air);
 
         // Drag must oppose velocity (negative x)
         assert!(drag.x < 0.0, "Drag must oppose velocity: got {}", drag.x);
@@ -633,7 +684,7 @@ mod tests {
         let v = Vector3::new(0.0, 0.0, 0.0);
         let ball = default_ball();
         let air = default_air();
-        let drag = compute_drag(&v, &ball, &air);
+        let drag = compute_drag(&v, &Vector3::zero(), &ball, &air);
 
         assert!(drag.x.abs() < 1e-10);
         assert!(drag.y.abs() < 1e-10);
@@ -642,7 +693,8 @@ mod tests {
 
     #[test]
     fn test_drag_scales_with_speed_squared() {
-        let ball = default_ball();
+        // 4.15 was calibrated on the 0.25 floor; the recovery term depends on it.
+        let ball = legacy_floor_ball();
         let air = default_air();
 
         // Both speeds must be fully turbulent (Re > 2e5)
@@ -651,8 +703,8 @@ mod tests {
         let v1 = Vector3::new(80.0, 0.0, 0.0);
         let v2 = Vector3::new(160.0, 0.0, 0.0);
 
-        let drag1 = compute_drag(&v1, &ball, &air);
-        let drag2 = compute_drag(&v2, &ball, &air);
+        let drag1 = compute_drag(&v1, &Vector3::zero(), &ball, &air);
+        let drag2 = compute_drag(&v2, &Vector3::zero(), &ball, &air);
 
         // Both fully turbulent → same Cd → ratio should be (160/80)^2 = 4
         let ratio = drag2.x.abs() / drag1.x.abs();
@@ -850,7 +902,7 @@ mod tests {
         let ball = default_ball();
         let air = default_air();
 
-        let drag = compute_drag(&v, &ball, &air);
+        let drag = compute_drag(&v, &Vector3::zero(), &ball, &air);
 
         // Dot product of drag and velocity should be negative (opposing)
         let dot = drag.x * v.x + drag.y * v.y + drag.z * v.z;
@@ -861,10 +913,10 @@ mod tests {
 
     #[test]
     fn test_drag_coefficient_laminar() {
-        let ball = default_ball();
+        let ball = legacy_floor_ball();
         let air = default_air();
         // Very low speed → laminar → Cd = 0.5
-        let cd = compute_drag_coefficient(1.0, &ball, &air);
+        let cd = compute_drag_coefficient(1.0, 0.0, &ball, &air);
         assert!(
             (cd - 0.500_001_242_489_331_1).abs() < 1e-12,
             "Laminar Cd should match the Python dimpled-sphere curve, got {}",
@@ -874,9 +926,9 @@ mod tests {
 
     #[test]
     fn test_drag_coefficient_matches_python_drag_crisis_curve() {
-        let ball = default_ball();
+        let ball = legacy_floor_ball();
         let air = default_air();
-        let cd = compute_drag_coefficient(100.0, &ball, &air);
+        let cd = compute_drag_coefficient(100.0, 0.0, &ball, &air);
         assert!(
             (cd - 0.257_787_143_359_211_3).abs() < 1e-12,
             "Rust Cd should match Python cd_dimpled_sphere at golf launch Re, got {}",
@@ -912,6 +964,26 @@ mod tests {
         assert!(cd_dimpled_sphere(1.0e8, 0.25).is_err());
         assert!(cd_dimpled_sphere(1.0e5, f64::INFINITY).is_err());
         assert!(cd_dimpled_sphere(1.0e5, -0.01).is_err());
+    }
+
+    #[test]
+    fn test_spin_adds_linear_drag_on_production_floor() {
+        assert_eq!(default_ball().drag_coefficient, DEFAULT_POST_CRISIS_CD);
+        let base = cd_dimpled_sphere(1.5e5, DEFAULT_POST_CRISIS_CD).unwrap();
+        let spun = cd_spinning_ball(1.5e5, 0.2, DEFAULT_POST_CRISIS_CD).unwrap();
+        assert!((spun - base - CD_SPIN_SLOPE * 0.2).abs() < 1e-15);
+        assert_eq!(cd_spinning_ball(1.5e5, 0.2, 0.0).unwrap(), 0.0);
+        assert!(cd_spinning_ball(1.5e5, -0.1, 0.2).is_err());
+        assert!(cd_spinning_ball(1.5e5, f64::NAN, 0.2).is_err());
+    }
+
+    #[test]
+    fn test_backspin_raises_drag_force() {
+        let (ball, air) = (default_ball(), default_air());
+        let v = Vector3::new(60.0, 0.0, 0.0);
+        let still = compute_drag(&v, &Vector3::zero(), &ball, &air).magnitude();
+        let spun = compute_drag(&v, &Vector3::new(0.0, -300.0, 0.0), &ball, &air).magnitude();
+        assert!(spun > still);
     }
 
     #[test]

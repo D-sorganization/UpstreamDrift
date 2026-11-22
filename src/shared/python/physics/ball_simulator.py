@@ -18,7 +18,10 @@ import math
 import numpy as np
 
 from src.shared.python.core.contracts import invariant, postcondition, precondition
-from src.shared.python.core.physics_constants import GOLF_BALL_DRAG_COEFFICIENT
+from src.shared.python.core.physics_constants import (
+    GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT,
+    GOLF_BALL_SPIN_DRAG_SLOPE,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.physics.ball_launch_conditions import (
     EnvironmentalConditions,
@@ -64,7 +67,8 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         """Return declared aerodynamic model family and effective parameters."""
         return {
             "drag_model": "reynolds_dimpled_sphere",
-            "base_cd": float(GOLF_BALL_DRAG_COEFFICIENT),
+            "base_cd": float(GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT),
+            "spin_drag_slope": float(GOLF_BALL_SPIN_DRAG_SLOPE),
             "lift_scale": PENNER_LIFT_SCALE,
             "lift_exponent": PENNER_LIFT_EXPONENT,
             "cl_max": MAX_LIFT_COEFFICIENT,
@@ -176,11 +180,11 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         ball_props = upstream_physics.AeroBallProperties(
             mass=self.ball.mass,
             radius=self.ball.radius,
-            # The kernel scales its Reynolds drag-crisis curve by this base
-            # Cd, exactly as the enhanced engine scales cd_dimpled_sphere.
-            # ball.cd0 is the spin polynomial's constant term, a different
-            # model; passing it under-predicted drag by ~16 %.
-            drag_coefficient=float(GOLF_BALL_DRAG_COEFFICIENT),
+            # Zero-spin floor of the kernel's Reynolds drag-crisis curve; the
+            # kernel adds the spin term itself (#15443), exactly as the
+            # enhanced engine's cd_spinning_ball. ball.cd0 belongs to a
+            # different (spin polynomial) model.
+            drag_coefficient=float(GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT),
             spin_decay_rate=self.ball.spin_decay_rate,
         )
 

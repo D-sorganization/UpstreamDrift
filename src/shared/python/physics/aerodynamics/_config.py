@@ -15,7 +15,7 @@ import numpy as np
 from src.shared.python.core.physics_constants import (
     AIR_DENSITY_SEA_LEVEL_KG_M3,
     GOLF_BALL_CROSS_SECTIONAL_AREA_M2,
-    GOLF_BALL_DRAG_COEFFICIENT,
+    GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT,
     GOLF_BALL_LIFT_COEFFICIENT,
     GOLF_BALL_RADIUS_M,
     MAGNUS_COEFFICIENT,
@@ -54,7 +54,7 @@ class AerodynamicsConfig:
     magnus_enabled: bool = True
 
     # Tunable coefficients
-    drag_coefficient: float = float(GOLF_BALL_DRAG_COEFFICIENT)
+    drag_coefficient: float = float(GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT)
     lift_coefficient: float = float(GOLF_BALL_LIFT_COEFFICIENT)
     magnus_coefficient: float = float(MAGNUS_COEFFICIENT)
     spin_decay_rate: float = float(SPIN_DECAY_RATE_S)
