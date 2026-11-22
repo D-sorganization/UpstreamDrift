@@ -347,6 +347,20 @@
       "id": "launcher.mcp_config"
     },
     {
+      "feature_id": "launcher.min_maturity",
+      "title": "Launcher min_maturity filter",
+      "status": "gap",
+      "pyqt": "src/launchers/launcher_orchestrator.py",
+      "api": "src/api/routes/launcher.py",
+      "web": null,
+      "issue": 15150,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "One ordered maturity scale (src/shared/python/config/maturity_scale.json) drives the PyQt6 launcher model list, the launcher loader and GET /api/launcher/tiles?min_maturity=, with the MIN_MATURITY setting as the default (which shows everything). The React dashboard does not yet send min_maturity, and no surface draws a maturity chip yet (follow-up branch); tracked under epic #15150.",
+      "id": "launcher.min_maturity"
+    },
+    {
       "feature_id": "launcher.tile_grid",
       "title": "Launcher tile grid from shared manifest",
       "status": "parity",
@@ -3397,7 +3411,7 @@
   "inputs": {
     "src/config/models.yaml": "ad3f0cf74f12a3a0df3443b3f40ace2393123ee6d39ee34b055d4f79c4a1c873",
     "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
-    "src/config/feature_parity.json": "815e87df798db9b0a4fce6a4207cd91b929f28d46735a75ed80c2c45feb5e9d2",
+    "src/config/feature_parity.json": "ae5969a71c7bc9e604cd8c072d452636d7481b0f7fadf3cd88aed09deff70099",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

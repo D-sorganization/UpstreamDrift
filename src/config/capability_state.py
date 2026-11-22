@@ -23,6 +23,7 @@ from pathlib import Path
 import sys
 from typing import Any, Final, Literal
 
+from src.shared.python.config.maturity_scale import valid_levels
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -36,9 +37,8 @@ CapabilityMaturity = Literal[
     "deprecated",
 ]
 
-VALID_MATURITY_LEVELS: Final[frozenset[str]] = frozenset(
-    {"experimental", "prototype", "beta", "stable", "deprecated"}
-)
+# One source of truth: the ordered scale in shared/python/config/maturity_scale.
+VALID_MATURITY_LEVELS: Final[frozenset[str]] = valid_levels()
 
 # Canonical surfaces supported across shells and tools
 VALID_SURFACES: Final[frozenset[str]] = frozenset({"desktop", "web", "api", "cli"})

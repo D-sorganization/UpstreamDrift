@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**72 launcher tiles · 72 feature contracts.**
+**72 launcher tiles · 73 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -214,6 +214,7 @@ flowchart LR
 | Docker engine management dialog | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/docker_manager.py) |
 | Embedded tool host (tabs + docks) | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/embedded_host.py) |
 | MCP server configuration writer/preferences | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/mcp_config_writer.py) |
+| Launcher min_maturity filter | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/launcher_orchestrator.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/launcher.py) |
 | Launcher tile grid from shared manifest | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/embedded_tool_bootstrap.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/launcher.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Dashboard.tsx) |
 | Manifest tile web-reachability contract (route / native-window / unavailable) | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/embedded_tool_bootstrap.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/launcher.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Dashboard.tsx) |
 | Weightlifting viewing and analysis for the five lifts (squat, deadlift, bench press, snatch, clean and jerk): lift selection, barbell, hand-force and GRF overlays, plots | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/exercise_dashboard.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/lifting.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/LiftBaseline.tsx) |

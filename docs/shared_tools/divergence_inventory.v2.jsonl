@@ -529,6 +529,8 @@
 {"path": "config/configuration_manager.py", "classification": "ud-only", "package": "config", "spelling_only": false}
 {"path": "config/environment.py", "classification": "diverged", "package": "config", "spelling_only": false}
 {"path": "config/handedness_support.py", "classification": "ud-only", "package": "config", "spelling_only": false}
+{"path": "config/maturity_scale.json", "classification": "ud-only", "package": "config", "spelling_only": false}
+{"path": "config/maturity_scale.py", "classification": "ud-only", "package": "config", "spelling_only": false}
 {"path": "config/model_pack_manifest.py", "classification": "ud-only", "package": "config", "spelling_only": false}
 {"path": "config/model_registry.py", "classification": "ud-only", "package": "config", "spelling_only": false}
 {"path": "config/model_source_providers.py", "classification": "ud-only", "package": "config", "spelling_only": false}

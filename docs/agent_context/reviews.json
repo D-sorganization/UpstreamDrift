@@ -19,16 +19,16 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01; model.py updated for worktree vendor resolution."
     },
     "launcher-atlas": {
-      "fingerprint": "a4c0eeaaae0b70fba8b8b1c49cd8ab2de9d4a1ae398518dc618cfad51d3104b8",
+      "fingerprint": "dbd97799815a85a8bf237d6167e6c82fc94c16b652441e6157b681f1a9ffda8c",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "122475bfa6e445ee8a2d4e1f94eae41c3b0e6bce954d1eb8ea44a1e40662e052",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "815e87df798db9b0a4fce6a4207cd91b929f28d46735a75ed80c2c45feb5e9d2",
+        "src/config/feature_parity.json": "ae5969a71c7bc9e604cd8c072d452636d7481b0f7fadf3cd88aed09deff70099",
         "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
-        "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
+        "src/config/launcher_manifest_loader.py": "551e868f572b9eb79fcd2b0e0fbe67bff5c9867f84f1d03f9cd6113547c72fd8",
         "src/config/models.yaml": "ad3f0cf74f12a3a0df3443b3f40ace2393123ee6d39ee34b055d4f79c4a1c873",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Branch adds the tools.golf_environment gap entry (tile golf_environment, issue 15150) and re-scopes tools.native_viewer_export from exempt to gap with an api path in feature_parity.json, plus a matching capability_migration.json row. Read the launcher-atlas contract and both ends: scripts/capability_atlas/model.py (build, validate_graph: status in parity/gap/exempt, surface paths must exist, unique tile ids) and the registry loader/feature_parity.json provider. Atlas builder, renderer, models.yaml, launcher manifest and goal catalog are unchanged, so the interface, schema and failure handling are unchanged and this is registry data flowing through it. Regenerated atlas passes --check. Passed: tests/config/feature_parity, tests/scripts/test_capability_atlas.py, tests/scripts/test_workspace_documentation_freshness.py, tests/tools/capture_rig goal catalog and planner tests."
+      "rationale": "Re-review after merging origin/main (which landed #15477's min-maturity gap entry, loader method and lazy settings import) into this branch. Read the launcher-atlas contract and both ends: scripts/capability_atlas/model.py builds from models.yaml, launcher_manifest.json and feature_parity.json and validates parity/gap/exempt status, surface paths and unique tile ids; the provider side is feature_parity.json. This branch changes data only, through the unchanged interface: tools.native_viewer_export moves from exempt to gap (issue 15150, api surface src/api/routes/agent_sim_run.py, which exists), and a new tools.golf_environment gap entry points at src/tools/golf_environment/gui.py (exists) and the golf_environment models.yaml tile. The atlas builder, renderer, models.yaml, launcher manifest and goal catalog are unchanged by this branch. Conflicts in generated files were resolved by taking main and regenerating feature_parity_matrix, ORG01 baseline and the capability atlas; generate_capability_atlas --check rc 0. Companion catalog baseline counts updated to 73 features / 169 surface paths, which reproduce build_catalog on the merged tree. Passed (rc 0): tests/companion, tests/config/feature_parity, tests/scripts/test_capability_atlas.py, tests/scripts/test_workspace_documentation_freshness.py, tests/config/test_launcher_loader_light_import.py, tests/api/test_launcher_min_maturity.py."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",

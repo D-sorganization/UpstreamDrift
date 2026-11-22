@@ -67,6 +67,16 @@
       "tiles": [],
       "notes": "Drake PyQt6 GUI draws provider force/torque glyphs in MeshCat and shades segments by axial load (#11297). The web surface reaches the same data through the engine-generic path: DrakePhysicsEngine implements get_force_torque_frame and get_segment_axial_loads, served by /api/force-overlays and the simulation WebSocket segment_loads field, and drawn by the Three.js ForceOverlay with ForceColorControls shading (#11307 FTO-22, #11308 FTO-23, closed with Playwright evidence). GCV-4 (#11710) changed the shared glyph defaults (12 mm shaft, group toggles, clamped flag only above the maximum length) that this overlay consumes."
     },
+    "launcher.min_maturity": {
+      "title": "Launcher min_maturity filter",
+      "pyqt": "src/launchers/launcher_orchestrator.py",
+      "api": "src/api/routes/launcher.py",
+      "web": null,
+      "status": "gap",
+      "issue": 15150,
+      "tiles": [],
+      "notes": "One ordered maturity scale (src/shared/python/config/maturity_scale.json) drives the PyQt6 launcher model list, the launcher loader and GET /api/launcher/tiles?min_maturity=, with the MIN_MATURITY setting as the default (which shows everything). The React dashboard does not yet send min_maturity, and no surface draws a maturity chip yet (follow-up branch); tracked under epic #15150."
+    },
     "launcher.tile_grid": {
       "title": "Launcher tile grid from shared manifest",
       "pyqt": "src/launchers/embedded_tool_bootstrap.py",
