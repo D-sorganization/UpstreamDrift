@@ -42,8 +42,11 @@ from src.shared.python.motion_matching.club_models import (
 from src.shared.python.motion_matching.club_shaft_chain import (
     DEFAULT_SHAFT_MODEL,
     SHAFT_MODELS,
+    add_shaft_arguments,
     apply_shaft_chain,
     build_shaft_chain,
+    checked_shaft_options,
+    shaft_options,
 )
 from src.shared.python.motion_matching.execution.assets import (
     get_candidate_geometry_spec,
@@ -786,24 +789,32 @@ def _annotate_document(
 
 
 def with_shaft_model(
-    document: dict[str, Any], club: str | ClubSpec, shaft_model: str | None
+    document: dict[str, Any],
+    club: str | ClubSpec,
+    shaft_model: str | None,
+    options: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Apply the ``club.shaft.model`` flag (#12686); ``"rigid"`` is the default.
 
     ``"rigid"`` (or ``None``) returns ``document`` itself, unchanged, so the
     default spec stays byte-identical; ``"chain"`` returns the flexible-shaft
-    copy built by :func:`club_shaft_chain.apply_shaft_chain`.
+    copy built by :func:`club_shaft_chain.apply_shaft_chain`. ``options``
+    (#15150) are the ``build_shaft_chain`` flex, stiffness scale and link
+    count (``checked_shaft_options``); empty gives the default chain, and the
+    chain records them in ``club.shaft``.
 
     Raises:
-        ValueError: ``shaft_model`` is not one of ``SHAFT_MODELS``.
+        ValueError: ``shaft_model`` is not one of ``SHAFT_MODELS``, or the
+            options are unknown, invalid or given for a rigid club.
     """
     model = DEFAULT_SHAFT_MODEL if shaft_model is None else shaft_model
     if model not in SHAFT_MODELS:
         raise ValueError(f"shaft_model must be one of {SHAFT_MODELS}, got {model!r}")
+    chosen = checked_shaft_options(model, options)
     if model == "rigid":
         return document
     spec = CLUBS[club] if isinstance(club, str) else club
-    return apply_shaft_chain(document, build_shaft_chain(spec))
+    return apply_shaft_chain(document, build_shaft_chain(spec, **chosen))
 
 
 @dataclass(frozen=True)
@@ -962,7 +973,9 @@ def compose_anthropometric_document(
         ),
     )
     _annotate_document(document, upper, kwargs.get("mirror_arm", True))
-    document = with_shaft_model(document, club_spec, kwargs.get("shaft_model"))
+    document = with_shaft_model(
+        document, club_spec, kwargs.get("shaft_model"), kwargs.get("shaft_options")
+    )
     document = _apply_kwarg_tibial_torsion(document, kwargs)
     document = apply_knee_axial_rotation(document, kwargs.get(KNEE_AXIAL_KEY))
     return AnthropometricDocument(
@@ -1085,6 +1098,7 @@ def build_parser(preset: Mapping[str, Any] | None = None) -> argparse.ArgumentPa
         default=DEFAULT_SHAFT_MODEL,
         help="club.shaft.model: rigid (default) or the chain flexible shaft (#12686)",
     )
+    add_shaft_arguments(parser)
     parser.add_argument(
         "--tibial-torsion",
         type=float,
@@ -1160,6 +1174,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         name=args.name,
         club_markers_path=args.club_markers,
         shaft_model=args.shaft_model,
+        shaft_options=shaft_options(args),
         tibial_torsion_offset_deg=args.tibial_torsion,
         shoulder_girdle_mass=args.shoulder_girdle_mass,
         grip_overrides=overrides_from_args(args),
