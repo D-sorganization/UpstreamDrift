@@ -122,7 +122,7 @@ impl AerodynamicsEngine {
         };
 
         let drag = if self.config.drag_active() {
-            compute_drag(&rel_velocity, &self.ball, &self.air)
+            compute_drag(&rel_velocity, spin, &self.ball, &self.air)
         } else {
             Vector3::zero()
         };

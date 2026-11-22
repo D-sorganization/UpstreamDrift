@@ -96,6 +96,28 @@ GOLF_BALL_DRAG_COEFFICIENT = PhysicalConstant(
     "Bearman & Harvey 1976",
     "Typical drag coefficient at Re=1.5e5",
 )
+GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT = PhysicalConstant(
+    0.20,
+    "dimensionless",
+    "Lyu, Kensrud, Smith & Tosaya 2018, Proceedings 2(6):238, "
+    "doi:10.3390/proceedings2060238: 13 production balls in still air, "
+    "non-spinning Cd near 0.5 at Re 5e4 and close to 0.2 at Re 1e5, "
+    "ball-to-ball spread < 0.05 above Re 1e5 (#15443)",
+    "Zero-spin post-crisis floor of the spinning-ball drag law "
+    "Cd(Re, S) = Cd_Re(Re; floor) + k*S used by the flight kernel",
+)
+GOLF_BALL_SPIN_DRAG_SLOPE = PhysicalConstant(
+    0.18,
+    "dimensionless",
+    "Smits & Smith 1994, Science and Golf II: CD2 = 0.18 (constants quoted "
+    "in secondary patent literature; primary text not reached). Cross-checks: "
+    "Bearman & Harvey 1976 as read by Crabill et al. 2018 (arXiv 1806.00378), "
+    "Cd +8 % at S 0.15 (about 0.13 per unit S); summary of Bearman & Harvey "
+    "in US 10118696 B1, Cd 0.27 -> 0.32 for S 0.1 -> 0.3 (0.25 per unit S); "
+    "Li et al. LES via Crabill et al., 0.217 static -> 0.238 at S 0.1 (0.21) "
+    "(#15443)",
+    "Linear rise of the drag coefficient with spin ratio S = r*omega/v",
+)
 GOLF_BALL_LIFT_COEFFICIENT = PhysicalConstant(
     0.15, "dimensionless", "Bearman & Harvey 1976", "Typical lift coefficient"
 )
