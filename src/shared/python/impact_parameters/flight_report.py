@@ -18,14 +18,17 @@ limit is an assumption (a real driver lands well inside it), not a measured boun
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 
 from src.shared.python.contracts import ensure, require
 from src.shared.python.physics.ball_flight_validity import (
-    MAX_DRIVER_LAUNCH_SPIN_RPM,
     assess_trajectory_validity,
+    launch_spin_envelope,
+    report_margin_rpm,
 )
 from src.shared.python.physics.swing_ball_flight_pipeline import (
     SwingBallFlightPipeline,
@@ -90,12 +93,37 @@ def swing_state_from_series(
     )
 
 
+def spin_envelope_reason(
+    meta: Mapping[str, Any], launch_spin_rpm: float, club: str | None
+) -> str:
+    """Invalid reason when the impact spin beat the club class envelope, else "".
+
+    Preconditions: ``meta`` is the pipeline result metadata.
+    Postcondition: the reason names the class of ``club``, not always "driver".
+    """
+    if not meta.get("launch_spin_clamped"):
+        return ""
+    envelope = launch_spin_envelope(club)
+    pre_clamp_rpm = float(meta.get("pre_clamp_launch_spin_rpm", launch_spin_rpm))
+    if pre_clamp_rpm <= envelope.max_rpm + report_margin_rpm():
+        return ""
+    return (
+        f"impact spin exceeds the {envelope.label} validity envelope "
+        f"({pre_clamp_rpm:.0f} rpm); trajectory after capping is not presented "
+        "(SHOW-C7 / #14621)"
+    )
+
+
 def flight_for_impact(
-    series: ClubheadSeries, index: int, frame: TargetFrame
+    series: ClubheadSeries, index: int, frame: TargetFrame, club: str | None = None
 ) -> FlightSummary:
-    """Carry flight of the impact state at ``index`` (impact solver + aerodynamics)."""
+    """Carry flight of the impact state at ``index`` (impact solver + aerodynamics).
+
+    ``club`` names the club; its class sets the launch-spin validity envelope
+    (``None``: the driver envelope).
+    """
     result = SwingBallFlightPipeline().run(
-        swing_state_from_series(series, index, frame)
+        swing_state_from_series(series, index, frame), club=club
     )
     path = np.array([p.position for p in result.trajectory], dtype=float)
     launch = result.launch_conditions
@@ -104,15 +132,8 @@ def flight_for_impact(
         reason = str(meta.get("flight_invalid_reason", "") or "")
     else:
         reason = _invalid_reason(path)
-        if not reason and meta.get("launch_spin_clamped"):
-            pre_clamp_rpm = float(
-                meta.get("pre_clamp_launch_spin_rpm", launch.spin_rate)
-            )
-            if pre_clamp_rpm > MAX_DRIVER_LAUNCH_SPIN_RPM + 1.0:
-                reason = (
-                    "impact spin exceeds the driver validity envelope "
-                    f"({pre_clamp_rpm:.0f} rpm); trajectory after capping is not presented (SHOW-C7 / #14621)"
-                )
+        if not reason:
+            reason = spin_envelope_reason(meta, float(launch.spin_rate), club)
     summary = FlightSummary(
         carry_m=float(result.carry_m),
         lateral_m=-float(path[-1, 1]),

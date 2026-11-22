@@ -61,6 +61,7 @@ from src.tools.native_viewer_export.flight_tracer import load_tracer_settings
 from src.tools.native_viewer_export.impact_factors import load_factor_settings
 from src.tools.native_viewer_export.overlay import OverlayOptions, build_overlay_feed
 from src.tools.native_viewer_export.runner import ExportJob, run_export
+from src.tools.native_viewer_export import camera_framing, shot_setup
 
 logger = logging.getLogger(__name__)
 
@@ -337,6 +338,17 @@ def _add_shot_setup_arguments(p: argparse.ArgumentParser) -> None:
         "are valid (|M| <= max_abs_ball_shift_m of shot_setup_settings.json; "
         "default: %(default)s)",
     )
+    p.add_argument(
+        "--shot-shape",
+        choices=shot_setup.SHAPES,
+        default=None,
+        help="solve the club roll in the hands from the flight model instead "
+        "of taking a number: straight lands on the target line, draw / fade "
+        "are the straight roll minus / plus shape_roll_step_deg (named by the "
+        "ball curve of a right-handed golfer: a draw curves left, a fade "
+        "right). Excludes a non-zero --club-roll-in-hands; combines with "
+        "--ball-position-shift (default: off)",
+    )
 
 
 def _add_clip_overlay_arguments(p: argparse.ArgumentParser) -> None:
@@ -352,6 +364,44 @@ def _add_clip_overlay_arguments(p: argparse.ArgumentParser) -> None:
         metavar="N",
         help="repeat the contact-instant frame N more times "
         "(default: contact_frame_settings.json)",
+    )
+
+
+def _add_camera_arguments(p: argparse.ArgumentParser) -> None:
+    p.add_argument(
+        "--camera-lookat",
+        default=None,
+        metavar="X,Y,Z",
+        help="look-at point in metres (world frame); beats the automatic "
+        "centre-of-mass look-at",
+    )
+    p.add_argument(
+        "--camera-height",
+        type=float,
+        default=None,
+        help="look-at height in metres; keeps the automatic centre-of-mass x/y "
+        "(lower it for a short club on the turf)",
+    )
+    p.add_argument(
+        "--camera-distance",
+        type=float,
+        default=None,
+        help="camera distance in metres (default: each view's own distance)",
+    )
+
+
+def _add_grip_and_ball_arguments(p: argparse.ArgumentParser) -> None:
+    p.add_argument(
+        "--grip",
+        action="store_true",
+        help="add the grip overlay (per-hand, net and couple; GCV-10) and write a "
+        "<swing>_<engine>_grip_wrench.json plot payload; pair with --views "
+        "hands_closeup",
+    )
+    p.add_argument(
+        "--no-ball",
+        action="store_true",
+        help="do not draw the decorative golf ball (shown until impact)",
     )
 
 
@@ -438,19 +488,9 @@ def build_parser() -> argparse.ArgumentParser:
         "--size", default=None, help="tile size WIDTHxHEIGHT (overrides the preset)"
     )
     _add_overlay_arguments(p)
-    p.add_argument(
-        "--grip",
-        action="store_true",
-        help="add the grip overlay (per-hand, net and couple; GCV-10) and write a "
-        "<swing>_<engine>_grip_wrench.json plot payload; pair with --views "
-        "hands_closeup",
-    )
-    p.add_argument(
-        "--no-ball",
-        action="store_true",
-        help="do not draw the decorative golf ball (shown until impact)",
-    )
+    _add_grip_and_ball_arguments(p)
     _add_clip_overlay_arguments(p)
+    _add_camera_arguments(p)
     p.add_argument("--no-grid", action="store_true", help="skip the 2x2 clip")
     add_appearance_arguments(p)
     add_grip_arguments(p, physical=True)
@@ -599,6 +639,21 @@ def _panel_for(args: argparse.Namespace) -> Any:
     return replace(load_panel_settings(), note=panel_note(visibility))
 
 
+def _camera_changes(args: argparse.Namespace) -> dict[str, Any]:
+    """Camera fields of ``ExportSettings`` from the flags (``ValueError``)."""
+    changes: dict[str, Any] = {}
+    if args.camera_lookat is not None:
+        changes["lookat_m"] = camera_framing.parse_lookat(args.camera_lookat)
+        changes["lookat_explicit"] = True
+    if args.camera_height is not None:
+        changes["lookat_height_m"] = camera_framing.check_finite(
+            "height", args.camera_height
+        )
+    if args.camera_distance is not None:
+        changes["distance_m"] = camera_framing.check_distance(args.camera_distance)
+    return changes
+
+
 def build_settings(args: argparse.Namespace) -> ExportSettings:
     """``ExportSettings`` from parsed arguments (raises ``ValueError``)."""
     base = ExportSettings.preview() if args.preset == "preview" else ExportSettings()
@@ -626,6 +681,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
     mobility_condition_cutoff = getattr(args, "mobility_condition_cutoff", None)
     return replace(
         base,
+        **_camera_changes(args),
         ellipsoid_panel=_panel_for(args),
         views=tuple(v for v in args.views.split(",") if v),
         width=width,
@@ -662,6 +718,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         lighting=_lighting_for(args),
         club_roll_in_hands_deg=getattr(args, "club_roll_in_hands", 0.0),
         ball_position_shift_m=getattr(args, "ball_position_shift", 0.0),
+        shot_shape=getattr(args, "shot_shape", None),
         ball_flight=load_tracer_settings(args.ball_flight_settings)
         if args.ball_flight or args.ball_flight_settings is not None
         else None,
@@ -672,7 +729,10 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if args.shot_shape is not None and args.club_roll_in_hands != 0.0:
+        parser.error("--shot-shape solves the roll: omit --club-roll-in-hands")
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     if args.stride is not None:
         logger.warning(

@@ -33,10 +33,13 @@ from src.shared.python.impact_parameters import (
     extract_impact_parameters,
 )
 from src.shared.python.impact_parameters.panel_model import (
+    MPS_TO_MPH,
+    CardRow,
     ImpactCard,
     build_impact_card,
 )
 from src.tools.native_viewer_export.club_pose import ClubPoseModel
+from src.tools.native_viewer_export.display_units import load_display_units
 from src.tools.native_viewer_export.impact_state import series_at_contact
 
 if TYPE_CHECKING:
@@ -192,6 +195,45 @@ def contact_index(series: ClubheadSeries, impact_time_s: float) -> int:
     return max(int(later[0]) if later.size else len(series) - 1, 1)
 
 
+#: note of a smash factor computed from the model ball speed
+SMASH_NOTE = "model"
+
+
+def smash_factor(ball_speed_mph: float, clubhead_speed_mph: float) -> float:
+    """Ball speed over clubhead speed (same unit, dimensionless).
+
+    Raises ``ValueError`` unless both speeds are finite and positive.
+    """
+    for name, value in (("ball", ball_speed_mph), ("clubhead", clubhead_speed_mph)):
+        if not (math.isfinite(value) and value > 0.0):
+            raise ValueError(f"{name} speed must be finite and positive, got {value}")
+    return ball_speed_mph / clubhead_speed_mph
+
+
+def with_model_smash(card: ImpactCard, ball_speed_mph: float | None) -> ImpactCard:
+    """``card`` with the smash factor of the flight model's ball speed.
+
+    ``ball_speed_mph`` is the ball speed of the impact solve that drives the
+    tracer (``FlightSummary.ball_speed_mph``). ``None`` returns ``card``
+    unchanged (the row keeps its "unavailable" reason, never a zero), as does a
+    card whose clubhead speed is not available. The row carries ``SMASH_NOTE``.
+    """
+    if ball_speed_mph is None:
+        return card
+    speed = next((r.value for r in card.rows if r.key == "clubhead_speed"), None)
+    if speed is None:
+        return card
+    scale = 1.0 if card.units == "mph" else MPS_TO_MPH  # card speed -> mph
+    value = smash_factor(ball_speed_mph, float(speed) * scale)
+    rows = tuple(
+        CardRow(r.key, r.label, r.unit, value, note=SMASH_NOTE)
+        if r.key == "smash_factor"
+        else r
+        for r in card.rows
+    )
+    return replace(card, rows=rows)
+
+
 def card_from_series(
     series: ClubheadSeries,
     impact_time_s: float,
@@ -228,7 +270,9 @@ def card_from_series(
         )
     else:
         params = _parameters_at_contact(*moved, frame, ball)
-    card = build_impact_card(_on_face_only(params))
+    card = build_impact_card(
+        _on_face_only(params), units=load_display_units().speed_unit
+    )
     card.extras["impact_state"] = STATE_AT_CONTACT if moved else STATE_LAST_SAMPLE
     card.extras["target_source"] = TARGET_SOURCE
     if ball is not None:

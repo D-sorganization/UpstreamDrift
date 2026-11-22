@@ -270,7 +270,7 @@ class TestDragModel:
         """Test tuned Cd scales smoothly through the Reynolds transition."""
         air_density = 1.225
         model_default = DragModel()
-        model_tuned = DragModel(base_coefficient=0.20)
+        model_tuned = DragModel(base_coefficient=0.16)  # 0.8 x the 0.20 default
         probe_velocity = np.array([10.0, 0.0, 0.0])
 
         default_cd = model_default.get_effective_coefficient(

@@ -156,6 +156,8 @@ class ExportSettings:
     grip: bool = False  # hands/grip overlay (GCV-10); hands_closeup tracks it
     lookat_m: tuple[float, float, float] = (1.0, 0.0, 0.9)
     distance_m: float | None = None
+    lookat_explicit: bool = False  # lookat_m beats the automatic look-at
+    lookat_height_m: float | None = None  # replaces only the automatic height
     #: resolved appearance-v1 document (``resolve_appearance``: CLI override, then
     #: document / sidecar, then contract defaults); ``None`` = contract defaults
     appearance: dict[str, Any] | None = None
@@ -192,6 +194,7 @@ class ExportSettings:
     #: opt-in shot setup, see ``shot_setup`` (club roll in the hands, ball shift)
     club_roll_in_hands_deg: float = 0.0
     ball_position_shift_m: float = 0.0
+    shot_shape: str | None = None  # straight | draw | fade: solves the roll
 
     @property
     def shading_enabled(self) -> bool:
@@ -249,7 +252,7 @@ class ExportSettings:
             )
         self._validate_clips()
         shot_setup.validate_shot_setup(
-            self.club_roll_in_hands_deg, self.ball_position_shift_m
+            self.club_roll_in_hands_deg, self.ball_position_shift_m, self.shot_shape
         )
         if len(self.lookat_m) != 3 or not all(math.isfinite(v) for v in self.lookat_m):
             raise ValueError("lookat_m must be three finite numbers")
@@ -1037,6 +1040,7 @@ def _export_clip(
                 glyph_counts.append(len(glyphs.arrows) + len(glyphs.torque_arcs))
             t = shown.time_s(k)
             extra_lines = ellipsoid_hud.hud_lines(overlays, shown_feed, k)
+            extra_lines = (*extra_lines, *shot_setup.hud_lines(settings))
             if flight is not None:
                 depth = getattr(tiles, "depth_m", None)
                 args = (t, settings.lookat_m, settings.distance_m, depth)
@@ -1120,10 +1124,12 @@ def export_swing(
     out_dir = Path(out_dir)
     from src.tools.native_viewer_export.ball import attach_ball
 
+    settings, setup_record = shot_setup.solve_shot_shape(swing, settings)
     swing = shot_setup.apply_club_roll(swing, settings.club_roll_in_hands_deg)
     swing, ball_record = attach_ball(
         swing, settings, getattr(backend, "ball_limitation", None)
     )
+    ball_record = shot_setup.with_setup_record(ball_record, setup_record)
     if settings.impact_time_s is not None or swing.has_impact_provenance:
         swing, contact = contact_frame.refine(swing, impact_time_s(swing, settings))
         if contact is not None:  # frames, HUD and panels count from contact
