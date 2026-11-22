@@ -11,6 +11,18 @@
       "id": "run_golf_simulator_golden_shot",
       "kind": "agent_capability",
       "runtime_status": "available"
+    },
+    {
+      "description": "Agent API capability `native_export_describe` via sim_run",
+      "id": "native_export_describe",
+      "kind": "agent_capability",
+      "runtime_status": "available"
+    },
+    {
+      "description": "Agent API capability `native_export_validate` via sim_run",
+      "id": "native_export_validate",
+      "kind": "agent_capability",
+      "runtime_status": "available"
     }
   ],
   "engines": [
