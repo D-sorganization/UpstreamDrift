@@ -14,14 +14,8 @@ import json
 import logging
 from pathlib import Path
 import sys
-from typing import Any
 
 from src.tools.native_viewer_export import shot_dispersion as sd
-from src.tools.native_viewer_export.display_units import (
-    DISTANCE_UNITS,
-    DisplayUnits,
-    load_display_units,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -40,28 +34,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--ball-sd", type=float, default=d.ball_position_sd_m, help="m")
     p.add_argument("--base-roll", type=float, default=d.base_club_roll_deg)
     p.add_argument("--base-ball-shift", type=float, default=d.base_ball_shift_m)
-    p.add_argument(
-        "--distance-unit",
-        choices=DISTANCE_UNITS,
-        default=None,
-        help="unit of the figure's distances (default: display units settings)",
-    )
     return p
-
-
-def record_for(
-    cfg: sd.DispersionSettings, result: sd.DispersionResult, units: DisplayUnits
-) -> dict[str, Any]:
-    """JSON record: SI values (``*_m``) plus the unit names of the figure."""
-    return {
-        "seed": cfg.seed,
-        **result.to_dict(),
-        "units": {
-            "distance_values": "m",
-            "angle_values": "deg",
-            "display_distance_unit": units.distance_unit,
-        },
-    }
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -80,15 +53,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             base_club_roll_deg=args.base_roll,
             base_ball_shift_m=args.base_ball_shift,
         )
-        units = load_display_units()
-        if args.distance_unit:
-            units = replace(units, distance_unit=args.distance_unit)
         swing = load_swing_input(args.bundle, swing=args.swing, club=args.club)
         result = sd.run_dispersion(swing, ExportSettings(), sd.sample_setups(cfg))
         args.out.mkdir(parents=True, exist_ok=True)
-        record = record_for(cfg, result, units)
+        record = {"seed": cfg.seed, **result.to_dict()}
         (args.out / "dispersion.json").write_text(json.dumps(record, indent=2))
-        draw_dispersion(result, cfg, args.out / "dispersion.png", units)
+        draw_dispersion(result, cfg, args.out / "dispersion.png")
     except (ValueError, FileNotFoundError) as exc:
         sys.stderr.write(f"error: {exc}\n")
         return 2

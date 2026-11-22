@@ -13,10 +13,6 @@ from typing import Any
 
 import numpy as np
 
-from src.tools.native_viewer_export.display_units import (
-    DisplayUnits,
-    load_display_units,
-)
 from src.tools.native_viewer_export.shot_dispersion import (
     DispersionResult,
     DispersionSettings,
@@ -25,50 +21,35 @@ from src.tools.native_viewer_export.shot_dispersion import (
 
 logger = logging.getLogger(__name__)
 
-#: (label, summary key, format, is a distance); ``{u}`` is the distance unit
 _TABLE_ROWS = (
-    ("Carry ({u})", "carry_m", "{:.1f}", True),
-    ("Side ({u}, + Right)", "side_m", "{:+.1f}", True),
-    ("Face Angle (deg)", "face_angle_deg", "{:+.2f}", False),
-    ("Club Path (deg)", "club_path_deg", "{:+.2f}", False),
-    ("Launch (deg)", "launch_deg", "{:.1f}", False),
-    ("Spin (rpm)", "spin_rpm", "{:.0f}", False),
+    ("Carry (m)", "carry_m", "{:.1f}"),
+    ("Side (m, + Right)", "side_m", "{:+.1f}"),
+    ("Face Angle (deg)", "face_angle_deg", "{:+.2f}"),
+    ("Club Path (deg)", "club_path_deg", "{:+.2f}"),
+    ("Launch (deg)", "launch_deg", "{:.1f}"),
+    ("Spin (rpm)", "spin_rpm", "{:.0f}"),
 )
 
 
-def forward_label(units: DisplayUnits) -> str:
-    """Axis label of the down-range distance in ``units``."""
-    return f"Forward ({units.distance_unit})"
-
-
-def side_label(units: DisplayUnits) -> str:
-    """Axis label of the lateral distance in ``units`` (right is positive)."""
-    return f"Side ({units.distance_unit}, + Right)"
-
-
-def _table_cells(result: DispersionResult, units: DisplayUnits) -> list[list[str]]:
-    """Mean and std rows; the metre metrics are shown in ``units``."""
+def _table_cells(result: DispersionResult) -> list[list[str]]:
     summary = result.summary()
     cells = []
-    for label, key, fmt, is_distance in _TABLE_ROWS:
-        label = label.format(u=units.distance_unit)
+    for label, key, fmt in _TABLE_ROWS:
         stat = summary[key]
-        k = units.distance_scale if is_distance else 1.0
         if stat is None:
             cells.append([label, "n/a", "n/a"])
         else:
-            cells.append(
-                [label, fmt.format(k * stat["mean"]), f"{k * stat['std']:.2f}"]
-            )
+            cells.append([label, fmt.format(stat["mean"]), f"{stat['std']:.2f}"])
     return cells
 
 
-def _draw_ellipse(ax: Any, pts: Any, cfg: DispersionSettings) -> None:
-    """Ellipse of the landing points ``pts`` (already in display units)."""
+def _draw_ellipse(ax: Any, result: DispersionResult, cfg: DispersionSettings) -> None:
     from matplotlib.patches import Ellipse
 
     plot = cfg.plot
-    fit = landing_ellipse(pts, cfg.ellipse_sigma, cfg.min_points_for_ellipse)
+    fit = landing_ellipse(
+        result.landing_points(), cfg.ellipse_sigma, cfg.min_points_for_ellipse
+    )
     if fit is None:
         return
     centre, width, height, angle = fit
@@ -101,37 +82,33 @@ def _landing_scatter(ax: Any, point: Any, colour: Any, plot: Any) -> None:
     )
 
 
-def _draw_traces(
-    plan: Any, side: Any, shots: Any, plot: Any, cmap: Any, scale: float
-) -> None:
+def _draw_traces(plan: Any, side: Any, shots: Any, plot: Any, cmap: Any) -> None:
     for i, shot in enumerate(shots):
-        trace, colour = scale * shot.trace, cmap(i % cmap.N)
+        trace, colour = shot.trace, cmap(i % cmap.N)
         plan.plot(trace[:, 1], trace[:, 0], color=colour, lw=plot["trace_linewidth"])
         _landing_scatter(plan, (trace[-1, 1], trace[-1, 0]), colour, plot)
         side.plot(trace[:, 0], trace[:, 2], color=colour, lw=plot["trace_linewidth"])
 
 
 def _draw_zoom(
-    ax: Any, result: DispersionResult, cfg: DispersionSettings, cmap: Any, view: Any
+    ax: Any, result: DispersionResult, cfg: DispersionSettings, cmap: Any
 ) -> None:
     """Landing points and the ellipse alone, at equal scale on both axes."""
-    units, scale = view
-    plot, pts = cfg.plot, scale * result.landing_points()
+    plot, pts = cfg.plot, result.landing_points()
     for i, point in enumerate(pts):
         _landing_scatter(ax, point, cmap(i % cmap.N), plot)
-    _draw_ellipse(ax, pts, cfg)
+    _draw_ellipse(ax, result, cfg)
     spread = float(max(np.ptp(pts[:, 0]), np.ptp(pts[:, 1])))
     half = max(
-        spread * (0.5 + plot["zoom_margin_fraction"]),
-        scale * plot["zoom_min_half_width_m"],
+        spread * (0.5 + plot["zoom_margin_fraction"]), plot["zoom_min_half_width_m"]
     )
     cx, cy = pts.mean(axis=0)
     ax.set_xlim(cx - half, cx + half)
     ax.set_ylim(cy - half, cy + half)
     ax.set_aspect("equal")
     ax.axvline(0.0, color=plot["target_line_color"], ls="--", lw=1.0)
-    ax.set_xlabel(side_label(units))
-    ax.set_ylabel(forward_label(units))
+    ax.set_xlabel("Side (m, + Right)")
+    ax.set_ylabel("Forward (m)")
     ax.set_title(plot["zoom_title"])
 
 
@@ -149,12 +126,10 @@ def _legend(ax: Any, cfg: DispersionSettings) -> None:
     ax.legend(handles=[handle], loc="lower right")
 
 
-def _draw_table(
-    ax: Any, result: DispersionResult, plot: Any, units: DisplayUnits
-) -> None:
+def _draw_table(ax: Any, result: DispersionResult, plot: Any) -> None:
     ax.axis("off")
     shown = ax.table(
-        cellText=_table_cells(result, units),
+        cellText=_table_cells(result),
         colLabels=["Metric", "Mean", "Std"],
         loc="center",
         cellLoc="center",
@@ -166,13 +141,9 @@ def _draw_table(
 
 
 def draw_dispersion(
-    result: DispersionResult,
-    cfg: DispersionSettings,
-    path: Path,
-    units: DisplayUnits | None = None,
+    result: DispersionResult, cfg: DispersionSettings, path: Path
 ) -> Path:
-    """Write the figure to ``path`` (PNG), distances in ``units`` (default: the
-    display-units settings, yards); the data stay metres. Raises ``ValueError`` when no shot
+    """Write the figure to ``path`` (PNG). Raises ``ValueError`` when no shot
     has a flight; ``ImportError`` without matplotlib. Returns ``path``."""
     import matplotlib
 
@@ -182,8 +153,6 @@ def draw_dispersion(
     shots = result.available
     if not shots:
         raise ValueError("no shot has a flight to draw")
-    units = units or load_display_units()
-    scale = units.distance_scale
     plot = cfg.plot
     plt.rcParams["font.size"] = plot["font_size"]
     fig = plt.figure(figsize=tuple(plot["figsize_in"]), dpi=plot["dpi"])
@@ -193,24 +162,24 @@ def draw_dispersion(
     zoom = fig.add_subplot(grid[1, 1])
     table = fig.add_subplot(grid[1, 2])
     cmap = plt.get_cmap(plot["colormap"])
-    _draw_traces(plan, side, shots, plot, cmap, scale)
-    pts = scale * result.landing_points()
-    _draw_ellipse(plan, pts, cfg)
+    _draw_traces(plan, side, shots, plot, cmap)
+    _draw_ellipse(plan, result, cfg)
     plan.axvline(0.0, color=plot["target_line_color"], ls="--", lw=1.0)
     plan.scatter([0.0], [0.0], s=plot["tee_marker_size"], c="black", marker="^")
-    plan.set_xlim(*_pad(min(pts[:, 0].min(), 0), max(pts[:, 0].max(), 0), 0.5, scale))
-    plan.set_ylim(*_pad(0.0, pts[:, 1].max(), plot["margin_fraction"], scale))
-    plan.set_xlabel(f"Side ({units.distance_unit}), Right of Target Line Is Positive")
-    plan.set_ylabel(forward_label(units))
+    pts = result.landing_points()
+    plan.set_xlim(*_pad(min(pts[:, 0].min(), 0), max(pts[:, 0].max(), 0), 0.5, 1.0))
+    plan.set_ylim(*_pad(0.0, pts[:, 1].max(), plot["margin_fraction"], 1.0))
+    plan.set_xlabel("Side (m), Right of Target Line Is Positive")
+    plan.set_ylabel("Forward (m)")
     plan.set_title("Plan View from Behind the Ball (Lateral Scale Exaggerated)")
-    side.set_xlabel(forward_label(units))
-    side.set_ylabel(f"Height ({units.distance_unit})")
+    side.set_xlabel("Forward (m)")
+    side.set_ylabel("Height (m)")
     side.set_title("Side Profile")
-    _draw_zoom(zoom, result, cfg, cmap, (units, scale))
+    _draw_zoom(zoom, result, cfg, cmap)
     for ax in (plan, side, zoom):
         ax.grid(alpha=plot["grid_alpha"])
     _legend(plan, cfg)
-    _draw_table(table, result, plot, units)
+    _draw_table(table, result, plot)
     fig.suptitle(plot["title"], fontsize=plot["title_font_size"])
     fig.tight_layout()
     path = Path(path)
