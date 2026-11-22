@@ -34,6 +34,7 @@ class ResultsPlaybackHostMixin:
     playback_panel: Any | None
     playback_dock: QDockWidget | None
     playback_bar: Any | None
+    shot_dock: QDockWidget | None = None
     _results: ResultsSession | None
     _inner: Any
     visualization_dock: Any
@@ -89,6 +90,7 @@ class ResultsPlaybackHostMixin:
             self.playback_bar.set_session(session)
         self.scrub_results(0)
         self._show_playback_panel(panel)
+        self._show_shot_card(session, panel)
         self.export_video_action.setEnabled(True)
         self.status_bar.showMessage(
             f"{session.title}: {results_path.name}, {session.frame_count} frames"
@@ -182,8 +184,19 @@ class ResultsPlaybackHostMixin:
         self.playback_dock.show()
         self.playback_dock.raise_()
 
+    def _show_shot_card(self, session: ResultsSession, panel: Any | None) -> None:
+        """Dock the Shot card (impact factors, ball flight) beside the playback."""
+        if panel is None:
+            return
+        from .playback_flight_panel import attach_shot_dock, summary_for_path
+
+        summary = summary_for_path(session.path)
+        self.shot_dock = attach_shot_dock(self._inner, self.shot_dock, summary)
+
     def _discard_results(self) -> None:
         """Drop the loaded run, its panel and its renderer; idempotent."""
+        if self.shot_dock is not None:
+            self.shot_dock.hide()
         panel, self.playback_panel = self.playback_panel, None
         if panel is not None:
             # The C++ widget may already be gone during teardown.

@@ -268,6 +268,7 @@ class FlightPlayback:
     aim_yaw_rad: float | None = None
     aim_text: str | None = None
     aim_lateral_m: float | None = None
+    spin_axis_deg: float | None = None  # model launch spin-axis tilt, + = right
 
     def __post_init__(self) -> None:
         if not isinstance(self.settings, TracerSettings):
@@ -553,6 +554,7 @@ def playback_from_flight(
         flight.launch_deg,
         flight.spin_rpm,
         flight.ball_speed_mph,
+        spin_axis_deg=flight.spin_axis_deg,
     )
 
 

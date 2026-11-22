@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 51 parity · 12 gap · 19 exempt (12 pending decision in #7460).
+**Summary:** 51 parity · 13 gap · 19 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -77,6 +77,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.matlab_suite`<br>MATLAB/Simscape model suite | ⚪ exempt | `src/launchers/matlab_suite_dialog.py` | — | — | Requires a local MATLAB installation; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `tools.model_explorer`<br>Model Explorer (browse/select/build URDF-MJCF) | ✅ parity | `src/tools/model_explorer/launch_model_explorer.py` | `src/api/routes/model_explorer.py` | `ui/src/pages/ModelExplorer.tsx` | — |
 | `tools.model_explorer.frankenstein_assembly`<br>Frankenstein drag-and-drop assembly with typed attachment ports | 🔴 gap | `src/tools/model_explorer/frankenstein_editor/assembly_panel.py` | `src/api/routes/model_explorer_assembly.py` | — | #11651 |
+| `tools.model_explorer.playback_shot_card`<br>Model Explorer Shot card: impact factors and ball flight beside the playback | 🔴 gap | `src/tools/model_explorer/playback_flight_panel.py` | — | — | #12878 |
 | `tools.model_explorer.results_playback`<br>Model Explorer results playback on the shared-appearance golfer | 🔴 gap | `src/tools/model_explorer/results_playback_panel.py` | — | — | #12878 |
 | `tools.motion_matching`<br>Motion Matching tour-average and club-only Excel matching | ✅ parity | `src/tools/motion_matching/gui.py` | — | — | — |
 | `tools.native_viewer_export`<br>Native per-engine viewer video export (CLI) | 🔴 gap | `src/tools/native_viewer_export/cli.py` | `src/api/routes/agent_sim_run.py` | — | #15150 |

@@ -923,6 +923,31 @@ def _export_clip(
     return paths, frames, glyph_counts
 
 
+def prepare_shot(
+    swing: SwingInput, settings: ExportSettings, ball_limitation: Any = None
+) -> tuple[SwingInput, ExportSettings, dict[str, Any] | None]:
+    """The swing, settings and ball record an export's panels are computed from.
+
+    Applies the shot setup (club roll, solved shot shape), places the ball and,
+    with a known impact, moves the impact time to the contact instant. Shared
+    by :func:`export_swing` and the explorer's live Shot card, so both read
+    the same strike.
+    """
+    from src.tools.native_viewer_export.ball import attach_ball
+
+    settings, setup_record = shot_setup.solve_shot_shape(swing, settings)
+    swing = shot_setup.apply_club_roll(swing, settings.club_roll_in_hands_deg)
+    swing, ball_record = attach_ball(swing, settings, ball_limitation)
+    ball_record = shot_setup.with_setup_record(ball_record, setup_record)
+    if settings.impact_time_s is not None or swing.has_impact_provenance:
+        swing, contact = contact_frame.refine(swing, impact_time_s(swing, settings))
+        if contact is not None:  # frames, HUD and panels count from contact
+            settings = replace(settings, impact_time_s=contact)
+            if ball_record is not None and "hide_after_s" in ball_record:
+                ball_record = {**ball_record, "hide_after_s": contact}
+    return swing, settings, ball_record
+
+
 def export_swing(
     backend: NativeBackend,
     swing: SwingInput,
@@ -944,20 +969,9 @@ def export_swing(
     if reason is not None:
         return ExportResult(engine, {}, 0, skipped_reason=reason)
     out_dir = Path(out_dir)
-    from src.tools.native_viewer_export.ball import attach_ball
-
-    settings, setup_record = shot_setup.solve_shot_shape(swing, settings)
-    swing = shot_setup.apply_club_roll(swing, settings.club_roll_in_hands_deg)
-    swing, ball_record = attach_ball(
+    swing, settings, ball_record = prepare_shot(
         swing, settings, getattr(backend, "ball_limitation", None)
     )
-    ball_record = shot_setup.with_setup_record(ball_record, setup_record)
-    if settings.impact_time_s is not None or swing.has_impact_provenance:
-        swing, contact = contact_frame.refine(swing, impact_time_s(swing, settings))
-        if contact is not None:  # frames, HUD and panels count from contact
-            settings = replace(settings, impact_time_s=contact)
-            if ball_record is not None and "hide_after_s" in ball_record:
-                ball_record = {**ball_record, "hide_after_s": contact}
     factors = None
     if settings.impact_factors is not None:
         factors, settings = factors_panel.factors_for_export(swing, settings)
