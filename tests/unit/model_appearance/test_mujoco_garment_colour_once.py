@@ -8,7 +8,7 @@ colour.
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET  # nosec B405 - construction only
+import xml.etree.ElementTree as ET  # noqa: S405  # nosec B405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # test-only construction of MJCF, never parses input
 
 import numpy as np
 import pytest
