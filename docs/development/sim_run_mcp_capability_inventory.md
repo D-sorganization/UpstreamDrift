@@ -22,9 +22,9 @@ records; public docs do not describe that surface.
 | :--- | :--- | :---: | :--- |
 | `pendulum` | Double pendulum dynamics benchmark | available | — |
 | `mujoco` | MuJoCo physics engine | available | — |
-| `pinocchio` | Pinocchio rigid body algorithms | available | — |
-| `drake` | Drake multibody plant simulation | available | — |
-| `opensim` | OpenSim musculoskeletal biomechanics | available | — |
+| `pinocchio` | Pinocchio rigid body algorithms | unavailable | optional engine dependency not installed (No module named 'pinocchio') |
+| `drake` | Drake multibody plant simulation | unavailable | optional engine dependency not installed (No module named 'pydrake') |
+| `opensim` | OpenSim musculoskeletal biomechanics | unavailable | optional engine dependency not installed (No module named 'opensim') |
 
 ## Putting Tools
 

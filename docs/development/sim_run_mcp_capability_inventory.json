@@ -57,7 +57,8 @@
       "engine_type": "pinocchio",
       "id": "pinocchio",
       "kind": "engine",
-      "runtime_status": "available"
+      "runtime_status": "unavailable",
+      "unavailable_reason": "optional engine dependency not installed (No module named 'pinocchio')"
     },
     {
       "capabilities": [
@@ -68,7 +69,8 @@
       "engine_type": "drake",
       "id": "drake",
       "kind": "engine",
-      "runtime_status": "available"
+      "runtime_status": "unavailable",
+      "unavailable_reason": "optional engine dependency not installed (No module named 'pydrake')"
     },
     {
       "capabilities": [
@@ -79,7 +81,8 @@
       "engine_type": "opensim",
       "id": "opensim",
       "kind": "engine",
-      "runtime_status": "available"
+      "runtime_status": "unavailable",
+      "unavailable_reason": "optional engine dependency not installed (No module named 'opensim')"
     }
   ],
   "putting_tools": [
