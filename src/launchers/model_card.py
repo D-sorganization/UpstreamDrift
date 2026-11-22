@@ -58,7 +58,8 @@ from .launcher_constants import (
     scaled_padding_px,
     validate_tile_scale,
 )
-from .model_card_maturity import add_maturity_chip, add_maturity_row, let_label_shrink
+from .model_card_maturity import add_maturity_chip, add_maturity_row
+from .elided_label import ElidedLabel
 from .startup import ASSETS_DIR, _get_theme_colors
 
 if TYPE_CHECKING:
@@ -537,7 +538,6 @@ class DraggableModelCard(QFrame):
 
         if embed_in_row:
             layout.addWidget(lbl_status)
-            let_label_shrink(self.lbl_name)
             add_maturity_chip(layout, self.model, _get_theme_colors(), chip_pt)
             return
 
@@ -747,11 +747,11 @@ class DraggableModelCard(QFrame):
             self._create_image_widget(outer)
 
             name_pt = max(scaled_font_pt(self.tile_scale, base_pt=10), 9)
-            self.lbl_name = QLabel(str(self.model.name))
+            self.lbl_name = ElidedLabel(str(self.model.name))
             self.lbl_name.setObjectName("CardName")
             self.lbl_name.setFont(get_display_font(size=name_pt, weight=Weights.BOLD))
 
-            self.lbl_desc = QLabel(str(self.model.description or ""))
+            self.lbl_desc = ElidedLabel(str(self.model.description or ""))
             self.lbl_desc.setObjectName("CardDescription")
             self.lbl_desc.setFont(get_qfont(size=8))
             self.lbl_desc.setVisible(False)
@@ -767,7 +767,7 @@ class DraggableModelCard(QFrame):
             text_box = QVBoxLayout()
             text_box.setSpacing(2)
             name_pt = max(scaled_font_pt(self.tile_scale, base_pt=12), 10)
-            self.lbl_name = QLabel(str(self.model.name))
+            self.lbl_name = ElidedLabel(str(self.model.name))
             self.lbl_name.setObjectName("CardName")
             self.lbl_name.setFont(get_display_font(size=name_pt, weight=Weights.BOLD))
 
@@ -776,7 +776,7 @@ class DraggableModelCard(QFrame):
             name_layout.addStretch()
             text_box.addLayout(name_layout)
 
-            self.lbl_desc = QLabel(str(self.model.description or ""))
+            self.lbl_desc = ElidedLabel(str(self.model.description or ""))
             self.lbl_desc.setObjectName("CardDescription")
             self.lbl_desc.setFont(get_qfont(size=9))
             self.lbl_desc.setVisible(self._show_description)

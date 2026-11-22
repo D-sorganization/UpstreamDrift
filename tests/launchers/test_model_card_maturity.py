@@ -16,6 +16,8 @@ from src.shared.python.theme.sidekick_tokens import DEFAULT_SIDEKICK_TOKENS
 
 pytestmark = pytest.mark.unit
 
+PHONE_WIDTH = 390
+
 
 def _need_qt() -> None:
     try:
@@ -104,3 +106,31 @@ def test_chip_does_not_change_card_row_height(qapp, width: int) -> None:
     assert tagged.minimumSizeHint().width() == plain.minimumSizeHint().width()
     assert tagged.sizeHint().height() == plain.sizeHint().height()
     assert chip.height() == chip.maximumHeight()
+
+
+@pytest.mark.parametrize("compact", [True, False])
+def test_chip_keeps_list_row_phone_sized(qapp, compact: bool) -> None:
+    _need_qt()
+    from unittest.mock import MagicMock
+
+    from src.launchers.model_card import DraggableModelCard
+
+    parent = MagicMock()
+    parent.layout_edit_mode = False
+
+    def min_width(maturity: str | None) -> int:
+        launcher = {"status": "ready", **({"maturity": maturity} if maturity else {})}
+        model = SimpleNamespace(
+            id="t",
+            name="Experimental Spine Fit",
+            description="A long description",
+            engine_type="mujoco",
+            type="custom_humanoid",
+            path="",
+            launcher=launcher,
+        )
+        card = DraggableModelCard(model, parent, list_mode=True, list_compact=compact)
+        return card.minimumSizeHint().width()
+
+    # A chip needs room, but the row must still fit a phone-width window.
+    assert min_width("deprecated") <= PHONE_WIDTH

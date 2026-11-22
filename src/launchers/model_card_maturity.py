@@ -144,12 +144,3 @@ def add_maturity_row(
     row.addWidget(chip)
     row.addStretch()
     layout.addLayout(row)
-
-
-def let_label_shrink(label: Any) -> None:
-    """Let a name label give up width instead of widening its row."""
-    from PyQt6.QtWidgets import QSizePolicy
-
-    label.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
-    label.setMinimumWidth(1)  # 0 means unset to Qt
-    label.setToolTip(label.text())
