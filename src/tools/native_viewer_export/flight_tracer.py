@@ -51,6 +51,12 @@ from src.tools.native_viewer_export.flight_inset import (
 from src.tools.native_viewer_export.landing_marker import LandingMarkerSettings
 from src.tools.native_viewer_export.impact_state import series_at_contact
 from src.tools.native_viewer_export.overlay2d import pinhole_for_view
+from src.tools.native_viewer_export.rollout import (
+    Rollout,
+    RolloutSettings,
+    compute_rollout,
+    load_rollout_settings,
+)
 
 if TYPE_CHECKING:
     from src.shared.python.impact_parameters.target_frame import TargetFrame
@@ -97,6 +103,7 @@ class TracerSettings:
     inset: FlightInsetSettings | None = None  # flight_inset_settings.json
     ball_shading: flight_depth.BallShading | None = None
     display_units: DisplayUnits = METRIC  # load_tracer_settings: display_units.py
+    rollout: RolloutSettings | None = None  # rollout_settings.json
     hole_view: Any = None  # hole_view.HoleViewSettings (--hole-view); None = off
 
     def __post_init__(self) -> None:
@@ -157,6 +164,7 @@ def load_tracer_settings(
     document["inset"] = replace(
         inset, unit=units.distance_unit, unit_scale=units.distance_scale
     )
+    document["rollout"] = load_rollout_settings()
     try:
         return TracerSettings(**document)
     except TypeError as exc:
@@ -243,6 +251,7 @@ class FlightPlayback:
     launch_deg: float | None = None
     spin_rpm: float | None = None
     ball_speed_mph: float | None = None  # of the impact solve; the smash factor's
+    rollout: Rollout | None = None  # roll after the carry (a model assumption)
 
     def __post_init__(self) -> None:
         if not isinstance(self.settings, TracerSettings):
@@ -494,6 +503,22 @@ def playback_from_flight(
     )
 
 
+def with_rollout(
+    playback: FlightPlayback, flight: FlightSummary, club: str | None
+) -> FlightPlayback:
+    """``playback`` with the roll and total of ``flight`` struck with ``club``.
+
+    Adds a HUD line stating them and the model assumption; unchanged when the
+    roll is off, the flight is invalid or ``club`` has no runout class.
+    """
+    settings = playback.settings
+    roll = compute_rollout(flight, club, settings.rollout)
+    if roll is None or playback.path_m is None or settings.rollout is None:
+        return playback
+    line = roll.hud_text(settings.display_units, settings.rollout)
+    return replace(playback, rollout=roll, lines=(*playback.lines, line))
+
+
 def strike_offset_m(
     series: ClubheadSeries, index: int, ball: BallPlacement
 ) -> tuple[float, float] | None:
@@ -558,13 +583,15 @@ def manifest_record(overlays: Any) -> dict[str, Any] | None:
     if flight.path_m is None:
         return {**record, "unavailable": flight.status}
     speed = flight.ball_speed_mph
-    return {
-        **record,
-        "carry_m": flight.carry_m,
-        "apex_m": flight.apex_m,
-        "lateral_m": flight.lateral_m,
-        "ball_speed_mps": None if speed is None else speed / MPS_TO_MPH,
-    }
+    record.update(
+        carry_m=flight.carry_m,
+        apex_m=flight.apex_m,
+        lateral_m=flight.lateral_m,
+        ball_speed_mps=None if speed is None else speed / MPS_TO_MPH,
+    )
+    if flight.rollout is not None:
+        record["rollout"] = flight.rollout.record()
+    return record
 
 
 def playback_from_series(
@@ -591,12 +618,14 @@ def playback_from_series(
     if contact is None:
         state = impact_card.contact_index(series, impact_time_s) - 1
         flight = flight_for_impact(series, state, frame, club, club_impact)
-        return playback_from_flight(flight, frame, impact_time_s, ball, settings)
+        play = playback_from_flight(flight, frame, impact_time_s, ball, settings)
+        return with_rollout(play, flight, club)
     moved, state = contact
     offset = strike_offset_m(moved, state, ball)
     flight = flight_for_impact(moved, state, frame, club, club_impact, offset)
     start_s = float(moved.times_s[state])
-    return playback_from_flight(flight, frame, start_s, ball, settings)
+    play = playback_from_flight(flight, frame, start_s, ball, settings)
+    return with_rollout(play, flight, club)
 
 
 def _spec_club(swing: SwingInput) -> Mapping[str, Any] | None:

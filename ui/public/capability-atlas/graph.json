@@ -377,7 +377,7 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "One ordered maturity scale (src/shared/python/config/maturity_scale.json) drives the PyQt6 launcher model list, the launcher loader and GET /api/launcher/tiles?min_maturity=, with the MIN_MATURITY setting as the default (which shows everything). The React dashboard does not yet send min_maturity, and no surface draws a maturity chip yet (follow-up branch); tracked under epic #15150.",
+      "notes": "One ordered maturity scale (src/shared/python/config/maturity_scale.json) drives the PyQt6 launcher model list, the launcher loader and GET /api/launcher/tiles?min_maturity=, with the MIN_MATURITY setting as the default (which shows everything). The React dashboard does not yet send min_maturity, the PyQt6 launcher tiles draw a maturity chip (stable draws none; fixed height, so card rows keep their height), and the web dashboard draws none yet; tracked under epic #15150.",
       "id": "launcher.min_maturity"
     },
     {
@@ -3515,7 +3515,7 @@
   "inputs": {
     "src/config/models.yaml": "ad3f0cf74f12a3a0df3443b3f40ace2393123ee6d39ee34b055d4f79c4a1c873",
     "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
-    "src/config/feature_parity.json": "22188e58819f13adf19de4fdf8c4926464b6acd06874064e3355aa7b56cfa2d2",
+    "src/config/feature_parity.json": "706382b1a82afa90b1b1f63c9139fee2a649bd3edb1092b76cfef87ba8f6e793",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
