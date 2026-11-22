@@ -181,13 +181,6 @@ def test_launcher_opens_explorer_plays_and_switches_matched_swings(
     explorer.cleanup()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "#15150 gap: the live playback panel has no ball, ball-flight or "
-        "shot-shape control; those exist only as Export Clips options"
-    ),
-)
 def test_live_playback_offers_ball_flight_and_shot_shape() -> None:
     for name in ("set_ball_flight_visible", "set_shot_shape"):
         assert callable(getattr(ResultsPlaybackPanel, name, None)), name
