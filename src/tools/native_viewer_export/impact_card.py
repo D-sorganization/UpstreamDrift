@@ -125,6 +125,15 @@ def address_target_frame(series: ClubheadSeries) -> TargetFrame:
     return TargetFrame(target_dir=(float(x), float(y), 0.0), handedness="right")
 
 
+def address_target_direction(swing: SwingInput) -> np.ndarray:
+    """Unit horizontal target-line direction of ``swing`` (z component 0).
+
+    Raises ``ValueError`` when the address face normal has no horizontal part.
+    """
+    x, y, _ = address_target_frame(_club_series(swing)).target_dir
+    return np.array([x, y, 0.0]) / math.hypot(x, y)
+
+
 def ball_contact_point(
     series: ClubheadSeries, index: int, ball: BallPlacement
 ) -> np.ndarray:
