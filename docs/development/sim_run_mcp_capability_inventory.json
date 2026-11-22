@@ -11,6 +11,18 @@
       "id": "run_golf_simulator_golden_shot",
       "kind": "agent_capability",
       "runtime_status": "available"
+    },
+    {
+      "description": "Agent API capability `native_export_describe` via sim_run",
+      "id": "native_export_describe",
+      "kind": "agent_capability",
+      "runtime_status": "available"
+    },
+    {
+      "description": "Agent API capability `native_export_validate` via sim_run",
+      "id": "native_export_validate",
+      "kind": "agent_capability",
+      "runtime_status": "available"
     }
   ],
   "engines": [
@@ -45,8 +57,7 @@
       "engine_type": "pinocchio",
       "id": "pinocchio",
       "kind": "engine",
-      "runtime_status": "unavailable",
-      "unavailable_reason": "optional engine dependency not installed (No module named 'pinocchio')"
+      "runtime_status": "available"
     },
     {
       "capabilities": [
@@ -57,8 +68,7 @@
       "engine_type": "drake",
       "id": "drake",
       "kind": "engine",
-      "runtime_status": "unavailable",
-      "unavailable_reason": "optional engine dependency not installed (No module named 'pydrake')"
+      "runtime_status": "available"
     },
     {
       "capabilities": [
@@ -69,8 +79,7 @@
       "engine_type": "opensim",
       "id": "opensim",
       "kind": "engine",
-      "runtime_status": "unavailable",
-      "unavailable_reason": "optional engine dependency not installed (No module named 'opensim')"
+      "runtime_status": "available"
     }
   ],
   "putting_tools": [

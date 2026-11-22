@@ -6,11 +6,17 @@ import json
 from collections.abc import Callable
 from typing import Any
 
-from .agent_capabilities import run_agent_capability
+from .agent_capabilities import CapabilityId, run_agent_capability
 from .store import SimulationRunStore
 
 ToolHandler = Callable[[dict[str, Any]], dict[str, Any]]
 AuthCheck = Callable[[Any], None]
+
+#: MCP tool name -> capability id of the native viewer exporter (#15150 G8).
+NATIVE_EXPORT_TOOLS: dict[str, CapabilityId] = {
+    "native_export_describe": "native_export_describe",
+    "native_export_validate": "native_export_validate",
+}
 
 
 def _envelope(payload: dict[str, Any]) -> dict[str, Any]:
@@ -49,7 +55,42 @@ def agent_capability_tool_specs() -> list[dict[str, Any]]:
                 },
             },
         },
+        {
+            "name": "native_export_describe",
+            "description": (
+                "Native viewer exporter request schema derived from its command "
+                "line: groups with maturity and sources, options with defaults. "
+                "request.min_maturity hides unready groups."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {**auth, "request": {"type": "object"}},
+            },
+        },
+        {
+            "name": "native_export_validate",
+            "description": (
+                "Check a native viewer export request {options: {name: value}} "
+                "against the schema and allowed roots; returns the command line."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {**auth, "request": {"type": "object"}},
+                "required": ["request"],
+            },
+        },
     ]
+
+
+def _capability_handler(
+    capability_id: CapabilityId, check_auth: AuthCheck, store: SimulationRunStore
+) -> ToolHandler:
+    def _handler(arguments: dict[str, Any]) -> dict[str, Any]:
+        check_auth(arguments.get("auth_token"))
+        req = dict(arguments.get("request") or {})
+        return _envelope(run_agent_capability(capability_id, req, store))
+
+    return _handler
 
 
 def agent_capability_tool_handlers(
@@ -73,4 +114,8 @@ def agent_capability_tool_handlers(
     return {
         "run_counterfactual_ztcf_golden": _ztcf,
         "run_golf_simulator_golden_shot": _golf,
+        **{
+            name: _capability_handler(cap, check_auth, store)
+            for name, cap in NATIVE_EXPORT_TOOLS.items()
+        },
     }
