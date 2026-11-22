@@ -61,6 +61,7 @@ from src.tools.native_viewer_export.flight_tracer import load_tracer_settings
 from src.tools.native_viewer_export.impact_factors import load_factor_settings
 from src.tools.native_viewer_export.overlay import OverlayOptions, build_overlay_feed
 from src.tools.native_viewer_export.runner import ExportJob, run_export
+from src.tools.native_viewer_export import shot_setup
 
 logger = logging.getLogger(__name__)
 
@@ -336,6 +337,17 @@ def _add_shot_setup_arguments(p: argparse.ArgumentParser) -> None:
         "already slowed by the real ball, so only the first few centimetres "
         "are valid (|M| <= max_abs_ball_shift_m of shot_setup_settings.json; "
         "default: %(default)s)",
+    )
+    p.add_argument(
+        "--shot-shape",
+        choices=shot_setup.SHAPES,
+        default=None,
+        help="solve the club roll in the hands from the flight model instead "
+        "of taking a number: straight lands on the target line, draw / fade "
+        "are the straight roll minus / plus shape_roll_step_deg (named by the "
+        "ball curve of a right-handed golfer: a draw curves left, a fade "
+        "right). Excludes a non-zero --club-roll-in-hands; combines with "
+        "--ball-position-shift (default: off)",
     )
 
 
@@ -662,6 +674,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         lighting=_lighting_for(args),
         club_roll_in_hands_deg=getattr(args, "club_roll_in_hands", 0.0),
         ball_position_shift_m=getattr(args, "ball_position_shift", 0.0),
+        shot_shape=getattr(args, "shot_shape", None),
         ball_flight=load_tracer_settings(args.ball_flight_settings)
         if args.ball_flight or args.ball_flight_settings is not None
         else None,
@@ -672,7 +685,10 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if args.shot_shape is not None and args.club_roll_in_hands != 0.0:
+        parser.error("--shot-shape solves the roll: omit --club-roll-in-hands")
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     if args.stride is not None:
         logger.warning(

@@ -13,22 +13,32 @@ Two display settings, both off by default (zero changes nothing):
 * ``ball_position_shift_m`` -- moves the nominal address ball along the
   horizontal target line (positive toward the target) before the strike
   placement, so the ball is still placed where the face centre passes.
+* ``shot_shape`` (``straight``, ``draw``, ``fade``) -- solves the club roll in
+  the hands instead of taking a number. ``straight`` is the roll at which the
+  flight model lands the ball on the target line; ``draw`` and ``fade`` are
+  that roll minus / plus ``shape_roll_step_deg``. The names are the ball curve
+  of a right-handed golfer: a draw curves left (more closed, more negative
+  roll), a fade curves right (more open, more positive roll). It excludes a
+  non-zero ``club_roll_in_hands_deg`` and combines with the ball shift.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
 import json
+import logging
 import math
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Callable
 
 import numpy as np
 
 if TYPE_CHECKING:
+    from src.tools.native_viewer_export.core import ExportSettings
     from src.tools.native_viewer_export.ball import BallPlacement
     from src.tools.native_viewer_export.core import SwingInput
 
+logger = logging.getLogger(__name__)
 SETTINGS_PATH = Path(__file__).with_name("shot_setup_settings.json")
 POSITION_NOTE = (
     "forward of the captured ball the measured club was already slowed by the "
@@ -36,20 +46,27 @@ POSITION_NOTE = (
 )
 
 
+SHAPES = ("straight", "draw", "fade")
+_SHAPE_SIGN = {"straight": 0.0, "draw": -1.0, "fade": 1.0}
+
+
 @dataclass(frozen=True)
 class ShotSetupSettings:
-    """Limits read from ``shot_setup_settings.json`` (both positive, finite)."""
+    """Values read from ``shot_setup_settings.json`` (all positive, finite)."""
 
     max_abs_roll_deg: float
     max_abs_ball_shift_m: float
+    straight_tolerance_m: float = 0.25
+    solve_span_deg: float = 6.0
+    max_solve_steps: int = 12
+    shape_roll_step_deg: float = 2.0
 
 
 def load_shot_setup_settings(path: Path | None = None) -> ShotSetupSettings:
     """Read the limits; ``KeyError`` for a missing key, ``ValueError`` if invalid."""
     raw = json.loads((path or SETTINGS_PATH).read_text(encoding="utf-8"))
-    limits = ShotSetupSettings(
-        float(raw["max_abs_roll_deg"]), float(raw["max_abs_ball_shift_m"])
-    )
+    raw.pop("sources", None)
+    limits = ShotSetupSettings(**raw)
     for name, value in vars(limits).items():
         if not (math.isfinite(value) and value > 0.0):
             raise ValueError(f"{name} must be positive and finite")
@@ -65,12 +82,25 @@ def _check(name: str, value: Any, limit: float) -> None:
         )
 
 
-def validate_shot_setup(roll_deg: Any, shift_m: Any) -> None:
-    """Raise ``TypeError`` for a non-number, ``ValueError`` for a value that is
-    not finite or beyond the limits of ``shot_setup_settings.json``."""
+def validate_shot_setup(roll_deg: Any, shift_m: Any, shape: Any = None) -> None:
+    """Raise ``TypeError`` for a non-number (or a non-string ``shape``),
+    ``ValueError`` for a value that is not finite or beyond the limits of
+    ``shot_setup_settings.json``, an unknown ``shape`` or a ``shape`` together
+    with a non-zero roll (the shape solves the roll)."""
     limits = load_shot_setup_settings()
     _check("club_roll_in_hands_deg", roll_deg, limits.max_abs_roll_deg)
     _check("ball_position_shift_m", shift_m, limits.max_abs_ball_shift_m)
+    if shape is None:
+        return
+    if not isinstance(shape, str):
+        raise TypeError(f"shot_shape must be a string, got {type(shape).__name__}")
+    if shape not in SHAPES:
+        raise ValueError(f"shot_shape must be one of {SHAPES}, got {shape!r}")
+    if roll_deg != 0.0:
+        raise ValueError(
+            "shot_shape solves the roll: club_roll_in_hands_deg must be 0, "
+            f"got {roll_deg}"
+        )
 
 
 def spec_with_roll_in_hands(spec_bytes: bytes, offset_deg: float) -> bytes:
@@ -123,3 +153,148 @@ def shift_ball(swing: SwingInput, ball: BallPlacement, shift_m: float) -> BallPl
         return ball
     moved = np.asarray(ball.position_m) + shift_m * target_direction(swing)
     return replace(ball, position_m=(float(moved[0]), float(moved[1]), float(moved[2])))
+
+
+def solve_straight_roll(
+    side_m: Callable[[float], float], limits: ShotSetupSettings
+) -> tuple[float, float]:
+    """The roll (degrees) where ``side_m`` is zero, and the side found there.
+
+    Bracketed false position (Illinois) on ``[-solve_span_deg, +solve_span_deg]``
+    with at most ``max_solve_steps`` evaluations, ending when
+    ``|side| <= straight_tolerance_m``. Postcondition: the returned roll lies in
+    the bracket. Raises ``ValueError`` for a non-finite side, a bracket without
+    a sign change or an exhausted step budget.
+    """
+    steps = 0
+
+    def probe(roll: float) -> float:
+        nonlocal steps
+        steps += 1
+        value = float(side_m(roll))
+        if not math.isfinite(value):
+            raise ValueError(f"landing side must be finite, got {value} at {roll} deg")
+        return value
+
+    lo, hi = -limits.solve_span_deg, limits.solve_span_deg
+    f_lo, f_hi = probe(lo), probe(hi)
+    for roll, value in ((lo, f_lo), (hi, f_hi)):
+        if abs(value) <= limits.straight_tolerance_m:
+            return roll, value
+    if f_lo * f_hi > 0.0:
+        raise ValueError(
+            f"no sign change of the landing side in +-{limits.solve_span_deg:g} deg "
+            f"of roll ({f_lo:.1f} m at {lo:g}, {f_hi:.1f} m at {hi:g})"
+        )
+    last = 0
+    while steps < limits.max_solve_steps:
+        mid = hi - f_hi * (hi - lo) / (f_hi - f_lo)
+        f_mid = probe(mid)
+        if abs(f_mid) <= limits.straight_tolerance_m:
+            return mid, f_mid
+        if f_mid * f_hi > 0.0:
+            hi, f_hi = mid, f_mid
+            f_lo = f_lo / 2.0 if last == -1 else f_lo
+            last = -1
+        else:
+            lo, f_lo = mid, f_mid
+            f_hi = f_hi / 2.0 if last == 1 else f_hi
+            last = 1
+    raise ValueError(
+        f"landing side not within {limits.straight_tolerance_m:g} m after {steps} steps"
+    )
+
+
+def roll_for_shape(
+    shape: str, side_m: Callable[[float], float], limits: ShotSetupSettings
+) -> tuple[float, float, float]:
+    """``(roll, straight_roll, side_at_straight)`` of ``shape``.
+
+    ``draw`` / ``fade`` are the straight roll minus / plus
+    ``shape_roll_step_deg`` (right-handed golfer; a draw curves left).
+    """
+    validate_shot_setup(0.0, 0.0, shape)
+    straight, side = solve_straight_roll(side_m, limits)
+    roll = straight + _SHAPE_SIGN[shape] * limits.shape_roll_step_deg
+    return roll, straight, side
+
+
+def lateral_of_flight(flight: Any) -> float:
+    """Right-positive landing side (metres) of a ``FlightPlayback``.
+
+    Raises ``ValueError`` stating the flight's status when it has no landing.
+    """
+    if flight is None or flight.lateral_m is None:
+        why = "not requested" if flight is None else flight.status
+        raise ValueError(f"cannot solve shot_shape, ball flight unavailable: {why}")
+    return float(flight.lateral_m)
+
+
+def _trial_lateral(swing: SwingInput, settings: ExportSettings, roll: float) -> float:
+    """Landing side of the export's flight for ``roll`` (no rendering)."""
+    from src.tools.native_viewer_export import contact_frame, core, flight_tracer
+    from src.tools.native_viewer_export.ball import attach_ball
+
+    tracer = settings.ball_flight or flight_tracer.load_tracer_settings()
+    trial = replace(
+        settings, club_roll_in_hands_deg=roll, ball_flight=tracer, shot_shape=None
+    )
+    rolled, _ = attach_ball(apply_club_roll(swing, roll), trial)
+    if trial.impact_time_s is not None or rolled.has_impact_provenance:
+        rolled, contact = contact_frame.refine(
+            rolled, core.impact_time_s(rolled, trial)
+        )
+        if contact is not None:
+            trial = replace(trial, impact_time_s=contact)
+    return lateral_of_flight(flight_tracer.flight_for_export(rolled, trial))
+
+
+def solve_shot_shape(
+    swing: SwingInput, settings: ExportSettings
+) -> tuple[ExportSettings, dict[str, Any] | None]:
+    """``settings`` with ``shot_shape`` turned into a club roll, plus a record.
+
+    Returns ``(settings, None)`` unchanged without a shape. Otherwise the
+    solved roll replaces ``club_roll_in_hands_deg`` (and ``shot_shape`` is
+    cleared, the roll now being explicit) and the record holds
+    ``shot_shape``, ``club_roll_in_hands_deg``, ``straight_roll_deg`` and
+    ``side_m_at_straight``. Raises ``ValueError`` when no flight can be
+    computed or the roll cannot be bracketed.
+    """
+    shape = settings.shot_shape
+    if shape is None:
+        return settings, None
+    roll, straight, side = roll_for_shape(
+        shape,
+        lambda r: _trial_lateral(swing, settings, r),
+        load_shot_setup_settings(),
+    )
+    logger.info("shot shape %s: club roll %.2f deg in hands", shape, roll)
+    record = {
+        "shot_shape": shape,
+        "club_roll_in_hands_deg": roll,
+        "straight_roll_deg": straight,
+        "side_m_at_straight": side,
+    }
+    return replace(settings, club_roll_in_hands_deg=roll, shot_shape=None), record
+
+
+def with_setup_record(
+    ball_record: dict[str, Any] | None, record: dict[str, Any] | None
+) -> dict[str, Any] | None:
+    """``ball_record`` carrying ``record`` under ``shot_setup`` (if both exist)."""
+    if ball_record is None or record is None:
+        return ball_record
+    return {**ball_record, "shot_setup": record}
+
+
+def hud_lines(settings: ExportSettings) -> tuple[str, ...]:
+    """One ``Setup: ...`` HUD line for a non-zero roll or ball shift, else ``()``."""
+    parts = []
+    if settings.club_roll_in_hands_deg:
+        parts.append(f"club roll {settings.club_roll_in_hands_deg:+.1f} deg in hands")
+    shift = settings.ball_position_shift_m
+    if shift:
+        where = "forward" if shift > 0 else "back"
+        parts.append(f"ball {shift * 100:+.1f} cm {where}")
+    return (f"Setup: {', '.join(parts)}",) if parts else ()

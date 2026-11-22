@@ -315,3 +315,45 @@ def test_add_trajectory_explicit_color_is_flat() -> None:
     pts = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 1.0]])
     r.add_trajectory(pts, color=(1.0, 0.0, 0.0, 1.0))
     assert tuple(np.asarray(r._trajectories[-1].color).tolist()) == (1.0, 0.0, 0.0, 1.0)
+
+
+def _mesh_items(renderer: EnvironmentRenderer) -> list:
+    return [i for i in renderer._gl_view.items if type(i).__name__ == "GLMeshItem"]
+
+
+@pytest.mark.parametrize(
+    "env",
+    [
+        DrivingRange(),
+        CourseHole(name="H", par=4, yardage=400, pin_position=(200.0, 0.0, 0.0)),
+    ],
+)
+def test_ground_meshes_are_drawable_by_pyqtgraph(env) -> None:
+    """Flat (N, 3) triangle soup must be wrapped as (N/3, 3, 3) faces.
+
+    pyqtgraph treats a 2-D ``vertexes`` array without ``faces`` as invalid and
+    the item fails at paint time (no ground drawn), which the item-count tests
+    cannot see. ``parseMeshData`` is the CPU step that raises.
+    """
+    if not ge_gui.PYQTGRAPH_AVAILABLE:
+        pytest.skip("pyqtgraph not available")
+    r = EnvironmentRenderer()
+    r.set_environment(env)
+    meshes = _mesh_items(r)
+    assert meshes
+    for mesh in meshes:
+        mesh.parseMeshData()  # must not raise
+        assert mesh.opts["meshdata"].faceCount() > 0
+
+
+def test_gui_tools_extra_declares_3d_viewer_dependencies() -> None:
+    """The golf_environment tile needs pyqtgraph.opengl, so gui-tools lists it."""
+    import tomllib
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[3]
+    extras = tomllib.loads((root / "pyproject.toml").read_text("utf-8"))["project"][
+        "optional-dependencies"
+    ]["gui-tools"]
+    names = {e.split(">")[0].split("=")[0].strip().lower() for e in extras}
+    assert {"pyqtgraph", "pyopengl"} <= names

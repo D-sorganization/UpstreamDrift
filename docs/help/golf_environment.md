@@ -93,3 +93,20 @@ Theory and notation for this surface are on [AffineDrift](https://affinedrift.co
 - [Ball Flight Simulator](ball_flight_simulator.md) - produces trajectories worth overlaying
 - [Shot Tracer](shot_tracer.md)
 - [Visualization Settings](visualization.md)
+
+## Model Shots on a Hole
+
+`shots.py` maps flights in target-frame axes (down-range, left, up) to hole
+coordinates, with the tee at the ball and the target line from tee to pin.
+`add_shots_to_renderer` feeds them to `add_trajectory`. The dependable
+headless output is `hole_figure.write_hole_figure` (matplotlib Agg). The command line runs the exporter's own steps without
+rendering video:
+
+```bash
+python -m src.tools.golf_environment.shots_cli --bundle B --swing S --club C \
+  --roll -4 --roll -2 --roll 0 --labels Draw,Straight,Fade --out DIR
+```
+
+The hole, colours and figure sizes are in `shots_settings.json`; the hole is
+illustrative, not a surveyed course. The OpenGL viewer needs `pyqtgraph`, which
+is not installed in every environment, so the figure is the checked output.
