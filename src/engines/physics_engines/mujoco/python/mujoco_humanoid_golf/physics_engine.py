@@ -504,6 +504,7 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine, MuJoCoDomainRandomizationMixin):
             self._segment_group_catalog = infer_segment_group_catalog(names)
             self._segment_catalog_model = self.model
         return self._segment_group_catalog
+
     def get_ground_reaction_breakdown(self) -> GroundReactionBreakdown | None:
         """The current foot-ground reaction breakdown, or None when unloaded.
 

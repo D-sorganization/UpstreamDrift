@@ -18,12 +18,6 @@
       "owner": "@dieterolson @D-sorganization/simulation-team",
       "reason": "Issue #12042 temporary exception while turn metrics, weld projection, and IK restart policies are decomposed from pipeline CLI (1457 lines) (measured 1529 > 1200 lines). Tracking renewal #15029 (Part of #15028); triaged 2026-11-12.",
       "expires_on": "2027-01-31"
-    },
-    {
-      "path": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py",
-      "owner": "@dieterolson @D-sorganization/simulation-team",
-      "reason": "Issue #15398 S4 angular-momentum overlay UI stacked with #15427 segment kinetic-energy controls after main merge (1282 lines) (measured 1282 > 1200 lines); extract shared visualization controls in a follow-up.",
-      "expires_on": "2027-03-31"
     }
   ]
 }
