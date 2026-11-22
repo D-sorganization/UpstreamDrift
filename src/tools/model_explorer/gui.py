@@ -595,6 +595,14 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         QMessageBox.information(self, "Export Video", f"Exported video to:\n{out}")
         return out
 
+    def open_export_clips(self) -> Any:
+        """Open the Export Clips dialog (native viewer export, #15150 G11)."""
+        from src.tools.native_viewer_export.export_dialog import ExportClipsDialog
+
+        self._export_clips_dialog = ExportClipsDialog(parent=self)
+        self._export_clips_dialog.show()
+        return self._export_clips_dialog
+
     # ---- lifecycle -----------------------------------------------------
 
     def has_unsaved_changes(self) -> bool:
@@ -779,6 +787,11 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         code_editor_action.setToolTip("Edit URDF XML directly with syntax highlighting")
         code_editor_action.triggered.connect(self.open_code_editor)
         tools_menu.addAction(code_editor_action)
+
+        export_clips_action = QAction("Export Cl&ips...", self)
+        export_clips_action.setToolTip("Render per-engine viewer clips as mp4 files")
+        export_clips_action.triggered.connect(self.open_export_clips)
+        tools_menu.addAction(export_clips_action)
 
         if HAS_NOTEPAD:
             tools_menu.addSeparator()

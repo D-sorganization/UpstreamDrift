@@ -195,6 +195,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 864 | `src/tools/simulation_backends_launcher/gui.py` |
 | 862 | `src/shared/python/pendulum_simulator/gui/pendulum_widget.py` |
 | 859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m` |
+| 859 | `src/tools/model_explorer/gui.py` |
 | 857 | `src/shared/python/injury/spinal_load_analysis.py` |
 | 853 | `src/shared/python/ai/gui/assistant_panel.py` |
 | 853 | `src/shared/python/chat/_chat_dock_widget_qt.py` |
@@ -205,7 +206,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 848 | `src/tools/native_viewer_export/cli.py` |
 | 847 | `src/api/routes/bunker_workbench.py` |
 | 846 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_render.m` |
-| 846 | `src/tools/model_explorer/gui.py` |
 | 843 | `src/shared/python/motion_pipeline/orchestrator.py` |
 | 842 | `src/engines/physics_engines/opensim/python/msk_lift_model.py` |
 | 842 | `src/engines/physics_engines/pinocchio/python/motion_matching/simulate.py` |

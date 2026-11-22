@@ -1,0 +1,8 @@
+{
+  "poll_interval_ms": 1000,
+  "impact_window_seconds": 0.4,
+  "default_output_subfolder": "clips",
+  "dialog_width": 560,
+  "dialog_height": 520,
+  "sources": "Export Clips dialog (#15150 G11). The dialog polls the export job queue once a second: often enough to show a queued, running or finished job promptly, rare enough that the poll is negligible next to a render that takes minutes. The impact clip window is 0.4 swing seconds centred on impact, which brackets the downswing release through early follow-through at the exporter's 0.1x impact speed. Clips go in a subfolder of the request schema's output root so a remote and a desktop export never mix files. The default size fits the engine, speed and path rows without scrolling."
+}
