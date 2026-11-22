@@ -45,6 +45,21 @@ def manifest_tiles() -> list:
 # =============================================================================
 
 
+# Tiles whose exempt entries land in the follow-up E9 slice (#15150): the
+# setup wizard, a developer demo and the sibling-repository tiles.
+_TILES_PENDING_EXEMPT_ENTRIES = frozenset(
+    {
+        "config_setup_wizard",
+        "pose_subscriber_demo",
+        "mujoco_models_shared",
+        "drake_models_shared",
+        "pinocchio_models_shared",
+        "opensim_models_shared",
+        "movement_optimizer",
+    }
+)
+
+
 class TestRegistryLoads:
     def test_registry_file_exists(self) -> None:
         assert REGISTRY_PATH.exists(), f"Missing registry: {REGISTRY_PATH}"
@@ -168,6 +183,27 @@ class TestLauncherTileCoverage:
         assert family <= tile_ids, f"tile left models.yaml: {sorted(family - tile_ids)}"
         uncovered = sorted(family - registry.covered_tile_ids)
         assert not uncovered, f"models.yaml tiles with no registry entry: {uncovered}"
+
+    @pytest.mark.unit
+    def test_every_visible_models_yaml_tile_is_covered(
+        self, registry: FeatureParityRegistry
+    ) -> None:
+        """Every non-hidden models.yaml tile needs a registry entry (#15150)."""
+        import yaml
+
+        with open(REPO_ROOT / "src/config/models.yaml", encoding="utf-8") as f:
+            tiles = yaml.safe_load(f)["models"]
+        uncovered = sorted(
+            t["id"]
+            for t in tiles
+            if not t.get("hidden")
+            and t["id"] not in registry.covered_tile_ids
+            and t["id"] not in _TILES_PENDING_EXEMPT_ENTRIES
+        )
+        assert not uncovered, (
+            f"models.yaml tiles with no feature_parity.json entry: {uncovered}. "
+            "Add or extend an entry listing them in 'tiles'."
+        )
 
     def test_covered_tiles_reference_real_manifest_ids(
         self, registry: FeatureParityRegistry, manifest_tiles: list

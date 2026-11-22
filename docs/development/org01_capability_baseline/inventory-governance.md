@@ -17,5 +17,6 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `platform.aip_protocol` | AI Protocol (AIP) structured method dispatch | `feature` | `governance` | — | `core` | 🟢 active_feature | `src/api/routes/aip.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `project_map` | Project Map | `tile` | `governance` | — | `core` | 🟢 active_feature | `docs/architecture/PROJECT_MAP.md` | `tests/config/test_launcher_registry_parity.py` |
 | `sidekick` | Sidekick | `tile` | `governance` | — | `core` | 🟢 active_feature | `src/tools/sidekick/_embed_adapter.py` | `tests/config/test_launcher_registry_parity.py` |
+| `sidekick.chat_panel` | Sidekick chat assistant panel | `feature` | `governance` | — | `core` | 🟢 active_feature | `src/shared/python/ai/gui/assistant_panel.py` | `tests/unit/shared_python/test_assistant_panel_rust_paths.py` |
 | `sidekick.terminal_repl_jupyter_skills` | Sidekick OS terminal / REPL / Jupyter / skills | `feature` | `governance` | — | `core` | ⚪ exempt | `src/launchers/launcher_sidekick_sidebar.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `tools.terrain_engine` | Terrain and topography configuration | `feature` | `governance` | — | `core` | 🟢 active_feature | `src/api/routes/terrain.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |

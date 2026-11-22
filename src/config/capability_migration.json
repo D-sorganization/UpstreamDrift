@@ -2373,6 +2373,78 @@
       "alias_target": null,
       "evidence": "src/shared/python/ui/anatomical_event_table_widget.py",
       "acceptance_owner": "tests/unit/anatomical_angles/test_event_table_view.py"
+    },
+    "simulation.ball_flight_simulator": {
+      "id": "simulation.ball_flight_simulator",
+      "name": "Ball Flight Simulator tool",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/ball_flight_gui/gui.py",
+      "acceptance_owner": "tests/api/test_routes_ball_flight.py"
+    },
+    "sidekick.chat_panel": {
+      "id": "sidekick.chat_panel",
+      "name": "Sidekick chat assistant panel",
+      "entity_kind": "feature",
+      "primary_workspace": "governance",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/shared/python/ai/gui/assistant_panel.py",
+      "acceptance_owner": "tests/unit/shared_python/test_assistant_panel_rust_paths.py"
+    },
+    "simulation.swing_flight_pipeline": {
+      "id": "simulation.swing_flight_pipeline",
+      "name": "Swing-to-flight pipeline tool",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/swing_flight_pipeline/gui.py",
+      "acceptance_owner": "tests/tools/swing_flight_pipeline/test_async_actions.py"
+    },
+    "matching.tour_matching_viewer": {
+      "id": "matching.tour_matching_viewer",
+      "name": "Tour matching viewer",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/tour_matching_viewer/__main__.py",
+      "acceptance_owner": "tests/tools/tour_matching_viewer/test_best_candidate_viewer.py"
+    },
+    "tools.training_controller": {
+      "id": "tools.training_controller",
+      "name": "Training controller tool",
+      "entity_kind": "feature",
+      "primary_workspace": "training",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/training_controller/__main__.py",
+      "acceptance_owner": "tests/tools/training_controller/test_controller.py"
+    },
+    "biomech.physics_informed_models": {
+      "id": "biomech.physics_informed_models",
+      "name": "Physics-informed biomechanics models",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "confirmed_prototype",
+      "alias_target": null,
+      "evidence": "src/config/models.yaml",
+      "acceptance_owner": "tests/config/feature_parity/test_registry.py"
     }
   },
   "fixtures": {

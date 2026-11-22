@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 49 parity · 8 gap · 16 exempt (12 pending decision in #7460).
+**Summary:** 51 parity · 12 gap · 16 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -19,6 +19,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `analysis.impact_parameters`<br>Impact parameters panel (speed, attack angle, path, face, face-to-path, dynamic loft, spin loft) relative to a target line | ✅ parity | `src/tools/impact_parameters_panel/gui.py` | `src/api/routes/analysis.py` | `ui/src/components/analysis/ImpactParametersPanel.tsx` | — |
 | `analysis.static_plots`<br>Static analysis plots (20+ plot types) | ✅ parity | `vendor/ud-tools/src/shared/python/plot_engine/pyqt6_widget.py` | `src/api/routes/analysis_plots.py` | `ui/src/components/analysis/PlotsSection.tsx` | — |
 | `biomech.exercise_injury_dashboards`<br>Exercise + injury-risk biomechanics dashboards | ⚪ exempt | `src/launchers/exercise_dashboard.py` | — | — | Desktop biomechanics dashboards; desktop-only candidate pending #7460. — **pending decision (#7460)** |
+| `biomech.physics_informed_models`<br>Physics-informed biomechanics models | 🔴 gap | — | — | — | #15150 |
 | `biomechanics.anatomical_event_table`<br>Anatomical Event Table of Wrist and Forearm Terms at Swing Events | ✅ parity | `src/shared/python/ui/anatomical_event_table_widget.py` | `src/api/routes/biomechanics.py` | `ui/src/components/analysis/anatomicalEventTable/AnatomicalEventTable.tsx` | — |
 | `canonical_core.workspaces`<br>Canonical-core estimation/comparison workspaces | ✅ parity | `src/tools/canonical_core/estimation.py` | — | `ui/src/pages/CanonicalCoreShell.tsx` | — |
 | `chat.live_context`<br>Live app/engine context in chat | ✅ parity | `src/launchers/launcher_sidekick_sidebar.py` | `src/api/services/chat_app_context.py` | `ui/src/components/ui/ChatContextChip.tsx` | — |
@@ -39,6 +40,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `lifting.five_lift_viewing`<br>Weightlifting viewing and analysis for the five lifts (squat, deadlift, bench press, snatch, clean and jerk): lift selection, barbell, hand-force and GRF overlays, plots | 🔴 gap | `src/launchers/exercise_dashboard.py` | `src/api/routes/lifting.py` | `ui/src/pages/LiftBaseline.tsx` | #11748 |
 | `loop_nullspace_exploration`<br>Closed-loop null-space exploration (NSX): invariants, envelopes, hand split and diagnostics from one plot model, with a registry preset selector | ✅ parity | `src/tools/grip_wrench_plots/window.py` | `src/api/routes/analysis_loop_nullspace.py` | `ui/src/components/analysis/LoopNullSpacePanel.tsx` | — |
 | `loop_nullspace_variability`<br>Closed-loop null-space variability and consistency (NSX-100): kernel heatmap, variance budget, strategy Pareto and face dispersion from the plot model 2.0.0 sensitivity panels, with disturbance, mechanism, strategy, outcome-priority and engine controls | ✅ parity | `src/tools/grip_wrench_plots/variability_tab.py` | `src/api/routes/analysis_loop_nullspace.py` | `ui/src/components/analysis/loopNullSpace/VariabilityView.tsx` | — |
+| `matching.tour_matching_viewer`<br>Tour matching viewer | 🔴 gap | `src/tools/tour_matching_viewer/__main__.py` | — | — | #15150 |
 | `mocap.breadth`<br>Motion-capture breadth (C3D upload/playback, OpenPose source) | ✅ parity | `src/tools/freemocap_sidecar/run_freemocap.py` | `src/api/routes/motion_capture.py` | `ui/src/pages/MotionCapture.tsx` | — |
 | `mujoco.force_overlays`<br>MuJoCo GUI force/torque overlays drawn through the shared glyph renderers (native viewer and MeshCat) | ✅ parity | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py` | `src/api/routes/force_overlays.py` | `ui/src/components/visualization/ForceOverlay.tsx` | — |
 | `onboarding.about_version`<br>About/version info + onboarding | ✅ parity | `src/launchers/about_dialog.py` | `src/api/routes/about.py` | `ui/src/components/ui/AboutModal.tsx` | — |
@@ -50,11 +52,14 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `reporting.swing_report_dialog`<br>Swing Report Full/Custom Plot Selection and Package Export | ✅ parity | `src/shared/python/ui/swing_report_dialog.py` | `src/api/routes/swing_report.py` | `ui/src/components/analysis/swingReport/SwingReportDialog.tsx` | — |
 | `settings.desktop_only_tabs`<br>Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance) | ⚪ exempt | `src/launchers/settings_dialog.py` | — | — | Desktop-process management (MCP server processes, Docker startup, window layout, app zoom of native widgets) has no browser equivalent; awaiting the desktop-only exemption decision in issue #7460. — **pending decision (#7460)** |
 | `settings.preferences`<br>Settings/preferences surface + persistence | ✅ parity | `src/launchers/settings_dialog.py` | `src/api/routes/settings.py` | `ui/src/pages/Settings.tsx` | — |
+| `sidekick.chat_panel`<br>Sidekick chat assistant panel | ✅ parity | `src/shared/python/ai/gui/assistant_panel.py` | `src/api/routes/chat_ws.py` | `ui/src/components/ui/ChatPanel.tsx` | — |
 | `sidekick.terminal_repl_jupyter_skills`<br>Sidekick OS terminal / REPL / Jupyter / skills | ⚪ exempt | `src/launchers/launcher_sidekick_sidebar.py` | — | — | Desktop-native OS integration (terminal/REPL/Jupyter/skills) per ADR-0028; final disposition pending #7460. — **pending decision (#7460)** |
+| `simulation.ball_flight_simulator`<br>Ball Flight Simulator tool | ✅ parity | `src/tools/ball_flight_gui/gui.py` | `src/api/routes/ball_flight.py` | `ui/src/pages/BallFlight.tsx` | — |
 | `simulation.controls_wiring`<br>Web SimulationControls wiring (camera presets, recording toggle, trajectory export, force overlays, actuator controls) | ✅ parity | `src/launchers/launcher_simulation.py` | `src/api/routes/force_overlays.py` | `ui/src/components/simulation/SimulationControls.tsx` | #7452 |
 | `simulation.golf_suite_batch`<br>Golf Simulation Suite (parameter sweeps, batch runs) | ⚪ exempt | `src/tools/golf_simulation_suite/__main__.py` | — | — | Desktop batch-simulation GUI; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `simulation.realtime_ws_stream`<br>Live simulation data over WebSocket pub-sub | ✅ parity | `src/launchers/launcher_simulation.py` | `src/api/routes/simulation_ws.py` | `ui/src/pages/Simulation.tsx` | — |
 | `simulation.shot_tracer`<br>Shot Tracer / ball-flight visualization | ✅ parity | `src/launchers/_shot_tracer_gui.py` | `src/api/routes/ball_flight.py` | `ui/src/pages/BallFlight.tsx` | — |
+| `simulation.swing_flight_pipeline`<br>Swing-to-flight pipeline tool | 🔴 gap | `src/tools/swing_flight_pipeline/gui.py` | — | — | #15150 |
 | `simulation.swing_objective_lab`<br>Swing Objective Lab — mechanism-vs-outcome downswing comparison | ✅ parity | `src/launchers/adapters/swing_objective_lab_embed.py` | `src/api/routes/swing_objectives.py` | `ui/src/pages/SwingObjectiveLab.tsx` | — |
 | `tools.bunkershot3d_workbench`<br>BunkerShot3D designer workbench (W2 sole parameters, W3 sand condition, F0 dynamic-RFT shot, W7 metrics, playability window, bounce utilisation, animated sole load field, 3-D shot animation through the ADR-0027 viewport, linked scalar traces with a validity band, F1 sand-field cross-sections, A/B comparison, validity verdict) | 🔴 gap | `src/tools/bunker_shot_gui/gui.py` | `src/api/routes/bunker_workbench.py` | `ui/src/pages/BunkerWorkbench.tsx` | #12536 |
 | `tools.capture_rig`<br>Capture Rig camera controller with the live view as the central pane and every control in a movable dock (step rail with the next action, settings tabs, action grid, log drawer) with saved layouts, themed header with status strip and workflow-grouped actions that reflow to fit a narrow pane, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export; non-destructive swing trim/crop and separate video export, visible capture library with durable swing notes, import/open/edit, archive/restore and storage management; saved coaching lines/arrows/circles/ellipses/rectangles with selection, resize, undo/redo, frame visibility and annotated still/video exports; reference comparison and overlay player force/torque vector arrow layers (FTO-25, #11310) | ⚪ exempt | `src/tools/capture_rig/__main__.py` | — | — | Drives local USB cameras through ffmpeg/DirectShow and reads multi-gigabyte recordings from disk (#9619); variants, overlays, provenance and annotation (#9790, #9791) and the multiview layout model/presets/editor and the layout-composited live preview and playback (#9810, #9811, #9812, #9813, #9814) run on the same local session trees; desktop-only candidate pending #7460. — **pending decision (#7460)** |
@@ -82,6 +87,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.spine_study`<br>Segmental spine study execution and model asset selection | ✅ parity | `src/tools/spine_viewer/gui.py` | `src/api/routes/spine_viewer.py` | `ui/src/pages/SpineViewer.tsx` | — |
 | `tools.spine_viewer`<br>Segmental spine viewer (per-level load heatmaps from study receipts) | ✅ parity | `src/tools/spine_viewer/gui.py` | `src/api/routes/spine_viewer.py` | `ui/src/pages/SpineViewer.tsx` | — |
 | `tools.terrain_engine`<br>Terrain and topography configuration | ✅ parity | — | `src/api/routes/terrain.py` | `ui/src/pages/Terrain.tsx` | — |
+| `tools.training_controller`<br>Training controller tool | 🔴 gap | `src/tools/training_controller/__main__.py` | — | — | #15150 |
 | `tools.video_analyzer`<br>Video Analyzer (pose tracking and force/torque overlay) | ✅ parity | `src/tools/video_analyzer/gui.py` | `src/api/routes/video_overlays.py` | `ui/src/pages/VideoAnalyzer.tsx` | — |
 | `visualization.force_color_controls`<br>Shared Segment Force Color Controls | ✅ parity | `src/shared/python/body_part_viz/force_color_controls.py` | — | `ui/src/components/visualization/ForceColorControls.tsx` | — |
 
@@ -95,8 +101,12 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `aip` | `platform.aip_protocol` |
 | `analysis_tools_api` | `analysis.analysis_tools_api` |
 | `anatomical_event_table` | `biomechanics.anatomical_event_table` |
+| `ball_flight_simulator` | `simulation.ball_flight_simulator` |
 | `biomech_exercise` | `biomech.exercise_injury_dashboards` |
+| `biomech_gait` | `biomech.exercise_injury_dashboards` |
+| `biomech_sit_to_stand` | `biomech.exercise_injury_dashboards` |
 | `bunkershot3d` | `tools.bunkershot3d_workbench` |
+| `c3d_viewer` | `mocap.breadth` |
 | `canonical_core_comparison` | `canonical_core.workspaces` |
 | `canonical_core_estimation` | `canonical_core.workspaces` |
 | `capture_rig` | `tools.capture_rig` |
@@ -118,8 +128,10 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `injury_analysis` | `biomech.exercise_injury_dashboards` |
 | `jaxsim_dashboard` | `engines.dashboards` |
 | `launch_monitor_analytics` | `tools.launch_monitor_analytics` |
+| `library_tool` | `docs.document_library` |
 | `matched_swing_browser` | `tools.matched_swing_browser` |
 | `matlab_suite` | `tools.matlab_suite` |
+| `mediapipe_analysis` | `mocap.breadth` |
 | `model_explorer` | `tools.model_explorer` |
 | `motion_capture` | `mocap.breadth` |
 | `motion_matching` | `tools.motion_matching` |
@@ -129,29 +141,37 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `mujoco_unified` | `engines.load_and_simulate` |
 | `myosim_suite` | `engines.load_and_simulate` |
 | `necromatcher` | `tools.necromatcher` |
+| `openpose_analysis` | `mocap.breadth` |
 | `opensim_golf` | `engines.load_and_simulate` |
 | `pendulum_simulator` | `engines.load_and_simulate` |
 | `perturbation_analysis` | `analysis.cross_engine_robustness` |
 | `pid_generator` | `launcher.tile_web_reachability` |
+| `pinn_hybrid` | `biomech.physics_informed_models` |
+| `pinn_pure_rigid` | `biomech.physics_informed_models` |
 | `pinocchio_dashboard` | `engines.dashboards` |
 | `pinocchio_golf` | `engines.load_and_simulate` |
 | `pose_studio` | `tools.pose_editing` |
 | `project_map` | `docs.document_library` |
 | `putting_analytics` | `tools.putting_analytics` |
 | `putting_green` | `tools.putting_green` |
+| `putting_green_gui` | `tools.putting_green` |
 | `rate_of_closure` | `tools.rate_of_closure` |
 | `realtime_ws` | `simulation.realtime_ws_stream` |
 | `robotics_module` | `launcher.tile_web_reachability` |
 | `shadow_tracker` | `mocap.breadth` |
 | `shot_pattern_analysis` | `tools.shot_pattern_analysis` |
 | `shot_tracer` | `simulation.shot_tracer` |
+| `sidekick` | `sidekick.chat_panel` |
 | `simulation_backends` | `analysis.counterfactuals` |
 | `spine_viewer` | `tools.spine_viewer` |
 | `starting_pose_matcher` | `mocap.breadth` |
+| `swing_flight_pipeline` | `simulation.swing_flight_pipeline` |
 | `swing_objective_lab` | `simulation.swing_objective_lab` |
 | `swing_optimizer` | `optimization.swing_optimizer` |
 | `terrain_engine` | `tools.terrain_engine` |
 | `tools_calculator_hub` | `launcher.tile_web_reachability` |
+| `tour_matching_viewer` | `matching.tour_matching_viewer` |
+| `training_controller` | `tools.training_controller` |
 | `unreal_integration` | `launcher.tile_web_reachability` |
 | `video_analyzer` | `tools.video_analyzer` |
 | `video_processor` | `launcher.tile_web_reachability` |
