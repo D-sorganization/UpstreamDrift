@@ -253,6 +253,13 @@ unverified. Subsequent join checks found angular finite-difference speeds of
 92--96 rad/s at the two boundaries against either the original or filtered
 neighboring reference states. The window cannot be spliced into either track
 as a smooth reference.
+A further nine-frame solve added the fixed original neighboring poses to the
+second-difference penalty. It converged with no named-bound excess and maximum
+weld translation 2.205e-7 mm inside the optimized window. Join speeds fell
+to 19.04 and 10.28 rad/s; however, second differences on the outer adjacent
+triples remained about 4,400 rad/s², and the fixed neighbors retained weld
+errors of 0.425 and 0.709 mm. Those soft boundary penalties do not make the
+combined reference dynamically or anatomically feasible.
 A soft face-axis target inferred from observed head-marker orientation was
 available in 476 of 477 pre-impact frames, but not at the dropout frame; no
 target was imputed there. At continuity weight 0.1, adding face weight 3.0
