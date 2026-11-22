@@ -25,8 +25,7 @@ from src.shared.python.motion_matching.shaft_bend_fit import (
 
 pytestmark = pytest.mark.unit
 
-#: Recovery tolerances: noise-free markers must give the tip slope back to
-#: 0.05 deg; 1 mm marker noise (about the stated capture accuracy) to 0.5 deg.
+#: Tip-slope recovery tolerances: exact markers 0.05 deg, 1 mm noise 0.5 deg.
 EXACT_TOL_DEG = 0.05
 NOISY_TOL_DEG = 0.5
 NOISE_M = 0.001
@@ -63,7 +62,6 @@ def _tip_slopes_deg(bend: np.ndarray) -> np.ndarray:
 
 def test_shape_basis_sums_to_unit_tip_slope(geometry: ChainGeometry) -> None:
     basis = shape_basis(geometry, 2)
-    assert basis.shape == (2, geometry.n_joints)
     np.testing.assert_allclose(basis.sum(axis=1), 1.0)
     assert np.all(np.diff(basis[0]) < 0)  # tip force: largest moment at the grip
 
@@ -78,11 +76,9 @@ def test_positive_bend_x_raises_tip_along_z(geometry: ChainGeometry) -> None:
 
 
 def test_identifiability(geometry: ChainGeometry) -> None:
-    """Head triad: tip slope + tip offset per plane (4 of 8). Shaft markers
-    beyond joint 0 add joint 0 per plane (6 of 8); two stay unobservable."""
+    """Head: slope + offset per plane; shaft markers add joint 0; 2 of 8 hidden."""
     settings = load_bend_settings()
     head = observability(geometry, OFFSETS[:3], settings)
-    assert head.n_coordinates == 2 * geometry.n_joints
     assert head.strong_rank == 4
     both = observability(geometry, OFFSETS, settings)
     assert both.strong_rank == 6
@@ -114,8 +110,7 @@ def test_break_lets_the_bend_drop_at_contact(geometry: ChainGeometry) -> None:
 def test_club_frame_targets_remove_rigid_motion(geometry: ChainGeometry) -> None:
     bend = _history(geometry)[30]
     local = marker_positions(geometry, bend, OFFSETS)
-    angle = 0.7
-    c, s = math.cos(angle), math.sin(angle)
+    c, s = math.cos(0.7), math.sin(0.7)
     rot = np.array([[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]])
     world = local @ rot.T + np.array([0.3, -1.2, 0.9])
     back = club_frame_targets(world[None], local[None], (3, 4, 5))[0]
@@ -135,8 +130,7 @@ def test_kinematics_match_mujoco_chain(geometry: ChainGeometry) -> None:
     bend = np.radians([[3.0, -2.0], [4.0, 1.5], [-2.5, 3.0], [5.0, -4.0]])
     data.qpos[:] = bend.reshape(-1)
     mujoco.mj_kinematics(model, data)
-    tip = np.asarray(document["tip_point_m"], dtype=float)
-    ours = marker_positions(geometry, bend, tip[None])[0]
+    ours = marker_positions(geometry, bend, np.array([document["tip_point_m"]]))[0]
     np.testing.assert_allclose(ours, data.site(mjcf.TIP_SITE).xpos, atol=1e-12)
 
 

@@ -75,12 +75,14 @@ class ChainGeometry:
     bend_stiffness: Array
 
     def __post_init__(self) -> None:
-        if self.joint_points_m.ndim != 2 or self.joint_points_m.shape[1] != 3:
-            raise ValueError("joint_points_m must be (N, 3)")
-        if self.bend_stiffness.shape != (len(self.joint_points_m),):
-            raise ValueError("one bending stiffness per joint")
-        if not np.all(np.diff(self.joint_points_m[:, 1]) > 0):
-            raise ValueError("joints must run from the grip toward the tip (+y)")
+        points = self.joint_points_m
+        if not (
+            points.ndim == 2
+            and points.shape[1] == 3
+            and self.bend_stiffness.shape == (len(points),)
+            and np.all(np.diff(points[:, 1]) > 0)
+        ):
+            raise ValueError("need (N, 3) joints from grip to tip and N stiffnesses")
 
     @classmethod
     def from_chain(cls, chain: Any) -> ChainGeometry:
@@ -137,22 +139,10 @@ def _positions(geometry: ChainGeometry, bend: Array, offsets: Array) -> Array:
 
 
 def marker_positions(geometry: ChainGeometry, bend: Array, offsets: Array) -> Array:
-    """Club-body-frame markers ``(m, 3)`` of the chain bent by ``bend (N, 2)``.
-
-    Postcondition: ``bend == 0`` returns ``offsets``; markers on the club body
-    (grip side of joint 0) never move.
-    """
+    """Club-frame markers ``(m, 3)`` bent by ``bend (N, 2)``; zero keeps them."""
     if bend.shape != (geometry.n_joints, 2):
         raise ValueError(f"bend must be ({geometry.n_joints}, 2), got {bend.shape}")
     return _positions(geometry, bend[None], np.asarray(offsets, dtype=float))[0]
-
-
-def tip_rotations(bend: Array) -> Array:
-    """Rotation ``(k, 3, 3)`` of the tip link relative to the club body."""
-    out = np.broadcast_to(np.eye(3), (len(bend), 3, 3)).copy()
-    for rot in np.moveaxis(_rotations(bend), 1, 0):
-        out = out @ rot
-    return out
 
 
 def club_frame_targets(
@@ -184,19 +174,15 @@ class Observability:
     """Singular values of the marker Jacobian over all bend coordinates."""
 
     singular_values: Array
-    n_coordinates: int
     strong_rank: int
 
 
 def observability(
     geometry: ChainGeometry, offsets: Array, settings: BendSettings
 ) -> Observability:
-    """Analytic Jacobian of ``offsets`` w.r.t. every bend coordinate at zero.
-
-    Column ``(i, axis)`` is ``axis x (p - joint_i)`` for markers beyond joint
-    ``i``. ``strong_rank`` counts singular values above
-    ``rank_relative_tolerance`` times the largest.
-    """
+    """SVD of the analytic marker Jacobian at zero bend (column ``(i, axis)``:
+    ``axis x (p - joint_i)`` beyond joint ``i``); ``strong_rank`` counts values
+    above ``rank_relative_tolerance`` times the largest."""
     links = marker_links(geometry, offsets)
     columns = []
     for i, joint in enumerate(geometry.joint_points_m):
@@ -205,7 +191,7 @@ def observability(
             columns.append(moved.reshape(-1))
     values = np.linalg.svd(np.column_stack(columns), compute_uv=False)
     strong = int(np.sum(values > settings.rank_relative_tolerance * values[0]))
-    return Observability(values, len(columns), strong)
+    return Observability(values, strong)
 
 
 @dataclass(frozen=True)
@@ -275,14 +261,16 @@ def fit_shaft_bend(
         ridge = settings.ridge_weight_m_per_rad * x
         return np.concatenate([error.reshape(-1), smooth, ridge])
 
-    bound = math.radians(settings.max_tip_slope_deg)
+    bound, tol = math.radians(settings.max_tip_slope_deg), settings.solver_tolerance
     result = least_squares(
         residuals,
         np.zeros(frames * n_par),
         jac_sparsity=_sparsity(frames, len(offsets), n_par),
         bounds=(-bound, bound),
         max_nfev=settings.solver_max_nfev,
-        **dict.fromkeys(("ftol", "xtol", "gtol"), settings.solver_tolerance),
+        ftol=tol,
+        xtol=tol,
+        gtol=tol,
     )
     bend = bend_of(result.x)
     error = np.linalg.norm(_positions(geometry, bend, offsets) - targets, axis=2)
