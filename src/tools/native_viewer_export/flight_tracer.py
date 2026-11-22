@@ -233,6 +233,9 @@ class FlightPlayback:
     axes_m: Array | None = None
     apex_m: float | None = None
     lateral_m: float | None = None
+    #: launch angle (degrees) and spin (rpm) of the model flight, for summaries
+    launch_deg: float | None = None
+    spin_rpm: float | None = None
     ball_speed_mph: float | None = None  # of the impact solve; the smash factor's
 
     def __post_init__(self) -> None:
@@ -479,6 +482,8 @@ def playback_from_flight(
         axes,
         flight.max_height_m,
         flight.lateral_m,
+        flight.launch_deg,
+        flight.spin_rpm,
         flight.ball_speed_mph,
     )
 

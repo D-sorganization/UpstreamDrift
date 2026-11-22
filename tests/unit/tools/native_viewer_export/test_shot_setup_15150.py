@@ -150,7 +150,7 @@ def test_limits_come_from_the_settings_file() -> None:
         (Path(shot_setup.__file__).parent / "shot_setup_settings.json").read_text()
     )
     assert raw["max_abs_roll_deg"] == 20 and raw["max_abs_ball_shift_m"] == 0.15
-    assert set(raw["sources"]) == {"max_abs_roll_deg", "max_abs_ball_shift_m"}
+    assert set(raw["sources"]) == set(raw) - {"sources"}
 
 
 def test_cli_parses_both_flags() -> None:

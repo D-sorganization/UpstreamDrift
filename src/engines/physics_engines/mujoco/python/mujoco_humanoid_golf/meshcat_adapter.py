@@ -42,7 +42,8 @@ class MuJoCoMeshcatAdapter:
 
     def __init__(self, model: mujoco.MjModel | None = None) -> None:
         self._force_colors: MeshcatForceColors | None = None
-        self._scalar_colors: MeshcatScalarColors | None = None
+        self._stored_ke_colors: MeshcatScalarColors | None = None
+        self._net_power_colors: MeshcatScalarColors | None = None
         self._glyph_renderer: MeshcatGlyphRenderer | None = None
         if meshcat is None:
             logger.warning("Meshcat not installed. Visualization disabled.")
@@ -91,7 +92,10 @@ class MuJoCoMeshcatAdapter:
         self._force_colors = MeshcatForceColors(
             self._set_color_property, color_bindings
         )
-        self._scalar_colors = MeshcatScalarColors(
+        self._stored_ke_colors = MeshcatScalarColors(
+            self._set_color_property, color_bindings
+        )
+        self._net_power_colors = MeshcatScalarColors(
             self._set_color_property, color_bindings
         )
 
@@ -112,8 +116,15 @@ class MuJoCoMeshcatAdapter:
         scale: ScalarColorScale,
     ) -> None:
         """Apply stored kinetic-energy scalar shading in MeshCat."""
-        if self._scalar_colors is not None:
-            self._scalar_colors.apply(values, scale)
+        if self._stored_ke_colors is not None:
+            self._stored_ke_colors.apply(values, scale)
+
+    def update_net_power_colors(
+        self, frame: Any | None, scale: ScalarColorScale
+    ) -> None:
+        values = None if frame is None else getattr(frame, "values", None)
+        if self._net_power_colors is not None:
+            self._net_power_colors.apply(values, scale)
 
     def update(self, data: mujoco.MjData) -> None:
         """

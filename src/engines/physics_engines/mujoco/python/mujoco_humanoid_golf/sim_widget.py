@@ -36,6 +36,7 @@ from .physics_engine import MuJoCoPhysicsEngine
 from .sim_angmom_mixin import SimAngMomMixin
 from .sim_camera_mixin import SimCameraMixin
 from .sim_force_color_mixin import SimForceColorMixin
+from .sim_net_power_mixin import SimNetPowerMixin
 from .sim_rendering_mixin import SimRenderingMixin
 from .sim_segment_ke_mixin import SimSegmentKeMixin
 from .telemetry import TelemetryRecorder
@@ -73,6 +74,7 @@ class ModelLoaderThread(QtCore.QThread):
 class MuJoCoSimWidget(  # type: ignore[misc]
     SimCameraMixin,
     SimForceColorMixin,
+    SimNetPowerMixin,
     SimAngMomMixin,
     SimSegmentKeMixin,
     SimRenderingMixin,
@@ -91,12 +93,14 @@ class MuJoCoSimWidget(  # type: ignore[misc]
     loading_finished = QtCore.pyqtSignal(bool)
     force_legend_changed = QtCore.pyqtSignal(str)
     ke_legend_changed = QtCore.pyqtSignal(str)
+    net_power_legend_changed = QtCore.pyqtSignal(str)
 
     def _init_visualization_toggles(self) -> None:
         from src.shared.python.body_part_viz import ForceColorScale
 
         self.axial_color_scale = ForceColorScale()
         self._init_force_color_hub()
+        self._init_net_power_state()
         self._init_segment_ke_shading()
         self.force_legend_text = ""
         self.show_force_vectors = False
@@ -232,6 +236,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
         self.loader_thread: ModelLoaderThread | None = None
         self.restore_force_overlay_settings()
+        self.restore_net_power_overlay_settings()
         self.restore_angmom_overlay_settings()
         self.restore_segment_ke_settings()
 
