@@ -52,6 +52,7 @@ from src.tools.native_viewer_export.compositor import (
 from src.tools.native_viewer_export import contact_frame, flight_tracer, shot_setup
 from src.tools.native_viewer_export import ellipsoid_panel as ellipsoid_hud
 from src.tools.native_viewer_export import flight_inset, hole_view
+from src.tools.native_viewer_export.behind_camera import look_map, view_lookat
 from src.tools.native_viewer_export import impact_factors as factors_panel
 from src.tools.native_viewer_export.impact_card import impact_card_for
 from src.tools.native_viewer_export.overlay_feed import (  # noqa: F401 - re-export
@@ -165,6 +166,7 @@ class ExportSettings:
     distance_m: float | None = None
     lookat_explicit: bool = False  # lookat_m beats the automatic look-at
     lookat_height_m: float | None = None  # replaces only the automatic height
+    behind_anchor_m: tuple[float, float, float] | None = None  # behind views
     #: resolved appearance-v1 document (``resolve_appearance``: CLI override, then
     #: document / sidecar, then contract defaults); ``None`` = contract defaults
     appearance: dict[str, Any] | None = None
@@ -595,11 +597,8 @@ def _club_pose_model(spec_bytes: bytes) -> Any:
 def view_lookats(
     settings: ExportSettings, indices: Sequence[int], swing: Any
 ) -> dict[str, list[tuple[float, float, float]]]:
-    """Look-at point per view and frame (``indices`` order).
-
-    A tracking view (``hands_closeup``) follows ``swing.grip_midpoint_at``, the
-    kinematic grip midpoint from the club pose, so the path is the same with
-    the overlay on or off; a fixed view keeps ``settings.lookat_m``.
+    """Look-at per view and frame (``indices`` order): ``hands_closeup`` follows the
+    kinematic grip midpoint, a fixed view is ``view_lookat`` (sideways if behind).
 
     Raises ``ValueError`` if a tracking view is requested for a specification
     without a club.
@@ -617,7 +616,7 @@ def view_lookats(
                 ) from exc
         out[name] = tracked_lookats(
             preset,
-            settings.lookat_m,
+            view_lookat(name, settings),
             focus if focus is not None else [None] * len(indices),
         )
     return out
@@ -865,7 +864,7 @@ def _export_clip(
             extra_lines = (*extra_lines, *shot_setup.hud_lines(settings))
             if flight is not None:
                 depth = getattr(tiles, "depth_m", None)
-                args = (t, settings.lookat_m, settings.distance_m, depth)
+                args = (t, look_map(settings), settings.distance_m, depth)
                 tiles = flight.draw(tiles, *args)
                 extra_lines = (*extra_lines, *flight.hud_lines(t))
             hud = HudInfo(

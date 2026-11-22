@@ -1050,7 +1050,7 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "File > Open Swing Result... lists swing-datastore runs (MuJoCo fit records and same-input closed-loop rollouts for Drake, OpenSim, Pinocchio and MyoSuite) and plays them on the MuJoCo golfer built from the run's own specification, with a timeline, joint-angle and club-head-speed plots and MP4 export (#12915). Non-MuJoCo results are labelled as playback of that engine's result. No web equivalent yet; tracked under epic #12878.",
+      "notes": "File > Open Swing Result... lists swing-datastore runs (MuJoCo fit records and same-input closed-loop rollouts for Drake, OpenSim, Pinocchio and MyoSuite) and plays them on the MuJoCo golfer built from the run's own specification, with a timeline, joint-angle and club-head-speed plots and MP4 export (#12915). File > Open Matched Swing lists the user-configured matched swings (UD_DEFAULT_MATCH_BUNDLE or matched_swings.json; otherwise a labelled demo bundle), and opening the tile from the launcher loads the default one (#15150). Non-MuJoCo results are labelled as playback of that engine's result. No web equivalent yet; tracked under epic #12878.",
       "id": "tools.model_explorer.results_playback"
     },
     {
@@ -3567,7 +3567,7 @@
   "inputs": {
     "src/config/models.yaml": "ad3f0cf74f12a3a0df3443b3f40ace2393123ee6d39ee34b055d4f79c4a1c873",
     "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
-    "src/config/feature_parity.json": "f3d5c47a81d1fc8d7bc1c1c3c3a85f7c1cdc74f56c2f41663851eca3f7960fdb",
+    "src/config/feature_parity.json": "7286a5ef3efd6590b39d2286ca929845b46e713bf571566e75ce1c2ddaee24d5",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

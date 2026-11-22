@@ -169,32 +169,35 @@ Sizes quoted from tests are the band a test asserts, not a published value.
 - **Instead:** `cd_spinning_ball` in
   `rust_core/upstream-physics/src/aerodynamics.rs` adds `0.18 * S` (Smits and
   Smith 1994), extrapolated beyond the S <= 0.3 wind-tunnel range for wedges.
-- **Effect:** both wedge reference rows fall short; each is a **strict
-  expected failure** (`xfail(strict=True)`) in
-  `tests/unit/physics/test_reference_shots_15443.py`. The 6-iron and 7-iron
-  rows that earlier disagreed by about 6 % came from memory; the sourced
-  rows below replace them and all irons from the 5-iron to the 9-iron pass.
+- **Effect:** both wedge reference rows fall short in carry; each is a
+  **strict expected failure** (`xfail(strict=True)`) in
+  `tests/unit/physics/test_reference_shots_15443.py`. Numbers below are on
+  the kernel with the Choi crisis refit (physics revision 3); "Before" is
+  revision 2.
 
-  | Row | Metric | Reference | Model | Band | Result |
-  | --- | --- | --- | --- | --- | --- |
-  | PGA driver | carry yd | 275 | 265.5 | 261.2 to 288.8 | pass |
-  | LPGA driver | carry yd | 218 | 216.5 | 207.1 to 228.9 | pass |
-  | PGA 5-iron | carry yd | 194 | 197.4 | 184.3 to 203.7 | pass |
-  | PGA 6-iron | carry yd | 183 | 184.5 | 173.8 to 192.2 | pass |
-  | PGA 7-iron | carry yd | 172 | 168.0 | 163.4 to 180.6 | pass |
-  | PGA 8-iron | carry yd | 160 | 155.6 | 152.0 to 168.0 | pass |
-  | PGA 9-iron | carry yd | 148 | 142.4 | 140.6 to 155.4 | pass |
-  | PGA wedge | carry yd | 136 | 127.3 | 129.2 to 142.8 | strict xfail |
-  | LPGA 7-iron | carry yd | 141 | 137.9 | 133.9 to 148.1 | pass |
-  | LPGA wedge | carry yd | 107 | 99.5 | 101.7 to 112.3 | strict xfail |
-  | LPGA wedge | apex yd | 23 | 19.3 | 19.6 to 26.4 | strict xfail |
+  | Row | Metric | Reference | Before | Model | Band | Result |
+  | --- | --- | --- | --- | --- | --- | --- |
+  | PGA driver | carry yd | 275 | 265.5 | 266.3 | 261.2 to 288.8 | pass |
+  | LPGA driver | carry yd | 218 | 216.5 | 220.2 | 207.1 to 228.9 | pass |
+  | PGA 5-iron | carry yd | 194 | 197.4 | 198.5 | 184.3 to 203.7 | pass |
+  | PGA 6-iron | carry yd | 183 | 184.5 | 185.4 | 173.8 to 192.2 | pass |
+  | PGA 7-iron | carry yd | 172 | 168.0 | 169.0 | 163.4 to 180.6 | pass |
+  | PGA 8-iron | carry yd | 160 | 155.6 | 156.4 | 152.0 to 168.0 | pass |
+  | PGA 9-iron | carry yd | 148 | 142.4 | 143.0 | 140.6 to 155.4 | pass |
+  | PGA wedge | carry yd | 136 | 127.3 | 127.5 | 129.2 to 142.8 | strict xfail |
+  | LPGA 7-iron | carry yd | 141 | 137.9 | 139.3 | 133.9 to 148.1 | pass |
+  | LPGA wedge | carry yd | 107 | 99.5 | 99.3 | 101.7 to 112.3 | strict xfail |
+  | LPGA wedge | apex yd | 23 | 19.3 | 19.8 | 19.6 to 26.4 | pass (was xfail) |
 
-  Apex and descent pass on every other row (the 5-iron descent, 45.3 deg
-  against a 45.0 lower bound, and the LPGA 7-iron apex, 22.3 yd against 22.1,
-  are within 0.3 of the edge). The carry error grows with spin and falls with
-  ball speed, consistent with the spin-drag extrapolation.
+  Apex and descent pass on every row. The refit steepens every iron and
+  wedge descent by 1.7 to 2.4 degrees toward the reference (5-iron 45.3 to
+  47.7 against 49, 6-iron 46.6 to 49.1 against 50, PGA wedge 51.7 to 53.6
+  against 52) and moves the 5-iron descent and LPGA 7-iron apex off their
+  band edges. The LPGA wedge apex now passes by 0.2 yd. The carry error
+  still grows with spin and falls with ball speed, consistent with the
+  spin-drag extrapolation.
 - **Tracking:** #15443 (F1).
-- **F1 investigation (no kernel change):** wind-tunnel points, digitised with
+- **F1 investigation:** wind-tunnel points, digitised with
   their sources, are in `tests/unit/physics/wind_tunnel_drag_15443.json`. The
   drag laws below were fitted to those points only; the five launch-monitor
   rows were the held-out test. Launch spin ratios run from 0.08 (driver) to
@@ -234,10 +237,17 @@ Sizes quoted from tests are the band a test asserts, not a published value.
   Swapping in the Bearman and Harvey lift curve makes the drivers and the
   wedge worse. The wedge row stays a strict expected failure. The Choi crisis
   fit keeps the other 14 cases inside their bands and moves the iron and
-  wedge descents closer to the reference (6-iron 47.8 to 50.3 degrees), but
-  it was not applied because the slice could not flip the expected failure.
+  wedge descents closer to the reference (6-iron 47.8 to 50.3 degrees); it
+  is now applied (below).
   Remaining suspects: the 6-iron and wedge rows are recorded from memory,
   and lift and drag above S 0.3 are unmeasured in these sources.
+- **F1 refit applied:** the Rust kernel and the Python fallback use the
+  Choi-fitted crisis (centre 7.59e4, width 0.065 decade, floor 0.187,
+  recovery centre 2.81e5; rms 0.008 against 0.034 before) with the spin term
+  unchanged at 0.18 S. `tests/unit/physics/test_drag_crisis_fit_15443.py`
+  re-derives the fit from the wind-tunnel fixture and holds the named
+  constants to it, with the Lyu 2018 values as a held-out check. The wedge
+  carries remain strict expected failures.
 
 ## Rollout and Reference Coverage
 
