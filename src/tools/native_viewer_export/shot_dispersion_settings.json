@@ -1,0 +1,40 @@
+{
+  "n_shots": 10,
+  "seed": 0,
+  "club_roll_sd_deg": 0.5,
+  "ball_position_sd_m": 0.005,
+  "base_club_roll_deg": 0.0,
+  "base_ball_shift_m": 0.0,
+  "ellipse_sigma": 1.0,
+  "min_points_for_ellipse": 3,
+  "plot": {
+    "dpi": 130,
+    "figsize_in": [13.0, 8.0],
+    "colormap": "tab10",
+    "trace_linewidth": 1.8,
+    "landing_marker_size": 60,
+    "landing_marker_edge": "black",
+    "ellipse_edge_color": "black",
+    "ellipse_linewidth": 2.0,
+    "target_line_color": "grey",
+    "tee_marker_size": 70,
+    "font_size": 11,
+    "table_font_size": 11,
+    "table_row_scale": 1.6,
+    "title_font_size": 13,
+    "grid_alpha": 0.3,
+    "margin_fraction": 0.1,
+    "title": "Shot Dispersion From Small Random Variations"
+  },
+  "sources": {
+    "n_shots": "Number of overlaid shots (the epic asks for 10 runs).",
+    "seed": "Seed of numpy.random.default_rng; the same seed always gives the same shots.",
+    "club_roll_sd_deg": "First illustrative value, not a measurement: 0.5 degree standard deviation of the club roll in the hands, to be replaced by measured grip repeatability. On the matched driver swing the side changes about 6.6 m per degree of roll.",
+    "ball_position_sd_m": "First illustrative value, not a measurement: 5 mm standard deviation of the ball position along the target line, to be replaced by measured setup repeatability. The face turns about 0.5 degree per centimetre of ball position.",
+    "base_club_roll_deg": "Mean club roll in the hands (degrees) the random variation is added to; 0 replays the matched swing as measured.",
+    "base_ball_shift_m": "Mean ball shift along the target line (metres, positive toward the target) the random variation is added to.",
+    "ellipse_sigma": "Ellipse of the landing points drawn at this many standard deviations (1 = one sigma, from the sample covariance).",
+    "min_points_for_ellipse": "A covariance needs at least three landing points to be a meaningful ellipse; fewer draw no ellipse.",
+    "plot": "Presentation only: colours, sizes and resolution of the dispersion figure; margin_fraction pads the axis limits around the traces."
+  }
+}
