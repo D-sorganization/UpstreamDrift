@@ -19,7 +19,7 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01; model.py updated for worktree vendor resolution."
     },
     "launcher-atlas": {
-      "fingerprint": "4f48ec8cfb6daf3bf40a6b1eb08aad367cd286ece80db16d39d1ba80b37bb303",
+      "fingerprint": "2d46f7e3908a33a6e462c999c538aa5a8ef9bab00d649ead4206d5113d27e7ad",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
@@ -28,7 +28,7 @@
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
         "src/config/feature_parity.json": "0dc5ccb2c9b1442b4ccfd52f0a7944542fa5b34b22a540bf523fbe51287b30f1",
         "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
-        "src/config/launcher_manifest_loader.py": "710ff5af9bb0cbfbe2a7461a58682eaed019a22dc3c15af510b8424709221c1f",
+        "src/config/launcher_manifest_loader.py": "551e868f572b9eb79fcd2b0e0fbe67bff5c9867f84f1d03f9cd6113547c72fd8",
         "src/config/models.yaml": "ad3f0cf74f12a3a0df3443b3f40ace2393123ee6d39ee34b055d4f79c4a1c873",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Branch adds the launcher.min_maturity gap entry (launcher_orchestrator and launcher route as pyqt/api surfaces, issue 15150) with a capability_migration.json row, and an additive LauncherManifest.visible_tiles_meeting method in launcher_manifest_loader.py backed by a shared maturity scale; branch was merged with current origin/main first. Read the launcher-atlas contract and both ends: scripts/capability_atlas/model.py (build and validate_graph: parity/gap/exempt status, existing surface paths, unique tile ids; it reads models.yaml, launcher_manifest.json and feature_parity.json directly and imports neither the loader nor capability_state) and the provider side, feature_parity.json plus the loader diff (visible_tiles and tile fields unchanged, new method defaults to the setting that keeps every tile). Atlas builder, renderer, models.yaml, launcher manifest JSON and goal catalog are unchanged, so interface, schema and failure handling hold; the new parity entry is data through an unchanged interface. Regenerated atlas passes --check. Passed: tests/config/feature_parity, tests/scripts/test_capability_atlas.py, tests/scripts/test_workspace_documentation_freshness.py, capture_rig goal catalog and planner tests, tests/config/test_maturity_scale.py, tests/api/test_launcher_min_maturity.py, launcher manifest tests (one local failure, test_engine_hub_consolidation_9479 visible-engine-set, caused by extra locally discovered model-pack tiles, unrelated to the atlas)."
+      "rationale": "Re-review after commit cb5be216e2, which moves the typed_settings import in src/config/launcher_manifest_loader.py from module level into visible_tiles_meeting. Read the launcher-atlas contract and both ends again: scripts/capability_atlas/model.py reads models.yaml, launcher_manifest.json and feature_parity.json directly, and the atlas job imports src.config, which imports the loader. The module-level import pulled in pydantic-settings, which the atlas job does not install, so generation crashed at import. With the lazy import, the loader's module import surface is what it was on main plus maturity_scale (stdlib plus a JSON file). The interface, schema, tile fields and failure handling are unchanged, and the new method's default behaviour is the same. New regression test tests/config/test_launcher_loader_light_import.py imports src.config with pydantic_settings blocked. It fails on the old loader and passes on the new one. Passed (rc 0): that test, tests/config/test_maturity_scale.py, tests/api/test_launcher_min_maturity.py, tests/scripts/test_capability_atlas.py, tests/config/feature_parity. generate_capability_atlas --check rc 0."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",
