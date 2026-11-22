@@ -11,7 +11,8 @@ tip slope and tip offset only, and a shaft marker past joint 0 adds that joint
 weakly; torsion is not fitted (no chain twist coordinate; the head-triad roll
 is confounded with the face-roll calibration). The bend is therefore a sum of
 static beam shapes (:func:`shape_basis`) whose amplitudes are tip slopes,
-bounded and smoothed by ``shaft_bend_fit_settings.json``. Kinematic only.
+bounded and smoothed by ``shaft_bend_fit_settings.json``. The bound is on the
+combined tip slope of a plane (the sum of its amplitudes). Kinematic only.
 """
 
 from __future__ import annotations
@@ -33,6 +34,7 @@ Array = NDArray[np.float64]
 SETTINGS_PATH = Path(__file__).with_name("shaft_bend_fit_settings.json")
 AXES = np.eye(3)[[0, 2]]  # joint bending axes in primitive order: club x, z
 MAX_SHAPES = 2
+_BOUND_SLACK = 1e-9  # relative rounding allowance of the post-fit bound check
 
 
 @dataclass(frozen=True)
@@ -206,14 +208,19 @@ class BendFit:
     message: str
 
 
-def _sparsity(frames: int, markers: int, n_par: int) -> Any:
-    """Jacobian pattern: markers per frame, second differences, ridge."""
+def _sparsity(frames: int, markers: int, n_par: int, coupled: bool = False) -> Any:
+    """Jacobian pattern: markers per frame, second differences, ridge.
+
+    ``coupled`` lets every amplitude row depend on all of a frame's variables
+    (the two-shape total-slope parameterisation of :func:`fit_shaft_bend`).
+    """
     from scipy import sparse
 
+    link = np.ones((n_par, n_par)) if coupled else np.eye(n_par)
     blocks = sparse.kron(sparse.eye(frames), np.ones((markers * 3, n_par)))
     stencil = sparse.diags([1, 1, 1], [0, 1, 2], shape=(max(frames - 2, 0), frames))
-    smooth = sparse.kron(stencil, sparse.eye(n_par))
-    stacked = sparse.vstack([blocks, smooth, sparse.eye(frames * n_par)])
+    smooth = sparse.kron(stencil, link)
+    stacked = sparse.vstack([blocks, smooth, sparse.kron(sparse.eye(frames), link)])
     return sparse.lil_matrix(stacked)
 
 
@@ -230,8 +237,13 @@ def fit_shaft_bend(
     ``m == len(offsets)`` (NaN marks a missing marker); each ``breaks`` entry
     ``b`` in ``1..k-1`` cuts the smoothness term between frames ``b - 1`` and
     ``b`` (ball contact unloads the shaft abruptly). Postconditions: every
-    amplitude lies within ``max_tip_slope_deg``; frames without targets follow
-    the smoothness and ridge terms only.
+    plane's combined tip slope (sum of its amplitudes) lies within
+    ``max_tip_slope_deg`` in every frame (checked, ``RuntimeError`` otherwise);
+    frames without targets follow the smoothness and ridge terms only.
+
+    With two shapes the solver variables per plane are the total tip slope
+    ``t`` (box-bounded, so the bound is exact) and the first amplitude ``u``
+    (unbounded); the amplitudes are ``(u, t - u)``.
     """
     offsets = np.asarray(offsets, dtype=float)
     if targets.ndim != 3 or targets.shape[1:] != offsets.shape:
@@ -249,24 +261,39 @@ def fit_shaft_bend(
     for b in breaks:
         keep[(rows < b) & (b <= rows + 2)] = 0.0
 
+    def amplitudes_of(x: Array) -> Array:
+        """Amplitudes ``(k, 2, S)`` of solver variables (``(t, u)`` if S = 2)."""
+        z = x.reshape(frames, 2, n_shapes)
+        if n_shapes == 1:
+            return z
+        return np.stack([z[..., 1], z[..., 0] - z[..., 1]], axis=-1)
+
     def bend_of(x: Array) -> Array:
-        amps = x.reshape(frames, 2, n_shapes)
-        return np.asarray(np.einsum("kps,sn->knp", amps, basis), dtype=np.float64)
+        return np.asarray(
+            np.einsum("kps,sn->knp", amplitudes_of(x), basis), dtype=np.float64
+        )
 
     def residuals(x: Array) -> Array:
-        amps = x.reshape(frames, n_par)
+        raw = amplitudes_of(x)
+        amps = raw.reshape(frames, n_par)
         error = (_positions(geometry, bend_of(x), offsets) - goal) * valid[..., None]
         smooth = (amps[2:] - 2.0 * amps[1:-1] + amps[:-2]) * keep[:, None]
         smooth = settings.smoothness_weight_m_per_rad * smooth.reshape(-1)
-        ridge = settings.ridge_weight_m_per_rad * x
+        ridge = settings.ridge_weight_m_per_rad * raw.reshape(-1)
         return np.concatenate([error.reshape(-1), smooth, ridge])
 
     bound, tol = math.radians(settings.max_tip_slope_deg), settings.solver_tolerance
+    lower, upper = np.full(frames * n_par, -bound), np.full(frames * n_par, bound)
+    if n_shapes == 2:  # the split amplitude is free; only the total is bounded
+        lower.reshape(frames, 2, 2)[..., 1], upper.reshape(frames, 2, 2)[..., 1] = (
+            -np.inf,
+            np.inf,
+        )
     result = least_squares(
         residuals,
         np.zeros(frames * n_par),
-        jac_sparsity=_sparsity(frames, len(offsets), n_par),
-        bounds=(-bound, bound),
+        jac_sparsity=_sparsity(frames, len(offsets), n_par, n_shapes == 2),
+        bounds=(lower, upper),
         max_nfev=settings.solver_max_nfev,
         ftol=tol,
         xtol=tol,
@@ -278,5 +305,8 @@ def fit_shaft_bend(
     with np.errstate(invalid="ignore", divide="ignore"):
         rms = np.sqrt(squared.sum(1) / valid.sum(1))
         marker_rms = np.sqrt(squared.sum(0) / valid.sum(0))
-    amplitudes = result.x.reshape(frames, n_par)
+    amplitudes = amplitudes_of(result.x).reshape(frames, n_par)
+    totals = amplitudes.reshape(frames, 2, n_shapes).sum(axis=2)
+    if np.abs(totals).max() > bound * (1.0 + _BOUND_SLACK):
+        raise RuntimeError("fitted combined tip slope exceeds max_tip_slope_deg")
     return BendFit(amplitudes, bend, rms, marker_rms, result.success, result.message)
