@@ -451,6 +451,16 @@
       "tiles": [],
       "notes": "File > Open Swing Result... lists swing-datastore runs (MuJoCo fit records and same-input closed-loop rollouts for Drake, OpenSim, Pinocchio and MyoSuite) and plays them on the MuJoCo golfer built from the run's own specification, with a timeline, joint-angle and club-head-speed plots and MP4 export (#12915). File > Open Matched Swing lists the user-configured matched swings (UD_DEFAULT_MATCH_BUNDLE or matched_swings.json; otherwise a labelled demo bundle), and opening the tile from the launcher loads the default one (#15150). Non-MuJoCo results are labelled as playback of that engine's result. No web equivalent yet; tracked under epic #12878."
     },
+    "tools.model_explorer.results_playback_ball": {
+      "title": "Ball, ball flight, shot shape and aim line in live results playback",
+      "pyqt": "src/tools/model_explorer/playback_ball_overlay.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 15150,
+      "tiles": [],
+      "notes": "The Results Playback panel draws the native export's own ball at address, and after impact its model ball flight with the straight, draw or fade shot shape and the finish aim line (Ball, Ball flight and Aim line check boxes, Shot combo box). It reuses native_viewer_export (prepare_shot, flight_for_export, FlightPlayback); without a current upstream_physics Rust flight wheel the flight boxes are disabled with the reason. No web equivalent yet."
+    },
     "tools.model_explorer.frankenstein_assembly": {
       "title": "Frankenstein drag-and-drop assembly with typed attachment ports",
       "pyqt": "src/tools/model_explorer/frankenstein_editor/assembly_panel.py",
