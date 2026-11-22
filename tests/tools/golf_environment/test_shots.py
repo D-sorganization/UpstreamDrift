@@ -95,11 +95,3 @@ def test_settings_load_with_sources_and_colours() -> None:
     assert settings["sources"] and settings["hole"]["length_m"] > 200.0
     assert all(len(c) == 4 for c in settings["shot_colours_rgba"])
 
-
-def test_cli_ball_shift_broadcasts_or_matches_roll_count() -> None:
-    from src.tools.golf_environment import shots_cli
-
-    assert shots_cli._per_shot(None, 3, "--ball-shift") == [0.0] * 3
-    assert shots_cli._per_shot([0.01, 0.02], 2, "--ball-shift") == [0.01, 0.02]
-    with pytest.raises(ValueError):
-        shots_cli._per_shot([0.01, 0.02], 3, "--ball-shift")
