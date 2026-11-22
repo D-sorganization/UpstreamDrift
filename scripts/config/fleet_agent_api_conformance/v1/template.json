@@ -19,7 +19,9 @@
     "putting_stimpmeter",
     "putting_capture_speed",
     "run_counterfactual_ztcf_golden",
-    "run_golf_simulator_golden_shot"
+    "run_golf_simulator_golden_shot",
+    "native_export_describe",
+    "native_export_validate"
   ],
   "checks": [
     {

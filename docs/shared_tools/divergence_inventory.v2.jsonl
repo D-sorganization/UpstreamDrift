@@ -1138,6 +1138,8 @@
 {"path": "impact_parameters/adapters/pinocchio_adapter.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/adapters/simscape_adapter.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/ball_impact.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
+{"path": "impact_parameters/club_impact.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
+{"path": "impact_parameters/club_impact_settings.json", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/clubhead_series.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/conditions.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/extract.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
@@ -1863,6 +1865,8 @@
 {"path": "motion_matching/same_input/stiffness.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/segment_scale_search.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/segment_scaling.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/shaft_bend_fit.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/shaft_bend_fit_settings.json", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/show_a9_refit.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/sim_out.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/simscape_block_budget.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -2238,6 +2242,7 @@
 {"path": "physics/ball_enhanced_simulator.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/ball_flight_physics.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/ball_flight_validity.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
+{"path": "physics/ball_flight_validity_settings.json", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/ball_launch_conditions.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/ball_properties.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/ball_simulator.py", "classification": "ud-only", "package": "physics", "spelling_only": false}

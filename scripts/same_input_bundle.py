@@ -36,7 +36,10 @@ import numpy as np
 from src.shared.python.motion_matching.club_shaft_chain import (
     DEFAULT_SHAFT_MODEL,
     SHAFT_MODELS,
+    add_shaft_arguments,
+    checked_shaft_options,
     passive_coordinates,
+    shaft_options,
 )
 from src.shared.python.motion_matching.execution.spec_builder import with_shaft_model
 from src.shared.python.motion_matching.impact_force import ImpactForce
@@ -93,17 +96,23 @@ def padded_track(spec_bytes: bytes, q_track: np.ndarray) -> np.ndarray:
 
 
 def shaft_inputs(
-    spec_bytes: bytes, q_track: np.ndarray, shaft_model: str
+    spec_bytes: bytes,
+    q_track: np.ndarray,
+    shaft_model: str,
+    options: dict | None = None,
 ) -> tuple[bytes, np.ndarray]:
     """Spec and track of a ``shaft_model`` bundle (#12691).
 
     ``"rigid"`` returns both inputs unchanged; ``"chain"`` applies the R6
-    chain of the spec's club and pads the track with a straight shaft.
+    chain of the spec's club, with the flex, stiffness scale and link
+    ``options`` (#15150; empty is the default chain), and pads the track with
+    a straight shaft. Options with a rigid club raise ``ValueError``.
     """
+    checked_shaft_options(shaft_model, options)
     if shaft_model == DEFAULT_SHAFT_MODEL:
         return spec_bytes, q_track
     document = json.loads(spec_bytes)
-    chain = with_shaft_model(document, document["club"]["name"], shaft_model)
+    chain = with_shaft_model(document, document["club"]["name"], shaft_model, options)
     chain_bytes = json.dumps(chain).encode()
     return chain_bytes, padded_track(chain_bytes, q_track)
 
@@ -128,16 +137,20 @@ def export(
     duration_s: float | None,
     effort_hold_ms: float = 1.0,
     shaft_model: str = DEFAULT_SHAFT_MODEL,
+    options: dict | None = None,
 ) -> dict:
     """Build the MuJoCo reference bundle of a pipeline run directory.
 
     ``effort_hold_ms`` is the controller hold recorded in the manifest
     (#12279); it must split the 1 ms step evenly into at most eight holds.
-    ``shaft_model`` selects the rigid club (default) or the chain shaft.
+    ``shaft_model`` selects the rigid club (default) or the chain shaft, and
+    the chain ``options`` (#15150) are recorded in the provenance when given.
     """
     spec_path = run_dir / "full_body_spec_hipcal_scaled.json"
     record_path, times, q_track = _track(run_dir)
-    spec_bytes, q_track = shaft_inputs(spec_path.read_bytes(), q_track, shaft_model)
+    spec_bytes, q_track = shaft_inputs(
+        spec_path.read_bytes(), q_track, shaft_model, options
+    )
     receipt = json.loads((run_dir / "receipt.json").read_text(encoding="utf-8"))
     impact, split = _impact_plan(receipt, times)
     bundle = generate_reference_bundle(
@@ -154,6 +167,7 @@ def export(
             "capture_sha256": receipt.get("capture_sha256"),
             "spec_file": spec_path.name,
             "shaft_model": shaft_model,
+            **({"shaft_options": dict(options)} if options else {}),
             "dynamics_record_sha256": _sha256(record_path),
         },
     )
@@ -258,6 +272,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_SHAFT_MODEL,
         help="rigid club (default) or the R6 chain shaft (#12686, #12691)",
     )
+    add_shaft_arguments(exp)
     rep = sub.add_parser("replay")
     rep.add_argument("--bundle", type=Path, required=True)
     rep.add_argument("--engine", choices=ALL_ENGINES, required=True)
@@ -281,6 +296,7 @@ def main() -> None:
             args.duration,
             args.effort_hold_ms,
             args.shaft_model,
+            shaft_options(args),
         )
         LOG.info("wrote %s: %d steps", args.out, manifest["steps"])
         return

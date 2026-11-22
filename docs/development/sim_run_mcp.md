@@ -21,6 +21,11 @@ transport via `src.sim_run.mcp_fastmcp`) for local agents (Grok Bot, Claude Desk
    cases routed through :mod:`src.sim_run.agent_capabilities`, with v1 capability run records,
    qualification banners, and 64 KiB inline payload limits (larger results spill to artifacts).
    REST mirrors the same handlers under ``/tools/agent-sim-run/``.
+6. `native_export_describe` / `native_export_validate` (Refs #15150): the native viewer
+   exporter's request schema derived from its parser (groups, maturity, defaults) and a
+   request check returning the equivalent command line; REST
+   ``/tools/agent-sim-run/native-export/{describe,validate}`` requires a Bearer token in
+   remote mode. Rendering (`run`) is not exposed yet.
 
 ## Host Configuration
 

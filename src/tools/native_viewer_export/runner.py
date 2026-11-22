@@ -18,6 +18,7 @@ from src.tools.native_viewer_export.backends.registry import (
     SHADING_ENGINES,
     make_backend,
 )
+from src.tools.native_viewer_export.camera_framing import resolve_lookat
 from src.tools.native_viewer_export.core import (
     ENGINES,
     BackendUnavailable,
@@ -143,6 +144,9 @@ def run_export(
                 per_settings = replace(per_settings, lookat_m=lookat)
             except BackendUnavailable as exc:
                 logger.warning("rendering %s without overlays: %s", engine, exc)
+        per_settings = replace(
+            per_settings, lookat_m=resolve_lookat(per_settings.lookat_m, settings)
+        )
         result = export_swing(
             backend, swing, per_settings, job.out_dir, feed, writer_factory
         )

@@ -1,0 +1,18 @@
+{
+  "shapes_per_plane": 1,
+  "smoothness_weight_m_per_rad": 0.5,
+  "ridge_weight_m_per_rad": 0.002,
+  "max_tip_slope_deg": 20.0,
+  "rank_relative_tolerance": 1e-3,
+  "solver_max_nfev": 200,
+  "solver_tolerance": 1e-10,
+  "sources": {
+    "shapes_per_plane": "Bend shapes fitted per bending plane (club x and z). Shape 1 is the static deflection of the lumped chain under a transverse tip force (joint rotation proportional to (L - s_i) / k_i), shape 2 the deflection under a tip moment (proportional to 1 / k_i). Per plane the head triad observes two numbers, the tip slope and the tip offset, so two shapes span everything the markers see; one shape (default) ties the tip offset to the slope as a beam loaded at the head would and leaves the rest as residual instead of absorbing marker error. Shape amplitudes are tip slopes in radians.",
+    "smoothness_weight_m_per_rad": "Weight on the second time difference of each shape amplitude, metres of marker residual per radian. At 360 Hz a 10 deg bend built over 10 samples has a second difference near 1.7e-3 rad, which this weight prices at 0.9 mm, the order of the marker noise, so the term removes sample-to-sample jitter without flattening the downswing loading. Chosen, not measured.",
+    "ridge_weight_m_per_rad": "Weight pulling each amplitude toward the straight shaft, metres per radian; 0.002 m/rad prices a 10 deg bend at 0.35 mm, enough only to keep frames without head markers near straight. Chosen, not measured.",
+    "max_tip_slope_deg": "Bound on each shape amplitude (tip slope). Published driver studies report lead and toe-down tip deflections at impact of the order of centimetres (MacKenzie and Sprigings 2009, Proc. IMechE P 223:13-19; Betzler et al. 2012, Sports Biomech. 11(2):223-238; magnitudes not re-verified at source for this setting); 20 deg is a generous envelope about twice the largest head-to-shaft marker rotation seen on a captured driver swing, not a measured limit.",
+    "rank_relative_tolerance": "Singular values of the marker Jacobian below this fraction of the largest count as unobservable in the identifiability report; 1e-3 separates a 1 m lever from a 1 mm one.",
+    "solver_max_nfev": "Function-evaluation cap of scipy.optimize.least_squares for the whole-trajectory solve.",
+    "solver_tolerance": "ftol, xtol and gtol of scipy.optimize.least_squares."
+  }
+}

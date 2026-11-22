@@ -6,7 +6,7 @@
      "sources": "Chain flexible shaft is a research model (#12686, #12691); flex and stiffness flags arrive with #15150 Track C1. Shaft options are set when the bundle is built."},
     {"name": "Inputs", "maturity": "beta", "dests": ["bundle", "out", "swing", "club", "engines"], "dest_prefixes": ["receipt_"],
      "sources": "Same-input bundle and receipt inputs used by every published clip set (NV-5, #11678)."},
-    {"name": "Clip", "maturity": "beta", "dests": ["views", "stride", "fps", "speeds", "impact_window", "impact_speed", "impact_time", "preset", "size", "no_grid", "contact_hold_frames"],
+    {"name": "Clip", "maturity": "beta", "dests": ["views", "stride", "fps", "speeds", "impact_window", "impact_speed", "impact_time", "preset", "size", "no_grid", "contact_hold_frames", "camera_lookat", "camera_height", "camera_distance"],
      "sources": "Time-based clips and speed variants (GCV-14, #11720)."},
     {"name": "HUD", "maturity": "beta", "dests": ["no_hud", "event_captions"],
      "sources": "HUD and event captions (HRG-E4, #13175)."},
