@@ -347,6 +347,20 @@
       "id": "launcher.mcp_config"
     },
     {
+      "feature_id": "launcher.min_maturity",
+      "title": "Launcher min_maturity filter",
+      "status": "gap",
+      "pyqt": "src/launchers/launcher_orchestrator.py",
+      "api": "src/api/routes/launcher.py",
+      "web": null,
+      "issue": 15150,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "One ordered maturity scale (src/shared/python/config/maturity_scale.json) drives the PyQt6 launcher model list, the launcher loader and GET /api/launcher/tiles?min_maturity=, with the MIN_MATURITY setting as the default (which shows everything). The React dashboard does not yet send min_maturity, and no surface draws a maturity chip yet (follow-up branch); tracked under epic #15150.",
+      "id": "launcher.min_maturity"
+    },
+    {
       "feature_id": "launcher.tile_grid",
       "title": "Launcher tile grid from shared manifest",
       "status": "parity",
@@ -777,6 +791,22 @@
       "id": "tools.dataset_generator"
     },
     {
+      "feature_id": "tools.golf_environment",
+      "title": "Golf Environment (driving range and hole scene, shots on a hole with hole presets)",
+      "status": "gap",
+      "pyqt": "src/tools/golf_environment/gui.py",
+      "api": null,
+      "web": null,
+      "issue": 15150,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "golf_environment"
+      ],
+      "notes": "PyQt6 tile draws a 3D driving range or a schematic hole (Par 3 150 y, Par 4 400 y presets, #15474) and overlays trajectory polylines; hole_figure.py and the shots_cli.py module (python3 -m src.tools.golf_environment.shots_cli) model several shots on a hole from a swing bundle and write hole_shots.png and hole_shots.json in the chosen display units (#15474, #15475). No API route, no React page and no launcher_manifest.json tile exist for it, so none of this is reachable from the web app. The web GolfSimulator page is a different tool and does not draw courses.",
+      "id": "tools.golf_environment"
+    },
+    {
       "feature_id": "tools.golf_simulator",
       "title": "Golf Simulator capability-aware controls and replay submission",
       "status": "parity",
@@ -903,15 +933,15 @@
     {
       "feature_id": "tools.native_viewer_export",
       "title": "Native per-engine viewer video export (CLI)",
-      "status": "exempt",
+      "status": "gap",
       "pyqt": "src/tools/native_viewer_export/cli.py",
       "api": "src/api/routes/agent_sim_run.py",
       "web": null,
-      "issue": null,
-      "reason": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL); the artefacts are mp4 files, so there is no interactive browser equivalent (epic #11673).",
+      "issue": 15150,
+      "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "Appearance flags (--appearance, --skin-tone, --hair, --clothing, --top-color, --bottom-color, --glove; HRG-B2, #13167, HRG-G1, #13186) resolve CLI over document over contract defaults and travel to every worker; --visual-grip-strength, --lead-roll-offset, --trail-roll-offset and --grip-thumb-offset-deg (HRG-GR4, #13205, HRG-A2, #13166) are picture-only and go in the appearance sidecar's grip block, while a physical grip flag (--grip-preset, --grip-style, --lead-shaft-rotation, ...; HRG-GS-G1, #13346) is refused with a message pointing to spec_builder, which writes the new model revision; the matching interactive controls are tracked under tools.character_builder; whole-system interface capability and mobility ellipsoids (--interface-ellipsoid {mobility,effective-mass,acceleration-capacity,force-capacity}, --ellipsoid-scale {auto,fixed:<m>}, --drift-arrow; CAP-6, #14038, #14046), with --hand-mobility supported as an alias and --hand-mobility-mode {constrained,unconstrained} (HCM-3, #14004). Agents describe, validate and queue exports over REST and MCP (/tools/agent-sim-run/native-export/{describe,validate,run,status}; #15150 G8); a run returns a job id and its status carries the clip manifest.",
+      "notes": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL) and writes mp4 files (epic #11673); it has no PyQt6 window and no tile. Web status: agents describe, validate and queue exports over REST and MCP (/tools/agent-sim-run/native-export/{describe,validate,run,status}; #15467, #15476, reusing the CLI request schema); a run returns a job id and its status carries the clip manifest. No browser page renders, plays or downloads a clip yet. Appearance flags (--appearance, --skin-tone, --hair, --clothing, --top-color, --bottom-color, --glove; HRG-B2, #13167, HRG-G1, #13186) resolve CLI over document over contract defaults and travel to every worker; --visual-grip-strength, --lead-roll-offset, --trail-roll-offset and --grip-thumb-offset-deg (HRG-GR4, #13205, HRG-A2, #13166) are picture-only and go in the appearance sidecar's grip block, while a physical grip flag (--grip-preset, --grip-style, --lead-shaft-rotation, ...; HRG-GS-G1, #13346) is refused with a message pointing to spec_builder, which writes the new model revision; the matching interactive controls are tracked under tools.character_builder; whole-system interface capability and mobility ellipsoids (--interface-ellipsoid {mobility,effective-mass,acceleration-capacity,force-capacity}, --ellipsoid-scale {auto,fixed:<m>}, --drift-arrow; CAP-6, #14038, #14046), with --hand-mobility supported as an alias and --hand-mobility-mode {constrained,unconstrained} (HCM-3, #14004).",
       "id": "tools.native_viewer_export"
     },
     {
@@ -3381,7 +3411,7 @@
   "inputs": {
     "src/config/models.yaml": "ad3f0cf74f12a3a0df3443b3f40ace2393123ee6d39ee34b055d4f79c4a1c873",
     "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
-    "src/config/feature_parity.json": "fe8cacf4dd069bba847b53aa88543fdf4a9bb77532dbe5520c07466e99161426",
+    "src/config/feature_parity.json": "68c4287d5c41bb79394b4ce89e2666c151318300984186ec8c9aa59aeab64d90",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**72 launcher tiles · 71 feature contracts.**
+**72 launcher tiles · 73 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -214,6 +214,7 @@ flowchart LR
 | Docker engine management dialog | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/docker_manager.py) |
 | Embedded tool host (tabs + docks) | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/embedded_host.py) |
 | MCP server configuration writer/preferences | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/mcp_config_writer.py) |
+| Launcher min_maturity filter | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/launcher_orchestrator.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/launcher.py) |
 | Launcher tile grid from shared manifest | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/embedded_tool_bootstrap.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/launcher.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Dashboard.tsx) |
 | Manifest tile web-reachability contract (route / native-window / unavailable) | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/embedded_tool_bootstrap.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/launcher.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Dashboard.tsx) |
 | Weightlifting viewing and analysis for the five lifts (squat, deadlift, bench press, snatch, clean and jerk): lift selection, barbell, hand-force and GRF overlays, plots | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/exercise_dashboard.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/lifting.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/LiftBaseline.tsx) |
@@ -242,6 +243,7 @@ flowchart LR
 | Grip presets and sliders (weak, neutral, strong, Palmer overlap, Woods interlock, ten-finger; rotation, palm diagonal, spacing, style) | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/character_builder/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/character_appearance.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/character/GripControls.tsx) |
 | Data Explorer (import/filter/visualize datasets) | parity | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/data_explorer.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/DataExplorer.tsx) |
 | Swing dataset generation and import | parity | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/dataset.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/DatasetGenerator.tsx) |
+| Golf Environment (driving range and hole scene, shots on a hole with hole presets) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/golf_environment/gui.py) |
 | Golf Simulator capability-aware controls and replay submission | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/golf_simulator/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/golf_simulator.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/GolfSimulator.tsx) |
 | Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/launch_monitor_analytics/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/launch_monitor_analytics.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/LaunchMonitorAnalytics.tsx) |
 | Matched Swing Results Browser | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/matched_swing_browser/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/matched_swings.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/MatchedSwings.tsx) |
@@ -250,7 +252,7 @@ flowchart LR
 | Frankenstein drag-and-drop assembly with typed attachment ports | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/model_explorer/frankenstein_editor/assembly_panel.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/model_explorer_assembly.py) |
 | Model Explorer results playback on the shared-appearance golfer | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/model_explorer/results_playback_panel.py) |
 | Motion Matching tour-average and club-only Excel matching | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/motion_matching/gui.py) |
-| Native per-engine viewer video export (CLI) | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/native_viewer_export/cli.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/agent_sim_run.py) |
+| Native per-engine viewer video export (CLI) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/native_viewer_export/cli.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/agent_sim_run.py) |
 | Historical Player Library And Source Review | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/necromatcher/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/necromatcher.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Necromatcher.tsx) |
 | Pose Studio interactive pose editing | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/pose_studio/__main__.py) |
 | Putting analytics studies | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/putting_analytics_gui/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/putting_analytics.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/PuttingAnalytics.tsx) |

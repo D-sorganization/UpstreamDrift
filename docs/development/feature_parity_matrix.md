@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 49 parity · 5 gap · 17 exempt (12 pending decision in #7460).
+**Summary:** 49 parity · 8 gap · 16 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -33,6 +33,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `launcher.docker_management`<br>Docker engine management dialog | ⚪ exempt | `src/launchers/docker_manager.py` | — | — | Manages the local Docker daemon from the desktop; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `launcher.embedded_tabs_docks`<br>Embedded tool host (tabs + docks) | ⚪ exempt | `src/launchers/embedded_host.py` | — | — | Desktop windowing composition is explicitly desktop-only per ADR-0028 (React shell uses routes, not embedded Qt docks). |
 | `launcher.mcp_config`<br>MCP server configuration writer/preferences | ⚪ exempt | `src/launchers/mcp_config_writer.py` | — | — | Writes local MCP configuration files for desktop AI integrations; desktop-only candidate pending #7460. — **pending decision (#7460)** |
+| `launcher.min_maturity`<br>Launcher min_maturity filter | 🔴 gap | `src/launchers/launcher_orchestrator.py` | `src/api/routes/launcher.py` | — | #15150 |
 | `launcher.tile_grid`<br>Launcher tile grid from shared manifest | ✅ parity | `src/launchers/embedded_tool_bootstrap.py` | `src/api/routes/launcher.py` | `ui/src/pages/Dashboard.tsx` | — |
 | `launcher.tile_web_reachability`<br>Manifest tile web-reachability contract (route / native-window / unavailable) | ✅ parity | `src/launchers/embedded_tool_bootstrap.py` | `src/api/routes/launcher.py` | `ui/src/pages/Dashboard.tsx` | — |
 | `lifting.five_lift_viewing`<br>Weightlifting viewing and analysis for the five lifts (squat, deadlift, bench press, snatch, clean and jerk): lift selection, barbell, hand-force and GRF overlays, plots | 🔴 gap | `src/launchers/exercise_dashboard.py` | `src/api/routes/lifting.py` | `ui/src/pages/LiftBaseline.tsx` | #11748 |
@@ -61,6 +62,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.character_builder_grip`<br>Grip presets and sliders (weak, neutral, strong, Palmer overlap, Woods interlock, ten-finger; rotation, palm diagonal, spacing, style) | ✅ parity | `src/tools/character_builder/gui.py` | `src/api/routes/character_appearance.py` | `ui/src/components/character/GripControls.tsx` | — |
 | `tools.data_explorer`<br>Data Explorer (import/filter/visualize datasets) | ✅ parity | — | `src/api/routes/data_explorer.py` | `ui/src/pages/DataExplorer.tsx` | — |
 | `tools.dataset_generator`<br>Swing dataset generation and import | ✅ parity | — | `src/api/routes/dataset.py` | `ui/src/pages/DatasetGenerator.tsx` | — |
+| `tools.golf_environment`<br>Golf Environment (driving range and hole scene, shots on a hole with hole presets) | 🔴 gap | `src/tools/golf_environment/gui.py` | — | — | #15150 |
 | `tools.golf_simulator`<br>Golf Simulator capability-aware controls and replay submission | ✅ parity | `src/tools/golf_simulator/gui.py` | `src/api/routes/golf_simulator.py` | `ui/src/pages/GolfSimulator.tsx` | — |
 | `tools.launch_monitor_analytics`<br>Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends | ✅ parity | `src/tools/launch_monitor_analytics/gui.py` | `src/api/routes/launch_monitor_analytics.py` | `ui/src/pages/LaunchMonitorAnalytics.tsx` | — |
 | `tools.matched_swing_browser`<br>Matched Swing Results Browser | ✅ parity | `src/tools/matched_swing_browser/gui.py` | `src/api/routes/matched_swings.py` | `ui/src/pages/MatchedSwings.tsx` | — |
@@ -69,7 +71,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.model_explorer.frankenstein_assembly`<br>Frankenstein drag-and-drop assembly with typed attachment ports | 🔴 gap | `src/tools/model_explorer/frankenstein_editor/assembly_panel.py` | `src/api/routes/model_explorer_assembly.py` | — | #11651 |
 | `tools.model_explorer.results_playback`<br>Model Explorer results playback on the shared-appearance golfer | 🔴 gap | `src/tools/model_explorer/results_playback_panel.py` | — | — | #12878 |
 | `tools.motion_matching`<br>Motion Matching tour-average and club-only Excel matching | ✅ parity | `src/tools/motion_matching/gui.py` | — | — | — |
-| `tools.native_viewer_export`<br>Native per-engine viewer video export (CLI) | ⚪ exempt | `src/tools/native_viewer_export/cli.py` | `src/api/routes/agent_sim_run.py` | — | Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL); the artefacts are mp4 files, so there is no interactive browser equivalent (epic #11673). |
+| `tools.native_viewer_export`<br>Native per-engine viewer video export (CLI) | 🔴 gap | `src/tools/native_viewer_export/cli.py` | `src/api/routes/agent_sim_run.py` | — | #15150 |
 | `tools.necromatcher`<br>Historical Player Library And Source Review | ✅ parity | `src/tools/necromatcher/gui.py` | `src/api/routes/necromatcher.py` | `ui/src/pages/Necromatcher.tsx` | — |
 | `tools.pose_editing`<br>Pose Studio interactive pose editing | ⚪ exempt | `src/tools/pose_studio/__main__.py` | — | — | Interactive 3D pose editing and shared scene-bound native reference points/planes (#9942); desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `tools.putting_analytics`<br>Putting analytics studies | ✅ parity | `src/tools/putting_analytics_gui/gui.py` | `src/api/routes/putting_analytics.py` | `ui/src/pages/PuttingAnalytics.tsx` | — |
@@ -107,6 +109,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `drake_dashboard` | `engines.dashboards` |
 | `drake_golf` | `engines.load_and_simulate` |
 | `force_overlays` | `simulation.controls_wiring` |
+| `golf_environment` | `tools.golf_environment` |
 | `golf_simulation_suite` | `simulation.golf_suite_batch` |
 | `golf_simulator` | `tools.golf_simulator` |
 | `grip_wrench_plots` | `analysis.grip_wrench` |

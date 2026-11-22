@@ -32,6 +32,11 @@ from __future__ import annotations
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from src.shared.python.config.maturity_scale import (
+    default_min_maturity,
+    validate_level,
+)
+
 # ---------------------------------------------------------------------------
 # Defaults — kept identical to the legacy accessors they replace so that the
 # migration is behavior-preserving.  Sourced from ``src/api/config.py``.
@@ -119,6 +124,19 @@ class Settings(BaseSettings):
         default="full",
         validation_alias="MEDIAPIPE_POSE_MODEL_VARIANT",
     )
+
+    # --- Launcher maturity floor (epic #15150, E7) ------------------------
+    # Default shows every tile; see ``config.maturity_scale``.
+    min_maturity: str = Field(
+        default=default_min_maturity(),
+        validation_alias="MIN_MATURITY",
+    )
+
+    @field_validator("min_maturity")
+    @classmethod
+    def _validate_min_maturity(cls, value: str) -> str:
+        """Reject a floor that is not a canonical maturity level."""
+        return validate_level(value, name="MIN_MATURITY")
 
     @field_validator("server_port")
     @classmethod

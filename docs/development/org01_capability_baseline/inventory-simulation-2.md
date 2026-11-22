@@ -14,6 +14,7 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `jaxsim_dashboard` | JaxSim Dashboard | `model` | `simulation` | — | `core` | 🟢 active_feature | `src/launchers/jaxsim_dashboard.py` | `tests/config/test_engine_tile_coverage.py` |
 | `launcher.docker_management` | Docker engine management dialog | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/launchers/docker_manager.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `launcher.embedded_tabs_docks` | Embedded tool host (tabs + docks) | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/launchers/embedded_host.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `launcher.min_maturity` | Launcher min_maturity filter | `feature` | `simulation` | — | `core` | 🟢 active_feature | `src/shared/python/config/maturity_scale.py` | `tests/config/test_maturity_scale.py` |
 | `launcher.tile_grid` | Launcher tile grid from shared manifest | `feature` | `simulation` | — | `core` | 🟢 active_feature | `src/launchers/embedded_tool_bootstrap.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `launcher.tile_web_reachability` | Manifest tile web-reachability contract (route / native-window / unavailable) | `feature` | `simulation` | — | `core` | 🔵 planned | `src/launchers/embedded_tool_bootstrap.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `matlab_suite` | Matlab Models | `model` | `simulation` | — | `core` | 🟢 active_feature | `virtual/matlab_suite` | `tests/config/test_launcher_registry_parity.py` |
@@ -30,4 +31,3 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `mujoco_models-squat` | Squat | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `src/mujoco_models/exercises/squat` | `tests/config/test_launcher_registry_parity.py` |
 | `mujoco_models_shared` | MuJoCo Models | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `MuJoCo_Models` | `tests/config/test_launcher_registry_parity.py` |
 | `mujoco_unified` | MuJoCo | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/__main__.py` | `tests/config/test_launcher_registry_parity.py` |
-| `myosim_suite` | MyoSuite | `model` | `simulation` | — | `opensim` | 🟢 active_feature | `src/engines/physics_engines/myosuite/python/gui.py` | `tests/config/test_launcher_registry_parity.py` |
