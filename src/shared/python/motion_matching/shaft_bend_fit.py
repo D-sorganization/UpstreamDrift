@@ -213,7 +213,8 @@ def _sparsity(frames: int, markers: int, n_par: int) -> Any:
     blocks = sparse.kron(sparse.eye(frames), np.ones((markers * 3, n_par)))
     stencil = sparse.diags([1, 1, 1], [0, 1, 2], shape=(max(frames - 2, 0), frames))
     smooth = sparse.kron(stencil, sparse.eye(n_par))
-    return sparse.vstack([blocks, smooth, sparse.eye(frames * n_par)]).tolil()
+    stacked = sparse.vstack([blocks, smooth, sparse.eye(frames * n_par)])
+    return sparse.lil_matrix(stacked)
 
 
 def fit_shaft_bend(
