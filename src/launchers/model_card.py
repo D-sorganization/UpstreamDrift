@@ -58,6 +58,7 @@ from .launcher_constants import (
     scaled_padding_px,
     validate_tile_scale,
 )
+from .model_card_maturity import add_maturity_chip, add_maturity_row, let_label_shrink
 from .startup import ASSETS_DIR, _get_theme_colors
 
 if TYPE_CHECKING:
@@ -536,6 +537,8 @@ class DraggableModelCard(QFrame):
 
         if embed_in_row:
             layout.addWidget(lbl_status)
+            let_label_shrink(self.lbl_name)
+            add_maturity_chip(layout, self.model, _get_theme_colors(), chip_pt)
             return
 
         chip_layout = QHBoxLayout()
@@ -543,6 +546,7 @@ class DraggableModelCard(QFrame):
         chip_layout.addWidget(lbl_status)
         chip_layout.addStretch()
         layout.addLayout(chip_layout)
+        add_maturity_row(layout, self.model, _get_theme_colors(), chip_pt)
 
     def setup_ui(self) -> None:
         """Build the model card widget layout with image, labels, and status chip."""

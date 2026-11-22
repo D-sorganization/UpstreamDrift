@@ -75,7 +75,7 @@
       "status": "gap",
       "issue": 15150,
       "tiles": [],
-      "notes": "One ordered maturity scale (src/shared/python/config/maturity_scale.json) drives the PyQt6 launcher model list, the launcher loader and GET /api/launcher/tiles?min_maturity=, with the MIN_MATURITY setting as the default (which shows everything). The React dashboard does not yet send min_maturity, and no surface draws a maturity chip yet (follow-up branch); tracked under epic #15150."
+      "notes": "One ordered maturity scale (src/shared/python/config/maturity_scale.json) drives the PyQt6 launcher model list, the launcher loader and GET /api/launcher/tiles?min_maturity=, with the MIN_MATURITY setting as the default (which shows everything). The React dashboard does not yet send min_maturity, the PyQt6 launcher tiles draw a maturity chip (stable draws none; fixed height, so card rows keep their height), and the web dashboard draws none yet; tracked under epic #15150."
     },
     "launcher.tile_grid": {
       "title": "Launcher tile grid from shared manifest",
