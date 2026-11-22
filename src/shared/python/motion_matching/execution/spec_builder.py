@@ -883,6 +883,17 @@ def _record_preset(upper: dict[str, Any], kwargs: Mapping[str, Any]) -> None:
         upper["subject"]["dropped_markers"] = sorted(kwargs["dropped_markers"])
 
 
+def _apply_kwarg_model_options(
+    document: Any, club_spec: Any, kwargs: dict[str, Any]
+) -> Any:
+    """Shaft model, tibial torsion and knee axial rotation from ``kwargs``."""
+    document = with_shaft_model(
+        document, club_spec, kwargs.get("shaft_model"), kwargs.get("shaft_options")
+    )
+    document = _apply_kwarg_tibial_torsion(document, kwargs)
+    return apply_knee_axial_rotation(document, kwargs.get(KNEE_AXIAL_KEY))
+
+
 def compose_anthropometric_document(
     stature_m: float = 1.80,
     mass_kg: float = 80.0,
@@ -973,11 +984,7 @@ def compose_anthropometric_document(
         ),
     )
     _annotate_document(document, upper, kwargs.get("mirror_arm", True))
-    document = with_shaft_model(
-        document, club_spec, kwargs.get("shaft_model"), kwargs.get("shaft_options")
-    )
-    document = _apply_kwarg_tibial_torsion(document, kwargs)
-    document = apply_knee_axial_rotation(document, kwargs.get(KNEE_AXIAL_KEY))
+    document = _apply_kwarg_model_options(document, club_spec, kwargs)
     return AnthropometricDocument(
         document=document,
         subject=upper["subject"],
