@@ -168,6 +168,71 @@ def flex_frequency_hz(flex: str = DEFAULT_FLEX) -> float:
     return float(SHAFT_FLEX_DATA[flex]["stiffness_cpm"]) / 60.0
 
 
+def flex_ratings() -> tuple[str, ...]:
+    """The ``SHAFT_FLEX_DATA`` ratings, most flexible (lowest cpm) first."""
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.club_configurations import (  # noqa: E501
+        SHAFT_FLEX_DATA,
+    )
+
+    return tuple(sorted(SHAFT_FLEX_DATA, key=flex_frequency_hz))
+
+
+# --- chain options (#15150 Track C1) -------------------------------------------
+
+#: ``build_shaft_chain`` keywords a spec or bundle build may set, with the
+#: command-line flag that sets each one.
+SHAFT_OPTION_FLAGS: dict[str, str] = {
+    "flex": "--shaft-flex",
+    "stiffness_scale": "--shaft-stiffness-scale",
+    "n_links": "--shaft-links",
+}
+
+
+def checked_shaft_options(
+    model: str, options: Mapping[str, Any] | None
+) -> dict[str, Any]:
+    """The ``build_shaft_chain`` keywords of ``options`` for ``model``.
+
+    Precondition: the keys are ``SHAFT_OPTION_FLAGS`` keys and a non-empty
+    ``options`` goes with the ``"chain"`` model. Postcondition: an empty or
+    ``None`` ``options`` gives ``{}`` (the default chain); values are checked
+    by ``build_shaft_chain``.
+
+    Raises:
+        ValueError: an unknown key, or options for a rigid club.
+    """
+    chosen = dict(options or {})
+    unknown = sorted(set(chosen) - set(SHAFT_OPTION_FLAGS))
+    if unknown:
+        raise ValueError(f"unknown shaft options {unknown}; known {SHAFT_OPTION_FLAGS}")
+    if chosen and model != "chain":
+        flags = [SHAFT_OPTION_FLAGS[k] for k in chosen]
+        raise ValueError(f"{flags} need the chain shaft model, not {model!r}")
+    return chosen
+
+
+def add_shaft_arguments(parser: Any) -> None:
+    """Add the chain flex, stiffness scale and link flags to ``parser``.
+
+    Every flag defaults to ``None`` (not given), so a command line without
+    them builds the default chain.
+    """
+    settings: dict[str, dict[str, Any]] = {
+        "flex": {"choices": flex_ratings(), "help": "chain flex rating"},
+        "stiffness_scale": {"type": float, "help": "multiplies every chain spring"},
+        "n_links": {"type": int, "help": f"chain links (default {DEFAULT_LINKS})"},
+    }
+    for key, flag in SHAFT_OPTION_FLAGS.items():
+        parser.add_argument(flag, dest=f"shaft_{key}", default=None, **settings[key])
+
+
+def shaft_options(args: Any) -> dict[str, Any]:
+    """The shaft options given on a command line parsed with
+    :func:`add_shaft_arguments` (flags left out are not included)."""
+    values = {k: getattr(args, f"shaft_{k}") for k in SHAFT_OPTION_FLAGS}
+    return {k: v for k, v in values.items() if v is not None}
+
+
 def tube_properties(club: ClubSpec, start_m: float, youngs_modulus: float) -> Any:
     """Constant-area tapered tube from ``start_m`` (from the butt) to the tip.
 

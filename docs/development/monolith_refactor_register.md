@@ -25,6 +25,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1198 | `src/tools/capture_rig/gui.py` |
 | 1197 | `src/bunkershot3d/solvers/mpm/verification.py` |
 | 1197 | `src/launchers/launcher_diagnostics.py` |
+| 1197 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 1196 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py` |
 | 1196 | `src/engines/physics_engines/opensim/python/tour_matching/native_moco_preparation.py` |
 | 1196 | `src/launchers/launcher_simulation.py` |
@@ -40,7 +41,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1182 | `src/launchers/launcher_model_handlers.py` |
 | 1181 | `src/shared/python/grip_contact/parity.py` |
 | 1178 | `src/engines/physics_engines/pinocchio/python/full_body_fit.py` |
-| 1175 | `src/shared/python/motion_matching/execution/spec_builder.py` |
 | 1174 | `src/shared/python/lifting/bundles.py` |
 | 1170 | `src/config/launcher_manifest_loader.py` |
 | 1168 | `src/api/routes/data_explorer.py` |
