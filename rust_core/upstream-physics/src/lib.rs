@@ -100,8 +100,9 @@ fn calculate_impact_py(
 /// to the project version, so it cannot flag stale wheels).  Python's
 /// `rust_kernel.MIN_PHYSICS_REVISION` must be raised to match.
 /// 2: spin-dependent drag (#15460).
+/// 3: drag crisis refitted to Choi et al. 2006 (#15443).
 #[cfg(feature = "python")]
-const PHYSICS_REVISION: u32 = 2;
+const PHYSICS_REVISION: u32 = 3;
 
 #[cfg(feature = "python")]
 #[pymodule]
