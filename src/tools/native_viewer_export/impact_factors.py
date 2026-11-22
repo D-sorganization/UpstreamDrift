@@ -131,6 +131,7 @@ class FactorsPanel:
     status: str
     frozen: Lines
     series: ClubheadSeries | None = None  # source of the live rows
+    card: ImpactCard | None = field(default=None, compare=False, repr=False)
     _live: dict[int, Lines] = field(default_factory=dict, compare=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -138,6 +139,18 @@ class FactorsPanel:
             raise TypeError("settings must be a FactorSettings")
         if self.impact_time_s is not None and not math.isfinite(self.impact_time_s):
             raise ValueError("impact_time_s must be finite or None")
+
+    def with_model_smash(self, ball_speed_mph: float | None) -> FactorsPanel:
+        """Panel whose smash row is that of the flight model's ball speed.
+
+        The same row as the impact card's (:func:`impact_card.with_model_smash`);
+        ``None``, or a panel without its card, returns ``self``.
+        """
+        if self.card is None:
+            return self
+        card = impact_card.with_model_smash(self.card, ball_speed_mph)
+        frozen = _rows(card, self.settings)
+        return replace(self, card=card, frozen=frozen)
 
     def lines_at(self, time_s: float) -> list[tuple[str, str]]:
         """``(label, value)`` lines at swing time ``time_s``: status, then rows."""
@@ -308,7 +321,8 @@ def panel_from_series(
     if ball is not None and str(location.reason).startswith(impact_card.OFF_FACE):
         miss_mm = closest_approach(series, ball)[1] * 1000.0
         status = f"{NO_CONTACT} (miss {miss_mm:.0f} mm)"
-    return FactorsPanel(settings, impact_time_s, status, _rows(card, settings), series)
+    rows = _rows(card, settings)
+    return FactorsPanel(settings, impact_time_s, status, rows, series, card)
 
 
 def factors_for_export(
