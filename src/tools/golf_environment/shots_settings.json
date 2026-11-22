@@ -1,0 +1,40 @@
+{
+  "sources": "Illustrative only, not a surveyed course: a 380 m par 4 with a 35 m fairway and a 15 m green radius so that driver carries of about 170 to 210 m land on the fairway. Colours are chosen for contrast on the fairway green; trace and figure sizes are display choices.",
+  "hole": {
+    "name": "Illustrative Par 4",
+    "par": 4,
+    "length_m": 380.0,
+    "metres_per_yard": 0.9144,
+    "fairway_width_m": 35.0,
+    "green_radius_m": 15.0
+  },
+  "shot_colours_rgba": [
+    [0.85, 0.1, 0.1, 1.0],
+    [0.05, 0.05, 0.05, 1.0],
+    [0.1, 0.25, 0.9, 1.0],
+    [0.9, 0.5, 0.0, 1.0],
+    [0.55, 0.1, 0.7, 1.0]
+  ],
+  "decimals": 0,
+  "figure": {
+    "width_in": 12.0,
+    "height_in": 8.0,
+    "dpi": 130,
+    "plan_height_ratio": 1.0,
+    "side_height_ratio": 1.0,
+    "line_width": 2.4,
+    "landing_marker_size": 9.0,
+    "tee_marker_size": 9.0,
+    "font_size": 11.0,
+    "title_font_size": 13.0,
+    "grid_alpha": 0.25,
+    "lateral_margin_fraction": 1.5,
+    "height_margin_fraction": 1.25,
+    "length_margin_fraction": 1.04,
+    "rough_rgb": [0.78, 0.88, 0.7],
+    "fairway_rgb": [0.55, 0.78, 0.45],
+    "green_rgb": [0.3, 0.68, 0.32],
+    "tee_rgb": [0.2, 0.2, 0.2],
+    "pin_rgb": [0.9, 0.1, 0.1]
+  }
+}
