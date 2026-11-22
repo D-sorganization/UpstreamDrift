@@ -20,6 +20,9 @@ from scipy.special import logsumexp
 Array = NDArray[np.float64]
 AdvanceFn = Callable[[float], tuple[Array, Array]]
 FaceTrianglesFn = Callable[[Array], Array]
+# Root bracketing is deliberately bounded; missed crossings between these
+# states remain an explicit limitation.
+CONTACT_ROOT_SUBDIVISIONS = 8
 MISS_PENALTY_SUBDIVISIONS = 8
 VertexKey = tuple[int, int, int]
 EdgeKey = tuple[VertexKey, VertexKey]
@@ -114,15 +117,21 @@ def _surface_sample(
 ) -> tuple[float, float, int, Array, Array, Array]:
     if len(triangles) == 0:
         raise ValueError("face_triangles_world must contain at least one triangle")
-    crosses = np.cross(
-        triangles[:, 1] - triangles[:, 0], triangles[:, 2] - triangles[:, 0]
-    )
+    with np.errstate(over="ignore", invalid="ignore"):
+        crosses = np.cross(
+            triangles[:, 1] - triangles[:, 0], triangles[:, 2] - triangles[:, 0]
+        )
     lengths = np.linalg.norm(crosses, axis=1)
+    if not np.isfinite(crosses).all() or not np.isfinite(lengths).all():
+        raise ValueError("face geometry must produce finite distances and normals")
     if np.any(lengths <= np.finfo(float).tiny):
         raise ValueError("face triangles must be nondegenerate")
     closest, barycentrics = _point_triangles(centre, triangles)
     deltas = centre - closest
-    distances2 = np.einsum("ij,ij->i", deltas, deltas)
+    with np.errstate(over="ignore", invalid="ignore"):
+        distances2 = np.einsum("ij,ij->i", deltas, deltas)
+    if not np.isfinite(distances2).all():
+        raise ValueError("face geometry must produce finite distances and normals")
     index = int(np.argmin(distances2))
     point, bary, delta = closest[index], barycentrics[index], deltas[index]
     cross = np.cross(
@@ -130,19 +139,77 @@ def _surface_sample(
         triangles[index, 2] - triangles[index, 0],
     )
     outward = cross / lengths[index]
+    # Smooth the normal-side sign numerically; negative signed distance means
+    # the sphere centre is behind the outward-wound face.
     distance = math.sqrt(float(distances2[index]))
     side = float(delta @ outward)
-    signed_distance = math.copysign(distance, side) if side != 0.0 else -distance
+    side_smoothing = math.sqrt(np.finfo(float).eps) * radius
+    smooth_side = math.tanh(side / side_smoothing)
+    signed_distance = distance * smooth_side
     gap = signed_distance - radius
 
-    # A normalized soft minimum of squared distances stays positive and smooth
-    # across triangle seams; radius supplies its physical length scale.
+    # A normalized soft minimum of squared distances stays continuous across
+    # triangle seams; radius supplies its physical length scale.
     scaled = -distances2 / (radius * radius)
     weights = np.exp(scaled - float(np.max(scaled)))
     weights /= float(weights.sum())
     smooth_distance = math.sqrt(float(weights @ distances2))
-    penalty = radius * float(np.logaddexp(0.0, (smooth_distance - radius) / radius))
+    smooth_gap = smooth_distance * smooth_side - radius
+    gap_smoothing = math.sqrt(np.finfo(float).eps) * radius
+    gap_penalty = math.hypot(smooth_gap, gap_smoothing) - gap_smoothing
+
+    # Penalize proximity to the outside boundary continuously. Edge lengths
+    # weight the Gaussian proximity sum so subdividing a boundary does not
+    # change its scale. Squared segment distance keeps the term finite and
+    # smooth at segment endpoints.
+    boundary_penalty = _boundary_proximity_penalty(triangles, centre, radius)
+    penalty = gap_penalty + boundary_penalty
+    if not math.isfinite(gap) or not math.isfinite(penalty):
+        raise ValueError("contact gap and miss cost must be finite")
     return gap, penalty, index, point, bary, outward
+
+
+def _boundary_proximity_penalty(triangles: Array, point: Array, radius: float) -> float:
+    """Finite smooth cost for proximity to the finite patch's outer boundary."""
+    scale = max(1.0, float(np.max(np.abs(triangles))))
+    quantum = 128.0 * np.finfo(float).eps * scale
+    edges = triangles[:, ((0, 1), (1, 2), (2, 0))].reshape(-1, 2, 3)
+    quantized = np.rint(edges / quantum).astype(np.int64)
+    first, second = quantized[:, 0], quantized[:, 1]
+    swap = (first[:, 0] > second[:, 0]) | (
+        (first[:, 0] == second[:, 0])
+        & (
+            (first[:, 1] > second[:, 1])
+            | ((first[:, 1] == second[:, 1]) & (first[:, 2] > second[:, 2]))
+        )
+    )
+    low, high = (
+        np.where(swap[:, None], second, first),
+        np.where(swap[:, None], first, second),
+    )
+    keys = np.column_stack((low, high))
+    _, first_indices, counts = np.unique(
+        keys, axis=0, return_index=True, return_counts=True
+    )
+    boundary = edges[first_indices[counts == 1]]
+    vectors = boundary[:, 1] - boundary[:, 0]
+    lengths = np.linalg.norm(vectors, axis=1)
+    fractions = np.clip(
+        np.einsum("ij,ij->i", point - boundary[:, 0], vectors)
+        / np.einsum("ij,ij->i", vectors, vectors),
+        0.0,
+        1.0,
+    )
+    deltas = point - (boundary[:, 0] + fractions[:, None] * vectors)
+    distances2 = np.einsum("ij,ij->i", deltas, deltas)
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        proximity = float(
+            np.sum((lengths / radius) * np.exp(-distances2 / (radius * radius)))
+        )
+        penalty = radius * math.sqrt(proximity)
+    if not math.isfinite(penalty):
+        raise ValueError("contact boundary cost must be finite")
+    return penalty
 
 
 def _boundary_edge_contact(triangles: Array, index: int, bary: Array) -> bool:
@@ -191,8 +258,11 @@ def find_contact_event(
 
     A root on the outer boundary of the supplied patch is rejected; shared
     interior triangle seams remain eligible. The caller must supply outward
-    triangle winding. Only an endpoint sign-change bracket is searched, so a
-    tangent touch or an even number of crossings in the interval is not found.
+    triangle winding. A fixed grid of nine equally spaced states is searched
+    for the first positive-to-nonpositive bracket, which is then bisected. A
+    separating start can therefore be followed by a later sampled contact.
+    Narrow crossings between grid states, tangent touches, and multiple
+    crossings within one grid cell can still be missed or unresolved.
     The smooth closest-approach penalty is a soft minimum over nine equally
     spaced states. This bounded scan can miss a narrower or multimodal minimum;
     it is not a global closest-approach guarantee. The penalty is returned for
@@ -240,49 +310,108 @@ def find_contact_event(
             )
         return q, qd, triangles, _surface_sample(triangles, centre, radius)
 
-    lo, hi = 0.0, duration
-    _, _, _, data_lo = sample(lo)
-    _, _, _, data_hi = sample(hi)
+    def local_gap_derivative(time_s: float) -> float:
+        """Estimate the signed-gap derivative locally using the real advance."""
+        base = max(4.0 * tolerance, duration * math.sqrt(np.finfo(float).eps))
+        available_before, available_after = time_s, duration - time_s
+        if time_s <= 0.0:
+            h = min(base, available_after / 2.0)
+            gap0 = sample(time_s)[3][0]
+            gap_half = sample(time_s + h / 2.0)[3][0]
+            gap_full = sample(time_s + h)[3][0]
+            half_slope = (gap_half - gap0) / (h / 2.0)
+            full_slope = (gap_full - gap0) / h
+            return 2.0 * half_slope - full_slope
+        if time_s >= duration:
+            h = min(base, available_before / 2.0)
+            gap0 = sample(time_s)[3][0]
+            gap_half = sample(time_s - h / 2.0)[3][0]
+            gap_full = sample(time_s - h)[3][0]
+            half_slope = (gap0 - gap_half) / (h / 2.0)
+            full_slope = (gap0 - gap_full) / h
+            return 2.0 * half_slope - full_slope
+        if available_before < base:
+            h = available_before / 2.0
+            gap0 = sample(time_s)[3][0]
+            gap_half = sample(time_s - h / 2.0)[3][0]
+            gap_full = sample(time_s - h)[3][0]
+            half_slope = (gap0 - gap_half) / (h / 2.0)
+            full_slope = (gap0 - gap_full) / h
+            return 2.0 * half_slope - full_slope
+        if available_after < base:
+            h = available_after / 2.0
+            gap0 = sample(time_s)[3][0]
+            gap_half = sample(time_s + h / 2.0)[3][0]
+            gap_full = sample(time_s + h)[3][0]
+            half_slope = (gap_half - gap0) / (h / 2.0)
+            full_slope = (gap_full - gap0) / h
+            return 2.0 * half_slope - full_slope
+        h = min(base, available_before, available_after)
+        gap_before = sample(time_s - h)[3][0]
+        gap_after = sample(time_s + h)[3][0]
+        return (gap_after - gap_before) / (2.0 * h)
+
+    grid_times = np.linspace(0.0, duration, CONTACT_ROOT_SUBDIVISIONS + 1)
+    grid_states = [sample(float(time_s)) for time_s in grid_times]
+    penalty_samples = np.asarray([state[3][1] for state in grid_states], dtype=float)
     event: ContactRoot | None = None
-    if data_lo[0] > 0.0 and data_hi[0] <= 0.0:
-        for _ in range(max_iterations):
-            if hi - lo <= tolerance:
-                break
-            mid = 0.5 * (lo + hi)
-            _, _, _, data_mid = sample(mid)
-            if data_mid[0] > 0.0:
-                lo, data_lo = mid, data_mid
-            else:
-                hi, data_hi = mid, data_mid
-        if hi - lo > tolerance:
-            raise ValueError("contact root did not converge within max_iterations")
-        time_s = 0.5 * (lo + hi)
-        q_star, qd_star, triangles, data_star = sample(time_s)
+    if grid_states[0][3][0] == 0.0 and local_gap_derivative(0.0) < 0.0:
+        q_star, qd_star, triangles, data_star = grid_states[0]
         index, point, bary = data_star[2], data_star[3], data_star[4]
         delta = centre - point
-        if not _boundary_edge_contact(triangles, index, bary):
-            distance = float(np.linalg.norm(delta))
-            if distance > 0.0:
-                normal = delta / distance
-                speed = float((data_lo[0] - data_hi[0]) / (hi - lo))
-                if speed > 0.0:
-                    event = ContactRoot(
-                        time_s,
-                        q_star.copy(),
-                        qd_star.copy(),
-                        point.copy(),
-                        normal.copy(),
-                        speed,
-                        int(index),
-                    )
+        distance = float(np.linalg.norm(delta))
+        if distance > 0.0 and not _boundary_edge_contact(triangles, index, bary):
+            event = ContactRoot(
+                0.0,
+                q_star.copy(),
+                qd_star.copy(),
+                point.copy(),
+                delta / distance,
+                -local_gap_derivative(0.0),
+                int(index),
+            )
 
-    penalty_samples = np.asarray(
-        [
-            sample(duration * i / MISS_PENALTY_SUBDIVISIONS)[3][1]
-            for i in range(MISS_PENALTY_SUBDIVISIONS + 1)
-        ],
-        dtype=float,
-    )
+    if event is None:
+        for bracket_index in range(CONTACT_ROOT_SUBDIVISIONS):
+            lo = float(grid_times[bracket_index])
+            hi = float(grid_times[bracket_index + 1])
+            data_lo = grid_states[bracket_index][3]
+            data_hi = grid_states[bracket_index + 1][3]
+            if not (data_lo[0] > 0.0 and data_hi[0] <= 0.0):
+                continue
+            exact_right_root = data_hi[0] == 0.0
+            for _ in range(max_iterations):
+                if hi - lo <= tolerance or exact_right_root:
+                    break
+                mid = 0.5 * (lo + hi)
+                _, _, _, data_mid = sample(mid)
+                if data_mid[0] > 0.0:
+                    lo, data_lo = mid, data_mid
+                else:
+                    hi, data_hi = mid, data_mid
+            if hi - lo > tolerance and not exact_right_root:
+                raise ValueError("contact root did not converge within max_iterations")
+            time_s = hi if exact_right_root else 0.5 * (lo + hi)
+            q_star, qd_star, triangles, data_star = sample(time_s)
+            index, point, bary = data_star[2], data_star[3], data_star[4]
+            delta = centre - point
+            distance = float(np.linalg.norm(delta))
+            if distance == 0.0 or _boundary_edge_contact(triangles, index, bary):
+                continue
+            gap_derivative = local_gap_derivative(time_s)
+            if not math.isfinite(gap_derivative) or gap_derivative >= 0.0:
+                continue
+            event = ContactRoot(
+                time_s,
+                q_star.copy(),
+                qd_star.copy(),
+                point.copy(),
+                delta / distance,
+                -float(gap_derivative),
+                int(index),
+            )
+            break
+
     penalty = -radius * float(
         logsumexp(-penalty_samples / radius) - math.log(len(penalty_samples))
     )

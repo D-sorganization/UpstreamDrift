@@ -121,6 +121,17 @@ assertions: a sampled pass is neither verified full-rollout coverage nor an
 anatomical or continuous-time feasibility certificate. It is not wired to the
 controller or an optimization acceptance gate.
 
+The optional zero-order-hold recorder retains numerical RK4 stage states and
+the held source effort after root zeroing, with accepted segment plans and
+pre/post-projection states. Contact-search trial advances are excluded, and
+failed steps discard their pending trace. A finish-time integrity check rejects
+missing, reordered or malformed stages and inconsistent held efforts. This is
+not evidence that the held
+effort is the requested controller's post-saturation total torque. Plan and
+stage records are produced by the same integrator, and neither they nor the
+sampled audit prove completeness against an independent actuator inventory or
+continuous-time bounds.
+
 To reproduce the historical sampled-limit counts from the repository root:
 
 ```powershell
@@ -189,9 +200,9 @@ probe using the rendered face patch and production RK4 stepper found a
 bracketed event with a sphere-to-face residual of approximately 1.4e-11 m.
 The public synthetic MuJoCo regression compares 1 ms and 0.5 ms steps and
 checks event state and residual, using the shared RK4 stepper. Neither check is
-an impact verification for the pinned swing. The event finder
-only detects endpoint sign-change brackets and can miss tangencies or multiple
-crossings within one step. Its finite nine-sample miss penalty is a smooth
+an impact verification for the pinned swing. The event finder searches nine
+states for a sign-change bracket and can miss tangencies or multiple crossings
+within one grid cell. Its finite nine-sample miss penalty is a smooth
 surrogate, not a proven global closest distance. Independent validation on the
 actual matched trajectory remains necessary.
 

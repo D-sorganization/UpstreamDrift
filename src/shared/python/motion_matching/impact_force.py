@@ -752,6 +752,7 @@ def step_through_impact(
     *,
     poses: PoseFn,
     accel: AccelFn,
+    trial_step: StepFn | None = None,
 ) -> tuple[Array, Array, ImpactForce | None, Any]:
     """Advance ``[t, t + dt]`` with ``step``, applying the ball force inside it.
 
@@ -765,15 +766,16 @@ def step_through_impact(
         q, v, extra = step(t, dt, q, v, None)
         return q, v, None, extra
     search_plan = impact
+    probe = step if trial_step is None else trial_step
 
     def advance_unforced(seconds: float) -> tuple[Array, Array]:
         arm = search_plan.armed_at_s if search_plan.trigger == "surface" else None
         if arm is not None and t < arm < t + seconds:
             arm_duration = arm - t
-            q_arm, v_arm, _ = step(t, arm_duration, q, v, None)
-            q_end, v_end, _ = step(arm, seconds - arm_duration, q_arm, v_arm, None)
+            q_arm, v_arm, _ = probe(t, arm_duration, q, v, None)
+            q_end, v_end, _ = probe(arm, seconds - arm_duration, q_arm, v_arm, None)
         else:
-            q_end, v_end, _ = step(t, seconds, q, v, None)
+            q_end, v_end, _ = probe(t, seconds, q, v, None)
         return np.asarray(q_end, dtype=float), np.asarray(v_end, dtype=float)
 
     impact = impact.schedule(

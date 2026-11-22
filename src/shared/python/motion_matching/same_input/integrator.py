@@ -35,6 +35,11 @@ from src.shared.python.motion_matching.impact_force import (
     ImpactForce,
     step_through_impact,
 )
+from src.shared.python.motion_matching.same_input.stage_trace import (
+    RunPlan,
+    SegmentPlan,
+    StageRecorder,
+)
 
 Array = NDArray[np.float64]
 EffortSource = Callable[[int, float, Array, Array], Array]
@@ -144,15 +149,29 @@ def root_indices(coordinate_order: Sequence[str]) -> Array:
 
 
 def zoh_rk4_step(
-    plant: DynamicsPlant, q: Array, v: Array, tau: Array, dt_s: float
+    plant: DynamicsPlant,
+    q: Array,
+    v: Array,
+    tau: Array,
+    dt_s: float,
+    *,
+    observe: Callable[[int, float, Array, Array], None] | None = None,
 ) -> tuple[Array, Array]:
     """One classical RK4 step with ``tau`` held constant over the step."""
+    if observe is not None:
+        observe(1, 0.0, q, v)
     k1q, k1v = v, plant.acceleration(q, v, tau)
     q2, v2 = q + dt_s / 2 * k1q, v + dt_s / 2 * k1v
+    if observe is not None:
+        observe(2, dt_s / 2, q2, v2)
     k2q, k2v = v2, plant.acceleration(q2, v2, tau)
     q3, v3 = q + dt_s / 2 * k2q, v + dt_s / 2 * k2v
+    if observe is not None:
+        observe(3, dt_s / 2, q3, v3)
     k3q, k3v = v3, plant.acceleration(q3, v3, tau)
     q4, v4 = q + dt_s * k3q, v + dt_s * k3v
+    if observe is not None:
+        observe(4, dt_s, q4, v4)
     k4q, k4v = v4, plant.acceleration(q4, v4, tau)
     q_next = q + dt_s / 6 * (k1q + 2 * k2q + 2 * k3q + k4q)
     v_next = v + dt_s / 6 * (k1v + 2 * k2v + 2 * k3v + k4v)
@@ -189,6 +208,7 @@ def integrate(
     dt_s: float,
     policy: StepPolicy = DEFAULT_POLICY,
     impact: ImpactForce | None = None,
+    recorder: StageRecorder | None = None,
 ) -> Rollout:
     """Integrate ``steps`` steps, asking ``source(j, t, q, v)`` for each effort.
 
@@ -210,33 +230,71 @@ def integrate(
     if steps < 1 or not (np.isfinite(dt_s) and dt_s > 0.0):
         raise ValueError("steps and dt_s must be positive")
     root = root_indices(plant.coordinate_order)
-    q, v = np.asarray(q0, dtype=float).copy(), np.asarray(v0, dtype=float).copy()
-    qs, vs, efforts, drift = [q.copy()], [v.copy()], [], []
-    failure = None
-    poses = None if impact is None else _plant_poses(plant)
-    for k in range(steps):
-        try:
-            q, v, impact, taus, step_drift = _held_step(
-                plant, (q, v), k, dt_s, (source, root, impact, poses), policy
+    if recorder is not None:
+        recorder.start_run(
+            RunPlan(
+                steps,
+                dt_s,
+                policy.substeps,
+                policy.effort_holds,
+                policy.project,
+                tuple(plant.coordinate_order),
             )
-        except (ArithmeticError, np.linalg.LinAlgError, ValueError) as exc:
-            if not policy.stop_on_failure:
+        )
+    try:
+        q, v = np.asarray(q0, dtype=float).copy(), np.asarray(v0, dtype=float).copy()
+        qs, vs, efforts, drift = [q.copy()], [v.copy()], [], []
+        failure = None
+        poses = None if impact is None else _plant_poses(plant)
+        for k in range(steps):
+            if recorder is not None:
+                recorder.begin()
+            try:
+                q, v, impact, taus, step_drift = _held_step(
+                    plant,
+                    (q, v),
+                    k,
+                    dt_s,
+                    (source, root, impact, poses),
+                    policy,
+                    recorder,
+                )
+            except (ArithmeticError, np.linalg.LinAlgError, ValueError) as exc:
+                if recorder is not None:
+                    recorder.abort()
+                if not policy.stop_on_failure:
+                    if recorder is not None:
+                        recorder.finish(f"step {k}: {type(exc).__name__}: {exc}")
+                    raise
+                failure = (
+                    f"step {k} (t = {k * dt_s:.3f} s): {type(exc).__name__}: {exc}"
+                )
+                break
+            except BaseException:
+                if recorder is not None:
+                    recorder.abort()
+                    recorder.finish(f"step {k}: exception")
                 raise
-            failure = f"step {k} (t = {k * dt_s:.3f} s): {type(exc).__name__}: {exc}"
-            break
-        drift.append(step_drift)
-        qs.append(q.copy())
-        vs.append(v.copy())
-        efforts.extend(taus)
-    return Rollout(
-        time_s=np.arange(len(qs), dtype=np.float64) * dt_s,
-        q=np.array(qs),
-        v=np.array(vs),
-        efforts=np.array(efforts).reshape(len(efforts), -1),
-        pose_drift=np.array(drift),
-        failure=failure,
-        ball_impact=None if impact is None else impact.to_record(),
-    )
+            drift.append(step_drift)
+            qs.append(q.copy())
+            vs.append(v.copy())
+            efforts.extend(taus)
+        if recorder is not None:
+            recorder.finish(failure)
+        return Rollout(
+            time_s=np.arange(len(qs), dtype=np.float64) * dt_s,
+            q=np.array(qs),
+            v=np.array(vs),
+            efforts=np.array(efforts).reshape(len(efforts), -1),
+            pose_drift=np.array(drift),
+            failure=failure,
+            ball_impact=None if impact is None else impact.to_record(),
+        )
+    except BaseException as exc:
+        if recorder is not None:
+            recorder.abort()
+            recorder.finish(f"integration exception: {type(exc).__name__}: {exc}")
+        raise
 
 
 def _held_step(
@@ -246,6 +304,7 @@ def _held_step(
     dt_s: float,
     inputs: tuple[EffortSource, Array, ImpactForce | None, Any],
     policy: StepPolicy,
+    recorder: StageRecorder | None = None,
 ) -> tuple[Array, Array, ImpactForce | None, list[Array], float]:
     """One step: ``effort_holds`` held efforts, then the closure projection."""
     source, root, impact, poses = inputs
@@ -259,17 +318,43 @@ def _held_step(
         tau[root] = 0.0
         taus.append(tau)
         if impact is None:
-            for _ in range(policy.substeps_per_hold):
-                q, v = zoh_rk4_step(
-                    plant, q, v, tau, hold_dt / policy.substeps_per_hold
+            if recorder is not None:
+                recorder.segment(
+                    SegmentPlan(
+                        k, h, 0, j * hold_dt, hold_dt, policy.substeps_per_hold, False
+                    )
                 )
+            for substep in range(policy.substeps_per_hold):
+                sub_dt = hold_dt / policy.substeps_per_hold
+                observe = (
+                    None
+                    if recorder is None
+                    else recorder.observer(
+                        k, h, 0, substep, j * hold_dt + substep * sub_dt, tau
+                    )
+                )
+                q, v = zoh_rk4_step(plant, q, v, tau, sub_dt, observe=observe)
         else:
             q, v, impact = _impact_hold(
-                plant, (q, v, tau), (j * hold_dt, hold_dt), impact, poses, policy
+                plant,
+                (q, v, tau),
+                (j * hold_dt, hold_dt),
+                impact,
+                poses,
+                policy,
+                recorder,
+                k,
+                h,
             )
+    pre_q, pre_v = (q.copy(), v.copy()) if recorder is not None else (q, v)
     if not policy.project:
-        return q, v, impact, taus, float(np.abs(plant.closure_pose_residual(q)).max())
+        drift = float(np.abs(plant.closure_pose_residual(q)).max())
+        if recorder is not None:
+            recorder.commit(pre_q, pre_v, q, v)
+        return q, v, impact, taus, drift
     projected = project_to_closure(plant, q, v)
+    if recorder is not None:
+        recorder.commit(pre_q, pre_v, projected.q, projected.v)
     return projected.q, projected.v, impact, taus, projected.pose_residual_before
 
 
@@ -280,17 +365,53 @@ def _impact_hold(
     impact: ImpactForce,
     poses: Any,
     policy: StepPolicy,
+    recorder: StageRecorder | None = None,
+    step_index: int = 0,
+    hold_index: int = 0,
 ) -> tuple[Array, Array, ImpactForce]:
     """One held effort through the ball window (no closure projection)."""
     q, v, tau = state
     t, hold_dt = clock
 
-    def advance(_t: float, h: float, q_a: Array, v_a: Array, external: Any) -> tuple:
+    segment = 0
+
+    def advance_impl(
+        _t: float, h: float, q_a: Array, v_a: Array, external: Any, *, trial: bool
+    ) -> tuple:
+        nonlocal segment
         parts = max(1, int(np.ceil(policy.substeps_per_hold * h / hold_dt - 1e-9)))
         forced = plant if external is None else _ForcedPlant(plant, external)
-        for _ in range(parts):
-            q_a, v_a = zoh_rk4_step(forced, q_a, v_a, tau, h / parts)  # type: ignore[arg-type]
+        if recorder is not None and not trial:
+            recorder.segment(
+                SegmentPlan(
+                    step_index, hold_index, segment, _t, h, parts, external is not None
+                )
+            )
+        for substep in range(parts):
+            observe = (
+                None
+                if recorder is None or trial
+                else recorder.observer(
+                    step_index,
+                    hold_index,
+                    segment,
+                    substep,
+                    _t + substep * h / parts,
+                    tau,
+                )
+            )
+            q_a, v_a = zoh_rk4_step(forced, q_a, v_a, tau, h / parts, observe=observe)  # type: ignore[arg-type]
+        if not trial:
+            segment += 1
         return q_a, v_a, None
+
+    def advance(t_a: float, h: float, q_a: Array, v_a: Array, external: Any) -> tuple:
+        return advance_impl(t_a, h, q_a, v_a, external, trial=False)
+
+    def trial_advance(
+        t_a: float, h: float, q_a: Array, v_a: Array, external: Any
+    ) -> tuple:
+        return advance_impl(t_a, h, q_a, v_a, external, trial=True)
 
     q, v, latched, _ = step_through_impact(
         impact,
@@ -301,6 +422,7 @@ def _impact_hold(
         advance,
         poses=poses,
         accel=lambda qq, vv, f: plant.acceleration(qq, vv, f),
+        trial_step=trial_advance if recorder is not None else None,
     )
     if latched is None:
         raise ValueError("ball impact plan was lost during the step")
@@ -316,6 +438,7 @@ def open_loop(
     dt_s: float,
     policy: StepPolicy = DEFAULT_POLICY,
     impact: ImpactForce | None = None,
+    recorder: StageRecorder | None = None,
 ) -> Rollout:
     """Replay a fixed effort sequence (steps * effort_holds, nv).
 
@@ -344,4 +467,5 @@ def open_loop(
         dt_s=dt_s,
         policy=policy,
         impact=impact,
+        recorder=recorder,
     )

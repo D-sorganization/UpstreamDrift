@@ -335,6 +335,65 @@ def test_surface_trigger_uses_integrated_root_and_moving_face_pose() -> None:
     assert not np.array_equal(q1, q) and not np.array_equal(v1, v)
 
 
+def test_surface_hit_commits_only_real_zoh_stages_and_event() -> None:
+    from src.shared.python.motion_matching.same_input.integrator import (
+        ROOT_COORDINATES,
+        StepPolicy,
+        integrate,
+    )
+    from src.shared.python.motion_matching.same_input.stage_trace import StageRecorder
+
+    class Plant:
+        coordinate_order = (*ROOT_COORDINATES, "x", "angle")
+
+        def acceleration(self, q, v, tau):
+            return np.asarray(tau) / np.array([1] * 6 + [M, INERTIA])
+
+        def kinematic_frames(self, q):
+            return rotating_poses(q[6:])
+
+        def closure_pose_residual(self, q):
+            return np.zeros(1)
+
+    q, v = np.zeros(8), np.zeros(8)
+    v[6:] = [100, 50]
+    recorder = StageRecorder()
+    run = integrate(
+        Plant(),
+        q,
+        v,
+        lambda *_: np.zeros(8),
+        steps=1,
+        dt_s=0.02,
+        policy=StepPolicy(substeps=1, project=False),
+        impact=_surface_plan(_ball_on_rotated_face()),
+        recorder=recorder,
+    )
+    assert run.ball_impact is not None
+    event = run.ball_impact["contact_event"]
+    assert event["time_s"] == pytest.approx(0.01, abs=5e-10)
+    stages = recorder.steps[0].stages
+    assert len(stages) == 12
+    assert {s.segment for s in stages} == {0, 1, 2}
+    assert [segment.force_active for segment in recorder.steps[0].segments] == [
+        False,
+        True,
+        False,
+    ]
+    expected = recorder.expected_stages()
+    actual = [(s.step, s.hold, s.segment, s.substep, s.stage, s.time_s) for s in stages]
+    assert expected == actual
+    assert recorder.outcome.status == "complete"
+    assert all(np.array_equal(s.tau, np.zeros(8)) for s in stages)
+    np.testing.assert_allclose(stages[4].q, event["q"], atol=1e-10)
+    np.testing.assert_allclose(stages[4].v, event["qd"], atol=1e-10)
+    changed = list(stages)
+    changed[4] = replace(changed[4], tau=np.ones(8))
+    recorder.steps[0] = replace(recorder.steps[0], stages=tuple(changed))
+    recorder.finish()
+    assert recorder.outcome.status == "partial"
+
+
 def test_surface_trigger_fails_closed_and_records_a_finite_miss() -> None:
     q, v = np.zeros(2), np.array([100.0, 0.0])
     impact = _surface_plan(np.array([1.0, 2.0, 0.0]))
@@ -353,6 +412,36 @@ def test_surface_trigger_fails_closed_and_records_a_finite_miss() -> None:
     assert all(external is None for external in calls)
     np.testing.assert_allclose(q1, q + 0.02 * v)
     np.testing.assert_array_equal(v1, v)
+
+
+def test_surface_search_separates_trial_and_accepted_advances() -> None:
+    q, v = np.zeros(2), np.array([100.0, 0.0])
+    impact = _surface_plan(np.array([1.0, 2.0, 0.0]))
+    trials, accepted = [], []
+
+    def trial(t, h, qq, vv, external):
+        trials.append((t, h))
+        return qq + h * vv, vv, None
+
+    def step(t, h, qq, vv, external):
+        accepted.append((t, h))
+        return qq + h * vv, vv, None
+
+    q1, _, result, _ = imf.step_through_impact(
+        impact,
+        0.0,
+        0.02,
+        q,
+        v,
+        step,
+        poses=rotating_poses,
+        accel=accel,
+        trial_step=trial,
+    )
+    assert trials
+    assert accepted == [(0.0, 0.02)]
+    assert not result.is_scheduled
+    np.testing.assert_allclose(q1, q + 0.02 * v)
 
 
 def test_surface_latch_uses_the_off_centre_root_for_impulse_and_force_jacobian() -> (
