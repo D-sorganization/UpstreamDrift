@@ -162,7 +162,9 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
 
         if not is_rust_available():
             raise RuntimeError(
-                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+                "upstream-physics Rust kernel not found or older than "
+                "rust_kernel.MIN_KERNEL_VERSION! Strict Rust Parity Enforced. "
+                "Rebuild: maturin develop in rust_core/upstream-physics."
             )
 
         import upstream_physics  # type: ignore[import-untyped]

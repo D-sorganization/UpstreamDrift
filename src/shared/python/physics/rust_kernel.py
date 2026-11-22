@@ -16,6 +16,7 @@ Principles:
 
 from __future__ import annotations
 
+import importlib.metadata
 from dataclasses import dataclass
 from typing import Any
 
@@ -31,13 +32,60 @@ logger = get_logger(__name__)
 
 # ── Try importing the Rust wheel ──────────────────────────────────────────────
 
+#: Minimum ``upstream_physics`` version this module accepts.  It must equal the
+#: crate version in ``rust_core/upstream-physics/Cargo.toml`` (enforced by
+#: ``tests/unit/physics/test_rust_kernel_version_guard.py``).  Bump both when
+#: the kernel's physics changes (2.2.0: spin-dependent drag, #15460).
+MIN_KERNEL_VERSION = "2.2.0"
+
+_REBUILD_HINT = (
+    "maturin develop (or maturin build --features python --release) "
+    "in rust_core/upstream-physics"
+)
+
+
+def _version_tuple(version: str | None) -> tuple[int, ...] | None:
+    """Parse ``"2.2.0"`` into ``(2, 2, 0)``; ``None`` if unparseable."""
+    parts = (version or "").split(".")[:3]
+    if len(parts) < 2 or not all(p.isdigit() for p in parts):
+        return None
+    return tuple(int(p) for p in parts)
+
+
+def _installed_kernel_version(module: Any) -> str | None:
+    """Return the installed wheel version, or ``None`` when it is unknown."""
+    try:
+        return importlib.metadata.version("upstream-physics")
+    except importlib.metadata.PackageNotFoundError:
+        return getattr(module, "__version__", None)
+
+
+def _kernel_is_current(installed: str | None) -> bool:
+    """True when ``installed`` is at least ``MIN_KERNEL_VERSION``."""
+    have = _version_tuple(installed)
+    need = _version_tuple(MIN_KERNEL_VERSION)
+    return have is not None and need is not None and have >= need
+
+
 _RUST_AVAILABLE = False
 
 try:
     import upstream_physics as _rust  # type: ignore[import-untyped]
 
-    _RUST_AVAILABLE = True
-    logger.info("upstream_physics Rust kernel loaded successfully")
+    _installed = _installed_kernel_version(_rust)
+    if _kernel_is_current(_installed):
+        _RUST_AVAILABLE = True
+        logger.info("upstream_physics Rust kernel loaded successfully")
+    else:
+        logger.warning(
+            "upstream_physics %s is older than the required %s (it lacks "
+            "recent physics such as spin-dependent drag) - using the "
+            "pure-Python fallback. Rebuild with: %s",
+            _installed or "of unknown version",
+            MIN_KERNEL_VERSION,
+            _REBUILD_HINT,
+        )
+        _rust = None  # type: ignore[assignment]
 except ImportError:
     _rust = None  # type: ignore[assignment]
     logger.warning(
@@ -48,7 +96,11 @@ except ImportError:
 
 
 def is_rust_available() -> bool:
-    """Return True if the Rust physics kernel is available."""
+    """Return True if a current Rust physics kernel is available.
+
+    Postcondition: never raises.  False when the wheel is missing or older
+    than ``MIN_KERNEL_VERSION``; callers then use the Python fallback.
+    """
     return _RUST_AVAILABLE
 
 
