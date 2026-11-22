@@ -3,12 +3,17 @@
   "impact_window_seconds": 0.4,
   "default_output_subfolder": "clips",
   "dialog_width": 560,
-  "dialog_height": 520,
-  "sources": "Export Clips dialog (#15150 G11). The dialog polls the export job queue once a second: often enough to show a queued, running or finished job promptly, rare enough that the poll is negligible next to a render that takes minutes. The impact clip window is 0.4 swing seconds centred on impact, which brackets the downswing release through early follow-through at the exporter's 0.1x impact speed. Clips go in a subfolder of the request schema's output root so a remote and a desktop export never mix files. The default size fits the engine, speed and path rows without scrolling. Unit labels (#15443) name the exporter's own distance and speed units, which come from display_units.py; the combo defaults are the display_units_settings.json units, so the dialog never repeats them.",
+  "dialog_height": 780,
+  "result_height": 90,
+  "sources": "Export Clips dialog (#15150 G11). The dialog polls the export job queue once a second: often enough to show a queued, running or finished job promptly, rare enough that the poll is negligible next to a render that takes minutes. The impact clip window is 0.4 swing seconds centred on impact, which brackets the downswing release through early follow-through at the exporter's 0.1x impact speed. Clips go in a subfolder of the request schema's output root so a remote and a desktop export never mix files. The default size fits the engine, speed and path rows without scrolling. Unit labels (#15443) name the exporter's own distance and speed units, which come from display_units.py; the combo defaults are the display_units_settings.json units, so the dialog never repeats them. The request schema carries no numeric bounds, so the generated spin boxes (#15150 G6) share one wide range; the exporter's own parser remains the validator. The minimum doubles as the 'unset' value shown as the default label, so an untouched option is never sent.",
   "unit_labels": {
     "yd": "Yards (yd)",
     "m": "Metres (m)",
     "mph": "Miles per hour (mph)",
     "m/s": "Metres per second (m/s)"
-  }
+  },
+  "spin_minimum": -1000000.0,
+  "spin_maximum": 1000000.0,
+  "spin_decimals": 4,
+  "default_label": "(default)"
 }
