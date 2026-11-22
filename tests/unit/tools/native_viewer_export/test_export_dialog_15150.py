@@ -9,6 +9,11 @@ from typing import Any
 import pytest
 
 from src.tools.native_viewer_export import dialog_core as dc
+from src.tools.native_viewer_export.display_units import (
+    DISTANCE_UNITS,
+    SPEED_UNITS,
+    load_display_units,
+)
 from src.tools.native_viewer_export.core import DEFAULT_SPEEDS, ENGINES
 
 pytestmark = pytest.mark.unit
@@ -69,6 +74,38 @@ def test_invalid_choices_raise_value_error(roots: Path, changes: dict) -> None:
         dc.validate_choices(_choices(roots, **changes))
 
 
+def test_unit_options_reuse_the_exporter_units_and_labels() -> None:
+    distance, speed = dc.distance_unit_options(), dc.speed_unit_options()
+    assert tuple(v for v, _ in distance) == DISTANCE_UNITS
+    assert tuple(v for v, _ in speed) == SPEED_UNITS
+    assert all(label for _, label in distance + speed)
+
+
+def test_unit_defaults_follow_the_display_units_settings(roots: Path) -> None:
+    units = load_display_units()
+    choices = dc.default_choices()
+    assert (choices.distance_unit, choices.speed_unit) == (
+        units.distance_unit,
+        units.speed_unit,
+    )
+    assert (units.distance_unit, units.speed_unit) == ("yd", "mph")
+
+
+def test_units_reach_the_exporter_flags(roots: Path) -> None:
+    checked = dc.validate_choices(_choices(roots, distance_unit="m", speed_unit="m/s"))
+    argv = checked["argv"]
+    assert argv[argv.index("--distance-unit") + 1] == "m"
+    assert argv[argv.index("--speed-unit") + 1] == "m/s"
+
+
+@pytest.mark.parametrize(
+    "changes", [{"distance_unit": "ft"}, {"speed_unit": "kph"}, {"speed_unit": ""}]
+)
+def test_unknown_unit_raises_value_error(roots: Path, changes: dict) -> None:
+    with pytest.raises(ValueError, match="unit"):
+        dc.validate_choices(_choices(roots, **changes))
+
+
 def test_manifest_lines_list_clips_and_skips() -> None:
     manifest = {
         "engines": [
@@ -125,6 +162,19 @@ def test_dialog_submits_polls_and_lists_clips(roots: Path) -> None:
     assert dialog.state_label.text().endswith("succeeded")
     assert "mujoco 2x2: /o/a.mp4" in dialog.result_view.toPlainText()
     assert dialog.export_button.isEnabled() and not dialog.timer.isActive()
+
+
+def test_dialog_unit_combos_default_and_submit(roots: Path) -> None:
+    _, module = _qt()
+    queue = FakeQueue()
+    dialog = module.ExportClipsDialog(queue=queue)
+    assert dialog.distance_combo.currentData() == "yd"
+    assert dialog.speed_combo.currentData() == "mph"
+    dialog.set_choices(_choices(roots, distance_unit="m", speed_unit="m/s"))
+    assert dialog.choices().distance_unit == "m"
+    dialog.start_export()
+    argv = queue.submitted[0][0]
+    assert argv[argv.index("--speed-unit") + 1] == "m/s"
 
 
 def test_dialog_reports_invalid_choice_without_submitting(roots: Path) -> None:
