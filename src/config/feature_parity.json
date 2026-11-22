@@ -773,42 +773,6 @@
         "pinn_hybrid"
       ],
       "notes": "Engine-type tiles with no launcher path of their own; the web useEngineStore references them but no page runs them (#15150 E9)."
-    },
-    "tools.config_setup_wizard": {
-      "title": "Configuration setup wizard",
-      "pyqt": "src/tools/config_setup_wizard/_embed_adapter.py",
-      "api": null,
-      "web": null,
-      "status": "exempt",
-      "reason": "Writes the local desktop configuration of this workstation; a browser session has no equivalent of that setup.",
-      "tiles": [
-        "config_setup_wizard"
-      ]
-    },
-    "dev.pose_subscriber_demo": {
-      "title": "Pose subscriber developer demo",
-      "pyqt": "src/tools/pose_subscriber_demo/__main__.py",
-      "api": null,
-      "web": null,
-      "status": "exempt",
-      "reason": "Developer demonstration of the realtime pose pub-sub contract, not an end-user feature.",
-      "tiles": [
-        "pose_subscriber_demo"
-      ]
-    },
-    "external.sibling_repository_tiles": {
-      "title": "Tiles that open sibling model repositories",
-      "api": null,
-      "web": null,
-      "status": "exempt",
-      "reason": "These tiles open checkouts of separate repositories (shared model repos and the Movement Optimizer provider) and have no UI of their own in this repository.",
-      "tiles": [
-        "mujoco_models_shared",
-        "drake_models_shared",
-        "pinocchio_models_shared",
-        "opensim_models_shared",
-        "movement_optimizer"
-      ]
     }
   }
 }

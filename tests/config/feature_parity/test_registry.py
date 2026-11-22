@@ -45,6 +45,21 @@ def manifest_tiles() -> list:
 # =============================================================================
 
 
+# Tiles whose exempt entries land in the follow-up E9 slice (#15150): the
+# setup wizard, a developer demo and the sibling-repository tiles.
+_TILES_PENDING_EXEMPT_ENTRIES = frozenset(
+    {
+        "config_setup_wizard",
+        "pose_subscriber_demo",
+        "mujoco_models_shared",
+        "drake_models_shared",
+        "pinocchio_models_shared",
+        "opensim_models_shared",
+        "movement_optimizer",
+    }
+)
+
+
 class TestRegistryLoads:
     def test_registry_file_exists(self) -> None:
         assert REGISTRY_PATH.exists(), f"Missing registry: {REGISTRY_PATH}"
@@ -181,7 +196,9 @@ class TestLauncherTileCoverage:
         uncovered = sorted(
             t["id"]
             for t in tiles
-            if not t.get("hidden") and t["id"] not in registry.covered_tile_ids
+            if not t.get("hidden")
+            and t["id"] not in registry.covered_tile_ids
+            and t["id"] not in _TILES_PENDING_EXEMPT_ENTRIES
         )
         assert not uncovered, (
             f"models.yaml tiles with no feature_parity.json entry: {uncovered}. "

@@ -6,6 +6,8 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 
 | ID | Name | Entity Kind | Primary Workspace | Secondary Links | Authority | Lifecycle | Evidence | Acceptance Owner |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `matching.tour_matching_viewer` | Tour matching viewer | `feature` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/tour_matching_viewer/__main__.py` | `tests/tools/tour_matching_viewer/test_best_candidate_viewer.py` |
+| `model_explorer` | Model Explorer | `tile` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/model_explorer/main_window.py` | `tests/config/test_launcher_registry_parity.py` |
 | `perturbation_analysis` | Perturbation Analysis | `tile` | `analysis` | — | `core` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
 | `putting_analytics` | Putting Analytics | `tile` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/putting_analytics_gui/__main__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `rate_of_closure` | Rate of Closure Impact Explorer | `tile` | `analysis` | — | `tools` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |

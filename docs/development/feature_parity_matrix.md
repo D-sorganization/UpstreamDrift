@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 51 parity · 12 gap · 19 exempt (12 pending decision in #7460).
+**Summary:** 51 parity · 12 gap · 16 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -24,7 +24,6 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `canonical_core.workspaces`<br>Canonical-core estimation/comparison workspaces | ✅ parity | `src/tools/canonical_core/estimation.py` | — | `ui/src/pages/CanonicalCoreShell.tsx` | — |
 | `chat.live_context`<br>Live app/engine context in chat | ✅ parity | `src/launchers/launcher_sidekick_sidebar.py` | `src/api/services/chat_app_context.py` | `ui/src/components/ui/ChatContextChip.tsx` | — |
 | `chat.transport`<br>AI chat transport (message send/stream) | ✅ parity | `src/launchers/launcher_sidekick_sidebar.py` | `src/api/routes/chat_ws.py` | `ui/src/pages/Chat.tsx` | — |
-| `dev.pose_subscriber_demo`<br>Pose subscriber developer demo | ⚪ exempt | `src/tools/pose_subscriber_demo/__main__.py` | — | — | Developer demonstration of the realtime pose pub-sub contract, not an end-user feature. |
 | `diagnostics.integrations_health`<br>Diagnostics + integrations-health panel | ✅ parity | `src/launchers/integrations_health_panel.py` | `src/api/routes/diagnostics.py` | `ui/src/components/ui/DiagnosticsPanel.tsx` | — |
 | `docs.document_library`<br>Document library / project map viewer | ⚪ exempt | `src/launchers/library_widget.py` | — | — | Desktop documentation browser; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `drake.gui_force_overlay`<br>Drake GUI force/torque arrows and live tension/compression shading | ✅ parity | `src/engines/physics_engines/drake/python/src/drake_force_overlay.py` | `src/api/routes/force_overlays.py` | `ui/src/components/visualization/ForceOverlay.tsx` | — |
@@ -32,7 +31,6 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `engines.load_and_simulate`<br>Engine load/probe + basic simulation loop | ✅ parity | `src/launchers/launcher_simulation.py` | `src/api/routes/engines.py` | `ui/src/pages/Simulation.tsx` | — |
 | `export.recordings_downloads`<br>Export/recording parity (HDF5/MAT/C3D/CSV/video, persisted recordings) | ✅ parity | `src/shared/python/data_io/export.py` | `src/api/routes/recordings.py` | `ui/src/components/simulation/RecordingsPanel.tsx` | — |
 | `export.video_speed_variants`<br>Time-based native video export with full-, half- and quarter-speed clips and an impact slow-motion clip | ⚪ exempt | `src/tools/native_viewer_export/cli.py` | — | — | Headless CLI batch export of mp4 clips (60 fps, 1x, 0.5x and 0.25x, optional 0.1x impact window; the motion-matching video export writes the same three variants through export_video_variants) through each engine's desktop viewer; no web route renders or serves these clips, so there is no browser equivalent until one is added (GCV-14, #11720, epic #11706). |
-| `external.sibling_repository_tiles`<br>Tiles that open sibling model repositories | ⚪ exempt | — | — | — | These tiles open checkouts of separate repositories (shared model repos and the Movement Optimizer provider) and have no UI of their own in this repository. |
 | `launcher.docker_management`<br>Docker engine management dialog | ⚪ exempt | `src/launchers/docker_manager.py` | — | — | Manages the local Docker daemon from the desktop; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `launcher.embedded_tabs_docks`<br>Embedded tool host (tabs + docks) | ⚪ exempt | `src/launchers/embedded_host.py` | — | — | Desktop windowing composition is explicitly desktop-only per ADR-0028 (React shell uses routes, not embedded Qt docks). |
 | `launcher.mcp_config`<br>MCP server configuration writer/preferences | ⚪ exempt | `src/launchers/mcp_config_writer.py` | — | — | Writes local MCP configuration files for desktop AI integrations; desktop-only candidate pending #7460. — **pending decision (#7460)** |
@@ -67,7 +65,6 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.capture_rig`<br>Capture Rig camera controller with the live view as the central pane and every control in a movable dock (step rail with the next action, settings tabs, action grid, log drawer) with saved layouts, themed header with status strip and workflow-grouped actions that reflow to fit a narrow pane, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export; non-destructive swing trim/crop and separate video export, visible capture library with durable swing notes, import/open/edit, archive/restore and storage management; saved coaching lines/arrows/circles/ellipses/rectangles with selection, resize, undo/redo, frame visibility and annotated still/video exports; reference comparison and overlay player force/torque vector arrow layers (FTO-25, #11310) | ⚪ exempt | `src/tools/capture_rig/__main__.py` | — | — | Drives local USB cameras through ffmpeg/DirectShow and reads multi-gigabyte recordings from disk (#9619); variants, overlays, provenance and annotation (#9790, #9791) and the multiview layout model/presets/editor and the layout-composited live preview and playback (#9810, #9811, #9812, #9813, #9814) run on the same local session trees; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `tools.character_builder`<br>Character Builder (spec-native character, presets, engine export) | ✅ parity | `src/tools/character_builder/gui.py` | `src/api/routes/character_builder.py` | `ui/src/pages/CharacterBuilder.tsx` | — |
 | `tools.character_builder_grip`<br>Grip presets and sliders (weak, neutral, strong, Palmer overlap, Woods interlock, ten-finger; rotation, palm diagonal, spacing, style) | ✅ parity | `src/tools/character_builder/gui.py` | `src/api/routes/character_appearance.py` | `ui/src/components/character/GripControls.tsx` | — |
-| `tools.config_setup_wizard`<br>Configuration setup wizard | ⚪ exempt | `src/tools/config_setup_wizard/_embed_adapter.py` | — | — | Writes the local desktop configuration of this workstation; a browser session has no equivalent of that setup. |
 | `tools.data_explorer`<br>Data Explorer (import/filter/visualize datasets) | ✅ parity | — | `src/api/routes/data_explorer.py` | `ui/src/pages/DataExplorer.tsx` | — |
 | `tools.dataset_generator`<br>Swing dataset generation and import | ✅ parity | — | `src/api/routes/dataset.py` | `ui/src/pages/DatasetGenerator.tsx` | — |
 | `tools.golf_environment`<br>Golf Environment (driving range and hole scene, shots on a hole with hole presets) | 🔴 gap | `src/tools/golf_environment/gui.py` | — | — | #15150 |
@@ -115,14 +112,12 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `capture_rig` | `tools.capture_rig` |
 | `character_builder` | `tools.character_builder` |
 | `chat_assistant` | `chat.transport` |
-| `config_setup_wizard` | `tools.config_setup_wizard` |
 | `cross_engine_dashboard` | `analysis.cross_engine_robustness` |
 | `data_explorer` | `tools.data_explorer` |
 | `data_processor` | `launcher.tile_web_reachability` |
 | `dataset_generator` | `tools.dataset_generator` |
 | `drake_dashboard` | `engines.dashboards` |
 | `drake_golf` | `engines.load_and_simulate` |
-| `drake_models_shared` | `external.sibling_repository_tiles` |
 | `force_overlays` | `simulation.controls_wiring` |
 | `golf_environment` | `tools.golf_environment` |
 | `golf_simulation_suite` | `simulation.golf_suite_batch` |
@@ -142,15 +137,12 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `motion_matching` | `tools.motion_matching` |
 | `motion_pipeline` | `mocap.breadth` |
 | `motion_target_preview` | `mocap.breadth` |
-| `movement_optimizer` | `external.sibling_repository_tiles` |
 | `mujoco_dashboard` | `engines.dashboards` |
-| `mujoco_models_shared` | `external.sibling_repository_tiles` |
 | `mujoco_unified` | `engines.load_and_simulate` |
 | `myosim_suite` | `engines.load_and_simulate` |
 | `necromatcher` | `tools.necromatcher` |
 | `openpose_analysis` | `mocap.breadth` |
 | `opensim_golf` | `engines.load_and_simulate` |
-| `opensim_models_shared` | `external.sibling_repository_tiles` |
 | `pendulum_simulator` | `engines.load_and_simulate` |
 | `perturbation_analysis` | `analysis.cross_engine_robustness` |
 | `pid_generator` | `launcher.tile_web_reachability` |
@@ -158,9 +150,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `pinn_pure_rigid` | `biomech.physics_informed_models` |
 | `pinocchio_dashboard` | `engines.dashboards` |
 | `pinocchio_golf` | `engines.load_and_simulate` |
-| `pinocchio_models_shared` | `external.sibling_repository_tiles` |
 | `pose_studio` | `tools.pose_editing` |
-| `pose_subscriber_demo` | `dev.pose_subscriber_demo` |
 | `project_map` | `docs.document_library` |
 | `putting_analytics` | `tools.putting_analytics` |
 | `putting_green` | `tools.putting_green` |

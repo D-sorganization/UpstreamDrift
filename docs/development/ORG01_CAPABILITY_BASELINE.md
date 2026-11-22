@@ -18,7 +18,7 @@ packages, saved layouts, and golden test fixtures.
 
 ## Baseline Metrics
 
-- **Total Cataloged Entries**: 197
+- **Total Cataloged Entries**: 203
 - **Observed Launcher Tiles / Models**: 104 (61 base desktop models + 29 discovered provider models + 14 web catalog tiles)
 - **Feature Parity Contracts**: 45
 - **Excluded Tool Packages / Libraries**: 9
@@ -28,12 +28,12 @@ packages, saved layouts, and golden test fixtures.
 
 | Workspace | Primary Capability Count | Description |
 | :--- | :---: | :--- |
-| `analysis` | 47 | Telemetry extraction, metric calculation, video/data analysis, and flight comparison |
+| `analysis` | 49 | Telemetry extraction, metric calculation, video/data analysis, and flight comparison |
 | `capture` | 21 | Multi-camera mocap, pose estimation, marker tracking, and 3D reconstruction |
-| `governance` | 13 | Configuration setup, project architecture mapping, sidekick docks, and registry admin |
+| `governance` | 14 | Configuration setup, project architecture mapping, sidekick docks, and registry admin |
 | `putting` | 7 | Putting physics, green surface simulation, and ball rolling dynamics |
-| `simulation` | 91 | Physics engines, multi-body kinematics, dynamics solvers, and forward simulation |
-| `training` | 18 | Drills, objective laboratories, movement/swing optimization, and skill reinforcement |
+| `simulation` | 93 | Physics engines, multi-body kinematics, dynamics solvers, and forward simulation |
+| `training` | 19 | Drills, objective laboratories, movement/swing optimization, and skill reinforcement |
 
 ## Representative Golden Preservation Fixtures
 
@@ -68,13 +68,13 @@ The full inventory table is split into linked parts by primary workspace.
 
 | Part | Entries | First ID | Last ID |
 | :--- | :---: | :--- | :--- |
-| [Capability Baseline Inventory: Analysis (Part 1/2)](org01_capability_baseline/inventory-analysis-1.md) | 25 | `analysis.analysis_tools_api` | `model_explorer` |
-| [Capability Baseline Inventory: Analysis (Part 2/2)](org01_capability_baseline/inventory-analysis-2.md) | 22 | `perturbation_analysis` | `tools_video_analyzer` |
+| [Capability Baseline Inventory: Analysis (Part 1/2)](org01_capability_baseline/inventory-analysis-1.md) | 25 | `analysis.analysis_tools_api` | `matched_swing_browser` |
+| [Capability Baseline Inventory: Analysis (Part 2/2)](org01_capability_baseline/inventory-analysis-2.md) | 24 | `matching.tour_matching_viewer` | `tools_video_analyzer` |
 | [Capability Baseline Inventory: Capture](org01_capability_baseline/inventory-capture.md) | 21 | `c3d_viewer` | `video_processor` |
-| [Capability Baseline Inventory: Governance](org01_capability_baseline/inventory-governance.md) | 13 | `aip` | `tools.terrain_engine` |
+| [Capability Baseline Inventory: Governance](org01_capability_baseline/inventory-governance.md) | 14 | `aip` | `tools.terrain_engine` |
 | [Capability Baseline Inventory: Putting](org01_capability_baseline/inventory-putting.md) | 7 | `bunkershot3d` | `tools.rate_of_closure` |
 | [Capability Baseline Inventory: Simulation (Part 1/4)](org01_capability_baseline/inventory-simulation-1.md) | 25 | `actuator_controls` | `engines.load_and_simulate` |
 | [Capability Baseline Inventory: Simulation (Part 2/4)](org01_capability_baseline/inventory-simulation-2.md) | 25 | `export.video_speed_variants` | `mujoco_unified` |
 | [Capability Baseline Inventory: Simulation (Part 3/4)](org01_capability_baseline/inventory-simulation-3.md) | 25 | `myosim_suite` | `pinocchio_models-squat` |
-| [Capability Baseline Inventory: Simulation (Part 4/4)](org01_capability_baseline/inventory-simulation-4.md) | 16 | `pinocchio_models_shared` | `visualization.force_color_controls` |
-| [Capability Baseline Inventory: Training](org01_capability_baseline/inventory-training.md) | 18 | `character_builder` | `training_controller` |
+| [Capability Baseline Inventory: Simulation (Part 4/4)](org01_capability_baseline/inventory-simulation-4.md) | 18 | `pinocchio_models_shared` | `visualization.force_color_controls` |
+| [Capability Baseline Inventory: Training](org01_capability_baseline/inventory-training.md) | 19 | `character_builder` | `training_controller` |
