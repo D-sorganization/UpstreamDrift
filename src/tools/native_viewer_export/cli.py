@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import argparse
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import replace
 from functools import partial
 import json
@@ -48,6 +48,7 @@ from src.tools.native_viewer_export.core import (
     DEFAULT_SPEEDS,
     ELLIPSOID_KINDS,
     ENGINES,
+    ExportResult,
     ExportSettings,
     parse_ellipsoid_scale,
 )
@@ -768,7 +769,11 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
     )
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def main(
+    argv: Sequence[str] | None = None,
+    on_results: Callable[[list[ExportResult]], None] | None = None,
+) -> int:
+    """Run the exporter; ``on_results`` receives the results (#15150 G8)."""
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.shot_shape is not None and args.club_roll_in_hands != 0.0:
@@ -820,6 +825,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     except (ValueError, FileNotFoundError) as exc:
         sys.stderr.write(f"error: {exc}\n")
         return 2
+    if on_results is not None:
+        on_results(results)
     for r in results:
         if r.skipped:
             sys.stdout.write(f"{r.engine}: SKIPPED ({r.skipped_reason})\n")

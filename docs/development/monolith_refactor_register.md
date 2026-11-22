@@ -202,6 +202,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 852 | `src/engines/physics_engines/opensim/python/tour_matching/native_muscle_effort_adapter.py` |
 | 849 | `src/tools/training_controller/gui.py` |
 | 848 | `src/shared/python/motion_matching/club_only/reproduction.py` |
+| 848 | `src/tools/native_viewer_export/cli.py` |
 | 847 | `src/api/routes/bunker_workbench.py` |
 | 846 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_render.m` |
 | 846 | `src/tools/model_explorer/gui.py` |
@@ -212,7 +213,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 842 | `src/shared/python/perturbation/cross_engine_runner.py` |
 | 841 | `src/engines/physics_engines/opensim/python/tour_matching/native_constrained_muscle.py` |
 | 841 | `src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py` |
-| 841 | `src/tools/native_viewer_export/cli.py` |
 | 840 | `src/api/routes/dataset.py` |
 | 840 | `src/tools/bunker_shot_gui/sandvolume.py` |
 | 837 | `src/bunkershot3d/calibration/f1_shear_cell.py` |
