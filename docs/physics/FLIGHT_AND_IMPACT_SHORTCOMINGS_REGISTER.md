@@ -31,8 +31,16 @@ Sizes quoted from tests are the band a test asserts, not a published value.
   equipment calibration. It runs only when an impact offset is supplied.
 - **Effect:** unknown. Epic #15443 child 1 measured spin about 20 to 40 % high
   per degree of spin loft (PR #15450).
-- **Tracking:** #15443 (F2, F5). `SpringDamperImpactModel` is listed as broken
-  there (smash 0.833, zero spin); fix or removal is open.
+- **Tracking:** #15443 (F2, F5).
+- **Spring-damper model (F5, fixed):** `SpringDamperImpactModel` gave smash
+  0.82 and zero spin because its fixed damping of 1e3 N s/m was over-damped
+  (damping ratio about 2.6, COR near 0) and it applied no tangential impulse.
+  Damping is now derived from `params.cor` (`kelvin_voigt_damping_for_cor`) and
+  one capped Coulomb friction impulse is shared with the rigid-body model.
+  Driver strike: smash 1.469 against 1.464 for rigid body, identical spin. It
+  stays in the choices. Remaining limits: the tangent plane is not
+  time-resolved, stiffness 1e6 N/m is uncalibrated, and
+  `params.contact_damping` is ignored.
 
 ### Face Bulge and Roll
 
