@@ -41,6 +41,8 @@ class WorkerJob:
     shading: dict[str, Any] | None = None
     #: positions whose scene depth (metres) the worker also writes, or ``None``
     depth_positions: list[bool] | None = None
+    #: opt-in scene lighting (``LightingSettings.to_dict()``; ``None`` = studio)
+    lighting: dict[str, Any] | None = None
 
     def lookat_for(self, view: str, position: int) -> list[float]:
         """Look-at point of ``view`` at ``position`` (static ``lookat_m`` if unset)."""

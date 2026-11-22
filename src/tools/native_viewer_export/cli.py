@@ -39,6 +39,11 @@ from src.shared.python.motion_matching.execution.grip_selection import (
     overrides_from_args,
     refuse_physical_in_sidecar,
 )
+from src.tools.native_viewer_export.backends._scene_lighting import (
+    LIGHTING_CHOICES,
+    LightingSettings,
+    load_lighting,
+)
 from src.tools.native_viewer_export.core import (
     DEFAULT_SPEEDS,
     ELLIPSOID_KINDS,
@@ -281,10 +286,37 @@ def _add_ball_flight_arguments(p: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_lighting_arguments(p: argparse.ArgumentParser) -> None:
+    """Scene lighting flags of the MuJoCo export (#15150)."""
+    p.add_argument(
+        "--lighting",
+        choices=LIGHTING_CHOICES,
+        default=LIGHTING_CHOICES[0],
+        help="scene lighting of the MuJoCo export: the studio lights, or the "
+        "showpiece lights, shadow and ground tone (default: %(default)s)",
+    )
+    p.add_argument(
+        "--lighting-settings",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help="settings file of the showpiece lighting (turns it on; default "
+        "backends/showpiece_lighting_settings.json beside the tool)",
+    )
+
+
+def _lighting_for(args: argparse.Namespace) -> LightingSettings | None:
+    """The opted-in lighting settings, or ``None`` for the studio scene."""
+    if args.lighting == LIGHTING_CHOICES[0] and args.lighting_settings is None:
+        return None
+    return load_lighting(args.lighting_settings)
+
+
 def _add_clip_overlay_arguments(p: argparse.ArgumentParser) -> None:
-    """Optional clip overlay flags: impact factors panel and ball flight."""
+    """Optional clip flags: impact factors panel, ball flight and lighting."""
     _add_impact_factor_arguments(p)
     _add_ball_flight_arguments(p)
+    _add_lighting_arguments(p)
     p.add_argument(
         "--contact-hold-frames",
         type=int,
@@ -599,6 +631,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         if args.impact_factors or args.impact_factors_settings is not None
         else None,
         appearance=build_appearance(args),
+        lighting=_lighting_for(args),
         ball_flight=load_tracer_settings(args.ball_flight_settings)
         if args.ball_flight or args.ball_flight_settings is not None
         else None,

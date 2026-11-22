@@ -146,6 +146,10 @@ The OpenSim backend only ever runs under `xvfb-run` and refuses to start when
   light (direction, colour, intensity, shadow; `enabled: false` removes it) so the
   400 m ground is lit to the horizon. Default look change: the near turf is
   brighter (about 1.9x mean level) and the golfer's shadow fainter.
+- **Showpiece lighting (MuJoCo, opt-in).** `--lighting showpiece` (or
+  `--lighting-settings PATH`) replaces the scene lights and the sun with the
+  directional lights, headlight, shadow map and ground tone of
+  `backends/showpiece_lighting_settings.json`. Display only; default `studio`.
 
 ## Appearance Flags
 
