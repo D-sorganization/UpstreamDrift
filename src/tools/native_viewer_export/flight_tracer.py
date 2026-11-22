@@ -37,6 +37,7 @@ from src.shared.python.impact_parameters.flight_report import (
 )
 from src.tools.native_viewer_export import (
     aim_line,
+    contact_verdict,
     flight_depth,
     impact_card,
     landing_marker,
@@ -75,6 +76,8 @@ logger = logging.getLogger(__name__)
 SETTINGS_PATH = Path(__file__).with_name("flight_tracer_settings.json")
 ON_TEE, IN_FLIGHT, LANDED = "on tee", "in flight", "landed"
 NO_IMPACT, MODEL = "no impact detected", "model prediction"
+#: status (HUD line and manifest) of a face that missed the ball
+NO_CONTACT_STATUS = "no contact: no flight"
 OUTSIDE = "outside the model validity envelope"
 club_series = impact_card._club_series
 
@@ -632,7 +635,9 @@ def attach_flight(overlays: Any, swing: Any, settings: Any) -> Any:
         return overlays
     from src.tools.native_viewer_export.core import ClipOverlays
 
-    flight = flight_for_export(swing, settings)
+    panel = None if overlays is None else overlays.factors
+    verdict = None if panel is None else panel.verdict
+    flight = flight_for_export(swing, settings, verdict)
     overlays = replace(overlays or ClipOverlays(), flight=flight)
     return with_model_smash(overlays)
 
@@ -668,8 +673,13 @@ def playback_from_series(
     settings: TracerSettings,
     club: str | None = None,
     club_impact: ClubImpact | None = None,
+    verdict: contact_verdict.ContactVerdict | None = None,
 ) -> FlightPlayback:
     """Flight launched from the clubhead state the impact card reads.
+
+    A ``verdict`` of no contact (given, e.g. the factors panel's, else decided
+    here by the same rule) gives a playback without a path whose status is
+    :data:`NO_CONTACT_STATUS`: a face that missed the ball launches nothing.
 
     That is the state where the face reaches the ball
     (:func:`impact_state.series_at_contact`) and the flight starts at that
@@ -680,6 +690,10 @@ def playback_from_series(
     defaults) and the strike offset on the face goes to the impact model. Raises what the
     impact and flight models raise for a series they cannot use.
     """
+    if verdict is None:
+        verdict = contact_verdict.verdict_for(series, impact_time_s, ball)
+    if not verdict.contact:
+        return FlightPlayback(settings, NO_CONTACT_STATUS)
     frame = impact_card.address_target_frame(series)
     contact = series_at_contact(series, ball.position_m, ball.radius_m, impact_time_s)
     if contact is None:
@@ -705,9 +719,14 @@ def _spec_club(swing: SwingInput) -> Mapping[str, Any] | None:
 
 
 def flight_for_export(
-    swing: SwingInput, settings: ExportSettings
+    swing: SwingInput,
+    settings: ExportSettings,
+    verdict: contact_verdict.ContactVerdict | None = None,
 ) -> FlightPlayback | None:
     """The export's ball flight, or ``None`` when the option is off.
+
+    ``verdict`` is the contact decision already made (the factors panel's);
+    without it the decision is made here by the same rule.
 
     Without a known impact time or a placed ball, or when the models fail, the
     playback has no path and its status states the reason.
@@ -722,10 +741,18 @@ def flight_for_export(
         impact = swing.impact_time_s
     if swing.ball is None:
         return FlightPlayback(config, "no ball placed")
+    if verdict is not None and not verdict.contact:
+        return FlightPlayback(config, NO_CONTACT_STATUS)
     try:
         club_impact = club_impact_from_spec(_spec_club(swing))
         return playback_from_series(
-            club_series(swing), impact, swing.ball, config, swing.club, club_impact
+            club_series(swing),
+            impact,
+            swing.ball,
+            config,
+            swing.club,
+            club_impact,
+            verdict,
         )
     except impact_card._EXPECTED_ERRORS as exc:
         return FlightPlayback(config, f"unavailable: {exc}")
