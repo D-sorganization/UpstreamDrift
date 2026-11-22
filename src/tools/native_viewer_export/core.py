@@ -51,7 +51,7 @@ from src.tools.native_viewer_export.compositor import (
 )
 from src.tools.native_viewer_export import contact_frame, flight_tracer, shot_setup
 from src.tools.native_viewer_export import ellipsoid_panel as ellipsoid_hud
-from src.tools.native_viewer_export import flight_inset
+from src.tools.native_viewer_export import flight_inset, hole_view
 from src.tools.native_viewer_export import impact_factors as factors_panel
 from src.tools.native_viewer_export.impact_card import impact_card_for
 from src.tools.native_viewer_export.shading import shading_legend
@@ -1176,6 +1176,7 @@ def export_swing(
         paths.update(clip_paths)
         counts[plan.suffix] = frames
         glyph_counts.extend(glyphs)
+    paths.update(hole_view.write_still(overlays, out_dir, swing.swing, engine))
     return ExportResult(
         engine,
         paths,
