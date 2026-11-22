@@ -72,6 +72,109 @@ valid markers, 3.69 mm closure translation, and foot-sphere heights from
 were assumptions, and the finite sweep does not prove infeasibility. The LM
 path clips trial states to named bounds, which is not a constrained-optimality
 certificate; shoulder Euler anatomy remains unassessed.
+In a separate first-frame control using the same 33-marker observation map,
+common named bounds and solver settings, the source v1 model gave 3.11 mm RMS
+and the committed v2 model 60.24 mm RMS without foot anchors. With the same
+assumed source-pose anchors, the figures were 3.42 and 67.56 mm respectively;
+the source solve converged and the v2 solve was classified at bounds. This
+supports a model/seed-geometry mismatch under these assumptions, not a unique
+cause or proof that a valid v2 fit cannot exist. The source model was calibrated
+to these observations, while transferring its offsets to v2 is provisional.
+In the unanchored v2 control, residual RMS was largest for the trail arm
+(117.5 mm) and club (76.1 mm), with pelvis and trunk at 43.0 and 24.7 mm.
+Five v2 coordinates were at bounds; closure translation was 2.85 mm versus
+0.047 mm for the source control. Grip, wrist and shoulder geometry and the
+initial pose differ, so the group errors do not identify a single cause.
+In a six-state FK diagnostic, corresponding local closure-site transforms
+matched, while some upper-body joint-frame orientations differed. At the
+initial migrated pose, wrist-associated body positions differed by roughly
+295--582 mm. Those comparisons combine frame convention, trunk geometry and
+closure mismatch; they are not anatomical-angle errors or a unique diagnosis.
+Local FK probes found that five right-side scapula, shoulder and wrist
+coordinates need a sign reversal to match source-model motion increments in
+the tested joint contexts; a separate FK check on the same model pair agreed
+on the isolated and combined-angle probes. Applying that provisional map at eight saved
+source-rollout states reduced the worst sampled closure translation from
+1,029 mm to 39.6 mm, but rotational closure still reached 179.9 degrees and
+marker discrepancies remained large. The map has not been validated as a
+full-swing anatomical mapping, and wrist neutral frames remain different.
+A first-frame fixed-prior fit using the map as an initialization found a lower
+basin: 30.35 mm marker RMS and 0.818 mm closure translation, versus 60.24 mm
+and 2.853 mm from the original initialization, on the same 33 valid markers
+and with the same unanchored objective. Both were classified at bounds; this
+does not isolate the effect of individual sign changes or establish an
+accepted trajectory. The transferred marker map remains provisional.
+Over the first 25 ms, a fixed-prior continuation from that candidate produced
+28.69--28.72 mm marker RMS and a 0.096 rad/s peak finite-difference coordinate
+speed in the sampled frames; a changing-prior variant produced a 34.08 rad/s
+peak. Both used assumed anchors, were classified at bounds, and cover only the
+named ROM ranges. These kinematic diagnostics are not a dynamic rollout or an
+anatomical-speed assessment.
+An exploratory 200 ms continuation compared the fixed prior with a
+time-aligned, sign-mapped source-rollout prior. Marker RMS ranged from 27.8 to
+30.3 mm and peak finite-difference coordinate speed was 0.58 and 1.82 rad/s,
+respectively. All 146 fitted frames were classified at bounds. Both runs used
+assumed fixed foot anchors and the provisional observation map; they do not
+establish full-swing tracking or direct anatomical rates.
+Two exploratory continuations then reached the sample immediately before the
+recorded impact split using either the original tracking prior or saved-rollout
+prior. Marker RMS ranged 25.4--38.0 mm and closure translation stayed below
+1.3 mm, but every frame was classified at bounds. Both showed an 84.5--84.7
+rad/s finite-difference forearm-coordinate spike near impact while the source
+prior remained smooth and the valid marker count briefly fell. Dropout is a
+plausible contributor, not an established cause. These remain kinematic fits
+with provisional offsets and assumed anchors, not physical acceptance.
+A local three-frame check using only the observed markers reduced the largest
+finite-difference coordinate jump from 84.67 to 8.22 rad/s with a stronger
+previous-fit continuity prior; the dropout-frame marker RMS rose from 25.58 to
+33.85 mm. All solutions were classified at bounds, and the changed prior is a
+different objective, not an anatomical-speed guarantee. Raising a source
+prior instead worsened fit and closure in the tested cases. This supports
+investigating underdetermination, without establishing dropout as its cause.
+Across all 477 pre-impact frames, previous-fit continuity weights 0.1 and 1.0
+reduced the maximum sampled coordinate rate from 84.67 to 43.88 and
+25.00 rad/s respectively. Maximum marker RMS was 38.00, 36.49 and 66.44 mm;
+maximum closure translation was 1.281, 1.093 and 4.790 mm. All frames were
+classified at bounds. The stronger prior substantially trades fit for
+smoothness; neither rate is an anatomical or physical acceptance result.
+Intermediate weights 0.2, 0.35, 0.5 and 0.75 also reached the pre-impact
+window. Their peak coordinate rates were 32.21, 29.49, 28.02 and 26.38 rad/s;
+maximum marker RMS was 37.07, 42.78, 49.26 and 58.59 mm, respectively. Every
+frame was still classified at bounds. These runs use the same provisional
+observation map, named bounds, assumed foot anchors and unfilled marker masks;
+they characterize a fitting tradeoff, not an optimized or feasible shot.
+The rate calculation excludes all six root coordinates; the remaining
+compiled coordinates are hinges. The largest rate at weights 0.2--1.0 moved
+to a wrist coordinate near impact, where all 33 markers were available, rather
+than the dropout frame. At weight 0.2, impact-window marker RMS had median
+31.50 mm and maximum 35.80 mm, compared with 29.61 and 30.72 mm for the
+source-prior baseline. These windows were examined in the same data used for
+the sweep, not held-out validation.
+At one common pre-impact sample, v2 FK face-centre speed was 50.68 m/s for
+the source-prior fit and 49.39 m/s at continuity weight 0.2; the unsigned
+horizontal angle between face normal and velocity was 1.3 and 11.6 degrees.
+These are time- and frame-sensitive kinematic proxies, not target-relative
+face-to-path measurements or evidence of contact, ballflight, or carry. A
+different finite-difference stencil changed velocity by 0.31--0.74 m/s.
+A soft face-axis target inferred from observed head-marker orientation was
+available in 476 of 477 pre-impact frames, but not at the dropout frame; no
+target was imputed there. At continuity weight 0.1, adding face weight 3.0
+reduced the target's median angular residual from 8.30 to 0.80 degrees, while
+maximum marker RMS rose from 36.49 to 55.14 mm and maximum closure translation
+from 1.09 to 7.48 mm. The target depends on calibrated offsets and assumed
+club roll; fitting it is not independent face or contact validation.
+An intermediate face-weight sweep found no unqualified optimum. At continuity
+weight 0.1, face weight 0.1 gave 19.20 degrees face-residual p95, 36.67 mm
+maximum marker RMS and 2.27 mm maximum closure translation; face weight 1.0
+gave 3.12 degrees, 49.07 mm and 5.59 mm, respectively. All frames were
+classified at bounds. These are fitted-data sensitivity results, not physical
+acceptance or ballflight predictions.
+A bounded, wrist-coordinate-only diagnostic on six saved poses did not match
+both parent-relative translation and rotation in all cases; several solutions
+hit a wrist bound. Translation and rotation were combined with arbitrary
+numerical weights, each pose was solved independently, and the compared body
+origins include a remote club origin. This neither establishes hand-surface
+separation nor proves that a valid full-model fit is impossible.
 An exploratory calibrated v2 derivative can be built using the source
 receipt's hip-center landmarks and the existing pelvis relocation. Its
 migrated initial state closes to numerical precision, with 5.44 mm RMS
