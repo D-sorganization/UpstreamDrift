@@ -57,6 +57,7 @@ from src.tools.native_viewer_export.flight_inset import (
 )
 from src.tools.native_viewer_export.landing_marker import LandingMarkerSettings
 from src.tools.native_viewer_export.impact_state import series_at_contact
+from src.tools.native_viewer_export.behind_camera import look_map, lookat_of
 from src.tools.native_viewer_export.overlay2d import pinhole_for_view
 from src.tools.native_viewer_export.rollout import (
     Rollout,
@@ -364,7 +365,7 @@ class FlightPlayback:
         self,
         tiles: Mapping[str, Image8],
         time_s: float,
-        lookat_m: Sequence[float],
+        lookat_m: Sequence[float] | Mapping[str, Sequence[float]],
         distance_m: float | None,
         depth_m: Mapping[str, Array] | None = None,
     ) -> dict[str, Image8]:
@@ -384,7 +385,8 @@ class FlightPlayback:
             if preset.tracks is not None:
                 continue
             size = (int(tile.shape[1]), int(tile.shape[0]))
-            camera = pinhole_for_view(preset, lookat_m, distance_m, fov, size)
+            look = lookat_of(lookat_m, view)
+            camera = pinhole_for_view(preset, look, distance_m, fov, size)
             depth = (depth_m or {}).get(view)
             if depth is None and self.settings.occlude_by_scene:
                 self._warn_once(view)
@@ -396,7 +398,7 @@ class FlightPlayback:
         self,
         tiles: Mapping[str, Image8],
         time_s: float,
-        lookat_m: Sequence[float],
+        lookat_m: Sequence[float] | Mapping[str, Sequence[float]],
         distance_m: float | None,
     ) -> dict[str, Image8]:
         """``tiles`` for the composed grid: the carry label an inset replaces.
@@ -414,7 +416,7 @@ class FlightPlayback:
                 continue
             size = (int(tile.shape[1]), int(tile.shape[0]))
             camera = pinhole_for_view(
-                get_view_preset(view), lookat_m, distance_m, fov, size
+                get_view_preset(view), lookat_of(lookat_m, view), distance_m, fov, size
             )
             out[view] = self._label(tile, camera, grid=True)
         return out
@@ -770,4 +772,5 @@ def grid_cells(
     """
     if flight is None:
         return tiles
-    return flight.grid_tiles(tiles, time_s, settings.lookat_m, settings.distance_m)
+    looks = look_map(settings)
+    return flight.grid_tiles(tiles, time_s, looks, settings.distance_m)

@@ -102,6 +102,8 @@ class SampleOutcome:
     notes: Mapping[str, str] = field(default_factory=dict)
     path_m: np.ndarray | None = None
     times_s: np.ndarray | None = None
+    roll_m: float | None = None  # model roll after the carry, with its offset
+    roll_offset_m: tuple[float, float] | None = None  # (down-range, left) [m]
 
     @property
     def available(self) -> bool:
@@ -173,8 +175,19 @@ def _outcome(setup: ShotSetup, flight: Any, card: Any) -> SampleOutcome:
     if not values:
         notes["impact_card"] = card if isinstance(card, str) else "unavailable"
     trace = _target_trace(flight)
+    roll = getattr(flight, "rollout", None)
     return SampleOutcome(
-        setup, None, metrics, trace, notes, flight.path_m, flight.times_s
+        setup,
+        None,
+        metrics,
+        trace,
+        notes,
+        flight.path_m,
+        flight.times_s,
+        None if roll is None else float(roll.roll_m),
+        None
+        if roll is None
+        else (float(roll.end_offset_m[0]), float(roll.end_offset_m[1])),
     )
 
 

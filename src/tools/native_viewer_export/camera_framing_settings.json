@@ -1,6 +1,20 @@
 {
   "default_lookat_height_m": 0.9,
+  "behind_views": [
+    "down_the_line",
+    "down_the_line_flight"
+  ],
+  "behind_fraction": 0.5,
+  "foot_bodies": [
+    "calcn_l",
+    "calcn_r",
+    "toes_l",
+    "toes_r"
+  ],
   "sources": {
-    "default_lookat_height_m": "Height of the automatic look-at point above the turf when overlays are on (the x and y come from the golfer's centre of mass at address). 0.9 m is roughly the standing hip-to-belt height and frames a teed driver. A shorter club with the ball on the turf sits lower in the frame, so pass --camera-height (or --camera-lookat) to lower it; the default is kept so existing exports render unchanged."
+    "default_lookat_height_m": "Height of the automatic look-at point above the turf when overlays are on (the x and y come from the golfer's centre of mass at address). 0.9 m is roughly the standing hip-to-belt height and frames a teed driver. A shorter club with the ball on the turf sits lower in the frame, so pass --camera-height (or --camera-lookat) to lower it; the default is kept so existing exports render unchanged.",
+    "behind_views": "Views that look down the target line from behind the golfer; their camera is moved sideways onto the line between the ball and the feet. face_on, overhead, oblique and hands_closeup keep the look-at.",
+    "behind_fraction": "How far from the address ball (0) to the midpoint of the feet (1) the camera line runs. 0.5 is midway, as the owner asked (2026-11-22): the ball then sits left of the picture centre and the feet right of it for a right-handed golfer.",
+    "foot_bodies": "Model bodies whose mean world position at address is the feet midpoint: both heel (calcn) and toe (toes) body origins of the replayed model, so the stance centre does not depend on one foot."
   }
 }

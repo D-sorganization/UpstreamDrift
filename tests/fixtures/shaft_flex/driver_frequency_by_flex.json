@@ -1,0 +1,28 @@
+{
+  "citation": "Hireko Golf, The Hireko Golf Dynamic Shaft Fitting Index (webinar slide deck, presented 2009-05-01), slides 6 and 7, hosted on SlideShare.",
+  "url": "https://www.slideshare.net/raltomonte/the-hireko-golf-dynamic-shaft-fitting-index",
+  "accessed": "2026-11-22",
+  "convention": {
+    "quantity": "assembled-club frequency, cycles per minute",
+    "clamp": "butt end of the assembled club, head plucked and set in oscillation",
+    "club_length": "not stated; slides say only 'at the same given length'",
+    "swingweight": "L flex measured at C-6; A through X flex at D-1",
+    "tip_weight": "assembled head; not stated separately"
+  },
+  "slope_assumption": "No length conversion is possible because the source states no length; the repo value is compared unconverted. A forum rule of about 10 cpm per flex step is not used as a tolerance.",
+  "resolution_cpm": 1,
+  "repo_flex_to_source_flex": {
+    "Ladies": "L",
+    "Senior": "A",
+    "Regular": "R",
+    "Stiff": "S",
+    "X-Stiff": "X"
+  },
+  "graphite_driver": {
+    "L": {"mean": 229, "low": 204, "high": 272},
+    "A": {"mean": 234, "low": 219, "high": 267},
+    "R": {"mean": 246, "low": 225, "high": 277},
+    "S": {"mean": 258, "low": 226, "high": 298},
+    "X": {"mean": 271, "low": 246, "high": 309}
+  }
+}
