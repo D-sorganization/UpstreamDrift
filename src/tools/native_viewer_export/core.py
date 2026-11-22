@@ -100,16 +100,13 @@ def parse_ellipsoid_scale(text: str) -> str:
         return "auto"
     if cleaned.startswith("fixed:"):
         raw = cleaned[len("fixed:") :].strip()
+        bad = f"--ellipsoid-scale fixed:<m> requires a positive finite number of metres, got {text!r}"
         try:
             val = float(raw)
         except ValueError:
-            raise ValueError(
-                f"--ellipsoid-scale fixed:<m> requires a positive finite number of metres, got {text!r}"
-            ) from None
+            raise ValueError(bad) from None
         if not (math.isfinite(val) and val > 0.0):
-            raise ValueError(
-                f"--ellipsoid-scale fixed:<m> requires a positive finite number of metres, got {text!r}"
-            )
+            raise ValueError(bad)
         return f"fixed:{val:g}"
     raise ValueError(f"--ellipsoid-scale must be 'auto' or 'fixed:<m>', got {text!r}")
 
@@ -186,6 +183,7 @@ class ExportSettings:
     #: ellipsoid colour encodes the point (default) or the kind (#15150)
     ellipsoid_color_by: str = "point"
     ellipsoid_panel: Any = None  # ``PanelSettings``; ``None``: packaged file
+    lighting: Any = None  # MuJoCo scene ``LightingSettings``; ``None``: studio
     #: a vector flag was passed: a kinematic replay still draws vectors
     vectors_requested: bool = False
     #: video frames the frame on the contact instant is repeated (#15150);
