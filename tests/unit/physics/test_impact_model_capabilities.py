@@ -12,6 +12,7 @@ from src.shared.python.physics.impact_model_capabilities import (
     ALLOWED_DURATION_MODES,
     ALLOWED_SPIN_MODES,
     IMPACT_MODEL_CAPABILITY_MATRIX,
+    ImpactModelCapability,
     get_impact_model_capability,
     qualify_spin_prediction,
     verify_impact_passivity,
@@ -42,9 +43,9 @@ class TestMatrixCoverage:
         assert capability.duration_mode in ALLOWED_DURATION_MODES
         assert capability.tangential_spin_mode in ALLOWED_SPIN_MODES
 
-    def test_spring_damper_never_implies_tangential_spin(self) -> None:
+    def test_spring_damper_supports_tangential_spin_after_15443(self) -> None:
         capability = IMPACT_MODEL_CAPABILITY_MATRIX["spring_damper"]
-        assert capability.tangential_spin_mode == "unavailable_normal_only"
+        assert capability.tangential_spin_mode == "supported_3d_tangential"
 
     def test_impact_acceptance_models_are_all_registered(self) -> None:
         if not _IMPACT_ACCEPTANCE_PATH.exists():
@@ -80,14 +81,31 @@ class TestGetImpactModelCapability:
 
 
 class TestQualifySpinPrediction:
-    def test_spring_damper_refuses_zero_rpm_as_prediction(self) -> None:
-        result = qualify_spin_prediction("spring_damper", 0.0)
+    @pytest.fixture(autouse=True)
+    def _normal_only_model(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Declare a hypothetical normal-only model to exercise the refusal."""
+        monkeypatch.setitem(
+            IMPACT_MODEL_CAPABILITY_MATRIX,
+            "normal_only_fixture",
+            ImpactModelCapability(
+                model_id="normal_only_fixture",
+                duration_mode="finite_duration",
+                tangential_spin_mode="unavailable_normal_only",
+                supports_off_center_gear_effect=False,
+                uses_full_3d_inertia_tensor=False,
+                supports_velocity_dependent_cor=False,
+                enforces_passivity_bound=True,
+            ),
+        )
+
+    def test_normal_only_model_refuses_zero_rpm_as_prediction(self) -> None:
+        result = qualify_spin_prediction("normal_only_fixture", 0.0)
         assert result["spin_status"] == "unavailable_normal_only"
         assert result["predicted_spin_rpm"] is None
         assert result["claim_qualified"] is False
 
-    def test_spring_damper_refuses_any_value(self) -> None:
-        result = qualify_spin_prediction("spring_damper", 3000.0)
+    def test_normal_only_model_refuses_any_value(self) -> None:
+        result = qualify_spin_prediction("normal_only_fixture", 3000.0)
         assert result["spin_status"] == "unavailable_normal_only"
         assert result["predicted_spin_rpm"] is None
         assert result["claim_qualified"] is False
