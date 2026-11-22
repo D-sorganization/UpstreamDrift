@@ -104,6 +104,7 @@ class FlightInsetSettings:
     dot_radius_px: int = 4
     marker_color_rgba: tuple[int, ...] = (255, 220, 40, 255)
     roll_color_rgba: tuple[int, ...] = (120, 220, 255, 255)
+    roll_width_px: int = 5
     marker_radius_px: int = 4
     text_color_rgb: tuple[int, ...] = (255, 255, 255)
     title_color_rgb: tuple[int, ...] = (255, 235, 90)
@@ -145,7 +146,12 @@ class FlightInsetSettings:
                 raise ValueError(f"{name} must be a non-negative integer")
         _positive(
             self,
-            ("curve_width_px", "ground_width_px", "target_line_width_px"),
+            (
+                "curve_width_px",
+                "ground_width_px",
+                "target_line_width_px",
+                "roll_width_px",
+            ),
             int,
         )
         _positive(self, ("dot_radius_px", "marker_radius_px"), int)
@@ -299,7 +305,7 @@ def plots_for(
     scale_x = (right - left) / down
     exag = settings.vertical_exaggeration
     top = y0 + pad + title
-    base = split - r - font_px * (0.15 + 1.25 * label_rows)  # carry (+ roll) rows
+    base = split - r - font_px * 1.4 * label_rows  # carry (+ roll) rows
     fit = (base - top - font_px * 1.5) / apex
     profile = Plot(
         (x0 + pad, top, x1 - pad, split),
@@ -323,22 +329,47 @@ def plots_for(
     return profile, plan
 
 
-def _text(
-    image: Image8,
-    text: str,
-    xy: tuple[float, float],
-    size: int,
-    colour: tuple[int, ...],
-    anchor: str = "left",
-) -> Image8:
-    """Outlined ``text`` by the HUD renderer, ``xy`` its left/centre/right top."""
-    box = compositor.text_box(text, (0, 0), size)
-    width = box[2] - box[0]
-    shift = {"left": 0.0, "centre": width / 2.0, "right": float(width)}[anchor]
-    x = min(max(xy[0] - shift, 0.0), max(0.0, image.shape[1] - width - 2.0))
-    y = min(max(xy[1], 0.0), max(0.0, image.shape[0] - (box[3] - box[1]) - 1.0))
-    rgb = (int(colour[0]), int(colour[1]), int(colour[2]))
-    return compositor.draw_label(image, text, (int(x), int(y)), size=size, fill=rgb)
+@dataclass(frozen=True)
+class LabelSpec:
+    """One inset label: text, anchor point and the box it must stay inside."""
+
+    text: str
+    xy: tuple[float, float]
+    size: int
+    colour: tuple[int, ...]
+    anchor: str
+    bounds: tuple[float, float, float, float]
+
+
+def _placed(spec: LabelSpec) -> tuple[int, int, int, tuple[int, int, int, int]]:
+    """Top-left ``(x, y)``, ``size`` and the box ``(x0, y0, x1, y1)`` of ``spec``.
+
+    The size shrinks (to at least 9 px) until the text is as narrow as its
+    bounds, and the anchor is clamped so the text lies inside them.
+    """
+    x0, y0, x1, y1 = spec.bounds
+    size = spec.size
+    box = compositor.text_box(spec.text, (0, 0), size)
+    while size > 9 and box[2] - box[0] > x1 - x0:
+        size -= 1
+        box = compositor.text_box(spec.text, (0, 0), size)
+    width, height = box[2] - box[0], box[3] - box[1]
+    shift = {"left": 0.0, "centre": width / 2.0, "right": float(width)}[spec.anchor]
+    x = max(x0, min(spec.xy[0] - shift, x1 - width))
+    y = max(y0, min(spec.xy[1], y1 - height))
+    return int(x), int(y), size, compositor.text_box(spec.text, (int(x), int(y)), size)
+
+
+def label_box(spec: LabelSpec) -> tuple[int, int, int, int]:
+    """Pixel box ``(x0, y0, x1, y1)`` the label of ``spec`` is drawn in."""
+    return tuple(int(v) for v in _placed(spec)[3])  # type: ignore[return-value]
+
+
+def _text(image: Image8, spec: LabelSpec) -> Image8:
+    """Outlined label of ``spec`` by the HUD renderer, inside its bounds."""
+    x, y, size, _ = _placed(spec)
+    rgb = (int(spec.colour[0]), int(spec.colour[1]), int(spec.colour[2]))
+    return compositor.draw_label(image, spec.text, (x, y), size=size, fill=rgb)
 
 
 def _line(
@@ -457,23 +488,78 @@ def _draw_roll(
     pair = np.vstack([data.full[-1], data.roll_end])
     for plot, axis in zip(plots, (2, 1), strict=True):
         pix = plot.pixels(pair[:, 0], pair[:, axis])
-        _line(pen, pix, cfg.roll_color_rgba, cfg.curve_width_px)
+        _line(pen, pix, cfg.roll_color_rgba, cfg.roll_width_px)
         _dot(pen, pix[-1], cfg.marker_radius_px, cfg.roll_color_rgba)
 
 
-def _roll_labels(
-    image: Image8, profile: Plot, data: InsetData, cfg: FlightInsetSettings, px: int
-) -> Image8:
-    """Roll and total (a model assumption) beneath the carry label."""
-    if data.roll is None:
-        return image
-    scale, gap = cfg.unit_scale, float(cfg.marker_radius_px + 3)
-    end = data.roll_end
-    u, v = profile.pixels(end[:1], end[2:])[0]
-    total = data.roll.total_m * scale
-    text = _fmt(cfg, "roll_label_format", roll=data.roll.roll_m * scale, total=total)
-    xy = (u + gap, v + gap + px * 1.25)
-    return _text(image, text, xy, px, cfg.roll_color_rgba, "right")
+def _uncrowded(titles: list[LabelSpec], labels: list[LabelSpec]) -> list[LabelSpec]:
+    """``labels`` in priority order without any that would cover another text.
+
+    The apex label is the least important (carry, roll and side come first), so
+    a short inset loses it rather than printing two labels over each other.
+    """
+    ranked = sorted(labels, key=lambda spec: spec.text.startswith("Apex"))
+    kept: list[LabelSpec] = []
+    boxes = [label_box(t) for t in titles]
+    for spec in ranked:
+        box = label_box(spec)
+        clear = all(
+            box[2] <= o[0] or o[2] <= box[0] or box[3] <= o[1] or o[3] <= box[1]
+            for o in boxes
+        )
+        if clear:
+            kept.append(spec)
+            boxes.append(box)
+    return [spec for spec in labels if spec in kept]
+
+
+def label_specs(
+    plots: tuple[Plot, Plot], data: InsetData, cfg: FlightInsetSettings, px: int
+) -> tuple[list[LabelSpec], list[LabelSpec]]:
+    """``(titles, labels)``: every inset text with the box it must stay inside.
+
+    Titles sit in the row above their plot; every other label is clamped inside
+    its plot's axes, so none leaves the inset or covers a title.
+    """
+    profile, plan = plots
+    scale, gap, row = cfg.unit_scale, float(cfg.marker_radius_px + 3), px * 1.4
+    titles = []
+    for plot, title in ((profile, cfg.profile_title), (plan, cfg.plan_title)):
+        x0, y0, x1, _ = plot.box
+        bounds = (x0, y0 - row, x1, y0)
+        titles.append(
+            LabelSpec(title, (x0, y0 - row), px, cfg.title_color_rgb, "left", bounds)
+        )
+    labels: list[LabelSpec] = []
+    text_rgb = cfg.text_color_rgb
+    if data.passed_apex:
+        u, v = _apex_pixel(profile, data)
+        text = _fmt(cfg, "apex_label_format", apex=data.apex_m * scale)
+        labels.append(
+            LabelSpec(text, (u, v - gap - row), px, text_rgb, "centre", profile.box)
+        )
+    if data.landed:
+        end = data.full[-1]
+        u, v = profile.pixels(end[:1], end[2:])[0]
+        text = _fmt(cfg, "carry_label_format", carry=data.carry_m * scale)
+        spec = LabelSpec(text, (u + gap, v + gap), px, text_rgb, "right", profile.box)
+        labels.append(spec)
+        if data.roll is not None:
+            ru, rv = profile.pixels(data.roll_end[:1], data.roll_end[2:])[0]
+            roll, total = data.roll.roll_m * scale, data.roll.total_m * scale
+            text = _fmt(cfg, "roll_label_format", roll=roll, total=total)
+            at = (ru + gap, label_box(spec)[3])  # directly beneath the carry
+            colour = cfg.roll_color_rgba
+            labels.append(LabelSpec(text, at, px, colour, "right", profile.box))
+        u, v = plan.pixels(end[:1], end[1:2])[0]
+        side = cfg.side_left_text if data.lateral_m < 0.0 else cfg.side_right_text
+        text = _fmt(
+            cfg, "side_label_format", side=abs(data.lateral_m) * scale, direction=side
+        )
+        # on the empty side of the target line, away from the curve
+        y = plan.origin_y - row - gap if data.lateral_m >= 0.0 else plan.origin_y + gap
+        labels.append(LabelSpec(text, (u + gap, y), px, text_rgb, "right", plan.box))
+    return titles, _uncrowded(titles, labels)
 
 
 def _draw_labels(
@@ -483,34 +569,10 @@ def _draw_labels(
     cfg: FlightInsetSettings,
     font_px: int,
 ) -> Image8:
-    """Titles and, as the flight earns them, the apex, carry and side labels."""
-    profile, plan = plots
-    scale = cfg.unit_scale
-    gap = float(cfg.marker_radius_px + 3)
-    for plot, title in ((profile, cfg.profile_title), (plan, cfg.plan_title)):
-        xy = (plot.box[0], plot.box[1] - font_px * 1.4)
-        image = _text(image, title, xy, font_px, cfg.title_color_rgb)
-    if data.passed_apex:
-        u, v = _apex_pixel(profile, data)
-        text = _fmt(cfg, "apex_label_format", apex=data.apex_m * scale)
-        xy = (u, v - gap - font_px * 1.4)
-        image = _text(image, text, xy, font_px, cfg.text_color_rgb, "centre")
-    if data.landed:
-        end = data.full[-1]
-        u, v = profile.pixels(end[:1], end[2:])[0]
-        text = _fmt(cfg, "carry_label_format", carry=data.carry_m * scale)
-        xy = (u + gap, v + gap)
-        image = _text(image, text, xy, font_px, cfg.text_color_rgb, "right")
-        image = _roll_labels(image, profile, data, cfg, font_px)
-        u, v = plan.pixels(end[:1], end[1:2])[0]
-        side = cfg.side_left_text if data.lateral_m < 0.0 else cfg.side_right_text
-        text = _fmt(
-            cfg, "side_label_format", side=abs(data.lateral_m) * scale, direction=side
-        )
-        # on the empty side of the target line, away from the curve
-        above = plan.origin_y - font_px * 1.4 - gap
-        y = above if data.lateral_m >= 0.0 else plan.origin_y + gap
-        image = _text(image, text, (u + gap, y), font_px, cfg.text_color_rgb, "right")
+    """Titles and, as the flight earns them, the apex, carry, roll and side labels."""
+    titles, labels = label_specs(plots, data, cfg, font_px)
+    for spec in (*titles, *labels):
+        image = _text(image, spec)
     return image
 
 

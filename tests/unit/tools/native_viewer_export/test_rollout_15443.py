@@ -111,3 +111,39 @@ def test_rollout_settings_are_documented_and_validated() -> None:
         ro.RolloutSettings(default_skill="putt")
     with pytest.raises(TypeError, match="enabled"):
         ro.RolloutSettings(enabled="yes")  # type: ignore[arg-type]
+
+
+def _specs(shape: tuple[int, int], time_s: float, limit: float = 0.85):
+    """Label specs as ``paint`` lays them out for an inset in a frame of ``shape``."""
+    _, play = _playback("driver")
+    cfg, data = SETTINGS.inset, fi.inset_data(play, time_s)
+    rect = fi.layout_rect((*shape, 3), cfg, [], 40, int(shape[0] * limit))
+    size = fi.font_px_for((*shape, 3), cfg)
+    reach = np.vstack([data.full, data.roll_end])
+    extent = (reach[:, 0].max(), data.apex_m, np.abs(reach[:, 1]).max())
+    width, height = rect[2] - rect[0], rect[3] - rect[1]
+    plots = fi.plots_for((0, 0, width, height), cfg, size, extent, 2)
+    return plots, fi.label_specs(plots, data, cfg, size)
+
+
+def _overlap(a, b) -> bool:
+    return not (a[2] <= b[0] or b[2] <= a[0] or a[3] <= b[1] or b[3] <= a[1])
+
+
+@pytest.mark.parametrize("shape", [(544, 640), (720, 1280)])
+@pytest.mark.parametrize("time_s", [1.0 + 2.5, 1.0 + 30.0])
+@pytest.mark.parametrize("limit", [0.85, 0.35])  # a short inset beside the panels
+def test_label_boxes_stay_in_their_axes_and_clear_of_titles(
+    shape, time_s, limit
+) -> None:
+    plots, (titles, labels) = _specs(shape, time_s, limit)
+    title_boxes = [fi.label_box(t) for t in titles]
+    boxes = [(spec, fi.label_box(spec)) for spec in labels]
+    landed = time_s > 2.0 + 10
+    assert any(s.text.startswith("Carry") for s, _ in boxes) == landed
+    for spec, box in boxes:
+        x0, y0, x1, y1 = spec.bounds
+        assert x0 <= box[0] and box[2] <= x1 and y0 <= box[1] and box[3] <= y1, spec
+        assert not any(_overlap(box, t) for t in title_boxes), spec.text
+    for i, (_, a) in enumerate(boxes):
+        assert not any(_overlap(a, b) for _, b in boxes[i + 1 :])
