@@ -11,7 +11,7 @@ helper so the face they see is the same.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import json
 from typing import Any
@@ -88,6 +88,12 @@ class ClubPoseModel:
         """World 4x4 of the spec club-body frame at ``coords``."""
         site = self._source.frame_poses(dict(coords))["Clubhead"]
         return np.asarray(site @ self._placement_inv, dtype=float)
+
+    def body_positions(
+        self, coords: Mapping[str, float], names: Sequence[str]
+    ) -> dict[str, tuple[float, float, float]]:
+        """World position of each model body in ``names`` at ``coords``."""
+        return self._source.body_positions_m(coords, names)
 
     def grip_midpoint_world(self, coords: Mapping[str, float]) -> Array:
         """World point midway between the lead and trail hands on the grip.

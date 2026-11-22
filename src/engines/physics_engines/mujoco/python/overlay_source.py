@@ -268,6 +268,17 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
             )
         return out
 
+    def body_positions_m(
+        self, coordinates: Mapping[str, float], names: Sequence[str]
+    ) -> dict[str, Vec3]:
+        """World position of each named body; ``KeyError`` for an unknown name."""
+        self._forward(coordinates)
+        out: dict[str, Vec3] = {}
+        for name in names:
+            p = self.data.xpos[self.model.body(name).id]
+            out[name] = (float(p[0]), float(p[1]), float(p[2]))
+        return out
+
     def center_of_mass_m(self, coordinates: Mapping[str, float]) -> Vec3:
         """System centre of mass in the world frame."""
         self._forward(coordinates)
