@@ -228,6 +228,19 @@ difference speed was 41.70 rad/s, versus 43.84 for independent refits and
 11.44 for the filtered reference. The filtered reference exceeded four
 named ranges in that window; the two bounded refits met the supplied ranges.
 The sequential fit does not establish smooth or anatomically complete motion.
+A separate five-frame joint fit around the dropout imposed all six weld
+equalities per frame and the 29 supplied named bounds, with observed markers,
+assumed foot anchors and a second-difference penalty. At the tested weight of
+1.0, SLSQP converged in 356 iterations from the original in-bounds seeds.
+Independent maximum weld translation and rotation residuals were 2.27e-7 mm
+and 8.52e-10 rad, with no named-bound excess. Peak consecutive angular
+finite-difference speed fell from 41.72 to 11.54 rad/s, while maximum joint
+coordinate displacement from the seed was 0.2703 rad. Per-frame marker RMS
+was 30.93--33.81 mm after fitting. The initial numerical weld Jacobian had
+full row rank; the window had free endpoints, the weights and transferred
+marker map were exploratory, and 18 coordinates lacked named ROM bounds.
+This establishes numerical convergence only for these five frames, not
+whole-swing smoothness, dynamics or anatomical feasibility.
 A soft face-axis target inferred from observed head-marker orientation was
 available in 476 of 477 pre-impact frames, but not at the dropout frame; no
 target was imputed there. At continuity weight 0.1, adding face weight 3.0
