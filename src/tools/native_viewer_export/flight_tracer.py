@@ -35,7 +35,13 @@ from src.shared.python.impact_parameters.flight_report import (
     FlightSummary,
     flight_for_impact,
 )
-from src.tools.native_viewer_export import flight_depth, impact_card, landing_marker
+from src.tools.native_viewer_export import (
+    aim_line,
+    flight_depth,
+    impact_card,
+    landing_marker,
+)
+from src.tools.native_viewer_export.aim_line import AimLineSettings, load_aim_settings
 from src.tools.native_viewer_export.display_units import (
     METRIC,
     DisplayUnits,
@@ -105,6 +111,7 @@ class TracerSettings:
     display_units: DisplayUnits = METRIC  # load_tracer_settings: display_units.py
     rollout: RolloutSettings | None = None  # rollout_settings.json
     hole_view: Any = None  # hole_view.HoleViewSettings (--hole-view); None = off
+    aim: AimLineSettings | None = None  # aim_line_settings.json (#15443)
 
     def __post_init__(self) -> None:
         rgba = _channels(self.tracer_color_rgba, 4, "tracer_color_rgba")
@@ -165,6 +172,7 @@ def load_tracer_settings(
         inset, unit=units.distance_unit, unit_scale=units.distance_scale
     )
     document["rollout"] = load_rollout_settings()
+    document["aim"] = load_aim_settings()
     try:
         return TracerSettings(**document)
     except TypeError as exc:
@@ -252,6 +260,11 @@ class FlightPlayback:
     spin_rpm: float | None = None
     ball_speed_mph: float | None = None  # of the impact solve; the smash factor's
     rollout: Rollout | None = None  # roll after the carry (a model assumption)
+    #: aim line of the plan view and wide view (aim_line.py): its turn from the
+    #: address line, label and the landing's side against it; ``None`` = address
+    aim_yaw_rad: float | None = None
+    aim_text: str | None = None
+    aim_lateral_m: float | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.settings, TracerSettings):
@@ -415,6 +428,24 @@ class FlightPlayback:
             tile, camera, end, style, self.carry_m, grid=grid
         )
 
+    def _paint_aim(self, tile: Image8, camera: Any, depth: Any) -> Image8:
+        """``tile`` with the aim line on the ground (nothing without one)."""
+        points, style = _aim_line_points(self), self.settings
+        aim = style.aim
+        if points is None or aim is None:
+            return tile
+        image = Image.fromarray(tile)
+        pen, hide = ImageDraw.Draw(image, "RGBA"), occlusion_for(style, depth)
+        width = aim.width_for(tile.shape[0])
+        for colour, size in (
+            (aim.outline_color_rgba, width + aim.outline_extra_px),
+            (aim.line_color_rgba, width),
+        ):
+            flight_depth.draw_line(
+                pen, camera, points, colour, size, style.near_clip_m, hide
+            )
+        return np.asarray(image, dtype=np.uint8)
+
     def _warn_once(self, view: str) -> None:
         if not self.__dict__.setdefault("_warned", False):
             self.__dict__["_warned"] = True
@@ -434,6 +465,7 @@ class FlightPlayback:
         ``label`` False leaves the carry label out (an inset states it).
         """
         style, marker = self.settings, self.settings.landing_marker
+        tile = self._paint_aim(tile, camera, depth)
         if marker is not None and self.path_m is not None:
             ring = landed or marker.when == "from_start"
             hide = occlusion_for(style, depth)
@@ -444,6 +476,23 @@ class FlightPlayback:
         return draw_trace(tile, camera, points, self.radius_m, style, depth)
 
 
+def _aim_line_points(play: FlightPlayback) -> Array | None:
+    """Ground end points of the drawn aim line, ``None`` when none is drawn."""
+    style = play.settings
+    if play.aim_yaw_rad is None or style.aim is None or play.path_m is None:
+        return None
+    axes = np.asarray(play.axes_m)
+    full = (play.path_m - play.path_m[0]) @ axes.T
+    ends = aim_line.rotate_plan(full[-1], play.aim_yaw_rad)
+    reach = max(float(ends[0]), 0.0)
+    marker = style.landing_marker
+    ground_z = marker.ground_z_m if marker is not None else 0.0
+    length = reach * (1.0 + style.aim.overshoot_fraction)
+    return aim_line.ground_line(
+        play.path_m[0], axes, play.aim_yaw_rad, length, ground_z
+    )
+
+
 def _flight_lines(
     flight: FlightSummary, side: str, units: DisplayUnits
 ) -> tuple[str, str]:
@@ -452,10 +501,11 @@ def _flight_lines(
     carry = distance_text(flight.carry_m, units)
     apex = distance_text(flight.max_height_m, units)
     offset = distance_text(abs(flight.lateral_m), units)
+    offset = f"{offset} {side}" if side else offset
     return (
         f"Ball {speed}   Launch {flight.launch_deg:.1f} deg"
         f"   Spin {flight.spin_rpm:.0f} rpm",
-        f"Carry {carry}   Apex {apex}   Side {offset} {side}"
+        f"Carry {carry}   Apex {apex}   Side {offset}"
         f"   Time {flight.flight_time_s:.1f} s",
     )
 
@@ -554,6 +604,23 @@ def with_model_smash(overlays: Any) -> Any:
     return replace(overlays, card=card, factors=factors)
 
 
+def with_aim(playback: FlightPlayback, flight: FlightSummary) -> FlightPlayback:
+    """``playback`` read against the aim line its settings ask for (#15443).
+
+    Unchanged for ``auto`` (no shot shape asked for) and for a flight without a
+    path. The HUD gets the side against the aim line and a line naming it.
+    """
+    aim = playback.settings.aim
+    if aim is None or aim.aim_line == "auto" or playback.path_m is None:
+        return playback
+    fields = aim_line.aimed_fields(playback, aim.aim_line, aim)
+    side_m, side = aim_line.side_text_args(fields["aim_lateral_m"])
+    units = playback.settings.display_units
+    own = _flight_lines(replace(flight, lateral_m=side_m), side, units)
+    lines = (*own, *playback.lines[2:], fields["aim_text"])
+    return replace(playback, lines=lines, **fields)
+
+
 def attach_flight(overlays: Any, swing: Any, settings: Any) -> Any:
     """``overlays`` with the export's flight and the model smash factor.
 
@@ -619,13 +686,13 @@ def playback_from_series(
         state = impact_card.contact_index(series, impact_time_s) - 1
         flight = flight_for_impact(series, state, frame, club, club_impact)
         play = playback_from_flight(flight, frame, impact_time_s, ball, settings)
-        return with_rollout(play, flight, club)
+        return with_aim(with_rollout(play, flight, club), flight)
     moved, state = contact
     offset = strike_offset_m(moved, state, ball)
     flight = flight_for_impact(moved, state, frame, club, club_impact, offset)
     start_s = float(moved.times_s[state])
     play = playback_from_flight(flight, frame, start_s, ball, settings)
-    return with_rollout(play, flight, club)
+    return with_aim(with_rollout(play, flight, club), flight)
 
 
 def _spec_club(swing: SwingInput) -> Mapping[str, Any] | None:

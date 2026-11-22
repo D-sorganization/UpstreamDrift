@@ -450,3 +450,13 @@ kinematic replay, not a refit. Limits live in `shot_setup_settings.json`.
   sign change is an error, never a silent fallback. The solved roll is logged
   and recorded in the ball record under `shot_setup`; a non-zero roll or shift
   adds a `Setup: ...` line to the clip HUD.
+
+## Aim Line
+
+- `--aim-line {finish,address}` picks the line the plan view, side figure and
+  wide-view ground line are read against. `finish` runs from the ball to where
+  it finishes (the rest point with a roll), so a draw or fade that ends on
+  target reads as on target; `address` keeps the address target line. The
+  default is `finish` with `--shot-shape`, else the picture is unchanged. The
+  HUD and plan title name the line; flight numbers never change. Colour, width
+  and halo are in `aim_line_settings.json`.
