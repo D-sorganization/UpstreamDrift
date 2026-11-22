@@ -67,3 +67,21 @@ def test_requirement_matches_crate_version():
     with CRATE_TOML.open("rb") as handle:
         crate_version = tomllib.load(handle)["package"]["version"]
     assert crate_version == rust_kernel.MIN_KERNEL_VERSION
+
+
+def test_aerodynamics_facade_follows_the_same_guard(monkeypatch):
+    from src.shared.python.physics.aerodynamics import _rust_facade
+
+    fake = types.ModuleType("upstream_physics")
+    for name in ("AerodynamicsEngine", "AeroEngineConfig"):
+        setattr(fake, name, object)
+    fake.AeroBallProperties = fake.AirProperties = object
+    monkeypatch.setitem(sys.modules, "upstream_physics", fake)
+    try:
+        for version, expected in (("2.1.3", False), ("2.2.0", True)):
+            monkeypatch.setattr("importlib.metadata.version", lambda name, v=version: v)
+            module = importlib.reload(_rust_facade)
+            assert module.is_rust_available() is expected
+    finally:
+        monkeypatch.undo()
+        importlib.reload(_rust_facade)

@@ -67,24 +67,36 @@ def _kernel_is_current(installed: str | None) -> bool:
     return have is not None and need is not None and have >= need
 
 
+def kernel_is_usable(module: Any) -> bool:
+    """Return True when ``module`` is a kernel at least ``MIN_KERNEL_VERSION``.
+
+    Shared by every facade that imports ``upstream_physics``.  Postcondition:
+    never raises; when the kernel is stale it logs one warning naming the
+    installed and required versions and the rebuild command, and returns False.
+    """
+    installed = _installed_kernel_version(module)
+    if _kernel_is_current(installed):
+        return True
+    logger.warning(
+        "upstream_physics %s is older than the required %s (it lacks "
+        "recent physics such as spin-dependent drag) - using the "
+        "pure-Python fallback. Rebuild with: %s",
+        installed or "of unknown version",
+        MIN_KERNEL_VERSION,
+        _REBUILD_HINT,
+    )
+    return False
+
+
 _RUST_AVAILABLE = False
 
 try:
     import upstream_physics as _rust  # type: ignore[import-untyped]
 
-    _installed = _installed_kernel_version(_rust)
-    if _kernel_is_current(_installed):
+    if kernel_is_usable(_rust):
         _RUST_AVAILABLE = True
         logger.info("upstream_physics Rust kernel loaded successfully")
     else:
-        logger.warning(
-            "upstream_physics %s is older than the required %s (it lacks "
-            "recent physics such as spin-dependent drag) - using the "
-            "pure-Python fallback. Rebuild with: %s",
-            _installed or "of unknown version",
-            MIN_KERNEL_VERSION,
-            _REBUILD_HINT,
-        )
         _rust = None  # type: ignore[assignment]
 except ImportError:
     _rust = None  # type: ignore[assignment]
