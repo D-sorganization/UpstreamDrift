@@ -334,6 +334,7 @@
 {"path": "body_part_viz/mujoco_segment_group_catalog.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/mujoco_segment_scene_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/mujoco_skin_colors.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/net_power_settings.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/overlay_options.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/persistence.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/renderers/__init__.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
@@ -343,6 +344,9 @@
 {"path": "body_part_viz/scalar_shading.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/segment_angular_momentum.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/segment_ke_settings.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/segment_net_power.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/segment_net_power_limits.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/segment_scalar_frame.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/series_validation.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/shapes/__init__.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/shapes/_mesh_decimation.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
@@ -2234,6 +2238,7 @@
 {"path": "physics/ball_enhanced_simulator.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/ball_flight_physics.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/ball_flight_validity.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
+{"path": "physics/ball_flight_validity_settings.json", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/ball_launch_conditions.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/ball_properties.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/ball_simulator.py", "classification": "ud-only", "package": "physics", "spelling_only": false}

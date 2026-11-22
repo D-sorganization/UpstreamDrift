@@ -46,6 +46,7 @@ from src.shared.python.physics.ball_flight_validity import (
     FlightValidityVerdict,
     assess_trajectory_validity,
     clamp_launch_spin_rate,
+    launch_spin_envelope,
 )
 from src.shared.python.physics.ball_properties import BallProperties
 from src.shared.python.physics.impact_model import (
@@ -350,7 +351,13 @@ class SwingBallFlightPipeline:
     # Public interface
     # ------------------------------------------------------------------
 
-    def run(self, swing: SwingState, *, spin_factor: float = 1.0) -> PipelineResult:
+    def run(
+        self,
+        swing: SwingState,
+        *,
+        spin_factor: float = 1.0,
+        club: str | None = None,
+    ) -> PipelineResult:
         """Execute the full swing → flight pipeline.
 
         Preconditions:
@@ -369,6 +376,8 @@ class SwingBallFlightPipeline:
             spin_factor: Multiplier on the derived launch spin rate, e.g. the
                 lie spin cut from ``perturb_impact_rows`` (#14569). The
                 default 1.0 leaves the launch untouched.
+            club: Club name; its class sets the launch-spin validity envelope
+                (#15443). ``None`` or an unknown name uses the driver cap.
 
         Returns:
             ``PipelineResult`` with trajectory, carry, height, and impact data.
@@ -396,7 +405,7 @@ class SwingBallFlightPipeline:
         if spin_factor != 1.0:
             launch = replace(launch, spin_rate=launch.spin_rate * spin_factor)
         pre_clamp_launch = launch
-        launch, spin_clamped = self._maybe_clamp_launch_spin(launch)
+        launch, spin_clamped = self._maybe_clamp_launch_spin(launch, club)
 
         # Step 4: Run ball flight simulation
         trajectory = self._run_flight_simulation(launch)
@@ -477,11 +486,11 @@ class SwingBallFlightPipeline:
         return BallFlightSimulator(ball=self._ball, env=self._environment)
 
     def _maybe_clamp_launch_spin(
-        self, launch: LaunchConditions
+        self, launch: LaunchConditions, club: str | None = None
     ) -> tuple[LaunchConditions, bool]:
         if not self._clamp_launch_spin:
             return launch, False
-        return clamp_launch_spin_rate(launch)
+        return clamp_launch_spin_rate(launch, launch_spin_envelope(club).max_rpm)
 
     def _build_result(
         self,

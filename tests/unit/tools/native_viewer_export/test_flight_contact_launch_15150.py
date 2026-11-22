@@ -68,7 +68,7 @@ def test_flight_launches_from_the_contact_state_and_time(monkeypatch) -> None:
     series, ball = _struck()
     seen = {}
 
-    def fake(series_in, index, frame):
+    def fake(series_in, index, frame, club=None):
         seen.update(series=series_in, index=index)
         return _flight()
 

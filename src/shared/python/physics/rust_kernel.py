@@ -20,7 +20,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from src.shared.python.core.physics_constants import (
-    GOLF_BALL_DRAG_COEFFICIENT,
+    GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT,
     GOLF_BALL_MASS_KG,
     GOLF_BALL_RADIUS_M,
     SPIN_DECAY_RATE_S,
@@ -213,7 +213,7 @@ def create_air_properties(
 def create_ball_properties(
     mass: float = float(GOLF_BALL_MASS_KG),
     radius: float = float(GOLF_BALL_RADIUS_M),
-    drag_coefficient: float = float(GOLF_BALL_DRAG_COEFFICIENT),
+    drag_coefficient: float = float(GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT),
     spin_decay_rate: float = float(SPIN_DECAY_RATE_S),
 ) -> Any:
     """Create golf ball properties for aerodynamics calculations.

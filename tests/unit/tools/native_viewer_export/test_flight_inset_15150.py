@@ -16,6 +16,7 @@ from src.tools.native_viewer_export import (
     flight_tracer as tr,
 )
 from src.tools.native_viewer_export.core import ClipOverlays
+from src.tools.native_viewer_export.display_units import METRIC
 from tests.unit.tools.native_viewer_export import test_flight_tracer as base
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
@@ -95,7 +96,9 @@ def test_settings_are_validated_and_documented(tmp_path: Path) -> None:
 
 
 def test_tracer_settings_carry_the_inset_file() -> None:
-    assert tr.load_tracer_settings().inset == ON
+    yards = tr.load_tracer_settings().inset  # display units (#15443): yards
+    assert yards == replace(ON, unit="yd", unit_scale=1.0 / 0.9144)
+    assert tr.load_tracer_settings(units=METRIC).inset == ON
 
 
 def test_layout_is_inside_frame_and_clear_of_view_label_and_hud() -> None:
