@@ -1,7 +1,7 @@
 {
   "pre_impact": "blank",
   "blank_text": "--",
-  "rows": ["clubhead_speed", "club_path_deg", "face_angle_deg", "face_to_path_deg", "attack_angle_deg", "dynamic_loft_deg", "impact_location"],
+  "rows": ["clubhead_speed", "smash_factor", "club_path_deg", "face_angle_deg", "face_to_path_deg", "attack_angle_deg", "dynamic_loft_deg", "impact_location"],
   "position": "right",
   "closest_approach_fallback": false,
   "opacity": 0.62,

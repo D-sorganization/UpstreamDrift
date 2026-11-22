@@ -304,6 +304,7 @@ def panel_from_series(
     settings: FactorSettings,
     *,
     detected: bool = True,
+    speed_unit: str | None = None,
 ) -> FactorsPanel:
     """Panel of ``series`` with the impact card rows frozen at ``impact_time_s``.
 
@@ -315,7 +316,7 @@ def panel_from_series(
     """
     if not isinstance(settings, FactorSettings):
         raise TypeError("settings must be a FactorSettings")
-    card = impact_card.card_from_series(series, impact_time_s, ball)
+    card = impact_card.card_from_series(series, impact_time_s, ball, speed_unit)
     location = next(row for row in card.rows if row.key == "impact_location")
     status = AT_IMPACT if detected else NOT_DETECTED
     if ball is not None and str(location.reason).startswith(impact_card.OFF_FACE):
@@ -349,7 +350,14 @@ def factors_for_export(
         impact = settings.impact_time_s
         if impact is None:
             impact = swing.impact_time_s
-        panel = panel_from_series(series, impact, swing.ball, config, detected=known)
+        panel = panel_from_series(
+            series,
+            impact,
+            swing.ball,
+            config,
+            detected=known,
+            speed_unit=settings.speed_unit,
+        )
     except impact_card._EXPECTED_ERRORS as exc:
         reason = f"unavailable: {exc}"
         return no_impact_panel(config, reason), settings

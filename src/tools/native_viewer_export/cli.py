@@ -51,6 +51,12 @@ from src.tools.native_viewer_export.core import (
     ExportSettings,
     parse_ellipsoid_scale,
 )
+from src.tools.native_viewer_export.display_units import (
+    DISTANCE_UNITS,
+    SPEED_UNITS,
+    DisplayUnits,
+    load_display_units,
+)
 from src.tools.native_viewer_export.ellipsoid_panel import load_panel_settings
 from src.tools.native_viewer_export.ellipsoid_visibility import (
     VisibilitySettings,
@@ -287,6 +293,37 @@ def _add_ball_flight_arguments(p: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_unit_arguments(p: argparse.ArgumentParser) -> None:
+    """Display unit flags of the flight labels and the impact card (#15443)."""
+    p.add_argument(
+        "--distance-unit",
+        dest="ball_flight_distance_unit",
+        choices=DISTANCE_UNITS,
+        default=None,
+        help="unit of flight distance labels (default: display_units_settings.json)",
+    )
+    p.add_argument(
+        "--speed-unit",
+        dest="ball_flight_speed_unit",
+        choices=SPEED_UNITS,
+        default=None,
+        help="unit of speed labels, flight HUD and impact card "
+        "(default: display_units_settings.json); the manifest stays SI",
+    )
+
+
+def _display_units(args: argparse.Namespace) -> DisplayUnits:
+    """Units of the settings file with the command line overrides applied."""
+    units = load_display_units()
+    distance = getattr(args, "ball_flight_distance_unit", None)
+    speed = getattr(args, "ball_flight_speed_unit", None)
+    return replace(
+        units,
+        distance_unit=distance or units.distance_unit,
+        speed_unit=speed or units.speed_unit,
+    )
+
+
 def _add_lighting_arguments(p: argparse.ArgumentParser) -> None:
     """Scene lighting flags of the MuJoCo export (#15150)."""
     p.add_argument(
@@ -355,6 +392,7 @@ def _add_clip_overlay_arguments(p: argparse.ArgumentParser) -> None:
     """Optional clip flags: impact factors panel, ball flight and lighting."""
     _add_impact_factor_arguments(p)
     _add_ball_flight_arguments(p)
+    _add_unit_arguments(p)
     _add_lighting_arguments(p)
     _add_shot_setup_arguments(p)
     p.add_argument(
@@ -614,6 +652,7 @@ def _panel_for(args: argparse.Namespace) -> Any:
 def build_settings(args: argparse.Namespace) -> ExportSettings:
     """``ExportSettings`` from parsed arguments (raises ``ValueError``)."""
     base = ExportSettings.preview() if args.preset == "preview" else ExportSettings()
+    units = _display_units(args)
     width, height = (
         parse_size(args.size) if args.size is not None else (base.width, base.height)
     )
@@ -675,9 +714,10 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         club_roll_in_hands_deg=getattr(args, "club_roll_in_hands", 0.0),
         ball_position_shift_m=getattr(args, "ball_position_shift", 0.0),
         shot_shape=getattr(args, "shot_shape", None),
-        ball_flight=load_tracer_settings(args.ball_flight_settings)
+        ball_flight=load_tracer_settings(args.ball_flight_settings, units)
         if args.ball_flight or args.ball_flight_settings is not None
         else None,
+        speed_unit=units.speed_unit if args.ball_flight_speed_unit else None,
         **(
             {"impact_speed": args.impact_speed} if args.impact_speed is not None else {}
         ),
@@ -742,6 +782,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             if r.ball is not None:
                 sys.stdout.write(f"{r.engine}: ball {r.ball}\n")
+            if r.flight is not None:
+                sys.stdout.write(f"{r.engine}: flight {r.flight}\n")
             sys.stdout.write(
                 f"{r.engine}: "
                 + ", ".join(
