@@ -390,6 +390,21 @@ def _add_camera_arguments(p: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_grip_and_ball_arguments(p: argparse.ArgumentParser) -> None:
+    p.add_argument(
+        "--grip",
+        action="store_true",
+        help="add the grip overlay (per-hand, net and couple; GCV-10) and write a "
+        "<swing>_<engine>_grip_wrench.json plot payload; pair with --views "
+        "hands_closeup",
+    )
+    p.add_argument(
+        "--no-ball",
+        action="store_true",
+        help="do not draw the decorative golf ball (shown until impact)",
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="python -m src.tools.native_viewer_export",
@@ -473,18 +488,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--size", default=None, help="tile size WIDTHxHEIGHT (overrides the preset)"
     )
     _add_overlay_arguments(p)
-    p.add_argument(
-        "--grip",
-        action="store_true",
-        help="add the grip overlay (per-hand, net and couple; GCV-10) and write a "
-        "<swing>_<engine>_grip_wrench.json plot payload; pair with --views "
-        "hands_closeup",
-    )
-    p.add_argument(
-        "--no-ball",
-        action="store_true",
-        help="do not draw the decorative golf ball (shown until impact)",
-    )
+    _add_grip_and_ball_arguments(p)
     _add_clip_overlay_arguments(p)
     _add_camera_arguments(p)
     p.add_argument("--no-grid", action="store_true", help="skip the 2x2 clip")
