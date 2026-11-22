@@ -31,8 +31,7 @@ from src.shared.python.motion_matching.club_models import HEAD_HEIGHT_M
 
 Array = NDArray[np.float64]
 SETTINGS_PATH = Path(__file__).with_name("shaft_bend_fit_settings.json")
-#: Bending axes of each chain joint, in primitive order (club x, then z).
-AXES = np.eye(3)[[0, 2]]
+AXES = np.eye(3)[[0, 2]]  # joint bending axes in primitive order: club x, z
 MAX_SHAPES = 2
 
 
