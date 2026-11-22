@@ -12,9 +12,12 @@ bundle it needs, and what it is not. To make the clips, see the
 [Quick Start](../user_guide/native_viewer_export.md).
 
 All force and torque pictures are displays of a model. None is a measurement.
-On a kinematic replay (every recorded effort is zero) the clip says
-"Kinematic Replay: Forces Not Shown" and leaves the force and torque vectors
-out.
+When every recorded effort is zero, the exporter treats the bundle as a
+kinematic replay. This is a display rule: it does not read provenance and does
+not prove how the motion was produced. By default the clip then says
+"Kinematic Replay: Forces Not Shown" and leaves out the force and torque
+vectors. Explicit `--force-vectors` or `--torque-vectors` draws them anyway;
+that does not make them measured or applied forces.
 
 ## Joint Torque Arcs
 

@@ -14,15 +14,18 @@ or panel means, read [What Am I Looking At](../help/native_viewer_export.md).
 A bundle can hold three kinds of motion. The exporter treats them the same way
 when it draws the body, but the force pictures mean different things.
 
-| Kind | What it is | How to tell |
+| Kind | What it is | What the exporter shows |
 | --- | --- | --- |
-| Kinematic replay | The fitted joint angles played back. No forces were applied. | Every recorded effort is zero. Clips carry the note "Kinematic Replay: Forces Not Shown" and the force and torque arrows are left out. |
+| Kinematic replay | The fitted joint angles played back, with no forces applied. | Every recorded effort is zero. By default the clips carry the note "Kinematic Replay: Forces Not Shown" and leave out the force and torque arrows; `--force-vectors` or `--torque-vectors` draws them anyway, which does not make them measured or applied forces. |
 | Feedback-tracked dynamics | A controller's torques drove the model to follow the fit. | Efforts are non-zero. The torques are what the tracking controller applied. |
 | Open-loop dynamics | The torques are replayed with no feedback, so the model moves on its own. | Efforts are non-zero. Not accepted for a full swing yet: treat such clips as experiments. |
 
-The exporter decides by looking at the efforts, not at a label: if all of them
-are zero it is a kinematic replay. Ellipsoids, impact factors, ball flight,
-lighting and the ball work on any of the three.
+The exporter only checks whether the step and hold effort tables are all zero.
+This is a display rule, not proof of how the motion was produced: it does not
+read the bundle's provenance, and non-zero efforts do not tell feedback-tracked
+dynamics from open-loop dynamics. Use the run's receipt to identify the
+dynamics. Ellipsoids, impact factors, ball flight, lighting and the ball work
+for every kind.
 
 ## Minimal Command
 
