@@ -123,6 +123,23 @@ Sizes quoted from tests are the band a test asserts, not a published value.
 - **Effect:** unknown.
 - **Tracking:** none.
 
+### Flight Model Registry Names
+
+- **Missing:** the published models. `FlightModelRegistry` in
+  `src/shared/python/physics/flight_models.py` lists Nathan, Ballantyne,
+  J. Cole, Rospie DL and Charry L3, but each is a constant Cd/Cl preset
+  (`ConstantCoefficientModel`) with illustrative coefficients, not the
+  author's model. `MacDonaldHanzelyModel` is likewise a constant Cd/Cl ODE with
+  exponential spin decay whose coefficients are not taken from the 1991 paper.
+  Waterloo/Penner is a Penner lift fit with a constant-spin TrackMan
+  calibration of `cd1` and the lift cap.
+- **Instead:** names are kept for API and UI compatibility (#15443 F6); the
+  `description` of each model now says it is not the published model and what
+  it implements.
+- **Effect:** unknown; carry differences between presets come from the chosen
+  constants, not from the named authors' data.
+- **Tracking:** #15443 (F6).
+
 ### Altitude and Air Density
 
 - **Missing:** density change along the trajectory, non-standard lapse, and
