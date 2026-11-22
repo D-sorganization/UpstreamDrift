@@ -54,8 +54,7 @@ fn rk4_decay_matches_python_reference_fixture() {
 /// Pure backspin on a level **+X** shot is **−Y** and yields upward (**+Z**) Magnus.
 #[test]
 fn aerodynamics_forces_match_python_reference_fixture() {
-    // Drag anchors regenerated for the spin-dependent drag law (#15443) from
-    // `_rust_facade._python_fallback_total` with the default ball and air.
+    // Drag anchors from `_python_fallback_total` under spin drag (#15443).
     let velocity = Vector3::new(62.0, -4.0, 18.0);
     let spin = Vector3::new(12.0, 265.0, -35.0);
     let forces = compute_aero_forces(
@@ -79,8 +78,7 @@ fn aerodynamics_forces_match_python_reference_fixture() {
 /// Ball-flight anchor uses `spin_axis = [0, 1, 0]` (pure **+Y** rotation) with
 /// mostly **+X** velocity — **topspin** in the documented frame, hence downward
 /// Magnus early in flight. This fixture pins integration parity, not backspin sign.
-/// Regenerated for the spin-dependent drag law (#15443) with an independent
-/// Python RK4 over `_python_fallback_total` (same dt, linear ground crossing).
+/// Regenerated for spin drag (#15443) by a Python RK4 over the fallback.
 #[test]
 fn ball_flight_matches_python_reference_fixture() {
     let config = IntegratorConfig {

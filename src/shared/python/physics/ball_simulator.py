@@ -180,10 +180,8 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         ball_props = upstream_physics.AeroBallProperties(
             mass=self.ball.mass,
             radius=self.ball.radius,
-            # Zero-spin floor of the kernel's Reynolds drag-crisis curve; the
-            # kernel adds the spin term itself (#15443), exactly as the
-            # enhanced engine's cd_spinning_ball. ball.cd0 belongs to a
-            # different (spin polynomial) model.
+            # Zero-spin floor; the kernel adds spin drag (#15443) as
+            # cd_spinning_ball does. ball.cd0 belongs to a different model.
             drag_coefficient=float(GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT),
             spin_decay_rate=self.ball.spin_decay_rate,
         )

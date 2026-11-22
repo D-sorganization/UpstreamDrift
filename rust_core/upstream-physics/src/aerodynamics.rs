@@ -38,14 +38,11 @@ const DRAG_CRISIS_RECOVERY_RE: f64 = 7.0e5;
 const MAX_LIFT_COEFFICIENT: f64 = 0.26;
 const PENNER_LIFT_SCALE: f64 = 0.70;
 const PENNER_LIFT_EXPONENT: f64 = 0.645;
-/// Zero-spin post-crisis drag floor of a production ball (#15443). Lyu,
-/// Kensrud, Smith & Tosaya 2018 (Proceedings 2(6):238): 13 production balls
-/// in still air, non-spinning Cd close to 0.2 at Re 1e5. Mirrors Python
-/// `GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT`.
+/// Zero-spin drag floor (#15443): Lyu et al. 2018, Cd ~0.2 at Re 1e5.
+/// Mirrors Python `GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT` (sources there).
 pub const DEFAULT_POST_CRISIS_CD: f64 = 0.20;
-/// Linear drag rise per unit spin ratio S (#15443). Smits & Smith 1994
-/// `CD2 = 0.18`; Bearman & Harvey 1976 and LES studies give 0.13-0.25.
-/// Mirrors Python `GOLF_BALL_SPIN_DRAG_SLOPE`.
+/// Drag rise per unit spin ratio (#15443): Smits & Smith 1994 `CD2 = 0.18`.
+/// Mirrors Python `GOLF_BALL_SPIN_DRAG_SLOPE` (sources there).
 pub const CD_SPIN_SLOPE: f64 = 0.18;
 
 /// Transverse spin rate ||ω × v̂|| [rad/s] used for Magnus/lift magnitude.
@@ -378,15 +375,9 @@ pub fn compute_drag_coefficient(
 
 /// Drag coefficient of a spinning golf ball (#15443).
 ///
-/// `Cd = cd_dimpled_sphere(Re, base_cd) + CD_SPIN_SLOPE * S`. Mirrors
-/// `src.shared.python.physics.atmosphere.cd_spinning_ball`.
-///
-/// # Design by Contract
-/// ## Preconditions
-/// - as [`cd_dimpled_sphere`]; `spin_ratio` finite and non-negative
-///
-/// ## Postconditions
-/// - zero when `base_cd == 0`, else the Reynolds curve plus the spin term
+/// `Cd = cd_dimpled_sphere(Re, base_cd) + CD_SPIN_SLOPE * S`, mirroring the
+/// Python `atmosphere.cd_spinning_ball`. Requires a finite `spin_ratio >= 0`;
+/// returns zero when `base_cd == 0`.
 pub fn cd_spinning_ball(reynolds: f64, spin_ratio: f64, base_cd: f64) -> Result<f64, String> {
     if !spin_ratio.is_finite() || spin_ratio < 0.0 {
         return Err("spin_ratio must be finite and non-negative".to_string());

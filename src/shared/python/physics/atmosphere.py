@@ -347,17 +347,9 @@ def cd_spinning_ball(
     ``Cd = cd_dimpled_sphere(reynolds, base_cd) + k * spin_ratio`` with
     ``k = GOLF_BALL_SPIN_DRAG_SLOPE`` (see its ``source``). Mirrors
     ``cd_spinning_ball`` in ``rust_core/upstream-physics/src/aerodynamics.rs``.
-
-    Preconditions: ``reynolds`` as for :func:`cd_dimpled_sphere`;
-    ``spin_ratio`` (``r * omega_transverse / v``) a finite real ``>= 0``.
-
-    Postconditions: returns ``0`` when ``base_cd == 0`` (drag disabled),
-    otherwise ``cd_dimpled_sphere(reynolds, base_cd) + k * spin_ratio``.
-
-    Raises:
-        TypeError: If an argument is not a real number.
-        ValueError: If ``spin_ratio`` is negative or not finite, or the
-            Reynolds/base checks of :func:`cd_dimpled_sphere` fail.
+    Preconditions: ``spin_ratio`` (``r * omega_transverse / v``) a finite real
+    ``>= 0`` (else TypeError/ValueError), ``reynolds`` as for
+    :func:`cd_dimpled_sphere`. Postcondition: ``0`` when ``base_cd == 0``.
     """
     if not isinstance(spin_ratio, (int, float)) or isinstance(spin_ratio, bool):
         raise TypeError("spin_ratio must be a real number")
