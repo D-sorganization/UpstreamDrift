@@ -206,6 +206,13 @@ within one grid cell. Its finite nine-sample miss penalty is a smooth
 surrogate, not a proven global closest distance. Independent validation on the
 actual matched trajectory remains necessary.
 
+The search reuses rigid-face boundary topology within a search. On the modeled
+576-triangle driver face with synthetic motion, a 30-run median was 10.6 ms
+for a miss and 34.0 ms for a hit, versus 46.5 ms and 202.9 ms when rebuilding
+the boundary for every sample. These are local computational timings, not
+swing-speed gains. The cache requires stable triangle order and rigid motion;
+deformation or insufficient coordinate resolution is rejected.
+
 ## Open Admission Gates
 
 - Resolve the verified pinned bundle's model mismatch and run forward tracking

@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from src.shared.python.motion_matching import contact_event
 from src.shared.python.motion_matching.contact_event import find_contact_event
 
 pytestmark = pytest.mark.unit
@@ -38,6 +39,67 @@ def test_finds_converged_approaching_root_and_returns_integrated_state() -> None
     np.testing.assert_allclose(result.event.qd, [1.0], atol=1e-12)
     np.testing.assert_allclose(result.event.contact_point_m, [0.5, 0.0, 0.0], atol=1e-8)
     assert result.event.approach_speed_mps == pytest.approx(1.0, abs=1e-6)
+
+
+def test_boundary_topology_reuse_preserves_penalty_for_rigid_pose() -> None:
+    topology = contact_event._build_boundary_topology(_TRIANGLES)
+    point = np.array([0.2, 0.3, 0.4])
+    radius = 0.1
+    angle = 0.73
+    rotation = np.array(
+        [
+            [np.cos(angle), -np.sin(angle), 0.0],
+            [np.sin(angle), np.cos(angle), 0.0],
+            [0.0, 0.0, 1.0],
+        ]
+    )
+    translation = np.array([0.3, -0.2, 0.6])
+    moved = _TRIANGLES @ rotation.T + translation
+    moved_point = point @ rotation.T + translation
+    topology.validate_rigid_pose(moved)
+
+    expected = contact_event._boundary_proximity_penalty(moved, moved_point, radius)
+    actual = contact_event._boundary_proximity_penalty(
+        moved, moved_point, radius, topology=topology
+    )
+    assert actual == pytest.approx(expected, rel=0.0, abs=1e-14)
+
+
+def test_boundary_topology_is_translation_invariant_at_resolvable_offsets() -> None:
+    first = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]], dtype=float)
+    second = first + np.array([0.0, 1e-8, 0.0])
+    mesh = np.stack((first, second))
+    translated = mesh + np.array([1e7, -1e7, 1e7])
+
+    base_topology = contact_event._build_boundary_topology(mesh)
+    translated_topology = contact_event._build_boundary_topology(translated)
+    assert (
+        len(base_topology.boundary_edges)
+        == len(translated_topology.boundary_edges)
+        == 6
+    )
+
+
+def test_boundary_topology_rejects_offsets_beyond_mesh_resolution() -> None:
+    mesh = _TRIANGLES + np.array([1e12, -1e12, 1e12])
+    with pytest.raises(ValueError, match="resolution"):
+        contact_event._build_boundary_topology(mesh)
+
+
+@pytest.mark.parametrize("change", ["deform", "reorder"])
+def test_contact_search_fails_closed_if_face_topology_changes(change: str) -> None:
+    def face(q: np.ndarray) -> np.ndarray:
+        triangles = _TRIANGLES.copy()
+        if change == "deform" and q[0] > 0.0:
+            triangles[1, 2, 2] += q[0]
+        elif change == "reorder" and q[0] > 0.0:
+            triangles = triangles[::-1]
+        return triangles
+
+    with pytest.raises(ValueError, match="rigid|topology"):
+        find_contact_event(
+            _advance(), face, np.array([1.0, 0.0, 0.0]), 0.5, duration_s=1.0
+        )
 
 
 def test_root_converges_on_nonlinear_state_advance() -> None:

@@ -9,7 +9,6 @@ the returned state is obtained by advancing the original state to the root.
 from __future__ import annotations
 
 import math
-from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -24,8 +23,116 @@ FaceTrianglesFn = Callable[[Array], Array]
 # states remain an explicit limitation.
 CONTACT_ROOT_SUBDIVISIONS = 8
 MISS_PENALTY_SUBDIVISIONS = 8
-VertexKey = tuple[int, int, int]
-EdgeKey = tuple[VertexKey, VertexKey]
+
+
+@dataclass(frozen=True)
+class _BoundaryTopology:
+    """Boundary edge indices for one fixed, rigidly moving triangle mesh."""
+
+    reference: Array
+    boundary_edges: Array
+    boundary_face_opposites: frozenset[tuple[int, int]]
+    shared_vertex_pairs: Array
+
+    def validate_rigid_pose(self, triangles: Array) -> None:
+        if triangles.shape != self.reference.shape:
+            raise ValueError("face topology changed during contact search")
+        current = triangles.reshape(-1, 3)
+        extent = float(np.max(np.ptp(current, axis=0)))
+        scale = max(extent, np.finfo(float).tiny)
+        world_magnitude = float(np.max(np.abs(current)))
+        resolution = float(np.spacing(world_magnitude))
+        if not math.isfinite(resolution) or resolution > 1e-8 * scale:
+            raise ValueError("face geometry exceeds available coordinate resolution")
+        if len(self.shared_vertex_pairs):
+            differences = (
+                current[self.shared_vertex_pairs[:, 0]]
+                - current[self.shared_vertex_pairs[:, 1]]
+            )
+            if np.max(np.linalg.norm(differences, axis=1)) > max(
+                1e-12 * scale, 2.0 * resolution
+            ):
+                raise ValueError("face topology changed during contact search")
+        reference = self.reference.reshape(-1, 3)
+        ref_mean, current_mean = reference.mean(axis=0), current.mean(axis=0)
+        ref_centered, current_centered = reference - ref_mean, current - current_mean
+        left, _, right = np.linalg.svd(ref_centered.T @ current_centered)
+        rotation = left @ right
+        if np.linalg.det(rotation) < 0.0:
+            left[:, -1] *= -1.0
+            rotation = left @ right
+        residual = current_centered - ref_centered @ rotation
+        scale = max(1.0, float(np.linalg.norm(ref_centered, axis=1).max()))
+        if (
+            not np.isfinite(residual).all()
+            or np.max(np.linalg.norm(residual, axis=1)) > 1e-10 * scale
+        ):
+            raise ValueError("face topology changed; rigid pose is required")
+
+
+def _build_boundary_topology(triangles: Array) -> _BoundaryTopology:
+    """Cache outer-edge indices while retaining the original quantized test."""
+    vertices = triangles.reshape(-1, 3)
+    scale = float(np.max(np.ptp(vertices, axis=0)))
+    if not math.isfinite(scale) or scale <= np.finfo(float).tiny:
+        raise ValueError("face geometry has insufficient topology resolution")
+    world_magnitude = float(np.max(np.abs(vertices)))
+    resolution = float(np.spacing(world_magnitude))
+    if not math.isfinite(resolution) or resolution > 1e-8 * scale:
+        raise ValueError("face geometry exceeds available coordinate resolution")
+    quantum = 128.0 * np.finfo(float).eps * scale
+    origin = vertices[0]
+    edges = triangles[:, ((0, 1), (1, 2), (2, 0))].reshape(-1, 2, 3)
+    quantized = np.rint((edges - origin) / quantum).astype(np.int64)
+    first, second = quantized[:, 0], quantized[:, 1]
+    swap = (first[:, 0] > second[:, 0]) | (
+        (first[:, 0] == second[:, 0])
+        & (
+            (first[:, 1] > second[:, 1])
+            | ((first[:, 1] == second[:, 1]) & (first[:, 2] > second[:, 2]))
+        )
+    )
+    keys = np.column_stack(
+        (
+            np.where(swap[:, None], second, first),
+            np.where(swap[:, None], first, second),
+        )
+    )
+    _, first_indices, counts = np.unique(
+        keys, axis=0, return_index=True, return_counts=True
+    )
+    boundary_indices = first_indices[counts == 1]
+    face_indices, local_edges = np.divmod(boundary_indices, 3)
+    opposite_for_edge = (2, 0, 1)
+    boundary_face_opposites = frozenset(
+        (int(face), opposite_for_edge[int(edge)])
+        for face, edge in zip(face_indices, local_edges, strict=True)
+    )
+    vertex_keys = np.rint((vertices - origin) / quantum).astype(np.int64)
+    _, vertex_inverse, vertex_counts = np.unique(
+        vertex_keys, axis=0, return_inverse=True, return_counts=True
+    )
+    shared_groups = [
+        np.flatnonzero(vertex_inverse == index)
+        for index in np.flatnonzero(vertex_counts > 1)
+    ]
+    shared_vertex_pairs = (
+        np.concatenate(
+            [
+                np.column_stack((np.repeat(group[0], len(group) - 1), group[1:]))
+                for group in shared_groups
+            ],
+            axis=0,
+        )
+        if shared_groups
+        else np.empty((0, 2), dtype=np.int64)
+    )
+    return _BoundaryTopology(
+        triangles.copy(),
+        np.column_stack((face_indices, local_edges)),
+        boundary_face_opposites,
+        shared_vertex_pairs,
+    )
 
 
 @dataclass(frozen=True)
@@ -113,7 +220,11 @@ def _point_triangles(point: Array, triangles: Array) -> tuple[Array, Array]:
 
 
 def _surface_sample(
-    triangles: Array, centre: Array, radius: float
+    triangles: Array,
+    centre: Array,
+    radius: float,
+    *,
+    boundary_topology: _BoundaryTopology | None = None,
 ) -> tuple[float, float, int, Array, Array, Array]:
     if len(triangles) == 0:
         raise ValueError("face_triangles_world must contain at least one triangle")
@@ -162,36 +273,28 @@ def _surface_sample(
     # weight the Gaussian proximity sum so subdividing a boundary does not
     # change its scale. Squared segment distance keeps the term finite and
     # smooth at segment endpoints.
-    boundary_penalty = _boundary_proximity_penalty(triangles, centre, radius)
+    boundary_penalty = _boundary_proximity_penalty(
+        triangles, centre, radius, topology=boundary_topology
+    )
     penalty = gap_penalty + boundary_penalty
     if not math.isfinite(gap) or not math.isfinite(penalty):
         raise ValueError("contact gap and miss cost must be finite")
     return gap, penalty, index, point, bary, outward
 
 
-def _boundary_proximity_penalty(triangles: Array, point: Array, radius: float) -> float:
+def _boundary_proximity_penalty(
+    triangles: Array,
+    point: Array,
+    radius: float,
+    *,
+    topology: _BoundaryTopology | None = None,
+) -> float:
     """Finite smooth cost for proximity to the finite patch's outer boundary."""
-    scale = max(1.0, float(np.max(np.abs(triangles))))
-    quantum = 128.0 * np.finfo(float).eps * scale
     edges = triangles[:, ((0, 1), (1, 2), (2, 0))].reshape(-1, 2, 3)
-    quantized = np.rint(edges / quantum).astype(np.int64)
-    first, second = quantized[:, 0], quantized[:, 1]
-    swap = (first[:, 0] > second[:, 0]) | (
-        (first[:, 0] == second[:, 0])
-        & (
-            (first[:, 1] > second[:, 1])
-            | ((first[:, 1] == second[:, 1]) & (first[:, 2] > second[:, 2]))
-        )
-    )
-    low, high = (
-        np.where(swap[:, None], second, first),
-        np.where(swap[:, None], first, second),
-    )
-    keys = np.column_stack((low, high))
-    _, first_indices, counts = np.unique(
-        keys, axis=0, return_index=True, return_counts=True
-    )
-    boundary = edges[first_indices[counts == 1]]
+    if topology is None:
+        topology = _build_boundary_topology(triangles)
+    face_indices, local_edges = topology.boundary_edges.T
+    boundary = edges[face_indices * 3 + local_edges]
     vectors = boundary[:, 1] - boundary[:, 0]
     lengths = np.linalg.norm(vectors, axis=1)
     fractions = np.clip(
@@ -212,27 +315,20 @@ def _boundary_proximity_penalty(triangles: Array, point: Array, radius: float) -
     return penalty
 
 
-def _boundary_edge_contact(triangles: Array, index: int, bary: Array) -> bool:
+def _boundary_edge_contact(
+    triangles: Array,
+    index: int,
+    bary: Array,
+    *,
+    topology: _BoundaryTopology | None = None,
+) -> bool:
     """Whether a closest point lies on the outer edge of the triangle patch."""
-    scale = max(1.0, float(np.max(np.abs(triangles))))
-    quantum = 128.0 * np.finfo(float).eps * scale
-
-    def key(point: Array) -> VertexKey:
-        quantized = np.rint(point / quantum).astype(np.int64)
-        return int(quantized[0]), int(quantized[1]), int(quantized[2])
-
-    def edge_key(a: VertexKey, b: VertexKey) -> EdgeKey:
-        return (a, b) if a <= b else (b, a)
-
-    counts: Counter[EdgeKey] = Counter()
-    for tri in triangles:
-        for a, b in ((0, 1), (1, 2), (2, 0)):
-            counts[edge_key(key(tri[a]), key(tri[b]))] += 1
+    if topology is None:
+        topology = _build_boundary_topology(triangles)
     tol = 128.0 * np.finfo(float).eps
-    for opposite, (a, b) in enumerate(((1, 2), (2, 0), (0, 1))):
+    for opposite in range(3):
         if bary[opposite] <= tol:
-            edge = edge_key(key(triangles[index, a]), key(triangles[index, b]))
-            if counts[edge] == 1:
+            if (index, opposite) in topology.boundary_face_opposites:
                 return True
     return False
 
@@ -251,8 +347,11 @@ def find_contact_event(
 
     ``advance(t)`` must return ``(q, qd)`` by advancing the same initial state
     through the production integrator for ``t`` seconds. ``face_triangles_world(q)``
-    returns the finite outward-wound surface triangles at that state. The ball
-    is stationary in world coordinates. The signed gap is closest-point distance
+    returns the finite outward-wound surface triangles at that state, in a
+    fixed triangle order and connectivity, undergoing rigid motion only. Each
+    returned mesh is checked against that contract; deformation, reordering,
+    or changed topology fails closed. The ball is stationary in world
+    coordinates. The signed gap is closest-point distance
     to the finite triangles (negative behind their outward normals), less the
     ball radius. Only a positive-to-nonpositive bracket is eligible.
 
@@ -268,6 +367,10 @@ def find_contact_event(
     it is not a global closest-approach guarantee. The penalty is returned for
     hits and misses alike, so event acquisition does not switch its value.
     This finder does not select or interpolate generalized states.
+
+    Limitation: a point-only rigid fit cannot distinguish a planar reflection
+    from a proper 3D rotation that flips the plane normal. The caller remains
+    responsible for preserving the physical outward-winding convention.
     """
     centre = np.asarray(ball_centre_m, dtype=float)
     radius = float(ball_radius_m)
@@ -288,9 +391,12 @@ def find_contact_event(
     ):
         raise ValueError("max_iterations must be a positive integer")
 
+    boundary_topology: _BoundaryTopology | None = None
+
     def sample(
         time_s: float,
     ) -> tuple[Array, Array, Array, tuple[float, float, int, Array, Array, Array]]:
+        nonlocal boundary_topology
         q, qd = (np.asarray(x, dtype=float) for x in advance(time_s))
         if (
             q.ndim != 1
@@ -308,7 +414,18 @@ def find_contact_event(
             raise ValueError(
                 "face_triangles_world must return finite (F, 3, 3) triangles"
             )
-        return q, qd, triangles, _surface_sample(triangles, centre, radius)
+        if boundary_topology is None:
+            boundary_topology = _build_boundary_topology(triangles)
+        else:
+            boundary_topology.validate_rigid_pose(triangles)
+        return (
+            q,
+            qd,
+            triangles,
+            _surface_sample(
+                triangles, centre, radius, boundary_topology=boundary_topology
+            ),
+        )
 
     def local_gap_derivative(time_s: float) -> float:
         """Estimate the signed-gap derivative locally using the real advance."""
@@ -360,7 +477,9 @@ def find_contact_event(
         index, point, bary = data_star[2], data_star[3], data_star[4]
         delta = centre - point
         distance = float(np.linalg.norm(delta))
-        if distance > 0.0 and not _boundary_edge_contact(triangles, index, bary):
+        if distance > 0.0 and not _boundary_edge_contact(
+            triangles, index, bary, topology=boundary_topology
+        ):
             event = ContactRoot(
                 0.0,
                 q_star.copy(),
@@ -396,7 +515,9 @@ def find_contact_event(
             index, point, bary = data_star[2], data_star[3], data_star[4]
             delta = centre - point
             distance = float(np.linalg.norm(delta))
-            if distance == 0.0 or _boundary_edge_contact(triangles, index, bary):
+            if distance == 0.0 or _boundary_edge_contact(
+                triangles, index, bary, topology=boundary_topology
+            ):
                 continue
             gap_derivative = local_gap_derivative(time_s)
             if not math.isfinite(gap_derivative) or gap_derivative >= 0.0:
