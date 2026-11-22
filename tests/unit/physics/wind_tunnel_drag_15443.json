@@ -1,0 +1,44 @@
+{
+  "settings": {
+    "digitising_uncertainty_cd": 0.005,
+    "digitising_uncertainty_re_fraction": 0.02,
+    "sources": "Points were read from published figures by pixel position against the figure grid lines, so each Cd carries about +-0.005 and each Reynolds number or spin ratio about +-2 %. They are wind-tunnel data, the fitting set for the flight-kernel drag law (#15443 F1); the launch-monitor rows in reference_shots_15443.json are the held-out test and must never be fitted."
+  },
+  "choi_2006_dimpled_sphere_cd_vs_re": {
+    "source": "Choi, J., Jeon, W.-P. and Choi, H. (2006) Mechanism of drag reduction by dimples on a sphere. Physics of Fluids 18, 041702, doi:10.1063/1.2191848, Fig. 1 (dimpled sphere, filled diamonds). Non-spinning 150 mm sphere, 392 dimples, k/d = 0.004, stated to be dynamically similar to a production ball without rotation; the text gives a nearly constant Cd from Re 0.9e5.",
+    "points_re_cd": [
+      [50000, 0.483], [60000, 0.478], [70000, 0.428], [80000, 0.309],
+      [90000, 0.214], [95000, 0.207], [100000, 0.204], [110000, 0.209],
+      [120000, 0.209], [140000, 0.213], [159000, 0.219], [179000, 0.224],
+      [199000, 0.226], [219000, 0.230], [238000, 0.237], [258000, 0.240],
+      [278000, 0.240]
+    ]
+  },
+  "bearman_harvey_1976_cd_vs_re": {
+    "source": "Bearman, P. W. and Harvey, J. K. (1976) Golf ball aerodynamics. Aeronautical Quarterly 27(2), 112-122, non-spinning ball as replotted in Choi et al. (2006) Fig. 1 (crosses); k/d = 0.009. Not fitted: deeper dimples than a production ball, crisis near Re 0.5e5 and a higher floor (Crabill, Witherden and Jameson 2018, arXiv:1806.00378, section 1).",
+    "points_re_cd": [
+      [40000, 0.490], [46400, 0.353], [60000, 0.249], [80000, 0.249],
+      [96000, 0.249], [123000, 0.253], [149000, 0.252], [177000, 0.255],
+      [205000, 0.258], [244000, 0.263]
+    ]
+  },
+  "bearman_harvey_1976_spin": {
+    "source": "Bearman and Harvey (1976) conventional ball, Cd and Cl against spin ratio S = omega r / U as replotted in Crabill et al. (2018) Fig. 6b (red Cd and blue Cl curves). The data end at S of about 0.28 to 0.29; nothing above that is measured.",
+    "points_s_cd": [
+      [0.021, 0.2649], [0.041, 0.2633], [0.060, 0.2641], [0.080, 0.2649],
+      [0.100, 0.2669], [0.119, 0.2731], [0.139, 0.2796], [0.158, 0.2857],
+      [0.178, 0.2914], [0.197, 0.2980], [0.217, 0.3037], [0.237, 0.3090],
+      [0.276, 0.3188]
+    ],
+    "points_s_cl": [
+      [0.020, 0.0808], [0.040, 0.1029], [0.060, 0.1184], [0.079, 0.1310],
+      [0.099, 0.1429], [0.118, 0.1543], [0.138, 0.1682], [0.157, 0.1820],
+      [0.177, 0.1951], [0.197, 0.2082], [0.216, 0.2237], [0.236, 0.2371],
+      [0.275, 0.2612], [0.295, 0.2722]
+    ]
+  },
+  "lyu_2018_still_air": {
+    "source": "Lyu, Kensrud, Smith and Tosaya (2018) Aerodynamics of golf balls in still air. Proceedings 2(6), 238, doi:10.3390/proceedings2060238, abstract: 13 production balls, non-spinning Cd near 0.5 at Re 5e4 and close to 0.2 at Re 1e5. Held-out wind-tunnel-independent check, not fitted.",
+    "checks_re_cd": [[50000, 0.5], [100000, 0.2]]
+  }
+}
