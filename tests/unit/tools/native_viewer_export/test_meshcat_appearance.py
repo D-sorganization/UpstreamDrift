@@ -289,10 +289,18 @@ def _mujoco_meshes(raw: bytes) -> dict[tuple[str, str], tuple[tuple, np.ndarray]
 
     xml, _ = full_body_mjcf.export_full_body_mjcf(raw, appearance=default_appearance())
     root = ET.fromstring(xml)
-    rgba = {
-        m.get("name"): tuple(float(x) for x in (m.get("rgba") or "").split())
-        for m in root.iter("material")
+    # A textured material wears rgba * texture (#15150: rgba is white there),
+    # so the colour the viewer sees is that product.
+    tex_rgb = {
+        t.get("name"): np.array((t.get("rgb1") or "").split(), float)
+        for t in root.iter("texture")
     }
+    rgba = {}
+    for m in root.iter("material"):
+        value = np.array((m.get("rgba") or "").split(), float)
+        if m.get("texture") in tex_rgb:
+            value[:3] *= tex_rgb[m.get("texture")]
+        rgba[m.get("name")] = tuple(value)
     verts = {
         m.get("name"): np.array((m.get("vertex") or "").split(), float).reshape(-1, 3)
         for m in root.iter("mesh")

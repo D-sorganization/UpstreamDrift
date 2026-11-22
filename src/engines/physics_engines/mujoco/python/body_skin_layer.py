@@ -87,11 +87,17 @@ def _layer_material(
     return garment or library.material_name_for(doc, roles["pelvis"])
 
 
-def _untextured(root: ET.Element, name: str) -> None:
+def _untextured(root: ET.Element, name: str, rgba: tuple[float, ...]) -> None:
+    """Drop the texture of material ``name`` and give its colour back to ``rgba``.
+
+    A textured material is emitted with a white rgba (the texture carries the
+    colour once); without the texture the colour must be written to rgba.
+    """
     for material in root.iter("material"):
         if material.get("name") == name:
             for key in _TEXTURE_KEYS:
                 material.attrib.pop(key, None)
+            material.set("rgba", _nums(rgba, 6))
 
 
 def spec_turns(
@@ -214,9 +220,12 @@ def attach_body_skin(
     summary["wrists_matched"] = sorted(rings)
     summary["wrists_blended"] = sorted(hands) if settings.wrist_blend_length_m else []
     for name, layer in layers.items():
-        material = material_for(_layer_material(doc, roles, name))
+        library_name = _layer_material(doc, roles, name)
+        material = material_for(library_name)
         if name == "skin":
-            _untextured(root, material)
+            _untextured(
+                root, material, library.library_materials(doc)[library_name].rgba
+            )
         node = ET.SubElement(
             deformable,
             "skin",

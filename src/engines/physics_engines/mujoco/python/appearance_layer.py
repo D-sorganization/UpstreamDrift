@@ -87,6 +87,10 @@ class _Assets:
         material = self.materials[name]
         attrs = _material_attrs(material, plane)
         tex = material.texture
+        if _texture_carries_colour(material, plane):
+            # MuJoCo multiplies rgba by the texture; the texture already holds
+            # the colour, so the material takes white and keeps its alpha.
+            attrs["rgba"] = _nums((1.0, 1.0, 1.0, material.rgba[3]))
         if tex is not None and tex.kind != "flat":
             tex_name = f"tex_{name}{'_plane' if plane else ''}"
             ET.SubElement(
@@ -128,6 +132,17 @@ def _material_attrs(material: Material, plane: bool) -> dict[str, str]:
     if plane:
         attrs["reflectance"] = _nums(0.12 * smooth)
     return attrs
+
+
+def _texture_carries_colour(material: Material, plane: bool) -> bool:
+    """True when the emitted texture alone supplies the material colour.
+
+    A solid (non-plane) procedural texture without explicit colours is built
+    from ``base_color`` in :func:`_texture_attrs`; ground planes keep their
+    own checker colours and are not covered.
+    """
+    tex = material.texture
+    return not plane and tex is not None and tex.kind != "flat" and tex.color_a is None
 
 
 def _texture_attrs(name: str, material: Material, plane: bool) -> dict[str, str]:
