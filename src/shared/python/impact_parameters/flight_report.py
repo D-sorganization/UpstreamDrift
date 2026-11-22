@@ -65,6 +65,23 @@ class FlightSummary:
     invalid_reason: str = ""
     #: seconds after launch of each ``trajectory_m`` point (``None``: not recorded)
     times_s: np.ndarray | None = None
+    #: launch spin-axis tilt, degrees, + = right (``None``: not reported)
+    spin_axis_deg: float | None = None
+
+
+def spin_axis_tilt_deg(axis: np.ndarray) -> float:
+    """Tilt of a launch spin axis from pure backspin, degrees, + = right.
+
+    ``axis`` is in the pipeline frame (x down-range, y left, z up), where pure
+    backspin is about -y; an axis dipped below horizontal on the right
+    (negative z) curves the ball right, the launch-monitor sign. Raises
+    ``ValueError`` for an axis that is zero or not finite.
+    """
+    vec = np.asarray(axis, dtype=float)
+    norm = float(np.linalg.norm(vec))
+    if vec.shape != (3,) or not math.isfinite(norm) or norm <= 0.0:
+        raise ValueError(f"spin axis must be a finite non-zero 3-vector, got {axis}")
+    return math.degrees(math.asin(max(-1.0, min(1.0, -float(vec[2]) / norm))))
 
 
 def _invalid_reason(path: np.ndarray) -> str:
@@ -174,6 +191,7 @@ def flight_for_impact(
         trajectory_m=path,
         valid=not reason,
         invalid_reason=reason,
+        spin_axis_deg=spin_axis_tilt_deg(launch.spin_axis),
         times_s=np.array([p.time for p in result.trajectory], dtype=float),
     )
     ensure(math.isfinite(summary.carry_m), "carry must be finite", summary.carry_m)

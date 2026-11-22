@@ -269,6 +269,7 @@ class FlightPlayback:
     aim_yaw_rad: float | None = None
     aim_text: str | None = None
     aim_lateral_m: float | None = None
+    spin_axis_deg: float | None = None  # model launch spin-axis tilt, + = right
 
     def __post_init__(self) -> None:
         if not isinstance(self.settings, TracerSettings):
@@ -433,7 +434,7 @@ class FlightPlayback:
             tile, camera, end, style, self.carry_m, grid=grid
         )
 
-    def _paint_aim(self, tile: Image8, camera: Any, depth: Any) -> Image8:
+    def paint_aim(self, tile: Image8, camera: Any, depth: Any) -> Image8:
         """``tile`` with the aim line on the ground (nothing without one)."""
         points, style = _aim_line_points(self), self.settings
         aim = style.aim
@@ -470,7 +471,7 @@ class FlightPlayback:
         ``label`` False leaves the carry label out (an inset states it).
         """
         style, marker = self.settings, self.settings.landing_marker
-        tile = self._paint_aim(tile, camera, depth)
+        tile = self.paint_aim(tile, camera, depth)
         if marker is not None and self.path_m is not None:
             ring = landed or marker.when == "from_start"
             hide = occlusion_for(style, depth)
@@ -555,6 +556,7 @@ def playback_from_flight(
         flight.launch_deg,
         flight.spin_rpm,
         flight.ball_speed_mph,
+        spin_axis_deg=flight.spin_axis_deg,
     )
 
 
