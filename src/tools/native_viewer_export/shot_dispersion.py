@@ -252,9 +252,8 @@ class DispersionResult:
         return [o for o in self.outcomes if o.available]
 
     def _column(self, metric: str, rows: Sequence[SampleOutcome]) -> list[float]:
-        return [
-            float(o.metrics[metric]) for o in rows if o.metrics.get(metric) is not None
-        ]
+        found = (o.metrics.get(metric) for o in rows)
+        return [float(v) for v in found if v is not None]
 
     def summary(self) -> dict[str, dict[str, float] | None]:
         """Mean, population std and count of each metric over available shots."""
@@ -266,7 +265,7 @@ class DispersionResult:
         out: dict[str, dict[str, float | None]] = {}
         for metric in SENSITIVITY_METRICS:
             rows = [o for o in self.available if o.metrics.get(metric) is not None]
-            ys = [float(o.metrics[metric]) for o in rows]
+            ys = self._column(metric, rows)
             inputs = {n: [getattr(o.setup, n) for o in rows] for n in INPUTS}
             out[metric] = slopes(inputs, ys)
         return out

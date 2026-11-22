@@ -55,7 +55,7 @@ def _draw_ellipse(ax: Any, result: DispersionResult, cfg: DispersionSettings) ->
     centre, width, height, angle = fit
     ax.add_patch(
         Ellipse(
-            centre,
+            (float(centre[0]), float(centre[1])),
             width,
             height,
             angle=angle,
