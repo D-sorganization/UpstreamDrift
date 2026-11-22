@@ -156,6 +156,71 @@ horizontal angle between face normal and velocity was 1.3 and 11.6 degrees.
 These are time- and frame-sensitive kinematic proxies, not target-relative
 face-to-path measurements or evidence of contact, ballflight, or carry. A
 different finite-difference stencil changed velocity by 0.31--0.74 m/s.
+A 200 ms forward-tracking diagnostic used the exact committed v2 model and
+the exploratory continuity 0.1 / face 0.1 fit, with the existing computed-
+torque controller, 1 ms zero-order hold and eight RK4 substeps. It completed
+200 steps with 6,400 expected stage records and no ball force. Joint-position
+tracking RMS was 0.007994 rad, root translation RMS 19.21 mm, and peak held
+source effort 303.05 N m. A zero-tolerance check of the available named ROM
+table flagged four coordinates (largest excess 0.742 degrees). The recorded
+effort is not established as post-saturation torque; complete anatomical,
+speed and torque gates remain indeterminate. This is neither Option B nor an
+admitted baseline.
+The same diagnostic was extended to 1.322 s, immediately before the recorded
+impact split. It completed 1,322 steps and 42,304 expected RK stages. Joint
+position tracking RMS was 0.005049 rad, root translation RMS 47.90 mm, and
+peak held root-zeroed source effort 1,193.91 N m. Six coordinates exceeded
+the available named ROM ranges in stage or grid samples; the largest excess was
+0.742 degrees. The sampled support model reported its center of pressure inside
+the polygon in 62.89% of grid samples. No impact force or Option B controller
+was used, and missing full anatomy, speed and torque bounds leave hard
+feasibility indeterminate. Stage points are numerical evaluation states, not
+independent physical observations.
+A sensitivity check of those 42,304 stage rows against the existing coordinate
+envelope found directional held-effort exceedances in 33 of 41 non-root slots,
+coordinate-ROM exceedances in seven, and no generalized-speed-prior
+exceedances. The largest effort ratio was 62.85 against an assumed capacity;
+the largest coordinate-ROM excess was 13.44 degrees. Six soft ROM slots,
+16 assumed torque slots and all 41 assumption-marked speed limits apply to
+that inventory. The held source command has not been proven to be
+post-saturation actuator torque, and coordinate mappings are not a complete
+anatomical model. These are model-assumption sensitivities, not clinical or
+physical certification.
+At four sampled hold states, fixed-state inverse-dynamics differences
+reconstructed the existing controller's commands within 4.55e-13 N m. At
+the peak thoracic axial command of -1,193.91 N m, the acceleration-reference
+term contributed -1,178.81 N m; feedback, balance and bias made up the
+remainder. This is local to those states, uses the existing computed-torque
+controller, and does not establish a physical motor torque or the cause of
+every envelope exceedance.
+The peak coincided with a marker-dropout frame, although that does not prove
+causation. The diagnostic tracker differentiated the fitted positions twice
+without filtering. Applying the repository's 12 Hz zero-phase reference filter
+to pre-impact data reduced the fixed-state command norm from 2,720 to 643 N m,
+but maximum marker RMS rose from 36.67 to 47.51 mm, maximum closure translation
+from 2.27 to 8.52 mm, and six named ROM flags appeared. The pre-impact
+face-centre speed proxy fell from 49.73 to 45.09 m/s. Filtering used later
+pre-impact samples and edge padding; it was not a new rollout or an acceptable
+standalone correction.
+Applying the existing trail-arm weld projection after that filter reduced
+maximum positional closure from 8.519 to 0.000860 mm, with little change in
+marker RMS. It did not enforce ROM: one named wrist excess grew from 0.063 to
+1.719 degrees. The projection therefore does not establish a hard-feasible
+reference, even though closure improved.
+A seven-frame bounded pose-solver diagnostic used in-bounds original seeds,
+the filtered poses as a prior and the actual available observations. It met
+the 29 supplied named bounds, with closure translation 0.290--1.650 mm and
+marker RMS 23.56--35.89 mm. All seven were classified at bounds; closure was
+a soft residual and 18 model coordinates lack named ranges. This is not a
+full anatomical or trajectory acceptance.
+Extending that independent-frame diagnostic to all 477 pre-impact frames
+preserved the supplied bounds, but every solve was classified at bounds and
+not converged. Maximum closure translation fell from 8.519 to 2.226 mm and
+maximum marker RMS from 47.515 to 36.577 mm. Peak twice-differentiated
+reference acceleration rose from 679 to 6,692 rad/s²; at the dropout hold,
+the fixed-state command norm rose from 643 to 2,719 N m. These are reference
+and fixed-state sensitivities, not rollout torques. The result does not
+establish a feasible trajectory or complete anatomical coverage.
 A soft face-axis target inferred from observed head-marker orientation was
 available in 476 of 477 pre-impact frames, but not at the dropout frame; no
 target was imputed there. At continuity weight 0.1, adding face weight 3.0
