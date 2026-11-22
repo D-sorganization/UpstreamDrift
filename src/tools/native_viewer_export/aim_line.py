@@ -40,12 +40,13 @@ class AimLineSettings:
     def __post_init__(self) -> None:
         if self.aim_line not in MODES:
             raise ValueError(f"aim_line must be one of {MODES}, got {self.aim_line!r}")
-        rgba = tuple(self.line_color_rgba)
-        if len(rgba) != 4 or not all(
-            isinstance(c, int) and 0 <= c <= 255 for c in rgba
-        ):
-            raise ValueError("line_color_rgba must be four integers in 0..255")
-        object.__setattr__(self, "line_color_rgba", rgba)
+        for name in ("line_color_rgba", "outline_color_rgba"):
+            rgba = tuple(getattr(self, name))
+            if len(rgba) != 4 or not all(
+                isinstance(c, int) and 0 <= c <= 255 for c in rgba
+            ):
+                raise ValueError(f"{name} must be four integers in 0..255")
+            object.__setattr__(self, name, rgba)
         if not isinstance(self.line_width_px, int) or self.line_width_px < 1:
             raise ValueError("line_width_px must be a positive integer")
         for name in ("overshoot_fraction", "min_finish_distance_m"):

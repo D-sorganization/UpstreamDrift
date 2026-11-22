@@ -43,6 +43,14 @@ def test_settings_file_is_documented_and_validated() -> None:
         replace(AIM, line_width_px=0)
 
 
+def test_loaded_colours_are_tuples_the_drawing_library_accepts() -> None:
+    # JSON arrays load as lists; PIL rejects a list as a colour (render crash).
+    assert isinstance(AIM.line_color_rgba, tuple)
+    assert isinstance(AIM.outline_color_rgba, tuple)
+    with pytest.raises(ValueError):
+        replace(AIM, outline_color_rgba=(10, 20, 40))
+
+
 def test_default_is_finish_with_a_shot_shape_and_unchanged_without() -> None:
     assert AIM.resolved("draw", None) == "finish"
     assert AIM.resolved(None, None) == "auto"
