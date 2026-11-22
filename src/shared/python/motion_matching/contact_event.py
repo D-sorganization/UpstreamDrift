@@ -98,19 +98,27 @@ def _build_boundary_topology(triangles: Array) -> _BoundaryTopology:
             np.where(swap[:, None], first, second),
         )
     )
-    _, first_indices, counts = np.unique(
-        keys, axis=0, return_index=True, return_counts=True
+    _, first_indices, edge_inverse, counts = np.unique(
+        keys, axis=0, return_index=True, return_inverse=True, return_counts=True
     )
+    vertex_keys = np.rint((vertices - origin) / quantum).astype(np.int64)
+    _, vertex_inverse, vertex_counts = np.unique(
+        vertex_keys, axis=0, return_inverse=True, return_counts=True
+    )
+    triangle_vertices = np.sort(vertex_inverse.reshape(-1, 3), axis=1)
+    if len(np.unique(triangle_vertices, axis=0)) != len(triangles):
+        raise ValueError("face topology contains duplicate triangles")
+    if np.any(counts > 2):
+        raise ValueError("face topology has a nonmanifold edge")
+    directions = np.bincount(edge_inverse, weights=np.where(swap, -1, 1))
+    if np.any((counts == 2) & (directions != 0)):
+        raise ValueError("face winding is inconsistent across a shared edge")
     boundary_indices = first_indices[counts == 1]
     face_indices, local_edges = np.divmod(boundary_indices, 3)
     opposite_for_edge = (2, 0, 1)
     boundary_face_opposites = frozenset(
         (int(face), opposite_for_edge[int(edge)])
         for face, edge in zip(face_indices, local_edges, strict=True)
-    )
-    vertex_keys = np.rint((vertices - origin) / quantum).astype(np.int64)
-    _, vertex_inverse, vertex_counts = np.unique(
-        vertex_keys, axis=0, return_inverse=True, return_counts=True
     )
     shared_groups = [
         np.flatnonzero(vertex_inverse == index)

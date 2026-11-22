@@ -145,6 +145,8 @@ def test_observation_contracts() -> None:
 
 
 def test_face_triangles_are_rendered_geometry_in_the_requested_frame() -> None:
+    from src.shared.python.motion_matching.contact_event import _build_boundary_topology
+
     spec = _spec()
     entry = next(f for f in spec["frames"] if f["name"] == cft.FACE_FRAME)
     placement = np.asarray(entry["placement"], dtype=float)
@@ -153,6 +155,7 @@ def test_face_triangles_are_rendered_geometry_in_the_requested_frame() -> None:
     assembly = ca.assembly_from_spec(spec)
     assert assembly is not None
     np.testing.assert_allclose(restored, ca.clubface_triangles(assembly), atol=1e-12)
+    assert len(_build_boundary_topology(frame_triangles).boundary_edges) > 0
 
 
 def test_face_triangles_reject_unrelated_frame() -> None:

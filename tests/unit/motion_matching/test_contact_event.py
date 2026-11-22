@@ -86,6 +86,26 @@ def test_boundary_topology_rejects_offsets_beyond_mesh_resolution() -> None:
         contact_event._build_boundary_topology(mesh)
 
 
+@pytest.mark.parametrize(
+    "mesh",
+    [
+        np.stack((_TRIANGLES[0], _TRIANGLES[0])),
+        np.stack((_TRIANGLES[0], _TRIANGLES[0][::-1])),
+        np.stack(
+            (
+                _TRIANGLES[0],
+                _TRIANGLES[1],
+                np.array([[0.0, -1.0, -1.0], [0.0, 0.0, 1.0], [1.0, -1.0, 0.0]]),
+            )
+        ),
+        np.stack((_TRIANGLES[0], _TRIANGLES[1][::-1])),
+    ],
+)
+def test_invalid_face_topology_fails_closed(mesh: np.ndarray) -> None:
+    with pytest.raises(ValueError, match="topology|winding"):
+        contact_event._build_boundary_topology(mesh)
+
+
 @pytest.mark.parametrize("change", ["deform", "reorder"])
 def test_contact_search_fails_closed_if_face_topology_changes(change: str) -> None:
     def face(q: np.ndarray) -> np.ndarray:
