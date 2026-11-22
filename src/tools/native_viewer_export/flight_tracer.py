@@ -30,7 +30,7 @@ from src.shared.python.impact_parameters.club_impact import (
     ClubImpact,
     club_impact_from_spec,
 )
-from src.shared.python.impact_parameters.extract import face_location_mm
+from src.shared.python.impact_parameters.extract import MPS_TO_MPH, face_location_mm
 from src.shared.python.impact_parameters.flight_report import (
     FlightSummary,
     flight_for_impact,
@@ -526,6 +526,44 @@ def with_model_smash(overlays: Any) -> Any:
     if factors is not None:
         factors = factors.with_model_smash(speed)
     return replace(overlays, card=card, factors=factors)
+
+
+def attach_flight(overlays: Any, swing: Any, settings: Any) -> Any:
+    """``overlays`` with the export's flight and the model smash factor.
+
+    One flight evaluation (:func:`flight_for_export`) feeds the flight HUD, the
+    impact card and the factors panel. Without ``settings.ball_flight``
+    ``overlays`` is returned unchanged. ``overlays`` may be ``None``.
+    """
+    if settings.ball_flight is None:
+        return overlays
+    from src.tools.native_viewer_export.core import ClipOverlays
+
+    flight = flight_for_export(swing, settings)
+    overlays = replace(overlays or ClipOverlays(), flight=flight)
+    return with_model_smash(overlays)
+
+
+def manifest_record(overlays: Any) -> dict[str, Any] | None:
+    """Manifest entry of the flight: SI values and the display unit names.
+
+    ``None`` without a flight; a flight without a path gives its status under
+    ``"unavailable"``. Speeds are m/s, distances m, whatever the labels show.
+    """
+    flight = None if overlays is None else overlays.flight
+    if flight is None:
+        return None
+    record: dict[str, Any] = {"units": flight.display_unit_names()}
+    if flight.path_m is None:
+        return {**record, "unavailable": flight.status}
+    speed = flight.ball_speed_mph
+    return {
+        **record,
+        "carry_m": flight.carry_m,
+        "apex_m": flight.apex_m,
+        "lateral_m": flight.lateral_m,
+        "ball_speed_mps": None if speed is None else speed / MPS_TO_MPH,
+    }
 
 
 def playback_from_series(

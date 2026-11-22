@@ -219,7 +219,9 @@ def _swing(steps: int = 100) -> SwingInput:
 
 
 def _export(monkeypatch, tmp_path, card, **overrides):
-    monkeypatch.setattr(core, "impact_card_for", lambda swing, t, ball=None: card)
+    monkeypatch.setattr(
+        core, "impact_card_for", lambda swing, t, ball=None, unit=None: card
+    )
     settings = ExportSettings(
         views=("face_on",),
         multiview=False,
