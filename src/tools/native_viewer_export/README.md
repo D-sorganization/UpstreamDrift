@@ -438,3 +438,15 @@ kinematic replay, not a refit. Limits live in `shot_setup_settings.json`.
   the captured ball the measured club was already slowed by the real ball, so
   forward positions are valid only for the first few centimetres; the ball
   record carries `ball_position_shift_m` and a `position_note`.
+- `--shot-shape {straight,draw,fade}` solves the club roll instead of taking a
+  number. `straight` is the roll at which the flight model lands the ball on
+  the target line (|side| <= `straight_tolerance_m`, found by a bracketed
+  secant search within +-`solve_span_deg` of zero, at most `max_solve_steps`
+  flight evaluations, no rendering); `draw` / `fade` are that roll minus / plus
+  `shape_roll_step_deg`. The names are the ball curve of a right-handed golfer:
+  a draw curves left (more closed, more negative roll). It cannot be combined
+  with a non-zero `--club-roll-in-hands` but combines with
+  `--ball-position-shift`. A flight that is unavailable or a bracket without a
+  sign change is an error, never a silent fallback. The solved roll is logged
+  and recorded in the ball record under `shot_setup`; a non-zero roll or shift
+  adds a `Setup: ...` line to the clip HUD.

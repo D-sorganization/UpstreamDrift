@@ -1,8 +1,16 @@
 {
   "max_abs_roll_deg": 20,
   "max_abs_ball_shift_m": 0.15,
+  "straight_tolerance_m": 0.25,
+  "solve_span_deg": 6,
+  "max_solve_steps": 12,
+  "shape_roll_step_deg": 2.0,
   "sources": {
     "max_abs_roll_deg": "Largest club roll in the hands (degrees, either sign) the exporter accepts. A grip rotation of a few degrees changes the delivered face by about the same amount (measured on the matched right-handed driver swing: 1 degree of roll turns the face about 0.73 degrees and adds about 0.67 degrees of loft); beyond 20 degrees the head no longer reads as a driver on the grip, so larger values are refused as a likely typing error.",
-    "max_abs_ball_shift_m": "Largest ball move along the target line (metres, either sign) the exporter accepts: 0.15 m is about three ball diameters, roughly the whole forward-to-back range of a real stance. The measured club was slowed by the real ball, so forward of the captured ball only the first few centimetres are valid."
+    "max_abs_ball_shift_m": "Largest ball move along the target line (metres, either sign) the exporter accepts: 0.15 m is about three ball diameters, roughly the whole forward-to-back range of a real stance. The measured club was slowed by the real ball, so forward of the captured ball only the first few centimetres are valid.",
+    "straight_tolerance_m": "Landing side offset (metres) within which a shot shape counts as straight: 0.25 m on a carry of about 250 m is a line error of about 0.06 degrees, far below the roughly 6.6 m per degree of roll measured on the matched right-handed driver swing, so the solved roll is good to about 0.04 degrees.",
+    "solve_span_deg": "Half-width of the roll bracket (degrees) searched around zero for the straight roll. Measured on the matched right-handed driver swing: the landing side crosses zero near -2 degrees (about -15 m at -6, +15 m at 0, +66 m at +6), so +-6 degrees brackets it with margin; at +8 degrees the added loft pushes the impact spin beyond the driver validity envelope and the flight model refuses. A swing whose side does not change sign inside the bracket raises instead of extrapolating.",
+    "max_solve_steps": "Most flight evaluations (each attaches the ball, refines contact and runs the flight model, no rendering) the straight-roll solve may use, including the two bracket ends. False position on a near-linear side converges in about 4 to 6; 12 leaves headroom for a curved response before the solve fails loudly.",
+    "shape_roll_step_deg": "Roll (degrees) a draw or fade is from straight: about 2 degrees of roll moves the landing side by roughly 13 m on the matched right-handed driver swing (from 0 m to about 11 m left or 15 m right at -4 and 0 degrees from the -2 degree straight roll), a visible but ordinary curve."
   }
 }
