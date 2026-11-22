@@ -97,6 +97,7 @@ class TracerSettings:
     inset: FlightInsetSettings | None = None  # flight_inset_settings.json
     ball_shading: flight_depth.BallShading | None = None
     display_units: DisplayUnits = METRIC  # load_tracer_settings: display_units.py
+    hole_view: Any = None  # hole_view.HoleViewSettings (--hole-view); None = off
 
     def __post_init__(self) -> None:
         rgba = _channels(self.tracer_color_rgba, 4, "tracer_color_rgba")

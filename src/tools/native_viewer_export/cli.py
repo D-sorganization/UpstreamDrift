@@ -65,6 +65,7 @@ from src.tools.native_viewer_export.ellipsoid_visibility import (
     panel_note,
 )
 from src.tools.native_viewer_export.flight_tracer import load_tracer_settings
+from src.tools.native_viewer_export.hole_view import load_hole_view_settings
 from src.tools.native_viewer_export.impact_factors import load_factor_settings
 from src.tools.native_viewer_export.overlay import OverlayOptions, build_overlay_feed
 from src.tools.native_viewer_export.runner import ExportJob, run_export
@@ -294,6 +295,22 @@ def _add_ball_flight_arguments(p: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_hole_view_arguments(p: argparse.ArgumentParser) -> None:
+    """Overhead hole view flags (#15150, track A4)."""
+    p.add_argument(
+        "--hole-view",
+        action="store_true",
+        help="also write a plan-view still of the flight on a hole (fairway, "
+        "green, trace, landing, carry); turns the ball flight on (default: off)",
+    )
+    p.add_argument(
+        "--hole-preset",
+        default=None,
+        metavar="NAME",
+        help="hole of --hole-view: par3, par4 or par5 (default: hole_view_settings.json)",
+    )
+
+
 def _add_unit_arguments(p: argparse.ArgumentParser) -> None:
     """Display unit flags of the flight labels and the impact card (#15443)."""
     p.add_argument(
@@ -393,6 +410,7 @@ def _add_clip_overlay_arguments(p: argparse.ArgumentParser) -> None:
     """Optional clip flags: impact factors panel, ball flight and lighting."""
     _add_impact_factor_arguments(p)
     _add_ball_flight_arguments(p)
+    _add_hole_view_arguments(p)
     _add_unit_arguments(p)
     _add_lighting_arguments(p)
     _add_shot_setup_arguments(p)
@@ -693,6 +711,18 @@ def _camera_changes(args: argparse.Namespace) -> dict[str, Any]:
     return changes
 
 
+def _ball_flight_for(args: argparse.Namespace, units: DisplayUnits) -> Any:
+    """Tracer settings of the flag combination, or ``None`` when no flight is wanted."""
+    hole = getattr(args, "hole_view", False)
+    if not (args.ball_flight or args.ball_flight_settings is not None or hole):
+        return None
+    tracer = load_tracer_settings(args.ball_flight_settings, units)
+    if not hole:
+        return tracer
+    view = load_hole_view_settings(preset=args.hole_preset)
+    return replace(tracer, hole_view=view)
+
+
 def build_settings(args: argparse.Namespace) -> ExportSettings:
     """``ExportSettings`` from parsed arguments (raises ``ValueError``)."""
     base = ExportSettings.preview() if args.preset == "preview" else ExportSettings()
@@ -759,9 +789,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         club_roll_in_hands_deg=getattr(args, "club_roll_in_hands", 0.0),
         ball_position_shift_m=getattr(args, "ball_position_shift", 0.0),
         shot_shape=getattr(args, "shot_shape", None),
-        ball_flight=load_tracer_settings(args.ball_flight_settings, units)
-        if args.ball_flight or args.ball_flight_settings is not None
-        else None,
+        ball_flight=_ball_flight_for(args, units),
         speed_unit=units.speed_unit if args.ball_flight_speed_unit else None,
         **(
             {"impact_speed": args.impact_speed} if args.impact_speed is not None else {}
