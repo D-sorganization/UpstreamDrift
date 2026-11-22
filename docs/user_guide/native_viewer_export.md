@@ -115,8 +115,14 @@ impact. `--ball-position-shift M` moves the ball along the target line
 (positive toward the target). Limits: the same body motion is replayed, the
 shaft is treated as rigid, and forward of the captured ball position only
 about the first few centimetres are valid because the real ball slowed the
-measured club. Both are bounded by `shot_setup_settings.json`. A single
-`--shot-shape` flag is not available yet.
+measured club. Both are bounded by `shot_setup_settings.json`.
+
+`--shot-shape straight|draw|fade` solves the roll instead: `straight` is the
+roll at which the flight model lands the ball on the target line, and `draw` /
+`fade` close / open it by a set step (right-handed ball curve). It cannot be
+combined with a non-zero `--club-roll-in-hands`, needs a flight the model can
+compute, and stops with an error rather than falling back. The solved roll is
+written to the ball record and the clip HUD.
 
 ### Force and Torque Vectors, Shading, and Grip Forces
 
