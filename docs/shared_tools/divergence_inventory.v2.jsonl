@@ -1138,6 +1138,8 @@
 {"path": "impact_parameters/adapters/pinocchio_adapter.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/adapters/simscape_adapter.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/ball_impact.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
+{"path": "impact_parameters/club_impact.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
+{"path": "impact_parameters/club_impact_settings.json", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/clubhead_series.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/conditions.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
 {"path": "impact_parameters/extract.py", "classification": "ud-only", "package": "impact_parameters", "spelling_only": false}
