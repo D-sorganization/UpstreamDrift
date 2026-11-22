@@ -124,8 +124,8 @@ def test_hud_lines_say_where_the_ball_is_and_what_the_model_predicts() -> None:
     assert flying[1:] == landed[1:]
     text = " ".join(flying)
     assert "Ball 140 mph" in text and "Launch 12.0 deg" in text
-    assert "Spin 2600 rpm" in text and "Carry 160 m" in text
-    assert "Apex 20 m" in text and "Side 8 m right" in text and "Time 4.0 s" in text
+    assert "Spin 2600 rpm" in text and "Carry 175 yd" in text
+    assert "Apex 22 yd" in text and "Side 9 yd right" in text and "Time 4.0 s" in text
 
 
 def test_a_flight_outside_the_model_envelope_is_not_drawn_by_default() -> None:
