@@ -173,10 +173,23 @@ Replace placeholders with local paths. Check the imported kernel's
 `PHYSICS_REVISION` and origin when reproducing the result; do not install over
 an existing shared environment merely to run this check.
 
+## Contact Verification
+
+The opt-in surface trigger is experimental. A synthetic one-step MuJoCo
+probe using the rendered face patch and production RK4 stepper found a
+bracketed event with a sphere-to-face residual of approximately 1.4e-11 m.
+The public synthetic MuJoCo regression compares 1 ms and 0.5 ms steps and
+checks event state and residual, using the shared RK4 stepper. Neither check is
+an impact verification for the pinned swing. The event finder
+only detects endpoint sign-change brackets and can miss tangencies or multiple
+crossings within one step. Its finite nine-sample miss penalty is a smooth
+surrogate, not a proven global closest distance. Independent validation on the
+actual matched trajectory remains necessary.
+
 ## Open Admission Gates
 
-- Locate and verify the render entrypoint's pinned bundle, migrate against the
-  specified v2 model, and run forward tracking against its actual reference.
+- Resolve the verified pinned bundle's model mismatch and run forward tracking
+  on the specified v2 model against the actual reference.
   Record runtime provenance and distinguish filtered and unfiltered targets.
 - Validate anatomical ROM, speed and total applied torque for every relevant
   joint, including controller feedback and between-sample behavior. Report

@@ -11,11 +11,14 @@ from __future__ import annotations
 
 import json
 import math
+from dataclasses import replace
 
 import numpy as np
 import pytest
 
 from src.shared.python.impact_parameters import ball_impact as bi
+from src.shared.python.model_appearance.ball import BALL_RADIUS_M as GOLF_BALL_RADIUS_M
+from src.shared.python.motion_matching.contact_event import ContactRoot
 from src.shared.python.motion_matching import impact_force as imf
 
 pytestmark = pytest.mark.unit
@@ -177,6 +180,24 @@ def test_window_must_fit_in_the_swing() -> None:
         plan(t_start=0.9999, duration=1e-3)
 
 
+def test_spec_plan_does_not_load_finite_geometry_unless_opted_in(monkeypatch) -> None:
+    from src.shared.python.motion_matching import club_face_target as cft
+
+    monkeypatch.setattr(cft, "face_centre_in_frame", lambda _spec: np.zeros(3))
+    monkeypatch.setattr(
+        cft, "face_axis_in_frame", lambda _spec: np.array([1.0, 0.0, 0.0])
+    )
+
+    def unexpected(_spec):
+        raise AssertionError("legacy plan must not load face triangles")
+
+    monkeypatch.setattr(cft, "face_triangles_in_frame", unexpected)
+    impact = imf.ImpactForce.for_spec(
+        {}, t_start_s=0.5, swing_span_s=(0.0, 1.0), ball_centre_m=np.ones(3)
+    )
+    assert impact.face_triangles_in_frame is None
+
+
 def test_reference_rates_do_not_differentiate_across_impact() -> None:
     t = np.linspace(0.0, 0.1, 37)
     t_hit = 0.0505
@@ -237,3 +258,369 @@ def test_passage_trigger_needs_the_head_near_the_ball() -> None:
     assert not out.is_scheduled
     early = plan(t_start=0.40).with_passage(np.array([L, 0.0, 0.0]))
     assert not early.schedule(0.30, 1e-3, q, v, poses).is_scheduled  # not armed
+
+
+def _surface_plan(ball: np.ndarray, *, t_start: float = 0.0) -> imf.ImpactForce:
+    triangles = np.array(
+        [
+            [[0.0, -0.2, -0.2], [0.0, 0.2, -0.2], [0.0, 0.0, 0.2]],
+            [[0.0, -0.2, -0.2], [0.0, 0.0, 0.2], [0.0, -0.2, 0.2]],
+        ]
+    )
+    return replace(
+        plan(t_start=t_start),
+        axis_in_frame=np.array([1.0, 0.0, 0.0]),
+        ball_centre_m=ball,
+        face_triangles_in_frame=triangles,
+    ).with_surface_contact()
+
+
+def rotating_poses(q: np.ndarray) -> dict[str, np.ndarray]:
+    angle = float(q[1])
+    c, s = math.cos(angle), math.sin(angle)
+    pose = np.eye(4)
+    pose[:3, :3] = [[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]]
+    pose[:3, 3] = [q[0], 0.0, 0.0]
+    return {"Clubhead": pose}
+
+
+def _ball_on_rotated_face() -> np.ndarray:
+    angle = 0.5
+    return np.array(
+        [
+            1.0 + GOLF_BALL_RADIUS_M * math.cos(angle),
+            GOLF_BALL_RADIUS_M * math.sin(angle),
+            0.0,
+        ]
+    )
+
+
+def test_surface_trigger_uses_integrated_root_and_moving_face_pose() -> None:
+    q = np.zeros(2)
+    v = np.array([100.0, 50.0])
+    ball = _ball_on_rotated_face()
+    impact = _surface_plan(ball)
+    active = []
+    latched_states = []
+
+    def drift(t_a, h, qq, vv, external):  # noqa: ANN001, ANN202
+        active.append(external is not None)
+        acceleration = np.zeros(2) if external is None else external(qq) / [M, INERTIA]
+        return qq + h * vv + 0.5 * h * h * acceleration, vv + h * acceleration, None
+
+    def record_accel(qq, vv, tau):  # noqa: ANN001, ANN202
+        latched_states.append((qq.copy(), vv.copy()))
+        return accel(qq, vv, tau)
+
+    q1, v1, triggered, _ = imf.step_through_impact(
+        impact, 0.0, 0.02, q, v, drift, poses=rotating_poses, accel=record_accel
+    )
+    assert triggered is not None and triggered.trigger == "surface"
+    assert triggered.is_scheduled and triggered.is_latched
+    assert triggered.contact_event is not None
+    event = triggered.contact_event
+    assert event.time_s == pytest.approx(0.01, abs=5e-10)
+    np.testing.assert_allclose(event.q, [1.0, 0.5], atol=1e-8)
+    np.testing.assert_allclose(event.qd, v)
+    np.testing.assert_allclose(event.contact_point_m, [1.0, 0.0, 0.0], atol=2e-8)
+    np.testing.assert_allclose(
+        event.contact_normal,
+        [math.cos(0.5), math.sin(0.5), 0.0],
+        atol=1e-14,
+    )
+    assert event.approach_speed_mps == pytest.approx(100.0 * math.cos(0.5), rel=1e-6)
+    np.testing.assert_allclose(latched_states[0][0], event.q)
+    np.testing.assert_allclose(latched_states[0][1], event.qd)
+    assert any(active)
+    assert not np.array_equal(q1, q) and not np.array_equal(v1, v)
+
+
+def test_surface_trigger_fails_closed_and_records_a_finite_miss() -> None:
+    q, v = np.zeros(2), np.array([100.0, 0.0])
+    impact = _surface_plan(np.array([1.0, 2.0, 0.0]))
+    calls = []
+
+    def drift(t_a, h, qq, vv, external):  # noqa: ANN001, ANN202
+        calls.append(external)
+        return qq + h * vv, vv, None
+
+    q1, v1, result, _ = imf.step_through_impact(
+        impact, 0.0, 0.02, q, v, drift, poses=rotating_poses, accel=accel
+    )
+    assert result is not None and not result.is_scheduled and not result.is_latched
+    assert result.contact_event is None
+    assert np.isfinite(result.contact_miss_penalty_m)
+    assert all(external is None for external in calls)
+    np.testing.assert_allclose(q1, q + 0.02 * v)
+    np.testing.assert_array_equal(v1, v)
+
+
+def test_surface_latch_uses_the_off_centre_root_for_impulse_and_force_jacobian() -> (
+    None
+):
+    angle, local_y = 0.5, 0.05
+    normal = np.array([math.cos(angle), math.sin(angle), 0.0])
+    face_point = np.array(
+        [1.0 - local_y * math.sin(angle), local_y * math.cos(angle), 0.0]
+    )
+    ball = face_point + GOLF_BALL_RADIUS_M * normal
+    impact = _surface_plan(ball)
+    q, v = np.zeros(2), np.array([100.0, 50.0])
+
+    def drift(_t, h, qq, vv, external):  # noqa: ANN001, ANN202
+        return qq + h * vv, vv, None
+
+    _, _, latched, _ = imf.step_through_impact(
+        impact, 0.0, 0.02, q, v, drift, poses=rotating_poses, accel=accel
+    )
+    assert latched.collision is not None and latched.contact_event is not None
+    assert latched.contact_point_in_frame is not None
+    np.testing.assert_allclose(
+        latched.contact_point_in_frame, [0.0, local_y, 0.0], atol=2e-8
+    )
+    expected_jac = latched.point_jacobian(
+        latched.contact_event.q, rotating_poses, latched.contact_point_in_frame
+    )
+    expected_hit_velocity = expected_jac @ latched.contact_event.qd
+    assert latched.collision.approach_speed_mps == pytest.approx(
+        float(latched.contact_event.contact_normal @ expected_hit_velocity), rel=1e-6
+    )
+    np.testing.assert_allclose(
+        latched.generalized_force(latched.contact_event.q, rotating_poses),
+        expected_jac.T @ latched.force_world,
+    )
+
+
+def test_unscheduled_surface_plan_cannot_accept_a_replay_force() -> None:
+    impact = _surface_plan(np.array([1.0, 0.0, 0.0]))
+    with pytest.raises(ValueError, match="surface.*force"):
+        impact.with_force(np.array([1.0, 0.0, 0.0]))
+
+
+def test_surface_search_requires_an_integrator_advance() -> None:
+    impact = _surface_plan(np.array([1.0, 0.0, 0.0]))
+    with pytest.raises(ValueError, match="advance"):
+        impact.schedule(0.0, 0.01, np.zeros(2), np.zeros(2), rotating_poses)
+
+
+def test_surface_arming_cannot_be_after_its_scheduled_root() -> None:
+    plan = _surface_plan(np.array([1.0, 0.0, 0.0]), t_start=0.1)
+    with pytest.raises(ValueError, match="armed_at_s"):
+        replace(plan, armed_at_s=0.2)
+
+
+def test_cross_step_miss_penalty_uses_smooth_weighted_aggregation() -> None:
+    q, v = np.zeros(2), np.array([100.0, 0.0])
+    impact = _surface_plan(np.array([1.0, 2.0, 0.0]))
+
+    def drift(_t, h, qq, vv, _external):  # noqa: ANN001, ANN202
+        return qq + h * vv, vv, None
+
+    _, _, first, _ = imf.step_through_impact(
+        impact, 0.0, 0.01, q, v, drift, poses=rotating_poses, accel=accel
+    )
+    _, _, second, _ = imf.step_through_impact(
+        first,
+        0.01,
+        0.01,
+        np.array([1.0, 0.0]),
+        v,
+        drift,
+        poses=rotating_poses,
+        accel=accel,
+    )
+    assert second.contact_miss_penalty_weight_s == pytest.approx(0.02)
+    assert second.contact_miss_penalty_logsum is not None
+    assert np.isfinite(second.contact_miss_penalty_m)
+    restored = imf.ImpactForce.from_record(json.loads(json.dumps(second.to_record())))
+    assert restored.contact_miss_penalty_m == pytest.approx(
+        second.contact_miss_penalty_m
+    )
+
+
+def test_surface_trigger_honors_arm_time_inside_the_step() -> None:
+    impact = _surface_plan(_ball_on_rotated_face(), t_start=0.005)
+    q, v = np.zeros(2), np.array([100.0, 50.0])
+    calls = []
+
+    def drift(t_a, h, qq, vv, external):  # noqa: ANN001, ANN202
+        calls.append((t_a, h, external is not None))
+        return qq + h * vv, vv, None
+
+    _, _, result, _ = imf.step_through_impact(
+        impact, 0.0, 0.02, q, v, drift, poses=rotating_poses, accel=accel
+    )
+    assert result is not None and result.is_latched
+    assert result.contact_event is not None
+    assert result.contact_event.time_s >= impact.armed_at_s
+    assert any(t0 == pytest.approx(0.005) and not active for t0, _, active in calls)
+
+
+def test_surface_sub_intervals_are_chronological_when_event_follows_arming() -> None:
+    impact = replace(
+        _surface_plan(np.array([1.0, 0.0, 0.0]), t_start=0.005),
+        scheduled=True,
+        t_start_s=0.007,
+        contact_event=ContactRoot(
+            time_s=0.007,
+            q=np.zeros(2),
+            qd=np.array([100.0, 0.0]),
+            contact_point_m=np.zeros(3),
+            contact_normal=np.array([1.0, 0.0, 0.0]),
+            approach_speed_mps=100.0,
+            triangle_index=0,
+        ),
+    )
+    intervals = impact.sub_intervals(0.0, 0.02)
+    assert intervals == [
+        (0.0, 0.005, False),
+        (0.005, 0.007, False),
+        (0.007, 0.007 + impact.duration_s, True),
+        (0.007 + impact.duration_s, 0.02, False),
+    ]
+    assert all(a < b for a, b, _ in intervals)
+
+
+def test_shifted_unscheduled_surface_plan_moves_arming_clock() -> None:
+    plan = _surface_plan(np.array([1.0, 0.0, 0.0]), t_start=0.1)
+    shifted = plan.shifted(0.3)
+    assert shifted.t_start_s == pytest.approx(0.4)
+    assert shifted.armed_at_s == pytest.approx(0.4)
+    assert shifted.swing_span_s == pytest.approx((0.3, 1.3))
+
+
+def test_shifted_scheduled_surface_plan_moves_root_and_arming_clocks() -> None:
+    plan = _surface_plan(np.array([1.0, 0.0, 0.0]), t_start=0.1)
+    root = ContactRoot(
+        time_s=0.1,
+        q=np.zeros(2),
+        qd=np.array([100.0, 0.0]),
+        contact_point_m=np.zeros(3),
+        contact_normal=np.array([1.0, 0.0, 0.0]),
+        approach_speed_mps=100.0,
+        triangle_index=0,
+    )
+    scheduled = replace(plan, scheduled=True, armed_at_s=0.05, contact_event=root)
+    shifted = scheduled.shifted(0.3)
+    assert shifted.t_start_s == pytest.approx(0.4)
+    assert shifted.armed_at_s == pytest.approx(0.35)
+    assert shifted.contact_event is not None
+    assert shifted.contact_event.time_s == pytest.approx(0.4)
+    restored = imf.ImpactForce.from_record(shifted.to_record())
+    assert restored.contact_event is not None
+    assert restored.contact_event.time_s == pytest.approx(restored.t_start_s)
+
+
+def test_shifted_latched_surface_record_moves_all_event_clocks() -> None:
+    plan = _surface_plan(np.array([1.0, 0.0, 0.0]), t_start=0.1)
+    root = ContactRoot(
+        time_s=0.1,
+        q=np.zeros(2),
+        qd=np.array([100.0, 0.0]),
+        contact_point_m=np.zeros(3),
+        contact_normal=np.array([1.0, 0.0, 0.0]),
+        approach_speed_mps=100.0,
+        triangle_index=0,
+    )
+    latched = replace(
+        plan,
+        scheduled=True,
+        armed_at_s=0.05,
+        contact_event=root,
+        contact_point_in_frame=np.zeros(3),
+    ).with_force(np.array([1.0, 2.0, 3.0]))
+    restored = imf.ImpactForce.from_record(json.loads(json.dumps(latched.to_record())))
+    shifted = restored.shifted(-0.02)
+    assert shifted.is_latched
+    assert shifted.t_start_s == pytest.approx(0.08)
+    assert shifted.armed_at_s == pytest.approx(0.03)
+    assert shifted.contact_event is not None
+    assert shifted.contact_event.time_s == pytest.approx(0.08)
+    assert imf.ImpactForce.from_record(
+        shifted.to_record()
+    ).contact_event.time_s == pytest.approx(0.08)
+
+
+def test_surface_geometry_and_root_round_trip_and_latched_replay_do_not_reschedule() -> (
+    None
+):
+    impact = _surface_plan(np.array([1.0, 0.0, 0.0]))
+    state = np.zeros(2), np.array([100.0, 50.0])
+
+    def drift(_t, h, qq, vv, external):  # noqa: ANN001, ANN202
+        return qq + h * vv, vv, None
+
+    _, _, triggered, _ = imf.step_through_impact(
+        impact, 0.0, 0.02, *state, drift, poses=rotating_poses, accel=accel
+    )
+    assert triggered is not None and triggered.is_latched
+    record = json.loads(json.dumps(triggered.to_record()))
+    restored = imf.ImpactForce.from_record(record)
+    assert restored.contact_event is not None
+    np.testing.assert_allclose(
+        restored.face_triangles_in_frame, impact.face_triangles_in_frame
+    )
+    assert restored.contact_event.time_s == pytest.approx(
+        triggered.contact_event.time_s
+    )
+    replay_calls = []
+
+    def replay_step(t_a, h, qq, vv, external):  # noqa: ANN001, ANN202
+        replay_calls.append(external is not None)
+        return drift(t_a, h, qq, vv, external)
+
+    q2, v2, replayed, _ = imf.step_through_impact(
+        restored,
+        0.0,
+        0.02,
+        np.array([-10.0, 0.0]),
+        np.zeros(2),
+        replay_step,
+        poses=rotating_poses,
+        accel=accel,
+    )
+    assert replayed is restored
+    assert replayed.contact_event.time_s == pytest.approx(
+        triggered.contact_event.time_s
+    )
+    assert any(replay_calls)
+    assert np.isfinite(q2).all() and np.isfinite(v2).all()
+
+
+def test_surface_record_fails_closed_without_geometry_or_with_invalid_event() -> None:
+    record = _surface_plan(np.array([1.0, 0.0, 0.0])).to_record()
+    missing_geometry = dict(record)
+    missing_geometry.pop("face_triangles_in_frame")
+    with pytest.raises(ValueError, match="surface contact needs"):
+        imf.ImpactForce.from_record(missing_geometry)
+
+    bad_event = dict(record)
+    bad_event["scheduled"] = True
+    bad_event["contact_event"] = {
+        "time_s": 0.5,
+        "q": [0.5],
+        "qd": [1.0],
+        "contact_point_m": [0.5, 0.0, 0.0],
+        "contact_normal": [0.0, 0.0, 0.0],
+        "approach_speed_mps": 1.0,
+        "triangle_index": 0,
+    }
+    with pytest.raises(ValueError, match="contact_event fields"):
+        imf.ImpactForce.from_record(bad_event)
+
+
+def test_rearming_surface_trigger_clears_event_and_latched_force() -> None:
+    impact = _surface_plan(np.array([1.0, 0.0, 0.0]))
+    q, v = np.zeros(2), np.array([100.0, 50.0])
+
+    def drift(_t, h, qq, vv, external):  # noqa: ANN001, ANN202
+        return qq + h * vv, vv, None
+
+    _, _, triggered, _ = imf.step_through_impact(
+        impact, 0.0, 0.02, q, v, drift, poses=rotating_poses, accel=accel
+    )
+    assert triggered is not None and triggered.is_latched
+    rearmed = triggered.rearmed(lead_s=0.002)
+    assert not rearmed.is_scheduled and not rearmed.is_latched
+    assert rearmed.contact_event is None
+    assert rearmed.armed_at_s == pytest.approx(triggered.t_start_s - 0.002)

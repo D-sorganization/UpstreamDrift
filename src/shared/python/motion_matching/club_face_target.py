@@ -152,6 +152,22 @@ def face_axis_in_frame(spec: Mapping[str, Any], frame: str = FACE_FRAME) -> Arra
     return np.asarray(axis / np.linalg.norm(axis), dtype=float)
 
 
+def face_triangles_in_frame(spec: Mapping[str, Any], frame: str = FACE_FRAME) -> Array:
+    """Rendered finite face triangles in the requested club frame, in metres.
+
+    This supplies geometry only; it does not establish a contact event.
+    Reject frames that are not on the club body or its shaft tip.
+    """
+    from src.shared.python.model_appearance import club_assembly as ca
+
+    assembly, club_body = require_club_assembly(spec)
+    body, placement = _frame_placement(spec, frame)
+    if body not in _club_frame_bodies(spec, club_body):
+        raise ValueError(f"frame {frame} is on {body}, not on the club body")
+    triangles = ca.clubface_triangles(assembly)
+    return np.asarray((triangles - placement[:3, 3]) @ placement[:3, :3])
+
+
 def face_centre_in_frame(spec: Mapping[str, Any], frame: str = FACE_FRAME) -> Array:
     """Rendered face-centre point expressed in the spec ``frame`` (metres)."""
     from src.shared.python.model_appearance import club_assembly as ca

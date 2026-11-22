@@ -29,6 +29,11 @@ face centre: the ball's contact point, the same definition as
 ``PASSAGE_GATE_M``. ``t_start_s`` then becomes that event time, sub-step
 accurate from the face-centre velocity at the step start.
 
+The opt-in ``surface`` trigger uses the finite rendered face triangles and
+actual unforced step callback to bracket sphere contact. The legacy ``passage``
+trigger remains a diagnostic centre-proximity event; it does not establish
+finite-face contact.
+
 The point Jacobian is a central finite difference of the frame pose in the
 generalized coordinates; it equals the velocity Jacobian because the
 full-body coordinates have ``nq == nv`` (Euler-angle root).
@@ -42,6 +47,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field, replace
+import math
 from typing import Any
 
 import numpy as np
@@ -56,6 +62,11 @@ from src.shared.python.impact_parameters.ball_impact import (
     FaceContact,
     collision_impulse,
     validate_window,
+)
+from src.shared.python.model_appearance.ball import BALL_RADIUS_M
+from src.shared.python.motion_matching.contact_event import (
+    ContactRoot,
+    find_contact_event,
 )
 
 Array = NDArray[np.float64]
@@ -100,6 +111,13 @@ class ImpactForce:
     trigger: str = "time"
     passage_point_m: Array | None = None
     scheduled: bool = False
+    face_triangles_in_frame: Array | None = field(default=None, compare=False)
+    armed_at_s: float | None = None
+    contact_event: ContactRoot | None = field(default=None, compare=False)
+    contact_miss_penalty_m: float | None = None
+    contact_miss_penalty_logsum: float | None = None
+    contact_miss_penalty_weight_s: float = 0.0
+    contact_point_in_frame: Array | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.frame, str) or not self.frame:
@@ -124,8 +142,10 @@ class ImpactForce:
             object.__setattr__(
                 self, "force_world", _finite3(self.force_world, "force_world")
             )
-        if self.trigger not in ("time", "passage"):
-            raise ValueError(f"trigger must be 'time' or 'passage', not {self.trigger}")
+        if self.trigger not in ("time", "passage", "surface"):
+            raise ValueError(
+                f"trigger must be 'time', 'passage', or 'surface', not {self.trigger}"
+            )
         if self.passage_point_m is not None:
             object.__setattr__(
                 self,
@@ -134,6 +154,89 @@ class ImpactForce:
             )
         if self.trigger == "passage" and self.passage_point_m is None:
             raise ValueError("a passage trigger needs passage_point_m")
+        if self.face_triangles_in_frame is not None:
+            triangles = np.asarray(self.face_triangles_in_frame, dtype=float)
+            if (
+                triangles.ndim != 3
+                or triangles.shape[1:] != (3, 3)
+                or len(triangles) == 0
+                or not np.isfinite(triangles).all()
+            ):
+                raise ValueError(
+                    "face_triangles_in_frame must be finite (F, 3, 3) geometry"
+                )
+            object.__setattr__(self, "face_triangles_in_frame", triangles.copy())
+        if self.trigger == "surface":
+            if self.ball_centre_m is None or self.face_triangles_in_frame is None:
+                raise ValueError("surface contact needs ball centre and face triangles")
+            armed = float(
+                self.t_start_s if self.armed_at_s is None else self.armed_at_s
+            )
+            if (
+                not np.isfinite(armed)
+                or armed < self.swing_span_s[0]
+                or armed > self.t_start_s
+            ):
+                raise ValueError(
+                    "armed_at_s must be inside the swing and at or before contact"
+                )
+            object.__setattr__(self, "armed_at_s", armed)
+            if self.scheduled != (self.contact_event is not None):
+                raise ValueError(
+                    "scheduled surface contact needs exactly one contact_event"
+                )
+            if self.force_world is not None and (
+                self.contact_event is None or self.contact_point_in_frame is None
+            ):
+                raise ValueError(
+                    "surface replay force requires an event and local point"
+                )
+            if self.contact_event is not None:
+                event = self.contact_event
+                point = np.asarray(event.contact_point_m, dtype=float)
+                normal = np.asarray(event.contact_normal, dtype=float)
+                if (
+                    event.q.ndim != 1
+                    or event.qd.ndim != 1
+                    or not np.isfinite(event.q).all()
+                    or not np.isfinite(event.qd).all()
+                    or point.shape != (3,)
+                    or normal.shape != (3,)
+                    or not np.isfinite(point).all()
+                    or not np.isfinite(normal).all()
+                    or not np.isfinite(event.time_s)
+                    or not np.isfinite(event.approach_speed_mps)
+                    or event.approach_speed_mps <= 0.0
+                    or event.triangle_index < 0
+                    or event.triangle_index >= len(self.face_triangles_in_frame)
+                    or abs(float(np.linalg.norm(event.contact_normal)) - 1.0) > 1e-8
+                    or abs(event.time_s - float(self.t_start_s)) > 1e-12
+                ):
+                    raise ValueError("contact_event fields are invalid")
+                validate_window(event.time_s, self.duration_s, self.swing_span_s)
+        elif self.contact_event is not None:
+            raise ValueError("contact_event is only valid for a surface trigger")
+        if self.contact_miss_penalty_m is not None and (
+            not np.isfinite(self.contact_miss_penalty_m)
+            or self.contact_miss_penalty_m < 0.0
+        ):
+            raise ValueError("contact_miss_penalty_m must be finite and nonnegative")
+        if not np.isfinite(self.contact_miss_penalty_weight_s) or (
+            self.contact_miss_penalty_weight_s < 0.0
+        ):
+            raise ValueError(
+                "contact_miss_penalty_weight_s must be finite and nonnegative"
+            )
+        if self.contact_miss_penalty_logsum is not None and not np.isfinite(
+            self.contact_miss_penalty_logsum
+        ):
+            raise ValueError("contact_miss_penalty_logsum must be finite")
+        if self.contact_point_in_frame is not None:
+            object.__setattr__(
+                self,
+                "contact_point_in_frame",
+                _finite3(self.contact_point_in_frame, "contact_point_in_frame"),
+            )
 
     @classmethod
     def for_spec(
@@ -156,19 +259,67 @@ class ImpactForce:
             ball_centre_m=ball_centre_m,
         )
 
+    @classmethod
+    def for_spec_surface_contact(
+        cls,
+        spec: Mapping[str, Any],
+        *,
+        t_start_s: float,
+        swing_span_s: tuple[float, float],
+        ball_centre_m: Any,
+    ) -> ImpactForce:
+        """Opt-in spec-backed finite-face contact plan."""
+        from src.shared.python.motion_matching import club_face_target as cft
+
+        plan = cls.for_spec(
+            spec,
+            t_start_s=t_start_s,
+            swing_span_s=swing_span_s,
+            ball_centre_m=ball_centre_m,
+        )
+        return replace(
+            plan,
+            face_triangles_in_frame=cft.face_triangles_in_frame(spec),
+        ).with_surface_contact()
+
     @property
     def is_latched(self) -> bool:
         return self.force_world is not None
 
     @property
     def is_scheduled(self) -> bool:
-        """Contact start known (fixed time, or the passage event has fired)."""
+        """Contact start known (fixed time or a trigger event has fired)."""
         return self.trigger == "time" or self.scheduled
 
     def with_passage(self, point_m: Any) -> ImpactForce:
-        """Copy armed at ``t_start_s`` to fire at the passage of ``point_m``."""
+        """Arm the legacy centre-proximity diagnostic at ``point_m``.
+
+        This trigger does not verify the finite clubface or sphere contact.
+        """
         return replace(
-            self, trigger="passage", passage_point_m=point_m, scheduled=False
+            self,
+            trigger="passage",
+            passage_point_m=point_m,
+            scheduled=False,
+            contact_event=None,
+        )
+
+    def with_surface_contact(self) -> ImpactForce:
+        """Opt into finite face-triangle contact, failing closed without geometry."""
+        if self.is_latched:
+            raise ValueError("cannot change a latched impact trigger")
+        if self.ball_centre_m is None or self.face_triangles_in_frame is None:
+            raise ValueError("surface contact needs ball centre and face triangles")
+        return replace(
+            self,
+            trigger="surface",
+            scheduled=False,
+            armed_at_s=float(self.t_start_s),
+            contact_event=None,
+            contact_miss_penalty_m=None,
+            contact_miss_penalty_logsum=None,
+            contact_miss_penalty_weight_s=0.0,
+            contact_point_in_frame=None,
         )
 
     def at_address(self, q0: Array, poses: PoseFn) -> ImpactForce:
@@ -196,16 +347,35 @@ class ImpactForce:
         the new run finds its own contact; a fixed-time plan keeps its time.
         """
         start = float(self.t_start_s)
-        if self.trigger == "passage":
+        if self.trigger in ("passage", "surface"):
             start = max(start - lead_s, float(self.swing_span_s[0]))
         return replace(
-            self, force_world=None, collision=None, scheduled=False, t_start_s=start
+            self,
+            force_world=None,
+            collision=None,
+            scheduled=False,
+            t_start_s=start,
+            armed_at_s=start if self.trigger == "surface" else None,
+            contact_event=None,
+            contact_miss_penalty_m=None,
+            contact_miss_penalty_logsum=None,
+            contact_miss_penalty_weight_s=0.0,
+            contact_point_in_frame=None,
         )
 
     def schedule(
-        self, t: float, dt: float, q: Array, v: Array, poses: PoseFn
+        self,
+        t: float,
+        dt: float,
+        q: Array,
+        v: Array,
+        poses: PoseFn,
+        *,
+        advance: Callable[[float], tuple[Array, Array]] | None = None,
     ) -> ImpactForce:
-        """Fire the passage trigger if the contact starts within ``[t, t + dt)``."""
+        """Fire the configured event if it occurs within the actual step."""
+        if self.trigger == "surface":
+            return self._schedule_surface(t, dt, q, v, poses, advance)
         if self.is_scheduled or t + dt < float(self.t_start_s):
             return self
         q = np.asarray(q, dtype=float)
@@ -223,6 +393,78 @@ class ImpactForce:
             return self
         return replace(self, t_start_s=t + max(lead, 0.0), scheduled=True)
 
+    def _schedule_surface(
+        self,
+        t: float,
+        dt: float,
+        q: Array,
+        v: Array,
+        poses: PoseFn,
+        advance: Callable[[float], tuple[Array, Array]] | None,
+    ) -> ImpactForce:
+        """Bracket finite-face contact using the integrator's actual advance."""
+        if self.scheduled or self.is_latched:
+            return self
+        if advance is None:
+            raise ValueError("surface contact search needs an integrator advance")
+        if self.ball_centre_m is None:
+            raise ValueError("surface contact needs a ball centre")
+        arm = float(self.armed_at_s if self.armed_at_s is not None else self.t_start_s)
+        offset = max(0.0, arm - t)
+        search_duration = dt - offset
+        if search_duration <= 0.0:
+            return self
+        if offset <= _EDGE_TOL_S:
+            q_arm, v_arm = np.asarray(q, dtype=float), np.asarray(v, dtype=float)
+        else:
+            q_arm, v_arm = (np.asarray(x, dtype=float) for x in advance(offset))
+
+        def armed_advance(seconds: float) -> tuple[Array, Array]:
+            return advance(offset + seconds)
+
+        def triangles_world(q_state: Array) -> Array:
+            pose = np.asarray(poses(q_state)[self.frame], dtype=float)
+            triangles = self.face_triangles_in_frame
+            if triangles is None:
+                raise ValueError("surface contact lost its face triangles")
+            return triangles @ pose[:3, :3].T + pose[:3, 3]
+
+        result = find_contact_event(
+            lambda seconds: (
+                (q_arm, v_arm) if seconds == 0.0 else armed_advance(seconds)
+            ),
+            triangles_world,
+            self.ball_centre_m,
+            BALL_RADIUS_M,
+            duration_s=search_duration,
+        )
+        penalty = result.closest_approach_penalty_m
+        weight_s = search_duration
+        logsum = math.log(weight_s) - penalty / BALL_RADIUS_M
+        if self.contact_miss_penalty_logsum is not None:
+            logsum = float(np.logaddexp(self.contact_miss_penalty_logsum, logsum))
+        total_weight = self.contact_miss_penalty_weight_s + weight_s
+        aggregate = -BALL_RADIUS_M * (logsum - math.log(total_weight))
+        accumulated = replace(
+            self,
+            contact_miss_penalty_m=aggregate,
+            contact_miss_penalty_logsum=logsum,
+            contact_miss_penalty_weight_s=total_weight,
+        )
+        if result.event is None:
+            return accumulated
+        event = replace(result.event, time_s=t + offset + result.event.time_s)
+        try:
+            validate_window(event.time_s, self.duration_s, self.swing_span_s)
+        except ValueError:
+            return accumulated
+        return replace(
+            accumulated,
+            t_start_s=event.time_s,
+            scheduled=True,
+            contact_event=event,
+        )
+
     @property
     def t_end_s(self) -> float:
         return float(self.t_start_s) + float(self.duration_s)
@@ -237,27 +479,40 @@ class ImpactForce:
         hit = self.collision
         if hit is not None:
             hit = replace(hit, time_s=hit.time_s + offset_s)
+        event = self.contact_event
+        if event is not None:
+            event = replace(event, time_s=event.time_s + offset_s)
         return replace(
-            self, t_start_s=self.t_start_s + offset_s, swing_span_s=span, collision=hit
+            self,
+            t_start_s=self.t_start_s + offset_s,
+            swing_span_s=span,
+            collision=hit,
+            armed_at_s=(
+                None if self.armed_at_s is None else self.armed_at_s + offset_s
+            ),
+            contact_event=event,
         )
 
     # -- kinematics -------------------------------------------------------
-    def _point_and_normal(self, q: Array, poses: PoseFn) -> tuple[Array, Array]:
+    def _point_and_normal(
+        self, q: Array, poses: PoseFn, point_in_frame: Array | None = None
+    ) -> tuple[Array, Array]:
         pose = np.asarray(poses(q)[self.frame], dtype=float)
         rotation = pose[:3, :3]
-        return rotation @ self.point_in_frame + pose[
-            :3, 3
-        ], rotation @ self.axis_in_frame
+        point = self.point_in_frame if point_in_frame is None else point_in_frame
+        return rotation @ point + pose[:3, 3], rotation @ self.axis_in_frame
 
-    def point_jacobian(self, q: Array, poses: PoseFn) -> Array:
+    def point_jacobian(
+        self, q: Array, poses: PoseFn, point_in_frame: Array | None = None
+    ) -> Array:
         """(3, nv) world Jacobian of the application point (central differences)."""
         q = np.asarray(q, dtype=float)
         columns = []
         for k in range(q.size):
             dq = np.zeros_like(q)
             dq[k] = _FD_STEP
-            plus = self._point_and_normal(q + dq, poses)[0]
-            minus = self._point_and_normal(q - dq, poses)[0]
+            plus = self._point_and_normal(q + dq, poses, point_in_frame)[0]
+            minus = self._point_and_normal(q - dq, poses, point_in_frame)[0]
             columns.append((plus - minus) / (2.0 * _FD_STEP))
         return np.column_stack(columns)
 
@@ -265,7 +520,8 @@ class ImpactForce:
         """``J(q)^T F`` of the latched world force."""
         if self.force_world is None:
             raise ValueError("impact force is not latched yet")
-        return self.point_jacobian(q, poses).T @ self.force_world
+        point = self.contact_point_in_frame
+        return self.point_jacobian(q, poses, point).T @ self.force_world
 
     def latch(self, q: Array, v: Array, poses: PoseFn, accel: AccelFn) -> ImpactForce:
         """Fix the force from the state at the start of contact.
@@ -276,8 +532,19 @@ class ImpactForce:
         """
         q = np.asarray(q, dtype=float)
         v = np.asarray(v, dtype=float)
-        point, normal = self._point_and_normal(q, poses)
-        jac = self.point_jacobian(q, poses)
+        point_in_frame = self.point_in_frame
+        if self.trigger == "surface":
+            if self.contact_event is None:
+                raise ValueError("surface impact cannot latch without a contact root")
+            pose = np.asarray(poses(q)[self.frame], dtype=float)
+            point_in_frame = pose[:3, :3].T @ (
+                self.contact_event.contact_point_m - pose[:3, 3]
+            )
+            point = self.contact_event.contact_point_m
+            normal = self.contact_event.contact_normal
+        else:
+            point, normal = self._point_and_normal(q, poses)
+        jac = self.point_jacobian(q, poses, point_in_frame)
         base = np.asarray(accel(q, v, np.zeros(q.size)), dtype=float)
         probe = np.asarray(accel(q, v, jac.T @ normal), dtype=float)
         compliance = float(normal @ (jac @ (probe - base)))
@@ -301,19 +568,38 @@ class ImpactForce:
                 centre_m=self.ball_centre_m,
             ),
         )
-        return replace(self, force_world=hit.mean_force_on_club_n, collision=hit)
+        return replace(
+            self,
+            force_world=hit.mean_force_on_club_n,
+            collision=hit,
+            contact_point_in_frame=(
+                point_in_frame if self.trigger == "surface" else None
+            ),
+        )
 
     # -- time stepping ----------------------------------------------------
     def sub_intervals(self, t: float, dt: float) -> list[tuple[float, float, bool]]:
         """Split ``[t, t + dt]`` at the window edges; flag the forced parts."""
         end = t + dt
         cuts = [t]
-        for edge in (float(self.t_start_s), self.t_end_s):
-            if t + _EDGE_TOL_S < edge < end - _EDGE_TOL_S:
+        edges = [float(self.t_start_s), self.t_end_s]
+        if self.trigger == "surface" and self.armed_at_s is not None:
+            edges.append(float(self.armed_at_s))
+        if self.trigger == "surface" and not self.scheduled:
+            edges = [float(self.armed_at_s)] if self.armed_at_s is not None else []
+        interior = sorted(
+            edge for edge in edges if t + _EDGE_TOL_S < edge < end - _EDGE_TOL_S
+        )
+        for edge in interior:
+            if edge - cuts[-1] > _EDGE_TOL_S:
                 cuts.append(edge)
         cuts.append(end)
         return [
-            (a, b, self.t_start_s <= 0.5 * (a + b) <= self.t_end_s)
+            (
+                a,
+                b,
+                self.is_scheduled and self.t_start_s <= 0.5 * (a + b) <= self.t_end_s,
+            )
             for a, b in zip(cuts[:-1], cuts[1:], strict=True)
         ]
 
@@ -323,7 +609,7 @@ class ImpactForce:
         def vec(x: Array | None) -> list[float] | None:
             return None if x is None else [float(c) for c in x]
 
-        return {
+        record = {
             "frame": self.frame,
             "point_in_frame": vec(self.point_in_frame),
             "axis_in_frame": vec(self.axis_in_frame),
@@ -339,12 +625,69 @@ class ImpactForce:
             "scheduled": bool(self.scheduled),
             "collision": None if self.collision is None else self.collision.to_record(),
         }
+        if self.trigger == "surface":
+            if self.face_triangles_in_frame is None or self.armed_at_s is None:
+                raise ValueError("surface contact requires geometry and arming time")
+            record.update(
+                {
+                    "face_triangles_in_frame": self.face_triangles_in_frame.tolist(),
+                    "armed_at_s": float(self.armed_at_s),
+                    "contact_miss_penalty_m": self.contact_miss_penalty_m,
+                    "contact_miss_penalty_logsum": self.contact_miss_penalty_logsum,
+                    "contact_miss_penalty_weight_s": self.contact_miss_penalty_weight_s,
+                    "contact_point_in_frame": vec(self.contact_point_in_frame),
+                    "contact_event": (
+                        None
+                        if self.contact_event is None
+                        else {
+                            "time_s": self.contact_event.time_s,
+                            "q": self.contact_event.q.tolist(),
+                            "qd": self.contact_event.qd.tolist(),
+                            "contact_point_m": self.contact_event.contact_point_m.tolist(),
+                            "contact_normal": self.contact_event.contact_normal.tolist(),
+                            "approach_speed_mps": self.contact_event.approach_speed_mps,
+                            "triangle_index": self.contact_event.triangle_index,
+                        }
+                    ),
+                }
+            )
+        return record
 
     @classmethod
     def from_record(cls, record: Mapping[str, Any]) -> ImpactForce:
         """Rebuild a plan (and its latched force) from :meth:`to_record`."""
         force = record.get("force_world_n")
         span = record["swing_span_s"]
+        raw_event = record.get("contact_event")
+        event = None
+        if raw_event is not None:
+            if not isinstance(raw_event, Mapping):
+                raise ValueError("contact_event must be an object")
+            event = ContactRoot(
+                time_s=float(raw_event["time_s"]),
+                q=np.asarray(raw_event["q"], dtype=float),
+                qd=np.asarray(raw_event["qd"], dtype=float),
+                contact_point_m=_finite3(
+                    raw_event["contact_point_m"], "contact_event.contact_point_m"
+                ),
+                contact_normal=_finite3(
+                    raw_event["contact_normal"], "contact_event.contact_normal"
+                ),
+                approach_speed_mps=float(raw_event["approach_speed_mps"]),
+                triangle_index=int(raw_event["triangle_index"]),
+            )
+            if (
+                not np.isfinite(event.time_s)
+                or event.q.ndim != 1
+                or event.qd.ndim != 1
+                or not np.isfinite(event.q).all()
+                or not np.isfinite(event.qd).all()
+                or not np.isfinite(event.approach_speed_mps)
+                or event.approach_speed_mps <= 0.0
+                or abs(float(np.linalg.norm(event.contact_normal)) - 1.0) > 1e-8
+                or event.triangle_index < 0
+            ):
+                raise ValueError("contact_event fields are invalid")
         return cls(
             frame=str(record["frame"]),
             point_in_frame=np.asarray(record["point_in_frame"], dtype=float),
@@ -367,6 +710,35 @@ class ImpactForce:
                 else np.asarray(record["passage_point_m"], dtype=float)
             ),
             scheduled=bool(record.get("scheduled", False)),
+            face_triangles_in_frame=(
+                None
+                if record.get("face_triangles_in_frame") is None
+                else np.asarray(record["face_triangles_in_frame"], dtype=float)
+            ),
+            armed_at_s=(
+                None
+                if record.get("armed_at_s") is None
+                else float(record["armed_at_s"])
+            ),
+            contact_event=event,
+            contact_miss_penalty_m=(
+                None
+                if record.get("contact_miss_penalty_m") is None
+                else float(record["contact_miss_penalty_m"])
+            ),
+            contact_miss_penalty_logsum=(
+                None
+                if record.get("contact_miss_penalty_logsum") is None
+                else float(record["contact_miss_penalty_logsum"])
+            ),
+            contact_miss_penalty_weight_s=float(
+                record.get("contact_miss_penalty_weight_s", 0.0)
+            ),
+            contact_point_in_frame=(
+                None
+                if record.get("contact_point_in_frame") is None
+                else np.asarray(record["contact_point_in_frame"], dtype=float)
+            ),
         )
 
 
@@ -392,10 +764,37 @@ def step_through_impact(
     if impact is None:
         q, v, extra = step(t, dt, q, v, None)
         return q, v, None, extra
-    impact = impact.schedule(t, dt, q, v, poses)
+    search_plan = impact
+
+    def advance_unforced(seconds: float) -> tuple[Array, Array]:
+        arm = search_plan.armed_at_s if search_plan.trigger == "surface" else None
+        if arm is not None and t < arm < t + seconds:
+            arm_duration = arm - t
+            q_arm, v_arm, _ = step(t, arm_duration, q, v, None)
+            q_end, v_end, _ = step(arm, seconds - arm_duration, q_arm, v_arm, None)
+        else:
+            q_end, v_end, _ = step(t, seconds, q, v, None)
+        return np.asarray(q_end, dtype=float), np.asarray(v_end, dtype=float)
+
+    impact = impact.schedule(
+        t,
+        dt,
+        q,
+        v,
+        poses,
+        advance=advance_unforced if impact.trigger == "surface" else None,
+    )
     if not impact.is_scheduled:
-        q, v, extra = step(t, dt, q, v, None)
-        return q, v, impact, extra
+        parts = impact.sub_intervals(t, dt)
+        if len(parts) == 1:
+            q, v, extra = step(t, dt, q, v, None)
+            return q, v, impact, extra
+        first_unforced = None
+        for index, (a, b, _) in enumerate(parts):
+            q, v, extra = step(a, b - a, q, v, None)
+            if index == 0:
+                first_unforced = extra
+        return q, v, impact, first_unforced
     parts = impact.sub_intervals(t, dt)
     if len(parts) == 1 and not parts[0][2]:
         q, v, extra = step(t, dt, q, v, None)  # bit-identical outside the window
@@ -404,6 +803,21 @@ def step_through_impact(
     for index, (a, b, active) in enumerate(parts):
         external: ExternalFn | None = None
         if active:
+            if (
+                not impact.is_latched
+                and impact.trigger == "surface"
+                and impact.contact_event is not None
+            ):
+                event = impact.contact_event
+                if abs(a - event.time_s) <= _EDGE_TOL_S:
+                    if not (
+                        np.allclose(q, event.q, rtol=1e-9, atol=1e-10)
+                        and np.allclose(v, event.qd, rtol=1e-9, atol=1e-10)
+                    ):
+                        raise RuntimeError(
+                            "surface contact root state differs from step replay"
+                        )
+                    q, v = event.q.copy(), event.qd.copy()
             if not impact.is_latched:
                 impact = impact.latch(q, v, poses, accel)
             plan = impact

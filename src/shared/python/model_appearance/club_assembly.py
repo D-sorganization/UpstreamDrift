@@ -21,6 +21,7 @@ import numpy as np
 from src.shared.python.model_appearance import library
 from src.shared.python.model_appearance.club_face_marking import (
     FaceMarkingSettings,
+    face_surface_triangles,
     load_face_marking_settings,
     marked_head_parts,
 )
@@ -237,6 +238,24 @@ def clubface_centre(club: ClubAssembly) -> np.ndarray:
         face_roll_deg=club.face_roll_deg,
     )[0]
     return np.asarray(seated + [0.0, club.head_slide_m, 0.0], dtype=float)
+
+
+def clubface_triangles(club: ClubAssembly) -> np.ndarray:
+    """Rendered club-face patch as triangles in the club-body frame, metres.
+
+    The triangles include the assembly's axis offset, face roll and head slide.
+    Their selection matches the rendered ``head_face`` patch regardless of
+    whether face marking is enabled.
+    """
+    head = load_club_head(club.head_alias)
+    triangles = face_surface_triangles(head.head_mesh)
+    points = head_points_to_club(
+        head,
+        triangles.reshape(-1, 3),
+        axis_offset_m=club.axis_offset_m,
+        face_roll_deg=club.face_roll_deg,
+    ).reshape(-1, 3, 3)
+    return np.asarray(points + [0.0, club.head_slide_m, 0.0], dtype=float)
 
 
 def club_body_name(spec: Mapping[str, Any]) -> str | None:

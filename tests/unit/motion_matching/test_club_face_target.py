@@ -144,6 +144,25 @@ def test_observation_contracts() -> None:
 # ----------------------------------------------------------- spec face axis
 
 
+def test_face_triangles_are_rendered_geometry_in_the_requested_frame() -> None:
+    spec = _spec()
+    entry = next(f for f in spec["frames"] if f["name"] == cft.FACE_FRAME)
+    placement = np.asarray(entry["placement"], dtype=float)
+    frame_triangles = cft.face_triangles_in_frame(spec)
+    restored = frame_triangles @ placement[:3, :3].T + placement[:3, 3]
+    assembly = ca.assembly_from_spec(spec)
+    assert assembly is not None
+    np.testing.assert_allclose(restored, ca.clubface_triangles(assembly), atol=1e-12)
+
+
+def test_face_triangles_reject_unrelated_frame() -> None:
+    spec = _spec()
+    entry = next(f for f in spec["frames"] if f["name"] == cft.FACE_FRAME)
+    entry["body"] = "unrelated"
+    with pytest.raises(ValueError, match="not on the club body"):
+        cft.face_triangles_in_frame(spec)
+
+
 def test_face_axis_is_the_rendered_clubface_vector_in_the_marker_frame() -> None:
     spec = _spec()
     axis = cft.face_axis_in_frame(spec)

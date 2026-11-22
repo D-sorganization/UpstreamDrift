@@ -133,6 +133,18 @@ def face_triangle_mask(mesh: Mesh, frame: FaceFrame, cos_min: float) -> np.ndarr
     return np.asarray((fn @ frame.normal > cos_min) & ahead)
 
 
+def face_surface_triangles(mesh: Mesh) -> Array:
+    """Return rendered face-patch triangles in head coordinates, in metres.
+
+    This is the same geometry selected for the rendered ``head_face`` part.
+    The returned ``(F, 3, 3)`` array is a copy, so callers may transform it
+    without mutating the source mesh.
+    """
+    frame = face_frame(mesh)
+    mask = face_triangle_mask(mesh, frame, FACE_NORMAL_COS)
+    return np.asarray(mesh.vertices[mesh.faces[mask]], dtype=float).copy()
+
+
 def _ray_heights(tri: Array, origins: Array, direction: Array) -> Array:
     """Distance to the nearest triangle hit along ``direction``, inf if none."""
     e1, e2 = tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0]

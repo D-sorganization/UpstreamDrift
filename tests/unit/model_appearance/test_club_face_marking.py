@@ -11,6 +11,7 @@ import pytest
 
 from src.shared.python.model_appearance import club_assembly as ca
 from src.shared.python.model_appearance import club_face_marking as fm
+from src.shared.python.model_appearance import club_head_mesh as chm
 from src.shared.python.model_appearance import library
 from src.shared.python.model_appearance.club_head_mesh import (
     face_centre,
@@ -90,6 +91,50 @@ def test_every_line_triangle_set_lies_on_the_face_within_tolerance() -> None:
     assert np.abs(above - settings.score_line_height_m).max() < 1e-6
     assert np.abs(up).max() < 0.5 * settings.score_line_count * 0.0035 + 0.001
     assert np.abs(toe).min() >= 0.5 * settings.centre_clear_width_m - 1e-9
+
+
+def test_face_surface_triangles_are_the_complete_rendered_face_patch() -> None:
+    head = load_club_head("driver")
+    triangles = fm.face_surface_triangles(head.head_mesh)
+    frame = fm.face_frame(head.head_mesh)
+    assert triangles.ndim == 3 and triangles.shape[1:] == (3, 3)
+    assert np.isfinite(triangles).all()
+    mask = fm.face_triangle_mask(head.head_mesh, frame, fm.FACE_NORMAL_COS)
+    assert len(triangles) == int(mask.sum())
+    np.testing.assert_array_equal(
+        triangles, head.head_mesh.vertices[head.head_mesh.faces[mask]]
+    )
+
+
+def test_clubface_triangles_follow_head_roll_and_slide() -> None:
+    club = ca.ClubAssembly(
+        "driver",
+        1.15,
+        0.265,
+        0.0065,
+        axis_offset_m=0.07,
+        face_roll_deg=-20.0,
+        head_slide_m=0.012,
+    )
+    triangles = ca.clubface_triangles(club)
+    assert triangles.ndim == 3 and triangles.shape[1:] == (3, 3)
+    assert np.isfinite(triangles).all()
+    drawn = ca.assembly_meshes(dataclasses.replace(club, face_marking=_on()))[
+        "head_face"
+    ]
+    np.testing.assert_allclose(triangles, drawn.vertices[drawn.faces])
+
+
+def test_clubface_triangles_use_committed_mesh_fallback(monkeypatch) -> None:
+    monkeypatch.setattr(chm, "triangles_from_tools", lambda _name: None)
+    chm.load_club_head.cache_clear()
+    try:
+        assert chm.load_club_head("driver").source == "committed_stl"
+        triangles = ca.clubface_triangles(_club(None))
+        assert triangles.ndim == 3 and triangles.shape[1:] == (3, 3)
+        assert len(triangles) > 0 and np.isfinite(triangles).all()
+    finally:
+        chm.load_club_head.cache_clear()
 
 
 def test_line_count_and_clear_zone_are_obeyed() -> None:
