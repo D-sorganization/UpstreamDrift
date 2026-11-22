@@ -1,7 +1,7 @@
 """Opt-in overhead hole view of a native export flight (#15150, track A4).
 
 A broadcast-style plan of the hole: fairway, green, the shot trace, the landing
-point and the carry label, as a still next to the clips so shots can be compared
+point, the roll to the rest point and a carry, side, roll and total label, as a still next to the clips so shots can be compared
 without a GUI. The hole and figure code is ``golf_environment`` (``shots`` and
 ``hole_figure``); this module only feeds it the export's own flight, whose carry
 and side are the flight model's. Off unless ``TracerSettings.hole_view`` is set
@@ -10,7 +10,7 @@ and side are the flight model's. Off unless ``TracerSettings.hole_view`` is set
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import json
 import math
 from pathlib import Path
@@ -33,6 +33,7 @@ class HoleViewSettings:
     label: str
     colour_rgba: tuple[float, float, float, float]
     figure: dict[str, float]
+    label_at_landing: bool = True
 
     def __post_init__(self) -> None:
         if not self.preset:
@@ -76,7 +77,8 @@ def hole_shot(flight: Any, cfg: HoleViewSettings) -> HoleShot:
     """The flight as a ``HoleShot`` on the tee of ``cfg``'s hole.
 
     Preconditions: ``flight`` has a path, axes, carry and side. Postcondition:
-    the shot starts on the tee and keeps the model's carry and side. Raises
+    the shot starts on the tee and keeps the model's carry and side; the roll
+    of ``flight.rollout`` (the export's roll model), if any, is added. Raises
     ``ValueError`` for a flight that cannot be drawn.
     """
     from src.tools.golf_environment.shots import (
@@ -91,7 +93,16 @@ def hole_shot(flight: Any, cfg: HoleViewSettings) -> HoleShot:
     local = flight_coordinates(flight.path_m, flight.axes_m)
     target = TargetFlight(local, float(flight.carry_m), float(flight.lateral_m))
     hole = hole_from_settings(load_shots_settings(), cfg.preset)
-    return shots_on_hole([target], hole, [cfg.label], [cfg.colour_rgba])[0]
+    shot = shots_on_hole([target], hole, [cfg.label], [cfg.colour_rgba])[0]
+    roll = getattr(flight, "rollout", None)
+    if roll is None:
+        return shot
+    return replace(
+        shot,
+        roll_m=float(roll.roll_m),
+        total_m=float(roll.total_m),
+        roll_offset_m=(float(roll.end_offset_m[0]), float(roll.end_offset_m[1])),
+    )
 
 
 def write_still(
@@ -114,5 +125,6 @@ def write_still(
     hole = hole_from_settings(settings, cfg.preset)
     png = Path(out_dir) / f"{swing}_{engine}_hole_view.png"
     shot = hole_shot(flight, cfg)
-    write_hole_figure([shot], hole, png, settings, flight.settings.display_units)
+    units = flight.settings.display_units
+    write_hole_figure([shot], hole, png, settings, units, cfg.label_at_landing)
     return {"hole_view": png}
