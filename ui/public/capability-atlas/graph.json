@@ -1813,7 +1813,7 @@
     {
       "id": "model_explorer",
       "title": "Model Explorer",
-      "description": "Explore models and generate URDFs",
+      "description": "Play matched golf swings, explore models and edit URDFs",
       "path": "src/tools/model_explorer/main_window.py",
       "launch_target": "src/tools/model_explorer/main_window.py",
       "category": "tool",
@@ -3565,7 +3565,7 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "ad3f0cf74f12a3a0df3443b3f40ace2393123ee6d39ee34b055d4f79c4a1c873",
+    "src/config/models.yaml": "89b2c78be5ec8c7093af2a9687366ae2b7a6fd1e58bf2a87a43b10df9295ff99",
     "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
     "src/config/feature_parity.json": "7286a5ef3efd6590b39d2286ca929845b46e713bf571566e75ce1c2ddaee24d5",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",

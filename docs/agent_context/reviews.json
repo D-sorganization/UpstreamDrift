@@ -19,7 +19,7 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01; model.py updated for worktree vendor resolution."
     },
     "launcher-atlas": {
-      "fingerprint": "8fc8f44187c9f5d9de3f7ad00552ab051ddba8a68363fc9cdb850d4014f86913",
+      "fingerprint": "8a9344c60308ff25b10d8ffa64630b21e48973a22d97c54fc96158b47918e975",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
@@ -29,14 +29,14 @@
         "src/config/feature_parity.json": "7286a5ef3efd6590b39d2286ca929845b46e713bf571566e75ce1c2ddaee24d5",
         "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
         "src/config/launcher_manifest_loader.py": "551e868f572b9eb79fcd2b0e0fbe67bff5c9867f84f1d03f9cd6113547c72fd8",
-        "src/config/models.yaml": "ad3f0cf74f12a3a0df3443b3f40ace2393123ee6d39ee34b055d4f79c4a1c873",
+        "src/config/models.yaml": "89b2c78be5ec8c7093af2a9687366ae2b7a6fd1e58bf2a87a43b10df9295ff99",
         "src/tools/capture_rig/goal_catalog.py": "0461380a7c083812bed54c56e28a763a70679e083767303167b0ce07ef43d4e5",
         "src/tools/capture_rig/goal_planner.py": "3bb60b46953b477d13fc358baf6fad5fecdcf4860ce840998d325bff0bec3121",
         "tests/scripts/test_capability_atlas.py": "1d06a18c83571769b61d9b02cc86bbff3e22a089a9a8f11f7944fca44d72cc5b",
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Read the launcher-atlas contract and both ends: feature_parity.json changes only the notes of the existing tools.model_explorer results-playback gap entry (issue 12878) to describe File > Open Matched Swing and default loading; identifiers, tiles and the gap status are unchanged. The atlas was regenerated (graph.json and index.html notes only); 52 tests in the capability atlas and feature parity suites pass; generate_capability_atlas --check passes."
+      "rationale": "Read the launcher-atlas contract and both ends: models.yaml changes only the model_explorer tile description to say it plays matched golf swings; the tile id, type, path and launcher category are unchanged and feature_parity.json is untouched. The atlas was regenerated (description text only); the capability atlas and feature parity suites pass; generate_capability_atlas --check passes."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",
