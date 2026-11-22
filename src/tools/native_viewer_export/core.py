@@ -49,7 +49,7 @@ from src.tools.native_viewer_export.compositor import (
     draw_view_label,
     event_caption_for_time,
 )
-from src.tools.native_viewer_export import contact_frame, flight_tracer
+from src.tools.native_viewer_export import contact_frame, flight_tracer, shot_setup
 from src.tools.native_viewer_export import ellipsoid_panel as ellipsoid_hud
 from src.tools.native_viewer_export import flight_inset
 from src.tools.native_viewer_export import impact_factors as factors_panel
@@ -189,6 +189,9 @@ class ExportSettings:
     #: video frames the frame on the contact instant is repeated (#15150);
     #: ``None``: the ``contact_frame_settings.json`` default of the clip kind
     contact_hold_frames: int | None = None
+    #: opt-in shot setup, see ``shot_setup`` (club roll in the hands, ball shift)
+    club_roll_in_hands_deg: float = 0.0
+    ball_position_shift_m: float = 0.0
 
     @property
     def shading_enabled(self) -> bool:
@@ -245,6 +248,9 @@ class ExportSettings:
                 stacklevel=3,
             )
         self._validate_clips()
+        shot_setup.validate_shot_setup(
+            self.club_roll_in_hands_deg, self.ball_position_shift_m
+        )
         if len(self.lookat_m) != 3 or not all(math.isfinite(v) for v in self.lookat_m):
             raise ValueError("lookat_m must be three finite numbers")
         if self.distance_m is not None and not (
@@ -1114,6 +1120,7 @@ def export_swing(
     out_dir = Path(out_dir)
     from src.tools.native_viewer_export.ball import attach_ball
 
+    swing = shot_setup.apply_club_roll(swing, settings.club_roll_in_hands_deg)
     swing, ball_record = attach_ball(
         swing, settings, getattr(backend, "ball_limitation", None)
     )

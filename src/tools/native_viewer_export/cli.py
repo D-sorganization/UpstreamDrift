@@ -312,11 +312,39 @@ def _lighting_for(args: argparse.Namespace) -> LightingSettings | None:
     return load_lighting(args.lighting_settings)
 
 
+def _add_shot_setup_arguments(p: argparse.ArgumentParser) -> None:
+    """Opt-in shot setup flags: club roll in the hands and ball position."""
+    p.add_argument(
+        "--club-roll-in-hands",
+        type=float,
+        default=0.0,
+        metavar="DEG",
+        help="rigidly turn the club about its shaft relative to the hands, same "
+        "body motion replayed (ignores shaft bend; positive opens the face: on "
+        "the matched right-handed driver swing +1 degree turns the face about "
+        "0.73 degrees right and adds about 0.67 degrees of loft; |DEG| <= "
+        "max_abs_roll_deg of shot_setup_settings.json; default: %(default)s)",
+    )
+    p.add_argument(
+        "--ball-position-shift",
+        type=float,
+        default=0.0,
+        metavar="M",
+        help="move the computed address ball M metres along the target line, "
+        "positive toward the target; the ball is still placed where the face "
+        "centre passes. Forward of the captured ball the measured club was "
+        "already slowed by the real ball, so only the first few centimetres "
+        "are valid (|M| <= max_abs_ball_shift_m of shot_setup_settings.json; "
+        "default: %(default)s)",
+    )
+
+
 def _add_clip_overlay_arguments(p: argparse.ArgumentParser) -> None:
     """Optional clip flags: impact factors panel, ball flight and lighting."""
     _add_impact_factor_arguments(p)
     _add_ball_flight_arguments(p)
     _add_lighting_arguments(p)
+    _add_shot_setup_arguments(p)
     p.add_argument(
         "--contact-hold-frames",
         type=int,
@@ -632,6 +660,8 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         else None,
         appearance=build_appearance(args),
         lighting=_lighting_for(args),
+        club_roll_in_hands_deg=getattr(args, "club_roll_in_hands", 0.0),
+        ball_position_shift_m=getattr(args, "ball_position_shift", 0.0),
         ball_flight=load_tracer_settings(args.ball_flight_settings)
         if args.ball_flight or args.ball_flight_settings is not None
         else None,

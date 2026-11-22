@@ -419,3 +419,22 @@ contact point (no ball placement supplied)"). When no card can be computed (no M
 below 1 m/s) nothing is drawn, `ExportResult.impact_card` holds the reason, and
 the showcase manifest records it. The panel shows model estimates, not a
 measurement.
+
+## Shot Setup
+
+Two opt-in display settings, both off by default (zero changes nothing). The
+body motion is replayed unchanged: no joint angle changes, and this is a
+kinematic replay, not a refit. Limits live in `shot_setup_settings.json`.
+
+- `--club-roll-in-hands DEG` turns the club rigidly about its shaft relative
+  to the hands (`|DEG| <= 20`). The shaft bend is ignored. Positive opens the
+  face: on the matched right-handed driver swing +1 degree of roll turns the
+  face about 0.73 degrees to the right and adds about 0.67 degrees of loft.
+  The rolled spec reaches the drawn head, impact card, flight and ball.
+- `--ball-position-shift M` moves the computed address ball along the
+  horizontal target line (`|M| <= 0.15`, positive toward the target) before
+  the strike placement, so the ball is still struck at the face centre. A
+  ball already on the swing or recorded by the bundle is not moved. Forward of
+  the captured ball the measured club was already slowed by the real ball, so
+  forward positions are valid only for the first few centimetres; the ball
+  record carries `ball_position_shift_m` and a `position_note`.
