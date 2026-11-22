@@ -221,6 +221,13 @@ reference acceleration rose from 679 to 6,692 rad/s²; at the dropout hold,
 the fixed-state command norm rose from 643 to 2,719 N m. These are reference
 and fixed-state sensitivities, not rollout torques. The result does not
 establish a feasible trajectory or complete anatomical coverage.
+A 13-frame dropout-window diagnostic instead used each previous bounded fit
+as the next seed and prior; all seeds were checked in bounds. All 13 solves
+remained at bounds and not converged. Peak consecutive angular finite-
+difference speed was 41.70 rad/s, versus 43.84 for independent refits and
+11.44 for the filtered reference. The filtered reference exceeded four
+named ranges in that window; the two bounded refits met the supplied ranges.
+The sequential fit does not establish smooth or anatomically complete motion.
 A soft face-axis target inferred from observed head-marker orientation was
 available in 476 of 477 pre-impact frames, but not at the dropout frame; no
 target was imputed there. At continuity weight 0.1, adding face weight 3.0

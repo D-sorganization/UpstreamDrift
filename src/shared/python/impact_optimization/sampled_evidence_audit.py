@@ -148,7 +148,10 @@ def _has_provenance(value: object) -> bool:
 
 def _numeric_array(value: object) -> Array | None:
     try:
-        return np.asarray(value, dtype=float)
+        array = np.asarray(value)
+        if array.dtype.kind not in "iuf":
+            return None
+        return np.asarray(array, dtype=float)
     except (TypeError, ValueError):
         return None
 

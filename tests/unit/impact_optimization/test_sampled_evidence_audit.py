@@ -108,6 +108,18 @@ def test_feedback_only_total_torque_exceedance_is_detected() -> None:
 
 
 @pytest.mark.parametrize(
+    "field",
+    ["coordinate_deg", "rate_deg_s", "total_applied_actuator_torque_nm"],
+)
+def test_string_channels_are_indeterminate_instead_of_raising(field: str) -> None:
+    original = getattr(_evidence(), field)
+    report = audit_sampled_evidence(
+        _evidence(**{field: original.astype(str)}), _envelope()
+    )
+    assert report.status == "indeterminate"
+
+
+@pytest.mark.parametrize(
     "changes",
     [
         {"coordinate_deg": np.array([[0.0, 0.0], [1.0, np.nan], [3.0, 4.0]])},
