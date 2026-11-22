@@ -32,6 +32,7 @@ if TYPE_CHECKING:
     from src.tools.native_viewer_export.compositor import HudInfo
     from src.tools.native_viewer_export.core import ClipOverlays
     from src.tools.native_viewer_export.flight_tracer import FlightPlayback
+    from src.tools.native_viewer_export.rollout import Rollout
 
 Array = NDArray[np.float64]
 Image8 = NDArray[np.uint8]
@@ -45,11 +46,13 @@ _RGBA = (
     "target_line_color_rgba",
     "dot_color_rgba",
     "marker_color_rgba",
+    "roll_color_rgba",
 )
 _RGB = ("text_color_rgb", "title_color_rgb")
 _FORMATS = {
     "apex_label_format": {"apex": 1.0, "unit": "m"},
     "carry_label_format": {"carry": 1.0, "unit": "m"},
+    "roll_label_format": {"roll": 1.0, "total": 1.0, "unit": "m"},
     "side_label_format": {"side": 1.0, "unit": "m", "direction": "R"},
 }
 
@@ -100,6 +103,7 @@ class FlightInsetSettings:
     dot_color_rgba: tuple[int, ...] = (255, 255, 255, 255)
     dot_radius_px: int = 4
     marker_color_rgba: tuple[int, ...] = (255, 220, 40, 255)
+    roll_color_rgba: tuple[int, ...] = (120, 220, 255, 255)
     marker_radius_px: int = 4
     text_color_rgb: tuple[int, ...] = (255, 255, 255)
     title_color_rgb: tuple[int, ...] = (255, 235, 90)
@@ -111,6 +115,7 @@ class FlightInsetSettings:
     unit_scale: float = 1.0
     apex_label_format: str = "Apex {apex:.0f} {unit}"
     carry_label_format: str = "Carry {carry:.0f} {unit}"
+    roll_label_format: str = "Roll {roll:.0f} {unit}  Total {total:.0f} {unit} (model)"
     side_label_format: str = "{side:.0f} {unit} {direction}"
     side_left_text: str = "L"
     side_right_text: str = "R"
@@ -276,6 +281,7 @@ def plots_for(
     settings: FlightInsetSettings,
     font_px: int,
     extent_m: tuple[float, float, float],
+    label_rows: int = 1,
 ) -> tuple[Plot, Plot]:
     """Profile and plan plots of the inset in ``rect`` for a flight.
 
@@ -293,7 +299,7 @@ def plots_for(
     scale_x = (right - left) / down
     exag = settings.vertical_exaggeration
     top = y0 + pad + title
-    base = split - r - font_px * 1.4  # room beneath the ground line for the carry
+    base = split - r - font_px * (0.15 + 1.25 * label_rows)  # carry (+ roll) rows
     fit = (base - top - font_px * 1.5) / apex
     profile = Plot(
         (x0 + pad, top, x1 - pad, split),
@@ -360,6 +366,15 @@ class InsetData:
     lateral_m: float
     landed: bool
     started: bool = True
+    roll: Rollout | None = None
+
+    @property
+    def roll_end(self) -> Array:
+        """Rest point (down, left, up) of the roll, the landing point without one."""
+        end = self.full[-1].copy()
+        if self.roll is not None:
+            end[:2] += self.roll.end_offset_m
+        return end
 
     @property
     def passed_apex(self) -> bool:
@@ -383,7 +398,8 @@ def inset_data(flight: FlightPlayback, time_s: float) -> InsetData | None:
     landed = time_s - flight.impact_time_s >= flight.duration_s
     shown = full[:1] if points is None else flight_coordinates(points, axes, path[0])
     carry, apex, lateral = (float(n or 0.0) for n in numbers)
-    return InsetData(shown, full, apex, carry, lateral, landed, points is not None)
+    started = points is not None
+    return InsetData(shown, full, apex, carry, lateral, landed, started, flight.rollout)
 
 
 def _apex_pixel(profile: Plot, data: InsetData) -> Array:
@@ -426,6 +442,38 @@ def _draw_plots(
     if data.landed:
         for pix in (a_pix, p_pix):
             _dot(pen, pix[-1], marker, cfg.marker_color_rgba)
+        _draw_roll(pen, plots, data, cfg)
+
+
+def _draw_roll(
+    pen: ImageDraw.ImageDraw,
+    plots: tuple[Plot, Plot],
+    data: InsetData,
+    cfg: FlightInsetSettings,
+) -> None:
+    """The roll as a ground track from the landing point to the rest point."""
+    if data.roll is None:
+        return
+    pair = np.vstack([data.full[-1], data.roll_end])
+    for plot, axis in zip(plots, (2, 1), strict=True):
+        pix = plot.pixels(pair[:, 0], pair[:, axis])
+        _line(pen, pix, cfg.roll_color_rgba, cfg.curve_width_px)
+        _dot(pen, pix[-1], cfg.marker_radius_px, cfg.roll_color_rgba)
+
+
+def _roll_labels(
+    image: Image8, profile: Plot, data: InsetData, cfg: FlightInsetSettings, px: int
+) -> Image8:
+    """Roll and total (a model assumption) beneath the carry label."""
+    if data.roll is None:
+        return image
+    scale, gap = cfg.unit_scale, float(cfg.marker_radius_px + 3)
+    end = data.roll_end
+    u, v = profile.pixels(end[:1], end[2:])[0]
+    total = data.roll.total_m * scale
+    text = _fmt(cfg, "roll_label_format", roll=data.roll.roll_m * scale, total=total)
+    xy = (u + gap, v + gap + px * 1.25)
+    return _text(image, text, xy, px, cfg.roll_color_rgba, "right")
 
 
 def _draw_labels(
@@ -453,6 +501,7 @@ def _draw_labels(
         text = _fmt(cfg, "carry_label_format", carry=data.carry_m * scale)
         xy = (u + gap, v + gap)
         image = _text(image, text, xy, font_px, cfg.text_color_rgb, "right")
+        image = _roll_labels(image, profile, data, cfg, font_px)
         u, v = plan.pixels(end[:1], end[1:2])[0]
         side = cfg.side_left_text if data.lateral_m < 0.0 else cfg.side_right_text
         text = _fmt(
@@ -490,9 +539,11 @@ def paint(
     data = inset_data(flight, time_s)
     if data is None or (not data.started and settings.hide_before_launch):
         return img
-    extent = (data.full[:, 0].max(), data.apex_m, np.abs(data.full[:, 1]).max())
+    reach = np.vstack([data.full, data.roll_end])
+    extent = (reach[:, 0].max(), data.apex_m, np.abs(reach[:, 1]).max())
     size = font_px_for(img.shape, settings)
-    plots = plots_for((0, 0, x1 - x0, y1 - y0), settings, size, extent)
+    rows = 1 if data.roll is None else 2
+    plots = plots_for((0, 0, x1 - x0, y1 - y0), settings, size, extent, rows)
     region = img[y0:y1, x0:x1].astype(np.float32) * (1.0 - settings.opacity)
     pil = Image.fromarray(region.astype(np.uint8))
     _draw_plots(ImageDraw.Draw(pil, "RGBA"), plots, data, settings)
