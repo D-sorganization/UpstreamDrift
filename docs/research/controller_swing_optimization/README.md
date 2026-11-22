@@ -112,6 +112,15 @@ torque slots, 44 unverified velocity limits, soft ROM and unbounded root
 rotations. These assumption-limited checks are not current-best results or
 clinical judgments.
 
+The experimental sampled-evidence audit checks supplied ROM, direct rates,
+and total post-saturation joint torque against the envelope. It reports assumed
+limits and rejects missing channels, duplicate names, unsupported mappings and
+nonfinite records. Stage identifiers distinguish the two RK4 midpoint states.
+The inventory, mapping, provenance and expected schedule remain caller
+assertions: a sampled pass is neither verified full-rollout coverage nor an
+anatomical or continuous-time feasibility certificate. It is not wired to the
+controller or an optimization acceptance gate.
+
 To reproduce the historical sampled-limit counts from the repository root:
 
 ```powershell
