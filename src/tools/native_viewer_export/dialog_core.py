@@ -7,13 +7,18 @@ request schema and ``dialog_settings.json``, never literals.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cache
 import json
 from pathlib import Path
 from typing import Any
 
 from src.tools.native_viewer_export import request_schema
+from src.tools.native_viewer_export.display_units import (
+    DISTANCE_UNITS,
+    SPEED_UNITS,
+    load_display_units,
+)
 
 _SETTINGS_PATH = Path(__file__).with_name("dialog_settings.json")
 
@@ -48,6 +53,25 @@ class ClipChoices:
     engines: tuple[str, ...]
     speeds: tuple[float, ...]
     impact_clip: bool
+    distance_unit: str = field(
+        default_factory=lambda: load_display_units().distance_unit
+    )
+    speed_unit: str = field(default_factory=lambda: load_display_units().speed_unit)
+
+
+def _unit_options(units: tuple[str, ...]) -> tuple[tuple[str, str], ...]:
+    labels = load_dialog_settings()["unit_labels"]
+    return tuple((unit, labels[unit]) for unit in units)
+
+
+def distance_unit_options() -> tuple[tuple[str, str], ...]:
+    """``(value, label)`` rows of the distance unit combo box."""
+    return _unit_options(DISTANCE_UNITS)
+
+
+def speed_unit_options() -> tuple[tuple[str, str], ...]:
+    """``(value, label)`` rows of the speed unit combo box."""
+    return _unit_options(SPEED_UNITS)
 
 
 def _schema_default(name: str) -> str:
@@ -87,6 +111,8 @@ def build_request(choices: ClipChoices) -> dict[str, Any]:
         "out": choices.out,
         "engines": ",".join(choices.engines),
         "speeds": ",".join(f"{s:g}" for s in choices.speeds),
+        "ball_flight_distance_unit": choices.distance_unit,
+        "ball_flight_speed_unit": choices.speed_unit,
     }
     if choices.impact_clip:
         options["impact_window"] = impact_window_seconds()

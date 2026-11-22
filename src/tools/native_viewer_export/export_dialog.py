@@ -12,6 +12,7 @@ from typing import Any, Protocol
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import (
     QCheckBox,
+    QComboBox,
     QDialog,
     QFileDialog,
     QFormLayout,
@@ -45,6 +46,13 @@ def _checks(labels: list[str], columns: int) -> tuple[QGroupBox, list[QCheckBox]
         grid.addWidget(check, index // columns, index % columns)
     box.setLayout(grid)
     return box, boxes
+
+
+def _combo(options: tuple[tuple[str, str], ...]) -> QComboBox:
+    combo = QComboBox()
+    for value, label in options:
+        combo.addItem(label, value)
+    return combo
 
 
 class ExportClipsDialog(QDialog):
@@ -82,6 +90,10 @@ class ExportClipsDialog(QDialog):
             [f"{s:g}x" for s in core.available_speeds()], columns=3
         )
         speeds.setTitle("Speed variants")
+        self.distance_combo = _combo(core.distance_unit_options())
+        self.speed_combo = _combo(core.speed_unit_options())
+        form.addRow("Distance unit", self.distance_combo)
+        form.addRow("Speed unit", self.speed_combo)
         self.impact_check = QCheckBox("Impact clip (slow motion around impact)")
         self.state_label = QLabel("State: idle")
         self.state_label.setWordWrap(True)
@@ -135,6 +147,11 @@ class ExportClipsDialog(QDialog):
         ):
             check.setChecked(speed in choices.speeds)
         self.impact_check.setChecked(choices.impact_clip)
+        for combo, value in (
+            (self.distance_combo, choices.distance_unit),
+            (self.speed_combo, choices.speed_unit),
+        ):
+            combo.setCurrentIndex(max(0, combo.findData(value)))
 
     def choices(self) -> core.ClipChoices:
         """The choices currently shown."""
@@ -155,6 +172,8 @@ class ExportClipsDialog(QDialog):
                 if c.isChecked()
             ),
             impact_clip=self.impact_check.isChecked(),
+            distance_unit=self.distance_combo.currentData(),
+            speed_unit=self.speed_combo.currentData(),
         )
 
     def start_export(self) -> None:
