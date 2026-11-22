@@ -97,12 +97,15 @@ GOLF_BALL_DRAG_COEFFICIENT = PhysicalConstant(
     "Typical drag coefficient at Re=1.5e5",
 )
 GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT = PhysicalConstant(
-    0.20,
+    0.187,
     "dimensionless",
-    "Lyu, Kensrud, Smith & Tosaya 2018, Proceedings 2(6):238, "
-    "doi:10.3390/proceedings2060238: 13 production balls in still air, "
-    "non-spinning Cd near 0.5 at Re 5e4 and close to 0.2 at Re 1e5, "
-    "ball-to-ball spread < 0.05 above Re 1e5 (#15443)",
+    "Least-squares fit of the drag-crisis law to Choi, Jeon & Choi 2006, "
+    "Phys. Fluids 18, 041702, Fig. 1 (non-spinning dimpled sphere; fit "
+    "re-derived in tests/unit/physics/test_drag_crisis_fit_15443.py). "
+    "Checked, not fitted, against Lyu, Kensrud, Smith & Tosaya 2018, "
+    "Proceedings 2(6):238, doi:10.3390/proceedings2060238: 13 production "
+    "balls, non-spinning Cd near 0.5 at Re 5e4 and close to 0.2 at Re 1e5 "
+    "(#15443)",
     "Zero-spin post-crisis floor of the spinning-ball drag law "
     "Cd(Re, S) = Cd_Re(Re; floor) + k*S used by the flight kernel",
 )
