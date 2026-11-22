@@ -1,0 +1,8 @@
+{
+  "max_abs_roll_deg": 20,
+  "max_abs_ball_shift_m": 0.15,
+  "sources": {
+    "max_abs_roll_deg": "Largest club roll in the hands (degrees, either sign) the exporter accepts. A grip rotation of a few degrees changes the delivered face by about the same amount (measured on the matched right-handed driver swing: 1 degree of roll turns the face about 0.73 degrees and adds about 0.67 degrees of loft); beyond 20 degrees the head no longer reads as a driver on the grip, so larger values are refused as a likely typing error.",
+    "max_abs_ball_shift_m": "Largest ball move along the target line (metres, either sign) the exporter accepts: 0.15 m is about three ball diameters, roughly the whole forward-to-back range of a real stance. The measured club was slowed by the real ball, so forward of the captured ball only the first few centimetres are valid."
+  }
+}

@@ -42,6 +42,7 @@ from src.shared.python.model_appearance.ball_strike import (
     load_ball_strike_settings,
     strike_ball_centre,
 )
+from src.tools.native_viewer_export import shot_setup
 from src.tools.native_viewer_export.club_pose import ClubPoseModel
 from src.tools.native_viewer_export.core import (
     ExportSettings,
@@ -269,15 +270,23 @@ def attach_ball(
         return replace(swing, ball=None), None
     placed: BallPlacement | str | None = swing.ball
     strike: dict[str, Any] | None = None
+    shifted: dict[str, Any] = {}
     if placed is None:
         impact = resolve_impact_time_s(swing, settings)
         placed = address_ball(swing, impact)
         if isinstance(placed, BallPlacement):
+            shift = settings.ball_position_shift_m
+            if placed.source == SOURCE_ADDRESS and shift:
+                placed = shot_setup.shift_ball(swing, placed, shift)
+                shifted = {
+                    "ball_position_shift_m": shift,
+                    "position_note": shot_setup.POSITION_NOTE,
+                }
             placed, strike = strike_ball(swing, placed, impact)
     if isinstance(placed, str):
         logger.warning("no golf ball drawn: %s", placed)
         return replace(swing, ball=None), {"unavailable": placed}
-    record = placed.to_dict()
+    record = {**placed.to_dict(), **shifted}
     if strike is not None:
         record["strike"] = strike
     if limitation:
