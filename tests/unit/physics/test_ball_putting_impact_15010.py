@@ -198,7 +198,8 @@ class TestRemainingHonestyCriteria15010:
         for cls in (BallFlightSimulator, EnhancedBallFlightSimulator):
             meta = cls().model_metadata
             assert meta["drag_model"] == "reynolds_dimpled_sphere"
-            assert meta["base_cd"] == pytest.approx(0.25)
+            assert meta["base_cd"] == pytest.approx(0.20)  # #15443 floor
+            assert meta["spin_drag_slope"] == pytest.approx(0.18)
             assert meta["cl_max"] == pytest.approx(expected_cl_max[cls])
             assert meta["spin_decay_rate"] == pytest.approx(0.05)
 

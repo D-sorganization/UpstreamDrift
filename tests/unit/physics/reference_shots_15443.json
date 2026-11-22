@@ -19,10 +19,7 @@
       "apex_yd": 32.0,
       "descent_deg": 38.0,
       "source": "Trackman PGA Tour averages (2019 table), driver: 167 mph, 10.9 deg, 2686 rpm, max height 32 yd (29 m), land angle 38 deg, carry 275 yd (251 m)",
-      "confidence": "high for the table values (published by the launch-monitor maker and widely reproduced); venue air not normalised",
-      "xfail": {
-        "carry": "measured 248.1 yd, -9.8 % (-26.9 yd) against 275 yd: Re-only drag at base Cd 0.25 (#15443)"
-      }
+      "confidence": "high for the table values (published by the launch-monitor maker and widely reproduced); venue air not normalised"
     },
     {
       "id": "lpga_tour_driver_2019",
@@ -33,10 +30,7 @@
       "apex_yd": 25.0,
       "descent_deg": 37.0,
       "source": "Trackman LPGA Tour averages (2019 table), driver: 140 mph, 13.2 deg, carry 218 yd confirmed in press coverage; 2611 rpm, 25 yd apex and 37 deg land angle are approximate, from memory",
-      "confidence": "high for speed, launch and carry; medium for spin, apex and descent (from memory)",
-      "xfail": {
-        "carry": "measured 204.8 yd, -6.1 % (-13.2 yd) against 218 yd (#15443)"
-      }
+      "confidence": "high for speed, launch and carry; medium for spin, apex and descent (from memory)"
     },
     {
       "id": "pga_tour_6_iron_2019",
@@ -47,11 +41,7 @@
       "apex_yd": 30.0,
       "descent_deg": 50.0,
       "source": "Trackman PGA Tour averages (2019 table), 6-iron: 130 mph, 14.0 deg, 6231 rpm, 30 yd, 50 deg, 183 yd; approximate, from memory",
-      "confidence": "medium (from memory; consistent with the published driver row of the same table)",
-      "xfail": {
-        "carry": "measured 198.3 yd, +8.4 % (+15.3 yd) against 183 yd: drag has no spin term (#15443)",
-        "descent": "measured 45.1 deg, -4.9 deg against 50 deg (#15443)"
-      }
+      "confidence": "medium (from memory; consistent with the published driver row of the same table)"
     },
     {
       "id": "pga_tour_7_iron_2019",
@@ -62,10 +52,7 @@
       "apex_yd": 32.0,
       "descent_deg": 50.0,
       "source": "Trackman PGA Tour averages (2019 table), 7-iron: 120 mph, 16.3 deg, 7097 rpm (the launch already used by test_trackman_benchmarks), 32 yd, 50 deg, 172 yd; carry, apex and descent approximate, from memory",
-      "confidence": "medium (from memory)",
-      "xfail": {
-        "descent": "measured 44.4 deg, -5.6 deg against 50 deg (carry 179.7 yd, +4.5 %, inside the band) (#15443)"
-      }
+      "confidence": "medium (from memory)"
     },
     {
       "id": "pga_tour_pitching_wedge_2019",
@@ -78,8 +65,7 @@
       "source": "Trackman PGA Tour averages (2019 table), pitching wedge: 102 mph, 24.2 deg, 9304 rpm, 29 yd, 52 deg, 136 yd; approximate, from memory",
       "confidence": "medium (from memory)",
       "xfail": {
-        "carry": "measured 144.0 yd, +5.9 % (+8.0 yd) against 136 yd: drag has no spin term (#15443)",
-        "descent": "measured 47.9 deg, -4.1 deg against 52 deg (#15443)"
+        "carry": "measured 127.3 yd, -6.4 % (-8.7 yd) against 136 yd after the spin-drag law: the linear spin term is extrapolated to S ~0.45, beyond the S <= 0.3 wind-tunnel range (#15443)"
       }
     }
   ]

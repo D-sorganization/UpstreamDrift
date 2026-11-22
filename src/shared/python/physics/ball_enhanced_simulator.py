@@ -17,7 +17,10 @@ from typing import TYPE_CHECKING, Callable
 import numpy as np
 
 from src.shared.python.core.contracts import postcondition, precondition
-from src.shared.python.core.physics_constants import AIR_VISCOSITY_KG_M_S
+from src.shared.python.core.physics_constants import (
+    AIR_VISCOSITY_KG_M_S,
+    GOLF_BALL_SPIN_DRAG_SLOPE,
+)
 from src.shared.python.physics.aerodynamics import _rust_facade
 from src.shared.python.physics.aerodynamics._rust_facade import AerodynamicsSpec
 from src.shared.python.physics.atmosphere import (
@@ -562,6 +565,7 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
         return {
             "drag_model": "reynolds_dimpled_sphere",
             "base_cd": float(self.aero_config.drag_coefficient),
+            "spin_drag_slope": float(GOLF_BALL_SPIN_DRAG_SLOPE),
             "lift_scale": PENNER_LIFT_SCALE,
             "lift_exponent": PENNER_LIFT_EXPONENT,
             "cl_max": min(

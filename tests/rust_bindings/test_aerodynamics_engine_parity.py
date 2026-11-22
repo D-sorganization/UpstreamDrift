@@ -23,6 +23,9 @@ import time
 import numpy as np
 import pytest
 
+from src.shared.python.core.physics_constants import (
+    GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT,
+)
 from src.shared.python.physics.aerodynamics import (
     AerodynamicsSpec,
     compute_total_force,
@@ -206,7 +209,7 @@ class TestAerodynamicsEngineParity:
             rust.AeroBallProperties(
                 mass=ball.mass,
                 radius=ball.radius,
-                drag_coefficient=0.25,
+                drag_coefficient=float(GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT),
                 spin_decay_rate=ball.spin_decay_rate,
             ),
             rust.AirProperties(
