@@ -16,6 +16,7 @@ import math
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from src.tools.native_viewer_export import aim_line
 from src.tools.native_viewer_export.flight_inset import flight_coordinates
 
 if TYPE_CHECKING:
@@ -91,18 +92,31 @@ def hole_shot(flight: Any, cfg: HoleViewSettings) -> HoleShot:
     if flight.path_m is None or flight.axes_m is None:
         raise ValueError(f"no drawable flight: {flight.status}")
     local = flight_coordinates(flight.path_m, flight.axes_m)
-    target = TargetFlight(local, float(flight.carry_m), float(flight.lateral_m))
+    yaw = getattr(flight, "aim_yaw_rad", None) or 0.0
+    side_m = float(flight.lateral_m)
+    if yaw:
+        local = aim_line.rotate_plan(local, yaw)  # finish aim: tee-to-finish on line
+        side_m = float(flight.aim_lateral_m)
+    target = TargetFlight(local, float(flight.carry_m), side_m)
     hole = hole_from_settings(load_shots_settings(), cfg.preset)
     shot = shots_on_hole([target], hole, [cfg.label], [cfg.colour_rgba])[0]
     roll = getattr(flight, "rollout", None)
     if roll is None:
         return shot
+    offset = (
+        aim_line.rotate_offset(roll.end_offset_m, yaw) if yaw else roll.end_offset_m
+    )
     return replace(
         shot,
         roll_m=float(roll.roll_m),
         total_m=float(roll.total_m),
-        roll_offset_m=(float(roll.end_offset_m[0]), float(roll.end_offset_m[1])),
+        roll_offset_m=(float(offset[0]), float(offset[1])),
     )
+
+
+def aim_note(flight: Any) -> str | None:
+    """The aim label of ``flight`` (``aim_line_settings.json`` text), or ``None``."""
+    return getattr(flight, "aim_text", None) or None
 
 
 def write_still(
@@ -126,5 +140,7 @@ def write_still(
     png = Path(out_dir) / f"{swing}_{engine}_hole_view.png"
     shot = hole_shot(flight, cfg)
     units = flight.settings.display_units
-    write_hole_figure([shot], hole, png, settings, units, cfg.label_at_landing)
+    write_hole_figure(
+        [shot], hole, png, settings, units, cfg.label_at_landing, aim_note(flight)
+    )
     return {"hole_view": png}
