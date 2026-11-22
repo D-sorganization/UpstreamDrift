@@ -80,7 +80,8 @@ def test_aerodynamics_facade_follows_the_same_guard(monkeypatch):
     from src.shared.python.physics.aerodynamics import _rust_facade
 
     try:
-        for revision, expected in ((1, False), (2, True)):
+        current = rust_kernel.MIN_PHYSICS_REVISION
+        for revision, expected in ((current - 1, False), (current, True)):
             fake = _fake_kernel(revision)
             for name in (
                 "AerodynamicsEngine",

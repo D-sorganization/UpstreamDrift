@@ -36,7 +36,8 @@ logger = get_logger(__name__)
 #: (enforced by ``tests/unit/physics/test_rust_kernel_version_guard.py``).
 #: A wheel built before the attribute existed reads as revision 0.
 #: 2: spin-dependent drag (#15460).
-MIN_PHYSICS_REVISION = 2
+#: 3: drag crisis refitted to Choi et al. 2006 (#15443).
+MIN_PHYSICS_REVISION = 3
 
 _REBUILD_HINT = (
     "maturin develop (or maturin build --features python --release) "
