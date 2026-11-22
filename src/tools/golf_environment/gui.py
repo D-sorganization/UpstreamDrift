@@ -121,23 +121,9 @@ class EnvironmentRenderer(QWidget):
             return
         length = env.length
         width = env.width
-        vertexes = np.array(
-            [
-                [-10, -width / 2, 0],
-                [length, -width / 2, 0],
-                [-10, width / 2, 0],
-                [-10, width / 2, 0],
-                [length, -width / 2, 0],
-                [length, width / 2, 0],
-            ]
-        )
-        colors = np.ones((6, 4))
-        colors[:, 0] = 0.1
-        colors[:, 1] = 0.6
-        colors[:, 2] = 0.2
-        colors[:, 3] = 1.0
-        mesh = gl.GLMeshItem(
-            vertexes=vertexes, vertexColors=colors, smooth=False, drawEdges=False
+        mesh = self._triangle_mesh(
+            self._create_rect(-10.0, -width / 2, length + 10.0, width),
+            (0.1, 0.6, 0.2, 1.0),
         )
         self._gl_view.addItem(mesh)
 
@@ -154,12 +140,9 @@ class EnvironmentRenderer(QWidget):
     def _render_course_hole(self, hole: CourseHole) -> None:
         if self._gl_view is None:
             return
-        tee_mesh = gl.GLMeshItem(
-            vertexes=self._create_rect(
-                hole.tee_position[0] - 2, hole.tee_position[1] - 2, 4, 4
-            ),
-            color=(0.3, 0.8, 0.3, 1.0),
-            smooth=False,
+        tee_mesh = self._triangle_mesh(
+            self._create_rect(hole.tee_position[0] - 2, hole.tee_position[1] - 2, 4, 4),
+            (0.3, 0.8, 0.3, 1.0),
         )
         self._gl_view.addItem(tee_mesh)
 
@@ -170,21 +153,18 @@ class EnvironmentRenderer(QWidget):
             hole.pin_position[1] - hole.tee_position[1],
             hole.pin_position[2] - hole.tee_position[2],
         )
-        fw_mesh = gl.GLMeshItem(
-            vertexes=self._create_rect(
+        fw_mesh = self._triangle_mesh(
+            self._create_rect(
                 0, -hole.fairway_width / 2, float(dist), hole.fairway_width
             ),
-            color=(0.2, 0.7, 0.2, 1.0),
-            smooth=False,
+            (0.2, 0.7, 0.2, 1.0),
         )
         self._gl_view.addItem(fw_mesh)
 
         green_pts = self._create_circle(
             hole.pin_position[0], hole.pin_position[1], hole.green_radius
         )
-        green_mesh = gl.GLMeshItem(
-            vertexes=green_pts, color=(0.1, 0.9, 0.1, 1.0), smooth=False
-        )
+        green_mesh = self._triangle_mesh(green_pts, (0.1, 0.9, 0.1, 1.0))
         self._gl_view.addItem(green_mesh)
 
         pin = gl.GLLinePlotItem(
@@ -198,6 +178,24 @@ class EnvironmentRenderer(QWidget):
             width=3,
         )
         self._gl_view.addItem(pin)
+
+    @staticmethod
+    def _triangle_mesh(
+        soup: np.ndarray, color: tuple[float, float, float, float]
+    ) -> Any:
+        """Wrap a flat ``(3 * n, 3)`` triangle soup as a pyqtgraph mesh item.
+
+        pyqtgraph reads a 2-D ``vertexes`` array without ``faces`` as invalid
+        and the item fails at paint time, so the soup is reshaped to
+        ``(n, 3, 3)`` (one row of three vertices per face).
+
+        Raises:
+            ValueError: If ``soup`` is not ``(3 * n, 3)``.
+        """
+        soup = np.asarray(soup, dtype=float)
+        if soup.ndim != 2 or soup.shape[1] != 3 or soup.shape[0] % 3 != 0:
+            raise ValueError(f"triangle soup must be (3n, 3); got {soup.shape}")
+        return gl.GLMeshItem(vertexes=soup.reshape(-1, 3, 3), color=color, smooth=False)
 
     def _create_rect(self, x: float, y: float, w: float, h: float) -> np.ndarray:
         # Delegates to the shared golf_viz geometry builder (DRY).
