@@ -68,6 +68,42 @@
     "name": "native_export_describe"
   },
   {
+    "description": "Validate a native viewer export request {options: {name: value}} and render it in the background; returns a job id at once.",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "request": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "request"
+      ],
+      "type": "object"
+    },
+    "name": "native_export_run"
+  },
+  {
+    "description": "State of a native export job (request.job_id): queued, running, succeeded with the clip manifest, or failed with the error.",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "request": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "request"
+      ],
+      "type": "object"
+    },
+    "name": "native_export_status"
+  },
+  {
     "description": "Check a native viewer export request {options: {name: value}} against the schema and allowed roots; returns the command line.",
     "inputSchema": {
       "properties": {

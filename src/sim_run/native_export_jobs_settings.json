@@ -1,0 +1,6 @@
+{
+  "max_concurrency": 1,
+  "timeout_seconds": 3600,
+  "max_retained_jobs": 64,
+  "sources": "Native viewer export jobs (#15150 G8). One render at a time: each export drives an engine viewer (headless Chromium, xvfb or EGL) that saturates a host, and a second concurrent render only queues behind it. The one-hour wall-clock bound covers the longest published clip set (four engines, three speed variants and the impact window) with margin; a job past it is terminated by managed_popen. 64 finished jobs are kept for status calls before the oldest are dropped, so a long-lived server holds bounded state."
+}
