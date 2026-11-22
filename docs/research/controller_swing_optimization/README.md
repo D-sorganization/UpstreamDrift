@@ -260,6 +260,10 @@ to 19.04 and 10.28 rad/s; however, second differences on the outer adjacent
 triples remained about 4,400 rad/s², and the fixed neighbors retained weld
 errors of 0.425 and 0.709 mm. Those soft boundary penalties do not make the
 combined reference dynamically or anatomically feasible.
+Including two fixed original neighbors at each end in that soft temporal
+penalty converged with join speeds 11.47 and 9.92 rad/s and maximum outer
+second difference 1,562 rad/s². The fixed-neighbor closure errors and all
+whole-trajectory and anatomical limitations remain.
 A soft face-axis target inferred from observed head-marker orientation was
 available in 476 of 477 pre-impact frames, but not at the dropout frame; no
 target was imputed there. At continuity weight 0.1, adding face weight 3.0
