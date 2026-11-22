@@ -773,6 +773,7 @@ class TestSpinDecay:
 
         assert carry_fast < carry_slow  # measured 214.8 m < 228.7 m
 
+    @pytest.mark.unit
     def test_higher_decay_rate_more_carry_for_high_spin(self) -> None:
         """High-spin launch: faster decay sheds spin drag and carries farther."""
         carry_slow, carry_fast = self._carries_for_decay(53.0, 16.0, 7000.0)
