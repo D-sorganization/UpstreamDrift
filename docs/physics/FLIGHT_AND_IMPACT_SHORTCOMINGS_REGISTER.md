@@ -95,10 +95,14 @@ Sizes quoted from tests are the band a test asserts, not a published value.
 - **Missing:** gusts, shear with height and turbulence.
 - **Instead:** one steady uniform vector in `EnvironmentalConditions.wind_velocity`
   (`src/shared/python/physics/ball_launch_conditions.py`), subtracted from ball
-  velocity in the kernel derivative. The pipeline default is calm. Only the
-  shot-model landing simulator sets wind
+  velocity in the kernel derivative. The pipeline default is calm, and
+  `SwingBallFlightPipeline` also accepts an explicit environment. Two
+  consumers set wind: the shot-model landing simulator
   (`PipelineLandingSimulator._pipeline` in
-  `src/shared/python/sg_optimizer/shot_model/physics_simulator.py`).
+  `src/shared/python/sg_optimizer/shot_model/physics_simulator.py`) and the
+  ball flight GUI (`_build_environment` in `src/tools/ball_flight_gui/gui.py`,
+  passed to `BallFlightSimulator` by `_compute_trajectory`). The native viewer
+  export flight runs calm; it has no wind setting.
 - **Effect:** a 5 m/s steady head wind removes 9 to 18 yd of driver carry, the
   band asserted by `test_five_meter_per_second_wind_changes_driver_carry_sensibly`
   in `tests/unit/physics/test_trackman_benchmarks.py`; not a published figure.
