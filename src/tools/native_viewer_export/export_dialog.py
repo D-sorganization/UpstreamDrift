@@ -7,6 +7,7 @@ mapping and validation lives in :mod:`dialog_core` (the pure-data layer).
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any, Protocol
 
 from PyQt6.QtCore import QTimer
@@ -23,11 +24,13 @@ from PyQt6.QtWidgets import (
     QLineEdit,
     QPlainTextEdit,
     QPushButton,
+    QScrollArea,
     QVBoxLayout,
     QWidget,
 )
 
 from src.tools.native_viewer_export import dialog_core as core
+from src.tools.native_viewer_export.option_groups import build_group
 
 __all__ = ["ExportClipsDialog"]
 
@@ -108,12 +111,26 @@ class ExportClipsDialog(QDialog):
         buttons.addStretch(1)
         buttons.addWidget(self.export_button)
         buttons.addWidget(close)
+        content = QWidget()
+        inner = QVBoxLayout(content)
+        inner.addLayout(form)
+        for item in (engines, speeds, self.impact_check):
+            inner.addWidget(item)
+        self.option_readers: dict[str, Callable[[], Any]] = {}
+        self._specs = core.grouped_specs()
+        for name, specs in self._specs:
+            inner.addWidget(build_group(name, specs, self.option_readers))
+        inner.addStretch(1)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(content)
         layout = QVBoxLayout(self)
-        for item in (form, engines, speeds, self.impact_check, self.state_label):
-            layout.addWidget(item) if isinstance(item, QWidget) else layout.addLayout(
-                item
-            )
-        layout.addWidget(self.result_view, 1)
+        layout.addWidget(scroll, 1)
+        layout.addWidget(self.state_label)
+        layout.addWidget(self.result_view)
+        self.result_view.setMaximumHeight(
+            int(core.load_dialog_settings()["result_height"])
+        )
         layout.addLayout(buttons)
 
     def _with_browse(self, edit: QLineEdit, folder: bool) -> QWidget:
@@ -174,7 +191,16 @@ class ExportClipsDialog(QDialog):
             impact_clip=self.impact_check.isChecked(),
             distance_unit=self.distance_combo.currentData(),
             speed_unit=self.speed_combo.currentData(),
+            extra_options=self._extra_options(),
         )
+
+    def _extra_options(self) -> dict[str, Any]:
+        raw = {name: read() for name, read in self.option_readers.items()}
+        return core.collect_options([s for _, g in self._specs for s in g], raw)
+
+    def prefill(self, bundle: str | None) -> None:
+        """Fill the bundle path and swing name from a loaded run's bundle."""
+        self.set_choices(core.prefill_choices(self.choices(), bundle))
 
     def start_export(self) -> None:
         """Validate, queue the job and start polling; never renders here."""

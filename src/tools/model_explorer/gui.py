@@ -600,6 +600,9 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         from src.tools.native_viewer_export.export_dialog import ExportClipsDialog
 
         self._export_clips_dialog = ExportClipsDialog(parent=self)
+        run = getattr(self, "_results", None)
+        if run is not None and run.path.suffix == ".npz":
+            self._export_clips_dialog.prefill(str(run.path))
         self._export_clips_dialog.show()
         return self._export_clips_dialog
 
