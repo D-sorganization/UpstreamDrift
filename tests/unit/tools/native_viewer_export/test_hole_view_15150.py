@@ -74,3 +74,18 @@ def test_cli_flag_is_off_by_default_and_turns_the_flight_on() -> None:
     flight = cli.build_settings(args).ball_flight
     assert isinstance(flight, tr.TracerSettings)
     assert flight.hole_view is not None and flight.hole_view.preset == "par5"
+
+
+def test_hole_shot_carries_the_playback_roll_and_the_label_option() -> None:
+    pytest.importorskip("PyQt6.QtCore")
+    from src.tools.native_viewer_export.rollout import Rollout
+
+    flight = base._playback()
+    assert hv.hole_shot(flight, CFG).roll_m is None
+    roll = Rollout(
+        20.0, flight.carry_m + 20.0, (19.0, -6.0), "driver", "fairway", "flat", "x"
+    )
+    shot = hv.hole_shot(replace(flight, rollout=roll), CFG)
+    assert shot.roll_m == 20.0 and shot.total_m == flight.carry_m + 20.0
+    assert shot.roll_offset_m == (19.0, -6.0)
+    assert CFG.label_at_landing is True
