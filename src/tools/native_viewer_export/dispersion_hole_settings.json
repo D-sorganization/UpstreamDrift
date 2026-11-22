@@ -1,0 +1,44 @@
+{
+  "preset": "par4",
+  "trace_rgb": [0.85, 0.1, 0.1],
+  "trace_alpha": 0.55,
+  "mean_marker": "*",
+  "mean_marker_size": 16.0,
+  "mean_rgb": [0.05, 0.05, 0.05],
+  "ellipse_rgb": [0.05, 0.05, 0.05],
+  "ellipse_fill_alpha": 0.12,
+  "ellipse_edge_alpha": 0.9,
+  "ellipse_linewidth": 1.8,
+  "figure": {
+    "width_in": 11.0,
+    "height_in": 6.5,
+    "dpi": 130
+  },
+  "input_names": {
+    "club_roll_deg": "club roll in the hands",
+    "ball_shift_m": "ball position"
+  },
+  "title_format": "Replay-level dispersion of {n} shots, varied: {inputs}. Aim: address line",
+  "legend_format": {
+    "traces": "{n} shot traces (carry point, rest point)",
+    "mean": "Mean landing point",
+    "ellipse": "{sigma:g}-sigma ellipse of the landing points",
+    "stats": "Carry {carry_mean:.1f} +/- {carry_sd:.1f} {unit}, side {side_mean:+.1f} +/- {side_sd:.1f} {unit} (+ right)"
+  },
+  "sources": {
+    "preset": "Hole preset of golf_environment/shots_settings.json; the same par 4 as the single-shot hole view, whose 380 m fairway holds a driver carry. Illustrative, not surveyed.",
+    "trace_rgb": "Colour shared by all shot traces so the bundle reads as one spread; the single-shot hole view red.",
+    "trace_alpha": "Opacity of each trace: ten overlapping traces stay individually visible at about one half.",
+    "mean_marker": "Matplotlib marker of the mean landing point (a star stands out from the round carry dots).",
+    "mean_marker_size": "Size in points of the mean landing marker, larger than the 9 point carry dots of the hole figure.",
+    "mean_rgb": "Colour of the mean landing marker, near black for contrast on the fairway.",
+    "ellipse_rgb": "Edge and fill colour of the spread ellipse.",
+    "ellipse_fill_alpha": "Fill opacity of the spread ellipse, low so traces underneath stay visible.",
+    "ellipse_edge_alpha": "Edge opacity of the spread ellipse.",
+    "ellipse_linewidth": "Edge width in points of the spread ellipse.",
+      "figure": "Figure size in inches and resolution, replacing the figure block of shots_settings.json; matches the hole view still in proportion.",
+    "input_names": "Plain-language names of the varied shot-setup inputs (shot_dispersion.INPUTS) for the title.",
+    "title_format": "Second title line: states a replay-level dispersion (not a physical or measured one), the varied inputs and that the hole is aimed along the address line since a dispersion has no single finish line.",
+    "legend_format": "Legend lines; the stats line is mean +/- population standard deviation of the flight model's carry and side in display units (side positive to the right)."
+  }
+}
