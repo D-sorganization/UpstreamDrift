@@ -16,11 +16,20 @@ AuthCheck = Callable[[Any], None]
 NATIVE_EXPORT_TOOLS: dict[str, CapabilityId] = {
     "native_export_describe": "native_export_describe",
     "native_export_validate": "native_export_validate",
+    "native_export_run": "native_export_run",
+    "native_export_status": "native_export_status",
 }
 
 
 def _envelope(payload: dict[str, Any]) -> dict[str, Any]:
     return {"content": [{"type": "text", "text": json.dumps(payload, sort_keys=True)}]}
+
+
+def _request_tool(name: str, description: str) -> dict[str, Any]:
+    """Spec of a tool taking a required ``request`` object (and auth token)."""
+    props = {"auth_token": {"type": "string"}, "request": {"type": "object"}}
+    schema = {"type": "object", "properties": props, "required": ["request"]}
+    return {"name": name, "description": description, "inputSchema": schema}
 
 
 def agent_capability_tool_specs() -> list[dict[str, Any]]:
@@ -79,6 +88,16 @@ def agent_capability_tool_specs() -> list[dict[str, Any]]:
                 "required": ["request"],
             },
         },
+        _request_tool(
+            "native_export_run",
+            "Validate a native viewer export request {options: {name: value}} "
+            "and render it in the background; returns a job id at once.",
+        ),
+        _request_tool(
+            "native_export_status",
+            "State of a native export job (request.job_id): queued, running, "
+            "succeeded with the clip manifest, or failed with the error.",
+        ),
     ]
 
 

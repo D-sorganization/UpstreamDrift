@@ -86,3 +86,25 @@ def validate_native_export(
     """Check an export request; the record carries the equivalent command line."""
     del request
     return run_agent_capability("native_export_validate", payload, _default_store())
+
+
+@router.post("/native-export/run", dependencies=_EXPORT_GUARD)
+@limiter.limit(_STUDY_LIMIT)
+@handle_api_errors
+def run_native_export(
+    request: Request, payload: dict[str, Any] = _EMPTY_BODY
+) -> dict[str, Any]:
+    """Validate and queue an export; the record carries the job id at once."""
+    del request
+    return run_agent_capability("native_export_run", payload, _default_store())
+
+
+@router.post("/native-export/status", dependencies=_EXPORT_GUARD)
+@limiter.limit(_STUDY_LIMIT)
+@handle_api_errors
+def native_export_status(
+    request: Request, payload: dict[str, Any] = _EMPTY_BODY
+) -> dict[str, Any]:
+    """Export job state; on success the record carries the clip manifest."""
+    del request
+    return run_agent_capability("native_export_status", payload, _default_store())

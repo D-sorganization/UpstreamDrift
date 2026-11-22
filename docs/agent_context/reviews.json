@@ -19,14 +19,14 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01; model.py updated for worktree vendor resolution."
     },
     "launcher-atlas": {
-      "fingerprint": "bd395d50447b4b5766efb5155006d305e7d6630c9a00e16ae73ee55d362e1a57",
+      "fingerprint": "d69ee8a4971948c96428974654aa9e559bdf11c081d05fd6513fcd8ad15345fd",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "122475bfa6e445ee8a2d4e1f94eae41c3b0e6bce954d1eb8ea44a1e40662e052",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "4bc71ad97820edb02970b2a43cfd48062a9c466e7d2fce8df7dd67816b17a541",
+        "src/config/feature_parity.json": "3fc804a6cf6d2a7607051a78167e6acfe204b7ea306de07c8f629276660614b9",
         "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
         "src/config/launcher_manifest_loader.py": "551e868f572b9eb79fcd2b0e0fbe67bff5c9867f84f1d03f9cd6113547c72fd8",
         "src/config/models.yaml": "ad3f0cf74f12a3a0df3443b3f40ace2393123ee6d39ee34b055d4f79c4a1c873",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Branch covers the 21 models.yaml tiles that no feature_parity.json entry listed. Read the launcher-atlas contract and both ends: scripts/capability_atlas/model.py builds from models.yaml, launcher_manifest.json and feature_parity.json, validating parity/gap/exempt status, existing surface paths and unique tile ids; the provider side is feature_parity.json. Data only, through the unchanged interface. Seven tiles join existing entries (mocap.breadth, tools.putting_green, docs.document_library, biomech.exercise_injury_dashboards). New parity entries were checked against source: ball_flight_simulator (BallFlight.tsx calls /api/tools/ball-flight/{models,simulate,import}, served by src/api/routes/ball_flight.py) and sidekick (ChatPanel.tsx uses /ws/chat from chat_ws.py). New gap entries carry issue 15150 and exempt entries carry concrete reasons. Every referenced path exists (registry tests). Builder, renderer, models.yaml, launcher manifest and goal catalog are unchanged. A new registry test requires every non-hidden models.yaml tile to be covered. Regenerated matrix and atlas; generate_capability_atlas --check rc 0; companion catalog counts (82 features, 180 surface paths) reproduce build_catalog. Passed: tests/config/feature_parity, tests/companion, tests/scripts/test_capability_atlas.py."
+      "rationale": "Re-review after merging origin/main (which landed #15476's native-export run/status note in the native_viewer_export entry) into the E9 coverage branch. Read the launcher-atlas contract and both ends again: scripts/capability_atlas/model.py builds from models.yaml, launcher_manifest.json and feature_parity.json, validating status, surface paths and tile ids; the provider side is feature_parity.json. This branch's change is data only: the 21 previously uncovered models.yaml tiles join existing entries or get new parity/gap/exempt entries, with the two parity claims checked against source (BallFlight.tsx calls /api/tools/ball-flight routes; ChatPanel.tsx uses /ws/chat). Builder, renderer, models.yaml, launcher manifest and goal catalog are unchanged. Conflicts were only in generated graph.json and reviews.json; I took main and regenerated. generate_capability_atlas --check rc 0; companion counts (82 features, 180 surface paths) reproduce build_catalog on the merged tree. Passed: tests/config/feature_parity, tests/companion, tests/scripts/test_capability_atlas.py."
     },
     "model-backends": {
       "fingerprint": "834925f5000ca59021892ac5b4d2859734c71aa4b239300cdc537beb8086c170",
