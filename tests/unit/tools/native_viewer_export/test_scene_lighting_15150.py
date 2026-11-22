@@ -98,6 +98,39 @@ def test_showpiece_lights_replace_the_scene_lights(scene_xml: str) -> None:
     assert model.mat_reflectance[floor] == pytest.approx(settings.reflectance)
 
 
+def _unit(vector: Any) -> np.ndarray:
+    return np.array(vector) / np.linalg.norm(vector)
+
+
+def test_showpiece_key_shapes_the_body_without_clipping_it() -> None:
+    """The look's invariants: a key above the ambient term and one short shadow."""
+    settings = lighting.load_lighting()
+    casters = [light for light in settings.lights if light.castshadow]
+    ambient = max(settings.headlight["ambient"])
+    # the body takes its form from the key, not from the flat ambient term
+    assert sum(max(light.diffuse) for light in casters) > ambient
+    # no cast shadow longer than the golfer is tall, and the copies of the key
+    # close enough that the far end of the shadow is one edge, not steps
+    directions = [_unit(light.direction) for light in casters]
+    mean = _unit(np.mean(directions, axis=0))
+    for direction in directions:
+        assert np.degrees(np.arcsin(-direction[2])) >= 45.0
+        assert np.degrees(np.arccos(min(1.0, direction @ mean))) <= 0.75
+    # the brightest any surface can be lit: a white shirt and light skin clip
+    # above about 1.1 times their base colour
+    normals = np.random.default_rng(0).normal(size=(20000, 3))
+    normals /= np.linalg.norm(normals, axis=1)[:, None]
+    lit = np.full(len(normals), ambient + max(settings.headlight["diffuse"]))
+    for light in settings.lights:
+        facing = np.clip(-(normals @ _unit(light.direction)), 0.0, None)
+        lit += max(light.diffuse) * facing
+    assert lit.max() <= 1.1
+    # the ground texture keeps both checker colours below the clip
+    tex = ET.fromstring(lighting.apply_lighting(WORLD, settings)).find(".//texture")
+    scale = settings.texture_gain * max(GREENS[0][1], GREENS[1][1])
+    assert scale > 1.0 and max(float(v) for v in tex.get("rgb2").split()) <= 1.0
+
+
 def test_ground_texture_takes_the_gain_and_contrast() -> None:
     settings = lighting.load_lighting()
     tex = ET.fromstring(lighting.apply_lighting(WORLD, settings)).find(".//texture")
