@@ -22,7 +22,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1199 | `src/api/services/simulation_service.py` |
 | 1198 | `src/api/local_server.py` |
 | 1198 | `src/launchers/cross_engine_dashboard.py` |
-| 1198 | `src/launchers/model_card.py` |
 | 1198 | `src/tools/capture_rig/gui.py` |
 | 1197 | `src/bunkershot3d/solvers/mpm/verification.py` |
 | 1197 | `src/launchers/launcher_diagnostics.py` |
@@ -33,6 +32,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1196 | `src/launchers/launcher_simulation.py` |
 | 1196 | `src/shared/python/grip_contact/topology_contact.py` |
 | 1195 | `src/launchers/launcher_process_manager.py` |
+| 1195 | `src/launchers/model_card.py` |
 | 1195 | `src/launchers/upstream_drift_launcher.py` |
 | 1195 | `src/tools/shot_pattern_analysis/matched_supplement_figures.py` |
 | 1188 | `src/config/launcher_manifest_loader.py` |
