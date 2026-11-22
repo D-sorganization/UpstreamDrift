@@ -1,105 +1,142 @@
-# Native Viewer Export
+# Native Viewer Export Quick Start
 
-The native viewer export tool renders a same-input swing in the native viewer of
-each physics engine and writes mp4 clips with force and torque overlays. It
-complements the shared renderers: each clip shows what the engine's own viewer
-displays for the engine's own rollout.
+The native viewer export renders a swing bundle (a `.npz` file holding the
+golfer's joint angles over time, plus any recorded joint efforts) into video
+clips. It runs headless: no window opens. Clips are written as mp4 files, one
+per camera view and one 2x2 grid, at several playback speeds.
 
-The `mujoco` engine renders with `mujoco.Renderer` using the MuJoCo appearance
-layer (body, head, club and scene), not a stick figure; use `--engines mujoco`
-and, without a GPU, `MUJOCO_GL=osmesa`.
+For the developer reference see the tool README in
+`src/tools/native_viewer_export/`. To learn what each drawn arrow, arc, shape
+or panel means, read [What Am I Looking At](../help/native_viewer_export.md).
 
-## Quick Start
+## Which Kind of Motion Is in Your Bundle
+
+A bundle can hold three kinds of motion. The exporter treats them the same way
+when it draws the body, but the force pictures mean different things.
+
+| Kind | What it is | How to tell |
+| --- | --- | --- |
+| Kinematic replay | The fitted joint angles played back. No forces were applied. | Every recorded effort is zero. Clips carry the note "Kinematic Replay: Forces Not Shown" and the force and torque arrows are left out. |
+| Feedback-tracked dynamics | A controller's torques drove the model to follow the fit. | Efforts are non-zero. The torques are what the tracking controller applied. |
+| Open-loop dynamics | The torques are replayed with no feedback, so the model moves on its own. | Efforts are non-zero. Not accepted for a full swing yet: treat such clips as experiments. |
+
+The exporter decides by looking at the efforts, not at a label: if all of them
+are zero it is a kinematic replay. Ellipsoids, impact factors, ball flight,
+lighting and the ball work on any of the three.
+
+## Minimal Command
 
 ```bash
 python3 -m src.tools.native_viewer_export \
-  --bundle docs/.../driver.npz --swing driver --club Driver --out renders/ \
-  --receipt-drake driver_closed_drake.json
+  --bundle bundle.npz --swing driver --club Driver --out renders/
 ```
 
 Clips are named `<swing>_<engine>_<view>_<speed>.mp4` and
-`<swing>_<engine>_2x2_<speed>.mp4`, for example `driver_drake_face_on_1x.mp4`
-and `driver_drake_face_on_0p5x.mp4`.
+`<swing>_<engine>_2x2_<speed>.mp4`, for example `driver_mujoco_face_on_1x.mp4`.
+Use `--engines mujoco` for the MuJoCo renderer. Without a graphics card set
+`MUJOCO_GL=osmesa`. Each backend that cannot run is skipped with a reason.
+Run `--help` for the full flag list.
 
-## Playback Speed and Frame Rate
+## Recipes
 
-Playback is time-based. Video frame `j` shows the swing at
-`t0 + j * speed / fps`, so a 1x clip really runs at real time and a 0.5x clip
-at half speed, independent of the source time step. When the source step is
-coarser than that, the pose is interpolated (linear for joint coordinates,
-spherical for free and ball joint quaternions) instead of repeated. Force and
-torque glyphs come from the nearest source sample.
+### Views, Speeds, and the Impact Window
 
-- `--fps` (default 60) sets the frame rate.
-- `--speeds 1,0.5,0.25` (default: full, half and quarter speed) writes one clip set per speed, each in `(0, 4]`;
-  suffixes are `_1x`, `_0p5x`, `_0p25x`.
-- `--impact-window 0.1` adds a clip of that many swing seconds centred on
-  impact at 0.1x speed (suffix `_impact_0p1x`). Impact is `--impact-time`, else
-  the bundle provenance `impact_time_s`, else the detected impact (see
-  [Ball](#ball)), else the last sample.
-- `--impact-speed 0.25` changes the speed of the impact clip. With an empty
-  `--speeds=` only the impact clip is written, for example a clean 0.25x clip
-  around impact.
-- `--stride` is deprecated: it still works as an alias (one clip at the speed
-  that stride implies) and logs a warning.
-- The heads-up display shows the playback speed and the real swing time in
-  milliseconds from impact. `--no-hud` writes clean frames without the view
-  label, HUD or legend text.
+```bash
+python3 -m src.tools.native_viewer_export --bundle bundle.npz --swing driver \
+  --out renders/ --views face_on,down_the_line --speeds 1,0.25 \
+  --impact-window 0.1 --impact-speed 0.1
+```
 
-## Quality Presets
+Views are `face_on`, `down_the_line`, `overhead` and `oblique` (the default
+four), plus `down_the_line_flight` and `hands_closeup`. `--speeds` takes values
+in (0, 4] and writes one set per speed (default 1, 0.5 and 0.25). The impact
+window adds a clip of that many swing seconds centred on impact. Limit: the
+impact time comes from `--impact-time`, the bundle, or detection; if none is
+found the last sample is used. `--preset preview` and `--size WxH` make smaller
+clips, `--no-hud` removes text, `--no-grid` skips the 2x2.
 
-`--preset hq` (default) renders 1280x720 tiles encoded with libx264,
-`yuv420p`, CRF 18. `--preset preview` keeps the small 640x544 tiles at CRF 23.
-`--size WIDTHxHEIGHT` overrides the preset size.
+### Impact Factors Panel
 
-## Camera Views
+```bash
+... --impact-factors
+```
 
-All engines use the same four presets (golfer faces -X, target line -Y for a
-right-handed golfer): face-on, down-the-line, overhead and oblique. The
-look-at point defaults to the golfer's centre of mass at address, at 0.9 m
-height.
+Draws club speed, path, face, face to path, attack angle, loft and strike
+point. Values are blank before impact and freeze at impact. Limit: kinematic
+values at the ball position the tool places; see the help page.
 
-## Overlays
+### Ball Flight Tracer and Inset
 
-Ground reaction forces act at the centre of pressure of each foot, joint torques
-are drawn as arcs at the joint anchors and body weight acts at the centre of
-mass. Wrenches come from one MuJoCo evaluation of the shared specification, so
-every engine shows identical glyph definitions while the poses come from that
-engine's rollout. This is a display of the shared contact law, not a
-measurement.
+```bash
+... --ball-flight --views down_the_line_flight,face_on
+```
 
-### Arrow Scale
+After impact the ball flies along the model-predicted carry path with a
+tracer, a small flight inset, and the clip holds until landing. Limit: carry
+only, ending at first ground contact; no bounce or roll. Use `--no-ball` to
+hide the ball before impact.
 
-When the model mass is known, force arrows use the `body_weight` scale mode
-(ADR-0052): one body weight (mass times 9.80665 m/s²) draws 0.5 m, and the
-length ceiling is 3 m (6 body weights), so a driver swing is not silently
-clamped. Without a mass the fixed scale of 0.7 m per kN with a 0.9 m ceiling is
-kept. An arrow that reaches the ceiling is drawn with a distinct tip and is
-counted in the legend.
+### Showpiece Lighting and Colours
 
-### Grip Overlay
+```bash
+... --lighting showpiece --skin-tone skin_4 --top-color "#1f4e79" \
+  --bottom-color "#333333" --glove lead
+```
 
-`--grip` adds the grip wrench of the hands on the club (GCV-10): the force of
-each hand at its grip point, the net force and the equivalent couple at the grip
-midpoint, and the per-hand moments of force. The labels are listed in
-[Force Overlay](force_overlay.md#grip-wrench-per-hand-loading-midpoint-net-force-and-couple).
-The legend names the left/right split method. A quantity that cannot be
-computed is shown as unavailable, never as a zero arrow. Each engine also writes
-`<swing>_<engine>_grip_wrench.json` for the grip plots. Drake uses its own KKT
-multiplier; the other viewers show the MuJoCo plant at that engine's pose. Use
-`--views hands_closeup --no-grid` for a camera that follows the grip midpoint.
+Showpiece lighting adds lights, one soft shadow and a ground tone (MuJoCo
+export only). Other appearance flags: `--hair`, `--clothing`, `--appearance`.
+Limit: appearance never changes the motion or any computed number.
 
-### Ball
+### Club Roll and Ball Position
 
-No ball is drawn. The ball enters only the impact detection, which runs when
-neither `--impact-time` nor the bundle provenance gives an impact time. It
-places the `Clubhead` frame by MuJoCo forward kinematics at every state and
-picks the closest approach to the address position, subject to its height and
-ball-radius checks (`model_appearance.club_face.impact_frame`). Without MuJoCo,
-or when no frame is a valid impact, the export logs a warning and uses the last
-sample.
+```bash
+... --club-roll-in-hands 3 --ball-position-shift 0.02
+```
+
+`--club-roll-in-hands DEG` turns the club about its shaft relative to the
+hands (positive opens the face), which changes the face angle and loft seen at
+impact. `--ball-position-shift M` moves the ball along the target line
+(positive toward the target). Limits: the same body motion is replayed, the
+shaft is treated as rigid, and forward of the captured ball position only
+about the first few centimetres are valid because the real ball slowed the
+measured club. Both are bounded by `shot_setup_settings.json`. A single
+`--shot-shape` flag is not available yet.
+
+### Force and Torque Vectors, Shading, and Grip Forces
+
+```bash
+... --grip --views hands_closeup --palm-thumb-force --segment-shading
+```
+
+Force arrows and torque arcs are on by default and are hidden on a kinematic
+replay unless you pass `--force-vectors` or `--torque-vectors`. `--grip` adds
+the hand forces on the club and a `<swing>_<engine>_grip_wrench.json` file.
+Limits: these need a bundle with non-zero efforts to mean anything. They are
+model displays, not measurements. See the Known Issues below.
+
+### Ellipsoids
+
+```bash
+... --interface-ellipsoid mobility --interface-ellipsoid effective-mass \
+  --mobility-points hands,clubhead --ellipsoid-color-by kind
+```
+
+Kinds are `mobility`, `effective-mass`, `acceleration-capacity` and
+`force-capacity`. `--hand-mobility` is a shortcut for the hands. Limit: with
+the default per-point scaling, sizes cannot be compared between points.
+
+## Known Issues
+
+As of this writing (epic #15150), fixes are under way on other branches:
+
+- Segment shading and the palm-thumb arrow can still be drawn on a kinematic
+  replay, where they carry no physical meaning.
+- A capacity ellipsoid requested without torque limits can fall back to
+  mobility sizes while keeping the capacity label.
+- `--drift-arrow` is accepted but draws nothing.
 
 ## Requirements
 
-Each backend reports why it cannot run (missing package, no Chromium, no
-`xvfb-run`) and is skipped. See the tool README for environment variables.
+Python 3.11 or newer with the project dependencies. Each backend reports why
+it cannot run (missing package, no `xvfb-run`) and is skipped. The
+[Force Overlay](force_overlay.md) page lists the arrow and arc palette.
