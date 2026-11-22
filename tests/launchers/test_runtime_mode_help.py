@@ -73,6 +73,7 @@ def test_runtime_mode_help_button_click_opens_dialog(qt_app) -> None:
         )
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     ("platform", "expected"),
     [("win32", "Windows"), ("linux", "Linux"), ("darwin", "macOS")],
@@ -83,6 +84,7 @@ def test_native_runtime_name_follows_the_platform(platform, expected) -> None:
     assert native_runtime_name(platform) == expected
 
 
+@pytest.mark.unit
 def test_native_runtime_name_rejects_empty_platform() -> None:
     from src.launchers.runtime_mode_help import native_runtime_name
 
