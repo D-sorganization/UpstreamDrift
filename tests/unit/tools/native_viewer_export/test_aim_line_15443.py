@@ -136,3 +136,13 @@ def test_aim_line_changes_no_flight_number() -> None:
     play, aimed = base._playback(_settings("auto")), _aimed("finish")
     assert aimed.carry_m == play.carry_m and aimed.lateral_m == play.lateral_m
     assert np.array_equal(aimed.path_m, play.path_m)
+
+
+def test_width_scales_with_resolution_and_zero_side_has_no_direction() -> None:
+    assert AIM.width_for(544) == 3
+    assert AIM.width_for(1080) > AIM.width_for(544)
+    with pytest.raises(ValueError):
+        AIM.width_for(0)
+    assert aim_line.side_text_args(1e-12) == (0.0, "")
+    assert aim_line.side_text_args(-2.0) == (2.0, "left")
+    assert "Side 0 yd   Time" in _aimed("finish").lines[1]

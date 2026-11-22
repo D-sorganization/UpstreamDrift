@@ -33,7 +33,10 @@ class AimLineSettings:
     finish_text: str = "Aim: finish line"
     address_text: str = "Aim: address line"
     line_color_rgba: tuple[int, ...] = (255, 255, 255, 200)
-    line_width_px: int = 2
+    line_width_px: int = 3
+    line_width_fraction: float = 0.0055
+    outline_color_rgba: tuple[int, ...] = (10, 20, 40, 230)
+    outline_extra_px: int = 2
     overshoot_fraction: float = 0.1
     min_finish_distance_m: float = 1.0
 
@@ -63,6 +66,12 @@ class AimLineSettings:
         if mode not in MODES:
             raise ValueError(f"aim_line must be one of {MODES}, got {mode!r}")
         return "finish" if mode == "auto" and shot_shape else mode
+
+    def width_for(self, tile_height_px: int) -> int:
+        """Line width (pixels) on a tile ``tile_height_px`` high, never below the minimum."""
+        if tile_height_px < 1:
+            raise ValueError("tile_height_px must be positive")
+        return max(self.line_width_px, round(tile_height_px * self.line_width_fraction))
 
     def text_for(self, mode: str) -> str:
         """The label stating which line is drawn."""
@@ -121,9 +130,9 @@ def ground_line(
 
 
 def side_text_args(lateral_m: float) -> tuple[float, str]:
-    """``(metres, "left"|"right")`` of a right-positive offset; noise rounds to 0."""
+    """``(metres, "left"|"right"|"")`` of a right-positive offset; noise is ``""``."""
     value = 0.0 if abs(lateral_m) < 1e-9 else lateral_m
-    return abs(value), "left" if value < 0.0 else "right"
+    return abs(value), "" if value == 0.0 else ("left" if value < 0.0 else "right")
 
 
 def aimed_fields(flight: Any, mode: str, settings: AimLineSettings) -> dict[str, Any]:

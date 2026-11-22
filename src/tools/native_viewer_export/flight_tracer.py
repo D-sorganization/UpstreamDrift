@@ -435,15 +435,15 @@ class FlightPlayback:
         if points is None or aim is None:
             return tile
         image = Image.fromarray(tile)
-        flight_depth.draw_line(
-            ImageDraw.Draw(image, "RGBA"),
-            camera,
-            points,
-            aim.line_color_rgba,
-            aim.line_width_px,
-            style.near_clip_m,
-            occlusion_for(style, depth),
-        )
+        pen, hide = ImageDraw.Draw(image, "RGBA"), occlusion_for(style, depth)
+        width = aim.width_for(tile.shape[0])
+        for colour, size in (
+            (aim.outline_color_rgba, width + aim.outline_extra_px),
+            (aim.line_color_rgba, width),
+        ):
+            flight_depth.draw_line(
+                pen, camera, points, colour, size, style.near_clip_m, hide
+            )
         return np.asarray(image, dtype=np.uint8)
 
     def _warn_once(self, view: str) -> None:
@@ -501,10 +501,11 @@ def _flight_lines(
     carry = distance_text(flight.carry_m, units)
     apex = distance_text(flight.max_height_m, units)
     offset = distance_text(abs(flight.lateral_m), units)
+    offset = f"{offset} {side}" if side else offset
     return (
         f"Ball {speed}   Launch {flight.launch_deg:.1f} deg"
         f"   Spin {flight.spin_rpm:.0f} rpm",
-        f"Carry {carry}   Apex {apex}   Side {offset} {side}"
+        f"Carry {carry}   Apex {apex}   Side {offset}"
         f"   Time {flight.flight_time_s:.1f} s",
     )
 
