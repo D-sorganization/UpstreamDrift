@@ -264,6 +264,14 @@ Including two fixed original neighbors at each end in that soft temporal
 penalty converged with join speeds 11.47 and 9.92 rad/s and maximum outer
 second difference 1,562 rad/s². The fixed-neighbor closure errors and all
 whole-trajectory and anatomical limitations remain.
+A 17-frame version with the same two-neighbor penalty, 799 variables and 102
+weld equalities did not converge within two successive 115-second budgets.
+The restarted partial iterate met the supplied named bounds; independent
+maximum weld errors were 0.01602 mm and 4.808e-5 rad. Its interior peak
+angular finite-difference speed was 13.95 rad/s and its join speeds were
+11.88 and 14.54 rad/s. This is a nonconverged partial result. The dense
+solver's cost and fixed-neighbor closure errors motivate further work before
+attempting a complete reference.
 A soft face-axis target inferred from observed head-marker orientation was
 available in 476 of 477 pre-impact frames, but not at the dropout frame; no
 target was imputed there. At continuity weight 0.1, adding face weight 3.0
