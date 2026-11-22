@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 49 parity · 5 gap · 17 exempt (12 pending decision in #7460).
+**Summary:** 49 parity · 6 gap · 17 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -33,6 +33,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `launcher.docker_management`<br>Docker engine management dialog | ⚪ exempt | `src/launchers/docker_manager.py` | — | — | Manages the local Docker daemon from the desktop; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `launcher.embedded_tabs_docks`<br>Embedded tool host (tabs + docks) | ⚪ exempt | `src/launchers/embedded_host.py` | — | — | Desktop windowing composition is explicitly desktop-only per ADR-0028 (React shell uses routes, not embedded Qt docks). |
 | `launcher.mcp_config`<br>MCP server configuration writer/preferences | ⚪ exempt | `src/launchers/mcp_config_writer.py` | — | — | Writes local MCP configuration files for desktop AI integrations; desktop-only candidate pending #7460. — **pending decision (#7460)** |
+| `launcher.min_maturity`<br>Launcher min_maturity filter | 🔴 gap | `src/launchers/launcher_orchestrator.py` | `src/api/routes/launcher.py` | — | #15150 |
 | `launcher.tile_grid`<br>Launcher tile grid from shared manifest | ✅ parity | `src/launchers/embedded_tool_bootstrap.py` | `src/api/routes/launcher.py` | `ui/src/pages/Dashboard.tsx` | — |
 | `launcher.tile_web_reachability`<br>Manifest tile web-reachability contract (route / native-window / unavailable) | ✅ parity | `src/launchers/embedded_tool_bootstrap.py` | `src/api/routes/launcher.py` | `ui/src/pages/Dashboard.tsx` | — |
 | `lifting.five_lift_viewing`<br>Weightlifting viewing and analysis for the five lifts (squat, deadlift, bench press, snatch, clean and jerk): lift selection, barbell, hand-force and GRF overlays, plots | 🔴 gap | `src/launchers/exercise_dashboard.py` | `src/api/routes/lifting.py` | `ui/src/pages/LiftBaseline.tsx` | #11748 |
