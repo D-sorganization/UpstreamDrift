@@ -484,6 +484,23 @@ def _apply_palm_thumb(
     provider.with_allocated_contacts(source, topo, static_friction=float(friction))
 
 
+def _withheld_effort_overlays(
+    axial: bool, grip: bool, palm_thumb: bool
+) -> tuple[str, ...]:
+    """Names of the requested effort-based overlays a kinematic replay withholds.
+
+    Logs one warning naming them; returns ``()`` when none was requested.
+    """
+    asked = (("shading", axial), ("grip", grip), ("palm-thumb", palm_thumb))
+    withheld = tuple(name for name, on in asked if on)
+    if withheld:
+        logger.warning(
+            "kinematic replay: %s not drawn (the bundle carries no efforts)",
+            ", ".join(withheld),
+        )
+    return withheld
+
+
 def build_overlay_feed(
     swing: SwingInput,
     engine: str,
@@ -525,18 +542,8 @@ def build_overlay_feed(
     effective_palm_thumb = palm_thumb or opts.palm_thumb
     withheld: tuple[str, ...] = ()
     if visibility.hidden:  # shading, grip and palm-thumb derive from the efforts
-        asked = (
-            ("shading", axial),
-            ("grip", grip),
-            ("palm-thumb", effective_palm_thumb),
-        )
-        withheld = tuple(name for name, on in asked if on)
+        withheld = _withheld_effort_overlays(axial, grip, effective_palm_thumb)
         axial, grip, effective_palm_thumb = False, False, False
-        if withheld:
-            logger.warning(
-                "kinematic replay: %s not drawn (the bundle carries no efforts)",
-                ", ".join(withheld),
-            )
 
     source = MujocoOverlaySource(swing.bundle.spec_bytes)
     grip_source, grip_name = (
