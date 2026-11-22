@@ -1,0 +1,18 @@
+{
+  "aim_line": "auto",
+  "finish_text": "Aim: finish line",
+  "address_text": "Aim: address line",
+  "line_color_rgba": [255, 255, 255, 200],
+  "line_width_px": 2,
+  "overshoot_fraction": 0.1,
+  "min_finish_distance_m": 1.0,
+  "sources": {
+    "aim_line": "Reference line of the shot-shape views: finish (ball to where the ball finishes, the rest point when a roll is modelled, so a draw or fade that ends on target reads as on target), address (the address target line) or auto (finish when --shot-shape was asked for, address otherwise; without a shot shape the picture is unchanged). --aim-line overrides it.",
+    "finish_text": "HUD and plan-view label when the finish line is the reference.",
+    "address_text": "HUD and plan-view label when the address target line is the reference.",
+    "line_color_rgba": "Colour and opacity of the aim line drawn on the ground of the fixed views.",
+    "line_width_px": "Width of the aim line in pixels.",
+    "overshoot_fraction": "How far the drawn aim line runs past the finish point, as a fraction of the ball-to-finish distance, so the finish does not sit on the line's end.",
+    "min_finish_distance_m": "Shortest ball-to-finish distance (metres) that defines a direction; a ball that finishes closer keeps the address line, since its direction is noise."
+  }
+}

@@ -39,6 +39,7 @@ from src.shared.python.motion_matching.execution.grip_selection import (
     overrides_from_args,
     refuse_physical_in_sidecar,
 )
+from src.tools.native_viewer_export.aim_line import load_aim_settings
 from src.tools.native_viewer_export.backends._scene_lighting import (
     LIGHTING_CHOICES,
     LightingSettings,
@@ -404,6 +405,16 @@ def _add_shot_setup_arguments(p: argparse.ArgumentParser) -> None:
         "right). Excludes a non-zero --club-roll-in-hands; combines with "
         "--ball-position-shift (default: off)",
     )
+    p.add_argument(
+        "--aim-line",
+        choices=("finish", "address"),
+        default=None,
+        help="reference line of the plan view, side figure and wide-view ground "
+        "line: finish (ball to where the ball finishes, so a draw or fade that "
+        "ends on target reads as on target) or address (the address target "
+        "line). Default: aim_line_settings.json, which is finish with "
+        "--shot-shape and otherwise leaves the picture unchanged",
+    )
 
 
 def _add_clip_overlay_arguments(p: argparse.ArgumentParser) -> None:
@@ -717,6 +728,9 @@ def _ball_flight_for(args: argparse.Namespace, units: DisplayUnits) -> Any:
     if not (args.ball_flight or args.ball_flight_settings is not None or hole):
         return None
     tracer = load_tracer_settings(args.ball_flight_settings, units)
+    aim = tracer.aim or load_aim_settings()
+    mode = aim.resolved(getattr(args, "shot_shape", None), args.aim_line)
+    tracer = replace(tracer, aim=replace(aim, aim_line=mode))
     if not hole:
         return tracer
     view = load_hole_view_settings(preset=args.hole_preset)

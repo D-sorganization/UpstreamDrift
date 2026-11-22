@@ -25,7 +25,7 @@ from numpy.typing import NDArray
 from PIL import Image, ImageDraw
 
 from src.shared.python.golf_view_presets import get_view_preset
-from src.tools.native_viewer_export import compositor, ellipsoid_panel
+from src.tools.native_viewer_export import aim_line, compositor, ellipsoid_panel
 from src.tools.native_viewer_export.landing_marker import rgba_channels
 
 if TYPE_CHECKING:
@@ -398,6 +398,7 @@ class InsetData:
     landed: bool
     started: bool = True
     roll: Rollout | None = None
+    aim_text: str | None = None  # names the plan view's reference line (#15443)
 
     @property
     def roll_end(self) -> Array:
@@ -424,13 +425,21 @@ def inset_data(flight: FlightPlayback, time_s: float) -> InsetData | None:
     numbers = (flight.carry_m, flight.apex_m, flight.lateral_m)
     if path is None or axes is None or any(n is None for n in numbers):
         return None
-    full = flight_coordinates(path, axes)
+    yaw = flight.aim_yaw_rad or 0.0
+    full = aim_line.rotate_plan(flight_coordinates(path, axes), yaw)
     points = flight.flown(time_s)
     landed = time_s - flight.impact_time_s >= flight.duration_s
-    shown = full[:1] if points is None else flight_coordinates(points, axes, path[0])
+    shown = full[:1]
+    if points is not None:
+        shown = aim_line.rotate_plan(flight_coordinates(points, axes, path[0]), yaw)
     carry, apex, lateral = (float(n or 0.0) for n in numbers)
+    if flight.aim_lateral_m is not None:
+        lateral = flight.aim_lateral_m
+    roll = aim_line.apply_roll_yaw(flight.rollout, yaw)
     started = points is not None
-    return InsetData(shown, full, apex, carry, lateral, landed, started, flight.rollout)
+    return InsetData(
+        shown, full, apex, carry, lateral, landed, started, roll, flight.aim_text
+    )
 
 
 def _apex_pixel(profile: Plot, data: InsetData) -> Array:
@@ -524,7 +533,10 @@ def label_specs(
     profile, plan = plots
     scale, gap, row = cfg.unit_scale, float(cfg.marker_radius_px + 3), px * 1.4
     titles = []
-    for plot, title in ((profile, cfg.profile_title), (plan, cfg.plan_title)):
+    plan_title = cfg.plan_title
+    if data.aim_text is not None:
+        plan_title = f"{plan_title} ({data.aim_text})"
+    for plot, title in ((profile, cfg.profile_title), (plan, plan_title)):
         x0, y0, x1, _ = plot.box
         bounds = (x0, y0 - row, x1, y0)
         titles.append(
