@@ -90,7 +90,9 @@ class SampleOutcome:
     """Result of one shot: metrics, or the ``reason`` there is no flight.
 
     ``metrics`` values may be ``None`` (reason in ``notes``). ``trace_target_m``
-    is the flight path relative to the ball as (forward, right, up) columns.
+    is the flight path relative to the ball as (forward, right, up) columns;
+    ``path_m`` and ``times_s`` are the world-frame path and its times for a
+    later video overlay.
     """
 
     setup: ShotSetup
@@ -98,6 +100,8 @@ class SampleOutcome:
     metrics: Mapping[str, float | None] = field(default_factory=dict)
     trace_target_m: np.ndarray | None = None
     notes: Mapping[str, str] = field(default_factory=dict)
+    path_m: np.ndarray | None = None
+    times_s: np.ndarray | None = None
 
     @property
     def available(self) -> bool:
@@ -168,7 +172,10 @@ def _outcome(setup: ShotSetup, flight: Any, card: Any) -> SampleOutcome:
     notes = {}
     if not values:
         notes["impact_card"] = card if isinstance(card, str) else "unavailable"
-    return SampleOutcome(setup, None, metrics, _target_trace(flight), notes)
+    trace = _target_trace(flight)
+    return SampleOutcome(
+        setup, None, metrics, trace, notes, flight.path_m, flight.times_s
+    )
 
 
 def make_evaluator(swing: Any, export_settings: Any) -> Evaluator:
