@@ -6,6 +6,7 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 
 | ID | Name | Entity Kind | Primary Workspace | Secondary Links | Authority | Lifecycle | Evidence | Acceptance Owner |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `pinocchio_models-squat` | Squat | `model` | `simulation` | — | `pinocchio` | 🟢 active_feature | `src/pinocchio_models/exercises/squat` | `tests/config/test_launcher_registry_parity.py` |
 | `pinocchio_models_shared` | Pinocchio Models | `model` | `simulation` | — | `pinocchio` | 🟢 active_feature | `Pinocchio_Models` | `tests/config/test_launcher_registry_parity.py` |
 | `realtime_ws` | Realtime WebSocket | `service` | `simulation` | — | `core` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
 | `robotics_module` | Robotics Module | `library` | `simulation` | — | `core` | 🟢 active_feature | `src/robotics/__init__.py` | `tests/config/test_launcher_registry_parity.py` |

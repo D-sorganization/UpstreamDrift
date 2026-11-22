@@ -11,6 +11,7 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `chat.transport` | AI chat transport (message send/stream) | `feature` | `governance` | — | `core` | 🟢 active_feature | `src/launchers/launcher_sidekick_sidebar.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `chat_assistant` | AI Assistant | `tile` | `governance` | — | `core` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
 | `config_setup_wizard` | Setup Wizard | `tile` | `governance` | — | `core` | 🟢 active_feature | `src/tools/config_setup_wizard/_embed_adapter.py` | `tests/config/test_launcher_registry_parity.py` |
+| `dev.pose_subscriber_demo` | Pose subscriber developer demo | `feature` | `governance` | — | `core` | ⚪ exempt | `src/tools/pose_subscriber_demo/__main__.py` | `tests/config/feature_parity/test_registry.py` |
 | `docs.document_library` | Document library / project map viewer | `feature` | `governance` | — | `core` | ⚪ exempt | `src/launchers/library_widget.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `launcher.mcp_config` | MCP server configuration writer/preferences | `feature` | `governance` | — | `core` | ⚪ exempt | `src/launchers/mcp_config_writer.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `library_tool` | Library | `tile` | `governance` | — | `core` | 🟢 active_feature | `virtual/library` | `tests/config/test_launcher_registry_parity.py` |
@@ -19,4 +20,5 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `sidekick` | Sidekick | `tile` | `governance` | — | `core` | 🟢 active_feature | `src/tools/sidekick/_embed_adapter.py` | `tests/config/test_launcher_registry_parity.py` |
 | `sidekick.chat_panel` | Sidekick chat assistant panel | `feature` | `governance` | — | `core` | 🟢 active_feature | `src/shared/python/ai/gui/assistant_panel.py` | `tests/unit/shared_python/test_assistant_panel_rust_paths.py` |
 | `sidekick.terminal_repl_jupyter_skills` | Sidekick OS terminal / REPL / Jupyter / skills | `feature` | `governance` | — | `core` | ⚪ exempt | `src/launchers/launcher_sidekick_sidebar.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `tools.config_setup_wizard` | Configuration setup wizard | `feature` | `governance` | — | `core` | ⚪ exempt | `src/tools/config_setup_wizard/_embed_adapter.py` | `tests/config/feature_parity/test_registry.py` |
 | `tools.terrain_engine` | Terrain and topography configuration | `feature` | `governance` | — | `core` | 🟢 active_feature | `src/api/routes/terrain.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |

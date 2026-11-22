@@ -212,6 +212,22 @@
       "id": "chat.transport"
     },
     {
+      "feature_id": "dev.pose_subscriber_demo",
+      "title": "Pose subscriber developer demo",
+      "status": "exempt",
+      "pyqt": "src/tools/pose_subscriber_demo/__main__.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Developer demonstration of the realtime pose pub-sub contract, not an end-user feature.",
+      "pending_decision": false,
+      "tiles": [
+        "pose_subscriber_demo"
+      ],
+      "notes": "",
+      "id": "dev.pose_subscriber_demo"
+    },
+    {
       "feature_id": "diagnostics.integrations_health",
       "title": "Diagnostics + integrations-health panel",
       "status": "parity",
@@ -323,6 +339,26 @@
       "tiles": [],
       "notes": "",
       "id": "export.video_speed_variants"
+    },
+    {
+      "feature_id": "external.sibling_repository_tiles",
+      "title": "Tiles that open sibling model repositories",
+      "status": "exempt",
+      "pyqt": null,
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "These tiles open checkouts of separate repositories (shared model repos and the Movement Optimizer provider) and have no UI of their own in this repository.",
+      "pending_decision": false,
+      "tiles": [
+        "mujoco_models_shared",
+        "drake_models_shared",
+        "pinocchio_models_shared",
+        "opensim_models_shared",
+        "movement_optimizer"
+      ],
+      "notes": "",
+      "id": "external.sibling_repository_tiles"
     },
     {
       "feature_id": "launcher.docker_management",
@@ -846,6 +882,22 @@
       "id": "tools.character_builder_grip"
     },
     {
+      "feature_id": "tools.config_setup_wizard",
+      "title": "Configuration setup wizard",
+      "status": "exempt",
+      "pyqt": "src/tools/config_setup_wizard/_embed_adapter.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Writes the local desktop configuration of this workstation; a browser session has no equivalent of that setup.",
+      "pending_decision": false,
+      "tiles": [
+        "config_setup_wizard"
+      ],
+      "notes": "",
+      "id": "tools.config_setup_wizard"
+    },
+    {
       "feature_id": "tools.data_explorer",
       "title": "Data Explorer (import/filter/visualize datasets)",
       "status": "parity",
@@ -1028,7 +1080,7 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL) and writes mp4 files (epic #11673); it has no PyQt6 window and no tile. Web status: agents describe, validate and queue exports over REST and MCP (/tools/agent-sim-run/native-export/{describe,validate,run,status}; #15467, #15476, reusing the CLI request schema); a run returns a job id and its status carries the clip manifest. No browser page renders, plays or downloads a clip yet. Appearance flags (--appearance, --skin-tone, --hair, --clothing, --top-color, --bottom-color, --glove; HRG-B2, #13167, HRG-G1, #13186) resolve CLI over document over contract defaults and travel to every worker; --visual-grip-strength, --lead-roll-offset, --trail-roll-offset and --grip-thumb-offset-deg (HRG-GR4, #13205, HRG-A2, #13166) are picture-only and go in the appearance sidecar's grip block, while a physical grip flag (--grip-preset, --grip-style, --lead-shaft-rotation, ...; HRG-GS-G1, #13346) is refused with a message pointing to spec_builder, which writes the new model revision; the matching interactive controls are tracked under tools.character_builder; whole-system interface capability and mobility ellipsoids (--interface-ellipsoid {mobility,effective-mass,acceleration-capacity,force-capacity}, --ellipsoid-scale {auto,fixed:<m>}, --drift-arrow; CAP-6, #14038, #14046), with --hand-mobility supported as an alias and --hand-mobility-mode {constrained,unconstrained} (HCM-3, #14004).",
+      "notes": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL) and writes mp4 files (epic #11673); the CLI has no tile of its own, but the PyQt6 Model Explorer opens an Export Clips dialog (Tools menu; engines, speed variants, impact clip, output folder; submits to the same export job queue and polls its status without blocking, #15150 G11). Web status: agents describe, validate and queue exports over REST and MCP (/tools/agent-sim-run/native-export/{describe,validate,run,status}; #15467, #15476, reusing the CLI request schema); a run returns a job id and its status carries the clip manifest. No browser page renders, plays or downloads a clip yet. Appearance flags (--appearance, --skin-tone, --hair, --clothing, --top-color, --bottom-color, --glove; HRG-B2, #13167, HRG-G1, #13186) resolve CLI over document over contract defaults and travel to every worker; --visual-grip-strength, --lead-roll-offset, --trail-roll-offset and --grip-thumb-offset-deg (HRG-GR4, #13205, HRG-A2, #13166) are picture-only and go in the appearance sidecar's grip block, while a physical grip flag (--grip-preset, --grip-style, --lead-shaft-rotation, ...; HRG-GS-G1, #13346) is refused with a message pointing to spec_builder, which writes the new model revision; the matching interactive controls are tracked under tools.character_builder; whole-system interface capability and mobility ellipsoids (--interface-ellipsoid {mobility,effective-mass,acceleration-capacity,force-capacity}, --ellipsoid-scale {auto,fixed:<m>}, --drift-arrow; CAP-6, #14038, #14046), with --hand-mobility supported as an alias and --hand-mobility-mode {constrained,unconstrained} (HCM-3, #14004).",
       "id": "tools.native_viewer_export"
     },
     {
@@ -3515,7 +3567,7 @@
   "inputs": {
     "src/config/models.yaml": "ad3f0cf74f12a3a0df3443b3f40ace2393123ee6d39ee34b055d4f79c4a1c873",
     "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
-    "src/config/feature_parity.json": "706382b1a82afa90b1b1f63c9139fee2a649bd3edb1092b76cfef87ba8f6e793",
+    "src/config/feature_parity.json": "f3d5c47a81d1fc8d7bc1c1c3c3a85f7c1cdc74f56c2f41663851eca3f7960fdb",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

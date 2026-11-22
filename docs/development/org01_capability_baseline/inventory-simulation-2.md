@@ -7,6 +7,7 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | ID | Name | Entity Kind | Primary Workspace | Secondary Links | Authority | Lifecycle | Evidence | Acceptance Owner |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `export.video_speed_variants` | Time-based native video export with full- and half-speed clips and an impact slow-motion clip | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/tools/native_viewer_export/cli.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `external.sibling_repository_tiles` | Tiles that open sibling model repositories | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/config/models.yaml` | `tests/config/feature_parity/test_registry.py` |
 | `golf_environment` | Golf Environment | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/golf_environment/gui.py` | `tests/config/test_launcher_registry_parity.py` |
 | `golf_simulation_suite` | Golf Simulation Suite | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/golf_simulation_suite/__main__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `golf_simulator` | Golf Simulator Console | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/golf_simulator/gui.py` | `tests/config/test_launcher_registry_parity.py` |
@@ -30,4 +31,3 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `mujoco_models-snatch` | Snatch | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `src/mujoco_models/exercises/snatch` | `tests/config/test_launcher_registry_parity.py` |
 | `mujoco_models-squat` | Squat | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `src/mujoco_models/exercises/squat` | `tests/config/test_launcher_registry_parity.py` |
 | `mujoco_models_shared` | MuJoCo Models | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `MuJoCo_Models` | `tests/config/test_launcher_registry_parity.py` |
-| `mujoco_unified` | MuJoCo | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/__main__.py` | `tests/config/test_launcher_registry_parity.py` |
