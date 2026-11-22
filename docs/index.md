@@ -54,7 +54,7 @@ separated from current guidance.
 - [`motion_matching/`](motion_matching/README.md) - 2 pages
 - [`motion_pipeline/`](motion_pipeline/README.md) - 6 pages
 - [`operations/`](operations/) - 29 pages
-- [`physics/`](physics/) - 3 pages
+- [`physics/`](physics/) - 4 pages
 - [`portfolio/`](portfolio/golf_modeling_demo.md) - 1 page
 - [`references/`](references/README.md) - 1 page
 - [`reviews/`](reviews/) - 4 pages
@@ -119,6 +119,8 @@ repository, which made them effectively unreachable.
   -- drag, lift, and spin-decay formulation used by the flight solvers.
 - [Golf ball flight and impact source map](physics/GOLF_BALL_FLIGHT_IMPACT_SOURCE_MAP.md)
   -- maps each published coefficient and equation to its literature source.
+- [Flight and impact shortcomings register](physics/FLIGHT_AND_IMPACT_SHORTCOMINGS_REGISTER.md)
+  -- what the impact, flight and rollout pipeline does not model.
 - [Putting kinematics and kinetics review](physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md)
   -- the putting-stroke kinematics/kinetics derivation behind
   `src/tools/putting_green_gui/`.
