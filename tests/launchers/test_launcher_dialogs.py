@@ -533,7 +533,11 @@ def test_update_execution_status(launcher) -> None:
 
     launcher.chk_docker.isChecked.return_value = False
     launcher.update_execution_status()
-    launcher.lbl_execution_mode.setText.assert_called_with("Runtime: Windows")
+    from src.launchers.runtime_mode_help import native_runtime_name
+
+    launcher.lbl_execution_mode.setText.assert_called_with(
+        f"Runtime: {native_runtime_name()}"
+    )
 
 
 def test_update_execution_status_no_label(launcher) -> None:

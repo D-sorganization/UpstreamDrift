@@ -39,7 +39,8 @@ def test_mujoco_fit_record_loads_with_its_specification() -> None:
     assert source.q.shape == (4, len(source.coordinate_order)) == (4, 44)
     assert source.coordinate_order[0] == "TranslationInputX"
     assert source.is_native_render
-    assert source.playback_label == "MuJoCo result"
+    assert source.playback_label.endswith("matched motion replay (MuJoCo)")
+    assert "kinematic_fit" not in source.playback_label
 
 
 @pytest.mark.unit
@@ -48,8 +49,10 @@ def test_drake_rollout_is_labelled_as_playback_of_drake_result() -> None:
 
     assert source.engine == "drake"
     assert not source.is_native_render
-    assert source.playback_label.startswith("Playback of Drake result")
-    assert "MuJoCo golfer model" in source.playback_label
+    label = source.playback_label
+    assert "matched motion replay" in label
+    assert "Drake result" in label
+    assert "MuJoCo golfer model" not in label
     np.testing.assert_allclose(source.time_s, [0.0, 0.001, 0.002, 0.003])
 
 
@@ -175,7 +178,7 @@ def test_session_loads_pose_run_and_scrubs() -> None:
 
     assert session.pose_source is not None
     assert session.engine == "drake"
-    assert session.title.startswith("Playback of Drake result")
+    assert "matched motion replay (Drake result" in session.title
     session.scrub(3)
     assert session.current_time_s == pytest.approx(0.003)
     with pytest.raises(ValueError, match="outside"):
@@ -196,3 +199,22 @@ def test_time_series_reports_angles_in_degrees_and_translations_in_metres() -> N
     assert series["HipInputX"].unit == "deg"
     np.testing.assert_allclose(series["HipInputX"].values, np.degrees(source.q[:, hip]))
     assert all(len(s.values) == source.frame_count for s in series.values())
+
+
+@pytest.mark.unit
+def test_playback_label_is_built_from_the_club_name_when_known(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source = load_pose_frame_source(MUJOCO_RECORD)
+    monkeypatch.setattr(
+        PoseFrameSource, "spec", property(lambda self: {"club": {"name": "driver"}})
+    )
+
+    assert source.playback_label == "Driver swing: matched motion replay (MuJoCo)"
+
+
+@pytest.mark.unit
+def test_source_tag_is_the_file_name_only() -> None:
+    source = load_pose_frame_source(MUJOCO_RECORD)
+
+    assert source.source_tag == MUJOCO_RECORD.name
