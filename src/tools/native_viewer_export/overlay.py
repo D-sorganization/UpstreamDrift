@@ -25,7 +25,10 @@ from src.tools.native_viewer_export.ellipsoid_visibility import (
     group_scales,
     load_visibility_settings,
 )
-from src.tools.native_viewer_export.kinematic_replay import NOTE, vector_visibility
+from src.tools.native_viewer_export.kinematic_replay import (
+    note_for,
+    vector_visibility,
+)
 from src.tools.native_viewer_export.core import (
     BackendUnavailable,
     OverlayFeed,
@@ -128,8 +131,19 @@ def palm_thumb_patch_for_spec(spec_bytes: bytes) -> tuple[Any, float]:
     return patch, float(friction)
 
 
+class EllipsoidUnavailable(ValueError):
+    """The ellipsoid kind cannot be computed here; ``str(exc)`` says why."""
+
+
+NO_TORQUE_LIMITS = "no joint torque limits"
+
+
 def _extract_physical_radii(hm: Any, kind: str) -> tuple[np.ndarray, tuple[float, ...]]:
-    """Return (axes, radii) for a given ellipsoid kind."""
+    """Return (axes, radii) for a given ellipsoid kind.
+
+    Raises ``EllipsoidUnavailable`` for a capacity kind whose torque limits are
+    missing (it is never answered with the mobility radii).
+    """
     if kind == "mobility":
         axes = hm.mobility_axes
         r = np.sqrt(np.maximum(hm.mobility_eigenvalues, 0.0))
@@ -142,6 +156,8 @@ def _extract_physical_radii(hm: Any, kind: str) -> tuple[np.ndarray, tuple[float
     elif kind == "acceleration-capacity" and hm.acceleration_capacity is not None:
         axes = hm.acceleration_capacity.axes
         r = hm.acceleration_capacity.radii
+    elif kind in ("force-capacity", "acceleration-capacity"):
+        raise EllipsoidUnavailable(NO_TORQUE_LIMITS)
     else:
         axes = hm.mobility_axes
         r = np.sqrt(np.maximum(hm.mobility_eigenvalues, 0.0))
@@ -175,12 +191,16 @@ def _build_hand_hud_lines_fn(
                     mobility_condition_cutoff is None
                     or hm.condition <= mobility_condition_cutoff
                 ):
-                    _, r = _extract_physical_radii(hm, kind)
                     lbl = (
                         ("lead" if "lead" in pt.name else "trail")
                         if is_hands
                         else pt.name
                     )
+                    try:
+                        _, r = _extract_physical_radii(hm, kind)
+                    except EllipsoidUnavailable as exc:
+                        parts.append(f"{lbl} {kind}: unavailable ({exc})")
+                        continue
                     parts.append(
                         format_hud_capability(lbl, kind, r, scale.unit, hm.condition)
                     )
@@ -232,8 +252,12 @@ def _semi_axes_series(
     for sample in samples:
         for pt in points:
             hm = _lookup_point_mobility(sample, pt)
-            if hm is not None:
+            if hm is None:
+                continue
+            try:
                 series.append(list(_extract_physical_radii(hm, kind)[1]))
+            except EllipsoidUnavailable:
+                continue
     return series
 
 
@@ -313,14 +337,17 @@ def _build_hand_ellipsoid_feed(
     vis = selection.visibility or load_visibility_settings()
     stride = max(1, scale_swing.n_states // 20)
     sampled = [_get_hm(i, scale_swing) for i in range(0, scale_swing.n_states, stride)]
-    scales = {
-        kind: group_scales(
-            {pt.name: _semi_axes_series(sampled, [pt], kind) for pt in resolved_pts},
-            kind,
-            ellipsoid_scale,
-            vis,
-        )
+    series = {
+        kind: {
+            pt.name: rows
+            for pt in resolved_pts
+            if (rows := _semi_axes_series(sampled, [pt], kind))
+        }
         for kind in active_ellipsoids
+    }
+    scales = {
+        kind: group_scales(by_point, kind, ellipsoid_scale, vis)
+        for kind, by_point in series.items()
     }
     hand_ellipsoids_fn = _build_glyph_fn(
         _get_hm,
@@ -370,7 +397,10 @@ def _build_glyph_fn(
                     condition_cutoff is not None and hm.condition > condition_cutoff
                 ):
                     continue
-                axes, radii = _extract_physical_radii(hm, kind)
+                try:
+                    axes, radii = _extract_physical_radii(hm, kind)
+                except EllipsoidUnavailable:
+                    continue  # named in the HUD line; nothing mislabelled is drawn
                 disp = builders[(kind, pt.name)].build_glyph(
                     hm.centre,
                     axes,
@@ -493,6 +523,20 @@ def build_overlay_feed(
     opts = options or OverlayOptions()
     visibility = vector_visibility(swing.bundle, opts)
     effective_palm_thumb = palm_thumb or opts.palm_thumb
+    withheld: tuple[str, ...] = ()
+    if visibility.hidden:  # shading, grip and palm-thumb derive from the efforts
+        asked = (
+            ("shading", axial),
+            ("grip", grip),
+            ("palm-thumb", effective_palm_thumb),
+        )
+        withheld = tuple(name for name, on in asked if on)
+        axial, grip, effective_palm_thumb = False, False, False
+        if withheld:
+            logger.warning(
+                "kinematic replay: %s not drawn (the bundle carries no efforts)",
+                ", ".join(withheld),
+            )
 
     source = MujocoOverlaySource(swing.bundle.spec_bytes)
     grip_source, grip_name = (
@@ -504,6 +548,7 @@ def build_overlay_feed(
         source,
         engine=engine,
         q=swing.q,
+        v=swing.v,  # SwingInput checks its shape; None: the reference velocity
     )
     if grip_source is not None:
         provider.with_grip(grip_source, grip_name)
@@ -535,7 +580,7 @@ def build_overlay_feed(
         grip_analyses=provider.grip_analyses if grip else None,
         show_force=visibility.show_force,
         show_torque=visibility.show_torque,
-        forces_note=NOTE if visibility.hidden else "",
+        forces_note=note_for(withheld) if visibility.hidden else "",
         show_palm_thumb=effective_palm_thumb,
         hand_ellipsoids=hand_ellipsoids_fn,
         hand_hud_lines=hand_hud_lines_fn,

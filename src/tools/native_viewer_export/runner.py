@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, replace
+import json
 import logging
 from pathlib import Path
 
@@ -29,6 +30,10 @@ from src.tools.native_viewer_export.core import (
     WriterFactory,
     export_swing,
     load_receipt_rollout,
+)
+from src.tools.native_viewer_export.kinematic_replay import (
+    UNAVAILABLE,
+    withholds_visuals,
 )
 from src.tools.native_viewer_export.overlay import (
     build_overlay_feed,
@@ -59,6 +64,14 @@ def write_grip_json(
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"{swing.swing}_{engine}_grip_wrench.json"
     path.write_text(plot_series_to_json(series), encoding="utf-8")
+    return path
+
+
+def write_grip_unavailable(swing: SwingInput, engine: str, out_dir: Path) -> Path:
+    """Write the grip record of a kinematic replay: ``{"unavailable": reason}``."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path = out_dir / f"{swing.swing}_{engine}_grip_wrench.json"
+    path.write_text(json.dumps({"unavailable": UNAVAILABLE}), encoding="utf-8")
     return path
 
 
@@ -137,6 +150,11 @@ def run_export(
                 per_settings = replace(settings, impact_time_s=impact_detector(swing))
             except (BackendUnavailable, ValueError, KeyError, RuntimeError) as exc:
                 logger.warning("impact time not detected for %s: %s", engine, exc)
+        withheld = settings.overlays and withholds_visuals(
+            bundle, settings.vectors_requested
+        )
+        if withheld:  # shading legend and strips would describe nothing
+            per_settings = replace(per_settings, shading=None, inset_strip=False)
         if settings.overlays:
             try:
                 feed, lookat = overlay_factory(swing, engine)
@@ -146,7 +164,15 @@ def run_export(
         result = export_swing(
             backend, swing, per_settings, job.out_dir, feed, writer_factory
         )
-        if feed is not None and feed.grip_analyses is not None:
+        if withheld and settings.inset_strip:
+            result = replace(
+                result, inset_strip=f"inset strip unavailable: {UNAVAILABLE}"
+            )
+        if withheld and settings.grip:
+            result = replace(
+                result, grip_json=write_grip_unavailable(swing, engine, job.out_dir)
+            )
+        elif feed is not None and feed.grip_analyses is not None:
             result = replace(
                 result,
                 grip_json=write_grip_json(

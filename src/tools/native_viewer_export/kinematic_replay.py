@@ -14,6 +14,7 @@ label, one can be absent or stale, and the efforts are what the forces depend on
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 from typing import Any, NamedTuple
 
 import numpy as np
@@ -21,6 +22,13 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 NOTE = "Kinematic Replay: Forces Not Shown"
+#: why a force-derived visual (shading, grip record, strip) is unavailable
+UNAVAILABLE = "kinematic replay: bundle carries no efforts"
+
+
+def note_for(withheld: Sequence[str]) -> str:
+    """HUD note naming the requested visuals withheld besides the vectors."""
+    return f"{NOTE} (also off: {', '.join(withheld)})" if withheld else NOTE
 
 
 class VectorVisibility(NamedTuple):
@@ -41,6 +49,12 @@ def is_kinematic_replay(bundle: Any) -> bool:
     if tables[0].ndim != 2 or tables[0].shape[0] < 1:
         raise ValueError("bundle efforts must be a non-empty (steps, nv) table")
     return not any(np.any(table) for table in tables)
+
+
+def withholds_visuals(bundle: Any, vectors_requested: bool) -> bool:
+    """True when ``bundle`` is a kinematic replay and no vector flag was passed:
+    shading, grip wrench, palm-thumb arrow and strips then carry no meaning."""
+    return not vectors_requested and is_kinematic_replay(bundle)
 
 
 def vector_visibility(bundle: Any, options: Any) -> VectorVisibility:
