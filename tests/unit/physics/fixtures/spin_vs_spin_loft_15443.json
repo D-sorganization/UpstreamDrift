@@ -1,0 +1,47 @@
+{
+  "sources": "Spin-loft table of the impact model (#15443 F2): centred strike, zero attack angle (spin loft = face loft), ball at rest, ball friction coefficient 0.4 and COR 0.83 as ImpactParameters defaults. model_backspin_rpm is the RigidBodyImpactModel output at the commit that added this fixture (regression values); the test also checks it against the closed-form oblique-impact solution of Cross, R., 'Grip-slip behavior of a bouncing ball', Am. J. Phys. 70(11), 1093-1101 (2002) and Penner, A. R., 'The physics of golf', Rep. Prog. Phys. 66, 131-171 (2003): tangential impulse = min(mu*J_n, v_t/(1/m_ball+1/M_club+R^2/I_ball)), spin = R*J_t/I_ball. Real-world context only (not asserted): TrackMan PGA Tour averages, driver 113 mph club / 167 mph ball / 2686 rpm, 7-iron 7097 rpm (TrackMan 'Tour Averages', trackman.com). TrackMan does not publish tour spin loft, so no pass/fail comparison is made. Head masses: driver 0.200 kg pipeline default, 7-iron 0.268 kg from club_models via club_impact_for; head inertia does not enter a centred strike.",
+  "spin_lofts_deg": [
+    10,
+    15,
+    20,
+    25,
+    30,
+    35,
+    40,
+    45
+  ],
+  "clubs": {
+    "driver": {
+      "head_mass_kg": 0.2,
+      "head_moi_kg_m2": 0.005,
+      "cor": 0.83,
+      "club_speed_mps": 45.0,
+      "model_backspin_rpm": [
+        2344,
+        3494,
+        4618,
+        5706,
+        6750,
+        7744,
+        8678,
+        9547
+      ]
+    },
+    "iron7": {
+      "head_mass_kg": 0.268,
+      "head_moi_kg_m2": 0.0021723,
+      "cor": 0.83,
+      "club_speed_mps": 40.0,
+      "model_backspin_rpm": [
+        2117,
+        3155,
+        4170,
+        5152,
+        6096,
+        6993,
+        7836,
+        8621
+      ]
+    }
+  }
+}
