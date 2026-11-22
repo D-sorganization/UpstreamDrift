@@ -151,7 +151,7 @@ def test_flight_starts_from_the_state_the_impact_card_reads(monkeypatch) -> None
     )
     seen: list[tuple[int, tuple[float, float, float]]] = []
 
-    def fake(series_in, index, frame):
+    def fake(series_in, index, frame, club=None):
         seen.append((index, frame.target_dir))
         return _flight()
 

@@ -454,6 +454,7 @@ def playback_from_series(
     impact_time_s: float,
     ball: BallPlacement,
     settings: TracerSettings,
+    club: str | None = None,
 ) -> FlightPlayback:
     """Flight launched from the clubhead state the impact card reads.
 
@@ -468,10 +469,10 @@ def playback_from_series(
     contact = series_at_contact(series, ball.position_m, ball.radius_m, impact_time_s)
     if contact is None:
         state = impact_card.contact_index(series, impact_time_s) - 1
-        flight = flight_for_impact(series, state, frame)
+        flight = flight_for_impact(series, state, frame, club)
         return playback_from_flight(flight, frame, impact_time_s, ball, settings)
     moved, state = contact
-    flight = flight_for_impact(moved, state, frame)
+    flight = flight_for_impact(moved, state, frame, club)
     start_s = float(moved.times_s[state])
     return playback_from_flight(flight, frame, start_s, ball, settings)
 
@@ -495,7 +496,9 @@ def flight_for_export(
     if swing.ball is None:
         return FlightPlayback(config, "no ball placed")
     try:
-        return playback_from_series(club_series(swing), impact, swing.ball, config)
+        return playback_from_series(
+            club_series(swing), impact, swing.ball, config, swing.club
+        )
     except impact_card._EXPECTED_ERRORS as exc:
         return FlightPlayback(config, f"unavailable: {exc}")
 
