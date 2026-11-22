@@ -453,12 +453,10 @@ kinematic replay, not a refit. Limits live in `shot_setup_settings.json`.
 
 ## Aim Line
 
-- `--aim-line {finish,address}` picks the reference line of the plan view, the
-  side figure and the wide-view ground line. `finish` runs from the ball to
-  where the ball finishes (the rest point when a roll is modelled), so a draw
-  or fade that ends on target reads as on target; `address` keeps the address
-  target line. With `--shot-shape` the default is `finish`; without it the
-  picture is unchanged. The HUD and the plan title say which line is drawn, a
-  side that rounds to zero reads `Side 0 yd`, and the flight numbers (carry,
-  apex, path) never change. Colour, width (scaled with the frame) and halo are
-  in `aim_line_settings.json`.
+- `--aim-line {finish,address}` picks the line the plan view, side figure and
+  wide-view ground line are read against. `finish` runs from the ball to where
+  it finishes (the rest point with a roll), so a draw or fade that ends on
+  target reads as on target; `address` keeps the address target line. The
+  default is `finish` with `--shot-shape`, else the picture is unchanged. The
+  HUD and plan title name the line; flight numbers never change. Colour, width
+  and halo are in `aim_line_settings.json`.

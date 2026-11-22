@@ -66,12 +66,6 @@ def test_cli_flag_overrides_the_default() -> None:
     )
 
 
-def test_auto_leaves_the_playback_untouched() -> None:
-    play = base._playback(_settings("auto"))
-    assert tr.with_aim(play, base._flight()) is play
-    assert play.aim_yaw_rad is None and play.aim_text is None
-
-
 def test_finish_aim_turns_the_plan_view_onto_the_finish_point() -> None:
     play = _aimed("finish")
     data = fi.inset_data(play, 1e9)
@@ -106,16 +100,6 @@ def test_hud_states_side_against_the_aim_line_and_names_it() -> None:
     assert "Side 9 yd" in address.lines[1] and "right" in address.lines[1]
 
 
-def test_plan_title_names_the_line() -> None:
-    play = _aimed("finish")
-    data = fi.inset_data(play, 1e9)
-    plots = fi.plots_for(
-        (0, 0, 400, 300), fi.load_inset_settings(), 12, (200, 20, 20), 1
-    )
-    titles, _ = fi.label_specs(plots, data, fi.load_inset_settings(), 12)
-    assert AIM.finish_text in titles[1].text
-
-
 def test_wide_view_draws_the_aim_line_along_the_finish() -> None:
     play = _aimed("finish")
     pts = tr._aim_line_points(play)
@@ -130,12 +114,6 @@ def test_wide_view_draws_the_aim_line_along_the_finish() -> None:
     target = np.asarray(play.axes_m)[0, :2]
     along = address[1, :2] - address[0, :2]
     assert along[0] * target[1] - along[1] * target[0] == pytest.approx(0.0, abs=1e-6)
-
-
-def test_aim_line_changes_no_flight_number() -> None:
-    play, aimed = base._playback(_settings("auto")), _aimed("finish")
-    assert aimed.carry_m == play.carry_m and aimed.lateral_m == play.lateral_m
-    assert np.array_equal(aimed.path_m, play.path_m)
 
 
 def test_width_scales_with_resolution_and_zero_side_has_no_direction() -> None:

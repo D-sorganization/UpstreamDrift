@@ -1,13 +1,10 @@
 """Aim line of the shot-shape views: ball to finish, or the address target line.
 
-A draw or fade solved to finish on target curves off the address target line,
-so against that line it reads as a miss. With ``aim_line = "finish"`` the plan
-view, the side figure and the wide view's ground line use the line from the
-ball to where the ball finishes (the rest point when a roll is modelled, else
-the landing point). ``"address"`` keeps the address target line and ``"auto"``
-is ``finish`` for a requested shot shape, else the unchanged picture (#15443).
-The flight numbers (carry, apex, world path) are never changed, only the line
-they are read against; the solver always works against the address line.
+With ``aim_line = "finish"`` the plan view, side figure and wide-view ground
+line use the line from the ball to where the ball finishes (the rest point
+when a roll is modelled), so a draw or fade ending on target reads as on
+target. ``"address"`` keeps the address line; ``"auto"`` is ``finish`` for a
+requested shot shape, else unchanged. Flight numbers never change (#15443).
 """
 
 from __future__ import annotations
@@ -118,10 +115,7 @@ def rotate_offset(offset: tuple[float, float], yaw: float) -> tuple[float, float
 def ground_line(
     start_m: Array, axes_m: Array, yaw: float, length_m: float, ground_z_m: float
 ) -> Array:
-    """World end points of the aim line on the ground from ``start_m``.
-
-    ``axes_m`` rows are the address target frame (target, left, up).
-    """
+    """Ground end points of the aim line from ``start_m`` (``axes_m``: target frame)."""
     axes = np.asarray(axes_m, dtype=float)
     direction = math.cos(yaw) * axes[0] + math.sin(yaw) * axes[1]
     direction = direction / float(np.linalg.norm(direction[:2]))
@@ -162,7 +156,7 @@ def aimed_fields(flight: Any, mode: str, settings: AimLineSettings) -> dict[str,
 
 
 def apply_roll_yaw(roll: Any, yaw: float) -> Any:
-    """``roll`` with its end offset expressed along the aim line."""
+    """``roll`` with its end offset along the aim line."""
     if roll is None or yaw == 0.0:
         return roll
     return replace(roll, end_offset_m=rotate_offset(roll.end_offset_m, yaw))
