@@ -113,6 +113,18 @@ def test_noisy_recovery_with_gap(geometry: ChainGeometry) -> None:
     assert error.max() < NOISY_TOL_DEG
 
 
+def test_break_lets_the_bend_drop_at_contact(geometry: ChainGeometry) -> None:
+    truth = _history(geometry)
+    truth[40:] = 0.0  # contact at frame 40 unloads the shaft at once
+    markers = np.stack([marker_positions(geometry, b, OFFSETS) for b in truth])
+    settings = load_bend_settings()
+    cut = fit_shaft_bend(geometry, markers, OFFSETS, settings, breaks=(40,))
+    error = np.abs(_tip_slopes_deg(cut.bend) - _tip_slopes_deg(truth))
+    assert error[:40].max() < EXACT_TOL_DEG
+    with pytest.raises(ValueError, match="breaks"):
+        fit_shaft_bend(geometry, markers, OFFSETS, settings, breaks=(0,))
+
+
 def test_club_frame_targets_remove_rigid_motion(geometry: ChainGeometry) -> None:
     bend = _history(geometry)[30]
     local = marker_positions(geometry, bend, OFFSETS)

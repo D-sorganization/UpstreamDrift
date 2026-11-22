@@ -248,24 +248,36 @@ def _sparsity(frames: int, markers: int, n_par: int) -> Any:
 
 
 def fit_shaft_bend(
-    geometry: ChainGeometry, targets: Array, offsets: Array, settings: BendSettings
+    geometry: ChainGeometry,
+    targets: Array,
+    offsets: Array,
+    settings: BendSettings,
+    breaks: Sequence[int] = (),
 ) -> BendFit:
     """Least-squares bend history carrying ``offsets`` onto ``targets``.
 
     Preconditions: ``targets`` is ``(k, m, 3)`` in the club-body frame with
-    ``m == len(offsets)`` (NaN marks a missing marker). Postconditions: every
+    ``m == len(offsets)`` (NaN marks a missing marker); each ``breaks`` entry
+    ``b`` in ``1..k-1`` cuts the smoothness term between frames ``b - 1`` and
+    ``b`` (ball contact unloads the shaft abruptly). Postconditions: every
     amplitude lies within ``max_tip_slope_deg``; frames without targets follow
     the smoothness and ridge terms only.
     """
     offsets = np.asarray(offsets, dtype=float)
     if targets.ndim != 3 or targets.shape[1:] != offsets.shape:
         raise ValueError("targets must be (k, m, 3) with one column per markers row")
+    if any(not 0 < b < len(targets) for b in breaks):
+        raise ValueError("breaks must lie inside the trajectory")
     from scipy.optimize import least_squares
 
     frames, n_shapes = len(targets), settings.shapes_per_plane
     basis, n_par = shape_basis(geometry, n_shapes), 2 * n_shapes
     valid = np.all(np.isfinite(targets), axis=2)
     goal = np.where(valid[..., None], targets, 0.0)
+    rows = np.arange(max(frames - 2, 0))
+    keep = np.ones(len(rows))
+    for b in breaks:
+        keep[(rows < b) & (b <= rows + 2)] = 0.0
 
     def bend_of(x: Array) -> Array:
         amps = x.reshape(frames, 2, n_shapes)
@@ -274,7 +286,7 @@ def fit_shaft_bend(
     def residuals(x: Array) -> Array:
         amps = x.reshape(frames, n_par)
         error = (_positions(geometry, bend_of(x), offsets) - goal) * valid[..., None]
-        smooth = amps[2:] - 2.0 * amps[1:-1] + amps[:-2]
+        smooth = (amps[2:] - 2.0 * amps[1:-1] + amps[:-2]) * keep[:, None]
         return np.concatenate(
             [
                 error.reshape(-1),
