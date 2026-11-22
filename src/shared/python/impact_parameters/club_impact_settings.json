@@ -1,0 +1,7 @@
+{
+  "sources": "Per-club impact-model inputs (#15443). pipeline_default_clubs keep the SwingBallFlightPipeline defaults (head 0.200 kg, scalar moi 5e-3 kg m^2, driver COR) so the driver path is numerically unchanged. Other catalogue clubs take the head mass from club_models and scale reference_head_moi_kg_m2 by the catalogue head m*k^2 ratio to the reference club, with k^2 the mean of the squared gyration radii about the two axes perpendicular to the face normal (the axes a face-offset torque turns the head about); an approximation from catalogue geometry, not a measured inertia. cor_by_club: USGA/R&A limit 0.830 applies to driver faces (CT test, Rules of Golf Appendix II). No source for a lower iron COR was found (a web search for a measured 7-iron value returned none), so iron7 keeps 0.830 and is flagged as an open question rather than an invented number.",
+  "pipeline_default_clubs": ["driver"],
+  "reference_club": "driver",
+  "reference_head_moi_kg_m2": 0.005,
+  "cor_by_club": {"driver": 0.83, "iron7": 0.83}
+}

@@ -53,6 +53,39 @@
     "name": "get_run"
   },
   {
+    "description": "Native viewer exporter request schema derived from its command line: groups with maturity and sources, options with defaults. request.min_maturity hides unready groups.",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "request": {
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "name": "native_export_describe"
+  },
+  {
+    "description": "Check a native viewer export request {options: {name: value}} against the schema and allowed roots; returns the command line.",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "request": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "request"
+      ],
+      "type": "object"
+    },
+    "name": "native_export_validate"
+  },
+  {
     "description": "Best aim and pace for one putt under the player's stroke noise",
     "inputSchema": {
       "properties": {
