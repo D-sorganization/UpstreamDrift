@@ -28,7 +28,7 @@ from src.shared.python.impact_parameters.panel_model import (
     ImpactCard,
     build_impact_card,
 )
-from src.tools.native_viewer_export import compositor, impact_card
+from src.tools.native_viewer_export import compositor, contact_verdict, impact_card
 
 if TYPE_CHECKING:
     from src.tools.native_viewer_export.ball import BallPlacement
@@ -132,6 +132,9 @@ class FactorsPanel:
     frozen: Lines
     series: ClubheadSeries | None = None  # source of the live rows
     card: ImpactCard | None = field(default=None, compare=False, repr=False)
+    verdict: contact_verdict.ContactVerdict | None = field(
+        default=None, compare=False, repr=False
+    )  # the one no-contact decision, read by the flight too
     _live: dict[int, Lines] = field(default_factory=dict, compare=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -317,13 +320,13 @@ def panel_from_series(
     if not isinstance(settings, FactorSettings):
         raise TypeError("settings must be a FactorSettings")
     card = impact_card.card_from_series(series, impact_time_s, ball, speed_unit)
-    location = next(row for row in card.rows if row.key == "impact_location")
+    verdict = contact_verdict.verdict_from_card(card, ball)
     status = AT_IMPACT if detected else NOT_DETECTED
-    if ball is not None and str(location.reason).startswith(impact_card.OFF_FACE):
+    if ball is not None and not verdict.contact:
         miss_mm = closest_approach(series, ball)[1] * 1000.0
         status = f"{NO_CONTACT} (miss {miss_mm:.0f} mm)"
     rows = _rows(card, settings)
-    return FactorsPanel(settings, impact_time_s, status, rows, series, card)
+    return FactorsPanel(settings, impact_time_s, status, rows, series, card, verdict)
 
 
 def factors_for_export(
