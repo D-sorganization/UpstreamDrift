@@ -34,7 +34,7 @@ from src.tools.native_viewer_export.core import (
 )
 from src.tools.native_viewer_export.kinematic_replay import (
     UNAVAILABLE,
-    withholds_visuals,
+    is_kinematic_replay,
 )
 from src.tools.native_viewer_export.overlay import (
     build_overlay_feed,
@@ -151,9 +151,7 @@ def run_export(
                 per_settings = replace(settings, impact_time_s=impact_detector(swing))
             except (BackendUnavailable, ValueError, KeyError, RuntimeError) as exc:
                 logger.warning("impact time not detected for %s: %s", engine, exc)
-        withheld = settings.overlays and withholds_visuals(
-            bundle, settings.vectors_requested
-        )
+        withheld = settings.overlays and is_kinematic_replay(bundle)
         if withheld:  # shading legend and strips would describe nothing
             per_settings = replace(per_settings, shading=None, inset_strip=False)
         if settings.overlays:

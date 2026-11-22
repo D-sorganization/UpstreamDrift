@@ -44,13 +44,14 @@ def test_a_provenance_label_does_not_decide() -> None:
 def test_vectors_are_hidden_on_a_replay_unless_requested(caplog) -> None:
     kin, dyn = _bundle(np.zeros((3, 2))), _bundle(np.ones((3, 2)))
     with caplog.at_level(logging.WARNING):
-        assert kr.vector_visibility(kin, OverlayOptions()) == (False, False, True)
+        assert kr.vector_visibility(kin, OverlayOptions()) == (False, False, True, True)
     assert sum("kinematic replay" in r.getMessage() for r in caplog.records) == 1
     asked = OverlayOptions(show_torque=False, forces_requested=True)
-    assert kr.vector_visibility(kin, asked) == (True, False, False)
+    assert kr.vector_visibility(kin, asked) == (True, False, False, True)
     assert kr.vector_visibility(dyn, OverlayOptions(show_force=False)) == (
         False,
         True,
+        False,
         False,
     )
     assert kr.NOTE == "Kinematic Replay: Forces Not Shown"
@@ -123,7 +124,7 @@ def test_a_kinematic_bundle_draws_no_force_or_torque_glyphs(zero_effort_swing) -
     asked, _ = build_overlay_feed(
         zero_effort_swing, "mujoco", options=OverlayOptions(forces_requested=True)
     )
-    assert asked.hud_lines_at(0) == ()
+    assert asked.hud_lines_at(0) == (kr.NOTE_DRAWN,)
     assert any(_drawn(asked, k) > 0 for k in range(STATES))  # the control
 
 

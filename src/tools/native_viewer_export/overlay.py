@@ -60,7 +60,7 @@ class OverlayOptions:
     visibility: VisibilitySettings | None = None
     #: blank axial loads around ball impact (skin_load_settings.json default)
     axial_impact_blackout: bool = True
-    #: the user passed a vector flag, so a kinematic replay still draws vectors
+    #: a vector flag was passed: a kinematic replay draws those vectors only
     forces_requested: bool = False
 
 
@@ -540,7 +540,7 @@ def build_overlay_feed(
     visibility = vector_visibility(swing.bundle, opts)
     effective_palm_thumb = palm_thumb or opts.palm_thumb
     withheld: tuple[str, ...] = ()
-    if visibility.hidden:  # shading, grip and palm-thumb derive from the efforts
+    if visibility.replay:  # shading, grip and palm-thumb derive from the efforts
         withheld = _withheld_effort_overlays(axial, grip, effective_palm_thumb)
         axial, grip, effective_palm_thumb = False, False, False
 
@@ -586,7 +586,11 @@ def build_overlay_feed(
         grip_analyses=provider.grip_analyses if grip else None,
         show_force=visibility.show_force,
         show_torque=visibility.show_torque,
-        forces_note=note_for(withheld) if visibility.hidden else "",
+        forces_note=(
+            note_for(withheld, vectors_drawn=not visibility.hidden)
+            if visibility.replay
+            else ""
+        ),
         show_palm_thumb=effective_palm_thumb,
         hand_ellipsoids=hand_ellipsoids_fn,
         hand_hud_lines=hand_hud_lines_fn,

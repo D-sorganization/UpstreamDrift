@@ -4,7 +4,10 @@ A bundle whose every effort is zero moves the plant through a recorded motion
 without actuation. The wrenches the overlay provider evaluates on it come from a
 contact law applied to a motion nobody loaded, so they are not applied forces.
 The export hides the vectors derived from efforts or contact unless the user
-asks for them, and says so once in the log and on the HUD. Ellipsoids are
+asks for them, and says so once in the log and on the HUD. A vector request
+draws the vectors it names and nothing else: shading, the grip record, the
+palm-thumb arrow and strips stay withheld, and the HUD says the drawn vectors
+are not measured forces. Ellipsoids are
 inertial properties of the pose and stay.
 
 Detection reads the efforts, not a provenance label: the bundle writers share no
@@ -23,20 +26,24 @@ logger = logging.getLogger(__name__)
 
 NOTE = "Kinematic Replay: Forces Not Shown"
 #: why a force-derived visual (shading, grip record, strip) is unavailable
+NOTE_DRAWN = "Kinematic Replay: Drawn Vectors Are Not Measured Forces"
 UNAVAILABLE = "kinematic replay: bundle carries no efforts"
 
 
-def note_for(withheld: Sequence[str]) -> str:
-    """HUD note naming the requested visuals withheld besides the vectors."""
-    return f"{NOTE} (also off: {', '.join(withheld)})" if withheld else NOTE
+def note_for(withheld: Sequence[str], vectors_drawn: bool = False) -> str:
+    """HUD note naming the requested visuals withheld besides the vectors;
+    ``vectors_drawn`` says the vectors on screen are not measured forces."""
+    note = NOTE_DRAWN if vectors_drawn else NOTE
+    return f"{note} (also off: {', '.join(withheld)})" if withheld else note
 
 
 class VectorVisibility(NamedTuple):
-    """Vectors drawn, and whether a kinematic replay withheld them."""
+    """Vectors drawn, whether a replay withheld them, and whether it is a replay."""
 
     show_force: bool
     show_torque: bool
     hidden: bool
+    replay: bool = False
 
 
 def is_kinematic_replay(bundle: Any) -> bool:
@@ -51,17 +58,14 @@ def is_kinematic_replay(bundle: Any) -> bool:
     return not any(np.any(table) for table in tables)
 
 
-def withholds_visuals(bundle: Any, vectors_requested: bool) -> bool:
-    """True when ``bundle`` is a kinematic replay and no vector flag was passed:
-    shading, grip wrench, palm-thumb arrow and strips then carry no meaning."""
-    return not vectors_requested and is_kinematic_replay(bundle)
-
-
 def vector_visibility(bundle: Any, options: Any) -> VectorVisibility:
     """Force and torque visibility of ``bundle`` under ``options`` (an
     ``OverlayOptions``): its flags stand, except that a kinematic replay hides
-    both unless ``forces_requested``. Logs one warning when it hides them."""
-    hidden = is_kinematic_replay(bundle) and not options.forces_requested
+    both unless ``forces_requested``. Logs one warning when it hides them.
+    ``replay`` is true on a kinematic replay whatever the flags: it alone
+    decides the withholding of every other effort-derived visual."""
+    replay = is_kinematic_replay(bundle)
+    hidden = replay and not options.forces_requested
     if hidden:
         logger.warning(
             "%s: the bundle has zero efforts (a kinematic replay), so force and "
@@ -70,5 +74,8 @@ def vector_visibility(bundle: Any, options: Any) -> VectorVisibility:
             NOTE,
         )
     return VectorVisibility(
-        options.show_force and not hidden, options.show_torque and not hidden, hidden
+        options.show_force and not hidden,
+        options.show_torque and not hidden,
+        hidden,
+        replay,
     )

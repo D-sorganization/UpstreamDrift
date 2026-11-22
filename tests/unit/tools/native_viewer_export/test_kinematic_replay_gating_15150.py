@@ -94,8 +94,30 @@ def test_a_replay_names_only_what_was_requested(kinematic) -> None:
     assert feed.hud_lines_at(0) == (kr.NOTE,)
 
 
-def test_explicit_vector_request_keeps_every_visual(kinematic) -> None:
-    feed = _feed(kinematic, options=OverlayOptions(forces_requested=True))
+VECTOR_FLAGS = [(True, False), (False, True), (True, True)]
+
+
+@pytest.mark.parametrize(("force", "torque"), VECTOR_FLAGS)
+def test_vector_request_draws_vectors_but_withholds_the_rest(
+    kinematic, force, torque, caplog
+) -> None:
+    opts = OverlayOptions(show_force=force, show_torque=torque, forces_requested=True)
+    with caplog.at_level(logging.WARNING):
+        feed = _feed(kinematic, options=opts)
+    assert (feed.show_force, feed.show_torque) == (force, torque)
+    assert all(feed.axial_at(k) is None for k in range(STATES))
+    assert feed.grip_analyses is None and not feed.show_palm_thumb
+    note = feed.hud_lines_at(0)[-1]
+    assert note.startswith(kr.NOTE_DRAWN) and "not measured" in note.lower()
+    assert all(name in note for name in ("shading", "grip", "palm-thumb"))
+    assert any("palm-thumb" in r.getMessage() for r in caplog.records)
+
+
+@pytest.mark.parametrize(("force", "torque"), VECTOR_FLAGS)
+def test_vector_request_on_efforts_draws_everything(dynamic, force, torque) -> None:
+    opts = OverlayOptions(show_force=force, show_torque=torque, forces_requested=True)
+    feed = _feed(dynamic, options=opts)
+    assert (feed.show_force, feed.show_torque) == (force, torque)
     assert feed.grip_analyses is not None and feed.show_palm_thumb
     assert feed.axial_at(0) is not None
     assert feed.hud_lines_at(0) == ()
@@ -246,14 +268,16 @@ def test_runner_withholds_grip_json_strip_and_legend_on_a_replay(tmp_path) -> No
     assert doc == {"unavailable": REASON}
 
 
-def test_runner_keeps_everything_when_forces_are_requested(tmp_path) -> None:
+def test_runner_withholds_the_same_when_vectors_are_requested(tmp_path) -> None:
     result, backend = _run(tmp_path, 0.0, vectors_requested=True)
-    assert backend.settings.shading_enabled
-    assert result.grip_json is None  # stub feed has no grip analyses; no record
-    assert result.inset_strip != f"inset strip unavailable: {REASON}"
+    assert not backend.settings.shading_enabled
+    assert result.inset_strip == f"inset strip unavailable: {REASON}"
+    doc = json.loads(Path(result.grip_json).read_text(encoding="utf-8"))
+    assert doc == {"unavailable": REASON}
 
 
-def test_runner_is_unchanged_for_a_bundle_with_efforts(tmp_path) -> None:
-    result, backend = _run(tmp_path, 1.0)
+@pytest.mark.parametrize("flags", [{}, {"vectors_requested": True}])
+def test_runner_is_unchanged_for_a_bundle_with_efforts(tmp_path, flags) -> None:
+    result, backend = _run(tmp_path, 1.0, **flags)
     assert backend.settings.shading_enabled and result.grip_json is None
     assert REASON not in str(result.inset_strip)
