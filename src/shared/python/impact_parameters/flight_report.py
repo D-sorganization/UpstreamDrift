@@ -32,6 +32,9 @@ from src.shared.python.physics.swing_ball_flight_pipeline import (
     SwingState,
 )
 
+from src.shared.python.physics.impact_model.types import ImpactParameters
+
+from .club_impact import ClubImpact
 from .clubhead_series import ClubheadSeries
 from .conditions import ImpactConditions
 from .target_frame import TargetFrame
@@ -67,12 +70,19 @@ def _invalid_reason(path: np.ndarray) -> str:
 
 
 def swing_state_from_series(
-    series: ClubheadSeries, index: int, frame: TargetFrame
+    series: ClubheadSeries,
+    index: int,
+    frame: TargetFrame,
+    club: ClubImpact | None = None,
+    impact_offset_m: tuple[float, float] | None = None,
 ) -> SwingState:
     """Clubhead state at sample ``index`` in the pipeline frame.
 
     Raises:
         ValueError: ``index`` out of range or the face normal is unobservable.
+
+    ``club`` sets head mass and inertia (``None``: pipeline defaults);
+    ``impact_offset_m`` is the strike (toe, high) from the face centre.
     """
     require(0 <= index < len(series), "index out of range", index)
     face_normals = series.face_normal
@@ -81,21 +91,39 @@ def swing_state_from_series(
     velocity = np.asarray(frame.components(series.velocity_mps[index]), dtype=float)
     normal = np.asarray(frame.components(face_normals[index]), dtype=float)
     normal /= np.linalg.norm(normal)
+    extra: dict[str, object] = {}
+    if club is not None:
+        extra = {
+            "clubhead_mass": club.head_mass_kg,
+            "clubhead_moi": club.head_moi_kg_m2,
+        }
+    if impact_offset_m is not None:
+        extra["impact_offset"] = np.asarray(impact_offset_m, dtype=float)
     return SwingState(
         clubhead_velocity=velocity,
         clubhead_angular_velocity=np.zeros(3),
         clubhead_orientation=normal,
         clubhead_loft_deg=math.degrees(math.asin(float(normal[2]))),
         engine_name="mujoco",
+        **extra,  # type: ignore[arg-type]
     )
 
 
 def flight_for_impact(
-    series: ClubheadSeries, index: int, frame: TargetFrame
+    series: ClubheadSeries,
+    index: int,
+    frame: TargetFrame,
+    club: ClubImpact | None = None,
+    impact_offset_m: tuple[float, float] | None = None,
 ) -> FlightSummary:
-    """Carry flight of the impact state at ``index`` (impact solver + aerodynamics)."""
-    result = SwingBallFlightPipeline().run(
-        swing_state_from_series(series, index, frame)
+    """Carry flight of the impact state at ``index`` (impact solver + aerodynamics).
+
+    ``club`` and ``impact_offset_m`` as in :func:`swing_state_from_series`; the
+    club's COR replaces the pipeline default.
+    """
+    params = None if club is None else ImpactParameters(cor=club.cor)
+    result = SwingBallFlightPipeline(impact_params=params).run(
+        swing_state_from_series(series, index, frame, club, impact_offset_m)
     )
     path = np.array([p.position for p in result.trajectory], dtype=float)
     launch = result.launch_conditions

@@ -26,6 +26,11 @@ from PIL import Image, ImageDraw
 
 from src.shared.python.golf_view_presets import get_view_preset
 from src.shared.python.impact_parameters import ClubheadSeries
+from src.shared.python.impact_parameters.club_impact import (
+    ClubImpact,
+    club_impact_from_spec,
+)
+from src.shared.python.impact_parameters.extract import face_location_mm
 from src.shared.python.impact_parameters.flight_report import (
     FlightSummary,
     flight_for_impact,
@@ -449,11 +454,28 @@ def playback_from_flight(
     )
 
 
+def strike_offset_m(
+    series: ClubheadSeries, index: int, ball: BallPlacement
+) -> tuple[float, float] | None:
+    """Strike (toe, high) from the face centre [m], ``None`` if unobservable/off-face."""
+    try:
+        point = impact_card.ball_contact_point(series, index, ball)
+        loc = face_location_mm(series, index, point)
+    except ValueError:
+        return None
+    if isinstance(loc, str):
+        return None
+    if math.hypot(*loc) > impact_card.MAX_FACE_OFFSET_M * 1000.0:
+        return None
+    return loc[0] * 1e-3, loc[1] * 1e-3
+
+
 def playback_from_series(
     series: ClubheadSeries,
     impact_time_s: float,
     ball: BallPlacement,
     settings: TracerSettings,
+    club: ClubImpact | None = None,
 ) -> FlightPlayback:
     """Flight launched from the clubhead state the impact card reads.
 
@@ -461,19 +483,31 @@ def playback_from_series(
     (:func:`impact_state.series_at_contact`) and the flight starts at that
     instant, so the tracer leaves the ball as the face meets it. Without a
     contact state (the face does not reach the ball) it is the last sample
-    before ``impact_time_s``, started at ``impact_time_s``. Raises what the
+    before ``impact_time_s``, started at ``impact_time_s``. ``club`` gives the
+    head mass, inertia and COR of the club struck with (``None``: the pipeline
+    defaults) and the strike offset on the face goes to the impact model. Raises what the
     impact and flight models raise for a series they cannot use.
     """
     frame = impact_card.address_target_frame(series)
     contact = series_at_contact(series, ball.position_m, ball.radius_m, impact_time_s)
     if contact is None:
         state = impact_card.contact_index(series, impact_time_s) - 1
-        flight = flight_for_impact(series, state, frame)
+        flight = flight_for_impact(series, state, frame, club)
         return playback_from_flight(flight, frame, impact_time_s, ball, settings)
     moved, state = contact
-    flight = flight_for_impact(moved, state, frame)
+    offset = strike_offset_m(moved, state, ball)
+    flight = flight_for_impact(moved, state, frame, club, offset)
     start_s = float(moved.times_s[state])
     return playback_from_flight(flight, frame, start_s, ball, settings)
+
+
+def _spec_club(swing: SwingInput) -> Mapping[str, Any] | None:
+    """The ``club`` entry of the bundle specification, ``None`` if unreadable."""
+    try:
+        entry = json.loads(swing.bundle.spec_bytes).get("club")
+    except (ValueError, AttributeError):
+        return None
+    return entry if isinstance(entry, Mapping) else None
 
 
 def flight_for_export(
@@ -495,7 +529,10 @@ def flight_for_export(
     if swing.ball is None:
         return FlightPlayback(config, "no ball placed")
     try:
-        return playback_from_series(club_series(swing), impact, swing.ball, config)
+        club = club_impact_from_spec(_spec_club(swing))
+        return playback_from_series(
+            club_series(swing), impact, swing.ball, config, club
+        )
     except impact_card._EXPECTED_ERRORS as exc:
         return FlightPlayback(config, f"unavailable: {exc}")
 
