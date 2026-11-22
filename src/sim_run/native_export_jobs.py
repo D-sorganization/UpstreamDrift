@@ -153,6 +153,11 @@ def _queue() -> ExportJobQueue:
         return _QUEUE
 
 
+def shared_queue() -> ExportJobQueue:
+    """The process-wide queue REST, MCP and the desktop dialog all submit to."""
+    return _queue()
+
+
 def submit_export(request: dict[str, Any] | None) -> dict[str, Any]:
     """Validate ``request`` (``TypeError``/``ValueError`` before queuing),
     then queue its export and return the queued job."""
