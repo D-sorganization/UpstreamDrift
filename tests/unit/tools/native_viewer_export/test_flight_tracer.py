@@ -129,6 +129,13 @@ def test_hud_lines_say_where_the_ball_is_and_what_the_model_predicts() -> None:
     assert "Apex 22 yd" in text and "Side 9 yd right" in text and "Time 4.0 s" in text
 
 
+def test_playback_carries_the_model_spin_axis() -> None:
+    flight = replace(_flight(), spin_axis_deg=4.5)
+    play = tracer.playback_from_flight(flight, FRAME, IMPACT_S, BALL, DEFAULTS)
+    assert play.spin_axis_deg == 4.5
+    assert _playback().spin_axis_deg is None  # not reported: not invented
+
+
 def test_a_flight_outside_the_model_envelope_is_not_drawn_by_default() -> None:
     hidden = _playback(valid=False)
     assert hidden.flown(IMPACT_S + 1.0) is None and hidden.duration_s == 0.0
