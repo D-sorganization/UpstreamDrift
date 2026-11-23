@@ -1176,3 +1176,37 @@ and forward versus fit 268.56 mm. This exposes substantial world/root drift
 that the approximately 0.016 rad joint-coordinate RMS alone concealed. It
 confirms the exploratory full-horizon rollout is not a forward-matched
 baseline, independent of its incomplete physical gates.
+
+The unchanged modeled-address ball was reconstructed with
+`ImpactForce.at_address` at the saved source initial pose: centre and passage
+point matched the pinned record exactly. This supports a modeled-address
+origin but does not independently prove historical generation chronology.
+The convention offsets by ball radius along the 3D face normal then resets
+ball height to face-centre height. In a planar diagnostic this loses normal
+clearance by r*n_z²: 1.326 mm at source pose and 0.680 mm at exploratory v2.
+Actual finite-mesh own-address overlaps were 1.483 and 0.852 mm; the source
+face-centre landmark was 0.210 mm from the rendered mesh. Keeping the full
+normal offset is a counterfactual, not authority to move the pinned ball;
+no placement was changed and no contact is certified.
+
+A targeted initial-saturation Option B diagnostic added −5 N m on the
+assumed shoulder-blade cap deficit to the prior ankle/lumbar direction,
+coefficient norm 9.28875 N m within trust. Initial command changed 29.779 to
+24.779 N m against an assumed 25 N m cap; over 200 ms clipped stages fell
+1440 to 1376 but tracking RMS worsened 0.26871 to 0.27204 rad and 11 ROM /
+zero speed flags were unchanged. It hit a guard at 0.585 s with 25 ROM and
+17 speed flags. This is not feasibility, physiological evidence or an
+improved shot.
+
+The existing lower-limb planted-coupling root regulator was tested with fixed
+gains (20,5) on the full nonconverged 477-frame proxy, using zero direct root
+effort in both runs, projected ideal unsaturated computed torque, no impact.
+Root translation component RMS changed 0.10572 to 0.08516 m; root rotation
+RMS 0.14282 to 0.14295 rad and joint RMS 0.016355 to 0.01731 rad. Using the
+same 15,733 valid samples, source-target marker RMS changed 269.65 to
+234.60 mm and observed-marker RMS 270.35 to 235.38 mm. Both remain far too
+large for a match. Held joint effort peak changed 383.77 to 359.62 N m;
+hold-sampled named ROM flags changed from two (5.055° / 3.676°) to one
+(4.080°), and minimum compliant foot-sphere height from −23.94 to −24.87 mm.
+These are unadmitted model-dependent diagnostics, not Option B, actual
+actuator force, measured support or physical feasibility.
