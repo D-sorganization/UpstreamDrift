@@ -146,6 +146,14 @@ Fourteen of the 33 exceeding capacity slots and all 41 speed priors were
 assumption-marked. These are violations of this model's declared thresholds,
 not established anatomical or clinical violations; complete feasibility is
 indeterminate without validated mappings, saturation and between-sample bounds.
+An independent 200 ms computed-torque rollout of a saved, nonstationary
+full-record fit completed all 6,400 expected stages without impact. Joint
+tracking RMS was 0.00812 rad and root translation RMS 14.52 mm; peak
+non-root ideal drive was 257.21 N m. Eleven of 41 modeled drive thresholds
+and two coordinate-ROM slots were exceeded; none of the generalized speed
+priors were exceeded. Five of those eleven capacity slots and all speed
+priors were assumption-marked. This is not Option B, a post-saturation
+measurement, anatomical clearance or an accepted trajectory.
 The flight suite was repeated in a fresh isolated Python 3.12 environment
 after building the current Rust extension and verifying physics revision 2:
 15 passed and one strict expected failure. The stale default revision 0 is
