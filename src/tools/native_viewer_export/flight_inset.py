@@ -60,10 +60,15 @@ _FORMATS = {
 def _positive(
     settings: object, names: Sequence[str], kind: type[int] | type[float]
 ) -> None:
+    """Every named setting must be a finite value strictly greater than zero."""
     for name in names:
         value: Any = getattr(settings, name)
         numeric = (int, float) if kind is float else int
-        if isinstance(value, bool) or not isinstance(value, numeric) or value <= 0:
+        if isinstance(value, bool) or not isinstance(value, numeric):
+            raise ValueError(f"{name} must be a positive {kind.__name__}")
+        if kind is float and not math.isfinite(float(value)):
+            raise ValueError(f"{name} must be a finite positive {kind.__name__}")
+        if value <= 0:
             raise ValueError(f"{name} must be a positive {kind.__name__}")
 
 
