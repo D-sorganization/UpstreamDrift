@@ -2255,3 +2255,22 @@ no stages clipped, and stage drive matched total-command clipping exactly.
 References and feedforward differ, so this is not a single-variable comparison.
 All speed and 16 torque capacities remain assumption-marked; work/slew limits
 and physical feasibility remain unverified.
+
+An interior-margin numerical pilot used 3 degrees for both modeled subtalar
+ranges, 0.5 degrees for wrist ranges and 0.25 degrees for lumbar ranges,
+ramped in over 18 frames to retain q0/q1. These are robustness parameters,
+not physiological limits. The full 476-frame reference had all pose solvers
+report success, closure <=7.30e-12, no modeled ROM/margin excess and no
+interval or centered speed flags (maximum assumed ratio 0.968). Foot/marker
+RMS changed from 2.51/24.09 mm to 3.45/24.22 mm versus the unmodified
+continuous reference.
+
+The identical-initial-state 1.319 s ideal rollout completed without a
+numerical failure. Compared with no margin, sampled forward ROM-violating
+states fell from 816 to 338, but right subtalar remained out of range from
+0.085 s and peak excess worsened 11.14 to 12.48 degrees. Source/observed
+marker RMS worsened 35.72/41.20 to 40.48/45.38 mm; held ideal torque
+capacity exceedances increased 280 to 313 samples, peak ratio 7.19 to 8.60,
+and peak absolute command 314.95 to 372.30 N m. No sampled assumed speed
+flag appeared. Reject this tradeoff as an admitted or improved baseline;
+actual saturated torque, stages, work and impact were not established.
