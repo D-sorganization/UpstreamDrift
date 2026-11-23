@@ -78,6 +78,26 @@ def test_unsafe_artifact_names_rejected(name: str) -> None:
         ArtifactRef(ArtifactRole.VIDEO, name, _SHA_A, 1)
 
 
+@pytest.mark.parametrize(
+    "name",
+    [
+        "C:/bundle-external/video.mp4",  # drive-qualified absolute
+        "C:video.mp4",  # drive-relative
+        "c:/x.mp4",
+        r"Z:\x.mp4",
+        "//server/share/video.mp4",  # UNC, forward slashes
+        r"\\server\share\video.mp4",  # UNC, backslashes
+        r"\rooted.mp4",  # root-relative backslash
+        "a/C:/x.mp4",  # drive inside a nested component
+        "a/b:stream.mp4",  # NTFS alternate-data-stream colon
+        "a/b\x00.mp4",  # NUL byte
+    ],
+)
+def test_windows_and_unc_artifact_names_rejected(name: str) -> None:
+    with pytest.raises(ValueError, match="name"):
+        ArtifactRef(ArtifactRole.VIDEO, name, _SHA_A, 1)
+
+
 def test_bad_digest_rejected() -> None:
     with pytest.raises(ValueError, match="sha256"):
         ArtifactRef(ArtifactRole.VIDEO, "v.mp4", "xyz", 1)
@@ -228,3 +248,34 @@ def test_verify_against_dir_clean_then_detects_tamper_and_missing(
     assert any("a/swing.mp4" in p and "sha256" in p for p in problems)
     assert any("b/res.csv" in p and "missing" in p for p in problems)
     assert len(problems) == 2
+
+
+def test_external_absolute_video_cannot_be_named_in_bundle(tmp_path: Path) -> None:
+    """Regression (Codex FIX-NEEDED): a path outside the bundle is not nameable."""
+    external = tmp_path / "outside" / "video.mp4"
+    external.parent.mkdir()
+    external.write_bytes(b"v")
+    with pytest.raises(ValueError, match="name"):
+        ArtifactRef.from_bytes(ArtifactRole.VIDEO, external.as_posix(), b"v")
+
+
+def test_verify_never_follows_forged_name_outside_bundle(tmp_path: Path) -> None:
+    """Defence in depth: a ref that bypassed validation is reported, not read."""
+    bundle = tmp_path / "bundle"
+    bundle.mkdir()
+    external = tmp_path / "video.mp4"
+    external.write_bytes(b"v")
+    m = _manifest()
+    _write_bundle(bundle, m)
+    forged = _ref(ArtifactRole.VIDEO, "min_effort/swing.mp4", b"v")
+    object.__setattr__(forged, "name", str(external))
+    cand = m.candidates[0]
+    object.__setattr__(cand, "artifacts", (forged, cand.artifacts[1]))
+    problems = verify_against_dir(m, bundle)
+    assert any("outside bundle" in p for p in problems)
+
+
+def test_nested_relative_name_still_verifies(tmp_path: Path) -> None:
+    m = _manifest(_replayed("deep/nest"))
+    _write_bundle(tmp_path, m)
+    assert verify_against_dir(m, tmp_path) == ()

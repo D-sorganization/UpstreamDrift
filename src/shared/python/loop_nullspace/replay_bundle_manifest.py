@@ -16,7 +16,7 @@ import math
 import re
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any
 
 __all__ = [
@@ -51,6 +51,20 @@ class ReplayStatus(str, Enum):
     UNAVAILABLE = "unavailable"
 
 
+def _is_safe_relative_name(name: str) -> bool:
+    """True only for a strict, platform-independent bundle-relative POSIX path.
+
+    Rejects, on every platform: empty names, backslashes, leading separators
+    (POSIX root, UNC), Windows drives (``C:/x``, drive-relative ``C:x``), any
+    colon (NTFS streams), NUL bytes and ``.``/``..``/empty components.
+    """
+    if not name or "\\" in name or "\x00" in name or ":" in name:
+        return False
+    if name.startswith("/") or PureWindowsPath(name).drive:
+        return False
+    return not any(p in ("", "..", ".") for p in name.split("/"))
+
+
 def _positive(value: float, label: str) -> None:
     if not (isinstance(value, (int, float)) and math.isfinite(value) and value > 0):
         raise ValueError(f"{label} must be finite and > 0, got {value!r}")
@@ -66,13 +80,7 @@ class ArtifactRef:
     size_bytes: int
 
     def __post_init__(self) -> None:
-        parts = self.name.split("/")
-        if (
-            not self.name
-            or "\\" in self.name
-            or self.name.startswith("/")
-            or any(p in ("", "..", ".") for p in parts)
-        ):
+        if not _is_safe_relative_name(self.name):
             raise ValueError(
                 f"artifact name must be a safe relative path: {self.name!r}"
             )
@@ -249,6 +257,11 @@ def verify_against_dir(manifest: ReplayBundleManifest, root: Path) -> tuple[str,
     problems: list[str] = []
     for ref in manifest.all_artifacts():
         path = root / ref.name
+        if not _is_safe_relative_name(ref.name) or not path.resolve().is_relative_to(
+            root.resolve()
+        ):
+            problems.append(f"{ref.name}: outside bundle")
+            continue
         if not path.is_file():
             problems.append(f"{ref.name}: missing")
             continue
