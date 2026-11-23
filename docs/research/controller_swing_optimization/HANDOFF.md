@@ -1651,3 +1651,17 @@ false. Loose synthetic motor caps, prescribed rather than detected contact,
 a partial runtime fingerprint and an unadmitted reference remain; this does
 not complete Slice 2 or establish a physical shot. Private bundle and hash-
 bound receipt remain outside git.
+
+Research branch `codex/15493-coverage-continuity23` at `e06fe08a75`
+fixes two conditional-contact coverage defects found by failing-first tests:
+a different q/v state could be spliced at the same timestamp, and an advance
+callback could start from a state different from its supplied q/v. The policy
+now stores and serializes the prior evaluated endpoint and fails closed on
+state mismatch, malformed or absent historical endpoint, and inconsistent
+callback origin. Exact equality intentionally may reject projected or
+roundoff-different states. One hundred four focused contact/coverage/MuJoCo
+tests, scoped NumPy-aware mypy, Ruff, Black, LaTeX compilation and normal
+headless push hooks passed. The unchanged pinned modeled-address ball still
+starts 12.704 mm overlapped in exploratory v2 and remains unresolved for
+illustrative 10/100/1000 m/s bounds. This does not verify the bound, continuous
+trajectory or first contact; the oversized research branch is not a PR.
