@@ -28,6 +28,10 @@ def project(camera: Any, points_m: Array, near_clip_m: float) -> tuple[Array, Ar
     return np.column_stack([u, v]), depth
 
 
+#: the near-plane cut is placed this fraction in front of the plane, so it projects
+_NEAR_MARGIN = 1e-3
+
+
 @dataclass(frozen=True)
 class Occlusion:
     """Scene depth of one view tile and the slack before it hides a point."""
@@ -64,6 +68,23 @@ class Occlusion:
         return np.vstack(out)
 
 
+def clip_near(camera: Any, points_m: Array, near_clip_m: float) -> Array:
+    """``points_m`` with a point added where each segment crosses the near plane.
+
+    A segment from in front of the camera to behind it then keeps its visible
+    part (an aim line whose finish lies behind a face-on camera, #15150).
+    """
+    pts = np.asarray(points_m, dtype=float)
+    depth = camera.camera_from_world(pts)[:, 2] - near_clip_m * (1.0 + _NEAR_MARGIN)
+    out = [pts[:1]]
+    for i in range(1, len(pts)):
+        if (depth[i - 1] > 0.0) != (depth[i] > 0.0):
+            t = depth[i - 1] / (depth[i - 1] - depth[i])
+            out.append(pts[i - 1 : i] + t * (pts[i : i + 1] - pts[i - 1 : i]))
+        out.append(pts[i : i + 1])
+    return np.vstack(out)
+
+
 def draw_line(
     pen: ImageDraw.ImageDraw,
     camera: Any,
@@ -74,6 +95,7 @@ def draw_line(
     occlusion: Occlusion | None,
 ) -> None:
     """Draw the world polyline ``points_m``, leaving out what the scene hides."""
+    points_m = clip_near(camera, points_m, near_clip_m)
     if occlusion is None:
         pixels, _ = project(camera, points_m, near_clip_m)
         mask = np.ones(len(pixels), dtype=bool)

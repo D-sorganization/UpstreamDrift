@@ -215,8 +215,17 @@ def roll_for_shape(
     """
     validate_shot_setup(0.0, 0.0, shape)
     straight, side = solve_straight_roll(side_m, limits)
-    roll = straight + _SHAPE_SIGN[shape] * limits.shape_roll_step_deg
-    return roll, straight, side
+    return shape_roll(shape, straight, limits), straight, side
+
+
+def shape_roll(shape: str, straight_deg: float, limits: ShotSetupSettings) -> float:
+    """Club roll (degrees) of ``shape`` given the solved straight roll.
+
+    ``draw`` / ``fade`` are ``straight_deg`` minus / plus
+    ``shape_roll_step_deg``; ``ValueError`` for an unknown ``shape``.
+    """
+    validate_shot_setup(0.0, 0.0, shape)
+    return straight_deg + _SHAPE_SIGN[shape] * limits.shape_roll_step_deg
 
 
 def lateral_of_flight(flight: Any) -> float:

@@ -177,3 +177,17 @@ def test_ball_marker_clipping_follows_the_setting() -> None:
     clipped = tr.draw_trace(_tile(), CAM, spot, 0.1, D, scene)
     assert _count(clipped, D.ball_color_rgb) < _count(free, D.ball_color_rgb)
     assert _count(clipped, D.ball_color_rgb) > 0
+
+
+def test_a_line_running_behind_the_camera_keeps_its_visible_part() -> None:
+    eye = np.asarray(CAM.translation_world_from_camera_m)
+    right = np.asarray(CAM.rotation_world_from_camera)[:, 0]
+    behind = 2.0 * eye - np.asarray(LOOKAT) + 3.0 * right
+    points = np.array([LOOKAT, behind])
+    assert not np.isfinite(fd.project(CAM, points, 0.05)[0][1]).all()
+    clipped = fd.clip_near(CAM, points, 0.05)
+    assert len(clipped) == 3
+    assert np.isfinite(fd.project(CAM, clipped, 0.05)[0][:2]).all()
+    image = fd.Image.fromarray(np.zeros((SIZE[1], SIZE[0], 3), np.uint8))
+    fd.draw_line(fd.ImageDraw.Draw(image), CAM, points, (*RED, 255), 3, 0.05, None)
+    assert _count(np.asarray(image)) > 0

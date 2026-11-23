@@ -164,6 +164,8 @@ class GolferPlayback:
 
         from src.tools.native_viewer_export.backends.mujoco_worker import (
             grow_offscreen_buffer,
+            load_scene_extent,
+            widen_ground,
         )
 
         self._mj = mujoco
@@ -172,11 +174,16 @@ class GolferPlayback:
         xml = scene_xml if scene_xml is not None else build_golfer_scene_xml(source)
         self._model = mujoco.MjModel.from_xml_string(xml)
         grow_offscreen_buffer(self._model, *self.size)
+        # the export's turf reaches past a drive, so a ball flight lands on it
+        widen_ground(self._model, load_scene_extent().ground_half_extent_m)
         self._data = mujoco.MjData(self._model)
         self._qpos_adr = self._address_map(source)
         self._renderer: Any = mujoco.Renderer(self._model, self.size[1], self.size[0])
         self._camera = mujoco.MjvCamera()
         self.view = VIEW_ORDER[0]
+        #: called as ``scene_hook(scene, index)`` after the scene is posed, to
+        #: add render-only geoms (the decorative ball); never touches the model
+        self.scene_hook: Callable[[Any, int], None] | None = None
 
     def _address_map(self, source: PoseFrameSource) -> list[int]:
         addresses: list[int] = []
@@ -222,7 +229,18 @@ class GolferPlayback:
         self._data.qpos[self._qpos_adr] = self.source.q[index]
         self._mj.mj_forward(self._model, self._data)
         self._renderer.update_scene(self._data, camera=self._camera)
+        if self.scene_hook is not None:
+            self.scene_hook(self._renderer.scene, index)
         return np.asarray(self._renderer.render(), dtype=np.uint8).copy()
+
+    def scene_depth(self) -> NDArray[np.float64]:
+        """Depth (metres per pixel) of the scene last rendered, for occlusion."""
+        renderer = self._renderer
+        renderer.enable_depth_rendering()
+        try:
+            return np.asarray(renderer.render(), dtype=float).copy()
+        finally:
+            renderer.disable_depth_rendering()
 
     def export_video(
         self,
