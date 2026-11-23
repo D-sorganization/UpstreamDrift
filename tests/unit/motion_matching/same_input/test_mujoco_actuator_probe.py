@@ -802,6 +802,56 @@ def test_motor_bundle_v2_fresh_replay_and_consistency(
         arrays=arr,
         schema_version=2,
     )
+    if not with_impact:
+        from dataclasses import replace
+        from src.shared.python.optimization.solution_bundle_v2 import save_bundle_v2
+        from src.shared.python.motion_matching.same_input.motor_solution_bundle import (
+            verify_motor_solution_v2,
+        )
+
+        original_arrays = dict(bundle.arrays)
+        independent = replace(
+            bundle,
+            arrays={
+                **original_arrays,
+                "reference_time": np.asarray(cfg["times_s"]),
+                **{
+                    name: np.asarray(cfg[name])
+                    for name in ("q_ref", "qd_ref", "tau_ff_ref")
+                },
+            },
+        )
+        v2_path = save_bundle_v2(independent, tmp_path / "independent-grid")
+        v2_hash = digest((v2_path / "manifest.json").read_bytes())
+        verify_motor_solution_v2(
+            v2_path,
+            expected_manifest_sha256=v2_hash,
+            expected_model_sha256=digest(spec),
+            expected_runtime_sha256=measured_bundle_motor_runtime(),
+        )
+        independent.arrays["reference_time"][1] += 1e-7
+        bad_time = save_bundle_v2(independent, tmp_path / "bad-reference-time")
+        with pytest.raises(ValueError, match="reference time mismatch"):
+            verify_motor_solution_v2(
+                bad_time,
+                expected_manifest_sha256=digest(
+                    (bad_time / "manifest.json").read_bytes()
+                ),
+                expected_model_sha256=digest(spec),
+                expected_runtime_sha256=measured_bundle_motor_runtime(),
+            )
+        independent.arrays["reference_time"][1] -= 1e-7
+        independent.arrays["q_ref"][0, 6] += 0.01
+        bad_reference = save_bundle_v2(independent, tmp_path / "bad-independent-grid")
+        with pytest.raises(ValueError, match="reference mismatch"):
+            verify_motor_solution_v2(
+                bad_reference,
+                expected_manifest_sha256=digest(
+                    (bad_reference / "manifest.json").read_bytes()
+                ),
+                expected_model_sha256=digest(spec),
+                expected_runtime_sha256=measured_bundle_motor_runtime(),
+            )
     path = save_solution_bundle(bundle, tmp_path / "b")
     manifest_hash = digest((path / "manifest.json").read_bytes())
     checked = verify_motor_solution(

@@ -13,7 +13,7 @@ from pathlib import Path
 
 import numpy as np
 
-from src.shared.python.optimization import solution_bundle
+from src.shared.python.optimization import solution_bundle, solution_bundle_v2
 from src.shared.python.optimization.solution_bundle import load_solution_bundle
 from .motor_forward_replay import (
     MotorForwardCheck,
@@ -54,6 +54,7 @@ def measured_bundle_motor_runtime() -> str:
     parts = [
         measured_motor_runtime(),
         _digest(Path(solution_bundle.__file__).read_bytes()),
+        _digest(Path(solution_bundle_v2.__file__).read_bytes()),
         _digest(Path(__file__).read_bytes()),
     ]
     return _digest("\n".join(parts).encode())
@@ -65,6 +66,7 @@ def verify_motor_solution(
     expected_manifest_sha256: str,
     expected_model_sha256: str,
     expected_runtime_sha256: str,
+    _separate_grid: bool = False,
 ) -> MotorForwardCheck:
     """Load a v2 bundle, validate its numerical evidence and freshly replay.
 
@@ -80,12 +82,17 @@ def verify_motor_solution(
     manifest = (root / "manifest.json").read_bytes()
     if _digest(manifest) != expected_manifest_sha256:
         raise ValueError("manifest hash mismatch")
-    bundle = load_solution_bundle(root, expected_model_hash=expected_model_sha256)
+    loader = (
+        solution_bundle_v2.load_bundle_v2 if _separate_grid else load_solution_bundle
+    )
+    bundle = loader(root, expected_model_hash=expected_model_sha256)
     if _digest((root / "manifest.json").read_bytes()) != expected_manifest_sha256:
         raise ValueError("manifest changed while loading")
     if bundle.schema_version != 2:
         raise ValueError("only explicit v2 evidence is supported")
     event = bundle.impact_event
+    if _separate_grid and event != {"status": "none"}:
+        raise ValueError("separate-grid replay only supports explicit no impact")
     if event != {"status": "none"} and (
         set(event) != {"t", "q", "qd", "semantics", "contact_verified"}
         or event["semantics"] != "prescribed_latched_force"
@@ -101,7 +108,10 @@ def verify_motor_solution(
         "holds_per_step": 1,
     }:
         raise ValueError("unsupported controller policy")
-    if set(bundle.arrays) != _BASE | set(_PAYLOADS):
+    required = (
+        _BASE | set(_PAYLOADS) | ({"reference_time"} if _separate_grid else set())
+    )
+    if set(bundle.arrays) != required:
         raise ValueError("unsupported motor bundle array inventory")
     data = {}
     for name in _PAYLOADS:
@@ -188,14 +198,37 @@ def verify_motor_solution(
     knots = np.r_[np.repeat(points[0], 4), points[1:-1], np.repeat(points[-1], 4)]
     if not np.array_equal(a["knots"], knots):
         raise ValueError("spline knots mismatch")
+    if _separate_grid and not np.array_equal(a["reference_time"], cfg["times_s"]):
+        raise ValueError("reference time mismatch")
     for name in ("q_ref", "qd_ref", "tau_ff_ref"):
         values = np.asarray(cfg[name], dtype=float)
-        sampled = np.column_stack(
-            [
-                np.interp(times, cfg["times_s"], values[:, i])
-                for i in range(len(bundle.joint_order))
-            ]
+        expected = (
+            values
+            if _separate_grid
+            else np.column_stack(
+                [
+                    np.interp(times, cfg["times_s"], values[:, i])
+                    for i in range(len(bundle.joint_order))
+                ]
+            )
         )
-        if not np.array_equal(a[name], sampled):
+        if not np.array_equal(a[name], expected):
             raise ValueError(f"{name} reference mismatch")
     return replay
+
+
+def verify_motor_solution_v2(
+    directory: str | Path,
+    *,
+    expected_manifest_sha256: str,
+    expected_model_sha256: str,
+    expected_runtime_sha256: str,
+) -> MotorForwardCheck:
+    """Replay explicit no-impact evidence with the original reference grid."""
+    return verify_motor_solution(
+        directory,
+        expected_manifest_sha256=expected_manifest_sha256,
+        expected_model_sha256=expected_model_sha256,
+        expected_runtime_sha256=expected_runtime_sha256,
+        _separate_grid=True,
+    )
