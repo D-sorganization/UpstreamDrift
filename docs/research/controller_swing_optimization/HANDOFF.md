@@ -1694,3 +1694,16 @@ stage 2087 to 2097, but retained ROM flags and clipping. Its extension hit a
 guard at 0.643 s with 26 ROM / 22 speed flags. The two-basis coefficient norm
 is parameterization-dependent and not equivalent to canonical knot insertion;
 no physical feasibility, continuous-path or improved-shot claim follows.
+
+A separately installed Python environment reproduced the original serialized
+projected 1.322 s exploratory v2 motor bundle with synthetic off-grid
+prescribed force: all 42,312 saved numerical stages and the event matched
+exactly in 167.71 s. It used the same host and CPython build, matching package
+versions and sampled NumPy/SciPy/MuJoCo extension binary hashes; this is
+isolated-environment repeatability, not independent runtime/hardware,
+physical feasibility or detected contact. The receipt keeps those verification
+flags false and the runtime fingerprint remains partial. A separate checkout
+at the same Git commit failed the byte fingerprint because four source files
+had CRLF instead of the original LF bytes; the guard was not bypassed. This
+shows Git SHA alone does not identify working-tree source bytes. Private
+hash-bound receipts and bundle remain outside git.
