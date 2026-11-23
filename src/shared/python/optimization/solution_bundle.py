@@ -31,6 +31,8 @@ __all__ = [
     "SUPPORTED_SCHEMA_VERSIONS",
     "SolutionBundle",
     "SolutionBundleError",
+    "MODEL_LOCK_FIELDS",
+    "validate_model_lock",
     "load_solution_bundle",
     "save_solution_bundle",
 ]
@@ -90,6 +92,37 @@ class SolutionBundle:
     assumptions: tuple[str, ...]
     arrays: dict[str, np.ndarray] = field(compare=False)
     schema_version: int = SCHEMA_VERSION
+    # Golfer model lock (#15659): which model, controller and solver produced
+    # the bundle. ``None`` marks a legacy bundle that may only be replayed.
+    model_lock: dict[str, str] | None = None
+
+
+#: Fields a model lock must give as non-empty strings (#15659).
+MODEL_LOCK_FIELDS = (
+    "registry_version",
+    "hand_visual_backend",
+    "body_visual_backend",
+    "spec_revision",
+    "plant_hash",
+    "controller_hash",
+    "solver_hash",
+)
+
+
+def validate_model_lock(lock: object) -> None:
+    """Raise unless ``lock`` is ``None`` or exactly the lock fields as strings."""
+    if lock is None:
+        return
+    if not isinstance(lock, dict):
+        raise SolutionBundleError("model_lock must be an object or null")
+    bad = [
+        k for k in MODEL_LOCK_FIELDS if not isinstance(lock.get(k), str) or not lock[k]
+    ]
+    extra = sorted(set(lock) - set(MODEL_LOCK_FIELDS))
+    if bad or extra:
+        raise SolutionBundleError(
+            f"model_lock needs non-empty {bad} and no unknown keys {extra}"
+        )
 
 
 def _validate_arrays(bundle: SolutionBundle) -> None:
@@ -160,6 +193,7 @@ def _validate_metadata(bundle: SolutionBundle) -> None:
     for key in ("solution_id", "git_sha", "model_hash", "frame"):
         if not getattr(bundle, key):
             raise SolutionBundleError(f"{key} must be non-empty")
+    validate_model_lock(bundle.model_lock)
     event = bundle.impact_event
     if not _is_finite_number(event.get("t")):
         raise SolutionBundleError("impact_event.t must be a finite number")
@@ -202,6 +236,7 @@ def _manifest(bundle: SolutionBundle, digest: str) -> dict[str, Any]:
         "feasibility_margins": bundle.feasibility_margins,
         "assumptions": list(bundle.assumptions),
         "arrays_sha256": digest,
+        "model_lock": bundle.model_lock,
     }
 
 
@@ -305,6 +340,7 @@ def load_solution_bundle(
             assumptions=tuple(manifest["assumptions"]),
             arrays=arrays,
             schema_version=version,
+            model_lock=manifest.get("model_lock"),
         )
     except KeyError as exc:
         raise SolutionBundleError(f"manifest is missing field {exc}") from exc

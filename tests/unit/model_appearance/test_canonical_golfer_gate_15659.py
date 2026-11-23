@@ -1,11 +1,4 @@
-"""Canonical golfer gate: refuse a non-current model before any simulation (#15659).
-
-Panel Option A (#15648 follow-up): optimization, allocation and replay may only
-run on the registry's current golfer model, and a Solution Bundle carries a
-model lock split three ways -- ``plant_hash`` (dynamics), ``controller_hash``
-(gains and spline basis) and ``solver_hash`` (integrator and step) -- so a
-mismatch names the domain that moved.
-"""
+"""Canonical golfer gate and Solution Bundle model lock (#15659, panel Option A)."""
 
 from __future__ import annotations
 
@@ -40,6 +33,9 @@ from src.shared.python.optimization.solution_bundle import (
     load_solution_bundle,
     save_solution_bundle,
 )
+from tests.unit.optimization.test_solution_bundle import (
+    _bundle as solution_bundle_fixture,
+)
 
 pytestmark = pytest.mark.unit
 REPO = Path(__file__).resolve().parents[3]
@@ -68,50 +64,36 @@ def _lock(spec: dict[str, Any] | None = None) -> GolferModelLock:
     )
 
 
-# -- require_canonical_golfer -------------------------------------------------
-
-
 def test_current_model_spec_passes_and_returns_the_registry_pin() -> None:
     assert require_canonical_golfer(_canonical_spec()) == current_golfer_model()
 
 
+_DROP = object()
+
+
 @pytest.mark.parametrize(
-    ("field", "value", "part"),
+    ("in_subject", "key", "value", "part"),
     [
-        ("hand_visual_backend", "capsule", "capsule"),
-        ("body_visual_backend", "loft", "loft"),
+        (True, "hand_visual_backend", "capsule", "capsule"),
+        (True, "body_visual_backend", "loft", "loft"),
+        (True, "hand_visual_backend", _DROP, "capsule"),  # default is deprecated
+        (False, "spec_revision", _DROP, "spec_revision"),
+        (False, "spec_revision", {"configuration": "other"}, "spec_revision"),
     ],
 )
-def test_deprecated_part_is_refused_and_named(field: str, value: str, part: str) -> None:
+def test_non_canonical_spec_is_refused_before_simulation_and_named(
+    in_subject: bool, key: str, value: object, part: str
+) -> None:
     spec = _canonical_spec()
-    spec["subject"][field] = value
+    target = spec["subject"] if in_subject else spec
+    if value is _DROP:
+        del target[key]
+    else:
+        target[key] = value
     with pytest.raises(NonCanonicalGolferError, match=part) as info:
         require_canonical_golfer(spec)
     assert info.value.part == part
-
-
-def test_missing_selectors_default_to_deprecated_parts() -> None:
-    spec = _canonical_spec()
-    del spec["subject"]["hand_visual_backend"]
-    with pytest.raises(NonCanonicalGolferError) as info:
-        require_canonical_golfer(spec)
-    assert info.value.part == "capsule"
-
-
-@pytest.mark.parametrize("revision", [None, {"version": 1, "configuration": "other"}])
-def test_unrevised_spec_is_refused(revision: dict[str, Any] | None) -> None:
-    spec = _canonical_spec()
-    if revision is None:
-        del spec["spec_revision"]
-    else:
-        spec["spec_revision"] = revision
-    with pytest.raises(NonCanonicalGolferError) as info:
-        require_canonical_golfer(spec)
-    assert info.value.part == "spec_revision"
-
-
-def test_error_is_a_value_error_for_existing_handlers() -> None:
-    assert issubclass(NonCanonicalGolferError, ValueError)
+    assert isinstance(info.value, ValueError)  # existing handlers still catch it
 
 
 def test_gate_reads_the_pin_from_the_registry_not_a_constant(
@@ -121,9 +103,6 @@ def test_gate_reads_the_pin_from_the_registry_not_a_constant(
     monkeypatch.setattr(gate, "current_golfer_model", lambda: pinned)
     with pytest.raises(NonCanonicalGolferError, match="next_rev"):
         require_canonical_golfer(_canonical_spec())
-
-
-# -- three-way hash split -----------------------------------------------------
 
 
 def test_plant_hash_ignores_visual_backends_and_revision_metadata() -> None:
@@ -154,9 +133,6 @@ def test_controller_and_solver_hashes_are_independent_domains() -> None:
 def test_solver_hash_requires_integrator_and_timestep(integrator: dict) -> None:
     with pytest.raises(ValueError, match="integrator"):
         solver_hash(integrator)
-
-
-# -- lock verification --------------------------------------------------------
 
 
 def test_lock_for_a_non_canonical_spec_is_refused() -> None:
@@ -203,53 +179,10 @@ def test_unknown_scope_is_a_contract_violation() -> None:
         verify_lock(_lock(), _lock(), scope="anything")
 
 
-# -- Solution Bundle mandatory lock -------------------------------------------
-
-
 def _bundle(lock: GolferModelLock | None) -> SolutionBundle:
-    rng = np.random.default_rng(15659)
-    n, j = 4, 3
-    arrays = {
-        name: rng.normal(size=(n, j))
-        for name in (
-            "q_ref",
-            "qd_ref",
-            "tau_ff_ref",
-            "q_rollout",
-            "qd_rollout",
-            "tau_cmd",
-            "tau_applied",
-        )
-    }
-    arrays.update(
-        time=np.linspace(0.0, 0.15, n),
-        knots=KNOTS,
-        delta_tau_coeffs=rng.normal(size=(4, j)),
-        q0=np.zeros(j),
-        qd0=np.zeros(j),
-        controller_state0=np.zeros(0),
-        kp=KP,
-        kd=KD,
-    )
-    return SolutionBundle(
-        solution_id="sol-15659",
-        parent_id=None,
-        git_sha="a" * 40,
-        model_hash="m" * 64,
-        asset_hashes={},
-        frame="world_z_up",
-        joint_order=("a", "b", "c"),
-        control=CONTROL,
-        integrator=INTEGRATOR,
-        environment={},
-        optimizer_seed=0,
-        impact_event={"t": 0.1, "q": [0.0] * j, "qd": [0.0] * j},
-        flight_metrics={},
-        feasibility_margins={},
-        assumptions=(),
-        arrays=arrays,
-        model_lock=None if lock is None else lock.to_dict(),
-    )
+    base = solution_bundle_fixture()
+    lock_dict = None if lock is None else lock.to_dict()
+    return replace(base, control=CONTROL, integrator=INTEGRATOR, model_lock=lock_dict)
 
 
 def test_locked_bundle_roundtrips_and_seeds_optimization(tmp_path: Path) -> None:
