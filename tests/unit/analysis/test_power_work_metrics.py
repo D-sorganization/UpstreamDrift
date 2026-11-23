@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 from src.shared.python.analysis.power_work_metrics import PowerWorkMetricsMixin
 
 
@@ -67,11 +68,15 @@ class TestComputeWorkMetrics:
         result = obj.compute_work_metrics(5)
         assert result is None
 
-    def test_caching_returns_same_result(self) -> None:
+    def test_caching_returns_defensive_copies(self) -> None:
         obj = _make_instance()
         result1 = obj.compute_work_metrics(0)
         result2 = obj.compute_work_metrics(0)
-        assert result1 is result2  # same object from cache
+        assert result1 == result2
+        assert result1 is not result2
+        result1["net_work"] = -999.0
+        result3 = obj.compute_work_metrics(0)
+        assert result3["net_work"] != -999.0
 
 
 class TestComputeJointPowerMetrics:
@@ -214,3 +219,32 @@ class TestComputeDynamicStiffness:
         obj = _make_instance(n_joints=2)
         times, stiffness, r2 = obj.compute_dynamic_stiffness(5)
         assert len(times) == 0
+
+
+@pytest.mark.unit
+class TestPowerWorkGuards15343:
+    """FC-012 guards for hysteresis, power durations, and work-metrics cache (#15343)."""
+
+    def test_open_hookean_cycle_reports_no_hysteresis(self) -> None:
+        obj = _make_instance(n_samples=50)
+        theta = np.linspace(0.0, np.pi, len(obj.times))
+        k = 10.0
+        obj.joint_positions[:, 0] = theta
+        obj.joint_torques[:, 0] = k * theta
+        metrics = obj.compute_joint_stiffness(0)
+        assert metrics is not None
+        assert metrics.hysteresis_area == pytest.approx(0.0, abs=1e-6)
+
+    def test_power_durations_respect_total_interval(self) -> None:
+        obj = _make_instance(n_samples=100)
+        obj.dt = 0.5
+        obj.joint_torques[:, 0] = 1.0
+        obj.joint_velocities[:, 0] = 1.0
+        metrics = obj.compute_joint_power_metrics(0)
+        assert metrics is not None
+        t_total = float(obj.times[-1] - obj.times[0])
+        assert metrics.generation_duration <= t_total + 1e-9
+        assert metrics.absorption_duration <= t_total + 1e-9
+        assert (
+            metrics.generation_duration + metrics.absorption_duration <= t_total + 1e-9
+        )
