@@ -117,9 +117,11 @@ def _validate_arrays(bundle: SolutionBundle) -> None:
                 )
         if not np.all(np.isfinite(value)):
             raise SolutionBundleError(f"{name} contains non-finite values")
-    if np.any(np.diff(arrays["time"]) <= 0.0):
+    # Compare neighbours directly: np.diff wraps for unsigned/extreme integers.
+    time, knots = np.asarray(arrays["time"]), np.asarray(arrays["knots"])
+    if np.any(time[1:] <= time[:-1]):
         raise SolutionBundleError("time must be strictly increasing")
-    if np.any(np.diff(arrays["knots"]) < 0.0):
+    if np.any(knots[1:] < knots[:-1]):
         raise SolutionBundleError("knots must be nondecreasing")
 
 
@@ -129,6 +131,18 @@ def _is_finite_number(value: object) -> bool:
         and not isinstance(value, bool)
         and math.isfinite(value)
     )
+
+
+def _require_finite(value: object, where: str) -> None:
+    """Reject any non-finite float nested in ``value`` (NaN, inf, overflow)."""
+    if isinstance(value, dict):
+        for key, item in value.items():
+            _require_finite(item, f"{where}.{key}")
+    elif isinstance(value, (list, tuple)):
+        for index, item in enumerate(value):
+            _require_finite(item, f"{where}[{index}]")
+    elif isinstance(value, float) and not math.isfinite(value):
+        raise SolutionBundleError(f"{where} must be finite, got {value}")
 
 
 def _validate_metadata(bundle: SolutionBundle) -> None:
@@ -151,6 +165,14 @@ def _validate_metadata(bundle: SolutionBundle) -> None:
             )
         if not all(_is_finite_number(v) for v in values):
             raise SolutionBundleError(f"impact_event.{key} must be finite numbers")
+    for key in (
+        "control",
+        "integrator",
+        "environment",
+        "flight_metrics",
+        "feasibility_margins",
+    ):
+        _require_finite(getattr(bundle, key), key)
 
 
 def _manifest(bundle: SolutionBundle, digest: str) -> dict[str, Any]:

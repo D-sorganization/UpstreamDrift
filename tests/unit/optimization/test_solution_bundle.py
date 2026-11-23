@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import replace
 from pathlib import Path
@@ -16,6 +17,8 @@ from src.shared.python.optimization.solution_bundle import (
     load_solution_bundle,
     save_solution_bundle,
 )
+
+pytestmark = pytest.mark.unit
 
 N_STEPS = 6
 N_JOINTS = 3
@@ -195,3 +198,94 @@ def test_save_refuses_to_overwrite_existing_bundle(tmp_path: Path) -> None:
 
     with pytest.raises(SolutionBundleError, match="already exists"):
         save_solution_bundle(_bundle(), tmp_path / "b")
+
+
+def _decreasing_time_cases() -> list[tuple[str, np.ndarray]]:
+    i64 = np.iinfo(np.int64)
+    return [
+        ("uint64", np.array([5, 4, 3, 2, 1, 0], dtype=np.uint64)),
+        ("int64_extremes", np.array([0, 1, 2, 3, i64.max, i64.min], dtype=np.int64)),
+    ]
+
+
+def _swap_arrays(root: Path, **replacements: np.ndarray) -> None:
+    """Replace arrays in a saved bundle and re-pin ``arrays_sha256``."""
+    npz = root / "arrays.npz"
+    with np.load(npz, allow_pickle=False) as data:
+        arrays = {name: data[name] for name in data.files}
+    arrays.update(replacements)
+    np.savez(npz, **arrays)
+    path = root / "manifest.json"
+    manifest = json.loads(path.read_text("utf-8"))
+    manifest["arrays_sha256"] = hashlib.sha256(npz.read_bytes()).hexdigest()
+    path.write_text(json.dumps(manifest), "utf-8")
+
+
+@pytest.mark.parametrize(("label", "time"), _decreasing_time_cases())
+def test_save_rejects_decreasing_integer_time(
+    tmp_path: Path, label: str, time: np.ndarray
+) -> None:
+    bundle = _bundle()
+    bundle.arrays["time"] = time
+
+    with pytest.raises(SolutionBundleError, match="strictly increasing"):
+        save_solution_bundle(bundle, tmp_path / label)
+
+
+@pytest.mark.parametrize(("label", "time"), _decreasing_time_cases())
+def test_load_rejects_decreasing_integer_time(
+    tmp_path: Path, label: str, time: np.ndarray
+) -> None:
+    save_solution_bundle(_bundle(), tmp_path / "b")
+    _swap_arrays(tmp_path / "b", time=time)
+
+    with pytest.raises(SolutionBundleError, match="strictly increasing"):
+        load_solution_bundle(tmp_path / "b")
+
+
+def test_save_and_load_reject_decreasing_unsigned_knots(tmp_path: Path) -> None:
+    knots = np.array([3, 2, 1], dtype=np.uint64)
+    bundle = _bundle()
+    bundle.arrays["knots"] = knots
+    with pytest.raises(SolutionBundleError, match="knots.*nondecreasing"):
+        save_solution_bundle(bundle, tmp_path / "s")
+
+    save_solution_bundle(_bundle(), tmp_path / "b")
+    _swap_arrays(tmp_path / "b", knots=knots)
+    with pytest.raises(SolutionBundleError, match="knots.*nondecreasing"):
+        load_solution_bundle(tmp_path / "b")
+
+
+@pytest.mark.parametrize("literal", ["NaN", "Infinity", "-Infinity", "1e999"])
+@pytest.mark.parametrize(
+    "field_path",
+    [
+        ("flight_metrics", "carry_m"),
+        ("integrator", "dt"),
+        ("feasibility_margins", "torque_nm"),
+        ("control", "saturation", "limit_nm"),
+        ("environment", "gravity", 2),
+    ],
+)
+def test_load_rejects_nonfinite_manifest_values(
+    tmp_path: Path, literal: str, field_path: tuple[str | int, ...]
+) -> None:
+    save_solution_bundle(_bundle(), tmp_path / "b")
+    path = tmp_path / "b" / "manifest.json"
+    manifest = json.loads(path.read_text("utf-8"))
+    node = manifest
+    for key in field_path[:-1]:
+        node = node[key]
+    node[field_path[-1]] = "__BAD__"
+    path.write_text(json.dumps(manifest).replace('"__BAD__"', literal), "utf-8")
+
+    with pytest.raises(SolutionBundleError, match="finite"):
+        load_solution_bundle(tmp_path / "b")
+
+
+def test_save_rejects_nonfinite_flight_metric(tmp_path: Path) -> None:
+    bundle = replace(_bundle(), flight_metrics={"carry_m": float("inf")})
+
+    with pytest.raises(SolutionBundleError, match="finite"):
+        save_solution_bundle(bundle, tmp_path / "b")
+    assert not (tmp_path / "b").exists()
