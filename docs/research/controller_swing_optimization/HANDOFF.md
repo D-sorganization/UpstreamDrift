@@ -2241,3 +2241,17 @@ assumed limits, while ideal commands exceeded modeled capacity in 280 samples
 (peak ratio 7.19). Passing reference-level gates does not establish rollout
 feasibility. Stage-level motor torque, work and contact remain unverified;
 this is not an admitted physical baseline or optimized shot.
+
+Actual fixed-gain Option B motor replay of the continuous reference used
+identical saved q0/v0 and v2 spec, zero spline and gains 3/0.3. Its first
+50 ms / 1,600 stages had no modeled registry ROM/speed flags or clipping,
+with joint RMS 0.00484 rad and maximum actual drive 35.07 N m. Right subtalar
+ROM first failed at stage 2007 (about 62.7 ms); through 200 ms, three ROM
+slots failed at 4,393 stages, with no speed flags or clipping and joint RMS
+0.11739 rad. The earlier foot-temporal reference had zero sampled ROM/speed
+flags and no clipping through 200 ms, with joint RMS 0.13974 rad. The new
+run stopped at a guard at 0.552 s, with 17 ROM and four speed slots flagged;
+no stages clipped, and stage drive matched total-command clipping exactly.
+References and feedforward differ, so this is not a single-variable comparison.
+All speed and 16 torque capacities remain assumption-marked; work/slew limits
+and physical feasibility remain unverified.
