@@ -1571,3 +1571,29 @@ fingerprint, no impact/projection/passive shaft, and an unadmitted fitted
 reference prevent physical, first-contact or independent-runtime claims. The
 branch is oversized research, copies codec files already on main, and requires
 reconciliation with current main; it is not a completed Slice 2 or PR.
+
+A predeclared stage-aware 100 ms Option B relinearization preserved the first
+2067 previously clean numerical stages and moved the first modeled ROM/speed
+flag to stage 2087 (about 65.2 ms); 100 ms peak modeled ROM excess changed
+0.2514 to 0.2468 rad and coefficient norm was 9.3341 N m within the 10 N m
+trust. The full extension reproduced the first 100 ms state/command/applied
+stage arrays in the same runtime then hit a guard at 0.509 s with 23 ROM /
+eight speed flags. At the first flagged stage left subtalar q was 0.349158 rad
+versus modeled upper 0.349066 rad and its 5.520 N m command equaled applied
+force. These are sampled numerical stages under partly unverified priors, not
+continuous, physiological, full-swing or power evidence.
+
+Initial-root-velocity provenance was examined using the hash-bound source
+controller target and stored feedback. Source `q_track` initial translation
+gradient norm was 0.02741 m/s, agreeing with source initial feedback v0 to
+5.97e-7 m/s; v2 proxy initial gradient norm was 0.01786 m/s and raw coordinate
+components differed by 0.01012 m/s. Coordinate equivalence across model frames
+is not established. Four pelvis-attached marker secants over four frames
+produced source-target-derived / observation-derived correction norms of
+0.01474 / 0.01819 m/s, with opposite vertical signs; these use fixed proxy
+joint rates and are not directly measured root velocity. Full projected,
+unsaturated computed-torque replays with no impact or root torque gave target /
+observed marker RMS 238.49 / 239.25 mm and 238.02 / 238.78 mm respectively,
+versus unperturbed 234.60 / 235.38 mm. Both worsened drift; they do not
+support adopting the earlier numerically selected 0.1 m/s correction as a
+measured state or establish a v2 baseline.
