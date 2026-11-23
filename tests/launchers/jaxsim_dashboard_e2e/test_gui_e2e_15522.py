@@ -24,13 +24,21 @@ DESKTOP_HEIGHT = 800
 
 
 @pytest.fixture
-def qt():
-    """Yield ``(QtCore, QtTest.QTest, QtWidgets)`` or skip when Qt is absent."""
+def qt(request):
+    """Return ``(QtCore, QtTest.QTest, QtWidgets)`` or skip when Qt is absent.
+
+    The shared session-scoped ``qapp`` fixture (tests/launchers/conftest.py) is
+    requested lazily, only after PyQt6 is known to import. It keeps a strong
+    Python reference to the ``QApplication`` for the whole xdist worker; an
+    unreferenced ``QApplication([])`` is garbage-collected, destroying the C++
+    app and every live widget ("wrapped C/C++ object ... has been deleted",
+    worker crash).
+    """
     try:
         from PyQt6 import QtCore, QtTest, QtWidgets
     except (ImportError, OSError) as exc:
         pytest.skip(f"PyQt6 not loadable: {exc}")
-    QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    request.getfixturevalue("qapp")
     return QtCore, QtTest.QTest, QtWidgets
 
 
@@ -46,6 +54,7 @@ def dashboard(qt):
     yield widget
     widget.close()
     widget.deleteLater()
+    qt[2].QApplication.processEvents()
 
 
 def _state(widget) -> dict[str, tuple[str, bool, str]]:
