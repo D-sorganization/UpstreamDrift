@@ -60,3 +60,36 @@ def test_playback_lookat_uses_the_anchor_for_behind_views_only() -> None:
 def test_playback_lookat_rejects_unknown_views() -> None:
     with pytest.raises(ValueError, match="selfie"):
         pv.playback_lookat("selfie", ANCHOR)
+
+
+def test_layout_settings_are_documented_and_positive() -> None:
+    raw = json.loads(pv.SETTINGS_PATH.read_text(encoding="utf-8"))
+    layout = pv.load_layout_settings()
+    for key in (
+        "render_stretch",
+        "plot_stretch",
+        "hide_editor_docks",
+        "slider_min_width_px",
+    ):
+        assert key in raw["sources"], key
+    assert layout.render_stretch > layout.plot_stretch > 0
+    assert isinstance(layout.hide_editor_docks, bool)
+
+
+@pytest.mark.parametrize(
+    ("patch", "match"),
+    [
+        ({"render_stretch": 0}, "render_stretch"),
+        ({"plot_stretch": -1}, "plot_stretch"),
+        ({"render_stretch": 2.5}, "render_stretch"),
+        ({"hide_editor_docks": "yes"}, "hide_editor_docks"),
+        ({"slider_min_width_px": 0}, "slider_min_width_px"),
+    ],
+)
+def test_layout_settings_reject_bad_values(tmp_path, patch, match) -> None:
+    raw = json.loads(pv.SETTINGS_PATH.read_text(encoding="utf-8"))
+    raw["layout"].update(patch)
+    bad = tmp_path / "view.json"
+    bad.write_text(json.dumps(raw))
+    with pytest.raises(ValueError, match=match):
+        pv.load_layout_settings(bad)
