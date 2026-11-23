@@ -92,6 +92,7 @@ def _draw_panel(
     axes.plot([rx[-1]], [ry[-1]], "s", color=_ROLL_COLOUR, label="rest")
     axes.set_xlabel(f"downrange [{unit}]")
     axes.set_ylabel(f"{ylabel} [{unit}]")
+    axes.margins(y=0.35)  # headroom so the in-axes banner clears the apex
     axes.set_aspect("equal", adjustable="datalim")
     axes.grid(True, alpha=0.3)
 
