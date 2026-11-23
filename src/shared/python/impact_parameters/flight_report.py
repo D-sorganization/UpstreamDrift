@@ -37,7 +37,7 @@ from src.shared.python.physics.swing_ball_flight_pipeline import (
 
 from src.shared.python.physics.impact_model.types import ImpactParameters
 
-from .club_impact import ClubImpact
+from .club_impact import ClubImpact, rigid_gear_head_for
 from .clubhead_series import ClubheadSeries
 from .conditions import ImpactConditions
 from .target_frame import TargetFrame
@@ -163,9 +163,11 @@ def flight_for_impact(
     ``club`` names the club; its class sets the launch-spin validity envelope
     (``None``: the driver envelope). ``club_impact`` and ``impact_offset_m`` as
     in :func:`swing_state_from_series`; the club's COR replaces the pipeline
-    default.
+    default. An off-centre strike's gear spin uses the rigid-contact law with
+    the club's head from :func:`club_impact.rigid_gear_head_for` (#15443).
     """
-    params = None if club_impact is None else ImpactParameters(cor=club_impact.cor)
+    cor = {} if club_impact is None else {"cor": club_impact.cor}
+    params = ImpactParameters(**cor, rigid_gear_head=rigid_gear_head_for(club))
     result = SwingBallFlightPipeline(impact_params=params).run(
         swing_state_from_series(series, index, frame, club_impact, impact_offset_m),
         club=club,

@@ -2278,6 +2278,7 @@
 {"path": "physics/impact_model/__init__.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/impact_model/contact_kinematics.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/impact_model/models.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
+{"path": "physics/impact_model/rigid_gear.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/impact_model/solver.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/impact_model/types.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/impact_model/utils.py", "classification": "ud-only", "package": "physics", "spelling_only": false}

@@ -60,6 +60,51 @@ Native flight tests skip explicitly if the required kernel cannot be imported;
 the qualified local run must execute them. Pure vector and public solver tests
 do not depend on a native flight installation.
 
+## Rigid-Contact Gear Law for the Shot Card
+
+Issue [#15443](https://github.com/D-sorganization/UpstreamDrift/issues/15443)
+adds an opt-in replacement for the heuristic. When `ImpactParameters.rigid_gear_head`
+is set, `ImpactSolverAPI` takes the gear increment from
+`physics/impact_model/rigid_gear.py` instead:
+
+$$\Delta\boldsymbol\omega = \boldsymbol\omega_b(b\,\mathbf n - h\,\mathbf e_h + v\,\mathbf e_u) - \boldsymbol\omega_b(b\,\mathbf n),$$
+
+where $\boldsymbol\omega_b(\mathbf r)$ is the ball spin from the shared
+finite-inertia contact solver (`physics/rigid_contact.py`). The solver uses the
+contact lever $\mathbf r$ from the head CG, the head inertia tensor
+$\mathbf R\,\mathrm{diag}(I_n, I_h, I_u)\,\mathbf R^\top$ in the face frame
+(normal $\mathbf n$, heel $\mathbf e_h = \mathbf u \times \mathbf n$, face-up
+$\mathbf e_u$), CG depth $b$, head mass, COR and friction. The face is flat.
+Only the spin increment is applied; the offset's change to ball speed and
+launch direction is not.
+
+Head values per club are settings (`impact_parameters/club_impact_settings.json`,
+`rigid_gear_heads`). They are the phase-two matched-delivery research
+assumptions, not measured heads. Only the shot card and export flight path
+(`flight_report.flight_for_impact`) opt in. Every other caller keeps the
+legacy term and its historical outputs.
+
+Evidence comes from `tests/unit/physics/test_rigid_gear_effect_15443.py`:
+
+- A centred strike gives zero increment.
+- Toe and heel strikes are antisymmetric, with the legacy sign.
+- A CG in the face plane gives no side spin.
+- A higher yaw inertia gives less gear.
+
+For a measured driver heel strike (h = -3.4 mm, v = +1.4 mm, 51.4 m/s), the law
+gives -143 rpm of side spin against the heuristic's -291 rpm. On the matched
+driver swing, this moves the spin axis from 19.8° to 15.3° (D-plane alone:
+10.3°). On the matched 7-iron (CG depth 10 mm), the gear tilt falls from 1.5° to
+0.15°.
+
+This is a software regression on a reviewed contact law, not an equipment
+calibration: no launch-monitor comparison qualifies these head values. Face
+bulge and roll are the next slice.
+
+```bash
+python3 -m pytest tests/unit/physics/test_rigid_gear_effect_15443.py tests/unit/impact_parameters -o addopts='' -q
+```
+
 ## Limitations
 
 The legacy model adds spin without solving the coupled club/ball rotational
