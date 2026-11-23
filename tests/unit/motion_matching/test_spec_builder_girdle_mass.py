@@ -20,6 +20,9 @@ from src.shared.python.motion_matching.anthropometric_geometry import (
 )
 from src.shared.python.motion_matching.anthropometry import segment_parameters
 from src.shared.python.motion_matching.execution import assets, spec_builder
+from src.shared.python.motion_matching.execution.spec_revisions import (
+    with_current_golfer_model,
+)
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
 
 pytestmark = pytest.mark.unit
@@ -130,7 +133,9 @@ def test_the_command_line_sets_the_rule_and_the_receipt_records_it(
     )
     assert SETTING not in plain["subject"]
     assert SETTING not in plain_receipt["subject"]
-    assert canonical_sha256(plain) == canonical_sha256(_compose())
+    # The CLI writes the composed document on the current golfer model (#15648).
+    current, _ = with_current_golfer_model(_compose(), {})
+    assert canonical_sha256(plain) == canonical_sha256(current)
 
 
 def test_the_command_line_refuses_an_unknown_rule(tmp_path: Path) -> None:

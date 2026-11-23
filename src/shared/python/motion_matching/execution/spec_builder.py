@@ -71,16 +71,14 @@ from src.shared.python.motion_matching.execution.osim_leg_lengths import (
     scale_leg_lengths,
 )
 from src.shared.python.motion_matching.execution.grip_selection import (
-    GripOverrides,
     add_grip_arguments,
-    apply_grip_selection,
-    apply_visual_picks,
     overrides_from_args,
 )
-from src.shared.python.model_appearance.appearance_selection import (
-    resolve_appearance,
+from src.shared.python.motion_matching.execution.spec_revisions import (
+    with_current_golfer_model,
+    with_grip_revision,
+    write_grip_sidecar,
 )
-from src.shared.python.model_appearance.schema import appearance_path_for
 from src.shared.python.motion_matching.hip_calibration import hip_is_mirrored
 from src.shared.python.motion_matching.full_body_spec import (
     BodySpec,
@@ -995,30 +993,6 @@ def compose_anthropometric_document(
     )
 
 
-def _with_grip_revision(
-    built: AnthropometricDocument, overrides: GripOverrides | None
-) -> tuple[dict[str, Any], dict[str, Any]]:
-    """The document and receipt subject after the physical grip picks (GR4).
-
-    Physical picks make a GR2 spec revision (a refit is needed); picture-only
-    picks do not touch the spec (they belong in an appearance sidecar).
-    """
-    if overrides is None or not overrides.has_physical:
-        return built.document, built.subject
-    document, _grip = apply_grip_selection(built.document, overrides)
-    return document, {**built.subject, **document["subject"]}
-
-
-def _write_grip_sidecar(spec_path: Path, overrides: GripOverrides | None) -> None:
-    """Write the picture-only grip picks beside the spec (never physical ones)."""
-    if overrides is None or not overrides.has_visual:
-        return
-    sidecar = resolve_appearance(None, apply_visual_picks({}, overrides.visual_only()))
-    appearance_path_for(spec_path).write_text(
-        json.dumps(sidecar, indent=2) + "\n", encoding="utf-8"
-    )
-
-
 def build_anthropometric_spec(
     *,
     native_path: Path,
@@ -1043,7 +1017,9 @@ def build_anthropometric_spec(
         **kwargs,
     )
     club_markers = get_club_markers(club, kwargs.get("club_markers_path"))
-    document, subject = _with_grip_revision(built, kwargs.get("grip_overrides"))
+    document, subject = with_current_golfer_model(
+        *with_grip_revision(built.document, built.subject, kwargs.get("grip_overrides"))
+    )
     paths = _write_outputs(
         document=document,
         output_dir=output_dir,
@@ -1055,7 +1031,7 @@ def build_anthropometric_spec(
         hub_h=built.hub_height_m,
         notes=built.notes,
     )
-    _write_grip_sidecar(paths[0], kwargs.get("grip_overrides"))
+    write_grip_sidecar(paths[0], kwargs.get("grip_overrides"))
     return paths
 
 
