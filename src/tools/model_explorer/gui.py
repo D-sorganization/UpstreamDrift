@@ -536,7 +536,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
             self, "Load Results", "", "Results (*.npz);;All Files (*)"
         )
         if file_path:
-            self.load_results(file_path)
+            self.load_results(file_path, wait=False)
 
     def scrub_results(self, index: int) -> None:
         """Move the playback cursor; ``ValueError`` if out of range or unloaded."""
@@ -621,6 +621,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         """Release any resources held by the widget. Idempotent."""
         if hasattr(self, "playback_bar") and self.playback_bar is not None:
             self.playback_bar.stop()
+        self.cancel_results_loads()
         self._discard_results()
         # No long-lived background resources today; the visualization
         # widget owns its own GL context which Qt tears down with the
