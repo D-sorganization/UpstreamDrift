@@ -88,5 +88,42 @@ def test_availability_requires_a_playable_session(bar):
     bar.set_session(_session(frames=1))
     bar.set_impact_zone_available(True)
     assert not bar.impact_slow_button.isEnabled()
+    # Availability belongs to the run it was declared for, so a new run must
+    # be re-qualified by the caller.
     bar.set_session(_session())
+    assert not bar.impact_slow_button.isEnabled()
+    bar.set_impact_zone_available(True)
     assert bar.impact_slow_button.isEnabled()
+
+
+def test_replacing_session_resets_availability_and_slow_mode(bar):
+    seen = _record(bar)
+    bar.set_session(_session())
+    bar.set_impact_zone_available(True)
+    bar.impact_slow_button.click()
+    bar.set_session(_session())  # playable -> playable, unqualified run
+    assert not bar.impact_slow_button.isChecked()
+    assert not bar.impact_slow_button.isEnabled()
+    assert seen == [True, False]  # False emitted exactly once
+
+
+def test_clear_then_reload_does_not_resurrect_availability(bar):
+    seen = _record(bar)
+    bar.set_session(_session())
+    bar.set_impact_zone_available(True)
+    bar.set_session(None)
+    bar.set_session(_session())
+    assert not bar.impact_slow_button.isEnabled()
+    assert seen == []  # was never switched on
+
+
+def test_refreshing_same_session_keeps_availability_and_slow_mode(bar):
+    seen = _record(bar)
+    session = _session()
+    bar.set_session(session)
+    bar.set_impact_zone_available(True)
+    bar.impact_slow_button.click()
+    bar.set_session(session)  # refresh, not a new run
+    assert bar.impact_slow_button.isChecked()
+    assert bar.impact_slow_button.isEnabled()
+    assert seen == [True]

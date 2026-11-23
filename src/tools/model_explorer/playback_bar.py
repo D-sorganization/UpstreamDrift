@@ -107,7 +107,15 @@ class PlaybackBar(QWidget):
             button.setChecked(False)  # emits impact_zone_slow_toggled(False)
 
     def set_session(self, session: ResultsSession | None) -> None:
-        """Configure transport controls for ``session``, or reset when ``None``."""
+        """Configure transport controls for ``session``, or reset when ``None``.
+
+        Impact availability is scoped to the loaded run: binding a different
+        session (replacement, or clear then reload) drops it, so the caller
+        must re-qualify the new run via :meth:`set_impact_zone_available`.
+        Re-binding the same session object is a refresh and keeps it.
+        """
+        if session is not self._session:
+            self._impact_available = False
         self._session = session
         self._refresh_impact_button()
         if session is None or session.frame_count < 2:
