@@ -101,6 +101,11 @@ closure translation 0.0647 mm, maximum marker RMS 37.46 mm, peak angular
 finite-difference speed 34.30 rad/s and peak second difference 5,840 rad/s².
 All 29 supplied named bounds held. The endpoints were free, the weld remained
 soft and 18 coordinate bounds were absent. This is not an admitted baseline.
+Two subsequent 300-second restarts from separately saved accepted points also
+timed out. The second ended with objective 7.9881, independently recomputed
+projected-gradient infinity norm 4.989, maximum soft closure translation
+0.00714 mm, maximum marker RMS 36.61 mm and peak sampled angular speed
+33.33 rad/s. Named bounds held; the same physical limitations apply.
 Direct derivation from the embedded calibrated model rejects an unknown pelvis
 offset; relocating its pelvis is a physical model change, not a coordinate-only
 migration. A three-state diagnostic of that changed-model candidate preserved
