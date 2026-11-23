@@ -21,6 +21,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.motion_matching.acceptance import Horizon, evaluate
+from src.shared.python.motion_matching.candidate import MatchedSwingCandidate
 from src.shared.python.motion_matching.full_body_forward_dynamics import (
     ContactAuditResult,
 )
@@ -70,18 +71,30 @@ class CrossEngineReplayConfig:
         if self.tolerance_rad <= 0.0:
             raise ValueError("tolerance_rad must be strictly positive")
 
-    def load_candidate(self) -> Any:
-        """Load candidate as MatchedSwingCandidate, falling back to legacy converter."""
+    def load_candidate(self) -> MatchedSwingCandidate:
+        """Load a canonical candidate or an explicitly detected returned81 archive.
+
+        A manifest always selects canonical validation, even when legacy fields
+        are also present. Integrity and loader errors propagate without legacy
+        conversion. Only manifest-free archives containing time_s and native_state
+        use the numeric-only returned81 converter; other formats are refused.
+        """
         from src.shared.python.motion_matching.candidate_convert import (
             convert_returned81_replay,
         )
-        from src.shared.python.motion_matching.candidate_io import load_candidate
+        from src.shared.python.motion_matching.candidate_io import (
+            MANIFEST_KEY,
+            load_candidate,
+        )
 
         p = Path(self.candidate_path)
-        try:
+        with np.load(p, allow_pickle=False) as data:
+            keys = set(data.files)
+        if MANIFEST_KEY in keys:
             return load_candidate(p)
-        except Exception:
+        if {"time_s", "native_state"} <= keys:
             return convert_returned81_replay(p)
+        raise ValueError(f"Archive {p} is not a recognised candidate")
 
 
 @dataclass(frozen=True)
