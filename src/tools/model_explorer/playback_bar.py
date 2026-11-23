@@ -4,7 +4,9 @@ Provides an interactive playback control surface:
 - Play / Pause button with background timer,
 - Horizontal timeline slider mapped to the results frame count,
 - Current simulation time readout and frame counter,
-- Signal emission on user or automated scrub actions.
+- Signal emission on user or automated scrub actions,
+- An impact-zone slow-motion toggle (#15524) that stays off and disabled
+  until the caller reports the run has an impact window.
 """
 
 from __future__ import annotations
@@ -36,10 +38,13 @@ class PlaybackBar(QWidget):
     """Transport controls for loaded results in the Model Explorer."""
 
     scrubbed = pyqtSignal(int)
+    #: Emitted with the new state whenever impact-zone slow motion changes.
+    impact_zone_slow_toggled = pyqtSignal(bool)
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._session: ResultsSession | None = None
+        self._impact_available = False
         self._build_ui()
 
         # Playback timer parented so it terminates when the bar is destroyed.
@@ -66,14 +71,45 @@ class PlaybackBar(QWidget):
         self.slider.valueChanged.connect(self._on_slider_value_changed)
         layout.addWidget(self.slider, 1)
 
+        self.impact_slow_button = QPushButton("Slow impact")
+        self.impact_slow_button.setObjectName("PlaybackImpactSlowButton")
+        self.impact_slow_button.setCheckable(True)
+        self.impact_slow_button.toggled.connect(self.impact_zone_slow_toggled)
+        layout.addWidget(self.impact_slow_button)
+        self._refresh_impact_button()
+
         self.time_label = QLabel("t = 0.000 s (0/0)")
         self.time_label.setObjectName("PlaybackTimeLabel")
         self.time_label.setMinimumWidth(150)
         layout.addWidget(self.time_label)
 
+    def set_impact_zone_available(self, available: bool) -> None:
+        """Declare whether the loaded run has an impact window to slow down.
+
+        Invariant: the toggle is checked only while it is enabled. Losing
+        availability while it is on unchecks it and emits ``False`` once, so
+        the consumer's clock never stays slow. Idempotent.
+        """
+        self._impact_available = bool(available)
+        self._refresh_impact_button()
+
+    def _refresh_impact_button(self) -> None:
+        playable = self._session is not None and self._session.frame_count >= 2
+        usable = self._impact_available and playable
+        button = self.impact_slow_button
+        button.setEnabled(usable)
+        button.setToolTip(
+            "Slow playback around the ball impact"
+            if usable
+            else "No qualified impact window in this run"
+        )
+        if not usable and button.isChecked():
+            button.setChecked(False)  # emits impact_zone_slow_toggled(False)
+
     def set_session(self, session: ResultsSession | None) -> None:
         """Configure transport controls for ``session``, or reset when ``None``."""
         self._session = session
+        self._refresh_impact_button()
         if session is None or session.frame_count < 2:
             self.stop()
             self.slider.setRange(0, 0)
