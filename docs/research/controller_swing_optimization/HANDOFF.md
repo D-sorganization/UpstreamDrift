@@ -1410,3 +1410,17 @@ translation RMS 0.10534 m, joint RMS 0.01650 rad and peak held ideal effort
 384.28 N m. Existing controller fallback can silently handle solver failure
 or missing support; solve status was not captured for every call, so this is
 not evidence that every QP solved, nor physical or Option B qualification.
+
+Research branch `codex/15493-wrench-audit18` at `4c270bd466` adds an
+opt-in strict contact-wrench audit with caller-selected finite normalized
+slack tolerance. It fails closed on missing support, failed or malformed QP
+solutions and excessive slack; default fallback remains available and is
+counted. Twenty-six focused tests passed with six Drake-dependent tests
+skipped on this host; scoped mypy, Ruff, Black, LaTeX compilation and normal
+headless push hooks passed. In a private v2 probe using the direct Clarabel
+adapter, strict mode stopped at controller call 18 because the adapter
+classified `AlmostSolved` as unsuccessful. The prior 1322-call diagnostic
+therefore must not be described as 1322 successful QP solves. The numeric
+slack tolerance used there was test-only, not a physiological gate. This is
+not a complete baseline or PR; a separate broad-import mypy was still running
+when the checkpoint was recorded.
