@@ -5675,6 +5675,15 @@ measured on its own clock. The 1 kHz rollout lags the reference by a few
 milliseconds, about 6 deg of face rotation at a fixed time. Comparing at a
 common time would mistake that lag for a face error.
 
+The legacy forward-replay passage trigger estimates closest-approach lead
+$\ell=-\mathbf{r}\cdot\mathbf{v}/\lVert\mathbf{v}\rVert^2$ from the face-centre
+offset $\mathbf r$ and its instantaneous velocity $\mathbf v$. It schedules
+only when $0\leq\ell<\Delta t$ and $t+\ell$ is at or after the arming time;
+otherwise it remains armed. This linear local estimate and the 0.15 m gate do
+not verify a bracketed first sphere-to-face contact or establish physical
+feasibility. Reproduce its timing regressions with
+\texttt{python -m pytest -q tests/unit/motion\_matching/test\_impact\_force.py}.
+
 \subsection{Weight Sweep and Selection}
 The sweep re-solves the full-capture IK and the consistency stage on the
 original calibrated runs, with the weight as the only change.

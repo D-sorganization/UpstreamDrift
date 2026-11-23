@@ -219,9 +219,9 @@ class ImpactForce:
         if float(np.linalg.norm(offset)) > PASSAGE_GATE_M or speed2 <= 0.0:
             return self
         lead = -float(offset @ velocity) / speed2
-        if lead >= dt:
+        if lead < 0.0 or lead >= dt or t + lead < float(self.t_start_s):
             return self
-        return replace(self, t_start_s=t + max(lead, 0.0), scheduled=True)
+        return replace(self, t_start_s=t + lead, scheduled=True)
 
     @property
     def t_end_s(self) -> float:
@@ -245,9 +245,10 @@ class ImpactForce:
     def _point_and_normal(self, q: Array, poses: PoseFn) -> tuple[Array, Array]:
         pose = np.asarray(poses(q)[self.frame], dtype=float)
         rotation = pose[:3, :3]
-        return rotation @ self.point_in_frame + pose[
-            :3, 3
-        ], rotation @ self.axis_in_frame
+        return (
+            rotation @ self.point_in_frame + pose[:3, 3],
+            rotation @ self.axis_in_frame,
+        )
 
     def point_jacobian(self, q: Array, poses: PoseFn) -> Array:
         """(3, nv) world Jacobian of the application point (central differences)."""

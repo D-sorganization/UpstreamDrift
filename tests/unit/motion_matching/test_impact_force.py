@@ -237,3 +237,15 @@ def test_passage_trigger_needs_the_head_near_the_ball() -> None:
     assert not out.is_scheduled
     early = plan(t_start=0.40).with_passage(np.array([L, 0.0, 0.0]))
     assert not early.schedule(0.30, 1e-3, q, v, poses).is_scheduled  # not armed
+
+
+def test_passage_trigger_does_not_fire_after_closest_approach() -> None:
+    armed = plan(t_start=0.40).with_passage(np.array([L, 0.0, 0.0]))
+    q, v = np.array([0.0, 0.05]), np.array([0.0, 40.0])
+    assert not armed.schedule(0.41, 1e-3, q, v, poses).is_scheduled
+
+
+def test_passage_trigger_does_not_fire_before_it_is_armed() -> None:
+    armed = plan(t_start=0.40).with_passage(np.array([L, 0.0, 0.0]))
+    q, v = np.array([0.0, -0.01]), np.array([0.0, 40.0])
+    assert not armed.schedule(0.3995, 1e-3, q, v, poses).is_scheduled
