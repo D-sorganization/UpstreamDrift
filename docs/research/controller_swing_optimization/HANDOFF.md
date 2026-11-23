@@ -437,3 +437,13 @@ The flight suite was repeated in a fresh isolated Python 3.12 environment
 after building the current Rust extension and verifying physics revision 2:
 15 passed and one strict expected failure. The stale default revision 0 is
 not a valid acceptance runtime.
+
+A fresh recorder-generated exploratory v2 no-impact run covered the full
+1.322 s horizon and 42,304 integration stages. Typed bundle save/load and
+same-runtime traced forward re-simulation reproduced the recorded stages.
+Recording took 430.68 s; save 6.71 s, load 8.72 s, and verification including
+rerun 569.59 s. The NPZ was 30,188,964 bytes; traced Python peak was 414.6 MiB
+and observed process working set approximately 598 MB. This is not an admitted
+best-match baseline or an independent-runtime replay; the fingerprint is
+partial. It establishes neither actuator torque nor impact/contact or flight
+validation. Bundle research checkpoint: `09e5a6647a`.
