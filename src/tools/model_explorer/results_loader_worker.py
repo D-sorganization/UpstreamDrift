@@ -1,10 +1,5 @@
-"""Load a results archive off the GUI thread (#15150, gap G3).
-
-:class:`ResultsLoader` builds the golfer scene (the slow grip-hand solve) in a
-``QThread``: ``loaded(session)`` lets the GUI thread create the renderer (it
-owns the GL context) and show the first frame; ``failed(message)`` replaces it
-for an unplayable archive and ``finished`` always comes last.
-"""
+"""Build the golfer scene in a ``QThread`` (#15150, G3): ``loaded`` or
+``failed``, then always ``finished``; the GUI thread owns the GL renderer."""
 
 from __future__ import annotations
 
@@ -28,8 +23,7 @@ __all__ = [
 
 logger = get_logger(__name__)
 
-#: What a bad or unplayable archive raises. A raise escaping ``run`` would
-#: abort the application, so these are reported as ``failed`` instead.
+#: Unplayable-archive errors, reported as ``failed`` (escaping ``run`` aborts).
 LOAD_ERRORS: tuple[type[BaseException], ...] = (
     *(OSError, ImportError, RuntimeError, ValueError, TypeError, KeyError),
     *(IndexError, AttributeError, ArithmeticError, VideoSourceError),
@@ -59,10 +53,7 @@ class ResultsLoadSettings:
 
 
 def prepare_results(path: Path, engine: str | None) -> ResultsSession:
-    """Read ``path`` and build its golfer scene (Qt- and GL-free, any thread).
-
-    Raises one of :data:`LOAD_ERRORS` when the archive cannot be shown.
-    """
+    """Read ``path`` and build its scene on any thread; raises LOAD_ERRORS."""
     session = ResultsSession.load(path, engine)
     if session.pose_source is not None:
         try:

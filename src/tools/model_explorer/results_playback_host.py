@@ -116,16 +116,20 @@ class ResultsPlaybackHostMixin:
     def cancel_results_loads(self) -> None:
         """Abandon every background load and wait for its thread (teardown)."""
         self._results_loader = None
-        for loader in list(self._live_loaders()):
-            loader.wait()
-        # Deliver the threads' queued signals now: superseded sessions close.
-        QCoreApplication.sendPostedEvents()
+        loaders = self._live_loaders()
+        for loader in list(loaders):
+            if not sip.isdeleted(loader):  # Qt may have retired it already
+                loader.wait()
+        loaders.clear()
+        QCoreApplication.sendPostedEvents()  # superseded sessions close now
 
     def _deliver(self, handler: Callable[..., None], *args: Any) -> None:
         """Run ``handler`` unless this widget is deleted (PyQt6 would abort)."""
         if isinstance(self, QWidget) and sip.isdeleted(self):
-            for arg in args:  # release a session nobody will show
-                if not isinstance(arg, ResultsLoader) and hasattr(arg, "close"):
+            for arg in args:  # forget the loader, release an unshown session
+                if isinstance(arg, ResultsLoader):
+                    self._live_loaders().discard(arg)
+                elif hasattr(arg, "close"):
                     arg.close()
             return
         handler(*args)
@@ -188,7 +192,8 @@ class ResultsPlaybackHostMixin:
         )
 
     def _on_loader_finished(self, loader: ResultsLoader) -> None:
-        loader.wait()
+        if not sip.isdeleted(loader):  # Qt may have retired it already
+            loader.wait()
         self._live_loaders().discard(loader)  # the worker retires the thread
         if loader is self._results_loader:
             self._results_loader = None

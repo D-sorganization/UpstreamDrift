@@ -1,12 +1,9 @@
-"""Offscreen: a load never freezes the Model Explorer (#15150, G3).
-
-Fast fakes replace the scene build to check the threading
-contract: work off the GUI thread, progress shown, errors reported.
-"""
+"""Offscreen: fake scene builds check a load never freezes the explorer (G3)."""
 
 from __future__ import annotations
 
 import os
+import sys
 import threading
 import time
 from collections.abc import Generator
@@ -19,6 +16,7 @@ import pytest
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 pytest.importorskip("PyQt6", reason="the explorer needs PyQt6")
 
+from PyQt6 import sip  # noqa: E402
 from PyQt6.QtCore import QTimer  # noqa: E402
 from PyQt6.QtWidgets import QApplication, QMessageBox, QWidget  # noqa: E402
 
@@ -154,15 +152,7 @@ def test_load_errors_reach_the_user(explorer: Any) -> None:
 def test_a_load_outliving_its_explorer_never_touches_the_deleted_widget(
     fake_work: list[Any], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """The window can be destroyed mid-load (tab closed, test torn down).
-
-    Its queued signals must not reach the deleted widget (PyQt6 aborts on the
-    resulting RuntimeError) and the thread must outlive it; the run closes.
-    """
-    import sys
-
-    from PyQt6 import sip
-
+    """Destroyed mid-load: no signal reaches the dead widget; the run closes."""
     from src.tools.model_explorer.gui import MainWidget
 
     errors: list[BaseException] = []
@@ -174,3 +164,17 @@ def test_a_load_outliving_its_explorer_never_touches_the_deleted_widget(
     _ticks_while(lambda: worker.live_loader_count() > 0)
     assert errors == []
     assert [s.closed for s in fake_work if isinstance(s, _FakeSession)] == [True]
+
+
+def test_teardown_skips_a_loader_qt_already_deleted(
+    explorer: Any, fake_work: list[Any]
+) -> None:
+    """Teardown and late ``finished`` skip a loader Qt already deleted."""
+    assert explorer.load_results("ok_retired.npz", wait=False) is True
+    loader = next(iter(explorer._live_loaders()))
+    loader.wait()
+    sip.delete(loader)
+    explorer.cancel_results_loads()
+    explorer.cancel_results_loads()  # idempotent
+    QApplication.processEvents()  # the late ``finished`` must not raise
+    assert explorer._live_loaders() == set()
