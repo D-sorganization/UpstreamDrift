@@ -326,3 +326,48 @@ def test_incompatible_retained_source_frame_refused(completed: Any) -> None:
                 context, sort_keys=True, allow_nan=False, separators=(",", ":")
             ),
         )
+
+
+def _saved_settings(head: Any) -> dict[str, Any]:
+    from dataclasses import asdict
+
+    from src.shared.python.physics.ball_launch_conditions import (
+        EnvironmentalConditions,
+    )
+    from src.shared.python.physics.ball_properties import BallProperties
+    from src.shared.python.physics.impact_model.types import ImpactParameters
+
+    return {
+        "environment": {
+            key: (value.tolist() if hasattr(value, "tolist") else value)
+            for key, value in asdict(EnvironmentalConditions()).items()
+        },
+        "ball_assumptions": asdict(BallProperties()),
+        "impact_params": asdict(ImpactParameters(rigid_gear_head=head)),
+        "impact_method": "RIGID_BODY",
+        "flight_settings": {"dt_s": 0.01, "max_time_s": 10.0},
+    }
+
+
+def test_the_rigid_gear_head_is_a_controlled_saved_setting() -> None:
+    """#15443: the head that sets gear spin is recorded, not dropped."""
+    from src.shared.python.physics.impact_model.types import RigidGearHead
+    from src.shared.python.workspace.necromatcher_golf import _settings
+
+    head = RigidGearHead((0.00025, 0.0004, 0.00045), 0.035)
+    saved = _saved_settings(head)
+    kept = _settings(saved)["impact_params"]
+    assert kept["rigid_gear_head"] == saved["impact_params"]["rigid_gear_head"]
+    assert _settings(_saved_settings(None))["impact_params"]["rigid_gear_head"] is None
+
+
+def test_a_non_finite_rigid_gear_head_is_refused() -> None:
+    from src.shared.python.workspace.necromatcher_golf import _settings
+
+    saved = _saved_settings(None)
+    saved["impact_params"]["rigid_gear_head"] = {
+        "inertia_diagonal_kg_m2": [float("nan"), 0.0004, 0.00045],
+        "cg_depth_m": 0.035,
+    }
+    with pytest.raises(ValueError):
+        _settings(saved)
