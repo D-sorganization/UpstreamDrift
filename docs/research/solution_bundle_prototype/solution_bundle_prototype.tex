@@ -1,0 +1,25 @@
+\documentclass{article}
+\usepackage{amsmath}
+\title{Solution Bundle Research Prototype}
+\begin{document}
+\maketitle
+This editable research reference describes an incomplete prototype for issue
+15493, not the engineering design manual or an accepted swing. The model is
+embedded; separately named assets and the runtime are represented by
+caller-asserted hashes. The manifest hash must be retained independently.
+
+The prototype admits finite scalar-coordinate arrays with strictly increasing
+reference and recorded times, cubic clamped spline knots, and one declared
+zero-order-held input per recorded interval. Array dimensions and model,
+asset, runtime and payload identities are checked before use. It rejects an
+impact and requires flight and feasibility results to be unavailable.
+
+For each quantity $x$ the comparison reports the maximum absolute difference
+and checks $|x_{\rm run}-x_{\rm recorded}| \le a_x+r_x|x_{\rm recorded}|$ at
+all supplied samples. The forward runner and its runtime identity are
+caller-supplied: numerical agreement is not proof of independent simulation,
+continuous-time agreement, anatomical feasibility or impact. Recorded
+playback does not run dynamics. Full asset embedding, explicit migrations,
+complete controller and integrator policies and a qualified forward runner
+are required before this prototype could become a solution bundle contract.
+\end{document}
