@@ -3,7 +3,9 @@
 Shows a joint-space run on the shared-appearance golfer: a 3D view rendered
 by :class:`GolferPlayback`, a timeline with play/pause, a camera-view chooser,
 a time-series plot (club-head speed and every joint angle) with a cursor at
-the current time, and an ``Export MP4...`` button. All state lives in the
+the current time, an ``Export MP4...`` button and the export's ball, ball
+flight, shot shape and finish aim line (:mod:`playback_ball_overlay`). All
+state lives in the
 Qt-free :class:`ResultsSession`; this widget only draws it.
 """
 
@@ -18,6 +20,7 @@ import numpy as np
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import (
+    QCheckBox,
     QComboBox,
     QFileDialog,
     QHBoxLayout,
@@ -39,6 +42,13 @@ from src.tools.model_explorer.golfer_playback import (
     TimeSeries,
     results_time_series,
     spec_summary,
+)
+from src.tools.model_explorer.playback_ball_overlay import (
+    SHAPES,
+    BallOverlay,
+    ShotLayout,
+    flight_unavailable_reason,
+    load_overlay_settings,
 )
 from src.tools.model_explorer.playback_clock import SPEEDS, PlaybackClock
 from src.tools.model_explorer.playback_view import (
@@ -123,6 +133,14 @@ class ResultsPlaybackPanel(QWidget):
         self._fit_timer.setSingleShot(True)
         self._fit_timer.setInterval(self._framing.resize_debounce_ms)
         self._fit_timer.timeout.connect(self._fit_render_to_label)
+        self._ball_settings = load_overlay_settings()
+        self.ball_overlay = BallOverlay(
+            pose, self._ball_settings, flight_unavailable_reason()
+        )
+        self._playback.scene_hook = self._decorate_scene
+        self._ball_poll = QTimer(self)
+        self._ball_poll.setInterval(self._ball_settings.poll_interval_ms)
+        self._ball_poll.timeout.connect(self._poll_ball)
         self._build_ui()
         self.view_label.resized.connect(self._fit_timer.start)
         self.show_frame(0)
@@ -156,6 +174,7 @@ class ResultsPlaybackPanel(QWidget):
         self.splitter = splitter
         layout.addWidget(splitter, 1)
         layout.addLayout(self._build_timeline())
+        layout.addLayout(self._build_ball_row())
 
     def showEvent(self, event: Any) -> None:  # noqa: N802 - Qt override
         """First show: split the height by the settings ratio (size hints
@@ -226,6 +245,40 @@ class ResultsPlaybackPanel(QWidget):
         row.addWidget(self.export_button)
         return row
 
+    def _build_ball_row(self) -> QHBoxLayout:
+        row, defaults = QHBoxLayout(), self._ball_settings
+        self.ball_check = QCheckBox("Ball")
+        self.ball_check.setChecked(defaults.show_ball)
+        self.flight_check = QCheckBox("Ball flight")
+        self.aim_check = QCheckBox("Aim line")
+        self.shape_combo = QComboBox()
+        self.shape_combo.addItems(list(SHAPES))
+        self.shape_combo.setCurrentText(defaults.shot_shape)
+        self.shape_combo.setToolTip("Shot shape of a right-handed golfer")
+        reason = self.ball_overlay.flight_reason
+        self.flight_check.setChecked(defaults.show_flight and reason is None)
+        self.aim_check.setChecked(defaults.show_aim_line and reason is None)
+        for box in (self.flight_check, self.aim_check, self.shape_combo):
+            box.setEnabled(reason is None)
+            if reason is not None:
+                box.setToolTip(
+                    defaults.flight_unavailable_tooltip.format(reason=reason)
+                )
+        for box in (self.ball_check, self.flight_check, self.aim_check):
+            box.toggled.connect(self._redraw)
+            row.addWidget(box)
+        if reason is None:
+            self.aim_check.setToolTip("Ends where the ball finishes; needs Ball flight")
+        self.flight_check.toggled.connect(self._sync_aim)
+        self._sync_aim()
+        row.addWidget(QLabel("Shot:"))
+        self.shape_combo.currentTextChanged.connect(self._redraw)
+        row.addWidget(self.shape_combo)
+        self.ball_status = QLabel()
+        self.ball_status.setWordWrap(True)
+        row.addWidget(self.ball_status, 1)
+        return row
+
     def set_heading(self, name: str) -> None:
         """Prefix the panel title with what was opened (e.g. a demo label)."""
         self.title_label.setText(f"{name}: {self.session.title}")
@@ -238,7 +291,83 @@ class ResultsPlaybackPanel(QWidget):
 
     def current_image(self) -> np.ndarray:
         """RGB array of the frame on screen (re-rendered, for audits)."""
-        return np.asarray(self._playback.render(self.current_frame))
+        return self._frame_rgb(self.current_frame)
+
+    def _frame_rgb(self, index: int) -> np.ndarray:
+        """The golfer at ``index`` with the ball, flight and aim line asked for."""
+        rgb = np.asarray(self._playback.render(index))
+        flight, aim = self.flight_check.isChecked(), self.aim_check.isChecked()
+        layout = self._shot_layout()
+        if layout is None or layout.flight is None or not (flight or aim):
+            return rgb
+        depth = self._playback.scene_depth()
+        time_s = float(self._pose.time_s[index])
+        view = self._playback.view
+        paint = self.ball_overlay.paint
+        return paint(rgb, view, time_s, layout, flight=flight, aim=aim, depth_m=depth)
+
+    def _sync_aim(self) -> None:
+        """The aim line ends where the ball finishes: it needs the flight."""
+        flying = self.flight_check.isChecked()
+        self.aim_check.setEnabled(flying)
+        if not flying:
+            self.aim_check.setChecked(False)
+
+    def _shot_layout(self) -> ShotLayout | None:
+        """The finished layout asked for; polls until it is ready.
+
+        The flight (and the shape's club-roll solve) is computed only while
+        Ball flight is checked; otherwise only the ball at address is placed.
+        """
+        flight = self.flight_check.isChecked()
+        layout = self.ball_overlay.layout(self.shape_combo.currentText(), flight)
+        if layout is not None:
+            self.ball_status.setText(layout.note)
+        elif not self._ball_poll.isActive():
+            what = "ball flight" if flight else "ball"
+            self.ball_status.setText(f"Computing {what}...")
+            self._ball_poll.start()
+        return layout
+
+    def _decorate_scene(self, scene: Any, index: int) -> None:
+        if self.ball_check.isChecked():
+            time_s = float(self._pose.time_s[index])
+            self.ball_overlay.decorate_scene(scene, time_s, self._shot_layout())
+
+    def _poll_ball(self) -> None:
+        shape, flight = self.shape_combo.currentText(), self.flight_check.isChecked()
+        if self.ball_overlay.layout(shape, flight) is not None:
+            self._ball_poll.stop()
+            self._redraw()
+
+    def _redraw(self) -> None:
+        self.show_frame(self.current_frame)
+
+    def set_ball_visible(self, visible: bool) -> None:
+        """Show or hide the ball at address."""
+        self.ball_check.setChecked(bool(visible))
+
+    def set_ball_flight_visible(self, visible: bool) -> None:
+        """Show or hide the flight trace; stays off when the model cannot run."""
+        self.flight_check.setChecked(bool(visible) and self.flight_check.isEnabled())
+
+    def set_aim_line_visible(self, visible: bool) -> None:
+        """Show or hide the finish aim line; stays off without the flight."""
+        self.aim_check.setChecked(bool(visible) and self.aim_check.isEnabled())
+
+    def set_shot_shape(self, shape: str) -> None:
+        """Choose the shot shape (``straight``, ``draw`` or ``fade``)."""
+        if shape not in SHAPES:
+            raise ValueError(f"shot shape must be one of {SHAPES}, got {shape!r}")
+        self.shape_combo.setCurrentText(shape)
+
+    def wait_for_shot(self, timeout_s: float) -> ShotLayout:
+        """Block until the layout asked for is computed, then redraw (audits)."""
+        shape, flight = self.shape_combo.currentText(), self.flight_check.isChecked()
+        future = self.ball_overlay.request(shape, flight)
+        future.exception(timeout=timeout_s)
+        self._poll_ball()
+        return future.result()
 
     def show_frame(self, index: int) -> None:
         """Scrub to ``index``: pose the golfer, move the plot cursor."""
@@ -247,7 +376,7 @@ class ResultsPlaybackPanel(QWidget):
             self.slider.blockSignals(True)
             self.slider.setValue(index)
             self.slider.blockSignals(False)
-        rgb = np.ascontiguousarray(self._playback.render(index))
+        rgb = np.ascontiguousarray(self._frame_rgb(index))
         height, width, _ = rgb.shape
         image = QImage(rgb.data, width, height, 3 * width, QImage.Format.Format_RGB888)
         self._pixmap = QPixmap.fromImage(image.copy())
@@ -364,3 +493,6 @@ class ResultsPlaybackPanel(QWidget):
     def stop(self) -> None:
         """Stop playback (called before the panel is discarded)."""
         self._timer.stop()
+        self._ball_poll.stop()
+        self._playback.scene_hook = None
+        self.ball_overlay.close()
