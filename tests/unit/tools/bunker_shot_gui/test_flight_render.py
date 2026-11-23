@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 
 import pytest
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 
 from src.tools.bunker_shot_gui.flight import BunkerFlight
@@ -78,7 +79,14 @@ def test_readout_states_carry_with_units_and_assumption(flight: BunkerFlight) ->
     assert "no flight" in flight_readout(None, FlightUnits.METRES, reason="refused")
 
 
-def test_panels_are_spaced_so_titles_clear_the_x_label() -> None:
-    """The overhead title must not overlap the side view's x-axis label."""
-    fig = flight_figure(None, units=FlightUnits.METRES, reason="x")
-    assert fig.subplotpars.hspace >= 0.45
+def test_narrow_canvas_keeps_labels_on_screen_and_banner_off_legend(
+    flight: BunkerFlight,
+) -> None:
+    figure = flight_figure(flight, figure=Figure(figsize=(3.9, 6.0), dpi=100))
+    renderer = FigureCanvasAgg(figure).get_renderer()
+    figure.draw(renderer)
+    for axes in figure.axes:
+        assert axes.yaxis.label.get_window_extent(renderer).x0 >= 0
+        for text in axes.texts:
+            legend = figure.legends[0].get_window_extent(renderer)
+            assert not text.get_window_extent(renderer).overlaps(legend)

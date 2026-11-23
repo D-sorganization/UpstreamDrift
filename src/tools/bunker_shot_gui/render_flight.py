@@ -15,7 +15,9 @@ The assumption travels with the picture
 
 The launch is uncalibrated and the rollout is a flat 10 ft stimp green with
 simplified bounce and spin. :attr:`BunkerFlight.assumption` is stamped
-*inside* the axes so a cropped screenshot cannot shed it.
+*inside* the axes so a cropped screenshot cannot shed it. It wraps to the
+figure width, and the legend lives below the plots, so a narrow (phone-width)
+canvas shows neither a clipped label nor a banner over the legend.
 """
 
 from __future__ import annotations
@@ -63,6 +65,7 @@ def _banner(axes: Axes, text: str) -> None:
         ha="left",
         va="top",
         fontsize=7,
+        wrap=True,
         color="white",
         bbox={"facecolor": _BANNER_COLOUR, "edgecolor": "none", "boxstyle": "round"},
         zorder=10,
@@ -115,7 +118,9 @@ def flight_figure(
     fig.clear()
     side = fig.add_subplot(2, 1, 1)
     top = fig.add_subplot(2, 1, 2)
-    fig.subplots_adjust(hspace=0.5)
+    # Fixed margins keep the y labels on-canvas and leave a strip under the
+    # plots for the figure legend, so a narrow window never clips or overlaps.
+    fig.subplots_adjust(left=0.2, right=0.96, top=0.93, bottom=0.14, hspace=0.6)
     side.set_title("Ball flight (side)", fontsize=9)
     top.set_title("Landing and rollout (overhead)", fontsize=9)
     if flight is None:
@@ -127,7 +132,15 @@ def flight_figure(
     k, unit = units.scale, units.symbol
     _draw_panel(side, flight, k, unit, vertical=2, ylabel="height")
     _draw_panel(top, flight, k, unit, vertical=1, ylabel="offline")
-    side.legend(loc="upper right", fontsize=7)
+    handles, labels = side.get_legend_handles_labels()
+    fig.legend(
+        handles,
+        labels,
+        loc="lower center",
+        ncol=len(labels),
+        fontsize=7,
+        frameon=False,
+    )
     _banner(side, flight.assumption)
     _banner(top, flight.assumption)
     return fig
