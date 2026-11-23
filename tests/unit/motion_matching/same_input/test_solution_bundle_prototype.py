@@ -696,6 +696,41 @@ def test_off_grid_recorded_force_replays_actual_impact_state(tmp_path):
     assert verify_evidenced_forward(evidence, tolerances).passed
     from io import BytesIO
 
+    from src.shared.python.motion_matching.same_input.evidenced_solution_numeric import (
+        save_numeric_solution,
+        load_numeric_solution,
+        verify_numeric_forward,
+    )
+
+    numeric_path = tmp_path / "numeric.json"
+    numeric_hash = save_numeric_solution(numeric_path, bundle, recorder)
+    numeric_kwargs = {**kwargs, "expected_manifest_sha256": numeric_hash}
+    numeric = load_numeric_solution(numeric_path, **numeric_kwargs)
+    assert verify_numeric_forward(numeric, tolerances).passed
+    numeric_stage = tmp_path / "numeric.stages.npz"
+    numeric_stage.write_bytes(numeric_stage.read_bytes() + b"tamper")
+    with pytest.raises(ValueError, match="hash"):
+        load_numeric_solution(numeric_path, **numeric_kwargs)
+    numeric_stage.write_bytes(numeric.stage_npz)
+    with np.load(BytesIO(numeric.stage_npz), allow_pickle=False) as source:
+        typed_arrays = {key: source[key] for key in source.files}
+    typed_arrays["q"][1, 0] += 1
+    changed_stage = BytesIO()
+    np.savez_compressed(changed_stage, **typed_arrays)
+    numeric_stage.write_bytes(changed_stage.getvalue())
+    numeric_manifest = json.loads(numeric_path.read_text(encoding="utf-8"))
+    numeric_manifest["stage_archive_sha256"] = hashlib.sha256(
+        changed_stage.getvalue()
+    ).hexdigest()
+    changed_manifest = json.dumps(
+        numeric_manifest, sort_keys=True, separators=(",", ":")
+    ).encode()
+    numeric_path.write_bytes(changed_manifest)
+    numeric_kwargs["expected_manifest_sha256"] = hashlib.sha256(
+        changed_manifest
+    ).hexdigest()
+    changed = load_numeric_solution(numeric_path, **numeric_kwargs)
+    assert not verify_numeric_forward(changed, tolerances).passed
     original = json.loads(evidence_path.read_text(encoding="utf-8"))
     stage_path = tmp_path / "evidence.stages.npz"
     original_stage = stage_path.read_bytes()
