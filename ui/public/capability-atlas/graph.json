@@ -1082,6 +1082,20 @@
       "id": "tools.model_explorer.results_playback_ball"
     },
     {
+      "feature_id": "tools.model_explorer.run_simulation_dock",
+      "title": "Model Explorer Run Simulation dock",
+      "status": "gap",
+      "pyqt": "src/tools/model_explorer/run_dock.py",
+      "api": null,
+      "web": null,
+      "issue": 15150,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "Tools > Run Simulation... opens a dock that runs a pinned sim_run case in a background QThread through the same service the MCP tools call (engines_for_describe, run_agent_capability), shows a bounded summary, and hands a playable result archive to the Results Playback loader. No web equivalent yet; tracked under #15150.",
+      "id": "tools.model_explorer.run_simulation_dock"
+    },
+    {
       "feature_id": "tools.motion_matching",
       "title": "Motion Matching tour-average and club-only Excel matching",
       "status": "parity",
@@ -3595,7 +3609,7 @@
   "inputs": {
     "src/config/models.yaml": "89b2c78be5ec8c7093af2a9687366ae2b7a6fd1e58bf2a87a43b10df9295ff99",
     "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
-    "src/config/feature_parity.json": "21691e23a986d37275f305cd8d44f2377c2d6367b3f074839baf4eaae28779e6",
+    "src/config/feature_parity.json": "d40d22730db69ab7cffbb4bb43695f808cfd521537f3f15152a4915d5067d006",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
