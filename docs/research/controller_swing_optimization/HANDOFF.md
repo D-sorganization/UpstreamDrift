@@ -26,13 +26,15 @@ modified. Preserve private inputs and their identifying provenance outside git.
 - [ ] **Slice 2:** Versioned JSON and NPZ bundle, complete state and model
   identity, strict validation and migration, distinct playback and forward
   resimulation, and per-quantity replay tolerances. The separate research
-  branch `codex/15493-solution-bundle-prototype` at `02402a9be2` adds a
-  restricted research-only JSON/NPZ codec and a real two-step no-impact
-  MuJoCo replay with ideal clipped input; 38 combined tests passed. It rejects
+  branch `codex/15493-solution-bundle-prototype` at `a990c524a8` adds a
+  restricted research-only JSON/NPZ codec and a real two-hold no-impact
+  MuJoCo replay with ideal clipped input; 47 combined tests passed. It rejects
   unsupported policies, assets and impact, and its runtime fingerprint is
   partial while Git identity remains caller-asserted. Embedded assets,
-  post-actuator evidence, full policy and schema migration remain missing;
-  the oversized research branch is not a compliant or complete Slice 2 PR.
+  post-actuator evidence and full policy remain missing. A limited explicit
+  research-v2 to v3 fixed-grid one-hold migration is available; production
+  schema migration remains missing. The oversized research branch is not a
+  compliant or complete Slice 2 PR.
 - [ ] **Slice 3:** Fixed-gain tracking and bounded smooth feedforward spline;
   trust radius, sensitivity audit and total-applied-torque, ROM, speed,
   tracking, slew and work feasibility checks. A separate research primitive
@@ -302,6 +304,13 @@ to 3.083 rad RMS and peak unsaturated ideal drive reached 963.95 N m. Matched
 eight- and 16-substep states differed by at most 5.34e-7 rad at 0.4 s and
 1.176 rad at 0.6 s. Numerical resolution changes this setup's failure mode;
 the higher-resolution result is not an admitted controller.
+An additional 700 ms sensitivity changed the feedback hold from 1 ms to
+0.125 ms, using recorded RK4 substep states as the reference and the same
+3/0.3 gains. Zero residual reproduced recorded grid states bit-for-bit; a
+0.2 N m pulse gave 0.747 rad RMS deviation versus 0.751 for the earlier
+1 ms hold, with the same 24 ROM, ten speed-prior and eleven held-effort model
+threshold exceedances out of 41 slots. The continuous pulse was sampled at
+different times in the two cases. Neither result establishes feasibility.
 When the fixed-PD reference was changed to the recorded dynamic states that
 produced the frozen feedforward, the zero-residual rollout reproduced those
 states bit-for-bit over 1.322 s. This isolates a reference/feedforward mismatch
@@ -340,6 +349,14 @@ signed work was -5.40 versus 151.50 J. These are numerical quadratures, not
 measured actuator or clinical work. Work, effort and slew limits were not
 available; the clipped run remains indeterminate even though its modeled
 torque caps were met.
+A predeclared 200 ms three-point B-spline sensitivity tested one coefficient
+at 0 and ±1 N m, within a unit scaled coefficient trust ball, with the same
+state, reference, gains and total-command clipping. All three completed
+6,400 accepted stages and met the declared sampled drive caps, but each
+exceeded 17 of 41 modeled ROM slots and three generalized-speed priors.
+Tracking RMS was 0.4448--0.4450 rad. None is admissible; three samples are
+not evidence that no feasible improvement exists. Work was evaluated only
+as ideal-input ZOH quadrature and anatomical mapping remains incomplete.
 A matched 32-substep run completed 0.7 s with approximately the same 1.431 rad
 tracking RMS as the 16-substep run. Their maximum coordinate difference grew
 from 1.13e-7 rad at 0.4 s to 0.109 rad at 0.7 s; resolution convergence is
