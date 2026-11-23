@@ -162,6 +162,8 @@ class ResultsSession:
         self._current_frame = 0
         self._playback: Any | None = None
         self._scene_xml: str | None = None
+        #: behind-view anchor from :meth:`prepare_scene` (``None``: preset view)
+        self._behind_anchor: tuple[float, float, float] | None = None
 
     @classmethod
     def load(cls, path: str | Path, engine: str | None = None) -> ResultsSession:
@@ -232,7 +234,7 @@ class ResultsSession:
         self._current_frame = index
 
     def prepare_scene(self) -> None:
-        """Build the golfer scene now (slow, GL-free: fine on a worker thread).
+        """Build the golfer scene and behind-view anchor now (slow, GL-free).
 
         :meth:`playback` then only creates the renderer. ``ValueError`` for a
         marker archive.
@@ -245,7 +247,10 @@ class ResultsSession:
                 build_golfer_scene_xml,
             )
 
+            from src.tools.model_explorer.playback_view import behind_anchor_for
+
             self._scene_xml = build_golfer_scene_xml(pose)
+            self._behind_anchor = behind_anchor_for(pose)
 
     def playback(self) -> Any:
         """The shared :class:`GolferPlayback` of a joint-space run (lazy).
@@ -259,6 +264,7 @@ class ResultsSession:
             from src.tools.model_explorer.golfer_playback import GolferPlayback
 
             self._playback = GolferPlayback(pose, scene_xml=self._scene_xml)
+            self._playback.behind_anchor_m = self._behind_anchor
         return self._playback
 
     def export_video(self, out_path: str | Path, *, stride: int = 5) -> Path:

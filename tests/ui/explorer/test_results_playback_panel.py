@@ -316,6 +316,8 @@ def test_playback_opens_behind_the_golfer_and_follows_the_anchor(
     panel = explorer.playback_panel
     default = load_view_settings().default_view
     assert panel.view_combo.currentText() == default == panel._playback.view
+    # the background load placed the camera midway between ball and feet
+    assert panel._playback.behind_anchor_m is not None
     before = panel.current_image()
     panel._playback.behind_anchor_m = (0.6, -0.4, 0.0)
     assert panel._playback.behind_anchor_m == (0.6, -0.4, 0.0)
