@@ -14,3 +14,8 @@ qualify motion between samples, actuator torque, contact, or physical limits.
 The calculation reference is [target_tracking_audit.tex](target_tracking_audit.tex).
 Run `python -m pytest -q tests/unit/motion_matching/same_input/test_bundle_cli.py`
 with the repository headless settings to check the report contract.
+
+The fixed-step rollout rounds its duration to the nearest 1 ms. When that
+rounding places the final state at most half a step beyond the source target,
+the receipt samples the controller's clamped endpoint and reports the
+clamped duration separately. Longer uncovered spans remain invalid.

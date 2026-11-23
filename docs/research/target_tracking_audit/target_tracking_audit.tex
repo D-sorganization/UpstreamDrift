@@ -12,7 +12,10 @@ For $N$ samples, the reported values are
 \]
 Coordinates keep their native units and are reported in model order; no mixed
 translation--rotation aggregate is defined. Only finite, increasing and
-covered time axes are accepted. The record digest must agree with the bundle
+covered time axes are accepted, except that the final state may exceed the
+reference endpoint by at most half the fixed 1 ms step, when rounding requires
+it. The controller clamps that target to its last value; the receipt reports
+the clamped duration. The record digest must agree with the bundle
 provenance. This comparison does not establish data provenance, correct model
 migration, continuity between samples, actuator feasibility or impact.
 \end{document}

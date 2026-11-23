@@ -184,3 +184,25 @@ def test_padded_track_rejects_a_mismatched_width() -> None:
     spec = SEED_SPEC.read_bytes()
     with pytest.raises(ValueError, match="q_track"):
         padded_track(spec, np.ones((3, 5)))
+
+
+def test_target_tracking_uses_clamped_endpoint_for_rounded_last_step() -> None:
+    times = np.array([7.0, 8.81388888888889])
+    target = np.array([[0.0], [2.0]])
+    summary = target_tracking_summary(
+        times,
+        target,
+        np.array([0.0, 1.814]),
+        np.array([[0.0], [2.5]]),
+        max_endpoint_extension_s=0.0005,
+    )
+    assert summary["max_abs_by_coordinate"] == pytest.approx([0.5])
+    assert summary["rms_by_coordinate"] == pytest.approx([np.sqrt(0.125)])
+    with pytest.raises(ValueError):
+        target_tracking_summary(
+            times,
+            target,
+            np.array([0.0, 1.815]),
+            np.zeros((2, 1)),
+            max_endpoint_extension_s=0.0005,
+        )

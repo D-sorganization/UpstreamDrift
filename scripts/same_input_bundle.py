@@ -46,6 +46,7 @@ from src.shared.python.motion_matching.club_shaft_chain import (
 )
 from src.shared.python.motion_matching.execution.spec_builder import with_shaft_model
 from src.shared.python.motion_matching.impact_force import ImpactForce
+from src.shared.python.motion_matching.pipeline.constants import DT_S
 from src.shared.python.motion_matching.same_input import (
     ALL_ENGINES,
     InputBundle,
@@ -79,10 +80,13 @@ def target_tracking_summary(
     q_track: np.ndarray,
     rollout_time: np.ndarray,
     rollout_q: np.ndarray,
+    *,
+    max_endpoint_extension_s: float = 0.0,
 ) -> dict:
     """Compare sampled states with the actual linear controller position target.
 
     Coordinates retain their native units; no mixed-unit aggregate is formed.
+    A short permitted final extension uses the controller's endpoint clamp.
     This measures sampled tracking error, not physiological feasibility.
     """
     from src.shared.python.motion_matching.impact_force import sample_rate_table
@@ -109,7 +113,9 @@ def target_tracking_summary(
         source_time = source_time - source_time[0]
     if not np.isfinite(source_time).all():
         raise ValueError("target time normalization overflowed")
-    if time_s[0] < 0 or time_s[-1] > source_time[-1]:
+    if not np.isfinite(max_endpoint_extension_s) or max_endpoint_extension_s < 0:
+        raise ValueError("endpoint extension must be finite and nonnegative")
+    if time_s[0] < 0 or time_s[-1] - source_time[-1] > max_endpoint_extension_s:
         raise ValueError("rollout times must lie within the target span")
     sampled = np.array(
         [sample_rate_table(source_time, target, t, None) for t in time_s]
@@ -122,6 +128,7 @@ def target_tracking_summary(
     scale = np.where(magnitude == 0.0, 1.0, magnitude)
     return {
         "reference": "controller_position_target",
+        "endpoint_clamped_duration_s": max(0.0, float(time_s[-1] - source_time[-1])),
         "rms_by_coordinate": (
             scale * np.sqrt(np.mean((error / scale) ** 2, axis=0))
         ).tolist(),
@@ -308,7 +315,13 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
         "full_horizon": score.summary(),
         "target_tracking": {
             "coordinate_order": bundle.coordinate_order,
-            **target_tracking_summary(times, target, rollout.time_s, rollout.q),
+            **target_tracking_summary(
+                times,
+                target,
+                rollout.time_s,
+                rollout.q,
+                max_endpoint_extension_s=DT_S / 2,
+            ),
         },
         "max_effort_difference_nm": float(
             np.abs(rollout.efforts - bundle.replay_efforts()).max()
