@@ -2293,3 +2293,18 @@ eight-substep trajectory differed by up to 0.0376 in q. Thus the early event
 timing and other earlier eight-substep comparisons are not established as
 numerically converged; recheck conclusions at a suitable step size. This
 local 120 ms comparison does not prove convergence over the full trajectory.
+
+For the corrected continuous-reference Option B motor trajectory, a local
+16-versus-32 RK4-substep comparison at the same 1 ms hold agreed over 120 ms:
+maximum matched-hold q/v differences were 1.01e-7 / 8.86e-5 in native units,
+and command/applied-drive difference 2.67e-5 N m. Both had zero modeled
+registry ROM/speed flags for 100 ms, no clipping, and the same first modeled
+ROM flag at 100.3125 ms. This is local numerical agreement, not continuous,
+full-swing or physiological validation.
+
+Hypothetical contact-parameter perturbations did not all converge: the -10%
+damping case changed from a modeled breach at 81 ms with 16 substeps to no
+breach over 120 ms with 32; the -10% stiffness case was also unstable across
+refinements. Do not infer measured force, parameter robustness or contact
+dominance from those variants. The nominal 16/32 ideal-controller agreement
+is only established over 120 ms; the pinned baseline settings were unchanged.
