@@ -26,13 +26,15 @@ modified. Preserve private inputs and their identifying provenance outside git.
 - [ ] **Slice 2:** Versioned JSON and NPZ bundle, complete state and model
   identity, strict validation and migration, distinct playback and forward
   resimulation, and per-quantity replay tolerances. The separate research
-  branch `codex/15493-solution-bundle-prototype` at `a990c524a8` adds a
-  restricted research-only JSON/NPZ codec and a real two-hold no-impact
-  MuJoCo replay with ideal clipped input; 47 combined tests passed. It rejects
-  unsupported policies, assets and impact, and its runtime fingerprint is
-  partial while Git identity remains caller-asserted. Embedded assets,
+  branch `codex/15493-solution-bundle-prototype` at `d42adfc3f8` adds a
+  restricted research-only JSON/NPZ codec and a real two-hold MuJoCo replay
+  with ideal clipped input. It can replay an unverified prescribed latched
+  force at an off-grid event and compare the actual split state; 100 focused
+  tests passed. This is not contact detection and uses the legacy impact
+  partition. It rejects unsupported policies and assets; its runtime
+  fingerprint is partial while Git identity remains caller-asserted. Embedded assets,
   post-actuator evidence and full policy remain missing. A limited explicit
-  research-v2 to v3 fixed-grid one-hold migration is available; production
+  research-v2/v3 to v4 no-impact fixed-grid migration is available; production
   schema migration remains missing. The oversized research branch is not a
   compliant or complete Slice 2 PR.
 - [ ] **Slice 3:** Fixed-gain tracking and bounded smooth feedforward spline;
@@ -355,10 +357,18 @@ relaxing it for acceptance.
 The registry's cited knee capacity derives from an isometric group parameter
 in [Anderson et al.](https://stacks.cdc.gov/view/cdc/188754/cdc_188754_DS1.pdf),
 whose model explicitly varies strength with joint angle and velocity. The
-diagnostic included eccentric modeled motion outside the study's reported
-eccentric test speed, so the static cap is a declared model gate, not a
-validated subject-specific dynamic limit. Preserve it until a justified policy
-and mapping are available.
+clipped, divergent diagnostic included eccentric modeled motion beyond the
+study's reported eccentric test speed. The corresponding over-cap hold-start
+speeds in the unclipped nominal diagnostic were within that speed interval,
+but the subject and posture are not validated matches. The static cap is a
+declared model gate, not a validated subject-specific dynamic limit. Preserve
+it until a justified policy and mapping are available.
+As a sensitivity only, evaluating the published population-mean active
+angle/velocity model at the 13 unclipped over-cap hold-start states gave
+115.88--121.39 N m; 12 ideal commands exceeded those point estimates. The
+study's seated, right-leg cohort and population parameters are not validated
+against this modeled left-leg stance; passive torque, individual uncertainty
+and between-stage behavior remain unverified. This did not alter the gate.
 Bit-identical replays of both 200 ms cases recovered pre-projection hold-end
 velocities. Under left-ZOH ideal input and linear velocity interpolation,
 unclipped versus clipped modeled positive work was 32.48 versus 327.54 J;
