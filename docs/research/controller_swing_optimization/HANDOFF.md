@@ -1340,3 +1340,25 @@ Upstream #15564 is now merged at `675d34feec3436e003e2363cd5ced6757dfa80e6`.
 Its limited bundle-schema scope alone does not establish the required complete
 Solution Bundle, migration or independent forward replay; check current main
 and remaining requirements before reuse.
+
+A predeclared nonlinear backtracking check along the 500 ms 41-coordinate
+Option B surrogate direction used fractions 0, 0.125, 0.25 and 0.5, fixed
+gains and the same assumption-marked motor caps. Zero and 0.125 completed
+500 ms but had peak modeled ROM excess 8.062 / 8.032 rad and speed excess
+92.00 / 129.91 rad/s; 0.25 and 0.5 hit guards at 0.349 / 0.467 s. On the
+common 349 ms prefix the one-sided linear prediction's max q errors were
+0.0395 / 0.5364 / 1.4464 rad for nonzero fractions, with max velocity errors
+1.22 / 19.48 / 48.58 rad/s. This local sensitivity is severely infeasible
+and shows the surrogate is unreliable over these steps; it does not prove
+there is no feasible improvement.
+
+An alternative root diagnostic used a weighted least-squares inverse of the
+existing compliant-contact/weld affine dynamics, actuated joint torques only
+and no direct root torque. At 200 ms, strong numerical root weight 10,000
+reduced translation RMS to 4.34 mm and rotation RMS to 0.00118 rad, versus
+8.74 mm / 0.00953 rad for the prior planted regulator, but peak ideal held
+effort rose to 504 N m and two modeled ROM flags remained. Its full-horizon
+extension hit a numerical guard at 0.805 s with partial joint RMS 0.212 rad,
+peak ideal held effort 64,437 N m and 11 modeled ROM flags. This is an
+unconstrained, projected computed-torque diagnostic, not Option B, physical
+feasibility or a baseline improvement. Private receipts remain outside git.
