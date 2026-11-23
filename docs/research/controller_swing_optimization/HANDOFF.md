@@ -836,3 +836,21 @@ common 250 ms prefix, tracking RMS against the original reference was
 shift; all had 20 modeled ROM flags, five speed flags and 1632 clipped stages
 of 8000. This single-direction diagnostic establishes neither meaningful
 feasibility nor power improvement and does not qualify the reference.
+
+Research branch `codex/15493-derived-velocity-audit` at `c4324734b5` adds
+per-coordinate controller-derived velocity-target errors to the position audit.
+The pinned source record contains `q_track` and `track_time_s`, not a stored
+velocity target; the implementation reuses the controller's `reference_rates`
+and split-aware sampling, including the bounded fixed-step endpoint clamp.
+It labels the rates as derived and preserves native units and provenance hash
+checks. Twenty-five focused tests, Ruff, Black, scoped mypy, LaTeX compilation
+and normal headless push hooks passed. The branch adds 131 changed lines past
+endpoint-fix, approximately 382 against its original main; refresh before
+review. It is partial audit infrastructure, not a complete Slice 1 or PR.
+
+On stored source-v1 feedback states, the derived target comparison found
+RFInput velocity RMS 4.87718 rad/s and maximum absolute residual 67.13571
+rad/s at 1.326 s, about 3 ms after the recorded impact split. Sampled RMS was
+0.08242 rad/s pre-impact and 9.36654 rad/s post-impact. This compares stored
+simulation with controller-derived finite-difference rates, not measured
+subject velocity, independent forward replay, or the committed-v2 baseline.
