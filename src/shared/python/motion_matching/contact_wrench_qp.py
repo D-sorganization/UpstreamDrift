@@ -86,8 +86,14 @@ class WrenchQPConfig:
     root_gain: float = 0.0
     """Fraction of the root PD toward the reference added to ``a_r^0``."""
     root_omega_rad_s: float = 12.0
+    max_allowed_slack: float | None = None
+    """Opt-in audit threshold in body weights; None preserves fallback behavior."""
 
     def __post_init__(self) -> None:
+        if self.max_allowed_slack is not None and not (
+            math.isfinite(self.max_allowed_slack) and self.max_allowed_slack >= 0
+        ):
+            raise ValueError("max_allowed_slack must be finite and nonnegative")
         if self.friction is not None and not (
             math.isfinite(self.friction) and self.friction > 0
         ):
@@ -411,6 +417,8 @@ class ContactWrenchTracker:
         self.last: WrenchQPSolution | None = None
         self.activations = 0
         self.calls = 0
+        self.missing_support = 0
+        self.unqualified_solves = 0
         self.max_slack = 0.0
         self.history: list[tuple[float, float, float]] = []
         """``(t, max slack in body weights, |a* - a_baseline|)`` of each solve."""
@@ -451,12 +459,45 @@ class ContactWrenchTracker:
         problem = self._problem(q, v, wanted, accel0, q_t, v_t, a_t)
         self.calls += 1
         if problem is None:
+            self.last = None
+            self.missing_support += 1
+            if cfg.max_allowed_slack is not None:
+                raise RuntimeError("contact wrench support unavailable")
             return tau_base
         solution = solve_wrench_qp(problem, cfg)
         self.last = solution
-        self.max_slack = max(self.max_slack, solution.max_slack)
-        if not solution.success:
+        finite = all(
+            np.isfinite(value).all()
+            for value in (
+                solution.a_joint,
+                solution.a_root,
+                solution.wrenches,
+                solution.slack,
+            )
+        )
+        valid_shape = (
+            solution.a_joint.shape == problem.a_target.shape
+            and solution.a_root.shape == problem.a_root_nominal.shape
+            and solution.wrenches.shape == problem.wrenches_nominal.shape
+            and solution.slack.shape == (CONE_ROWS_PER_FOOT * len(problem.touching),)
+        )
+        if (
+            not solution.success
+            or not finite
+            or not valid_shape
+            or np.any(solution.slack < -1e-8)
+        ):
+            self.unqualified_solves += 1
+            if cfg.max_allowed_slack is not None:
+                raise RuntimeError("contact wrench solve failed or was nonfinite")
             return tau_base
+        self.max_slack = max(self.max_slack, solution.max_slack)
+        if (
+            cfg.max_allowed_slack is not None
+            and solution.max_slack > cfg.max_allowed_slack
+        ):
+            self.unqualified_solves += 1
+            raise RuntimeError("contact wrench slack exceeded audit threshold")
         self.history.append(
             (
                 float(t),

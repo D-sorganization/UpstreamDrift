@@ -1,0 +1,33 @@
+\documentclass{article}
+\usepackage{amsmath}
+\title{Contact-Wrench Audit Mode}
+\author{UpstreamDrift Research}
+\date{}
+\begin{document}
+\maketitle
+\section{Scope and Conventions}
+The existing contact-wrench tracking quadratic program uses joint and root
+accelerations and per-foot wrenches in the world frame. Force is in newtons,
+moment in newton metres, and the solver scales wrench by body weight $B$.
+Its cone slack $s$ is dimensionless, in body-weight-normalized wrench units.
+The new opt-in threshold $\epsilon\geq0$ is supplied by the caller; it is a
+numerical audit choice, not a physiological or measured force limit.
+\section{Policy}
+At each control evaluation, strict mode accepts a solution only when support
+geometry exists, the solver reports success, all solution arrays have expected
+shapes and finite values, slack is nonnegative within solver tolerance, and
+$\max_i s_i\leq\epsilon$. Missing support, solver failure, invalid solution,
+or excessive slack raises an error rather than returning baseline torque.
+The default mode retains baseline fallback; counters expose missing support
+and unqualified solves. The pre-existing constraints, model, and controller
+physics are unchanged.
+\section{Evidence and Limits}
+Tests exercise missing support, solver failure, excessive and malformed slack,
+a valid bounded result, and default fallback with a real model and a stubbed
+solver. They do not establish solver accuracy, applied actuator force,
+measured contact, continuous-time constraint satisfaction, or a qualified
+swing. The local environment lacks Drake; solver-dependent tests skip rather
+than claim verification. Reproduce with the headless focused contact-wrench
+pytest suite; set \texttt{QT\_QPA\_PLATFORM=offscreen} and
+\texttt{MPLBACKEND=Agg}. This is standalone research documentation.
+\end{document}

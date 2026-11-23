@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -270,3 +271,139 @@ def test_wrench_qp_is_a_registered_tracking_backend() -> None:
     assert validate_tracking_backend(" Wrench-QP ") == "wrench-qp"
     with pytest.raises(ValueError, match="Unknown tracking backend"):
         validate_tracking_backend("nope")
+
+
+@pytest.fixture(scope="module")
+def audit_standing():
+    fs = pytest.importorskip(
+        "src.shared.python.motion_matching.full_body_forward_dynamics"
+    )
+    model = pytest.importorskip(
+        "src.engines.physics_engines.mujoco.python.full_body_model"
+    )
+    sim = fs.FullBodySimulator(model.NativeMujocoFullBodyModel(SPEC.read_bytes()))
+    q = fs.preload_feet(sim, np.zeros(sim.nv))
+    times = np.linspace(0.0, 1.0, 11)
+    return sim, q, times, np.tile(q, (len(times), 1))
+
+
+def test_strict_wrench_audit_rejects_missing_support(audit_standing, monkeypatch):
+    sim, q, times, reference = audit_standing
+    tracker = cw.contact_wrench_controller(
+        sim,
+        times,
+        reference,
+        omega_rad_s=30.0,
+        config=cw.WrenchQPConfig(max_allowed_slack=0.01),
+    )
+    monkeypatch.setattr(tracker, "_problem", lambda *args: None)
+    with pytest.raises(RuntimeError, match="support"):
+        tracker(0.2, q, np.zeros(sim.nv))
+    assert tracker.missing_support == 1
+
+
+@pytest.mark.parametrize(
+    "success,slack,reason", [(False, 0.0, "failed"), (True, 0.02, "slack")]
+)
+def test_strict_wrench_audit_rejects_unqualified_solution(
+    audit_standing, monkeypatch, success, slack, reason
+):
+    sim, q, times, reference = audit_standing
+    tracker = cw.contact_wrench_controller(
+        sim,
+        times,
+        reference,
+        omega_rad_s=30.0,
+        config=cw.WrenchQPConfig(max_allowed_slack=0.01),
+    )
+    problem = SimpleNamespace(
+        a_target=np.zeros(sim.actuated.size),
+        a_root_nominal=np.zeros(6),
+        wrenches_nominal=np.zeros((1, 6)),
+        touching=[True],
+    )
+    monkeypatch.setattr(tracker, "_problem", lambda *args: problem)
+    solution = cw.WrenchQPSolution(
+        np.zeros(sim.actuated.size),
+        np.zeros(6),
+        np.zeros((1, 6)),
+        np.full(11, slack),
+        success,
+    )
+    monkeypatch.setattr(cw, "solve_wrench_qp", lambda *args: solution)
+    with pytest.raises(RuntimeError, match=reason):
+        tracker(0.2, q, np.zeros(sim.nv))
+    assert tracker.unqualified_solves == 1
+
+
+def test_default_wrench_audit_records_fallback(audit_standing, monkeypatch):
+    sim, q, times, reference = audit_standing
+    tracker = cw.contact_wrench_controller(sim, times, reference, omega_rad_s=30.0)
+    monkeypatch.setattr(tracker, "_problem", lambda *args: None)
+    assert np.isfinite(tracker(0.2, q, np.zeros(sim.nv))).all()
+    assert tracker.missing_support == 1 and tracker.last is None
+
+
+@pytest.mark.parametrize("bad", [float("nan"), -1.0, float("inf")])
+def test_strict_wrench_audit_validates_slack_budget(bad):
+    with pytest.raises(ValueError, match="max_allowed_slack"):
+        cw.WrenchQPConfig(max_allowed_slack=bad)
+
+
+def test_strict_wrench_audit_accepts_finite_bounded_solution(
+    audit_standing, monkeypatch
+):
+    sim, q, times, reference = audit_standing
+    tracker = cw.contact_wrench_controller(
+        sim,
+        times,
+        reference,
+        omega_rad_s=30.0,
+        config=cw.WrenchQPConfig(max_allowed_slack=0.01),
+    )
+    problem = SimpleNamespace(
+        a_target=np.zeros(sim.actuated.size),
+        a_root_nominal=np.zeros(6),
+        wrenches_nominal=np.zeros((1, 6)),
+        touching=[True],
+    )
+    monkeypatch.setattr(tracker, "_problem", lambda *args: problem)
+    result = cw.WrenchQPSolution(
+        np.zeros(sim.actuated.size),
+        np.zeros(6),
+        np.zeros((1, 6)),
+        np.full(11, 0.005),
+        True,
+    )
+    monkeypatch.setattr(cw, "solve_wrench_qp", lambda *args: result)
+    assert np.isfinite(tracker(0.2, q, np.zeros(sim.nv))).all()
+    assert tracker.max_slack == pytest.approx(0.005) and tracker.unqualified_solves == 0
+
+
+@pytest.mark.parametrize(
+    "bad_slack", [np.full(11, np.nan), np.zeros(0), np.full(11, -0.1)]
+)
+def test_strict_wrench_audit_rejects_malformed_slack(
+    audit_standing, monkeypatch, bad_slack
+):
+    sim, q, times, reference = audit_standing
+    tracker = cw.contact_wrench_controller(
+        sim,
+        times,
+        reference,
+        omega_rad_s=30.0,
+        config=cw.WrenchQPConfig(max_allowed_slack=0.01),
+    )
+    problem = SimpleNamespace(
+        a_target=np.zeros(sim.actuated.size),
+        a_root_nominal=np.zeros(6),
+        wrenches_nominal=np.zeros((1, 6)),
+        touching=[True],
+    )
+    monkeypatch.setattr(tracker, "_problem", lambda *args: problem)
+    solution = cw.WrenchQPSolution(
+        np.zeros(sim.actuated.size), np.zeros(6), np.zeros((1, 6)), bad_slack, True
+    )
+    monkeypatch.setattr(cw, "solve_wrench_qp", lambda *args: solution)
+    with pytest.raises(RuntimeError, match="failed"):
+        tracker(0.2, q, np.zeros(sim.nv))
