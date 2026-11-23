@@ -928,3 +928,16 @@ reached 3.04°. These are assumed-ground diagnostics with nonconverged,
 non-admitted fits and ideal unsaturated drive. Sampled position constraints
 alone did not prevent dynamic penetration under these preload/support
 semantics; they do not establish measured subject contact or feasibility.
+
+Research branch `codex/15493-contact-coverage-research` at `8cc3d9de0f`
+adds a fail-closed adaptive clearance scan prototype (213 added lines beyond
+the boundary fix). Seven new and 39 existing contact tests, scoped
+NumPy-aware mypy, Ruff, LaTeX compilation and normal headless push hooks
+passed. A narrow real-triangle crossing missed by coarse endpoints is detected;
+earlier ambiguous intervals, initial overlap and budget exhaustion remain
+unresolved rather than certifying a later hit. The scanner is not wired into
+the event finder, relies on a caller-attested continuous whole-surface speed
+bound that samples cannot validate, and has no interval rounding. It does not
+certify first contact, the pinned swing or a physical shot. A separate broad
+mypy invocation reported unrelated Qt document-reader errors; normal
+repository mypy and the genuinely scoped check passed.
