@@ -466,3 +466,20 @@ pre-push hooks passed. This is a partial extraction, not a completed Slice 1
 or a PR. The admitted pinned-v2 forward match, physical gates and bracketed
 on-face contact evidence remain open; reconcile against current main before
 continuing and retain the five-PR and under-500-lines constraints.
+
+A private 477-frame fit probe replaced local finite-difference grip/foot
+Jacobians with native derivatives. At three sampled states the directional
+errors were 2.3e-10 to 1.7e-9, while the original and native whole-objective
+values at the seed agreed within 5e-15. A whole-record directional Jacobian
+check had relative error 1.45e-8. One same-process full assembly benchmark
+measured 9.147 s for finite differences and 0.781 s for native derivatives
+(11.71 times faster); total-objective gradient relative difference was
+5.11e-7. These measurements are not an independent implementation audit.
+A 120.47 s full-record trial saved 81 accepted iterates and did not converge:
+marker RMS changed from 36.6081 to 36.6079 mm, maximum soft closure translation
+from 0.00714 to 0.00971 mm, peak sampled speed from 33.326 to 33.325 rad/s,
+and peak sampled acceleration from 2173 to 2126 rad/s². The native unscaled
+projected-gradient infinity norm was 5.37. These are exploratory kinematic
+results, not a stationary fit, an admitted baseline, or physical validation.
+Further work must verify the native derivative mapping across the complete
+feasible domain and use hard closure and defensible physical limits.
