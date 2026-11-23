@@ -151,12 +151,21 @@ class BundleProblem:
             raise ValueError(f"marker_weights must be ({markers},) and not negative")
         if not np.all(self.pose_bounds[0] <= self.pose_bounds[1]):
             raise ValueError("pose_bounds must have lower <= upper")
+        if not np.any(np.asarray(self.valid, bool)):
+            raise ValueError("valid must mark at least one valid observation")
+        if not np.any(np.asarray(self.offset_sigmas) > 0):
+            raise ValueError("at least one free offset component (offset_sigmas > 0)")
         if self.pose_prior is not None:
             mean, sigma = self.pose_prior
             if np.shape(mean) != (frames, n_q) or np.shape(sigma) != (frames, n_q):
                 raise ValueError(f"pose_prior arrays must have shape {(frames, n_q)}")
-            if not np.all(np.asarray(sigma) > 0):
+            sigmas = np.asarray(sigma)
+            if not np.all(sigmas > 0):
                 raise ValueError("pose_prior sigmas must be positive (inf: none)")
+            if not np.any(np.isfinite(sigmas) & (sigmas > 0)):
+                raise ValueError(
+                    "active pose_prior requires finite sigma > 0 somewhere"
+                )
 
 
 @dataclass(frozen=True)
@@ -228,17 +237,48 @@ def _prior_weights(prob: BundleProblem) -> Array:
 
 
 def _cost(prob: BundleProblem, sigma: float, poses: Array, offsets: Array) -> float:
+    """Total chi-squared: sum of squared residual blocks (not scipy's 0.5·‖r‖²)."""
     return float(sum(term @ term for term in _terms(prob, sigma, poses, offsets)))
 
 
-def _difference(fn: Callable[[Array], Any], pose: Array, step: float) -> Any:
-    """``fn(pose)`` and its forward difference, the pose on the last axis."""
+def _fd_step_at_bound(value: float, lower: float, upper: float, step: float) -> float:
+    """Feasible signed probe step; zero for a coordinate held by equal bounds."""
+    forward, backward = upper - value, value - lower
+    if forward >= step:
+        return step
+    if backward >= step:
+        return -step
+    return forward if forward >= backward else -backward
+
+
+def _difference(
+    fn: Callable[[Array], Any],
+    pose: Array,
+    step: float,
+    bounds: tuple[Array, Array] | None = None,
+) -> Any:
+    """``fn(pose)`` and feasible slopes; held coordinates have zero slope."""
     base = np.atleast_1d(np.asarray(fn(pose), float))
     slope = np.empty((*base.shape, len(pose)))
+    lower_arr = upper_arr = None
+    if bounds is not None:
+        lower_arr, upper_arr = (np.asarray(b, float) for b in bounds)
     for j in range(len(pose)):
         moved = pose.copy()
-        moved[j] += step
-        slope[..., j] = (np.atleast_1d(np.asarray(fn(moved), float)) - base) / step
+        if lower_arr is not None and upper_arr is not None:
+            delta = _fd_step_at_bound(
+                float(pose[j]), float(lower_arr[j]), float(upper_arr[j]), step
+            )
+        else:
+            delta = step
+        moved[j] += delta
+        if lower_arr is not None and upper_arr is not None:
+            moved[j] = np.clip(moved[j], lower_arr[j], upper_arr[j])
+        delta = moved[j] - pose[j]
+        if delta == 0:
+            slope[..., j] = 0.0
+            continue
+        slope[..., j] = (np.atleast_1d(np.asarray(fn(moved), float)) - base) / delta
     return base, slope
 
 
@@ -256,8 +296,9 @@ def _linearise(
     gain = _gain(prob, settings.marker_sigma_m)
     seen = np.asarray(prob.valid[k], bool)
     rotations = np.asarray(prob.fk(pose))[bodies][:, :3, :3]
+    pose_bounds = prob.pose_bounds
     if prob.body_jacobian is None:
-        slope = _difference(prob.fk, pose, step)[1][bodies]
+        slope = _difference(prob.fk, pose, step, pose_bounds)[1][bodies]
         moved = np.einsum("mijq,mj->miq", slope[:, :3, :3], offsets) + slope[:, :3, 3]
     else:
         twist = np.asarray(prob.body_jacobian(pose), float)[bodies]
@@ -270,7 +311,9 @@ def _linearise(
     for m in np.flatnonzero(seen):
         by_offset[3 * m : 3 * m + 3, 3 * m : 3 * m + 3] = rotations[m] * gain[m, 0]
     if prob.constraint is not None:
-        closed, closed_slope = _difference(partial(prob.constraint, k), pose, step)
+        closed, closed_slope = _difference(
+            partial(prob.constraint, k), pose, step, pose_bounds
+        )
         residual.append(closed)
         by_pose.append(closed_slope)
         by_offset = np.vstack([by_offset, np.zeros((len(closed), offsets.size))])
@@ -431,14 +474,17 @@ def _offset_information(
 
     Pose priors are left out on purpose: they are what this must expose.
     Constraints stay in: they restrict the poses.
+    Project the span of feasible inward tangents at active box bounds, too;
+    only coordinates held by equal bounds have no tangent direction.
     """
     lower, upper = prob.pose_bounds
     info = np.zeros((offsets.size, offsets.size))
     for k, pose in enumerate(poses):
         _, by_pose, by_offset = _linearise(prob, settings, k, (pose, offsets))
-        inside = (pose > lower) & (pose < upper)
-        basis, singular, _ = np.linalg.svd(by_pose[:, inside], full_matrices=False)
-        basis = basis[:, singular > settings.rank_rcond * max(singular.max(), 1.0)]
+        movable = np.asarray(lower) < np.asarray(upper)
+        basis, singular, _ = np.linalg.svd(by_pose[:, movable], full_matrices=False)
+        cutoff = settings.rank_rcond * max(singular.max(initial=0.0), 1.0)
+        basis = basis[:, singular > cutoff]
         reduced = by_offset - basis @ (basis.T @ by_offset)
         info += reduced.T @ reduced
     scale = np.asarray(prob.offset_sigmas, float).ravel()
@@ -449,8 +495,12 @@ def _weak_directions(
     information: Array, owners: Array, settings: BundleSettings
 ) -> tuple[tuple[int, ...], tuple[float, ...]]:
     """Markers (``owners`` of each free component) loading a weak direction."""
+    if information.size == 0:
+        return (), ()
     values, vectors = np.linalg.eigh(information)
     weak = values < settings.weak_information_ratio
+    if not np.any(weak):
+        return (), ()
     loading = np.zeros((int(owners.max(initial=-1)) + 1, int(weak.sum())))
     np.add.at(loading, owners, vectors[:, weak] ** 2)
     named = np.flatnonzero((loading >= settings.weak_loading_share).any(axis=1))
@@ -458,9 +508,10 @@ def _weak_directions(
 
 
 def _rms(errors: Array, valid: Array, axis: int | None) -> Any:
+    counted = valid.sum(axis=axis)
     total = (np.sum(errors**2, axis=-1) * valid).sum(axis=axis)
     with np.errstate(invalid="ignore", divide="ignore"):
-        return np.sqrt(total / valid.sum(axis=axis))
+        return np.sqrt(total / counted)
 
 
 def solve_bundle(prob: BundleProblem, settings: BundleSettings) -> BundleResult:
@@ -489,10 +540,12 @@ def solve_bundle(prob: BundleProblem, settings: BundleSettings) -> BundleResult:
         np.repeat(np.arange(len(seeds)), 3)[free.ravel()],
         settings,
     )
+    rms_m = float(_rms(errors, valid, None))
+    converged = converged and np.isfinite(rms_m)
     return BundleResult(
         offsets=offsets,
         poses=poses,
-        rms_m=float(_rms(errors, valid, None)),
+        rms_m=rms_m,
         per_marker_rms_m=_rms(errors, valid, 0),
         per_frame_rms_m=_rms(errors, valid, 1),
         data_chi2=chi2[0],
