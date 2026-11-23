@@ -2532,3 +2532,16 @@ ratio rose 1.608 to 2.087 and peak ideal drive 229.6 to 326.5 N m. This is
 not an admitted physical baseline: contact is assumed, the optimizer did not
 converge, no actual motor/work/impact gate passed, and endpoint derivatives do
 not seamlessly join the full reference.
+
+The short support fit was replayed through actual modeled motors over its
+valid 150 ms interval, with fixed gains 3/0.3, zero spline and identical
+baseline q0/v0. Six modeled ROM slots and one speed slot failed, first ROM
+at about 80.9 ms and speed at 129.4 ms; 5,376 of 19,200 32-substep stages
+clipped. Peak total command / applied drive were 464.50 / 258.61 N m.
+Sixteen/32 substeps agreed closely at matched holds (maximum q/v/applied-drive
+differences 2.63e-6 / 1.00e-4 / 3.50e-5 in native units). Target root
+translation / rotation and joint RMS were 0.00397 m / 0.11099 rad / 0.11782
+rad. The earlier corrected continuity run had 0.01659 m / 0.05893 rad /
+0.07765 rad, but used a different reference and spline, so this is not a
+single-variable comparison. Work/slew bounds and physical provenance remain
+unverified; reject this support candidate as an admitted motor baseline.
