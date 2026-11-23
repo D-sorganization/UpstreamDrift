@@ -41,6 +41,7 @@ def solve_equality_least_squares(
     Optional positive scales use x=initial+scales*y internally. Callbacks,
     returned x/jac and active bounds retain physical units. No residual or
     constraint scaling is applied. None preserves the original solver variables.
+    Bounds may be unbounded; absence of a bound does not certify feasibility.
     """
     x0, lo, hi, p = (
         np.array(v, dtype=float, copy=True) for v in (initial, lower, upper, projection)
@@ -50,7 +51,11 @@ def solve_equality_least_squares(
         or not x0.size
         or lo.shape != x0.shape
         or hi.shape != x0.shape
-        or not all(np.isfinite(v).all() for v in (x0, lo, hi))
+        or not np.isfinite(x0).all()
+        or np.isnan(lo).any()
+        or np.isnan(hi).any()
+        or np.isposinf(lo).any()
+        or np.isneginf(hi).any()
         or np.any(lo >= hi)
         or np.any(x0 < lo)
         or np.any(x0 > hi)
@@ -86,8 +91,10 @@ def solve_equality_least_squares(
     with np.errstate(over="ignore", divide="ignore", invalid="ignore"):
         scaled_initial = (x0 - offset) / scale
         scaled_lower, scaled_upper = (lo - offset) / scale, (hi - offset) / scale
-    if not all(
-        np.isfinite(v).all() for v in (scaled_initial, scaled_lower, scaled_upper)
+    if (
+        not np.isfinite(scaled_initial).all()
+        or not np.isfinite(scaled_lower[np.isfinite(lo)]).all()
+        or not np.isfinite(scaled_upper[np.isfinite(hi)]).all()
     ):
         raise ValueError("Unrepresentable bounds for variable scales")
 
@@ -185,8 +192,8 @@ def solve_equality_least_squares(
     result.nfev = count
     # Comparable least_squares scaled optimality is unavailable from SLSQP.
     result.active_mask = np.where(
-        np.isclose(result.x, lo, rtol=0, atol=1e-8),
+        np.isfinite(lo) & np.isclose(result.x, lo, rtol=0, atol=1e-8),
         -1,
-        np.where(np.isclose(result.x, hi, rtol=0, atol=1e-8), 1, 0),
+        np.where(np.isfinite(hi) & np.isclose(result.x, hi, rtol=0, atol=1e-8), 1, 0),
     )
     return result

@@ -186,3 +186,102 @@ def test_scaled_derivatives_and_bounds_use_affine_chain_rule(monkeypatch) -> Non
     )
     assert result.success
     np.testing.assert_allclose(result.x, [2.5, 2.5], atol=1e-7)
+
+
+@pytest.mark.parametrize("scales", [None, np.array([2.0, 0.05])])
+@pytest.mark.parametrize(
+    "lower,upper",
+    [
+        ([-np.inf, -np.inf], [np.inf, np.inf]),
+        ([-np.inf, 0.0], [3.0, np.inf]),
+        ([0.0, -np.inf], [2.0, np.inf]),
+    ],
+)
+def test_infinite_bounds_preserve_solution_and_active_mask(
+    scales, lower, upper
+) -> None:
+    result = solve_equality_least_squares(
+        residual,
+        jacobian,
+        np.ones(2),
+        np.array(lower),
+        np.array(upper),
+        equality_start=1,
+        projection=np.array([[0.2, 0.4]]),
+        max_iterations=50,
+        max_evaluations=80,
+        variable_scales=scales,
+    )
+    assert result.success
+    expected = 2.0 if upper[0] == 2.0 else 2.5
+    np.testing.assert_allclose(result.x, [expected, expected], atol=1e-6)
+    np.testing.assert_array_equal(result.active_mask, [1 if expected == 2.0 else 0, 0])
+
+
+@pytest.mark.parametrize(
+    "lower,upper",
+    [
+        ([np.nan, 0], [4, 4]),
+        ([0, 0], [np.nan, 4]),
+        ([np.inf, 0], [np.inf, 4]),
+        ([-np.inf, 0], [-np.inf, 4]),
+    ],
+)
+def test_invalid_infinite_bounds_rejected_before_evaluation(lower, upper) -> None:
+    def forbidden(_):
+        pytest.fail("invalid bounds reached callback")
+
+    with pytest.raises(ValueError, match="Invalid bounded"):
+        solve_equality_least_squares(
+            forbidden,
+            forbidden,
+            np.ones(2),
+            np.array(lower),
+            np.array(upper),
+            equality_start=1,
+            projection=np.array([[0.2, 0.4]]),
+            max_iterations=20,
+            max_evaluations=30,
+        )
+
+
+def test_finite_bound_scaling_overflow_rejected() -> None:
+    with pytest.raises(ValueError, match="Unrepresentable bounds"):
+        solve_equality_least_squares(
+            residual,
+            jacobian,
+            np.ones(2),
+            np.array([-1e308, -np.inf]),
+            np.array([1e308, np.inf]),
+            equality_start=1,
+            projection=np.array([[0.2, 0.4]]),
+            max_iterations=20,
+            max_evaluations=30,
+            variable_scales=np.array([1e-308, 1.0]),
+        )
+
+
+@pytest.mark.parametrize("scales", [None, np.array([2.0, 0.05])])
+def test_unbounded_budget_exhaustion_returns_evaluated_fallback(scales) -> None:
+    observed = []
+
+    def capture(x):
+        observed.append(x.copy())
+        return residual(x)
+
+    result = solve_equality_least_squares(
+        capture,
+        jacobian,
+        np.ones(2),
+        np.array([-np.inf, 0.0]),
+        np.array([np.inf, np.inf]),
+        equality_start=1,
+        projection=np.array([[0.2, 0.4]]),
+        max_iterations=50,
+        max_evaluations=1,
+        variable_scales=scales,
+    )
+    assert not result.success
+    assert result.nfev == 1
+    np.testing.assert_array_equal(result.x, observed[0])
+    np.testing.assert_array_equal(result.active_mask, [0, 0])
