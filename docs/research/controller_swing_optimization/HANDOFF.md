@@ -342,6 +342,23 @@ replayed its recorded states exactly. Clipping affected 45 of 200 holds and
 stages, but tracking RMS rose to 0.44482 rad and 17 modeled ROM and three
 generalized-rate slots were exceeded. Sixteen capacity priors were assumed.
 This is not post-actuator evidence or physiological clearance.
+A matched 200 ms clipping ablation used the same state, reference and gains.
+Joint tracking RMS was 0, 0.44482, 0.04142 and 0.43842 rad for unclipped,
+all-cap, assumption-marked-only and other-registry-only clipping respectively.
+Relaxing either group still violated some declared caps. This identifies a
+model sensitivity, not validation of the registry values as anatomical limits.
+An additional same-state ablation isolated one modeled knee cap: clipping that
+cap alone gave 0.44928 rad tracking RMS, while applying the other caps but
+relaxing it gave 0.09199 rad RMS and still violated that declared cap. This
+does not establish that the cap is valid or invalid and does not authorize
+relaxing it for acceptance.
+The registry's cited knee capacity derives from an isometric group parameter
+in [Anderson et al.](https://stacks.cdc.gov/view/cdc/188754/cdc_188754_DS1.pdf),
+whose model explicitly varies strength with joint angle and velocity. The
+diagnostic included eccentric modeled motion outside the study's reported
+eccentric test speed, so the static cap is a declared model gate, not a
+validated subject-specific dynamic limit. Preserve it until a justified policy
+and mapping are available.
 Bit-identical replays of both 200 ms cases recovered pre-projection hold-end
 velocities. Under left-ZOH ideal input and linear velocity interpolation,
 unclipped versus clipped modeled positive work was 32.48 versus 327.54 J;
@@ -357,6 +374,12 @@ exceeded 17 of 41 modeled ROM slots and three generalized-speed priors.
 Tracking RMS was 0.4448--0.4450 rad. None is admissible; three samples are
 not evidence that no feasible improvement exists. Work was evaluated only
 as ideal-input ZOH quadrature and anatomical mapping remains incomplete.
+A subsequent three-parameter constrained SLSQP search hit its time limit
+without convergence. All 12 evaluated candidates were within the coefficient
+trust ball and met the sampled clipped-drive caps, but each exceeded 17 modeled
+ROM slots and three generalized-speed priors. This limited search does not
+prove infeasibility and lacks complete anatomical, actuator, work/slew,
+between-sample and impact evidence.
 A matched 32-substep run completed 0.7 s with approximately the same 1.431 rad
 tracking RMS as the 16-substep run. Their maximum coordinate difference grew
 from 1.13e-7 rad at 0.4 s to 0.109 rad at 0.7 s; resolution convergence is
