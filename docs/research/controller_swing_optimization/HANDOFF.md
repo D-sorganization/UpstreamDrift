@@ -732,3 +732,15 @@ differed from observed markers by 28.34 mm RMS over those 15 frames and 487
 valid marker samples. Thus a target-observation mismatch exists before v2
 transfer, but this check does not apportion the v2 fitting tradeoff. The
 private data, scripts and hash-bound receipts remain outside git.
+
+Research delivery checkpoint `codex/15493-delivery-audit4` at `19523f3f3b`
+adds separately labeled per-coordinate sampled controller-position-target RMS
+and maximum errors to the existing same-input replay audit, preserving native
+coordinate units. It binds the source dynamics record to the bundle hash
+before simulation; a regression shows zero saved-feedback-rollout parity can
+coexist with nonzero controller-target error. Twenty-two focused tests,
+Ruff, Black, scoped mypy, LaTeX compilation and normal headless push hooks
+passed. This is 208 changed lines against main `34c0d41e4a`; it is not a
+qualified v2 baseline, physical gate, contact evidence or a PR. Combining it
+wholesale with the current contact extraction exceeds the 500-line limit;
+reconcile and reuse rather than claim a completed Slice 1.
