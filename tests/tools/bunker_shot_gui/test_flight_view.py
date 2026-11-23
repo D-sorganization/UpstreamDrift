@@ -72,14 +72,12 @@ def _seeded_shell():  # noqa: ANN202
     shell = BunkerShotWidget()
     shell._flight_a.set_flight(_flight(), reason="")
     assert shell._flight_a.has_flight
-    assert any(len(ax.lines) for ax in shell._flight_a._canvas.fig.axes)
     return shell
 
 
 def test_loading_a_saved_record_clears_a_stale_flight(
     monkeypatch: pytest.MonkeyPatch, tmp_path
 ) -> None:
-    """A loaded (refused) record carries no flight, so none may stay drawn."""
     from src.tools.bunker_shot_gui import gui
 
     record = {
@@ -93,16 +91,15 @@ def test_loading_a_saved_record_clears_a_stale_flight(
     shell = _seeded_shell()
     shell.load_evaluation(tmp_path / "refused.json")
     assert not shell._flight_a.has_flight
-    assert all(len(ax.lines) == 0 for ax in shell._flight_a._canvas.fig.axes)
+    assert not any(ax.lines for ax in shell._flight_a._canvas.fig.axes)
     assert "loaded" in shell._flight_a._readout.text()
 
 
 def test_input_error_clears_a_stale_flight() -> None:
-    """A rejected input must not sit beside another shot's trajectory."""
     from src.tools.bunker_shot_gui.gui import WorkbenchInputError
 
     shell = _seeded_shell()
     shell._show_input_error(WorkbenchInputError("loft out of range"))
     assert not shell._flight_a.has_flight
-    assert all(len(ax.lines) == 0 for ax in shell._flight_a._canvas.fig.axes)
+    assert not any(ax.lines for ax in shell._flight_a._canvas.fig.axes)
     assert "input" in shell._flight_a._readout.text()

@@ -1055,8 +1055,7 @@ class BunkerShotWidget(QWidget):
         self._loaded_record = record
         self._last_evaluation = None
         self._last_comparison = None
-        # A saved record stores no trajectory, so any flight on screen belongs
-        # to a different shot than the inputs and verdict now shown.
+        # A saved record stores no trajectory: drop any other shot's flight.
         self._flight_a.set_flight(
             None,
             reason="loaded record: no ball flight is stored; re-run to draw one",
