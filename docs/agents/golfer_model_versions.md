@@ -18,6 +18,10 @@ thumb, ring finger beside the lead forefinger and a 30° trail trigger spread.
 
 ## Putting a Spec on the Current Model
 
+`build_anthropometric_spec` does steps 1 and 2 for every right-handed spec it
+writes without grip picks (`motion_matching/execution/spec_revisions.py`,
+`with_current_golfer_model`). Do them by hand only for an older spec.
+
 1. Apply `apply_skinned_hand_wrists(spec)`
    (`motion_matching/execution/skinned_hand_wrists.py`). It moves the wrist
    joints to the skinned hands' wrists, sets `hand_visual_backend` and records
@@ -34,8 +38,15 @@ naming the registry.
 
 ## What Is Still Migrating (#15648)
 
-- **Builders:** the spec builder, character builder and API still emit
-  unrevised specs. They are next to move to the current model by default.
+- **Left-handed hands:** the skinned pair is posed right-handed, so a
+  left-handed spec still draws the deprecated capsule hands and logs it.
+  Left-handed skinned hands are being added (#15652); left-handed golfers
+  are not dropped.
+- **Physical grip picks:** the skinned pair is posed with the owner grip, so a
+  spec with `subject.grip_config` keeps the capsule hands rather than silently
+  losing its picks. Posing the skinned pair from `grip_config` is #15654.
+- **Builders:** the spec builder writes right-handed specs on the current
+  model. The character builder and API still emit unrevised specs.
 - **Committed specs:** every committed full-body spec, including
   `full_body_spec_anthro_driver.json` and `full_body_spec_anthro_iron7.json`,
   is legacy. Current-model reference specs will be committed beside them, under
