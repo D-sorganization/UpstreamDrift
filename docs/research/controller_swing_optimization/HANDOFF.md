@@ -1597,3 +1597,25 @@ observed marker RMS 238.49 / 239.25 mm and 238.02 / 238.78 mm respectively,
 versus unperturbed 234.60 / 235.38 mm. Both worsened drift; they do not
 support adopting the earlier numerically selected 0.1 m/s correction as a
 measured state or establish a v2 baseline.
+
+Research branch `codex/15493-motor-impact22` at `cde946327e` extends the
+codec-backed motor replay with optional existing closure projection and a
+separately applied prescribed latched force. It records/recomputes saturated
+motor input and external force distinctly, verifies the actual split-event
+state, and preserves `contact_verified=False`. Synthetic committed-v2 bundle
+round trips cover projected/unprojected × no-impact/prescribed-force cases,
+including tampered-event and false-contact-certification rejection. One
+hundred seventy-seven focused tests, Ruff, Black, LaTeX compilation and normal
+headless push hooks passed. Replaying a supplied force does not establish
+bracketed physical contact, physiological feasibility, independent runtime
+or a complete Slice 2. This is an oversized research branch, not a PR. An
+additional broad mypy was still running when this checkpoint was recorded.
+
+A direct raw-coordinate diagnostic matched the source `q_track` initial
+translation-gradient components with a 0.01012 m/s perturbation; cross-model
+root-frame equivalence remains unverified. The full projected ideal-drive
+replay changed target/observed marker RMS from 234.60/235.38 to 233.35/234.13
+mm, with one modeled ROM flag, so the small reduction does not qualify the
+baseline. Four-pelvis-marker source-target and observation estimates each
+improved its own initial marker-velocity comparison but worsened the other;
+finite secants and fixed attachments are not measured root velocity.
