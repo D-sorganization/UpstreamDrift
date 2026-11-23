@@ -742,7 +742,7 @@ class MainWidget(QtWidgets.QWidget):
 
     def _report_failure(self, headline: str, exc: Exception) -> None:
         """Surface an action failure in the status/report panes and log it."""
-        logger.exception(headline)
+        logger.error(headline, exc_info=exc)
         self._report_failure_text(headline, str(exc))
 
     def _report_failure_text(self, headline: str, detail: str) -> None:
@@ -785,6 +785,11 @@ class SimulationBackendsWindow(QtWidgets.QMainWindow):
     def main_widget(self) -> MainWidget:
         """Return the embedded :class:`MainWidget`."""
         return self._main_widget
+
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+        """Cancel and join active physics work before the standalone window closes."""
+        self._main_widget.cleanup()
+        super().closeEvent(event)
 
     def _build_menu_bar(self) -> None:
         menubar = self.menuBar()
