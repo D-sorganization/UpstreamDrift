@@ -263,16 +263,17 @@ def _difference(
     """``fn(pose)`` and its finite-difference slope along pose coordinates."""
     base = np.atleast_1d(np.asarray(fn(pose), float))
     slope = np.empty((*base.shape, len(pose)))
-    lower = upper = None
+    lower_arr = upper_arr = None
     if bounds is not None:
-        lower, upper = (np.asarray(b, float) for b in bounds)
+        lower_arr, upper_arr = (np.asarray(b, float) for b in bounds)
     for j in range(len(pose)):
         moved = pose.copy()
-        delta = (
-            _fd_step_at_bound(float(pose[j]), float(lower[j]), float(upper[j]), step)
-            if bounds is not None
-            else step
-        )
+        if lower_arr is not None and upper_arr is not None:
+            delta = _fd_step_at_bound(
+                float(pose[j]), float(lower_arr[j]), float(upper_arr[j]), step
+            )
+        else:
+            delta = step
         moved[j] += delta
         slope[..., j] = (np.atleast_1d(np.asarray(fn(moved), float)) - base) / delta
     return base, slope
