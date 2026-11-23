@@ -1,4 +1,4 @@
-# Capability Baseline Inventory: Analysis (Part 1/2)
+# Capability Baseline Inventory: Analysis (Part 1/3)
 
 <!-- Generated: python -m scripts.generate_capability_baseline -->
 
