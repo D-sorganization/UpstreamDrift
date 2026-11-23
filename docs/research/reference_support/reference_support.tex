@@ -1,0 +1,29 @@
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+\section{Offline Reference Support at Joins}
+The existing computed-torque tracker linearly interpolates position and
+interpolates velocity and acceleration tables formed by applying
+\texttt{numpy.gradient} twice. For an interior uniform grid away from
+segment boundaries, the stencils are
+\[
+v_i=\frac{q_{i+1}-q_{i-1}}{2h},\qquad
+a_i=\frac{q_{i+2}-2q_i+q_{i-2}}{4h^2}.
+\]
+At endpoints the library uses first-order one-sided differences; nonuniform
+grids use different weights. An off-grid interpolation may use two adjacent
+rate rows, extending the set of source indices. The diagnostic returns a
+conservative structural union, including terms that may cancel, in the input
+clock supplied by the caller. Invalid or numerically overflowing clocks fail.
+
+GCV-20 differentiates and interpolates rate tables separately on each side
+of impact. The existing position sample is unsplit, so a query
+before the split can use a position row after it. This describes existing
+offline behavior and does not establish an implementation defect. The opt-in
+past-only guard rejects any structurally possible row later than the query.
+Neither the guard nor a passing result audits upstream filtering, target
+generation, reference hooks or closed-loop dynamics; no physical or causal
+inference follows. Test by perturbation and basis vectors with
+\texttt{python -m pytest -q
+tests/unit/motion\_matching/test\_reference\_support\_15493.py}.
+\end{document}
