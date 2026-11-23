@@ -1952,3 +1952,28 @@ are sourced with assumed margin; none is an established subject-specific hard
 limit. Existing partial lower-limb static and force-velocity sources are
 population- and posture-dependent. Work and slew limits remain unsourced.
 Use these as research priors, not certified physical gates.
+
+A 60 ms exact-seam Option B continuation reduced the original candidate's
+0.004591 rad modeled ROM excess to zero sampled ROM/speed flags across 1,920
+stages. Coefficient norm was 9.437298 within the 10 N m diagnostic ball, with
+960 clipped stages, signed work -4.4830 J, positive-power integral 1.76935 J,
+and peak 1 ms applied-drive update 23.2962 N m. Independent uninterrupted
+replay first flagged ROM at stage 1921 (about 60.03 ms) and stopped at a
+numerical guard at 0.665 s with 27 ROM and 15 speed coordinates flagged.
+Compared with the 40 ms candidate, the first flag moved later but the guard
+occurred sooner. Neither demonstrates full-horizon or physical feasibility.
+
+Windowed support diagnosis found zero modeled contact in the original
+reference over 0–1.1 s, and only 0.32–0.43 body weights RMS modeled contact
+force in the preloaded fit over that interval. A 21-frame post-filter reduced
+correction roughness but worsened force and moment residuals; it is not an
+admissible fix. A coupled acceleration-regularized fit stopped unconverged
+after 265 s. Its sampled linear and angular residuals fell from 0.671 to
+0.527 body weights RMS and 60.2 to 43.4 N m RMS relative to its seeded start,
+but its weak numerical regularizer barely changed correction roughness.
+Independent 1.322 s ideal-drive rollout source-target marker RMS worsened
+from 268.43 mm baseline and 284.68 mm seeded to 291.77 mm regularized;
+observed-marker RMS was 269.13 / 285.32 / 292.39 mm. All retained two modeled
+ROM flags. Reject both fitted candidates: lower sampled balance residuals
+have not produced forward tracking improvement. No measured ground forces,
+motor saturation, impact or verified speed and torque gates were included.
