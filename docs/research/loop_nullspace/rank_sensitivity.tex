@@ -1,0 +1,47 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage[margin=1in]{geometry}
+\title{Sampled Null-Space Rank Sensitivity}
+\author{UpstreamDrift Research}
+\begin{document}
+\maketitle
+\section{Scope and Contract}
+This is a separate editable research reference for issue \#15494, not the
+engineering design manual. The research module is
+\texttt{scripts.research.nullspace\_rank\_audit}; its entry point is
+\texttt{audit\_rank\_history}.
+It reuses the existing decomposition dimension accounting without a new solver.
+Inputs are closed-loop snapshots with identical topology and ground-load
+dimension, strictly increasing finite times in seconds, and at least two unique
+relative tolerances in $(0,1)$. Callers must separately pin model and asset
+versions, input hashes, coordinate frames, contact regime and ground-load policy.
+The tool checks dimensions, not semantic equivalence of these assumptions.
+
+\section{Numerical Method and Units}
+For each supplied tolerance and snapshot, the existing accounting evaluates
+$\sigma_i > r\max(\sigma_{\max},1)$ on its scaled load matrices.
+Characteristic force and moment defaults are 100 N and 5 N\,m; custom scales
+are recorded. Counts are dimensionless. Closure rank, unactuated load rank,
+balance rank, nullity, multiplier gauge and attainable torque variation are
+reported independently. Changed-frame indices identify the later sample in
+an adjacent count change; tolerance-sensitive indices identify any count
+disagreement across the declared grid. Raw basis coordinates are never compared.
+
+\section{Controls and Acceptance}
+The synthetic diagonal closure has rows $e_1^T$ and $\epsilon e_2^T$, with
+$\epsilon=1,10^{-7},0$ at times $0,0.1,0.2$ s. For tolerances $10^{-9}$ and
+$10^{-5}$, expected closure ranks are $(2,2,1)$ and $(2,1,1)$.
+Full actuation keeps balance rank five. A partially actuated control makes
+balance rank tolerance-sensitive. An inconsistent unactuated load is rejected
+by the existing decomposition while the rank audit remains diagnostic only.
+These are algebraic fixtures, not valid sampled golfer kinematics or replay.
+
+\section{Reproduction and Limitations}
+Run \texttt{python3 -m scripts.research.nullspace\_rank\_audit} for strict JSON.
+Run \texttt{python3 -m pytest tests/unit/loop\_nullspace/test\_rank\_sensitivity.py}.
+Tests compare custom-scale results against existing accounting and check
+analytic counts, invalid input rejection and JSON serialization.
+No admission, contact feasibility, continuous-time rank guarantee, physical
+invariance, capacity-prior robustness or forward replay is established.
+No recorded baseline, private capture or rendered evidence is included.
+\end{document}
