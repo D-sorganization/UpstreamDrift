@@ -2740,3 +2740,16 @@ trajectory response, not a fixed-state derivative or universal claim.
 It supports an explicitly bounded reference-shift experiment whose velocity
 is analytically derived from the same spline, as required by the objective;
 combined trust, actual torque, physical and work/slew gates still need proof.
+
+A separate reference-shift diagnostic set delta-q to 0.01 rad/N m times the
+same causal feedforward spline and derived delta-qdot analytically from that
+spline. Gains, model and actual motor were unchanged. Shift coefficient norm
+was 0.0100 rad, sampled peak shift 0.00595 rad and peak shift speed 0.1633
+rad/s; the additional feedforward norm was 1.0 N m under its separately
+specified radius 2. The first 150 ms matched the feedforward-only trajectory
+and first 200 ms sampled ROM/speed gates remained clear. By 300 ms, 13 ROM
+and five speed slots still failed; maximum ROM excess changed only 2.92703
+to 2.92701 rad and joint RMS 0.32878 to 0.32872 rad. No stages clipped;
+16/32 results agreed on flags. Reject as a meaningful feasibility improvement.
+This heuristic policy has no combined trust certificate, and work/slew and
+physical limits remain unverified.
