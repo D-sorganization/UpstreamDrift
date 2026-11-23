@@ -132,7 +132,7 @@ def verify_bundle_replay(
         raise ValueError("invalid fixed-step schedule")
     time = np.asarray(a["time"], dtype=float)
     if time.size < 2 or not np.allclose(
-        time, time[0] + np.arange(time.size) * dt, rtol=0, atol=1e-12
+        time, time[0] + np.arange(time.size) * dt, rtol=0, atol=min(1e-12, dt * 1e-6)
     ):
         raise ValueError("recorded time must match the fixed control grid")
     if bundle.impact_event["t"] <= time[-1]:

@@ -128,7 +128,7 @@ def test_changed_recorded_states_fail_comparison(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "change", ["model", "runtime", "impact", "assets", "state", "schedule"]
+    "change", ["model", "runtime", "impact", "assets", "state", "schedule", "tiny_grid"]
 )
 def test_unsupported_or_mismatched_policy_fails_before_factory(tmp_path, change):
     bundle = make_bundle()
@@ -143,6 +143,9 @@ def test_unsupported_or_mismatched_policy_fails_before_factory(tmp_path, change)
         bundle = replace(bundle, asset_hashes={"external": "d" * 64})
     elif change == "state":
         bundle.arrays["controller_state0"] = np.ones(1)
+    elif change == "tiny_grid":
+        bundle.arrays["time"] = np.array([0.0, 1e-18, 2e-18])
+        bundle = replace(bundle, integrator={**bundle.integrator, "dt": 1e-20})
     else:
         bundle.arrays["time"][1] += 0.001
     path = save_solution_bundle(bundle, tmp_path / "bundle")
