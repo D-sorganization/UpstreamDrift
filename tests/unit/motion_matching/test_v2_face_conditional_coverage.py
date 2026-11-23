@@ -9,8 +9,10 @@ import numpy as np
 import pytest
 from scipy.optimize import least_squares
 
+from src.shared.python.model_appearance.ball import BALL_RADIUS_M
 from src.shared.python.motion_matching.club_face_target import face_triangles_in_frame
 from src.shared.python.motion_matching.contact_event import find_contact_event
+from src.shared.python.motion_matching.impact_force import ImpactForce
 from src.shared.python.motion_matching.same_input.integrator import zoh_rk4_step
 from src.shared.python.motion_matching.same_input.plant import VectorPlant
 from src.shared.python.motion_matching.same_input.stage_trace import fixed_substep_sizes
@@ -75,6 +77,37 @@ def test_synthetic_driver_face_root_halves_fixed_integration_steps() -> None:
             max_clearance_rate_mps=2.0,  # synthetic test assumption, not validated
             coverage_max_evaluations=2000,
         )
+
+    # Exercise the higher-level ImpactForce integration on the same synthetic
+    # v2 face; the speed bound is a test assumption, not a certificate.
+    impact = ImpactForce.for_spec_surface_contact(
+        json.loads(spec),
+        t_start_s=0.0,
+        swing_span_s=(0.0, 0.1),
+        ball_centre_m=ball - (radius - BALL_RADIUS_M) * normal,
+    ).with_contact_coverage(2.0)
+
+    def impact_advance(t: float) -> tuple[np.ndarray, np.ndarray]:
+        q, v = q0.copy(), v0.copy()
+        if t > 0:
+            for h in fixed_substep_sizes(t, 1.25e-7, 0.0):
+                q, v = zoh_rk4_step(plant, q, v, effort, h)
+        return q, v
+
+    scheduled = impact.schedule(
+        0.0,
+        1e-6,
+        q0,
+        v0,
+        plant.kinematic_frames,
+        advance=impact_advance,
+        point_velocity=lambda q, v, frame, point: plant.frame_point_velocity(
+            q, v, frame, point
+        ),
+    )
+    assert scheduled.is_scheduled
+    assert scheduled.contact_search_status == "conditional_bracket_candidate"
+    assert not scheduled.contact_search_has_prior_unresolved_intervals
 
     coarse, fine = run(2.5e-7, ball), run(1.25e-7, ball)
     assert coarse.event is not None and fine.event is not None

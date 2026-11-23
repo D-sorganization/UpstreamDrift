@@ -448,6 +448,8 @@ within one grid cell. Its finite nine-sample miss penalty is a smooth
 surrogate, not a proven global closest distance. Independent validation on the
 actual matched trajectory remains necessary.
 
+The optional ImpactForce coverage policy carries a caller-attested clearance-rate bound and a chronological coverage clock. Clear intervals advance the clock; missing or unresolved earlier intervals prevent later scheduling until re-arming. The bound is not verified, floating-point evaluation is not interval arithmetic, and conditional candidates are not first-contact certificates.
+
 The search reuses rigid-face boundary topology within a search. On the modeled
 576-triangle driver face with synthetic motion, a 30-run median was 10.6 ms
 for a miss and 34.0 ms for a hit, versus 46.5 ms and 202.9 ms when rebuilding

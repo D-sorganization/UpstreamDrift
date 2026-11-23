@@ -911,3 +911,99 @@ def test_rearming_surface_trigger_clears_event_and_latched_force() -> None:
     assert rearmed.contact_event is None
     assert rearmed.contact_search_status == "unsearched"
     assert rearmed.armed_at_s == pytest.approx(triggered.t_start_s - 0.002)
+
+
+def test_conditional_surface_policy_preserves_clear_and_blocks_after_unresolved(
+    monkeypatch,
+):
+    from src.shared.python.motion_matching.contact_event import ContactSearchResult
+
+    plan_ = _surface_plan(np.array([1.0, 0.0, 0.0])).with_contact_coverage(200.0)
+    outcomes = iter(
+        [
+            ContactSearchResult(None, 0.1, "conditionally_clear"),
+            ContactSearchResult(None, 0.1, "unresolved_coverage"),
+        ]
+    )
+    seen = []
+
+    def fake(*args, **kwargs):
+        seen.append(kwargs["max_clearance_rate_mps"])
+        return next(outcomes)
+
+    monkeypatch.setattr(imf, "find_contact_event", fake)
+    q, v = np.zeros(2), np.array([1.0, 0.0])
+
+    def advance(t):
+        return q + t * v, v
+
+    clear = plan_.schedule(0.0, 0.01, q, v, rotating_poses, advance=advance)
+    assert clear.contact_search_status == "conditionally_clear"
+    assert not clear.contact_search_has_prior_unresolved_intervals
+    unresolved = clear.schedule(0.01, 0.01, q, v, rotating_poses, advance=advance)
+    assert unresolved.contact_search_has_prior_unresolved_intervals
+    assert not unresolved.is_scheduled
+    assert seen == [200.0, 200.0]
+    blocked = unresolved.schedule(0.02, 0.01, q, v, rotating_poses, advance=advance)
+    assert not blocked.is_scheduled
+    assert blocked.contact_search_has_prior_unresolved_intervals
+    assert seen == [200.0, 200.0]
+    restored = imf.ImpactForce.from_record(unresolved.to_record())
+    assert restored.contact_max_clearance_rate_mps == 200.0
+    assert restored.contact_search_has_prior_unresolved_intervals
+
+
+def test_conditional_surface_rate_bound_validation():
+    plan_ = _surface_plan(np.array([1.0, 0.0, 0.0]))
+    for value in (float("nan"), float("inf"), -1.0):
+        with pytest.raises(ValueError):
+            plan_.with_contact_coverage(value)
+
+
+def test_conditional_surface_real_clear_and_gap_fail_closed():
+    plan_ = _surface_plan(np.array([1.0, 0.0, 0.0])).with_contact_coverage(1.0)
+    q, v = np.zeros(2), np.zeros(2)
+
+    def advance(t):
+        return q, v
+
+    clear = plan_.schedule(0.0, 0.01, q, v, rotating_poses, advance=advance)
+    assert clear.contact_search_status == "conditionally_clear"
+    assert not clear.contact_search_has_prior_unresolved_intervals
+    skipped = clear.schedule(0.02, 0.01, q, v, rotating_poses, advance=advance)
+    assert not skipped.is_scheduled
+    assert skipped.contact_search_status == "unresolved_coverage"
+    assert skipped.contact_search_has_prior_unresolved_intervals
+    with pytest.raises(ValueError):
+        skipped.with_contact_coverage(1.0)
+    assert skipped.rearmed().contact_search_status == "unsearched"
+
+
+def test_conditional_surface_mode_switch_drops_policy():
+    plan_ = _surface_plan(np.array([1.0, 0.0, 0.0])).with_contact_coverage(1.0)
+    passage = plan_.with_passage(np.zeros(3))
+    assert passage.contact_max_clearance_rate_mps is None
+    assert passage.contact_coverage_until_s is None
+
+
+def test_conditional_surface_real_finite_face_root():
+    radius = GOLF_BALL_RADIUS_M
+    plan_ = _surface_plan(np.array([0.02 + radius, 0.0, 0.0])).with_contact_coverage(
+        1.0
+    )
+    q, v = np.zeros(2), np.array([1.0, 0.0])
+    out = plan_.schedule(
+        0.0,
+        0.04,
+        q,
+        v,
+        rotating_poses,
+        advance=lambda t: (q + t * v, v),
+        point_velocity=lambda qq, vv, frame, point: np.array([1.0, 0.0, 0.0]),
+    )
+    assert out.is_scheduled
+    assert out.contact_search_status == "conditional_bracket_candidate"
+    assert out.contact_event.time_s == pytest.approx(0.02, abs=2e-9)
+    assert not out.contact_search_has_prior_unresolved_intervals
+    restored = imf.ImpactForce.from_record(out.to_record())
+    assert restored.contact_search_status == "conditional_bracket_candidate"

@@ -121,6 +121,8 @@ class ImpactForce:
     # A candidate bracket is sampled evidence, never first-contact certification.
     contact_search_status: str | None = None
     contact_search_has_prior_unresolved_intervals: bool = False
+    contact_max_clearance_rate_mps: float | None = None
+    contact_coverage_until_s: float | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.frame, str) or not self.frame:
@@ -149,6 +151,20 @@ class ImpactForce:
             raise ValueError(
                 f"trigger must be 'time', 'passage', or 'surface', not {self.trigger}"
             )
+        if self.contact_max_clearance_rate_mps is not None:
+            if isinstance(self.contact_max_clearance_rate_mps, bool):
+                raise ValueError("contact coverage rate cannot be boolean")
+            rate = float(self.contact_max_clearance_rate_mps)
+            if not math.isfinite(rate) or rate < 0 or self.trigger != "surface":
+                raise ValueError(
+                    "contact coverage requires a finite nonnegative rate and surface trigger"
+                )
+            if self.contact_coverage_until_s is None or not math.isfinite(
+                self.contact_coverage_until_s
+            ):
+                raise ValueError("contact coverage requires a finite coverage clock")
+        elif self.contact_coverage_until_s is not None:
+            raise ValueError("coverage clock requires a rate bound")
         if not isinstance(self.contact_search_has_prior_unresolved_intervals, bool):
             raise ValueError("prior unresolved contact status must be boolean")
         if self.passage_point_m is not None:
@@ -189,6 +205,9 @@ class ImpactForce:
             valid_search_statuses = {
                 "unsearched",
                 "sampled_bracket_candidate",
+                "conditional_bracket_candidate",
+                "conditionally_clear",
+                "unresolved_coverage",
                 "unresolved_no_accepted_candidate",
                 "sampled_bracket_outside_window",
             }
@@ -202,7 +221,20 @@ class ImpactForce:
                 object.__setattr__(self, "contact_search_status", search_status)
             if search_status not in valid_search_statuses:
                 raise ValueError("surface contact search status is invalid")
-            if self.scheduled != (search_status == "sampled_bracket_candidate"):
+            if (
+                search_status
+                in (
+                    "conditionally_clear",
+                    "conditional_bracket_candidate",
+                    "unresolved_coverage",
+                )
+                and self.contact_max_clearance_rate_mps is None
+            ):
+                raise ValueError("conditional status requires a rate bound")
+            if self.scheduled != (
+                search_status
+                in ("sampled_bracket_candidate", "conditional_bracket_candidate")
+            ):
                 raise ValueError(
                     "surface contact status disagrees with scheduled state"
                 )
@@ -338,6 +370,8 @@ class ImpactForce:
             contact_event=None,
             contact_search_status=None,
             contact_search_has_prior_unresolved_intervals=False,
+            contact_max_clearance_rate_mps=None,
+            contact_coverage_until_s=None,
         )
 
     def with_surface_contact(self) -> ImpactForce:
@@ -357,6 +391,29 @@ class ImpactForce:
             contact_miss_penalty_weight_s=0.0,
             contact_point_in_frame=None,
             contact_search_status="unsearched",
+            contact_search_has_prior_unresolved_intervals=False,
+            contact_max_clearance_rate_mps=None,
+            contact_coverage_until_s=None,
+        )
+
+    def with_contact_coverage(self, max_clearance_rate_mps: float) -> ImpactForce:
+        """Opt in to conditional chronological coverage using a caller-attested bound."""
+        if (
+            self.trigger != "surface"
+            or self.is_scheduled
+            or self.contact_search_status != "unsearched"
+            or self.armed_at_s is None
+        ):
+            raise ValueError("coverage requires an unsearched surface plan")
+        if isinstance(max_clearance_rate_mps, bool):
+            raise ValueError("coverage rate cannot be boolean")
+        rate = float(max_clearance_rate_mps)
+        if not math.isfinite(rate) or rate < 0:
+            raise ValueError("coverage rate must be finite and nonnegative")
+        return replace(
+            self,
+            contact_max_clearance_rate_mps=rate,
+            contact_coverage_until_s=float(self.armed_at_s),
             contact_search_has_prior_unresolved_intervals=False,
         )
 
@@ -401,6 +458,9 @@ class ImpactForce:
             contact_point_in_frame=None,
             contact_search_status="unsearched" if self.trigger == "surface" else None,
             contact_search_has_prior_unresolved_intervals=False,
+            contact_coverage_until_s=(
+                start if self.contact_max_clearance_rate_mps is not None else None
+            ),
         )
 
     def schedule(
@@ -471,6 +531,17 @@ class ImpactForce:
                 raise ValueError("surface contact lost its face triangles")
             return triangles @ pose[:3, :3].T + pose[:3, 3]
 
+        if self.contact_max_clearance_rate_mps is not None and (
+            self.contact_search_has_prior_unresolved_intervals
+            or self.contact_coverage_until_s is None
+            or abs((t + offset) - self.contact_coverage_until_s) > _EDGE_TOL_S
+        ):
+            return replace(
+                self,
+                contact_search_status="unresolved_coverage",
+                contact_search_has_prior_unresolved_intervals=True,
+            )
+
         result = find_contact_event(
             lambda seconds: (
                 (q_arm, v_arm) if seconds == 0.0 else armed_advance(seconds)
@@ -479,6 +550,7 @@ class ImpactForce:
             self.ball_centre_m,
             BALL_RADIUS_M,
             duration_s=search_duration,
+            max_clearance_rate_mps=self.contact_max_clearance_rate_mps,
             face_point_velocity_world=(
                 None
                 if point_velocity is None
@@ -504,7 +576,15 @@ class ImpactForce:
             ),
             contact_search_has_prior_unresolved_intervals=(
                 self.contact_search_has_prior_unresolved_intervals
-                or result.event is None
+                or (
+                    result.event is None
+                    and result.coverage_status != "conditionally_clear"
+                )
+            ),
+            contact_coverage_until_s=(
+                t + dt
+                if result.coverage_status == "conditionally_clear"
+                else self.contact_coverage_until_s
             ),
         )
         if result.event is None:
@@ -549,7 +629,11 @@ class ImpactForce:
             t_start_s=event.time_s,
             scheduled=True,
             contact_event=event,
-            contact_search_status="sampled_bracket_candidate",
+            contact_search_status=(
+                "conditional_bracket_candidate"
+                if self.contact_max_clearance_rate_mps is not None
+                else "sampled_bracket_candidate"
+            ),
         )
 
     @property
@@ -578,6 +662,11 @@ class ImpactForce:
                 None if self.armed_at_s is None else self.armed_at_s + offset_s
             ),
             contact_event=event,
+            contact_coverage_until_s=(
+                None
+                if self.contact_coverage_until_s is None
+                else self.contact_coverage_until_s + offset_s
+            ),
         )
 
     # -- kinematics -------------------------------------------------------
@@ -723,6 +812,8 @@ class ImpactForce:
                     "contact_miss_penalty_logsum": self.contact_miss_penalty_logsum,
                     "contact_miss_penalty_weight_s": self.contact_miss_penalty_weight_s,
                     "contact_search_status": self.contact_search_status,
+                    "contact_max_clearance_rate_mps": self.contact_max_clearance_rate_mps,
+                    "contact_coverage_until_s": self.contact_coverage_until_s,
                     "contact_search_has_prior_unresolved_intervals": (
                         self.contact_search_has_prior_unresolved_intervals
                     ),
@@ -835,6 +926,8 @@ class ImpactForce:
                 if record.get("contact_search_status") is None
                 else str(record["contact_search_status"])
             ),
+            contact_max_clearance_rate_mps=record.get("contact_max_clearance_rate_mps"),
+            contact_coverage_until_s=record.get("contact_coverage_until_s"),
             contact_search_has_prior_unresolved_intervals=record.get(
                 "contact_search_has_prior_unresolved_intervals", False
             ),

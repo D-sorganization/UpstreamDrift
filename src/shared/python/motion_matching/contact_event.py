@@ -558,7 +558,12 @@ def find_contact_event(
             max_evaluations=coverage_max_evaluations,
         )
         if coverage.status != "conditional_bracket":
-            return ContactSearchResult(None, penalty, "unresolved_coverage")
+            status = (
+                "conditionally_clear"
+                if coverage.status == "conditionally_clear"
+                else "unresolved_coverage"
+            )
+            return ContactSearchResult(None, penalty, status)
     event: ContactRoot | None = None
     if (
         coverage is None
