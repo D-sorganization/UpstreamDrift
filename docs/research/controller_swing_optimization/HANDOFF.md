@@ -2205,3 +2205,14 @@ modeled drive were 260.09 / 189.97 N m and clipping began at the first stage.
 Target and feedforward both changed, so projection alone is not isolated.
 Registry limits are model assumptions, not verified anatomical capacities;
 this actual motor result does not admit either reference.
+
+A registry-bounded closure pilot solved all 476 frames independently with q0
+and q1 retained: sampled closure residual <=5.88e-11 and zero excess against
+modeled registry ranges; controller initial-rate discrepancy remained 0.000337
+mixed-coordinate units/s. Source-foot RMS improved 2.229 to 0.943 mm and
+source-marker RMS 30.05 to 24.27 mm. It is not a usable trajectory: joint
+acceleration RMS rose from 47.9 to 430.6 rad/s², peak 20,851 rad/s², and
+three actual-interval speed ratios exceeded the assumption-limited registry
+(maximum 1.243). Centered differences missed those interval violations.
+No forward test was warranted. Time coupling and interval-aware auditing are
+needed; registry soft and assumed values are not verified anatomical limits.
