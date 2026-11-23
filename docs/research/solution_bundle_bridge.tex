@@ -1,0 +1,24 @@
+\documentclass{article}
+\usepackage{amsmath}
+\title{Restricted Solution Bundle Replay Bridge}
+\author{UpstreamDrift Research}
+\date{}
+\begin{document}
+\maketitle
+\section{Scope and Assumptions}
+The restricted bridge reads the version-one solution bundle and calls the
+existing fresh-state backend runner. It accepts stateless, fixed-period
+zero-order-hold control, with no saturation, external assets, or impact in
+the replay interval. The last command is unused zero padding. Model, runtime,
+and fresh factory identity are caller assertions, not independently measured.
+It does not attest actuated torque, contact, flight, or physical feasibility.
+\section{Comparison}
+For each supported boundary quantity, the caller supplies absolute and relative
+budgets in that quantity's units. Each element must satisfy
+\( |x_{\rm replay}-x_{\rm record}| \le a + r |x_{\rm record}| \).
+Nonfinite arithmetic is rejected. Time, position, velocity and commanded
+control are checked separately; recorded applied torque is never substituted
+for measured force. Markers are not replay inputs. Independent reconstruction,
+runtime lock, stage-level applied torque, in-window impact, migrations, and
+full replay remain future requirements.
+\end{document}

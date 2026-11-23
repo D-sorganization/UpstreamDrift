@@ -43,3 +43,27 @@ recorded bundle under explicit per-quantity tolerances and matching runtime
 pins. No physical acceptance or winning-candidate promotion follows merely from
 successful execution. Bundle decoding, replay comparison, controller assembly,
 step refinement and the optimization/flight loop remain separate integration work.
+
+## Restricted Bundle Bridge
+
+`scripts.replay_solution_bundle` supplies separate `playback_bundle` and
+`verify_bundle_replay` entry points for a narrow schema-v1 subset. Playback
+returns copies of the recorded state, command and applied-torque arrays and
+never runs a plant. Verification loads a bundle with an expected model hash,
+constructs fresh backend and controller instances through caller-supplied
+factories, integrates from `q0` / `qd0`, and compares time, position, velocity
+and non-terminal commands with explicit per-quantity tolerances. The controller
+factory receives detached reference, spline and gain inputs, not rollout arrays
+or recorded applied torques. Nonfinite comparison arithmetic is rejected.
+
+The accepted policy is stateless fixed-period ZOH, no controller saturation,
+no external assets, no impact during the replay window, and an unused zero
+terminal command. Unsupported values fail before backend construction. The
+model and runtime hashes and factory semantics are caller assertions: this
+bridge does not independently establish the executable model, integrator,
+environment, controller reconstruction, or runtime. The generic runner does
+not measure actuator force; the result explicitly leaves applied torque,
+impact, and independent verification false. Passing its comparisons is not
+full bundle replay, physical qualification, contact, or carry evidence. This
+subset must be extended and independently validated before Slice 2 can be
+considered complete.
