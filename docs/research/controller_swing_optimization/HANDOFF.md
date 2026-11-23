@@ -106,6 +106,12 @@ timed out. The second ended with objective 7.9881, independently recomputed
 projected-gradient infinity norm 4.989, maximum soft closure translation
 0.00714 mm, maximum marker RMS 36.61 mm and peak sampled angular speed
 33.33 rad/s. Named bounds held; the same physical limitations apply.
+A further restart changed the objective only from 7.988055 to 7.987017 while
+the projected-gradient norm increased to 5.597, so repeated identical
+restarts were stopped. The largest sampled generalized speed occurs at the
+free record endpoint; the largest second difference occurs near a marker
+dropout where the corresponding marker-Jacobian sensitivity decreases.
+This association does not prove causation or establish anatomical rates.
 Direct derivation from the embedded calibrated model rejects an unknown pelvis
 offset; relocating its pelvis is a physical model change, not a coordinate-only
 migration. A three-state diagnostic of that changed-model candidate preserved
@@ -154,6 +160,15 @@ and two coordinate-ROM slots were exceeded; none of the generalized speed
 priors were exceeded. Five of those eleven capacity slots and all speed
 priors were assumption-marked. This is not Option B, a post-saturation
 measurement, anatomical clearance or an accepted trajectory.
+The same saved fit was tracked over the full 1.322-second pre-impact interval:
+42,304 of 42,304 accepted stages, no impact or numerical failure. Joint
+tracking RMS was 0.01532 rad, root translation RMS 30.43 mm, and peak
+unsaturated ideal drive 356.87 N m. Thirty of 41 modeled directional drive
+thresholds and seven coordinate-ROM slots were exceeded; none of the
+generalized speed priors were exceeded. Thirteen of the 30 exceeding drive
+slots and all speed priors were assumption-marked. These are sampled model
+thresholds, not clinical findings; the nonstationary fit, computed-torque
+controller, missing saturation, anatomy and impact prevent admission.
 The flight suite was repeated in a fresh isolated Python 3.12 environment
 after building the current Rust extension and verifying physics revision 2:
 15 passed and one strict expected failure. The stale default revision 0 is
