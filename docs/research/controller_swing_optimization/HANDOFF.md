@@ -76,6 +76,10 @@ optimality was 0.276, so the stop is not a stationarity certificate. A 99-frame
 trial reached its 90-second cap without convergence; its last saved point was
 a function trial, not necessarily an accepted iterate. Soft weld penalties,
 missing anatomical bounds and untested forward dynamics prevent acceptance.
+Directional checks of the 33-frame Jacobian had relative errors of
+1.4e-7--4.3e-7. A tighter, rescaled trust-region trial timed out and did not
+improve the measured stationarity; its last function trial is not necessarily
+an accepted iterate.
 Direct derivation from the embedded calibrated model rejects an unknown pelvis
 offset; relocating its pelvis is a physical model change, not a coordinate-only
 migration. A three-state diagnostic of that changed-model candidate preserved
