@@ -116,15 +116,25 @@ def view_lookat(view: str, settings: Any) -> Vec3:
     camera of a behind view lies on the line through ``settings.behind_anchor_m``
     along the view direction, with the same height and depth as before.
     """
-    look = tuple(settings.lookat_m)
-    anchor = settings.behind_anchor_m
-    if settings.lookat_explicit or anchor is None:
-        return look  # type: ignore[return-value]
-    if view not in load_behind_settings().views:
-        return look  # type: ignore[return-value]
+    look: Vec3 = tuple(settings.lookat_m)  # type: ignore[assignment]
+    if settings.lookat_explicit:
+        return look
+    return shift_to_anchor(view, look, settings.behind_anchor_m)
+
+
+def shift_to_anchor(view: str, look: Sequence[float], anchor: Vec3 | None) -> Vec3:
+    """``look`` moved sideways so a behind ``view`` looks along the anchor line.
+
+    Postcondition: other views, or no ``anchor``, return ``look`` unchanged; a
+    behind view keeps the height and depth of ``look`` and puts ``anchor`` at
+    the picture's horizontal centre.
+    """
+    base = np.asarray(look, float)
+    if anchor is None or view not in load_behind_settings().views:
+        return (float(base[0]), float(base[1]), float(base[2]))
     right = get_view_preset(view).image_right()
-    shift = float(np.dot(np.asarray(anchor, float) - np.asarray(look, float), right))
-    moved = np.asarray(look, float) + shift * right
+    shift = float(np.dot(np.asarray(anchor, float) - base, right))
+    moved = base + shift * right
     return (float(moved[0]), float(moved[1]), float(moved[2]))
 
 

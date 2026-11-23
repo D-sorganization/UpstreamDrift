@@ -1326,6 +1326,7 @@
 {"path": "loop_nullspace/qp_core.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/registry.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/replay.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/replay_bundle_manifest.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/replay_campaign.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/replay_ground.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/replay_policy.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
@@ -1352,6 +1353,7 @@
 {"path": "loop_nullspace/strategy_catalogue_data.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/strategy_evaluators.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/strategy_layer_eval.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/strategy_margins.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/strategy_spec.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/strategy_stability.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/tangent_linearization.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
@@ -2074,6 +2076,7 @@
 {"path": "optimization/_swing_models.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/_swing_objectives.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/_swing_reference.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
+{"path": "optimization/applied_effort_audit.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/backend_registry.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/batch_swing_optimizer.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/casadi_backend.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
@@ -2094,6 +2097,7 @@
 {"path": "optimization/ocp/symbolic_model.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/ocp/tracking_ocp.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/smooth_costs.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
+{"path": "optimization/solution_bundle.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/swing_bridge.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/swing_optimizer.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/tests/__init__.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
@@ -2251,6 +2255,7 @@
 {"path": "physics/ball_trajectory_analysis.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/contact_reaction_decomposition.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/dimple_geometry.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
+{"path": "physics/divot_model.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/energy_monitor.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/equipment.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/flexible_shaft.py", "classification": "ud-only", "package": "physics", "spelling_only": false}

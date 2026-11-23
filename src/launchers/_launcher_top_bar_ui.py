@@ -174,7 +174,10 @@ class LauncherTopBarUIMixin:
 
     def _setup_runtime_indicator(self, top_bar: QHBoxLayout) -> None:
         """Create the engine-runtime control and its hover help."""
-        from src.launchers.runtime_mode_help import make_runtime_mode_help_button
+        from src.launchers.runtime_mode_help import (
+            make_runtime_mode_help_button,
+            native_runtime_name,
+        )
 
         self.btn_runtime_help = make_runtime_mode_help_button(self.launcher)
         self.btn_runtime_help.hide()
@@ -197,7 +200,7 @@ class LauncherTopBarUIMixin:
         text_color = _resolve_theme_color(colors, "text_primary", "text", "#ffffff")
 
         self.lbl_execution_mode = RuntimeButton(help_button=self.btn_runtime_help)
-        self.lbl_execution_mode.setText("Runtime: Windows")
+        self.lbl_execution_mode.setText(f"Runtime: {native_runtime_name()}")
         self.lbl_execution_mode.setProperty("exec_mode", "warning")
         style = self.lbl_execution_mode.style()
         if style:

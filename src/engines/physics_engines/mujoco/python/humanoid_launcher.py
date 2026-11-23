@@ -36,7 +36,7 @@ except ImportError:
         UISetupMixin,
     )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QColor, QPalette
+from PyQt6.QtGui import QCloseEvent, QColor, QPalette
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -260,6 +260,20 @@ class HumanoidLauncher(UISetupMixin, SimulationMixin, AnalysisMixin, QMainWindow
 
         # UI Setup
         self.setup_ui()
+
+    def closeEvent(self, event: QCloseEvent | None) -> None:
+        """Stop the owned worker before allowing its launcher to close."""
+        worker = self.simulation_thread
+        if worker is not None and worker.isRunning():
+            worker.stop()
+            if not worker.wait(5000):
+                logger.warning(
+                    "Simulation worker still stopping; keeping launcher open"
+                )
+                if event is not None:
+                    event.ignore()
+                return
+        super().closeEvent(event)
 
 
 def get_dockable_ui(config_path: Path | str | None = None) -> Any:

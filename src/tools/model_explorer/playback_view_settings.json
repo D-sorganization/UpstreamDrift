@@ -1,0 +1,29 @@
+{
+  "default_view": "down_the_line",
+  "sources": {
+    "default_view": "Camera the results playback opens on. down_the_line looks along the target line from behind the golfer; once the run's address ball and feet are known the camera sits on the line midway between them (behind_fraction in native_viewer_export/camera_framing_settings.json), as the owner asked on 2026-11-22. Any VIEW_ORDER preset is allowed.",
+    "render_stretch": "Share of the playback panel's height given to the 3D render; the plot below gets plot_stretch. 5:2 leaves the render about 70% (owner asked on 2026-11-22 that the swing, not the plot, fill the window).",
+    "plot_stretch": "Share of the playback panel's height given to the time-series plot (see render_stretch).",
+    "hide_editor_docks": "While the Results Playback tab is on top, hide the Model Segments and Properties docks so the swing gets the window; the 3D Viewport tab (or View menu) brings them back.",
+    "slider_min_width_px": "Narrowest the timeline slider may get; the transport row (Play, slider, View, Speed, Export) stays on one row and the window's minimum width grows instead of the slider collapsing to its handle.",
+    "camera_distance_m": "Camera distance in metres per view; only the views listed override the shared preset's default_distance_m (3.75 m for down_the_line), which the exports keep. Measured on the committed demo bundle at address (golfer and club pixels from a MuJoCo segmentation render, first to last row over frame height): down_the_line 3.75 m (preset) 52%, 2.6 m 76%; face_on 3.5 m (preset) 60%, 2.8 m 74%. The owner asked on 2026-11-22 that the golfer fill the render; 70-80% leaves head and club clear of the frame edge.",
+    "framing": "How the render fills its area. The render is made at the view label's aspect (width over height), clamped to min_aspect..max_aspect and rounded to aspect_step so a drag-resize does not rebuild the renderer on every pixel; render_height_px is its height. A resize is debounced by resize_debounce_ms before the renderer is rebuilt. Past the clamp the picture keeps its shape and the label shows grey gutters."
+  },
+  "layout": {
+    "render_stretch": 5,
+    "plot_stretch": 2,
+    "hide_editor_docks": true,
+    "slider_min_width_px": 160
+  },
+  "camera_distance_m": {
+    "down_the_line": 2.6,
+    "face_on": 2.8
+  },
+  "framing": {
+    "render_height_px": 540,
+    "min_aspect": 1.0,
+    "max_aspect": 3.2,
+    "aspect_step": 0.1,
+    "resize_debounce_ms": 150
+  }
+}

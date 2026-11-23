@@ -311,7 +311,17 @@ def _group_maps(
         u = (points - hip_mid) @ axis
         return points + np.outer(warp(u) - u, axis)
 
-    maps: dict[str, PointMap] = {"trunk": trunk}
+    src_hip_half = 0.5 * abs(float(marks["hip_l"][1] - marks["hip_r"][1]))
+    if src_hip_half <= 0.0:
+        raise ValueError("source hip landmarks must span the lateral axis")
+    hip_wide = lengths.hip_half_spacing / src_hip_half
+
+    def pelvis(points: Array) -> Array:
+        out = trunk(points)
+        out[:, 1] = hip_mid[1] + hip_wide * (out[:, 1] - hip_mid[1])
+        return out
+
+    maps: dict[str, PointMap] = {"trunk": trunk, "pelvis": pelvis}
     joints = {"neck": trunk(marks["neck"][None])[0]}
     for side, sign in SIDES:
         lateral = np.array([0.0, sign, 0.0])
@@ -415,8 +425,12 @@ def fit_body_skin(
     maps: dict[str, PointMap] = {}
     vertices = np.zeros_like(skin.vertices)
     for column, group in enumerate(skin.groups):
-        trunk = group.startswith(TRUNK_GROUPS)
-        key = "trunk" if trunk else f"{group.split('_')[0]}_{group[-1]}"
+        if group.startswith("pelvis"):
+            key = "pelvis"
+        elif group.startswith(TRUNK_GROUPS):
+            key = "trunk"
+        else:
+            key = f"{group.split('_')[0]}_{group[-1]}"
         maps[group] = prefix_maps[key]
         used = skin.weights[:, column] > 0.0
         vertices[used] += skin.weights[used, column, None] * maps[group](rest[used])

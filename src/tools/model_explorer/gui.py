@@ -85,6 +85,8 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         self._results: ResultsSession | None = None
         self.playback_panel: Any | None = None
         self.playback_dock: QDockWidget | None = None
+        self.run_panel: Any | None = None
+        self.run_dock: QDockWidget | None = None
 
         # Internal QMainWindow gives us QDockWidget without forcing this
         # object to *be* a top-level window. ``Qt.WindowType.Widget``
@@ -536,7 +538,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
             self, "Load Results", "", "Results (*.npz);;All Files (*)"
         )
         if file_path:
-            self.load_results(file_path)
+            self.load_results(file_path, wait=False)
 
     def scrub_results(self, index: int) -> None:
         """Move the playback cursor; ``ValueError`` if out of range or unloaded."""
@@ -608,6 +610,19 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
 
     # ---- lifecycle -----------------------------------------------------
 
+    def open_run_simulation(self) -> None:
+        """Show the Run Simulation dock, tabbed with Model Segments (reused)."""
+        from . import run_dock
+
+        if self.run_dock is None:
+            self.run_panel = run_dock.RunSimulationPanel(run_dock.SimRunService(), self)
+            self.run_dock = QDockWidget("Run Simulation", self._inner)
+            self.run_dock.setObjectName("RunSimulationDock")
+            self.run_dock.setWidget(self.run_panel)
+            self._inner.tabifyDockWidget(self.segment_dock, self.run_dock)
+        self.run_dock.show()
+        self.run_dock.raise_()
+
     def has_unsaved_changes(self) -> bool:
         """Return ``True`` if the builder has segments and no file path."""
         return (
@@ -621,7 +636,10 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         """Release any resources held by the widget. Idempotent."""
         if hasattr(self, "playback_bar") and self.playback_bar is not None:
             self.playback_bar.stop()
+        self.cancel_results_loads()
         self._discard_results()
+        if self.run_panel is not None:
+            self.run_panel.cleanup()
         # No long-lived background resources today; the visualization
         # widget owns its own GL context which Qt tears down with the
         # widget itself. The hook exists so the embed adapter can call
@@ -779,6 +797,11 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         advanced_editor_action.setShortcut("Ctrl+E")
         advanced_editor_action.triggered.connect(self.open_advanced_editor)
         tools_menu.addAction(advanced_editor_action)
+
+        run_action = QAction("&Run Simulation...", self)
+        run_action.setToolTip("Run a pinned simulation case and watch the result")
+        run_action.triggered.connect(self.open_run_simulation)
+        tools_menu.addAction(run_action)
 
         tools_menu.addSeparator()
 

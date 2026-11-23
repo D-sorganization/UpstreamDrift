@@ -121,11 +121,13 @@ def _explorer_tab(launcher: Any) -> Any:
 
 
 def _wait_for_results(explorer: Any) -> None:
+    """Spin events until the queued background load has started and finished."""
     deadline = time.monotonic() + LOAD_DEADLINE_S
     while explorer.results_frame_count == 0 and time.monotonic() < deadline:
         QApplication.processEvents()
         time.sleep(0.05)
     assert explorer.results_frame_count > 0, "default matched swing never loaded"
+    assert explorer.wait_for_results_load(LOAD_DEADLINE_S), "load did not finish"
 
 
 def test_launcher_opens_explorer_plays_and_switches_matched_swings(
@@ -162,17 +164,20 @@ def test_launcher_opens_explorer_plays_and_switches_matched_swings(
     assert [a.text() for a in actions] == user_setting
     before = (panel.title_label.text(), count)
     actions[1].trigger()
-    QApplication.processEvents()
+    assert explorer.is_loading_results, "the switch must load in the background"
+    assert explorer.wait_for_results_load(LOAD_DEADLINE_S)
     panel = explorer.playback_panel
     assert panel.title_label.text().startswith(user_setting[1])
     assert (panel.title_label.text(), panel.session.frame_count) != before
     _grab(launcher, shots, "04_second_scenario")
 
     # Feature 1: camera view changes the rendered golfer.
+    # It opens behind the golfer (the default_view setting, #15150).
+    assert panel.view_combo.currentText() == "down_the_line"
     panel.show_frame(panel.session.frame_count // 2)
-    face_on = panel.current_image()
-    panel.view_combo.setCurrentText("down_the_line")
-    assert not np.array_equal(face_on, panel.current_image())
+    behind = panel.current_image()
+    panel.view_combo.setCurrentText("face_on")
+    assert not np.array_equal(behind, panel.current_image())
     # Feature 2: the plotted channel changes the plot axis.
     joint = panel.channel_combo.itemText(panel.channel_combo.count() - 1)
     panel.select_channel(joint)
@@ -181,13 +186,6 @@ def test_launcher_opens_explorer_plays_and_switches_matched_swings(
     explorer.cleanup()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "#15150 gap: the live playback panel has no ball, ball-flight or "
-        "shot-shape control; those exist only as Export Clips options"
-    ),
-)
 def test_live_playback_offers_ball_flight_and_shot_shape() -> None:
     for name in ("set_ball_flight_visible", "set_shot_shape"):
         assert callable(getattr(ResultsPlaybackPanel, name, None)), name

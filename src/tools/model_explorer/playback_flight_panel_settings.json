@@ -1,0 +1,28 @@
+{
+  "title": "Shot",
+  "sections": ["Impact", "Launch", "Flight"],
+  "blank_text": "--",
+  "flight_unavailable_text": "flight unavailable",
+  "needs_bundle_text": "needs a same-input bundle run",
+  "default_club": "Driver",
+  "club_labels": {"driver": "Driver", "iron7": "7-Iron"},
+  "angle_decimals": 1,
+  "spin_decimals": 0,
+  "side_left_text": "L",
+  "side_right_text": "R",
+  "min_width_px": 230,
+  "sources": {
+    "title": "Title of the card's dock.",
+    "sections": "Names of the row groups: impact factors (club), launch (ball, flight model) and flight (carry, total, apex, side).",
+    "blank_text": "Value of a number the exporter did not compute (never shown as 0).",
+    "flight_unavailable_text": "Start of the Ball Flight row when the flight model gave no flight (e.g. no upstream_physics wheel); the exporter's reason follows. No contact shows the exporter's flight_tracer.NO_CONTACT_STATUS.",
+    "needs_bundle_text": "Status of a run that is not a same-input bundle: the exporter needs a bundle's club and ball.",
+    "default_club": "Club label of the flight and roll models when the bundle names no club (the exporter's --club default).",
+    "club_labels": "Bundle club name -> launch-monitor label of the flight and roll models (club_to_skill reads 7-Iron, not iron7); pass the same --club to compare with the exporter.",
+    "angle_decimals": "Decimals of the angle rows (as the impact factors panel).",
+    "spin_decimals": "Decimals of the spin rate (as the flight HUD).",
+    "side_left_text": "Suffix of a side offset or spin axis to the left.",
+    "side_right_text": "Suffix of a side offset or spin axis to the right (+).",
+    "min_width_px": "Smallest card width, so the longest value is not cut."
+  }
+}

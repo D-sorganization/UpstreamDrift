@@ -892,8 +892,11 @@ class BunkerShotWidget(QWidget):
             )
 
     def _show_input_error(self, error: WorkbenchInputError) -> None:
-        """Report an unusable input without pretending it is a verdict."""
+        """Report an unusable input with no stale result to view or export."""
         logger.info("bunker workbench input rejected: %s", error)
+        self._last_evaluation = None
+        self._last_comparison = None
+        self._loaded_record = None
         self._banner.show_error(str(error))
         self._results.setPlainText(
             "The inputs do not describe a shot that can be solved.\n\n"
@@ -908,8 +911,14 @@ class BunkerShotWidget(QWidget):
             self._window_map_b,
             self._field_a,
             self._field_b,
+            self._scene_a,
+            self._traces_a,
+            self._cross_tier,
         ):
             widget.clear()
+        self._clear_sand_field()
+        self.update_control_states()
+        self.evaluation_changed.emit()
 
     def cleanup(self) -> None:
         """Cancel and join any running action (#8880)."""

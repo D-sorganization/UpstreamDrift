@@ -85,6 +85,22 @@ class CrossEngineReplayConfig:
 
 
 @dataclass(frozen=True)
+class StepSizeTolerance:
+    """Convergence thresholds for step-size refinement.
+
+    ``qd_rad_s=None`` (default) keeps the historical q-only gate; declare it to
+    also gate the maximum qd difference (#14756 P7).
+    """
+
+    q_rad: float = 0.05
+    qd_rad_s: float | None = None
+
+    def __post_init__(self) -> None:
+        if self.qd_rad_s is not None and not self.qd_rad_s > 0.0:
+            raise ValueError("qd_rad_s must be positive when provided")
+
+
+@dataclass(frozen=True)
 class StepSizeConvergenceResult:
     """Results of step-size refinement convergence analysis."""
 
@@ -112,9 +128,21 @@ def compute_step_size_convergence(
     qd_refined: Array,
     h_nominal: float,
     h_refined: float,
-    tolerance_rad: float = 0.05,
+    tolerance_rad: float | StepSizeTolerance = 0.05,
 ) -> StepSizeConvergenceResult:
-    """Measure trajectory difference across integration step refinement."""
+    """Measure trajectory difference across integration step refinement.
+
+    ``is_converged`` requires every q/qd sample of both runs to be finite and
+    the maximum q difference to be within the q tolerance. ``tolerance_rad`` is
+    either a float (q-only, historical behaviour) or a ``StepSizeTolerance``;
+    the qd difference is only gated when ``qd_rad_s`` is declared, so no gate
+    is redefined implicitly (#14756 P7).
+    """
+    tol = (
+        tolerance_rad
+        if isinstance(tolerance_rad, StepSizeTolerance)
+        else StepSizeTolerance(q_rad=tolerance_rad)
+    )
     if q_nominal.shape != q_refined.shape or qd_nominal.shape != qd_refined.shape:
         raise ValueError("Nominal and refined trajectories must have identical shape")
     if len(time_s) != q_nominal.shape[0]:
@@ -125,7 +153,13 @@ def compute_step_size_convergence(
 
     max_q_diff = float(np.max(q_diff))
     max_qd_diff = float(np.max(qd_diff))
-    is_converged = bool(max_q_diff <= tolerance_rad)
+    all_finite = all(
+        bool(np.all(np.isfinite(a)))
+        for a in (q_nominal, qd_nominal, q_refined, qd_refined)
+    )
+    is_converged = bool(all_finite and max_q_diff <= tol.q_rad)
+    if tol.qd_rad_s is not None:
+        is_converged = bool(is_converged and max_qd_diff <= tol.qd_rad_s)
 
     return StepSizeConvergenceResult(
         h_nominal=h_nominal,

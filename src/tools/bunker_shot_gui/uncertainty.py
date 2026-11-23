@@ -49,7 +49,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from numpy.typing import NDArray
 
-from bunkershot3d.ball import BunkerShotState, compute_bunker_launch
+from bunkershot3d.ball import BallLaunchResult, BunkerShotState, compute_bunker_launch
 from bunkershot3d.metrics import PlayabilityWindow
 from bunkershot3d.solvers import ValidityVerdict
 from bunkershot3d.vandv.band import ConsistencyBand
@@ -162,6 +162,7 @@ class CarryEstimate:
     verdict: ValidityVerdict
     band: ConsistencyBand | None = None
     band_reasons: tuple[str, ...] = ()
+    launch: BallLaunchResult | None = None
 
     def __post_init__(self) -> None:
         """Keep the band and the number it is the band of together.

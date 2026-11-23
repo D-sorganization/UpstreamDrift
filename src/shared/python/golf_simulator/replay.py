@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+import math
 import time
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
@@ -127,6 +128,12 @@ class ReplaySubmissionCoordinator:
     - Pausing or seeking across impact automatically disarms the prepared shot.
     - Dropped presentation frames or variable tick rates do not duplicate submissions.
     - Records latency audit metrics (impact-to-send and send-to-response).
+
+    ``impact_to_send_latency_ms`` is wall-clock time from the scheduled impact
+    instant on the replay timeline to the send attempt: replay frame
+    quantization ``(t_curr - impact_time_s) / playback_rate`` plus software
+    path overhead from impact-cross detection to send attempt
+    ``t_trigger - t_detect``.
     """
 
     def __init__(
@@ -237,12 +244,21 @@ class ReplaySubmissionCoordinator:
 
         # Normal forward playback crossing impact
         if t_prev < self._impact_time_s <= t_curr:
-            receipt = await self._execute_impact_submission()
+            t_detect = self._time_fn()
+            receipt = await self._execute_impact_submission(
+                t_detect_wall_s=t_detect,
+                replay_time_at_cross_s=t_curr,
+            )
             return receipt
 
         return None
 
-    async def _execute_impact_submission(self) -> SubmissionReceipt:
+    async def _execute_impact_submission(
+        self,
+        *,
+        t_detect_wall_s: float,
+        replay_time_at_cross_s: float,
+    ) -> SubmissionReceipt:
         """Execute single-impact submission and measure latencies."""
         assert self._prepared_shot is not None
         assert self._arm_token is not None
@@ -254,7 +270,23 @@ class ReplaySubmissionCoordinator:
         shot_id = self._shot_id
         impact_t = self._impact_time_s
 
+        if not math.isfinite(t_detect_wall_s):
+            msg = f"t_detect_wall_s must be finite, got {t_detect_wall_s!r}"
+            raise ValueError(msg)
+        if not math.isfinite(replay_time_at_cross_s):
+            msg = (
+                f"replay_time_at_cross_s must be finite, got {replay_time_at_cross_s!r}"
+            )
+            raise ValueError(msg)
+
+        rate = self._clock.playback_rate
+        if rate <= 0.0:
+            raise ValueError(f"playback_rate must be strictly positive, got {rate}")
+
         t_trigger = self._time_fn()
+        if not math.isfinite(t_trigger):
+            msg = f"t_trigger must be finite, got {t_trigger!r}"
+            raise ValueError(msg)
         send_attempt_utc = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
         # Execute submission
@@ -264,10 +296,20 @@ class ReplaySubmissionCoordinator:
         )
 
         t_done = self._time_fn()
+        if not math.isfinite(t_done):
+            msg = f"t_done must be finite, got {t_done!r}"
+            raise ValueError(msg)
         response_utc = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
-        impact_to_send_ms = max(0.0, (t_trigger - t_trigger) * 1000.0)
-        send_to_response_ms = max(0.0, (t_done - t_trigger) * 1000.0)
+        replay_lag_s = max(0.0, (replay_time_at_cross_s - impact_t) / rate)
+        software_lag_s = max(0.0, t_trigger - t_detect_wall_s)
+        impact_to_send_ms = round((replay_lag_s + software_lag_s) * 1000.0, 6)
+        send_to_response_ms = round(max(0.0, (t_done - t_trigger) * 1000.0), 6)
+
+        if not math.isfinite(impact_to_send_ms):
+            raise ValueError("impact_to_send_latency_ms must be finite")
+        if not math.isfinite(send_to_response_ms):
+            raise ValueError("send_to_response_latency_ms must be finite")
 
         record = ReplayTimingRecord(
             shot_id=shot_id,
