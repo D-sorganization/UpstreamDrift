@@ -1,0 +1,7 @@
+\documentclass{article}
+\usepackage{amsmath}
+\title{MuJoCo Actuator Drive Research Probe}
+\begin{document}
+\maketitle
+The constrained solver uses $M(q)\ddot q + b(q,\dot q)=\tau + J^T\lambda+\tau_{\mathrm{contact}}$. This probe obtains the generalized input $\tau$ from MuJoCo's actuator force after its configured control and force limits, then supplies $\tau$ once to the existing constrained solve. The synthetic fixture uses memoryless joint motors; its unit gear and limits are test parameters, not physiological data. The baseline model has no native actuators. This point evaluation does not establish an admissible swing, an actuator identification, a continuous force history, or replay. States use the plant's scalar coordinate order, SI radians and meters, rates in radians or meters per second, and generalized force in newtons or newton meters. Caller-provided motor parameters and mappings require independent validation. Run the repository test \texttt{tests/unit/motion\_matching/same\_input/test\_mujoco\_actuator\_probe.py} headlessly to check force saturation and single application.
+\end{document}
