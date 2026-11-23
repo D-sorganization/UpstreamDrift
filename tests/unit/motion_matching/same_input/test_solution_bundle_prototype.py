@@ -21,7 +21,7 @@ pytestmark = pytest.mark.unit
 def _fixture():
     model = b'{"synthetic":true}'
     manifest = {
-        "schema_version": "research-solution-prototype/v3",
+        "schema_version": "research-solution-prototype/v4",
         "research_only": True,
         "runner": {"mode": "unavailable"},
         "solution_id": "synthetic",
@@ -265,6 +265,100 @@ def test_real_impact_evidence_is_not_accepted_by_prototype():
         SolutionBundle(manifest, b.arrays, b.model_bytes)
 
 
+def test_grid_aligned_recorded_force_event_is_preserved_but_not_certified(tmp_path):
+    b = _fixture()
+    manifest = deepcopy(b.manifest)
+    manifest["impact"] = {
+        "status": "recorded_latched_force",
+        "time_s": 0.0,
+        "duration_s": 0.1,
+        "frame": "face",
+        "point_in_frame_m": [0.0, 0.0, 0.0],
+        "axis_in_frame": [1.0, 0.0, 0.0],
+        "force_world_n": [-1.0, 0.0, 0.0],
+        "event_q": [0.0],
+        "event_qd": [1.0],
+        "contact_verified": False,
+    }
+    bundle = SolutionBundle(manifest, b.arrays, b.model_bytes)
+    path = tmp_path / "impact.json"
+    digest = save_solution(path, bundle)
+    loaded = load_solution(
+        path,
+        expected_manifest_sha256=digest,
+        expected_model_sha256=manifest["model_sha256"],
+        expected_runtime_sha256="c" * 64,
+    )
+    assert loaded.manifest["impact"] == manifest["impact"]
+
+
+@pytest.mark.parametrize(
+    "bad",
+    [
+        "near_edge",
+        "state",
+        "outside",
+        "verified",
+        "extra",
+        "nonfinite",
+        "tiny_duration",
+    ],
+)
+def test_recorded_force_event_rejects_inconsistent_evidence(bad):
+    b = _fixture()
+    manifest = deepcopy(b.manifest)
+    event = {
+        "status": "recorded_latched_force",
+        "time_s": 0.0,
+        "duration_s": 0.1,
+        "frame": "face",
+        "point_in_frame_m": [0.0, 0.0, 0.0],
+        "axis_in_frame": [1.0, 0.0, 0.0],
+        "force_world_n": [-1.0, 0.0, 0.0],
+        "event_q": [0.0],
+        "event_qd": [1.0],
+        "contact_verified": False,
+    }
+    if bad == "near_edge":
+        event["time_s"] = 5e-13
+    if bad == "state":
+        event["event_q"] = [0.01]
+    if bad == "outside":
+        event["duration_s"] = 1.01
+    if bad == "verified":
+        event["contact_verified"] = True
+    if bad == "extra":
+        event["undocumented"] = 1
+    if bad == "nonfinite":
+        event["force_world_n"] = [float("nan"), 0, 0]
+    if bad == "tiny_duration":
+        event["time_s"], event["duration_s"] = 0.5, 5e-13
+    manifest["impact"] = event
+    with pytest.raises(ValueError):
+        SolutionBundle(manifest, b.arrays, b.model_bytes)
+
+
+def test_off_grid_force_event_is_allowed_without_claiming_grid_interpolation():
+    b = _fixture()
+    manifest = deepcopy(b.manifest)
+    manifest["impact"] = {
+        "status": "recorded_latched_force",
+        "time_s": 0.5,
+        "duration_s": 0.1,
+        "frame": "face",
+        "point_in_frame_m": [0.0, 0.0, 0.0],
+        "axis_in_frame": [1.0, 0.0, 0.0],
+        "force_world_n": [-1.0, 0.0, 0.0],
+        "event_q": [0.123],
+        "event_qd": [0.987],
+        "contact_verified": False,
+    }
+    assert (
+        SolutionBundle(manifest, b.arrays, b.model_bytes).manifest["impact"]["time_s"]
+        == 0.5
+    )
+
+
 def test_unavailable_runner_and_old_research_schema_fail_closed():
     from src.shared.python.motion_matching.same_input.solution_bundle_prototype import (
         run_mujoco_ideal,
@@ -297,6 +391,24 @@ def test_explicit_v2_migration_preserves_single_hold_values():
     )
     with pytest.raises(ValueError, match="v2"):
         migrate_research_v2(b.manifest, arrays, b.model_bytes)
+
+
+def test_v3_requires_explicit_no_impact_migration():
+    from src.shared.python.motion_matching.same_input.solution_bundle_prototype import (
+        migrate_research_v3,
+    )
+
+    b = _fixture()
+    old = deepcopy(b.manifest)
+    old["schema_version"] = "research-solution-prototype/v3"
+    with pytest.raises(ValueError, match="migration"):
+        SolutionBundle(old, b.arrays, b.model_bytes)
+    migrated = migrate_research_v3(old, b.arrays, b.model_bytes)
+    assert migrated.manifest["impact"] == {"status": "none"}
+    assert migrated.manifest["schema_version"].endswith("/v4")
+    old["impact"] = {"status": "detected"}
+    with pytest.raises(ValueError, match="impact"):
+        migrate_research_v3(old, b.arrays, b.model_bytes)
 
 
 def test_real_mujoco_ideal_forward_replay_uses_actual_integrator(tmp_path):
@@ -435,6 +547,130 @@ def test_real_mujoco_ideal_forward_replay_uses_actual_integrator(tmp_path):
     wrong_manifest["model_sha256"] = hashlib.sha256(wrong_model).hexdigest()
     with pytest.raises(ValueError, match="coordinate inventory"):
         run_mujoco_ideal(SolutionBundle(wrong_manifest, arrays, wrong_model))
+
+
+def test_off_grid_recorded_force_replays_actual_impact_state(tmp_path):
+    pytest.importorskip("mujoco")
+    from pathlib import Path
+    from src.shared.python.motion_matching import club_face_target as face
+    from src.shared.python.motion_matching.same_input.integrator import ROOT_COORDINATES
+    from src.shared.python.motion_matching.same_input.solution_bundle_mujoco_replay import (
+        measured_runtime_fingerprint,
+    )
+    from src.shared.python.motion_matching.same_input.solution_bundle_prototype import (
+        run_mujoco_ideal,
+    )
+
+    model = (
+        Path(__file__).resolve().parents[4]
+        / "docs/development/full_body_models/full_body_spec_anthro_driver_v2.json"
+    ).read_bytes()
+    spec = json.loads(model)
+    names, dt = spec["coordinate_order"], 0.0001
+    n = len(names)
+    root = [names.index(name) for name in ROOT_COORDINATES]
+    times = np.arange(3, dtype=float) * dt
+    lower, upper = np.full(n, -10.0), np.full(n, 10.0)
+    lower[root] = upper[root] = 0.0
+    seed = _fixture()
+    manifest = deepcopy(seed.manifest)
+    manifest["model_sha256"] = hashlib.sha256(model).hexdigest()
+    manifest["conventions"]["joint_order"] = names
+    manifest["controller"].update(saturation="ideal_clip_total", holds_per_step=2)
+    manifest["integrator"] = {
+        "kind": "rk4_zoh",
+        "runtime": "partial_measured_v1",
+        "runtime_sha256": measured_runtime_fingerprint(),
+    }
+    manifest["runner"] = {
+        "mode": "mujoco_ideal_zoh",
+        "dt_s": dt,
+        "substeps": 4,
+        "project": False,
+        "trust_radius": 1.0,
+        "min_spacing_s": dt,
+    }
+    manifest["impact"] = {
+        "status": "recorded_latched_force",
+        "time_s": dt / 4,
+        "duration_s": dt,
+        "frame": face.FACE_FRAME,
+        "point_in_frame_m": face.face_centre_in_frame(spec).tolist(),
+        "axis_in_frame": face.face_axis_in_frame(spec).tolist(),
+        "force_world_n": [-10.0, 0.0, 0.0],
+        "event_q": np.zeros(n).tolist(),
+        "event_qd": np.zeros(n).tolist(),
+        "contact_verified": False,
+    }
+    arrays = {
+        "reference_time_s": times,
+        "q_ref": np.zeros((3, n)),
+        "qd_ref": np.zeros((3, n)),
+        "tau_ff_ref": np.zeros((3, n)),
+        "spline_knots_s": np.r_[np.repeat(times[0], 4), np.repeat(times[-1], 4)],
+        "spline_coefficients": np.zeros((4, n)),
+        "kp": np.zeros(n),
+        "kd": np.zeros(n),
+        "q0": np.zeros(n),
+        "qd0": np.zeros(n),
+        "recorded_time_s": times,
+        "recorded_hold_time_s": np.arange(4, dtype=float) * (dt / 2),
+        "recorded_q": np.zeros((3, n)),
+        "recorded_qd": np.zeros((3, n)),
+        "commanded_tau": np.zeros((4, n)),
+        "ideal_input_tau": np.zeros((4, n)),
+        "saturation_lower": lower,
+        "saturation_upper": upper,
+        "spline_scale": np.ones(n),
+    }
+    actual = run_mujoco_ideal(SolutionBundle(manifest, arrays, model))
+    assert actual.impact_event is not None and actual.impact_event[0] == dt / 4
+    assert np.any(
+        actual.impact_event[2] != 0.0
+    )  # Real pre-force integration, not grid interpolation.
+    stronger = deepcopy(manifest)
+    stronger["impact"]["force_world_n"] = [-20.0, 0.0, 0.0]
+    strong_replay = run_mujoco_ideal(SolutionBundle(stronger, arrays, model))
+    np.testing.assert_array_equal(strong_replay.impact_event[1], actual.impact_event[1])
+    np.testing.assert_array_equal(strong_replay.impact_event[2], actual.impact_event[2])
+    assert np.max(np.abs(strong_replay.q[-1] - actual.q[-1])) > 1e-12
+    arrays.update(
+        recorded_q=actual.q,
+        recorded_qd=actual.qd,
+        commanded_tau=actual.commanded_tau,
+        ideal_input_tau=actual.ideal_input_tau,
+    )
+    manifest["impact"]["event_q"] = actual.impact_event[1].tolist()
+    manifest["impact"]["event_qd"] = actual.impact_event[2].tolist()
+    bundle = SolutionBundle(manifest, arrays, model)
+    path = tmp_path / "impact.json"
+    digest = save_solution(path, bundle)
+    loaded = load_solution(
+        path,
+        expected_manifest_sha256=digest,
+        expected_model_sha256=manifest["model_sha256"],
+        expected_runtime_sha256=manifest["integrator"]["runtime_sha256"],
+    )
+    tolerances = dict.fromkeys(
+        ("q", "qd", "commanded_tau", "ideal_input_tau"), (1e-12, 1e-12)
+    )
+    report = verify_forward_resimulation(
+        loaded,
+        run_mujoco_ideal,
+        tolerances,
+        runtime_sha256=manifest["integrator"]["runtime_sha256"],
+    )
+    assert report.passed and not report.independently_verified
+    assert report.max_absolute_error["impact_q"] <= 1e-12
+    altered = deepcopy(manifest)
+    altered["impact"]["event_q"][0] += 0.01
+    bad = SolutionBundle(altered, arrays, model)
+    assert not verify_forward_resimulation(
+        bad,
+        run_mujoco_ideal,
+        tolerances,
+        runtime_sha256=manifest["integrator"]["runtime_sha256"],
+    ).passed
 
 
 def test_multiple_holds_preserve_control_clock_and_replay(tmp_path):

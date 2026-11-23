@@ -189,6 +189,7 @@ def integrate(
     dt_s: float,
     policy: StepPolicy = DEFAULT_POLICY,
     impact: ImpactForce | None = None,
+    impact_event_observer: Callable[[float, Array, Array], None] | None = None,
 ) -> Rollout:
     """Integrate ``steps`` steps, asking ``source(j, t, q, v)`` for each effort.
 
@@ -217,7 +218,13 @@ def integrate(
     for k in range(steps):
         try:
             q, v, impact, taus, step_drift = _held_step(
-                plant, (q, v), k, dt_s, (source, root, impact, poses), policy
+                plant,
+                (q, v),
+                k,
+                dt_s,
+                (source, root, impact, poses),
+                policy,
+                impact_event_observer,
             )
         except (ArithmeticError, np.linalg.LinAlgError, ValueError) as exc:
             if not policy.stop_on_failure:
@@ -246,6 +253,7 @@ def _held_step(
     dt_s: float,
     inputs: tuple[EffortSource, Array, ImpactForce | None, Any],
     policy: StepPolicy,
+    impact_event_observer: Callable[[float, Array, Array], None] | None = None,
 ) -> tuple[Array, Array, ImpactForce | None, list[Array], float]:
     """One step: ``effort_holds`` held efforts, then the closure projection."""
     source, root, impact, poses = inputs
@@ -265,7 +273,13 @@ def _held_step(
                 )
         else:
             q, v, impact = _impact_hold(
-                plant, (q, v, tau), (j * hold_dt, hold_dt), impact, poses, policy
+                plant,
+                (q, v, tau),
+                (j * hold_dt, hold_dt),
+                impact,
+                poses,
+                policy,
+                impact_event_observer,
             )
     if not policy.project:
         return q, v, impact, taus, float(np.abs(plant.closure_pose_residual(q)).max())
@@ -280,6 +294,7 @@ def _impact_hold(
     impact: ImpactForce,
     poses: Any,
     policy: StepPolicy,
+    impact_event_observer: Callable[[float, Array, Array], None] | None = None,
 ) -> tuple[Array, Array, ImpactForce]:
     """One held effort through the ball window (no closure projection)."""
     q, v, tau = state
@@ -301,6 +316,11 @@ def _impact_hold(
         advance,
         poses=poses,
         accel=lambda qq, vv, f: plant.acceleration(qq, vv, f),
+        **(
+            {}
+            if impact_event_observer is None
+            else {"event_observer": impact_event_observer}
+        ),
     )
     if latched is None:
         raise ValueError("ball impact plan was lost during the step")

@@ -380,6 +380,7 @@ def step_through_impact(
     *,
     poses: PoseFn,
     accel: AccelFn,
+    event_observer: Callable[[float, Array, Array], None] | None = None,
 ) -> tuple[Array, Array, ImpactForce | None, Any]:
     """Advance ``[t, t + dt]`` with ``step``, applying the ball force inside it.
 
@@ -404,6 +405,8 @@ def step_through_impact(
     for index, (a, b, active) in enumerate(parts):
         external: ExternalFn | None = None
         if active:
+            if event_observer is not None and abs(a - impact.t_start_s) <= _EDGE_TOL_S:
+                event_observer(a, np.asarray(q).copy(), np.asarray(v).copy())
             if not impact.is_latched:
                 impact = impact.latch(q, v, poses, accel)
             plan = impact

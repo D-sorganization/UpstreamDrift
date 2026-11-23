@@ -26,7 +26,7 @@ enforce archive resource limits for hostile inputs.
 `recorded_playback` copies stored values without running a plant. The separate
 `run_mujoco_ideal` entry point uses the existing same-input RK4 integrator and
 fixed-gain spline prototype. It accepts fixed equally spaced holds, rigid-shaft,
-no-impact MuJoCo inputs with explicit total-command clipping, zero root input,
+MuJoCo inputs with explicit total-command clipping, zero root input,
 model-default environment and no external assets. State records are sampled
 after each integration step; command and ideal input records carry their own
 hold clock and are sampled once per hold. The number of holds must divide the
@@ -40,15 +40,25 @@ software-clipped generalized input, not measured or post-actuator torque.
 `verify_forward_resimulation` compares outputs from a caller-supplied runner
 using per-quantity tolerances. Even when passed `run_mujoco_ideal`, its result
 cannot authenticate the runner or establish independent verification. The
-metadata must label flight and feasibility unavailable. The v3 research schema
+metadata must label flight and feasibility unavailable. The v4 research schema
 rejects older schemas unless explicitly migrated. `migrate_research_v2` converts
 only already-authenticated, fixed-grid v2 one-hold records; callers must verify
 their old manifest and payload before decoding them. Migration retains the old
 runtime digest; a runner with changed code rejects that digest unless new
-evidence is independently generated. Full runtime locking, asset embedding and
-impact replay, downstream applied-actuator evidence, physical gates, flight
+evidence is independently generated. `migrate_research_v3` accepts only
+caller-authenticated no-impact research records. Full runtime locking, asset
+embedding and root-detected impact replay, downstream applied-actuator evidence, physical gates, flight
 metrics and independently replayed optimization results remain unimplemented.
 The code must not be used to claim Slice 2 is complete or to qualify a swing.
+
+The v4 prototype can replay a recorded, already-latched constant world force
+on a specified model frame. Its start and end must lie inside the run without
+ambiguous near-hold-edge timing. The actual pre-force q and qd are observed at
+the stepper's split, including off-grid events, and compared with the recorded
+event state. This is prescribed-force replay: it does not search for, verify or
+certify on-face contact, a ball collision, or first contact. Metadata must set
+`contact_verified` false. The force is external to the ideal generalized
+controller input and is not recorded as actuator torque.
 
 Focused validation: `python -m pytest -q
 tests/unit/motion_matching/same_input/test_solution_bundle_prototype.py`.

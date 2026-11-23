@@ -22,7 +22,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 Array = NDArray[np.float64]
-SCHEMA_VERSION = "research-solution-prototype/v3"
+SCHEMA_VERSION = "research-solution-prototype/v4"
 _REQUIRED = frozenset(
     {
         "schema_version",
@@ -203,8 +203,25 @@ class SolutionBundle:
             raise ValueError("integrator and runtime identity are required")
         if not _hash(metadata["integrator"].get("runtime_sha256"), 64):
             raise ValueError("runtime hash is required")
-        if metadata["impact"] != {"status": "none"}:
-            raise ValueError("prototype only supports explicitly absent impact")
+        impact = metadata["impact"]
+        impact_fields = {
+            "status",
+            "time_s",
+            "duration_s",
+            "frame",
+            "point_in_frame_m",
+            "axis_in_frame",
+            "force_world_n",
+            "event_q",
+            "event_qd",
+            "contact_verified",
+        }
+        if impact != {"status": "none"} and (
+            set(impact) != impact_fields
+            or impact.get("status") != "recorded_latched_force"
+            or impact.get("contact_verified") is not False
+        ):
+            raise ValueError("unsupported or uncertified impact record")
         if any(
             metadata[key] != {"status": "unavailable"}
             for key in ("flight_metrics", "feasibility")
@@ -283,6 +300,65 @@ class SolutionBundle:
             a["qd0"], a["recorded_qd"][0]
         ):
             raise ValueError("recorded states must begin at q0 and qd0")
+        if impact != {"status": "none"}:
+            time_s, duration_s = impact["time_s"], impact["duration_s"]
+            if any(
+                isinstance(x, bool) or not isinstance(x, int | float)
+                for x in (time_s, duration_s)
+            ):
+                raise ValueError("impact time and duration must be numeric")
+            try:
+                time_s, duration_s = float(time_s), float(duration_s)
+            except OverflowError as exc:
+                raise ValueError("impact time or duration is too large") from exc
+            if not np.isfinite([time_s, duration_s]).all() or duration_s <= 1e-12:
+                raise ValueError(
+                    "impact time must be finite and duration exceed edge tolerance"
+                )
+            end_s = time_s + duration_s
+            if (
+                not np.isfinite(end_s)
+                or time_s < 0
+                or time_s >= a["recorded_time_s"][-1]
+                or end_s > a["recorded_time_s"][-1]
+            ):
+                raise ValueError("impact window must lie inside the run")
+            # The existing impact stepper deliberately coalesces edges within
+            # 1e-12 s of a hold boundary. Refuse ambiguous near-edge timing;
+            # never silently turn an off-grid event into a boundary event.
+            edges = np.r_[a["recorded_hold_time_s"], a["recorded_time_s"][-1]]
+            for edge in (time_s, end_s):
+                distances = np.abs(edges - edge)
+                if np.any((distances > 0.0) & (distances <= 1e-12)):
+                    raise ValueError("impact edge too close to hold boundary")
+            if not isinstance(impact["frame"], str) or not impact["frame"].strip():
+                raise ValueError("impact frame is required")
+            for key in ("point_in_frame_m", "axis_in_frame", "force_world_n"):
+                if _array(impact[key], key).shape != (3,):
+                    raise ValueError("impact geometry must contain three-vectors")
+            with np.errstate(over="ignore", invalid="ignore"):
+                axis_norm = float(
+                    np.linalg.norm(_array(impact["axis_in_frame"], "axis"))
+                )
+                force_norm = float(
+                    np.linalg.norm(_array(impact["force_world_n"], "force"))
+                )
+            if (
+                not np.isfinite([axis_norm, force_norm]).all()
+                or axis_norm <= 0
+                or force_norm <= 0
+            ):
+                raise ValueError("impact axis and force must be nonzero")
+            hits = np.flatnonzero(a["recorded_time_s"] == time_s)
+            for key, recorded in (
+                ("event_q", "recorded_q"),
+                ("event_qd", "recorded_qd"),
+            ):
+                value = _array(impact[key], key)
+                if value.shape != (n,) or (
+                    len(hits) and not np.array_equal(value, a[recorded][hits[0]])
+                ):
+                    raise ValueError("impact event state must match recorded state")
         knots = a["spline_knots_s"]
         coeff = a["spline_coefficients"]
         if (
@@ -335,11 +411,27 @@ def migrate_research_v2(
         raise ValueError("invalid research v2 array inventory")
     times = _array(arrays["recorded_time_s"], "recorded time")
     _times(times, "recorded time")
-    metadata["schema_version"] = SCHEMA_VERSION
+    metadata["schema_version"] = "research-solution-prototype/v3"
     controller["holds_per_step"] = 1
     migrated = dict(arrays)
     migrated["recorded_hold_time_s"] = times[:-1].copy()
-    return SolutionBundle(metadata, migrated, model_bytes)
+    return migrate_research_v3(metadata, migrated, model_bytes)
+
+
+def migrate_research_v3(
+    manifest: Mapping[str, Any], arrays: Mapping[str, Array], model_bytes: bytes
+) -> SolutionBundle:
+    """Convert caller-authenticated no-impact v3 research data to v4."""
+    if (
+        not isinstance(manifest, Mapping)
+        or manifest.get("schema_version") != "research-solution-prototype/v3"
+    ):
+        raise ValueError("expected research v3 manifest")
+    metadata = json.loads(json.dumps(manifest, allow_nan=False))
+    if metadata.get("impact") != {"status": "none"}:
+        raise ValueError("v3 migration supports only absent impact")
+    metadata["schema_version"] = SCHEMA_VERSION
+    return SolutionBundle(metadata, dict(arrays), model_bytes)
 
 
 class Playback(NamedTuple):
@@ -349,24 +441,31 @@ class Playback(NamedTuple):
     qd: Array
     commanded_tau: Array
     ideal_input_tau: Array
+    impact_event: tuple[float, Array, Array] | None = None
 
 
 def recorded_playback(bundle: SolutionBundle) -> Playback:
     """Return copies of recorded states; no engine or dynamics is invoked."""
     bundle = SolutionBundle(bundle.manifest, bundle.arrays, bundle.model_bytes)
     a = bundle.arrays
-    return Playback(
-        *(
-            a[k].copy()
-            for k in (
-                "recorded_time_s",
-                "recorded_hold_time_s",
-                "recorded_q",
-                "recorded_qd",
-                "commanded_tau",
-                "ideal_input_tau",
-            )
+    impact = bundle.manifest["impact"]
+    event = (
+        None
+        if impact["status"] == "none"
+        else (
+            float(impact["time_s"]),
+            np.array(impact["event_q"], dtype=float),
+            np.array(impact["event_qd"], dtype=float),
         )
+    )
+    return Playback(
+        a["recorded_time_s"].copy(),
+        a["recorded_hold_time_s"].copy(),
+        a["recorded_q"].copy(),
+        a["recorded_qd"].copy(),
+        a["commanded_tau"].copy(),
+        a["ideal_input_tau"].copy(),
+        event,
     )
 
 
@@ -412,6 +511,8 @@ def verify_forward_resimulation(
         or not np.array_equal(actual.hold_time_s, expected.hold_time_s)
     ):
         raise ValueError("runner must return Playback on the recorded time grid")
+    if (actual.impact_event is None) != (expected.impact_event is None):
+        raise ValueError("runner impact event presence differs from recording")
     errors: dict[str, float] = {}
     passed = True
     for key in keys:
@@ -426,6 +527,22 @@ def verify_forward_resimulation(
             raise ValueError(f"{key} comparison arithmetic is nonfinite")
         errors[key] = float(np.max(absolute_error))
         passed = passed and bool(np.all(absolute_error <= allowed))
+    if expected.impact_event is not None and actual.impact_event is not None:
+        if actual.impact_event[0] != expected.impact_event[0]:
+            raise ValueError("runner impact time differs from recording")
+        for index, key in ((1, "q"), (2, "qd")):
+            observed = _array(actual.impact_event[index], f"impact_{key}")
+            target = expected.impact_event[index]
+            if observed.shape != target.shape:
+                raise ValueError("impact state shape mismatch")
+            atol, rtol = tolerances[key]
+            with np.errstate(over="ignore", invalid="ignore"):
+                difference = np.abs(observed - target)
+                allowance = atol + rtol * np.abs(target)
+            if not np.isfinite(difference).all() or not np.isfinite(allowance).all():
+                raise ValueError("impact comparison arithmetic is nonfinite")
+            errors[f"impact_{key}"] = float(np.max(difference))
+            passed = passed and bool(np.all(difference <= allowance))
     return ReplayComparison(passed, errors)
 
 

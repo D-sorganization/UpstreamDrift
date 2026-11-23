@@ -1,7 +1,8 @@
 """Restricted real MuJoCo runner for the research solution prototype.
 
-Only rigid-club, scalar-coordinate, no-impact, fixed-hold RK4 runs are
-supported. Clipping is a software ideal-input rule, not actuator saturation.
+Only rigid-club, scalar-coordinate, fixed-hold RK4 runs with no impact or a
+recorded latched force are supported. A recorded force is replayed without
+detecting or certifying physical contact. Clipping is software ideal input.
 The runtime fingerprint measures a limited declared subset and does not prove
 the full dependency environment or cross-platform determinism.
 """
@@ -22,6 +23,8 @@ from src.shared.python.impact_optimization.option_b_prototype import (
 )
 from src.shared.python.motion_matching.club_shaft_chain import passive_coordinates
 from src.shared.python.motion_matching import club_shaft_chain
+from src.shared.python.motion_matching import impact_force
+from src.shared.python.impact_parameters import ball_impact
 from src.shared.python.motion_matching.same_input import (
     closure,
     integrator,
@@ -52,6 +55,8 @@ def measured_runtime_fingerprint() -> str:
         native_mjcf,
         club_shaft_chain,
         solution_bundle_prototype,
+        impact_force,
+        ball_impact,
     )
     files = {}
     for module in modules:
@@ -178,6 +183,25 @@ def run_mujoco_ideal(bundle: SolutionBundle) -> Playback:
         residual=spline,
     )
     model = plant.VectorPlant("mujoco", b.model_bytes)
+    impact_record = m["impact"]
+    impact = None
+    events = []
+    if impact_record["status"] == "recorded_latched_force":
+        if impact_record["frame"] not in model.kinematic_frames(a["q0"]):
+            raise ValueError("impact frame is unavailable in model")
+        impact = impact_force.ImpactForce(
+            frame=impact_record["frame"],
+            point_in_frame=np.asarray(impact_record["point_in_frame_m"], dtype=float),
+            axis_in_frame=np.asarray(impact_record["axis_in_frame"], dtype=float),
+            t_start_s=impact_record["time_s"],
+            duration_s=impact_record["duration_s"],
+            swing_span_s=(0.0, float(times[-1])),
+            force_world=np.asarray(impact_record["force_world_n"], dtype=float),
+        )
+
+    def observe_event(time_s, q, v):
+        events.append((float(time_s), q.copy(), v.copy()))
+
     commands, ideal_inputs = [], []
 
     def effort(_index, time_s, q, v):
@@ -196,11 +220,15 @@ def run_mujoco_ideal(bundle: SolutionBundle) -> Playback:
         policy=integrator.StepPolicy(
             substeps=substeps, project=project, effort_holds=holds
         ),
+        impact=impact,
+        impact_event_observer=observe_event if impact is not None else None,
     )
     if rollout.failure is not None or not np.array_equal(
         rollout.efforts, np.asarray(ideal_inputs)
     ):
         raise ValueError("ideal input was modified or rollout failed")
+    if len(events) != (0 if impact is None else 1):
+        raise ValueError("recorded impact event was not observed exactly once")
     return Playback(
         rollout.time_s,
         np.arange(len(commands), dtype=float) * (float(dt) / holds),
@@ -208,4 +236,5 @@ def run_mujoco_ideal(bundle: SolutionBundle) -> Playback:
         rollout.v,
         np.asarray(commands),
         rollout.efforts,
+        None if not events else events[0],
     )
