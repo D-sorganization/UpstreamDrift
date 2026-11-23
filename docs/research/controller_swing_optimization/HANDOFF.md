@@ -2322,3 +2322,16 @@ bound to canonical v2 was found locally; the embedded calibrated source model
 differs and must not be silently accepted. This branch is not a PR or complete
 Slice 1: actual best-match forward evidence, full applied-stage physical gates,
 first finite-face contact and contact-to-flight qualification remain open.
+
+The continuous-reference ideal-controller convergence comparison was extended
+through 0.5 s, holding the 1 ms command lattice fixed. Sixteen versus 32 RK4
+substeps agreed across five saved windows to maximum q/v/held-command
+differences 4.62e-7 / 7.54e-5 / 0.00118 in native units, with no numerical
+failure. The earlier eight-substep trajectory differed from the 32-substep
+trajectory by up to 0.0502 in q and 1.40 in v over this interval. At 32
+substeps, the only sampled modeled ROM failure through 0.5 s was RWInputY,
+first at 0.201 s, peak 0.00711 degrees; no sampled speed flag appeared.
+Assumed ideal-command capacity was exceeded from 0.068 s. This invalidates
+using the earlier eight-substep early ankle timing as a converged result and
+requires reevaluation of its full-run gate counts. It does not establish
+full-horizon, actual-motor or physiological feasibility.
