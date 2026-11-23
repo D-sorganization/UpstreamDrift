@@ -8,4 +8,4 @@ branch: "codex/15538-overlay-lookat"
 
 - Thread the active view `lookat_m` through `BallOverlay.paint` for aim-line and flight projection via `pinhole_for_view` and `bare.draw` (#15538).
 - Add shifted-camera regression coverage in `tests/tools/model_explorer/test_playback_ball_overlay.py` (#15538).
-- Assert shifted-camera output differs from the default in both views; remove the unrelated straight-roll assert (#15542).
+- Assert shifted-camera output differs from the default in both views; replace the unrelated straight-roll runtime assert with a static typing cast required by mypy (#15542).

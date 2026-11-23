@@ -18,7 +18,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, replace
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -195,7 +195,7 @@ class BallOverlay:
                 self._straight = float((record or {})["straight_roll_deg"])
             except (ValueError, KeyError) as exc:
                 self._straight = f"no shot shape: {exc}"
-        return self._straight
+        return cast(float | str, self._straight)
 
     def _layout(self, shape: str, flown: bool) -> ShotLayout:
         from src.tools.native_viewer_export import flight_tracer
