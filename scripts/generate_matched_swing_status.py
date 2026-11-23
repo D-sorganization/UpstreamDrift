@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 import sys
 from typing import Any
@@ -16,6 +17,22 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from src.shared.python.contracts import postcondition, precondition
+from src.shared.python.motion_matching.acceptance import (
+    AcceptanceGates,
+    AcceptanceVerdict,
+    GateStatus,
+    Horizon,
+    evaluate,
+)
+
+LADDER_ENGINES: tuple[str, ...] = (
+    "mujoco",
+    "pinocchio",
+    "drake",
+    "opensim",
+    "simscape",
+    "myosuite",
+)
 
 FENCE_START = "<!-- generated:matched-swing-status -->"
 FENCE_END = "<!-- end-generated:matched-swing-status -->"
@@ -193,22 +210,187 @@ def _render_progress_matrix(rows: list[dict[str, Any]]) -> list[str]:
     return lines
 
 
-def _render_qualification_ladder() -> list[str]:
-    """Render the full-swing qualification ladder table."""
+def _load_receipt_dict(repo_root: Path, receipt_path: str) -> dict[str, Any] | None:
+    if not receipt_path or not str(receipt_path).strip():
+        return None
+    path = repo_root / receipt_path
+    if not path.is_file():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _whole_marker_rmse_m(verdict: AcceptanceVerdict) -> float | None:
+    for gate in verdict.gates:
+        if gate.name != "whole_marker_rmse_m":
+            continue
+        if gate.measured is None:
+            return None
+        if not math.isfinite(float(gate.measured)):
+            raise ValueError("whole_marker_rmse_m must be finite when measured")
+        return float(gate.measured)
+    return None
+
+
+def _verdict_rank(verdict: AcceptanceVerdict) -> tuple[int, float]:
+    accepted_rank = 0 if verdict.is_physically_accepted else 1
+    whole = _whole_marker_rmse_m(verdict)
+    whole_rank = whole if whole is not None else float("inf")
+    return (accepted_rank, whole_rank)
+
+
+def _best_engine_verdict(
+    rows: list[dict[str, Any]],
+    *,
+    engine: str,
+    horizon: Horizon,
+    gates: AcceptanceGates,
+    repo_root: Path,
+) -> tuple[AcceptanceVerdict | None, bool]:
+    """Return the best ledger-derived verdict for an engine and whether any row matched."""
+    engine_key = engine.lower()
+    best: AcceptanceVerdict | None = None
+    saw_row = False
+    for row in rows:
+        if str(row.get("engine", "")).lower() != engine_key:
+            continue
+        saw_row = True
+        receipt_path = row.get("receipt_path")
+        if not isinstance(receipt_path, str):
+            continue
+        receipt = _load_receipt_dict(repo_root, receipt_path)
+        if receipt is None:
+            continue
+        capture = row.get("capture")
+        verdict = evaluate(
+            receipt,
+            horizon=horizon,
+            gates=gates,
+            capture=str(capture) if capture is not None else None,
+        )
+        if best is None or _verdict_rank(verdict) < _verdict_rank(best):
+            best = verdict
+    return best, saw_row
+
+
+def _format_ladder_engine_cell(
+    verdict: AcceptanceVerdict | None,
+    whole_threshold_m: float,
+    *,
+    saw_engine_rows: bool,
+) -> str:
+    if verdict is None:
+        return "🔄 In Progress" if saw_engine_rows else "⏳ Pending"
+    whole_m = _whole_marker_rmse_m(verdict)
+    whole_mm = whole_m * 1000.0 if whole_m is not None else None
+    thr_mm = whole_threshold_m * 1000.0
+    if verdict.is_physically_accepted:
+        if whole_mm is None:
+            return "✅ Passed"
+        return f"✅ Passed ({whole_mm:.1f} mm)"
+    if whole_mm is not None:
+        return f"❌ Failed ({whole_mm:.1f} mm > {thr_mm:.0f} mm)"
+    if any(g.status == GateStatus.MISSING for g in verdict.gates):
+        return "⚠️ Unverified"
+    return "❌ Failed"
+
+
+def _aggregate_gate_status(cells: list[str], *, horizon: Horizon) -> str:
+    if cells and all(cell.startswith("✅") for cell in cells):
+        return f"**{horizon.value} Milestone Met**"
+    if any(cell.startswith("✅") for cell in cells):
+        if horizon == Horizon.G2:
+            return "**Partial (not all engines)**"
+        if horizon == Horizon.G3:
+            return "**Open (Blocks Release)**"
+        return "**G1 Milestone Active**"
+    if horizon == Horizon.G3:
+        return "**Open (Blocks Release)**"
+    if horizon == Horizon.G2:
+        return "**In Progress**"
+    return "**G1 Milestone Active**"
+
+
+def _render_historical_superseded_note() -> list[str]:
     return [
         "",
+        "#### Historical (superseded widened-bound receipts)",
+        "",
+        "Pre-HO-8 MuJoCo tour-driver receipts under widened leg bounds recorded "
+        "**27.3 mm** IK and **74.6 mm** dynamics RMS. Those figures used "
+        "non-current bounds and RoM violations (#11044); they **do not** pass "
+        "today's `AcceptanceGates` and must not appear as active Passed ladder "
+        "cells. See `anthro_driver_shoot_g025/receipt.json` and README evidence "
+        "prose above the generated fence.",
+        "",
+    ]
+
+
+def _render_qualification_ladder(
+    rows: list[dict[str, Any]],
+    *,
+    repo_root: Path = REPO_ROOT,
+) -> list[str]:
+    """Render the full-swing qualification ladder from ledger receipts + AcceptanceGates."""
+    gates = AcceptanceGates()
+    g1_thr = gates.g1_whole_rmse_m
+    g2_thr = gates.g2_whole_rmse_m
+    g3_thr = gates.g3_whole_driver_rmse_m
+
+    g1_cells: list[str] = []
+    g2_cells: list[str] = []
+    g3_cells: list[str] = []
+
+    for engine in LADDER_ENGINES:
+        v1, saw1 = _best_engine_verdict(
+            rows, engine=engine, horizon=Horizon.G1, gates=gates, repo_root=repo_root
+        )
+        g1_cells.append(_format_ladder_engine_cell(v1, g1_thr, saw_engine_rows=saw1))
+        v2, saw2 = _best_engine_verdict(
+            rows, engine=engine, horizon=Horizon.G2, gates=gates, repo_root=repo_root
+        )
+        g2_cells.append(_format_ladder_engine_cell(v2, g2_thr, saw_engine_rows=saw2))
+        v3, saw3 = _best_engine_verdict(
+            rows, engine=engine, horizon=Horizon.G3, gates=gates, repo_root=repo_root
+        )
+        g3_cells.append(_format_ladder_engine_cell(v3, g3_thr, saw_engine_rows=saw3))
+
+    lines = [
+        "",
         "### 2. Full-Swing Qualification Ladder (Fail-Closed Gates)",
+        "",
+        "Derived from `AcceptanceGates` + `evaluate()` on committed ledger "
+        "receipts (fail-closed; superseded widened-bound results are historical only).",
         "",
         "Per Owner-Authorized Contract Revision (MS-100 #10374 / MS-104 #10378 / MS-106 #10380):",
         "Partial, reduced-model, and strength-limited outcomes do not satisfy G3 release. All six engines remain required.",
         "",
         "| Gate | Criterion | MuJoCo | Pinocchio | Drake | OpenSim | Simscape | MyoSuite | Gate Status |",
         "|---|---|---|---|---|---|---|---|---|",
-        "| **G1: Kinematic Fit** | Whole-swing marker RMS $\\le 30$ mm, 0 RoM violations | ✅ Passed (27.3 mm) | 🔄 In Progress | 🔄 In Progress | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **G1 Milestone Active** |",
-        "| **G2: Dynamic Ground Support** | GRF in support polygon, floating root tracked | ✅ Passed (74.6 mm) | 🔄 In Progress | ⏳ Pending | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **Partial (MuJoCo only)** |",
-        "| **G3: Professional Release** | Dual-club (driver+iron), all 6 engines, cross-engine verified | ⏳ Pending | ⏳ Pending | ⏳ Pending | ⏳ Pending | ⏳ Pending | ❌ Blocked | **Open (Blocks Release)** |",
-        "",
+        (
+            f"| **G1: Kinematic Fit** | Whole marker RMSE $\\le {g1_thr * 1000:.0f}$ mm "
+            f"(`g1_whole_rmse_m`); contact & integrity gates via `evaluate()` | "
+            + " | ".join(g1_cells)
+            + f" | {_aggregate_gate_status(g1_cells, horizon=Horizon.G1)} |"
+        ),
+        (
+            f"| **G2: Dynamic Ground Support** | Whole marker RMSE $\\le {g2_thr * 1000:.0f}$ mm "
+            f"(`g2_whole_rmse_m`); GRF, penetration, support polygon | "
+            + " | ".join(g2_cells)
+            + f" | {_aggregate_gate_status(g2_cells, horizon=Horizon.G2)} |"
+        ),
+        (
+            f"| **G3: Professional Release** | Driver whole swing $\\le {g3_thr * 1000:.0f}$ mm "
+            f"(`g3_whole_driver_rmse_m`); dual-club all six engines | "
+            + " | ".join(g3_cells)
+            + f" | {_aggregate_gate_status(g3_cells, horizon=Horizon.G3)} |"
+        ),
     ]
+    lines.extend(_render_historical_superseded_note())
+    return lines
 
 
 def _render_roadmap_table() -> list[str]:
@@ -241,7 +423,7 @@ def render_matched_swing_status(ledger_data: dict[str, Any]) -> str:
     rows: list[dict[str, Any]] = ledger_data.get("rows", [])
     lines: list[str] = []
     lines.extend(_render_progress_matrix(rows))
-    lines.extend(_render_qualification_ladder())
+    lines.extend(_render_qualification_ladder(rows, repo_root=REPO_ROOT))
     lines.extend(_render_roadmap_table())
     return "\n".join(lines)
 

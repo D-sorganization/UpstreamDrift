@@ -148,14 +148,20 @@ Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 1
 
 ### 2. Full-Swing Qualification Ladder (Fail-Closed Gates)
 
+Derived from `AcceptanceGates` + `evaluate()` on committed ledger receipts (fail-closed; superseded widened-bound results are historical only).
+
 Per Owner-Authorized Contract Revision (MS-100 #10374 / MS-104 #10378 / MS-106 #10380):
 Partial, reduced-model, and strength-limited outcomes do not satisfy G3 release. All six engines remain required.
 
 | Gate | Criterion | MuJoCo | Pinocchio | Drake | OpenSim | Simscape | MyoSuite | Gate Status |
 |---|---|---|---|---|---|---|---|---|
-| **G1: Kinematic Fit** | Whole-swing marker RMS $\le 30$ mm, 0 RoM violations | ✅ Passed (27.3 mm) | 🔄 In Progress | 🔄 In Progress | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **G1 Milestone Active** |
-| **G2: Dynamic Ground Support** | GRF in support polygon, floating root tracked | ✅ Passed (74.6 mm) | 🔄 In Progress | ⏳ Pending | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **Partial (MuJoCo only)** |
-| **G3: Professional Release** | Dual-club (driver+iron), all 6 engines, cross-engine verified | ⏳ Pending | ⏳ Pending | ⏳ Pending | ⏳ Pending | ⏳ Pending | ❌ Blocked | **Open (Blocks Release)** |
+| **G1: Kinematic Fit** | Whole marker RMSE $\le 25$ mm (`g1_whole_rmse_m`); contact & integrity gates via `evaluate()` | ❌ Failed (51.2 mm > 25 mm) | ❌ Failed (26.8 mm > 25 mm) | ❌ Failed (0.0 mm > 25 mm) | ❌ Failed (78.5 mm > 25 mm) | ❌ Failed (20.3 mm > 25 mm) | ❌ Failed (185.7 mm > 25 mm) | **G1 Milestone Active** |
+| **G2: Dynamic Ground Support** | Whole marker RMSE $\le 40$ mm (`g2_whole_rmse_m`); GRF, penetration, support polygon | ❌ Failed (51.2 mm > 40 mm) | ❌ Failed (26.8 mm > 40 mm) | ❌ Failed (0.0 mm > 40 mm) | ❌ Failed (78.5 mm > 40 mm) | ❌ Failed (20.3 mm > 40 mm) | ❌ Failed (185.7 mm > 40 mm) | **In Progress** |
+| **G3: Professional Release** | Driver whole swing $\le 60$ mm (`g3_whole_driver_rmse_m`); dual-club all six engines | ❌ Failed (51.2 mm > 60 mm) | ❌ Failed (26.8 mm > 60 mm) | ❌ Failed (0.0 mm > 60 mm) | ❌ Failed (78.5 mm > 60 mm) | ❌ Failed (20.3 mm > 60 mm) | ❌ Failed (185.7 mm > 60 mm) | **Open (Blocks Release)** |
+
+#### Historical (superseded widened-bound receipts)
+
+Pre-HO-8 MuJoCo tour-driver receipts under widened leg bounds recorded **27.3 mm** IK and **74.6 mm** dynamics RMS. Those figures used non-current bounds and RoM violations (#11044); they **do not** pass today's `AcceptanceGates` and must not appear as active Passed ladder cells. See `anthro_driver_shoot_g025/receipt.json` and README evidence prose above the generated fence.
 
 ### 3. Matched Swing Release Issues Roadmap
 
