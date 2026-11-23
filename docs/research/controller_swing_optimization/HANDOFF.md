@@ -1977,3 +1977,30 @@ observed-marker RMS was 269.13 / 285.32 / 292.39 mm. All retained two modeled
 ROM flags. Reject both fitted candidates: lower sampled balance residuals
 have not produced forward tracking improvement. No measured ground forces,
 motor saturation, impact or verified speed and torque gates were included.
+
+A foot-geometry diagnosis compared the actual embedded matched model with the
+pinned v1/v2 models. Sphere definitions, contact parameters and ground normals
+match; the embedded ground height is 0.258 mm above the v2 default plane.
+The embedded source has different lower-chain transforms from both pinned
+models: hip translations differ by 61/103 mm and rotations by 11.1/28.8 deg,
+with 10 deg ankle rotation differences. Direct joint-name copying is invalid;
+source versus v2 sphere-height discrepancy under that copy is 69.3 mm RMS.
+The migration helper correctly rejects the differing embedded source spec.
+
+Over 476 samples, the source target's median deepest sphere gap is -0.415 mm
+and modeled normal force is about 0.081 body weights median; the fitted v2
+target's median deepest gap is +0.502 mm and 93.7% of samples have zero
+modeled normal force. These statistics do not establish that the small ground
+offset caused the mismatch. The current fit tracks source-model markers and
+anchors only horizontal foot projections. Against time-varying source-model
+sphere centers, horizontal RMS is 0.77 mm but vertical RMS is 14.23 mm
+(left heel 28.31 mm). These are model-derived targets, not measured foot
+positions or measured ground forces.
+
+Three independent representative frame fits retained v2 geometry, modeled
+hand/club closure and available named anatomical bounds while fitting 3D source
+sphere centers and markers. Sphere RMS decreased from 14.08/14.94/15.67 mm
+to 0.57/0.63/0.54 mm; marker RMS increased from 25.14/17.38/19.37 mm to
+27.21/20.92/22.49 mm and closure residual stayed below 1.7e-11. Solver success
+for isolated poses does not establish temporal continuity, physical limits or
+forward tracking. Test a continuous fit and independent rollout before use.
