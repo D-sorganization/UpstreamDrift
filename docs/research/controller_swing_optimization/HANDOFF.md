@@ -1753,3 +1753,32 @@ copied runtime/native binaries, not an independently built runtime. Contact,
 physical feasibility and independent-runtime flags remained false. The force
 was prescribed, motor caps synthetic, and the reference unadmitted. A private
 hash-bound receipt preserves the result; no private identifiers are in git.
+
+A fixed-basis local Option B convex minimax model over the 0.5 s hold grid
+used the existing finite-difference trajectory sensitivity, the 10 N m global
+coefficient ball and local step radii 0.25 / 0.5 / 1 N m. Numerical
+primal/dual worst-violation values were approximately 7.22275 / 6.93559 /
+6.57204 rad-equivalent, with solver residuals around 1e-10. These are only
+approximate bounds for that linearized finite-grid surrogate and partly
+unverified model priors, not nonlinear or physiological infeasibility proofs.
+The 0.25 candidate's actual motor rollout hit a guard at 0.357 s while its
+baseline reached 0.5 s; prediction errors grew rapidly and it was rejected.
+
+A separate multiple-shooting seam prerequisite split an actual fixed-gain
+0.5 s motor rollout at 0.250 s. Restarting a fresh plant with exact full q/v
+seam state and absolute controller clock reproduced the uninterrupted q/v,
+RK4 stage states, commands and post-saturation drive bit-for-bit in the same
+runtime, for both baseline and a nonzero coefficient perturbation within the
+10 N m trust ball. This validates the numerical handoff only; it is not a
+lifted optimizer with seam-defect constraints, a feasible trajectory or
+independent runtime replay. Private scripts and hash-bound receipts remain
+outside git.
+
+Current-main codec coordination finding: open PR #15600 at inspected head
+`9de2563904b026eac983227c2112f84eabaadf5b` requires the impact event time to
+lie within the recorded interval. The prior restricted no-impact bridge
+`codex/15493-main-bundle17` requires its v1 placeholder event after the final
+sample, so these contracts would be mutually unsatisfiable if combined
+unchanged. Explicit versioned no-event semantics and migration are required;
+recheck the current PR head/state before acting. Do not invent an event or
+bypass its validation.
