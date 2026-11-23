@@ -2088,3 +2088,30 @@ matched the actual motor run bit-for-bit in states, stage states and applied
 drive through 750 ms. Projected preclip is a direct-input surrogate: the
 motor plant does not support projection. These comparisons narrow the first
 failure but do not establish its cause or physical feasibility.
+
+The ideal foot-target replay and low-gain Option B use different controllers.
+The ideal recomputes constrained inverse dynamics at the actual state with
+acceleration gains 900/60 and COM balance gains 60/15; Option B freezes
+reference-state feedforward and uses direct torque gains 3/0.3. At the shared
+start, their peak commands were 65.65 and 3.19 N m respectively. With the
+identical actual-state computed-torque controller, the unprojected direct
+plant reproduced the saved projected ideal through 350 ms to maximum q/v
+errors 1.22e-11 / 1.05e-10 and effort error 1.89e-8, with no modeled ROM or
+speed flags. Projection therefore did not explain the ideal tracking in that
+interval. On the same controller, motor saturation first clipped at about
+62 ms and clipped 8,352 of 11,200 stages; eight modeled ROM slots failed.
+Joint RMS versus target was 0.1966 rad, compared with 0.0436 rad for ideal;
+root translation RMS was 0.0174 versus 0.00563 m. Peak command / actual
+modeled drive were 563.8 / 200.3 N m. Saturation changes this controlled
+comparison under assumption-marked capacities, but does not establish a
+physiological solution. Actual-state computed torque is a diagnostic, not
+the required fixed-gain Option B architecture.
+
+An initial-constrained temporal fit fixed q0 and a three-point initial
+velocity and stopped unconverged at 242 s. Although that derivative matched
+v0 to 1.3e-13 and closure was 5.9e-10, the controller's actual first-order
+initial velocity differed by 6.93 rad/s and peak sampled acceleration was
+4,992 rad/s². Reject it as an admitted reference. Closure-projecting a
+one-step Euler pose instead left only 0.000337 mixed-coordinate units/s
+maximum initial velocity discrepancy; it is approximate, and an explicit
+manifold-consistent velocity state is the principled follow-up.
