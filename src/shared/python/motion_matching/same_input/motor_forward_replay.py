@@ -47,9 +47,18 @@ def measured_motor_runtime() -> str:
         mujoco_actuator_probe,
         stage_numeric_archive,
     ):
+        if module.__file__ is None:
+            raise ValueError("runtime source file is unavailable")
         parts.append(hashlib.sha256(Path(module.__file__).read_bytes()).hexdigest())
     parts.append(hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
     return hashlib.sha256("\n".join(parts).encode()).hexdigest()
+
+
+class _NoProjectionMotorPlant(MotorRolloutPlant):
+    """Satisfy the integrator protocol while rejecting unsupported projection."""
+
+    def closure_rate_matrix(self, q: np.ndarray) -> np.ndarray:
+        raise ValueError("motor replay does not support projection")
 
 
 def verify_motor_forward(
@@ -156,7 +165,7 @@ def verify_motor_forward(
         if len(matches) != 1:
             raise ValueError("motor joint missing from coordinate order")
         indices.append(int(matches[0]))
-    plant = MotorRolloutPlant(drive, np.asarray(indices, dtype=np.int64))
+    plant = _NoProjectionMotorPlant(drive, np.asarray(indices, dtype=np.int64))
     recorder = StageRecorder(capture_motor_drive=True)
     result = integrate(
         plant,
