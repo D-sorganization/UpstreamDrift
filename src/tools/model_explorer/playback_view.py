@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -21,11 +22,13 @@ __all__ = [
     "SETTINGS_PATH",
     "LayoutSettings",
     "ViewSettings",
+    "behind_anchor_for",
     "load_layout_settings",
     "load_view_settings",
     "playback_lookat",
 ]
 
+logger = logging.getLogger(__name__)
 SETTINGS_PATH = Path(__file__).with_name("playback_view_settings.json")
 #: Camera look-at for the golfer at address (matches ``ExportSettings``).
 DEFAULT_LOOKAT_M: Vec3 = (1.0, 0.0, 0.9)
@@ -89,3 +92,20 @@ def playback_lookat(view: str, anchor_m: Vec3 | None) -> Vec3:
     """Look-at for ``view``: the address look-at, moved onto the anchor line
     for behind views when the run's ball-to-feet ``anchor_m`` is known."""
     return shift_to_anchor(_check_view(view), DEFAULT_LOOKAT_M, anchor_m)
+
+
+def behind_anchor_for(pose: Any) -> Vec3 | None:
+    """The run's ball-to-feet anchor (export rule), or ``None`` if unavailable.
+
+    Slow (it poses the club model), so call it off the GUI thread. ``None``,
+    with a warning, keeps the preset camera: no time base, ball or feet.
+    """
+    from src.tools.model_explorer.playback_ball_overlay import swing_for_source
+    from src.tools.native_viewer_export.behind_camera import address_anchor
+
+    try:
+        swing = swing_for_source(pose)
+    except ValueError as exc:
+        logger.warning("no address swing, keeping the preset camera: %s", exc)
+        return None
+    return address_anchor(swing)

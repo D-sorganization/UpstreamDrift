@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import shutil
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -60,6 +62,46 @@ def test_playback_lookat_uses_the_anchor_for_behind_views_only() -> None:
 def test_playback_lookat_rejects_unknown_views() -> None:
     with pytest.raises(ValueError, match="selfie"):
         pv.playback_lookat("selfie", ANCHOR)
+
+
+REPO = Path(__file__).resolve().parents[3]
+
+
+def _fixture_pose(tmp_path: Path):  # type: ignore[no-untyped-def]
+    from src.tools.model_explorer.pose_results import load_pose_frame_source
+
+    run = tmp_path / "fit"
+    shutil.copytree(REPO / "tests/fixtures/results_playback/mujoco_fit", run)
+    spec = REPO / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+    (run / "full_body_spec_hipcal_scaled.json").write_bytes(spec.read_bytes())
+    return load_pose_frame_source(run / "dynamics_record.npz")
+
+
+def test_anchor_of_a_run_sits_the_set_fraction_from_ball_to_feet(tmp_path) -> None:
+    from src.tools.model_explorer.playback_ball_overlay import swing_for_source
+    from src.tools.native_viewer_export.ball import address_ball
+    from src.tools.native_viewer_export.club_pose import ClubPoseModel
+
+    pose = _fixture_pose(tmp_path)
+    anchor = pv.behind_anchor_for(pose)
+    assert anchor is not None and np.all(np.isfinite(anchor))
+    swing = swing_for_source(pose)
+    settings = bc.load_behind_settings()
+    coords = dict(zip(pose.coordinate_order, map(float, pose.q[0]), strict=True))
+    feet = bc.feet_midpoint(
+        ClubPoseModel(pose.spec_bytes), coords, settings.foot_bodies
+    )
+    ball = np.asarray(address_ball(swing, None).position_m)
+    expected = ball + settings.fraction * (np.asarray(feet) - ball)
+    assert anchor == pytest.approx(tuple(expected), abs=1e-9)
+
+
+def test_anchor_is_none_when_the_run_has_no_time_base(tmp_path) -> None:
+    from dataclasses import replace
+
+    pose = _fixture_pose(tmp_path)
+    frozen = replace(pose, time_s=np.zeros_like(pose.time_s))
+    assert pv.behind_anchor_for(frozen) is None
 
 
 def test_layout_settings_are_documented_and_positive() -> None:

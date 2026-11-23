@@ -97,6 +97,8 @@ def _ticks_while(condition: Any) -> int:
 def test_settings_reject_a_non_positive_timeout() -> None:
     with pytest.raises(ValueError, match="wait_timeout_s"):
         worker.ResultsLoadSettings(wait_timeout_s=0.0)
+    with pytest.raises(ValueError, match="poll_interval_ms"):
+        worker.ResultsLoadSettings(poll_interval_ms=0)
 
 
 @pytest.mark.parametrize(
@@ -178,3 +180,14 @@ def test_teardown_skips_a_loader_qt_already_deleted(
     explorer.cancel_results_loads()  # idempotent
     QApplication.processEvents()  # the late ``finished`` must not raise
     assert explorer._live_loaders() == set()
+
+
+def test_waiting_on_a_load_that_already_finished_returns_at_once(
+    explorer: Any, fake_work: list[Any]
+) -> None:
+    """``finished`` emitted before the wait began must not stall it (CI hang)."""
+    assert explorer.load_results("ok_quick.npz", wait=False) is True
+    next(iter(explorer._live_loaders())).wait()  # done; signals still queued
+    start = time.monotonic()
+    assert explorer.wait_for_results_load(timeout_s=5.0) is True
+    assert time.monotonic() - start < 2.0, "waited for the timeout"
