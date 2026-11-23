@@ -29,7 +29,7 @@ from src.shared.python.model_appearance.grip_hands import (
     HAND_PARTS,
     face_square_axes,
 )
-from src.shared.python.model_appearance.grip_pose import Hand
+from src.shared.python.model_appearance.grip_pose import GripPose, Hand
 from src.shared.python.model_appearance.hand_backends.golf_grip import load_golf_grip
 from src.shared.python.model_appearance.hand_backends.qa import (
     load_hand_visual_quality,
@@ -54,6 +54,8 @@ _GRIP_AXIS = np.array([0.0, 1.0, 0.0])  # butt -> head in the club-body frame
 _BAND_M = 0.004
 #: Distance from the cut plane within which a vertex is on the cut rim.
 _RIM_M = 1e-9
+#: Posed pairs kept in a process: the owner grip's and a few spec grips'.
+_PAIR_CACHE_SIZE = 4
 
 
 @dataclass(frozen=True)
@@ -302,7 +304,39 @@ def seat_settings(seat: TrailSeat) -> SkinnedHumanSettings:
     return settings_from_mapping(raw)
 
 
-def owner_grip_spec(roll_deg: float = 0.0, seat: str | None = None) -> GripSpec:
+def _check_grip(grip: GripPose | None) -> None:
+    if grip is not None and not isinstance(grip, GripPose):
+        raise TypeError(f"grip must be a GripPose or None, got {type(grip).__name__}")
+
+
+def _with_picks(owner: GripSpec, grip: GripPose) -> GripSpec:
+    """``owner`` with the grip picks of a spec's ``grip_config`` (#15654).
+
+    It takes the grip's style, trigger finger and hand spacing, both hands' V
+    azimuth (strength), the lead palm diagonal and the lead thumb. The owner's
+    seat stays: the lead hand below the cap, its heel pad, the trail seat's
+    cross angle and the trail thumb (the visual pose carries one palm
+    diagonal, the lead's). ``ValueError`` when the result is no valid grip.
+    """
+    lead_v = grip.lead_v_azimuth_deg
+    return replace(
+        owner,
+        style=grip.style,
+        trigger_finger=grip.trigger_finger,
+        hand_spacing_m=grip.hand_spacing_m,
+        lead=replace(
+            owner.lead,
+            v_azimuth_deg=lead_v,
+            thumb_azimuth_deg=grip.lead_thumb_offset_deg,
+            club_cross_angle_deg=grip.palm_diagonal_deg,
+        ),
+        trail=replace(owner.trail, v_azimuth_deg=lead_v + grip.trail_v_offset_deg),
+    )
+
+
+def owner_grip_spec(
+    roll_deg: float = 0.0, seat: str | None = None, grip: GripPose | None = None
+) -> GripSpec:
     """The legacy grip with the owner's settings from ``hand_visual_quality``.
 
     The lead thumb sits ``owner_thumb_azimuth_deg.lead`` to the away-from-target
@@ -312,13 +346,18 @@ def owner_grip_spec(roll_deg: float = 0.0, seat: str | None = None) -> GripSpec:
     as the trail seat ``seat`` has it (:func:`trail_seat`; #15265, #15150); the
     lead hand is ``owner_lead_below_cap_edge_m``
     below the edge of the butt cap. ``roll_deg`` turns both hands about the shaft.
+    ``grip``, a spec's grip (:func:`hand_spec.spec_grip_pose`), overrides the
+    picks it makes (:func:`_with_picks`); ``None`` keeps the owner grip.
+    Preconditions: ``grip`` a :class:`GripPose` or ``None`` (``TypeError``)
+    that gives a valid grip (``ValueError``).
     """
+    _check_grip(grip)
     base = GripSpec.legacy()
     quality: Mapping[str, Any] = load_hand_visual_quality()
     thumbs = quality["owner_thumb_azimuth_deg"]
     heel = float(quality["owner_lead_heel_pad_depth_m"])
     below = float(quality["owner_lead_below_cap_edge_m"])
-    return replace(
+    owner = replace(
         base,
         lead=replace(
             base.lead,
@@ -334,6 +373,7 @@ def owner_grip_spec(roll_deg: float = 0.0, seat: str | None = None) -> GripSpec:
         ),
         lead_below_butt_m=below + load_golf_grip().cap_height_m,
     )
+    return owner if grip is None else _with_picks(owner, grip)
 
 
 def skinned_hand_frame(club: ClubAssembly) -> Array:
@@ -350,24 +390,34 @@ def skinned_hand_frame(club: ClubAssembly) -> Array:
     return frame
 
 
-def build_seated_pair(seat: str | None = None) -> dict[str, HandVisualResult]:
+def build_seated_pair(
+    seat: str | None = None, grip: GripPose | None = None
+) -> dict[str, HandVisualResult]:
     """The posed pair with the trail hand in seat ``seat``, in its grip frame.
 
-    Precondition: as :func:`trail_seat`. Postcondition: as
+    With a spec's ``grip`` the pair takes its picks (:func:`owner_grip_spec`)
+    and the trail hand never slides closer to the lead hand than the grip's
+    ``hand_spacing_m``; it still slides toward the head until its fingers
+    clear the lead hand. Preconditions: as :func:`trail_seat` and
+    :func:`owner_grip_spec`. Postcondition: as
     :func:`skinned_pair.build_grip_hands`; solving it takes seconds.
     """
     quality: Mapping[str, Any] = load_hand_visual_quality()
+    settings = seat_settings(trail_seat(seat))
+    if grip is not None:
+        settings = replace(settings, pair_max_spacing_close_m=0.0)
     return build_grip_hands(
-        owner_grip_spec(seat=seat),
+        owner_grip_spec(seat=seat, grip=grip),
         grip_radius_m=float(quality["grip_radius_m"]),
-        settings=seat_settings(trail_seat(seat)),
+        settings=settings,
     )
 
 
-@lru_cache(maxsize=1)
-def _pair() -> dict[str, HandVisualResult]:
-    """The posed pair of the configured seat (``owner_trail_seat``)."""
-    return build_seated_pair()
+@lru_cache(maxsize=_PAIR_CACHE_SIZE)
+def _pair(grip: GripPose | None) -> dict[str, HandVisualResult]:
+    """The posed pair of the configured seat (``owner_trail_seat``), by grip."""
+    _check_grip(grip)
+    return build_seated_pair(grip=grip)
 
 
 def forearm_cuff_m() -> float:
@@ -386,9 +436,12 @@ def _joint_m(result: HandVisualResult, bone: str) -> Array:
     return np.asarray(posed[:3], dtype=float)
 
 
-def forearm_reach_m(club: ClubAssembly) -> dict[str, tuple[Array, Array]]:
-    """Per hand: (wrist joint, unit direction from wrist to elbow), club frame."""
-    frame, pair = skinned_hand_frame(club), _pair()
+def forearm_reach_m(
+    club: ClubAssembly, grip: GripPose | None = None
+) -> dict[str, tuple[Array, Array]]:
+    """Per hand: (wrist joint, unit direction from wrist to elbow), club frame,
+    of the pair posed with ``grip`` (:func:`owner_grip_spec`)."""
+    frame, pair = skinned_hand_frame(club), _pair(grip)
     reach = {}
     for side, result in pair.items():
         wrist = wrist_joint_m(result)
@@ -562,6 +615,7 @@ def skinned_hand_meshes(
     widen_wrist: bool = True,
     with_ball: bool = False,
     sleeve: bool = False,
+    grip: GripPose | None = None,
 ) -> dict[str, Mesh]:
     """``{"lead_hand", "trail_hand"}`` skinned meshes in the club-body frame.
 
@@ -575,9 +629,11 @@ def skinned_hand_meshes(
     ``with_ball`` adds the :func:`wrist_ball` solid above the cut, for drawing.
     With ``sleeve`` the hand ends under a skinned forearm instead
     (:class:`WristSleeve`): cut further up, flush with that skin, no ball.
+    The pair is posed with ``grip``, a spec's grip, else the owner grip
+    (:func:`owner_grip_spec`).
     """
-    frame, pair = skinned_hand_frame(club), _pair()
-    reach = forearm_reach_m(club)
+    frame, pair = skinned_hand_frame(club), _pair(grip)
+    reach = forearm_reach_m(club, grip)
     meshes = {}
     for hand, label in HAND_PARTS.items():
         mesh = pair[hand.value].mesh
@@ -606,12 +662,15 @@ def skinned_hand_meshes(
     return meshes
 
 
-def wrist_joints_m(club: ClubAssembly) -> dict[str, Array]:
+def wrist_joints_m(
+    club: ClubAssembly, grip: GripPose | None = None
+) -> dict[str, Array]:
     """Wrist joint centre of each hand (``lead``, ``trail``) in the club-body frame.
 
-    This is where a forearm attaches to the posed hand.
+    This is where a forearm attaches to the hand posed with ``grip``, a spec's
+    grip, else the owner grip (:func:`owner_grip_spec`).
     """
-    frame, pair = skinned_hand_frame(club), _pair()
+    frame, pair = skinned_hand_frame(club), _pair(grip)
     return {
         hand.value: frame[:3, :3] @ wrist_joint_m(pair[hand.value]) + frame[:3, 3]
         for hand in (Hand.LEAD, Hand.TRAIL)
