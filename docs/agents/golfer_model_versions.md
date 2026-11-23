@@ -45,3 +45,10 @@ naming the registry.
 Until a part has migrated, prefer a current-model source, such as a matched
 swing on the skinned model, for renders and screenshots. When only legacy
 sources exist, say so in the PR.
+
+## Ratchet
+
+`src/config/golfer_model_legacy_assets.json` lists every committed spec and
+bundle still on a deprecated part. `tests/config/golfer_model_ratchet` fails
+when a new spec or bundle uses a deprecated part, and when a listed file was
+migrated or removed without deleting its entry. The list only shrinks.
