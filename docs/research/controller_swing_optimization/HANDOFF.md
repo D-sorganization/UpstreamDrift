@@ -647,3 +647,23 @@ sample slew audit. Its stated scope does not include inter-sample behavior,
 work, ROM, tracking or the matched-swing experiment. It is unarmed and has not
 been integrated into this research; inspect its current state before reuse.
 It is not evidence that the required five sequential slices are complete.
+
+A dense SLSQP polish of the coupled 15-frame solution hit its 400-iteration
+limit after 98.66 s. Objective changed 0.495250 to 0.492709; native grip
+residual was 4.26e-9 and independently measured closure 1.22e-6 mm and
+4.30e-9 rad. Sampled join-acceleration mismatch was 1.44e-10 rad/s², peak
+sampled second difference 1049.50 rad/s², and supplied bounds held. A
+bounded-multiplier estimate gave Lagrangian-gradient infinity norm 0.00345;
+55 bounds were active at 1e-7, and equality Jacobian rank was 131/131
+including all coordinates but 128/131 on free coordinates. This is neither a
+converged or stationary fit nor physical or full-trajectory admission.
+
+A matched-policy 200 ms exploratory v2 computed-torque comparison used zero
+KKT regularization for both paths, no projection or impact, and synthetic
+unit-gear motors. With ±1000 N m test-only caps, ideal and motor paths each
+recorded 6400 stages, did not clip, and matched q, velocity and held commands
+bit-for-bit; motor-stage force matched command. Both had 0.00812 rad joint
+tracking RMS and 257.21 N m sampled peak command. With arbitrary ±30 N m
+caps, all accepted motor stages clipped and the run hit a numerical guard at
+0.189 s after divergent states. These are exploratory computed-torque results,
+not Option B, physiological limits, or admission of the refitted baseline.
