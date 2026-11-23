@@ -1256,3 +1256,29 @@ first regression, 37 focused CLI/lead-in tests, scoped mypy, Ruff, Black,
 LaTeX compilation and normal headless push hooks passed. The branch remains
 oversized research and does not establish the v2 baseline, physical gates,
 contact, a completed Slice 1 or a PR.
+
+The existing all-six-spheres planted-coupling assumption was audited at 134
+equally spaced saved hold states. Only 1–5 spheres in the baseline and 1–6
+in the regulated run carried >1 N modeled load, with means 2.84 / 2.77;
+all-sphere centre RMS speed was 0.430 / 0.716 m/s and loaded-sphere horizontal
+RMS speed 0.123 / 0.076 m/s. These sampled model values show that all-six
+stationarity is not satisfied, not measured physiology or causal proof.
+A load-weighted coupling diagnostic used square-root modeled normal-force
+weights and a >1 N activity threshold, fixed gains 20/5, no direct root torque,
+projection, ideal unsaturated computed torque and no impact. At 1.322 s,
+source-target marker RMS changed 234.60 to 212.74 mm, root translation RMS
+0.08516 to 0.07436 m and rotation 0.14295 to 0.13873 rad. Joint RMS worsened
+0.01731 to 0.03885 rad, peak held effort 359.62 to 790.28 N m, model ROM
+flags one to three; minimum modeled compliant sphere height changed −24.87
+to −18.92 mm. The experimental threshold and weights are not physical
+limits, and the result is neither an admitted baseline nor Option B.
+
+A 41-coordinate local 20 ms trust-region feasibility probe used fixed gains,
+actual post-saturation motor forces and assumption-marked model limits. Its
+9.3058 N m coefficient candidate had zero modeled ROM/speed violations at
+1 ms hold samples, but an RK4 stage first exceeded a modeled ROM limit at
+13.625 ms; peak stage excess was 1.05e-5 rad. At 200 ms it retained 11 ROM
+flags and extended only to a numerical guard at 0.593 s with 26 ROM / 23
+speed flags. Integration-stage values are not independently certified
+continuous-path extrema; the result nevertheless disproves a hold-sample-only
+pass and is not a feasible or physical swing.
