@@ -95,6 +95,12 @@ Restarting that solver-returned point with the same objective stopped on
 `xtol` after five evaluations, with independently recomputed unscaled
 projected-gradient infinity norm 0.629 and exit join 33.12 rad/s. It is not
 evidence of gradient convergence.
+A full 477-frame, weight-10 sparse run reached its 300-second cap without
+convergence. Forty accepted iterates were saved; the last had maximum soft
+closure translation 0.0647 mm, maximum marker RMS 37.46 mm, peak angular
+finite-difference speed 34.30 rad/s and peak second difference 5,840 rad/s².
+All 29 supplied named bounds held. The endpoints were free, the weld remained
+soft and 18 coordinate bounds were absent. This is not an admitted baseline.
 Direct derivation from the embedded calibrated model rejects an unknown pelvis
 offset; relocating its pelvis is a physical model change, not a coordinate-only
 migration. A three-state diagnostic of that changed-model candidate preserved
@@ -121,6 +127,20 @@ adds impact generalized force before that mask. The path has no actuator
 control or saturation step. Audit actual accepted-stage ideal generalized
 drive separately from impact, bias, passive, ground and weld forces, and do
 not label it measured or post-saturation actuator torque.
+An isolated research branch `codex/15493-ideal-drive-audit` at `d351e55f75`
+captures the separated ideal drive and impact input at accepted RK4 stages.
+Re-running the earlier 1.322-second rigid-v2 computed-torque diagnostic gave
+42,304 of 42,304 expected stages; ideal drive equaled the root-zeroed source
+at every stage and the impact component was zero. Peak non-root ideal drive
+was 1,193.91 N m. This identifies the applied ideal input for that run only;
+it is unsaturated, is not Option B, and is not anatomical certification.
+At those recorded stages, 33 of 41 modeled non-root drive channels exceeded
+their declared directional capacity thresholds and seven coordinate-ROM
+slots exceeded their declared ranges; no generalized speed prior was exceeded.
+Fourteen of the 33 exceeding capacity slots and all 41 speed priors were
+assumption-marked. These are violations of this model's declared thresholds,
+not established anatomical or clinical violations; complete feasibility is
+indeterminate without validated mappings, saturation and between-sample bounds.
 The flight suite was repeated in a fresh isolated Python 3.12 environment
 after building the current Rust extension and verifying physics revision 2:
 15 passed and one strict expected failure. The stale default revision 0 is
