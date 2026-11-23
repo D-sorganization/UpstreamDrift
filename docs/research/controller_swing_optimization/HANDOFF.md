@@ -2841,3 +2841,16 @@ Reference shift amplitudes were [0.375, -1.375, 2] mm: inside each +/-2 mm
 axis bound but about 2.454 mm vector norm. Tail/prefix/fade bounds remain
 separate, with no unified trust certificate. Assumed capacities, work/slew,
 contact and full-swing feasibility remain unverified; this is not a gate pass.
+
+One further bounded multivariable relinearization selected an unclipped
+one-eighth step; larger steps clipped 64–448 coarse-run stages and were
+rejected for this comparison. Independent 16/32 motor replays reduced the
+worst sampled 300 ms modeled ROM excess from 0.233913 to 0.220635 rad, but
+two ROM slots still failed and no speed slots failed. The first 200 ms checks
+remained clear, no stages clipped, and the first 150 ms q/drive was identical.
+Reference shifts [0.4375, -1.4375, 2] mm remained within +/-2 mm per axis
+but had about 2.50 mm vector norm; tail norm 1.1912/2 and prefix 0.3161/10
+were separate from the fade, with no unified trust certificate. Marker/foot
+fit worsened marginally. The 5.7% reduction is not a 300 ms gate pass; local
+diminishing progress and clipping motivate a different formulation, not a
+claim of global infeasibility or physical qualification.
