@@ -67,6 +67,28 @@ def _check_names(label: str, given: Iterable[str], known: Sequence[str]) -> None
         raise ValueError(f"{label} names unknown components: {unknown}")
 
 
+def _checked_bounds(
+    name: str,
+    series: np.ndarray,
+    prior: tuple[float, float] | None,
+    feasible: tuple[float, float] | None,
+) -> tuple[tuple[float, float] | None, tuple[float, float] | None]:
+    """Validate one component's declared prior/feasible bounds against samples."""
+    if prior is not None:
+        prior = _interval("prior", name, prior)
+        if series.min() < prior[0] or series.max() > prior[1]:
+            raise ValueError(f"samples for {name!r} fall outside its prior")
+    if feasible is not None:
+        feasible = _interval("feasible bounds", name, feasible)
+        if prior is None:
+            raise ValueError(f"feasible bounds for {name!r} need a prior")
+        if feasible[0] < prior[0] or feasible[1] > prior[1]:
+            raise ValueError(f"feasible bounds for {name!r} exceed its prior")
+        if series.min() < feasible[0] or series.max() > feasible[1]:
+            raise ValueError(f"samples for {name!r} fall outside its feasible bounds")
+    return prior, feasible
+
+
 def classify_component_ranges(
     histories: ArrayLike,
     *,
@@ -125,22 +147,9 @@ def classify_component_ranges(
     components = []
     for idx, name in enumerate(names):
         series = data[:, :, idx]
-        prior = priors.get(name)
-        if prior is not None:
-            prior = _interval("prior", name, prior)
-            if series.min() < prior[0] or series.max() > prior[1]:
-                raise ValueError(f"samples for {name!r} fall outside its prior")
-        feasible = feasibles.get(name)
-        if feasible is not None:
-            feasible = _interval("feasible bounds", name, feasible)
-            if prior is None:
-                raise ValueError(f"feasible bounds for {name!r} need a prior")
-            if feasible[0] < prior[0] or feasible[1] > prior[1]:
-                raise ValueError(f"feasible bounds for {name!r} exceed its prior")
-            if series.min() < feasible[0] or series.max() > feasible[1]:
-                raise ValueError(
-                    f"samples for {name!r} fall outside its feasible bounds"
-                )
+        prior, feasible = _checked_bounds(
+            name, series, priors.get(name), feasibles.get(name)
+        )
         lower, upper = series.min(axis=0), series.max(axis=0)
         max_width = float((upper - lower).max())
         classes = [
