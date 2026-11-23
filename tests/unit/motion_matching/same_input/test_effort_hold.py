@@ -35,7 +35,24 @@ from src.shared.python.motion_matching.same_input.scoring import (
 pytestmark = pytest.mark.unit
 
 ORDER = (*ROOT_COORDINATES, "Joint")
-SPEC = json.dumps({"coordinate_order": list(ORDER)}).encode()
+SPEC = json.dumps(
+    {
+        "coordinate_order": list(ORDER),
+        "joints": [
+            {
+                "primitives": [
+                    {
+                        "coordinate": name,
+                        "primitive": (
+                            "Px" if name.startswith("TranslationInput") else "Rx"
+                        ),
+                    }
+                    for name in ORDER
+                ]
+            }
+        ],
+    }
+).encode()
 DT_S = 1e-3  # the bundle step (pipeline DT_S)
 STEPS = 200
 # Computed-torque tracking of q_ref = A sin(W t) on a = -q + tau.  Under a

@@ -21,7 +21,24 @@ from src.shared.python.motion_matching.same_input import (
 pytestmark = pytest.mark.unit
 
 ORDER = (*ROOT_COORDINATES, "Joint")
-SPEC = json.dumps({"coordinate_order": list(ORDER)}).encode()
+SPEC = json.dumps(
+    {
+        "coordinate_order": list(ORDER),
+        "joints": [
+            {
+                "primitives": [
+                    {
+                        "coordinate": name,
+                        "primitive": (
+                            "Px" if name.startswith("TranslationInput") else "Rx"
+                        ),
+                    }
+                    for name in ORDER
+                ]
+            }
+        ],
+    }
+).encode()
 DT = 1e-3
 STEPS = 20
 POLICY = StepPolicy(project=False)

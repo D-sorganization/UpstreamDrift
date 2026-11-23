@@ -1,0 +1,6 @@
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+\section*{Same-Input Replay Unit Scoring}
+For recorded sample $k$, let $R$ and $P$ be coordinates declared by rotational and translational joint primitives. Report $e_R(k)=\max_{i\in R}|q_i-\hat q_i|$ in radians and $e_P(k)=\max_{i\in P}|q_i-\hat q_i|$ in metres separately; an empty class has zero error. Reject incomplete or ambiguous primitive inventories. The numerical parity bounds are $e_R\leq10^{-6}$ rad, $e_P\leq10^{-6}$ m and sampled frame-position error $\leq10^{-3}$ m. The horizon is the first failing recorded coordinate sample or sampled frame. Inter-sample extrema are not certified. The fitted growth exponent uses only $e_R$. These bounds are not anatomical admission criteria and parity is not evidence of a physical match. Existing v1 receipts used a mixed-unit maximum and should be regenerated. The research source is standalone and not the engineering design manual.
+\end{document}

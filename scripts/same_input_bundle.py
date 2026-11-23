@@ -201,18 +201,24 @@ def replay(bundle_path: Path, engine: str, segment_ms: float) -> dict:
     }
     _STATES["q"], _STATES["time_s"] = rollout.q, rollout.time_s
     return {
-        "schema": "same-input-replay/v1",
+        "schema": "same-input-replay/v2",
         "bundle_sha256": _sha256(bundle_path),
         "bundle": bundle.manifest(),
         "engine": engine,
         "elapsed_s": elapsed,
         "full_horizon": score.summary(),
-        "coordinate_error_at_s": checkpoints,
+        "coordinate_error_rad_at_s": checkpoints,
+        "translation_error_m_at_s": {
+            f"{t:.2f}": float(score.translation_error_m[int(round(t / bundle.dt_s))])
+            for t in np.arange(0.05, bundle.steps * bundle.dt_s + 1e-9, 0.05)
+            if int(round(t / bundle.dt_s)) < score.translation_error_m.size
+        },
         "max_pose_drift_m": float(rollout.pose_drift.max()),
         "segment_steps": segment_steps,
         "segments": segments,
         "worst_segment": {
             "coordinate_error_rad": max(s["coordinate_error_rad"] for s in segments),
+            "translation_error_m": max(s["translation_error_m"] for s in segments),
             "frame_error_m": max(s["frame_error_m"] for s in segments),
         },
     }
@@ -239,7 +245,7 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
     score = score_replay(plant, bundle, rollout)
     _STATES["q"], _STATES["time_s"] = rollout.q, rollout.time_s
     return {
-        "schema": "same-input-closed-loop/v1",
+        "schema": "same-input-closed-loop/v2",
         "bundle_sha256": _sha256(bundle_path),
         "bundle": bundle.manifest(),
         "engine": engine,

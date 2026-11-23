@@ -14,6 +14,7 @@ grows exponentially.  Two measures follow from that:
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -31,6 +32,7 @@ Array = NDArray[np.float64]
 
 # Epic #11605 level L2 bounds.
 COORDINATE_BOUND_RAD = 1e-6
+TRANSLATION_BOUND_M = 1e-6
 FRAME_BOUND_M = 1e-3
 
 
@@ -46,6 +48,7 @@ class ReplayScore:
 
     time_s: Array
     coordinate_error: Array
+    translation_error_m: Array
     frame_time_s: Array
     frame_error_m: Array
     growth_rate_per_s: float
@@ -59,10 +62,41 @@ class ReplayScore:
             "failure": self.failure,
             "duration_s": float(self.time_s[-1]),
             "max_coordinate_error_rad": float(self.coordinate_error.max()),
+            "max_translation_error_m": float(self.translation_error_m.max()),
             "max_frame_error_m": float(self.frame_error_m.max()),
-            "growth_rate_per_s": growth if np.isfinite(growth) else None,
+            "rotation_growth_rate_per_s": growth if np.isfinite(growth) else None,
             "horizon_s": self.horizon_s,
         }
+
+
+def _coordinate_indices(bundle: InputBundle) -> tuple[list[int], list[int]]:
+    """Resolve SI units from every declared joint primitive; reject ambiguity."""
+    spec = json.loads(bundle.spec_bytes)
+    units: dict[str, str] = {}
+    if len(set(bundle.coordinate_order)) != len(bundle.coordinate_order):
+        raise ValueError("duplicate coordinate primitive inventory")
+    for joint in spec.get("joints", []):
+        for primitive in joint.get("primitives", []):
+            name, kind = primitive.get("coordinate"), primitive.get("primitive")
+            if (
+                name not in bundle.coordinate_order
+                or kind not in ("Px", "Py", "Pz", "Rx", "Ry", "Rz")
+                or name in units
+            ):
+                raise ValueError("ambiguous or unsupported coordinate primitive")
+            units[name] = kind[0]
+    if set(units) != set(bundle.coordinate_order):
+        raise ValueError("coordinate primitive inventory is incomplete")
+    return (
+        [i for i, name in enumerate(bundle.coordinate_order) if units[name] == "R"],
+        [i for i, name in enumerate(bundle.coordinate_order) if units[name] == "P"],
+    )
+
+
+def _max_error(delta: Array, indices: list[int]) -> Array:
+    return (
+        np.max(np.abs(delta[:, indices]), axis=1) if indices else np.zeros(len(delta))
+    )
 
 
 def _frame_positions(plant: FramePlant, q: Array) -> Array:
@@ -84,13 +118,36 @@ def growth_rate(time_s: Array, error: Array, low: float, high: float) -> float:
 def score_replay(
     plant: FramePlant, bundle: InputBundle, rollout: Rollout, *, frame_stride: int = 10
 ) -> ReplayScore:
-    """Compare ``rollout`` with the bundle reference over the steps it reached."""
+    """Score rotational radians and translational metres separately.
+
+    Horizon is the first failed recorded coordinate sample or sampled frame;
+    between-sample and continuous-time extrema are not certified.
+    """
     reached = rollout.q.shape[0]
-    if reached > bundle.steps + 1 or rollout.q.shape[1] != bundle.q0.size:
+    if (
+        rollout.q.ndim != 2
+        or reached < 1
+        or reached > bundle.steps + 1
+        or rollout.q.shape[1] != bundle.q0.size
+    ):
         raise ValueError("rollout must not exceed the bundle")
+    if not np.isfinite(rollout.q).all():
+        raise ValueError("rollout coordinates must be finite")
+    if (
+        rollout.time_s.shape != (reached,)
+        or not np.isfinite(rollout.time_s).all()
+        or np.any(np.diff(rollout.time_s) <= 0.0)
+        or not np.allclose(
+            rollout.time_s, np.arange(reached) * bundle.dt_s, rtol=0, atol=1e-12
+        )
+    ):
+        raise ValueError("rollout time must match the bundle grid")
     if frame_stride < 1:
         raise ValueError("frame_stride must be positive")
-    coordinate_error = np.abs(rollout.q - bundle.reference_q[:reached]).max(axis=1)
+    rotation, translation = _coordinate_indices(bundle)
+    delta = rollout.q - bundle.reference_q[:reached]
+    coordinate_error = _max_error(delta, rotation)
+    translation_error = _max_error(delta, translation)
     rows = np.unique(np.r_[np.arange(0, reached, frame_stride), reached - 1])
     frame_error = np.array(
         [
@@ -103,14 +160,18 @@ def score_replay(
         ]
     )
     frame_time = rows * bundle.dt_s
-    inside = (coordinate_error <= COORDINATE_BOUND_RAD)[rows] & (
-        frame_error <= FRAME_BOUND_M
+    inside = (coordinate_error <= COORDINATE_BOUND_RAD) & (
+        translation_error <= TRANSLATION_BOUND_M
     )
+    inside[rows] &= frame_error <= FRAME_BOUND_M
     first_out = np.flatnonzero(~inside)
-    horizon = float(frame_time[-1] if first_out.size == 0 else frame_time[first_out[0]])
+    horizon = float(
+        rollout.time_s[-1] if first_out.size == 0 else rollout.time_s[first_out[0]]
+    )
     return ReplayScore(
         time_s=rollout.time_s,
         coordinate_error=coordinate_error,
+        translation_error_m=translation_error,
         frame_time_s=frame_time,
         frame_error_m=frame_error,
         growth_rate_per_s=growth_rate(rollout.time_s, coordinate_error, 1e-12, 1e-3),
@@ -131,6 +192,7 @@ def segmented_replay(
     if segment_steps < 1:
         raise ValueError("segment_steps must be positive")
     segments = []
+    rotation, translation = _coordinate_indices(bundle)
     impact = bundle.ball_impact()
     for start in range(0, bundle.steps, segment_steps):
         stop = min(start + segment_steps, bundle.steps)
@@ -148,7 +210,12 @@ def segmented_replay(
             {
                 "start_s": start * bundle.dt_s,
                 "steps": stop - start,
-                "coordinate_error_rad": float(np.abs(end_q - ref_q).max()),
+                "coordinate_error_rad": float(
+                    _max_error((end_q - ref_q)[None, :], rotation)[0]
+                ),
+                "translation_error_m": float(
+                    _max_error((end_q - ref_q)[None, :], translation)[0]
+                ),
                 "frame_error_m": float(
                     np.linalg.norm(
                         _frame_positions(plant, end_q) - _frame_positions(plant, ref_q),

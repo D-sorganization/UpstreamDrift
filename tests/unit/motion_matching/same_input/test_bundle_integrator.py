@@ -23,7 +23,24 @@ from src.shared.python.motion_matching.same_input import (
 pytestmark = pytest.mark.unit
 
 ORDER = (*ROOT_COORDINATES, "Joint")
-SPEC = json.dumps({"coordinate_order": list(ORDER)}).encode()
+SPEC = json.dumps(
+    {
+        "coordinate_order": list(ORDER),
+        "joints": [
+            {
+                "primitives": [
+                    {
+                        "coordinate": name,
+                        "primitive": (
+                            "Px" if name.startswith("TranslationInput") else "Rx"
+                        ),
+                    }
+                    for name in ORDER
+                ]
+            }
+        ],
+    }
+).encode()
 
 
 class _Oscillator:
@@ -190,8 +207,73 @@ def test_score_replay_of_the_reference_is_exact() -> None:
     assert score.frame_error_m.max() == 0.0
     assert score.horizon_s == pytest.approx(bundle.steps * bundle.dt_s)
     summary = score.summary()
-    assert summary["growth_rate_per_s"] is None  # no growth band: strict JSON null
+    assert (
+        summary["rotation_growth_rate_per_s"] is None
+    )  # no growth band: strict JSON null
     json.dumps(summary, allow_nan=False)
+
+
+def test_replay_reports_translation_and_rotation_separately() -> None:
+    bundle = _bundle()
+    rollout = open_loop(
+        _Oscillator(),
+        bundle.q0,
+        bundle.v0,
+        bundle.efforts,
+        dt_s=bundle.dt_s,
+        policy=StepPolicy(project=False),
+    )
+    rollout.q[1, 0] += 2e-6
+    rollout.q[2, -1] += 3e-7
+    score = score_replay(_Oscillator(), bundle, rollout, frame_stride=5)
+    summary = score.summary()
+    assert summary["max_translation_error_m"] == pytest.approx(2e-6)
+    assert summary["max_coordinate_error_rad"] == pytest.approx(3e-7)
+    assert score.horizon_s == pytest.approx(0.01)
+
+
+def test_replay_rejects_missing_coordinate_units() -> None:
+    from dataclasses import replace
+
+    bundle = _bundle()
+    unknown = replace(
+        bundle, spec_bytes=json.dumps({"coordinate_order": list(ORDER)}).encode()
+    )
+    rollout = open_loop(
+        _Oscillator(),
+        bundle.q0,
+        bundle.v0,
+        bundle.efforts,
+        dt_s=bundle.dt_s,
+        policy=StepPolicy(project=False),
+    )
+    with pytest.raises(ValueError, match="primitive"):
+        score_replay(_Oscillator(), unknown, rollout)
+
+
+def test_replay_rejects_ambiguous_or_unknown_primitive() -> None:
+    from dataclasses import replace
+
+    bundle = _bundle()
+    rollout = open_loop(
+        _Oscillator(),
+        bundle.q0,
+        bundle.v0,
+        bundle.efforts,
+        dt_s=bundle.dt_s,
+        policy=StepPolicy(project=False),
+    )
+    for kind in ("Qx", "Px"):
+        spec = json.loads(SPEC)
+        spec["joints"][0]["primitives"].append(
+            {"coordinate": ORDER[0], "primitive": kind}
+        )
+        with pytest.raises(ValueError, match="primitive"):
+            score_replay(
+                _Oscillator(),
+                replace(bundle, spec_bytes=json.dumps(spec).encode()),
+                rollout,
+            )
 
 
 def test_stop_on_failure_returns_the_states_reached() -> None:
@@ -229,3 +311,25 @@ def test_step_policy_rejects_nonpositive_substeps(substeps: int) -> None:
 def test_step_policy_rejects_non_integer_substeps() -> None:
     with pytest.raises(TypeError, match="substeps"):
         StepPolicy(substeps=2.0)  # type: ignore[arg-type]
+
+
+def test_replay_rejects_nonfinite_state_and_shifted_clock() -> None:
+    from dataclasses import replace
+
+    bundle = _bundle()
+    rollout = open_loop(
+        _Oscillator(),
+        bundle.q0,
+        bundle.v0,
+        bundle.efforts,
+        dt_s=bundle.dt_s,
+        policy=StepPolicy(project=False),
+    )
+    with pytest.raises(ValueError, match="time"):
+        score_replay(
+            _Oscillator(), bundle, replace(rollout, time_s=rollout.time_s + 0.01)
+        )
+    bad_q = rollout.q.copy()
+    bad_q[1, 0] = np.nan
+    with pytest.raises(ValueError, match="finite"):
+        score_replay(_Oscillator(), bundle, replace(rollout, q=bad_q))
