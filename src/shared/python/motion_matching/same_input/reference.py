@@ -172,12 +172,7 @@ def generate_reference_bundle(
     )
     manifest = {"ball_impact": rollout.ball_impact, "impact_split_time_s": split_time_s}
     return _rollout_bundle(
-        spec_bytes,
-        rollout,
-        policy,
-        {**manifest, **(provenance or {})},
-        target_time_s=track_time_s,
-        target_q=q_track,
+        spec_bytes, rollout, policy, manifest, provenance, track_time_s, q_track
     )
 
 
@@ -221,12 +216,7 @@ def generate_lead_in_bundle(
     rollout, lead_in = drop_lead_in(rollout, lead_in_steps, policy.effort_holds)
     manifest = {"ball_impact": None, "impact_split_time_s": None, **lead_in}
     return _rollout_bundle(
-        spec_bytes,
-        rollout,
-        policy,
-        {**manifest, **(provenance or {})},
-        target_time_s=track_time_s,
-        target_q=q_track,
+        spec_bytes, rollout, policy, manifest, provenance, track_time_s, q_track
     )
 
 
@@ -235,11 +225,11 @@ def _rollout_bundle(
     rollout: Rollout,
     policy: StepPolicy,
     manifest: dict[str, Any],
-    *,
+    provenance: dict[str, Any] | None,
     target_time_s: Array,
     target_q: Array,
 ) -> InputBundle:
-    """The bundle of a MuJoCo reference rollout, with its manifest fields."""
+    """Bundle a rollout and original target, preserving caller provenance overrides."""
     holds = policy.effort_holds
     return InputBundle(
         spec_bytes=bytes(spec_bytes),
@@ -255,6 +245,7 @@ def _rollout_bundle(
             "controller": "pipeline computed-torque (kkt), held per step",
             "max_pose_drift_m": float(rollout.pose_drift.max()),
             **manifest,
+            **(provenance or {}),
         },
         effort_holds=holds,
         hold_efforts=None if holds == 1 else rollout.efforts,
