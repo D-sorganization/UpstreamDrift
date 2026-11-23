@@ -2507,3 +2507,28 @@ tracking. Even the smallest of five tested steps failed early ROM gates.
 Reject all tested candidates; the linear estimate addresses only initial
 translation and does not prove global infeasibility, physiology, work or
 contact. Torque and speed priors retain their documented assumptions.
+
+Fixed-lattice event-prefix research checkpoint `codex/15493-lattice-prefix37`
+at `ad0b6609cf` uses cached RK4 substep endpoints and a fixed held effort,
+avoiding the earlier trial-prefix repartition seam. A supplied projected
+endpoint that differs in q/v is rejected; absent such an endpoint projection
+is unchecked. Twenty-seven focused tests and normal push hooks passed. This
+214-line increment has oversized research ancestry, has no PR, and provides
+no validated dense-output enclosure or first-contact certificate.
+
+A short 55-frame support-aware fit held q0/q1 fixed, retained sampled closure
+<=2.72e-12 and passed modeled registry ROM/speed checks, but stopped
+unconverged. Its target-state root translation acceleration defect fell
+9.32 to 0.576 m/s² RMS while median modeled support rose 0.073 to 0.851 body
+weights; source marker/foot RMS changed 27.27/7.19 to 27.63/8.16 mm. Joint
+acceleration RMS rose 29.1 to 140.8 rad/s², peak 170 to 2,967 rad/s².
+
+Independent 16/32-substep ideal forward checks over 150 ms agreed closely and
+had no sampled modeled ROM/speed flags. Compared with the original reference,
+source/observed marker RMS improved 29.63/30.62 to 29.04/30.07 mm and root
+translation tracking RMS 8.08 to 5.80 mm, but joint tracking RMS worsened
+0.0181 to 0.0222 rad. Modeled capacity-bad commands fell 27 to 14 while peak
+ratio rose 1.608 to 2.087 and peak ideal drive 229.6 to 326.5 N m. This is
+not an admitted physical baseline: contact is assumed, the optimizer did not
+converge, no actual motor/work/impact gate passed, and endpoint derivatives do
+not seamlessly join the full reference.
