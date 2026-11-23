@@ -79,7 +79,22 @@ missing anatomical bounds and untested forward dynamics prevent acceptance.
 Directional checks of the 33-frame Jacobian had relative errors of
 1.4e-7--4.3e-7. A tighter, rescaled trust-region trial timed out and did not
 improve the measured stationarity; its last function trial is not necessarily
-an accepted iterate.
+an accepted iterate. A later 99-frame run from original seeds stopped on
+`xtol` after 66.3 seconds, with first-order optimality 0.486. Its maximum soft
+closure translation was 0.00172 mm and all supplied named bounds held, but
+peak sampled angular speed remained 39.41 rad/s and acceleration remained
+21,740 rad/s². It is not a stationary or physically admitted result.
+A controlled 99-frame comparison with the same seeds and a tenfold larger
+second-difference residual weight reached its 200-evaluation/300-second cap
+without convergence (optimality 3.776). Peak sampled speed fell to 31.66 rad/s
+and peak second difference to 984 rad/s²; maximum soft closure was 0.00628 mm,
+maximum marker RMS 36.44 mm, and exit join speed 33.12 rad/s. All supplied
+named bounds held. The altered objective, soft closure, unvalidated anatomy and
+missing forward dynamics mean this is sensitivity evidence only.
+Restarting that solver-returned point with the same objective stopped on
+`xtol` after five evaluations, with independently recomputed unscaled
+projected-gradient infinity norm 0.629 and exit join 33.12 rad/s. It is not
+evidence of gradient convergence.
 Direct derivation from the embedded calibrated model rejects an unknown pelvis
 offset; relocating its pelvis is a physical model change, not a coordinate-only
 migration. A three-state diagnostic of that changed-model candidate preserved
@@ -100,6 +115,12 @@ suite passed 16 tests with one strict expected failure, including a check that
 an airborne endpoint cannot be reported as carry. Reference
 flight rows include approximate inputs and are not independent flight
 validation. Re-run relevant checks on the actual delivery commit and runtime.
+In the MuJoCo parity plant the recorded held effort is a source command; the
+native KKT solve zeroes passive shaft coordinates, and the forced wrapper
+adds impact generalized force before that mask. The path has no actuator
+control or saturation step. Audit actual accepted-stage ideal generalized
+drive separately from impact, bias, passive, ground and weld forces, and do
+not label it measured or post-saturation actuator torque.
 The flight suite was repeated in a fresh isolated Python 3.12 environment
 after building the current Rust extension and verifying physics revision 2:
 15 passed and one strict expected failure. The stale default revision 0 is
