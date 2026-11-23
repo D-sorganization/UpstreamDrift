@@ -1210,3 +1210,11 @@ hold-sampled named ROM flags changed from two (5.055° / 3.676°) to one
 (4.080°), and minimum compliant foot-sphere height from −23.94 to −24.87 mm.
 These are unadmitted model-dependent diagnostics, not Option B, actual
 actuator force, measured support or physical feasibility.
+
+For the root-regulation diagnostic, root-translation error norm against the
+fitted proxy first exceeded 50 mm at 0.438 s versus 0.417 s unregulated,
+and 100 mm at 0.626 versus 0.601 s; final norm was 0.288 versus 0.424 m.
+A fresh-process repeat under the same runtime reproduced time, q, velocity
+and held effort arrays bit-for-bit. No accepted-stage trace or independent
+runtime was checked. This remains substantially off the target and is not a
+qualified baseline, physical feasibility or Option B result.
