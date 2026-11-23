@@ -1933,3 +1933,22 @@ update 23.2964 N m. Uninterrupted replay first flagged ROM at stage 1843
 and 41 speed coordinates flagged. The run's post-violation outputs are not
 physical metrics. Sixteen torque capacities and the work/slew bounds remain
 unverified; sampled short-window success does not admit this swing.
+
+A focused reconciliation of `0d1437e5fc` with real-face research commit
+`36a15de7c2` passed 84 impact-force, contact-event, MuJoCo surface and
+synthetic v2 finite-face tests (three warnings). Keep the research version of
+`_point_and_normal` and both sets of tests when resolving the two textual
+conflicts; the legacy timing guard applies cleanly and surface dispatch bypasses
+it. This isolated test changes neither branch and does not resolve first-root
+coverage, initial overlap or physical admission.
+
+A provenance review found that the v2 spec defines coordinate and soft ROM,
+but no torque, rate or work capacities. The existing registry and physiological
+envelope leave 16 of 41 non-root torque slots assumption-marked: bilateral
+shoulder X/Y/Z, scapula X/Y, forearm rotation, wrist radial/ulnar and MTP.
+Some individual directions have static literature entries, but their opposite
+directions remain unverified. Of 41 speed slots, 33 are unverified and eight
+are sourced with assumed margin; none is an established subject-specific hard
+limit. Existing partial lower-limb static and force-velocity sources are
+population- and posture-dependent. Work and slew limits remain unsourced.
+Use these as research priors, not certified physical gates.
