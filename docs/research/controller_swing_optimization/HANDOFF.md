@@ -423,6 +423,12 @@ lowest-tracking-RMS candidate, selected after the scan, matched saved state,
 command and ideal-input arrays bit-for-bit. Zero residual had the lower
 predeclared penalized score. This is not an independent runtime or a Solution
 Bundle replay.
+A full-horizon check of zero residual and the selected two-direction trial
+with the same clipped controller became nonfinite at 0.402 and 0.583 s,
+respectively. Neither reached the 1.322 s endpoint; a later failure is not a
+feasibility improvement, and two trials do not prove infeasibility. A
+trajectory-wide solver with continuity constraints and uninterrupted replay
+remains to be implemented.
 A matched 32-substep run completed 0.7 s with approximately the same 1.431 rad
 tracking RMS as the 16-substep run. Their maximum coordinate difference grew
 from 1.13e-7 rad at 0.4 s to 0.109 rad at 0.7 s; resolution convergence is
