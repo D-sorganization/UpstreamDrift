@@ -26,6 +26,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .default_match import MatchScenario, default_match, match_scenarios
 from .results_loader_worker import LOAD_ERRORS, ResultsLoader, ResultsLoadSettings
+from .playback_view import load_layout_settings
 from .results_session import ResultsSession
 
 logger = get_logger(__name__)
@@ -37,6 +38,9 @@ class ResultsPlaybackHostMixin:
     playback_panel: Any | None
     playback_dock: QDockWidget | None
     playback_bar: Any | None
+    segment_dock: QDockWidget
+    properties_dock: QDockWidget
+    _hidden_editor_docks: tuple[QDockWidget, ...] = ()
     _results: ResultsSession | None
     _inner: Any
     visualization_dock: Any
@@ -286,9 +290,29 @@ class ResultsPlaybackHostMixin:
             self.playback_dock = QDockWidget("Results Playback", self._inner)
             self.playback_dock.setObjectName("ResultsPlaybackDock")
             self._inner.tabifyDockWidget(self.visualization_dock, self.playback_dock)
+            self._inner.tabifiedDockWidgetActivated.connect(self._on_dock_tab_shown)
         self.playback_dock.setWidget(panel)
         self.playback_dock.show()
         self.playback_dock.raise_()
+        self._on_dock_tab_shown(self.playback_dock)
+
+    def _on_dock_tab_shown(self, dock: QDockWidget) -> None:
+        """Playback tab on top: the swing gets the window, the editor docks
+        step aside; the viewport tab brings back the ones this hid."""
+        if dock is self.playback_dock:
+            if load_layout_settings().hide_editor_docks:
+                shown = tuple(
+                    d
+                    for d in (self.segment_dock, self.properties_dock)
+                    if not d.isHidden()
+                )
+                self._hidden_editor_docks += shown
+                for hidden in shown:
+                    hidden.hide()
+        elif dock is self.visualization_dock:
+            for restored in self._hidden_editor_docks:
+                restored.show()
+            self._hidden_editor_docks = ()
 
     def _discard_results(self) -> None:
         """Drop the loaded run, its panel and its renderer; idempotent."""

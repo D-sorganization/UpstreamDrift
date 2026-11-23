@@ -41,6 +41,7 @@ from src.tools.model_explorer.golfer_playback import (
     spec_summary,
 )
 from src.tools.model_explorer.playback_clock import SPEEDS, PlaybackClock
+from src.tools.model_explorer.playback_view import load_layout_settings
 from src.tools.model_explorer.results_session import ResultsSession
 
 logger = get_logger(__name__)
@@ -133,10 +134,28 @@ class ResultsPlaybackPanel(QWidget):
         self.view_label.setObjectName("ResultsPlaybackView")
         splitter.addWidget(self.view_label)
         splitter.addWidget(self._build_plot())
-        splitter.setStretchFactor(0, 3)
-        splitter.setStretchFactor(1, 2)
+        cfg = load_layout_settings()
+        splitter.setStretchFactor(0, cfg.render_stretch)
+        splitter.setStretchFactor(1, cfg.plot_stretch)
+        self._split_ratio = [cfg.render_stretch, cfg.plot_stretch]
+        splitter.setChildrenCollapsible(False)
+        self.splitter = splitter
         layout.addWidget(splitter, 1)
         layout.addLayout(self._build_timeline())
+
+    def showEvent(self, event: Any) -> None:  # noqa: N802 - Qt override
+        """First show: split the height by the settings ratio (size hints
+        would otherwise give the plot half of it)."""
+        super().showEvent(event)
+        if self._split_ratio:
+            QTimer.singleShot(0, self._apply_split_ratio)
+
+    def _apply_split_ratio(self) -> None:
+        total = self.splitter.height()
+        weights = self._split_ratio
+        if weights and total > 0:
+            self.splitter.setSizes([total * w // sum(weights) for w in weights])
+            self._split_ratio = []
 
     def _build_plot(self) -> QWidget:
         box = QWidget()
@@ -168,6 +187,7 @@ class ResultsPlaybackPanel(QWidget):
         row.addWidget(self.play_button)
         self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setObjectName("ResultsTimeline")
+        self.slider.setMinimumWidth(load_layout_settings().slider_min_width_px)
         self.slider.setRange(0, self._pose.frame_count - 1)
         self.slider.valueChanged.connect(self._on_scrub)
         row.addWidget(self.slider, 1)

@@ -1,6 +1,16 @@
 {
   "default_view": "down_the_line",
   "sources": {
-    "default_view": "Camera the results playback opens on. down_the_line looks along the target line from behind the golfer; once the run's address ball and feet are known the camera sits on the line midway between them (behind_fraction in native_viewer_export/camera_framing_settings.json), as the owner asked on 2026-11-22. Any VIEW_ORDER preset is allowed."
+    "default_view": "Camera the results playback opens on. down_the_line looks along the target line from behind the golfer; once the run's address ball and feet are known the camera sits on the line midway between them (behind_fraction in native_viewer_export/camera_framing_settings.json), as the owner asked on 2026-11-22. Any VIEW_ORDER preset is allowed.",
+    "render_stretch": "Share of the playback panel's height given to the 3D render; the plot below gets plot_stretch. 5:2 leaves the render about 70% (owner asked on 2026-11-22 that the swing, not the plot, fill the window).",
+    "plot_stretch": "Share of the playback panel's height given to the time-series plot (see render_stretch).",
+    "hide_editor_docks": "While the Results Playback tab is on top, hide the Model Segments and Properties docks so the swing gets the window; the 3D Viewport tab (or View menu) brings them back.",
+    "slider_min_width_px": "Narrowest the timeline slider may get; the transport row (Play, slider, View, Speed, Export) stays on one row and the window's minimum width grows instead of the slider collapsing to its handle."
+  },
+  "layout": {
+    "render_stretch": 5,
+    "plot_stretch": 2,
+    "hide_editor_docks": true,
+    "slider_min_width_px": 160
   }
 }
