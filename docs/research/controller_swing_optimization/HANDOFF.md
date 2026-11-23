@@ -2490,3 +2490,20 @@ velocities or observed maxima therefore do not establish a continuous
 trajectory bound or first-root certificate. A fixed-lattice diagnostic can
 remove that partition seam, but remains conditional without a validated
 continuous error enclosure and projection-continuity treatment.
+
+At the continuous-reference motor state, finite-difference joint-to-root
+translation acceleration sensitivity had rank three at the sampled early
+states; no direct root effort was applied. A -0.05 N m hip spline change
+slightly reduced the initial translation defect while retaining 100 ms
+sampled modeled ROM/speed gates and no clipping; 16/32 motor substeps agreed
+locally. It did not resolve the roughly 8.1 m/s² defect.
+
+A local least-norm linear estimate to eliminate that initial defect required
+20.85 N m perturbation norm and 21.61 N m total spline coefficient norm,
+above the existing 10 N m diagnostic trust radius. A bounded radius-10
+estimate reduced the instantaneous modeled defect to 4.392 m/s², but its
+actual 100 ms motor replay failed three modeled ROM slots and worsened joint
+tracking. Even the smallest of five tested steps failed early ROM gates.
+Reject all tested candidates; the linear estimate addresses only initial
+translation and does not prove global infeasibility, physiology, work or
+contact. Torque and speed priors retain their documented assumptions.
