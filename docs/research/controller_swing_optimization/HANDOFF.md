@@ -612,3 +612,20 @@ roots were at 0.000459850311 s, with q difference 2.22e-16, qd difference
 sampled penalties. The initial state was an exploratory fit, while velocity
 and ball placement were synthetic; the one-millisecond fixture does not
 establish pinned-match contact, complete scan coverage or a physical shot.
+
+Reproducible research branch `codex/15493-realface-fixture` at `36a15de7c2`
+adds a synthetic v2 finite-face regression with a closure state solved from
+zero, no private fit input, fixed-lattice integration, step halving, receding
+and off-face controls. One focused test and normal headless push hooks passed.
+The 1 microsecond synthetic horizon does not certify actual-match contact,
+first-contact coverage or physical gates. It is based on oversized research,
+not a PR.
+
+Research branch `codex/15493-actuator-rollout-research` at `0db6c92d5f`
+adds a separately labeled post-saturation motor-drive recording mode for RK4
+stages without silently changing ideal-drive semantics. Thirty-one focused
+actuator, ideal-drive and stage-trace tests and normal headless push hooks
+passed. A real-v2 synthetic two-step fixture required 0.1 microsecond steps;
+a 1 ms trial diverged. This is short plumbing evidence only, with synthetic
+motor limits, no admitted actuator model, and no impact or projection support
+in that mode. It is not a qualified trajectory or compliant Slice 1 PR.
