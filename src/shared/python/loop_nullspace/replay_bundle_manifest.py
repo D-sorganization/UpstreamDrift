@@ -14,7 +14,7 @@ import hashlib
 import json
 import math
 import re
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path, PureWindowsPath
 from typing import Any
@@ -54,9 +54,8 @@ class ReplayStatus(str, Enum):
 def _is_safe_relative_name(name: str) -> bool:
     """True only for a strict, platform-independent bundle-relative POSIX path.
 
-    Rejects, on every platform: empty names, backslashes, leading separators
-    (POSIX root, UNC), Windows drives (``C:/x``, drive-relative ``C:x``), any
-    colon (NTFS streams), NUL bytes and ``.``/``..``/empty components.
+    Rejects empty names, backslashes, leading separators (root, UNC), Windows
+    drives, any colon (NTFS streams), NUL bytes and ``.``/``..``/empty parts.
     """
     if not name or "\\" in name or "\x00" in name or ":" in name:
         return False
@@ -81,9 +80,7 @@ class ArtifactRef:
 
     def __post_init__(self) -> None:
         if not _is_safe_relative_name(self.name):
-            raise ValueError(
-                f"artifact name must be a safe relative path: {self.name!r}"
-            )
+            raise ValueError(f"unsafe artifact name: {self.name!r}")
         if not _SHA256.fullmatch(self.sha256):
             raise ValueError("sha256 must be 64 lowercase hex characters")
         if self.size_bytes < 0:
@@ -131,14 +128,10 @@ class BundleCandidate:
             if not self.unavailable_reason:
                 raise ValueError("an unavailable candidate needs a reason")
             if self.artifacts or self.max_residual is not None:
-                raise ValueError(
-                    "an unavailable candidate carries no artifacts or residual"
-                )
+                raise ValueError("unavailable candidate carries no artifacts")
             return
         if self.unavailable_reason:
-            raise ValueError(
-                "unavailable reason only applies to unavailable candidates"
-            )
+            raise ValueError("reason only applies to unavailable candidates")
         res = self.max_residual
         if res is None or not math.isfinite(res) or res < 0:
             raise ValueError("max_residual must be finite and >= 0")
@@ -183,12 +176,7 @@ class ReplayBundleManifest:
         return {
             "schema": MANIFEST_SCHEMA,
             "baseline": _ref_dict(self.baseline),
-            "render": {
-                "camera_id": self.render.camera_id,
-                "timebase_s": self.render.timebase_s,
-                "force_scale_m_per_n": self.render.force_scale_m_per_n,
-                "torque_scale_m_per_nm": self.render.torque_scale_m_per_nm,
-            },
+            "render": asdict(self.render),
             "assumptions": list(self.assumptions),
             "candidates": [
                 {
@@ -223,12 +211,11 @@ class ReplayBundleManifest:
             assumptions=tuple(data["assumptions"]),
             candidates=tuple(
                 BundleCandidate(
-                    candidate_id=c["candidate_id"],
-                    strategy=c["strategy"],
-                    status=ReplayStatus(c["status"]),
-                    max_residual=c["max_residual"],
-                    unavailable_reason=c["unavailable_reason"],
-                    artifacts=tuple(_ref_from(a) for a in c["artifacts"]),
+                    **{
+                        **c,
+                        "status": ReplayStatus(c["status"]),
+                        "artifacts": tuple(_ref_from(a) for a in c["artifacts"]),
+                    }
                 )
                 for c in data["candidates"]
             ),
@@ -236,16 +223,11 @@ class ReplayBundleManifest:
 
 
 def _ref_dict(ref: ArtifactRef) -> dict[str, Any]:
-    return {
-        "role": ref.role.value,
-        "name": ref.name,
-        "sha256": ref.sha256,
-        "size_bytes": ref.size_bytes,
-    }
+    return {**asdict(ref), "role": ref.role.value}
 
 
 def _ref_from(d: dict[str, Any]) -> ArtifactRef:
-    return ArtifactRef(ArtifactRole(d["role"]), d["name"], d["sha256"], d["size_bytes"])
+    return ArtifactRef(**{**d, "role": ArtifactRole(d["role"])})
 
 
 def verify_against_dir(manifest: ReplayBundleManifest, root: Path) -> tuple[str, ...]:
