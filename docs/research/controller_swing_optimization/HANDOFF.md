@@ -2395,3 +2395,18 @@ fixed; the higher-gain cases worsened joint tracking and added clipping in
 this modeled interval despite lower root-rotation RMS. This is sensitivity
 analysis, not a physiological gain recommendation or feasible-swing proof;
 16 torque and all speed capacities remain assumption-limited.
+
+Static finite-face clearance research checkpoint `codex/15493-clearance35`
+at `34489362a8` builds on face geometry and adds 285 lines (434 relative to
+its main base). It computes instantaneous sphere-to-patch gap and rejects
+initial nonpositive or insufficient caller-margin clearance. Fifteen focused
+tests, including independent constrained-minimization comparisons, and normal
+push hooks passed. It cannot certify outside-solid placement, approach, interval
+coverage or first root; no PR was opened and address overlap remains open.
+
+In the fixed-gain sweep above, the higher-gain cases first clipped at right
+toe actuators after 12 ms (6/0.6) or 6 ms (12/1.2); left/right toe actuators
+were dominant clipped slots and their capacities are unverified. The cases
+also had toe ROM/speed flags under the model. These results do not establish
+verified physiological restrictions or justify escalating gains in place of
+addressing the coupled reference and dynamics.
