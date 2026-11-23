@@ -2145,3 +2145,19 @@ closure was unacceptable (15.94 mm / 0.0368 rad, constraint residual 0.0329)
 despite no named-angle bound excess. Do not forward-test or admit this
 iterate; restart only to investigate whether closure can recover. The
 regularizer is numerical, not a physiological acceleration limit.
+
+A four-window, exact-seam 400 ms Option B diagnostic kept the first 320 ms
+sampled modeled gates clear and reduced maximum 400 ms ROM excess from
+0.54359 to 0.43246 rad; seven ROM slots still failed, no speed slots failed,
+and coefficient norm was 2.741 within the 10 N m diagnostic ball. The
+independent motor replay first flagged ROM at about 0.324 s and reached a
+numerical guard at 1.204 s, with 34 ROM and 30 speed slots flagged. Longer
+numerical survival is not feasibility or qualified tracking. The larger
+linearized step was rejected because actual early sampled ROM failed.
+
+A restart of the projected-q1 reference fit stopped unconverged after another
+255 s. Sampled hand/club closure improved from 15.94 mm / 0.0368 rad to
+12.39 mm / 0.0315 rad, still unacceptable; controller initial-rate residual
+remained 0.000337 mixed-coordinate units/s, and peak sampled target speed and
+acceleration were 23.86 rad/s and 1,134 rad/s². No forward run was warranted.
+Do not admit either iterate as a closure-consistent reference.
