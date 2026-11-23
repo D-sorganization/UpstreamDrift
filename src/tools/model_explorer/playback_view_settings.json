@@ -1,0 +1,6 @@
+{
+  "default_view": "down_the_line",
+  "sources": {
+    "default_view": "Camera the results playback opens on. down_the_line looks along the target line from behind the golfer; once the run's address ball and feet are known the camera sits on the line midway between them (behind_fraction in native_viewer_export/camera_framing_settings.json), as the owner asked on 2026-11-22. Any VIEW_ORDER preset is allowed."
+  }
+}
