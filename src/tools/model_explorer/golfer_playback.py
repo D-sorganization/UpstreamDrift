@@ -27,6 +27,8 @@ from src.shared.python.golf_view_presets.presets import VIEW_ORDER
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.tools.model_explorer.playback_view import (
     DEFAULT_LOOKAT_M,
+    MIN_RENDER_PX,
+    load_camera_distances,
     load_view_settings,
     playback_lookat,
 )
@@ -157,6 +159,14 @@ def golfer_scene_inputs(source: PoseFrameSource) -> dict[str, bytes]:
     return {"builder": builder, "spec": source.spec_bytes, "appearance": document}
 
 
+def _check_size(width: int, height: int) -> None:
+    if width < MIN_RENDER_PX or height < MIN_RENDER_PX:
+        raise ValueError(
+            f"frame size must be at least {MIN_RENDER_PX}x{MIN_RENDER_PX}, "
+            f"got {(width, height)}"
+        )
+
+
 class GolferPlayback:
     """Offscreen MuJoCo renders of a run on the shared-appearance golfer.
 
@@ -173,8 +183,7 @@ class GolferPlayback:
         scene_xml: str | None = None,
     ) -> None:
         width, height = size
-        if width < 16 or height < 16:
-            raise ValueError(f"frame size must be at least 16x16, got {size}")
+        _check_size(width, height)
         import mujoco
 
         from src.tools.native_viewer_export.backends.mujoco_worker import (
@@ -194,6 +203,7 @@ class GolferPlayback:
         self._data = mujoco.MjData(self._model)
         self._qpos_adr = self._address_map(source)
         self._renderer: Any = mujoco.Renderer(self._model, self.size[1], self.size[0])
+        self._distances = load_camera_distances()
         self._camera = mujoco.MjvCamera()
         #: ball-to-feet point behind views look along; ``None`` keeps the preset
         self._behind_anchor_m: tuple[float, float, float] | None = None
@@ -229,7 +239,9 @@ class GolferPlayback:
         )
 
         params = mujoco_camera_params(
-            name, playback_lookat(name, self._behind_anchor_m)
+            name,
+            playback_lookat(name, self._behind_anchor_m),
+            self._distances.get(name),
         )
         cam = self._camera
         cam.type = _free_camera_type(self._mj)
@@ -251,6 +263,25 @@ class GolferPlayback:
             anchor = (float(point[0]), float(point[1]), float(point[2]))
         self._behind_anchor_m = anchor
         self.view = self._view
+
+    def resize(self, width: int, height: int) -> None:
+        """Render at ``width`` x ``height`` from now on (GUI thread only).
+
+        Rebuilds the MuJoCo renderer only when the size changes; the scene,
+        camera and anchor are kept. ``ValueError`` below the minimum edge.
+        """
+        _check_size(width, height)
+        size = (int(width), int(height))
+        if size == self.size or self._renderer is None:
+            return
+        from src.tools.native_viewer_export.backends.mujoco_worker import (
+            grow_offscreen_buffer,
+        )
+
+        grow_offscreen_buffer(self._model, *size)
+        self._renderer.close()
+        self._renderer = self._mj.Renderer(self._model, size[1], size[0])
+        self.size = size
 
     def render(self, index: int) -> NDArray[np.uint8]:
         """RGB frame ``(height, width, 3)`` of the golfer at sample ``index``.
