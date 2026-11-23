@@ -1739,3 +1739,17 @@ was about 0.00525 on matched sampling in the earlier audit. This suggests the
 kinematic transfer loses modeled support consistency, but uses estimated
 forces and finite differences, not measured GRF or proof of physical
 impossibility. No baseline is admitted.
+
+The original hash-bound 1.322 s projected exploratory v2 motor bundle with
+synthetic off-grid prescribed force was replayed on a separate user-owned
+Windows host using an isolated portable copy of the trusted interpreter,
+packages and exact source bytes. The strict partial runtime fingerprint
+matched without bypass; local/remote trusted JSON, manifest and array archive
+hashes matched. The verifier completed 42,312 stages in 593.85 s and returned
+forward replay verified. Its comparisons use exact array equality for each
+stored/replayed stage array and event q/v, and exact event time; mismatch
+raises. This is cross-host repeatability with the same OS build, CPython and
+copied runtime/native binaries, not an independently built runtime. Contact,
+physical feasibility and independent-runtime flags remained false. The force
+was prescribed, motor caps synthetic, and the reference unadmitted. A private
+hash-bound receipt preserves the result; no private identifiers are in git.
