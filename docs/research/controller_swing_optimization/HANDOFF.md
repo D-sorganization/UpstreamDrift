@@ -700,3 +700,18 @@ the corresponding ideal run, maximum coordinate difference first exceeded
 100 rad/s at 1.215 s. The divergent tail makes whole-partial-run RMS
 misleading. This is model-envelope sensitivity, not a physical gate pass,
 physiological limit, Option B result or proof of infeasibility.
+
+A fixed-PD Option B motor-path sensitivity used gains 3/0.3, 1 ms ZOH,
+eight RK4 substeps, the exploratory recorded-dynamics reference, no
+projection or impact, and existing directional model-envelope capacities
+(16 of 41 slots unverified). The zero-residual candidate hit a numerical
+guard at 0.333 s after 10,656 stages; a preselected cubic residual with
+1 N m coefficient norm failed at 0.265 s after 8,480 stages. Actual recorded
+motor force matched directional clipping. On their common 250 ms prefix,
+zero versus residual tracking RMS was 0.54085 versus 0.53655 rad; both had
+20 modeled ROM flags, speed flags were 6 versus 5, and clipped stages were
+1600 versus 1632 of 8000. Maximum held applied-input update rates were
+111,246 versus 116,200 N m/s and stage-based positive work estimates were
+435.87 versus 433.50 J. Both trajectories failed well before the endpoint;
+this limited diagnostic is not a physical acceptance, complete optimization,
+carry result or proof that no feasible improvement exists.
