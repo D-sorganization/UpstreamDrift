@@ -983,3 +983,30 @@ The separate broad Python 3.12 mypy invocation for the preceding coverage
 checkpoint eventually exited 1 with 96 errors in 34 unrelated imported files;
 no changed contact-module error appeared. The normal repository mypy hook and
 scoped NumPy-aware check passed.
+
+A vertical force-balance audit of the 199-frame exploratory v2 target proxy
+used modeled foot support and COM acceleration estimated from Jacobian
+velocity. Mean absolute vertical residual was 1.016 bodyweights (RMS 1.143),
+with zero modeled normal force in 92.3% of interior samples. Applying the
+same audit to the corresponding 0.55 s forward rollout gave mean 0.000829
+and RMS 0.001074 bodyweights. Target acceleration from position second
+differences versus Jacobian-velocity derivatives differed by at most
+0.044 m/s² on interior samples. Uniform downward offsets of nominal static
+compression 2.584 mm and 15.185 mm gave mean mismatch 0.911 and 1.524
+bodyweights; neither is a dynamic correction. A per-frame root-translation
+force match found roots for 197/199 samples, but when velocity and
+acceleration were recomputed its mean mismatch became 3.97 bodyweights,
+peak modeled normal force 18.73 bodyweights and peak offset second derivative
+714.6 m/s². These are model-dependent, assumed-ground diagnostics, not
+measured forces, physiological impossibility or an admitted trajectory. They
+support using coupled smooth dynamics and support constraints rather than
+independent pose adjustments.
+
+A 41-coordinate saturation-deficit Option B direction with 10 N m coefficient
+trust lowered clipped stages from 1440 to 1376 over 200 ms, but tracking RMS
+worsened 0.44482 to 0.51337 rad, modeled ROM flags 17 to 18, speed flags
+3 to 4 and the regularized score 7.41166 to 9.66887. Extension reproduced
+the first 200 ms stage arrays bit-for-bit then hit a numerical guard at
+0.437 s with 24 ROM and eight speed flags. The later failure is not a feasible
+or improved shot. Limits remain assumption-marked, and no physical or
+infeasibility claim follows.
