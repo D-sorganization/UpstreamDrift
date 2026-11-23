@@ -369,3 +369,6 @@ Shared beside the spine packages:
 `motion_matching.club_face_target.face_triangles_in_frame` exposes the existing
 rendered finite face patch in a club frame. It is geometry only, not a contact
 verdict or first-root certification; see `docs/research/finite_face_geometry`.
+`motion_matching.face_clearance` computes a static sphere-to-patch gap and a
+strict initial-gap guard; neither certifies first contact or outside-solid
+position. See `docs/research/face_clearance`.

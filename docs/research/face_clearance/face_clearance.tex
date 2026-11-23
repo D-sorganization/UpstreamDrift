@@ -1,0 +1,20 @@
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+\section{Static Finite-Face Clearance}
+For finite triangles $T_i$ and sphere centre $c$, in the same SI frame, the
+instantaneous gap is $g=\min_i\min_{p\in T_i}\lVert c-p\rVert-r$ with radius
+$r>0$. The implementation uses the Voronoi-region point--triangle method
+extracted from the experimental contact-event work. Empty, nonfinite, nearly
+degenerate or insufficiently resolved geometry fails closed. The initial guard
+requires $g>m$, where the caller supplies a nonnegative margin $m$; zero is a
+numerical convention, not a measured tolerance.
+
+This is distance to an open surface, not signed distance to a closed solid.
+A positive gap is not evidence of initial exterior placement, front-side
+geometry, approach, a bracketed first root, or physical feasibility. No time
+interval is searched or certified. An overlapped initial state and any
+unexamined interval cannot be admitted as contact. Tests cover analytic
+interior, edge and vertex cases, independent constrained minimization, a
+synthetic overlap against the pinned v2 rendered face and invalid geometry.
+\end{document}
