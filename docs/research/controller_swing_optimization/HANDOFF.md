@@ -28,7 +28,11 @@ modified. Preserve private inputs and their identifying provenance outside git.
   resimulation, and per-quantity replay tolerances.
 - [ ] **Slice 3:** Fixed-gain tracking and bounded smooth feedforward spline;
   trust radius, sensitivity audit and total-applied-torque, ROM, speed,
-  tracking, slew and work feasibility checks.
+  tracking, slew and work feasibility checks. A separate research primitive
+  on `codex/15493-option-b-prototype` at `6aad831418` covers fixed PD,
+  clamped cubic residual splines, coefficient trust bound and ideal clipping
+  of the total command; 14 focused tests passed. It does not provide slew,
+  work, physiological feasibility, an optimizer or actual actuator evidence.
 - [ ] **Slice 4:** Optimize power and straight flight through the existing
   pipeline, then independently replay and refine any qualified candidate.
 - [ ] **Slice 5:** Comparison and analysis CLI with baseline and candidate
@@ -135,7 +139,11 @@ controller target, distinct from its saved feedback rollout. Source-model
 sampled target states close at the grip; naive or provisional sign-mapped
 transfer to committed v2 produces large marker and closure errors. An initial
 200 ms source-model open-loop replay matched the saved rollout to near
-roundoff, but this historical v1 result is not the required v2 audit.
+roundoff. In a repeated full pre-impact source-v1 replay, maximum angular
+coordinate disagreement first exceeded 1e-6 rad at 0.755 s and 0.001 rad at
+0.920 s, growing to 65.83 rad by 1.322 s. Recorded impact begins later, so
+its omission does not explain this pre-impact divergence. This historical
+v1 result is not the required v2 audit or a feasibility certificate.
 
 The contact prototype rejects duplicated faces, non-manifold edges and
 inconsistent shared-edge winding. Its bounded root scan can still miss narrow
@@ -275,6 +283,29 @@ elbow pulse completed numerically but grew to 3.088 rad RMS deviation over
 the full interval, with peak ideal drive 640.15 N m and widespread declared
 model-limit exceedances. These grid-sampled, unsaturated results remain
 nonadmitted and do not prove anatomical or clinical limits.
+With that same recorded-state reference, increasing the trial derivative gain
+from 0.3 to 0.6 while retaining proportional gain 3 caused the 0.2 N m pulse
+run to fail numerically after 45 ms; the unpulsed run reproduced the nominal
+states for 700 ms. This is specific to the sampled controller and model.
+At the initial recorded state, finite differences of the complete 1 ms
+held-control and projection map gave local spectral radii about 1.034 and
+2.179 for derivative gains 0.3 and 0.6 respectively, stable across tested
+finite-difference steps. This supports local gain-dependent amplification,
+not a global stability or physiological conclusion.
+A predeclared per-coordinate sensitivity retained 3/0.6 gains except for
+zero gains on both modeled toe coordinates. Over 700 ms, its 0.2 N m pulse
+gave 0.403 rad joint RMS deviation versus 0.751 rad for uniform 3/0.3; uniform
+3/0.6 failed numerically. The toe-zero trial still exceeded 20 of 41 modeled
+ROM slots, four speed priors and 11 drive thresholds. It is an unvalidated,
+unsaturated numerical experiment, not an accepted or optimized swing.
+An independent 200 ms test of the separate Option B primitive used the same
+recorded-state reference and zero spline residual, comparing an unclipped
+control with declared directional model-capacity clipping. The control
+replayed its recorded states exactly. Clipping affected 45 of 200 holds and
+11 channels; recorded ideal drive matched the clipped total at all 6,400
+stages, but tracking RMS rose to 0.44482 rad and 17 modeled ROM and three
+generalized-rate slots were exceeded. Sixteen capacity priors were assumed.
+This is not post-actuator evidence or physiological clearance.
 A matched 32-substep run completed 0.7 s with approximately the same 1.431 rad
 tracking RMS as the 16-substep run. Their maximum coordinate difference grew
 from 1.13e-7 rad at 0.4 s to 0.109 rad at 0.7 s; resolution convergence is
