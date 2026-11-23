@@ -71,3 +71,26 @@ first-contact timing. Main's impact path has not been changed by this research.
 
 Focused validation: `python -m pytest -q
 tests/unit/motion_matching/same_input/test_solution_bundle_prototype.py`.
+
+The separate `motor_forward_replay` research routine binds a numeric motor
+stage archive, model specification, motor XML and fixed-controller JSON to
+independently supplied SHA-256 digests, checks a declared partial runtime
+fingerprint, reconstructs the controller and motor plant, and performs fresh
+fixed-hold forward integration. It compares all numerical RK4 stage arrays,
+including commands, MuJoCo post-saturation generalized motor forces, external
+forces and boundary states, exactly. The controller's raw total command is
+sent to the motor; its software-clipped output is not used. Rigid scalar
+coordinates, stateless joint motors, no projection and no impact/external
+forces are required; the hash-bound controller description also declares KKT regularization. A same-runtime equality check is not independent-runtime,
+continuous-path, anatomical, physical-actuator or contact validation; this
+separate research contract is not the merged Solution Bundle or Slice 2.
+
+A private exploratory v2 fixed-PD 200 ms run with model-prior motor ranges
+recorded and freshly reproduced 6,400 numerical stages exactly in one runtime.
+A second 1.322 s run with loose synthetic ±1000 N m motor caps reproduced
+42,304 stages exactly in one runtime. Both used a previously generated
+exploratory dynamics reference, no projection or impact, and explicit zero KKT
+regularization; the model priors include unverified slots. These checks are
+not a matched baseline, independently pinned runtime, full Solution Bundle,
+anatomical gate, contact verification or power result. Private input digests
+and numerical receipts remain outside the repository.

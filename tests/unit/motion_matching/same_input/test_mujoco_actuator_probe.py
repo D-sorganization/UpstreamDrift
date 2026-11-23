@@ -3,6 +3,7 @@
 from pathlib import Path
 import hashlib
 import io
+import json
 
 import numpy as np
 import pytest
@@ -100,6 +101,105 @@ def test_repeated_calls_do_not_accumulate_actuation(model):
     assert np.array_equal(a1, a2)
 
 
+def test_forward_replay_recomputes_feedback_at_each_hold(model):
+    from src.shared.python.impact_optimization.option_b_prototype import (
+        FixedGainController,
+        SplineResidual,
+    )
+    from src.shared.python.motion_matching.same_input.integrator import (
+        StepPolicy,
+        integrate,
+    )
+    from src.shared.python.motion_matching.same_input.motor_forward_replay import (
+        measured_motor_runtime,
+        verify_motor_forward,
+    )
+    from src.shared.python.motion_matching.same_input.mujoco_actuator_probe import (
+        MotorRolloutPlant,
+    )
+    from src.shared.python.motion_matching.same_input.stage_numeric_archive import (
+        encode_numeric,
+    )
+    from src.shared.python.motion_matching.same_input.stage_trace import StageRecorder
+
+    n = len(model.coordinate_order)
+    q0 = np.zeros(n)
+    ref = q0.copy()
+    ref[6] = 0.1
+    gain = q0.copy()
+    gain[6] = 4.0
+    damping = q0.copy()
+    damping[6] = 2.0
+    xml = (
+        f'<actuator><motor joint="{model.coordinate_order[6]}" '
+        'ctrllimited="true" ctrlrange="-0.1 0.1"/></actuator>'
+    ).encode()
+    plant = MotorRolloutPlant(ControlledMujocoDrive(model, xml.decode()), np.array([6]))
+    cfg = {
+        "q0": q0.tolist(),
+        "v0": q0.tolist(),
+        "times_s": [0.0, 2e-7],
+        "q_ref": [ref.tolist(), ref.tolist()],
+        "qd_ref": [q0.tolist(), q0.tolist()],
+        "tau_ff_ref": [q0.tolist(), q0.tolist()],
+        "kp": gain.tolist(),
+        "kd": damping.tolist(),
+        "lower": (-np.ones(n)).tolist(),
+        "upper": np.ones(n).tolist(),
+        "breakpoints_s": [0.0, 2e-7],
+        "coefficients": np.zeros((4, n)).tolist(),
+        "scale": np.ones(n).tolist(),
+        "trust_radius": 1.0,
+        "min_spacing_s": 1e-8,
+        "kkt_regularization": 1e-6,
+    }
+    spline = SplineResidual(
+        breakpoints_s=cfg["breakpoints_s"],
+        coefficients_nm=cfg["coefficients"],
+        scale_nm=cfg["scale"],
+        trust_radius=1.0,
+        min_spacing_s=1e-8,
+    )
+    control = FixedGainController(
+        times_s=cfg["times_s"],
+        q_ref=cfg["q_ref"],
+        qd_ref=cfg["qd_ref"],
+        tau_ff_ref=cfg["tau_ff_ref"],
+        kp=cfg["kp"],
+        kd=cfg["kd"],
+        lower_nm=cfg["lower"],
+        upper_nm=cfg["upper"],
+        residual=spline,
+    )
+    trace = StageRecorder(capture_motor_drive=True)
+    result = integrate(
+        plant,
+        q0,
+        q0,
+        lambda _i, t, q, v: control.evaluate(t, q, v).commanded_nm,
+        steps=2,
+        dt_s=1e-7,
+        policy=StepPolicy(substeps=2, project=False),
+        recorder=trace,
+    )
+    assert result.failure is None
+    assert result.efforts[0, 6] != result.efforts[1, 6]
+    raw, spec = encode_numeric(trace), SPEC.read_bytes()
+    config = json.dumps(cfg, sort_keys=True).encode()
+    checked = verify_motor_forward(
+        raw,
+        spec,
+        xml,
+        config,
+        expected_archive_sha256=hashlib.sha256(raw).hexdigest(),
+        expected_model_sha256=hashlib.sha256(spec).hexdigest(),
+        expected_motor_sha256=hashlib.sha256(xml).hexdigest(),
+        expected_controller_sha256=hashlib.sha256(config).hexdigest(),
+        expected_runtime_sha256=measured_motor_runtime(),
+    )
+    assert checked.stages == 16 and checked.forward_replay_verified
+
+
 def test_fixed_hold_rollout_records_post_saturation_motor_forces(model):
     from src.shared.python.motion_matching.same_input.integrator import (
         StepPolicy,
@@ -165,6 +265,67 @@ def test_fixed_hold_rollout_records_post_saturation_motor_forces(model):
     with pytest.raises(ValueError, match="ideal"):
         _check_plan(SimpleNamespace(manifest={"runner": {}}), trace)
     raw = encode_numeric(trace)
+    from src.shared.python.motion_matching.same_input.motor_forward_replay import (
+        measured_motor_runtime,
+        verify_motor_forward,
+    )
+
+    config = json.dumps(
+        {
+            "q0": q.tolist(),
+            "v0": q.tolist(),
+            "times_s": [0.0, 2e-7],
+            "q_ref": [q.tolist(), q.tolist()],
+            "qd_ref": [q.tolist(), q.tolist()],
+            "tau_ff_ref": [command.tolist(), command.tolist()],
+            "kp": q.tolist(),
+            "kd": q.tolist(),
+            "lower": (-np.ones(len(q)) * 1000).tolist(),
+            "upper": (np.ones(len(q)) * 1000).tolist(),
+            "breakpoints_s": [0.0, 2e-7],
+            "coefficients": np.zeros((4, len(q))).tolist(),
+            "scale": np.ones(len(q)).tolist(),
+            "trust_radius": 1.0,
+            "min_spacing_s": 1e-8,
+            "kkt_regularization": 1e-6,
+        },
+        sort_keys=True,
+    ).encode()
+    spec = SPEC.read_bytes()
+    motors = f"<actuator>{xml}</actuator>".encode()
+    hashes = {
+        "expected_archive_sha256": hashlib.sha256(raw).hexdigest(),
+        "expected_model_sha256": hashlib.sha256(spec).hexdigest(),
+        "expected_motor_sha256": hashlib.sha256(motors).hexdigest(),
+        "expected_controller_sha256": hashlib.sha256(config).hexdigest(),
+        "expected_runtime_sha256": measured_motor_runtime(),
+    }
+    checked = verify_motor_forward(raw, spec, motors, config, **hashes)
+    assert checked.stages == 16 and checked.forward_replay_verified
+    assert not checked.independent_runtime_verified
+    with pytest.raises(ValueError, match="controller.*hash"):
+        verify_motor_forward(raw, spec, motors, config + b" ", **hashes)
+    with pytest.raises(ValueError, match="runtime"):
+        verify_motor_forward(
+            raw, spec, motors, config, **{**hashes, "expected_runtime_sha256": "0" * 64}
+        )
+    altered = json.loads(config)
+    altered["tau_ff_ref"][0][6] = 2.5
+    altered["tau_ff_ref"][1][6] = 2.5
+    altered_config = json.dumps(altered, sort_keys=True).encode()
+    with pytest.raises(ValueError, match="stages differ"):
+        verify_motor_forward(
+            raw,
+            spec,
+            motors,
+            altered_config,
+            **{
+                **hashes,
+                "expected_controller_sha256": hashlib.sha256(
+                    altered_config
+                ).hexdigest(),
+            },
+        )
     with pytest.raises(ValueError, match="semantics"):
         decode_numeric(raw)
     with np.load(__import__("io").BytesIO(raw), allow_pickle=False) as data:
@@ -203,6 +364,17 @@ def test_fixed_hold_rollout_records_post_saturation_motor_forces(model):
     corrupt = io.BytesIO()
     np.savez_compressed(corrupt, **edited)
     edited_raw = corrupt.getvalue()
+    with pytest.raises(ValueError, match="stages differ"):
+        verify_motor_forward(
+            edited_raw,
+            spec,
+            motors,
+            config,
+            **{
+                **hashes,
+                "expected_archive_sha256": hashlib.sha256(edited_raw).hexdigest(),
+            },
+        )
     with pytest.raises(ValueError, match="force differs"):
         verify_motor_stage_forces(
             edited_raw,

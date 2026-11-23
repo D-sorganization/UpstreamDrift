@@ -38,4 +38,21 @@ hold-lattice boundaries and the prescribed force-window edges. An optional
 trace records accepted RK4 states and native ideal drive and external input
 components separately. The trace is not yet persisted, and this replay does
 not detect contact or certify the first contact time or integration error.
+\section{Restricted Motor Forward Replay}
+An independently supplied digest binds each numerical stage archive, model,
+motor XML, and fixed-controller description. A declared partial runtime hash
+is checked before fresh fixed-hold integration with a reconstructed MuJoCo
+motor plant. Raw total command is sent to the motor, and each resulting
+post-saturation generalized motor force and numerical stage state is compared
+exactly with the record. The supported case has rigid scalar coordinates,
+stateless motors, explicitly bound KKT regularization, no projection and no impact or external force. The hash is
+not a complete runtime lock; exact same-runtime agreement is not independent
+replay, continuous-time, anatomical, actuator-capacity or contact validation.
+This restricted research contract is not the merged Solution Bundle.
+
+A private exploratory fixed-PD v2 diagnostic reproduced 6,400 numerical
+ stages over 200 ms with model-prior motor ranges, and 42,304 stages over
+ 1.322 s with loose synthetic motor caps, within one runtime. These are
+ neither an admitted matched baseline nor physical, contact or independent
+ runtime validation.
 \end{document}
