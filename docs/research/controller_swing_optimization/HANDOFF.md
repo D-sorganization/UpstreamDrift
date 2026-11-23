@@ -26,13 +26,16 @@ modified. Preserve private inputs and their identifying provenance outside git.
 - [ ] **Slice 2:** Versioned JSON and NPZ bundle, complete state and model
   identity, strict validation and migration, distinct playback and forward
   resimulation, and per-quantity replay tolerances. The separate research
-  branch `codex/15493-solution-bundle-prototype` at `55fc00cd5a` adds a
+  branch `codex/15493-solution-bundle-prototype` at `09e5a6647a` adds a
   restricted research-only JSON/NPZ codec and a real two-hold MuJoCo replay
   with ideal clipped input. It can replay an unverified prescribed latched
   force at an off-grid event and compare the actual split state; 106 focused
   tests passed. Its restricted runner now uses the fixed held-step lattice and
-  can observe ideal source and external inputs at accepted stages in memory;
-  those stages are not yet persisted. This is not contact detection. It rejects
+  can bind and compare ideal source and external accepted-stage records in a
+  typed NPZ archive. A fresh 200 ms exploratory v2 recording, save/load and
+  same-runtime traced rerun passed with 6,400 actual stages. This does not
+  establish independent runtime or matched-target validation. Full-horizon
+  evidence is not yet qualified. This is not contact detection. It rejects
   unsupported policies and assets; its runtime
   fingerprint is partial while Git identity remains caller-asserted. Embedded assets,
   post-actuator evidence and full policy remain missing. A limited explicit
