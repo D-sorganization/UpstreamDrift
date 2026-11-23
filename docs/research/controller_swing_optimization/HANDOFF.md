@@ -2753,3 +2753,23 @@ to 2.92701 rad and joint RMS 0.32878 to 0.32872 rad. No stages clipped;
 16/32 results agreed on flags. Reject as a meaningful feasibility improvement.
 This heuristic policy has no combined trust certificate, and work/slew and
 physical limits remain unverified.
+
+A support-aware reference-shift diagnostic used an explicit vertical C2
+bump: zero through 150 ms, +2 mm at 225 ms, and zero at 300 ms. Position,
+velocity and acceleration shifts were derived analytically from the same
+spline; fixed gains, motor and model were unchanged. Reference sampled closure
+remained <=4.95e-12 and prior 150 ms q/applied-drive arrays were identical.
+At 250 ms, 16/32 motor replays retained clear sampled ROM/speed gates through
+200 ms but had three modeled ROM slots fail thereafter, maximum excess
+0.345293 rad versus 1.03766 rad in the prior 32-substep baseline. Post-150 ms
+source/observed marker RMS changed 29.50/30.58 to 29.21/30.31 mm and
+source-model foot RMS 3.79 to 3.19 mm.
+
+At 300 ms, the 16/32 motor replays first flagged ROM at about 214.05 ms and
+had nine modeled ROM and two speed slots fail, versus 13 and five in the
+baseline; maximum ROM excess was 1.46663 versus 2.92653 rad. Joint RMS was
+0.19122 versus 0.32961 rad, root rotation RMS 0.18044 versus 0.34863 rad,
+and no stage clipped. These remain large violations; work after violations is
+not feasibility evidence. The +/-2 mm shift bound, original spline radius and
+separate fade have no combined trust certificate. The support estimates,
+physical capacities, work/slew limits and the whole swing remain unverified.
