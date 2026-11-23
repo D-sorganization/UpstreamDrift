@@ -1040,6 +1040,20 @@
       "id": "tools.model_explorer.frankenstein_assembly"
     },
     {
+      "feature_id": "tools.model_explorer.playback_shot_card",
+      "title": "Model Explorer Shot card: impact factors and ball flight beside the playback",
+      "status": "gap",
+      "pyqt": "src/tools/model_explorer/playback_flight_panel.py",
+      "api": null,
+      "web": null,
+      "issue": 12878,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "A Shot dock beside the Results Playback of a same-input bundle shows the native exporter's numbers for that bundle, never recomputed: impact factors (club speed, face to path, attack angle), launch (ball speed, launch angle, spin rate, spin axis) and flight (carry, total, apex, side) with yd/m and mph/m/s selectors from the export dialog. No contact reads 'no contact: no flight'; without the upstream_physics flight wheel the factors stay and the flight row states why (#15150 G5b). No web equivalent yet; tracked under epic #12878.",
+      "id": "tools.model_explorer.playback_shot_card"
+    },
+    {
       "feature_id": "tools.model_explorer.results_playback",
       "title": "Model Explorer results playback on the shared-appearance golfer",
       "status": "gap",
@@ -1066,6 +1080,20 @@
       "tiles": [],
       "notes": "The Results Playback panel draws the native export's own ball at address, and after impact its model ball flight with the straight, draw or fade shot shape and the finish aim line (Ball, Ball flight and Aim line check boxes, Shot combo box). The flight is off by default and computed in the background only once Ball flight is checked; the aim line needs it. It reuses native_viewer_export (prepare_shot, flight_for_export, FlightPlayback); without a current upstream_physics Rust flight wheel the flight boxes are disabled with the reason. No web equivalent yet.",
       "id": "tools.model_explorer.results_playback_ball"
+    },
+    {
+      "feature_id": "tools.model_explorer.run_simulation_dock",
+      "title": "Model Explorer Run Simulation dock",
+      "status": "gap",
+      "pyqt": "src/tools/model_explorer/run_dock.py",
+      "api": null,
+      "web": null,
+      "issue": 15150,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "Tools > Run Simulation... opens a dock that runs a pinned sim_run case in a background QThread through the same service the MCP tools call (engines_for_describe, run_agent_capability), shows a bounded summary, and hands a playable result archive to the Results Playback loader. No web equivalent yet; tracked under #15150.",
+      "id": "tools.model_explorer.run_simulation_dock"
     },
     {
       "feature_id": "tools.motion_matching",
@@ -3581,7 +3609,7 @@
   "inputs": {
     "src/config/models.yaml": "89b2c78be5ec8c7093af2a9687366ae2b7a6fd1e58bf2a87a43b10df9295ff99",
     "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
-    "src/config/feature_parity.json": "91d51c648811d586219faec8c8dae0e63a20a06e09a3326f09d01ae1bb6bb144",
+    "src/config/feature_parity.json": "d40d22730db69ab7cffbb4bb43695f808cfd521537f3f15152a4915d5067d006",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

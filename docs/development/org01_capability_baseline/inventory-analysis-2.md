@@ -1,4 +1,4 @@
-# Capability Baseline Inventory: Analysis (Part 2/2)
+# Capability Baseline Inventory: Analysis (Part 2/3)
 
 <!-- Generated: python -m scripts.generate_capability_baseline -->
 
@@ -23,11 +23,11 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `tools.matched_swing_browser` | Matched Swing Results Browser (browse and filter matched swing execution receipts) | `feature` | `analysis` | `simulation`, `capture` | `core` | 🟢 active_feature | `src/tools/matched_swing_browser/gui.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `tools.model_explorer` | Model Explorer (browse/select/build URDF-MJCF) | `feature` | `analysis` | — | `core` | 🔵 planned | `src/tools/model_explorer/launch_model_explorer.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `tools.model_explorer.frankenstein_assembly` | Frankenstein drag-and-drop assembly with typed attachment ports | `feature` | `analysis` | — | `core` | 🔵 planned | `src/tools/model_explorer/frankenstein_editor/assembly_panel.py` | `tests/unit/tools/model_explorer/test_assembly_panel_gui.py` |
+| `tools.model_explorer.playback_shot_card` | Model Explorer Shot card: impact factors and ball flight beside the playback | `feature` | `analysis` | — | `core` | 🔵 planned | `src/tools/model_explorer/playback_flight_panel.py` | `tests/ui/explorer/test_playback_flight_card.py` |
 | `tools.model_explorer.results_playback` | Model Explorer results playback on the shared-appearance golfer | `feature` | `analysis` | — | `core` | 🔵 planned | `src/tools/model_explorer/results_playback_panel.py` | `tests/ui/explorer/test_results_playback_panel.py` |
 | `tools.model_explorer.results_playback_ball` | Ball, ball flight, shot shape and aim line in live results playback | `feature` | `analysis` | — | `core` | 🔵 planned | `src/tools/model_explorer/playback_ball_overlay.py` | `tests/ui/explorer/test_playback_ball_controls.py` |
+| `tools.model_explorer.run_simulation_dock` | Model Explorer Run Simulation dock | `feature` | `analysis` | — | `core` | 🔵 planned | `src/tools/model_explorer/run_dock.py` | `tests/ui/explorer/test_run_dock.py` |
 | `tools.putting_analytics` | Putting analytics studies | `feature` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/putting_analytics_gui/gui.py` | `tests/config/feature_parity/test_registry.py` |
 | `tools.shot_pattern_analysis` | Shot Pattern Analysis Workbench | `feature` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/shot_pattern_analysis/gui.py` | `tests/config/test_feature_parity_registry.py` |
 | `tools.spine_study` | Segmental spine study execution and model asset selection | `feature` | `analysis` | — | `core` | 🟢 active_feature | `src/api/routes/spine_viewer.py` | `tests/api/test_spine_viewer_route.py` |
 | `tools.spine_viewer` | Segmental spine viewer | `feature` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/spine_viewer/gui.py` | `tests/tools/spine_viewer/test_core.py` |
-| `tools_calculator_hub` | Tools Calculator Suite (Data Processor Entry) | `cli_tool` | `analysis` | — | `tools` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
-| `tools_video_analyzer` | Tools Package: video_analyzer | `library` | `analysis` | `simulation` | `core` | 🟣 intentionally_headless | `src/tools/video_analyzer/__init__.py` | `tests/config/test_registry_exclusions.py` |

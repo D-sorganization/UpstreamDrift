@@ -12,7 +12,10 @@ Usage (Linux, MuJoCo; ``MUJOCO_GL=osmesa`` when EGL is unavailable)::
     MUJOCO_GL=osmesa python3 \\
         docs/development/full_body_models/evidence/trunk_visuals/render_trunk_visuals_evidence.py
 
-Stills are visual evidence only, not physics validation.
+Migration uses the input bundle's hash-validated embedded source spec, never a
+mutable repository default. The derived bundle records source/derived spec,
+input bundle and migration implementation hashes. Stills are visual evidence
+only, not physics validation.
 """
 
 from __future__ import annotations
@@ -31,7 +34,6 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[4]
 EVIDENCE = Path(__file__).resolve().parent
-V1_SPEC = ROOT / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
 DRAKE_RUN = ROOT / (
     "docs/development/full_body_models/evidence/ground_support/anthro_driver_drake"
 )
@@ -73,7 +75,8 @@ def _export_v1_bundle(tmp: Path) -> Path:
 
 
 def _build_v2_bundle(v1_bundle: Path) -> tuple[bytes, Path]:
-    from src.shared.python.motion_matching.full_body_migration import TrunkMigrator
+    """Derive and migrate from the validated bundle's exact model specification."""
+    from src.shared.python.motion_matching import full_body_migration as migration
     from src.shared.python.motion_matching.full_body_v2_geometry import (
         derive_landmark_v2_spec,
     )
@@ -82,14 +85,13 @@ def _build_v2_bundle(v1_bundle: Path) -> tuple[bytes, Path]:
         generate_reference_bundle,
     )
 
-    v1_doc = json.loads(V1_SPEC.read_text(encoding="utf-8"))
+    loaded = InputBundle.load(v1_bundle)
+    v1_doc = json.loads(loaded.spec_bytes)
     v2_doc = derive_landmark_v2_spec(
         v1_doc, provenance="HRG-D3 trunk stills evidence (#13174)"
     )
     v2_bytes = json.dumps(v2_doc, sort_keys=True).encode("utf-8")
-    V2_SPEC.write_bytes(v2_bytes)
-    loaded = InputBundle.load(v1_bundle)
-    q_v2 = TrunkMigrator(v1_doc, v2_doc).migrate_coordinates(
+    q_v2 = migration.TrunkMigrator(v1_doc, v2_doc).migrate_coordinates(
         loaded.reference_q, loaded.coordinate_order
     )
     times = loaded.dt_s * np.arange(len(q_v2))
@@ -101,11 +103,15 @@ def _build_v2_bundle(v1_bundle: Path) -> tuple[bytes, Path]:
             "issue": "13174",
             "source_run": "ground_support/anthro_driver_drake",
             "source_v1_bundle_sha256": _sha256(v1_bundle),
+            "source_v1_spec_sha256": loaded.spec_sha256,
+            "derived_v2_spec_sha256": hashlib.sha256(v2_bytes).hexdigest(),
+            "migration_source_sha256": _sha256(Path(migration.__file__)),
             "event_frames_source": (
                 "v1 MuJoCo face-centre rules on the same-input export"
             ),
         },
     )
+    V2_SPEC.write_bytes(v2_bytes)
     bundle.save(V2_BUNDLE)
     return v2_bytes, V2_BUNDLE
 

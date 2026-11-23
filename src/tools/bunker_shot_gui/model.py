@@ -558,6 +558,12 @@ class WorkbenchModel:
             "ball flight",
             missing,
         )
+        if carry is not None and flight is None:
+            if not any(reason.startswith("ball flight:") for reason in missing):
+                missing.append(
+                    "ball flight: release did not yield a usable flight and settled "
+                    "green rollout; no trajectory is reported"
+                )
         return ShotOutcome(
             verdict=result.verdict,
             fidelity_tier=result.fidelity_tier,

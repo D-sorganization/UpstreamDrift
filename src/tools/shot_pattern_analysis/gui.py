@@ -416,12 +416,23 @@ class MainWidget(QtWidgets.QWidget):
             clubhead_mass_kg=self.clubhead_mass.value(),
             club_id=str(self.club_preset.currentData()),
         )
-        self.action_bar.start(
+        started = self.action_bar.start(
             "Shot pattern analysis",
             lambda ctx: self._run_cli(request, ctx),
             on_finished=self._completed,
             on_failed=self._failed,
         )
+        if started:
+            # Results belong to the completed request, never to a pending or
+            # failed rerun with different inputs or a different output folder.
+            self.summary_table.setRowCount(0)
+            self.scoring_label.clear()
+            for label in self.figure_labels.values():
+                label.setProperty("sourcePixmap", None)
+                label.clear()
+                label.setToolTip("")
+                label.setText("Run an analysis to view this graphic.")
+            self.status_label.setText("Analysis running…")
 
     @staticmethod
     def _run_cli(

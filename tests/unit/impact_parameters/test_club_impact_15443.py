@@ -93,3 +93,16 @@ def test_flight_for_impact_uses_the_club() -> None:
         _series(speed=40.0), 1, FRAME, club_impact=club_impact_for("iron7")
     )
     assert iron.ball_speed_mph > plain.ball_speed_mph
+
+
+def test_rigid_gear_heads_are_settings_per_club():
+    """Gear-law head inertia and CG depth come from the settings file (#15443)."""
+    from src.shared.python.impact_parameters.club_impact import rigid_gear_head_for
+
+    driver = rigid_gear_head_for("driver")
+    iron = rigid_gear_head_for("iron7")
+    assert driver.inertia_diagonal_kg_m2 == (0.00025, 0.00040, 0.00045)
+    assert driver.cg_depth_m == pytest.approx(0.035)
+    assert iron.cg_depth_m == pytest.approx(0.010)
+    assert rigid_gear_head_for(None) == driver
+    assert rigid_gear_head_for("no-such-club") == driver

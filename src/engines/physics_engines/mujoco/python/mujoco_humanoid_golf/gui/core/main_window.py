@@ -56,6 +56,21 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         # Apply Global Stylesheet
         self._load_stylesheet()
 
+    def closeEvent(self, event: QtGui.QCloseEvent | None) -> None:  # noqa: N802
+        """Stop owned timers and release both simulations before hiding.
+
+        Qt does not deliver a parent's close event to child widgets.
+        Postcondition: the main and grip-preview simulations are stopped,
+        their renderers released, and this window's timers inactive.
+        Repeated close is safe.
+        """
+        self.timer.stop()
+        for timer in self.findChildren(QtCore.QTimer):
+            timer.stop()
+        for simulation in self.findChildren(MuJoCoSimWidget):
+            simulation.release_resources()
+        super().closeEvent(event)
+
     def _load_stylesheet(self) -> None:
         """Load and apply the external QSS stylesheet."""
         self._apply_qss_stylesheet()

@@ -97,6 +97,9 @@ class ShotOutcome:
             (issue #9243), or ``None`` when there was no interval to
             propagate. The centre is ``carry_m``.
         carry_band_reasons: What had to be said while propagating that band.
+        flight: Optional visualization trace, paired with matching carry and
+            non-refused shot and carry verdicts. Refusal in either verdict
+            forbids the trace, even if the caller set ``refused=False``.
         unavailable: One line per metric that could not be computed, with
             the reason. Empty when everything was.
     """
@@ -148,6 +151,13 @@ class ShotOutcome:
                 "read as though it had been measured"
             )
         if not self.refused:
+            if self.flight is not None and (
+                self.verdict.is_refusal
+                or (self.carry_verdict is not None and self.carry_verdict.is_refusal)
+            ):
+                raise ValueError(
+                    "flight must not accompany a refused shot or carry verdict"
+                )
             if self.flight is not None and (
                 self.carry_m is None
                 or not math.isclose(

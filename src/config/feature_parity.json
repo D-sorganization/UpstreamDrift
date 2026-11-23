@@ -451,6 +451,26 @@
       "tiles": [],
       "notes": "File > Open Swing Result... lists swing-datastore runs (MuJoCo fit records and same-input closed-loop rollouts for Drake, OpenSim, Pinocchio and MyoSuite) and plays them on the MuJoCo golfer built from the run's own specification, with a timeline, joint-angle and club-head-speed plots and MP4 export (#12915). File > Open Matched Swing lists the user-configured matched swings (UD_DEFAULT_MATCH_BUNDLE or matched_swings.json; otherwise a labelled demo bundle), and opening the tile from the launcher loads the default one (#15150). Non-MuJoCo results are labelled as playback of that engine's result. No web equivalent yet; tracked under epic #12878."
     },
+    "tools.model_explorer.playback_shot_card": {
+      "title": "Model Explorer Shot card: impact factors and ball flight beside the playback",
+      "pyqt": "src/tools/model_explorer/playback_flight_panel.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 12878,
+      "tiles": [],
+      "notes": "A Shot dock beside the Results Playback of a same-input bundle shows the native exporter's numbers for that bundle, never recomputed: impact factors (club speed, face to path, attack angle), launch (ball speed, launch angle, spin rate, spin axis) and flight (carry, total, apex, side) with yd/m and mph/m/s selectors from the export dialog. No contact reads 'no contact: no flight'; without the upstream_physics flight wheel the factors stay and the flight row states why (#15150 G5b). No web equivalent yet; tracked under epic #12878."
+    },
+    "tools.model_explorer.run_simulation_dock": {
+      "title": "Model Explorer Run Simulation dock",
+      "pyqt": "src/tools/model_explorer/run_dock.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 15150,
+      "tiles": [],
+      "notes": "Tools > Run Simulation... opens a dock that runs a pinned sim_run case in a background QThread through the same service the MCP tools call (engines_for_describe, run_agent_capability), shows a bounded summary, and hands a playable result archive to the Results Playback loader. No web equivalent yet; tracked under #15150."
+    },
     "tools.model_explorer.results_playback_ball": {
       "title": "Ball, ball flight, shot shape and aim line in live results playback",
       "pyqt": "src/tools/model_explorer/playback_ball_overlay.py",

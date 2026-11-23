@@ -108,8 +108,9 @@ Sizes quoted from tests are the band a test asserts, not a published value.
   consumers set wind: the shot-model landing simulator
   (`PipelineLandingSimulator._pipeline` in
   `src/shared/python/sg_optimizer/shot_model/physics_simulator.py`) and the
-  ball flight GUI (`_build_environment` in `src/tools/ball_flight_gui/gui.py`,
-  passed to `BallFlightSimulator` by `_compute_trajectory`). The native viewer
+  ball flight GUI (`src/tools/ball_flight_gui/gui.py::_build_environment`,
+  passing the environment to `BallFlightSimulator` via
+  `src/tools/ball_flight_gui/gui.py::_compute_trajectory`). The native viewer
   export flight runs calm; it has no wind setting.
 - **Effect:** a 5 m/s steady head wind removes 9 to 18 yd of driver carry, the
   band asserted by `test_five_meter_per_second_wind_changes_driver_carry_sensibly`

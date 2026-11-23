@@ -38,6 +38,7 @@ class ResultsPlaybackHostMixin:
     playback_panel: Any | None
     playback_dock: QDockWidget | None
     playback_bar: Any | None
+    shot_dock: QDockWidget | None = None
     segment_dock: QDockWidget
     properties_dock: QDockWidget
     _hidden_editor_docks: tuple[QDockWidget, ...] = ()
@@ -86,6 +87,9 @@ class ResultsPlaybackHostMixin:
         self._live_loaders().add(loader)
         loader.loaded.connect(
             lambda s, ld=loader: self._deliver(self._on_loaded, ld, s, heading)
+        )
+        loader.progress.connect(
+            lambda text, ld=loader: self._deliver(self._on_progress, ld, text)
         )
         loader.failed.connect(
             lambda text, ld=loader: self._deliver(self._on_load_failed, ld, text)
@@ -177,6 +181,7 @@ class ResultsPlaybackHostMixin:
         self._show_playback_panel(panel)
         if panel is not None and heading:
             panel.set_heading(heading)
+        self._show_shot_card(session, panel)
         self.export_video_action.setEnabled(True)
         frames = f"{session.frame_count} frames"
         self._results_message = (
@@ -185,6 +190,10 @@ class ResultsPlaybackHostMixin:
             else f"{session.title}: {loader.path.name}, {frames}"
         )
         self.status_bar.showMessage(self._results_message)
+
+    def _on_progress(self, loader: ResultsLoader, text: str) -> None:
+        if loader is self._results_loader:
+            self.status_bar.showMessage(text)
 
     def _on_load_failed(self, loader: ResultsLoader, message: str) -> None:
         if loader is not self._results_loader:
@@ -314,8 +323,22 @@ class ResultsPlaybackHostMixin:
                 restored.show()
             self._hidden_editor_docks = ()
 
+    def _show_shot_card(self, session: ResultsSession, panel: Any | None) -> None:
+        """Dock the Shot card (impact factors, ball flight) beside the playback."""
+        # Evaluated in the background load (impact and flight are slow); a
+        # session that never prepared one shows no card.
+        summary = getattr(session, "shot_summary", None)
+        if panel is None or summary is None:
+            return
+        from .playback_flight_panel import attach_shot_dock
+
+        self.shot_dock = attach_shot_dock(self._inner, self.shot_dock, summary)
+        panel.show_shot(summary)  # the plot titles the card's impact speed
+
     def _discard_results(self) -> None:
         """Drop the loaded run, its panel and its renderer; idempotent."""
+        if self.shot_dock is not None:
+            self.shot_dock.hide()
         panel, self.playback_panel = self.playback_panel, None
         if panel is not None:
             # The C++ widget may already be gone during teardown.

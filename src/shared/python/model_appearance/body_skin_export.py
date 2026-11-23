@@ -44,6 +44,7 @@ from src.shared.python.model_appearance.body_skin_fit import (
     FittedSkin,
     SegmentLengths,
 )
+from src.shared.python.model_appearance.golfer_model_versions import warn_if_deprecated
 from src.shared.python.model_appearance.body_skin_pose import (
     NECK_GROUPS,
     PoseSettings,
@@ -178,12 +179,17 @@ def load_export_settings(path: Path | None = None) -> ExportSettings:
 
 
 def body_skin_enabled(spec: Mapping[str, Any]) -> bool:
-    """Whether ``subject.body_visual_backend`` asks for the skinned body."""
+    """Whether ``subject.body_visual_backend`` asks for the skinned body.
+
+    The loft fallback is deprecated (``golfer_model_versions``); using it logs
+    a warning once per process.
+    """
     backend = spec.get("subject", {}).get("body_visual_backend", LOFT_BACKEND)
     if backend not in (LOFT_BACKEND, SKINNED_BACKEND):
         raise ValueError(
             f"body_visual_backend must be {LOFT_BACKEND!r} or {SKINNED_BACKEND!r}"
         )
+    warn_if_deprecated(spec, "body_visual_backend")
     return bool(backend == SKINNED_BACKEND)
 
 
