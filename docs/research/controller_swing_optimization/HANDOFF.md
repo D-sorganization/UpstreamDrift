@@ -1040,3 +1040,25 @@ timestamp continuity alone does not prove the latter. Floating-point
 calculations are not interval arithmetic. The result is conditional, not a
 first-contact certificate, pinned-swing contact, completed Slice 1 or PR.
 The branch is based on oversized research.
+
+The opt-in ImpactForce policy was exercised with the unchanged pinned
+modeled-address ball and exploratory v2 trajectory. Initial finite-face gap
+was −12.704 mm (overlap); with illustrative caller bounds 10, 100 and
+1000 m/s, the policy remained unresolved and did not schedule an impact.
+Skipping ahead stayed blocked. Across 1323 stored grid states and 42,304
+RK4 stage states, maximum sampled speed of the 321 face vertices was
+52.174 m/s at grid time 1.317 s; a point-Jacobian vector agreed with finite
+difference there to 3.3e-8 m/s. This contradicts the illustrative 10 m/s
+bound at a sample but does not prove 100 or 1000 m/s bounds; RK4 stages are
+not necessarily physical path states, and no continuous global bound or
+pinned-swing first contact is established.
+
+A feasibility-prioritized two-direction Option B surrogate confirmed zero
+sampled modeled ROM/speed flags at its initial state. With a 10 N m trust
+ball and assumption-marked motor limits, its selected 3.3045 N m candidate
+changed the 200 ms diagnostic score 2.95782 to 2.84732 and tracking RMS
+0.44482 to 0.41842 rad, but retained 17 modeled ROM and three speed flags and
+1440 clipped stages of 6400. The extended run reproduced the first 200 ms
+stage arrays bit-for-bit in this runtime then hit a guard at 0.263 s, with
+22 ROM and nine speed flags. It is not a feasible full-horizon candidate,
+physiological assessment or shot improvement.
