@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import (
     QComboBox,
@@ -41,7 +41,10 @@ from src.tools.model_explorer.golfer_playback import (
     spec_summary,
 )
 from src.tools.model_explorer.playback_clock import SPEEDS, PlaybackClock
-from src.tools.model_explorer.playback_view import load_layout_settings
+from src.tools.model_explorer.playback_view import (
+    load_framing_settings,
+    load_layout_settings,
+)
 from src.tools.model_explorer.results_session import ResultsSession
 
 logger = get_logger(__name__)
@@ -61,7 +64,11 @@ class _ScaledPixmapLabel(QLabel):
 
     ``Ignored`` size policy: the pixmap never dictates the label's size, so the
     image grows and shrinks with the dock instead of staying at its first size.
+    ``resized`` fires after every resize so the owner can re-render at the new
+    shape.
     """
+
+    resized = pyqtSignal()
 
     def __init__(self) -> None:
         super().__init__()
@@ -77,6 +84,7 @@ class _ScaledPixmapLabel(QLabel):
     def resizeEvent(self, event: Any) -> None:  # noqa: N802 - Qt override
         super().resizeEvent(event)
         self._rescale()
+        self.resized.emit()
 
     def _rescale(self) -> None:
         if self._source is None:
@@ -110,7 +118,13 @@ class ResultsPlaybackPanel(QWidget):
         self._timer = QTimer(self)
         self._timer.setInterval(PLAYBACK_INTERVAL_MS)
         self._timer.timeout.connect(self._advance)
+        self._framing = load_framing_settings()
+        self._fit_timer = QTimer(self)
+        self._fit_timer.setSingleShot(True)
+        self._fit_timer.setInterval(self._framing.resize_debounce_ms)
+        self._fit_timer.timeout.connect(self._fit_render_to_label)
         self._build_ui()
+        self.view_label.resized.connect(self._fit_timer.start)
         self.show_frame(0)
 
     # ---- construction -----------------------------------------------------
@@ -245,6 +259,20 @@ class ResultsPlaybackPanel(QWidget):
         if self._cursor is not None:
             self._cursor.set_xdata([time_s, time_s])
             self.canvas.draw_idle()
+
+    def _fit_render_to_label(self) -> None:
+        """Render at the label's shape so the picture fills it (debounced).
+
+        Runs on the GUI thread; the renderer is rebuilt only when the clamped,
+        stepped size differs from the current one.
+        """
+        label = self.view_label
+        if label.height() <= 0:
+            return
+        width, height = self._framing.render_size(label.width() / label.height())
+        if (width, height) != self._playback.size:
+            self._playback.resize(width, height)
+            self.show_frame(self.current_frame)
 
     def set_view(self, name: str) -> None:
         """Switch the camera preset and redraw the current frame."""

@@ -135,3 +135,82 @@ def test_layout_settings_reject_bad_values(tmp_path, patch, match) -> None:
     bad.write_text(json.dumps(raw))
     with pytest.raises(ValueError, match=match):
         pv.load_layout_settings(bad)
+
+
+def _patched(tmp_path, block: str, patch) -> Path:
+    raw = json.loads(pv.SETTINGS_PATH.read_text(encoding="utf-8"))
+    raw[block] = patch(raw[block]) if callable(patch) else patch
+    out = tmp_path / "view.json"
+    out.write_text(json.dumps(raw))
+    return out
+
+
+def test_camera_distances_are_documented_and_known_views() -> None:
+    raw = json.loads(pv.SETTINGS_PATH.read_text(encoding="utf-8"))
+    distances = pv.load_camera_distances()
+    assert "camera_distance_m" in raw["sources"]
+    assert set(distances) <= set(VIEW_ORDER)
+    assert {"down_the_line", "face_on"} <= set(distances)
+    preset = get_view_preset("down_the_line").default_distance_m
+    assert 0 < distances["down_the_line"] < preset  # closer: the golfer fills more
+
+
+@pytest.mark.parametrize(
+    ("distances", "match"),
+    [
+        ({"selfie": 2.0}, "selfie"),
+        ({"face_on": 0}, "face_on"),
+        ({"face_on": -1.5}, "face_on"),
+        ({"face_on": float("nan")}, "face_on"),
+        ({"face_on": "near"}, "face_on"),
+        ({"face_on": True}, "face_on"),
+    ],
+)
+def test_camera_distances_reject_bad_values(tmp_path, distances, match) -> None:
+    path = _patched(tmp_path, "camera_distance_m", distances)
+    with pytest.raises(ValueError, match=match):
+        pv.load_camera_distances(path)
+
+
+def test_framing_settings_are_documented() -> None:
+    raw = json.loads(pv.SETTINGS_PATH.read_text(encoding="utf-8"))
+    cfg = pv.load_framing_settings()
+    for key in ("framing", "camera_distance_m"):
+        assert key in raw["sources"], key
+    assert 0 < cfg.min_aspect < cfg.max_aspect
+    assert cfg.render_height_px >= 16 and cfg.resize_debounce_ms > 0
+
+
+def test_render_size_follows_the_aspect_and_is_clamped() -> None:
+    cfg = pv.load_framing_settings()
+    wide = cfg.render_size(10.0)
+    narrow = cfg.render_size(0.01)
+    assert wide == (round(cfg.render_height_px * cfg.max_aspect), cfg.render_height_px)
+    assert narrow == (
+        round(cfg.render_height_px * cfg.min_aspect),
+        cfg.render_height_px,
+    )
+    mid = cfg.render_size(2.0)
+    assert mid[0] / mid[1] == pytest.approx(2.0, abs=cfg.aspect_step)
+    with pytest.raises(ValueError, match="aspect"):
+        cfg.render_size(float("nan"))
+    with pytest.raises(ValueError, match="aspect"):
+        cfg.render_size(0.0)
+
+
+@pytest.mark.parametrize(
+    ("patch", "match"),
+    [
+        ({"render_height_px": 8}, "render_height_px"),
+        ({"min_aspect": 4.0}, "min_aspect"),
+        ({"max_aspect": 0}, "max_aspect"),
+        ({"aspect_step": 0}, "aspect_step"),
+        ({"aspect_step": float("inf")}, "aspect_step"),
+        ({"resize_debounce_ms": 0}, "resize_debounce_ms"),
+        ({"resize_debounce_ms": 1.5}, "resize_debounce_ms"),
+    ],
+)
+def test_framing_settings_reject_bad_values(tmp_path, patch, match) -> None:
+    path = _patched(tmp_path, "framing", lambda blk: {**blk, **patch})
+    with pytest.raises(ValueError, match=match):
+        pv.load_framing_settings(path)
