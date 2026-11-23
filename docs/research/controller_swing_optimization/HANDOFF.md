@@ -796,3 +796,28 @@ maximum coordinate parity error was 4.24e-10 rad and maximum frame error
 and maximum 0.84263 rad. The final target clamp was 0.000111111 s. This
 shows recorded-rollout parity does not establish target tracking. It is not
 the required committed-v2 forward match, a physical acceptance or a PR.
+
+A revised 99-frame target-marker-proxy sensitivity used the same initial
+seed, sampled hard grip rows and supplied bounds while changing the assumed
+foot-anchor residual weight from 100 to 10. It stopped at its callback budget
+(183.19 s, 92 iterations), not converged. Native grip residual was 1.36e-10,
+independently measured maximum closure 5.95e-8 mm / 1.38e-10 rad, and the
+one sampled acceleration join mismatch 1.73e-10 rad/s². Supplied bounds held.
+Target marker component RMS changed 11.5407 to 9.1115 mm (Euclidean about
+19.99 to 15.78 mm), observed component RMS 19.6095 to 19.9910 mm (about
+33.97 to 34.63 mm), and assumed foot-anchor component RMS 0.1744 to
+0.3460 mm. Peak sampled speed was 35.69 rad/s, second difference 957.43
+rad/s² and reported optimality 1.79e-4. The objective differs from the
+previous weight-100 trial and objective values are not directly comparable.
+Assumed anchors, incomplete anatomy, only one discrete join, no forward
+tracking and lack of a stationarity certificate prevent admission.
+
+For the exploratory fixed-PD Option B reference, a loose synthetic ±1000 N m
+motor-cap diagnostic completed 1.322 s and 42,304 stages with zero clipping
+and exactly matched reference q and v, but still had seven modeled ROM flags.
+A preselected 1 N m spline perturbation under the same loose caps hit a guard
+at 0.515 s, showing that clipping is not the sole source of local sensitivity.
+For that one perturbation, PD feedback dotted with the residual was negative
+at 200 of the first 201 held samples; this is one unadmitted direction, not
+proof that reference shifts are safe or generally beneficial. Neither run is
+physical feasibility, optimization or carry evidence.
