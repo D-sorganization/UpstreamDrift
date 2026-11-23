@@ -786,7 +786,7 @@ class SimulationBackendsWindow(QtWidgets.QMainWindow):
         """Return the embedded :class:`MainWidget`."""
         return self._main_widget
 
-    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+    def closeEvent(self, event: QtGui.QCloseEvent | None) -> None:
         """Cancel and join active physics work before the standalone window closes."""
         self._main_widget.cleanup()
         super().closeEvent(event)
