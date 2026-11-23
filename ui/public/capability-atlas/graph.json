@@ -1054,6 +1054,20 @@
       "id": "tools.model_explorer.results_playback"
     },
     {
+      "feature_id": "tools.model_explorer.results_playback_ball",
+      "title": "Ball, ball flight, shot shape and aim line in live results playback",
+      "status": "gap",
+      "pyqt": "src/tools/model_explorer/playback_ball_overlay.py",
+      "api": null,
+      "web": null,
+      "issue": 15150,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "The Results Playback panel draws the native export's own ball at address, and after impact its model ball flight with the straight, draw or fade shot shape and the finish aim line (Ball, Ball flight and Aim line check boxes, Shot combo box). The flight is off by default and computed in the background only once Ball flight is checked; the aim line needs it. It reuses native_viewer_export (prepare_shot, flight_for_export, FlightPlayback); without a current upstream_physics Rust flight wheel the flight boxes are disabled with the reason. No web equivalent yet.",
+      "id": "tools.model_explorer.results_playback_ball"
+    },
+    {
       "feature_id": "tools.motion_matching",
       "title": "Motion Matching tour-average and club-only Excel matching",
       "status": "parity",
@@ -3567,7 +3581,7 @@
   "inputs": {
     "src/config/models.yaml": "89b2c78be5ec8c7093af2a9687366ae2b7a6fd1e58bf2a87a43b10df9295ff99",
     "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
-    "src/config/feature_parity.json": "355d18d29d2dc7eb194c0eee9c96fa5dc5ea1c31671f0ce5eccea0be323bceac",
+    "src/config/feature_parity.json": "91d51c648811d586219faec8c8dae0e63a20a06e09a3326f09d01ae1bb6bb144",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
