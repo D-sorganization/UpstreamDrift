@@ -24,6 +24,7 @@ DistanceFn = Callable[[float], float]
 
 _DEFAULT_XTOL_S = 1e-12
 _MISS_SAMPLES = 129
+_MISS_EXPONENT = 32.0
 
 
 class ContactBracketError(ValueError):
@@ -100,10 +101,11 @@ def find_contact_root(
             lo = mid
         iterations += 1
 
+    # Difference probes stay inside the caller's bracket (one-sided at its ends),
+    # since the callback is only defined on [t0_s, t1_s].
     step = max(1e-6 * (t1_s - t0_s), 1e-12)
-    closing = -(
-        _clearance(distance_fn, hi + step) - _clearance(distance_fn, hi - step)
-    ) / (2.0 * step)
+    a, b = max(float(t0_s), hi - step), min(float(t1_s), hi + step)
+    closing = -(_clearance(distance_fn, b) - _clearance(distance_fn, a)) / (b - a)
     if not closing > 0.0:
         raise ContactBracketError(
             f"crossing at t={hi!r} is not approaching (closing speed {closing!r})"
@@ -127,12 +129,28 @@ def closest_approach_penalty(
 ) -> float:
     """Smooth, finite cost for a (possibly) missed contact; ``0.0`` once touching.
 
-    Returns the squared minimum sampled clearance, which is C1 in the
-    clearance and so usable by gradient-based optimizers, unlike ``NaN``.
+    The cost is ``m**2`` where ``m`` is a smooth minimum of the sampled
+    clearances, the negative-exponent power mean
+    ``m = d_min * mean((d_min / d_i) ** p) ** (-1 / p)`` with ``p = 32``. Unlike
+    ``min`` it has no cusp where the closest sample changes, so the cost is C1
+    in the trajectory parameters (and tends to ``0`` smoothly as any clearance
+    reaches contact). It never under-estimates: ``d_min**2 <= cost <=
+    n**(2/p) * d_min**2``. Raises ``ValueError`` if the cost would overflow.
     """
     _check_interval(t0_s, t1_s)
     if samples < 2:
         raise ValueError(f"samples must be at least 2, got {samples!r}")
     times = np.linspace(t0_s, t1_s, samples)
-    closest = min(_clearance(distance_fn, float(t)) for t in times)
-    return 0.0 if closest <= 0.0 else closest * closest
+    clearances = np.array([_clearance(distance_fn, float(t)) for t in times])
+    closest = float(clearances.min())
+    if closest <= 0.0:
+        return 0.0
+    # Ratios are <= 1, so the power mean cannot overflow even for huge d_min.
+    ratios = (closest / clearances) ** _MISS_EXPONENT
+    smooth_min = closest * float(np.mean(ratios)) ** (-1.0 / _MISS_EXPONENT)
+    cost = smooth_min * smooth_min
+    if not math.isfinite(cost):
+        raise ValueError(
+            f"clearance {closest!r} overflows the squared miss cost; rescale it"
+        )
+    return cost
