@@ -1807,3 +1807,35 @@ files. Ninety-seven focused v1/v2 tests and normal headless push hooks passed.
 It is not integrated motor replay, provenance attestation, physical acceptance
 or a complete Slice 2; reconcile with current canonical codec and #15600 state
 before use. No PR was opened.
+
+A genuine two-window lifted Option B local feasibility diagnostic used an
+independent 47-q/47-v seam, 41 coefficients, fixed gains, real motor forces
+and the original 10 N m coefficient ball. Two local linearized iterations
+reduced 20 ms modeled stage excess 0.01104 to 0.00778 rad-equivalent, but
+nonlinear seam defects remained (second iteration 3.01e-5 native q /
+0.002699 native v). Replacing the seam with the actual first endpoint made
+segmented and uninterrupted first 640 stages exactly equal in this runtime,
+but did not remove violations; full extension hit a guard at 0.528 s with
+23 modeled ROM / eight speed flags. Only near-bound stage constraints were
+linearized; work/slew, continuous behavior and 16 unverified capacities remain.
+This is not a feasible swing, complete optimizer or physical conclusion.
+
+A 477-frame coupled root/ankle/knee soft momentum and target-marker fit,
+with randomized sparse-Jacobian checks 7.6e-8–1.03e-7 relative, stopped at
+its 240 s callback after eight evaluations without convergence (optimality
+1209.83). Under identical baseline-derived closure-projected initial q/v,
+its 1.322 s projected ideal-drive replay worsened original-reference root
+translation RMS 105.72 to 107.89 mm, rotation 0.14282 to 0.15646 rad and
+peak ideal drive 383.77 to 761.81 N m; two model ROM flags remained. Across
+15,700 valid markers, forward source-target RMS worsened 268.43 to 280.62 mm
+and observed RMS 269.13 to 281.27 mm. It is not a qualified baseline or
+forward improvement; ground and numerical regularizers remain assumptions.
+
+Research branch `codex/15493-motor-v2-reconcile27` at `ad8a78319b` connects
+explicit no-impact v2 replay to the original reference grid, without resampling
+controller input. Four synthetic motor cases, including projection and legacy
+prescribed force, passed; altered reference values and times are rejected.
+Normal headless push hooks passed. This 354-line increment is based on the
+oversized motor research branch, not a complete Slice 2, independent-runtime
+or physical certification, and not a PR. Reconcile against current main and
+current #15600 state before use.
