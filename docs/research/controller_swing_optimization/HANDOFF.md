@@ -455,3 +455,14 @@ It rejects invalid infinities and overflow; unknown bounds remain unknown and
 are not a physical feasibility pass. Fifty-five focused cases, Ruff, Black,
 scoped mypy and the normal headless pre-push hooks passed. This is a research
 checkpoint, not a Slice 1 PR.
+
+Slice 1 delivery preparation: branch `codex/15493-slice1-extraction` at
+`6985e6c2e1` contains 93 changed lines against then-current main. It rejects
+migration from a mismatched embedded model and prevents an unlanded flight
+fixture from reporting carry. Both defects were demonstrated by failing tests
+before the fixes. Focused tests: 39 passed, two strict expected failures,
+using verified physics revision 3; Ruff, Black, scoped mypy and normal headless
+pre-push hooks passed. This is a partial extraction, not a completed Slice 1
+or a PR. The admitted pinned-v2 forward match, physical gates and bracketed
+on-face contact evidence remain open; reconcile against current main before
+continuing and retain the five-PR and under-500-lines constraints.
