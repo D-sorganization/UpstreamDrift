@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -192,6 +193,60 @@ def test_score_replay_of_the_reference_is_exact() -> None:
     summary = score.summary()
     assert summary["growth_rate_per_s"] is None  # no growth band: strict JSON null
     json.dumps(summary, allow_nan=False)
+
+
+@pytest.mark.parametrize("defect", ["shifted", "nonmonotonic", "nonfinite"])
+def test_score_replay_rejects_invalid_rollout_clock(defect: str) -> None:
+    """A coordinate match cannot certify a different or malformed timeline."""
+    bundle = _bundle()
+    rollout = open_loop(
+        _Oscillator(),
+        bundle.q0,
+        bundle.v0,
+        bundle.efforts,
+        dt_s=bundle.dt_s,
+        policy=StepPolicy(project=False),
+    )
+    times = rollout.time_s.copy()
+    if defect == "shifted":
+        times += 0.001
+    elif defect == "nonmonotonic":
+        times[5] = times[4]
+    else:
+        times[5] = np.nan
+    with pytest.raises(ValueError, match="time grid"):
+        score_replay(_Oscillator(), bundle, replace(rollout, time_s=times))
+
+
+def test_score_replay_rejects_nonfinite_rollout_state() -> None:
+    bundle = _bundle()
+    rollout = open_loop(
+        _Oscillator(),
+        bundle.q0,
+        bundle.v0,
+        bundle.efforts,
+        dt_s=bundle.dt_s,
+        policy=StepPolicy(project=False),
+    )
+    q = rollout.q.copy()
+    q[3, -1] = np.nan
+    with pytest.raises(ValueError, match="finite"):
+        score_replay(_Oscillator(), bundle, replace(rollout, q=q))
+
+
+def test_score_replay_allows_leadin_clock_roundoff() -> None:
+    bundle = _bundle()
+    rollout = open_loop(
+        _Oscillator(),
+        bundle.q0,
+        bundle.v0,
+        bundle.efforts,
+        dt_s=bundle.dt_s,
+        policy=StepPolicy(project=False),
+    )
+    trimmed_time = (rollout.time_s + 1.234) - 1.234
+    score = score_replay(_Oscillator(), bundle, replace(rollout, time_s=trimmed_time))
+    assert score.horizon_s == pytest.approx(bundle.steps * bundle.dt_s)
 
 
 def test_stop_on_failure_returns_the_states_reached() -> None:

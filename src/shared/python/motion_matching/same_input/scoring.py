@@ -85,9 +85,28 @@ def score_replay(
     plant: FramePlant, bundle: InputBundle, rollout: Rollout, *, frame_stride: int = 10
 ) -> ReplayScore:
     """Compare ``rollout`` with the bundle reference over the steps it reached."""
-    reached = rollout.q.shape[0]
-    if reached > bundle.steps + 1 or rollout.q.shape[1] != bundle.q0.size:
+    q = np.asarray(rollout.q, dtype=float)
+    if (
+        q.ndim != 2
+        or not 1 <= len(q) <= bundle.steps + 1
+        or q.shape[1] != bundle.q0.size
+    ):
         raise ValueError("rollout must not exceed the bundle")
+    if not np.isfinite(q).all():
+        raise ValueError("rollout states must be finite")
+    reached = len(q)
+    time_s = np.asarray(rollout.time_s, dtype=float)
+    expected = np.arange(reached, dtype=float) * bundle.dt_s
+    # Subtracting a lead-in clock can introduce roundoff; it must not permit
+    # a different sample interval, shifted origin, or nonmonotonic timeline.
+    clock_atol = 8 * np.finfo(float).eps * max(1.0, float(expected[-1]))
+    if (
+        time_s.shape != expected.shape
+        or not np.isfinite(time_s).all()
+        or np.any(np.diff(time_s) <= 0)
+        or not np.allclose(time_s, expected, rtol=0.0, atol=clock_atol)
+    ):
+        raise ValueError("rollout time grid must match the bundle fixed-step grid")
     if frame_stride < 1:
         raise ValueError("frame_stride must be positive")
     coordinate_error = np.abs(rollout.q - bundle.reference_q[:reached]).max(axis=1)
