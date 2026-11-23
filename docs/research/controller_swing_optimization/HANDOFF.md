@@ -2189,3 +2189,19 @@ preserving the first 320 ms sampled gates. Clustered active-row sensitivities
 were poorly conditioned; this is not proof of global uncontrollability. The
 independent replay first flagged ROM around 0.321 s and stopped at 0.807 s,
 earlier than its predecessor. It is not a full-horizon improvement.
+
+The closure-projected reference was also replayed with actual modeled motors,
+zero spline and fixed gains 3/0.3, from the same saved q0/v0. The full registry
+covers 41 non-root slots versus 29 in HUMAN_RANGES_DEG. Over the first 200 ms,
+both tables flagged right-wrist range starting at stage 151 (about 4.7 ms),
+with 1,146 violating stages, no modeled speed flags and 800 clipped stages;
+the previous foot-target candidate had no sampled flags or clipping in that
+window. At equal 27,232-stage prefix the registry flagged 29 projected-run
+slots versus 23 in the narrower table. The motor run stopped at 0.851 s.
+Over 200 ms, own-target translation / rotation / joint RMS changed from
+0.03068 m / 0.08367 rad / 0.13974 rad for the earlier candidate to 0.02945 m /
+0.11694 rad / 0.12259 rad for the projected one. Peak command / applied
+modeled drive were 260.09 / 189.97 N m and clipping began at the first stage.
+Target and feedforward both changed, so projection alone is not isolated.
+Registry limits are model assumptions, not verified anatomical capacities;
+this actual motor result does not admit either reference.
