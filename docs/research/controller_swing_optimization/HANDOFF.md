@@ -1282,3 +1282,23 @@ flags and extended only to a numerical guard at 0.593 s with 26 ROM / 23
 speed flags. Integration-stage values are not independently certified
 continuous-path extrema; the result nevertheless disproves a hold-sample-only
 pass and is not a feasible or physical swing.
+
+Research branch `codex/15493-delivery16` at `c02b391c13` fixes a
+same-input replay-scoring defect: shifted, nonmonotonic or nonfinite clocks
+and nonfinite q could previously be accepted while assigning a fixed-grid
+horizon. The guard requires finite state and the bundle time grid, with
+bounded roundoff for lead-in subtraction. Failing-first regressions, 18
+focused tests, Ruff, Black, scoped NumPy-aware mypy and normal headless push
+hooks passed. It is 78 changed lines against then-current main, partial audit
+infrastructure rather than a Slice 1 PR. It overlaps scoring files with
+`codex/15493-replay-horizon` and must be combined and retested deliberately.
+The legacy `max_coordinate_error_rad` scalar still mixes translation metres
+and rotational radians, and frame checks remain sampled; neither is fixed by
+this checkpoint.
+
+As observed at the time of the delivery review, #15552, #15564 and #15573
+were open and unarmed. The latter two independently address portions of a
+bundle schema and optimization runner but explicitly omit required replay /
+migration or force-attestation / comparison work. Inspect current PR heads
+and status before reuse; they do not establish the requested sequential five
+slices as complete.
