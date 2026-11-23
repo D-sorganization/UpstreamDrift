@@ -1010,3 +1010,20 @@ the first 200 ms stage arrays bit-for-bit then hit a numerical guard at
 0.437 s with 24 ROM and eight speed flags. The later failure is not a feasible
 or improved shot. Limits remain assumption-marked, and no physical or
 infeasibility claim follows.
+
+A coupled 199-frame vertical-offset diagnostic used sparse least squares,
+fixed joint coordinates, the same assumed compliant ground, and explicit
+numerical offset/speed regularizers. It reduced sampled COM vertical force-
+balance residual RMS from 1.052 to 0.004536 bodyweights, independently
+recomputed with COM Jacobian/velocity, but stopped at 30 evaluations with
+optimality 0.295 and did not converge. Offsets ranged −16.13 to +0.23 mm,
+RMS 9.33 mm; peak offset acceleration was 150.7 m/s² and modeled normal
+force 2.65 bodyweights. The 0.550 s projected computed-torque forward replay
+completed 550 holds / 17,600 ideal-drive stages, no impact. Compared with the
+prior proxy, lowest modeled foot sphere was −13.59 versus −15.18 mm, joint
+RMS tracking 0.01854 versus 0.016995 rad, peak ideal drive 381.52 versus
+395.04 N m, and worst modeled subtalar ROM exceedance 7.40° versus 1.785°.
+Root translation RMS was 19.72 mm; preload changed initial q up to 0.00612
+native units. The sampled balance reduction did not produce an admitted or
+better rollout: the offset was not jointly optimized, regularizers and ground
+are assumptions, forces are unmeasured and drive is ideal unsaturated.
