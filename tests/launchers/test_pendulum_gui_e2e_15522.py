@@ -12,15 +12,21 @@ from collections.abc import Iterator
 
 import numpy as np
 import pytest
-from pytestqt.qtbot import QtBot
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("PYTEST_QT_API", "pyqt6")
+
+qt = pytest.importorskip("PyQt6")
+if getattr(qt, "__ud_fake__", False):
+    pytest.skip("Pendulum E2E requires real PyQt6", allow_module_level=True)
+pytest.importorskip("pytestqt")
+pytest.importorskip("PyQt6.QtTest")
 
 from PyQt6 import sip
 from PyQt6.QtCore import Qt
 from PyQt6.QtTest import QTest
 from PyQt6.QtWidgets import QLineEdit
+from pytestqt.qtbot import QtBot
 
 from src.shared.python.pendulum_simulator.__main__ import get_dockable_ui
 from src.shared.python.pendulum_simulator.gui.main_window import MainWindow
