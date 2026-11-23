@@ -1,0 +1,21 @@
+{
+  "presets": [
+    {
+      "id": "golf_simulator_golden_shot",
+      "label": "Golden golf shot (ball flight)"
+    },
+    {
+      "id": "counterfactual_ztcf_golden",
+      "label": "ZTCF golden case (double pendulum)"
+    }
+  ],
+  "store_subdir": "UpstreamDrift/sim_runs",
+  "playable_result_key": "results_path",
+  "summary_max_lines": 12,
+  "sources": {
+    "presets": "Pinned golden cases the Run Simulation dock offers, in menu order. Each id is a sim_run Agent API capability (src/sim_run/agent_capabilities.py); these are the two golden cases the MCP server runs (run_golf_simulator_golden_shot, run_counterfactual_ztcf_golden), so the GUI and the MCP tools execute the same code (#15150 R1).",
+    "store_subdir": "Folder under the user's data location (QStandardPaths GenericDataLocation, XDG_DATA_HOME on Linux) for the sim_run store; large results spill there as artifacts (payload_bounds.INLINE_PAYLOAD_LIMIT_BYTES). Relative, no '..'.",
+    "playable_result_key": "Result key naming a results archive (.npz) the explorer can play; when present and the file exists the dock calls load_results(path, wait=False). Neither golden case writes one today, so both show a summary.",
+    "summary_max_lines": "Most result lines the summary box shows, so a long trajectory never floods the dock."
+  }
+}
