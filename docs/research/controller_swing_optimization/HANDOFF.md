@@ -2025,3 +2025,39 @@ ball. The independent full rollout first flagged ROM around 62.8 ms and hit a
 guard at 0.552 s, earlier than the previous 0.665 s. Reject this as evidence
 of full-horizon improvement. Small coefficient changes produced large later
 joint differences even without late-stage clipping; causality remains unproven.
+
+Research branch `codex/15493-flight-evidence31` at `592b9ffd7b` makes
+prescribed-flight fixture failures distinguishable from unavailable or stale
+native physics: expected physical misses accept assertion failures only, and
+an unusable kernel fails explicitly. Failing-first regression, isolated
+revision-3 run (32 passed, two expected numerical failures), stale-revision
+negative control, scoped mypy, Ruff, Black and normal push hooks passed. It is
+not a PR. Reconciliation with the earlier Slice 1 extraction must retain the
+aggregate-data caveat and both sets of tests, and mock kernel availability in
+the extraction's mocked unlanded-trajectory test.
+
+A 476-frame sparse 3D-foot/marker/closure fit on the pinned v2 model stopped
+unconverged after 244 s. Source-model sphere error fell from 8.23 to 0.440 mm
+per Cartesian component while target-marker component RMS rose from 11.33 to
+15.81 mm; sampled closure residual was 1.8e-9 and no named-angle excess was
+reported. It used soft temporal regularization and model-derived foot targets,
+not measured forces. Every sampled frame had modeled contact but median normal
+force was only 0.0286 body weights. Peak target joint rate was 34.5 rad/s;
+no verified speed gate passed.
+
+An ideal unsaturated projected-drive rollout of that target completed 1.319 s
+without numerical failure. Against exactly the same source-FK markers, the
+same 475 comparison times and array-equal initial q/v as the baseline rollout,
+source-marker RMS improved 267.24 to 37.32 mm and observed-marker RMS 267.94
+to 43.07 mm. Source-marker RMS in the last 1.1–1.317 s improved 514.4 to
+59.3 mm; the first 0.1 s changed 28.9 to 30.0 mm. Against the original
+reference, root translation vector RMS improved 0.1817 to 0.0201 m and root
+rotation vector RMS 0.2436 to 0.1116 rad. Peak held ideal unsaturated effort
+rose from 383.77 to 524.20 N m; peak sampled joint speed was 35.03 / 34.91
+rad/s. RK4 stages were not retained. The fitted target's first pose differs
+from the shared rollout start by up to 0.335 rad in a shoulder coordinate;
+its initial state was not constrained in the fit. This is an encouraging
+tracking lead, not an admitted baseline: the fit is unconverged, and actual
+saturated total torque, stage-level ROM/speed, work, impact and measured
+ground forces remain unverified. Independently check actual motor-drive
+replay and consistent initialization before any physical or carry claim.
