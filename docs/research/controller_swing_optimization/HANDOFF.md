@@ -540,3 +540,38 @@ finite-patch evaluator and continuous fixed-hold advancement. The current
 limit, while the existing research mesh handling alone is larger; find a
 reuse-based implementation and recheck exact diff rather than dropping the
 geometry or convergence requirements.
+
+A three-state overlapping hard-closure window converged after one restart:
+maximum native equality residual was 6.93e-10, original-frame closure
+translation 3.57e-7 mm and rotation 7.63e-10 rad, with reduced Jacobian rank
+36/36. Shared positions, both discrete velocities and one shared second
+difference agreed exactly by construction. The immediately following second
+difference changed by 1098.75 rad/s²; peak was 1266.10 rad/s². Estimated
+bounded-multiplier Lagrangian gradient infinity norm was 0.01153 with 24
+active bounds. This does not certify stationarity, acceleration continuity,
+anatomical feasibility or forward tracking. With those three states fixed,
+exactly matching the next discrete acceleration uniquely predicts the next
+state; that state violated hard grip closure by 0.0274 mm and 1.21e-4 rad.
+This local incompatibility does not rule out a joint window solve. Next test
+a coupled sparse constrained trajectory with explicit continuity, and source
+actual acceleration limits separately.
+
+A private reuse probe compared installed optional trimesh 4.12.2 against the
+research finite-face nearest-point implementation on 500 deterministic points
+of the 576-triangle v2 patch: maximum per-triangle difference was 8.37e-16 m
+and no nearest-triangle indices differed. One same-process 1000-point timing
+was 0.168 s versus 0.280 s. This is sampled evidence, not equivalence proof;
+trimesh is optional and its default vertex merging tolerance differs from the
+research topology rules. Boundary semantics, continuous fixed-hold state,
+approach velocity, scan coverage and smooth miss penalty remain open.
+
+Direct model inspection found 47 degrees of freedom and no native actuators.
+A private one-state plumbing probe added 41 synthetic unit-gear motors in a
+copy of the compiled model, with arbitrary ±1 test-only limits. MuJoCo clipped
+controls and mapped measured actuator forces to generalized coordinates with
+zero maximum residual, while six root inputs remained zero; feeding those
+forces to the existing constrained solver yielded finite acceleration. This
+is not a physiological actuator model, a trajectory or a physical limit.
+The existing solver consumes its supplied effort directly, so any future seam
+must explicitly avoid double counting; physical actuator provenance and
+post-saturation trajectory evidence remain missing and the gate stays closed.
