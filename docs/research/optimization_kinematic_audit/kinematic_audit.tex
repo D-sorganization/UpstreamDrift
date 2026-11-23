@@ -1,0 +1,40 @@
+\documentclass{article}
+\usepackage{amsmath}
+\title{Sampled Optimization Kinematic Audit}
+\author{UpstreamDrift}
+\date{}
+\begin{document}
+\maketitle
+\section{Scope and Inputs}
+Research diagnostic for issue 15493, Slice 3; separate from the canonical
+engineering design manual. Recorded and reference joint angles $q,r$ are in
+unwrapped radians, velocities $v,s$ in radians per second, on the same frame,
+sign convention, ordered joints and finite increasing time grid $t_i$.
+There must be at least two samples. Quaternion or translational coordinates
+are outside this tool's contract. The caller supplies justified per-joint
+bounds $l_j\le u_j$, speed limits $V_j\ge0$, and absolute tracking budgets
+$E_j,F_j\ge0$; this tool does not calibrate anatomical limits.
+\section{Numerical Method and Acceptance}
+For each joint $j$, compute sampled signed margins
+\begin{align*}
+ M^q_j &= \min_i\{q_{ij}-l_j,\;u_j-q_{ij}\},\\
+ M^v_j &= V_j-\max_i|v_{ij}|,\\
+ M^r_j &= E_j-\max_i|q_{ij}-r_{ij}|,\\
+ M^s_j &= F_j-\max_i|v_{ij}-s_{ij}|.
+\end{align*}
+Sampled feasibility requires every margin to be nonnegative, including exact
+zero. No numerical slack is introduced. Invalid shapes, nonfinite inputs,
+misordered limits or arithmetic overflow are rejected. Actual state limits
+are independent of reference tracking. No physics model or integration is
+performed. Output records solution identity, joint order and sample count.
+\section{Verification and Limitations}
+The unit suite exercises hand-calculated violations, inclusive boundaries,
+tracking independence, finite contracts and strict JSON CLI round trips
+through the existing Solution Bundle codec. The initial RED experiment
+failed on the absent audit module. Reproduce from the repository root with
+\texttt{py -3.12 -m pytest -o addopts='' tests/unit/scripts/}\allowbreak
+\texttt{test\_audit\_optimization\_kinematics.py -q}.
+This editable reference has not been compiled or publication-qualified.
+Sample checks do not bound inter-sample motion, validate anatomical limits,
+qualify forward dynamics, or audit torque, work, impact or flight.
+\end{document}
