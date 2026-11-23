@@ -515,3 +515,28 @@ same-input parity score that hid coordinate excursions between sparse frame
 samples; 15 focused tests and normal headless push checks passed. Its frame
 checks remain sampled, and it is not the controller-based physical admission
 gate. Neither checkpoint is a PR or a complete Slice 1.
+
+An adjacent nine-frame hard-closure pilot fixed the two shared states to the
+first window, making their positions and shared discrete interval velocity
+identical by construction. After one restart it reached native grip residual
+infinity norm 7.75e-9 and independently evaluated original-frame closure
+translation 5.09e-6 mm and rotation-vector norm 9.42e-9 rad, but the solver
+hit its iteration limit. The reduced equality Jacobian had rank 42/42; the
+combined peak sampled speed was 16.155 rad/s and the join second difference
+1259.77 rad/s². Acceleration was not constrained. A bounded-multiplier
+stationarity estimate was 0.0181; neither stationarity nor continuous-time
+feasibility is established. The first-window multiplier audit likewise found
+an estimated gradient infinity norm 0.00845. Assumed anchors, incomplete
+anatomy, free ends and lack of a qualifying forward run remain limitations.
+
+Native MuJoCo geometry inspection of the committed v2 plant found six foot
+geometries and no club-body geometry, so its built-in geom distance cannot
+query the actual driver face without adding geometry. The research rendered
+face patch has 576 triangles, 64 boundary edges and approximately 20.04°
+maximum triangle-normal spread; substituting a plane or rectangle would alter
+the geometry. The compact root kernel must be connected to a validated
+finite-patch evaluator and continuous fixed-hold advancement. The current
+369-line extraction leaves about 130 changed lines under the requested PR
+limit, while the existing research mesh handling alone is larger; find a
+reuse-based implementation and recheck exact diff rather than dropping the
+geometry or convergence requirements.
