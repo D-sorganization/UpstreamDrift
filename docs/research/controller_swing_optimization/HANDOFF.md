@@ -586,3 +586,29 @@ accumulation; Ruff, Black, scoped mypy, LaTeX compilation and normal headless
 push hooks passed. This is not integrated with stage recording and supplies
 neither physiological motor limits nor a validated actuator model. Its branch
 is based on oversized research and is not a Slice 1 PR or physical admission.
+
+A coupled 15-frame sparse trust-constr pilot optimized the shared window
+states together, enforced all native grip rows and equated one pair of
+sampled join accelerations. The first run stopped at 150 iterations without
+convergence: native closure residual 5.41e-8, independently measured maximum
+closure 1.78e-5 mm and 7.38e-8 rad, sampled acceleration-join mismatch
+1.15e-10 rad/s², and reported optimality 0.00857. Supplied bounds held.
+A same-objective restart reached 1000 iterations in 149.04 s without
+convergence. Objective fell 0.54449 to 0.49525 and peak sampled second
+difference 1410 to 1094 rad/s², while native closure residual rose to
+2.17e-7 (original-frame 0.000113 mm, 2.95e-7 rad); sampled join mismatch
+was 1.73e-10 rad/s² and reported optimality 0.00433. This local test uses
+shared states and an explicit discrete join constraint, not global C2
+interpolation; a Gauss–Newton objective and zero constraint-Hessian
+approximation, assumed anchors, partial physical limits and no forward replay
+prevent physical admission or a stationarity certificate.
+
+A private synthetic-motion contact probe used the actual v2 576-triangle face,
+fixed-lattice forward dynamics and point-Jacobian approach velocity. With
+nonzero root rotation and 250/125 microsecond maximum substeps, both candidate
+roots were at 0.000459850311 s, with q difference 2.22e-16, qd difference
+1.57e-16, clearance 2.27e-9 m and approach speed 1.089914 m/s. Receding and
+0.2 m lateral-offset controls returned no accepted candidate and finite
+sampled penalties. The initial state was an exploratory fit, while velocity
+and ball placement were synthetic; the one-millisecond fixture does not
+establish pinned-match contact, complete scan coverage or a physical shot.
