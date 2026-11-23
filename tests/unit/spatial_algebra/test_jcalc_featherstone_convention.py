@@ -83,3 +83,11 @@ def test_two_link_rz_px_forward_kinematics_against_independent() -> None:
     transformed = x_from_jcalc @ motion_unit_x
     np.testing.assert_allclose(transformed[3:6], axis_in_base, atol=1e-14)
     np.testing.assert_allclose(transformed[0:3], 0.0, atol=1e-14)
+
+
+@pytest.mark.parametrize("jtype", ["Rx", "Ry", "Rz", "Px", "Py", "Pz"])
+@pytest.mark.parametrize("bad_q", [float("nan"), float("inf"), float("-inf")])
+def test_jcalc_rejects_non_finite_q(jtype: str, bad_q: float) -> None:
+    """A non-finite joint coordinate must fail loudly, not poison X_J (#15233)."""
+    with pytest.raises(ValueError, match="q must be finite"):
+        jcalc(jtype, bad_q)
