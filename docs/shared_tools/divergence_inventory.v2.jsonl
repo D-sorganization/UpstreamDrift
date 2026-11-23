@@ -2080,6 +2080,7 @@
 {"path": "optimization/backend_registry.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/batch_swing_optimizer.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/casadi_backend.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
+{"path": "optimization/contact_root.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/crocoddyl_backend.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/examples/README.md", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/examples/__init__.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
