@@ -1,8 +1,8 @@
 """Reference-shot regression of the production ball-flight model (#15443).
 
-Each row of ``reference_shots_15443.json`` is a published launch-monitor shot
-(ball speed, launch, back spin, no side spin, sea-level standard air) with its
-carry, apex and descent.  The launch goes straight into
+Each row of ``reference_shots_15443.json`` combines published aggregate
+launch and flight metrics; the published observations are not individual
+matched shots or normalized to standard air. The prescribed launch goes into
 :class:`BallFlightSimulator` (the Rust kernel the swing pipeline uses), so a
 failure here is the flight model's, never the impact model's.
 
@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import math
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -33,7 +34,10 @@ _METRICS = ("carry", "apex", "descent")
 
 def _flight(shot: dict[str, Any]) -> dict[str, float]:
     """Carry and apex [yd] and descent [deg] of one reference launch."""
-    pytest.importorskip("upstream_physics", reason="native flight kernel unavailable")
+    from src.shared.python.physics.rust_kernel import is_rust_available
+
+    if not is_rust_available():
+        raise RuntimeError("a current native flight kernel is required")
     from src.shared.python.physics.ball_simulator import BallFlightSimulator
 
     launch = LaunchConditions(
@@ -71,7 +75,11 @@ def _cases() -> list[Any]:
     for shot in _DATA["shots"]:
         for metric in _METRICS:
             reason = shot.get("xfail", {}).get(metric)
-            marks = [pytest.mark.xfail(strict=True, reason=reason)] if reason else []
+            marks = (
+                [pytest.mark.xfail(strict=True, reason=reason, raises=AssertionError)]
+                if reason
+                else []
+            )
             cases.append(
                 pytest.param(shot, metric, id=f"{shot['id']}-{metric}", marks=marks)
             )
@@ -93,6 +101,21 @@ def test_fixture_cites_a_fetched_published_table() -> None:
     assert source["urls"] and all(u.startswith("https://") for u in source["urls"])
     for shot in _DATA["shots"]:
         assert "from memory" not in (shot["source"] + shot["confidence"]), shot["id"]
+
+
+def test_expected_mismatches_only_accept_assertion_failures() -> None:
+    marks = [mark for case in _cases() for mark in case.marks if mark.name == "xfail"]
+    assert marks
+    assert all(mark.kwargs.get("raises") is AssertionError for mark in marks)
+
+
+def test_unavailable_kernel_is_an_error_not_a_skipped_flight(monkeypatch) -> None:
+    from src.shared.python.physics import rust_kernel
+
+    monkeypatch.setattr(rust_kernel, "is_rust_available", lambda: False)
+    monkeypatch.setitem(sys.modules, "upstream_physics", None)
+    with pytest.raises(RuntimeError, match="kernel"):
+        _flight(_DATA["shots"][0])
 
 
 @pytest.mark.parametrize(("shot", "metric"), _cases())
