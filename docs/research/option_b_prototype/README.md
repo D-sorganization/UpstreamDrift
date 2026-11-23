@@ -21,3 +21,6 @@ reference rate consistency, hold timing, and saturation parameters remain
 caller responsibilities. Saturation flags do not constitute a feasibility
 gate. Reusing the shared integrator in a synthetic unit-mass test establishes
 only its local input/hold connection, not replayability or human performance.
+To represent an explicitly unactuated coordinate, set its lower and upper
+limits to zero; a nonzero command is then reported as saturated and clipped
+to zero before the plant. Equal nonzero lower and upper limits are rejected.
