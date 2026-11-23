@@ -33,7 +33,6 @@ __all__ = [
     "GolferPlayback",
     "TimeSeries",
     "build_golfer_scene_xml",
-    "club_head_speed",
     "results_time_series",
 ]
 
@@ -70,10 +69,8 @@ def _translational(spec: dict[str, Any]) -> set[str]:
     return names
 
 
-def club_head_speed(source: PoseFrameSource) -> TimeSeries | None:
+def _club_head_speed(source: PoseFrameSource) -> TimeSeries | None:
     """Face-centre speed (mph) from MuJoCo FK, or ``None`` without a club.
-
-    GL-free, so it may run on a worker thread (see ``results_loader_worker``).
 
     Uses the repository's one club-head measurement point, the rendered face
     centre carried by the spec ``Clubhead`` frame (``club_face_target``).
@@ -119,7 +116,7 @@ def results_time_series(
     """
     series: dict[str, TimeSeries] = {}
     if with_club:
-        club = club_head_speed(source)
+        club = _club_head_speed(source)
         if club is not None:
             series[club.name] = club
     linear = _translational(source.spec)

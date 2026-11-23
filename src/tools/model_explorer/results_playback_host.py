@@ -68,9 +68,8 @@ class ResultsPlaybackHostMixin:
         A joint-space run (fit record, closed-loop rollout or same-input
         bundle) opens the Results Playback panel on the shared-appearance
         golfer; a marker archive is loaded for marker-overlay export.
-        A :class:`ResultsLoader` thread does the slow work (status bar shows
-        progress; club-head speed joins the plot after the first frame) and
-        supersedes a load in flight. ``wait=False`` returns True once started;
+        A :class:`ResultsLoader` thread does the slow work and supersedes a
+        load in flight. ``wait=False`` returns True once started;
         otherwise, still processing events, it waits for the whole load.
         Returns False, with a message naming the file and the problem, when
         the archive is missing, fails schema validation or cannot be shown.
@@ -82,9 +81,6 @@ class ResultsPlaybackHostMixin:
         self._live_loaders().add(loader)
         loader.loaded.connect(
             lambda s, ld=loader: self._deliver(self._on_loaded, ld, s, heading)
-        )
-        loader.club_ready.connect(
-            lambda c, ld=loader: self._deliver(self._on_club, ld, c)
         )
         loader.failed.connect(
             lambda text, ld=loader: self._deliver(self._on_load_failed, ld, text)
@@ -126,22 +122,16 @@ class ResultsPlaybackHostMixin:
         QCoreApplication.sendPostedEvents()
 
     def _deliver(self, handler: Callable[..., None], *args: Any) -> None:
-        """Run a loader signal's ``handler`` unless this widget is gone.
-
-        The lambdas connected in :meth:`load_results` outlive a destroyed
-        window; touching it then raises, which PyQt6 turns into an abort.
-        A session that arrives for a deleted window is closed instead.
-        """
+        """Run ``handler`` unless this widget is deleted (PyQt6 would abort)."""
         if isinstance(self, QWidget) and sip.isdeleted(self):
-            for arg in args:  # a loaded session: release it, nobody will show it
+            for arg in args:  # release a session nobody will show
                 if not isinstance(arg, ResultsLoader) and hasattr(arg, "close"):
                     arg.close()
             return
         handler(*args)
 
     def _live_loaders(self) -> set[ResultsLoader]:
-        # Read the instance dict directly: ``cleanup`` runs from ``destroyed``,
-        # when attribute lookup falling through to the deleted Qt object raises.
+        # Instance dict: ``cleanup`` runs from ``destroyed`` (Qt lookups raise).
         loaders: set[ResultsLoader] = self.__dict__.setdefault("_loaders", set())
         return loaders
 
@@ -181,12 +171,7 @@ class ResultsPlaybackHostMixin:
             if heading
             else f"{session.title}: {loader.path.name}, {frames}"
         )
-        pending = "; computing club-head speed\u2026" if panel is not None else ""
-        self.status_bar.showMessage(self._results_message + pending)
-
-    def _on_club(self, loader: ResultsLoader, series: Any) -> None:
-        if loader is self._results_loader and self.playback_panel is not None:
-            self.playback_panel.add_series(series)
+        self.status_bar.showMessage(self._results_message)
 
     def _on_load_failed(self, loader: ResultsLoader, message: str) -> None:
         if loader is not self._results_loader:

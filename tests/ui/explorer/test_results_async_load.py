@@ -1,6 +1,6 @@
 """Offscreen: a load never freezes the Model Explorer (#15150, G3).
 
-Fast fakes replace the scene build and club-head speed to check the threading
+Fast fakes replace the scene build to check the threading
 contract: work off the GUI thread, progress shown, errors reported.
 """
 
@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
-import numpy as np
 import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -24,14 +23,12 @@ from PyQt6.QtCore import QTimer  # noqa: E402
 from PyQt6.QtWidgets import QApplication, QMessageBox, QWidget  # noqa: E402
 
 from src.tools.model_explorer import results_loader_worker as worker  # noqa: E402
-from src.tools.model_explorer.golfer_playback import TimeSeries  # noqa: E402
 
 pytestmark = [pytest.mark.ui, pytest.mark.integration]
 
 HOST = "src.tools.model_explorer.results_playback_host"
 SLOW_LOAD_S = 0.6
 TICK_MS = 20
-CLUB = TimeSeries("Club-head speed", "mph", np.zeros(4))
 
 
 class _FakeSession:
@@ -48,8 +45,6 @@ class _FakeSession:
 class _FakePanel(QWidget):
     def __init__(self, session: Any) -> None:
         super().__init__()
-        self.added: list[TimeSeries] = []
-        self.add_series = self.added.append
         self.set_heading = self.stop = lambda *_args: None
 
 
@@ -73,7 +68,6 @@ def fake_work(qapp: QApplication) -> Generator[list[Any], None, None]:
 
     with (
         patch.object(worker, "prepare_results", _prepare),
-        patch.object(worker, "club_head_speed", lambda _pose: CLUB),
         patch(f"{HOST}.ResultsPlaybackHostMixin._playback_panel_for", _FakePanel),
     ):
         yield made
@@ -110,7 +104,7 @@ def test_settings_reject_a_non_positive_timeout() -> None:
 @pytest.mark.parametrize(
     ("name", "expected"),
     [
-        ("ok_run.npz", ["loaded", "club", "finished"]),
+        ("ok_run.npz", ["loaded", "finished"]),
         ("broken.npz", ["failed cannot read broken.npz", "finished"]),
     ],
 )
@@ -119,7 +113,6 @@ def test_loader_works_off_the_gui_thread_in_order(
 ) -> None:
     loader, events = worker.ResultsLoader(name), []
     loader.loaded.connect(lambda _s: events.append("loaded"))
-    loader.club_ready.connect(lambda _c: events.append("club"))
     loader.failed.connect(lambda m: events.append(f"failed {m}"))
     loader.finished.connect(lambda: events.append("finished"))
     loader.start()
@@ -137,7 +130,6 @@ def test_explorer_stays_responsive_and_shows_progress_while_loading(
     ticks = _ticks_while(lambda: explorer.playback_panel is None)
     assert ticks >= (SLOW_LOAD_S * 1000 / TICK_MS) / 2, "GUI thread was blocked"
     assert explorer.wait_for_results_load() is True
-    assert explorer.playback_panel.added == [CLUB]  # club speed came later
 
 
 def test_a_new_load_supersedes_one_in_flight(

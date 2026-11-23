@@ -1,10 +1,9 @@
 """Load a results archive off the GUI thread (#15150, gap G3).
 
-:class:`ResultsLoader` builds the golfer scene (the slow grip-hand solve) and
-then the club-head speed in a ``QThread``: ``loaded(session)`` lets the GUI
-thread create the renderer (it owns the GL context) and show the first frame,
-``club_ready(series)`` follows; ``failed(message)`` replaces ``loaded`` for an
-unplayable archive and ``finished`` always comes last.
+:class:`ResultsLoader` builds the golfer scene (the slow grip-hand solve) in a
+``QThread``: ``loaded(session)`` lets the GUI thread create the renderer (it
+owns the GL context) and show the first frame; ``failed(message)`` replaces it
+for an unplayable archive and ``finished`` always comes last.
 """
 
 from __future__ import annotations
@@ -17,7 +16,6 @@ from PyQt6.QtCore import QThread, pyqtSignal
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.motion_matching.video_frame_source import VideoSourceError
-from src.tools.model_explorer.golfer_playback import club_head_speed
 from src.tools.model_explorer.results_session import ResultsSession
 
 __all__ = [
@@ -79,7 +77,6 @@ class ResultsLoader(QThread):
     """One background load of ``path``; create it on the GUI thread."""
 
     loaded = pyqtSignal(object)
-    club_ready = pyqtSignal(object)
     failed = pyqtSignal(str)
 
     def __init__(self, path: str | Path, engine: str | None = None) -> None:
@@ -88,8 +85,7 @@ class ResultsLoader(QThread):
             raise ValueError("path must name a results archive")
         self.path = Path(path)
         self._engine = engine
-        # Keep the thread referenced until it ends: its window may be destroyed
-        # first, and a QThread collected while running aborts the process.
+        # Outlive the window: a QThread collected while running aborts.
         _LIVE.add(self)
         self.finished.connect(self._retire)
 
@@ -105,13 +101,3 @@ class ResultsLoader(QThread):
             self.failed.emit(str(exc) or type(exc).__name__)
             return
         self.loaded.emit(session)
-        pose = session.pose_source
-        if pose is None:
-            return
-        try:
-            series = club_head_speed(pose)
-        except LOAD_ERRORS:
-            logger.exception("club-head speed failed for %s", self.path)
-            return
-        if series is not None:
-            self.club_ready.emit(series)
