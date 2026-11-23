@@ -2572,3 +2572,15 @@ reference had six ROM/one speed slot failures and 5,376 clipped stages, but
 the changed reference and feedforward prevent single-factor attribution.
 Work/slew bounds, physical capacities, endpoint continuity and impact remain
 unverified; neither result admits a full swing or improved shot.
+
+Capacity-source research checkpoint `codex/15493-capacity-sources38` at
+`55479da8de` records candidate primary studies for forearm, wrist, shoulder,
+scapular and toe measurements, with populations, posture, axes and transfer
+limitations. It includes [Rezzoug et al.](https://doi.org/10.3390/biomechanics1010008)
+and [Nicolozakes et al.](https://doi.org/10.1249/MSS.0000000000002708).
+The former instrumented the right upper limb but did not explicitly identify
+the torque-tested side in the reviewed text; the latter restrained the scapula
+and measured a specific shoulder posture. External scapular/toe force results
+cannot be converted to modeled joint torque without defensible geometry and
+mapping. No registry value or UNVERIFIED status changed. Standalone LaTeX
+compiled, documentation checks and normal push hooks passed; no PR was opened.
