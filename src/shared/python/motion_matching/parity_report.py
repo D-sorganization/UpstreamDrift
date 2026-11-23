@@ -473,6 +473,32 @@ def _determine_overall_status(rows: Mapping[str, EngineParityRow]) -> str:
     return "PARTIAL"
 
 
+def _candidate_fingerprint(candidate: MatchedSwingCandidate) -> str:
+    """Return a full, deterministic SHA-256 of candidate evidence and provenance.
+
+    Reuse the package's checksum inventory, recomputed from the actual arrays.
+    Shape and dtype bind the interpretation of those bytes. Metadata must be
+    JSON-serializable and finite. This is candidate identity only: it does not
+    certify provenance, identify an evaluation operation or qualify a replay.
+    """
+    checksums = candidate.compute_checksums()
+    metadata = candidate.metadata.to_dict()
+    metadata["checksums"] = checksums
+    arrays = {}
+    for name in checksums:
+        array = getattr(candidate, name)
+        arrays[name] = {"shape": array.shape, "dtype": array.dtype.str}
+    payload = {
+        "schema": "parity-candidate-fingerprint/v1",
+        "metadata": metadata,
+        "arrays": arrays,
+    }
+    encoded = json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
 @postcondition(
     lambda r: isinstance(r, UnifiedParityReport), "Must return a UnifiedParityReport"
 )
@@ -485,9 +511,13 @@ def build_parity_report(
     attachments: Mapping[str, tuple[str, Sequence[float]]] | None = None,
     spec: bytes | Mapping[str, Any] | None = None,
 ) -> UnifiedParityReport:
-    """Construct unified parity report comparing candidate through all engines."""
+    """Construct unified parity report comparing candidate through all engines.
+
+    ``candidate_sha256`` binds the candidate metadata and complete array
+    evidence; ``candidate_id`` remains its human-readable model name.
+    """
     cand = _resolve_candidate(candidate)
-    cand_sha = hashlib.sha256(cand.q.tobytes()).hexdigest()[:16]
+    cand_sha = _candidate_fingerprint(cand)
     engine_list = _build_engine_list(engines, plants, reference_engine)
     resolved_spec, resolved_attachments = _resolve_spec_and_attachments(
         spec, attachments
