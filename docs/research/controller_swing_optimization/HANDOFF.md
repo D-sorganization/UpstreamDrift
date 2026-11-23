@@ -2216,3 +2216,28 @@ three actual-interval speed ratios exceeded the assumption-limited registry
 (maximum 1.243). Centered differences missed those interval violations.
 No forward test was warranted. Time coupling and interval-aware auditing are
 needed; registry soft and assumed values are not verified anatomical limits.
+
+Research branch `codex/15493-rom-coverage32` at `273e8dc414` makes legacy
+range-table coverage explicit in IK and dynamics receipts and summaries:
+checked/unchecked coordinates and covered/incomplete/invalid status are
+reported, while old receipts show unknown. Forty-six focused tests, Ruff,
+Black and normal push hooks passed. Covered means table coverage only, not a
+complete anatomical gate; no PR was opened.
+
+A full 476-frame smoothed, registry-bounded closure reference retained exact
+q0 and 0.000337 mixed-coordinate units/s initial-rate residual; sampled
+closure inf was 7.31e-12, no modeled ROM excess, interval/centered speed
+ratios at most 0.9809/0.9715, acceleration RMS 55.98 and peak 1,010.72 rad/s².
+Source-model foot/marker RMS were 2.51/24.09 mm. One frame reached its solver
+iteration limit despite independently satisfying sampled geometric gates;
+optimality was not established. All registry limits remain soft or assumed.
+
+The independent 1.319 s ideal-drive rollout from the same initial state
+completed without numerical failure and achieved source/observed marker RMS
+35.72/41.20 mm versus 267.24/267.94 mm baseline, peak unsaturated held
+command 314.95 N m. Forward state registry ROM failed in 816 samples (worst
+right subtalar excess 11.14 degrees); no sampled speed flag appeared under
+assumed limits, while ideal commands exceeded modeled capacity in 280 samples
+(peak ratio 7.19). Passing reference-level gates does not establish rollout
+feasibility. Stage-level motor torque, work and contact remain unverified;
+this is not an admitted physical baseline or optimized shot.
