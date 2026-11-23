@@ -1480,3 +1480,30 @@ continuation from that candidate moved the first sampled violation back to
 about 29 ms, had 11 ROM flags / 0.7982 rad excess at 200 ms, and failed at
 0.458 s. These are numerical stage samples, not continuous-path or
 physiological feasibility, a full-horizon swing or power improvement.
+
+A prefix-preserving nonlinear Option B search retained zero modeled ROM/speed
+flags in its first 1600 recorded RK4 stages and moved the first sampled flag
+from stage 1833 to 1969 (about 61 ms), using a 9.31983 N m coefficient norm
+under partly unverified model limits. At 200 ms it still had 11 ROM flags,
+1.1050 rad peak excess and 1376 clipped stages; its full extension failed at
+0.346 s. Common-prefix q/v/command/applied arrays matched in the same runtime.
+This is not a continuous, physiological or full-swing feasibility result.
+
+A coupled 199-frame 3D-root and bilateral knee/ankle support sensitivity
+stopped after 12 evaluations without convergence; support residual RMS
+changed 1.258 to 0.693 bodyweights, target-marker RMS 16.120 to 17.311 mm and
+observed RMS 32.621 to 33.325 mm. Its 0.55 s projected, no-impact ideal-drive
+replay completed 17,600 stages. Over the same 6559 valid marker samples,
+source-target marker RMS changed 72.94 to 66.53 mm, but peak ideal drive
+rose 395.04 to 1187.20 N m, joint q/v tracking worsened and three modeled
+ROM flags remained. The numerical bounds/weights and compliant support are
+assumptions, not physical gates; this is not an admitted improvement.
+
+A fresh same-runtime v2 fixed-gain motor replay reproduced 6400 recorded
+stages over 200 ms, including post-saturation generalized motor forces, using
+partly unverified model-prior caps. A separate full 1.322 s recording and
+fresh replay reproduced all 42,304 numerical stages exactly, including
+post-saturation force, under loose synthetic ±1000 N m caps, no impact or
+projection and an exploratory dynamics-derived reference. The two passes took
+78.02 s. These are same-runtime numerical replay results, not independent
+runtime, physical actuator qualification, admitted match or improved shot.
