@@ -1730,3 +1730,12 @@ first 100 ms numerical stage arrays in the same runtime but hit a guard at
 0.504 s with 23 modeled ROM / 12 speed flags. The two-basis coefficient
 norm is parameterization-dependent and 16/41 capacities remain unverified;
 this is not physical feasibility or a shot improvement.
+
+A model-dependent support audit of the full 477-frame v2 saved-feedback
+marker proxy gave combined 3D COM force-balance residual 0.9242 bodyweights
+RMS (vertical 0.8614, horizontal 0.3348), versus 0.00729 for its v2 forward
+rollout under the same compliant-ground audit. The source-v1 saved feedback
+was about 0.00525 on matched sampling in the earlier audit. This suggests the
+kinematic transfer loses modeled support consistency, but uses estimated
+forces and finite differences, not measured GRF or proof of physical
+impossibility. No baseline is admitted.
