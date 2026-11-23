@@ -1,10 +1,11 @@
 """Reference-shot regression of the production ball-flight model (#15443).
 
-Each row of ``reference_shots_15443.json`` is a published launch-monitor shot
-(ball speed, launch, back spin, no side spin, sea-level standard air) with its
-carry, apex and descent.  The launch goes straight into
-:class:`BallFlightSimulator` (the Rust kernel the swing pipeline uses), so a
-failure here is the flight model's, never the impact model's.
+Rows of ``reference_shots_15443.json`` combine published averages with
+approximate reference values; see each row's source and confidence. The
+prescribed launch goes straight into :class:`BallFlightSimulator` (the Rust
+kernel the swing pipeline uses), independently of the impact model. These
+regressions do not establish independent flight validation or guarantee that
+the reference observations were measured under standard air.
 
 Rows the current model misses are marked ``xfail(strict=True)`` with the
 measured error; the bands are never widened to make a row pass.  When the
@@ -87,7 +88,7 @@ def test_fixture_rows_carry_source_and_confidence() -> None:
 
 @pytest.mark.parametrize(("shot", "metric"), _cases())
 def test_reference_shot_within_band(shot: dict[str, Any], metric: str) -> None:
-    """The simulated metric lies inside the published reference band."""
+    """The simulated metric lies inside the stated reference band."""
     value = _flight(shot)[metric]
     low, high = _band(shot, metric)
     assert low <= value <= high, (

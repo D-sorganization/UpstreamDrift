@@ -34,6 +34,7 @@ def test_finds_converged_approaching_root_and_returns_integrated_state() -> None
         _advance(), _face, np.array([1.0, 0.0, 0.0]), 0.5, duration_s=1.0
     )
     assert result.event is not None
+    assert result.coverage_status == "sampled_bracket_candidate"
     assert result.event.time_s == pytest.approx(0.5, abs=1e-8)
     np.testing.assert_allclose(result.event.q, [0.5], atol=1e-8)
     np.testing.assert_allclose(result.event.qd, [1.0], atol=1e-12)
@@ -331,6 +332,39 @@ def test_endpoint_zero_gap_with_tangent_velocity_is_not_an_approaching_root() ->
     )
     assert result.event is None
     assert np.isfinite(result.closest_approach_penalty_m)
+    assert result.coverage_status == "unresolved_no_accepted_candidate"
+
+
+def test_narrow_unsampled_crossing_is_reported_as_unresolved() -> None:
+    centre_time, width, duration = 0.0703125, 0.003, 0.125
+
+    def advance(time_s: float) -> tuple[np.ndarray, np.ndarray]:
+        z = (time_s - centre_time) / width
+        envelope = np.exp(-(z * z))
+        return (
+            np.array([0.6 - 0.2 * envelope]),
+            np.array([0.4 * z / width * envelope]),
+        )
+
+    def moving_face(q: np.ndarray) -> np.ndarray:
+        x = q[0]
+        return np.array(
+            [
+                [[x, 0.0, 0.0], [x, 0.0, 1.0], [x, 1.0, 0.0]],
+                [[x, 0.0, 1.0], [x, 1.0, 1.0], [x, 1.0, 0.0]],
+            ]
+        )
+
+    result = find_contact_event(
+        advance,
+        moving_face,
+        np.array([0.0, 0.5, 0.5]),
+        0.5,
+        duration_s=duration,
+    )
+    assert advance(centre_time)[0][0] - 0.5 < 0.0
+    assert result.event is None
+    assert result.coverage_status == "unresolved_no_accepted_candidate"
 
 
 def test_nonfinite_geometry_cost_fails_closed() -> None:

@@ -61,8 +61,10 @@ def test_generalized_force_is_the_jacobian_transpose() -> None:
 
 
 def test_unlatched_plan_has_no_force() -> None:
+    impact = plan()
+    assert impact.contact_search_status is None
     with pytest.raises(ValueError, match="latched"):
-        plan().generalized_force(np.zeros(2), poses)
+        impact.generalized_force(np.zeros(2), poses)
 
 
 def test_latch_uses_the_plant_effective_mass() -> None:
@@ -318,6 +320,8 @@ def test_surface_trigger_uses_integrated_root_and_moving_face_pose() -> None:
     assert triggered is not None and triggered.trigger == "surface"
     assert triggered.is_scheduled and triggered.is_latched
     assert triggered.contact_event is not None
+    assert triggered.contact_search_status == "sampled_bracket_candidate"
+    assert not triggered.contact_search_has_prior_unresolved_intervals
     event = triggered.contact_event
     assert event.time_s == pytest.approx(0.01, abs=5e-10)
     np.testing.assert_allclose(event.q, [1.0, 0.5], atol=1e-8)
@@ -409,9 +413,39 @@ def test_surface_trigger_fails_closed_and_records_a_finite_miss() -> None:
     assert result is not None and not result.is_scheduled and not result.is_latched
     assert result.contact_event is None
     assert np.isfinite(result.contact_miss_penalty_m)
+    assert result.contact_search_status == "unresolved_no_accepted_candidate"
+    restored = imf.ImpactForce.from_record(result.to_record())
+    assert restored.contact_search_status == "unresolved_no_accepted_candidate"
+    assert restored.contact_search_has_prior_unresolved_intervals
     assert all(external is None for external in calls)
     np.testing.assert_allclose(q1, q + 0.02 * v)
     np.testing.assert_array_equal(v1, v)
+
+
+def test_later_sampled_bracket_preserves_prior_unresolved_interval() -> None:
+    impact = _surface_plan(np.array([0.1, 0.0, 0.0]))
+    q, v = np.zeros(2), np.array([10.0, 0.0])
+
+    def drift(_t, h, qq, vv, _external):  # noqa: ANN001, ANN202
+        return qq + h * vv, vv, None
+
+    q, v, missed, _ = imf.step_through_impact(
+        impact, 0.0, 0.005, q, v, drift, poses=rotating_poses, accel=accel
+    )
+    assert missed is not None and not missed.is_scheduled
+    assert missed.contact_search_status == "unresolved_no_accepted_candidate"
+    assert missed.contact_search_has_prior_unresolved_intervals
+
+    _, _, hit, _ = imf.step_through_impact(
+        missed, 0.005, 0.01, q, v, drift, poses=rotating_poses, accel=accel
+    )
+    assert hit is not None and hit.is_scheduled
+    assert hit.contact_event is not None
+    assert hit.contact_search_status == "sampled_bracket_candidate"
+    assert hit.contact_search_has_prior_unresolved_intervals
+    restored = imf.ImpactForce.from_record(json.loads(json.dumps(hit.to_record())))
+    assert restored.contact_search_status == "sampled_bracket_candidate"
+    assert restored.contact_search_has_prior_unresolved_intervals
 
 
 def test_surface_search_separates_trial_and_accepted_advances() -> None:
@@ -550,6 +584,7 @@ def test_surface_sub_intervals_are_chronological_when_event_follows_arming() -> 
         _surface_plan(np.array([1.0, 0.0, 0.0]), t_start=0.005),
         scheduled=True,
         t_start_s=0.007,
+        contact_search_status="sampled_bracket_candidate",
         contact_event=ContactRoot(
             time_s=0.007,
             q=np.zeros(2),
@@ -589,7 +624,13 @@ def test_shifted_scheduled_surface_plan_moves_root_and_arming_clocks() -> None:
         approach_speed_mps=100.0,
         triangle_index=0,
     )
-    scheduled = replace(plan, scheduled=True, armed_at_s=0.05, contact_event=root)
+    scheduled = replace(
+        plan,
+        scheduled=True,
+        armed_at_s=0.05,
+        contact_event=root,
+        contact_search_status="sampled_bracket_candidate",
+    )
     shifted = scheduled.shifted(0.3)
     assert shifted.t_start_s == pytest.approx(0.4)
     assert shifted.armed_at_s == pytest.approx(0.35)
@@ -617,6 +658,7 @@ def test_shifted_latched_surface_record_moves_all_event_clocks() -> None:
         armed_at_s=0.05,
         contact_event=root,
         contact_point_in_frame=np.zeros(3),
+        contact_search_status="sampled_bracket_candidate",
     ).with_force(np.array([1.0, 2.0, 3.0]))
     restored = imf.ImpactForce.from_record(json.loads(json.dumps(latched.to_record())))
     shifted = restored.shifted(-0.02)
@@ -643,9 +685,13 @@ def test_surface_geometry_and_root_round_trip_and_latched_replay_do_not_reschedu
         impact, 0.0, 0.02, *state, drift, poses=rotating_poses, accel=accel
     )
     assert triggered is not None and triggered.is_latched
+    assert triggered.contact_search_status == "sampled_bracket_candidate"
+    assert not triggered.contact_search_has_prior_unresolved_intervals
     record = json.loads(json.dumps(triggered.to_record()))
     restored = imf.ImpactForce.from_record(record)
     assert restored.contact_event is not None
+    assert restored.contact_search_status == "sampled_bracket_candidate"
+    assert not restored.contact_search_has_prior_unresolved_intervals
     np.testing.assert_allclose(
         restored.face_triangles_in_frame, impact.face_triangles_in_frame
     )
@@ -685,6 +731,7 @@ def test_surface_record_fails_closed_without_geometry_or_with_invalid_event() ->
 
     bad_event = dict(record)
     bad_event["scheduled"] = True
+    bad_event["contact_search_status"] = "sampled_bracket_candidate"
     bad_event["contact_event"] = {
         "time_s": 0.5,
         "q": [0.5],
@@ -712,4 +759,5 @@ def test_rearming_surface_trigger_clears_event_and_latched_force() -> None:
     rearmed = triggered.rearmed(lead_s=0.002)
     assert not rearmed.is_scheduled and not rearmed.is_latched
     assert rearmed.contact_event is None
+    assert rearmed.contact_search_status == "unsearched"
     assert rearmed.armed_at_s == pytest.approx(triggered.t_start_s - 0.002)

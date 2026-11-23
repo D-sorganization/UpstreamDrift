@@ -118,6 +118,9 @@ class ImpactForce:
     contact_miss_penalty_logsum: float | None = None
     contact_miss_penalty_weight_s: float = 0.0
     contact_point_in_frame: Array | None = None
+    # A candidate bracket is sampled evidence, never first-contact certification.
+    contact_search_status: str | None = None
+    contact_search_has_prior_unresolved_intervals: bool = False
 
     def __post_init__(self) -> None:
         if not isinstance(self.frame, str) or not self.frame:
@@ -146,6 +149,8 @@ class ImpactForce:
             raise ValueError(
                 f"trigger must be 'time', 'passage', or 'surface', not {self.trigger}"
             )
+        if not isinstance(self.contact_search_has_prior_unresolved_intervals, bool):
+            raise ValueError("prior unresolved contact status must be boolean")
         if self.passage_point_m is not None:
             object.__setattr__(
                 self,
@@ -181,6 +186,26 @@ class ImpactForce:
                     "armed_at_s must be inside the swing and at or before contact"
                 )
             object.__setattr__(self, "armed_at_s", armed)
+            valid_search_statuses = {
+                "unsearched",
+                "sampled_bracket_candidate",
+                "unresolved_no_accepted_candidate",
+                "sampled_bracket_outside_window",
+            }
+            search_status = self.contact_search_status
+            if search_status is None:
+                search_status = (
+                    "sampled_bracket_candidate"
+                    if self.contact_event is not None
+                    else "unsearched"
+                )
+                object.__setattr__(self, "contact_search_status", search_status)
+            if search_status not in valid_search_statuses:
+                raise ValueError("surface contact search status is invalid")
+            if self.scheduled != (search_status == "sampled_bracket_candidate"):
+                raise ValueError(
+                    "surface contact status disagrees with scheduled state"
+                )
             if self.scheduled != (self.contact_event is not None):
                 raise ValueError(
                     "scheduled surface contact needs exactly one contact_event"
@@ -214,8 +239,17 @@ class ImpactForce:
                 ):
                     raise ValueError("contact_event fields are invalid")
                 validate_window(event.time_s, self.duration_s, self.swing_span_s)
-        elif self.contact_event is not None:
-            raise ValueError("contact_event is only valid for a surface trigger")
+        else:
+            if self.contact_event is not None:
+                raise ValueError("contact_event is only valid for a surface trigger")
+            if self.contact_search_status is not None:
+                raise ValueError(
+                    "contact search status is only valid for a surface trigger"
+                )
+            if self.contact_search_has_prior_unresolved_intervals:
+                raise ValueError(
+                    "prior unresolved contact status is only valid for a surface trigger"
+                )
         if self.contact_miss_penalty_m is not None and (
             not np.isfinite(self.contact_miss_penalty_m)
             or self.contact_miss_penalty_m < 0.0
@@ -302,6 +336,8 @@ class ImpactForce:
             passage_point_m=point_m,
             scheduled=False,
             contact_event=None,
+            contact_search_status=None,
+            contact_search_has_prior_unresolved_intervals=False,
         )
 
     def with_surface_contact(self) -> ImpactForce:
@@ -320,6 +356,8 @@ class ImpactForce:
             contact_miss_penalty_logsum=None,
             contact_miss_penalty_weight_s=0.0,
             contact_point_in_frame=None,
+            contact_search_status="unsearched",
+            contact_search_has_prior_unresolved_intervals=False,
         )
 
     def at_address(self, q0: Array, poses: PoseFn) -> ImpactForce:
@@ -361,6 +399,8 @@ class ImpactForce:
             contact_miss_penalty_logsum=None,
             contact_miss_penalty_weight_s=0.0,
             contact_point_in_frame=None,
+            contact_search_status="unsearched" if self.trigger == "surface" else None,
+            contact_search_has_prior_unresolved_intervals=False,
         )
 
     def schedule(
@@ -450,6 +490,15 @@ class ImpactForce:
             contact_miss_penalty_m=aggregate,
             contact_miss_penalty_logsum=logsum,
             contact_miss_penalty_weight_s=total_weight,
+            contact_search_status=(
+                "unresolved_no_accepted_candidate"
+                if result.event is not None
+                else result.coverage_status
+            ),
+            contact_search_has_prior_unresolved_intervals=(
+                self.contact_search_has_prior_unresolved_intervals
+                or result.event is None
+            ),
         )
         if result.event is None:
             return accumulated
@@ -457,12 +506,17 @@ class ImpactForce:
         try:
             validate_window(event.time_s, self.duration_s, self.swing_span_s)
         except ValueError:
-            return accumulated
+            return replace(
+                accumulated,
+                contact_search_status="sampled_bracket_outside_window",
+                contact_search_has_prior_unresolved_intervals=True,
+            )
         return replace(
             accumulated,
             t_start_s=event.time_s,
             scheduled=True,
             contact_event=event,
+            contact_search_status="sampled_bracket_candidate",
         )
 
     @property
@@ -635,6 +689,10 @@ class ImpactForce:
                     "contact_miss_penalty_m": self.contact_miss_penalty_m,
                     "contact_miss_penalty_logsum": self.contact_miss_penalty_logsum,
                     "contact_miss_penalty_weight_s": self.contact_miss_penalty_weight_s,
+                    "contact_search_status": self.contact_search_status,
+                    "contact_search_has_prior_unresolved_intervals": (
+                        self.contact_search_has_prior_unresolved_intervals
+                    ),
                     "contact_point_in_frame": vec(self.contact_point_in_frame),
                     "contact_event": (
                         None
@@ -738,6 +796,14 @@ class ImpactForce:
                 None
                 if record.get("contact_point_in_frame") is None
                 else np.asarray(record["contact_point_in_frame"], dtype=float)
+            ),
+            contact_search_status=(
+                None
+                if record.get("contact_search_status") is None
+                else str(record["contact_search_status"])
+            ),
+            contact_search_has_prior_unresolved_intervals=record.get(
+                "contact_search_has_prior_unresolved_intervals", False
             ),
         )
 

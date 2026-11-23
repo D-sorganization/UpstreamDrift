@@ -2,6 +2,7 @@
 
 This research record tracks the evidence for UpstreamDrift #15493. The
 calculation-level reference is [swing optimization](swing_optimization.tex).
+The current task ledger and continuation notes are in the [handoff](HANDOFF.md).
 It is an editable research reference, not the engineering design manual.
 The initial source compiled with `pdflatex --disable-installer
 -interaction=nonstopmode -halt-on-error` on this host; compilation does not

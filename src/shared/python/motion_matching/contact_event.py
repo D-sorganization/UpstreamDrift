@@ -158,10 +158,15 @@ class ContactRoot:
 
 @dataclass(frozen=True)
 class ContactSearchResult:
-    """Root, when found, and a finite smooth miss penalty in metres."""
+    """Sampled candidate status and finite smooth proximity penalty.
+
+    ``sampled_bracket_candidate`` is not a certification that this is the
+    first contact; no sampled bracket remains unresolved between samples.
+    """
 
     event: ContactRoot | None
     closest_approach_penalty_m: float
+    coverage_status: str
 
 
 def _point_triangles(point: Array, triangles: Array) -> tuple[Array, Array]:
@@ -544,4 +549,11 @@ def find_contact_event(
     penalty = -radius * float(
         logsumexp(-penalty_samples / radius) - math.log(len(penalty_samples))
     )
-    return ContactSearchResult(event, penalty)
+    # A bracket proves only that the sampled trajectory contains a candidate
+    # bracket. No bracket does not prove absence between the fixed samples.
+    status = (
+        "sampled_bracket_candidate"
+        if event is not None
+        else "unresolved_no_accepted_candidate"
+    )
+    return ContactSearchResult(event, penalty, status)
