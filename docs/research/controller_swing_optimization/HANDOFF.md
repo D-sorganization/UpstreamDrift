@@ -2773,3 +2773,18 @@ and no stage clipped. These remain large violations; work after violations is
 not feasibility evidence. The +/-2 mm shift bound, original spline radius and
 separate fade have no combined trust certificate. The support estimates,
 physical capacities, work/slew limits and the whole swing remain unverified.
+
+A 2 mm vertical reference bump centered at 200 ms plus a separately bounded
+causal feedforward tail was checked with 16/32 actual-motor substeps. The
+first 150 ms q/applied drive exactly matched the baseline and first 200 ms
+sampled ROM/speed checks remained clear. First modeled ROM failure moved from
+about 214.05 to 224.18 ms; by 300 ms seven ROM and two speed slots failed,
+with maximum ROM excess 1.35006 versus 1.46663 rad and joint RMS 0.18018
+versus 0.19122 rad. No stage clipped; peak actual drive was 125.292 N m.
+Sixteen/32 matched-hold q/v/drive differences were <=4.17e-6 / 2.73e-4 /
+7.66e-5 in native units. Post-150 ms source/observed marker RMS were
+29.202/30.299 mm and source-model feet 3.126 mm, slightly improved versus
+the previous bump. This remains far from a gate pass; post-violation work is
+not feasibility evidence. Prefix spline, added feedforward, reference shift
+and fade have separate numerical bounds but no unified trust certificate.
+Physical capacities, work/slew, full swing and contact remain unverified.
