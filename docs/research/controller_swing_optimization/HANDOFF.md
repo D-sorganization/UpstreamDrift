@@ -2728,3 +2728,15 @@ rotation RMS 0.00558 rad, compared with 0.32961 and 0.34863 for the fixed
 gain bridge run. This controller is not the required fixed-gain Option B; it
 is a contrast motivating sensitivity analysis, not an accepted solution.
 Torque/speed assumptions, work/slew, full swing and contact remain unverified.
+
+A prescribed Option B feedback-sensitivity audit compared the added causal
+feedforward tail with the no-tail trajectory on actuated coordinates only.
+The change in PD feedback opposed the change in feedforward in 477 of 590
+active joint/hold pairs (80.8%); its global projection on the feedforward
+change was -0.245, about 25% projected cancellation for this candidate.
+No clipping occurred in the comparison and the actual-drive difference
+matched feedforward plus PD difference to 3.1e-14 N m. This is a coupled
+trajectory response, not a fixed-state derivative or universal claim.
+It supports an explicitly bounded reference-shift experiment whose velocity
+is analytically derived from the same spline, as required by the objective;
+combined trust, actual torque, physical and work/slew gates still need proof.
