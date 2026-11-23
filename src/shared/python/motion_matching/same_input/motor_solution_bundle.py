@@ -144,7 +144,10 @@ def verify_motor_solution(
     q = np.vstack((np.asarray(cfg["q0"]), *(x.post_projection_q for x in trace.steps)))
     v = np.vstack((np.asarray(cfg["v0"]), *(x.post_projection_v for x in trace.steps)))
     command = np.stack([x.stages[0].tau for x in trace.steps])
-    drive = np.stack([x.stages[0].applied_drive for x in trace.steps])
+    drive_samples = [x.stages[0].applied_drive for x in trace.steps]
+    if any(value is None for value in drive_samples):
+        raise ValueError("motor drive evidence missing")
+    drive = np.stack([value for value in drive_samples if value is not None])
     for name, expected in (
         ("time", times),
         ("q0", cfg["q0"]),
