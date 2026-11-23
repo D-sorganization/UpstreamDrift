@@ -11,6 +11,8 @@ from src.shared.python.loop_nullspace.strategy_margins import (
     torque_history_margins,
 )
 
+pytestmark = pytest.mark.unit
+
 TIMES = np.array([0.0, 0.1, 0.2, 0.3])
 LO = np.array([-10.0, -20.0])
 HI = np.array([10.0, 20.0])
