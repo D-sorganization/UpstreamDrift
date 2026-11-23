@@ -56,7 +56,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         # Apply Global Stylesheet
         self._load_stylesheet()
 
-    def closeEvent(self, event: QtGui.QCloseEvent) -> None:  # noqa: N802
+    def closeEvent(self, event: QtGui.QCloseEvent | None) -> None:  # noqa: N802
         """Stop owned timers and release both simulations before hiding.
 
         Qt does not deliver a parent's close event to child widgets.
