@@ -82,3 +82,40 @@ def test_loading_a_bundle_docks_the_card_beside_the_playback(
     assert dock.isHidden()
     explorer.cleanup()
     explorer.deleteLater()
+
+
+def test_the_shot_is_evaluated_off_the_gui_thread(
+    qapp: QApplication, tmp_path: Path
+) -> None:
+    """Impact and flight run in the background load, never on the GUI thread."""
+    import threading
+
+    from src.tools.model_explorer import shot_card_rows
+    from src.tools.model_explorer.results_session import ResultsSession
+
+    threads: list[int] = []
+    real = shot_card_rows.summary_for_path
+
+    def _record(path: str | Path) -> ShotSummary:
+        threads.append(threading.get_ident())
+        return real(path)
+
+    sample = (
+        Path(__file__).resolve().parents[2] / "fixtures/results_playback/mujoco_fit"
+    )
+    run = tmp_path / "fit"
+    import shutil
+
+    shutil.copytree(sample, run)
+    spec = Path(__file__).resolve().parents[3] / (
+        "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+    )
+    (run / "full_body_spec_hipcal_scaled.json").write_bytes(spec.read_bytes())
+    session = ResultsSession.load(run / "dynamics_record.npz")
+    worker = threading.Thread(target=session.prepare_scene)
+    with patch.object(shot_card_rows, "summary_for_path", _record):
+        worker.start()
+        worker.join()
+    assert threads and threads[0] != threading.get_ident()
+    assert session.shot_summary is not None  # a fit record: "needs a bundle"
+    session.close()

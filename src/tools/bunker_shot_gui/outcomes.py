@@ -26,6 +26,7 @@ to print rather than a leader the model cannot support.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import math
 
 from bunkershot3d.geometry import DeliveredGeometry, StationCamber, WedgeGeometry
 from bunkershot3d.metrics import DigSkidResult, DivotMetrics, HeadLoadMetrics
@@ -43,6 +44,7 @@ from bunkershot3d.vandv.band import ConsistencyBand
 from .bridge import SoleLoadMap
 from .design import WedgeDesign
 from .field import ContactPatch, SoleLoadField
+from .flight import BunkerFlight
 from .objective import CarryObjectiveStanding, uncalibrated_standing
 from .shot3d import ShotScene
 from .traces import ShotTraces
@@ -119,6 +121,7 @@ class ShotOutcome:
     contact_patch: ContactPatch | None = None
     scene: ShotScene | None = None
     traces: ShotTraces | None = None
+    flight: BunkerFlight | None = None
     carry_m: float | None = None
     carry_verdict: ValidityVerdict | None = None
     carry_band: ConsistencyBand | None = None
@@ -145,12 +148,20 @@ class ShotOutcome:
                 "read as though it had been measured"
             )
         if not self.refused:
+            if self.flight is not None and (
+                self.carry_m is None
+                or not math.isclose(
+                    self.flight.carry_m, self.carry_m, rel_tol=1e-9, abs_tol=1e-9
+                )
+            ):
+                raise ValueError("flight must accompany its matching carry and verdict")
             return
         numbers = (
             self.peak_force_n,
             self.impulse_n_s,
             self.max_depth_m,
             self.carry_m,
+            self.flight,
             self.carry_band,
             self.sole_field,
             self.contact_patch,

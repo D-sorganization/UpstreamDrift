@@ -24,6 +24,11 @@ from numpy.typing import NDArray
 
 from src.shared.python.golf_view_presets.presets import VIEW_ORDER
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.tools.model_explorer.playback_view import (
+    DEFAULT_LOOKAT_M,
+    load_view_settings,
+    playback_lookat,
+)
 from src.tools.model_explorer.pose_results import PoseFrameSource, ResultsSchemaError
 
 __all__ = [
@@ -32,11 +37,10 @@ __all__ = [
     "DEFAULT_SIZE",
     "GolferPlayback",
     "TimeSeries",
+    "build_golfer_scene_xml",
     "results_time_series",
 ]
 
-#: Camera look-at for the golfer at address (matches ``ExportSettings``).
-DEFAULT_LOOKAT_M = (1.0, 0.0, 0.9)
 DEFAULT_SIZE = (960, 540)
 CLUB_HEAD_SPEED = "Club-head speed"
 _MPS_TO_MPH = 2.2369362920544
@@ -128,15 +132,30 @@ def results_time_series(
     return series
 
 
+def build_golfer_scene_xml(source: PoseFrameSource) -> str:
+    """MJCF of the golfer for ``source``: the slow, GL-free part of a load."""
+    from src.tools.native_viewer_export.backends.mujoco_worker import (
+        build_scene_xml,
+    )
+
+    xml, _ = build_scene_xml(source.spec_bytes)
+    return xml
+
+
 class GolferPlayback:
     """Offscreen MuJoCo renders of a run on the shared-appearance golfer.
 
     Raises ``ImportError`` without MuJoCo and :class:`ResultsSchemaError`
-    when a run coordinate has no joint in the exported model.
+    when a run coordinate has no joint in the exported model. A prebuilt
+    ``scene_xml`` skips the build; create it on the thread that renders.
     """
 
     def __init__(
-        self, source: PoseFrameSource, size: tuple[int, int] = DEFAULT_SIZE
+        self,
+        source: PoseFrameSource,
+        size: tuple[int, int] = DEFAULT_SIZE,
+        *,
+        scene_xml: str | None = None,
     ) -> None:
         width, height = size
         if width < 16 or height < 16:
@@ -144,7 +163,6 @@ class GolferPlayback:
         import mujoco
 
         from src.tools.native_viewer_export.backends.mujoco_worker import (
-            build_scene_xml,
             grow_offscreen_buffer,
             load_scene_extent,
             widen_ground,
@@ -153,7 +171,7 @@ class GolferPlayback:
         self._mj = mujoco
         self.source = source
         self.size = (int(width), int(height))
-        xml, _ = build_scene_xml(source.spec_bytes)
+        xml = scene_xml if scene_xml is not None else build_golfer_scene_xml(source)
         self._model = mujoco.MjModel.from_xml_string(xml)
         grow_offscreen_buffer(self._model, *self.size)
         # the export's turf reaches past a drive, so a ball flight lands on it
@@ -162,7 +180,9 @@ class GolferPlayback:
         self._qpos_adr = self._address_map(source)
         self._renderer: Any = mujoco.Renderer(self._model, self.size[1], self.size[0])
         self._camera = mujoco.MjvCamera()
-        self.view = VIEW_ORDER[0]
+        #: ball-to-feet point behind views look along; ``None`` keeps the preset
+        self._behind_anchor_m: tuple[float, float, float] | None = None
+        self.view = load_view_settings().default_view
         #: called as ``scene_hook(scene, index)`` after the scene is posed, to
         #: add render-only geoms (the decorative ball); never touches the model
         self.scene_hook: Callable[[Any, int], None] | None = None
@@ -193,11 +213,29 @@ class GolferPlayback:
             mujoco_camera_params,
         )
 
-        params = mujoco_camera_params(name, DEFAULT_LOOKAT_M)
+        params = mujoco_camera_params(
+            name, playback_lookat(name, self._behind_anchor_m)
+        )
         cam = self._camera
         cam.type = _free_camera_type(self._mj)
         params.apply_to(cam)
         self._view = name
+
+    @property
+    def behind_anchor_m(self) -> tuple[float, float, float] | None:
+        """Point midway ball-to-feet that behind views look along, if known."""
+        return self._behind_anchor_m
+
+    @behind_anchor_m.setter
+    def behind_anchor_m(self, anchor: tuple[float, float, float] | None) -> None:
+        """Set the anchor (finite 3-vector or ``None``) and re-aim the camera."""
+        if anchor is not None:
+            point = np.asarray(anchor, float)
+            if point.shape != (3,) or not np.all(np.isfinite(point)):
+                raise ValueError(f"anchor must be a finite 3-vector, got {anchor!r}")
+            anchor = (float(point[0]), float(point[1]), float(point[2]))
+        self._behind_anchor_m = anchor
+        self.view = self._view
 
     def render(self, index: int) -> NDArray[np.uint8]:
         """RGB frame ``(height, width, 3)`` of the golfer at sample ``index``.
