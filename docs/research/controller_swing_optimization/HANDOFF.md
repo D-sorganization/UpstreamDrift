@@ -2004,3 +2004,24 @@ to 0.57/0.63/0.54 mm; marker RMS increased from 25.14/17.38/19.37 mm to
 27.21/20.92/22.49 mm and closure residual stayed below 1.7e-11. Solver success
 for isolated poses does not establish temporal continuity, physical limits or
 forward tracking. Test a continuous fit and independent rollout before use.
+
+Current-main prescribed-launch fixtures call the flight simulator directly
+using ten published aggregate launch rows, separately from swing-to-impact.
+An isolated Python 3.12 build of the current native kernel reported physics
+revision 3 and yielded 30 passed / two expected failures. Running the two
+expected failures as ordinary assertions confirmed actual carry-band misses:
+127.481 yd versus a 129.2 yd lower bound and 99.266 yd versus 101.65 yd.
+Published aggregates are comparisons, not individually matched controlled
+shots. The default Python environment contained an importable stale revision
+and produced setup failures; the broad expected-failure marks also masked two
+of those errors. Future fixture work must distinguish an unavailable or stale
+kernel from a numerical model discrepancy. Neither result qualifies the
+unverified swing-to-impact path.
+
+A 200 ms late-violation sensitivity and early-restoration experiment reduced
+maximum modeled ROM excess at 200 ms from 1.15669 to 1.03005 rad while keeping
+zero sampled flags in the first 60 ms and staying in the diagnostic trust
+ball. The independent full rollout first flagged ROM around 62.8 ms and hit a
+guard at 0.552 s, earlier than the previous 0.665 s. Reject this as evidence
+of full-horizon improvement. Small coefficient changes produced large later
+joint differences even without late-stage clipping; causality remains unproven.
