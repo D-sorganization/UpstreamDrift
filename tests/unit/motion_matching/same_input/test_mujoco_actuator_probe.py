@@ -200,6 +200,161 @@ def test_forward_replay_recomputes_feedback_at_each_hold(model):
     assert checked.stages == 16 and checked.forward_replay_verified
 
 
+def test_forward_replay_prescribed_force_separates_motor_input(model):
+    from src.shared.python.impact_optimization.option_b_prototype import (
+        FixedGainController,
+        SplineResidual,
+    )
+    from src.shared.python.motion_matching.same_input.integrator import (
+        StepPolicy,
+        integrate,
+    )
+    from src.shared.python.motion_matching.same_input.motor_forward_replay import (
+        measured_motor_runtime,
+        verify_motor_forward,
+    )
+    from src.shared.python.motion_matching.same_input.mujoco_actuator_probe import (
+        MotorRolloutPlant,
+    )
+    from src.shared.python.motion_matching.same_input.stage_numeric_archive import (
+        encode_numeric,
+    )
+    from src.shared.python.motion_matching.same_input.stage_trace import StageRecorder
+
+    n = len(model.coordinate_order)
+    q0 = np.zeros(n)
+    ref = q0.copy()
+    ref[6] = 0.1
+    gain = q0.copy()
+    gain[6] = 4.0
+    damping = q0.copy()
+    damping[6] = 2.0
+    xml = (
+        f'<actuator><motor joint="{model.coordinate_order[6]}" '
+        'ctrllimited="true" ctrlrange="-0.1 0.1"/></actuator>'
+    ).encode()
+    plant = MotorRolloutPlant(ControlledMujocoDrive(model, xml.decode()), np.array([6]))
+    cfg = {
+        "q0": q0.tolist(),
+        "v0": q0.tolist(),
+        "times_s": [0.0, 2e-7],
+        "q_ref": [ref.tolist(), ref.tolist()],
+        "qd_ref": [q0.tolist(), q0.tolist()],
+        "tau_ff_ref": [q0.tolist(), q0.tolist()],
+        "kp": gain.tolist(),
+        "kd": damping.tolist(),
+        "lower": (-np.ones(n)).tolist(),
+        "upper": np.ones(n).tolist(),
+        "breakpoints_s": [0.0, 2e-7],
+        "coefficients": np.zeros((4, n)).tolist(),
+        "scale": np.ones(n).tolist(),
+        "trust_radius": 1.0,
+        "min_spacing_s": 1e-8,
+        "kkt_regularization": 1e-6,
+    }
+    spline = SplineResidual(
+        breakpoints_s=cfg["breakpoints_s"],
+        coefficients_nm=cfg["coefficients"],
+        scale_nm=cfg["scale"],
+        trust_radius=1.0,
+        min_spacing_s=1e-8,
+    )
+    control = FixedGainController(
+        times_s=cfg["times_s"],
+        q_ref=cfg["q_ref"],
+        qd_ref=cfg["qd_ref"],
+        tau_ff_ref=cfg["tau_ff_ref"],
+        kp=cfg["kp"],
+        kd=cfg["kd"],
+        lower_nm=cfg["lower"],
+        upper_nm=cfg["upper"],
+        residual=spline,
+    )
+    from src.shared.python.motion_matching.impact_force import ImpactForce
+
+    impact = ImpactForce(
+        frame="Clubhead",
+        point_in_frame=np.zeros(3),
+        axis_in_frame=np.array([1.0, 0.0, 0.0]),
+        t_start_s=0.5e-7,
+        duration_s=1e-7,
+        swing_span_s=(0.0, 2e-7),
+        force_world=np.array([-100.0, 0.0, 0.0]),
+    )
+    cfg["impact"] = {
+        "status": "recorded_latched_force",
+        "frame": "Clubhead",
+        "point_in_frame_m": [0.0, 0.0, 0.0],
+        "axis_in_frame": [1.0, 0.0, 0.0],
+        "time_s": 0.5e-7,
+        "duration_s": 1e-7,
+        "force_world_n": [-100.0, 0.0, 0.0],
+        "contact_verified": False,
+    }
+    trace = StageRecorder(capture_motor_drive=True)
+    result = integrate(
+        plant,
+        q0,
+        q0,
+        lambda _i, t, q, v: control.evaluate(t, q, v).commanded_nm,
+        steps=2,
+        dt_s=1e-7,
+        policy=StepPolicy(substeps=2, project=False),
+        recorder=trace,
+        impact=impact,
+    )
+    assert result.failure is None
+    plain = integrate(
+        plant,
+        q0,
+        q0,
+        lambda _i, t, q, v: control.evaluate(t, q, v).commanded_nm,
+        steps=2,
+        dt_s=1e-7,
+        policy=StepPolicy(substeps=2, project=False),
+        impact=impact,
+    )
+    np.testing.assert_array_equal(result.q, plain.q)
+    np.testing.assert_array_equal(result.v, plain.v)
+    assert any(
+        np.linalg.norm(s.applied_external) > 0
+        for step in trace.steps
+        for s in step.stages
+    )
+    assert all(
+        abs(s.applied_drive[6]) <= 0.1 for step in trace.steps for s in step.stages
+    )
+    raw, spec = encode_numeric(trace), SPEC.read_bytes()
+    config = json.dumps(cfg, sort_keys=True).encode()
+    checked = verify_motor_forward(
+        raw,
+        spec,
+        xml,
+        config,
+        expected_archive_sha256=hashlib.sha256(raw).hexdigest(),
+        expected_model_sha256=hashlib.sha256(spec).hexdigest(),
+        expected_motor_sha256=hashlib.sha256(xml).hexdigest(),
+        expected_controller_sha256=hashlib.sha256(config).hexdigest(),
+        expected_runtime_sha256=measured_motor_runtime(),
+    )
+    assert checked.forward_replay_verified and not checked.contact_verified
+    changed = json.loads(config)
+    changed["impact"]["contact_verified"] = True
+    forged = json.dumps(changed, sort_keys=True).encode()
+    with pytest.raises(ValueError, match="prescribed-force contract"):
+        verify_motor_forward(
+            raw,
+            spec,
+            xml,
+            forged,
+            expected_archive_sha256=hashlib.sha256(raw).hexdigest(),
+            expected_model_sha256=hashlib.sha256(spec).hexdigest(),
+            expected_motor_sha256=hashlib.sha256(xml).hexdigest(),
+            expected_controller_sha256=hashlib.sha256(forged).hexdigest(),
+            expected_runtime_sha256=measured_motor_runtime(),
+        )
+
+
 def test_fixed_hold_rollout_records_post_saturation_motor_forces(model):
     from src.shared.python.motion_matching.same_input.integrator import (
         StepPolicy,
@@ -435,26 +590,17 @@ def test_motor_rollout_rejects_misleading_recording_and_wrong_mapping(model):
             policy=StepPolicy(substeps=1, project=False),
             recorder=StageRecorder(capture_ideal_drive=True),
         )
-    with pytest.raises(ValueError, match="impact"):
-        integrate(
-            plant,
-            q,
-            q,
-            lambda *_: q,
-            steps=1,
-            dt_s=1e-7,
-            policy=StepPolicy(substeps=1, project=False),
-            impact=object(),
-        )
-    with pytest.raises(ValueError, match="projection"):
-        integrate(plant, q, q, lambda *_: q, steps=1, dt_s=1e-7)
     bad = q.copy()
     bad[7] = 1
     with pytest.raises(ValueError, match="unmapped"):
         plant.acceleration(q, q, bad)
 
 
-def test_motor_bundle_v2_fresh_replay_and_consistency(model, tmp_path):
+@pytest.mark.parametrize("project", [False, True])
+@pytest.mark.parametrize("with_impact", [False, True])
+def test_motor_bundle_v2_fresh_replay_and_consistency(
+    model, tmp_path, project, with_impact
+):
     from src.shared.python.impact_optimization.option_b_prototype import (
         FixedGainController,
         SplineResidual,
@@ -484,20 +630,33 @@ def test_motor_bundle_v2_fresh_replay_and_consistency(model, tmp_path):
 
     n = len(model.coordinate_order)
     q0 = np.zeros(n)
+    if project:
+        from scipy.optimize import least_squares
+
+        probe_xml = f'<actuator><motor joint="{model.coordinate_order[6]}"/></actuator>'
+        probe = MotorRolloutPlant(
+            ControlledMujocoDrive(model, probe_xml), np.array([6])
+        )
+        closed = least_squares(
+            probe.closure_pose_residual, q0, ftol=1e-12, xtol=1e-12, gtol=1e-12
+        )
+        assert np.max(np.abs(closed.fun)) < 1e-8
+        q0 = closed.x
+    v0 = np.zeros(n)
     target = q0.copy()
     target[6] = 0.1
-    kp = q0.copy()
+    kp = v0.copy()
     kp[6] = 4.0
-    kd = q0.copy()
+    kd = v0.copy()
     kd[6] = 2.0
     xml = f'<actuator><motor joint="{model.coordinate_order[6]}" ctrllimited="true" ctrlrange="-0.1 0.1"/></actuator>'.encode()
     cfg = {
         "q0": q0.tolist(),
-        "v0": q0.tolist(),
+        "v0": v0.tolist(),
         "times_s": [0.0, 2e-7],
         "q_ref": [target.tolist()] * 2,
-        "qd_ref": [q0.tolist()] * 2,
-        "tau_ff_ref": [q0.tolist()] * 2,
+        "qd_ref": [v0.tolist()] * 2,
+        "tau_ff_ref": [v0.tolist()] * 2,
         "kp": kp.tolist(),
         "kd": kd.tolist(),
         "lower": (-np.ones(n)).tolist(),
@@ -509,6 +668,34 @@ def test_motor_bundle_v2_fresh_replay_and_consistency(model, tmp_path):
         "min_spacing_s": 1e-8,
         "kkt_regularization": 1e-6,
     }
+    impact = None
+    events = []
+    if with_impact:
+        from src.shared.python.motion_matching.impact_force import ImpactForce
+
+        impact = ImpactForce(
+            frame="Clubhead",
+            point_in_frame=np.zeros(3),
+            axis_in_frame=np.array([1.0, 0.0, 0.0]),
+            t_start_s=0.5e-7,
+            duration_s=1e-7,
+            swing_span_s=(0.0, 2e-7),
+            force_world=np.array([-100.0, 0.0, 0.0]),
+        )
+        cfg["impact"] = {
+            "status": "recorded_latched_force",
+            "frame": "Clubhead",
+            "point_in_frame_m": [0.0, 0.0, 0.0],
+            "axis_in_frame": [1.0, 0.0, 0.0],
+            "time_s": 0.5e-7,
+            "duration_s": 1e-7,
+            "force_world_n": [-100.0, 0.0, 0.0],
+            "contact_verified": False,
+        }
+
+    def observe(t, q, v):
+        events.append((t, q.copy(), v.copy()))
+
     spline = SplineResidual(
         breakpoints_s=cfg["breakpoints_s"],
         coefficients_nm=cfg["coefficients"],
@@ -532,12 +719,14 @@ def test_motor_bundle_v2_fresh_replay_and_consistency(model, tmp_path):
     run = integrate(
         plant,
         q0,
-        q0,
+        v0,
         lambda _i, t, q, v: control.evaluate(t, q, v).commanded_nm,
         steps=2,
         dt_s=1e-7,
-        policy=StepPolicy(substeps=2, project=False),
+        policy=StepPolicy(substeps=2, project=project),
         recorder=trace,
+        impact=impact,
+        impact_event_observer=observe if with_impact else None,
     )
     assert run.failure is None
     raw = encode_numeric(trace)
@@ -560,7 +749,7 @@ def test_motor_bundle_v2_fresh_replay_and_consistency(model, tmp_path):
         "knots": np.array([0, 0, 0, 0, 2e-7, 2e-7, 2e-7, 2e-7]),
         "delta_tau_coeffs": np.zeros((4, n)),
         "q0": q0,
-        "qd0": q0,
+        "qd0": v0,
         "controller_state0": np.zeros(0),
         "kp": kp,
         "kd": kd,
@@ -591,12 +780,22 @@ def test_motor_bundle_v2_fresh_replay_and_consistency(model, tmp_path):
             "kind": "rk4",
             "dt_s": 1e-7,
             "substeps": 2,
-            "project": False,
+            "project": project,
             "runtime_sha256": measured_bundle_motor_runtime(),
         },
         environment={},
         optimizer_seed=0,
-        impact_event={"status": "none"},
+        impact_event=(
+            {
+                "t": events[0][0],
+                "q": events[0][1].tolist(),
+                "qd": events[0][2].tolist(),
+                "semantics": "prescribed_latched_force",
+                "contact_verified": False,
+            }
+            if with_impact
+            else {"status": "none"}
+        ),
         flight_metrics={},
         feasibility_margins={},
         assumptions=("synthetic limits",),
@@ -612,10 +811,25 @@ def test_motor_bundle_v2_fresh_replay_and_consistency(model, tmp_path):
         expected_runtime_sha256=measured_bundle_motor_runtime(),
     )
     assert (
-        checked.stages == 16
+        checked.stages == sum(len(step.stages) for step in trace.steps)
         and checked.forward_replay_verified
         and not checked.independent_runtime_verified
     )
+    if with_impact:
+        assert checked.event is not None and not checked.contact_verified
+        original_event_q = bundle.impact_event["q"][0]
+        bundle.impact_event["q"][0] += 0.01
+        tampered = save_solution_bundle(bundle, tmp_path / "tampered-event")
+        with pytest.raises(ValueError, match="event state mismatch"):
+            verify_motor_solution(
+                tampered,
+                expected_manifest_sha256=digest(
+                    (tampered / "manifest.json").read_bytes()
+                ),
+                expected_model_sha256=digest(spec),
+                expected_runtime_sha256=measured_bundle_motor_runtime(),
+            )
+        bundle.impact_event["q"][0] = original_event_q
     with pytest.raises(ValueError, match="manifest"):
         verify_motor_solution(
             path,

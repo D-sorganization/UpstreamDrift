@@ -2,8 +2,9 @@
 
 Trusted hashes must be stored outside the untrusted archive. This independent
 numerical rerun supports only stateless fixed-gain control, rigid scalar
-coordinates, no projection, no external force and no impact. The measured
-runtime covers a declared subset; it is not an environment lock.
+coordinates, optional closure projection, and a prescribed latched external
+force. Contact is not verified. The measured runtime covers a declared subset;
+it is not an environment lock.
 """
 
 from dataclasses import dataclass
@@ -24,6 +25,7 @@ from src.shared.python.impact_optimization.option_b_prototype import (
 from src.shared.python.motion_matching.club_shaft_chain import passive_coordinates
 from . import motor_stage_verification, mujoco_actuator_probe, stage_numeric_archive
 from .integrator import StepPolicy, integrate
+from src.shared.python.motion_matching.impact_force import ImpactForce
 from .mujoco_actuator_probe import ControlledMujocoDrive, MotorRolloutPlant
 from .solution_bundle_mujoco_replay import measured_runtime_fingerprint
 from .solution_bundle_prototype import _unique_object
@@ -37,6 +39,8 @@ class MotorForwardCheck:
     forward_replay_verified: bool = True
     independent_runtime_verified: bool = False
     physical_feasibility_verified: bool = False
+    contact_verified: bool = False
+    event: tuple[float, np.ndarray, np.ndarray] | None = None
 
 
 def measured_motor_runtime() -> str:
@@ -52,13 +56,6 @@ def measured_motor_runtime() -> str:
         parts.append(hashlib.sha256(Path(module.__file__).read_bytes()).hexdigest())
     parts.append(hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
     return hashlib.sha256("\n".join(parts).encode()).hexdigest()
-
-
-class _NoProjectionMotorPlant(MotorRolloutPlant):
-    """Satisfy the integrator protocol while rejecting unsupported projection."""
-
-    def closure_rate_matrix(self, q: np.ndarray) -> np.ndarray:
-        raise ValueError("motor replay does not support projection")
 
 
 def verify_motor_forward(
@@ -92,12 +89,8 @@ def verify_motor_forward(
         raise ValueError("runtime fingerprint mismatch")
     trace = decode_numeric(archive, expected_semantics=MOTOR_SEMANTICS)
     plan = trace.plan
-    if (
-        plan is None
-        or plan.project
-        or any(s.force_active for step in trace.steps for s in step.segments)
-    ):
-        raise ValueError("only no-impact, nonprojected runs are supported")
+    if plan is None:
+        raise ValueError("stage plan is missing")
     try:
         c = json.loads(controller_json, object_pairs_hook=_unique_object)
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
@@ -120,7 +113,7 @@ def verify_motor_forward(
         "min_spacing_s",
         "kkt_regularization",
     }
-    if not isinstance(c, dict) or set(c) != keys:
+    if not isinstance(c, dict) or set(c) not in (keys, keys | {"impact"}):
         raise ValueError("invalid controller contract")
     regularization = c["kkt_regularization"]
     if (
@@ -165,7 +158,49 @@ def verify_motor_forward(
         if len(matches) != 1:
             raise ValueError("motor joint missing from coordinate order")
         indices.append(int(matches[0]))
-    plant = _NoProjectionMotorPlant(drive, np.asarray(indices, dtype=np.int64))
+    plant = MotorRolloutPlant(drive, np.asarray(indices, dtype=np.int64))
+    impact = None
+    if "impact" in c:
+        event = c["impact"]
+        if (
+            not isinstance(event, dict)
+            or set(event)
+            != {
+                "status",
+                "frame",
+                "point_in_frame_m",
+                "axis_in_frame",
+                "time_s",
+                "duration_s",
+                "force_world_n",
+                "contact_verified",
+            }
+            or event["status"] != "recorded_latched_force"
+            or event["contact_verified"] is not False
+        ):
+            raise ValueError("invalid prescribed-force contract")
+        if event["frame"] not in plant.kinematic_frames(
+            np.asarray(c["q0"], dtype=float)
+        ):
+            raise ValueError("impact frame is unavailable")
+        impact = ImpactForce(
+            frame=event["frame"],
+            point_in_frame=np.asarray(event["point_in_frame_m"], dtype=float),
+            axis_in_frame=np.asarray(event["axis_in_frame"], dtype=float),
+            t_start_s=event["time_s"],
+            duration_s=event["duration_s"],
+            swing_span_s=(0.0, plan.requested_steps * plan.dt_s),
+            force_world=np.asarray(event["force_world_n"], dtype=float),
+        )
+    if any(s.force_active for step in trace.steps for s in step.segments) != (
+        impact is not None
+    ):
+        raise ValueError("impact and recorded force segments mismatch")
+    events: list[tuple[float, np.ndarray, np.ndarray]] = []
+
+    def observe_event(t: float, q: np.ndarray, v: np.ndarray) -> None:
+        events.append((float(t), q.copy(), v.copy()))
+
     recorder = StageRecorder(capture_motor_drive=True)
     result = integrate(
         plant,
@@ -175,12 +210,16 @@ def verify_motor_forward(
         steps=plan.requested_steps,
         dt_s=plan.dt_s,
         policy=StepPolicy(
-            substeps=plan.substeps, project=False, effort_holds=plan.effort_holds
+            substeps=plan.substeps, project=plan.project, effort_holds=plan.effort_holds
         ),
         recorder=recorder,
+        impact=impact,
+        impact_event_observer=observe_event if impact is not None else None,
     )
     if result.failure is not None:
         raise ValueError("motor forward integration failed")
+    if len(events) != (0 if impact is None else 1):
+        raise ValueError("prescribed event not observed exactly once")
     with (
         np.load(BytesIO(archive), allow_pickle=False) as recorded,
         np.load(BytesIO(encode_numeric(recorder)), allow_pickle=False) as actual,
@@ -189,4 +228,6 @@ def verify_motor_forward(
             np.array_equal(recorded[k], actual[k]) for k in recorded.files
         ):
             raise ValueError("motor forward stages differ")
-    return MotorForwardCheck(sum(len(s.stages) for s in recorder.steps))
+    return MotorForwardCheck(
+        sum(len(s.stages) for s in recorder.steps), event=events[0] if events else None
+    )

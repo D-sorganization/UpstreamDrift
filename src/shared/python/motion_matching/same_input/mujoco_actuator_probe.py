@@ -51,6 +51,14 @@ class ControlledMujocoDrive:
             raise ValueError("motor model does not match base coordinate dimensions")
 
     def acceleration(self, q: Array, v: Array, control: Array) -> tuple[Array, Array]:
+        acceleration, applied, _ = self.acceleration_with_external(
+            q, v, control, np.zeros(len(self.plant.coordinate_order))
+        )
+        return acceleration, applied
+
+    def acceleration_with_external(
+        self, q: Array, v: Array, control: Array, external: Array
+    ) -> tuple[Array, Array, Array]:
         n = len(self.plant.coordinate_order)
         q, v, control = (np.asarray(x, dtype=float) for x in (q, v, control))
         if q.shape != (n,) or v.shape != (n,) or control.shape != (self.model.nu,):
@@ -75,16 +83,28 @@ class ControlledMujocoDrive:
         named_tau = dict(
             zip(self.plant.coordinate_order, map(float, applied), strict=True)
         )
-        result = self.plant.accelerations(named_q, named_v, named_tau)
-        return np.array([result[name] for name in self.plant.coordinate_order]), applied
+        ext = np.asarray(external, dtype=float)
+        if ext.shape != (n,) or not np.isfinite(ext).all():
+            raise ValueError("external force must be finite and coordinate ordered")
+        named_external = dict(
+            zip(self.plant.coordinate_order, map(float, ext), strict=True)
+        )
+        result, applied, effective_external = self.plant.accelerations_with_drive(
+            named_q, named_v, named_tau, named_external
+        )
+        return (
+            np.array([result[name] for name in self.plant.coordinate_order]),
+            applied,
+            effective_external,
+        )
 
 
 class MotorRolloutPlant:
-    """No-impact research plant: held controls, measured motor input at each RK4 stage."""
+    """Research plant with measured motor and separate external RK4 inputs."""
 
     drive_evidence_semantics = "mujoco_post_saturation_generalized_motor"
-    supports_impact = False
-    supports_projection = False
+    supports_impact = True
+    supports_projection = True
 
     def __init__(
         self, drive: ControlledMujocoDrive, control_indices: NDArray[np.int64]
@@ -123,11 +143,47 @@ class MotorRolloutPlant:
         acceleration, applied = self.drive.acceleration(q, v, values[self.indices])
         return acceleration, applied, np.zeros_like(applied)
 
+    def acceleration_with_drive_components(
+        self, q: Array, v: Array, command: Array, external: Array
+    ) -> tuple[Array, Array, Array]:
+        values = np.asarray(command, dtype=float)
+        if (
+            values.shape != (len(self.coordinate_order),)
+            or not np.isfinite(values).all()
+        ):
+            raise ValueError("command must be a finite coordinate-order vector")
+        unsupported = np.ones(len(values), dtype=bool)
+        unsupported[self.indices] = False
+        if np.any(values[unsupported] != 0):
+            raise ValueError("command includes unmapped coordinates")
+        return self.drive.acceleration_with_external(
+            q, v, values[self.indices], external
+        )
+
     def acceleration(self, q: Array, v: Array, command: Array) -> Array:
         return self.acceleration_with_drive(q, v, command)[0]
+
+    def kinematic_frames(self, q: Array) -> dict[str, Array]:
+        q = np.asarray(q, dtype=float)
+        if q.shape != (len(self.coordinate_order),) or not np.isfinite(q).all():
+            raise ValueError("q must be finite and coordinate ordered")
+        named = dict(zip(self.coordinate_order, map(float, q), strict=True))
+        return self.drive.plant.frame_poses(named)
 
     def closure_pose_residual(self, q: Array) -> Array:
         n = len(self.coordinate_order)
         self.drive.acceleration(q, np.zeros(n), np.zeros(self.drive.model.nu))
         pose, _ = self.drive.plant.closure_errors()
         return np.asarray(pose, dtype=float)
+
+    def closure_rate_matrix(self, q: Array) -> Array:
+        """Use the native weld rate map in the same coordinate order."""
+        n = len(self.coordinate_order)
+        columns = []
+        for index in range(n):
+            velocity = np.zeros(n)
+            velocity[index] = 1.0
+            self.drive.acceleration(q, velocity, np.zeros(self.drive.model.nu))
+            _, rate = self.drive.plant.closure_errors()
+            columns.append(np.asarray(rate, dtype=float))
+        return np.column_stack(columns)

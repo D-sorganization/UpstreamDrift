@@ -1,7 +1,7 @@
 """Research bridge: versioned Solution Bundle to constrained motor replay.
 
 Trusted manifest/model/runtime digests must be stored outside the bundle. This
-supports no impact, no projection, no passive shaft and one ZOH hold per step.
+supports explicit no impact or prescribed latched force, closure projection, no passive shaft and one ZOH hold per step.
 Numerical stage equality is not a physical or independent-runtime certificate.
 """
 
@@ -83,8 +83,15 @@ def verify_motor_solution(
     bundle = load_solution_bundle(root, expected_model_hash=expected_model_sha256)
     if _digest((root / "manifest.json").read_bytes()) != expected_manifest_sha256:
         raise ValueError("manifest changed while loading")
-    if bundle.schema_version != 2 or bundle.impact_event != {"status": "none"}:
-        raise ValueError("only explicit v2 no-impact evidence is supported")
+    if bundle.schema_version != 2:
+        raise ValueError("only explicit v2 evidence is supported")
+    event = bundle.impact_event
+    if event != {"status": "none"} and (
+        set(event) != {"t", "q", "qd", "semantics", "contact_verified"}
+        or event["semantics"] != "prescribed_latched_force"
+        or event["contact_verified"] is not False
+    ):
+        raise ValueError("unsupported impact evidence")
     if bundle.frame != "world" or bundle.environment or bundle.flight_metrics:
         raise ValueError("unsupported frame, environment or flight")
     if bundle.control != {
@@ -113,7 +120,7 @@ def verify_motor_solution(
         raise ValueError("invalid controller JSON") from exc
     trace = decode_numeric(data["motor_stage_npz"], expected_semantics=MOTOR_SEMANTICS)
     plan = trace.plan
-    if plan is None or plan.effort_holds != 1 or plan.project:
+    if plan is None or plan.effort_holds != 1:
         raise ValueError("unsupported stage plan")
     if tuple(bundle.joint_order) != plan.coordinate_order:
         raise ValueError("coordinate inventory mismatch")
@@ -121,7 +128,7 @@ def verify_motor_solution(
         "kind": "rk4",
         "dt_s": plan.dt_s,
         "substeps": plan.substeps,
-        "project": False,
+        "project": plan.project,
         "runtime_sha256": expected_runtime_sha256,
     }
     if bundle.integrator != expected_integrator:
@@ -137,6 +144,19 @@ def verify_motor_solution(
         expected_controller_sha256=assets["controller_json"],
         expected_runtime_sha256=measured_motor_runtime(),
     )
+    if event == {"status": "none"}:
+        if replay.event is not None or "impact" in cfg:
+            raise ValueError("unexpected prescribed event")
+    else:
+        if replay.event is None or "impact" not in cfg:
+            raise ValueError("prescribed event missing")
+        t_event, q_event, v_event = replay.event
+        if (
+            t_event != event["t"]
+            or not np.array_equal(q_event, event["q"])
+            or not np.array_equal(v_event, event["qd"])
+        ):
+            raise ValueError("prescribed event state mismatch")
     a = bundle.arrays
     times = np.arange(plan.requested_steps + 1, dtype=float) * plan.dt_s
     if cfg["times_s"][0] > times[0] or cfg["times_s"][-1] < times[-1]:

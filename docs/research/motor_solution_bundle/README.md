@@ -7,7 +7,7 @@ without inventing an event. Readers reject unsupported versions, duplicate
 JSON/NPZ keys, and non-finite or nonnumeric extra arrays.
 
 The bridge accepts one fixed ZOH hold per step, a rigid scalar-coordinate
-plant, and no projection, impact, external force or flight. The bundle carries
+plant, optional fixed-step closure projection, and either no impact or an explicitly recorded latched force. Flight is unsupported. The bundle carries
 model JSON, motor XML, controller JSON and the typed motor-stage NPZ as byte
 arrays. A separately trusted manifest digest binds the NPZ digest and asset
 hashes. The bridge checks the hash-bound configuration, model, coordinate
@@ -32,3 +32,13 @@ python -m pytest -q tests/unit/optimization/test_solution_bundle.py tests/unit/m
 ```
 
 The editable calculation-level reference is [motor_solution_bundle.tex](motor_solution_bundle.tex).
+
+
+The prescribed-force replay is not contact detection: its event is labeled
+`prescribed_latched_force` with `contact_verified: false`. The force is mapped
+through the existing point Jacobian and applied separately from post-saturation
+motor force, so the external force is never clipped as motor control. The
+actual split event state is re-simulated and compared with the bundle. The
+projection uses the existing weld-closure projection at each completed step;
+the archive binds both pre- and post-projection states. These checks establish
+numerical replay only, not an on-face root or physical validity.

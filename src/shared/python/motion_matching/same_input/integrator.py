@@ -195,6 +195,9 @@ class _ForcedPlant:
         self._external = external
 
     def acceleration(self, q: Array, v: Array, tau: Array) -> Array:
+        method = getattr(self._plant, "acceleration_with_drive_components", None)
+        if callable(method):
+            return np.asarray(method(q, v, tau, self._external(q))[0], dtype=float)
         return self._plant.acceleration(q, v, tau + self._external(q))
 
     def acceleration_with_drive(
