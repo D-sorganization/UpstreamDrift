@@ -2274,3 +2274,22 @@ capacity exceedances increased 280 to 313 samples, peak ratio 7.19 to 8.60,
 and peak absolute command 314.95 to 372.30 N m. No sampled assumed speed
 flag appeared. Reject this tradeoff as an admitted or improved baseline;
 actual saturated torque, stages, work and impact were not established.
+
+A bounded continuous-reference Option B spline correction cleared modeled
+registry ROM/speed flags over 100 ms / 3,200 actual motor stages with no
+clipping and norm 2.93171 inside the 10 N m diagnostic ball. Independent
+replay first flagged ROM at about 100.3 ms versus 62.7 ms uncorrected, then
+stopped at 0.869 s with 30 ROM and 25 speed slots flagged; native overflow and
+invalid-matmul warnings occurred before the guarded stop. Tracking over the
+first 100 ms worsened slightly. This is not full-horizon or physical proof.
+
+A separate 120 ms ideal-controller contact sensitivity found a material
+integration-resolution issue. At the same 1 ms hold, the nominal eight-RK4-
+substep run first crossed the modeled right-subtalar bound at 79 ms; with 16
+substeps it did not cross and peaked at 19.319535 degrees. At 32 substeps
+it peaked at 19.319552 degrees, with maximum 16-to-32 q/v differences
+4.62e-7 / 7.53e-5 and held effort difference 0.00118 in native units. The
+eight-substep trajectory differed by up to 0.0376 in q. Thus the early event
+timing and other earlier eight-substep comparisons are not established as
+numerically converged; recheck conclusions at a suitable step size. This
+local 120 ms comparison does not prove convergence over the full trajectory.
