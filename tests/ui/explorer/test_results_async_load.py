@@ -191,3 +191,25 @@ def test_waiting_on_a_load_that_already_finished_returns_at_once(
     start = time.monotonic()
     assert explorer.wait_for_results_load(timeout_s=5.0) is True
     assert time.monotonic() - start < 2.0, "waited for the timeout"
+
+
+def test_deleting_an_explorer_leaves_other_deferred_deletes_alone(
+    qapp: QApplication,
+) -> None:
+    """Teardown inside a deletion must not re-post later deletions (CI shard 2).
+
+    ``destroyed`` runs ``cleanup``; a blanket ``sendPostedEvents()`` there
+    re-posted every deferred delete queued behind the explorer, so the outer
+    flush skipped them and their widgets (and timers) survived.
+    """
+    from PyQt6.QtCore import QEvent
+
+    from src.tools.model_explorer.gui import MainWidget
+
+    explorer, other = MainWidget(), QWidget()
+    timer = QTimer(other)
+    explorer.deleteLater()
+    other.deleteLater()
+    QApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+    assert sip.isdeleted(explorer)
+    assert sip.isdeleted(timer)

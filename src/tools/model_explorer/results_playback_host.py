@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from PyQt6 import sip
-from PyQt6.QtCore import QCoreApplication, QEventLoop
+from PyQt6.QtCore import QCoreApplication, QEvent, QEventLoop
 from PyQt6.QtWidgets import (
     QDockWidget,
     QInputDialog,
@@ -124,7 +124,9 @@ class ResultsPlaybackHostMixin:
             if not sip.isdeleted(loader):  # Qt may have retired it already
                 loader.wait()
         loaders.clear()
-        QCoreApplication.sendPostedEvents()  # superseded sessions close now
+        # Queued signals only, so superseded sessions close now. A blanket flush
+        # inside ``destroyed`` re-posts later deferred deletes, which then leak.
+        QCoreApplication.sendPostedEvents(None, QEvent.Type.MetaCall)
 
     def _deliver(self, handler: Callable[..., None], *args: Any) -> None:
         """Run ``handler`` unless this widget is deleted (PyQt6 would abort)."""
