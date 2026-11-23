@@ -86,6 +86,7 @@ def test_closed_loop_reports_target_and_rollout_scores_separately(
     rollout = SimpleNamespace(
         time_s=np.array([0.0, 1.0]),
         q=np.array([[0.0], [1.0]]),
+        v=np.array([[2.0], [1.0]]),
         efforts=np.zeros((1, 1)),
         pose_drift=np.zeros(1),
     )
@@ -107,6 +108,7 @@ def test_closed_loop_reports_target_and_rollout_scores_separately(
     assert result["full_horizon"]["max_coordinate_error_rad"] == 0.0
     assert result["target_tracking"]["max_abs_by_coordinate"] == [1.0]
     assert result["target_tracking"]["coordinate_order"] == ("joint",)
+    assert result["velocity_target_tracking"]["max_abs_by_coordinate"] == [1.0]
 
 
 def test_target_tracking_rms_does_not_overflow_for_finite_values() -> None:
@@ -205,4 +207,46 @@ def test_target_tracking_uses_clamped_endpoint_for_rounded_last_step() -> None:
             np.array([0.0, 1.815]),
             np.zeros((2, 1)),
             max_endpoint_extension_s=0.0005,
+        )
+
+
+def test_velocity_target_uses_split_rates_and_clamped_endpoint() -> None:
+    from scripts.same_input_bundle import target_velocity_tracking_summary
+
+    times = np.array([7.0, 8.0, 9.0, 10.0, 11.0, 12.0])
+    # Pre-impact slope 1, post-impact slope 10; neither side is smeared.
+    q = np.array([[0.0], [1.0], [2.0], [20.0], [30.0], [40.0]])
+    run_t = np.array([0.0, 2.5, 3.0, 5.0001])
+    run_v = np.array([[1.0], [1.0], [8.0], [10.0]])
+    result = target_velocity_tracking_summary(
+        times, q, run_t, run_v, split_time_s=2.5, max_endpoint_extension_s=0.0005
+    )
+    assert result["reference"] == "controller_derived_velocity_target"
+    assert result["max_abs_by_coordinate"] == pytest.approx([2.0])
+    assert result["rms_by_coordinate"] == pytest.approx([1.0])
+    assert result["endpoint_clamped_duration_s"] == pytest.approx(0.0001)
+    with pytest.raises(ValueError):
+        target_velocity_tracking_summary(
+            times,
+            q,
+            np.array([0.0, 5.001]),
+            np.zeros((2, 1)),
+            split_time_s=2.5,
+            max_endpoint_extension_s=0.0005,
+        )
+
+
+def test_velocity_target_uses_derived_rates_not_interpolant_derivative() -> None:
+    from scripts.same_input_bundle import target_velocity_tracking_summary
+
+    # Finite differences are [1, 2, 3]; the first segment slope is 1.
+    times = np.array([0.0, 1.0, 2.0])
+    q = np.array([[0.0], [1.0], [4.0]])
+    summary = target_velocity_tracking_summary(
+        times, q, np.array([0.0, 0.5, 1.0]), np.array([[1.0], [1.5], [2.0]])
+    )
+    assert summary["max_abs_by_coordinate"] == pytest.approx([0.0])
+    with pytest.raises(ValueError, match="split_time_s"):
+        target_velocity_tracking_summary(
+            times, q, np.array([0.0, 1.0]), np.zeros((2, 1)), split_time_s=0.5
         )

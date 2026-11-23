@@ -6,6 +6,12 @@ is the linearly sampled `q_track` at each rollout time on the reference clock.
 For each coordinate, the report gives sampled RMS and maximum absolute error
 in that coordinate's native units, in the recorded coordinate order. It does
 not combine rotational and translational units or infer anatomical angles.
+The receipt separately compares velocity against the controller-derived rate
+table: finite differences of the position target, split at the recorded
+impact when specified and sampled with the controller's same side clamp.
+These rates are not measured velocities or derivatives of the piecewise
+linear position interpolant. Velocity units are native coordinate units per
+second. Hash binding applies to the source position record for both reports.
 
 The tracking record must match the hash in the bundle provenance. This binds
 the selected data to the bundle; a hash does not establish its source,

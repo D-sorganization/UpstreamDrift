@@ -89,7 +89,54 @@ def target_tracking_summary(
     A short permitted final extension uses the controller's endpoint clamp.
     This measures sampled tracking error, not physiological feasibility.
     """
-    from src.shared.python.motion_matching.impact_force import sample_rate_table
+    return _target_summary(
+        track_time,
+        q_track,
+        rollout_time,
+        rollout_q,
+        max_endpoint_extension_s=max_endpoint_extension_s,
+    )
+
+
+def target_velocity_tracking_summary(
+    track_time: np.ndarray,
+    q_track: np.ndarray,
+    rollout_time: np.ndarray,
+    rollout_v: np.ndarray,
+    *,
+    split_time_s: float | None = None,
+    max_endpoint_extension_s: float = 0.0,
+) -> dict:
+    """Compare velocity with rates derived by the source controller.
+
+    The rates are finite differences, optionally split at impact; they are not
+    independent measurements or derivatives of linear position interpolation.
+    """
+    return _target_summary(
+        track_time,
+        q_track,
+        rollout_time,
+        rollout_v,
+        max_endpoint_extension_s=max_endpoint_extension_s,
+        velocity=True,
+        split_time_s=split_time_s,
+    )
+
+
+def _target_summary(
+    track_time: np.ndarray,
+    q_track: np.ndarray,
+    rollout_time: np.ndarray,
+    rollout_q: np.ndarray,
+    *,
+    max_endpoint_extension_s: float,
+    velocity: bool = False,
+    split_time_s: float | None = None,
+) -> dict:
+    from src.shared.python.motion_matching.impact_force import (
+        reference_rates,
+        sample_rate_table,
+    )
 
     source_time, target = np.asarray(track_time, float), np.asarray(q_track, float)
     time_s, q = np.asarray(rollout_time, float), np.asarray(rollout_q, float)
@@ -117,8 +164,15 @@ def target_tracking_summary(
         raise ValueError("endpoint extension must be finite and nonnegative")
     if time_s[0] < 0 or time_s[-1] - source_time[-1] > max_endpoint_extension_s:
         raise ValueError("rollout times must lie within the target span")
+    split = None
+    if velocity:
+        target, _, last = reference_rates(source_time, target, split_time_s)
+        if last is not None:
+            if split_time_s is None:
+                raise ValueError("split rate table requires split time")
+            split = (float(split_time_s), last)
     sampled = np.array(
-        [sample_rate_table(source_time, target, t, None) for t in time_s]
+        [sample_rate_table(source_time, target, t, split) for t in time_s]
     )
     with np.errstate(over="ignore", invalid="ignore"):
         error = q - sampled
@@ -127,7 +181,11 @@ def target_tracking_summary(
     magnitude = np.max(np.abs(error), axis=0)
     scale = np.where(magnitude == 0.0, 1.0, magnitude)
     return {
-        "reference": "controller_position_target",
+        "reference": (
+            "controller_derived_velocity_target"
+            if velocity
+            else "controller_position_target"
+        ),
         "endpoint_clamped_duration_s": max(0.0, float(time_s[-1] - source_time[-1])),
         "rms_by_coordinate": (
             scale * np.sqrt(np.mean((error / scale) ** 2, axis=0))
@@ -320,6 +378,17 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
                 target,
                 rollout.time_s,
                 rollout.q,
+                max_endpoint_extension_s=DT_S / 2,
+            ),
+        },
+        "velocity_target_tracking": {
+            "coordinate_order": bundle.coordinate_order,
+            **target_velocity_tracking_summary(
+                times,
+                target,
+                rollout.time_s,
+                rollout.v,
+                split_time_s=bundle.provenance.get("impact_split_time_s"),
                 max_endpoint_extension_s=DT_S / 2,
             ),
         },
