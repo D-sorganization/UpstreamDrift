@@ -16,10 +16,15 @@ impact and requires flight and feasibility results to be unavailable.
 
 For each quantity $x$ the comparison reports the maximum absolute difference
 and checks $|x_{\rm run}-x_{\rm recorded}| \le a_x+r_x|x_{\rm recorded}|$ at
-all supplied samples. The forward runner and its runtime identity are
-caller-supplied: numerical agreement is not proof of independent simulation,
-continuous-time agreement, anatomical feasibility or impact. Recorded
-playback does not run dynamics. Full asset embedding, explicit migrations,
+all supplied samples. Recorded playback does not run dynamics. A restricted
+MuJoCo runner uses fixed-gain feedback, cubic residuals, ideal clipping and
+the existing held-input integrator; it rejects impact, passive shaft
+coordinates, external assets and unsupported policies. Its runtime digest
+measures a declared subset of code and libraries, not the full environment.
+The stored Git SHA is a caller assertion, not a verified clean checkout.
+The stored ideal input is not measured post-actuator torque. Numerical
+agreement is not proof of independent simulation, continuous-time agreement,
+anatomical feasibility or impact. Full asset embedding, explicit migrations,
 complete controller and integrator policies and a qualified forward runner
 are required before this prototype could become a solution bundle contract.
 \end{document}

@@ -21,8 +21,9 @@ pytestmark = pytest.mark.unit
 def _fixture():
     model = b'{"synthetic":true}'
     manifest = {
-        "schema_version": "research-solution-prototype/v1",
+        "schema_version": "research-solution-prototype/v2",
         "research_only": True,
+        "runner": {"mode": "unavailable"},
         "solution_id": "synthetic",
         "parent_id": None,
         "git_sha": "a" * 40,
@@ -68,7 +69,10 @@ def _fixture():
         "recorded_q": np.array([[0.0], [1.0]]),
         "recorded_qd": np.array([[1.0], [1.0]]),
         "commanded_tau": np.array([[2.0]]),
-        "applied_tau": np.array([[1.0]]),
+        "ideal_input_tau": np.array([[1.0]]),
+        "saturation_lower": np.array([-10.0]),
+        "saturation_upper": np.array([10.0]),
+        "spline_scale": np.array([1.0]),
     }
     return SolutionBundle(manifest, arrays, model)
 
@@ -110,7 +114,7 @@ def test_rejects_incompatible_or_incomplete_evidence(bad):
     if bad == "time":
         arrays["reference_time_s"][:] = 0
     if bad == "shape":
-        arrays["applied_tau"] = np.zeros((2, 1))
+        arrays["ideal_input_tau"] = np.zeros((2, 1))
     if bad == "version":
         manifest["schema_version"] = "9.0"
     if bad == "asset":
@@ -259,6 +263,157 @@ def test_real_impact_evidence_is_not_accepted_by_prototype():
         SolutionBundle(manifest, b.arrays, b.model_bytes)
 
 
+def test_unavailable_runner_and_old_research_schema_fail_closed():
+    from src.shared.python.motion_matching.same_input.solution_bundle_prototype import (
+        run_mujoco_ideal,
+    )
+
+    b = _fixture()
+    with pytest.raises(ValueError, match="runner"):
+        run_mujoco_ideal(b)
+    old = deepcopy(b.manifest)
+    old["schema_version"] = "research-solution-prototype/v1"
+    with pytest.raises(ValueError, match="migration"):
+        SolutionBundle(old, b.arrays, b.model_bytes)
+
+
+def test_real_mujoco_ideal_forward_replay_uses_actual_integrator(tmp_path):
+    pytest.importorskip("mujoco")
+    from pathlib import Path
+    from src.shared.python.motion_matching.same_input.integrator import ROOT_COORDINATES
+    from src.shared.python.motion_matching.same_input.solution_bundle_mujoco_replay import (
+        measured_runtime_fingerprint,
+    )
+    from src.shared.python.motion_matching.same_input.solution_bundle_prototype import (
+        run_mujoco_ideal,
+    )
+
+    model = (
+        Path(__file__).resolve().parents[4]
+        / "docs/development/full_body_models/full_body_spec_anthro_driver_v2.json"
+    ).read_bytes()
+    names = json.loads(model)["coordinate_order"]
+    n, dt = len(names), 0.0001
+    times = np.arange(3, dtype=float) * dt
+    root = [names.index(name) for name in ROOT_COORDINATES]
+    lower, upper = np.full(n, -10.0), np.full(n, 10.0)
+    lower[root] = upper[root] = 0.0
+    seed = _fixture()
+    manifest = deepcopy(seed.manifest)
+    manifest["model_sha256"] = hashlib.sha256(model).hexdigest()
+    manifest["conventions"]["joint_order"] = names
+    manifest["controller"]["saturation"] = "ideal_clip_total"
+    manifest["integrator"] = {
+        "kind": "rk4_zoh",
+        "runtime": "partial_measured_v1",
+        "runtime_sha256": measured_runtime_fingerprint(),
+    }
+    manifest["runner"] = {
+        "mode": "mujoco_ideal_zoh",
+        "dt_s": dt,
+        "substeps": 2,
+        "project": False,
+        "trust_radius": 1.0,
+        "min_spacing_s": dt,
+    }
+    arrays = {
+        "reference_time_s": times,
+        "q_ref": np.zeros((3, n)),
+        "qd_ref": np.zeros((3, n)),
+        "tau_ff_ref": np.zeros((3, n)),
+        "spline_knots_s": np.r_[np.repeat(times[0], 4), np.repeat(times[-1], 4)],
+        "spline_coefficients": np.zeros((4, n)),
+        "kp": np.zeros(n),
+        "kd": np.zeros(n),
+        "q0": np.zeros(n),
+        "qd0": np.zeros(n),
+        "recorded_time_s": times,
+        "recorded_q": np.zeros((3, n)),
+        "recorded_qd": np.zeros((3, n)),
+        "commanded_tau": np.zeros((2, n)),
+        "ideal_input_tau": np.zeros((2, n)),
+        "saturation_lower": lower,
+        "saturation_upper": upper,
+        "spline_scale": np.ones(n),
+    }
+    active = next(i for i in range(n) if i not in root)
+    arrays["tau_ff_ref"][:, active] = 2.0
+    arrays["saturation_upper"][active] = 1.0
+    initial = SolutionBundle(manifest, arrays, model)
+    actual = run_mujoco_ideal(initial)
+    assert np.any(actual.q[1:] != 0.0)  # Real dynamics, not recorded-state playback.
+    assert np.all(actual.commanded_tau[:, active] == 2.0)
+    assert np.all(actual.ideal_input_tau[:, active] == 1.0)
+    arrays.update(
+        recorded_q=actual.q,
+        recorded_qd=actual.qd,
+        commanded_tau=actual.commanded_tau,
+        ideal_input_tau=actual.ideal_input_tau,
+    )
+    bundle = SolutionBundle(manifest, arrays, model)
+    path = tmp_path / "real.json"
+    manifest_hash = save_solution(path, bundle)
+    loaded = load_solution(
+        path,
+        expected_manifest_sha256=manifest_hash,
+        expected_model_sha256=manifest["model_sha256"],
+        expected_runtime_sha256=manifest["integrator"]["runtime_sha256"],
+    )
+    replay = run_mujoco_ideal(loaded)
+    for key in ("q", "qd", "commanded_tau", "ideal_input_tau"):
+        np.testing.assert_allclose(
+            getattr(replay, key), getattr(actual, key), rtol=1e-12, atol=1e-12
+        )
+    checked = verify_forward_resimulation(
+        loaded,
+        run_mujoco_ideal,
+        dict.fromkeys(("q", "qd", "commanded_tau", "ideal_input_tau"), (1e-12, 1e-12)),
+        runtime_sha256=manifest["integrator"]["runtime_sha256"],
+    )
+    assert checked.passed and not checked.independently_verified
+    altered = {k: v.copy() for k, v in arrays.items()}
+    altered["recorded_q"][-1, active] += 0.01
+    mismatch = SolutionBundle(manifest, altered, model)
+    assert not verify_forward_resimulation(
+        mismatch,
+        run_mujoco_ideal,
+        dict.fromkeys(("q", "qd", "commanded_tau", "ideal_input_tau"), (1e-12, 1e-12)),
+        runtime_sha256=manifest["integrator"]["runtime_sha256"],
+    ).passed
+
+    wrong_runtime = deepcopy(manifest)
+    wrong_runtime["integrator"]["runtime_sha256"] = "d" * 64
+    with pytest.raises(ValueError, match="runtime fingerprint"):
+        run_mujoco_ideal(SolutionBundle(wrong_runtime, arrays, model))
+    unsupported = deepcopy(manifest)
+    unsupported["controller"]["internal_state"] = {"memory": [1.0]}
+    with pytest.raises(ValueError, match="state"):
+        run_mujoco_ideal(SolutionBundle(unsupported, arrays, model))
+    unsupported = deepcopy(manifest)
+    unsupported["environment"] = {"wind": [1, 0, 0]}
+    with pytest.raises(ValueError, match="environment"):
+        run_mujoco_ideal(SolutionBundle(unsupported, arrays, model))
+    wrong_grid = {k: v.copy() for k, v in arrays.items()}
+    wrong_grid["recorded_time_s"][1] += dt / 10
+    with pytest.raises(ValueError, match="time grid"):
+        run_mujoco_ideal(SolutionBundle(manifest, wrong_grid, model))
+    wrong_root = {k: v.copy() for k, v in arrays.items()}
+    wrong_root["saturation_lower"][root[0]] = -1.0
+    with pytest.raises(ValueError, match="root"):
+        run_mujoco_ideal(SolutionBundle(manifest, wrong_root, model))
+    unsupported = deepcopy(manifest)
+    unsupported["integrator"]["adaptive"] = True
+    with pytest.raises(ValueError, match="integrator"):
+        run_mujoco_ideal(SolutionBundle(unsupported, arrays, model))
+    wrong_model_doc = json.loads(model)
+    wrong_model_doc["coordinate_order"] = []
+    wrong_model = json.dumps(wrong_model_doc).encode()
+    wrong_manifest = deepcopy(manifest)
+    wrong_manifest["model_sha256"] = hashlib.sha256(wrong_model).hexdigest()
+    with pytest.raises(ValueError, match="coordinate inventory"):
+        run_mujoco_ideal(SolutionBundle(wrong_manifest, arrays, wrong_model))
+
+
 @pytest.mark.parametrize("field", ["feasibility", "flight_metrics"])
 def test_prototype_cannot_claim_results_it_does_not_verify(field):
     b = _fixture()
@@ -288,7 +443,9 @@ def test_forward_resimulation_is_distinct_and_checks_each_quantity():
         p = recorded_playback(bundle)
         return p
 
-    tolerances = dict.fromkeys(("q", "qd", "commanded_tau", "applied_tau"), (0.0, 0.0))
+    tolerances = dict.fromkeys(
+        ("q", "qd", "commanded_tau", "ideal_input_tau"), (0.0, 0.0)
+    )
     result = verify_forward_resimulation(
         b, forward, tolerances, runtime_sha256="c" * 64
     )
@@ -299,7 +456,7 @@ def test_forward_resimulation_is_distinct_and_checks_each_quantity():
 
     def drift(bundle):
         p = recorded_playback(bundle)
-        return p._replace(applied_tau=p.applied_tau + 0.1)
+        return p._replace(ideal_input_tau=p.ideal_input_tau + 0.1)
 
     assert not verify_forward_resimulation(
         b, drift, tolerances, runtime_sha256="c" * 64
@@ -310,3 +467,25 @@ def test_forward_resimulation_is_distinct_and_checks_each_quantity():
         )
     with pytest.raises(ValueError, match="runtime"):
         verify_forward_resimulation(b, forward, tolerances, runtime_sha256="d" * 64)
+
+
+@pytest.mark.parametrize("overflow", ["difference", "tolerance"])
+def test_forward_comparison_rejects_nonfinite_derived_arithmetic(overflow):
+    b = _fixture()
+    arrays = {k: v.copy() for k, v in b.arrays.items()}
+    arrays["recorded_q"][-1, 0] = 1e308
+    b = SolutionBundle(b.manifest, arrays, b.model_bytes)
+
+    def runner(bundle):
+        playback = recorded_playback(bundle)
+        if overflow == "difference":
+            playback.q[-1, 0] = -1e308
+        return playback
+
+    tolerances = dict.fromkeys(
+        ("q", "qd", "commanded_tau", "ideal_input_tau"), (0.0, 0.0)
+    )
+    if overflow == "tolerance":
+        tolerances["q"] = (0.0, 2.0)
+    with pytest.raises(ValueError, match="nonfinite"):
+        verify_forward_resimulation(b, runner, tolerances, runtime_sha256="c" * 64)

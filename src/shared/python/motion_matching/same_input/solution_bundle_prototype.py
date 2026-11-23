@@ -22,11 +22,12 @@ import numpy as np
 from numpy.typing import NDArray
 
 Array = NDArray[np.float64]
-SCHEMA_VERSION = "research-solution-prototype/v1"
+SCHEMA_VERSION = "research-solution-prototype/v2"
 _REQUIRED = frozenset(
     {
         "schema_version",
         "research_only",
+        "runner",
         "solution_id",
         "parent_id",
         "git_sha",
@@ -60,7 +61,10 @@ _ARRAYS = frozenset(
         "recorded_q",
         "recorded_qd",
         "commanded_tau",
-        "applied_tau",
+        "ideal_input_tau",
+        "saturation_lower",
+        "saturation_upper",
+        "spline_scale",
     }
 )
 
@@ -194,7 +198,7 @@ class SolutionBundle:
             raise ValueError("integrator and runtime identity are required")
         if not _hash(metadata["integrator"].get("runtime_sha256"), 64):
             raise ValueError("runtime hash is required")
-        if metadata["impact"].get("status") != "none":
+        if metadata["impact"] != {"status": "none"}:
             raise ValueError("prototype only supports explicitly absent impact")
         if any(
             metadata[key] != {"status": "unavailable"}
@@ -224,14 +228,34 @@ class SolutionBundle:
         for key in ("recorded_q", "recorded_qd"):
             if a[key].shape != (ts, n):
                 raise ValueError(f"{key} dimensions do not match recorded time")
-        for key in ("commanded_tau", "applied_tau"):
+        for key in ("commanded_tau", "ideal_input_tau"):
             if a[key].shape != (ts - 1, n):
                 raise ValueError(f"{key} must have one row per hold")
-        for key in ("q0", "qd0", "kp", "kd"):
+        for key in (
+            "q0",
+            "qd0",
+            "kp",
+            "kd",
+            "saturation_lower",
+            "saturation_upper",
+            "spline_scale",
+        ):
             if a[key].shape != (n,):
                 raise ValueError(f"{key} dimensions do not match joint order")
         if np.any(a["kp"] < 0) or np.any(a["kd"] < 0):
             raise ValueError("gains must be nonnegative")
+        if np.any(a["saturation_lower"] > a["saturation_upper"]) or np.any(
+            a["spline_scale"] <= 0
+        ):
+            raise ValueError("saturation bounds and spline scale are invalid")
+        if not isinstance(metadata["runner"], dict):
+            raise ValueError("runner contract must be an object")
+        if metadata["runner"].get("mode") not in ("unavailable", "mujoco_ideal_zoh"):
+            raise ValueError("unsupported runner mode")
+        if metadata["runner"].get("mode") == "unavailable" and metadata["runner"] != {
+            "mode": "unavailable"
+        }:
+            raise ValueError("unavailable runner cannot declare an execution policy")
         if not np.array_equal(a["q0"], a["recorded_q"][0]) or not np.array_equal(
             a["qd0"], a["recorded_qd"][0]
         ):
@@ -267,7 +291,7 @@ class Playback(NamedTuple):
     q: Array
     qd: Array
     commanded_tau: Array
-    applied_tau: Array
+    ideal_input_tau: Array
 
 
 def recorded_playback(bundle: SolutionBundle) -> Playback:
@@ -282,7 +306,7 @@ def recorded_playback(bundle: SolutionBundle) -> Playback:
                 "recorded_q",
                 "recorded_qd",
                 "commanded_tau",
-                "applied_tau",
+                "ideal_input_tau",
             )
         )
     )
@@ -296,6 +320,15 @@ class ReplayComparison:
     runtime_identity_is_caller_asserted: bool = True
 
 
+def run_mujoco_ideal(bundle: SolutionBundle) -> Playback:
+    """Run the restricted MuJoCo ideal-input prototype, not an actuator model."""
+    from src.shared.python.motion_matching.same_input.solution_bundle_mujoco_replay import (
+        run_mujoco_ideal as run,
+    )
+
+    return run(bundle)
+
+
 def verify_forward_resimulation(
     bundle: SolutionBundle,
     runner: Callable[[SolutionBundle], Playback],
@@ -304,7 +337,7 @@ def verify_forward_resimulation(
     runtime_sha256: str,
 ) -> ReplayComparison:
     """Compare an explicitly supplied runner, without claiming its independence."""
-    keys = ("q", "qd", "commanded_tau", "applied_tau")
+    keys = ("q", "qd", "commanded_tau", "ideal_input_tau")
     if set(tolerances) != set(keys) or any(
         len(tolerances[k]) != 2
         or not np.isfinite(tolerances[k]).all()
@@ -325,9 +358,14 @@ def verify_forward_resimulation(
         observed, target = _array(getattr(actual, key), key), getattr(expected, key)
         if observed.shape != target.shape:
             raise ValueError(f"{key} replay shape mismatch")
-        errors[key] = float(np.max(np.abs(observed - target)))
         atol, rtol = tolerances[key]
-        passed = passed and bool(np.allclose(observed, target, atol=atol, rtol=rtol))
+        with np.errstate(over="ignore", invalid="ignore"):
+            absolute_error = np.abs(observed - target)
+            allowed = atol + rtol * np.abs(target)
+        if not np.isfinite(absolute_error).all() or not np.isfinite(allowed).all():
+            raise ValueError(f"{key} comparison arithmetic is nonfinite")
+        errors[key] = float(np.max(absolute_error))
+        passed = passed and bool(np.all(absolute_error <= allowed))
     return ReplayComparison(passed, errors)
 
 
