@@ -19,4 +19,12 @@ control are checked separately; recorded applied torque is never substituted
 for measured force. Markers are not replay inputs. Independent reconstruction,
 runtime lock, stage-level applied torque, in-window impact, migrations, and
 full replay remain future requirements.
+\section{Measured Local Subset}
+The measured-local entry point hashes the supplied model file and a declared
+runtime subset before constructing factories. The subset includes the Python
+executable, NumPy core binary, bridge, runner, codec, protocol and comparison
+source files, plus Python, NumPy and platform versions. It does not establish
+that either factory consumed that model, or measure backend/controller code,
+all native dependencies, impact or post-actuator forces. It is not an
+independent runtime attestation. Hash mismatch fails before factory creation.
 \end{document}

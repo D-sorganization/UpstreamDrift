@@ -260,3 +260,93 @@ def test_fresh_real_ode_replay_of_serialized_bundle(tmp_path):
     assert all(report.passed for report in result.reports.values())
     assert result.applied_torque_verified is False
     assert result.independently_verified is False
+
+
+def test_measured_local_replay_rejects_model_and_runtime_mismatch_before_factory(
+    tmp_path,
+):
+    import hashlib
+    from scripts.replay_solution_bundle import (
+        verify_measured_local_replay,
+        measured_replay_runtime,
+    )
+
+    model = tmp_path / "model.json"
+    model.write_bytes(b"model identity")
+    digest = hashlib.sha256(model.read_bytes()).hexdigest()
+    runtime = measured_replay_runtime()
+    bundle = replace(
+        make_bundle(),
+        model_hash=digest,
+        integrator={**make_bundle().integrator, "runtime_sha256": runtime},
+    )
+    path = save_solution_bundle(bundle, tmp_path / "bundle")
+
+    def forbidden():
+        pytest.fail("mismatch must fail before factory")
+
+    model.write_bytes(b"tampered")
+    with pytest.raises(ValueError, match="model"):
+        verify_measured_local_replay(
+            path,
+            model_path=model,
+            backend_factory=forbidden,
+            controller_factory=forbidden,
+            tolerances={
+                k: ReplayTolerance(atol=0.0, rtol=0.0)
+                for k in ("time", "q", "qd", "tau_cmd")
+            },
+        )
+    model.write_bytes(b"model identity")
+    wrong = replace(
+        bundle, integrator={**bundle.integrator, "runtime_sha256": "d" * 64}
+    )
+    path2 = save_solution_bundle(wrong, tmp_path / "wrong")
+    with pytest.raises(ValueError, match="runtime"):
+        verify_measured_local_replay(
+            path2,
+            model_path=model,
+            backend_factory=forbidden,
+            controller_factory=forbidden,
+            tolerances={
+                k: ReplayTolerance(atol=0.0, rtol=0.0)
+                for k in ("time", "q", "qd", "tau_cmd")
+            },
+        )
+
+
+def test_measured_local_replay_reports_limited_identity_not_independent(tmp_path):
+    import hashlib
+    from scripts.replay_solution_bundle import (
+        verify_measured_local_replay,
+        measured_replay_runtime,
+    )
+
+    model = tmp_path / "model.json"
+    model.write_bytes(b"model identity")
+    digest = hashlib.sha256(model.read_bytes()).hexdigest()
+    bundle = replace(
+        make_bundle(),
+        model_hash=digest,
+        integrator={
+            **make_bundle().integrator,
+            "runtime_sha256": measured_replay_runtime(),
+        },
+    )
+    path = save_solution_bundle(bundle, tmp_path / "bundle")
+    result = verify_measured_local_replay(
+        path,
+        model_path=model,
+        backend_factory=Plant,
+        controller_factory=lambda inputs: lambda s: -s.q - s.v,
+        tolerances={
+            k: ReplayTolerance(atol=1e-12, rtol=0.0)
+            for k in ("time", "q", "qd", "tau_cmd")
+        },
+    )
+    assert all(x.passed for x in result.replay.reports.values())
+    assert result.model_file_hash_verified and result.partial_runtime_verified
+    assert (
+        not result.factory_model_verified and not result.replay.independently_verified
+    )
+    assert not result.replay.applied_torque_verified

@@ -9,6 +9,11 @@ fixed-rate ZOH subset is accepted, and comparison never uses markers.
 from __future__ import annotations
 
 import copy
+import hashlib
+import importlib
+import json
+import platform
+import sys
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -55,6 +60,75 @@ class PartialReplayEvidence:
     applied_torque_verified: bool = False
     impact_verified: bool = False
     independently_verified: bool = False
+
+
+@dataclass(frozen=True)
+class MeasuredLocalEvidence:
+    """Measured file identities; factories and full environment remain unverified."""
+
+    replay: PartialReplayEvidence
+    model_file_hash_verified: bool = True
+    partial_runtime_verified: bool = True
+    factory_model_verified: bool = False
+
+
+def measured_replay_runtime() -> str:
+    """Measure a declared runtime subset, not a complete environment lock.
+
+    The executing Python binary, NumPy core binary and bridge/runner/protocol
+    source files are measured. Backend and controller implementations, their
+    native dependencies and factory construction are not attested.
+    """
+    import scripts.replay_optimized_candidate as runner
+    import src.shared.python.optimization.solution_bundle as codec
+    import src.shared.python.simulation_backends.protocol as protocol
+    import src.shared.python.simulation_backends.validation as validation
+
+    try:
+        core = importlib.import_module("numpy._core._multiarray_umath")
+    except ModuleNotFoundError:
+        core = importlib.import_module("numpy.core._multiarray_umath")
+    if core.__file__ is None:
+        raise ValueError("NumPy core binary unavailable")
+    modules = (runner, protocol, codec, validation)
+    paths = [Path(sys.executable), Path(core.__file__), Path(__file__)]
+    for module in modules:
+        if module.__file__ is None:
+            raise ValueError("runtime source file unavailable")
+        paths.append(Path(module.__file__))
+    digests = [hashlib.sha256(path.read_bytes()).hexdigest() for path in paths]
+    data = {
+        "python": sys.version,
+        "platform": platform.platform(),
+        "numpy": np.__version__,
+        "files": digests,
+    }
+    return hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()
+
+
+def verify_measured_local_replay(
+    directory: str | Path,
+    *,
+    model_path: str | Path,
+    backend_factory: Callable[[], SimulationBackend],
+    controller_factory: Callable[[ControllerInputs], Controller],
+    tolerances: Mapping[str, ReplayTolerance],
+) -> MeasuredLocalEvidence:
+    """Measure the model file and runtime subset before constructing factories.
+
+    The model file digest is bound to the bundle, but the factory is not proven
+    to have consumed that file. Applied torque and impact remain unverified.
+    """
+    model_hash = hashlib.sha256(Path(model_path).read_bytes()).hexdigest()
+    replay = verify_bundle_replay(
+        directory,
+        expected_model_hash=model_hash,
+        runtime_sha256=measured_replay_runtime(),
+        backend_factory=backend_factory,
+        controller_factory=controller_factory,
+        tolerances=tolerances,
+    )
+    return MeasuredLocalEvidence(replay=replay)
 
 
 def playback_bundle(directory: str | Path, *, expected_model_hash: str) -> Trace:
