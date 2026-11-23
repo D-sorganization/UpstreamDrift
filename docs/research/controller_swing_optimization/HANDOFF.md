@@ -2369,3 +2369,17 @@ frame transforms. It rejects invalid or unrelated geometry and makes no
 contact/admission decision. Thirty-nine focused tests and normal push hooks
 passed; 149 lines were added and no PR was opened. Initial ball/face overlap,
 approaching first-root coverage and end-to-end event verification remain open.
+
+A bounded +2 ms local timing warp preserved q0/q1, sampled closure, modeled
+ROM and interval-speed gates, and changed source-model reference marker RMS
+24.092 to 24.463 mm. Offline fixed-recorded-state evaluation suggested the
+maximum assumed command-capacity ratio would fall from 7.249 to 6.861.
+Independent 32-substep ideal continuation from the identical 1.1 s q/v did
+not confirm that gain: full comparison source/observed marker RMS improved
+35.279/40.911 to 34.829/40.514 mm and peak absolute command 425.60 to
+391.68 N m, but maximum modeled capacity ratio worsened 7.249 to 7.528,
+236 held commands still exceeded capacities, and peak left subtalar excess
+worsened 3.561 to 3.748 degrees. Both had 712 sampled ROM-flagged states and
+no sampled speed flags. Reject this as a gate-regressing candidate; modeled
+limits remain soft/assumed and actual motor, stage, work and impact were not
+verified. Offline fixed-state improvements are not forward guarantees.
