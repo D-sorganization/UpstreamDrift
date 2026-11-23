@@ -780,3 +780,19 @@ mismatch was 5.76e-11 rad/s², peak speed 44.22 rad/s, second difference
 stationary fit nor proof of infeasibility. Revise formulation and residual
 weighting before spending more time on identical restarts; private receipts and
 input hashes remain outside git.
+
+The controller-target audit was exercised on the actual hash-verified pinned
+source-v1 bundle. Its initial run exposed an endpoint defect: rounding to a
+fixed 1 ms grid extends the final time from 1.8138889 to 1.814 s, and the
+audit rejected it even though the controller clamps the reference. Research
+branch `codex/15493-target-endpoint-fix` at `4754344ff0` handles only the
+fixed-step rounding allowance, reports the clamped duration and rejects longer
+extensions. A failing-first regression, 23 focused tests, Ruff, Black, scoped
+mypy, LaTeX compilation and normal headless push hooks passed.
+
+The corrected full source-v1 CLI run completed 1.814 s. Recorded-rollout
+maximum coordinate parity error was 4.24e-10 rad and maximum frame error
+1.49e-10 m, while controller-target RFInput had sampled RMS error 0.15628 rad
+and maximum 0.84263 rad. The final target clamp was 0.000111111 s. This
+shows recorded-rollout parity does not establish target tracking. It is not
+the required committed-v2 forward match, a physical acceptance or a PR.
