@@ -1062,3 +1062,17 @@ changed the 200 ms diagnostic score 2.95782 to 2.84732 and tracking RMS
 stage arrays bit-for-bit in this runtime then hit a guard at 0.263 s, with
 22 ROM and nine speed flags. It is not a feasible full-horizon candidate,
 physiological assessment or shot improvement.
+
+A coupled vertical plus bilateral ankle support sensitivity, initialized
+from the vertical-only diagnostic, stopped after 12 evaluations / 32.7 s
+without convergence. Its regularized objective changed 0.87069 to 0.48761
+while sampled support-balance RMS worsened 0.00454 to 0.01173 bodyweights;
+maximum ankle adjustment was 2.272° and grip closure remained 3.38e-5 mm /
+8.37e-8 rad. A like-for-like projected 0.55 s computed-torque replay
+completed 550 holds / 17,600 stages. Compared with vertical-only, q RMS
+was 0.02196 versus 0.01854 rad, peak ideal drive 449.85 versus 381.52 N m,
+worst named ROM exceedance 9.36° versus 7.40°, and minimum modeled sphere
+height −13.98 versus −13.59 mm. Initial preload shift was 0.00429 native
+units. This assumption-dependent, unsaturated ideal-drive proxy is not a
+qualified baseline or an improvement; numerical regularizers and trust
+bounds are not physical limits.
