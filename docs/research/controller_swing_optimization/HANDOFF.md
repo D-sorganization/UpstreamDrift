@@ -156,6 +156,16 @@ clearance. The current arbitrary advance callback supplies neither a proven
 interval speed bound nor numerical distance enclosures; sampled qd alone does
 not bound the derivative of an RK4 trial-prefix map. Do not infer clearance
 certification from the sampled scan.
+The renderer-pinned bundle has a ball centre from a legacy modeled-address
+passage plan, not an independently measured placement. Against that unchanged
+centre, 123 sampled pre-impact states of the exploratory v2 rollout had a
+minimum sphere-to-face gap of 169.75 mm in the last 122 ms; its initial pose
+overlapped the same ball by approximately 12.7 mm. The available rollout
+ends before the source impact time. Those samples neither establish a valid
+address nor prove absence of contact between samples, and no ball placement
+was shifted to force a hit. On the final recorded 1 ms, a bracket search using
+the real held-effort integrator reproduced the stored end state bit-for-bit and
+returned unresolved with no accepted candidate; it is not a global miss proof.
 In the MuJoCo parity plant the recorded held effort is a source command; the
 native KKT solve zeroes passive shaft coordinates, and the forced wrapper
 adds impact generalized force before that mask. The path has no actuator
@@ -210,6 +220,18 @@ A 0.2 N m pulse under the same gains gave open-loop and PD response RMS of
 0.02319 and 0.002842 rad, with same-axis PD opposition on 198 of 199 nonzero
 holds. These exploratory responses are nonlinear across pulse amplitudes;
 all runs still exceeded declared drive thresholds.
+Over the full 1.322-second pre-impact interval with the same frozen history,
+the 3/0.3 PD baseline failed numerically after 0.641 s and the 0.2 N m pulsed
+case after 0.548 s. The corresponding open-loop baseline completed, but its
+pulsed counterpart diverged to 16.33 rad joint RMS and exceeded 40 of 41
+modeled ROM slots and all 41 generalized speed priors. These are sensitivity
+and numerical results for this controller, time step and unadmitted reference;
+no impact, saturation, anatomical or optimized-flight claim follows.
+A further full-duration 0.3/0.03 fixed-gain trial completed its unpulsed run
+but diverged to 5.78 rad tracking RMS, exceeding 40 of 41 declared model ROM
+slots and all 41 speed priors. Its 0.2 N m pulsed run failed numerically at
+0.522 s. This gain choice is not an accepted controller; no conclusion about
+all possible gains or physical injury follows.
 The flight suite was repeated in a fresh isolated Python 3.12 environment
 after building the current Rust extension and verifying physics revision 2:
 15 passed and one strict expected failure. The stale default revision 0 is
