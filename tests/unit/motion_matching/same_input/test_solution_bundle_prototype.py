@@ -679,6 +679,86 @@ def test_off_grid_recorded_force_replays_actual_impact_state(tmp_path):
     )
     assert report.passed and not report.independently_verified
     assert report.max_absolute_error["impact_q"] <= 1e-12
+    from src.shared.python.motion_matching.same_input.evidenced_solution import (
+        save_evidenced_solution,
+        load_evidenced_solution,
+        verify_evidenced_forward,
+    )
+
+    evidence_path = tmp_path / "evidence.json"
+    evidence_hash = save_evidenced_solution(evidence_path, bundle, recorder)
+    kwargs = {
+        "expected_manifest_sha256": evidence_hash,
+        "expected_model_sha256": manifest["model_sha256"],
+        "expected_runtime_sha256": manifest["integrator"]["runtime_sha256"],
+    }
+    evidence = load_evidenced_solution(evidence_path, **kwargs)
+    assert verify_evidenced_forward(evidence, tolerances).passed
+    from io import BytesIO
+
+    original = json.loads(evidence_path.read_text(encoding="utf-8"))
+    stage_path = tmp_path / "evidence.stages.npz"
+    original_stage = stage_path.read_bytes()
+    for mutation in (
+        "missing",
+        "old",
+        "partial",
+        "tampered",
+        "boundary",
+        "drive",
+        "event",
+        "full_run",
+    ):
+        modified = deepcopy(original)
+        archive = deepcopy(evidence.archive)
+        if mutation == "missing":
+            del modified["stage_archive_sha256"]
+        elif mutation == "old":
+            modified["schema"] = "research-solution-prototype/v4"
+        else:
+            if mutation == "full_run":
+                archive["steps"][0]["stages"] = [
+                    archive["steps"][0]["stages"][0]
+                ] * 4097
+            elif mutation == "partial":
+                archive["steps"][0]["stages"].pop()
+            elif mutation == "tampered":
+                archive["steps"][0]["stages"][1]["q"][0] += 1
+            elif mutation == "boundary":
+                archive["steps"][0]["post_projection_q"][0] += 1
+            elif mutation == "drive":
+                archive["steps"][0]["stages"][0]["applied_drive"][0] += 1
+            else:
+                event = next(
+                    s
+                    for s in archive["steps"][0]["stages"]
+                    if s["stage"] == 1 and s["time_s"] == dt / 4
+                )
+                event["q"][0] += 1
+            stage_json = json.dumps(
+                archive, sort_keys=True, allow_nan=False, separators=(",", ":")
+            ).encode()
+            stream = BytesIO()
+            np.savez_compressed(
+                stream, stage_json=np.frombuffer(stage_json, dtype=np.uint8)
+            )
+            stage_path.write_bytes(stream.getvalue())
+            modified["stage_archive_sha256"] = hashlib.sha256(
+                stream.getvalue()
+            ).hexdigest()
+        encoded = json.dumps(modified, sort_keys=True, allow_nan=False).encode()
+        evidence_path.write_bytes(encoded)
+        with pytest.raises(ValueError):
+            load_evidenced_solution(evidence_path, **kwargs)
+        kwargs["expected_manifest_sha256"] = hashlib.sha256(encoded).hexdigest()
+        if mutation == "tampered":
+            altered_evidence = load_evidenced_solution(evidence_path, **kwargs)
+            assert not verify_evidenced_forward(altered_evidence, tolerances).passed
+        else:
+            with pytest.raises(ValueError):
+                load_evidenced_solution(evidence_path, **kwargs)
+        kwargs["expected_manifest_sha256"] = evidence_hash
+        stage_path.write_bytes(original_stage)
     altered = deepcopy(manifest)
     altered["impact"]["event_q"][0] += 0.01
     bad = SolutionBundle(altered, arrays, model)
