@@ -2459,3 +2459,13 @@ increased tracking RMS. The full replay first flagged ROM around 102.7 ms and
 stopped at 0.861 s with 32 ROM and 26 speed slots flagged. Ill-conditioned
 selected sensitivities and this local failure do not establish global
 infeasibility; no physical acceptance is implied.
+
+Advancing finite-face diagnostic checkpoint `codex/15493-contact-diagnostic36`
+at `5963d3cad4` checks sampled positive-to-nonpositive gaps with finite states,
+front side, strict triangle interior and material-point approach, and rejects
+initial overlap. Twenty-three geometry/clearance/diagnostic tests and normal
+push hooks passed, including hidden crossings, discontinuous gaps, back side,
+edge, endpoint and a synthetic pinned-v2 MuJoCo step-halving case. Both hit
+and miss remain unqualified and coverage uncertified: sampled scans do not
+exclude an earlier crossing. This 353-line increment has a 787-line research
+ancestry, so it is not a <500-line PR or a completed Slice 1.
