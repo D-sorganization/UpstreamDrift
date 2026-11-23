@@ -197,7 +197,8 @@ def save_solution_bundle(bundle: SolutionBundle, directory: str | Path) -> Path:
         raise SolutionBundleError(f"cannot serialise manifest: {exc}") from exc
     target.mkdir(parents=True)
     arrays_path = target / ARRAYS_NAME
-    np.savez(arrays_path, **{k: np.asarray(v) for k, v in bundle.arrays.items()})
+    payload: dict[str, Any] = {k: np.asarray(v) for k, v in bundle.arrays.items()}
+    np.savez(arrays_path, **payload)
     digest = hashlib.sha256(arrays_path.read_bytes()).hexdigest()
     text = text.replace("0" * 64, digest, 1)
     (target / MANIFEST_NAME).write_text(text + "\n", encoding="utf-8")
