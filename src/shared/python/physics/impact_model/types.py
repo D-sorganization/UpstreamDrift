@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum, auto
+from typing import Any
 
 import numpy as np
 
@@ -140,6 +141,6 @@ class ImpactEvent:
     timestamp: float
     pre_state: PreImpactState
     post_state: PostImpactState
-    energy_balance: dict[str, float]
+    energy_balance: dict[str, Any]  # floats plus budget flags (validate_energy_balance)
     impact_id: int
     model_type: ImpactModelType
