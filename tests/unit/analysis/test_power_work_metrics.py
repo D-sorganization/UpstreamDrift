@@ -68,6 +68,7 @@ class TestComputeWorkMetrics:
         result = obj.compute_work_metrics(5)
         assert result is None
 
+    @pytest.mark.unit
     def test_caching_returns_defensive_copies(self) -> None:
         obj = _make_instance()
         result1 = obj.compute_work_metrics(0)
