@@ -1027,3 +1027,16 @@ Root translation RMS was 19.72 mm; preload changed initial q up to 0.00612
 native units. The sampled balance reduction did not produce an admitted or
 better rollout: the offset was not jointly optimized, regularizers and ground
 are assumptions, forces are unmeasured and drive is ideal unsaturated.
+
+Research branch `codex/15493-impact-coverage10` at `178b591940` integrates
+an opt-in conditional coverage policy into ImpactForce. Its chronological
+coverage clock and serialized policy fail closed on missing or previously
+unresolved intervals; a synthetic actual-v2-face fixture exercises the
+higher-level schedule. Ninety-nine focused tests, scoped NumPy-aware mypy,
+Ruff, Black, LaTeX compilation and normal headless push hooks passed.
+Coverage starts at arming time and assumes a caller-attested continuous
+whole-surface speed bound and physically consistent contiguous advance states;
+timestamp continuity alone does not prove the latter. Floating-point
+calculations are not interval arithmetic. The result is conditional, not a
+first-contact certificate, pinned-swing contact, completed Slice 1 or PR.
+The branch is based on oversized research.
