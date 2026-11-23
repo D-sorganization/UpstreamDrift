@@ -565,6 +565,9 @@ def interpolate_contact_trajectory_frames(
     Postconditions:
         Returns a list of length ``num_frames`` containing time-resolved
         ball and club kinematics, forces, and angles across the contact window.
+        Frame timestamps retain the simulation time origin: a positive
+        ``contact_duration_s`` is elapsed time from the first sample, not an
+        absolute end timestamp.
     Raises:
         ImpactAuditError: When the audit fails, contact is truncated (TIME_LIMIT)
             or contact was missed (NO_CONTACT). Fails closed.
@@ -583,8 +586,8 @@ def interpolate_contact_trajectory_frames(
     t_0 = float(time_arr[0])
     duration = getattr(result, "contact_duration_s", None)
     t_1 = (
-        float(duration)
-        if duration is not None and duration > t_0
+        t_0 + float(duration)
+        if duration is not None and duration > 0.0
         else float(time_arr[-1])
     )
     if t_1 <= t_0:
