@@ -1839,3 +1839,25 @@ Normal headless push hooks passed. This 354-line increment is based on the
 oversized motor research branch, not a complete Slice 2, independent-runtime
 or physical certification, and not a PR. Reconcile against current main and
 current #15600 state before use.
+
+A condensed two-window Option B local restoration initialized the second
+window from the actual first endpoint, making the nonlinear seam exact by
+construction. It removed sampled modeled ROM/speed flags over its first
+20 ms / 640 RK4 stages while checking actual clipped total motor force.
+Uninterrupted validation nevertheless first violated modeled ROM at stage 755
+(about 23.6 ms) and hit a numerical guard at 0.528 s, with 23 ROM and eight
+speed coordinates flagged. Sixteen torque capacities are assumption-marked;
+work/slew and continuous physical gates remain unverified. This is not a
+feasible full-horizon swing or improved shot.
+
+A full-horizon contact-wrench QP diagnostic used a private Clarabel adapter
+with numerical solver tolerances 1e-6 and independently checked equality
+residual <=1e-5 and inequality <=1e-6. All 1322 calls completed without
+fallback and direct root effort was zero. Target/observed marker RMS were
+272.70 / 273.39 mm, root translation component RMS 0.1055 m and rotation
+RMS 0.1408 rad; peak absolute generalized actuated effort was 384.09 N m.
+Maximum normalized soft contact-cone slack was 0.5337 and its threshold was
+deliberately nonbinding to observe solver behavior. This shows fallback alone
+did not explain prior poor tracking, but does not establish admissible
+contact, anatomy, actuator limits, physical baseline or Option B success.
+The adapter is not independently proven equivalent to unavailable Drake.
