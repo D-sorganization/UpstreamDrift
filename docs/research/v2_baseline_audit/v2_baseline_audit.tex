@@ -1,0 +1,26 @@
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+\section{V2 Baseline Forward-Tracking Diagnostic}
+The pinned v2 spec supplies coordinates in SI units. A same-input bundle must
+embed the identical canonical spec and the original controller target; no
+target is inferred from rollout states. The existing MuJoCo tracker rebases
+the target clock, initializes and projects its own state, then integrates with
+the recorded step policy and no ball force. This is a diagnostic and not an
+independent replay of the recorded initial state.
+
+At each saved time $t_k$, the error $e_{ki}=q_{ki}-q_{i,\mathrm{target}}(t_k)$
+uses linear interpolation and the tracker's endpoint clamp. For each coordinate
+the report gives $\sqrt{N^{-1}\sum_k e_{ki}^2}$ and $\max_k |e_{ki}|$ in metres
+for translations and radians for angular coordinates. Samples are discrete;
+the output is not a continuous-time bound. A failed rollout is reported as
+such. These differences are neither wrapped anatomical joint angles nor a
+physiological acceptance criterion.
+
+The report always remains unqualified. Ledger/target provenance, anatomical
+range and speed limits, actual total applied torque, mechanical work, first
+finite-face contact and carry require separate evidence. It never treats a
+missing input or an unsourced limit as a pass. Reproduce headlessly with
+\texttt{python -m scripts.audit\_15493\_baseline BUNDLE --out REPORT}; keep
+private bundle and receipt identifiers outside the repository.
+\end{document}
