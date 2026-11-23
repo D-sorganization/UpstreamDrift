@@ -902,3 +902,29 @@ a synthetic 0.5 s corner root; the fix rejects it while retaining an interior
 vertex control. Thirty-nine focused contact tests, Ruff, Black, LaTeX
 compilation and normal headless push hooks passed. It remains an oversized
 research branch, not a PR or proof of first contact on the pinned swing.
+
+A bounded local two-direction Option B quadratic surrogate used four central
+probes and a 10 N m coefficient trust ball with actual post-saturation stage
+forces under assumption-marked model priors. Its selected 2.301 N m candidate
+changed the 200 ms regularized diagnostic score from 7.41166 to 7.35845 and
+tracking RMS from 0.44482 to 0.43876 rad, but retained 17 modeled ROM flags,
+three speed flags and 1440 clipped stages of 6400. Extended toward 1.322 s,
+it reproduced its first 200 ms bit-for-bit but hit a numerical guard at
+0.265 s. This is not a feasible candidate, physiological result or shot
+improvement.
+
+The 199-frame target proxy's fitting objective constrained horizontal foot
+anchors but had no height row. Kinematic evaluation found modeled foot-sphere
+gap below the assumed ground in 25 of 199 frames, worst −0.453 mm. A revised
+sampled six-sphere nonpenetration-inequality sensitivity stopped at its
+180 s callback budget after 194 s without convergence; minimum sampled gap
+became +4.390 mm, but grip closure worsened to 0.274 mm / 0.001004 rad and
+target component RMS changed 9.307 to 9.366 mm. In a like-for-like 0.55 s
+projected computed-torque replay, minimum modeled foot height was −16.57 mm
+(previous proxy −15.18 mm), despite positive sampled fit gaps. Preload
+changed initial q by up to 0.00777 native units (previous 0.00357); joint RMS
+was 0.01276 rad, peak ideal drive 304.56 N m and a modeled subtalar flag
+reached 3.04°. These are assumed-ground diagnostics with nonconverged,
+non-admitted fits and ideal unsaturated drive. Sampled position constraints
+alone did not prevent dynamic penetration under these preload/support
+semantics; they do not establish measured subject contact or feasibility.
