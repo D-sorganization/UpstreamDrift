@@ -1244,3 +1244,15 @@ joint 0.03703 rad, peak held effort 393.16 N m and source-target marker RMS
 retain a modeled ROM flag; the tiny 100/20 marker reduction comes with more
 than twice the effort and worse joint tracking. These are exploratory, not
 Option B, measured support or physical acceptance.
+
+Research branch `codex/15493-leadin-clock15` at `68c6efe35b` fixes a
+confirmed target-audit alignment defect for generated lead-in bundles: the
+bundle's recorded trajectory is trimmed and clock-shifted, but the prior
+closed-loop audit started and scored at original time zero. The correction
+repeats the existing no-impact fixed-step lead-in, scores the trimmed window
+against position and derived-velocity targets at the elapsed clock, reports
+the offset, and rejects inconsistent metadata before simulation. A failing-
+first regression, 37 focused CLI/lead-in tests, scoped mypy, Ruff, Black,
+LaTeX compilation and normal headless push hooks passed. The branch remains
+oversized research and does not establish the v2 baseline, physical gates,
+contact, a completed Slice 1 or a PR.
