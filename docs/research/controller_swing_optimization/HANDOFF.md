@@ -2584,3 +2584,26 @@ and measured a specific shoulder posture. External scapular/toe force results
 cannot be converted to modeled joint torque without defensible geometry and
 mapping. No registry value or UNVERIFIED status changed. Standalone LaTeX
 compiled, documentation checks and normal push hooks passed; no PR was opened.
+
+A bounded fixed-gain Option B spline restoration on the regularized support
+reference cleared all sampled modeled registry ROM/speed checks over its
+valid 150 ms actual-motor interval at both 16 and 32 RK4 substeps; neither
+run clipped. The prior zero-spline run had one subtalar ROM violation. At 32
+substeps the minimum modeled ROM margin was 2.49e-5 rad, peak speed ratio
+0.1403 and coefficient norm 0.07103 within the 10 N m diagnostic ball. Peak
+actual total command/drive was 125.293 N m; target root translation/rotation
+and joint RMS were 0.004692 m / 0.01617 rad / 0.02957 rad. Signed applied
+work was -5.01156 J and positive-power integral 0.34214 J; work/slew limits
+remain unsourced. Matched-hold 16/32 q/v/applied-drive differences were at
+most 4.93e-7 / 1.40e-4 / 4.16e-5 in native units. This is a sampled 150 ms
+model result, not between-stage certification, verified physiology, impact or
+full-swing feasibility. The reference fit is unconverged, 16 torque and all
+speed capacities remain assumption-marked, and its terminal state requires a
+verified seam before continuation.
+
+A bounded seam feasibility pilot retained the 150 ms pose and matched both
+quadratic-left and centered endpoint velocity to <1.6e-13 by adjusting the
+last two prefix samples up to 0.00492 mixed coordinate units; sampled closure
+residual was 6.44e-9 and modeled bounds passed. The original first two samples
+remain fixed. This is numerical seam feasibility, not an unchanged prefix or
+complete continuous reference; a 300 ms continuation requires fresh replay.
