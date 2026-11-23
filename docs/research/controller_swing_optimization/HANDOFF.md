@@ -767,3 +767,16 @@ observed-marker RMS changed 30.30 to 31.51 mm. Peak sampled speed was
 32.68 rad/s and second difference 886.89 rad/s². This is not a converged or
 admitted full-swing trajectory: anchors are assumed, anatomy is incomplete,
 global continuity is unconstrained and forward dynamics were not verified.
+
+A 99-frame target-marker-proxy sparse constrained run reached its 240.68 s
+callback budget after 198 iterations without convergence. Objective decreased
+7.80094 to 2.76869, but Euclidean target-marker RMS worsened 19.99 to
+24.57 mm and observed-marker RMS 33.97 to 41.78 mm. The objective includes
+strong assumed foot-anchor residuals, so the lower value does not establish
+an improved match. Native closure residual was 9.29e-4, independent closure
+0.3750 mm / 0.001134 rad; supplied bounds held, sampled acceleration join
+mismatch was 5.76e-11 rad/s², peak speed 44.22 rad/s, second difference
+2360.93 rad/s² and reported optimality 20.88. This is neither a physical or
+stationary fit nor proof of infeasibility. Revise formulation and residual
+weighting before spending more time on identical restarts; private receipts and
+input hashes remain outside git.
