@@ -2126,3 +2126,22 @@ saturation, stage gates, verified speed/torque or impact were checked. Reject
 it for admission despite the marker improvement. A bounded follow-up pins the
 closure-projected first step to align with the existing controller's finite
 difference and tests stronger numerical acceleration regularization.
+
+On the 3D-foot reference, a bounded four-coefficient fixed-gain Option B
+restoration removed sampled modeled ROM/speed flags over 320 ms / 10,240
+actual motor RK4 stages; the unmodified run had three ROM slots with maximum
+0.139206 rad excess. Coefficient norm was 1.23574 within the 10 N m ball,
+and no stage clipped in the optimized window. Joint RMS versus target
+worsened 0.2435 to 0.2471 rad. An independent uninterrupted replay first
+flagged ROM at about 0.321 s versus 0.294 s baseline, but hit a guard earlier
+at 0.797 versus 0.885 s, with 21 ROM and 17 speed slots flagged. This is
+prefix restoration, not full-horizon improvement or physical feasibility;
+work/slew limits and several capacity and speed priors remain unverified.
+
+The projected-Euler q1, 10-times numerical acceleration-regularization fit
+stopped unconverged after 250 s with exact q0 and 0.000337 mixed-coordinate
+units/s maximum controller initial-rate mismatch. Its sampled hand/club
+closure was unacceptable (15.94 mm / 0.0368 rad, constraint residual 0.0329)
+despite no named-angle bound excess. Do not forward-test or admit this
+iterate; restart only to investigate whether closure can recover. The
+regularizer is numerical, not a physiological acceleration limit.
