@@ -136,3 +136,27 @@ def test_flight_is_computed_only_when_asked(tmp_path: Path) -> None:
     assert solver.call_count == 0 and ball_only.flight is None
     assert overlay.request("draw", flight=True) is not overlay.request("draw")
     overlay.close()
+
+
+@pytest.mark.parametrize("view", ["down_the_line", "face_on"])
+def test_shifted_lookat_is_used_for_aim_and_flight(tmp_path: Path, view: str) -> None:
+    from src.tools.native_viewer_export.overlay2d import pinhole_for_view
+    import math
+
+    overlay = pbo.BallOverlay(_pose(tmp_path), pbo.BallOverlaySettings())
+    blank = np.zeros((SIZE[1], SIZE[0], 3), dtype=np.uint8)
+    layout = _layout()
+    lookat = (0.7, -0.4, 1.2)
+    play = layout.flight
+    camera = pinhole_for_view(
+        view, lookat, None, math.radians(play.settings.fov_y_deg), SIZE
+    )
+    aim = np.asarray(play.paint_aim(blank, camera, None))
+    expected = replace(play, aim_yaw_rad=None).draw(
+        {view: aim}, IMPACT_S + 1.0, lookat, None, None
+    )[view]
+    actual = overlay.paint(
+        blank, view, IMPACT_S + 1.0, layout, flight=True, aim=True, lookat_m=lookat
+    )
+    np.testing.assert_array_equal(actual, expected)
+    overlay.close()
