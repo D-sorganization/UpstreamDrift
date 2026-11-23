@@ -208,7 +208,7 @@ class ReceiptContext:
     capture_sha: str
     warm_start_path: str
     options: DrakeFitOptions
-    shared_metrics: dict[str, float | None]
+    shared_metrics: dict[str, float]
     replay_five: dict[str, float]
     physical_audit: dict[str, Any]
     acceptance_dict: dict[str, Any]
@@ -491,7 +491,7 @@ def _extract_markers_and_metrics(
 
 
 def _evaluate_acceptance(
-    shared_dict: dict[str, float | None],
+    shared_dict: dict[str, float],
     five_metrics: Any,
     physical_audit: dict[str, Any],
 ) -> Any:
