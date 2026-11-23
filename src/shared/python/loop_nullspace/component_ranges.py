@@ -11,7 +11,7 @@ the caller and then checked against the samples, never inferred from them.
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
 
 import numpy as np
@@ -44,7 +44,7 @@ def _classify_one(
     return _VARIABLE
 
 
-def _check_names(label: str, given: Sequence[str], known: Sequence[str]) -> None:
+def _check_names(label: str, given: Iterable[str], known: Sequence[str]) -> None:
     unknown = sorted(set(given) - set(known))
     if unknown:
         raise ValueError(f"{label} names unknown components: {unknown}")
