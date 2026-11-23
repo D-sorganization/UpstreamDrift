@@ -2335,3 +2335,17 @@ Assumed ideal-command capacity was exceeded from 0.068 s. This invalidates
 using the earlier eight-substep early ankle timing as a converged result and
 requires reevaluation of its full-run gate counts. It does not establish
 full-horizon, actual-motor or physiological feasibility.
+
+The continuous-reference ideal-controller convergence comparison was extended
+through the full 1.319 s on the same 1 ms hold lattice. Across 1,320 common
+sampled states, 16 versus 32 RK4 substeps differed by at most 2.14e-6 in q,
+8.42e-5 in v and 0.00481 N m in held command, with no numerical failure.
+The old eight-substep result differed from the 32-substep run by up to 0.183
+in q and 1.93 in v, so its full-run state and gate counts are not reliable.
+Both refined runs had 712 sampled states with modeled ROM excess (peak right
+subtalar 1.106, left subtalar 3.561, soft lumbar 0.082 and wrist 0.447
+degrees), no sampled speed flags, and 234 samples exceeding assumed ideal
+command capacities (peak ratio 7.249, peak absolute command about 425.6 N m).
+This establishes a close sampled numerical comparison for this ideal controller
+and model, not actual saturated-motor, integration-stage, physical or contact
+feasibility. Registry limits retain their soft/assumed provenance.
