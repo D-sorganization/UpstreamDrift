@@ -2545,3 +2545,30 @@ rad. The earlier corrected continuity run had 0.01659 m / 0.05893 rad /
 0.07765 rad, but used a different reference and spline, so this is not a
 single-variable comparison. Work/slew bounds and physical provenance remain
 unverified; reject this support candidate as an admitted motor baseline.
+
+A second 55-frame support-aware fit added numerical acceleration
+regularization inside the solve. It stopped unconverged, preserving q0/q1,
+sampled closure <=2.72e-12 and modeled registry ROM/speed checks. Relative
+to the prior support fit, joint acceleration RMS fell 140.8 to 105.5 rad/s²
+and peak 2,967 to 1,091 rad/s²; target root acceleration defect was 0.574
+m/s² RMS and median modeled support 0.823 body weights. Source foot/marker
+RMS were 7.60/27.76 mm. Contact and registry limits are assumed; the endpoint
+does not yet join the full reference.
+
+Independent 16/32-substep ideal replay through 150 ms had no sampled modeled
+ROM, speed or held-command capacity violations; peak modeled capacity ratio
+was 0.811 versus 1.608 for the original reference. Source/observed marker RMS
+were 29.03/30.05 versus 29.63/30.62 mm, root translation tracking RMS 5.51
+versus 8.08 mm, and joint RMS 0.0218 versus 0.0181 rad. This is a short,
+ideal-drive research result, not a physical baseline.
+
+An independent fixed-gain zero-spline actual motor replay of the same 150 ms
+reference at 32 substeps had no clipping or sampled modeled speed violations;
+one of 41 modeled ROM slots failed from about 139.14 ms, maximum 0.03713 rad.
+Peak applied command was 125.29 N m; root translation/rotation and joint
+tracking RMS were 0.004661 m / 0.01565 rad / 0.02996 rad. Sixteen/32 motor
+substeps agreed closely at matched holds. The previous unregularized support
+reference had six ROM/one speed slot failures and 5,376 clipped stages, but
+the changed reference and feedforward prevent single-factor attribution.
+Work/slew bounds, physical capacities, endpoint continuity and impact remain
+unverified; neither result admits a full swing or improved shot.
