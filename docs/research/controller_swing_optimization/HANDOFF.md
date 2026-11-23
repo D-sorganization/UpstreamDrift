@@ -130,6 +130,12 @@ migration. A three-state diagnostic of that changed-model candidate preserved
 grip closure but did not preserve all original marker positions; copying its
 coordinate values into the required committed v2 produced large closure and
 marker errors. This does not prove that a valid mapping is impossible.
+The pinned bundle's hash-bound dynamics record also contains the original
+controller target, distinct from its saved feedback rollout. Source-model
+sampled target states close at the grip; naive or provisional sign-mapped
+transfer to committed v2 produces large marker and closure errors. An initial
+200 ms source-model open-loop replay matched the saved rollout to near
+roundoff, but this historical v1 result is not the required v2 audit.
 
 The contact prototype rejects duplicated faces, non-manifold edges and
 inconsistent shared-edge winding. Its bounded root scan can still miss narrow
@@ -148,7 +154,16 @@ disabled; a separate revision-2 flight
 suite passed 16 tests with one strict expected failure, including a check that
 an airborne endpoint cannot be reported as carry. Reference
 flight rows include approximate inputs and are not independent flight
-validation. Re-run relevant checks on the actual delivery commit and runtime.
+validation on this research branch. Current `origin/main` has since replaced
+those rows with source-linked tour-table values and changed the flight model;
+the old branch's results do not validate that newer model. Rebuild and rerun
+the exact delivery commit, recording its kernel and fixture versions. Tour
+averages remain unpaired observations under venue conditions, not a validation
+of an individual shot under standard air.
+An isolated detached test of `origin/main` at `fa228f3a9374`, with its own
+freshly built physics revision 3 extension, passed 30 tests with two strict
+expected failures in wedge carry. The build resolved Cargo dependencies afresh;
+pin and record the build environment before treating it as reproducible.
 For a fixed ball centre and continuous rigid face with a proven material-point
 speed bound V and exact endpoint distances d0 and d1 over duration dt, the interval distance
 is at least (d0 + d1 - V dt)/2. A strict bound above ball radius can certify
@@ -252,6 +267,14 @@ to 3.083 rad RMS and peak unsaturated ideal drive reached 963.95 N m. Matched
 eight- and 16-substep states differed by at most 5.34e-7 rad at 0.4 s and
 1.176 rad at 0.6 s. Numerical resolution changes this setup's failure mode;
 the higher-resolution result is not an admitted controller.
+When the fixed-PD reference was changed to the recorded dynamic states that
+produced the frozen feedforward, the zero-residual rollout reproduced those
+states bit-for-bit over 1.322 s. This isolates a reference/feedforward mismatch
+in the earlier nominal test; it does not establish a matched target. A 0.2 N m
+elbow pulse completed numerically but grew to 3.088 rad RMS deviation over
+the full interval, with peak ideal drive 640.15 N m and widespread declared
+model-limit exceedances. These grid-sampled, unsaturated results remain
+nonadmitted and do not prove anatomical or clinical limits.
 A matched 32-substep run completed 0.7 s with approximately the same 1.431 rad
 tracking RMS as the 16-substep run. Their maximum coordinate difference grew
 from 1.13e-7 rad at 0.4 s to 0.109 rad at 0.7 s; resolution convergence is
