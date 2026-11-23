@@ -2094,6 +2094,7 @@
 {"path": "optimization/ocp/symbolic_model.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/ocp/tracking_ocp.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/smooth_costs.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
+{"path": "optimization/solution_bundle.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/swing_bridge.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/swing_optimizer.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/tests/__init__.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
