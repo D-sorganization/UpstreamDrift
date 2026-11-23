@@ -372,3 +372,6 @@ verdict or first-root certification; see `docs/research/finite_face_geometry`.
 `motion_matching.face_clearance` computes a static sphere-to-patch gap and a
 strict initial-gap guard; neither certifies first contact or outside-solid
 position. See `docs/research/face_clearance`.
+`motion_matching.face_trajectory_diagnostic` inspects sampled advancing states;
+every candidate remains unqualified with uncertified interval coverage. See
+`docs/research/face_trajectory_diagnostic`.

@@ -1,0 +1,21 @@
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+\section{Sampled Finite-Face Trajectory Diagnostic}
+For a caller-supplied state advance, let $g(t)$ be the static sphere-to-patch
+gap in metres. Initial $g(0)\leq0$ is rejected. The first sampled pair with
+$g(t_a)>0$ and $g(t_b)\leq0$ is refined with Brent's method using the supplied
+time tolerance; a candidate also needs a residual within the declared distance
+tolerance, a front-side point strictly inside one triangle, and positive
+material velocity projected toward the ball. The ball is fixed and all
+positions and velocities are in one frame in SI units. Triangle-boundary and
+shared-seam events are conservatively excluded.
+
+These conditions do not certify initial outside-solid placement, trajectory
+continuity, rigid topology, global closest approach or the first contact root.
+Finite samples may miss arbitrarily narrow or tangent crossings. Both a
+candidate and a miss remain unqualified with uncertified interval coverage; no
+impact or flight may be inferred. The reported minimum is over inspected grid
+samples only. A synthetic pinned-v2 MuJoCo advancing fixture compares two
+integration steps and is not a matched-swing or physiological validation.
+\end{document}
