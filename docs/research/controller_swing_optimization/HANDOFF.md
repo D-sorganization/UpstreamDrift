@@ -2115,3 +2115,14 @@ initial velocity differed by 6.93 rad/s and peak sampled acceleration was
 one-step Euler pose instead left only 0.000337 mixed-coordinate units/s
 maximum initial velocity discrepancy; it is approximate, and an explicit
 manifold-consistent velocity state is the principled follow-up.
+
+The initial-pose-constrained fit's independent ideal unsaturated rollout
+completed 1.319 s without numerical failure, with source/observed marker RMS
+36.83 / 42.58 mm against the same 475 samples (original baseline 267.24 /
+267.94 mm) and no reported sampled modeled ROM flags. It nevertheless needed
+901.3 N m peak ideal drive and retained the 6.93 rad/s controller initial-rate
+mismatch and 4,992 rad/s² peak sampled target acceleration. No motor
+saturation, stage gates, verified speed/torque or impact were checked. Reject
+it for admission despite the marker improvement. A bounded follow-up pins the
+closure-projected first step to align with the existing controller's finite
+difference and tests stronger numerical acceleration regularization.
