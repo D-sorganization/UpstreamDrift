@@ -1218,3 +1218,29 @@ A fresh-process repeat under the same runtime reproduced time, q, velocity
 and held effort arrays bit-for-bit. No accepted-stage trace or independent
 runtime was checked. This remains substantially off the target and is not a
 qualified baseline, physical feasibility or Option B result.
+
+A fixed-step resolution sensitivity repeated the 0.585 s Option B candidate
+at 8, 16 and 32 RK4 substeps per 1 ms hold under the same model-envelope
+motors. All hit the guard at 0.585 s with 25 modeled ROM / 17 speed flags.
+Maximum |q16−q32| at 0.2 / 0.5 / 0.55 / 0.58 s was 1.42e-7 / 5.73e-7 /
+2.05e-4 / 3.82e-4 rad; maximum |v16−v32| at 0.55 / 0.58 s was 0.00720 /
+0.00890 rad/s. Finer differences decreased, but a shared guard time is not
+whole-trajectory convergence or physical qualification.
+
+A subsequent within-trust earliest-limit perturbation scan extended three
+candidates toward the full horizon. Wrist, subtalar and combined candidates
+hit guards at 0.521, 0.506 and 0.516 s versus 0.585 s for the prior
+candidate; they had 23 modeled ROM and 8 / 11 / 10 speed flags. A short
+tracking benefit did not survive full-horizon validation. Model priors remain
+partly unverified; this is not proof of infeasibility or an improved shot.
+
+Two predeclared full-horizon lower-limb root-regulator sensitivities used no
+direct root torque, projected ideal unsaturated computed torque and no impact.
+Gains (50,10) gave root translation RMS 0.08616 m, root rotation 0.17569 rad,
+joint 0.03703 rad, peak held effort 393.16 N m and source-target marker RMS
+254.75 mm. Gains (100,20) gave 0.09314 m, 0.12405 rad, 0.03617 rad,
+800.95 N m and 234.22 mm. The prior (20,5) gave 0.08516 m, 0.14295 rad,
+0.01731 rad, 359.62 N m and 234.60 mm. All remain far from a match and
+retain a modeled ROM flag; the tiny 100/20 marker reduction comes with more
+than twice the effort and worse joint tracking. These are exploratory, not
+Option B, measured support or physical acceptance.
