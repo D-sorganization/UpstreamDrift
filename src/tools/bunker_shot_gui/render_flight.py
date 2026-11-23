@@ -115,6 +115,7 @@ def flight_figure(
     fig.clear()
     side = fig.add_subplot(2, 1, 1)
     top = fig.add_subplot(2, 1, 2)
+    fig.subplots_adjust(hspace=0.5)
     side.set_title("Ball flight (side)", fontsize=9)
     top.set_title("Landing and rollout (overhead)", fontsize=9)
     if flight is None:

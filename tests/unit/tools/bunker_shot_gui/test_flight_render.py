@@ -76,3 +76,9 @@ def test_readout_states_carry_with_units_and_assumption(flight: BunkerFlight) ->
     assert f"{flight.carry_m:.1f} m" in text
     assert flight.assumption in text
     assert "no flight" in flight_readout(None, FlightUnits.METRES, reason="refused")
+
+
+def test_panels_are_spaced_so_titles_clear_the_x_label() -> None:
+    """The overhead title must not overlap the side view's x-axis label."""
+    fig = flight_figure(None, units=FlightUnits.METRES, reason="x")
+    assert fig.subplotpars.hspace >= 0.45

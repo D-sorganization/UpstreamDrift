@@ -64,3 +64,45 @@ def test_workbench_shell_has_a_flight_tab() -> None:
     tabs = [shell._views.tabText(i) for i in range(shell._views.count())]
     assert "Ball flight and green" in tabs
     assert not shell._flight_a.has_flight
+
+
+def _seeded_shell():  # noqa: ANN202
+    from src.tools.bunker_shot_gui.gui import BunkerShotWidget
+
+    shell = BunkerShotWidget()
+    shell._flight_a.set_flight(_flight(), reason="")
+    assert shell._flight_a.has_flight
+    assert any(len(ax.lines) for ax in shell._flight_a._canvas.fig.axes)
+    return shell
+
+
+def test_loading_a_saved_record_clears_a_stale_flight(
+    monkeypatch: pytest.MonkeyPatch, tmp_path
+) -> None:
+    """A loaded (refused) record carries no flight, so none may stay drawn."""
+    from src.tools.bunker_shot_gui import gui
+
+    record = {
+        "inputs": {},
+        "verdict": {"status": "beyond_validation", "headline": "refused"},
+        "digest": "d",
+        "stamp": "s",
+        "schema_version": "bunker-workbench-evaluation/1",
+    }
+    monkeypatch.setattr(gui, "load_workbench_evaluation", lambda _path: record)
+    shell = _seeded_shell()
+    shell.load_evaluation(tmp_path / "refused.json")
+    assert not shell._flight_a.has_flight
+    assert all(len(ax.lines) == 0 for ax in shell._flight_a._canvas.fig.axes)
+    assert "loaded" in shell._flight_a._readout.text()
+
+
+def test_input_error_clears_a_stale_flight() -> None:
+    """A rejected input must not sit beside another shot's trajectory."""
+    from src.tools.bunker_shot_gui.gui import WorkbenchInputError
+
+    shell = _seeded_shell()
+    shell._show_input_error(WorkbenchInputError("loft out of range"))
+    assert not shell._flight_a.has_flight
+    assert all(len(ax.lines) == 0 for ax in shell._flight_a._canvas.fig.axes)
+    assert "input" in shell._flight_a._readout.text()

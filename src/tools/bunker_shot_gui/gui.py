@@ -931,6 +931,9 @@ class BunkerShotWidget(QWidget):
             self._cross_tier,
         ):
             widget.clear()
+        self._flight_a.set_flight(
+            None, reason="input error: no ball flight was computed for these inputs"
+        )
         self._clear_sand_field()
         self.update_control_states()
         self.evaluation_changed.emit()
@@ -1052,6 +1055,12 @@ class BunkerShotWidget(QWidget):
         self._loaded_record = record
         self._last_evaluation = None
         self._last_comparison = None
+        # A saved record stores no trajectory, so any flight on screen belongs
+        # to a different shot than the inputs and verdict now shown.
+        self._flight_a.set_flight(
+            None,
+            reason="loaded record: no ball flight is stored; re-run to draw one",
+        )
         apply_loaded_evaluation_to_widget(self, record, path)
         return record
 
