@@ -1167,3 +1167,12 @@ predeclared score, and all had 23 modeled ROM / seven speed flags. A selected
 +3 N m hip extension reproduced its first 400 ms stage arrays in the same
 runtime then hit a guard at 0.531 s. Model limits remain partly unverified;
 none is a feasible or improved shot.
+
+An independent 477-frame marker-space audit used 15,733 valid samples. The
+fitted proxy versus source target had 19.62 mm Euclidean RMS, whereas the
+projected ideal-drive forward rollout versus source target had 269.65 mm;
+fit versus observations was 28.01 mm, forward versus observations 270.35 mm,
+and forward versus fit 268.56 mm. This exposes substantial world/root drift
+that the approximately 0.016 rad joint-coordinate RMS alone concealed. It
+confirms the exploratory full-horizon rollout is not a forward-matched
+baseline, independent of its incomplete physical gates.
