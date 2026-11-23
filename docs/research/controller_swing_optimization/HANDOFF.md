@@ -1424,3 +1424,7 @@ therefore must not be described as 1322 successful QP solves. The numeric
 slack tolerance used there was test-only, not a physiological gate. This is
 not a complete baseline or PR; a separate broad-import mypy was still running
 when the checkpoint was recorded.
+The separate follow-imports mypy for this checkpoint subsequently completed
+successfully for the one source file. The private QP adapter was modified for
+logging after the initial full run, so its current hash is not that run's
+original script hash; its solve-success count remains unknown.
