@@ -16,9 +16,7 @@ from tests.unit.tools.native_viewer_export import test_flight_inset_15150 as ins
 from tests.unit.tools.native_viewer_export import test_flight_tracer as base
 from tests.unit.tools.native_viewer_export import test_landing_track_15150 as track
 
-pytest_plugins = (
-    "tests.unit.tools.native_viewer_export.test_kinematic_replay_15150",
-)
+pytest_plugins = ("tests.unit.tools.native_viewer_export.test_kinematic_replay_15150",)
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
 IMPACT_S, LOOKAT = base.IMPACT_S, base.LOOKAT
