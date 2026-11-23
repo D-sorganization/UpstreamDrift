@@ -1507,3 +1507,20 @@ post-saturation force, under loose synthetic ±1000 N m caps, no impact or
 projection and an exploratory dynamics-derived reference. The two passes took
 78.02 s. These are same-runtime numerical replay results, not independent
 runtime, physical actuator qualification, admitted match or improved shot.
+
+Research branch `codex/15493-motor-forward20` at `cd6752e605` implements a
+fresh fixed-PD controller and MuJoCo motor re-simulation against separately
+hash-bound controller, model, motor XML, archive and partial measured runtime.
+It compares numerical stage q/v/command and actual post-saturation generalized
+motor force, with explicit KKT regularization. Functional failing-first API
+check, 54 focused actuator/archive/bundle tests, scoped mypy, Ruff, Black,
+LaTeX compilation and clean normal headless push hooks passed. Initial push
+caught two real type/protocol issues; after correction both empirical runs were
+repeated under the changed fingerprint before the successful clean push.
+The 200 ms exploratory v2 run matched all 6400 stages exactly in the same
+runtime, with 1440 clipped stages under partly unverified model priors; a
+separate 1.322 s run matched all 42,304 stages with no clipping under synthetic
+±1000 N m caps. The contract rejects impact, projection and passive shafts;
+it is not bound to the merged Solution Bundle, a complete runtime lock,
+independent-runtime replay, physiological actuator evidence, admitted match
+or improved shot. The branch is oversized research, not a PR.
