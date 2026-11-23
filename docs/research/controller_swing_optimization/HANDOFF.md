@@ -2308,3 +2308,17 @@ breach over 120 ms with 32; the -10% stiffness case was also unstable across
 refinements. Do not infer measured force, parameter robustness or contact
 dominance from those variants. The nominal 16/32 ideal-controller agreement
 is only established over 120 ms; the pinned baseline settings were unchanged.
+
+A main-based partial integration checkpoint `codex/15493-slice1-integrate33`
+at `ee07ab7fc6` combines fail-closed prescribed-flight fixture evidence,
+landing verification and a concise v2 forward-tracking diagnostic, 347 changed
+lines across five files. Failing-first regressions, 33 flight tests plus two
+expected numeric failures with revision-3 physics, four baseline tests
+including a closure-consistent synthetic 2 ms MuJoCo run, stale-kernel
+negative control, scoped mypy, Ruff, Black, LaTeX and normal push hooks passed.
+The diagnostic reports missing provenance and physical gates as unverified,
+writes an unqualified result and exits 2. No eligible original-target bundle
+bound to canonical v2 was found locally; the embedded calibrated source model
+differs and must not be silently accepted. This branch is not a PR or complete
+Slice 1: actual best-match forward evidence, full applied-stage physical gates,
+first finite-face contact and contact-to-flight qualification remain open.
