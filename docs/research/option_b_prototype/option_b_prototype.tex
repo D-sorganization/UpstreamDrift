@@ -1,0 +1,44 @@
+\documentclass{article}
+\usepackage{amsmath}
+\title{Fixed-Gain Option B Prototype: Research Reference}
+\begin{document}
+\maketitle
+\section{Scope and Conventions}
+This editable research note describes a controller primitive, not the
+engineering design manual, a qualified golfer model or a forward-dynamics
+acceptance. Time is in seconds, generalized angles in radians and generalized
+torques in newton metres where channels are rotational. The caller must bind
+channel order, units and model, and must exclude or otherwise handle
+unactuated coordinates according to the plant contract.
+
+\section{Control and Trust Region}
+At a caller-selected time, linearly interpolated reference samples and fixed
+diagonal gains give
+\[
+ u_{\rm cmd}=u_{\rm ff,ref}+\sum_i B_i(t)c_i
+ +K_p(q_{\rm ref}-q)+K_d(\dot q_{\rm ref}-\dot q).
+\]
+The cubic basis is open and clamped. Each pair of distinct breakpoints must
+be at least the declared minimum spacing apart. Coefficients $c_{ij}$ are
+accepted only if $\lVert c/s\rVert_2\le r$, using a positive per-channel scale
+$s$ and stated radius $r$. This is a coefficient-space trust region, not a
+total-torque, work, slew, reference-tracking or anatomical constraint.
+Reference rate is supplied separately; this primitive makes no reference
+shift and does not prove that the supplied rate is the derivative of position.
+
+\section{Input and Limitations}
+The ideal input is $u_{\rm ideal}=\min(u_{\max},\max(u_{\min},u_{\rm cmd}))$
+componentwise. Command, ideal input and saturation flags are returned. The
+caller specifies the control hold; clipping takes place after all feedforward
+and feedback terms are summed. A downstream plant may mask or transform these
+inputs, so the ideal input is not established as post-saturation actuator or
+anatomical torque. No continuous-time bound or physical acceptance follows.
+
+\section{Verification}
+The focused Python tests cover the total-command saturation, coefficient trust,
+minimum spacing, finite inputs, cubic continuity and interaction with the
+existing held-step integrator on a synthetic unit-mass plant. They do not test
+an accepted reference, contact, optimization or a physical model. Run
+\texttt{python -m pytest -q tests/unit/impact\_optimization/test\_option\_b\_prototype.py}
+from the repository root with the pinned Tools submodule initialized.
+\end{document}
