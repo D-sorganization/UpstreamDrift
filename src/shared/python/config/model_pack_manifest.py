@@ -16,6 +16,7 @@ import yaml
 
 from src.shared.python.config.maturity_scale import validate_level
 from src.shared.python.contracts import ContractChecker, ensure, require
+from src.shared.python.optimization.solution_bundle import validate_model_lock
 
 _CAPABILITY_ALIASES = {
     "inverse-kinematics": "ik",
@@ -613,6 +614,9 @@ class ModelPackEntry:
     embed_adapter: str | None = None
     exercise: str | None = None
     preset_params: dict[str, Any] = field(default_factory=dict)
+    # Golfer model lock (#15667): the model, controller and solver the pack's
+    # results were computed on; checked by canonical_golfer_gate (#15659).
+    golfer_model_lock: dict[str, str] | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> ModelPackEntry:
@@ -632,6 +636,8 @@ class ModelPackEntry:
         hidden, hidden_reason, hidden_owner = _parse_hidden_fields(data)
         nested = _parse_entry_metadata(data)
         embed_adapter = _optional_nonempty_str(data, "embed_adapter")
+        lock = data.get("golfer_model_lock")
+        validate_model_lock(lock)
 
         return cls(
             id=data["id"].strip(),
@@ -665,6 +671,7 @@ class ModelPackEntry:
                 if isinstance(data.get("preset_params"), dict)
                 else {}
             ),
+            golfer_model_lock=dict(lock) if lock is not None else None,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -709,6 +716,8 @@ class ModelPackEntry:
             data["hidden_owner"] = self.hidden_owner
         if self.embed_adapter:
             data["embed_adapter"] = self.embed_adapter
+        if self.golfer_model_lock is not None:
+            data["golfer_model_lock"] = dict(self.golfer_model_lock)
         return data
 
 

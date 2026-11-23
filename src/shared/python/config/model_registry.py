@@ -146,6 +146,7 @@ class ModelConfig:
     embed_adapter: str | None = None
     exercise: str | None = None
     preset_params: dict[str, Any] | None = None
+    golfer_model_lock: dict[str, str] | None = None
 
 
 class ModelRegistry(ContractChecker):
@@ -401,6 +402,7 @@ class ModelRegistry(ContractChecker):
             embed_adapter=entry.embed_adapter,
             exercise=entry.exercise,
             preset_params=entry.preset_params,
+            golfer_model_lock=entry.golfer_model_lock,
         )
 
     def _load_legacy_models(
