@@ -13,6 +13,7 @@ club-head speed) and video export goes through the one shared writer,
 
 from __future__ import annotations
 
+import json
 import math
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -38,6 +39,7 @@ __all__ = [
     "GolferPlayback",
     "TimeSeries",
     "build_golfer_scene_xml",
+    "golfer_scene_inputs",
     "results_time_series",
 ]
 
@@ -140,6 +142,19 @@ def build_golfer_scene_xml(source: PoseFrameSource) -> str:
 
     xml, _ = build_scene_xml(source.spec_bytes)
     return xml
+
+
+def golfer_scene_inputs(source: PoseFrameSource) -> dict[str, bytes]:
+    """Every caller input of :func:`build_golfer_scene_xml` (the cache key).
+
+    The appearance document and the contact-sphere switch are the builder's
+    defaults; they are part of the key so a changed default misses.
+    """
+    from src.tools.native_viewer_export.backends.mujoco_worker import APPEARANCE
+
+    document = json.dumps(APPEARANCE, sort_keys=True, default=str).encode()
+    builder = b"mujoco_worker.build_scene_xml;show_contact_spheres=False"
+    return {"builder": builder, "spec": source.spec_bytes, "appearance": document}
 
 
 class GolferPlayback:

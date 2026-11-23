@@ -56,7 +56,7 @@ def qapp() -> QApplication:
 def fake_work(qapp: QApplication) -> Generator[list[Any], None, None]:
     made: list[Any] = []
 
-    def _prepare(path: Path, engine: str | None) -> _FakeSession:
+    def _prepare(path: Path, engine: str | None, report: Any = None) -> _FakeSession:
         made.append(threading.get_ident())
         time.sleep(SLOW_LOAD_S)  # releases the GIL, like the real C/numpy work
         if not Path(path).name.startswith("ok"):
