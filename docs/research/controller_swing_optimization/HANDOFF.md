@@ -1871,3 +1871,31 @@ archive-versus-fresh-stage equality. The regression failed before the fix;
 This does not establish the private bundle's validity, physical feasibility,
 contact or independent runtime, and the branch remains oversized research,
 not a complete slice or PR.
+
+A three-window condensed Option B restoration propagated the actual endpoint
+between each 10 ms window. Over 30 ms / 960 RK4 stages it had exact q/v
+seams and no sampled modeled ROM or speed flags, with coefficient norm
+9.43249 within the 10 N m diagnostic radius. There were 672 clipped stages;
+signed stage-quadrature work was -6.245 J, positive power integral 0.00463 J,
+and the largest 1 ms applied-drive update was 23.2964 N m. Work and slew
+limits are not sourced, and 16 of 41 torque capacities remain unverified.
+The uninterrupted continuation first flagged ROM at stage 961 and hit a guard
+at 0.723 s with 27 ROM and 17 speed coordinates flagged. This is sampled,
+short-window numerical evidence, not full-horizon feasibility or a shot.
+
+Production contact and flight paths still need integration: the existing
+impact scheduler uses a face-center proximity / linear-extrapolation heuristic
+and clamps negative lead to immediate firing; the flight pipeline accepts a
+supplied impact state. Neither independently proves an approaching finite-face
+root. A separate research surface trigger and an open generic root PR do not
+by themselves establish this end-to-end contact gate. Verify the first root,
+finite-face geometry, bracket confinement and numerical convergence before
+using contact or carry as evidence.
+
+Next priorities: complete the support-preloaded full-trajectory fit and an
+independent forward audit; establish sourced hard anatomical, speed, actuator,
+work and slew limits; resolve the initial ball/face overlap with an authorized
+physical placement; and extract small, sequential Slice 1 changes against the
+current main and existing open work. Keep the prescribed-launch flight tests
+separate from the unqualified swing-to-impact path. Related Slice A remains
+blocked on admission of the same physically qualified two-handed baseline.
