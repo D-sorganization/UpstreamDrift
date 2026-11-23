@@ -1619,3 +1619,5 @@ mm, with one modeled ROM flag, so the small reduction does not qualify the
 baseline. Four-pelvis-marker source-target and observation estimates each
 improved its own initial marker-velocity comparison but worsened the other;
 finite secants and fixed attachments are not measured root velocity.
+The additional broad follow-imports mypy subsequently completed successfully
+for the four changed source files.
