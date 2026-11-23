@@ -36,7 +36,7 @@ from .stage_trace import StageRecorder
 @dataclass(frozen=True)
 class MotorForwardCheck:
     stages: int
-    forward_replay_verified: bool = True
+    forward_replay_verified: bool = False
     independent_runtime_verified: bool = False
     physical_feasibility_verified: bool = False
     contact_verified: bool = False
@@ -229,5 +229,7 @@ def verify_motor_forward(
         ):
             raise ValueError("motor forward stages differ")
     return MotorForwardCheck(
-        sum(len(s.stages) for s in recorder.steps), event=events[0] if events else None
+        sum(len(s.stages) for s in recorder.steps),
+        forward_replay_verified=True,
+        event=events[0] if events else None,
     )

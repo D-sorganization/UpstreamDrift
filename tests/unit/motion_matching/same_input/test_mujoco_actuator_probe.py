@@ -915,3 +915,15 @@ def test_motor_bundle_v2_fresh_replay_and_consistency(
             expected_model_sha256=digest(spec),
             expected_runtime_sha256=measured_bundle_motor_runtime(),
         )
+
+
+def test_motor_forward_check_is_unverified_by_default():
+    from src.shared.python.motion_matching.same_input.motor_forward_replay import (
+        MotorForwardCheck,
+    )
+
+    result = MotorForwardCheck(stages=0)
+    assert not result.forward_replay_verified
+    assert not result.independent_runtime_verified
+    assert not result.physical_feasibility_verified
+    assert not result.contact_verified

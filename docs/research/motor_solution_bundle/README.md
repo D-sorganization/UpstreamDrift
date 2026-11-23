@@ -42,3 +42,13 @@ actual split event state is re-simulated and compared with the bundle. The
 projection uses the existing weld-closure projection at each completed step;
 the archive binds both pre- and post-projection states. These checks establish
 numerical replay only, not an on-face root or physical validity.
+
+Replay result flags default to false. The motor forward replay marks stage
+replay verified only after a fresh integration exactly matches the archived
+stage arrays; this does not establish the other evidence claims above.
+
+Remaining work: bind the full model/runtime inputs without claiming an
+unmeasured environment, recover the admitted private v2 match and fit receipt,
+verify forward tracking and anatomical gates, and add physical on-face
+contact-root and prescribed-flight evidence. Reconcile the separate-grid v2
+codec with current main and the active codec PR before proposing a bounded PR.
