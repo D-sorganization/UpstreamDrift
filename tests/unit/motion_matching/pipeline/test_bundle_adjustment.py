@@ -8,6 +8,7 @@ import time
 import numpy as np
 import pytest
 
+from src.shared.python.motion_matching.pipeline import bundle_adjustment as ba
 from src.shared.python.motion_matching.pipeline.bundle_adjustment import (
     BundleProblem,
     BundleSettings,
@@ -289,3 +290,70 @@ def test_a_marker_weight_scales_its_residual_and_shields_the_fit() -> None:
     assert fit.per_marker_rms_m[0] > 0.01  # the reported error stays unweighted
     with pytest.raises(ValueError, match="marker_weights"):
         dataclasses.replace(prob, marker_weights=-weights).check(settings)
+
+
+class TestFc011BundleGuards15345:
+    """FC-011 edge cases for bundle_adjustment (#15345)."""
+
+    def test_no_weak_directions_returns_empty_without_error(self) -> None:
+        info = np.diag([2.0, 3.0, 4.0])
+        owners = np.array([0, 0, 0])
+        settings = BundleSettings(weak_information_ratio=1.0)
+        weak, ratios = ba._weak_directions(info, owners, settings)
+        assert weak == () and ratios == ()
+
+    def test_check_requires_at_least_one_valid_observation(self) -> None:
+        prob, _, _ = problem()
+        invalid = dataclasses.replace(
+            prob, valid=np.zeros(prob.valid.shape, dtype=bool)
+        )
+        with pytest.raises(ValueError, match="at least one valid observation"):
+            invalid.check(BundleSettings())
+
+    def test_check_requires_a_free_offset_component(self) -> None:
+        prob, _, _ = problem()
+        held = dataclasses.replace(
+            prob, offset_sigmas=np.zeros_like(prob.offset_sigmas)
+        )
+        with pytest.raises(ValueError, match="free offset"):
+            held.check(BundleSettings())
+
+    def test_check_requires_active_pose_prior_when_provided(self) -> None:
+        prob, _, poses = problem()
+        inactive = dataclasses.replace(
+            prob,
+            pose_prior=(poses, np.full(poses.shape, np.inf)),
+        )
+        with pytest.raises(ValueError, match="active pose_prior"):
+            inactive.check(BundleSettings())
+
+    def test_solve_refuses_problem_with_no_valid_observations(self) -> None:
+        prob, _, _ = problem()
+        invalid = dataclasses.replace(
+            prob, valid=np.zeros(prob.valid.shape, dtype=bool)
+        )
+        with pytest.raises(ValueError, match="at least one valid observation"):
+            solve_bundle(invalid, BundleSettings())
+
+    def test_inward_fd_steps_toward_the_box_interior(self) -> None:
+        lower, upper = np.array([0.0, -1.0]), np.array([1.0, 0.0])
+        pose = upper.copy()
+        touched: list[np.ndarray] = []
+
+        def sampler(q: np.ndarray) -> float:
+            touched.append(q.copy())
+            return float(q.sum())
+
+        step = 1e-4
+        _, slope = ba._difference(sampler, pose, step, (lower, upper))
+        assert slope.shape == (1, 2)
+        assert touched[1][0] == pytest.approx(upper[0] - step)
+        assert touched[2][1] == pytest.approx(upper[1] - step)
+
+    def test_result_is_never_converged_with_non_finite_rms(self) -> None:
+        prob, _, _ = problem()
+        prob.check(BundleSettings())
+        result = solve_bundle(prob, BundleSettings(marker_sigma_m=NOISE_M))
+        assert np.isfinite(result.rms_m)
+        if result.converged:
+            assert result.rms_m < np.inf
