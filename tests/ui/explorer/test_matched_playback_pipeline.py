@@ -169,10 +169,12 @@ def test_launcher_opens_explorer_plays_and_switches_matched_swings(
     _grab(launcher, shots, "04_second_scenario")
 
     # Feature 1: camera view changes the rendered golfer.
+    # It opens behind the golfer (the default_view setting, #15150).
+    assert panel.view_combo.currentText() == "down_the_line"
     panel.show_frame(panel.session.frame_count // 2)
-    face_on = panel.current_image()
-    panel.view_combo.setCurrentText("down_the_line")
-    assert not np.array_equal(face_on, panel.current_image())
+    behind = panel.current_image()
+    panel.view_combo.setCurrentText("face_on")
+    assert not np.array_equal(behind, panel.current_image())
     # Feature 2: the plotted channel changes the plot axis.
     joint = panel.channel_combo.itemText(panel.channel_combo.count() - 1)
     panel.select_channel(joint)

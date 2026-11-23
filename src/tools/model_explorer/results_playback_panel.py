@@ -196,6 +196,7 @@ class ResultsPlaybackPanel(QWidget):
         row.addWidget(QLabel("View:"))
         self.view_combo = QComboBox()
         self.view_combo.addItems(list(VIEW_ORDER))
+        self.view_combo.setCurrentText(self._playback.view)
         self.view_combo.currentTextChanged.connect(self.set_view)
         row.addWidget(self.view_combo)
         row.addWidget(QLabel("Speed:"))
