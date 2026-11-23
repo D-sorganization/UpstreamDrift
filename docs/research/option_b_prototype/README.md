@@ -37,3 +37,9 @@ with no observed update is indeterminate. Even a pass covers only the supplied
 schedule and this quadrature model. Provenance, units, coordinate mapping and
 limits are caller assertions; between-hold motion, actual actuator forces and
 anatomical or physical feasibility are not certified.
+Separately labeled `ideal_direct_observed` evidence supports exploratory
+accounting of an observed ideal direct generalized input without claiming an
+actuator model. It is assumption-limited: a no-violation result remains
+indeterminate, while violations apply only to the declared model limits.
+Work, effort and update-rate limits may be explicitly unavailable; metrics are
+still reported, but missing limits prevent a no-violation result from passing.

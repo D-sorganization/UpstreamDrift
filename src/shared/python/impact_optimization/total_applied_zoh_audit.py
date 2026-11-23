@@ -22,6 +22,7 @@ class AppliedEvidenceKind(StrEnum):
     """Declared origin of the supplied rotational generalized inputs."""
 
     TOTAL_APPLIED = "total_applied"
+    IDEAL_DIRECT_OBSERVED = "ideal_direct_observed"
     COMMAND = "command"
     DELTA = "delta"
 
@@ -53,10 +54,10 @@ class ZOHLimits:
 
     lower_nm: Array
     upper_nm: Array
-    max_update_rate_nm_s: Array
-    max_l2_effort_nm2_s: float
-    max_positive_work_j: float
-    max_abs_signed_work_j: float
+    max_update_rate_nm_s: Array | None
+    max_l2_effort_nm2_s: float | None
+    max_positive_work_j: float | None
+    max_abs_signed_work_j: float | None
 
 
 @dataclass(frozen=True)
@@ -65,11 +66,14 @@ class ZOHWorkAudit:
 
     status: Literal["pass", "violation", "indeterminate"]
     violations: tuple[str, ...]
+    missing_limits: tuple[str, ...]
     signed_work_j: float
     positive_work_j: float
     negative_work_j: float
     l2_effort_nm2_s: float
     peak_update_rate_nm_s: Array | None
+    evidence_kind: AppliedEvidenceKind
+    assumption_limited: bool
     continuous_certified: bool = False
     provenance_is_caller_asserted: bool = True
     initial_update_unobserved: bool = True
@@ -93,7 +97,12 @@ def audit_total_applied_zoh(evidence: AppliedZOH, limits: ZOHLimits) -> ZOHWorkA
     """
     if not isinstance(evidence, AppliedZOH) or not isinstance(limits, ZOHLimits):
         raise ValueError("applied evidence and limits records are required")
-    if evidence.evidence_kind is not AppliedEvidenceKind.TOTAL_APPLIED:
+    if not isinstance(
+        evidence.evidence_kind, AppliedEvidenceKind
+    ) or evidence.evidence_kind not in (
+        AppliedEvidenceKind.TOTAL_APPLIED,
+        AppliedEvidenceKind.IDEAL_DIRECT_OBSERVED,
+    ):
         raise ValueError("total applied input evidence is required")
     if any(
         not isinstance(value, str) or not value.strip()
@@ -120,7 +129,11 @@ def audit_total_applied_zoh(evidence: AppliedZOH, limits: ZOHLimits) -> ZOHWorkA
     v_end = _finite(evidence.velocity_end_rad_s, "end velocity", 2)
     lower = _finite(limits.lower_nm, "lower torque limit", 1)
     upper = _finite(limits.upper_nm, "upper torque limit", 1)
-    slew = _finite(limits.max_update_rate_nm_s, "update-rate limit", 1)
+    slew = (
+        None
+        if limits.max_update_rate_nm_s is None
+        else _finite(limits.max_update_rate_nm_s, "update-rate limit", 1)
+    )
     if (
         len(times) < 2
         or not np.isfinite(np.diff(times)).all()
@@ -130,16 +143,21 @@ def audit_total_applied_zoh(evidence: AppliedZOH, limits: ZOHLimits) -> ZOHWorkA
     count, channels = len(times) - 1, len(names)
     if any(x.shape != (count, channels) for x in (torque, v_start, v_end)):
         raise ValueError("each hold requires total torque and both endpoint velocities")
-    if any(x.shape != (channels,) for x in (lower, upper, slew)):
+    if any(x.shape != (channels,) for x in (lower, upper)) or (
+        slew is not None and slew.shape != (channels,)
+    ):
         raise ValueError("limit vectors must match the channel inventory")
-    if np.any(lower > upper) or np.any(slew < 0.0):
+    if np.any(lower > upper) or (slew is not None and np.any(slew < 0.0)):
         raise ValueError("torque bounds and update-rate limits must be ordered")
     scalars = (
         limits.max_l2_effort_nm2_s,
         limits.max_positive_work_j,
         limits.max_abs_signed_work_j,
     )
-    if not np.isfinite(scalars).all() or np.any(np.asarray(scalars) < 0.0):
+    if any(
+        value is not None and (not np.isfinite(value) or value < 0.0)
+        for value in scalars
+    ):
         raise ValueError("work and effort limits must be finite and nonnegative")
 
     durations = np.diff(times)
@@ -167,22 +185,47 @@ def audit_total_applied_zoh(evidence: AppliedZOH, limits: ZOHLimits) -> ZOHWorkA
     violations = []
     if np.any((torque < lower) | (torque > upper)):
         violations.append("torque")
-    if peak is not None and np.any(peak > slew):
+    if peak is not None and slew is not None and np.any(peak > slew):
         violations.append("update_rate")
-    if effort > limits.max_l2_effort_nm2_s:
+    if limits.max_l2_effort_nm2_s is not None and effort > limits.max_l2_effort_nm2_s:
         violations.append("l2_effort")
-    if positive > limits.max_positive_work_j:
+    if limits.max_positive_work_j is not None and positive > limits.max_positive_work_j:
         violations.append("positive_work")
-    if abs(signed) > limits.max_abs_signed_work_j:
+    if (
+        limits.max_abs_signed_work_j is not None
+        and abs(signed) > limits.max_abs_signed_work_j
+    ):
         violations.append("signed_work")
+    missing = tuple(
+        name
+        for name, value in (
+            ("update_rate", slew),
+            ("l2_effort", limits.max_l2_effort_nm2_s),
+            ("positive_work", limits.max_positive_work_j),
+            ("signed_work", limits.max_abs_signed_work_j),
+        )
+        if value is None
+    )
     return ZOHWorkAudit(
         status=(
-            "violation" if violations else "indeterminate" if peak is None else "pass"
+            "violation"
+            if violations
+            else (
+                "indeterminate"
+                if peak is None
+                or missing
+                or evidence.evidence_kind is AppliedEvidenceKind.IDEAL_DIRECT_OBSERVED
+                else "pass"
+            )
         ),
         violations=tuple(violations),
+        missing_limits=missing,
         signed_work_j=signed,
         positive_work_j=positive,
         negative_work_j=negative,
         l2_effort_nm2_s=effort,
         peak_update_rate_nm_s=peak,
+        evidence_kind=evidence.evidence_kind,
+        assumption_limited=evidence.evidence_kind
+        is AppliedEvidenceKind.IDEAL_DIRECT_OBSERVED,
     )

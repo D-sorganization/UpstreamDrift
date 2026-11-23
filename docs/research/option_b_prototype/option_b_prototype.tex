@@ -52,6 +52,11 @@ An audit pass covers only this declared schedule and interpolation. Units,
 rotational coordinate mapping, limits and applied-input provenance are
 caller assertions; neither intervening motion nor actuator or anatomical
 feasibility is certified. No value is clipped by this audit.
+Observed ideal direct generalized inputs have a separate, assumption-limited
+evidence kind; they are not relabeled as actuator measurements. A result with
+no declared-limit violations remains indeterminate for this evidence kind.
+Unknown work, effort or update-rate limits are represented as unavailable,
+not fabricated; they also make a no-violation result indeterminate.
 
 \section{Verification}
 The focused Python tests cover the total-command saturation, coefficient trust,

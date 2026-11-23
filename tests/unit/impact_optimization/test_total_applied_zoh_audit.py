@@ -88,6 +88,11 @@ def test_command_or_delta_cannot_be_relabeled_as_applied(kind):
         audit_total_applied_zoh(evidence(evidence_kind=kind), limits())
 
 
+def test_string_cannot_spoof_typed_evidence_kind():
+    with pytest.raises(ValueError, match="total applied"):
+        audit_total_applied_zoh(evidence(evidence_kind="total_applied"), limits())
+
+
 @pytest.mark.parametrize(
     "changes",
     [
@@ -112,6 +117,42 @@ def test_no_clipping_and_no_continuous_slew_certificate():
     assert report.status == "violation" and "torque" in report.violations
     assert obj.total_applied_nm[0, 0] == 20.0
     assert not report.continuous_certified
+
+
+def test_observed_ideal_direct_input_is_explicitly_assumption_limited():
+    obj = evidence(evidence_kind=AppliedEvidenceKind.IDEAL_DIRECT_OBSERVED)
+    report = audit_total_applied_zoh(obj, limits())
+    assert report.status == "indeterminate"
+    assert report.assumption_limited
+    assert report.evidence_kind is AppliedEvidenceKind.IDEAL_DIRECT_OBSERVED
+    assert report.signed_work_j == pytest.approx(2.0)
+
+
+def test_ideal_direct_model_violation_is_not_a_physical_claim():
+    obj = evidence(evidence_kind=AppliedEvidenceKind.IDEAL_DIRECT_OBSERVED)
+    report = audit_total_applied_zoh(obj, limits(upper_nm=np.array([1.0, 10.0])))
+    assert report.status == "violation"
+    assert report.assumption_limited and not report.continuous_certified
+    assert "torque" in report.violations
+
+
+def test_missing_limits_remain_indeterminate_without_invented_bounds():
+    unknown = limits(
+        max_update_rate_nm_s=None,
+        max_l2_effort_nm2_s=None,
+        max_positive_work_j=None,
+        max_abs_signed_work_j=None,
+    )
+    report = audit_total_applied_zoh(evidence(), unknown)
+    assert report.status == "indeterminate"
+    assert report.missing_limits == (
+        "update_rate",
+        "l2_effort",
+        "positive_work",
+        "signed_work",
+    )
+    assert report.signed_work_j == pytest.approx(2.0)
+    assert report.peak_update_rate_nm_s[0] == pytest.approx(0.0)
 
 
 def test_one_hold_does_not_claim_an_observed_update_rate():
