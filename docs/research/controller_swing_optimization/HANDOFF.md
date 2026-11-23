@@ -2809,3 +2809,22 @@ units. This remains infeasible under modeled gates, and post-violation work
 is not physical evidence. Prefix spline, added feedforward, reference shift
 and fade have no combined trust certificate; capacities, work/slew, contact
 and full-swing admission remain unverified.
+
+A bounded multivariable reference/feedforward sensitivity used analytic C2
+reference shifts of [0.25, -1.25, 2.0] mm, each within the stated +/-2 mm
+per-axis limits but with 2.372 mm vector peak. Prefix spline norm was 0.3161
+within radius 10 and independent feedforward tail 1.1867 within radius 2;
+the fade remains separate and no unified mixed-unit trust is certified.
+Sampled reference closure <=4.95e-12, reference ROM and interval-speed
+checks passed, and post-150 ms source/observed marker RMS changed from
+29.226/30.319 to 29.236/30.327 mm, source feet 3.007 to 3.031 mm.
+
+Independent 16/32 actual motor replay preserved the first 150 ms q/drive
+exactly and had no ROM/speed flags before 200 ms or clipping through 300 ms.
+At 300 ms two modeled ROM slots still failed, maximum excess 0.271893 rad
+versus 0.431638, with no speed flags; first ROM failure was about 240.68 ms.
+Joint RMS was 0.129815 rad and peak actual drive 125.292 N m. Matched-hold
+16/32 q/v/drive differences were <=4.41e-6 / 1.73e-4 / 6.37e-5 in native
+units. This is an improvement in a short modeled diagnostic, not a gate pass,
+physiological qualification, contact or full-swing result. Post-failure work
+is not feasibility evidence and work/slew limits remain unsourced.
