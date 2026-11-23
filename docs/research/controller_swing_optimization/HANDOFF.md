@@ -2700,3 +2700,14 @@ clipping and joint RMS 0.3296 rad. Sixteen/32 matched-hold q/v/drive
 differences were <=2.32e-6 / 9.61e-5 / 2.86e-5 in native units. Work totals
 after gate violations are not physical-feasibility evidence. This remains an
 assumption-limited diagnostic, not a validated 300 ms or full swing.
+
+A causal post-seam cubic-tail diagnostic retained the first 150 ms q and
+applied-drive arrays exactly and kept the first 200 ms sampled modeled ROM
+checks clear. Its separate coefficient norm was about 1.0 within a declared
+radius 2; the original prefix spline retained its separate radius 10 and the
+quintic fade was another policy. No combined-policy trust certificate is
+claimed. In the 32-substep motor replay, worst 250 ms modeled ROM excess fell
+1.03766 to 1.01350 rad but five ROM and one speed slots still failed; by
+300 ms 13 ROM and five speed slots failed, with no clipping. Sixteen/32
+matched-hold differences were small. This was not a meaningful feasibility
+improvement, and work/slew and physiological limits remain unverified.
