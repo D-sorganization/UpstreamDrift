@@ -575,3 +575,14 @@ is not a physiological actuator model, a trajectory or a physical limit.
 The existing solver consumes its supplied effort directly, so any future seam
 must explicitly avoid double counting; physical actuator provenance and
 post-saturation trajectory evidence remain missing and the gate stays closed.
+
+Research branch `codex/15493-actuator-seam-research` at `6d934c440d`
+adds a stateless point-evaluation seam using caller-supplied joint motors on
+a copy of the base model. It passes MuJoCo's post-saturation generalized
+actuator force exactly once to the constrained solve and rejects missing or
+stateful actuators and passive-shaft drive. Five focused tests cover synthetic
+control and force clipping, a non-unit transmission and no repeated-call
+accumulation; Ruff, Black, scoped mypy, LaTeX compilation and normal headless
+push hooks passed. This is not integrated with stage recording and supplies
+neither physiological motor limits nor a validated actuator model. Its branch
+is based on oversized research and is not a Slice 1 PR or physical admission.
