@@ -1923,3 +1923,13 @@ normal commit and push hooks including mypy, Bandit and the unit-test hook.
 This is a small pushed checkpoint, not a PR or the required finite-face
 contact gate. It overlaps the impact-force files of the larger real-face
 research branch and must be reconciled before integration.
+
+A four-window exact-seam Option B continuation removed sampled modeled ROM
+and speed flags over 40 ms / 1,280 RK4 stages, with coefficient norm 9.43307
+inside the 10 N m diagnostic ball and 672 clipped stages. Signed applied-stage
+work was -5.947 J, positive-power integral 0.303 J, and peak 1 ms drive
+update 23.2964 N m. Uninterrupted replay first flagged ROM at stage 1843
+(approximately 57.6 ms), then hit a numerical guard at 1.270 s with 38 ROM
+and 41 speed coordinates flagged. The run's post-violation outputs are not
+physical metrics. Sixteen torque capacities and the work/slew bounds remain
+unverified; sampled short-window success does not admit this swing.
