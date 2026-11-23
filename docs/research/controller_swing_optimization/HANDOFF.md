@@ -686,3 +686,17 @@ active-bound gradients dependent, so multiplier estimates can be non-unique.
 This local finding does not prove infeasibility or stationarity; actual
 inequality complementarity, complete physical limits and forward tracking
 remain open.
+
+A full-horizon sensitivity mapped the existing directional model torque
+priors to synthetic motor control ranges for all 41 non-root v2 coordinates.
+Sixteen slots are explicitly assumed or unverified; subject and actuator
+inventory remain unverified. With the same computed-torque controller,
+1 ms hold, eight substeps, zero KKT regularization, no projection and no
+impact, this run reached 1.250 s then hit a numerical guard after 40,000
+accepted stages. Applied motor force matched directional clipping at each
+recorded stage; 37 coordinates clipped in 5,792 stages (14.48%). Against
+the corresponding ideal run, maximum coordinate difference first exceeded
+0.01 rad at 0.008 s, 0.1 at 1.139 s and 1 rad at 1.166 s; speed exceeded
+100 rad/s at 1.215 s. The divergent tail makes whole-partial-run RMS
+misleading. This is model-envelope sensitivity, not a physical gate pass,
+physiological limit, Option B result or proof of infeasibility.
