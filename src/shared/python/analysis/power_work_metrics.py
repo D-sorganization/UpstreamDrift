@@ -43,6 +43,62 @@ def _power_active_duration(times: np.ndarray, active: np.ndarray) -> float:
     return float(step_dt[segment_active].sum())
 
 
+def _bound_overlapping_durations(
+    gen_dur: float, abs_dur: float, t_total: float
+) -> tuple[float, float]:
+    """Scale gen/abs durations when OR-segment overlap exceeds ``t_total``."""
+    if t_total > 0.0 and gen_dur + abs_dur > t_total:
+        scale = t_total / (gen_dur + abs_dur)
+        return gen_dur * scale, abs_dur * scale
+    return gen_dur, abs_dur
+
+
+def _integrate_power_net(power: np.ndarray, dt: float) -> float:
+    if hasattr(np, "trapezoid"):
+        return float(np.trapezoid(power, dx=dt))
+    trapz_func = getattr(np, "trapz")  # noqa: B009
+    return float(trapz_func(power, dx=dt))
+
+
+def _ensure_joint_power_metrics(result: JointPowerMetrics, t_total: float) -> None:
+    ensure(
+        result.peak_generation >= 0,
+        "peak generation must be non-negative",
+        result.peak_generation,
+    )
+    ensure(
+        result.peak_absorption <= 0,
+        "peak absorption must be non-positive",
+        result.peak_absorption,
+    )
+    ensure(
+        result.generation_duration >= 0,
+        "generation duration must be non-negative",
+        result.generation_duration,
+    )
+    ensure(
+        result.absorption_duration >= 0,
+        "absorption duration must be non-negative",
+        result.absorption_duration,
+    )
+    ensure(np.isfinite(result.net_work), "net work must be finite", result.net_work)
+    ensure(
+        result.generation_duration <= t_total + 1e-9,
+        "generation duration must not exceed the signal interval",
+        result.generation_duration,
+    )
+    ensure(
+        result.absorption_duration <= t_total + 1e-9,
+        "absorption duration must not exceed the signal interval",
+        result.absorption_duration,
+    )
+    ensure(
+        result.generation_duration + result.absorption_duration <= t_total + 1e-9,
+        "generation plus absorption duration must not exceed the signal interval",
+        result.generation_duration + result.absorption_duration,
+    )
+
+
 def _split_trapezoid(values: np.ndarray, dx: float) -> tuple[float, float]:
     """Integrate the positive and negative parts of a sampled signal.
 
@@ -225,69 +281,19 @@ class PowerWorkMetricsMixin:
         peak_abs = float(np.min(power)) if np.any(abs_indices) else 0.0
         avg_abs = float(np.mean(power[abs_indices])) if np.any(abs_indices) else 0.0
         abs_dur = _power_active_duration(times, abs_indices)
-        if t_total > 0.0 and gen_dur + abs_dur > t_total:
-            scale = t_total / (gen_dur + abs_dur)
-            gen_dur *= scale
-            abs_dur *= scale
-
-        if hasattr(np, "trapezoid"):
-            net_work = float(np.trapezoid(power, dx=dt))
-        else:
-            trapz_func = getattr(np, "trapz")  # noqa: B009
-            net_work = float(trapz_func(power, dx=dt))
+        gen_dur, abs_dur = _bound_overlapping_durations(gen_dur, abs_dur, t_total)
 
         result = JointPowerMetrics(
             peak_generation=peak_gen,
             peak_absorption=peak_abs,
             avg_generation=avg_gen,
             avg_absorption=avg_abs,
-            net_work=net_work,
+            net_work=_integrate_power_net(power, dt),
             generation_duration=gen_dur,
             absorption_duration=abs_dur,
         )
 
-        # Postconditions
-        ensure(
-            result.peak_generation >= 0,
-            "peak generation must be non-negative",
-            result.peak_generation,
-        )
-        ensure(
-            result.peak_absorption <= 0,
-            "peak absorption must be non-positive",
-            result.peak_absorption,
-        )
-        ensure(
-            result.generation_duration >= 0,
-            "generation duration must be non-negative",
-            result.generation_duration,
-        )
-        ensure(
-            result.absorption_duration >= 0,
-            "absorption duration must be non-negative",
-            result.absorption_duration,
-        )
-        ensure(
-            np.isfinite(result.net_work),
-            "net work must be finite",
-            result.net_work,
-        )
-        ensure(
-            result.generation_duration <= t_total + 1e-9,
-            "generation duration must not exceed the signal interval",
-            result.generation_duration,
-        )
-        ensure(
-            result.absorption_duration <= t_total + 1e-9,
-            "absorption duration must not exceed the signal interval",
-            result.absorption_duration,
-        )
-        ensure(
-            result.generation_duration + result.absorption_duration <= t_total + 1e-9,
-            "generation plus absorption duration must not exceed the signal interval",
-            result.generation_duration + result.absorption_duration,
-        )
-
+        _ensure_joint_power_metrics(result, t_total)
         return result
 
     def compute_impulse_metrics(
