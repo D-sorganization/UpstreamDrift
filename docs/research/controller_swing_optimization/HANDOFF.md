@@ -1362,3 +1362,17 @@ extension hit a numerical guard at 0.805 s with partial joint RMS 0.212 rad,
 peak ideal held effort 64,437 N m and 11 modeled ROM flags. This is an
 unconstrained, projected computed-torque diagnostic, not Option B, physical
 feasibility or a baseline improvement. Private receipts remain outside git.
+
+Research branch `codex/15493-main-bundle17` at `84a8c9f155` bridges the
+merged bundle codec and fresh closed-loop replay runner, with separate recorded
+playback and explicit per-quantity boundary q/v/command/time comparisons. A
+serialized two-link ODE fixture reruns with fresh factories in the same
+runtime. It fails closed outside a no-impact, no-saturation, stateless fixed-
+ZOH subset without external assets. Factories, model and runtime are caller-
+attested; actual applied torque, impact and independent runtime are unverified,
+and full migration, actual v2 and complete replay remain missing. A tiny-dt
+fixed-grid tolerance defect was reproduced and fixed test-first. Thirteen
+focused bridge tests, 115 combined neighboring tests before that additional
+case, scoped mypy, Ruff, Black, LaTeX compilation and normal headless push
+hooks passed. The branch has 499 insertions against fetched main `d73e7e933e`;
+refresh main and reconcile before reuse. It is not a completed Slice 2 or PR.
