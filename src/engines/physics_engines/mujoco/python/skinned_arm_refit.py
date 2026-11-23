@@ -32,6 +32,7 @@ from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
     export_full_body_mjcf,
 )
 from src.shared.python.model_appearance.club_assembly import assembly_from_spec
+from src.shared.python.model_appearance.hand_spec import spec_grip_pose
 from src.shared.python.model_appearance.skinned_club_hands import forearm_reach_m
 
 Array = NDArray[np.float64]
@@ -273,7 +274,7 @@ def refit_arms_to_club(
     club_rotation, club_origin = source.club_frame()
     cuffs = {
         side: club_rotation @ along
-        for side, (_, along) in forearm_reach_m(club).items()
+        for side, (_, along) in forearm_reach_m(club, spec_grip_pose(spec_to)).items()
     }
     arms, low, high, stay = _free_coordinates(spec_to, (*also_free, *posture))
     order = list(spec_to["coordinate_order"])

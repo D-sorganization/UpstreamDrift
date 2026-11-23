@@ -20,6 +20,7 @@ from numpy.typing import NDArray
 
 from src.shared.python.core.handedness import subject_handedness
 from src.shared.python.model_appearance.club_assembly import assembly_from_spec
+from src.shared.python.model_appearance.hand_spec import spec_grip_pose
 from src.shared.python.model_appearance.schema import physics_spec_sha256
 from src.shared.python.model_appearance.skinned_club_hands import wrist_joints_m
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
@@ -88,7 +89,9 @@ def apply_skinned_hand_wrists(document: Mapping[str, Any]) -> dict[str, Any]:
     The lead wrist joint and the ``LW`` frame move on the club body; the trail
     wrist moves by shifting ``closure.placement_a`` on the trail hand body.
     ``subject.hand_visual_backend`` becomes ``skinned_human`` and
-    ``spec_revision`` records the parent hashes.
+    ``spec_revision`` records the parent hashes. The pair is posed from the
+    document's ``subject.grip_config`` when it has one, else from the owner
+    grip (#15654).
 
     Preconditions: a right-handed document with a club (``ValueError``
     otherwise; the skinned pair is posed right-handed). Postconditions: the
@@ -103,7 +106,7 @@ def apply_skinned_hand_wrists(document: Mapping[str, Any]) -> dict[str, Any]:
     club = assembly_from_spec(document)
     if club is None:
         raise ValueError("document has no club to hold")
-    target = wrist_joints_m(club)
+    target = wrist_joints_m(club, spec_grip_pose(document))
     now = wrist_joints_in_club_m(document)
     out = copy.deepcopy(dict(document))
     placed = all(np.allclose(now[side], target[side], atol=1e-12) for side in target)

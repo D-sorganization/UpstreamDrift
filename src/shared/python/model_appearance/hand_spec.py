@@ -100,6 +100,9 @@ class ResolvedHandSpec:
     #: The emitter draws the skinned body: a skinned hand ends in a sleeve under
     #: the forearm's skin (``skinned_club_hands.WristSleeve``), with no wrist ball.
     forearm_skin: bool = False
+    #: ``pose`` comes from the spec's ``subject.grip_config`` (#15654), not the
+    #: default: the skinned pair is then posed from it, else from the owner grip.
+    grip_configured: bool = False
 
     def __post_init__(self) -> None:
         if not isinstance(self.pose, GripPose):
@@ -118,6 +121,24 @@ class ResolvedHandSpec:
         return self.grip_geometry.radius_at(distance_below_butt_m)
 
 
+def spec_grip_pose(spec_document: Mapping[str, Any]) -> GripPose | None:
+    """The visual :class:`GripPose` of the spec's ``subject.grip_config``.
+
+    ``None`` for a document without one. ``ValueError`` for a configuration
+    that is not a valid grip (an unknown style, an angle out of range).
+    """
+    if not isinstance(spec_document, Mapping):
+        raise TypeError("spec_document must be a mapping")
+    if spec_document.get("subject", {}).get("grip_config") is None:
+        return None
+    # Imported here: grip_rotation pulls the motion-matching package.
+    from src.shared.python.motion_matching.execution.grip_rotation import (
+        grip_spec_of,
+    )
+
+    return grip_spec_of(spec_document).pose()
+
+
 def resolved_hand_spec(spec_document: Mapping[str, Any]) -> ResolvedHandSpec:
     """The :class:`ResolvedHandSpec` a spec document describes.
 
@@ -125,15 +146,8 @@ def resolved_hand_spec(spec_document: Mapping[str, Any]) -> ResolvedHandSpec:
     ``hand_size`` range.
     """
     subject = spec_document.get("subject", {})
-    if subject.get("grip_config") is not None:
-        # Imported here: grip_rotation pulls the motion-matching package.
-        from src.shared.python.motion_matching.execution.grip_rotation import (
-            grip_spec_of,
-        )
-
-        pose = grip_spec_of(spec_document).pose()
-    else:
-        pose = DEFAULT_GRIP_POSE
+    configured = spec_grip_pose(spec_document)
+    pose = DEFAULT_GRIP_POSE if configured is None else configured
     override = subject.get("hand_length_m")
     stature = subject.get("stature_m")
     if override is None and stature is None:
@@ -154,4 +168,5 @@ def resolved_hand_spec(spec_document: Mapping[str, Any]) -> ResolvedHandSpec:
         visual_backend=str(
             subject.get("hand_visual_backend", DEFAULT_HAND_VISUAL_BACKEND)
         ),
+        grip_configured=configured is not None,
     )

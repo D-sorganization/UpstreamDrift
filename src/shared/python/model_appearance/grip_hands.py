@@ -234,7 +234,8 @@ def grip_hand_meshes(
     meshes in the club-body frame.
 
     With ``hands.visual_backend`` set to ``skinned_human`` the skinned human
-    pair of :mod:`skinned_club_hands` is drawn instead, squared to the clubface.
+    pair of :mod:`skinned_club_hands` is drawn instead, squared to the clubface,
+    posed from the spec's grip when ``hands.grip_configured`` (#15654).
     """
     _check_club(club)
     _check_pose(pose)
@@ -245,7 +246,12 @@ def grip_hand_meshes(
         )
 
         under_skin = hands.forearm_skin
-        return skinned_hand_meshes(club, with_ball=not under_skin, sleeve=under_skin)
+        return skinned_hand_meshes(
+            club,
+            with_ball=not under_skin,
+            sleeve=under_skin,
+            grip=hands.pose if hands.grip_configured else None,
+        )
     return {
         label: _placed_hand(club, hand, pose, hand_length_m=hand_length_m, hands=hands)
         for hand, label in HAND_PARTS.items()
