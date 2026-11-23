@@ -2828,3 +2828,16 @@ Joint RMS was 0.129815 rad and peak actual drive 125.292 N m. Matched-hold
 units. This is an improvement in a short modeled diagnostic, not a gate pass,
 physiological qualification, contact or full-swing result. Post-failure work
 is not feasibility evidence and work/slew limits remain unsourced.
+
+One bounded relinearization of the multivariable motor diagnostic selected an
+unclipped quarter-step after larger coarse steps clipped. Independent 16/32
+replays reduced the worst sampled 300 ms modeled ROM excess from 0.271893 to
+0.233913 rad; two ROM slots still failed, no speed slots failed, and first
+200 ms remained clear. First ROM flag occurred about 241.49 ms; joint RMS
+changed 0.129815 to 0.130044 rad and peak actual drive was 125.292 N m.
+The first 150 ms q/drive remained identical. Source/observed marker RMS
+changed 29.236/30.327 to 29.242/30.331 mm and model feet 3.031 to 3.048 mm.
+Reference shift amplitudes were [0.375, -1.375, 2] mm: inside each +/-2 mm
+axis bound but about 2.454 mm vector norm. Tail/prefix/fade bounds remain
+separate, with no unified trust certificate. Assumed capacities, work/slew,
+contact and full-swing feasibility remain unverified; this is not a gate pass.
