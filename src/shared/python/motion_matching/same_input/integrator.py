@@ -157,23 +157,29 @@ def zoh_rk4_step(
     dt_s: float,
     *,
     observe: Callable[[int, float, Array, Array], None] | None = None,
+    observe_drive: Callable[[Array, Array], None] | None = None,
 ) -> tuple[Array, Array]:
     """One classical RK4 step with ``tau`` held constant over the step."""
-    if observe is not None:
-        observe(1, 0.0, q, v)
-    k1q, k1v = v, plant.acceleration(q, v, tau)
+
+    def evaluate(stage: int, offset: float, state_q: Array, state_v: Array) -> Array:
+        if observe is not None:
+            observe(stage, offset, state_q, state_v)
+        if observe_drive is None:
+            return plant.acceleration(state_q, state_v, tau)
+        method = getattr(plant, "acceleration_with_drive", None)
+        if not callable(method):
+            raise TypeError("plant cannot supply ideal drive effort evidence")
+        acceleration, drive, external = method(state_q, state_v, tau)
+        observe_drive(drive, external)
+        return np.asarray(acceleration, dtype=float)
+
+    k1q, k1v = v, evaluate(1, 0.0, q, v)
     q2, v2 = q + dt_s / 2 * k1q, v + dt_s / 2 * k1v
-    if observe is not None:
-        observe(2, dt_s / 2, q2, v2)
-    k2q, k2v = v2, plant.acceleration(q2, v2, tau)
+    k2q, k2v = v2, evaluate(2, dt_s / 2, q2, v2)
     q3, v3 = q + dt_s / 2 * k2q, v + dt_s / 2 * k2v
-    if observe is not None:
-        observe(3, dt_s / 2, q3, v3)
-    k3q, k3v = v3, plant.acceleration(q3, v3, tau)
+    k3q, k3v = v3, evaluate(3, dt_s / 2, q3, v3)
     q4, v4 = q + dt_s * k3q, v + dt_s * k3v
-    if observe is not None:
-        observe(4, dt_s, q4, v4)
-    k4q, k4v = v4, plant.acceleration(q4, v4, tau)
+    k4q, k4v = v4, evaluate(4, dt_s, q4, v4)
     q_next = q + dt_s / 6 * (k1q + 2 * k2q + 2 * k3q + k4q)
     v_next = v + dt_s / 6 * (k1v + 2 * k2v + 2 * k3v + k4v)
     if not (np.isfinite(q_next).all() and np.isfinite(v_next).all()):
@@ -190,6 +196,14 @@ class _ForcedPlant:
 
     def acceleration(self, q: Array, v: Array, tau: Array) -> Array:
         return self._plant.acceleration(q, v, tau + self._external(q))
+
+    def acceleration_with_drive(
+        self, q: Array, v: Array, tau: Array
+    ) -> tuple[Array, Array, Array]:
+        method = getattr(self._plant, "acceleration_with_drive_components", None)
+        if not callable(method):
+            raise TypeError("plant cannot supply separate ideal drive effort evidence")
+        return method(q, v, tau, self._external(q))
 
 
 def _plant_poses(plant: DynamicsPlant) -> Callable[[Array], Mapping[str, Array]]:
@@ -286,7 +300,9 @@ def integrate(
             time_s=np.arange(len(qs), dtype=np.float64) * dt_s,
             q=np.array(qs),
             v=np.array(vs),
-            efforts=np.array(efforts).reshape(len(efforts), -1),
+            efforts=np.array(efforts).reshape(
+                len(efforts), len(plant.coordinate_order)
+            ),
             pose_drift=np.array(drift),
             failure=failure,
             ball_impact=None if impact is None else impact.to_record(),
@@ -342,7 +358,19 @@ def _held_step(
                         k, h, 0, substep, j * hold_dt + substep * sub_dt, tau
                     )
                 )
-                q, v = zoh_rk4_step(plant, q, v, tau, sub_dt, observe=observe)
+                q, v = zoh_rk4_step(
+                    plant,
+                    q,
+                    v,
+                    tau,
+                    sub_dt,
+                    observe=observe,
+                    observe_drive=(
+                        recorder.record_drive
+                        if recorder is not None and recorder.capture_ideal_drive
+                        else None
+                    ),
+                )
         else:
             q, v, impact = _impact_hold(
                 plant,
@@ -420,7 +448,21 @@ def _impact_hold(
                     tau,
                 )
             )
-            q_a, v_a = zoh_rk4_step(forced, q_a, v_a, tau, sub_dt, observe=observe)  # type: ignore[arg-type]
+            q_a, v_a = zoh_rk4_step(
+                forced,  # type: ignore[arg-type]
+                q_a,
+                v_a,
+                tau,
+                sub_dt,
+                observe=observe,
+                observe_drive=(
+                    recorder.record_drive
+                    if recorder is not None
+                    and not trial
+                    and recorder.capture_ideal_drive
+                    else None
+                ),
+            )
             offset += sub_dt
         if not trial:
             segment += 1
