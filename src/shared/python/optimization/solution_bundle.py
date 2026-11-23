@@ -165,14 +165,14 @@ def _validate_metadata(bundle: SolutionBundle) -> None:
             )
         if not all(_is_finite_number(v) for v in values):
             raise SolutionBundleError(f"impact_event.{key} must be finite numbers")
-    for key in (
-        "control",
-        "integrator",
-        "environment",
-        "flight_metrics",
-        "feasibility_margins",
-    ):
-        _require_finite(getattr(bundle, key), key)
+    # The whole manifest, not a hand-picked subset: every serialised field must
+    # satisfy the strict-JSON contract the writer enforces.
+    _require_finite(_manifest(bundle, "0" * 64), "manifest")
+
+
+def _reject_json_constant(name: str) -> object:
+    """``json.loads`` hook: refuse the non-standard NaN/Infinity tokens."""
+    raise SolutionBundleError(f"{MANIFEST_NAME} contains non-finite constant {name}")
 
 
 def _manifest(bundle: SolutionBundle, digest: str) -> dict[str, Any]:
@@ -247,9 +247,18 @@ def load_solution_bundle(
         if not path.is_file():
             raise SolutionBundleError(f"missing {path.name} in {root}")
     try:
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
+        manifest = json.loads(
+            manifest_path.read_text(encoding="utf-8"),
+            parse_constant=_reject_json_constant,
+        )
+    except ValueError as exc:  # JSONDecodeError, oversized int literals
+        if isinstance(exc, SolutionBundleError):
+            raise
         raise SolutionBundleError(f"{MANIFEST_NAME} is not valid JSON: {exc}") from exc
+    if not isinstance(manifest, dict):
+        raise SolutionBundleError(f"{MANIFEST_NAME} must contain a JSON object")
+    # Overflowed literals such as 1e999 parse to inf: check before any use.
+    _require_finite(manifest, "manifest")
     version = manifest.get("schema_version")
     if version not in SUPPORTED_SCHEMA_VERSIONS:
         raise SolutionBundleError(f"unsupported schema_version {version!r}")

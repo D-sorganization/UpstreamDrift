@@ -6,6 +6,7 @@ import hashlib
 import json
 from dataclasses import replace
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
@@ -285,6 +286,76 @@ def test_load_rejects_nonfinite_manifest_values(
 
 def test_save_rejects_nonfinite_flight_metric(tmp_path: Path) -> None:
     bundle = replace(_bundle(), flight_metrics={"carry_m": float("inf")})
+
+    with pytest.raises(SolutionBundleError, match="finite"):
+        save_solution_bundle(bundle, tmp_path / "b")
+    assert not (tmp_path / "b").exists()
+
+
+_UNCHECKED_FIELD_PATHS: list[tuple[str | int, ...]] = [
+    ("optimizer_seed",),
+    ("parent_id",),
+    ("asset_hashes", "club"),
+    ("assumptions", 0),
+    ("extra_field",),
+    ("impact_event", "extra"),
+]
+
+
+@pytest.mark.parametrize("literal", ["NaN", "Infinity", "-Infinity", "1e999"])
+@pytest.mark.parametrize("field_path", _UNCHECKED_FIELD_PATHS)
+def test_load_rejects_nonfinite_values_anywhere_in_manifest(
+    tmp_path: Path, literal: str, field_path: tuple[str | int, ...]
+) -> None:
+    save_solution_bundle(_bundle(), tmp_path / "b")
+    path = tmp_path / "b" / "manifest.json"
+    manifest = json.loads(path.read_text("utf-8"))
+    node = manifest
+    for key in field_path[:-1]:
+        node = node[key]
+    node[field_path[-1]] = "__BAD__"
+    path.write_text(json.dumps(manifest).replace('"__BAD__"', literal), "utf-8")
+
+    with pytest.raises(SolutionBundleError, match="finite"):
+        load_solution_bundle(tmp_path / "b")
+
+
+def test_load_rejects_oversized_integer_literal_as_solution_error(
+    tmp_path: Path,
+) -> None:
+    save_solution_bundle(_bundle(), tmp_path / "b")
+    path = tmp_path / "b" / "manifest.json"
+    manifest = json.loads(path.read_text("utf-8"))
+    manifest["optimizer_seed"] = "__BAD__"
+    text = json.dumps(manifest).replace('"__BAD__"', "9" * 5000)
+    path.write_text(text, "utf-8")
+
+    with pytest.raises(SolutionBundleError):
+        load_solution_bundle(tmp_path / "b")
+
+
+def test_load_rejects_non_object_manifest(tmp_path: Path) -> None:
+    save_solution_bundle(_bundle(), tmp_path / "b")
+    (tmp_path / "b" / "manifest.json").write_text("[1, 2]", "utf-8")
+
+    with pytest.raises(SolutionBundleError, match="object"):
+        load_solution_bundle(tmp_path / "b")
+
+
+@pytest.mark.parametrize("bad", [float("nan"), float("inf"), float("-inf")])
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        lambda bad: {"optimizer_seed": bad},
+        lambda bad: {"asset_hashes": {"club": bad}},
+        lambda bad: {"assumptions": (bad,)},
+        lambda bad: {"parent_id": bad},
+    ],
+)
+def test_save_rejects_nonfinite_values_anywhere_in_manifest(
+    tmp_path: Path, bad: float, overrides: Any
+) -> None:
+    bundle = replace(_bundle(), **overrides(bad))
 
     with pytest.raises(SolutionBundleError, match="finite"):
         save_solution_bundle(bundle, tmp_path / "b")
