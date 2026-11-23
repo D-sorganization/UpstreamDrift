@@ -29,28 +29,27 @@ Implements Issue #5337 (foundation).
 
 from __future__ import annotations
 
-import math
 import logging
+import math
 from dataclasses import dataclass, field, replace
 from typing import Any, Protocol, runtime_checkable
 
 import numpy as np
 
 from src.shared.python.contracts import ensure, require
-from src.shared.python.physics.ball_launch_conditions import (
-    EnvironmentalConditions,
-    LaunchConditions,
-    TrajectoryPoint,
-)
 from src.shared.python.physics.ball_flight_validity import (
     FlightValidityVerdict,
     assess_trajectory_validity,
     clamp_launch_spin_rate,
     launch_spin_envelope,
 )
+from src.shared.python.physics.ball_launch_conditions import (
+    EnvironmentalConditions,
+    LaunchConditions,
+    TrajectoryPoint,
+)
 from src.shared.python.physics.ball_properties import BallProperties
 from src.shared.python.physics.divot_model import DivotResult, SwingArc, compute_divot
-from src.shared.python.physics.terrain.materials import SurfaceMaterial
 from src.shared.python.physics.impact_model import (
     ImpactModelType,
     ImpactParameters,
@@ -58,6 +57,7 @@ from src.shared.python.physics.impact_model import (
     PostImpactState,
     PreImpactState,
 )
+from src.shared.python.physics.terrain.materials import SurfaceMaterial
 
 logger = logging.getLogger(__name__)
 
@@ -404,26 +404,10 @@ class SwingBallFlightPipeline:
             spin_factor,
         )
 
-        if (divot_arc is None) != (turf_material is None):
-            raise ValueError("divot_arc and turf_material must be supplied together")
-        divot = None
-        impact_swing = swing
-        if divot_arc is not None and turf_material is not None:
-            divot = compute_divot(
-                divot_arc,
-                float(np.linalg.norm(swing.clubhead_velocity)),
-                turf_material,
-                effective_mass_kg=swing.clubhead_mass,
-            )
-            if divot.speed_retention == 0.0:
-                raise ValueError("club stopped by turf before ball impact")
-            impact_swing = replace(
-                swing,
-                clubhead_velocity=(
-                    np.asarray(swing.clubhead_velocity) * divot.speed_retention
-                ),
-            )
-            spin_factor *= divot.spin_retention
+        impact_swing, divot, spin_retention = self._apply_divot(
+            swing, divot_arc, turf_material
+        )
+        spin_factor *= spin_retention
 
         # Step 1: Build pre-impact state from the ground-adjusted swing.
         pre = self._build_pre_impact_state(impact_swing)
@@ -469,6 +453,41 @@ class SwingBallFlightPipeline:
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _apply_divot(
+        swing: SwingState,
+        divot_arc: SwingArc | None,
+        turf_material: SurfaceMaterial | None,
+    ) -> tuple[SwingState, DivotResult | None, float]:
+        """Return the ground-adjusted swing, divot, and launch spin retention.
+
+        Paired ground inputs are required; a stopped club raises before impact.
+        The original swing and its velocity array remain unchanged.
+        """
+        if (divot_arc is None) != (turf_material is None):
+            raise ValueError("divot_arc and turf_material must be supplied together")
+        divot = None
+        spin_retention = 1.0
+        impact_swing = swing
+        if divot_arc is not None and turf_material is not None:
+            divot = compute_divot(
+                divot_arc,
+                float(np.linalg.norm(swing.clubhead_velocity)),
+                turf_material,
+                effective_mass_kg=swing.clubhead_mass,
+            )
+            if divot.speed_retention == 0.0:
+                raise ValueError("club stopped by turf before ball impact")
+            impact_swing = replace(
+                swing,
+                clubhead_velocity=(
+                    np.asarray(swing.clubhead_velocity) * divot.speed_retention
+                ),
+            )
+            spin_retention = divot.spin_retention
+
+        return impact_swing, divot, spin_retention
 
     def _build_pre_impact_state(self, swing: SwingState) -> PreImpactState:
         """Convert ``SwingState`` to ``PreImpactState`` (LOD boundary)."""
