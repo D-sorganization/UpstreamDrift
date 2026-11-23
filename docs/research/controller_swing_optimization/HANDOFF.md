@@ -2788,3 +2788,24 @@ the previous bump. This remains far from a gate pass; post-violation work is
 not feasibility evidence. Prefix spline, added feedforward, reference shift
 and fade have separate numerical bounds but no unified trust certificate.
 Physical capacities, work/slew, full swing and contact remain unverified.
+
+A multiaxis support-reference sensitivity added a -1 mm lateral C2 shift to
+the existing +2 mm vertical shift, with q/qd/qdd derived from the same
+analytic shapes and no direct root torque. Each axis stayed within its
+declared +/-2 mm numerical bound; combined displacement peaked at 2.236 mm,
+so this is not a 2 mm Euclidean bound. Reference closure stayed <=4.95e-12
+with no sampled reference ROM/interval-speed flags. Post-150 ms source/
+observed marker RMS changed 29.202/30.299 to 29.226/30.319 mm and source
+feet 3.126 to 3.007 mm.
+
+Independent 16/32 actual motor replays preserved the first 150 ms q/drive
+bit-for-bit and had no sampled ROM/speed flags before 200 ms. By 300 ms,
+two modeled ROM slots and no speed slots failed, maximum excess 0.43164 rad
+versus 1.35006 in the prior candidate; first ROM failure moved from about
+224.2 to 238.8 ms. Joint RMS changed 0.18018 to 0.13116 rad and root
+rotation RMS 0.17011 to 0.04359 rad; no stage clipped. Matched-hold 16/32
+q/v/applied-drive differences were <=4.63e-6 / 2.09e-4 / 7.25e-5 native
+units. This remains infeasible under modeled gates, and post-violation work
+is not physical evidence. Prefix spline, added feedforward, reference shift
+and fade have no combined trust certificate; capacities, work/slew, contact
+and full-swing admission remain unverified.
