@@ -84,7 +84,11 @@ def growth_rate(time_s: Array, error: Array, low: float, high: float) -> float:
 def score_replay(
     plant: FramePlant, bundle: InputBundle, rollout: Rollout, *, frame_stride: int = 10
 ) -> ReplayScore:
-    """Compare ``rollout`` with the bundle reference over the steps it reached."""
+    """Compare reached states; frame bounds are checked only at sampled frames.
+
+    The reported horizon is the first sampled violation, or the last reached
+    time if no violation is observed. It is not a continuous-time guarantee.
+    """
     reached = rollout.q.shape[0]
     if reached > bundle.steps + 1 or rollout.q.shape[1] != bundle.q0.size:
         raise ValueError("rollout must not exceed the bundle")
@@ -103,11 +107,13 @@ def score_replay(
         ]
     )
     frame_time = rows * bundle.dt_s
-    inside = (coordinate_error <= COORDINATE_BOUND_RAD)[rows] & (
-        frame_error <= FRAME_BOUND_M
-    )
-    first_out = np.flatnonzero(~inside)
-    horizon = float(frame_time[-1] if first_out.size == 0 else frame_time[first_out[0]])
+    coordinate_out = np.flatnonzero(~(coordinate_error <= COORDINATE_BOUND_RAD))
+    frame_out = np.flatnonzero(~(frame_error <= FRAME_BOUND_M))
+    horizon = float(rollout.time_s[-1])
+    if coordinate_out.size:
+        horizon = min(horizon, float(rollout.time_s[coordinate_out[0]]))
+    if frame_out.size:
+        horizon = min(horizon, float(frame_time[frame_out[0]]))
     return ReplayScore(
         time_s=rollout.time_s,
         coordinate_error=coordinate_error,

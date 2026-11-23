@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -192,6 +193,47 @@ def test_score_replay_of_the_reference_is_exact() -> None:
     summary = score.summary()
     assert summary["growth_rate_per_s"] is None  # no growth band: strict JSON null
     json.dumps(summary, allow_nan=False)
+
+
+def test_replay_horizon_catches_coordinate_excursion_between_frame_samples() -> None:
+    bundle = _bundle()
+    rollout = open_loop(
+        _Oscillator(),
+        bundle.q0,
+        bundle.v0,
+        bundle.efforts,
+        dt_s=bundle.dt_s,
+        policy=StepPolicy(project=False),
+    )
+    q = rollout.q.copy()
+    q[2, -1] += 2e-6
+    score = score_replay(_Oscillator(), bundle, replace(rollout, q=q), frame_stride=5)
+    assert score.horizon_s == pytest.approx(2 * bundle.dt_s)
+
+
+def test_replay_horizon_uses_earliest_coordinate_or_sampled_frame_failure() -> None:
+    class _MagnifiedFrame(_Oscillator):
+        def kinematic_frames(self, q):
+            pose = np.eye(4)
+            pose[0, 3] = 2000 * q[-1]
+            return {"tip": pose}
+
+    bundle = _bundle()
+    rollout = open_loop(
+        _Oscillator(),
+        bundle.q0,
+        bundle.v0,
+        bundle.efforts,
+        dt_s=bundle.dt_s,
+        policy=StepPolicy(project=False),
+    )
+    q = rollout.q.copy()
+    q[5, -1] += 6e-7  # below coordinate bound, above sampled frame bound
+    q[7, -1] += 2e-6
+    score = score_replay(
+        _MagnifiedFrame(), bundle, replace(rollout, q=q), frame_stride=5
+    )
+    assert score.horizon_s == pytest.approx(5 * bundle.dt_s)
 
 
 def test_stop_on_failure_returns_the_states_reached() -> None:
