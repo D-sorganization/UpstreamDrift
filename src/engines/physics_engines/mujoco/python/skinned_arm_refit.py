@@ -262,8 +262,7 @@ def refit_arms_to_club(
     ``posture`` gives coordinates an angle (rad) to sit at (#15277): solved
     with the arms, pulled there by ``posture_weight`` in place of toward ``q``.
 
-    Preconditions: both specs share ``coordinate_order`` and hold a club for a
-    right-handed golfer;
+    Preconditions: both specs share ``coordinate_order``, hold a right-handed club;
     ``q`` has one finite value per coordinate; ``alignment_weight >= 0``;
     every ``also_free`` and ``posture`` name is a coordinate, posture targets
     are finite and ``posture_weight >= 0`` (``ValueError`` otherwise).
