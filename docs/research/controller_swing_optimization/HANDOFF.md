@@ -2410,3 +2410,14 @@ were dominant clipped slots and their capacities are unverified. The cases
 also had toe ROM/speed flags under the model. These results do not establish
 verified physiological restrictions or justify escalating gains in place of
 addressing the coupled reference and dynamics.
+
+An early local -4 ms reference timing warp preserved q0/q1, sampled closure,
+modeled registry ROM and interval-speed bounds before replay. Independent
+16/32-substep ideal runs over 200 ms agreed to maximum q/v/held-command
+differences 2.61e-7 / 1.70e-5 / 0.00114 in native units. First-100-ms modeled
+capacity peak ratio improved 1.608 to 1.477, with violating held commands 27
+to 18, but a wrist range first exceeded its modeled bound at 0.195 s (six
+samples, peak 0.000388 degrees); the original refined run remained inside
+through 200 ms. Reject the candidate under the zero-tolerance modeled gate.
+This is ideal-drive numerical evidence, not applied-motor or physiological
+acceptance; capacity priors remain assumption-limited.
