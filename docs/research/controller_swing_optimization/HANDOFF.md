@@ -2441,3 +2441,21 @@ at 1.110 s with 31 ROM and 31 speed slots flagged. Sixteen/32-substep motor
 checks through 150 ms agreed closely on the violations (peak difference
 <4e-9 rad), not on full-horizon feasibility. Work and slew limits and the
 physical provenance of several capacities remain unverified.
+
+The 32-substep early-warp/wrist-margin ideal continuation completed 1.319 s
+without numerical failure. Against the refined original it changed source/
+observed marker RMS from 35.279/40.911 to 36.198/41.703 mm and sampled
+modeled ROM-flagged states from 712 to 614, but right subtalar peak excess
+worsened 1.1058 to 1.1118 degrees and left wrist 0.4471 to 0.4487 degrees.
+Modeled speed flags remained zero; held ideal commands above assumed capacity
+changed 236 to 234, peak ratio 7.24873 to 7.25312, and peak absolute command
+425.6 to 389.7 N m. Reject as gate-regressing. Sixteen/32 agreement for this
+candidate was checked only through 200 ms; actual motor stages, work, impact
+and physical feasibility remain unverified.
+
+A further 150 ms exact-seam motor restoration reduced worst sampled modeled
+ROM excess 0.004383 to 0.001266 rad but left two coordinates failing and
+increased tracking RMS. The full replay first flagged ROM around 102.7 ms and
+stopped at 0.861 s with 32 ROM and 26 speed slots flagged. Ill-conditioned
+selected sensitivities and this local failure do not establish global
+infeasibility; no physical acceptance is implied.
