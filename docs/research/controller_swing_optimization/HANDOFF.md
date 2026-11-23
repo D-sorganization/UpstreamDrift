@@ -2669,3 +2669,19 @@ with no clipping and joint tracking RMS 0.3156 rad. Sixteen/32 substeps
 agreed on the flags. The added residual tail is a new diagnostic policy, not
 the original trust-certified spline; work/slew and physical capacities remain
 unverified. Reject this as a feasible continuation or full swing.
+
+Main-based research checkpoint `codex/15493-reference-causality39` at
+`934be28f78` adds an opt-in conservative source-row support diagnostic for
+position, velocity and acceleration sampling, with a past-only rejection
+check. It preserves existing GCV-20 semantics: rate tables split at impact
+and position interpolation remains unsplit. Twenty-five focused tests and
+normal push hooks passed; 237 added lines, no PR. It does not establish
+causality of earlier filtering, hooks or closed-loop dynamics.
+
+For the bridge motor replay, the first post-seam modeled subtalar failure is
+already determined by the unchanged seam state: q=0.349040956 rad versus
+upper 0.349065850 rad with outward velocity 3.14636 rad/s; the next RK4
+midpoint exceeds the bound. A smooth post-seam -1 N m test confirmed the
+same first failure. This rules out correcting that first midpoint using only
+post-seam torque while holding the seam state exact; it does not prove global
+infeasibility when the earlier trajectory may change.
