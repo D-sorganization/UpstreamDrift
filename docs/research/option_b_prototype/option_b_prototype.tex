@@ -33,6 +33,9 @@ caller specifies the control hold; clipping takes place after all feedforward
 and feedback terms are summed. A downstream plant may mask or transform these
 inputs, so the ideal input is not established as post-saturation actuator or
 anatomical torque. No continuous-time bound or physical acceptance follows.
+For an explicitly unactuated coordinate, both limits may be set to zero;
+equal nonzero limits are rejected. A nonzero command on that coordinate is
+recorded as saturated before the plant receives the zero ideal input.
 
 \section{Verification}
 The focused Python tests cover the total-command saturation, coefficient trust,

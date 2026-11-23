@@ -125,8 +125,9 @@ class FixedGainController:
             raise ValueError("gain and limit vectors must match channels")
         if np.any(self._kp < 0.0) or np.any(self._kd < 0.0):
             raise ValueError("fixed gains must be nonnegative")
-        if np.any(self._lower >= self._upper):
-            raise ValueError("saturation lower bound must be below upper bound")
+        fixed = self._lower == self._upper
+        if np.any(self._lower > self._upper) or np.any(fixed & (self._lower != 0.0)):
+            raise ValueError("equal saturation bounds are allowed only at zero")
         if not isinstance(residual, SplineResidual) or residual._channels != n:
             raise ValueError("spline channels must match controller")
         if residual._start != self._times[0] or residual._end != self._times[-1]:

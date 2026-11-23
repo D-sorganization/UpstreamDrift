@@ -96,6 +96,17 @@ def test_directional_saturation_records_full_command_and_negative_bound():
     assert result.saturated[1]
 
 
+def test_fixed_zero_unactuated_channel_clips_nonzero_total_command():
+    result = controller(
+        lower_nm=np.array([0.0, -6.0]), upper_nm=np.array([0.0, 4.0])
+    ).evaluate(0.5, np.array([-1.0, 2.0]), np.zeros(2))
+    assert result.commanded_nm[0] == pytest.approx(8.5)
+    assert result.applied_nm[0] == 0.0
+    assert result.saturated[0]
+    with pytest.raises(ValueError):
+        controller(lower_nm=np.array([1.0, -6.0]), upper_nm=np.array([1.0, 4.0]))
+
+
 def test_nonzero_residual_is_added_before_total_saturation():
     coeff = np.ones((5, 2)) * 0.5
     result = controller(residual=residual(coeff)).evaluate(
@@ -149,8 +160,10 @@ def test_clipped_total_drives_existing_held_integrator():
 
     times = np.array([0.0, 0.02])
     reference = np.zeros((2, 7))
+    reference[:, 0] = 2.0
     reference[:, 6] = 10.0
     gains = np.zeros(7)
+    gains[0] = 2.0
     gains[6] = 2.0
     spline = SplineResidual(
         breakpoints_s=times,
@@ -166,8 +179,8 @@ def test_clipped_total_drives_existing_held_integrator():
         tau_ff_ref=np.zeros((2, 7)),
         kp=gains,
         kd=np.zeros(7),
-        lower_nm=-np.ones(7),
-        upper_nm=np.ones(7),
+        lower_nm=np.array([0.0] * 6 + [-1.0]),
+        upper_nm=np.array([0.0] * 6 + [1.0]),
         residual=spline,
     )
     decisions = []
@@ -188,6 +201,10 @@ def test_clipped_total_drives_existing_held_integrator():
     )
     assert len(decisions) == 2
     assert all(d.commanded_nm[6] > 1.0 and d.saturated[6] for d in decisions)
+    assert all(
+        d.commanded_nm[0] == 4.0 and d.applied_nm[0] == 0.0 and d.saturated[0]
+        for d in decisions
+    )
     np.testing.assert_array_equal(run.efforts[:, 6], [1.0, 1.0])
     assert run.q[-1, 6] == pytest.approx(0.0002)
     assert run.v[-1, 6] == pytest.approx(0.02)
