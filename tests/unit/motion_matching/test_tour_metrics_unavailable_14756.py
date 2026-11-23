@@ -77,3 +77,52 @@ def test_fully_observed_metrics_stay_finite() -> None:
     assert metrics.early_marker_rmse_m == pytest.approx(0.1)
     assert metrics.pelvis_yaw_rmse_rad == pytest.approx(0.0)
     assert metrics.terminal_marker_rmse_m == pytest.approx(0.1)
+
+
+# --- Persistence boundary: unavailable metrics must be strict-JSON null -----
+
+
+def _missing_club_metrics() -> dict[str, float | None]:
+    cap = _capture(np.ones((FRAMES, len(LABELS)), dtype=bool))
+    return compute_shared_metrics(cap, _offset_pred(cap)).as_dict()
+
+
+def test_as_dict_emits_none_for_unavailable_metrics() -> None:
+    metrics = _missing_club_metrics()
+    assert metrics["club_marker_rmse_m"] is None
+    assert metrics["whole_marker_rmse_m"] == pytest.approx(0.1)
+
+
+def test_as_dict_is_strict_json_serialisable() -> None:
+    import json
+
+    payload = json.dumps({"shared_metrics": _missing_club_metrics()}, allow_nan=False)
+    assert json.loads(payload)["shared_metrics"]["club_marker_rmse_m"] is None
+
+
+def test_receipt_field_annotations_accept_unavailable_metrics() -> None:
+    from pydantic import TypeAdapter
+
+    from src.shared.python.motion_matching.pipeline.receipt_schema import (
+        CandidateReplayReceipt,
+    )
+
+    for field in ("shared_metrics", "g1_metrics"):
+        annotation = CandidateReplayReceipt.model_fields[field].annotation
+        adapter = TypeAdapter(annotation, config=CandidateReplayReceipt.model_config)
+        adapter.validate_python(_missing_club_metrics())
+        with pytest.raises(ValueError):
+            adapter.validate_python({"club_marker_rmse_m": float("nan")})
+
+
+def test_unavailable_club_metric_fails_g1_acceptance_closed() -> None:
+    from src.engines.physics_engines.mujoco.python.replay_contract import (
+        g1_acceptance,
+    )
+
+    metrics = _missing_club_metrics()
+    result = g1_acceptance(metrics, {})
+    by_name = {g["name"]: g for g in result["gates"]}
+    assert by_name["required_club_marker_rmse_m"]["status"] == "failed"
+    assert by_name["required_club_marker_rmse_m"]["measured"] is None
+    assert result["is_physically_accepted"] is False

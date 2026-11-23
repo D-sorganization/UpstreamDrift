@@ -18,6 +18,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 
+import math
+
 import numpy as np
 
 from src.shared.python.motion_matching.tour_capture_contract import (
@@ -45,8 +47,14 @@ class SharedMetrics:
         """Full-marker terminal RMS (authoritative; identical to terminal_marker_rmse_m)."""
         return self.terminal_marker_rmse_m
 
-    def as_dict(self) -> dict[str, float]:
-        return {
+    def as_dict(self) -> dict[str, float | None]:
+        """Persistence view: unavailable (non-finite) metrics become ``None``.
+
+        ``None`` serialises to strict-JSON ``null`` and validates against the
+        receipt schema (``float | None``, ``allow_inf_nan=False``); downstream
+        gates treat it as missing evidence and fail closed (#14756 P7).
+        """
+        values = {
             "whole_marker_rmse_m": self.whole_marker_rmse_m,
             "early_marker_rmse_m": self.early_marker_rmse_m,
             "terminal_marker_rmse_m": self.terminal_marker_rmse_m,
@@ -58,6 +66,7 @@ class SharedMetrics:
             "club_marker_rmse_m": self.club_marker_rmse_m,
             "pelvis_yaw_rmse_rad": self.pelvis_yaw_rmse_rad,
         }
+        return {k: (v if math.isfinite(v) else None) for k, v in values.items()}
 
 
 def _pelvis_yaw(points: np.ndarray, wl_idx: int, wr_idx: int) -> np.ndarray:
