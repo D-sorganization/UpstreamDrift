@@ -1,0 +1,20 @@
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+\section{Finite Face Geometry}
+The exported surface is the visual clubhead triangle patch selected by the
+existing face-marking routine, using its normal threshold and front-of-centre
+heuristic. It is a model assumption, not an independently measured face.
+Empty, nonfinite or degenerate selected geometry is rejected. The assembly
+applies the existing head seating, axis offset, roll and shaft slide in metres.
+For club-frame placement $(R,p)$, each club-body vertex $x$ becomes
+$R^{T}(x-p)$ in that frame. A frame outside the club assembly is rejected.
+
+Only geometry is returned. No signed-distance search or contact verdict is
+performed; initial overlap and an uncertified first root remain unqualified.
+This interface cannot establish approach speed, interval coverage, convergence,
+impact, or flight. The v2 regression compares transformed triangles against the
+rendered patch and checks copy isolation; it does not certify a real swing.
+Reproduce with \texttt{python -m pytest -q
+tests/unit/motion\_matching/test\_v2\_finite\_face\_geometry\_15493.py}.
+\end{document}

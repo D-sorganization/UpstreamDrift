@@ -363,3 +363,9 @@ Shared beside the spine packages:
 
 - `expected_putts.solve_expected_putts` and `optimize.optimal_expected_putts` give a player's own expected-putts curve E(d) by solving `(I - M) E = 1` exactly over every leave sample (no mean-leave Jensen bias); the second also returns the best `PuttAction` (aim, pace) per distance by policy iteration.
 - `optimize.evaluate_actions` scores candidates on common random numbers with standard errors; `best_action(..., "sg" | "must_make")` picks fewest expected strokes or highest make rate. `strokes_gained(d, outcomes, player, tour)` returns `sg_player` (against the player's own E(d), 0 for their best action) and `sg_tour` (against a reference field), each using one curve for both start and leave.
+
+## Rendered Clubface Geometry
+
+`motion_matching.club_face_target.face_triangles_in_frame` exposes the existing
+rendered finite face patch in a club frame. It is geometry only, not a contact
+verdict or first-root certification; see `docs/research/finite_face_geometry`.

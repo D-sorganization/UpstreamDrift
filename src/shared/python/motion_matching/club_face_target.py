@@ -152,6 +152,17 @@ def face_axis_in_frame(spec: Mapping[str, Any], frame: str = FACE_FRAME) -> Arra
     return np.asarray(axis / np.linalg.norm(axis), dtype=float)
 
 
+def face_triangles_in_frame(spec: Mapping[str, Any], frame: str = FACE_FRAME) -> Array:
+    """Rendered finite face patch in the requested club frame; not contact evidence."""
+    from src.shared.python.model_appearance import club_assembly as ca
+
+    assembly, _ = require_club_assembly(spec)
+    _, placement = _frame_placement(spec, frame)
+    face_axis_in_frame(spec, frame)  # reject frames outside the club body
+    triangles = ca.clubface_triangles(assembly)
+    return np.asarray((triangles - placement[:3, 3]) @ placement[:3, :3])
+
+
 def face_centre_in_frame(spec: Mapping[str, Any], frame: str = FACE_FRAME) -> Array:
     """Rendered face-centre point expressed in the spec ``frame`` (metres)."""
     from src.shared.python.model_appearance import club_assembly as ca

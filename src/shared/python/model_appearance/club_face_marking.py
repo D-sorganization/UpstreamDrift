@@ -133,6 +133,25 @@ def face_triangle_mask(mesh: Mesh, frame: FaceFrame, cos_min: float) -> np.ndarr
     return np.asarray((fn @ frame.normal > cos_min) & ahead)
 
 
+def face_surface_triangles(mesh: Mesh) -> Array:
+    """Return the rendered face patch, not a contact or first-root verdict."""
+    mask = face_triangle_mask(mesh, face_frame(mesh), FACE_NORMAL_COS)
+    triangles = np.asarray(mesh.vertices[mesh.faces[mask]], dtype=float).copy()
+    if triangles.ndim != 3 or triangles.shape[1:] != (3, 3) or not len(triangles):
+        raise ValueError("face patch must contain triangles")
+    area = np.linalg.norm(
+        np.cross(triangles[:, 1] - triangles[:, 0], triangles[:, 2] - triangles[:, 0]),
+        axis=1,
+    )
+    if (
+        not np.isfinite(triangles).all()
+        or not np.isfinite(area).all()
+        or np.any(area <= 0)
+    ):
+        raise ValueError("face patch must contain finite nondegenerate triangles")
+    return triangles
+
+
 def _ray_heights(tri: Array, origins: Array, direction: Array) -> Array:
     """Distance to the nearest triangle hit along ``direction``, inf if none."""
     e1, e2 = tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0]
