@@ -116,6 +116,29 @@ class VectorPlant:
         )
         return self._ordered(result)
 
+    def acceleration_with_drive_components(
+        self,
+        q: Array,
+        v: Array,
+        drive: Array,
+        external: Array,
+    ) -> tuple[Array, Array, Array]:
+        """Direct ideal inputs at this solve; not a saturated actuator model."""
+        method = getattr(self._adapter, "accelerations_with_drive", None)
+        if self.engine != "mujoco" or not callable(method):
+            raise TypeError("engine cannot provide ideal drive effort evidence")
+        acceleration, effective_drive, effective_external = method(
+            self._named(q), self._named(v), self._named(drive), self._named(external)
+        )
+        return self._ordered(acceleration), effective_drive, effective_external
+
+    def acceleration_with_drive(
+        self, q: Array, v: Array, drive: Array
+    ) -> tuple[Array, Array, Array]:
+        return self.acceleration_with_drive_components(
+            q, v, drive, np.zeros_like(drive)
+        )
+
     def closure_residuals(self, q: Array, v: Array) -> tuple[Array, Array]:
         """Engine-native weld pose residual (6) and rate residual (6) at ``(q, v)``.
 

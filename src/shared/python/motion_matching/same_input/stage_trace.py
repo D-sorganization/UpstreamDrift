@@ -4,7 +4,7 @@ Stages are numerical evaluation states, not a continuous-time certificate.
 """
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import numpy as np
 from numpy.typing import NDArray
@@ -24,6 +24,9 @@ class Stage:
     q: Array
     v: Array
     tau: Array
+    applied_drive: Array | None = None
+    applied_external: Array | None = None
+    effort_semantics: str | None = None
 
 
 @dataclass(frozen=True)
@@ -92,7 +95,8 @@ class TracedStep:
 class StageRecorder:
     """Commit one complete integration step at a time; failed buffers vanish."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, capture_ideal_drive: bool = False) -> None:
+        self.capture_ideal_drive = capture_ideal_drive
         self.steps: list[TracedStep] = []
         self._pending: list[Stage] = []
         self._segments: list[SegmentPlan] = []
@@ -211,6 +215,17 @@ class StageRecorder:
                         return "held effort changes within a hold"
                 else:
                     held_efforts[stage.hold] = stage.tau
+                if self.capture_ideal_drive and (
+                    stage.applied_drive is None
+                    or stage.applied_external is None
+                    or stage.applied_drive.shape != (nv,)
+                    or stage.applied_external.shape != (nv,)
+                    or not np.isfinite(stage.applied_drive).all()
+                    or not np.isfinite(stage.applied_external).all()
+                    or stage.effort_semantics
+                    != "ideal_direct_generalized_no_saturation"
+                ):
+                    return "missing or invalid ideal drive evidence"
         expected = self.expected_stages()
         actual = [
             (s.step, s.hold, s.segment, s.substep, s.stage, s.time_s)
@@ -284,6 +299,16 @@ class StageRecorder:
             self.record(step, hold, segment, substep, stage, time_s + offset, q, v, tau)
 
         return record_stage
+
+    def record_drive(self, drive: Array, external: Array) -> None:
+        if not self._pending:
+            raise ValueError("drive evidence requires a pending stage")
+        self._pending[-1] = replace(
+            self._pending[-1],
+            applied_drive=np.asarray(drive, dtype=float).copy(),
+            applied_external=np.asarray(external, dtype=float).copy(),
+            effort_semantics="ideal_direct_generalized_no_saturation",
+        )
 
     def commit(
         self,

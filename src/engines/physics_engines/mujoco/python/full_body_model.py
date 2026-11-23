@@ -8,7 +8,7 @@ dual-grip weld closure via an explicit rigid solve.
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from importlib import import_module
 from typing import Any
 
@@ -386,12 +386,26 @@ class NativeMujocoFullBodyModel:
         coordinates: Mapping[str, float],
         rates: Mapping[str, float],
         primitive_efforts: Mapping[str, float],
+        *,
+        effort_parts: tuple[Mapping[str, float], Mapping[str, float]] | None = None,
+        effort_observer: Callable[[np.ndarray, np.ndarray], None] | None = None,
     ) -> tuple[np.ndarray, np.ndarray]:
         """Shared KKT solve: dense ``(qacc, lambda)``; leaves ``data`` at the state."""
         mj, model, data = self._mj, self.model, self.data
         effort = self._vector(primitive_efforts)
         if self._passive_dofs.size:
             effort[self._passive_dofs] = 0.0  # shaft joints are unactuated
+        if effort_parts is not None:
+            source, external = (self._vector(part) for part in effort_parts)
+            source[self._passive_dofs] = 0.0
+            external[self._passive_dofs] = 0.0
+            if not np.array_equal(source + external, effort):
+                raise ValueError("effort components do not match applied input")
+            if effort_observer is None:
+                raise ValueError("effort observer required")
+            effort_observer(
+                source[self._order_dofs].copy(), external[self._order_dofs].copy()
+            )
         bias, tau_contact, _ = self.generalized_forces(coordinates, rates)
 
         mass = full_mass_matrix(mj, model, data)
@@ -422,6 +436,27 @@ class NativeMujocoFullBodyModel:
         """Solve constrained dynamics with applied contact forces and dual-grip weld."""
         acceleration, _ = self._constrained_solve(coordinates, rates, primitive_efforts)
         return self._as_named(acceleration)
+
+    def accelerations_with_drive(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        source: Mapping[str, float],
+        external: Mapping[str, float],
+    ) -> tuple[dict[str, float], np.ndarray, np.ndarray]:
+        """Observe ideal direct generalized input, not saturated actuator torque."""
+        combined = {
+            name: source[name] + external[name] for name in self.coordinate_order
+        }
+        parts: list[tuple[np.ndarray, np.ndarray]] = []
+        acceleration, _ = self._constrained_solve(
+            coordinates,
+            rates,
+            combined,
+            effort_parts=(source, external),
+            effort_observer=lambda drive, impact: parts.append((drive, impact)),
+        )
+        return self._as_named(acceleration), *parts[0]
 
     def solve_with_multipliers(
         self,
