@@ -2074,6 +2074,7 @@
 {"path": "optimization/_swing_models.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/_swing_objectives.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/_swing_reference.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
+{"path": "optimization/applied_effort_audit.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/backend_registry.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/batch_swing_optimizer.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/casadi_backend.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
