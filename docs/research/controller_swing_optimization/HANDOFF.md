@@ -26,12 +26,14 @@ modified. Preserve private inputs and their identifying provenance outside git.
 - [ ] **Slice 2:** Versioned JSON and NPZ bundle, complete state and model
   identity, strict validation and migration, distinct playback and forward
   resimulation, and per-quantity replay tolerances. The separate research
-  branch `codex/15493-solution-bundle-prototype` at `d42adfc3f8` adds a
+  branch `codex/15493-solution-bundle-prototype` at `55fc00cd5a` adds a
   restricted research-only JSON/NPZ codec and a real two-hold MuJoCo replay
   with ideal clipped input. It can replay an unverified prescribed latched
-  force at an off-grid event and compare the actual split state; 100 focused
-  tests passed. This is not contact detection and uses the legacy impact
-  partition. It rejects unsupported policies and assets; its runtime
+  force at an off-grid event and compare the actual split state; 106 focused
+  tests passed. Its restricted runner now uses the fixed held-step lattice and
+  can observe ideal source and external inputs at accepted stages in memory;
+  those stages are not yet persisted. This is not contact detection. It rejects
+  unsupported policies and assets; its runtime
   fingerprint is partial while Git identity remains caller-asserted. Embedded assets,
   post-actuator evidence and full policy remain missing. A limited explicit
   research-v2/v3 to v4 no-impact fixed-grid migration is available; production
@@ -390,6 +392,34 @@ trust ball and met the sampled clipped-drive caps, but each exceeded 17 modeled
 ROM slots and three generalized-speed priors. This limited search does not
 prove infeasibility and lacks complete anatomical, actuator, work/slew,
 between-sample and impact evidence.
+A retrospective local KKT coupling direction was then tested with a single
+cubic residual coefficient at 0 and ±10 N m L2, keeping total-command
+clipping and all declared caps. The positive trial reduced 200 ms joint
+tracking RMS from 0.4448 to 0.4181 rad and modeled ROM flags from 17 to 16;
+all three still exceeded modeled motion limits. Fresh-plant same-runtime
+replays of the zero and positive trials matched saved q, v and inputs
+bit-for-bit. The direction was selected from one state; neither independent
+runtime replay nor physical qualification was performed, and this is not a
+power or carry improvement.
+A retrospective scale sweep along that same direction, using a larger
+declared coefficient trust radius up to 20 N m, reduced 200 ms tracking RMS
+to 0.3926 rad at the largest tested scale, but still exceeded 15 modeled ROM
+slots and four speed priors. It is not a feasible candidate; the arbitrary
+regularized diagnostic score did not improve monotonically with scale.
+A separate unit-L2-trust local acceleration-matching direction reduced the
+same-state modeled acceleration mismatch from 397.19 to 220.75 rad/s², but
+its 200 ms rollout changed tracking RMS only from 0.444824 to 0.444684 rad
+and still exceeded 17 modeled ROM and three speed slots. It did not produce
+an admissible candidate or establish infeasibility of the full search.
+A predeclared five-point combination of the two local directions stayed
+within a 10 N m coefficient trust ball. The best sampled tracking RMS was
+0.4330 versus 0.4448 rad for zero residual, but every candidate exceeded
+modeled motion limits. This small grid does not establish full-search
+infeasibility or a power improvement. A fresh same-runtime rerun of the
+lowest-tracking-RMS candidate, selected after the scan, matched saved state,
+command and ideal-input arrays bit-for-bit. Zero residual had the lower
+predeclared penalized score. This is not an independent runtime or a Solution
+Bundle replay.
 A matched 32-substep run completed 0.7 s with approximately the same 1.431 rad
 tracking RMS as the 16-substep run. Their maximum coordinate difference grew
 from 1.13e-7 rad at 0.4 s to 0.109 rad at 0.7 s; resolution convergence is
