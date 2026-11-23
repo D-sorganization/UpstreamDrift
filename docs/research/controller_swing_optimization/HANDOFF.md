@@ -483,3 +483,35 @@ projected-gradient infinity norm was 5.37. These are exploratory kinematic
 results, not a stationary fit, an admitted baseline, or physical validation.
 Further work must verify the native derivative mapping across the complete
 feasible domain and use hard closure and defensible physical limits.
+
+A same-seed 60 s LSMR sensitivity on the native-derivative soft fit compared
+inner tolerance 1e-6/max 200 against 1e-8/max 1000. Both timed out without
+stationarity; respectively they accepted 35 and 14 steps, with objectives
+7.983665 and 7.984408 and projected-gradient infinity norms 5.2031 and 5.2290.
+The tighter settings did not help in this limited comparison.
+
+A nine-frame hard-equality pilot used the existing SLSQP equality solver with
+all 54 native grip rows. It terminated successfully after 193 iterations in
+34.44 s; whole-residual directional derivative relative error was 1.46e-9.
+Independent original-frame checks found maximum closure translation
+6.73e-8 mm and rotation 3.35e-10 rad; the equality Jacobian had full row rank
+54 and condition number 9.69. The objective was 0.32457088834 versus
+0.32457088852 for the earlier finite-difference run from the same seed.
+The free-coordinate Lagrangian-gradient infinity norm was 0.00845; it omits
+active-bound multiplier signs and is not a KKT certificate. This window has
+35 active supplied bounds, free endpoints, assumed foot anchors, incomplete
+anatomy and no qualifying forward replay. It is not an admitted baseline.
+Test overlapping-window joins and a genuinely sparse full-trajectory constrained
+method before considering this result transferable.
+
+Research checkpoint `codex/15493-contact-root-kernel` at `810991550b` adds a
+bracket refinement kernel with approaching and face-eligibility checks, with
+10 focused tests including a MuJoCo sliding-face fixture; normal headless
+push checks passed. Its 369 changed lines include the earlier extraction.
+It does not yet integrate the real finite face or fixed-hold evaluator,
+certify first-contact scan coverage, or implement a smooth miss penalty.
+Research checkpoint `codex/15493-replay-horizon` at `12a806ea78` corrects a
+same-input parity score that hid coordinate excursions between sparse frame
+samples; 15 focused tests and normal headless push checks passed. Its frame
+checks remain sampled, and it is not the controller-based physical admission
+gate. Neither checkpoint is a PR or a complete Slice 1.
