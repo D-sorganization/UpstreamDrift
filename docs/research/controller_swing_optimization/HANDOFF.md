@@ -25,7 +25,14 @@ modified. Preserve private inputs and their identifying provenance outside git.
   a complete consistent reference and real matched-swing contact remain open.
 - [ ] **Slice 2:** Versioned JSON and NPZ bundle, complete state and model
   identity, strict validation and migration, distinct playback and forward
-  resimulation, and per-quantity replay tolerances.
+  resimulation, and per-quantity replay tolerances. The separate research
+  branch `codex/15493-solution-bundle-prototype` at `02402a9be2` adds a
+  restricted research-only JSON/NPZ codec and a real two-step no-impact
+  MuJoCo replay with ideal clipped input; 38 combined tests passed. It rejects
+  unsupported policies, assets and impact, and its runtime fingerprint is
+  partial while Git identity remains caller-asserted. Embedded assets,
+  post-actuator evidence, full policy and schema migration remain missing;
+  the oversized research branch is not a compliant or complete Slice 2 PR.
 - [ ] **Slice 3:** Fixed-gain tracking and bounded smooth feedforward spline;
   trust radius, sensitivity audit and total-applied-torque, ROM, speed,
   tracking, slew and work feasibility checks. A separate research primitive
