@@ -8,6 +8,7 @@ limits testable at endpoints and speed limits testable on whole segments.
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -33,37 +34,34 @@ def _margins(values: NDArray[np.float64], location: str) -> dict[str, Any]:
     }
 
 
-def audit_motion_limits(
+@dataclass(frozen=True)
+class MotionLimitPriors:
+    """Caller-sourced ROM, speed and optional coupled posture declarations.
+
+    The audit validates these declarations against the supplied motion; no
+    anatomical defaults or qualification are implied by constructing them.
+    """
+
+    lower_rad: ArrayLike
+    upper_rad: ArrayLike
+    max_speed_rad_s: ArrayLike
+    safety_margin_rad: float = 0.0
+    coupled_matrix: ArrayLike | None = None
+    coupled_upper_rad: ArrayLike | None = None
+
+
+def _validate_declarations(
     times_s: ArrayLike,
     q_rad: ArrayLike,
-    *,
     coordinate_order: Sequence[str],
-    lower_rad: ArrayLike,
-    upper_rad: ArrayLike,
-    max_speed_rad_s: ArrayLike,
     limit_source: str,
-    safety_margin_rad: float = 0.0,
-    coupled_matrix: ArrayLike | None = None,
-    coupled_upper_rad: ArrayLike | None = None,
-) -> dict[str, Any]:
-    """Check unwrapped angular motion against explicit constant priors.
-
-    Preconditions: finite q of shape (samples, joints), increasing seconds,
-    unique coordinate names, nonempty source, ordered per-joint ROM and
-    positive speed bounds. Optional coupled inequalities are A q <= b;
-    A is dimensionless, b is in radians, and rows must be nonzero. Both
-    coupled inputs must be supplied together. No anatomical defaults exist.
-
-    A nonnegative margin shrinks ROM at both ends and offsets each coupled
-    plane inward by that distance in radians; an empty ROM is rejected.
-    Postconditions: signed minimum margins, all violating samples/segments,
-    units, priors and interpolation are retained in strict-JSON-compatible
-    data. A pass applies only to the declared piecewise-linear path, not
-    spline/native replay or acceleration at knots. Limits are caller-sourced,
-    not independently verified; no clinical safety or feasibility is certified.
-
-    Raises ValueError for invalid declarations or nonfinite derived arithmetic.
-    """
+    priors: MotionLimitPriors,
+) -> tuple[NDArray[np.float64], ...]:
+    """Validate declarations and return finite arrays with compatible shapes."""
+    lower_rad, upper_rad = priors.lower_rad, priors.upper_rad
+    max_speed_rad_s = priors.max_speed_rad_s
+    safety_margin_rad = priors.safety_margin_rad
+    coupled_matrix, coupled_upper_rad = priors.coupled_matrix, priors.coupled_upper_rad
     times = readonly_float(times_s, "times_s")
     q = readonly_float(q_rad, "q_rad")
     if times.ndim != 1 or times.size < 2:
@@ -95,6 +93,41 @@ def audit_motion_limits(
     if (coupled_matrix is None) != (coupled_upper_rad is None):
         raise ValueError("coupled_matrix and coupled_upper_rad are a pair")
 
+    return times, q, lo, hi, speed_limit
+
+
+def audit_motion_limits(
+    times_s: ArrayLike,
+    q_rad: ArrayLike,
+    *,
+    coordinate_order: Sequence[str],
+    priors: MotionLimitPriors,
+    limit_source: str,
+) -> dict[str, Any]:
+    """Check unwrapped angular motion against explicit constant priors.
+
+    Preconditions: finite q of shape (samples, joints), increasing seconds,
+    unique coordinate names, nonempty source, ordered per-joint ROM and
+    positive speed bounds. Optional coupled inequalities are A q <= b;
+    A is dimensionless, b is in radians, and rows must be nonzero. Both
+    coupled inputs must be supplied together. No anatomical defaults exist.
+
+    A nonnegative margin shrinks ROM at both ends and offsets each coupled
+    plane inward by that distance in radians; an empty ROM is rejected.
+    Postconditions: signed minimum margins, all violating samples/segments,
+    units, priors and interpolation are retained in strict-JSON-compatible
+    data. A pass applies only to the declared piecewise-linear path, not
+    spline/native replay or acceleration at knots. Limits are caller-sourced,
+    not independently verified; no clinical safety or feasibility is certified.
+
+    Raises ValueError for invalid declarations or nonfinite derived arithmetic.
+    """
+    times, q, lo, hi, speed_limit = _validate_declarations(
+        times_s, q_rad, coordinate_order, limit_source, priors
+    )
+    safety_margin_rad = priors.safety_margin_rad
+    coupled_matrix, coupled_upper_rad = priors.coupled_matrix, priors.coupled_upper_rad
+    joints = q.shape[1]
     coupled = None
     coupled_priors = None
     try:

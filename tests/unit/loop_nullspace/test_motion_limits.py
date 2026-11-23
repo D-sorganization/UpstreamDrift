@@ -8,7 +8,10 @@ from typing import Any
 import numpy as np
 import pytest
 
-from scripts.research.nullspace_motion_limits import audit_motion_limits
+from scripts.research.nullspace_motion_limits import (
+    MotionLimitPriors,
+    audit_motion_limits,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -24,7 +27,21 @@ def _audit(**overrides: Any) -> dict[str, Any]:
         "limit_source": "Synthetic model-specific envelope; not human ROM",
     }
     args.update(overrides)
-    return audit_motion_limits(**args)
+    priors = MotionLimitPriors(
+        **{
+            name: args.pop(name)
+            for name in (
+                "lower_rad",
+                "upper_rad",
+                "max_speed_rad_s",
+                "safety_margin_rad",
+                "coupled_matrix",
+                "coupled_upper_rad",
+            )
+            if name in args
+        }
+    )
+    return audit_motion_limits(**args, priors=priors)
 
 
 def test_rom_and_segment_speed_margins_match_hand_calculation() -> None:
