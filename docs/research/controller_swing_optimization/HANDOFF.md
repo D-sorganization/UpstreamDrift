@@ -1076,3 +1076,19 @@ height −13.98 versus −13.59 mm. Initial preload shift was 0.00429 native
 units. This assumption-dependent, unsaturated ideal-drive proxy is not a
 qualified baseline or an improvement; numerical regularizers and trust
 bounds are not physical limits.
+
+A 0.100–0.110 s post-separation ImpactForce test explicitly rearmed the
+conditional scanner and used illustrative 10, 100 and 1000 m/s bounds.
+All ten 1 ms intervals returned conditionally clear with no event for each
+bound; end-state q differences versus the saved states were zero and maximum
+v difference 5.94e-14. Runtime was 106.5 s. Rearming discards the known
+unresolved initial overlap; the bounds are not verified continuous bounds,
+and 10 m/s is contradicted by a later sampled face speed. This is neither a
+first-contact result nor a global no-contact proof.
+
+At the same 199-frame samples, Euclidean target-marker RMS was 16.120 mm for
+the original proxy, 18.629 mm for the vertical-only support adjustment and
+17.236 mm for the coupled vertical/ankle adjustment; observed-marker RMS was
+32.621, 33.738 and 33.066 mm respectively. The coupled adjustment is closer
+to markers than vertical-only but farther than the original proxy, while its
+forward tracking, modeled ROM and ideal drive worsened. None is admitted.
