@@ -1092,3 +1092,25 @@ the original proxy, 18.629 mm for the vertical-only support adjustment and
 32.621, 33.738 and 33.066 mm respectively. The coupled adjustment is closer
 to markers than vertical-only but farther than the original proxy, while its
 forward tracking, modeled ROM and ideal drive worsened. None is admitted.
+
+A targeted ankle/lumbar Option B surrogate used fixed gains 3/0.3, the
+assumption-marked motor envelope and 10 N m coefficient trust. Its 7.828 N m
+candidate changed 200 ms joint RMS 0.44482 to 0.26871 rad, modeled ROM/speed
+flags 17/3 to 11/0 and modeled ROM RMS 0.29398 to 0.15878 rad; 1440 of 6400
+stages still clipped. The 1.322 s extension reproduced the first 200 ms stage
+arrays bit-for-bit in this runtime, then hit a guard at 0.531 s with 24 ROM
+and eight speed flags. Retrospective 0.5× and 1.2× scales stayed inside trust
+but still failed ROM. This is not a feasible or physically qualified swing,
+independent replay, carry or power improvement; 16/41 capacities are
+unverified.
+
+A coupled 199-frame root-height, bilateral ankle and knee sensitivity stopped
+at 20 evaluations / 98.18 s without convergence. Modeled support-balance RMS
+changed 0.01173 to 0.001582 bodyweights; grip closure stayed 3.38e-5 mm /
+8.37e-8 rad, with max ankle/knee shifts 2.60° / 1.75°. Target/observed marker
+RMS were 16.584 / 32.773 mm. A projected 0.55 s computed-torque replay
+completed 550 holds / 17,600 ideal-drive stages, but relative to the prior
+ankle/root adjustment q RMS worsened 0.02196 to 0.02630 rad, peak ideal
+drive 449.85 to 507.91 N m, worst model ROM excess 9.36° to 13.47°, and
+lowest modeled foot height −13.98 to −15.30 mm. It is an assumption-dependent
+nonconverged proxy, not a physical or actuator-qualified baseline.
