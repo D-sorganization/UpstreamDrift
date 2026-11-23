@@ -629,3 +629,21 @@ passed. A real-v2 synthetic two-step fixture required 0.1 microsecond steps;
 a 1 ms trial diverged. This is short plumbing evidence only, with synthetic
 motor limits, no admitted actuator model, and no impact or projection support
 in that mode. It is not a qualified trajectory or compliant Slice 1 PR.
+
+The unchanged pinned modeled-address ball was checked against the exploratory
+v2 computed-torque rollout. Its only 1 ms sampled clearance sign change was
+at 0.099–0.100 s and was separation after initial overlap. Re-integrating
+the held input at 125 and 62.5 microsecond maximum substeps located the
+separating root at 0.0990658750665 s with 1.37e-15 s between estimates and
+gap-increase speed 0.272676745 m/s; the approaching-contact finder rejected
+it. In the final 1 ms, 33 samples per resolution found no accepted candidate
+and sampled clearances 0.169752–0.210776 m. Both checks are exploratory,
+sampled evidence and cannot rule out unsampled crossings or establish contact
+for an admitted match. The ball placement was not altered.
+
+An independent non-draft PR #15552 at head `138feba99e37a9e03d19951a321ba30353924532`
+was opened by another lane for a sampled total-applied-torque and adjacent
+sample slew audit. Its stated scope does not include inter-sample behavior,
+work, ROM, tracking or the matched-swing experiment. It is unarmed and has not
+been integrated into this research; inspect its current state before reuse.
+It is not evidence that the required five sequential slices are complete.
