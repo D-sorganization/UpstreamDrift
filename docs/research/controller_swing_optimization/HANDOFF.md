@@ -883,3 +883,22 @@ reached −9.72 mm. Preloading changed initial q by up to 0.00357 in native
 coordinates. Assumed anchors, incomplete physical limits, projection, lack
 of independent replay and tracking a proxy rather than original q_track mean
 this is not an admitted baseline.
+
+The complete 0.550 s extent of the exploratory 199-frame proxy was tracked
+with computed torque, projection and no impact: 550 holds and 17,600
+recorded ideal-drive stages. Joint q RMS error was 0.016995 rad, maximum
+0.17582 rad; velocity RMS 0.4293 rad/s, maximum 4.0859 rad/s. Peak ideal
+generalized drive was 395.04 N m and peak stage speed 34.94 rad/s. Two named
+subtalar model ROM slots exceeded by 0.518° and 1.785°, and the lowest modeled
+foot sphere reached −15.18 mm. Preload changed initial q up to 0.00357 in
+native coordinates. This is not Option B, actuator evidence, original-target
+full pre-impact tracking, physical admission or independent replay.
+
+Research branch `codex/15493-boundary-vertex-research` at `08e2da96e8`
+fixes a finite-face classification defect: an outer corner was accepted as
+interior when an incident interior triangle won the nearest-triangle tie.
+An end-to-end failing-first regression showed the old implementation accepting
+a synthetic 0.5 s corner root; the fix rejects it while retaining an interior
+vertex control. Thirty-nine focused contact tests, Ruff, Black, LaTeX
+compilation and normal headless push hooks passed. It remains an oversized
+research branch, not a PR or proof of first contact on the pinned swing.
