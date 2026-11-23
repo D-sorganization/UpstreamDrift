@@ -649,3 +649,85 @@ def find_contact_event(
         else "unresolved_no_accepted_candidate"
     )
     return ContactSearchResult(event, penalty, status)
+
+
+@dataclass(frozen=True)
+class ClearanceCoverage:
+    """Conditional earliest bracket; the rate bound is caller-attested only."""
+
+    status: str
+    start_s: float
+    end_s: float
+    evaluations: int
+
+
+def scan_first_clearance_bracket(
+    clearance_at: Callable[[float], float],
+    *,
+    duration_s: float,
+    max_clearance_rate_mps: float,
+    time_tolerance_s: float,
+    max_evaluations: int,
+) -> ClearanceCoverage:
+    """Inspect intervals chronologically under a caller-attested Lipschitz bound.
+
+    A whole-surface speed bound must hold continuously for the entire trajectory;
+    samples cannot establish that assumption. A conditional bracket proves only
+    a clearance crossing in the returned time window, not an on-face impact.
+    Ambiguous intervals and exhausted budgets return unresolved, before any later
+    candidate. Floating-point calculations are not interval arithmetic.
+    """
+    duration, speed, tolerance = map(
+        float, (duration_s, max_clearance_rate_mps, time_tolerance_s)
+    )
+    if not math.isfinite(duration) or duration <= 0:
+        raise ValueError("duration_s must be positive and finite")
+    if not math.isfinite(speed) or speed < 0:
+        raise ValueError("max_clearance_rate_mps must be finite and nonnegative")
+    if not math.isfinite(tolerance) or not 0 < tolerance < duration:
+        raise ValueError("time_tolerance_s must lie inside duration")
+    if (
+        isinstance(max_evaluations, bool)
+        or not isinstance(max_evaluations, int)
+        or max_evaluations < 2
+    ):
+        raise ValueError("max_evaluations must be an integer of at least two")
+
+    def evaluate(t: float) -> float:
+        result = float(clearance_at(t))
+        if not math.isfinite(result):
+            raise ValueError("clearance must be finite")
+        return result
+
+    left, right = evaluate(0.0), evaluate(duration)
+    evaluations = 2
+    if left <= 0:
+        return ClearanceCoverage("unresolved", 0.0, 0.0, evaluations)
+    pending = [(0.0, duration, left, right)]
+    while pending:
+        lo, hi, a, b = pending.pop()
+        width = hi - lo
+        variation = speed * width
+        if not math.isfinite(variation):
+            raise ValueError("clearance-rate bound overflow")
+        # The slack only tolerates roundoff in validation; it is subtracted
+        # from the lower bound so it cannot produce a spurious clear interval.
+        slack = 16 * np.finfo(float).eps * max(abs(a), abs(b), variation, 1.0)
+        if abs(a - b) > variation + slack:
+            raise ValueError("sampled clearances contradict the rate bound")
+        lower = min(a, b, a / 2.0 + b / 2.0 - variation / 2.0) - slack
+        if lower > 0:
+            continue
+        if width <= tolerance:
+            status = "conditional_bracket" if a > 0 and b <= 0 else "unresolved"
+            return ClearanceCoverage(status, lo, hi, evaluations)
+        if evaluations >= max_evaluations:
+            return ClearanceCoverage("unresolved", lo, hi, evaluations)
+        mid = (lo + hi) / 2.0
+        if mid in (lo, hi):
+            return ClearanceCoverage("unresolved", lo, hi, evaluations)
+        m = evaluate(mid)
+        evaluations += 1
+        pending.append((mid, hi, m, b))
+        pending.append((lo, mid, a, m))
+    return ClearanceCoverage("conditionally_clear", 0.0, duration, evaluations)
