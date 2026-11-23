@@ -27,6 +27,7 @@ from src.launchers.launcher_constants import (
 )
 from src.launchers.launcher_manager_attrs import forward_manager_attribute
 from src.launchers.layout_config_backup import replace_existing_layout_backup
+from src.launchers.runtime_mode_help import native_runtime_name
 from src.launchers.ui_components import (
     LayoutManagerDialog,
 )
@@ -730,7 +731,7 @@ class DialogsManager:
             self.lbl_execution_mode.setText("Runtime: Docker")
             self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_DOCKER)
         else:
-            self.lbl_execution_mode.setText("Runtime: Windows")
+            self.lbl_execution_mode.setText(f"Runtime: {native_runtime_name()}")
             self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_WARNING)
 
     def show_dependency_error(
