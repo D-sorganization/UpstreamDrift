@@ -29,8 +29,16 @@ _qtest = cast(Any, QTest)
 def explorer(qapp: QApplication, request: Any, monkeypatch: Any) -> Iterator[Any]:
     """Resolve the pinned provider, launch its registered window, and dispose it."""
     root = Path(__file__).resolve().parents[3]
-    provider = resolve_tools_repo(root, None)
-    assert provider is not None and provider.pinned, "Initialize vendor/ud-tools"
+    try:
+        provider = resolve_tools_repo(root, None)
+    except RuntimeError:
+        provider = None
+    if provider is None or not provider.pinned:
+        # unit-test-gate does not materialize vendor/ud-tools (see #9361).
+        pytest.skip(
+            "requires the pinned vendored Tools checkout (vendor/ud-tools); "
+            "not materialized in this CI job"
+        )
     monkeypatch.syspath_prepend(str(provider.path / "src"))
     registration = importlib.import_module("rate_of_closure.gui_registration")
     config = registration.get_gui_info()["pyqt6"]
