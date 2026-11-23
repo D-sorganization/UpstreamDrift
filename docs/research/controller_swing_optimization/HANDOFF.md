@@ -854,3 +854,32 @@ rad/s at 1.326 s, about 3 ms after the recorded impact split. Sampled RMS was
 0.08242 rad/s pre-impact and 9.36654 rad/s post-impact. This compares stored
 simulation with controller-derived finite-difference rates, not measured
 subject velocity, independent forward replay, or the committed-v2 baseline.
+
+A predeclared five-point, two-direction Option B motor-path grid used fixed
+gains 3/0.3, 200 ms, a 10 N m coefficient trust ball and actual stage-level
+post-saturation forces under assumption-marked model limits. All five
+candidates exceeded sampled modeled ROM and speed limits. Zero residual had
+the best predeclared regularized diagnostic score (7.4117); the best tracking
+sample improved RMS from 0.44482 to 0.43305 rad but still had 16 ROM and
+three speed flags and 1440 clipped stages of 6400. A fresh-plant same-runtime
+rerun reproduced its arrays bit-for-bit. Extended towards the full horizon,
+it hit the numerical guard at 0.339 s; later failure than zero does not show
+feasibility or shot improvement. These are not physiological or carry claims.
+
+A 199-frame target-marker-proxy continuation, seeded partly by the revised
+99-frame fit, stopped after 248 s and 84 iterations without convergence.
+Component target RMS changed 11.686 to 9.307 mm (Euclidean approximately
+20.24 to 16.12 mm), observed RMS 18.087 to 18.834 mm (about 31.33 to
+32.62 mm). Native grip residual was 5.42e-8, independent closure
+3.38e-5 mm / 8.37e-8 rad, and supplied bounds held. One sampled join
+mismatch was 1.15e-10 rad/s²; sampled peak speed was 35.67 rad/s, second
+difference 959.39 rad/s² and reported optimality 0.00306. A fresh 200 ms
+computed-torque forward diagnostic of this refitted proxy completed 200
+holds and 6400 ideal-drive stages with projection and no impact. Joint RMS
+tracking error was 0.01764 rad, maximum 0.17582 rad; velocity RMS 0.4665
+rad/s, maximum 3.8873 rad/s. Peak ideal generalized drive was 195.86 N m;
+one named model ROM slot exceeded by 0.518° and modeled foot-sphere height
+reached −9.72 mm. Preloading changed initial q by up to 0.00357 in native
+coordinates. Assumed anchors, incomplete physical limits, projection, lack
+of independent replay and tracking a proxy rather than original q_track mean
+this is not an admitted baseline.
