@@ -766,6 +766,15 @@ class SubmitDialog(QDialog):
 
         layout.addLayout(form_layout)
 
+        # Visible validation/submit feedback (#15522): rejected input used to
+        # reach only the log, so the dialog looked frozen.
+        self.error_label = QLabel("", self)
+        self.error_label.setObjectName("submit-error")
+        self.error_label.setWordWrap(True)
+        self.error_label.setStyleSheet("color: #ff6666;")
+        self.error_label.hide()
+        layout.addWidget(self.error_label)
+
         # Buttons
         button_layout = QHBoxLayout()
         button_layout.addStretch(1)
@@ -784,6 +793,7 @@ class SubmitDialog(QDialog):
         self.cancel_btn.clicked.connect(self.reject)
 
     def _on_submit_clicked(self) -> None:
+        self.error_label.hide()
         framework = self.framework_combo.currentData()
         entry_point = self.entry_edit.text().strip()
         output_dir_str = self.output_edit.text().strip()
@@ -792,9 +802,11 @@ class SubmitDialog(QDialog):
         # Basic inputs validation
         if not entry_point:
             logger.warning("Submission blocked: empty entry point")
+            self._show_error("Entry point is required (e.g. module:train).")
             return
         if not output_dir_str:
             logger.warning("Submission blocked: empty output directory")
+            self._show_error("Output directory is required.")
             return
 
         try:
@@ -808,6 +820,12 @@ class SubmitDialog(QDialog):
             self.accept()
         except Exception as e:
             logger.exception(f"Failed to submit training job: {e}")
+            self._show_error(f"Could not submit job: {e}")
+
+    def _show_error(self, message: str) -> None:
+        """Show ``message`` in the dialog; the next submit attempt clears it."""
+        self.error_label.setText(message)
+        self.error_label.show()
 
 
 def build_default_controller() -> TrainingDashboardController:
