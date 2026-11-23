@@ -967,3 +967,19 @@ and 1440 clipped stages of 6400 under assumption-marked priors. Its extended
 run reproduced the first 200 ms stage arrays bit-for-bit then hit a numerical
 guard at 0.266 s, with 22 ROM and seven speed flags. This is not a feasible
 candidate, physical acceptance, or a carry/power improvement.
+
+Research branch `codex/15493-coverage-event-research` at `e2860862d1`
+integrates the optional conditional adaptive scan with the existing finite-face
+event finder. It rejects a later hit when an earlier interval is unresolved,
+and detects a narrow crossing missed by coarse endpoints. Synthetic fixed-
+lattice tests include the actual committed v2 face and step halving. Fifty-one
+focused contact/coverage/v2-face tests, scoped NumPy-aware mypy, Ruff, Black,
+LaTeX compilation and normal headless push hooks passed. The continuous speed
+bound remains caller-attested, floating-point evaluation is not interval
+arithmetic, and the higher-level ImpactForce trigger does not opt in. This is
+not a first-contact certificate, pinned-swing result, complete Slice 1 or PR.
+
+The separate broad Python 3.12 mypy invocation for the preceding coverage
+checkpoint eventually exited 1 with 96 errors in 34 unrelated imported files;
+no changed contact-module error appeared. The normal repository mypy hook and
+scoped NumPy-aware check passed.
