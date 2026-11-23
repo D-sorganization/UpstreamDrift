@@ -1,0 +1,38 @@
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+\title{Bracketed Contact Root Kernel}
+\author{UpstreamDrift Research}
+\date{}
+\maketitle
+This note documents a numerical refinement primitive, not a validated golf
+impact model.  For a stationary ball and a specified moving finite face, the
+caller supplies SI clearance $g(t)$, positive before sphere--face contact,
+and the integrated state $(q(t),\dot q(t))$ in the plant's own frame and
+joint ordering.  The caller also supplies a Boolean that includes front-side
+and strict finite-face membership, and material-point approach speed in m/s.
+
+Given $g(a)>0$, $g(b)\leq0$, the kernel uses Brent's bracketed root solver
+on the callback and evaluates the plant again at the candidate time $t^*$.
+It accepts only if $|g(t^*)|$ is at most the configured distance tolerance,
+face membership holds, and approach speed exceeds the configured threshold.
+The default time tolerance is $10^{-9}$ s, distance tolerance $10^{-6}$ m,
+and minimum speed $10^{-7}$ m/s; these are numerical criteria, not measured
+anatomical or contact-uncertainty bounds.  Invalid or nonfinite state samples
+fail closed. A sign jump with nonzero residual is rejected, but residual and
+endpoint signs cannot establish continuity or exclude earlier roots.
+
+The caller must maintain the same continuous forward trajectory and actuator
+hold schedule at every queried time. The existing research finite-triangle
+geometry, physical point Jacobian and fixed-lattice advance still require
+integration. Neither sampling coverage nor a smooth missed-contact penalty is
+provided here. Existing visual-export bisection instead fits an infinite plane
+and is not a generalized-state forward replay; the legacy impact hook uses a
+passage trigger. No empirical swing or ball-flight acceptance is claimed.
+
+The headless unit suite \texttt{tests/unit/motion\_matching/test\_contact\_root.py}
+checks bracket refinement, invalid candidates, discontinuity and a native
+MuJoCo sliding planar-face fixture. This analytic fixture uses one translational
+degree of freedom and is not the pinned driver model. Private input identifiers
+are not required to reproduce it.
+\end{document}
