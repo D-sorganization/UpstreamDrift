@@ -667,3 +667,22 @@ tracking RMS and 257.21 N m sampled peak command. With arbitrary ±30 N m
 caps, all accepted motor stages clipped and the run hit a numerical guard at
 0.189 s after divergent states. These are exploratory computed-torque results,
 not Option B, physiological limits, or admission of the refitted baseline.
+
+The matched-policy full pre-impact exploratory v2 run completed 1.322 s,
+1322 holds and 42,304 actual RK4 stages for both ideal input and synthetic
+±1000 N m unit-gear motors. Within this runtime, saved q, velocity, held
+commands and every recorded stage q, velocity, command and applied drive were
+bit-identical; no stage clipped and peak command/applied magnitude was
+356.8718 N m. Joint target RMS error was 0.01532 rad, maximum 0.31992 rad.
+Each pass took approximately 41 s. The run used computed torque, an
+exploratory nonstationary refit, no projection or impact, zero KKT
+regularization and arbitrary motor caps; it is not independent-runtime
+replay, Option B, physical admission, or contact evidence.
+
+The coupled 15-frame fit's active-set sensitivity found the same 55 active
+bounds at thresholds 1e-9, 1e-7 and 1e-5, with full equality rank 131 but
+free-coordinate rank 128. Treating these bounds as active makes equality and
+active-bound gradients dependent, so multiplier estimates can be non-unique.
+This local finding does not prove infeasibility or stationarity; actual
+inequality complementarity, complete physical limits and forward tracking
+remain open.
