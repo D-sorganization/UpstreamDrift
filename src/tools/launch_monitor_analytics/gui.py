@@ -331,6 +331,11 @@ class LaunchMonitorAnalyticsWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.main_widget)
         self._build_menu()
 
+    def closeEvent(self, event: QtGui.QCloseEvent | None) -> None:
+        """Use the embedded workspace's worker cleanup on standalone close."""
+        self.main_widget.cleanup()
+        super().closeEvent(event)
+
     def _build_menu(self) -> None:
         menu_bar = self.menuBar()
         assert menu_bar is not None
