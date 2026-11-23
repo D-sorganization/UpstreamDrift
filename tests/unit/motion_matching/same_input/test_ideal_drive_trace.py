@@ -47,7 +47,9 @@ class DirectPlant:
 
 
 def test_actual_accepted_stages_separate_ideal_drive_and_impact(monkeypatch):
-    def fake_impact(impact, t, dt, q, v, step, *, poses, accel, trial_step):
+    def fake_impact(
+        impact, t, dt, q, v, step, *, poses, accel, trial_step, point_velocity
+    ):
         def external(x):
             return np.array([0, 0, 0, 0, 0, 0, 3 + x[6], 9])
 
