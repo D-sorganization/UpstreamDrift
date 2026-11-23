@@ -72,6 +72,50 @@ def test_rom_flags_detects_violations() -> None:
 
 
 @pytest.mark.unit
+def test_rom_coverage_exposes_unchecked_v2_coordinate_and_invalid_data() -> None:
+    from src.shared.python.motion_matching.pipeline.dynamics import rom_coverage
+
+    names = ["LEInput", "lumbar_axial_rotation"]
+    q = np.radians(np.array([[0.0, 120.0]]))
+    assert rom_flags(q, names) == {}
+    coverage = rom_coverage(q, names)
+    assert coverage["status"] == "incomplete"
+    assert coverage["checked_coordinates"] == ["LEInput"]
+    assert coverage["unchecked_coordinates"] == ["lumbar_axial_rotation"]
+    assert rom_coverage(np.array([[np.nan]]), ["LEInput"])["status"] == "invalid"
+    assert rom_coverage(np.zeros((0, 1)), ["LEInput"])["status"] == "invalid"
+    assert rom_coverage(np.zeros((1, 1)), ["LEInput"])["status"] == "covered"
+
+
+@pytest.mark.unit
+def test_rom_coverage_is_preserved_by_receipt_models() -> None:
+    from src.shared.python.motion_matching.pipeline.receipt_components import IkReceipt
+    from src.shared.python.motion_matching.pipeline.receipt_dynamics import (
+        DynamicsReceipt,
+    )
+
+    for model in (IkReceipt, DynamicsReceipt):
+        assert "range_of_motion_coverage" in model.model_json_schema()["properties"]
+
+
+@pytest.mark.unit
+def test_pinned_v2_trunk_is_not_reported_as_covered() -> None:
+    import json
+    from pathlib import Path
+
+    from src.shared.python.motion_matching.pipeline.dynamics import rom_coverage
+
+    spec = Path(__file__).resolve().parents[4] / (
+        "docs/development/full_body_models/full_body_spec_anthro_driver_v2.json"
+    )
+    names = json.loads(spec.read_text(encoding="utf-8"))["coordinate_order"]
+    result = rom_coverage(np.zeros((1, len(names))), names)
+    assert result["status"] == "incomplete"
+    assert "lumbar_axial_rotation" in result["unchecked_coordinates"]
+    assert "thoracic_axial_rotation" in result["unchecked_coordinates"]
+
+
+@pytest.mark.unit
 def test_com_report_structure() -> None:
     sim = MagicMock()
     kin = MagicMock()
@@ -145,6 +189,11 @@ def test_build_dynamics_report_structure() -> None:
     report, errors = build_dynamics_report(inputs)
     assert report["duration_s"] == pytest.approx(2.0)
     assert "controller" in report
+    assert report["range_of_motion_coverage"]["status"] == "incomplete"
+    assert (
+        report["range_of_motion_coverage"]["unchecked_coordinates"]
+        == kin.coordinate_order
+    )
     assert "reference_zmp" in report
     assert "marker_rms_m" in report
     assert "root_error_timeline_m" in report

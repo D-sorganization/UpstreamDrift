@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 # -----------------------------------------------------------------------------
@@ -647,6 +649,14 @@ class SegmentScalingReport(BaseModel):
     )
 
 
+class RomCoverage(BaseModel):
+    """Coverage of a named range table, not anatomical qualification."""
+
+    status: Literal["invalid", "incomplete", "covered"]
+    checked_coordinates: list[str]
+    unchecked_coordinates: list[str]
+
+
 class RomFlag(BaseModel):
     """Range of motion excess details for a single joint coordinate."""
 
@@ -941,6 +951,11 @@ class IkReceipt(BaseModel):
     range_of_motion_flags: dict[str, RomFlag] | None = Field(
         None,
         description="Excursions exceeding anatomical limits across reference",
+        json_schema_extra={"unit": "compound", "stage": "ik"},
+    )
+    range_of_motion_coverage: RomCoverage | None = Field(
+        None,
+        description="Legacy range-table coverage; covered does not establish anatomical feasibility",
         json_schema_extra={"unit": "compound", "stage": "ik"},
     )
     bound_widening: float | None = Field(

@@ -6,7 +6,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .receipt_components import RomFlag
+from .receipt_components import RomCoverage, RomFlag
 
 # -----------------------------------------------------------------------------
 # Dynamics Stage Models
@@ -632,6 +632,11 @@ class DynamicsReceipt(BaseModel):
     range_of_motion_flags: dict[str, RomFlag] | None = Field(
         None,
         description="Range-of-motion excursions observed during simulation",
+        json_schema_extra={"unit": "compound", "stage": "dynamics"},
+    )
+    range_of_motion_coverage: RomCoverage | None = Field(
+        None,
+        description="Legacy range-table coverage; covered does not establish anatomical feasibility",
         json_schema_extra={"unit": "compound", "stage": "dynamics"},
     )
     root_error_timeline_m: dict[str, float] = Field(

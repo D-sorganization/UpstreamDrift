@@ -463,6 +463,7 @@ def build_ik_report(inputs: IKReportInputs) -> dict[str, Any]:
     - Returns dictionary matching the full-body IK receipt specification.
     """
     from src.shared.python.motion_matching.pipeline.dynamics import (
+        rom_coverage,
         rom_flags,
         segment_rms,
     )
@@ -514,6 +515,7 @@ def build_ik_report(inputs: IKReportInputs) -> dict[str, Any]:
         },
         "joint_ranges_deg": LOWER_LIMB_RANGES_DEG,
         "range_of_motion_flags": rom_flags(inputs.q_ref, kin.coordinate_order),
+        "range_of_motion_coverage": rom_coverage(inputs.q_ref, kin.coordinate_order),
         "bound_widening": BOUND_WIDENING,
         "leg_angle_ranges_deg": {
             name: [

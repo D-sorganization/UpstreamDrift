@@ -589,6 +589,26 @@ def zmp_filter(
     return q_track, zmp, report
 
 
+def rom_coverage(q: np.ndarray, names: Sequence[str]) -> dict[str, Any]:
+    """Describe coverage of the legacy range table, not anatomical acceptance."""
+    values = np.asarray(q, dtype=float)
+    if values.ndim != 2 or values.shape[1] != len(names):
+        raise ValueError("q must be (frames, coordinates) matching the order")
+    checked = [name for name in names if name in HUMAN_RANGES_DEG]
+    unchecked = [name for name in names if name not in HUMAN_RANGES_DEG]
+    if len(names) == 0 or len(values) == 0 or not np.isfinite(values).all():
+        status = "invalid"
+    elif unchecked:
+        status = "incomplete"
+    else:
+        status = "covered"
+    return {
+        "status": status,
+        "checked_coordinates": checked,
+        "unchecked_coordinates": unchecked,
+    }
+
+
 def rom_flags(q: np.ndarray, names: Sequence[str]) -> dict[str, dict[str, Any]]:
     """Human range-of-motion violations of a trajectory (degrees, frames).
 
@@ -867,6 +887,7 @@ def build_dynamics_report(
         "weight_fraction": weight_fraction_report(lane, record),
         "inside_support_polygon_fraction": float(record.inside_support_polygon.mean()),
         "range_of_motion_flags": rom_flags(sim_q, kin.coordinate_order),
+        "range_of_motion_coverage": rom_coverage(sim_q, kin.coordinate_order),
         "root_error_timeline_m": {
             f"{t:.2f}": float(
                 math.sqrt(

@@ -61,6 +61,12 @@ def test_receipt_summary_reads_the_headline_numbers(tmp_path: Path) -> None:
     assert summary["backswing_root_error_max_mm"] == 6.0
     assert summary["com_inside_polygon_at_address"] is True
     assert summary["range_of_motion_flags_ik"] == ["knee_angle_r"]
+    assert summary["range_of_motion_coverage_ik"] == "unknown"
+    assert summary["range_of_motion_coverage_simulation"] == "unknown"
+    receipt["ik"]["range_of_motion_coverage"] = {"status": "incomplete"}
+    assert (
+        module.summarise_receipt(receipt)["range_of_motion_coverage_ik"] == "incomplete"
+    )
     with pytest.raises(ValueError):
         module.summarise_receipt({"address": {}})
     with pytest.raises(ValueError):

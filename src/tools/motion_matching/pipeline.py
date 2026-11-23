@@ -496,6 +496,12 @@ def summarise_receipt(receipt: dict[str, Any]) -> dict[str, Any]:
         "range_of_motion_flags_simulation": sorted(
             (dynamics.get("range_of_motion_flags") or {}).keys()
         ),
+        "range_of_motion_coverage_ik": (
+            receipt["ik"].get("range_of_motion_coverage") or {}
+        ).get("status", "unknown"),
+        "range_of_motion_coverage_simulation": (
+            dynamics.get("range_of_motion_coverage") or {}
+        ).get("status", "unknown"),
     }
     if "step_mode" in constrained:
         summary["step_mode"] = constrained["step_mode"]

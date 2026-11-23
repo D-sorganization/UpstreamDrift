@@ -203,6 +203,10 @@ def test_build_ik_report_structure() -> None:
 
     report = build_ik_report(inputs)
     assert report["frames"] == 10
+    assert report["range_of_motion_coverage"]["status"] == "incomplete"
+    assert report["range_of_motion_coverage"]["checked_coordinates"] == [
+        "hip_flexion_r"
+    ]
     assert "marker_rms_m" in report
     assert "reference" in report
     assert "calibration" in report
