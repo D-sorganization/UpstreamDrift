@@ -2636,3 +2636,20 @@ prior 150 ms spline, replayed only within its original interval against this
 adjusted reference, no longer passed: two modeled ROM slots failed and 1,280
 of 19,200 stages clipped. Its original short-interval pass cannot be carried
 across the modified seam. No physical or full-swing admission is established.
+
+Seam audit found that the extended reference changes q52/q53 and the centered
+reference-rate stencil looks ahead: at 138 ms position/velocity targets were
+unchanged but reference acceleration differed by up to 108 rad/s² and target
+feedforward by 62.96 N m, with first clipping at that point. At 145 ms the
+respective differences reached 263 rad/s² and 152.7 N m. Both modified prefix
+samples and derivative support matter; this is not solely an endpoint effect.
+
+A diagnostic restored original q52–q54 and closure-corrected q55. Its sampled
+closure was 1.27e-15, no modeled reference ROM/speed flags and centered seam
+velocity mismatch 3.70e-5 mixed units/s. Splitting the reference-rate tables
+at 150 ms reproduced the previously passing 150 ms actual-motor trajectory
+bit-for-bit at 16/32 substeps, without clipping or sampled modeled ROM/speed
+flags. However, that split policy produced rate-table and acceleration-table
+jumps of 0.545 mixed units/s and 270.4 mixed units/s² across the seam. It is
+a causal-prefix diagnostic, not a verified smooth continuation; it changes
+rate semantics and does not certify 300 ms, actual impact or physiology.
