@@ -59,6 +59,11 @@ event state. This is prescribed-force replay: it does not search for, verify or
 certify on-face contact, a ball collision, or first contact. Metadata must set
 `contact_verified` false. The force is external to the ideal generalized
 controller input and is not recorded as actuator torque.
+The current main-branch impact stepper repartitions substeps as event time
+changes, which can introduce numerical discontinuities. This research replay
+holds the recorded force timing fixed; it must not be used to optimize event
+time or to replace the fixed-lattice contact-search work on the baseline
+research branch.
 
 Focused validation: `python -m pytest -q
 tests/unit/motion_matching/same_input/test_solution_bundle_prototype.py`.
