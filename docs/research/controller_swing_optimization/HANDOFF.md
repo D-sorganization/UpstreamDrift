@@ -2061,3 +2061,17 @@ tracking lead, not an admitted baseline: the fit is unconverged, and actual
 saturated total torque, stage-level ROM/speed, work, impact and measured
 ground forces remain unverified. Independently check actual motor-drive
 replay and consistent initialization before any physical or carry claim.
+
+The 3D-foot candidate was also tested with actual modeled motor saturation,
+fixed gains 3/0.3 and target-state computed feedforward sampled at 1 ms, from
+identical model hash and recorded initial q/v. The first 200 ms / 6,400 RK4
+stages had no sampled modeled ROM/speed flags or clipping, with root
+translation/rotation and joint RMS versus its own target 0.0307 m / 0.0837
+rad / 0.1397 rad. The full requested 1.319 s run first flagged modeled ROM
+at stage 9399 (about 0.294 s), then stopped at a numerical guard at 0.885 s,
+with 32 ROM and 25 speed slots flagged. Peak total command was 272.94 N m,
+peak actual modeled drive 72.4 N m and 2,560 of 28,320 stages clipped. The
+ideal comparison used projected computed torque, while this run used an
+unprojected fixed-gain controller, so this does not isolate saturation as the
+cause. Sixteen capacity priors and all speed/work/slew admissions remain
+unverified; this is not an admitted baseline or feasible swing.
