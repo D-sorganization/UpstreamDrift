@@ -157,3 +157,28 @@ def test_load_errors_reach_the_user(explorer: Any) -> None:
     assert "cannot read broken.npz" in str(explorer.box.call_args)
     assert explorer.results_frame_count == 0
     assert not explorer.is_loading_results
+
+
+def test_a_load_outliving_its_explorer_never_touches_the_deleted_widget(
+    fake_work: list[Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The window can be destroyed mid-load (tab closed, test torn down).
+
+    Its queued signals must not reach the deleted widget (PyQt6 aborts on the
+    resulting RuntimeError) and the thread must outlive it; the run closes.
+    """
+    import sys
+
+    from PyQt6 import sip
+
+    from src.tools.model_explorer.gui import MainWidget
+
+    errors: list[BaseException] = []
+    monkeypatch.setattr(sys, "excepthook", lambda _t, exc, _tb: errors.append(exc))
+    widget = MainWidget()
+    assert widget.load_results("ok_orphan.npz", wait=False) is True
+    sip.delete(widget)
+    _ticks_while(lambda: not any(isinstance(s, _FakeSession) for s in fake_work))
+    _ticks_while(lambda: worker.live_loader_count() > 0)
+    assert errors == []
+    assert [s.closed for s in fake_work if isinstance(s, _FakeSession)] == [True]

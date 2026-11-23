@@ -20,7 +20,13 @@ from src.shared.python.motion_matching.video_frame_source import VideoSourceErro
 from src.tools.model_explorer.golfer_playback import club_head_speed
 from src.tools.model_explorer.results_session import ResultsSession
 
-__all__ = ["LOAD_ERRORS", "ResultsLoadSettings", "ResultsLoader", "prepare_results"]
+__all__ = [
+    "LOAD_ERRORS",
+    "ResultsLoadSettings",
+    "ResultsLoader",
+    "live_loader_count",
+    "prepare_results",
+]
 
 logger = get_logger(__name__)
 
@@ -30,6 +36,14 @@ LOAD_ERRORS: tuple[type[BaseException], ...] = (
     *(OSError, ImportError, RuntimeError, ValueError, TypeError, KeyError),
     *(IndexError, AttributeError, ArithmeticError, VideoSourceError),
 )
+
+
+_LIVE: set[ResultsLoader] = set()
+
+
+def live_loader_count() -> int:
+    """Background loads still running (or not yet retired), app-wide."""
+    return len(_LIVE)
 
 
 @dataclass(frozen=True)
@@ -74,6 +88,14 @@ class ResultsLoader(QThread):
             raise ValueError("path must name a results archive")
         self.path = Path(path)
         self._engine = engine
+        # Keep the thread referenced until it ends: its window may be destroyed
+        # first, and a QThread collected while running aborts the process.
+        _LIVE.add(self)
+        self.finished.connect(self._retire)
+
+    def _retire(self) -> None:
+        _LIVE.discard(self)
+        self.deleteLater()
 
     def run(self) -> None:
         try:

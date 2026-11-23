@@ -11,6 +11,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from PyQt6 import sip
 from PyQt6.QtCore import QCoreApplication, QEventLoop, QTimer
 from PyQt6.QtWidgets import (
     QDockWidget,
@@ -79,10 +80,18 @@ class ResultsPlaybackHostMixin:
         loader = ResultsLoader(results_path, engine)
         self._results_loader = loader
         self._live_loaders().add(loader)
-        loader.loaded.connect(lambda s, ld=loader: self._on_loaded(ld, s, heading))
-        loader.club_ready.connect(lambda c, ld=loader: self._on_club(ld, c))
-        loader.failed.connect(lambda text, ld=loader: self._on_load_failed(ld, text))
-        loader.finished.connect(lambda ld=loader: self._on_loader_finished(ld))
+        loader.loaded.connect(
+            lambda s, ld=loader: self._deliver(self._on_loaded, ld, s, heading)
+        )
+        loader.club_ready.connect(
+            lambda c, ld=loader: self._deliver(self._on_club, ld, c)
+        )
+        loader.failed.connect(
+            lambda text, ld=loader: self._deliver(self._on_load_failed, ld, text)
+        )
+        loader.finished.connect(
+            lambda ld=loader: self._deliver(self._on_loader_finished, ld)
+        )
         self._results_message = None
         self.status_bar.showMessage(f"Loading {heading or results_path.name}\u2026")
         self._load_progress_bar().show()
@@ -116,10 +125,25 @@ class ResultsPlaybackHostMixin:
         # Deliver the threads' queued signals now: superseded sessions close.
         QCoreApplication.sendPostedEvents()
 
+    def _deliver(self, handler: Callable[..., None], *args: Any) -> None:
+        """Run a loader signal's ``handler`` unless this widget is gone.
+
+        The lambdas connected in :meth:`load_results` outlive a destroyed
+        window; touching it then raises, which PyQt6 turns into an abort.
+        A session that arrives for a deleted window is closed instead.
+        """
+        if isinstance(self, QWidget) and sip.isdeleted(self):
+            for arg in args:  # a loaded session: release it, nobody will show it
+                if not isinstance(arg, ResultsLoader) and hasattr(arg, "close"):
+                    arg.close()
+            return
+        handler(*args)
+
     def _live_loaders(self) -> set[ResultsLoader]:
-        if not hasattr(self, "_loaders"):
-            self._loaders: set[ResultsLoader] = set()
-        return self._loaders
+        # Read the instance dict directly: ``cleanup`` runs from ``destroyed``,
+        # when attribute lookup falling through to the deleted Qt object raises.
+        loaders: set[ResultsLoader] = self.__dict__.setdefault("_loaders", set())
+        return loaders
 
     def _load_progress_bar(self) -> QProgressBar:
         if getattr(self, "_results_progress", None) is None:
@@ -180,8 +204,7 @@ class ResultsPlaybackHostMixin:
 
     def _on_loader_finished(self, loader: ResultsLoader) -> None:
         loader.wait()
-        self._live_loaders().discard(loader)
-        loader.deleteLater()
+        self._live_loaders().discard(loader)  # the worker retires the thread
         if loader is self._results_loader:
             self._results_loader = None
             self._load_progress_bar().hide()
