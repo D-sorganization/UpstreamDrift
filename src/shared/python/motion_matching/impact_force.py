@@ -123,6 +123,8 @@ class ImpactForce:
     contact_search_has_prior_unresolved_intervals: bool = False
     contact_max_clearance_rate_mps: float | None = None
     contact_coverage_until_s: float | None = None
+    contact_coverage_end_q: Array | None = field(default=None, compare=False)
+    contact_coverage_end_v: Array | None = field(default=None, compare=False)
 
     def __post_init__(self) -> None:
         if not isinstance(self.frame, str) or not self.frame:
@@ -165,6 +167,25 @@ class ImpactForce:
                 raise ValueError("contact coverage requires a finite coverage clock")
         elif self.contact_coverage_until_s is not None:
             raise ValueError("coverage clock requires a rate bound")
+        if (self.contact_coverage_end_q is None) != (
+            self.contact_coverage_end_v is None
+        ):
+            raise ValueError("coverage endpoint requires both q and v")
+        if self.contact_coverage_end_q is not None:
+            end_q = np.asarray(self.contact_coverage_end_q, dtype=float)
+            end_v = np.asarray(self.contact_coverage_end_v, dtype=float)
+            if (
+                self.contact_max_clearance_rate_mps is None
+                or end_q.ndim != 1
+                or end_q.shape != end_v.shape
+                or not np.isfinite(end_q).all()
+                or not np.isfinite(end_v).all()
+            ):
+                raise ValueError(
+                    "coverage endpoint must be finite matching state vectors"
+                )
+            object.__setattr__(self, "contact_coverage_end_q", end_q.copy())
+            object.__setattr__(self, "contact_coverage_end_v", end_v.copy())
         if not isinstance(self.contact_search_has_prior_unresolved_intervals, bool):
             raise ValueError("prior unresolved contact status must be boolean")
         if self.passage_point_m is not None:
@@ -372,6 +393,8 @@ class ImpactForce:
             contact_search_has_prior_unresolved_intervals=False,
             contact_max_clearance_rate_mps=None,
             contact_coverage_until_s=None,
+            contact_coverage_end_q=None,
+            contact_coverage_end_v=None,
         )
 
     def with_surface_contact(self) -> ImpactForce:
@@ -394,6 +417,8 @@ class ImpactForce:
             contact_search_has_prior_unresolved_intervals=False,
             contact_max_clearance_rate_mps=None,
             contact_coverage_until_s=None,
+            contact_coverage_end_q=None,
+            contact_coverage_end_v=None,
         )
 
     def with_contact_coverage(self, max_clearance_rate_mps: float) -> ImpactForce:
@@ -414,6 +439,8 @@ class ImpactForce:
             self,
             contact_max_clearance_rate_mps=rate,
             contact_coverage_until_s=float(self.armed_at_s),
+            contact_coverage_end_q=None,
+            contact_coverage_end_v=None,
             contact_search_has_prior_unresolved_intervals=False,
         )
 
@@ -461,6 +488,8 @@ class ImpactForce:
             contact_coverage_until_s=(
                 start if self.contact_max_clearance_rate_mps is not None else None
             ),
+            contact_coverage_end_q=None,
+            contact_coverage_end_v=None,
         )
 
     def schedule(
@@ -535,12 +564,34 @@ class ImpactForce:
             self.contact_search_has_prior_unresolved_intervals
             or self.contact_coverage_until_s is None
             or abs((t + offset) - self.contact_coverage_until_s) > _EDGE_TOL_S
+            or (
+                self.contact_search_status == "conditionally_clear"
+                and (
+                    self.contact_coverage_end_q is None
+                    or self.contact_coverage_end_v is None
+                    or not np.array_equal(q_arm, self.contact_coverage_end_q)
+                    or not np.array_equal(v_arm, self.contact_coverage_end_v)
+                )
+            )
         ):
             return replace(
                 self,
                 contact_search_status="unresolved_coverage",
                 contact_search_has_prior_unresolved_intervals=True,
             )
+
+        if self.contact_max_clearance_rate_mps is not None:
+            callback_q, callback_v = (
+                np.asarray(x, dtype=float) for x in advance(offset)
+            )
+            if not np.array_equal(q_arm, callback_q) or not np.array_equal(
+                v_arm, callback_v
+            ):
+                return replace(
+                    self,
+                    contact_search_status="unresolved_coverage",
+                    contact_search_has_prior_unresolved_intervals=True,
+                )
 
         result = find_contact_event(
             lambda seconds: (
@@ -564,6 +615,26 @@ class ImpactForce:
             logsum = float(np.logaddexp(self.contact_miss_penalty_logsum, logsum))
         total_weight = self.contact_miss_penalty_weight_s + weight_s
         aggregate = -BALL_RADIUS_M * (logsum - math.log(total_weight))
+        end_q, end_v = None, None
+        if (
+            self.contact_max_clearance_rate_mps is not None
+            and result.coverage_status == "conditionally_clear"
+        ):
+            end_q, end_v = (
+                np.asarray(x, dtype=float) for x in armed_advance(search_duration)
+            )
+            if (
+                end_q.ndim != 1
+                or end_q.shape != end_v.shape
+                or end_q.shape != q_arm.shape
+                or not np.isfinite(end_q).all()
+                or not np.isfinite(end_v).all()
+            ):
+                return replace(
+                    self,
+                    contact_search_status="unresolved_coverage",
+                    contact_search_has_prior_unresolved_intervals=True,
+                )
         accumulated = replace(
             self,
             contact_miss_penalty_m=aggregate,
@@ -586,6 +657,8 @@ class ImpactForce:
                 if result.coverage_status == "conditionally_clear"
                 else self.contact_coverage_until_s
             ),
+            contact_coverage_end_q=end_q,
+            contact_coverage_end_v=end_v,
         )
         if result.event is None:
             return accumulated
@@ -814,6 +887,8 @@ class ImpactForce:
                     "contact_search_status": self.contact_search_status,
                     "contact_max_clearance_rate_mps": self.contact_max_clearance_rate_mps,
                     "contact_coverage_until_s": self.contact_coverage_until_s,
+                    "contact_coverage_end_q": vec(self.contact_coverage_end_q),
+                    "contact_coverage_end_v": vec(self.contact_coverage_end_v),
                     "contact_search_has_prior_unresolved_intervals": (
                         self.contact_search_has_prior_unresolved_intervals
                     ),
@@ -928,6 +1003,8 @@ class ImpactForce:
             ),
             contact_max_clearance_rate_mps=record.get("contact_max_clearance_rate_mps"),
             contact_coverage_until_s=record.get("contact_coverage_until_s"),
+            contact_coverage_end_q=record.get("contact_coverage_end_q"),
+            contact_coverage_end_v=record.get("contact_coverage_end_v"),
             contact_search_has_prior_unresolved_intervals=record.get(
                 "contact_search_has_prior_unresolved_intervals", False
             ),
@@ -962,6 +1039,8 @@ def step_through_impact(
     probe = step if trial_step is None else trial_step
 
     def advance_unforced(seconds: float) -> tuple[Array, Array]:
+        if seconds == 0.0:
+            return np.asarray(q, dtype=float), np.asarray(v, dtype=float)
         arm = search_plan.armed_at_s if search_plan.trigger == "surface" else None
         if arm is not None and t < arm < t + seconds:
             arm_duration = arm - t

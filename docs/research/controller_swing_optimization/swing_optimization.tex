@@ -83,6 +83,13 @@ settings, sources, reproduction commands and margins as evidence is obtained.
 an externally attested continuous clearance-rate bound and a chronological
 coverage clock. Clear intervals advance that clock; a missing interval or an
 unresolved earlier scan prevents later scheduling until an explicit re-arm.
+Each clear interval retains the evaluated endpoint position and velocity;
+the next interval must start with exactly that state, or remains unresolved.
+The advance callback at the interval's start must also reproduce the supplied
+state exactly; its endpoint must remain finite and retain the state dimension.
+Old clear records without this endpoint also fail closed. Projection or
+roundoff can therefore produce a conservative false negative, while matching
+endpoints do not prove physical continuity within an interval.
 The bound is not verified by samples and the scan is not interval arithmetic;
 a conditional candidate is not a first-contact or physical-impact certificate.
 Run the synthetic checks with \texttt{python -m pytest -q

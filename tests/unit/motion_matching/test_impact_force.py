@@ -940,7 +940,10 @@ def test_conditional_surface_policy_preserves_clear_and_blocks_after_unresolved(
     clear = plan_.schedule(0.0, 0.01, q, v, rotating_poses, advance=advance)
     assert clear.contact_search_status == "conditionally_clear"
     assert not clear.contact_search_has_prior_unresolved_intervals
-    unresolved = clear.schedule(0.01, 0.01, q, v, rotating_poses, advance=advance)
+    q1 = q + 0.01 * v
+    unresolved = clear.schedule(
+        0.01, 0.01, q1, v, rotating_poses, advance=lambda t: (q1 + t * v, v)
+    )
     assert unresolved.contact_search_has_prior_unresolved_intervals
     assert not unresolved.is_scheduled
     assert seen == [200.0, 200.0]
@@ -1007,3 +1010,144 @@ def test_conditional_surface_real_finite_face_root():
     assert not out.contact_search_has_prior_unresolved_intervals
     restored = imf.ImpactForce.from_record(out.to_record())
     assert restored.contact_search_status == "conditional_bracket_candidate"
+
+
+def test_conditional_coverage_rejects_spliced_state_at_same_time(monkeypatch):
+    from src.shared.python.motion_matching.contact_event import ContactSearchResult
+
+    plan = _surface_plan(np.array([1.0, 0.0, 0.0])).with_contact_coverage(200.0)
+    calls = []
+
+    def fake(*args, **kwargs):
+        calls.append(1)
+        return ContactSearchResult(None, 0.1, "conditionally_clear")
+
+    monkeypatch.setattr(imf, "find_contact_event", fake)
+    q, v = np.zeros(2), np.array([1.0, 0.0])
+    clear = plan.schedule(
+        0.0, 0.01, q, v, rotating_poses, advance=lambda t: (q + t * v, v)
+    )
+    assert clear.contact_search_status == "conditionally_clear"
+    spliced_q = np.array([0.9, 0.0])
+    result = clear.schedule(
+        0.01,
+        0.01,
+        spliced_q,
+        v,
+        rotating_poses,
+        advance=lambda t: (spliced_q + t * v, v),
+    )
+    assert result.contact_search_status == "unresolved_coverage"
+    assert result.contact_search_has_prior_unresolved_intervals
+    assert len(calls) == 1
+
+
+def test_conditional_coverage_roundtrip_checks_velocity_and_missing_endpoint(
+    monkeypatch,
+):
+    from src.shared.python.motion_matching.contact_event import ContactSearchResult
+
+    monkeypatch.setattr(
+        imf,
+        "find_contact_event",
+        lambda *args, **kwargs: ContactSearchResult(None, 0.1, "conditionally_clear"),
+    )
+    q, v = np.zeros(2), np.array([1.0, 0.0])
+    plan = _surface_plan(np.array([1.0, 0.0, 0.0])).with_contact_coverage(200.0)
+    clear = plan.schedule(
+        0.0, 0.01, q, v, rotating_poses, advance=lambda t: (q + t * v, v)
+    )
+    record = clear.to_record()
+    restored = imf.ImpactForce.from_record(record)
+    q1 = q + 0.01 * v
+    spliced_v = v + np.array([0.0, 0.1])
+    blocked = restored.schedule(
+        0.01,
+        0.01,
+        q1,
+        spliced_v,
+        rotating_poses,
+        advance=lambda t: (q1 + t * spliced_v, spliced_v),
+    )
+    assert blocked.contact_search_status == "unresolved_coverage"
+    record.pop("contact_coverage_end_q")
+    record.pop("contact_coverage_end_v")
+    old = imf.ImpactForce.from_record(record)
+    blocked_old = old.schedule(
+        0.01, 0.01, q1, v, rotating_poses, advance=lambda t: (q1 + t * v, v)
+    )
+    assert blocked_old.contact_search_status == "unresolved_coverage"
+
+
+def test_conditional_coverage_accepts_contiguous_state_after_roundtrip():
+    radius = GOLF_BALL_RADIUS_M
+    plan = _surface_plan(np.array([0.02 + radius, 0.0, 0.0])).with_contact_coverage(1.0)
+    q, v = np.zeros(2), np.array([1.0, 0.0])
+    first = plan.schedule(
+        0.0,
+        0.01,
+        q,
+        v,
+        rotating_poses,
+        advance=lambda t: (q + t * v, v),
+        point_velocity=lambda qq, vv, frame, point: np.array([1.0, 0.0, 0.0]),
+    )
+    assert first.contact_search_status == "conditionally_clear"
+    restored = imf.ImpactForce.from_record(first.to_record())
+    q1 = q + 0.01 * v
+    hit = restored.schedule(
+        0.01,
+        0.03,
+        q1,
+        v,
+        rotating_poses,
+        advance=lambda t: (q1 + t * v, v),
+        point_velocity=lambda qq, vv, frame, point: np.array([1.0, 0.0, 0.0]),
+    )
+    assert hit.is_scheduled
+    assert hit.contact_event.time_s == pytest.approx(0.02, abs=2e-9)
+    assert hit.contact_search_status == "conditional_bracket_candidate"
+
+
+def test_conditional_coverage_nonfinite_endpoint_fails_closed(monkeypatch):
+    from src.shared.python.motion_matching.contact_event import ContactSearchResult
+
+    monkeypatch.setattr(
+        imf,
+        "find_contact_event",
+        lambda *args, **kwargs: ContactSearchResult(None, 0.1, "conditionally_clear"),
+    )
+    q, v = np.zeros(2), np.zeros(2)
+    plan = _surface_plan(np.array([1.0, 0.0, 0.0])).with_contact_coverage(1.0)
+    blocked = plan.schedule(
+        0.0,
+        0.01,
+        q,
+        v,
+        rotating_poses,
+        advance=lambda t: (np.array([float("nan"), 0.0]), v),
+    )
+    assert blocked.contact_search_status == "unresolved_coverage"
+    assert blocked.contact_search_has_prior_unresolved_intervals
+
+
+def test_conditional_coverage_rejects_advance_origin_mismatch(monkeypatch):
+    from src.shared.python.motion_matching.contact_event import ContactSearchResult
+
+    monkeypatch.setattr(
+        imf,
+        "find_contact_event",
+        lambda *args, **kwargs: ContactSearchResult(None, 0.1, "conditionally_clear"),
+    )
+    q, v = np.zeros(2), np.zeros(2)
+    plan = _surface_plan(np.array([1.0, 0.0, 0.0])).with_contact_coverage(1.0)
+    result = plan.schedule(
+        0.0,
+        0.01,
+        q,
+        v,
+        rotating_poses,
+        advance=lambda t: (np.array([0.2, 0.0]), v),
+    )
+    assert result.contact_search_status == "unresolved_coverage"
+    assert result.contact_search_has_prior_unresolved_intervals

@@ -448,7 +448,7 @@ within one grid cell. Its finite nine-sample miss penalty is a smooth
 surrogate, not a proven global closest distance. Independent validation on the
 actual matched trajectory remains necessary.
 
-The optional ImpactForce coverage policy carries a caller-attested clearance-rate bound and a chronological coverage clock. Clear intervals advance the clock; missing or unresolved earlier intervals prevent later scheduling until re-arming. The bound is not verified, floating-point evaluation is not interval arithmetic, and conditional candidates are not first-contact certificates.
+The optional ImpactForce coverage policy carries a caller-attested clearance-rate bound and a chronological coverage clock. Clear intervals advance the clock and preserve the evaluated endpoint state. A subsequent interval with different position or velocity at that time is unresolved, as is a restored older clear record without an endpoint. Exact equality intentionally fails closed when projection or numerical roundoff changes the state; the caller must explicitly re-arm rather than infer continuity. This check does not prove that a callback follows the physical trajectory between endpoints. Missing or unresolved earlier intervals prevent later scheduling until re-arming. The bound is not verified, floating-point evaluation is not interval arithmetic, and conditional candidates are not first-contact certificates.
 
 The search reuses rigid-face boundary topology within a search. On the modeled
 576-triangle driver face with synthetic motion, a 30-run median was 10.6 ms
