@@ -88,6 +88,9 @@ class ResultsPlaybackHostMixin:
         loader.loaded.connect(
             lambda s, ld=loader: self._deliver(self._on_loaded, ld, s, heading)
         )
+        loader.progress.connect(
+            lambda text, ld=loader: self._deliver(self._on_progress, ld, text)
+        )
         loader.failed.connect(
             lambda text, ld=loader: self._deliver(self._on_load_failed, ld, text)
         )
@@ -187,6 +190,10 @@ class ResultsPlaybackHostMixin:
             else f"{session.title}: {loader.path.name}, {frames}"
         )
         self.status_bar.showMessage(self._results_message)
+
+    def _on_progress(self, loader: ResultsLoader, text: str) -> None:
+        if loader is self._results_loader:
+            self.status_bar.showMessage(text)
 
     def _on_load_failed(self, loader: ResultsLoader, message: str) -> None:
         if loader is not self._results_loader:

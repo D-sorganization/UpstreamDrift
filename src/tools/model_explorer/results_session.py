@@ -236,7 +236,7 @@ class ResultsSession:
         self._current_frame = index
 
     def prepare_scene(self) -> None:
-        """Build the golfer scene, behind-view anchor and shot now (slow, GL-free).
+        """Build (or read cached) golfer scene, behind anchor and shot (GL-free).
 
         :meth:`playback` then only creates the renderer. ``ValueError`` for a
         marker archive.
@@ -245,13 +245,14 @@ class ResultsSession:
         if pose is None:
             raise ValueError("marker archives have no model pose to play back")
         if self._scene_xml is None:
-            from src.tools.model_explorer.golfer_playback import (
-                build_golfer_scene_xml,
-            )
-
+            from src.tools.model_explorer import golfer_playback as golfer
             from src.tools.model_explorer.playback_view import behind_anchor_for
+            from src.tools.model_explorer.scene_cache import default_scene_cache
 
-            self._scene_xml = build_golfer_scene_xml(pose)
+            self._scene_xml, _ = default_scene_cache().get_or_build(
+                golfer.golfer_scene_inputs(pose),
+                lambda: golfer.build_golfer_scene_xml(pose),
+            )
             self._behind_anchor = behind_anchor_for(pose)
         if self._shot_summary is None:
             from src.tools.model_explorer import shot_card_rows
@@ -262,6 +263,29 @@ class ResultsSession:
     def shot_summary(self) -> Any | None:
         """The Shot card summary :meth:`prepare_scene` evaluated, or ``None``."""
         return self._shot_summary
+
+    def scene_is_cached(self) -> bool:
+        """True when :meth:`prepare_scene` will read the scene cache, not build.
+
+        ``ValueError`` for a marker archive.
+        """
+        pose = self.pose_source
+        if pose is None:
+            raise ValueError("marker archives have no model pose to play back")
+        from src.tools.model_explorer.golfer_playback import golfer_scene_inputs
+        from src.tools.model_explorer.scene_cache import default_scene_cache
+
+        return default_scene_cache().is_cached(golfer_scene_inputs(pose))
+
+    @property
+    def scene_xml(self) -> str | None:
+        """The prepared golfer scene MJCF, or ``None`` before :meth:`prepare_scene`."""
+        return self._scene_xml
+
+    @property
+    def behind_anchor(self) -> tuple[float, float, float] | None:
+        """The behind-view anchor from :meth:`prepare_scene` (``None``: preset)."""
+        return self._behind_anchor
 
     def playback(self) -> Any:
         """The shared :class:`GolferPlayback` of a joint-space run (lazy).

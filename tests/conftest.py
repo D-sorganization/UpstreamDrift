@@ -333,6 +333,13 @@ def _prevent_repo_root_io(monkeypatch, tmp_path):
 
 
 @pytest.fixture(autouse=True)
+def _isolate_scene_cache(monkeypatch, tmp_path_factory):
+    """Keep built golfer scenes (#15150) out of the real user cache."""
+    root = tmp_path_factory.getbasetemp() / "golfer_scene_cache"
+    monkeypatch.setenv("UD_SCENE_CACHE_DIR", str(root))
+
+
+@pytest.fixture(autouse=True)
 def _no_real_network_in_unit_lane(request, monkeypatch):
     """Block real outbound HTTP from unit tests by default.
 
