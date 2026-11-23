@@ -1302,3 +1302,16 @@ bundle schema and optimization runner but explicitly omit required replay /
 migration or force-attestation / comparison work. Inspect current PR heads
 and status before reuse; they do not establish the requested sequential five
 slices as complete.
+
+A 41-coordinate 200 ms Option B local linearization used fixed gains, actual
+post-saturation forces, a 10 N m coefficient trust ball and hold-sampled
+modeled ROM/speed constraints under partly unverified capacities. The solver's
+initial output exceeded trust by 3e-12 N m and was scaled inward before
+nonlinear validation. At recorded integration stages, peak modeled ROM excess
+changed 1.319 to 0.602 rad and ROM flags 11 to six; joint RMS tracking error
+changed 0.2720 to 0.1651 rad. The candidate still violated a modeled ROM
+limit from 9.94 ms, clipped in 1440 of 6400 stages and hit a numerical guard
+at 0.288 s on extension, with 19 ROM / three speed flags. This is a one-sided
+local diagnostic, not a feasible full swing, continuous-time certificate,
+physiological assessment or power improvement. Private hash-bound receipts
+and arrays remain outside git.
