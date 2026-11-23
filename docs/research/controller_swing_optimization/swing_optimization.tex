@@ -41,6 +41,10 @@ discontinuous crossing. The prototype instead brackets finite-surface sphere
 clearance, checks the outward-facing side separately, and requires a spatial
 residual tolerance in addition to its time tolerance. This rejects the
 demonstrated false root but does not close gaps in the bounded time scan.
+The finite-patch interior check treats every incidence of an outer-boundary
+vertex as boundary, even when the selected nearest triangle touches that
+vertex only through shared interior edges. This avoids accepting a corner
+contact solely because of triangle ordering; it does not certify scan coverage.
 The derivative of a numerical trial-prefix position with respect to its
 duration need not equal the velocity in the returned state. Consequently the
 prototype also checks the instantaneous velocity of the material face point

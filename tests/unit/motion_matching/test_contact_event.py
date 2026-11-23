@@ -361,6 +361,44 @@ def test_rejects_contact_on_the_outer_mesh_boundary() -> None:
     assert result.event is None
 
 
+def test_boundary_vertex_remains_boundary_when_nearest_face_has_internal_edges() -> (
+    None
+):
+    # The first face touches the outer corner only at its vertex; both its
+    # incident edges are shared. Mesh ordering must not turn that corner into
+    # an interior point when nearest triangles tie.
+    vertex = [0.0, 0.0, 0.0]
+    a, b = [0.0, 1.0, 0.0], [0.0, 1.0, 1.0]
+    c = [0.0, 0.0, 1.0]
+    p, q = [0.0, 0.6, 0.3], [0.0, 0.3, 0.6]
+    mesh = np.array(
+        [
+            [vertex, p, q],
+            [vertex, a, p],
+            [vertex, q, c],
+            [a, b, p],
+            [b, q, p],
+            [b, c, q],
+        ]
+    )
+    topology = contact_event._build_boundary_topology(mesh)
+    assert contact_event._boundary_edge_contact(
+        mesh, 0, np.array([1.0, 0.0, 0.0]), topology=topology
+    )
+    # p is a genuinely interior vertex, shared by four faces.
+    assert not contact_event._boundary_edge_contact(
+        mesh, 0, np.array([0.0, 1.0, 0.0]), topology=topology
+    )
+    result = find_contact_event(
+        _advance(),
+        lambda state: mesh + np.array([state[0], 0.0, 0.0]),
+        np.array([1.0, 0.0, 0.0]),
+        0.5,
+        duration_s=1.0,
+    )
+    assert result.event is None
+
+
 def test_accepts_contact_across_an_interior_triangle_seam() -> None:
     result = find_contact_event(
         _advance(), _face, np.array([1.0, -0.5, 0.0]), 0.5, duration_s=1.0

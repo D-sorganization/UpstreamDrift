@@ -35,6 +35,7 @@ class _BoundaryTopology:
     reference: Array
     boundary_edges: Array
     boundary_face_opposites: frozenset[tuple[int, int]]
+    boundary_face_vertices: frozenset[tuple[int, int]]
     shared_vertex_pairs: Array
 
     def validate_rigid_pose(self, triangles: Array) -> None:
@@ -123,6 +124,15 @@ def _build_boundary_topology(triangles: Array) -> _BoundaryTopology:
         (int(face), opposite_for_edge[int(edge)])
         for face, edge in zip(face_indices, local_edges, strict=True)
     )
+    vertex_ids = vertex_inverse.reshape(-1, 3)
+    edge_endpoints = np.array(((0, 1), (1, 2), (2, 0)))
+    boundary_ids = np.unique(
+        vertex_ids[face_indices[:, None], edge_endpoints[local_edges]]
+    )
+    boundary_face_vertices = frozenset(
+        (int(face), int(vertex))
+        for face, vertex in np.argwhere(np.isin(vertex_ids, boundary_ids))
+    )
     shared_groups = [
         np.flatnonzero(vertex_inverse == index)
         for index in np.flatnonzero(vertex_counts > 1)
@@ -142,6 +152,7 @@ def _build_boundary_topology(triangles: Array) -> _BoundaryTopology:
         triangles.copy(),
         np.column_stack((face_indices, local_edges)),
         boundary_face_opposites,
+        boundary_face_vertices,
         shared_vertex_pairs,
     )
 
@@ -345,6 +356,9 @@ def _boundary_edge_contact(
     if topology is None:
         topology = _build_boundary_topology(triangles)
     tol = 128.0 * np.finfo(float).eps
+    if np.count_nonzero(bary <= tol) >= 2:
+        if (index, int(np.argmax(bary))) in topology.boundary_face_vertices:
+            return True
     for opposite in range(3):
         if bary[opposite] <= tol:
             if (index, opposite) in topology.boundary_face_opposites:
