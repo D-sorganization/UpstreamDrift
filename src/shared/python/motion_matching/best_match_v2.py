@@ -23,6 +23,7 @@ from numpy.typing import NDArray
 
 from src.shared.python.contracts import ensure, require
 from src.shared.python.motion_matching.full_body_migration import TrunkMigrator
+from src.shared.python.motion_matching.full_body_spec import canonical_sha256
 
 Array = NDArray[np.float64]
 
@@ -68,6 +69,8 @@ def migrate_bundle(
     v1 = json.loads(v1_spec_path.read_text(encoding="utf-8"))
     v2 = json.loads(v2_spec_path.read_text(encoding="utf-8"))
     loaded = InputBundle.load(v1_bundle)
+    if canonical_sha256(json.loads(loaded.spec_bytes)) != canonical_sha256(v1):
+        raise ValueError("bundle embedded spec does not match the v1 migration spec")
     q_v2 = migrate_q_to_v2(v1, v2, loaded.reference_q, loaded.coordinate_order)
     times = np.asarray(loaded.dt_s * np.arange(len(q_v2)), dtype=np.float64)
     bundle = generate_reference_bundle(

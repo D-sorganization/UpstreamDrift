@@ -1,10 +1,11 @@
 """Reference-shot regression of the production ball-flight model (#15443).
 
-Each row of ``reference_shots_15443.json`` is a published launch-monitor shot
-(ball speed, launch, back spin, no side spin, sea-level standard air) with its
-carry, apex and descent.  The launch goes straight into
-:class:`BallFlightSimulator` (the Rust kernel the swing pipeline uses), so a
-failure here is the flight model's, never the impact model's.
+Rows of ``reference_shots_15443.json`` combine published averages with
+approximate reference values; see each row's source and confidence. The
+prescribed launch goes straight into :class:`BallFlightSimulator` (the Rust
+kernel the swing pipeline uses), independently of the impact model. These
+regressions do not establish independent flight validation or guarantee that
+the reference observations were measured under standard air.
 
 Rows the current model misses are marked ``xfail(strict=True)`` with the
 measured error; the bands are never widened to make a row pass.  When the
@@ -16,7 +17,9 @@ from __future__ import annotations
 
 import json
 import math
+import sys
 from pathlib import Path
+from types import ModuleType, SimpleNamespace
 from typing import Any
 
 import numpy as np
@@ -47,6 +50,19 @@ def _flight(shot: dict[str, Any]) -> dict[str, float]:
         launch, max_time=_SETTINGS["max_time_s"], dt=_SETTINGS["dt_s"]
     )
     path = np.array([p.position for p in points], dtype=float)
+    if (
+        path.ndim != 2
+        or path.shape[1:] != (3,)
+        or len(path) < 3
+        or not np.isfinite(path).all()
+        or np.any(path[1:-1, 2] <= 0.0)
+        or abs(path[-1, 2]) > 1e-8
+        or not np.isfinite(points[-1].velocity).all()
+        or points[-1].velocity[2] >= 0.0
+    ):
+        raise ValueError(
+            "flight did not terminate at the first descending ground contact"
+        )
     vx, vy, vz = points[-1].velocity
     yard = _SETTINGS["yard_m"]
     return {
@@ -95,9 +111,24 @@ def test_fixture_cites_a_fetched_published_table() -> None:
         assert "from memory" not in (shot["source"] + shot["confidence"]), shot["id"]
 
 
+def test_unlanded_trajectory_cannot_be_reported_as_carry(monkeypatch) -> None:
+    from src.shared.python.physics.ball_simulator import BallFlightSimulator
+
+    monkeypatch.setitem(sys.modules, "upstream_physics", ModuleType("upstream_physics"))
+    points = [
+        SimpleNamespace(position=np.array([0.0, 0.0, 0.0]), velocity=[20, 0, 10]),
+        SimpleNamespace(position=np.array([10.0, 0.0, 2.0]), velocity=[10, 0, -2]),
+    ]
+    monkeypatch.setattr(
+        BallFlightSimulator, "simulate_trajectory", lambda *a, **kw: points
+    )
+    with pytest.raises(ValueError, match="ground"):
+        _flight(_DATA["shots"][0])
+
+
 @pytest.mark.parametrize(("shot", "metric"), _cases())
 def test_reference_shot_within_band(shot: dict[str, Any], metric: str) -> None:
-    """The simulated metric lies inside the published reference band."""
+    """The simulated metric lies inside the stated reference band."""
     value = _flight(shot)[metric]
     low, high = _band(shot, metric)
     assert low <= value <= high, (
