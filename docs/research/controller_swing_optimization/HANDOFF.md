@@ -744,3 +744,26 @@ passed. This is 208 changed lines against main `34c0d41e4a`; it is not a
 qualified v2 baseline, physical gate, contact evidence or a PR. Combining it
 wholesale with the current contact extraction exceeds the 500-line limit;
 reconcile and reuse rather than claim a completed Slice 1.
+
+A controlled zero-residual Option B gain sensitivity used fixed gains
+1/0.1, 3/0.3 and 10/1 with the same exploratory recorded-dynamics reference,
+1 ms ZOH/eight RK4 substeps and actual post-saturation force under the
+assumption-marked directional model envelope. Numerical guards stopped the
+runs at 0.399, 0.333 and 0.313 s. Over their shared first 250 ms, joint RMS
+errors were 1.1783, 0.54085 and 0.31659 rad; modeled ROM flags were 26, 20
+and 14, speed flags 12, 6 and 2, and clipped stages 1408, 1600 and 7328 of
+8000. A repeat of the 3/0.3 control reproduced saved states and stage arrays
+bit-for-bit in this runtime. None completed or qualified; the model limits
+are not verified physiological limits, and this is not gain co-optimization
+or proof of infeasibility.
+
+A 33-frame sparse hard-closure fit to FK markers from the hash-verified
+controller target hit its 350-evaluation limit after 125.36 s. Objective
+changed 2.49949 to 0.34634; native grip residual was 1.33e-13 and independent
+closure was 5.28e-11 mm / 1.61e-13 rad. One discrete acceleration-join
+mismatch was 1.15e-10 rad/s², supplied bounds held, and reported optimality
+was 7.99e-4. Euclidean target-marker RMS changed 19.08 to 15.93 mm while
+observed-marker RMS changed 30.30 to 31.51 mm. Peak sampled speed was
+32.68 rad/s and second difference 886.89 rad/s². This is not a converged or
+admitted full-swing trajectory: anchors are assumed, anatomy is incomplete,
+global continuity is unconstrained and forward dynamics were not verified.
