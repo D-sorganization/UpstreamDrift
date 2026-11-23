@@ -206,7 +206,7 @@ def main() -> None:
 
     configure_gui_logging()
 
-    window = create_standalone_window()  # noqa: F841 - keeps the window alive
+    _window = create_standalone_window()  # keeps the window alive until exit
     sys.exit(app.exec())
 
 
