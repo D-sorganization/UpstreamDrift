@@ -144,6 +144,38 @@ def load_ledger_entry(ledger_path: Path, engine: str) -> dict[str, Any]:
     raise ValueError(f"ledger has no entry for engine {engine!r}")
 
 
+def verify_ledger_binding(
+    target: RenderTarget, entry: dict[str, Any], input_hashes: dict[str, str]
+) -> str:
+    """``"bound"`` or ``"unbound"``; ValueError when the entry is for another run.
+
+    A ledger entry is joined to a render by engine name alone, so a stale
+    same-engine entry would otherwise lend its fit metrics to different inputs.
+    An entry that declares ``input_sha256`` must cover every rendered input hash
+    exactly; one that declares nothing is reported ``unbound`` (never verified).
+    """
+    declared = entry.get("input_sha256")
+    if declared is None:
+        return "unbound"
+    for name, actual in sorted(input_hashes.items()):
+        if declared.get(name) != actual:
+            raise ValueError(
+                f"{target.model_id}: ledger entry {entry.get('engine')!r} is not "
+                f"for this run: input {name!r} ledger {declared.get(name)!r} != "
+                f"rendered {actual}"
+            )
+    return "bound"
+
+
+def _binding_lines(entry: dict[str, Any], input_hashes: dict[str, str]) -> list[str]:
+    if entry.get("input_sha256") is None:
+        return [
+            "- Ledger binding: UNBOUND; the ledger entry records no input hashes, "
+            "so its fit metrics are not joined to this render by identity"
+        ]
+    return [f"- Ledger binding: bound to the rendered inputs ({len(input_hashes)})"]
+
+
 def _metric(value: float | None, unit: str) -> str:
     return "not measured" if value is None else f"{value:.1f} {unit}"
 
@@ -188,6 +220,9 @@ def render_summary(
         f"- Marker RMS: {_metric(entry['marker_rms_mm'], 'mm')}",
         f"- Joint-angle RMS: {_metric(entry['joint_angle_rms_deg'], 'deg')}",
         *_trunk_lines(target),
+        "- Operation: visual replay of the pinned inputs; fit metrics above come "
+        "from the ledger entry, not from this render",
+        *_binding_lines(entry, input_hashes),
         f"- Verdict: {entry['verdict']}",
         f"- Limitations and blockers: {entry['blocker']}",
         f"- Inputs (SHA-256): {_hash_list(input_hashes)}",
@@ -237,6 +272,7 @@ def _render(target: RenderTarget, args: argparse.Namespace, commit: str) -> None
         if p.suffix in VIDEO_SUFFIXES
     }
     entry = load_ledger_entry(args.ledger, target.ledger_engine)
+    verify_ledger_binding(target, entry, input_hashes)
     summary = render_summary(target, entry, input_hashes, outputs, commit)
     (out_dir / "SUMMARY.md").write_text(summary, encoding="utf-8")
 

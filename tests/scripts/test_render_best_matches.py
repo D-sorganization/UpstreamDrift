@@ -103,3 +103,51 @@ def test_v2_summary_labels_the_migration_a_replay_not_a_refit() -> None:
     assert "replay, not a refit" not in render_summary(
         _target("opensim_os9"), ENTRY, {}, {}, "x"
     )
+
+
+# --- #14756 P3: bind ledger metrics to the rendered run -----------------------
+
+HASHES = {"model": "a" * 64, "states": "b" * 64}
+
+
+def test_bound_ledger_entry_matching_rendered_hashes_is_accepted() -> None:
+    from scripts.render_best_matches import verify_ledger_binding
+
+    entry = {**ENTRY, "input_sha256": dict(HASHES)}
+    assert verify_ledger_binding(_target("opensim_os9"), entry, HASHES) == "bound"
+
+
+def test_same_engine_wrong_run_ledger_entry_is_rejected() -> None:
+    from scripts.render_best_matches import verify_ledger_binding
+
+    stale = {**ENTRY, "input_sha256": {"model": "c" * 64, "states": "b" * 64}}
+    with pytest.raises(ValueError, match="model"):
+        verify_ledger_binding(_target("opensim_os9"), stale, HASHES)
+
+
+def test_ledger_entry_missing_a_rendered_input_hash_is_rejected() -> None:
+    from scripts.render_best_matches import verify_ledger_binding
+
+    partial = {**ENTRY, "input_sha256": {"model": "a" * 64}}
+    with pytest.raises(ValueError, match="states"):
+        verify_ledger_binding(_target("opensim_os9"), partial, HASHES)
+
+
+def test_ledger_entry_without_declared_hashes_is_unbound_not_silently_joined() -> None:
+    from scripts.render_best_matches import verify_ledger_binding
+
+    assert verify_ledger_binding(_target("opensim_os9"), ENTRY, HASHES) == "unbound"
+
+
+def test_summary_states_binding_status_and_render_only_operation() -> None:
+    unbound = render_summary(_target("opensim_os9"), ENTRY, HASHES, {}, "x")
+    assert "UNBOUND" in unbound and "not joined to this render" in unbound
+    assert "Operation: visual replay" in unbound
+    bound = render_summary(
+        _target("opensim_os9"),
+        {**ENTRY, "input_sha256": dict(HASHES)},
+        HASHES,
+        {},
+        "x",
+    )
+    assert "Ledger binding: bound" in bound and "UNBOUND" not in bound
