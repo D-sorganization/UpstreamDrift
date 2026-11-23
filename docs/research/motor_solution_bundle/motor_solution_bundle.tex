@@ -1,0 +1,32 @@
+\documentclass{article}
+\usepackage{amsmath}
+\title{Motor Solution Bundle Research}
+\begin{document}
+\maketitle
+\section{Scope and State}
+A versioned JSON manifest and NPZ array archive bind a scalar-coordinate
+MuJoCo model, stateless fixed-gain controller, motor XML and numerical RK4
+stage trace. The v2 event marker explicitly says no impact; no event is
+invented. A validated v1 event can be explicitly migrated without adding
+unobserved data. This is a restricted research contract, not a complete
+Solution Bundle or a clinical or physical acceptance.
+\section{Replay and Numerical Evidence}
+At each zero-order hold the control law is
+\[\tau_{\rm cmd}=\tau_{\rm ff}+\delta\tau_{\rm ff}
++K_p(q_{\rm ref}-q)+K_d(\dot q_{\rm ref}-\dot q).\]
+The reconstructed motor plant evaluates post-saturation generalized drive.
+The verifier compares all recorded numerical stage arrays exactly and checks
+bundle boundary states, sampled references and held forces against the
+archive. Final boundary torque repeats the last held value. Stage values are
+not continuous-time extrema. All model, XML, controller and archive bytes
+are hashed; the manifest, model and runtime digests must be trusted separately.
+\section{Limits and Validation}
+Only one hold per fixed step, no impact, no projection, no passive shaft and
+no flight are supported. The directory must remain stable during loading. The
+runtime hash covers a declared subset and does not prove independent runtime,
+full dependency identity, historical model origin, anatomical limits or
+physical actuator provenance. Real matched-swing contact and optimization
+remain unqualified. Focused headless tests and reproduction instructions are
+listed in the adjacent README; private model inputs and execution receipts stay
+outside version control.
+\end{document}

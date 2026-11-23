@@ -452,3 +452,202 @@ def test_motor_rollout_rejects_misleading_recording_and_wrong_mapping(model):
     bad[7] = 1
     with pytest.raises(ValueError, match="unmapped"):
         plant.acceleration(q, q, bad)
+
+
+def test_motor_bundle_v2_fresh_replay_and_consistency(model, tmp_path):
+    from src.shared.python.impact_optimization.option_b_prototype import (
+        FixedGainController,
+        SplineResidual,
+    )
+    from src.shared.python.motion_matching.same_input.integrator import (
+        StepPolicy,
+        integrate,
+    )
+    from src.shared.python.motion_matching.same_input.mujoco_actuator_probe import (
+        MotorRolloutPlant,
+    )
+    from src.shared.python.motion_matching.same_input.stage_numeric_archive import (
+        encode_numeric,
+    )
+    from src.shared.python.motion_matching.same_input.stage_trace import StageRecorder
+    from src.shared.python.motion_matching.same_input.motor_forward_replay import (
+        measured_motor_runtime,
+    )
+    from src.shared.python.optimization.solution_bundle import (
+        SolutionBundle,
+        save_solution_bundle,
+    )
+    from src.shared.python.motion_matching.same_input.motor_solution_bundle import (
+        measured_bundle_motor_runtime,
+        verify_motor_solution,
+    )
+
+    n = len(model.coordinate_order)
+    q0 = np.zeros(n)
+    target = q0.copy()
+    target[6] = 0.1
+    kp = q0.copy()
+    kp[6] = 4.0
+    kd = q0.copy()
+    kd[6] = 2.0
+    xml = f'<actuator><motor joint="{model.coordinate_order[6]}" ctrllimited="true" ctrlrange="-0.1 0.1"/></actuator>'.encode()
+    cfg = {
+        "q0": q0.tolist(),
+        "v0": q0.tolist(),
+        "times_s": [0.0, 2e-7],
+        "q_ref": [target.tolist()] * 2,
+        "qd_ref": [q0.tolist()] * 2,
+        "tau_ff_ref": [q0.tolist()] * 2,
+        "kp": kp.tolist(),
+        "kd": kd.tolist(),
+        "lower": (-np.ones(n)).tolist(),
+        "upper": np.ones(n).tolist(),
+        "breakpoints_s": [0.0, 2e-7],
+        "coefficients": np.zeros((4, n)).tolist(),
+        "scale": np.ones(n).tolist(),
+        "trust_radius": 1.0,
+        "min_spacing_s": 1e-8,
+        "kkt_regularization": 1e-6,
+    }
+    spline = SplineResidual(
+        breakpoints_s=cfg["breakpoints_s"],
+        coefficients_nm=cfg["coefficients"],
+        scale_nm=cfg["scale"],
+        trust_radius=1.0,
+        min_spacing_s=1e-8,
+    )
+    control = FixedGainController(
+        times_s=cfg["times_s"],
+        q_ref=cfg["q_ref"],
+        qd_ref=cfg["qd_ref"],
+        tau_ff_ref=cfg["tau_ff_ref"],
+        kp=cfg["kp"],
+        kd=cfg["kd"],
+        lower_nm=cfg["lower"],
+        upper_nm=cfg["upper"],
+        residual=spline,
+    )
+    plant = MotorRolloutPlant(ControlledMujocoDrive(model, xml.decode()), np.array([6]))
+    trace = StageRecorder(capture_motor_drive=True)
+    run = integrate(
+        plant,
+        q0,
+        q0,
+        lambda _i, t, q, v: control.evaluate(t, q, v).commanded_nm,
+        steps=2,
+        dt_s=1e-7,
+        policy=StepPolicy(substeps=2, project=False),
+        recorder=trace,
+    )
+    assert run.failure is None
+    raw = encode_numeric(trace)
+    spec = SPEC.read_bytes()
+    config = json.dumps(cfg, sort_keys=True).encode()
+
+    def digest(x):
+        return hashlib.sha256(x).hexdigest()
+
+    drive = np.stack([step.stages[0].applied_drive for step in trace.steps])
+    arr = {
+        "time": run.time_s,
+        "q_ref": np.tile(target, (3, 1)),
+        "qd_ref": np.zeros((3, n)),
+        "tau_ff_ref": np.zeros((3, n)),
+        "q_rollout": run.q,
+        "qd_rollout": run.v,
+        "tau_cmd": np.vstack((run.efforts, run.efforts[-1])),
+        "tau_applied": np.vstack((drive, drive[-1])),
+        "knots": np.array([0, 0, 0, 0, 2e-7, 2e-7, 2e-7, 2e-7]),
+        "delta_tau_coeffs": np.zeros((4, n)),
+        "q0": q0,
+        "qd0": q0,
+        "controller_state0": np.zeros(0),
+        "kp": kp,
+        "kd": kd,
+        "motor_stage_npz": np.frombuffer(raw, dtype=np.uint8),
+        "motor_xml": np.frombuffer(xml, dtype=np.uint8),
+        "controller_json": np.frombuffer(config, dtype=np.uint8),
+        "model_json": np.frombuffer(spec, dtype=np.uint8),
+    }
+    bundle = SolutionBundle(
+        solution_id="synthetic",
+        parent_id=None,
+        git_sha="a" * 40,
+        model_hash=digest(spec),
+        asset_hashes={
+            "motor_stage_npz": digest(raw),
+            "motor_xml": digest(xml),
+            "controller_json": digest(config),
+        },
+        frame="world",
+        joint_order=tuple(model.coordinate_order),
+        control={
+            "kind": "fixed_pd_bspline",
+            "hold": "zoh",
+            "saturation": "mujoco_motor",
+            "holds_per_step": 1,
+        },
+        integrator={
+            "kind": "rk4",
+            "dt_s": 1e-7,
+            "substeps": 2,
+            "project": False,
+            "runtime_sha256": measured_bundle_motor_runtime(),
+        },
+        environment={},
+        optimizer_seed=0,
+        impact_event={"status": "none"},
+        flight_metrics={},
+        feasibility_margins={},
+        assumptions=("synthetic limits",),
+        arrays=arr,
+        schema_version=2,
+    )
+    path = save_solution_bundle(bundle, tmp_path / "b")
+    manifest_hash = digest((path / "manifest.json").read_bytes())
+    checked = verify_motor_solution(
+        path,
+        expected_manifest_sha256=manifest_hash,
+        expected_model_sha256=digest(spec),
+        expected_runtime_sha256=measured_bundle_motor_runtime(),
+    )
+    assert (
+        checked.stages == 16
+        and checked.forward_replay_verified
+        and not checked.independent_runtime_verified
+    )
+    with pytest.raises(ValueError, match="manifest"):
+        verify_motor_solution(
+            path,
+            expected_manifest_sha256="0" * 64,
+            expected_model_sha256=digest(spec),
+            expected_runtime_sha256=measured_bundle_motor_runtime(),
+        )
+    with pytest.raises(ValueError, match="runtime"):
+        verify_motor_solution(
+            path,
+            expected_manifest_sha256=manifest_hash,
+            expected_model_sha256=digest(spec),
+            expected_runtime_sha256="0" * 64,
+        )
+    for index, (key, col) in enumerate((("tau_applied", 6), ("q_ref", 6))):
+        original = bundle.arrays[key][0, col]
+        bundle.arrays[key][0, col] += 0.01
+        bad = save_solution_bundle(bundle, tmp_path / f"bad-{index}")
+        with pytest.raises(ValueError, match="mismatch"):
+            verify_motor_solution(
+                bad,
+                expected_manifest_sha256=digest((bad / "manifest.json").read_bytes()),
+                expected_model_sha256=digest(spec),
+                expected_runtime_sha256=measured_bundle_motor_runtime(),
+            )
+        bundle.arrays[key][0, col] = original
+    bundle.arrays["q_rollout"][1, 6] += 0.01
+    altered = save_solution_bundle(bundle, tmp_path / "altered")
+    with pytest.raises(ValueError, match="boundary"):
+        verify_motor_solution(
+            altered,
+            expected_manifest_sha256=digest((altered / "manifest.json").read_bytes()),
+            expected_model_sha256=digest(spec),
+            expected_runtime_sha256=measured_bundle_motor_runtime(),
+        )
