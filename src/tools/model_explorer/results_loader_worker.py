@@ -40,16 +40,20 @@ def live_loader_count() -> int:
 
 @dataclass(frozen=True)
 class ResultsLoadSettings:
-    """Blocking-load bound and busy-bar width (``ValueError`` unless > 0)."""
+    """Blocking-load bound, busy-bar width and poll interval (each > 0)."""
 
     wait_timeout_s: float = 900.0
     progress_width_px: int = 160
+    #: longest the GUI thread sleeps between checks while waiting on a load
+    poll_interval_ms: int = 50
 
     def __post_init__(self) -> None:
         if not (math.isfinite(self.wait_timeout_s) and self.wait_timeout_s > 0):
             raise ValueError(f"wait_timeout_s must be positive: {self.wait_timeout_s}")
         if self.progress_width_px <= 0:
             raise ValueError(f"progress_width_px must be positive: {self}")
+        if self.poll_interval_ms <= 0:
+            raise ValueError(f"poll_interval_ms must be positive: {self}")
 
 
 def prepare_results(path: Path, engine: str | None) -> ResultsSession:

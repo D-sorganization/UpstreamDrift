@@ -7,12 +7,13 @@ panel, so ``gui.py`` stays under the monolith line limit.
 from __future__ import annotations
 
 import contextlib
+import time
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 from PyQt6 import sip
-from PyQt6.QtCore import QCoreApplication, QEvent, QEventLoop, QTimer
+from PyQt6.QtCore import QCoreApplication, QEvent, QEventLoop
 from PyQt6.QtWidgets import (
     QDockWidget,
     QInputDialog,
@@ -105,12 +106,14 @@ class ResultsPlaybackHostMixin:
         limit = timeout_s or self.results_load_settings.wait_timeout_s
         if limit <= 0:
             raise ValueError(f"timeout_s must be positive, got {limit}")
-        if self._results_loader is not None:
-            loop, timer = QEventLoop(), QTimer()
-            timer.timeout.connect(loop.quit)
-            self._results_loader.finished.connect(loop.quit)
-            timer.start(int(limit * 1000))
-            loop.exec()
+        # Poll the state, not ``finished``: it may already have been emitted,
+        # and a nested QEventLoop would then sit out the whole timeout.
+        deadline = time.monotonic() + limit
+        while self.is_loading_results and time.monotonic() < deadline:
+            QCoreApplication.processEvents(
+                QEventLoop.ProcessEventsFlag.WaitForMoreEvents,
+                self.results_load_settings.poll_interval_ms,
+            )
         return self._results is not None and not self.is_loading_results
 
     def cancel_results_loads(self) -> None:
@@ -123,7 +126,7 @@ class ResultsPlaybackHostMixin:
         loaders.clear()
         # Queued signals only, so superseded sessions close now. A blanket flush
         # inside ``destroyed`` re-posts later deferred deletes, which then leak.
-        QCoreApplication.sendPostedEvents(None, QEvent.Type.MetaCall.value)
+        QCoreApplication.sendPostedEvents(None, QEvent.Type.MetaCall)
 
     def _deliver(self, handler: Callable[..., None], *args: Any) -> None:
         """Run ``handler`` unless this widget is deleted (PyQt6 would abort)."""
