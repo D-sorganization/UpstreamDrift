@@ -244,7 +244,17 @@ def integrate(
     """
     if steps < 1 or not (np.isfinite(dt_s) and dt_s > 0.0):
         raise ValueError("steps and dt_s must be positive")
+    if impact is not None and not getattr(plant, "supports_impact", True):
+        raise ValueError("plant does not support impact forces")
+    if policy.project and not getattr(plant, "supports_projection", True):
+        raise ValueError("plant does not support projection")
     root = root_indices(plant.coordinate_order)
+    if recorder is not None and recorder.capture_drive:
+        semantics = getattr(
+            plant, "drive_evidence_semantics", "ideal_direct_generalized_no_saturation"
+        )
+        if semantics != recorder.drive_semantics:
+            raise ValueError("plant and recorder drive evidence semantics differ")
     if recorder is not None:
         recorder.start_run(
             RunPlan(
@@ -367,7 +377,7 @@ def _held_step(
                     observe=observe,
                     observe_drive=(
                         recorder.record_drive
-                        if recorder is not None and recorder.capture_ideal_drive
+                        if recorder is not None and recorder.capture_drive
                         else None
                     ),
                 )
@@ -457,9 +467,7 @@ def _impact_hold(
                 observe=observe,
                 observe_drive=(
                     recorder.record_drive
-                    if recorder is not None
-                    and not trial
-                    and recorder.capture_ideal_drive
+                    if recorder is not None and not trial and recorder.capture_drive
                     else None
                 ),
             )

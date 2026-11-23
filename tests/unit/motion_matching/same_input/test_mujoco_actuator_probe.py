@@ -92,3 +92,103 @@ def test_repeated_calls_do_not_accumulate_actuation(model):
     a2, t2 = system.acceleration(q, q, np.array([1.0]))
     assert np.array_equal(t1, t2)
     assert np.array_equal(a1, a2)
+
+
+def test_fixed_hold_rollout_records_post_saturation_motor_forces(model):
+    from src.shared.python.motion_matching.same_input.integrator import (
+        StepPolicy,
+        integrate,
+    )
+    from src.shared.python.motion_matching.same_input.stage_trace import StageRecorder
+    from src.shared.python.motion_matching.same_input.mujoco_actuator_probe import (
+        MotorRolloutPlant,
+    )
+
+    names = model.coordinate_order
+    xml = "".join(
+        f'<motor joint="{n}" gear="2" ctrllimited="true" ctrlrange="-1 1"/>'
+        for n in names[6:]
+    )
+    drive = ControlledMujocoDrive(model, f"<actuator>{xml}</actuator>")
+    plant = MotorRolloutPlant(drive, np.arange(6, len(names)))
+    q = np.zeros(len(names))
+    command = np.r_[np.zeros(6), np.full(len(names) - 6, 3.0)]
+    trace = StageRecorder(capture_motor_drive=True)
+    out = integrate(
+        plant,
+        q,
+        q,
+        lambda *_: command,
+        steps=2,
+        dt_s=0.0000001,
+        policy=StepPolicy(substeps=2, project=False),
+        recorder=trace,
+    )
+    assert out.failure is None and trace.outcome.status == "complete"
+    plain = integrate(
+        plant,
+        q,
+        q,
+        lambda *_: command,
+        steps=2,
+        dt_s=1e-7,
+        policy=StepPolicy(substeps=2, project=False),
+    )
+    np.testing.assert_array_equal(out.q, plain.q)
+    np.testing.assert_array_equal(out.v, plain.v)
+    stages = [stage for step in trace.steps for stage in step.stages]
+    assert len(stages) == 16
+    for stage in stages:
+        np.testing.assert_array_equal(stage.tau, command)
+        np.testing.assert_array_equal(
+            stage.applied_drive, np.r_[np.zeros(6), np.full(len(names) - 6, 2.0)]
+        )
+        np.testing.assert_array_equal(stage.applied_external, np.zeros(len(names)))
+        assert stage.effort_semantics == "mujoco_post_saturation_generalized_motor"
+
+
+def test_motor_rollout_rejects_misleading_recording_and_wrong_mapping(model):
+    from src.shared.python.motion_matching.same_input.integrator import (
+        StepPolicy,
+        integrate,
+    )
+    from src.shared.python.motion_matching.same_input.stage_trace import StageRecorder
+    from src.shared.python.motion_matching.same_input.mujoco_actuator_probe import (
+        MotorRolloutPlant,
+    )
+
+    names = model.coordinate_order
+    xml = f'<actuator><motor joint="{names[6]}"/></actuator>'
+    drive = ControlledMujocoDrive(model, xml)
+    with pytest.raises(ValueError, match="motor joint order"):
+        MotorRolloutPlant(drive, np.array([7]))
+    plant = MotorRolloutPlant(drive, np.array([6]))
+    q = np.zeros(len(names))
+    with pytest.raises(ValueError, match="semantics"):
+        integrate(
+            plant,
+            q,
+            q,
+            lambda *_: q,
+            steps=1,
+            dt_s=1e-7,
+            policy=StepPolicy(substeps=1, project=False),
+            recorder=StageRecorder(capture_ideal_drive=True),
+        )
+    with pytest.raises(ValueError, match="impact"):
+        integrate(
+            plant,
+            q,
+            q,
+            lambda *_: q,
+            steps=1,
+            dt_s=1e-7,
+            policy=StepPolicy(substeps=1, project=False),
+            impact=object(),
+        )
+    with pytest.raises(ValueError, match="projection"):
+        integrate(plant, q, q, lambda *_: q, steps=1, dt_s=1e-7)
+    bad = q.copy()
+    bad[7] = 1
+    with pytest.raises(ValueError, match="unmapped"):
+        plant.acceleration(q, q, bad)

@@ -95,8 +95,18 @@ class TracedStep:
 class StageRecorder:
     """Commit one complete integration step at a time; failed buffers vanish."""
 
-    def __init__(self, *, capture_ideal_drive: bool = False) -> None:
+    def __init__(
+        self, *, capture_ideal_drive: bool = False, capture_motor_drive: bool = False
+    ) -> None:
+        if capture_ideal_drive and capture_motor_drive:
+            raise ValueError("choose one drive evidence mode")
         self.capture_ideal_drive = capture_ideal_drive
+        self.capture_drive = capture_ideal_drive or capture_motor_drive
+        self.drive_semantics = (
+            "mujoco_post_saturation_generalized_motor"
+            if capture_motor_drive
+            else "ideal_direct_generalized_no_saturation"
+        )
         self.steps: list[TracedStep] = []
         self._pending: list[Stage] = []
         self._segments: list[SegmentPlan] = []
@@ -215,15 +225,14 @@ class StageRecorder:
                         return "held effort changes within a hold"
                 else:
                     held_efforts[stage.hold] = stage.tau
-                if self.capture_ideal_drive and (
+                if self.capture_drive and (
                     stage.applied_drive is None
                     or stage.applied_external is None
                     or stage.applied_drive.shape != (nv,)
                     or stage.applied_external.shape != (nv,)
                     or not np.isfinite(stage.applied_drive).all()
                     or not np.isfinite(stage.applied_external).all()
-                    or stage.effort_semantics
-                    != "ideal_direct_generalized_no_saturation"
+                    or stage.effort_semantics != self.drive_semantics
                 ):
                     return "missing or invalid ideal drive evidence"
         expected = self.expected_stages()
@@ -307,7 +316,7 @@ class StageRecorder:
             self._pending[-1],
             applied_drive=np.asarray(drive, dtype=float).copy(),
             applied_external=np.asarray(external, dtype=float).copy(),
-            effort_semantics="ideal_direct_generalized_no_saturation",
+            effort_semantics=self.drive_semantics,
         )
 
     def commit(
