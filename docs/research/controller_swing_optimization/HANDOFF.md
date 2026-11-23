@@ -715,3 +715,20 @@ zero versus residual tracking RMS was 0.54085 versus 0.53655 rad; both had
 435.87 versus 433.50 J. Both trajectories failed well before the endpoint;
 this limited diagnostic is not a physical acceptance, complete optimization,
 carry result or proof that no feasible improvement exists.
+
+A separate 15-frame hard-closure trial fitted v2 FK markers to markers
+computed from the original controller target `q_track`; the source dynamics
+file hash matched the pinned bundle's dynamics-record hash. The 250-iteration
+trial did not converge. Source-target marker RMS changed 19.04 to 15.30 mm,
+while observed-marker RMS changed 31.01 to 32.91 mm and maximum coordinate
+change was 0.439 rad. Native grip residual was 1.03e-5; original-frame
+closure was 0.00371 mm and 1.27e-5 rad. Supplied bounds held, sampled join
+acceleration mismatch was 1.44e-10 rad/s² and peak second difference was
+714 rad/s². This is a short marker-space target proxy, not direct migration,
+whole-swing tracking or physical admission.
+
+An independent original-source-model check found `q_track` FK markers already
+differed from observed markers by 28.34 mm RMS over those 15 frames and 487
+valid marker samples. Thus a target-observation mismatch exists before v2
+transfer, but this check does not apportion the v2 fitting tradeoff. The
+private data, scripts and hash-bound receipts remain outside git.
