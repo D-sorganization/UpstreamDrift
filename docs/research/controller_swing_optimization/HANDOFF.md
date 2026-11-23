@@ -1621,3 +1621,20 @@ improved its own initial marker-velocity comparison but worsened the other;
 finite secants and fixed attachments are not measured root velocity.
 The additional broad follow-imports mypy subsequently completed successfully
 for the four changed source files.
+
+A six-component source-derived initial pelvis-twist diagnostic used four
+pelvis-attached markers. At six sampled source/v2 states their translational
+root Jacobian columns matched exactly; rotational columns differed in norm by
+up to 0.0272–0.0284. At the initial projected v2 state, source-v2 marker
+velocity residual had comparable translational and rotational components.
+A rank-six least-squares correction had magnitudes 0.01359 m/s translation and
+0.06637 rad/s angular. After closure projection it changed initial source-
+target pelvis marker velocity component RMS 0.00956 to 0.001315 m/s but
+worsened observed secant RMS 0.01355 to 0.02141 m/s. Its full 1.322 s
+projected, no-impact, unsaturated computed-torque replay used zero direct
+root torque; source-target marker RMS worsened 234.60 to 244.13 mm, observed
+235.38 to 244.87 mm, root translation component RMS 0.08516 to 0.08962 m,
+root rotation RMS 0.14295 to 0.14745 rad. Joint RMS changed 0.01731 to
+0.01643 rad; one modeled ROM excess was 3.67° and peak held ideal effort
+359.75 N m. This source-derived model/attachment estimate is not a measured
+initial root velocity or a qualified baseline; it did not fix full drift.
