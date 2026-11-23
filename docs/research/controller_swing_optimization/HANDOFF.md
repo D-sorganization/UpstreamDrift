@@ -2607,3 +2607,16 @@ last two prefix samples up to 0.00492 mixed coordinate units; sampled closure
 residual was 6.44e-9 and modeled bounds passed. The original first two samples
 remain fixed. This is numerical seam feasibility, not an unchanged prefix or
 complete continuous reference; a 300 ms continuation requires fresh replay.
+
+The saved 109-frame support continuation extends the 150 ms reference to
+300 ms. It retains the disclosed adjusted prefix and q0/q1, matches the seam
+pose and centered velocity, and independently reports sampled closure
+residual 8.50e-9 and maximum assumed interval-speed ratio 0.1313 with no
+sampled speed flags. Its sampled linear balance residual decreased 0.534 to
+0.111 body weights RMS and angular residual 56.34 to 32.44 N m RMS; source
+marker and foot RMS were 28.62 and 6.03 mm. The bounded numerical fit stopped
+at 186 seconds without convergence (optimality 16.04), and the speed term was
+a penalty rather than a hard constraint. These are assumed-contact and
+model-derived target results, not measured ground force or physical admission.
+Full registry ROM coverage, independent forward tracking and actual motor
+stage gates require audit before using this candidate.
