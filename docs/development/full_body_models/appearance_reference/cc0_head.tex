@@ -46,6 +46,38 @@ mismatch, a non-closed or inward shell or a head outside its envelope raise
 \texttt{ValueError}. Budgets: asset $\le150$\,kB (measured 63\,kB), total
 $\le12\,000$ triangles (measured 9386).
 
+\subsection{Native Hair Shading Parity (Epic 12678)}
+The shared native-viewer OBJ exporter now selects \texttt{hair\_mesh} for
+smooth shading, matching MuJoCo's \texttt{HAIR\_PART} selection. For each
+vertex $i$, it sums incident oriented triangle cross products and normalizes:
+\[
+ n_i = \frac{\sum_{t\ni i}(b_t-a_t)\times(c_t-a_t)}
+ {\left\|\sum_{t\ni i}(b_t-a_t)\times(c_t-a_t)\right\|}.
+\]
+This reuses \texttt{body\_skin\_mesh.vertex\_normals}. Normals are computed
+after placement in the spec head-body frame, serialized as OBJ \texttt{vn}
+records with six decimal places and referenced using \texttt{v//vn} indices.
+An explicit smoothing group selects interpolated shading. Non-finite or zero
+normals fail before the file is written. Six-decimal serialization is checked
+within $5.1\times10^{-7}$ per component; this is a formatting bound, not an
+anatomical tolerance. Unit-normal checks allow $10^{-6}$ after serialization.
+Skin, facial parts, caps and the parametric hair retain their prior OBJ format.
+Vertices (metres), triangle winding, materials, head placement, joint mapping,
+mass and inertia are unchanged. No physics specification is modified.
+
+Reproduce the engine-free regression with
+\texttt{python3 -m pytest tests/unit/tools/native\_viewer\_export/test\_head\_obj\_normals.py}.
+It checks deterministic output, normal references and direction in a rotated
+head frame, unchanged coordinates/topology and rejection of degenerate normals.
+Render the native MeshCat OBJ path with
+\texttt{python3 -m docs.development.full\_body\_models.evidence.appearance.native\_hair\_normals.render}.
+The sibling evidence directory contains front and three-quarter before/after
+views at $1280\times844$ and $390\times844$. The baseline removes only normal
+records, smoothing groups and face-normal references to reproduce the old
+writer; all captures use identical geometry, colours, lighting and cameras.
+These appearance receipts do not qualify dynamics or live Drake/OpenSim
+execution. OpenSim's OBJ normal handling still requires a native check.
+
 \subsection{Limitations}
 Skin is one flat colour: the base mesh has no eye, lip or brow texture, so the
 eyes and mouth read through geometry only. The hairline follows quad
