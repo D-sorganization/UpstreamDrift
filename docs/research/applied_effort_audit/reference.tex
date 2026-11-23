@@ -1,0 +1,31 @@
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+\title{Sampled Applied Effort Audit}
+\author{UpstreamDrift}
+\maketitle
+\section{Inputs and Assumptions}
+For $N\geq2$ finite, strictly increasing sample times $t_i$ in seconds,
+let $u_{ij}$ be the total measured applied torque in Nm of rotational actuator
+$j$, including feedback and saturation. All arrays use the same actuator order
+and torque sign convention. Bounds $l_j\leq h_j$ are finite and the finite
+slew limits $s_j\geq0$ have units Nm/s. No coordinate transformation,
+calibration or anatomical bound inference is performed.
+\section{Method and Acceptance}
+\begin{align*}
+m_{u,j} &= \min_i\{u_{ij}-l_j,\ h_j-u_{ij}\},\\
+m_{s,j} &= s_j-\max_{i<N-1}
+  \left|\frac{u_{i+1,j}-u_{ij}}{t_{i+1}-t_i}\right|.
+\end{align*}
+The sampled receipt is feasible precisely when every margin is nonnegative.
+Invalid dimensions, nonfinite values and derived overflow raise errors.
+For times $(0,0.5,2)$, torques $(1,3,0)$, bounds $(-4,4)$ and slew
+limit $5$, the margins are respectively $1$ Nm and $1$ Nm/s.
+\section{Scope and Evidence}
+Secants do not certify continuous-time derivatives or ZOH jumps. No work,
+tracking, joint-range or flight feasibility is implied. No optimizer or plant
+is run. Analytical fixtures and invalid-input tests live in
+\texttt{tests/unit/optimization/test\_applied\_effort\_audit.py}; reproduction
+commands and the initial missing-module failure are recorded in the adjacent
+README. This is a standalone research reference, not a generated design manual.
+\end{document}
