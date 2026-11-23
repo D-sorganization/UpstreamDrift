@@ -1550,3 +1550,24 @@ velocity is not measured or biomechanically sourced; this is sensitivity on a
 nonconverged proxy, not an admitted baseline, physical claim or Option B
 improvement. Common first-550-ms arrays matched previous probes in the same
 runtime.
+
+Research branch `codex/15493-motor-bundle21` at `1ba9012db7` integrates an
+explicit research schema-v2 no-impact representation and v1 migration with the
+actual JSON+NPZ codec and motor-stage replay. It preserves separate reference
+and rollout grids, binds externally trusted manifest/model/runtime hashes and
+typed motor-stage/controller/XML payloads, and checks boundary states,
+commands, applied inputs and controller references against the stage archive
+before fresh replay. Adversarial tests reject duplicate JSON/NPZ names,
+nonfinite extra arrays, unsupported impact status, wrong hashes and mismatched
+boundary/target data. One hundred forty-two targeted tests, scoped mypy, Ruff,
+Black, LaTeX compilation and clean normal headless push hooks passed. An
+initial push caught an Optional-drive typing defect; it was fixed fail-closed,
+tests repeated and the empirical run repeated after the final commit.
+
+The actual codec saved and loaded the exploratory v2 no-impact bundle and a
+fresh motor replay matched all 42,304 recorded numerical stages exactly in the
+same runtime (38.96 s after final commit). Loose synthetic caps, partial runtime
+fingerprint, no impact/projection/passive shaft, and an unadmitted fitted
+reference prevent physical, first-contact or independent-runtime claims. The
+branch is oversized research, copies codec files already on main, and requires
+reconciliation with current main; it is not a completed Slice 2 or PR.
