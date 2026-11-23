@@ -1315,3 +1315,28 @@ at 0.288 s on extension, with 19 ROM / three speed flags. This is a one-sided
 local diagnostic, not a feasible full swing, continuous-time certificate,
 physiological assessment or power improvement. Private hash-bound receipts
 and arrays remain outside git.
+
+Research branch `codex/15493-score-units16b` at `28f34a9f91` fixes the
+legacy mixed-unit replay score and invalid-clock/state acceptance. It classifies
+coordinates from model joint primitives, fails closed for missing or ambiguous
+metadata, reports rotation in radians and translation in metres separately,
+and applies numerical-parity thresholds 1e-6 rad and 1e-6 m to every recorded
+q sample. Frame checks remain sampled. Replay and closed-loop receipts use v2
+schemas to distinguish corrected semantics from historical mixed-unit v1
+receipts. Failing-first regressions, 61 focused tests, Ruff, Black, scoped and
+broad mypy, LaTeX compilation and normal headless push hooks passed. The
+254-line branch overlaps earlier scoring/clock branches and needs reconciliation;
+it is not a physical gate, continuous-time certificate or completed Slice 1.
+
+A 500 ms 41-coordinate Option B linearized continuation predicted reduced
+hold-sampled modeled violation, but nonlinear validation hit a numerical guard
+at 0.277 s versus 0.585 s for its starting candidate. At 200 ms recorded stage
+ROM peak worsened 1.319 to 2.317 rad, speed flags zero to three and tracking
+RMS 0.2720 to 0.3113 rad. The complete sensitivity matrix and candidate were
+saved before a partial-horizon comparison harness error; limits remain partly
+unverified. This is not feasible, a full-horizon result or an improved shot.
+
+Upstream #15564 is now merged at `675d34feec3436e003e2363cd5ced6757dfa80e6`.
+Its limited bundle-schema scope alone does not establish the required complete
+Solution Bundle, migration or independent forward replay; check current main
+and remaining requirements before reuse.
