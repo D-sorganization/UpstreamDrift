@@ -2711,3 +2711,20 @@ claimed. In the 32-substep motor replay, worst 250 ms modeled ROM excess fell
 300 ms 13 ROM and five speed slots failed, with no clipping. Sixteen/32
 matched-hold differences were small. This was not a meaningful feasibility
 improvement, and work/slew and physiological limits remain unverified.
+
+The explicit bridge's fixed-gain motor rollout developed increasing modeled
+root angular acceleration mismatch: actual/reference magnitudes at 150, 175
+and 200 ms were 13.95/1.14, 139.08/2.79 and 243.90/3.99 rad/s². The seam's
+root-only rate/acceleration table jumps were 0.00557 and 1.289 in mixed units,
+so the later difference is not explained merely by that root table jump.
+Modeled actual and reference support also differed, but contact, state and
+control all changed; no single cause or measured ground-force claim follows.
+
+A diagnostic state-dependent computed-torque controller on the same bridge,
+initial state and actual motor (no direct root actuation) completed 300 ms at
+16/32 substeps with no clipping or sampled modeled speed flags. One wrist ROM
+slot failed, maximum 0.00012815 rad. Joint RMS was 0.01887 rad and root
+rotation RMS 0.00558 rad, compared with 0.32961 and 0.34863 for the fixed
+gain bridge run. This controller is not the required fixed-gain Option B; it
+is a contrast motivating sensitivity analysis, not an accepted solution.
+Torque/speed assumptions, work/slew, full swing and contact remain unverified.
