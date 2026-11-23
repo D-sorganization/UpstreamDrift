@@ -26,23 +26,15 @@ class UpstreamDriftLauncher(QtWidgets.QMainWindow):
         self.setWindowTitle("Golf Model Suite Launcher")
         self.resize(400, 300)
 
-        # Paths
-        # Accessing sibling repositories assuming standard checkout structure
-        # Current: .../MuJoCo_Golf_Swing_Model/python/
-        # Root: .../MuJoCo_Golf_Swing_Model/
-        # Sibling: .../Drake_Golf_Model/
-
-        # We are at CWD likely.
-        # Let's try to resolve paths relative to this script
+        # Resolve the consolidated source tree independently of the caller's cwd.
         self.script_dir = Path(__file__).parent.resolve()
-        self.repo_root = self.script_dir.parent  # python/ -> root
-        self.repos_dir = self.repo_root.parent  # Repositories/
+        self.repo_root = Path(__file__).resolve().parents[5]
+        self.repos_dir = self.repo_root.parent
+        engines_dir = self.repo_root / "src/engines/physics_engines"
 
-        self.mujoco_path = self.script_dir / "mujoco_humanoid_golf/advanced_gui.py"
-        self.drake_path = self.repos_dir / "Drake_Golf_Model/python/src/golf_gui.py"
-        self.pinocchio_path = (
-            self.repos_dir / "Pinocchio_Golf_Model/python/pinocchio_golf/gui.py"
-        )  # noqa: E501
+        self.mujoco_path = self.script_dir / "mujoco_humanoid_golf/__main__.py"
+        self.drake_path = engines_dir / "drake/python/src/golf_gui.py"
+        self.pinocchio_path = engines_dir / "pinocchio/python/pinocchio_golf/gui.py"
 
         self._setup_ui()
 
@@ -84,8 +76,8 @@ class UpstreamDriftLauncher(QtWidgets.QMainWindow):
         self.status.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.status)
 
-    def _launch_script(self, name: str, path: Path, cwd: Path) -> None:
-        """Launch a script in a subprocess."""
+    def _launch_script(self, name: str, path: Path) -> None:
+        """Launch an in-tree module with package-relative imports preserved."""
         if name is None:
             raise ValueError("name must be provided")
         self.status.setText(f"Launching {name}...")
@@ -101,7 +93,11 @@ class UpstreamDriftLauncher(QtWidgets.QMainWindow):
         try:
             # Launch detached process
             # Use same python interpreter
-            subprocess.Popen([sys.executable, str(path)], cwd=str(cwd))  # noqa: S603
+            module = ".".join(path.relative_to(self.repo_root).with_suffix("").parts)
+            module = module.removesuffix(".__main__")
+            subprocess.Popen(  # noqa: S603
+                [sys.executable, "-m", module], cwd=str(self.repo_root)
+            )
             self.status.setText(f"{name} Launched")
         except (OSError, subprocess.SubprocessError) as e:
             QtWidgets.QMessageBox.critical(
@@ -111,9 +107,7 @@ class UpstreamDriftLauncher(QtWidgets.QMainWindow):
 
     def _launch_mujoco(self) -> None:
         """Launch the MuJoCo model GUI."""
-        # CWD should be python root of mujoco repo for imports to work usually
-        cwd = self.mujoco_path.parent.parent
-        self._launch_script("MuJoCo", self.mujoco_path, cwd)
+        self._launch_script("MuJoCo", self.mujoco_path)
 
     def _launch_drake(self) -> None:
         """Launch the Drake model GUI inside Docker container."""
@@ -154,11 +148,14 @@ class UpstreamDriftLauncher(QtWidgets.QMainWindow):
                 # Mount workspace
                 "-v",
                 f"{repo_root_host}:/workspace",
+                "-w",
+                f"/workspace/{self.repo_root.name}",
                 # Image
                 "upstream-drift:engine",
                 # Command inside container
                 "python",
-                "UpstreamDrift/engines/physics_engines/drake/python/src/golf_gui.py",
+                "-m",
+                "src.engines.physics_engines.drake.python.src.golf_gui",
             ]
         )
 
@@ -176,8 +173,7 @@ class UpstreamDriftLauncher(QtWidgets.QMainWindow):
 
     def _launch_pinocchio(self) -> None:
         """Launch the Pinocchio model GUI."""
-        cwd = self.pinocchio_path.parent.parent  # python/
-        self._launch_script("Pinocchio", self.pinocchio_path, cwd)
+        self._launch_script("Pinocchio", self.pinocchio_path)
 
 
 def main() -> None:
