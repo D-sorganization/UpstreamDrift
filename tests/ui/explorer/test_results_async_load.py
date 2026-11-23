@@ -178,3 +178,25 @@ def test_teardown_skips_a_loader_qt_already_deleted(
     explorer.cancel_results_loads()  # idempotent
     QApplication.processEvents()  # the late ``finished`` must not raise
     assert explorer._live_loaders() == set()
+
+
+def test_deleting_an_explorer_leaves_other_deferred_deletes_alone(
+    qapp: QApplication,
+) -> None:
+    """Teardown inside a deletion must not re-post later deletions (CI shard 2).
+
+    ``destroyed`` runs ``cleanup``; a blanket ``sendPostedEvents()`` there
+    re-posted every deferred delete queued behind the explorer, so the outer
+    flush skipped them and their widgets (and timers) survived.
+    """
+    from PyQt6.QtCore import QEvent
+
+    from src.tools.model_explorer.gui import MainWidget
+
+    explorer, other = MainWidget(), QWidget()
+    timer = QTimer(other)
+    explorer.deleteLater()
+    other.deleteLater()
+    QApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete.value)
+    assert sip.isdeleted(explorer)
+    assert sip.isdeleted(timer)
