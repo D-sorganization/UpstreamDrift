@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -40,6 +43,99 @@ def test_finds_converged_approaching_root_and_returns_integrated_state() -> None
     np.testing.assert_allclose(result.event.qd, [1.0], atol=1e-12)
     np.testing.assert_allclose(result.event.contact_point_m, [0.5, 0.0, 0.0], atol=1e-8)
     assert result.event.approach_speed_mps == pytest.approx(1.0, abs=1e-6)
+
+
+def test_folded_seam_normal_switch_does_not_create_a_distant_contact() -> None:
+    angle = np.pi / 6.0
+    triangles = np.array(
+        [
+            [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+            [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, np.cos(angle), np.sin(angle)]],
+        ]
+    )
+    centre = np.array([0.25, -0.58, 0.98])
+    radius = 0.05
+    result = find_contact_event(
+        _advance(),
+        lambda q: triangles - np.array([0.0, 0.02 * q[0], 0.0]),
+        centre,
+        radius,
+        duration_s=1.0,
+        time_tolerance_s=1e-6,
+    )
+    assert result.event is None
+    assert result.coverage_status == "unresolved_no_accepted_candidate"
+
+
+def test_fast_contact_returns_geometrically_converged_sphere_clearance() -> None:
+    centre = np.array([0.9, 0.0, 0.0])
+    radius = 0.5
+    result = find_contact_event(
+        _advance(1000.0),
+        _face,
+        centre,
+        radius,
+        duration_s=0.002,
+        time_tolerance_s=1e-4,
+    )
+    assert result.event is not None
+    assert abs(np.linalg.norm(centre - result.event.contact_point_m) - radius) <= 1e-6
+
+
+def test_miss_penalty_is_continuous_across_folded_seam_normal_switch() -> None:
+    angle = np.pi / 6.0
+    triangles = np.array(
+        [
+            [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+            [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, np.cos(angle), np.sin(angle)]],
+        ]
+    )
+    switch_y = -0.98 * np.tan(angle)
+    penalties = []
+    for offset in (-1e-6, 1e-6):
+        result = find_contact_event(
+            _advance(0.0),
+            lambda _q: triangles,
+            np.array([0.25, switch_y + offset, 0.98]),
+            0.05,
+            duration_s=1.0,
+        )
+        assert result.event is None
+        penalties.append(result.closest_approach_penalty_m)
+    assert abs(penalties[1] - penalties[0]) < 1e-4
+
+
+def test_committed_driver_face_retains_a_front_side_contact() -> None:
+    from src.shared.python.motion_matching.club_face_target import (
+        face_triangles_in_frame,
+    )
+
+    spec_path = (
+        Path(__file__).resolve().parents[3]
+        / "docs/development/full_body_models/full_body_spec_anthro_driver_v2.json"
+    )
+    triangles = face_triangles_in_frame(
+        json.loads(spec_path.read_text(encoding="utf-8"))
+    )
+    target = triangles[300]
+    normal = np.cross(target[1] - target[0], target[2] - target[0])
+    normal /= np.linalg.norm(normal)
+    radius = 0.02135
+    centre = target.mean(axis=0) + normal * (radius + 0.01)
+    result = find_contact_event(
+        _advance(),
+        lambda q: triangles + q[0] * 0.02 * normal,
+        centre,
+        radius,
+        duration_s=1.0,
+        time_tolerance_s=1e-7,
+    )
+    assert result.event is not None
+    assert result.event.time_s == pytest.approx(0.5, abs=1e-6)
+    assert result.event.approach_speed_mps == pytest.approx(0.02, rel=1e-5)
+    assert float(result.event.contact_normal @ normal) > 0.99
+    assert float((centre - result.event.contact_point_m) @ normal) > 0.0
+    assert abs(np.linalg.norm(centre - result.event.contact_point_m) - radius) <= 1e-6
 
 
 def test_boundary_topology_reuse_preserves_penalty_for_rigid_pose() -> None:
@@ -176,6 +272,20 @@ def test_rejects_back_face_approach() -> None:
         _advance(), _face, np.array([-1.0, 0.0, 0.0]), 0.5, duration_s=2.0
     )
     assert result.event is None
+
+
+def test_back_face_crossing_does_not_hide_later_front_face_contact() -> None:
+    def advance(time_s: float) -> tuple[np.ndarray, np.ndarray]:
+        return np.array([np.cos(np.pi * time_s)]), np.array(
+            [-np.pi * np.sin(np.pi * time_s)]
+        )
+
+    result = find_contact_event(
+        advance, _face, np.zeros(3), 0.1, duration_s=2.0, time_tolerance_s=1e-9
+    )
+    assert result.event is not None
+    assert result.event.time_s == pytest.approx(2.0 - np.arccos(-0.1) / np.pi, abs=1e-8)
+    assert result.event.approach_speed_mps > 0.0
 
 
 def test_rejects_contact_on_the_outer_mesh_boundary() -> None:

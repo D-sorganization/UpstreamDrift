@@ -22,6 +22,7 @@ FaceTrianglesFn = Callable[[Array], Array]
 # Root bracketing is deliberately bounded; missed crossings between these
 # states remain an explicit limitation.
 CONTACT_ROOT_SUBDIVISIONS = 8
+SIDE_SWITCH_REFINEMENT = 32
 MISS_PENALTY_SUBDIVISIONS = 8
 
 
@@ -272,13 +273,16 @@ def _surface_sample(
     signed_distance = distance * smooth_side
     gap = signed_distance - radius
 
-    # A normalized soft minimum of squared distances stays continuous across
-    # triangle seams; radius supplies its physical length scale.
+    # A normalized soft minimum of squared distances and blended triangle
+    # side values stay continuous at seams. This is a per-triangle surrogate:
+    # uneven tessellation affects the weights, not the geometric root.
     scaled = -distances2 / (radius * radius)
     weights = np.exp(scaled - float(np.max(scaled)))
     weights /= float(weights.sum())
     smooth_distance = math.sqrt(float(weights @ distances2))
-    smooth_gap = smooth_distance * smooth_side - radius
+    triangle_sides = np.einsum("ij,ij->i", deltas, crosses / lengths[:, None])
+    blended_side = float(weights @ np.tanh(triangle_sides / side_smoothing))
+    smooth_gap = smooth_distance * blended_side - radius
     gap_smoothing = math.sqrt(np.finfo(float).eps) * radius
     gap_penalty = math.hypot(smooth_gap, gap_smoothing) - gap_smoothing
 
@@ -354,6 +358,7 @@ def find_contact_event(
     *,
     duration_s: float,
     time_tolerance_s: float = 1e-9,
+    distance_tolerance_m: float = 1e-6,
     max_iterations: int = 80,
 ) -> ContactSearchResult:
     """Find a bracketed, front-side sphere contact during one actual advance.
@@ -364,14 +369,23 @@ def find_contact_event(
     fixed triangle order and connectivity, undergoing rigid motion only. Each
     returned mesh is checked against that contract; deformation, reordering,
     or changed topology fails closed. The ball is stationary in world
-    coordinates. The signed gap is closest-point distance
-    to the finite triangles (negative behind their outward normals), less the
-    ball radius. Only a positive-to-nonpositive bracket is eligible.
+    coordinates. The sphere clearance is the unsigned closest-point distance
+    to the finite triangles minus the ball radius. It is positive outside and
+    negative during overlap, including across triangle seams. Only a
+    positive-to-nonpositive bracket on this clearance is eligible; the root
+    must separately lie on the outward-facing side of the selected triangle.
+    A reported candidate must meet both the bracket time tolerance and the
+    specified absolute sphere-clearance tolerance. The default one-micrometre
+    clearance tolerance is a numerical root criterion, not a model-accuracy or
+    physical-contact uncertainty bound.
 
     A root on the outer boundary of the supplied patch is rejected; shared
     interior triangle seams remain eligible. The caller must supply outward
     triangle winding. A fixed grid of nine equally spaced states is searched
-    for the first positive-to-nonpositive bracket, which is then bisected. A
+    for a positive-to-nonpositive clearance bracket, which is then bisected.
+    A coarse interval with a side-sign switch but no clearance bracket is
+    additionally sampled at 32 subdivisions; a side switch alone is never a
+    contact. A
     separating start can therefore be followed by a later sampled contact.
     Narrow crossings between grid states, tangent touches, and multiple
     crossings within one grid cell can still be missed or unresolved.
@@ -379,6 +393,8 @@ def find_contact_event(
     spaced states. This bounded scan can miss a narrower or multimodal minimum;
     it is not a global closest-approach guarantee. The penalty is returned for
     hits and misses alike, so event acquisition does not switch its value.
+    Its per-triangle soft weights depend on the mesh tessellation and it is
+    not a tessellation-invariant distance measurement.
     This finder does not select or interpolate generalized states.
 
     Limitation: a point-only rigid fit cannot distinguish a planar reflection
@@ -389,6 +405,7 @@ def find_contact_event(
     radius = float(ball_radius_m)
     duration = float(duration_s)
     tolerance = float(time_tolerance_s)
+    distance_tolerance = float(distance_tolerance_m)
     if centre.shape != (3,) or not np.isfinite(centre).all():
         raise ValueError("ball_centre_m must be a finite three-vector")
     if not math.isfinite(radius) or radius <= 0.0:
@@ -397,6 +414,8 @@ def find_contact_event(
         raise ValueError("duration_s must be positive and finite")
     if not math.isfinite(tolerance) or tolerance <= 0.0 or tolerance >= duration:
         raise ValueError("time_tolerance_s must lie inside duration_s")
+    if not math.isfinite(distance_tolerance) or distance_tolerance <= 0.0:
+        raise ValueError("distance_tolerance_m must be positive and finite")
     if (
         isinstance(max_iterations, bool)
         or not isinstance(max_iterations, int)
@@ -440,58 +459,65 @@ def find_contact_event(
             ),
         )
 
+    def clearance(data: tuple[float, float, int, Array, Array, Array]) -> float:
+        return float(np.linalg.norm(centre - data[3])) - radius
+
     def local_gap_derivative(time_s: float) -> float:
-        """Estimate the signed-gap derivative locally using the real advance."""
-        base = max(4.0 * tolerance, duration * math.sqrt(np.finfo(float).eps))
+        """Estimate the finite-surface clearance derivative using the real advance."""
+        base = max(duration * 1e-6, min(4.0 * tolerance, duration * 1e-4))
         available_before, available_after = time_s, duration - time_s
         if time_s <= 0.0:
             h = min(base, available_after / 2.0)
-            gap0 = sample(time_s)[3][0]
-            gap_half = sample(time_s + h / 2.0)[3][0]
-            gap_full = sample(time_s + h)[3][0]
+            gap0 = clearance(sample(time_s)[3])
+            gap_half = clearance(sample(time_s + h / 2.0)[3])
+            gap_full = clearance(sample(time_s + h)[3])
             half_slope = (gap_half - gap0) / (h / 2.0)
             full_slope = (gap_full - gap0) / h
             return 2.0 * half_slope - full_slope
         if time_s >= duration:
             h = min(base, available_before / 2.0)
-            gap0 = sample(time_s)[3][0]
-            gap_half = sample(time_s - h / 2.0)[3][0]
-            gap_full = sample(time_s - h)[3][0]
+            gap0 = clearance(sample(time_s)[3])
+            gap_half = clearance(sample(time_s - h / 2.0)[3])
+            gap_full = clearance(sample(time_s - h)[3])
             half_slope = (gap0 - gap_half) / (h / 2.0)
             full_slope = (gap0 - gap_full) / h
             return 2.0 * half_slope - full_slope
         if available_before < base:
             h = available_before / 2.0
-            gap0 = sample(time_s)[3][0]
-            gap_half = sample(time_s - h / 2.0)[3][0]
-            gap_full = sample(time_s - h)[3][0]
+            gap0 = clearance(sample(time_s)[3])
+            gap_half = clearance(sample(time_s - h / 2.0)[3])
+            gap_full = clearance(sample(time_s - h)[3])
             half_slope = (gap0 - gap_half) / (h / 2.0)
             full_slope = (gap0 - gap_full) / h
             return 2.0 * half_slope - full_slope
         if available_after < base:
             h = available_after / 2.0
-            gap0 = sample(time_s)[3][0]
-            gap_half = sample(time_s + h / 2.0)[3][0]
-            gap_full = sample(time_s + h)[3][0]
+            gap0 = clearance(sample(time_s)[3])
+            gap_half = clearance(sample(time_s + h / 2.0)[3])
+            gap_full = clearance(sample(time_s + h)[3])
             half_slope = (gap_half - gap0) / (h / 2.0)
             full_slope = (gap_full - gap0) / h
             return 2.0 * half_slope - full_slope
         h = min(base, available_before, available_after)
-        gap_before = sample(time_s - h)[3][0]
-        gap_after = sample(time_s + h)[3][0]
+        gap_before = clearance(sample(time_s - h)[3])
+        gap_after = clearance(sample(time_s + h)[3])
         return (gap_after - gap_before) / (2.0 * h)
 
     grid_times = np.linspace(0.0, duration, CONTACT_ROOT_SUBDIVISIONS + 1)
     grid_states = [sample(float(time_s)) for time_s in grid_times]
     penalty_samples = np.asarray([state[3][1] for state in grid_states], dtype=float)
     event: ContactRoot | None = None
-    if grid_states[0][3][0] == 0.0 and local_gap_derivative(0.0) < 0.0:
+    if clearance(grid_states[0][3]) == 0.0 and local_gap_derivative(0.0) < 0.0:
         q_star, qd_star, triangles, data_star = grid_states[0]
         index, point, bary = data_star[2], data_star[3], data_star[4]
         delta = centre - point
         distance = float(np.linalg.norm(delta))
-        if distance > 0.0 and not _boundary_edge_contact(
-            triangles, index, bary, topology=boundary_topology
+        if (
+            distance > 0.0
+            and float(delta @ data_star[5]) > 0.0
+            and not _boundary_edge_contact(
+                triangles, index, bary, topology=boundary_topology
+            )
         ):
             event = ContactRoot(
                 0.0,
@@ -503,33 +529,59 @@ def find_contact_event(
                 int(index),
             )
 
+    brackets = []
     if event is None:
         for bracket_index in range(CONTACT_ROOT_SUBDIVISIONS):
-            lo = float(grid_times[bracket_index])
-            hi = float(grid_times[bracket_index + 1])
-            data_lo = grid_states[bracket_index][3]
-            data_hi = grid_states[bracket_index + 1][3]
-            if not (data_lo[0] > 0.0 and data_hi[0] <= 0.0):
-                continue
-            exact_right_root = data_hi[0] == 0.0
-            for _ in range(max_iterations):
-                if hi - lo <= tolerance or exact_right_root:
-                    break
-                mid = 0.5 * (lo + hi)
-                _, _, _, data_mid = sample(mid)
-                if data_mid[0] > 0.0:
-                    lo, data_lo = mid, data_mid
+            lo, hi = map(float, grid_times[bracket_index : bracket_index + 2])
+            data_lo, data_hi = (
+                grid_states[i][3] for i in (bracket_index, bracket_index + 1)
+            )
+            if clearance(data_lo) > 0.0 and clearance(data_hi) <= 0.0:
+                brackets.append((lo, hi, data_lo, data_hi))
+            elif data_lo[0] > 0.0 and data_hi[0] <= 0.0:
+                times = np.linspace(lo, hi, SIDE_SWITCH_REFINEMENT + 1)
+                previous_time, previous = lo, data_lo
+                for current_time in times[1:]:
+                    current = (
+                        data_hi
+                        if current_time == hi
+                        else sample(float(current_time))[3]
+                    )
+                    if clearance(previous) > 0.0 and clearance(current) <= 0.0:
+                        brackets.append(
+                            (previous_time, float(current_time), previous, current)
+                        )
+                    previous_time, previous = float(current_time), current
+        for lo, hi, data_lo, data_hi in brackets:
+            exact_right_root = clearance(data_hi) == 0.0
+            if exact_right_root:
+                time_s = hi
+            else:
+                for _ in range(max_iterations):
+                    mid = 0.5 * (lo + hi)
+                    _, _, _, data_mid = sample(mid)
+                    gap_mid = clearance(data_mid)
+                    if hi - lo <= tolerance and abs(gap_mid) <= distance_tolerance:
+                        time_s = mid
+                        break
+                    if gap_mid > 0.0:
+                        lo, data_lo = mid, data_mid
+                    else:
+                        hi, data_hi = mid, data_mid
                 else:
-                    hi, data_hi = mid, data_mid
-            if hi - lo > tolerance and not exact_right_root:
-                raise ValueError("contact root did not converge within max_iterations")
-            time_s = hi if exact_right_root else 0.5 * (lo + hi)
+                    raise ValueError(
+                        "contact root did not converge within max_iterations"
+                    )
             q_star, qd_star, triangles, data_star = sample(time_s)
             index, point, bary = data_star[2], data_star[3], data_star[4]
             delta = centre - point
             distance = float(np.linalg.norm(delta))
-            if distance == 0.0 or _boundary_edge_contact(
-                triangles, index, bary, topology=boundary_topology
+            if (
+                distance == 0.0
+                or float(delta @ data_star[5]) <= 0.0
+                or _boundary_edge_contact(
+                    triangles, index, bary, topology=boundary_topology
+                )
             ):
                 continue
             gap_derivative = local_gap_derivative(time_s)

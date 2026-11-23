@@ -119,6 +119,11 @@ second difference from 2,145 to 2,090 rad/s² but increased maximum soft closure
 translation from 0.0094 to 0.0639 mm; marker and face-axis residuals were
 nearly unchanged and the free-end speed remained about 33.3 rad/s. The
 experiment does not justify adopting that penalty.
+A separate matched endpoint sensitivity used only a weak prior toward the
+estimated earlier motion trend, without future observations. Both runs timed
+out without convergence; endpoint speed changed from 33.325 to 33.306 rad/s,
+with negligible change in the near-impact face-centre speed and direction
+proxies. The trend is an unvalidated model assumption and is not adopted.
 Direct derivation from the embedded calibrated model rejects an unknown pelvis
 offset; relocating its pelvis is a physical model change, not a coordinate-only
 migration. A three-state diagnostic of that changed-model candidate preserved
@@ -133,8 +138,13 @@ guarantee. An integrator audit found that repartitioning trial durations could
 make a state jump at a substep boundary; the working correction anchors trial
 and accepted segment partitions to a common hold lattice. This removes the
 demonstrated numerical discontinuity but does not bound ODE integration error
-or certify first contact. A focused contact, impact, stage-trace and MuJoCo
-suite passed 89 tests with graphics disabled; a separate revision-2 flight
+or certify first contact. A later folded-face test showed that changing the
+nearest triangle normal can create a false signed-gap root. The prototype now
+brackets finite-surface sphere clearance, checks outward side and approach
+separately, and requires a 1 µm numerical clearance residual. It retains a
+bounded scan and a tessellation-dependent sampled miss surrogate. A focused
+contact, impact, stage-trace and MuJoCo suite passed 94 tests with graphics
+disabled; a separate revision-2 flight
 suite passed 16 tests with one strict expected failure, including a check that
 an airborne endpoint cannot be reported as carry. Reference
 flight rows include approximate inputs and are not independent flight
@@ -176,6 +186,23 @@ generalized speed priors were exceeded. Thirteen of the 30 exceeding drive
 slots and all speed priors were assumption-marked. These are sampled model
 thresholds, not clinical findings; the nonstationary fit, computed-torque
 controller, missing saturation, anatomy and impact prevent admission.
+A 200 ms fixed-gain sensitivity used the prior computed-torque history as
+frozen feedforward, trial gains 3 N m/rad and 0.3 N m s/rad, and a smooth
+2 N m elbow pulse. The pulse-response joint RMS was 0.15352 rad open-loop
+and 0.02835 rad with fixed PD; baseline tracking RMS was 0.00812 and 0.01684
+rad respectively. Each run recorded 6,400 stages without impact. All four
+exceeded 11 of 41 declared modeled drive thresholds, and two to five ROM
+slots. The gains, ideal unsaturated effort, exploratory reference and assumed
+limits do not establish feasibility. A larger trial gain failed numerically.
+For that pulse, the change in the same-axis PD term opposed the pulse on all
+199 nonzero hold samples, peaking at 1.214 N m. This local sensitivity does
+not by itself justify optimizing reference shifts. The larger 30/3 trial
+failed with nonfinite acceleration after five completed 1 ms steps; that is
+a numerical result for this setup, not a general physiological conclusion.
+A 0.2 N m pulse under the same gains gave open-loop and PD response RMS of
+0.02319 and 0.002842 rad, with same-axis PD opposition on 198 of 199 nonzero
+holds. These exploratory responses are nonlinear across pulse amplitudes;
+all runs still exceeded declared drive thresholds.
 The flight suite was repeated in a fresh isolated Python 3.12 environment
 after building the current Rust extension and verifying physics revision 2:
 15 passed and one strict expected failure. The stale default revision 0 is

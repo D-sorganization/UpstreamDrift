@@ -35,6 +35,12 @@ arming split. This avoids a jump caused by changing the number of equal
 substeps as the trial duration crosses a partition threshold. The bounded
 scan can still miss narrow crossings; its candidate root is not a proof of
 first contact, and the integration error is not enclosed.
+On a folded mesh, a nearest triangle and its normal can change across a seam;
+using that normal's side sign directly as a root function can create a false
+discontinuous crossing. The prototype instead brackets finite-surface sphere
+clearance, checks the outward-facing side separately, and requires a spatial
+residual tolerance in addition to its time tolerance. This rejects the
+demonstrated false root but does not close gaps in the bounded time scan.
 
 \section{Evidence and Limitations}
 The accompanying README records the prescribed-launch regression and the
