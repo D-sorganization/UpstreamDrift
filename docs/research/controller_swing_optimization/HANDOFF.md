@@ -1458,3 +1458,25 @@ The same candidate had 11 ROM flags and 1.2492 rad peak excess by 200 ms,
 and hit a guard at 1.050 s with divergent states. The later guard is not
 feasibility or improved carry. RK4 evaluation stages are not a continuous
 trajectory certificate, and 16/41 capacities remain unverified.
+
+Research branch `codex/15493-motor-bundle19` at `5b3b0fdf21` combines the
+existing typed-stage and motor-stage research components. A force-only
+verifier reconstructs a fresh MuJoCo model and motor XML from externally
+hash-bound bytes, decodes explicitly labeled post-saturation numerical stages
+and re-evaluates saved stage forces. A synthetic v2 16-stage test rejects
+altered force even when the archive digest is recomputed; ideal v5/v6
+envelopes reject motor traces. Sixty-three focused tests, scoped mypy, Ruff,
+Black, LaTeX compilation and normal headless push hooks passed. This verifies
+forces at stored numerical states only: it does not bind to the merged bundle
+schema, freshly replay the controller, attest an independent runtime or prove
+physical motor parameters. The combined branch is oversized research, not a
+complete Slice 2 or PR.
+
+A 41-coordinate stage-aware Option B continuation attained a 50 ms prefix
+with zero sampled modeled ROM/speed flags over 1600 RK4 stages, though 608
+stages clipped under partly unverified capacities. At 200 ms it still had
+11 ROM flags and 1.249 rad peak excess; extension failed at 0.729 s. A 100 ms
+continuation from that candidate moved the first sampled violation back to
+about 29 ms, had 11 ROM flags / 0.7982 rad excess at 200 ms, and failed at
+0.458 s. These are numerical stage samples, not continuous-path or
+physiological feasibility, a full-horizon swing or power improvement.
