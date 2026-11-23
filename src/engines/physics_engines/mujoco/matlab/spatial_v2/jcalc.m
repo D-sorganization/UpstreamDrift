@@ -48,30 +48,30 @@ addpath('..');
 constants;
 
 switch jtype
-    case 'Rx'  % Revolute about x-axis
+    case 'Rx'  % Revolute about x-axis (Featherstone passive E = R^T)
         c = cos(q);
         s = sin(q);
         E = [1,  0,  0;
-             0,  c, -s;
-             0,  s,  c];
+             0,  c,  s;
+             0, -s,  c];
         Xj = xrot(E);
         S = [1; 0; 0; 0; 0; 0];  % Angular velocity about x
 
-    case 'Ry'  % Revolute about y-axis
+    case 'Ry'  % Revolute about y-axis (Featherstone passive E = R^T)
         c = cos(q);
         s = sin(q);
-        E = [ c,  0,  s;
+        E = [ c,  0, -s;
               0,  1,  0;
-             -s,  0,  c];
+              s,  0,  c];
         Xj = xrot(E);
         S = [0; 1; 0; 0; 0; 0];  % Angular velocity about y
 
-    case 'Rz'  % Revolute about z-axis
+    case 'Rz'  % Revolute about z-axis (Featherstone passive E = R^T)
         c = cos(q);
         s = sin(q);
-        E = [c, -s,  0;
-             s,  c,  0;
-             0,  0,  1];
+        E = [ c,  s,  0;
+             -s,  c,  0;
+              0,  0,  1];
         Xj = xrot(E);
         S = [0; 0; 1; 0; 0; 0];  % Angular velocity about z
 
