@@ -60,9 +60,12 @@ positive-to-nonpositive bracket at a chosen time resolution, and fails closed
 on unresolved intervals, initial overlap, exhausted evaluations or sampled
 rate-bound contradictions. This output is conditional on a justified global
 whole-face speed bound and continuous fixed-lattice state evaluation, and its
-floating-point arithmetic is not an outward-rounded proof. It does not test
-face interior, approach velocity or physical impact, and is not yet wired to
-the event finder. No validated bound is available for the matched swing.
+floating-point arithmetic is not an outward-rounded proof. When explicitly enabled, the event finder uses this scan to select a bracket
+before applying its finite-face interior and point-velocity checks. Unresolved
+coverage suppresses all later candidates. The caller remains responsible for
+the continuous bound; a returned conditional candidate is not a first-contact
+certificate or physical impact proof. No validated bound is available for the
+matched swing. The sampled proximity penalty is unchanged by this option.
 
 \section{Evidence and Limitations}
 The accompanying README records the prescribed-launch regression and the

@@ -377,6 +377,8 @@ def find_contact_event(
     distance_tolerance_m: float = 1e-6,
     max_iterations: int = 80,
     face_point_velocity_world: FaceVelocityFn | None = None,
+    max_clearance_rate_mps: float | None = None,
+    coverage_max_evaluations: int = 4096,
 ) -> ContactSearchResult:
     """Find a bracketed, front-side sphere contact during one actual advance.
 
@@ -401,6 +403,12 @@ def find_contact_event(
     callback a sampled bracket remains unresolved. This instantaneous test is
     not a bound between samples or a guarantee of first contact. Approach at
     or below 1e-7 m/s is treated as numerically ambiguous, not physical proof.
+
+    When ``max_clearance_rate_mps`` is supplied, an adaptive scan searches
+    chronologically using that caller-attested continuous bound. Ambiguous
+    earlier intervals suppress later hits. A conditional candidate is not a
+    first-contact certificate: the bound is not verified and floating-point
+    calculations are not interval arithmetic.
 
     A root on the outer boundary of the supplied patch is rejected; shared
     interior triangle seams remain eligible. The caller must supply outward
@@ -537,8 +545,26 @@ def find_contact_event(
     grid_times = np.linspace(0.0, duration, CONTACT_ROOT_SUBDIVISIONS + 1)
     grid_states = [sample(float(time_s)) for time_s in grid_times]
     penalty_samples = np.asarray([state[3][1] for state in grid_states], dtype=float)
+    penalty = -radius * float(
+        logsumexp(-penalty_samples / radius) - math.log(len(penalty_samples))
+    )
+    coverage = None
+    if max_clearance_rate_mps is not None:
+        coverage = scan_first_clearance_bracket(
+            lambda t: clearance(sample(t)[3]),
+            duration_s=duration,
+            max_clearance_rate_mps=max_clearance_rate_mps,
+            time_tolerance_s=tolerance,
+            max_evaluations=coverage_max_evaluations,
+        )
+        if coverage.status != "conditional_bracket":
+            return ContactSearchResult(None, penalty, "unresolved_coverage")
     event: ContactRoot | None = None
-    if clearance(grid_states[0][3]) == 0.0 and local_gap_derivative(0.0) < 0.0:
+    if (
+        coverage is None
+        and clearance(grid_states[0][3]) == 0.0
+        and local_gap_derivative(0.0) < 0.0
+    ):
         q_star, qd_star, triangles, data_star = grid_states[0]
         index, point, bary = data_star[2], data_star[3], data_star[4]
         delta = centre - point
@@ -567,7 +593,10 @@ def find_contact_event(
             )
 
     brackets = []
-    if event is None:
+    if coverage is not None:
+        lo, hi = coverage.start_s, coverage.end_s
+        brackets.append((lo, hi, sample(lo)[3], sample(hi)[3]))
+    elif event is None:
         for bracket_index in range(CONTACT_ROOT_SUBDIVISIONS):
             lo, hi = map(float, grid_times[bracket_index : bracket_index + 2])
             data_lo, data_hi = (
@@ -589,6 +618,7 @@ def find_contact_event(
                             (previous_time, float(current_time), previous, current)
                         )
                     previous_time, previous = float(current_time), current
+    if event is None:
         for lo, hi, data_lo, data_hi in brackets:
             exact_right_root = clearance(data_hi) == 0.0
             if exact_right_root:
@@ -638,13 +668,14 @@ def find_contact_event(
             )
             break
 
-    penalty = -radius * float(
-        logsumexp(-penalty_samples / radius) - math.log(len(penalty_samples))
-    )
     # A bracket proves only that the sampled trajectory contains a candidate
     # bracket. No bracket does not prove absence between the fixed samples.
     status = (
-        "sampled_bracket_candidate"
+        (
+            "conditional_bracket_candidate"
+            if coverage is not None
+            else "sampled_bracket_candidate"
+        )
         if event is not None
         else "unresolved_no_accepted_candidate"
     )
