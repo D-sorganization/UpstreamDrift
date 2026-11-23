@@ -201,6 +201,14 @@ address nor prove absence of contact between samples, and no ball placement
 was shifted to force a hit. On the final recorded 1 ms, a bracket search using
 the real held-effort integrator reproduced the stored end state bit-for-bit and
 returned unresolved with no accepted candidate; it is not a global miss proof.
+An additional source-v1 check used its unchanged modeled-address ball, saved
+state and held effort through the final partial millisecond up to its legacy
+passage trigger. The physical-approach finder returned unresolved with no
+accepted candidate; the minimum of 17 sampled clearances was 22.24 mm. This
+is neither a measured-ball result nor proof that no crossing occurred between
+samples, and it does not qualify the required v2 baseline. At the source
+bundle's initial state that same modeled-address sphere overlaps the rendered
+face by about 1.48 mm; it is not a verified nonpenetrating address.
 In the MuJoCo parity plant the recorded held effort is a source command; the
 native KKT solve zeroes passive shaft coordinates, and the forced wrapper
 adds impact generalized force before that mask. The path has no actuator
