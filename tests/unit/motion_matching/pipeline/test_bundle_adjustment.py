@@ -357,3 +357,87 @@ class TestFc011BundleGuards15345:
         assert np.isfinite(result.rms_m)
         if result.converged:
             assert result.rms_m < np.inf
+
+
+def translating_problem(n_q: int = 1) -> BundleProblem:
+    """Two frames with one translating body and otherwise inert coordinates."""
+
+    def fk(pose: np.ndarray) -> np.ndarray:
+        frames = np.eye(4)[None].copy()
+        frames[0, 0, 3] = pose[0]
+        return frames
+
+    return BundleProblem(
+        fk=fk,
+        marker_bodies=np.array([0]),
+        observations=np.zeros((2, 1, 3)),
+        valid=np.ones((2, 1), bool),
+        offset_seeds=np.zeros((1, 3)),
+        offset_sigmas=np.full((1, 3), 0.01),
+        pose_start=np.zeros((2, n_q)),
+        pose_bounds=(np.zeros(n_q), np.ones(n_q)),
+    )
+
+
+@pytest.mark.parametrize("fixed", [False, True])
+def test_all_bound_poses_solve_and_report_offset_information(fixed: bool) -> None:
+    prob = translating_problem()
+    if fixed:
+        prob = dataclasses.replace(prob, pose_bounds=(np.zeros(1), np.zeros(1)))
+    result = solve_bundle(prob, BundleSettings())
+    assert result.rms_m == pytest.approx(0.0)
+    assert np.array_equal(result.poses, prob.pose_start)
+    assert np.array_equal(result.offsets, prob.offset_seeds)
+    assert result.weakly_identified == (() if fixed else (0,))
+    assert len(result.weak_information_ratios) == (0 if fixed else 1)
+    if not fixed:
+        assert result.weak_information_ratios[0] == pytest.approx(0.0, abs=1e-12)
+
+
+@pytest.mark.parametrize("position", [0.0, 1e-5, 1.0])
+def test_inward_pose_tangent_removes_translation_information(position: float) -> None:
+    prob = translating_problem(n_q=2)
+    poses = np.tile([position, 0.5], (2, 1))
+    information = ba._offset_information(
+        prob, BundleSettings(), poses, prob.offset_seeds
+    )
+    np.testing.assert_allclose(information, np.diag([0.0, 2.0, 2.0]), atol=1e-12)
+
+
+@pytest.mark.parametrize("fraction", [0.0, 0.5, 1.0])
+def test_fd_probes_respect_fixed_and_narrow_boxes(fraction: float) -> None:
+    lower = np.zeros(2)
+    upper = np.array([0.0, 1e-8])
+    pose = upper * fraction
+    prob = dataclasses.replace(translating_problem(n_q=2), pose_bounds=(lower, upper))
+    calls = {"fk": 0, "constraint": 0}
+
+    def checked_fk(q: np.ndarray) -> np.ndarray:
+        assert np.all((lower <= q) & (q <= upper))
+        calls["fk"] += 1
+        frames = np.eye(4)[None].copy()
+        frames[0, 0, 3] = q.sum()
+        return frames
+
+    def checked_constraint(k: int, q: np.ndarray) -> np.ndarray:
+        assert np.all((lower <= q) & (q <= upper))
+        calls["constraint"] += 1
+        return np.array([q.sum()])
+
+    prob = dataclasses.replace(prob, fk=checked_fk, constraint=checked_constraint)
+    _, by_pose, _ = ba._linearise(prob, BundleSettings(), 0, (pose, prob.offset_seeds))
+    np.testing.assert_allclose(by_pose[:, 0], 0.0)
+    np.testing.assert_allclose(by_pose[:, 1], [100.0, 0.0, 0.0, 1.0])
+    assert calls["fk"] > 1 and calls["constraint"] > 1
+
+
+@pytest.mark.parametrize("sigma", [-np.inf, np.inf])
+def test_mixed_pose_prior_requires_positive_sigmas(sigma: float) -> None:
+    prob = translating_problem(n_q=2)
+    sigmas = np.tile([1.0, sigma], (2, 1))
+    prob = dataclasses.replace(prob, pose_prior=(prob.pose_start, sigmas))
+    if sigma < 0:
+        with pytest.raises(ValueError, match="pose_prior sigmas must be positive"):
+            prob.check(BundleSettings())
+    else:
+        prob.check(BundleSettings())

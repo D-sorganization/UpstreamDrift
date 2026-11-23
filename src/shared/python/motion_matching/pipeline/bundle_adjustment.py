@@ -160,7 +160,7 @@ class BundleProblem:
             if np.shape(mean) != (frames, n_q) or np.shape(sigma) != (frames, n_q):
                 raise ValueError(f"pose_prior arrays must have shape {(frames, n_q)}")
             sigmas = np.asarray(sigma)
-            if not np.all((sigmas > 0) | np.isinf(sigmas)):
+            if not np.all(sigmas > 0):
                 raise ValueError("pose_prior sigmas must be positive (inf: none)")
             if not np.any(np.isfinite(sigmas) & (sigmas > 0)):
                 raise ValueError(
@@ -242,16 +242,13 @@ def _cost(prob: BundleProblem, sigma: float, poses: Array, offsets: Array) -> fl
 
 
 def _fd_step_at_bound(value: float, lower: float, upper: float, step: float) -> float:
-    """Inward finite-difference step so probes stay inside pose box bounds."""
-    if value <= lower:
+    """Feasible signed probe step; zero for a coordinate held by equal bounds."""
+    forward, backward = upper - value, value - lower
+    if forward >= step:
         return step
-    if value >= upper:
+    if backward >= step:
         return -step
-    if value - step < lower:
-        return step
-    if value + step > upper:
-        return -step
-    return step
+    return forward if forward >= backward else -backward
 
 
 def _difference(
@@ -260,7 +257,7 @@ def _difference(
     step: float,
     bounds: tuple[Array, Array] | None = None,
 ) -> Any:
-    """``fn(pose)`` and its finite-difference slope along pose coordinates."""
+    """``fn(pose)`` and feasible slopes; held coordinates have zero slope."""
     base = np.atleast_1d(np.asarray(fn(pose), float))
     slope = np.empty((*base.shape, len(pose)))
     lower_arr = upper_arr = None
@@ -275,6 +272,12 @@ def _difference(
         else:
             delta = step
         moved[j] += delta
+        if lower_arr is not None and upper_arr is not None:
+            moved[j] = np.clip(moved[j], lower_arr[j], upper_arr[j])
+        delta = moved[j] - pose[j]
+        if delta == 0:
+            slope[..., j] = 0.0
+            continue
         slope[..., j] = (np.atleast_1d(np.asarray(fn(moved), float)) - base) / delta
     return base, slope
 
@@ -471,14 +474,17 @@ def _offset_information(
 
     Pose priors are left out on purpose: they are what this must expose.
     Constraints stay in: they restrict the poses.
+    Project the span of feasible inward tangents at active box bounds, too;
+    only coordinates held by equal bounds have no tangent direction.
     """
     lower, upper = prob.pose_bounds
     info = np.zeros((offsets.size, offsets.size))
     for k, pose in enumerate(poses):
         _, by_pose, by_offset = _linearise(prob, settings, k, (pose, offsets))
-        inside = (pose > lower) & (pose < upper)
-        basis, singular, _ = np.linalg.svd(by_pose[:, inside], full_matrices=False)
-        basis = basis[:, singular > settings.rank_rcond * max(singular.max(), 1.0)]
+        movable = np.asarray(lower) < np.asarray(upper)
+        basis, singular, _ = np.linalg.svd(by_pose[:, movable], full_matrices=False)
+        cutoff = settings.rank_rcond * max(singular.max(initial=0.0), 1.0)
+        basis = basis[:, singular > cutoff]
         reduced = by_offset - basis @ (basis.T @ by_offset)
         info += reduced.T @ reduced
     scale = np.asarray(prob.offset_sigmas, float).ravel()
