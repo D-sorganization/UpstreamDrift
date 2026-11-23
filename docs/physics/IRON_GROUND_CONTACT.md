@@ -2,7 +2,7 @@
 
 This diagnostic slice of issue 15523 observes ground-first iron strikes on a
 recorded sole path. Import `analyze_iron_ground_contact` from
-`src.shared.python.physics.iron_ground_contact`. It accepts timestamps in
+`src.tools.iron_ground_contact`. It accepts timestamps in
 seconds, signed sole heights in metres, and ball contact time in seconds on the
 same clock. Heights must already be relative to the local turf surface, with
 positive above turf. The caller owns sole geometry, frame conversion, terrain
@@ -42,8 +42,8 @@ truncated contact, large finite heights and invalid records. Reproduce with:
 
 ```sh
 python3 -m pytest tests/unit/physics/test_iron_ground_contact_15523.py -m unit -q
-python3 -m ruff check src/shared/python/physics/iron_ground_contact.py tests/unit/physics/test_iron_ground_contact_15523.py
-python3 -m ruff format --check src/shared/python/physics/iron_ground_contact.py tests/unit/physics/test_iron_ground_contact_15523.py
+python3 -m ruff check src/tools/iron_ground_contact.py tests/unit/physics/test_iron_ground_contact_15523.py
+python3 -m ruff format --check src/tools/iron_ground_contact.py tests/unit/physics/test_iron_ground_contact_15523.py
 ```
 
 The supplementary editable LaTeX calculation note is `iron_ground_contact.tex`;

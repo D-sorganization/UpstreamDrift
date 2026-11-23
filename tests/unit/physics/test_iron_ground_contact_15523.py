@@ -4,7 +4,7 @@ import math
 
 import pytest
 
-from src.shared.python.physics.iron_ground_contact import analyze_iron_ground_contact
+from src.tools.iron_ground_contact import analyze_iron_ground_contact
 
 pytestmark = pytest.mark.unit
 
