@@ -1861,3 +1861,13 @@ deliberately nonbinding to observe solver behavior. This shows fallback alone
 did not explain prior poor tracking, but does not establish admissible
 contact, anatomy, actuator limits, physical baseline or Option B success.
 The adapter is not independently proven equivalent to unavailable Drake.
+
+Research branch `codex/15493-motor-evidence28` at `bcd082ce4d` fixes a
+false-positive replay evidence path in the research motor runner: constructing
+`MotorForwardCheck` could set `forward_replay_verified=True` with zero stages
+before any integration. The default is now false and true is set only after
+archive-versus-fresh-stage equality. The regression failed before the fix;
+14 focused MuJoCo motor replay tests and normal headless push hooks passed.
+This does not establish the private bundle's validity, physical feasibility,
+contact or independent runtime, and the branch remains oversized research,
+not a complete slice or PR.
