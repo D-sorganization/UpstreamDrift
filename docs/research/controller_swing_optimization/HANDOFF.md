@@ -2075,3 +2075,16 @@ ideal comparison used projected computed torque, while this run used an
 unprojected fixed-gain controller, so this does not isolate saturation as the
 cause. Sixteen capacity priors and all speed/work/slew admissions remain
 unverified; this is not an admitted baseline or feasible swing.
+
+A controlled fixed-gain Option B ablation on the foot-target candidate used
+the same v2 plant, reference, initial state and command with projection on/off
+and manual preclip on/off. Through 350 ms / 11,200 RK stages, all four direct
+input cases were identical to roundoff (maximum q difference 3.36e-13,
+velocity 1.51e-12): six modeled ROM slots failed, first at stage 9399, and no
+speed slots or commands clipped. At 750 ms, unprojected clipping first
+occurred near 0.717 s, after the first ROM failure; the two unprojected cases
+had 20 ROM and 11 versus 12 speed slots flagged. Preclipped direct input
+matched the actual motor run bit-for-bit in states, stage states and applied
+drive through 750 ms. Projected preclip is a direct-input surrogate: the
+motor plant does not support projection. These comparisons narrow the first
+failure but do not establish its cause or physical feasibility.
