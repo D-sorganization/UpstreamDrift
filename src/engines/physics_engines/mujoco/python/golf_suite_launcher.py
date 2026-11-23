@@ -33,7 +33,7 @@ class UpstreamDriftLauncher(QtWidgets.QMainWindow):
         engines_dir = self.repo_root / "src/engines/physics_engines"
 
         self.mujoco_path = self.script_dir / "mujoco_humanoid_golf/__main__.py"
-        self.drake_path = engines_dir / "drake/python/src/golf_gui.py"
+        self.drake_path = engines_dir / "drake/python/src/drake_gui_app.py"
         self.pinocchio_path = engines_dir / "pinocchio/python/pinocchio_golf/gui.py"
 
         self._setup_ui()
@@ -155,7 +155,7 @@ class UpstreamDriftLauncher(QtWidgets.QMainWindow):
                 # Command inside container
                 "python",
                 "-m",
-                "src.engines.physics_engines.drake.python.src.golf_gui",
+                "src.engines.physics_engines.drake.python.src.drake_gui_app",
             ]
         )
 

@@ -6,6 +6,7 @@ These tests qualify launcher dispatch and recovery, not engine dynamics.
 
 from __future__ import annotations
 
+import ast
 import subprocess
 import sys
 from collections.abc import Callable, Iterator
@@ -99,13 +100,24 @@ def test_drake_container_launch(
     assert command[-3:] == [
         "python",
         "-m",
-        "src.engines.physics_engines.drake.python.src.golf_gui",
+        "src.engines.physics_engines.drake.python.src.drake_gui_app",
     ]
     assert command[command.index("-v") + 1] == f"{ROOT.parent}:/workspace"
     assert command[command.index("-w") + 1] == f"/workspace/{ROOT.name}"
     assert kwargs == {"cwd": str(ROOT)}
     assert window.status.text() == "Drake Launched (Docker)"
     critical.assert_not_called()
+
+
+def test_drake_target_is_runnable(
+    launcher: tuple[gui.UpstreamDriftLauncher, MagicMock, MagicMock],
+) -> None:
+    """Never route Drake to the historical docstring-only golf_gui placeholder."""
+    window, _, _ = launcher
+    tree = ast.parse(window.drake_path.read_text(encoding="utf-8"))
+    assert any(
+        isinstance(node, ast.FunctionDef) and node.name == "main" for node in tree.body
+    )
 
 
 def test_missing_script_then_recovery(
