@@ -16,7 +16,14 @@ from numpy.typing import NDArray
 
 from src.tools.model_explorer.playback_clock import PlaybackClock
 
-__all__ = ["ImpactZoneClock"]
+__all__ = ["ImpactZoneClock", "check_slow_factor"]
+
+
+def check_slow_factor(slow_factor: float) -> float:
+    """Return ``slow_factor`` as a float, or raise unless it is in ``(0, 1]``."""
+    if not (math.isfinite(slow_factor) and 0 < slow_factor <= 1):
+        raise ValueError("slow_factor must be in (0, 1]")
+    return float(slow_factor)
 
 
 class ImpactZoneClock(PlaybackClock):
@@ -42,9 +49,7 @@ class ImpactZoneClock(PlaybackClock):
             raise ValueError(f"impact_s {impact_s} is outside the run ({t0}..{t1})")
         if not (math.isfinite(half_width_s) and half_width_s > 0):
             raise ValueError("half_width_s must be positive and finite")
-        if not (math.isfinite(slow_factor) and 0 < slow_factor <= 1):
-            raise ValueError("slow_factor must be in (0, 1]")
-        self._slow = float(slow_factor)
+        self._slow = check_slow_factor(slow_factor)
         self._zone = (
             max(0.0, impact_s - half_width_s - t0),
             min(self._duration, impact_s + half_width_s - t0),
@@ -73,10 +78,6 @@ class ImpactZoneClock(PlaybackClock):
             return lo + media * self._slow
         return hi + media - (hi - lo) / self._slow
 
-    def media_time_at(self, now_s: float) -> float:
-        """The run time shown at wall time ``now_s`` (looping)."""
-        return float(self._time[0]) + self._offset_at(now_s)
-
     def _offset_at(self, now_s: float) -> float:
         loop = self.loop_wall_s
         wall = (self._phase0 + (now_s - self._wall0)) % loop
@@ -85,6 +86,11 @@ class ImpactZoneClock(PlaybackClock):
     def start(self, frame: int, now_s: float) -> None:
         """Begin (or rebase) playback from ``frame`` at wall time ``now_s``."""
         super().start(frame, now_s)
+        self._phase0 = self._media_to_wall(self._offset0)
+
+    def start_at_time(self, media_s: float, now_s: float) -> None:
+        """Rebase on a run time reported by :meth:`media_time_at`."""
+        super().start_at_time(media_s, now_s)
         self._phase0 = self._media_to_wall(self._offset0)
 
     def set_speed(self, speed: float, now_s: float) -> None:

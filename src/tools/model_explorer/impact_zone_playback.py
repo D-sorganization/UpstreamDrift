@@ -13,7 +13,10 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 
-from src.tools.model_explorer.impact_zone_clock import ImpactZoneClock
+from src.tools.model_explorer.impact_zone_clock import (
+    ImpactZoneClock,
+    check_slow_factor,
+)
 from src.tools.model_explorer.playback_clock import PlaybackClock
 
 __all__ = ["DEFAULT_SLOW_FACTOR", "ImpactZonePlayback"]
@@ -42,6 +45,7 @@ class ImpactZonePlayback:
         slow_factor: float = DEFAULT_SLOW_FACTOR,
         speed: float = 1.0,
     ) -> None:
+        slow_factor = check_slow_factor(slow_factor)
         self._plain = PlaybackClock(time_s, speed)
         self._slow: ImpactZoneClock | None = None
         if window is not None:
@@ -82,9 +86,9 @@ class ImpactZonePlayback:
         if enabled and self._slow is None:
             raise ValueError("no impact window: slow motion is unavailable")
         target: PlaybackClock = self._slow if enabled and self._slow else self._plain
-        frame = self._active.frame_at(now_s)
+        media_s = self._active.media_time_at(now_s)
         target.speed = self._active.speed
-        target.start(frame, now_s)
+        target.start_at_time(media_s, now_s)
         self._active = target
 
     def start(self, frame: int, now_s: float) -> None:

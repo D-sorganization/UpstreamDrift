@@ -132,3 +132,30 @@ def test_invalid_slow_factor_is_rejected(factor: float) -> None:
 def test_bad_time_axis_is_rejected_even_without_a_window() -> None:
     with pytest.raises(ValueError, match="time axis"):
         ImpactZonePlayback(np.array([0.0]), None)
+
+
+def test_enabling_on_the_terminal_frame_does_not_wrap_to_the_start() -> None:
+    pb = _playback()
+    pb.start(0, now_s=0.0)
+    assert pb.frame_at(1.999) == TIME.size - 1
+    pb.set_enabled(True, now_s=1.999)
+    assert pb.frame_at(1.999) == TIME.size - 1  # no 200 -> 0 jump
+
+
+def test_disabling_on_the_terminal_frame_does_not_wrap_to_the_start() -> None:
+    pb = _playback()
+    pb.set_enabled(True, now_s=0.0)
+    pb.start(0, now_s=0.0)
+    wall = pb.loop_wall_s - 0.001
+    assert pb.frame_at(wall) == TIME.size - 1
+    pb.set_enabled(False, now_s=wall)
+    assert pb.frame_at(wall) == TIME.size - 1  # no 200 -> 0 jump
+
+
+@pytest.mark.parametrize("slow_factor", [0.0, -0.5, 1.5, float("nan"), float("inf")])
+@pytest.mark.parametrize("window", [None, WINDOW])
+def test_invalid_slow_factor_is_rejected_with_or_without_a_window(
+    slow_factor: float, window: tuple[float, float] | None
+) -> None:
+    with pytest.raises(ValueError, match="slow_factor"):
+        ImpactZonePlayback(TIME, window, slow_factor=slow_factor)
