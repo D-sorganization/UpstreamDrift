@@ -1707,3 +1707,26 @@ at the same Git commit failed the byte fingerprint because four source files
 had CRLF instead of the original LF bytes; the guard was not bypassed. This
 shows Git SHA alone does not identify working-tree source bytes. Private
 hash-bound receipts and bundle remain outside git.
+
+A 477-frame v2 hard-closure fit to FK markers from the source saved-feedback
+trajectory (kept distinct from true `q_track`) stopped after 241 s / 46
+iterations without convergence. Fit Euclidean marker RMS was 20.96 mm versus
+feedback, 32.43 mm versus `q_track`, and 38.58 mm versus observations;
+independent max closure was 0.000973 mm / 2.37e-6 rad and supplied bounds
+held. A fresh 1.322 s projected, unsaturated ideal computed-torque replay
+completed 1322 holds / 42,304 stages with no impact. On 15,733 valid marker
+samples forward RMS was 260.82 mm versus feedback, 274.38 mm versus `q_track`
+and 275.11 mm versus observations; root translation component RMS was
+0.1037 m, joint q RMS 0.01696 rad, peak ideal drive 375.63 N m, one named
+model ROM excess 1.685° and minimum compliant sphere height −21.64 mm.
+Using the source's dynamically consistent saved feedback as a kinematic target
+alone did not resolve v2 world/root drift. This nonconverged proxy is not an
+admitted baseline, Option B, actual-actuator or contact evidence.
+
+A coordinated 41-coordinate late-spline diagnostic preserved its first 50 ms
+and reduced 100 ms sampled model-ROM peak 0.24675 to 0.20172 rad; three ROM
+flags and 1376/3200 clipped stages remained. Its extension reproduced the
+first 100 ms numerical stage arrays in the same runtime but hit a guard at
+0.504 s with 23 modeled ROM / 12 speed flags. The two-basis coefficient
+norm is parameterization-dependent and 16/41 capacities remain unverified;
+this is not physical feasibility or a shot improvement.
