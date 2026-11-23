@@ -1,0 +1,22 @@
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+\section{Fixed-Lattice RK4 Prefix Diagnostic}
+With a fixed effort $\tau$ during one hold, cache
+$z_{k+1}=\operatorname{RK4}(z_k,\tau,h)$ at fixed $h$. For a query in a
+substep, compute $\operatorname{RK4}(z_k,\tau,t-t_k)$ from its cached left
+endpoint; on a lattice endpoint return the cached state. This uses the existing
+native-plant acceleration and RK4 implementation. A caller-supplied projected
+end state must match both cached position and velocity exactly, or evaluation
+fails closed. Without it projection is unchecked. A new lattice is required
+at each hold, impact or projection boundary.
+
+The prefix map is a numerical construction, not a validated continuous
+solution. Floating-point endpoint checks do not establish real-arithmetic
+continuity, local truncation or integration error bounds, rigorous MuJoCo
+state enclosures, or finite-face speed bounds. State-dependent contact and
+projection regimes require separate handling. An identical projected endpoint
+does not certify a first root. All contact coverage remains uncertified.
+Synthetic oscillator and MuJoCo slider tests check numerical stitching only;
+they are not evidence about a matched swing or physiological limits.
+\end{document}

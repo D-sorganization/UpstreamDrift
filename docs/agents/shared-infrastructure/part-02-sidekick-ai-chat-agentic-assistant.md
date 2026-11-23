@@ -375,3 +375,6 @@ position. See `docs/research/face_clearance`.
 `motion_matching.face_trajectory_diagnostic` inspects sampled advancing states;
 every candidate remains unqualified with uncertified interval coverage. See
 `docs/research/face_trajectory_diagnostic`.
+`motion_matching.fixed_lattice_advance` supplies fixed-hold RK4 prefix queries;
+projection is unchecked unless explicitly compared, and coverage is uncertified.
+See `docs/research/fixed_lattice_advance`.
