@@ -181,6 +181,21 @@ def get_dockable_ui() -> URDFGeneratorWindow:
     return URDFGeneratorWindow()
 
 
+def create_standalone_window() -> URDFGeneratorWindow:
+    """Show the standalone window, then open the default matched swing.
+
+    Mirrors the launcher tab (#15150): the load is queued for the next
+    event-loop turn, so the window paints before the background load starts.
+    Postcondition: the returned window is visible.
+    """
+    from .default_match import schedule_default_match
+
+    window = URDFGeneratorWindow()
+    window.show()
+    schedule_default_match(window.centralWidget())
+    return window
+
+
 def main() -> None:
     """Standalone entry point for the URDF Generator."""
     from src.shared.python.logging_pkg.logging_config import configure_gui_logging
@@ -191,9 +206,7 @@ def main() -> None:
 
     configure_gui_logging()
 
-    window = URDFGeneratorWindow()
-    window.show()
-
+    window = create_standalone_window()  # noqa: F841 - keeps the window alive
     sys.exit(app.exec())
 
 
