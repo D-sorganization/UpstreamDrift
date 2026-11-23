@@ -2161,3 +2161,31 @@ A restart of the projected-q1 reference fit stopped unconverged after another
 remained 0.000337 mixed-coordinate units/s, and peak sampled target speed and
 acceleration were 23.86 rad/s and 1,134 rad/s². No forward run was warranted.
 Do not admit either iterate as a closure-consistent reference.
+
+A framewise closure-projection pilot on the smoother initial-constrained fit
+succeeded on all 476 frames: sampled closure inf 8.87e-14, no violations in
+its available named-ROM subset, maximum coordinate correction 0.0121, exact
+q0 and 0.000337 mixed-coordinate units/s controller initial-rate discrepancy.
+Source-foot RMS stayed 2.229 mm, source-marker RMS changed 29.966 to 30.052
+mm, and peak sampled joint acceleration stayed about 1,134 rad/s². This is
+post-processing, not a closure-constrained optimization or physical proof.
+
+Its independent 1.319 s ideal-drive rollout used the same initial state and
+475 marker samples: source-marker RMS improved from 267.24 to 45.73 mm and
+observed-marker RMS from 267.94 to 50.83 mm versus the original baseline;
+peak held unsaturated drive was 464.49 N m. A broader registry audit revealed
+lumbar axial rotation outside its modeled envelope in 590 sampled states,
+peak 19.94 degrees, although the older HUMAN_RANGES_DEG subset reported zero.
+The ideal command exceeded registry torque capacities at 320 samples, peak
+ratio 13.56. No sampled speed flag appeared in the assumption-limited registry
+(maximum ratio 0.726). All speed capacities and 16 torque slots remain
+assumption-marked; no stage-level or actual saturated torque, work or impact
+was verified. Do not infer a complete ROM pass from the narrower reporter or
+admit this reference as physically feasible.
+
+An eight-direction 400 ms motor-spline continuation reduced worst modeled
+ROM excess from 0.43246 to 0.31034 rad but still failed six ROM slots while
+preserving the first 320 ms sampled gates. Clustered active-row sensitivities
+were poorly conditioned; this is not proof of global uncontrollability. The
+independent replay first flagged ROM around 0.321 s and stopped at 0.807 s,
+earlier than its predecessor. It is not a full-horizon improvement.
