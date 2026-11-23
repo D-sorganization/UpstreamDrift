@@ -1524,3 +1524,29 @@ separate 1.322 s run matched all 42,304 stages with no clipping under synthetic
 it is not bound to the merged Solution Bundle, a complete runtime lock,
 independent-runtime replay, physiological actuator evidence, admitted match
 or improved shot. The branch is oversized research, not a PR.
+
+A predeclared Option B 100 ms relinearization retained the first 1600 clean
+recorded RK4 stages and moved the first sampled modeled ROM/speed flag from
+stage 1969 to 2067 (about 64.6 ms), with 100 ms modeled ROM peak changing
+0.27452 to 0.25141 rad and coefficient norm 9.3316 N m. Its full extension
+reproduced the first 100 ms arrays in the same runtime but hit a guard at
+0.523 s with 23 ROM / ten speed flags and 8.21 rad peak excess. Capacities are
+partly unverified; this is not continuous or physiological feasibility, an
+admitted swing or a power improvement.
+
+An initial root translational velocity sensitivity used six central-difference
+probes and a numerical 0.1 m/s L2 bound, unchanged compliant ground/model and
+no direct root torque. The selected unmeasured initial-velocity perturbation
+changed sampled root translation component RMS from 23.59 to 12.96 mm over
+the predeclared 50–550 ms window. Its full 1.322 s projected, unsaturated
+computed-torque replay with no impact changed source-target marker RMS 234.60
+to 186.74 mm and observed-marker RMS 235.38 to 187.77 mm (15,733 valid
+samples); root translation component RMS changed 0.08516 to 0.06761 m and
+rotation RMS 0.14295 to 0.11509 rad. Joint RMS worsened 0.01731 to 0.01939
+rad, peak held ideal torque changed 359.62 to 340.39 N m, one modeled ROM
+flag increased 4.080° to 4.675°, and minimum compliant sphere height changed
+−24.87 to −25.50 mm. Initial closure projection was reapplied. The initial
+velocity is not measured or biomechanically sourced; this is sensitivity on a
+nonconverged proxy, not an admitted baseline, physical claim or Option B
+improvement. Common first-550-ms arrays matched previous probes in the same
+runtime.
