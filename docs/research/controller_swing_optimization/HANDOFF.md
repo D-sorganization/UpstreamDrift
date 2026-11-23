@@ -2421,3 +2421,23 @@ samples, peak 0.000388 degrees); the original refined run remained inside
 through 200 ms. Reject the candidate under the zero-tolerance modeled gate.
 This is ideal-drive numerical evidence, not applied-motor or physiological
 acceptance; capacity priors remain assumption-limited.
+
+An early -4 ms timing warp with a declared 0.005 degree right-wrist interior
+margin retained q0/q1, closure <=7.31e-12 and modeled reference ROM/interval
+speed checks. Independent 16/32-substep ideal replays through 200 ms had no
+sampled ROM/speed flags and agreed to maximum q/v/held-command differences
+2.61e-7 / 1.70e-5 / 0.00114 in native units. First-100-ms modeled capacity
+peak improved 1.608 to 1.477 times the assumed limit and violating commands
+27 to 18. It still fails modeled torque capacity, so it is not admitted; the
+margin is numerical, not a verified physical threshold. Full-horizon replay
+and actual motor stages remain necessary.
+
+A 150 ms, three-window actual motor Option B continuation preserved the first
+100 ms sampled gates and reduced maximum 150 ms modeled ROM excess from
+0.009191 to 0.004383 rad, but two ROM slots still failed and tracking RMS
+rose 0.07643 to 0.07765 rad. No stages clipped in the 150 ms comparison.
+Independent full replay first flagged ROM at about 101.5 ms and hit a guard
+at 1.110 s with 31 ROM and 31 speed slots flagged. Sixteen/32-substep motor
+checks through 150 ms agreed closely on the violations (peak difference
+<4e-9 rad), not on full-horizon feasibility. Work and slew limits and the
+physical provenance of several capacities remain unverified.
