@@ -1782,3 +1782,28 @@ sample, so these contracts would be mutually unsatisfiable if combined
 unchanged. Explicit versioned no-event semantics and migration are required;
 recheck the current PR head/state before acting. Do not invent an event or
 bypass its validation.
+
+After correcting a sparse-Jacobian row-pattern error and checking randomized
+whole-residual directional derivatives (relative errors 7.2e-7–1.6e-6), a
+33-frame six-DOF root soft centroidal-momentum fit reached its 20-evaluation
+limit without convergence. The earlier result using the incorrect pattern is
+invalid and must not be used. A 477-frame extension stopped at its 240 s
+callback, not converged (reported optimality 278): sampled modeled linear
+balance RMS changed 1.1243 to 0.8637 bodyweights and angular RMS 104.01 to
+35.21 N m. Root adjustments were numerical bounded diagnostics, not physical
+limits. A matched-initial-state 1.322 s projected ideal computed-torque
+comparison gave original-root translation component RMS 105.716 / 105.727 mm
+and original-root rotation RMS 0.142821 / 0.142826 rad baseline/candidate.
+On 15,700 valid marker samples, fitted source-target RMS worsened 19.619 to
+20.363 mm and forward source-target RMS 268.434 to 268.463 mm. The candidate's
+own-reference metric was misleading because its reference changed. This soft,
+nonconverged model diagnostic is not hard collocation, physical admission or
+an improved baseline.
+
+Research branch `codex/15493-schema-v2-26` at `f965b29e51` implements an
+isolated explicit v2 no-impact representation, separate reference and rollout
+grids and event-preserving v1 migration without editing the active codec PR's
+files. Ninety-seven focused v1/v2 tests and normal headless push hooks passed.
+It is not integrated motor replay, provenance attestation, physical acceptance
+or a complete Slice 2; reconcile with current canonical codec and #15600 state
+before use. No PR was opened.
