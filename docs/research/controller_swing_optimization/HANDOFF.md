@@ -2620,3 +2620,19 @@ a penalty rather than a hard constraint. These are assumed-contact and
 model-derived target results, not measured ground force or physical admission.
 Full registry ROM coverage, independent forward tracking and actual motor
 stage gates require audit before using this candidate.
+
+Independent audit of the 300 ms support continuation confirmed no sampled
+registry ROM violations or bad interval speeds, maximum assumed speed ratio
+0.1313, closure <=6.44e-9 and the disclosed q52/q53 adjustment of at most
+0.004919 mixed coordinate units. Source/observed marker RMS were 28.625 /
+29.712 mm. The fit remains unconverged and its limits are assumption-based.
+
+Independent 16/32 projected ideal replays completed 300 ms, but 32 sampled
+states exceeded modeled ROM and 13 held commands exceeded modeled capacity
+(peak ratio 4.378). Zero-residual actual motor replay had 12 modeled ROM and
+seven speed slots fail, with 1,792 of 38,400 stages clipped; matched-hold
+16/32 maximum q/v differences were 3.82e-5 / 0.04035 in native units. The
+prior 150 ms spline, replayed only within its original interval against this
+adjusted reference, no longer passed: two modeled ROM slots failed and 1,280
+of 19,200 stages clipped. Its original short-interval pass cannot be carried
+across the modified seam. No physical or full-swing admission is established.
