@@ -107,6 +107,19 @@ def _native_skin_mask(with_skin: np.ndarray, without_skin: np.ndarray) -> np.nda
     return with_skin < without_skin - 1e-5
 
 
+class NativeSkinContractError(Exception):
+    """The native skinned body is missing or contributes nothing measurable.
+
+    Deliberately not an ``AssertionError`` so the deferred lighting-bound
+    expected failures below cannot absorb a native-skin regression.
+    """
+
+
+def _require(condition: bool, message: str) -> None:
+    if not condition:
+        raise NativeSkinContractError(message)
+
+
 def _skin_mask(mujoco, model, segmentation) -> np.ndarray:
     skin = np.zeros(model.ngeom + 1, dtype=bool)
     for geom in range(model.ngeom):
@@ -134,7 +147,7 @@ def _measure(mujoco, model, bounds) -> dict[str, float]:
     original_groups = model.skin_group.copy()
     if model.nskin:
         body_skin = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SKIN, "body_skin_skin")
-        assert body_skin >= 0, "native body skin is missing"
+        _require(body_skin >= 0, "native body skin is missing")
         model.skin_group[:] = 0
         model.skin_group[body_skin] = 5
         options.skingroup[5] = 1
@@ -181,8 +194,8 @@ def _measure(mujoco, model, bounds) -> dict[str, float]:
         model.skin_group[:] = original_groups
         renderer.close()
     if model.nskin:
-        assert totals["native"] > 0, "native skinned body contributed no pixels"
-    assert totals["inner"] > bounds["min_skin_px"]
+        _require(totals["native"] > 0, "native skinned body contributed no pixels")
+    _require(totals["inner"] > bounds["min_skin_px"], "too few skin pixels measured")
     return {
         "ragged": totals["ragged"] / totals["inner"],
         "clipped": totals["clipped"] / totals["skin"],
@@ -205,15 +218,12 @@ def test_lit_skin_has_no_ragged_shadow_and_is_not_clipped(sun: bool) -> None:
 
 _SHOWPIECE_LIGHTING_XFAIL = (
     "Refs #15383: showpiece native skin exceeds acceptance limits until lighting "
-    "is visually qualified (spot ragged 0.01922 vs 0.007, clipped 0.02775 vs 0.03; "
-    "directional ragged 0.01999, clipped 0.08999 vs 0.03)."
+    "is visually qualified (spot ragged ~0.019 vs 0.007, clipped ~0.027 vs 0.03; "
+    "directional ragged ~0.020 vs 0.007, clipped ~0.09 vs 0.03)."
 )
 
 
-@pytest.mark.requires_gl
-@pytest.mark.xfail(strict=False, reason=_SHOWPIECE_LIGHTING_XFAIL)
-@pytest.mark.parametrize("sun", [False, True], ids=["spot", "sun"])
-def test_showpiece_native_skin_meets_lighting_bounds(sun: bool) -> None:
+def _showpiece_shares(sun: bool) -> tuple[dict[str, float], dict]:
     """Measure the actual native export, including its visible skinned body."""
     mujoco = pytest.importorskip("mujoco")
     spec = json.loads(SHOWPIECE_V2.read_text(encoding="utf-8"))
@@ -222,10 +232,27 @@ def test_showpiece_native_skin_meets_lighting_bounds(sun: bool) -> None:
     )
     xml, _ = build_scene_xml(json.dumps(spec).encode())
     model = mujoco.MjModel.from_xml_string(xml)
-    assert model.nskin > 0
+    _require(model.nskin > 0, "showpiece export has no native skin")
     if sun:
         model.light_type[:] = mujoco.mjtLightType.mjLIGHT_DIRECTIONAL
     bounds = lighting.load_scene_lighting().acceptance
-    shares = _measure(mujoco, model, bounds)
+    return _measure(mujoco, model, bounds), bounds
+
+
+@pytest.mark.requires_gl
+@pytest.mark.parametrize("sun", [False, True], ids=["spot", "sun"])
+def test_showpiece_native_skin_is_present_and_measured(sun: bool) -> None:
+    """Not deferred: a missing or zero-pixel native skin must fail normally."""
+    shares, _ = _showpiece_shares(sun)
+    assert shares["ragged"] >= 0.0
+    assert shares["clipped"] >= 0.0
+
+
+@pytest.mark.requires_gl
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason=_SHOWPIECE_LIGHTING_XFAIL)
+@pytest.mark.parametrize("sun", [False, True], ids=["spot", "sun"])
+def test_showpiece_native_skin_meets_lighting_bounds(sun: bool) -> None:
+    """Deferred lighting qualification; only the bound comparisons may xfail."""
+    shares, bounds = _showpiece_shares(sun)
     assert shares["ragged"] <= bounds["max_ragged_shadow_share"], shares
     assert shares["clipped"] <= bounds["max_clipped_share"], shares
