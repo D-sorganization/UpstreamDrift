@@ -1,6 +1,9 @@
 """Synthetic motor seam tests; limits in these fixtures are not physiological."""
 
 from pathlib import Path
+import hashlib
+import io
+
 import numpy as np
 import pytest
 
@@ -13,7 +16,10 @@ from src.shared.python.motion_matching.same_input.mujoco_actuator_probe import (
 
 pytestmark = pytest.mark.unit
 
-SPEC = Path("docs/development/full_body_models/full_body_spec_anthro_driver_v2.json")
+SPEC = (
+    Path(__file__).resolve().parents[4]
+    / "docs/development/full_body_models/full_body_spec_anthro_driver_v2.json"
+)
 
 
 @pytest.fixture(scope="module")
@@ -145,6 +151,88 @@ def test_fixed_hold_rollout_records_post_saturation_motor_forces(model):
         )
         np.testing.assert_array_equal(stage.applied_external, np.zeros(len(names)))
         assert stage.effort_semantics == "mujoco_post_saturation_generalized_motor"
+
+    from src.shared.python.motion_matching.same_input.stage_numeric_archive import (
+        decode_numeric,
+        encode_numeric,
+    )
+
+    from types import SimpleNamespace
+    from src.shared.python.motion_matching.same_input.evidenced_solution import (
+        _check_plan,
+    )
+
+    with pytest.raises(ValueError, match="ideal"):
+        _check_plan(SimpleNamespace(manifest={"runner": {}}), trace)
+    raw = encode_numeric(trace)
+    with pytest.raises(ValueError, match="semantics"):
+        decode_numeric(raw)
+    with np.load(__import__("io").BytesIO(raw), allow_pickle=False) as data:
+        fields = {k: data[k] for k in data.files}
+    del fields["drive_semantics"]
+    stripped = io.BytesIO()
+    np.savez_compressed(stripped, **fields)
+    with pytest.raises(ValueError, match="semantics"):
+        decode_numeric(
+            stripped.getvalue(),
+            expected_semantics="mujoco_post_saturation_generalized_motor",
+        )
+    from src.shared.python.motion_matching.same_input.motor_stage_verification import (
+        verify_motor_stage_forces,
+    )
+
+    spec = SPEC.read_bytes()
+    motors = f"<actuator>{xml}</actuator>".encode()
+    verification = verify_motor_stage_forces(
+        raw,
+        spec,
+        motors,
+        expected_archive_sha256=hashlib.sha256(raw).hexdigest(),
+        expected_model_sha256=hashlib.sha256(spec).hexdigest(),
+        expected_motor_sha256=hashlib.sha256(motors).hexdigest(),
+        atol=0.0,
+    )
+    assert verification.stages == 16
+    assert verification.max_abs_error == 0.0
+    assert verification.independent_runtime_verified is False
+    assert verification.forward_replay_verified is False
+    assert verification.physical_feasibility_verified is False
+    with np.load(io.BytesIO(raw), allow_pickle=False) as data:
+        edited = {k: data[k] for k in data.files}
+    edited["drive"][0, 6] += 0.25
+    corrupt = io.BytesIO()
+    np.savez_compressed(corrupt, **edited)
+    edited_raw = corrupt.getvalue()
+    with pytest.raises(ValueError, match="force differs"):
+        verify_motor_stage_forces(
+            edited_raw,
+            spec,
+            motors,
+            expected_archive_sha256=hashlib.sha256(edited_raw).hexdigest(),
+            expected_model_sha256=hashlib.sha256(spec).hexdigest(),
+            expected_motor_sha256=hashlib.sha256(motors).hexdigest(),
+            atol=0.0,
+        )
+    with pytest.raises(ValueError, match="hash"):
+        verify_motor_stage_forces(
+            raw,
+            spec,
+            motors,
+            expected_archive_sha256=hashlib.sha256(raw).hexdigest(),
+            expected_model_sha256="0" * 64,
+            expected_motor_sha256=hashlib.sha256(motors).hexdigest(),
+            atol=0.0,
+        )
+    restored = decode_numeric(
+        raw, expected_semantics="mujoco_post_saturation_generalized_motor"
+    )
+    assert restored.drive_semantics == "mujoco_post_saturation_generalized_motor"
+    restored_stages = [s for step in restored.steps for s in step.stages]
+    for actual, expected in zip(restored_stages, stages, strict=True):
+        assert actual.effort_semantics == expected.effort_semantics
+        np.testing.assert_array_equal(actual.tau, expected.tau)
+        np.testing.assert_array_equal(actual.applied_drive, expected.applied_drive)
+        assert not np.array_equal(actual.tau, actual.applied_drive)
 
 
 def test_motor_rollout_rejects_misleading_recording_and_wrong_mapping(model):

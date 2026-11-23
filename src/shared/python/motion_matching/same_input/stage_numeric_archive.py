@@ -27,18 +27,20 @@ KEYS = {
     "boundaries",
 }
 SEMANTICS = "ideal_direct_generalized_no_saturation"
+MOTOR_SEMANTICS = "mujoco_post_saturation_generalized_motor"
+MOTOR_KEY = "drive_semantics"
 
 
 def encode_numeric(recorder: StageRecorder) -> bytes:
-    """Encode only a complete ideal-drive trace, preserving numeric float64 values."""
+    """Encode a complete ideal or motor trace with explicit motor semantics."""
     if (
-        not recorder.capture_ideal_drive
+        not recorder.capture_drive
         or recorder.plan is None
         or recorder.outcome is None
         or recorder.outcome.status != "complete"
         or recorder._integrity_failure() is not None
     ):
-        raise ValueError("complete ideal stage evidence required")
+        raise ValueError("complete drive stage evidence required")
     stages = [s for step in recorder.steps for s in step.stages]
     segments = [s for step in recorder.steps for s in step.segments]
     if not stages or len(stages) > MAX_STAGES:
@@ -88,6 +90,12 @@ def encode_numeric(recorder: StageRecorder) -> bytes:
         ("external", "applied_external"),
     ):
         arrays[name] = np.asarray([getattr(s, attr) for s in stages], dtype=np.float64)
+    if recorder.drive_semantics == MOTOR_SEMANTICS:
+        arrays[MOTOR_KEY] = np.frombuffer(
+            MOTOR_SEMANTICS.encode("ascii"), dtype=np.uint8
+        )
+    elif recorder.drive_semantics != SEMANTICS:
+        raise ValueError("unsupported drive semantics")
     if sum(a.nbytes for a in arrays.values()) > LIMIT:
         raise ValueError("stage arrays exceed size limit")
     out = BytesIO()
@@ -97,17 +105,22 @@ def encode_numeric(recorder: StageRecorder) -> bytes:
     return out.getvalue()
 
 
-def decode_numeric(raw: bytes) -> StageRecorder:
+def decode_numeric(raw: bytes, *, expected_semantics: str = SEMANTICS) -> StageRecorder:
     """Reject incomplete, oversized, malformed, nonfinite, or inconsistent evidence."""
     if len(raw) > LIMIT:
         raise ValueError("stage archive exceeds size limit")
+    if expected_semantics not in (SEMANTICS, MOTOR_SEMANTICS):
+        raise ValueError("unsupported expected drive semantics")
     try:
         with zipfile.ZipFile(BytesIO(raw)) as z:
             entries = z.infolist()
+            names = {x.filename for x in entries}
+            ideal_names = {k + ".npy" for k in KEYS}
+            motor_names = ideal_names | {MOTOR_KEY + ".npy"}
             if (
-                {x.filename for x in entries} != {k + ".npy" for k in KEYS}
-                or len(entries) != len(KEYS)
-                or sum(x.file_size for x in entries) > LIMIT + len(KEYS) * 4096
+                names not in (ideal_names, motor_names)
+                or len(entries) != len(names)
+                or sum(x.file_size for x in entries) > LIMIT + len(motor_names) * 4096
             ):
                 raise ValueError("invalid stage NPZ inventory or size")
             for entry in entries:
@@ -125,7 +138,7 @@ def decode_numeric(raw: bytes) -> StageRecorder:
                         raise ValueError("unsupported NPY version")
                     expected = np.dtype(
                         np.uint8
-                        if entry.filename == "plan.npy"
+                        if entry.filename in {"plan.npy", MOTOR_KEY + ".npy"}
                         else (
                             np.int64
                             if entry.filename
@@ -146,6 +159,13 @@ def decode_numeric(raw: bytes) -> StageRecorder:
                         raise ValueError("invalid NPY header")
         with np.load(BytesIO(raw), allow_pickle=False) as data:
             a = {k: data[k] for k in KEYS}
+            motor = MOTOR_KEY in data.files
+            if motor != (expected_semantics == MOTOR_SEMANTICS):
+                raise ValueError("drive semantics mismatch")
+            if motor:
+                mode = data[MOTOR_KEY]
+                if mode.ndim != 1 or mode.tobytes() != MOTOR_SEMANTICS.encode("ascii"):
+                    raise ValueError("invalid drive semantics")
         p = json.loads(a["plan"].tobytes())
         if set(p) != {
             "requested_steps",
@@ -208,7 +228,9 @@ def decode_numeric(raw: bytes) -> StageRecorder:
             )
         ):
             raise ValueError("nonfinite stage evidence")
-        recorder = StageRecorder(capture_ideal_drive=True)
+        recorder = StageRecorder(
+            capture_ideal_drive=not motor, capture_motor_drive=motor
+        )
         recorder.start_run(plan)
         stage_steps = a["stage_ids"][:, 0]
         segment_steps = a["segment_ids"][:, 0]
@@ -221,9 +243,11 @@ def decode_numeric(raw: bytes) -> StageRecorder:
             or np.any(np.diff(segment_steps) < 0)
         ):
             raise ValueError("out-of-range or reordered step id")
-        stage_breaks = np.searchsorted(stage_steps, np.arange(plan.requested_steps + 1))
-        segment_breaks = np.searchsorted(
-            segment_steps, np.arange(plan.requested_steps + 1)
+        stage_breaks = np.atleast_1d(
+            np.searchsorted(stage_steps, np.arange(plan.requested_steps + 1))
+        )
+        segment_breaks = np.atleast_1d(
+            np.searchsorted(segment_steps, np.arange(plan.requested_steps + 1))
         )
         for step_id in range(plan.requested_steps):
             segments = []
@@ -256,7 +280,7 @@ def decode_numeric(raw: bytes) -> StageRecorder:
                         a["tau"][i],
                         a["drive"][i],
                         a["external"][i],
-                        SEMANTICS,
+                        MOTOR_SEMANTICS if motor else SEMANTICS,
                     )
                 )
             recorder.steps.append(

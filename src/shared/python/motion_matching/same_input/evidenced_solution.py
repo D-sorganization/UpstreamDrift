@@ -56,6 +56,8 @@ def _hash(value: bytes) -> str:
 
 
 def _check_plan(bundle: SolutionBundle, recorder: StageRecorder) -> None:
+    if not recorder.capture_ideal_drive:
+        raise ValueError("ideal stage evidence required for v5/v6")
     plan = recorder.plan
     runner = bundle.manifest["runner"]
     if (
