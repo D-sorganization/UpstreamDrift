@@ -21,11 +21,13 @@ from src.tools.native_viewer_export.behind_camera import Vec3, shift_to_anchor
 __all__ = [
     "DEFAULT_LOOKAT_M",
     "SETTINGS_PATH",
+    "ClubSpeedPlotSettings",
     "FramingSettings",
     "LayoutSettings",
     "ViewSettings",
     "behind_anchor_for",
     "load_camera_distances",
+    "load_club_speed_plot_settings",
     "load_framing_settings",
     "load_layout_settings",
     "load_view_settings",
@@ -93,6 +95,42 @@ def load_layout_settings(path: Path | None = None) -> LayoutSettings:
         _positive_int(raw, "plot_stretch"),
         hide,
         _positive_int(raw, "slider_min_width_px"),
+    )
+
+
+@dataclass(frozen=True)
+class ClubSpeedPlotSettings:
+    """Club-head speed plot labels; titles take ``{speed}`` and ``{time}``."""
+
+    impact_title: str
+    peak_title: str
+    marker_color: str
+    marker_size_pt: float
+
+
+def _title(raw: dict[str, Any], key: str) -> str:
+    value = raw.get(key)
+    try:
+        if not isinstance(value, str):
+            raise TypeError(type(value).__name__)
+        value.format(speed=1.0, time=1.0)
+    except (KeyError, IndexError, TypeError, ValueError) as exc:
+        raise ValueError(
+            f"{key} must format with {{speed}} and {{time}}: {exc}"
+        ) from exc
+    return value
+
+
+def load_club_speed_plot_settings(path: Path | None = None) -> ClubSpeedPlotSettings:
+    """Read the ``club_speed_plot`` block; ``ValueError`` on a bad title template
+    or a non-positive marker size."""
+    raw = json.loads((path or SETTINGS_PATH).read_text(encoding="utf-8"))
+    block = raw["club_speed_plot"]
+    return ClubSpeedPlotSettings(
+        _title(block, "impact_title"),
+        _title(block, "peak_title"),
+        str(block["marker_color"]),
+        _positive_float(block, "marker_size_pt"),
     )
 
 

@@ -333,6 +333,7 @@ class ResultsPlaybackHostMixin:
         from .playback_flight_panel import attach_shot_dock
 
         self.shot_dock = attach_shot_dock(self._inner, self.shot_dock, summary)
+        panel.show_shot(summary)  # the plot titles the card's impact speed
 
     def _discard_results(self) -> None:
         """Drop the loaded run, its panel and its renderer; idempotent."""
