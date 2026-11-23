@@ -2383,3 +2383,15 @@ worsened 3.561 to 3.748 degrees. Both had 712 sampled ROM-flagged states and
 no sampled speed flags. Reject this as a gate-regressing candidate; modeled
 limits remain soft/assumed and actual motor, stage, work and impact were not
 verified. Offline fixed-state improvements are not forward guarantees.
+
+A controlled 200 ms fixed-gain Option B motor sensitivity used the identical
+v2 spec, target-state feedforward and initial q/v. The baseline 3/0.3 gains
+reproduced prior recorded states, commands and drive bit-for-bit: joint RMS
+0.1174 rad, three modeled ROM slots, no speed slots or clipping among 6,400
+stages. Gains 6/0.6 yielded 0.1901 rad RMS, five ROM and two speed slots,
+with 4,416 clipped stages; gains 12/1.2 yielded 0.2676 rad RMS, three ROM
+and two speed slots, with 5,728 clipped stages. Each case held its gains
+fixed; the higher-gain cases worsened joint tracking and added clipping in
+this modeled interval despite lower root-rotation RMS. This is sensitivity
+analysis, not a physiological gain recommendation or feasible-swing proof;
+16 torque and all speed capacities remain assumption-limited.
