@@ -6,7 +6,7 @@ It consumes measured total applied torques after feedforward, PD feedback and
 saturation, in a caller-declared consistent actuator order and sign frame.
 Only rotational actuator torques in Nm are supported; times are seconds.
 
-The standalone calculation reference is [reference.tex](reference.tex).
+The standalone calculation reference is [applied_effort_audit.tex](applied_effort_audit.tex).
 For each actuator, the receipt reports the minimum signed torque margin and
 the slew limit minus the maximum absolute adjacent-sample secant rate. Bounds
 are inclusive and can be asymmetric. No implicit tolerance is applied.
