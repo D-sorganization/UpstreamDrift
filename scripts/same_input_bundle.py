@@ -347,7 +347,20 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
     record_path, times, q_track = _track(run_dir)
     if _sha256(record_path) != bundle.provenance.get("dynamics_record_sha256"):
         raise ValueError("tracking record does not match bundle provenance")
-    target = padded_track(bundle.spec_bytes, q_track)
+    run_spec = (run_dir / "full_body_spec_hipcal_scaled.json").read_bytes()
+    expected_spec, target = shaft_inputs(
+        run_spec,
+        q_track,
+        bundle.provenance.get("shaft_model", DEFAULT_SHAFT_MODEL),
+        bundle.provenance.get("shaft_options"),
+    )
+
+    def canonical(data: bytes) -> str:
+        return json.dumps(json.loads(data), sort_keys=True, allow_nan=False)
+
+    if canonical(expected_spec) != canonical(bundle.spec_bytes):
+        raise ValueError("run model does not match bundle model")
+    target = padded_track(bundle.spec_bytes, target)
     impact = bundle.ball_impact()
     started = time.perf_counter()
     rollout = closed_loop(

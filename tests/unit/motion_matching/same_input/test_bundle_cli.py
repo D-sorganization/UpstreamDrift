@@ -70,6 +70,7 @@ def test_closed_loop_reports_target_and_rollout_scores_separately(
 
     record = tmp_path / "record.npz"
     record.write_bytes(b"bound reference")
+    (tmp_path / "full_body_spec_hipcal_scaled.json").write_text("{}", encoding="utf-8")
     bundle_path = tmp_path / "bundle.npz"
     bundle_path.write_bytes(b"bundle")
     bundle = SimpleNamespace(
@@ -250,3 +251,75 @@ def test_velocity_target_uses_derived_rates_not_interpolant_derivative() -> None
         target_velocity_tracking_summary(
             times, q, np.array([0.0, 1.0]), np.zeros((2, 1)), split_time_s=0.5
         )
+
+
+def test_closed_loop_rejects_same_width_but_different_run_model(
+    monkeypatch, tmp_path
+) -> None:
+    from scripts import same_input_bundle as cli
+
+    record = tmp_path / "record.npz"
+    record.write_bytes(b"bound reference")
+    (tmp_path / "full_body_spec_hipcal_scaled.json").write_text(
+        json.dumps({"coordinate_order": ["joint"], "mass": 80.0}), encoding="utf-8"
+    )
+    bundle = SimpleNamespace(
+        provenance={"dynamics_record_sha256": cli._sha256(record)},
+        spec_bytes=json.dumps({"coordinate_order": ["joint"], "mass": 70.0}).encode(),
+        ball_impact=lambda: None,
+        steps=1,
+        dt_s=1.0,
+        step_policy=lambda: None,
+    )
+    monkeypatch.setattr(cli.InputBundle, "load", lambda _: bundle)
+    monkeypatch.setattr(
+        cli, "_track", lambda _: (record, np.arange(2.0), np.zeros((2, 1)))
+    )
+    monkeypatch.setattr(
+        cli, "closed_loop", lambda *a, **k: pytest.fail("must reject before simulating")
+    )
+    with pytest.raises(ValueError, match="model.*match"):
+        cli.closed_loop_receipt(tmp_path, tmp_path / "bundle.npz", "mujoco")
+
+
+def test_closed_loop_reconstructs_recorded_shaft_before_model_check(
+    monkeypatch, tmp_path
+) -> None:
+    from scripts import same_input_bundle as cli
+
+    record = tmp_path / "record.npz"
+    record.write_bytes(b"bound reference")
+    (tmp_path / "full_body_spec_hipcal_scaled.json").write_text(
+        '{"rigid": true}', encoding="utf-8"
+    )
+    bundle = SimpleNamespace(
+        provenance={
+            "dynamics_record_sha256": cli._sha256(record),
+            "shaft_model": "chain",
+            "shaft_options": {"scale": 2},
+        },
+        spec_bytes=b'{"chain": 2}',
+        ball_impact=lambda: None,
+        steps=1,
+        dt_s=1.0,
+        step_policy=lambda: None,
+    )
+    monkeypatch.setattr(cli.InputBundle, "load", lambda _: bundle)
+    monkeypatch.setattr(
+        cli, "_track", lambda _: (record, np.arange(2.0), np.zeros((2, 1)))
+    )
+
+    def transformed(spec, q, model, options):
+        assert json.loads(spec) == {"rigid": True}
+        assert model == "chain" and options == {"scale": 2}
+        return b'{ "chain": 2 }', q
+
+    monkeypatch.setattr(cli, "shaft_inputs", transformed)
+    monkeypatch.setattr(cli, "padded_track", lambda _, q: q)
+    monkeypatch.setattr(
+        cli,
+        "closed_loop",
+        lambda *a, **k: (_ for _ in ()).throw(RuntimeError("simulation reached")),
+    )
+    with pytest.raises(RuntimeError, match="simulation reached"):
+        cli.closed_loop_receipt(tmp_path, tmp_path / "bundle.npz", "mujoco")

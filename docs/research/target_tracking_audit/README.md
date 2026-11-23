@@ -13,9 +13,11 @@ These rates are not measured velocities or derivatives of the piecewise
 linear position interpolant. Velocity units are native coordinate units per
 second. Hash binding applies to the source position record for both reports.
 
-The tracking record must match the hash in the bundle provenance. This binds
-the selected data to the bundle; a hash does not establish its source,
-calibration, model compatibility or an accepted fit. The report does not
+The tracking record must match the hash in the bundle provenance. The run's
+model, with the recorded shaft configuration applied, must also match the
+bundle model before replay; JSON formatting does not affect this comparison.
+These checks do not establish that the record was generated from that model,
+its calibration, a valid model migration or an accepted fit. The report does not
 qualify motion between samples, actuator torque, contact, or physical limits.
 The calculation reference is [target_tracking_audit.tex](target_tracking_audit.tex).
 Run `python -m pytest -q tests/unit/motion_matching/same_input/test_bundle_cli.py`
