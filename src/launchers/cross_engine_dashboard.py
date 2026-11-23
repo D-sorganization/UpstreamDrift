@@ -993,6 +993,27 @@ def CrossEngineDashboardWindow(
     return cls(parent, shape_per_engine=shape_per_engine)
 
 
+def _release_theme_manager(window: Any) -> None:
+    """Drop the singleton ThemeManager's reference to a destroyed dashboard.
+
+    ``apply_theme_to_window`` makes the first window it sees the manager's
+    ``main_window``; without this, reopening the dashboard after closing it
+    raises ``RuntimeError: wrapped C/C++ object ... has been deleted``.
+
+    Design by Contract
+    ------------------
+    Post: the manager never retains ``window`` as its ``main_window``.
+    """
+    try:
+        from src.shared.python.theme.theme_manager import ThemeManager
+
+        manager = ThemeManager.instance()
+    except ImportError:
+        return
+    if manager.main_window is window:
+        manager.main_window = None
+
+
 def _create_dashboard_window_class() -> type:
     """Construct and return the _Window class with deferred Qt/mpl imports.
 
@@ -1049,6 +1070,7 @@ def _create_dashboard_window_class() -> type:
                 return
             if callable(apply_theme_to_window):
                 apply_theme_to_window(self)
+                self.destroyed.connect(lambda *_: _release_theme_manager(self))
 
         def _build_window_layout(self) -> None:
             """Create the central dashboard layout."""
