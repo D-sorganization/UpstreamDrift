@@ -303,3 +303,22 @@ def test_viewport_image_scales_with_the_widget(
     explorer.hide()
 
     assert large[0] > small[0] and large[1] > small[1]
+
+
+@pytest.mark.unit
+def test_playback_opens_behind_the_golfer_and_follows_the_anchor(
+    explorer: MainWidget, runs: dict[str, Path], boxes: list[str]
+) -> None:
+    """Default view is the setting; a ball-to-feet anchor re-aims it (#15150)."""
+    from src.tools.model_explorer.playback_view import load_view_settings
+
+    assert explorer.load_results(runs["mujoco"]) is True, boxes
+    panel = explorer.playback_panel
+    default = load_view_settings().default_view
+    assert panel.view_combo.currentText() == default == panel._playback.view
+    before = panel.current_image()
+    panel._playback.behind_anchor_m = (0.6, -0.4, 0.0)
+    assert panel._playback.behind_anchor_m == (0.6, -0.4, 0.0)
+    assert not np.array_equal(before, panel.current_image())
+    with pytest.raises(ValueError, match="finite 3-vector"):
+        panel._playback.behind_anchor_m = (0.0, float("nan"), 0.0)
