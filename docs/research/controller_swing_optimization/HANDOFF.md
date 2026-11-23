@@ -112,6 +112,13 @@ restarts were stopped. The largest sampled generalized speed occurs at the
 free record endpoint; the largest second difference occurs near a marker
 dropout where the corresponding marker-Jacobian sensitivity decreases.
 This association does not prove causation or establish anatomical rates.
+A matched 120-second sensitivity around that dropout compared an added
+localized temporal penalty with an unchanged-objective control, starting from
+the same accepted state. Neither converged. The penalty reduced peak sampled
+second difference from 2,145 to 2,090 rad/s² but increased maximum soft closure
+translation from 0.0094 to 0.0639 mm; marker and face-axis residuals were
+nearly unchanged and the free-end speed remained about 33.3 rad/s. The
+experiment does not justify adopting that penalty.
 Direct derivation from the embedded calibrated model rejects an unknown pelvis
 offset; relocating its pelvis is a physical model change, not a coordinate-only
 migration. A three-state diagnostic of that changed-model candidate preserved
