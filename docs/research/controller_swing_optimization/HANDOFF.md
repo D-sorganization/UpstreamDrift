@@ -2469,3 +2469,24 @@ edge, endpoint and a synthetic pinned-v2 MuJoCo step-halving case. Both hit
 and miss remain unqualified and coverage uncertified: sampled scans do not
 exclude an earlier crossing. This 353-line increment has a 787-line research
 ancestry, so it is not a <500-line PR or a completed Slice 1.
+
+A 16/32-substep motor-state KKT acceleration audit of the continuous
+reference exposed a support/reference mismatch before large tracking drift.
+At the initial reference state, target-controller root translation acceleration
+differed from the finite-difference reference by 8.27 m/s² while modeled
+support was 0.165 body weights; at 75 ms the defect was 9.27 m/s² with
+0.073 body weights of modeled support. At the actual motor state at 75 ms,
+modeled support was 1.97 body weights and root acceleration mismatch was
+28.2 m/s². The target-state inverse solve applies no direct root actuation and
+cannot generally force the prescribed root acceleration. These are instantaneous
+model calculations under assumed compliant contact, not measured ground
+forces or a causal proof. They motivate a closure- and continuity-constrained
+support-aware reference fit as well as controller work.
+
+The sampled face diagnostic's trial-prefix advance repartitions its RK4
+steps as query time changes; the existing integrator has no dense-output/error
+enclosure and applies nonlinear closure projection at step boundaries. Sampled
+velocities or observed maxima therefore do not establish a continuous
+trajectory bound or first-root certificate. A fixed-lattice diagnostic can
+remove that partition seam, but remains conditional without a validated
+continuous error enclosure and projection-continuity treatment.
