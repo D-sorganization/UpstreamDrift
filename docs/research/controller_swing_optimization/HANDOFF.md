@@ -1638,3 +1638,16 @@ root rotation RMS 0.14295 to 0.14745 rad. Joint RMS changed 0.01731 to
 0.01643 rad; one modeled ROM excess was 3.67° and peak held ideal effort
 359.75 N m. This source-derived model/attachment estimate is not a measured
 initial root velocity or a qualified baseline; it did not fix full drift.
+
+A fresh Python process verified an actual serialized 1.322 s exploratory v2
+motor bundle using the pushed `codex/15493-motor-impact22` implementation.
+Closure projection was enabled and an explicitly synthetic off-grid 2 N
+prescribed force was latched at 1.0005 s. All 42,312 numerical stages and
+the split-event state reproduced exactly in the same runtime; the separately
+recorded generalized external force was nonzero at 36 stages. Recording took
+183.09 s and fresh-process verification 167.62 s. The receipt explicitly
+sets contact, physical feasibility and independent-runtime verification
+false. Loose synthetic motor caps, prescribed rather than detected contact,
+a partial runtime fingerprint and an unadmitted reference remain; this does
+not complete Slice 2 or establish a physical shot. Private bundle and hash-
+bound receipt remain outside git.
