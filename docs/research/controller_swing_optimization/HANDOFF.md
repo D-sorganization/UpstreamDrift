@@ -1376,3 +1376,37 @@ focused bridge tests, 115 combined neighboring tests before that additional
 case, scoped mypy, Ruff, Black, LaTeX compilation and normal headless push
 hooks passed. The branch has 499 insertions against fetched main `d73e7e933e`;
 refresh main and reconcile before reuse. It is not a completed Slice 2 or PR.
+
+Research branch `codex/15493-bundle-attest18` at `1bb66374f5` adds
+measured-local checks of the supplied model file bytes and a declared partial
+runtime fingerprint before replay factory construction. Ninety-six focused
+bridge/codec tests, scoped mypy, Ruff, Black, LaTeX compilation and normal
+headless push hooks passed. This does not prove a factory consumed that model,
+cover all backend/controller/native dependencies, verify post-actuator torque
+or impact, or establish independent replay. The initial test-first attempt
+failed at collection due to an uninitialized pinned dependency; a functional
+red phase was not observed. The 172-line increment is atop the 499-line
+research bridge and is not a complete Slice 2 or PR.
+
+Sequential local Option B relinearization used fixed gains, actual motor
+clipping, partly unverified priors and a 10 N m global coefficient trust.
+The strict first 0.5 N m local step changed 200 ms stage peak modeled ROM
+excess 0.60196 to 0.22128 rad and joint RMS 0.16512 to 0.09674 rad, but
+five ROM slots still failed and 1440/6400 stages clipped; extension hit a
+guard at 0.631 s. A second local step lowered 200 ms peak to 0.10405 rad
+and joint RMS to 0.08979 but still had five ROM flags and hit a guard at
+0.594 s. A later 500 ms relinearization reduced stage ROM peak 6.220 to
+4.572 rad but increased speed flags seven to 13 and clipped stages 1440 to
+1504 of 16,000; its full extension failed at 0.568 s. These remain infeasible
+model diagnostics, not physical or shot improvements.
+
+The existing contact-wrench QP was exercised through a private Clarabel
+adapter because its Drake wrapper was unavailable; three toy scenarios and
+residual checks do not prove equivalence to Drake. The full 1.322 s
+projected ideal computed-torque run made 1322 controller calls with zero
+direct root effort; maximum reported normalized cone slack was 0.535,
+source-target marker RMS 272.77 mm versus 269.65 mm unregulated, root
+translation RMS 0.10534 m, joint RMS 0.01650 rad and peak held ideal effort
+384.28 N m. Existing controller fallback can silently handle solver failure
+or missing support; solve status was not captured for every call, so this is
+not evidence that every QP solved, nor physical or Option B qualification.
