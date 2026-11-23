@@ -2349,3 +2349,16 @@ command capacities (peak ratio 7.249, peak absolute command about 425.6 N m).
 This establishes a close sampled numerical comparison for this ideal controller
 and model, not actual saturated-motor, integration-stage, physical or contact
 feasibility. Registry limits retain their soft/assumed provenance.
+
+A corrected per-hold decomposition of the refined ideal controller rebuilt
+commands at the actual state to <=3.7e-12 N m. The largest assumed-capacity
+ratio was 7.25 at a wrist coordinate at 1.313 s: 72.5 N m total, comprising
+68.8 state-conditioned reference dynamics, 3.9 PD increment and -0.2 balance;
+the corresponding target-state controller value was 65.8 N m. That wrist
+capacity is unverified. The earliest exceedance, right hip adduction at
+0.068 s, was -144.1 N m versus -16.0 N m evaluated at target state. The
+state-conditioned term includes actual-state bias and contact, so neither it
+nor the target-state difference is pure open-loop feedforward or isolated
+feedback. The results motivate checking both reference dynamics and state/
+contact coupling; they do not identify a single cause or justify changing
+physiological capacities.
