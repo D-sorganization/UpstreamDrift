@@ -69,6 +69,13 @@ A sparse `trust-constr` pilot did not converge on the nine-frame test and
 degraded the fit from a converged SLSQP seed. It still assembled dense local
 Jacobian blocks and used default BFGS, so it does not rule out a fully sparse
 or better-conditioned trajectory formulation.
+A block-sparse soft-weld pilot reached an `xtol` stop on 33 frames in 30.3 s:
+maximum positional closure was 0.000606 mm, peak sampled angular speed was
+16.75 rad/s, and join speeds were 7.34 and 15.76 rad/s. Its reported first-order
+optimality was 0.276, so the stop is not a stationarity certificate. A 99-frame
+trial reached its 90-second cap without convergence; its last saved point was
+a function trial, not necessarily an accepted iterate. Soft weld penalties,
+missing anatomical bounds and untested forward dynamics prevent acceptance.
 Direct derivation from the embedded calibrated model rejects an unknown pelvis
 offset; relocating its pelvis is a physical model change, not a coordinate-only
 migration. A three-state diagnostic of that changed-model candidate preserved
@@ -79,9 +86,14 @@ marker errors. This does not prove that a valid mapping is impossible.
 The contact prototype rejects duplicated faces, non-manifold edges and
 inconsistent shared-edge winding. Its bounded root scan can still miss narrow
 crossings, and its sampled miss penalty is not a global closest-approach
-guarantee. A recent focused contact/evidence run passed 71 tests with two
-MuJoCo skips in that environment; a separate revision-2 flight-kernel run
-passed 15 prescribed-launch cases with one strict expected failure. Reference
+guarantee. An integrator audit found that repartitioning trial durations could
+make a state jump at a substep boundary; the working correction anchors trial
+and accepted segment partitions to a common hold lattice. This removes the
+demonstrated numerical discontinuity but does not bound ODE integration error
+or certify first contact. A focused contact, impact, stage-trace and MuJoCo
+suite passed 89 tests with graphics disabled; a separate revision-2 flight
+suite passed 16 tests with one strict expected failure, including a check that
+an airborne endpoint cannot be reported as carry. Reference
 flight rows include approximate inputs and are not independent flight
 validation. Re-run relevant checks on the actual delivery commit and runtime.
 The flight suite was repeated in a fresh isolated Python 3.12 environment

@@ -29,6 +29,12 @@ closest-approach heuristic is not that event. Missed contact must have a
 finite smooth penalty. Prescribed-launch flight checks are separate from
 swing-to-impact checks. Carry is distance to first ground contact and does not
 include unvalidated rollout.
+In the prototype, numerical trial and accepted substeps are partitioned on
+the same fixed lattice anchored to each held-control interval, including an
+arming split. This avoids a jump caused by changing the number of equal
+substeps as the trial duration crosses a partition threshold. The bounded
+scan can still miss narrow crossings; its candidate root is not a proof of
+first contact, and the integration error is not enclosed.
 
 \section{Evidence and Limitations}
 The accompanying README records the prescribed-launch regression and the

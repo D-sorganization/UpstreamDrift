@@ -238,6 +238,110 @@ def test_impact_probes_do_not_enter_trace(monkeypatch):
     assert len(recorder.expected_stages()) == 4
 
 
+def test_impact_trial_prefix_is_continuous_and_matches_accepted_trace(monkeypatch):
+    class NonlinearPlant(Plant):
+        def acceleration(self, q, v, tau):
+            return 100.0 * q
+
+    def fake_impact(impact, t, dt, q, v, step, *, poses, accel, trial_step):
+        # Old ceil-based repartition jumps at 0.25 s, despite smooth dynamics.
+        before = trial_step(t, 0.25, q, v, None)[0]
+        after = trial_step(t, 0.250000001, q, v, None)[0]
+        np.testing.assert_allclose(before, after, atol=1e-6, rtol=0.0)
+        trial_q, trial_v, _ = trial_step(t, 0.251, q, v, None)
+        accepted_q, accepted_v, extra = step(t, 0.251, q, v, None)
+        np.testing.assert_array_equal(trial_q, accepted_q)
+        np.testing.assert_array_equal(trial_v, accepted_v)
+        end_q, end_v, _ = step(t + 0.251, dt - 0.251, accepted_q, accepted_v, None)
+        return end_q, end_v, impact, extra
+
+    class FakeImpact:
+        def to_record(self):
+            return {}
+
+    monkeypatch.setattr(integrator, "step_through_impact", fake_impact)
+    p, recorder = NonlinearPlant(), StageRecorder()
+    p.kinematic_frames = lambda q: {}
+    q = np.ones(7)
+    integrate(
+        p,
+        q,
+        np.zeros(7),
+        lambda *_: np.zeros(7),
+        steps=1,
+        dt_s=1.0,
+        policy=StepPolicy(substeps=4, project=False),
+        impact=FakeImpact(),
+        recorder=recorder,
+    )
+    assert recorder.outcome.status == "complete"
+    assert [segment.substeps for segment in recorder.steps[0].segments] == [2, 3]
+    assert recorder.steps[0].stages[4].time_s == pytest.approx(0.25)
+
+
+def test_armed_surface_search_replays_same_hold_lattice(monkeypatch):
+    from src.shared.python.motion_matching.contact_event import find_contact_event
+
+    class NonlinearPlant(Plant):
+        def acceleration(self, q, v, tau):
+            return 100.0 * q
+
+    triangles = np.array([[[0.0, -1.0, -1.0], [0.0, 1.0, -1.0], [0.0, 0.0, 1.0]]])
+
+    def fake_impact(impact, t, dt, q, v, step, *, poses, accel, trial_step):
+        arm = 0.1
+        q_arm, v_arm, _ = trial_step(t, arm, q, v, None)
+
+        def advance_after_arm(h):
+            if h == 0.0:
+                return q_arm, v_arm
+            return trial_step(t + arm, h, q_arm, v_arm, None)[:2]
+
+        result = find_contact_event(
+            advance_after_arm,
+            lambda x: triangles + np.array([x[0], 0.0, 0.0]),
+            np.array([6.4, 0.0, 0.0]),
+            0.5,
+            duration_s=dt - arm,
+            time_tolerance_s=1e-11,
+        )
+        event = result.event
+        assert event is not None
+        assert abs(5.9 - event.q[0]) < 1e-6
+        q_a, v_a, extra = step(t, arm, q, v, None)
+        q_hit, v_hit, _ = step(t + arm, event.time_s, q_a, v_a, None)
+        np.testing.assert_array_equal(q_hit, event.q)
+        np.testing.assert_array_equal(v_hit, event.qd)
+        q_end, v_end, _ = step(
+            t + arm + event.time_s, dt - arm - event.time_s, q_hit, v_hit, None
+        )
+        return q_end, v_end, impact, extra
+
+    class FakeImpact:
+        def to_record(self):
+            return {}
+
+    monkeypatch.setattr(integrator, "step_through_impact", fake_impact)
+    plant, recorder = NonlinearPlant(), StageRecorder()
+    plant.kinematic_frames = lambda q: {}
+    integrate(
+        plant,
+        np.ones(7),
+        np.zeros(7),
+        lambda *_: np.zeros(7),
+        steps=1,
+        dt_s=1.0,
+        policy=StepPolicy(substeps=4, project=False),
+        impact=FakeImpact(),
+        recorder=recorder,
+    )
+    assert recorder.outcome.status == "complete"
+    segments = recorder.steps[0].segments
+    assert segments[1].start_s == pytest.approx(0.1)
+    assert segments[2].start_s < 0.25
+    assert segments[2].step_sizes_s[0] == pytest.approx(0.25 - segments[2].start_s)
+
+
 def test_projection_exception_aborts_step(monkeypatch):
     def fail(*args):
         raise RuntimeError("projection failed")

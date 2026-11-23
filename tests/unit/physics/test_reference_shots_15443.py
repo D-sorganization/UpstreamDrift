@@ -17,7 +17,9 @@ from __future__ import annotations
 
 import json
 import math
+import sys
 from pathlib import Path
+from types import ModuleType, SimpleNamespace
 from typing import Any
 
 import numpy as np
@@ -48,6 +50,19 @@ def _flight(shot: dict[str, Any]) -> dict[str, float]:
         launch, max_time=_SETTINGS["max_time_s"], dt=_SETTINGS["dt_s"]
     )
     path = np.array([p.position for p in points], dtype=float)
+    if (
+        path.ndim != 2
+        or path.shape[1:] != (3,)
+        or len(path) < 3
+        or not np.isfinite(path).all()
+        or np.any(path[1:-1, 2] <= 0.0)
+        or abs(path[-1, 2]) > 1e-8
+        or not np.isfinite(points[-1].velocity).all()
+        or points[-1].velocity[2] >= 0.0
+    ):
+        raise ValueError(
+            "flight did not terminate at the first descending ground contact"
+        )
     vx, vy, vz = points[-1].velocity
     yard = _SETTINGS["yard_m"]
     return {
@@ -84,6 +99,21 @@ def test_fixture_rows_carry_source_and_confidence() -> None:
     for shot in _DATA["shots"]:
         assert shot["source"].strip() and shot["confidence"].strip(), shot["id"]
         assert set(shot.get("xfail", {})) <= set(_METRICS), shot["id"]
+
+
+def test_unlanded_trajectory_cannot_be_reported_as_carry(monkeypatch) -> None:
+    from src.shared.python.physics.ball_simulator import BallFlightSimulator
+
+    monkeypatch.setitem(sys.modules, "upstream_physics", ModuleType("upstream_physics"))
+    points = [
+        SimpleNamespace(position=np.array([0.0, 0.0, 0.0]), velocity=[20, 0, 10]),
+        SimpleNamespace(position=np.array([10.0, 0.0, 2.0]), velocity=[10, 0, -2]),
+    ]
+    monkeypatch.setattr(
+        BallFlightSimulator, "simulate_trajectory", lambda *a, **kw: points
+    )
+    with pytest.raises(ValueError, match="ground"):
+        _flight(_DATA["shots"][0])
 
 
 @pytest.mark.parametrize(("shot", "metric"), _cases())

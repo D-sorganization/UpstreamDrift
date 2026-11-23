@@ -398,6 +398,62 @@ def test_surface_hit_commits_only_real_zoh_stages_and_event() -> None:
     assert recorder.outcome.status == "partial"
 
 
+def test_armed_surface_hit_replays_integrator_prefix_and_commits_trace() -> None:
+    from src.shared.python.motion_matching.same_input.integrator import (
+        ROOT_COORDINATES,
+        StepPolicy,
+        integrate,
+    )
+    from src.shared.python.motion_matching.same_input.stage_trace import StageRecorder
+
+    class Plant:
+        coordinate_order = (*ROOT_COORDINATES, "x", "angle")
+
+        def acceleration(self, q, v, tau):
+            result = np.asarray(tau) / np.array([1] * 6 + [M, INERTIA])
+            result[6] += 5000.0 * q[6]
+            return result
+
+        def kinematic_frames(self, q):
+            return rotating_poses(q[6:])
+
+        def closure_pose_residual(self, q):
+            return np.zeros(1)
+
+    q, v = np.zeros(8), np.zeros(8)
+    v[6:] = [100.0, 50.0]
+    recorder = StageRecorder()
+    arm = 0.0037  # Inside a nominal 0.005-second substep.
+    run = integrate(
+        Plant(),
+        q,
+        v,
+        lambda *_: np.zeros(8),
+        steps=1,
+        dt_s=0.02,
+        policy=StepPolicy(substeps=4, project=False),
+        impact=_surface_plan(_ball_on_rotated_face(), t_start=arm),
+        recorder=recorder,
+    )
+    assert run.ball_impact is not None
+    event = run.ball_impact["contact_event"]
+    assert event is not None and arm < event["time_s"] < 0.02
+    assert recorder.outcome.status == "complete"
+    segments = recorder.steps[0].segments
+    assert segments[0].start_s == pytest.approx(0.0)
+    assert segments[0].duration_s == pytest.approx(arm)
+    active_index = next(i for i, segment in enumerate(segments) if segment.force_active)
+    active = segments[active_index]
+    assert active.start_s == pytest.approx(event["time_s"], abs=1e-10)
+    impact_stage = next(
+        stage
+        for stage in recorder.steps[0].stages
+        if stage.segment == active.segment and stage.substep == 0 and stage.stage == 1
+    )
+    np.testing.assert_allclose(impact_stage.q, event["q"], rtol=0.0, atol=1e-10)
+    np.testing.assert_allclose(impact_stage.v, event["qd"], rtol=0.0, atol=1e-10)
+
+
 def test_surface_trigger_fails_closed_and_records_a_finite_miss() -> None:
     q, v = np.zeros(2), np.array([100.0, 0.0])
     impact = _surface_plan(np.array([1.0, 2.0, 0.0]))

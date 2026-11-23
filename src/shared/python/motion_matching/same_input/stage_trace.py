@@ -45,6 +45,30 @@ class SegmentPlan:
     duration_s: float
     substeps: int
     force_active: bool
+    step_sizes_s: tuple[float, ...] = ()
+
+
+def fixed_substep_sizes(
+    duration_s: float, nominal_step_s: float, start_offset_s: float = 0.0
+) -> tuple[float, ...]:
+    """Partition an interval at the nominal lattice anchored to the hold start."""
+    if not np.isfinite([duration_s, nominal_step_s, start_offset_s]).all():
+        raise ValueError("step durations must be finite")
+    if duration_s <= 0.0 or nominal_step_s <= 0.0 or start_offset_s < 0.0:
+        raise ValueError("step durations must be positive")
+    phase = start_offset_s / nominal_step_s
+    nearest = round(phase)
+    if abs(phase - nearest) <= 8 * np.finfo(float).eps * max(1.0, abs(phase)):
+        to_boundary = nominal_step_s
+    else:
+        to_boundary = (np.floor(phase) + 1.0 - phase) * nominal_step_s
+    first = min(duration_s, to_boundary)
+    remaining = duration_s - first
+    count = int(np.floor(remaining / nominal_step_s))
+    remainder = remaining - count * nominal_step_s
+    return (
+        (first,) + (nominal_step_s,) * count + ((remainder,) if remainder > 0 else ())
+    )
 
 
 @dataclass(frozen=True)
@@ -143,6 +167,7 @@ class StageRecorder:
             current = next(segments, None)
             for hold in range(plan.effort_holds):
                 start = (k * plan.effort_holds + hold) * hold_dt
+                hold_start = start
                 end = start + hold_dt
                 segment_id = 0
                 while current is not None and current.hold == hold:
@@ -156,19 +181,18 @@ class StageRecorder:
                         or abs(current.start_s - start) > 1e-12
                     ):
                         return "invalid segment schedule"
-                    expected_substeps = max(
-                        1,
-                        int(
-                            np.ceil(
-                                (plan.substeps // plan.effort_holds)
-                                * current.duration_s
-                                / hold_dt
-                                - 1e-9
-                            )
-                        ),
+                    expected_sizes = fixed_substep_sizes(
+                        current.duration_s,
+                        hold_dt / (plan.substeps // plan.effort_holds),
+                        max(0.0, current.start_s - hold_start),
                     )
-                    if current.substeps != expected_substeps:
-                        return "invalid segment substep count"
+                    if current.substeps != len(expected_sizes) or (
+                        len(current.step_sizes_s) != len(expected_sizes)
+                        or not np.allclose(
+                            current.step_sizes_s, expected_sizes, rtol=0.0, atol=1e-15
+                        )
+                    ):
+                        return "invalid segment substep schedule"
                     start = current.start_s + current.duration_s
                     if start > end + 1e-12:
                         return "segment exceeds hold"
@@ -205,9 +229,8 @@ class StageRecorder:
         expected = []
         for step in self.steps:
             for segment in step.segments:
-                h = segment.duration_s / segment.substeps
-                for substep in range(segment.substeps):
-                    start = segment.start_s + substep * h
+                start = segment.start_s
+                for substep, h in enumerate(segment.step_sizes_s):
                     for stage, offset in enumerate((0.0, h / 2, h / 2, h), 1):
                         expected.append(
                             (
@@ -219,6 +242,7 @@ class StageRecorder:
                                 start + offset,
                             )
                         )
+                    start += h
         return expected
 
     def record(

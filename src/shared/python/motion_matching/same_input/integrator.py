@@ -39,6 +39,7 @@ from src.shared.python.motion_matching.same_input.stage_trace import (
     RunPlan,
     SegmentPlan,
     StageRecorder,
+    fixed_substep_sizes,
 )
 
 Array = NDArray[np.float64]
@@ -321,7 +322,15 @@ def _held_step(
             if recorder is not None:
                 recorder.segment(
                     SegmentPlan(
-                        k, h, 0, j * hold_dt, hold_dt, policy.substeps_per_hold, False
+                        k,
+                        h,
+                        0,
+                        j * hold_dt,
+                        hold_dt,
+                        policy.substeps_per_hold,
+                        False,
+                        (hold_dt / policy.substeps_per_hold,)
+                        * policy.substeps_per_hold,
                     )
                 )
             for substep in range(policy.substeps_per_hold):
@@ -379,15 +388,26 @@ def _impact_hold(
         _t: float, h: float, q_a: Array, v_a: Array, external: Any, *, trial: bool
     ) -> tuple:
         nonlocal segment
-        parts = max(1, int(np.ceil(policy.substeps_per_hold * h / hold_dt - 1e-9)))
+        sizes = fixed_substep_sizes(
+            h, hold_dt / policy.substeps_per_hold, max(0.0, _t - t)
+        )
+        parts = len(sizes)
         forced = plant if external is None else _ForcedPlant(plant, external)
         if recorder is not None and not trial:
             recorder.segment(
                 SegmentPlan(
-                    step_index, hold_index, segment, _t, h, parts, external is not None
+                    step_index,
+                    hold_index,
+                    segment,
+                    _t,
+                    h,
+                    parts,
+                    external is not None,
+                    sizes,
                 )
             )
-        for substep in range(parts):
+        offset = 0.0
+        for substep, sub_dt in enumerate(sizes):
             observe = (
                 None
                 if recorder is None or trial
@@ -396,11 +416,12 @@ def _impact_hold(
                     hold_index,
                     segment,
                     substep,
-                    _t + substep * h / parts,
+                    _t + offset,
                     tau,
                 )
             )
-            q_a, v_a = zoh_rk4_step(forced, q_a, v_a, tau, h / parts, observe=observe)  # type: ignore[arg-type]
+            q_a, v_a = zoh_rk4_step(forced, q_a, v_a, tau, sub_dt, observe=observe)  # type: ignore[arg-type]
+            offset += sub_dt
         if not trial:
             segment += 1
         return q_a, v_a, None
