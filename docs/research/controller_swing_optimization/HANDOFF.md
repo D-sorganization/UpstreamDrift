@@ -1665,3 +1665,32 @@ headless push hooks passed. The unchanged pinned modeled-address ball still
 starts 12.704 mm overlapped in exploratory v2 and remains unresolved for
 illustrative 10/100/1000 m/s bounds. This does not verify the bound, continuous
 trajectory or first contact; the oversized research branch is not a PR.
+
+A post-hoc FK decomposition on 15,733 valid marker samples replaced root
+components in saved full v2 rollout states with the fitted proxy's values.
+Unregulated source-target marker RMS was 269.65 mm; replacing only root
+translation gave 158.98 mm, only rotation 182.90 mm, both 20.52 mm, while
+the fitted proxy itself was 19.62 mm. For the existing regulator the same
+values were 234.60, 150.29, 147.56 and 20.33 mm. These counterfactuals are
+not additive, dynamically achieved trajectories or acceptance evidence;
+they isolate root/world motion as a dominant residual.
+
+A matched-grid source-v1 support audit used its own ground/gravity and COM
+Jacobian, finite differences at 473 interior 360 Hz samples, no impact.
+The hash-bound controller target had vector COM residual 1.013 bodyweights
+RMS (vertical 0.970, horizontal 0.291) and modeled normal-support median
+0.0807 bodyweights versus required-normal median 1.003. Saved feedback q/v
+interpolated to that same grid had vector residual 0.00525 bodyweights RMS.
+Source and v2 ground planes differ by about 0.258 mm; these are retrospective,
+model-dependent force estimates, not measured GRF, independent replay or
+proof of physiological impossibility. They indicate force inconsistency in
+the source target under its own model before v2 transfer.
+
+A two-basis compact-support Option B spline diagnostic used a 10.1 ms minimum
+break spacing and combined coefficient L2 9.804 N m under the same assumption-
+marked caps. A −3 N m subtalar coefficient starting after 50 ms preserved
+the first 1600 stage q/v exactly and changed first sampled modeled flag from
+stage 2087 to 2097, but retained ROM flags and clipping. Its extension hit a
+guard at 0.643 s with 26 ROM / 22 speed flags. The two-basis coefficient norm
+is parameterization-dependent and not equivalent to canonical knot insertion;
+no physical feasibility, continuous-path or improved-shot claim follows.
