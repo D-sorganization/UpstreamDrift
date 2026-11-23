@@ -1428,3 +1428,33 @@ The separate follow-imports mypy for this checkpoint subsequently completed
 successfully for the one source file. The private QP adapter was modified for
 logging after the initial full run, so its current hash is not that run's
 original script hash; its solve-success count remains unknown.
+
+A full 477-frame 3D support audit used native COM Jacobian velocity,
+finite-difference acceleration, and the six modeled normal/friction forces,
+excluding two endpoints. The kinematic target proxy had vertical RMS force
+residual 1.067 bodyweights, horizontal vector RMS 0.354 and combined 1.124;
+modeled support was zero for 93.66% of sampled interior states. Applying the
+same audit to its 1.322 s forward rollout gave vertical 0.000897, horizontal
+0.00714 and combined 0.00719 bodyweights RMS. These are assumed-ground model
+and finite-difference diagnostics, not measured forces or proof of physical
+impossibility.
+
+A coupled root-translation-only 3D support correction with numerical ±0.05 m
+bounds and smoothing stopped after 15 evaluations without convergence; its
+sampled force-balance RMS decreased 1.0097 to 0.00557 bodyweights, but
+optimality was 3.76. Its projected ideal-drive 1.322 s forward test completed
+42,304 stages yet source-target marker RMS worsened 269.65 to 293.27 mm and
+observed-marker RMS 270.35 to 293.90 mm. Root translation RMS against the
+original proxy rose 0.10587 to 0.11720 m; joint RMS was 0.01764 rad, modeled
+ROM excesses 3.87° / 8.98°, peak ideal drive 336.92 N m, minimum compliant
+foot sphere −22.72 mm. No impact, measured actuator force or physical
+admission was established; sampled COM balance alone did not fix the mismatch.
+
+A stage-constrained 41-coordinate Option B refinement under 10 N m trust and
+assumption-marked motor limits reduced a 20 ms RK4-stage modeled ROM overshoot
+from about 1.047e-5 to 2.16e-9 rad; a further numerical margin gave zero
+modeled ROM/speed flags at 640 recorded stages, with 608 stages clipped.
+The same candidate had 11 ROM flags and 1.2492 rad peak excess by 200 ms,
+and hit a guard at 1.050 s with divergent states. The later guard is not
+feasibility or improved carry. RK4 evaluation stages are not a continuous
+trajectory certificate, and 16/41 capacities remain unverified.
