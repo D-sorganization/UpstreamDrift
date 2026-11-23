@@ -159,7 +159,8 @@ def save_bundle_v2(bundle: SolutionBundle, directory: str | Path) -> Path:
         raise SolutionBundleError("invalid manifest") from exc
     path.mkdir(parents=True)
     archive = path / "arrays.npz"
-    np.savez(archive, **{k: np.asarray(v) for k, v in bundle.arrays.items()})
+    payload: dict[str, Any] = {k: np.asarray(v) for k, v in bundle.arrays.items()}
+    np.savez(archive, **payload)
     digest = hashlib.sha256(archive.read_bytes()).hexdigest()
     (path / "manifest.json").write_text(
         json.dumps(_manifest(bundle, digest), sort_keys=True, indent=2, allow_nan=False)
