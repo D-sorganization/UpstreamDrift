@@ -80,7 +80,7 @@ def _simulate_and_read_carry(widget: BallFlightWidget) -> float:
     """Click Simulate Flight, wait for the worker, return the displayed carry."""
     _click(_button(widget, "Simulate Flight"))
     assert _pump_until(lambda: "Carry:" in widget._results_text.toPlainText())
-    assert _pump_until(lambda: not widget.action_bar.is_running())
+    assert _pump_until(lambda: not widget.action_bar.is_running)
     match = _CARRY.search(widget._results_text.toPlainText())
     assert match, widget._results_text.toPlainText()
     return float(match.group(1))
@@ -119,11 +119,11 @@ def test_simulate_click_runs_real_physics_and_shows_results(
 
     _click(run_btn)
     # While the worker is in flight the trigger must be locked out.
-    assert widget.action_bar.is_running() or "Carry:" in (
+    assert widget.action_bar.is_running or "Carry:" in (
         widget._results_text.toPlainText()
     )
     assert _pump_until(lambda: "Carry:" in widget._results_text.toPlainText())
-    assert _pump_until(lambda: not widget.action_bar.is_running())
+    assert _pump_until(lambda: not widget.action_bar.is_running)
 
     text = widget._results_text.toPlainText()
     assert "Ball Flight Results" in text
