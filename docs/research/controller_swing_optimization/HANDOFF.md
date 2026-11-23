@@ -2344,7 +2344,7 @@ The old eight-substep result differed from the 32-substep run by up to 0.183
 in q and 1.93 in v, so its full-run state and gate counts are not reliable.
 Both refined runs had 712 sampled states with modeled ROM excess (peak right
 subtalar 1.106, left subtalar 3.561, soft lumbar 0.082 and wrist 0.447
-degrees), no sampled speed flags, and 234 samples exceeding assumed ideal
+degrees), no sampled speed flags, and 236 held commands exceeding assumed ideal
 command capacities (peak ratio 7.249, peak absolute command about 425.6 N m).
 This establishes a close sampled numerical comparison for this ideal controller
 and model, not actual saturated-motor, integration-stage, physical or contact
