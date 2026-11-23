@@ -201,6 +201,8 @@ class MainWidget(QtWidgets.QWidget):
         self.engine_picker.set_status(status)
         self.units_badge.set_engine(engine_name)
         self.joint_panel.set_limits(self._engine_controller.joint_limits_deg())
+        # The viewport must use the newly selected engine on its first redraw.
+        self.view_3d.set_service(self._engine_controller.service)
         self.view_3d.update_pose(self._engine_controller.pose)
 
     def _on_angle_edited(self, name: str, value_deg: float) -> None:
@@ -346,7 +348,7 @@ class MainWidget(QtWidgets.QWidget):
 
     def _report_file_failure(self, title: str, exc: Exception) -> None:
         """Surface a save/load failure to the user, not just to the log."""
-        logger.exception(title)
+        logger.error("%s: %s", title, exc)
         QtWidgets.QMessageBox.warning(self, title, f"{title}: {exc}")
 
     def confirm_close(self) -> bool:
