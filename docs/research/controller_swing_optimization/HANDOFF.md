@@ -31,8 +31,14 @@ modified. Preserve private inputs and their identifying provenance outside git.
   tracking, slew and work feasibility checks. A separate research primitive
   on `codex/15493-option-b-prototype` at `6aad831418` covers fixed PD,
   clamped cubic residual splines, coefficient trust bound and ideal clipping
-  of the total command; 14 focused tests passed. It does not provide slew,
-  work, physiological feasibility, an optimizer or actual actuator evidence.
+  of the total command; 14 focused tests passed. A later research checkpoint
+  `473e4df628` adds a caller-attested total-input ZOH work/update-rate audit
+  and distinguishes observed ideal input; 34 combined focused tests passed.
+  Work assumes linearly interpolated endpoint
+  velocities, the update-rate metric is not continuous ZOH slew, and prehistory
+  is unknown. Neither checkpoint establishes physiological feasibility, an
+  optimizer or actual actuator evidence. The combined branch exceeds the PR
+  size limit and is not a complete Slice 3 delivery.
 - [ ] **Slice 4:** Optimize power and straight flight through the existing
   pipeline, then independently replay and refine any qualified candidate.
 - [ ] **Slice 5:** Comparison and analysis CLI with baseline and candidate
@@ -306,6 +312,13 @@ replayed its recorded states exactly. Clipping affected 45 of 200 holds and
 stages, but tracking RMS rose to 0.44482 rad and 17 modeled ROM and three
 generalized-rate slots were exceeded. Sixteen capacity priors were assumed.
 This is not post-actuator evidence or physiological clearance.
+Bit-identical replays of both 200 ms cases recovered pre-projection hold-end
+velocities. Under left-ZOH ideal input and linear velocity interpolation,
+unclipped versus clipped modeled positive work was 32.48 versus 327.54 J;
+signed work was -5.40 versus 151.50 J. These are numerical quadratures, not
+measured actuator or clinical work. Work, effort and slew limits were not
+available; the clipped run remains indeterminate even though its modeled
+torque caps were met.
 A matched 32-substep run completed 0.7 s with approximately the same 1.431 rad
 tracking RMS as the 16-substep run. Their maximum coordinate difference grew
 from 1.13e-7 rad at 0.4 s to 0.109 rad at 0.7 s; resolution convergence is
