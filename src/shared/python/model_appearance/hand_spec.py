@@ -28,6 +28,7 @@ from src.shared.python.hand_size import (
     resolve_hand_length_m,
     validate_hand_length_m,
 )
+from src.shared.python.model_appearance.golfer_model_versions import warn_if_deprecated
 from src.shared.python.model_appearance.grip_pose import (
     DEFAULT_GRIP_POSE,
     GripPose,
@@ -76,6 +77,8 @@ def wrist_follower_dorsal_axis(
 
 #: Hands a spec can draw on the club (``subject.hand_visual_backend``): the
 #: capsule hands of ``grip_hand_mesh``, or the skinned human pair (#15251).
+#: The skinned pair is the current model; the capsule default is the
+#: deprecated fallback for unrevised specs (``golfer_model_versions``, #15648).
 HAND_VISUAL_BACKENDS = ("capsule", "skinned_human")
 DEFAULT_HAND_VISUAL_BACKEND = "capsule"
 
@@ -147,6 +150,7 @@ def resolved_hand_spec(spec_document: Mapping[str, Any]) -> ResolvedHandSpec:
         axis = wrist_follower_dorsal_axis(spec_document, hand, pose)
         if axis is not None:
             dorsal_axes[hand] = (float(axis[0]), float(axis[1]), float(axis[2]))
+    warn_if_deprecated(spec_document, "hand_visual_backend")
     return ResolvedHandSpec(
         pose=pose,
         hand_length_m=length,
