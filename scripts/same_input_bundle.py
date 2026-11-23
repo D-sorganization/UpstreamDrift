@@ -20,6 +20,9 @@ controller hold, #12279; default 1 ms).  ``replay`` integrates the bundle effort
 open loop in one engine and writes the full-horizon and segmented scores.
 ``closed-loop`` tracks the run's reference in one engine with the identical
 controller function and scores it against the bundle's MuJoCo reference.
+It also reports per-coordinate error against the actual controller position
+target. The tracking record must match the bundle's recorded digest; this
+binds the selected file but does not independently validate its provenance.
 """
 
 from __future__ import annotations
@@ -69,6 +72,61 @@ def _track(run_dir: Path) -> tuple[Path, np.ndarray, np.ndarray]:
         if "q_track" not in record:
             raise ValueError(f"{record_path} predates q_track; rerun the pipeline")
         return record_path, record["track_time_s"], record["q_track"]
+
+
+def target_tracking_summary(
+    track_time: np.ndarray,
+    q_track: np.ndarray,
+    rollout_time: np.ndarray,
+    rollout_q: np.ndarray,
+) -> dict:
+    """Compare sampled states with the actual linear controller position target.
+
+    Coordinates retain their native units; no mixed-unit aggregate is formed.
+    This measures sampled tracking error, not physiological feasibility.
+    """
+    from src.shared.python.motion_matching.impact_force import sample_rate_table
+
+    source_time, target = np.asarray(track_time, float), np.asarray(q_track, float)
+    time_s, q = np.asarray(rollout_time, float), np.asarray(rollout_q, float)
+    if (
+        source_time.ndim != 1
+        or source_time.size < 2
+        or target.ndim != 2
+        or target.shape[0] != source_time.size
+        or time_s.ndim != 1
+        or not time_s.size
+        or q.shape != (time_s.size, target.shape[1])
+        or not target.shape[1]
+        or not all(np.isfinite(a).all() for a in (source_time, target, time_s, q))
+        or np.any(np.diff(source_time) <= 0)
+        or np.any(np.diff(time_s) <= 0)
+    ):
+        raise ValueError(
+            "target and rollout must have finite, aligned, increasing samples"
+        )
+    with np.errstate(over="ignore", invalid="ignore"):
+        source_time = source_time - source_time[0]
+    if not np.isfinite(source_time).all():
+        raise ValueError("target time normalization overflowed")
+    if time_s[0] < 0 or time_s[-1] > source_time[-1]:
+        raise ValueError("rollout times must lie within the target span")
+    sampled = np.array(
+        [sample_rate_table(source_time, target, t, None) for t in time_s]
+    )
+    with np.errstate(over="ignore", invalid="ignore"):
+        error = q - sampled
+    if not np.isfinite(error).all():
+        raise ValueError("target tracking difference overflowed")
+    magnitude = np.max(np.abs(error), axis=0)
+    scale = np.where(magnitude == 0.0, 1.0, magnitude)
+    return {
+        "reference": "controller_position_target",
+        "rms_by_coordinate": (
+            scale * np.sqrt(np.mean((error / scale) ** 2, axis=0))
+        ).tolist(),
+        "max_abs_by_coordinate": magnitude.tolist(),
+    }
 
 
 def padded_track(spec_bytes: bytes, q_track: np.ndarray) -> np.ndarray:
@@ -221,14 +279,17 @@ def replay(bundle_path: Path, engine: str, segment_ms: float) -> dict:
 def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
     """Score a closed-loop run in ``engine`` against the bundle reference."""
     bundle = InputBundle.load(bundle_path)
-    _, times, q_track = _track(run_dir)
+    record_path, times, q_track = _track(run_dir)
+    if _sha256(record_path) != bundle.provenance.get("dynamics_record_sha256"):
+        raise ValueError("tracking record does not match bundle provenance")
+    target = padded_track(bundle.spec_bytes, q_track)
     impact = bundle.ball_impact()
     started = time.perf_counter()
     rollout = closed_loop(
         engine,
         bundle.spec_bytes,
         times,
-        padded_track(bundle.spec_bytes, q_track),
+        target,
         duration_s=bundle.steps * bundle.dt_s,
         impact=None if impact is None else impact.rearmed(),
         split_time_s=bundle.provenance.get("impact_split_time_s"),
@@ -245,6 +306,10 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
         "engine": engine,
         "elapsed_s": elapsed,
         "full_horizon": score.summary(),
+        "target_tracking": {
+            "coordinate_order": bundle.coordinate_order,
+            **target_tracking_summary(times, target, rollout.time_s, rollout.q),
+        },
         "max_effort_difference_nm": float(
             np.abs(rollout.efforts - bundle.replay_efforts()).max()
         ),
@@ -306,7 +371,7 @@ def main() -> None:
         receipt = replay(args.bundle, args.engine, args.segment_ms)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
-    np.savez_compressed(args.out.with_suffix(".npz"), **_STATES)
+    np.savez_compressed(args.out.with_suffix(".npz"), **_STATES)  # type: ignore[arg-type]  # NumPy's named-array stub
     LOG.info("%s: %s", args.engine, json.dumps(receipt["full_horizon"]))
     if "worst_segment" in receipt:
         LOG.info("worst %g ms segment: %s", args.segment_ms, receipt["worst_segment"])

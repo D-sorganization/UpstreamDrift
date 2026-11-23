@@ -1,0 +1,18 @@
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+\section*{Controller Target Tracking Audit}
+At rollout time $t_i$, the controller target $r_j(t_i)$ is the linear
+interpolant of the recorded position track for coordinate $j$ on the same
+relative time axis. The reported sampled residual is $e_{ij}=q_{ij}-r_j(t_i)$.
+For $N$ samples, the reported values are
+\[
+ R_j=\sqrt{N^{-1}\sum_{i=1}^{N} e_{ij}^2},\qquad
+ M_j=\max_i |e_{ij}|.
+\]
+Coordinates keep their native units and are reported in model order; no mixed
+translation--rotation aggregate is defined. Only finite, increasing and
+covered time axes are accepted. The record digest must agree with the bundle
+provenance. This comparison does not establish data provenance, correct model
+migration, continuity between samples, actuator feasibility or impact.
+\end{document}

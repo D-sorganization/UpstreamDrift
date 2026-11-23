@@ -4,11 +4,17 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
 
-from scripts.same_input_bundle import build_parser, padded_track, shaft_inputs
+from scripts.same_input_bundle import (
+    build_parser,
+    padded_track,
+    shaft_inputs,
+    target_tracking_summary,
+)
 from src.shared.python.motion_matching.same_input import (
     ALL_ENGINES,
     OPTIONAL_ENGINES,
@@ -16,6 +22,101 @@ from src.shared.python.motion_matching.same_input import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+def test_target_tracking_is_measured_against_interpolated_controller_reference() -> (
+    None
+):
+    times = np.array([10.0, 11.0, 12.0])
+    target = np.array([[0.0, 0.0], [2.0, 4.0], [4.0, 8.0]])
+    actual = np.array([[0.0, 0.0], [1.0, 2.5], [2.0, 4.0]])
+    summary = target_tracking_summary(times, target, np.array([0.0, 0.5, 1.0]), actual)
+    assert summary["rms_by_coordinate"] == pytest.approx([0.0, np.sqrt(0.25 / 3)])
+    assert summary["max_abs_by_coordinate"] == pytest.approx([0.0, 0.5])
+    assert summary["reference"] == "controller_position_target"
+
+
+@pytest.mark.parametrize("run_times", [np.array([0.0, 2.1]), np.array([0.0, np.nan])])
+def test_target_tracking_rejects_uncovered_or_nonfinite_rollout_times(
+    run_times,
+) -> None:
+    with pytest.raises(ValueError):
+        target_tracking_summary(
+            np.array([4.0, 6.0]), np.zeros((2, 1)), run_times, np.zeros((2, 1))
+        )
+
+
+def test_closed_loop_refuses_an_unbound_tracking_record(monkeypatch, tmp_path) -> None:
+    from scripts import same_input_bundle as cli
+
+    bundle = SimpleNamespace(provenance={"dynamics_record_sha256": "not-the-record"})
+    monkeypatch.setattr(cli.InputBundle, "load", lambda _: bundle)
+    record = tmp_path / "record.npz"
+    record.write_bytes(b"different record")
+    monkeypatch.setattr(
+        cli, "_track", lambda _: (record, np.arange(2.0), np.zeros((2, 1)))
+    )
+    monkeypatch.setattr(
+        cli, "closed_loop", lambda *a, **k: pytest.fail("must reject before simulating")
+    )
+    with pytest.raises(ValueError, match="tracking record"):
+        cli.closed_loop_receipt(tmp_path, tmp_path / "bundle.npz", "mujoco")
+
+
+def test_closed_loop_reports_target_and_rollout_scores_separately(
+    monkeypatch, tmp_path
+) -> None:
+    from scripts import same_input_bundle as cli
+
+    record = tmp_path / "record.npz"
+    record.write_bytes(b"bound reference")
+    bundle_path = tmp_path / "bundle.npz"
+    bundle_path.write_bytes(b"bundle")
+    bundle = SimpleNamespace(
+        provenance={"dynamics_record_sha256": cli._sha256(record)},
+        spec_bytes=b"{}",
+        steps=1,
+        dt_s=1.0,
+        coordinate_order=("joint",),
+        ball_impact=lambda: None,
+        step_policy=lambda: None,
+        manifest=dict,
+        replay_efforts=lambda: np.zeros((1, 1)),
+    )
+    rollout = SimpleNamespace(
+        time_s=np.array([0.0, 1.0]),
+        q=np.array([[0.0], [1.0]]),
+        efforts=np.zeros((1, 1)),
+        pose_drift=np.zeros(1),
+    )
+    monkeypatch.setattr(cli.InputBundle, "load", lambda _: bundle)
+    monkeypatch.setattr(
+        cli,
+        "_track",
+        lambda _: (record, np.array([5.0, 6.0]), np.array([[0.0], [2.0]])),
+    )
+    monkeypatch.setattr(cli, "padded_track", lambda _, q: q)
+    monkeypatch.setattr(cli, "closed_loop", lambda *a, **k: rollout)
+    monkeypatch.setattr(cli, "VectorPlant", lambda *a: None)
+    monkeypatch.setattr(
+        cli,
+        "score_replay",
+        lambda *a: SimpleNamespace(summary=lambda: {"max_coordinate_error_rad": 0.0}),
+    )
+    result = cli.closed_loop_receipt(tmp_path, bundle_path, "mujoco")
+    assert result["full_horizon"]["max_coordinate_error_rad"] == 0.0
+    assert result["target_tracking"]["max_abs_by_coordinate"] == [1.0]
+    assert result["target_tracking"]["coordinate_order"] == ("joint",)
+
+
+def test_target_tracking_rms_does_not_overflow_for_finite_values() -> None:
+    result = target_tracking_summary(
+        np.array([0.0, 1.0]),
+        np.zeros((2, 1)),
+        np.array([0.0, 1.0]),
+        np.full((2, 1), 1e200),
+    )
+    assert result["rms_by_coordinate"] == pytest.approx([1e200])
 
 
 def test_all_engines_lists_core_then_optional() -> None:
