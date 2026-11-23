@@ -159,7 +159,7 @@ Partial, reduced-model, and strength-limited outcomes do not satisfy G3 release.
 | **G2: Dynamic Ground Support** | Whole marker RMSE $\le 40$ mm (`g2_whole_rmse_m`); GRF, penetration, support polygon | ❌ Failed (51.2 mm > 40 mm) | ❌ Failed (26.8 mm > 40 mm) | ❌ Failed (0.0 mm > 40 mm) | ❌ Failed (78.5 mm > 40 mm) | ❌ Failed (20.3 mm > 40 mm) | ❌ Failed (185.7 mm > 40 mm) | **In Progress** |
 | **G3: Professional Release** | Driver whole swing $\le 60$ mm (`g3_whole_driver_rmse_m`); dual-club all six engines | ❌ Failed (51.2 mm > 60 mm) | ❌ Failed (26.8 mm > 60 mm) | ❌ Failed (0.0 mm > 60 mm) | ❌ Failed (78.5 mm > 60 mm) | ❌ Failed (20.3 mm > 60 mm) | ❌ Failed (185.7 mm > 60 mm) | **Open (Blocks Release)** |
 
-#### Historical (superseded widened-bound receipts)
+#### Historical (Superseded Widened-Bound Receipts)
 
 Pre-HO-8 MuJoCo tour-driver receipts under widened leg bounds recorded **27.3 mm** IK and **74.6 mm** dynamics RMS. Those figures used non-current bounds and RoM violations (#11044); they **do not** pass today's `AcceptanceGates` and must not appear as active Passed ladder cells. See `anthro_driver_shoot_g025/receipt.json` and README evidence prose above the generated fence.
 

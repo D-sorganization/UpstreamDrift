@@ -317,7 +317,7 @@ def _aggregate_gate_status(cells: list[str], *, horizon: Horizon) -> str:
 def _render_historical_superseded_note() -> list[str]:
     return [
         "",
-        "#### Historical (superseded widened-bound receipts)",
+        "#### Historical (Superseded Widened-Bound Receipts)",
         "",
         "Pre-HO-8 MuJoCo tour-driver receipts under widened leg bounds recorded "
         "**27.3 mm** IK and **74.6 mm** dynamics RMS. Those figures used "
