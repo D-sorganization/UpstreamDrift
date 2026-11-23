@@ -164,6 +164,8 @@ class ResultsSession:
         self._scene_xml: str | None = None
         #: behind-view anchor from :meth:`prepare_scene` (``None``: preset view)
         self._behind_anchor: tuple[float, float, float] | None = None
+        #: Shot card summary from :meth:`prepare_scene` (``None``: not built)
+        self._shot_summary: Any | None = None
 
     @classmethod
     def load(cls, path: str | Path, engine: str | None = None) -> ResultsSession:
@@ -234,7 +236,7 @@ class ResultsSession:
         self._current_frame = index
 
     def prepare_scene(self) -> None:
-        """Build the golfer scene and behind-view anchor now (slow, GL-free).
+        """Build the golfer scene, behind-view anchor and shot now (slow, GL-free).
 
         :meth:`playback` then only creates the renderer. ``ValueError`` for a
         marker archive.
@@ -251,6 +253,15 @@ class ResultsSession:
 
             self._scene_xml = build_golfer_scene_xml(pose)
             self._behind_anchor = behind_anchor_for(pose)
+        if self._shot_summary is None:
+            from src.tools.model_explorer import shot_card_rows
+
+            self._shot_summary = shot_card_rows.summary_for_path(self.path)
+
+    @property
+    def shot_summary(self) -> Any | None:
+        """The Shot card summary :meth:`prepare_scene` evaluated, or ``None``."""
+        return self._shot_summary
 
     def playback(self) -> Any:
         """The shared :class:`GolferPlayback` of a joint-space run (lazy).
