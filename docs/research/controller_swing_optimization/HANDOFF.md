@@ -447,3 +447,11 @@ and observed process working set approximately 598 MB. This is not an admitted
 best-match baseline or an independent-runtime replay; the fingerprint is
 partial. It establishes neither actuator torque nor impact/contact or flight
 validation. Bundle research checkpoint: `09e5a6647a`.
+
+Numerical fitting research branch `codex/15493-infinite-bounds-research`
+checkpoint `9802796bd9` supports correctly signed infinite bounds in the
+existing equality least-squares solver without inventing finite limits.
+It rejects invalid infinities and overflow; unknown bounds remain unknown and
+are not a physical feasibility pass. Fifty-five focused cases, Ruff, Black,
+scoped mypy and the normal headless pre-push hooks passed. This is a research
+checkpoint, not a Slice 1 PR.
