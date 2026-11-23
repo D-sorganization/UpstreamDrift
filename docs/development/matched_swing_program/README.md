@@ -155,9 +155,9 @@ Partial, reduced-model, and strength-limited outcomes do not satisfy G3 release.
 
 | Gate | Criterion | MuJoCo | Pinocchio | Drake | OpenSim | Simscape | MyoSuite | Gate Status |
 |---|---|---|---|---|---|---|---|---|
-| **G1: Kinematic Fit** | Whole marker RMSE $\le 25$ mm (`g1_whole_rmse_m`); contact & integrity gates via `evaluate()` | ❌ Failed (51.2 mm > 25 mm) | ❌ Failed (26.8 mm > 25 mm) | ❌ Failed (0.0 mm > 25 mm) | ❌ Failed (78.5 mm > 25 mm) | ❌ Failed (20.3 mm > 25 mm) | ❌ Failed (185.7 mm > 25 mm) | **G1 Milestone Active** |
-| **G2: Dynamic Ground Support** | Whole marker RMSE $\le 40$ mm (`g2_whole_rmse_m`); GRF, penetration, support polygon | ❌ Failed (51.2 mm > 40 mm) | ❌ Failed (26.8 mm > 40 mm) | ❌ Failed (0.0 mm > 40 mm) | ❌ Failed (78.5 mm > 40 mm) | ❌ Failed (20.3 mm > 40 mm) | ❌ Failed (185.7 mm > 40 mm) | **In Progress** |
-| **G3: Professional Release** | Driver whole swing $\le 60$ mm (`g3_whole_driver_rmse_m`); dual-club all six engines | ❌ Failed (51.2 mm > 60 mm) | ❌ Failed (26.8 mm > 60 mm) | ❌ Failed (0.0 mm > 60 mm) | ❌ Failed (78.5 mm > 60 mm) | ❌ Failed (20.3 mm > 60 mm) | ❌ Failed (185.7 mm > 60 mm) | **Open (Blocks Release)** |
+| **G1: Kinematic Fit** | Whole marker RMSE $\le 25$ mm (`g1_whole_rmse_m`); contact & integrity gates via `evaluate()` | ❌ Failed (51.2 mm > 25 mm) | ❌ Failed (26.8 mm > 25 mm) | ❌ Failed (capture_provenance) | ❌ Failed (78.5 mm > 25 mm) | ❌ Failed (terminal_marker_rmse_m) | ❌ Failed (185.7 mm > 25 mm) | **G1 Milestone Active** |
+| **G2: Dynamic Ground Support** | Whole marker RMSE $\le 40$ mm (`g2_whole_rmse_m`); GRF, penetration, support polygon | ❌ Failed (51.2 mm > 40 mm) | ❌ Failed (terminal_marker_rmse_m) | ❌ Failed (capture_provenance) | ❌ Failed (78.5 mm > 40 mm) | ⚠️ Unverified (max_normal_force_n missing) | ❌ Failed (185.7 mm > 40 mm) | **In Progress** |
+| **G3: Professional Release** | Driver whole swing $\le 60$ mm (`g3_whole_driver_rmse_m`); dual-club all six engines | ❌ Failed (max_normal_force_n) | ❌ Failed (pelvis_yaw_error_pct) | ❌ Failed (capture_provenance) | ❌ Failed (78.5 mm > 60 mm) | ⚠️ Unverified (max_normal_force_n missing) | ❌ Failed (185.7 mm > 60 mm) | **Open (Blocks Release)** |
 
 #### Historical (Superseded Widened-Bound Receipts)
 

@@ -285,16 +285,29 @@ def _format_ladder_engine_cell(
     if verdict is None:
         return "🔄 In Progress" if saw_engine_rows else "⏳ Pending"
     whole_m = _whole_marker_rmse_m(verdict)
-    whole_mm = whole_m * 1000.0 if whole_m is not None else None
-    thr_mm = whole_threshold_m * 1000.0
     if verdict.is_physically_accepted:
-        if whole_mm is None:
+        if whole_m is None:
             return "✅ Passed"
-        return f"✅ Passed ({whole_mm:.1f} mm)"
-    if whole_mm is not None:
-        return f"❌ Failed ({whole_mm:.1f} mm > {thr_mm:.0f} mm)"
-    if any(g.status == GateStatus.MISSING for g in verdict.gates):
-        return "⚠️ Unverified"
+        return f"✅ Passed ({whole_m * 1000.0:.1f} mm)"
+    # Rejected: report the gate that actually caused it. A numeric '>' comparison
+    # is emitted only when the whole-RMSE gate itself failed on a measured value,
+    # using that gate's own threshold (falling back to the ladder default).
+    for gate in verdict.gates:
+        if (
+            gate.name == "whole_marker_rmse_m"
+            and gate.status == GateStatus.FAILED
+            and gate.measured is not None
+        ):
+            thr_m = gate.threshold if gate.threshold is not None else whole_threshold_m
+            return (
+                f"❌ Failed ({gate.measured * 1000.0:.1f} mm > {thr_m * 1000.0:.0f} mm)"
+            )
+    failed = next((g for g in verdict.gates if g.status == GateStatus.FAILED), None)
+    if failed is not None:
+        return f"❌ Failed ({failed.name})"
+    missing = next((g for g in verdict.gates if g.status == GateStatus.MISSING), None)
+    if missing is not None:
+        return f"⚠️ Unverified ({missing.name} missing)"
     return "❌ Failed"
 
 
