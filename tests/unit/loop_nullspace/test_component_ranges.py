@@ -46,10 +46,64 @@ def _by_name(report):
 
 
 def test_invariant_narrow_and_variable_are_separated():
-    comps = _by_name(_classify())
+    comps = _by_name(_classify(feasible_bounds={"wrist_torque": (19.99, 20.05)}))
     assert comps["net_force"]["classification"] == "MODEL_INVARIANT"
     assert comps["wrist_torque"]["classification"] == "PRIOR_CONSTRAINED_NARROW"
     assert comps["hand_split"]["classification"] == "VARIABLE"
+
+
+def test_small_sampled_spread_in_broad_prior_is_not_prior_constrained():
+    # Codex FIX-NEEDED on #15611: two nearby samples in a 100 N prior say
+    # nothing about the feasible interval, so no causal label may be given.
+    report = classify_component_ranges(
+        [[[50.0]], [[50.01]]],
+        names=["force"],
+        units=["N"],
+        atols=[1e-9],
+        prior_bounds={"force": (0.0, 100.0)},
+    )
+    comp = report["components"][0]
+    assert comp["classification"] == "SAMPLED_SMALL_SPREAD"
+    assert comp["classification_by_atol"] == ["SAMPLED_SMALL_SPREAD"]
+
+
+def test_small_spread_without_any_prior_is_variable():
+    comp = classify_component_ranges(
+        [[[50.0]], [[50.01]]], names=["f"], units=["N"], atols=[1e-9]
+    )["components"][0]
+    assert comp["classification"] == "VARIABLE"
+
+
+def test_wide_feasible_bounds_do_not_earn_the_narrow_label():
+    comps = _by_name(_classify(feasible_bounds={"wrist_torque": (0.0, 100.0)}))
+    assert comps["wrist_torque"]["classification"] == "SAMPLED_SMALL_SPREAD"
+
+
+@pytest.mark.parametrize(
+    "bounds, match",
+    [
+        ({"wrist_torque": (20.5, 21.0)}, "outside"),  # samples escape it
+        ({"wrist_torque": (21.0, 19.0)}, "lo < hi"),
+        ({"wrist_torque": (19.0, float("inf"))}, "lo < hi"),
+        ({"nope": (0.0, 1.0)}, "unknown"),
+    ],
+)
+def test_bad_feasible_bounds_are_rejected(bounds, match):
+    with pytest.raises(ValueError, match=match):
+        _classify(feasible_bounds=bounds)
+
+
+def test_feasible_bounds_must_sit_inside_the_prior():
+    with pytest.raises(ValueError, match="prior"):
+        _classify(
+            prior_bounds={"wrist_torque": (19.0, 21.0)},
+            feasible_bounds={"wrist_torque": (18.0, 20.5)},
+        )
+
+
+def test_feasible_bounds_require_a_prior_to_judge_narrowness():
+    with pytest.raises(ValueError, match="prior"):
+        _classify(prior_bounds={}, feasible_bounds={"wrist_torque": (19.9, 20.1)})
 
 
 def test_ranges_and_width_match_numpy_oracle():
@@ -74,7 +128,11 @@ def test_declared_invariant_that_moves_is_reported_violated():
 
 def test_tolerance_dependence_is_flagged():
     # wrist spread is 0.02: unmoved at 0.05, moving at 1e-9.
-    report = _classify(atols=(1e-9, 0.05), declared_invariant=("net_force",))
+    report = _classify(
+        atols=(1e-9, 0.05),
+        declared_invariant=("net_force",),
+        feasible_bounds={"wrist_torque": (19.99, 20.05)},
+    )
     wrist = _by_name(report)["wrist_torque"]
     assert wrist["classification_by_atol"] == [
         "PRIOR_CONSTRAINED_NARROW",
