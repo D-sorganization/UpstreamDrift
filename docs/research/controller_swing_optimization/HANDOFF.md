@@ -1899,3 +1899,19 @@ physical placement; and extract small, sequential Slice 1 changes against the
 current main and existing open work. Keep the prescribed-launch flight tests
 separate from the unqualified swing-to-impact path. Related Slice A remains
 blocked on admission of the same physically qualified two-handed baseline.
+
+A 477-frame support-preloaded fit used the existing six compliant ground
+spheres and no direct root drive. Sparse directional Jacobian errors were
+5.6e-7 to 6.7e-7 relative. At its 254 s budget it had not converged: linear
+balance residual decreased from 1.010 to 0.671 body weights RMS and angular
+residual from 109.6 to 60.2 N m RMS relative to the preloaded initial guess,
+while proxy marker RMS increased from 19.62 to 20.18 mm. An independent 1.322 s
+ideal-drive rollout under the identical baseline-derived initial state finished
+without a numerical failure but worsened source-target marker RMS from 268.43
+to 284.68 mm, observed-marker RMS from 269.13 to 285.32 mm, root translation
+RMS from 0.1057 to 0.1101 m and root rotation RMS from 0.1428 to 0.1557 rad.
+Peak unsaturated ideal drive rose from 383.8 to 556.6 N m; both rollouts had
+two modeled ROM flags. No measured ground reaction, motor saturation, impact,
+or verified speed and torque gates were included. Reject this fit as a
+baseline improvement; improved fitted balance alone did not predict improved
+forward tracking.
