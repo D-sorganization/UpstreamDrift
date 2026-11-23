@@ -11,6 +11,7 @@ cannot silently change the Simscape refusal's premise.
 from __future__ import annotations
 
 import re
+import xml.etree.ElementTree as ET  # noqa: S405 - committed model, not untrusted
 import zipfile
 from pathlib import Path
 
@@ -48,8 +49,23 @@ def _block_xml(name: str) -> str:
     raise AssertionError(f"{name!r} block not found in {MODEL.name}")
 
 
+def _commented_state(block: str) -> str:
+    """Return the block's own ``Commented`` value (``off`` when absent).
+
+    Only direct ``<P>`` children count, so a nested block's property is not
+    mistaken for the subsystem's.  Simulink values are ``on``, ``off`` and
+    ``through``; both ``on`` and ``through`` bypass the subsystem.
+    """
+    element = ET.fromstring(block)  # noqa: S314 - committed model, not untrusted
+    for prop in element.findall("P"):
+        if prop.get("Name") == "Commented":
+            return (prop.text or "").strip().lower()
+    return "off"
+
+
 def _is_commented(block: str) -> bool:
-    return '<P Name="Commented">on</P>' in block
+    """True when the block is bypassed (``on`` or ``through``)."""
+    return _commented_state(block) != "off"
 
 
 def test_flexible_beam_is_present_but_commented_out() -> None:
@@ -58,6 +74,18 @@ def test_flexible_beam_is_present_but_commented_out() -> None:
 
 def test_rigid_shaft_is_the_active_club_body() -> None:
     assert not _is_commented(_block_xml(RIGID))
+
+
+@pytest.mark.parametrize("state", ["on", "through"])
+def test_rigid_shaft_guard_rejects_any_bypass_state(state: str) -> None:
+    block = _block_xml(RIGID)
+    opening = re.match(r"<Block[^>]*>", block)
+    assert opening is not None
+    mutated = (
+        opening.group(0) + f'<P Name="Commented">{state}</P>' + block[opening.end() :]
+    )
+    assert mutated != block
+    assert _is_commented(mutated)
 
 
 def test_simscape_stays_outside_the_chain_engines() -> None:
