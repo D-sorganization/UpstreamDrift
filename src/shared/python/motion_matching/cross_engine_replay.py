@@ -279,11 +279,12 @@ class CrossEngineComparisonReport:
                 if eng in {"mujoco", "drake", "pinocchio"}
                 else ComparisonClass.NATIVE_MODEL_OBSERVABLE_AGREEMENT
             )
-            metrics = (
-                outcome.shared_metrics.as_dict()
-                if outcome.shared_metrics is not None
-                else None
-            )
+            metrics: dict[str, float] | None = None
+            if outcome.shared_metrics is not None:
+                raw = outcome.shared_metrics.as_dict()
+                metrics = {
+                    key: float(val) for key, val in raw.items() if val is not None
+                }
             pt_diffs = dict(pointwise_by_engine.get(eng, {}))
             rows[eng] = EngineParityRow(
                 engine=eng,
@@ -391,7 +392,11 @@ def _compute_pairwise_diffs(
             dict_b = b.shared_metrics.as_dict()
             pair_diffs: dict[str, float] = {}
             for k in metric_keys:
-                diff_val = abs(dict_a[k] - dict_b[k])
+                val_a = dict_a.get(k)
+                val_b = dict_b.get(k)
+                if val_a is None or val_b is None:
+                    continue
+                diff_val = abs(float(val_a) - float(val_b))
                 pair_diffs[f"{k}_diff"] = diff_val
                 if "marker" in k:
                     max_diff = max(max_diff, diff_val)
