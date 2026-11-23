@@ -81,9 +81,11 @@ def _check_plan(bundle: SolutionBundle, recorder: StageRecorder) -> None:
             raise ValueError("stage and recorded state mismatch")
         for stage in step.stages:
             hold = index * plan.effort_holds + stage.hold
-            if not np.array_equal(
-                stage.tau, a["ideal_input_tau"][hold]
-            ) or not np.array_equal(stage.applied_drive, a["ideal_input_tau"][hold]):
+            if (
+                not np.array_equal(stage.tau, a["ideal_input_tau"][hold])
+                or stage.applied_drive is None
+                or not np.array_equal(stage.applied_drive, a["ideal_input_tau"][hold])
+            ):
                 raise ValueError("stage and held ideal drive mismatch")
     impact = bundle.manifest["impact"]
     if impact["status"] == "recorded_latched_force":
