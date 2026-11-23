@@ -119,8 +119,14 @@ def _validate_arrays(bundle: SolutionBundle) -> None:
             raise SolutionBundleError(f"{name} contains non-finite values")
     # Compare neighbours directly: np.diff wraps for unsigned/extreme integers.
     time, knots = np.asarray(arrays["time"]), np.asarray(arrays["knots"])
+    if time.size < 2:
+        raise SolutionBundleError("time must contain at least two samples")
     if np.any(time[1:] <= time[:-1]):
         raise SolutionBundleError("time must be strictly increasing")
+    if not time[0] <= bundle.impact_event["t"] <= time[-1]:
+        raise SolutionBundleError(
+            "impact_event.t must lie within the recorded time interval"
+        )
     if np.any(knots[1:] < knots[:-1]):
         raise SolutionBundleError("knots must be nondecreasing")
 
@@ -201,6 +207,10 @@ def _manifest(bundle: SolutionBundle, digest: str) -> dict[str, Any]:
 
 def save_solution_bundle(bundle: SolutionBundle, directory: str | Path) -> Path:
     """Validate ``bundle`` and write it to a new ``directory``.
+
+    The recorded timebase must span at least one interval and contain the
+    impact time, including endpoints. This establishes temporal support only;
+    it does not qualify a contact root or forward-dynamics replay.
 
     Raises:
         SolutionBundleError: invalid bundle, or ``directory`` already exists.
