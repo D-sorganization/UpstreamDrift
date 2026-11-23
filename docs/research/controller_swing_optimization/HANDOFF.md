@@ -821,3 +821,18 @@ For that one perturbation, PD feedback dotted with the residual was negative
 at 200 of the first 201 held samples; this is one unadmitted direction, not
 proof that reference shifts are safe or generally beneficial. Neither run is
 physical feasibility, optimization or carry evidence.
+
+Under the original assumption-marked model envelope, the change in PD feedback
+between the 1 N m residual and zero-residual runs opposed the spline residual
+at 200 of 201 held samples through 0.2 s (mean incremental dot product
+−0.03265 N²m²). Total feedback itself was mostly aligned because the
+baseline tracking error was already large; these are different quantities.
+A predeclared diagnostic then applied ±0.01 rad coefficient-L2 reference
+shifts in the residual spline direction, with analytic velocity derivatives
+from the same spline, fixed gains 3/0.3 and unchanged caps. Both shifted runs
+hit the numerical guard at 0.265 s, as did the unshifted residual. On the
+common 250 ms prefix, tracking RMS against the original reference was
+0.536550, 0.536446 and 0.536655 rad for unshifted, positive and negative
+shift; all had 20 modeled ROM flags, five speed flags and 1632 clipped stages
+of 8000. This single-direction diagnostic establishes neither meaningful
+feasibility nor power improvement and does not qualify the reference.
