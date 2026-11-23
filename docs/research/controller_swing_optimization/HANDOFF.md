@@ -2362,3 +2362,10 @@ nor the target-state difference is pure open-loop feedforward or isolated
 feedback. The results motivate checking both reference dynamics and state/
 contact coupling; they do not identify a single cause or justify changing
 physiological capacities.
+
+Research checkpoint `codex/15493-face-geometry34` at `287d644490` extracts
+finite-face triangles using the existing rendered mesh mask, seating and
+frame transforms. It rejects invalid or unrelated geometry and makes no
+contact/admission decision. Thirty-nine focused tests and normal push hooks
+passed; 149 lines were added and no PR was opened. Initial ball/face overlap,
+approaching first-root coverage and end-to-end event verification remain open.
