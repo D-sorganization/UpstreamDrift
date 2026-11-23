@@ -46,6 +46,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from typing import cast
 
 from PyQt6.QtGui import QCloseEvent, QFont
 from PyQt6.QtWidgets import (
@@ -91,7 +92,7 @@ class StartingPoseMatcher(QMainWindow):
         self._main_widget = MainWidget(self)
         self.setCentralWidget(self._main_widget)
 
-    def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802
+    def closeEvent(self, event: QCloseEvent | None) -> None:  # noqa: N802
         """Stop playback and release embedded resources on standalone close."""
         if self._main_widget.is_playing:
             self._main_widget._toggle_play()
@@ -122,7 +123,7 @@ def get_dockable_ui() -> QMainWindow:
 
 
 def main() -> int:
-    app = QApplication.instance() or QApplication(sys.argv)
+    app = cast(QApplication, QApplication.instance() or QApplication(sys.argv))
     if "Fusion" in QStyleFactory.keys():
         app.setStyle("Fusion")
     app.setStyleSheet(_QSS)
