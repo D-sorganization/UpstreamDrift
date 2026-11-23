@@ -556,6 +556,7 @@ def test_off_grid_recorded_force_replays_actual_impact_state(tmp_path):
     from src.shared.python.motion_matching.same_input.integrator import ROOT_COORDINATES
     from src.shared.python.motion_matching.same_input.solution_bundle_mujoco_replay import (
         measured_runtime_fingerprint,
+        run_mujoco_ideal_with_trace,
     )
     from src.shared.python.motion_matching.same_input.solution_bundle_prototype import (
         run_mujoco_ideal,
@@ -624,6 +625,22 @@ def test_off_grid_recorded_force_replays_actual_impact_state(tmp_path):
         "spline_scale": np.ones(n),
     }
     actual = run_mujoco_ideal(SolutionBundle(manifest, arrays, model))
+    traced, recorder = run_mujoco_ideal_with_trace(
+        SolutionBundle(manifest, arrays, model)
+    )
+    np.testing.assert_array_equal(actual.q, traced.q)
+    np.testing.assert_array_equal(actual.qd, traced.qd)
+    assert recorder.outcome.status == "complete"
+    assert any(
+        np.linalg.norm(stage.applied_external) > 0
+        for step in recorder.steps
+        for stage in step.stages
+    )
+    assert all(
+        stage.effort_semantics == "ideal_direct_generalized_no_saturation"
+        for step in recorder.steps
+        for stage in step.stages
+    )
     assert actual.impact_event is not None and actual.impact_event[0] == dt / 4
     assert np.any(
         actual.impact_event[2] != 0.0

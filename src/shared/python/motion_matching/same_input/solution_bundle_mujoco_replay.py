@@ -35,6 +35,8 @@ from src.shared.python.motion_matching.same_input.solution_bundle_prototype impo
     Playback,
     SolutionBundle,
 )
+from src.shared.python.motion_matching.same_input import stage_trace
+from src.shared.python.motion_matching.same_input.stage_trace import StageRecorder
 
 
 def measured_runtime_fingerprint() -> str:
@@ -55,6 +57,7 @@ def measured_runtime_fingerprint() -> str:
         native_mjcf,
         club_shaft_chain,
         solution_bundle_prototype,
+        stage_trace,
         impact_force,
         ball_impact,
     )
@@ -93,6 +96,23 @@ def measured_runtime_fingerprint() -> str:
 
 def run_mujoco_ideal(bundle: SolutionBundle) -> Playback:
     """Reintegrate supported ideal-direct input and return actual grid records."""
+    return _run_mujoco_ideal(bundle, None)
+
+
+def run_mujoco_ideal_with_trace(
+    bundle: SolutionBundle,
+) -> tuple[Playback, StageRecorder]:
+    """Reintegrate and observe accepted stage ideal inputs, not actuator torque."""
+    recorder = StageRecorder(capture_ideal_drive=True)
+    playback = _run_mujoco_ideal(bundle, recorder)
+    if recorder.outcome is None or recorder.outcome.status != "complete":
+        raise ValueError("ideal drive stage trace is incomplete")
+    return playback, recorder
+
+
+def _run_mujoco_ideal(
+    bundle: SolutionBundle, recorder: StageRecorder | None
+) -> Playback:
     b = SolutionBundle(bundle.manifest, bundle.arrays, bundle.model_bytes)
     m, a = b.manifest, b.arrays
     policy = m["runner"]
@@ -222,6 +242,7 @@ def run_mujoco_ideal(bundle: SolutionBundle) -> Playback:
         ),
         impact=impact,
         impact_event_observer=observe_event if impact is not None else None,
+        recorder=recorder,
     )
     if rollout.failure is not None or not np.array_equal(
         rollout.efforts, np.asarray(ideal_inputs)

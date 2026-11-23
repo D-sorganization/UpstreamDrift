@@ -36,6 +36,11 @@ only a declared subset of source and binaries, not the full environment; it is
 not an exact reproducibility guarantee. The recorded Git SHA is caller-asserted
 and is not checked against a clean running checkout. The stored `ideal_input_tau` is the
 software-clipped generalized input, not measured or post-actuator torque.
+The separate `run_mujoco_ideal_with_trace` also records accepted RK4 stage
+states and the ideal drive and external-force components observed in the
+native KKT solve. Its trace must complete and is returned in memory; these
+stage records are not yet persisted by the research bundle. The two forces
+remain ideal generalized inputs and do not establish actuator torque.
 
 `verify_forward_resimulation` compares outputs from a caller-supplied runner
 using per-quantity tolerances. Even when passed `run_mujoco_ideal`, its result
@@ -59,11 +64,10 @@ event state. This is prescribed-force replay: it does not search for, verify or
 certify on-face contact, a ball collision, or first contact. Metadata must set
 `contact_verified` false. The force is external to the ideal generalized
 controller input and is not recorded as actuator torque.
-The current main-branch impact stepper repartitions substeps as event time
-changes, which can introduce numerical discontinuities. This research replay
-holds the recorded force timing fixed; it must not be used to optimize event
-time or to replace the fixed-lattice contact-search work on the baseline
-research branch.
+This research branch uses fixed held-step lattice boundaries on both sides of
+the recorded force window, including an off-grid split. It does not search for
+contact or bound integration error, and must not be used to certify or optimize
+first-contact timing. Main's impact path has not been changed by this research.
 
 Focused validation: `python -m pytest -q
 tests/unit/motion_matching/same_input/test_solution_bundle_prototype.py`.
