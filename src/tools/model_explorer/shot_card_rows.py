@@ -18,6 +18,7 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
+from src.shared.python.impact_parameters.extract import MPS_TO_MPH
 from src.tools.native_viewer_export.display_units import (
     DisplayUnits,
     distance_text,
@@ -130,11 +131,15 @@ def summary_from_shot(panel: Any, flight: Any) -> ShotSummary:
     """Summary of an exporter factors ``panel`` and ``FlightPlayback``.
 
     Either may be ``None``; a flight without a path gives its status as the
-    ``flight_reason``.
+    ``flight_reason``. The card's club speed is normalized to mph before
+    building the summary, regardless of the exporter's display units.
     """
     none = "not computed"
     card = None if panel is None else panel.card
     rows = {} if card is None else {row.key: row.value for row in card.rows}
+    speed = rows.get("clubhead_speed")
+    if speed is not None and getattr(card, "units", "mph") == "m/s":
+        rows["clubhead_speed"] = speed * MPS_TO_MPH
     verdict = None if panel is None else panel.verdict
     base = ShotSummary(
         none if panel is None else str(panel.status),
