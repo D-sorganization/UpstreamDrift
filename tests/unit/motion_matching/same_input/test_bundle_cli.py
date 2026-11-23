@@ -112,6 +112,94 @@ def test_closed_loop_reports_target_and_rollout_scores_separately(
     assert result["velocity_target_tracking"]["max_abs_by_coordinate"] == [1.0]
 
 
+def test_closed_loop_lead_in_scores_the_shifted_controller_clock(
+    monkeypatch, tmp_path
+) -> None:
+    from scripts import same_input_bundle as cli
+    from src.shared.python.motion_matching.same_input.integrator import Rollout
+
+    record = tmp_path / "record.npz"
+    record.write_bytes(b"bound reference")
+    (tmp_path / "full_body_spec_hipcal_scaled.json").write_text("{}", encoding="utf-8")
+    bundle_path = tmp_path / "bundle.npz"
+    bundle_path.write_bytes(b"bundle")
+    times = np.arange(4) * 0.001
+    q = np.arange(4, dtype=float)[:, None]
+    bundle = SimpleNamespace(
+        provenance={
+            "dynamics_record_sha256": cli._sha256(record),
+            "lead_in": {"steps": 1, "duration_s": 0.001},
+        },
+        spec_bytes=b"{}",
+        steps=2,
+        dt_s=0.001,
+        effort_holds=1,
+        coordinate_order=("joint",),
+        ball_impact=lambda: None,
+        step_policy=lambda: None,
+        manifest=dict,
+        replay_efforts=lambda: np.zeros((2, 1)),
+    )
+    rollout = Rollout(times, q, np.full_like(q, 1000), np.zeros((3, 1)), np.zeros(3))
+    monkeypatch.setattr(cli.InputBundle, "load", lambda _: bundle)
+    monkeypatch.setattr(cli, "_track", lambda _: (record, times, q))
+    monkeypatch.setattr(cli, "padded_track", lambda _, values: values)
+
+    def run(*args, **kwargs):
+        assert kwargs["duration_s"] == pytest.approx(0.003)
+        return rollout
+
+    monkeypatch.setattr(cli, "closed_loop", run)
+    monkeypatch.setattr(cli, "VectorPlant", lambda *a: None)
+
+    def score(_plant, _bundle, actual):
+        assert actual.time_s == pytest.approx([0.0, 0.001, 0.002])
+        assert actual.q[:, 0] == pytest.approx([1.0, 2.0, 3.0])
+        return SimpleNamespace(summary=lambda: {"max_coordinate_error_rad": 0.0})
+
+    monkeypatch.setattr(cli, "score_replay", score)
+    result = cli.closed_loop_receipt(tmp_path, bundle_path, "mujoco")
+    assert result["target_clock_offset_s"] == pytest.approx(0.001)
+    assert result["target_tracking"]["max_abs_by_coordinate"] == pytest.approx([0.0])
+    assert result["velocity_target_tracking"]["max_abs_by_coordinate"] == pytest.approx(
+        [0.0]
+    )
+
+
+@pytest.mark.parametrize(
+    "metadata",
+    [
+        {"steps": 1, "duration_s": 0.002},
+        {"steps": True, "duration_s": 0.001},
+        {"steps": -1, "duration_s": -0.001},
+    ],
+)
+def test_closed_loop_rejects_inconsistent_lead_in_before_simulating(
+    monkeypatch, tmp_path, metadata
+) -> None:
+    from scripts import same_input_bundle as cli
+
+    record = tmp_path / "record.npz"
+    record.write_bytes(b"bound reference")
+    (tmp_path / "full_body_spec_hipcal_scaled.json").write_text("{}", encoding="utf-8")
+    bundle = SimpleNamespace(
+        provenance={"dynamics_record_sha256": cli._sha256(record), "lead_in": metadata},
+        spec_bytes=b"{}",
+        dt_s=0.001,
+        ball_impact=lambda: None,
+    )
+    monkeypatch.setattr(cli.InputBundle, "load", lambda _: bundle)
+    monkeypatch.setattr(
+        cli, "_track", lambda _: (record, np.arange(2.0), np.zeros((2, 1)))
+    )
+    monkeypatch.setattr(cli, "padded_track", lambda _, q: q)
+    monkeypatch.setattr(
+        cli, "closed_loop", lambda *a, **k: pytest.fail("must reject before simulating")
+    )
+    with pytest.raises(ValueError, match="lead-in"):
+        cli.closed_loop_receipt(tmp_path, tmp_path / "bundle.npz", "mujoco")
+
+
 def test_target_tracking_rms_does_not_overflow_for_finite_values() -> None:
     result = target_tracking_summary(
         np.array([0.0, 1.0]),

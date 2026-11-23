@@ -27,3 +27,9 @@ The fixed-step rollout rounds its duration to the nearest 1 ms. When that
 rounding places the final state at most half a step beyond the source target,
 the receipt samples the controller's clamped endpoint and reports the
 clamped duration separately. Longer uncovered spans remain invalid.
+
+For a recorded settled lead-in, the audit repeats the lead-in before scoring
+the bundle window and evaluates both targets at their original clock offset.
+Only the existing no-impact fixed-step lead-in contract is supported; invalid
+or inconsistent metadata is rejected rather than silently scoring the wrong
+segment. This does not independently establish the lead-in state provenance.

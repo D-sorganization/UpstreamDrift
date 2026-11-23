@@ -58,6 +58,7 @@ from src.shared.python.motion_matching.same_input import (
     score_replay,
     segmented_replay,
 )
+from src.shared.python.motion_matching.same_input.reference import drop_lead_in
 
 LOG = logging.getLogger("same_input_bundle")
 _STATES: dict[str, np.ndarray] = {}  # last rollout, written beside the receipt
@@ -362,17 +363,36 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
         raise ValueError("run model does not match bundle model")
     target = padded_track(bundle.spec_bytes, target)
     impact = bundle.ball_impact()
+    lead = bundle.provenance.get("lead_in")
+    lead_steps = 0
+    if lead is not None:
+        if not isinstance(lead, dict):
+            raise ValueError("lead-in metadata must be a mapping")
+        candidate = lead.get("steps")
+        if (
+            isinstance(candidate, bool)
+            or not isinstance(candidate, int)
+            or candidate <= 0
+            or bundle.dt_s != DT_S
+            or lead.get("duration_s") != candidate * DT_S
+            or impact is not None
+            or bundle.provenance.get("impact_split_time_s") is not None
+        ):
+            raise ValueError("unsupported or inconsistent lead-in metadata")
+        lead_steps = candidate
     started = time.perf_counter()
     rollout = closed_loop(
         engine,
         bundle.spec_bytes,
         times,
         target,
-        duration_s=bundle.steps * bundle.dt_s,
+        duration_s=(bundle.steps + lead_steps) * bundle.dt_s,
         impact=None if impact is None else impact.rearmed(),
         split_time_s=bundle.provenance.get("impact_split_time_s"),
         policy=bundle.step_policy(),
     )
+    if lead_steps:
+        rollout, _ = drop_lead_in(rollout, lead_steps, bundle.effort_holds)
     elapsed = time.perf_counter() - started
     plant = VectorPlant(engine, bundle.spec_bytes)
     score = score_replay(plant, bundle, rollout)
@@ -384,12 +404,13 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
         "engine": engine,
         "elapsed_s": elapsed,
         "full_horizon": score.summary(),
+        "target_clock_offset_s": lead_steps * DT_S,
         "target_tracking": {
             "coordinate_order": bundle.coordinate_order,
             **target_tracking_summary(
                 times,
                 target,
-                rollout.time_s,
+                rollout.time_s + lead_steps * DT_S,
                 rollout.q,
                 max_endpoint_extension_s=DT_S / 2,
             ),
@@ -399,7 +420,7 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
             **target_velocity_tracking_summary(
                 times,
                 target,
-                rollout.time_s,
+                rollout.time_s + lead_steps * DT_S,
                 rollout.v,
                 split_time_s=bundle.provenance.get("impact_split_time_s"),
                 max_endpoint_extension_s=DT_S / 2,

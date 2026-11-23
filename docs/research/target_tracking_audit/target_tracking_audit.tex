@@ -26,4 +26,9 @@ provenance; the run model with its recorded shaft configuration must match the
 bundle model. This comparison does not establish that the record was generated
 from that model, data provenance, correct model
 migration, continuity between samples, actuator feasibility or impact.
+For a settled lead-in of $L$ fixed steps, the run repeats those steps, the
+score begins at step $L$, and the controller target is sampled at the elapsed
+time $t_i+L\Delta t$. Only the existing no-impact fixed-step lead-in contract
+is supported; inconsistent metadata is rejected. This does not establish
+independent provenance for the settled state.
 \end{document}
