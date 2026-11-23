@@ -43,17 +43,11 @@ def _featherstone_e_rot(jtype: str, q: float) -> npt.NDArray[np.float64]:
     c = math.cos(q)
     s = math.sin(q)
     if jtype == "Rx":
-        return np.array(
-            [[1.0, 0.0, 0.0], [0.0, c, s], [0.0, -s, c]], dtype=np.float64
-        )
+        return np.array([[1.0, 0.0, 0.0], [0.0, c, s], [0.0, -s, c]], dtype=np.float64)
     if jtype == "Ry":
-        return np.array(
-            [[c, 0.0, -s], [0.0, 1.0, 0.0], [s, 0.0, c]], dtype=np.float64
-        )
+        return np.array([[c, 0.0, -s], [0.0, 1.0, 0.0], [s, 0.0, c]], dtype=np.float64)
     if jtype == "Rz":
-        return np.array(
-            [[c, s, 0.0], [-s, c, 0.0], [0.0, 0.0, 1.0]], dtype=np.float64
-        )
+        return np.array([[c, s, 0.0], [-s, c, 0.0], [0.0, 0.0, 1.0]], dtype=np.float64)
     msg = f"unsupported revolute type: {jtype}"
     raise ValueError(msg)
 
