@@ -149,6 +149,13 @@ suite passed 16 tests with one strict expected failure, including a check that
 an airborne endpoint cannot be reported as carry. Reference
 flight rows include approximate inputs and are not independent flight
 validation. Re-run relevant checks on the actual delivery commit and runtime.
+For a fixed ball centre and continuous rigid face with a proven material-point
+speed bound V and exact endpoint distances d0 and d1 over duration dt, the interval distance
+is at least (d0 + d1 - V dt)/2. A strict bound above ball radius can certify
+clearance. The current arbitrary advance callback supplies neither a proven
+interval speed bound nor numerical distance enclosures; sampled qd alone does
+not bound the derivative of an RK4 trial-prefix map. Do not infer clearance
+certification from the sampled scan.
 In the MuJoCo parity plant the recorded held effort is a source command; the
 native KKT solve zeroes passive shaft coordinates, and the forced wrapper
 adds impact generalized force before that mask. The path has no actuator
