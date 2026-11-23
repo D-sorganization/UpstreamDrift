@@ -3,5 +3,11 @@
   "pipeline_default_clubs": ["driver"],
   "reference_club": "driver",
   "reference_head_moi_kg_m2": 0.005,
-  "cor_by_club": {"driver": 0.83, "iron7": 0.83}
+  "cor_by_club": {"driver": 0.83, "iron7": 0.83},
+  "rigid_gear_sources": "Head inertia for the rigid-contact gear law (physics/impact_model/rigid_gear.py), principal values about the head CG along the face normal, heel and face-up axes, and the CG depth behind the face. These are the research assumptions of the phase-two matched-delivery study (src/tools/shot_pattern_analysis/matched_config.py: driver preset and seven_iron preset), not measured properties of a specific head. A club without an entry uses rigid_gear_default_club, as club_impact_for launches an unknown club with the driver defaults.",
+  "rigid_gear_default_club": "driver",
+  "rigid_gear_heads": {
+    "driver": {"inertia_diagonal_kg_m2": [0.00025, 0.00040, 0.00045], "cg_depth_m": 0.035},
+    "iron7": {"inertia_diagonal_kg_m2": [0.00012, 0.00020, 0.00025], "cg_depth_m": 0.010}
+  }
 }

@@ -72,6 +72,29 @@ class PostImpactState:
     impact_location: np.ndarray
 
 
+@dataclass(frozen=True)
+class RigidGearHead:
+    """Head inertia for the rigid-contact gear law (#15443).
+
+    Attributes:
+        inertia_diagonal_kg_m2: Principal inertia about the head CG along the
+            face normal, heel and face-up axes [kg·m²]; each positive.
+        cg_depth_m: CG distance behind the face along the normal [m]; >= 0.
+    """
+
+    inertia_diagonal_kg_m2: tuple[float, float, float]
+    cg_depth_m: float
+
+    def __post_init__(self) -> None:
+        values = (*self.inertia_diagonal_kg_m2, self.cg_depth_m)
+        if len(self.inertia_diagonal_kg_m2) != 3 or not all(
+            np.isfinite(v) for v in values
+        ):
+            raise ValueError("gear head needs three finite inertias and a finite depth")
+        if min(self.inertia_diagonal_kg_m2) <= 0.0 or self.cg_depth_m < 0.0:
+            raise ValueError("gear head inertia must be positive and CG depth >= 0")
+
+
 @dataclass
 class ImpactParameters:
     """Parameters for impact model.
@@ -83,6 +106,9 @@ class ImpactParameters:
         contact_damping: Damping for compliant model [N·s/m]
         friction_coefficient: Ball-face friction
         gear_effect_factor: Gear effect spin amplification (0-1)
+        rigid_gear_head: When set, an off-centre strike's gear spin comes from
+            the rigid-contact law with this head instead of the legacy
+            heuristic (``gear_effect_*``). ``None`` keeps the legacy term.
     """
 
     cor: float = float(DRIVER_COR)
@@ -93,6 +119,7 @@ class ImpactParameters:
     gear_effect_factor: float = 0.5
     gear_effect_h_scale: float = 350.0
     gear_effect_v_scale: float = 150.0
+    rigid_gear_head: RigidGearHead | None = None
 
 
 @dataclass

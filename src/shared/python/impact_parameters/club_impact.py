@@ -19,6 +19,7 @@ from pathlib import Path
 
 from src.shared.python.contracts import ensure, require
 from src.shared.python.motion_matching.club_models import CLUBS, ClubSpec
+from src.shared.python.physics.impact_model.types import RigidGearHead
 
 logger = logging.getLogger(__name__)
 SETTINGS_PATH = Path(__file__).with_name("club_impact_settings.json")
@@ -83,3 +84,23 @@ def club_impact_from_spec(club: Mapping[str, object] | None) -> ClubImpact | Non
     """:func:`club_impact_for` the ``name`` of a bundle spec's ``club`` entry."""
     name = None if club is None else club.get("name")
     return club_impact_for(name if isinstance(name, str) else None)
+
+
+def rigid_gear_head_for(name: str | None, path: Path | None = None) -> RigidGearHead:
+    """Rigid-contact gear head of the club ``name`` from the settings file.
+
+    A club without an entry (or ``None``) gets ``rigid_gear_default_club``'s
+    head, as :func:`club_impact_for` launches it with the driver defaults.
+    Postcondition: the head has positive inertia and a CG depth >= 0.
+    """
+    cfg = _load(path)
+    heads = cfg["rigid_gear_heads"]
+    entry = heads.get(name) if isinstance(name, str) else None
+    if entry is None:
+        entry = heads[cfg["rigid_gear_default_club"]]
+    inertia = tuple(float(v) for v in entry["inertia_diagonal_kg_m2"])
+    require(len(inertia) == 3, "gear head inertia needs three values", inertia)
+    return RigidGearHead(
+        inertia_diagonal_kg_m2=(inertia[0], inertia[1], inertia[2]),
+        cg_depth_m=float(entry["cg_depth_m"]),
+    )
