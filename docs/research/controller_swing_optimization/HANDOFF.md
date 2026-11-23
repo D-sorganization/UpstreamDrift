@@ -941,3 +941,29 @@ bound that samples cannot validate, and has no interval rounding. It does not
 certify first contact, the pinned swing or a physical shot. A separate broad
 mypy invocation reported unrelated Qt document-reader errors; normal
 repository mypy and the genuinely scoped check passed.
+
+The assumed v2 stance uses compliant Hunt–Crossley sphere contact with
+50,000 N/m per sphere, not a rigid nonpenetration constraint. `preload_feet`
+sets nominal equal-load static compression of 2.584 mm for the modeled
+79.06 kg mass and six spheres, then closure projection can alter q. At the
+worst sampled 0.516 s state, the previous and ground-inequality forward runs
+had minimum gaps −15.185 / −16.568 mm and modeled total normal force
+1528.5 / 1668.0 N (1.97 / 2.15 bodyweights); their sampled maximum totals
+were 1758.4 / 1942.5 N. At that time their interpolated kinematic references
+had positive modeled clearance +2.78 / +5.39 mm. Across hold-end grip
+projections, minimum gaps were unchanged to printed precision; maximum q and
+v projection changes were 3.65e-12 and 4.20e-10. Compression is expected in
+this compliant model and is not automatically a rigid-contact violation;
+these model-dependent forces are not measured ground forces or acceptance.
+The reference/forward difference calls for analysis of support dynamics,
+root motion and preload rather than assuming the sampled fit alone enforces
+stance.
+
+A targeted knee/right-hip Option B local surrogate selected a candidate with
+7.1586 N m coefficient norm inside the 10 N m trust ball. Over 200 ms it
+changed tracking RMS 0.44482 to 0.38316 rad and the regularized diagnostic
+score 7.41166 to 6.82228, but had 17 modeled ROM flags, three speed flags
+and 1440 clipped stages of 6400 under assumption-marked priors. Its extended
+run reproduced the first 200 ms stage arrays bit-for-bit then hit a numerical
+guard at 0.266 s, with 22 ROM and seven speed flags. This is not a feasible
+candidate, physical acceptance, or a carry/power improvement.
