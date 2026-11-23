@@ -562,7 +562,7 @@ models:
   - id: "model_explorer"
     help: "docs/help/model_explorer.md"
     name: "Model Explorer"
-    description: "Explore models and generate URDFs"
+    description: "Play matched golf swings, explore models and edit URDFs"
     type: "special_app"
     path: "src/tools/model_explorer/main_window.py"
     launcher:

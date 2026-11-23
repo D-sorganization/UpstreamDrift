@@ -195,7 +195,7 @@ class ResultsSession:
 
     @property
     def title(self) -> str:
-        """What is being shown, e.g. ``Playback of Drake result (...)``."""
+        """What is being shown, e.g. ``Swing: matched motion replay (...)``."""
         pose = self.pose_source
         if pose is not None:
             return pose.playback_label

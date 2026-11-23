@@ -126,7 +126,7 @@ def test_mujoco_fit_opens_playback_dock_on_the_golfer(
     assert panel is not None
     assert explorer.playback_dock is not None
     assert explorer.playback_dock.windowTitle() == "Results Playback"
-    assert panel.title_label.text() == "MuJoCo result"
+    assert panel.title_label.text().endswith("matched motion replay (MuJoCo)")
     assert (panel.slider.minimum(), panel.slider.maximum()) == (0, 3)
     image = panel.current_image()
     assert image.shape[2] == 3 and image.std() > 10.0  # a scene, not a blank
@@ -161,8 +161,8 @@ def test_drake_rollout_is_labelled_playback_of_drake_result(
     assert explorer.load_results(runs["drake"]) is True, boxes
 
     title = explorer.playback_panel.title_label.text()
-    assert title.startswith("Playback of Drake result")
-    assert "MuJoCo golfer model" in title
+    assert "matched motion replay" in title
+    assert "Drake result" in title
 
 
 @pytest.mark.unit
@@ -322,3 +322,16 @@ def test_playback_opens_behind_the_golfer_and_follows_the_anchor(
     assert not np.array_equal(before, panel.current_image())
     with pytest.raises(ValueError, match="finite 3-vector"):
         panel._playback.behind_anchor_m = (0.0, float("nan"), 0.0)
+
+
+@pytest.mark.unit
+def test_source_label_shows_file_name_with_full_path_in_tooltip(
+    explorer: MainWidget, runs: dict[str, Path], boxes: list[str]
+) -> None:
+    assert explorer.load_results(runs["drake"]) is True, boxes
+
+    label = explorer.playback_panel.source_label
+    full_path = label.toolTip()
+    assert Path(full_path).is_absolute()
+    assert label.text().startswith(f"{Path(full_path).name}: ")
+    assert str(Path(full_path).parent) not in label.text()

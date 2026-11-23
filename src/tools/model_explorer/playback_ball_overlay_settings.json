@@ -1,0 +1,18 @@
+{
+  "show_ball": true,
+  "show_flight": false,
+  "show_aim_line": false,
+  "shot_shape": "straight",
+  "default_club": "Driver",
+  "poll_interval_ms": 100,
+  "flight_unavailable_tooltip": "Ball flight is unavailable: {reason}",
+  "sources": {
+    "show_ball": "Whether the Results Playback panel starts with the decorative ball at address (the native export's ball: placed at the address face, hidden from the contact instant).",
+    "show_flight": "Whether the panel starts with the ball flight trace. Off by default: the flight (and the shot-shape club-roll solve it needs, several flight-model evaluations, seconds on a full swing) is computed on a background thread only once Ball flight is checked; until then only the ball at address is placed",
+    "show_aim_line": "Whether the panel starts with the finish aim line (ball to where the ball finishes, aim_line_settings.json of the export). The finish comes from the flight, so the aim line needs Ball flight.",
+    "shot_shape": "Shot shape the panel starts with: one of the export presets straight, draw or fade (shot_setup_settings.json); names are the ball curve of a right-handed golfer.",
+    "default_club": "Club name given to the flight model (validity envelope and roll-out class) when the specification names no club.",
+    "poll_interval_ms": "How often (milliseconds) the panel checks whether the background ball and flight computation has finished.",
+    "flight_unavailable_tooltip": "Tooltip of the disabled Ball flight and Aim line check boxes; {reason} says why the flight model cannot run (for example the upstream_physics Rust flight wheel is missing or older than the physics revision the flight model requires)."
+  }
+}
