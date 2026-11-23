@@ -113,8 +113,18 @@ def compute_step_size_convergence(
     h_nominal: float,
     h_refined: float,
     tolerance_rad: float = 0.05,
+    tolerance_rad_s: float | None = None,
 ) -> StepSizeConvergenceResult:
-    """Measure trajectory difference across integration step refinement."""
+    """Measure trajectory difference across integration step refinement.
+
+    ``is_converged`` requires every q/qd sample of both runs to be finite and
+    the maximum q difference to be within ``tolerance_rad``. The qd difference
+    is only gated when the caller declares ``tolerance_rad_s``; the default
+    (``None``) preserves the historical q-only threshold, so no gate is
+    redefined implicitly (#14756 P7).
+    """
+    if tolerance_rad_s is not None and not tolerance_rad_s > 0.0:
+        raise ValueError("tolerance_rad_s must be positive when provided")
     if q_nominal.shape != q_refined.shape or qd_nominal.shape != qd_refined.shape:
         raise ValueError("Nominal and refined trajectories must have identical shape")
     if len(time_s) != q_nominal.shape[0]:
@@ -125,7 +135,13 @@ def compute_step_size_convergence(
 
     max_q_diff = float(np.max(q_diff))
     max_qd_diff = float(np.max(qd_diff))
-    is_converged = bool(max_q_diff <= tolerance_rad)
+    all_finite = all(
+        bool(np.all(np.isfinite(a)))
+        for a in (q_nominal, qd_nominal, q_refined, qd_refined)
+    )
+    is_converged = bool(all_finite and max_q_diff <= tolerance_rad)
+    if tolerance_rad_s is not None:
+        is_converged = bool(is_converged and max_qd_diff <= tolerance_rad_s)
 
     return StepSizeConvergenceResult(
         h_nominal=h_nominal,
