@@ -195,7 +195,6 @@ class BallOverlay:
                 self._straight = float((record or {})["straight_roll_deg"])
             except (ValueError, KeyError) as exc:
                 self._straight = f"no shot shape: {exc}"
-        assert isinstance(self._straight, (float, str))
         return self._straight
 
     def _layout(self, shape: str, flown: bool) -> ShotLayout:

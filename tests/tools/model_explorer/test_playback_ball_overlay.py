@@ -8,6 +8,7 @@ hands the exporter, and that it paints the exporter's own ``FlightPlayback``
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
@@ -141,7 +142,6 @@ def test_flight_is_computed_only_when_asked(tmp_path: Path) -> None:
 @pytest.mark.parametrize("view", ["down_the_line", "face_on"])
 def test_shifted_lookat_is_used_for_aim_and_flight(tmp_path: Path, view: str) -> None:
     from src.tools.native_viewer_export.overlay2d import pinhole_for_view
-    import math
 
     overlay = pbo.BallOverlay(_pose(tmp_path), pbo.BallOverlaySettings())
     blank = np.zeros((SIZE[1], SIZE[0], 3), dtype=np.uint8)
@@ -159,4 +159,6 @@ def test_shifted_lookat_is_used_for_aim_and_flight(tmp_path: Path, view: str) ->
         blank, view, IMPACT_S + 1.0, layout, flight=True, aim=True, lookat_m=lookat
     )
     np.testing.assert_array_equal(actual, expected)
+    default = overlay.paint(blank, view, IMPACT_S + 1.0, layout, flight=True, aim=True)
+    assert not np.array_equal(actual, default)
     overlay.close()
