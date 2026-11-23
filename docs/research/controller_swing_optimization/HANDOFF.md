@@ -129,6 +129,12 @@ second difference from 2,145 to 2,090 rad/s² but increased maximum soft closure
 translation from 0.0094 to 0.0639 mm; marker and face-axis residuals were
 nearly unchanged and the free-end speed remained about 33.3 rad/s. The
 experiment does not justify adopting that penalty.
+A matched full-record comparison increased the global second-difference
+weight from 10 to 30, with the same seed and 180-second budget. Neither run
+converged. Peak angular second difference fell from 2,158 to 2,042 rad/s²,
+while maximum soft closure translation increased from 0.0091 to 0.0670 mm;
+marker RMS and near-impact delivery proxies were nearly unchanged. This
+tradeoff does not justify adopting the stronger weight.
 A separate matched endpoint sensitivity used only a weak prior toward the
 estimated earlier motion trend, without future observations. Both runs timed
 out without convergence; endpoint speed changed from 33.325 to 33.306 rad/s,
