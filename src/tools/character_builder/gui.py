@@ -371,6 +371,8 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
     def _load_preset_into_form(self, preset_id: str | None) -> None:
         if preset_id is not None:
             self.model.apply_preset(preset_id)
+        else:
+            self.model.clear_preset()
         self._syncing = True
         try:
             values = self.model.parameters_dict()

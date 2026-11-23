@@ -101,6 +101,10 @@ class CharacterBuilderModel:
         self._params = replace(self._params, **overrides)
         self._preset = None
 
+    def clear_preset(self) -> None:
+        """Select Custom, preserving parameters, appearance and grip choices."""
+        self._preset = None
+
     def compile(self) -> spec_export.CompiledCharacter:
         """Compile the current parameters to a full-body spec."""
         built = spec_export.compile_character(None, self._params.to_dict())
