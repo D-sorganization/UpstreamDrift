@@ -5,6 +5,7 @@ Tests the require()/ensure() contracts added to:
 - compute_permutation_entropy (preconditions: order>=2, delay>=1; postcondition: >=0)
 - compute_sample_entropy (preconditions: m>=1, r>0; postcondition: >=0)
 - compute_fractal_dimension (precondition: k_max>=1; postcondition: finite)
+- compute_correlation_dimension (preconditions: tau>=1, dim>=1; postcondition: finite)
 """
 
 from __future__ import annotations
@@ -39,6 +40,9 @@ def _make_mixin(n: int = 500, n_joints: int = 3, dt: float = 0.01) -> object:
     )
     obj.estimate_lyapunov_exponent = (
         NonlinearDynamicsMixin.estimate_lyapunov_exponent.__get__(obj)
+    )
+    obj.compute_correlation_dimension = (
+        NonlinearDynamicsMixin.compute_correlation_dimension.__get__(obj)
     )
     return obj
 
@@ -181,6 +185,27 @@ class TestLyapunovExponentContracts(unittest.TestCase):
             np.array([1.0, 2.0]), tau=1, dim=3, window=10
         )
         self.assertEqual(result, 0.0)
+
+
+class TestCorrelationDimensionContracts(unittest.TestCase):
+    """Verify require()/ensure() on compute_correlation_dimension."""
+
+    def test_tau_zero_raises(self) -> None:
+        obj = _make_mixin()
+        with self.assertRaises((ValueError, Exception)):
+            obj.compute_correlation_dimension(np.ones(100), tau=0, dim=3)
+
+    def test_dim_zero_raises(self) -> None:
+        obj = _make_mixin()
+        with self.assertRaises((ValueError, Exception)):
+            obj.compute_correlation_dimension(np.ones(100), tau=1, dim=0)
+
+    def test_spike_outlier_returns_finite(self) -> None:
+        obj = _make_mixin()
+        data = np.ones(80, dtype=float)
+        data[40] = 100.0
+        result = obj.compute_correlation_dimension(data)
+        self.assertTrue(np.isfinite(result))
 
 
 if __name__ == "__main__":
