@@ -2685,3 +2685,18 @@ midpoint exceeds the bound. A smooth post-seam -1 N m test confirmed the
 same first failure. This rules out correcting that first midpoint using only
 post-seam torque while holding the seam state exact; it does not prove global
 infeasibility when the earlier trajectory may change.
+
+A pre-seam motor-spline diagnostic used the numerical predictor
+upper-q >= max(v,0)*0.050 s, which ignores acceleration and is not a
+physiological or continuous-time guarantee. A -0.25 N m adjustment to the
+existing left-subtalar coefficient gave a 32-substep seam margin 0.11750 rad,
+outward velocity 0.04390 rad/s and coefficient norm 0.31609 within the 10 N m
+diagnostic radius. First 150 ms had no sampled modeled ROM/speed flags or
+clipping at 16/32 substeps. With the explicitly separate bridge/decay tail,
+first ROM failure moved from immediately after 150 ms to about 205.02 ms;
+the first 200 ms sampled ROM/speed gates were clear. By 300 ms, however, 13
+ROM and five speed slots failed, maximum ROM excess 2.927 rad, with no
+clipping and joint RMS 0.3296 rad. Sixteen/32 matched-hold q/v/drive
+differences were <=2.32e-6 / 9.61e-5 / 2.86e-5 in native units. Work totals
+after gate violations are not physical-feasibility evidence. This remains an
+assumption-limited diagnostic, not a validated 300 ms or full swing.
