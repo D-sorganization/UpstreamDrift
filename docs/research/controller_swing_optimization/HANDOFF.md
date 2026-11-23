@@ -2653,3 +2653,19 @@ flags. However, that split policy produced rate-table and acceleration-table
 jumps of 0.545 mixed units/s and 270.4 mixed units/s² across the seam. It is
 a causal-prefix diagnostic, not a verified smooth continuation; it changes
 rate semantics and does not certify 300 ms, actual impact or physiology.
+
+A quintic coordinate bridge across 150–200 ms preserved original prefix
+boundary data analytically, then bounded framewise projection restored sampled
+closure <=4.95e-12 with no modeled reference ROM/speed flags. Discrete split
+rate/acceleration table jumps fell from 0.545/270.4 to about 0.073/9.96 in
+mixed units, but continuous C2 after projection was not established.
+
+A disclosed 300 ms motor diagnostic used split derivative feedforward, that
+projected bridge, and an explicit quintic decay of the original spline to zero
+from 150 to 200 ms. The first 150 ms q/v/applied drive matched the prior
+short replay within 8.2e-15 / 2.0e-13 / 6.3e-14. Modeled ROM failed on the
+first stage after 150 ms; by 300 ms eight ROM and three speed slots failed,
+with no clipping and joint tracking RMS 0.3156 rad. Sixteen/32 substeps
+agreed on the flags. The added residual tail is a new diagnostic policy, not
+the original trust-certified spline; work/slew and physical capacities remain
+unverified. Reject this as a feasible continuation or full swing.
