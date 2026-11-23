@@ -412,10 +412,11 @@ class ImpactForce:
         poses: PoseFn,
         *,
         advance: Callable[[float], tuple[Array, Array]] | None = None,
+        point_velocity: Callable[[Array, Array, str, Array], Array] | None = None,
     ) -> ImpactForce:
         """Fire the configured event if it occurs within the actual step."""
         if self.trigger == "surface":
-            return self._schedule_surface(t, dt, q, v, poses, advance)
+            return self._schedule_surface(t, dt, q, v, poses, advance, point_velocity)
         if self.is_scheduled or t + dt < float(self.t_start_s):
             return self
         q = np.asarray(q, dtype=float)
@@ -441,6 +442,7 @@ class ImpactForce:
         v: Array,
         poses: PoseFn,
         advance: Callable[[float], tuple[Array, Array]] | None,
+        point_velocity: Callable[[Array, Array, str, Array], Array] | None,
     ) -> ImpactForce:
         """Bracket finite-face contact using the integrator's actual advance."""
         if self.scheduled or self.is_latched:
@@ -477,6 +479,11 @@ class ImpactForce:
             self.ball_centre_m,
             BALL_RADIUS_M,
             duration_s=search_duration,
+            face_point_velocity_world=(
+                None
+                if point_velocity is None
+                else lambda qq, vv, point: point_velocity(qq, vv, self.frame, point)
+            ),
         )
         penalty = result.closest_approach_penalty_m
         weight_s = search_duration
@@ -502,6 +509,32 @@ class ImpactForce:
         )
         if result.event is None:
             return accumulated
+        # Latching uses the point Jacobian below; refuse the candidate if it
+        # cannot reproduce the independently supplied material-point velocity.
+        candidate = result.event
+        if point_velocity is None or candidate.q.shape != candidate.qd.shape:
+            return replace(
+                accumulated, contact_search_has_prior_unresolved_intervals=True
+            )
+        pose = np.asarray(poses(candidate.q)[self.frame], dtype=float)
+        local = pose[:3, :3].T @ (candidate.contact_point_m - pose[:3, 3])
+        latch_velocity = self.point_jacobian(candidate.q, poses, local) @ candidate.qd
+        velocity = np.asarray(
+            point_velocity(
+                candidate.q, candidate.qd, self.frame, candidate.contact_point_m
+            ),
+            dtype=float,
+        )
+        if not np.allclose(latch_velocity, velocity, rtol=1e-5, atol=1e-7):
+            return replace(
+                accumulated, contact_search_has_prior_unresolved_intervals=True
+            )
+        closing = float(latch_velocity @ candidate.contact_normal)
+        disagreement = float(np.linalg.norm(latch_velocity - velocity))
+        if closing <= 1e-7 + disagreement:
+            return replace(
+                accumulated, contact_search_has_prior_unresolved_intervals=True
+            )
         event = replace(result.event, time_s=t + offset + result.event.time_s)
         try:
             validate_window(event.time_s, self.duration_s, self.swing_span_s)
@@ -819,6 +852,7 @@ def step_through_impact(
     poses: PoseFn,
     accel: AccelFn,
     trial_step: StepFn | None = None,
+    point_velocity: Callable[[Array, Array, str, Array], Array] | None = None,
 ) -> tuple[Array, Array, ImpactForce | None, Any]:
     """Advance ``[t, t + dt]`` with ``step``, applying the ball force inside it.
 
@@ -851,6 +885,7 @@ def step_through_impact(
         v,
         poses,
         advance=advance_unforced if impact.trigger == "surface" else None,
+        point_velocity=point_velocity,
     )
     if not impact.is_scheduled:
         parts = impact.sub_intervals(t, dt)

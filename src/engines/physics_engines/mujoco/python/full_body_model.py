@@ -234,6 +234,25 @@ class NativeMujocoFullBodyModel:
         self._mj.mj_kinematics(self.model, self.data)
         return _extract_frame_poses(self.data, self._sites)
 
+    def frame_point_velocity(
+        self,
+        coordinates: Mapping[str, float],
+        rates: Mapping[str, float],
+        frame: str,
+        point_world: np.ndarray,
+    ) -> np.ndarray:
+        """Instantaneous world velocity of a material point on a frame's body."""
+        point = np.asarray(point_world, dtype=float)
+        if point.shape != (3,) or not np.isfinite(point).all():
+            raise ValueError("point_world must be a finite three-vector")
+        q, v = self._vector(coordinates), self._vector(rates)
+        _prepare_forward_dynamics(self._mj, self.model, self.data, q, v)
+        site = self._sites[frame]
+        body = int(self.model.site_bodyid[site])
+        jac = np.zeros((3, self.model.nv))
+        self._mj.mj_jac(self.model, self.data, jac, None, point, body)
+        return jac @ v
+
     def ordered_frame_pose(self, values: np.ndarray, name: str) -> np.ndarray:
         """4x4 pose of one frame site at ``values`` (``coordinate_order``).
 

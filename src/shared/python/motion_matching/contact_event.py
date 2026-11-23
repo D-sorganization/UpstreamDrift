@@ -19,11 +19,13 @@ from scipy.special import logsumexp
 Array = NDArray[np.float64]
 AdvanceFn = Callable[[float], tuple[Array, Array]]
 FaceTrianglesFn = Callable[[Array], Array]
+FaceVelocityFn = Callable[[Array, Array, Array], Array]
 # Root bracketing is deliberately bounded; missed crossings between these
 # states remain an explicit limitation.
 CONTACT_ROOT_SUBDIVISIONS = 8
 SIDE_SWITCH_REFINEMENT = 32
 MISS_PENALTY_SUBDIVISIONS = 8
+MIN_APPROACH_SPEED_MPS = 1e-7
 
 
 @dataclass(frozen=True)
@@ -360,6 +362,7 @@ def find_contact_event(
     time_tolerance_s: float = 1e-9,
     distance_tolerance_m: float = 1e-6,
     max_iterations: int = 80,
+    face_point_velocity_world: FaceVelocityFn | None = None,
 ) -> ContactSearchResult:
     """Find a bracketed, front-side sphere contact during one actual advance.
 
@@ -378,6 +381,12 @@ def find_contact_event(
     specified absolute sphere-clearance tolerance. The default one-micrometre
     clearance tolerance is a numerical root criterion, not a model-accuracy or
     physical-contact uncertainty bound.
+    The optional velocity callback supplies the instantaneous world velocity
+    of the face material point at ``(q, qd, point_world)``. A candidate also
+    requires a positive face velocity toward the fixed ball; without that
+    callback a sampled bracket remains unresolved. This instantaneous test is
+    not a bound between samples or a guarantee of first contact. Approach at
+    or below 1e-7 m/s is treated as numerically ambiguous, not physical proof.
 
     A root on the outer boundary of the supplied patch is rejected; shared
     interior triangle seams remain eligible. The caller must supply outward
@@ -462,6 +471,14 @@ def find_contact_event(
     def clearance(data: tuple[float, float, int, Array, Array, Array]) -> float:
         return float(np.linalg.norm(centre - data[3])) - radius
 
+    def physical_approach(q: Array, qd: Array, point: Array, normal: Array) -> float:
+        if face_point_velocity_world is None:
+            return 0.0
+        velocity = np.asarray(face_point_velocity_world(q, qd, point), dtype=float)
+        if velocity.shape != (3,) or not np.isfinite(velocity).all():
+            raise ValueError("face point velocity must be a finite three-vector")
+        return float(velocity @ normal)
+
     def local_gap_derivative(time_s: float) -> float:
         """Estimate the finite-surface clearance derivative using the real advance."""
         base = max(duration * 1e-6, min(4.0 * tolerance, duration * 1e-4))
@@ -512,8 +529,14 @@ def find_contact_event(
         index, point, bary = data_star[2], data_star[3], data_star[4]
         delta = centre - point
         distance = float(np.linalg.norm(delta))
+        approach = (
+            physical_approach(q_star, qd_star, point, delta / distance)
+            if distance > 0
+            else 0.0
+        )
         if (
             distance > 0.0
+            and approach > MIN_APPROACH_SPEED_MPS
             and float(delta @ data_star[5]) > 0.0
             and not _boundary_edge_contact(
                 triangles, index, bary, topology=boundary_topology
@@ -525,7 +548,7 @@ def find_contact_event(
                 qd_star.copy(),
                 point.copy(),
                 delta / distance,
-                -local_gap_derivative(0.0),
+                approach,
                 int(index),
             )
 
@@ -587,13 +610,16 @@ def find_contact_event(
             gap_derivative = local_gap_derivative(time_s)
             if not math.isfinite(gap_derivative) or gap_derivative >= 0.0:
                 continue
+            approach = physical_approach(q_star, qd_star, point, delta / distance)
+            if not math.isfinite(approach) or approach <= MIN_APPROACH_SPEED_MPS:
+                continue
             event = ContactRoot(
                 time_s,
                 q_star.copy(),
                 qd_star.copy(),
                 point.copy(),
                 delta / distance,
-                -float(gap_derivative),
+                approach,
                 int(index),
             )
             break

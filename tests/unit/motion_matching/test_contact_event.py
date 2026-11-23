@@ -9,7 +9,9 @@ import numpy as np
 import pytest
 
 from src.shared.python.motion_matching import contact_event
-from src.shared.python.motion_matching.contact_event import find_contact_event
+from src.shared.python.motion_matching.contact_event import (
+    find_contact_event as _find_contact_event,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -19,6 +21,70 @@ _TRIANGLES = np.array(
         [[0.0, -1.0, -1.0], [0.0, 0.0, 1.0], [0.0, -1.0, 1.0]],
     ]
 )
+
+
+def find_contact_event(advance, face, centre, radius, **kwargs):
+    """Explicit directional kinematic velocity for scalar-coordinate test fixtures."""
+
+    def point_velocity(q, qd, point):
+        triangles = face(q)
+        closest, bary = contact_event._point_triangles(point, triangles)
+        index = int(np.argmin(np.linalg.norm(closest - point, axis=1)))
+        eps = 1e-7
+        return (
+            bary[index]
+            @ (face(q + eps * qd)[index] - face(q - eps * qd)[index])
+            / (2 * eps)
+        )
+
+    kwargs.setdefault("face_point_velocity_world", point_velocity)
+    return _find_contact_event(advance, face, centre, radius, **kwargs)
+
+
+def test_missing_face_velocity_does_not_accept_candidate() -> None:
+    result = _find_contact_event(
+        _advance(), _face, np.array([1.0, 0.0, 0.0]), 0.5, duration_s=1.0
+    )
+    assert result.event is None
+    assert result.coverage_status == "unresolved_no_accepted_candidate"
+
+
+def test_near_zero_physical_approach_is_unresolved() -> None:
+    result = _find_contact_event(
+        _advance(),
+        _face,
+        np.array([1.0, 0.0, 0.0]),
+        0.5,
+        duration_s=1.0,
+        face_point_velocity_world=lambda q, v, point: np.array([1e-9, 0.0, 0.0]),
+    )
+    assert result.event is None
+
+
+def test_rk4_prefix_derivative_cannot_substitute_for_event_velocity() -> None:
+    from src.shared.python.motion_matching.same_input.integrator import zoh_rk4_step
+
+    class Oscillator:
+        def acceleration(self, q, v, tau):
+            return -(q - 1.0)
+
+    def advance(t):
+        return zoh_rk4_step(
+            Oscillator(), np.array([1.0]), np.array([1.0]), np.zeros(1), t
+        )
+
+    triangle = np.array([[[0.0, -4.0, -4.0], [0.0, 0.0, 4.0], [0.0, 4.0, -4.0]]])
+    result = find_contact_event(
+        advance,
+        lambda q: triangle + np.array([q[0], 0.0, 0.0]),
+        np.zeros(3),
+        1.9375,
+        duration_s=1.6,
+        time_tolerance_s=1e-10,
+        face_point_velocity_world=lambda q, qd, point: np.array([qd[0], 0.0, 0.0]),
+    )
+    assert result.event is None
+    assert result.coverage_status == "unresolved_no_accepted_candidate"
 
 
 def _advance(rate: float = 1.0):

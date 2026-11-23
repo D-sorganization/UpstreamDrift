@@ -26,6 +26,30 @@ pytestmark = pytest.mark.unit
 M, INERTIA, L = 2.0, 0.05, 1.0
 
 
+def _point_velocity(q, v, frame, point, pose_fn):
+    pose = pose_fn(q)[frame]
+    local = pose[:3, :3].T @ (point - pose[:3, 3])
+    eps = 1e-7
+    ahead, behind = pose_fn(q + eps * v)[frame], pose_fn(q - eps * v)[frame]
+    return (
+        (ahead[:3, :3] @ local + ahead[:3, 3])
+        - (behind[:3, :3] @ local + behind[:3, 3])
+    ) / (2 * eps)
+
+
+def _step_through_impact(*args, poses, **kwargs):
+    velocity = kwargs.pop(
+        "point_velocity",
+        lambda q, v, frame, point: _point_velocity(q, v, frame, point, poses),
+    )
+    return imf.step_through_impact(
+        *args,
+        poses=poses,
+        point_velocity=velocity,
+        **kwargs,
+    )
+
+
 def poses(q: np.ndarray) -> dict[str, np.ndarray]:
     x, th = q
     c, s = math.cos(th), math.sin(th)
@@ -101,7 +125,7 @@ def test_integrating_through_the_window_gives_the_analytic_rebound() -> None:
             None,
         )
 
-    q1, v1, latched, _ = imf.step_through_impact(
+    q1, v1, latched, _ = _step_through_impact(
         impact, t, dt, q, v, rk4, poses=poses, accel=accel
     )
     assert latched.is_latched
@@ -119,12 +143,12 @@ def test_steps_outside_the_window_are_untouched() -> None:
         return qq, vv, "tau"
 
     impact = plan()
-    _, _, out, first = imf.step_through_impact(
+    _, _, out, first = _step_through_impact(
         impact, 0.1, 1e-3, np.zeros(2), np.ones(2), step, poses=poses, accel=accel
     )
     assert calls == [(0.1, 1e-3, None)] and first == "tau"
     assert not out.is_latched
-    _, _, _, _ = imf.step_through_impact(
+    _, _, _, _ = _step_through_impact(
         None, 0.1, 1e-3, np.zeros(2), np.ones(2), step, poses=poses, accel=accel
     )
     assert len(calls) == 2
@@ -241,7 +265,7 @@ def test_passage_trigger_fires_when_the_face_reaches_the_ball() -> None:
 
     impact = armed
     for _ in range(20):
-        q, v, impact, _ = imf.step_through_impact(
+        q, v, impact, _ = _step_through_impact(
             impact, t, dt, q, v, drift, poses=poses, accel=accel
         )
         t += dt
@@ -314,7 +338,7 @@ def test_surface_trigger_uses_integrated_root_and_moving_face_pose() -> None:
         latched_states.append((qq.copy(), vv.copy()))
         return accel(qq, vv, tau)
 
-    q1, v1, triggered, _ = imf.step_through_impact(
+    q1, v1, triggered, _ = _step_through_impact(
         impact, 0.0, 0.02, q, v, drift, poses=rotating_poses, accel=record_accel
     )
     assert triggered is not None and triggered.trigger == "surface"
@@ -339,6 +363,70 @@ def test_surface_trigger_uses_integrated_root_and_moving_face_pose() -> None:
     assert not np.array_equal(q1, q) and not np.array_equal(v1, v)
 
 
+@pytest.mark.parametrize("missing", [True, False])
+def test_surface_rejects_missing_or_inconsistent_point_velocity(missing) -> None:
+    q = np.zeros(2)
+    v = np.array([100.0, 50.0])
+
+    def drift(t, h, qq, vv, external):
+        assert external is None
+        return qq + h * vv, vv, None
+
+    velocity = (
+        None if missing else lambda q, v, frame, point: np.array([200.0, 0.0, 0.0])
+    )
+    _, _, result, _ = imf.step_through_impact(
+        _surface_plan(_ball_on_rotated_face()),
+        0.0,
+        0.02,
+        q,
+        v,
+        drift,
+        poses=rotating_poses,
+        accel=accel,
+        point_velocity=velocity,
+    )
+    assert result.contact_event is None
+    assert result.contact_search_status == "unresolved_no_accepted_candidate"
+
+
+def test_surface_integrator_without_point_velocity_stays_unresolved() -> None:
+    from src.shared.python.motion_matching.same_input.integrator import (
+        ROOT_COORDINATES,
+        StepPolicy,
+        integrate,
+    )
+
+    class Plant:
+        coordinate_order = (*ROOT_COORDINATES, "x", "angle")
+
+        def acceleration(self, q, v, tau):
+            return np.zeros_like(q)
+
+        def kinematic_frames(self, q):
+            return rotating_poses(q[6:])
+
+        def closure_pose_residual(self, q):
+            return np.zeros(1)
+
+    q, v = np.zeros(8), np.zeros(8)
+    v[6:] = [100.0, 50.0]
+    run = integrate(
+        Plant(),
+        q,
+        v,
+        lambda *_: np.zeros(8),
+        steps=1,
+        dt_s=0.02,
+        policy=StepPolicy(substeps=1, project=False),
+        impact=_surface_plan(_ball_on_rotated_face()),
+    )
+    assert run.ball_impact["contact_event"] is None
+    assert (
+        run.ball_impact["contact_search_status"] == "unresolved_no_accepted_candidate"
+    )
+
+
 def test_surface_hit_commits_only_real_zoh_stages_and_event() -> None:
     from src.shared.python.motion_matching.same_input.integrator import (
         ROOT_COORDINATES,
@@ -355,6 +443,9 @@ def test_surface_hit_commits_only_real_zoh_stages_and_event() -> None:
 
         def kinematic_frames(self, q):
             return rotating_poses(q[6:])
+
+        def frame_point_velocity(self, q, v, frame, point):
+            return _point_velocity(q[6:], v[6:], frame, point, rotating_poses)
 
         def closure_pose_residual(self, q):
             return np.zeros(1)
@@ -417,6 +508,9 @@ def test_armed_surface_hit_replays_integrator_prefix_and_commits_trace() -> None
         def kinematic_frames(self, q):
             return rotating_poses(q[6:])
 
+        def frame_point_velocity(self, q, v, frame, point):
+            return _point_velocity(q[6:], v[6:], frame, point, rotating_poses)
+
         def closure_pose_residual(self, q):
             return np.zeros(1)
 
@@ -463,7 +557,7 @@ def test_surface_trigger_fails_closed_and_records_a_finite_miss() -> None:
         calls.append(external)
         return qq + h * vv, vv, None
 
-    q1, v1, result, _ = imf.step_through_impact(
+    q1, v1, result, _ = _step_through_impact(
         impact, 0.0, 0.02, q, v, drift, poses=rotating_poses, accel=accel
     )
     assert result is not None and not result.is_scheduled and not result.is_latched
@@ -485,14 +579,14 @@ def test_later_sampled_bracket_preserves_prior_unresolved_interval() -> None:
     def drift(_t, h, qq, vv, _external):  # noqa: ANN001, ANN202
         return qq + h * vv, vv, None
 
-    q, v, missed, _ = imf.step_through_impact(
+    q, v, missed, _ = _step_through_impact(
         impact, 0.0, 0.005, q, v, drift, poses=rotating_poses, accel=accel
     )
     assert missed is not None and not missed.is_scheduled
     assert missed.contact_search_status == "unresolved_no_accepted_candidate"
     assert missed.contact_search_has_prior_unresolved_intervals
 
-    _, _, hit, _ = imf.step_through_impact(
+    _, _, hit, _ = _step_through_impact(
         missed, 0.005, 0.01, q, v, drift, poses=rotating_poses, accel=accel
     )
     assert hit is not None and hit.is_scheduled
@@ -517,7 +611,7 @@ def test_surface_search_separates_trial_and_accepted_advances() -> None:
         accepted.append((t, h))
         return qq + h * vv, vv, None
 
-    q1, _, result, _ = imf.step_through_impact(
+    q1, _, result, _ = _step_through_impact(
         impact,
         0.0,
         0.02,
@@ -549,7 +643,7 @@ def test_surface_latch_uses_the_off_centre_root_for_impulse_and_force_jacobian()
     def drift(_t, h, qq, vv, external):  # noqa: ANN001, ANN202
         return qq + h * vv, vv, None
 
-    _, _, latched, _ = imf.step_through_impact(
+    _, _, latched, _ = _step_through_impact(
         impact, 0.0, 0.02, q, v, drift, poses=rotating_poses, accel=accel
     )
     assert latched.collision is not None and latched.contact_event is not None
@@ -595,10 +689,10 @@ def test_cross_step_miss_penalty_uses_smooth_weighted_aggregation() -> None:
     def drift(_t, h, qq, vv, _external):  # noqa: ANN001, ANN202
         return qq + h * vv, vv, None
 
-    _, _, first, _ = imf.step_through_impact(
+    _, _, first, _ = _step_through_impact(
         impact, 0.0, 0.01, q, v, drift, poses=rotating_poses, accel=accel
     )
-    _, _, second, _ = imf.step_through_impact(
+    _, _, second, _ = _step_through_impact(
         first,
         0.01,
         0.01,
@@ -626,7 +720,7 @@ def test_surface_trigger_honors_arm_time_inside_the_step() -> None:
         calls.append((t_a, h, external is not None))
         return qq + h * vv, vv, None
 
-    _, _, result, _ = imf.step_through_impact(
+    _, _, result, _ = _step_through_impact(
         impact, 0.0, 0.02, q, v, drift, poses=rotating_poses, accel=accel
     )
     assert result is not None and result.is_latched
@@ -737,7 +831,7 @@ def test_surface_geometry_and_root_round_trip_and_latched_replay_do_not_reschedu
     def drift(_t, h, qq, vv, external):  # noqa: ANN001, ANN202
         return qq + h * vv, vv, None
 
-    _, _, triggered, _ = imf.step_through_impact(
+    _, _, triggered, _ = _step_through_impact(
         impact, 0.0, 0.02, *state, drift, poses=rotating_poses, accel=accel
     )
     assert triggered is not None and triggered.is_latched
@@ -760,7 +854,7 @@ def test_surface_geometry_and_root_round_trip_and_latched_replay_do_not_reschedu
         replay_calls.append(external is not None)
         return drift(t_a, h, qq, vv, external)
 
-    q2, v2, replayed, _ = imf.step_through_impact(
+    q2, v2, replayed, _ = _step_through_impact(
         restored,
         0.0,
         0.02,
@@ -808,7 +902,7 @@ def test_rearming_surface_trigger_clears_event_and_latched_force() -> None:
     def drift(_t, h, qq, vv, external):  # noqa: ANN001, ANN202
         return qq + h * vv, vv, None
 
-    _, _, triggered, _ = imf.step_through_impact(
+    _, _, triggered, _ = _step_through_impact(
         impact, 0.0, 0.02, q, v, drift, poses=rotating_poses, accel=accel
     )
     assert triggered is not None and triggered.is_latched

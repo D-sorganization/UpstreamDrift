@@ -486,6 +486,7 @@ def _impact_hold(
         poses=poses,
         accel=lambda qq, vv, f: plant.acceleration(qq, vv, f),
         trial_step=trial_advance if recorder is not None else None,
+        point_velocity=getattr(plant, "frame_point_velocity", None),
     )
     if latched is None:
         raise ValueError("ball impact plan was lost during the step")

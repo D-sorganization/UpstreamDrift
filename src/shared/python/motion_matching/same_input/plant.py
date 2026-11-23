@@ -96,6 +96,8 @@ class VectorPlant:
         )
         self.nv = len(self.coordinate_order)
         self._adapter = _build_adapter(engine, bytes(spec_bytes), kkt_regularization)
+        if engine == "mujoco":
+            self.frame_point_velocity = self._mujoco_frame_point_velocity
         if tuple(self._adapter.coordinate_order) != self.coordinate_order:
             raise ValueError(f"{engine} adapter coordinate order differs from spec")
         self._zeros = np.zeros(self.nv)
@@ -115,6 +117,16 @@ class VectorPlant:
             self._named(q), self._named(v), self._named(tau)
         )
         return self._ordered(result)
+
+    def _mujoco_frame_point_velocity(
+        self, q: Array, v: Array, frame: str, point_world: Array
+    ) -> Array:
+        return np.asarray(
+            self._adapter.frame_point_velocity(
+                self._named(q), self._named(v), frame, point_world
+            ),
+            dtype=float,
+        )
 
     def acceleration_with_drive_components(
         self,

@@ -41,6 +41,11 @@ discontinuous crossing. The prototype instead brackets finite-surface sphere
 clearance, checks the outward-facing side separately, and requires a spatial
 residual tolerance in addition to its time tolerance. This rejects the
 demonstrated false root but does not close gaps in the bounded time scan.
+The derivative of a numerical trial-prefix position with respect to its
+duration need not equal the velocity in the returned state. Consequently the
+prototype also checks the instantaneous velocity of the material face point
+at $(q^*,\dot q^*)$; without a supported velocity mapping the candidate is
+unresolved. Neither check bounds unsampled motion or proves first contact.
 
 \section{Evidence and Limitations}
 The accompanying README records the prescribed-launch regression and the

@@ -207,7 +207,9 @@ def test_recording_does_not_change_rollout_or_dynamics_calls():
 
 
 def test_impact_probes_do_not_enter_trace(monkeypatch):
-    def fake_impact(impact, t, dt, q, v, step, *, poses, accel, trial_step):
+    def fake_impact(
+        impact, t, dt, q, v, step, *, poses, accel, trial_step, point_velocity
+    ):
         trial_step(t, dt / 2, q, v, None)
         q, v, extra = step(t, dt, q, v, None)
         return q, v, impact, extra
@@ -243,7 +245,9 @@ def test_impact_trial_prefix_is_continuous_and_matches_accepted_trace(monkeypatc
         def acceleration(self, q, v, tau):
             return 100.0 * q
 
-    def fake_impact(impact, t, dt, q, v, step, *, poses, accel, trial_step):
+    def fake_impact(
+        impact, t, dt, q, v, step, *, poses, accel, trial_step, point_velocity
+    ):
         # Old ceil-based repartition jumps at 0.25 s, despite smooth dynamics.
         before = trial_step(t, 0.25, q, v, None)[0]
         after = trial_step(t, 0.250000001, q, v, None)[0]
@@ -288,7 +292,9 @@ def test_armed_surface_search_replays_same_hold_lattice(monkeypatch):
 
     triangles = np.array([[[0.0, -1.0, -1.0], [0.0, 1.0, -1.0], [0.0, 0.0, 1.0]]])
 
-    def fake_impact(impact, t, dt, q, v, step, *, poses, accel, trial_step):
+    def fake_impact(
+        impact, t, dt, q, v, step, *, poses, accel, trial_step, point_velocity
+    ):
         arm = 0.1
         q_arm, v_arm, _ = trial_step(t, arm, q, v, None)
 
@@ -304,6 +310,7 @@ def test_armed_surface_search_replays_same_hold_lattice(monkeypatch):
             0.5,
             duration_s=dt - arm,
             time_tolerance_s=1e-11,
+            face_point_velocity_world=lambda qq, vv, point: np.array([vv[0], 0.0, 0.0]),
         )
         event = result.event
         assert event is not None

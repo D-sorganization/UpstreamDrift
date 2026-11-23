@@ -143,7 +143,7 @@ nearest triangle normal can create a false signed-gap root. The prototype now
 brackets finite-surface sphere clearance, checks outward side and approach
 separately, and requires a 1 µm numerical clearance residual. It retains a
 bounded scan and a tessellation-dependent sampled miss surrogate. A focused
-contact, impact, stage-trace and MuJoCo suite passed 94 tests with graphics
+contact, impact, stage-trace and MuJoCo suite passed 105 tests with graphics
 disabled; a separate revision-2 flight
 suite passed 16 tests with one strict expected failure, including a check that
 an airborne endpoint cannot be reported as carry. Reference
@@ -156,6 +156,12 @@ clearance. The current arbitrary advance callback supplies neither a proven
 interval speed bound nor numerical distance enclosures; sampled qd alone does
 not bound the derivative of an RK4 trial-prefix map. Do not infer clearance
 certification from the sampled scan.
+An RK4 counterexample also showed that the trial-prefix clearance derivative
+can report approach while the returned state velocity is separating. The
+prototype now requires an event-state material-point velocity, checks it
+against the latch Jacobian and leaves unavailable or ambiguous mappings
+unresolved. MuJoCo uses its native point Jacobian; this does not certify
+between-sample motion or first contact.
 The renderer-pinned bundle has a ball centre from a legacy modeled-address
 passage plan, not an independently measured placement. Against that unchanged
 centre, 123 sampled pre-impact states of the exploratory v2 rollout had a
@@ -194,6 +200,14 @@ and two coordinate-ROM slots were exceeded; none of the generalized speed
 priors were exceeded. Five of those eleven capacity slots and all speed
 priors were assumption-marked. This is not Option B, a post-saturation
 measurement, anatomical clearance or an accepted trajectory.
+A matched 200 ms trial smoothed that same saved reference with an 11-sample
+cubic Savitzky--Golay filter followed by the existing weld projection. Peak
+ideal drive fell from 257.21 to 238.94 N m, but joint tracking RMS rose from
+0.00812 to 0.00913 rad, root translation RMS from 14.52 to 16.32 mm, and
+modeled ROM threshold flags from two to four slots; 11 modeled drive thresholds
+remained exceeded. This is not a physically accepted improvement.
+Each run used the same initial-state preparation procedure but its own
+reference's first pose, so this is not a same-state causal comparison.
 The same saved fit was tracked over the full 1.322-second pre-impact interval:
 42,304 of 42,304 accepted stages, no impact or numerical failure. Joint
 tracking RMS was 0.01532 rad, root translation RMS 30.43 mm, and peak
@@ -232,6 +246,16 @@ but diverged to 5.78 rad tracking RMS, exceeding 40 of 41 declared model ROM
 slots and all 41 speed priors. Its 0.2 N m pulsed run failed numerically at
 0.522 s. This gain choice is not an accepted controller; no conclusion about
 all possible gains or physical injury follows.
+With the same 1 ms hold and 3/0.3 gains, increasing RK4 substeps from eight to
+16 allowed the full 1.322-second run to finish, but joint tracking diverged
+to 3.083 rad RMS and peak unsaturated ideal drive reached 963.95 N m. Matched
+eight- and 16-substep states differed by at most 5.34e-7 rad at 0.4 s and
+1.176 rad at 0.6 s. Numerical resolution changes this setup's failure mode;
+the higher-resolution result is not an admitted controller.
+A matched 32-substep run completed 0.7 s with approximately the same 1.431 rad
+tracking RMS as the 16-substep run. Their maximum coordinate difference grew
+from 1.13e-7 rad at 0.4 s to 0.109 rad at 0.7 s; resolution convergence is
+not established.
 The flight suite was repeated in a fresh isolated Python 3.12 environment
 after building the current Rust extension and verifying physics revision 2:
 15 passed and one strict expected failure. The stale default revision 0 is

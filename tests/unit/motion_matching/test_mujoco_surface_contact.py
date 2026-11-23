@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from pathlib import Path
 
 from src.shared.python.model_appearance.ball import BALL_RADIUS_M
 from src.shared.python.motion_matching.impact_force import (
@@ -17,6 +18,41 @@ from src.shared.python.motion_matching.impact_force import (
 from src.shared.python.motion_matching.same_input.integrator import zoh_rk4_step
 
 pytestmark = [pytest.mark.unit, pytest.mark.requires_mujoco]
+
+
+def test_committed_driver_point_velocity_matches_kinematic_direction() -> None:
+    pytest.importorskip("mujoco")
+    from src.shared.python.motion_matching.same_input.plant import VectorPlant
+
+    path = Path(__file__).resolve().parents[3] / (
+        "docs/development/full_body_models/full_body_spec_anthro_driver_v2.json"
+    )
+    plant = VectorPlant("mujoco", path.read_bytes())
+    q = np.zeros(len(plant.coordinate_order))
+    v = np.linspace(-0.4, 0.5, len(q))
+    frame = "Clubhead"
+    transform = plant.kinematic_frames(q)[frame]
+    local = np.array([0.025, -0.012, 0.019])
+    point = transform[:3, :3] @ local + transform[:3, 3]
+    observed = plant.frame_point_velocity(q, v, frame, point)
+    epsilon = 1e-7
+    ahead = plant.kinematic_frames(q + epsilon * v)[frame]
+    behind = plant.kinematic_frames(q - epsilon * v)[frame]
+    estimate = (
+        (ahead[:3, :3] @ local + ahead[:3, 3])
+        - (behind[:3, :3] @ local + behind[:3, 3])
+    ) / (2 * epsilon)
+    np.testing.assert_allclose(observed, estimate, atol=1e-7, rtol=1e-7)
+    impact = ImpactForce(
+        frame=frame,
+        point_in_frame=local,
+        axis_in_frame=np.array([1.0, 0.0, 0.0]),
+        t_start_s=0.0,
+        duration_s=0.001,
+        swing_span_s=(0.0, 1.0),
+    )
+    latch_velocity = impact.point_jacobian(q, plant.kinematic_frames, local) @ v
+    np.testing.assert_allclose(observed, latch_velocity, atol=1e-7, rtol=1e-5)
 
 
 def test_surface_event_converges_under_step_halving_on_mujoco() -> None:
@@ -108,6 +144,7 @@ def test_surface_event_converges_under_step_halving_on_mujoco() -> None:
                 step,
                 poses=pose,
                 accel=accel,
+                point_velocity=lambda q, v, frame, point: np.array([v[0], 0.0, 0.0]),
             )
             t += dt_s
         assert result.contact_event is not None
