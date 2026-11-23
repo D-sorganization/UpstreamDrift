@@ -1915,3 +1915,11 @@ two modeled ROM flags. No measured ground reaction, motor saturation, impact,
 or verified speed and torque gates were included. Reject this fit as a
 baseline improvement; improved fitted balance alone did not predict improved
 forward tracking.
+
+Research branch `codex/15493-slice-audit29` at `0d1437e5fc` corrects two
+legacy passage-trigger timing cases: receding closest approach and an event
+before arming. Both regressions failed first; 20 focused tests passed, as did
+normal commit and push hooks including mypy, Bandit and the unit-test hook.
+This is a small pushed checkpoint, not a PR or the required finite-face
+contact gate. It overlaps the impact-force files of the larger real-face
+research branch and must be reconciled before integration.
