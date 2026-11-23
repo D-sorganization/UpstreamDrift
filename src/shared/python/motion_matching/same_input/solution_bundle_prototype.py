@@ -22,7 +22,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 Array = NDArray[np.float64]
-SCHEMA_VERSION = "research-solution-prototype/v2"
+SCHEMA_VERSION = "research-solution-prototype/v3"
 _REQUIRED = frozenset(
     {
         "schema_version",
@@ -58,6 +58,7 @@ _ARRAYS = frozenset(
         "q0",
         "qd0",
         "recorded_time_s",
+        "recorded_hold_time_s",
         "recorded_q",
         "recorded_qd",
         "commanded_tau",
@@ -180,12 +181,16 @@ class SolutionBundle:
         ):
             raise ValueError("joint order must be nonempty and unique")
         if (
-            set(controller) != {"kind", "hold", "saturation", "internal_state"}
+            set(controller)
+            != {"kind", "hold", "holds_per_step", "saturation", "internal_state"}
             or controller["kind"] != "fixed_pd_bspline"
             or controller["hold"] != "zoh"
             or not isinstance(controller["saturation"], str)
             or not controller["saturation"].strip()
             or not isinstance(controller["internal_state"], dict)
+            or isinstance(controller["holds_per_step"], bool)
+            or not isinstance(controller["holds_per_step"], int)
+            or controller["holds_per_step"] < 1
         ):
             raise ValueError(
                 "supported controller, hold, saturation and state required"
@@ -228,9 +233,27 @@ class SolutionBundle:
         for key in ("recorded_q", "recorded_qd"):
             if a[key].shape != (ts, n):
                 raise ValueError(f"{key} dimensions do not match recorded time")
+        holds = controller["holds_per_step"]
+        expected_holds = (ts - 1) * holds
+        if a["recorded_hold_time_s"].shape != (expected_holds,):
+            raise ValueError("recorded hold time grid has the wrong length")
         for key in ("commanded_tau", "ideal_input_tau"):
-            if a[key].shape != (ts - 1, n):
+            if a[key].shape != (expected_holds, n):
                 raise ValueError(f"{key} must have one row per hold")
+        dt = a["recorded_time_s"][1] - a["recorded_time_s"][0]
+        hold_dt = dt / holds
+        with np.errstate(over="ignore", invalid="ignore", under="ignore"):
+            grid = np.arange(ts, dtype=float) * dt
+            hold_grid = np.arange(expected_holds, dtype=float) * hold_dt
+        if (
+            not np.isfinite(hold_dt)
+            or hold_dt <= 0
+            or not np.isfinite(hold_grid).all()
+            or np.any(np.diff(hold_grid) <= 0)
+            or not np.array_equal(a["recorded_time_s"], grid)
+            or not np.array_equal(a["recorded_hold_time_s"], hold_grid)
+        ):
+            raise ValueError("recorded state or hold time grid is incompatible")
         for key in (
             "q0",
             "qd0",
@@ -286,8 +309,42 @@ class SolutionBundle:
         object.__setattr__(self, "arrays", a)
 
 
+def migrate_research_v2(
+    manifest: Mapping[str, Any], arrays: Mapping[str, Array], model_bytes: bytes
+) -> SolutionBundle:
+    """Explicitly convert authenticated research-v2 one-hold data to v3.
+
+    The caller must authenticate the old manifest and NPZ bytes before passing
+    decoded contents here. This does not migrate production solution schemas.
+    """
+    if (
+        not isinstance(manifest, Mapping)
+        or manifest.get("schema_version") != "research-solution-prototype/v2"
+    ):
+        raise ValueError("expected research v2 manifest")
+    metadata = json.loads(json.dumps(manifest, allow_nan=False))
+    controller = metadata.get("controller")
+    if not isinstance(controller, dict) or set(controller) != {
+        "kind",
+        "hold",
+        "saturation",
+        "internal_state",
+    }:
+        raise ValueError("invalid research v2 controller")
+    if set(arrays) != _ARRAYS - {"recorded_hold_time_s"}:
+        raise ValueError("invalid research v2 array inventory")
+    times = _array(arrays["recorded_time_s"], "recorded time")
+    _times(times, "recorded time")
+    metadata["schema_version"] = SCHEMA_VERSION
+    controller["holds_per_step"] = 1
+    migrated = dict(arrays)
+    migrated["recorded_hold_time_s"] = times[:-1].copy()
+    return SolutionBundle(metadata, migrated, model_bytes)
+
+
 class Playback(NamedTuple):
     time_s: Array
+    hold_time_s: Array
     q: Array
     qd: Array
     commanded_tau: Array
@@ -303,6 +360,7 @@ def recorded_playback(bundle: SolutionBundle) -> Playback:
             a[k].copy()
             for k in (
                 "recorded_time_s",
+                "recorded_hold_time_s",
                 "recorded_q",
                 "recorded_qd",
                 "commanded_tau",
@@ -348,8 +406,10 @@ def verify_forward_resimulation(
     if runtime_sha256 != bundle.manifest["integrator"]["runtime_sha256"]:
         raise ValueError("runtime identity does not match bundle")
     expected, actual = recorded_playback(bundle), runner(bundle)
-    if not isinstance(actual, Playback) or not np.array_equal(
-        actual.time_s, expected.time_s
+    if (
+        not isinstance(actual, Playback)
+        or not np.array_equal(actual.time_s, expected.time_s)
+        or not np.array_equal(actual.hold_time_s, expected.hold_time_s)
     ):
         raise ValueError("runner must return Playback on the recorded time grid")
     errors: dict[str, float] = {}

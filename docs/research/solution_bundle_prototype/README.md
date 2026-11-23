@@ -25,9 +25,12 @@ enforce archive resource limits for hostile inputs.
 
 `recorded_playback` copies stored values without running a plant. The separate
 `run_mujoco_ideal` entry point uses the existing same-input RK4 integrator and
-fixed-gain spline prototype. It accepts only one-hold-per-step, rigid-shaft,
+fixed-gain spline prototype. It accepts fixed equally spaced holds, rigid-shaft,
 no-impact MuJoCo inputs with explicit total-command clipping, zero root input,
-model-default environment and no external assets. Unsupported policies or a
+model-default environment and no external assets. State records are sampled
+after each integration step; command and ideal input records carry their own
+hold clock and are sampled once per hold. The number of holds must divide the
+RK4 substep count; closure projection remains once per step. Unsupported policies or a
 mismatched measured runtime fingerprint are rejected. The fingerprint covers
 only a declared subset of source and binaries, not the full environment; it is
 not an exact reproducibility guarantee. The recorded Git SHA is caller-asserted
@@ -37,9 +40,12 @@ software-clipped generalized input, not measured or post-actuator torque.
 `verify_forward_resimulation` compares outputs from a caller-supplied runner
 using per-quantity tolerances. Even when passed `run_mujoco_ideal`, its result
 cannot authenticate the runner or establish independent verification. The
-metadata must label flight and feasibility unavailable. The v2 research schema
-explicitly rejects v1 pending an actual migration; it does not silently
-reinterpret old data. Full runtime locking, asset embedding, multi-hold and
+metadata must label flight and feasibility unavailable. The v3 research schema
+rejects older schemas unless explicitly migrated. `migrate_research_v2` converts
+only already-authenticated, fixed-grid v2 one-hold records; callers must verify
+their old manifest and payload before decoding them. Migration retains the old
+runtime digest; a runner with changed code rejects that digest unless new
+evidence is independently generated. Full runtime locking, asset embedding and
 impact replay, downstream applied-actuator evidence, physical gates, flight
 metrics and independently replayed optimization results remain unimplemented.
 The code must not be used to claim Slice 2 is complete or to qualify a swing.

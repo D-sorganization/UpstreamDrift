@@ -1,6 +1,6 @@
 """Restricted real MuJoCo runner for the research solution prototype.
 
-Only rigid-club, scalar-coordinate, no-impact, one-hold RK4 runs are
+Only rigid-club, scalar-coordinate, no-impact, fixed-hold RK4 runs are
 supported. Clipping is a software ideal-input rule, not actuator saturation.
 The runtime fingerprint measures a limited declared subset and does not prove
 the full dependency environment or cross-platform determinism.
@@ -96,6 +96,7 @@ def run_mujoco_ideal(bundle: SolutionBundle) -> Playback:
         raise ValueError("runner contract is unavailable or unsupported")
     dt = policy["dt_s"]
     substeps, project = policy["substeps"], policy["project"]
+    holds = m["controller"]["holds_per_step"]
 
     def positive_finite(value: object) -> bool:
         if isinstance(value, bool) or not isinstance(value, int | float):
@@ -112,6 +113,7 @@ def run_mujoco_ideal(bundle: SolutionBundle) -> Playback:
         isinstance(substeps, bool)
         or not isinstance(substeps, int)
         or substeps < 1
+        or substeps % holds != 0
         or not isinstance(project, bool)
     ):
         raise ValueError("runner integration policy is invalid")
@@ -191,12 +193,19 @@ def run_mujoco_ideal(bundle: SolutionBundle) -> Playback:
         effort,
         steps=len(times) - 1,
         dt_s=float(dt),
-        policy=integrator.StepPolicy(substeps=substeps, project=project),
+        policy=integrator.StepPolicy(
+            substeps=substeps, project=project, effort_holds=holds
+        ),
     )
     if rollout.failure is not None or not np.array_equal(
         rollout.efforts, np.asarray(ideal_inputs)
     ):
         raise ValueError("ideal input was modified or rollout failed")
     return Playback(
-        rollout.time_s, rollout.q, rollout.v, np.asarray(commands), rollout.efforts
+        rollout.time_s,
+        np.arange(len(commands), dtype=float) * (float(dt) / holds),
+        rollout.q,
+        rollout.v,
+        np.asarray(commands),
+        rollout.efforts,
     )

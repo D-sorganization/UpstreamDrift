@@ -21,7 +21,7 @@ pytestmark = pytest.mark.unit
 def _fixture():
     model = b'{"synthetic":true}'
     manifest = {
-        "schema_version": "research-solution-prototype/v2",
+        "schema_version": "research-solution-prototype/v3",
         "research_only": True,
         "runner": {"mode": "unavailable"},
         "solution_id": "synthetic",
@@ -38,6 +38,7 @@ def _fixture():
         "controller": {
             "kind": "fixed_pd_bspline",
             "hold": "zoh",
+            "holds_per_step": 1,
             "saturation": "declared",
             "internal_state": {},
         },
@@ -66,6 +67,7 @@ def _fixture():
         "q0": np.array([0.0]),
         "qd0": np.array([1.0]),
         "recorded_time_s": np.array([0.0, 1.0]),
+        "recorded_hold_time_s": np.array([0.0]),
         "recorded_q": np.array([[0.0], [1.0]]),
         "recorded_qd": np.array([[1.0], [1.0]]),
         "commanded_tau": np.array([[2.0]]),
@@ -272,9 +274,29 @@ def test_unavailable_runner_and_old_research_schema_fail_closed():
     with pytest.raises(ValueError, match="runner"):
         run_mujoco_ideal(b)
     old = deepcopy(b.manifest)
-    old["schema_version"] = "research-solution-prototype/v1"
+    old["schema_version"] = "research-solution-prototype/v2"
     with pytest.raises(ValueError, match="migration"):
         SolutionBundle(old, b.arrays, b.model_bytes)
+
+
+def test_explicit_v2_migration_preserves_single_hold_values():
+    from src.shared.python.motion_matching.same_input.solution_bundle_prototype import (
+        migrate_research_v2,
+    )
+
+    b = _fixture()
+    old, arrays = deepcopy(b.manifest), {k: v.copy() for k, v in b.arrays.items()}
+    old["schema_version"] = "research-solution-prototype/v2"
+    del old["controller"]["holds_per_step"]
+    del arrays["recorded_hold_time_s"]
+    migrated = migrate_research_v2(old, arrays, b.model_bytes)
+    assert migrated.manifest["controller"]["holds_per_step"] == 1
+    np.testing.assert_array_equal(migrated.arrays["recorded_hold_time_s"], [0.0])
+    np.testing.assert_array_equal(
+        migrated.arrays["ideal_input_tau"], arrays["ideal_input_tau"]
+    )
+    with pytest.raises(ValueError, match="v2"):
+        migrate_research_v2(b.manifest, arrays, b.model_bytes)
 
 
 def test_real_mujoco_ideal_forward_replay_uses_actual_integrator(tmp_path):
@@ -328,6 +350,7 @@ def test_real_mujoco_ideal_forward_replay_uses_actual_integrator(tmp_path):
         "q0": np.zeros(n),
         "qd0": np.zeros(n),
         "recorded_time_s": times,
+        "recorded_hold_time_s": times[:-1],
         "recorded_q": np.zeros((3, n)),
         "recorded_qd": np.zeros((3, n)),
         "commanded_tau": np.zeros((2, n)),
@@ -412,6 +435,142 @@ def test_real_mujoco_ideal_forward_replay_uses_actual_integrator(tmp_path):
     wrong_manifest["model_sha256"] = hashlib.sha256(wrong_model).hexdigest()
     with pytest.raises(ValueError, match="coordinate inventory"):
         run_mujoco_ideal(SolutionBundle(wrong_manifest, arrays, wrong_model))
+
+
+def test_multiple_holds_preserve_control_clock_and_replay(tmp_path):
+    pytest.importorskip("mujoco")
+    from pathlib import Path
+    from src.shared.python.motion_matching.same_input.integrator import ROOT_COORDINATES
+    from src.shared.python.motion_matching.same_input.solution_bundle_mujoco_replay import (
+        measured_runtime_fingerprint,
+    )
+    from src.shared.python.motion_matching.same_input.solution_bundle_prototype import (
+        run_mujoco_ideal,
+    )
+
+    model = (
+        Path(__file__).resolve().parents[4]
+        / "docs/development/full_body_models/full_body_spec_anthro_driver_v2.json"
+    ).read_bytes()
+    names = json.loads(model)["coordinate_order"]
+    n, dt = len(names), 0.0002
+    root = [names.index(name) for name in ROOT_COORDINATES]
+    active = next(i for i in range(n) if i not in root)
+    b = _fixture()
+    manifest = deepcopy(b.manifest)
+    manifest["model_sha256"] = hashlib.sha256(model).hexdigest()
+    manifest["conventions"]["joint_order"] = names
+    manifest["controller"].update(saturation="ideal_clip_total", holds_per_step=2)
+    manifest["integrator"] = {
+        "kind": "rk4_zoh",
+        "runtime": "partial_measured_v1",
+        "runtime_sha256": measured_runtime_fingerprint(),
+    }
+    manifest["runner"] = {
+        "mode": "mujoco_ideal_zoh",
+        "dt_s": dt,
+        "substeps": 4,
+        "project": False,
+        "trust_radius": 1.0,
+        "min_spacing_s": dt,
+    }
+    t = np.arange(3) * dt
+    lower, upper = np.full(n, -10.0), np.full(n, 10.0)
+    lower[root] = upper[root] = 0.0
+    ff = np.zeros((3, n))
+    ff[:, active] = [0.0, 2.0, 4.0]
+    arrays = {
+        "reference_time_s": t,
+        "q_ref": np.zeros((3, n)),
+        "qd_ref": np.zeros((3, n)),
+        "tau_ff_ref": ff,
+        "spline_knots_s": np.r_[np.repeat(t[0], 4), np.repeat(t[-1], 4)],
+        "spline_coefficients": np.zeros((4, n)),
+        "kp": np.zeros(n),
+        "kd": np.zeros(n),
+        "q0": np.zeros(n),
+        "qd0": np.zeros(n),
+        "recorded_time_s": t,
+        "recorded_hold_time_s": np.arange(4) * (dt / 2),
+        "recorded_q": np.zeros((3, n)),
+        "recorded_qd": np.zeros((3, n)),
+        "commanded_tau": np.zeros((4, n)),
+        "ideal_input_tau": np.zeros((4, n)),
+        "saturation_lower": lower,
+        "saturation_upper": upper,
+        "spline_scale": np.ones(n),
+    }
+    initial = SolutionBundle(manifest, arrays, model)
+    actual = run_mujoco_ideal(initial)
+    np.testing.assert_array_equal(actual.hold_time_s, arrays["recorded_hold_time_s"])
+    np.testing.assert_allclose(
+        actual.commanded_tau[:, active], [0, 1, 2, 3], atol=1e-12
+    )
+    arrays.update(
+        recorded_q=actual.q,
+        recorded_qd=actual.qd,
+        commanded_tau=actual.commanded_tau,
+        ideal_input_tau=actual.ideal_input_tau,
+    )
+    bundle = SolutionBundle(manifest, arrays, model)
+    digest = save_solution(tmp_path / "multi.json", bundle)
+    restored = load_solution(
+        tmp_path / "multi.json",
+        expected_manifest_sha256=digest,
+        expected_model_sha256=manifest["model_sha256"],
+        expected_runtime_sha256=manifest["integrator"]["runtime_sha256"],
+    )
+    result = verify_forward_resimulation(
+        restored,
+        run_mujoco_ideal,
+        dict.fromkeys(("q", "qd", "commanded_tau", "ideal_input_tau"), (1e-12, 1e-12)),
+        runtime_sha256=manifest["integrator"]["runtime_sha256"],
+    )
+    assert result.passed and not result.independently_verified
+    invalid_policy = deepcopy(manifest)
+    invalid_policy["runner"]["substeps"] = 3
+    with pytest.raises(ValueError, match="policy"):
+        run_mujoco_ideal(SolutionBundle(invalid_policy, arrays, model))
+
+
+@pytest.mark.parametrize(
+    "bad", ["count", "clock", "offset", "noninteger", "fraction", "huge"]
+)
+def test_hold_schedule_fails_closed(bad):
+    b = _fixture()
+    manifest = deepcopy(b.manifest)
+    arrays = {k: v.copy() for k, v in b.arrays.items()}
+    if bad == "count":
+        manifest["controller"]["holds_per_step"] = 2
+    elif bad == "clock":
+        arrays["recorded_hold_time_s"][0] = 0.01
+    elif bad == "offset":
+        arrays["recorded_time_s"] += 0.1
+        arrays["recorded_hold_time_s"] += 0.1
+    elif bad == "noninteger":
+        manifest["controller"]["holds_per_step"] = True
+    elif bad == "fraction":
+        manifest["controller"]["holds_per_step"] = 1.5
+    else:
+        manifest["controller"]["holds_per_step"] = 10**100
+    with pytest.raises(ValueError, match="hold|controller"):
+        SolutionBundle(manifest, arrays, b.model_bytes)
+
+
+def test_forward_comparison_rejects_wrong_hold_clock():
+    b = _fixture()
+
+    def wrong_clock(bundle):
+        playback = recorded_playback(bundle)
+        return playback._replace(hold_time_s=playback.hold_time_s + 0.01)
+
+    with pytest.raises(ValueError, match="time grid"):
+        verify_forward_resimulation(
+            b,
+            wrong_clock,
+            dict.fromkeys(("q", "qd", "commanded_tau", "ideal_input_tau"), (0.0, 0.0)),
+            runtime_sha256="c" * 64,
+        )
 
 
 @pytest.mark.parametrize("field", ["feasibility", "flight_metrics"])

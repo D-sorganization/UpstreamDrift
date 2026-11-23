@@ -9,8 +9,11 @@ embedded; separately named assets and the runtime are represented by
 caller-asserted hashes. The manifest hash must be retained independently.
 
 The prototype admits finite scalar-coordinate arrays with strictly increasing
-reference and recorded times, cubic clamped spline knots, and one declared
-zero-order-held input per recorded interval. Array dimensions and model,
+reference and recorded times, cubic clamped spline knots, and a declared
+number of equally spaced zero-order holds per recorded integration step.
+State and hold clocks are stored separately; the hold count divides the
+substep count and closure projection, if selected, occurs once per step.
+Array dimensions and model,
 asset, runtime and payload identities are checked before use. It rejects an
 impact and requires flight and feasibility results to be unavailable.
 
@@ -24,7 +27,8 @@ measures a declared subset of code and libraries, not the full environment.
 The stored Git SHA is a caller assertion, not a verified clean checkout.
 The stored ideal input is not measured post-actuator torque. Numerical
 agreement is not proof of independent simulation, continuous-time agreement,
-anatomical feasibility or impact. Full asset embedding, explicit migrations,
+anatomical feasibility or impact. An explicit research-v2 to v3 migration
+accepts only previously authenticated, fixed-grid one-hold data. Full asset embedding, production migrations,
 complete controller and integrator policies and a qualified forward runner
 are required before this prototype could become a solution bundle contract.
 \end{document}
