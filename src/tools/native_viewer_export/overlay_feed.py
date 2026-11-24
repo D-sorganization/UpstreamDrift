@@ -15,13 +15,16 @@ from src.shared.python.force_overlay.conversions import restrict_frame
 from src.shared.python.force_overlay.glyphs import ForceGlyphStyle, GlyphSet
 from src.shared.python.force_overlay.renderers.meshcat_glyphs import legend_text
 from src.shared.python.grip_contact.palm_thumb import PALM_THUMB_LABEL
+from src.tools.native_viewer_export.arrow_style import load_arrow_style
 
 
 STANDARD_GRAVITY_M_S2 = 9.80665
 BODY_WEIGHT_ARROW_M = 0.5
 
 
-def default_glyph_style(body_mass_kg: float | None = None) -> ForceGlyphStyle:
+def default_glyph_style(
+    body_mass_kg: float | None = None, *, arrow_style: str | None = None
+) -> ForceGlyphStyle:
     """Golfer-scale glyph style.
 
     With ``body_mass_kg`` the force arrows use ``body_weight`` scaling so one
@@ -30,8 +33,13 @@ def default_glyph_style(body_mass_kg: float | None = None) -> ForceGlyphStyle:
     capped at 0.6 m length (0.30 m radius) to prevent oversized arcs near
     impact (NV-9, #11697). Without body mass the fixed 0.7 m per kN scale is kept.
 
-    Raises ``ValueError`` when ``body_mass_kg`` is not finite and positive.
+    ``arrow_style`` names a look in ``src/config/force_arrow_style.json``
+    (default: its ``default_style``); the shaft radius comes from it.
+
+    Raises ``ValueError`` when ``body_mass_kg`` is not finite and positive or
+    the arrow style is unknown.
     """
+    shaft_radius_m = load_arrow_style(arrow_style).shaft_radius_m
     if body_mass_kg is None:
         return ForceGlyphStyle(
             force_scale_m_per_n=0.7 / 1000.0,
@@ -39,7 +47,7 @@ def default_glyph_style(body_mass_kg: float | None = None) -> ForceGlyphStyle:
             max_length_m=0.9,
             max_torque_length_m=0.6,
             min_length_m=0.04,
-            shaft_radius_m=0.015,
+            shaft_radius_m=shaft_radius_m,
             magnitude_floor_nm=8.0,
             magnitude_floor_n=20.0,
         )
@@ -55,7 +63,7 @@ def default_glyph_style(body_mass_kg: float | None = None) -> ForceGlyphStyle:
         max_length_m=3.0,
         max_torque_length_m=0.6,
         min_length_m=0.04,
-        shaft_radius_m=0.015,
+        shaft_radius_m=shaft_radius_m,
         magnitude_floor_nm=8.0,
         magnitude_floor_n=20.0,
     )

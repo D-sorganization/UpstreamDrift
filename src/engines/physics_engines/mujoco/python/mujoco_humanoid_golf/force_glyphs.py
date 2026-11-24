@@ -92,14 +92,20 @@ class SceneGlyphReceipt:
     dropped: int
 
 
-def segment_geom_count(glyphs: GlyphSet) -> int:
+def segment_geom_count(
+    glyphs: GlyphSet, *, arrow_head_shaft_radii: float | None = None
+) -> int:
     """Return the total number of MjvGeom entries required to render glyphs.
 
     Hosts can size scene.maxgeom or warn before rendering.
-    Each arrow requires 1 geom. Each torque arc requires (len(polyline) - 1)
-    capsule connectors plus 1 arrow head connector.
+    Each arrow requires 1 geom; with ``arrow_head_shaft_radii`` (see
+    ``add_glyphs_to_scene``) an upper bound of 2 is counted per arrow. Each
+    torque arc requires (len(polyline) - 1) capsule connectors plus 1 arrow
+    head connector.
     """
-    count = len(glyphs.arrows) + sum(1 for a in glyphs.arrows if a.clamped)
+    per_arrow = 1 if arrow_head_shaft_radii is None else 2
+    count = per_arrow * len(glyphs.arrows)
+    count += sum(1 for a in glyphs.arrows if a.clamped)
     for arc in glyphs.torque_arcs:
         n_pts = len(arc.polyline_m)
         segments = max(0, n_pts - 1)
@@ -146,6 +152,7 @@ def add_glyphs_to_scene(
     glyphs: GlyphSet,
     *,
     arc_width_m: float = 0.006,
+    arrow_head_shaft_radii: float | None = None,
 ) -> SceneGlyphReceipt:
     """Draw a GlyphSet into a MuJoCo MjvScene as 3D arrows and torque arcs.
 
@@ -156,6 +163,12 @@ def add_glyphs_to_scene(
         scene: Target MuJoCo scene whose pre-allocated geoms buffer is populated.
         glyphs: Deterministic GlyphSet containing arrows and torque arcs.
         arc_width_m: Diameter in meters of the torque arc polyline capsules.
+        arrow_head_shaft_radii: When set, the head length of each force arrow
+            is ``span = arrow_head_shaft_radii * shaft_radius_m``; an arrow
+            longer than ``span`` is drawn as a capsule shaft up to ``span``
+            before the tip plus an arrow geom of the same width over the last
+            ``span`` metres, so the head keeps one size instead of growing
+            into a long spike. ``None`` (the default) draws one arrow geom.
 
     Returns:
         SceneGlyphReceipt recording the count of geoms added and dropped.
@@ -171,6 +184,13 @@ def add_glyphs_to_scene(
         raise TypeError(f"glyphs must be a GlyphSet, got {type(glyphs).__name__}")
     if arc_width_m <= 0.0 or not np.isfinite(arc_width_m):
         raise ValueError(f"arc_width_m must be positive and finite, got {arc_width_m}")
+    if arrow_head_shaft_radii is not None and not (
+        np.isfinite(arrow_head_shaft_radii) and arrow_head_shaft_radii > 0.0
+    ):
+        raise ValueError(
+            "arrow head length in shaft radii must be positive and finite, "
+            f"got {arrow_head_shaft_radii}"
+        )
 
     added = 0
     dropped = 0
@@ -183,7 +203,22 @@ def add_glyphs_to_scene(
         to_pt = np.asarray(arrow.tip_m, dtype=np.float64)
         width = 2.0 * float(arrow.shaft_radius_m)
 
-        if _append_connector(scene, arrow_type, width, from_pt, to_pt, arrow.rgba):
+        head_from = from_pt
+        length = float(np.linalg.norm(to_pt - from_pt))
+        span = (
+            None
+            if arrow_head_shaft_radii is None
+            else arrow_head_shaft_radii * float(arrow.shaft_radius_m)
+        )
+        if span is not None and length > span:
+            head_from = to_pt - (to_pt - from_pt) / length * span
+            if _append_connector(
+                scene, capsule_type, width, from_pt, head_from, arrow.rgba
+            ):
+                added += 1
+            else:
+                dropped += 1
+        if _append_connector(scene, arrow_type, width, head_from, to_pt, arrow.rgba):
             added += 1
         else:
             dropped += 1
