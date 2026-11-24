@@ -61,6 +61,8 @@ class OverlayOptions:
     forces_requested: bool = False
     #: tip-to-tail ZTCF drift + ZVCF control hand-on-club force (#15685)
     ztcf_zvcf_hand_force: bool = False
+    #: length gain for the tip-to-tail hand-force arrows only (#15685)
+    ztcf_arrow_gain: float = 1.0
 
 
 def _grip_source(swing: SwingInput, engine: str, mujoco_source: Any) -> tuple[Any, str]:
@@ -544,11 +546,15 @@ def build_overlay_feed(
         ellipsoids_for=ellipsoids_for,
     )
     if opts.ztcf_zvcf_hand_force:
-        from src.tools.native_viewer_export.ztcf_feed import LEGEND, ztcf_zvcf_arrows
-
-        feed = replace(
-            feed, extra_arrows=ztcf_zvcf_arrows(swing, style), extra_legend=LEGEND
+        from src.tools.native_viewer_export.ztcf_feed import (
+            gained_style,
+            legend_for,
+            ztcf_zvcf_arrows,
         )
+
+        gain = opts.ztcf_arrow_gain
+        arrows = ztcf_zvcf_arrows(swing, gained_style(style, gain))
+        feed = replace(feed, extra_arrows=arrows, extra_legend=legend_for(gain))
     return feed, lookat
 
 

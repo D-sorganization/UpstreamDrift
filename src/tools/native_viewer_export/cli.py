@@ -170,6 +170,13 @@ def _add_hand_force_arguments(p: argparse.ArgumentParser) -> None:
         "needs a dynamics bundle with efforts (default: off) (#15685)",
     )
     p.add_argument(
+        "--ztcf-arrow-gain",
+        type=float,
+        default=1.0,
+        help="draw the tip-to-tail hand-force arrows this many times longer; "
+        "the legend states the gain (default: 1)",
+    )
+    p.add_argument(
         "--palm-thumb-force",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -875,6 +882,7 @@ def main(
                     visibility=_visibility_of(args),
                     axial_impact_blackout=args.axial_impact_blackout,
                     ztcf_zvcf_hand_force=args.ztcf_zvcf_hand_force,
+                    ztcf_arrow_gain=args.ztcf_arrow_gain,
                 ),
             ),
         )
