@@ -577,6 +577,45 @@ def draw_text_panel(
     return out
 
 
+COLOUR_KEY_TITLE = "Colour Key"
+#: one colour key row: its text and the 8-bit RGB it is drawn in
+KeyEntry = tuple[str, tuple[int, int, int]]
+
+
+def _key_lines(entries: Sequence[KeyEntry]) -> list[tuple[str, Cells, bool]]:
+    for _, rgb in entries:
+        if len(rgb) != 3 or not all(isinstance(c, int) and 0 <= c <= 255 for c in rgb):
+            raise ValueError(f"key colour must be three 0-255 integers, got {rgb!r}")
+    return [(text, "", False) for text, _ in entries]
+
+
+def colour_key_box(
+    shape: tuple[int, ...], entries: Sequence[KeyEntry]
+) -> tuple[int, int, int, int]:
+    """Pixel box of the colour key: top left, under the view label, clear of
+    the impact card on the right (#15150 Track Z, Z3)."""
+    return text_panel_box(shape, COLOUR_KEY_TITLE, _key_lines(entries), "left")[0]
+
+
+def draw_colour_key(img: Image8, entries: Sequence[KeyEntry]) -> Image8:
+    """Copy of ``img`` with a panel naming each arrow colour in that colour.
+
+    An empty key draws nothing. Only pixels in :func:`colour_key_box` change.
+
+    Raises:
+        ValueError: a colour is not three integers in 0-255.
+    """
+    _check_image(img)
+    lines = _key_lines(entries)
+    if not lines:
+        return img.copy()
+    box, size = text_panel_box(img.shape, COLOUR_KEY_TITLE, lines, "left")
+    colours = [rgb for _, rgb in entries]
+    return draw_text_panel(
+        img, box, size, COLOUR_KEY_TITLE, lines, label_colours=colours
+    )
+
+
 def draw_hud(img: Image8, hud: HudInfo, *, size: int = HUD_SIZE_PX) -> Image8:
     """Draw the HUD lines along the bottom edge of ``img``.
 
