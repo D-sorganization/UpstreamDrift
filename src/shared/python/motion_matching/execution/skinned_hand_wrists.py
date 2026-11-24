@@ -106,7 +106,9 @@ def apply_skinned_hand_wrists(document: Mapping[str, Any]) -> dict[str, Any]:
     club = assembly_from_spec(document)
     if club is None:
         raise ValueError("document has no club to hold")
-    target = wrist_joints_m(club, spec_grip_pose(document))
+    target = wrist_joints_m(
+        club, spec_grip_pose(document), handedness=subject_handedness(document)
+    )
     now = wrist_joints_in_club_m(document)
     out = copy.deepcopy(dict(document))
     placed = all(np.allclose(now[side], target[side], atol=1e-12) for side in target)
