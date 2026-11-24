@@ -84,3 +84,32 @@ def test_flex_contracts() -> None:
 def test_cli_parser_defaults() -> None:
     args = build_parser().parse_args(["--bundle", "b.npz", "--out", "o"])
     assert args.club == "driver" and args.flexes is None
+
+
+def _run_with_tail(peak_after_impact_m: float):
+    """A ShaftRun whose bend grows after impact (the extrapolated tail)."""
+    from src.shared.python.club_fitting.grip_driven_shaft import ShaftRun
+
+    times = np.linspace(-0.1, 0.025, 6)
+    bend = np.where(times <= 0.0, 0.1, peak_after_impact_m)
+    defl = np.column_stack([bend, np.zeros(6), np.zeros(6)])
+    vec, rot = np.zeros((6, 3)), np.tile(np.eye(3), (6, 1, 1))
+    zero = np.zeros(6)
+    return ShaftRun(
+        times, np.zeros((6, 8)), defl, vec, vec, vec, vec, rot, rot,
+        zero, zero, zero, np.array([]),
+    )  # fmt: skip
+
+
+def test_peak_bend_is_measured_up_to_impact_not_in_the_extrapolated_tail() -> None:
+    """After impact the grip motion is extrapolated and no ball load acts, so
+    the bend there grows without limit; the reported peak ends at impact."""
+    from src.shared.python.club_fitting.flex_sweep import _row
+
+    run = _run_with_tail(0.3)
+    assert run.peak_tip_deflection_until_m(0.0) == pytest.approx(0.1)
+    assert _row("Stiff", 280.0, run, 0.0, None).peak_tip_deflection_mm == (
+        pytest.approx(100.0)
+    )
+    with pytest.raises(ValueError, match="before the run"):
+        run.peak_tip_deflection_until_m(-0.5)

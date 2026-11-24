@@ -116,6 +116,20 @@ class ShaftRun:
     def peak_tip_deflection_m(self) -> float:
         return float(np.max(np.linalg.norm(self.tip_deflection_m, axis=1)))
 
+    def peak_tip_deflection_until_m(self, t_end_s: float) -> float:
+        """Peak tip deflection over ``times_s <= t_end_s``.
+
+        Use the impact time: after it the grip motion is extrapolated and no
+        ball load acts on the head, so the bend there is not physical.
+
+        Raises:
+            ValueError: ``t_end_s`` is before the first recorded time.
+        """
+        keep = self.times_s <= t_end_s
+        if not np.any(keep):
+            raise ValueError("t_end_s is before the run starts")
+        return float(np.max(np.linalg.norm(self.tip_deflection_m[keep], axis=1)))
+
     def at(self, name: str, t: float) -> float:
         """Linear interpolation of the scalar series ``name`` at time ``t``."""
         return float(np.interp(t, self.times_s, getattr(self, name)))
