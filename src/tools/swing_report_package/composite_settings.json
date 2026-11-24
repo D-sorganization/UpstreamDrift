@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "description": "Case comparison grid video and phase freeze-frame sheet layout (#15722). Case colours come from the tip-to-tail style (one source with the arrows and the ground reaction); titles and subtitles are here.",
+  "case_order": ["ztcf", "zvcf", "total"],
+  "cases": {
+    "ztcf": {"title": "ZTCF: Drift", "subtitle": "Gravity, Momentum and Passive Effects (No Applied Torques)"},
+    "zvcf": {"title": "ZVCF: Control", "subtitle": "Applied Joint Torques Alone (No Gravity)"},
+    "total": {"title": "Total: ZTCF + ZVCF", "subtitle": "Everything Acting on the Golfer and Club"}
+  },
+  "banner_height_px": 96,
+  "title_px": 40,
+  "subtitle_px": 26,
+  "grid_columns": 2,
+  "tile_width_px": 1920,
+  "cell_width_px": 960,
+  "row_label_width_px": 420,
+  "row_label_px": 36,
+  "info_background_hex": "#1E2430",
+  "crf": 16
+}
