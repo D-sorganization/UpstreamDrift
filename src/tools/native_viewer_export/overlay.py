@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Callable, Iterable, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 
 import numpy as np
@@ -59,6 +59,8 @@ class OverlayOptions:
     axial_impact_blackout: bool = True
     #: the user passed a vector flag, so a kinematic replay still draws vectors
     forces_requested: bool = False
+    #: tip-to-tail ZTCF drift + ZVCF control hand-on-club force (#15685)
+    ztcf_zvcf_hand_force: bool = False
 
 
 def _grip_source(swing: SwingInput, engine: str, mujoco_source: Any) -> tuple[Any, str]:
@@ -541,6 +543,12 @@ def build_overlay_feed(
         hand_panel_rows=panel_rows_fn,
         ellipsoids_for=ellipsoids_for,
     )
+    if opts.ztcf_zvcf_hand_force:
+        from src.tools.native_viewer_export.ztcf_feed import LEGEND, ztcf_zvcf_arrows
+
+        feed = replace(
+            feed, extra_arrows=ztcf_zvcf_arrows(swing, style), extra_legend=LEGEND
+        )
     return feed, lookat
 
 

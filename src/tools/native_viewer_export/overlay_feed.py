@@ -91,6 +91,10 @@ class OverlayFeed:
     ellipsoids_for: Callable[[Any], tuple[Any, Any, Any]] | None = None
     #: HUD note when force/torque vectors are withheld (``kinematic_replay``)
     forces_note: str = ""
+    #: extra arrows by source state (tip-to-tail ZTCF/ZVCF hand force, #15685)
+    extra_arrows: Callable[[int], tuple[Any, ...]] | None = None
+    #: legend text appended when ``extra_arrows`` draws anything
+    extra_legend: str = ""
     _frames: dict[int, Any] = field(
         default_factory=dict, init=False, repr=False, compare=False
     )
@@ -108,8 +112,16 @@ class OverlayFeed:
         ``k``, so they sit on the body that frame shows. Raises ``ValueError``
         when the feed has ellipsoids it cannot evaluate at another swing.
         """
-        source = self.frame_at
-        feed = replace(self, frame_at=lambda i: source(source_index(int(i))))
+        source, arrows_at = self.frame_at, self.extra_arrows
+        feed = replace(
+            self,
+            frame_at=lambda i: source(source_index(int(i))),
+            extra_arrows=(
+                None
+                if arrows_at is None
+                else (lambda i: arrows_at(source_index(int(i))))
+            ),
+        )
         if self.hand_ellipsoids is None and self.hand_hud_lines is None:
             return feed
         if self.ellipsoids_for is None:
@@ -134,6 +146,7 @@ class OverlayFeed:
             hand_ellipsoids=clamp(self.hand_ellipsoids),
             hand_hud_lines=clamp(self.hand_hud_lines),
             hand_panel_rows=clamp(self.hand_panel_rows),
+            extra_arrows=clamp(self.extra_arrows),
         )
 
     def glyphs_at(self, index: int) -> GlyphSet:
@@ -160,6 +173,8 @@ class OverlayFeed:
         if allocated and self.show_palm_thumb:
             frame = replace(frame, wrenches=(*frame.wrenches, *allocated))
         gs = build(frame, self.style)
+        if self.extra_arrows is not None:
+            gs = replace(gs, arrows=(*gs.arrows, *self.extra_arrows(index)))
         if self.hand_ellipsoids is not None:
             extra_e = self.hand_ellipsoids(index)
             if extra_e:
@@ -179,7 +194,10 @@ class OverlayFeed:
     def legend_for(self, glyphs: GlyphSet | None) -> str:
         """The legend row; none on a replay that draws no vectors (#15150)."""
         drawn = glyphs is not None and (glyphs.arrows or glyphs.torque_arcs)
-        return "" if self.forces_note and not drawn else self.legend(glyphs)
+        text = "" if self.forces_note and not drawn else self.legend(glyphs)
+        if self.extra_legend and glyphs is not None and self.extra_arrows is not None:
+            text = f"{text} | {self.extra_legend}" if text else self.extra_legend
+        return text
 
     @staticmethod
     def legend(glyphs: GlyphSet | None) -> str:
