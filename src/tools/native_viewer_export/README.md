@@ -464,7 +464,7 @@ simulated. The mode is determined from the bundle, never guessed
 - `open_loop_dynamics`: efforts replayed from an initial state; the bundle
   must declare it with provenance `replay_mode: open_loop_dynamics`, as no
   writer does yet.
-- `unknown_replay_mode` (shown as "unknown replay mode"): anything else.
+- `unknown_replay_mode` (shown as "Unknown Replay Mode (provenance not recorded)"): anything else.
 
 `--no-hud` removes the line; the manifest field stays.
 

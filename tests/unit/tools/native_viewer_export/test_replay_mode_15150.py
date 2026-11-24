@@ -62,7 +62,9 @@ def test_empty_efforts_raise() -> None:
 def test_display_text_comes_from_settings_for_every_mode() -> None:
     texts = {m: rm.display_text(m) for m in rm.ReplayMode}
     assert len(set(texts.values())) == len(rm.ReplayMode)
-    assert texts[rm.ReplayMode.UNKNOWN] == "unknown replay mode"
+    assert (
+        texts[rm.ReplayMode.UNKNOWN] == "Unknown Replay Mode (provenance not recorded)"
+    )
     assert "kinematic replay" in texts[rm.ReplayMode.KINEMATIC].lower()
     with pytest.raises(TypeError):
         rm.display_text("kinematic_replay")  # type: ignore[arg-type]

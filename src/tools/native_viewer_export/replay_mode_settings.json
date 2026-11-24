@@ -5,7 +5,7 @@
     "kinematic_replay": "Kinematic Replay (recorded motion, no dynamics)",
     "feedback_tracked_dynamics": "Feedback-Tracked Dynamics (closed loop)",
     "open_loop_dynamics": "Open-Loop Dynamics from t0",
-    "unknown_replay_mode": "unknown replay mode"
+    "unknown_replay_mode": "Unknown Replay Mode (provenance not recorded)"
   },
   "hud_prefix": "Replay: ",
   "sources": {
