@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "description": "Midhands equivalent wrench of both hands on the club (#15720): one force at the midpoint of the hands plus the equivalent couple, drawn per ZTCF/ZVCF case in the case colour.",
+  "case_hex": {
+    "ztcf": "#0072B2",
+    "zvcf": "#D55E00",
+    "total": "#F2F2F2"
+  },
+  "case_text": {
+    "ztcf": "ZTCF drift",
+    "zvcf": "ZVCF control",
+    "total": "Total (ZTCF + ZVCF)"
+  }
+}

@@ -656,6 +656,8 @@ def _with_ztcf_zvcf(
 
     gain, view, quantity = opts.ztcf_arrow_gain, opts.ztcf_view, opts.ztcf_quantity
     hands = hands_of(opts.ztcf_hands)
+    if not hands:
+        return _with_midhands(feed, swing, style, view, gain)
     arrows = ztcf_zvcf_arrows(
         swing, gained_style(style, gain), None, view, quantity, hands, gain
     )
@@ -665,6 +667,39 @@ def _with_ztcf_zvcf(
         extra_legend=legend_for(gain, view, quantity, hands),
         colour_key=hands_colour_key(view, hands),
     )
+
+
+def _with_midhands(
+    feed: OverlayFeed, swing: SwingInput, style: Any, case: str, gain: float
+) -> OverlayFeed:
+    """``feed`` with both hands reduced to one force + couple at their
+    midpoint (#15720), one ZTCF/ZVCF case per render.
+
+    ``gain`` lengthens the force and the couple alike: the couple is tens of
+    newton metres, a curl hidden inside the hands at the body torque scale.
+    """
+    from src.tools.native_viewer_export import ztcf_feed
+    from src.tools.native_viewer_export.midhands import (
+        MIDHANDS_CASES,
+        load_midhands_settings,
+        midhands_glyphs,
+        midhands_key,
+    )
+
+    if case not in MIDHANDS_CASES:
+        raise ValueError(
+            f"the midhands equivalent draws one case of {MIDHANDS_CASES}; "
+            f"--ztcf-zvcf-view {case!r} is not one"
+        )
+    look = load_midhands_settings()
+    gained = ztcf_feed.gained_style(style, gain)
+    gained = replace(gained, torque_scale_m_per_nm=style.torque_scale_m_per_nm * gain)
+    glyphs = ztcf_feed.split_glyphs(
+        swing, lambda split: midhands_glyphs(split, case, gained, look)
+    )
+    ((text, _rgb),) = key = midhands_key(case, look)
+    legend = text if gain == 1.0 else f"{text}; drawn {gain:g}x"
+    return replace(feed, extra_arrows=glyphs, extra_legend=legend, colour_key=key)
 
 
 def face_centre_trajectory(

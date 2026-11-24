@@ -12,7 +12,11 @@ import math
 from typing import Any
 
 from src.shared.python.force_overlay.conversions import restrict_frame
-from src.shared.python.force_overlay.glyphs import ForceGlyphStyle, GlyphSet
+from src.shared.python.force_overlay.glyphs import (
+    ForceGlyphStyle,
+    GlyphSet,
+    TorqueArcGlyph,
+)
 from src.shared.python.force_overlay.renderers.meshcat_glyphs import legend_text
 from src.shared.python.grip_contact.palm_thumb import PALM_THUMB_LABEL
 from src.tools.native_viewer_export.arrow_style import load_arrow_style
@@ -101,7 +105,7 @@ class OverlayFeed:
     forces_note: str = ""
     #: HUD note naming the ZTCF/ZVCF part the segment shading shows (Z4b)
     shading_note: str = ""
-    #: extra arrows by source state (tip-to-tail ZTCF/ZVCF hand force, #15685)
+    #: extra arrows (and torque arcs, #15720) by source state (ZTCF/ZVCF, #15685)
     extra_arrows: Callable[[int], tuple[Any, ...]] | None = None
     #: legend text appended when ``extra_arrows`` draws anything
     extra_legend: str = ""
@@ -189,7 +193,13 @@ class OverlayFeed:
             frame = replace(frame, wrenches=(*frame.wrenches, *allocated))
         gs = build(frame, self.style)
         if self.extra_arrows is not None:
-            gs = replace(gs, arrows=(*gs.arrows, *self.extra_arrows(index)))
+            extra = self.extra_arrows(index)
+            arcs = tuple(g for g in extra if isinstance(g, TorqueArcGlyph))
+            gs = replace(
+                gs,
+                arrows=(*gs.arrows, *(g for g in extra if g not in arcs)),
+                torque_arcs=(*gs.torque_arcs, *arcs),
+            )
         if self.hand_ellipsoids is not None:
             extra_e = self.hand_ellipsoids(index)
             if extra_e:

@@ -43,12 +43,14 @@ __all__ = [
     "hands_colour_key",
     "hands_of",
     "legend_for",
+    "split_glyphs",
     "split_provider",
     "ztcf_zvcf_arrows",
 ]
 
 #: ``--ztcf-zvcf-hands``: both hands or one.
-HAND_CHOICES = ("both", *HANDS)
+#: ``midhands`` draws no hand: both reduce to one force + couple (#15720)
+HAND_CHOICES = ("both", *HANDS, "midhands")
 _HAND_LABEL = {"lead": "Lead", "trail": "Trail"}
 _VIEW_TEXT = {
     "tip_to_tail": "ZTCF drift + ZVCF control = total, tip to tail",
@@ -98,6 +100,8 @@ def hands_of(choice: str) -> tuple[str, ...]:
     """The hands a ``--ztcf-zvcf-hands`` choice draws; ``ValueError`` otherwise."""
     if choice not in HAND_CHOICES:
         raise ValueError(f"hands must be one of {HAND_CHOICES}, got {choice!r}")
+    if choice == "midhands":
+        return ()
     return HANDS if choice == "both" else (choice,)
 
 
@@ -260,16 +264,13 @@ def _states(swing: Any) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     return q, v, efforts[step]
 
 
-def ztcf_zvcf_arrows(
-    swing: Any,
-    style: ForceGlyphStyle,
-    colours: TipToTailStyle | None = None,
-    view: str = "tip_to_tail",
-    quantity: str = "force",
-    hands: Sequence[str] = HANDS,
-    gain: float = 1.0,
-) -> Callable[[int], tuple[ArrowGlyph, ...]]:
-    """Arrows by source state index, evaluated lazily and cached.
+def split_glyphs(
+    swing: Any, draw: Callable[[Any], tuple[Any, ...]]
+) -> Callable[[int], tuple[Any, ...]]:
+    """``draw(split)`` by source state index, evaluated lazily and cached.
+
+    ``split`` is the one-row hand-wrench split of the state (#15720 draws the
+    midhands equivalent from it, :func:`ztcf_zvcf_arrows` the hands).
 
     Raises:
         ValueError: the bundle has no efforts (a kinematic replay), or its
@@ -291,15 +292,32 @@ def ztcf_zvcf_arrows(
         bundle.spec_bytes, tuple(bundle.coordinate_order)
     )
     q, v, tau = _states(swing)
-    cache: dict[int, tuple[ArrowGlyph, ...]] = {}
+    cache: dict[int, tuple[Any, ...]] = {}
 
-    def arrows(index: int) -> tuple[ArrowGlyph, ...]:
+    def glyphs(index: int) -> tuple[Any, ...]:
         k = min(max(int(index), 0), q.shape[0] - 1)
         if k not in cache:
-            split = hand_wrench_split(
-                provider, frame_at, club_load, lead_point, q[k], v[k], tau[k]
+            cache[k] = draw(
+                hand_wrench_split(
+                    provider, frame_at, club_load, lead_point, q[k], v[k], tau[k]
+                )
             )
-            cache[k] = hand_arrows(split, style, view, quantity, hands, colours, gain)
         return cache[k]
 
-    return arrows
+    return glyphs
+
+
+def ztcf_zvcf_arrows(
+    swing: Any,
+    style: ForceGlyphStyle,
+    colours: TipToTailStyle | None = None,
+    view: str = "tip_to_tail",
+    quantity: str = "force",
+    hands: Sequence[str] = HANDS,
+    gain: float = 1.0,
+) -> Callable[[int], tuple[ArrowGlyph, ...]]:
+    """Hand arrows by source state index (:func:`split_glyphs`)."""
+    return split_glyphs(
+        swing,
+        lambda split: hand_arrows(split, style, view, quantity, hands, colours, gain),
+    )
