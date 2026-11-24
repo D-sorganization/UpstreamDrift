@@ -156,6 +156,7 @@ def _closure_provider(
     from src.engines.physics_engines.pinocchio.python.force_adapter import (
         PinocchioForceAdapter,
     )
+    from src.shared.python.loop_nullspace.grounded_provider import GroundedProvider
     from src.shared.python.loop_nullspace.provider import (
         AdapterConstrainedProvider,
         ReorderedProvider,
@@ -163,7 +164,10 @@ def _closure_provider(
 
     adapter = PinocchioForceAdapter(spec_bytes)
     native = tuple(adapter.coordinate_order)
-    provider: Any = AdapterConstrainedProvider(adapter)
+    # The feet are reactions too: planted, re-solved in each part (Z5).
+    provider: Any = GroundedProvider(
+        AdapterConstrainedProvider(adapter), adapter.ground_weld_rows
+    )
     if native == order:
         return (
             provider,
