@@ -112,12 +112,14 @@ class OverlayFeed:
         ``k``, so they sit on the body that frame shows. Raises ``ValueError``
         when the feed has ellipsoids it cannot evaluate at another swing.
         """
-        source, extra = self.frame_at, self.extra_arrows
+        source, arrows_at = self.frame_at, self.extra_arrows
         feed = replace(
             self,
             frame_at=lambda i: source(source_index(int(i))),
             extra_arrows=(
-                None if extra is None else (lambda i: extra(source_index(int(i))))
+                None
+                if arrows_at is None
+                else (lambda i: arrows_at(source_index(int(i))))
             ),
         )
         if self.hand_ellipsoids is None and self.hand_hud_lines is None:
