@@ -45,6 +45,7 @@ from src.shared.python.impact_parameters.panel_model import ImpactCard
 from src.tools.native_viewer_export.compositor import (
     HudInfo,
     compose_grid,
+    draw_colour_key,
     draw_hud,
     draw_view_label,
     event_caption_for_time,
@@ -62,7 +63,7 @@ from src.tools.native_viewer_export.overlay_feed import (  # noqa: F401 - re-exp
     OverlayFeed,
     default_glyph_style,
 )
-from src.tools.native_viewer_export.shading import shading_legend
+from src.tools.native_viewer_export.shading import shading_colour_key, shading_legend
 from src.tools.native_viewer_export.inset_strip import (
     StripRenderer,
     StripSeries,
@@ -853,6 +854,11 @@ def _export_clip(
     glyph_counts: list[int] = []
     viewer = VIEWER_NAMES.get(engine, engine)
     fixed = (*shot_setup.hud_lines(settings), replay_mode.hud_line_of(swing.bundle))
+    shaded = settings.shading is not None and settings.shading_enabled
+    key_entries = (
+        *(shown_feed.colour_key if shown_feed is not None else ()),
+        *(shading_colour_key(settings.shading) if shaded else ()),
+    )
     frames = 0
     try:
         for k, tiles in zip(
@@ -879,9 +885,7 @@ def _export_clip(
                 else OverlayFeed.legend(glyphs),
                 speed=plan.speed,
                 ms_from_impact=(t - impact) * 1000.0,
-                shading_legend=shading_legend(settings.shading)
-                if settings.shading is not None and settings.shading_enabled
-                else "",
+                shading_legend=shading_legend(settings.shading) if shaded else "",
                 event_caption=_swing_event_caption(shown, t, impact)
                 if settings.event_captions
                 else "",
@@ -907,8 +911,10 @@ def _export_clip(
                 outputs = factors_panel.draw_card_all(outputs, card, GRID_VIEW)
             if factors is not None:
                 outputs = factors.draw_all(outputs, t, GRID_VIEW)
-            if settings.hud and shown_feed is not None:
-                outputs = {n: shown_feed.draw_key(f) for n, f in outputs.items()}
+            if settings.hud and key_entries:
+                outputs = {
+                    n: draw_colour_key(f, key_entries) for n, f in outputs.items()
+                }
             outputs = ellipsoid_hud.draw_all(overlays, shown_feed, k, hud, outputs)
             outputs = flight_inset.draw_all(overlays, shown_feed, k, hud, outputs)
             if strip is not None:  # cursor at this frame's swing time
