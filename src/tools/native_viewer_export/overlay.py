@@ -11,7 +11,7 @@ import json
 import logging
 from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, replace
-from typing import Any
+from typing import Any, NamedTuple
 
 import numpy as np
 from numpy.typing import NDArray
@@ -543,7 +543,8 @@ def build_overlay_feed(
         ellipsoids_for = _ellipsoid_feed_factory(swing, engine, opts, active_ellipsoids)
         hand_ellipsoids_fn, hand_hud_lines_fn, panel_rows_fn = ellipsoids_for(swing)
 
-    frame_at, shading_note = _part_shading(provider.frame_at, swing, axial, opts)
+    parts = _part_shading(provider.frame_at, swing, axial, opts)
+    frame_at, shading_note = parts.frame_at, parts.note
     feed = OverlayFeed(
         frame_at,
         style,
@@ -560,17 +561,59 @@ def build_overlay_feed(
     )
     if opts.ztcf_zvcf_hand_force:
         feed = _with_ztcf_zvcf(feed, swing, style, opts)
+    if parts.ground_arrows is not None:
+        feed = _with_ground_arrows(feed, parts, style, opts.force_part)
     return feed, lookat
+
+
+def _joined_lines(
+    first: Callable[[int], tuple[Any, ...]] | None,
+    then: Callable[[int], tuple[Any, ...]],
+) -> Callable[[int], tuple[Any, ...]]:
+    """Items of ``first`` (when set) then those of ``then``, by frame index."""
+    if first is None:
+        return then
+    return lambda index: (*first(index), *then(index))
+
+
+class _PartForces(NamedTuple):
+    """The case-split frames, their HUD note and, for a force part, its net
+    ground readout and a ``style -> arrows`` builder of its ground arrow."""
+
+    frame_at: Any
+    note: str
+    ground_lines: Callable[[int], tuple[str, ...]] | None = None
+    ground_arrows: Callable[[Any], Callable[[int], tuple[Any, ...]]] | None = None
+
+
+def _with_ground_arrows(
+    feed: OverlayFeed, parts: _PartForces, style: Any, part: str
+) -> OverlayFeed:
+    """``feed`` with ``part``'s case-coloured ground arrow, its key rows and
+    its net ground readout."""
+    from src.tools.native_viewer_export.ztcf_axial import ground_key
+
+    if parts.ground_arrows is None:
+        raise ValueError(f"no ground arrows for force part {part!r}")
+    return replace(
+        feed,
+        extra_arrows=_joined_lines(feed.extra_arrows, parts.ground_arrows(style)),
+        extra_hud_lines=parts.ground_lines,
+        colour_key=(*feed.colour_key, *ground_key(part)),
+    )
 
 
 def _part_shading(
     frame_at: Any, swing: SwingInput, axial: bool, opts: OverlayOptions
-) -> tuple[Any, str]:
-    """``frame_at`` with the chosen ZTCF/ZVCF shading and force parts, and
-    their HUD note (one split per state serves both)."""
+) -> _PartForces:
+    """``frame_at`` with the chosen ZTCF/ZVCF shading and force parts (one
+    split per state serves the shading, the force kinds and the ground)."""
     from src.tools.native_viewer_export.ztcf_axial import (
         FORCE_NOTES,
         SHADING_NOTES,
+        ground_arrows,
+        ground_readout,
+        net_ground,
         swing_part_splits,
         with_part_shading,
         with_part_wrenches,
@@ -579,14 +622,24 @@ def _part_shading(
     shading = opts.shading_part if axial else "recorded"
     force = opts.force_part
     with_part_shading(frame_at, dict, shading)  # validates the part names
-    with_part_wrenches(frame_at, dict, force)
+    with_part_wrenches(frame_at, force)
     if shading == "recorded" and force == "recorded":
-        return frame_at, ""
+        return _PartForces(frame_at, "")
     splits = swing_part_splits(swing)
     out = with_part_shading(frame_at, lambda i: splits(i).axial, shading)
-    out = with_part_wrenches(out, lambda i: splits(i).ground, force)
+    out = with_part_wrenches(out, force)
     notes = (SHADING_NOTES[shading], FORCE_NOTES[force])
-    return out, " | ".join(n for n in notes if n)
+    note = " | ".join(n for n in notes if n)
+    if force == "recorded":
+        return _PartForces(out, note)
+
+    def readout(index: int) -> tuple[str, ...]:
+        return (ground_readout(net_ground(splits(index).ground[force]), force),)
+
+    def arrows(style: Any) -> Callable[[int], tuple[Any, ...]]:
+        return ground_arrows(lambda i: splits(i).ground, force, style)
+
+    return _PartForces(out, note, readout, arrows)
 
 
 def _with_ztcf_zvcf(

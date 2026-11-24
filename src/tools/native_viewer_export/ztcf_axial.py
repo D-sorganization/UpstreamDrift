@@ -23,7 +23,6 @@ actuator torques in the ZTCF, no weight in the ZVCF).
 
 from __future__ import annotations
 
-import re
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, replace
 from typing import Any
@@ -32,7 +31,10 @@ import numpy as np
 
 from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
 from src.shared.python.body_part_viz.mujoco_axial_loads import BodyWrench
-from src.shared.python.force_overlay.contracts import OverlayWrench, WrenchKind
+from src.shared.python.force_overlay.contracts import WrenchKind
+from src.shared.python.force_overlay.glyphs import ArrowGlyph, ForceGlyphStyle
+from src.shared.python.force_overlay.palette import get_kind_rgba, hex_to_rgba
+from src.shared.python.force_overlay.tip_to_tail import TipToTailStyle, part_arrows
 
 __all__ = [
     "FORCE_NOTES",
@@ -41,7 +43,12 @@ __all__ = [
     "SHADING_PARTS",
     "PartLoad",
     "PartSplit",
+    "NET_GROUND_BODY",
     "centre_of_pressure",
+    "ground_arrows",
+    "ground_key",
+    "ground_readout",
+    "net_ground",
     "part_ground",
     "swing_part_splits",
     "with_part_wrenches",
@@ -169,28 +176,115 @@ def part_ground(
     return {"ztcf": tuple(drift), "zvcf": tuple(control), "total": total}
 
 
-def _ground_arrow(wrench: BodyWrench, part: str) -> OverlayWrench:
-    force = wrench.force_n or (0.0, 0.0, 0.0)
-    point = centre_of_pressure(wrench.point_m, force, wrench.torque_nm or (0, 0, 0))
-    return OverlayWrench(
-        WrenchKind.CONTACT,
-        "contact:" + re.sub(r"[^A-Za-z0-9_.:-]", "_", wrench.body),
-        wrench.body,
-        point,
-        force_n=tuple(map(float, force)),  # type: ignore[arg-type]
-        source=f"{part.upper()} ground reaction, feet planted (centre of pressure)",
+NET_GROUND_BODY = "net_ground"
+
+
+def net_ground(wrenches: Sequence[BodyWrench]) -> BodyWrench | None:
+    """Net ground wrench of all planted feet, about their mean point.
+
+    With both feet welded the split between the feet is one null-space
+    solution of an indeterminate support; the net wrench is unique, so it is
+    what a case render draws. ``None`` without wrenches.
+    """
+    if not wrenches:
+        return None
+    points = np.array([w.point_m for w in wrenches], dtype=float)
+    forces = np.array([w.force_n or (0, 0, 0) for w in wrenches], dtype=float)
+    torques = np.array([w.torque_nm or (0, 0, 0) for w in wrenches], dtype=float)
+    ref = points.mean(axis=0)
+    moment = torques.sum(axis=0) + np.cross(points - ref, forces).sum(axis=0)
+    return BodyWrench(
+        NET_GROUND_BODY,
+        tuple(ref.tolist()),  # type: ignore[arg-type]
+        tuple(forces.sum(axis=0).tolist()),  # type: ignore[arg-type]
+        tuple(moment.tolist()),  # type: ignore[arg-type]
+    )
+
+
+def ground_readout(net: BodyWrench | None, part: str) -> str:
+    """HUD line with ``part``'s net ground force (vertical, horizontal)."""
+    name = part.upper()
+    if net is None:
+        return f"Net ground reaction ({name}): not drawn (no planted feet)"
+    f = np.asarray(net.force_n or (0, 0, 0), dtype=float)
+    return (
+        f"Net ground reaction ({name}, both feet): {f[2]:.0f} N vertical, "
+        f"{float(np.hypot(f[0], f[1])):.0f} N horizontal"
+    )
+
+
+#: the tip-to-tail view that draws each case's single vector
+_CASE_VIEW = {"ztcf": "ztcf", "zvcf": "zvcf", "total": "total"}
+_CASE_HEX = {"ztcf": "drift_hex", "zvcf": "control_hex", "total": "total_hex"}
+
+
+def ground_arrows(
+    ground_at: Callable[[int], Mapping[str, Sequence[BodyWrench]]],
+    part: str,
+    style: ForceGlyphStyle,
+    colours: TipToTailStyle | None = None,
+) -> Callable[[int], tuple[ArrowGlyph, ...]]:
+    """``part``'s net ground-reaction arrow by state, in the case colour.
+
+    The arrow starts at the part's own combined centre of pressure and uses
+    the case colours of the hand arrows (``colours``, default the tip-to-tail
+    look: ZTCF drift, ZVCF control, total), at ``style``'s force scale with
+    no gain.
+
+    Raises:
+        ValueError: ``part`` is not one of the ZTCF/ZVCF/total cases.
+    """
+    if part not in _CASE_VIEW:
+        raise ValueError(
+            f"ground arrows need a case in {tuple(_CASE_VIEW)}, got {part!r}"
+        )
+    zero = (0.0, 0.0, 0.0)
+
+    def at(index: int) -> tuple[ArrowGlyph, ...]:
+        net = net_ground(ground_at(index)[part])
+        if net is None:
+            return ()
+        force = net.force_n or zero
+        point = centre_of_pressure(net.point_m, force, net.torque_nm or zero)
+        drift = force if part != "zvcf" else zero
+        control = force if part == "zvcf" else zero
+        return part_arrows(
+            point, drift, control, style, _CASE_VIEW[part], "force", colours, "ground"
+        )
+
+    return at
+
+
+def ground_key(
+    part: str, colours: TipToTailStyle | None = None
+) -> tuple[tuple[str, tuple[int, int, int]], ...]:
+    """Colour-key rows of ``part``'s ground arrow and, when the case draws
+    it, the weight arrow; none for ``recorded``."""
+    if part not in _CASE_HEX:
+        return ()
+    rows = [
+        (
+            f"Net ground reaction, both feet ({part.upper()})",
+            hex_to_rgba(getattr(colours or TipToTailStyle(), _CASE_HEX[part])),
+        )
+    ]
+    if WrenchKind.GRAVITY in PART_KINDS[part]:
+        rows.append(("Body weight (gravity)", get_kind_rgba(WrenchKind.GRAVITY)))
+    return tuple(
+        (text, (round(255 * c[0]), round(255 * c[1]), round(255 * c[2])))
+        for text, c in rows
     )
 
 
 def with_part_wrenches(
     frame_at: Callable[[int], Any],
-    ground_at: Callable[[int], Mapping[str, Sequence[BodyWrench]]],
     part: str,
 ) -> Callable[[int], Any]:
     """``frame_at`` showing ``part``'s ground reaction and force kinds only.
 
-    The contact arrows are replaced by the part's planted-foot reactions;
-    other kinds are kept when :data:`PART_KINDS` lists them for ``part``.
+    The recorded contact arrows are dropped (the part's net ground reaction
+    is drawn in its case colour by :func:`ground_arrows`); other kinds are
+    kept when :data:`PART_KINDS` lists them for ``part``.
     ``recorded`` returns ``frame_at`` itself.
 
     Raises:
@@ -205,8 +299,7 @@ def with_part_wrenches(
     def at(index: int) -> Any:
         frame = frame_at(index)
         kept = tuple(w for w in frame.wrenches if w.kind in kinds)
-        ground = tuple(_ground_arrow(w, part) for w in ground_at(index)[part])
-        return replace(frame, wrenches=(*kept, *ground))
+        return replace(frame, wrenches=kept)
 
     return at
 

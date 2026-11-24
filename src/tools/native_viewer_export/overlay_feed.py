@@ -105,6 +105,8 @@ class OverlayFeed:
     extra_arrows: Callable[[int], tuple[Any, ...]] | None = None
     #: legend text appended when ``extra_arrows`` draws anything
     extra_legend: str = ""
+    #: extra HUD lines by source state (ZTCF/ZVCF net ground readout, #15150)
+    extra_hud_lines: Callable[[int], tuple[str, ...]] | None = None
     #: ``(text, RGB)`` naming each extra arrow colour (#15150 Track Z, Z3b)
     colour_key: tuple[tuple[str, tuple[int, int, int]], ...] = ()
     _frames: dict[int, Any] = field(
@@ -124,15 +126,15 @@ class OverlayFeed:
         ``k``, so they sit on the body that frame shows. Raises ``ValueError``
         when the feed has ellipsoids it cannot evaluate at another swing.
         """
-        source, arrows_at = self.frame_at, self.extra_arrows
+
+        def mapped(fn: Any) -> Any:
+            return None if fn is None else (lambda i: fn(source_index(int(i))))
+
         feed = replace(
             self,
-            frame_at=lambda i: source(source_index(int(i))),
-            extra_arrows=(
-                None
-                if arrows_at is None
-                else (lambda i: arrows_at(source_index(int(i))))
-            ),
+            frame_at=mapped(self.frame_at),
+            extra_arrows=mapped(self.extra_arrows),
+            extra_hud_lines=mapped(self.extra_hud_lines),
         )
         if self.hand_ellipsoids is None and self.hand_hud_lines is None:
             return feed
@@ -159,6 +161,7 @@ class OverlayFeed:
             hand_hud_lines=clamp(self.hand_hud_lines),
             hand_panel_rows=clamp(self.hand_panel_rows),
             extra_arrows=clamp(self.extra_arrows),
+            extra_hud_lines=clamp(self.extra_hud_lines),
         )
 
     def glyphs_at(self, index: int) -> GlyphSet:
@@ -197,8 +200,9 @@ class OverlayFeed:
         """HUD capability/mobility text lines at frame ``index`` (HCM-3, #14004),
         then the forces note."""
         lines = () if self.hand_hud_lines is None else self.hand_hud_lines(index)
+        extra = () if self.extra_hud_lines is None else self.extra_hud_lines(index)
         notes = tuple(n for n in (self.forces_note, self.shading_note) if n)
-        return (*lines, *notes)
+        return (*lines, *extra, *notes)
 
     def axial_at(self, index: int) -> Any:
         """``AxialLoadFrame`` of state ``index``, or ``None`` when not computed."""
