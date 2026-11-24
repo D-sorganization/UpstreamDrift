@@ -15,8 +15,24 @@ os.environ.setdefault("PYTEST_QT_API", "pyqt6")
 
 
 pytest.importorskip("PyQt6")
-pytest.importorskip("pydrake")
 pytest.importorskip("pytestqt")
+
+
+def _real_pydrake() -> bool:
+    """True only for a genuine pydrake install, not a ``sys.modules`` mock."""
+    import importlib
+
+    try:
+        module = importlib.import_module("pydrake")
+    except ImportError:
+        return False
+    return hasattr(module, "__path__") and type(module).__module__ != "unittest.mock"
+
+
+# unit-test-gate does not install Drake; a collection-time MagicMock would
+# otherwise pass importorskip and fail inside AddMultibodyPlantSceneGraph.
+if not _real_pydrake():
+    pytest.skip("pydrake is not installed (or is mocked)", allow_module_level=True)
 
 from PyQt6 import sip
 from PyQt6.QtCore import QCoreApplication, QEvent, Qt
