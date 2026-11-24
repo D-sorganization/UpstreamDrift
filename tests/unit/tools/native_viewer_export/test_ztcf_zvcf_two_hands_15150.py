@@ -190,3 +190,41 @@ def test_live_both_hands_on_the_seed_swing() -> None:
     labels = _labels(arrows)
     assert any(lb.startswith("Lead ") for lb in labels)
     assert any(lb.startswith("Trail ") for lb in labels)
+
+
+def test_each_hand_has_its_own_colours() -> None:
+    """Review of the first render: both hands in one palette read as one hand."""
+    arrows = hand_arrows(_split(), STYLE, "tip_to_tail", "force", HANDS)
+    by_label = {a.label: a.rgba for a in arrows}
+    for part in ("ztcf:drift", "zvcf:control", "total"):
+        assert by_label[f"Lead {part}"] != by_label[f"Trail {part}"]
+
+
+def test_the_colour_key_names_each_hand_in_its_colours() -> None:
+    from src.tools.native_viewer_export.ztcf_feed import hands_colour_key
+
+    key = hands_colour_key("tip_to_tail", HANDS)
+    assert len(key) == 2 * len(colour_key("tip_to_tail"))
+    texts = [text for text, _ in key]
+    assert sum(t.startswith("Lead ") for t in texts) == 3
+    assert sum(t.startswith("Trail ") for t in texts) == 3
+    assert len({rgb for _, rgb in key}) == len(key)
+    (only,) = hands_colour_key("zvcf", ("trail",))
+    assert only[0].startswith("Trail ZVCF")
+
+
+def test_hand_colours_come_from_the_settings_file(tmp_path) -> None:
+    from src.tools.native_viewer_export.ztcf_feed import (
+        HAND_COLOURS_PATH,
+        hand_styles,
+    )
+
+    styles = hand_styles()
+    assert set(styles) == set(HANDS)
+    doc = json.loads(HAND_COLOURS_PATH.read_text(encoding="utf-8"))
+    assert styles["trail"].drift_hex == doc["trail"]["drift_hex"]
+    del doc["trail"]
+    bad = tmp_path / "colours.json"
+    bad.write_text(json.dumps(doc), encoding="utf-8")
+    with pytest.raises(ValueError, match="trail"):
+        hand_styles(bad)
