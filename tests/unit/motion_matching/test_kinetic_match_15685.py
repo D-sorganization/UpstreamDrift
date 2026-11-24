@@ -37,6 +37,18 @@ class _Adapter:
         return np.zeros(2)
 
 
+def _close_pose(q):
+    """Fake pose closer for the ``c == a`` closure (bundle columns 6, 8)."""
+    closed = np.array(q, dtype=float)
+    gap = abs(closed[8] - closed[6])
+    closed[8] = closed[6]
+    return closed, gap
+
+
+def _match(bundle, settings, allocate):
+    return km.kinetic_match(bundle, settings, _Adapter(), allocate, _close_pose)
+
+
 def _settings(**over):
     base = km.load_settings()
     return replace(base, **over)
@@ -91,7 +103,7 @@ def test_settings_load_and_validate() -> None:
 
 def test_rates_are_reordered_and_projected_onto_the_closure() -> None:
     allocate, calls = _fake_allocate()
-    km.kinetic_match(_bundle(), _settings(), _Adapter(), allocate)
+    _match(_bundle(), _settings(), allocate)
     jac = _Adapter().compute_grip_jacobian(None)
     assert np.abs(calls["v"] @ jac.T).max() < 1e-9
     assert np.abs(calls["a"] @ jac.T).max() < 1e-9
@@ -101,7 +113,7 @@ def test_rates_are_reordered_and_projected_onto_the_closure() -> None:
 
 def test_efforts_come_back_in_bundle_order_and_receipt_passes() -> None:
     allocate, _ = _fake_allocate()
-    out, receipt = km.kinetic_match(_bundle(), _settings(), _Adapter(), allocate)
+    out, receipt = _match(_bundle(), _settings(), allocate)
     # native actuated (c, a, b) carry (1, 2, 10) -> bundle (a, b, c) = (2, 10, 1)
     np.testing.assert_allclose(out.efforts[:, 6:], np.tile([2.0, 10.0, 1.0], (39, 1)))
     assert not out.efforts[:, :6].any()
@@ -113,7 +125,7 @@ def test_efforts_come_back_in_bundle_order_and_receipt_passes() -> None:
 
 def test_implausible_peaks_and_root_residual_are_reported_not_hidden() -> None:
     allocate, _ = _fake_allocate(peak_tau=5000.0, grip=9000.0, root=500.0)
-    _, receipt = km.kinetic_match(_bundle(), _settings(), _Adapter(), allocate)
+    _, receipt = _match(_bundle(), _settings(), allocate)
     assert receipt["verdict"] == "implausible"
     reasons = " ".join(receipt["reasons"])
     assert "grip" in reasons and "torque" in reasons and "root" in reasons
@@ -126,6 +138,29 @@ def test_preconditions() -> None:
     bad = _bundle()
     bad.coordinate_order = ORDER[:-1] + ("zz",)
     with pytest.raises(ValueError, match="coordinate"):
-        km.kinetic_match(bad, _settings(), _Adapter(), allocate)
+        _match(bad, _settings(), allocate)
     with pytest.raises(ValueError, match="frames"):
-        km.kinetic_match(_bundle(frames=3), _settings(), _Adapter(), allocate)
+        _match(_bundle(frames=3), _settings(), allocate)
+
+
+def test_pose_is_closed_before_inverse_dynamics_and_gap_reported() -> None:
+    """An open weld lets the grip multiplier act as a fake external moment.
+
+    The matched pose leaves a gap at the hand weld; the loop Jacobian then has
+    root columns of the gap's size and the allocator buys root moment with
+    kN of grip force. The pose is projected onto the closure first and the
+    largest gap closed is reported.
+    """
+    allocate, calls = _fake_allocate()
+    _, receipt = _match(_bundle(), _settings(), allocate)
+    # native (c, a) = columns 6, 7 must coincide after closing the pose
+    np.testing.assert_allclose(calls["q"][:, 6], calls["q"][:, 7], atol=1e-12)
+    assert receipt["closure_gap_max_m"] == pytest.approx(
+        abs(0.5 * 0.39 - np.sin(0.39)), abs=0.05
+    )
+
+
+def test_closure_tolerance_is_a_setting() -> None:
+    assert km.load_settings().closure_tolerance_m > 0
+    with pytest.raises(ValueError, match="limit"):
+        replace(km.load_settings(), closure_tolerance_m=0.0)
