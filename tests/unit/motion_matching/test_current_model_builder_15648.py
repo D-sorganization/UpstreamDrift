@@ -2,9 +2,9 @@
 
 ``build_anthropometric_spec`` used to write specs that drew the deprecated
 capsule hands and loft body. It now applies the registry's current model: the
-skinned hand wrist revision and the skinned body. A left-handed spec keeps the
-deprecated parts (the skinned pair is posed right-handed) and says so. Every
-spec gains the current flexible shaft (#15684).
+skinned hand wrist revision and the skinned body. A left-handed spec is the
+exact sagittal mirror of the right-handed current-model spec (#15652), so it is
+on the current model too. Every spec gains the current flexible shaft (#15684).
 """
 
 from __future__ import annotations
@@ -29,6 +29,9 @@ from src.shared.python.motion_matching.execution.grip_selection import (
 )
 from src.shared.python.motion_matching.execution.skinned_hand_wrists import (
     wrist_joints_in_club_m,
+)
+from src.shared.python.motion_matching.mirrored_spec import (
+    mirror_spec_to_left_handed,
 )
 from src.shared.python.motion_matching.execution.spec_revisions import (
     with_current_golfer_model,
@@ -65,16 +68,40 @@ def test_the_revision_moves_placements_only(built: Any) -> None:
     assert masses == [(b["name"], b.get("mass")) for b in shafted["bodies"]]
 
 
-def test_a_left_handed_spec_keeps_the_deprecated_parts_and_says_so(
-    built: Any, caplog: pytest.LogCaptureFixture
+def test_a_left_handed_spec_is_the_mirror_of_the_right_handed_one(
+    built: Any,
 ) -> None:
+    right, _ = with_current_golfer_model(built.document, built.subject)
+    left, subject = with_current_golfer_model(
+        built.document, built.subject, handedness="left"
+    )
+    assert left == mirror_spec_to_left_handed(right)
+    assert gmv.deprecated_parts(left) == ()
+    assert subject["handedness"] == "left"
+
+
+def test_a_left_label_on_unmirrored_geometry_is_refused(built: Any) -> None:
+    """A right-handed body labelled left would draw right-handed hands."""
     left = copy.deepcopy(built.document)
     left["subject"]["handedness"] = "left"
-    gmv.reset_deprecation_warnings()
-    with caplog.at_level(logging.WARNING):
-        document, _ = with_current_golfer_model(left, built.subject)
-    assert document == with_current_shaft(left)
-    assert "capsule" in caplog.text and "loft" in caplog.text
+    with pytest.raises(ValueError, match="handedness='left'"):
+        with_current_golfer_model(left, built.subject)
+
+
+def test_the_builder_writes_a_left_handed_current_model_spec(tmp_path: Any) -> None:
+    spec_path, _receipt = spec_builder.build_anthropometric_spec(
+        native_path=get_native_geometry_spec(),
+        osim_path=get_opensim_model(),
+        native_candidate_path=get_candidate_geometry_spec(),
+        stature_m=1.80,
+        mass_kg=80.0,
+        output_dir=tmp_path,
+        handedness="left",
+    )
+    document = json.loads(spec_path.read_text(encoding="utf-8"))
+    assert document["subject"]["handedness"] == "left"
+    assert "handedness_mirror" in document
+    assert gmv.deprecated_parts(document) == ()
 
 
 def test_the_builder_writes_a_current_model_spec(tmp_path: Any) -> None:

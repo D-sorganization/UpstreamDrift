@@ -1009,7 +1009,11 @@ def build_anthropometric_spec(
     club: str = "driver",
     **kwargs: Any,
 ) -> tuple[Path, Path]:
-    """Build candidate spec and receipt, writing both to output_dir."""
+    """Build candidate spec and receipt, writing both to output_dir.
+
+    ``handedness="left"`` writes the sagittal mirror of the right-handed
+    current-model spec (#15652).
+    """
     name = kwargs.get("name")
     spec_name = name or f"full_body_spec_anthro_{club}"
     built = compose_anthropometric_document(
@@ -1028,6 +1032,7 @@ def build_anthropometric_spec(
         ),
         shaft_model=kwargs.get("shaft_model"),
         shaft_options=kwargs.get("shaft_options"),
+        handedness=kwargs.get("handedness") or "right",
     )
     paths = _write_outputs(
         document=document,
@@ -1063,6 +1068,7 @@ def build_parser(preset: Mapping[str, Any] | None = None) -> argparse.ArgumentPa
     parser.add_argument("--arm-scale", type=float, default=1.0)
     parser.add_argument("--shoulder-scale", type=float, default=1.0)
     parser.add_argument("--club", choices=sorted(CLUBS), default="driver")
+    parser.add_argument("--handedness", choices=("right", "left"), default="right")
     parser.add_argument(
         "--grip-roll", type=float, default=0.0, help="hand roll about the shaft, deg"
     )
@@ -1171,6 +1177,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         club_markers_path=args.club_markers,
         shaft_model=args.shaft_model,
         shaft_options=shaft_options(args),
+        handedness=args.handedness,
         tibial_torsion_offset_deg=args.tibial_torsion,
         shoulder_girdle_mass=args.shoulder_girdle_mass,
         grip_overrides=overrides_from_args(args),
