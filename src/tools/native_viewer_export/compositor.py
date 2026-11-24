@@ -179,24 +179,40 @@ def hud_line_boxes(
     return [text_box(t, xy, size) for t, xy in zip(lines, origins, strict=True)]
 
 
-def wrap_hud_line(text: str, width_px: int, size: int) -> list[str]:
-    """``text`` as rows that fit a frame ``width_px`` wide, split at ``HUD_SEPARATOR``.
-
-    Rows are filled in order and joined by the separator they were split at, so
-    joining the rows gives ``text`` back. An entry wider than the frame cannot
-    be split and keeps a row of its own.
-    """
+def _fits(text: str, width_px: int, size: int) -> bool:
     margin = HUD_LAYOUT.edge_margin_px
+    return text_box(text, (margin, 0), size)[2] <= width_px - margin
+
+
+def _fill(parts: list[str], sep: str, width_px: int, size: int) -> list[str]:
+    """Greedily join ``parts`` with ``sep`` into rows that fit ``width_px``."""
     rows: list[str] = []
     row = ""
-    for entry in text.split(HUD_SEPARATOR):
-        longer = entry if not row else row + HUD_SEPARATOR + entry
-        if row and text_box(longer, (margin, 0), size)[2] > width_px - margin:
+    for part in parts:
+        longer = part if not row else row + sep + part
+        if row and not _fits(longer, width_px, size):
             rows.append(row)
-            row = entry
+            row = part
         else:
             row = longer
     return [*rows, row]
+
+
+def wrap_hud_line(text: str, width_px: int, size: int) -> list[str]:
+    """``text`` as rows that fit a frame ``width_px`` wide, split at ``HUD_SEPARATOR``.
+
+    Rows are filled in order and joined by the separator they were split at.
+    An entry wider than the frame on its own is broken at spaces instead of
+    running off the edge; a single word wider than the frame keeps its own
+    row. Postcondition: the rows hold the words of ``text`` in order.
+    """
+    rows: list[str] = []
+    for row in _fill(text.split(HUD_SEPARATOR), HUD_SEPARATOR, width_px, size):
+        if _fits(row, width_px, size):
+            rows.append(row)
+        else:
+            rows.extend(_fill(row.split(" "), " ", width_px, size))
+    return rows
 
 
 def draw_label(
