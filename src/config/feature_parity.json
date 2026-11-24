@@ -40,6 +40,16 @@
       "tiles": ["golf_environment"],
       "notes": "PyQt6 tile draws a 3D driving range or a schematic hole (Par 3 150 y, Par 4 400 y presets, #15474) and overlays trajectory polylines; hole_figure.py and the shots_cli.py module (python3 -m src.tools.golf_environment.shots_cli) model several shots on a hole from a swing bundle and write hole_shots.png and hole_shots.json in the chosen display units (#15474, #15475). No API route, no React page and no launcher_manifest.json tile exist for it, so none of this is reachable from the web app. The web GolfSimulator page is a different tool and does not draw courses."
     },
+    "tools.swing_report_package": {
+      "title": "Swing report package generator (CLI: videos, case grids and key-phase sheets of one swing)",
+      "pyqt": "src/tools/swing_report_package/runner.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 15724,
+      "notes": "Headless command-line tool (epic #15725): python3 -m src.tools.swing_report_package plans a package from package_catalog.json (a default package plus --include/--exclude/--no-default, --views, --speeds, --set KEY=VALUE or a --package request file), renders each video through native_viewer_export, composes the ZTCF/ZVCF/total grid videos and key-phase freeze-frame sheets, and writes manifest.json; reruns reuse finished clips. No tile, PyQt6 dialog, REST route or browser page yet (#15724).",
+      "tiles": []
+    },
     "export.video_speed_variants": {
       "title": "Time-based native video export with full-, half- and quarter-speed clips and an impact slow-motion clip",
       "pyqt": "src/tools/native_viewer_export/cli.py",
