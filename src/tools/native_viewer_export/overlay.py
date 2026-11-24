@@ -591,7 +591,7 @@ def _with_ground_arrows(
 ) -> OverlayFeed:
     """``feed`` with ``part``'s case-coloured ground arrow, its key rows and
     its net ground readout."""
-    from src.tools.native_viewer_export.ztcf_axial import ground_key
+    from src.tools.native_viewer_export.ztcf_axial import case_force_key
 
     if parts.ground_arrows is None:
         raise ValueError(f"no ground arrows for force part {part!r}")
@@ -599,7 +599,7 @@ def _with_ground_arrows(
         feed,
         extra_arrows=_joined_lines(feed.extra_arrows, parts.ground_arrows(style)),
         extra_hud_lines=parts.ground_lines,
-        colour_key=(*feed.colour_key, *ground_key(part)),
+        colour_key=(*feed.colour_key, *case_force_key(part)),
     )
 
 

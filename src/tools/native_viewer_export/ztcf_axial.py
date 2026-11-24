@@ -46,7 +46,7 @@ __all__ = [
     "NET_GROUND_BODY",
     "centre_of_pressure",
     "ground_arrows",
-    "ground_key",
+    "case_force_key",
     "ground_readout",
     "net_ground",
     "part_ground",
@@ -255,11 +255,12 @@ def ground_arrows(
     return at
 
 
-def ground_key(
+def case_force_key(
     part: str, colours: TipToTailStyle | None = None
 ) -> tuple[tuple[str, tuple[int, int, int]], ...]:
-    """Colour-key rows of ``part``'s ground arrow and, when the case draws
-    it, the weight arrow; none for ``recorded``."""
+    """Colour-key rows of ``part``'s ground arrow and of the weight arrow and
+    applied joint-torque arcs when the case draws them; none for
+    ``recorded``."""
     if part not in _CASE_HEX:
         return ()
     rows = [
@@ -270,6 +271,13 @@ def ground_key(
     ]
     if WrenchKind.GRAVITY in PART_KINDS[part]:
         rows.append(("Body weight (gravity)", get_kind_rgba(WrenchKind.GRAVITY)))
+    if WrenchKind.JOINT_ACTUATOR in PART_KINDS[part]:
+        rows.append(
+            (
+                "Applied joint torques (curl arrows)",
+                get_kind_rgba(WrenchKind.JOINT_ACTUATOR),
+            )
+        )
     return tuple(
         (text, (round(255 * c[0]), round(255 * c[1]), round(255 * c[2])))
         for text, c in rows

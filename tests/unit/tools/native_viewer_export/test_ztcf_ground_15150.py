@@ -29,7 +29,7 @@ from src.tools.native_viewer_export.ztcf_axial import (
     FORCE_NOTES,
     centre_of_pressure,
     ground_arrows,
-    ground_key,
+    case_force_key,
     ground_readout,
     net_ground,
     part_ground,
@@ -152,18 +152,21 @@ def test_the_ground_arrow_wears_the_case_colour_at_its_centre_of_pressure(
     assert arrow.tail_m == pytest.approx((0.0, 0.0, 0.0))
 
 
-def test_the_ground_key_row_names_the_case_in_its_colour() -> None:
-    ((text, rgb),) = ground_key("zvcf")
+def test_the_case_force_key_row_names_the_case_in_its_colour() -> None:
+    (text, rgb), torques = case_force_key("zvcf")
+    assert "torque" in torques[0].lower()
+    actuator = get_kind_rgba(WrenchKind.JOINT_ACTUATOR)
+    assert torques[1] == tuple(round(255 * c) for c in actuator[:3])
     assert "ground" in text.lower() and "ZVCF" in text
     look = TipToTailStyle()
     assert rgb == tuple(round(255 * c) for c in hex_to_rgba(look.control_hex)[:3])
-    assert ground_key("recorded") == ()
+    assert case_force_key("recorded") == ()
     # the cases that draw the weight arrow name it in the key, in its colour
-    weight = ground_key("ztcf")[-1]
+    (_ground, weight) = case_force_key("ztcf")
     assert "weight" in weight[0].lower()
     grey = get_kind_rgba(WrenchKind.GRAVITY)
     assert weight[1] == tuple(round(255 * c) for c in grey[:3])
-    assert len(ground_key("total")) == 2
+    assert len(case_force_key("total")) == 3
 
 
 def test_recorded_keeps_the_frame_and_an_unknown_part_is_refused() -> None:
@@ -214,3 +217,21 @@ def test_extra_hud_lines_follow_the_clip_frames_and_hold_after_the_end() -> None
     resampled = feed.following(object(), lambda k: 2 * k)
     assert resampled.hud_lines_at(3) == ("state 6",)
     assert resampled.held_after(4).hud_lines_at(9) == ("state 8",)
+
+
+def test_no_hand_case_colour_repeats_a_force_kind_colour() -> None:
+    """A case render draws hand arrows beside weight and torque arrows; a
+    shared colour would make two different forces read as one. Muscle
+    arrows (musculoskeletal models only) still share the control vermillion:
+    a tracked follow-up on the report-package epic."""
+    from src.tools.native_viewer_export.ztcf_axial import PART_KINDS
+    from src.tools.native_viewer_export.ztcf_feed import hand_styles
+
+    drawn = set().union(*PART_KINDS.values()) - {WrenchKind.MUSCLE}
+    kinds = {
+        "#" + "".join(f"{round(255 * c):02X}" for c in get_kind_rgba(k)[:3])
+        for k in drawn
+    }
+    for look in hand_styles().values():
+        for field in ("drift_hex", "control_hex", "total_hex"):
+            assert getattr(look, field).upper() not in kinds, field
