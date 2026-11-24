@@ -42,9 +42,9 @@ naming the registry.
   left-handed spec still draws the deprecated capsule hands and logs it.
   Left-handed skinned hands are being added (#15652); left-handed golfers
   are not dropped.
-- **Physical grip picks:** the skinned pair is posed with the owner grip, so a
-  spec with `subject.grip_config` keeps the capsule hands rather than silently
-  losing its picks. Posing the skinned pair from `grip_config` is #15654.
+- **Physical grip picks:** done. The skinned pair is posed from
+  `subject.grip_config` (#15654), so the builder moves grip-picked specs to
+  the current model and keeps their picks.
 - **Builders:** the spec builder writes right-handed specs on the current
   model. The character builder and API still emit unrevised specs.
 - **Committed specs:** every committed full-body spec, including

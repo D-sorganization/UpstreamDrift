@@ -361,6 +361,14 @@ def test_library_lists_the_grip_presets_and_styles() -> None:
     assert grip["styles"] == ["overlap", "interlock", "ten_finger"]
 
 
+def _assert_grip_picks_then_current_model(doc: dict[str, Any]) -> None:
+    """The builder records the grip picks (revision 1), then poses the current
+    model's skinned hands from them (revision 2, #15654)."""
+    assert doc["spec_revision"]["configuration"] == "skinned_hand_wrists"
+    assert doc["spec_revision"]["version"] == 2
+    assert doc["subject"]["hand_visual_backend"] == "skinned_human"
+
+
 def _build(tmp_path: Path, *flags: str) -> tuple[Path, dict[str, Any]]:
     from src.shared.python.motion_matching.execution import assets
 
@@ -404,7 +412,7 @@ def test_spec_builder_flags_write_a_revision_and_a_picture_sidecar(
         "--grip-thumb-offset-deg",
         "20",
     )
-    assert doc["spec_revision"]["configuration"] == "grip"
+    _assert_grip_picks_then_current_model(doc)
     assert doc["subject"]["grip_config"]["lead"]["alpha_deg"] == -15.0
     assert doc["subject"]["grip_config"]["hand_spacing_m"] == 0.09
     assert doc["subject"]["grip_config"]["style"] == "interlock"
@@ -426,7 +434,7 @@ def test_spec_builder_style_only_writes_a_revision_without_a_sidecar(
     parent_spec, parent = _build(tmp_path / "a")
     spec, doc = _build(tmp_path / "b", "--grip-style", "ten_finger")
     assert physics_spec_sha256(doc) != physics_spec_sha256(parent)
-    assert doc["spec_revision"]["configuration"] == "grip"
+    _assert_grip_picks_then_current_model(doc)
     assert doc["subject"]["grip_config"]["style"] == "ten_finger"
     assert not spec.with_name("grip_case.appearance.json").exists()
 

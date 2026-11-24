@@ -2,11 +2,10 @@
 
 The builder writes a spec on the current golfer model
 (``src/config/golfer_model_versions.json``): the physical grip picks (GR4)
-first, then the skinned hand wrists and the skinned body. Two kinds of spec
-keep the deprecated capsule hands and loft body, each logging a deprecation:
-a left-handed spec, because the skinned pair is posed right-handed (#15652),
-and a spec with physical grip picks (``subject.grip_config``), because the
-skinned pair is posed with the owner grip and would drop the picks (#15654).
+first, then the skinned hand wrists, posed from those picks (#15654), and the skinned
+body. A left-handed spec keeps the deprecated capsule hands and loft body,
+logging a deprecation, because the skinned pair is posed right-handed
+(#15652).
 """
 
 from __future__ import annotations
@@ -69,13 +68,11 @@ def with_current_golfer_model(
     """The document and receipt subject on the current golfer model.
 
     Right-handed: the skinned hand wrist revision plus the registry's body.
-    Left-handed or with physical grip picks: unchanged, with a deprecation
-    logged for each old part.
+    Left-handed: unchanged, with a deprecation logged for each old part.
     Postconditions: the input is not mutated; a right-handed result has the
     registry's hand and body backends and spec revision configuration.
     """
-    picked = document.get("subject", {}).get("grip_config") is not None
-    if picked or subject_handedness(document) == "left":
+    if subject_handedness(document) == "left":
         for field in _BACKENDS:
             warn_if_deprecated(document, field)
         return dict(document), dict(subject)
