@@ -49,12 +49,18 @@ def overlay_between(
 ) -> list[dict[str, Any]]:
     """The ``set`` operations that turn ``parent`` into ``child``.
 
-    Raises ``ValueError`` when ``child`` drops a key or changes a list length,
-    which an overlay of ``set`` operations cannot express.
+    Mappings and equal-length lists are compared item by item; where
+    ``child`` drops a key or changes a list length, the whole value at that
+    path is set (a chain shaft adds bodies and coordinates, #15684).
+
+    Raises:
+        ValueError: the root mapping drops a key (an empty path cannot be set).
     """
     if isinstance(parent, Mapping) and isinstance(child, Mapping):
         if set(parent) - set(child):
-            raise ValueError(f"child drops keys at {list(at)}")
+            if not at:
+                raise ValueError("child drops keys at the root")
+            return [{"path": list(at), "value": child}]
         ops: list[dict[str, Any]] = []
         for key in sorted(child):
             if key in parent:
@@ -64,7 +70,7 @@ def overlay_between(
         return ops
     if isinstance(parent, list) and isinstance(child, list):
         if len(parent) != len(child):
-            raise ValueError(f"list length changes at {list(at)}")
+            return [{"path": list(at), "value": child}]
         return [
             op
             for i, (a, b) in enumerate(zip(parent, child, strict=True))

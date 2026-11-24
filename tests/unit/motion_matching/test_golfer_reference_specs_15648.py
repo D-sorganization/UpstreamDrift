@@ -30,12 +30,10 @@ def test_overlay_round_trips_a_nested_document() -> None:
     assert parent == {"a": [1.0, {"b": 2}], "c": "x"}
 
 
-@pytest.mark.parametrize(
-    ("parent", "child"), [({"a": 1, "b": 2}, {"a": 1}), ({"a": [1, 2]}, {"a": [1]})]
-)
-def test_overlay_refuses_what_a_set_cannot_express(parent: Any, child: Any) -> None:
+def test_overlay_refuses_what_a_set_cannot_express() -> None:
+    """Only a key dropped at the root has no path to set (#15684)."""
     with pytest.raises(ValueError):
-        refs.overlay_between(parent, child)
+        refs.overlay_between({"a": 1, "b": 2}, {"a": 1})
 
 
 def test_apply_overlay_refuses_an_empty_or_dangling_path() -> None:

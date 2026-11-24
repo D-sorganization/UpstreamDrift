@@ -3,7 +3,8 @@
 ``build_anthropometric_spec`` used to write specs that drew the deprecated
 capsule hands and loft body. It now applies the registry's current model: the
 skinned hand wrist revision and the skinned body. A left-handed spec keeps the
-deprecated parts (the skinned pair is posed right-handed) and says so.
+deprecated parts (the skinned pair is posed right-handed) and says so. Every
+spec gains the current flexible shaft (#15684).
 """
 
 from __future__ import annotations
@@ -32,6 +33,7 @@ from src.shared.python.motion_matching.execution.skinned_hand_wrists import (
 from src.shared.python.motion_matching.execution.spec_revisions import (
     with_current_golfer_model,
     with_grip_revision,
+    with_current_shaft,
 )
 
 pytestmark = pytest.mark.unit
@@ -54,11 +56,13 @@ def test_a_right_handed_spec_moves_to_the_current_model(built: Any) -> None:
 
 
 def test_the_revision_moves_placements_only(built: Any) -> None:
+    """Body masses match the same spec on the current shaft (#15684)."""
     before = copy.deepcopy(built.document)
     document, _ = with_current_golfer_model(built.document, built.subject)
     assert built.document == before
+    shafted = with_current_shaft(before)
     masses = [(b["name"], b.get("mass")) for b in document["bodies"]]
-    assert masses == [(b["name"], b.get("mass")) for b in before["bodies"]]
+    assert masses == [(b["name"], b.get("mass")) for b in shafted["bodies"]]
 
 
 def test_a_left_handed_spec_keeps_the_deprecated_parts_and_says_so(
@@ -69,7 +73,7 @@ def test_a_left_handed_spec_keeps_the_deprecated_parts_and_says_so(
     gmv.reset_deprecation_warnings()
     with caplog.at_level(logging.WARNING):
         document, _ = with_current_golfer_model(left, built.subject)
-    assert document == left
+    assert document == with_current_shaft(left)
     assert "capsule" in caplog.text and "loft" in caplog.text
 
 

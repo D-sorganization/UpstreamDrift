@@ -1,10 +1,16 @@
 {
-  "sources": "Owner direction 2026-11-23 (#15648): the skinned human hands and the skinned body are the main golfer model; the capsule hands and the loft body are deprecated and must not appear in new work. This file is the single answer to 'which golfer model is current'. A spec selects its hands and body with subject.hand_visual_backend and subject.body_visual_backend; the skinned hands need the skinned_hand_wrists spec revision, which moves the wrist joints to the skinned hands' wrists, and a pose fitted before that revision needs its arms refitted. Drawing an unrevised spec with skinned hands would misplace them, so an unrevised spec still falls back to the deprecated capsule hands at draw time, and that fallback logs a deprecation warning.",
+  "sources": "Owner direction 2026-11-23 (#15648): the skinned human hands and the skinned body are the main golfer model; the capsule hands and the loft body are deprecated and must not appear in new work. This file is the single answer to 'which golfer model is current'. A spec selects its hands and body with subject.hand_visual_backend and subject.body_visual_backend; the skinned hands need the skinned_hand_wrists spec revision, which moves the wrist joints to the skinned hands' wrists, and a pose fitted before that revision needs its arms refitted. Drawing an unrevised spec with skinned hands would misplace them, so an unrevised spec still falls back to the deprecated capsule hands at draw time, and that fallback logs a deprecation warning. Owner direction 2026-11-23 (#15684): golf shafts bend, so the current model carries the flexible chain shaft (Stiff by default); a rigid club is only an explicit ballpark fallback for a quick first match when the flexible model will not solve, and the flexible shaft is reintroduced afterwards.",
   "current": {
-    "version": "full_body_skinned_v1",
+    "version": "full_body_skinned_flex_v2",
     "hand_visual_backend": "skinned_human",
     "body_visual_backend": "skinned_cc0",
     "spec_revision_configuration": "skinned_hand_wrists",
+    "shaft": {
+      "model": "chain",
+      "flex": "Stiff",
+      "ballpark_fallback": "rigid",
+      "apply_with": "src/shared/python/motion_matching/execution/spec_builder.py::with_shaft_model"
+    },
     "make_with": "src/shared/python/motion_matching/execution/skinned_hand_wrists.py::apply_skinned_hand_wrists",
     "refit_poses_with": "src/engines/physics_engines/mujoco/python/skinned_arm_refit.py::refit_arms_to_club",
     "docs": "docs/agents/golfer_model_versions.md",

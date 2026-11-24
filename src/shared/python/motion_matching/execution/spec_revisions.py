@@ -6,11 +6,16 @@ first, then the skinned hand wrists, posed from those picks (#15654), and the sk
 body. A left-handed spec keeps the deprecated capsule hands and loft body,
 logging a deprecation, because the skinned pair is posed right-handed
 (#15652).
+
+Last comes the current model's flexible shaft (#15684): a chain shaft with
+the registry's flex. A rigid club is only the explicit ballpark fallback
+(``shaft_model="rigid"``), and choosing it logs a warning.
 """
 
 from __future__ import annotations
 
 import json
+import logging
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -24,6 +29,14 @@ from src.shared.python.model_appearance.golfer_model_versions import (
     warn_if_deprecated,
 )
 from src.shared.python.model_appearance.schema import appearance_path_for
+from src.shared.python.motion_matching.club_models import recorded_club
+from src.shared.python.motion_matching.club_shaft_chain import (
+    SHAFT_MODELS,
+    apply_shaft_chain,
+    build_shaft_chain,
+    checked_shaft_options,
+    shaft_model,
+)
 from src.shared.python.motion_matching.execution.grip_selection import (
     GripOverrides,
     apply_grip_selection,
@@ -34,6 +47,50 @@ from src.shared.python.motion_matching.execution.skinned_hand_wrists import (
 )
 
 _BACKENDS = ("hand_visual_backend", "body_visual_backend")
+logger = logging.getLogger(__name__)
+
+
+def current_shaft(
+    requested: str | None, options: Mapping[str, Any] | None = None
+) -> tuple[str, dict[str, Any]]:
+    """The shaft model and chain options a current-model spec gets (#15684).
+
+    ``None`` is the registry's flexible shaft, with ``options`` (flex,
+    stiffness scale, links) over its flex. ``"rigid"`` is the ballpark
+    fallback for a quick first match and logs a warning.
+
+    Raises:
+        ValueError: an unknown ``requested`` model or invalid options.
+    """
+    current = current_golfer_model()
+    model = current.shaft_model if requested is None else requested
+    if model not in SHAFT_MODELS:
+        raise ValueError(f"shaft_model must be one of {SHAFT_MODELS}, got {model!r}")
+    if model == "rigid":
+        checked_shaft_options(model, options)
+        logger.warning(
+            "Rigid club: ballpark fallback only; the current golfer model %s "
+            "uses a flexible %s shaft, so reintroduce it once the match solves",
+            current.version,
+            current.shaft_flex,
+        )
+        return model, {}
+    chosen = {"flex": current.shaft_flex, **dict(options or {})}
+    checked_shaft_options(model, chosen)
+    return model, chosen
+
+
+def with_current_shaft(
+    document: Mapping[str, Any],
+    requested: str | None = None,
+    options: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """``document`` with the current model's shaft; a chain spec is kept as is."""
+    model, chosen = current_shaft(requested, options)
+    if model == "rigid" or shaft_model(document) != "rigid":
+        return dict(document)
+    club = recorded_club(document, document["club"]["name"])
+    return apply_shaft_chain(document, build_shaft_chain(club, **chosen))
 
 
 def with_grip_revision(
@@ -63,19 +120,27 @@ def write_grip_sidecar(spec_path: Path, overrides: GripOverrides | None) -> None
 
 
 def with_current_golfer_model(
-    document: Mapping[str, Any], subject: Mapping[str, Any]
+    document: Mapping[str, Any],
+    subject: Mapping[str, Any],
+    *,
+    shaft_model: str | None = None,
+    shaft_options: Mapping[str, Any] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """The document and receipt subject on the current golfer model.
 
     Right-handed: the skinned hand wrist revision plus the registry's body.
-    Left-handed: unchanged, with a deprecation logged for each old part.
+    Left-handed: unchanged hands and body, with a deprecation logged for each
+    old part. Every spec then gets the current shaft
+    (:func:`with_current_shaft`; ``shaft_model="rigid"`` is the logged
+    ballpark fallback).
     Postconditions: the input is not mutated; a right-handed result has the
     registry's hand and body backends and spec revision configuration.
     """
     if subject_handedness(document) == "left":
         for field in _BACKENDS:
             warn_if_deprecated(document, field)
-        return dict(document), dict(subject)
+        shafted = with_current_shaft(document, shaft_model, shaft_options)
+        return shafted, dict(subject)
     current = current_golfer_model()
     revised = apply_skinned_hand_wrists(document)
     revised["subject"]["body_visual_backend"] = current.body_visual_backend
@@ -85,4 +150,5 @@ def with_current_golfer_model(
         != current.spec_revision_configuration
     ):
         raise ValueError("the wrist revision does not make the registry's model")
-    return revised, {**subject, **{key: revised["subject"][key] for key in _BACKENDS}}
+    shafted = with_current_shaft(revised, shaft_model, shaft_options)
+    return shafted, {**subject, **{key: revised["subject"][key] for key in _BACKENDS}}
