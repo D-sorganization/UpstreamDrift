@@ -7,6 +7,7 @@ The launcher, solver thread, closed-chain physics and playback are real.
 from __future__ import annotations
 
 import os
+import sys
 from collections.abc import Iterator
 
 import numpy as np
@@ -55,6 +56,21 @@ def dialogs(qapp: QApplication) -> Iterator[list[str]]:
         timer.stop()
 
 
+def _release_theme_manager(widget: MainWindow) -> None:
+    """Drop a ThemeManager singleton bound to *widget* before it is deleted.
+
+    The singleton keeps the first window it was created with; once this window
+    is gone, later windows (e.g. the cross-engine dashboard) would restyle a
+    deleted C++ object.
+    """
+    for module in list(sys.modules.values()):
+        manager_cls = getattr(module, "ThemeManager", None)
+        reset = getattr(manager_cls, "reset_instance", None)
+        instance = getattr(manager_cls, "_instance", None)
+        if callable(reset) and getattr(instance, "main_window", None) is widget:
+            reset()
+
+
 @pytest.fixture
 def window(qtbot: QtBot, dialogs: list[str]) -> Iterator[MainWindow]:
     """Select the golfer through Qt events and drain all workers on teardown."""
@@ -77,6 +93,7 @@ def window(qtbot: QtBot, dialogs: list[str]) -> Iterator[MainWindow]:
             if thread is not None and not sip.isdeleted(thread):
                 thread.quit()
                 assert thread.wait(10_000), "Golfer solver failed to stop"
+        _release_theme_manager(widget)
         widget.close()
 
 
