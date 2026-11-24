@@ -1,12 +1,15 @@
 """How a clip's motion was produced, labelled on every clip (#15150, D3).
 
-Three honest modes, decided from the bundle and never guessed:
+Four honest modes, decided from the bundle and never guessed:
 
 * kinematic replay: every effort is zero, the motion is recorded, not simulated;
 * feedback-tracked dynamics: non-zero efforts written by the closed-loop tracker
   (the bundle's provenance records its ``controller``);
 * open-loop dynamics from t0: efforts replayed from an initial state, declared by
-  the bundle's ``replay_mode`` provenance field.
+  the bundle's ``replay_mode`` provenance field;
+* inverse dynamics: the recorded motion with the efforts that inverse dynamics
+  and allocation give for it (the kinetic match, #15685), declared the same
+  way. The motion is not simulated.
 
 Anything else is ``unknown_replay_mode``. Labels and keys live in
 ``replay_mode_settings.json``.
@@ -30,6 +33,7 @@ class ReplayMode(str, Enum):
     KINEMATIC = "kinematic_replay"
     FEEDBACK_TRACKED = "feedback_tracked_dynamics"
     OPEN_LOOP = "open_loop_dynamics"
+    INVERSE_DYNAMICS = "inverse_dynamics"
     UNKNOWN = "unknown_replay_mode"
 
 
@@ -58,6 +62,16 @@ def hud_line(mode: ReplayMode) -> str:
     return f"{_read()['hud_prefix']}{display_text(mode)}"
 
 
+_DECLARABLE = frozenset(
+    m.value
+    for m in (
+        ReplayMode.FEEDBACK_TRACKED,
+        ReplayMode.OPEN_LOOP,
+        ReplayMode.INVERSE_DYNAMICS,
+    )
+)
+
+
 def replay_mode_of(bundle: Any) -> ReplayMode:
     """Mode of ``bundle``: zero efforts decide kinematic; else a declared
     dynamics label, else a recorded tracker controller; else unknown.
@@ -69,7 +83,7 @@ def replay_mode_of(bundle: Any) -> ReplayMode:
     settings = _read()
     provenance = getattr(bundle, "provenance", None) or {}
     declared = provenance.get(settings["provenance_key"])
-    if declared in (ReplayMode.FEEDBACK_TRACKED.value, ReplayMode.OPEN_LOOP.value):
+    if declared in _DECLARABLE:
         return ReplayMode(declared)
     if declared is None and provenance.get(settings["controller_key"]):
         return ReplayMode.FEEDBACK_TRACKED

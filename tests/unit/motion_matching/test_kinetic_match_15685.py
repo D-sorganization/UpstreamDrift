@@ -120,6 +120,7 @@ def test_efforts_come_back_in_bundle_order_and_receipt_passes() -> None:
     assert receipt["verdict"] == "plausible"
     assert receipt["method"] == "inverse_dynamics_allocation"
     assert out.provenance["kinetic_match"] == receipt
+    assert out.provenance["replay_mode"] == "inverse_dynamics"
     json.dumps(receipt)
 
 
