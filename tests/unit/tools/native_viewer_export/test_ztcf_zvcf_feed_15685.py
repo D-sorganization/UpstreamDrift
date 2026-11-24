@@ -16,7 +16,12 @@ from src.shared.python.force_overlay.glyphs import ForceGlyphStyle
 from src.shared.python.force_overlay.tip_to_tail import tip_to_tail_arrows
 from src.tools.native_viewer_export import cli
 from src.tools.native_viewer_export.core import OverlayFeed
-from src.tools.native_viewer_export.ztcf_feed import ztcf_zvcf_arrows
+from src.tools.native_viewer_export.ztcf_feed import (
+    LEGEND,
+    gained_style,
+    legend_for,
+    ztcf_zvcf_arrows,
+)
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 BASE = ["--bundle", "b.npz", "--out", "o", "--swing", "s"]
@@ -65,3 +70,31 @@ def test_a_kinematic_replay_is_refused() -> None:
     bundle = SimpleNamespace(efforts=np.zeros((3, 4)), spec_bytes=b"{}")
     with pytest.raises(ValueError, match="kinetic match"):
         ztcf_zvcf_arrows(SimpleNamespace(bundle=bundle), STYLE)
+
+
+def test_the_arrow_gain_defaults_to_one_and_parses() -> None:
+    parser = cli.build_parser()
+    assert parser.parse_args(BASE).ztcf_arrow_gain == 1.0
+    assert parser.parse_args([*BASE, "--ztcf-arrow-gain", "8"]).ztcf_arrow_gain == 8.0
+
+
+def test_the_gain_lengthens_only_the_hand_force_arrows() -> None:
+    scaled = gained_style(STYLE, 8.0)
+    grip = WrenchKind.GRIP
+    assert scaled.force_scale_for(grip) == pytest.approx(
+        8 * STYLE.force_scale_for(grip)
+    )
+    contact = WrenchKind.CONTACT
+    assert scaled.force_scale_for(contact) == STYLE.force_scale_for(contact)
+    assert gained_style(STYLE, 1.0) is STYLE
+
+
+@pytest.mark.parametrize("gain", [0.0, -2.0, float("nan"), float("inf")])
+def test_a_gain_that_is_not_finite_and_positive_is_refused(gain: float) -> None:
+    with pytest.raises(ValueError, match="gain"):
+        gained_style(STYLE, gain)
+
+
+def test_the_legend_states_a_gain_so_lengths_are_not_misread() -> None:
+    assert legend_for(1.0) == LEGEND
+    assert "8x" in legend_for(8.0) and legend_for(8.0).startswith(LEGEND)

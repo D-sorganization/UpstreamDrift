@@ -12,23 +12,58 @@ efforts) is refused.
 from __future__ import annotations
 
 import json
+import math
 from collections.abc import Callable
+from dataclasses import replace
 from typing import Any
 
 import numpy as np
 
+from src.shared.python.force_overlay.contracts import WrenchKind
 from src.shared.python.force_overlay.glyphs import ArrowGlyph, ForceGlyphStyle
 from src.shared.python.force_overlay.tip_to_tail import (
     TipToTailStyle,
     tip_to_tail_arrows,
 )
 
-__all__ = ["LEGEND", "ztcf_zvcf_arrows"]
+__all__ = ["LEGEND", "gained_style", "legend_for", "ztcf_zvcf_arrows"]
 
 LEGEND = (
     "Trail hand on club: ZTCF drift (blue) + ZVCF control (orange) = total "
     "(white); one null-space solution"
 )
+
+
+def _checked_gain(gain: float) -> float:
+    if not math.isfinite(gain) or gain <= 0.0:
+        raise ValueError(
+            f"the hand-force arrow gain must be finite and positive, got {gain}"
+        )
+    return float(gain)
+
+
+def gained_style(style: ForceGlyphStyle, gain: float) -> ForceGlyphStyle:
+    """``style`` with the hand-force (grip) arrows ``gain`` times longer.
+
+    Trail-hand forces are tens of newtons, a few centimetres at body-weight
+    scale; the gain makes them legible without touching any other arrow.
+    Returns ``style`` itself for a gain of one.
+
+    Raises:
+        ValueError: ``gain`` is not finite and positive.
+    """
+    if _checked_gain(gain) == 1.0:
+        return style
+    grip = WrenchKind.GRIP
+    kind_scale = {**style.kind_scale, grip: style.kind_scale.get(grip, 1.0) * gain}
+    return replace(style, kind_scale=kind_scale)
+
+
+def legend_for(gain: float) -> str:
+    """The legend, naming the gain whenever the arrows are drawn longer."""
+    if _checked_gain(gain) == 1.0:
+        return LEGEND
+    return f"{LEGEND}; hand-force arrows drawn {gain:g}x"
 
 
 def _closure_provider(spec_bytes: bytes, order: tuple[str, ...]) -> tuple[Any, Any]:
