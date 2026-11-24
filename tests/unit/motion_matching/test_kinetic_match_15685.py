@@ -253,3 +253,13 @@ def test_the_response_shaft_reports_no_mismatch() -> None:
     )
     assert receipt["shaft_source"] == "response"
     assert receipt["shaft_mismatch_n_m"] == 0.0
+
+
+def test_shaft_actuated_columns_index_a_numpy_vector() -> None:
+    """The allocator scatters ``tau[actuated_indices]``; a tuple of ints would
+    be read as one index per axis and fail on the 1-D torque vector."""
+    adapter = SimpleNamespace(actuated_indices=[6, 7], nv=9)
+    wrapped = km._ShaftActuated(adapter, [8])
+    tau = np.zeros(adapter.nv)
+    tau[wrapped.actuated_indices] = (1.0, 2.0, 3.0)
+    np.testing.assert_array_equal(tau[6:], (1.0, 2.0, 3.0))
