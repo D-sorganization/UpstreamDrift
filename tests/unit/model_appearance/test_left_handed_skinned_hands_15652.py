@@ -23,6 +23,9 @@ from src.shared.python.model_appearance.club_assembly import (
 )
 
 pytestmark = pytest.mark.unit
+#: Builds a skinned hand pair (tens of seconds per handedness and worker), like
+#: the covered-seat tests: kept out of the default unit lane.
+_BUILDS_PAIR = pytest.mark.slow
 
 #: Exact mirror up to round-off of the frame transforms (metres).
 _MIRROR_ATOL_M = 1e-9
@@ -49,6 +52,7 @@ def _assert_mirrored(left: np.ndarray, right: np.ndarray) -> None:
     )
 
 
+@_BUILDS_PAIR
 def test_left_pair_is_the_mirror_of_the_right_pair_in_its_grip_frame() -> None:
     right, left = sch._pair(handedness="right"), sch._pair(handedness="left")
     for side in ("lead", "trail"):
@@ -57,6 +61,7 @@ def test_left_pair_is_the_mirror_of_the_right_pair_in_its_grip_frame() -> None:
         np.testing.assert_array_equal(lt.faces, r.faces[:, ::-1])
 
 
+@_BUILDS_PAIR
 @pytest.mark.parametrize("cut_at_wrist", (False, True))
 def test_left_hand_meshes_mirror_the_right_ones_on_the_club(
     cut_at_wrist: bool,
@@ -75,6 +80,7 @@ def test_left_hand_meshes_mirror_the_right_ones_on_the_club(
             np.testing.assert_array_equal(mesh.faces, right[label].faces[:, ::-1])
 
 
+@_BUILDS_PAIR
 def test_left_wrist_joints_mirror_the_right_ones() -> None:
     right = sch.wrist_joints_m(_club())
     left = sch.wrist_joints_m(_club("left"), handedness="left")
@@ -82,6 +88,7 @@ def test_left_wrist_joints_mirror_the_right_ones() -> None:
         _assert_mirrored(left[side][None], right[side][None])
 
 
+@_BUILDS_PAIR
 def test_left_forearm_reach_mirrors_the_right_one() -> None:
     right = sch.forearm_reach_m(_club())
     left = sch.forearm_reach_m(_club("left"), handedness="left")
@@ -135,6 +142,7 @@ def test_assembly_from_spec_reads_the_subject_handedness() -> None:
     assert dataclasses.replace(left, handedness="right") == assembly_from_spec(spec)
 
 
+@_BUILDS_PAIR
 def test_right_handed_outputs_are_unchanged() -> None:
     club = _club()
     assert sch.owner_grip_spec() == sch.owner_grip_spec(handedness="right")
