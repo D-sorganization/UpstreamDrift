@@ -38,6 +38,8 @@ class FlexRow:
     """Result of one flex. ``shot`` holds ball speed, launch and carry, if known.
 
     Deltas are bent minus straight club in the same hand motion, at impact.
+    ``peak_tip_deflection_mm`` is the peak up to impact; the extrapolated
+    window after it is not physical.
     """
 
     flex: str
@@ -70,7 +72,7 @@ def _row(
         run.at("loft_delta_deg", impact_s),
         run.at("face_delta_deg", impact_s),
         run.at("lie_delta_deg", impact_s),
-        run.peak_tip_deflection_m * 1e3,
+        run.peak_tip_deflection_until_m(impact_s) * 1e3,
         None if shot is None else shot(run),
     )
 
