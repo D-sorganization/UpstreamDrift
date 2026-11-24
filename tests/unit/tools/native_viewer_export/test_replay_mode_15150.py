@@ -35,6 +35,15 @@ def test_declared_open_loop_label_is_honoured() -> None:
     assert rm.replay_mode_of(bundle) is rm.ReplayMode.OPEN_LOOP
 
 
+def test_declared_inverse_dynamics_is_its_own_honest_mode() -> None:
+    """Kinetic-match efforts come from inverse dynamics of the recorded motion
+    (#15685): not simulated, so neither tracked nor open-loop dynamics."""
+    bundle = _bundle(np.ones((4, 2)), {"replay_mode": "inverse_dynamics"})
+    assert rm.replay_mode_of(bundle) is rm.ReplayMode.INVERSE_DYNAMICS
+    text = rm.hud_line(rm.ReplayMode.INVERSE_DYNAMICS)
+    assert "Inverse Dynamics" in text and "not simulated" in text
+
+
 def test_declared_label_beats_the_controller_key() -> None:
     bundle = _bundle(
         np.ones((4, 2)),

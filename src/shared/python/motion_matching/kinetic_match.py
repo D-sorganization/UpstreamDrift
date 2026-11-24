@@ -46,6 +46,8 @@ logger = logging.getLogger(__name__)
 
 SETTINGS_PATH = Path(__file__).resolve().parents[3] / "config" / "kinetic_match.json"
 METHOD = "inverse_dynamics_allocation"
+#: provenance ``replay_mode`` the native export labels (recorded motion, ID efforts)
+REPLAY_MODE = "inverse_dynamics"
 NULL_SPACE_NOTE = (
     "One minimum-effort solution in the null space of the closed arm loop; "
     "not unique and not measured."
@@ -247,7 +249,11 @@ def kinetic_match(
         efforts[:, perm[native_index]] = np.interp(
             times[:-1], result.time_s, np.asarray(result.tau_actuated)[:, column]
         )
-    provenance = {**bundle.provenance, "kinetic_match": receipt}
+    provenance = {
+        **bundle.provenance,
+        "kinetic_match": receipt,
+        "replay_mode": REPLAY_MODE,
+    }
     if hasattr(bundle, "__dataclass_fields__"):
         out = replace(bundle, efforts=efforts, provenance=provenance)
     else:

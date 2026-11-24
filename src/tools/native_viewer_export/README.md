@@ -464,6 +464,10 @@ simulated. The mode is determined from the bundle, never guessed
 - `open_loop_dynamics`: efforts replayed from an initial state; the bundle
   must declare it with provenance `replay_mode: open_loop_dynamics`, as no
   writer does yet.
+- `inverse_dynamics`: the recorded motion with efforts from inverse dynamics
+  and allocation (the kinetic match, `motion_matching/kinetic_match.py`, which
+  declares it). The motion is not simulated, and the efforts are one solution
+  in the null space of the closed arm loop.
 - `unknown_replay_mode` (shown as "Unknown Replay Mode (provenance not recorded)"): anything else.
 
 `--no-hud` removes the line; the manifest field stays.
