@@ -69,6 +69,9 @@ class OverlayOptions:
     ztcf_hands: str = "both"
     #: segment shading: recorded loads, or the ZTCF/ZVCF split part (Z4b)
     shading_part: str = "recorded"
+    #: forces drawn: ``recorded`` or one ZTCF/ZVCF case's ground and kinds
+    force_part: str = "recorded"
+    arrow_style: str | None = None
 
 
 def _grip_source(swing: SwingInput, engine: str, mujoco_source: Any) -> tuple[Any, str]:
@@ -528,7 +531,9 @@ def build_overlay_feed(
     names = swing.bundle.coordinate_order
     com = source.center_of_mass_m(dict(zip(names, map(float, swing.q[0]), strict=True)))
     lookat = (float(com[0]), float(com[1]), default_lookat_height_m())
-    style = default_glyph_style(body_mass_kg=float(source.total_mass_kg))
+    style = default_glyph_style(
+        body_mass_kg=float(source.total_mass_kg), arrow_style=opts.arrow_style
+    )
 
     active_ellipsoids = _resolve_active_ellipsoids(
         opts.hand_mobility, opts.interface_ellipsoids
@@ -561,18 +566,27 @@ def build_overlay_feed(
 def _part_shading(
     frame_at: Any, swing: SwingInput, axial: bool, opts: OverlayOptions
 ) -> tuple[Any, str]:
-    """``frame_at`` shading the chosen ZTCF/ZVCF part, and its HUD note."""
+    """``frame_at`` with the chosen ZTCF/ZVCF shading and force parts, and
+    their HUD note (one split per state serves both)."""
     from src.tools.native_viewer_export.ztcf_axial import (
+        FORCE_NOTES,
         SHADING_NOTES,
-        swing_part_frames,
+        swing_part_splits,
         with_part_shading,
+        with_part_wrenches,
     )
 
-    part = opts.shading_part
-    if not axial or part == "recorded":
-        return with_part_shading(frame_at, dict, part), ""
-    shaded = with_part_shading(frame_at, swing_part_frames(swing), part)
-    return shaded, SHADING_NOTES[part]
+    shading = opts.shading_part if axial else "recorded"
+    force = opts.force_part
+    with_part_shading(frame_at, dict, shading)  # validates the part names
+    with_part_wrenches(frame_at, dict, force)
+    if shading == "recorded" and force == "recorded":
+        return frame_at, ""
+    splits = swing_part_splits(swing)
+    out = with_part_shading(frame_at, lambda i: splits(i).axial, shading)
+    out = with_part_wrenches(out, lambda i: splits(i).ground, force)
+    notes = (SHADING_NOTES[shading], FORCE_NOTES[force])
+    return out, " | ".join(n for n in notes if n)
 
 
 def _with_ztcf_zvcf(

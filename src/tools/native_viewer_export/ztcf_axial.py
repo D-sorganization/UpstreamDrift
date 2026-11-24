@@ -14,10 +14,16 @@ This module splits it the way the hand arrows are split:
 The two parts add to ``total``, the inverse dynamics of the summed solve.
 ``recorded`` keeps the export's own shading (recorded motion, contact-law
 ground), which this split does not replace unless asked.
+
+The ground reaction splits the same way (Z4c): each part's planted-foot
+reactions replace the contact arrows, drawn at each foot's centre of
+pressure, and each case keeps only the force kinds that belong to it (no
+actuator torques in the ZTCF, no weight in the ZVCF).
 """
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, replace
 from typing import Any
@@ -25,11 +31,20 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
+from src.shared.python.body_part_viz.mujoco_axial_loads import BodyWrench
+from src.shared.python.force_overlay.contracts import OverlayWrench, WrenchKind
 
 __all__ = [
+    "FORCE_NOTES",
+    "PART_KINDS",
     "SHADING_NOTES",
     "SHADING_PARTS",
     "PartLoad",
+    "PartSplit",
+    "centre_of_pressure",
+    "part_ground",
+    "swing_part_splits",
+    "with_part_wrenches",
     "part_axial_frames",
     "part_axial_source",
     "swing_part_frames",
@@ -45,6 +60,23 @@ SHADING_NOTES = {
     "zvcf": "Shading: ZVCF control only (applied torques alone, no gravity)",
 }
 _SPLIT = ("total", "ztcf", "zvcf")
+#: force kinds each case keeps besides its own ground reaction: the ZTCF has
+#: ``tau = 0`` (no actuator torques), the ZVCF has no gravity (no weight)
+PART_KINDS = {
+    "ztcf": frozenset({WrenchKind.GRAVITY}),
+    "zvcf": frozenset({WrenchKind.JOINT_ACTUATOR, WrenchKind.MUSCLE}),
+    "total": frozenset(
+        {WrenchKind.GRAVITY, WrenchKind.JOINT_ACTUATOR, WrenchKind.MUSCLE}
+    ),
+}
+FORCE_NOTES = {
+    "recorded": "",
+    "total": "Ground and torques: ZTCF + ZVCF (feet planted, centre of pressure)",
+    "ztcf": "Ground: ZTCF drift part (feet planted); no applied torques (tau = 0)",
+    "zvcf": "Ground: ZVCF control part (feet planted); no weight (no gravity)",
+}
+#: below this vertical load a foot's centre of pressure is undefined
+COP_MIN_VERTICAL_N = 1.0
 
 Sampler = Callable[[Any, Any, Sequence[Any], Any], AxialLoadFrame | None]
 
@@ -97,6 +129,88 @@ def part_axial_frames(
     return {"total": total, "ztcf": ztcf, "zvcf": zvcf}
 
 
+def centre_of_pressure(
+    point: Sequence[float],
+    force: Sequence[float],
+    moment: Sequence[float],
+    min_vertical_n: float = COP_MIN_VERTICAL_N,
+) -> tuple[float, float, float]:
+    """Point in the horizontal plane of ``point`` where ``force`` acts with no
+    tilting moment (``moment`` is about ``point``; world z up).
+
+    With ``|F_z| < min_vertical_n`` there is no centre of pressure and
+    ``point`` is returned.
+    """
+    p, f, m = (np.asarray(x, dtype=float) for x in (point, force, moment))
+    if abs(f[2]) < min_vertical_n:
+        return (float(p[0]), float(p[1]), float(p[2]))
+    return (float(p[0] - m[1] / f[2]), float(p[1] + m[0] / f[2]), float(p[2]))
+
+
+def _sum_wrench(a: BodyWrench, b: BodyWrench) -> BodyWrench:
+    if a.body != b.body or not np.allclose(a.point_m, b.point_m, atol=1e-12):
+        raise ValueError(f"ground parts of {a.body!r} are not at the same point")
+    force = tuple(np.add(a.force_n or (0, 0, 0), b.force_n or (0, 0, 0)).tolist())
+    torque = tuple(np.add(a.torque_nm or (0, 0, 0), b.torque_nm or (0, 0, 0)).tolist())
+    return BodyWrench(a.body, a.point_m, force, torque)  # type: ignore[arg-type]
+
+
+def part_ground(
+    drift: Sequence[BodyWrench], control: Sequence[BodyWrench]
+) -> dict[str, tuple[BodyWrench, ...]]:
+    """``{"ztcf", "zvcf", "total"}`` ground wrenches; ``total`` is the sum.
+
+    Raises:
+        ValueError: the two parts are not on the same bodies and points.
+    """
+    if len(drift) != len(control):
+        raise ValueError("ground parts must name the same planted bodies")
+    total = tuple(_sum_wrench(d, c) for d, c in zip(drift, control, strict=True))
+    return {"ztcf": tuple(drift), "zvcf": tuple(control), "total": total}
+
+
+def _ground_arrow(wrench: BodyWrench, part: str) -> OverlayWrench:
+    force = wrench.force_n or (0.0, 0.0, 0.0)
+    point = centre_of_pressure(wrench.point_m, force, wrench.torque_nm or (0, 0, 0))
+    return OverlayWrench(
+        WrenchKind.CONTACT,
+        "contact:" + re.sub(r"[^A-Za-z0-9_.:-]", "_", wrench.body),
+        wrench.body,
+        point,
+        force_n=tuple(map(float, force)),  # type: ignore[arg-type]
+        source=f"{part.upper()} ground reaction, feet planted (centre of pressure)",
+    )
+
+
+def with_part_wrenches(
+    frame_at: Callable[[int], Any],
+    ground_at: Callable[[int], Mapping[str, Sequence[BodyWrench]]],
+    part: str,
+) -> Callable[[int], Any]:
+    """``frame_at`` showing ``part``'s ground reaction and force kinds only.
+
+    The contact arrows are replaced by the part's planted-foot reactions;
+    other kinds are kept when :data:`PART_KINDS` lists them for ``part``.
+    ``recorded`` returns ``frame_at`` itself.
+
+    Raises:
+        ValueError: ``part`` is not in :data:`SHADING_PARTS`.
+    """
+    if part not in SHADING_PARTS:
+        raise ValueError(f"force part must be one of {SHADING_PARTS}, got {part!r}")
+    if part == "recorded":
+        return frame_at
+    kinds = PART_KINDS[part]
+
+    def at(index: int) -> Any:
+        frame = frame_at(index)
+        kept = tuple(w for w in frame.wrenches if w.kind in kinds)
+        ground = tuple(_ground_arrow(w, part) for w in ground_at(index)[part])
+        return replace(frame, wrenches=(*kept, *ground))
+
+    return at
+
+
 def with_part_shading(
     frame_at: Callable[[int], Any],
     parts_at: Callable[[int], Mapping[str, AxialLoadFrame | None]],
@@ -125,6 +239,14 @@ def with_part_shading(
     return at
 
 
+@dataclass(frozen=True)
+class PartSplit:
+    """One state's split: section loads and ground wrenches by part."""
+
+    axial: dict[str, AxialLoadFrame | None]
+    ground: dict[str, tuple[BodyWrench, ...]]
+
+
 class _PartAxialSource:
     """Split section loads of a specification, bundle coordinate order."""
 
@@ -142,7 +264,6 @@ class _PartAxialSource:
         return dict(zip(self._order, map(float, x), strict=True))
 
     def _load(self, q: np.ndarray, accel: Any, lam: np.ndarray) -> PartLoad:
-        from src.shared.python.body_part_viz.mujoco_axial_loads import BodyWrench
         from src.shared.python.simulation_backends.hand_force_split import (
             CLOSURE_ROWS,
         )
@@ -183,19 +304,24 @@ class _PartAxialSource:
         )
         return self._load(q, a_d, lam_d), self._load(q, a_c, lam_c)
 
-    def __call__(
-        self, q: Any, v: Any, tau: Any, time_s: float
-    ) -> dict[str, AxialLoadFrame | None]:
-        """The split section loads at one state."""
+    def split(self, q: Any, v: Any, tau: Any, time_s: float) -> PartSplit:
+        """Section loads and ground wrenches by part at one state."""
         drift, control = self._parts(q, v, tau)
         unloaded = self._source.closure_from_multiplier(self._named(q), np.zeros(6))
-        return part_axial_frames(
+        axial = part_axial_frames(
             self._sampler(np.asarray(q, float), time_s),
             np.asarray(v, dtype=float),
             drift,
             control,
             unloaded,
         )
+        return PartSplit(axial, part_ground(drift.ground, control.ground))
+
+    def __call__(
+        self, q: Any, v: Any, tau: Any, time_s: float
+    ) -> dict[str, AxialLoadFrame | None]:
+        """The split section loads at one state."""
+        return self.split(q, v, tau, time_s).axial
 
     def summed(self, q: Any, v: Any, tau: Any, time_s: float) -> Any:
         """Inverse dynamics of the summed solve (the check on ``total``)."""
@@ -216,6 +342,15 @@ def swing_part_frames(
 
     Raises ``ValueError`` for a kinematic replay (no efforts to split).
     """
+    splits = swing_part_splits(swing)
+    return lambda index: splits(index).axial
+
+
+def swing_part_splits(swing: Any) -> Callable[[int], PartSplit]:
+    """:class:`PartSplit` by source state of ``swing``, lazily, cached.
+
+    Raises ``ValueError`` for a kinematic replay (no efforts to split).
+    """
     from src.tools.native_viewer_export.ztcf_feed import _states
 
     bundle = swing.bundle
@@ -227,12 +362,12 @@ def swing_part_frames(
     source = part_axial_source(bundle.spec_bytes, tuple(bundle.coordinate_order))
     q, v, tau = _states(swing)
     dt = float(bundle.dt_s)
-    cache: dict[int, dict[str, AxialLoadFrame | None]] = {}
+    cache: dict[int, PartSplit] = {}
 
-    def at(index: int) -> dict[str, AxialLoadFrame | None]:
+    def at(index: int) -> PartSplit:
         k = min(max(int(index), 0), q.shape[0] - 1)
         if k not in cache:
-            cache[k] = source(q[k], v[k], tau[k], k * dt)
+            cache[k] = source.split(q[k], v[k], tau[k], k * dt)
         return cache[k]
 
     return at

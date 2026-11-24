@@ -41,6 +41,7 @@ from src.shared.python.motion_matching.execution.grip_selection import (
     refuse_physical_in_sidecar,
 )
 from src.tools.native_viewer_export.aim_line import load_aim_settings
+from src.tools.native_viewer_export.arrow_style import arrow_style_names
 from src.tools.native_viewer_export.backends._scene_lighting import (
     LIGHTING_CHOICES,
     LightingSettings,
@@ -200,6 +201,22 @@ def _add_hand_force_arguments(p: argparse.ArgumentParser) -> None:
         help="what the segment shading shows: the recorded loads, or the "
         "ZTCF drift, ZVCF control or their total section loads (feet planted; "
         "needs a dynamics bundle) (default: recorded) (#15150)",
+    )
+    p.add_argument(
+        "--force-part",
+        choices=SHADING_PARTS,
+        default="recorded",
+        help="which forces are drawn: the recorded ones, or one ZTCF/ZVCF case: "
+        "its planted-foot ground reaction at each centre of pressure and only "
+        "its force kinds (ZTCF: no applied torques; ZVCF: no weight) "
+        "(default: recorded) (#15150)",
+    )
+    p.add_argument(
+        "--arrow-style",
+        choices=arrow_style_names(),
+        default=arrow_style_names()[0],
+        help="force arrow look from src/config/force_arrow_style.json; slim is "
+        "for 1080p and above (default: %(default)s) (#15150)",
     )
     p.add_argument(
         "--ztcf-zvcf-hands",
@@ -918,6 +935,8 @@ def main(
                     ztcf_quantity=args.ztcf_zvcf_quantity,
                     ztcf_hands=args.ztcf_zvcf_hands,
                     shading_part=args.segment_shading_part,
+                    force_part=args.force_part,
+                    arrow_style=args.arrow_style,
                 ),
             ),
         )
