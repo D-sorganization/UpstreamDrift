@@ -184,6 +184,8 @@ def test_passive_rows_are_solved_before_allocation_and_returned() -> None:
     bundle = _bundle()
     bundle.reference_q[:, 7] = 0.3 * np.sin(5.0 * np.arange(40) * 0.01)
     adapter = _PassiveAdapter()
+    bundle.reference_v = np.gradient(bundle.reference_q, 0.01, axis=0)
+    bundle.q0, bundle.v0 = bundle.reference_q[0].copy(), bundle.reference_v[0].copy()
     out, receipt = km.kinetic_match(bundle, _settings(), adapter, allocate, _close_pose)
     q, v, a = calls["q"], calls["v"], calls["a"]
     rows = [
@@ -194,6 +196,10 @@ def test_passive_rows_are_solved_before_allocation_and_returned() -> None:
     assert np.abs(rows).max() < 1e-12
     assert q[0, 8] == pytest.approx(0.1)  # starts at its spring rest
     np.testing.assert_array_equal(out.reference_q[:, 7], q[:, 8])
+    np.testing.assert_array_equal(out.reference_v[:, 7], v[:, 8])
+    # The bundle invariant: reference states start at q0, v0.
+    np.testing.assert_array_equal(out.q0, out.reference_q[0])
+    np.testing.assert_array_equal(out.v0, out.reference_v[0])
     assert receipt["passive_coordinates"] == 1
 
 

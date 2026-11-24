@@ -219,6 +219,24 @@ def _receipt(result, adapter, settings, bundle) -> dict[str, Any]:
     }
 
 
+def _passive_states(bundle, adapter, perm, q, v) -> dict[str, np.ndarray]:
+    """Bundle reference states with the passive columns from the response.
+
+    Keeps the bundle invariant ``reference[0] == q0, v0`` when the bundle
+    carries velocities and initial states.
+    """
+    names = [n for n in ("reference_q", "reference_v") if hasattr(bundle, n)]
+    sources = {"reference_q": q, "reference_v": v}
+    states = {n: np.array(getattr(bundle, n), dtype=float) for n in names}
+    for native_index in passive_indices(adapter):
+        for name in names:
+            states[name][:, perm[native_index]] = sources[name][:, native_index]
+    for name, initial in (("reference_q", "q0"), ("reference_v", "v0")):
+        if name in states and hasattr(bundle, initial):
+            states[initial] = states[name][0].copy()
+    return states
+
+
 def kinetic_match(
     bundle: Any,
     settings: KineticMatchSettings,
@@ -236,8 +254,10 @@ def kinetic_match(
     largest closure gap closed (``closure_gap_max_m``) and the number of
     passive coordinates (``passive_coordinates``); the reference angles are
     unchanged except the passive ones (a flexible shaft), which become their
-    response to the prescribed motion. ``close_pose`` maps a bundle-order pose to ``(closed pose,
-    gap before)``; by default the MuJoCo closure of the bundle's spec.
+    response to the prescribed motion (with ``q0``/``v0`` kept equal to the
+    first reference state). ``close_pose`` maps a bundle-order pose to
+    ``(closed pose, gap before)``; by default the MuJoCo closure of the
+    bundle's spec.
     """
     perm = _native_order(bundle, adapter)
     frames = bundle.reference_q.shape[0]
@@ -258,9 +278,7 @@ def kinetic_match(
         "closure_gap_max_m": gap,
         "passive_coordinates": passive,
     }
-    reference = np.array(bundle.reference_q, dtype=float)
-    for native_index in passive_indices(adapter):
-        reference[:, perm[native_index]] = q[:, native_index]
+    states = _passive_states(bundle, adapter, perm, q, v)
     efforts = np.zeros((frames - 1, len(perm)))
     for column, native_index in enumerate(adapter.actuated_indices):
         efforts[:, perm[native_index]] = np.interp(
@@ -268,13 +286,12 @@ def kinetic_match(
         )
     provenance = {**bundle.provenance, "kinetic_match": receipt}
     if hasattr(bundle, "__dataclass_fields__"):
-        out = replace(
-            bundle, efforts=efforts, provenance=provenance, reference_q=reference
-        )
+        out = replace(bundle, efforts=efforts, provenance=provenance, **states)
     else:
         out = bundle
         out.efforts, out.provenance = efforts, provenance
-        out.reference_q = reference
+        for name, value in states.items():
+            setattr(out, name, value)
     return out, receipt
 
 
