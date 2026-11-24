@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "description": "Swing report package generator settings (#15724). Each video is one native_viewer_export subprocess run with its own temporary folder, wiped after the run (a render stages several GB of raw frames). 'min_free_gb' is checked before every render. 'phase_bodies' names the model body standing for each point the phase settings use.",
+  "exporter_module": "src.tools.native_viewer_export",
+  "min_free_gb": 12,
+  "render_timeout_s": 10800,
+  "phase_bodies": {
+    "grip": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector",
+    "clubhead": "solid_reference:GolfSwing3D_Kinetic/Club/Clubface Vector/Shaft Link 3",
+    "lead_shoulder": "solid_reference:GolfSwing3D_Kinetic/LUpperArm",
+    "lead_wrist": "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm"
+  }
+}
