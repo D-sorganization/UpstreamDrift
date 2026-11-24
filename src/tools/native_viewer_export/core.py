@@ -823,6 +823,34 @@ def _swing_event_caption(swing: SwingInput, time_s: float, impact_s: float) -> s
     return event_caption_for_time(time_s, fallback)
 
 
+def _hud_info(
+    shown: SwingInput,
+    settings: ExportSettings,
+    plan: ClipPlan,
+    feed: OverlayFeed | None,
+    glyphs: Any,
+    at: tuple[float, float],
+    viewer: str,
+    extra_lines: tuple[str, ...],
+) -> HudInfo:
+    """The HUD at clip time ``at = (t, impact time)`` for ``viewer``."""
+    t, impact = at
+    shading = settings.shading is not None and settings.shading_enabled
+    return HudInfo(
+        t,
+        viewer,
+        shown.club,
+        feed.legend_for(glyphs) if feed is not None else OverlayFeed.legend(glyphs),
+        speed=plan.speed,
+        ms_from_impact=(t - impact) * 1000.0,
+        shading_legend=shading_legend(settings.shading) if shading else "",
+        event_caption=_swing_event_caption(shown, t, impact)
+        if settings.event_captions
+        else "",
+        extra_lines=extra_lines,
+    )
+
+
 def _export_clip(
     backend: NativeBackend,
     swing: SwingInput,
@@ -870,22 +898,15 @@ def _export_clip(
                 args = (t, look_map(settings), settings.distance_m, depth)
                 tiles = flight.draw(tiles, *args)
                 extra_lines = (*extra_lines, *flight.hud_lines(t))
-            hud = HudInfo(
-                t,
+            hud = _hud_info(
+                shown,
+                settings,
+                plan,
+                shown_feed,
+                glyphs,
+                (t, impact),
                 viewer,
-                swing.club,
-                shown_feed.legend_for(glyphs)
-                if shown_feed is not None
-                else OverlayFeed.legend(glyphs),
-                speed=plan.speed,
-                ms_from_impact=(t - impact) * 1000.0,
-                shading_legend=shading_legend(settings.shading)
-                if settings.shading is not None and settings.shading_enabled
-                else "",
-                event_caption=_swing_event_caption(shown, t, impact)
-                if settings.event_captions
-                else "",
-                extra_lines=extra_lines,
+                extra_lines,
             )
             labelled = {
                 v: draw_view_label(tiles[v], get_view_preset(v).label)
