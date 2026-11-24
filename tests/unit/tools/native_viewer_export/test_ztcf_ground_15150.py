@@ -235,3 +235,25 @@ def test_no_hand_case_colour_repeats_a_force_kind_colour() -> None:
     for look in hand_styles().values():
         for field in ("drift_hex", "control_hex", "total_hex"):
             assert getattr(look, field).upper() not in kinds, field
+
+
+def test_the_hud_says_why_the_shading_is_withheld_at_ball_contact() -> None:
+    """Section loads are blanked within a step of contact (the impact impulse
+    is not modelled); unexplained, the unshaded body reads as a glitch."""
+    from types import SimpleNamespace
+
+    from src.tools.native_viewer_export.overlay_feed import (
+        CONTACT_BLACKOUT_NOTE,
+        OverlayFeed,
+    )
+
+    def frame(value):
+        loads = SimpleNamespace(values_n={"trunk": value})
+        return SimpleNamespace(axial_loads=loads, wrenches=())
+
+    blank = OverlayFeed(lambda _i: frame(None))
+    assert CONTACT_BLACKOUT_NOTE in blank.hud_lines_at(0)
+    assert "impulse" in CONTACT_BLACKOUT_NOTE
+    assert CONTACT_BLACKOUT_NOTE not in OverlayFeed(lambda _i: frame(5.0)).hud_lines_at(
+        0
+    )
