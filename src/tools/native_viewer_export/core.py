@@ -835,7 +835,7 @@ def _hud_info(
 ) -> HudInfo:
     """The HUD at clip time ``at = (t, impact time)`` for ``viewer``."""
     t, impact = at
-    shading = settings.shading is not None and settings.shading_enabled
+    scale = settings.shading if settings.shading_enabled else None
     return HudInfo(
         t,
         viewer,
@@ -843,7 +843,7 @@ def _hud_info(
         feed.legend_for(glyphs) if feed is not None else OverlayFeed.legend(glyphs),
         speed=plan.speed,
         ms_from_impact=(t - impact) * 1000.0,
-        shading_legend=shading_legend(settings.shading) if shading else "",
+        shading_legend=shading_legend(scale) if scale is not None else "",
         event_caption=_swing_event_caption(shown, t, impact)
         if settings.event_captions
         else "",
