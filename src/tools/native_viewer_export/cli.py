@@ -215,7 +215,7 @@ def _add_hand_force_arguments(p: argparse.ArgumentParser) -> None:
         "--arrow-style",
         choices=arrow_style_names(),
         default=arrow_style_names()[0],
-        help="force arrow look from src/config/force_arrow_style.json; slim is "
+        help="force arrow look from arrow_style_settings.json; slim is "
         "for 1080p and above (default: %(default)s) (#15150)",
     )
     p.add_argument(

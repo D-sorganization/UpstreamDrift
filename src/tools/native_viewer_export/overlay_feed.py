@@ -33,7 +33,7 @@ def default_glyph_style(
     capped at 0.6 m length (0.30 m radius) to prevent oversized arcs near
     impact (NV-9, #11697). Without body mass the fixed 0.7 m per kN scale is kept.
 
-    ``arrow_style`` names a look in ``src/config/force_arrow_style.json``
+    ``arrow_style`` names a look in ``arrow_style_settings.json``
     (default: its ``default_style``); the shaft radius comes from it.
 
     Raises ``ValueError`` when ``body_mass_kg`` is not finite and positive or

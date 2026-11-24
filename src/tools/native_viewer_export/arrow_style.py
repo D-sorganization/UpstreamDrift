@@ -3,7 +3,7 @@
 The owner asked for slimmer, cleaner arrows for shared high-resolution
 renders. Each named style (shaft radius, the lowest output height it is
 legible at) and the fixed head length live in
-``src/config/force_arrow_style.json``, so they are settings, never literals
+``arrow_style_settings.json`` beside this module, so they are settings, never literals
 in the drawing code. ``standard`` keeps the NV-9 720p legibility floor
 (#11697); ``slim`` is for 1080p and above.
 """
@@ -24,9 +24,7 @@ __all__ = [
     "load_arrow_style",
 ]
 
-ARROW_STYLE_PATH = (
-    Path(__file__).resolve().parents[2] / "config" / "force_arrow_style.json"
-)
+ARROW_STYLE_PATH = Path(__file__).with_name("arrow_style_settings.json")
 
 
 @dataclass(frozen=True)
