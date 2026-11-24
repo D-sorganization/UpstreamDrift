@@ -111,3 +111,20 @@ def test_colour_key_explains_gravity_lives_in_the_ztcf() -> None:
     ztcf, zvcf = (colour_key(v, TipToTailStyle())[0][0] for v in ("ztcf", "zvcf"))
     assert "gravity" in ztcf.lower()
     assert "gravity" not in zvcf.lower()
+
+
+@pytest.mark.parametrize(("torque_nm", "drawn"), [(0.5, True), (0.05, False)])
+def test_torque_visibility_uses_the_torque_floor(torque_nm: float, drawn: bool) -> None:
+    """A torque below the force floor (1 N) but over the torque floor (0.1 N m)
+    is drawn; the force floor is a different unit (review of #15709)."""
+    style = ForceGlyphStyle(
+        torque_scale_m_per_nm=0.01,
+        max_length_m=5.0,
+        magnitude_floor_n=1.0,
+        magnitude_floor_nm=0.1,
+    )
+    torque = (0.0, 0.0, torque_nm)
+    arrows = part_arrows(POINT, torque, (0.0, 0.0, 0.0), style, "ztcf", "torque")
+    assert bool(arrows) is drawn
+    forces = part_arrows(POINT, (0.5, 0.0, 0.0), (0.0, 0.0, 0.0), style, "ztcf")
+    assert forces == ()  # 0.5 N stays under the force floor

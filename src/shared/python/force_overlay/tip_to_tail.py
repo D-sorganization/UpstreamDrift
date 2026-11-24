@@ -194,10 +194,13 @@ def part_arrows(
     if view == "tip_to_tail":
         tails["control"] = point + scale * vectors["drift"]
     lead = f"{prefix} " if prefix else ""
+    floor = (
+        style.magnitude_floor_nm if quantity == "torque" else style.magnitude_floor_n
+    )
     arrows = []
     for part in parts:
         vector = vectors[part]
-        if float(np.linalg.norm(vector)) < style.magnitude_floor_n:
+        if float(np.linalg.norm(vector)) < floor:
             continue
         if part == "total" and not math.isfinite(scale):
             continue
