@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "description": "Kinetic match settings (#15685): forces and torques for a kinematic best match by inverse dynamics and allocation. One minimum-effort solution in the null space of the closed arm loop, never a unique answer.",
+  "method": "inverse_dynamics_allocation",
+  "engine": "mujoco",
+  "cutoff_hz": 20.0,
+  "stride": 2,
+  "regularisation_grip": 1.0,
+  "root_penalty_weight": 10000.0,
+  "root_residual_limit_n": 50.0,
+  "max_grip_force_n": 1500.0,
+  "max_joint_torque_n_m": 500.0,
+  "limits_note": "Plausibility limits, not acceptance: published driver swings report hand-on-club forces under about 1 kN and joint torques of a few hundred N m. A result above them is reported implausible with its reasons."
+}
