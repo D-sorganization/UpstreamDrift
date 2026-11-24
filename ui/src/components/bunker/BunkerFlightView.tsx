@@ -1,6 +1,9 @@
 import { useId, useState } from "react";
 import { displayTrace, type FlightRecord, type FlightTrace, type Point } from "./flightTrace";
 
+// Shared by the flight polyline and its legend entry so the two never drift.
+const FLIGHT_STROKE = "#60a5fa";
+
 function Projection({
   trace,
   vertical,
@@ -39,7 +42,7 @@ function Projection({
       viewBox="0 0 360 195"
       role="img"
       aria-labelledby={id}
-      className="w-full min-w-0 rounded bg-gray-950"
+      className="w-full min-w-0 rounded bg-canvas"
     >
       <title id={id}>{`${title} (${unit})`}</title>
       <g fill="#d1d5db" fontSize="11">
@@ -62,7 +65,7 @@ function Projection({
         <text x="188" y="178" textAnchor="middle">{`Downrange (${unit})`}</text>
       </g>
       <path d="M48 40 V140 H328" fill="none" stroke="#6b7280" />
-      <polyline points={line(trace.flight_m)} fill="none" stroke="#60a5fa" strokeWidth="2.5" />
+      <polyline points={line(trace.flight_m)} fill="none" stroke={FLIGHT_STROKE} strokeWidth="2.5" />
       <polyline
         points={line(trace.rollout_m)}
         fill="none"
@@ -97,18 +100,18 @@ export function BunkerFlightView({ record }: { record: FlightRecord }) {
     <section aria-label="Ball Flight and Green Landing" className="mt-4 min-w-0 space-y-2">
       <h4 className="font-medium text-white">Ball Flight and Green Landing</h4>
       <p className="text-xs text-amber-200">{trace.assumption}</p>
-      <label className="flex items-center gap-2 text-xs text-gray-200">
+      <label className="flex items-center gap-2 text-xs text-token-text">
         Flight units
         <select
           value={unit}
           onChange={(e) => setUnit(e.target.value as "m" | "yd")}
-          className="rounded bg-gray-900 p-1"
+          className="rounded bg-surface p-1"
         >
           <option value="m">Metres</option>
           <option value="yd">Yards</option>
         </select>
       </label>
-      <p className="text-sm text-gray-200">{`Carry ${(trace.carry_m * factor).toFixed(
+      <p className="text-sm text-token-text">{`Carry ${(trace.carry_m * factor).toFixed(
         2,
       )} ${unit}`}</p>
       <div className="grid min-w-0 grid-cols-1 gap-2 xl:grid-cols-2">
@@ -116,7 +119,7 @@ export function BunkerFlightView({ record }: { record: FlightRecord }) {
         <Projection trace={trace} vertical={1} unit={unit} />
       </div>
       <p className="flex flex-wrap gap-x-3 text-xs">
-        <span className="text-blue-400">Flight — solid</span>
+        <span style={{ color: FLIGHT_STROKE }}>Flight — solid</span>
         <span className="text-green-400">Rollout — dashed</span>
         <span className="text-amber-300">● Landing</span>
         <span className="text-pink-400">● Rest</span>
