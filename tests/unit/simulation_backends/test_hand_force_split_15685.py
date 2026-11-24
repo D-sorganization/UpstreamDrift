@@ -6,10 +6,14 @@ import numpy as np
 import pytest
 
 from src.shared.python.simulation_backends.constrained_ztcf_zvcf import (
+    constrained_acceleration_at,
     drift_and_control_reactions,
 )
 from src.shared.python.simulation_backends.hand_force_split import (
+    HANDS,
+    PARTS,
     hand_force_split,
+    hand_wrench_split,
 )
 
 pytestmark = pytest.mark.unit
@@ -81,3 +85,81 @@ def test_shapes_are_checked() -> None:
         hand_force_split(
             _Provider(), frame, np.zeros((1, 6)), np.zeros((1, 6)), np.zeros((1, 6))
         )
+
+
+# --- Both hands, ZTCF and ZVCF (#15150 Track Z, Z2) -------------------------
+
+_K = np.random.default_rng(11).normal(size=(6, 6))
+_GRAVITY = np.array([0.0, 0.0, -9.81])
+_CLUB_MASS = 0.31
+
+
+def _club_load(q, v, a, gravity):
+    """Fake bare-club net load: affine in ``a``, quadratic in ``v``, gravity once.
+
+    Returns (force, moment about the world origin) the hands must supply.
+    """
+    v = np.asarray(v, dtype=float)
+    load = _K @ np.asarray(a, dtype=float) + 0.5 * float(v @ v) * np.ones(6)
+    if gravity:
+        load[:3] -= _CLUB_MASS * _GRAVITY
+    return load[:3], load[3:]
+
+
+def _lead_point(_q):
+    return np.array([0.05, -0.1, 1.1])
+
+
+def _split(q, v, tau):
+    rot, origin = _rotation_z(0.4), np.array([0.1, 0.2, 1.0])
+    return (
+        hand_wrench_split(
+            _SixRow(), lambda _q: (rot, origin), _club_load, _lead_point, q, v, tau
+        ),
+        rot,
+        origin,
+    )
+
+
+def test_each_hand_ztcf_plus_zvcf_is_its_total() -> None:
+    q, v, tau = np.zeros((2, 6)), np.full((2, 6), 0.3), np.ones((2, 6))
+    split, rot, origin = _split(q, v, tau)
+    a, lam = constrained_acceleration_at(_SixRow(), q[0], v[0], tau[0])
+    trail = split.total("trail")
+    np.testing.assert_allclose(trail.force_n[0], -rot @ lam[:3], atol=1e-9)
+    np.testing.assert_allclose(trail.torque_nm[0], -rot @ lam[3:], atol=1e-9)
+    net_f, net_m = _club_load(q[0], v[0], a, True)
+    lead = split.total("lead")
+    np.testing.assert_allclose(lead.force_n[0] + trail.force_n[0], net_f, atol=1e-9)
+    moment = (
+        lead.torque_nm[0]
+        + np.cross(lead.point_m[0], lead.force_n[0])
+        + trail.torque_nm[0]
+        + np.cross(trail.point_m[0], trail.force_n[0])
+    )
+    np.testing.assert_allclose(moment, net_m, atol=1e-9)
+    for hand in HANDS:
+        parts = [split.part(hand, p) for p in PARTS]
+        np.testing.assert_allclose(
+            parts[0].force_n + parts[1].force_n, split.total(hand).force_n
+        )
+
+
+def test_gravity_is_counted_once_in_the_ztcf() -> None:
+    """Owner, 2026-11-24: gravity is passive; the ZVCF is the torques alone."""
+    q, v = np.zeros((1, 6)), np.zeros((1, 6))
+    split, _, _ = _split(q, v, np.zeros((1, 6)))
+    for hand in HANDS:
+        zvcf = split.part(hand, "zvcf")
+        np.testing.assert_allclose(zvcf.force_n, 0.0, atol=1e-12)
+        np.testing.assert_allclose(zvcf.torque_nm, 0.0, atol=1e-12)
+    supported = split.part("lead", "ztcf").force_n + split.part("trail", "ztcf").force_n
+    assert np.linalg.norm(supported) > 0.0
+
+
+def test_unknown_hand_or_part_is_refused() -> None:
+    split, _, _ = _split(np.zeros((1, 6)), np.zeros((1, 6)), np.zeros((1, 6)))
+    with pytest.raises(ValueError, match="hand"):
+        split.part("left", "ztcf")
+    with pytest.raises(ValueError, match="part"):
+        split.part("lead", "gravity")
