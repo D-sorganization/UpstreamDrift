@@ -154,10 +154,10 @@ class BodyKinematics:
 
     def __init__(self, plant: Any, bodies: Sequence[str]) -> None:
         self.bodies = tuple(bodies)
-        probes = {
-            f"{body}#{i}": (body, tuple(point))
+        probes: dict[str, tuple[str, tuple[float, ...]]] = {
+            f"{body}#{i}": (body, tuple(_PROBES[i]))
             for body in self.bodies
-            for i, point in enumerate(_PROBES)
+            for i in range(len(_PROBES))
         }
         self.kin = plant.create_ik(probes)
         self._pose: Any = None

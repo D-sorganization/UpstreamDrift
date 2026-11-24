@@ -70,7 +70,9 @@ class WristBlend:
 
     def centred(self, centre: Array) -> Array:
         """``centre`` (off the wrist joint) pulled within the allowed shift."""
-        return centre * min(1.0, self.max_centre_shift_m / np.linalg.norm(centre))
+        return centre * min(
+            1.0, float(self.max_centre_shift_m / np.linalg.norm(centre))
+        )
 
     def __post_init__(self) -> None:
         if not 1.0 <= self.rim_scale <= 1.5:

@@ -548,7 +548,8 @@ def draw_text_panel(
     for i, (label, value, unavailable) in enumerate(lines, start=1):
         y = pad + i * line_h
         colour = _CARD_GREY if unavailable else _WHITE
-        colour = next(iter(label_colours[i - 1 : i]), None) or colour
+        override = label_colours[i - 1] if i <= len(label_colours) else None
+        colour = override or colour
         draw.text((pad, y), label, font=font, fill=colour)
         for cell, right in zip(reversed(_cells(value)), rights, strict=False):
             draw.text(

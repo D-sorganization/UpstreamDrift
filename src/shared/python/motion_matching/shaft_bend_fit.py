@@ -161,7 +161,8 @@ def club_frame_targets(
         raise ValueError("need (k, m, 3) markers and at least 3 reference markers")
     ref = np.broadcast_to(reference_offsets, captured.shape)
     out = np.full_like(captured, np.nan)
-    for k, (points, local) in enumerate(zip(captured, ref, strict=True)):
+    for k in range(captured.shape[0]):
+        points, local = captured[k], ref[k]
         if not np.all(np.isfinite(points[idx])):
             continue
         a, b = local[idx], points[idx]
