@@ -99,7 +99,7 @@ def test_unknown_lumping_raises() -> None:
 def test_record_names_the_rule() -> None:
     mid = build_shaft_chain(DRIVER, 4).record
     exact = build_shaft_chain(DRIVER, 4, lumping="tip_slope_exact").record
-    assert mid["lumping_rule"] == "midpoint"
+    assert "lumping_rule" not in mid  # default record unchanged
     assert exact["lumping_rule"] == "tip_slope_exact"
     assert "midpoint" in mid["lumping"]
     assert "exact tip slope" in exact["lumping"]

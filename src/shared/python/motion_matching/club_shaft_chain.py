@@ -526,7 +526,7 @@ def _chain_record(
     lumping: str = DEFAULT_LUMPING,
 ) -> dict[str, Any]:
     flex, torsion, scale = options
-    return {
+    record = {
         "model": "chain",
         "n_links": n_links,
         "torsion": torsion,
@@ -545,11 +545,13 @@ def _chain_record(
             "damping_ratio": DAMPING_RATIO,
         },
         "span_m": properties.length,
-        "lumping_rule": lumping,
         "lumping": _LUMPING_TEXT[lumping],
         "axes": "Rx, Rz bending about club x, z; Ry torsion; links in club frame",
         "sources": list(SOURCES),
     }
+    if lumping != DEFAULT_LUMPING:  # the default record stays byte-identical
+        record["lumping_rule"] = lumping
+    return record
 
 
 # --- specification transform --------------------------------------------------
