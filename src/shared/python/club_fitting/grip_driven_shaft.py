@@ -120,6 +120,13 @@ class ShaftRun:
         """Linear interpolation of the scalar series ``name`` at time ``t``."""
         return float(np.interp(t, self.times_s, getattr(self, name)))
 
+    def at_vector_norm(self, name: str, t: float) -> float:
+        """Norm of the (n, 3) series ``name`` interpolated at time ``t``."""
+        series = getattr(self, name)
+        return float(
+            np.linalg.norm([np.interp(t, self.times_s, series[:, j]) for j in range(3)])
+        )
+
 
 def _angles(n: np.ndarray, x_t: np.ndarray, y_t: np.ndarray) -> tuple[float, float]:
     """``(face heading, loft)`` in degrees of a face normal (heading + = open)."""
