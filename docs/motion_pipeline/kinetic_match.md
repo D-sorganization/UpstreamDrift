@@ -23,7 +23,12 @@ private bundles and their outputs outside the repository.
 1. Maps the bundle's coordinates to the engine's native order by name. The
    MuJoCo adapter orders coordinates differently from the bundle, and feeding
    bundle order scrambles every result.
-2. Low-passes the reference (`cutoff_hz`) and differentiates it.
+2. Low-passes the reference (`cutoff_hz`), projects every pose onto the
+   hand-on-club closure (`closure_tolerance_m`) and differentiates it. An open
+   weld gives the loop Jacobian root columns as large as the gap, so the grip
+   force becomes a fake external moment: the allocator buys root moment with
+   grip force instead of reporting a root residual. The receipt's
+   `closure_gap_max_m` is the largest gap closed.
 3. Projects the velocities and accelerations onto the hand-on-club closure,
    mass-weighted, so that the relative hand-club velocity and acceleration are
    zero. Matched angles do not satisfy the weld exactly; without this step the
@@ -49,6 +54,7 @@ measured. State the objective with any figure that shows these forces.
 | `reasons` | Each limit exceeded, with its value |
 | `root_residual_window_s` | Time span from the start where the root residual stays under its limit |
 | `peaks` | Peak grip force, peak joint torque and its coordinate, peak root residual |
+| `closure_gap_max_m` | Largest hand-on-club pose gap closed before inverse dynamics |
 | `max_equilibrium_residual` | Consistency of the allocation; should be near zero |
 
 Render forces only inside the root-residual window, and only from a plausible
@@ -64,9 +70,12 @@ reports where the motion cannot be balanced.
 
 ## Known Limits
 
-On the current best driver match the backswing kinetics are physical (grip
-force under 100 N, joint torques under 100 N m, zero root residual to 1.11 s).
-From 1.11 s, when the feet start leaving the ground, the allocation reports
-5 to 14 kN at the grip and 1 to 4 kN m at the lead shoulder, although the club
-itself needs only about 400 N. The receipt marks this implausible. The
-ground-contact side of the allocation at heel lift is under review on #15685.
+On the current best driver match the pose gap at the weld reaches 28 mm.
+Before the pose was closed, the allocation used that gap as a lever and
+reported 5 to 14 kN at the grip and 1 to 4 kN m at the lead shoulder from
+heel lift. With the pose closed the peaks are 74 N at the grip and 408 N m at
+the hip, and the remaining reason for an implausible verdict is the root
+residual: 40 to 270 N through impact and about 1.3 kN just after it. That is
+support the matched motion asks of the feet that the contact model cannot
+give, a kinematic-quality signal for the match rather than an allocation
+artefact.

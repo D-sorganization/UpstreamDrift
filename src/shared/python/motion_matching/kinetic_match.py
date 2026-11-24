@@ -5,7 +5,11 @@ one set of joint torques, ground forces and hand-on-club forces that produce
 it, so that every new best match can be given forces and torques the same way:
 
 1. reorder the bundle's coordinates into the engine's native order;
-2. low-pass the reference (``cutoff_hz``) and differentiate it;
+2. low-pass the reference (``cutoff_hz``), project every pose onto the
+   hand-on-club closure (``closure_tolerance_m``) and differentiate it. An
+   open weld gives the loop Jacobian root columns the size of the gap, so the
+   grip multiplier becomes a fake external moment that the allocator buys
+   instead of the penalised root residual (kN of grip on the current driver);
 3. project the velocities and accelerations onto the hand-on-club closure,
    mass-weighted, so ``J v = 0`` and ``J a + Jdot v = 0`` (the matched angles
    do not satisfy the weld exactly, and inverse dynamics of an inconsistent
@@ -54,6 +58,7 @@ _FLOATS = (
     "root_residual_limit_n",
     "max_grip_force_n",
     "max_joint_torque_n_m",
+    "closure_tolerance_m",
 )
 
 __all__ = ["KineticMatchSettings", "kinetic_match", "load_settings"]
@@ -72,6 +77,7 @@ class KineticMatchSettings:
     root_residual_limit_n: float
     max_grip_force_n: float
     max_joint_torque_n_m: float
+    closure_tolerance_m: float
 
     def __post_init__(self) -> None:
         if self.method != METHOD:
@@ -111,6 +117,34 @@ def _project(adapter: Any, q: np.ndarray, v: np.ndarray, a: np.ndarray) -> None:
         gain = m_inv_jt @ np.linalg.pinv(jac @ m_inv_jt, rcond=1e-8)
         v[k] -= gain @ (jac @ v[k])
         a[k] -= gain @ (jac @ a[k] + adapter.compute_closure_drift(q[k], v[k]))
+
+
+PoseCloser = Callable[[np.ndarray], tuple[np.ndarray, float]]
+
+
+def _pose_closer(spec_bytes: bytes, tolerance_m: float) -> PoseCloser:
+    """Default: Newton projection onto the closure manifold in spec order."""
+    from src.shared.python.motion_matching.same_input.closure import (
+        project_to_closure,
+    )
+    from src.shared.python.motion_matching.same_input.plant import VectorPlant
+
+    plant = VectorPlant("mujoco", spec_bytes)
+
+    def close(q: np.ndarray) -> tuple[np.ndarray, float]:
+        result = project_to_closure(plant, q, np.zeros_like(q), tolerance=tolerance_m)
+        return result.q, result.pose_residual_before
+
+    return close
+
+
+def _close_poses(close: PoseCloser, q: np.ndarray) -> float:
+    """Close every pose of ``q`` in place; the largest gap closed (m)."""
+    gap = 0.0
+    for k in range(q.shape[0]):
+        q[k], before = close(q[k])
+        gap = max(gap, float(before))
+    return gap
 
 
 def _allocate(adapter, t, q, v, a, settings: KineticMatchSettings) -> Any:
@@ -181,6 +215,7 @@ def kinetic_match(
     settings: KineticMatchSettings,
     adapter: Any,
     allocate: Callable[..., Any] = _allocate,
+    close_pose: PoseCloser | None = None,
 ) -> tuple[Any, dict[str, Any]]:
     """Return ``(bundle with efforts, receipt)`` for a kinematic bundle.
 
@@ -188,20 +223,25 @@ def kinetic_match(
     bundle has at least ``MIN_FRAMES`` frames. ``ValueError`` otherwise.
     Postconditions: ``efforts`` holds the allocated actuated torques in the
     bundle's coordinate order (zeros on unactuated coordinates), sampled at
-    the step times; ``provenance["kinetic_match"]`` is the receipt; the
-    reference angles are unchanged.
+    the step times; ``provenance["kinetic_match"]`` is the receipt, with the
+    largest closure gap closed (``closure_gap_max_m``); the reference angles
+    are unchanged. ``close_pose`` maps a bundle-order pose to ``(closed pose,
+    gap before)``; by default the MuJoCo closure of the bundle's spec.
     """
     perm = _native_order(bundle, adapter)
     frames = bundle.reference_q.shape[0]
     if frames < MIN_FRAMES:
         raise ValueError(f"need at least {MIN_FRAMES} frames, got {frames}")
     times = np.arange(frames) * bundle.dt_s
-    q = condition(bundle.reference_q, times, settings.cutoff_hz)[:, perm]
+    closer = close_pose or _pose_closer(bundle.spec_bytes, settings.closure_tolerance_m)
+    q = condition(bundle.reference_q, times, settings.cutoff_hz)
+    gap = _close_poses(closer, q)
+    q = q[:, perm]
     v = np.gradient(q, times, axis=0)
     a = np.gradient(v, times, axis=0)
     _project(adapter, q, v, a)
     result = allocate(adapter, times, q, v, a, settings)
-    receipt = _receipt(result, adapter, settings, bundle)
+    receipt = {**_receipt(result, adapter, settings, bundle), "closure_gap_max_m": gap}
     efforts = np.zeros((frames - 1, len(perm)))
     for column, native_index in enumerate(adapter.actuated_indices):
         efforts[:, perm[native_index]] = np.interp(

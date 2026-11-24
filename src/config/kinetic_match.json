@@ -10,5 +10,6 @@
   "root_residual_limit_n": 50.0,
   "max_grip_force_n": 1500.0,
   "max_joint_torque_n_m": 500.0,
-  "limits_note": "Plausibility limits, not acceptance: published driver swings report hand-on-club forces under about 1 kN and joint torques of a few hundred N m. A result above them is reported implausible with its reasons."
+  "closure_tolerance_m": 1e-10,
+  "limits_note": "Plausibility limits, not acceptance: published driver swings report hand-on-club forces under about 1 kN and joint torques of a few hundred N m. A result above them is reported implausible with its reasons. closure_tolerance_m is the hand-on-club pose residual each frame is projected to before inverse dynamics; an open weld turns the grip force into a fake external moment."
 }
