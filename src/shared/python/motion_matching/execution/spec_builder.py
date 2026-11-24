@@ -885,10 +885,15 @@ def _record_preset(upper: dict[str, Any], kwargs: Mapping[str, Any]) -> None:
 def _apply_kwarg_model_options(
     document: Any, club_spec: Any, kwargs: dict[str, Any]
 ) -> Any:
-    """Shaft model, tibial torsion and knee axial rotation from ``kwargs``."""
-    document = with_shaft_model(
-        document, club_spec, kwargs.get("shaft_model"), kwargs.get("shaft_options")
-    )
+    """Shaft model, tibial torsion and knee axial rotation from ``kwargs``.
+
+    Without a ``shaft_model`` the composed club stays rigid here and
+    :func:`with_current_golfer_model` gives it the current flexible shaft.
+    """
+    if kwargs.get("shaft_model") is not None:
+        document = with_shaft_model(
+            document, club_spec, kwargs["shaft_model"], kwargs.get("shaft_options")
+        )
     document = _apply_kwarg_tibial_torsion(document, kwargs)
     return apply_knee_axial_rotation(document, kwargs.get(KNEE_AXIAL_KEY))
 
@@ -1018,7 +1023,11 @@ def build_anthropometric_spec(
     )
     club_markers = get_club_markers(club, kwargs.get("club_markers_path"))
     document, subject = with_current_golfer_model(
-        *with_grip_revision(built.document, built.subject, kwargs.get("grip_overrides"))
+        *with_grip_revision(
+            built.document, built.subject, kwargs.get("grip_overrides")
+        ),
+        shaft_model=kwargs.get("shaft_model"),
+        shaft_options=kwargs.get("shaft_options"),
     )
     paths = _write_outputs(
         document=document,
@@ -1079,8 +1088,11 @@ def build_parser(preset: Mapping[str, Any] | None = None) -> argparse.ArgumentPa
     parser.add_argument(
         "--shaft-model",
         choices=SHAFT_MODELS,
-        default=DEFAULT_SHAFT_MODEL,
-        help="club.shaft.model: rigid (default) or the chain flexible shaft (#12686)",
+        default=None,
+        help=(
+            "club.shaft.model; default: the current golfer model's flexible "
+            "chain shaft (#15684); rigid is a ballpark fallback only"
+        ),
     )
     add_shaft_arguments(parser)
     parser.add_argument(

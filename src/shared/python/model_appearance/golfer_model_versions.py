@@ -34,6 +34,8 @@ _FIELDS: dict[str, tuple[tuple[str, ...], str]] = {
     "body_visual_backend": (("loft", "skinned_cc0"), "loft"),
 }
 _TEXT_KEYS = ("version", "spec_revision_configuration", "make_with")
+#: Shaft models the registry knows (#15684); the current model must bend.
+SHAFT_MODELS = ("rigid", "chain")
 
 
 @dataclass(frozen=True)
@@ -47,6 +49,8 @@ class CurrentGolferModel:
     make_with: str
     refit_poses_with: str
     docs: str
+    shaft_model: str = "chain"
+    shaft_flex: str = "Stiff"
 
 
 @dataclass(frozen=True)
@@ -74,6 +78,23 @@ def _known(field: str, value: str) -> str:
     return value
 
 
+def _current_shaft(shaft: Mapping[str, Any]) -> dict[str, str]:
+    """The current model's shaft fields (#15684).
+
+    Raises:
+        ValueError: an unknown shaft model, a rigid current shaft (rigid is
+            only the ballpark fallback) or an empty flex rating.
+    """
+    model, flex = str(shaft["model"]), str(shaft["flex"])
+    if model not in SHAFT_MODELS:
+        raise ValueError(f"unknown shaft model {model!r} in the golfer model registry")
+    if model == "rigid":
+        raise ValueError("the current golfer model cannot use a rigid shaft")
+    if not flex:
+        raise ValueError("the current golfer model's shaft needs a flex rating")
+    return {"shaft_model": model, "shaft_flex": flex}
+
+
 def load_golfer_model_versions(path: Path | None = None) -> GolferModelVersions:
     """Parse and validate the registry.
 
@@ -97,6 +118,7 @@ def load_golfer_model_versions(path: Path | None = None) -> GolferModelVersions:
         make_with=str(cur["make_with"]),
         refit_poses_with=str(cur["refit_poses_with"]),
         docs=str(cur["docs"]),
+        **_current_shaft(cur["shaft"]),
     )
     if not all(getattr(current, key) for key in _TEXT_KEYS):
         raise ValueError("the current golfer model needs a version, revision and maker")

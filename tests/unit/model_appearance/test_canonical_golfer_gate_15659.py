@@ -27,6 +27,9 @@ from src.shared.python.model_appearance.canonical_golfer_gate import (
 from src.shared.python.model_appearance.golfer_model_versions import (
     current_golfer_model,
 )
+from src.shared.python.motion_matching.execution.spec_revisions import (
+    with_current_shaft,
+)
 from src.shared.python.optimization.solution_bundle import (
     SolutionBundle,
     SolutionBundleError,
@@ -53,7 +56,7 @@ def _canonical_spec() -> dict[str, Any]:
     spec["subject"]["hand_visual_backend"] = "skinned_human"
     spec["subject"]["body_visual_backend"] = "skinned_cc0"
     spec["spec_revision"] = {"version": 1, "configuration": "skinned_hand_wrists"}
-    return spec
+    return with_current_shaft(spec)  # the flexible shaft is canonical (#15684)
 
 
 def _lock(spec: dict[str, Any] | None = None) -> GolferModelLock:

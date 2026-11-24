@@ -6,21 +6,31 @@ parts it deprecates. Read it through
 (`current_golfer_model()`, `deprecated_parts(spec)`), never by memory or by
 copying an older spec.
 
-## Current Model: `full_body_skinned_v1`
+## Current Model: `full_body_skinned_flex_v2`
 
 | Part | Spec Field | Current | Deprecated |
 |---|---|---|---|
 | Hands | `subject.hand_visual_backend` | `skinned_human` | `capsule` |
 | Body | `subject.body_visual_backend` | `skinned_cc0` | `loft` |
+| Shaft | `club.shaft.model` (`club.shaft.flex`) | `chain` (`Stiff`) | `rigid` (ballpark fallback only) |
 
 The skinned hands carry the owner-approved grip: trail palm over the lead
 thumb, ring finger beside the lead forefinger and a 30° trail trigger spread.
+
+Golf shafts bend, so the current model carries the flexible chain shaft
+(`club_shaft_chain.build_shaft_chain`, Stiff by default, #15684). A rigid
+club is only a ballpark fallback: pass `shaft_model="rigid"` (or
+`--shaft-model rigid`) to get a quick first match when the flexible model
+will not solve, then reintroduce the flexible shaft. The fallback logs a
+warning, and `require_canonical_golfer` refuses a rigid spec.
 
 ## Putting a Spec on the Current Model
 
 `build_anthropometric_spec` does steps 1 and 2 for every right-handed spec it
 writes without grip picks (`motion_matching/execution/spec_revisions.py`,
 `with_current_golfer_model`). Do them by hand only for an older spec.
+
+Every spec, left-handed and grip-pick specs included, gets step 4 too.
 
 1. Apply `apply_skinned_hand_wrists(spec)`
    (`motion_matching/execution/skinned_hand_wrists.py`). It moves the wrist
@@ -30,6 +40,8 @@ writes without grip picks (`motion_matching/execution/spec_revisions.py`,
 3. Refit any pose fitted before the revision with `refit_arms_to_club`
    (`engines/physics_engines/mujoco/python/skinned_arm_refit.py`). It holds the
    club where the old pose had it and closes the trail hand on the grip.
+4. Give the club the current shaft with `with_current_shaft(spec)`
+   (`motion_matching/execution/spec_revisions.py`); a chain spec is kept.
 
 Drawing an unrevised spec with skinned hands misplaces them. That is why a spec
 without the selectors still falls back to the deprecated capsule hands and loft

@@ -72,7 +72,8 @@ def require_canonical_golfer(spec: Mapping[str, Any]) -> CurrentGolferModel:
     Raises:
         NonCanonicalGolferError: ``spec`` resolves to a deprecated hand or
             body backend (``part`` is the deprecated value), or it lacks the
-            current spec revision (``part`` is ``spec_revision``).
+            current spec revision (``part`` is ``spec_revision``), or its
+            club is not on the current shaft model (``part`` is ``shaft``).
     """
     current = current_golfer_model()
     for item in deprecated_parts(spec):
@@ -88,6 +89,14 @@ def require_canonical_golfer(spec: Mapping[str, Any]) -> CurrentGolferModel:
             f"spec revision {revision or 'none'!r} is not "
             f"{current.spec_revision_configuration!r}; make it with "
             f"{current.make_with}",
+        )
+    shaft = (spec.get("club") or {}).get("shaft") or {}
+    if shaft.get("model", "rigid") != current.shaft_model:
+        raise NonCanonicalGolferError(
+            "shaft",
+            f"the current golfer model {current.version} uses a flexible "
+            f"{current.shaft_model} shaft; a rigid club is only a ballpark "
+            "fallback (#15684)",
         )
     return current
 
