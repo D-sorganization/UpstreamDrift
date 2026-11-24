@@ -212,7 +212,7 @@ export const FIELD_METADATA: FieldMetadata[] = [
     "id": "counterfactual.kind",
     "label": "Counterfactual kind",
     "shortHelp": "Which counterfactual or induced-acceleration analysis to run.",
-    "longHelp": "- `ztcf`: zero-torque counterfactual — joint accelerations with applied\n  torques removed (velocity-dependent + gravity effects remain).\n- `zvcf`: zero-velocity counterfactual — accelerations with joint\n  velocities zeroed (gravity/configuration effects).\n- `gravity` / `drift`: passive drift component of the acceleration.\n- `control`: acceleration attributable to the applied torques.\n- `total`: drift + control superposition.\nResults are joint accelerations in rad/s^2, computed by the same\npost-hoc replay the desktop dashboard uses (issue #7450).\n",
+    "longHelp": "- `ztcf`: zero-torque counterfactual — joint accelerations with applied\n  torques removed (velocity-dependent + gravity effects remain).\n- `zvcf`: zero-velocity counterfactual — acceleration attributable to\n  applied torques with velocity and gravity removed (control component).\n- `gravity` / `drift`: passive drift component of the acceleration.\n- `control`: acceleration attributable to the applied torques.\n- `total`: drift + control superposition.\nResults are joint accelerations in rad/s^2, computed by the same\npost-hoc replay the desktop dashboard uses (issue #7450).\n",
     "units": null,
     "validRange": [
       "ztcf",

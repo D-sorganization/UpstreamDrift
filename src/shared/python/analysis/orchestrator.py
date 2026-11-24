@@ -57,7 +57,7 @@ INDUCED_ACCELERATION_KINDS = frozenset({"gravity", "drift", "control", "total"})
 #: supported must actually be computable end-to-end.
 COUNTERFACTUAL_KIND_REQUIREMENTS: dict[str, tuple[str, ...]] = {
     "ztcf": ("compute_ztcf",),
-    "zvcf": ("compute_zvcf",),
+    "zvcf": ("compute_control_acceleration_at_state",),
     "gravity": ("compute_drift_acceleration",),
     "drift": ("compute_drift_acceleration",),
     "control": ("compute_control_acceleration",),
@@ -72,7 +72,7 @@ _POST_HOC_ENGINE_METHODS: tuple[str, ...] = (
     "set_control",
     "forward",
     "compute_ztcf",
-    "compute_zvcf",
+    "compute_control_acceleration_at_state",
     "compute_drift_acceleration",
     "compute_control_acceleration",
 )

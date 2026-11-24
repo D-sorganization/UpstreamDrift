@@ -150,7 +150,7 @@ class LivePlotWidget(QtWidgets.QWidget):
             "Kinetic Energy": "kinetic_energy",
             "Club Head Speed": "club_head_speed",
             "ZTCF (Zero Torque)": "ztcf_accel",
-            "ZVCF (Zero Velocity)": "zvcf_accel",
+            "ZVCF (Applied Control)": "zvcf_accel",
             "Drift Acceleration": "drift_accel",
             "Total Control Accel": "control_accel",
             "Induced Accel (Specific Source)": "induced_accel_source",

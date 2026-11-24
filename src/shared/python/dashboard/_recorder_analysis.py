@@ -46,7 +46,7 @@ class _AnalysisMixin:
             ztcf = self.engine.compute_ztcf(q, v)
             ztcf_accels.append(ztcf)
 
-            zvcf = self.engine.compute_zvcf(q)
+            zvcf = self.engine.compute_control_acceleration_at_state(q, tau)
             zvcf_accels.append(zvcf)
 
             drift = self.engine.compute_drift_acceleration()

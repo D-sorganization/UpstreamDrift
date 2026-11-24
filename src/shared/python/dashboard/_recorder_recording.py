@@ -76,7 +76,9 @@ class _RecordingMixin:
 
         if self.analysis_config["zvcf"] and self.data["zvcf_accel"] is not None:
             try:
-                self.data["zvcf_accel"][idx] = self.engine.compute_zvcf(q)
+                self.data["zvcf_accel"][idx] = (
+                    self.engine.compute_control_acceleration_at_state(q, tau)
+                )
             except (ValueError, RuntimeError, AttributeError) as e:
                 logger.warning("Failed to compute ZVCF at frame %d: %s", idx, e)
 

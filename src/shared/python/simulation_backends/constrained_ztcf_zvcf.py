@@ -10,11 +10,11 @@ never held::
     ZTCF: tau = 0, state (q, v) kept            -> a_ZTCF (drift)
     ZVCF: control component, a(tau) - a_ZTCF = P_c tau
           = M^-1 (tau + J^T (lambda - lambda_0))   (#14494)
-    zero-velocity, zero-torque: v = 0 and tau = 0  -> report field ``zvcf``
+    zero-velocity, zero-torque: v = 0 and tau = 0  -> explicit diagnostic
 
 Names follow ``model_aware_matching.tex`` (Section "ZTCF and ZVCF as exact
-projections"): both are *pointwise*; the control-preserved zero-velocity
-acceleration is never called a ZVCF.  Allocation dependence follows
+projections"): both are *pointwise*; ZVCF is the applied-control acceleration
+with velocity and gravity off. Allocation dependence follows
 ``loop_nullspace.tex``: the accelerations and the control-induced total depend
 only on measured motion (``INVARIANT``); the per-actuator split
 ``P_c e_i tau_i`` depends on the individual torques and is
@@ -172,9 +172,9 @@ class ConstrainedCounterfactuals:
 
     Attributes:
         ztcf: ``a`` with ``tau = 0`` at the measured ``(q, v)``.
-        zvcf: ``a`` with ``v = 0`` and ``tau = 0`` at the measured ``q``; the
-            zero-velocity, zero-torque acceleration under its pre-#14494 name.
-            ZVCF proper (the control component) is ``control_total``.
+        zero_velocity_zero_torque: ``a`` with ``v = 0`` and ``tau = 0`` at the
+            measured ``q``; a gravity-only diagnostic, not ZVCF.
+        zvcf: alias for ``control_total``, the applied-control component.
         control_total: ``a(tau) - a_ZTCF = P_c tau`` (``INVARIANT``), equal to
             ``ztcf_zvcf.zvcf_acceleration(provider, q, tau)``.
         per_actuator: column ``i`` is ``P_c e_i tau_i`` (``FAMILY_DEPENDENT``);
@@ -185,7 +185,7 @@ class ConstrainedCounterfactuals:
     """
 
     ztcf: Array
-    zvcf: Array
+    zero_velocity_zero_torque: Array
     control_total: Array
     per_actuator: Array
     reaction_ztcf: Array
@@ -196,7 +196,7 @@ class ConstrainedCounterfactuals:
     def __post_init__(self) -> None:
         for name in (
             "ztcf",
-            "zvcf",
+            "zero_velocity_zero_torque",
             "control_total",
             "per_actuator",
             "reaction_ztcf",
@@ -207,6 +207,11 @@ class ConstrainedCounterfactuals:
                 raise ValueError(f"{name} must be finite")
             arr.flags.writeable = False
             object.__setattr__(self, name, arr)
+
+    @property
+    def zvcf(self) -> Array:
+        """Applied-control component; kept as the canonical ZVCF name."""
+        return self.control_total
 
 
 def constrained_counterfactual_report(
@@ -246,13 +251,14 @@ def constrained_counterfactual_report(
     ]
     dependence = {
         "ztcf": AllocationDependence.INVARIANT,
+        "zero_velocity_zero_torque": AllocationDependence.INVARIANT,
         "zvcf": AllocationDependence.INVARIANT,
         "control_total": AllocationDependence.INVARIANT,
         "per_actuator": AllocationDependence.FAMILY_DEPENDENT,
     }
     return ConstrainedCounterfactuals(
         ztcf=ztcf,
-        zvcf=zvcf,
+        zero_velocity_zero_torque=zvcf,
         control_total=control_total,
         per_actuator=np.stack(columns, axis=1),
         reaction_ztcf=lam0,

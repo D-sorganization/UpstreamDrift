@@ -151,6 +151,21 @@ def test_measured_acceleration_is_ztcf_plus_control_total(planar) -> None:
     assert _scaled(report.ztcf + report.control_total - s.a, np.max(np.abs(s.a))) < 1e-8
 
 
+def test_constrained_zvcf_names_control_total(planar) -> None:
+    """The public ZVCF field is the applied-control component (#15711)."""
+    s, provider = planar
+    tau = s.S.T @ np.array([1.0, -2.0, 0.5, 0.3, 1.7])
+    report = constrained_counterfactual_report(provider, s.q, s.v, tau)
+
+    np.testing.assert_allclose(report.zvcf, report.control_total, atol=TOL, rtol=0)
+    np.testing.assert_allclose(
+        report.ztcf + report.zvcf,
+        constrained_acceleration_at(provider, s.q, s.v, tau)[0],
+        atol=TOL,
+        rtol=0,
+    )
+
+
 def test_dependence_labels_follow_nsx00(planar) -> None:
     s, provider = planar
     report = constrained_counterfactual_report(provider, s.q, s.v, s.S.T @ np.ones(5))
