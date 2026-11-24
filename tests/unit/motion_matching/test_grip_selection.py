@@ -432,5 +432,6 @@ def test_spec_builder_style_only_writes_a_revision_without_a_sidecar(
 
     same_spec, same_doc = _build(tmp_path / "c", "--grip-style", "overlap")
     assert physics_spec_sha256(same_doc) == physics_spec_sha256(parent)
-    assert "spec_revision" not in same_doc
+    # No grip revision: the same current-model revision as no pick (#15648).
+    assert same_doc["spec_revision"] == parent["spec_revision"]
     assert same_spec.read_bytes() == parent_spec.read_bytes()
