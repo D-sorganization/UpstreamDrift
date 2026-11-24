@@ -31,6 +31,20 @@ club's. Joint damping is stiffness proportional, ``c_i = beta k_i`` with
 ``beta = 2 zeta / omega_1``, ``omega_1`` the FEM first bending frequency of
 the grip-clamped span with the head.
 
+Lumping rule (``tip_slope_exact``, option ``lumping``, #15150 C14): the
+joints stay at the segment midpoints but each compliance is chosen so a static
+tip load gives the continuum tip slope exactly at the same ``N``. For a
+cantilever with tip load ``P`` the slope is ``P int_0^L (L - s)/EI(s) ds``;
+joint ``i`` carries the moment ``P (L - s_i)`` and turns by ``P (L - s_i)/k_i``.
+Equating segment by segment gives ``1/k_i = [int_seg_i (L - s)/EI ds] /
+(L - s_i)`` and the sum over the joints is the exact slope (``L - s_i > 0``
+because ``s_i`` is a midpoint). In torsion the twist under a tip torque ``T``
+is ``T int_0^L ds/GJ``, so ``1/k_i = int_seg_i ds/GJ`` is exact. The integrals
+use ``LUMPING_QUADRATURE_POINTS`` Gauss-Legendre points on every piece between
+the segment edges and the profile stations (the profile is piecewise linear,
+so each piece of ``1/EI`` is smooth). Tip deflection is not made exact by this
+rule. ``midpoint`` stays the default so existing bundles are unchanged.
+
 Frames: every link body uses the club body frame (shaft along ``-y`` from the
 head to the grip, origin at the head); at zero deflection all link frames
 coincide with the club frame, so solid and frame placements keep their rigid
@@ -66,6 +80,11 @@ from src.shared.python.motion_matching.club_models import (
 
 SHAFT_MODELS: tuple[str, ...] = ("rigid", "chain")
 DEFAULT_SHAFT_MODEL = "rigid"
+#: Lumping rules of ``build_shaft_chain`` (``midpoint`` is the default).
+LUMPING_RULES: tuple[str, ...] = ("midpoint", "tip_slope_exact")
+DEFAULT_LUMPING = "midpoint"
+#: Gauss-Legendre points per smooth piece of the compliance integrals.
+LUMPING_QUADRATURE_POINTS = 8
 #: Engines whose spec adapters apply the chain's joint springs and pass the
 #: chain parity gate (MuJoCo #12686; OpenSim, MyoSuite, Drake and Pinocchio
 #: #12691).
@@ -185,6 +204,7 @@ SHAFT_OPTION_FLAGS: dict[str, str] = {
     "flex": "--shaft-flex",
     "stiffness_scale": "--shaft-stiffness-scale",
     "n_links": "--shaft-links",
+    "lumping": "--shaft-lumping",
 }
 
 
@@ -212,7 +232,7 @@ def checked_shaft_options(
 
 
 def add_shaft_arguments(parser: Any) -> None:
-    """Add the chain flex, stiffness scale and link flags to ``parser``.
+    """Add the chain flex, stiffness scale, link and lumping flags to ``parser``.
 
     Every flag defaults to ``None`` (not given), so a command line without
     them builds the default chain.
@@ -221,6 +241,10 @@ def add_shaft_arguments(parser: Any) -> None:
         "flex": {"choices": flex_ratings(), "help": "chain flex rating"},
         "stiffness_scale": {"type": float, "help": "multiplies every chain spring"},
         "n_links": {"type": int, "help": f"chain links (default {DEFAULT_LINKS})"},
+        "lumping": {
+            "choices": LUMPING_RULES,
+            "help": f"spring lumping rule (default {DEFAULT_LUMPING})",
+        },
     }
     for key, flag in SHAFT_OPTION_FLAGS.items():
         parser.add_argument(flag, dest=f"shaft_{key}", default=None, **settings[key])
@@ -382,6 +406,59 @@ def station_profile(properties: Any, club: ClubSpec) -> Any:
 # --- chain parameters --------------------------------------------------------
 
 
+def _segment_integrals(
+    profile: Any, span_m: float, n_links: int, weight: Any, key: str
+) -> list[float]:
+    """``int_seg weight(s) / key(s) ds`` for each of ``n_links`` equal segments.
+
+    ``key`` names the station attribute (``ei_about_x_n_m2`` or ``gj_n_m2``),
+    linearly interpolated by the profile. Every segment is split at the
+    profile stations so the integrand is smooth on each piece.
+    """
+    stations = np.array([st.position_m for st in profile.stations])
+    values = np.array([getattr(st, key) for st in profile.stations])
+    nodes, weights = np.polynomial.legendre.leggauss(LUMPING_QUADRATURE_POINTS)
+    edges = np.linspace(0.0, span_m, n_links + 1)
+    result = []
+    for lo, hi in zip(edges[:-1], edges[1:], strict=True):
+        cuts = np.concatenate(([lo], stations[(stations > lo) & (stations < hi)], [hi]))
+        total = 0.0
+        for a, b in zip(cuts[:-1], cuts[1:], strict=True):
+            s = 0.5 * (b - a) * nodes + 0.5 * (a + b)
+            total += (
+                0.5
+                * (b - a)
+                * float(np.sum(weights * weight(s) / np.interp(s, stations, values)))
+            )
+        result.append(total)
+    return result
+
+
+def _midpoint_springs(
+    profile: Any, joints: tuple[float, ...], ds: float
+) -> tuple[list[float], list[float]]:
+    stations = [profile.station_at(s) for s in joints]
+    return (
+        [st.ei_about_x_n_m2 / ds for st in stations],
+        [st.gj_n_m2 / ds for st in stations],
+    )
+
+
+def _tip_slope_springs(
+    profile: Any, joints: tuple[float, ...], span_m: float
+) -> tuple[list[float], list[float]]:
+    """Springs whose static tip slope and tip twist are the continuum's."""
+    n = len(joints)
+    bend = _segment_integrals(
+        profile, span_m, n, lambda s: span_m - s, "ei_about_x_n_m2"
+    )
+    twist = _segment_integrals(profile, span_m, n, lambda s: 1.0, "gj_n_m2")
+    return (
+        [(span_m - s) / c for s, c in zip(joints, bend, strict=True)],
+        [1.0 / c for c in twist],
+    )
+
+
 def build_shaft_chain(
     club: ClubSpec,
     n_links: int = DEFAULT_LINKS,
@@ -389,12 +466,21 @@ def build_shaft_chain(
     flex: str = DEFAULT_FLEX,
     torsion: bool = False,
     stiffness_scale: float = 1.0,
+    lumping: str = DEFAULT_LUMPING,
 ) -> ShaftChain:
-    """Lump the calibrated profile into ``n_links`` links (midpoint rule).
+    """Lump the calibrated profile into ``n_links`` links.
 
-    ``stiffness_scale`` multiplies every spring (the rigid-limit check uses
-    1e6); damping scales with its square root so modal damping ratios stay.
+    ``lumping`` is ``"midpoint"`` (``k_i = EI(s_i)/ds``, the default) or
+    ``"tip_slope_exact"`` (exact continuum tip slope and twist at the same
+    ``n_links``; see the module docstring). ``stiffness_scale`` multiplies
+    every spring (the rigid-limit check uses 1e6); damping scales with its
+    square root so modal damping ratios stay.
+
+    Raises:
+        ValueError: ``n_links``, ``stiffness_scale`` or ``lumping`` invalid.
     """
+    if lumping not in LUMPING_RULES:
+        raise ValueError(f"unknown lumping {lumping!r}; known {LUMPING_RULES}")
     if isinstance(n_links, bool) or not isinstance(n_links, int) or n_links < 1:
         raise ValueError("n_links must be a positive integer")
     if not (math.isfinite(stiffness_scale) and stiffness_scale > 0):
@@ -403,28 +489,44 @@ def build_shaft_chain(
     profile = station_profile(properties, club)
     ds = properties.length / n_links
     joints = tuple((i + 0.5) * ds for i in range(n_links))
-    stations = [profile.station_at(s) for s in joints]
-    bend = tuple(stiffness_scale * st.ei_about_x_n_m2 / ds for st in stations)
-    twist = (
-        tuple(stiffness_scale * st.gj_n_m2 / ds for st in stations) if torsion else ()
-    )
+    if lumping == "midpoint":
+        bend_k, twist_k = _midpoint_springs(profile, joints, ds)
+    else:
+        bend_k, twist_k = _tip_slope_springs(profile, joints, properties.length)
+    bend = tuple(stiffness_scale * k for k in bend_k)
+    twist = tuple(stiffness_scale * k for k in twist_k) if torsion else ()
     omega = 2.0 * math.pi * float(clamped_head_frequencies(properties, club)[0])
     beta = 2.0 * DAMPING_RATIO / omega / math.sqrt(stiffness_scale)
     bounds = tuple(
         (s, joints[i + 1] if i + 1 < n_links else properties.length)
         for i, s in enumerate(joints)
     )
-    record = _chain_record(club, n_links, properties, (flex, torsion, stiffness_scale))
+    record = _chain_record(
+        club, n_links, properties, (flex, torsion, stiffness_scale), lumping
+    )
     return ShaftChain(
         club, n_links, joints, bounds, bend, twist, beta, stiffness_scale, record
     )
 
 
+_LUMPING_TEXT = {
+    "midpoint": "midpoint joints s_i=(i+1/2)L/N, k_i=EI(s_i)/(L/N), c_i=beta k_i",
+    "tip_slope_exact": (
+        "midpoint joints s_i=(i+1/2)L/N, 1/k_i=int_seg (L-s)/EI ds/(L-s_i) "
+        "(exact tip slope), torsion 1/k_i=int_seg ds/GJ, c_i=beta k_i"
+    ),
+}
+
+
 def _chain_record(
-    club: ClubSpec, n_links: int, properties: Any, options: tuple[str, bool, float]
+    club: ClubSpec,
+    n_links: int,
+    properties: Any,
+    options: tuple[str, bool, float],
+    lumping: str = DEFAULT_LUMPING,
 ) -> dict[str, Any]:
     flex, torsion, scale = options
-    return {
+    record = {
         "model": "chain",
         "n_links": n_links,
         "torsion": torsion,
@@ -443,10 +545,13 @@ def _chain_record(
             "damping_ratio": DAMPING_RATIO,
         },
         "span_m": properties.length,
-        "lumping": "midpoint joints s_i=(i+1/2)L/N, k_i=EI(s_i)/(L/N), c_i=beta k_i",
+        "lumping": _LUMPING_TEXT[lumping],
         "axes": "Rx, Rz bending about club x, z; Ry torsion; links in club frame",
         "sources": list(SOURCES),
     }
+    if lumping != DEFAULT_LUMPING:  # the default record stays byte-identical
+        record["lumping_rule"] = lumping
+    return record
 
 
 # --- specification transform --------------------------------------------------
