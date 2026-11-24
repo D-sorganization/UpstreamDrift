@@ -208,3 +208,48 @@ def test_passive_substep_is_a_setting() -> None:
     assert km.load_settings().passive_substep_s > 0
     with pytest.raises(ValueError, match="limit"):
         replace(km.load_settings(), passive_substep_s=0.0)
+
+
+def test_shaft_source_is_a_validated_setting() -> None:
+    """Z6c (#15150): the shaft follows its response or the bundle's own bend."""
+    assert km.load_settings().shaft_source in km.SHAFT_SOURCES
+    for source in km.SHAFT_SOURCES:
+        assert replace(km.load_settings(), shaft_source=source).shaft_source == source
+    with pytest.raises(ValueError, match="shaft_source"):
+        replace(km.load_settings(), shaft_source="guess")
+
+
+def test_a_reference_shaft_keeps_its_bend_and_reports_the_torque_it_lacks() -> None:
+    """A bend fitted to the club markers is kept, not replaced by the response.
+
+    Its rows then cannot balance by the spring alone: the allocator carries
+    them as shaft torques, which are the model shaft's mismatch with the
+    measured bend. They are reported, never written as actuator efforts.
+    """
+    allocate, calls = _fake_allocate(peak_tau=7.0)
+    bundle = _bundle()
+    bend = 0.3 * np.sin(5.0 * np.arange(40) * 0.01)
+    bundle.reference_q[:, 7] = bend
+    settings = _settings(shaft_source="reference")
+    out, receipt = km.kinetic_match(
+        bundle, settings, _PassiveAdapter(), allocate, _close_pose
+    )
+    np.testing.assert_allclose(calls["q"][:, 8], bend, atol=0.02)
+    np.testing.assert_array_equal(out.reference_q[:, 7], bundle.reference_q[:, 7])
+    assert not out.efforts[:, 7].any()
+    assert receipt["shaft_source"] == "reference"
+    assert receipt["passive_coordinates"] == 1
+    assert receipt["shaft_mismatch_n_m"] == pytest.approx(7.0)
+    assert receipt["shaft_mismatch_coordinate"] == "b"
+    # The body torques stay where they were: native (c, a) -> bundle (a, c).
+    np.testing.assert_allclose(out.efforts[:, 6], 2.0)
+    np.testing.assert_allclose(out.efforts[:, 8], 1.0)
+
+
+def test_the_response_shaft_reports_no_mismatch() -> None:
+    allocate, _ = _fake_allocate()
+    _, receipt = km.kinetic_match(
+        _bundle(), _settings(), _PassiveAdapter(), allocate, _close_pose
+    )
+    assert receipt["shaft_source"] == "response"
+    assert receipt["shaft_mismatch_n_m"] == 0.0
