@@ -196,7 +196,7 @@ class _ShaftActuated:
     def __init__(self, adapter: Any, passive: list[int]) -> None:
         self._adapter = adapter
         # Body joints first, in the adapter's order, so their columns keep it.
-        self.actuated_indices = (*adapter.actuated_indices, *passive)
+        self.actuated_indices = [*adapter.actuated_indices, *passive]
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._adapter, name)
