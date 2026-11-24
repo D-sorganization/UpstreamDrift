@@ -16,14 +16,14 @@
       "value": "capsule",
       "replacement": "skinned_human",
       "reason": "Capsule-finger hands (grip_hand_mesh) predate the skinned human hands with the owner-approved grip: trail palm over the lead thumb, ring finger beside the lead forefinger, 30 degree trail trigger spread.",
-      "still_allowed_for": "Left-handed subjects until left-handed skinned hands land (#15652), specs with physical grip picks (subject.grip_config) until the skinned pair is posed from them (#15654), and specs without the skinned_hand_wrists revision until they are migrated (#15648)."
+      "still_allowed_for": "Left-handed subjects until left-handed skinned hands land (#15652), and specs without the skinned_hand_wrists revision until they are migrated (#15648)."
     },
     {
       "field": "body_visual_backend",
       "value": "loft",
       "replacement": "skinned_cc0",
       "reason": "The lofted segment body predates the skinned CC0 body that the best matches are drawn with.",
-      "still_allowed_for": "Specs not yet migrated to the current model (#15648), and the left-handed and grip-pick specs that keep the capsule hands (#15652, #15654)."
+      "still_allowed_for": "Specs not yet migrated to the current model (#15648), and the left-handed specs that keep the capsule hands (#15652)."
     }
   ]
 }

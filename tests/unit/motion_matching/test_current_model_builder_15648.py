@@ -13,6 +13,7 @@ import json
 import logging
 from typing import Any
 
+import numpy as np
 import pytest
 
 from src.shared.python.model_appearance import golfer_model_versions as gmv
@@ -22,8 +23,15 @@ from src.shared.python.motion_matching.execution.assets import (
     get_native_geometry_spec,
     get_opensim_model,
 )
+from src.shared.python.motion_matching.execution.grip_selection import (
+    GripOverrides,
+)
+from src.shared.python.motion_matching.execution.skinned_hand_wrists import (
+    wrist_joints_in_club_m,
+)
 from src.shared.python.motion_matching.execution.spec_revisions import (
     with_current_golfer_model,
+    with_grip_revision,
 )
 
 pytestmark = pytest.mark.unit
@@ -78,19 +86,25 @@ def test_the_builder_writes_a_current_model_spec(tmp_path: Any) -> None:
     assert gmv.deprecated_parts(document) == ()
 
 
-def test_physical_grip_picks_keep_their_hands_and_say_so(
-    built: Any, caplog: pytest.LogCaptureFixture
+@pytest.mark.slow  # builds two skinned hand pairs
+def test_physical_grip_picks_move_to_the_current_model_posed_from_them(
+    built: Any,
 ) -> None:
-    """The skinned pair is posed with the owner grip, not ``grip_config``.
+    """A spec with ``subject.grip_config`` moves to the current model too.
 
-    Moving a spec with physical grip picks onto it would silently drop the
-    picks, so it keeps the deprecated hands, logged, until the skinned pair is
-    posed from ``grip_config``.
+    The skinned pair is posed from the picks (#15654, #15656), so the wrist
+    joints differ from the owner grip's and the picks are kept.
     """
-    picked = copy.deepcopy(built.document)
-    picked["subject"]["grip_config"] = {"style": "interlock"}
-    gmv.reset_deprecation_warnings()
-    with caplog.at_level(logging.WARNING):
-        document, _ = with_current_golfer_model(picked, built.subject)
-    assert document == picked
-    assert "capsule" in caplog.text
+    picked, subject = with_grip_revision(
+        copy.deepcopy(built.document),
+        dict(built.subject),
+        GripOverrides(preset="weak"),
+    )
+    document, receipt = with_current_golfer_model(picked, subject)
+    owner, _ = with_current_golfer_model(built.document, built.subject)
+    assert gmv.deprecated_parts(document) == ()
+    assert receipt["hand_visual_backend"] == "skinned_human"
+    assert document["subject"]["grip_config"] == picked["subject"]["grip_config"]
+    assert document["spec_revision"]["version"] == 2
+    moved, unpicked = wrist_joints_in_club_m(document), wrist_joints_in_club_m(owner)
+    assert not np.allclose(moved["lead"], unpicked["lead"], atol=1e-6)
