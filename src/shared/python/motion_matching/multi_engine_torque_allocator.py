@@ -396,7 +396,8 @@ class MujocoForceAdapter:
         chain-shaft coordinates, minus the passive spring and damper force."""
         mass, bias = self._mass_and_bias(q, v)
         if self._shaft.size:
-            passive = self._model.data.qfrc_passive
+            data = self._model.data
+            passive = data.qfrc_passive
             bias[self._shaft] -= passive[self._shaft]
         return mass, bias
 
