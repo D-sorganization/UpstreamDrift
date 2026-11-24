@@ -14,9 +14,13 @@ it, so that every new best match can be given forces and torques the same way:
    mass-weighted, so ``J v = 0`` and ``J a + Jdot v = 0`` (the matched angles
    do not satisfy the weld exactly, and inverse dynamics of an inconsistent
    state answers with huge internal loop forces);
-   then replace the passive coordinates (a flexible shaft: no actuator, no
-   closure force on their rows) by their response to that prescribed motion,
-   integrated in ``passive_substep_s`` steps, so their rows balance exactly;
+   then, with ``shaft_source`` ``"response"``, replace the passive
+   coordinates (a flexible shaft: no actuator, no closure force on their
+   rows) by their response to that prescribed motion, integrated in
+   ``passive_substep_s`` steps, so their rows balance exactly. With
+   ``"reference"`` the bundle's own bend (fitted to the club markers) is
+   kept, and the torque its rows need beyond the spring and damper is
+   allocated on them and reported as the model shaft's mismatch with it;
 4. allocate torques, ground forces and the closure force by the conic
    allocator (minimum effort, with ``regularisation_grip`` penalising the
    internal loop force), reporting any root residual it could not close;
@@ -39,6 +43,7 @@ import warnings
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import numpy as np
@@ -71,7 +76,10 @@ _FLOATS = (
     "passive_substep_s",
 )
 
-__all__ = ["KineticMatchSettings", "kinetic_match", "load_settings"]
+#: Where the flexible shaft's bend comes from (see the module docstring).
+SHAFT_SOURCES = ("response", "reference")
+
+__all__ = ["SHAFT_SOURCES", "KineticMatchSettings", "kinetic_match", "load_settings"]
 
 
 @dataclass(frozen=True)
@@ -89,10 +97,13 @@ class KineticMatchSettings:
     max_joint_torque_n_m: float
     closure_tolerance_m: float
     passive_substep_s: float
+    shaft_source: str
 
     def __post_init__(self) -> None:
         if self.method != METHOD:
             raise ValueError(f"unsupported method {self.method!r}")
+        if self.shaft_source not in SHAFT_SOURCES:
+            raise ValueError(f"shaft_source must be one of {SHAFT_SOURCES}")
         if int(self.stride) != self.stride or self.stride < 1:
             raise ValueError("stride must be an integer >= 1")
         for name in _FLOATS:
@@ -173,6 +184,70 @@ def _allocate(adapter, t, q, v, a, settings: KineticMatchSettings) -> Any:
             root_penalty_weight=settings.root_penalty_weight,
         )
     return allocator.allocate_trajectory(t, q, v, a, stride=settings.stride)
+
+
+class _ShaftActuated:
+    """An adapter whose passive (shaft) rows are allocated like actuated ones.
+
+    Their torque is what the measured bend needs beyond the adapter's own
+    spring and damper (which stay in its bias), i.e. the shaft's mismatch.
+    """
+
+    def __init__(self, adapter: Any, passive: list[int]) -> None:
+        self._adapter = adapter
+        # Body joints first, in the adapter's order, so their columns keep it.
+        self.actuated_indices = [*adapter.actuated_indices, *passive]
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._adapter, name)
+
+    def closure_topology(self) -> Any:
+        """The wrapped topology with the shaft moved to the actuated side."""
+        topology = self._adapter.closure_topology()
+        actuated = set(self.actuated_indices)
+        return replace(
+            topology,
+            actuated_indices=self.actuated_indices,
+            unactuated_indices=tuple(i for i in range(self.nv) if i not in actuated),
+        )
+
+
+def _shaft_columns(solver: Any, passive: list[int]) -> tuple[list[int], list[int]]:
+    """Columns of the allocated torques that are body joints and shaft joints."""
+    shaft = set(passive)
+    columns = list(enumerate(solver.actuated_indices))
+    return [c for c, i in columns if i not in shaft], [
+        c for c, i in columns if i in shaft
+    ]
+
+
+def _shaft_mismatch(result: Any, solver: Any, passive: list[int]) -> dict[str, Any]:
+    """Peak torque the shaft rows needed beyond their spring (0 for a response)."""
+    _, shaft = _shaft_columns(solver, passive)
+    if not shaft:
+        return {"shaft_mismatch_n_m": 0.0, "shaft_mismatch_coordinate": None}
+    tau = np.abs(np.asarray(result.tau_actuated, dtype=float)[:, shaft])
+    _, column = np.unravel_index(int(np.argmax(tau)), tau.shape)
+    native = solver.actuated_indices[shaft[column]]
+    return {
+        "shaft_mismatch_n_m": float(tau.max()),
+        "shaft_mismatch_coordinate": solver.coordinate_order[native],
+    }
+
+
+def _body_view(result: Any, solver: Any, passive: list[int]) -> Any:
+    """``result`` with only the body-joint torque columns (for the peaks)."""
+    body, _ = _shaft_columns(solver, passive)
+    tau = np.asarray(result.tau_actuated, dtype=float)[:, body]
+    fields = {
+        name: getattr(result, name)
+        for name in ("time_s", "lambda_grip", "delta_tau_root")
+    }
+    return SimpleNamespace(
+        tau_actuated=tau,
+        max_equilibrium_residual=result.max_equilibrium_residual,
+        **fields,
+    )
 
 
 def _root_window(times: np.ndarray, root_n: np.ndarray, limit: float) -> list[float]:
@@ -273,18 +348,29 @@ def kinetic_match(
     v = np.gradient(q, times, axis=0)
     a = np.gradient(v, times, axis=0)
     _project(adapter, q, v, a)
-    passive = passive_response(adapter, times, q, v, a, settings.passive_substep_s)
-    result = allocate(adapter, times, q, v, a, settings)
+    passive = list(passive_indices(adapter))
+    solver = adapter
+    states: dict[str, np.ndarray] = {}
+    if settings.shaft_source == "response":
+        passive_response(adapter, times, q, v, a, settings.passive_substep_s)
+        states = _passive_states(bundle, adapter, perm, q, v)
+    elif passive:
+        solver = _ShaftActuated(adapter, passive)
+    result = allocate(solver, times, q, v, a, settings)
     receipt = {
-        **_receipt(result, adapter, settings, bundle),
+        **_receipt(_body_view(result, solver, passive), adapter, settings, bundle),
         "closure_gap_max_m": gap,
-        "passive_coordinates": passive,
+        "passive_coordinates": len(passive),
+        "shaft_source": settings.shaft_source,
+        **_shaft_mismatch(result, solver, passive),
     }
-    states = _passive_states(bundle, adapter, perm, q, v)
     efforts = np.zeros((frames - 1, len(perm)))
-    for column, native_index in enumerate(adapter.actuated_indices):
+    body, _ = _shaft_columns(solver, passive)
+    tau = np.asarray(result.tau_actuated, dtype=float)
+    for column in body:
+        native_index = solver.actuated_indices[column]
         efforts[:, perm[native_index]] = np.interp(
-            times[:-1], result.time_s, np.asarray(result.tau_actuated)[:, column]
+            times[:-1], result.time_s, tau[:, column]
         )
     provenance = {
         **bundle.provenance,
