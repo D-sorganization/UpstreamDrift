@@ -159,6 +159,26 @@ def _add_ellipsoid_arguments(p: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_hand_force_arguments(p: argparse.ArgumentParser) -> None:
+    """Add the hand-on-club force overlays (tip-to-tail split, palm on thumb)."""
+    p.add_argument(
+        "--ztcf-zvcf-hand-force",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="draw the trail hand's force on the club tip to tail: ZTCF drift "
+        "(tau = 0) then ZVCF control (the applied torques), with the total; "
+        "needs a dynamics bundle with efforts (default: off) (#15685)",
+    )
+    p.add_argument(
+        "--palm-thumb-force",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="draw the allocated trail-palm-on-lead-thumb normal force at the "
+        "contact patch (an equivalent of the grip closure force, not a "
+        "measured contact; unloaded frames draw nothing; default: off)",
+    )
+
+
 def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
     """Add the overlay and segment-shading options."""
     p.add_argument(
@@ -180,22 +200,7 @@ def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
         help="draw curling joint-torque arcs (default: on, except on a kinematic "
         "replay with zero efforts, where only this flag draws them)",
     )
-    p.add_argument(
-        "--ztcf-zvcf-hand-force",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="draw the trail hand's force on the club tip to tail: ZTCF drift "
-        "(tau = 0) then ZVCF control (the applied torques), with the total; "
-        "needs a dynamics bundle with efforts (default: off) (#15685)",
-    )
-    p.add_argument(
-        "--palm-thumb-force",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="draw the allocated trail-palm-on-lead-thumb normal force at the "
-        "contact patch (an equivalent of the grip closure force, not a "
-        "measured contact; unloaded frames draw nothing; default: off)",
-    )
+    _add_hand_force_arguments(p)
     _add_ellipsoid_arguments(p)
     p.add_argument(
         "--axial-impact-blackout",
