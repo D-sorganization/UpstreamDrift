@@ -184,11 +184,13 @@ jobs:
         if: always()
         shell: bash
         run: |
-          echo "## URDF Cross-Engine Equivalence Summary" >> "$GITHUB_STEP_SUMMARY"
-          if [ -f "reports/urdf_cross_engine.json" ]; then
-            echo "\`\`\`json" >> "$GITHUB_STEP_SUMMARY"
-            cat "reports/urdf_cross_engine.json" >> "$GITHUB_STEP_SUMMARY"
-            echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "No equivalence report generated (test was skipped or crashed before emission)." >> "$GITHUB_STEP_SUMMARY"
-          fi
+          {
+            echo "## URDF Cross-Engine Equivalence Summary"
+            if [ -f "reports/urdf_cross_engine.json" ]; then
+              echo "\`\`\`json"
+              cat "reports/urdf_cross_engine.json"
+              echo "\`\`\`"
+            else
+              echo "No equivalence report generated (test was skipped or crashed before emission)."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

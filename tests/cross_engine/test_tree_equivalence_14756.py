@@ -17,6 +17,7 @@ import pytest
 from src.shared.python.model_generation.canonical_model import CanonicalModel
 from src.shared.python.model_generation.converters.urdf_parser import URDFParser
 from src.shared.python.model_generation.tree_equivalence import (
+    GRAVITY,
     coupled_generalized_force,
     dof_order,
     drake_to_canonical_floating,
@@ -238,6 +239,9 @@ def test_pinocchio_gravity_matches_reference(tree, tmp_path: Path) -> None:
     urdf = tmp_path / "tree.urdf"
     urdf.write_text(URDF, encoding="utf-8")
     model = pin.buildModelFromUrdf(str(urdf))
+    # Pinocchio defaults to g = 9.81; pin it to the canonical constant the
+    # reference uses so the comparison tests tree dynamics, not the constant.
+    model.gravity.linear = GRAVITY
     names = dof_order(parsed.joints, root)
     q = np.array([Q[n] for n in model.names[1:]])
     assert list(model.names[1:]) == names
