@@ -376,9 +376,24 @@ class PinocchioForceAdapter:
             j for j in self._model.subtrees[joint] if j != joint and names[j] in shaft
         )
 
+    def _club_subtree_inertias(self) -> tuple[tuple[int, Any], ...]:
+        """``(joint, inertia)`` of the bare club and its shaft links.
+
+        The club joint carries the bare club only (head, shaft, grip); the
+        hand solids welded into the club body belong to the hands (NSX-01).
+        """
+        joint, bare = self._bare_club_in_joint_frame()
+        club = self._pin.Inertia(
+            bare.mass_kg, np.asarray(bare.com_m), np.asarray(bare.inertia_com_kg_m2)
+        )
+        return tuple(
+            (j, club if j == joint else self._model.inertias[j])
+            for j in self._club_subtree()
+        )
+
     def club_subtree_mass_kg(self) -> float:
-        """Mass of the club body (welded hand solids included) and shaft links."""
-        return float(sum(self._model.inertias[j].mass for j in self._club_subtree()))
+        """Mass of the bare club and its shaft links (no welded hand solids)."""
+        return float(sum(i.mass for _, i in self._club_subtree_inertias()))
 
     def lead_wrist_point(self, q: Array) -> Array:
         """World origin of the club joint: the lead wrist weld, at ``q``."""
@@ -391,19 +406,20 @@ class PinocchioForceAdapter:
     ) -> tuple[Array, Array]:
         """World ``(force, moment about the origin)`` the hands supply together.
 
-        Sum over the club body and its flexible-shaft links of the momentum
+        Sum over the bare club and its flexible-shaft links of the momentum
         rate ``Y a + v x* Y v``, less the weight when ``gravity`` (#15150 Z2).
-        The club body carries the welded hand solids, so these are wrist
-        interaction loads. Postcondition: equals the spatial force Pinocchio's
-        RNEA passes through the club joint (the subtree holds no other body).
+        The hand solids welded into the club body are excluded: they are the
+        hands' own mass. Postcondition: equals the spatial force Pinocchio's
+        RNEA passes through the club joint of a model whose club body holds
+        the bare club only.
         """
         self._second_order_kinematics(q, v, a)
         pin = self._pin
         field = self._model.gravity
         weight = pin.Motion(np.asarray(field.linear), np.zeros(3))
         total = pin.Force.Zero()
-        for j in self._club_subtree():
-            placement, inertia = self._data.oMi[j], self._model.inertias[j]
+        for j, inertia in self._club_subtree_inertias():
+            placement = self._data.oMi[j]
             accel = self._data.a[j]
             if gravity:
                 accel = accel - placement.actInv(weight)

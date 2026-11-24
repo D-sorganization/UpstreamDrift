@@ -1,9 +1,10 @@
 """Two-hand ZTCF/ZVCF split on the live Pinocchio adapter (#15150 Track Z, Z2).
 
-``club_subtree_load`` (the club body plus its flexible-shaft links) is checked
-against Pinocchio's own recursive Newton-Euler pass: the spatial force the
-lead wrist joint transmits to its subtree is exactly the momentum rate minus
-gravity that the two hands supply together.
+``club_subtree_load`` (the bare club plus its flexible-shaft links) is checked
+against Pinocchio's own recursive Newton-Euler pass on a model whose club
+body holds the bare club only: the hand solids welded into the club body in
+the specification belong to the hands, so the load the two hands supply
+together is the momentum rate minus gravity of head, shaft and grip.
 """
 
 from __future__ import annotations
@@ -56,9 +57,34 @@ def _state(adapter, seed: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     return q, rng.normal(size=adapter.nv), rng.normal(size=adapter.nv)
 
 
+def _bare_club_model(adapter, pin):
+    """A model copy whose club body holds head, shaft and grip only."""
+    from src.shared.python.biomechanics.club_inertia_partition import (
+        club_solids_partition,
+    )
+
+    model = adapter._model.copy()
+    _, pose = adapter._plant.body_placement(adapter._spec["closure"]["body_b"])
+    bare = club_solids_partition(adapter._spec).bare_club
+    bare = bare.expressed_in(pose.homogeneous)
+    model.inertias[adapter.club_joint_index()] = pin.Inertia(
+        bare.mass_kg, np.asarray(bare.com_m), np.asarray(bare.inertia_com_kg_m2)
+    )
+    return model
+
+
+def _welded_hand_mass_kg(adapter) -> float:
+    from src.shared.python.biomechanics.club_inertia_partition import (
+        club_solids_partition,
+    )
+
+    hands = club_solids_partition(adapter._spec).welded_hands
+    return float(sum(h.mass_kg for h in hands.values()))
+
+
 def _rnea_subtree_wrench(adapter, pin, q, v, a, gravity: bool):
     """World wrench (about the origin) the club joint passes to its subtree."""
-    model = adapter._model.copy()
+    model = _bare_club_model(adapter, pin)
     if not gravity:
         model.gravity = pin.Motion.Zero()
     data = model.createData()
@@ -93,11 +119,20 @@ def test_at_rest_the_hands_hold_the_club_weight_including_shaft_links(
     assert np.allclose(still, 0.0, atol=1e-12)
 
 
+def test_the_welded_hand_solids_are_not_in_the_club_load(adapter, pin) -> None:
+    """Review of #15708: the hands' own mass is the hands', not the club's."""
+    hands = _welded_hand_mass_kg(adapter)
+    assert hands > 0.0
+    full = sum(float(adapter._model.inertias[j].mass) for j in adapter._club_subtree())
+    assert adapter.club_subtree_mass_kg() == pytest.approx(full - hands, rel=1e-12)
+
+
 def test_chain_subtree_is_heavier_than_the_rigid_club_body(pin) -> None:
     """The chain moves shaft and head mass onto links the rigid body owned."""
     rigid, chain = _adapter("rigid"), _adapter("chain")
     joint = chain.club_joint_index()
-    assert chain.club_subtree_mass_kg() > float(chain._model.inertias[joint].mass)
+    body = float(chain._model.inertias[joint].mass) - _welded_hand_mass_kg(chain)
+    assert chain.club_subtree_mass_kg() > body
     assert np.isclose(
         chain.club_subtree_mass_kg(), rigid.club_subtree_mass_kg(), rtol=1e-9
     )
