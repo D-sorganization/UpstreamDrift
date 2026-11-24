@@ -146,7 +146,11 @@ class PinocchioForceAdapter:
             ),
             dtype=float,
         ).copy()
-        return mass, bias
+        return mass, bias - self._plant.shaft_spring_torque(configuration, velocity)
+
+    def shaft_springs(self) -> dict[str, tuple[float, float, float]]:
+        """``{chain coordinate: (k, rest, c)}``; empty for a rigid club."""
+        return self._plant.shaft_springs()
 
     def _checked(self, values: Array, name: str) -> Array:
         result = np.asarray(values, dtype=float)
@@ -158,12 +162,13 @@ class PinocchioForceAdapter:
         configuration = self._checked(q, "configuration")
         velocity = self._checked(v, "velocity")
         acceleration = self._checked(a, "acceleration")
-        return np.asarray(
+        rnea = np.asarray(
             self._pin.rnea(
                 self._model, self._data, configuration, velocity, acceleration
             ),
             dtype=float,
         ).copy()
+        return rnea - self._plant.shaft_spring_torque(configuration, velocity)
 
     # -- inertial parameters (NSX-62, #12587) --------------------------------
 
