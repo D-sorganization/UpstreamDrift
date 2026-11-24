@@ -60,6 +60,11 @@ def _vec3(value: Sequence[float], name: str) -> np.ndarray:
     return arr
 
 
+def _point(vec: np.ndarray) -> tuple[float, float, float]:
+    x, y, z = (float(c) for c in vec)
+    return (x, y, z)
+
+
 def _arrow(
     label: str,
     tail: np.ndarray,
@@ -75,9 +80,9 @@ def _arrow(
     return ArrowGlyph(
         label=label,
         kind=WrenchKind.GRIP,
-        tail_m=tuple(float(x) for x in tail),
-        tip_m=tuple(float(x) for x in tip),
-        head_base_m=tuple(float(x) for x in head),
+        tail_m=_point(tail),
+        tip_m=_point(tip),
+        head_base_m=_point(head),
         shaft_radius_m=radius,
         head_radius_m=radius * style.head_radius_ratio,
         rgba=rgba,

@@ -30,6 +30,9 @@ from numpy.typing import NDArray
 from src.shared.python.simulation_backends.constrained_ztcf_zvcf import (
     drift_and_control_reactions,
 )
+from src.shared.python.simulation_backends.protocol import (
+    ConstrainedEquationsOfMotionProvider,
+)
 
 Array = NDArray[np.float64]
 FrameAt = Callable[[Array], tuple[Array, Array]]
@@ -52,7 +55,7 @@ class HandForceSplit:
 
 
 def hand_force_split(
-    provider: object,
+    provider: ConstrainedEquationsOfMotionProvider,
     frame_at: FrameAt,
     q: Array,
     v: Array,
