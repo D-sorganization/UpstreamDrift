@@ -451,6 +451,23 @@ kinematic replay, not a refit. Limits live in `shot_setup_settings.json`.
   and recorded in the ball record under `shot_setup`; a non-zero roll or shift
   adds a `Setup: ...` line to the clip HUD.
 
+## Replay Mode Label
+
+Every clip HUD carries a `Replay: ...` line and every engine row of the export
+manifest carries `"replay_mode"`, so a clip never passes recorded motion off as
+simulated. The mode is determined from the bundle, never guessed
+(`replay_mode.py`; labels in `replay_mode_settings.json`):
+
+- `kinematic_replay`: every effort is zero (recorded motion, no dynamics).
+- `feedback_tracked_dynamics`: non-zero efforts from the closed-loop tracker
+  (the bundle provenance records its `controller`).
+- `open_loop_dynamics`: efforts replayed from an initial state; the bundle
+  must declare it with provenance `replay_mode: open_loop_dynamics`, as no
+  writer does yet.
+- `unknown_replay_mode` (shown as "unknown replay mode"): anything else.
+
+`--no-hud` removes the line; the manifest field stays.
+
 ## Aim Line
 
 - `--aim-line {finish,address}` picks the line the plan view, side figure and

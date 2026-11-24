@@ -1,0 +1,15 @@
+{
+  "provenance_key": "replay_mode",
+  "controller_key": "controller",
+  "labels": {
+    "kinematic_replay": "Kinematic Replay (recorded motion, no dynamics)",
+    "feedback_tracked_dynamics": "Feedback-Tracked Dynamics (closed loop)",
+    "open_loop_dynamics": "Open-Loop Dynamics from t0",
+    "unknown_replay_mode": "unknown replay mode"
+  },
+  "hud_prefix": "Replay: ",
+  "sources": {
+    "provenance_key": "Bundle provenance field a writer sets to declare a dynamics mode. No writer sets it for open-loop today, so an open-loop bundle must declare it.",
+    "controller_key": "Provenance field the closed-loop bundle writer (motion_matching/same_input/reference.py) always records: its presence with non-zero efforts means a feedback tracker produced the efforts."
+  }
+}
