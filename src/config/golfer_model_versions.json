@@ -7,7 +7,8 @@
     "spec_revision_configuration": "skinned_hand_wrists",
     "make_with": "src/shared/python/motion_matching/execution/skinned_hand_wrists.py::apply_skinned_hand_wrists",
     "refit_poses_with": "src/engines/physics_engines/mujoco/python/skinned_arm_refit.py::refit_arms_to_club",
-    "docs": "docs/agents/golfer_model_versions.md"
+    "docs": "docs/agents/golfer_model_versions.md",
+    "reference_specs": "src/config/golfer_reference_specs.json"
   },
   "deprecated": [
     {

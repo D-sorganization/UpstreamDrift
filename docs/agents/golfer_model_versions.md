@@ -47,10 +47,17 @@ naming the registry.
   losing its picks. Posing the skinned pair from `grip_config` is #15654.
 - **Builders:** the spec builder writes right-handed specs on the current
   model. The character builder and API still emit unrevised specs.
-- **Committed specs:** every committed full-body spec, including
+- **Committed specs:** every committed full-body spec file, including
   `full_body_spec_anthro_driver.json` and `full_body_spec_anthro_iron7.json`,
-  is legacy. Current-model reference specs will be committed beside them, under
-  versioned names, and listed here.
+  is legacy. The current-model driver and 7-iron reference specs are
+  `reference_spec("driver")` and `reference_spec("iron7")` in
+  `src/shared/python/motion_matching/execution/golfer_reference_specs.py`;
+  `write_reference_spec(club, path)` writes one for tools that take a path.
+  They are a hash-pinned overlay on the legacy files
+  (`src/config/golfer_reference_specs.json`, the registry's
+  `reference_specs`); regenerate with
+  `python3 scripts/generate_golfer_reference_specs.py`. Moving consumers off
+  the legacy files is what shrinks the ratchet baseline.
 - **Model Explorer demo:** the demo bundle is legacy and is being replaced.
 
 Until a part has migrated, prefer a current-model source, such as a matched
