@@ -109,7 +109,10 @@ def load_bundle_shot(bundle: Path, club_label: str, out_dir: Path) -> BundleShot
     )
     face = model.face_world(dict(zip(names, map(float, swing.q[0]), strict=True)))
     head = HeadGeometry(rot[0].T @ (face.centre_m - origin[0]), rot[0].T @ face.normal)
-    impact, ball = settings.impact_time_s, swing.ball
+    impact = settings.impact_time_s
+    if swing.ball is None:
+        raise ValueError("the bundle swing places no ball; a flex sweep needs one")
+    ball = swing.ball
     club_impact = club_impact_from_spec(flight_tracer._spec_club(swing))
     rigid = flight_tracer.club_series(swing)
 
