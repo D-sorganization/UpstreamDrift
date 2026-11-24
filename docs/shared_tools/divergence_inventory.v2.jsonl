@@ -514,6 +514,7 @@
 {"path": "club_data/public_clubs.json", "classification": "ud-only", "package": "club_data", "spelling_only": false}
 {"path": "club_data/targets.py", "classification": "ud-only", "package": "club_data", "spelling_only": false}
 {"path": "club_fitting/__init__.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
+{"path": "club_fitting/grip_driven_shaft.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
 {"path": "club_fitting/grip_motion.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
 {"path": "codemap/__init__.py", "classification": "tools-only", "package": "codemap", "spelling_only": false}
 {"path": "codemap/_lang_js.py", "classification": "tools-only", "package": "codemap", "spelling_only": false}
