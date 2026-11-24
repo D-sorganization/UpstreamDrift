@@ -22,6 +22,7 @@ from src.shared.python.body_part_viz.skin_load_settings import (
     load_skin_load_settings,
 )
 from src.shared.python.force_overlay.palette import ELLIPSOID_COLOR_MODES
+from src.shared.python.force_overlay.tip_to_tail import PART_VIEWS, QUANTITIES
 from src.shared.python.golf_view_presets import VIEW_ORDER
 from src.shared.python.model_appearance.appearance_selection import (
     AppearanceOverrides,
@@ -70,6 +71,7 @@ from src.tools.native_viewer_export.hole_view import load_hole_view_settings
 from src.tools.native_viewer_export.impact_factors import load_factor_settings
 from src.tools.native_viewer_export.overlay import OverlayOptions, build_overlay_feed
 from src.tools.native_viewer_export.runner import ExportJob, run_export
+from src.tools.native_viewer_export.ztcf_feed import HAND_CHOICES
 from src.tools.native_viewer_export import camera_framing, shot_setup
 
 logger = logging.getLogger(__name__)
@@ -175,6 +177,26 @@ def _add_hand_force_arguments(p: argparse.ArgumentParser) -> None:
         default=1.0,
         help="draw the tip-to-tail hand-force arrows this many times longer; "
         "the legend states the gain (default: 1)",
+    )
+    p.add_argument(
+        "--ztcf-zvcf-view",
+        choices=PART_VIEWS,
+        default="tip_to_tail",
+        help="which part of the hand-on-club split to draw: tip_to_tail (ZTCF "
+        "drift + ZVCF control = total), ztcf, zvcf or total (default: "
+        "tip_to_tail) (#15150)",
+    )
+    p.add_argument(
+        "--ztcf-zvcf-quantity",
+        choices=QUANTITIES,
+        default="force",
+        help="draw the hands' force (N) or torque (N m) on the club (default: force)",
+    )
+    p.add_argument(
+        "--ztcf-zvcf-hands",
+        choices=HAND_CHOICES,
+        default="both",
+        help="draw the lead hand, the trail hand or both (default: both)",
     )
     p.add_argument(
         "--palm-thumb-force",
@@ -883,6 +905,9 @@ def main(
                     axial_impact_blackout=args.axial_impact_blackout,
                     ztcf_zvcf_hand_force=args.ztcf_zvcf_hand_force,
                     ztcf_arrow_gain=args.ztcf_arrow_gain,
+                    ztcf_view=args.ztcf_zvcf_view,
+                    ztcf_quantity=args.ztcf_zvcf_quantity,
+                    ztcf_hands=args.ztcf_zvcf_hands,
                 ),
             ),
         )
