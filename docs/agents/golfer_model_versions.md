@@ -26,11 +26,14 @@ warning, and `require_canonical_golfer` refuses a rigid spec.
 
 ## Putting a Spec on the Current Model
 
-`build_anthropometric_spec` does steps 1 and 2 for every right-handed spec it
-writes without grip picks (`motion_matching/execution/spec_revisions.py`,
-`with_current_golfer_model`). Do them by hand only for an older spec.
-
-Every spec, left-handed and grip-pick specs included, gets step 4 too.
+`build_anthropometric_spec` does steps 1, 2 and 4 for every spec it writes
+(`motion_matching/execution/spec_revisions.py`, `with_current_golfer_model`).
+Do them by hand only for an older spec. A left-handed golfer
+(`handedness="left"`, or `--handedness left`) is composed right-handed, put on
+the current model, then mirrored through the sagittal plane
+(`motion_matching/mirrored_spec.py`), so the left-handed spec is the exact
+reflection of the right-handed one. A spec labelled left-handed but not
+mirrored is refused.
 
 1. Apply `apply_skinned_hand_wrists(spec)`
    (`motion_matching/execution/skinned_hand_wrists.py`). It moves the wrist
@@ -50,15 +53,13 @@ naming the registry.
 
 ## What Is Still Migrating (#15648)
 
-- **Left-handed hands:** the skinned pair is posed right-handed, so a
-  left-handed spec still draws the deprecated capsule hands and logs it.
-  Left-handed skinned hands are being added (#15652); left-handed golfers
-  are not dropped.
+- **Left-handed hands:** done. The builder writes a left-handed spec as the
+  mirror of the right-handed current-model spec (#15652).
 - **Physical grip picks:** done. The skinned pair is posed from
   `subject.grip_config` (#15654), so the builder moves grip-picked specs to
   the current model and keeps their picks.
-- **Builders:** the spec builder writes right-handed specs on the current
-  model. The character builder and API still emit unrevised specs.
+- **Builders:** the spec builder writes right- and left-handed specs on the
+  current model. The character builder and API still emit unrevised specs.
 - **Committed specs:** every committed full-body spec file, including
   `full_body_spec_anthro_driver.json` and `full_body_spec_anthro_iron7.json`,
   is legacy. The current-model driver and 7-iron reference specs are

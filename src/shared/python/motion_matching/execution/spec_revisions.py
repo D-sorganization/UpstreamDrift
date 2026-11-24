@@ -3,9 +3,8 @@
 The builder writes a spec on the current golfer model
 (``src/config/golfer_model_versions.json``): the physical grip picks (GR4)
 first, then the skinned hand wrists, posed from those picks (#15654), and the skinned
-body. A left-handed spec keeps the deprecated capsule hands and loft body,
-logging a deprecation, because the skinned pair is posed right-handed
-(#15652).
+body. A left-handed golfer is the exact sagittal mirror of that right-handed
+spec (``mirrored_spec``, #15652), so it is on the current model too.
 
 Last comes the current model's flexible shaft (#15684): a chain shaft with
 the registry's flex. A rigid club is only the explicit ballpark fallback
@@ -20,13 +19,15 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.core.handedness import subject_handedness
+from src.shared.python.core.handedness import subject_handedness, validate_handedness
 from src.shared.python.model_appearance.appearance_selection import (
     resolve_appearance,
 )
+from src.shared.python.motion_matching.mirrored_spec import (
+    mirror_spec_to_left_handed,
+)
 from src.shared.python.model_appearance.golfer_model_versions import (
     current_golfer_model,
-    warn_if_deprecated,
 )
 from src.shared.python.model_appearance.schema import appearance_path_for
 from src.shared.python.motion_matching.club_models import recorded_club
@@ -125,22 +126,30 @@ def with_current_golfer_model(
     *,
     shaft_model: str | None = None,
     shaft_options: Mapping[str, Any] | None = None,
+    handedness: str = "right",
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """The document and receipt subject on the current golfer model.
 
-    Right-handed: the skinned hand wrist revision plus the registry's body.
-    Left-handed: unchanged hands and body, with a deprecation logged for each
-    old part. Every spec then gets the current shaft
-    (:func:`with_current_shaft`; ``shaft_model="rigid"`` is the logged
-    ballpark fallback).
-    Postconditions: the input is not mutated; a right-handed result has the
-    registry's hand and body backends and spec revision configuration.
+    ``document`` is the composed right-handed spec. The skinned hand wrist
+    revision, the registry's body and the current shaft are applied
+    (:func:`with_current_shaft`; ``shaft_model="rigid"`` is the logged ballpark
+    fallback). ``handedness="left"`` then mirrors the result through the
+    sagittal plane (:func:`mirror_spec_to_left_handed`).
+
+    Raises:
+        ValueError: ``document`` is labelled left-handed (compose right-handed
+            and pass ``handedness='left'``), or an unknown ``handedness``.
+
+    Postconditions: the input is not mutated; the result has the registry's
+    hand and body backends and spec revision configuration, and
+    ``subject.handedness`` equals ``handedness``.
     """
+    side = validate_handedness(handedness)
     if subject_handedness(document) == "left":
-        for field in _BACKENDS:
-            warn_if_deprecated(document, field)
-        shafted = with_current_shaft(document, shaft_model, shaft_options)
-        return shafted, dict(subject)
+        raise ValueError(
+            "compose the right-handed spec and pass handedness='left'; a left "
+            "label on right-handed geometry draws right-handed hands"
+        )
     current = current_golfer_model()
     revised = apply_skinned_hand_wrists(document)
     revised["subject"]["body_visual_backend"] = current.body_visual_backend
@@ -151,4 +160,7 @@ def with_current_golfer_model(
     ):
         raise ValueError("the wrist revision does not make the registry's model")
     shafted = with_current_shaft(revised, shaft_model, shaft_options)
-    return shafted, {**subject, **{key: revised["subject"][key] for key in _BACKENDS}}
+    receipt = {**subject, **{key: revised["subject"][key] for key in _BACKENDS}}
+    if side == "right":
+        return shafted, receipt
+    return mirror_spec_to_left_handed(shafted), {**receipt, "handedness": side}
