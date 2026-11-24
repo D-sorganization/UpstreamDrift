@@ -319,6 +319,16 @@ class PinocchioForceAdapter:
             self._bare_club = bare.expressed_in(pose.homogeneous)
         return joint, self._bare_club
 
+    def _second_order_kinematics(self, q: Array, v: Array, a: Array) -> None:
+        """Checked forward kinematics with velocity and acceleration."""
+        self._pin.forwardKinematics(
+            self._model,
+            self._data,
+            self._checked(q, "configuration"),
+            self._checked(v, "velocity"),
+            self._checked(a, "acceleration"),
+        )
+
     def club_newton_euler(self, q: Array, v: Array, a: Array) -> dict:
         """Bare-club Newton-Euler keywords at ``(q, v, a)`` (NSX-01, #12550).
 
@@ -326,13 +336,8 @@ class PinocchioForceAdapter:
         and grip only; the hand solids welded into the club body are excluded.
         ``a`` is the constrained generalised acceleration in native order.
         """
-        configuration = self._checked(q, "configuration")
-        velocity = self._checked(v, "velocity")
-        acceleration = self._checked(a, "acceleration")
+        self._second_order_kinematics(q, v, a)
         pin = self._pin
-        pin.forwardKinematics(
-            self._model, self._data, configuration, velocity, acceleration
-        )
         joint, inertia = self._bare_club_in_joint_frame()
         gravity = self._model.gravity
         world_aligned = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
@@ -387,14 +392,10 @@ class PinocchioForceAdapter:
         interaction loads. Postcondition: equals the spatial force Pinocchio's
         RNEA passes through the club joint (the subtree holds no other body).
         """
-        configuration = self._checked(q, "configuration")
-        velocity = self._checked(v, "velocity")
-        acceleration = self._checked(a, "acceleration")
+        self._second_order_kinematics(q, v, a)
         pin = self._pin
-        pin.forwardKinematics(
-            self._model, self._data, configuration, velocity, acceleration
-        )
-        weight = pin.Motion(np.asarray(self._model.gravity.linear), np.zeros(3))
+        field = self._model.gravity
+        weight = pin.Motion(np.asarray(field.linear), np.zeros(3))
         total = pin.Force.Zero()
         for j in self._club_subtree():
             placement, inertia = self._data.oMi[j], self._model.inertias[j]
