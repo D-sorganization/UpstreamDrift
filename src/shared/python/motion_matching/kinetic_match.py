@@ -14,6 +14,9 @@ it, so that every new best match can be given forces and torques the same way:
    mass-weighted, so ``J v = 0`` and ``J a + Jdot v = 0`` (the matched angles
    do not satisfy the weld exactly, and inverse dynamics of an inconsistent
    state answers with huge internal loop forces);
+   then replace the passive coordinates (a flexible shaft: no actuator, no
+   closure force on their rows) by their response to that prescribed motion,
+   integrated in ``passive_substep_s`` steps, so their rows balance exactly;
 4. allocate torques, ground forces and the closure force by the conic
    allocator (minimum effort, with ``regularisation_grip`` penalising the
    internal loop force), reporting any root residual it could not close;
@@ -41,6 +44,10 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.motion_matching.execution.downswing import condition
+from src.shared.python.motion_matching.passive_response import (
+    passive_indices,
+    passive_response,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +68,7 @@ _FLOATS = (
     "max_grip_force_n",
     "max_joint_torque_n_m",
     "closure_tolerance_m",
+    "passive_substep_s",
 )
 
 __all__ = ["KineticMatchSettings", "kinetic_match", "load_settings"]
@@ -80,6 +88,7 @@ class KineticMatchSettings:
     max_grip_force_n: float
     max_joint_torque_n_m: float
     closure_tolerance_m: float
+    passive_substep_s: float
 
     def __post_init__(self) -> None:
         if self.method != METHOD:
@@ -212,6 +221,24 @@ def _receipt(result, adapter, settings, bundle) -> dict[str, Any]:
     }
 
 
+def _passive_states(bundle, adapter, perm, q, v) -> dict[str, np.ndarray]:
+    """Bundle reference states with the passive columns from the response.
+
+    Keeps the bundle invariant ``reference[0] == q0, v0`` when the bundle
+    carries velocities and initial states.
+    """
+    names = [n for n in ("reference_q", "reference_v") if hasattr(bundle, n)]
+    sources = {"reference_q": q, "reference_v": v}
+    states = {n: np.array(getattr(bundle, n), dtype=float) for n in names}
+    for native_index in passive_indices(adapter):
+        for name in names:
+            states[name][:, perm[native_index]] = sources[name][:, native_index]
+    for name, initial in (("reference_q", "q0"), ("reference_v", "v0")):
+        if name in states and hasattr(bundle, initial):
+            states[initial] = states[name][0].copy()
+    return states
+
+
 def kinetic_match(
     bundle: Any,
     settings: KineticMatchSettings,
@@ -226,9 +253,13 @@ def kinetic_match(
     Postconditions: ``efforts`` holds the allocated actuated torques in the
     bundle's coordinate order (zeros on unactuated coordinates), sampled at
     the step times; ``provenance["kinetic_match"]`` is the receipt, with the
-    largest closure gap closed (``closure_gap_max_m``); the reference angles
-    are unchanged. ``close_pose`` maps a bundle-order pose to ``(closed pose,
-    gap before)``; by default the MuJoCo closure of the bundle's spec.
+    largest closure gap closed (``closure_gap_max_m``) and the number of
+    passive coordinates (``passive_coordinates``); the reference angles are
+    unchanged except the passive ones (a flexible shaft), which become their
+    response to the prescribed motion (with ``q0``/``v0`` kept equal to the
+    first reference state). ``close_pose`` maps a bundle-order pose to
+    ``(closed pose, gap before)``; by default the MuJoCo closure of the
+    bundle's spec.
     """
     perm = _native_order(bundle, adapter)
     frames = bundle.reference_q.shape[0]
@@ -242,8 +273,14 @@ def kinetic_match(
     v = np.gradient(q, times, axis=0)
     a = np.gradient(v, times, axis=0)
     _project(adapter, q, v, a)
+    passive = passive_response(adapter, times, q, v, a, settings.passive_substep_s)
     result = allocate(adapter, times, q, v, a, settings)
-    receipt = {**_receipt(result, adapter, settings, bundle), "closure_gap_max_m": gap}
+    receipt = {
+        **_receipt(result, adapter, settings, bundle),
+        "closure_gap_max_m": gap,
+        "passive_coordinates": passive,
+    }
+    states = _passive_states(bundle, adapter, perm, q, v)
     efforts = np.zeros((frames - 1, len(perm)))
     for column, native_index in enumerate(adapter.actuated_indices):
         efforts[:, perm[native_index]] = np.interp(
@@ -255,10 +292,12 @@ def kinetic_match(
         "replay_mode": REPLAY_MODE,
     }
     if hasattr(bundle, "__dataclass_fields__"):
-        out = replace(bundle, efforts=efforts, provenance=provenance)
+        out = replace(bundle, efforts=efforts, provenance=provenance, **states)
     else:
         out = bundle
         out.efforts, out.provenance = efforts, provenance
+        for name, value in states.items():
+            setattr(out, name, value)
     return out, receipt
 
 
