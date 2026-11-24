@@ -1,19 +1,23 @@
-"""Tip-to-tail ZTCF/ZVCF hand-force arrows for the native export (#15685, K5).
+"""ZTCF/ZVCF hand-on-club arrows for the native export (#15685 K5, #15150 Z3b).
 
-Per frame, the force the closing (trail) hand applies to the club splits into
-its drift part (ZTCF, ``tau = 0``) and its control part (ZVCF, the applied
-torques alone); the two are drawn tip to tail with the total. The split is
-evaluated pointwise on the closed-loop Pinocchio provider of the bundle's own
-specification (``hand_force_split``), so it needs a dynamics bundle whose
-efforts are the torques that produced the motion; a kinematic replay (zero
-efforts) is refused.
+Per frame, each hand's load on the club splits into its drift part (ZTCF,
+``tau = 0``: velocity terms, gravity and passive springs) and its control
+part (ZVCF, the applied torques alone, no gravity, so gravity is counted
+once). One render shows one view of that split (:data:`PART_VIEWS`: tip to
+tail with the total, the ZTCF alone, the ZVCF alone, or the total) of the
+force or the torque, for the lead hand, the trail hand or both, each drawn
+from its own point. The split is evaluated pointwise on the closed-loop
+Pinocchio provider of the bundle's own specification
+(``hand_wrench_split``), so it needs a dynamics bundle whose efforts are the
+torques that produced the motion; a kinematic replay (zero efforts) is
+refused.
 """
 
 from __future__ import annotations
 
 import json
 import math
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import replace
 from typing import Any
 
@@ -23,15 +27,52 @@ from src.shared.python.force_overlay.contracts import WrenchKind
 from src.shared.python.force_overlay.glyphs import ArrowGlyph, ForceGlyphStyle
 from src.shared.python.force_overlay.tip_to_tail import (
     TipToTailStyle,
-    tip_to_tail_arrows,
+    part_arrows,
 )
+from src.shared.python.simulation_backends.hand_force_split import HANDS
 
-__all__ = ["LEGEND", "gained_style", "legend_for", "ztcf_zvcf_arrows"]
+__all__ = [
+    "HAND_CHOICES",
+    "LEGEND",
+    "gained_style",
+    "hand_arrows",
+    "hands_of",
+    "legend_for",
+    "ztcf_zvcf_arrows",
+]
 
-LEGEND = (
-    "Trail hand on club: ZTCF drift (blue) + ZVCF control (orange) = total "
-    "(white); one null-space solution"
-)
+#: ``--ztcf-zvcf-hands``: both hands or one.
+HAND_CHOICES = ("both", *HANDS)
+_HAND_LABEL = {"lead": "Lead", "trail": "Trail"}
+_VIEW_TEXT = {
+    "tip_to_tail": "ZTCF drift + ZVCF control = total, tip to tail",
+    "ztcf": "ZTCF drift (passive, velocity and gravity) alone",
+    "zvcf": "ZVCF control (applied torques alone) alone",
+    "total": "total (ZTCF + ZVCF)",
+}
+_NULL_SPACE = "one null-space solution"
+
+
+def hands_of(choice: str) -> tuple[str, ...]:
+    """The hands a ``--ztcf-zvcf-hands`` choice draws; ``ValueError`` otherwise."""
+    if choice not in HAND_CHOICES:
+        raise ValueError(f"hands must be one of {HAND_CHOICES}, got {choice!r}")
+    return HANDS if choice == "both" else (choice,)
+
+
+def _hands_text(hands: Sequence[str]) -> str:
+    names = [_HAND_LABEL[h].lower() for h in hands]
+    return " and ".join(names).capitalize()
+
+
+def _legend(view: str, quantity: str, hands: Sequence[str]) -> str:
+    return (
+        f"{_hands_text(hands)} hand {quantity} on club: {_VIEW_TEXT[view]}; "
+        f"{_NULL_SPACE}"
+    )
+
+
+LEGEND = _legend("tip_to_tail", "force", HANDS)
 
 
 def _checked_gain(gain: float) -> float:
@@ -59,15 +100,59 @@ def gained_style(style: ForceGlyphStyle, gain: float) -> ForceGlyphStyle:
     return replace(style, kind_scale=kind_scale)
 
 
-def legend_for(gain: float) -> str:
-    """The legend, naming the gain whenever the arrows are drawn longer."""
+def legend_for(
+    gain: float,
+    view: str = "tip_to_tail",
+    quantity: str = "force",
+    hands: Sequence[str] = HANDS,
+) -> str:
+    """The legend, naming hands, view, quantity and any arrow gain."""
+    text = _legend(view, quantity, hands)
     if _checked_gain(gain) == 1.0:
-        return LEGEND
-    return f"{LEGEND}; hand-force arrows drawn {gain:g}x"
+        return text
+    return f"{text}; hand arrows drawn {gain:g}x"
 
 
-def _closure_provider(spec_bytes: bytes, order: tuple[str, ...]) -> tuple[Any, Any]:
-    """Closed-loop provider in ``order`` and its grip-frame function."""
+def hand_arrows(
+    split: Any,
+    style: ForceGlyphStyle,
+    view: str,
+    quantity: str,
+    hands: Sequence[str],
+    colours: TipToTailStyle | None = None,
+    gain: float = 1.0,
+    row: int = 0,
+) -> tuple[ArrowGlyph, ...]:
+    """Arrows of ``view`` for each of ``hands`` at ``row`` of a hand-wrench split.
+
+    Each hand is drawn from its own point and labelled with its name. The
+    length limit grows with ``gain``, so lengthening the arrows never turns a
+    legible frame into an error.
+    """
+    reach = replace(style, max_length_m=style.max_length_m * _checked_gain(gain))
+    field = "force_n" if quantity == "force" else "torque_nm"
+    out: list[ArrowGlyph] = []
+    for hand in hands:
+        drift, control = split.part(hand, "ztcf"), split.part(hand, "zvcf")
+        out.extend(
+            part_arrows(
+                drift.point_m[row],
+                getattr(drift, field)[row],
+                getattr(control, field)[row],
+                reach,
+                view,
+                quantity,
+                colours,
+                _HAND_LABEL[hand],
+            )
+        )
+    return tuple(out)
+
+
+def _closure_provider(
+    spec_bytes: bytes, order: tuple[str, ...]
+) -> tuple[Any, Any, Any, Any]:
+    """``(provider, grip frame, club load, lead point)`` in ``order``."""
     from src.engines.physics_engines.pinocchio.python.force_adapter import (
         PinocchioForceAdapter,
     )
@@ -80,10 +165,25 @@ def _closure_provider(spec_bytes: bytes, order: tuple[str, ...]) -> tuple[Any, A
     native = tuple(adapter.coordinate_order)
     provider: Any = AdapterConstrainedProvider(adapter)
     if native == order:
-        return provider, adapter.closure_wrench_frame
+        return (
+            provider,
+            adapter.closure_wrench_frame,
+            adapter.club_subtree_load,
+            adapter.lead_wrist_point,
+        )
     take = np.array([order.index(n) for n in native])
-    reordered = ReorderedProvider(provider, native, order)
-    return reordered, lambda q: adapter.closure_wrench_frame(np.asarray(q)[take])
+
+    def native_of(x: Any) -> np.ndarray:
+        return np.asarray(x)[take]
+
+    return (
+        ReorderedProvider(provider, native, order),
+        lambda q: adapter.closure_wrench_frame(native_of(q)),
+        lambda q, v, a, gravity: adapter.club_subtree_load(
+            native_of(q), native_of(v), native_of(a), gravity
+        ),
+        lambda q: adapter.lead_wrist_point(native_of(q)),
+    )
 
 
 def _states(swing: Any) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -106,6 +206,10 @@ def ztcf_zvcf_arrows(
     swing: Any,
     style: ForceGlyphStyle,
     colours: TipToTailStyle | None = None,
+    view: str = "tip_to_tail",
+    quantity: str = "force",
+    hands: Sequence[str] = HANDS,
+    gain: float = 1.0,
 ) -> Callable[[int], tuple[ArrowGlyph, ...]]:
     """Arrows by source state index, evaluated lazily and cached.
 
@@ -114,7 +218,7 @@ def ztcf_zvcf_arrows(
             specification declares no closure.
     """
     from src.shared.python.simulation_backends.hand_force_split import (
-        hand_force_split,
+        hand_wrench_split,
     )
 
     bundle = swing.bundle
@@ -125,7 +229,7 @@ def ztcf_zvcf_arrows(
         )
     if "closure" not in json.loads(bundle.spec_bytes):
         raise ValueError("the specification declares no hand-club closure")
-    provider, frame_at = _closure_provider(
+    provider, frame_at, club_load, lead_point = _closure_provider(
         bundle.spec_bytes, tuple(bundle.coordinate_order)
     )
     q, v, tau = _states(swing)
@@ -134,10 +238,10 @@ def ztcf_zvcf_arrows(
     def arrows(index: int) -> tuple[ArrowGlyph, ...]:
         k = min(max(int(index), 0), q.shape[0] - 1)
         if k not in cache:
-            split = hand_force_split(provider, frame_at, q[k], v[k], tau[k])
-            cache[k] = tip_to_tail_arrows(
-                split.point_m[0], split.drift_n[0], split.control_n[0], style, colours
+            split = hand_wrench_split(
+                provider, frame_at, club_load, lead_point, q[k], v[k], tau[k]
             )
+            cache[k] = hand_arrows(split, style, view, quantity, hands, colours, gain)
         return cache[k]
 
     return arrows

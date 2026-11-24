@@ -63,6 +63,10 @@ class OverlayOptions:
     ztcf_zvcf_hand_force: bool = False
     #: length gain for the tip-to-tail hand-force arrows only (#15685)
     ztcf_arrow_gain: float = 1.0
+    #: which view of the split, force or torque, and which hands (#15150 Z3b)
+    ztcf_view: str = "tip_to_tail"
+    ztcf_quantity: str = "force"
+    ztcf_hands: str = "both"
 
 
 def _grip_source(swing: SwingInput, engine: str, mujoco_source: Any) -> tuple[Any, str]:
@@ -546,16 +550,33 @@ def build_overlay_feed(
         ellipsoids_for=ellipsoids_for,
     )
     if opts.ztcf_zvcf_hand_force:
-        from src.tools.native_viewer_export.ztcf_feed import (
-            gained_style,
-            legend_for,
-            ztcf_zvcf_arrows,
-        )
-
-        gain = opts.ztcf_arrow_gain
-        arrows = ztcf_zvcf_arrows(swing, gained_style(style, gain))
-        feed = replace(feed, extra_arrows=arrows, extra_legend=legend_for(gain))
+        feed = _with_ztcf_zvcf(feed, swing, style, opts)
     return feed, lookat
+
+
+def _with_ztcf_zvcf(
+    feed: OverlayFeed, swing: SwingInput, style: Any, opts: OverlayOptions
+) -> OverlayFeed:
+    """``feed`` with the ZTCF/ZVCF hand arrows, their legend and colour key."""
+    from src.shared.python.force_overlay.tip_to_tail import colour_key
+    from src.tools.native_viewer_export.ztcf_feed import (
+        gained_style,
+        hands_of,
+        legend_for,
+        ztcf_zvcf_arrows,
+    )
+
+    gain, view, quantity = opts.ztcf_arrow_gain, opts.ztcf_view, opts.ztcf_quantity
+    hands = hands_of(opts.ztcf_hands)
+    arrows = ztcf_zvcf_arrows(
+        swing, gained_style(style, gain), None, view, quantity, hands, gain
+    )
+    return replace(
+        feed,
+        extra_arrows=arrows,
+        extra_legend=legend_for(gain, view, quantity, hands),
+        colour_key=colour_key(view),
+    )
 
 
 def face_centre_trajectory(

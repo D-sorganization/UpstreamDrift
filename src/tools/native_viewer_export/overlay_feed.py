@@ -95,6 +95,8 @@ class OverlayFeed:
     extra_arrows: Callable[[int], tuple[Any, ...]] | None = None
     #: legend text appended when ``extra_arrows`` draws anything
     extra_legend: str = ""
+    #: ``(text, RGB)`` naming each extra arrow colour (#15150 Track Z, Z3b)
+    colour_key: tuple[tuple[str, tuple[int, int, int]], ...] = ()
     _frames: dict[int, Any] = field(
         default_factory=dict, init=False, repr=False, compare=False
     )
@@ -190,6 +192,14 @@ class OverlayFeed:
     def axial_at(self, index: int) -> Any:
         """``AxialLoadFrame`` of state ``index``, or ``None`` when not computed."""
         return getattr(self._frame(index), "axial_loads", None)
+
+    def draw_key(self, img: Any) -> Any:
+        """``img`` with the colour key panel; ``img`` itself when there is none."""
+        if not self.colour_key:
+            return img
+        from src.tools.native_viewer_export.compositor import draw_colour_key
+
+        return draw_colour_key(img, self.colour_key)
 
     def legend_for(self, glyphs: GlyphSet | None) -> str:
         """The legend row; none on a replay that draws no vectors (#15150)."""
