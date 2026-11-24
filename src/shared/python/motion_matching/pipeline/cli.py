@@ -109,6 +109,10 @@ from src.shared.python.motion_matching.pipeline.lane import (
     fitted_grip,
     wrist_bounds,
 )
+from src.shared.python.motion_matching.pipeline.swing_placement import (
+    add_placement_arguments,
+    replace_run_markers,
+)
 from src.shared.python.motion_matching.pipeline.turn_split import (
     DEFAULT_SHOULDER_GIRDLE_WEIGHT,
     DEFAULT_THORAX_WEIGHT,
@@ -451,6 +455,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     add_turn_split_arguments(parser)
     add_trajectory_convergence_arguments(parser)
+    add_placement_arguments(parser)
     add_hip_zero_twist_argument(parser)
     add_knee_flexion_argument(parser)
     add_marker_selection_argument(parser)
@@ -852,6 +857,25 @@ def _solve_trajectory_ik(
     )
     ref_errors = marker_errors(kin, q_ref, lane.points)
     return q_ik, q_ref, fits, ref_fits, errors, ref_errors, None
+
+
+def _targets_and_solve(
+    ctx: PipelineContext,
+    lane: Lane,
+    cal_res: _CalibrateAndScaleResult,
+    labels: tuple[str, ...],
+) -> tuple[Any, ...]:
+    """Set the club and turn targets from the attachments, then solve the swing."""
+    args = ctx.args
+    lane.set_club_targets(cal_res.attachments, cal_res.scaled_spec, args.face_weight)
+    lane.set_turn_split(
+        cal_res.attachments,
+        getattr(args, "thorax_weight", DEFAULT_THORAX_WEIGHT),
+        getattr(args, "shoulder_girdle_weight", DEFAULT_SHOULDER_GIRDLE_WEIGHT),
+    )
+    return _solve_trajectory_ik(
+        ctx, lane, cal_res.kin, cal_res.scaled_spec, labels, cal_res.address2.q
+    )
 
 
 def _save_dynamics_record(
@@ -1494,7 +1518,6 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         run.labels,
         run.cal_res,
     )
-    lane.set_club_targets(cal_res.attachments, cal_res.scaled_spec, args.face_weight)
     lane.set_restart_policy(
         getattr(args, "ik_restart_policy", DEFAULT_IK_RESTART_POLICY)
     )
@@ -1504,23 +1527,15 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         getattr(args, "ik_spin_prior_weight", None),
     )
     apply_stance_arguments(lane, args)
-    lane.set_turn_split(
-        cal_res.attachments,
-        getattr(args, "thorax_weight", DEFAULT_THORAX_WEIGHT),
-        getattr(args, "shoulder_girdle_weight", DEFAULT_SHOULDER_GIRDLE_WEIGHT),
-    )
-
-    (
-        q_ik,
-        q_ref,
-        fits,
-        ref_fits,
-        errors,
-        ref_errors,
-        constrained_ik_dict,
-    ) = _solve_trajectory_ik(
-        ctx, lane, cal_res.kin, cal_res.scaled_spec, labels, cal_res.address2.q
-    )
+    solved = _targets_and_solve(ctx, lane, cal_res, labels)
+    placement_reports: list[dict[str, Any]] = []
+    for _ in range(getattr(args, "placement_passes", 0)):
+        # Markers re-placed from the swing just solved, then solved again.
+        cal_res, placed = replace_run_markers(lane, cal_res, solved[0], args)
+        placed["swing_marker_rms_before_m"] = float(np.sqrt(np.nanmean(solved[4] ** 2)))
+        placement_reports.append(placed)
+        solved = _targets_and_solve(ctx, lane, cal_res, labels)
+    q_ik, q_ref, fits, ref_fits, errors, ref_errors, constrained_ik_dict = solved
 
     if lane.feet is not None:
         cal_res.address_report["foot_progression"]["trajectory"] = {
@@ -1560,6 +1575,8 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     ik_report["restart_policy"] = lane.restart_report()
     if lane.convergence_report():
         ik_report["trajectory_convergence"] = lane.convergence_report()
+    if placement_reports:
+        ik_report["swing_placement"] = placement_reports
     if turn_split_active(lane):
         ik_report["turn_split"] = turn_split_report(lane)
     _save_ik_trajectory(ctx, lane, q_ik, q_ref, errors, ref_errors)
