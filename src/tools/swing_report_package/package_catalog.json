@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "description": "Catalog of swing report package items (#15723). 'render_defaults' are native_viewer_export options shared by every video; an item's 'args' add to or replace them; a composite 'needs' the items it is built from. 'default_package' is what a plain run produces; a request file can include, exclude and override.",
+  "render_defaults": {
+    "engines": "mujoco",
+    "preset": "hq",
+    "size": "1920x1080",
+    "no_grid": true,
+    "arrow_style": "slim",
+    "ztcf_zvcf_hand_force": true,
+    "ztcf_arrow_gain": 4,
+    "ztcf_zvcf_quantity": "force",
+    "segment_shading": true,
+    "tension_color": "#009E73",
+    "compression_color": "#CC79A7",
+    "shading_limit_n": 400,
+    "shading_opacity": 0.75
+  },
+  "views": ["face_on", "down_the_line"],
+  "speeds": [0.25],
+  "items": {
+    "case_ztcf": {"kind": "video", "title": "ZTCF Drift: Hand Forces, Ground Reaction and Shading", "args": {"ztcf_zvcf_view": "ztcf", "force_part": "ztcf", "segment_shading_part": "ztcf", "ztcf_zvcf_hands": "both"}},
+    "case_zvcf": {"kind": "video", "title": "ZVCF Control: Hand Forces, Ground Reaction and Shading", "args": {"ztcf_zvcf_view": "zvcf", "force_part": "zvcf", "segment_shading_part": "zvcf", "ztcf_zvcf_hands": "both"}},
+    "case_total": {"kind": "video", "title": "Total: Hand Forces, Ground Reaction and Shading", "args": {"ztcf_zvcf_view": "total", "force_part": "total", "segment_shading_part": "total", "ztcf_zvcf_hands": "both"}},
+    "tip_to_tail": {"kind": "video", "title": "ZTCF + ZVCF = Total, Tip to Tail, per Hand", "args": {"ztcf_zvcf_view": "tip_to_tail", "force_part": "total", "segment_shading_part": "total", "ztcf_zvcf_hands": "both"}},
+    "midhands_ztcf": {"kind": "video", "title": "ZTCF Drift: Equivalent Force and Couple at the Midpoint of the Hands", "args": {"ztcf_zvcf_view": "ztcf", "force_part": "ztcf", "segment_shading_part": "ztcf", "ztcf_zvcf_hands": "midhands"}},
+    "midhands_zvcf": {"kind": "video", "title": "ZVCF Control: Equivalent Force and Couple at the Midpoint of the Hands", "args": {"ztcf_zvcf_view": "zvcf", "force_part": "zvcf", "segment_shading_part": "zvcf", "ztcf_zvcf_hands": "midhands"}},
+    "midhands_total": {"kind": "video", "title": "Total: Equivalent Force and Couple at the Midpoint of the Hands", "args": {"ztcf_zvcf_view": "total", "force_part": "total", "segment_shading_part": "total", "ztcf_zvcf_hands": "midhands"}},
+    "case_grid": {"kind": "grid", "title": "ZTCF, ZVCF and Total Side by Side", "needs": ["case_ztcf", "case_zvcf", "case_total"]},
+    "midhands_grid": {"kind": "grid", "title": "Midhands Force and Couple: ZTCF, ZVCF and Total", "needs": ["midhands_ztcf", "midhands_zvcf", "midhands_total"]},
+    "phase_sheet": {"kind": "phase_sheet", "title": "Key Phases: ZTCF, ZVCF and Total", "needs": ["case_ztcf", "case_zvcf", "case_total"]},
+    "midhands_phase_sheet": {"kind": "phase_sheet", "title": "Key Phases: Midhands Force and Couple", "needs": ["midhands_ztcf", "midhands_zvcf", "midhands_total"]}
+  },
+  "default_package": ["case_ztcf", "case_zvcf", "case_total", "tip_to_tail", "midhands_total", "case_grid", "phase_sheet"]
+}
