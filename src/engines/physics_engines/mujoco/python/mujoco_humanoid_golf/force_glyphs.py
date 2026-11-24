@@ -147,6 +147,37 @@ def _append_connector(
     return True
 
 
+def _add_force_arrow(
+    scene: mujoco.MjvScene, arrow: Any, head_shaft_radii: float | None
+) -> tuple[int, int]:
+    """Draw one force arrow; ``(added, dropped)`` geom counts.
+
+    See :func:`add_glyphs_to_scene` for ``head_shaft_radii``. A clamped arrow
+    gets a short white arrow continuing past its tip.
+    """
+    arrow_type = int(mujoco.mjtGeom.mjGEOM_ARROW)
+    from_pt = np.asarray(arrow.tail_m, dtype=np.float64)
+    to_pt = np.asarray(arrow.tip_m, dtype=np.float64)
+    width = 2.0 * float(arrow.shaft_radius_m)
+    pieces = []
+    head_from = from_pt
+    length = float(np.linalg.norm(to_pt - from_pt))
+    span = None if head_shaft_radii is None else head_shaft_radii * width / 2.0
+    if span is not None and length > span:
+        head_from = to_pt - (to_pt - from_pt) / length * span
+        capsule = int(mujoco.mjtGeom.mjGEOM_CAPSULE)
+        pieces.append((capsule, from_pt, head_from, arrow.rgba))
+    pieces.append((arrow_type, head_from, to_pt, arrow.rgba))
+    if arrow.clamped and length > 0.0:
+        extra = to_pt + (to_pt - from_pt) / length * CLAMPED_TIP_LENGTH_M
+        pieces.append((arrow_type, to_pt, extra, (1.0, 1.0, 1.0, arrow.rgba[3])))
+    added = sum(
+        bool(_append_connector(scene, kind, width, a, b, rgba))
+        for kind, a, b, rgba in pieces
+    )
+    return added, len(pieces) - added
+
+
 def add_glyphs_to_scene(
     scene: mujoco.MjvScene,
     glyphs: GlyphSet,
@@ -197,42 +228,10 @@ def add_glyphs_to_scene(
     arrow_type = int(mujoco.mjtGeom.mjGEOM_ARROW)
     capsule_type = int(mujoco.mjtGeom.mjGEOM_CAPSULE)
 
-    # 1. Force Arrows: 1 mjGEOM_ARROW per arrow
+    # 1. Force Arrows: an arrow geom (with a capsule shaft for a fixed head)
     for arrow in glyphs.arrows:
-        from_pt = np.asarray(arrow.tail_m, dtype=np.float64)
-        to_pt = np.asarray(arrow.tip_m, dtype=np.float64)
-        width = 2.0 * float(arrow.shaft_radius_m)
-
-        head_from = from_pt
-        length = float(np.linalg.norm(to_pt - from_pt))
-        span = (
-            None
-            if arrow_head_shaft_radii is None
-            else arrow_head_shaft_radii * float(arrow.shaft_radius_m)
-        )
-        if span is not None and length > span:
-            head_from = to_pt - (to_pt - from_pt) / length * span
-            if _append_connector(
-                scene, capsule_type, width, from_pt, head_from, arrow.rgba
-            ):
-                added += 1
-            else:
-                dropped += 1
-        if _append_connector(scene, arrow_type, width, head_from, to_pt, arrow.rgba):
-            added += 1
-        else:
-            dropped += 1
-        if arrow.clamped:
-            # Distinct clamped tip: a short white arrow continuing past the tip.
-            direction = to_pt - from_pt
-            norm = float(np.linalg.norm(direction))
-            if norm > 0.0:
-                extra = to_pt + direction / norm * CLAMPED_TIP_LENGTH_M
-                marker = (1.0, 1.0, 1.0, float(arrow.rgba[3]))
-                if _append_connector(scene, arrow_type, width, to_pt, extra, marker):
-                    added += 1
-                else:
-                    dropped += 1
+        ok, bad = _add_force_arrow(scene, arrow, arrow_head_shaft_radii)
+        added, dropped = added + ok, dropped + bad
 
     # 2. Torque Arcs: (N-1) mjGEOM_CAPSULE along polyline + 1 mjGEOM_ARROW head
     for arc in glyphs.torque_arcs:
