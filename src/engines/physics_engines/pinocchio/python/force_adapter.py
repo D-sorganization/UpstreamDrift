@@ -53,6 +53,7 @@ from src.shared.python.model_appearance.grip_pose import (
     GripPose,
     Hand,
 )
+from src.shared.python.motion_matching.club_shaft_chain import passive_coordinates
 from src.shared.python.motion_matching.multi_engine_torque_allocator import EngineType
 from src.shared.python.motion_matching.polynomial_actuation import (
     actuated_coordinate_indices,
@@ -318,6 +319,16 @@ class PinocchioForceAdapter:
             self._bare_club = bare.expressed_in(pose.homogeneous)
         return joint, self._bare_club
 
+    def _second_order_kinematics(self, q: Array, v: Array, a: Array) -> None:
+        """Checked forward kinematics with velocity and acceleration."""
+        self._pin.forwardKinematics(
+            self._model,
+            self._data,
+            self._checked(q, "configuration"),
+            self._checked(v, "velocity"),
+            self._checked(a, "acceleration"),
+        )
+
     def club_newton_euler(self, q: Array, v: Array, a: Array) -> dict:
         """Bare-club Newton-Euler keywords at ``(q, v, a)`` (NSX-01, #12550).
 
@@ -325,13 +336,8 @@ class PinocchioForceAdapter:
         and grip only; the hand solids welded into the club body are excluded.
         ``a`` is the constrained generalised acceleration in native order.
         """
-        configuration = self._checked(q, "configuration")
-        velocity = self._checked(v, "velocity")
-        acceleration = self._checked(a, "acceleration")
+        self._second_order_kinematics(q, v, a)
         pin = self._pin
-        pin.forwardKinematics(
-            self._model, self._data, configuration, velocity, acceleration
-        )
         joint, inertia = self._bare_club_in_joint_frame()
         gravity = self._model.gravity
         world_aligned = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
@@ -350,6 +356,55 @@ class PinocchioForceAdapter:
             accel_origin=classical.linear,
             gravity=gravity.linear,
         )
+
+    def club_joint_index(self) -> int:
+        """Pinocchio joint carrying the club body (the lead wrist weld)."""
+        joint, _ = self._plant.body_placement(self._spec["closure"]["body_b"])
+        return int(joint)
+
+    def _club_subtree(self) -> tuple[int, ...]:
+        """Club joint plus its flexible-shaft link joints (no other bodies)."""
+        joint = self.club_joint_index()
+        shaft = set(passive_coordinates(self._spec))
+        names = self._model.names
+        return (joint,) + tuple(
+            j for j in self._model.subtrees[joint] if j != joint and names[j] in shaft
+        )
+
+    def club_subtree_mass_kg(self) -> float:
+        """Mass of the club body (welded hand solids included) and shaft links."""
+        return float(sum(self._model.inertias[j].mass for j in self._club_subtree()))
+
+    def lead_wrist_point(self, q: Array) -> Array:
+        """World origin of the club joint: the lead wrist weld, at ``q``."""
+        configuration = self._checked(q, "configuration")
+        self._pin.forwardKinematics(self._model, self._data, configuration)
+        return self._data.oMi[self.club_joint_index()].translation.copy()
+
+    def club_subtree_load(
+        self, q: Array, v: Array, a: Array, gravity: bool = True
+    ) -> tuple[Array, Array]:
+        """World ``(force, moment about the origin)`` the hands supply together.
+
+        Sum over the club body and its flexible-shaft links of the momentum
+        rate ``Y a + v x* Y v``, less the weight when ``gravity`` (#15150 Z2).
+        The club body carries the welded hand solids, so these are wrist
+        interaction loads. Postcondition: equals the spatial force Pinocchio's
+        RNEA passes through the club joint (the subtree holds no other body).
+        """
+        self._second_order_kinematics(q, v, a)
+        pin = self._pin
+        field = self._model.gravity
+        weight = pin.Motion(np.asarray(field.linear), np.zeros(3))
+        total = pin.Force.Zero()
+        for j in self._club_subtree():
+            placement, inertia = self._data.oMi[j], self._model.inertias[j]
+            accel = self._data.a[j]
+            if gravity:
+                accel = accel - placement.actInv(weight)
+            body_v = self._data.v[j]
+            total += placement.act(inertia * accel + body_v.cross(inertia * body_v))
+        return total.linear.copy(), total.angular.copy()
 
     def bare_club_net_wrench(self, q: Array, v: Array, a: Array) -> tuple[Array, Array]:
         """Net hand-on-club ``(force, torque about CoM)`` of the bare club.

@@ -108,6 +108,34 @@ def constrained_acceleration_at(
     )
 
 
+def drift_and_control_states(
+    provider: ConstrainedEquationsOfMotionProvider,
+    q: ArrayLike,
+    v: ArrayLike,
+    tau: ArrayLike,
+) -> tuple[tuple[Array, Array], tuple[Array, Array]]:
+    """``((a, lambda) drift, (a, lambda) control)`` at one state (#15150 Z2).
+
+    Drift (ZTCF) is the constrained solve at ``tau = 0`` with ``q``, ``v``,
+    gravity and passive terms kept. Control (ZVCF) solves the same KKT system
+    with the load ``tau`` alone: no bias, no closure drift, so gravity is
+    counted once, in the drift (owner decision #14497, restated 2026-11-24).
+    Postcondition: each part's ``a`` and ``lambda`` sum to the solve under
+    ``tau``, to rounding. Preconditions as :func:`drift_and_control_reactions`.
+    """
+    _require_constrained(provider)
+    q_arr = _state("q", q)
+    mass = np.asarray(provider.mass_matrix(q_arr), dtype=np.float64)
+    n = mass.shape[0]
+    tau_arr = _state("tau", tau, n)
+    drift = constrained_acceleration_at(provider, q_arr, v, np.zeros(n))
+    jacobian = np.asarray(provider.closure_jacobian(q_arr), dtype=np.float64)
+    control = constrained_acceleration(
+        mass, np.zeros(n), tau_arr, jacobian, np.zeros(jacobian.shape[0])
+    )
+    return drift, control
+
+
 def drift_and_control_reactions(
     provider: ConstrainedEquationsOfMotionProvider,
     q: ArrayLike,
@@ -134,16 +162,7 @@ def drift_and_control_reactions(
     Postcondition: ``lambda_drift + lambda_control`` equals the reaction under
     ``tau`` to rounding (minimum-norm multipliers if ``J_c`` is rank deficient).
     """
-    _require_constrained(provider)
-    q_arr = _state("q", q)
-    mass = np.asarray(provider.mass_matrix(q_arr), dtype=np.float64)
-    n = mass.shape[0]
-    tau_arr = _state("tau", tau, n)
-    _, drift = constrained_acceleration_at(provider, q_arr, v, np.zeros(n))
-    jacobian = np.asarray(provider.closure_jacobian(q_arr), dtype=np.float64)
-    _, control = constrained_acceleration(
-        mass, np.zeros(n), tau_arr, jacobian, np.zeros(jacobian.shape[0])
-    )
+    (_, drift), (_, control) = drift_and_control_states(provider, q, v, tau)
     return drift, control
 
 
