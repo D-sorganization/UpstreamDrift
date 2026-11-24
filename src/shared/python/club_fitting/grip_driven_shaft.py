@@ -23,7 +23,6 @@ from typing import Any
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from src.engines.physics_engines.mujoco.python.shaft_chain_mjcf import TIP_SITE
 from src.shared.python.club_fitting.grip_motion import (
     ClubPoseTrack,
     FittingSettings,
@@ -197,6 +196,8 @@ class _ChainSim:
 def _head_series(sim: _ChainSim, times, qcs, vcs, head, target) -> dict:
     """Head kinematics and bend deltas along a run (bent minus straight)."""
     mj, m, d = sim.mujoco, sim.m, sim.d
+    from src.engines.physics_engines.mujoco.python.shaft_chain_mjcf import TIP_SITE
+
     site = mj.mj_name2id(m, mj.mjtObj.mjOBJ_SITE, TIP_SITE)
     tip_body = int(m.site_bodyid[site])
     off = head.centre_club_m - np.array([0.0, 0.0, cm.HEAD_HEIGHT_M])
