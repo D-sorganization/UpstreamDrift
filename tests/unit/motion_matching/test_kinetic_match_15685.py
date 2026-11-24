@@ -74,7 +74,8 @@ def _fake_allocate(peak_tau: float = 10.0, grip: float = 100.0, root: float = 0.
     def allocate(adapter, t, q, v, a, settings):
         calls.update(q=q, v=v, a=a, t=t)
         n = len(t)
-        tau = np.tile([1.0, 2.0, peak_tau], (n, 1))
+        columns = len(adapter.actuated_indices)
+        tau = np.tile([1.0, 2.0, peak_tau][:columns], (n, 1))
         lam = np.zeros((n, 6))
         lam[:, 0] = grip
         rootw = np.zeros((n, 6))
@@ -165,3 +166,39 @@ def test_closure_tolerance_is_a_setting() -> None:
     assert km.load_settings().closure_tolerance_m > 0
     with pytest.raises(ValueError, match="limit"):
         replace(km.load_settings(), closure_tolerance_m=0.0)
+
+
+class _PassiveAdapter(_Adapter):
+    """Native ``b`` (column 8) is a passive spring: no actuator, no closure."""
+
+    actuated_indices = (6, 7)
+
+    def compute_mass_and_bias(self, q, v):
+        mass, bias = super().compute_mass_and_bias(q, v)
+        bias[8] = 50.0 * (q[8] - 0.1)
+        return mass, bias
+
+
+def test_passive_rows_are_solved_before_allocation_and_returned() -> None:
+    """Z6b (#15150): the shaft is the passive response, not a copied path."""
+    allocate, calls = _fake_allocate()
+    bundle = _bundle()
+    bundle.reference_q[:, 7] = 0.3 * np.sin(5.0 * np.arange(40) * 0.01)
+    adapter = _PassiveAdapter()
+    out, receipt = km.kinetic_match(bundle, _settings(), adapter, allocate, _close_pose)
+    q, v, a = calls["q"], calls["v"], calls["a"]
+    rows = [
+        (adapter.compute_mass_and_bias(q[k], v[k])[0] @ a[k])[8]
+        + adapter.compute_mass_and_bias(q[k], v[k])[1][8]
+        for k in range(q.shape[0])
+    ]
+    assert np.abs(rows).max() < 1e-12
+    assert q[0, 8] == pytest.approx(0.1)  # starts at its spring rest
+    np.testing.assert_array_equal(out.reference_q[:, 7], q[:, 8])
+    assert receipt["passive_coordinates"] == 1
+
+
+def test_passive_substep_is_a_setting() -> None:
+    assert km.load_settings().passive_substep_s > 0
+    with pytest.raises(ValueError, match="limit"):
+        replace(km.load_settings(), passive_substep_s=0.0)
