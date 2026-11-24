@@ -907,6 +907,8 @@ def _export_clip(
                 outputs = factors_panel.draw_card_all(outputs, card, GRID_VIEW)
             if factors is not None:
                 outputs = factors.draw_all(outputs, t, GRID_VIEW)
+            if settings.hud and shown_feed is not None:
+                outputs = {n: shown_feed.draw_key(f) for n, f in outputs.items()}
             outputs = ellipsoid_hud.draw_all(overlays, shown_feed, k, hud, outputs)
             outputs = flight_inset.draw_all(overlays, shown_feed, k, hud, outputs)
             if strip is not None:  # cursor at this frame's swing time
