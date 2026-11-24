@@ -293,6 +293,19 @@ class PinocchioForceAdapter:
             drift.append(np.concatenate([linear.linear, angular.angular]))
         return np.vstack(rows), np.concatenate(drift)
 
+    def ground_wrench_points(self, q: Array) -> tuple[tuple[str, Array], ...]:
+        """``(body, world point)`` per planted body, where the multipliers of
+        :meth:`ground_weld_rows` act: the body's first contact sphere centre."""
+        pin = self._pin
+        pin.framesForwardKinematics(self._model, self._data, np.asarray(q, float))
+        spheres = self._spec["contact"]["spheres"]
+        out = []
+        for body in self.planted_bodies():
+            first = next(x["name"] for x in spheres if x["body"] == body)
+            placement = self._data.oMf[self._model.getFrameId(first)]
+            out.append((body, np.asarray(placement.translation, dtype=float).copy()))
+        return tuple(out)
+
     def foot_contact_candidates(self, q: Array) -> tuple[ContactCandidate, ...]:
         """Contact spheres as candidates, in ``contact_names`` order (NSX-60).
 

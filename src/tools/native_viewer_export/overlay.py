@@ -67,6 +67,8 @@ class OverlayOptions:
     ztcf_view: str = "tip_to_tail"
     ztcf_quantity: str = "force"
     ztcf_hands: str = "both"
+    #: segment shading: recorded loads, or the ZTCF/ZVCF split part (Z4b)
+    shading_part: str = "recorded"
 
 
 def _grip_source(swing: SwingInput, engine: str, mujoco_source: Any) -> tuple[Any, str]:
@@ -536,13 +538,15 @@ def build_overlay_feed(
         ellipsoids_for = _ellipsoid_feed_factory(swing, engine, opts, active_ellipsoids)
         hand_ellipsoids_fn, hand_hud_lines_fn, panel_rows_fn = ellipsoids_for(swing)
 
+    frame_at, shading_note = _part_shading(provider.frame_at, swing, axial, opts)
     feed = OverlayFeed(
-        provider.frame_at,
+        frame_at,
         style,
         grip_analyses=provider.grip_analyses if grip else None,
         show_force=visibility.show_force,
         show_torque=visibility.show_torque,
         forces_note=NOTE if visibility.hidden else "",
+        shading_note=shading_note,
         show_palm_thumb=effective_palm_thumb,
         hand_ellipsoids=hand_ellipsoids_fn,
         hand_hud_lines=hand_hud_lines_fn,
@@ -552,6 +556,23 @@ def build_overlay_feed(
     if opts.ztcf_zvcf_hand_force:
         feed = _with_ztcf_zvcf(feed, swing, style, opts)
     return feed, lookat
+
+
+def _part_shading(
+    frame_at: Any, swing: SwingInput, axial: bool, opts: OverlayOptions
+) -> tuple[Any, str]:
+    """``frame_at`` shading the chosen ZTCF/ZVCF part, and its HUD note."""
+    from src.tools.native_viewer_export.ztcf_axial import (
+        SHADING_NOTES,
+        swing_part_frames,
+        with_part_shading,
+    )
+
+    part = opts.shading_part
+    if not axial or part == "recorded":
+        return with_part_shading(frame_at, dict, part), ""
+    shaded = with_part_shading(frame_at, swing_part_frames(swing), part)
+    return shaded, SHADING_NOTES[part]
 
 
 def _with_ztcf_zvcf(

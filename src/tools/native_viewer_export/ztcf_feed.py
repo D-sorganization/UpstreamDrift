@@ -20,7 +20,7 @@ import math
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import replace
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 import numpy as np
 
@@ -43,6 +43,7 @@ __all__ = [
     "hands_colour_key",
     "hands_of",
     "legend_for",
+    "split_provider",
     "ztcf_zvcf_arrows",
 ]
 
@@ -191,10 +192,19 @@ def hand_arrows(
     return tuple(out)
 
 
-def _closure_provider(
-    spec_bytes: bytes, order: tuple[str, ...]
-) -> tuple[Any, Any, Any, Any]:
-    """``(provider, grip frame, club load, lead point)`` in ``order``."""
+class SplitProvider(NamedTuple):
+    """The grounded closure provider and its callables, in bundle order."""
+
+    provider: Any
+    frame_at: Callable[[Any], Any]
+    club_load: Callable[..., Any]
+    lead_point: Callable[[Any], Any]
+    #: ``q -> ((body, world point), ...)`` where each foot's reaction acts
+    ground_points: Callable[[Any], Any]
+
+
+def split_provider(spec_bytes: bytes, order: tuple[str, ...]) -> SplitProvider:
+    """The ZTCF/ZVCF split provider of ``spec_bytes`` in ``order``."""
     from src.engines.physics_engines.pinocchio.python.force_adapter import (
         PinocchioForceAdapter,
     )
@@ -211,24 +221,26 @@ def _closure_provider(
         AdapterConstrainedProvider(adapter), adapter.ground_weld_rows
     )
     if native == order:
-        return (
+        return SplitProvider(
             provider,
             adapter.closure_wrench_frame,
             adapter.club_subtree_load,
             adapter.lead_wrist_point,
+            adapter.ground_wrench_points,
         )
     take = np.array([order.index(n) for n in native])
 
     def native_of(x: Any) -> np.ndarray:
         return np.asarray(x)[take]
 
-    return (
+    return SplitProvider(
         ReorderedProvider(provider, native, order),
         lambda q: adapter.closure_wrench_frame(native_of(q)),
         lambda q, v, a, gravity: adapter.club_subtree_load(
             native_of(q), native_of(v), native_of(a), gravity
         ),
         lambda q: adapter.lead_wrist_point(native_of(q)),
+        lambda q: adapter.ground_wrench_points(native_of(q)),
     )
 
 
@@ -275,7 +287,7 @@ def ztcf_zvcf_arrows(
         )
     if "closure" not in json.loads(bundle.spec_bytes):
         raise ValueError("the specification declares no hand-club closure")
-    provider, frame_at, club_load, lead_point = _closure_provider(
+    provider, frame_at, club_load, lead_point, _ = split_provider(
         bundle.spec_bytes, tuple(bundle.coordinate_order)
     )
     q, v, tau = _states(swing)
