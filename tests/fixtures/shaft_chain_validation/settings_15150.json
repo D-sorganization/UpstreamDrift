@@ -25,7 +25,7 @@
     "torque_rating_deg": [2.5, 7.0]
   },
   "sources": {
-    "flexes": "SHAFT_FLEX_DATA keys in mujoco_humanoid_golf/club_configurations.py (220-300 cpm).",
+    "flexes": "SHAFT_FLEX_DATA keys in mujoco_humanoid_golf/club_configurations.py (220-272 cpm, values and sources in src/config/shaft_flex_frequencies.json).",
     "tip_force_n": "Unit transverse tip load; the response is linear (small deflection), so only the ratio to theory matters.",
     "gravity_m_s2": "Standard gravity, applied transverse to the shaft with the head attached at the tip.",
     "tip_torque_n_m": "1 ft lbf, the load of the usual shaft torque-rating test (approximate, from memory).",
@@ -36,7 +36,7 @@
     "free_vibration_duration_s": "1 s of free vibration, as the task specifies for the energy check.",
     "static_rel_error_default_links": "The R6 (#12686) acceptance level of the default 4-link chain against the FEM cantilever, now against independent Euler-Bernoulli quadrature, for deflection and slope.",
     "static_rel_error_finest_links": "Midpoint lumping is second order, so 16 links should be within 0.1 % (16x below the 4-link level).",
-    "flex_frequency_rel_error": "Flex steps are 20 cpm apart (7-9 %); 3 % keeps every flex unambiguously inside its own step (less than half a step) and is about the spread of frequency-analyser readings between shops (approximate).",
+    "flex_frequency_rel_error": "The chain is calibrated to the flex cpm, so 3 % is a numerical bound on the calibration, not a flex-resolution claim; the flex steps are 10-14 cpm apart (4-6 %). The tolerance is unchanged by #15150 C19.",
     "chain_vs_beam_frequency_rel_error": "R6 (#12686) chain-versus-FEM frequency acceptance level.",
     "rayleigh_rel_excess": "Rayleigh's quotient with the static tip-load shape bounds the first frequency from above; for a tip-mass dominated shaft it is within a few percent of the exact value.",
     "time_domain_vs_eigen_rel_error": "Zero-crossing frequency over 1 s of RK4 free vibration against the linearised eigenvalue: interpolated crossings resolve the period to well below 0.5 % at the 0.5 cm amplitude.",

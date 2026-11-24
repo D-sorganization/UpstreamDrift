@@ -15,7 +15,7 @@ Profile (owner decision, #12686): a generic STIFF flex, flagged
 toward the tip so the linear density stays the club's (shaft mass over the
 exposed span, which keeps the chain's mass identical to the rigid club). The
 modulus is calibrated so the clamped shaft plus head vibrates at the
-``SHAFT_FLEX_DATA`` frequency of the flex (STIFF: 280 cpm) in the standard
+``SHAFT_FLEX_DATA`` frequency of the flex (STIFF: 258 cpm) in the standard
 5 in butt clamp. The stations are the vendored Tools ``ShaftStation`` records.
 
 Lumping rule (midpoint): the exposed span ``L`` is cut into ``N`` equal
