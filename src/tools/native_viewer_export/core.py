@@ -49,7 +49,8 @@ from src.tools.native_viewer_export.compositor import (
     draw_view_label,
     event_caption_for_time,
 )
-from src.tools.native_viewer_export import contact_frame, flight_tracer, shot_setup
+from src.tools.native_viewer_export import contact_frame, flight_tracer, replay_mode
+from src.tools.native_viewer_export import shot_setup
 from src.tools.native_viewer_export import ellipsoid_panel as ellipsoid_hud
 from src.tools.native_viewer_export import flight_inset, hole_view
 from src.tools.native_viewer_export.behind_camera import look_map, view_lookat
@@ -689,6 +690,8 @@ class ExportResult:
     #: inset strip record (``StripSeries.record()``) or the reason it is
     #: unavailable; None when the strip is off
     inset_strip: dict[str, Any] | str | None = None
+    #: how the motion was produced (``ReplayMode`` value), written to the manifest
+    replay_mode: str = "unknown_replay_mode"
 
     @property
     def skipped(self) -> bool:
@@ -849,6 +852,7 @@ def _export_clip(
     writers: dict[str, ClipWriter] = {}
     glyph_counts: list[int] = []
     viewer = VIEWER_NAMES.get(engine, engine)
+    fixed = (*shot_setup.hud_lines(settings), replay_mode.hud_line_of(swing.bundle))
     frames = 0
     try:
         for k, tiles in zip(
@@ -860,8 +864,7 @@ def _export_clip(
             if glyphs is not None:
                 glyph_counts.append(len(glyphs.arrows) + len(glyphs.torque_arcs))
             t = shown.time_s(k)
-            extra_lines = ellipsoid_hud.hud_lines(overlays, shown_feed, k)
-            extra_lines = (*extra_lines, *shot_setup.hud_lines(settings))
+            extra_lines = (*ellipsoid_hud.hud_lines(overlays, shown_feed, k), *fixed)
             if flight is not None:
                 depth = getattr(tiles, "depth_m", None)
                 args = (t, look_map(settings), settings.distance_m, depth)
@@ -1022,6 +1025,7 @@ def export_swing(
             else (outcome if isinstance(outcome, str) else None)
         ),
         ball=ball_record,
+        replay_mode=replay_mode.replay_mode_of(swing.bundle).value,
         flight=flight_tracer.manifest_record(overlays),
         inset_strip=(
             strip_outcome.record()
