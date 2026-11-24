@@ -210,3 +210,15 @@ def test_cli_speeds_preset_and_stride_warning(tmp_path: Path) -> None:
     )
     with pytest.raises(ValueError, match="speeds"):
         cli.build_settings(bad)
+
+
+def test_every_clip_has_a_frame_times_sidecar(tmp_path: Path) -> None:
+    """Freeze-frame sheets find a swing instant in a clip from it (#15722)."""
+    from src.tools.native_viewer_export.frame_times import load_frame_times
+
+    settings = ExportSettings(views=("face_on",), multiview=False, speeds=(1.0, 0.5))
+    result, sink, _ = _run(settings, tmp_path)
+    for path in result.paths.values():
+        times = load_frame_times(path)
+        assert len(times) == len(sink[path.name].frames)
+        assert list(times) == sorted(times)

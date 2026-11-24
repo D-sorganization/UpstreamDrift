@@ -54,6 +54,7 @@ from src.tools.native_viewer_export import contact_frame, flight_tracer, replay_
 from src.tools.native_viewer_export import shot_setup
 from src.tools.native_viewer_export import ellipsoid_panel as ellipsoid_hud
 from src.tools.native_viewer_export import flight_inset, hole_view
+from src.tools.native_viewer_export.frame_times import write_frame_times
 from src.tools.native_viewer_export.behind_camera import look_map, view_lookat
 from src.tools.native_viewer_export import impact_factors as factors_panel
 from src.tools.native_viewer_export.impact_card import impact_card_for
@@ -852,6 +853,15 @@ def _hud_info(
     )
 
 
+def _key_entries(feed: OverlayFeed | None, settings: ExportSettings) -> tuple:
+    """Colour key rows of the clip: the feed's, then the shading's."""
+    shaded = settings.shading is not None and settings.shading_enabled
+    return (
+        *(feed.colour_key if feed is not None else ()),
+        *(shading_colour_key(settings.shading) if shaded else ()),
+    )
+
+
 def _export_clip(
     backend: NativeBackend,
     swing: SwingInput,
@@ -882,11 +892,7 @@ def _export_clip(
     glyph_counts: list[int] = []
     viewer = VIEWER_NAMES.get(engine, engine)
     fixed = (*shot_setup.hud_lines(settings), replay_mode.hud_line_of(swing.bundle))
-    shaded = settings.shading is not None and settings.shading_enabled
-    key_entries = (
-        *(shown_feed.colour_key if shown_feed is not None else ()),
-        *(shading_colour_key(settings.shading) if shaded else ()),
-    )
+    key_entries = _key_entries(shown_feed, settings)
     frames = 0
     try:
         for k, tiles in zip(
@@ -953,6 +959,7 @@ def _export_clip(
             writer.close()
     if frames != len(indices):
         raise RuntimeError(f"backend yielded {frames} frames, expected {len(indices)}")
+    write_frame_times(paths, [shown.time_s(k) for k in indices])
     return paths, frames, glyph_counts
 
 
