@@ -852,7 +852,7 @@ def _export_clip(
     writers: dict[str, ClipWriter] = {}
     glyph_counts: list[int] = []
     viewer = VIEWER_NAMES.get(engine, engine)
-    mode = replay_mode.replay_mode_of(swing.bundle)
+    fixed = (*shot_setup.hud_lines(settings), replay_mode.hud_line_of(swing.bundle))
     frames = 0
     try:
         for k, tiles in zip(
@@ -864,9 +864,7 @@ def _export_clip(
             if glyphs is not None:
                 glyph_counts.append(len(glyphs.arrows) + len(glyphs.torque_arcs))
             t = shown.time_s(k)
-            extra_lines = ellipsoid_hud.hud_lines(overlays, shown_feed, k)
-            extra_lines = (*extra_lines, *shot_setup.hud_lines(settings))
-            extra_lines = (*extra_lines, replay_mode.hud_line(mode))
+            extra_lines = (*ellipsoid_hud.hud_lines(overlays, shown_feed, k), *fixed)
             if flight is not None:
                 depth = getattr(tiles, "depth_m", None)
                 args = (t, look_map(settings), settings.distance_m, depth)

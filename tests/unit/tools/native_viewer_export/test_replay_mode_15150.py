@@ -88,3 +88,9 @@ def test_manifest_carries_the_replay_mode() -> None:
     row = manifest_of([result])["engines"][0]
     assert row["replay_mode"] == "kinematic_replay"
     assert ExportResult("mujoco", {}, 0).replay_mode == "unknown_replay_mode"
+
+
+def test_hud_line_of_reads_the_bundle() -> None:
+    """``hud_line_of`` labels the bundle's recorded mode."""
+    bundle = _bundle(np.ones((4, 2)))
+    assert rm.hud_line_of(bundle) == rm.hud_line(rm.ReplayMode.UNKNOWN)

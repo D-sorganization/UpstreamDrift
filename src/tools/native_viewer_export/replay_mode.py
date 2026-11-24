@@ -74,3 +74,8 @@ def replay_mode_of(bundle: Any) -> ReplayMode:
     if declared is None and provenance.get(settings["controller_key"]):
         return ReplayMode.FEEDBACK_TRACKED
     return ReplayMode.UNKNOWN
+
+
+def hud_line_of(bundle: Any) -> str:
+    """The HUD line for the replay mode recorded in ``bundle``."""
+    return hud_line(replay_mode_of(bundle))
