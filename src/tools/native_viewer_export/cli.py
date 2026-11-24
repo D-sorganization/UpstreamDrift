@@ -181,6 +181,14 @@ def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
         "replay with zero efforts, where only this flag draws them)",
     )
     p.add_argument(
+        "--ztcf-zvcf-hand-force",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="draw the trail hand's force on the club tip to tail: ZTCF drift "
+        "(tau = 0) then ZVCF control (the applied torques), with the total; "
+        "needs a dynamics bundle with efforts (default: off) (#15685)",
+    )
+    p.add_argument(
         "--palm-thumb-force",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -861,6 +869,7 @@ def main(
                     ellipsoid_color_by=settings.ellipsoid_color_by,
                     visibility=_visibility_of(args),
                     axial_impact_blackout=args.axial_impact_blackout,
+                    ztcf_zvcf_hand_force=args.ztcf_zvcf_hand_force,
                 ),
             ),
         )
