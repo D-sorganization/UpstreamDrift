@@ -21,7 +21,7 @@ from PIL import Image
 
 from src.shared.python.force_overlay.palette import hex_to_rgba
 from src.shared.python.force_overlay.tip_to_tail import TipToTailStyle
-from src.tools.native_viewer_export.compositor import draw_label
+from src.tools.native_viewer_export.compositor import _font, draw_label
 from src.tools.native_viewer_export.frame_times import frame_at_time, load_frame_times
 
 __all__ = [
@@ -46,6 +46,7 @@ _INT_KEYS = (
     "cell_width_px",
     "row_label_width_px",
     "row_label_px",
+    "info_text_px",
     "crf",
 )
 Image8 = NDArray[np.uint8]
@@ -65,6 +66,8 @@ class CompositeSettings:
     cell_width_px: int
     row_label_width_px: int
     row_label_px: int
+    info_text_px: int
+    guide: tuple[str, ...]
     info_background_hex: str
     crf: int
 
@@ -100,6 +103,7 @@ def load_composite_settings(path: Path | None = None) -> CompositeSettings:
         order,
         doc["cases"],
         **{k: doc[k] for k in _INT_KEYS},
+        guide=tuple(doc.get("guide", ())),
         info_background_hex=doc["info_background_hex"],
     )
 
@@ -143,11 +147,30 @@ def _info_tile(
 ) -> Image8:
     tile = np.empty((*shape, 3), np.uint8)
     tile[:] = [round(255 * c) for c in hex_to_rgba(s.info_background_hex)[:3]]
+    size, x = s.info_text_px, s.banner_height_px // 3
     y = s.banner_height_px // 2
     for line in lines:
-        tile = draw_label(tile, line, (s.banner_height_px // 3, y), size=s.subtitle_px)
-        y += int(s.subtitle_px * 1.5)
+        for part in label_lines(line, shape[1] - x, size) if line else ("",):
+            tile = draw_label(tile, part, (x, y), size=size)
+            y += int(size * 1.3)
+        y += size // 2
     return tile
+
+
+def grid_info_lines(
+    time_s: float,
+    phases: Sequence[Any],
+    base: Sequence[str],
+    s: CompositeSettings,
+) -> tuple[str, ...]:
+    """Info tile text at swing time ``time_s``: ``base``, the swing time and
+    the latest phase reached (when phases are known), then the guide."""
+    reached = [p for p in phases if p.time_s <= time_s + 1e-9]
+    now: tuple[str, ...] = ()
+    if phases:
+        label = reached[-1].label if reached else phases[0].label
+        now = (f"Swing time {time_s:.3f} s", f"Phase: {label}")
+    return (*base, *now, *s.guide)
 
 
 def _grid(
@@ -184,8 +207,11 @@ def compose_grid_video(
     settings: CompositeSettings | None = None,
     info_lines: Sequence[str] = (),
     writer_factory: Callable[[Path, float], Any] | None = None,
+    phases: Sequence[Any] = (),
 ) -> Path:
     """Write the case grid video of ``clips`` (one per case) to ``out``.
+
+    With ``phases`` the info tile shows each frame's swing time and phase.
 
     Raises:
         ValueError: a case clip is missing or the clips' frame times differ.
@@ -193,7 +219,7 @@ def compose_grid_video(
     import imageio.v2 as imageio
 
     s = settings or load_composite_settings()
-    _checked_clips(clips, s)
+    times = _checked_clips(clips, s)[0]
     readers = [imageio.get_reader(str(clips[c])) for c in s.case_order]
     fps = float(readers[0].get_meta_data()["fps"])
     if writer_factory is None:
@@ -204,15 +230,49 @@ def compose_grid_video(
 
     writer = writer_factory(out, fps)
     try:
-        for frames in zip(*readers, strict=True):
+        for t, *frames in zip(times, *readers, strict=True):
+            lines = grid_info_lines(t, phases, info_lines, s)
             writer.append_data(
-                _grid(dict(zip(s.case_order, frames, strict=True)), info_lines, s)
+                _grid(dict(zip(s.case_order, frames, strict=True)), lines, s)
             )
     finally:
         writer.close()
         for reader in readers:
             reader.close()
     return out
+
+
+def text_width(text: str, size: int) -> float:
+    """Drawn width (px) of ``text`` at font ``size``."""
+    return float(_font(size).getlength(text))
+
+
+def label_lines(text: str, width_px: int, size: int) -> tuple[str, ...]:
+    """``text`` wrapped at spaces to fit ``width_px`` less a ``size`` margin.
+
+    A single word wider than the column stays on its own line.
+    """
+    room = width_px - size
+    lines: list[str] = []
+    for word in text.split():
+        joined = f"{lines[-1]} {word}" if lines else word
+        if lines and text_width(joined, size) <= room:
+            lines[-1] = joined
+        else:
+            lines.append(word)
+    return tuple(lines)
+
+
+def _row_label(height: int, text: str, s: CompositeSettings) -> Image8:
+    tile = _info_tile((height, s.row_label_width_px), (), s)
+    lines = label_lines(text, s.row_label_width_px, s.row_label_px)
+    step = round(1.25 * s.row_label_px)
+    top = height // 2 - (len(lines) * step) // 2
+    for i, line in enumerate(lines):
+        tile = draw_label(
+            tile, line, (s.row_label_px // 2, top + i * step), size=s.row_label_px
+        )
+    return tile
 
 
 def phase_sheet(
@@ -246,13 +306,7 @@ def phase_sheet(
             Image.fromarray(frame).save(path)
             stills.append(path)
             cells.append(_resized(frame, s.cell_width_px))
-        label = _info_tile((cells[0].shape[0], s.row_label_width_px), (), s)
-        label = draw_label(
-            label,
-            phase.label,
-            (s.row_label_px // 2, cells[0].shape[0] // 2),
-            size=s.row_label_px,
-        )
+        label = _row_label(cells[0].shape[0], phase.label, s)
         rows.append(np.hstack([label, *cells]))
     corner = _info_tile((s.banner_height_px, s.row_label_width_px), (), s)
     header = np.hstack(

@@ -117,3 +117,34 @@ def test_settings_are_checked(tmp_path) -> None:
     bad.write_text(json.dumps(doc), encoding="utf-8")
     with pytest.raises(ValueError, match="case"):
         load_composite_settings(bad)
+
+
+def test_a_long_row_label_wraps_inside_its_column() -> None:
+    """The first HQ sheet cut "Follow-Through (Shaft Parallel)" off at the
+    column edge; labels wrap at spaces so every word is shown."""
+    from src.tools.swing_report_package.composite import label_lines, text_width
+
+    s = load_composite_settings()
+    text = "Follow-Through (Shaft Parallel)"
+    lines = label_lines(text, s.row_label_width_px, s.row_label_px)
+    assert len(lines) > 1 and " ".join(lines) == text
+    margin = s.row_label_px  # half on each side
+    for line in lines:
+        assert text_width(line, s.row_label_px) <= s.row_label_width_px - margin
+    assert label_lines("Top", s.row_label_width_px, s.row_label_px) == ("Top",)
+
+
+def test_the_grid_info_tile_reads_the_swing_time_and_current_phase() -> None:
+    """The fourth grid tile was nearly empty; it now tells the player where
+    in the swing the frame is, then how to read the three cases."""
+    from src.tools.swing_report_package.composite import grid_info_lines
+
+    s = load_composite_settings()
+    phases = (KeyPhase("address", "Address", 0, 0.0), KeyPhase("top", "Top", 9, 0.9))
+    lines = grid_info_lines(0.95, phases, ("Title",), s)
+    assert lines[0] == "Title"
+    assert "0.950 s" in lines[1] and lines[2].endswith("Top")
+    assert lines[3:] == tuple(s.guide)
+    assert grid_info_lines(0.5, phases, (), s)[1].endswith("Address")
+    assert all("Phase" not in x for x in grid_info_lines(0.5, (), (), s))
+    assert s.info_text_px > s.subtitle_px

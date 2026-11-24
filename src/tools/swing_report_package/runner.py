@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import replace
+from dataclasses import dataclass, field, replace
 import json
 import os
 from pathlib import Path
@@ -191,10 +191,14 @@ def _check_disk(root: Path, min_free_gb: float) -> None:
         )
 
 
-def _render_job(job: Job, root: Path, swing: str, render: Render, min_gb: float):
+def _render_job(
+    job: Job, root: Path, swing: str, render: Render | None, min_gb: float
+) -> Path:
+    if render is None:
+        raise ValueError(f"{job.key}: no renderer")
     clip = _clip(root, job, swing)
     if clip.is_file() and frame_times_path(clip).is_file():
-        return "done", [clip]
+        return clip
     clip.parent.mkdir(parents=True, exist_ok=True)
     _check_disk(root, min_gb)
     tmp_root = root / ".tmp"
@@ -203,27 +207,77 @@ def _render_job(job: Job, root: Path, swing: str, render: Render, min_gb: float)
         render(job, clip, Path(tmp))
     if not clip.is_file():
         raise FileNotFoundError(f"{job.key}: the exporter wrote no {clip.name}")
-    return "done", [clip]
+    return clip
 
 
-def _case_clips(job: Job, clips: Mapping[str, Path], by_key: Mapping[str, Job]):
-    return {str(by_key[n].args["force_part"]): clips[n] for n in job.needs}
+@dataclass
+class _Run:
+    """State shared by the jobs of one package run."""
+
+    root: Path
+    swing: str
+    render: Render | None
+    phases_of: Callable[[str], Sequence[Any]] | None
+    composite: Any
+    min_free_gb: float
+    manifest: dict[str, Any]
+    by_key: dict[str, Job] = field(default_factory=dict)
+    clips: dict[str, Path] = field(default_factory=dict)
+
+    def phases(self) -> list[Any]:
+        """Key phases, detected once per run (none without a detector)."""
+        from src.tools.swing_report_package.phases import KeyPhase
+
+        if self.phases_of is not None and not self.manifest["phases"]:
+            found = self.phases_of(self.swing)
+            self.manifest["phases"] = [p.to_dict() for p in found]
+        return [KeyPhase(**p) for p in self.manifest["phases"]]
+
+    def case_clips(self, job: Job) -> dict[str, Path]:
+        """The clips ``job`` is built from, by their ZTCF/ZVCF case."""
+        return {
+            str(self.by_key[n].args["force_part"]): self.clips[n] for n in job.needs
+        }
 
 
-def _compose_job(job, root, clips, by_key, phases, composite):
+def _compose_job(job: Job, run: _Run) -> list[Path]:
     from src.tools.swing_report_package import composite as comp
 
-    cases = _case_clips(job, clips, by_key)
-    folder = job_dir(root, job)
+    cases = run.case_clips(job)
+    folder = job_dir(run.root, job)
     folder.mkdir(parents=True, exist_ok=True)
+    phases = run.phases()
     if job.kind == "grid":
         out = folder / f"{job.item}.mp4"
         info = (job.title, f"{job.view.replace('_', ' ')}, {job.speed:g}x speed")
-        comp.compose_grid_video(cases, out, composite, info_lines=info)
-        return "done", [out]
+        comp.compose_grid_video(
+            cases, out, run.composite, info_lines=info, phases=phases
+        )
+        return [out]
     out = folder / f"{job.item}.png"
-    stills = comp.phase_sheet(cases, phases, out, composite)
-    return "done", [out, *stills]
+    return [out, *comp.phase_sheet(cases, phases, out, run.composite)]
+
+
+def _entry(job: Job) -> dict[str, Any]:
+    return {
+        "key": job.key,
+        "item": job.item,
+        "kind": job.kind,
+        "title": job.title,
+        "status": "planned",
+        "outputs": [],
+    }
+
+
+def _merged(path: Path, manifest: dict[str, Any]) -> dict[str, Any]:
+    """``manifest`` plus the jobs of an earlier run into the same folder."""
+    if not path.is_file():
+        return manifest
+    old = json.loads(path.read_text(encoding="utf-8"))
+    keys = {j["key"] for j in manifest["jobs"]}
+    kept = [j for j in old.get("jobs", ()) if j["key"] not in keys]
+    phases = manifest["phases"] or old.get("phases", [])
+    return {**manifest, "jobs": [*kept, *manifest["jobs"]], "phases": phases}
 
 
 def run_package(
@@ -240,75 +294,44 @@ def run_package(
     """Run ``jobs`` into ``root`` and write ``root/manifest.json``.
 
     A job whose input failed is ``blocked``; a failed render is ``failed``
-    and the rest still run. A dry run writes nothing.
+    and the rest still run. A dry run writes nothing. Jobs recorded by an
+    earlier run into ``root`` (another view, say) stay in the manifest.
 
     Raises:
         DiskSpaceError: less than ``min_free_gb`` free before a render.
     """
-    entries = [
-        {
-            "key": j.key,
-            "item": j.item,
-            "kind": j.kind,
-            "title": j.title,
-            "status": "planned",
-            "outputs": [],
-        }
-        for j in jobs
-    ]
+    entries = [_entry(j) for j in jobs]
     manifest: dict[str, Any] = {"swing": swing, "jobs": entries, "phases": []}
     if dry_run:
         return manifest
     root.mkdir(parents=True, exist_ok=True)
     gb = load_runner_settings()["min_free_gb"] if min_free_gb is None else min_free_gb
-    by_key = {j.key: j for j in jobs}
-    clips: dict[str, Path] = {}
+    run = _Run(root, swing, render, phases_of, composite, gb, manifest)
+    run.by_key = {j.key: j for j in jobs}
     try:
         for job, entry in zip(jobs, entries, strict=True):
-            _run_one(
-                job,
-                entry,
-                root,
-                swing,
-                render,
-                gb,
-                clips,
-                by_key,
-                phases_of,
-                composite,
-                manifest,
-            )
+            _run_one(job, entry, run)
     finally:
         shutil.rmtree(root / ".tmp", ignore_errors=True)
+        manifest = _merged(root / MANIFEST, manifest)
         (root / MANIFEST).write_text(json.dumps(manifest, indent=1), encoding="utf-8")
     return manifest
 
 
-def _run_one(
-    job, entry, root, swing, render, gb, clips, by_key, phases_of, composite, manifest
-) -> None:
-    if any(n not in clips for n in job.needs):
+def _run_one(job: Job, entry: dict[str, Any], run: _Run) -> None:
+    if any(n not in run.clips for n in job.needs):
         entry["status"] = "blocked"
         return
     try:
         if job.kind == "video":
-            status, outs = _render_job(job, root, swing, render, gb)
-            clips[job.key] = outs[0]
+            outs = [_render_job(job, run.root, run.swing, run.render, run.min_free_gb)]
+            run.clips[job.key] = outs[0]
         else:
-            if job.kind == "phase_sheet" and not manifest["phases"]:
-                manifest["phases"] = [p.to_dict() for p in phases_of(swing)]
-            phases = [_Phase(**p) for p in manifest["phases"]]
-            status, outs = _compose_job(job, root, clips, by_key, phases, composite)
+            outs = _compose_job(job, run)
     except (subprocess.SubprocessError, OSError, ValueError) as exc:
         entry.update(status="failed", error=str(exc))
         return
-    entry.update(status=status, outputs=[str(p.relative_to(root)) for p in outs])
-
-
-def _Phase(**kw: Any) -> Any:  # noqa: N802 - KeyPhase from its manifest dict
-    from src.tools.swing_report_package.phases import KeyPhase
-
-    return KeyPhase(**kw)
+    entry.update(status="done", outputs=[str(p.relative_to(run.root)) for p in outs])
 
 
 def _value(text: str) -> Any:

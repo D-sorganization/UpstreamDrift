@@ -169,3 +169,29 @@ def test_every_catalog_video_parses_in_the_exporter_cli() -> None:
             parser.parse_args(
                 ["--bundle", "b", "--out", "o", "--swing", "s", *job.exporter_argv()]
             )
+
+
+def test_a_second_run_into_the_folder_keeps_the_first_runs_jobs(tmp_path) -> None:
+    """Rendering one view per run (to bound temporary disk) must not drop
+    the earlier view from the manifest."""
+    catalog = load_catalog()
+    kwargs = {
+        "swing": "driver",
+        "render": _fake_render([]),
+        "phases_of": _phases,
+        "composite": _settings(),
+        "min_free_gb": 0.0,
+    }
+    for view in ("face_on", "down_the_line"):
+        request = PackageRequest(
+            include=("case_grid",),
+            default=False,
+            views=(view,),
+            render_overrides=SMALL,
+        )
+        manifest = runner.run_package(
+            plan_package(catalog, request), tmp_path, **kwargs
+        )
+    views = {j["key"].split("@")[1] for j in manifest["jobs"]}
+    assert views == {"face_on", "down_the_line"}
+    assert len(manifest["jobs"]) == 8
