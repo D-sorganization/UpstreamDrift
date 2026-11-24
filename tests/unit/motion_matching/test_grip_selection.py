@@ -397,6 +397,7 @@ def _build(tmp_path: Path, *flags: str) -> tuple[Path, dict[str, Any]]:
     return spec, json.loads(spec.read_text(encoding="utf-8"))
 
 
+@pytest.mark.slow  # builds skinned hand pairs for picked grips (#15654)
 def test_spec_builder_flags_write_a_revision_and_a_picture_sidecar(
     tmp_path: Path,
 ) -> None:
@@ -428,6 +429,7 @@ def test_spec_builder_flags_write_a_revision_and_a_picture_sidecar(
     assert not parent_spec.with_name("grip_case.appearance.json").exists()
 
 
+@pytest.mark.slow  # builds skinned hand pairs for picked grips (#15654)
 def test_spec_builder_style_only_writes_a_revision_without_a_sidecar(
     tmp_path: Path,
 ) -> None:
