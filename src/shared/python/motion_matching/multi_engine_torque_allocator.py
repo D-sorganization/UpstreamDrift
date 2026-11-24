@@ -43,6 +43,7 @@ from src.shared.python.loop_nullspace.snapshot import (
     canonical_closure_jacobian,
     parity_effort,
 )
+from src.shared.python.motion_matching.club_shaft_chain import passive_coordinates
 from src.shared.python.motion_matching.contact_force_allocator import (
     AllocationObjective,
     ContactForceAllocation,
@@ -214,11 +215,19 @@ class MujocoForceAdapter:
         mj_model = self._model.model
         self._nq = int(mj_model.nq)
         self._nv = int(mj_model.nv)
-        self._actuated_indices = list(range(6, self._nv))
         self._n_spheres = len(self._model._spheres)
         self._model_hash = getattr(self._model, "model_sha256", "")
         # State vectors use MuJoCo dof order, which need not be spec order.
         self._coordinate_order = self._model.native_coordinate_order
+        # Chain-shaft coordinates are passive (#15150 Z6): springs and dampers
+        # go into the bias as drift, and no actuator is allocated to them.
+        order = list(self._coordinate_order)
+        self._shaft = np.array(
+            [order.index(n) for n in passive_coordinates(json.loads(spec_bytes))],
+            dtype=int,
+        )
+        shaft = set(self._shaft.tolist())
+        self._actuated_indices = [i for i in range(6, self._nv) if i not in shaft]
         self._contact_names = tuple(getattr(self._model, "_spheres", {}).keys())
 
     def _make_model(self, spec_bytes: bytes) -> Any:
@@ -383,8 +392,13 @@ class MujocoForceAdapter:
         return mass, data.qfrc_bias.copy()
 
     def compute_mass_and_bias(self, q: Array, v: Array) -> tuple[Array, Array]:
-        """Compute inertia matrix M(q) and Coriolis/gravity bias vector b(q, v)."""
-        return self._mass_and_bias(q, v)
+        """Inertia ``M(q)`` and bias ``b(q, v)``: Coriolis, gravity and, on the
+        chain-shaft coordinates, minus the passive spring and damper force."""
+        mass, bias = self._mass_and_bias(q, v)
+        if self._shaft.size:
+            passive = self._model.data.qfrc_passive
+            bias[self._shaft] -= passive[self._shaft]
+        return mass, bias
 
     def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
         """Return raw M a + bias, before allocating ground and grip reactions.
@@ -393,7 +407,7 @@ class MujocoForceAdapter:
         cannot be used as the raw right-hand side of this allocation equation.
         """
         acceleration = self._checked_vector(a, self._nv, "acceleration")
-        mass, bias = self._mass_and_bias(q, v)
+        mass, bias = self.compute_mass_and_bias(q, v)
         return mass @ acceleration + bias
 
     def compute_contact_jacobian(self, q: Array) -> Array:
