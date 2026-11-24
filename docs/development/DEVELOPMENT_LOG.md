@@ -18,6 +18,487 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#15539 · Wait for Async Results Load Without Spinning the Qt Event Loop (#15539)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15539
+- **Branch:** codex/15539-results-wait
+- **PR:** #15541
+- **Paths:** see #15541
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`5a02b0c1`; collated from changes/15539-wait-for-async-results-load-without-spin.md)
+- **Summary:** Wait for async results load without spinning the Qt event loop (#15539)
+- **Next step:** Review the PR; operator handles merge authorization.
+
+### DL-#15538 · Project Playback Ball Overlay Using the View Look-At (#15538)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15538
+- **Branch:** codex/15538-overlay-lookat
+- **PR:** #15542
+- **Paths:** see #15542
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`ccbeee4e`; collated from changes/15538-project-playback-ball-overlay-using-the.md)
+- **Summary:** Project playback ball overlay using the view look-at (#15538)
+- **Next step:** Independent acceptance at the new head; production wiring remains tracked by open #15538.
+
+### DL-#15524 · Preserve the Simulation Time Origin When Exporting Contact-Interval Playback Frames.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15524
+- **Branch:** codex/15524-impact-playback-timebase
+- **PR:** #15581, #15598, #15615, #15572, #15548, #15626, #15589
+- **Paths:** see #15581
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`cc53d0ba`; collated from changes/15524-separation-gate.md)
+- **Summary:** Preserve the simulation time origin when exporting contact-interval playback frames.
+- **Next step:** Independent review; PR intentionally unarmed. Wiring the signal to ImpactZonePlayback (#15615) and the window source (#15598) is a follow-up once those land.
+
+### DL-#15497 · Connect Bunker Release to Ball Flight and Exploratory Green Rollout
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15497
+- **Branch:** codex-oglaptop-1/15497-flight-adapter
+- **PR:** #15512, #15619, #15590, #15604, #15597, #15629, #15623
+- **Paths:** see #15512
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`d4595e12`; collated from changes/15497-validate-bunker-flight-integration-time.md)
+- **Summary:** Connect bunker release to ball flight and exploratory green rollout
+- **Next step:** Independent review; keep PR unarmed per owner instruction.
+
+### DL-#15494 · Add Sampled Feasible Component-Range Classification (Model Invariant, Prior-Constrained Narrow, Unmoved, Variable) With Tolerance Dependence (Slice B)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15494
+- **Branch:** claude/15494-component-ranges
+- **PR:** #15611, #15569, #15562
+- **Paths:** see #15611
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`4b720f2b`; collated from changes/15494-strategy-torque-margins.md)
+- **Summary:** Add sampled feasible component-range classification (model invariant, prior-constrained narrow, unmoved, variable) with tolerance dependence (Slice B)
+- **Next step:** Merge the PR; wire the manifest into the video exporter.
+
+### DL-#15399 · dE/Dt Diverging Segment Shading, Interface Transfer Glyphs, Swing-Derived Limits
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15399
+- **Branch:** cursor/segment-net-power-shading-15399-4895
+- **PR:** #15431
+- **Paths:** see #15431
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`0c874082`; collated from changes/15399-segment-net-power-shading.md)
+- **Summary:** dE/dt diverging segment shading, interface transfer glyphs, swing-derived limits
+- **Next step:** CI quality-gate on PR.
+
+### DL-#15390 · Robertson–Winter Interface Power (F·V + M·Ω), Per-Segment Balance Residual, MuJoCo Adapter
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15390
+- **Branch:** cursor/rw-interface-power-15390-a314
+- **PR:** #15393
+- **Paths:** see #15393
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`73ec5d73`; collated from changes/15390-robertson-winter-interface-power.md)
+- **Summary:** Robertson–Winter interface power (F·v + M·ω), per-segment balance residual, MuJoCo adapter
+- **Next step:** CI on PR for #15390.
+
+### DL-#15389 · Segment Kinetic-Energy Globes, Per-Frame KE Time Series API, and Translational/Rotational Split
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15389
+- **Branch:** cursor/segment-ke-globe-view-f14a
+- **PR:** #15391
+- **Paths:** see #15391
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`889deecd`; collated from changes/15389-segment-ke-globe-overlay.md)
+- **Summary:** Segment kinetic-energy globes, per-frame KE time series API, and translational/rotational split
+- **Next step:** CI on PR #15391.
+
+### DL-#15383 · Measure Native Skinned Body in Showpiece Lighting Checks
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15383
+- **Branch:** codex-oglaptop-2/15383-showpiece-lighting
+- **PR:** #15392
+- **Paths:** see #15392
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`636f6e1a`; collated from changes/15383-measure-native-skinned-body-in-showpiece.md)
+- **Summary:** Measure native skinned body in showpiece lighting checks
+- **Next step:** Review the metric/test change, then qualify showpiece lighting (ragged shadow and clipping) against the acceptance bounds and remove the strict xfail.
+
+### DL-#15244 · Derive Matched Swing Qualification Ladder From AcceptanceGates + Ledger Receipts
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15244
+- **Branch:** cursor/matched-swing-ladder-15244-2d97
+- **PR:** #15570
+- **Paths:** see #15570
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`4c9f89a3`; collated from changes/15244-matched-swing-qualification-ladder.md)
+- **Summary:** Derive matched swing qualification ladder from AcceptanceGates + ledger receipts
+- **Next step:** Merge after CI green; regenerate README with generate_matched_swing_status --write when ledger changes.
+
+### DL-#15238 · Split Positive and Negative Work and Impulse at the Zero Crossing Instead of Clipping the Trapezoid
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15238
+- **Branch:** claude-desk/t4-work-zero-crossing
+- **PR:** #15239
+- **Paths:** see #15239
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`b0e4880c`; collated from changes/15238-power-work-zero-crossing-split.md)
+- **Summary:** Split positive and negative work and impulse at the zero crossing instead of clipping the trapezoid
+- **Next step:** Review the PR; operator handles merge authorization.
+
+### DL-#15233 · Unify Spatial_Algebra Jcalc on Featherstone Passive X_J for Revolute and Prismatic Joints
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15233
+- **Branch:** cursor/jcalc-featherstone-15233-2d97
+- **PR:** #15560
+- **Paths:** see #15560
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`1493bc1a`; collated from changes/15233-jcalc-featherstone-passive-convention.md)
+- **Summary:** Unify spatial_algebra jcalc on Featherstone passive X_J for revolute and prismatic joints
+- **Next step:** Merge after CI green; dynamics callers inherit the convention via shared jcalc.
+
+### DL-#15232 · Motion Pipeline Resample Keeps the 1/Target_Fps Step and Rejects Invalid Target_Fps
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15232
+- **Branch:** claude-desk/t4-resample-grid
+- **PR:** #15234
+- **Paths:** see #15234
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`f9877dfd`; collated from changes/15232-resample-grid-keeps-target-fps-step.md)
+- **Summary:** Motion Pipeline Resample Keeps the 1/target_fps Step and Rejects Invalid target_fps
+- **Next step:** Review the PR; operator handles merge authorization.
+
+### DL-#15231 · Fix Replay Impact_to_Send_Latency_ms (Replay Quantization Plus Detect-to-Send Overhead)
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15231
+- **Branch:** cursor/impact-send-latency-15231-2d97
+- **PR:** #15567
+- **Paths:** see #15567
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`e93d70af`; collated from changes/15231-impact-to-send-latency-metric.md)
+- **Summary:** Fix replay impact_to_send_latency_ms (replay quantization plus detect-to-send overhead)
+- **Next step:** Merge after CI green; benchmark now measures presentation-to-send budget.
+
+### DL-#15221 · Handle Overflow Through Safe Numeric Conversion Fallback and Strict Contracts
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15221
+- **Branch:** codex/burn1116-15221-numeric-overflow
+- **PR:** #15222
+- **Paths:** src/shared/python/core/type_utils.py,tests/unit/core/test_type_conversion_overflow.py
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`e0535f8b`; collated from changes/15221-safe-conversion-overflow.md)
+- **Summary:** Handle overflow through safe numeric conversion fallback and strict contracts
+- **Next step:** CI and automated review
+
+### DL-#15218 · Preserve Fresh Caller Defaults After JSON and YAML Load Failures
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15218
+- **Branch:** codex/burn1116-15218-config-default
+- **PR:** #15220
+- **Paths:** src/shared/python/config/config_utils.py,tests/unit/config/test_config_load_failure_defaults.py
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`517d71b7`; collated from changes/15218-config-load-defaults.md)
+- **Summary:** Preserve fresh caller defaults after JSON and YAML load failures
+- **Next step:** CI and automated review
+
+### DL-#15216 · Floor Grid Indices so Points Just Below the Raster Origin Are Off-Grid
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15216
+- **Branch:** claude-desk/t4-puttsg
+- **PR:** #15217
+- **Paths:** see #15217
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`0c3ea407`; collated from changes/15216-floor-grid-indices-so-points-just-below.md)
+- **Summary:** Floor grid indices so points just below the raster origin are off-grid
+- **Next step:** Review the PR.
+
+### DL-#15196 · Validate JSON and YAML Serialization Before Changing Destination Files
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #15196
+- **Branch:** fix/json-serialization-preserve
+- **PR:** #15198
+- **Paths:** see #15198
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`ff1575d1`; collated from changes/15196-validate-json-and-yaml-serialization-bef.md)
+- **Summary:** Validate JSON and YAML serialization before changing destination files
+- **Next step:** Review serialization-failure preservation and merge through the supervised pipeline
+
+### DL-#15193 · Resolve Dotted Import Names and Version Checks on the Requested Module
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #15193
+- **Branch:** fix/dotted-module-imports
+- **PR:** #15195
+- **Paths:** see #15195
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`f424f4e3`; collated from changes/15193-resolve-dotted-import-names-and-version.md)
+- **Summary:** Resolve dotted import names and version checks on the requested module
+- **Next step:** Review dotted-module regression fix through the supervised pipeline
+
+### DL-#15191 · Reject Invalid Seed Types Before Mutating Global RNG State
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #15191
+- **Branch:** fix/seed-validation-atomic
+- **PR:** #15194
+- **Paths:** see #15194
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`75c19da6`; collated from changes/15191-reject-invalid-seed-types-before-mutatin.md)
+- **Summary:** Reject invalid seed types before mutating global RNG state
+- **Next step:** Review seed precondition and regression evidence through the supervised pipeline
+
+### DL-#15189 · Report Filesystem Errors Through Async and Background Save Callbacks
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #15189
+- **Branch:** fix/async-save-io-errors
+- **PR:** #15190
+- **Paths:** src/shared/python/data_io/_async_io.py; tests/output/wave5_output/test_async_io.py
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`45e57a32`; collated from changes/15189-report-filesystem-errors-through-async-a.md)
+- **Summary:** Report filesystem errors through async and background save callbacks
+- **Next step:** Review regression fix through the supervised pipeline
+
+### DL-#15187 · Refresh the Full-Source Mypy Diagnostic Baseline and Mark Its Regression Test
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15187
+- **Branch:** cursor/fix-full-src-mypy-baseline-4b58
+- **PR:** #15188
+- **Paths:** see #15188
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`ca9d8887`; collated from changes/15187-refresh-the-full-source-mypy-diagnostic.md)
+- **Summary:** Refresh the Full-Source Mypy Diagnostic Baseline and Mark Its Regression Test
+- **Next step:** Review PR #15188; operator handles merge authorization.
+
+### DL-#15148 · Skinned Human Hand Visual Backend: MakeHuman CC0 Rig and Weights, Hierarchical LBS, Shared Curl-to-Contact Posing, EGL Evidence Renders.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15148
+- **Branch:** cursor/skinned-human-hand-backend-751f
+- **PR:** #15288
+- **Paths:** see #15288
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`f637f68b`; collated from changes/15148-skinned-human-hand-visual-backend-makehu.md)
+- **Summary:** Skinned human hand visual backend: MakeHuman CC0 rig and weights, hierarchical LBS, shared curl-to-contact posing, EGL evidence renders.
+- **Next step:** Cup the palm and solve the trail hand against the lead hand; see PR #15149 score table.
+
+### DL-#15144 · Calibrate MyoHand Anatomical Contact Solver, Bilateral Mirroring, Skeleton JSON Export, and 74% Z-Buffer Framing
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15144
+- **Branch:** cursor/myohand-visual-backend-dcca
+- **PR:** #15147
+- **Paths:** see #15147
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`4c18f5cc`; collated from changes/15144-myohand-skeleton-visual-calibration.md)
+- **Summary:** Calibrate MyoHand anatomical contact solver, bilateral mirroring, skeleton JSON export, and 74% Z-buffer framing
+- **Next step:** Integrate shared posing.py (#15164) and render.py (#15154) when landed while keeping research_only=True until #13763 owner sign-off
+
+### DL-#15138 · HRG-GB1b: Per-Hand Shaft Roll on Grip Attachment via Apply_Shaft_Roll and Cross-Engine Parity.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15138
+- **Branch:** cursor/hrg-gb1b-shaft-roll-2882
+- **PR:** #15139
+- **Paths:** see #15139
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`4f30c6dc`; collated from changes/15138-hrg-gb1b-per-hand-shaft-roll-on-grip-att.md)
+- **Summary:** HRG-GB1b: per-hand shaft roll on grip attachment via apply_shaft_roll and cross-engine parity.
+- **Next step:** Merge after GB-1 #15133; GB-2 wires roll into the procedural builder.
+
+### DL-#15128 · HRG-GB5b: Offline Grip-Loss Evaluator With Configurable Hysteresis and Committed-Series Prediction Reports.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15128
+- **Branch:** cursor/hrg-gb5b-grip-loss-evaluator-4e08
+- **PR:** #15136
+- **Paths:** see #15136
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`6db6bf8b`; collated from changes/15128-hrg-gb5b-grip-loss-evaluator.md)
+- **Summary:** HRG-GB5b: offline grip-loss evaluator with configurable hysteresis and committed-series prediction reports.
+- **Next step:** Stack merges after GB-1; GB-6 MuJoCo clamp consumes the same threshold config pattern.
+
+### DL-#15125 · HRG-GB3 Palm Wrap, Thumb Press, Trail Overlap/Interlock/Ten-Finger Linking, Golden Checksums
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15125
+- **Branch:** cursor/hrg-gb3-grip-builder-fd55
+- **PR:** #15137
+- **Paths:** see #15137
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`5d7af863`; collated from changes/15125-hrg-gb3-palm-thumb-trail-goldens.md)
+- **Summary:** HRG-GB3 palm wrap, thumb press, trail overlap/interlock/ten-finger linking, golden checksums
+- **Next step:** Review stacked on GB-2 (#15134); merge queue after parent chain.
+
+### DL-#15124 · HRG-GB2 Engine-Free Flat-Hand Curl Builder and Build Receipt Stacked on GB-1 GripSpec
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15124
+- **Branch:** cursor/hrg-gb2-grip-builder-0932
+- **PR:** #15137
+- **Paths:** see #15137
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`5d7af863`; collated from changes/15124-hrg-gb2-engine-free-flat-hand-curl-build.md)
+- **Summary:** HRG-GB2 engine-free flat-hand curl builder and build receipt stacked on GB-1 GripSpec
+- **Next step:** Merge GB-1 (#15133) then GB-2 (#15134).
+
+### DL-#15123 · HRG-GB1: Versioned Engine-Free GripSpec, GripPose Projection, Force/Contact Providers, ADR-0057 Proposed Addendum.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15123
+- **Branch:** cursor/hrg-gb1-grip-spec-96ca
+- **PR:** #15133
+- **Paths:** see #15133
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`e652d497`; collated from changes/15123-hrg-gb1-grip-spec.md)
+- **Summary:** HRG-GB1: versioned engine-free GripSpec, GripPose projection, force/contact providers, ADR-0057 Proposed addendum.
+- **Next step:** Review and merge; GB-2 may consume GripSpec for the procedural builder.
+
+### DL-#15115 · Local API App Applies the Shared Allowed-Host Policy
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15115
+- **Branch:** claude-og/local-server-host-check
+- **PR:** #15116
+- **Paths:** see #15116
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`795caaad`; collated from changes/15115-local-api-app-applies-the-shared-allowed.md)
+- **Summary:** Local API app applies the shared allowed-host policy
+- **Next step:** Merge the PR.
+
+### DL-#15112 · Fail Closed on Per-Crate Maturin Build Errors in Dockerfile and Enforce in check_dockerfile_contracts.py.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15112
+- **Branch:** gemini-og/15112-dockerfile-maturin-fail-closed
+- **PR:** #15114
+- **Paths:** see #15114
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`7699de0c`; collated from changes/15112-dockerfile-maturin-fail-closed.md)
+- **Summary:** Fail closed on per-crate maturin build errors in Dockerfile and enforce in check_dockerfile_contracts.py.
+- **Next step:** Merge PR for #15112.
+
+### DL-#15107 · Fix Broken Repo Paths in Curated Testing, Architecture, and Manual Docs and Enforce in check_spec_paths.py.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15107
+- **Branch:** gemini-og/15107-docs-broken-repo-paths
+- **PR:** #15113
+- **Paths:** see #15113
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`6b454ac0`; collated from changes/15107-docs-broken-repo-paths.md)
+- **Summary:** Fix broken repo paths in curated testing, architecture, and manual docs and enforce in check_spec_paths.py.
+- **Next step:** Merge PR #15113.
+
+### DL-#15086 · Restore Per-Workflow Docker CI Concurrency Groups and Per-Run Image Tags in Docker-Smoke (Fix-Forward).
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #15086
+- **Branch:** cursor/docker-ci-concurrency-fix-f3f5
+- **PR:** #15167
+- **Paths:** see #15167
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`a0409003`; collated from changes/15086-docker-ci-concurrency-fix-forward.md)
+- **Summary:** Restore per-workflow Docker CI concurrency groups and per-run image tags in docker-smoke (fix-forward).
+- **Next step:** Merge after CI green, including Docker Size and Health Check.
+
+### DL-#13888 · Add HILL_MTU Drive Mode to 3DOF FTLE Study With Matched Nominal Excitation and Four-Mode Receipt.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13888
+- **Branch:** cursor/hill-mtu-drive-mode-3dof-ftle-f296
+- **PR:** #15076
+- **Paths:** see #15076
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`1b4ce670`; collated from changes/13888-hill-mtu-drive-mode-3dof-ftle-study.md)
+- **Summary:** Add HILL_MTU drive mode to 3DOF FTLE study with matched nominal excitation and four-mode receipt.
+- **Next step:** Merge after CI; full t_end=0.2 Hill receipt rows remain NOT_QUALIFIED until MTU equilibrium converges on full swing.
+
+### DL-#13782 · ML-WS-5 MuJoCo Corpus Run Receipt, Manifest-Verified Loader, and CI Evidence
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13782
+- **Branch:** cursor/ml-ws5-corpus-receipt-loader-791f
+- **PR:** #15075
+- **Paths:** see #15075
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`0adc2797`; collated from changes/13782-ml-ws-5-mujoco-corpus-run-receipt-manife.md)
+- **Summary:** ML-WS-5 MuJoCo corpus run receipt, manifest-verified loader, and CI evidence
+- **Next step:** Barb review / CI
+
+### DL-#13761 · Bump Dnspython to 2.9.2 and Tornado to 6.6.1; Remove Stale Tornado Pip-Audit Waivers.
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13761
+- **Branch:** cursor/pip-audit-dnspython-tornado-54d2
+- **PR:** #15086
+- **Paths:** see #15086
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`b6abbfbf`; collated from changes/13761-bump-dnspython-to-2-9-2-and-tornado-to-6.md)
+- **Summary:** Bump dnspython to 2.9.2 and tornado to 6.6.1; remove stale tornado pip-audit waivers.
+- **Next step:** Merge after CI green.
+
+### DL-#13427 · Regression-Test Address Reserve Share; Wire Study Allow_Implausible and OS-9 Asset Gate
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #13427
+- **Branch:** cursor/spn-d9-address-reserve-share-ab3e
+- **PR:** #15077
+- **Paths:** see #15077
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`d56bdccf`; collated from changes/13427-regression-test-address-reserve-share-wi.md)
+- **Summary:** Regression-test address reserve share; wire study allow_implausible and OS-9 asset gate
+- **Next step:** Owner decides address trunk bound; merge qualified OS-9 native receipt when measured
+
 ### DL-#15045 · Hill F_V Zero Beyond Vmax; Exponential Activation Substeps for Mocap Dt
 
 - **State:** shipped
@@ -77,10 +558,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #15022
 - **Branch:** cursor/agent-api-v1-fastmcp-15022-1251
-- **PR:** #15073
+- **PR:** #15073, #15163
 - **Paths:** see #15073
 - **Started:** 2026-11-14
-- **Last verified:** 2026-11-14 (`808174d4`; collated from changes/15022-agent-api-v1-fastmcp.md)
+- **Last verified:** 2026-11-24 (`26334a68`; collated from changes/15022-agent-api-issue-closure.md)
 - **Summary:** Agent API v1 conformance CI and FastMCP migration for ud-sim-mcp
 
 ### DL-#15015 · Fail-Closed Motion-Matching Gates; Archive Run-102 Evidence Script With Restore Ref.
@@ -90,10 +571,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #15015
 - **Branch:** cursor/motion-matching-gate-honesty-15015-2352
-- **PR:** #15037
+- **PR:** #15037, #15078, #15173, #15160, #15172, #15178, #15171, #15170
 - **Paths:** see #15037
 - **Started:** 2026-11-14
-- **Last verified:** 2026-11-14 (`1d015b47`; collated from changes/15015-fail-closed-motion-matching-gates-archiv.md)
+- **Last verified:** 2026-11-24 (`3a36793e`; collated from changes/15015-two-window-pelvis-yaw-nan-00d4.md)
 - **Summary:** Fail-closed motion-matching gates; archive run-102 evidence script with restore ref.
 
 ### DL-#15014 · Fix Dempster/Zatsiorsky Segment Mass Expansion and C3D Export Placeholder (Part A)
@@ -103,10 +584,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #15014
 - **Branch:** cursor/segment-mass-c3d-fix-e135
-- **PR:** #15036, #15035
+- **PR:** #15036, #15035, #15159, #15088
 - **Paths:** see #15036
 - **Started:** 2026-11-14
-- **Last verified:** 2026-11-14 (`01c67c54`; collated from changes/15014-urdf-mjcf-converter-preserves-joint-and.md)
+- **Last verified:** 2026-11-24 (`504086c0`; collated from changes/15014-mocap-conventions-and-de-leva-guard.md)
 - **Summary:** Fix Dempster/Zatsiorsky segment mass expansion and C3D export placeholder (part a)
 
 ### DL-#13887 · Add Hill MTU Joint Actuator (Agonist/Antagonist, Compliant Tendon, Linearisation API).
@@ -729,6 +1210,1059 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Shipped (Last 90 Days)
 
+### DL-#2725 · Remove the Retired Vendored GAAI Framework Tree, Its Launcher and Slash Commands; .claude/ Is Now the Canonical Agent Configuration Root
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #2725
+- **Branch:** merged via #15119
+- **PR:** #15119
+- **Paths:** see #15119
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`e63b3a62`; collated from changes/2725-remove-the-retired-vendored-gaai-framewo.md)
+- **Summary:** Remove the retired vendored GAAI framework tree, its launcher and slash commands; .claude/ is now the canonical agent configuration root
+- **Next step:** Shipped in PR #15119.
+
+### DL-#15670 · The Model Explorer Demo Swing (Trunk_Visuals/Driver_V2_Bundle.Npz) No Longer Falls Over About 0.8 s in. Its V2 Spec Now Carries the Run's Hip, Ankle, Shank and Ground Calibration (Carry_Calibration), so the Pelvis Stays Within 2.3 cm (Height) of the Run's Target. the Evidence Generator's Repository Root Is Fixed as Well.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15670
+- **Branch:** merged via #15680
+- **PR:** #15680
+- **Paths:** see #15680
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`60bf6549`; collated from changes/15670-driver-v2-bundle-calibrated.md)
+- **Summary:** The Model Explorer demo swing (trunk_visuals/driver_v2_bundle.npz) no longer falls over about 0.8 s in. Its v2 spec now carries the run's hip, ankle, shank and ground calibration (carry_calibration), so the pelvis stays within 2.3 cm (height) of the run's target. The evidence generator's repository root is fixed as well.
+- **Next step:** Shipped in PR #15680.
+
+### DL-#15659 · Canonical Golfer Gate Refuses Capsule, Loft and Unrevised Specs Before Simulation; Solution Bundles Carry a Plant/Controller/Solver Model Lock and Unlocked Bundles Are Replay-Only
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15659
+- **Branch:** merged via #15668
+- **PR:** #15668
+- **Paths:** see #15668
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`36aec7db`; collated from changes/15659-canonical-golfer-gate.md)
+- **Summary:** Canonical golfer gate refuses capsule, loft and unrevised specs before simulation; Solution Bundles carry a plant/controller/solver model lock and unlocked bundles are replay-only
+- **Next step:** Shipped in PR #15668.
+
+### DL-#15654 · The Spec Builder Moves Specs With Physical Grip Picks to the Current Golfer Model, Posing the Skinned Hands From Subject.Grip_Config; Only Left-Handed Specs Keep the Deprecated Fallback.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15654
+- **Branch:** merged via #15677
+- **PR:** #15677, #15656
+- **Paths:** see #15677
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`7ee0859b`; collated from changes/15654-skinned-hands-grip-config.md)
+- **Summary:** The spec builder moves specs with physical grip picks to the current golfer model, posing the skinned hands from subject.grip_config; only left-handed specs keep the deprecated fallback.
+- **Next step:** Shipped in PR #15677.
+
+### DL-#15652 · Ratchet Test: Committed Specs and Bundles on a Deprecated Golfer Model Part May Only Leave Src/Config/Golfer_Model_Legacy_Assets.Json, Never Join It.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15652
+- **Branch:** merged via #15658
+- **PR:** #15658, #15655
+- **Paths:** see #15658
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`eab8469b`; collated from changes/15652-left-handed-skinned-hands.md)
+- **Summary:** Ratchet test: committed specs and bundles on a deprecated golfer model part may only leave src/config/golfer_model_legacy_assets.json, never join it.
+- **Next step:** Shipped in PR #15658.
+
+### DL-#15650 · Resolve Four Mypy Arg-Type and Operator Errors in cross_engine_replay.py That Blocked Pre-Push Hooks
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15650
+- **Branch:** merged via #15653
+- **PR:** #15653
+- **Paths:** see #15653
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`4fb75a6b`; collated from changes/15650-fix-mypy-cross-engine-replay.md)
+- **Summary:** Resolve four mypy arg-type and operator errors in cross_engine_replay.py that blocked pre-push hooks
+- **Next step:** Shipped in PR #15653.
+
+### DL-#15648 · Build_Anthropometric_Spec Writes Right-Handed Specs on the Current Golfer Model (Skinned Hand Wrists, Skinned Body); Left-Handed Specs Log the Deprecated Fallback Until Left-Handed Skinned Hands Land.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15648
+- **Branch:** merged via #15657
+- **PR:** #15657, #15651, #15678
+- **Paths:** see #15657
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`937979e1`; collated from changes/15648-golfer-reference-specs.md)
+- **Summary:** build_anthropometric_spec writes right-handed specs on the current golfer model (skinned hand wrists, skinned body); left-handed specs log the deprecated fallback until left-handed skinned hands land.
+- **Next step:** Shipped in PR #15657.
+
+### DL-#15523 · Add Iron Divot Model With Fat-Shot Pre-Ball Turf Contact (Physics/divot_model.py)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15523
+- **Branch:** merged via #15545
+- **PR:** #15545, #15617, #15583, #15606, #15596
+- **Paths:** see #15545
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`1bcb6da4`; collated from changes/15523-iron-ground-contact.md)
+- **Summary:** Add iron divot model with fat-shot pre-ball turf contact (physics/divot_model.py)
+- **Next step:** Shipped in PR #15545.
+
+### DL-#15522 · Add Headless Qt End-to-End Tests Driving the Ball Flight GUI Simulate Click Through Real Physics
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15522
+- **Branch:** merged via #15543
+- **PR:** #15543, #15631, #15577, #15568, #15647, #15633, #15634, #15622, #15593, #15628, #15640, #15614, #15618, #15621, #15637, #15561, #15636, #15612, #15563, #15643, #15645, #15601, #15599, #15579, #15605, #15627, #15638, #15588, #15639, #15591, #15607, #15644, #15608
+- **Paths:** see #15543
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`c220a014`; collated from changes/15522-unified-dashboard-qtest-e2e.md)
+- **Summary:** Add headless Qt end-to-end tests driving the Ball Flight GUI Simulate click through real physics
+- **Next step:** Shipped in PR #15543.
+
+### DL-#15493 · Add Versioned Solution Bundle Schema and Strict JSON+NPZ Codec for Replayable Optimized Swings (Slice 2).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15493
+- **Branch:** merged via #15564
+- **PR:** #15564, #15595, #15624, #15625, #15573, #15565, #15552, #15600
+- **Paths:** see #15564
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`49723453`; collated from changes/15493-solution-bundle-time-domain.md)
+- **Summary:** Add versioned Solution Bundle schema and strict JSON+NPZ codec for replayable optimized swings (Slice 2).
+- **Next step:** Shipped in PR #15564.
+
+### DL-#15485 · Regression Test and Citation Tightening for Wind Consumers in the Flight Shortcomings Register (#15482 Review)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15485
+- **Branch:** merged via #15550
+- **PR:** #15550
+- **Paths:** see #15550
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`d1a76787`; collated from changes/15485-qualify-wind-consumer-register.md)
+- **Summary:** Regression test and citation tightening for wind consumers in the flight shortcomings register (#15482 review)
+- **Next step:** Shipped in PR #15550.
+
+### DL-#15444 · Normalize MuJoCo Geom_Rgba Ndarrays Before MeshCat Material Binding (#15444).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15444
+- **Branch:** merged via #15525
+- **PR:** #15525
+- **Paths:** see #15525
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`23d638b5`; collated from changes/15444-normalize-mujoco-geom-rgba-ndarrays-befo.md)
+- **Summary:** Normalize MuJoCo geom_rgba ndarrays before MeshCat material binding (#15444).
+- **Next step:** Shipped in PR #15525.
+
+### DL-#15443 · Add Reference-Shot Regression for the Ball-Flight Model: Published Driver/Iron/Wedge Launches With Carry, Apex and Descent Bands; Rows the Model Misses Are Strict Xfails With Measured Errors
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15443
+- **Branch:** merged via #15450
+- **PR:** #15450, #15498, #15482, #15500, #15501, #15489, #15488, #15460, #15473, #15474, #15492, #15499, #15490, #15466, #15468, #15454, #15506, #15502, #15646, #15486, #15475, #15496
+- **Paths:** see #15450
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`87d68a6f`; collated from changes/15443-shot-shape-views-aim-at-the-finish-plan.md)
+- **Summary:** Add reference-shot regression for the ball-flight model: published driver/iron/wedge launches with carry, apex and descent bands; rows the model misses are strict xfails with measured errors
+- **Next step:** Shipped in PR #15450.
+
+### DL-#15435 · S4 Angmom Independent Oracle; Ball Excluded From Whole-Body H; Root_Body_Id Deprecated
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15435
+- **Branch:** merged via #15544
+- **PR:** #15544
+- **Paths:** see #15544
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`5795bbc0`; collated from changes/15435-s4-angmom-oracle-ball-com-consistency.md)
+- **Summary:** S4 angmom independent oracle; ball excluded from whole-body H; root_body_id deprecated
+- **Next step:** Shipped in PR #15544.
+
+### DL-#15429 · Reject Non-Finite Flight Inset Positives; Pin Headless Native Verification Clip
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15429
+- **Branch:** merged via #15527
+- **PR:** #15527
+- **Paths:** see #15527
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`0173406c`; collated from changes/15429-reject-non-finite-flight-inset-positives.md)
+- **Summary:** Reject non-finite flight inset positives; pin headless native verification clip
+- **Next step:** Shipped in PR #15527.
+
+### DL-#15398 · S4: Straight Angular-Momentum Arrows (Whole-Body + Groups, Fixed Scale) for MuJoCo/MeshCat
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15398
+- **Branch:** merged via #15409
+- **PR:** #15409
+- **Paths:** see #15409
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`d26d6e2a`; collated from changes/15398-angular-momentum-vector-overlay.md)
+- **Summary:** S4: straight angular-momentum arrows (whole-body + groups, fixed scale) for MuJoCo/MeshCat
+- **Next step:** Shipped in PR #15409.
+
+### DL-#15397 · Engine-Agnostic Segment Angular-Momentum Frame and MuJoCo Provider (About Whole-Body COM, World Frame)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15397
+- **Branch:** merged via #15400
+- **PR:** #15400
+- **Paths:** see #15400
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`a439780d`; collated from changes/15397-segment-angular-momentum-provider-mujoco.md)
+- **Summary:** Engine-agnostic segment angular-momentum frame and MuJoCo provider (about whole-body COM, world frame)
+- **Next step:** Shipped in PR #15400.
+
+### DL-#15396 · Segment Kinetic-Energy Surface Shading (Cividis, Fixed Limits); Demote KE Globes to KE Proxy Debug Overlay
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15396
+- **Branch:** merged via #15427
+- **PR:** #15427
+- **Paths:** see #15427
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`510beb20`; collated from changes/15396-segment-ke-surface-shading.md)
+- **Summary:** Segment kinetic-energy surface shading (cividis, fixed limits); demote KE globes to KE proxy debug overlay
+- **Next step:** Shipped in PR #15427.
+
+### DL-#15395 · Generalize Segment Tension/Compression Shading Into Quantity-Agnostic Scalar Series and Colour Scale
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15395
+- **Branch:** merged via #15403
+- **PR:** #15403
+- **Paths:** see #15403
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`0ad23f4f`; collated from changes/15395-segment-scalar-shading-core.md)
+- **Summary:** Generalize segment tension/compression shading into quantity-agnostic scalar series and colour scale
+- **Next step:** Shipped in PR #15403.
+
+### DL-#15345 · Bundle Adjustment FC-011 Guards, Feasible Tangent Projection, Bounded FD, and Positive Prior Sigmas
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15345
+- **Branch:** merged via #15537
+- **PR:** #15537
+- **Paths:** see #15537
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`38425e26`; collated from changes/15345-bundle-adjustment-fc-011-guards-inward-f.md)
+- **Summary:** Bundle adjustment FC-011 guards, feasible tangent projection, bounded FD, and positive prior sigmas
+- **Next step:** Shipped in PR #15537.
+
+### DL-#15344 · Guard Degenerate GP Radius Window in Compute_Correlation_Dimension
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15344
+- **Branch:** merged via #15530
+- **PR:** #15530
+- **Paths:** see #15530
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`8994c0e2`; collated from changes/15344-guard-degenerate-gp-radius-window-in-com.md)
+- **Summary:** Guard degenerate GP radius window in compute_correlation_dimension
+- **Next step:** Shipped in PR #15530.
+
+### DL-#15343 · Guard Hysteresis, Bound Power Durations, Defensive Work-Metrics Cache Copies
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15343
+- **Branch:** merged via #15531
+- **PR:** #15531
+- **Paths:** see #15531
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`c981f575`; collated from changes/15343-guard-hysteresis-bound-power-durations-d.md)
+- **Summary:** Guard hysteresis, bound power durations, defensive work-metrics cache copies
+- **Next step:** Shipped in PR #15531.
+
+### DL-#15342 · Require a List for Subject.Dropped_Markers in Marker_Selection; Dict, Int, Bool, Tuple and Stringified Values Now Raise ValueError
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15342
+- **Branch:** merged via #15513
+- **PR:** #15513
+- **Paths:** see #15513
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`fa228f3a`; collated from changes/15342-require-a-list-for-subject-dropped-marke.md)
+- **Summary:** Require a list for subject.dropped_markers in marker_selection; dict, int, bool, tuple and stringified values now raise ValueError
+- **Next step:** Shipped in PR #15513.
+
+### DL-#15333 · C3D Viewer Embed Loader Registers the Tool Again When the Registry Was Reset After the First Import
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15333
+- **Branch:** merged via #15334
+- **PR:** #15334
+- **Paths:** see #15334
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`224fae7e`; collated from changes/15333-c3d-viewer-embed-loader-registers-the-to.md)
+- **Summary:** C3D viewer embed loader registers the tool again when the registry was reset after the first import
+- **Next step:** Shipped in PR #15334.
+
+### DL-#15329 · A Hand May Be Given a Thumb Target of Its Own (Thumb.Toward_Index_Target_of, None Set): The Trail Thumb Can Close a V on Its Forefinger While the Lead Thumb Keeps Its Azimuth. A Hand's Thumb May Be Held Flexed, a Short Thumb (Thumb.Held_Flexion_Deg_of, None Set): Tried for the Lead Thumb Under the Squarer Trail Seats and Not Set, Because the Raised Knuckle Lifts the Trail Palm Off the Thumb (Crown Gap 12.6 to 15.3-17.9 mm); Drawn Hands Unchanged (Appearance Only)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15329
+- **Branch:** merged via #15372
+- **PR:** #15372, #15364, #15368, #15377, #15362
+- **Paths:** see #15372
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`0f125125`; collated from changes/15329-set-metacarpal-arch-for-the-skinned-hand.md)
+- **Summary:** A hand may be given a thumb target of its own (thumb.toward_index_target_of, none set): the trail thumb can close a V on its forefinger while the lead thumb keeps its azimuth. A hand's thumb may be held flexed, a short thumb (thumb.held_flexion_deg_of, none set): tried for the lead thumb under the squarer trail seats and not set, because the raised knuckle lifts the trail palm off the thumb (crown gap 12.6 to 15.3-17.9 mm); drawn hands unchanged (appearance only)
+- **Next step:** Shipped in PR #15372.
+
+### DL-#15322 · Pelvis Skin Map Scales Lateral Hip Spacing to Match Subject Hip_Half_Spacing
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15322
+- **Branch:** merged via #15556
+- **PR:** #15556
+- **Paths:** see #15556
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`45491e1d`; collated from changes/15322-pelvis-map-hip-half-spacing.md)
+- **Summary:** Pelvis skin map scales lateral hip spacing to match subject hip_half_spacing
+- **Next step:** Shipped in PR #15556.
+
+### DL-#15299 · Add a Chest Depth Scale and a Thigh-Front Shift to the CC0 Body Skin Fit as Named Settings, Neutral by Default and Set by the Showpiece Profile
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15299
+- **Branch:** merged via #15325
+- **PR:** #15325, #15324, #15317, #15321, #15335, #15314, #15384, #15331, #15316, #15367, #15366, #15303, #15310, #15309, #15328, #15338, #15313, #15336, #15370, #15308, #15386, #15307, #15365, #15371, #15375, #15356, #15376, #15385, #15360, #15353, #15369, #15379, #15347, #15341, #15339, #15349, #15363, #15305, #15326, #15311
+- **Paths:** see #15325
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`1918c7f4`; collated from changes/15299-wrist-ball-elbow-and-one-tone-skin.md)
+- **Summary:** Add a chest depth scale and a thigh-front shift to the CC0 body skin fit as named settings, neutral by default and set by the showpiece profile
+- **Next step:** Shipped in PR #15325.
+
+### DL-#15296 · Add a Selectable Club-Only Driver Club Marker Registration (Club_Only); the Default Driver.Json and the Committed Documents Are Unchanged
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15296
+- **Branch:** merged via #15302
+- **PR:** #15302, #15374, #15304, #15320, #15361, #15351, #15340, #15346, #15337, #15332, #15354, #15348, #15318, #15330, #15315, #15358, #15312
+- **Paths:** see #15302
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`7684bb42`; collated from changes/15296-thigh-shank-and-hip-spacing-as-optional.md)
+- **Summary:** Add a selectable club-only driver club marker registration (club_only); the default driver.json and the committed documents are unchanged
+- **Next step:** Shipped in PR #15302.
+
+### DL-#15292 · Slanted Crew-Neck Collar and Shoulder Caps Lowered Below the Neck Point (Trunk, Yoke and Upper-Arm Geometry)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15292
+- **Branch:** merged via #15298
+- **PR:** #15298, #15300, #15294
+- **Paths:** see #15298
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`74469014`; collated from changes/15292-visual-neck-solid-for-the-cc0-head-thora.md)
+- **Summary:** Slanted crew-neck collar and shoulder caps lowered below the neck point (trunk, yoke and upper-arm geometry)
+- **Next step:** Shipped in PR #15298.
+
+### DL-#15280 · Hide Contact Spheres by Default, Light Golf Shoes With Dark Sole, Tapered Legs
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15280
+- **Branch:** merged via #15281
+- **PR:** #15281
+- **Paths:** see #15281
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`2b02c618`; collated from changes/15280-hide-contact-spheres-by-default-light-go.md)
+- **Summary:** Hide contact spheres by default, light golf shoes with dark sole, tapered legs
+- **Next step:** Shipped in PR #15281.
+
+### DL-#15279 · Shoulder Caps Sit Lower and Smaller so the Shoulders Read as Shoulders, Not Pads
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15279
+- **Branch:** merged via #15290
+- **PR:** #15290, #15282, #15283
+- **Paths:** see #15290
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`5033cda6`; collated from changes/15279-upper-body-builder-can-take-the-clavicle.md)
+- **Summary:** Shoulder caps sit lower and smaller so the shoulders read as shoulders, not pads
+- **Next step:** Shipped in PR #15290.
+
+### DL-#15278 · Knuckle Sideways Range as a Setting (Off by Default): A Bent Knuckle's Sideways Swing Is Held to a Range That Shrinks With Flexion
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15278
+- **Branch:** merged via #15288
+- **PR:** #15288
+- **Paths:** see #15288
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`f637f68b`; collated from changes/15278-trail-thumb-set-40-degrees-to-the-target.md)
+- **Summary:** Knuckle sideways range as a setting (off by default): a bent knuckle's sideways swing is held to a range that shrinks with flexion
+- **Next step:** Shipped in PR #15288.
+
+### DL-#15277 · Arm Refit Takes Posture Targets; Address Posture Is a Neutral Lumbar Joint With a Slight Thoracic Bend
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15277
+- **Branch:** merged via #15288
+- **PR:** #15288
+- **Paths:** see #15288
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`f637f68b`; collated from changes/15277-arm-refit-takes-posture-targets-address.md)
+- **Summary:** Arm refit takes posture targets; address posture is a neutral lumbar joint with a slight thoracic bend
+- **Next step:** Shipped in PR #15288.
+
+### DL-#15276 · Golfer Head: Dirty Blonde Short-Crop Hair With a Natural Taper, Eyes, Brows and Mouth
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15276
+- **Branch:** merged via #15287
+- **PR:** #15287
+- **Paths:** see #15287
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`117df07e`; collated from changes/15276-golfer-head-dirty-blonde-short-crop-hair.md)
+- **Summary:** Golfer head: dirty blonde short-crop hair with a natural taper, eyes, brows and mouth
+- **Next step:** Shipped in PR #15287.
+
+### DL-#15275 · Add Per-Frame Swing Wrist and Forearm Readout (Flexion/Extension, Radial/Ulnar Deviation, Pronation/Supination) and 3-Row Plot Script
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15275
+- **Branch:** merged via #15284
+- **PR:** #15284
+- **Paths:** see #15284
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`4237aa18`; collated from changes/15275-add-per-frame-swing-wrist-and-forearm-re.md)
+- **Summary:** Add per-frame swing wrist and forearm readout (flexion/extension, radial/ulnar deviation, pronation/supination) and 3-row plot script
+- **Next step:** Shipped in PR #15284.
+
+### DL-#15272 · Skinned Hand: Typed Landmarks and Joint Frames Export for the Other Hand Tracks
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15272
+- **Branch:** merged via #15288
+- **PR:** #15288
+- **Paths:** see #15288
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`f637f68b`; collated from changes/15272-skinned-hand-typed-landmarks-and-joint-f.md)
+- **Summary:** Skinned hand: typed landmarks and joint frames export for the other hand tracks
+- **Next step:** Shipped in PR #15288.
+
+### DL-#15270 · Skinned Hand: Palm Fold Joint so the Trail Palm Closes on the Lead Thumb
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15270
+- **Branch:** merged via #15288
+- **PR:** #15288
+- **Paths:** see #15288
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`f637f68b`; collated from changes/15270-palm-fold-joint-so-the-trail-palm-closes.md)
+- **Summary:** Skinned hand: palm fold joint so the trail palm closes on the lead thumb
+- **Next step:** Shipped in PR #15288.
+
+### DL-#15265 · Rest the Trail Palm on the Lead Thumb: Owner Trail Cross Angle, Thumb Contact Check
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15265
+- **Branch:** merged via #15288
+- **PR:** #15288
+- **Paths:** see #15288
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`f637f68b`; collated from changes/15265-rest-the-trail-palm-on-the-lead-thumb-ow.md)
+- **Summary:** Rest the trail palm on the lead thumb: owner trail cross angle, thumb contact check
+- **Next step:** Shipped in PR #15288.
+
+### DL-#15264 · Size the Forearm's Wrist End From the Skinned Hand's Wrist When the Skinned Hands Are Drawn
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15264
+- **Branch:** merged via #15288
+- **PR:** #15288
+- **Paths:** see #15288
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`f637f68b`; collated from changes/15264-size-the-forearm-s-wrist-end-from-the-sk.md)
+- **Summary:** Size the forearm's wrist end from the skinned hand's wrist when the skinned hands are drawn
+- **Next step:** Shipped in PR #15288.
+
+### DL-#15262 · Draw the Forearm as One Continuous Tapered Shape Across Its Rotation Joint, so the Golfer No Longer Appears to Have Two Elbows
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15262
+- **Branch:** merged via #15288
+- **PR:** #15288
+- **Paths:** see #15288
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`f637f68b`; collated from changes/15262-draw-the-forearm-as-one-continuous-taper.md)
+- **Summary:** Draw the forearm as one continuous tapered shape across its rotation joint, so the golfer no longer appears to have two elbows
+- **Next step:** Shipped in PR #15288.
+
+### DL-#15258 · Arm Scale Estimated From Capture Marker Distances With Stated Skin-to-Joint Offsets
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15258
+- **Branch:** merged via #15288
+- **PR:** #15288
+- **Paths:** see #15288
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`f637f68b`; collated from changes/15258-arm-scale-estimated-from-capture-marker.md)
+- **Summary:** Arm scale estimated from capture marker distances with stated skin-to-joint offsets
+- **Next step:** Shipped in PR #15288.
+
+### DL-#15255 · Arm Refit That Returns the Club to Its Pose After the Wrist Joints Move to the Skinned Hands, With Optional Trunk Coordinates
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15255
+- **Branch:** merged via #15288
+- **PR:** #15288
+- **Paths:** see #15288
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`f637f68b`; collated from changes/15255-arm-refit-that-returns-the-club-to-its-p.md)
+- **Summary:** Arm refit that returns the club to its pose after the wrist joints move to the skinned hands, with optional trunk coordinates
+- **Next step:** Shipped in PR #15288.
+
+### DL-#15253 · Spec Revision That Moves the Golfer's Wrist Joints to the Skinned Hands' Wrists; Skinned Club Hands Cut and Capped at the Wrist
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15253
+- **Branch:** merged via #15288
+- **PR:** #15288
+- **Paths:** see #15288
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`f637f68b`; collated from changes/15253-spec-revision-that-moves-the-golfer-s-wr.md)
+- **Summary:** Spec revision that moves the golfer's wrist joints to the skinned hands' wrists; skinned club hands cut and capped at the wrist
+- **Next step:** Shipped in PR #15288.
+
+### DL-#15251 · Skinned Human Hands Selectable on the Golfer's Club, Squared to the Clubface (Subject.Hand_Visual_Backend)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15251
+- **Branch:** merged via #15288
+- **PR:** #15288
+- **Paths:** see #15288
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`f637f68b`; collated from changes/15251-skinned-human-hands-selectable-on-the-go.md)
+- **Summary:** Skinned human hands selectable on the golfer's club, squared to the clubface (subject.hand_visual_backend)
+- **Next step:** Shipped in PR #15288.
+
+### DL-#15248 · Remove Unused Numpy Import From Motion_Pipeline Resample Preprocessing (Ruff F401)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15248
+- **Branch:** barb/remove-unused-numpy-import
+- **PR:** #15248
+- **Paths:** see #15248
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`53dd87f7`; collated from changes/15248-remove-unused-numpy-import-from-motion-p.md)
+- **Summary:** Remove unused numpy import from motion_pipeline resample preprocessing (ruff F401)
+- **Next step:** Shipped in PR #15248.
+
+### DL-#15246 · Conflict Disarm Starts Again: Pass Only the Secrets the Pinned Provider Declares
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15246
+- **Branch:** merged via #15247
+- **PR:** #15247
+- **Paths:** see #15247
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`caeb99c2`; collated from changes/15246-conflict-disarm-starts-again-pass-only-t.md)
+- **Summary:** Conflict Disarm starts again: pass only the secrets the pinned provider declares
+- **Next step:** Shipped in PR #15247.
+
+### DL-#15241 · Preserve JSON Recording Files on Serialization or Publication Failure by Reusing the Atomic Text Writer.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15241
+- **Branch:** merged via #15243
+- **PR:** #15243
+- **Paths:** see #15243
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`93797bb7`; collated from changes/15241-preserve-json-recording-files-on-seriali.md)
+- **Summary:** Preserve JSON recording files on serialization or publication failure by reusing the atomic text writer.
+- **Next step:** Shipped in PR #15243.
+
+### DL-#15240 · Honor Package Anchors in Safe_Import Relative Module Resolution
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15240
+- **Branch:** merged via #15242
+- **PR:** #15242
+- **Paths:** see #15242
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`a401215a`; collated from changes/15240-safe-relative-imports.md)
+- **Summary:** Honor package anchors in safe_import relative module resolution
+- **Next step:** Shipped in PR #15242.
+
+### DL-#15236 · Reject Unsupported Analysis Report Formats Before Creating Directories or Capturing Provenance, Preserving JSON and HTML Exports.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15236
+- **Branch:** merged via #15237
+- **PR:** #15237
+- **Paths:** see #15237
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`c38937eb`; collated from changes/15236-reject-unsupported-analysis-report-forma.md)
+- **Summary:** Reject unsupported analysis report formats before creating directories or capturing provenance, preserving JSON and HTML exports.
+- **Next step:** Shipped in PR #15237.
+
+### DL-#15227 · RQA Determinism Counts Diagonal Lines in Both Triangles and Excludes the Main Diagonal by Its Content
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15227
+- **Branch:** merged via #15230
+- **PR:** #15230
+- **Paths:** see #15230
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`55dbf8d1`; collated from changes/15227-rqa-determinism-counts-diagonal-lines-in.md)
+- **Summary:** RQA determinism counts diagonal lines in both triangles and excludes the main diagonal by its content
+- **Next step:** Shipped in PR #15230.
+
+### DL-#15226 · Compare_Scalars No Longer Reports 0% for Opposite-Sign or NaN Values
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15226
+- **Branch:** merged via #15229
+- **PR:** #15229
+- **Paths:** see #15229
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`af7c1593`; collated from changes/15226-compare-scalars-no-longer-reports-0-for.md)
+- **Summary:** compare_scalars no longer reports 0% for opposite-sign or NaN values
+- **Next step:** Shipped in PR #15229.
+
+### DL-#15225 · Pair Tools Cache Count-Pressure Correction While Preserving Integrity and Minimum-Age Checks
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15225
+- **Branch:** merged via #15228
+- **PR:** #15228
+- **Paths:** see #15228
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`4a46a5ed`; collated from changes/15225-pair-tools-cache-count-pressure-correcti.md)
+- **Summary:** Pair Tools cache count-pressure correction while preserving integrity and minimum-age checks
+- **Next step:** Shipped in PR #15228.
+
+### DL-#15223 · SwingComparator No Longer Scores 100 When the Reference Peak Speed, Club Head Speed or Tempo Ratio Is Zero.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15223
+- **Branch:** merged via #15224
+- **PR:** #15224
+- **Paths:** see #15224
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`b1d00398`; collated from changes/15223-swing-comparison-zero-reference-score.md)
+- **Summary:** SwingComparator no longer scores 100 when the reference peak speed, club head speed or tempo ratio is zero.
+- **Next step:** Shipped in PR #15224.
+
+### DL-#15214 · Adopt Tools Cumulative Integral Initial Offset via Coherent Provider Pin and Consumer Regressions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15214
+- **Branch:** merged via #15575
+- **PR:** #15575
+- **Paths:** see #15575
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`54b5f908`; collated from changes/15214-adopt-paired-cumulative-integral-offset.md)
+- **Summary:** Adopt Tools cumulative integral initial offset via coherent provider pin and consumer regressions
+- **Next step:** Shipped in PR #15575.
+
+### DL-#15213 · Compute_Screw_Axis Refuses Non-Finite Twists, Bad Thresholds and Bad Endpoint Lengths Instead of Returning NaN Screw Axes.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15213
+- **Branch:** merged via #15215
+- **PR:** #15215
+- **Paths:** see #15215
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`b208d7aa`; collated from changes/15213-screw-axis-refuses-non-finite-twists.md)
+- **Summary:** compute_screw_axis refuses non-finite twists, bad thresholds and bad endpoint lengths instead of returning NaN screw axes.
+- **Next step:** Shipped in PR #15215.
+
+### DL-#15209 · Reject NaN Environment Floats When Numeric Bounds Are Supplied; Pair Tools#6083
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15209
+- **Branch:** merged via #15211
+- **PR:** #15211
+- **Paths:** see #15211
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`3e0db00b`; collated from changes/15209-reject-nan-environment-floats-when-numer.md)
+- **Summary:** Reject NaN environment floats when numeric bounds are supplied; pair Tools#6083
+- **Next step:** Shipped in PR #15211.
+
+### DL-#15206 · Spectral Arc Length Now Uses the Adaptive Cut-Off From Balasubramanian 2015, so It No Longer Depends on Fc
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15206
+- **Branch:** merged via #15210
+- **PR:** #15210
+- **Paths:** see #15210
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`2de7b64d`; collated from changes/15206-spectral-arc-length-adaptive-cutoff.md)
+- **Summary:** Spectral arc length now uses the adaptive cut-off from Balasubramanian 2015, so it no longer depends on fc
+- **Next step:** Shipped in PR #15210.
+
+### DL-#15205 · Capture an Independent Deep Snapshot of Provenance Parameters so Caller Mutations Cannot Rewrite Run Metadata or Later Export Headers.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15205
+- **Branch:** merged via #15235
+- **PR:** #15235
+- **Paths:** see #15235
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`09b84de8`; collated from changes/15205-capture-an-independent-deep-snapshot-of.md)
+- **Summary:** Capture an independent deep snapshot of provenance parameters so caller mutations cannot rewrite run metadata or later export headers.
+- **Next step:** Shipped in PR #15235.
+
+### DL-#15204 · Use Transverse Spin in the Python Magnus/Lift Force Laws (BallFlightSimulator, LiftModel/MagnusModel, ODE Flight Models) as #15042 Did for Rust.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15204
+- **Branch:** merged via #15208
+- **PR:** #15208
+- **Paths:** see #15208
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`8a715591`; collated from changes/15204-use-transverse-spin-in-python-magnus-lift.md)
+- **Summary:** Use transverse spin in the Python Magnus/lift force laws (BallFlightSimulator, LiftModel/MagnusModel, ODE flight models) as #15042 did for Rust.
+- **Next step:** Shipped in PR #15208.
+
+### DL-#15202 · Reject Zero-Row CSV Frames and Trajectory Arrays Before Reporting Successful Loads
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15202
+- **Branch:** merged via #15207
+- **PR:** #15207
+- **Paths:** see #15207
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`a565e63f`; collated from changes/15202-reject-zero-row-csv-frames-and-trajector.md)
+- **Summary:** Reject zero-row CSV frames and trajectory arrays before reporting successful loads
+- **Next step:** Shipped in PR #15207.
+
+### DL-#15200 · Preserve Exact NumPy Integer Values and JSON Integer Types in Output Exports
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15200
+- **Branch:** merged via #15203
+- **PR:** #15203
+- **Paths:** see #15203
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`c2c88b51`; collated from changes/15200-preserve-exact-numpy-integer-values-and.md)
+- **Summary:** Preserve exact NumPy integer values and JSON integer types in output exports
+- **Next step:** Shipped in PR #15203.
+
+### DL-#15199 · Stage Legacy Launcher Configuration Copies so Partial Failures Remain Retryable
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15199
+- **Branch:** merged via #15201
+- **PR:** #15201
+- **Paths:** see #15201
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`a75eb07c`; collated from changes/15199-stage-legacy-launcher-configuration-copi.md)
+- **Summary:** Stage legacy launcher configuration copies so partial failures remain retryable
+- **Next step:** Shipped in PR #15201.
+
+### DL-#15150 · Add a Dispersion-on-the-Hole Still (--Hole, --Hole-Preset) to the Shot Dispersion CLI
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15150
+- **Branch:** merged via #15507
+- **PR:** #15507, #15441, #15192, #15476, #15423, #15472, #15458, #15674, #15394, #15479, #15381, #15681, #15510, #15417, #15432, #15413, #15407, #15465, #15515, #15481, #15478, #15487, #15428, #15437, #15374, #15449, #15457, #15456, #15436, #15412, #15415, #15434, #15464, #15422, #15533, #15520, #15528, #15526, #15519, #15532, #15470, #15408, #15387, #15455, #15411, #15402, #15433, #15421, #15420, #15426, #15410, #15424, #15469, #15484, #15453, #15401, #15483, #15509, #15418, #15517, #15467, #15461, #15504, #15438, #15414, #15406, #15405, #15430, #15440, #15508, #15516, #15642, #15549, #15540, #15566, #15547, #15557, #15529, #15553, #15536, #15480, #15511, #15514, #15477, #15378, #15425, #15380, #15675, #15463, #15679, #15197, #15459, #15451, #15419, #15442, #15382, #15388, #15404, #15301, #15505, #15416, #15350, #15355, #15359, #15503
+- **Paths:** see #15507
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`ab4cdc8c`; collated from changes/15150-with-shaft-model-resolves-a-named-club-t.md)
+- **Summary:** Add a dispersion-on-the-hole still (--hole, --hole-preset) to the shot dispersion CLI
+- **Next step:** Shipped in PR #15507.
+
+### DL-#15130 · Local Desktop API App Requires the Launcher Capability Token on API Requests
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15130
+- **Branch:** merged via #15132
+- **PR:** #15132
+- **Paths:** see #15132
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`4a1c5f43`; collated from changes/15130-local-app-requires-the-launcher-capability.md)
+- **Summary:** Local desktop API app requires the launcher capability token on API requests
+- **Next step:** Shipped in PR #15132.
+
+### DL-#15122 · Fleet Critic 2026-11-20: Grip Epic Critique (Builder Capsule Clearance Uses Max Not Min; Grip-Loss Shear Estimate Drops Axial Pull; Near-Circular Null Result).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15122
+- **Branch:** merged via #15352
+- **PR:** #15352, #15357
+- **Paths:** see #15352
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`cc80419a`; collated from changes/15122-pragmatic-programmer-review-2026-11-20-o.md)
+- **Summary:** Fleet Critic 2026-11-20: grip epic critique (builder capsule clearance uses max not min; grip-loss shear estimate drops axial pull; near-circular null result).
+- **Next step:** Shipped in PR #15352.
+
+### DL-#15119 · Record the Reviewed GAAI Policy-Test Retirement for Merge-Group CI
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15119
+- **Branch:** merged via #15119
+- **PR:** #15119
+- **Paths:** see #15119
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`e63b3a62`; collated from changes/15119-reviewed-test-deletion.md)
+- **Summary:** Record the reviewed GAAI policy-test retirement for merge-group CI
+- **Next step:** Shipped in PR #15119.
+
+### DL-#15117 · Desktop UI Sends the Launcher Capability Token on Backend API Requests Through One Shared Fetch Helper
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15117
+- **Branch:** merged via #15118
+- **PR:** #15118
+- **Paths:** see #15118
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`800ac553`; collated from changes/15117-desktop-ui-sends-the-launcher-capability.md)
+- **Summary:** Desktop UI sends the launcher capability token on backend API requests through one shared fetch helper
+- **Next step:** Shipped in PR #15118.
+
+### DL-#15108 · Scope Tests/Unit/conftest.py Engine MagicMocks to Tests/Unit and Guard OpenSim Dynamics Parity (#15108)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15108
+- **Branch:** merged via #15109
+- **PR:** #15109
+- **Paths:** see #15109
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`daf6ce2a`; collated from changes/15108-scope-unit-conftest-engine-mocks.md)
+- **Summary:** Scope tests/unit/conftest.py engine MagicMocks to tests/unit and guard OpenSim dynamics parity (#15108)
+- **Next step:** Shipped in PR #15109.
+
+### DL-#15106 · Prune Dead Testpaths/LEGACY_SRC_TEST_DIRS, Enable Green Tests/* Suites in Unit-Test-Gate, and Enforce Unrun Suite Exclusions (#15106)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15106
+- **Branch:** merged via #15110
+- **PR:** #15110
+- **Paths:** see #15110
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`f25a6b67`; collated from changes/15106-testpaths-and-unrun-suite-exclusions.md)
+- **Summary:** Prune dead testpaths/LEGACY_SRC_TEST_DIRS, enable green tests/* suites in unit-test-gate, and enforce unrun suite exclusions (#15106)
+- **Next step:** Shipped in PR #15110.
+
+### DL-#15105 · Guard Drain_Process_Streams Against Infinite MagicMock Readline Loops in Launcher Pipe Drains
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15105
+- **Branch:** merged via #15157
+- **PR:** #15157
+- **Paths:** see #15157
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`e2cecf0c`; collated from changes/15105-drain-magicmock-guard.md)
+- **Summary:** Guard drain_process_streams against infinite MagicMock readline loops in launcher pipe drains
+- **Next step:** Shipped in PR #15157.
+
+### DL-#15103 · Guard Pytest Makereport and Teardown Against Leaked Os.Name Patches
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15103
+- **Branch:** merged via #15168
+- **PR:** #15168
+- **Paths:** see #15168
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`b8159ea3`; collated from changes/15103-guard-pytest-makereport-and-teardown-aga.md)
+- **Summary:** Guard pytest makereport and teardown against leaked os.name patches
+- **Next step:** Shipped in PR #15168.
+
+### DL-#15101 · Join or Retain Retiring BinderThread and CameraWorker Instances Until Qt Finishes Thread Teardown so Capture Rig Preview Never Aborts in ~QThread.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15101
+- **Branch:** merged via #15102
+- **PR:** #15102
+- **Paths:** see #15102
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`8123908e`; collated from changes/15101-preview-qthread-lifetime.md)
+- **Summary:** Join or retain retiring BinderThread and CameraWorker instances until Qt finishes thread teardown so Capture Rig preview never aborts in ~QThread.
+- **Next step:** Shipped in PR #15102.
+
+### DL-#15097 · Isolate Sidekick Sys.Modules and Sys.Meta_Path State Across Overlay Tests (#15097)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15097
+- **Branch:** merged via #15099
+- **PR:** #15099
+- **Paths:** see #15099
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`eb2d9b7e`; collated from changes/15097-sidekick-overlay-module-isolation.md)
+- **Summary:** Isolate sidekick sys.modules and sys.meta_path state across overlay tests (#15097)
+- **Next step:** Shipped in PR #15099.
+
+### DL-#15091 · Drain Child Output Streams Before Transitioning ManagedProcess Exit State and Exposing Exit_Code
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15091
+- **Branch:** merged via #15092
+- **PR:** #15092
+- **Paths:** see #15092
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`257654e0`; collated from changes/15091-stderr-drain-before-exit.md)
+- **Summary:** Drain child output streams before transitioning ManagedProcess exit state and exposing exit_code
+- **Next step:** Shipped in PR #15092.
+
+### DL-#15013 · Restore UdAttachmentManifestMixin so Rejected File_Upload Clears Dedup SHA and Retry Sends WebSocket Again; Re-Add Reject-Then-Retry Regression Tests.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15013
+- **Branch:** merged via #15072
+- **PR:** #15072, #15060, #15156
+- **Paths:** see #15072
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`d7bdbc56`; collated from changes/15013-sg-analytics-documentation-close.md)
+- **Summary:** Restore UdAttachmentManifestMixin so rejected file_upload clears dedup SHA and retry sends WebSocket again; re-add reject-then-retry regression tests.
+- **Next step:** Shipped in PR #15072.
+
+### DL-#14850 · Redact Host/Home Literals in Batch 5 Docs and Add Shell Placeholder Regression Test
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14850
+- **Branch:** merged via #14850
+- **PR:** #14850
+- **Paths:** see #14850
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`9a0dbab7`; collated from changes/14850-redact-host-home-literals-in-batch-5-doc.md)
+- **Summary:** Redact host/home literals in batch 5 docs and add shell placeholder regression test
+- **Next step:** Shipped in PR #14850.
+
+### DL-#14849 · Parameterize Remote Evidence Runners and Finish Batch 3 Host Redaction
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14849
+- **Branch:** merged via #14849
+- **PR:** #14849
+- **Paths:** see #14849
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`c60c445c`; collated from changes/14849-parameterize-remote-evidence-runners-and.md)
+- **Summary:** Parameterize remote evidence runners and finish batch 3 host redaction
+- **Next step:** Shipped in PR #14849.
+
+### DL-#14310 · Headless Qt/Matplotlib Teardown After Each Test and MuJoCo Offscreen Renderer Release (#14310)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14310
+- **Branch:** merged via #15098
+- **PR:** #15098
+- **Paths:** see #15098
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`180394fd`; collated from changes/14310-headless-gui-teardown.md)
+- **Summary:** Headless Qt/matplotlib teardown after each test and MuJoCo offscreen renderer release (#14310)
+- **Next step:** Shipped in PR #15098.
+
+### DL-#13575 · Retire Jules Push/PR Noise Workflows and Use FLEET_GENERAL_AGENT App Credentials for Fleet Policy Gates.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13575
+- **Branch:** merged via #14999
+- **PR:** #14999
+- **Paths:** see #14999
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`310c1327`; collated from changes/13575-retire-jules-workflows.md)
+- **Summary:** Retire Jules push/PR noise workflows and use FLEET_GENERAL_AGENT App credentials for fleet policy gates.
+- **Next step:** Shipped in PR #14999.
+
+### DL-#13314 · Unit-Test Gate Runs in Three Shards; Leg Two of Two Was Cancelled at Its 35 Minute Limit
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13314
+- **Branch:** merged via #15319
+- **PR:** #15319
+- **Paths:** see #15319
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`f7827f0a`; collated from changes/13314-unit-test-gate-runs-in-three-shards-leg.md)
+- **Summary:** Unit-test gate runs in three shards; leg two of two was cancelled at its 35 minute limit
+- **Next step:** Shipped in PR #15319.
+
+### DL-#12678 · Preserve Smooth CC0 Hair Shading in Shared Native-Viewer OBJ Exports, Matching MuJoCo's Hair Selection
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12678
+- **Branch:** merged via #15571
+- **PR:** #15571
+- **Paths:** see #15571
+- **Started:** 2026-11-24
+- **Last verified:** 2026-11-24 (`af612ed8`; collated from changes/12678-native-hair-normals.md)
+- **Summary:** Preserve smooth CC0 hair shading in shared native-viewer OBJ exports, matching MuJoCo's hair selection
+- **Next step:** Shipped in PR #15571.
+
 ### DL-#15095 · Fix SwingMetricsMixin Test Harness After Velocity Delegation and Add Unit Marker (#15095)
 
 - **State:** shipped
@@ -839,10 +2373,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #15016
 - **Branch:** merged via #15063
-- **PR:** #15063, #15080, #15079
+- **PR:** #15063, #15080, #15079, #15090
 - **Paths:** see #15063
 - **Started:** 2026-11-14
-- **Last verified:** 2026-11-14 (`3e24dc3f`; collated from changes/15016-zvcf-manual-consistency.md)
+- **Last verified:** 2026-11-24 (`d54c0c57`; collated from changes/15016-spec-input-map-manifest-honesty.md)
 - **Summary:** Link tile help to AffineDrift theory; register six provisional core calculations and dedupe registry blocker ids
 - **Next step:** Shipped in PR #15063.
 
@@ -852,10 +2386,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #15012
 - **Branch:** merged via #15025
-- **PR:** #15025
+- **PR:** #15025, #15083
 - **Paths:** see #15025
 - **Started:** 2026-11-14
-- **Last verified:** 2026-11-14 (`19294384`; collated from changes/15012-fix-wbc-zero-torques-with-contact-and-hi.md)
+- **Last verified:** 2026-11-24 (`339be5a5`; collated from changes/15012-friction-cone-rl-honesty.md)
 - **Summary:** Fix WBC zero torques with contact and hierarchical task enforcement
 - **Next step:** Shipped in PR #15025.
 
@@ -865,10 +2399,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #15010
 - **Branch:** merged via #15026
-- **PR:** #15026
+- **PR:** #15026, #15084
 - **Paths:** see #15026
 - **Started:** 2026-11-14
-- **Last verified:** 2026-11-14 (`49d3fc78`; collated from changes/15010-correct-putting-slope-rolling-5-7-g-unif.md)
+- **Last verified:** 2026-11-24 (`6996475c`; collated from changes/15010-flight-aero-impact-honesty.md)
 - **Summary:** Correct putting slope rolling (5/7 g), unify stimp friction, impact club spin, flight spin sign docs, Rust air temperature K
 - **Next step:** Shipped in PR #15026.
 
@@ -917,10 +2451,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14935
 - **Branch:** merged via #14960
-- **PR:** #14960
+- **PR:** #14960, #15120, #15082
 - **Paths:** see #14960
 - **Started:** 2026-11-14
-- **Last verified:** 2026-11-14 (`c52d3757`; collated from changes/14935-committed-evidence-validator-with-gate-a.md)
+- **Last verified:** 2026-11-24 (`318242c0`; collated from changes/14935-evidence-recompute-and-ratchets.md)
 - **Summary:** Committed evidence scan calls receipt taxonomy validation; missing fields and conflicts are tested (#14935).
 - **Next step:** Shipped in PR #14960.
 
@@ -930,10 +2464,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14502
 - **Branch:** merged via #14825
-- **PR:** #14825
+- **PR:** #14825, #15100
 - **Paths:** see #14825
 - **Started:** 2026-11-14
-- **Last verified:** 2026-11-14 (`1780a5e5`; collated from changes/14502-np09-io-sensitivity.md)
+- **Last verified:** 2026-11-24 (`30f937bf`; collated from changes/14502-np09-lexical-fragment-guard.md)
 - **Summary:** NP-09 policy input-output sensitivity at stated operating points (#14502)
 - **Next step:** Shipped in PR #14825.
 
@@ -995,10 +2529,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12046
 - **Branch:** merged via #14929
-- **PR:** #14929
+- **PR:** #14929, #15085
 - **Paths:** see #14929
 - **Started:** 2026-11-14
-- **Last verified:** 2026-11-14 (`7a52997f`; collated from changes/12046-realtime-shadow-sunset-interim.md)
+- **Last verified:** 2026-11-24 (`e47a24aa`; collated from changes/12046-realtime-adr-split-ruling.md)
 - **Summary:** Interim 30-day realtime shadow ledger sunset (#12046) so hygiene tests pass pending Tools migration
 - **Next step:** Shipped in PR #14929.
 
@@ -1021,10 +2555,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #15029
 - **Branch:** merged via #15031
-- **PR:** #15031
+- **PR:** #15031, #15162, #15174
 - **Paths:** see #15031
 - **Started:** 2026-11-12
-- **Last verified:** 2026-11-12 (`28da654d`; collated from changes/15029-renew-or-delete-67-budget-exceptions-exp.md)
+- **Last verified:** 2026-11-24 (`316a2989`; collated from changes/15029-wave0-architecture-issue-field.md)
 - **Summary:** Renew or delete 67 budget exceptions expiring 2026-11-30 (Wave 0 #15028).
 - **Next step:** Shipped in PR #15031.
 
@@ -1242,10 +2776,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14227
 - **Branch:** merged via #14923
-- **PR:** #14923
+- **PR:** #14923, #15089, #15158, #15176
 - **Paths:** see #14923
 - **Started:** 2026-11-10
-- **Last verified:** 2026-11-10 (`e946eb78`; collated from changes/14227-document-ci-optional-stack-slice-1-pinoc.md)
+- **Last verified:** 2026-11-24 (`cc10309b`; collated from changes/14227-optional-stack-scheduled-green.md)
 - **Summary:** Document CI Optional Stack slice 1 (Pinocchio gravity) and add runbook contract tests
 - **Next step:** Shipped in PR #14923.
 
@@ -1749,12 +3283,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #14756
 - **Branch:** merged via #14770
-- **PR:** #14770
+- **PR:** #14770, #15165, #15373, #15587, #15613, #15594, #15602, #15578, #15576, #15580
 - **Paths:** see #14770
 - **Started:** 2026-11-06
-- **Last verified:** 2026-11-06 (`3e727f85`; collated from changes/14756-p5-parity-report-candidate-resolution-fa.md)
+- **Last verified:** 2026-11-24 (`a7326c81`; collated from changes/14756-trunk-bundle-source.md)
 - **Summary:** P5: parity report candidate resolution fails closed; canonical checksum/schema/manifest failures never fall through to legacy loading, legacy numeric archives detected explicitly, no allow_pickle=True
-- **Next step:** Shipped in PR #14770.
+- **Next step:** Independent review; keep PR unarmed.
 
 ### DL-#14744 · Strategy CLI: --Shot-Table / --Shot-Model Inject the Selected Shot Model Into the Personal Solve and Report Its Provenance in Text and HTML
 
@@ -2152,10 +3686,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12691
 - **Branch:** merged via #14692
-- **PR:** #14692, #14773
+- **PR:** #14692, #14773, #15554
 - **Paths:** see #14692
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-06 (`7e843383`; collated from changes/12691-manual-ch-67-quotes-the-five-engine-r11.md)
+- **Last verified:** 2026-11-24 (`3c07a1c2`; collated from changes/12691-gs3dx-design-report-rigid-shaft.md)
 - **Summary:** R11: per-engine chain-shaft impact-window receipt and overlay now cover drake and pinocchio, with an engine-free gate
 - **Next step:** Shipped in PR #14692.
 
@@ -2204,10 +3738,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #12553
 - **Branch:** merged via #14684
-- **PR:** #14684, #14690, #14696, #14704, #14713, #14725, #14787, #14925, #15064
+- **PR:** #14684, #14690, #14696, #14704, #14713, #14725, #14787, #14925, #15064, #15174
 - **Paths:** see #14684
 - **Started:** 2026-11-05
-- **Last verified:** 2026-11-14 (`65360d12`; collated from changes/12553-verify-hip-adduction-and-rotation-torque.md)
+- **Last verified:** 2026-11-24 (`316a2989`; collated from changes/12553-anatomical-torque-slots-acceptance.md)
 - **Summary:** NSX-04 slice 1: verified subtalar inversion/eversion and MTP flexion torque capacities (da Fonseca 2025, Saeki 2021); hip and MTP-extension slots keep ASSUMED with stated reasons
 - **Next step:** Shipped in PR #14684.
 
