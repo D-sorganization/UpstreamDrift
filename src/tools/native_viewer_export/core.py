@@ -855,10 +855,14 @@ def _hud_info(
 
 def _key_entries(feed: OverlayFeed | None, settings: ExportSettings) -> tuple:
     """Colour key rows of the clip: the feed's, then the shading's."""
-    shaded = settings.shading is not None and settings.shading_enabled
+    scale = settings.shading
     return (
         *(feed.colour_key if feed is not None else ()),
-        *(shading_colour_key(settings.shading) if shaded else ()),
+        *(
+            shading_colour_key(scale)
+            if scale is not None and settings.shading_enabled
+            else ()
+        ),
     )
 
 
