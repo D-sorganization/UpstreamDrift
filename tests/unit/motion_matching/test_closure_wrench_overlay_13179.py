@@ -173,7 +173,7 @@ def test_overlay_feed_blanks_axial_loads_at_ball_impact(
         dt_s=0.001,
         q0=q[0],
         v0=q[0],
-        efforts=np.zeros((3, len(names))),
+        efforts=np.ones((3, len(names))),  # not a kinematic replay (#15150 G1)
         reference_q=q,
         reference_v=q.copy(),
         reference_engine="mujoco",
