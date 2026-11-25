@@ -13,7 +13,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, replace
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -73,7 +73,7 @@ class CompositeSettings:
 
     def scaled(self, **sizes: int) -> CompositeSettings:
         """These settings with other sizes (e.g. a preview)."""
-        return replace(self, **sizes)
+        return replace(self, **dict[str, Any](sizes))
 
     def rgb(self, case: str) -> tuple[int, int, int]:
         """The case colour; ``ValueError`` for an unknown case."""
@@ -117,19 +117,17 @@ def _text_rgb(rgb: Sequence[int]) -> tuple[int, int, int]:
 def case_banner(width: int, case: str, settings: CompositeSettings) -> Image8:
     """A banner ``width`` wide in the case colour with its title and subtitle."""
     rgb = settings.rgb(case)
-    img = np.empty((settings.banner_height_px, width, 3), np.uint8)
-    img[:] = rgb
+    img: Image8 = np.full((settings.banner_height_px, width, 3), rgb, np.uint8)
     text = settings.cases[case]
     ink = _text_rgb(rgb)
     pad = max(2, settings.banner_height_px // 12)
     img = draw_label(
         img, text["title"], (2 * pad, pad), size=settings.title_px, fill=ink
     )
-    sub_y = pad + int(settings.title_px * 1.2)
     return draw_label(
         img,
         text.get("subtitle", ""),
-        (2 * pad, sub_y),
+        (2 * pad, pad + int(settings.title_px * 1.2)),
         size=settings.subtitle_px,
         fill=ink,
     )
@@ -139,16 +137,16 @@ def _resized(frame: Image8, width: int) -> Image8:
     height = max(1, round(frame.shape[0] * width / frame.shape[1]))
     if frame.shape[:2] == (height, width):
         return frame
-    return np.asarray(Image.fromarray(frame).resize((width, height), Image.LANCZOS))
+    img = Image.fromarray(frame).resize((width, height), Image.Resampling.LANCZOS)
+    return np.asarray(img)
 
 
 def _info_tile(
     shape: tuple[int, int], lines: Sequence[str], s: CompositeSettings
 ) -> Image8:
-    tile = np.empty((*shape, 3), np.uint8)
+    tile: Image8 = np.empty((*shape, 3), np.uint8)
     tile[:] = [round(255 * c) for c in hex_to_rgba(s.info_background_hex)[:3]]
-    size, x = s.info_text_px, s.banner_height_px // 3
-    y = s.banner_height_px // 2
+    size, x, y = s.info_text_px, s.banner_height_px // 3, s.banner_height_px // 2
     for line in lines:
         for part in label_lines(line, shape[1] - x, size) if line else ("",):
             tile = draw_label(tile, part, (x, y), size=size)
@@ -183,7 +181,7 @@ def _grid(
         for c in s.case_order
     ]
     while len(tiles) % s.grid_columns:
-        tiles.append(_info_tile(tiles[0].shape[:2], lines, s))
+        tiles.append(_info_tile((tiles[0].shape[0], tiles[0].shape[1]), lines, s))
     rows = [
         np.hstack(tiles[i : i + s.grid_columns])
         for i in range(0, len(tiles), s.grid_columns)
@@ -230,6 +228,7 @@ def compose_grid_video(
 
     writer = writer_factory(out, fps)
     try:
+        frames: list[Image8]
         for t, *frames in zip(times, *readers, strict=True):
             lines = grid_info_lines(t, phases, info_lines, s)
             writer.append_data(
@@ -301,7 +300,7 @@ def phase_sheet(
         cells = []
         for case in s.case_order:
             with imageio.get_reader(str(clips[case])) as reader:
-                frame = np.asarray(reader.get_data(k))
+                frame = np.asarray(cast(Any, reader).get_data(k))
             path = out.with_name(f"{case}_{phase.id}.png")
             Image.fromarray(frame).save(path)
             stills.append(path)

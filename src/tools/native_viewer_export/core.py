@@ -653,7 +653,7 @@ class ClipWriter(Protocol):
 WriterFactory = Callable[[Path, int], ClipWriter]
 
 
-def imageio_writer(path: Path, fps: int, crf: int = HQ_CRF) -> ClipWriter:
+def imageio_writer(path: Path, fps: float, crf: int = HQ_CRF) -> ClipWriter:
     """Default clip writer: libx264, ``yuv420p``, constant rate factor ``crf``."""
     import imageio.v2 as imageio
 
