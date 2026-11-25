@@ -222,7 +222,8 @@ def synthetic_forward_step(position, velocity, omega, force, moment, mass, inert
     vel = _vec(velocity, "velocity") + _vec(force, "force") / mass * dt
     omg = _vec(omega, "omega") + np.linalg.solve(iner, _vec(moment, "moment")) * dt
     return _vec(position, "position") + vel * dt, vel, omg
-def certify_forward_replay(solution, *, mass, inertia, position, velocity, omega, dt, reference_position, reference_velocity, reference_omega, atol=1e-8):
+def certify_forward_replay(solution, body, reference, *, atol=1e-8):
+    (position, velocity, omega, mass, inertia, dt), (reference_position, reference_velocity, reference_omega) = body, reference
     if not solution.feasible:
         return solution
     pos, vel, omg = synthetic_forward_step(

@@ -78,15 +78,16 @@ def _hand(values, units: str, reason: str) -> Channel:
     if values is None:
         return _missing(reason or "hand load unavailable", units)
     return _channel(values, units)
-def simulation_output(problem, solution, *, frame, time_s, ground_force_n=None, ground_moment_nm=None, ground_point_m=None, cop_min_fz_n=DEFAULT_COP_MIN_FZ_N, match_id="", model_definition_hash="", subject_profile_hash="", match_artifact_hash=""):
+def simulation_output(problem, solution, *, frame, time_s, ground=None, cop_min_fz_n=DEFAULT_COP_MIN_FZ_N, lineage=("", "", "", "")):
     _pre(problem.load_kind == solution.load_kind, "problem and solution load_kind differ")
     reason = solution.reason or "hand load unavailable"
-    if ground_force_n is None:
+    if ground is None:
         ground_f = _missing("ground wrench unavailable", "N")
         ground_m = _missing("ground wrench unavailable", "N*m")
         cop = _missing("CoP UNAVAILABLE: ground wrench unavailable", "m")
     else:
-        _pre(ground_moment_nm is not None and ground_point_m is not None, "ground wrench needs force, moment, and point")
+        _pre(len(ground) == 3, "ground wrench needs force, moment, and point")
+        ground_force_n, ground_moment_nm, ground_point_m = ground
         ground_f, ground_m = _channel(ground_force_n, "N"), _channel(ground_moment_nm, "N*m")
         cop = cop_channel(ground_force_n, ground_moment_nm, ground_point_m, min_fz_n=cop_min_fz_n)
     return SimulationOutput(
@@ -94,7 +95,7 @@ def simulation_output(problem, solution, *, frame, time_s, ground_force_n=None, 
         _hand(solution.net_force_n, "N", reason), _hand(solution.midhands_moment_nm, "N*m", reason),
         _hand(solution.f_l_n, "N", reason), _hand(solution.f_r_n, "N", reason),
         _hand(solution.m_l_nm, "N*m", reason), _hand(solution.m_r_nm, "N*m", reason),
-        ground_f, ground_m, cop, match_id, model_definition_hash, subject_profile_hash, match_artifact_hash,
+        ground_f, ground_m, cop, *lineage,
     )
 def superposition_holds(total_f, ztcf_f, zvcf_f, total_m, ztcf_m, zvcf_m, *, rtol=DEFAULT_SUPERPOSITION_RTOL) -> bool:
     _pre(math.isfinite(rtol) and rtol > 0, "rtol must be positive")

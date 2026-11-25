@@ -1,6 +1,5 @@
 # fmt: off
 """Analytic oracle for the two-hand null-space load family (#15731, #15494)."""
-
 from __future__ import annotations
 
 import numpy as np
@@ -11,9 +10,8 @@ from src.shared.python.hand_load_nullspace.simulation_output import (
 )
 from src.shared.python.hand_load_nullspace.solver import (
     HandLoadProblem, certify_forward_replay, component_extrema, grasp_null_residual,
-    kkt_residual, solve, synthetic_forward_step, time_weighted_squared_force,
+    kkt_residual, solve, synthetic_forward_step,     time_weighted_squared_force,
 )
-
 pytestmark = pytest.mark.unit
 _FORCE = (10.0, 0.0, 4.0)
 
@@ -89,10 +87,10 @@ def test_forward_replay_matches_the_net_wrench_and_ignores_alpha():
     step = synthetic_forward_step(zeros, zeros, zeros, base.net_force_n, base.midhands_moment_nm, mass, inertia, dt)
     other = synthetic_forward_step(zeros, zeros, zeros, shifted.net_force_n, shifted.midhands_moment_nm, mass, inertia, dt)
     assert np.allclose(step[0], other[0]) and np.allclose(step[2], other[2])
-    kwargs = {"mass": mass, "inertia": inertia, "position": zeros, "velocity": zeros, "omega": zeros, "dt": dt, "reference_velocity": step[1], "reference_omega": step[2]}
+    body = (zeros, zeros, zeros, mass, inertia, dt)
     assert base.replay_badge == "allocation-only"
-    assert certify_forward_replay(base, reference_position=step[0], **kwargs).replay_badge == "forward-replayed"
-    assert certify_forward_replay(base, reference_position=(1.0, 0.0, 0.0), **kwargs).replay_badge == "allocation-only"
+    assert certify_forward_replay(base, body, (step[0], step[1], step[2])).replay_badge == "forward-replayed"
+    assert certify_forward_replay(base, body, ((1.0, 0.0, 0.0), step[1], step[2])).replay_badge == "allocation-only"
 
 
 def test_couple_policy_and_total_only_grip_check():
@@ -120,8 +118,8 @@ def test_pinned_attribution_and_simulation_output_contract():
     assert superposition_holds(low.net_force_n, ztcf_f, zvcf_f, low.midhands_moment_nm, ztcf_m, zvcf_m)
     assert not superposition_holds(low.net_force_n, ztcf_f, (6.0, 0.0, 3.0), low.midhands_moment_nm, ztcf_m, zvcf_m)
     out = simulation_output(
-        _problem(), low, frame="world", time_s=0.2, ground_force_n=(0.0, 0.0, 4.0),
-        ground_moment_nm=(0.0, 0.0, 0.0), ground_point_m=(0.0, 0.0, 0.0), match_id="match-1",
+        _problem(), low, frame="world", time_s=0.2,
+        ground=((0.0, 0.0, 4.0), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0)), lineage=("match-1", "", "", ""),
     )
     assert out.schema_version == SCHEMA_VERSION and out.replay_badge == "allocation-only"
     assert out.cop_m.availability == "UNAVAILABLE" and out.cop_m.values is None
