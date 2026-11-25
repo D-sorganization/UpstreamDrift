@@ -151,3 +151,28 @@ def test_a_second_run_into_the_folder_keeps_the_first_runs_jobs(tmp_path) -> Non
     views = {j["key"].split("@")[1] for j in manifest["jobs"]}
     assert views == {"face_on", "down_the_line"}
     assert len(manifest["jobs"]) == 8
+
+
+def test_a_failed_render_reports_the_exporters_own_error(tmp_path, monkeypatch) -> None:
+    """The manifest names why the exporter stopped, not only its exit status,
+    and the full stderr is kept beside the clip."""
+    import sys
+
+    script = (
+        "import sys; sys.stderr.write('INFO noise\\n"
+        "error: ZTCF/ZVCF shading needs a dynamics bundle with efforts\\n');"
+        " sys.exit(2)"
+    )
+    monkeypatch.setattr(
+        runner, "exporter_command", lambda *a, **k: [sys.executable, "-c", script]
+    )
+    render = runner.subprocess_render(tmp_path / "b.npz", "driver", "Driver")
+    (job,) = _jobs("case_total")
+    clip = tmp_path / "out" / "clip.mp4"
+    clip.parent.mkdir()
+    with pytest.raises(runner.RenderError, match="needs a dynamics bundle") as err:
+        render(job, clip, tmp_path)
+    assert "exit 2" in str(err.value)
+    log = clip.parent / runner.load_runner_settings()["render_log"]
+    assert "INFO noise" in log.read_text(encoding="utf-8")
+    assert issubclass(runner.RenderError, runner.subprocess.SubprocessError)
