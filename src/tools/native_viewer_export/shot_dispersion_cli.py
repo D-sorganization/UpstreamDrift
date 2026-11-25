@@ -103,7 +103,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         args.out.mkdir(parents=True, exist_ok=True)
         record = record_for(cfg, result, units)
         (args.out / "dispersion.json").write_text(json.dumps(record, indent=2))
-        draw_dispersion(result, cfg, args.out / "dispersion.png", units)
+        if result.available or not args.hole:
+            draw_dispersion(result, cfg, args.out / "dispersion.png", units)
+        else:  # the hole still falls back to the nominal shot alone
+            logger.warning("no sample has a flight: dispersion.png not written")
         if args.hole:
             hole_cfg = load_dispersion_hole_settings(preset=args.hole_preset)
             base = sd.run_dispersion(swing, export, [sd.nominal_setup(cfg)])

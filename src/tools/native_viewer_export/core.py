@@ -853,15 +853,24 @@ def _hud_info(
     )
 
 
-def _key_entries(feed: OverlayFeed | None, settings: ExportSettings) -> tuple:
-    """Colour key rows of the clip: the feed's, then the shading's."""
+def _key_entries(
+    feed: OverlayFeed | None, settings: ExportSettings, flight: Any = None
+) -> tuple:
+    """Colour key rows of the clip: the feed's, the shading's, then the
+    dispersion samples and nominal shot of ``flight`` (when it has samples)."""
     scale = settings.shading
+    spread = None if flight is None else flight.dispersion
     return (
         *(feed.colour_key if feed is not None else ()),
         *(
             shading_colour_key(scale)
             if scale is not None and settings.shading_enabled
             else ()
+        ),
+        *(
+            ()
+            if spread is None
+            else spread.key_entries(flight.settings.tracer_color_rgba)
         ),
     )
 
@@ -896,7 +905,7 @@ def _export_clip(
     glyph_counts: list[int] = []
     viewer = VIEWER_NAMES.get(engine, engine)
     fixed = (*shot_setup.hud_lines(settings), replay_mode.hud_line_of(swing.bundle))
-    key_entries = _key_entries(shown_feed, settings)
+    key_entries = _key_entries(shown_feed, settings, flight)
     frames = 0
     try:
         for k, tiles in zip(
