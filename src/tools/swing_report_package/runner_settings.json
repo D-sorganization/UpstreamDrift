@@ -2,6 +2,8 @@
   "schema_version": 1,
   "description": "Swing report package executor settings (#15724). Each video is one native_viewer_export subprocess run with its own temporary folder, wiped after the run (a render stages several GB of raw frames). 'min_free_gb' is checked before every render; 'render_timeout_s' bounds one render.",
   "exporter_module": "src.tools.native_viewer_export",
+  "render_log": "render.log",
+  "error_tail_lines": 3,
   "min_free_gb": 12,
   "render_timeout_s": 10800
 }

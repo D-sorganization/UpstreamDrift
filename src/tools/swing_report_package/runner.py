@@ -38,6 +38,7 @@ __all__ = [
     "load_runner_settings",
     "plan_manifest",
     "run_package",
+    "RenderError",
     "subprocess_render",
     "unavailable_jobs",
 ]
@@ -57,12 +58,23 @@ class DiskSpaceError(RuntimeError):
     """Too little free disk to start a render."""
 
 
+class RenderError(subprocess.SubprocessError):
+    """The exporter stopped; the message carries its exit status and the
+    error lines it wrote (the full stderr is in the job's render log)."""
+
+
 def load_runner_settings(path: Path | None = None) -> dict[str, Any]:
     """The runner settings; ``ValueError`` when a required key is missing."""
     doc = json.loads((path or RUNNER_SETTINGS_PATH).read_text(encoding="utf-8"))
     missing = [
         k
-        for k in ("exporter_module", "min_free_gb", "render_timeout_s")
+        for k in (
+            "exporter_module",
+            "min_free_gb",
+            "render_timeout_s",
+            "render_log",
+            "error_tail_lines",
+        )
         if k not in doc
     ]
     if missing:
@@ -140,16 +152,34 @@ def subprocess_render(
     settings: Mapping[str, Any] | None = None,
 ) -> Render:
     """A render that runs the exporter headless with ``TMPDIR`` = the job's
-    temporary folder. Raises ``subprocess.CalledProcessError`` on failure."""
+    temporary folder. Raises :class:`RenderError` (the exporter's error lines)
+    on failure; its stderr is kept in the job folder's render log."""
     s = settings or load_runner_settings()
     opts: dict[str, Any] = {"impact_time_s": impact_time_s, "settings": s}
 
     def render(job: Job, clip: Path, tmp_dir: Path) -> None:
         argv = exporter_command(job, bundle, clip.parent, swing, club, **opts)
         env = {**os.environ, **_HEADLESS_ENV, "TMPDIR": str(tmp_dir)}
-        subprocess.run(argv, check=True, env=env, timeout=s["render_timeout_s"])
+        log = clip.parent / s["render_log"]
+        with log.open("w", encoding="utf-8") as err:
+            done = subprocess.run(
+                argv, stderr=err, env=env, timeout=s["render_timeout_s"]
+            )
+        if done.returncode != 0:
+            why = _error_lines(log, int(s["error_tail_lines"]))
+            raise RenderError(
+                f"{job.key}: exporter exit {done.returncode}: {why} (log: {log})"
+            )
 
     return render
+
+
+def _error_lines(log: Path, tail: int) -> str:
+    """The ``error:`` lines of ``log``, else its last ``tail`` lines."""
+    lines = [ln.strip() for ln in log.read_text(encoding="utf-8").splitlines()]
+    lines = [ln for ln in lines if ln]
+    errors = [ln for ln in lines if ln.lower().startswith("error")]
+    return " | ".join(errors or lines[-tail:]) or "no stderr"
 
 
 def _check_disk(root: Path, min_free_gb: float) -> None:
