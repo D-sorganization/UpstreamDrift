@@ -67,6 +67,8 @@ class OverlayOptions:
     ztcf_view: str = "tip_to_tail"
     ztcf_quantity: str = "force"
     ztcf_hands: str = "both"
+    #: force arrow look in ``arrow_style_settings.json`` (default: its default)
+    arrow_style: str | None = None
 
 
 def _grip_source(swing: SwingInput, engine: str, mujoco_source: Any) -> tuple[Any, str]:
@@ -526,7 +528,9 @@ def build_overlay_feed(
     names = swing.bundle.coordinate_order
     com = source.center_of_mass_m(dict(zip(names, map(float, swing.q[0]), strict=True)))
     lookat = (float(com[0]), float(com[1]), default_lookat_height_m())
-    style = default_glyph_style(body_mass_kg=float(source.total_mass_kg))
+    style = default_glyph_style(
+        body_mass_kg=float(source.total_mass_kg), arrow_style=opts.arrow_style
+    )
 
     active_ellipsoids = _resolve_active_ellipsoids(
         opts.hand_mobility, opts.interface_ellipsoids

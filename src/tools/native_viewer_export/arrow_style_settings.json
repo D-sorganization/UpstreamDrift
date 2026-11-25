@@ -1,0 +1,9 @@
+{
+  "description": "Force arrow looks for rendered overlays (#15150 Z8 review). shaft_radius_m is the arrow shaft radius; min_height_px is the lowest output height at which the style still meets min_shaft_px (the NV-9 legibility floor, #11697). head_span_shaft_radii fixes the arrow head length at that many shaft radii, so a long arrow keeps a slim shaft instead of a long spike. slim is for high-resolution shareable renders.",
+  "default_style": "standard",
+  "head_span_shaft_radii": 20.0,
+  "styles": {
+    "standard": {"shaft_radius_m": 0.015, "min_height_px": 720, "min_shaft_px": 7.0},
+    "slim": {"shaft_radius_m": 0.006, "min_height_px": 1080, "min_shaft_px": 4.0}
+  }
+}
