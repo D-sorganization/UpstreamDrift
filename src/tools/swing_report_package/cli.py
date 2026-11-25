@@ -29,7 +29,7 @@ from src.tools.swing_report_package.runner import (
     subprocess_render,
 )
 
-__all__ = ["build_parser", "main"]
+__all__ = ["build_parser", "main", "request_from_args"]
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -53,7 +53,7 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
-def _request(args: argparse.Namespace, catalog: Catalog) -> PackageRequest:
+def request_from_args(args: argparse.Namespace, catalog: Catalog) -> PackageRequest:
     """The package request of the flags; ``ValueError``/``OSError`` if bad."""
     base = PackageRequest.from_file(args.config) if args.config else PackageRequest()
     if args.package is not None:
@@ -105,7 +105,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not args.bundle.is_file():
         parser.error(f"no bundle file {args.bundle}")
     try:
-        jobs = plan_package(catalog, _request(args, catalog))
+        jobs = plan_package(catalog, request_from_args(args, catalog))
     except (ValueError, OSError) as exc:
         parser.error(str(exc))
     if args.dry_run:
