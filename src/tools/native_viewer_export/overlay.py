@@ -562,9 +562,9 @@ def _with_ztcf_zvcf(
     feed: OverlayFeed, swing: SwingInput, style: Any, opts: OverlayOptions
 ) -> OverlayFeed:
     """``feed`` with the ZTCF/ZVCF hand arrows, their legend and colour key."""
-    from src.shared.python.force_overlay.tip_to_tail import colour_key
     from src.tools.native_viewer_export.ztcf_feed import (
         gained_style,
+        hands_colour_key,
         hands_of,
         legend_for,
         ztcf_zvcf_arrows,
@@ -579,7 +579,7 @@ def _with_ztcf_zvcf(
         feed,
         extra_arrows=arrows,
         extra_legend=legend_for(gain, view, quantity, hands),
-        colour_key=colour_key(view),
+        colour_key=hands_colour_key(view, hands),
     )
 
 
