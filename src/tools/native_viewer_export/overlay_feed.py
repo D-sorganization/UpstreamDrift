@@ -20,6 +20,10 @@ from src.tools.native_viewer_export.arrow_style import load_arrow_style
 
 STANDARD_GRAVITY_M_S2 = 9.80665
 BODY_WEIGHT_ARROW_M = 0.5
+#: HUD note on states whose section loads are blanked around ball contact
+CONTACT_BLACKOUT_NOTE = (
+    "Shading withheld at ball contact: the impact impulse is not modelled"
+)
 
 
 def default_glyph_style(
@@ -193,9 +197,14 @@ class OverlayFeed:
 
     def hud_lines_at(self, index: int) -> tuple[str, ...]:
         """HUD capability/mobility text lines at frame ``index`` (HCM-3, #14004),
-        then the forces note."""
+        then the forces note and, where the section loads are blanked around
+        ball contact, :data:`CONTACT_BLACKOUT_NOTE`."""
         lines = () if self.hand_hud_lines is None else self.hand_hud_lines(index)
-        return (*lines, self.forces_note) if self.forces_note else lines
+        notes = (self.forces_note,) if self.forces_note else ()
+        axial = self.axial_at(index)
+        if axial is not None and all(v is None for v in axial.values_n.values()):
+            notes = (*notes, CONTACT_BLACKOUT_NOTE)
+        return (*lines, *notes)
 
     def axial_at(self, index: int) -> Any:
         """``AxialLoadFrame`` of state ``index``, or ``None`` when not computed."""

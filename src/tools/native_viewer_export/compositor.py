@@ -545,10 +545,13 @@ def draw_text_panel(
     lines: Sequence[tuple[str, Cells, bool]],
     alpha: float = _CARD_ALPHA,
     label_colours: Sequence[tuple[int, int, int] | None] = (),
+    swatches: Sequence[tuple[int, int, int]] = (),
 ) -> Image8:
     """Copy of ``img`` with a darkened panel in ``box``: ``title``, then one
     ``(label, value, dimmed)`` line each. Only pixels inside ``box`` change.
-    A value of cells is drawn as columns; ``label_colours`` colour the labels."""
+    A value of cells is drawn as columns; ``label_colours`` colour the labels;
+    ``swatches`` draw a solid block of that colour at the start of each line
+    (the label then needs :data:`SWATCH_INDENT` in front to clear it)."""
     _check_image(img)
     (x0, y0, x1, y1), out = box, img.copy()
     region = out[y0:y1, x0:x1].astype(np.float32) * (1.0 - alpha)
@@ -565,6 +568,9 @@ def draw_text_panel(
         y = pad + i * line_h
         colour = _CARD_GREY if unavailable else _WHITE
         colour = next(iter(label_colours[i - 1 : i]), None) or colour
+        swatch = next(iter(swatches[i - 1 : i]), None)
+        if swatch is not None:
+            draw.rectangle((pad, y + 3, pad + size - 2, y + size), fill=tuple(swatch))
         draw.text((pad, y), label, font=font, fill=colour)
         for cell, right in zip(reversed(_cells(value)), rights, strict=False):
             draw.text(
@@ -578,6 +584,8 @@ def draw_text_panel(
 
 
 COLOUR_KEY_TITLE = "Colour Key"
+#: room in front of a key row for its colour swatch
+SWATCH_INDENT = "      "
 #: one colour key row: its text and the 8-bit RGB it is drawn in
 KeyEntry = tuple[str, tuple[int, int, int]]
 
@@ -586,7 +594,7 @@ def _key_lines(entries: Sequence[KeyEntry]) -> list[tuple[str, Cells, bool]]:
     for _, rgb in entries:
         if len(rgb) != 3 or not all(isinstance(c, int) and 0 <= c <= 255 for c in rgb):
             raise ValueError(f"key colour must be three 0-255 integers, got {rgb!r}")
-    return [(text, "", False) for text, _ in entries]
+    return [(SWATCH_INDENT + text, "", False) for text, _ in entries]
 
 
 def colour_key_box(
@@ -598,7 +606,8 @@ def colour_key_box(
 
 
 def draw_colour_key(img: Image8, entries: Sequence[KeyEntry]) -> Image8:
-    """Copy of ``img`` with a panel naming each arrow colour in that colour.
+    """Copy of ``img`` with a panel naming each arrow colour: a solid swatch
+    of the colour, then the name in white (dark colours stay readable).
 
     An empty key draws nothing. Only pixels in :func:`colour_key_box` change.
 
@@ -611,9 +620,7 @@ def draw_colour_key(img: Image8, entries: Sequence[KeyEntry]) -> Image8:
         return img.copy()
     box, size = text_panel_box(img.shape, COLOUR_KEY_TITLE, lines, "left")
     colours = [rgb for _, rgb in entries]
-    return draw_text_panel(
-        img, box, size, COLOUR_KEY_TITLE, lines, label_colours=colours
-    )
+    return draw_text_panel(img, box, size, COLOUR_KEY_TITLE, lines, swatches=colours)
 
 
 def draw_hud(img: Image8, hud: HudInfo, *, size: int = HUD_SIZE_PX) -> Image8:
