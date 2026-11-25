@@ -46,6 +46,9 @@ PointAt = Callable[[Array], Array]
 
 #: Hands, in display order. The trail hand closes the loop (the weld).
 HANDS = ("lead", "trail")
+#: The hand-club weld rows lead the multipliers; planted-ground rows
+#: (``GroundedProvider``) follow them.
+CLOSURE_ROWS = 6
 #: ZTCF: drift (zero torque; gravity, momentum, passive). ZVCF: control
 #: (the applied torques alone). Owner decision #14497; they sum to the total.
 PARTS = ("ztcf", "zvcf")
@@ -190,10 +193,10 @@ def hand_wrench_split(
         for part, (a, lam), rates, gravity in zip(
             PARTS, states, (v[k], np.zeros_like(v[k])), (True, False), strict=True
         ):
-            if lam.shape != (6,):
+            if lam.ndim != 1 or lam.shape[0] < CLOSURE_ROWS:
                 raise ValueError("the closure must have six rows (a weld)")
             net = club_load(q[k], rates, a, gravity)
-            loads = _hand_loads(lam, rot, origin, net, point)
+            loads = _hand_loads(lam[:CLOSURE_ROWS], rot, origin, net, point)
             for hand, (force, torque), at in zip(
                 HANDS, loads, (point, origin), strict=True
             ):

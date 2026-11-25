@@ -256,6 +256,57 @@ class PinocchioForceAdapter:
             result[3 * i : 3 * i + 3] = jac[:3]
         return result
 
+    def planted_bodies(self) -> tuple[str, ...]:
+        """Bodies that carry contact spheres (the feet), in spec order."""
+        spheres = self._spec["contact"]["spheres"]
+        return tuple(dict.fromkeys(str(s["body"]) for s in spheres))
+
+    def gravity_m_s2(self) -> Array:
+        """World gravity vector of the model (m/s^2)."""
+        field = self._model.gravity
+        return np.asarray(field.linear, dtype=float).copy()
+
+    def ground_weld_rows(self, q: Array, v: Array) -> tuple[Array, Array]:
+        """``(J, Jdot v)`` welding each planted body to the ground (#15150 Z5).
+
+        Six rows per body of :meth:`planted_bodies`, linear then angular, in
+        world-aligned axes at the body's first contact sphere (a frame rigid on
+        that body); the drift is that point's classical acceleration and the
+        angular acceleration at ``a = 0``. The multipliers on these rows are
+        the ground's wrench on each foot, about that sphere centre.
+        """
+        zero = np.zeros(self.nv)
+        self._second_order_kinematics(q, v, zero)
+        pin = self._pin
+        aligned = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+        pin.computeJointJacobians(self._model, self._data, np.asarray(q, float))
+        pin.updateFramePlacements(self._model, self._data)
+        rows, drift = [], []
+        spheres = self._spec["contact"]["spheres"]
+        for body in self.planted_bodies():
+            first = next(x["name"] for x in spheres if x["body"] == body)
+            frame = self._model.getFrameId(first)
+            rows.append(pin.getFrameJacobian(self._model, self._data, frame, aligned))
+            linear = pin.getFrameClassicalAcceleration(
+                self._model, self._data, frame, aligned
+            )
+            angular = pin.getFrameAcceleration(self._model, self._data, frame, aligned)
+            drift.append(np.concatenate([linear.linear, angular.angular]))
+        return np.vstack(rows), np.concatenate(drift)
+
+    def ground_wrench_points(self, q: Array) -> tuple[tuple[str, Array], ...]:
+        """``(body, world point)`` per planted body, where the multipliers of
+        :meth:`ground_weld_rows` act: the body's first contact sphere centre."""
+        pin = self._pin
+        pin.framesForwardKinematics(self._model, self._data, np.asarray(q, float))
+        spheres = self._spec["contact"]["spheres"]
+        out = []
+        for body in self.planted_bodies():
+            first = next(x["name"] for x in spheres if x["body"] == body)
+            placement = self._data.oMf[self._model.getFrameId(first)]
+            out.append((body, np.asarray(placement.translation, dtype=float).copy()))
+        return tuple(out)
+
     def foot_contact_candidates(self, q: Array) -> tuple[ContactCandidate, ...]:
         """Contact spheres as candidates, in ``contact_names`` order (NSX-60).
 
