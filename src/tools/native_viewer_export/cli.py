@@ -71,6 +71,9 @@ from src.tools.native_viewer_export.flight_tracer import load_tracer_settings
 from src.tools.native_viewer_export.dispersion_traces import load_trace_settings
 from src.tools.native_viewer_export.hole_view import load_hole_view_settings
 from src.tools.native_viewer_export.impact_factors import load_factor_settings
+from src.tools.native_viewer_export.model_card_panel import (
+    default_enabled as default_card_panel,
+)
 from src.tools.native_viewer_export.overlay import OverlayOptions, build_overlay_feed
 from src.tools.native_viewer_export.runner import ExportJob, run_export
 from src.tools.native_viewer_export.ztcf_axial import SHADING_PARTS
@@ -619,6 +622,13 @@ def build_parser() -> argparse.ArgumentParser:
         "HUD (default: off; HRG-E4, #13175)",
     )
     p.add_argument(
+        "--model-card-panel",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="draw the model card (each field with its measured/fitted/assumed/"
+        "unknown tag) in the clip; default: model_card_panel_settings.json",
+    )
+    p.add_argument(
         "--impact-time",
         type=float,
         default=None,
@@ -822,6 +832,12 @@ def _ball_flight_for(args: argparse.Namespace, units: DisplayUnits) -> Any:
     return replace(tracer, hole_view=view)
 
 
+def _card_panel_flag(args: argparse.Namespace) -> bool:
+    """``--model-card-panel``, else the settings file default (#15150 E2)."""
+    flag = getattr(args, "model_card_panel", None)
+    return default_card_panel() if flag is None else bool(flag)
+
+
 def build_settings(args: argparse.Namespace) -> ExportSettings:
     """``ExportSettings`` from parsed arguments (raises ``ValueError``)."""
     base = ExportSettings.preview() if args.preset == "preview" else ExportSettings()
@@ -879,6 +895,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         grip=args.grip,
         hud=not args.no_hud,
         event_captions=bool(getattr(args, "event_captions", False)),
+        model_card_panel=_card_panel_flag(args),
         ball=not args.no_ball,
         impact_factors=load_factor_settings(args.impact_factors_settings)
         if args.impact_factors or args.impact_factors_settings is not None

@@ -51,7 +51,7 @@ from src.tools.native_viewer_export.compositor import (
     event_caption_for_time,
 )
 from src.tools.native_viewer_export import contact_frame, flight_tracer, replay_mode
-from src.tools.native_viewer_export import model_card, shot_setup
+from src.tools.native_viewer_export import model_card, model_card_panel, shot_setup
 from src.tools.native_viewer_export import ellipsoid_panel as ellipsoid_hud
 from src.tools.native_viewer_export import dispersion_traces, flight_inset, hole_view
 from src.tools.native_viewer_export.frame_times import write_frame_times
@@ -207,6 +207,8 @@ class ExportSettings:
     club_roll_in_hands_deg: float = 0.0
     ball_position_shift_m: float = 0.0
     shot_shape: str | None = None  # straight | draw | fade: solves the roll
+    #: model card panel in the clip (#15150 E2); default from its settings file
+    model_card_panel: bool = field(default_factory=model_card_panel.default_enabled)
 
     @property
     def shading_enabled(self) -> bool:
@@ -282,6 +284,7 @@ class ExportSettings:
             "palm_thumb_force",
             "drift_arrow",
             "event_captions",
+            "model_card_panel",
         ):
             if not isinstance(getattr(self, flag), bool):
                 raise TypeError(f"{flag} must be bool")
@@ -804,6 +807,7 @@ class ClipOverlays:
     strip: StripRenderer | None = None
     factors: factors_panel.FactorsPanel | None = None
     ellipsoids: ellipsoid_hud.EllipsoidPanel | None = None
+    card_panel: model_card_panel.ModelCardPanel | None = None
 
 
 def _swing_event_caption(swing: SwingInput, time_s: float, impact_s: float) -> str:
@@ -875,6 +879,19 @@ def _key_entries(
             else spread.key_entries(flight.settings.tracer_color_rgba)
         ),
     )
+
+
+def _draw_keys(
+    outputs: dict[str, Image8],
+    key_entries: tuple,
+    overlays: ClipOverlays | None,
+    hud: HudInfo,
+) -> dict[str, Image8]:
+    """``outputs`` with the colour key (when it has rows), then the model card
+    panel (when the export asks for it)."""
+    if key_entries:
+        outputs = {n: draw_colour_key(f, key_entries) for n, f in outputs.items()}
+    return model_card_panel.draw_all(overlays, hud, outputs)
 
 
 def _export_clip(
@@ -955,10 +972,8 @@ def _export_clip(
                 outputs = factors_panel.draw_card_all(outputs, card, GRID_VIEW)
             if factors is not None:
                 outputs = factors.draw_all(outputs, t, GRID_VIEW)
-            if settings.hud and key_entries:
-                outputs = {
-                    n: draw_colour_key(f, key_entries) for n, f in outputs.items()
-                }
+            keys = key_entries if settings.hud else ()
+            outputs = _draw_keys(outputs, keys, overlays, hud)
             outputs = ellipsoid_hud.draw_all(overlays, shown_feed, k, hud, outputs)
             outputs = flight_inset.draw_all(overlays, shown_feed, k, hud, outputs)
             if strip is not None:  # cursor at this frame's swing time
@@ -1061,6 +1076,8 @@ def export_swing(
     )
     factors = overlays.factors if overlays is not None else factors
     overlays = ellipsoid_hud.with_panel(overlays, settings, feed, factors)
+    card_record = model_card.model_card_of(swing, settings, ball_record)
+    overlays = model_card_panel.with_panel(overlays, settings, card_record)
     for plan in plans:
         clip = flight_inset.for_clip(overlays, plan.window)
         clip_paths, frames, glyphs = _export_clip(
@@ -1083,7 +1100,7 @@ def export_swing(
         ),
         ball=ball_record,
         replay_mode=replay_mode.replay_mode_of(swing.bundle).value,
-        model_card=model_card.model_card_of(swing, settings, ball_record).to_dict(),
+        model_card=card_record.to_dict(),
         flight=flight_tracer.manifest_record(overlays),
         inset_strip=(
             strip_outcome.record()
