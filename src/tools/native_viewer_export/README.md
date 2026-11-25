@@ -504,7 +504,11 @@ flex), `shot_setup` (club roll, ball shift, shot shape, ball placement) and
 `impact_model`. Each entry is `{value, tag, source}` with the tag `measured`,
 `fitted`, `assumed` or `unknown`; data the bundle does not record is the
 explicit value `unknown`, never left out. `ModelCard.from_dict` reads it back
-and refuses another schema. The card is not drawn in the clip yet.
+and refuses another schema.
+
+`--model-card-panel` (off by default) draws the card on every frame, a row per
+field coloured by its tag (`model_card_panel.py`); its layout and colours are in
+`model_card_panel_settings.json`, and `--no-hud` removes it.
 
 ## Aim Line
 

@@ -1,0 +1,28 @@
+{
+  "_comment": "Flex comparison sheet styling and layout (#15150 C5). See club_fitting/flex_comparison.py.",
+  "sheet_stem": "flex_comparison",
+  "page_size_in": [11.0, 8.5],
+  "dpi": 120,
+  "font_size": 9.0,
+  "title_font_size": 13.5,
+  "title": "Flex Comparison: Same Hand Motion",
+  "grid_alpha": 0.3,
+  "height_ratios": [2.0, 2.0, 1.6],
+  "line_width": 1.6,
+  "flex_colors": ["#9467bd", "#2ca02c", "#1f77b4", "#ff7f0e", "#d62728", "#8c564b", "#17becf"],
+  "distance_scale": 1.0936132983,
+  "downrange_label": "Downrange (yd)",
+  "height_label": "Height (yd)",
+  "side_label": "Side, + Right (yd)",
+  "side_view_title": "Side View",
+  "plan_view_title": "Plan View",
+  "no_flight_text": "No ball flight in this sweep",
+  "missing_text": "n/a",
+  "metrics": [
+    { "key": "impact_head_speed_mph", "label": "Head Speed (mph)", "format": "{:.1f}" },
+    { "key": "shot_ball_speed_mph", "label": "Ball Speed (mph)", "format": "{:.1f}" },
+    { "key": "shot_carry_yd", "label": "Carry (yd)", "format": "{:.1f}" },
+    { "key": "shot_side_yd", "label": "Side (yd)", "format": "{:+.1f}" },
+    { "key": "shot_face_angle_deg", "label": "Face (deg)", "format": "{:+.1f}" }
+  ]
+}

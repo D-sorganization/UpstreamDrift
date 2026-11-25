@@ -68,6 +68,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1118 | `src/motion_capture/rig/__main__.py` |
 | 1115 | `src/bunkershot3d/ball/qualification.py` |
 | 1113 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/PostProcessingModule.m` |
+| 1110 | `src/tools/native_viewer_export/core.py` |
 | 1110 | `src/tools/shot_pattern_analysis/academic_plots.py` |
 | 1106 | `src/shared/python/motion_matching/leaderboard.py` |
 | 1103 | `src/launchers/launcher_dialogs.py` |
@@ -75,7 +76,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1100 | `src/shared/python/motion_matching/club_only/control_replay.py` |
 | 1098 | `src/tools/shot_pattern_analysis/matched_supplement_pipeline.py` |
 | 1096 | `src/learning/retargeting/retargeter.py` |
-| 1093 | `src/tools/native_viewer_export/core.py` |
 | 1089 | `src/shared/python/motion_pipeline/contracts.py` |
 | 1089 | `src/shared/python/physics/flight_models.py` |
 | 1078 | `src/engines/physics_engines/drake/python/full_body_model.py` |
@@ -112,13 +112,13 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1007 | `src/shared/python/grip_contact/simscape_grip_contact.py` |
 | 1001 | `src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py` |
 | 1000 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_opengl_renderer.py` |
+| 1000 | `src/tools/native_viewer_export/cli.py` |
 | 999 | `src/shared/python/estimation/dime_contracts.py` |
 | 998 | `src/engines/physics_engines/myosuite/python/myohand_grip_controller.py` |
 | 998 | `src/shared/python/motion_matching/multi_engine_torque_allocator.py` |
 | 994 | `src/api/models/responses.py` |
 | 990 | `src/shared/python/estimation/map_estimator.py` |
 | 988 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_data_core.py` |
-| 983 | `src/tools/native_viewer_export/cli.py` |
 | 981 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
 | 981 | `src/shared/python/workspace/necromatcher_video.py` |
 | 975 | `src/api/routes/simulation_ws.py` |

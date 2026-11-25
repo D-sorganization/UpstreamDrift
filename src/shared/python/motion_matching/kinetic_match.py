@@ -79,7 +79,13 @@ _FLOATS = (
 #: Where the flexible shaft's bend comes from (see the module docstring).
 SHAFT_SOURCES = ("response", "reference")
 
-__all__ = ["SHAFT_SOURCES", "KineticMatchSettings", "kinetic_match", "load_settings"]
+__all__ = [
+    "SHAFT_SOURCES",
+    "KineticMatchSettings",
+    "kinetic_match",
+    "load_settings",
+    "run_kinetic_match",
+]
 
 
 @dataclass(frozen=True)
@@ -387,6 +393,41 @@ def kinetic_match(
     return out, receipt
 
 
+def run_kinetic_match(
+    bundle: Path,
+    out: Path,
+    *,
+    settings_path: Path | str = SETTINGS_PATH,
+    shaft_source: str | None = None,
+) -> dict[str, Any]:
+    """Kinetic match of a saved bundle: the one entry for CLI, REST and MCP.
+
+    Loads the settings (``shaft_source`` overrides theirs when given) and the
+    bundle, runs :func:`kinetic_match` on the MuJoCo adapter, saves the bundle
+    with efforts to ``out`` and the receipt beside it. Returns ``{"receipt",
+    "out", "receipt_path"}``. ``ValueError`` for an unwired engine or an
+    invalid ``shaft_source``.
+    """
+    from src.shared.python.motion_matching.multi_engine_torque_allocator import (
+        MujocoForceAdapter,
+    )
+    from src.shared.python.motion_matching.same_input.bundle import InputBundle
+
+    settings = load_settings(settings_path)
+    if shaft_source is not None:
+        settings = replace(settings, shaft_source=shaft_source)
+    if settings.engine != "mujoco":
+        raise ValueError("only the mujoco engine is wired")
+    loaded = InputBundle.load(bundle)
+    matched, receipt = kinetic_match(
+        loaded, settings, MujocoForceAdapter(loaded.spec_bytes)
+    )
+    matched.save(out)
+    receipt_path = out.with_suffix(".kinetic_receipt.json")
+    receipt_path.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
+    return {"receipt": receipt, "out": out, "receipt_path": receipt_path}
+
+
 def main(argv: list[str] | None = None) -> int:
     """CLI: ``python3 -m src.shared.python.motion_matching.kinetic_match``."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -394,21 +435,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("out", type=Path, help="output bundle with efforts (.npz)")
     parser.add_argument("--settings", type=Path, default=SETTINGS_PATH)
     args = parser.parse_args(argv)
-    from src.shared.python.motion_matching.multi_engine_torque_allocator import (
-        MujocoForceAdapter,
-    )
-    from src.shared.python.motion_matching.same_input.bundle import InputBundle
-
-    settings = load_settings(args.settings)
-    if settings.engine != "mujoco":
-        raise ValueError("only the mujoco engine is wired")
-    bundle = InputBundle.load(args.bundle)
-    out, receipt = kinetic_match(
-        bundle, settings, MujocoForceAdapter(bundle.spec_bytes)
-    )
-    out.save(args.out)
-    receipt_path = args.out.with_suffix(".kinetic_receipt.json")
-    receipt_path.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
+    result = run_kinetic_match(args.bundle, args.out, settings_path=args.settings)
+    receipt = result["receipt"]
     logging.basicConfig(level=logging.INFO)
     logger.info("kinetic match %s: %s", receipt["verdict"], receipt["reasons"])
     return 0

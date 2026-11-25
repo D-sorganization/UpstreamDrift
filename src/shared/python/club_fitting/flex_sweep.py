@@ -13,8 +13,10 @@ from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass, field
 import logging
 import math
+from typing import Any
 
 from src.shared.python.club_fitting.bend_trace import BendTrace, bend_trace
+from src.shared.python.club_fitting.flight_trace import FLIGHT_KEY, FlightTrace
 from src.shared.python.club_fitting.grip_driven_shaft import (
     HeadGeometry,
     ShaftRun,
@@ -31,7 +33,7 @@ from src.shared.python.motion_matching import club_shaft_chain as cs
 logger = logging.getLogger(__name__)
 RIGID = "Rigid"
 MPH_PER_MPS = 2.2369362920544
-ShotFn = Callable[["ShaftRun | None"], dict[str, float | None]]
+ShotFn = Callable[["ShaftRun | None"], dict[str, Any]]
 
 
 @dataclass(frozen=True)
@@ -41,7 +43,8 @@ class FlexRow:
     Deltas are bent minus straight club in the same hand motion, at impact.
     ``peak_tip_deflection_mm`` is the peak up to impact; the extrapolated
     window after it is not physical. ``bend`` is the lead and droop up to
-    impact (for the shaft report); it is not part of :meth:`record`.
+    impact (for the shaft report) and ``flight`` the ball flight (for the flex
+    comparison); neither is part of :meth:`record`.
     """
 
     flex: str
@@ -55,10 +58,12 @@ class FlexRow:
     peak_tip_deflection_mm: float
     shot: dict[str, float | None] | None
     bend: BendTrace | None = field(default=None, compare=False, repr=False)
+    flight: FlightTrace | None = field(default=None, compare=False, repr=False)
 
     def record(self) -> dict[str, object]:
         flat = asdict(self)
         flat.pop("bend")
+        flat.pop("flight")
         shot = flat.pop("shot") or {}
         return {**flat, **{f"shot_{k}": v for k, v in shot.items()}}
 
@@ -72,6 +77,8 @@ def _row(
     head: HeadGeometry | None = None,
 ) -> FlexRow:
     mph = MPH_PER_MPS
+    values = None if shot is None else dict(shot(run))
+    flight = None if values is None else values.pop(FLIGHT_KEY, None)
     return FlexRow(
         flex,
         cpm,
@@ -82,8 +89,9 @@ def _row(
         run.at("face_delta_deg", impact_s),
         run.at("lie_delta_deg", impact_s),
         run.peak_tip_deflection_until_m(impact_s) * 1e3,
-        None if shot is None else shot(run),
+        values,
         None if head is None else bend_trace(run, head, impact_s),
+        flight,
     )
 
 
@@ -102,7 +110,8 @@ def run_flex_sweep(
         flexes: ratings to run (default: every ``club_shaft_chain`` rating,
             most flexible first).
         shot: maps a run (``None`` for the rigid club) to ball speed, launch
-            and carry; omitted when no shot model is available.
+            and carry, and optionally the flight under ``FLIGHT_KEY`` (kept
+            on the row, not in its record); omitted without a shot model.
 
     Raises:
         ValueError: empty or unknown flex list, or any input rejected by

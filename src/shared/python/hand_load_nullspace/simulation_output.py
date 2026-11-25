@@ -52,6 +52,18 @@ class SimulationOutput:
     model_definition_hash: str = ""
     subject_profile_hash: str = ""
     match_artifact_hash: str = ""
+    cop_wrench_m: Channel | None = None
+    cop_pressure_centroid_m: Channel | None = None
+    bos_valid: bool = True
+    bos_margin_m: float = 0.0
+    contact_state: str = "flight"
+    cop_segment_id: int = 0
+    gate_alpha: float = 1.0
+    filter_provenance: str = "raw"
+    com_body_m: Channel | None = None
+    com_body_club_m: Channel | None = None
+    mass_total_kg: Channel | None = None
+    momentum_residual_n: Channel | None = None
     def __post_init__(self) -> None:
         _pre(self.schema_version == SCHEMA_VERSION, "schema_version is not supported")
         _pre(bool(self.frame.strip()) and math.isfinite(self.time_s), "frame and time_s are required")
@@ -78,7 +90,19 @@ def _hand(values, units: str, reason: str) -> Channel:
     if values is None:
         return _missing(reason or "hand load unavailable", units)
     return _channel(values, units)
-def simulation_output(problem, solution, *, frame, time_s, ground=None, cop_min_fz_n=DEFAULT_COP_MIN_FZ_N, lineage=("", "", "", "")):
+def simulation_output(problem, solution, *, frame, time_s, ground=None, cop_min_fz_n=DEFAULT_COP_MIN_FZ_N, lineage=("", "", "", ""), **biomech):
+    cop_wrench_m = biomech.get("cop_wrench_m")
+    cop_pressure_centroid_m = biomech.get("cop_pressure_centroid_m")
+    bos_valid = biomech.get("bos_valid", True)
+    bos_margin_m = biomech.get("bos_margin_m", 0.0)
+    contact_state = biomech.get("contact_state", "flight")
+    cop_segment_id = biomech.get("cop_segment_id", 0)
+    gate_alpha = biomech.get("gate_alpha", 1.0)
+    filter_provenance = biomech.get("filter_provenance", "raw")
+    com_body_m = biomech.get("com_body_m")
+    com_body_club_m = biomech.get("com_body_club_m")
+    mass_total_kg = biomech.get("mass_total_kg")
+    momentum_residual_n = biomech.get("momentum_residual_n")
     _pre(problem.load_kind == solution.load_kind, "problem and solution load_kind differ")
     reason = solution.reason or "hand load unavailable"
     if ground is None:
@@ -90,12 +114,29 @@ def simulation_output(problem, solution, *, frame, time_s, ground=None, cop_min_
         ground_force_n, ground_moment_nm, ground_point_m = ground
         ground_f, ground_m = _channel(ground_force_n, "N"), _channel(ground_moment_nm, "N*m")
         cop = cop_channel(ground_force_n, ground_moment_nm, ground_point_m, min_fz_n=cop_min_fz_n)
+    match_id, model_def_hash, subj_hash, artifact_hash = lineage
     return SimulationOutput(
         SCHEMA_VERSION, frame, float(time_s), solution.load_kind, solution.replay_badge,
         _hand(solution.net_force_n, "N", reason), _hand(solution.midhands_moment_nm, "N*m", reason),
         _hand(solution.f_l_n, "N", reason), _hand(solution.f_r_n, "N", reason),
         _hand(solution.m_l_nm, "N*m", reason), _hand(solution.m_r_nm, "N*m", reason),
-        ground_f, ground_m, cop, *lineage,
+        ground_f, ground_m, cop,
+        match_id=match_id,
+        model_definition_hash=model_def_hash,
+        subject_profile_hash=subj_hash,
+        match_artifact_hash=artifact_hash,
+        cop_wrench_m=cop_wrench_m or cop,
+        cop_pressure_centroid_m=cop_pressure_centroid_m or _missing("pressure centroid unavailable", "m"),
+        bos_valid=bos_valid,
+        bos_margin_m=float(bos_margin_m),
+        contact_state=contact_state,
+        cop_segment_id=int(cop_segment_id),
+        gate_alpha=float(gate_alpha),
+        filter_provenance=filter_provenance,
+        com_body_m=com_body_m or _missing("com_body unavailable", "m"),
+        com_body_club_m=com_body_club_m or _missing("com_body_club unavailable", "m"),
+        mass_total_kg=mass_total_kg or _missing("mass_total unavailable", "kg"),
+        momentum_residual_n=momentum_residual_n or _missing("momentum_residual unavailable", "N"),
     )
 def superposition_holds(total_f, ztcf_f, zvcf_f, total_m, ztcf_m, zvcf_m, *, rtol=DEFAULT_SUPERPOSITION_RTOL) -> bool:
     _pre(math.isfinite(rtol) and rtol > 0, "rtol must be positive")

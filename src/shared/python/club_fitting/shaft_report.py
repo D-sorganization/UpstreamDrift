@@ -9,7 +9,7 @@ does not adapt). The sweep CLI writes it with ``--report``.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, field, fields
 import json
 import logging
 from pathlib import Path
@@ -17,6 +17,7 @@ import re
 from typing import Any
 
 from src.shared.python.club_fitting.bend_trace import BendTrace
+from src.shared.python.club_fitting.flight_trace import FlightTrace
 from src.shared.python.club_fitting.grip_motion import _positive
 
 logger = logging.getLogger(__name__)
@@ -69,32 +70,38 @@ class ReportSettings:
             raise ValueError("metrics must list at least one entry")
 
 
-_SETTING_KEYS = {f.name for f in fields(ReportSettings)}
+def load_settings_json(path: Path, cls: type, tuple_keys: tuple[str, ...]) -> Any:
+    """``cls`` built from the JSON at ``path``: ``_``-keys dropped, ``metrics``
+    as :class:`Metric` entries and ``tuple_keys`` as tuples.
+
+    Raises:
+        ValueError: a missing or unknown key, or a value ``cls`` rejects.
+    """
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data = {k: v for k, v in data.items() if not k.startswith("_")}
+    schema = {f.name for f in fields(cls)}
+    if set(data) != schema:
+        diff = sorted(set(data) ^ schema)
+        raise ValueError(f"{path.name} keys differ from the schema: {diff}")
+    data["metrics"] = tuple(Metric(**m) for m in data["metrics"])
+    data |= {k: tuple(data[k]) for k in tuple_keys}
+    return cls(**data)
 
 
 def load_report_settings(path: Path | None = None) -> ReportSettings:
-    """Settings from ``path`` (default ``src/config/shaft_report.json``).
-
-    Raises:
-        ValueError: a missing or unknown key, or a value out of range.
-    """
-    data = json.loads((path or SETTINGS_PATH).read_text(encoding="utf-8"))
-    data = {k: v for k, v in data.items() if not k.startswith("_")}
-    if set(data) != _SETTING_KEYS:
-        diff = sorted(set(data) ^ _SETTING_KEYS)
-        raise ValueError(f"shaft_report settings keys differ from the schema: {diff}")
-    data["metrics"] = tuple(Metric(**m) for m in data["metrics"])
-    data["page_size_in"] = tuple(data["page_size_in"])
-    data["height_ratios"] = tuple(data["height_ratios"])
-    return ReportSettings(**data)
+    """Settings from ``path`` (default ``src/config/shaft_report.json``)."""
+    keys = ("page_size_in", "height_ratios")
+    return load_settings_json(path or SETTINGS_PATH, ReportSettings, keys)
 
 
 @dataclass(frozen=True)
 class SweepResult:
-    """Sweep rows (flat records, one per flex) and their bend traces, if any."""
+    """Sweep rows (flat records, one per flex), their bend traces and ball
+    flights, where the sweep has them."""
 
     rows: tuple[dict[str, Any], ...]
     traces: dict[str, BendTrace]
+    flights: dict[str, FlightTrace] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not self.rows:
@@ -104,28 +111,33 @@ class SweepResult:
 
 
 def load_sweep_result(path: Path) -> SweepResult:
-    """Read ``flex_sweep.json``; ``traces`` is optional (older sweeps)."""
+    """Read ``flex_sweep.json``; ``traces`` and ``flights`` are optional."""
     data = json.loads(path.read_text(encoding="utf-8"))
     traces = {k: BendTrace.from_dict(v) for k, v in data.get("traces", {}).items()}
-    return SweepResult(tuple(data.get("rows", ())), traces)
+    flights = {k: FlightTrace.from_dict(v) for k, v in data.get("flights", {}).items()}
+    return SweepResult(tuple(data.get("rows", ())), traces, flights)
 
 
 def summary_rows(result: SweepResult, settings: ReportSettings) -> list[dict]:
     """One record per flex: ``flex`` and every settings metric (``None`` if
     the sweep does not provide it)."""
+    return metric_rows(result, settings.metrics)
+
+
+def metric_rows(result: SweepResult, metrics: tuple[Metric, ...]) -> list[dict]:
+    """:func:`summary_rows` for any metric list."""
     out = []
     for row in result.rows:
         trace = result.traces.get(row["flex"])
         lead, droop = (None, None) if trace is None else trace.at_impact()
         known = {**row, "lead_at_impact_mm": lead, "droop_at_impact_mm": droop}
-        out.append(
-            {"flex": row["flex"], **{m.key: known.get(m.key) for m in settings.metrics}}
-        )
+        out.append({"flex": row["flex"], **{m.key: known.get(m.key) for m in metrics}})
     return out
 
 
-def _text(value: Any, metric: Metric, settings: ReportSettings) -> str:
-    return settings.missing_text if value is None else metric.format.format(value)
+def metric_text(value: Any, metric: Metric, missing: str) -> str:
+    """``value`` in the metric's format, ``missing`` for ``None``."""
+    return missing if value is None else metric.format.format(value)
 
 
 def _plot_trace(ax: Any, trace: BendTrace | None, settings: ReportSettings) -> None:
@@ -154,7 +166,8 @@ def render_page(record: dict, trace: BendTrace | None, settings: ReportSettings)
     fig.suptitle(f"{record['flex']} Shaft", fontsize=s.title_font_size)
     _plot_trace(top, trace, s)
     bottom.axis("off")
-    cells = [[m.label, _text(record.get(m.key), m, s)] for m in s.metrics]
+    cells = [[m.label, metric_text(record.get(m.key), m, s.missing_text)]
+             for m in s.metrics]  # fmt: skip
     table = bottom.table(cellText=cells, colLabels=["Quantity", "Value"], loc="center")
     table.set_fontsize(s.font_size)
     for ax in (top, bottom):
@@ -162,11 +175,14 @@ def render_page(record: dict, trace: BendTrace | None, settings: ReportSettings)
     return fig
 
 
-def _markdown(records: list[dict], settings: ReportSettings) -> str:
-    head = ["Flex", *(m.label for m in settings.metrics)]
+def markdown_table(
+    records: list[dict], metrics: tuple[Metric, ...], missing: str
+) -> str:
+    """Markdown table: a flex column then one column per metric."""
+    head = ["Flex", *(m.label for m in metrics)]
     lines = ["| " + " | ".join(head) + " |", "|" + "---|" * len(head)]
     for r in records:
-        cells = [_text(r[m.key], m, settings) for m in settings.metrics]
+        cells = [metric_text(r[m.key], m, missing) for m in metrics]
         lines.append("| " + " | ".join([str(r["flex"]), *cells]) + " |")
     return "\n".join(lines) + "\n"
 
@@ -187,5 +203,7 @@ def write_report(
     table = {"columns": ["flex", *(m.key for m in s.metrics)], "rows": records}
     json_path, md_path = out_dir / f"{s.page_stem}.json", out_dir / f"{s.page_stem}.md"
     json_path.write_text(json.dumps(table, indent=2), encoding="utf-8")
-    md_path.write_text(_markdown(records, s), encoding="utf-8")
+    md_path.write_text(
+        markdown_table(records, s.metrics, s.missing_text), encoding="utf-8"
+    )
     return [*paths, json_path, md_path]
