@@ -454,6 +454,25 @@ kinematic replay, not a refit. Limits live in `shot_setup_settings.json`.
   and recorded in the ball record under `shot_setup`; a non-zero roll or shift
   adds a `Setup: ...` line to the clip HUD.
 
+### Ball Position in the Stance
+
+`python -m src.tools.native_viewer_export.ball_position_sweep --bundle B
+--swing S --out sweep.json` moves the ball along the target line through
+`ball_position_sweep_settings.json` `shifts_m` (or `--shifts M ...`), with
+`--ball-position-shift` semantics (contact kept on the face centre), and
+writes one row per position. Each row has the impact factors and flight at
+zero club roll, plus the club roll that lands the ball on the target line
+(the `--shot-shape straight` solve). The record also gives each quantity's
+slope per centimetre of shift. Each position's roll bracket is centred on its
+neighbour's straight roll. If a bracket end leaves the flight model's
+envelope, the span is halved up to `bracket_halvings` times. Positions forward
+of `forward_valid_m` are flagged, not refused. Nothing is rendered and the
+body motion is unchanged.
+
+The factors that come from the clubhead velocity, such as club path, change
+abruptly when contact crosses the bundle's recorded impact frame. After that
+frame, the measured club already carries the real ball's push.
+
 ## Replay Mode Label
 
 Every clip HUD carries a `Replay: ...` line and every engine row of the export
