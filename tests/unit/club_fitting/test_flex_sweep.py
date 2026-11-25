@@ -113,3 +113,14 @@ def test_peak_bend_is_measured_up_to_impact_not_in_the_extrapolated_tail() -> No
     )
     with pytest.raises(ValueError, match="before the run"):
         run.peak_tip_deflection_until_m(-0.5)
+
+
+def test_rows_carry_the_bend_trace_into_the_sweep_json(tmp_path) -> None:
+    """The shaft report (#15150 C12) reads lead and droop from flex_sweep.json."""
+    from src.shared.python.club_fitting.flex_sweep import _row
+
+    row = _row("Stiff", 280.0, _run_with_tail(0.3), 0.0, None, HEAD)
+    assert row.bend is not None and row.bend.time_s[-1] <= 0.0
+    assert "bend" not in row.record()
+    json_path, _ = write_outputs([row], tmp_path)
+    assert set(json.loads(json_path.read_text())["traces"]) == {"Stiff"}
