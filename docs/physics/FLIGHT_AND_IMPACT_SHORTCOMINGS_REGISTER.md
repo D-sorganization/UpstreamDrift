@@ -64,14 +64,26 @@ Sizes quoted from tests are the band a test asserts, not a published value.
 
 ### Iron COR Source
 
-- **Missing:** a sourced iron-face COR.
-- **Instead:** `cor_by_club` in
-  `src/shared/python/impact_parameters/club_impact_settings.json` holds 0.83 for
-  `iron7`, the driver value (`DRIVER_COR` in
-  `src/shared/python/core/physics_constants.py`, a USGA/R&A limit). The file
-  records that no source for a lower iron value was found.
-- **Effect:** unknown; it scales iron ball speed directly.
-- **Tracking:** #15443 ("Sourced iron COR and calibrated gear effect").
+- **Fixed (sourced law):** `cor_by_club` in
+  `src/shared/python/impact_parameters/club_impact_settings.json` now gives
+  `iron7` the ball-on-rigid-plate law e = 0.86 - 0.0029 v_n, with v_n the
+  normal approach speed in m/s (Penner, Am. J. Phys. 69, 563 (2001), Eq. (5),
+  a linear fit to Lieberman and Johnson's ball-barrier data, Science and Golf
+  II, 1994). `flight_for_impact` evaluates it per strike
+  (`ClubImpact.cor_at`). The previous value was the driver limit 0.83 with no
+  iron source. The driver stays at 0.83.
+- **Remaining limits:** the fit spans about 37 to 50 m/s, so iron and wedge
+  strikes (about 25 to 35 m/s normal speed) are extrapolated. It treats the
+  iron face as rigid and is for the balls tested in 1994, not a modern ball.
+  No measured COR of a specific iron head was found. Wedges and other irons
+  have no catalogue club (`club_models.CLUBS` holds only the driver and
+  `iron7`), so they still launch with the driver defaults. The source block
+  is `iron_cor_source` in the settings file.
+- **Effect:** a 40 m/s strike at 34 degrees loft (v_n about 33 m/s, e about
+  0.764) drops from 116.7 to 112.5 mph ball speed and from 155.4 to 149.5 yd
+  carry. The reference-shot rows feed the launch directly and are unchanged.
+- **Tracking:** #15443 ("Sourced iron COR and calibrated gear effect"); the
+  gear-effect calibration is still open.
 
 ### Shaft Bend in the Delivery
 
