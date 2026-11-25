@@ -516,6 +516,7 @@
 {"path": "club_data/targets.py", "classification": "ud-only", "package": "club_data", "spelling_only": false}
 {"path": "club_fitting/__init__.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
 {"path": "club_fitting/__main__.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
+{"path": "club_fitting/bend_rate_check.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
 {"path": "club_fitting/bend_trace.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
 {"path": "club_fitting/bundle_input.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
 {"path": "club_fitting/flex_comparison.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
