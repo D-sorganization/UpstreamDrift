@@ -203,7 +203,9 @@ class _PartAxialSource:
             control,
             unloaded,
         )
-        return PartSplit(axial, {"ztcf": drift.ground, "zvcf": control.ground})
+        from src.tools.native_viewer_export.ztcf_ground import part_ground
+
+        return PartSplit(axial, part_ground(drift.ground, control.ground))
 
     def __call__(
         self, q: Any, v: Any, tau: Any, time_s: float
