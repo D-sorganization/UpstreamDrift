@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from argparse import Namespace
 from pathlib import Path
 
 import numpy as np
@@ -11,6 +12,7 @@ import pytest
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.tools.native_viewer_export import model_card as mc
 from src.tools.native_viewer_export import model_card_panel as mp
+from src.tools.native_viewer_export.cli import _card_panel_flag
 from src.tools.native_viewer_export.core import ExportSettings, SwingInput
 from src.tools.native_viewer_export.core import export_swing
 
@@ -54,20 +56,19 @@ def test_lines_follow_the_settings_field_list_with_their_tags() -> None:
         assert line.tag == getattr(card, entry["field"]).tag
         assert line.text.startswith(entry["label"])
     by_field = {ln.field: ln for ln in lines}
-    assert by_field["replay_kind"].tag == "measured"
+    expect = {"replay_kind": "measured", "fit_error": "fitted", "club": "assumed"}
+    assert {f: by_field[f].tag for f in expect} == expect
     assert "kinematic replay" in by_field["replay_kind"].text.lower()
-    assert by_field["fit_error"].tag == "fitted"
     assert "0.0123" in by_field["fit_error"].text
-    assert by_field["club"].tag == "assumed"
     assert "chain" in by_field["club"].text
 
 
 def test_line_format_and_field_list_come_from_settings() -> None:
     cfg = mp.load_panel_settings()
     fields = ({"field": "club", "label": "Shaft", "keys": ["flex"]},)
-    custom = mp.CardPanelSettings(**{**cfg.as_dict(), "fields": fields})
+    fmt = "{tag} / {label} = {value}"
     custom = mp.CardPanelSettings(
-        **{**custom.as_dict(), "line_format": "{tag} / {label} = {value}"}
+        **{**cfg.as_dict(), "fields": fields, "line_format": fmt}
     )
     (line,) = mp.panel_lines(_card(), custom)
     assert line.text == "assumed / Shaft = stiff"
@@ -76,12 +77,9 @@ def test_line_format_and_field_list_come_from_settings() -> None:
 def test_unknown_fields_show_as_unknown() -> None:
     cfg = mp.load_panel_settings()
     lines = {ln.field: ln for ln in mp.panel_lines(_card(), cfg)}
-    fit = lines["fit_error"]
-    assert fit.tag == "unknown"
-    assert cfg.unknown_text in fit.text
-    impact = lines["impact_model"]
-    assert impact.tag == "unknown"
-    assert cfg.unknown_text in impact.text
+    for name in ("fit_error", "impact_model"):
+        assert lines[name].tag == "unknown"
+        assert cfg.unknown_text in lines[name].text
 
 
 def test_settings_validate_colours_positions_and_fields() -> None:
@@ -100,8 +98,8 @@ def test_settings_validate_colours_positions_and_fields() -> None:
 
 def test_the_option_is_off_by_default() -> None:
     assert mp.load_panel_settings().enabled_by_default is False
-    assert ExportSettings().model_card_panel is False
-    assert ExportSettings.preview().model_card_panel is False
+    for settings in (ExportSettings(), ExportSettings.preview()):
+        assert settings.model_card_panel is False
     with pytest.raises(TypeError, match="model_card_panel"):
         ExportSettings(model_card_panel="yes")  # type: ignore[arg-type]
 
@@ -133,14 +131,9 @@ class _FakeBackend:
 
 def _first_frame(tmp_path: Path, panel: bool) -> np.ndarray:
     frames: list[np.ndarray] = []
+    kw = {"width": 640, "height": 480, "multiview": False, "model_card_panel": panel}
     settings = ExportSettings(
-        views=("overhead",),
-        multiview=False,
-        width=640,
-        height=480,
-        speeds=(1.0,),
-        impact_card=False,
-        model_card_panel=panel,
+        views=("overhead",), speeds=(1.0,), impact_card=False, **kw
     )
     export_swing(
         _FakeBackend(),
@@ -168,10 +161,6 @@ def test_export_with_the_option_on_draws_the_panel(tmp_path: Path) -> None:
 
 
 def test_cli_flag_falls_back_to_the_settings_default() -> None:
-    from argparse import Namespace
-
-    from src.tools.native_viewer_export.cli import _card_panel_flag
-
     assert _card_panel_flag(Namespace(model_card_panel=None)) is False
     assert _card_panel_flag(Namespace(model_card_panel=True)) is True
     assert _card_panel_flag(Namespace()) is False
