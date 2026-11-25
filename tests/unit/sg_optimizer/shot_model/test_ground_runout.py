@@ -280,20 +280,9 @@ def test_roll_fraction_falls_from_driver_to_short_iron_on_the_pipeline() -> None
     assert all(a >= b for a, b in zip(chain, chain[1:], strict=False)), frac
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "#15443: with the spin-aware Penner (2002) bounce the 66 yd tour wedge "
-        "runs 0.0629 of carry against 0.0523 for the 114 yd short iron (hop "
-        "2.30 yd of 4.13 yd run against 2.64 of 5.96). Both land with little "
-        "backspin, 303 and 284 rad/s, because PipelineLandingSimulator calls "
-        "the pipeline without a club, so every skill's launch spin is clamped "
-        "to the 3500 rpm driver envelope; at that spin the 2/7 r w term of "
-        "Penner eq. (3a) is small and the hop is about constant in yards. "
-        "Before the spin-aware bounce the margin was 0.0355 against 0.0341."
-    ),
-)
 def test_roll_fraction_falls_from_short_iron_to_wedge_on_the_pipeline() -> None:
+    """#15443: with each skill's own club spin cap the wedge lands with more
+    backspin than the short iron, so it checks up and runs a smaller fraction."""
     frac = _pipeline_run_fractions()
     assert frac["short_iron"] >= frac["wedge"], frac
 
