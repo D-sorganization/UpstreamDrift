@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 51 parity · 15 gap · 19 exempt (12 pending decision in #7460).
+**Summary:** 51 parity · 16 gap · 19 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -92,6 +92,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.shot_pattern_analysis`<br>Shot Pattern Analysis Workbench | ⚪ exempt | `src/tools/shot_pattern_analysis/gui.py` | — | — | The current product surface is a local PyQt6 launcher and headless CLI for deterministic physics simulation and local CSV, JSON, and PNG exports. There is no API route or React page, so browser parity is not claimed. |
 | `tools.spine_study`<br>Segmental spine study execution and model asset selection | ✅ parity | `src/tools/spine_viewer/gui.py` | `src/api/routes/spine_viewer.py` | `ui/src/pages/SpineViewer.tsx` | — |
 | `tools.spine_viewer`<br>Segmental spine viewer (per-level load heatmaps from study receipts) | ✅ parity | `src/tools/spine_viewer/gui.py` | `src/api/routes/spine_viewer.py` | `ui/src/pages/SpineViewer.tsx` | — |
+| `tools.swing_report_package`<br>Swing report package: one command regenerates a swing's videos, grids and phase sheets (CLI) | 🔴 gap | `src/tools/swing_report_package/cli.py` | — | — | #15724 |
 | `tools.terrain_engine`<br>Terrain and topography configuration | ✅ parity | — | `src/api/routes/terrain.py` | `ui/src/pages/Terrain.tsx` | — |
 | `tools.training_controller`<br>Training controller tool | 🔴 gap | `src/tools/training_controller/__main__.py` | — | — | #15150 |
 | `tools.video_analyzer`<br>Video Analyzer (pose tracking and force/torque overlay) | ✅ parity | `src/tools/video_analyzer/gui.py` | `src/api/routes/video_overlays.py` | `ui/src/pages/VideoAnalyzer.tsx` | — |

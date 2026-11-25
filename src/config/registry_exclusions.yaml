@@ -71,7 +71,7 @@ exclusions:
       has no interactive window to host in the launcher (epic #11673).
   - package: swing_report_package
     reason: >-
-      Headless library and CLI that assembles swing report packages (videos,
-      stills and charts) from an analysed swing; until the generator lands it
-      has no window, and its launcher tile arrives with the generator (SRP-5).
-    issue: "#15725"
+      Headless CLI rendering swing report packages from a swing bundle; a
+      tile launching it without a bundle would be dead, so its launcher tile
+      waits for a windowed front end.
+    issue: "#15724"
