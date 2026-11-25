@@ -190,6 +190,20 @@ def load_tracer_settings(
 project = flight_depth.project
 
 
+def drawn_ball_radius_px(projected_px: float, minimum_px: float) -> float:
+    """Drawn radius of the flying ball: its projected radius, at least ``minimum_px``.
+
+    Raises ``ValueError`` for a non-positive minimum or a negative or
+    non-finite projection. Postcondition: the result is never below
+    ``minimum_px`` and equals ``projected_px`` when that is larger.
+    """
+    if not (math.isfinite(minimum_px) and minimum_px > 0.0):
+        raise ValueError("minimum_px must be positive")
+    if not (math.isfinite(projected_px) and projected_px >= 0.0):
+        raise ValueError("projected_px must be finite and not negative")
+    return max(float(minimum_px), float(projected_px))
+
+
 def occlusion_for(style: TracerSettings, depth_m: Array | None) -> Any:
     """The depth test for one tile, or ``None`` without scene depth or when off."""
     if depth_m is None or not style.occlude_by_scene:
@@ -223,7 +237,7 @@ def draw_trace(
     pixels, depth = project(camera, points_m[-1:], near)
     if np.isfinite(pixels).all():
         projected = float(camera.matrix[1, 1]) * radius_m / float(depth[-1])
-        r = max(float(style.min_ball_radius_px), projected)
+        r = drawn_ball_radius_px(projected, style.min_ball_radius_px)
         centre = (float(pixels[-1, 0]), float(pixels[-1, 1]))
         sphere = (float(depth[-1]), radius_m)
         flight_depth.draw_ball(

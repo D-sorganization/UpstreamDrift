@@ -459,12 +459,27 @@ def text_panel_box(
 
 class GridLayout(NamedTuple):
     """Placement of a text panel in the composed 2x2 grid (see ``grid_anchor``,
-    ``grid_font_height_divisor`` and ``grid_min_font_px`` in
+    ``grid_font_tile_fraction`` and ``grid_min_font_px`` in
     ``impact_factors_settings.json``)."""
 
     anchor: str
-    font_height_divisor: int
+    font_tile_fraction: float
     min_font_px: int
+
+
+def grid_font_px(tile_h: int, fraction: float, floor_px: int) -> int:
+    """Font size of grid panel text: ``fraction`` of the tile height, at least
+    ``floor_px``.
+
+    Raises ``ValueError`` unless ``tile_h`` and ``floor_px`` are positive and
+    ``fraction`` lies in (0, 1]. Postcondition: the size grows with the tile
+    and is never below ``floor_px``.
+    """
+    if tile_h < 1 or floor_px < 1:
+        raise ValueError("tile_h and floor_px must be positive")
+    if not (math.isfinite(fraction) and 0.0 < fraction <= 1.0):
+        raise ValueError("fraction must lie in (0, 1]")
+    return max(int(floor_px), int(tile_h * fraction))
 
 
 def grid_text_panel_box(
@@ -475,13 +490,13 @@ def grid_text_panel_box(
 ) -> tuple[tuple[int, int, int, int], int]:
     """Pixel box and font size of a panel in the ``layout.anchor`` tile corner.
 
-    The font is the larger of ``layout.min_font_px`` and the frame height over
-    ``layout.font_height_divisor``; it shrinks to the minimum until the box
-    fits inside its tile, and the box is clipped to that tile.
+    The font is :func:`grid_font_px` of the tile height; it shrinks to
+    ``layout.min_font_px`` until the box fits inside its tile, and the box is
+    clipped to that tile.
     """
     height, width = int(shape[0]), int(shape[1])
     tile_w, tile_h = width // 2, height // 2
-    top = max(layout.min_font_px, height // layout.font_height_divisor)
+    top = grid_font_px(tile_h, layout.font_tile_fraction, layout.min_font_px)
     for size in range(top, layout.min_font_px - 1, -1):
         x0, y0, x1, y1 = text_panel_box(shape, title, lines, "right", size)[0]
         margin = width - x1
