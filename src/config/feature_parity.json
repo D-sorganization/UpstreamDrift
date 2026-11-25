@@ -679,12 +679,7 @@
       "status": "exempt",
       "reason": "Desktop biomechanics dashboards; desktop-only candidate pending #7460.",
       "pending_decision": true,
-      "tiles": [
-        "biomech_exercise",
-        "injury_analysis",
-        "biomech_gait",
-        "biomech_sit_to_stand"
-      ]
+      "tiles": ["biomech_exercise", "injury_analysis", "biomech_gait", "biomech_sit_to_stand"]
     },
     "lifting.five_lift_viewing": {
       "title": "Weightlifting viewing and analysis for the five lifts (squat, deadlift, bench press, snatch, clean and jerk): lift selection, barbell, hand-force and GRF overlays, plots",
@@ -755,7 +750,9 @@
       "api": "src/api/routes/ball_flight.py",
       "web": "ui/src/pages/BallFlight.tsx",
       "status": "parity",
-      "tiles": ["ball_flight_simulator"],
+      "tiles": [
+        "ball_flight_simulator"
+      ],
       "notes": "The desktop ball-flight simulator and the web BallFlight page both drive the flight-model registry; the web page reaches it through the /tools/ball-flight API routes (#15150 E9)."
     },
     "sidekick.chat_panel": {
@@ -764,7 +761,9 @@
       "api": "src/api/routes/chat_ws.py",
       "web": "ui/src/components/ui/ChatPanel.tsx",
       "status": "parity",
-      "tiles": ["sidekick"],
+      "tiles": [
+        "sidekick"
+      ],
       "notes": "Desktop assistant panel and the web ChatPanel both talk to the shared Sidekick chat protocol (the web over the /ws/chat WebSocket route). The OS terminal, REPL, Jupyter and skills integration stays in sidekick.terminal_repl_jupyter_skills (#15150 E9)."
     },
     "simulation.swing_flight_pipeline": {
@@ -774,7 +773,9 @@
       "web": null,
       "status": "gap",
       "issue": 15150,
-      "tiles": ["swing_flight_pipeline"],
+      "tiles": [
+        "swing_flight_pipeline"
+      ],
       "notes": "No API route or React page serves the swing-to-flight pipeline yet (#15150 E9)."
     },
     "matching.tour_matching_viewer": {
@@ -784,7 +785,9 @@
       "web": null,
       "status": "gap",
       "issue": 15150,
-      "tiles": ["tour_matching_viewer"],
+      "tiles": [
+        "tour_matching_viewer"
+      ],
       "notes": "3D replay of matching candidates against tour capture is desktop-only; the web only lists the tile in workspaceNavigation.ts (#15150 E9)."
     },
     "tools.training_controller": {
@@ -794,7 +797,9 @@
       "web": null,
       "status": "gap",
       "issue": 15150,
-      "tiles": ["training_controller"],
+      "tiles": [
+        "training_controller"
+      ],
       "notes": "No API route or React page exists for the training controller (#15150 E9)."
     },
     "biomech.physics_informed_models": {
@@ -803,7 +808,10 @@
       "web": null,
       "status": "gap",
       "issue": 15150,
-      "tiles": ["pinn_pure_rigid", "pinn_hybrid"],
+      "tiles": [
+        "pinn_pure_rigid",
+        "pinn_hybrid"
+      ],
       "notes": "Engine-type tiles with no launcher path of their own; the web useEngineStore references them but no page runs them (#15150 E9)."
     },
     "tools.config_setup_wizard": {
@@ -813,7 +821,9 @@
       "web": null,
       "status": "exempt",
       "reason": "Writes the local desktop configuration of this workstation; a browser session has no equivalent of that setup.",
-      "tiles": ["config_setup_wizard"]
+      "tiles": [
+        "config_setup_wizard"
+      ]
     },
     "dev.pose_subscriber_demo": {
       "title": "Pose subscriber developer demo",
@@ -822,7 +832,9 @@
       "web": null,
       "status": "exempt",
       "reason": "Developer demonstration of the realtime pose pub-sub contract, not an end-user feature.",
-      "tiles": ["pose_subscriber_demo"]
+      "tiles": [
+        "pose_subscriber_demo"
+      ]
     },
     "external.sibling_repository_tiles": {
       "title": "Tiles that open sibling model repositories",
