@@ -1,21 +1,10 @@
-"""Baseline versus least-force frames on one clock.
-
-Rows are the baseline null-space allocation and the least-force strategy.
-Columns are ZTCF, ZVCF and Total. ``J_F`` is least squared force and ``C`` is
-opposing-force cancellation. Each frame carries Okabe-Ito case colors, units,
-that objective, a provenance footer and an ``allocation-only`` or
-``forward-replayed`` badge. Missing panels are painted ``UNAVAILABLE``; a real
-zero-force frame stays dark. Callers pass arrays through :class:`PanelSource`.
-The swing-report catalog is not imported. The seven phase ids match that
-catalog's phase settings; a phase outside tolerance is reported, not snapped.
-"""
+"""Baseline versus least-force frames on a ZTCF, ZVCF and Total grid."""
 
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, Protocol
 
 import numpy as np
@@ -26,32 +15,12 @@ STRATEGIES = ("baseline", "least-force")
 COMPONENTS = ("ztcf", "zvcf", "total")
 BADGES = ("allocation-only", "forward-replayed")
 OBJECTIVE = "J_F: least squared force; C: opposing-force cancellation"
-PHASES = (
-    "address",
-    "shaft_parallel_back",
-    "top",
-    "lead_arm_parallel",
-    "shaft_parallel_down",
-    "impact",
-    "follow_through",
-)
-PHASE_LABEL = {
-    "address": "Address",
-    "shaft_parallel_back": "Shaft Parallel (Backswing)",
-    "top": "Top of Backswing",
-    "lead_arm_parallel": "Lead Arm Parallel (Downswing)",
-    "shaft_parallel_down": "Shaft Parallel (Downswing)",
-    "impact": "Impact",
-    "follow_through": "Follow-Through (Shaft Parallel)",
-}
 _COLUMN = {"ztcf": "ZTCF", "zvcf": "ZVCF", "total": "Total"}
-_GRID = tuple((row, col) for row in STRATEGIES for col in COMPONENTS)
+_GRID = tuple(
+    (strategy, component) for strategy in STRATEGIES for component in COMPONENTS
+)
 _FONT = ImageFont.load_default()
 _Box = tuple[int, int, int, int]
-
-
-class VideoWriterUnavailable(RuntimeError):
-    """imageio's ffmpeg writer is not installed."""
 
 
 class PanelSource(Protocol):
@@ -63,18 +32,16 @@ class PanelSource(Protocol):
 
 @dataclass(frozen=True)
 class GridSpec:
-    """Pixel geometry. Every length is a setting."""
-
     cell_w: int = 80
     cell_h: int = 36
     gutter: int = 4
     banner_h: int = 14
     footer_h: int = 16
     label_w: int = 100
-    yellow = (240, 228, 66)
-    white = (255, 255, 255)
-    black = (0, 0, 0)
-    purple = (204, 121, 167)
+    rows = STRATEGIES
+    columns = COMPONENTS
+    yellow, white = (240, 228, 66), (255, 255, 255)
+    black, purple = (0, 0, 0), (204, 121, 167)
     component_rgb = {
         "ztcf": (0, 114, 178),
         "zvcf": (213, 94, 0),
@@ -87,45 +54,30 @@ class GridSpec:
             if int(getattr(self, name)) < 1:
                 raise ValueError(f"{name} must be a positive length")
 
-    @property
-    def rows(self) -> tuple[str, ...]:
-        return STRATEGIES
-
-    @property
-    def columns(self) -> tuple[str, ...]:
-        return COMPONENTS
+    def _at(self, col: int, row: int) -> tuple[int, int]:
+        x = self.label_w + self.gutter + col * (self.cell_w + self.gutter)
+        step = self.banner_h + self.cell_h + self.gutter
+        return x, 2 * self.banner_h + self.gutter + row * step
 
     @property
     def width(self) -> int:
-        cols = len(COMPONENTS)
-        return self.label_w + cols * self.cell_w + (cols + 1) * self.gutter
+        n = len(COMPONENTS)
+        return self.label_w + n * self.cell_w + (n + 1) * self.gutter
 
     @property
     def height(self) -> int:
-        row = self.gutter + self.banner_h + self.cell_h
-        return 2 * self.banner_h + len(STRATEGIES) * row + self.gutter + self.footer_h
-
-    def _x(self, col: int) -> int:
-        return self.label_w + self.gutter + col * (self.cell_w + self.gutter)
-
-    def _row_y(self, row: int) -> int:
-        step = self.banner_h + self.cell_h + self.gutter
-        return 2 * self.banner_h + self.gutter + row * step
+        band = self.gutter + self.banner_h + self.cell_h
+        return 2 * self.banner_h + len(STRATEGIES) * band + self.gutter + self.footer_h
 
     def cell_box(self, row: int, col: int) -> _Box:
-        """``(x, y, w, h)`` of the picture, below its row banner."""
-        return (
-            self._x(col),
-            self._row_y(row) + self.banner_h,
-            self.cell_w,
-            self.cell_h,
-        )
+        x, y = self._at(col, row)
+        return (x, y + self.banner_h, self.cell_w, self.cell_h)
 
     def header_box(self, col: int) -> _Box:
-        return (self._x(col), self.banner_h, self.cell_w, self.banner_h)
+        return (self._at(col, 0)[0], self.banner_h, self.cell_w, self.banner_h)
 
     def badge_box(self, row: int) -> _Box:
-        return (0, self._row_y(row), self.label_w, self.banner_h)
+        return (0, self._at(0, row)[1], self.label_w, self.banner_h)
 
     def text_origin(self, slot: str) -> tuple[int, int]:
         if slot == "objective":
@@ -135,20 +87,21 @@ class GridSpec:
         raise ValueError(f"unknown text slot {slot!r}")
 
     def badge_text_origin(self, row: int) -> tuple[int, int]:
-        x, y, _, _ = self.badge_box(row)
-        return (x + 2, y + 1)
+        return (2, self.badge_box(row)[1] + 1)
 
     def unavailable_origin(self, row: int, col: int) -> tuple[int, int]:
         x, y, _, _ = self.cell_box(row, col)
         return (x + 1, y + self.banner_h)
 
-    def header_sample(self, col: int) -> tuple[int, int]:
-        x, y, width, height = self.header_box(col)
+    def _mid_edge(self, box: _Box) -> tuple[int, int]:
+        x, y, width, height = box
         return y + height // 2, x + width - 2
 
+    def header_sample(self, col: int) -> tuple[int, int]:
+        return self._mid_edge(self.header_box(col))
+
     def badge_sample(self, row: int) -> tuple[int, int]:
-        x, y, width, height = self.badge_box(row)
-        return y + height // 2, x + width - 2
+        return self._mid_edge(self.badge_box(row))
 
     def content_sample(self, row: int, col: int) -> tuple[int, int]:
         x, y, width, height = self.cell_box(row, col)
@@ -157,8 +110,6 @@ class GridSpec:
 
 @dataclass(frozen=True)
 class Provenance:
-    """Footer identity of the run that produced the frames."""
-
     source_id: str
     model_id: str
     git_sha: str
@@ -174,8 +125,6 @@ class Provenance:
 
 @dataclass(frozen=True)
 class PanelSequence:
-    """One strategy and component, in time order."""
-
     strategy: str
     component: str
     times_s: tuple[float, ...]
@@ -184,27 +133,22 @@ class PanelSequence:
     units: str
 
     def __post_init__(self) -> None:
-        if self.strategy not in STRATEGIES:
-            raise ValueError(f"strategy must be one of {STRATEGIES}")
-        if self.component not in COMPONENTS:
-            raise ValueError(f"component must be one of {COMPONENTS}")
-        if self.badge not in BADGES:
-            raise ValueError(f"badge must be one of {BADGES}")
+        for name, value, allowed in (
+            ("strategy", self.strategy, STRATEGIES),
+            ("component", self.component, COMPONENTS),
+            ("badge", self.badge, BADGES),
+        ):
+            if value not in allowed:
+                raise ValueError(f"{name} must be one of {allowed}")
         if not str(self.units).strip():
             raise ValueError("units must be a non-empty string")
         if len(self.times_s) != len(self.frames):
             raise ValueError("each frame needs one time")
-        if any(not math.isfinite(t) for t in self.times_s):
-            raise ValueError("frame times must be finite")
-        pairs = zip(self.times_s, self.times_s[1:], strict=False)
-        if any(later <= earlier for earlier, later in pairs):
-            raise ValueError("frame times must be strictly increasing")
+        object.__setattr__(self, "times_s", _times(self.times_s, "frame times"))
 
 
 @dataclass(frozen=True)
 class Cell:
-    """One grid cell at one clock time."""
-
     strategy: str
     component: str
     time_s: float | None
@@ -216,31 +160,18 @@ class Cell:
 
 @dataclass(frozen=True)
 class SyncedFrame:
-    """Every panel at one shared clock time."""
-
     time_s: float
     cells: tuple[Cell, ...]
 
     def cell(self, strategy: str, component: str) -> Cell:
         for item in self.cells:
-            if item.strategy == strategy and item.component == component:
+            if (item.strategy, item.component) == (strategy, component):
                 return item
         raise KeyError((strategy, component))
 
 
 @dataclass(frozen=True)
-class PhasePick:
-    """A phase and the synced frame at its time, when one is inside tolerance."""
-
-    name: str
-    time_s: float | None
-    frame: SyncedFrame | None
-
-
-@dataclass(frozen=True)
 class FrameStamp:
-    """Words painted on one comparison frame."""
-
     objective: str
     footer: str
     badges: tuple[str, str]
@@ -257,124 +188,65 @@ def panel_from_arrays(
     badge: str,
     units: str,
 ) -> PanelSequence:
-    """Copy uint8 HxWx3 frames. ``None`` means that instant is unavailable."""
-    copied = tuple(_as_frame(frame) for frame in frames)
     return PanelSequence(
-        strategy, component, tuple(float(t) for t in times_s), copied, badge, units
+        strategy, component, tuple(times_s), tuple(map(_as_frame, frames)), badge, units
     )
 
 
 def load_source(source: PanelSource) -> tuple[PanelSequence, ...]:
-    """Read a :class:`PanelSource`. Post: no duplicate strategy/component pair."""
     panels = tuple(source.sequences())
     _index(panels)
     return panels
 
 
 def align(
-    panels: Sequence[PanelSequence],
-    clock_s: Sequence[float],
-    *,
-    tolerance_s: float,
+    panels: Sequence[PanelSequence], clock_s: Sequence[float], *, tolerance_s: float
 ) -> tuple[SyncedFrame, ...]:
-    """Place every panel on ``clock_s`` by time, never by stored index.
-
-    Post: synced times equal the clock, and a present cell is within
-    ``tolerance_s`` of that time. Further frames and missing channels are
-    unavailable.
-    """
-    _tolerance(tolerance_s)
+    if not math.isfinite(tolerance_s) or tolerance_s < 0:
+        raise ValueError("tolerance_s must be non-negative")
     indexed = _index(panels)
-    return tuple(_synced(indexed, t, tolerance_s) for t in _clock(clock_s))
-
-
-def select_phases(
-    frames: Sequence[SyncedFrame],
-    phase_times: Mapping[str, float | None],
-    *,
-    tolerance_s: float,
-) -> tuple[PhasePick, ...]:
-    """One pick per swing phase. Omitted, ``None``, or out-of-tolerance times stay missing."""
-    _tolerance(tolerance_s)
-    unknown = sorted(set(phase_times) - set(PHASES))
-    if unknown:
-        raise ValueError(f"unknown swing phase {unknown}")
-    return tuple(
-        _pick(name, phase_times.get(name), frames, tolerance_s) for name in PHASES
-    )
+    clock = _times(clock_s, "clock times", nonempty=True)
+    frames = []
+    for time_s in clock:
+        cells = tuple(
+            _cell_at(indexed.get(key), *key, time_s, tolerance_s) for key in _GRID
+        )
+        frames.append(SyncedFrame(time_s, cells))
+    return tuple(frames)
 
 
 def compose(
     frame: SyncedFrame, provenance: Provenance, spec: GridSpec | None = None
 ) -> tuple[np.ndarray, FrameStamp]:
-    """Paint ``frame``. Post: the stamp lists the words drawn on the image."""
     layout = spec or GridSpec()
-    stamp = _stamp(frame, provenance)
+    badges = (_row_badge(frame, STRATEGIES[0]), _row_badge(frame, STRATEGIES[1]))
+    units = tuple(frame.cell(*key).units for key in _GRID)
+    missing = tuple(frame.cell(*key).missing for key in _GRID)
+    stamp = FrameStamp(OBJECTIVE, provenance.footer(), badges, units, missing)
     canvas = Image.new("RGB", (layout.width, layout.height), layout.black)
     _paint(canvas, ImageDraw.Draw(canvas), frame, layout, stamp)
     return np.array(canvas), stamp
 
 
-def phase_sheets(
-    picks: Sequence[PhasePick], provenance: Provenance, spec: GridSpec | None = None
-) -> dict[str, np.ndarray]:
-    """One sheet per swing phase. A missing phase is titled unavailable."""
-    layout = spec or GridSpec()
-    by_name = {pick.name: pick for pick in picks}
-    return {
-        name: _sheet(by_name.get(name), name, provenance, layout) for name in PHASES
-    }
-
-
-def stack_sheets(sheets: Sequence[np.ndarray], *, gutter: int = 2) -> np.ndarray:
-    """Stack phase sheets top to bottom with a ``gutter``-pixel gap."""
-    if not sheets or gutter < 0:
-        raise ValueError("sheets must be non-empty and gutter non-negative")
-    gap = np.zeros((gutter, sheets[0].shape[1], 3), dtype=np.uint8)
-    parts: list[np.ndarray] = []
-    for index, sheet in enumerate(sheets):
-        if index:
-            parts.append(gap)
-        parts.append(np.asarray(sheet))
-    return np.vstack(parts)
-
-
-def write_video(frames: Sequence[np.ndarray], path: str | Path, *, fps: float) -> None:
-    """Write ``frames`` with imageio's ffmpeg writer, when that extra is installed."""
-    if not frames:
-        raise ValueError("no frames to write")
-    if not math.isfinite(fps) or fps <= 0:
-        raise ValueError("fps must be positive")
-    imageio = _load_imageio()
-    try:
-        writer = imageio.get_writer(
-            Path(path), fps=fps, codec="libx264", format="FFMPEG"
-        )
-    except (ImportError, OSError, ValueError, RuntimeError) as exc:
-        raise VideoWriterUnavailable("ffmpeg writer is unavailable") from exc
-    try:
-        for frame in frames:
-            writer.append_data(np.asarray(frame))
-    finally:
-        writer.close()
-
-
-def _load_imageio() -> Any:
-    try:
-        import imageio.v2 as imageio
-    except ImportError as exc:
-        raise VideoWriterUnavailable("imageio is not installed") from exc
-    return imageio
+def _times(values, label, *, nonempty=False):
+    times = tuple(float(item) for item in values)
+    if (nonempty and not times) or any(not math.isfinite(item) for item in times):
+        suffix = " and non-empty" if nonempty else ""
+        raise ValueError(f"{label} must be finite{suffix}")
+    if any(later <= earlier for earlier, later in zip(times, times[1:], strict=False)):
+        raise ValueError(f"{label} must be strictly increasing")
+    return times
 
 
 def _as_frame(value: Any) -> np.ndarray | None:
     if value is None:
         return None
-    arr = np.asarray(value)
+    arr = np.array(value, copy=True)
     shape = arr.shape
-    if arr.dtype != np.uint8 or arr.ndim != 3 or shape[2] != 3 or min(shape[:2]) < 1:
+    bad = arr.dtype != np.uint8 or arr.ndim != 3 or shape[2] != 3 or min(shape[:2]) < 1
+    if bad:
         raise ValueError("a frame must be uint8 HxWx3 or None")
-    return np.array(arr, copy=True)
+    return arr
 
 
 def _index(panels: Sequence[PanelSequence]) -> dict[tuple[str, str], PanelSequence]:
@@ -387,194 +259,72 @@ def _index(panels: Sequence[PanelSequence]) -> dict[tuple[str, str], PanelSequen
         if key in indexed:
             raise ValueError(f"duplicate panel {key}")
         prior = badges.get(panel.strategy)
-        if prior is not None and prior != panel.badge:
-            raise ValueError(
-                f"{panel.strategy} badge {prior!r} disagrees with {panel.badge!r}"
-            )
+        if prior not in (None, panel.badge):
+            raise ValueError(f"badge mismatch for {panel.strategy}")
         badges[panel.strategy] = panel.badge
         indexed[key] = panel
     return indexed
 
 
-def _tolerance(tolerance_s: float) -> None:
-    if not math.isfinite(tolerance_s) or tolerance_s < 0:
-        raise ValueError("tolerance_s must be non-negative")
-
-
-def _clock(clock_s: Sequence[float]) -> tuple[float, ...]:
-    clock = tuple(float(t) for t in clock_s)
-    if not clock or any(not math.isfinite(t) for t in clock):
-        raise ValueError("clock times must be finite and non-empty")
-    pairs = zip(clock, clock[1:], strict=False)
-    if any(later <= earlier for earlier, later in pairs):
-        raise ValueError("clock times must be strictly increasing")
-    return clock
-
-
-def _nearest(times: Sequence[float], time_s: float, tolerance_s: float) -> int | None:
+def _cell_at(panel, strategy, component, time_s, tolerance_s) -> Cell:
+    if panel is None:
+        return Cell(strategy, component, None, None, UNAVAILABLE, UNAVAILABLE, True)
     best: int | None = None
     best_gap = tolerance_s
-    for index, stamp in enumerate(times):
+    for index, stamp in enumerate(panel.times_s):
         gap = abs(stamp - time_s)
         if gap <= tolerance_s and (best is None or gap < best_gap):
             best, best_gap = index, gap
-    return best
-
-
-def _cell_at(
-    panel: PanelSequence | None,
-    strategy: str,
-    component: str,
-    time_s: float,
-    tolerance_s: float,
-) -> Cell:
-    if panel is None:
-        return Cell(strategy, component, None, None, UNAVAILABLE, UNAVAILABLE, True)
-    index = _nearest(panel.times_s, time_s, tolerance_s)
-    if index is None:
+    if best is None:
         return Cell(strategy, component, None, None, panel.units, panel.badge, True)
-    pixels = panel.frames[index]
-    return Cell(
-        strategy,
-        component,
-        panel.times_s[index],
-        pixels,
-        panel.units,
-        panel.badge,
-        pixels is None,
-    )
-
-
-def _synced(
-    indexed: Mapping[tuple[str, str], PanelSequence], time_s: float, tolerance_s: float
-) -> SyncedFrame:
-    cells = tuple(
-        _cell_at(indexed.get(key), key[0], key[1], time_s, tolerance_s) for key in _GRID
-    )
-    return SyncedFrame(time_s, cells)
-
-
-def _pick(
-    name: str, raw: float | None, frames: Sequence[SyncedFrame], tolerance_s: float
-) -> PhasePick:
-    if raw is None:
-        return PhasePick(name, None, None)
-    time_s = float(raw)
-    if not math.isfinite(time_s):
-        raise ValueError(f"phase {name} time must be finite")
-    chosen: SyncedFrame | None = None
-    gap = tolerance_s
-    for frame in frames:
-        delta = abs(frame.time_s - time_s)
-        if delta <= tolerance_s and (chosen is None or delta < gap):
-            chosen, gap = frame, delta
-    return PhasePick(name, time_s, chosen)
+    pixels = panel.frames[best]
+    when, units, badge = panel.times_s[best], panel.units, panel.badge
+    return Cell(strategy, component, when, pixels, units, badge, pixels is None)
 
 
 def _row_badge(frame: SyncedFrame, strategy: str) -> str:
-    for component in COMPONENTS:
-        badge = frame.cell(strategy, component).badge
-        if badge != UNAVAILABLE:
-            return badge
-    return UNAVAILABLE
+    found = [frame.cell(strategy, name).badge for name in COMPONENTS]
+    return next((badge for badge in found if badge != UNAVAILABLE), UNAVAILABLE)
 
 
-def _stamp(frame: SyncedFrame, provenance: Provenance) -> FrameStamp:
-    badges = (_row_badge(frame, STRATEGIES[0]), _row_badge(frame, STRATEGIES[1]))
-    units = tuple(frame.cell(*key).units for key in _GRID)
-    missing = tuple(frame.cell(*key).missing for key in _GRID)
-    return FrameStamp(OBJECTIVE, provenance.footer(), badges, units, missing)
-
-
-def _text(
-    image: Image.Image, xy: tuple[int, int], text: str, fill: tuple[int, int, int]
-) -> None:
-    """Stamp ``text`` in exact ``fill`` pixels, with no antialiased mix."""
+def _text(image, xy, text, fill) -> None:
     mask = _FONT.getmask(text, mode="1")
-    image.paste(
-        Image.new("RGB", mask.size, fill),
-        xy,
-        Image.frombytes("L", mask.size, bytes(mask)),
-    )
+    glyph = Image.frombytes("L", mask.size, bytes(mask))
+    image.paste(Image.new("RGB", mask.size, fill), xy, glyph)
 
 
-def _rect(box: _Box) -> list[int]:
-    x, y, width, height = box
-    return [x, y, x + width - 1, y + height - 1]
-
-
-def _picture(spec: GridSpec, cell: Cell, width: int, height: int) -> Image.Image:
-    if cell.missing or cell.pixels is None:
-        tile = np.zeros((height, width, 3), dtype=np.uint8)
-        yy, xx = np.indices((height, width))
-        tile[((xx + yy) // 3) % 2 == 0] = spec.purple
-        return Image.fromarray(tile, mode="RGB")
-    image = Image.fromarray(cell.pixels, mode="RGB")
-    return image.resize((width, height), Image.Resampling.NEAREST)
-
-
-def _paint(
-    canvas: Image.Image,
-    draw: ImageDraw.ImageDraw,
-    frame: SyncedFrame,
-    spec: GridSpec,
-    stamp: FrameStamp,
-) -> None:
+def _paint(canvas, draw, frame, spec, stamp) -> None:
     _text(canvas, spec.text_origin("objective"), stamp.objective, spec.yellow)
-    for col, component in enumerate(COMPONENTS):
-        box = spec.header_box(col)
-        draw.rectangle(_rect(box), fill=spec.component_rgb[component])
-        ink = spec.black if component == "total" else spec.yellow
-        _text(canvas, (box[0] + 2, box[1] + 1), _COLUMN[component], ink)
+    for col, name in enumerate(COMPONENTS):
+        x, y, width, height = spec.header_box(col)
+        ink = spec.black if name == "total" else spec.yellow
+        draw.rectangle(
+            [x, y, x + width - 1, y + height - 1], fill=spec.component_rgb[name]
+        )
+        _text(canvas, (x + 2, y + 1), _COLUMN[name], ink)
     for row, strategy in enumerate(STRATEGIES):
-        _paint_row(canvas, draw, frame, spec, stamp, row, strategy)
+        badge = stamp.badges[row]
+        x, y, width, height = spec.badge_box(row)
+        color = spec.badge_rgb.get(badge, spec.purple)
+        draw.rectangle([x, y, x + width - 1, y + height - 1], fill=color)
+        _text(canvas, spec.badge_text_origin(row), badge, spec.black)
+        _text(canvas, (2, spec.cell_box(row, 0)[1] + 1), strategy, spec.yellow)
+        for col, name in enumerate(COMPONENTS):
+            _paint_cell(canvas, frame.cell(strategy, name), spec, row, col)
     _text(canvas, spec.text_origin("footer"), stamp.footer, spec.white)
 
 
-def _paint_row(
-    canvas: Image.Image,
-    draw: ImageDraw.ImageDraw,
-    frame: SyncedFrame,
-    spec: GridSpec,
-    stamp: FrameStamp,
-    row: int,
-    strategy: str,
-) -> None:
-    badge = stamp.badges[row]
-    draw.rectangle(
-        _rect(spec.badge_box(row)), fill=spec.badge_rgb.get(badge, spec.purple)
-    )
-    _text(canvas, spec.badge_text_origin(row), badge, spec.black)
-    _text(canvas, (2, spec.cell_box(row, 0)[1] + 1), strategy, spec.yellow)
-    for col, component in enumerate(COMPONENTS):
-        _paint_cell(canvas, frame.cell(strategy, component), spec, row, col)
-
-
-def _paint_cell(
-    canvas: Image.Image, cell: Cell, spec: GridSpec, row: int, col: int
-) -> None:
+def _paint_cell(canvas, cell, spec, row, col) -> None:
     x, y, width, height = spec.cell_box(row, col)
-    canvas.paste(_picture(spec, cell, width, height), (x, y))
+    if not cell.missing and cell.pixels is not None:
+        shot = Image.fromarray(cell.pixels, mode="RGB")
+        tile = shot.resize((width, height), Image.Resampling.NEAREST)
+    else:
+        raw = np.zeros((height, width, 3), dtype=np.uint8)
+        yy, xx = np.indices((height, width))
+        raw[((xx + yy) // 3) % 2 == 0] = spec.purple
+        tile = Image.fromarray(raw, mode="RGB")
+    canvas.paste(tile, (x, y))
     _text(canvas, (x + 1, y + 1), cell.units, spec.yellow)
     if cell.missing or cell.pixels is None:
         _text(canvas, spec.unavailable_origin(row, col), UNAVAILABLE, spec.yellow)
-
-
-def _blank() -> SyncedFrame:
-    cells = tuple(
-        Cell(strategy, component, None, None, UNAVAILABLE, UNAVAILABLE, True)
-        for strategy, component in _GRID
-    )
-    return SyncedFrame(0.0, cells)
-
-
-def _sheet(
-    pick: PhasePick | None, name: str, provenance: Provenance, spec: GridSpec
-) -> np.ndarray:
-    label = PHASE_LABEL[name]
-    held = None if pick is None else pick.frame
-    body, _painted = compose(held if held is not None else _blank(), provenance, spec)
-    title = label if held is not None else f"{label} {UNAVAILABLE}"
-    band = Image.new("RGB", (spec.width, spec.banner_h), spec.black)
-    _text(band, (2, 1), title, spec.yellow)
-    return np.vstack([np.array(band), body])
