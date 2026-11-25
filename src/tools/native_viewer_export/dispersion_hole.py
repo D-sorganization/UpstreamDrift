@@ -134,12 +134,21 @@ def stats_line(
     result: DispersionResult, cfg: DispersionHoleSettings, units: DisplayUnits
 ) -> str:
     """Mean +/- standard deviation of carry and side in display units."""
+    return spread_text(result, cfg.style["legend_format"]["stats"], units)
+
+
+def spread_text(result: DispersionResult, fmt: str, units: DisplayUnits) -> str:
+    """``fmt`` filled with ``n`` and mean +/- sd of carry and side in ``units``.
+
+    Raises ``ValueError`` when no available shot has a carry and a side.
+    """
     summary = result.summary()
     carry, side = summary["carry_m"], summary["side_m"]
     if carry is None or side is None:
         raise ValueError("no shot has a carry and a side")
     k = units.distance_scale
-    return cfg.style["legend_format"]["stats"].format(
+    return fmt.format(
+        n=int(carry["n"]),
         carry_mean=k * carry["mean"],
         carry_sd=k * carry["std"],
         side_mean=k * side["mean"],

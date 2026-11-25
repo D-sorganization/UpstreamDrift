@@ -52,7 +52,7 @@ from src.tools.native_viewer_export.compositor import (
 from src.tools.native_viewer_export import contact_frame, flight_tracer, replay_mode
 from src.tools.native_viewer_export import shot_setup
 from src.tools.native_viewer_export import ellipsoid_panel as ellipsoid_hud
-from src.tools.native_viewer_export import flight_inset, hole_view
+from src.tools.native_viewer_export import dispersion_traces, flight_inset, hole_view
 from src.tools.native_viewer_export.frame_times import write_frame_times
 from src.tools.native_viewer_export.behind_camera import look_map, view_lookat
 from src.tools.native_viewer_export import impact_factors as factors_panel
@@ -996,6 +996,7 @@ def export_swing(
     if reason is not None:
         return ExportResult(engine, {}, 0, skipped_reason=reason)
     out_dir = Path(out_dir)
+    raw_swing, raw_settings = swing, settings  # the dispersion samples' input
     swing, settings, ball_record = prepare_shot(
         swing, settings, getattr(backend, "ball_limitation", None)
     )
@@ -1027,6 +1028,9 @@ def export_swing(
         else None
     )
     overlays = flight_tracer.attach_flight(overlays, swing, settings)
+    overlays = dispersion_traces.with_dispersion(
+        overlays, raw_swing, raw_settings, settings
+    )
     factors = overlays.factors if overlays is not None else factors
     overlays = ellipsoid_hud.with_panel(overlays, settings, feed, factors)
     for plan in plans:

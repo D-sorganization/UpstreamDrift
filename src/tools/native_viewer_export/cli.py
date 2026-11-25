@@ -68,6 +68,7 @@ from src.tools.native_viewer_export.ellipsoid_visibility import (
     panel_note,
 )
 from src.tools.native_viewer_export.flight_tracer import load_tracer_settings
+from src.tools.native_viewer_export.dispersion_traces import load_trace_settings
 from src.tools.native_viewer_export.hole_view import load_hole_view_settings
 from src.tools.native_viewer_export.impact_factors import load_factor_settings
 from src.tools.native_viewer_export.overlay import OverlayOptions, build_overlay_feed
@@ -359,6 +360,16 @@ def _add_hole_view_arguments(p: argparse.ArgumentParser) -> None:
         default=None,
         metavar="NAME",
         help="hole of --hole-view: par3, par4 or par5 (default: hole_view_settings.json)",
+    )
+    p.add_argument(
+        "--dispersion-traces",
+        action="store_true",
+        help="replay the shot with the random club roll and ball position of "
+        "shot_dispersion_settings.json and draw every sample flight, thin and "
+        "translucent beneath the shot, on the views of "
+        "dispersion_traces_settings.json (the wide down_the_line_flight view), "
+        "with the carry and side spread in the HUD; turns the ball flight on "
+        "(default: off)",
     )
 
 
@@ -775,9 +786,13 @@ def _camera_changes(args: argparse.Namespace) -> dict[str, Any]:
 def _ball_flight_for(args: argparse.Namespace, units: DisplayUnits) -> Any:
     """Tracer settings of the flag combination, or ``None`` when no flight is wanted."""
     hole = getattr(args, "hole_view", False)
-    if not (args.ball_flight or args.ball_flight_settings is not None or hole):
+    spread = getattr(args, "dispersion_traces", False)
+    wanted = args.ball_flight or args.ball_flight_settings is not None
+    if not (wanted or hole or spread):
         return None
     tracer = load_tracer_settings(args.ball_flight_settings, units)
+    if spread:
+        tracer = replace(tracer, dispersion_traces=load_trace_settings())
     aim = tracer.aim or load_aim_settings()
     mode = aim.resolved(getattr(args, "shot_shape", None), args.aim_line)
     tracer = replace(tracer, aim=replace(aim, aim_line=mode))
