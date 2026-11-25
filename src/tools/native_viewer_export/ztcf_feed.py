@@ -17,8 +17,9 @@ from __future__ import annotations
 
 import json
 import math
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import replace
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -27,15 +28,19 @@ from src.shared.python.force_overlay.contracts import WrenchKind
 from src.shared.python.force_overlay.glyphs import ArrowGlyph, ForceGlyphStyle
 from src.shared.python.force_overlay.tip_to_tail import (
     TipToTailStyle,
+    colour_key,
     part_arrows,
 )
 from src.shared.python.simulation_backends.hand_force_split import HANDS
 
 __all__ = [
     "HAND_CHOICES",
+    "HAND_COLOURS_PATH",
     "LEGEND",
     "gained_style",
     "hand_arrows",
+    "hand_styles",
+    "hands_colour_key",
     "hands_of",
     "legend_for",
     "ztcf_zvcf_arrows",
@@ -51,6 +56,41 @@ _VIEW_TEXT = {
     "total": "total (ZTCF + ZVCF)",
 }
 _NULL_SPACE = "one null-space solution"
+HAND_COLOURS_PATH = (
+    Path(__file__).resolve().parents[2] / "config" / "ztcf_zvcf_hand_colours.json"
+)
+_COLOUR_FIELDS = ("drift_hex", "control_hex", "total_hex")
+
+
+def hand_styles(path: Path | None = None) -> dict[str, TipToTailStyle]:
+    """Each hand's arrow colours from the settings file.
+
+    Raises:
+        ValueError: a hand or one of its colours is missing, or a colour is
+            not ``#RRGGBB``.
+    """
+    document = json.loads((path or HAND_COLOURS_PATH).read_text(encoding="utf-8"))
+    styles = {}
+    for hand in HANDS:
+        entry = document.get(hand)
+        if not isinstance(entry, dict) or any(f not in entry for f in _COLOUR_FIELDS):
+            raise ValueError(f"hand colours need {_COLOUR_FIELDS} for {hand!r}")
+        styles[hand] = TipToTailStyle(**{f: entry[f] for f in _COLOUR_FIELDS})
+    return styles
+
+
+def hands_colour_key(
+    view: str,
+    hands: Sequence[str],
+    styles: Mapping[str, TipToTailStyle] | None = None,
+) -> tuple[tuple[str, tuple[int, int, int]], ...]:
+    """The colour key of ``view`` for each of ``hands``, named by hand."""
+    looks = styles or hand_styles()
+    return tuple(
+        (f"{_HAND_LABEL[hand]} {text}", rgb)
+        for hand in hands
+        for text, rgb in colour_key(view, looks[hand])
+    )
 
 
 def hands_of(choice: str) -> tuple[str, ...]:
@@ -125,11 +165,13 @@ def hand_arrows(
 ) -> tuple[ArrowGlyph, ...]:
     """Arrows of ``view`` for each of ``hands`` at ``row`` of a hand-wrench split.
 
-    Each hand is drawn from its own point and labelled with its name. The
-    length limit grows with ``gain``, so lengthening the arrows never turns a
-    legible frame into an error.
+    Each hand is drawn from its own point, labelled with its name and in its
+    own colours (:func:`hand_styles`; ``colours`` paints every hand alike).
+    The length limit grows with ``gain``, so lengthening the arrows never
+    turns a legible frame into an error.
     """
     reach = replace(style, max_length_m=style.max_length_m * _checked_gain(gain))
+    looks = hand_styles() if colours is None else dict.fromkeys(hands, colours)
     field = "force_n" if quantity == "force" else "torque_nm"
     out: list[ArrowGlyph] = []
     for hand in hands:
@@ -142,7 +184,7 @@ def hand_arrows(
                 reach,
                 view,
                 quantity,
-                colours,
+                looks[hand],
                 _HAND_LABEL[hand],
             )
         )
