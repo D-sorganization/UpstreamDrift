@@ -69,9 +69,3 @@ exclusions:
       records each engine's own viewer (Drake/Pinocchio MeshCat via headless
       Chromium, OpenSim simbody under xvfb, MyoSuite EGL) to mp4 files; it
       has no interactive window to host in the launcher (epic #11673).
-  - package: swing_report_package
-    reason: >-
-      Headless CLI rendering swing report packages from a swing bundle; a
-      tile launching it without a bundle would be dead, so its launcher tile
-      waits for a windowed front end.
-    issue: "#15724"
