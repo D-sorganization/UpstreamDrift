@@ -16,7 +16,7 @@ import numpy as np
 
 from src.shared.python.club_fitting.grip_driven_shaft import HeadGeometry, ShaftRun
 
-_SHAFT_CLUB = np.array([0.0, 1.0, 0.0])
+SHAFT_CLUB = np.array([0.0, 1.0, 0.0])
 _MIN_LEAD_AXIS = 1e-6
 MM_PER_M = 1e3
 _KEYS = ("time_s", "lead_mm", "droop_mm")
@@ -58,6 +58,25 @@ class BendTrace:
             raise ValueError(f"bend trace is missing {exc}") from exc
 
 
+def bend_axes(
+    head: HeadGeometry, rigid_rotation_at_impact: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """Unit lead and droop axes in the rigid club frame (see the module doc).
+
+    Raises:
+        ValueError: a face normal along the shaft (no lead direction).
+    """
+    normal = head.normal_club
+    lead_axis = normal - (normal @ SHAFT_CLUB) * SHAFT_CLUB
+    if np.linalg.norm(lead_axis) < _MIN_LEAD_AXIS:
+        raise ValueError("the face normal runs along the shaft; no lead axis")
+    lead_axis = lead_axis / np.linalg.norm(lead_axis)
+    droop_axis = np.cross(SHAFT_CLUB, lead_axis)
+    if (rigid_rotation_at_impact @ droop_axis)[2] > 0.0:
+        droop_axis = -droop_axis
+    return lead_axis, droop_axis
+
+
 def bend_trace(run: ShaftRun, head: HeadGeometry, impact_time_s: float) -> BendTrace:
     """Lead and droop of ``run`` up to ``impact_time_s``.
 
@@ -68,15 +87,8 @@ def bend_trace(run: ShaftRun, head: HeadGeometry, impact_time_s: float) -> BendT
     keep = run.times_s <= impact_time_s
     if not np.any(keep):
         raise ValueError("impact_time_s is before the run starts")
-    normal = head.normal_club
-    lead_axis = normal - (normal @ _SHAFT_CLUB) * _SHAFT_CLUB
-    if np.linalg.norm(lead_axis) < _MIN_LEAD_AXIS:
-        raise ValueError("the face normal runs along the shaft; no lead axis")
-    lead_axis = lead_axis / np.linalg.norm(lead_axis)
-    droop_axis = np.cross(_SHAFT_CLUB, lead_axis)
     rotation = run.rigid_rotation[keep]
-    if (rotation[-1] @ droop_axis)[2] > 0.0:
-        droop_axis = -droop_axis
+    lead_axis, droop_axis = bend_axes(head, rotation[-1])
     local = np.einsum("nji,nj->ni", rotation, run.tip_deflection_m[keep])
     return BendTrace(
         run.times_s[keep] - impact_time_s,

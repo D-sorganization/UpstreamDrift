@@ -1,7 +1,7 @@
 """``python3 -m src.shared.python.club_fitting``: same-hand-motion flex sweep.
 
 Runs one bundle's grip motion through each shaft flex and writes
-``flex_sweep.json`` (rows and bend traces) and ``flex_sweep.csv``; with
+``flex_sweep.json`` (rows, bend traces, flights and impact shaft shapes) and ``flex_sweep.csv``; with
 ``--report`` also the shaft report pages and tables (:mod:`shaft_report`) and with
 ``--comparison`` the flex comparison sheet (:mod:`flex_comparison`). The golfer does not adapt to the
 shaft, so the rows are a groundwork answer, not a speed-potential model.
@@ -54,7 +54,9 @@ def write_outputs(rows: list[FlexRow], out_dir: Path) -> tuple[Path, Path]:
     json_path = out_dir / f"{OUTPUT_STEM}.json"
     traces = {r.flex: r.bend.to_dict() for r in rows if r.bend is not None}
     flights = {r.flex: r.flight.to_dict() for r in rows if r.flight is not None}
+    shapes = {r.flex: r.shape.to_dict() for r in rows if r.shape is not None}
     payload = {"rows": records, "traces": traces, "flights": flights}
+    payload["shapes"] = shapes
     json_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     csv_path = out_dir / f"{OUTPUT_STEM}.csv"
     with csv_path.open("w", newline="", encoding="utf-8") as handle:
