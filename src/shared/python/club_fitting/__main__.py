@@ -1,7 +1,8 @@
 """``python3 -m src.shared.python.club_fitting``: same-hand-motion flex sweep.
 
 Runs one bundle's grip motion through each shaft flex and writes
-``flex_sweep.json`` and ``flex_sweep.csv``. The golfer does not adapt to the
+``flex_sweep.json`` (rows and bend traces) and ``flex_sweep.csv``; with
+``--report`` also the shaft report pages and tables (:mod:`shaft_report`). The golfer does not adapt to the
 shaft, so the rows are a groundwork answer, not a speed-potential model.
 """
 
@@ -30,6 +31,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="comma-separated ratings (default: every known rating)",
     )
     p.add_argument("--out", type=Path, required=True, help="output directory")
+    p.add_argument("--report", action="store_true", help="also write the report")
+    p.add_argument(
+        "--report-settings", type=Path, default=None, help="shaft report settings"
+    )
     return p
 
 
@@ -40,7 +45,9 @@ def write_outputs(rows: list[FlexRow], out_dir: Path) -> tuple[Path, Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
     records = [r.record() for r in rows]
     json_path = out_dir / f"{OUTPUT_STEM}.json"
-    json_path.write_text(json.dumps({"rows": records}, indent=2), encoding="utf-8")
+    traces = {r.flex: r.bend.to_dict() for r in rows if r.bend is not None}
+    payload = {"rows": records, "traces": traces}
+    json_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     csv_path = out_dir / f"{OUTPUT_STEM}.csv"
     with csv_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(records[0]))
@@ -66,7 +73,14 @@ def main(argv: list[str] | None = None) -> int:
         flexes,
         shot=loaded.shot,
     )
-    for path in write_outputs(rows, args.out):
+    json_path, csv_path = write_outputs(rows, args.out)
+    written = [json_path, csv_path]
+    if args.report:
+        from src.shared.python.club_fitting import shaft_report as sr
+
+        settings = sr.load_report_settings(args.report_settings)
+        written += sr.write_report(sr.load_sweep_result(json_path), args.out, settings)
+    for path in written:
         logger.info("wrote %s", path.name)
     return 0
 

@@ -10,10 +10,11 @@ fast a given player would swing each shaft.
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 import logging
 import math
 
+from src.shared.python.club_fitting.bend_trace import BendTrace, bend_trace
 from src.shared.python.club_fitting.grip_driven_shaft import (
     HeadGeometry,
     ShaftRun,
@@ -39,7 +40,8 @@ class FlexRow:
 
     Deltas are bent minus straight club in the same hand motion, at impact.
     ``peak_tip_deflection_mm`` is the peak up to impact; the extrapolated
-    window after it is not physical.
+    window after it is not physical. ``bend`` is the lead and droop up to
+    impact (for the shaft report); it is not part of :meth:`record`.
     """
 
     flex: str
@@ -52,15 +54,22 @@ class FlexRow:
     lie_delta_deg: float
     peak_tip_deflection_mm: float
     shot: dict[str, float | None] | None
+    bend: BendTrace | None = field(default=None, compare=False, repr=False)
 
     def record(self) -> dict[str, object]:
         flat = asdict(self)
+        flat.pop("bend")
         shot = flat.pop("shot") or {}
         return {**flat, **{f"shot_{k}": v for k, v in shot.items()}}
 
 
 def _row(
-    flex: str, cpm: float | None, run: ShaftRun, impact_s: float, shot: ShotFn | None
+    flex: str,
+    cpm: float | None,
+    run: ShaftRun,
+    impact_s: float,
+    shot: ShotFn | None,
+    head: HeadGeometry | None = None,
 ) -> FlexRow:
     mph = MPH_PER_MPS
     return FlexRow(
@@ -74,6 +83,7 @@ def _row(
         run.at("lie_delta_deg", impact_s),
         run.peak_tip_deflection_until_m(impact_s) * 1e3,
         None if shot is None else shot(run),
+        None if head is None else bend_trace(run, head, impact_s),
     )
 
 
@@ -108,7 +118,9 @@ def run_flex_sweep(
     for flex in chosen:
         chain = cs.build_shaft_chain(club, cfg.chain_links, flex=flex)
         run = simulate_grip_driven_shaft(track, chain, head, impact_time_s, cfg)
-        rows.append(_row(flex, chain.record["flex_cpm"], run, impact_time_s, shot))
+        rows.append(
+            _row(flex, chain.record["flex_cpm"], run, impact_time_s, shot, head)
+        )
         logger.info(
             "%s: impact head speed %.2f mph (rigid %.2f)",
             flex,
