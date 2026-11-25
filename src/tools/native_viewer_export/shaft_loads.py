@@ -160,11 +160,11 @@ def with_shaft_loads(
     look: ShaftLoadLook,
 ) -> Any:
     """``feed`` with the shaft arrows after its own extras, legend and key."""
-    extra = feed.extra_arrows
+    prior = feed.extra_arrows
     text = legend(quantity, part, look)
     return replace(
         feed,
-        extra_arrows=glyphs if extra is None else (lambda i: (*extra(i), *glyphs(i))),
+        extra_arrows=glyphs if prior is None else (lambda i: (*prior(i), *glyphs(i))),
         extra_legend=f"{feed.extra_legend} | {text}" if feed.extra_legend else text,
         colour_key=(*feed.colour_key, *colour_key(quantity, part, look)),
     )
