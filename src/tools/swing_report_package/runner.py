@@ -36,6 +36,7 @@ __all__ = [
     "exporter_command",
     "job_dir",
     "load_runner_settings",
+    "plan_manifest",
     "run_package",
     "subprocess_render",
     "unavailable_jobs",
@@ -249,6 +250,19 @@ def _merged(path: Path, manifest: dict[str, Any]) -> dict[str, Any]:
     return {**manifest, "jobs": [*kept, *manifest["jobs"]], "phases": phases}
 
 
+def plan_manifest(
+    jobs: Sequence[Job], *, swing: str, preflight: Preflight | None = None
+) -> dict[str, Any]:
+    """The manifest of ``jobs`` before any render (a dry run); writes nothing.
+
+    Each job is ``planned``, or ``unavailable`` with the reason ``preflight``
+    (default :func:`unavailable_jobs`) gives.
+    """
+    reasons = (preflight or unavailable_jobs)(jobs)
+    entries = [_entry(j, reasons.get(j.key)) for j in jobs]
+    return {"swing": swing, "jobs": entries, "phases": []}
+
+
 def run_package(
     jobs: Sequence[Job],
     root: Path,
@@ -258,25 +272,21 @@ def run_package(
     phases_of: Callable[[str], Sequence[Any]] | None,
     composite: Any = None,
     min_free_gb: float | None = None,
-    dry_run: bool = False,
     preflight: Preflight | None = None,
 ) -> dict[str, Any]:
     """Run ``jobs`` into ``root`` and write ``root/manifest.json``.
 
     A video the exporter rejects is ``unavailable``; a job whose input did
     not finish is ``blocked``; a failed render is ``failed`` and the rest
-    still run. A dry run writes nothing. Jobs recorded by an earlier run
+    still run (:func:`plan_manifest` is the dry run). Jobs recorded by an earlier run
     into ``root`` (another view, say) stay in the manifest. ``preflight``
     (default :func:`unavailable_jobs`) names the videos that cannot run.
 
     Raises:
         DiskSpaceError: less than ``min_free_gb`` free before a render.
     """
-    reasons = (preflight or unavailable_jobs)(jobs)
-    entries = [_entry(j, reasons.get(j.key)) for j in jobs]
-    manifest: dict[str, Any] = {"swing": swing, "jobs": entries, "phases": []}
-    if dry_run:
-        return manifest
+    manifest = plan_manifest(jobs, swing=swing, preflight=preflight)
+    entries = manifest["jobs"]
     root.mkdir(parents=True, exist_ok=True)
     gb = load_runner_settings()["min_free_gb"] if min_free_gb is None else min_free_gb
     run = _Run(root, swing, render, phases_of, composite, float(gb), manifest)

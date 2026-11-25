@@ -98,14 +98,8 @@ def test_the_disk_guard_stops_before_a_render(tmp_path) -> None:
 
 
 def test_a_dry_run_lists_the_plan_and_renders_nothing(tmp_path) -> None:
-    manifest = runner.run_package(
-        _jobs("case_grid"),
-        tmp_path,
-        swing="driver",
-        render=None,
-        phases_of=None,
-        dry_run=True,
-        preflight=lambda jobs: {},
+    manifest = runner.plan_manifest(
+        _jobs("case_grid"), swing="driver", preflight=lambda jobs: {}
     )
     assert {j["status"] for j in manifest["jobs"]} == {"planned"}
     assert not any(tmp_path.iterdir())
