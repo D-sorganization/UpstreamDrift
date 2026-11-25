@@ -17,6 +17,7 @@ from dataclasses import dataclass, replace
 import json
 import logging
 import math
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +27,7 @@ from PIL import Image, ImageDraw
 from src.shared.python.golf_view_presets import get_view_preset
 from src.tools.native_viewer_export import flight_depth
 from src.tools.native_viewer_export import shot_dispersion as sd
+from src.tools.native_viewer_export.compositor import KeyEntry
 from src.tools.native_viewer_export.display_units import DisplayUnits
 from src.tools.native_viewer_export.flight_tracer import (
     FlightPlayback,
@@ -60,6 +62,10 @@ class DispersionTraceSettings:
     hole_sample_width_pt: float
     hole_sample_zorder: float
     hole_nominal_zorder: float
+    hole_clip_margin: float
+    key_samples: str
+    key_nominal: str
+    hole_key_samples: str
 
     def __post_init__(self) -> None:
         if not self.views:
@@ -82,6 +88,19 @@ class DispersionTraceSettings:
         orders = (self.hole_sample_zorder, self.hole_nominal_zorder)
         if not (all(map(math.isfinite, orders)) and orders[0] < orders[1]):
             raise ValueError("hole_sample_zorder must be finite and below the nominal")
+        if not (math.isfinite(self.hole_clip_margin) and self.hole_clip_margin >= 0.0):
+            raise ValueError("hole_clip_margin must be non-negative and finite")
+        for name in ("key_samples", "key_nominal"):
+            if not getattr(self, name).strip():
+                raise ValueError(f"{name} must not be empty")
+        try:
+            self.hole_key_samples.format(n=1)
+        except (KeyError, IndexError, ValueError) as exc:
+            raise ValueError(f"hole_key_samples cannot be filled: {exc}") from exc
+
+    def hole_key_text(self, n: int) -> str:
+        """The hole still's legend line of ``n`` samples."""
+        return self.hole_key_samples.format(n=n)
 
     def hole_sample_style(self) -> HoleLineStyle:
         """The sample traces' style on a hole still (``sample_color_rgba`` in 0..1)."""
@@ -142,12 +161,52 @@ class DispersionOverlay:
             )
         return np.asarray(image, dtype=np.uint8)
 
+    def key_entries(self, nominal_rgba: Sequence[int]) -> tuple[KeyEntry, ...]:
+        """Colour key rows: the samples, then the nominal shot (``nominal_rgba``)."""
+        cfg = self.settings
+        sr, sg, sb = (int(c) for c in cfg.sample_color_rgba[:3])
+        nr, ng, nb = (int(c) for c in nominal_rgba[:3])
+        return ((cfg.key_samples, (sr, sg, sb)), (cfg.key_nominal, (nr, ng, nb)))
+
     def paint_hole(
         self, axes: tuple[Any, Any], paths_m: list[np.ndarray], hole: Any, scale: float
     ) -> None:
-        """The sample ``paths_m`` (hole frame) thin beneath the hole still's shot."""
+        """The sample ``paths_m`` (hole frame) thin beneath the hole still's shot.
+
+        Each path is cut at the axis limits (``hole_clip_margin``) and the
+        plan's legend gains one line for the samples.
+        """
+        from matplotlib.lines import Line2D
+
         style = self.settings.hole_sample_style()
-        draw_on_hole(axes, paths_m, hole, scale, style, "dispersion_sample")
+        draw_on_hole(
+            axes,
+            paths_m,
+            hole,
+            scale,
+            style,
+            "dispersion_sample",
+            self.settings.hole_clip_margin,
+        )
+        plan = axes[0]
+        old = plan.get_legend()
+        if old is None:
+            return
+        handles = [
+            *old.legend_handles,
+            Line2D([], [], color=style.colour, lw=style.width_pt),
+        ]
+        texts = [t.get_text() for t in old.get_texts()]
+        label = self.settings.hole_key_text(len(paths_m))
+        size = old.get_texts()[0].get_fontsize()
+        plan.legend(
+            handles,
+            [*texts, label],
+            loc="upper center",
+            fontsize=size,
+            ncol=1,
+            framealpha=0.9,
+        ).set_zorder(old.get_zorder())
 
 
 def draw_on_hole(
@@ -157,25 +216,83 @@ def draw_on_hole(
     scale: float,
     style: HoleLineStyle,
     gid: str,
+    margin: float = 0.0,
 ) -> None:
     """Draw each hole-frame path on the (plan, profile) axes of a hole figure.
 
     ``paths_m`` are (n, 3) world points of ``hole`` (as ``HoleShot.path_m``);
     the plan is (down-range, left), the profile (down-range, height), both in
     display units (``scale`` per metre). Every line gets ``style`` and ``gid``.
+    The parts of a path outside the axis limits (widened by ``margin`` of each
+    span, ``ValueError`` if negative) are not drawn; the crossing is cut exactly.
     """
     from src.tools.golf_environment.shots import hole_axes
 
     if not (math.isfinite(scale) and scale > 0.0):
         raise ValueError("scale must be positive and finite")
+    if not (math.isfinite(margin) and margin >= 0.0):
+        raise ValueError("margin must be non-negative and finite")
     tee, forward, left = hole_axes(hole)
     plan, side = axes
     kw = {"color": style.colour, "lw": style.width_pt, "zorder": style.zorder}
     for path in paths_m:
         rel = np.asarray(path, dtype=float) - tee
         x = scale * (rel @ forward)
-        plan.plot(x, scale * (rel @ left), gid=gid, **kw)
-        side.plot(x, scale * rel[:, 2], gid=gid, **kw)
+        for ax, y in ((plan, scale * (rel @ left)), (side, scale * rel[:, 2])):
+            xb, yb = _widened(ax.get_xlim(), margin), _widened(ax.get_ylim(), margin)
+            for run in clip_to_bounds(np.column_stack([x, y]), xb, yb):
+                ax.plot(run[:, 0], run[:, 1], gid=gid, **kw)
+
+
+def _widened(limits: tuple[float, float], margin: float) -> tuple[float, float]:
+    """``limits`` (low, high) widened by ``margin`` of their span each side."""
+    lo, hi = sorted(limits)
+    pad = margin * (hi - lo)
+    return lo - pad, hi + pad
+
+
+def clip_to_bounds(
+    xy: np.ndarray, x_bounds: tuple[float, float], y_bounds: tuple[float, float]
+) -> list[np.ndarray]:
+    """The runs of the polyline ``xy`` ((n, 2)) inside the box, cut at its edges.
+
+    Each run is (m, 2) with m >= 2; a path wholly outside gives ``[]``, one wholly
+    inside gives ``[xy]``. Raises ``ValueError`` for a bad shape or inverted bounds.
+    """
+    pts = np.asarray(xy, dtype=float)
+    if pts.ndim != 2 or pts.shape[1] != 2 or len(pts) < 1:
+        raise ValueError("xy must be an (n, 2) array of points")
+    if not (x_bounds[0] <= x_bounds[1] and y_bounds[0] <= y_bounds[1]):
+        raise ValueError("bounds must be (low, high) with low <= high")
+    lo = np.array([x_bounds[0], y_bounds[0]])
+    hi = np.array([x_bounds[1], y_bounds[1]])
+    runs: list[list[np.ndarray]] = []
+    current: list[np.ndarray] = []
+    for a, b in zip(pts[:-1], pts[1:], strict=True):
+        d = b - a
+        t0, t1 = 0.0, 1.0
+        for k in range(2):  # Liang-Barsky on the segment a + t d
+            if d[k] == 0.0:
+                if not lo[k] <= a[k] <= hi[k]:
+                    t0, t1 = 1.0, 0.0
+                continue
+            ta, tb = (lo[k] - a[k]) / d[k], (hi[k] - a[k]) / d[k]
+            t0, t1 = max(t0, min(ta, tb)), min(t1, max(ta, tb))
+        if t0 > t1:  # wholly outside: close the open run
+            if current:
+                runs.append(current)
+            current = []
+            continue
+        start, end = a + t0 * d, a + t1 * d
+        if not current:
+            current = [start]
+        current.append(end)
+        if t1 < 1.0:  # left the box: close the run
+            runs.append(current)
+            current = []
+    if current:
+        runs.append(current)
+    return [np.array(r) for r in runs if len(r) >= 2]
 
 
 def overlay_for(

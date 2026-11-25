@@ -262,6 +262,8 @@ def build_dispersion_hole_figure(
     """
     if nominal is not None and not nominal.available:
         raise ValueError("the nominal shot has no flight to draw")
+    if nominal is not None and not result.available:
+        return _nominal_only_figure(nominal, cfg, units or load_display_units())
     from matplotlib.lines import Line2D
 
     from src.tools.golf_environment.hole_figure import build_hole_figure
@@ -292,6 +294,27 @@ def build_dispersion_hole_figure(
     return fig, plan, side
 
 
+def _nominal_only_figure(
+    nominal: SampleOutcome, cfg: DispersionHoleSettings, units: DisplayUnits
+) -> tuple[Any, Any, Any]:
+    """The hole still of the nominal shot alone (no sample has a flight).
+
+    Drawn like the export's shot (its colour and width); the title says that
+    there is no dispersion, and there is no mean marker or ellipse.
+    """
+    from src.tools.golf_environment.hole_figure import build_hole_figure
+    from src.tools.golf_environment.shots import hole_from_settings, load_shots_settings
+    from src.tools.native_viewer_export.hole_view import load_hole_view_settings
+
+    settings = load_shots_settings()
+    settings["figure"] = {**settings["figure"], **cfg.style["figure"]}
+    hole = hole_from_settings(settings, cfg.preset)
+    colour = load_hole_view_settings().colour_rgba
+    shots = _hole_shots([nominal], hole, colour)
+    note = cfg.style["title_format_nominal_only"]
+    return build_hole_figure(shots, hole, settings, units, False, note)
+
+
 def write_dispersion_hole(
     result: DispersionResult,
     sigma_cfg: DispersionSettings,
@@ -302,7 +325,8 @@ def write_dispersion_hole(
 ) -> Path:
     """Write the dispersion-on-the-hole PNG to ``path`` and return it.
 
-    Raises ``ValueError`` when no shot (or a given ``nominal``) has a flight.
+    Raises ``ValueError`` when no shot (or a given ``nominal``) has a flight;
+    with no sample flight but a ``nominal`` one, the nominal shot alone is drawn.
     Postcondition: ``path`` exists; distances are in ``units`` (default:
     display-units settings); ``nominal`` is emphasised over the samples.
     """
