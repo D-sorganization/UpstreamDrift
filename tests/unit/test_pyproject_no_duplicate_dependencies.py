@@ -32,7 +32,9 @@ def _duplicates(requirements: list[str]) -> list[str]:
 
 
 def test_duplicate_detector_flags_repeated_names() -> None:
-    assert _duplicates(["certifi>=1", "Flask>=3", "certifi>=1", "my_pkg", "my-pkg"]) == [
+    assert _duplicates(
+        ["certifi>=1", "Flask>=3", "certifi>=1", "my_pkg", "my-pkg"]
+    ) == [
         "certifi",
         "my-pkg",
     ]
