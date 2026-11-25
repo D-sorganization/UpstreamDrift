@@ -214,7 +214,9 @@ def _add_hand_force_arguments(p: argparse.ArgumentParser) -> None:
         "--ztcf-zvcf-hands",
         choices=HAND_CHOICES,
         default="both",
-        help="draw the lead hand, the trail hand or both (default: both)",
+        help="draw the lead hand, the trail hand or both, or midhands: both "
+        "reduced to one force + couple at their midpoint, one case per "
+        "--ztcf-zvcf-view (default: both) (#15720)",
     )
     p.add_argument(
         "--palm-thumb-force",

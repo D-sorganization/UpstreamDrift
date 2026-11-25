@@ -49,7 +49,8 @@ __all__ = [
 ]
 
 #: ``--ztcf-zvcf-hands``: both hands or one.
-HAND_CHOICES = ("both", *HANDS)
+#: ``midhands`` draws no hand: both reduce to one force + couple (#15720)
+HAND_CHOICES = ("both", *HANDS, "midhands")
 _HAND_LABEL = {"lead": "Lead", "trail": "Trail"}
 _VIEW_TEXT = {
     "tip_to_tail": "ZTCF drift + ZVCF control = total, tip to tail",
@@ -99,6 +100,8 @@ def hands_of(choice: str) -> tuple[str, ...]:
     """The hands a ``--ztcf-zvcf-hands`` choice draws; ``ValueError`` otherwise."""
     if choice not in HAND_CHOICES:
         raise ValueError(f"hands must be one of {HAND_CHOICES}, got {choice!r}")
+    if choice == "midhands":
+        return ()
     return HANDS if choice == "both" else (choice,)
 
 
