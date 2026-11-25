@@ -55,3 +55,21 @@ def test_key_stays_clear_of_the_right_hand_impact_card() -> None:
     shape = (720, 1280, 3)
     key = colour_key_box(shape, ENTRIES)
     assert key[2] <= shape[1] // 2
+
+
+def test_each_row_has_a_solid_swatch_and_light_text() -> None:
+    """Review of the whole-swing renders: dark blue or red text on the dark
+    panel was unreadable, so each colour is a solid swatch block and the
+    text is white."""
+    img = np.full((720, 1280, 3), 40, dtype=np.uint8)
+    out = draw_colour_key(img, ENTRIES)
+    x0, y0, x1, y1 = colour_key_box(img.shape, ENTRIES)
+    region = out[y0:y1, x0:x1]
+    for _, rgb in ENTRIES:
+        hit = np.all(region == np.array(rgb), axis=2)
+        rows, cols = np.nonzero(hit)
+        # a filled block: at least 8 x 8 pixels of the exact colour
+        assert hit.sum() >= 64, rgb
+        assert cols.max() - cols.min() >= 7 and rows.max() - rows.min() >= 7, rgb
+    white = np.all(region == 255, axis=2)
+    assert white.sum() > 200  # the row text

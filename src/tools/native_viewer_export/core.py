@@ -53,6 +53,7 @@ from src.tools.native_viewer_export import contact_frame, flight_tracer, replay_
 from src.tools.native_viewer_export import shot_setup
 from src.tools.native_viewer_export import ellipsoid_panel as ellipsoid_hud
 from src.tools.native_viewer_export import flight_inset, hole_view
+from src.tools.native_viewer_export.frame_times import write_frame_times
 from src.tools.native_viewer_export.behind_camera import look_map, view_lookat
 from src.tools.native_viewer_export import impact_factors as factors_panel
 from src.tools.native_viewer_export.impact_card import impact_card_for
@@ -945,6 +946,7 @@ def _export_clip(
             writer.close()
     if frames != len(indices):
         raise RuntimeError(f"backend yielded {frames} frames, expected {len(indices)}")
+    write_frame_times(paths, [shown.time_s(k) for k in indices])
     return paths, frames, glyph_counts
 
 
