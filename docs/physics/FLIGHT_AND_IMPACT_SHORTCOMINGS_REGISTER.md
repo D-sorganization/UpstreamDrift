@@ -278,8 +278,13 @@ Sizes quoted from tests are the band a test asserts, not a published value.
   URLs are in its `tour_table_source` block); it bands carry, apex and descent
   only. There are no woods, hybrids, long irons or lob
   wedges, no side or spin-axis data, no roll or total reference, and no
-  impact-model reference table (club delivery to ball data). The older bands in
-  `tests/unit/physics/test_trackman_benchmarks.py` are wide (driver 238 to 290
-  yd, 7-iron 148 to 182 yd).
+  impact-model reference table (club delivery to ball data). The older driver
+  benchmarks in `tests/unit/physics/test_trackman_benchmarks.py` and
+  `tests/unit/test_flight_models.py` now read the PGA driver row and its
+  carry and apex bands through `tests/unit/physics/reference_bands.py` (F7);
+  the 7-iron benchmark keeps its wide 148 to 182 yd band. Against the driver
+  band (261.3 to 288.8 yd) three alternative flight models overshoot and are
+  strict xfails with their measured numbers: Nathan 294.3 yd (apex 34.4 m),
+  Ballantyne 297.2 yd (apex 33.7 m) and Rospie DL 290.8 yd.
 - **Effect:** not applicable; this limits what can be detected.
 - **Tracking:** #15443 (children 2, 3, F7).
