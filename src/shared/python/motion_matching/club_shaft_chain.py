@@ -779,7 +779,40 @@ def apply_shaft_chain(document: Mapping[str, Any], chain: ShaftChain) -> dict[st
         "tip_link": parent,
         "club_body": prefix,
     }
+    _attach_shaft_markers_to_link_zero(doc, f"{prefix}/Shaft Link 0")
     return doc
+
+
+def _attach_shaft_markers_to_link_zero(doc: dict[str, Any], link0: str) -> None:
+    """Move the shaft markers off the tip link onto ``link0`` (#15150 C23).
+
+    The ``Clubhead`` frame (now on the tip link) carries the whole club
+    cluster; only the head triad belongs to the head. The rest (the shaft
+    markers) go to a ``SHAFT_MARKER_FRAME`` frame on ``link0`` with the same
+    placement, so their offsets and rest positions are unchanged (every link
+    frame is the club frame at zero deflection) and a bend past joint 0 no
+    longer carries them with the head. No-op without shaft markers.
+    """
+    from src.shared.python.motion_matching.execution.club_markers import (
+        CLUB_MARKER_BODY,
+        HEAD_TRIAD,
+        SHAFT_MARKER_FRAME,
+    )
+
+    shaft_markers = [
+        attachment
+        for label, attachment in doc.get("marker_attachments", {}).items()
+        if attachment["body"] == CLUB_MARKER_BODY and label not in HEAD_TRIAD
+    ]
+    head = next((f for f in doc["frames"] if f["name"] == CLUB_MARKER_BODY), None)
+    if not shaft_markers or head is None:
+        return
+    doc["frames"].append(
+        {"name": SHAFT_MARKER_FRAME, "body": link0, "placement": head["placement"]}
+    )
+    for attachment in shaft_markers:
+        attachment["body"] = SHAFT_MARKER_FRAME
+    doc["club"]["shaft"]["shaft_marker_link"] = link0
 
 
 def clamped_shaft_document(

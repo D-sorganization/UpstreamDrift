@@ -41,8 +41,13 @@ physical acceptance of a captured swing fit.
 
 ## Out of Scope (Deferred)
 
-- Real-swing bend fit with rigid-club double-counting resolved (C23 / club-root
-  refit).
+- Real-swing bend fit with rigid-club double-counting resolved (C23 club-root
+  refit). The spec half of C23 is done: `apply_shaft_chain` now attaches the
+  shaft markers (the club cluster outside the head triad) to chain link 0
+  through the `ClubheadShaft` frame, so in the engine a bend past joint 0 moves
+  only the head markers (`tests/unit/motion_matching/test_shaft_chain_markers.py`).
+  The refit of the lead wrist and closure with the club root following the
+  shaft markers still needs the private capture and is not run here.
 - Bent-shaft bundle, impact-card, or flight before/after comparison (#15150 C13).
 - Any Explorer or live playback integration.
 
