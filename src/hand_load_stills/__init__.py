@@ -1,12 +1,4 @@
-"""Tip-to-tail stills: ZTCF + ZVCF = Total at the seven swing phases.
-
-Copies supplied midhands vectors. It does not solve the grip null space.
-A non-finite component is UNAVAILABLE and is never drawn as zero. The drawn
-tip of ZTCF then ZVCF must meet Total within the relative tolerance (owner
-default 1e-4); a miss is labelled CLOSURE FAILED. Face-on uses the shared
-face-on camera. Colours are Okabe–Ito. The footer carries the caller's git
-SHA and data hash.
-"""
+"""3D tip-to-tail stills: ZTCF + ZVCF = Total at the seven swing phases."""
 
 from __future__ import annotations
 
@@ -16,31 +8,12 @@ import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Protocol, cast
+from typing import Any, Protocol
 
 import numpy as np
-from golf_view_presets.presets import get_view_preset
-from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-__all__ = [
-    "PHASE_IDS",
-    "PHASE_LABELS",
-    "ComponentVectors",
-    "PhaseLoads",
-    "SimulationOutputLike",
-    "StillRecord",
-    "adapt_simulation_output",
-    "closure_status",
-    "render_tip_to_tail",
-]
-
 RELATIVE_TOLERANCE = 1e-4
-_VIEWS = ("2d", "3d")
-_VIEW_LABEL = {
-    "3d": "Three-Dimensional Tip-to-Tail",
-    "2d": "Two-Dimensional Face-On Tip-to-Tail",
-}
 _ZTCF, _ZVCF, _TOTAL, _BADGE = "#0072B2", "#D55E00", "#000000", "#F0E442"
 _SHA = re.compile(r"^[0-9a-fA-F]{7,64}$")
 _HASH = re.compile(r"^[0-9a-fA-F]{8,128}$")
@@ -49,14 +22,11 @@ _BANNED = ("wasted energy", "biological optimality")
 _PARTS = ("ztcf", "zvcf", "total")
 _SETTINGS = (
     Path(__file__).resolve().parents[1]
-    / "tools"
-    / "swing_report_package"
-    / "phase_settings.json"
+    / "tools/swing_report_package/phase_settings.json"
 )
 
 
 def _catalog(path: Path = _SETTINGS) -> tuple[tuple[str, str], ...]:
-    """Seven ``(id, label)`` rows from the swing-report phase settings."""
     phases = json.loads(path.read_text(encoding="utf-8")).get("phases")
     if not isinstance(phases, list):
         raise ValueError("phase settings must list phases")
@@ -85,13 +55,9 @@ for _pid, _label in PHASE_CATALOG:
         if _folded in _PHASE_INDEX and _PHASE_INDEX[_folded] != _pid:
             raise ValueError(f"phase alias {_key!r} is ambiguous")
         _PHASE_INDEX[_folded] = _pid
-_FACE = get_view_preset("face_on")
-_RIGHT, _UP = _FACE.image_right(), _FACE.image_up()
 
 
 class SimulationOutputLike(Protocol):
-    """Fields another lane's SimulationOutput must expose to this adapter."""
-
     git_sha: str
     data_hash: str
     objective: str
@@ -106,35 +72,31 @@ def _canonical(name: object) -> str:
     return found
 
 
-def _as_vec(value: object, name: str) -> np.ndarray:
+def _vec3(value: object, name: str) -> np.ndarray:
     try:
         arr = np.asarray(value, dtype=np.float64)
     except (TypeError, ValueError) as exc:
         raise ValueError(f"{name} must be numeric") from exc
     if arr.shape != (3,):
         raise ValueError(f"{name} must have shape (3,), got {arr.shape}")
-    out = arr.copy()
-    out[~np.isfinite(out)] = np.nan
-    return out
+    return arr.copy()
 
 
 @dataclass(frozen=True, eq=False)
 class ComponentVectors:
-    """ZTCF, ZVCF and Total. NaN means unavailable, not a physical zero."""
-
     ztcf: np.ndarray
     zvcf: np.ndarray
     total: np.ndarray
 
     def __post_init__(self) -> None:
         for name in _PARTS:
-            object.__setattr__(self, name, _as_vec(getattr(self, name), name))
+            arr = _vec3(getattr(self, name), name)
+            arr[~np.isfinite(arr)] = np.nan
+            object.__setattr__(self, name, arr)
 
 
 @dataclass(frozen=True, eq=False)
 class PhaseLoads:
-    """One phase. ``name`` is stored as the phase-settings id."""
-
     name: str
     force_n: ComponentVectors
     moment_nm: ComponentVectors
@@ -162,13 +124,6 @@ def _objective(value: object) -> str:
 
 @dataclass(frozen=True, eq=False)
 class StillRecord:
-    """Seven phase loads and the provenance stamped on every still.
-
-    Preconditions: hex provenance, evidence ``allocation-only`` or
-    ``forward-replayed``, the seven phase ids in swing order, and a
-    ``relative_tolerance`` in ``(0, 1]``.
-    """
-
     git_sha: str
     data_hash: str
     objective: str
@@ -195,36 +150,18 @@ class StillRecord:
         object.__setattr__(self, "relative_tolerance", tolerance)
 
 
-def _drawn(value: object, name: str) -> np.ndarray | None:
-    try:
-        arr = np.asarray(value, dtype=np.float64)
-    except (TypeError, ValueError) as exc:
-        raise ValueError(f"{name} must be numeric") from exc
-    if arr.ndim != 1 or arr.shape[0] not in (2, 3):
-        raise ValueError(f"{name} must be a length-2 or length-3 vector")
-    if not np.isfinite(arr).all():
-        return None
-    return arr
-
-
 def closure_status(
     ztcf: object, zvcf: object, total: object, tolerance: float = RELATIVE_TOLERANCE
 ) -> str:
-    """``closed``, ``open`` or ``unavailable`` for one drawn triple.
-
-    Unavailable when any component is non-finite. Open when
-    ``||(ztcf + zvcf) - total|| / scale`` exceeds ``tolerance``. ``scale`` is
-    the larger norm, and at least ``1e-12``.
-    """
     drawn = [
-        _drawn(item, name)
-        for item, name in ((ztcf, "ztcf"), (zvcf, "zvcf"), (total, "total"))
+        _vec3(value, name)
+        for name, value in zip(_PARTS, (ztcf, zvcf, total), strict=True)
     ]
-    if any(item is None for item in drawn):
+    if any(not np.isfinite(part).all() for part in drawn):
         return "unavailable"
     if not math.isfinite(tolerance) or not 0.0 < tolerance <= 1.0:
         raise ValueError("tolerance must lie in (0, 1]")
-    ztcf_v, zvcf_v, total_v = (np.asarray(item) for item in drawn)
+    ztcf_v, zvcf_v, total_v = drawn
     gap = float(np.linalg.norm(ztcf_v + zvcf_v - total_v))
     scale = max(
         float(np.linalg.norm(total_v)), float(np.linalg.norm(ztcf_v + zvcf_v)), 1e-12
@@ -234,24 +171,18 @@ def closure_status(
     return "open"
 
 
-def _read(item: object, key: str) -> object:
+def _get(item: object, key: str, *, required: bool) -> object:
     if isinstance(item, Mapping):
+        if required and key not in item:
+            raise ValueError(f"simulation output is missing {key}")
         return item.get(key)
+    if required and not hasattr(item, key):
+        raise ValueError(f"simulation output is missing {key}")
     return getattr(item, key, None)
 
 
-def _need(source: object, key: str) -> object:
-    if isinstance(source, Mapping):
-        if key not in source:
-            raise ValueError(f"simulation output is missing {key}")
-        return source[key]
-    if not hasattr(source, key):
-        raise ValueError(f"simulation output is missing {key}")
-    return getattr(source, key)
-
-
 def _vectors(item: object | None, key: str) -> ComponentVectors:
-    raw = {} if item is None else _read(item, key)
+    raw = {} if item is None else _get(item, key, required=False)
     if raw is None:
         raw = {}
     if not isinstance(raw, Mapping):
@@ -263,16 +194,12 @@ def _vectors(item: object | None, key: str) -> ComponentVectors:
 
 
 def adapt_simulation_output(source: SimulationOutputLike) -> StillRecord:
-    """Copy phase loads. Missing channels and phases are NaN, never zero.
-
-    Total is not invented from ZTCF + ZVCF. Postcondition: seven phases in order.
-    """
-    raw = _need(source, "phases")
+    raw = _get(source, "phases", required=True)
     if isinstance(raw, (str, bytes)) or not isinstance(raw, Sequence):
         raise TypeError("phases must be a sequence of phase loads")
     found: dict[str, object] = {}
     for item in raw:
-        name = _read(item, "name")
+        name = _get(item, "name", required=False)
         if name is None:
             raise ValueError("each phase needs a name")
         pid = _canonical(name)
@@ -288,168 +215,90 @@ def adapt_simulation_output(source: SimulationOutputLike) -> StillRecord:
         for pid in PHASE_IDS
     )
     return StillRecord(
-        git_sha=str(_need(source, "git_sha")),
-        data_hash=str(_need(source, "data_hash")),
-        objective=str(_need(source, "objective")),
-        evidence=str(_need(source, "evidence")),
+        git_sha=str(_get(source, "git_sha", required=True)),
+        data_hash=str(_get(source, "data_hash", required=True)),
+        objective=str(_get(source, "objective", required=True)),
+        evidence=str(_get(source, "evidence", required=True)),
         phases=phases,
     )
 
 
-def _project(vec: np.ndarray, view: str) -> np.ndarray:
-    if view == "3d":
-        return vec
-    return np.array([float(np.dot(vec, _RIGHT)), float(np.dot(vec, _UP))])
+def _gid(ax: Any, text: str, gid: str, y: float) -> None:
+    artist = ax.text2D(0.5, y, text, transform=ax.transAxes, ha="center", fontsize=8)
+    artist.set_gid(gid)
 
 
-def _triple(
-    triple: ComponentVectors, view: str
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    return (
-        _project(triple.ztcf, view),
-        _project(triple.zvcf, view),
-        _project(triple.total, view),
-    )
-
-
-def _plot(
-    ax: Axes, tail: np.ndarray, tip: np.ndarray, color: str, style: str, label: str
+def _segment(
+    ax: Any, tail: np.ndarray, tip: np.ndarray, color: str, label: str
 ) -> None:
-    series = [[float(tail[i]), float(tip[i])] for i in range(int(tail.shape[0]))]
+    style = "--" if label == "Total" else "-"
     ax.plot(
-        *series,
+        [tail[0], tip[0]],
+        [tail[1], tip[1]],
+        [tail[2], tip[2]],
         color=color,
-        linestyle=style,
-        linewidth=0.0 if style == "none" else 2.0,
-        marker="x" if style == "none" else None,
+        lw=2,
+        ls=style,
         label=label,
     )
 
 
-def _note(ax: Axes, message: str, gid: str, y: float) -> None:
-    kwargs: dict[str, Any] = {
-        "transform": ax.transAxes,
-        "ha": "center",
-        "va": "center",
-        "fontsize": 8,
-        "color": "#000000",
-    }
-    axis = cast(Any, ax)
-    artist = (
-        axis.text2D(0.5, y, message, **kwargs)
-        if ax.name == "3d"
-        else axis.text(0.5, y, message, **kwargs)
-    )
-    artist.set_gid(gid)
-
-
-def _panel(
-    ax: Axes, triple: ComponentVectors, view: str, tolerance: float, span: float
-) -> None:
-    ax.set_xlim(-span, span)
-    ax.set_ylim(-span, span)
-    if view == "3d":
-        axis3d = cast(Any, ax)
-        axis3d.set_zlim(-span, span)
-        axis3d.set_xlabel("X")
-        axis3d.set_ylabel("Y")
-        axis3d.set_zlabel("Z")
-    else:
-        ax.set_xlabel("Target")
-        ax.set_ylabel("Up")
-        ax.set_aspect("equal", adjustable="box")
-    ztcf, zvcf, total = _triple(triple, view)
-    status = closure_status(ztcf, zvcf, total, tolerance)
-    if status == "unavailable":
-        _note(ax, "UNAVAILABLE", "unavailable", 0.55)
-        return
-    origin = np.zeros_like(total)
-    specs = (
-        (origin, total, _TOTAL, "--", "Total"),
-        (origin, ztcf, _ZTCF, "-", "ZTCF"),
-        (ztcf, ztcf + zvcf, _ZVCF, "-", "ZVCF"),
-    )
-    for tail, tip, color, style, label in specs:
-        _plot(ax, tail, tip, color, style, label)
-    if status == "open":
-        _plot(ax, ztcf + zvcf, ztcf + zvcf, _ZVCF, "none", "_sum_tip")
-        _note(ax, "CLOSURE FAILED", "closure-failure", 0.9)
-
-
-def _span(record: StillRecord, view: str) -> float:
-    peak = 1.0
-    for phase in record.phases:
-        for attr in ("force_n", "moment_nm"):
-            drawn = _triple(getattr(phase, attr), view)
-            if closure_status(*drawn, record.relative_tolerance) == "unavailable":
-                continue
-            points = (*drawn, drawn[0] + drawn[1])
-            peak = max(peak, max(float(np.max(np.abs(point))) for point in points))
-    return peak * 1.25
-
-
-def render_tip_to_tail(record: StillRecord, view: str = "3d") -> Figure:
-    """Return a 2×7 still of force and moment at every swing phase.
-
-    Preconditions: ``record`` is a StillRecord and ``view`` is ``3d`` or ``2d``.
-    Postcondition: fourteen panels, an objective title, an evidence badge and
-    a provenance footer. Closure failures and unavailable panels stay visible.
-    The figure is not written to disk.
-    """
+def render_tip_to_tail(record: StillRecord) -> Figure:
     if not isinstance(record, StillRecord):
         raise TypeError(f"record must be StillRecord, got {type(record).__name__}")
-    if view not in _VIEWS:
-        raise ValueError(f"view must be one of {_VIEWS}, got {view!r}")
     import matplotlib.pyplot as plt
 
     fig, axes = plt.subplots(
-        2,
-        len(PHASE_IDS),
-        figsize=(16.8, 5.6),
-        subplot_kw={"projection": "3d"} if view == "3d" else {},
+        2, len(PHASE_IDS), figsize=(16.8, 5.6), subplot_kw={"projection": "3d"}
     )
     fig.suptitle(f"Objective: {record.objective}")
-    label = fig.text(0.5, 0.93, _VIEW_LABEL[view], ha="center", va="top", fontsize=10)
-    label.set_gid("view-label")
+    view = fig.text(
+        0.5, 0.93, "Three-Dimensional Tip-to-Tail", ha="center", fontsize=10
+    )
+    view.set_gid("view-label")
     badge = fig.text(
         0.99,
         0.99,
         record.evidence,
         ha="right",
         va="top",
-        fontsize=9,
         bbox={"boxstyle": "round", "fc": _BADGE, "ec": "#000000"},
     )
     badge.set_gid("evidence-badge")
     footer = fig.text(
-        0.01,
-        0.01,
-        f"Provenance: git {record.git_sha} | data {record.data_hash}",
-        ha="left",
-        va="bottom",
-        fontsize=8,
+        0.01, 0.01, f"Provenance: git {record.git_sha} | data {record.data_hash}"
     )
     footer.set_gid("provenance-footer")
-    span = _span(record, view)
     grid = np.atleast_2d(axes)
-    units = (("force_n", "Force (N)"), ("moment_nm", "Moment (N·m)"))
-    for row, (attr, unit) in enumerate(units):
+    rows = (("force_n", "Force (N)"), ("moment_nm", "Moment (N·m)"))
+    for row, (attr, unit) in enumerate(rows):
         for phase in record.phases:
-            axis = grid[row, PHASE_IDS.index(phase.name)]
-            axis.set_title(f"{_LABEL[phase.name]} {unit}")
-            _panel(axis, getattr(phase, attr), view, record.relative_tolerance, span)
-    handles, labels = grid[0, 0].get_legend_handles_labels()
-    kept = [
-        (h, lab)
-        for h, lab in zip(handles, labels, strict=True)
-        if not str(lab).startswith("_")
-    ]
-    if kept:
-        chosen_h, chosen_l = zip(*kept, strict=True)
-        fig.legend(
-            chosen_h, chosen_l, loc="upper left", frameon=False, fontsize=8
-        ).set_gid("part-legend")
-    fig.subplots_adjust(
-        top=0.78, bottom=0.14, left=0.04, right=0.99, wspace=0.55, hspace=0.6
-    )
+            ax = grid[row, PHASE_IDS.index(phase.name)]
+            triple = getattr(phase, attr)
+            ax.set_title(f"{_LABEL[phase.name]} {unit}")
+            ax.set_xlabel("X")
+            ax.set_ylabel("Y")
+            ax.set_zlabel("Z")
+            status = closure_status(
+                triple.ztcf, triple.zvcf, triple.total, record.relative_tolerance
+            )
+            if status == "unavailable":
+                _gid(ax, "UNAVAILABLE", "unavailable", 0.55)
+                continue
+            origin = np.zeros(3)
+            _segment(ax, origin, triple.total, _TOTAL, "Total")
+            _segment(ax, origin, triple.ztcf, _ZTCF, "ZTCF")
+            _segment(ax, triple.ztcf, triple.ztcf + triple.zvcf, _ZVCF, "ZVCF")
+            if status == "open":
+                tip = triple.ztcf + triple.zvcf
+                ax.plot(
+                    [tip[0]],
+                    [tip[1]],
+                    [tip[2]],
+                    color=_ZVCF,
+                    marker="x",
+                    ls="none",
+                    label="_sum_tip",
+                )
+                _gid(ax, "CLOSURE FAILED", "closure-failure", 0.9)
     return fig
