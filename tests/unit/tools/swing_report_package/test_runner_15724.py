@@ -119,18 +119,27 @@ def test_the_exporter_command_carries_the_job_options(tmp_path) -> None:
 def test_an_unsupported_video_is_unavailable_and_blocks_its_composites(
     tmp_path,
 ) -> None:
-    """The midhands exporter (#15720) is not on main: its jobs fail closed
-    before any render instead of hours into a package."""
+    """A video whose options the exporter rejects fails closed before any
+    render instead of hours into a package, and blocks what composes it."""
     calls: list[str] = []
     kwargs = {**_kwargs(calls), "preflight": None}
-    manifest = runner.run_package(_jobs("midhands_grid"), tmp_path, **kwargs)
+    args = {"ztcf_zvcf_view": "total", "ztcf_zvcf_hands": "elbows", "no_grid": True}
+    video = Job("elbows", "video", "Elbows", "face_on", 0.25, args)
+    grid = Job("elbows_grid", "grid", "Grid", "face_on", 0.25, needs=(video.key,))
+    manifest = runner.run_package([video, grid], tmp_path, **kwargs)
     status = {j["item"]: j for j in manifest["jobs"]}
-    for item in MIDHANDS:
-        assert status[item]["status"] == "unavailable"
-        assert "not available yet" in status[item]["error"]
-        assert "midhands" in status[item]["error"]
-    assert status["midhands_grid"]["status"] == "blocked"
+    assert status["elbows"]["status"] == "unavailable"
+    assert "not available yet" in status["elbows"]["error"]
+    assert "elbows" in status["elbows"]["error"]
+    assert status["elbows_grid"]["status"] == "blocked"
     assert calls == []
+
+
+def test_the_midhands_videos_pass_the_preflight() -> None:
+    """The midhands exporter (#15720) accepts the catalog's midhands videos."""
+    jobs = [j for j in _jobs("midhands_grid") if j.item in MIDHANDS]
+    assert jobs
+    assert runner.unavailable_jobs(jobs) == {}
 
 
 def test_a_video_the_exporter_accepts_passes_the_preflight() -> None:
