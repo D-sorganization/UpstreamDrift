@@ -74,6 +74,7 @@ from src.tools.native_viewer_export.impact_factors import load_factor_settings
 from src.tools.native_viewer_export.overlay import OverlayOptions, build_overlay_feed
 from src.tools.native_viewer_export.runner import ExportJob, run_export
 from src.tools.native_viewer_export.ztcf_axial import SHADING_PARTS
+from src.tools.native_viewer_export.ztcf_ground import FORCE_PARTS
 from src.tools.native_viewer_export.ztcf_feed import HAND_CHOICES
 from src.tools.native_viewer_export import camera_framing, shot_setup
 
@@ -209,6 +210,14 @@ def _add_hand_force_arguments(p: argparse.ArgumentParser) -> None:
         help="what the segment shading shows: the recorded loads, or the "
         "ZTCF drift, ZVCF control or their total section loads (feet planted; "
         "needs a dynamics bundle) (default: recorded) (#15150)",
+    )
+    p.add_argument(
+        "--force-part",
+        choices=FORCE_PARTS,
+        default="recorded",
+        help="forces drawn: recorded, or one ZTCF/ZVCF case's net planted-foot "
+        "ground reaction at its centre of pressure and only its force kinds "
+        "(ZTCF: no applied torques; ZVCF: no weight) (default: recorded) (#15150)",
     )
     p.add_argument(
         "--ztcf-zvcf-hands",
@@ -943,6 +952,7 @@ def main(
                     ztcf_quantity=args.ztcf_zvcf_quantity,
                     ztcf_hands=args.ztcf_zvcf_hands,
                     shading_part=args.segment_shading_part,
+                    force_part=args.force_part,
                     arrow_style=args.arrow_style,
                 ),
             ),
