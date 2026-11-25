@@ -45,6 +45,16 @@ the segment edges and the profile stations (the profile is piecewise linear,
 so each piece of ``1/EI`` is smooth). Tip deflection is not made exact by this
 rule. ``midpoint`` stays the default so existing bundles are unchanged.
 
+Torque rating (option ``torque_rating_deg``, #15150 C17): by default the
+torsion springs come from the bending calibration through the isotropic
+``G = E / 2(1 + nu)``, so twist is tied to flex. Shafts are sold with an
+independent torque rating, the twist in degrees under 1 ft lbf
+(``TORQUE_RATING_TEST_N_M``). With a rating the springs are scaled by one
+common factor so ``T sum_i 1/k_i`` equals the rating over the flexible span:
+the ``GJ`` distribution along the shaft is kept, bending is untouched, and
+the rating holds whatever the flex or ``stiffness_scale``. The span is the
+exposed shaft from the grip end, not the butt clamp of a rating bench.
+
 Frames: every link body uses the club body frame (shaft along ``-y`` from the
 head to the grip, origin at the head); at zero deflection all link frames
 coincide with the club frame, so solid and frame placements keep their rigid
@@ -83,6 +93,13 @@ DEFAULT_SHAFT_MODEL = "rigid"
 #: Lumping rules of ``build_shaft_chain`` (``midpoint`` is the default).
 LUMPING_RULES: tuple[str, ...] = ("midpoint", "tip_slope_exact")
 DEFAULT_LUMPING = "midpoint"
+#: Torque of the shaft torque-rating test: 1 ft lbf at the tip (#15150 C17).
+TORQUE_RATING_TEST_N_M = 1.3558179483314004
+#: Torque ratings ``build_shaft_chain`` accepts (degrees under the test
+#: torque): a validity window around the published driver range (roughly
+#: 2.5-7 degrees; tour shafts near 3, light senior and ladies shafts near
+#: 6-7), not a fitted value.
+TORQUE_RATING_RANGE_DEG = (1.0, 12.0)
 #: Gauss-Legendre points per smooth piece of the compliance integrals.
 LUMPING_QUADRATURE_POINTS = 8
 #: Engines whose spec adapters apply the chain's joint springs and pass the
@@ -205,6 +222,7 @@ SHAFT_OPTION_FLAGS: dict[str, str] = {
     "stiffness_scale": "--shaft-stiffness-scale",
     "n_links": "--shaft-links",
     "lumping": "--shaft-lumping",
+    "torque_rating_deg": "--shaft-torque-rating",
 }
 
 
@@ -244,6 +262,10 @@ def add_shaft_arguments(parser: Any) -> None:
         "lumping": {
             "choices": LUMPING_RULES,
             "help": f"spring lumping rule (default {DEFAULT_LUMPING})",
+        },
+        "torque_rating_deg": {
+            "type": float,
+            "help": "shaft torque rating, degrees under 1 ft lbf (adds torsion)",
         },
     }
     for key, flag in SHAFT_OPTION_FLAGS.items():
@@ -467,6 +489,7 @@ def build_shaft_chain(
     torsion: bool = False,
     stiffness_scale: float = 1.0,
     lumping: str = DEFAULT_LUMPING,
+    torque_rating_deg: float | None = None,
 ) -> ShaftChain:
     """Lump the calibrated profile into ``n_links`` links.
 
@@ -476,8 +499,16 @@ def build_shaft_chain(
     every spring (the rigid-limit check uses 1e6); damping scales with its
     square root so modal damping ratios stay.
 
+    ``torque_rating_deg`` (#15150 C17) sets the torsion springs from the
+    shaft's torque rating instead of the bending flex: the span twists that
+    many degrees under :data:`TORQUE_RATING_TEST_N_M`, the springs keep
+    their ``GJ`` distribution, and ``stiffness_scale`` no longer applies to
+    them. A rating adds the torsion springs (``torsion`` is implied).
+
     Raises:
-        ValueError: ``n_links``, ``stiffness_scale`` or ``lumping`` invalid.
+        ValueError: ``n_links``, ``stiffness_scale``, ``lumping`` or
+            ``torque_rating_deg`` (outside :data:`TORQUE_RATING_RANGE_DEG`)
+            invalid.
     """
     if lumping not in LUMPING_RULES:
         raise ValueError(f"unknown lumping {lumping!r}; known {LUMPING_RULES}")
@@ -485,6 +516,14 @@ def build_shaft_chain(
         raise ValueError("n_links must be a positive integer")
     if not (math.isfinite(stiffness_scale) and stiffness_scale > 0):
         raise ValueError("stiffness_scale must be finite and positive")
+    if torque_rating_deg is not None:
+        low, high = TORQUE_RATING_RANGE_DEG
+        if not (math.isfinite(torque_rating_deg) and low <= torque_rating_deg <= high):
+            raise ValueError(
+                f"torque_rating_deg must be in {TORQUE_RATING_RANGE_DEG}, "
+                f"got {torque_rating_deg}"
+            )
+        torsion = True
     properties = span_properties(club, flex)
     profile = station_profile(properties, club)
     ds = properties.length / n_links
@@ -495,6 +534,8 @@ def build_shaft_chain(
         bend_k, twist_k = _tip_slope_springs(profile, joints, properties.length)
     bend = tuple(stiffness_scale * k for k in bend_k)
     twist = tuple(stiffness_scale * k for k in twist_k) if torsion else ()
+    if torque_rating_deg is not None:
+        twist = rated_twist_springs(twist_k, torque_rating_deg)
     omega = 2.0 * math.pi * float(clamped_head_frequencies(properties, club)[0])
     beta = 2.0 * DAMPING_RATIO / omega / math.sqrt(stiffness_scale)
     bounds = tuple(
@@ -504,9 +545,37 @@ def build_shaft_chain(
     record = _chain_record(
         club, n_links, properties, (flex, torsion, stiffness_scale), lumping
     )
+    if torque_rating_deg is not None:  # the default record stays byte-identical
+        record["torque_rating"] = {
+            "degrees": torque_rating_deg,
+            "test_torque_n_m": TORQUE_RATING_TEST_N_M,
+            "rule": "torsion springs scaled so the span twist under the test "
+            "torque equals the rating; GJ distribution kept",
+        }
     return ShaftChain(
         club, n_links, joints, bounds, bend, twist, beta, stiffness_scale, record
     )
+
+
+def rated_twist_springs(
+    springs: Sequence[float], torque_rating_deg: float
+) -> tuple[float, ...]:
+    """``springs`` (N m/rad, in series) scaled so the chain twists
+    ``torque_rating_deg`` degrees under :data:`TORQUE_RATING_TEST_N_M`.
+
+    Postcondition: ``TORQUE_RATING_TEST_N_M * sum(1/k)`` equals the rating
+    in radians and the ratios between the springs are unchanged.
+
+    Raises:
+        ValueError: no springs, a non-positive spring or a non-positive rating.
+    """
+    if not springs or not all(math.isfinite(k) and k > 0 for k in springs):
+        raise ValueError("torsion springs must be finite and positive")
+    if not (math.isfinite(torque_rating_deg) and torque_rating_deg > 0):
+        raise ValueError("torque_rating_deg must be finite and positive")
+    twist_rad = TORQUE_RATING_TEST_N_M * sum(1.0 / k for k in springs)
+    factor = twist_rad / math.radians(torque_rating_deg)
+    return tuple(factor * k for k in springs)
 
 
 _LUMPING_TEXT = {
