@@ -67,6 +67,8 @@ class OverlayOptions:
     ztcf_view: str = "tip_to_tail"
     ztcf_quantity: str = "force"
     ztcf_hands: str = "both"
+    #: segment shading: recorded loads, or the ZTCF/ZVCF split part (Z4b)
+    shading_part: str = "recorded"
     #: force arrow look in ``arrow_style_settings.json`` (default: its default)
     arrow_style: str | None = None
 
@@ -540,13 +542,15 @@ def build_overlay_feed(
         ellipsoids_for = _ellipsoid_feed_factory(swing, engine, opts, active_ellipsoids)
         hand_ellipsoids_fn, hand_hud_lines_fn, panel_rows_fn = ellipsoids_for(swing)
 
+    frame_at, shading_note = part_shading(provider.frame_at, swing, axial, opts)
     feed = OverlayFeed(
-        provider.frame_at,
+        frame_at,
         style,
         grip_analyses=provider.grip_analyses if grip else None,
         show_force=visibility.show_force,
         show_torque=visibility.show_torque,
         forces_note=NOTE if visibility.hidden else "",
+        shading_note=shading_note,
         show_palm_thumb=effective_palm_thumb,
         hand_ellipsoids=hand_ellipsoids_fn,
         hand_hud_lines=hand_hud_lines_fn,
@@ -556,6 +560,33 @@ def build_overlay_feed(
     if opts.ztcf_zvcf_hand_force:
         feed = _with_ztcf_zvcf(feed, swing, style, opts)
     return feed, lookat
+
+
+def part_shading(
+    frame_at: Callable[[int], Any],
+    swing: SwingInput | None,
+    axial: bool,
+    opts: OverlayOptions,
+) -> tuple[Callable[[int], Any], str]:
+    """``frame_at`` shaded by ``opts.shading_part`` and its HUD note (Z4b).
+
+    Without axial loads, or for ``recorded``, ``frame_at`` and no note.
+
+    Raises:
+        ValueError: an unknown shading part, or a kinematic replay ``swing``.
+    """
+    from src.tools.native_viewer_export.ztcf_axial import (
+        SHADING_NOTES,
+        swing_part_splits,
+        with_part_shading,
+    )
+
+    with_part_shading(frame_at, lambda _i: {}, opts.shading_part)  # checks it
+    if not axial or opts.shading_part == "recorded":
+        return frame_at, ""
+    splits = swing_part_splits(swing)
+    shaded = with_part_shading(frame_at, lambda i: splits(i).axial, opts.shading_part)
+    return shaded, SHADING_NOTES[opts.shading_part]
 
 
 def _with_ztcf_zvcf(

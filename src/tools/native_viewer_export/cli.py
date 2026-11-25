@@ -73,6 +73,7 @@ from src.tools.native_viewer_export.hole_view import load_hole_view_settings
 from src.tools.native_viewer_export.impact_factors import load_factor_settings
 from src.tools.native_viewer_export.overlay import OverlayOptions, build_overlay_feed
 from src.tools.native_viewer_export.runner import ExportJob, run_export
+from src.tools.native_viewer_export.ztcf_axial import SHADING_PARTS
 from src.tools.native_viewer_export.ztcf_feed import HAND_CHOICES
 from src.tools.native_viewer_export import camera_framing, shot_setup
 
@@ -200,6 +201,14 @@ def _add_hand_force_arguments(p: argparse.ArgumentParser) -> None:
         default=arrow_style_names()[0],
         help="force arrow look from arrow_style_settings.json; slim is "
         "for 1080p and above (default: %(default)s) (#15150)",
+    )
+    p.add_argument(
+        "--segment-shading-part",
+        choices=SHADING_PARTS,
+        default="recorded",
+        help="what the segment shading shows: the recorded loads, or the "
+        "ZTCF drift, ZVCF control or their total section loads (feet planted; "
+        "needs a dynamics bundle) (default: recorded) (#15150)",
     )
     p.add_argument(
         "--ztcf-zvcf-hands",
@@ -931,6 +940,7 @@ def main(
                     ztcf_view=args.ztcf_zvcf_view,
                     ztcf_quantity=args.ztcf_zvcf_quantity,
                     ztcf_hands=args.ztcf_zvcf_hands,
+                    shading_part=args.segment_shading_part,
                     arrow_style=args.arrow_style,
                 ),
             ),
