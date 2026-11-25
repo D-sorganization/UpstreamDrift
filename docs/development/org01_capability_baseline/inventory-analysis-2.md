@@ -8,6 +8,7 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `matching.tour_matching_viewer` | Tour matching viewer | `feature` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/tour_matching_viewer/__main__.py` | `tests/tools/tour_matching_viewer/test_best_candidate_viewer.py` |
 | `model_explorer` | Model Explorer | `tile` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/model_explorer/main_window.py` | `tests/config/test_launcher_registry_parity.py` |
+| `motion_matching.kinetic_match` | Kinetic match: joint torques for a matched swing from the CLI, REST route and MCP tool | `feature` | `analysis` | `simulation` | `core` | 🟢 active_feature | `src/shared/python/motion_matching/kinetic_match.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `perturbation_analysis` | Perturbation Analysis | `tile` | `analysis` | — | `core` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
 | `putting_analytics` | Putting Analytics | `tile` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/putting_analytics_gui/__main__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `rate_of_closure` | Rate of Closure Impact Explorer | `tile` | `analysis` | — | `tools` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
@@ -30,4 +31,3 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `tools.model_explorer.run_simulation_dock` | Model Explorer Run Simulation dock | `feature` | `analysis` | — | `core` | 🔵 planned | `src/tools/model_explorer/run_dock.py` | `tests/ui/explorer/test_run_dock.py` |
 | `tools.putting_analytics` | Putting analytics studies | `feature` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/putting_analytics_gui/gui.py` | `tests/config/feature_parity/test_registry.py` |
 | `tools.shot_pattern_analysis` | Shot Pattern Analysis Workbench | `feature` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/shot_pattern_analysis/gui.py` | `tests/config/test_feature_parity_registry.py` |
-| `tools.spine_study` | Segmental spine study execution and model asset selection | `feature` | `analysis` | — | `core` | 🟢 active_feature | `src/api/routes/spine_viewer.py` | `tests/api/test_spine_viewer_route.py` |

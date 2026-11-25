@@ -20,6 +20,10 @@ from typing import Any
 import numpy as np
 from scipy.spatial.transform import Rotation, Slerp
 
+from src.shared.python.club_fitting.flight_trace import (
+    FLIGHT_KEY,
+    flight_from_playback,
+)
 from src.shared.python.club_fitting.grip_driven_shaft import HeadGeometry, ShaftRun
 from src.shared.python.club_fitting.grip_motion import (
     ClubPoseTrack,
@@ -30,7 +34,7 @@ from src.shared.python.motion_matching import club_models as cm
 logger = logging.getLogger(__name__)
 MPH_PER_MPS = 2.2369362920544
 YD_PER_M = 1.0 / 0.9144
-ShotFn = Callable[["ShaftRun | None"], dict[str, float | None]]
+ShotFn = Callable[["ShaftRun | None"], dict[str, Any]]
 
 
 @dataclass(frozen=True)
@@ -116,7 +120,7 @@ def load_bundle_shot(bundle: Path, club_label: str, out_dir: Path) -> BundleShot
     club_impact = club_impact_from_spec(flight_tracer._spec_club(swing))
     rigid = flight_tracer.club_series(swing)
 
-    def shot(run: ShaftRun | None) -> dict[str, float | None]:
+    def shot(run: ShaftRun | None) -> dict[str, Any]:
         series = rigid if run is None else _moved_series(rigid, run)
         card = impact_card.card_from_series(series, impact, ball, "mph")
         verdict = contact_verdict.verdict_for(series, impact, ball)
@@ -133,6 +137,7 @@ def load_bundle_shot(bundle: Path, club_label: str, out_dir: Path) -> BundleShot
             "spin_rpm": play.spin_rpm,
             "carry_yd": None if carry is None else carry * YD_PER_M,
             "side_yd": None if side is None else side * YD_PER_M,
+            FLIGHT_KEY: flight_from_playback(play),
         }
 
     logger.info("loaded bundle shot, impact at %.4f s", impact)
