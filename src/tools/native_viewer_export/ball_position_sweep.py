@@ -175,16 +175,15 @@ def record_for(rows: Sequence[PositionRow]) -> dict[str, Any]:
     keys = sorted({k for r in rows for k in r.metrics} | {"straight_roll_deg"})
     slope_per_cm: dict[str, float | None] = {}
     for key in keys:
-        pairs = [
-            (
-                r.shift_m,
+        pairs: list[tuple[float, float]] = []
+        for r in rows:
+            value = (
                 r.straight_roll_deg
                 if key == "straight_roll_deg"
-                else r.metrics.get(key),
+                else r.metrics.get(key)
             )
-            for r in rows
-        ]
-        pairs = [(s, v) for s, v in pairs if v is not None]
+            if value is not None:
+                pairs.append((r.shift_m, value))
         fit = slopes({"shift": [s for s, _ in pairs]}, [v for _, v in pairs])["shift"]
         slope_per_cm[key] = None if fit is None else fit / 100.0
     return {
