@@ -75,7 +75,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1100 | `src/shared/python/motion_matching/club_only/control_replay.py` |
 | 1098 | `src/tools/shot_pattern_analysis/matched_supplement_pipeline.py` |
 | 1096 | `src/learning/retargeting/retargeter.py` |
-| 1090 | `src/tools/native_viewer_export/core.py` |
+| 1093 | `src/tools/native_viewer_export/core.py` |
 | 1089 | `src/shared/python/motion_pipeline/contracts.py` |
 | 1089 | `src/shared/python/physics/flight_models.py` |
 | 1078 | `src/engines/physics_engines/drake/python/full_body_model.py` |
