@@ -103,6 +103,8 @@ class OverlayFeed:
     ellipsoids_for: Callable[[Any], tuple[Any, Any, Any]] | None = None
     #: HUD note when force/torque vectors are withheld (``kinematic_replay``)
     forces_note: str = ""
+    #: HUD note naming the ZTCF/ZVCF part the segment shading shows (Z4b)
+    shading_note: str = ""
     #: extra arrows by source state (tip-to-tail ZTCF/ZVCF hand force, #15685)
     extra_arrows: Callable[[int], tuple[Any, ...]] | None = None
     #: legend text appended when ``extra_arrows`` draws anything
@@ -197,10 +199,10 @@ class OverlayFeed:
 
     def hud_lines_at(self, index: int) -> tuple[str, ...]:
         """HUD capability/mobility text lines at frame ``index`` (HCM-3, #14004),
-        then the forces note and, where the section loads are blanked around
-        ball contact, :data:`CONTACT_BLACKOUT_NOTE`."""
+        then the forces and shading notes and, where the section loads are
+        blanked around ball contact, :data:`CONTACT_BLACKOUT_NOTE`."""
         lines = () if self.hand_hud_lines is None else self.hand_hud_lines(index)
-        notes = (self.forces_note,) if self.forces_note else ()
+        notes = tuple(n for n in (self.forces_note, self.shading_note) if n)
         axial = self.axial_at(index)
         if axial is not None and all(v is None for v in axial.values_n.values()):
             notes = (*notes, CONTACT_BLACKOUT_NOTE)
