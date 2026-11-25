@@ -494,6 +494,18 @@ simulated. The mode is determined from the bundle, never guessed
 
 `--no-hud` removes the line; the manifest field stays.
 
+## Model Card
+
+Every engine row of the manifest also carries `"model_card"`, a
+schema-versioned record (`native-export-model-card/v1`, `model_card.py`,
+settings in `model_card_settings.json`) of what the clip is made of:
+`replay_kind`, `fit_error`, `golfer_model`, `club` (shaft rigid or chain,
+flex), `shot_setup` (club roll, ball shift, shot shape, ball placement) and
+`impact_model`. Each entry is `{value, tag, source}` with the tag `measured`,
+`fitted`, `assumed` or `unknown`; data the bundle does not record is the
+explicit value `unknown`, never left out. `ModelCard.from_dict` reads it back
+and refuses another schema. The card is not drawn in the clip yet.
+
 ## Aim Line
 
 - `--aim-line {finish,address}` picks the line the plan view, side figure and
