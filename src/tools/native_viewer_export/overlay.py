@@ -544,11 +544,7 @@ def build_overlay_feed(
         ellipsoids_for = _ellipsoid_feed_factory(swing, engine, opts, active_ellipsoids)
         hand_ellipsoids_fn, hand_hud_lines_fn, panel_rows_fn = ellipsoids_for(swing)
 
-    from src.tools.native_viewer_export.ztcf_axial import swing_part_splits
-
-    splits = None  # one cached split per state serves shading and force part
-    if opts.force_part != "recorded" or (axial and opts.shading_part != "recorded"):
-        splits = swing_part_splits(swing)
+    splits = _part_splits(swing, axial, opts)
     frame_at, shading_note = part_shading(provider.frame_at, swing, axial, opts, splits)
     feed = OverlayFeed(
         frame_at,
@@ -569,6 +565,18 @@ def build_overlay_feed(
     if splits is not None and opts.force_part != "recorded":
         feed = with_force_part(feed, splits, style, opts.force_part)
     return feed, lookat
+
+
+def _part_splits(swing: SwingInput, axial: bool, opts: OverlayOptions) -> Any:
+    """One cached ZTCF/ZVCF split per state, shared by the shading and the
+    force part; ``None`` when neither asks for a part."""
+    if opts.force_part == "recorded" and not (
+        axial and opts.shading_part != "recorded"
+    ):
+        return None
+    from src.tools.native_viewer_export.ztcf_axial import swing_part_splits
+
+    return swing_part_splits(swing)
 
 
 def with_force_part(
