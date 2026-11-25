@@ -510,6 +510,13 @@ and refuses another schema.
 field coloured by its tag (`model_card_panel.py`); its layout and colours are in
 `model_card_panel_settings.json`, and `--no-hud` removes it.
 
+## Shaft Loads
+
+`--shaft-loads {bending,shear}` (off) draws the grip side's bending moment or
+shear on the tip side at each chain-shaft joint, `--shaft-loads-part` picks the
+part; look in `shaft_loads_settings.json`. Chain bending is the joint spring
+moment, so an unbent shaft shows none.
+
 ## Aim Line
 
 - `--aim-line {finish,address}` picks the line the plan view, side figure and

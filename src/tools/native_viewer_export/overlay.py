@@ -27,6 +27,7 @@ from src.tools.native_viewer_export.ellipsoid_visibility import (
     load_visibility_settings,
 )
 from src.tools.native_viewer_export.kinematic_replay import NOTE, vector_visibility
+from src.tools.native_viewer_export import shaft_loads
 from src.tools.native_viewer_export.core import (
     BackendUnavailable,
     OverlayFeed,
@@ -73,6 +74,9 @@ class OverlayOptions:
     force_part: str = "recorded"
     #: force arrow look in ``arrow_style_settings.json`` (default: its default)
     arrow_style: str | None = None
+    #: shaft internal-load arrows: ``bending``, ``shear`` or off (#15150 Z9c)
+    shaft_loads: str | None = None
+    shaft_loads_part: str = "total"  # or one ZTCF/ZVCF part
 
 
 def _grip_source(swing: SwingInput, engine: str, mujoco_source: Any) -> tuple[Any, str]:
@@ -564,6 +568,9 @@ def build_overlay_feed(
         feed = _with_ztcf_zvcf(feed, swing, style, opts)
     if splits is not None and opts.force_part != "recorded":
         feed = with_force_part(feed, splits, style, opts.force_part)
+    if opts.shaft_loads is not None:
+        part = opts.shaft_loads_part
+        feed = shaft_loads.feed_with_loads(feed, swing, opts.shaft_loads, part)
     return feed, lookat
 
 
