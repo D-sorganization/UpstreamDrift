@@ -1,0 +1,10 @@
+{
+  "roots": {
+    "input_roots_env": "UD_KINETIC_MATCH_INPUT_ROOTS",
+    "output_root_env": "UD_KINETIC_MATCH_OUTPUT_ROOT",
+    "default_input_roots": ["output", "sim_results"],
+    "default_output_root": "output/kinetic_match_requests"
+  },
+  "bundle_suffix": ".npz",
+  "sources": "Kinetic match over REST and MCP (#15150 D10). A remote request names a saved kinematic bundle below the input roots and an output bundle below the output root; defaults are relative to the repository root and the environment variables override them (os.pathsep-separated for inputs). The solve itself and its settings are the CLI's (src/config/kinetic_match.json); a request may only override shaft_source."
+}

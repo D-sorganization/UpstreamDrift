@@ -533,6 +533,20 @@
       "id": "mocap.breadth"
     },
     {
+      "feature_id": "motion_matching.kinetic_match",
+      "title": "Kinetic match: forces and torques for a kinematic best match (CLI, REST, MCP)",
+      "status": "gap",
+      "pyqt": "src/shared/python/motion_matching/kinetic_match.py",
+      "api": "src/api/routes/agent_sim_run.py",
+      "web": null,
+      "issue": 15150,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "One function, run_kinetic_match (#15685, #15695), behind the command line (python3 -m src.shared.python.motion_matching.kinetic_match), REST POST /tools/agent-sim-run/kinetic-match and the MCP tool kinetic_match (#15150 D10): a saved kinematic bundle in, the bundle with efforts and a receipt (verdict, reasons, peaks) out. The result is one minimum-effort solution in the null space of the closed arm loop, never a unique or measured answer. No PyQt6 control (the Model Explorer is the remaining D10 surface) and no browser page run it yet.",
+      "id": "motion_matching.kinetic_match"
+    },
+    {
       "feature_id": "mujoco.force_overlays",
       "title": "MuJoCo GUI force/torque overlays drawn through the shared glyph renderers (native viewer and MeshCat)",
       "status": "parity",
@@ -3635,7 +3649,7 @@
   "inputs": {
     "src/config/models.yaml": "c5c3fa8bf58ceed736ae7b11e9096bc8860c2a07c7d79ca5710a20a21e00789c",
     "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
-    "src/config/feature_parity.json": "3cb2849a52dc558427f0378648341b7919a5a888507b909efcc295ffb205f335",
+    "src/config/feature_parity.json": "df9971673f947232053edc885f1e10ab6ca0b8e3a9ea0149b65fe16f5684a82b",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
