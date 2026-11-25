@@ -1,8 +1,4 @@
-"""Paths a remote (REST or MCP) request may read and write (#15150 G8, D10).
-
-Settings name ``input_roots_env``/``output_root_env`` (environment overrides)
-and ``default_input_roots``/``default_output_root`` (repository-relative).
-"""
+"""Paths a remote (REST or MCP) request may read and write (#15150 G8, D10)."""
 
 from __future__ import annotations
 

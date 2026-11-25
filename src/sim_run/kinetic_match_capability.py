@@ -21,14 +21,8 @@ from .remote_paths import contained_below, resolve_roots
 _SETTINGS_PATH = Path(__file__).with_name("kinetic_match_capability_settings.json")
 REQUEST_FIELDS = ("bundle", "out", "shaft_source")
 #: Fields of a succeeded response (the capability record's delivery value).
-RESPONSE_FIELDS: tuple[str, ...] = (
-    "bundle",
-    "out_bundle",
-    "receipt_path",
-    "method",
-    "verdict",
-)
-RESPONSE_FIELDS += ("reasons", "peaks", "receipt")
+RESPONSE_FIELDS: tuple[str, ...] = ("bundle", "out_bundle", "receipt_path", "method")
+RESPONSE_FIELDS += ("verdict", "reasons", "peaks", "receipt")
 
 
 @cache

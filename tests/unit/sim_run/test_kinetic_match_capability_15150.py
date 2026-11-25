@@ -73,15 +73,9 @@ def _client(mode: str, monkeypatch: pytest.MonkeyPatch) -> TestClient:
 
 def _mcp(store: SimulationRunStore, request: dict[str, Any]) -> Any:
     server = SimulationMcpServer(store=store, security_policy=SecurityPolicy())
-    reply = server.handle_request(
-        {
-            "jsonrpc": "2.0",
-            "id": 1,
-            "method": "tools/call",
-            "params": {"name": "kinetic_match", "arguments": {"request": request}},
-        }
-    )
-    return json.loads(reply["result"]["content"][0]["text"])
+    params = {"name": "kinetic_match", "arguments": {"request": request}}
+    call = {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": params}
+    return json.loads(server.handle_request(call)["result"]["content"][0]["text"])
 
 
 def _both(store, monkeypatch, request) -> list[dict[str, Any]]:
@@ -103,18 +97,15 @@ def test_rest_and_mcp_delegate_to_the_shared_kinetic_match(
     rest, mcp = records
     assert rest["status"] == mcp["status"] == "succeeded"
     assert rest["delivery"] == mcp["delivery"]
-
-
-def test_response_has_the_documented_fields(store, roots, calls, monkeypatch) -> None:
-    record = _both(store, monkeypatch, {"bundle": "b.npz", "out": "k.npz"})[0]
-    value = record["delivery"]["value"]
+    value = rest["delivery"]["value"]
     assert set(cap.RESPONSE_FIELDS) <= set(value)
-    assert value["verdict"] == "implausible"
-    assert value["reasons"] == _RECEIPT["reasons"]
-    assert value["peaks"] == _RECEIPT["peaks"]
-    assert value["method"] == km.METHOD
+    assert {k: value[k] for k in _RECEIPT} == _RECEIPT
     assert value["out_bundle"].endswith("k.npz")
     assert value["receipt_path"].endswith("k.kinetic_receipt.json")
+
+
+def test_shaft_source_defaults_to_none(store, roots, calls, monkeypatch) -> None:
+    _both(store, monkeypatch, {"bundle": "b.npz", "out": "k.npz"})
     assert calls[0]["shaft_source"] is None
 
 
@@ -145,9 +136,7 @@ def test_remote_mode_rejects_unauthenticated_requests(store, monkeypatch) -> Non
     assert _client("remote", monkeypatch).post(_ROUTE, json={}).status_code == 401
 
 
-def test_cli_delegates_to_the_shared_run(
-    tmp_path: Path, calls: list[dict[str, Any]]
-) -> None:
+def test_cli_delegates_to_the_shared_run(tmp_path: Path, calls: list) -> None:
     assert km.main([str(tmp_path / "b.npz"), str(tmp_path / "k.npz")]) == 0
     assert calls[0]["bundle"] == tmp_path / "b.npz"
     assert calls[0]["settings_path"] == km.SETTINGS_PATH

@@ -29,13 +29,9 @@ transport via `src.sim_run.mcp_fastmcp`) for local agents (Grok Bot, Claude Desk
 7. `native_export_run` / `native_export_status` (Refs #15150): queue a validated export and
    return a job id at once; status is queued, running, succeeded with the clip manifest or
    failed with the error. REST ``/tools/agent-sim-run/native-export/{run,status}``.
-8. `kinetic_match` (Refs #15150 D10): forces and torques for a saved kinematic bundle through
-   `run_kinetic_match`, the function the command line calls. The request is
-   `{bundle, out, shaft_source?}`. `bundle` must be below the input roots and `out` (a `.npz`)
-   below the output root (`UD_KINETIC_MATCH_INPUT_ROOTS` / `UD_KINETIC_MATCH_OUTPUT_ROOT`).
-   The response carries `bundle`, `out_bundle`, `receipt_path`, `method`, `verdict`,
-   `reasons`, `peaks` and the full `receipt`. The solve runs synchronously. REST
-   ``/tools/agent-sim-run/kinetic-match`` requires a Bearer token in remote mode.
+8. `kinetic_match` (Refs #15150 D10): the command line's `run_kinetic_match` for a saved
+   bundle, `{bundle, out, shaft_source?}` below the allowed roots, run synchronously. REST
+   ``/tools/agent-sim-run/kinetic-match`` (Bearer token in remote mode).
 
 ## Host Configuration
 
