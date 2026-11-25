@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**72 launcher tiles · 85 feature contracts.**
+**72 launcher tiles · 86 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -273,6 +273,7 @@ flowchart LR
 | Shot Pattern Analysis Workbench | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/shot_pattern_analysis/gui.py) |
 | Segmental spine study execution and model asset selection | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/spine_viewer/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/spine_viewer.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/SpineViewer.tsx) |
 | Segmental spine viewer (per-level load heatmaps from study receipts) | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/spine_viewer/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/spine_viewer.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/SpineViewer.tsx) |
+| Swing report package: one command regenerates a swing's videos, grids and phase sheets (CLI) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/swing_report_package/cli.py) |
 | Terrain and topography configuration | parity | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/terrain.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Terrain.tsx) |
 | Training controller tool | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/training_controller/__main__.py) |
 | Video Analyzer (pose tracking and force/torque overlay) | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/video_analyzer/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/video_overlays.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/VideoAnalyzer.tsx) |
