@@ -76,6 +76,7 @@ def test_landing_state_mode_adds_velocity_and_matches_carry_columns() -> None:
     rows = np.stack([_ZERO, _ZERO + [0, 4.0, 0, 0, 0, 0]])
     carry = PipelineLandingSimulator()(rows, "mid_iron", (0.0, 0.0))
     state = PipelineLandingSimulator(landing_state=True)(rows, "mid_iron", (0.0, 0.0))
-    assert state.shape == (2, 5)
+    assert state.shape == (2, 6)
+    assert np.all(state[:, 5] > 0.0)  # backspin at landing
     np.testing.assert_allclose(state[:, :2], carry)
     assert np.all(state[:, 4] < 0.0)  # descending at first ground contact

@@ -260,13 +260,35 @@ Sizes quoted from tests are the band a test asserts, not a published value.
   carry only: `FlightSummary.total_m` is never set (`TOTAL_UNAVAILABLE` in
   `src/shared/python/impact_parameters/flight_report.py`).
 - **Instead:** `SlopeAwareGround` in
-  `src/shared/python/sg_optimizer/shot_model/ground_runout.py` gives one hop
-  plus roll from fixed gains, a skill multiplier standing in for spin, a lie
-  multiplier and a stance-bin slope factor. It is used only by the dispersion
-  tables (`dispersion_table.py`). Its parameters are marked "assumption,
-  unmeasured turf, no primary citation". No undulation, firmness, green,
-  hazard, spin-dependent check or bounce from the actual landing spin.
-- **Effect:** unknown.
+  `src/shared/python/sg_optimizer/shot_model/ground_runout.py` (model
+  `sg_runout_v2`) gives one hop plus roll. It is used by the dispersion tables
+  (`dispersion_table.py`) and the native viewer roll
+  (`src/tools/native_viewer_export/rollout.py`).
+  - **Hop:** spin-aware since #15443. It is the first bounce of Penner, "The
+    run of a golf ball", Can. J. Phys. 80, 931-940 (2002), eqs. (2)-(8): the
+    turf acts as a rigid surface tilted by `theta_c`, and the ball either rolls
+    out (`vx' = 5/7 vx' - 2/7 r w`) or slides, by the critical friction of
+    eq. (4). The hop is the drag-free range of the rebound, so more landing
+    backspin gives a shorter hop, or a backward one. The landing backspin is
+    the launch spin decayed at the kernel rate.
+  - **Coefficients:** in `src/config/runout_bounce.json` with their equation
+    numbers. `theta_c` (eq. 8) was fitted to a single green impact (Haake),
+    `e` (eq. 5) was measured on soft turf, and `mu = 0.40` is Daish's
+    unmeasured green value. The same bounce applies to every lie.
+  - **Paper discrepancy:** at Penner's Haake check point, eqs. (3), (6) and
+    (7) as printed reproduce his `mu_c = 0.29` and `e = 0.14`. They do not
+    reproduce his quoted rebound of 4.34 m/s at 34.1 deg: they give 4.16 m/s
+    at 41.7 deg. This is pinned in `test_ground_runout.py`.
+  - **Roll:** still fixed gains, with a per-skill multiplier standing in for
+    spin, a lie multiplier and a stance-bin slope factor. These parameters are
+    marked "assumption, unmeasured turf, no primary citation".
+  - **Not modelled:** undulation, firmness, green, hazards, later bounces and
+    spin-dependent check in the roll.
+- **Effect:** unknown. Tour wedge run/carry still exceeds the short iron's (a
+  strict expected failure in `test_ground_runout.py`). `PipelineLandingSimulator`
+  runs the pipeline without a club, so every skill's launch spin is clamped to
+  the 3500 rpm driver envelope. That leaves the wedge too little landing
+  backspin for the spin-aware hop to shorten it.
 - **Tracking:** #15443 (child 6).
 
 ### Launch-Monitor Reference Coverage
