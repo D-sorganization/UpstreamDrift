@@ -514,6 +514,23 @@ def _withheld_effort_overlays(
     return withheld
 
 
+def _apply_axial(
+    provider: BundleOverlayProvider,
+    source: Any,
+    swing: SwingInput,
+    impact_time_s: float | None,
+    opts: OverlayOptions,
+) -> None:
+    """Segment axial loads on ``provider``, blanked around ball impact unless
+    ``opts.axial_impact_blackout`` is off (#13179, #15150)."""
+    provider.with_axial_loads(source)
+    impact = None
+    if opts.axial_impact_blackout:
+        impact = _impact_or_none(swing) if impact_time_s is None else impact_time_s
+    if impact is not None:
+        provider.with_axial_impact_window(impact, float(swing.bundle.dt_s))
+
+
 def build_overlay_feed(
     swing: SwingInput,
     engine: str,
@@ -557,7 +574,6 @@ def build_overlay_feed(
     if visibility.replay:  # shading, grip and palm-thumb derive from the efforts
         withheld = _withheld_effort_overlays(axial, grip, effective_palm_thumb)
         axial, grip, effective_palm_thumb = False, False, False
-
     source = MujocoOverlaySource(swing.bundle.spec_bytes)
     grip_source, grip_name = (
         _grip_source(swing, engine, source) if grip else (None, None)
@@ -573,12 +589,7 @@ def build_overlay_feed(
     if grip_source is not None:
         provider.with_grip(grip_source, grip_name)
     if axial:
-        provider.with_axial_loads(source)
-        impact = None
-        if opts.axial_impact_blackout:
-            impact = _impact_or_none(swing) if impact_time_s is None else impact_time_s
-        if impact is not None:
-            provider.with_axial_impact_window(impact, float(swing.bundle.dt_s))
+        _apply_axial(provider, source, swing, impact_time_s, opts)
     if effective_palm_thumb:
         _apply_palm_thumb(provider, source, swing.bundle.spec_bytes)
     names = swing.bundle.coordinate_order
@@ -587,7 +598,6 @@ def build_overlay_feed(
     style = default_glyph_style(
         body_mass_kg=float(source.total_mass_kg), arrow_style=opts.arrow_style
     )
-
     active_ellipsoids = _resolve_active_ellipsoids(
         opts.hand_mobility, opts.interface_ellipsoids
     )
