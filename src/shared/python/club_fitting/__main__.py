@@ -2,7 +2,8 @@
 
 Runs one bundle's grip motion through each shaft flex and writes
 ``flex_sweep.json`` (rows and bend traces) and ``flex_sweep.csv``; with
-``--report`` also the shaft report pages and tables (:mod:`shaft_report`). The golfer does not adapt to the
+``--report`` also the shaft report pages and tables (:mod:`shaft_report`) and with
+``--comparison`` the flex comparison sheet (:mod:`flex_comparison`). The golfer does not adapt to the
 shaft, so the rows are a groundwork answer, not a speed-potential model.
 """
 
@@ -35,6 +36,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--report-settings", type=Path, default=None, help="shaft report settings"
     )
+    p.add_argument(
+        "--comparison", action="store_true", help="also write the flex comparison"
+    )
+    p.add_argument(
+        "--comparison-settings", type=Path, default=None, help="comparison settings"
+    )
     return p
 
 
@@ -46,7 +53,8 @@ def write_outputs(rows: list[FlexRow], out_dir: Path) -> tuple[Path, Path]:
     records = [r.record() for r in rows]
     json_path = out_dir / f"{OUTPUT_STEM}.json"
     traces = {r.flex: r.bend.to_dict() for r in rows if r.bend is not None}
-    payload = {"rows": records, "traces": traces}
+    flights = {r.flex: r.flight.to_dict() for r in rows if r.flight is not None}
+    payload = {"rows": records, "traces": traces, "flights": flights}
     json_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     csv_path = out_dir / f"{OUTPUT_STEM}.csv"
     with csv_path.open("w", newline="", encoding="utf-8") as handle:
@@ -54,6 +62,14 @@ def write_outputs(rows: list[FlexRow], out_dir: Path) -> tuple[Path, Path]:
         writer.writeheader()
         writer.writerows(records)
     return json_path, csv_path
+
+
+def _write_comparison(json_path: Path, out: Path, settings: Path | None) -> list:
+    from src.shared.python.club_fitting import flex_comparison as fc
+    from src.shared.python.club_fitting.shaft_report import load_sweep_result
+
+    cfg = fc.load_comparison_settings(settings)
+    return fc.write_comparison(load_sweep_result(json_path), out, cfg)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -80,6 +96,8 @@ def main(argv: list[str] | None = None) -> int:
 
         settings = sr.load_report_settings(args.report_settings)
         written += sr.write_report(sr.load_sweep_result(json_path), args.out, settings)
+    if args.comparison:
+        written += _write_comparison(json_path, args.out, args.comparison_settings)
     for path in written:
         logger.info("wrote %s", path.name)
     return 0

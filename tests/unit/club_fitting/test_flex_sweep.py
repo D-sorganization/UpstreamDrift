@@ -124,3 +124,18 @@ def test_rows_carry_the_bend_trace_into_the_sweep_json(tmp_path) -> None:
     assert "bend" not in row.record()
     json_path, _ = write_outputs([row], tmp_path)
     assert set(json.loads(json_path.read_text())["traces"]) == {"Stiff"}
+
+
+def test_rows_carry_the_flight_series_into_the_sweep_json(tmp_path) -> None:
+    """The flex comparison (#15150 C5) overlays flights from flex_sweep.json."""
+    from src.shared.python.club_fitting.flex_sweep import _row
+    from src.shared.python.club_fitting.flight_trace import FLIGHT_KEY, FlightTrace
+
+    flight = FlightTrace(np.array([0.0, 200.0]), np.zeros(2), np.zeros(2))
+    stub = lambda run: {"carry_yd": 218.7, FLIGHT_KEY: flight}  # noqa: E731
+    row = _row("Stiff", 280.0, _run_with_tail(0.3), 0.0, stub)
+    assert row.flight is flight and row.shot == {"carry_yd": 218.7}
+    assert "flight" not in row.record()
+    json_path, _ = write_outputs([row], tmp_path)
+    saved = json.loads(json_path.read_text())["flights"]["Stiff"]
+    assert FlightTrace.from_dict(saved).to_dict() == flight.to_dict()
