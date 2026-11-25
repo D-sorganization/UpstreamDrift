@@ -397,7 +397,10 @@ positions gives the velocity; `extract_impact_parameters` gives the rows. With a
 ball the impact state is the club where its face reaches the ball
 (`impact_state.series_at_contact`, settings in `impact_state_settings.json`): a
 fit of the samples before contact carried to the contact instant, so no row is
-read a sample early or across the strike (`extras.impact_state`); without a ball
+read a sample early or across the strike (`extras.impact_state`). A bundle's
+recorded impact sample already carries the strike, so the fit ends before it
+(`ModelClubSeries.strike_time_s`): a ball moved forward is met by the swing as
+it was before the strike, not by the struck head; without a ball
 it is the last sample before the impact time. The specification has no target
 line, so the target direction is the horizontal part of the address (state 0)
 face normal of the address-square head (as `plan_gaze` does; it does not turn
