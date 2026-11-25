@@ -16,6 +16,7 @@ from typing import Any
 from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
 from src.shared.python.body_part_viz.force_colors import ForceColorScale
 from src.shared.python.body_part_viz.meshcat_force_colors import MeshcatForceColors
+from src.shared.python.force_overlay.palette import hex_to_rgba
 
 logger = logging.getLogger(__name__)
 
@@ -27,25 +28,55 @@ __all__ = [
     "log_coverage",
     "mujoco_scene_coverage",
     "pinocchio_color_bindings",
+    "shading_colour_key",
     "shading_legend",
 ]
+
+#: Colour-key text per load sign; the colours themselves come from the scale.
+TENSION_KEY = "Tension: segment pulled apart"
+COMPRESSION_KEY = "Compression: segment pushed together"
 
 Bindings = dict[str, dict[str, tuple[float, ...]]]
 
 
-def shading_legend(scale: ForceColorScale) -> str:
-    """One HUD line naming both colours and the saturation load.
+def _checked(scale: ForceColorScale) -> ForceColorScale:
+    if not isinstance(scale, ForceColorScale):
+        raise TypeError("scale must be a ForceColorScale")
+    return scale
+
+
+def _rgb(hex_value: str) -> tuple[int, int, int]:
+    rgba = hex_to_rgba(hex_value)
+    return (round(255 * rgba[0]), round(255 * rgba[1]), round(255 * rgba[2]))
+
+
+def shading_colour_key(
+    scale: ForceColorScale,
+) -> tuple[tuple[str, tuple[int, int, int]], ...]:
+    """Colour-key entries naming tension and compression in their colours.
 
     Preconditions: ``scale`` is a ``ForceColorScale`` (``TypeError`` otherwise).
     """
-    if not isinstance(scale, ForceColorScale):
-        raise TypeError("scale must be a ForceColorScale")
+    scale = _checked(scale)
+    return (
+        (TENSION_KEY, _rgb(scale.tension_color)),
+        (COMPRESSION_KEY, _rgb(scale.compression_color)),
+    )
+
+
+def shading_legend(scale: ForceColorScale) -> str:
+    """One HUD line with the saturation load and the blend; the colours are
+    named in their own colours by :func:`shading_colour_key`.
+
+    Preconditions: ``scale`` is a ``ForceColorScale`` (``TypeError`` otherwise).
+    """
+    scale = _checked(scale)
     if scale.tension_limit_n == scale.compression_limit_n:
         sat = f"{scale.tension_limit_n:g} N"
     else:
         sat = f"{scale.tension_limit_n:g} N / {scale.compression_limit_n:g} N"
     return (
-        f"Tension {scale.tension_color} | Compression {scale.compression_color}"
+        "Tension / Compression Shading (colours in the key)"
         f" | Saturation {sat} | Opacity {scale.opacity:g} ({scale.blend_mode})"
     )
 
