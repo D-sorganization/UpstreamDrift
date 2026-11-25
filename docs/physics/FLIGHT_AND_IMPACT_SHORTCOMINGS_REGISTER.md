@@ -278,7 +278,13 @@ Sizes quoted from tests are the band a test asserts, not a published value.
   - **Paper discrepancy:** at Penner's Haake check point, eqs. (3), (6) and
     (7) as printed reproduce his `mu_c = 0.29` and `e = 0.14`. They do not
     reproduce his quoted rebound of 4.34 m/s at 34.1 deg: they give 4.16 m/s
-    at 41.7 deg. This is pinned in `test_ground_runout.py`.
+    at 41.7 deg. His quote needs a normal rebound of 2.82 m/s, which eq. (5)
+    cannot give at any normal speed up to 20 m/s (maximum 2.42 m/s), so the
+    figure is inconsistent with his own equations; an independent re-derivation
+    found no reading that matches within 2 %. The equations do reproduce his
+    quoted drive and 9-iron `mu_c` and bounce heights, which
+    `test_ground_runout.py` uses as the primary validation; the Haake case is
+    pinned there as computed.
   - **Roll:** still fixed gains, with a per-skill multiplier standing in for
     spin, a lie multiplier and a stance-bin slope factor. These parameters are
     marked "assumption, unmeasured turf, no primary citation".

@@ -129,6 +129,32 @@ def test_penner_rebound_reproduces_his_haake_green_check() -> None:
     assert np.degrees(np.arctan2(out.vx, out.vz)) == pytest.approx(41.7, abs=0.1)
 
 
+#: Penner 2002, Sec. 3: landing speed (m/s), angle from vertical (deg) and
+#: backspin (rad/s) of his drives and 9-iron, with the mu_c and first-bounce
+#: height (m, None where he quotes none) he reports for them
+PENNER_QUOTED = [
+    pytest.param(26.8, 68.0, 224.0, 0.23, 2.82, id="drive_35_m_s_club"),
+    pytest.param(26.2, 46.2, 315.0, 0.18, 1.17, id="drive_55_m_s_club"),
+    pytest.param(23.8, 34.0, 809.0, 0.28, None, id="nine_iron_809"),
+    pytest.param(23.8, 34.0, 1000.0, 0.33, None, id="nine_iron_1000"),
+    pytest.param(23.8, 34.0, 1200.0, 0.38, None, id="nine_iron_1200"),
+]
+
+
+@pytest.mark.parametrize(("v", "phi_deg", "spin", "mu_c", "height_m"), PENNER_QUOTED)
+def test_penner_rebound_reproduces_his_quoted_drive_and_iron_bounces(
+    v: float, phi_deg: float, spin: float, mu_c: float, height_m: float | None
+) -> None:
+    """The primary validation: the printed equations reproduce the mu_c and
+    first-bounce height Penner quotes for his drives and 9-iron (to the
+    precision he quotes), which the Haake case above cannot."""
+    phi = np.radians(phi_deg)
+    out = gr.penner_rebound(v * np.sin(phi), v * np.cos(phi), spin)
+    assert out.mu_c == pytest.approx(mu_c, abs=0.005)
+    if height_m is not None:
+        assert out.vz**2 / (2.0 * 9.81) == pytest.approx(height_m, abs=0.01)
+
+
 def test_more_backspin_bounces_shorter_until_the_ball_slides() -> None:
     """Rolling bounce (eq. 3a) loses 2/7 r w; once mu < mu_c (eq. 2) spin is moot."""
     spins = np.linspace(0.0, 2000.0, 41)
