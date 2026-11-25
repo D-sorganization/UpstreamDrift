@@ -1,21 +1,47 @@
 # fmt: off
 # ruff: noqa: E301, E302, E305, E306
-"""Versioned SimulationOutput. Unavailable channels carry no payload. CoP threshold is 5 N."""
+"""Versioned immutable serializable SimulationOutput and DynamicsQuery interface (#15794 B2 / #15731).
+
+Unavailable channels carry no payload. CoP threshold is 5 N.
+"""
 from __future__ import annotations
+from abc import abstractmethod
+import json
 import math
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+from typing import Any, Callable, Mapping, Protocol, runtime_checkable
 import numpy as np
 from src.shared.python.biomechanics.ground_reaction import center_of_pressure
 from src.shared.python.hand_load_nullspace.solver import _post, _pre, _vec
+
+__all__ = [
+    "Channel",
+    "SimulationOutput",
+    "DynamicsQuery",
+    "DefaultDynamicsQuery",
+    "cop_channel",
+    "simulation_output",
+    "serialize_simulation_output",
+    "deserialize_simulation_output",
+    "superposition_holds",
+    "zvcf_from_pinned",
+    "SCHEMA_VERSION",
+    "DEFAULT_COP_MIN_FZ_N",
+    "DEFAULT_SUPERPOSITION_RTOL",
+]
+
 SCHEMA_VERSION = "simulation-output/1"
 DEFAULT_COP_MIN_FZ_N = 5.0
 DEFAULT_SUPERPOSITION_RTOL = 1e-4
+
+
 @dataclass(frozen=True)
 class Channel:
     availability: str
     units: str
     values: tuple[float, ...] | None = None
     reason: str = ""
+
     def __post_init__(self) -> None:
         if self.availability == "UNAVAILABLE":
             if self.values is not None:
@@ -28,10 +54,38 @@ class Channel:
             raise ValueError("available channel requires finite values")
         if self.reason:
             raise ValueError("available channel must not carry a reason")
+
+    def to_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {
+            "availability": self.availability,
+            "units": self.units,
+        }
+        if self.values is not None:
+            d["values"] = list(self.values)
+        if self.reason:
+            d["reason"] = self.reason
+        return d
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> Channel:
+        values_raw = data.get("values")
+        values = tuple(float(v) for v in values_raw) if values_raw is not None else None
+        return cls(
+            availability=str(data["availability"]),
+            units=str(data["units"]),
+            values=values,
+            reason=str(data.get("reason", "")),
+        )
+
+
 def _channel(values, units: str) -> Channel:
     return Channel("available", units, tuple(float(v) for v in np.asarray(values)))
+
+
 def _missing(reason: str, units: str) -> Channel:
     return Channel("UNAVAILABLE", units, None, reason)
+
+
 @dataclass(frozen=True)
 class SimulationOutput:
     schema_version: str
@@ -64,6 +118,7 @@ class SimulationOutput:
     com_body_club_m: Channel | None = None
     mass_total_kg: Channel | None = None
     momentum_residual_n: Channel | None = None
+
     def __post_init__(self) -> None:
         _pre(self.schema_version == SCHEMA_VERSION, "schema_version is not supported")
         _pre(bool(self.frame.strip()) and math.isfinite(self.time_s), "frame and time_s are required")
@@ -78,6 +133,167 @@ class SimulationOutput:
             self.replay_badge != "forward-replayed" or self.f_l_n.availability == "available",
             "forward-replayed requires available hand forces",
         )
+
+    def to_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {
+            "schema_version": self.schema_version,
+            "frame": self.frame,
+            "time_s": float(self.time_s),
+            "load_kind": self.load_kind,
+            "replay_badge": self.replay_badge,
+            "net_force_n": self.net_force_n.to_dict(),
+            "midhands_moment_nm": self.midhands_moment_nm.to_dict(),
+            "f_l_n": self.f_l_n.to_dict(),
+            "f_r_n": self.f_r_n.to_dict(),
+            "m_l_nm": self.m_l_nm.to_dict(),
+            "m_r_nm": self.m_r_nm.to_dict(),
+            "ground_force_n": self.ground_force_n.to_dict(),
+            "ground_moment_nm": self.ground_moment_nm.to_dict(),
+            "cop_m": self.cop_m.to_dict(),
+            "match_id": self.match_id,
+            "model_definition_hash": self.model_definition_hash,
+            "subject_profile_hash": self.subject_profile_hash,
+            "match_artifact_hash": self.match_artifact_hash,
+            "bos_valid": self.bos_valid,
+            "bos_margin_m": float(self.bos_margin_m),
+            "contact_state": self.contact_state,
+            "cop_segment_id": int(self.cop_segment_id),
+            "gate_alpha": float(self.gate_alpha),
+            "filter_provenance": self.filter_provenance,
+        }
+        optional_channel_fields = (
+            "cop_wrench_m",
+            "cop_pressure_centroid_m",
+            "com_body_m",
+            "com_body_club_m",
+            "mass_total_kg",
+            "momentum_residual_n",
+        )
+        for field_name in optional_channel_fields:
+            ch = getattr(self, field_name)
+            if ch is not None:
+                d[field_name] = ch.to_dict()
+        return d
+
+    def to_json(self, **kwargs) -> str:
+        return json.dumps(self.to_dict(), **kwargs)
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> SimulationOutput:
+        _pre(data.get("schema_version") == SCHEMA_VERSION, "schema_version is not supported")
+        def _get_ch(name: str) -> Channel:
+            return Channel.from_dict(data[name])
+
+        def _maybe_ch(name: str) -> Channel | None:
+            raw = data.get(name)
+            return Channel.from_dict(raw) if raw is not None else None
+
+        return cls(
+            schema_version=str(data["schema_version"]),
+            frame=str(data["frame"]),
+            time_s=float(data["time_s"]),
+            load_kind=str(data["load_kind"]),
+            replay_badge=str(data["replay_badge"]),
+            net_force_n=_get_ch("net_force_n"),
+            midhands_moment_nm=_get_ch("midhands_moment_nm"),
+            f_l_n=_get_ch("f_l_n"),
+            f_r_n=_get_ch("f_r_n"),
+            m_l_nm=_get_ch("m_l_nm"),
+            m_r_nm=_get_ch("m_r_nm"),
+            ground_force_n=_get_ch("ground_force_n"),
+            ground_moment_nm=_get_ch("ground_moment_nm"),
+            cop_m=_get_ch("cop_m"),
+            match_id=str(data.get("match_id", "")),
+            model_definition_hash=str(data.get("model_definition_hash", "")),
+            subject_profile_hash=str(data.get("subject_profile_hash", "")),
+            match_artifact_hash=str(data.get("match_artifact_hash", "")),
+            cop_wrench_m=_maybe_ch("cop_wrench_m"),
+            cop_pressure_centroid_m=_maybe_ch("cop_pressure_centroid_m"),
+            bos_valid=bool(data.get("bos_valid", True)),
+            bos_margin_m=float(data.get("bos_margin_m", 0.0)),
+            contact_state=str(data.get("contact_state", "flight")),
+            cop_segment_id=int(data.get("cop_segment_id", 0)),
+            gate_alpha=float(data.get("gate_alpha", 1.0)),
+            filter_provenance=str(data.get("filter_provenance", "raw")),
+            com_body_m=_maybe_ch("com_body_m"),
+            com_body_club_m=_maybe_ch("com_body_club_m"),
+            mass_total_kg=_maybe_ch("mass_total_kg"),
+            momentum_residual_n=_maybe_ch("momentum_residual_n"),
+        )
+
+    @classmethod
+    def from_json(cls, json_str: str) -> SimulationOutput:
+        return cls.from_dict(json.loads(json_str))
+
+
+def serialize_simulation_output(output: SimulationOutput) -> str:
+    """Serialize SimulationOutput to JSON string."""
+    return output.to_json()
+
+
+def deserialize_simulation_output(json_str: str) -> SimulationOutput:
+    """Deserialize SimulationOutput from JSON string."""
+    return SimulationOutput.from_json(json_str)
+
+
+@runtime_checkable
+class DynamicsQuery(Protocol):
+    """Optional separate interface for live dynamics queries (M(q), C+g, J_midhands)."""
+
+    @abstractmethod
+    def mass_matrix(self, q: np.ndarray) -> np.ndarray:
+        """Compute the generalized inertia matrix M(q)."""
+        ...
+
+    @abstractmethod
+    def bias_forces(self, q: np.ndarray, qdot: np.ndarray) -> np.ndarray:
+        """Compute bias forces C(q, qdot) + g(q)."""
+        ...
+
+    @abstractmethod
+    def jacobian_midhands(self, q: np.ndarray) -> np.ndarray:
+        """Compute spatial Jacobian J_midhands(q) mapping joint velocities to midhands twist."""
+        ...
+
+
+class DefaultDynamicsQuery:
+    """Default implementation of DynamicsQuery taking callable providers."""
+
+    def __init__(
+        self,
+        *,
+        mass_matrix_fn: Callable[[np.ndarray], np.ndarray],
+        bias_forces_fn: Callable[[np.ndarray, np.ndarray], np.ndarray],
+        jacobian_midhands_fn: Callable[[np.ndarray], np.ndarray],
+    ) -> None:
+        self._mass_matrix_fn = mass_matrix_fn
+        self._bias_forces_fn = bias_forces_fn
+        self._jacobian_midhands_fn = jacobian_midhands_fn
+
+    def mass_matrix(self, q: np.ndarray) -> np.ndarray:
+        q_arr = np.asarray(q, dtype=float)
+        _pre(bool(np.all(np.isfinite(q_arr))), "q must contain finite values")
+        M = self._mass_matrix_fn(q_arr)
+        _post(bool(np.all(np.isfinite(M))), "M(q) must contain finite values")
+        return M
+
+    def bias_forces(self, q: np.ndarray, qdot: np.ndarray) -> np.ndarray:
+        q_arr = np.asarray(q, dtype=float)
+        qdot_arr = np.asarray(qdot, dtype=float)
+        _pre(bool(np.all(np.isfinite(q_arr))), "q must contain finite values")
+        _pre(bool(np.all(np.isfinite(qdot_arr))), "qdot must contain finite values")
+        cg = self._bias_forces_fn(q_arr, qdot_arr)
+        _post(bool(np.all(np.isfinite(cg))), "C(q,qdot)+g(q) must contain finite values")
+        return cg
+
+    def jacobian_midhands(self, q: np.ndarray) -> np.ndarray:
+        q_arr = np.asarray(q, dtype=float)
+        _pre(bool(np.all(np.isfinite(q_arr))), "q must contain finite values")
+        J = self._jacobian_midhands_fn(q_arr)
+        _post(bool(np.all(np.isfinite(J))), "J_midhands must contain finite values")
+        return J
+
+
 def cop_channel(force_n, moment_nm, point_m, *, min_fz_n: float = DEFAULT_COP_MIN_FZ_N) -> Channel:
     force, moment, point = _vec(force_n, "force"), _vec(moment_nm, "moment"), _vec(point_m, "point")
     _pre(math.isfinite(min_fz_n) and min_fz_n >= 0, "min_fz_n must be non-negative")
@@ -86,10 +302,14 @@ def cop_channel(force_n, moment_nm, point_m, *, min_fz_n: float = DEFAULT_COP_MI
     if cop is None:
         return _missing(f"CoP UNAVAILABLE: F_z < {min_fz_n} N", "m")
     return _channel(cop, "m")
+
+
 def _hand(values, units: str, reason: str) -> Channel:
     if values is None:
         return _missing(reason or "hand load unavailable", units)
     return _channel(values, units)
+
+
 def simulation_output(problem, solution, *, frame, time_s, ground=None, cop_min_fz_n=DEFAULT_COP_MIN_FZ_N, lineage=("", "", "", ""), **biomech):
     cop_wrench_m = biomech.get("cop_wrench_m")
     cop_pressure_centroid_m = biomech.get("cop_pressure_centroid_m")
@@ -138,6 +358,8 @@ def simulation_output(problem, solution, *, frame, time_s, ground=None, cop_min_
         mass_total_kg=mass_total_kg or _missing("mass_total unavailable", "kg"),
         momentum_residual_n=momentum_residual_n or _missing("momentum_residual unavailable", "N"),
     )
+
+
 def superposition_holds(total_f, ztcf_f, zvcf_f, total_m, ztcf_m, zvcf_m, *, rtol=DEFAULT_SUPERPOSITION_RTOL) -> bool:
     _pre(math.isfinite(rtol) and rtol > 0, "rtol must be positive")
     def ok(total, left, right) -> bool:
@@ -145,6 +367,8 @@ def superposition_holds(total_f, ztcf_f, zvcf_f, total_m, ztcf_m, zvcf_m, *, rto
         scale = max(float(np.linalg.norm(whole)), 1.0)
         return float(np.linalg.norm(a + b - whole)) <= rtol * scale
     return ok(total_f, ztcf_f, zvcf_f) and ok(total_m, ztcf_m, zvcf_m)
+
+
 def zvcf_from_pinned(total_f, total_m, ztcf_f, ztcf_m):
     force = _vec(total_f, "total_f") - _vec(ztcf_f, "ztcf_f")
     moment = _vec(total_m, "total_m") - _vec(ztcf_m, "ztcf_m")
