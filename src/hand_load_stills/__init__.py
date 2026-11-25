@@ -17,8 +17,8 @@ from pathlib import Path
 from typing import Any, Protocol
 
 import numpy as np
-from golf_view_presets.presets import get_view_preset
 from matplotlib.figure import Figure
+from src.shared.python.golf_view_presets import get_view_preset
 
 RELATIVE_TOLERANCE = 1e-4
 _ZTCF, _ZVCF, _TOTAL, _BADGE = "#0072B2", "#D55E00", "#000000", "#F0E442"
@@ -100,17 +100,25 @@ def _vec3(value: object, name: str) -> np.ndarray:
     return arr.copy()
 
 
+_BASIS: tuple[np.ndarray, np.ndarray] | None = None
+
+
 def _face_basis() -> tuple[np.ndarray, np.ndarray]:
-    """Image right and image up of the shared face-on camera."""
-    preset = get_view_preset("face_on")
-    if (preset.azimuth_deg, preset.elevation_deg) != (0.0, -6.0):
-        raise ValueError("face-on preset must be azimuth 0 and elevation -6")
-    right = np.asarray(preset.image_right(), dtype=np.float64)
-    up = np.asarray(preset.image_up(), dtype=np.float64)
-    return right, up
+    """Image right and image up of the shared face-on camera.
 
-
-_RIGHT, _UP = _face_basis()
+    Computed on the first face-on sheet. A preset mismatch raises there and
+    leaves the 3D sheet importable.
+    """
+    global _BASIS
+    if _BASIS is None:
+        preset = get_view_preset("face_on")
+        if (preset.azimuth_deg, preset.elevation_deg) != (0.0, -6.0):
+            raise ValueError("face-on preset must be azimuth 0 and elevation -6")
+        _BASIS = (
+            np.asarray(preset.image_right(), dtype=np.float64),
+            np.asarray(preset.image_up(), dtype=np.float64),
+        )
+    return _BASIS
 
 
 @dataclass(frozen=True, eq=False)
@@ -259,7 +267,8 @@ def adapt_simulation_output(source: SimulationOutputLike) -> StillRecord:
 def _project(vec: np.ndarray, view: str) -> np.ndarray:
     if view == "3d":
         return vec
-    return np.array([float(np.dot(vec, _RIGHT)), float(np.dot(vec, _UP))])
+    right, up = _face_basis()
+    return np.array([float(np.dot(vec, right)), float(np.dot(vec, up))])
 
 
 def _gid(ax: Any, text: str, gid: str, y: float) -> None:
@@ -321,7 +330,9 @@ def render_tip_to_tail(record: StillRecord, view: str = "3d") -> Figure:
     Postcondition: fourteen panels, the objective, an evidence badge
     (``allocation-only`` or ``forward-replayed``) and a provenance footer.
     A non-finite panel reads UNAVAILABLE and is not drawn as zero. A closure
-    miss is drawn and labelled. The figure is not written to disk.
+    miss is drawn and labelled. The face-on sheet checks closure on the
+    projected plane, so a gap along the view direction stays closed there and
+    fails on the 3D sheet. The figure is not written to disk.
     """
     if not isinstance(record, StillRecord):
         raise TypeError(f"record must be StillRecord, got {type(record).__name__}")

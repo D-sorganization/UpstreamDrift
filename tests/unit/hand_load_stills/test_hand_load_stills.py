@@ -13,7 +13,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-from golf_view_presets.presets import get_view_preset
+from src.shared.python.golf_view_presets import get_view_preset
 from matplotlib.colors import to_hex
 
 from hand_load_stills import PHASE_IDS, PHASE_LABELS, ComponentVectors, PhaseLoads
