@@ -59,9 +59,41 @@ __all__ = [
     "HandForceSplit",
     "HandWrench",
     "HandWrenchSplit",
+    "checked_rows",
     "hand_force_split",
     "hand_wrench_split",
+    "part_states",
 ]
+
+
+def checked_rows(q: Array, v: Array, tau: Array) -> tuple[Array, Array, Array]:
+    """``q``, ``v``, ``tau`` as 2-D float arrays with the same number of rows.
+
+    ``ValueError`` when the row counts differ.
+    """
+    q, v, tau = (np.atleast_2d(np.asarray(x, dtype=float)) for x in (q, v, tau))
+    if not q.shape[0] == v.shape[0] == tau.shape[0]:
+        raise ValueError("q, v and tau must have the same number of rows")
+    return q, v, tau
+
+
+def part_states(
+    provider: ConstrainedEquationsOfMotionProvider, q: Array, v: Array, tau: Array
+) -> tuple[tuple[str, Array, Array, Array, bool], ...]:
+    """``(part, rates, a, lambda, gravity)`` of the ZTCF then the ZVCF, one state.
+
+    The ZTCF is evaluated at ``(q, v, a_ZTCF)`` with gravity, the ZVCF at
+    ``(q, 0, a_ZVCF)`` without, so any load affine in ``a`` and counting the
+    velocity product and gravity once adds over the parts to its total.
+    """
+    states = drift_and_control_states(provider, q, v, tau)
+    rates = (v, np.zeros_like(v))
+    return tuple(
+        (part, rate, a, lam, gravity)
+        for part, (a, lam), rate, gravity in zip(
+            PARTS, states, rates, (True, False), strict=True
+        )
+    )
 
 
 @dataclass(frozen=True)
@@ -94,9 +126,7 @@ def hand_force_split(
     closure has six rows (a weld). ``ValueError`` otherwise.
     Postcondition: ``drift_n + control_n`` is the reaction under ``tau``.
     """
-    q, v, tau = (np.atleast_2d(np.asarray(x, dtype=float)) for x in (q, v, tau))
-    if not q.shape[0] == v.shape[0] == tau.shape[0]:
-        raise ValueError("q, v and tau must have the same number of rows")
+    q, v, tau = checked_rows(q, v, tau)
     rows = q.shape[0]
     point, drift, control = (np.zeros((rows, 3)) for _ in range(3))
     for k in range(rows):
@@ -181,18 +211,13 @@ def hand_wrench_split(
     Preconditions: as :func:`hand_force_split`. Postcondition: for each part,
     lead plus trail equals ``club_load`` (force, and moment about any point).
     """
-    q, v, tau = (np.atleast_2d(np.asarray(x, dtype=float)) for x in (q, v, tau))
-    if not q.shape[0] == v.shape[0] == tau.shape[0]:
-        raise ValueError("q, v and tau must have the same number of rows")
+    q, v, tau = checked_rows(q, v, tau)
     rows = q.shape[0]
     out = {h: {p: np.zeros((3, rows, 3)) for p in PARTS} for h in HANDS}
     for k in range(rows):
-        states = drift_and_control_states(provider, q[k], v[k], tau[k])
         rot, origin = (np.asarray(x, dtype=float) for x in frame_at(q[k]))
         point = np.asarray(lead_point(q[k]), dtype=float)
-        for part, (a, lam), rates, gravity in zip(
-            PARTS, states, (v[k], np.zeros_like(v[k])), (True, False), strict=True
-        ):
+        for part, rates, a, lam, gravity in part_states(provider, q[k], v[k], tau[k]):
             if lam.ndim != 1 or lam.shape[0] < CLOSURE_ROWS:
                 raise ValueError("the closure must have six rows (a weld)")
             net = club_load(q[k], rates, a, gravity)
