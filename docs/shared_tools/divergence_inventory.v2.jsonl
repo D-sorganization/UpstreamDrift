@@ -261,6 +261,7 @@
 {"path": "biomechanics/activation_dynamics.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/biomechanics_data.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/club_inertia_partition.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
+{"path": "biomechanics/cop_grf_replay_harness.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/drift_control_transfer.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/dynamic_com.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/foot_membership.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
