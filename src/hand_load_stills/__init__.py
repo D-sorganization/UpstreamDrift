@@ -1,4 +1,10 @@
-"""3D tip-to-tail stills: ZTCF + ZVCF = Total at the seven swing phases."""
+"""Tip-to-tail stills of supplied midhands ZTCF + ZVCF = Total.
+
+Draws the 3D sheet and the face-on 2D sheet. The face-on camera is the shared
+preset (azimuth 0, elevation -6): target toward image right, up along the
+image. Vectors are copied. The grip null space is not solved here; its
+minimum-norm member is alpha = 0 in f = F/2 ± (u × m')/d ± alpha u.
+"""
 
 from __future__ import annotations
 
@@ -11,10 +17,15 @@ from pathlib import Path
 from typing import Any, Protocol
 
 import numpy as np
+from golf_view_presets.presets import get_view_preset
 from matplotlib.figure import Figure
 
 RELATIVE_TOLERANCE = 1e-4
 _ZTCF, _ZVCF, _TOTAL, _BADGE = "#0072B2", "#D55E00", "#000000", "#F0E442"
+_VIEW_LABEL = {
+    "3d": "Three-Dimensional Tip-to-Tail",
+    "2d": "Two-Dimensional Face-On Tip-to-Tail",
+}
 _SHA = re.compile(r"^[0-9a-fA-F]{7,64}$")
 _HASH = re.compile(r"^[0-9a-fA-F]{8,128}$")
 _EVIDENCE = frozenset({"allocation-only", "forward-replayed"})
@@ -72,14 +83,34 @@ def _canonical(name: object) -> str:
     return found
 
 
-def _vec3(value: object, name: str) -> np.ndarray:
+def _components(value: object, name: str) -> np.ndarray:
     try:
         arr = np.asarray(value, dtype=np.float64)
     except (TypeError, ValueError) as exc:
         raise ValueError(f"{name} must be numeric") from exc
+    if arr.ndim != 1 or arr.shape[0] not in (2, 3):
+        raise ValueError(f"{name} must be a length-2 or length-3 vector")
+    return arr
+
+
+def _vec3(value: object, name: str) -> np.ndarray:
+    arr = _components(value, name)
     if arr.shape != (3,):
         raise ValueError(f"{name} must have shape (3,), got {arr.shape}")
     return arr.copy()
+
+
+def _face_basis() -> tuple[np.ndarray, np.ndarray]:
+    """Image right and image up of the shared face-on camera."""
+    preset = get_view_preset("face_on")
+    if (preset.azimuth_deg, preset.elevation_deg) != (0.0, -6.0):
+        raise ValueError("face-on preset must be azimuth 0 and elevation -6")
+    right = np.asarray(preset.image_right(), dtype=np.float64)
+    up = np.asarray(preset.image_up(), dtype=np.float64)
+    return right, up
+
+
+_RIGHT, _UP = _face_basis()
 
 
 @dataclass(frozen=True, eq=False)
@@ -154,9 +185,11 @@ def closure_status(
     ztcf: object, zvcf: object, total: object, tolerance: float = RELATIVE_TOLERANCE
 ) -> str:
     drawn = [
-        _vec3(value, name)
+        _components(value, name)
         for name, value in zip(_PARTS, (ztcf, zvcf, total), strict=True)
     ]
+    if any(part.shape != drawn[0].shape for part in drawn):
+        raise ValueError("ztcf, zvcf and total must share a length")
     if any(not np.isfinite(part).all() for part in drawn):
         return "unavailable"
     if not math.isfinite(tolerance) or not 0.0 < tolerance <= 1.0:
@@ -223,8 +256,18 @@ def adapt_simulation_output(source: SimulationOutputLike) -> StillRecord:
     )
 
 
+def _project(vec: np.ndarray, view: str) -> np.ndarray:
+    if view == "3d":
+        return vec
+    return np.array([float(np.dot(vec, _RIGHT)), float(np.dot(vec, _UP))])
+
+
 def _gid(ax: Any, text: str, gid: str, y: float) -> None:
-    artist = ax.text2D(0.5, y, text, transform=ax.transAxes, ha="center", fontsize=8)
+    kwargs = {"transform": ax.transAxes, "ha": "center", "fontsize": 8}
+    if ax.name == "3d":
+        artist = ax.text2D(0.5, y, text, **kwargs)
+    else:
+        artist = ax.text(0.5, y, text, **kwargs)
     artist.set_gid(gid)
 
 
@@ -232,30 +275,67 @@ def _segment(
     ax: Any, tail: np.ndarray, tip: np.ndarray, color: str, label: str
 ) -> None:
     style = "--" if label == "Total" else "-"
-    ax.plot(
-        [tail[0], tip[0]],
-        [tail[1], tip[1]],
-        [tail[2], tip[2]],
-        color=color,
-        lw=2,
-        ls=style,
-        label=label,
-    )
+    coords = [[float(tail[i]), float(tip[i])] for i in range(int(tail.shape[0]))]
+    ax.plot(*coords, color=color, lw=2, ls=style, label=label)
 
 
-def render_tip_to_tail(record: StillRecord) -> Figure:
+def _mark_open(ax: Any, tip: np.ndarray) -> None:
+    coords = [[float(tip[i])] for i in range(int(tip.shape[0]))]
+    ax.plot(*coords, color=_ZVCF, marker="x", ls="none", label="_sum_tip")
+    _gid(ax, "CLOSURE FAILED", "closure-failure", 0.9)
+
+
+def _axes_labels(ax: Any, view: str) -> None:
+    if view == "3d":
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+        ax.set_zlabel("Z")
+        return
+    ax.set_xlabel("Target")
+    ax.set_ylabel("Up")
+    ax.set_aspect("equal", adjustable="box")
+
+
+def _draw_panel(ax: Any, triple: ComponentVectors, view: str, tolerance: float) -> None:
+    """Draw one projected triple, or label it UNAVAILABLE."""
+    _axes_labels(ax, view)
+    ztcf = _project(triple.ztcf, view)
+    zvcf = _project(triple.zvcf, view)
+    total = _project(triple.total, view)
+    status = closure_status(ztcf, zvcf, total, tolerance)
+    if status == "unavailable":
+        _gid(ax, "UNAVAILABLE", "unavailable", 0.55)
+        return
+    origin = np.zeros_like(total)
+    _segment(ax, origin, total, _TOTAL, "Total")
+    _segment(ax, origin, ztcf, _ZTCF, "ZTCF")
+    _segment(ax, ztcf, ztcf + zvcf, _ZVCF, "ZVCF")
+    if status == "open":
+        _mark_open(ax, ztcf + zvcf)
+
+
+def render_tip_to_tail(record: StillRecord, view: str = "3d") -> Figure:
+    """Return the 2×7 force and moment sheet for ``view``.
+
+    Preconditions: ``record`` is a StillRecord and ``view`` is ``3d`` or ``2d``.
+    Postcondition: fourteen panels, the objective, an evidence badge
+    (``allocation-only`` or ``forward-replayed``) and a provenance footer.
+    A non-finite panel reads UNAVAILABLE and is not drawn as zero. A closure
+    miss is drawn and labelled. The figure is not written to disk.
+    """
     if not isinstance(record, StillRecord):
         raise TypeError(f"record must be StillRecord, got {type(record).__name__}")
+    if view not in _VIEW_LABEL:
+        raise ValueError(f"view must be one of {tuple(_VIEW_LABEL)}, got {view!r}")
     import matplotlib.pyplot as plt
 
-    fig, axes = plt.subplots(
-        2, len(PHASE_IDS), figsize=(16.8, 5.6), subplot_kw={"projection": "3d"}
-    )
+    options: dict[str, Any] = {"figsize": (16.8, 5.6)}
+    if view == "3d":
+        options["subplot_kw"] = {"projection": "3d"}
+    fig, axes = plt.subplots(2, len(PHASE_IDS), **options)
     fig.suptitle(f"Objective: {record.objective}")
-    view = fig.text(
-        0.5, 0.93, "Three-Dimensional Tip-to-Tail", ha="center", fontsize=10
-    )
-    view.set_gid("view-label")
+    label = fig.text(0.5, 0.93, _VIEW_LABEL[view], ha="center", fontsize=10)
+    label.set_gid("view-label")
     badge = fig.text(
         0.99,
         0.99,
@@ -274,31 +354,6 @@ def render_tip_to_tail(record: StillRecord) -> Figure:
     for row, (attr, unit) in enumerate(rows):
         for phase in record.phases:
             ax = grid[row, PHASE_IDS.index(phase.name)]
-            triple = getattr(phase, attr)
             ax.set_title(f"{_LABEL[phase.name]} {unit}")
-            ax.set_xlabel("X")
-            ax.set_ylabel("Y")
-            ax.set_zlabel("Z")
-            status = closure_status(
-                triple.ztcf, triple.zvcf, triple.total, record.relative_tolerance
-            )
-            if status == "unavailable":
-                _gid(ax, "UNAVAILABLE", "unavailable", 0.55)
-                continue
-            origin = np.zeros(3)
-            _segment(ax, origin, triple.total, _TOTAL, "Total")
-            _segment(ax, origin, triple.ztcf, _ZTCF, "ZTCF")
-            _segment(ax, triple.ztcf, triple.ztcf + triple.zvcf, _ZVCF, "ZVCF")
-            if status == "open":
-                tip = triple.ztcf + triple.zvcf
-                ax.plot(
-                    [tip[0]],
-                    [tip[1]],
-                    [tip[2]],
-                    color=_ZVCF,
-                    marker="x",
-                    ls="none",
-                    label="_sum_tip",
-                )
-                _gid(ax, "CLOSURE FAILED", "closure-failure", 0.9)
+            _draw_panel(ax, getattr(phase, attr), view, record.relative_tolerance)
     return fig

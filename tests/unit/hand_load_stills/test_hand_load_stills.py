@@ -1,4 +1,4 @@
-"""3D fixture stills for midhands ZTCF + ZVCF = Total (#15494, #15725)."""
+"""Fixture stills for midhands ZTCF + ZVCF = Total (#15494, #15725)."""
 
 from __future__ import annotations
 
@@ -12,6 +12,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+from golf_view_presets.presets import get_view_preset
 from matplotlib.colors import to_hex
 
 from hand_load_stills import PHASE_IDS, PHASE_LABELS, ComponentVectors, PhaseLoads
@@ -63,8 +64,19 @@ def _record(**overrides: object) -> StillRecord:
 
 def _ends(axis, label: str) -> tuple[np.ndarray, np.ndarray]:
     line = next(item for item in axis.lines if item.get_label() == label)
-    xs, ys, zs = line.get_data_3d()
-    return np.array([xs[0], ys[0], zs[0]]), np.array([xs[-1], ys[-1], zs[-1]])
+    if axis.name == "3d":
+        xs, ys, zs = line.get_data_3d()
+        return np.array([xs[0], ys[0], zs[0]]), np.array([xs[-1], ys[-1], zs[-1]])
+    return (
+        np.array([line.get_xdata()[0], line.get_ydata()[0]]),
+        np.array([line.get_xdata()[-1], line.get_ydata()[-1]]),
+    )
+
+
+def _face_on():
+    preset = get_view_preset("face_on")
+    assert (preset.azimuth_deg, preset.elevation_deg) == (0.0, -6.0)
+    return preset.image_right(), preset.image_up(), preset.view_direction()
 
 
 def test_seven_phase_layout_closure_palette_and_footer() -> None:
@@ -181,3 +193,112 @@ def test_adapter_leaves_gaps_and_contract_rejects_bad_records() -> None:
             _record(**overrides)
     with pytest.raises(TypeError):
         render_tip_to_tail(object())  # type: ignore[arg-type]
+
+
+def test_face_on_sheet_projects_onto_target_and_up() -> None:
+    right, up, _depth = _face_on()
+    chain = np.array(_Z) + np.array(_V)
+    moment = np.array((0.0, -0.4, 0.0))
+    for evidence in ("allocation-only", "forward-replayed"):
+        fig = render_tip_to_tail(_record(evidence=evidence), "2d")
+        try:
+            titles = [axis.get_title() for axis in fig.axes]
+            assert len(titles) == 14 and all(axis.name != "3d" for axis in fig.axes)
+            for phase in PHASE_LABELS:
+                assert f"{phase} Force (N)" in titles
+                assert f"{phase} Moment (N·m)" in titles
+            texts = {text.get_gid(): text for text in fig.texts}
+            assert texts["view-label"].get_text() == (
+                "Two-Dimensional Face-On Tip-to-Tail"
+            )
+            assert texts["evidence-badge"].get_text() == evidence
+            assert fig.get_suptitle() == f"Objective: {_OBJECTIVE}"
+            footer = texts["provenance-footer"].get_text()
+            assert _SHA in footer and _HASH in footer
+            face = to_hex(
+                texts["evidence-badge"].get_bbox_patch().get_facecolor()
+            ).lower()
+            assert face in OKABE_ITO
+            force, couple = fig.axes[0], fig.axes[len(PHASE_IDS)]
+            assert force.get_xlabel() == "Target" and force.get_ylabel() == "Up"
+            z_tail, z_tip = _ends(force, "ZTCF")
+            v_tail, v_tip = _ends(force, "ZVCF")
+            t_tail, t_tip = _ends(force, "Total")
+            np.testing.assert_allclose(z_tail, 0.0, atol=1e-9)
+            np.testing.assert_allclose(v_tail, z_tip, atol=1e-9)
+            np.testing.assert_allclose(t_tail, 0.0, atol=1e-9)
+            np.testing.assert_allclose(v_tip, t_tip, atol=1e-8)
+            np.testing.assert_allclose(z_tip, [np.dot(_Z, right), np.dot(_Z, up)])
+            np.testing.assert_allclose(v_tip, [np.dot(chain, right), np.dot(chain, up)])
+            np.testing.assert_allclose(t_tip, [np.dot(_T, right), np.dot(_T, up)])
+            _, moment_tip = _ends(couple, "ZTCF")
+            np.testing.assert_allclose(
+                moment_tip, [np.dot(moment, right), np.dot(moment, up)]
+            )
+            for line in force.lines:
+                label = str(line.get_label())
+                color = to_hex(line.get_color()).lower()
+                assert color in OKABE_ITO and color == _PARTS[label]
+            assert "closure-failure" not in {text.get_gid() for text in force.texts}
+        finally:
+            plt.close(fig)
+
+
+def test_face_on_closure_shows_in_plane_gaps_and_drops_depth() -> None:
+    outside = (0.0, -1.0 - 2e-4, 1.0)
+    flat = render_tip_to_tail(
+        _record(phases=tuple(_phase(name, outside) for name in PHASE_IDS)), "2d"
+    )
+    try:
+        _, v_tip = _ends(flat.axes[0], "ZVCF")
+        _, t_tip = _ends(flat.axes[0], "Total")
+        assert np.linalg.norm(v_tip - t_tip) > 1e-4
+        assert any(text.get_text() == "CLOSURE FAILED" for text in flat.axes[0].texts)
+        assert any(line.get_label() == "_sum_tip" for line in flat.axes[0].lines)
+    finally:
+        plt.close(flat)
+    _right, _up, depth = _face_on()
+    broken = tuple(float(item) for item in np.array(_T) + np.asarray(depth))
+    phases = tuple(_phase(name, broken) for name in PHASE_IDS)  # type: ignore[arg-type]
+    face = render_tip_to_tail(_record(phases=phases), "2d")
+    solid = render_tip_to_tail(_record(phases=phases))
+    try:
+        _, v_tip = _ends(face.axes[0], "ZVCF")
+        _, t_tip = _ends(face.axes[0], "Total")
+        np.testing.assert_allclose(v_tip, t_tip, atol=1e-8)
+        assert "CLOSURE FAILED" not in {text.get_text() for text in face.axes[0].texts}
+        _, v3 = _ends(solid.axes[0], "ZVCF")
+        _, t3 = _ends(solid.axes[0], "Total")
+        assert np.linalg.norm(v3 - t3) > 0.5
+        assert any(text.get_text() == "CLOSURE FAILED" for text in solid.axes[0].texts)
+    finally:
+        plt.close(face)
+        plt.close(solid)
+
+
+def test_face_on_unavailable_is_labelled_and_zero_is_drawn() -> None:
+    phases = {name: _phase(name) for name in PHASE_IDS}
+    phases["impact"] = _phase("impact", blank=True)
+    zero = (0.0, 0.0, 0.0)
+    phases["top"] = PhaseLoads(
+        "top", _cv(_Z, zero, _Z), _cv((0.0, -0.4, 0.0), zero, (0.0, -0.4, 0.0))
+    )
+    fig = render_tip_to_tail(
+        _record(phases=tuple(phases[name] for name in PHASE_IDS)), "2d"
+    )
+    try:
+        impact = [axis for axis in fig.axes if axis.get_title().startswith("Impact")]
+        top = next(axis for axis in fig.axes if axis.get_title().startswith("Top"))
+        assert len(impact) == 2 and all(len(axis.lines) == 0 for axis in impact)
+        assert all(
+            any(text.get_text() == "UNAVAILABLE" for text in axis.texts)
+            for axis in impact
+        )
+        _tail, z_tip = _ends(top, "ZTCF")
+        v_tail, v_tip = _ends(top, "ZVCF")
+        np.testing.assert_allclose(v_tail, z_tip)
+        np.testing.assert_allclose(v_tip, z_tip)
+    finally:
+        plt.close(fig)
+    with pytest.raises(ValueError):
+        render_tip_to_tail(_record(), "oblique")
