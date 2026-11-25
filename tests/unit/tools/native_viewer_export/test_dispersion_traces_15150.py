@@ -13,6 +13,7 @@ from src.tools.native_viewer_export import cli
 from src.tools.native_viewer_export import dispersion_traces as dt
 from src.tools.native_viewer_export import flight_tracer as tracer
 from src.tools.native_viewer_export import shot_dispersion as sd
+from src.tools.native_viewer_export.core import ClipOverlays
 from src.tools.native_viewer_export.display_units import DisplayUnits
 from src.tools.native_viewer_export.overlay2d import pinhole_for_view
 from tests.unit.tools.native_viewer_export import test_flight_tracer as base
@@ -169,3 +170,117 @@ def test_cli_flag_turns_the_overlay_and_the_flight_on() -> None:
     flight = cli.build_settings(args).ball_flight
     assert isinstance(flight, tracer.TracerSettings)
     assert isinstance(flight.dispersion_traces, dt.DispersionTraceSettings)
+
+
+MAGENTA = (255, 0, 255, 255)
+
+
+def _hole_flight(colour=MAGENTA) -> tracer.FlightPlayback:
+    from src.tools.native_viewer_export.hole_view import load_hole_view_settings
+
+    nominal = base._playback(
+        replace(base.DEFAULTS, hole_view=load_hole_view_settings())
+    )
+    grow = np.linspace(0.0, 1.0, len(nominal.path_m))[:, None]  # fanning out
+    fanned = [
+        replace(o, path_m=nominal.path_m + grow * (shift, 0.0, 0.0))
+        for o, shift in zip(_result(nominal).available, SHIFTS_M, strict=True)
+    ]
+    result = sd.DispersionResult(tuple(fanned))
+    overlay = dt.overlay_for(result, nominal, _settings(sample_color_rgba=colour))
+    return replace(nominal, dispersion=overlay)
+
+
+def test_hole_settings_keep_samples_thin_and_beneath_the_nominal() -> None:
+    from src.tools.golf_environment.shots import load_shots_settings
+
+    cfg = _settings()
+    assert cfg.hole_sample_width_pt < load_shots_settings()["figure"]["line_width"]
+    assert cfg.hole_sample_zorder < cfg.hole_nominal_zorder
+    style = cfg.hole_sample_style()
+    assert style.colour == pytest.approx(tuple(c / 255 for c in cfg.sample_color_rgba))
+    assert style.width_pt == cfg.hole_sample_width_pt
+    with pytest.raises(ValueError, match="hole_sample_width_pt"):
+        _settings(hole_sample_width_pt=0.0)
+    with pytest.raises(ValueError, match="zorder"):
+        _settings(hole_sample_zorder=cfg.hole_nominal_zorder)
+
+
+def test_samples_use_the_single_shot_hole_projection() -> None:
+    from src.tools.golf_environment.shots import hole_axes, hole_from_settings
+    from src.tools.golf_environment.shots import load_shots_settings
+    from src.tools.native_viewer_export import hole_view as hv
+
+    flight = _hole_flight()
+    cfg = flight.settings.hole_view
+    hole = hole_from_settings(load_shots_settings(), cfg.preset)
+    paths = hv.sample_paths(flight, hole)
+    assert len(paths) == len(SHIFTS_M)
+    same = replace(flight.dispersion, samples=(flight,))
+    (own,) = hv.sample_paths(replace(flight, dispersion=same), hole)
+    assert np.allclose(own, hv.hole_shot(flight, cfg).path_m)  # nominal projection
+    tee, _, left = hole_axes(hole)
+    nominal_left = float((np.asarray(own)[-1] - tee) @ left)
+    for path, shift in zip(paths, SHIFTS_M, strict=True):
+        assert np.allclose(path[0], tee)  # every sample starts on the tee
+        lateral = float((np.asarray(path)[-1] - tee) @ left) - nominal_left
+        assert np.sign(lateral) == np.sign(shift)  # world +X is left of target
+    assert hv.sample_paths(replace(flight, dispersion=None), hole) == []
+
+
+def test_hole_still_draws_samples_thin_beneath_the_nominal_shot(tmp_path) -> None:
+    pytest.importorskip("matplotlib")
+    from matplotlib import pyplot as plt
+    from PIL import Image
+
+    from src.tools.native_viewer_export import hole_view as hv
+
+    flight = _hole_flight()
+    fig, plan, side = hv.build_still(flight)
+    cfg = flight.dispersion.settings
+    for ax in (plan, side):
+        drawn = [ln for ln in ax.get_lines() if ln.get_gid() == "dispersion_sample"]
+        assert len(drawn) == len(SHIFTS_M)
+        shot = [
+            ln
+            for ln in ax.get_lines()
+            if ln.get_color() == hv.load_hole_view_settings().colour_rgba
+        ]
+        assert shot and all(ln.get_zorder() > drawn[0].get_zorder() for ln in shot)
+        assert all(ln.get_linewidth() == cfg.hole_sample_width_pt for ln in drawn)
+    plt.close(fig)
+    png = hv.write_still(ClipOverlays(flight=flight), tmp_path, "s", "e")["hole_view"]
+    pixels = np.asarray(Image.open(png).convert("RGB")).astype(int)
+    magenta = (pixels[..., 0] > 200) & (pixels[..., 1] < 60) & (pixels[..., 2] > 200)
+    assert magenta.sum() > 30
+    bare = hv.write_still(
+        ClipOverlays(flight=replace(flight, dispersion=None)), tmp_path / "b", "s", "e"
+    )["hole_view"]
+    plain = np.asarray(Image.open(bare).convert("RGB")).astype(int)
+    assert not (
+        (plain[..., 0] > 200) & (plain[..., 1] < 60) & (plain[..., 2] > 200)
+    ).any()
+
+
+def test_warns_when_no_requested_view_shows_the_samples(caplog) -> None:
+    from src.tools.native_viewer_export.core import ClipOverlays, ExportSettings
+
+    nominal = _nominal()
+    picked = _result(nominal).outcomes
+
+    def evaluate(setup: sd.ShotSetup) -> sd.SampleOutcome:
+        return replace(picked[0], setup=setup)
+
+    flight = replace(base.DEFAULTS, dispersion_traces=_settings())
+    views = ("face_on", "down_the_line")
+    on = ExportSettings(ball_flight=flight, views=views, multiview=False)
+    overlays = ClipOverlays(flight=nominal)
+    with caplog.at_level("WARNING", logger=dt.__name__):
+        dt.with_dispersion(overlays, None, on, on, evaluate)
+    (record,) = [r for r in caplog.records if "none of the requested" in r.message]
+    assert WIDE in record.message and "face_on" in record.message
+    caplog.clear()
+    wide = replace(on, views=("face_on", WIDE))
+    with caplog.at_level("WARNING", logger=dt.__name__):
+        dt.with_dispersion(overlays, None, wide, wide, evaluate)
+    assert not [r for r in caplog.records if "none of the requested" in r.message]

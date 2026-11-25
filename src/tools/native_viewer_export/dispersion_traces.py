@@ -37,6 +37,16 @@ logger = logging.getLogger(__name__)
 SETTINGS_PATH = Path(__file__).with_name("dispersion_traces_settings.json")
 _STATS = ("carry_mean", "carry_sd", "side_mean", "side_sd")
 _PROBE = {**dict.fromkeys(_STATS, 0.0), "n": 1, "unit": "m"}  # label_format check
+_CHANNEL_MAX = 255.0  # sample_color_rgba channels are 0..255, matplotlib's 0..1
+
+
+@dataclass(frozen=True)
+class HoleLineStyle:
+    """Colour (0..1 RGBA), width in points and drawing order of hole-still lines."""
+
+    colour: tuple[float, float, float, float]
+    width_pt: float
+    zorder: float
 
 
 @dataclass(frozen=True)
@@ -47,6 +57,9 @@ class DispersionTraceSettings:
     sample_color_rgba: tuple[int, ...]
     sample_width_px: int
     label_format: str
+    hole_sample_width_pt: float
+    hole_sample_zorder: float
+    hole_nominal_zorder: float
 
     def __post_init__(self) -> None:
         if not self.views:
@@ -63,6 +76,18 @@ class DispersionTraceSettings:
             self.label_format.format(**_PROBE)
         except (KeyError, IndexError, ValueError) as exc:
             raise ValueError(f"label_format cannot be filled: {exc}") from exc
+        hole_width = self.hole_sample_width_pt
+        if not (math.isfinite(hole_width) and hole_width > 0.0):
+            raise ValueError("hole_sample_width_pt must be positive and finite")
+        orders = (self.hole_sample_zorder, self.hole_nominal_zorder)
+        if not (all(map(math.isfinite, orders)) and orders[0] < orders[1]):
+            raise ValueError("hole_sample_zorder must be finite and below the nominal")
+
+    def hole_sample_style(self) -> HoleLineStyle:
+        """The sample traces' style on a hole still (``sample_color_rgba`` in 0..1)."""
+        r, g, b, a = (c / _CHANNEL_MAX for c in self.sample_color_rgba)
+        width, order = self.hole_sample_width_pt, self.hole_sample_zorder
+        return HoleLineStyle((r, g, b, a), width, order)
 
 
 def load_trace_settings(path: Path | None = None) -> DispersionTraceSettings:
@@ -117,6 +142,41 @@ class DispersionOverlay:
             )
         return np.asarray(image, dtype=np.uint8)
 
+    def paint_hole(
+        self, axes: tuple[Any, Any], paths_m: list[np.ndarray], hole: Any, scale: float
+    ) -> None:
+        """The sample ``paths_m`` (hole frame) thin beneath the hole still's shot."""
+        style = self.settings.hole_sample_style()
+        draw_on_hole(axes, paths_m, hole, scale, style, "dispersion_sample")
+
+
+def draw_on_hole(
+    axes: tuple[Any, Any],
+    paths_m: list[np.ndarray],
+    hole: Any,
+    scale: float,
+    style: HoleLineStyle,
+    gid: str,
+) -> None:
+    """Draw each hole-frame path on the (plan, profile) axes of a hole figure.
+
+    ``paths_m`` are (n, 3) world points of ``hole`` (as ``HoleShot.path_m``);
+    the plan is (down-range, left), the profile (down-range, height), both in
+    display units (``scale`` per metre). Every line gets ``style`` and ``gid``.
+    """
+    from src.tools.golf_environment.shots import hole_axes
+
+    if not (math.isfinite(scale) and scale > 0.0):
+        raise ValueError("scale must be positive and finite")
+    tee, forward, left = hole_axes(hole)
+    plan, side = axes
+    kw = {"color": style.colour, "lw": style.width_pt, "zorder": style.zorder}
+    for path in paths_m:
+        rel = np.asarray(path, dtype=float) - tee
+        x = scale * (rel @ forward)
+        plan.plot(x, scale * (rel @ left), gid=gid, **kw)
+        side.plot(x, scale * rel[:, 2], gid=gid, **kw)
+
 
 def overlay_for(
     result: sd.DispersionResult,
@@ -170,6 +230,14 @@ def with_dispersion(
     flight = None if overlays is None else overlays.flight
     if cfg is None or flight is None:
         return overlays
+    requested = tuple(getattr(raw_settings, "views", ()))
+    if not set(cfg.views) & set(requested):
+        logger.warning(
+            "dispersion traces are drawn on %s, none of the requested views %s "
+            "(views of dispersion_traces_settings.json)",
+            ", ".join(cfg.views),
+            ", ".join(requested),
+        )
     if flight.path_m is None:
         logger.warning("no dispersion traces: nominal flight %s", flight.status)
         return overlays
