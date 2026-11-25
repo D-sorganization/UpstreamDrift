@@ -19,6 +19,7 @@ from src.tools.native_viewer_export.backends.registry import (
     SHADING_ENGINES,
     make_backend,
 )
+from src.tools.native_viewer_export.behind_camera import address_anchor, behind_views
 from src.tools.native_viewer_export.camera_framing import resolve_lookat
 from src.tools.native_viewer_export.core import (
     ENGINES,
@@ -163,6 +164,8 @@ def run_export(
         per_settings = replace(
             per_settings, lookat_m=resolve_lookat(per_settings.lookat_m, settings)
         )
+        if not settings.lookat_explicit and behind_views(settings.views):
+            per_settings = replace(per_settings, behind_anchor_m=address_anchor(swing))
         result = export_swing(
             backend, swing, per_settings, job.out_dir, feed, writer_factory
         )

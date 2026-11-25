@@ -20,6 +20,7 @@ from src.shared.python.impact_parameters.flight_report import FlightSummary
 from src.shared.python.impact_parameters.target_frame import TargetFrame
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.tools.native_viewer_export import cli, flight_tracer as tracer
+from src.tools.native_viewer_export.contact_verdict import ContactVerdict
 from src.tools.native_viewer_export.ball import BallPlacement
 from src.tools.native_viewer_export.core import (
     ExportSettings,
@@ -128,6 +129,13 @@ def test_hud_lines_say_where_the_ball_is_and_what_the_model_predicts() -> None:
     assert "Apex 22 yd" in text and "Side 9 yd right" in text and "Time 4.0 s" in text
 
 
+def test_playback_carries_the_model_spin_axis() -> None:
+    flight = replace(_flight(), spin_axis_deg=4.5)
+    play = tracer.playback_from_flight(flight, FRAME, IMPACT_S, BALL, DEFAULTS)
+    assert play.spin_axis_deg == 4.5
+    assert _playback().spin_axis_deg is None  # not reported: not invented
+
+
 def test_a_flight_outside_the_model_envelope_is_not_drawn_by_default() -> None:
     hidden = _playback(valid=False)
     assert hidden.flown(IMPACT_S + 1.0) is None and hidden.duration_s == 0.0
@@ -156,7 +164,10 @@ def test_flight_starts_from_the_state_the_impact_card_reads(monkeypatch) -> None
         return _flight()
 
     monkeypatch.setattr(tracer, "flight_for_impact", fake)
-    flight = tracer.playback_from_series(series, 0.1, BALL, DEFAULTS)
+    # BALL lies 0.2 m off the face (a miss): the verdict is forced to contact
+    # so the last-sample launch path stays covered
+    hit = ContactVerdict(contact=True)
+    flight = tracer.playback_from_series(series, 0.1, BALL, DEFAULTS, verdict=hit)
     assert seen == [(99, (1.0, 0.0, 0.0))]  # last sample before the impact time
     end = flight.flown(99.0)
     assert end is not None and end[-1, 0] == pytest.approx(1.0 + 160.0)  # along +X

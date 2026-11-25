@@ -242,6 +242,30 @@ def with_butt_to_sole_length(
     return replace(club, length_m=length)
 
 
+#: ``document["club"]`` keys that restate a ``ClubSpec`` field (``apply_club``).
+RECORDED_CLUB_FIELDS = ("length_m", "head_mass_kg", "shaft_mass_kg", "grip_mass_kg")
+
+
+def recorded_club(document: Mapping[str, Any], name: str) -> ClubSpec:
+    """Catalogue club ``name`` restated by the ``club`` record of ``document``.
+
+    A document built with a subject preset carries the preset's club length (and
+    any restated masses) in ``document["club"]``, so the catalogue club alone no
+    longer describes its solids. Postcondition: the fields in
+    :data:`RECORDED_CLUB_FIELDS` that the record holds replace the catalogue's.
+    Raises ``ValueError`` for an unknown club or a record of another club.
+    """
+    if name not in CLUBS:
+        raise ValueError(f"unknown club {name!r}; known: {sorted(CLUBS)}")
+    record = document.get("club") or {}
+    if record.get("name", name) != name:
+        raise ValueError(f"document club is {record['name']!r}, not {name!r}")
+    values: dict[str, Any] = {
+        k: float(record[k]) for k in RECORDED_CLUB_FIELDS if k in record
+    }
+    return replace(CLUBS[name], **values)
+
+
 def _placement(translation: tuple[float, float, float]) -> list[list[float]]:
     m = np.eye(4)
     m[:3, 3] = translation

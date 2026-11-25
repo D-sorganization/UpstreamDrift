@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -58,7 +59,13 @@ def angular_momentum_anchors(
     root_body_id: int | None = None,
 ) -> dict[str, tuple[float, float, float]]:
     """Anchors for whole-body, five groups, and every named body."""
-    del root_body_id
+    if root_body_id is not None:
+        warnings.warn(
+            "root_body_id is deprecated and ignored; whole-body H uses the "
+            "mass-weighted COM reference (ball excluded)",
+            DeprecationWarning,
+            stacklevel=2,
+        )
     anchors = body_com_positions(model, data)
     com, _ = whole_body_com_kinematics(model, data, np.asarray(data.qvel, dtype=float))
     anchors["whole_body"] = (float(com[0]), float(com[1]), float(com[2]))

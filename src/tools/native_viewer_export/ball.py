@@ -59,6 +59,9 @@ STRIKE_NOTE = (
     "display placement: the ball is drawn where the face centre of the replayed "
     "swing passes; it is not a measured or simulated ball"
 )
+#: ``strike["fallback"]`` when the strike placement failed and the ball stays
+#: at the address ball (``strike["unavailable"]`` says why)
+FALLBACK_ADDRESS = "address ball used"
 BALL_RGBA = (0.97, 0.97, 0.95, 1.0)
 #: A clubhead centre this far above the ground is not an address stance.
 MAX_ADDRESS_HEIGHT_M = 0.5
@@ -217,8 +220,9 @@ def strike_ball(
     """``nominal`` moved to where the face centre strikes, plus the record.
 
     The record is ``None`` under the ``address`` setting and for a recorded
-    ball (never moved), ``{"unavailable": reason}`` when the swing does not
-    pass the ball (``nominal`` is kept), else the strike record. A moved ball
+    ball (never moved), ``{"unavailable": reason, "fallback":
+    FALLBACK_ADDRESS}`` when the swing does not pass the ball (``nominal`` is
+    kept), else the strike record. A moved ball
     has source :data:`SOURCE_STRIKE` and is hidden from its contact time.
     """
     settings = load_ball_strike_settings()
@@ -244,7 +248,10 @@ def strike_ball(
             radius_m=nominal.radius_m,
         )
     except (ImportError, ValueError, KeyError) as exc:
-        return nominal, {"unavailable": f"strike placement unavailable: {exc}"}
+        return nominal, {
+            "unavailable": f"strike placement unavailable: {exc}",
+            "fallback": FALLBACK_ADDRESS,
+        }
     moved = BallPlacement(
         strike.centre_m,
         nominal.radius_m,

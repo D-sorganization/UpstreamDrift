@@ -397,7 +397,10 @@ positions gives the velocity; `extract_impact_parameters` gives the rows. With a
 ball the impact state is the club where its face reaches the ball
 (`impact_state.series_at_contact`, settings in `impact_state_settings.json`): a
 fit of the samples before contact carried to the contact instant, so no row is
-read a sample early or across the strike (`extras.impact_state`); without a ball
+read a sample early or across the strike (`extras.impact_state`). A bundle's
+recorded impact sample already carries the strike, so the fit ends before it
+(`ModelClubSeries.strike_time_s`): a ball moved forward is met by the swing as
+it was before the strike, not by the struck head; without a ball
 it is the last sample before the impact time. The specification has no target
 line, so the target direction is the horizontal part of the address (state 0)
 face normal of the address-square head (as `plan_gaze` does; it does not turn
@@ -450,3 +453,53 @@ kinematic replay, not a refit. Limits live in `shot_setup_settings.json`.
   sign change is an error, never a silent fallback. The solved roll is logged
   and recorded in the ball record under `shot_setup`; a non-zero roll or shift
   adds a `Setup: ...` line to the clip HUD.
+
+### Ball Position in the Stance
+
+`python -m src.tools.native_viewer_export.ball_position_sweep --bundle B
+--swing S --out sweep.json` moves the ball along the target line through
+`ball_position_sweep_settings.json` `shifts_m` (or `--shifts M ...`), with
+`--ball-position-shift` semantics (contact kept on the face centre), and
+writes one row per position. Each row has the impact factors and flight at
+zero club roll, plus the club roll that lands the ball on the target line
+(the `--shot-shape straight` solve). The record also gives each quantity's
+slope per centimetre of shift. Each position's roll bracket is centred on its
+neighbour's straight roll. If a bracket end leaves the flight model's
+envelope, the span is halved up to `bracket_halvings` times. Positions forward
+of `forward_valid_m` are flagged, not refused. Nothing is rendered and the
+body motion is unchanged.
+
+The factors that come from the clubhead velocity, such as club path, change
+abruptly when contact crosses the bundle's recorded impact frame. After that
+frame, the measured club already carries the real ball's push.
+
+## Replay Mode Label
+
+Every clip HUD carries a `Replay: ...` line and every engine row of the export
+manifest carries `"replay_mode"`, so a clip never passes recorded motion off as
+simulated. The mode is determined from the bundle, never guessed
+(`replay_mode.py`; labels in `replay_mode_settings.json`):
+
+- `kinematic_replay`: every effort is zero (recorded motion, no dynamics).
+- `feedback_tracked_dynamics`: non-zero efforts from the closed-loop tracker
+  (the bundle provenance records its `controller`).
+- `open_loop_dynamics`: efforts replayed from an initial state; the bundle
+  must declare it with provenance `replay_mode: open_loop_dynamics`, as no
+  writer does yet.
+- `inverse_dynamics`: the recorded motion with efforts from inverse dynamics
+  and allocation (the kinetic match, `motion_matching/kinetic_match.py`, which
+  declares it). The motion is not simulated, and the efforts are one solution
+  in the null space of the closed arm loop.
+- `unknown_replay_mode` (shown as "Unknown Replay Mode (provenance not recorded)"): anything else.
+
+`--no-hud` removes the line; the manifest field stays.
+
+## Aim Line
+
+- `--aim-line {finish,address}` picks the line the plan view, side figure and
+  wide-view ground line are read against. `finish` runs from the ball to where
+  it finishes (the rest point with a roll), so a draw or fade that ends on
+  target reads as on target; `address` keeps the address target line. The
+  default is `finish` with `--shot-shape`, else the picture is unchanged. The
+  HUD and plan title name the line; flight numbers never change. Colour, width
+  and halo are in `aim_line_settings.json`.

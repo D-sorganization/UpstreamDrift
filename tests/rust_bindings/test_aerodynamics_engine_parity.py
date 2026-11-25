@@ -17,6 +17,7 @@ will not meet the 10× target — that case is also skipped).
 
 from __future__ import annotations
 
+import dataclasses
 import math
 import time
 
@@ -48,6 +49,11 @@ _FLIGHT_CASES: list[tuple[tuple[float, float, float], tuple[float, float, float]
     ((10.0, 0.0, 5.0), (0.0, 100.0, 0.0)),  # apex descent
     ((1.0, 0.0, 0.0), (0.0, 0.0, 0.0)),  # near-rest
 ]
+
+
+# Air speeds [m/s] spanning Re of about 3e4 to 3.5e5 for a 42.7 mm ball in
+# sea-level air: subcritical, the drag crisis near 7.6e4 and the recovery.
+_CRISIS_SWEEP_SPEEDS_M_S = np.linspace(10.0, 120.0, 45)
 
 
 def _make_spec(
@@ -148,6 +154,29 @@ class TestAerodynamicsEngineParity:
         rmse = float(np.sqrt(np.mean(np.stack(diffs) ** 2)))
         assert rmse < 1e-8, f"Wind-subtraction parity broken: RMSE={rmse:.3e}"
 
+    def test_drag_crisis_sweep_parity(self) -> None:
+        """Zero-spin drag matches across the refitted crisis (#15443).
+
+        Sweeps air speed over Re 3e4 to 3.5e5 with the production floor, so
+        every fitted constant of the drag law (crisis centre and width,
+        floor, recovery centre) is exercised on both code paths.
+        """
+        if not is_rust_available():
+            pytest.skip("upstream_physics Rust kernel not installed")
+
+        spec = dataclasses.replace(
+            _make_spec(lift_enabled=False, magnus_enabled=False),
+            drag_coefficient=float(GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT),
+        )
+        spin = np.zeros(3)
+        diffs = [
+            compute_total_force(spec, np.array([speed, 0.0, 0.0]), spin)
+            - _python_reference_total(spec, np.array([speed, 0.0, 0.0]), spin)
+            for speed in _CRISIS_SWEEP_SPEEDS_M_S
+        ]
+        rmse = float(np.sqrt(np.mean(np.stack(diffs) ** 2)))
+        assert rmse < 1e-8, f"Drag-crisis parity broken: RMSE={rmse:.3e} N"
+
     def test_toggle_drag_off_changes_force(self) -> None:
         """Disabling drag must reduce |F| relative to all-on case."""
         v = np.array([60.0, 0.0, 20.0])
@@ -172,6 +201,12 @@ class TestAerodynamicsEngineParity:
     def test_driver_trajectory_matches_public_simulator(self) -> None:
         """Driver launch parity guards the public Rust-backed simulator."""
         rust = pytest.importorskip("upstream_physics")
+        from src.shared.python.physics.rust_kernel import (
+            is_rust_available as kernel_is_current,
+        )
+
+        if not kernel_is_current():
+            pytest.skip("upstream_physics older than rust_kernel.MIN_PHYSICS_REVISION")
         from src.shared.python.physics.ball_flight_physics import (
             BallProperties,
             EnvironmentalConditions,

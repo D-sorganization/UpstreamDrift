@@ -16,6 +16,89 @@ from src.shared.python.analysis.dataclasses import (
 from src.shared.python.core.contracts import ensure
 
 
+def _closed_angle_cycle(
+    angles: np.ndarray, *, rtol: float = 1e-3, atol: float = 1e-6
+) -> bool:
+    """True when the sampled angle trace ends where it started (a closed loop)."""
+    if len(angles) < 2:
+        return False
+    return bool(np.isclose(float(angles[0]), float(angles[-1]), rtol=rtol, atol=atol))
+
+
+def _hysteresis_loop_area(angles: np.ndarray, torques: np.ndarray) -> float:
+    """Shoelace area of the angle–torque polygon (Joules) for a closed cycle."""
+    x = np.asarray(angles, dtype=float)
+    y = np.asarray(torques, dtype=float)
+    return float(0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1))))
+
+
+def _power_active_duration(times: np.ndarray, active: np.ndarray) -> float:
+    """Time span where ``active`` is true on the piecewise-linear time grid."""
+    if len(times) < 2 or not np.any(active):
+        return 0.0
+    step_dt = np.diff(times)
+    if len(active) != len(times):
+        raise ValueError("active mask must match times length")
+    segment_active = active[:-1] | active[1:]
+    return float(step_dt[segment_active].sum())
+
+
+def _bound_overlapping_durations(
+    gen_dur: float, abs_dur: float, t_total: float
+) -> tuple[float, float]:
+    """Scale gen/abs durations when OR-segment overlap exceeds ``t_total``."""
+    if t_total > 0.0 and gen_dur + abs_dur > t_total:
+        scale = t_total / (gen_dur + abs_dur)
+        return gen_dur * scale, abs_dur * scale
+    return gen_dur, abs_dur
+
+
+def _integrate_power_net(power: np.ndarray, dt: float) -> float:
+    if hasattr(np, "trapezoid"):
+        return float(np.trapezoid(power, dx=dt))
+    trapz_func = getattr(np, "trapz")  # noqa: B009
+    return float(trapz_func(power, dx=dt))
+
+
+def _ensure_joint_power_metrics(result: JointPowerMetrics, t_total: float) -> None:
+    ensure(
+        result.peak_generation >= 0,
+        "peak generation must be non-negative",
+        result.peak_generation,
+    )
+    ensure(
+        result.peak_absorption <= 0,
+        "peak absorption must be non-positive",
+        result.peak_absorption,
+    )
+    ensure(
+        result.generation_duration >= 0,
+        "generation duration must be non-negative",
+        result.generation_duration,
+    )
+    ensure(
+        result.absorption_duration >= 0,
+        "absorption duration must be non-negative",
+        result.absorption_duration,
+    )
+    ensure(np.isfinite(result.net_work), "net work must be finite", result.net_work)
+    ensure(
+        result.generation_duration <= t_total + 1e-9,
+        "generation duration must not exceed the signal interval",
+        result.generation_duration,
+    )
+    ensure(
+        result.absorption_duration <= t_total + 1e-9,
+        "absorption duration must not exceed the signal interval",
+        result.absorption_duration,
+    )
+    ensure(
+        result.generation_duration + result.absorption_duration <= t_total + 1e-9,
+        "generation plus absorption duration must not exceed the signal interval",
+        result.generation_duration + result.absorption_duration,
+    )
+
+
 def _split_trapezoid(values: np.ndarray, dx: float) -> tuple[float, float]:
     """Integrate the positive and negative parts of a sampled signal.
 
@@ -99,7 +182,7 @@ class PowerWorkMetricsMixin:
         if joint_idx is None:
             raise ValueError("joint_idx must be provided")
         if joint_idx in self._work_metrics_cache:
-            return self._work_metrics_cache[joint_idx]
+            return dict(self._work_metrics_cache[joint_idx])
 
         if (
             joint_idx >= self.joint_torques.shape[1]
@@ -148,7 +231,7 @@ class PowerWorkMetricsMixin:
         )
 
         self._work_metrics_cache[joint_idx] = result
-        return result
+        return dict(result)
 
     def compute_joint_power_metrics(self, joint_idx: int) -> JointPowerMetrics | None:
         """Compute detailed power metrics for a joint.
@@ -183,67 +266,34 @@ class PowerWorkMetricsMixin:
 
         torque = torque[:n_samples]
         velocity = velocity[:n_samples]
+        times = self.times[:n_samples]
         dt = self.dt
 
         power = torque * velocity
+        t_total = float(times[-1] - times[0]) if len(times) >= 2 else 0.0
 
         gen_indices = power > 0
         peak_gen = float(np.max(power)) if np.any(gen_indices) else 0.0
         avg_gen = float(np.mean(power[gen_indices])) if np.any(gen_indices) else 0.0
-        gen_dur = float(
-            np.count_nonzero(gen_indices) * dt
-        )  # ⚡ Bolt: np.count_nonzero is ~30% faster than np.sum() for boolean arrays
+        gen_dur = _power_active_duration(times, gen_indices)
 
         abs_indices = power < 0
         peak_abs = float(np.min(power)) if np.any(abs_indices) else 0.0
         avg_abs = float(np.mean(power[abs_indices])) if np.any(abs_indices) else 0.0
-        abs_dur = float(
-            np.count_nonzero(abs_indices) * dt
-        )  # ⚡ Bolt: np.count_nonzero is ~30% faster than np.sum() for boolean arrays
-
-        if hasattr(np, "trapezoid"):
-            net_work = float(np.trapezoid(power, dx=dt))
-        else:
-            trapz_func = getattr(np, "trapz")  # noqa: B009
-            net_work = float(trapz_func(power, dx=dt))
+        abs_dur = _power_active_duration(times, abs_indices)
+        gen_dur, abs_dur = _bound_overlapping_durations(gen_dur, abs_dur, t_total)
 
         result = JointPowerMetrics(
             peak_generation=peak_gen,
             peak_absorption=peak_abs,
             avg_generation=avg_gen,
             avg_absorption=avg_abs,
-            net_work=net_work,
+            net_work=_integrate_power_net(power, dt),
             generation_duration=gen_dur,
             absorption_duration=abs_dur,
         )
 
-        # Postconditions
-        ensure(
-            result.peak_generation >= 0,
-            "peak generation must be non-negative",
-            result.peak_generation,
-        )
-        ensure(
-            result.peak_absorption <= 0,
-            "peak absorption must be non-positive",
-            result.peak_absorption,
-        )
-        ensure(
-            result.generation_duration >= 0,
-            "generation duration must be non-negative",
-            result.generation_duration,
-        )
-        ensure(
-            result.absorption_duration >= 0,
-            "absorption duration must be non-negative",
-            result.absorption_duration,
-        )
-        ensure(
-            np.isfinite(result.net_work),
-            "net work must be finite",
-            result.net_work,
-        )
-
+        _ensure_joint_power_metrics(result, t_total)
         return result
 
     def compute_impulse_metrics(
@@ -332,6 +382,11 @@ class PowerWorkMetricsMixin:
     ) -> JointStiffnessMetrics | None:
         """Compute Quasi-Stiffness from Moment-Angle relationship.
 
+        Design by Contract:
+            Postconditions:
+                - hysteresis_area is zero unless the angle trace is a closed cycle
+                - hysteresis_area >= 0 and finite when reported
+
         Args:
             joint_idx: Joint index
             window: Optional slice to compute stiffness over a specific phase
@@ -367,11 +422,16 @@ class PowerWorkMetricsMixin:
         ss_tot = float(np.vdot(diff_tot, diff_tot))
         r_squared = 1 - (ss_res / ss_tot) if ss_tot > 0 else 0.0
 
-        if hasattr(np, "trapezoid"):
-            area = float(np.abs(np.trapezoid(torques, x=angles)))
+        if _closed_angle_cycle(angles):
+            area = _hysteresis_loop_area(angles, torques)
         else:
-            trapz_func = getattr(np, "trapz")  # noqa: B009
-            area = float(np.abs(trapz_func(torques, x=angles)))
+            area = 0.0
+        ensure(
+            area >= 0,
+            "hysteresis area must be non-negative",
+            area,
+        )
+        ensure(np.isfinite(area), "hysteresis area must be finite", area)
 
         return JointStiffnessMetrics(
             stiffness=float(slope),

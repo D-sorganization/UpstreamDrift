@@ -170,7 +170,7 @@ def multiplier_envelope(
     return centre - spread, centre + spread
 
 
-def require_real_module(name: str) -> ModuleType:
+def require_real_module(name: str, required_attrs: tuple[str, ...] = ()) -> ModuleType:
     """Skip unless the real ``name`` bindings are importable (not a mock).
 
     The suite's conftest may inject a ``MagicMock`` as ``sys.modules[name]`` so
@@ -196,9 +196,12 @@ def require_real_module(name: str) -> ModuleType:
         pytest.skip(
             f"real {name} is not installed (stub without __file__ in sys.modules)"
         )
+    missing = [attr for attr in required_attrs if not hasattr(module, attr)]
+    if missing:
+        pytest.skip(f"{name} is not the real bindings (missing {', '.join(missing)})")
     return module
 
 
 def require_real_pinocchio() -> None:
     """Skip unless the real Pinocchio bindings are importable."""
-    require_real_module("pinocchio")
+    require_real_module("pinocchio", required_attrs=("Model",))

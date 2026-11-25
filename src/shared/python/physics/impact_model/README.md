@@ -18,3 +18,9 @@ record the sign correction, units, regression evidence and limitations.
 The separate [Matched-Delivery Design](../../../../../docs/research/shot_pattern_analysis/phase2/DESIGN.md)
 documents the coupled-contact research pathway; that pathway does not add this
 legacy gear-spin term.
+
+`ImpactParameters.rigid_gear_head` opts into a rigid-contact gear law instead
+(`rigid_gear.py`, #15443). It solves the flat-face off-centre strike with the
+shared contact solver and the head's inertia tensor. Only the shot card and
+export flight path use it; the reference's rigid-contact section records the
+evidence and limits.

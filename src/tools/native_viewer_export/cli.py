@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import argparse
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import replace
 from functools import partial
 import json
@@ -22,6 +22,7 @@ from src.shared.python.body_part_viz.skin_load_settings import (
     load_skin_load_settings,
 )
 from src.shared.python.force_overlay.palette import ELLIPSOID_COLOR_MODES
+from src.shared.python.force_overlay.tip_to_tail import PART_VIEWS, QUANTITIES
 from src.shared.python.golf_view_presets import VIEW_ORDER
 from src.shared.python.model_appearance.appearance_selection import (
     AppearanceOverrides,
@@ -39,6 +40,8 @@ from src.shared.python.motion_matching.execution.grip_selection import (
     overrides_from_args,
     refuse_physical_in_sidecar,
 )
+from src.tools.native_viewer_export.aim_line import load_aim_settings
+from src.tools.native_viewer_export.arrow_style import arrow_style_names
 from src.tools.native_viewer_export.backends._scene_lighting import (
     LIGHTING_CHOICES,
     LightingSettings,
@@ -48,6 +51,7 @@ from src.tools.native_viewer_export.core import (
     DEFAULT_SPEEDS,
     ELLIPSOID_KINDS,
     ENGINES,
+    ExportResult,
     ExportSettings,
     parse_ellipsoid_scale,
 )
@@ -64,9 +68,14 @@ from src.tools.native_viewer_export.ellipsoid_visibility import (
     panel_note,
 )
 from src.tools.native_viewer_export.flight_tracer import load_tracer_settings
+from src.tools.native_viewer_export.dispersion_traces import load_trace_settings
+from src.tools.native_viewer_export.hole_view import load_hole_view_settings
 from src.tools.native_viewer_export.impact_factors import load_factor_settings
 from src.tools.native_viewer_export.overlay import OverlayOptions, build_overlay_feed
 from src.tools.native_viewer_export.runner import ExportJob, run_export
+from src.tools.native_viewer_export.ztcf_axial import SHADING_PARTS
+from src.tools.native_viewer_export.ztcf_ground import FORCE_PARTS
+from src.tools.native_viewer_export.ztcf_feed import HAND_CHOICES
 from src.tools.native_viewer_export import camera_framing, shot_setup
 
 logger = logging.getLogger(__name__)
@@ -156,6 +165,76 @@ def _add_ellipsoid_arguments(p: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_hand_force_arguments(p: argparse.ArgumentParser) -> None:
+    """Add the hand-on-club force overlays (tip-to-tail split, palm on thumb)."""
+    p.add_argument(
+        "--ztcf-zvcf-hand-force",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="draw the trail hand's force on the club tip to tail: ZTCF drift "
+        "(tau = 0) then ZVCF control (the applied torques), with the total; "
+        "needs a dynamics bundle with efforts (default: off) (#15685)",
+    )
+    p.add_argument(
+        "--ztcf-arrow-gain",
+        type=float,
+        default=1.0,
+        help="draw the tip-to-tail hand-force arrows this many times longer; "
+        "the legend states the gain (default: 1)",
+    )
+    p.add_argument(
+        "--ztcf-zvcf-view",
+        choices=PART_VIEWS,
+        default="tip_to_tail",
+        help="which part of the hand-on-club split to draw: tip_to_tail (ZTCF "
+        "drift + ZVCF control = total), ztcf, zvcf or total (default: "
+        "tip_to_tail) (#15150)",
+    )
+    p.add_argument(
+        "--ztcf-zvcf-quantity",
+        choices=QUANTITIES,
+        default="force",
+        help="draw the hands' force (N) or torque (N m) on the club (default: force)",
+    )
+    p.add_argument(
+        "--arrow-style",
+        choices=arrow_style_names(),
+        default=arrow_style_names()[0],
+        help="force arrow look from arrow_style_settings.json; slim is "
+        "for 1080p and above (default: %(default)s) (#15150)",
+    )
+    p.add_argument(
+        "--segment-shading-part",
+        choices=SHADING_PARTS,
+        default="recorded",
+        help="what the segment shading shows: the recorded loads, or the "
+        "ZTCF drift, ZVCF control or their total section loads (feet planted; "
+        "needs a dynamics bundle) (default: recorded) (#15150)",
+    )
+    p.add_argument(
+        "--force-part",
+        choices=FORCE_PARTS,
+        default="recorded",
+        help="forces drawn: recorded, or one ZTCF/ZVCF case's net planted-foot "
+        "ground reaction at its centre of pressure and only its force kinds "
+        "(ZTCF: no applied torques; ZVCF: no weight) (default: recorded) (#15150)",
+    )
+    p.add_argument(
+        "--ztcf-zvcf-hands",
+        choices=HAND_CHOICES,
+        default="both",
+        help="draw the lead hand, the trail hand or both (default: both)",
+    )
+    p.add_argument(
+        "--palm-thumb-force",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="draw the allocated trail-palm-on-lead-thumb normal force at the "
+        "contact patch (an equivalent of the grip closure force, not a "
+        "measured contact; unloaded frames draw nothing; default: off)",
+    )
+
+
 def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
     """Add the overlay and segment-shading options."""
     p.add_argument(
@@ -177,14 +256,7 @@ def _add_overlay_arguments(p: argparse.ArgumentParser) -> None:
         help="draw curling joint-torque arcs (default: on, except on a kinematic "
         "replay with zero efforts, where only this flag draws them)",
     )
-    p.add_argument(
-        "--palm-thumb-force",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="draw the allocated trail-palm-on-lead-thumb normal force at the "
-        "contact patch (an equivalent of the grip closure force, not a "
-        "measured contact; unloaded frames draw nothing; default: off)",
-    )
+    _add_hand_force_arguments(p)
     _add_ellipsoid_arguments(p)
     p.add_argument(
         "--axial-impact-blackout",
@@ -293,6 +365,32 @@ def _add_ball_flight_arguments(p: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_hole_view_arguments(p: argparse.ArgumentParser) -> None:
+    """Overhead hole view flags (#15150, track A4)."""
+    p.add_argument(
+        "--hole-view",
+        action="store_true",
+        help="also write a plan-view still of the flight on a hole (fairway, "
+        "green, trace, landing, carry); turns the ball flight on (default: off)",
+    )
+    p.add_argument(
+        "--hole-preset",
+        default=None,
+        metavar="NAME",
+        help="hole of --hole-view: par3, par4 or par5 (default: hole_view_settings.json)",
+    )
+    p.add_argument(
+        "--dispersion-traces",
+        action="store_true",
+        help="replay the shot with the random club roll and ball position of "
+        "shot_dispersion_settings.json and draw every sample flight, thin and "
+        "translucent beneath the shot, on the views of "
+        "dispersion_traces_settings.json (the wide down_the_line_flight view), "
+        "with the carry and side spread in the HUD; turns the ball flight on "
+        "(default: off)",
+    )
+
+
 def _add_unit_arguments(p: argparse.ArgumentParser) -> None:
     """Display unit flags of the flight labels and the impact card (#15443)."""
     p.add_argument(
@@ -386,12 +484,23 @@ def _add_shot_setup_arguments(p: argparse.ArgumentParser) -> None:
         "right). Excludes a non-zero --club-roll-in-hands; combines with "
         "--ball-position-shift (default: off)",
     )
+    p.add_argument(
+        "--aim-line",
+        choices=("finish", "address"),
+        default=None,
+        help="reference line of the plan view, side figure and wide-view ground "
+        "line: finish (ball to where the ball finishes, so a draw or fade that "
+        "ends on target reads as on target) or address (the address target "
+        "line). Default: aim_line_settings.json, which is finish with "
+        "--shot-shape and otherwise leaves the picture unchanged",
+    )
 
 
 def _add_clip_overlay_arguments(p: argparse.ArgumentParser) -> None:
     """Optional clip flags: impact factors panel, ball flight and lighting."""
     _add_impact_factor_arguments(p)
     _add_ball_flight_arguments(p)
+    _add_hole_view_arguments(p)
     _add_unit_arguments(p)
     _add_lighting_arguments(p)
     _add_shot_setup_arguments(p)
@@ -692,6 +801,25 @@ def _camera_changes(args: argparse.Namespace) -> dict[str, Any]:
     return changes
 
 
+def _ball_flight_for(args: argparse.Namespace, units: DisplayUnits) -> Any:
+    """Tracer settings of the flag combination, or ``None`` when no flight is wanted."""
+    hole = getattr(args, "hole_view", False)
+    spread = getattr(args, "dispersion_traces", False)
+    wanted = args.ball_flight or args.ball_flight_settings is not None
+    if not (wanted or hole or spread):
+        return None
+    tracer = load_tracer_settings(args.ball_flight_settings, units)
+    if spread:
+        tracer = replace(tracer, dispersion_traces=load_trace_settings())
+    aim = tracer.aim or load_aim_settings()
+    mode = aim.resolved(getattr(args, "shot_shape", None), args.aim_line)
+    tracer = replace(tracer, aim=replace(aim, aim_line=mode))
+    if not hole:
+        return tracer
+    view = load_hole_view_settings(preset=args.hole_preset)
+    return replace(tracer, hole_view=view)
+
+
 def build_settings(args: argparse.Namespace) -> ExportSettings:
     """``ExportSettings`` from parsed arguments (raises ``ValueError``)."""
     base = ExportSettings.preview() if args.preset == "preview" else ExportSettings()
@@ -758,9 +886,7 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         club_roll_in_hands_deg=getattr(args, "club_roll_in_hands", 0.0),
         ball_position_shift_m=getattr(args, "ball_position_shift", 0.0),
         shot_shape=getattr(args, "shot_shape", None),
-        ball_flight=load_tracer_settings(args.ball_flight_settings, units)
-        if args.ball_flight or args.ball_flight_settings is not None
-        else None,
+        ball_flight=_ball_flight_for(args, units),
         speed_unit=units.speed_unit if args.ball_flight_speed_unit else None,
         **(
             {"impact_speed": args.impact_speed} if args.impact_speed is not None else {}
@@ -768,7 +894,11 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
     )
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def main(
+    argv: Sequence[str] | None = None,
+    on_results: Callable[[list[ExportResult]], None] | None = None,
+) -> int:
+    """Run the exporter; ``on_results`` receives the results (#15150 G8)."""
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.shot_shape is not None and args.club_roll_in_hands != 0.0:
@@ -814,12 +944,22 @@ def main(argv: Sequence[str] | None = None) -> int:
                     ellipsoid_color_by=settings.ellipsoid_color_by,
                     visibility=_visibility_of(args),
                     axial_impact_blackout=args.axial_impact_blackout,
+                    ztcf_zvcf_hand_force=args.ztcf_zvcf_hand_force,
+                    ztcf_arrow_gain=args.ztcf_arrow_gain,
+                    ztcf_view=args.ztcf_zvcf_view,
+                    ztcf_quantity=args.ztcf_zvcf_quantity,
+                    ztcf_hands=args.ztcf_zvcf_hands,
+                    shading_part=args.segment_shading_part,
+                    force_part=args.force_part,
+                    arrow_style=args.arrow_style,
                 ),
             ),
         )
     except (ValueError, FileNotFoundError) as exc:
         sys.stderr.write(f"error: {exc}\n")
         return 2
+    if on_results is not None:
+        on_results(results)
     for r in results:
         if r.skipped:
             sys.stdout.write(f"{r.engine}: SKIPPED ({r.skipped_reason})\n")

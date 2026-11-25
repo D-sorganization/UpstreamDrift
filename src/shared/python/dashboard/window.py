@@ -12,7 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from PyQt6 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 from src.shared.python.analysis.orchestrator import AnalysisOrchestrator
 from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
@@ -334,16 +334,24 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
             self.runner.start()
 
     def _reset_simulation(self) -> None:
-        """Reset simulation and recorder."""
+        """Stop recording and reset the model and pause controls for a fresh run."""
         if self.runner.isRunning():
             self.runner.stop()
             self.runner.wait()
 
+        self.runner.paused = False
+        pause_button = self.control_panel.btn_pause
+        pause_button.setChecked(False)
         self.engine.reset()
         self.recorder.reset()
         self.live_plot.ax.clear()
         self.live_plot.canvas.draw()
         self.status_label.setText("Reset complete.")
+
+    def closeEvent(self, event: QtGui.QCloseEvent | None) -> None:
+        """Join the simulation thread before the dashboard can be destroyed."""
+        self.runner.stop()
+        super().closeEvent(event)
 
     def refresh_static_plot(self) -> None:
         """Update the static plot based on selection."""

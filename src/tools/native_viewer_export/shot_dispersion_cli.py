@@ -46,6 +46,16 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="unit of the figure's distances (default: display units settings)",
     )
+    p.add_argument(
+        "--hole",
+        action="store_true",
+        help="also write dispersion_hole.png: all shots on the hole",
+    )
+    p.add_argument(
+        "--hole-preset",
+        default=None,
+        help="hole preset of the --hole still (default: dispersion hole settings)",
+    )
     return p
 
 
@@ -68,6 +78,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     from src.tools.native_viewer_export.core import ExportSettings, load_swing_input
+    from src.tools.native_viewer_export.dispersion_hole import (
+        load_dispersion_hole_settings,
+        write_dispersion_hole,
+    )
     from src.tools.native_viewer_export.shot_dispersion_plot import draw_dispersion
 
     try:
@@ -84,11 +98,23 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.distance_unit:
             units = replace(units, distance_unit=args.distance_unit)
         swing = load_swing_input(args.bundle, swing=args.swing, club=args.club)
-        result = sd.run_dispersion(swing, ExportSettings(), sd.sample_setups(cfg))
+        export = ExportSettings()
+        result = sd.run_dispersion(swing, export, sd.sample_setups(cfg))
         args.out.mkdir(parents=True, exist_ok=True)
         record = record_for(cfg, result, units)
         (args.out / "dispersion.json").write_text(json.dumps(record, indent=2))
-        draw_dispersion(result, cfg, args.out / "dispersion.png", units)
+        if result.available or not args.hole:
+            draw_dispersion(result, cfg, args.out / "dispersion.png", units)
+        else:  # the hole still falls back to the nominal shot alone
+            logger.warning("no sample has a flight: dispersion.png not written")
+        if args.hole:
+            hole_cfg = load_dispersion_hole_settings(preset=args.hole_preset)
+            base = sd.run_dispersion(swing, export, [sd.nominal_setup(cfg)])
+            nominal = base.outcomes[0] if base.available else None
+            if nominal is None:
+                logger.warning("hole still without the nominal shot: no flight")
+            path = args.out / "dispersion_hole.png"
+            write_dispersion_hole(result, cfg, path, hole_cfg, units, nominal)
     except (ValueError, FileNotFoundError) as exc:
         sys.stderr.write(f"error: {exc}\n")
         return 2

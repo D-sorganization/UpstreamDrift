@@ -34,15 +34,29 @@ class TargetFlight:
 
 @dataclass(frozen=True)
 class HoleShot:
-    """One shot in hole coordinates: ``path_m`` is (n, 3) starting on the tee."""
+    """One shot in hole coordinates: ``path_m`` is (n, 3) starting on the tee.
+
+    The optional roll (#15443) is the ground segment from the landing point; its
+    offset is in the hole's (down-range, left) axes and all three are set or none.
+    """
 
     label: str
     colour: Colour
     path_m: Any
     carry_m: float
     side_m: float
+    roll_m: float | None = None  # ground roll after landing [m]
+    total_m: float | None = None  # carry plus roll [m]
+    roll_offset_m: tuple[float, float] | None = None  # (down-range, left) [m]
 
     def __post_init__(self) -> None:
+        roll = (self.roll_m, self.total_m, self.roll_offset_m)
+        if any(r is None for r in roll) and not all(r is None for r in roll):
+            raise ValueError("roll_m, total_m and roll_offset_m are set together")
+        if self.roll_m is not None and not (
+            math.isfinite(self.roll_m) and self.roll_m >= 0.0
+        ):
+            raise ValueError("roll must be finite and not negative")
         path = np.asarray(self.path_m, dtype=float)
         if path.ndim != 2 or path.shape[1] != 3 or len(path) < 2:
             raise ValueError(f"path must be (n>=2, 3), got {path.shape}")

@@ -1414,6 +1414,18 @@
       "evidence": "src/tools/drift_control/__init__.py",
       "acceptance_owner": "tests/config/test_registry_exclusions.py"
     },
+    "swing_report_package": {
+      "id": "swing_report_package",
+      "name": "Tools Package: swing_report_package",
+      "entity_kind": "cli_tool",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "intentionally_headless",
+      "alias_target": null,
+      "evidence": "src/tools/swing_report_package/__init__.py",
+      "acceptance_owner": "tests/config/test_registry_exclusions.py"
+    },
     "sg_optimizer": {
       "id": "sg_optimizer",
       "name": "Tools Package: sg_optimizer",
@@ -1846,6 +1858,18 @@
       "evidence": "src/launchers/mcp_config_writer.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
+    "launcher.min_maturity": {
+      "id": "launcher.min_maturity",
+      "name": "Launcher min_maturity filter",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/shared/python/config/maturity_scale.py",
+      "acceptance_owner": "tests/config/test_maturity_scale.py"
+    },
     "launcher.tile_grid": {
       "id": "launcher.tile_grid",
       "name": "Launcher tile grid from shared manifest",
@@ -2098,6 +2122,18 @@
       "evidence": "src/tools/golf_simulator/gui.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
+    "tools.golf_environment": {
+      "id": "tools.golf_environment",
+      "name": "Golf Environment",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/golf_environment/gui.py",
+      "acceptance_owner": "tests/config/feature_parity/test_registry.py"
+    },
     "tools.launch_monitor_analytics": {
       "id": "tools.launch_monitor_analytics",
       "name": "Launch-monitor import, interdependency analysis, monitor comparison, dispersion, and longitudinal trends",
@@ -2181,6 +2217,42 @@
       "alias_target": null,
       "evidence": "src/tools/model_explorer/results_playback_panel.py",
       "acceptance_owner": "tests/ui/explorer/test_results_playback_panel.py"
+    },
+    "tools.model_explorer.results_playback_ball": {
+      "id": "tools.model_explorer.results_playback_ball",
+      "name": "Ball, ball flight, shot shape and aim line in live results playback",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/tools/model_explorer/playback_ball_overlay.py",
+      "acceptance_owner": "tests/ui/explorer/test_playback_ball_controls.py"
+    },
+    "tools.model_explorer.playback_shot_card": {
+      "id": "tools.model_explorer.playback_shot_card",
+      "name": "Model Explorer Shot card: impact factors and ball flight beside the playback",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/tools/model_explorer/playback_flight_panel.py",
+      "acceptance_owner": "tests/ui/explorer/test_playback_flight_card.py"
+    },
+    "tools.model_explorer.run_simulation_dock": {
+      "id": "tools.model_explorer.run_simulation_dock",
+      "name": "Model Explorer Run Simulation dock",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/tools/model_explorer/run_dock.py",
+      "acceptance_owner": "tests/ui/explorer/test_run_dock.py"
     },
     "tools.motion_matching": {
       "id": "tools.motion_matching",
@@ -2349,6 +2421,114 @@
       "alias_target": null,
       "evidence": "src/shared/python/ui/anatomical_event_table_widget.py",
       "acceptance_owner": "tests/unit/anatomical_angles/test_event_table_view.py"
+    },
+    "simulation.ball_flight_simulator": {
+      "id": "simulation.ball_flight_simulator",
+      "name": "Ball Flight Simulator tool",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/ball_flight_gui/gui.py",
+      "acceptance_owner": "tests/api/test_routes_ball_flight.py"
+    },
+    "sidekick.chat_panel": {
+      "id": "sidekick.chat_panel",
+      "name": "Sidekick chat assistant panel",
+      "entity_kind": "feature",
+      "primary_workspace": "governance",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/shared/python/ai/gui/assistant_panel.py",
+      "acceptance_owner": "tests/unit/shared_python/test_assistant_panel_rust_paths.py"
+    },
+    "simulation.swing_flight_pipeline": {
+      "id": "simulation.swing_flight_pipeline",
+      "name": "Swing-to-flight pipeline tool",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/swing_flight_pipeline/gui.py",
+      "acceptance_owner": "tests/tools/swing_flight_pipeline/test_async_actions.py"
+    },
+    "matching.tour_matching_viewer": {
+      "id": "matching.tour_matching_viewer",
+      "name": "Tour matching viewer",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/tour_matching_viewer/__main__.py",
+      "acceptance_owner": "tests/tools/tour_matching_viewer/test_best_candidate_viewer.py"
+    },
+    "tools.training_controller": {
+      "id": "tools.training_controller",
+      "name": "Training controller tool",
+      "entity_kind": "feature",
+      "primary_workspace": "training",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/training_controller/__main__.py",
+      "acceptance_owner": "tests/tools/training_controller/test_controller.py"
+    },
+    "biomech.physics_informed_models": {
+      "id": "biomech.physics_informed_models",
+      "name": "Physics-informed biomechanics models",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "confirmed_prototype",
+      "alias_target": null,
+      "evidence": "src/config/models.yaml",
+      "acceptance_owner": "tests/config/feature_parity/test_registry.py"
+    },
+    "tools.config_setup_wizard": {
+      "id": "tools.config_setup_wizard",
+      "name": "Configuration setup wizard",
+      "entity_kind": "feature",
+      "primary_workspace": "governance",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "exempt",
+      "alias_target": null,
+      "evidence": "src/tools/config_setup_wizard/_embed_adapter.py",
+      "acceptance_owner": "tests/config/feature_parity/test_registry.py"
+    },
+    "dev.pose_subscriber_demo": {
+      "id": "dev.pose_subscriber_demo",
+      "name": "Pose subscriber developer demo",
+      "entity_kind": "feature",
+      "primary_workspace": "governance",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "exempt",
+      "alias_target": null,
+      "evidence": "src/tools/pose_subscriber_demo/__main__.py",
+      "acceptance_owner": "tests/config/feature_parity/test_registry.py"
+    },
+    "external.sibling_repository_tiles": {
+      "id": "external.sibling_repository_tiles",
+      "name": "Tiles that open sibling model repositories",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "exempt",
+      "alias_target": null,
+      "evidence": "src/config/models.yaml",
+      "acceptance_owner": "tests/config/feature_parity/test_registry.py"
     }
   },
   "fixtures": {

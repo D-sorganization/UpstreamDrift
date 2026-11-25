@@ -15,7 +15,7 @@ Profile (owner decision, #12686): a generic STIFF flex, flagged
 toward the tip so the linear density stays the club's (shaft mass over the
 exposed span, which keeps the chain's mass identical to the rigid club). The
 modulus is calibrated so the clamped shaft plus head vibrates at the
-``SHAFT_FLEX_DATA`` frequency of the flex (STIFF: 280 cpm) in the standard
+``SHAFT_FLEX_DATA`` frequency of the flex (STIFF: 258 cpm) in the standard
 5 in butt clamp. The stations are the vendored Tools ``ShaftStation`` records.
 
 Lumping rule (midpoint): the exposed span ``L`` is cut into ``N`` equal
@@ -30,6 +30,30 @@ partitioned exactly, so mass, centre of mass and inertia equal the rigid
 club's. Joint damping is stiffness proportional, ``c_i = beta k_i`` with
 ``beta = 2 zeta / omega_1``, ``omega_1`` the FEM first bending frequency of
 the grip-clamped span with the head.
+
+Lumping rule (``tip_slope_exact``, option ``lumping``, #15150 C14): the
+joints stay at the segment midpoints but each compliance is chosen so a static
+tip load gives the continuum tip slope exactly at the same ``N``. For a
+cantilever with tip load ``P`` the slope is ``P int_0^L (L - s)/EI(s) ds``;
+joint ``i`` carries the moment ``P (L - s_i)`` and turns by ``P (L - s_i)/k_i``.
+Equating segment by segment gives ``1/k_i = [int_seg_i (L - s)/EI ds] /
+(L - s_i)`` and the sum over the joints is the exact slope (``L - s_i > 0``
+because ``s_i`` is a midpoint). In torsion the twist under a tip torque ``T``
+is ``T int_0^L ds/GJ``, so ``1/k_i = int_seg_i ds/GJ`` is exact. The integrals
+use ``LUMPING_QUADRATURE_POINTS`` Gauss-Legendre points on every piece between
+the segment edges and the profile stations (the profile is piecewise linear,
+so each piece of ``1/EI`` is smooth). Tip deflection is not made exact by this
+rule. ``midpoint`` stays the default so existing bundles are unchanged.
+
+Torque rating (option ``torque_rating_deg``, #15150 C17): by default the
+torsion springs come from the bending calibration through the isotropic
+``G = E / 2(1 + nu)``, so twist is tied to flex. Shafts are sold with an
+independent torque rating, the twist in degrees under 1 ft lbf
+(``TORQUE_RATING_TEST_N_M``). With a rating the springs are scaled by one
+common factor so ``T sum_i 1/k_i`` equals the rating over the flexible span:
+the ``GJ`` distribution along the shaft is kept, bending is untouched, and
+the rating holds whatever the flex or ``stiffness_scale``. The span is the
+exposed shaft from the grip end, not the butt clamp of a rating bench.
 
 Frames: every link body uses the club body frame (shaft along ``-y`` from the
 head to the grip, origin at the head); at zero deflection all link frames
@@ -66,6 +90,18 @@ from src.shared.python.motion_matching.club_models import (
 
 SHAFT_MODELS: tuple[str, ...] = ("rigid", "chain")
 DEFAULT_SHAFT_MODEL = "rigid"
+#: Lumping rules of ``build_shaft_chain`` (``midpoint`` is the default).
+LUMPING_RULES: tuple[str, ...] = ("midpoint", "tip_slope_exact")
+DEFAULT_LUMPING = "midpoint"
+#: Torque of the shaft torque-rating test: 1 ft lbf at the tip (#15150 C17).
+TORQUE_RATING_TEST_N_M = 1.3558179483314004
+#: Torque ratings ``build_shaft_chain`` accepts (degrees under the test
+#: torque): a validity window around the published driver range (roughly
+#: 2.5-7 degrees; tour shafts near 3, light senior and ladies shafts near
+#: 6-7), not a fitted value.
+TORQUE_RATING_RANGE_DEG = (1.0, 12.0)
+#: Gauss-Legendre points per smooth piece of the compliance integrals.
+LUMPING_QUADRATURE_POINTS = 8
 #: Engines whose spec adapters apply the chain's joint springs and pass the
 #: chain parity gate (MuJoCo #12686; OpenSim, MyoSuite, Drake and Pinocchio
 #: #12691).
@@ -185,6 +221,8 @@ SHAFT_OPTION_FLAGS: dict[str, str] = {
     "flex": "--shaft-flex",
     "stiffness_scale": "--shaft-stiffness-scale",
     "n_links": "--shaft-links",
+    "lumping": "--shaft-lumping",
+    "torque_rating_deg": "--shaft-torque-rating",
 }
 
 
@@ -212,7 +250,7 @@ def checked_shaft_options(
 
 
 def add_shaft_arguments(parser: Any) -> None:
-    """Add the chain flex, stiffness scale and link flags to ``parser``.
+    """Add the chain flex, stiffness scale, link and lumping flags to ``parser``.
 
     Every flag defaults to ``None`` (not given), so a command line without
     them builds the default chain.
@@ -221,6 +259,14 @@ def add_shaft_arguments(parser: Any) -> None:
         "flex": {"choices": flex_ratings(), "help": "chain flex rating"},
         "stiffness_scale": {"type": float, "help": "multiplies every chain spring"},
         "n_links": {"type": int, "help": f"chain links (default {DEFAULT_LINKS})"},
+        "lumping": {
+            "choices": LUMPING_RULES,
+            "help": f"spring lumping rule (default {DEFAULT_LUMPING})",
+        },
+        "torque_rating_deg": {
+            "type": float,
+            "help": "shaft torque rating, degrees under 1 ft lbf (adds torsion)",
+        },
     }
     for key, flag in SHAFT_OPTION_FLAGS.items():
         parser.add_argument(flag, dest=f"shaft_{key}", default=None, **settings[key])
@@ -382,6 +428,59 @@ def station_profile(properties: Any, club: ClubSpec) -> Any:
 # --- chain parameters --------------------------------------------------------
 
 
+def _segment_integrals(
+    profile: Any, span_m: float, n_links: int, weight: Any, key: str
+) -> list[float]:
+    """``int_seg weight(s) / key(s) ds`` for each of ``n_links`` equal segments.
+
+    ``key`` names the station attribute (``ei_about_x_n_m2`` or ``gj_n_m2``),
+    linearly interpolated by the profile. Every segment is split at the
+    profile stations so the integrand is smooth on each piece.
+    """
+    stations = np.array([st.position_m for st in profile.stations])
+    values = np.array([getattr(st, key) for st in profile.stations])
+    nodes, weights = np.polynomial.legendre.leggauss(LUMPING_QUADRATURE_POINTS)
+    edges = np.linspace(0.0, span_m, n_links + 1)
+    result = []
+    for lo, hi in zip(edges[:-1], edges[1:], strict=True):
+        cuts = np.concatenate(([lo], stations[(stations > lo) & (stations < hi)], [hi]))
+        total = 0.0
+        for a, b in zip(cuts[:-1], cuts[1:], strict=True):
+            s = 0.5 * (b - a) * nodes + 0.5 * (a + b)
+            total += (
+                0.5
+                * (b - a)
+                * float(np.sum(weights * weight(s) / np.interp(s, stations, values)))
+            )
+        result.append(total)
+    return result
+
+
+def _midpoint_springs(
+    profile: Any, joints: tuple[float, ...], ds: float
+) -> tuple[list[float], list[float]]:
+    stations = [profile.station_at(s) for s in joints]
+    return (
+        [st.ei_about_x_n_m2 / ds for st in stations],
+        [st.gj_n_m2 / ds for st in stations],
+    )
+
+
+def _tip_slope_springs(
+    profile: Any, joints: tuple[float, ...], span_m: float
+) -> tuple[list[float], list[float]]:
+    """Springs whose static tip slope and tip twist are the continuum's."""
+    n = len(joints)
+    bend = _segment_integrals(
+        profile, span_m, n, lambda s: span_m - s, "ei_about_x_n_m2"
+    )
+    twist = _segment_integrals(profile, span_m, n, lambda s: 1.0, "gj_n_m2")
+    return (
+        [(span_m - s) / c for s, c in zip(joints, bend, strict=True)],
+        [1.0 / c for c in twist],
+    )
+
+
 def build_shaft_chain(
     club: ClubSpec,
     n_links: int = DEFAULT_LINKS,
@@ -389,42 +488,114 @@ def build_shaft_chain(
     flex: str = DEFAULT_FLEX,
     torsion: bool = False,
     stiffness_scale: float = 1.0,
+    lumping: str = DEFAULT_LUMPING,
+    torque_rating_deg: float | None = None,
 ) -> ShaftChain:
-    """Lump the calibrated profile into ``n_links`` links (midpoint rule).
+    """Lump the calibrated profile into ``n_links`` links.
 
-    ``stiffness_scale`` multiplies every spring (the rigid-limit check uses
-    1e6); damping scales with its square root so modal damping ratios stay.
+    ``lumping`` is ``"midpoint"`` (``k_i = EI(s_i)/ds``, the default) or
+    ``"tip_slope_exact"`` (exact continuum tip slope and twist at the same
+    ``n_links``; see the module docstring). ``stiffness_scale`` multiplies
+    every spring (the rigid-limit check uses 1e6); damping scales with its
+    square root so modal damping ratios stay.
+
+    ``torque_rating_deg`` (#15150 C17) sets the torsion springs from the
+    shaft's torque rating instead of the bending flex: the span twists that
+    many degrees under :data:`TORQUE_RATING_TEST_N_M`, the springs keep
+    their ``GJ`` distribution, and ``stiffness_scale`` no longer applies to
+    them. A rating adds the torsion springs (``torsion`` is implied).
+
+    Raises:
+        ValueError: ``n_links``, ``stiffness_scale``, ``lumping`` or
+            ``torque_rating_deg`` (outside :data:`TORQUE_RATING_RANGE_DEG`)
+            invalid.
     """
+    if lumping not in LUMPING_RULES:
+        raise ValueError(f"unknown lumping {lumping!r}; known {LUMPING_RULES}")
     if isinstance(n_links, bool) or not isinstance(n_links, int) or n_links < 1:
         raise ValueError("n_links must be a positive integer")
     if not (math.isfinite(stiffness_scale) and stiffness_scale > 0):
         raise ValueError("stiffness_scale must be finite and positive")
+    if torque_rating_deg is not None:
+        low, high = TORQUE_RATING_RANGE_DEG
+        if not (math.isfinite(torque_rating_deg) and low <= torque_rating_deg <= high):
+            raise ValueError(
+                f"torque_rating_deg must be in {TORQUE_RATING_RANGE_DEG}, "
+                f"got {torque_rating_deg}"
+            )
+        torsion = True
     properties = span_properties(club, flex)
     profile = station_profile(properties, club)
     ds = properties.length / n_links
     joints = tuple((i + 0.5) * ds for i in range(n_links))
-    stations = [profile.station_at(s) for s in joints]
-    bend = tuple(stiffness_scale * st.ei_about_x_n_m2 / ds for st in stations)
-    twist = (
-        tuple(stiffness_scale * st.gj_n_m2 / ds for st in stations) if torsion else ()
-    )
+    if lumping == "midpoint":
+        bend_k, twist_k = _midpoint_springs(profile, joints, ds)
+    else:
+        bend_k, twist_k = _tip_slope_springs(profile, joints, properties.length)
+    bend = tuple(stiffness_scale * k for k in bend_k)
+    twist = tuple(stiffness_scale * k for k in twist_k) if torsion else ()
+    if torque_rating_deg is not None:
+        twist = rated_twist_springs(twist_k, torque_rating_deg)
     omega = 2.0 * math.pi * float(clamped_head_frequencies(properties, club)[0])
     beta = 2.0 * DAMPING_RATIO / omega / math.sqrt(stiffness_scale)
     bounds = tuple(
         (s, joints[i + 1] if i + 1 < n_links else properties.length)
         for i, s in enumerate(joints)
     )
-    record = _chain_record(club, n_links, properties, (flex, torsion, stiffness_scale))
+    record = _chain_record(
+        club, n_links, properties, (flex, torsion, stiffness_scale), lumping
+    )
+    if torque_rating_deg is not None:  # the default record stays byte-identical
+        record["torque_rating"] = {
+            "degrees": torque_rating_deg,
+            "test_torque_n_m": TORQUE_RATING_TEST_N_M,
+            "rule": "torsion springs scaled so the span twist under the test "
+            "torque equals the rating; GJ distribution kept",
+        }
     return ShaftChain(
         club, n_links, joints, bounds, bend, twist, beta, stiffness_scale, record
     )
 
 
+def rated_twist_springs(
+    springs: Sequence[float], torque_rating_deg: float
+) -> tuple[float, ...]:
+    """``springs`` (N m/rad, in series) scaled so the chain twists
+    ``torque_rating_deg`` degrees under :data:`TORQUE_RATING_TEST_N_M`.
+
+    Postcondition: ``TORQUE_RATING_TEST_N_M * sum(1/k)`` equals the rating
+    in radians and the ratios between the springs are unchanged.
+
+    Raises:
+        ValueError: no springs, a non-positive spring or a non-positive rating.
+    """
+    if not springs or not all(math.isfinite(k) and k > 0 for k in springs):
+        raise ValueError("torsion springs must be finite and positive")
+    if not (math.isfinite(torque_rating_deg) and torque_rating_deg > 0):
+        raise ValueError("torque_rating_deg must be finite and positive")
+    twist_rad = TORQUE_RATING_TEST_N_M * sum(1.0 / k for k in springs)
+    factor = twist_rad / math.radians(torque_rating_deg)
+    return tuple(factor * k for k in springs)
+
+
+_LUMPING_TEXT = {
+    "midpoint": "midpoint joints s_i=(i+1/2)L/N, k_i=EI(s_i)/(L/N), c_i=beta k_i",
+    "tip_slope_exact": (
+        "midpoint joints s_i=(i+1/2)L/N, 1/k_i=int_seg (L-s)/EI ds/(L-s_i) "
+        "(exact tip slope), torsion 1/k_i=int_seg ds/GJ, c_i=beta k_i"
+    ),
+}
+
+
 def _chain_record(
-    club: ClubSpec, n_links: int, properties: Any, options: tuple[str, bool, float]
+    club: ClubSpec,
+    n_links: int,
+    properties: Any,
+    options: tuple[str, bool, float],
+    lumping: str = DEFAULT_LUMPING,
 ) -> dict[str, Any]:
     flex, torsion, scale = options
-    return {
+    record = {
         "model": "chain",
         "n_links": n_links,
         "torsion": torsion,
@@ -443,10 +614,13 @@ def _chain_record(
             "damping_ratio": DAMPING_RATIO,
         },
         "span_m": properties.length,
-        "lumping": "midpoint joints s_i=(i+1/2)L/N, k_i=EI(s_i)/(L/N), c_i=beta k_i",
+        "lumping": _LUMPING_TEXT[lumping],
         "axes": "Rx, Rz bending about club x, z; Ry torsion; links in club frame",
         "sources": list(SOURCES),
     }
+    if lumping != DEFAULT_LUMPING:  # the default record stays byte-identical
+        record["lumping_rule"] = lumping
+    return record
 
 
 # --- specification transform --------------------------------------------------

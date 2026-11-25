@@ -45,16 +45,26 @@ from src.shared.python.impact_parameters.panel_model import ImpactCard
 from src.tools.native_viewer_export.compositor import (
     HudInfo,
     compose_grid,
+    draw_colour_key,
     draw_hud,
     draw_view_label,
     event_caption_for_time,
 )
-from src.tools.native_viewer_export import contact_frame, flight_tracer, shot_setup
+from src.tools.native_viewer_export import contact_frame, flight_tracer, replay_mode
+from src.tools.native_viewer_export import shot_setup
 from src.tools.native_viewer_export import ellipsoid_panel as ellipsoid_hud
-from src.tools.native_viewer_export import flight_inset
+from src.tools.native_viewer_export import dispersion_traces, flight_inset, hole_view
+from src.tools.native_viewer_export.frame_times import write_frame_times
+from src.tools.native_viewer_export.behind_camera import look_map, view_lookat
 from src.tools.native_viewer_export import impact_factors as factors_panel
 from src.tools.native_viewer_export.impact_card import impact_card_for
-from src.tools.native_viewer_export.shading import shading_legend
+from src.tools.native_viewer_export.overlay_feed import (  # noqa: F401 - re-export
+    BODY_WEIGHT_ARROW_M,
+    STANDARD_GRAVITY_M_S2,
+    OverlayFeed,
+    default_glyph_style,
+)
+from src.tools.native_viewer_export.shading import shading_colour_key, shading_legend
 from src.tools.native_viewer_export.inset_strip import (
     StripRenderer,
     StripSeries,
@@ -159,6 +169,7 @@ class ExportSettings:
     distance_m: float | None = None
     lookat_explicit: bool = False  # lookat_m beats the automatic look-at
     lookat_height_m: float | None = None  # replaces only the automatic height
+    behind_anchor_m: tuple[float, float, float] | None = None  # behind views
     #: resolved appearance-v1 document (``resolve_appearance``: CLI override, then
     #: document / sidecar, then contract defaults); ``None`` = contract defaults
     appearance: dict[str, Any] | None = None
@@ -579,192 +590,6 @@ def frame_indices(n_states: int, stride: int) -> list[int]:
     return idx
 
 
-STANDARD_GRAVITY_M_S2 = 9.80665
-BODY_WEIGHT_ARROW_M = 0.5
-
-
-def default_glyph_style(body_mass_kg: float | None = None) -> ForceGlyphStyle:
-    """Golfer-scale glyph style.
-
-    With ``body_mass_kg`` the force arrows use ``body_weight`` scaling so one
-    body weight is ``BODY_WEIGHT_ARROW_M`` (0.5 m) long, with a 3 m ceiling
-    (6 BW) so a driver swing is never silently clamped. Torque arcs are
-    capped at 0.6 m length (0.30 m radius) to prevent oversized arcs near
-    impact (NV-9, #11697). Without body mass the fixed 0.7 m per kN scale is kept.
-
-    Raises ``ValueError`` when ``body_mass_kg`` is not finite and positive.
-    """
-    if body_mass_kg is None:
-        return ForceGlyphStyle(
-            force_scale_m_per_n=0.7 / 1000.0,
-            torque_scale_m_per_nm=0.5 / 250.0,
-            max_length_m=0.9,
-            max_torque_length_m=0.6,
-            min_length_m=0.04,
-            shaft_radius_m=0.015,
-            magnitude_floor_nm=8.0,
-            magnitude_floor_n=20.0,
-        )
-    if not math.isfinite(body_mass_kg) or body_mass_kg <= 0.0:
-        raise ValueError(
-            f"body_mass_kg must be finite and positive, got {body_mass_kg}"
-        )
-    return ForceGlyphStyle(
-        scale_mode="body_weight",
-        reference_force_n=body_mass_kg * STANDARD_GRAVITY_M_S2,
-        reference_length_m=BODY_WEIGHT_ARROW_M,
-        torque_scale_m_per_nm=0.5 / 250.0,
-        max_length_m=3.0,
-        max_torque_length_m=0.6,
-        min_length_m=0.04,
-        shaft_radius_m=0.015,
-        magnitude_floor_nm=8.0,
-        magnitude_floor_n=20.0,
-    )
-
-
-@dataclass
-class OverlayFeed:
-    """Glyph sets by state index, built lazily from an overlay provider.
-
-    Frames are cached per index: a frame may need an engine solve (the grip
-    wrench), and both the glyphs and the tracked camera read it.
-    """
-
-    frame_at: Callable[[int], Any]
-    style: ForceGlyphStyle = field(default_factory=default_glyph_style)
-    build: Callable[[Any, ForceGlyphStyle], GlyphSet] | None = None
-    #: grip analyses at given indices (set when the grip overlay is enabled)
-    grip_analyses: Callable[[Sequence[int]], list[Any]] | None = None
-    #: glyph kinds drawn; the frame (and its axial loads) is never restricted
-    show_force: bool = True
-    show_torque: bool = True
-    #: the allocated palm-on-thumb arrow (``PALM_THUMB_LABEL``), drawn only when
-    #: set and independent of ``show_force``/``show_torque``
-    show_palm_thumb: bool = False
-    #: hand capability/mobility ellipsoids generator (HCM-3, #14004)
-    hand_ellipsoids: Callable[[int], tuple[Any, ...]] | None = None
-    #: hand capability/mobility HUD text lines generator (HCM-3, #14004)
-    hand_hud_lines: Callable[[int], tuple[str, ...]] | None = None
-    hand_panel_rows: Callable[[int], tuple[Any, ...]] | None = (
-        None  # PanelRow per frame
-    )
-    #: ``(hand_ellipsoids, hand_hud_lines, hand_panel_rows)`` at the poses of a swing
-    ellipsoids_for: Callable[[Any], tuple[Any, Any, Any]] | None = None
-    #: HUD note when force/torque vectors are withheld (``kinematic_replay``)
-    forces_note: str = ""
-    _frames: dict[int, Any] = field(
-        default_factory=dict, init=False, repr=False, compare=False
-    )
-
-    def _frame(self, index: int) -> Any:
-        if index not in self._frames:
-            self._frames[index] = self.frame_at(index)
-        return self._frames[index]
-
-    def following(self, swing: Any, source_index: Callable[[int], int]) -> OverlayFeed:
-        """This feed for the frames of ``swing``, a re-sampling of its source (#15150).
-
-        Frame ``k`` reads the source frame ``source_index(k)`` (forces are not
-        interpolated); ellipsoids are evaluated at the pose of ``swing`` state
-        ``k``, so they sit on the body that frame shows. Raises ``ValueError``
-        when the feed has ellipsoids it cannot evaluate at another swing.
-        """
-        source = self.frame_at
-        feed = replace(self, frame_at=lambda i: source(source_index(int(i))))
-        if self.hand_ellipsoids is None and self.hand_hud_lines is None:
-            return feed
-        if self.ellipsoids_for is None:
-            raise ValueError(
-                "the overlay feed has ellipsoids indexed by source state and no "
-                "ellipsoids_for to evaluate them at the clip frames"
-            )
-        glyphs, lines, rows = self.ellipsoids_for(swing)
-        return replace(
-            feed, hand_ellipsoids=glyphs, hand_hud_lines=lines, hand_panel_rows=rows
-        )
-
-    def held_after(self, last: int) -> OverlayFeed:
-        """This feed repeating frame ``last`` (glyphs and HUD) at every later index."""
-
-        def clamp(fn: Any) -> Any:
-            return None if fn is None else (lambda i: fn(min(int(i), last)))
-
-        return replace(
-            self,
-            frame_at=clamp(self.frame_at),
-            hand_ellipsoids=clamp(self.hand_ellipsoids),
-            hand_hud_lines=clamp(self.hand_hud_lines),
-            hand_panel_rows=clamp(self.hand_panel_rows),
-        )
-
-    def glyphs_at(self, index: int) -> GlyphSet:
-        build = self.build
-        if build is None:
-            from src.shared.python.force_overlay.glyphs import build_glyphs
-
-            build = build_glyphs
-        frame = self._frame(index)
-        allocated = tuple(
-            w
-            for w in frame.wrenches
-            if w.label == PALM_THUMB_LABEL
-            or (w.label.startswith("external:") and w.label.endswith("_allocated"))
-        )
-        if allocated:
-            frame = replace(
-                frame, wrenches=tuple(w for w in frame.wrenches if w not in allocated)
-            )
-        if not (self.show_force and self.show_torque):
-            frame = restrict_frame(
-                frame, show_force=self.show_force, show_torque=self.show_torque
-            )
-        if allocated and self.show_palm_thumb:
-            frame = replace(frame, wrenches=(*frame.wrenches, *allocated))
-        gs = build(frame, self.style)
-        if self.hand_ellipsoids is not None:
-            extra_e = self.hand_ellipsoids(index)
-            if extra_e:
-                gs = replace(gs, ellipsoids=(*gs.ellipsoids, *extra_e))
-        return gs
-
-    def hud_lines_at(self, index: int) -> tuple[str, ...]:
-        """HUD capability/mobility text lines at frame ``index`` (HCM-3, #14004),
-        then the forces note."""
-        lines = () if self.hand_hud_lines is None else self.hand_hud_lines(index)
-        return (*lines, self.forces_note) if self.forces_note else lines
-
-    def axial_at(self, index: int) -> Any:
-        """``AxialLoadFrame`` of state ``index``, or ``None`` when not computed."""
-        return getattr(self._frame(index), "axial_loads", None)
-
-    def legend_for(self, glyphs: GlyphSet | None) -> str:
-        """The legend row; none on a replay that draws no vectors (#15150)."""
-        drawn = glyphs is not None and (glyphs.arrows or glyphs.torque_arcs)
-        return "" if self.forces_note and not drawn else self.legend(glyphs)
-
-    @staticmethod
-    def legend(glyphs: GlyphSet | None) -> str:
-        if glyphs is None:
-            return ""
-        text = legend_text(glyphs)
-        allocated_arrows = [
-            a
-            for a in glyphs.arrows
-            if a.label == PALM_THUMB_LABEL
-            or (a.label.startswith("external:") and a.label.endswith("_allocated"))
-        ]
-        if allocated_arrows:
-            if (
-                len(allocated_arrows) == 1
-                and allocated_arrows[0].label == PALM_THUMB_LABEL
-            ):
-                text += " | Palm-thumb force: allocated (not measured)"
-            else:
-                text += " | Hand-hand contact force: allocated (not measured)"
-        return text
-
-
 @functools.lru_cache(maxsize=4)
 def _club_pose_model(spec_bytes: bytes) -> Any:
     from src.tools.native_viewer_export.club_pose import ClubPoseModel
@@ -775,11 +600,8 @@ def _club_pose_model(spec_bytes: bytes) -> Any:
 def view_lookats(
     settings: ExportSettings, indices: Sequence[int], swing: Any
 ) -> dict[str, list[tuple[float, float, float]]]:
-    """Look-at point per view and frame (``indices`` order).
-
-    A tracking view (``hands_closeup``) follows ``swing.grip_midpoint_at``, the
-    kinematic grip midpoint from the club pose, so the path is the same with
-    the overlay on or off; a fixed view keeps ``settings.lookat_m``.
+    """Look-at per view and frame (``indices`` order): ``hands_closeup`` follows the
+    kinematic grip midpoint, a fixed view is ``view_lookat`` (sideways if behind).
 
     Raises ``ValueError`` if a tracking view is requested for a specification
     without a club.
@@ -797,7 +619,7 @@ def view_lookats(
                 ) from exc
         out[name] = tracked_lookats(
             preset,
-            settings.lookat_m,
+            view_lookat(name, settings),
             focus if focus is not None else [None] * len(indices),
         )
     return out
@@ -832,7 +654,7 @@ class ClipWriter(Protocol):
 WriterFactory = Callable[[Path, int], ClipWriter]
 
 
-def imageio_writer(path: Path, fps: int, crf: int = HQ_CRF) -> ClipWriter:
+def imageio_writer(path: Path, fps: float, crf: int = HQ_CRF) -> ClipWriter:
     """Default clip writer: libx264, ``yuv420p``, constant rate factor ``crf``."""
     import imageio.v2 as imageio
 
@@ -870,6 +692,8 @@ class ExportResult:
     #: inset strip record (``StripSeries.record()``) or the reason it is
     #: unavailable; None when the strip is off
     inset_strip: dict[str, Any] | str | None = None
+    #: how the motion was produced (``ReplayMode`` value), written to the manifest
+    replay_mode: str = "unknown_replay_mode"
 
     @property
     def skipped(self) -> bool:
@@ -1001,6 +825,56 @@ def _swing_event_caption(swing: SwingInput, time_s: float, impact_s: float) -> s
     return event_caption_for_time(time_s, fallback)
 
 
+def _hud_info(
+    shown: SwingInput,
+    settings: ExportSettings,
+    plan: ClipPlan,
+    feed: OverlayFeed | None,
+    glyphs: Any,
+    at: tuple[float, float],
+    viewer: str,
+    extra_lines: tuple[str, ...],
+) -> HudInfo:
+    """The HUD at clip time ``at = (t, impact time)`` for ``viewer``."""
+    t, impact = at
+    scale = settings.shading if settings.shading_enabled else None
+    return HudInfo(
+        t,
+        viewer,
+        shown.club,
+        feed.legend_for(glyphs) if feed is not None else OverlayFeed.legend(glyphs),
+        speed=plan.speed,
+        ms_from_impact=(t - impact) * 1000.0,
+        shading_legend=shading_legend(scale) if scale is not None else "",
+        event_caption=_swing_event_caption(shown, t, impact)
+        if settings.event_captions
+        else "",
+        extra_lines=extra_lines,
+    )
+
+
+def _key_entries(
+    feed: OverlayFeed | None, settings: ExportSettings, flight: Any = None
+) -> tuple:
+    """Colour key rows of the clip: the feed's, the shading's, then the
+    dispersion samples and nominal shot of ``flight`` (when it has samples)."""
+    scale = settings.shading
+    spread = None if flight is None else flight.dispersion
+    return (
+        *(feed.colour_key if feed is not None else ()),
+        *(
+            shading_colour_key(scale)
+            if scale is not None and settings.shading_enabled
+            else ()
+        ),
+        *(
+            ()
+            if spread is None
+            else spread.key_entries(flight.settings.tracer_color_rgba)
+        ),
+    )
+
+
 def _export_clip(
     backend: NativeBackend,
     swing: SwingInput,
@@ -1030,6 +904,8 @@ def _export_clip(
     writers: dict[str, ClipWriter] = {}
     glyph_counts: list[int] = []
     viewer = VIEWER_NAMES.get(engine, engine)
+    fixed = (*shot_setup.hud_lines(settings), replay_mode.hud_line_of(swing.bundle))
+    key_entries = _key_entries(shown_feed, settings, flight)
     frames = 0
     try:
         for k, tiles in zip(
@@ -1041,29 +917,21 @@ def _export_clip(
             if glyphs is not None:
                 glyph_counts.append(len(glyphs.arrows) + len(glyphs.torque_arcs))
             t = shown.time_s(k)
-            extra_lines = ellipsoid_hud.hud_lines(overlays, shown_feed, k)
-            extra_lines = (*extra_lines, *shot_setup.hud_lines(settings))
+            extra_lines = (*ellipsoid_hud.hud_lines(overlays, shown_feed, k), *fixed)
             if flight is not None:
                 depth = getattr(tiles, "depth_m", None)
-                args = (t, settings.lookat_m, settings.distance_m, depth)
+                args = (t, look_map(settings), settings.distance_m, depth)
                 tiles = flight.draw(tiles, *args)
                 extra_lines = (*extra_lines, *flight.hud_lines(t))
-            hud = HudInfo(
-                t,
+            hud = _hud_info(
+                shown,
+                settings,
+                plan,
+                shown_feed,
+                glyphs,
+                (t, impact),
                 viewer,
-                swing.club,
-                shown_feed.legend_for(glyphs)
-                if shown_feed is not None
-                else OverlayFeed.legend(glyphs),
-                speed=plan.speed,
-                ms_from_impact=(t - impact) * 1000.0,
-                shading_legend=shading_legend(settings.shading)
-                if settings.shading is not None and settings.shading_enabled
-                else "",
-                event_caption=_swing_event_caption(shown, t, impact)
-                if settings.event_captions
-                else "",
-                extra_lines=extra_lines,
+                extra_lines,
             )
             labelled = {
                 v: draw_view_label(tiles[v], get_view_preset(v).label)
@@ -1085,6 +953,10 @@ def _export_clip(
                 outputs = factors_panel.draw_card_all(outputs, card, GRID_VIEW)
             if factors is not None:
                 outputs = factors.draw_all(outputs, t, GRID_VIEW)
+            if settings.hud and key_entries:
+                outputs = {
+                    n: draw_colour_key(f, key_entries) for n, f in outputs.items()
+                }
             outputs = ellipsoid_hud.draw_all(overlays, shown_feed, k, hud, outputs)
             outputs = flight_inset.draw_all(overlays, shown_feed, k, hud, outputs)
             if strip is not None:  # cursor at this frame's swing time
@@ -1100,7 +972,33 @@ def _export_clip(
             writer.close()
     if frames != len(indices):
         raise RuntimeError(f"backend yielded {frames} frames, expected {len(indices)}")
+    write_frame_times(paths, [shown.time_s(k) for k in indices])
     return paths, frames, glyph_counts
+
+
+def prepare_shot(
+    swing: SwingInput, settings: ExportSettings, limitation: str | None = None
+) -> tuple[SwingInput, ExportSettings, dict[str, Any] | None]:
+    """``swing`` set up for its shot: shape solved, club rolled, ball placed.
+
+    Returns the swing (club roll applied, ball attached and hidden from the
+    contact instant), the settings (solved roll, contact ``impact_time_s``)
+    and the ball manifest record. Shared by the export and the live playback
+    overlay (#15150), so both show the same ball and shot.
+    """
+    from src.tools.native_viewer_export.ball import attach_ball
+
+    settings, setup_record = shot_setup.solve_shot_shape(swing, settings)
+    swing = shot_setup.apply_club_roll(swing, settings.club_roll_in_hands_deg)
+    swing, ball_record = attach_ball(swing, settings, limitation)
+    ball_record = shot_setup.with_setup_record(ball_record, setup_record)
+    if settings.impact_time_s is not None or swing.has_impact_provenance:
+        swing, contact = contact_frame.refine(swing, impact_time_s(swing, settings))
+        if contact is not None:  # frames, HUD and panels count from contact
+            settings = replace(settings, impact_time_s=contact)
+            if ball_record is not None and "hide_after_s" in ball_record:
+                ball_record = {**ball_record, "hide_after_s": contact}
+    return swing, settings, ball_record
 
 
 def export_swing(
@@ -1124,20 +1022,10 @@ def export_swing(
     if reason is not None:
         return ExportResult(engine, {}, 0, skipped_reason=reason)
     out_dir = Path(out_dir)
-    from src.tools.native_viewer_export.ball import attach_ball
-
-    settings, setup_record = shot_setup.solve_shot_shape(swing, settings)
-    swing = shot_setup.apply_club_roll(swing, settings.club_roll_in_hands_deg)
-    swing, ball_record = attach_ball(
+    raw_swing, raw_settings = swing, settings  # the dispersion samples' input
+    swing, settings, ball_record = prepare_shot(
         swing, settings, getattr(backend, "ball_limitation", None)
     )
-    ball_record = shot_setup.with_setup_record(ball_record, setup_record)
-    if settings.impact_time_s is not None or swing.has_impact_provenance:
-        swing, contact = contact_frame.refine(swing, impact_time_s(swing, settings))
-        if contact is not None:  # frames, HUD and panels count from contact
-            settings = replace(settings, impact_time_s=contact)
-            if ball_record is not None and "hide_after_s" in ball_record:
-                ball_record = {**ball_record, "hide_after_s": contact}
     factors = None
     if settings.impact_factors is not None:
         factors, settings = factors_panel.factors_for_export(swing, settings)
@@ -1166,6 +1054,9 @@ def export_swing(
         else None
     )
     overlays = flight_tracer.attach_flight(overlays, swing, settings)
+    overlays = dispersion_traces.with_dispersion(
+        overlays, raw_swing, raw_settings, settings
+    )
     factors = overlays.factors if overlays is not None else factors
     overlays = ellipsoid_hud.with_panel(overlays, settings, feed, factors)
     for plan in plans:
@@ -1176,6 +1067,7 @@ def export_swing(
         paths.update(clip_paths)
         counts[plan.suffix] = frames
         glyph_counts.extend(glyphs)
+    paths.update(hole_view.write_still(overlays, out_dir, swing.swing, engine))
     return ExportResult(
         engine,
         paths,
@@ -1188,6 +1080,7 @@ def export_swing(
             else (outcome if isinstance(outcome, str) else None)
         ),
         ball=ball_record,
+        replay_mode=replay_mode.replay_mode_of(swing.bundle).value,
         flight=flight_tracer.manifest_record(overlays),
         inset_strip=(
             strip_outcome.record()

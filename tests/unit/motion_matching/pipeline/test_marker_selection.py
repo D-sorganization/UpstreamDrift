@@ -104,6 +104,32 @@ def test_a_selection_the_fit_cannot_honour_is_refused(preset, edit, match) -> No
         select_markers(document, CAPTURE_LABELS)
 
 
+@pytest.mark.parametrize(
+    "raw",
+    [{"HeadSide": False}, {}, 0, False, "[]", "", ("HeadSide",)],
+    ids=["dict", "empty-dict", "int", "bool", "stringified-list", "empty-str", "tuple"],
+)
+def test_dropped_markers_must_be_a_list_not_a_falsy_or_iterable_stand_in(
+    committed, raw
+) -> None:
+    """#15342: only a list (or an omitted / ``None`` value) is a label list."""
+    document = copy.deepcopy(committed)
+    document["subject"] = {"dropped_markers": raw}
+    with pytest.raises(ValueError, match="list of labels"):
+        select_markers(document, CAPTURE_LABELS)
+
+
+@pytest.mark.parametrize(
+    "subject", [{}, {"dropped_markers": None}, {"dropped_markers": []}]
+)
+def test_an_omitted_none_or_empty_dropped_markers_selects_nothing(
+    committed, subject
+) -> None:
+    document = copy.deepcopy(committed)
+    document["subject"] = subject
+    assert select_markers(document, CAPTURE_LABELS).dropped == ()
+
+
 def test_the_leg_seed_source_is_a_checked_setting(preset) -> None:
     with pytest.raises(ValueError, match="leg seed source"):
         select_markers(preset, CAPTURE_LABELS, "spec")

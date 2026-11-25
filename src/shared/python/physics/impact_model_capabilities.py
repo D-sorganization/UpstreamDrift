@@ -7,11 +7,13 @@ impact-interval solver (see ``impact_interval_audit.py``) can and cannot
 report, so that a caller can never attribute a capability - most importantly
 3D tangential spin - to a model that does not compute it.
 
-The ``spring_damper`` model is the deliberate trap this module closes: it
-integrates only the face-normal Kelvin-Voigt contact and never advances
-tangential spin, so any spin value it returns is the unmodified pre-impact
-input, not a prediction. ``qualify_spin_prediction`` refuses to report that
-value - including a literal ``0.0`` - as a physical result.
+Before #15443 F5 the ``spring_damper`` model integrated only the face-normal
+Kelvin-Voigt contact and never advanced tangential spin, so any spin value it
+returned was the unmodified pre-impact input. It now applies a Coulomb
+friction impulse and is listed as supporting tangential spin. The
+``unavailable_normal_only`` mode stays in the vocabulary:
+``qualify_spin_prediction`` still refuses to report a value from any model
+declared that way - including a literal ``0.0`` - as a physical result.
 """
 
 from __future__ import annotations
@@ -74,7 +76,7 @@ IMPACT_MODEL_CAPABILITY_MATRIX: Mapping[str, ImpactModelCapability] = {
     "spring_damper": ImpactModelCapability(
         model_id="spring_damper",
         duration_mode="finite_duration",
-        tangential_spin_mode="unavailable_normal_only",
+        tangential_spin_mode="supported_3d_tangential",
         supports_off_center_gear_effect=True,
         uses_full_3d_inertia_tensor=False,
         supports_velocity_dependent_cor=False,

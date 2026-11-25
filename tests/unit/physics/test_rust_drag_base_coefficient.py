@@ -3,7 +3,7 @@
 ``upstream_physics`` scales its dimpled-sphere drag-crisis curve by
 ``AeroBallProperties.drag_coefficient``, the same way the enhanced Python
 engine scales ``cd_spinning_ball`` by ``GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT``
-(0.20; since #15443 the kernel adds a spin term, so the 0.25 compensation for
+(0.187; since #15443 the kernel adds a spin term, so the 0.25 compensation for
 spin drag is gone). ``BallProperties.cd0`` is the constant term of a *different* model,
 the spin polynomial ``cd0 + cd1*S + cd2*S**2``. Passing it across the
 boundary under-predicted drag, so the production simulator carried a

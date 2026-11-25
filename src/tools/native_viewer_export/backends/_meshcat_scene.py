@@ -50,7 +50,7 @@ from src.shared.python.model_appearance.schema import (
 )
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
 from src.tools.native_viewer_export.backends._body import body_mesh_files
-from src.tools.native_viewer_export.backends._club import club_parts, write_obj
+from src.tools.native_viewer_export.backends._club import club_parts_by_body, write_obj
 from src.tools.native_viewer_export.backends._head import head_mesh_files
 from src.tools.native_viewer_export.backends._scene import z_axis_frame
 
@@ -182,15 +182,14 @@ def _appearance_items(
 
 
 def _club_items(spec: Mapping[str, Any], directory: Path) -> list[VisualItem]:
-    club = club_parts(spec)
-    if club is None:
-        return []
-    body, parts = club
-    (directory / "club").mkdir(parents=True, exist_ok=True)
-    out = []
-    for i, part in enumerate(parts):
-        path = Path(write_obj(part.mesh, str(directory / "club"), part.name))
-        out.append(_mesh_item(i, body, part.name, path, part.rgba, None))
+    out: list[VisualItem] = []
+    by_body = club_parts_by_body(spec)
+    if by_body:
+        (directory / "club").mkdir(parents=True, exist_ok=True)
+    for body, parts in by_body.items():
+        for part in parts:
+            path = Path(write_obj(part.mesh, str(directory / "club"), part.name))
+            out.append(_mesh_item(len(out), body, part.name, path, part.rgba, None))
     return out
 
 

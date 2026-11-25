@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Callable, Iterable, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 
 import numpy as np
@@ -62,6 +62,20 @@ class OverlayOptions:
     axial_impact_blackout: bool = True
     #: a vector flag was passed: a kinematic replay draws those vectors only
     forces_requested: bool = False
+    #: tip-to-tail ZTCF drift + ZVCF control hand-on-club force (#15685)
+    ztcf_zvcf_hand_force: bool = False
+    #: length gain for the tip-to-tail hand-force arrows only (#15685)
+    ztcf_arrow_gain: float = 1.0
+    #: which view of the split, force or torque, and which hands (#15150 Z3b)
+    ztcf_view: str = "tip_to_tail"
+    ztcf_quantity: str = "force"
+    ztcf_hands: str = "both"
+    #: segment shading: recorded loads, or the ZTCF/ZVCF split part (Z4b)
+    shading_part: str = "recorded"
+    #: forces drawn: ``recorded``, or one ZTCF/ZVCF case's ground and kinds (Z4c)
+    force_part: str = "recorded"
+    #: force arrow look in ``arrow_style_settings.json`` (default: its default)
+    arrow_style: str | None = None
 
 
 def _grip_source(swing: SwingInput, engine: str, mujoco_source: Any) -> tuple[Any, str]:
@@ -570,7 +584,9 @@ def build_overlay_feed(
     names = swing.bundle.coordinate_order
     com = source.center_of_mass_m(dict(zip(names, map(float, swing.q[0]), strict=True)))
     lookat = (float(com[0]), float(com[1]), default_lookat_height_m())
-    style = default_glyph_style(body_mass_kg=float(source.total_mass_kg))
+    style = default_glyph_style(
+        body_mass_kg=float(source.total_mass_kg), arrow_style=opts.arrow_style
+    )
 
     active_ellipsoids = _resolve_active_ellipsoids(
         opts.hand_mobility, opts.interface_ellipsoids
@@ -580,8 +596,10 @@ def build_overlay_feed(
         ellipsoids_for = _ellipsoid_feed_factory(swing, engine, opts, active_ellipsoids)
         hand_ellipsoids_fn, hand_hud_lines_fn, panel_rows_fn = ellipsoids_for(swing)
 
+    splits = _part_splits(swing, axial, opts)
+    frame_at, shading_note = part_shading(provider.frame_at, swing, axial, opts, splits)
     feed = OverlayFeed(
-        provider.frame_at,
+        frame_at,
         style,
         grip_analyses=provider.grip_analyses if grip else None,
         show_force=visibility.show_force,
@@ -591,13 +609,106 @@ def build_overlay_feed(
             if visibility.replay
             else ""
         ),
+        shading_note=shading_note,
         show_palm_thumb=effective_palm_thumb,
         hand_ellipsoids=hand_ellipsoids_fn,
         hand_hud_lines=hand_hud_lines_fn,
         hand_panel_rows=panel_rows_fn,
         ellipsoids_for=ellipsoids_for,
     )
+    if opts.ztcf_zvcf_hand_force:
+        feed = _with_ztcf_zvcf(feed, swing, style, opts)
+    if splits is not None and opts.force_part != "recorded":
+        feed = with_force_part(feed, splits, style, opts.force_part)
     return feed, lookat
+
+
+def _part_splits(swing: SwingInput, axial: bool, opts: OverlayOptions) -> Any:
+    """One cached ZTCF/ZVCF split per state, shared by the shading and the
+    force part; ``None`` when neither asks for a part."""
+    if opts.force_part == "recorded" and not (
+        axial and opts.shading_part != "recorded"
+    ):
+        return None
+    from src.tools.native_viewer_export.ztcf_axial import swing_part_splits
+
+    return swing_part_splits(swing)
+
+
+def with_force_part(
+    feed: OverlayFeed, splits: Callable[[int], Any], style: Any, part: str
+) -> OverlayFeed:
+    """``feed`` with ``part``'s force kinds, ground arrow and key row (Z4c)."""
+    from src.tools.native_viewer_export.ztcf_ground import (
+        case_force_key,
+        ground_arrows,
+        load_ground_settings,
+        with_part_wrenches,
+    )
+
+    look = load_ground_settings()
+    arrows = ground_arrows(lambda i: splits(i).ground, part, style, look)
+    hands = feed.extra_arrows
+    return replace(
+        feed,
+        frame_at=with_part_wrenches(feed.frame_at, part),
+        extra_arrows=(arrows if hands is None else (lambda i: (*hands(i), *arrows(i)))),
+        colour_key=(*feed.colour_key, case_force_key(part, look)),
+    )
+
+
+def part_shading(
+    frame_at: Callable[[int], Any],
+    swing: SwingInput | None,
+    axial: bool,
+    opts: OverlayOptions,
+    splits: Callable[[int], Any] | None = None,
+) -> tuple[Callable[[int], Any], str]:
+    """``frame_at`` shaded by ``opts.shading_part`` and its HUD note (Z4b).
+
+    Without axial loads, or for ``recorded``, ``frame_at`` and no note.
+    ``splits`` (by state) is reused when given, else built from ``swing``.
+
+    Raises:
+        ValueError: an unknown shading part, or a kinematic replay ``swing``.
+    """
+    from src.tools.native_viewer_export.ztcf_axial import (
+        SHADING_NOTES,
+        swing_part_splits,
+        with_part_shading,
+    )
+
+    with_part_shading(frame_at, lambda _i: {}, opts.shading_part)  # checks it
+    if not axial or opts.shading_part == "recorded":
+        return frame_at, ""
+    split_at = splits or swing_part_splits(swing)
+    shaded = with_part_shading(frame_at, lambda i: split_at(i).axial, opts.shading_part)
+    return shaded, SHADING_NOTES[opts.shading_part]
+
+
+def _with_ztcf_zvcf(
+    feed: OverlayFeed, swing: SwingInput, style: Any, opts: OverlayOptions
+) -> OverlayFeed:
+    """``feed`` with the ZTCF/ZVCF hand arrows, their legend and colour key."""
+    from src.tools.native_viewer_export.ztcf_feed import (
+        gained_style,
+        hands_colour_key,
+        hands_of,
+        legend_for,
+        ztcf_zvcf_arrows,
+    )
+
+    gain, view, quantity = opts.ztcf_arrow_gain, opts.ztcf_view, opts.ztcf_quantity
+    hands = hands_of(opts.ztcf_hands)
+    arrows = ztcf_zvcf_arrows(
+        swing, gained_style(style, gain), None, view, quantity, hands, gain
+    )
+    return replace(
+        feed,
+        extra_arrows=arrows,
+        extra_legend=legend_for(gain, view, quantity, hands),
+        colour_key=hands_colour_key(view, hands),
+    )
 
 
 def face_centre_trajectory(

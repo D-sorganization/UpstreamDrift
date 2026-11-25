@@ -30,17 +30,27 @@ use tools_core::Vector3;
 
 const MIN_VALID_REYNOLDS: f64 = 1.0e3;
 const MAX_VALID_REYNOLDS: f64 = 1.0e7;
+// Drag crisis (#15443 F1): centre, width, recovery centre and the floor
+// `DEFAULT_POST_CRISIS_CD` are a least-squares fit to Choi, Jeon & Choi 2006,
+// Phys. Fluids 18, 041702, Fig. 1 (rms 0.008); mirrors Python `atmosphere.py`.
+/// Subcritical Cd (Bearman & Harvey 1976; Lyu et al. 2018). Held fixed.
 const CD_PRECRITICAL: f64 = 0.50;
-const RE_MIN_CD: f64 = 7.0e4;
+/// Crisis centre Reynolds number (Choi 2006 fit).
+const RE_MIN_CD: f64 = 7.59e4;
+/// High-Re asymptote Cd (Bearman & Harvey 1976, Mehta 1985). Held fixed.
 const CD_HIGH: f64 = 0.30;
-const TRANSITION_WIDTH: f64 = 0.16;
-const DRAG_CRISIS_RECOVERY_RE: f64 = 7.0e5;
+/// Crisis width in log10(Re) decades (Choi 2006 fit).
+const TRANSITION_WIDTH: f64 = 0.065;
+/// Recovery centre Reynolds number (Choi 2006 fit).
+const DRAG_CRISIS_RECOVERY_RE: f64 = 2.81e5;
+/// Recovery width in log10(Re) decades (Mehta 1985 shape). Held fixed.
+const RECOVERY_WIDTH: f64 = 0.45;
 const MAX_LIFT_COEFFICIENT: f64 = 0.26;
 const PENNER_LIFT_SCALE: f64 = 0.70;
 const PENNER_LIFT_EXPONENT: f64 = 0.645;
-/// Zero-spin drag floor (#15443): Lyu et al. 2018, Cd ~0.2 at Re 1e5.
-/// Mirrors Python `GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT` (sources there).
-pub const DEFAULT_POST_CRISIS_CD: f64 = 0.20;
+/// Zero-spin drag floor (#15443): Choi 2006 fit, checked against Lyu et al.
+/// 2018. Mirrors Python `GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT` (sources there).
+pub const DEFAULT_POST_CRISIS_CD: f64 = 0.187;
 /// Drag rise per unit spin ratio (#15443): Smits & Smith 1994 `CD2 = 0.18`.
 /// Mirrors Python `GOLF_BALL_SPIN_DRAG_SLOPE` (sources there).
 pub const CD_SPIN_SLOPE: f64 = 0.18;
@@ -431,7 +441,7 @@ pub fn cd_dimpled_sphere(reynolds: f64, base_cd: f64) -> Result<f64, String> {
     let crisis_blend = smoothstep_tanh(log_re, log_re_crisis, TRANSITION_WIDTH);
     let cd_crisis = CD_PRECRITICAL + (cd_floor - CD_PRECRITICAL) * crisis_blend;
 
-    let recovery_blend = smoothstep_tanh(log_re, log_re_recovery, 0.45);
+    let recovery_blend = smoothstep_tanh(log_re, log_re_recovery, RECOVERY_WIDTH);
     let cd = cd_crisis + (CD_HIGH - cd_floor) * recovery_blend;
 
     Ok(cd.clamp(0.15, 0.55))
@@ -909,7 +919,7 @@ mod tests {
         // Very low speed → laminar → Cd = 0.5
         let cd = compute_drag_coefficient(1.0, 0.0, &ball, &air);
         assert!(
-            (cd - 0.500_001_242_489_331_1).abs() < 1e-12,
+            (cd - 0.500_007_278_123_134_7).abs() < 1e-12,
             "Laminar Cd should match the Python dimpled-sphere curve, got {}",
             cd
         );
@@ -921,7 +931,7 @@ mod tests {
         let air = default_air();
         let cd = compute_drag_coefficient(100.0, 0.0, &ball, &air);
         assert!(
-            (cd - 0.257_787_143_359_211_3).abs() < 1e-12,
+            (cd - 0.275_676_454_138_666_4).abs() < 1e-12,
             "Rust Cd should match Python cd_dimpled_sphere at golf launch Re, got {}",
             cd
         );
@@ -930,12 +940,12 @@ mod tests {
     #[test]
     fn test_cd_dimpled_sphere_python_parity_anchors() {
         let cases = [
-            (1.0e3, 0.500_000_161_176_627_4),
-            (1.0e4, 0.500_007_263_990_912_3),
-            (4.0e4, 0.488_763_716_427_621_5),
-            (7.0e4, 0.375_580_365_822_265_2),
-            (7.0e5, 0.275_000_931_659_821_1),
-            (1.0e7, 0.299_706_757_892_032_6),
+            (1.0e3, 0.500_000_938_587_036_6),
+            (1.0e4, 0.500_079_797_031_805_9),
+            (4.0e4, 0.501_086_585_301_479_8),
+            (7.0e4, 0.439_887_227_582_845_43),
+            (7.0e5, 0.292_671_378_568_654_77),
+            (1.0e7, 0.299_949_391_121_969_44),
         ];
 
         for (reynolds, expected) in cases {

@@ -17,12 +17,10 @@ from src.shared.python.model_appearance import library
 from src.shared.python.model_appearance.club_assembly import (
     assembly_from_spec,
     club_body_name,
-    club_part_material,
 )
+from src.shared.python.model_appearance.club_chain_meshes import club_meshes_by_body
 from src.shared.python.model_appearance.defaults import default_appearance
 from src.shared.python.model_appearance.schema import AppearanceDocument
-from src.shared.python.model_appearance.grip_hands import assembly_meshes_with_hands
-from src.shared.python.model_appearance.hand_spec import resolved_hand_spec
 from src.shared.python.model_appearance.geometry import Mesh
 
 DEFAULT_FINISH = "satin_steel"
@@ -37,6 +35,40 @@ class ClubPart:
     rgba: tuple[float, float, float, float]
 
 
+def club_parts_by_body(
+    spec: Mapping[str, Any],
+    finish: str = DEFAULT_FINISH,
+    appearance: AppearanceDocument | None = None,
+) -> dict[str, list[ClubPart]]:
+    """Club meshes per spec body, each in that body's frame (empty: no club).
+
+    A rigid club has every part on the club body. A chain shaft (#12686) has
+    the grip, hands and root shaft piece on the club body, one shaft piece on
+    each link and the head on the tip link, so the bent shaft and the head
+    that follows it are drawn where the physics puts them (#15150).
+    ``appearance`` (default: the contract default) makes the hands bare skin
+    or gloved. Raises ``ValueError`` for an unknown ``finish``.
+    """
+    doc = appearance if appearance is not None else default_appearance()
+    if finish not in library.MATERIALS:
+        raise ValueError(f"unknown club finish {finish!r}")
+    club = assembly_from_spec(spec)
+    if club is None or club_body_name(spec) is None:
+        return {}
+    materials = library.library_materials(doc)
+    return {
+        body: [
+            ClubPart(
+                f"club_{label}",
+                mesh,
+                tuple(float(c) for c in materials[material].rgba),  # type: ignore[arg-type]
+            )
+            for label, mesh, material in parts
+        ]
+        for body, parts in club_meshes_by_body(spec, club, finish, doc).items()
+    }
+
+
 def club_parts(
     spec: Mapping[str, Any],
     finish: str = DEFAULT_FINISH,
@@ -46,27 +78,14 @@ def club_parts(
 
     The two curled-finger hands are wrapped on the grip (OSV-2,
     ``model_appearance.grip_hands``) and ride the club body like the rest.
+    For a chain shaft only the parts that stay on the club body are returned;
+    :func:`club_parts_by_body` has the links and the head.
 
-    ``appearance`` (default: the contract default) makes the hands bare skin or
-    gloved per its ``glove`` field. Postcondition: ``None`` exactly when the spec
-    has no club assembly.
+    Postcondition: ``None`` exactly when the spec has no club assembly.
     """
-    doc = appearance if appearance is not None else default_appearance()
-    if finish not in library.MATERIALS:
-        raise ValueError(f"unknown club finish {finish!r}")
-    club = assembly_from_spec(spec)
+    by_body = club_parts_by_body(spec, finish, appearance)
     body = club_body_name(spec)
-    if club is None or body is None:
-        return None
-    parts = []
-    for name, mesh in assembly_meshes_with_hands(
-        club, hands=resolved_hand_spec(spec)
-    ).items():
-        rgba = library.library_materials(doc)[
-            club_part_material(name, finish, doc)
-        ].rgba
-        parts.append(ClubPart(f"club_{name}", mesh, tuple(float(c) for c in rgba)))  # type: ignore[arg-type]
-    return body, parts
+    return None if body is None or body not in by_body else (body, by_body[body])
 
 
 def write_obj(mesh: Mesh, directory: str, stem: str) -> str:

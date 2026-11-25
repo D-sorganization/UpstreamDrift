@@ -1,7 +1,23 @@
 {
-  "sources": "Per-club impact-model inputs (#15443). pipeline_default_clubs keep the SwingBallFlightPipeline defaults (head 0.200 kg, scalar moi 5e-3 kg m^2, driver COR) so the driver path is numerically unchanged. Other catalogue clubs take the head mass from club_models and scale reference_head_moi_kg_m2 by the catalogue head m*k^2 ratio to the reference club, with k^2 the mean of the squared gyration radii about the two axes perpendicular to the face normal (the axes a face-offset torque turns the head about); an approximation from catalogue geometry, not a measured inertia. cor_by_club: USGA/R&A limit 0.830 applies to driver faces (CT test, Rules of Golf Appendix II). No source for a lower iron COR was found (a web search for a measured 7-iron value returned none), so iron7 keeps 0.830 and is flagged as an open question rather than an invented number.",
+  "sources": "Per-club impact-model inputs (#15443). pipeline_default_clubs keep the SwingBallFlightPipeline defaults (head 0.200 kg, scalar moi 5e-3 kg m^2, driver COR) so the driver path is numerically unchanged. Other catalogue clubs take the head mass from club_models and scale reference_head_moi_kg_m2 by the catalogue head m*k^2 ratio to the reference club, with k^2 the mean of the squared gyration radii about the two axes perpendicular to the face normal (the axes a face-offset torque turns the head about); an approximation from catalogue geometry, not a measured inertia. cor_by_club: each club has a linear COR law e = intercept - slope_s_per_m * v_n in the normal approach speed v_n [m/s], evaluated per strike by flight_report.flight_for_impact. driver: constant 0.830, the USGA/R&A limit for driver faces (CT test, Rules of Golf Appendix II). iron7: the sourced ball-on-rigid-plate law in iron_cor_source.",
   "pipeline_default_clubs": ["driver"],
   "reference_club": "driver",
   "reference_head_moi_kg_m2": 0.005,
-  "cor_by_club": {"driver": 0.83, "iron7": 0.83}
+  "cor_by_club": {
+    "driver": {"intercept": 0.83, "slope_s_per_m": 0.0},
+    "iron7": {"intercept": 0.86, "slope_s_per_m": 0.0029}
+  },
+  "iron_cor_source": {
+    "citation": "A. R. Penner, 'The physics of golf: The optimum loft of a driver', Am. J. Phys. 69, 563-568 (2001); author copy http://www.raypenner.com/golf-loft.pdf (accessed 2026-11-24)",
+    "location": "p. 564, Eq. (5): e = 0.86 - 0.0029 v_ci cos(theta), with v_ci the clubhead impact speed [m/s] and theta the dynamic loft, so v_ci cos(theta) is the normal approach speed of the face on a ball at rest; e is defined by Eq. (4) on normal velocity components, as the rigid-body impulse uses it",
+    "fitted_data": "Penner's linear fit to B. B. Lieberman and S. H. Johnson, 'An analytical model for ball-barrier impact', Science and Golf II (Proc. 1994 World Scientific Congress of Golf, eds. A. J. Cochran and M. R. Farrally, E & FN Spon, 1994): golf balls fired into a stationary plate, e falling from about 0.76 at 37 m/s to about 0.72 at 50 m/s (Penner p. 564)",
+    "validity": "Fitted over normal impact speeds of about 37-50 m/s. Tour iron and wedge strikes (normal speed about 25-35 m/s) extrapolate the line below that range; Penner, Rep. Prog. Phys. 66, 131 (2003), section 3.1.1, quotes Chou et al. (1994) at about 0.85 for 20 m/s and 0.78 for 45 m/s for a one-piece ball, the same downward trend. The fit is for the balls Lieberman and Johnson tested, not a specific modern ball.",
+    "applicability": "Treats the iron face as a rigid plate: Penner (2003, section 4) describes iron and wedge heads as solid, flat steel and attributes a face-flexing (trampoline) COR gain only to thin faces whose natural frequency approaches the ball's (about 1000 Hz), quoting about 1800 Hz even for 150 cc hollow steel wood heads; it reports no trampoline gain for irons. No measured COR of a specific iron head was found; the USGA iron test (Interim Procedure for Measuring the COR of an Iron Clubhead Relative to a Baseline Plate) reports a value relative to a plate, not an absolute iron COR."
+  },
+  "rigid_gear_sources": "Head inertia for the rigid-contact gear law (physics/impact_model/rigid_gear.py), principal values about the head CG along the face normal, heel and face-up axes, and the CG depth behind the face. These are the research assumptions of the phase-two matched-delivery study (src/tools/shot_pattern_analysis/matched_config.py: driver preset and seven_iron preset), not measured properties of a specific head. A club without an entry uses rigid_gear_default_club, as club_impact_for launches an unknown club with the driver defaults.",
+  "rigid_gear_default_club": "driver",
+  "rigid_gear_heads": {
+    "driver": {"inertia_diagonal_kg_m2": [0.00025, 0.00040, 0.00045], "cg_depth_m": 0.035},
+    "iron7": {"inertia_diagonal_kg_m2": [0.00012, 0.00020, 0.00025], "cg_depth_m": 0.010}
+  }
 }

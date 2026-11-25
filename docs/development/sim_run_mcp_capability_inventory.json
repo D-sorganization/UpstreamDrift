@@ -23,6 +23,18 @@
       "id": "native_export_validate",
       "kind": "agent_capability",
       "runtime_status": "available"
+    },
+    {
+      "description": "Agent API capability `native_export_run` via sim_run",
+      "id": "native_export_run",
+      "kind": "agent_capability",
+      "runtime_status": "available"
+    },
+    {
+      "description": "Agent API capability `native_export_status` via sim_run",
+      "id": "native_export_status",
+      "kind": "agent_capability",
+      "runtime_status": "available"
     }
   ],
   "engines": [

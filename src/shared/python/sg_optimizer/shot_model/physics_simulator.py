@@ -13,20 +13,29 @@ mass / MOI use the ``SwingState`` defaults; both are placeholders until a fit
 
 from __future__ import annotations
 
+import functools
+import logging
+
 import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import ensure, require
+from src.shared.python.physics.ball_flight_validity import club_class_of
 from src.shared.python.physics.ball_launch_conditions import EnvironmentalConditions
 from src.shared.python.physics.swing_ball_flight_pipeline import (
+    PipelineResult,
     SwingBallFlightPipeline,
     SwingState,
+)
+from src.shared.python.sg_optimizer.shot_model.ground_runout import (
+    landing_backspin_rads,
 )
 from src.shared.python.sg_optimizer.shot_model.skill_family import (
     IMPACT_FIELDS,
     SKILL_NAMES,
 )
 
+logger = logging.getLogger(__name__)
 MPH_TO_MS = 0.44704
 M_TO_YD = 1.0 / 0.9144
 CLUB_LOFT_DEG: dict[str, float] = {
@@ -55,6 +64,27 @@ REPRESENTATIVE_CLUB: dict[str, str] = {
 }
 
 
+@functools.cache
+def pipeline_club(skill: str) -> str:
+    """Club name handed to ``SwingBallFlightPipeline.run`` for ``skill`` (#15443).
+
+    The club's class sets the launch-spin cap. A club no class pattern matches
+    (the short-game shots, which keep the shot name) gets the pipeline's own
+    fallback, the driver envelope, as ``launch_spin_envelope`` documents; that
+    fallback is logged once per skill rather than taken silently.
+    """
+    require(skill in SKILL_NAMES, f"unknown skill {skill!r}")
+    club = REPRESENTATIVE_CLUB[skill]
+    if club_class_of(club) is None:
+        logger.warning(
+            "skill %r: club %r matches no launch-spin class; the pipeline uses "
+            "the fallback (driver) spin envelope",
+            skill,
+            club,
+        )
+    return club
+
+
 def swing_state_from_impact(impact: NDArray[np.float64], skill: str) -> SwingState:
     """One impact-condition row -> clubhead kinematics at impact."""
     require(skill in SKILL_NAMES, f"unknown skill {skill!r}")
@@ -79,12 +109,21 @@ def swing_state_from_impact(impact: NDArray[np.float64], skill: str) -> SwingSta
     )
 
 
+def _landing_backspin(result: PipelineResult, velocity: NDArray[np.float64]) -> float:
+    """Decayed launch spin about the backspin axis ``u x z`` of the landing direction."""
+    launch = result.launch_conditions
+    h = float(np.hypot(velocity[0], velocity[1]))
+    back = np.array([velocity[1], -velocity[0], 0.0]) / h if h > 0.0 else np.zeros(3)
+    share = float(np.dot(launch.spin_axis, back) / np.linalg.norm(launch.spin_axis))
+    return landing_backspin_rads(launch.spin_rate, result.flight_time_s, share)
+
+
 class PipelineLandingSimulator:
     """``LandingSimulator`` over ``SwingBallFlightPipeline`` (one pipeline per wind).
 
-    ``landing_state=True`` returns ``(n, 5)`` rows ``(x_yd, y_yd, vx, vy, vz m/s)``
-    at first ground contact, the input of ``ground_runout`` (B3b); the default is
-    carry ``(n, 2)``.
+    ``landing_state=True`` returns ``(n, 6)`` rows ``(x_yd, y_yd, vx, vy, vz m/s,
+    backspin rad/s)`` at first ground contact, the input of ``ground_runout`` (B3b);
+    the default is carry ``(n, 2)``.
     """
 
     def __init__(self, *, landing_state: bool = False) -> None:
@@ -114,13 +153,15 @@ class PipelineLandingSimulator:
         n = len(impacts)
         spin = np.ones(n) if spin_factor is None else np.asarray(spin_factor, float)
         require(spin.shape == (n,), "spin_factor must have one entry per impact row")
-        pipe = self._pipeline(wind)
-        out = np.empty((n, 5 if self._landing_state else 2))
+        pipe, club = self._pipeline(wind), pipeline_club(skill)
+        out = np.empty((n, 6 if self._landing_state else 2))
         for i in range(n):
             swing = swing_state_from_impact(impacts[i], skill)
-            end = pipe.run(swing, spin_factor=float(spin[i])).trajectory[-1]
+            result = pipe.run(swing, spin_factor=float(spin[i]), club=club)
+            end = result.trajectory[-1]
             out[i, :2] = (end.position[0] * M_TO_YD, end.position[1] * M_TO_YD)
             if self._landing_state:
-                out[i, 2:] = end.velocity[:3]
+                out[i, 2:5] = end.velocity[:3]
+                out[i, 5] = _landing_backspin(result, end.velocity[:3])
         ensure(bool(np.isfinite(out).all()), "pipeline produced non-finite landing")
         return out

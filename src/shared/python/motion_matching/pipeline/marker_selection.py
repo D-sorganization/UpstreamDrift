@@ -59,8 +59,12 @@ class MarkerSelection:
 
 
 def _dropped(document: Mapping[str, Any], capture_labels: Sequence[str]) -> list[str]:
-    dropped = document.get("subject", {}).get("dropped_markers") or []
-    if isinstance(dropped, str) or not all(isinstance(x, str) for x in dropped):
+    dropped = document.get("subject", {}).get("dropped_markers")
+    if dropped is None:  # omitted: nothing is dropped
+        return []
+    # Only a list is a label list: ``or []`` would let 0 / False / {} through, and
+    # a dict or tuple would pass the per-item check by iterating its keys (#15342).
+    if not isinstance(dropped, list) or not all(isinstance(x, str) for x in dropped):
         raise ValueError("subject.dropped_markers must be a list of labels")
     if unknown := sorted(set(dropped) - set(capture_labels)):
         raise ValueError(f"dropped markers are not in the capture: {unknown}")

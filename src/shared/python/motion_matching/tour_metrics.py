@@ -18,6 +18,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 
+import math
+
 import numpy as np
 
 from src.shared.python.motion_matching.tour_capture_contract import (
@@ -45,8 +47,14 @@ class SharedMetrics:
         """Full-marker terminal RMS (authoritative; identical to terminal_marker_rmse_m)."""
         return self.terminal_marker_rmse_m
 
-    def as_dict(self) -> dict[str, float]:
-        return {
+    def as_dict(self) -> dict[str, float | None]:
+        """Persistence view: unavailable (non-finite) metrics become ``None``.
+
+        ``None`` serialises to strict-JSON ``null`` and validates against the
+        receipt schema (``float | None``, ``allow_inf_nan=False``); downstream
+        gates treat it as missing evidence and fail closed (#14756 P7).
+        """
+        values = {
             "whole_marker_rmse_m": self.whole_marker_rmse_m,
             "early_marker_rmse_m": self.early_marker_rmse_m,
             "terminal_marker_rmse_m": self.terminal_marker_rmse_m,
@@ -58,6 +66,7 @@ class SharedMetrics:
             "club_marker_rmse_m": self.club_marker_rmse_m,
             "pelvis_yaw_rmse_rad": self.pelvis_yaw_rmse_rad,
         }
+        return {k: (v if math.isfinite(v) else None) for k, v in values.items()}
 
 
 def _pelvis_yaw(points: np.ndarray, wl_idx: int, wr_idx: int) -> np.ndarray:
@@ -66,9 +75,17 @@ def _pelvis_yaw(points: np.ndarray, wl_idx: int, wr_idx: int) -> np.ndarray:
     return np.arctan2(delta[:, 0], delta[:, 2])
 
 
+UNAVAILABLE: float = float("nan")
+"""Sentinel for a metric with no supporting evidence (#14756 P7).
+
+An empty mask or absent label set is *unavailable*, never a perfect 0.0. NaN
+fails every ``<=`` threshold comparison, so gates reject it rather than pass.
+"""
+
+
 def _rms_from_mask(dist_sq: np.ndarray, mask: np.ndarray) -> float:
     errs = dist_sq[mask]
-    return float(np.sqrt(np.mean(errs))) if len(errs) > 0 else 0.0
+    return float(np.sqrt(np.mean(errs))) if len(errs) > 0 else UNAVAILABLE
 
 
 def _terminal_partition_rmse(
@@ -104,7 +121,7 @@ def _club_rmse(dist_sq: np.ndarray, valid: np.ndarray, labels: Sequence[str]) ->
     club_labels = set(MARKER_SEGMENTS["club"])
     club_indices = [i for i, label in enumerate(labels) if label in club_labels]
     if not club_indices:
-        return 0.0
+        return UNAVAILABLE
     club_mask = np.zeros_like(valid)
     club_mask[:, club_indices] = valid[:, club_indices]
     return _rms_from_mask(dist_sq, club_mask)
@@ -117,12 +134,12 @@ def _pelvis_yaw_rmse(
     labels: Sequence[str],
 ) -> float:
     if "WaistLeft" not in labels or "WaistRight" not in labels:
-        return 0.0
+        return UNAVAILABLE
     wl_idx = labels.index("WaistLeft")
     wr_idx = labels.index("WaistRight")
     valid_both = valid[:, wl_idx] & valid[:, wr_idx]
     if not np.any(valid_both):
-        return 0.0
+        return UNAVAILABLE
     obs_yaw = _pelvis_yaw(obs[valid_both], wl_idx, wr_idx)
     pred_yaw = _pelvis_yaw(pred[valid_both], wl_idx, wr_idx)
     angle_diff = np.remainder(pred_yaw - obs_yaw + np.pi, 2 * np.pi) - np.pi
@@ -143,8 +160,15 @@ def compute_shared_metrics(
     - predicted_points_m must have shape (frames, markers, 3) matching capture
     - predicted_points_m must be finite where capture is valid
 
+    - at least one valid (tracked, finite) capture point must exist
+
     Returns:
-    - SharedMetrics instance with the 5 scalar metrics
+    - SharedMetrics instance with the 5 scalar metrics. A sub-metric with no
+      supporting evidence (empty window, absent club/pelvis labels) is NaN
+      (``UNAVAILABLE``), never 0.0.
+
+    Raises:
+    - ValueError if no valid points exist at all.
     """
     pred = np.asarray(predicted_points_m, dtype=np.float64)
     expected_shape = (capture.frames, len(capture.labels), 3)
@@ -163,6 +187,11 @@ def compute_shared_metrics(
 
     if not np.isfinite(pred[valid]).all():
         raise ValueError("Predicted points must be finite at all valid capture points")
+
+    if not valid.any():
+        raise ValueError(
+            "No valid capture points to score: refusing to report a perfect 0.0"
+        )
 
     dist_sq = np.sum((pred - obs) ** 2, axis=-1)
     term_start = int(capture.frames * (1.0 - terminal_ratio))

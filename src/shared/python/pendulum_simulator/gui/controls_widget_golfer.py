@@ -480,10 +480,10 @@ class ControlsWidgetGolfer(ControlsWidgetBase):
 
         def _sv(widget: Any, val: Any) -> None:
             """Set value on UnitAwareInput (float) or LabeledInput (str)."""
-            try:
-                widget.set_value(float(str(val)), is_si=True)
-            except TypeError:
+            if isinstance(widget, LabeledInput):
                 widget.set_value(str(val))
+            else:
+                widget.set_value(float(str(val)), is_si=True)
 
         _sv(self.inp_m_hub, p["m_hub"])
         _sv(self.inp_m_r_upper, p["m_r_upper"])
