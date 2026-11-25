@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 os.environ.setdefault("MPLBACKEND", "Agg")
 
@@ -302,3 +303,55 @@ def test_face_on_unavailable_is_labelled_and_zero_is_drawn() -> None:
         plt.close(fig)
     with pytest.raises(ValueError):
         render_tip_to_tail(_record(), "oblique")
+
+
+def test_face_on_import_does_not_need_shared_python_on_path() -> None:
+    """A normal import must not depend on ``src/shared/python`` being on path."""
+    import os
+    import subprocess
+    import sys
+
+    root = Path(__file__).resolve().parents[3]
+    env = os.environ.copy()
+    env["PYTHONPATH"] = os.pathsep.join((str(root), str(root / "src")))
+    env["MPLBACKEND"] = "Agg"
+    probe = (
+        "import hand_load_stills\n"
+        "from src.shared.python.golf_view_presets import get_view_preset\n"
+        "assert hand_load_stills.get_view_preset is get_view_preset\n"
+        "assert hand_load_stills.get_view_preset.__module__.startswith(\n"
+        "    'src.shared.python.golf_view_presets'\n"
+        ")\n"
+    )
+    completed = subprocess.run(
+        [sys.executable, "-c", probe],
+        cwd=root,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+
+
+def test_face_preset_check_waits_until_the_2d_sheet(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A face-on preset mismatch must leave the 3D sheet importable."""
+    import importlib
+    import sys
+
+    import src.shared.python.golf_view_presets as presets
+
+    def _moved(_name: str) -> object:
+        raise ValueError("face-on preset moved")
+
+    monkeypatch.setattr(presets, "get_view_preset", _moved)
+    original = sys.modules["hand_load_stills"]
+    sys.modules.pop("hand_load_stills")
+    try:
+        fresh = importlib.import_module("hand_load_stills")
+        with pytest.raises(ValueError, match="face-on preset"):
+            fresh._face_basis()
+    finally:
+        sys.modules["hand_load_stills"] = original
