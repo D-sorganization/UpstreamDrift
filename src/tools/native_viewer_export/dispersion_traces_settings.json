@@ -1,0 +1,12 @@
+{
+  "views": ["down_the_line_flight"],
+  "sample_color_rgba": [255, 170, 60, 110],
+  "sample_width_px": 2,
+  "label_format": "Dispersion of {n} shots: carry {carry_mean:.1f} +/- {carry_sd:.1f} {unit}, side {side_mean:+.1f} +/- {side_sd:.1f} {unit} (+ right)",
+  "sources": {
+    "views": "View presets that get the sample traces: the wide down-the-line view that keeps the whole flight in the picture. Other views keep the single shot so the swing stays readable.",
+    "sample_color_rgba": "Colour and opacity (0..255) of every sample trace: an orange apart from the red nominal tracer, translucent so the overlapping samples read as one spread and the nominal shot stays on top.",
+    "sample_width_px": "Line width in pixels of each sample trace, thinner than tracer_width_px of flight_tracer_settings.json so the nominal shot is the emphasised one.",
+    "label_format": "HUD line of the spread: mean +/- population standard deviation of the flight model's carry and side over the available sample shots, in display units (side positive to the right). A replay-level dispersion of the varied shot setup, not a measured one."
+  }
+}

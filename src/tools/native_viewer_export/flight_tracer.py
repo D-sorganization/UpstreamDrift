@@ -116,6 +116,8 @@ class TracerSettings:
     rollout: RolloutSettings | None = None  # rollout_settings.json
     hole_view: Any = None  # hole_view.HoleViewSettings (--hole-view); None = off
     aim: AimLineSettings | None = None  # aim_line_settings.json (#15443)
+    #: dispersion_traces.DispersionTraceSettings (--dispersion-traces); None = off
+    dispersion_traces: Any = None
 
     def __post_init__(self) -> None:
         rgba = _channels(self.tracer_color_rgba, 4, "tracer_color_rgba")
@@ -270,6 +272,8 @@ class FlightPlayback:
     aim_text: str | None = None
     aim_lateral_m: float | None = None
     spin_axis_deg: float | None = None  # model launch spin-axis tilt, + = right
+    #: dispersion_traces.DispersionOverlay: sample traces drawn beneath this shot
+    dispersion: Any = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.settings, TracerSettings):
@@ -332,7 +336,8 @@ class FlightPlayback:
         if since < 0.0:
             return (f"Ball flight: {ON_TEE}",)
         phase = LANDED if since >= self.duration_s else IN_FLIGHT
-        return (f"Ball flight ({self.status}): {phase}", *self.lines)
+        spread = () if self.dispersion is None else (self.dispersion.label,)
+        return (f"Ball flight ({self.status}): {phase}", *self.lines, *spread)
 
     def held(self, shown: SwingInput, feed: Any, step_s: float) -> tuple[Any, Any]:
         """``shown`` with its last pose repeated until the ball has landed.
@@ -392,6 +397,8 @@ class FlightPlayback:
             if depth is None and self.settings.occlude_by_scene:
                 self._warn_once(view)
             label = not shows_inset(self.settings.inset, view)
+            if self.dispersion is not None:  # samples beneath the nominal shot
+                tile = self.dispersion.paint(view, tile, camera, time_s, depth)
             out[view] = self._paint(tile, camera, points, depth, landed, label)
         return out
 
