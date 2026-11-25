@@ -277,7 +277,8 @@ class PinocchioForceAdapter:
         """
         zero = np.zeros(self.nv)
         self._second_order_kinematics(q, v, zero)
-        pin, aligned = self._pin, self._pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+        pin = self._pin
+        aligned = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
         pin.computeJointJacobians(self._model, self._data, np.asarray(q, float))
         pin.updateFramePlacements(self._model, self._data)
         rows, drift = [], []
