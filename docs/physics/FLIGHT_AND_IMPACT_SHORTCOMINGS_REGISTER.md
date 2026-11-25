@@ -302,11 +302,20 @@ Sizes quoted from tests are the band a test asserts, not a published value.
     marked "assumption, unmeasured turf, no primary citation".
   - **Not modelled:** undulation, firmness, green, hazards, later bounces and
     spin-dependent check in the roll.
-- **Effect:** unknown. Tour wedge run/carry still exceeds the short iron's (a
-  strict expected failure in `test_ground_runout.py`). `PipelineLandingSimulator`
-  runs the pipeline without a club, so every skill's launch spin is clamped to
-  the 3500 rpm driver envelope. That leaves the wedge too little landing
-  backspin for the spin-aware hop to shorten it.
+  - **Club per skill:** `PipelineLandingSimulator` passes each skill's
+    `REPRESENTATIVE_CLUB` to the pipeline (#15443), so the launch spin cap is
+    that club's class envelope (`ball_flight_validity_settings.json`), not the
+    3500 rpm driver one. On the tour family (12 draws, calm, fairway) the
+    long iron to wedge now launch at 5,300 to 8,100 rpm instead of 3,500, and
+    land with 391 to 702 rad/s of backspin instead of 261 to 303. Their carry
+    falls by 4 to 10 yd (wedge 65.6 to 61.4 yd) and run/carry falls from
+    driver to wedge (0.129, 0.069, 0.045, 0.043, 0.037, 0.032), which
+    `test_ground_runout.py` now asserts.
+- **Effect:** unknown in absolute terms. The short-game shots (pitch, chip,
+  bunker) have no bag club, match no club class and keep the driver fallback
+  envelope (logged as a warning); pitch and bunker launch spin is still
+  clamped at 3,500 rpm, so their carry and landing backspin are those of a
+  clamped launch (their modelled roll is zero either way).
 - **Tracking:** #15443 (child 6).
 
 ### Launch-Monitor Reference Coverage
