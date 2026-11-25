@@ -23,6 +23,7 @@ __all__ = [
     "Job",
     "PackageRequest",
     "load_catalog",
+    "package_request",
     "plan_package",
 ]
 
@@ -40,6 +41,8 @@ class Catalog:
     default_package: tuple[str, ...]
     views: tuple[str, ...]
     speeds: tuple[float, ...]
+    #: named packages besides ``default``: item lists a user picks by name
+    packages: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
 
 
 def load_catalog(path: Path | None = None) -> Catalog:
@@ -47,7 +50,8 @@ def load_catalog(path: Path | None = None) -> Catalog:
 
     Raises:
         ValueError: an unknown kind, a composite needing an unknown or
-            non-video item, or a default naming an unknown item.
+            non-video item, or a default or named package naming an unknown
+            item.
     """
     doc = json.loads((path or CATALOG_PATH).read_text(encoding="utf-8"))
     items = doc["items"]
@@ -61,15 +65,18 @@ def load_catalog(path: Path | None = None) -> Catalog:
                 raise ValueError(
                     f"catalog item {name!r} needs {need!r}, not a video item"
                 )
-    unknown = [n for n in doc["default_package"] if n not in items]
-    if unknown:
-        raise ValueError(f"default package names unknown items {unknown}")
+    packages = {"default": doc["default_package"], **doc.get("packages", {})}
+    for pname, names in packages.items():
+        unknown = [n for n in names if n not in items]
+        if unknown:
+            raise ValueError(f"{pname} package names unknown items {unknown}")
     return Catalog(
         doc["render_defaults"],
         items,
         tuple(doc["default_package"]),
         tuple(doc["views"]),
         tuple(float(s) for s in doc["speeds"]),
+        {k: tuple(v) for k, v in packages.items() if k != "default"},
     )
 
 
@@ -134,6 +141,16 @@ class Job:
             elif value is not False and value is not None:
                 argv.extend([flag, str(value)])
         return argv
+
+
+def package_request(catalog: Catalog, name: str) -> PackageRequest:
+    """The request starting from package ``name``; ``ValueError`` if unknown."""
+    if name == "default":
+        return PackageRequest()
+    if name not in catalog.packages:
+        known = ["default", *catalog.packages]
+        raise ValueError(f"unknown package {name!r}; use one of {known}")
+    return PackageRequest(include=catalog.packages[name], default=False)
 
 
 def _selected(catalog: Catalog, request: PackageRequest) -> list[str]:
