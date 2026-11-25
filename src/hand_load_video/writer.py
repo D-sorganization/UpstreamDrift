@@ -10,7 +10,7 @@ import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from src.hand_load_video.compare import GridSpec, Provenance, SyncedFrame, compose
 
@@ -182,9 +182,9 @@ def _require_playable(path: Path, n_frames: int) -> None:
         )
     import imageio.v2 as imageio
 
-    reader = imageio.get_reader(str(path))
+    reader = cast(Any, imageio.get_reader(str(path)))
     try:
-        count = int(reader.count_frames())
+        count = sum(1 for _frame in reader)
     finally:
         reader.close()
     if count != n_frames:
