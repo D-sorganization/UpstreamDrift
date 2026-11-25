@@ -108,3 +108,14 @@ def native_export_status(
     """Export job state; on success the record carries the clip manifest."""
     del request
     return run_agent_capability("native_export_status", payload, _default_store())
+
+
+@router.post("/kinetic-match", dependencies=_EXPORT_GUARD)
+@limiter.limit(_STUDY_LIMIT)
+@handle_api_errors
+def kinetic_match(
+    request: Request, payload: dict[str, Any] = _EMPTY_BODY
+) -> dict[str, Any]:
+    """Kinetic match of a saved bundle (#15150 D10); v1 capability record."""
+    del request
+    return run_agent_capability("kinetic_match", payload, _default_store())

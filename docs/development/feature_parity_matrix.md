@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 51 parity · 16 gap · 19 exempt (12 pending decision in #7460).
+**Summary:** 51 parity · 17 gap · 19 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -44,6 +44,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `loop_nullspace_variability`<br>Closed-loop null-space variability and consistency (NSX-100): kernel heatmap, variance budget, strategy Pareto and face dispersion from the plot model 2.0.0 sensitivity panels, with disturbance, mechanism, strategy, outcome-priority and engine controls | ✅ parity | `src/tools/grip_wrench_plots/variability_tab.py` | `src/api/routes/analysis_loop_nullspace.py` | `ui/src/components/analysis/loopNullSpace/VariabilityView.tsx` | — |
 | `matching.tour_matching_viewer`<br>Tour matching viewer | 🔴 gap | `src/tools/tour_matching_viewer/__main__.py` | — | — | #15150 |
 | `mocap.breadth`<br>Motion-capture breadth (C3D upload/playback, OpenPose source) | ✅ parity | `src/tools/freemocap_sidecar/run_freemocap.py` | `src/api/routes/motion_capture.py` | `ui/src/pages/MotionCapture.tsx` | — |
+| `motion_matching.kinetic_match`<br>Kinetic match: forces and torques for a kinematic best match (CLI, REST, MCP) | 🔴 gap | `src/shared/python/motion_matching/kinetic_match.py` | `src/api/routes/agent_sim_run.py` | — | #15150 |
 | `mujoco.force_overlays`<br>MuJoCo GUI force/torque overlays drawn through the shared glyph renderers (native viewer and MeshCat) | ✅ parity | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py` | `src/api/routes/force_overlays.py` | `ui/src/components/visualization/ForceOverlay.tsx` | — |
 | `onboarding.about_version`<br>About/version info + onboarding | ✅ parity | `src/launchers/about_dialog.py` | `src/api/routes/about.py` | `ui/src/components/ui/AboutModal.tsx` | — |
 | `opencap.session_import`<br>OpenCap session import action and OpenSim engine handoff | ✅ parity | `src/engines/physics_engines/opensim/python/opencap_import_action.py` | `src/api/routes/opencap.py` | `ui/src/components/opencap/OpenCapImportModal.tsx` | — |
