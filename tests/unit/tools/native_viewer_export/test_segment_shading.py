@@ -193,7 +193,8 @@ def test_restrict_frame_is_shared_with_the_mujoco_overlay_module() -> None:
 def test_legend_names_colours_and_saturation() -> None:
     scale = ForceColorScale(enabled=True, tension_limit_n=900.0, opacity=0.5)
     line = shading_legend(scale)
-    assert "Tension #0000ff" in line and "Compression #ff0000" in line
+    assert "Tension" in line and "Compression" in line
+    assert "#" not in line  # colours are shown in the colour key, not as hex
     assert "900 N" in line
     hud = HudInfo(0.0, "MuJoCo", "Driver", "", shading_legend=line)
     assert hud.lines()[-1] == line
@@ -419,3 +420,17 @@ def test_worker_subprocess_applies_the_staged_shading() -> None:
     off = render(None)
     shaded = render(ForceColorScale(enabled=True, blend_mode="replace", opacity=0.8))
     assert np.any(shaded != off)
+
+
+def test_shading_key_names_tension_and_compression_in_their_colours() -> None:
+    """Review of the Track Z render: hex codes in the HUD read as noise."""
+    from src.tools.native_viewer_export.shading import shading_colour_key
+
+    scale = ForceColorScale(
+        enabled=True, tension_color="#0000ff", compression_color="#ff0000"
+    )
+    (tension, compression) = shading_colour_key(scale)
+    assert tension[0].startswith("Tension") and tension[1] == (0, 0, 255)
+    assert compression[0].startswith("Compression") and compression[1] == (255, 0, 0)
+    with pytest.raises(TypeError):
+        shading_colour_key("red")  # type: ignore[arg-type]
