@@ -1390,6 +1390,18 @@
       "evidence": "src/tools/native_viewer_export/cli.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
+    "tools.swing_report_package": {
+      "id": "tools.swing_report_package",
+      "name": "Swing report package: one command regenerates a swing's videos, grids and phase sheets (CLI)",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/swing_report_package/cli.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
     "contraction": {
       "id": "contraction",
       "name": "Tools Package: contraction",

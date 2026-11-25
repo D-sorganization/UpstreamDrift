@@ -1,7 +1,14 @@
 {
   "schema_version": 1,
-  "description": "Swing report package executor settings (#15724). Each video is one native_viewer_export subprocess run with its own temporary folder, wiped after the run (a render stages several GB of raw frames). 'min_free_gb' is checked before every render; 'render_timeout_s' bounds one render.",
+  "description": "Swing report package executor settings (#15724). Each video is one native_viewer_export subprocess run with its own temporary folder, wiped after the run (a render stages several GB of raw frames). 'min_free_gb' is checked before every render; 'render_timeout_s' bounds one render. 'phase_bodies' names the model body standing for each phase point other than 'grip' (midway between the hands) and 'clubhead' (the face centre), which come from the exporter's club model; key phases use the bundle's reference swing. 'cli_defaults' are the command line's swing name and club label.",
   "exporter_module": "src.tools.native_viewer_export",
+  "render_log": "render.log",
+  "error_tail_lines": 3,
   "min_free_gb": 12,
-  "render_timeout_s": 10800
+  "render_timeout_s": 10800,
+  "phase_bodies": {
+    "lead_shoulder": "solid_reference:GolfSwing3D_Kinetic/LUpperArm",
+    "lead_wrist": "solid_reference:GolfSwing3D_Kinetic/Left Forearm/LLowerForearm"
+  },
+  "cli_defaults": {"swing": "swing", "club": "Driver"}
 }

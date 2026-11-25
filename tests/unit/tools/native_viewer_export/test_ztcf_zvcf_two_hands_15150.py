@@ -96,7 +96,7 @@ def test_the_view_quantity_and_hand_flags_default_and_parse() -> None:
 def test_hands_of_maps_the_choice() -> None:
     assert hands_of("both") == HANDS
     assert hands_of("lead") == ("lead",)
-    assert set(HAND_CHOICES) == {"both", *HANDS}
+    assert set(HAND_CHOICES) == {"both", *HANDS, "midhands"}  # midhands: #15720
     with pytest.raises(ValueError, match="hands"):
         hands_of("left")
 

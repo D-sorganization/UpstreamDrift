@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "description": "Catalog of swing report package items (#15723). 'render_defaults' are native_viewer_export options shared by every video; an item's 'args' add to or replace them; a composite 'needs' the items it is built from. 'default_package' is what a plain run produces; a request file can include, exclude and override.",
+  "description": "Catalog of swing report package items (#15723). 'render_defaults' are native_viewer_export options shared by every video; an item's 'args' add to or replace them; a composite 'needs' the items it is built from. 'default_package' is what a plain run produces; 'packages' are other named starting sets; a request file can include, exclude and override.",
   "render_defaults": {
     "engines": "mujoco",
     "preset": "hq",
@@ -31,5 +31,9 @@
     "phase_sheet": {"kind": "phase_sheet", "title": "Key Phases: ZTCF, ZVCF and Total", "needs": ["case_ztcf", "case_zvcf", "case_total"]},
     "midhands_phase_sheet": {"kind": "phase_sheet", "title": "Key Phases: Midhands Force and Couple", "needs": ["midhands_ztcf", "midhands_zvcf", "midhands_total"]}
   },
-  "default_package": ["case_ztcf", "case_zvcf", "case_total", "tip_to_tail", "midhands_total", "case_grid", "phase_sheet"]
+  "default_package": ["case_ztcf", "case_zvcf", "case_total", "tip_to_tail", "midhands_total", "case_grid", "phase_sheet"],
+  "packages": {
+    "midhands": ["midhands_ztcf", "midhands_zvcf", "midhands_total", "midhands_grid", "midhands_phase_sheet"],
+    "full": ["case_ztcf", "case_zvcf", "case_total", "tip_to_tail", "midhands_ztcf", "midhands_zvcf", "midhands_total", "case_grid", "midhands_grid", "phase_sheet", "midhands_phase_sheet"]
+  }
 }

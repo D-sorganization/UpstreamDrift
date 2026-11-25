@@ -49,6 +49,16 @@
       "reason": "Headless CLI batch export of mp4 clips (60 fps, 1x, 0.5x and 0.25x, optional 0.1x impact window; the motion-matching video export writes the same three variants through export_video_variants) through each engine's desktop viewer; no web route renders or serves these clips, so there is no browser equivalent until one is added (GCV-14, #11720, epic #11706).",
       "tiles": []
     },
+    "tools.swing_report_package": {
+      "title": "Swing report package: one command regenerates a swing's videos, grids and phase sheets (CLI)",
+      "pyqt": "src/tools/swing_report_package/cli.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 15724,
+      "notes": "Headless command line (python3 -m src.tools.swing_report_package, epic #15725) that plans a package from package_catalog.json (default or named package, --add, --drop, a custom request JSON), runs each native_viewer_export render in its own temporary folder behind a free-disk guard, composes the case grids and key-phase sheets, and writes manifest.json with planned, done, failed, blocked or unavailable per job; reruns resume. --list prints the catalog and --dry-run the plan. No launcher tile or browser page selects, runs or downloads a package yet.",
+      "tiles": []
+    },
     "tools.necromatcher": {
       "title": "Historical Player Library And Source Review",
       "pyqt": "src/tools/necromatcher/gui.py",
