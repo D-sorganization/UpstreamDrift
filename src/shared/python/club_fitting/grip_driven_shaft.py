@@ -88,6 +88,9 @@ class ShaftRun:
     same hand motion); face delta + is more open, loft delta + is the face
     normal tilted up, lie delta + is a shaft axis closer to the ground.
     ``tip_deflection_m`` is the tip-site displacement caused by the bend.
+    ``impact_chain_club_m`` holds the chain joint centres then the tip site
+    at impact, ``(n_links + 1, 3)`` in the rigid club-body frame (``None``
+    when not recorded; see :mod:`shaft_shape`).
     """
 
     times_s: np.ndarray
@@ -103,6 +106,7 @@ class ShaftRun:
     loft_delta_deg: np.ndarray
     lie_delta_deg: np.ndarray
     repaired_times_s: np.ndarray
+    impact_chain_club_m: np.ndarray | None = None
 
     @property
     def head_speed_mps(self) -> np.ndarray:
@@ -257,6 +261,25 @@ def _head_series(sim: _ChainSim, times, qcs, vcs, head, target) -> dict:
     return out
 
 
+def _impact_chain_points(sim: _ChainSim, times, qcs, impact_s: float) -> np.ndarray:
+    """Chain joint centres then the tip site at impact, in the club-body frame.
+
+    The chain coordinates are interpolated linearly at ``impact_s``.
+    """
+    mj, m, d = sim.mujoco, sim.m, sim.d
+    from src.engines.physics_engines.mujoco.python.shaft_chain_mjcf import TIP_SITE
+
+    qc = np.array([np.interp(impact_s, times, q) for q in np.asarray(qcs).T])
+    sim.set_state(impact_s, qc, np.zeros_like(qc))
+    mj.mj_kinematics(m, d)
+    club = int(m.jnt_bodyid[0])
+    joints = [int(m.body_jntadr[b]) for b in range(club + 1, m.nbody)]
+    site = mj.mj_name2id(m, mj.mjtObj.mjOBJ_SITE, TIP_SITE)
+    world = np.vstack([d.xanchor[joints], d.site_xpos[site][None, :]])
+    rotation = d.xmat[club].reshape(3, 3)
+    return (world - d.xpos[club]) @ rotation
+
+
 def simulate_grip_driven_shaft(
     track: ClubPoseTrack,
     chain: cs.ShaftChain,
@@ -324,4 +347,5 @@ def simulate_grip_driven_shaft(
         o["loft"],
         o["lie"],
         motion.repaired_times_s,
+        _impact_chain_points(sim, times, qcs, impact_time_s),
     )

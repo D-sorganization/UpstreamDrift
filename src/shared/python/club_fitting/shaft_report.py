@@ -19,6 +19,7 @@ from typing import Any
 from src.shared.python.club_fitting.bend_trace import BendTrace
 from src.shared.python.club_fitting.flight_trace import FlightTrace
 from src.shared.python.club_fitting.grip_motion import _positive
+from src.shared.python.club_fitting.shaft_shape import ShaftShape
 
 logger = logging.getLogger(__name__)
 SETTINGS_PATH = Path(__file__).resolve().parents[3] / "config" / "shaft_report.json"
@@ -96,12 +97,13 @@ def load_report_settings(path: Path | None = None) -> ReportSettings:
 
 @dataclass(frozen=True)
 class SweepResult:
-    """Sweep rows (flat records, one per flex), their bend traces and ball
-    flights, where the sweep has them."""
+    """Sweep rows (flat records, one per flex), their bend traces, ball
+    flights and impact shaft shapes, where the sweep has them."""
 
     rows: tuple[dict[str, Any], ...]
     traces: dict[str, BendTrace]
     flights: dict[str, FlightTrace] = field(default_factory=dict)
+    shapes: dict[str, ShaftShape] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not self.rows:
@@ -111,11 +113,13 @@ class SweepResult:
 
 
 def load_sweep_result(path: Path) -> SweepResult:
-    """Read ``flex_sweep.json``; ``traces`` and ``flights`` are optional."""
+    """Read ``flex_sweep.json``; ``traces``, ``flights`` and ``shapes`` (absent
+    from sweeps written before #15150 C5b) are optional."""
     data = json.loads(path.read_text(encoding="utf-8"))
     traces = {k: BendTrace.from_dict(v) for k, v in data.get("traces", {}).items()}
     flights = {k: FlightTrace.from_dict(v) for k, v in data.get("flights", {}).items()}
-    return SweepResult(tuple(data.get("rows", ())), traces, flights)
+    shapes = {k: ShaftShape.from_dict(v) for k, v in data.get("shapes", {}).items()}
+    return SweepResult(tuple(data.get("rows", ())), traces, flights, shapes)
 
 
 def summary_rows(result: SweepResult, settings: ReportSettings) -> list[dict]:

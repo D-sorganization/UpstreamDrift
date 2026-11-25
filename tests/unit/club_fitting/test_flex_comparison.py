@@ -120,3 +120,45 @@ def test_sweep_cli_has_a_comparison_option() -> None:
 
     args = build_parser().parse_args(["--bundle", "b", "--out", "o", "--comparison"])
     assert args.comparison is True
+
+
+def _shape_points(lead_m: float, droop_m: float) -> list[list[float]]:
+    f = np.linspace(0.0, 1.0, 5)
+    return np.column_stack([f, lead_m * f**2, droop_m * f**2]).tolist()
+
+
+def test_shaft_shape_panel_draws_each_flex(sweep_json) -> None:
+    data = json.loads(sweep_json.read_text())
+    data["shapes"] = {
+        f: {"points_m": _shape_points(0.01 * (5 - i), 0.004 * i)}
+        for i, f in enumerate(FLEXES)
+    }
+    sweep_json.write_text(json.dumps(data))
+    settings = load_comparison_settings()
+    assert settings.shape_exaggeration != 1.0
+    fig = render_comparison(load_sweep_result(sweep_json), settings)
+    lead, droop = fig.axes[2:4]
+    for ax in (lead, droop):
+        assert [ln.get_label() for ln in ax.get_lines()] == list(FLEXES)
+        assert [ln.get_color() for ln in ax.get_lines()] == list(
+            settings.flex_colors[:5]
+        )
+        texts = [t.get_text() for t in ax.texts]
+        assert (
+            settings.shape_exaggeration_format.format(settings.shape_exaggeration)
+            in texts
+        )
+    k = settings.shape_length_scale * settings.shape_exaggeration
+    assert lead.get_lines()[1].get_ydata()[-1] == pytest.approx(0.04 * k)
+    assert droop.get_lines()[1].get_ydata()[-1] == pytest.approx(0.004 * k)
+    true_scale = dataclasses.replace(settings, shape_exaggeration=1.0)
+    fig = render_comparison(load_sweep_result(sweep_json), true_scale)
+    assert list(fig.axes[2].texts) == []
+
+
+def test_shaft_shape_panel_says_when_shapes_are_not_recorded(sweep_json) -> None:
+    settings = load_comparison_settings()
+    fig = render_comparison(load_sweep_result(sweep_json), settings)
+    for ax in fig.axes[2:4]:
+        assert ax.get_lines() == []
+        assert [t.get_text() for t in ax.texts] == [settings.no_shape_text]
