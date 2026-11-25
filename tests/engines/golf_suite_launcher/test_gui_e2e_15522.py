@@ -32,7 +32,7 @@ from src.engines.physics_engines.mujoco.python import (  # noqa: E402
 pytestmark = pytest.mark.unit
 
 _APP: QApplication | None = None
-_DRAKE_SCRIPT = "UpstreamDrift/engines/physics_engines/drake/python/src/golf_gui.py"
+_DRAKE_MODULE = "src.engines.physics_engines.drake.python.src.drake_gui_app"
 
 
 def _ensure_qapp() -> QApplication:
@@ -73,6 +73,9 @@ def launcher(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     monkeypatch.setattr(gsl.QtWidgets.QMessageBox, "critical", fake_critical)
 
     window = gsl.UpstreamDriftLauncher()
+    # Scripts are launched as ``python -m <module>`` relative to ``repo_root``,
+    # so the throwaway scripts must live under a (fake) repository root.
+    window.repo_root = tmp_path
     for attr in ("mujoco_path", "pinocchio_path"):
         script = tmp_path / attr / "run.py"
         script.parent.mkdir(parents=True)
@@ -114,13 +117,12 @@ def test_window_launches_with_three_enabled_buttons_and_ready_status(launcher) -
 def test_clicking_script_button_spawns_interpreter_and_updates_status(
     launcher, button_attr: str, path_attr: str, name: str
 ) -> None:
-    """A click starts the model script with this interpreter in its work dir."""
-    script: Path = getattr(launcher, path_attr)
+    """A click starts the model as ``-m <module>`` from the repository root."""
     _click(getattr(launcher, button_attr))
     assert len(launcher.rec.popen_calls) == 1
     cmd, kwargs = launcher.rec.popen_calls[0]
-    assert cmd == [sys.executable, str(script)]
-    assert kwargs["cwd"] == str(script.parent.parent)
+    assert cmd == [sys.executable, "-m", f"{path_attr}.run"]
+    assert kwargs["cwd"] == str(launcher.repo_root)
     assert launcher.status.text() == f"{name} Launched"
     assert launcher.rec.dialogs == []
 
@@ -172,7 +174,7 @@ def test_drake_click_builds_docker_command_mounting_repositories(launcher) -> No
     else:
         assert "--net=host" not in cmd
         assert "DISPLAY=host.docker.internal:0" in cmd
-    assert cmd[-2:] == ["python", _DRAKE_SCRIPT]
+    assert cmd[-3:] == ["python", "-m", _DRAKE_MODULE]
     assert kwargs["cwd"] == str(launcher.repo_root)
     assert launcher.status.text() == "Drake Launched (Docker)"
 
