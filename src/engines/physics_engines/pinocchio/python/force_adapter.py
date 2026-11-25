@@ -452,6 +452,24 @@ class PinocchioForceAdapter:
         self._pin.forwardKinematics(self._model, self._data, configuration)
         return self._data.oMi[self.club_joint_index()].translation.copy()
 
+    def _club_demands(
+        self, q: Array, v: Array, a: Array, gravity: bool
+    ) -> dict[int, Any]:
+        """World spatial force (about the origin) each club-subtree joint's body
+        needs: momentum rate ``Y a + v x* Y v``, less the weight when ``gravity``."""
+        self._second_order_kinematics(q, v, a)
+        field = self._model.gravity
+        weight = self._pin.Motion(np.asarray(field.linear), np.zeros(3))
+        demands = {}
+        for j, inertia in self._club_subtree_inertias():
+            placement = self._data.oMi[j]
+            accel = self._data.a[j]
+            if gravity:
+                accel = accel - placement.actInv(weight)
+            body_v = self._data.v[j]
+            demands[j] = placement.act(inertia * accel + body_v.cross(inertia * body_v))
+        return demands
+
     def club_subtree_load(
         self, q: Array, v: Array, a: Array, gravity: bool = True
     ) -> tuple[Array, Array]:
@@ -464,19 +482,60 @@ class PinocchioForceAdapter:
         RNEA passes through the club joint of a model whose club body holds
         the bare club only.
         """
-        self._second_order_kinematics(q, v, a)
         pin = self._pin
-        field = self._model.gravity
-        weight = pin.Motion(np.asarray(field.linear), np.zeros(3))
-        total = pin.Force.Zero()
-        for j, inertia in self._club_subtree_inertias():
-            placement = self._data.oMi[j]
-            accel = self._data.a[j]
-            if gravity:
-                accel = accel - placement.actInv(weight)
-            body_v = self._data.v[j]
-            total += placement.act(inertia * accel + body_v.cross(inertia * body_v))
+        demands = self._club_demands(q, v, a, gravity).values()
+        total = sum(demands, pin.Force.Zero())
         return total.linear.copy(), total.angular.copy()
+
+    def _shaft_station_joints(self) -> tuple[tuple[int, ...], ...]:
+        """Pinocchio joints of each shaft joint (one per primitive), grip first.
+
+        ``ValueError`` for a rigid club (no shaft joints).
+        """
+        groups: dict[int, list[int]] = {}
+        for name in passive_coordinates(self._spec):
+            station = int(name.rsplit("_", 1)[1])
+            groups.setdefault(station, []).append(int(self._model.getJointId(name)))
+        if not groups:
+            raise ValueError("the club has no flexible-shaft chain")
+        return tuple(tuple(groups[i]) for i in sorted(groups))
+
+    def shaft_stations(self, q: Array) -> tuple[Array, Array]:
+        """World ``(points, tip-ward unit axes)`` of the shaft joints, ``(n, 3)``.
+
+        The axis is the distal link's ``+y`` (club frame: grip toward head),
+        the convention of ``shaft_load_split`` (#15150 Z9).
+        """
+        configuration = self._checked(q, "configuration")
+        self._pin.forwardKinematics(self._model, self._data, configuration)
+        placements = self._data.oMi
+        points, axes = [], []
+        for joints in self._shaft_station_joints():
+            first, last = placements[joints[0]], placements[joints[-1]]
+            rotation = last.rotation
+            points.append(first.translation.copy())
+            axes.append(rotation[:, 1].copy())
+        return np.array(points), np.array(axes)
+
+    def shaft_link_loads(
+        self, q: Array, v: Array, a: Array, gravity: bool = True
+    ) -> tuple[Array, Array]:
+        """World ``(forces, moments about the origin)`` each shaft link needs.
+
+        Row ``i`` is link ``i`` (distal of shaft joint ``i``): its momentum
+        rate less its weight when ``gravity``. Feeds ``shaft_load_split``.
+        """
+        pin = self._pin
+        demands = self._club_demands(q, v, a, gravity)
+        zero = pin.Force.Zero()
+        links = [
+            sum((demands[j] for j in joints), zero)
+            for joints in self._shaft_station_joints()
+        ]
+        return (
+            np.array([f.linear for f in links]),
+            np.array([f.angular for f in links]),
+        )
 
     def bare_club_net_wrench(self, q: Array, v: Array, a: Array) -> tuple[Array, Array]:
         """Net hand-on-club ``(force, torque about CoM)`` of the bare club.

@@ -515,10 +515,12 @@
 {"path": "club_data/targets.py", "classification": "ud-only", "package": "club_data", "spelling_only": false}
 {"path": "club_fitting/__init__.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
 {"path": "club_fitting/__main__.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
+{"path": "club_fitting/bend_trace.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
 {"path": "club_fitting/bundle_input.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
 {"path": "club_fitting/flex_sweep.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
 {"path": "club_fitting/grip_driven_shaft.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
 {"path": "club_fitting/grip_motion.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
+{"path": "club_fitting/shaft_report.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
 {"path": "codemap/__init__.py", "classification": "tools-only", "package": "codemap", "spelling_only": false}
 {"path": "codemap/_lang_js.py", "classification": "tools-only", "package": "codemap", "spelling_only": false}
 {"path": "codemap/_lang_markdown.py", "classification": "tools-only", "package": "codemap", "spelling_only": false}
@@ -3123,6 +3125,7 @@
 {"path": "simulation_backends/ode_backend.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/protocol.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/provenance.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
+{"path": "simulation_backends/shaft_load_split.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/superposition.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/trace_io.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/validation.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}

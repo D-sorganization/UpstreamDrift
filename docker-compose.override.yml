@@ -1,0 +1,9 @@
+# Dev-only overrides, loaded automatically by `docker compose up` (#15763).
+# Skip in shared or internet-facing environments:
+#   docker compose -f docker-compose.yml up
+services:
+  backend:
+    # Override the image ENTRYPOINT (the prod uvicorn wrapper, #7129) so this
+    # dev `command` with --reload is run directly rather than passed as args.
+    entrypoint: []
+    command: python3 -m uvicorn src.api.server:app --host 0.0.0.0 --port 8001 --reload

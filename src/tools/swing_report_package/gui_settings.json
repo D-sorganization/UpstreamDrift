@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "description": "Swing report package window (#15724). It runs 'python -m <module>' with the command line's flags; ticked items become --add/--drop against the package. Swing and club defaults are runner_settings.json 'cli_defaults'.",
+  "module": "src.tools.swing_report_package",
+  "window": {"title": "Swing Report Package", "width": 900, "height": 680, "items_min_height": 220},
+  "defaults": {"package": "default"},
+  "bundle_filter": "Swing bundle (*.npz);;All files (*)",
+  "labels": {
+    "bundle": "Bundle", "out": "Output folder", "package": "Package",
+    "swing": "Swing name", "club": "Club", "items": "Items",
+    "browse": "Browse…", "preview": "Preview Plan", "run": "Run", "stop": "Stop",
+    "choose_bundle": "Choose Swing Bundle", "choose_out": "Choose Output Folder",
+    "started": "Running: {command}", "finished": "Finished with exit status {code}",
+    "error": "Error: {message}"
+  }
+}

@@ -51,7 +51,7 @@ from src.tools.native_viewer_export.compositor import (
     event_caption_for_time,
 )
 from src.tools.native_viewer_export import contact_frame, flight_tracer, replay_mode
-from src.tools.native_viewer_export import shot_setup
+from src.tools.native_viewer_export import model_card, shot_setup
 from src.tools.native_viewer_export import ellipsoid_panel as ellipsoid_hud
 from src.tools.native_viewer_export import dispersion_traces, flight_inset, hole_view
 from src.tools.native_viewer_export.frame_times import write_frame_times
@@ -694,6 +694,8 @@ class ExportResult:
     inset_strip: dict[str, Any] | str | None = None
     #: how the motion was produced (``ReplayMode`` value), written to the manifest
     replay_mode: str = "unknown_replay_mode"
+    #: ``ModelCard.to_dict()`` of the clip (#15150 E2), written to the manifest
+    model_card: dict[str, Any] | None = None
 
     @property
     def skipped(self) -> bool:
@@ -1081,6 +1083,7 @@ def export_swing(
         ),
         ball=ball_record,
         replay_mode=replay_mode.replay_mode_of(swing.bundle).value,
+        model_card=model_card.model_card_of(swing, settings, ball_record).to_dict(),
         flight=flight_tracer.manifest_record(overlays),
         inset_strip=(
             strip_outcome.record()

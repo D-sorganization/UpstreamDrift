@@ -92,7 +92,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.shot_pattern_analysis`<br>Shot Pattern Analysis Workbench | ⚪ exempt | `src/tools/shot_pattern_analysis/gui.py` | — | — | The current product surface is a local PyQt6 launcher and headless CLI for deterministic physics simulation and local CSV, JSON, and PNG exports. There is no API route or React page, so browser parity is not claimed. |
 | `tools.spine_study`<br>Segmental spine study execution and model asset selection | ✅ parity | `src/tools/spine_viewer/gui.py` | `src/api/routes/spine_viewer.py` | `ui/src/pages/SpineViewer.tsx` | — |
 | `tools.spine_viewer`<br>Segmental spine viewer (per-level load heatmaps from study receipts) | ✅ parity | `src/tools/spine_viewer/gui.py` | `src/api/routes/spine_viewer.py` | `ui/src/pages/SpineViewer.tsx` | — |
-| `tools.swing_report_package`<br>Swing report package: one command regenerates a swing's videos, grids and phase sheets (CLI) | 🔴 gap | `src/tools/swing_report_package/cli.py` | — | — | #15724 |
+| `tools.swing_report_package`<br>Swing report package: choose, preview and render a swing's videos, grids and phase sheets | 🔴 gap | `src/tools/swing_report_package/gui.py` | — | — | #15725 |
 | `tools.terrain_engine`<br>Terrain and topography configuration | ✅ parity | — | `src/api/routes/terrain.py` | `ui/src/pages/Terrain.tsx` | — |
 | `tools.training_controller`<br>Training controller tool | 🔴 gap | `src/tools/training_controller/__main__.py` | — | — | #15150 |
 | `tools.video_analyzer`<br>Video Analyzer (pose tracking and force/torque overlay) | ✅ parity | `src/tools/video_analyzer/gui.py` | `src/api/routes/video_overlays.py` | `ui/src/pages/VideoAnalyzer.tsx` | — |
@@ -182,6 +182,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `swing_flight_pipeline` | `simulation.swing_flight_pipeline` |
 | `swing_objective_lab` | `simulation.swing_objective_lab` |
 | `swing_optimizer` | `optimization.swing_optimizer` |
+| `swing_report_package` | `tools.swing_report_package` |
 | `terrain_engine` | `tools.terrain_engine` |
 | `tools_calculator_hub` | `launcher.tile_web_reachability` |
 | `tour_matching_viewer` | `matching.tour_matching_viewer` |
