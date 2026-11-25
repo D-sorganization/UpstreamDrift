@@ -512,10 +512,9 @@ field coloured by its tag (`model_card_panel.py`); its layout and colours are in
 
 ## Shaft Loads
 
-`--shaft-loads {bending,shear}` (off) draws the grip side's bending moment or
-shear on the tip side at each chain-shaft joint, `--shaft-loads-part` picks the
-part; look in `shaft_loads_settings.json`. Chain bending is the joint spring
-moment, so an unbent shaft shows none.
+`--shaft-loads {bending,shear}` (off) draws each chain-shaft joint's bending
+moment or shear, `--shaft-loads-part` the part (`shaft_loads_settings.json`).
+Chain bending is the joint spring moment, so an unbent shaft shows none.
 
 ## Aim Line
 

@@ -36,8 +36,7 @@ _QUANTITY_KEYS = {"units", "scale_m", "floor", "legend", "key"}
 
 @dataclass(frozen=True)
 class ShaftLoadLook:
-    """Arrow look (``shaft_loads_settings.json``); ``scale_m`` is arrow metres
-    per unit, ``floor`` the smallest load drawn."""
+    """Arrow look: ``scale_m`` arrow metres per unit, ``floor`` smallest load drawn."""
 
     max_length_m: float
     shaft_radius_m: float
@@ -196,11 +195,28 @@ def _sampler(swing: Any) -> Callable[[int], tuple[ShaftLoadSplit, np.ndarray]]:
     return sample
 
 
-def feed_with_loads(feed: Any, swing: Any, quantity: str, part: str) -> Any:
-    """``feed`` with the shaft arrows of ``swing`` (:func:`with_shaft_loads`)."""
-    look = load_look()
+def feed_with_options(feed: Any, swing: Any, opts: Any) -> Any:
+    """``feed`` plus the shaft arrows ``opts`` asks for; unchanged when off."""
+    if (quantity := opts.shaft_loads) is None:
+        return feed
+    part, look = opts.shaft_loads_part, load_look()
     glyphs = shaft_load_glyphs(swing, quantity, part, look)
     return with_shaft_loads(feed, glyphs, quantity, part, look)
+
+
+def add_cli_arguments(parser: Any) -> None:
+    """Add ``--shaft-loads`` and ``--shaft-loads-part`` to an argparse parser."""
+    parser.add_argument(
+        "--shaft-loads",
+        choices=QUANTITIES,
+        help="draw the shaft's bending or shear at each joint (default: off)",
+    )
+    parser.add_argument(
+        "--shaft-loads-part",
+        choices=PARTS,
+        default=PARTS[0],
+        help="shaft-load part: total (default), ZTCF or ZVCF",
+    )
 
 
 def shaft_load_glyphs(

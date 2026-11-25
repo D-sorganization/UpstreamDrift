@@ -622,18 +622,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="draw an anatomical swing event caption line ('Event: <name>') in the "
         "HUD (default: off; HRG-E4, #13175)",
     )
-    p.add_argument(
-        "--shaft-loads",
-        choices=shaft_load_look.QUANTITIES,
-        help="draw the chain shaft's internal bending moment or shear at each "
-        "shaft joint (look: shaft_loads_settings.json; default: off; #15150 Z9c)",
-    )
-    p.add_argument(
-        "--shaft-loads-part",
-        choices=shaft_load_look.PARTS,
-        default=shaft_load_look.PARTS[0],
-        help="shaft-load part: total (default), ZTCF drift or ZVCF control",
-    )
+    shaft_load_look.add_cli_arguments(p)
     p.add_argument(
         "--model-card-panel",
         action=argparse.BooleanOptionalAction,

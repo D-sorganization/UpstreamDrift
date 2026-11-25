@@ -74,8 +74,7 @@ class OverlayOptions:
     force_part: str = "recorded"
     #: force arrow look in ``arrow_style_settings.json`` (default: its default)
     arrow_style: str | None = None
-    #: shaft internal-load arrows: ``bending``, ``shear`` or off (#15150 Z9c)
-    shaft_loads: str | None = None
+    shaft_loads: str | None = None  # bending, shear or None: off (#15150 Z9c)
     shaft_loads_part: str = "total"  # or one ZTCF/ZVCF part
 
 
@@ -568,9 +567,7 @@ def build_overlay_feed(
         feed = _with_ztcf_zvcf(feed, swing, style, opts)
     if splits is not None and opts.force_part != "recorded":
         feed = with_force_part(feed, splits, style, opts.force_part)
-    if opts.shaft_loads is not None:
-        part = opts.shaft_loads_part
-        feed = shaft_loads.feed_with_loads(feed, swing, opts.shaft_loads, part)
+    feed = shaft_loads.feed_with_options(feed, swing, opts)
     return feed, lookat
 
 

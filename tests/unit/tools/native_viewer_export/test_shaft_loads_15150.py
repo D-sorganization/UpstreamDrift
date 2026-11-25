@@ -80,10 +80,8 @@ def test_bending_and_shear_arrows_are_the_loads_at_the_stations(look) -> None:
 
 def test_long_arrows_are_clamped_small_ones_dropped_and_stride_kept(look) -> None:
     points, loads = _cantilever()
-    floor = {**look.quantities["bending"], "floor": 2.5}
-    tight = replace(
-        look, max_length_m=1e-3, quantities={**look.quantities, "bending": floor}
-    )
+    q = {**look.quantities, "bending": {**look.quantities["bending"], "floor": 2.5}}
+    tight = replace(look, max_length_m=1e-3, quantities=q)
     arrows = shaft_loads.shaft_load_arrows(points, loads, "bending", "total", tight)
     assert len(arrows) == 4  # the last station's 2 N m is below the floor
     assert np.linalg.norm(_tips(arrows), axis=1) == pytest.approx([1e-3] * 4)
@@ -123,7 +121,6 @@ def test_with_shaft_loads_keeps_the_feed_arrows_legend_and_key(look) -> None:
 def test_export_settings_and_cli_flags() -> None:
     from src.tools.native_viewer_export.cli import build_parser, build_settings
 
-    assert ExportSettings().shaft_loads is None
     assert ExportSettings(shaft_loads="shear").shaft_loads_part == "total"
     for kwargs in (
         {"shaft_loads": "torsion"},
@@ -137,6 +134,9 @@ def test_export_settings_and_cli_flags() -> None:
     settings = build_settings(build_parser().parse_args([*base, *flags]))
     assert (settings.shaft_loads, settings.shaft_loads_part) == ("bending", "ztcf")
     assert build_settings(build_parser().parse_args(base)).shaft_loads is None
+    assert (
+        shaft_loads.feed_with_options(id, None, SimpleNamespace(shaft_loads=None)) is id
+    )
 
 
 @pytest.mark.requires_pinocchio
@@ -163,7 +163,6 @@ def test_live_glyphs_match_the_shaft_load_split() -> None:
     glyphs = shaft_loads.shaft_load_glyphs(swing, "bending", "total", look)
     arrows = glyphs(0)
     assert arrows and glyphs(0) is arrows  # evaluated once per state
-    split, _ = shaft_loads._sampler(swing)(0)
-    expected = split.total().bending_magnitude_nm[0]
+    expected = shaft_loads._sampler(swing)(0)[0].total().bending_magnitude_nm[0]
     kept = expected[expected >= look.quantities["bending"]["floor"]]
     np.testing.assert_allclose([a.magnitude for a in arrows], kept, rtol=1e-9)
