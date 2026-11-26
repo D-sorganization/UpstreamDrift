@@ -392,6 +392,7 @@ class TestLocalServerDiagnostics:
         assert "status" in data
         assert "ui_available" in data
 
+    @pytest.mark.unit
     def test_health_endpoint_reports_bind_port_identity(
         self, client: TestClient, monkeypatch: pytest.MonkeyPatch
     ) -> None:
