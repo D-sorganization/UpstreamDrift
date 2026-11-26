@@ -76,3 +76,21 @@ def test_profiles_have_distinct_face_and_clothing_treatments():
         )
         >= 2
     )
+
+
+def test_sam_snead_profile_uses_the_shared_straw_hat_contract():
+    """Use the separately shared straw-hat style for Snead's silhouette."""
+    head = player_appearance("sam_snead").head
+    assert head.cap_style == "straw_hat"
+    assert head.cap_material == "hat_straw"
+
+
+def test_seve_profile_keeps_the_reviewed_dark_side_part_visible():
+    """Preserve the reviewed compilation close-up's uncovered hairstyle."""
+    profile = player_profile("seve_ballesteros")
+    head = profile["appearance"]["head"]
+    shirt = profile["appearance"]["materials"]["polo_white"]["base_color"]
+    assert head["cap_style"] == "none"
+    assert head["hair_part"] == "left"
+    assert head["headwear_material"] == "hair_dark_brown"
+    assert shirt[:3] == [0.10, 0.16, 0.29]
