@@ -7,6 +7,8 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Must-Read Pointers
 
+- #15825: Necromatcher native definitions may explicitly embed `appearance-v1`; binding and ranges reconstruct and verify the exact styled MJCF.
+
 - `AGENTS.md`, `CLAUDE.md`: binding policy, discovery workflow and the shared-infrastructure directory.
 - `docs/development/DEVELOPMENT_LOG.md`: one `DL-#<issue>` state row per feature. `docs/development/HANDOFF.md`: canonical fleet handoff.
 - `SPEC.md`: architecture contract; the change log is written by the fragment collate step, one row per PR.
@@ -51,9 +53,13 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Active Epics and Slices (One Line Each; Detail in the Archive)
 
+- Player skins #15814: visual head morphology #15815; Tiger/Hogan dimension and appearance bundles #15816; calculation reference `docs/development/player-skin-morphology.tex`. Likeness and historical motion remain unqualified.
+- Player reference footage #15817: source receipt and reproduction commands are linked from `docs/development/historical-capture-procedure.md`; USGA full-source PTS alignment remains unverified, physical clock unknown, and no training was performed.
+
 - Simulation Backends GUI E2E #15703: `codex-ct-1/15703-gui-e2e` uses MuJoCo CPU-only mode on Windows and handles optional backend import runtime failures; the focused four-worker suite passes.
 - Output I/O #15189: `fix/async-save-io-errors` reports filesystem failures through async/background save callbacks and default logging; regression tests preserve the original future exception. Review through Barb's pipeline.
 - Reproducibility #15191: `fix/seed-validation-atomic` rejects non-integer seeds before modifying Python or NumPy RNG state; `validate=False` continues to bypass only the range check. Review through Barb's pipeline.
+- Player profiles #15816: `player_models.export_player` builds source-attributed Tiger/Hogan candidates or preserves an existing spec with `base_spec`; motion requires separate qualification.
 - Import Utilities #15193: `fix/dotted-module-imports` resolves dotted names to the requested module and reads its own version for dependency checks. Review through Barb's pipeline.
 
 Canonical golfer Drake alignment (#13531, #13450; folded into the grip-lane consolidation): actuator count from `resolve_plant_n_actuators`, grip frames `mid_hands`/`club_head`; verify `tests/engines/drake/test_drake_fit_actuator_alignment_13531.py` and grip-resolution tests.
@@ -103,6 +109,7 @@ Golf Chain Visualisation, Epic #11706 (GCV):
 - Native export backends, quarter-speed variants, impact time, high-FPS schedule GCV-14: #11720; MyoSuite v3 export worker #11997.
 - ClubheadSeries adapters GCV-16 #11722; impact parameters panel GCV-17 #11723; ground reaction manual slice GCV-18 #11724.
 - Clubhead speed timing GCV-20: #11767; MyoSuite hip retarget #12052; right knee flexes negative like the left #12057.
+- Visual flat-cap appearance #15822 adds a low-profile CC0 headwear style; the crown geometry stays in the appearance layer.
 
 Open Swing Visualisation grip and gaze (OSV, Epic #11726):
 
@@ -137,3 +144,5 @@ Motion matching and tour baselines:
 - Tour baselines (exact-capture matching, fail-closed qualification): #10829, #10830, #10831, #10799, #10800, #10844, #10849; TB-12 #10597 merged.
 - Hip-calibrated receipt provenance #10271; GolfSwingVisualizer MATLAB consolidation #9225; docs-consistency cross-repo paths #10743.
 - Tiger 2000 and Ben Hogan baselines: see the archive section of that name.
+
+- #15821: Neutral shoe-to-head stature calibration uses bounded trunk scaling; see `docs/development/player-stature.tex`. New anatomy requires motion refitting.

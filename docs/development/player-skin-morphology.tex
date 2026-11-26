@@ -1,0 +1,54 @@
+\documentclass{article}
+\usepackage{amsmath,hyperref}
+\title{Player Skin Morphology: Visual Contract and Reproduction}
+\author{UpstreamDrift}
+\date{26 November 2026}
+\begin{document}
+\maketitle
+\section{Scope and Provenance}
+This editable research reference accompanies issues 15814 and 15815; it is
+separate from the governed engineering design manual. The existing CC0
+MakeHuman-derived head and its provenance remain unchanged. Morphs are artistic
+controls, not measured player anatomy, fitted video evidence or biometric scans.
+They operate only on the shared visual meshes, leaving bodies, joints, marker
+attachments, masses, inertias, collision geometry and motion coordinates intact.
+The same full-body MuJoCo exporter remains authoritative.
+\section{Frames, Units and Equations}
+The input vertex $(x,y,z)$ uses the canonical unit-head frame: origin at the
+neck plane, $x$ forward, $y$ left and $z$ up. Output coordinates are multiplied
+by the existing head length in metres. Heights are unchanged.
+Let $u=\mathrm{clip}(z/0.2,0,1)$, $n=u^2(3-2u)$,
+$f=\mathrm{clip}((x+0.05)/0.35,0,1)$ and
+$G(c,r)=\exp(-((z-c)/r)^2)$. For width $w$, jaw $j$, nose $a$,
+mouth $m$ and eye-spacing $e$:
+\begin{align*}
+y' &= y[1+n(w+jG(0.28,0.16)
+       +f(mG(0.276,0.08)+eG(0.532,0.08)))],\\
+x' &= x+0.12nafG(0.43,0.12)\exp(-(y/0.10)^2),\\
+z' &= z.
+\end{align*}
+Every parameter must be finite and lie in $[-0.2,0.2]$; missing parameters
+are zero. All-zero parameters return an exact copy. Skin, eyes, brows, mouth,
+hair and cap receive the identical spatial mapping, preserving attachment.
+The neck plane is fixed. Triangle indices are preserved; no remeshing or
+physical parameter estimation occurs. Bounds constrain artistic edits but do
+not establish anatomical accuracy or certify every possible morph combination.
+\section{Acceptance and Reproduction}
+Schema round-trips, invalid-input rejection, identity, unchanged heights and
+neck, closed outward mesh topology and native physics equivalence are tested.
+The native gate compares compiled model parameters and forward computations
+with and without nonzero morphs. Visual review remains a separate gate:
+passing numerical tests does not establish resemblance to a named player.
+From the repository root with the pinned Tools dependency initialized:
+\begin{verbatim}
+PYTHONPATH=.:vendor/ud-tools/src MUJOCO_GL=egl python3 -m pytest \
+ tests/unit/model_appearance/test_head_morph.py -q -o addopts=''
+\end{verbatim}
+\section{Limits and Failed Experiments}
+The initial red test failed because the morphology module was absent.
+The old generic head controls could change colors and headwear but not face
+shape. A shared deformation was selected so accessories follow the same
+surface transformation. No historical motion training, physical playback
+qualification, player scan, period-specific mass measurement or precise
+reconstruction is claimed by this change.
+\end{document}
