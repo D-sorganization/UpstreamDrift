@@ -51,6 +51,7 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Active Epics and Slices (One Line Each; Detail in the Archive)
 
+- Player skins #15814: visual head morphology #15815; Tiger/Hogan dimension and appearance bundles #15816; calculation reference `docs/development/player-skin-morphology.tex`. Likeness and historical motion remain unqualified.
 - Player reference footage #15817: source receipt and reproduction commands are linked from `docs/development/historical-capture-procedure.md`; USGA full-source PTS alignment remains unverified, physical clock unknown, and no training was performed.
 
 - Simulation Backends GUI E2E #15703: `codex-ct-1/15703-gui-e2e` uses MuJoCo CPU-only mode on Windows and handles optional backend import runtime failures; the focused four-worker suite passes.
@@ -140,3 +141,5 @@ Motion matching and tour baselines:
 - Tour baselines (exact-capture matching, fail-closed qualification): #10829, #10830, #10831, #10799, #10800, #10844, #10849; TB-12 #10597 merged.
 - Hip-calibrated receipt provenance #10271; GolfSwingVisualizer MATLAB consolidation #9225; docs-consistency cross-repo paths #10743.
 - Tiger 2000 and Ben Hogan baselines: see the archive section of that name.
+
+- #15821: Neutral shoe-to-head stature calibration uses bounded trunk scaling; see `docs/development/player-stature.tex`. New anatomy requires motion refitting.

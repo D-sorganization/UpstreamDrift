@@ -66,6 +66,7 @@ def _closed(faces: NDArray[np.int64]) -> bool:
 
 
 def _check_mesh(name: str, mesh: Mesh) -> None:
+    """Reject malformed, open, inward-facing, or oversized head parts."""
     v, f = mesh.vertices, mesh.faces
     if v.ndim != 2 or v.shape[1] != 3 or not np.isfinite(v).all() or len(f) == 0:
         raise ValueError(f"head mesh {name!r}: bad vertex or face arrays")
@@ -88,6 +89,7 @@ def _check_mesh(name: str, mesh: Mesh) -> None:
 
 
 def _load(asset: Path, provenance: Path) -> HeadAsset:
+    """Load a hash-pinned CC0 asset and validate each mesh part."""
     if not provenance.is_file():
         raise ValueError(f"head provenance record missing: {provenance}")
     record = json.loads(provenance.read_text(encoding="utf-8"))
@@ -118,6 +120,7 @@ def load_head_asset(
 
 @lru_cache(maxsize=1)
 def _default_asset() -> HeadAsset:
+    """Return the validated repository head asset from the cache."""
     return _load(ASSET_PATH, PROVENANCE_PATH)
 
 
@@ -215,6 +218,25 @@ def build_mesh_parts(
             (name, Mesh(m.vertices * length_m, m.faces), "cap")
             for name, m in head_cap.build_cap(asset.skin, settings.cap_brim)
         ]
+    if settings is not None:
+        from src.shared.python.model_appearance.head_morph import (
+            HeadMorph,
+            warp_vertices,
+        )
+
+        if settings.morph != HeadMorph():
+            out = [
+                (
+                    name,
+                    Mesh(
+                        warp_vertices(mesh.vertices / length_m, settings.morph)
+                        * length_m,
+                        mesh.faces,
+                    ),
+                    role,
+                )
+                for name, mesh, role in out
+            ]
     return out
 
 
