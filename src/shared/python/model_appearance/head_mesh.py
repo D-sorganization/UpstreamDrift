@@ -202,13 +202,17 @@ def build_mesh_parts(
             (name, Mesh(m.vertices * length_m, m.faces), role)
             for name, m, role in head_features.face_parts(asset.skin)
         ]
-    capped = settings is not None and settings.cap_style == "baseball_cap"
+    flat_capped = settings is not None and settings.cap_style == "flat_cap"
+    capped = flat_capped or (
+        settings is not None and settings.cap_style == "baseball_cap"
+    )
+    cap_crop = head_cap.flat_cap_crop() if flat_capped else head_cap.CapCrop()
     if headwear == "hair":
         crop = settings is not None and settings.hair_style == "short_crop"
         unit = asset.hair
         if settings is not None and (crop or capped):
             # Under a cap the hair is cut flatter than the crown stands off.
-            under = head_cap.CapCrop().hair_under if capped else None
+            under = cap_crop.hair_under if capped else None
             unit = head_hair.build_short_crop(asset.skin, settings.hair_part, under)
         out.append(
             ("hair_mesh", Mesh(unit.vertices * length_m, unit.faces), "headwear")
@@ -216,7 +220,7 @@ def build_mesh_parts(
     if settings is not None and capped:
         out += [
             (name, Mesh(m.vertices * length_m, m.faces), "cap")
-            for name, m in head_cap.build_cap(asset.skin, settings.cap_brim)
+            for name, m in head_cap.build_cap(asset.skin, settings.cap_brim, cap_crop)
         ]
     if settings is not None:
         from src.shared.python.model_appearance.head_morph import (
