@@ -39,9 +39,9 @@ not photogrammetric reconstructions. The shared head deformation and limits
 are defined in \texttt{player-skin-morphology.tex}. Defaults and physical
 parameters remain separate. Preview pose and vertical placement are authored
 for inspection, not inferred motion. Posed head-to-shoe height is not the
-same as erect anatomical stature. With the explicit leg targets, head-skin
-to lowest sole height is 1.91593 metres for Tiger and 1.79034 for Hogan.
-Issue 15821 tracks geometric calibration; these are not stature-qualified yet.
+same as erect anatomical stature. A bounded trunk calibration now matches
+the declared neutral shoe-to-head convention; see \texttt{player-stature.tex}
+for the equations, actual native checks and anatomical interpretation limits.
 \section{Reproduction and Acceptance}
 From the repository root, initialize the pinned Tools submodule and set
 \texttt{PYTHONPATH=.:vendor/ud-tools/src} and \texttt{MUJOCO\_GL=egl} on Linux.

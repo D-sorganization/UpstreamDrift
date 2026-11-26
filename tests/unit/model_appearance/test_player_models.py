@@ -39,6 +39,9 @@ def test_player_dimensions_and_current_model(player, height, mass):
     )
     assert human_mass == pytest.approx(mass, abs=1e-9)
     assert spec["subject"]["stature_m"] == height
+    assert spec["subject"]["neutral_visual_calibration"][
+        "neutral_visual_height_m"
+    ] == pytest.approx(height, abs=0.0001)
     from src.shared.python.motion_matching.anthropometric_candidate import (
         zero_pose_joint_positions,
     )
