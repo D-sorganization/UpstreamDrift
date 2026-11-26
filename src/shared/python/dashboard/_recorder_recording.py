@@ -19,6 +19,7 @@ class _RecordingMixin:
     engine: Any
 
     def record_step(self, control_input: np.ndarray | None = None) -> None:
+        """Record one step's state, analysis and ground forces when recording is active."""
         if not self.is_recording:
             return
 
@@ -49,6 +50,7 @@ class _RecordingMixin:
         self.current_idx += 1
 
     def _compute_kinetic_energy(self, v: np.ndarray, M: np.ndarray | None) -> float:
+        """Return 0.5 * v^T M v, or 0.0 when the mass matrix is unavailable."""
         if v is None:
             raise ValueError("v must be provided")
         if M is not None and M.size > 0:
@@ -66,6 +68,7 @@ class _RecordingMixin:
         tau: np.ndarray,
         M: np.ndarray | None,
     ) -> None:
+        """Store the enabled per-frame ZTCF, ZVCF, drift and control accelerations."""
         if idx is None:
             raise ValueError("idx must be provided")
         if self.analysis_config["ztcf"] and self.data["ztcf_accel"] is not None:
@@ -108,6 +111,7 @@ class _RecordingMixin:
     def _record_induced_accelerations(  # noqa: C901
         self, idx: int, tau: np.ndarray, M: np.ndarray | None
     ) -> None:
+        """Store per-source induced accelerations, using Cholesky when M is available."""
         if idx is None:
             raise ValueError("idx must be provided")
         sources = cast(list[int], self.analysis_config["induced_accel_sources"])
@@ -163,6 +167,7 @@ class _RecordingMixin:
         ke: float,
         tau: np.ndarray,
     ) -> None:
+        """Store time, state, kinetic energy and torque for frame idx."""
         if idx is None:
             raise ValueError("idx must be provided")
         self.data["times"][idx] = t
@@ -172,6 +177,7 @@ class _RecordingMixin:
         self.data["joint_torques"][idx] = tau
 
     def _record_ground_forces(self, idx: int) -> None:
+        """Store ground forces and moments for frame idx when the engine provides them."""
         try:
             grf = self.engine.compute_contact_forces()
             if grf is not None and len(grf) >= 3:
@@ -182,5 +188,6 @@ class _RecordingMixin:
             logger.warning("Failed to compute ground forces at frame %d: %s", idx, e)
 
     def update_control(self, u: np.ndarray) -> None:
+        """Overwrite the torque of the most recent recorded frame with u."""
         if self.is_recording and self.current_idx > 0 and self._buffers_initialized:
             self.data["joint_torques"][self.current_idx - 1] = u

@@ -114,7 +114,7 @@ class RecorderLike(Protocol):
     def get_time_series(
         self, field_name: str
     ) -> tuple[np.ndarray, np.ndarray]:  # pragma: no cover - protocol
-        ...
+        """Return ``(times, values)`` numpy arrays for the named recorder field."""
 
 
 class AnalysisOrchestrator:
@@ -364,6 +364,7 @@ class AnalysisOrchestrator:
     # ------------------------------------------------------------------
 
     def _fetch_counterfactual(self, kind: str) -> tuple[np.ndarray, np.ndarray]:
+        """Fetch a counterfactual or induced-acceleration series as numpy arrays."""
         if kind in COUNTERFACTUAL_KINDS:
             getter = getattr(self.recorder, "get_counterfactual_series", None)
         else:
@@ -412,6 +413,7 @@ class AnalysisOrchestrator:
     def _series_column(
         self, field_name: str, idx: int
     ) -> tuple[np.ndarray, np.ndarray]:
+        """Return one column of a 2-D time series, or empty arrays when out of range."""
         times, values = self._series(field_name)
         if values.ndim != 2 or idx < 0 or idx >= values.shape[1]:
             return np.array([]), np.array([])
@@ -433,6 +435,7 @@ class AnalysisOrchestrator:
         y_label: str,
         message: str = "No data recorded",
     ) -> PlotData:
+        """Build an empty PlotData that carries a placeholder message."""
         return PlotData(
             plot_type=plot_type,
             title=title,
@@ -482,6 +485,7 @@ class AnalysisOrchestrator:
     # ------------------------------------------------------------------
 
     def _plot_joint_angles(self) -> PlotData:
+        """Build the per-joint angle plot in degrees."""
         return self._per_joint_plot(
             "joint_angles",
             "joint_positions",
@@ -492,6 +496,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_joint_velocities(self) -> PlotData:
+        """Build the per-joint angular velocity plot in deg/s."""
         return self._per_joint_plot(
             "joint_velocities",
             "joint_velocities",
@@ -502,6 +507,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_joint_torques(self) -> PlotData:
+        """Build the per-joint applied torque plot."""
         return self._per_joint_plot(
             "joint_torques",
             "joint_torques",
@@ -511,6 +517,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_power_flow(self) -> PlotData:
+        """Build the per-actuator power flow plot labelled by joint name."""
         data = self._per_joint_plot(
             "power_flow",
             "actuator_powers",
@@ -524,6 +531,7 @@ class AnalysisOrchestrator:
         return data
 
     def _plot_energies(self) -> PlotData:
+        """Build the kinetic, potential and total energy time plot."""
         times_ke, ke = self._series("kinetic_energy")
         times_pe, pe = self._series("potential_energy")
         times_te, te = self._series("total_energy")
@@ -544,6 +552,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_club_head_speed(self) -> PlotData:
+        """Build the club head speed plot in mph with peak metadata."""
         times, speeds = self._series("club_head_speed")
         if len(times) == 0 or speeds.size == 0:
             return self._empty(
@@ -575,6 +584,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_angular_momentum(self) -> PlotData:
+        """Build the system angular momentum components and magnitude plot."""
         times, am = self._series("angular_momentum")
         if len(times) == 0 or am.size == 0 or am.ndim != 2 or am.shape[1] < 3:
             return self._empty(
@@ -604,6 +614,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_joint_power_curves(self) -> PlotData:
+        """Build per-joint power curves as torque multiplied by joint velocity."""
         times, torques = self._series("joint_torques")
         _, velocities = self._series("joint_velocities")
         if (
@@ -642,6 +653,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_impulse_accumulation(self) -> PlotData:
+        """Build the per-joint cumulative trapezoidal angular impulse plot."""
         times, torques = self._series("joint_torques")
         if len(times) < 2 or torques.size == 0 or torques.ndim != 2:
             return self._empty(
@@ -685,6 +697,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_phase_diagram(self, joint_idx: int = 0) -> PlotData:
+        """Build the angle versus angular velocity phase diagram for one joint."""
         times, positions = self._series("joint_positions")
         _, velocities = self._series("joint_velocities")
         name = self._joint_name(joint_idx)
@@ -723,6 +736,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_poincare_map_3d(self, joint_idx: int = 0) -> PlotData:
+        """Build a Poincare section map at zero joint velocity by interpolating crossings."""
         times, positions = self._series_column("joint_positions", joint_idx)
         _, velocities = self._series_column("joint_velocities", joint_idx)
         _, accelerations = self._series_column("joint_accelerations", joint_idx)
@@ -805,6 +819,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_lyapunov_exponent(self, joint_idx: int = 0) -> PlotData:
+        """Build the Lyapunov divergence curve and estimated exponent for one joint."""
         try:
             analyzer = self._build_statistical_analyzer(require_torques=False)
         except ValueError as exc:
@@ -863,6 +878,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_recurrence_plot(self) -> PlotData:
+        """Build the recurrence matrix heatmap, or an empty plot when unavailable."""
         try:
             matrix = self.compute_recurrence_matrix()
         except ValueError as exc:
@@ -891,6 +907,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_cop_trajectory(self) -> PlotData:
+        """Build the centre-of-pressure X-Y trajectory plot."""
         times, cop = self._series("cop_position")
         if len(times) == 0 or cop.size == 0 or cop.ndim != 2 or cop.shape[1] < 2:
             return self._empty(
@@ -918,6 +935,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_stability_diagram(self) -> PlotData:
+        """Build the CoM versus CoP planar stability diagram."""
         times, cop = self._series("cop_position")
         _, com = self._series("com_position")
         if (
@@ -953,6 +971,7 @@ class AnalysisOrchestrator:
         skip_steps: int = 5,
         scale: float = 0.001,
     ) -> PlotData:
+        """Build the GRF butterfly diagram from CoP origins and scaled GRF vectors."""
         times, cop = self._series("cop_position")
         _, grf = self._series("ground_forces")
         if (
@@ -1006,6 +1025,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_club_head_trajectory_3d(self) -> PlotData:
+        """Build the 3-D club head trajectory plot."""
         times, pos = self._series("club_head_position")
         if len(times) == 0 or pos.size == 0 or pos.ndim != 2 or pos.shape[1] < 3:
             return self._empty(
@@ -1034,6 +1054,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_swing_profile_radar(self) -> PlotData:
+        """Build the swing profile radar chart from computed swing metrics."""
         try:
             metrics = self.compute_swing_profile_metrics()
         except ValueError as e:
@@ -1063,6 +1084,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_kinematic_sequence_bars(self) -> PlotData:
+        """Build the bar chart of kinematic sequence joint indices."""
         indices = self.derive_kinematic_sequence_indices()
         if not indices:
             return self._empty(
@@ -1090,6 +1112,7 @@ class AnalysisOrchestrator:
         )
 
     def _plot_summary_dashboard(self) -> PlotData:
+        """Build a dashboard that bundles the summary panel plots."""
         panel_types = (
             "club_head_speed",
             "energies",
@@ -1122,6 +1145,7 @@ class AnalysisOrchestrator:
         value: float,
         direction: str = "both",
     ) -> list[int]:
+        """Return indices where consecutive samples cross a value in the given direction."""
         diff = np.asarray(data, dtype=np.float64) - value
         if diff.size < 2:
             return []
@@ -1147,6 +1171,7 @@ class AnalysisOrchestrator:
 
     @staticmethod
     def _crossing_alpha(left: float, right: float, value: float) -> float:
+        """Return the linear interpolation fraction at which the segment reaches value."""
         denominator = right - left
         if denominator == 0.0:
             return 0.0

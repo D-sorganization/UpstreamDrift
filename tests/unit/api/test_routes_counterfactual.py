@@ -35,26 +35,30 @@ class StubEngine:
     model_name_str = "StubPendulum"
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
-        pass
+        """Accept the state without effect; this stub keeps no state."""
 
     def set_control(self, u: np.ndarray) -> None:
-        pass
+        """Accept the control without effect for this stub engine."""
 
     def forward(self) -> None:
-        pass
+        """Advance nothing; this stub engine has no dynamics to run."""
 
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        """Return a constant ZTCF stub of 1.0 per joint."""
         return np.full(N_JOINTS, 1.0)
 
     def compute_control_acceleration_at_state(
         self, q: np.ndarray, tau: np.ndarray
     ) -> np.ndarray:
+        """Return a constant control-at-state stub of 2.0 per joint."""
         return np.full(N_JOINTS, 2.0)
 
     def compute_drift_acceleration(self) -> np.ndarray:
+        """Return a constant drift stub of 3.0 per joint."""
         return np.full(N_JOINTS, 3.0)
 
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
+        """Return a constant control-acceleration stub of 4.0 per joint."""
         return np.full(N_JOINTS, 4.0)
 
 
@@ -68,23 +72,28 @@ class StubRecorder:
     """Recorder stub with recorded frames but no stored counterfactuals."""
 
     def __init__(self, engine: Any) -> None:
+        """Store the engine and build a fixed time base with empty counterfactual maps."""
         self.engine = engine
         self.times = np.linspace(0.0, 1.0, N_FRAMES)
         self.counterfactuals: dict[str, tuple[np.ndarray, np.ndarray]] = {}
         self.induced: dict[str, tuple[np.ndarray, np.ndarray]] = {}
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
+        """Return empty arrays for every field."""
         return np.array([]), np.array([])
 
     def get_counterfactual_series(self, name: str) -> tuple[np.ndarray, np.ndarray]:
+        """Return the stored counterfactual pair for name, or empty arrays."""
         return self.counterfactuals.get(name, (np.array([]), np.array([])))
 
     def get_induced_acceleration_series(
         self, name: str
     ) -> tuple[np.ndarray, np.ndarray]:
+        """Return the stored induced-acceleration pair for name, or empty arrays."""
         return self.induced.get(name, (np.array([]), np.array([])))
 
     def compute_analysis_post_hoc(self) -> None:
+        """Populate the ztcf and zvcf counterfactuals with synthetic values."""
         cf = np.tile(np.arange(N_JOINTS, dtype=float) + 1.0, (N_FRAMES, 1))
         self.counterfactuals["ztcf"] = (self.times, cf)
         self.counterfactuals["zvcf"] = (self.times, 2.0 * cf)
@@ -95,19 +104,24 @@ class MockTaskManager:
     """Synchronous TaskManager mock (#4843 compatibility contract)."""
 
     def __init__(self) -> None:
+        """Start with no registered tasks."""
         self.tasks: dict[str, dict[str, Any]] = {}
 
     def exists(self, task_id: str) -> bool:
+        """Report whether task_id is registered."""
         return task_id in self.tasks
 
     def get(self, task_id: str) -> dict[str, Any] | None:
+        """Return the stored task value for task_id, or None."""
         return self.tasks.get(task_id)
 
     def set(self, task_id: str, value: dict[str, Any]) -> None:
+        """Store value under task_id."""
         self.tasks[task_id] = value
 
 
 def _make_service(recorder: StubRecorder | None) -> SimulationService:
+    """Build a SimulationService whose last recorder is the given stub."""
     service = SimulationService(engine_manager=MagicMock())
     service._last_recorder = recorder  # noqa: SLF001 - test seam
     return service
@@ -115,12 +129,14 @@ def _make_service(recorder: StubRecorder | None) -> SimulationService:
 
 @pytest.fixture
 def task_manager() -> MockTaskManager:
+    """Provide a fresh mock task manager."""
     return MockTaskManager()
 
 
 def _make_client(
     service: SimulationService, task_manager: MockTaskManager
 ) -> TestClient:
+    """Build a FastAPI TestClient with analysis and simulation routers mounted."""
     from src.api.rate_limit import limiter
 
     app = FastAPI()
@@ -138,6 +154,7 @@ def _make_client(
 
 
 def test_kinds_endpoint_full_engine(task_manager: MockTaskManager) -> None:
+    """A full engine exposes every counterfactual kind when a session exists."""
     client = _make_client(_make_service(StubRecorder(StubEngine())), task_manager)
     response = client.get("/analysis/counterfactual/kinds")
     assert response.status_code == 200
@@ -165,6 +182,7 @@ def test_kinds_endpoint_partial_engine_gated_out(
 
 
 def test_kinds_endpoint_no_session(task_manager: MockTaskManager) -> None:
+    """Without a session the kinds endpoint reports no kinds and no session."""
     client = _make_client(_make_service(None), task_manager)
     data = client.get("/analysis/counterfactual/kinds").json()
     assert data == {"kinds": [], "engine": None, "session_available": False}
@@ -204,6 +222,7 @@ def test_counterfactual_happy_path_task_flow(
 
 
 def test_counterfactual_induced_kind(task_manager: MockTaskManager) -> None:
+    """Posting an induced kind to the counterfactual endpoint queues a task."""
     client = _make_client(_make_service(StubRecorder(StubEngine())), task_manager)
     task_id = client.post("/analysis/counterfactual", json={"kind": "total"}).json()[
         "task_id"
@@ -217,6 +236,7 @@ def test_counterfactual_induced_kind(task_manager: MockTaskManager) -> None:
 def test_counterfactual_unknown_kind_is_422(
     task_manager: MockTaskManager,
 ) -> None:
+    """An unknown counterfactual kind is rejected with HTTP 422."""
     client = _make_client(_make_service(StubRecorder(StubEngine())), task_manager)
     response = client.post("/analysis/counterfactual", json={"kind": "warp_drive"})
     assert response.status_code == 422
@@ -226,6 +246,7 @@ def test_counterfactual_unknown_kind_is_422(
 def test_counterfactual_unsupported_kind_is_409(
     task_manager: MockTaskManager,
 ) -> None:
+    """A kind the engine cannot compute is rejected with HTTP 409."""
     client = _make_client(_make_service(StubRecorder(PartialEngine())), task_manager)
     response = client.post("/analysis/counterfactual", json={"kind": "ztcf"})
     assert response.status_code == 409
@@ -233,6 +254,7 @@ def test_counterfactual_unsupported_kind_is_409(
 
 
 def test_counterfactual_no_session_is_409(task_manager: MockTaskManager) -> None:
+    """A counterfactual request without a session is rejected with HTTP 409."""
     client = _make_client(_make_service(None), task_manager)
     response = client.post("/analysis/counterfactual", json={"kind": "ztcf"})
     assert response.status_code == 409
@@ -244,6 +266,7 @@ def test_failed_compute_marks_task_failed(task_manager: MockTaskManager) -> None
 
     class ExplodingRecorder(StubRecorder):
         def compute_analysis_post_hoc(self) -> None:
+            """Raise to simulate a post-hoc analysis failure."""
             raise RuntimeError("engine exploded")
 
     client = _make_client(_make_service(ExplodingRecorder(StubEngine())), task_manager)

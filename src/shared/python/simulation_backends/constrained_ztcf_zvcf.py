@@ -65,6 +65,7 @@ def is_constrained_provider(
 
 
 def _state(name: str, value: ArrayLike, n: int | None = None) -> Array:
+    """Return value as a finite 1-D float array, optionally checking its length n."""
     arr = np.asarray(value, dtype=np.float64).reshape(-1)
     if arr.size == 0 or not np.isfinite(arr).all():
         raise ValueError(f"{name} must be a non-empty finite vector")
@@ -74,6 +75,7 @@ def _state(name: str, value: ArrayLike, n: int | None = None) -> Array:
 
 
 def _require_constrained(provider: Any) -> None:
+    """Raise TypeError unless the provider supplies the closure rows."""
     if not is_constrained_provider(provider):
         raise TypeError(
             "provider must satisfy ConstrainedEquationsOfMotionProvider "
@@ -194,6 +196,7 @@ class ConstrainedCounterfactuals:
     hypotheses: Mapping[str, tuple[str, ...]]
 
     def __post_init__(self) -> None:
+        """Freeze each report array as a finite, read-only copy."""
         for name in (
             "ztcf",
             "zero_velocity_zero_torque",

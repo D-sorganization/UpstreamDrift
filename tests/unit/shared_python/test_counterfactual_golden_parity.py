@@ -143,15 +143,16 @@ def test_capability_probe_is_conservative() -> None:
 
     class _Partial:
         def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
-            pass
+            """Accept the state without effect for this stub engine."""
 
         def set_control(self, u: np.ndarray) -> None:
-            pass
+            """Accept the control without effect for this stub engine."""
 
         def forward(self) -> None:
-            pass
+            """Advance nothing; this stub engine has no dynamics to run."""
 
         def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+            """Return a fixed two-element ZTCF vector."""
             return np.zeros(2)
 
         # compute_zvcf / drift / control intentionally missing

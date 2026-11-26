@@ -16,6 +16,7 @@ class _AnalysisMixin:
     engine: Any
 
     def compute_analysis_post_hoc(self) -> None:
+        """Recompute ZTCF, ZVCF and induced-acceleration series from the stored frames."""
         logger.info("Computing post-hoc analysis...")
 
         if not self._buffers_initialized or self.current_idx == 0:
@@ -83,6 +84,7 @@ class _AnalysisMixin:
     def compute_grf_and_wrench_analysis(
         self, impact_time: float | None = None, fsp_window_ms: float = 100.0
     ) -> dict[str, Any]:
+        """Run GRF, swing-plane and wrench analysis, store the results and return them."""
         if fsp_window_ms is None:
             raise ValueError("fsp_window_ms must be provided")
         if not self._buffers_initialized or self.current_idx == 0:
@@ -122,6 +124,7 @@ class _AnalysisMixin:
         moments: np.ndarray,
         cops: np.ndarray,
     ) -> Any:
+        """Run the GRF analyzer on combined foot data, returning None on failure."""
         if times is None:
             raise ValueError("times must be provided")
         from src.shared.python.physics.ground_reaction_forces import (
@@ -154,6 +157,7 @@ class _AnalysisMixin:
         forces: np.ndarray,
         n: int,
     ) -> float:
+        """Return the explicit impact time, else the peak vertical-force time, else mid-run."""
         if times is None:
             raise ValueError("times must be provided")
         if impact_time is not None:
@@ -170,6 +174,7 @@ class _AnalysisMixin:
         fsp_window_ms: float,
         n: int,
     ) -> Any:
+        """Fit a functional swing plane to club head data, or return None."""
         if times is None:
             raise ValueError("times must be provided")
         from src.shared.python.spatial_algebra.reference_frames import (
@@ -193,6 +198,7 @@ class _AnalysisMixin:
         fsp: Any,
         n: int,
     ) -> dict[str, np.ndarray]:
+        """Project forces and moments onto swing-plane axes, or zeros when no plane exists."""
         if forces is None:
             raise ValueError("forces must be provided")
         from src.shared.python.spatial_algebra.reference_frames import (
@@ -238,6 +244,7 @@ class _AnalysisMixin:
         fsp: Any,
         wrench_arrays: dict[str, np.ndarray],
     ) -> dict[str, Any]:
+        """Assemble the GRF, swing-plane and wrench result dictionaries."""
         if wrench_arrays is None:
             raise ValueError("wrench_arrays must be provided")
         result: dict[str, Any] = {
