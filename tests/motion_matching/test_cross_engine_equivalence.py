@@ -1,11 +1,17 @@
-"""Cross-engine equivalence gate test (issues #4249, #7048, #7097).
+"""Cross-engine equivalence CI gate (issues #4249, #7048, #7097, #15245).
 
-The flagship **cross-engine equivalence gate**: under an *identical* fixed
-``theta`` (gravity-only, ``theta = 0``), every *installed* physics engine must
-produce the same grip trajectory as every other installed engine — i.e. the
-engines agree with one another within **5 mm** grip RMSE — and must have a
-grip world-frame origin within a plausible distance of the Simscape address
+This module is the **contact-free gravity-only** equivalence gate run by
+``.github/workflows/cross-engine-equivalence.yml`` (job ``equivalence``). Under
+an identical fixed ``theta`` (gravity-only, ``theta = 0``), every *installed*
+physics engine must produce the same grip trajectory as every other installed
+engine — i.e. cross-engine agreement within **5 mm** grip RMSE — and must have
+a grip world-frame origin within a plausible distance of the Simscape address
 pose.
+
+This is not the actuated ``theta_truth`` forward-simulation gate described in
+``src/engines/CROSS_ENGINE_PARITY_SPEC.md`` §2.2. Helper-only smoke tests for
+that spec's coefficient and metric utilities live in
+``tests/cross_engine/test_cross_engine_equivalence_helpers.py``.
 
 MuJoCo and Drake use the same collision-free canonical URDF and right-hand
 anchor. Their default demo plants differ in contacts, topology and grip closure;

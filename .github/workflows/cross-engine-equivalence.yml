@@ -1,10 +1,14 @@
-# Cross-Engine Forward-Sim Equivalence (PARITY-EQUIVALENCE, issue #4096)
+# Cross-Engine Equivalence Workflow (issues #4096, #15245)
 #
-# CI gate enforcing src/engines/CROSS_ENGINE_PARITY_SPEC.md §2.2:
-# every engine's `simulate_with_coefficients(theta_truth, pose)` must agree
-# with the reference engine to within 5 mm grip-position RMSE / 1° grip-
-# orientation RMSE / (5 mm + max club-length difference) clubhead RMSE at
-# three canonical poses (impact, top-of-backswing, address).
+# Heavy lane (job `equivalence`): contact-free gravity-only cross-engine
+# agreement via tests/motion_matching/test_cross_engine_equivalence.py (5 mm
+# grip RMSE among installed engines, requires_* skips), plus JaxSim/Pinocchio
+# dynamics parity, flex-shaft, JaxSim forward-sim, and impact-parameter adapter
+# checks. This is not the unused actuated forward-sim harness formerly
+# documented in tests/cross_engine/test_cross_engine_equivalence.py (retired in
+# #15245; helpers live in test_cross_engine_equivalence_helpers.py).
+#
+# Claim-to-CI mapping: docs/testing/integration-testing-strategy.md.
 #
 # CC-8 also makes this workflow the Canonical Core conformance gate. The
 # light lane runs adapter/validator conformance that is safe for the standard
@@ -253,7 +257,7 @@ jobs:
           python -c "import jax, jaxlib, jaxsim"
           python3 scripts/ci/check_pinocchio_dynamics_api.py
 
-      - name: Run cross-engine forward-sim equivalence test
+      - name: Run contact-free cross-engine equivalence and parity tests
         env:
           UPSTREAM_DRIFT_OUTPUT_ROOT: ${{ github.workspace }}/output
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"

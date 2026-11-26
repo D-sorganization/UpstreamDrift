@@ -420,6 +420,19 @@ class TestCIEnvironmentCompatibility:
         assert 'pip install -e ".[jaxsim]"' in workflow
         assert "tests/cross_engine/test_jaxsim_vs_pinocchio.py" in workflow
 
+    def test_cross_engine_equivalence_job_names_contact_free_gate(self) -> None:
+        """Issue #15245: the heavy job must name the contact-free gate explicitly."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "cross-engine-equivalence.yml"
+        ).read_text(encoding="utf-8")
+
+        assert "Run contact-free cross-engine equivalence and parity tests" in workflow
+        assert "contact-free gravity-only" in workflow
+        assert "tests/motion_matching/test_cross_engine_equivalence.py" in workflow
+        run_idx = workflow.index("Run contact-free cross-engine equivalence")
+        pytest_block = workflow[run_idx : run_idx + 900]
+        assert "test_cross_engine_equivalence_helpers.py" not in pytest_block
+
     def test_cross_engine_equivalence_hardens_against_skipped_parity(self) -> None:
         """The required parity gate must fail when JaxSim parity is all-skipped.
 
