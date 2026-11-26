@@ -21,6 +21,11 @@ from src.shared.python.model_appearance.schema import (
 CATALOG = Path(__file__).resolve().parents[3] / "config/player_appearance_presets.json"
 
 
+def player_ids() -> tuple[str, ...]:
+    """Return the stable sorted identifiers in the public appearance catalog."""
+    return tuple(sorted(json.loads(CATALOG.read_text(encoding="utf-8"))["players"]))
+
+
 def player_profile(player: str) -> dict[str, Any]:
     """Return a fresh profile; reject unknown IDs instead of guessing a subject."""
     profiles = json.loads(CATALOG.read_text(encoding="utf-8"))["players"]

@@ -58,7 +58,7 @@ detail of a finished slice to the archive instead of growing this file.
 - Simulation Backends GUI E2E #15703: `codex-ct-1/15703-gui-e2e` uses MuJoCo CPU-only mode on Windows and handles optional backend import runtime failures; the focused four-worker suite passes.
 - Output I/O #15189: `fix/async-save-io-errors` reports filesystem failures through async/background save callbacks and default logging; regression tests preserve the original future exception. Review through Barb's pipeline.
 - Reproducibility #15191: `fix/seed-validation-atomic` rejects non-integer seeds before modifying Python or NumPy RNG state; `validate=False` continues to bypass only the range check. Review through Barb's pipeline.
-- Player profiles #15816: `player_models.export_player` builds source-attributed Tiger/Hogan candidates or preserves an existing spec with `base_spec`; motion requires separate qualification.
+- Player profiles #15816/#15832/#15833: `player_models.export_player` supports source-attributed Tiger/Hogan and five legend candidates; Sam's straw hat follows #15838 in final delivery #15836.
 - Player delivery #15819: `scripts/export_player_models.py` and `assets/player_models/` provide native sized/reference-skin bundles, hash-bound review poses and desktop/phone previews; motion remains unqualified.
 - Import Utilities #15193: `fix/dotted-module-imports` resolves dotted names to the requested module and reads its own version for dependency checks. Review through Barb's pipeline.
 
