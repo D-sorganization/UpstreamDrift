@@ -18,6 +18,8 @@ in each `receipt.json` and `src/config/player_appearance_presets.json`. Exact SI
 conversion does not make a historical estimate an exact measurement. Height is
 calibrated from neutral head skin to lowest shoe sole: it includes shoes and
 excludes hair and headwear. Segment anatomy is estimated from the shared priors.
+Period facial hair, collars and garment cuts are not reconstructed; the profile
+receipts distinguish inspected source features from the simplified interpretation.
 
 ## Use the Models
 
