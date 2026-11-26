@@ -169,11 +169,11 @@ def test_impact_time_needs_a_recorded_contact() -> None:
 # --- CLI ----------------------------------------------------------------------
 
 
-def test_horizon_subcommand_defaults_to_mujoco_and_the_settings_file() -> None:
+def test_horizon_subcommand_defaults_to_cross_engine_and_the_settings_file() -> None:
     from scripts.same_input_bundle import build_parser
 
     args = build_parser().parse_args(["horizon", "--bundle", "b.npz"])
-    assert args.engine == "mujoco"
+    assert args.engine is None
     assert args.settings == olh.SETTINGS_PATH
     assert args.impact_s is None and args.out is None
 
@@ -188,7 +188,65 @@ def test_horizon_cli_writes_the_result_json(bundle, tmp_path) -> None:
     settings.write_text(json.dumps(vars(SETTINGS)))
     receipt = horizon_receipt(path, "mujoco", settings, impact_s=IMPACT_S)
     assert receipt["schema"] == "same-input-horizon/v1"
-    assert receipt["engine"] == "mujoco"
+    assert receipt["replay_engine"] == "mujoco"
+    assert receipt["reference_engine"] == "mujoco"
+    assert receipt["self_replay"] is True
+    assert receipt["note"] == hr.SELF_REPLAY_NOTE
     assert receipt["horizon"]["status"] == "accepted"
     assert receipt["reference"]["head_speed_mps"] > 0.0
+    json.dumps(receipt, allow_nan=False)
+
+
+# --- divergence and cross-engine replay ---------------------------------------
+
+
+@pytest.mark.requires_mujoco
+def test_a_diverged_rollout_raises_replay_diverged(replay, monkeypatch) -> None:
+    from types import SimpleNamespace
+
+    def failed(*_args, **_kwargs):
+        return SimpleNamespace(failure="step 3: nonfinite state", q=np.zeros((2, 1)))
+
+    monkeypatch.setattr(hr, "open_loop", failed)
+    with pytest.raises(olh.ReplayDiverged, match="nonfinite"):
+        replay(IMPACT_S - SETTINGS.step_s)
+    result = hr.search_bundle_horizon(replay, settings=SETTINGS)
+    assert result.status == "none_accepted"
+    assert all(c.failure and "diverged" in c.failure for c in result.candidates)
+
+
+def test_default_replay_engine_is_another_parity_engine() -> None:
+    from src.shared.python.motion_matching.same_input import PARITY_ENGINES
+
+    for reference in PARITY_ENGINES:
+        engine = hr.cross_engine(reference)
+        assert engine in PARITY_ENGINES and engine != reference
+    assert hr.cross_engine("opensim") == PARITY_ENGINES[0]
+
+
+def test_replay_provenance_flags_self_replay() -> None:
+    same = hr.replay_provenance("mujoco", "mujoco")
+    assert same["self_replay"] is True and same["note"] == hr.SELF_REPLAY_NOTE
+    cross = hr.replay_provenance("mujoco", "drake")
+    assert cross["self_replay"] is False and cross["note"] is None
+    with pytest.raises(ValueError, match="engine"):
+        hr.replay_provenance("mujoco", "")
+
+
+@pytest.mark.requires_mujoco
+@pytest.mark.requires_pinocchio
+def test_cross_engine_horizon_is_not_exact_by_construction(bundle, tmp_path) -> None:
+    pytest.importorskip("pinocchio")
+    from scripts.same_input_bundle import horizon_receipt
+
+    path = tmp_path / "bundle.npz"
+    bundle.save(path)
+    settings = tmp_path / "settings.json"
+    settings.write_text(json.dumps(vars(SETTINGS)))
+    receipt = horizon_receipt(path, "pinocchio", settings, impact_s=IMPACT_S)
+    assert receipt["reference_engine"] == "mujoco"
+    assert receipt["replay_engine"] == "pinocchio"
+    assert receipt["self_replay"] is False and receipt["note"] is None
+    candidates = receipt["horizon"]["candidates"]
+    assert any(c["path_error_deg"] > 0.0 for c in candidates)
     json.dumps(receipt, allow_nan=False)

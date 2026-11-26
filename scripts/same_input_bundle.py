@@ -9,7 +9,7 @@
         --run-dir RUN --bundle bundle.npz --engine drake --out receipt.json
 
     MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.same_input_bundle horizon \\
-        --bundle bundle.npz [--engine mujoco] [--impact-s T] [--out horizon.json]
+        --bundle bundle.npz [--engine drake] [--impact-s T] [--out horizon.json]
 
 ``export --shaft-model chain`` replaces the rigid club by the R6 chain shaft
 (#12686) and appends an undeflected shaft to the tracked reference; chain
@@ -25,7 +25,9 @@ open loop in one engine and writes the full-horizon and segmented scores.
 controller function and scores it against the bundle's MuJoCo reference.
 ``horizon`` searches backward from impact for the earliest open-loop replay
 start that still delivers the club within the ``open_loop_horizon.json``
-tolerances (#15150 D2) and prints (or writes) the result as JSON.
+tolerances (#15150 D2) and prints (or writes) the result as JSON.  Its
+``--engine`` defaults to a parity engine other than the bundle's reference
+engine; a self-replay is exact by construction and is flagged in the JSON.
 """
 
 from __future__ import annotations
@@ -264,22 +266,33 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
 
 
 def horizon_receipt(
-    bundle_path: Path, engine: str, settings_path: Path, impact_s: float | None
+    bundle_path: Path,
+    engine: str | None,
+    settings_path: Path,
+    impact_s: float | None,
 ) -> dict:
-    """Open-loop horizon search on ``bundle_path`` in ``engine`` (#15150 D2)."""
+    """Open-loop horizon search on ``bundle_path`` in ``engine`` (#15150 D2).
+
+    ``engine`` ``None`` replays in a parity engine other than the bundle's
+    reference engine; a self-replay is flagged ``self_replay`` with a note.
+    """
     from src.shared.python.motion_matching.same_input.horizon_replay import (
         BundleReplay,
+        cross_engine,
+        replay_provenance,
         search_bundle_horizon,
     )
 
     bundle = InputBundle.load(bundle_path)
+    if engine is None:
+        engine = cross_engine(bundle.reference_engine)
     replay_fn = BundleReplay(bundle, VectorPlant(engine, bundle.spec_bytes), impact_s)
     settings = load_settings(settings_path)
     result = search_bundle_horizon(replay_fn, settings=settings)
     return {
         "schema": "same-input-horizon/v1",
         "bundle_sha256": _sha256(bundle_path),
-        "engine": engine,
+        **replay_provenance(bundle.reference_engine, engine),
         "settings": vars(settings),
         "reference": vars(replay_fn.reference()),
         "horizon": result.summary(),
@@ -319,7 +332,12 @@ def build_parser() -> argparse.ArgumentParser:
     clo.add_argument("--out", type=Path, required=True)
     hor = sub.add_parser("horizon")
     hor.add_argument("--bundle", type=Path, required=True)
-    hor.add_argument("--engine", choices=ALL_ENGINES, default="mujoco")
+    hor.add_argument(
+        "--engine",
+        choices=ALL_ENGINES,
+        default=None,
+        help="replay engine (default: a parity engine other than the reference)",
+    )
     hor.add_argument("--settings", type=Path, default=SETTINGS_PATH)
     hor.add_argument(
         "--impact-s",
@@ -358,6 +376,8 @@ def main() -> None:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(text, encoding="utf-8")
         LOG.info("horizon: %s", json.dumps(receipt["horizon"]["status"]))
+        if receipt["self_replay"]:
+            LOG.warning("%s", receipt["note"])
         return
     if args.command == "closed-loop":
         receipt = closed_loop_receipt(args.run_dir, args.bundle, args.engine)

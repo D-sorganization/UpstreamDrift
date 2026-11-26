@@ -18,6 +18,13 @@ rendered face (``Clubhead`` frame, :func:`face_axis_in_frame` and
 
 The replay stops before the ball window opens, so the recorded ball force
 never enters it.  Every number comes from the bundle or the horizon settings.
+
+A replay that diverges raises
+:class:`~src.shared.python.motion_matching.open_loop_horizon.ReplayDiverged`,
+so the search records that start as a failed candidate.  Replaying a bundle in
+its own reference engine reproduces the tracked states bit for bit, so its
+horizon is trivially the whole window; :func:`replay_provenance` flags that
+case and :func:`cross_engine` picks another parity engine for a real horizon.
 """
 
 from __future__ import annotations
@@ -40,21 +47,48 @@ from src.shared.python.motion_matching.open_loop_horizon import (
     HorizonResult,
     HorizonSettings,
     ImpactDelivery,
+    ReplayDiverged,
     search_horizon,
 )
 from src.shared.python.motion_matching.same_input.integrator import open_loop
+from src.shared.python.motion_matching.same_input.plant import PARITY_ENGINES
 
 Array = NDArray[np.float64]
 # Fraction of a bundle step accepted as round-off when snapping times to it.
 _GRID_SLACK = 1e-6
+SELF_REPLAY_NOTE = "self-replay: exact by construction"
 
 __all__ = [
     "BundleReplay",
     "HeadGeometry",
+    "SELF_REPLAY_NOTE",
     "bundle_impact_s",
+    "cross_engine",
     "delivery_from_poses",
+    "replay_provenance",
     "search_bundle_horizon",
 ]
+
+
+def cross_engine(reference_engine: str) -> str:
+    """First parity engine other than ``reference_engine`` (default replay)."""
+    return next(engine for engine in PARITY_ENGINES if engine != reference_engine)
+
+
+def replay_provenance(reference_engine: str, replay_engine: str) -> dict[str, Any]:
+    """Engines of a horizon receipt, flagging a self-replay as exact.
+
+    Preconditions: both engine names are non-empty strings.
+    """
+    if not (reference_engine and replay_engine):
+        raise ValueError("reference and replay engine names must be non-empty")
+    self_replay = reference_engine == replay_engine
+    return {
+        "reference_engine": reference_engine,
+        "replay_engine": replay_engine,
+        "self_replay": self_replay,
+        "note": SELF_REPLAY_NOTE if self_replay else None,
+    }
 
 
 @dataclass(frozen=True)
@@ -177,7 +211,8 @@ class BundleReplay:
         """Open-loop delivery from the tracked state at ``start_s``.
 
         Preconditions: ``start_s`` is on the step grid and before
-        :attr:`impact_s`.  A replay that diverges raises ``ValueError``.
+        :attr:`impact_s`.  A replay that diverges (integrator failure or a
+        non-finite final state) raises :class:`ReplayDiverged`.
         """
         start = self.grid_steps(start_s, "start_s")
         if not 0 <= start < self._step:
@@ -194,7 +229,9 @@ class BundleReplay:
             policy=bundle.step_policy(stop_on_failure=True),
         )
         if rollout.failure is not None:
-            raise ValueError(f"replay from {start_s} s diverged: {rollout.failure}")
+            raise ReplayDiverged(f"replay from {start_s} s diverged: {rollout.failure}")
+        if not np.isfinite(rollout.q[-2:]).all():
+            raise ReplayDiverged(f"replay from {start_s} s diverged: nonfinite state")
         return self._delivery(rollout.q[-2], rollout.q[-1])
 
 

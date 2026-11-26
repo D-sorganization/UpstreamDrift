@@ -12,7 +12,9 @@ all stay within tolerance, with the per-candidate errors for a report.
 The search assumes agreement worsens monotonically with lead time.  It checks
 that assumption instead of trusting it: if a start passes after a later start
 failed, the window is reported ``non_contiguous`` and no earliest start is
-picked.  Tolerances, the candidate step and the maximum horizon come from
+picked.  A replay that diverges (non-finite state, integrator error) raises
+:class:`ReplayDiverged`; that candidate is recorded as a failure with the
+reason instead of aborting the search.  Tolerances, the candidate step and the maximum horizon come from
 ``src/config/open_loop_horizon.json``.
 
 The search is engine-free; building the replay callable from a MuJoCo efforts
@@ -41,6 +43,7 @@ __all__ = [
     "HorizonResult",
     "HorizonSettings",
     "ImpactDelivery",
+    "ReplayDiverged",
     "load_settings",
     "search_horizon",
 ]
@@ -58,6 +61,15 @@ def _positive(value: float, name: str) -> float:
     if number <= 0.0:
         raise ValueError(f"{name} must be positive, got {value!r}")
     return number
+
+
+class ReplayDiverged(RuntimeError):
+    """A replay that could not reach impact (non-finite state, integrator error).
+
+    Raised by a replay callable; :func:`search_horizon` records the candidate
+    as failed with ``str(exc)`` as the reason.  Precondition errors (bad start
+    times) stay ``ValueError`` and still abort the search.
+    """
 
 
 @dataclass(frozen=True)
@@ -113,16 +125,21 @@ def _angle_error_deg(a: float, b: float) -> float:
 
 @dataclass(frozen=True)
 class CandidateResult:
-    """One open-loop replay start and its delivery errors at impact."""
+    """One open-loop replay start and its delivery errors at impact.
+
+    A diverged replay has ``failure`` set, every error ``None`` and
+    ``passed`` false.
+    """
 
     lead_s: float
     start_s: float
-    face_error_deg: float
-    path_error_deg: float
-    head_speed_error_mps: float
+    face_error_deg: float | None
+    path_error_deg: float | None
+    head_speed_error_mps: float | None
     passed: bool
+    failure: str | None = None
 
-    def as_dict(self) -> dict[str, float | bool]:
+    def as_dict(self) -> dict[str, float | bool | str | None]:
         """Strict-JSON record for a report."""
         return {item.name: getattr(self, item.name) for item in fields(self)}
 
@@ -134,7 +151,10 @@ def _evaluate(
     lead_s: float,
     settings: HorizonSettings,
 ) -> CandidateResult:
-    simulated = replay(start_s)
+    try:
+        simulated = replay(start_s)
+    except ReplayDiverged as exc:
+        return CandidateResult(lead_s, start_s, None, None, None, False, str(exc))
     if not isinstance(simulated, ImpactDelivery):
         raise TypeError(
             f"replay must return an ImpactDelivery, got {type(simulated).__name__}"
@@ -188,6 +208,7 @@ class HorizonResult:
             "horizon_s": self.horizon_s,
             "earliest_start_s": self.earliest_start_s,
             "passes_after_failure_s": list(self.passes_after_failure_s),
+            "diverged_leads_s": [c.lead_s for c in self.candidates if c.failure],
             "candidates": [c.as_dict() for c in self.candidates],
         }
 
