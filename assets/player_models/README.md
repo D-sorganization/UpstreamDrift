@@ -29,6 +29,7 @@ Load a `model.xml` with MuJoCo. In Necromatcher, import it as a native model wit
 engine `mujoco` and the exact ordered coordinates from its `receipt.json`.
 Supply `model.visual.json` when verifying/binding the skinned native resource;
 its embedded appearance reproduces the exact XML without altering physics.
+All four archived variants passed actual Necromatcher import, binding and range checks.
 Map named coordinates to MuJoCo joint `qposadr` when driving raw native buffers;
 the declared spec order need not equal MuJoCo traversal order.
 The bundled address poses are hash-bound inspection poses, not captured swings.
