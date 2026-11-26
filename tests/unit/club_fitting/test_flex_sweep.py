@@ -64,6 +64,18 @@ def test_rows_follow_flex_order_and_deflection(rows) -> None:
 
 
 @pytest.mark.slow
+def test_rows_carry_the_shaft_shape_at_impact(rows) -> None:
+    """Chain joints then the tip, matching the bend trace's tip at impact."""
+    for r in rows:
+        assert r.shape is not None and r.bend is not None
+        assert r.shape.points_m.shape == (FAST.chain_links + 1, 3)
+        lead_mm, droop_mm = r.bend.at_impact()
+        assert r.shape.lead_m[-1] * 1e3 == pytest.approx(lead_mm, abs=0.5)
+        assert r.shape.droop_m[-1] * 1e3 == pytest.approx(droop_mm, abs=0.5)
+        assert r.shape.lead_m[0] == pytest.approx(0.0, abs=1e-9)
+
+
+@pytest.mark.slow
 def test_outputs_round_trip(rows, tmp_path) -> None:
     json_path, csv_path = write_outputs(rows, tmp_path / "out")
     data = json.loads(json_path.read_text())["rows"]

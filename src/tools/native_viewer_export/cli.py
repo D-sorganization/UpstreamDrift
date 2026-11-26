@@ -75,6 +75,7 @@ from src.tools.native_viewer_export.model_card_panel import (
     default_enabled as default_card_panel,
 )
 from src.tools.native_viewer_export.overlay import OverlayOptions, build_overlay_feed
+from src.tools.native_viewer_export import shaft_loads as shaft_load_look
 from src.tools.native_viewer_export.runner import ExportJob, run_export
 from src.tools.native_viewer_export.ztcf_axial import SHADING_PARTS
 from src.tools.native_viewer_export.ztcf_ground import FORCE_PARTS
@@ -621,6 +622,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="draw an anatomical swing event caption line ('Event: <name>') in the "
         "HUD (default: off; HRG-E4, #13175)",
     )
+    shaft_load_look.add_cli_arguments(p)
     p.add_argument(
         "--model-card-panel",
         action=argparse.BooleanOptionalAction,
@@ -896,6 +898,8 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         hud=not args.no_hud,
         event_captions=bool(getattr(args, "event_captions", False)),
         model_card_panel=_card_panel_flag(args),
+        shaft_loads=getattr(args, "shaft_loads", None),
+        shaft_loads_part=getattr(args, "shaft_loads_part", shaft_load_look.PARTS[0]),
         ball=not args.no_ball,
         impact_factors=load_factor_settings(args.impact_factors_settings)
         if args.impact_factors or args.impact_factors_settings is not None
@@ -971,6 +975,8 @@ def main(
                     shading_part=args.segment_shading_part,
                     force_part=args.force_part,
                     arrow_style=args.arrow_style,
+                    shaft_loads=settings.shaft_loads,
+                    shaft_loads_part=settings.shaft_loads_part,
                 ),
             ),
         )

@@ -52,6 +52,7 @@ from src.tools.native_viewer_export.compositor import (
 )
 from src.tools.native_viewer_export import contact_frame, flight_tracer, replay_mode
 from src.tools.native_viewer_export import model_card, model_card_panel, shot_setup
+from src.tools.native_viewer_export import shaft_loads as shaft_load_look
 from src.tools.native_viewer_export import ellipsoid_panel as ellipsoid_hud
 from src.tools.native_viewer_export import dispersion_traces, flight_inset, hole_view
 from src.tools.native_viewer_export.frame_times import write_frame_times
@@ -209,6 +210,9 @@ class ExportSettings:
     shot_shape: str | None = None  # straight | draw | fade: solves the roll
     #: model card panel in the clip (#15150 E2); default from its settings file
     model_card_panel: bool = field(default_factory=model_card_panel.default_enabled)
+    #: shaft loads (``bending``, ``shear``, ``None``: off) and part (#15150 Z9c)
+    shaft_loads: str | None = None
+    shaft_loads_part: str = shaft_load_look.PARTS[0]
 
     @property
     def shading_enabled(self) -> bool:
@@ -268,6 +272,7 @@ class ExportSettings:
         shot_setup.validate_shot_setup(
             self.club_roll_in_hands_deg, self.ball_position_shift_m, self.shot_shape
         )
+        shaft_load_look.validate(self.shaft_loads, self.shaft_loads_part, self.overlays)
         if len(self.lookat_m) != 3 or not all(math.isfinite(v) for v in self.lookat_m):
             raise ValueError("lookat_m must be three finite numbers")
         if self.distance_m is not None and not (

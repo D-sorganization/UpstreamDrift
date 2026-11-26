@@ -27,6 +27,10 @@ from src.shared.python.club_fitting.grip_motion import (
     FittingSettings,
     load_settings,
 )
+from src.shared.python.club_fitting.shaft_shape import (
+    ShaftShape,
+    shaft_shape_from_run,
+)
 from src.shared.python.motion_matching import club_models as cm
 from src.shared.python.motion_matching import club_shaft_chain as cs
 
@@ -43,8 +47,9 @@ class FlexRow:
     Deltas are bent minus straight club in the same hand motion, at impact.
     ``peak_tip_deflection_mm`` is the peak up to impact; the extrapolated
     window after it is not physical. ``bend`` is the lead and droop up to
-    impact (for the shaft report) and ``flight`` the ball flight (for the flex
-    comparison); neither is part of :meth:`record`.
+    impact (for the shaft report), ``flight`` the ball flight and ``shape``
+    the shaft centreline at impact (both for the flex comparison); none is
+    part of :meth:`record`.
     """
 
     flex: str
@@ -59,11 +64,13 @@ class FlexRow:
     shot: dict[str, float | None] | None
     bend: BendTrace | None = field(default=None, compare=False, repr=False)
     flight: FlightTrace | None = field(default=None, compare=False, repr=False)
+    shape: ShaftShape | None = field(default=None, compare=False, repr=False)
 
     def record(self) -> dict[str, object]:
         flat = asdict(self)
         flat.pop("bend")
         flat.pop("flight")
+        flat.pop("shape")
         shot = flat.pop("shot") or {}
         return {**flat, **{f"shot_{k}": v for k, v in shot.items()}}
 
@@ -92,6 +99,7 @@ def _row(
         values,
         None if head is None else bend_trace(run, head, impact_s),
         flight,
+        None if head is None else shaft_shape_from_run(run, head, impact_s),
     )
 
 

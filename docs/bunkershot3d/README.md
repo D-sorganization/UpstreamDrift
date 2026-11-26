@@ -16,6 +16,23 @@ The workbench exposes identical physics, verdict tiers, and validity markings ac
 - **Desktop Workbench (`bunker_shot_gui`)**: Interactive PyQt application featuring design parameter controls, sand/delivery condition editors, interactive 3D VTK viewport embedding clubhead and sand furrow geometries, and stamped export actions.
 - **Versioned Web API (`/tools/bunker-workbench/v1`)**: Thin FastAPI endpoints providing synchronous single-shot evaluation (`/v1/evaluate`), A/B comparison sweeps (`/v1/compare`), and record integrity verification (`/v1/verify`).
 
+### Flight Trace Response (#15497)
+
+Each evaluation record includes `flight`, also present inside both comparison
+sides and completed job results. When available, it contains `flight_m` and
+`rollout_m` arrays of `[x, y, z]` positions in metres, with x forward, y left,
+and z up. The final flight point is the landing point and the first rollout
+point matches it. `carry_m` matches the adjacent carry record, and `assumption`
+travels with the coordinates: the launch is uncalibrated and rollout assumes a
+flat 10 ft stimp green with simplified bounce and spin. This is exploratory
+display data, not physical acceptance. No additional solver runs in the API.
+
+`flight` is null for refused shots or when the adapter cannot produce a valid
+trace; clients must suppress the plot in either case. The existing record
+digest covers every trace point and the assumption. This additive field keeps
+the v1 schema; previously saved records without it remain verifiable. Desktop
+and web rendering remain a separate slice of #15497.
+
 ---
 
 ## 2. Replayable V1 Workbench API Example

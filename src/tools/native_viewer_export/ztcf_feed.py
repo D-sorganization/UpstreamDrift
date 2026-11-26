@@ -205,6 +205,9 @@ class SplitProvider(NamedTuple):
     lead_point: Callable[[Any], Any]
     #: ``q -> ((body, world point), ...)`` where each foot's reaction acts
     ground_points: Callable[[Any], Any]
+    #: shaft joint points and axes, and per-link loads (``shaft_load_split``)
+    stations: Callable[[Any], Any] | None = None
+    link_loads: Callable[..., Any] | None = None
 
 
 def split_provider(spec_bytes: bytes, order: tuple[str, ...]) -> SplitProvider:
@@ -234,6 +237,8 @@ def split_provider(spec_bytes: bytes, order: tuple[str, ...]) -> SplitProvider:
             adapter.club_subtree_load,
             adapter.lead_wrist_point,
             adapter.ground_wrench_points,
+            adapter.shaft_stations,
+            adapter.shaft_link_loads,
         )
     take = np.array([order.index(n) for n in native])
 
@@ -248,6 +253,10 @@ def split_provider(spec_bytes: bytes, order: tuple[str, ...]) -> SplitProvider:
         ),
         lambda q: adapter.lead_wrist_point(native_of(q)),
         lambda q: adapter.ground_wrench_points(native_of(q)),
+        lambda q: adapter.shaft_stations(native_of(q)),
+        lambda q, v, a, gravity: adapter.shaft_link_loads(
+            native_of(q), native_of(v), native_of(a), gravity
+        ),
     )
 
 
@@ -291,9 +300,9 @@ def split_glyphs(
         )
     if "closure" not in json.loads(bundle.spec_bytes):
         raise ValueError("the specification declares no hand-club closure")
-    provider, frame_at, club_load, lead_point, _ = split_provider(
+    provider, frame_at, club_load, lead_point = split_provider(
         bundle.spec_bytes, tuple(bundle.coordinate_order)
-    )
+    )[:4]
     q, v, tau = _states(swing)
     cache: dict[int, tuple[Any, ...]] = {}
 
