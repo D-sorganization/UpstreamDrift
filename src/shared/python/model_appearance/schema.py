@@ -137,7 +137,7 @@ HEAD_MODELS = ("parametric", "cc0_mesh")
 HAIR_STYLES = ("short_crop", "dome")
 HAIR_PARTS = ("left", "right", "none")
 EYE_COLORS = ("blue_grey", "hazel", "brown")
-CAP_STYLES = ("none", "baseball_cap")
+CAP_STYLES = ("none", "baseball_cap", "flat_cap")
 CAP_BRIM_RANGE = (0.10, 0.80)  # brim length, head lengths
 DEFAULT_CAP_BRIM = 0.30
 #: ``stature``: menton to vertex is ``height_over_stature`` of the subject's
@@ -191,7 +191,7 @@ class HeadSettings:
     hair_part: str = "left"
     #: Iris colour: ``blue_grey`` (default), ``hazel`` or ``brown``.
     eye_color: str = "blue_grey"
-    #: ``none`` (default) or ``baseball_cap`` (CC0 head only; hair shows below).
+    #: ``none`` (default), ``baseball_cap`` or a low-profile ``flat_cap``.
     cap_style: str = "none"
     #: Library material of the cap (a colour); the brim shares it.
     cap_material: str = "cap_navy"
