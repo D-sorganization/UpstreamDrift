@@ -146,10 +146,7 @@ fn find_python() -> Option<(String, String)> {
 fn lock_supervisor(
     process: &BackendProcess,
 ) -> Result<std::sync::MutexGuard<'_, BackendSupervisor>, String> {
-    process
-        .0
-        .lock()
-        .map_err(|e| e.to_string())
+    process.0.lock().map_err(|e| e.to_string())
 }
 
 /// Poll child state while holding the mutex briefly; run HTTP health probes outside it.
