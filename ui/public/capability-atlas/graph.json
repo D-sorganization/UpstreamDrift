@@ -30,7 +30,7 @@
       "tiles": [
         "simulation_backends"
       ],
-      "notes": "#7450 (closed by #7495): the analysis routes expose ZTCF/ZVCF and induced-acceleration counterfactuals, and the web CounterfactualPanel is mounted on the Analysis Tools page.",
+      "notes": "#7450 (closed by #7495): the analysis routes expose ZTCF/ZVCF and induced-acceleration counterfactuals, and the web CounterfactualPanel is mounted on the Analysis Tools page. ZVCF is the applied-control acceleration with velocity and gravity off; at each recorded state ZTCF + ZVCF = total (#15711).",
       "id": "analysis.counterfactuals"
     },
     {
@@ -3649,7 +3649,7 @@
   "inputs": {
     "src/config/models.yaml": "c5c3fa8bf58ceed736ae7b11e9096bc8860c2a07c7d79ca5710a20a21e00789c",
     "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
-    "src/config/feature_parity.json": "d930b2ac9eb70533aee8bbfca997375e0023919f3f0be9999f4f33ed144575bd",
+    "src/config/feature_parity.json": "5a3cd5f2b2183184c7e90aa8f2e3683dc34abafec6efda29685eec566d9cf471",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
