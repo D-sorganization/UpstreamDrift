@@ -94,6 +94,7 @@ def _coerce_simout(
     """Reduce a ``SimOut``-like object to the slice equivalence reporting needs."""
 
     def _last(arr: Any, n: int) -> np.ndarray:
+        """last."""
         a = np.asarray(arr, dtype=float)
         if a.ndim == 1:
             if a.shape != (n,):
@@ -106,6 +107,7 @@ def _coerce_simout(
         return a[-1]
 
     def _get(name: str) -> Any:
+        """get."""
         if hasattr(raw, name):
             return getattr(raw, name)
         if isinstance(raw, dict) and name in raw:
@@ -152,6 +154,7 @@ def _quat_angle_deg(qa: np.ndarray, qb: np.ndarray) -> float:
 
 @pytest.mark.unit
 def test_theta_truth_is_deterministic() -> None:
+    """test theta truth is deterministic."""
     a = _generate_theta_truth(42)
     b = _generate_theta_truth(42)
     np.testing.assert_array_equal(a, b)
@@ -160,6 +163,7 @@ def test_theta_truth_is_deterministic() -> None:
 
 @pytest.mark.unit
 def test_theta_truth_respects_amplitude_bounds() -> None:
+    """test theta truth respects amplitude bounds."""
     theta = _generate_theta_truth(42)
     for joint in range(_N_JOINTS):
         for k in range(_COEFFS_PER_JOINT):
@@ -170,6 +174,7 @@ def test_theta_truth_respects_amplitude_bounds() -> None:
 
 @pytest.mark.unit
 def test_theta_truth_rejects_non_finite_seed() -> None:
+    """test theta truth rejects non finite seed."""
     with pytest.raises(ValueError, match="seed must be finite"):
         _generate_theta_truth(float("nan"))
 
@@ -192,6 +197,7 @@ def test_nonzero_theta_polynomial_order_matches_across_engine_helpers() -> None:
 
     class FakeMuJoCoModel:
         def __init__(self, nu: int) -> None:
+            """init."""
             self.nu = nu
 
     n_joints = 2
@@ -219,18 +225,21 @@ def test_nonzero_theta_polynomial_order_matches_across_engine_helpers() -> None:
 
 @pytest.mark.unit
 def test_quat_angle_zero() -> None:
+    """test quat angle zero."""
     q = np.array([1.0, 0.0, 0.0, 0.0])
     assert _quat_angle_deg(q, q) < 1e-9
 
 
 @pytest.mark.unit
 def test_quat_angle_180() -> None:
+    """test quat angle 180."""
     q = np.array([1.0, 0.0, 0.0, 0.0])
     assert _quat_angle_deg(q, -q) < 1e-9
 
 
 @pytest.mark.unit
 def test_rmse_position_matches_norm_for_single_sample() -> None:
+    """test rmse position matches norm for single sample."""
     a = np.array([0.0, 0.0, 0.0])
     b = np.array([0.003, 0.004, 0.0])
     assert abs(_rmse_position(a, b) - 0.005) < 1e-12
@@ -240,7 +249,10 @@ def test_rmse_position_matches_norm_for_single_sample() -> None:
 def test_simulator_lookup_rejects_unregistered_import(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """test simulator lookup rejects unregistered import."""
+
     def unexpected_import(_: str) -> Any:
+        """unexpected import."""
         pytest.fail("Unregistered simulator must not be imported")
 
     monkeypatch.setattr(importlib, "import_module", unexpected_import)
@@ -257,6 +269,7 @@ class _MockSimOut:
 
 @pytest.mark.unit
 def test_coerce_simout_from_dataclass_snapshot() -> None:
+    """test coerce simout from dataclass snapshot."""
     raw = _MockSimOut(
         grip=np.array([0.1, 0.2, 0.3]),
         grip_quat=np.array([1.0, 0.0, 0.0, 0.0]),
@@ -272,6 +285,7 @@ def test_coerce_simout_from_dataclass_snapshot() -> None:
 
 @pytest.mark.unit
 def test_coerce_simout_from_dict_time_series() -> None:
+    """test coerce simout from dict time series."""
     raw = {
         "grip": np.array([[0.0, 0.0, 0.0], [0.1, 0.2, 0.3]]),
         "grip_quat": np.array([[1.0, 0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0]]),

@@ -48,6 +48,7 @@ def test_pre_push_hook_keeps_pytest_failure_and_gives_repair_guidance(
     invocation: list[list[str]] = []
 
     def failed_pytest(args: list[str], *, check: bool) -> subprocess.CompletedProcess:
+        """failed pytest."""
         invocation.append(args)
         assert check is False
         return subprocess.CompletedProcess(args, returncode=1)
@@ -2011,6 +2012,7 @@ class TestReleaseAttestationRetry:
 
     @staticmethod
     def _protected_main_steps() -> list[dict[str, Any]]:
+        """protected main steps."""
         workflow = yaml.safe_load(
             (REPO_ROOT / ".github" / "workflows" / "release.yml").read_text(
                 encoding="utf-8"
@@ -2019,6 +2021,7 @@ class TestReleaseAttestationRetry:
         return workflow["jobs"]["companion-protected-main"]["steps"]
 
     def test_each_attestation_has_one_bounded_retry(self) -> None:
+        """test each attestation has one bounded retry."""
         steps = self._protected_main_steps()
         attest_indexes = [
             index
@@ -2044,6 +2047,7 @@ class TestReleaseAttestationRetry:
             assert "sleep" in pause["run"]
 
     def test_record_reads_attestation_from_either_attempt(self) -> None:
+        """test record reads attestation from either attempt."""
         steps = self._protected_main_steps()
         record = next(
             step
@@ -2062,6 +2066,7 @@ class TestPyprojectTomlConsistency:
 
     @staticmethod
     def _load_pyproject() -> dict[str, Any]:
+        """load pyproject."""
         try:
             import tomllib  # Python 3.11+
         except ImportError:
@@ -2130,6 +2135,7 @@ class TestPyprojectTomlConsistency:
         data = self._load_pyproject()
 
         def _dist_name(requirement: str) -> str:
+            """dist name."""
             return (
                 requirement.split("[", 1)[0].split(">", 1)[0].split("=", 1)[0].lower()
             )

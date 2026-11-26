@@ -57,6 +57,7 @@ from tempfile import TemporaryDirectory
 import numpy as np
 import pytest
 
+from src.shared.python.core.physics_constants import GRAVITY_M_S2
 from src.shared.python.engine_core.engine_availability import (
     is_engine_available,
 )
@@ -183,6 +184,7 @@ def _require_real_backend(module_name: str) -> None:
 
 
 def _run_drake() -> tuple[np.ndarray, np.ndarray]:
+    """run drake."""
     _require_real_backend("pydrake")
     from src.engines.physics_engines.drake.python.motion_matching import (
         simulate as sim_mod,
@@ -208,6 +210,7 @@ def _run_drake() -> tuple[np.ndarray, np.ndarray]:
 
 
 def _run_mujoco() -> tuple[np.ndarray, np.ndarray]:
+    """run mujoco."""
     _require_real_backend("mujoco")
     from src.engines.physics_engines.mujoco.python.motion_matching import (
         simulate as sim_mod,
@@ -224,6 +227,7 @@ def _run_mujoco() -> tuple[np.ndarray, np.ndarray]:
 
 
 def _run_opensim() -> tuple[np.ndarray, np.ndarray]:
+    """run opensim."""
     _require_real_backend("opensim")
     from src.engines.physics_engines.opensim.python.motion_matching import (
         simulate as sim_mod,
@@ -240,6 +244,7 @@ def _run_opensim() -> tuple[np.ndarray, np.ndarray]:
 
 
 def _run_pinocchio() -> tuple[np.ndarray, np.ndarray]:
+    """run pinocchio."""
     _require_real_backend("pinocchio")
     # The Pinocchio simulate module loads the model as fixed-base (see
     # pinocchio/python/motion_matching/simulate.py: "parity spec defers
@@ -423,6 +428,7 @@ def test_opensim_matches_simscape_address() -> None:
 
 
 def _installed_engines() -> list[str]:
+    """installed engines."""
     return [
         name for name in _ENGINE_RUNNERS if is_engine_available(_AVAILABILITY_KEY[name])
     ]
@@ -494,7 +500,7 @@ def test_gravity_fixture_matches_analytic_free_fall(engine: str) -> None:
     time, grip = _run_engine_checked(engine)
     displacement = grip - grip[0]
     expected = np.zeros_like(displacement)
-    expected[:, 2] = -0.5 * 9.81 * time**2
+    expected[:, 2] = -0.5 * float(GRAVITY_M_S2) * time**2
     error_mm = np.linalg.norm(displacement - expected, axis=1) * 1000.0
     assert np.max(error_mm) < RMSE_POSITION_GATE_MM
 
@@ -548,6 +554,7 @@ def test_engine_bindings_error_is_raised_not_pytest_skip() -> None:
     """
 
     def _broken_mujoco() -> tuple[np.ndarray, np.ndarray]:
+        """broken mujoco."""
         raise ImportError("no module named mujoco_bindings")
 
     original = _ENGINE_RUNNERS["mujoco"]
@@ -571,6 +578,7 @@ def test_all_nan_grip_raises_engine_bindings_error() -> None:
     """
 
     def _all_nan_grip_runner() -> tuple[np.ndarray, np.ndarray]:
+        """all nan grip runner."""
         time = np.linspace(0.0, 0.30, 301)
         grip = np.full((301, 3), np.nan, dtype=np.float64)
         return time, grip
@@ -596,6 +604,7 @@ def test_diverged_grip_fails_not_skips() -> None:
     import pytest as _pytest
 
     def _diverged_grip_runner() -> tuple[np.ndarray, np.ndarray]:
+        """diverged grip runner."""
         time = np.linspace(0.0, 0.30, 301)
         grip = np.zeros((301, 3), dtype=np.float64)
         # First frame finite, then diverge to Inf from frame 1 onward.
@@ -642,6 +651,7 @@ def test_cross_engine_agreement_filters_broken_engines() -> None:
     """
 
     def broken_runner() -> tuple[np.ndarray, np.ndarray]:
+        """broken runner."""
         raise ImportError("no bindings for this engine")
 
     # Simulate the aggregation loop from test_cross_engine_grip_agreement.
@@ -668,6 +678,7 @@ def test_cross_engine_agreement_filters_broken_engines() -> None:
     # Now test that the _EngineBindingsError IS raised (not pytest.skip) so
     # callers can distinguish "incomplete bindings" from "not installed".
     def _broken() -> tuple[np.ndarray, np.ndarray]:
+        """broken."""
         raise ImportError("no mujoco bindings")
 
     original = _ENGINE_RUNNERS["mujoco"]
