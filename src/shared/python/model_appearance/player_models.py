@@ -13,6 +13,7 @@ from typing import Any
 from src.shared.python.model_appearance.schema import (
     AppearanceDocument,
     document_from_dict,
+    document_to_dict,
     physics_spec_sha256,
     save_appearance,
 )
@@ -74,6 +75,9 @@ def export_player(
     raw = json.dumps(spec, indent=2).encode()
     (output / "model.json").write_bytes(raw + b"\n")
     save_appearance(doc, output / "model.appearance.json")
+    (output / "model.visual.json").write_text(
+        json.dumps({**spec, "appearance": document_to_dict(doc)}, indent=2) + "\n"
+    )
     xml, metadata = export_full_body_mjcf(raw, appearance=doc)
     target = output / "model.xml"
     target.write_text(xml, encoding="utf-8")
@@ -84,6 +88,7 @@ def export_player(
         "calibration": spec.get("subject", {}).get("neutral_visual_calibration"),
         "physics_spec_sha256": physics_spec_sha256(spec),
         "coordinate_order": spec["coordinate_order"],
+        "visual_definition": "model.visual.json",
         "export": metadata,
         "status": "visual interpretation; supplied base dimensions retained"
         if base_spec
