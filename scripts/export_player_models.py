@@ -262,7 +262,7 @@ def _render(
         "pose": "validated review coordinates"
         if coordinates is not None
         else "model default qpos",
-        "capture_motion_used": False,
+        "motion_qualification": "not established by this renderer",
     }
 
 
