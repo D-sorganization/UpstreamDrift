@@ -28,6 +28,7 @@ from src.shared.python.core.handedness import (
     HANDEDNESS_CHOICES,
 )
 from src.shared.python.model_appearance.defaults import default_fields
+from src.shared.python.model_appearance.head_morph import HeadMorph
 
 SCHEMA_VERSION = "appearance-v1"
 SCHEMA_PATH = Path(__file__).with_name("appearance_v1.schema.json")
@@ -201,6 +202,14 @@ class HeadSettings:
     sizing: str = "stature"
     #: Drawn menton to vertex over stature, in :data:`HEAD_HEIGHT_OVER_STATURE_RANGE`.
     height_over_stature: float = DEFAULT_HEAD_HEIGHT_OVER_STATURE
+    #: Artistic face shape controls, in the canonical CC0 head frame.
+    morph: HeadMorph = field(default_factory=HeadMorph)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.morph, HeadMorph):
+            raise ValueError("head morph must be a HeadMorph")
+        if self.morph != HeadMorph() and self.model != "cc0_mesh":
+            raise ValueError("head morph needs the cc0_mesh head model")
 
 
 @dataclass(frozen=True)
@@ -339,6 +348,7 @@ def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
         brim,
         picked["sizing"],
         ratio,
+        HeadMorph(**raw.get("morph", {})),
     )
 
 
@@ -364,6 +374,11 @@ def _head_to_dict(head: HeadSettings) -> dict[str, Any]:
     ):
         if getattr(head, key) != getattr(HeadSettings(), key):
             out[key] = getattr(head, key)
+    if head.morph != HeadMorph():
+        out["morph"] = {
+            key: getattr(head.morph, key)
+            for key in ("width", "jaw", "nose", "mouth", "eyes")
+        }
     if head.headwear_material is not None:
         out["headwear_material"] = head.headwear_material
     ovr = head.orientation_override

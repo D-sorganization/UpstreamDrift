@@ -215,6 +215,25 @@ def build_mesh_parts(
             (name, Mesh(m.vertices * length_m, m.faces), "cap")
             for name, m in head_cap.build_cap(asset.skin, settings.cap_brim)
         ]
+    if settings is not None:
+        from src.shared.python.model_appearance.head_morph import (
+            HeadMorph,
+            warp_vertices,
+        )
+
+        if settings.morph != HeadMorph():
+            out = [
+                (
+                    name,
+                    Mesh(
+                        warp_vertices(mesh.vertices / length_m, settings.morph)
+                        * length_m,
+                        mesh.faces,
+                    ),
+                    role,
+                )
+                for name, mesh, role in out
+            ]
     return out
 
 
