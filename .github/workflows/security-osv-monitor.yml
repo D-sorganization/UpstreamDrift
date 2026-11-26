@@ -24,7 +24,9 @@ jobs:
       - name: Run OSV scanner action
         # The repository root action.yml has no `runs:`; the runnable action is the subpath (#14137).
         uses: google/osv-scanner-action/osv-scanner-action@b1d267aea5211fa648d9d442fa64b90dbdcbdd36
-        # Findings must not fail the monitor; the SLA triage export below reports them.
+        # The action reports both vulnerability findings and tool crashes as
+        # one step failure and does not publish the scanner exit code. Continue
+        # so the export step can fail the job only on a crash (#15765).
         continue-on-error: true
         with:
           scan-args: |
@@ -38,10 +40,35 @@ jobs:
       - name: Export OSV JSON for SLA triage
         shell: bash
         run: |
+          set -euo pipefail
+          set +e
           go run github.com/google/osv-scanner/v2/cmd/osv-scanner@v2.3.1 \
-            scan --format json --output osv-results.json . || true
+            scan --format json --output osv-results.json .
+          scan_status=$?
+          set -e
+          scan_class=$(python3 scripts/security/triage_osv_findings.py \
+            --classify-exit "$scan_status")
+          if [ "$scan_class" = "crash" ]; then
+            echo "::error::OSV scanner crashed with exit code ${scan_status}"
+            exit "$scan_status"
+          fi
+          if [ "$scan_class" = "vulnerabilities" ]; then
+            echo "OSV scanner reported vulnerabilities (exit 1); running SLA triage."
+          fi
+          set +e
           python3 scripts/security/triage_osv_findings.py \
-            --osv-json osv-results.json > osv-triage.jsonl || true
+            --osv-json osv-results.json > osv-triage.jsonl
+          triage_status=$?
+          set -e
+          triage_class=$(python3 scripts/security/triage_osv_findings.py \
+            --classify-exit "$triage_status")
+          if [ "$triage_class" = "crash" ]; then
+            echo "::error::OSV triage crashed with exit code ${triage_status}"
+            exit "$triage_status"
+          fi
+          if [ "$triage_class" = "vulnerabilities" ]; then
+            echo "OSV triage recorded findings; the SLA artifact reports them."
+          fi
 
       - name: Upload OSV triage summary
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9

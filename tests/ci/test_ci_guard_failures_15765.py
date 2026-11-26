@@ -146,12 +146,26 @@ def test_triage_findings_remain_exit_one(tmp_path: Path) -> None:
     assert "GHSA-test" in result.stdout
 
 
+def _checker_stub(directory: Path, status: int) -> Path:
+    """Write a checker stub that exits with ``status``."""
+    stub = directory / f"checker_{status}.py"
+    stub.write_text(f"import sys\nraise SystemExit({status})\n", encoding="utf-8")
+    return stub
+
+
 def test_code_quality_runner_returns_the_checker_status(tmp_path: Path) -> None:
     """A checker failure must be the runner's own exit status."""
     sample = tmp_path / "sample.py"
-    sample.write_text("def helper():\n    return 1\n", encoding="utf-8")
+    sample.write_text("x = 1\n", encoding="utf-8")
     result = subprocess.run(
-        [sys.executable, str(QUALITY_RUNNER), "--changed-file", str(sample)],
+        [
+            sys.executable,
+            str(QUALITY_RUNNER),
+            "--checker",
+            str(_checker_stub(tmp_path, 1)),
+            "--changed-file",
+            str(sample),
+        ],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
@@ -160,18 +174,77 @@ def test_code_quality_runner_returns_the_checker_status(tmp_path: Path) -> None:
     assert result.returncode == 1, result.stderr
 
 
-def test_code_quality_runner_accepts_a_clean_file(tmp_path: Path) -> None:
-    """A documented function does not fail the code-quality runner."""
-    sample = tmp_path / "sample.py"
-    sample.write_text(
-        'def helper() -> int:\n    """Return one."""\n    return 1\n',
-        encoding="utf-8",
+def test_review_events_diff_and_other_events_audit_the_tree() -> None:
+    """Pull requests and merge groups diff; other events keep the full audit."""
+    runner = _load_module("run_code_quality_check_15765", QUALITY_RUNNER)
+    assert (
+        runner.diff_base_for_event(
+            "pull_request",
+            base_ref="main",
+            before_sha="",
+            merge_group_base_sha="",
+        )
+        == "origin/main"
     )
+    assert (
+        runner.diff_base_for_event(
+            "merge_group",
+            base_ref="",
+            before_sha="",
+            merge_group_base_sha="abc123",
+        )
+        == "abc123"
+    )
+    assert (
+        runner.diff_base_for_event(
+            "schedule",
+            base_ref="",
+            before_sha="",
+            merge_group_base_sha="",
+        )
+        is None
+    )
+    zero_sha = "0" * 40
+    assert (
+        runner.diff_base_for_event(
+            "push",
+            base_ref="",
+            before_sha=zero_sha,
+            merge_group_base_sha="",
+        )
+        is None
+    )
+    with pytest.raises(ValueError, match="pull_request requires base_ref"):
+        runner.diff_base_for_event(
+            "pull_request",
+            base_ref="",
+            before_sha="",
+            merge_group_base_sha="",
+        )
+
+
+def test_code_quality_runner_accepts_a_clean_checker(tmp_path: Path) -> None:
+    """A zero checker status is preserved."""
+    sample = tmp_path / "sample.py"
+    sample.write_text("x = 1\n", encoding="utf-8")
     result = subprocess.run(
-        [sys.executable, str(QUALITY_RUNNER), "--changed-file", str(sample)],
+        [
+            sys.executable,
+            str(QUALITY_RUNNER),
+            "--checker",
+            str(_checker_stub(tmp_path, 0)),
+            "--changed-file",
+            str(sample),
+        ],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
         check=False,
     )
     assert result.returncode == 0, result.stderr
+
+
+def test_runner_defaults_to_the_repository_checker() -> None:
+    """The production runner invokes the shared code-quality checker."""
+    runner = _load_module("run_code_quality_check_default_15765", QUALITY_RUNNER)
+    assert runner.CHECKER == REPO_ROOT / "src/tools/code_quality_check.py"
