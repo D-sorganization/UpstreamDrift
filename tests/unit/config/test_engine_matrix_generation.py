@@ -97,6 +97,44 @@ def test_advertised_and_unsupported_engines_are_disjoint() -> None:
             f"{name} tier {profile['tier']!r} != ENGINE_TIERS {ENGINE_TIERS[name]!r}"
         )
 
+    # ADR-0058 keeps putting_green as the shared putting core in the catalog.
+    assert "putting_green" in advertised
+    assert "putting_green" not in unsupported
+    assert "double_pendulum" in unsupported
+    assert "double_pendulum" not in advertised
+
+
+def test_classify_engine_membership_contract() -> None:
+    """Membership flags stay disjoint, and bad inputs fail at the boundary."""
+    from scripts.generate_engine_matrix import _classify_engine_membership
+
+    advertised, experimental, unsupported = _classify_engine_membership(
+        is_advertised=True,
+        tier="core",
+        is_qualified=False,
+    )
+    assert (advertised, experimental, unsupported) == (True, False, False)
+
+    archived = _classify_engine_membership(
+        is_advertised=False,
+        tier="archived",
+        is_qualified=False,
+    )
+    assert archived == (False, False, True)
+
+    with pytest.raises(TypeError, match="is_advertised must be a bool"):
+        _classify_engine_membership(
+            is_advertised="yes",  # type: ignore[arg-type]
+            tier="core",
+            is_qualified=False,
+        )
+    with pytest.raises(ValueError, match="tier must be a non-empty string"):
+        _classify_engine_membership(
+            is_advertised=False,
+            tier="  ",
+            is_qualified=False,
+        )
+
 
 def test_matrix_generation_from_fixture_ledger(tmp_path: Path) -> None:
     """Generate matrix from ledger data where one engine passes and others have no receipts."""
