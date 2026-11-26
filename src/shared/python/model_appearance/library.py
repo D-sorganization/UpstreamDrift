@@ -62,6 +62,7 @@ def plain_rgba(key: str) -> tuple[float, float, float, float]:
 
 
 def _skin(rgb: tuple[float, float, float]) -> Material:
+    """Build a lightly textured skin swatch from an RGB triplet."""
     return Material(
         (*rgb, 1.0),
         roughness=0.55,
@@ -99,6 +100,10 @@ MATERIALS: dict[str, Material] = {
     "cap_red": Material(
         (0.62, 0.10, 0.10, 1.0), 0.85, texture=Texture("noise", noise=0.04)
     ),
+    "hat_straw": Material(
+        (0.72, 0.59, 0.35, 1.0), 0.95, texture=Texture("noise", noise=0.05)
+    ),
+    "hat_band_dark": Material((0.12, 0.08, 0.05, 1.0), 0.9),
     "eye_white": Material((0.96, 0.96, 0.94, 1.0), 0.2),
     "iris_dark": Material((0.10, 0.07, 0.05, 1.0), 0.15),
     "iris_blue_grey": Material((0.36, 0.47, 0.56, 1.0), 0.15),
@@ -713,6 +718,7 @@ def check_references(doc: AppearanceDocument) -> None:
 
 
 def rule_for_body(doc: AppearanceDocument, body_name: str) -> SegmentRule | None:
+    """Find the first case-insensitive appearance rule for a body."""
     lowered = body_name.lower()
     for rule in doc.segments:
         if fnmatchcase(lowered, rule.match.lower()):
