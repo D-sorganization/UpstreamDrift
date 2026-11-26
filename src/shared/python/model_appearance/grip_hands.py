@@ -76,11 +76,13 @@ _GRIP_AXIS = np.array([0.0, 1.0, 0.0])  # butt toward head in the club frame
 
 
 def _check_club(club: object) -> None:
+    """check club."""
     if not isinstance(club, ClubAssembly):
         raise TypeError(f"club must be a ClubAssembly, got {type(club).__name__}")
 
 
 def _check_pose(pose: object) -> None:
+    """check pose."""
     if not isinstance(pose, GripPose):
         raise TypeError(f"pose must be a GripPose, got {type(pose).__name__}")
 
@@ -128,6 +130,7 @@ def _resolve_dorsal_axis(
     wrist_follower: Array | Mapping[str, Any] | None,
     hands: ResolvedHandSpec | None,
 ) -> Array | None:
+    """resolve dorsal axis."""
     if isinstance(wrist_follower, Mapping):
         return wrist_follower_dorsal_axis(wrist_follower, hand, pose)
     if wrist_follower is not None:
@@ -198,6 +201,7 @@ def grip_hand_frame(
 
 
 def _mesh_params(hand_length_m: float | None) -> HandMeshParams:
+    """mesh params."""
     length = DEFAULT_HAND_LENGTH_M if hand_length_m is None else float(hand_length_m)
     return replace(DEFAULT_HAND_MESH_PARAMS, scale=hand_mesh_scale(length))
 

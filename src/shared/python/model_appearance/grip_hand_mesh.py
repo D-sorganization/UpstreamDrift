@@ -141,6 +141,7 @@ class HandMeshParams:
     sides: int = 16
 
     def __post_init__(self) -> None:
+        """post init."""
         for name in ("finger_gap_m", "pad_clearance_m", "palm_clearance_m"):
             value = getattr(self, name)
             if not (math.isfinite(value) and 0.0 <= value <= MAX_PAD_CLEARANCE_M):
@@ -238,10 +239,12 @@ class GripHandMesh:
 
 
 def _radial(theta: float) -> Array:
+    """radial."""
     return np.array([math.cos(theta), math.sin(theta), 0.0])
 
 
 def _tangential(theta: float) -> Array:
+    """tangential."""
     return np.array([-math.sin(theta), math.cos(theta), 0.0])
 
 
@@ -376,6 +379,7 @@ def _stack_z(params: HandMeshParams) -> dict[str, float]:
 def _check_inputs(
     hand: object, grip_radius_m: object, pose: object, style: object
 ) -> None:
+    """check inputs."""
     if not isinstance(hand, Hand):
         raise TypeError(f"hand must be a Hand, got {hand!r}")
     if isinstance(grip_radius_m, bool) or not isinstance(grip_radius_m, (int, float)):

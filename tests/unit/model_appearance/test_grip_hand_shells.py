@@ -37,16 +37,19 @@ _BARY = _BARY[_BARY[:, 2] >= -1e-12]
 
 
 def _surface_points(mesh: Mesh) -> np.ndarray:
+    """surface points."""
     tri = mesh.vertices[mesh.faces]
     samples = np.einsum("kj,mjd->mkd", _BARY, tri).reshape(-1, 3)
     return np.vstack([mesh.vertices, samples])
 
 
 def _rho(points: np.ndarray) -> np.ndarray:
+    """rho."""
     return np.hypot(points[:, 0], points[:, 1])
 
 
 def _parts(result: GripHandMesh, finger: str):
+    """parts."""
     return [p for p in result.components if p.finger == finger]
 
 
@@ -131,6 +134,7 @@ def _merged_covered_arc_deg(intervals: list[tuple[float, float]]) -> float:
 
 
 def _assert_covered_arc_at_least_deg(covered_deg: float, minimum_deg: float) -> None:
+    """assert covered arc at least deg."""
     assert covered_deg >= minimum_deg - 1e-6, (covered_deg, minimum_deg)
 
 
@@ -151,6 +155,7 @@ def _contact_patch_samples(gap: np.ndarray) -> np.ndarray:
 def _assert_patch_clearance_within_limit(
     patch_gap: np.ndarray, taper_slack: float, *, part_name: str
 ) -> None:
+    """assert patch clearance within limit."""
     assert patch_gap.size, part_name
     assert patch_gap.min() >= -1e-6, (part_name, patch_gap.min(), patch_gap.max())
     limit = MAX_PAD_CLEARANCE_M + taper_slack + 1e-6
@@ -164,6 +169,7 @@ def _assert_patch_clearance_within_limit(
 
 
 def _club(key: str) -> ca.ClubAssembly:
+    """club."""
     spec = ROOT / f"docs/development/full_body_models/full_body_spec_anthro_{key}.json"
     club = ca.assembly_from_spec(json.loads(spec.read_text(encoding="utf-8")))
     assert club is not None
@@ -176,6 +182,7 @@ def _club(key: str) -> ca.ClubAssembly:
 def test_hand_section_covers_270_deg_around_grip(
     hand: Hand, style: GripStyle, radius: float
 ):
+    """test hand section covers 270 deg around grip."""
     result = build_grip_hand_mesh(hand, grip_radius_m=radius, style=style)
     proximal_z = [
         float(
@@ -200,6 +207,7 @@ def test_hand_section_covers_270_deg_around_grip(
 def test_each_contact_patch_gap_within_0_to_3_mm(
     key: str, hand: Hand, style: GripStyle
 ):
+    """test each contact patch gap within 0 to 3 mm."""
     club = _club(key)
     result = gh.baked_grip_hand(club, hand, GripPose(style=style))
     for part in result.components:
@@ -230,6 +238,7 @@ def test_circular_arc_span_at_0_360_seam_is_short_not_linear_span() -> None:
 
 
 def test_contact_patch_clearance_rejects_over_limit_sample() -> None:
+    """test contact patch clearance rejects over limit sample."""
     taper_slack = 0.0001
     ok = np.array([0.0005, 0.0012, 0.0018])
     _assert_patch_clearance_within_limit(ok, taper_slack, part_name="synthetic_ok")
@@ -246,6 +255,7 @@ def test_contact_patch_clearance_rejects_over_limit_sample() -> None:
 def test_dorsum_shell_exists_beyond_mcp_radius(
     hand: Hand, style: GripStyle, radius: float
 ):
+    """test dorsum shell exists beyond mcp radius."""
     result = build_grip_hand_mesh(hand, grip_radius_m=radius, style=style)
     dorsum = _parts(result, "dorsum")
     assert dorsum, "no dorsum shell"
@@ -261,11 +271,13 @@ def test_dorsum_shell_exists_beyond_mcp_radius(
 
 
 def _wrapped_deg(angle: np.ndarray) -> np.ndarray:
+    """wrapped deg."""
     return (angle + 180.0) % 360.0 - 180.0
 
 
 @pytest.mark.parametrize("style", list(GripStyle))
 def test_mirrored_hand_matches_handedness(style: GripStyle):
+    """test mirrored hand matches handedness."""
     pose = GripPose(style=style)
     lead = build_grip_hand_mesh(Hand.LEAD, grip_radius_m=0.014, pose=pose)
     trail = build_grip_hand_mesh(Hand.TRAIL, grip_radius_m=0.014, pose=pose)
@@ -285,6 +297,7 @@ def test_mirrored_hand_matches_handedness(style: GripStyle):
 
 
 def test_thumb_web_shell_is_on_grip():
+    """test thumb web shell is on grip."""
     for style in GripStyle:
         for hand in Hand:
             result = build_grip_hand_mesh(hand, grip_radius_m=0.014, style=style)

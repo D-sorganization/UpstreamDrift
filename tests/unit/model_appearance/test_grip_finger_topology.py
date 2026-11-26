@@ -55,11 +55,13 @@ def _mesh_centroid_in_grip(hand_mesh: GripHandMesh, component_name: str) -> np.n
 
 
 def _azimuth_deg(pts: np.ndarray) -> float:
+    """azimuth deg."""
     mean_xy = pts[:, :2].mean(axis=0)
     return float(np.degrees(np.arctan2(mean_xy[1], mean_xy[0])))
 
 
 def _wrap_deg(angle: float) -> float:
+    """wrap deg."""
     return float((angle + 180.0) % 360.0 - 180.0)
 
 
@@ -234,6 +236,7 @@ _SHELLS_13997 = frozenset({"dorsum", "thumb_web"})
 
 
 def _skip_grip_hand_golden_component(name: str) -> bool:
+    """skip grip hand golden component."""
     return name in _SHELLS_13997 or name.startswith("palm_")
 
 
