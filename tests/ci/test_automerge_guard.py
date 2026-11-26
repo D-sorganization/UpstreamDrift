@@ -116,6 +116,10 @@ class FakeGh:
             return _completed(self.committer_date)
         if "/files" in joined:
             return _completed("\n".join(self.removed))
+        if "/issues/" in joined and "comments" in joined:
+            return _completed("[]")
+        if "/pulls/" in joined and "commits" in joined:
+            return _completed("[]")
         if "/pulls/" in joined:
             return _completed(json.dumps(self.pull))
         raise AssertionError(f"unexpected gh call: {joined}")
@@ -1209,6 +1213,109 @@ def test_no_guard_function_exceeds_the_consumer_function_budget() -> None:
         and node.end_lineno - node.lineno + 1 > 100
     ]
     assert too_long == []
+
+
+# --------------------------------------------------------------------------
+# #15491: independent exact-head PASS / FIX-NEEDED gating
+# --------------------------------------------------------------------------
+
+_REVIEW_HEAD = HEAD_SHA
+
+_INDEP_REVIEW = (
+    "Independent Exact-Head Acceptance Review (d-sorgcodexagent / `codex`)\n\n"
+    "Verdict: {verdict} @{sha}\n"
+)
+
+
+class IndependentReviewGh(FakeGh):
+    """FakeGh that serves PR issue comments and commits for signal 5."""
+
+    def __init__(
+        self,
+        *,
+        issue_comments: Sequence[dict[str, str]] = (),
+        commit_messages: Sequence[str] = (),
+        **kw: object,
+    ) -> None:
+        super().__init__(**kw)  # type: ignore[arg-type]
+        self.issue_comments = list(issue_comments)
+        self.commit_messages = list(commit_messages)
+
+    def __call__(self, cmd: Sequence[str]) -> subprocess.CompletedProcess[str]:
+        argv = list(cmd)
+        joined = " ".join(argv)
+        if "/issues/" in joined and "comments" in joined:
+            self.calls.append(argv)
+            return _completed(json.dumps(self.issue_comments))
+        if "/pulls/" in joined and "commits" in joined:
+            self.calls.append(argv)
+            commits = [{"commit": {"message": msg}} for msg in self.commit_messages]
+            return _completed(json.dumps(commits))
+        return super().__call__(cmd)
+
+    @property
+    def disarm_calls(self) -> list[list[str]]:
+        return [
+            c
+            for c in self.calls
+            if any(p.endswith("/ccr/auto_merge") for p in c) and "DELETE" in c
+        ]
+
+
+def test_arm_refuses_without_independent_pass_at_exact_head() -> None:
+    fake = IndependentReviewGh(labels=["agent-model:claude"])
+    result = automerge_guard.arm_auto_merge("o/r", 1, runner=fake)
+    assert result.armed is False
+    assert fake.armed is False
+    assert "independent exact-head" in result.verdict.describe().lower()
+
+
+def test_arm_proceeds_with_independent_pass_at_head() -> None:
+    body = _INDEP_REVIEW.format(verdict="PASS", sha=_REVIEW_HEAD)
+    fake = IndependentReviewGh(
+        labels=["agent-model:claude"],
+        issue_comments=[{"body": body, "created_at": "2026-11-22T18:00:00Z"}],
+    )
+    result = automerge_guard.arm_auto_merge("o/r", 1, runner=fake)
+    assert result.armed is True
+
+
+def test_fix_needed_at_head_blocks_arming() -> None:
+    body = _INDEP_REVIEW.format(verdict="FIX-NEEDED", sha=_REVIEW_HEAD)
+    fake = IndependentReviewGh(
+        labels=["agent-model:claude"],
+        issue_comments=[{"body": body, "created_at": "2026-11-22T18:00:00Z"}],
+    )
+    result = automerge_guard.arm_auto_merge("o/r", 1, runner=fake)
+    assert result.armed is False
+    assert "FIX-NEEDED" in result.verdict.describe()
+
+
+def test_disarm_if_held_on_fix_needed_verdict() -> None:
+    body = _INDEP_REVIEW.format(verdict="FIX-NEEDED", sha=_REVIEW_HEAD)
+    fake = IndependentReviewGh(
+        labels=["agent-model:claude"],
+        issue_comments=[{"body": body, "created_at": "2026-11-22T18:00:00Z"}],
+    )
+    verdict = automerge_guard.disarm_if_held("o/r", 1, runner=fake)
+    assert verdict.held is True
+    assert len(fake.disarm_calls) == 1
+
+
+def test_quoted_fix_needed_in_reply_does_not_disarm() -> None:
+    body = (
+        "Independent Exact-Head Acceptance Review (d-sorgcodexagent / `codex`)\n"
+        "Reply: earlier `FIX-NEEDED @"
+        + _REVIEW_HEAD
+        + "` — resolved. PASS @"
+        + _REVIEW_HEAD
+    )
+    fake = IndependentReviewGh(
+        labels=["agent-model:claude"],
+        issue_comments=[{"body": body, "created_at": "2026-11-22T18:00:00Z"}],
+    )
+    verdict = automerge_guard.evaluate_hold("o/r", 1, runner=fake)
+    assert verdict.held is False
 
 
 def test_guard_has_no_builtin_print_calls() -> None:

@@ -31,16 +31,18 @@ own). Neither replaces the other: this one avoids the fight, the guard wins it.
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import logging
 import os
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
@@ -401,6 +403,100 @@ def _disarm_reasons(run: CommandRunner, repo: str, pr: int, sha: str) -> list[st
     return []
 
 
+def _independent_exact_head_review_module() -> object:
+    name = "independent_exact_head_review"
+    cached = sys.modules.get(name)
+    if cached is not None:
+        return cached
+    path = Path(__file__).with_name("independent_exact_head_review.py")
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load {path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _issue_comments(run: CommandRunner, repo: str, pr: int) -> list[dict[str, Any]]:
+    payload = _gh_json(
+        run, ["api", f"repos/{repo}/issues/{pr}/comments?per_page=100", "--paginate"]
+    )
+    if not isinstance(payload, list):
+        raise RuntimeError(f"unreadable issue comments for {repo}#{pr}")
+    return [item for item in payload if isinstance(item, dict)]
+
+
+def _commit_messages(run: CommandRunner, repo: str, pr: int) -> list[str]:
+    payload = _gh_json(
+        run, ["api", f"repos/{repo}/pulls/{pr}/commits?per_page=100", "--paginate"]
+    )
+    if not isinstance(payload, list):
+        raise RuntimeError(f"unreadable commits for {repo}#{pr}")
+    rows: list[str] = []
+    for item in payload:
+        if not isinstance(item, dict):
+            continue
+        commit = item.get("commit")
+        if isinstance(commit, dict):
+            rows.append(str(commit.get("message") or ""))
+    return rows
+
+
+def _independent_review_reasons(
+    run: CommandRunner, repo: str, pr: int, pull: _PullRequest
+) -> list[str]:
+    """Signal 5: independent exact-head FIX-NEEDED at the current head."""
+    if not pull.head_sha:
+        return []
+    review = cast(Any, _independent_exact_head_review_module())
+    author_model_from_labels = review.author_model_from_labels
+    author_model_from_commit_messages = review.author_model_from_commit_messages
+    independent_review_hold_reason = review.independent_review_hold_reason
+    parse_issue_comments = review.parse_issue_comments
+
+    try:
+        comments = _issue_comments(run, repo, pr)
+        messages = _commit_messages(run, repo, pr)
+    except (RuntimeError, json.JSONDecodeError, OSError, TypeError, ValueError):
+        return ["independent exact-head review state is unreadable"]
+    author_model = author_model_from_labels(
+        pull.labels
+    ) or author_model_from_commit_messages(messages)
+    reviews = parse_issue_comments(comments)
+    return independent_review_hold_reason(
+        reviews,
+        head_sha=pull.head_sha,
+        author_model=author_model,
+        labels=pull.labels,
+    )
+
+
+def _disarm_auto_merge(repo: str, pr: int, run: CommandRunner) -> bool:
+    proc = run(["gh", "api", "-X", "DELETE", f"repos/{repo}/pulls/{pr}/ccr/auto_merge"])
+    if proc.returncode == 0:
+        logger.warning("Disarmed auto-merge on %s#%s before a blocked merge.", repo, pr)
+        return True
+    err = proc.stderr.strip() or proc.stdout.strip()
+    logger.warning("Could not disarm auto-merge on %s#%s: %s", repo, pr, err)
+    return False
+
+
+def disarm_if_held(
+    repo: str, pr: int, *, runner: CommandRunner | None = None
+) -> HoldVerdict:
+    """Re-check holds on an already-armed PR; disarm when a hold applies (#4315).
+
+    Post: returns the current :func:`evaluate_hold` verdict. When ``held``, one
+    ``DELETE .../ccr/auto_merge`` is attempted (author-bot / scheduled paths).
+    """
+    run = runner or _default_runner
+    verdict = evaluate_hold(repo, pr, runner=run)
+    if verdict.held:
+        _disarm_auto_merge(repo, pr, run)
+    return verdict
+
+
 def _deletion_reasons(
     run: CommandRunner, repo: str, pr: int, pull: _PullRequest
 ) -> list[str]:
@@ -457,6 +553,7 @@ def evaluate_hold(
     3. auto-merge disabled by a non-bot account more recently than the head
        commit — a reviewer said no and nobody has pushed since
     4. the diff deletes tracked files with no acknowledgement
+    5. an independent exact-head review is ``FIX-NEEDED`` at the current head
 
     Fails closed: any error computing the verdict returns ``held=True``.
     """
@@ -472,6 +569,7 @@ def evaluate_hold(
             reasons.append("PR is a draft (mark ready first)")
         reasons += _disarm_reasons(run, repo, pr, pull.head_sha)
         reasons += _deletion_reasons(run, repo, pr, pull)
+        reasons += _independent_review_reasons(run, repo, pr, pull)
     except (RuntimeError, json.JSONDecodeError, OSError) as exc:
         # Fail closed. An unknown state is not a licence to arm.
         return HoldVerdict(True, (), error=str(exc))
@@ -825,12 +923,22 @@ def main(argv: Sequence[str] | None = None) -> int:
         action="store_true",
         help="exit 2 unless the active token is a GitHub App installation token",
     )
+    parser.add_argument(
+        "--disarm-if-held",
+        action="store_true",
+        help="disarm an already-armed PR when a hold applies (author-bot safety path)",
+    )
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     if not check_token_identity(require_app_token=args.require_app_token):
         return EXIT_IDENTITY_REFUSED
+
+    if args.disarm_if_held:
+        verdict = disarm_if_held(args.repo, args.pr)
+        _emit(f"{args.repo}#{args.pr}: {verdict.describe()}")
+        return 1 if verdict.held else 0
 
     if args.arm:
         result = arm_auto_merge(
