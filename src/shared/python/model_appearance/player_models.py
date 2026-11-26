@@ -39,35 +39,15 @@ def build_player_spec(player: str, club: str = "driver") -> dict[str, Any]:
     This intentionally changes physics. Existing C3D motion/torques require a
     new fit; callers wanting only a skin must use :func:`player_appearance`.
     """
-    from src.shared.python.model_appearance.canonical_golfer_gate import (
-        require_canonical_golfer,
-    )
-    from src.shared.python.motion_matching.execution.spec_builder import (
-        compose_anthropometric_document,
-    )
-    from src.shared.python.motion_matching.anthropometry import segment_parameters
-    from src.shared.python.motion_matching.execution.spec_revisions import (
-        with_current_golfer_model,
-        with_grip_revision,
+    from src.shared.python.model_appearance.player_stature import (
+        build_stature_calibrated,
     )
 
     profile = player_profile(player)
-    built = compose_anthropometric_document(
-        stature_m=profile["stature_m"],
-        mass_kg=profile["mass_kg"],
-        club=club,
-        match_subject_mass=True,
-        thigh_length_m=segment_parameters(
-            profile["stature_m"], profile["mass_kg"], "thigh"
-        ).length_m,
-        shank_length_m=segment_parameters(
-            profile["stature_m"], profile["mass_kg"], "shank"
-        ).length_m,
+    spec, calibration = build_stature_calibrated(
+        profile["stature_m"], profile["mass_kg"], club
     )
-    spec, _ = with_current_golfer_model(
-        *with_grip_revision(built.document, built.subject, None)
-    )
-    require_canonical_golfer(spec)
+    spec["subject"]["neutral_visual_calibration"] = calibration
     return spec
 
 
@@ -101,6 +81,7 @@ def export_player(
         "player": player,
         "mode": "sized_candidate" if base_spec is None else "appearance_only",
         "profile": profile,
+        "calibration": spec.get("subject", {}).get("neutral_visual_calibration"),
         "physics_spec_sha256": physics_spec_sha256(spec),
         "coordinate_order": spec["coordinate_order"],
         "export": metadata,
