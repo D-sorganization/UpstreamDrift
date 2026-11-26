@@ -22,6 +22,7 @@ class HeadMorph:
     eyes: float = 0.0
 
     def __post_init__(self) -> None:
+        """Require every artistic adjustment to be finite and bounded."""
         for item in fields(self):
             value = getattr(self, item.name)
             if (
@@ -48,6 +49,7 @@ def warp_vertices(
     neck = neck * neck * (3.0 - 2.0 * neck)
 
     def window(center: float, radius: float) -> NDArray[np.float64]:
+        """Return a smooth vertical influence centered on a facial feature."""
         return np.exp(-(((z - center) / radius) ** 2))
 
     front = np.clip((x + 0.05) / 0.35, 0.0, 1.0)

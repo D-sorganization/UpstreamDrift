@@ -12,6 +12,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_identity_and_neck_anchor():
+    """Zero morph is identity and the neck plane remains fixed."""
     points = np.array([[0.2, 0.1, 0.0], [0.6, 0.1, 0.5], [0.0, 0.0, 1.0]])
     assert np.array_equal(warp_vertices(points, HeadMorph()), points)
     changed = warp_vertices(points, HeadMorph(width=0.1, nose=0.1))
@@ -21,6 +22,7 @@ def test_identity_and_neck_anchor():
 
 @pytest.mark.parametrize("value", [float("nan"), float("inf"), -0.201, 0.201])
 def test_bounds(value):
+    """Reject out-of-range and non-finite morphs in both constructors."""
     with pytest.raises(ValueError):
         HeadMorph(nose=value)
     with pytest.raises(ValueError):
@@ -30,6 +32,7 @@ def test_bounds(value):
 
 
 def test_appearance_roundtrip():
+    """Serialize and parse face morph settings without changing the document."""
     doc = document_from_dict(
         {
             "schema_version": "appearance-v1",
@@ -48,6 +51,7 @@ def test_appearance_roundtrip():
 
 
 def test_parts_share_warp_and_keep_closed_topology():
+    """Apply the same warp to all parts while retaining closed meshes."""
     morph = HeadMorph(width=0.1, jaw=-0.1, nose=0.1, mouth=0.1, eyes=-0.1)
     original = build_mesh_parts(0.24, "hair", HeadSettings(cap_style="baseball_cap"))
     changed = build_mesh_parts(
@@ -70,6 +74,7 @@ def test_parts_share_warp_and_keep_closed_topology():
 
 
 def test_parametric_head_cannot_silently_ignore_morph():
+    """Refuse face controls when the selected head cannot render them."""
     with pytest.raises(ValueError, match="cc0_mesh"):
         document_from_dict(
             {
@@ -81,6 +86,7 @@ def test_parametric_head_cannot_silently_ignore_morph():
 
 @pytest.mark.timeout(180)
 def test_morph_preserves_current_mujoco_reference_physics():
+    """Verify visual morphing leaves MuJoCo body and joint physics unchanged."""
     import json
 
     mujoco = pytest.importorskip("mujoco")
@@ -147,5 +153,6 @@ def test_morph_preserves_current_mujoco_reference_physics():
 
 
 def test_direct_head_settings_rejects_invalid_morph():
+    """Reject a mapping where a typed HeadMorph value is required."""
     with pytest.raises(ValueError, match="HeadMorph"):
         HeadSettings(morph={"nose": 0.1})  # type: ignore[arg-type]
