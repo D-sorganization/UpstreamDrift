@@ -79,7 +79,7 @@ def flat_cap_crop() -> CapCrop:
         brim_half_angle=0.93,
         brim_forward=0.68,
         brim_end_taper=0.34,
-        front_overhang=0.30,
+        front_overhang=0.12,
         hair_under=HairCrop(
             top_thickness=0.020,
             fringe_thickness=0.0,
@@ -126,6 +126,7 @@ def _brim(rim: Array, crop: CapCrop, length: float) -> Mesh:
         r: NDArray[np.int64],
         s: NDArray[np.int64],
     ) -> NDArray[np.int64]:
+        """Triangulate the ordered row-to-row plate cells."""
         return np.concatenate(
             [
                 np.stack([p, q, r], -1).reshape(-1, 3),
@@ -176,9 +177,8 @@ def build_cap(
         v, n, faces, np.full(len(v), cfg.wall), cfg.offset - cfg.wall, cfg.wall
     )
     if cfg.front_overhang:
-        # Keep the inner crown on the scalp and move both shell surfaces
-        # forward only across the upper forehead. Smooth gates leave the cap
-        # line and crown apex fixed, preserving the closed shell and clearance.
+        # Move both shell surfaces together toward the forehead, preserving
+        # their stand-off. Smooth gates leave the cap line and crown apex fixed.
         crown_vertices = crown.vertices.copy()
         z = crown_vertices[:, 2]
         front = np.clip((crown_vertices[:, 0] - cfg.centre_x) / 0.24, 0.0, 1.0)

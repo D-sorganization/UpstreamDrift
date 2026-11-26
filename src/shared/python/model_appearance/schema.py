@@ -83,6 +83,7 @@ class Material:
 
     @property
     def rgba(self) -> tuple[float, float, float, float]:
+        """Return base colour as RGBA, defaulting alpha to fully opaque."""
         rgb = tuple(float(c) for c in self.base_color[:3])
         alpha = float(self.base_color[3]) if len(self.base_color) == 4 else 1.0
         return (rgb[0], rgb[1], rgb[2], alpha)
@@ -123,6 +124,7 @@ class BallSettings:
     source: str = "address_geometry"
 
     def __post_init__(self) -> None:
+        """Validate the ball source and any measured position."""
         if self.source not in BALL_SOURCES:
             raise ValueError(f"ball source must be one of {BALL_SOURCES}")
         if self.position_m is not None:
@@ -234,6 +236,7 @@ class AppearanceDocument:
 
 @lru_cache(maxsize=1)
 def _validator() -> Any:
+    """Load and cache the versioned appearance JSON schema validator."""
     import jsonschema
 
     schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
@@ -256,6 +259,7 @@ def validate_document(data: Mapping[str, Any]) -> None:
 
 
 def _texture(raw: Mapping[str, Any]) -> Texture:
+    """Parse a schema-validated texture object into typed fields."""
     if raw["kind"] == "file" and not raw.get("path"):
         raise ValueError("A file texture needs a path")
     a, b = raw.get("color_a"), raw.get("color_b")
@@ -270,6 +274,7 @@ def _texture(raw: Mapping[str, Any]) -> Texture:
 
 
 def _material(raw: Mapping[str, Any]) -> Material:
+    """Parse a schema-validated material and its optional texture."""
     texture = raw.get("texture")
     return Material(
         tuple(float(c) for c in raw["base_color"]),
@@ -287,6 +292,7 @@ def _head_model(raw: Mapping[str, Any], defaults: HeadSettings) -> str:
 
 
 def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
+    """Parse head appearance fields and enforce cross-field contracts."""
     defaults = HeadSettings()
     ovr_raw = raw.get("orientation_override")
     override = None
@@ -343,6 +349,7 @@ def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
 
 
 def _head_to_dict(head: HeadSettings) -> dict[str, Any]:
+    """Serialize head settings while omitting default values."""
     out: dict[str, Any] = {
         "enabled": head.enabled,
         "headwear": head.headwear,
@@ -379,6 +386,7 @@ def _head_to_dict(head: HeadSettings) -> dict[str, Any]:
 
 
 def _ball_settings(raw: Mapping[str, Any]) -> BallSettings:
+    """Parse decorative ball settings with the documented defaults."""
     defaults = BallSettings()
     position = raw.get("position_m")
     return BallSettings(
@@ -391,6 +399,7 @@ def _ball_settings(raw: Mapping[str, Any]) -> BallSettings:
 
 
 def _ball_to_dict(ball: BallSettings) -> dict[str, Any]:
+    """Serialize decorative ball settings."""
     out: dict[str, Any] = {"enabled": ball.enabled, "source": ball.source}
     if ball.position_m is not None:
         out["position_m"] = list(ball.position_m)
@@ -441,6 +450,7 @@ def document_from_dict(data: Mapping[str, Any]) -> AppearanceDocument:
 
 
 def _texture_to_dict(texture: Texture) -> dict[str, Any]:
+    """Serialize texture settings while omitting optional defaults."""
     out: dict[str, Any] = {"kind": texture.kind}
     for key in ("color_a", "color_b"):
         value = getattr(texture, key)
@@ -456,6 +466,7 @@ def _texture_to_dict(texture: Texture) -> dict[str, Any]:
 
 
 def material_to_dict(material: Material) -> dict[str, Any]:
+    """Serialize a material and its optional texture."""
     out: dict[str, Any] = {
         "base_color": list(material.base_color),
         "roughness": material.roughness,
@@ -544,10 +555,12 @@ def appearance_path_for(spec_path: str | Path) -> Path:
 
 
 def load_appearance(path: str | Path) -> AppearanceDocument:
+    """Read and validate an appearance document from JSON."""
     return document_from_dict(json.loads(Path(path).read_text(encoding="utf-8")))
 
 
 def save_appearance(doc: AppearanceDocument, path: str | Path) -> None:
+    """Write an appearance document as formatted JSON."""
     Path(path).write_text(
         json.dumps(document_to_dict(doc), indent=2) + "\n", encoding="utf-8"
     )
