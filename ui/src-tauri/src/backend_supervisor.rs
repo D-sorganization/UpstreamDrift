@@ -1,11 +1,10 @@
 use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
-use std::io::{Read, Write};
-use std::net::{TcpListener, TcpStream};
 use std::process::{Child, Command, Stdio};
 use std::sync::mpsc;
 use std::thread;
-use std::time::Duration;
+
+use crate::health_probe::HealthProbeResult;
 
 pub const STDERR_TAIL_LINES: usize = 32;
 
@@ -42,37 +41,12 @@ impl Default for BackendSupervisor {
 }
 
 pub fn pick_ephemeral_port() -> Result<u16, String> {
-    let listener = TcpListener::bind("127.0.0.1:0")
+    let listener = std::net::TcpListener::bind("127.0.0.1:0")
         .map_err(|e| format!("could not bind ephemeral port: {e}"))?;
     listener
         .local_addr()
         .map(|addr| addr.port())
         .map_err(|e| format!("could not read ephemeral port: {e}"))
-}
-
-pub fn health_ready(port: u16) -> bool {
-    use std::net::ToSocketAddrs;
-    let Ok(mut addrs) = format!("127.0.0.1:{port}").to_socket_addrs() else {
-        return false;
-    };
-    let Some(socket_addr) = addrs.next() else {
-        return false;
-    };
-    let Ok(mut stream) = TcpStream::connect_timeout(&socket_addr, Duration::from_millis(400))
-    else {
-        return false;
-    };
-    let request =
-        format!("GET /api/health HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nConnection: close\r\n\r\n");
-    if stream.write_all(request.as_bytes()).is_err() {
-        return false;
-    }
-    let mut buffer = [0_u8; 2048];
-    let Ok(read_bytes) = stream.read(&mut buffer) else {
-        return false;
-    };
-    let body = String::from_utf8_lossy(&buffer[..read_bytes]);
-    body.contains("healthy")
 }
 
 impl BackendSupervisor {
@@ -104,6 +78,7 @@ impl BackendSupervisor {
         }
     }
 
+    /// Fast poll: child exit + stderr only (no HTTP probe — callers probe outside the mutex).
     pub fn poll(&mut self) {
         self.drain_stderr_channel();
         let Some(child) = self.child.as_mut() else {
@@ -121,19 +96,36 @@ impl BackendSupervisor {
                 self.child = None;
                 self.stderr_rx = None;
             }
-            Ok(None) => {
-                if matches!(self.state, BackendState::Starting { .. }) && health_ready(self.port) {
-                    self.state = BackendState::Ready {
-                        pid: child.id(),
-                        port: self.port,
-                    };
-                }
-            }
+            Ok(None) => {}
             Err(err) => {
                 self.state = BackendState::Failed {
                     reason: format!("Failed to poll backend child: {err}"),
                 };
             }
+        }
+    }
+
+    pub fn apply_health_probe(&mut self, probe: HealthProbeResult) {
+        if !probe.is_ready() {
+            return;
+        }
+        let BackendState::Starting { port } = self.state else {
+            return;
+        };
+        let Some(child) = self.child.as_ref() else {
+            return;
+        };
+        self.state = BackendState::Ready {
+            pid: child.id(),
+            port,
+        };
+    }
+
+    pub fn starting_port(&self) -> Option<u16> {
+        if let BackendState::Starting { port } = self.state {
+            Some(port)
+        } else {
+            None
         }
     }
 
@@ -203,6 +195,14 @@ impl BackendSupervisor {
     }
 }
 
+pub fn spawn_immediate_exit_child() -> std::io::Result<Child> {
+    if cfg!(windows) {
+        Command::new("cmd").args(["/C", "exit", "0"]).spawn()
+    } else {
+        Command::new("sh").args(["-c", "exit 0"]).spawn()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -224,19 +224,27 @@ mod tests {
     }
 
     #[test]
-    fn state_transitions_to_exited_when_child_drops() {
+    fn state_transitions_to_exited_when_child_exits() {
         let mut supervisor = BackendSupervisor::default();
-        let child = Command::new("true").spawn().expect("spawn true");
+        let child = spawn_immediate_exit_child().expect("spawn immediate exit");
         supervisor.child = Some(child);
-        supervisor.port = 9_999;
-        supervisor.state = BackendState::Starting { port: 9_999 };
-        supervisor.poll();
+        supervisor.port = pick_ephemeral_port().expect("port");
+        supervisor.state = BackendState::Starting {
+            port: supervisor.port,
+        };
+        for _ in 0..20 {
+            supervisor.poll();
+            if matches!(supervisor.state, BackendState::Exited { .. }) {
+                break;
+            }
+            thread::sleep(std::time::Duration::from_millis(10));
+        }
         assert!(matches!(supervisor.state, BackendState::Exited { .. }));
     }
 
     #[test]
-    fn health_ready_false_for_closed_port() {
+    fn health_probe_false_for_closed_port() {
         let port = pick_ephemeral_port().expect("port");
-        assert!(!health_ready(port));
+        assert!(!crate::health_probe::probe_backend_health(port).is_ready());
     }
 }
