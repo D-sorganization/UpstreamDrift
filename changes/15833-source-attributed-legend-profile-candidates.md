@@ -6,7 +6,7 @@ next_step: "Merge the PR; final delivery #15836 adds Snead's straw_hat after #15
 branch: "pr/15833-legends-profiles"
 ---
 
-# Source-attributed legend appearance candidates
+# Source-Attributed Legend Appearance Candidates
 
 Adds catalog profiles for Seve Ballesteros, Jack Nicklaus, Bobby Jones, Sam
 Snead and Byron Nelson on the existing ellipsoid-body and CC0-head pipeline.
