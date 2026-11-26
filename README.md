@@ -138,6 +138,9 @@ hardware are recorded in the
 ### Install
 
 Create and activate a virtual environment before installing into the checkout.
+A tagged release also publishes `install.sh` with `install.sh.sha256`. Verify
+that checksum before running the script. The commands are in
+[Checksum-Verified Tagged Release](docs/user_guide/installation.md#checksum-verified-tagged-release).
 
 **Linux and macOS (bash):**
 

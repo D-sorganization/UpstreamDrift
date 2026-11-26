@@ -62,3 +62,21 @@
       ```matlab
       setup_golf_suite()
       ```
+
+## Checksum-Verified Tagged Release
+
+A tagged GitHub release publishes `install.sh` and `install.sh.sha256`.
+Download both files, verify the digest, then run the local script. Do not
+pipe the installer from mutable `main` into a shell.
+
+```bash
+TAG=vX.Y.Z
+curl -fsSL -o install.sh \
+  "https://github.com/D-sorganization/UpstreamDrift/releases/download/${TAG}/install.sh"
+curl -fsSL -o install.sh.sha256 \
+  "https://github.com/D-sorganization/UpstreamDrift/releases/download/${TAG}/install.sh.sha256"
+sha256sum -c install.sh.sha256
+bash install.sh
+```
+
+Development work still uses the checkout install above.

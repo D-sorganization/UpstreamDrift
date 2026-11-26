@@ -267,6 +267,17 @@ jobs:
           cd dist
           sha256sum * > SHA256SUMS.txt
           cat SHA256SUMS.txt
+      - name: Stage checksum-verified install script
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          install -m 0644 install.sh release-assets/install.sh
+          (
+            cd release-assets
+            sha256sum install.sh > install.sh.sha256
+            sha256sum -c install.sh.sha256
+          )
       # Step-level (not job-level) PYTHONPATH here on purpose: this job also
       # builds the wheel and SBOM, which must not see the checkout on
       # sys.path (Repository_Management #1507, #9416).
@@ -289,6 +300,8 @@ jobs:
             dist/*.whl
             dist/*.json
             dist/SHA256SUMS.txt
+            release-assets/install.sh
+            release-assets/install.sh.sha256
       - name: Attest companion publication payloads
         id: companion-attestation
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
@@ -299,6 +312,12 @@ jobs:
         with:
           name: dist
           path: dist/
+      - name: Upload checksum-verified install script
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: install-script
+          path: release-assets/
+          if-no-files-found: error
 
   smoke-python-wheel:
     timeout-minutes: 30
@@ -385,6 +404,10 @@ jobs:
         with:
           name: dist
           path: dist/
+      - uses: actions/download-artifact@9000827ccba6bdabf93d22962f4752f3646cd9
+        with:
+          name: install-script
+          path: release-assets/
 
       - name: Create GitHub Release
         id: github-release
@@ -399,6 +422,8 @@ jobs:
             dist/*.json
             dist/SHA256SUMS.txt
             dist/companion/*
+            release-assets/install.sh
+            release-assets/install.sh.sha256
 
   record-companion-release:
     name: Verify and publish immutable release acquisition
