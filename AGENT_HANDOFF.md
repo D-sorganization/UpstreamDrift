@@ -142,3 +142,4 @@ Motion matching and tour baselines:
 
 - #15821: Neutral shoe-to-head stature calibration uses bounded trunk scaling; see `docs/development/player-stature.tex`. New anatomy requires motion refitting.
 - Visual flat-cap appearance #15822 adds a low-profile CC0 head cap style; geometry stays in the visual layer and physics is unchanged.
+- Player delivery #15819: `scripts/export_player_models.py` and `assets/player_models/` provide native sized/reference-skin bundles, hash-bound review poses and desktop/phone previews; motion remains unqualified.
