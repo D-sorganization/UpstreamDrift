@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import re
+import subprocess
 from pathlib import Path
 
 import pytest
+
+from scripts.ci.verify_release_artifacts import parse_sha256sums
 
 pytestmark = pytest.mark.unit
 
@@ -87,6 +90,29 @@ def test_release_publishes_install_script_and_checksum() -> None:
     assert "release-assets/install.sh" in text
     assert "release-assets/install.sh.sha256" in text
     assert "sha256sum -c install.sh.sha256" in text
+
+
+def test_release_checksum_manifest_keeps_bare_filenames(tmp_path: Path) -> None:
+    """SHA256SUMS names must match dist file names.
+
+    ``sha256sum ./*`` records ``./<name>``. ``verify_release_artifacts`` then
+    reports every artifact as untracked. ``sha256sum -- *`` keeps the basename
+    and still satisfies shellcheck SC2035.
+    """
+    text = _read_text(RELEASE_WORKFLOW)
+    assert "sha256sum ./*" not in text
+    assert "sha256sum -- *" in text
+
+    dist = tmp_path / "dist"
+    dist.mkdir()
+    (dist / "upstream.txt").write_text("payload\n", encoding="utf-8")
+    manifest = dist / "SHA256SUMS.txt"
+    subprocess.run(
+        ["bash", "-c", "sha256sum -- * > SHA256SUMS.txt"],
+        cwd=dist,
+        check=True,
+    )
+    assert set(parse_sha256sums(manifest)) == {"upstream.txt"}
 
 
 def test_user_guide_documents_verified_tagged_install() -> None:

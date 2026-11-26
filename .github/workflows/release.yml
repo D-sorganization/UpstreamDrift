@@ -265,7 +265,9 @@ jobs:
       - name: Generate checksums
         run: |
           cd dist
-          sha256sum ./* > SHA256SUMS.txt
+          # Bare names: verify_release_artifacts.py keys this manifest on
+          # f.name. "--" satisfies shellcheck SC2035 without a "./" prefix.
+          sha256sum -- * > SHA256SUMS.txt
           cat SHA256SUMS.txt
       - name: Stage checksum-verified install script
         shell: bash
