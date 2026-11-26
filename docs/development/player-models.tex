@@ -53,7 +53,9 @@ export_player("ben_hogan", Path("output/hogan"))
 export_player("tiger_woods", Path("output/capture_skin"),
               base_spec=Path("existing_match.json"))
 \end{verbatim}
-Outputs are native MJCF, full-body JSON, an appearance sidecar and a receipt.
+Outputs are native MJCF, physical JSON, an appearance sidecar and a receipt.
+A separate \texttt{model.visual.json} embeds appearance explicitly for exact
+Necromatcher native-resource verification; the input physics stays unchanged.
 Tests check published priors, actual total human mass, current model selection,
 distinct face settings, independent profile reads, unchanged supplied specs
 and compiled native dynamics under skin changes. The first tests failed on

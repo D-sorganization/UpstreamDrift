@@ -104,6 +104,9 @@ def test_skin_export_retains_supplied_spec(tmp_path, monkeypatch):
     assert json.loads((result.parent / "model.json").read_text()) == spec
     receipt = json.loads((result.parent / "receipt.json").read_text())
     assert receipt["mode"] == "appearance_only"
+    visual = json.loads((result.parent / "model.visual.json").read_text())
+    assert visual.pop("appearance")["name"] == "tiger_woods_stylized"
+    assert visual == spec
 
 
 def test_skin_preserves_native_physics_and_joint_order():
