@@ -129,6 +129,7 @@ class TestAPIDiagnostics:
         assert "executable" in result.details
 
     def test_python_environment_reports_realtime_bind_env(self) -> None:
+        """test python environment reports realtime bind env."""
         diag = APIDiagnostics()
         with patch.dict(
             "os.environ",
@@ -174,10 +175,12 @@ class TestAPIDiagnostics:
 
         @app.get("/test")
         def test_endpoint() -> dict[str, str]:
+            """test endpoint."""
             return {"status": "ok"}
 
         @app.get("/health")
         def health() -> dict[str, str]:
+            """health."""
             return {"status": "healthy"}
 
         diag = APIDiagnostics(app)
