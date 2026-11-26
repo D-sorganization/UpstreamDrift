@@ -19,7 +19,7 @@
         {
           "url": "https://www.youtube.com/watch?v=bado2QdgD3c",
           "values": "Official USGA 2000 U.S. Open final-round broadcast, including Tiger Woods range footage.",
-          "era": "2000 event; source catalog identifies the range clip, while detailed visual appearance review remains pending."
+          "era": "2000 event; source catalog identifies the range clip. Reviewed frames show other outfits; the selected red polo is an illustrative palette."
         },
         {
           "url": "https://www.youtube.com/watch?v=t_J6Vik3Tss",
@@ -85,12 +85,12 @@
         {
           "url": "https://www.youtube.com/watch?v=DJDYMjmvFwg",
           "values": "Compilation titled '10 Minutes of Ben Hogan (Every Angle Ever Recorded)'.",
-          "era": "Individual archive recording dates are unverified; source catalog marks the compilation unreviewed."
+          "era": "Individual archive recording dates are unverified; representative-frame inspection does not qualify every compiled clip."
         }
       ],
       "limitations": [
         "Stature and mass use the PGA Tour biography values (5 ft 8 in, 150 lb), converted exactly; PGA.com gives the same stature and a different mass of 145 lb.",
-        "The pale polo, muted grey-brown trousers, dark brown side-parted hair, and leather shoes are an illustrative source-inspired palette, not a verified outfit from a particular frame. A period cap is not modeled because the appearance contract supports baseball caps only.",
+        "The pale polo and flat cap, muted grey-brown trousers, dark brown side-parted hair, and leather shoes are an illustrative source-inspired palette, not a verified outfit from a particular frame.",
         "Skin and hair swatches are visual approximations; this preset does not encode a measured face, body morphology, or capture-specific clothing."
       ],
       "appearance": {
@@ -112,12 +112,12 @@
           "hair_style": "short_crop",
           "hair_part": "left",
           "eye_color": "brown",
-          "cap_style": "none",
+          "cap_style": "flat_cap",
           "cap_material": "cap_white",
-          "cap_brim": 0.3,
+          "cap_brim": 0.12,
           "sizing": "stature",
           "height_over_stature": 0.132,
-          "morph": { "width": -0.06, "jaw": -0.04, "nose": 0.16, "mouth": -0.04, "eyes": 0.02 }
+          "morph": { "width": -0.03, "jaw": 0.08, "nose": 0.16, "mouth": -0.04, "eyes": -0.03 }
         },
         "body_model": "ellipsoid",
         "ball": { "enabled": false, "source": "address_geometry" },
