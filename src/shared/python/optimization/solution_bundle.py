@@ -26,6 +26,8 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.optimization.admission import validate_admission
+
 __all__ = [
     "SCHEMA_VERSION",
     "SUPPORTED_SCHEMA_VERSIONS",
@@ -95,6 +97,8 @@ class SolutionBundle:
     # Golfer model lock (#15659): which model, controller and solver produced
     # the bundle. ``None`` marks a legacy bundle that may only be replayed.
     model_lock: dict[str, str] | None = None
+    # #15808 WP-0c. ``None`` is a pre-admission recording.
+    admission: dict[str, Any] | None = None
 
 
 #: Fields a model lock must give as non-empty strings (#15659).
@@ -237,7 +241,18 @@ def _manifest(bundle: SolutionBundle, digest: str) -> dict[str, Any]:
         "assumptions": list(bundle.assumptions),
         "arrays_sha256": digest,
         "model_lock": bundle.model_lock,
+        "admission": bundle.admission,
     }
+
+
+def _validate_admission_block(bundle: SolutionBundle) -> None:
+    """Check the optional WP-0c admission block against the recorded arrays."""
+    validate_admission(
+        bundle.admission,
+        time=np.asarray(bundle.arrays["time"]),
+        n_joints=len(bundle.joint_order),
+        arrays=bundle.arrays,
+    )
 
 
 def save_solution_bundle(bundle: SolutionBundle, directory: str | Path) -> Path:
@@ -253,6 +268,7 @@ def save_solution_bundle(bundle: SolutionBundle, directory: str | Path) -> Path:
     target = Path(directory)
     _validate_metadata(bundle)
     _validate_arrays(bundle)
+    _validate_admission_block(bundle)
     if target.exists():
         raise SolutionBundleError(f"{target} already exists; bundles are immutable")
     # Serialise the manifest before touching disk so a bad value leaves nothing.
@@ -341,9 +357,11 @@ def load_solution_bundle(
             arrays=arrays,
             schema_version=version,
             model_lock=manifest.get("model_lock"),
+            admission=manifest.get("admission"),
         )
     except KeyError as exc:
         raise SolutionBundleError(f"manifest is missing field {exc}") from exc
     _validate_metadata(bundle)
     _validate_arrays(bundle)
+    _validate_admission_block(bundle)
     return bundle
