@@ -1355,6 +1355,26 @@ def test_independent_review_module_import_error_fails_closed(
     assert any("unreadable" in r.lower() for r in verdict.reasons)
 
 
+def test_spoofed_commit_trailer_does_not_clear_same_model_pass() -> None:
+    """A Codex PASS must not clear when the only 'claude' signal is a trailer."""
+    body = _INDEP_REVIEW.format(verdict="PASS", sha=_REVIEW_HEAD)
+    fake = IndependentReviewGh(
+        labels=[],
+        commit_messages=["fix: work\n\nAgent-Id: claude\nModel: claude\n"],
+        issue_comments=[
+            {
+                "body": body,
+                "created_at": "2026-11-22T18:00:00Z",
+                "user": {"login": "d-sorgcodexagent[bot]"},
+            }
+        ],
+    )
+    result = automerge_guard.arm_auto_merge("o/r", 1, runner=fake)
+    assert result.armed is False
+    described = result.verdict.describe().lower()
+    assert "author model unknown" in described or "independent exact-head" in described
+
+
 def test_fail_closed_gate_holds_pr_without_exempt_or_pass() -> None:
     verdict = automerge_guard.evaluate_hold(
         "o/r",

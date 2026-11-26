@@ -427,22 +427,6 @@ def _issue_comments(run: CommandRunner, repo: str, pr: int) -> list[dict[str, An
     return [item for item in payload if isinstance(item, dict)]
 
 
-def _commit_messages(run: CommandRunner, repo: str, pr: int) -> list[str]:
-    payload = _gh_json(
-        run, ["api", f"repos/{repo}/pulls/{pr}/commits?per_page=100", "--paginate"]
-    )
-    if not isinstance(payload, list):
-        raise RuntimeError(f"unreadable commits for {repo}#{pr}")
-    rows: list[str] = []
-    for item in payload:
-        if not isinstance(item, dict):
-            continue
-        commit = item.get("commit")
-        if isinstance(commit, dict):
-            rows.append(str(commit.get("message") or ""))
-    return rows
-
-
 def _independent_review_reasons(
     run: CommandRunner, repo: str, pr: int, pull: _PullRequest
 ) -> list[str]:
@@ -454,18 +438,15 @@ def _independent_review_reasons(
     except ImportError:
         return ["independent exact-head review state is unreadable"]
     author_model_from_labels = review.author_model_from_labels
-    author_model_from_commit_messages = review.author_model_from_commit_messages
     independent_review_hold_reason = review.independent_review_hold_reason
     parse_issue_comments = review.parse_issue_comments
 
     try:
         comments = _issue_comments(run, repo, pr)
-        messages = _commit_messages(run, repo, pr)
     except (RuntimeError, json.JSONDecodeError, OSError, TypeError, ValueError):
         return ["independent exact-head review state is unreadable"]
-    author_model = author_model_from_labels(
-        pull.labels
-    ) or author_model_from_commit_messages(messages)
+    # Labels are the protected author-model source. Commit trailers are not.
+    author_model = author_model_from_labels(pull.labels)
     reviews = parse_issue_comments(comments)
     return independent_review_hold_reason(
         reviews,

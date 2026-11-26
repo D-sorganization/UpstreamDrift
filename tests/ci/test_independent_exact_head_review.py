@@ -146,3 +146,22 @@ def test_stale_head_fix_needed_does_not_hold_current_head() -> None:
     )
     assert reasons
     assert "no independent exact-head verdict" in reasons[0].lower()
+
+
+def test_spoofed_commit_trailer_is_not_an_author_model() -> None:
+    """Commit messages are author-controlled and cannot name the author model."""
+    messages = [
+        "feat: real work\n\nAgent-Id: claude\nModel: claude\n",
+    ]
+    assert mod.author_model_from_commit_messages(messages) == ""
+    reviews = mod.parse_issue_comments(
+        [_comment(_REVIEW.format(verdict="PASS", sha=HEAD))]
+    )
+    reasons = mod.independent_review_hold_reason(
+        reviews,
+        head_sha=HEAD,
+        author_model=mod.author_model_from_commit_messages(messages),
+        labels=[],
+    )
+    assert reasons
+    assert "author model unknown" in reasons[0].lower()

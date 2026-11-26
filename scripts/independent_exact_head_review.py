@@ -20,8 +20,6 @@ _REVIEWER_MODEL = re.compile(
 )
 _AGENT_MODEL_LABEL = re.compile(r"^agent-model:(.+)$", re.IGNORECASE)
 _AGENT_LABEL = re.compile(r"^agent:(.+)$", re.IGNORECASE)
-_MODEL_TRAILER = re.compile(r"^Model:\s*(.+)$", re.IGNORECASE | re.MULTILINE)
-_AGENT_ID_TRAILER = re.compile(r"^Agent-Id:\s*(.+)$", re.IGNORECASE | re.MULTILINE)
 _FENCED_CODE = re.compile(r"```.*?```", re.DOTALL)
 _INLINE_CODE = re.compile(r"`[^`]*`")
 
@@ -94,11 +92,13 @@ def author_model_from_labels(labels: Sequence[str]) -> str:
 
 
 def author_model_from_commit_messages(messages: Sequence[str]) -> str:
-    for message in reversed(messages):
-        for pattern in (_MODEL_TRAILER, _AGENT_ID_TRAILER):
-            match = pattern.search(message)
-            if match:
-                return match.group(1).strip()
+    """Ignore commit trailers. They are author-controlled, not authenticated.
+
+    Precondition: ``messages`` is a sequence of commit message strings.
+    Postcondition: always ``""``. Callers fail closed unless a protected
+    ``agent-model:`` or ``agent:`` label names the author model.
+    """
+    del messages
     return ""
 
 
