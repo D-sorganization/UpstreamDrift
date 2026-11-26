@@ -116,6 +116,7 @@ def export_bound_native_xml(definition_bytes: bytes) -> str:
     from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
         export_full_body_mjcf,
     )
+
     definition = json.loads(definition_bytes)
     if not isinstance(definition, dict):
         raise ValueError("Native definition must be an object")
