@@ -18,7 +18,8 @@ independent native geometry checks within 1 mm and retain the 52-coordinate orde
 ## Files and Use
 
 `player-models.zip` contains self-contained native MuJoCo `model.xml` files,
-full-body `model.json` specifications, appearance sidecars, dimension/source
+physical `model.json` and explicit `model.visual.json` definitions, appearance
+sidecars, dimension/source
 receipts, review poses, previews, checksums and asset-license provenance.
 The `sized/` models use separately constructed player dimensions. Refit captured
 motion and torques before using them for biomechanical inference. The
@@ -26,6 +27,11 @@ motion and torques before using them for biomechanical inference. The
 
 Load a `model.xml` with MuJoCo. In Necromatcher, import it as a native model with
 engine `mujoco` and the exact ordered coordinates from its `receipt.json`.
+Supply `model.visual.json` when verifying/binding the skinned native resource;
+its embedded appearance reproduces the exact XML without altering physics.
+All four archived variants passed actual Necromatcher import, binding and range checks.
+Map named coordinates to MuJoCo joint `qposadr` when driving raw native buffers;
+the declared spec order need not equal MuJoCo traversal order.
 The bundled address poses are hash-bound inspection poses, not captured swings.
 They satisfy the recorded grip-closure checks; cuff angles and unequal shoe
 heights remain review limitations. Preview grounding moves the lowest sole to
