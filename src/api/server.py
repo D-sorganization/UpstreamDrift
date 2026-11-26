@@ -47,6 +47,7 @@ from .config import (
     get_server_port,
 )
 from .auth.launcher_capability import install_launcher_capability
+from .auth.middleware import assert_local_admin_bypass_allowed
 from .database import init_db
 from .middleware.security_headers import add_security_headers
 from .middleware.upload_limits import validate_upload_size
@@ -57,7 +58,11 @@ from .services.chat_service import ChatService
 from .services.simulation_service import SimulationService
 from .task_manager import TaskManager
 from .utils.tracing import RequestTracer
-from .versioning import get_app_version
+from .versioning import (
+    get_app_version,
+    legacy_rest_deprecation_dependency,
+    warn_deprecated_rest_prefix,
+)
 from .routes import chat_ws, realtime as realtime_route, simulation_ws
 from src.api.services.chat_app_context import make_app_state_provider
 from src.shared.python.app_state import get_agent_state_store
@@ -160,6 +165,9 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
         # Fail fast on a misconfigured CORS allowlist before any service
         # initialisation (issue #7167 D2) — single, obvious startup gate.
         _validate_cors_at_startup()
+        # GOLF_AUTH_DISABLED mints LocalUser ADMIN. Refuse that bypass in
+        # production or on a non-loopback bind before any service starts (#15767).
+        assert_local_admin_bypass_allowed(get_server_host())
 
         # Validate environment variables before any service initialisation.
         # env_validator checks GOLF_API_SECRET_KEY, DATABASE_URL, and the
@@ -332,35 +340,63 @@ app.middleware("http")(_tracer.trace_request)
 # ── Route Registration ──────────────────────────────────────────
 # Use plugin-style auto-discovery instead of 20+ explicit imports (#1485).
 # Routes are registered at root, /api, and /api/v1 (#1488).
+# Root and /api stay mounted for existing clients and advertise deprecation.
+# They are not removed (#15767).
+_LEGACY_REST_DEPS = (legacy_rest_deprecation_dependency(API_PREFIX),)
 
-# Register all routes at root level (backward compatibility)
-_root_count = register_routes(app, prefix="")
+
+def _register_prefixed_routes(prefix: str) -> int:
+    """Mount discovered routers, warning when ``prefix`` is not canonical.
+
+    Preconditions:
+        ``prefix`` is ``""``, ``/api``, or :data:`API_PREFIX`.
+
+    Postconditions:
+        Returns the number of routers mounted. Legacy prefixes emit
+        ``DeprecationWarning`` and attach deprecation response headers.
+    """
+    if prefix == API_PREFIX:
+        return register_routes(app, prefix=prefix)
+    warn_deprecated_rest_prefix(prefix, canonical=API_PREFIX)
+    return register_routes(
+        app,
+        prefix=prefix,
+        extra_dependencies=_LEGACY_REST_DEPS,
+    )
+
+
+# Register all routes at root level (deprecated; backward compatibility)
+_root_count = _register_prefixed_routes("")
 logger.info("Registered %d route modules at root prefix", _root_count)
 
-# Register all routes under /api prefix (legacy API compatibility)
-_legacy_api_count = register_routes(app, prefix="/api")
+# Register all routes under /api prefix (deprecated; legacy API compatibility)
+_legacy_api_count = _register_prefixed_routes("/api")
 logger.info("Registered %d route modules under /api", _legacy_api_count)
 
 # Register all routes under /api/v1/ prefix (versioned API)
-_versioned_count = register_routes(app, prefix=API_PREFIX)
+_versioned_count = _register_prefixed_routes(API_PREFIX)
 logger.info("Registered %d route modules under %s", _versioned_count, API_PREFIX)
 
 # Register explicitly excluded WebSocket routes.
 #
 # These routers mix WebSocket endpoints (which self-authenticate via
 # resolve_ws_user) with HTTP endpoints. The HTTP endpoints were previously
-# unauthenticated in cloud mode (issues #6888, #6889), allowing unauthenticated
-# broadcast injection (POST /realtime/publish) and chat-session enumeration
-# (GET /chat/sessions, /history). ws_compatible_auth_dependency enforces the
-# bearer header on HTTP requests only; WebSocket connections fall through to the
-# route handler's own auth check, and local/auth-disabled mode remains open.
+# unauthenticated in cloud mode (issues #6888, #6889, #15767), allowing
+# unauthenticated broadcast injection (POST /realtime/publish) and
+# chat-session enumeration (GET /chat/sessions, /history). simulation_ws is
+# mounted with the same dependency so a later HTTP route cannot skip auth.
+# ws_compatible_auth_dependency enforces the bearer header on HTTP requests
+# only; WebSocket connections fall through to the route handler's own auth
+# check, and local/auth-disabled mode remains open.
 _excluded_ws_auth = [Depends(ws_compatible_auth_dependency)]
 app.include_router(chat_ws.router, prefix=API_PREFIX, dependencies=_excluded_ws_auth)
-app.include_router(simulation_ws.router, prefix=API_PREFIX)
+app.include_router(
+    simulation_ws.router, prefix=API_PREFIX, dependencies=_excluded_ws_auth
+)
 app.include_router(chat_ws.router, prefix="/api", dependencies=_excluded_ws_auth)
-app.include_router(simulation_ws.router, prefix="/api")
+app.include_router(simulation_ws.router, prefix="/api", dependencies=_excluded_ws_auth)
 app.include_router(chat_ws.router, prefix="", dependencies=_excluded_ws_auth)
-app.include_router(simulation_ws.router, prefix="")
+app.include_router(simulation_ws.router, prefix="", dependencies=_excluded_ws_auth)
 
 # Realtime IPC layer (issue #4997) — combined HTTP + WS endpoints under
 # /realtime; mounted at root so cross-process clients (WSPubSub) can use the

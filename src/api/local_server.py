@@ -247,7 +247,10 @@ def _register_api_routers(app: FastAPI) -> None:
         logger.info("Registered %d route modules under %s", count, prefix or "/")
 
         app.include_router(
-            simulation_ws.router, prefix=prefix, tags=["Simulation WebSocket"]
+            simulation_ws.router,
+            prefix=prefix,
+            tags=["Simulation WebSocket"],
+            dependencies=[Depends(ws_compatible_auth_dependency)],
         )
         app.include_router(
             chat_ws.router,
@@ -1192,7 +1195,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-# Clarified web UI as primary entry point (Issue #6096)
-
-# Main entry point documented in issue 6096
