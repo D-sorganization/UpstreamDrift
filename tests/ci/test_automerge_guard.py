@@ -56,7 +56,7 @@ class FakeGh:
         self,
         *,
         draft: bool = False,
-        labels: Sequence[str] = (),
+        labels: Sequence[str] = ("independent-exact-head-exempt",),
         body: str = "",
         disarms: Sequence[str] = (),
         enables: Sequence[str] = (),
@@ -327,7 +327,10 @@ def test_deletions_released_by_label() -> None:
     verdict = automerge_guard.evaluate_hold(
         "o/r",
         1,
-        runner=FakeGh(removed=["a.py"], labels=["deletions-acknowledged"]),
+        runner=FakeGh(
+            removed=["a.py"],
+            labels=["deletions-acknowledged", "independent-exact-head-exempt"],
+        ),
     )
     assert verdict.held is False
 
@@ -1274,7 +1277,13 @@ def test_arm_proceeds_with_independent_pass_at_head() -> None:
     body = _INDEP_REVIEW.format(verdict="PASS", sha=_REVIEW_HEAD)
     fake = IndependentReviewGh(
         labels=["agent-model:claude"],
-        issue_comments=[{"body": body, "created_at": "2026-11-22T18:00:00Z"}],
+        issue_comments=[
+            {
+                "body": body,
+                "created_at": "2026-11-22T18:00:00Z",
+                "user": {"login": "d-sorgcodexagent[bot]"},
+            }
+        ],
     )
     result = automerge_guard.arm_auto_merge("o/r", 1, runner=fake)
     assert result.armed is True
@@ -1284,7 +1293,13 @@ def test_fix_needed_at_head_blocks_arming() -> None:
     body = _INDEP_REVIEW.format(verdict="FIX-NEEDED", sha=_REVIEW_HEAD)
     fake = IndependentReviewGh(
         labels=["agent-model:claude"],
-        issue_comments=[{"body": body, "created_at": "2026-11-22T18:00:00Z"}],
+        issue_comments=[
+            {
+                "body": body,
+                "created_at": "2026-11-22T18:00:00Z",
+                "user": {"login": "d-sorgcodexagent[bot]"},
+            }
+        ],
     )
     result = automerge_guard.arm_auto_merge("o/r", 1, runner=fake)
     assert result.armed is False
@@ -1295,11 +1310,59 @@ def test_disarm_if_held_on_fix_needed_verdict() -> None:
     body = _INDEP_REVIEW.format(verdict="FIX-NEEDED", sha=_REVIEW_HEAD)
     fake = IndependentReviewGh(
         labels=["agent-model:claude"],
-        issue_comments=[{"body": body, "created_at": "2026-11-22T18:00:00Z"}],
+        issue_comments=[
+            {
+                "body": body,
+                "created_at": "2026-11-22T18:00:00Z",
+                "user": {"login": "d-sorgcodexagent[bot]"},
+            }
+        ],
     )
     verdict = automerge_guard.disarm_if_held("o/r", 1, runner=fake)
     assert verdict.held is True
     assert len(fake.disarm_calls) == 1
+
+
+def test_untrusted_commenter_pass_does_not_clear_hold(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    body = _INDEP_REVIEW.format(verdict="PASS", sha=_REVIEW_HEAD)
+    fake = IndependentReviewGh(
+        labels=["agent-model:claude"],
+        issue_comments=[
+            {
+                "body": body,
+                "created_at": "2026-11-22T18:00:00Z",
+                "user": {"login": "dieterolson"},
+            }
+        ],
+    )
+    result = automerge_guard.arm_auto_merge("o/r", 1, runner=fake)
+    assert result.armed is False
+
+
+def test_independent_review_module_import_error_fails_closed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def _broken() -> object:
+        raise ImportError("independent_exact_head_review missing")
+
+    monkeypatch.setattr(
+        automerge_guard, "_independent_exact_head_review_module", _broken
+    )
+    verdict = automerge_guard.evaluate_hold("o/r", 1, runner=FakeGh())
+    assert verdict.held is True
+    assert any("unreadable" in r.lower() for r in verdict.reasons)
+
+
+def test_fail_closed_gate_holds_pr_without_exempt_or_pass() -> None:
+    verdict = automerge_guard.evaluate_hold(
+        "o/r",
+        1,
+        runner=FakeGh(labels=["agent-model:claude"]),
+    )
+    assert verdict.held is True
+    assert any("independent exact-head" in r.lower() for r in verdict.reasons)
 
 
 def test_quoted_fix_needed_in_reply_does_not_disarm() -> None:
@@ -1312,7 +1375,13 @@ def test_quoted_fix_needed_in_reply_does_not_disarm() -> None:
     )
     fake = IndependentReviewGh(
         labels=["agent-model:claude"],
-        issue_comments=[{"body": body, "created_at": "2026-11-22T18:00:00Z"}],
+        issue_comments=[
+            {
+                "body": body,
+                "created_at": "2026-11-22T18:00:00Z",
+                "user": {"login": "d-sorgcodexagent[bot]"},
+            }
+        ],
     )
     verdict = automerge_guard.evaluate_hold("o/r", 1, runner=fake)
     assert verdict.held is False

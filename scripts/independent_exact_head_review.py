@@ -7,6 +7,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
+INDEPENDENT_EXACT_HEAD_EXEMPT_LABEL = "independent-exact-head-exempt"
 INDEPENDENT_REVIEW_MARKER = "Independent Exact-Head Acceptance Review"
 
 _VERDICT_AT_SHA = re.compile(
@@ -31,6 +32,24 @@ class IndependentHeadReview:
     head_sha: str
     reviewer_model: str
     created_at: str
+
+
+def commenter_login_from_item(item: Mapping[str, Any]) -> str:
+    """Return the GitHub ``user.login`` for an issue-comment payload."""
+    user = item.get("user")
+    if isinstance(user, Mapping):
+        return str(user.get("login") or "").strip()
+    return ""
+
+
+def is_trusted_independent_reviewer_login(login: str) -> bool:
+    """Only fleet agent bot identities may post binding independent verdicts."""
+    lowered = login.strip().lower()
+    if not lowered:
+        return False
+    if not lowered.endswith("[bot]"):
+        return False
+    return lowered.startswith("d-sorg") and "agent" in lowered
 
 
 def normalize_model_token(value: str) -> str:
@@ -118,6 +137,8 @@ def parse_issue_comments(
 ) -> list[IndependentHeadReview]:
     rows: list[IndependentHeadReview] = []
     for item in comments:
+        if not is_trusted_independent_reviewer_login(commenter_login_from_item(item)):
+            continue
         body = str(item.get("body") or "")
         parsed = parse_independent_review_comment(
             body, created_at=str(item.get("created_at") or "")
@@ -134,9 +155,11 @@ def independent_review_gate_active(
     labels: Sequence[str] = (),
 ) -> bool:
     """True when an exact-head independent verdict is required before arm or merge."""
-    if reviews:
-        return True
-    return bool(author_model or author_model_from_labels(labels))
+    lowered = {label.strip().lower() for label in labels}
+    if INDEPENDENT_EXACT_HEAD_EXEMPT_LABEL in lowered:
+        return False
+    _ = author_model  # retained for API stability; gate is fail-closed by default
+    return True
 
 
 def latest_independent_verdict_at_head(

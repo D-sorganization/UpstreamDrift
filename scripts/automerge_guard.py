@@ -38,8 +38,8 @@ import os
 import shutil
 import subprocess
 import sys
-from pathlib import Path
 from collections.abc import Callable, Mapping, Sequence
+from pathlib import Path
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, cast
@@ -449,7 +449,10 @@ def _independent_review_reasons(
     """Signal 5: independent exact-head FIX-NEEDED at the current head."""
     if not pull.head_sha:
         return []
-    review = cast(Any, _independent_exact_head_review_module())
+    try:
+        review = cast(Any, _independent_exact_head_review_module())
+    except ImportError:
+        return ["independent exact-head review state is unreadable"]
     author_model_from_labels = review.author_model_from_labels
     author_model_from_commit_messages = review.author_model_from_commit_messages
     independent_review_hold_reason = review.independent_review_hold_reason
@@ -570,7 +573,15 @@ def evaluate_hold(
         reasons += _disarm_reasons(run, repo, pr, pull.head_sha)
         reasons += _deletion_reasons(run, repo, pr, pull)
         reasons += _independent_review_reasons(run, repo, pr, pull)
-    except (RuntimeError, json.JSONDecodeError, OSError) as exc:
+    except (
+        RuntimeError,
+        json.JSONDecodeError,
+        OSError,
+        TypeError,
+        ValueError,
+        ImportError,
+        AttributeError,
+    ) as exc:
         # Fail closed. An unknown state is not a licence to arm.
         return HoldVerdict(True, (), error=str(exc))
     return _verdict_from(raw, pull, reasons)

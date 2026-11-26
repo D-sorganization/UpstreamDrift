@@ -29,8 +29,13 @@ _REVIEW = (
 )
 
 
-def _comment(body: str, *, created_at: str = "2026-11-22T18:00:00Z") -> dict[str, str]:
-    return {"body": body, "created_at": created_at}
+def _comment(
+    body: str,
+    *,
+    created_at: str = "2026-11-22T18:00:00Z",
+    login: str = "d-sorgcodexagent[bot]",
+) -> dict[str, str]:
+    return {"body": body, "created_at": created_at, "user": {"login": login}}
 
 
 def test_pass_at_exact_head_clears_hold() -> None:
@@ -83,6 +88,49 @@ def test_quoted_fix_needed_in_reply_does_not_trigger() -> None:
     parsed = mod.parse_independent_review_comment(body)
     assert parsed is not None
     assert parsed.verdict == "PASS"
+
+
+def test_untrusted_commenter_pass_is_ignored() -> None:
+    body = _REVIEW.format(verdict="PASS", sha=HEAD)
+    reviews = mod.parse_issue_comments([_comment(body, login="evil-contributor")])
+    assert reviews == []
+    reasons = mod.independent_review_hold_reason(
+        reviews,
+        head_sha=HEAD,
+        author_model="claude",
+        labels=["agent-model:claude"],
+    )
+    assert reasons
+
+
+def test_gate_fail_closed_without_agent_labels() -> None:
+    assert mod.independent_review_gate_active([], author_model="", labels=[]) is True
+    reasons = mod.independent_review_hold_reason(
+        [],
+        head_sha=HEAD,
+        author_model="claude",
+        labels=[],
+    )
+    assert reasons
+    assert "no independent exact-head verdict" in reasons[0].lower()
+
+
+def test_exempt_label_disables_gate() -> None:
+    assert (
+        mod.independent_review_gate_active(
+            [],
+            author_model="claude",
+            labels=[mod.INDEPENDENT_EXACT_HEAD_EXEMPT_LABEL],
+        )
+        is False
+    )
+    reasons = mod.independent_review_hold_reason(
+        [],
+        head_sha=HEAD,
+        author_model="claude",
+        labels=[mod.INDEPENDENT_EXACT_HEAD_EXEMPT_LABEL],
+    )
+    assert reasons == []
 
 
 def test_stale_head_fix_needed_does_not_hold_current_head() -> None:
