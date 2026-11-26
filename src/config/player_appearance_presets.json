@@ -131,15 +131,15 @@
       "sources": [
         {"url": "https://www.jgto.org/en/player/10161/profile", "values": "183 cm; 80 kg", "era": "Japan Golf Tour profile; measurement date is unspecified."},
         {"url": "https://www.pgatour.com/player/01051/seve-ballesteros/bio", "values": "6 ft 0 in; 195 lb", "era": "PGA Tour profile; same rounded height but conflicting mass; date is unspecified."},
-        {"url": "https://www.youtube.com/watch?v=iKdLRJHqNSw", "values": "The R&A verified 'Five of the best Open shots'; reviewed swing and face frames.", "era": "Published 2016; the individual clip dates are not identified."},
+        {"url": "https://www.youtube.com/watch?v=iKdLRJHqNSw", "values": "The R&A verified 'Five of the best Open shots'; reviewed swing and 121.5 s close-up.", "era": "Published 2016; the individual clip event date is not identified."},
         {"url": "https://www.youtube.com/watch?v=JqpeeZkAzYc", "values": "The R&A official film of Ballesteros winning The Open", "era": "1979 Royal Lytham; period source, not a measured-outfit record."}
       ],
-      "limitations": ["Selected JGTO values are 183 cm and 80 kg; the PGA Tour profile lists 6 ft 0 in and 195 lb, with no measurement date on either profile. They are not asserted as exact 1979 measurements.", "The reviewed period frame shows a mustache, which this head library cannot represent. Ivory shirt, blue trousers, dark hair and pale cap are illustrative, not a verified outfit; skin, face morph and proportions are artistic approximations."],
+      "limitations": ["Selected JGTO values are 183 cm and 80 kg; the PGA Tour profile lists 6 ft 0 in and 195 lb, with no measurement date on either profile. They are not asserted as exact 1979 measurements.", "The reviewed R&A compilation close-up shows a mustache, which this head library cannot represent. Dark side-parted hair and a navy shirt with pale collar are source-inspired; the collar detail is not modeled, and skin, face morph and proportions are artistic approximations."],
       "appearance": {
         "schema_version": "appearance-v1", "name": "seve_ballesteros_stylized", "skin_tone": "skin_3", "clothing": "golf_polo_trousers", "club_finish": "satin_steel",
-        "materials": {"polo_white": {"base_color": [0.88, 0.89, 0.84, 1.0]}, "trousers_charcoal": {"base_color": [0.10, 0.19, 0.35, 1.0]}, "shoe_leather": {"base_color": [0.86, 0.86, 0.82, 1.0]}},
+        "materials": {"polo_white": {"base_color": [0.10, 0.16, 0.29, 1.0]}, "trousers_charcoal": {"base_color": [0.10, 0.19, 0.35, 1.0]}, "shoe_leather": {"base_color": [0.86, 0.86, 0.82, 1.0]}},
         "segments": [], "environment": {"ground_material": "turf", "sky_top": [0.3, 0.5, 0.78], "sky_bottom": [0.88, 0.92, 0.96], "lighting": "studio"},
-        "head": {"enabled": true, "headwear": "hair", "headwear_material": "hair_dark_brown", "model": "cc0_mesh", "hair_style": "short_crop", "hair_part": "none", "eye_color": "brown", "cap_style": "baseball_cap", "cap_material": "cap_white", "cap_brim": 0.3, "sizing": "stature", "height_over_stature": 0.132, "morph": {"width": 0.13, "jaw": 0.06, "nose": 0.17, "mouth": 0.08, "eyes": 0.04}},
+        "head": {"enabled": true, "headwear": "hair", "headwear_material": "hair_dark_brown", "model": "cc0_mesh", "hair_style": "short_crop", "hair_part": "left", "eye_color": "brown", "cap_style": "none", "cap_material": "cap_white", "cap_brim": 0.3, "sizing": "stature", "height_over_stature": 0.132, "morph": {"width": 0.13, "jaw": 0.06, "nose": 0.17, "mouth": 0.08, "eyes": 0.04}},
         "body_model": "ellipsoid", "ball": {"enabled": false, "source": "address_geometry"}, "glove": "none", "handedness": "right", "foot": {"model": "procedural"}
       }
     },
@@ -182,12 +182,12 @@
         {"url": "https://www.youtube.com/watch?v=sS39129T7P0", "values": "Vertical Golf 'Sam Snead's Golf Swing in slow motion'; reviewed source frame.", "era": "Published 2025; original footage date and event are not established; uploader is not verified."},
         {"url": "https://www.youtube.com/watch?v=Hhrd0y-zhRI", "values": "British Pathé newsreel of Snead winning the PGA Championship", "era": "1949 final; film description notes unused footage and possible date/location uncertainty."}
       ],
-      "limitations": ["Selected PGA Tour dimensions are exact conversions of 5 ft 11 in and 190 lb; the Hall of Fame profile lists 5 ft 10 in and 185 lb.", "The reviewed 1949 newsreel is monochrome and notes unused footage with date/location uncertainty; ivory shirt and brown trousers are illustrative. Hat shape is modeled separately; color and face proportions are not measured."],
+      "limitations": ["Selected PGA Tour dimensions are exact conversions of 5 ft 11 in and 190 lb; the Hall of Fame profile lists 5 ft 10 in and 185 lb.", "The reviewed 1949 newsreel is monochrome and notes unused footage with date/location uncertainty; ivory shirt and brown trousers are illustrative. A straw hat provides a period-inspired silhouette, not exact frame reproduction; face proportions are not measured."],
       "appearance": {
         "schema_version": "appearance-v1", "name": "sam_snead_stylized", "skin_tone": "skin_2", "clothing": "golf_polo_trousers", "club_finish": "satin_steel",
         "materials": {"polo_white": {"base_color": [0.86, 0.82, 0.69, 1.0]}, "trousers_charcoal": {"base_color": [0.32, 0.24, 0.17, 1.0]}, "shoe_leather": {"base_color": [0.38, 0.30, 0.22, 1.0]}},
         "segments": [], "environment": {"ground_material": "turf", "sky_top": [0.3, 0.5, 0.78], "sky_bottom": [0.88, 0.92, 0.96], "lighting": "studio"},
-        "head": {"enabled": true, "headwear": "hair", "headwear_material": "hair_grey", "model": "cc0_mesh", "hair_style": "short_crop", "hair_part": "left", "eye_color": "blue_grey", "cap_style": "none", "cap_material": "cap_white", "cap_brim": 0.3, "sizing": "stature", "height_over_stature": 0.132, "morph": {"width": 0.08, "jaw": 0.16, "nose": -0.11, "mouth": 0.03, "eyes": -0.10}},
+        "head": {"enabled": true, "headwear": "hair", "headwear_material": "hair_grey", "model": "cc0_mesh", "hair_style": "short_crop", "hair_part": "left", "eye_color": "blue_grey", "cap_style": "straw_hat", "cap_material": "hat_straw", "cap_brim": 0.3, "sizing": "stature", "height_over_stature": 0.132, "morph": {"width": 0.08, "jaw": 0.16, "nose": -0.11, "mouth": 0.03, "eyes": -0.10}},
         "body_model": "ellipsoid", "ball": {"enabled": false, "source": "address_geometry"}, "glove": "none", "handedness": "right", "foot": {"model": "procedural"}
       }
     },
