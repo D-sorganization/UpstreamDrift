@@ -80,6 +80,7 @@ def models_are_independent(author_model: str, reviewer_model: str) -> bool:
 
 
 def author_model_from_labels(labels: Sequence[str]) -> str:
+    """author model from labels."""
     for label in labels:
         lowered = label.strip().lower()
         match = _AGENT_MODEL_LABEL.match(lowered)
@@ -135,6 +136,7 @@ def parse_independent_review_comment(
 def parse_issue_comments(
     comments: Sequence[Mapping[str, Any]],
 ) -> list[IndependentHeadReview]:
+    """parse issue comments."""
     rows: list[IndependentHeadReview] = []
     for item in comments:
         if not is_trusted_independent_reviewer_login(commenter_login_from_item(item)):

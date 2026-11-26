@@ -198,6 +198,7 @@ class HoldVerdict:
     head_in_base_repo: bool = False
 
     def describe(self) -> str:
+        """describe."""
         if not self.held:
             return "no hold in effect"
         return "; ".join(self.reasons) or "unknown hold"
@@ -232,6 +233,7 @@ class _PullRequest:
 
 
 def _gh_json(runner: CommandRunner, args: Sequence[str]) -> object:
+    """gh json."""
     proc = runner(["gh", *args])
     if proc.returncode != 0:
         raise RuntimeError(f"gh {' '.join(args)} failed: {proc.stderr.strip()}")
@@ -240,6 +242,7 @@ def _gh_json(runner: CommandRunner, args: Sequence[str]) -> object:
 
 
 def _gh_lines(runner: CommandRunner, args: Sequence[str]) -> list[str]:
+    """gh lines."""
     proc = runner(["gh", *args])
     if proc.returncode != 0:
         raise RuntimeError(f"gh {' '.join(args)} failed: {proc.stderr.strip()}")
@@ -404,6 +407,7 @@ def _disarm_reasons(run: CommandRunner, repo: str, pr: int, sha: str) -> list[st
 
 
 def _independent_exact_head_review_module() -> object:
+    """independent exact head review module."""
     name = "independent_exact_head_review"
     cached = sys.modules.get(name)
     if cached is not None:
@@ -419,6 +423,7 @@ def _independent_exact_head_review_module() -> object:
 
 
 def _issue_comments(run: CommandRunner, repo: str, pr: int) -> list[dict[str, Any]]:
+    """issue comments."""
     payload = _gh_json(
         run, ["api", f"repos/{repo}/issues/{pr}/comments?per_page=100", "--paginate"]
     )
@@ -457,6 +462,7 @@ def _independent_review_reasons(
 
 
 def _disarm_auto_merge(repo: str, pr: int, run: CommandRunner) -> bool:
+    """disarm auto merge."""
     proc = run(["gh", "api", "-X", "DELETE", f"repos/{repo}/pulls/{pr}/ccr/auto_merge"])
     if proc.returncode == 0:
         logger.warning("Disarmed auto-merge on %s#%s before a blocked merge.", repo, pr)
@@ -569,6 +575,7 @@ def evaluate_hold(
 
 
 def _deletions_acknowledged(lowered_labels: set[str], body: str) -> bool:
+    """deletions acknowledged."""
     if DELETIONS_ACK_LABEL in lowered_labels:
         return True
     for line in body.splitlines():

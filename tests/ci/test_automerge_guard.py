@@ -44,6 +44,7 @@ HEAD_DATE = "2026-08-13T20:35:02Z"
 def _completed(
     stdout: str = "", returncode: int = 0, stderr: str = ""
 ) -> subprocess.CompletedProcess[str]:
+    """completed."""
     return subprocess.CompletedProcess(
         args=[], returncode=returncode, stdout=stdout, stderr=stderr
     )
@@ -69,6 +70,7 @@ class FakeGh:
         force_push_fails: bool = False,
         merge_returncode: int = 0,
     ) -> None:
+        """init."""
         self.pull = {
             "draft": draft,
             "labels": [{"name": name} for name in labels],
@@ -94,6 +96,7 @@ class FakeGh:
         self.calls: list[list[str]] = []
 
     def __call__(self, cmd: Sequence[str]) -> subprocess.CompletedProcess[str]:
+        """call."""
         argv = list(cmd)
         self.calls.append(argv)
         joined = " ".join(argv)
@@ -133,6 +136,7 @@ class FakeGh:
 
     @property
     def armed(self) -> bool:
+        """armed."""
         return any("merge" in call and "--auto" in call for call in self.calls)
 
 
@@ -142,6 +146,7 @@ class FakeGh:
 
 
 def test_clean_pr_is_not_held() -> None:
+    """test clean pr is not held."""
     verdict = automerge_guard.evaluate_hold("o/r", 1, runner=FakeGh())
     assert verdict.held is False
     assert verdict.reasons == ()
@@ -151,12 +156,14 @@ def test_clean_pr_is_not_held() -> None:
     "label", ["do-not-merge", "blocked", "do-not-automate", "Do-Not-Merge"]
 )
 def test_hold_labels_block_arming(label: str) -> None:
+    """test hold labels block arming."""
     verdict = automerge_guard.evaluate_hold("o/r", 1, runner=FakeGh(labels=[label]))
     assert verdict.held is True
     assert f"`{label.lower()}` label" in verdict.describe()
 
 
 def test_draft_is_held() -> None:
+    """test draft is held."""
     verdict = automerge_guard.evaluate_hold("o/r", 1, runner=FakeGh(draft=True))
     assert verdict.held is True
     assert "draft" in verdict.describe()
@@ -209,6 +216,7 @@ def test_force_push_to_a_previously_seen_sha_supersedes_a_disarm() -> None:
 
 
 def test_force_push_before_the_disarm_still_holds() -> None:
+    """test force push before the disarm still holds."""
     verdict = automerge_guard.evaluate_hold(
         "o/r",
         1,
@@ -221,6 +229,7 @@ def test_force_push_before_the_disarm_still_holds() -> None:
 
 
 def test_timeline_failure_falls_back_to_check_suite_time() -> None:
+    """test timeline failure falls back to check suite time."""
     held = automerge_guard.evaluate_hold(
         "o/r",
         1,
@@ -236,6 +245,7 @@ def test_timeline_failure_falls_back_to_check_suite_time() -> None:
 
 
 def test_missing_arrival_time_fails_closed_when_a_disarm_exists() -> None:
+    """test missing arrival time fails closed when a disarm exists."""
     verdict = automerge_guard.evaluate_hold(
         "o/r", 1, runner=FakeGh(disarms=["2026-08-14T04:14:21Z"], head_date="")
     )
@@ -243,6 +253,7 @@ def test_missing_arrival_time_fails_closed_when_a_disarm_exists() -> None:
 
 
 def test_latest_disarm_wins_when_several_exist() -> None:
+    """test latest disarm wins when several exist."""
     verdict = automerge_guard.evaluate_hold(
         "o/r",
         1,
@@ -265,6 +276,7 @@ def test_disarm_followed_by_a_re_enable_is_still_held() -> None:
 
 
 def test_disarm_caused_by_a_pr_close_is_not_held() -> None:
+    """test disarm caused by a pr close is not held."""
     verdict = automerge_guard.evaluate_hold(
         "o/r",
         1,
@@ -276,6 +288,7 @@ def test_disarm_caused_by_a_pr_close_is_not_held() -> None:
 
 
 def test_disarm_a_few_seconds_after_a_close_is_not_held() -> None:
+    """test disarm a few seconds after a close is not held."""
     verdict = automerge_guard.evaluate_hold(
         "o/r",
         1,
@@ -287,6 +300,7 @@ def test_disarm_a_few_seconds_after_a_close_is_not_held() -> None:
 
 
 def test_disarm_long_after_a_close_is_still_held() -> None:
+    """test disarm long after a close is still held."""
     verdict = automerge_guard.evaluate_hold(
         "o/r",
         1,
@@ -298,6 +312,7 @@ def test_disarm_long_after_a_close_is_still_held() -> None:
 
 
 def test_genuine_disarm_after_a_close_driven_one_is_held() -> None:
+    """test genuine disarm after a close driven one is held."""
     verdict = automerge_guard.evaluate_hold(
         "o/r",
         1,
@@ -310,11 +325,13 @@ def test_genuine_disarm_after_a_close_driven_one_is_held() -> None:
 
 
 def test_unreadable_timeline_raises_so_callers_fail_closed() -> None:
+    """test unreadable timeline raises so callers fail closed."""
     with pytest.raises(RuntimeError):
         automerge_guard._disarm_reasons(FakeGh(timeline_fails=True), "o/r", 1, HEAD_SHA)
 
 
 def test_deleted_tracked_files_block_arming() -> None:
+    """test deleted tracked files block arming."""
     verdict = automerge_guard.evaluate_hold(
         "o/r", 4709, runner=FakeGh(removed=[f"docs/f{i}.md" for i in range(13)])
     )
@@ -324,6 +341,7 @@ def test_deleted_tracked_files_block_arming() -> None:
 
 
 def test_deletions_released_by_label() -> None:
+    """test deletions released by label."""
     verdict = automerge_guard.evaluate_hold(
         "o/r",
         1,
@@ -337,6 +355,7 @@ def test_deletions_released_by_label() -> None:
 
 @pytest.mark.parametrize("value", ["yes", "true", "YES"])
 def test_deletions_released_by_body_marker(value: str) -> None:
+    """test deletions released by body marker."""
     verdict = automerge_guard.evaluate_hold(
         "o/r",
         1,
@@ -348,6 +367,7 @@ def test_deletions_released_by_body_marker(value: str) -> None:
 
 
 def test_deletions_not_released_by_unrelated_body_text() -> None:
+    """test deletions not released by unrelated body text."""
     verdict = automerge_guard.evaluate_hold(
         "o/r",
         1,
@@ -357,6 +377,7 @@ def test_deletions_not_released_by_unrelated_body_text() -> None:
 
 
 def test_multiple_signals_are_all_reported() -> None:
+    """test multiple signals are all reported."""
     verdict = automerge_guard.evaluate_hold(
         "o/r",
         4709,
@@ -366,7 +387,10 @@ def test_multiple_signals_are_all_reported() -> None:
 
 
 def test_evaluation_failure_fails_closed() -> None:
+    """test evaluation failure fails closed."""
+
     def broken(cmd: Sequence[str]) -> subprocess.CompletedProcess[str]:
+        """broken."""
         return _completed(returncode=1, stderr="HTTP 403 rate limited")
 
     verdict = automerge_guard.evaluate_hold("o/r", 1, runner=broken)
@@ -380,6 +404,7 @@ def test_evaluation_failure_fails_closed() -> None:
 
 
 def test_arm_refuses_held_pr_and_never_shells_out_to_merge() -> None:
+    """test arm refuses held pr and never shells out to merge."""
     fake = FakeGh(labels=["do-not-merge"])
     result = automerge_guard.arm_auto_merge("o/r", 1, runner=fake)
     assert result.armed is False
@@ -387,6 +412,7 @@ def test_arm_refuses_held_pr_and_never_shells_out_to_merge() -> None:
 
 
 def test_arm_proceeds_on_clean_pr() -> None:
+    """test arm proceeds on clean pr."""
     fake = FakeGh()
     result = automerge_guard.arm_auto_merge("o/r", 1, runner=fake)
     assert result.armed is True
@@ -394,6 +420,7 @@ def test_arm_proceeds_on_clean_pr() -> None:
 
 
 def test_arm_passes_strategy_and_delete_branch() -> None:
+    """test arm passes strategy and delete branch."""
     fake = FakeGh()
     automerge_guard.arm_auto_merge(
         "o/r", 7, strategy="rebase", delete_branch=True, runner=fake
@@ -405,6 +432,7 @@ def test_arm_passes_strategy_and_delete_branch() -> None:
 
 
 def test_arm_reports_gh_failure() -> None:
+    """test arm reports gh failure."""
     fake = FakeGh(merge_returncode=1)
     result = automerge_guard.arm_auto_merge("o/r", 1, runner=fake)
     assert result.armed is False
@@ -432,6 +460,7 @@ class CloudGh(FakeGh):
         put_body: str = "",
         **kw: object,
     ) -> None:
+        """init."""
         super().__init__(merge_returncode=1, **kw)  # type: ignore[arg-type]
         self.put_body = put_body
         self.merge_stderr = merge_stderr
@@ -441,6 +470,7 @@ class CloudGh(FakeGh):
         self.delete_returncode = delete_returncode
 
     def __call__(self, cmd: Sequence[str]) -> subprocess.CompletedProcess[str]:
+        """call."""
         argv = list(cmd)
         if ".auto_merge.merge_method" in argv:
             self.calls.append(argv)
@@ -476,10 +506,12 @@ class CloudGh(FakeGh):
 
     @property
     def rest_calls(self) -> list[list[str]]:
+        """rest calls."""
         return [c for c in self.calls if any(p.endswith("/ccr/auto_merge") for p in c)]
 
 
 def test_graphql_blocked_falls_back_to_rest_route_once() -> None:
+    """test graphql blocked falls back to rest route once."""
     fake = CloudGh()
     result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert result.armed is True
@@ -491,12 +523,14 @@ def test_graphql_blocked_falls_back_to_rest_route_once() -> None:
 
 
 def test_rest_fallback_uses_requested_strategy() -> None:
+    """test rest fallback uses requested strategy."""
     fake = CloudGh()
     automerge_guard.arm_auto_merge("o/r", 7, strategy="rebase", runner=fake)
     assert "merge_method=rebase" in fake.rest_calls[0]
 
 
 def test_rest_fallback_failure_is_reported_not_armed() -> None:
+    """test rest fallback failure is reported not armed."""
     fake = CloudGh(rest_returncode=1)
     result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert result.armed is False
@@ -513,6 +547,7 @@ def test_rest_fallback_refuses_when_route_stores_a_different_method() -> None:
 
 
 def test_rest_fallback_verifies_the_stored_method() -> None:
+    """test rest fallback verifies the stored method."""
     fake = CloudGh()
     result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert result.armed is True
@@ -533,6 +568,7 @@ def test_put_body_confirms_arm_even_when_pr_read_shows_it_queued() -> None:
 
 
 def test_put_body_with_a_different_method_is_still_revoked() -> None:
+    """test put body with a different method is still revoked."""
     fake = CloudGh(put_body='{"enabled":true,"merge_method":"merge"}')
     result = automerge_guard.arm_auto_merge("o/r", 7, strategy="squash", runner=fake)
     assert result.armed is False
@@ -541,6 +577,7 @@ def test_put_body_with_a_different_method_is_still_revoked() -> None:
 
 
 def test_put_body_reporting_disabled_is_revoked() -> None:
+    """test put body reporting disabled is revoked."""
     fake = CloudGh(put_body='{"enabled":false,"merge_method":"squash"}')
     result = automerge_guard.arm_auto_merge("o/r", 7, strategy="squash", runner=fake)
     assert result.armed is False
@@ -548,6 +585,7 @@ def test_put_body_reporting_disabled_is_revoked() -> None:
 
 
 def test_unparseable_put_body_falls_back_to_reading_the_pr() -> None:
+    """test unparseable put body falls back to reading the pr."""
     fake = CloudGh(put_body="not json")
     result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert result.armed is True
@@ -555,6 +593,7 @@ def test_unparseable_put_body_falls_back_to_reading_the_pr() -> None:
 
 
 def _delete_calls(fake: CloudGh) -> list[list[str]]:
+    """delete calls."""
     return [c for c in fake.rest_calls if "DELETE" in c]
 
 
@@ -572,6 +611,7 @@ def test_verify_mismatch_revokes_the_arm() -> None:
 
 @pytest.mark.parametrize("case", ["get-fails", "empty"])
 def test_unverifiable_arm_is_revoked(case: str) -> None:
+    """test unverifiable arm is revoked."""
     fake = (
         CloudGh(verify_returncode=1)
         if case == "get-fails"
@@ -583,6 +623,7 @@ def test_unverifiable_arm_is_revoked(case: str) -> None:
 
 
 def test_failed_revoke_says_auto_merge_may_still_be_on() -> None:
+    """test failed revoke says auto merge may still be on."""
     fake = CloudGh(stored_method="merge", delete_returncode=1)
     result = automerge_guard.arm_auto_merge("o/r", 7, strategy="squash", runner=fake)
     assert result.armed is False
@@ -595,6 +636,7 @@ def test_failed_revoke_says_auto_merge_may_still_be_on() -> None:
 def test_failed_revoke_flags_result_and_logs_error(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
+    """test failed revoke flags result and logs error."""
     fake = CloudGh(stored_method="merge", delete_returncode=1)
     with caplog.at_level("ERROR"):
         result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
@@ -606,6 +648,7 @@ def test_failed_revoke_flags_result_and_logs_error(
 
 
 def test_revoked_arm_does_not_flag_may_be_on() -> None:
+    """test revoked arm does not flag may be on."""
     result = automerge_guard.arm_auto_merge(
         "o/r", 7, runner=CloudGh(stored_method="merge")
     )
@@ -615,6 +658,7 @@ def test_revoked_arm_does_not_flag_may_be_on() -> None:
 def test_cli_surfaces_detail_and_distinct_exit_when_revoke_fails(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    """test cli surfaces detail and distinct exit when revoke fails."""
     result = automerge_guard.ArmResult(
         False,
         automerge_guard.HoldVerdict(False, ()),
@@ -631,6 +675,7 @@ def test_cli_surfaces_detail_and_distinct_exit_when_revoke_fails(
 def test_cli_prints_detail_for_ordinary_unarmed_result(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    """test cli prints detail for ordinary unarmed result."""
     result = automerge_guard.ArmResult(
         False,
         automerge_guard.HoldVerdict(False, ()),
@@ -643,12 +688,14 @@ def test_cli_prints_detail_for_ordinary_unarmed_result(
 
 
 def test_verified_arm_is_not_revoked() -> None:
+    """test verified arm is not revoked."""
     fake = CloudGh()
     assert automerge_guard.arm_auto_merge("o/r", 7, runner=fake).armed is True
     assert _delete_calls(fake) == []
 
 
 def test_other_403_does_not_trigger_rest_fallback() -> None:
+    """test other 403 does not trigger rest fallback."""
     fake = CloudGh(merge_stderr="403 Forbidden: Resource not accessible")
     result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert result.armed is False
@@ -656,6 +703,7 @@ def test_other_403_does_not_trigger_rest_fallback() -> None:
 
 
 def test_held_pr_makes_no_graphql_or_rest_arm_call() -> None:
+    """test held pr makes no graphql or rest arm call."""
     fake = CloudGh(removed=["a.py"])
     result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert result.armed is False
@@ -671,6 +719,7 @@ def test_held_pr_makes_no_graphql_or_rest_arm_call() -> None:
 def test_cli_reports_hold_with_nonzero_exit(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    """test cli reports hold with nonzero exit."""
     monkeypatch.setattr(
         automerge_guard,
         "evaluate_hold",
@@ -705,6 +754,7 @@ def test_no_fleet_script_arms_auto_merge_directly() -> None:
 def test_cli_reports_clear_with_zero_exit(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    """test cli reports clear with zero exit."""
     monkeypatch.setattr(
         automerge_guard,
         "evaluate_hold",
@@ -731,16 +781,21 @@ def test_cli_reports_clear_with_zero_exit(
     ],
 )
 def test_classify_token(token: str, kind: str) -> None:
+    """test classify token."""
     assert automerge_guard.classify_token(token) == kind
 
 
 def test_classify_token_rejects_non_string() -> None:
+    """test classify token rejects non string."""
     with pytest.raises(TypeError):
         automerge_guard.classify_token(None)  # type: ignore[arg-type]
 
 
 def test_active_token_prefers_gh_token_then_github_token() -> None:
+    """test active token prefers gh token then github token."""
+
     def no_gh(cmd: Sequence[str]) -> subprocess.CompletedProcess[str]:
+        """no gh."""
         raise AssertionError("gh must not be consulted when an env token is set")
 
     env = {"GH_TOKEN": FAKE_CLASSIC_PAT, "GITHUB_TOKEN": FAKE_APP_TOKEN}
@@ -750,9 +805,11 @@ def test_active_token_prefers_gh_token_then_github_token() -> None:
 
 
 def test_active_token_falls_back_to_gh_auth_token() -> None:
+    """test active token falls back to gh auth token."""
     calls: list[list[str]] = []
 
     def gh(cmd: Sequence[str]) -> subprocess.CompletedProcess[str]:
+        """gh."""
         calls.append(list(cmd))
         return _completed(stdout=FAKE_OAUTH_TOKEN + "\n")
 
@@ -761,10 +818,14 @@ def test_active_token_falls_back_to_gh_auth_token() -> None:
 
 
 def test_active_token_is_none_when_gh_is_unauthenticated_or_missing() -> None:
+    """test active token is none when gh is unauthenticated or missing."""
+
     def unauth(cmd: Sequence[str]) -> subprocess.CompletedProcess[str]:
+        """unauth."""
         return _completed(returncode=1, stderr="no oauth token")
 
     def missing(cmd: Sequence[str]) -> subprocess.CompletedProcess[str]:
+        """missing."""
         raise FileNotFoundError("gh")
 
     assert automerge_guard.active_token_kind({}, runner=unauth) == "none"
@@ -775,6 +836,7 @@ def test_identity_check_accepts_user_token_silently(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     # Owner decision 2026-10-10: the personal token is an approved identity.
+    """test identity check accepts user token silently."""
     env = {"GH_TOKEN": FAKE_CLASSIC_PAT}
     with caplog.at_level("WARNING"):
         ok = automerge_guard.check_token_identity(env=env, require_app_token=False)
@@ -785,6 +847,7 @@ def test_identity_check_accepts_user_token_silently(
 def test_identity_check_require_app_refuses_user_token_without_leaking_it(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
+    """test identity check require app refuses user token without leaking it."""
     env = {"GH_TOKEN": FAKE_CLASSIC_PAT}
     with caplog.at_level("WARNING"):
         ok = automerge_guard.check_token_identity(env=env, require_app_token=True)
@@ -797,6 +860,7 @@ def test_identity_check_require_app_refuses_user_token_without_leaking_it(
 def test_identity_check_is_silent_for_app_token(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
+    """test identity check is silent for app token."""
     env = {"GH_TOKEN": FAKE_APP_TOKEN}
     with caplog.at_level("WARNING"):
         assert automerge_guard.check_token_identity(env=env, require_app_token=True)
@@ -805,9 +869,11 @@ def test_identity_check_is_silent_for_app_token(
 
 @pytest.mark.parametrize("token", [FAKE_FINE_GRAINED_PAT, "", "v1.opaque"])
 def test_identity_check_fails_only_when_app_token_required(token: str) -> None:
+    """test identity check fails only when app token required."""
     env = {"GH_TOKEN": token} if token else {}
 
     def unauth(cmd: Sequence[str]) -> subprocess.CompletedProcess[str]:
+        """unauth."""
         return _completed(returncode=1)
 
     assert automerge_guard.check_token_identity(
@@ -821,9 +887,11 @@ def test_identity_check_fails_only_when_app_token_required(token: str) -> None:
 def test_cli_require_app_token_refuses_user_token(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    """test cli require app token refuses user token."""
     monkeypatch.setenv("GH_TOKEN", FAKE_CLASSIC_PAT)
 
     def must_not_evaluate(repo: str, pr: int, **kw: object) -> object:
+        """must not evaluate."""
         raise AssertionError("must refuse before touching the PR")
 
     monkeypatch.setattr(automerge_guard, "evaluate_hold", must_not_evaluate)
@@ -837,6 +905,7 @@ def test_cli_user_token_without_flag_proceeds_silently(
     capsys: pytest.CaptureFixture[str],
     caplog: pytest.LogCaptureFixture,
 ) -> None:
+    """test cli user token without flag proceeds silently."""
     monkeypatch.setenv("GH_TOKEN", FAKE_CLASSIC_PAT)
     monkeypatch.setattr(
         automerge_guard,
@@ -877,6 +946,7 @@ class CleanGh(CloudGh):
         ref_delete_returncode: int = 0,
         **kw: object,
     ) -> None:
+        """init."""
         super().__init__(rest_returncode=1, **kw)
         self.queue_on_later_page = queue_on_later_page
         self.later_page_fails = later_page_fails
@@ -890,6 +960,7 @@ class CleanGh(CloudGh):
         self.merged = merged
 
     def __call__(self, cmd: Sequence[str]) -> subprocess.CompletedProcess[str]:
+        """call."""
         argv = list(cmd)
         if any(p.endswith("/ccr/auto_merge") for p in argv) and "PUT" in argv:
             self.calls.append(argv)
@@ -935,10 +1006,12 @@ class CleanGh(CloudGh):
 
     @property
     def direct_calls(self) -> list[list[str]]:
+        """direct calls."""
         return [c for c in self.calls if any(p.endswith("/pulls/7/merge") for p in c)]
 
 
 def test_clean_status_422_merges_directly_with_sha_and_method() -> None:
+    """test clean status 422 merges directly with sha and method."""
     fake = CleanGh()
     result = automerge_guard.arm_auto_merge("o/r", 7, strategy="rebase", runner=fake)
     assert result.armed is False
@@ -953,6 +1026,7 @@ def test_clean_status_422_merges_directly_with_sha_and_method() -> None:
 
 
 def test_clean_status_merge_is_verified_via_merged_flag() -> None:
+    """test clean status merge is verified via merged flag."""
     fake = CleanGh(merged="false")
     result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert result.merged is False
@@ -962,6 +1036,7 @@ def test_clean_status_merge_is_verified_via_merged_flag() -> None:
 
 @pytest.mark.parametrize("status", ["405", "409", "422"])
 def test_clean_status_merge_refused_reports_reason_without_retry(status: str) -> None:
+    """test clean status merge refused reports reason without retry."""
     fake = CleanGh(
         direct_returncode=1, direct_stderr=f"Head branch was modified (HTTP {status})"
     )
@@ -974,6 +1049,7 @@ def test_clean_status_merge_refused_reports_reason_without_retry(status: str) ->
 
 
 def test_other_422_keeps_current_behaviour() -> None:
+    """test other 422 keeps current behaviour."""
     fake = CleanGh(arm_stderr="Auto merge is not allowed for this repository (422)")
     result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert result.merged is False
@@ -983,6 +1059,7 @@ def test_other_422_keeps_current_behaviour() -> None:
 
 
 def test_held_pr_is_never_merged_directly() -> None:
+    """test held pr is never merged directly."""
     fake = CleanGh(removed=["a.py"])
     result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert result.merged is False
@@ -993,10 +1070,12 @@ ENQUEUE_HINT = "gh pr merge 7 --repo o/r --squash"
 
 
 def _graphql_calls(fake: CleanGh) -> list[list[str]]:
+    """graphql calls."""
     return [c for c in fake.calls if "graphql" in c]
 
 
 def test_queue_present_enqueues_with_expected_head_and_never_puts_merge() -> None:
+    """test queue present enqueues with expected head and never puts merge."""
     fake = CleanGh(queue=True)
     result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert result.armed is True
@@ -1011,6 +1090,7 @@ def test_queue_present_enqueues_with_expected_head_and_never_puts_merge() -> Non
 
 
 def test_queue_present_graphql_failure_never_direct_merges() -> None:
+    """test queue present graphql failure never direct merges."""
     fake = CleanGh(queue=True, graphql_fail=True)
     result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert result.armed is False and result.merged is False
@@ -1020,6 +1100,7 @@ def test_queue_present_graphql_failure_never_direct_merges() -> None:
 
 
 def test_rules_lookup_failure_is_treated_as_queue_present() -> None:
+    """test rules lookup failure is treated as queue present."""
     fake = CleanGh(rules_fail=True)
     result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert result.merged is False
@@ -1028,6 +1109,7 @@ def test_rules_lookup_failure_is_treated_as_queue_present() -> None:
 
 
 def test_no_queue_uses_direct_merge_path() -> None:
+    """test no queue uses direct merge path."""
     fake = CleanGh(queue=False)
     result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert result.merged is True
@@ -1035,12 +1117,14 @@ def test_no_queue_uses_direct_merge_path() -> None:
 
 
 def test_enqueue_hint_names_the_repo() -> None:
+    """test enqueue hint names the repo."""
     fake = CleanGh(queue=True, graphql_fail=True)
     result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert "gh pr merge 7 --repo o/r --squash" in result.detail
 
 
 def test_rules_lookup_is_paginated_at_100() -> None:
+    """test rules lookup is paginated at 100."""
     fake = CleanGh(queue_on_later_page=True)
     result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert result.merged is False, "a queue on page 2 must not be missed"
@@ -1049,6 +1133,7 @@ def test_rules_lookup_is_paginated_at_100() -> None:
 
 
 def test_rules_later_page_failure_fails_closed() -> None:
+    """test rules later page failure fails closed."""
     fake = CleanGh(queue_on_later_page=True, later_page_fails=True)
     result = automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert result.merged is False
@@ -1056,10 +1141,12 @@ def test_rules_later_page_failure_fails_closed() -> None:
 
 
 def _ref_deletes(fake: CleanGh) -> list[list[str]]:
+    """ref deletes."""
     return [c for c in fake.calls if any("/git/refs/heads/" in p for p in c)]
 
 
 def test_clean_fallback_honours_delete_branch() -> None:
+    """test clean fallback honours delete branch."""
     fake = CleanGh()
     result = automerge_guard.arm_auto_merge("o/r", 7, delete_branch=True, runner=fake)
     assert result.merged is True
@@ -1077,6 +1164,7 @@ def test_clean_fallback_honours_delete_branch() -> None:
 def test_clean_fallback_percent_encodes_the_head_ref() -> None:
     # `gh api` treats `#` as a URL fragment: an unencoded `feat#one` would send
     # DELETE .../heads/feat and delete an unrelated branch. `/` stays literal.
+    """test clean fallback percent encodes the head ref."""
     fake = CleanGh()
     fake.pull["head"]["ref"] = "feat/x#one?y%z"  # type: ignore[index]
     automerge_guard.arm_auto_merge("o/r", 7, delete_branch=True, runner=fake)
@@ -1086,12 +1174,14 @@ def test_clean_fallback_percent_encodes_the_head_ref() -> None:
 
 
 def test_clean_fallback_does_not_delete_without_the_flag() -> None:
+    """test clean fallback does not delete without the flag."""
     fake = CleanGh()
     automerge_guard.arm_auto_merge("o/r", 7, runner=fake)
     assert _ref_deletes(fake) == []
 
 
 def test_clean_fallback_never_deletes_a_fork_branch() -> None:
+    """test clean fallback never deletes a fork branch."""
     fake = CleanGh()
     fake.pull["head"]["repo"] = {"full_name": "fork/r"}  # type: ignore[index]
     result = automerge_guard.arm_auto_merge("o/r", 7, delete_branch=True, runner=fake)
@@ -1100,6 +1190,7 @@ def test_clean_fallback_never_deletes_a_fork_branch() -> None:
 
 
 def test_clean_fallback_delete_failure_warns_but_stays_merged() -> None:
+    """test clean fallback delete failure warns but stays merged."""
     fake = CleanGh(ref_delete_returncode=1)
     result = automerge_guard.arm_auto_merge("o/r", 7, delete_branch=True, runner=fake)
     assert result.merged is True
@@ -1107,6 +1198,7 @@ def test_clean_fallback_delete_failure_warns_but_stays_merged() -> None:
 
 
 def test_clean_fallback_does_not_delete_when_merge_unverified() -> None:
+    """test clean fallback does not delete when merge unverified."""
     fake = CleanGh(merged="false")
     result = automerge_guard.arm_auto_merge("o/r", 7, delete_branch=True, runner=fake)
     assert result.merged is False
@@ -1116,6 +1208,7 @@ def test_clean_fallback_does_not_delete_when_merge_unverified() -> None:
 def test_cli_reports_merged_and_exits_zero(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    """test cli reports merged and exits zero."""
     monkeypatch.setattr(
         automerge_guard, "arm_auto_merge", _patched_merged_result(merged=True)
     )
@@ -1126,6 +1219,7 @@ def test_cli_reports_merged_and_exits_zero(
 def test_cli_refused_clean_merge_exits_nonzero_with_reason(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    """test cli refused clean merge exits nonzero with reason."""
     monkeypatch.setattr(
         automerge_guard, "arm_auto_merge", _patched_merged_result(merged=False)
     )
@@ -1134,6 +1228,7 @@ def test_cli_refused_clean_merge_exits_nonzero_with_reason(
 
 
 def _patched_merged_result(*, merged: bool):  # type: ignore[no-untyped-def]
+    """patched merged result."""
     result = automerge_guard.ArmResult(
         False,
         automerge_guard.HoldVerdict(False, ()),
@@ -1151,6 +1246,7 @@ def _patched_merged_result(*, merged: bool):  # type: ignore[no-untyped-def]
 
 
 def test_stalled_pr_on_queue_base_is_enqueued_once_at_the_verified_head() -> None:
+    """test stalled pr on queue base is enqueued once at the verified head."""
     fake = CleanGh(queue=True)
     result = automerge_guard.enqueue_stalled_pr("o/r", 7, runner=fake)
     assert result.armed is True
@@ -1163,6 +1259,7 @@ def test_stalled_pr_on_queue_base_is_enqueued_once_at_the_verified_head() -> Non
 
 
 def test_stalled_pr_that_is_held_is_never_enqueued() -> None:
+    """test stalled pr that is held is never enqueued."""
     fake = CleanGh(queue=True, labels=["do-not-merge"])
     result = automerge_guard.enqueue_stalled_pr("o/r", 7, runner=fake)
     assert result.armed is False
@@ -1172,6 +1269,7 @@ def test_stalled_pr_that_is_held_is_never_enqueued() -> None:
 
 
 def test_stalled_pr_without_a_merge_queue_is_left_alone() -> None:
+    """test stalled pr without a merge queue is left alone."""
     fake = CleanGh(queue=False)
     result = automerge_guard.enqueue_stalled_pr("o/r", 7, runner=fake)
     assert result.armed is False and result.merged is False
@@ -1181,6 +1279,7 @@ def test_stalled_pr_without_a_merge_queue_is_left_alone() -> None:
 
 
 def test_stalled_pr_enqueue_failure_is_reported_not_retried() -> None:
+    """test stalled pr enqueue failure is reported not retried."""
     fake = CleanGh(queue=True, graphql_fail=True)
     result = automerge_guard.enqueue_stalled_pr("o/r", 7, runner=fake)
     assert result.armed is False
@@ -1196,6 +1295,7 @@ def test_stalled_pr_enqueue_failure_is_reported_not_retried() -> None:
 
 
 def test_malformed_head_field_yields_a_verdict_not_a_crash() -> None:
+    """test malformed head field yields a verdict not a crash."""
     fake = FakeGh()
     fake.pull["head"] = "not-an-object"
     verdict = automerge_guard.evaluate_hold("o/r", 7, runner=fake)
@@ -1205,6 +1305,7 @@ def test_malformed_head_field_yields_a_verdict_not_a_crash() -> None:
 
 
 def test_no_guard_function_exceeds_the_consumer_function_budget() -> None:
+    """test no guard function exceeds the consumer function budget."""
     import ast
 
     tree = ast.parse(_MODULE_PATH.read_text(encoding="utf-8"))
@@ -1240,11 +1341,13 @@ class IndependentReviewGh(FakeGh):
         commit_messages: Sequence[str] = (),
         **kw: object,
     ) -> None:
+        """init."""
         super().__init__(**kw)  # type: ignore[arg-type]
         self.issue_comments = list(issue_comments)
         self.commit_messages = list(commit_messages)
 
     def __call__(self, cmd: Sequence[str]) -> subprocess.CompletedProcess[str]:
+        """call."""
         argv = list(cmd)
         joined = " ".join(argv)
         if "/issues/" in joined and "comments" in joined:
@@ -1258,6 +1361,7 @@ class IndependentReviewGh(FakeGh):
 
     @property
     def disarm_calls(self) -> list[list[str]]:
+        """disarm calls."""
         return [
             c
             for c in self.calls
@@ -1266,6 +1370,7 @@ class IndependentReviewGh(FakeGh):
 
 
 def test_arm_refuses_without_independent_pass_at_exact_head() -> None:
+    """test arm refuses without independent pass at exact head."""
     fake = IndependentReviewGh(labels=["agent-model:claude"])
     result = automerge_guard.arm_auto_merge("o/r", 1, runner=fake)
     assert result.armed is False
@@ -1274,6 +1379,7 @@ def test_arm_refuses_without_independent_pass_at_exact_head() -> None:
 
 
 def test_arm_proceeds_with_independent_pass_at_head() -> None:
+    """test arm proceeds with independent pass at head."""
     body = _INDEP_REVIEW.format(verdict="PASS", sha=_REVIEW_HEAD)
     fake = IndependentReviewGh(
         labels=["agent-model:claude"],
@@ -1290,6 +1396,7 @@ def test_arm_proceeds_with_independent_pass_at_head() -> None:
 
 
 def test_fix_needed_at_head_blocks_arming() -> None:
+    """test fix needed at head blocks arming."""
     body = _INDEP_REVIEW.format(verdict="FIX-NEEDED", sha=_REVIEW_HEAD)
     fake = IndependentReviewGh(
         labels=["agent-model:claude"],
@@ -1307,6 +1414,7 @@ def test_fix_needed_at_head_blocks_arming() -> None:
 
 
 def test_disarm_if_held_on_fix_needed_verdict() -> None:
+    """test disarm if held on fix needed verdict."""
     body = _INDEP_REVIEW.format(verdict="FIX-NEEDED", sha=_REVIEW_HEAD)
     fake = IndependentReviewGh(
         labels=["agent-model:claude"],
@@ -1326,6 +1434,7 @@ def test_disarm_if_held_on_fix_needed_verdict() -> None:
 def test_untrusted_commenter_pass_does_not_clear_hold(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """test untrusted commenter pass does not clear hold."""
     body = _INDEP_REVIEW.format(verdict="PASS", sha=_REVIEW_HEAD)
     fake = IndependentReviewGh(
         labels=["agent-model:claude"],
@@ -1344,7 +1453,10 @@ def test_untrusted_commenter_pass_does_not_clear_hold(
 def test_independent_review_module_import_error_fails_closed(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """test independent review module import error fails closed."""
+
     def _broken() -> object:
+        """broken."""
         raise ImportError("independent_exact_head_review missing")
 
     monkeypatch.setattr(
@@ -1376,6 +1488,7 @@ def test_spoofed_commit_trailer_does_not_clear_same_model_pass() -> None:
 
 
 def test_fail_closed_gate_holds_pr_without_exempt_or_pass() -> None:
+    """test fail closed gate holds pr without exempt or pass."""
     verdict = automerge_guard.evaluate_hold(
         "o/r",
         1,
@@ -1386,6 +1499,7 @@ def test_fail_closed_gate_holds_pr_without_exempt_or_pass() -> None:
 
 
 def test_quoted_fix_needed_in_reply_does_not_disarm() -> None:
+    """test quoted fix needed in reply does not disarm."""
     body = (
         "Independent Exact-Head Acceptance Review (d-sorgcodexagent / `codex`)\n"
         "Reply: earlier `FIX-NEEDED @"

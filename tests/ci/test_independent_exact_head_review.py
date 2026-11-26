@@ -35,10 +35,12 @@ def _comment(
     created_at: str = "2026-11-22T18:00:00Z",
     login: str = "d-sorgcodexagent[bot]",
 ) -> dict[str, str]:
+    """comment."""
     return {"body": body, "created_at": created_at, "user": {"login": login}}
 
 
 def test_pass_at_exact_head_clears_hold() -> None:
+    """test pass at exact head clears hold."""
     reviews = mod.parse_issue_comments(
         [_comment(_REVIEW.format(verdict="PASS", sha=HEAD))]
     )
@@ -52,6 +54,7 @@ def test_pass_at_exact_head_clears_hold() -> None:
 
 
 def test_fix_needed_at_exact_head_holds() -> None:
+    """test fix needed at exact head holds."""
     reviews = mod.parse_issue_comments(
         [_comment(_REVIEW.format(verdict="FIX-NEEDED", sha=HEAD))]
     )
@@ -67,6 +70,7 @@ def test_fix_needed_at_exact_head_holds() -> None:
 
 
 def test_arming_refused_without_pass_at_exact_head() -> None:
+    """test arming refused without pass at exact head."""
     reasons = mod.independent_review_hold_reason(
         [],
         head_sha=HEAD,
@@ -78,6 +82,7 @@ def test_arming_refused_without_pass_at_exact_head() -> None:
 
 
 def test_quoted_fix_needed_in_reply_does_not_trigger() -> None:
+    """test quoted fix needed in reply does not trigger."""
     body = (
         "Independent Exact-Head Acceptance Review (d-sorgcodexagent / `codex`)\n"
         "Follow-up: the prior note said `FIX-NEEDED @"
@@ -91,6 +96,7 @@ def test_quoted_fix_needed_in_reply_does_not_trigger() -> None:
 
 
 def test_untrusted_commenter_pass_is_ignored() -> None:
+    """test untrusted commenter pass is ignored."""
     body = _REVIEW.format(verdict="PASS", sha=HEAD)
     reviews = mod.parse_issue_comments([_comment(body, login="evil-contributor")])
     assert reviews == []
@@ -104,6 +110,7 @@ def test_untrusted_commenter_pass_is_ignored() -> None:
 
 
 def test_gate_fail_closed_without_agent_labels() -> None:
+    """test gate fail closed without agent labels."""
     assert mod.independent_review_gate_active([], author_model="", labels=[]) is True
     reasons = mod.independent_review_hold_reason(
         [],
@@ -116,6 +123,7 @@ def test_gate_fail_closed_without_agent_labels() -> None:
 
 
 def test_exempt_label_disables_gate() -> None:
+    """test exempt label disables gate."""
     assert (
         mod.independent_review_gate_active(
             [],
@@ -134,6 +142,7 @@ def test_exempt_label_disables_gate() -> None:
 
 
 def test_stale_head_fix_needed_does_not_hold_current_head() -> None:
+    """test stale head fix needed does not hold current head."""
     old = "a" * 40
     reviews = mod.parse_issue_comments(
         [_comment(_REVIEW.format(verdict="FIX-NEEDED", sha=old))]
