@@ -14,7 +14,6 @@ class PreviewSettingsProvider(Protocol):
 
     def settings(self) -> PreviewSettings:
         """Return the preview settings."""
-        ...
 
 
 @dataclass(frozen=True)
