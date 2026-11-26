@@ -54,6 +54,50 @@ def test_audit_engine_conformance_qualified() -> None:
     assert len(res.failure_reasons) == 0
 
 
+def test_advertised_and_unsupported_engines_are_disjoint() -> None:
+    """Advertised engines must not also be listed as unsupported (#15764).
+
+    Preconditions: ``generate_matrix_data`` accepts an empty ledger.
+    Postcondition: ``set(advertised_engines) & set(unsupported_engines)``
+    is empty. README Engine Support keeps MuJoCo supported and Drake and
+    Pinocchio extended, and those engines' profile tiers match
+    ``ENGINE_TIERS``. A missing qualification receipt stays on the profile
+    and does not create a second membership.
+    """
+    from scripts.generate_engine_matrix import generate_matrix_data
+    from src.engines.tiers import ENGINE_TIERS
+
+    matrix = generate_matrix_data(ledger_rows=[])
+    advertised = set(matrix["advertised_engines"])
+    unsupported = set(matrix["unsupported_engines"])
+    overlap = advertised & unsupported
+    assert overlap == set(), (
+        "engines listed as both advertised and unsupported: "
+        + ", ".join(sorted(overlap))
+    )
+
+    # README.md Engine Support: Supported = MuJoCo; Extended = Drake, Pinocchio.
+    readme_support = {"mujoco", "drake", "pinocchio"}
+    missing_from_advertised = readme_support - advertised
+    assert missing_from_advertised == set(), (
+        "README support engines missing from advertised_engines: "
+        + ", ".join(sorted(missing_from_advertised))
+    )
+    readme_marked_unsupported = readme_support & unsupported
+    assert readme_marked_unsupported == set(), (
+        "README support engines listed as unsupported: "
+        + ", ".join(sorted(readme_marked_unsupported))
+    )
+
+    for name in sorted(advertised):
+        if name not in ENGINE_TIERS:
+            continue
+        profile = matrix["profiles"][name]
+        assert profile["tier"] == ENGINE_TIERS[name], (
+            f"{name} tier {profile['tier']!r} != ENGINE_TIERS {ENGINE_TIERS[name]!r}"
+        )
+
+
 def test_matrix_generation_from_fixture_ledger(tmp_path: Path) -> None:
     """Generate matrix from ledger data where one engine passes and others have no receipts."""
     from scripts.generate_engine_matrix import generate_matrix_data
