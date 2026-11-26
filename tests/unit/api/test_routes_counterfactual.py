@@ -46,7 +46,9 @@ class StubEngine:
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         return np.full(N_JOINTS, 1.0)
 
-    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
+    def compute_control_acceleration_at_state(
+        self, q: np.ndarray, tau: np.ndarray
+    ) -> np.ndarray:
         return np.full(N_JOINTS, 2.0)
 
     def compute_drift_acceleration(self) -> np.ndarray:
@@ -59,7 +61,7 @@ class StubEngine:
 class PartialEngine(StubEngine):
     """Engine stub missing the ZVCF method (gated out conservatively)."""
 
-    compute_zvcf = None  # type: ignore[assignment]
+    compute_control_acceleration_at_state = None  # type: ignore[assignment]
 
 
 class StubRecorder:
