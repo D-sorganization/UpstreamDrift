@@ -78,11 +78,11 @@ def test_profiles_have_distinct_face_and_clothing_treatments():
     )
 
 
-def test_sam_snead_profile_uses_supported_current_appearance_style():
-    """Keep the core profile valid until final straw-hat delivery #15836."""
+def test_sam_snead_profile_uses_the_shared_straw_hat_contract():
+    """Use the separately shared straw-hat style for Snead's silhouette."""
     head = player_appearance("sam_snead").head
-    assert head.cap_style == "none"
-    assert head.cap_material == "cap_white"
+    assert head.cap_style == "straw_hat"
+    assert head.cap_material == "hat_straw"
 
 
 def test_seve_profile_keeps_the_reviewed_dark_side_part_visible():

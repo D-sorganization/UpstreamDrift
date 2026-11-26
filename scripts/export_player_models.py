@@ -266,12 +266,34 @@ def _render(
     }
 
 
+def _selected_players(
+    requested: tuple[str, ...], catalog: tuple[str, ...]
+) -> tuple[str, ...]:
+    """Expand catalog selections in order, preserving the legacy two-player alias."""
+    if not requested:
+        raise ValueError("Select at least one player")
+    selected: dict[str, None] = {}
+    for item in requested:
+        expanded = catalog if item == "all" else PLAYERS if item == "both" else (item,)
+        for player in expanded:
+            if player not in catalog:
+                raise ValueError(f"Unknown player {player!r}")
+            selected[player] = None
+    return tuple(selected)
+
+
 def main(argv: list[str] | None = None) -> int:
     """Export or render selected player models with optional validated review poses."""
-    from src.shared.python.model_appearance.player_models import export_player
+    from src.shared.python.model_appearance.player_models import (
+        export_player,
+        player_ids,
+    )
 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--player", choices=(*PLAYERS, "both"), default="both")
+    catalog = player_ids()
+    parser.add_argument(
+        "--player", nargs="+", choices=(*catalog, "both", "all"), default=("both",)
+    )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
         "--base-spec", type=Path, help="Export appearance on a base physics spec"
@@ -288,7 +310,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.render_existing and args.base_spec:
         parser.error("--base-spec cannot be used with --render-existing")
     args.output.mkdir(parents=True, exist_ok=True)
-    selected = PLAYERS if args.player == "both" else (args.player,)
+    selected = _selected_players(tuple(args.player), catalog)
     items: list[dict[str, Any]] = []
     for player in selected:
         folder = args.output / player

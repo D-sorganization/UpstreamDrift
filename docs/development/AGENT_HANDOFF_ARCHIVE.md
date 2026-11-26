@@ -1511,3 +1511,7 @@ The linked records preserve peer-reported status and provenance; this index does
 ## Completed Player Reference Footage (#15817)
 
 - Player reference footage #15817: source receipt and reproduction commands are linked from `docs/development/historical-capture-procedure.md`; USGA full-source PTS alignment remains unverified, physical clock unknown, and no training was performed.
+
+## Completed Player Skin Foundation (#15815)
+
+- Player skins #15814: visual head morphology #15815; Tiger/Hogan dimension and appearance bundles #15816; calculation reference `docs/development/player-skin-morphology.tex`. Likeness and historical motion remain unqualified.

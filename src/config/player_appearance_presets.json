@@ -182,12 +182,12 @@
         {"url": "https://www.youtube.com/watch?v=sS39129T7P0", "values": "Vertical Golf 'Sam Snead's Golf Swing in slow motion'; reviewed source frame.", "era": "Published 2025; original footage date and event are not established; uploader is not verified."},
         {"url": "https://www.youtube.com/watch?v=Hhrd0y-zhRI", "values": "British Pathé newsreel of Snead winning the PGA Championship", "era": "1949 final; film description notes unused footage and possible date/location uncertainty."}
       ],
-      "limitations": ["Selected PGA Tour dimensions are exact conversions of 5 ft 11 in and 190 lb; the Hall of Fame profile lists 5 ft 10 in and 185 lb.", "The reviewed 1949 newsreel is monochrome and notes unused footage with date/location uncertainty; ivory shirt and brown trousers are illustrative. This current appearance-v1 entry leaves the hat off; final delivery #15836 will apply the shared straw_hat/hat_straw style after #15838 lands."],
+      "limitations": ["Selected PGA Tour dimensions are exact conversions of 5 ft 11 in and 190 lb; the Hall of Fame profile lists 5 ft 10 in and 185 lb.", "The reviewed 1949 newsreel is monochrome and notes unused footage with date/location uncertainty; ivory shirt and brown trousers are illustrative. A straw hat provides a period-inspired silhouette, not exact frame reproduction; face proportions are not measured."],
       "appearance": {
         "schema_version": "appearance-v1", "name": "sam_snead_stylized", "skin_tone": "skin_2", "clothing": "golf_polo_trousers", "club_finish": "satin_steel",
         "materials": {"polo_white": {"base_color": [0.86, 0.82, 0.69, 1.0]}, "trousers_charcoal": {"base_color": [0.32, 0.24, 0.17, 1.0]}, "shoe_leather": {"base_color": [0.38, 0.30, 0.22, 1.0]}},
         "segments": [], "environment": {"ground_material": "turf", "sky_top": [0.3, 0.5, 0.78], "sky_bottom": [0.88, 0.92, 0.96], "lighting": "studio"},
-        "head": {"enabled": true, "headwear": "hair", "headwear_material": "hair_grey", "model": "cc0_mesh", "hair_style": "short_crop", "hair_part": "left", "eye_color": "blue_grey", "cap_style": "none", "cap_material": "cap_white", "cap_brim": 0.3, "sizing": "stature", "height_over_stature": 0.132, "morph": {"width": 0.08, "jaw": 0.16, "nose": -0.11, "mouth": 0.03, "eyes": -0.10}},
+        "head": {"enabled": true, "headwear": "hair", "headwear_material": "hair_grey", "model": "cc0_mesh", "hair_style": "short_crop", "hair_part": "left", "eye_color": "blue_grey", "cap_style": "straw_hat", "cap_material": "hat_straw", "cap_brim": 0.3, "sizing": "stature", "height_over_stature": 0.132, "morph": {"width": 0.08, "jaw": 0.16, "nose": -0.11, "mouth": 0.03, "eyes": -0.10}},
         "body_model": "ellipsoid", "ball": {"enabled": false, "source": "address_geometry"}, "glove": "none", "handedness": "right", "foot": {"model": "procedural"}
       }
     },
