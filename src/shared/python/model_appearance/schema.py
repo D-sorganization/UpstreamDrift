@@ -140,7 +140,7 @@ HEAD_MODELS = ("parametric", "cc0_mesh")
 HAIR_STYLES = ("short_crop", "dome")
 HAIR_PARTS = ("left", "right", "none")
 EYE_COLORS = ("blue_grey", "hazel", "brown")
-CAP_STYLES = ("none", "baseball_cap", "flat_cap")
+CAP_STYLES = ("none", "baseball_cap", "flat_cap", "straw_hat")
 CAP_BRIM_RANGE = (0.10, 0.80)  # brim length, head lengths
 DEFAULT_CAP_BRIM = 0.30
 #: ``stature``: menton to vertex is ``height_over_stature`` of the subject's
