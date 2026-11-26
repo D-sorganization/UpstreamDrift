@@ -14,6 +14,7 @@ Image8 = NDArray[np.uint8]
 
 
 def write_gif(path: Path, frames: tuple[Image8, ...], fps: int) -> None:
+    """write gif."""
     if len(frames) < 1:
         raise ValueError("frames must not be empty")
     import imageio.v2 as imageio
@@ -23,6 +24,7 @@ def write_gif(path: Path, frames: tuple[Image8, ...], fps: int) -> None:
 
 
 def write_mp4(path: Path, frames: tuple[Image8, ...], fps: int) -> None:
+    """write mp4."""
     if len(frames) < 1:
         raise ValueError("frames must not be empty")
     writer = imageio_writer(path, fps=fps)
@@ -34,6 +36,7 @@ def write_mp4(path: Path, frames: tuple[Image8, ...], fps: int) -> None:
 
 
 def write_still_strip(path: Path, frames: tuple[Image8, ...], cols: int = 4) -> None:
+    """write still strip."""
     if len(frames) < 1:
         raise ValueError("frames must not be empty")
     import imageio.v2 as imageio

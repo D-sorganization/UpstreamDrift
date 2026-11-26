@@ -20,6 +20,7 @@ from src.tools.grip_build_preview.stage_timeline import build_stage_keyframes
 
 
 def frame_content_hash(frame: np.ndarray) -> str:
+    """frame content hash."""
     if not isinstance(frame, np.ndarray) or frame.dtype != np.uint8:
         raise TypeError("frame must be a uint8 ndarray")
     return hashlib.sha256(frame.tobytes()).hexdigest()
@@ -30,6 +31,7 @@ def generate_preview_rgb_frames(
     result: GripBuildResult,
     settings: PreviewSettings | PreviewSettingsProvider | None = None,
 ) -> tuple[np.ndarray, ...]:
+    """generate preview rgb frames."""
     if not isinstance(spec, GripSpec):
         raise TypeError("spec must be GripSpec")
     if not isinstance(result, GripBuildResult):

@@ -22,12 +22,14 @@ class PreviewFramePlan:
 
 
 def _lerp(a: float, b: float, t: float) -> float:
+    """lerp."""
     return a + (b - a) * t
 
 
 def _interpolate_angles(
     start: dict[str, dict[str, float]], end: dict[str, dict[str, float]], t: float
 ) -> dict[str, dict[str, float]]:
+    """interpolate angles."""
     fingers = sorted(set(start) | set(end))
     out: dict[str, dict[str, float]] = {}
     for finger in fingers:
@@ -43,6 +45,7 @@ def sample_preview_frames(
     keyframes: tuple[StageKeyframe, ...],
     settings: PreviewSettings,
 ) -> tuple[PreviewFramePlan, ...]:
+    """sample preview frames."""
     if len(keyframes) < 1:
         raise ValueError("keyframes must not be empty")
     steps = settings.frames_per_segment

@@ -25,11 +25,13 @@ from src.tools.grip_build_preview.stage_timeline import build_stage_keyframes
 
 
 def _neutral(hand_length_m: float = 0.2) -> GripSpec:
+    """neutral."""
     return replace(GripSpec.neutral(), hand_size=HandSize(length_m=hand_length_m))
 
 
 @pytest.mark.unit
 def test_preview_frames_follow_stage_order() -> None:
+    """test preview frames follow stage order."""
     spec = _neutral()
     built = build_lead_fingers(spec)
     keyframes = build_stage_keyframes(spec, built)
@@ -47,6 +49,7 @@ def test_preview_frames_follow_stage_order() -> None:
 
 @pytest.mark.unit
 def test_preview_final_frame_equals_built_pose() -> None:
+    """test preview final frame equals built pose."""
     spec = _neutral()
     built = build_lead_fingers(spec)
     keyframes = build_stage_keyframes(spec, built)
@@ -59,6 +62,7 @@ def test_preview_final_frame_equals_built_pose() -> None:
 
 @pytest.mark.unit
 def test_preview_is_deterministic_headless() -> None:
+    """test preview is deterministic headless."""
     spec = _neutral()
     built = build_lead_fingers(spec)
     frames_a = generate_preview_rgb_frames(spec, built, DEFAULT_PREVIEW_SETTINGS)
@@ -73,6 +77,7 @@ def test_preview_is_deterministic_headless() -> None:
 
 @pytest.mark.unit
 def test_preview_marks_gap_and_infeasible_status() -> None:
+    """test preview marks gap and infeasible status."""
     spec = _neutral(hand_length_m=0.14)
     built = build_lead_fingers(spec)
     keyframes = build_stage_keyframes(spec, built)
@@ -96,6 +101,7 @@ def test_preview_marks_gap_and_infeasible_status() -> None:
 
 @pytest.mark.unit
 def test_replay_matches_builder_per_stage_poses() -> None:
+    """test replay matches builder per stage poses."""
     spec = _neutral()
     built = build_lead_fingers(spec)
     keyframes = build_stage_keyframes(spec, built)

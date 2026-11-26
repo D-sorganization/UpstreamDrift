@@ -15,6 +15,7 @@ from src.tools.native_viewer_export.compositor import draw_label
 
 
 def _apply_plan_to_chain(chain: HandChain, plan: PreviewFramePlan) -> None:
+    """apply plan to chain."""
     for finger, joints in plan.joint_angles_rad.items():
         if finger not in chain.joint_angles:
             continue
@@ -35,6 +36,7 @@ def _world_to_pixel(
     z_min: float,
     z_max: float,
 ) -> tuple[int, int]:
+    """world to pixel."""
     width = settings.width_px
     height = settings.height_px
     margin = settings.margin_m
@@ -53,6 +55,7 @@ def render_preview_frame(
     *,
     geometry: GripGeometry | None = None,
 ) -> np.ndarray:
+    """render preview frame."""
     if not isinstance(plan, PreviewFramePlan):
         raise TypeError("plan must be PreviewFramePlan")
     geometry = geometry if geometry is not None else get_grip_preset()
@@ -73,6 +76,7 @@ def render_preview_frame(
     img[:, :] = np.array(settings.background_rgb, dtype=np.uint8)
 
     def draw_capsule(p0: np.ndarray, p1: np.ndarray, rgb: tuple[int, int, int]) -> None:
+        """draw capsule."""
         x0, y0 = _world_to_pixel(
             float(p0[1]),
             float(p0[2]),

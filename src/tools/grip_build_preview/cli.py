@@ -15,6 +15,7 @@ from src.tools.grip_build_preview.settings import DEFAULT_PREVIEW_SETTINGS
 
 
 def _load_spec(path: Path) -> GripSpec:
+    """load spec."""
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError("spec JSON must be an object")
@@ -22,6 +23,7 @@ def _load_spec(path: Path) -> GripSpec:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """build parser."""
     parser = argparse.ArgumentParser(
         description="Replay HRG grip build stages (GB-4 preview, lead fingers on GB-2)."
     )
@@ -44,6 +46,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """main."""
     args = build_parser().parse_args(argv)
     spec = _load_spec(args.spec)
     built = build_lead_fingers(spec)

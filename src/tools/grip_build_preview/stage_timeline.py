@@ -29,6 +29,7 @@ class StageKeyframe:
 def hand_chain_for_spec(
     spec: GripSpec, *, geometry: GripGeometry | None = None
 ) -> HandChain:
+    """hand chain for spec."""
     if not isinstance(spec, GripSpec):
         raise TypeError(f"spec must be GripSpec, got {type(spec).__name__}")
     geometry = geometry if geometry is not None else get_grip_preset()
@@ -48,6 +49,7 @@ def hand_chain_for_spec(
 
 
 def _snapshot_angles(chain: HandChain) -> dict[str, dict[str, float]]:
+    """snapshot angles."""
     return {
         finger: {
             "mcp": chain.joint_angles[finger].mcp_rad,
@@ -64,6 +66,7 @@ def build_stage_keyframes(
     *,
     geometry: GripGeometry | None = None,
 ) -> tuple[StageKeyframe, ...]:
+    """build stage keyframes."""
     if not isinstance(result, GripBuildResult):
         raise TypeError("result must be GripBuildResult")
     chain = hand_chain_for_spec(spec, geometry=geometry)

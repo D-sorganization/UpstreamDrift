@@ -12,7 +12,9 @@ from src.shared.python.grip_build.receipt import BuildStatus
 class PreviewSettingsProvider(Protocol):
     """Supplies colours and timing; swap for themes or CI fixtures."""
 
-    def settings(self) -> PreviewSettings: ...
+    def settings(self) -> PreviewSettings:
+        """Return the preview settings."""
+        ...
 
 
 @dataclass(frozen=True)
@@ -41,6 +43,7 @@ class PreviewSettings:
     status_colors: StatusColors = StatusColors()
 
     def __post_init__(self) -> None:
+        """post init."""
         if self.width_px < 64 or self.height_px < 64:
             raise ValueError("width_px and height_px must be >= 64")
         if self.frames_per_segment < 1:
@@ -49,6 +52,7 @@ class PreviewSettings:
             raise ValueError("dpi must be >= 50")
 
     def color_for_status(self, status: BuildStatus) -> tuple[int, int, int]:
+        """color for status."""
         mapping = {
             BuildStatus.OK: self.status_colors.ok,
             BuildStatus.GAP: self.status_colors.gap,
@@ -64,12 +68,14 @@ DEFAULT_PREVIEW_SETTINGS: Final[PreviewSettings] = PreviewSettings()
 @dataclass(frozen=True)
 class _DefaultPreviewProvider:
     def settings(self) -> PreviewSettings:
+        """settings."""
         return DEFAULT_PREVIEW_SETTINGS
 
 
 def get_preview_settings(
     provider: PreviewSettingsProvider | None = None,
 ) -> PreviewSettings:
+    """get preview settings."""
     if provider is None:
         return DEFAULT_PREVIEW_SETTINGS
     if not isinstance(provider, PreviewSettingsProvider):
