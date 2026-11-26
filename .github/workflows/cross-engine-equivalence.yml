@@ -5,8 +5,8 @@
 # grip RMSE among installed engines, requires_* skips), plus JaxSim/Pinocchio
 # dynamics parity, flex-shaft, JaxSim forward-sim, and impact-parameter adapter
 # checks. This is not the unused actuated forward-sim harness formerly
-# documented in tests/cross_engine/test_cross_engine_equivalence.py (retired in
-# #15245; helpers live in test_cross_engine_equivalence_helpers.py).
+# The retired forward-sim harness module was removed in #15245; helper smoke
+# tests live in tests/cross_engine/test_cross_engine_equivalence_helpers.py.
 #
 # Claim-to-CI mapping: docs/testing/integration-testing-strategy.md.
 #
