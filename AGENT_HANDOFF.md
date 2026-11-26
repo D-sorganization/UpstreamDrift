@@ -137,3 +137,5 @@ Motion matching and tour baselines:
 - Tour baselines (exact-capture matching, fail-closed qualification): #10829, #10830, #10831, #10799, #10800, #10844, #10849; TB-12 #10597 merged.
 - Hip-calibrated receipt provenance #10271; GolfSwingVisualizer MATLAB consolidation #9225; docs-consistency cross-repo paths #10743.
 - Tiger 2000 and Ben Hogan baselines: see the archive section of that name.
+
+- #15821: Neutral shoe-to-head stature calibration uses bounded trunk scaling; see `docs/development/player-stature.tex`. New anatomy requires motion refitting.
