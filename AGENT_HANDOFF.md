@@ -51,7 +51,7 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Active Epics and Slices (One Line Each; Detail in the Archive)
 
-- Player skins #15814: visual head morphology #15815; Tiger/Hogan dimension and appearance bundles #15816; calculation reference `docs/development/player-skin-morphology.tex`. Likeness and historical motion remain unqualified.
+- Player skins #15814: visual head morphology #15815; Tiger/Hogan dimension and appearance bundles #15816 (`player_models.export_player`, including skin-only base_spec); calculation reference `docs/development/player-skin-morphology.tex`. Likeness and historical motion remain unqualified.
 
 - Simulation Backends GUI E2E #15703: `codex-ct-1/15703-gui-e2e` uses MuJoCo CPU-only mode on Windows and handles optional backend import runtime failures; the focused four-worker suite passes.
 - Output I/O #15189: `fix/async-save-io-errors` reports filesystem failures through async/background save callbacks and default logging; regression tests preserve the original future exception. Review through Barb's pipeline.
