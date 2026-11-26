@@ -15,6 +15,17 @@
   "time_label": "Time From Impact (ms)",
   "bend_label": "Tip Bend (mm)",
   "missing_text": "n/a",
+  "bend_rate": {
+    "_comment": "Single-mode bend-rate check line (#15150 C18, club_fitting/bend_rate_check.py). Texts take {rate} and {limit} in m/s and {ratio}; positions are figure fractions.",
+    "clear_text": "Bend Rate Clear: Peak {rate:.2f} m/s Within the Single-Mode Limit {limit:.2f} m/s (Ratio {ratio:.2f})",
+    "flagged_text": "Bend Rate Flagged: Peak {rate:.2f} m/s Exceeds the Single-Mode Limit {limit:.2f} m/s (Ratio {ratio:.2f})",
+    "flagged_note": "The peak bend includes rotation-driven (centrifugal) loading beyond one free mode at the rated frequency; check the loads before quoting it.",
+    "missing_text": "Bend Rate: Not Checked (No Trace or Frequency)",
+    "clear_color": "#2ca02c",
+    "flagged_color": "#d62728",
+    "line_xy": [0.5, 0.06],
+    "note_xy": [0.5, 0.03]
+  },
   "metrics": [
     { "key": "flex_cpm", "label": "Frequency (cpm)", "format": "{:.0f}" },
     { "key": "lead_at_impact_mm", "label": "Lead at Impact (mm)", "format": "{:.1f}" },

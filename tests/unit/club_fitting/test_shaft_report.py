@@ -19,8 +19,11 @@ from src.shared.python.club_fitting.grip_driven_shaft import (  # noqa: E402
 from src.shared.python.club_fitting.shaft_report import (  # noqa: E402
     SETTINGS_PATH,
     SweepResult,
+    bend_rate_checks,
+    bend_rate_lines,
     load_report_settings,
     load_sweep_result,
+    render_page,
     summary_rows,
     write_report,
 )
@@ -125,3 +128,75 @@ def test_sweep_cli_has_a_report_option() -> None:
 
     args = build_parser().parse_args(["--bundle", "b", "--out", "o", "--report"])
     assert args.report is True
+
+
+# --- Bend-rate check on the report (#15150 C18) -----------------------------
+RATE_TIMES = np.linspace(-0.2, 0.0, 401)
+RATE_CPM = 258.0
+
+
+def _rate_trace(cycles_per_mode: float) -> BendTrace:
+    """Circular bend at ``cycles_per_mode`` times the rated frequency (mm)."""
+    w = 2.0 * np.pi * cycles_per_mode * RATE_CPM / 60.0
+    return BendTrace(
+        RATE_TIMES, 50.0 * np.cos(w * RATE_TIMES), 50.0 * np.sin(w * RATE_TIMES)
+    )
+
+
+@pytest.fixture
+def rate_result() -> SweepResult:
+    """Clear: one free mode at the rated frequency; Flagged: three times faster."""
+    rows = tuple({"flex": f, "flex_cpm": RATE_CPM} for f in ("Clear", "Flagged"))
+    return SweepResult(rows, {"Clear": _rate_trace(0.5), "Flagged": _rate_trace(3.0)})
+
+
+def test_bend_rate_checks_flag_only_the_fast_trace(rate_result) -> None:
+    checks = bend_rate_checks(rate_result)
+    assert not checks["Clear"].flagged and checks["Flagged"].flagged
+    assert checks["Flagged"].ratio == pytest.approx(3.0, rel=1e-2)
+
+
+def test_bend_rate_line_shows_rate_limit_ratio_and_the_note(rate_result) -> None:
+    s = load_report_settings()
+    checks = bend_rate_checks(rate_result)
+    clear, clear_color = bend_rate_lines(checks["Clear"], s.bend_rate)
+    flagged, flagged_color = bend_rate_lines(checks["Flagged"], s.bend_rate)
+    assert clear_color == s.bend_rate.clear_color
+    assert flagged_color == s.bend_rate.flagged_color
+    assert len(clear) == 1 and len(flagged) == 2
+    assert flagged[1] == s.bend_rate.flagged_note and "centrifugal" in flagged[1]
+    c = checks["Flagged"]
+    for value in (c.peak_rate_mps, c.single_mode_bound_mps, c.ratio):
+        assert f"{value:.2f}" in flagged[0]
+    assert bend_rate_lines(None, s.bend_rate) == ([s.bend_rate.missing_text], None)
+
+
+def test_report_renders_clear_and_flagged_pages(rate_result, tmp_path) -> None:
+    s = load_report_settings()
+    paths = write_report(rate_result, tmp_path / "rep", s)
+    assert all(p.stat().st_size > 0 for p in paths if p.suffix == ".png")
+    checks = bend_rate_checks(rate_result)
+    for flex in ("Clear", "Flagged"):
+        record = summary_rows(rate_result, s)[0] | {"flex": flex}
+        fig = render_page(record, rate_result.traces[flex], s, checks[flex])
+        texts = [t.get_text() for t in fig.texts]
+        assert bend_rate_lines(checks[flex], s.bend_rate)[0][0] in texts
+        assert (s.bend_rate.flagged_note in texts) == (flex == "Flagged")
+    md = (tmp_path / "rep" / f"{s.page_stem}.md").read_text()
+    assert md.count(s.bend_rate.flagged_note) == 1
+    table = json.loads((tmp_path / "rep" / f"{s.page_stem}.json").read_text())
+    assert table["bend_rate"]["Flagged"]["flagged"] is True
+    assert table["bend_rate"]["Clear"]["flagged"] is False
+
+
+def test_no_check_without_a_frequency_or_a_bend(rate_result) -> None:
+    rows = ({"flex": "Clear"}, {"flex": "Flagged", "flex_cpm": RATE_CPM})
+    still = BendTrace(RATE_TIMES, np.zeros(401), np.zeros(401))
+    checks = bend_rate_checks(SweepResult(rows, {"Flagged": still}))
+    assert checks == {"Clear": None, "Flagged": None}
+
+
+def test_bend_rate_text_contracts() -> None:
+    s = load_report_settings()
+    with pytest.raises(ValueError, match="clear_text"):
+        dataclasses.replace(s.bend_rate, clear_text="{unknown}")
