@@ -21,6 +21,10 @@ approximate and comes from a secondary encyclopedia. Outfits, skin/hair swatches
 and face shapes are stylized interpretations; no precise likeness, historical
 motion, body scan or physical qualification is claimed.
 
+Sam Snead's current appearance-v1 entry leaves headwear off to remain valid
+against main. Final delivery issue #15836 applies the shared `straw_hat` /
+`hat_straw` visual after implementation #15838 lands.
+
 Focused unit coverage validates all five entries, their source catalog,
 appearance documents, dimension inputs and public ID ordering. Native player
 dimension verification is handled separately from this lightweight contract
