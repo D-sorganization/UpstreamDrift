@@ -176,3 +176,63 @@ def test_settings_file_loads_and_rejects_missing_fields(tmp_path) -> None:
     bad.write_text(json.dumps({"step_s": 0.01}), encoding="utf-8")
     with pytest.raises(ValueError, match="miss"):
         olh.load_settings(bad)
+
+
+# --- diverged replays count as failed candidates ------------------------------
+
+
+def _diverges_beyond(lead_limit_s: float):
+    """Exact replay that diverges for every lead past ``lead_limit_s``."""
+
+    def replay(start_s: float) -> olh.ImpactDelivery:
+        if IMPACT_S - start_s > lead_limit_s:
+            raise olh.ReplayDiverged(f"nonfinite state from {start_s} s")
+        return REFERENCE
+
+    return replay
+
+
+def test_diverged_replay_is_a_failed_candidate_with_a_reason() -> None:
+    result = olh.search_horizon(
+        _diverges_beyond(0.25),
+        REFERENCE,
+        impact_s=IMPACT_S,
+        earliest_s=0.0,
+        settings=SETTINGS,
+    )
+    assert result.status == "accepted"
+    assert result.horizon_s == pytest.approx(0.25)
+    assert len(result.candidates) == 8
+    diverged = result.candidates[4:]
+    assert not any(c.passed for c in diverged)
+    assert all("nonfinite state" in (c.failure or "") for c in diverged)
+    assert all(c.face_error_deg is None for c in diverged)
+    assert all(c.failure is None for c in result.candidates[:4])
+    summary = result.summary()
+    json.dumps(summary, allow_nan=False)
+    assert summary["diverged_leads_s"] == [c.lead_s for c in diverged]
+
+
+def test_divergence_after_a_failure_does_not_break_the_contiguity_check() -> None:
+    def replay(start_s: float) -> olh.ImpactDelivery:
+        lead = IMPACT_S - start_s
+        if lead > 0.375:
+            raise olh.ReplayDiverged("integrator error")
+        bump = 0.0 if lead <= 0.125 else 1.0
+        return replace(REFERENCE, path_deg=REFERENCE.path_deg + bump)
+
+    result = olh.search_horizon(
+        replay, REFERENCE, impact_s=IMPACT_S, earliest_s=0.0, settings=SETTINGS
+    )
+    assert result.status == "accepted"
+    assert result.horizon_s == pytest.approx(0.125)
+
+
+def test_other_replay_errors_still_propagate() -> None:
+    def replay(start_s: float) -> olh.ImpactDelivery:
+        raise ValueError("off the step grid")
+
+    with pytest.raises(ValueError, match="grid"):
+        olh.search_horizon(
+            replay, REFERENCE, impact_s=IMPACT_S, earliest_s=0.0, settings=SETTINGS
+        )
