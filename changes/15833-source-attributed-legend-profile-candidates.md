@@ -1,3 +1,11 @@
+---
+issue: 15833
+summary: "Add source-attributed appearance candidates for five golf legends"
+dl_state: "in_review"
+next_step: "Merge the PR; final delivery #15836 adds Snead's straw_hat after #15838 lands."
+branch: "pr/15833-legends-profiles"
+---
+
 # Source-attributed legend appearance candidates
 
 Adds catalog profiles for Seve Ballesteros, Jack Nicklaus, Bobby Jones, Sam
