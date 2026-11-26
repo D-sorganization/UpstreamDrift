@@ -42,12 +42,14 @@ _TOLERANCE_ATOL = 1e-12
 
 
 def _fail(message: str) -> NoReturn:
+    """Raise ``SolutionBundleError`` for ``message``."""
     from src.shared.python.optimization.solution_bundle import SolutionBundleError
 
     raise SolutionBundleError(message)
 
 
 def _finite_number(value: object) -> bool:
+    """Return whether ``value`` is a finite int or float, excluding bool."""
     return (
         isinstance(value, (int, float))
         and not isinstance(value, bool)
@@ -56,6 +58,7 @@ def _finite_number(value: object) -> bool:
 
 
 def _require_mapping(value: object, what: str, keys: frozenset[str]) -> dict[str, Any]:
+    """Return ``value`` when it is an object with exactly ``keys``."""
     if not isinstance(value, dict):
         _fail(f"{what} must be an object")
     extra = sorted(set(value) - keys)
@@ -68,6 +71,7 @@ def _require_mapping(value: object, what: str, keys: frozenset[str]) -> dict[str
 
 
 def _validate_controller(controller: object) -> None:
+    """Require a named controller with positive finite capacity."""
     body = _require_mapping(controller, "controller", _CONTROLLER_KEYS)
     for key in ("name", "feedback"):
         if not isinstance(body[key], str) or not body[key].strip():
@@ -78,6 +82,7 @@ def _validate_controller(controller: object) -> None:
 
 
 def _validate_interval(interval: object, time: np.ndarray) -> tuple[float, float]:
+    """Return an admitted interval that lies inside ``time``."""
     body = _require_mapping(interval, "interval", _INTERVAL_KEYS)
     start, end = body["t_start"], body["t_end"]
     if not _finite_number(start) or not _finite_number(end) or not start < end:
@@ -88,6 +93,7 @@ def _validate_interval(interval: object, time: np.ndarray) -> tuple[float, float
 
 
 def _validate_tolerances(tolerances: object) -> None:
+    """Require exactly the preregistered tolerance values."""
     body = _require_mapping(
         tolerances, "tolerances", frozenset(PREREGISTERED_TOLERANCES)
     )
@@ -102,6 +108,7 @@ def _validate_tolerances(tolerances: object) -> None:
 def _validate_flags(
     flags: np.ndarray, time: np.ndarray, start: float, end: float
 ) -> None:
+    """Require a boolean mask that is false outside the admitted interval."""
     if flags.dtype != np.dtype(bool) or flags.shape != (time.shape[0],):
         _fail("frame_valid must be a boolean mask with one flag per sample")
     outside = (time < start) | (time > end)
@@ -114,6 +121,7 @@ def _validate_flags(
 def _as_channel(
     arrays: dict[str, np.ndarray], name: str, n: int, joints: int
 ) -> np.ndarray:
+    """Return one finite torque channel with shape ``(n, joints)``."""
     if name not in arrays:
         _fail(f"admission is missing torque channel {name}")
     value = np.asarray(arrays[name])
