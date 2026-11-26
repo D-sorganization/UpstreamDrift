@@ -1,0 +1,130 @@
+{
+  "schema_version": "player-appearance-presets/1",
+  "players": {
+    "tiger_woods": {
+      "display_name": "Tiger Woods",
+      "stature_m": 1.8542,
+      "mass_kg": 83.91458845,
+      "sources": [
+        {
+          "url": "https://news.tigerwoods.com/about-tiger/",
+          "values": "6 ft 1 in; 185 lb",
+          "era": "Official biography page; capture-period applicability is unestablished."
+        },
+        {
+          "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/2005_pgatour.pdf",
+          "values": "Historical PGA Tour media-guide profile; 6 ft 2 in; 180 lb (alternate published values, not selected).",
+          "era": "2005 media guide; differs from the current official biography."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=bado2QdgD3c",
+          "values": "Official USGA 2000 U.S. Open final-round broadcast, including Tiger Woods range footage.",
+          "era": "2000 event; source catalog identifies the range clip, while detailed visual appearance review remains pending."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=t_J6Vik3Tss",
+          "values": "Video titled/attributed as Tiger Woods 2000 footage.",
+          "era": "Uploader-claimed 2000; event lineage is unverified."
+        }
+      ],
+      "limitations": [
+        "Stature and mass use the official biography values (6 ft 1 in, 185 lb), converted exactly; the page is not evidence of measurements during the 2000 footage. The historical media guide reports different values.",
+        "The red polo, near-black trousers, black cap, and dark shoes are an illustrative source-inspired palette, not a verified outfit from a particular frame.",
+        "Skin and hair swatches are visual approximations; this preset does not encode a measured face, body morphology, or capture-specific clothing."
+      ],
+      "appearance": {
+        "schema_version": "appearance-v1",
+        "name": "tiger_woods_stylized",
+        "skin_tone": "skin_5",
+        "clothing": "golf_polo_trousers",
+        "club_finish": "satin_steel",
+        "materials": {
+          "polo_white": { "base_color": [0.70, 0.12, 0.14, 1.0], "roughness": 0.85, "metallic": 0.0, "texture": { "kind": "noise", "noise": 0.04 } },
+          "trousers_charcoal": { "base_color": [0.08, 0.08, 0.09, 1.0], "roughness": 0.9, "metallic": 0.0, "texture": { "kind": "noise", "noise": 0.05 } },
+          "shoe_leather": { "base_color": [0.06, 0.06, 0.07, 1.0], "roughness": 0.35, "metallic": 0.0 }
+        },
+        "segments": [],
+        "environment": { "ground_material": "turf", "sky_top": [0.3, 0.5, 0.78], "sky_bottom": [0.88, 0.92, 0.96], "lighting": "studio" },
+        "head": {
+          "enabled": true,
+          "headwear": "hair",
+          "headwear_material": "hair_black",
+          "model": "cc0_mesh",
+          "hair_style": "short_crop",
+          "hair_part": "none",
+          "eye_color": "brown",
+          "cap_style": "baseball_cap",
+          "cap_material": "cap_black",
+          "cap_brim": 0.3,
+          "sizing": "stature",
+          "height_over_stature": 0.132,
+          "morph": { "width": 0.08, "jaw": 0.14, "nose": 0.08, "mouth": 0.12, "eyes": -0.03 }
+        },
+        "body_model": "ellipsoid",
+        "ball": { "enabled": false, "source": "address_geometry" },
+        "glove": "none",
+        "handedness": "right",
+        "foot": { "model": "procedural" }
+      }
+    },
+    "ben_hogan": {
+      "display_name": "Ben Hogan",
+      "stature_m": 1.7272,
+      "mass_kg": 68.0388555,
+      "sources": [
+        {
+          "url": "https://www.pgatour.com/player/01528/ben-hogan/bio",
+          "values": "5 ft 8 in; 150 lb",
+          "era": "PGA Tour biography; date/context of the listed measurements is not specified."
+        },
+        {
+          "url": "https://www.pga.com/story/pga-professionals-remember-the-legendary-swing-of-ben-25-years",
+          "values": "5 ft 8 in; 145 lb",
+          "era": "Retrospective PGA.com article; gives a conflicting mass value."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=DJDYMjmvFwg",
+          "values": "Compilation titled '10 Minutes of Ben Hogan (Every Angle Ever Recorded)'.",
+          "era": "Individual archive recording dates are unverified; source catalog marks the compilation unreviewed."
+        }
+      ],
+      "limitations": [
+        "Stature and mass use the PGA Tour biography values (5 ft 8 in, 150 lb), converted exactly; PGA.com gives the same stature and a different mass of 145 lb.",
+        "The pale polo, muted grey-brown trousers, dark brown side-parted hair, and leather shoes are an illustrative source-inspired palette, not a verified outfit from a particular frame. A period cap is not modeled because the appearance contract supports baseball caps only.",
+        "Skin and hair swatches are visual approximations; this preset does not encode a measured face, body morphology, or capture-specific clothing."
+      ],
+      "appearance": {
+        "schema_version": "appearance-v1",
+        "name": "ben_hogan_stylized",
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "club_finish": "satin_steel",
+        "materials": {
+          "trousers_charcoal": { "base_color": [0.40, 0.38, 0.34, 1.0], "roughness": 0.9, "metallic": 0.0, "texture": { "kind": "noise", "noise": 0.05 } }
+        },
+        "segments": [],
+        "environment": { "ground_material": "turf", "sky_top": [0.3, 0.5, 0.78], "sky_bottom": [0.88, 0.92, 0.96], "lighting": "studio" },
+        "head": {
+          "enabled": true,
+          "headwear": "hair",
+          "headwear_material": "hair_dark_brown",
+          "model": "cc0_mesh",
+          "hair_style": "short_crop",
+          "hair_part": "left",
+          "eye_color": "brown",
+          "cap_style": "none",
+          "cap_material": "cap_white",
+          "cap_brim": 0.3,
+          "sizing": "stature",
+          "height_over_stature": 0.132,
+          "morph": { "width": -0.06, "jaw": -0.04, "nose": 0.16, "mouth": -0.04, "eyes": 0.02 }
+        },
+        "body_model": "ellipsoid",
+        "ball": { "enabled": false, "source": "address_geometry" },
+        "glove": "none",
+        "handedness": "right",
+        "foot": { "model": "procedural" }
+      }
+    }
+  }
+}
