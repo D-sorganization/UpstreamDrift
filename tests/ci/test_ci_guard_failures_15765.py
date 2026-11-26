@@ -33,46 +33,30 @@ def _load_module(name: str, path: Path) -> Any:
     return module
 
 
-def _workflow(path: Path) -> dict[str, Any]:
-    """Return a parsed workflow document."""
-    loaded = yaml.safe_load(path.read_text(encoding="utf-8"))
-    if not isinstance(loaded, dict):
-        raise TypeError(f"{path} must be a workflow mapping")
-    return loaded
-
-
-def _triggers(workflow: dict[str, Any]) -> dict[str, Any]:
-    """Return the workflow ``on`` mapping.
-
-    PyYAML parses the bare ``on`` key as ``True``.
-    """
-    triggers = workflow.get(True, workflow.get("on"))
-    if not isinstance(triggers, dict):
-        raise TypeError("workflow triggers must be a mapping")
-    return triggers
-
-
-def _step(workflow: dict[str, Any], job: str, name: str) -> dict[str, Any]:
-    """Return one named step from a job."""
-    steps = workflow["jobs"][job]["steps"]
-    found = next((step for step in steps if step.get("name") == name), None)
+def _step(workflow_path: Path, job: str, name: str) -> dict[str, Any]:
+    """Return one named step from a workflow job."""
+    loaded = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+    found = next(
+        step for step in loaded["jobs"][job]["steps"] if step.get("name") == name
+    )
     if not isinstance(found, dict):
-        raise AssertionError(f"missing step {name!r} in {job}")
+        raise AssertionError(f"missing step {name!r}")
     return found
 
 
 def test_push_paths_ignore_matches_docs_only_patterns() -> None:
     """A ``.github`` push to main must still run CI Standard."""
     classifier = _load_module("classify_event_tier_15765", CLASSIFIER)
-    ignored = _triggers(_workflow(CI_STANDARD))["push"]["paths-ignore"]
+    loaded = yaml.safe_load(CI_STANDARD.read_text(encoding="utf-8"))
+    triggers = loaded.get(True, loaded.get("on"))
+    ignored = triggers["push"]["paths-ignore"]
     assert ignored == list(classifier.DOCS_ONLY_PATTERNS)
     assert ".github/**" not in ignored
 
 
 def test_code_quality_check_propagates_its_exit_status() -> None:
     """The code-quality step must not turn checker failures into warnings."""
-    step = _step(_workflow(CI_STANDARD), "code-quality", "Code Quality Check")
-    script = str(step.get("run", ""))
+    script = str(_step(CI_STANDARD, "code-quality", "Code Quality Check")["run"])
     assert "set -euo pipefail" in script
     assert "run_code_quality_check.py" in script
     assert "||" not in script
@@ -80,15 +64,13 @@ def test_code_quality_check_propagates_its_exit_status() -> None:
 
 def test_osv_export_distinguishes_findings_from_crashes() -> None:
     """OSV exit 1 stays reportable and any higher status fails the monitor."""
-    step = _step(
-        _workflow(OSV_MONITOR), "osv-monitor", "Export OSV JSON for SLA triage"
+    script = str(
+        _step(OSV_MONITOR, "osv-monitor", "Export OSV JSON for SLA triage")["run"]
     )
-    script = str(step.get("run", ""))
     assert "|| true" not in script
-    assert "||true" not in script.replace(" ", "")
     assert "--classify-exit" in script
-    assert 'scan_class" = "crash"' in script or 'scan_class" == "crash"' in script
-    assert 'triage_class" = "crash"' in script or 'triage_class" == "crash"' in script
+    assert '[ "$scan_class" = "crash" ]' in script
+    assert '[ "$triage_class" = "crash" ]' in script
     assert 'exit "$scan_status"' in script
     assert 'exit "$triage_status"' in script
 
@@ -96,24 +78,29 @@ def test_osv_export_distinguishes_findings_from_crashes() -> None:
 def test_classify_osv_exit_separates_findings_from_crashes() -> None:
     """Exit 0 is clean, exit 1 is a finding, and every other status is a crash."""
     triage = _load_module("triage_osv_findings_15765", TRIAGE)
-    assert triage.classify_osv_exit(0) == "clean"
-    assert triage.classify_osv_exit(1) == "vulnerabilities"
-    assert triage.classify_osv_exit(2) == "crash"
-    assert triage.classify_osv_exit(127) == "crash"
+    assert [triage.classify_osv_exit(status) for status in (0, 1, 2, 127)] == [
+        "clean",
+        "vulnerabilities",
+        "crash",
+        "crash",
+    ]
     with pytest.raises(TypeError, match="status must be an int"):
         triage.classify_osv_exit(True)
 
 
-def test_triage_crash_exits_above_the_finding_status(tmp_path: Path) -> None:
-    """A missing OSV report is a tool crash, not a vulnerability finding."""
-    missing = tmp_path / "missing.json"
-    result = subprocess.run(
-        [sys.executable, str(TRIAGE), "--osv-json", str(missing)],
+def _run_triage(argument: str, value: str) -> subprocess.CompletedProcess[str]:
+    """Run the OSV triage CLI and return the completed process."""
+    return subprocess.run(
+        [sys.executable, str(TRIAGE), argument, value],
         capture_output=True,
         text=True,
         check=False,
     )
-    assert result.returncode > 1
+
+
+def test_triage_crash_exits_above_the_finding_status(tmp_path: Path) -> None:
+    """A missing OSV report is a tool crash, not a vulnerability finding."""
+    assert _run_triage("--osv-json", str(tmp_path / "missing.json")).returncode > 1
 
 
 def test_triage_findings_remain_exit_one(tmp_path: Path) -> None:
@@ -136,12 +123,7 @@ def test_triage_findings_remain_exit_one(tmp_path: Path) -> None:
         ),
         encoding="utf-8",
     )
-    result = subprocess.run(
-        [sys.executable, str(TRIAGE), "--osv-json", str(report)],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    result = _run_triage("--osv-json", str(report))
     assert result.returncode == 1
     assert "GHSA-test" in result.stdout
 
@@ -153,8 +135,11 @@ def _checker_stub(directory: Path, status: int) -> Path:
     return stub
 
 
-def test_code_quality_runner_returns_the_checker_status(tmp_path: Path) -> None:
-    """A checker failure must be the runner's own exit status."""
+@pytest.mark.parametrize("status", [1, 0])
+def test_code_quality_runner_preserves_checker_status(
+    tmp_path: Path, status: int
+) -> None:
+    """The runner's exit status is the checker status, including zero."""
     sample = tmp_path / "sample.py"
     sample.write_text("x = 1\n", encoding="utf-8")
     result = subprocess.run(
@@ -162,7 +147,7 @@ def test_code_quality_runner_returns_the_checker_status(tmp_path: Path) -> None:
             sys.executable,
             str(QUALITY_RUNNER),
             "--checker",
-            str(_checker_stub(tmp_path, 1)),
+            str(_checker_stub(tmp_path, status)),
             "--changed-file",
             str(sample),
         ],
@@ -171,49 +156,29 @@ def test_code_quality_runner_returns_the_checker_status(tmp_path: Path) -> None:
         text=True,
         check=False,
     )
-    assert result.returncode == 1, result.stderr
+    assert result.returncode == status, result.stderr
 
 
 def test_review_events_diff_and_other_events_audit_the_tree() -> None:
     """Pull requests and merge groups diff; other events keep the full audit."""
     runner = _load_module("run_code_quality_check_15765", QUALITY_RUNNER)
-    assert (
-        runner.diff_base_for_event(
-            "pull_request",
-            base_ref="main",
-            before_sha="",
-            merge_group_base_sha="",
+    assert runner.CHECKER == REPO_ROOT / "src/tools/code_quality_check.py"
+    cases = {
+        ("pull_request", "main", "", ""): "origin/main",
+        ("merge_group", "", "", "abc123"): "abc123",
+        ("schedule", "", "", ""): None,
+        ("push", "", "0" * 40, ""): None,
+    }
+    for (event, base_ref, before_sha, merge_base), expected in cases.items():
+        assert (
+            runner.diff_base_for_event(
+                event,
+                base_ref=base_ref,
+                before_sha=before_sha,
+                merge_group_base_sha=merge_base,
+            )
+            == expected
         )
-        == "origin/main"
-    )
-    assert (
-        runner.diff_base_for_event(
-            "merge_group",
-            base_ref="",
-            before_sha="",
-            merge_group_base_sha="abc123",
-        )
-        == "abc123"
-    )
-    assert (
-        runner.diff_base_for_event(
-            "schedule",
-            base_ref="",
-            before_sha="",
-            merge_group_base_sha="",
-        )
-        is None
-    )
-    zero_sha = "0" * 40
-    assert (
-        runner.diff_base_for_event(
-            "push",
-            base_ref="",
-            before_sha=zero_sha,
-            merge_group_base_sha="",
-        )
-        is None
-    )
     with pytest.raises(ValueError, match="pull_request requires base_ref"):
         runner.diff_base_for_event(
             "pull_request",
@@ -221,30 +186,3 @@ def test_review_events_diff_and_other_events_audit_the_tree() -> None:
             before_sha="",
             merge_group_base_sha="",
         )
-
-
-def test_code_quality_runner_accepts_a_clean_checker(tmp_path: Path) -> None:
-    """A zero checker status is preserved."""
-    sample = tmp_path / "sample.py"
-    sample.write_text("x = 1\n", encoding="utf-8")
-    result = subprocess.run(
-        [
-            sys.executable,
-            str(QUALITY_RUNNER),
-            "--checker",
-            str(_checker_stub(tmp_path, 0)),
-            "--changed-file",
-            str(sample),
-        ],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    assert result.returncode == 0, result.stderr
-
-
-def test_runner_defaults_to_the_repository_checker() -> None:
-    """The production runner invokes the shared code-quality checker."""
-    runner = _load_module("run_code_quality_check_default_15765", QUALITY_RUNNER)
-    assert runner.CHECKER == REPO_ROOT / "src/tools/code_quality_check.py"

@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Run the code-quality checker and propagate its exit status (#15765).
-
-Review events check changed Python files. Schedule and manual runs audit
-the tree. A non-zero checker status is returned unchanged.
-"""
+"""Run the code-quality checker and return its status unchanged (#15765)."""
 
 from __future__ import annotations
 
@@ -27,13 +23,10 @@ def diff_base_for_event(
     before_sha: str,
     merge_group_base_sha: str,
 ) -> str | None:
-    """Return the git base for a review diff, or None for a full audit.
+    """Return a review diff base, or None when the caller audits the tree.
 
-    Preconditions:
-        ``event_name`` is a non-empty string.
-    Postconditions:
-        None means the caller audits every Python file. A string is a git
-        revision the caller diffs against HEAD.
+    Preconditions: ``event_name`` is a non-empty string.
+    Postcondition: None selects a full audit; a string is a git revision.
     """
     if not isinstance(event_name, str) or not event_name.strip():
         raise ValueError("event_name must be a non-empty string")
@@ -56,10 +49,9 @@ def diff_base_for_event(
 
 
 def python_paths(changed_paths: list[str]) -> list[str]:
-    """Return the Python files from a list of repository paths.
+    """Return Python paths from ``changed_paths``.
 
-    Preconditions:
-        ``changed_paths`` is a list of strings.
+    Preconditions: ``changed_paths`` is a list of strings.
     """
     if not isinstance(changed_paths, list):
         raise TypeError("changed_paths must be a list")
@@ -73,13 +65,9 @@ def python_paths(changed_paths: list[str]) -> list[str]:
 
 
 def changed_python_files(base: str) -> list[str]:
-    """Return Python paths changed between ``base`` and HEAD.
+    """Return added or modified Python paths between ``base`` and HEAD.
 
-    Preconditions:
-        ``base`` is a non-empty git revision.
-    Postconditions:
-        The list contains added, copied, modified, renamed, and type-changed
-        Python files only.
+    Preconditions: ``base`` is a non-empty git revision.
     """
     if not isinstance(base, str) or not base.strip():
         raise ValueError("base must be a non-empty git revision")
@@ -101,20 +89,15 @@ def changed_python_files(base: str) -> list[str]:
         check=False,
     )
     if completed.returncode != 0:
-        detail = completed.stderr.strip() or "git diff failed"
-        raise RuntimeError(detail)
+        raise RuntimeError(completed.stderr.strip() or "git diff failed")
     return [line for line in completed.stdout.splitlines() if line.endswith(".py")]
 
 
 def run_checker(paths: list[str] | None, checker: Path | None = None) -> int:
-    """Run the code-quality checker and return its exit status.
+    """Return the checker process status.
 
-    Preconditions:
-        ``paths`` is None for a full audit, or a list of file paths.
-        ``checker`` is the checker script, or None for the repository checker.
-    Postconditions:
-        The return value is the checker process status. An empty list
-        returns 0 without launching the checker.
+    Preconditions: ``paths`` is None or a list; ``checker`` is a Path or None.
+    Postcondition: an empty path list returns 0 and does not launch a process.
     """
     if paths is not None and not isinstance(paths, list):
         raise TypeError("paths must be a list or None")
@@ -135,8 +118,8 @@ def run_checker(paths: list[str] | None, checker: Path | None = None) -> int:
     return int(completed.returncode)
 
 
-def main(argv: list[str] | None = None) -> int:
-    """Check changed Python files, or the whole tree outside review events."""
+def _parse_args(argv: list[str] | None) -> argparse.Namespace:
+    """Parse runner arguments, defaulting review metadata from the environment."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--event", default=os.environ.get("EVENT_NAME", ""))
     parser.add_argument("--base-ref", default=os.environ.get("BASE_REF", ""))
@@ -147,12 +130,16 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--changed-file", action="append", default=None)
     parser.add_argument("--checker", type=Path)
-    args = parser.parse_args(argv)
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Check changed Python files, or the whole tree outside review events."""
+    args = _parse_args(argv)
     if args.changed_file is not None:
         return run_checker(python_paths(args.changed_file), checker=args.checker)
-    event_name = args.event or "workflow_dispatch"
     base = diff_base_for_event(
-        event_name,
+        args.event or "workflow_dispatch",
         base_ref=args.base_ref,
         before_sha=args.before_sha,
         merge_group_base_sha=args.merge_group_base_sha,
