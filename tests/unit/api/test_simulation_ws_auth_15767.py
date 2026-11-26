@@ -37,56 +37,59 @@ _LOOPBACK_DEV = {
 }
 
 
-def _include_mounts(app: FastAPI) -> list[tuple[str, tuple[str, ...], tuple[str, ...]]]:
-    """Return ``(prefix, dependency names, child route paths)`` for each mount.
+def _dep_names(dependencies: object) -> tuple[str, ...]:
+    """Return dependency callable names from Depends objects or dependants."""
+    names: list[str] = []
+    for dep in dependencies or ():
+        call = getattr(dep, "dependency", None) or getattr(dep, "call", None)
+        if call is not None:
+            names.append(getattr(call, "__name__", ""))
+    return tuple(names)
 
-    FastAPI keeps ``include_router(..., dependencies=)`` on the include
-    context rather than copying them onto each child route.
+
+def _routes(app: FastAPI) -> dict[str, tuple[str, ...]]:
+    """Map each full path to its dependency names.
+
+    FastAPI 0.136 flattens includes and copies router dependencies onto each
+    route. FastAPI 0.165 keeps them on ``_IncludedRouter.include_context``.
     """
-    mounts: list[tuple[str, tuple[str, ...], tuple[str, ...]]] = []
+    found: dict[str, tuple[str, ...]] = {}
 
-    def _walk(router: object, prefix: str) -> None:
+    def _walk(router: object, prefix: str, inherited: tuple[str, ...]) -> None:
         for route in getattr(router, "routes", ()):
-            if type(route).__name__ != "_IncludedRouter":
+            if type(route).__name__ == "_IncludedRouter":
+                context = route.include_context
+                extra = _dep_names(getattr(context, "dependencies", ()))
+                _walk(
+                    context.included_router,
+                    f"{prefix}{context.prefix or ''}",
+                    inherited + extra,
+                )
                 continue
-            context = route.include_context
-            child_prefix = f"{prefix}{context.prefix or ''}"
-            names = tuple(
-                getattr(getattr(dep, "dependency", None), "__name__", "")
-                for dep in (context.dependencies or ())
+            path = getattr(route, "path", None)
+            if not isinstance(path, str) or not path:
+                continue
+            full = path if not prefix or path.startswith(prefix) else f"{prefix}{path}"
+            dependant = getattr(route, "dependant", None)
+            found[full] = (
+                inherited
+                + _dep_names(getattr(route, "dependencies", ()))
+                + _dep_names(getattr(dependant, "dependencies", ()))
             )
-            child_paths = tuple(
-                str(getattr(child, "path", ""))
-                for child in context.included_router.routes
-                if getattr(child, "path", None)
-            )
-            mounts.append((child_prefix, names, child_paths))
-            _walk(context.included_router, child_prefix)
 
-    _walk(app.router, "")
-    return mounts
-
-
-def _mounts_exposing(app: FastAPI, path: str) -> list[tuple[str, tuple[str, ...]]]:
-    return [
-        (prefix, names)
-        for prefix, names, paths in _include_mounts(app)
-        if path in paths
-    ]
+    _walk(app.router, "", ())
+    return found
 
 
 def test_server_mounts_simulation_ws_with_chat_auth_dependency() -> None:
     """Every simulation_ws prefix must carry the same auth dep as chat_ws."""
     from src.api.server import app
 
-    simulated = _mounts_exposing(app, "/ws/simulate/{engine_type}")
-    chat = _mounts_exposing(app, "/ws/chat/{session_id}")
-    assert {prefix for prefix, _names in simulated} == {"", "/api", "/api/v1"}
-    assert {prefix for prefix, _names in chat} == {"", "/api", "/api/v1"}
-    assert all("_ws_compatible_auth_dependency" in names for _prefix, names in chat)
-    assert all(
-        "_ws_compatible_auth_dependency" in names for _prefix, names in simulated
-    )
+    routes = _routes(app)
+    for kind in ("simulate/{engine_type}", "chat/{session_id}"):
+        for prefix in ("", "/api", "/api/v1"):
+            names = routes[f"{prefix}/ws/{kind}"]
+            assert "_ws_compatible_auth_dependency" in names
 
 
 @pytest.mark.parametrize("prefix", ["", "/api", "/api/v1"])
@@ -229,11 +232,10 @@ def test_server_legacy_routes_carry_deprecation_dependency() -> None:
     """The live app deprecates root and /api health without removing them."""
     from src.api.server import app
 
-    mounts = dict(_mounts_exposing(app, "/health"))
-    assert set(mounts) >= {"", "/api", "/api/v1"}
-    assert "mark_legacy_rest_deprecated" in mounts[""]
-    assert "mark_legacy_rest_deprecated" in mounts["/api"]
-    assert "mark_legacy_rest_deprecated" not in mounts["/api/v1"]
+    routes = _routes(app)
+    assert "mark_legacy_rest_deprecated" in routes["/health"]
+    assert "mark_legacy_rest_deprecated" in routes["/api/health"]
+    assert "mark_legacy_rest_deprecated" not in routes["/api/v1/health"]
 
 
 def test_deprecated_dependency_requires_absolute_successor() -> None:
