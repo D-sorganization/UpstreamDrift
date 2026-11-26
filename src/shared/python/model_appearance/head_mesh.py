@@ -202,12 +202,11 @@ def build_mesh_parts(
             (name, Mesh(m.vertices * length_m, m.faces), role)
             for name, m, role in head_features.face_parts(asset.skin)
         ]
-    capped = settings is not None and settings.cap_style in ("baseball_cap", "flat_cap")
-    cap_crop = (
-        head_cap.flat_cap_crop()
-        if capped and settings.cap_style == "flat_cap"
-        else head_cap.CapCrop()
+    flat_capped = settings is not None and settings.cap_style == "flat_cap"
+    capped = flat_capped or (
+        settings is not None and settings.cap_style == "baseball_cap"
     )
+    cap_crop = head_cap.flat_cap_crop() if flat_capped else head_cap.CapCrop()
     if headwear == "hair":
         crop = settings is not None and settings.hair_style == "short_crop"
         unit = asset.hair
