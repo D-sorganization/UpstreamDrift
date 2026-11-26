@@ -105,6 +105,7 @@ Golf Chain Visualisation, Epic #11706 (GCV):
 - Native export backends, quarter-speed variants, impact time, high-FPS schedule GCV-14: #11720; MyoSuite v3 export worker #11997.
 - ClubheadSeries adapters GCV-16 #11722; impact parameters panel GCV-17 #11723; ground reaction manual slice GCV-18 #11724.
 - Clubhead speed timing GCV-20: #11767; MyoSuite hip retarget #12052; right knee flexes negative like the left #12057.
+- Visual flat-cap appearance #15822 adds a low-profile CC0 headwear style; the crown geometry stays in the appearance layer.
 
 Open Swing Visualisation grip and gaze (OSV, Epic #11726):
 
@@ -139,4 +140,3 @@ Motion matching and tour baselines:
 - Tour baselines (exact-capture matching, fail-closed qualification): #10829, #10830, #10831, #10799, #10800, #10844, #10849; TB-12 #10597 merged.
 - Hip-calibrated receipt provenance #10271; GolfSwingVisualizer MATLAB consolidation #9225; docs-consistency cross-repo paths #10743.
 - Tiger 2000 and Ben Hogan baselines: see the archive section of that name.
-- Visual flat-cap appearance #15822 adds a low-profile CC0 head cap style; geometry stays in the visual layer and physics is unchanged.

@@ -66,7 +66,7 @@ def _closed(faces: NDArray[np.int64]) -> bool:
 
 
 def _check_mesh(name: str, mesh: Mesh) -> None:
-    """Reject a head mesh that is invalid, open, inward, or out of bounds."""
+    """Reject malformed, open, inward-facing, or oversized head parts."""
     v, f = mesh.vertices, mesh.faces
     if v.ndim != 2 or v.shape[1] != 3 or not np.isfinite(v).all() or len(f) == 0:
         raise ValueError(f"head mesh {name!r}: bad vertex or face arrays")
@@ -89,7 +89,7 @@ def _check_mesh(name: str, mesh: Mesh) -> None:
 
 
 def _load(asset: Path, provenance: Path) -> HeadAsset:
-    """Load the asset only when its licence and content hash are verified."""
+    """Load a hash-pinned CC0 asset and validate each mesh part."""
     if not provenance.is_file():
         raise ValueError(f"head provenance record missing: {provenance}")
     record = json.loads(provenance.read_text(encoding="utf-8"))
@@ -120,7 +120,7 @@ def load_head_asset(
 
 @lru_cache(maxsize=1)
 def _default_asset() -> HeadAsset:
-    """Return the cached, validated default head asset."""
+    """Return the validated repository head asset from the cache."""
     return _load(ASSET_PATH, PROVENANCE_PATH)
 
 
