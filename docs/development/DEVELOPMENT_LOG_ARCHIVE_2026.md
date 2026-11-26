@@ -1,5 +1,499 @@
 # Development Log Archive — 2026
 
+### DL-#15027 · Re-Bootstrap Pip With Ensurepip Before Force-Overlay-Parity Engine Installs (#15027).
+
+- **State:** shipped
+- **Shipped:** 2026-11-11
+- **Owner:** unassigned
+- **Issue:** #15027
+- **Branch:** cursor/force-overlay-pip-ensurepip-a939
+- **PR:** #15032
+- **Paths:** see #15032
+- **Started:** 2026-11-12
+- **Last verified:** 2026-11-12 (`3afe09c1`; collated from changes/15027-re-bootstrap-pip-with-ensurepip-before-f.md)
+- **Summary:** Re-bootstrap pip with ensurepip before force-overlay-parity engine installs (#15027).
+
+### DL-#15011 · Label Injury Spinal-Load Heuristics Honestly; Disclaim Unvalidated Screening Bands.
+
+- **State:** shipped
+- **Shipped:** 2026-11-11
+- **Owner:** unassigned
+- **Issue:** #15011
+- **Branch:** cursor/injury-heuristic-labels-118d
+- **PR:** #15033
+- **Paths:** see #15033
+- **Started:** 2026-11-12
+- **Last verified:** 2026-11-12 (`a1a26523`; collated from changes/15011-label-injury-spinal-load-heuristics-hone.md)
+- **Summary:** Label injury spinal-load heuristics honestly; disclaim unvalidated screening bands.
+
+### DL-#14934 · Fix Syngas Water Unit Conversions and Router Fallback on 60F_14.696Psia Basis (Paired With Tools#6009)
+
+- **State:** shipped
+- **Shipped:** 2026-11-10
+- **Owner:** unassigned
+- **Issue:** #14934
+- **Branch:** agy/6004-syngas-water-router-pair
+- **PR:** #14976, #14985, #14990, #14995
+- **Paths:** see #14976
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`71515bb6`; collated from changes/14934-default-true-removal.md)
+- **Summary:** Fix syngas water unit conversions and router fallback on 60F_14.696psia basis (paired with Tools#6009)
+
+### DL-#14906 · Correct SHOW-A10 Evidence Provenance Manifest and Summary Attribution Without Regenerating Artifacts
+
+- **State:** shipped
+- **Shipped:** 2026-11-09
+- **Owner:** unassigned
+- **Issue:** #14906
+- **Branch:** agy/ct/14906-show-a10-provenance-correction
+- **PR:** #14920
+- **Paths:** see #14920
+- **Started:** 2026-11-09
+- **Last verified:** 2026-11-09 (`94f794b0`; collated from changes/14906-show-a10-provenance-correction.md)
+- **Summary:** Correct SHOW-A10 evidence provenance manifest and summary attribution without regenerating artifacts
+
+### DL-#14397 · Canonical Float Rounding Before Hashing for Ubuntu 26.04
+
+- **State:** shipped
+- **Shipped:** 2026-11-08
+- **Owner:** unassigned
+- **Issue:** #14397
+- **Branch:** agy/14397-ubuntu-2604-hash-drift
+- **PR:** #14899
+- **Paths:** see #14899
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`604503f6`; collated from changes/14397-ubuntu-2604-hash-drift.md)
+- **Summary:** physics_spec_sha256 and the saved-comparison receipts compare floats at a canonical precision (12 significant digits, 1e-12 absolute) so BLAS/libm last-bit drift cannot move them (owner option A)
+
+### DL-#14896 · CI Checkout Depth Qualification and Transfer Budget Policy
+
+- **State:** shipped
+- **Shipped:** 2026-11-08
+- **Owner:** fleet-orchestrator
+- **Issue:** #14896
+- **Branch:** agy/14896-ci-checkout-depth-contracts
+- **PR:** #14915, #14916
+- **Paths:** scripts/ci/qualify_checkout_depth.py, tests/ci/test_qualify_checkout_depth.py, docs/development/evidence/CI_CHECKOUT_DEPTH_AND_TRANSFER_BUDGET_POLICY.md
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`0ec24365`; collated from changes/14896-ci-checkout-depth-contracts.md)
+- **Summary:** Qualify job-specific CI checkout depth, transfer bandwidth budgets, and sparse-state regression contracts
+
+### DL-#14895 · Source Asset Selective LFS Policy and Inventory Contracts
+
+- **State:** shipped
+- **Shipped:** 2026-11-08
+- **Owner:** fleet-orchestrator
+- **Issue:** #14895
+- **Branch:** agy/14895-source-asset-lfs-policy
+- **PR:** #14914
+- **Paths:** scripts/assets/source_asset_inventory.py, tests/unit/assets/test_source_asset_inventory.py, docs/development/evidence/SOURCE_ASSET_LFS_POLICY.md
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`c6375e53`; collated from changes/14895-source-asset-lfs-policy.md)
+- **Summary:** Selective Git LFS policy, source asset inventory contracts, and fail-closed hydration verification
+
+### DL-#14894 · Research Artifacts: Checksum-Bound Storage Contracts
+
+- **State:** shipped
+- **Owner:** fleet-orchestrator
+- **Issue:** #14894
+- **Branch:** agy/14894-research-artifact-storage
+- **PR:** #14911, #14912
+- **Paths:** scripts/research/shot_pattern_analysis/fetch_release_assets.py, tests/unit/research/test_fetch_release_assets.py, docs/development/evidence/RESEARCH_ARTIFACT_STORAGE_POLICY.md
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`781dcc0b`; collated from changes/14894-research-artifact-storage-contracts.md)
+- **Summary:** Research artifacts: checksum-bound durable storage, fail-closed offline/integrity verification, and evidence preservation policy
+- **Next step:** Shipped.
+
+### DL-#13158 · OSL-19: Grip Closure and OpenSim Reach Receipt
+
+- **State:** shipped
+- **Shipped:** 2026-11-08
+- **Owner:** fleet-orchestrator
+- **Issue:** #13158
+- **Branch:** agy/13158-osl19-grip-closure-reach
+- **PR:** #14802, #14907
+- **Paths:** src/shared/python/osl_scoping/osl19.py, tests/fixtures/lifting/osl_scoping/osl19_scoping_v1.json, tests/unit/lifting/osl_scoping/test_osl19_scoping_contract.py
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-08 (`9e90db40`; collated from changes/13158-osl-19-grip-closure-reach.md)
+- **Summary:** OSL-19: grip closure contracts and OpenSim reach hook for back-squat bundles
+
+### DL-#13131 · OSL-17: Back-Squat Bar Rack and Rest Window
+
+- **State:** shipped
+- **Shipped:** 2026-11-08
+- **Owner:** fleet-orchestrator
+- **Issue:** #13131
+- **Branch:** agy/13131-osl17-bar-rack-rest
+- **PR:** #14802, #14903
+- **Paths:** src/shared/python/lifting/back_rack.py, src/shared/python/osl_scoping/osl17.py, tests/unit/lifting/test_back_rack.py, tests/unit/lifting/osl_scoping/test_osl17_scoping_contract.py, docs/development/lifting/evidence/opensim_ik_id/receipts.json
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-08 (`ccd72956`; collated from changes/13131-osl-17-back-squat-bar-rack-and-rest.md)
+- **Summary:** OSL-17: put back-squat bar on BackTop high-bar rack, verify lead-in settle and whole-window OpenSim Hicks and marker gates
+
+### DL-#13093 · OSL-15: Regenerate Source Back Squat With Bar Load
+
+- **State:** shipped
+- **Shipped:** 2026-11-08
+- **Owner:** fleet-orchestrator
+- **Issue:** #13093
+- **Branch:** agy/13093-osl15-load-balance-squat
+- **PR:** #14904
+- **Paths:** src/shared/python/osl_scoping/osl15.py, tests/fixtures/lifting/osl_scoping/osl15_scoping_v1.json, tests/unit/lifting/osl_scoping/test_osl15_scoping_contract.py
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-08 (`7b629286`; collated from changes/13093-osl-15-load-balance-squat.md)
+- **Summary:** OSL-15: verify bar-load balance in IK provenance (combined CoM constrained over mid-foot) on back-squat barbell and source bundles
+
+### DL-#11746 · LIFT-6: OpenSim Lift Composition and Static Hold Contracts
+
+- **State:** shipped
+- **Shipped:** 2026-11-08
+- **Owner:** fleet-orchestrator
+- **Issue:** #11746
+- **Branch:** agy/11746-lift6-composition-static-hold
+- **PR:** #14805, #14910
+- **Paths:** src/shared/python/lift_scoping/lift6.py, tests/fixtures/lifting/lift_scoping/lift6_epic_v1.json, tests/unit/lifting/lift_scoping/test_lift6_epic_contract.py
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-08 (`c3813358`; collated from changes/11746-lift-6-composition-static-hold.md)
+- **Summary:** LIFT-6: OpenSim full-body lift composition, 80-muscle count, static hold, and kinetics qualification contracts
+
+### DL-#11745 · LIFT-5: Four-Engine Bar Path Parity Contract
+
+- **State:** shipped
+- **Shipped:** 2026-11-08
+- **Owner:** fleet-orchestrator
+- **Issue:** #11745
+- **Branch:** agy/11745-lift5-four-engine-bar-path-parity
+- **PR:** #14805, #14877, #14909
+- **Paths:** src/shared/python/lift_scoping/lift5.py, tests/fixtures/lifting/lift_scoping/lift5_epic_v1.json, tests/unit/lifting/lift_scoping/test_lift5_epic_contract.py
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-08 (`960d2084`; collated from changes/11745-lift-5-four-engine-bar-path-parity.md)
+- **Summary:** LIFT-5: four-engine bar path parity contract and tests covering MuJoCo, Drake, Pinocchio, and OpenSim
+
+### DL-#15020 · Register Ud-Sim-Mcp Console Script, Generated Capability Inventory, and Agent API Auth Docs.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #15020
+- **Branch:** merged via #15023
+- **PR:** #15023
+- **Paths:** see #15023
+- **Started:** 2026-11-11
+- **Last verified:** 2026-11-11 (`972404f4`; collated from changes/15020-register-ud-sim-mcp-console-script-gener.md)
+- **Summary:** Register ud-sim-mcp console script, generated capability inventory, and Agent API auth docs.
+- **Next step:** Shipped in PR #15023.
+
+### DL-#14937 · BallFlightSimulator Reports Per-Step Forces From the Rust Integrator With Legacy Post-Hoc Path Tagged
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14937
+- **Branch:** merged via #14962
+- **PR:** #14962
+- **Paths:** see #14962
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`a423e0d2`; collated from changes/14937-ballflightsimulator-reports-per-step-for.md)
+- **Summary:** BallFlightSimulator reports per-step forces from the Rust integrator with legacy post-hoc path tagged
+- **Next step:** Shipped in PR #14962.
+
+### DL-#14951 · Tauri BackendState Supervisor With Ephemeral Port and Stderr Tail (Part Of #14951).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14951
+- **Branch:** merged via #14988
+- **PR:** #14988, #14992
+- **Paths:** see #14988
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`1d08a591`; collated from changes/14951-tauri-version-consistency-and-dynamic-port.md)
+- **Summary:** Tauri BackendState supervisor with ephemeral port and stderr tail (Part of #14951).
+- **Next step:** Shipped in PR #14988.
+
+### DL-#14947 · Add Directory-Based Suite Marker Inference, Opt-Out Marker, Gate Selectability Summary, and Audit Utility (Part of #14947, Part Of #14934)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14947
+- **Branch:** agy/14947-suite-marker-reach
+- **PR:** #14980, #14986
+- **Paths:** see #14980
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`b5be04e6`; collated from changes/14947-enable-auto-mark-ci.md)
+- **Summary:** Add directory-based suite marker inference, opt-out marker, gate selectability summary, and audit utility (Part of #14947, Part of #14934)
+- **Next step:** Shipped in PR #14980.
+
+### DL-#14941 · Workspace Synchronous Optimization Returns Explicit Synthetic Placeholder; RECEIPT Registration Refused for Synthetic Results
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14941
+- **Branch:** merged via #14963
+- **PR:** #14963
+- **Paths:** see #14963
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`2da54750`; collated from changes/14941-workspace-synchronous-optimization-retur.md)
+- **Summary:** Workspace synchronous optimization returns explicit synthetic placeholder; RECEIPT registration refused for synthetic results
+- **Next step:** Shipped in PR #14963.
+
+### DL-#14938 · \ Marker IK Exposes Convergence Status,Reports NO_MARKERS and NaN RMS for Empty Frames,and Routes LM With Finite Bounds to TRF\
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14938
+- **Branch:** agy/14938-marker-ik-convergence
+- **PR:** #14974
+- **Paths:** see #14974
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`bb977b68`; collated from changes/14938-marker-ik-convergence.md)
+- **Summary:** \ Marker IK exposes convergence status,reports NO_MARKERS and NaN RMS for empty frames,and routes LM with finite bounds to TRF\
+- **Next step:** Shipped in PR #14974.
+
+### DL-#14946 · Make Coverage Truth Explicit in CI Summary and Remove Dead Cov-Fail-Under Flags
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14946
+- **Branch:** merged via #14972
+- **PR:** #14972, #14981
+- **Paths:** see #14972
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`be9e042d`; collated from changes/14946-sharded-coverage-ratchet.md)
+- **Summary:** Make coverage truth explicit in CI summary and remove dead cov-fail-under flags
+- **Next step:** Shipped in PR #14972.
+
+### DL-#14950 · Simulation WS Error Frame Handling and isPaused Reset on Stop (Part Of #14950).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14950
+- **Branch:** merged via #14958
+- **PR:** #14958, #14967, #15001
+- **Paths:** see #14958
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`6a566a98`; collated from changes/14950-sim-run-lifecycle-reducer.md)
+- **Summary:** Simulation WS error frame handling and isPaused reset on stop (Part of #14950).
+- **Next step:** Shipped in PR #14958.
+
+### DL-#14945 · Make Architecture and File-Size Budget Expiry Evaluation Deterministic
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14945
+- **Branch:** merged via #14954
+- **PR:** #14954
+- **Paths:** see #14954
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`268f76ed`; collated from changes/14945-deterministic-budget-expiry.md)
+- **Summary:** Make architecture and file-size budget expiry evaluation deterministic
+- **Next step:** Shipped in PR #14954.
+
+### DL-#14944 · ZTCF: Guard Multi-Body Misuse of Compute_Ztcf_Forces; Double-Pendulum Regression (#14944, Part Of #14934)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14944
+- **Branch:** merged via #14953
+- **PR:** #14953, #14979
+- **Paths:** see #14953
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`975141a2`; collated from changes/14944-ztcf-rnea-contract.md)
+- **Summary:** ZTCF: guard multi-body misuse of compute_ztcf_forces; double-pendulum regression (#14944, Part of #14934)
+- **Next step:** Shipped in PR #14953.
+
+### DL-#13604 · NSX Salvage Tracker: Unit Receipts for Merged NSX-22/NSX-24 Rows on Main (#13604)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13604
+- **Branch:** merged via #14930
+- **PR:** #14930
+- **Paths:** see #14930
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`2d4fde75`; collated from changes/13604-nsx-salvage-tracker-receipts.md)
+- **Summary:** NSX salvage tracker: unit receipts for merged NSX-22/NSX-24 rows on main (#13604)
+- **Next step:** Shipped in PR #14930.
+
+### DL-#14860 · Redact Fleet Host and Home Literals Batch 4 Recovery
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14860
+- **Branch:** merged via #14933
+- **PR:** #14933
+- **Paths:** see #14933
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`1cc97639`; collated from changes/14860-host-redact-04.md)
+- **Summary:** Redact fleet host and home literals batch 4 recovery
+- **Next step:** Shipped in PR #14933.
+
+### DL-#14820 · UD Docs and CI Contract Tests Reaffirm PR Size Is Advisory Only (Dieter 2026-11-06)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14820
+- **Branch:** merged via #14926
+- **PR:** #14926
+- **Paths:** see #14926
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`ee388e1a`; collated from changes/14820-ud-pr-size-advisory-review-contract.md)
+- **Summary:** UD docs and CI contract tests reaffirm PR size is advisory only (Dieter 2026-11-06)
+- **Next step:** Shipped in PR #14926.
+
+### DL-#14928 · Align Realtime Shadow-Ledger Sunset_Date With Q4 Baseline and Validate Against UTC Date (#14928, #12046)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14928
+- **Branch:** merged via #14931
+- **PR:** #14931
+- **Paths:** see #14931
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`a3e2f0f1`; collated from changes/14928-realtime-shadow-sunset.md)
+- **Summary:** Align realtime shadow-ledger sunset_date with Q4 baseline and validate against UTC date (#14928, #12046)
+- **Next step:** Shipped in PR #14931.
+
+### DL-#12878 · Explorer Contract: Engine-Tagged Playback Archives and Per-Engine MP4 Distinctness Test (#12878 Workstream C)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12878
+- **Branch:** merged via #14921
+- **PR:** #14921
+- **Paths:** see #14921
+- **Started:** 2026-11-10
+- **Last verified:** 2026-11-10 (`f6c43790`; collated from changes/12878-explorer-contract-engine-tagged-playback.md)
+- **Summary:** Explorer contract: engine-tagged playback archives and per-engine MP4 distinctness test (#12878 workstream C)
+- **Next step:** Shipped in PR #14921.
+
+### DL-#14905 · Preserve #14733 Proposal Durable Change-History Evidence Across Normal Change-Fragment Collation and Log Archival
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14905
+- **Branch:** merged via #14908
+- **PR:** #14908
+- **Paths:** see #14908
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`a89dd7dd`; collated from changes/14905-preserve-proposal-collation-evidence.md)
+- **Summary:** Preserve #14733 proposal durable change-history evidence across normal change-fragment collation and log archival
+- **Next step:** Shipped in PR #14908.
+
+### DL-#14897 · Point Driver Motion-Matching Smoke to Canonical Capture-Fit Spec (Full_Body_Spec_Anthro_Driver_Capture.Json) and Align Anthro_Driver Receipt Base_Spec_File Metadata
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14897
+- **Branch:** merged via #14901
+- **PR:** #14901
+- **Paths:** see #14901
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`1c3126cd`; collated from changes/14897-motion-matching-smoke-driver-spec.md)
+- **Summary:** Point driver motion-matching smoke to canonical capture-fit spec (full_body_spec_anthro_driver_capture.json) and align anthro_driver receipt base_spec_file metadata
+- **Next step:** Shipped in PR #14901.
+
+### DL-#14795 · SHOW-A19: Re-Characterise Wrist and Scapula ROM From Evidence and Evaluate Option (C) Address Reachability
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14795
+- **Branch:** merged via #14890
+- **PR:** #14890
+- **Paths:** see #14890
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`632c36c9`; collated from changes/14795-show-a19-wrist-scapula-rom.md)
+- **Summary:** SHOW-A19: re-characterise wrist and scapula ROM from evidence and evaluate option (c) address reachability
+- **Next step:** Shipped in PR #14890.
+
+### DL-#14733 · Proposal (Write-Up Only): #13560 OpenSim Net-Moment Gap - Recorder Inconsistency Finding, Conditioning Math, Options
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14733
+- **Branch:** merged via #14888
+- **PR:** #14888
+- **Paths:** see #14888
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`36155e93`; collated from changes/14733-opensim-net-moment-gap-proposal.md)
+- **Summary:** Proposal (write-up only): #13560 OpenSim net-moment gap - recorder inconsistency finding, conditioning math, options
+- **Next step:** Shipped in PR #14888.
+
+### DL-#14500 · NP-07 Loop-Constraint Projection of Policy Output (Grip Loop, Diagnostic) (#14500)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14500
+- **Branch:** merged via #14824
+- **PR:** #14824
+- **Paths:** see #14824
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`884bf8f5`; collated from changes/14500-np07-loop-projection.md)
+- **Summary:** NP-07 loop-constraint projection of policy output (grip loop, diagnostic) (#14500)
+- **Next step:** Shipped in PR #14824.
+
+### DL-#14477 · NP-02 Demonstration Fixture and Behavior-Cloned 64X64 MLP Baseline (#14477)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14477
+- **Branch:** merged via #14839
+- **PR:** #14839
+- **Paths:** see #14839
+- **Started:** 2026-11-08
+- **Last verified:** 2026-11-08 (`e01522fd`; collated from changes/14477-np02-bc-mlp-baseline.md)
+- **Summary:** NP-02 demonstration fixture and behavior-cloned 64x64 MLP baseline (#14477)
+- **Next step:** Shipped in PR #14839.
+
+### DL-#14735 · Key-Frame PNG Writer and Grip-Clock Inset Helper for Styled Renders (SHOW-A10)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14735
+- **Branch:** merged via #14880
+- **PR:** #14880, #14900
+- **Paths:** see #14880
+- **Started:** 2026-11-07
+- **Last verified:** 2026-11-08 (`df2d7034`; collated from changes/14735-show-a10-evidence.md)
+- **Summary:** Key-frame PNG writer and grip-clock inset helper for styled renders (SHOW-A10)
+- **Next step:** Shipped in PR #14880.
+
+### DL-#14727 · Commit the V1 Source Spec of the Trunk_Visuals Driver V2 Bundle and Pin the Generator Against the Committed Rollout on Its True Inputs (Step 1)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #14727
+- **Branch:** merged via #14785
+- **PR:** #14785, #14898
+- **Paths:** see #14785
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-08 (`4bd0ae50`; collated from changes/14727-drake-v2-reference.md)
+- **Summary:** Commit the v1 source spec of the trunk_visuals driver v2 bundle and pin the generator against the committed rollout on its true inputs (step 1)
+- **Next step:** Shipped in PR #14785.
+
+### DL-#12737 · SPN-0B data_extraction.md: DOIs and Full Author Lists for Pearcy 1984, Fujii 2007, Wilke 1999 and Wu 2002 From Crossref; No Verified_From_Primary Flag Changed
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #12737
+- **Branch:** merged via #14760
+- **PR:** #14760, #14924
+- **Paths:** see #14760
+- **Started:** 2026-11-06
+- **Last verified:** 2026-11-10 (`ee2d7b2c`; collated from changes/12737-contract-test-bruno-b2-supplement-stays.md)
+- **Summary:** SPN-0b data_extraction.md: DOIs and full author lists for Pearcy 1984, Fujii 2007, Wilke 1999 and Wu 2002 from Crossref; no verified_from_primary flag changed
+- **Next step:** Shipped in PR #14760.
+
+### DL-#13560 · MuJoCo Grip Samples Read Zero-Slip Pairs Frictionless, Matching the Shared Law's Zero Friction at Rest; the Ten_Finger Hold Net_Moment_Com Xfail Is Removed
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #13560
+- **Branch:** merged via #14185
+- **PR:** #14185, #14351, #14354, #14711, #14902
+- **Paths:** see #14185
+- **Started:** 2026-11-01
+- **Last verified:** 2026-11-08 (`79dc26d9`; collated from changes/13560-grip-contact-preload-parity.md)
+- **Summary:** MuJoCo grip samples read zero-slip pairs frictionless, matching the shared law's zero friction at rest; the ten_finger hold net_moment_com xfail is removed
+- **Next step:** Shipped in PR #14185.
+
 ### DL-#13991 · Docs: ADR-0060 OpenSim Scaling and Fit Plan (#13991)
 
 - **State:** shipped
