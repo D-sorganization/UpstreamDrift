@@ -65,6 +65,7 @@ detail of a finished slice to the archive instead of growing this file.
 Canonical golfer Drake alignment (#13531, #13450; folded into the grip-lane consolidation): actuator count from `resolve_plant_n_actuators`, grip frames `mid_hands`/`club_head`; verify `tests/engines/drake/test_drake_fit_actuator_alignment_13531.py` and grip-resolution tests.
 
 - Config serialization #15196: `fix/json-serialization-preserve` checks JSON/YAML payloads before opening destinations or creating directories; rejected payloads preserve existing bytes. Review through Barb's pipeline.
+- Legend reference footage #15835: private acquired clips for Seve Ballesteros, Jack Nicklaus, Bobby Jones, Sam Snead, and Byron Nelson; source hashes, date/identity limits, and reproduction steps are in `docs/development/historical_capture/legend-reference-acquisition-2026-11-26.json` and its commands guide. No training or publication qualification is claimed.
 
 OpenSim musculoskeletal barbell lifts (OSL, Epic #13038; research record `docs/research/lift_models/lift_models.tex`; state as of 2026-10-20):
 
