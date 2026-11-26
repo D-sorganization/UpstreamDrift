@@ -49,6 +49,7 @@ class CapCrop:
     brim_root_inset: float = 0.030  # brim starts this far inside the cap line
     brim_thickness: float = 0.010
     brim_droop: float = 0.12  # tip drop per unit of brim length
+    front_overhang: float = 0.0  # smooth forward crown projection, head lengths
     hair_under: HairCrop = field(
         default_factory=lambda: HairCrop(
             top_thickness=0.028,
@@ -56,6 +57,35 @@ class CapCrop:
             comb_amplitude=0.0,
             heavy_side_gain=0.0,
         )
+    )
+
+
+def flat_cap_crop() -> CapCrop:
+    """Return a close fitting, low crown with a short, broad flat-cap peak.
+
+    The reduced crown stand-off and the matching short-hair crop keep hair
+    under the shell. The higher cap line lowers the crown edge, while the peak
+    has less forward rake than the baseball-cap default.
+    """
+    return CapCrop(
+        line=(
+            (0.0, 0.80),
+            (0.90, 0.76),
+            (1.80, 0.69),
+            (2.60, 0.65),
+            (math.pi, 0.64),
+        ),
+        offset=0.034,
+        brim_half_angle=0.93,
+        brim_forward=0.68,
+        brim_end_taper=0.34,
+        front_overhang=0.30,
+        hair_under=HairCrop(
+            top_thickness=0.020,
+            fringe_thickness=0.0,
+            comb_amplitude=0.0,
+            heavy_side_gain=0.0,
+        ),
     )
 
 
@@ -145,6 +175,20 @@ def build_cap(
     crown = closed_shell(
         v, n, faces, np.full(len(v), cfg.wall), cfg.offset - cfg.wall, cfg.wall
     )
+    if cfg.front_overhang:
+        # Keep the inner crown on the scalp and move both shell surfaces
+        # forward only across the upper forehead. Smooth gates leave the cap
+        # line and crown apex fixed, preserving the closed shell and clearance.
+        crown_vertices = crown.vertices.copy()
+        z = crown_vertices[:, 2]
+        front = np.clip((crown_vertices[:, 0] - cfg.centre_x) / 0.24, 0.0, 1.0)
+        rise = np.clip((z - 0.79) / 0.09, 0.0, 1.0)
+        apex = np.clip((0.99 - z) / 0.07, 0.0, 1.0)
+        front, rise, apex = (
+            gate * gate * (3.0 - 2.0 * gate) for gate in (front, rise, apex)
+        )
+        crown_vertices[:, 0] += cfg.front_overhang * front * rise * apex
+        crown = Mesh(crown_vertices, crown.faces)
     rim = open_rim(faces)
     pts = v[rim] + (cfg.offset) * n[rim]
     az = np.arctan2(pts[:, 1], pts[:, 0] - cfg.centre_x)

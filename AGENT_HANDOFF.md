@@ -141,3 +141,4 @@ Motion matching and tour baselines:
 - Tiger 2000 and Ben Hogan baselines: see the archive section of that name.
 
 - #15821: Neutral shoe-to-head stature calibration uses bounded trunk scaling; see `docs/development/player-stature.tex`. New anatomy requires motion refitting.
+- Visual flat-cap appearance #15822 adds a low-profile CC0 head cap style; geometry stays in the visual layer and physics is unchanged.
