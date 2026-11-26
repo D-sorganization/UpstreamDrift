@@ -192,9 +192,60 @@ def build_cap(
     rim = open_rim(faces)
     pts = v[rim] + (cfg.offset) * n[rim]
     az = np.arctan2(pts[:, 1], pts[:, 0] - cfg.centre_x)
-    front = np.abs(az) <= cfg.brim_half_angle
-    order = np.argsort(az[front])
-    brim_pts = pts[front][order]
+    front_mask = np.abs(az) <= cfg.brim_half_angle
+    order = np.argsort(az[front_mask])
+    brim_pts = pts[front_mask][order]
     if len(brim_pts) < 3:
         raise ValueError("cap line leaves no front rim for the brim")
     return [("cap_crown", crown), ("cap_brim", _brim(brim_pts, cfg, brim_length))]
+
+
+def straw_hat_crop() -> CapCrop:
+    """Return a rounded straw crown with clearance for short cropped hair."""
+    return CapCrop(
+        line=((0.0, 0.73), (math.pi, 0.73)),
+        offset=0.075,
+        hair_under=HairCrop(
+            top_thickness=0.020,
+            fringe_thickness=0.0,
+            comb_amplitude=0.0,
+            heavy_side_gain=0.0,
+        ),
+    )
+
+
+def build_straw_hat(skin: Mesh) -> list[tuple[str, Mesh]]:
+    """Build closed rounded crown, circumferential brim and narrow dark band.
+
+    Dimensions are artistic head-length fractions; all are visual only.
+    The brim extends 0.32 radially from the crown and is 0.012 thick.
+    """
+    cfg = straw_hat_crop()
+    crown = build_cap(skin, 0.3, cfg)[0][1]
+    v0, n0 = skin.vertices, _vertex_normals(skin)
+    v, n, faces = _clip_above(v0, n0, skin.faces, v0[:, 2] - 0.73)
+    rim = open_rim(faces)
+    pts = v[rim] + cfg.offset * n[rim]
+    angle = np.arctan2(pts[:, 1], pts[:, 0] - cfg.centre_x)
+    pts, angle = pts[np.argsort(angle)], np.sort(angle)
+    radial = np.column_stack((np.cos(angle), np.sin(angle), np.zeros(len(angle))))
+    inner = pts.copy()
+    outer = pts + 0.32 * radial
+    outer[:, 2] -= 0.025
+    upper = np.array([0.0, 0.0, 0.006])
+    rings = np.stack((inner + upper, outer + upper, outer - upper, inner - upper))
+    count = len(pts)
+    faces_list: list[NDArray[np.int64]] = []
+    for i in range(4):
+        a = np.arange(count) + i * count
+        b = np.roll(np.arange(count), -1) + i * count
+        c = np.roll(np.arange(count), -1) + ((i + 1) % 4) * count
+        d = np.arange(count) + ((i + 1) % 4) * count
+        faces_list.extend((np.stack((a, b, c), axis=1), np.stack((a, c, d), axis=1)))
+    mesh = Mesh(rings.reshape(-1, 3), np.concatenate(faces_list))
+    if mesh.volume() < 0:
+        mesh = Mesh(mesh.vertices, mesh.faces[:, ::-1].copy())
+    vb, nb, fb = _clip_above(v0, n0, skin.faces, v0[:, 2] - 0.76)
+    vb, nb, fb = _clip_above(vb, nb, fb, 0.82 - vb[:, 2])
+    band = closed_shell(vb, nb, fb, np.full(len(vb), 0.006), cfg.offset, 0.006)
+    return [("straw_crown", crown), ("straw_brim", mesh), ("straw_band", band)]

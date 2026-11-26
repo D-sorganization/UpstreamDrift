@@ -7,7 +7,7 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Must-Read Pointers
 
-- #15825: Necromatcher native definitions may explicitly embed `appearance-v1`; binding and ranges reconstruct and verify the exact styled MJCF.
+- #15834: Shared `straw_hat` visual style and its [calculation reference](docs/development/full_body_models/appearance_reference/straw_hat.tex); preserve physical model and existing cap meshes.
 
 - `AGENTS.md`, `CLAUDE.md`: binding policy, discovery workflow and the shared-infrastructure directory.
 - `docs/development/DEVELOPMENT_LOG.md`: one `DL-#<issue>` state row per feature. `docs/development/HANDOFF.md`: canonical fleet handoff.
