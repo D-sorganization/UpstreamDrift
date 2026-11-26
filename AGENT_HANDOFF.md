@@ -7,6 +7,8 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Must-Read Pointers
 
+- #15825: Necromatcher native definitions may explicitly embed `appearance-v1`; binding and ranges reconstruct and verify the exact styled MJCF.
+
 - `AGENTS.md`, `CLAUDE.md`: binding policy, discovery workflow and the shared-infrastructure directory.
 - `docs/development/DEVELOPMENT_LOG.md`: one `DL-#<issue>` state row per feature. `docs/development/HANDOFF.md`: canonical fleet handoff.
 - `SPEC.md`: architecture contract; the change log is written by the fragment collate step, one row per PR.
