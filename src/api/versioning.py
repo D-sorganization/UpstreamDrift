@@ -18,11 +18,13 @@ Design by Contract:
 
 from __future__ import annotations
 
+import logging
 import re
+import warnings
 from functools import lru_cache
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from fastapi import APIRouter
@@ -30,13 +32,17 @@ if TYPE_CHECKING:
 try:
     import tomllib
 except ImportError:  # pragma: no cover - Python <3.11 fallback
-    import tomli as tomllib
+    import tomli as tomllib  # type: ignore[no-redef]
 
 # Public re-exports for the versioning policy helpers.
 __all__ = [
     "get_app_version",
+    "legacy_rest_deprecation_dependency",
     "make_versioned_router",
+    "warn_deprecated_rest_prefix",
 ]
+
+logger = logging.getLogger(__name__)
 
 # Major-version segment, e.g. "v1", "v2", "v17". Minor/patch revisions are
 # expressed in the application version, not the URI.
@@ -69,6 +75,82 @@ def get_app_version() -> str:
         return str(data["project"]["version"])
     except (FileNotFoundError, KeyError, OSError, TypeError):
         return "0.0.0"
+
+
+def _absolute_prefix(value: object, *, name: str, allow_empty: bool) -> str:
+    """Normalize a REST mount prefix.
+
+    Preconditions:
+        ``value`` is a string. Empty or ``/`` is accepted only when
+        ``allow_empty`` is true. Any other value must be absolute.
+
+    Postconditions:
+        Returns ``""`` or an absolute prefix without a trailing slash.
+    """
+    if not isinstance(value, str):
+        raise TypeError(f"{name} must be a string")
+    stripped = value.strip()
+    if stripped in ("", "/"):
+        if allow_empty:
+            return ""
+        raise ValueError(f"{name} must be an absolute prefix")
+    if not stripped.startswith("/"):
+        raise ValueError(f"{name} must be an absolute prefix, got {value!r}")
+    return stripped.rstrip("/")
+
+
+def warn_deprecated_rest_prefix(prefix: str, *, canonical: str) -> None:
+    """Warn when a REST mount is not the canonical versioned prefix.
+
+    The mount is not removed. Callers keep serving it and should also attach
+    :func:`legacy_rest_deprecation_dependency` so clients see the successor.
+
+    Preconditions:
+        ``prefix`` is ``""`` or an absolute path. ``canonical`` is an
+        absolute path such as ``/api/v1``.
+
+    Postconditions:
+        Emits ``DeprecationWarning`` and a logger warning when ``prefix``
+        differs from ``canonical``. Returns without warning when they match.
+    """
+    normalized = _absolute_prefix(prefix, name="prefix", allow_empty=True)
+    successor = _absolute_prefix(canonical, name="canonical", allow_empty=False)
+    if normalized == successor:
+        return
+    shown = normalized or "/"
+    message = (
+        f"REST prefix {shown!r} is deprecated; use {successor!r}. "
+        "The legacy mount remains until a later removal."
+    )
+    logger.warning(message)
+    warnings.warn(message, DeprecationWarning, stacklevel=2)
+
+
+def legacy_rest_deprecation_dependency(canonical: str) -> object:
+    """Return a dependency that advertises a deprecated REST prefix.
+
+    Preconditions:
+        ``canonical`` is an absolute successor prefix.
+
+    Postconditions:
+        The dependency sets ``Deprecation: true`` and a ``Link`` successor
+        header. It does not change the response body or remove the route.
+    """
+    successor = _absolute_prefix(canonical, name="canonical", allow_empty=False)
+    from fastapi import Depends, Response
+
+    def mark_legacy_rest_deprecated(response: Response) -> None:
+        """Attach RFC 9745 deprecation headers without altering the body."""
+        response.headers["Deprecation"] = "true"
+        response.headers["Link"] = f'<{successor}>; rel="successor-version"'
+
+    # ``from __future__ import annotations`` stores the hint as a string.
+    # FastAPI only injects Response when the annotation is the live class.
+    mark_legacy_rest_deprecated.__annotations__ = {
+        "response": Response,
+        "return": None,
+    }
+    return Depends(mark_legacy_rest_deprecated)
 
 
 def _validate_version(value: object) -> str:
@@ -169,7 +251,7 @@ def make_versioned_router(
     # passes the live ``Response`` instance.
     _deprecation_headers.__annotations__ = {"response": Response, "return": None}
 
-    dependencies: list = []
+    dependencies: list[Any] = []
     if deprecated:
         dependencies.append(Depends(_deprecation_headers))
 
