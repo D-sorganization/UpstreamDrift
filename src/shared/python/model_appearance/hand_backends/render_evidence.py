@@ -9,7 +9,10 @@ import numpy as np
 from numpy.typing import NDArray
 from PIL import Image
 
-from src.shared.python.model_appearance.geometry import Mesh
+from src.shared.python.model_appearance.geometry import (
+    Mesh,
+    rasterize_face_zbuffer,
+)
 
 Array = NDArray[np.float64]
 
@@ -110,83 +113,6 @@ def _shade_corners(
     return np.clip(base[None, None, :] * diff[:, :, None] + spec[:, :, None], 0.0, 1.0)
 
 
-def _rasterize_batches(
-    sx: Array,
-    sy: Array,
-    sz: Array,
-    faces: NDArray[np.int64],
-    px: int,
-) -> NDArray[np.uint64]:
-    """Vectorized orthographic Z-buffer rasterizer returning packed depth|tri_id."""
-    p0x, p0y = sx[faces[:, 0]], sy[faces[:, 0]]
-    p1x, p1y = sx[faces[:, 1]], sy[faces[:, 1]]
-    p2x, p2y = sx[faces[:, 2]], sy[faces[:, 2]]
-    z0, z1, z2 = sz[faces[:, 0]], sz[faces[:, 1]], sz[faces[:, 2]]
-
-    x0i = np.maximum(
-        0, np.floor(np.minimum(np.minimum(p0x, p1x), p2x)).astype(np.int64)
-    )
-    x1i = np.minimum(
-        px - 1, np.ceil(np.maximum(np.maximum(p0x, p1x), p2x)).astype(np.int64)
-    )
-    y0i = np.maximum(
-        0, np.floor(np.minimum(np.minimum(p0y, p1y), p2y)).astype(np.int64)
-    )
-    y1i = np.minimum(
-        px - 1, np.ceil(np.maximum(np.maximum(p0y, p1y), p2y)).astype(np.int64)
-    )
-    bw = np.maximum(0, x1i - x0i + 1)
-    bh = np.maximum(0, y1i - y0i + 1)
-    area_bb = bw * bh
-    area2 = (p1x - p0x) * (p2y - p0y) - (p1y - p0y) * (p2x - p0x)
-    valid = (x1i >= x0i) & (y1i >= y0i) & (area_bb > 0) & (np.abs(area2) > 1e-6)
-    v_idx = np.flatnonzero(valid)
-
-    best = np.zeros(px * px, dtype=np.uint64)
-    if len(v_idx) == 0:
-        return best
-
-    z_min = float(sz.min()) - 1e-4
-    z_max = float(sz.max()) + 1e-4
-    z_scale = 4294967290.0 / max(z_max - z_min, 1e-6)
-
-    batch_start = 0
-    max_cand = 1_600_000
-    cum = np.cumsum(area_bb[v_idx])
-    while batch_start < len(v_idx):
-        base_c = 0 if batch_start == 0 else int(cum[batch_start - 1])
-        end = int(np.searchsorted(cum, base_c + max_cand, side="right"))
-        end = max(end, batch_start + 1)
-        sl = v_idx[batch_start:end]
-        counts = area_bb[sl]
-        bws = bw[sl]
-        local_idx = np.repeat(sl, counts)
-        starts = np.repeat(np.cumsum(counts) - counts, counts)
-        rel = np.arange(int(counts.sum()), dtype=np.int64) - starts
-        bws_rep = np.repeat(bws, counts)
-        gpx = np.repeat(x0i[sl], counts) + (rel % bws_rep)
-        gpy = np.repeat(y0i[sl], counts) + (rel // bws_rep)
-        cx, cy = gpx.astype(np.float64) + 0.5, gpy.astype(np.float64) + 0.5
-
-        t0x, t0y = p0x[local_idx], p0y[local_idx]
-        t1x, t1y = p1x[local_idx], p1y[local_idx]
-        t2x, t2y = p2x[local_idx], p2y[local_idx]
-        inv_a = 1.0 / area2[local_idx]
-        w0 = ((t1x - cx) * (t2y - cy) - (t1y - cy) * (t2x - cx)) * inv_a
-        w1 = ((t2x - cx) * (t0y - cy) - (t2y - cy) * (t0x - cx)) * inv_a
-        w2 = 1.0 - w0 - w1
-        inside = (w0 >= -1e-5) & (w1 >= -1e-5) & (w2 >= -1e-5)
-        if np.any(inside):
-            hi = local_idx[inside]
-            hz = w0[inside] * z0[hi] + w1[inside] * z1[hi] + w2[inside] * z2[hi]
-            hpx = gpy[inside] * px + gpx[inside]
-            zq = np.clip((hz - z_min) * z_scale, 1.0, 4294967294.0).astype(np.uint64)
-            packed = (zq << np.uint64(32)) | (hi.astype(np.uint64) + np.uint64(1))
-            np.maximum.at(best, hpx, packed)
-        batch_start = end
-    return best
-
-
 def _color_for_label(label: str, cfg: LitRenderSettings) -> tuple[float, float, float]:
     if label == "grip":
         return cfg.grip_rgb
@@ -256,7 +182,7 @@ def render_scene_png(
     sy = half - (verts @ cam_up - cy) * scale
     sz = verts @ fwd
 
-    best = _rasterize_batches(sx, sy, sz, faces, px)
+    best = rasterize_face_zbuffer(sx, sy, sz, faces, px, px)
     img = np.empty((px * px, 3), dtype=np.float64)
     img[:, :] = np.asarray(cfg.background_rgb, dtype=np.float64)
     hit_pix = np.flatnonzero(best != 0)

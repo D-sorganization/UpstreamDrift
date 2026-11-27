@@ -4,7 +4,10 @@ import numpy as np
 import pytest
 
 from src.shared.python.model_appearance import ellipsoid_mesh, lofted_segment
-from src.shared.python.model_appearance.geometry import LoftOptions
+from src.shared.python.model_appearance.geometry import (
+    LoftOptions,
+    rasterize_face_zbuffer,
+)
 
 pytestmark = pytest.mark.unit
 Z = np.array([0.0, 0.0, 0.4])
@@ -203,3 +206,47 @@ def test_width_axes_come_from_spec_landmarks(spec_path) -> None:
             assert _angle_deg(width, sections[cap.body].ml_axis) < 5.0, cap.body
             checked += 1
     assert checked >= 4  # spine capsules and both shoes
+
+
+def _two_triangle_scene():
+    """A far triangle covering the grid and a near one inside it."""
+    sx = np.array([0.0, 9.0, 0.0, 2.0, 4.0, 2.0], dtype=np.float64)
+    sy = np.array([0.0, 0.0, 9.0, 2.0, 2.0, 4.0], dtype=np.float64)
+    sz = np.array([0.0, 0.0, 0.0, 1.0, 1.0, 1.0], dtype=np.float64)
+    faces = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int64)
+    return sx, sy, sz, faces
+
+
+def _hit_faces(best):
+    """Decoded face index per pixel; -1 where the pixel is empty."""
+    out = np.full(best.shape, -1, dtype=np.int64)
+    hit = np.flatnonzero(best != 0)
+    out[hit] = (best[hit] & np.uint64(0xFFFFFFFF)).astype(np.int64) - 1
+    return out
+
+
+def test_nearer_triangle_wins_the_pixel() -> None:
+    sx, sy, sz, faces = _two_triangle_scene()
+    won = _hit_faces(rasterize_face_zbuffer(sx, sy, sz, faces, 9, 9))
+    assert won[2 * 9 + 2] == 1  # pixel centre 2.5,2.5 is inside both: near wins
+    assert won[1 * 9 + 1] == 0  # centre 1.5,1.5 is outside the small triangle
+
+
+def test_face_mask_culls_without_renumbering_faces() -> None:
+    """Low word stays an index into ``faces``, not into the kept subset.
+
+    The shaded-hand preview culls to the triangles in front of the camera and
+    then looks the winner up in the *full* face list, so a masked rasteriser
+    that renumbered from zero would silently shade the wrong triangle.
+    """
+    sx, sy, sz, faces = _two_triangle_scene()
+    only_near = _hit_faces(
+        rasterize_face_zbuffer(sx, sy, sz, faces, 9, 9, np.array([False, True]))
+    )
+    assert only_near[2 * 9 + 2] == 1  # still face 1, not the subset's face 0
+    assert only_near[1 * 9 + 1] == -1  # the culled far triangle painted nothing
+
+
+def test_empty_selection_paints_nothing() -> None:
+    sx, sy, sz, faces = _two_triangle_scene()
+    assert not rasterize_face_zbuffer(sx, sy, sz, faces, 9, 9, np.zeros(2, bool)).any()

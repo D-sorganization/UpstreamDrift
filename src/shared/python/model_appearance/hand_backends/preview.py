@@ -8,7 +8,11 @@ import math
 import numpy as np
 from numpy.typing import NDArray
 
-from src.shared.python.model_appearance.geometry import Mesh, concat_meshes
+from src.shared.python.model_appearance.geometry import (
+    Mesh,
+    concat_meshes,
+    rasterize_face_zbuffer,
+)
 from src.shared.python.model_appearance.library import MATERIALS
 
 Array = NDArray[np.float64]
@@ -333,86 +337,6 @@ def _welded_vertex_normals(mesh: Mesh, weld_tol_m: float = 1.5e-4) -> Array:
     return unit_wn[inv]
 
 
-def _rasterize_ssaa(
-    sx: Array,
-    sy: Array,
-    sz: Array,
-    faces: NDArray[np.int64],
-    tri_mask: NDArray[np.bool_],
-    w_ss: int,
-    h_ss: int,
-) -> NDArray[np.uint64]:
-    """Rasterise triangles with supersampling into an RGB image."""
-    active = np.flatnonzero(tri_mask)
-    best = np.zeros(w_ss * h_ss, dtype=np.uint64)
-    if len(active) == 0:
-        return best
-    z_min = float(sz.min()) - 1e-4
-    z_max = float(sz.max()) + 1e-4
-    z_scale = 4294967290.0 / max(z_max - z_min, 1e-6)
-    f_act = faces[active]
-    p0x, p0y = sx[f_act[:, 0]], sy[f_act[:, 0]]
-    p1x, p1y = sx[f_act[:, 1]], sy[f_act[:, 1]]
-    p2x, p2y = sx[f_act[:, 2]], sy[f_act[:, 2]]
-    tz0, tz1, tz2 = sz[f_act[:, 0]], sz[f_act[:, 1]], sz[f_act[:, 2]]
-    x0i = np.maximum(
-        0, np.floor(np.minimum(np.minimum(p0x, p1x), p2x)).astype(np.int64)
-    )
-    x1i = np.minimum(
-        w_ss - 1, np.ceil(np.maximum(np.maximum(p0x, p1x), p2x)).astype(np.int64)
-    )
-    y0i = np.maximum(
-        0, np.floor(np.minimum(np.minimum(p0y, p1y), p2y)).astype(np.int64)
-    )
-    y1i = np.minimum(
-        h_ss - 1, np.ceil(np.maximum(np.maximum(p0y, p1y), p2y)).astype(np.int64)
-    )
-    bw = np.maximum(0, x1i - x0i + 1)
-    bh = np.maximum(0, y1i - y0i + 1)
-    area_bb = bw * bh
-    area2 = (p1x - p0x) * (p2y - p0y) - (p1y - p0y) * (p2x - p0x)
-    v_idx = np.flatnonzero((area_bb > 0) & (np.abs(area2) > 1e-6))
-    if len(v_idx) == 0:
-        return best
-    batch_start = 0
-    max_cand = 1_600_000
-    cum = np.cumsum(area_bb[v_idx])
-    while batch_start < len(v_idx):
-        base_c = 0 if batch_start == 0 else int(cum[batch_start - 1])
-        end = max(
-            int(np.searchsorted(cum, base_c + max_cand, side="right")), batch_start + 1
-        )
-        sl = v_idx[batch_start:end]
-        counts = area_bb[sl]
-        bws = bw[sl]
-        local_idx = np.repeat(sl, counts)
-        starts = np.repeat(np.cumsum(counts) - counts, counts)
-        rel = np.arange(int(counts.sum()), dtype=np.int64) - starts
-        bws_rep = np.repeat(bws, counts)
-        px = np.repeat(x0i[sl], counts) + (rel % bws_rep)
-        py = np.repeat(y0i[sl], counts) + (rel // bws_rep)
-        cx, cy = px.astype(np.float64) + 0.5, py.astype(np.float64) + 0.5
-        t0x, t0y = p0x[local_idx], p0y[local_idx]
-        t1x, t1y = p1x[local_idx], p1y[local_idx]
-        t2x, t2y = p2x[local_idx], p2y[local_idx]
-        inv_a = 1.0 / area2[local_idx]
-        w0 = ((t1x - cx) * (t2y - cy) - (t1y - cy) * (t2x - cx)) * inv_a
-        w1 = ((t2x - cx) * (t0y - cy) - (t2y - cy) * (t0x - cx)) * inv_a
-        w2 = 1.0 - w0 - w1
-        inside = (w0 >= -1e-5) & (w1 >= -1e-5) & (w2 >= -1e-5)
-        if np.any(inside):
-            hi = local_idx[inside]
-            hz = w0[inside] * tz0[hi] + w1[inside] * tz1[hi] + w2[inside] * tz2[hi]
-            hpx = py[inside] * w_ss + px[inside]
-            zq = np.clip((hz - z_min) * z_scale, 1.0, 4294967294.0).astype(np.uint64)
-            packed = (zq << np.uint64(32)) | (
-                active[hi].astype(np.uint64) + np.uint64(1)
-            )
-            np.maximum.at(best, hpx, packed)
-        batch_start = end
-    return best
-
-
 def _stack_drawables(
     drawables: Sequence[
         tuple[Mesh, tuple[float, float, float]]
@@ -539,7 +463,7 @@ def render_shaded_scene_rgb(
             < h_ss
         )
     )
-    best = _rasterize_ssaa(sx, sy, sz, faces, in_fr, w_ss, h_ss)
+    best = rasterize_face_zbuffer(sx, sy, sz, faces, w_ss, h_ss, in_fr)
 
     img = np.empty((h_ss * w_ss, 3), dtype=np.float64)
     img[:] = bg_rgb
