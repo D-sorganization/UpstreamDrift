@@ -99,21 +99,25 @@ def build_period_cap(
 ) -> list[tuple[str, Mesh]]:
     """Add a small crown-to-peak snap to the closed flat-cap assembly."""
     parts = build_cap(skin, length, crop)
-    crown, brim = (part.vertices for _, part in parts)
-    crown = crown[(np.abs(crown[:, 1]) < 0.035) & (crown[:, 0] > 0.3)]
-    brim = brim[(np.abs(brim[:, 1]) < 0.035) & (brim[:, 0] > 0.3)]
-    distances = np.linalg.norm(crown[:, None] - brim[None, :], axis=2)
-    i, j = np.unravel_index(distances.argmin(), distances.shape)
-    centre = (crown[i] + brim[j]) / 2
-    axis = crown[i] - brim[j]
-    length = np.linalg.norm(axis)
-    if length < 1e-9:
-        axis = np.array([0.0, 0.0, 1.0])
+    crown_mesh, brim_mesh = (part for _, part in parts)
+    crown, brim = crown_mesh.vertices, brim_mesh.vertices
+    central_crown = crown[(np.abs(crown[:, 1]) < 0.035) & (crown[:, 0] > 0.3)]
+    central_brim = brim[(np.abs(brim[:, 1]) < 0.035) & (brim[:, 0] > 0.3)]
+    # Long configurable bills retain a bounded pull; short bills join at the tip.
+    eligible = central_brim[central_brim[:, 0] <= central_crown[:, 0].max() + 0.05]
+    target = eligible[eligible[:, 0].argmax()]
+    anchor = central_crown[np.linalg.norm(central_crown - target, axis=1).argmin()]
+    delta = target - anchor
+    weight = np.exp(
+        -np.sum(((crown - anchor) / np.array([0.18, 0.18, 0.15])) ** 2, axis=1)
+    )
+    crown = crown + weight[:, None] * delta
+    parts[0] = ("cap_crown", Mesh(crown, crown_mesh.faces))
     snap = ellipsoid_mesh(
-        centre,
-        np.array([max(length / 2, 0.002), 0.012, 0.006]),
-        axis,
-        width_hint=np.array([0.0, 1.0, 0.0]),
+        target,
+        np.array([0.002, 0.012, 0.006]),
+        np.array([0.0, 0.0, 1.0]),
+        width_hint=np.array([1.0, 0.0, 0.0]),
     )
     return [*parts, ("cap_snap", snap)]
 
@@ -286,7 +290,7 @@ def build_straw_hat(skin: Mesh) -> list[tuple[str, Mesh]]:
     if mesh.volume() < 0:
         mesh = Mesh(mesh.vertices, mesh.faces[:, ::-1].copy())
     vb, nb, fb = _clip_above(v0, n0, skin.faces, v0[:, 2] - 0.76)
-    vb, nb, fb = _clip_above(vb, nb, fb, 0.82 - vb[:, 2])
+    vb, nb, fb = _clip_above(vb, nb, fb, 0.80 - vb[:, 2])
     band = closed_shell(vb, nb, fb, np.full(len(vb), 0.006), cfg.offset, 0.006)
     band = _straw_crown_shape(band, rise)
     return [("straw_crown", crown), ("straw_brim", mesh), ("straw_band", band)]

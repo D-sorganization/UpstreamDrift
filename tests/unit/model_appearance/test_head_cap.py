@@ -112,7 +112,7 @@ def test_flat_cap_hair_is_cropped_below_the_crown() -> None:
     parts = {p.name: p for p in build_head_parts(LENGTH, settings)}
     assert "hair_mesh" in parts
     crop = head_cap.flat_cap_crop()
-    crown = head_cap.build_cap(skin, settings.cap_brim, crop)[0][1]
+    crown = head_cap.build_period_cap(skin, settings.cap_brim, crop)[0][1]
     hair = head_hair.build_short_crop(skin, settings.hair_part, crop.hair_under)
     _assert_hair_under_crown(crown, hair, np.array([crop.centre_x, 0.0, 0.55]))
     assert hair.vertices[:, 2].max() < crown.vertices[:, 2].max()
@@ -170,3 +170,12 @@ def test_newsboy_hair_is_cropped_below_the_crown() -> None:
     crown = dict(head_cap.build_period_cap(skin, 0.3, crop))["cap_crown"]
     hair = head_hair.build_short_crop(skin, "left", crop.hair_under)
     _assert_hair_under_crown(crown, hair, np.array([crop.centre_x, 0.0, 0.55]))
+
+
+def test_short_snapped_caps_clear_hair() -> None:
+    """Check actual reshaped crowns at the short period-peak setting."""
+    skin = head_mesh._default_asset().skin
+    for crop in (head_cap.flat_cap_crop(), head_cap.newsboy_cap_crop()):
+        crown = dict(head_cap.build_period_cap(skin, 0.12, crop))["cap_crown"]
+        hair = head_hair.build_short_crop(skin, "left", crop.hair_under)
+        _assert_hair_under_crown(crown, hair, np.array([crop.centre_x, 0.0, 0.55]))

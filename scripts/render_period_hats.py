@@ -39,6 +39,7 @@ def main() -> None:
                 "schema_version": "appearance-v1",
                 "head": {
                     "cap_style": style,
+                    "cap_brim": 0.12,
                     "cap_material": "hat_straw" if style == "straw_hat" else "cap_navy",
                 },
             }
