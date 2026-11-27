@@ -27,6 +27,7 @@ ORDER = tuple(json.loads(SHOWPIECE_V2.read_text(encoding="utf-8"))["coordinate_o
 
 
 def test_subset_has_trunk_neck_and_the_lead_arm_chain() -> None:
+    """Subset has trunk neck and the lead arm chain."""
     chosen = select_controlled(ORDER)
     for needed in (
         "lumbar_axial_rotation",
@@ -42,22 +43,26 @@ def test_subset_has_trunk_neck_and_the_lead_arm_chain() -> None:
 
 
 def test_subset_never_contains_root_or_legs() -> None:
+    """Subset never contains root or legs."""
     chosen = select_controlled(ORDER)
     assert not any(j.startswith(("Translation", "HipInput")) for j in chosen)
     assert not any(j.endswith(("_r", "_l")) for j in chosen)
 
 
 def test_a_missing_joint_is_refused() -> None:
+    """A missing joint is refused."""
     with pytest.raises(ContractViolationError, match="NeckInputZ"):
         select_controlled(tuple(j for j in ORDER if j != "NeckInputZ"))
 
 
 def test_default_ladder_does_not_stop_below_the_firm_125_target() -> None:
+    """Default ladder does not stop below the firm 125 target."""
     spec = ladder_spec()
     assert spec.stop_mph == 125.0 and spec.start_mph < spec.stop_mph
 
 
 def test_outputs_must_live_outside_the_repo(tmp_path: Path) -> None:
+    """Outputs must live outside the repo."""
     require_outside_repo(tmp_path)
     with pytest.raises(ContractViolationError, match="outside the repo"):
         require_outside_repo(Path(__file__).resolve().parents[3] / "docs" / "x")
@@ -85,6 +90,7 @@ def test_run_gate_envelope_builds_on_v2_without_unbounded_rom() -> None:
 
 
 def test_face_is_checked_unless_the_face_free_flag_is_set() -> None:
+    """Face is checked unless the face free flag is set."""
     assert baseline_band(face_free=False).max_abs_face_deg == 25.0
     free = baseline_band(face_free=True)
     assert free.max_abs_face_deg is None

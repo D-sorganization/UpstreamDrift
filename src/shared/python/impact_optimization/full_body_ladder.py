@@ -75,6 +75,7 @@ class BaselineBand:
     max_abs_path_deg: float = 15.0
 
     def __post_init__(self) -> None:
+        """Reject a band whose bounds are not ordered."""
         require(
             0.0 < self.speed_mph_min < self.speed_mph_max,
             "need 0 < speed_mph_min < speed_mph_max",
@@ -189,6 +190,7 @@ def make_mujoco_impact_fn(
     run: Callable[..., Any] = evaluate or evaluate_rollout
 
     def impact_fn(times_s: Array, q: Array, v: Array) -> MeasuredImpact:
+        """Impact fn."""
         require(q.shape[1] == len(ids) == v.shape[1], "state width must match ids")
         qpos = np.tile(np.asarray(model.qpos0, dtype=float), (len(times_s), 1))
         qvel = np.zeros((len(times_s), model.nv))

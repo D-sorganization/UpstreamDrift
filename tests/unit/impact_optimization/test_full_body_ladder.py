@@ -48,17 +48,22 @@ class _Plant:
     coordinate_order = ORDER
 
     def acceleration(self, q, v, tau):
+        """Acceleration."""
         a = np.array(tau, dtype=float)
         a[:6] = 0.0
         return a
 
     def closure_pose_residual(self, q):
+        """Closure pose residual."""
         return np.zeros(1)
 
 
 def _window(base_speed_gain: float = 100.0) -> RolloutWindow:
+    """Window."""
+
     def impact_fn(times, q, v):
         # speed grows with J0 velocity at the end of the window
+        """Impact fn."""
         return _Impact(0.0, 0.0, 0.0, base_speed_gain + 40.0 * float(v[-1, 6]))
 
     eff = np.zeros((STEPS, len(ORDER)))
@@ -75,6 +80,7 @@ def _window(base_speed_gain: float = 100.0) -> RolloutWindow:
 
 
 def _env() -> PhysiologicalEnvelope:
+    """Env."""
     return PhysiologicalEnvelope(
         names=("J0", "J1", "J2"),
         tau_max_negative_nm=np.full(3, 50.0),
@@ -87,6 +93,7 @@ def _env() -> PhysiologicalEnvelope:
 
 
 def test_band_accepts_a_physical_baseline_and_rejects_the_rest() -> None:
+    """Band accepts a physical baseline and rejects the rest."""
     band = BaselineBand()
     require_physical_baseline(_Impact(10.0, 3.0, 2.0, 110.0), band)
     for bad in (
@@ -100,6 +107,7 @@ def test_band_accepts_a_physical_baseline_and_rejects_the_rest() -> None:
 
 
 def test_face_free_band_skips_only_the_face_check() -> None:
+    """Face free band skips only the face check."""
     band = BaselineBand(max_abs_face_deg=None)
     require_physical_baseline(_Impact(-58.6, 3.0, 2.0, 110.0), band)
     require_physical_baseline(_Impact(None, 3.0, 2.0, 110.0), band)
@@ -113,12 +121,14 @@ def test_face_free_band_skips_only_the_face_check() -> None:
 
 
 def test_the_default_band_still_checks_the_face() -> None:
+    """The default band still checks the face."""
     assert BaselineBand().max_abs_face_deg == 25.0
     with pytest.raises(ContractViolationError):
         require_physical_baseline(_Impact(-58.6, 3.0, 2.0, 110.0), BaselineBand())
 
 
 def test_band_validates_its_own_bounds() -> None:
+    """Band validates its own bounds."""
     with pytest.raises(ContractViolationError):
         BaselineBand(speed_mph_min=120.0, speed_mph_max=100.0)
     with pytest.raises(ContractViolationError):
@@ -126,6 +136,7 @@ def test_band_validates_its_own_bounds() -> None:
 
 
 def test_ladder_refuses_to_start_on_a_non_physical_baseline() -> None:
+    """Ladder refuses to start on a non physical baseline."""
     with pytest.raises(ContractViolationError, match="baseline"):
         run_full_body_ladder(
             _window(base_speed_gain=50.0),
@@ -137,6 +148,7 @@ def test_ladder_refuses_to_start_on_a_non_physical_baseline() -> None:
 
 
 def test_ladder_runs_on_a_physical_baseline_and_reports_per_rung_bindings() -> None:
+    """Ladder runs on a physical baseline and reports per rung bindings."""
     run = run_full_body_ladder(
         _window(),
         ("J0", "J1"),
@@ -153,10 +165,13 @@ def test_ladder_runs_on_a_physical_baseline_and_reports_per_rung_bindings() -> N
 
 
 def test_held_joints_are_the_non_root_complement_in_plant_order() -> None:
+    """Held joints are the non root complement in plant order."""
     assert held_joints(_window(), ("J1",)) == ("J0", "J2")
 
 
 def test_mujoco_impact_fn_scatters_by_joint_id_and_evaluates_at_the_index() -> None:
+    """Mujoco impact fn scatters by joint id and evaluates at the index."""
+
     class _Model:
         nq, nv = 4, 4
         jnt_qposadr = np.array([2, 0, 3])
@@ -167,6 +182,7 @@ def test_mujoco_impact_fn_scatters_by_joint_id_and_evaluates_at_the_index() -> N
     seen = {}
 
     def fake_eval(model, rollout, body, frame, *, spec, impact_index):
+        """Fake eval."""
         seen.update(q=rollout.qpos, v=rollout.qvel, idx=impact_index, body=body)
         return _Impact(1.0, 2.0, 3.0, 4.0)
 
@@ -181,6 +197,8 @@ def test_mujoco_impact_fn_scatters_by_joint_id_and_evaluates_at_the_index() -> N
 
 
 def test_mujoco_impact_fn_rejects_non_scalar_joints_and_wrong_width() -> None:
+    """Mujoco impact fn rejects non scalar joints and wrong width."""
+
     class _Free:
         nq, nv = 7, 6
         jnt_qposadr = np.array([0])
@@ -206,6 +224,7 @@ def test_mujoco_impact_fn_rejects_non_scalar_joints_and_wrong_width() -> None:
 
 
 def test_rung_bindings_are_computed_in_radians() -> None:
+    """Rung bindings are computed in radians."""
     env = PhysiologicalEnvelope(
         names=("J0", "J1", "J2"),
         tau_max_negative_nm=np.full(3, 50.0),

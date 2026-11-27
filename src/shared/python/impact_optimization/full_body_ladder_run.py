@@ -208,6 +208,7 @@ def _run(
     face_free: bool = False,
     impact_step: int | None = None,
 ) -> int:  # pragma: no cover - the real run is held (D24)
+    """Run."""
     import numpy as np
 
     from src.shared.python.impact_optimization.full_body_ladder import (
@@ -250,6 +251,7 @@ def _run(
     plant = VectorPlant("mujoco", spec_bytes)
 
     def window(policy: StepPolicy) -> RolloutWindow:
+        """Window."""
         return RolloutWindow(
             plant,
             np.asarray(bundle.reference_q[a], dtype=float),
