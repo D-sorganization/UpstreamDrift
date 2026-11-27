@@ -142,6 +142,10 @@ that does not make them measured or applied forces.
 - Do not quote impact factors as launch-monitor data or flight as total distance.
 - Do not say an open-loop clip is accepted for a full swing.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html): *The Physics of Golf — Forces and Torques*.
+
 ## Known Issues
 
 As of this writing, tracked in epic #15150 with fixes on other branches:
