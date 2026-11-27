@@ -36,6 +36,7 @@ ALLOWLIST: frozenset[str] = frozenset(
         "Dockerfile.modular",
         "docker-compose.yml",
         "docker-compose.gpu.yml",
+        "docker-compose.override.yml",
         "docker-compose.profiles.yml",
         "build_hooks.py",
         "conftest.py",

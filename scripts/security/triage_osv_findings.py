@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
@@ -151,6 +152,7 @@ def load_osv_findings(path: Path) -> list[dict[str, Any]]:
 
 
 def _packages_from_result(result: dict[str, Any]) -> list[dict[str, Any]]:
+    """Return vulnerability mappings stored on one OSV result entry."""
     packages = result.get("packages", [])
     findings: list[dict[str, Any]] = []
     if not isinstance(packages, list):
@@ -171,6 +173,7 @@ def _packages_from_result(result: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _package_name(finding: dict[str, Any]) -> str:
+    """Return the normalized package name stored on one finding."""
     package = finding.get("package", {})
     if isinstance(package, dict):
         return _normalize_required("package.name", str(package.get("name", "")))
@@ -178,10 +181,12 @@ def _package_name(finding: dict[str, Any]) -> str:
 
 
 def _normalize_required(name: str, value: str) -> str:
+    """Return required text folded to lowercase."""
     return _require_text(name, value).lower()
 
 
 def _require_text(name: str, value: str) -> str:
+    """Return stripped text or raise when the value is missing."""
     if not isinstance(value, str):
         raise TypeError(f"{name} must be a string")
     normalized = value.strip()
@@ -191,27 +196,80 @@ def _require_text(name: str, value: str) -> str:
 
 
 def _is_common_critical_vector(score: str) -> bool:
+    """Return whether a CVSS vector is the common critical pattern."""
     return all(
         part in score for part in ("AV:N", "AC:L", "PR:N", "UI:N", "C:H", "I:H", "A:H")
     )
 
 
-def parse_args() -> argparse.Namespace:
+def classify_osv_exit(status: int) -> str:
+    """Classify an OSV scanner or triage process status.
+
+    Preconditions:
+        ``status`` is an ``int`` and is not a ``bool``.
+    Postconditions:
+        ``"clean"`` for 0, ``"vulnerabilities"`` for 1, and ``"crash"``
+        for every other status.
+    """
+    if isinstance(status, bool) or not isinstance(status, int):
+        raise TypeError("status must be an int")
+    if status == 0:
+        return "clean"
+    if status == 1:
+        return "vulnerabilities"
+    return "crash"
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--osv-json", type=Path, required=True)
+    parser.add_argument("--osv-json", type=Path)
     parser.add_argument("--detected-on", default=date.today().isoformat())
-    return parser.parse_args()
+    parser.add_argument("--classify-exit", type=int)
+    return parser.parse_args(argv)
 
 
-def main() -> int:
-    """Print tiered OSV finding summaries as JSON lines."""
-    args = parse_args()
-    detected_on = date.fromisoformat(args.detected_on)
-    summaries = [
-        summarize_finding(finding, detected_on=detected_on)
-        for finding in load_osv_findings(args.osv_json)
-    ]
+def _argument_status(exc: SystemExit) -> int:
+    """Return a process status for an argparse ``SystemExit``."""
+    code = exc.code
+    if code in (0, None):
+        return 0
+    if isinstance(code, int) and code > 1:
+        return code
+    return 2
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Print tiered OSV finding summaries as JSON lines.
+
+    Postconditions:
+        0 when the report has no findings, 1 when findings were summarized,
+        and 2 when triage itself failed. ``--classify-exit`` prints the
+        status class and returns 0.
+    """
+    try:
+        args = parse_args(argv)
+    except SystemExit as exc:
+        return _argument_status(exc)
+    if args.classify_exit is not None:
+        try:
+            print(classify_osv_exit(args.classify_exit))
+        except TypeError as exc:
+            sys.stderr.write(f"OSV triage failed: {exc}\n")
+            return 2
+        return 0
+    if args.osv_json is None:
+        sys.stderr.write("OSV triage requires --osv-json\n")
+        return 2
+    try:
+        detected_on = date.fromisoformat(args.detected_on)
+        summaries = [
+            summarize_finding(finding, detected_on=detected_on)
+            for finding in load_osv_findings(args.osv_json)
+        ]
+    except (OSError, ValueError, TypeError) as exc:
+        sys.stderr.write(f"OSV triage failed: {exc}\n")
+        return 2
     for summary in summaries:
         print(
             json.dumps(

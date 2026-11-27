@@ -1390,6 +1390,30 @@
       "evidence": "src/tools/native_viewer_export/cli.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
+    "motion_matching.kinetic_match": {
+      "id": "motion_matching.kinetic_match",
+      "name": "Kinetic match: joint torques for a matched swing from the CLI, REST route and MCP tool",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/shared/python/motion_matching/kinetic_match.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
+    "tools.swing_report_package": {
+      "id": "tools.swing_report_package",
+      "name": "Swing report package: one command regenerates a swing's videos, grids and phase sheets (CLI)",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/swing_report_package/cli.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
     "contraction": {
       "id": "contraction",
       "name": "Tools Package: contraction",
@@ -1412,6 +1436,18 @@
       "lifecycle": "intentionally_headless",
       "alias_target": null,
       "evidence": "src/tools/drift_control/__init__.py",
+      "acceptance_owner": "tests/config/test_registry_exclusions.py"
+    },
+    "swing_report_package": {
+      "id": "swing_report_package",
+      "name": "Tools Package: swing_report_package",
+      "entity_kind": "cli_tool",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "intentionally_headless",
+      "alias_target": null,
+      "evidence": "src/tools/swing_report_package/__init__.py",
       "acceptance_owner": "tests/config/test_registry_exclusions.py"
     },
     "sg_optimizer": {

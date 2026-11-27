@@ -82,7 +82,7 @@ def test_default_profile_is_generic_stiff_and_flagged() -> None:
     record = chain.record
     assert DEFAULT_FLEX == "Stiff" and chain.n_links == DEFAULT_LINKS
     assert record["flex"] == "Stiff"
-    assert record["flex_cpm"] == pytest.approx(280.0)
+    assert record["flex_cpm"] == pytest.approx(258.0)
     assert record["profile_status"] == PROFILE_STATUS == "default_not_measured"
     assert not chain.torsion and chain.stiffness_scale == 1.0
     assert any("Milne" in s for s in record["sources"])

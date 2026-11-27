@@ -37,6 +37,10 @@ Contract
   record a client saved and reloaded and accepts it only when its schema is
   known and its digest still covers it, so an edited record -- an exploratory
   leader promoted to ``winner``, say -- is refused as corrupt.
+* **Flight data retains its assumptions (#15497).** ``flight`` is the
+  model's SI flight/rollout trace and uncalibrated-green assumption, or
+  ``None`` for refused shots or unavailable releases. It is digest-covered
+  in evaluations and in each side of a comparison, including job results.
 
 The workbench model imports in seconds, so it is imported inside the
 handler, never at route discovery (the #8943 lazy-import pattern).
@@ -272,6 +276,17 @@ class BunkerCarryV1(BaseModel):
     band_reasons: list[str]
 
 
+class BunkerFlightV1(BaseModel):
+    """Existing adapter trace in metres, x forward, y left, z up."""
+
+    model_config = ConfigDict(allow_inf_nan=False)
+
+    flight_m: list[tuple[float, float, float]]
+    rollout_m: list[tuple[float, float, float]]
+    carry_m: float
+    assumption: str
+
+
 class BunkerSourceStampV1(BaseModel):
     basis: str
     source: str
@@ -308,6 +323,7 @@ class BunkerWorkbenchEvaluationV1(BaseModel):
     shot: BunkerShotMetricsV1
     delivered: BunkerDeliveredV1
     carry: BunkerCarryV1 | None
+    flight: BunkerFlightV1 | None = None
     unavailable: list[str]
     sources: BunkerSourcesV1
     objective: BunkerObjectiveReportV1 | None
@@ -521,6 +537,11 @@ def evaluation_record(
         "shot": _shot_metrics(shot),
         "delivered": _delivered(shot),
         "carry": _carry(shot),
+        "flight": (
+            None
+            if shot.refused or shot.flight is None
+            else dataclasses.asdict(shot.flight)
+        ),
         "unavailable": list(shot.unavailable),
         "sources": evaluation_sources(evaluation),
         "objective": (

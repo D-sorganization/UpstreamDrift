@@ -56,6 +56,7 @@ _AGENT_CAPABILITY_TOOLS = (
     "native_export_validate",
     "native_export_run",
     "native_export_status",
+    "kinetic_match",
 )
 
 

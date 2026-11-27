@@ -174,6 +174,11 @@ def _checked(
     club = assembly_from_spec(spec_to)
     if club is None:
         raise ValueError("spec has no club to hold")
+    if club.handedness != "right":
+        raise ValueError(
+            "left-handed skinned arm refit is not implemented: the arm chain "
+            "is fitted for a right-handed golfer (#15652)"
+        )
     return start, club
 
 
@@ -257,7 +262,7 @@ def refit_arms_to_club(
     ``posture`` gives coordinates an angle (rad) to sit at (#15277): solved
     with the arms, pulled there by ``posture_weight`` in place of toward ``q``.
 
-    Preconditions: both specs share ``coordinate_order`` and hold a club;
+    Preconditions: both specs share ``coordinate_order``, hold a right-handed club;
     ``q`` has one finite value per coordinate; ``alignment_weight >= 0``;
     every ``also_free`` and ``posture`` name is a coordinate, posture targets
     are finite and ``posture_weight >= 0`` (``ValueError`` otherwise).

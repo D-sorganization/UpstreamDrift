@@ -261,6 +261,7 @@
 {"path": "biomechanics/activation_dynamics.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/biomechanics_data.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/club_inertia_partition.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
+{"path": "biomechanics/cop_grf_replay_harness.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/drift_control_transfer.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/dynamic_com.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/foot_membership.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
@@ -513,6 +514,18 @@
 {"path": "club_data/player_clubs.py", "classification": "ud-only", "package": "club_data", "spelling_only": false}
 {"path": "club_data/public_clubs.json", "classification": "ud-only", "package": "club_data", "spelling_only": false}
 {"path": "club_data/targets.py", "classification": "ud-only", "package": "club_data", "spelling_only": false}
+{"path": "club_fitting/__init__.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
+{"path": "club_fitting/__main__.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
+{"path": "club_fitting/bend_rate_check.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
+{"path": "club_fitting/bend_trace.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
+{"path": "club_fitting/bundle_input.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
+{"path": "club_fitting/flex_comparison.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
+{"path": "club_fitting/flex_sweep.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
+{"path": "club_fitting/flight_trace.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
+{"path": "club_fitting/grip_driven_shaft.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
+{"path": "club_fitting/grip_motion.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
+{"path": "club_fitting/shaft_report.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
+{"path": "club_fitting/shaft_shape.py", "classification": "ud-only", "package": "club_fitting", "spelling_only": false}
 {"path": "codemap/__init__.py", "classification": "tools-only", "package": "codemap", "spelling_only": false}
 {"path": "codemap/_lang_js.py", "classification": "tools-only", "package": "codemap", "spelling_only": false}
 {"path": "codemap/_lang_markdown.py", "classification": "tools-only", "package": "codemap", "spelling_only": false}
@@ -764,6 +777,7 @@
 {"path": "force_overlay/renderers/qpainter_glyphs.py", "classification": "ud-only", "package": "force_overlay", "spelling_only": false}
 {"path": "force_overlay/segment_axes.py", "classification": "ud-only", "package": "force_overlay", "spelling_only": false}
 {"path": "force_overlay/series.py", "classification": "ud-only", "package": "force_overlay", "spelling_only": false}
+{"path": "force_overlay/tip_to_tail.py", "classification": "ud-only", "package": "force_overlay", "spelling_only": false}
 {"path": "force_plates/__init__.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/alignment.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
 {"path": "force_plates/comparison.py", "classification": "ud-only", "package": "force_plates", "spelling_only": false}
@@ -1035,6 +1049,9 @@
 {"path": "gui_pkg/plotting_utils.py", "classification": "ud-only", "package": "gui_pkg", "spelling_only": false}
 {"path": "gui_pkg/video_pose_pipeline.py", "classification": "ud-only", "package": "gui_pkg", "spelling_only": false}
 {"path": "gui_pkg/viewpoint_controls.py", "classification": "ud-only", "package": "gui_pkg", "spelling_only": false}
+{"path": "hand_load_nullspace/__init__.py", "classification": "ud-only", "package": "hand_load_nullspace", "spelling_only": false}
+{"path": "hand_load_nullspace/simulation_output.py", "classification": "ud-only", "package": "hand_load_nullspace", "spelling_only": false}
+{"path": "hand_load_nullspace/solver.py", "classification": "ud-only", "package": "hand_load_nullspace", "spelling_only": false}
 {"path": "hand_size.py", "classification": "ud-only", "package": "hand_size.py", "spelling_only": false}
 {"path": "humanoid_character_builder/__init__.py", "classification": "diverged", "package": "humanoid_character_builder", "spelling_only": false}
 {"path": "humanoid_character_builder/__main__.py", "classification": "ud-only", "package": "humanoid_character_builder", "spelling_only": false}
@@ -1288,6 +1305,7 @@
 {"path": "loop_nullspace/grip_split.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/ground_contact.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/ground_envelopes.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
+{"path": "loop_nullspace/grounded_provider.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/hit_and_run.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/impact_ball_flight_map.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
 {"path": "loop_nullspace/impact_outcome_map.py", "classification": "ud-only", "package": "loop_nullspace", "spelling_only": false}
@@ -1392,6 +1410,7 @@
 {"path": "model_appearance/body_skin_fit.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/body_skin_mesh.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/body_skin_pose.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/canonical_golfer_gate.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_assembly.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_chain_meshes.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/club_face.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
@@ -1454,10 +1473,13 @@
 {"path": "model_appearance/head_features.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/head_hair.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/head_mesh.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/head_morph.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/library.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/mesh_io.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/neck.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/pelvis_width.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/player_models.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/player_stature.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/schema.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/skinned_body.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/skinned_club_hands.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
@@ -1563,6 +1585,7 @@
 {"path": "model_generation/tests/test_simscape.py", "classification": "identical", "package": "model_generation", "spelling_only": false}
 {"path": "model_generation/tests/test_unified_loader.py", "classification": "identical", "package": "model_generation", "spelling_only": false}
 {"path": "model_generation/tests/test_urdf_roundtrip.py", "classification": "identical", "package": "model_generation", "spelling_only": false}
+{"path": "model_generation/tree_equivalence.py", "classification": "ud-only", "package": "model_generation", "spelling_only": false}
 {"path": "motion_matching/__init__.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/__main__.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/_checkpoint_artifacts.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1671,6 +1694,7 @@
 {"path": "motion_matching/execution/club_only_registration.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/execution/downswing.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/execution/driver.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/execution/golfer_reference_specs.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/execution/grip_rotation.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/execution/grip_selection.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/execution/marker_seed_overrides.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1699,6 +1723,7 @@
 {"path": "motion_matching/full_body_spec.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/full_body_step.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/full_body_v2.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/full_body_v2_calibration.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/full_body_v2_coupling.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/full_body_v2_geometry.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/full_body_v2_showpiece.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1763,6 +1788,7 @@
 {"path": "motion_matching/jobs/service.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/joint_club_pose_refit.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/kinematic_smoothing.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/kinetic_match.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/knee_axial_rotation.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/knot_gradient_optimiser.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/leaderboard.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1790,6 +1816,7 @@
 {"path": "motion_matching/marker_replay_report.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/matching_strategy.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/metrics.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/mirrored_spec.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/multi_engine_torque_allocator.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/multi_shooting_fit.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/multi_source_target.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1798,10 +1825,12 @@
 {"path": "motion_matching/native_release_gate.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/native_viewers.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/neck_rom.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/open_loop_horizon.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/output_policy.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/output_time_grid.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/parity_report.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/parity_schema.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/passive_response.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/pelvis_frame.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/pelvis_yaw.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/performance_baseline.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1870,6 +1899,7 @@
 {"path": "motion_matching/same_input/bundle.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/same_input/closure.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/same_input/drake_reference.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/same_input/horizon_replay.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/same_input/integrator.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/same_input/plant.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/same_input/reference.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1912,6 +1942,7 @@
 {"path": "motion_matching/surrogate/train_10k.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/surrogate/validate.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/swing_evaluator.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/swing_marker_placement.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/synthesize_target_from_coefficients.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/target.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/tibial_torsion.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -2084,6 +2115,7 @@
 {"path": "optimization/_swing_models.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/_swing_objectives.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/_swing_reference.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
+{"path": "optimization/admission.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/applied_effort_audit.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/backend_registry.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/batch_swing_optimizer.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
@@ -3095,6 +3127,7 @@
 {"path": "simulation_backends/constrained_ztcf_zvcf.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/exceptions.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/factory.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
+{"path": "simulation_backends/hand_force_split.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/jaxsim_urdf_sdf_gate.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/mjcf.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/mjwarp_backend.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
@@ -3104,6 +3137,7 @@
 {"path": "simulation_backends/ode_backend.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/protocol.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/provenance.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
+{"path": "simulation_backends/shaft_load_split.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/superposition.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/trace_io.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}
 {"path": "simulation_backends/validation.py", "classification": "ud-only", "package": "simulation_backends", "spelling_only": false}

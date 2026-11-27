@@ -38,6 +38,7 @@ class PlacementSettings:
     max_move_m: float | None = 0.05
 
     def __post_init__(self) -> None:
+        """Reject a frame count below 1 or a negative move limit."""
         if self.min_frames < 1:
             raise ValueError("min_frames must be at least 1")
         if self.max_move_m is not None and not self.max_move_m >= 0.0:
@@ -66,6 +67,7 @@ class MarkerPlacement:
 
 
 def _rms(distances: Array) -> float:
+    """Root-mean-square of the distances, or NaN when there are none."""
     return float(np.sqrt(np.mean(distances**2))) if len(distances) else float("nan")
 
 
