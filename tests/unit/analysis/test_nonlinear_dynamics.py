@@ -84,6 +84,27 @@ class TestPermutationEntropy:
         assert isinstance(H4, float)
 
 
+@pytest.mark.unit
+class TestCorrelationDimension:
+    """Grassberger-Procaccia correlation dimension (#15344, FC-012)."""
+
+    def setup_method(self) -> None:
+        self.obj = _Concrete(n=200, n_joints=1)
+
+    def test_returns_finite_on_nominal_signal(self) -> None:
+        data = self.obj.joint_positions[:, 0]
+        d2 = self.obj.compute_correlation_dimension(data)
+        assert isinstance(d2, float)
+        assert np.isfinite(d2)
+
+    def test_degenerate_radius_with_spike_outlier_is_finite(self) -> None:
+        """A flat segment plus spike collapses the radius window and must not return NaN."""
+        data = np.ones(80, dtype=float)
+        data[40] = 100.0
+        d2 = self.obj.compute_correlation_dimension(data)
+        assert np.isfinite(d2)
+
+
 class TestLocalDivergenceRate:
     def setup_method(self) -> None:
         self.obj = _Concrete(n=100, n_joints=3)

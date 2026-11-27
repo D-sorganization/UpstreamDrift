@@ -1,0 +1,12 @@
+{
+  "axial_impact_blackout": true,
+  "load_body_alias": {
+    "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/LowerTorso": "trunk_lumbar"
+  },
+  "unshaded_material_prefixes": ["mat_hair", "mat_eye", "mat_iris", "mat_pupil", "mat_lid", "mat_brow", "mat_lip"],
+  "sources": {
+    "axial_impact_blackout": "Whether segment axial loads are reported as unavailable around ball impact. The ball impact force is not modelled, so a load shown there leaves it out; true (the #13179 rule) blanks those frames. False shades them from the motion alone, for a review that states this beside the picture (#15150 review clips, 2026-11-20). The width of the window is not set here.",
+    "load_body_alias": "Skin pieces of the key body take the axial load of the value body. The pelvis is the root segment and has no proximal section load of its own, so its pieces stayed unshaded; they take the lumbar load, the load carried between trunk and pelvis. Names are those of the full-body-v2 model; a key no piece follows is ignored.",
+    "unshaded_material_prefixes": "Scene geoms whose material name starts with one of these keep their own colour under segment shading. The head's load coloured every geom of the head body, so hair turned to the load colour (a bald look in replace mode) and eyes, brows and lips with it. The prefixes are the MuJoCo appearance layer's names (mat_ and the library material) for hair, eye white, iris, pupil, lid line, brow and lips."
+  }
+}

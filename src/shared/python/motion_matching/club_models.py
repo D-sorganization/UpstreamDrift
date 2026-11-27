@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 
 import numpy as np
@@ -28,6 +28,14 @@ CLUB_BODY_SUFFIX = "Clubface Vector"
 HAND_STANDOFF_SUFFIX = "RHandStandoff"
 HEAD_HEIGHT_M = 0.064  # Clubhead frame above the club body origin (native)
 WRIST_TO_BUTT_M = 0.032  # native: wrist joint 32 mm below the butt end
+#: Farthest a stated sole point may lie from the head centre: no catalogue head
+#: (``HEAD_SHAPES``) has a half size above 0.060 m, so twice that is generous.
+SOLE_POINT_MAX_FROM_HEAD_CENTRE_M = 0.12
+#: Where a preset-built ``club.sole_point_m`` comes from (#15296).
+SOLE_POINT_SOURCE = (
+    "club_models.sole_point_m: lowest point of the catalogue head ellipsoid in the "
+    "address lie of the subject preset (club_shaft_elevation_deg, club_head_roll_deg)"
+)
 
 
 @dataclass(frozen=True)
@@ -35,7 +43,7 @@ class ClubSpec:
     """Typical values for one club type; lengths in metres, masses in kg."""
 
     name: str
-    length_m: float  # butt end to sole along the shaft
+    length_m: float  # butt end to the head centre along the shaft (sole_offset_m)
     head_mass_kg: float
     shaft_mass_kg: float
     grip_mass_kg: float
@@ -139,6 +147,123 @@ def from_database(club_id: str) -> ClubSpec:
         head_half_size_m=half,
         head_gyration_m=(0.85 * k_vertical, k_vertical, k_vertical),
     )
+
+
+Point = tuple[float, float, float]
+
+
+def _address_ground_normal(shaft_elevation_deg: float, head_roll_deg: float) -> Point:
+    """Ground normal in the club-body frame for an address lie (#15296)."""
+    if not 0.0 < shaft_elevation_deg <= 90.0:  # also refuses NaN
+        raise ValueError(f"shaft elevation must be in (0, 90], {shaft_elevation_deg}")
+    if not math.isfinite(head_roll_deg):
+        raise ValueError(f"head roll must be finite, got {head_roll_deg}")
+    elevation, roll = math.radians(shaft_elevation_deg), math.radians(head_roll_deg)
+    level = math.cos(elevation)
+    return (level * math.sin(roll), -math.sin(elevation), level * math.cos(roll))
+
+
+def sole_offset_m(
+    club: ClubSpec, shaft_elevation_deg: float, head_roll_deg: float
+) -> float:
+    """Distance along the shaft from the head centre to the ground (#15296).
+
+    ``length_m`` ends at the head centre; a club is sold by its length to the
+    sole. With the head ellipsoid resting on level ground, the shaft
+    ``shaft_elevation_deg`` above it and the ground normal turned
+    ``head_roll_deg`` about the shaft from the club body +z toward +x, the
+    shaft axis meets the ground this far beyond the head centre. Raises
+    ``ValueError`` unless 0 < elevation <= 90 and the roll is finite.
+    """
+    up = _address_ground_normal(shaft_elevation_deg, head_roll_deg)
+    support = math.hypot(
+        *(h * u for h, u in zip(club.head_half_size_m, up, strict=True))
+    )
+    return support / math.sin(math.radians(shaft_elevation_deg))
+
+
+def sole_point_m(
+    club: ClubSpec, shaft_elevation_deg: float, head_roll_deg: float
+) -> Point:
+    """The sole in the club-body frame: the head's lowest point at address.
+
+    The point of the head ellipsoid (centre ``(0, 0, HEAD_HEIGHT_M)``) on level
+    ground in the lie of :func:`sole_offset_m` (same ``ValueError``); a fixed
+    body point, exact in that lie only.
+    """
+    up = _address_ground_normal(shaft_elevation_deg, head_roll_deg)
+    half = club.head_half_size_m
+    support = math.hypot(*(h * u for h, u in zip(half, up, strict=True)))
+    x, y, z = (-h * h * u / support for h, u in zip(half, up, strict=True))
+    return (x, y, z + HEAD_HEIGHT_M)
+
+
+def checked_sole_point_m(value: Any) -> Point:
+    """``value`` as a club-body sole point (#15296); ``ValueError`` unless it is
+    three finite numbers within ``SOLE_POINT_MAX_FROM_HEAD_CENTRE_M`` of the head
+    centre ``(0, 0, HEAD_HEIGHT_M)``."""
+    if not isinstance(value, (list, tuple)) or len(value) != 3:
+        raise ValueError(f"club sole_point_m must be a 3-vector, got {value!r}")
+    if not all(type(v) in (int, float) and math.isfinite(v) for v in value):
+        raise ValueError(f"club sole_point_m must be finite numbers, got {value!r}")
+    x, y, z = (float(v) for v in value)
+    reach = math.sqrt(x * x + y * y + (z - HEAD_HEIGHT_M) ** 2)
+    if reach > SOLE_POINT_MAX_FROM_HEAD_CENTRE_M:
+        raise ValueError(
+            f"club sole_point_m {value!r} is {reach:.3f} m from the head centre; it "
+            f"must be within {SOLE_POINT_MAX_FROM_HEAD_CENTRE_M} m of the head centre"
+        )
+    return (x, y, z)
+
+
+def document_sole_point_m(spec: Mapping[str, Any]) -> Point | None:
+    """``club.sole_point_m`` of a document (:func:`checked_sole_point_m`), or
+    ``None`` when it states none: the address pin stays the origin (#12969)."""
+    club = spec.get("club")
+    if not isinstance(club, Mapping) or club.get("sole_point_m") is None:
+        return None
+    return checked_sole_point_m(club["sole_point_m"])
+
+
+def with_butt_to_sole_length(
+    club: ClubSpec, butt_to_sole_m: float, sole_offset: float
+) -> ClubSpec:
+    """``club`` with its length stated butt to sole along the shaft (#15296).
+
+    ``sole_offset`` is :func:`sole_offset_m` for the address lie. Raises
+    ``ValueError`` when the head centre would not lie beyond the grip.
+    """
+    length = butt_to_sole_m - sole_offset
+    if not math.isfinite(length) or sole_offset < 0 or length <= club.grip_length_m:
+        raise ValueError(
+            f"butt to sole length {butt_to_sole_m} m with a {sole_offset} m sole "
+            f"offset leaves no shaft below the {club.grip_length_m} m grip"
+        )
+    return replace(club, length_m=length)
+
+
+#: ``document["club"]`` keys that restate a ``ClubSpec`` field (``apply_club``).
+RECORDED_CLUB_FIELDS = ("length_m", "head_mass_kg", "shaft_mass_kg", "grip_mass_kg")
+
+
+def recorded_club(document: Mapping[str, Any], name: str) -> ClubSpec:
+    """Catalogue club ``name`` restated by the ``club`` record of ``document``.
+
+    A document built with a subject preset carries the preset's club length (and
+    any restated masses) in ``document["club"]``, so the catalogue club alone no
+    longer describes its solids. Postcondition: the fields in
+    :data:`RECORDED_CLUB_FIELDS` that the record holds replace the catalogue's.
+    Raises ``ValueError`` for an unknown club or a record of another club.
+    """
+    if name not in CLUBS:
+        raise ValueError(f"unknown club {name!r}; known: {sorted(CLUBS)}")
+    record = document.get("club") or {}
+    if record.get("name", name) != name:
+        raise ValueError(f"document club is {record['name']!r}, not {name!r}")
+    values: dict[str, Any] = {
+        k: float(record[k]) for k in RECORDED_CLUB_FIELDS if k in record
+    }
+    return replace(CLUBS[name], **values)
 
 
 def _placement(translation: tuple[float, float, float]) -> list[list[float]]:

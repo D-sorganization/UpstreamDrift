@@ -33,6 +33,7 @@ from numpy.typing import ArrayLike
 from scipy.spatial.transform import Rotation
 
 from src.shared.python.motion_matching.hip_calibration import hip_is_mirrored
+from src.shared.python.motion_matching.knee_axial_rotation import require_hinge_knee
 from src.shared.python.motion_matching.full_body_schema import (
     SchemaFeatureUnavailableError,
     require_full_body_schema,
@@ -204,4 +205,7 @@ def spec_document(spec_bytes: bytes) -> dict[str, Any]:
             child="HRG-Q1",
             issue=13176,
         )
+    require_hinge_knee(
+        spec["coordinate_order"], "musculoskeletal graft"
+    )  # paths assume a hinge
     return spec

@@ -150,7 +150,8 @@ def test_every_engine_exports_all_variants_with_zero_ms_at_impact(
     for r in results:
         assert sorted(r.frames_by_suffix) == ["_0p25x", "_0p5x", "_1x"]
         for speed in SPEED_VARIANTS:
-            expected = math.floor(span * 60 / speed + 1e-9) + 1
+            # the regular grid plus the frame on the exact contact instant
+            expected = math.floor(span * 60 / speed + 1e-9) + 1 + 1
             assert r.frames_by_suffix[speed_suffix(speed)] == expected
             name = f"driver_{r.engine}_face_on{speed_suffix(speed)}.mp4"
             clip = tmp_path / "out" / name
@@ -158,7 +159,7 @@ def test_every_engine_exports_all_variants_with_zero_ms_at_impact(
     for speed in SPEED_VARIANTS:
         rows = [h for s, h in huds if s == speed]
         nearest = min(rows, key=lambda h: abs(h.time_s - t_impact))
-        assert abs(nearest.ms_from_impact) <= 0.5 * speed / 60 * 1000.0 + 1e-6
+        assert nearest.ms_from_impact == 0.0  # a frame is rendered at contact
         assert nearest.ms_from_impact == pytest.approx(
             (nearest.time_s - t_impact) * 1000.0
         )

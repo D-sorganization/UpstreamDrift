@@ -173,6 +173,9 @@ def _face_location(
     return float(rel @ toe) * 1e3, float(rel @ high) * 1e3
 
 
+face_location_mm = _face_location  # public name: (toe, high) mm or a reason
+
+
 def _face_angles(
     frame: TargetFrame, v: np.ndarray, n: np.ndarray, path: float | None
 ) -> dict[str, float | None]:

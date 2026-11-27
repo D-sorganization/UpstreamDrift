@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from numbers import Integral, Real
-from types import MappingProxyType
-
 from .contracts import ColorOverrideRenderer
 from .force_colors import ForceColorScale
+from .series_validation import (
+    normalize_segment_samples,
+    validate_strictly_increasing_times,
+)
 
 
 @dataclass(frozen=True)
@@ -32,35 +33,14 @@ class SegmentLoadSeries:
             raise ValueError("loads require N units and tension-positive convention")
         if not isinstance(self.source, str) or not self.source.strip():
             raise ValueError("source must describe the load producer and section")
-        times = tuple(self.time_s)
-        if not times or any(
-            isinstance(t, bool) or not isinstance(t, Real) or not math.isfinite(t)
-            for t in times
-        ):
-            raise ValueError("time_s must contain finite real sample times")
-        if any(right <= left for left, right in zip(times, times[1:], strict=False)):
-            raise ValueError("time_s must be strictly increasing")
-        if not isinstance(self.values_n, Mapping):
-            raise TypeError("values_n must be a segment-to-samples mapping")
-        copied = {}
-        for segment, values in self.values_n.items():
-            if not isinstance(segment, str) or not segment.strip():
-                raise ValueError("segment identifiers must be nonempty strings")
-            samples = tuple(values)
-            if len(samples) != len(times):
-                raise ValueError(f"{segment}: load sample count must match time_s")
-            if any(
-                value is not None
-                and (isinstance(value, bool) or not isinstance(value, Real))
-                for value in samples
-            ):
-                raise TypeError("load samples must be real numbers or None")
-            copied[segment] = tuple(
-                float(value) if value is not None and math.isfinite(value) else None
-                for value in samples
-            )
-        object.__setattr__(self, "time_s", tuple(float(t) for t in times))
-        object.__setattr__(self, "values_n", MappingProxyType(copied))
+        times = validate_strictly_increasing_times(self.time_s)
+        copied = normalize_segment_samples(
+            times,
+            self.values_n,
+            segment_value_label="load sample count",
+        )
+        object.__setattr__(self, "time_s", times)
+        object.__setattr__(self, "values_n", copied)
 
     def value_at(self, segment: str, frame_idx: int) -> float | None:
         """Read a segment sample without exposing the series' storage layout."""

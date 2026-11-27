@@ -96,6 +96,17 @@ def test_appearance_geoms_are_visual_only() -> None:
     assert "visual_layer" not in models["plain"][1]
 
 
+def test_flat_textures_are_one_colour_on_every_face() -> None:
+    # MuJoCo fills the bottom face of a flat cube texture with rgb2; a lighter
+    # rgb2 drew a pale patch on every skin and cloth solid (#15299).
+    xml, _ = exporter.export_full_body_mjcf(
+        FULL_BODY.read_bytes(), appearance=document_from_dict(DOC)
+    )
+    flat = [t for t in ET.fromstring(xml).iter("texture") if t.get("builtin") == "flat"]
+    assert flat and all(t.get("rgb1") == t.get("rgb2") for t in flat)
+    assert all(t.get("markrgb") != t.get("rgb1") for t in flat)  # marks stay
+
+
 def test_appearance_does_not_change_the_spec_hash() -> None:
     raw = FULL_BODY.read_bytes()
     spec = json.loads(raw)

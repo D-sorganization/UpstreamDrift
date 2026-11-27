@@ -72,6 +72,7 @@ from src.shared.python.visualization.viewport import (
 )
 
 from .bridge import HeadBuild
+from .flight import BunkerFlight
 from .crosstier import CrossTierComparison
 from .particle_panel import ParticlePlaybackPanel
 from .render import RENDERER as MATPLOTLIB_RENDERER
@@ -81,6 +82,7 @@ from .render3d_sand import SandVolumeArtists
 from .sandvolume import SandVolumeScale
 from .render3d_vtk import VtkSceneArtists
 from .render_crosstier import CrossTierArtists
+from .render_flight import FlightUnits, flight_figure, flight_readout
 from .render_slice import SliceArtists
 from .render_traces import TracePanelArtists
 from .shot3d import CameraPreset, ShotScene
@@ -97,6 +99,7 @@ from .widgets import build_canvas_column
 logger = logging.getLogger(__name__)
 
 __all__ = [
+    "BallFlightWidget",
     "CrossTierWidget",
     "SandSliceWidget",
     "ShotViewportWidget",
@@ -105,6 +108,7 @@ __all__ = [
 
 _MIN_SCENE_HEIGHT_PX = 340
 _MIN_TRACE_HEIGHT_PX = 420
+_MIN_FLIGHT_HEIGHT_PX = 460
 _MIN_CROSS_TIER_HEIGHT_PX = 460
 _MIN_SLICE_HEIGHT_PX = 460
 _IDLE_CROSS_TIER = (
@@ -486,6 +490,89 @@ class ShotViewportWidget(QWidget):
             return
         self._artists.update(self._frame)
         self._canvas.draw()
+
+
+class BallFlightWidget(QWidget):
+    """Ball flight, landing and green rollout, with a metres/yards switch.
+
+    A refused or invalid shot is shown as a banner with no trajectory
+    (ADR-0032); the uncalibrated-launch and flat-green assumption is stamped
+    inside the plot.
+    """
+
+    def __init__(self, title: str, parent: QWidget | None = None) -> None:
+        """Build an empty view showing the no-flight banner.
+
+        Args:
+            title: Heading shown above the canvas.
+            parent: Parent widget.
+        """
+        super().__init__(parent)
+        layout, self._heading, self._canvas = build_canvas_column(
+            self,
+            title,
+            width_in=7.0,
+            height_in=6.0,
+            minimum_height_px=_MIN_FLIGHT_HEIGHT_PX,
+        )
+        row = QHBoxLayout()
+        row.addWidget(QLabel("Units"))
+        self._units = QComboBox()
+        for unit in FlightUnits:
+            self._units.addItem(unit.symbol, unit)
+        self._units.currentIndexChanged.connect(self._redraw)
+        row.addWidget(self._units)
+        row.addStretch(1)
+        layout.addLayout(row)
+        self._readout = QLabel()
+        self._readout.setWordWrap(True)
+        layout.addWidget(self._readout)
+        self._flight: BunkerFlight | None = None
+        self._reason = "no shot"
+        self._redraw()
+
+    @property
+    def has_flight(self) -> bool:
+        """Whether a trajectory is currently drawn."""
+        return self._flight is not None
+
+    @property
+    def units(self) -> FlightUnits:
+        """The selected display units."""
+        return self._units.currentData()
+
+    def set_units(self, units: FlightUnits) -> None:
+        """Select display units and repaint."""
+        self._units.setCurrentIndex(self._units.findData(units))
+
+    def set_flight(self, flight: BunkerFlight | None, *, reason: str) -> None:
+        """Show a trace, or the banner when ``flight`` is ``None``.
+
+        Args:
+            flight: The trace, or ``None`` for a refused/invalid shot.
+            reason: Why there is no trace; used only when ``flight`` is None.
+        """
+        self._flight = flight
+        self._reason = reason
+        self._redraw()
+
+    def clear(self) -> None:
+        """Drop the trace so nothing stale stays under a refusal banner."""
+        self.set_flight(None, reason="no shot")
+
+    def _redraw(self, _index: int = 0) -> None:
+        """Repaint the canvas and the readout."""
+        units = self.units
+        flight_figure(
+            self._flight, units=units, reason=self._reason, figure=self._canvas.fig
+        )
+        self._readout.setText(flight_readout(self._flight, units, reason=self._reason))
+        if self._canvas_is_alive():
+            self._canvas.draw_idle()
+
+    def _canvas_is_alive(self) -> bool:
+        """Whether the Qt canvas still exists (teardown can race a redraw)."""
+        return not sip.isdeleted(self._canvas)
 
 
 class TracePanelWidget(QWidget):

@@ -1017,6 +1017,12 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
 
         self.launch_native_backend(engine)
 
+    def closeEvent(self, event: QtGui.QCloseEvent | None) -> None:  # noqa: N802
+        """Stop playback when the embedded viewer closes; retain its loaded scene."""
+        self._transport.pause()
+        self._is_playing = False
+        super().closeEvent(event)
+
     def cleanup(self) -> None:
         """Halt playback and release resources."""
         self._transport.pause()

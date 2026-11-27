@@ -96,6 +96,8 @@ class FrameSchedule:
         speed: playback speed relative to real time (> 0; 0.5 is half speed).
         window: optional ``(start_s, end_s)`` swing interval to show, clipped
             to the source range; it must overlap the samples.
+        extra_times_s: swing instants that must be a frame (for example the
+            instant of ball contact); those inside the window are merged in.
 
     Postconditions: ``sample_times_s`` is strictly increasing, starts at the
     window start (or ``times_s[0]``) and never exceeds the window end.
@@ -107,6 +109,7 @@ class FrameSchedule:
         fps: float = DEFAULT_FPS,
         speed: float = 1.0,
         window: tuple[float, float] | None = None,
+        extra_times_s: tuple[float, ...] = (),
     ) -> None:
         t = np.asarray(times_s, dtype=float)
         require(t.ndim == 1 and t.size >= 2, "times_s must be 1-D with >= 2 samples")
@@ -124,19 +127,32 @@ class FrameSchedule:
         self.fps = float(fps)
         self.speed = float(speed)
         self.window = window
+        require(
+            all(math.isfinite(x) for x in extra_times_s),
+            "extra_times_s must be finite",
+        )
         self._start, self._end = start, end
+        self._extra = tuple(float(x) for x in extra_times_s)
 
     @property
     def n_frames(self) -> int:
-        return (
-            int(math.floor((self._end - self._start) * self.fps / self.speed + _EPS))
-            + 1
-        )
+        return int(self.sample_times_s.size)
 
     @property
     def sample_times_s(self) -> Array:
-        """Swing time shown by each video frame."""
-        return self._start + np.arange(self.n_frames) * self.speed / self.fps  # type: ignore[no-any-return,return-value]
+        """Swing time shown by each video frame, plus each in-window extra instant."""
+        count = (
+            int(math.floor((self._end - self._start) * self.fps / self.speed + _EPS))
+            + 1
+        )
+        grid: Array = np.asarray(
+            self._start + np.arange(count) * self.speed / self.fps, dtype=np.float64
+        )
+        for when in self._extra:
+            if self._start <= when <= self._end:
+                kept = grid[np.abs(grid - when) > _EPS]
+                grid = np.asarray(np.sort(np.append(kept, when)), dtype=np.float64)
+        return grid
 
     def nearest_indices(self) -> NDArray[np.int_]:
         """Source sample nearest to each video frame (non-decreasing)."""

@@ -59,13 +59,19 @@ def swing() -> SwingInput:
 
 @pytest.mark.parametrize("engine", ENGINES)
 def test_overlay_changes_native_pixels(engine: str, swing: SwingInput) -> None:
-    from src.tools.native_viewer_export.overlay import build_overlay_feed
+    from src.tools.native_viewer_export.overlay import (
+        OverlayOptions,
+        build_overlay_feed,
+    )
 
     backend = make_backend(engine)
     reason = backend.unavailable_reason()
     if reason is not None:
         pytest.skip(reason)
-    feed, lookat = build_overlay_feed(swing, engine)
+    # the smoke bundle has zero efforts (a kinematic replay): ask for the vectors
+    feed, lookat = build_overlay_feed(
+        swing, engine, options=OverlayOptions(forces_requested=True)
+    )
     settings = ExportSettings(
         views=("face_on",),
         width=320,

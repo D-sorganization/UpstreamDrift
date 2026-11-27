@@ -253,9 +253,15 @@ specs:
 #### Short-term (1-2 days)
 
 1. **Create Dockerfile** for containerized deployment
-2. **Document one-command install script:**
+2. **Document a checksum-verified tagged install:**
    ```bash
-   curl -fsSL https://raw.githubusercontent.com/.../install.sh | bash
+   TAG=vX.Y.Z
+   curl -fsSL -o install.sh \
+     "https://github.com/D-sorganization/UpstreamDrift/releases/download/${TAG}/install.sh"
+   curl -fsSL -o install.sh.sha256 \
+     "https://github.com/D-sorganization/UpstreamDrift/releases/download/${TAG}/install.sh.sha256"
+   sha256sum -c install.sh.sha256
+   bash install.sh
    ```
 
 #### Medium-term (1 week)

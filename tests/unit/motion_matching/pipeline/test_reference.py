@@ -111,6 +111,7 @@ def test_consistency_resolve_calls_kin_solve_trajectory() -> None:
     lane.stance = [("heel_r",)] * 5
     lane.bounds = {"joint": (-1.0, 1.0)}
     lane.feet = None
+    lane.stance_anchor = {}
 
     kin = MagicMock()
     kin.nq = 10
@@ -137,6 +138,13 @@ def test_consistency_resolve_calls_kin_solve_trajectory() -> None:
     assert kwargs["anchor_stance_at_init"] is False  # foot progression off
     assert np.array_equal(kwargs["prior_trajectory"], q_smooth)
     assert kwargs["bounds"] == lane.bounds
+    assert "anchor_slide_m" not in kwargs and "anchor_weight" not in kwargs
+    lane.stance_anchor = {"anchor_slide_m": 0.003}  # soft anchor (#15296)
+    consistency_resolve(
+        lane, kin, q_smooth, prior_weight=CONSISTENCY_PRIOR, iterations=30
+    )
+    assert kin.solve_trajectory.call_args[1]["anchor_slide_m"] == 0.003
+    assert kin.solve_trajectory.call_args[1]["plant_stance"] is True
 
 
 @pytest.mark.unit

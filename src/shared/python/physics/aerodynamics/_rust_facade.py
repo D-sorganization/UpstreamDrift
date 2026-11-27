@@ -24,6 +24,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.physics.rust_kernel import kernel_is_usable
 from src.shared.python.physics.ball_properties import (
     MAX_LIFT_COEFFICIENT,
     PENNER_LIFT_EXPONENT,
@@ -51,7 +52,8 @@ try:
     import upstream_physics as _rust  # type: ignore[import-untyped]
 
     _RUST_AVAILABLE = bool(
-        hasattr(_rust, "AerodynamicsEngine")
+        kernel_is_usable(_rust)
+        and hasattr(_rust, "AerodynamicsEngine")
         and hasattr(_rust, "AeroEngineConfig")
         and hasattr(_rust, "AeroBallProperties")
         and hasattr(_rust, "AirProperties")
@@ -169,7 +171,7 @@ def _python_fallback_total(
     """
     # Local import avoids a circular import: this module is consumed by
     # _engine.py which itself imports from the aerodynamics package.
-    from src.shared.python.physics.atmosphere import cd_dimpled_sphere
+    from src.shared.python.physics.atmosphere import cd_spinning_ball
 
     area = math.pi * spec.radius**2
     rel_velocity = velocity - np.asarray(spec.wind, dtype=float)
@@ -180,29 +182,28 @@ def _python_fallback_total(
     if speed < 1e-6:
         return total
 
-    # ── Drag ────────────────────────────────────────────────────────────
+    magnus_dir = np.cross(spin, rel_velocity)
+    magnus_norm = _magnitude(magnus_dir)
+    # Transverse spin ratio r·||ω × v̂||/|v| — matches rust_core (#15042, #15443).
+    spin_param = spec.radius * (magnus_norm / speed) / speed
+
+    # ── Drag (Reynolds crisis + spin term, #15443) ──────────────────────
     if spec.drag_enabled:
         diameter = 2.0 * spec.radius
         re = spec.air_density * speed * diameter / spec.air_viscosity
         re_clamped = max(1.0e3, min(1.0e7, re))
-        cd = cd_dimpled_sphere(re_clamped, base_cd=spec.drag_coefficient)
+        cd = cd_spinning_ball(re_clamped, spin_param, base_cd=spec.drag_coefficient)
         f_mag = 0.5 * spec.air_density * cd * area * speed * speed
         total = total - f_mag * rel_velocity / speed
 
     # ── Single spin-induced Magnus/lift force ───────────────────────────
-    if spec.magnus_enabled and spin_mag > 1e-6:
-        magnus_dir = np.cross(spin, rel_velocity)
-        magnus_norm = _magnitude(magnus_dir)
-        if magnus_norm > 1e-6:
-            # Transverse spin ||ω × v̂|| — matches rust_core compute_magnus (#15042).
-            transverse_spin = magnus_norm / speed
-            spin_param = spec.radius * transverse_spin / speed
-            cl = min(
-                MAX_LIFT_COEFFICIENT,
-                PENNER_LIFT_SCALE * spin_param**PENNER_LIFT_EXPONENT,
-            )
-            f_mag = 0.5 * spec.air_density * cl * area * speed * speed
-            total = total + f_mag * magnus_dir / magnus_norm
+    if spec.magnus_enabled and spin_mag > 1e-6 and magnus_norm > 1e-6:
+        cl = min(
+            MAX_LIFT_COEFFICIENT,
+            PENNER_LIFT_SCALE * spin_param**PENNER_LIFT_EXPONENT,
+        )
+        f_mag = 0.5 * spec.air_density * cl * area * speed * speed
+        total = total + f_mag * magnus_dir / magnus_norm
 
     return total
 

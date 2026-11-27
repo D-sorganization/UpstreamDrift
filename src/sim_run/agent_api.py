@@ -52,6 +52,11 @@ _PUTTING_CORE_TOOLS = (
 _AGENT_CAPABILITY_TOOLS = (
     "run_counterfactual_ztcf_golden",
     "run_golf_simulator_golden_shot",
+    "native_export_describe",
+    "native_export_validate",
+    "native_export_run",
+    "native_export_status",
+    "kinetic_match",
 )
 
 

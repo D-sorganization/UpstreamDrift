@@ -167,6 +167,7 @@ def test_width_axes_come_from_spec_landmarks(spec_path) -> None:
 
     from src.shared.python.model_appearance.cross_section import body_sections
     from src.shared.python.model_appearance.library import (
+        LEG_PARTS,
         PART_ASPECT,
         classify_body,
     )
@@ -181,12 +182,14 @@ def test_width_axes_come_from_spec_landmarks(spec_path) -> None:
         b["name"]
         for b in spec["bodies"]
         if b["name"] != "world" and PART_ASPECT.get(classify_body(b["name"]), 1.0) != 1
-    }
+    } | {b["name"] for b in spec["bodies"] if classify_body(b["name"]) in LEG_PARTS}
     assert set(sections) == non_round and non_round
     for name, section in sections.items():
+        assert abs(float(np.dot(section.ml_axis, section.depth_axis))) < 1e-9
+        if classify_body(name) in LEG_PARTS:
+            continue  # a leg faces the way its foot points (test_leg_shape)
         ml = _landmark_ml(spec, name)
         assert _angle_deg(section.ml_axis, ml) < 5.0, name
-        assert abs(float(np.dot(section.ml_axis, section.depth_axis))) < 1e-9
     for name in ("calcn_r", "calcn_l"):  # the OpenSim calcn lateral axis is z
         assert _angle_deg(sections[name].ml_axis, np.array([0, 0, 1.0])) < 5.0
     checked = 0

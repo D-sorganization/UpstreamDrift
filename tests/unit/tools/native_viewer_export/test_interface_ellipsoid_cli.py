@@ -154,3 +154,18 @@ def test_feature_parity_json_entry_updated() -> None:
     assert "--hand-mobility-mode" in notes
     assert "--ellipsoid-scale" in notes
     assert "--drift-arrow" in notes
+
+
+def test_axial_impact_blackout_defaults_to_the_settings_file_and_can_be_set() -> None:
+    from src.shared.python.body_part_viz.skin_load_settings import (
+        load_skin_load_settings,
+    )
+
+    def parsed(*extra: str) -> bool:
+        return bool(
+            cli.build_parser().parse_args([*BASE, *extra]).axial_impact_blackout
+        )
+
+    assert parsed() is load_skin_load_settings().axial_impact_blackout
+    assert parsed("--no-axial-impact-blackout") is False
+    assert parsed("--axial-impact-blackout") is True

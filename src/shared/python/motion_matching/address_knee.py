@@ -52,6 +52,9 @@ from src.shared.python.motion_matching.foot_progression import (
     address_window,
     foot_role,
 )
+from src.shared.python.motion_matching.knee_axial_rotation import (
+    knee_axial_coordinates,
+)
 from src.shared.python.motion_matching.hip_calibration import (
     LATERAL_SEEDS_M,
     functional_hip_calibration,
@@ -392,9 +395,16 @@ def _flexion_at(kin: Any, q: np.ndarray, side: str, coord: float) -> float:
 
 
 def flexion_sign(kin: Any, q: np.ndarray, side: str) -> float:
-    """+1 or -1: the knee coordinate direction that flexes the knee (sign-safe)."""
-    plus = _flexion_at(kin, q, side, _PROBE_RAD)
-    minus = _flexion_at(kin, q, side, -_PROBE_RAD)
+    """+1 or -1: the knee coordinate direction that flexes the knee (sign-safe).
+
+    Probed with any opt-in knee axial rotation (#15296) at zero, where the knee
+    is the plain hinge: the unsigned flexion angle tells the two directions
+    apart only by the leg's small rest bend, which a turned shank can cancel.
+    """
+    hinge, order = np.asarray(q, dtype=float).copy(), list(kin.coordinate_order)
+    hinge[[order.index(n) for n in knee_axial_coordinates() if n in order]] = 0.0
+    plus = _flexion_at(kin, hinge, side, _PROBE_RAD)
+    minus = _flexion_at(kin, hinge, side, -_PROBE_RAD)
     if abs(plus - minus) < 1.0:
         raise ValueError(f"the {side} knee coordinate barely moves the shank")
     return 1.0 if plus > minus else -1.0

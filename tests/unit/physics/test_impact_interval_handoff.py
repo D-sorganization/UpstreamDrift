@@ -160,6 +160,37 @@ def _closed_audit(**overrides: float) -> SimpleNamespace:
     return SimpleNamespace(**terms)
 
 
+@pytest.mark.parametrize("start_s", [-0.0001, 0.0001, 1.25])
+@pytest.mark.parametrize("provide_at_time", [False, True])
+def test_contact_playback_preserves_shifted_simulation_time(
+    start_s: float, provide_at_time: bool
+) -> None:
+    """Contact duration is elapsed time, independent of simulation time origin."""
+    reference = _MockIntervalResult(_closed_audit(), provide_at_time=provide_at_time)
+    shifted = _MockIntervalResult(_closed_audit(), provide_at_time=provide_at_time)
+    shifted.time_s = shifted.time_s + start_s
+    if provide_at_time:
+        shifted.at_time = lambda t: _MockSample(  # type: ignore[method-assign]
+            t - start_s, shifted.contact_duration_s
+        )
+
+    expected = export_impact_run_playback_summary(reference, num_playback_frames=5)
+    actual = export_impact_run_playback_summary(shifted, num_playback_frames=5)
+
+    assert actual["qualified"]
+    assert actual["contact_window_s"] == pytest.approx(
+        [start_s, start_s + shifted.contact_duration_s], abs=1e-12
+    )
+    assert actual["contact_duration_s"] == pytest.approx(shifted.contact_duration_s)
+    for frame, baseline in zip(
+        actual["playback_frames"], expected["playback_frames"], strict=True
+    ):
+        assert frame["time_s"] == pytest.approx(start_s + baseline["time_s"], abs=1e-12)
+        for channel, value in baseline.items():
+            if channel != "time_s":
+                np.testing.assert_allclose(frame[channel], value, atol=1e-8)
+
+
 # ==============================================================================
 # 1. ud.pre_impact_bundle/1 Schema & Serialization Tests (#9703)
 # ==============================================================================

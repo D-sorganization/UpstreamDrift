@@ -19,7 +19,8 @@ Frame contract (DbC)
     the chest.
 
 Sizing rule
-    Limbs, hands, feet and the head use ``library.PART_RADIUS_M``. The trunk
+    Limbs, hands, feet and the head use ``library.PART_RADIUS_M``; the leg radii
+    scale with the subject stature (``library.stature_scale``). The trunk
     (torso, pelvis) is ONE lofted solid per body along its longest capsule
     (joint origin to the farthest child joint), sized from the spec's own
     ``visual_hints`` ellipsoids: radius = the largest mediolateral (ML)
@@ -263,10 +264,18 @@ class _Context:
     feet: Mapping[str, Sequence[foot.FootPart]] = field(default_factory=dict)
     #: Club parts per body (``club_chain_meshes``; chain shaft R6, #12686).
     club_parts: Mapping[str, Sequence[ClubPart]] = field(default_factory=dict)
+    #: Fraction of its whole limb each body of a continuous part draws (#15262).
+    windows: Mapping[str, tuple[float, float]] = field(default_factory=dict)
+    #: Wrist section per forearm body, when the drawn hands set it (#15264).
+    wrist_sections: Mapping[str, Any] = field(default_factory=dict)
     #: Trunk bodies that carry a shoulder link: drawn with the thorax profile.
     thorax: frozenset[str] = frozenset()
     #: Parent body of each torso body that hangs from another torso body.
     parents: Mapping[str, str] = field(default_factory=dict)
+    #: Height of the neck point above each shoulder link, metres (#15299).
+    neck_rise: Mapping[str, float] = field(default_factory=dict)
+    #: Parts a skinned body draws instead of these meshes (#15299).
+    skinned_parts: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -276,15 +285,30 @@ class _Segment:
     radius: float
     aspect: float
     end_scale: float = 1.0
-    #: Full-radius axis of a flattened limb whose body has no landmark section.
+    window: tuple[float, float] = library.FULL_COVERAGE
+    belly: tuple[float, float, float] = library.NO_BELLY
+    capsule_ends: bool = False
+    taper_end: float = 1.0
+    end_aspect: float | None = None
+    flatten_from: float = 0.0
     width_hint: np.ndarray | None = None
+    end_cap: float = 1.0
+    end_shift: np.ndarray | None = None
+    offset: tuple[np.ndarray, float, float] | None = None  # centreline bow
+    start_scale: float = 1.0
+    start_until: float = 1.0
     #: Trunk cross-sections and the joint plane they are measured from (#15279).
     profile: TorsoProfile | None = None
     profile_start: np.ndarray | None = None
+    front_axis: np.ndarray | None = None  # slants the profile's collar (#15292)
 
 
-def _shoulder_segment(cap: Capsule, scale: float) -> _Segment:
-    """The shoulder link as a yoke: flat, and starting beside the neck (#15279)."""
+def _shoulder_segment(cap: Capsule, scale: float, rise_m: float | None) -> _Segment:
+    """The shoulder link as a yoke: flat, from beside the neck down to the joint.
+
+    ``rise_m`` is the height of the neck point above the link (``None``: the
+    library default); both ends of the yoke hang from the neck point (#15299).
+    """
     start, end = np.asarray(cap.start_m), np.asarray(cap.end_m)
     along = end - start
     up = np.asarray(library.SHOULDER_UP_AXIS, dtype=float)
@@ -294,20 +318,141 @@ def _shoulder_segment(cap: Capsule, scale: float) -> _Segment:
         # An upright link has no front-back axis from "up": keep it round.
         return _Segment(start, end, radius, 1.0)
     radius *= library.SHOULDER_RADIUS_SCALE
+    rise = library.SHOULDER_DEFAULT_RISE if rise_m is None else rise_m / radius
+    outer = min(
+        rise - library.SHOULDER_JOINT_END_BELOW_NECK, library.SHOULDER_JOINT_END_LIFT
+    )
     return _Segment(
-        start + library.SHOULDER_START_FRACTION * along,
-        end,
+        start
+        + library.SHOULDER_START_FRACTION * along
+        + (rise - library.SHOULDER_NECK_END_BELOW_NECK) * radius * up,
+        end
+        - library.SHOULDER_END_INSET * radius * along / np.linalg.norm(along)
+        + outer * radius * up,
         radius,
         library.SHOULDER_ASPECT,
+        library.SHOULDER_END_SCALE,
         width_hint=front,
     )
 
 
-def _limb_segments(part: str, caps: Sequence[Capsule], scale: float) -> list[_Segment]:
+def _limb_windows(
+    spec: Mapping[str, Any], by_body: Mapping[str, Sequence[Capsule]]
+) -> dict[str, tuple[float, float]]:
+    """The share of one limb drawn by each body of a continuous part.
+
+    Two bodies of the same ``library.CONTINUOUS_PARTS`` part joined by a
+    joint, each with one capsule, are the near and far lengths of one limb:
+    the parent draws ``(0, f)`` and the child ``(f, 1)``, ``f`` the parent's
+    share of the summed length.
+    """
+    out: dict[str, tuple[float, float]] = {}
+    for joint in spec.get("joints", ()):
+        near, far = joint.get("parent"), joint.get("child")
+        part = library.classify_body(near) if near in by_body else None
+        if part not in library.CONTINUOUS_PARTS or far not in by_body:
+            continue
+        if library.classify_body(far) != part:
+            continue
+        if len(by_body[near]) != 1 or len(by_body[far]) != 1:
+            continue
+        lengths = by_body[near][0].length_m(), by_body[far][0].length_m()
+        share = lengths[0] / sum(lengths)
+        out[near], out[far] = (0.0, share), (share, 1.0)
+    return out
+
+
+def _wrist_shape(part: str, radius: float, wrist: Any) -> dict[str, Any]:
+    """Far-end shape of a limb: the library taper, or the drawn hand's wrist.
+
+    ``wrist`` is a ``skinned_wrist_sections.WristSection`` in the body frame,
+    or ``None``. With one, the limb ends that wide and that deep, turned to
+    its width axis, the flat section easing in past the rotation joint, and
+    narrows to it by the wrist's own ``taper_end``, with its ``belly`` (#15299).
+    """
+    if wrist is None:
+        return {
+            "end_scale": library.limb_distal_scale(part),
+            "taper_end": library.taper_end(part),
+            "belly": library.belly(part),
+        }
+    scale = library.validate_distal_scale(min(1.0, wrist.half_width_m / radius))
+    taper = {"end_scale": scale, "taper_end": wrist.taper_end, "belly": wrist.belly}
+    taper["start_scale"], taper["start_until"] = wrist.elbow
+    if not wrist.shapes_end:
+        return taper
+    return {
+        **taper,
+        "end_aspect": wrist.half_depth_m / wrist.half_width_m,
+        "flatten_from": library.PART_FLATTEN_FROM.get(part, 0.0),
+        "width_hint": wrist.width_axis,
+        "end_cap": wrist.cap,
+        "end_shift": wrist.centre_m,
+    }
+
+
+def _skinned_wrist_sections(
+    spec: Mapping[str, Any], club: ClubAssembly | None
+) -> Mapping[str, Any]:
+    """Wrist section per forearm body if the spec draws the skinned hands."""
+    backend = spec.get("subject", {}).get("hand_visual_backend")
+    if club is None or backend != "skinned_human":
+        return {}
+    # Imported here: the skinned backend loads a mesh asset and a solver.
+    from src.shared.python.model_appearance.skinned_wrist_sections import (
+        forearm_wrist_sections,
+    )
+
+    sections = dict(forearm_wrist_sections(spec, club))
+    for joint in spec.get("joints", ()):
+        far = sections.get(joint["child"])
+        if far is not None and library.classify_body(joint["parent"]) == "forearm":
+            # The near length of the same limb narrows to the same wrist (#15299).
+            sections[joint["parent"]] = dataclasses.replace(far, shapes_end=False)
+    return sections
+
+
+def _skinned_parts() -> frozenset[str]:
+    # Imported here: only an emitter that draws the skinned body needs it.
+    from src.shared.python.model_appearance.body_skin_export import (
+        load_export_settings,
+    )
+
+    return frozenset(load_export_settings().covered_parts)
+
+
+def _neck_rises(
+    spec: Mapping[str, Any], caps: Mapping[str, Sequence[Capsule]]
+) -> dict[str, float]:
+    """Height of the neck point above each shoulder link (metres).
+
+    The trunk body that carries the shoulders has a capsule up to the neck and
+    one up to each shoulder link: the difference of their lengths.
+    """
+    out = {}
+    for joint in spec.get("joints", ()):
+        lengths = [c.length_m() for c in caps.get(str(joint.get("parent", "")), ())]
+        if library.classify_body(str(joint.get("child", ""))) == "shoulder" and lengths:
+            out[str(joint["child"])] = max(lengths) - min(lengths)
+    for joint in spec.get("joints", ()):  # the arm hangs from its shoulder link
+        if str(joint.get("parent", "")) in out:
+            out.setdefault(str(joint["child"]), out[str(joint["parent"])])
+    return out
+
+
+def _limb_segments(
+    part: str,
+    caps: Sequence[Capsule],
+    scale: float,
+    window: tuple[float, float] = library.FULL_COVERAGE,
+    wrist: Any = None,
+    front: np.ndarray | None = None,
+    rise_m: float | None = None,
+) -> list[_Segment]:
     out = []
     for cap in caps:
         if part == "shoulder":
-            out.append(_shoulder_segment(cap, scale))
+            out.append(_shoulder_segment(cap, scale, rise_m))
             continue
         radius = scale * (
             cap.radius_m
@@ -316,13 +461,24 @@ def _limb_segments(part: str, caps: Sequence[Capsule], scale: float) -> list[_Se
         )
         radius = min(radius, _MAX_RADIUS_OVER_LENGTH * cap.length_m())
         aspect = library.PART_ASPECT.get(part, 1.0)
+        start, end = np.asarray(cap.start_m), np.asarray(cap.end_m)
+        shift, at, width = library.offset(part)
+        bow = (
+            None if front is None or not shift else (shift * radius * front, at, width)
+        )
+        if part == "upper_arm":  # the spindle's tip, not its middle, is the joint
+            axis = (end - start) / cap.length_m()
+            start = start + library.UPPER_ARM_START_INSET * radius * axis
         out.append(
             _Segment(
-                np.asarray(cap.start_m),
-                np.asarray(cap.end_m),
+                start,
+                end,
                 radius,
                 aspect,
-                library.distal_scale(part),
+                window=window,
+                capsule_ends=part in library.CAPSULE_END_PARTS,
+                offset=bow,
+                **_wrist_shape(part, radius, wrist),
             )
         )
     return out
@@ -338,7 +494,8 @@ def _trunk_segment(
     chest then begins at the lumbar plane where the pelvis solid ends.
     """
     spine = max(caps, key=lambda c: c.length_m())  # first wins on a tie
-    size = _section_size(part, ctx.shapes.get(body, ()), ctx.sections.get(body))
+    section = ctx.sections.get(body)
+    size = _section_size(part, ctx.shapes.get(body, ()), section)
     radius = scale * size.radius_m
     if size.source == "library_default":
         radius = min(radius, _MAX_RADIUS_OVER_LENGTH * spine.length_m())
@@ -351,7 +508,14 @@ def _trunk_segment(
         profile = TorsoProfile(
             tuple(TorsoStation(*row) for row in library.TORSO_PROFILES[role]),
             library.TORSO_SQUARENESS,
+            rings=library.TORSO_RINGS,
+            fine_from=library.TORSO_FINE_FROM,
+            fine_rings=library.TORSO_FINE_RINGS,
         )
+        if role == "thorax" and len(caps) > 1:  # shortest capsule: shoulder line
+            line = min(c.length_m() for c in caps) / spine.length_m()
+            reference = library.THORAX_SHOULDER_ALONG
+            profile = profile.with_shoulder(reference, min(line, reference))
         if not ctx.shapes.get(ctx.parents.get(body, "")):
             # Nothing drawn as a trunk solid under it (the pelvis ends at this
             # joint plane): start there instead of tucking in.
@@ -363,6 +527,7 @@ def _trunk_segment(
         size.aspect,
         profile=profile,
         profile_start=start,
+        front_axis=section.front_axis if section is not None else None,
     )
 
 
@@ -417,6 +582,9 @@ def _pelvis_plan(
         half_up,
         half_down,
         top,
+        back=None if marks.front is None else -marks.front,
+        back_scale=1.0 if marks.front is None else library.PELVIS_BACK_SCALE,
+        back_square=2.0 if marks.front is None else library.PELVIS_BACK_SQUARE,
     )
     return shape, width
 
@@ -488,8 +656,11 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
             np.asarray(hint, dtype=float),
             seg.radius,
             seg.radius * seg.aspect,
+            seg.front_axis,
         )
-        return torso_mesh(frame, seg.profile, thickness=extra.get("thickness", 1.0))
+        thickness = extra.get("thickness", 1.0)
+        inset = _SKIN_CAP_INSET_M if thickness == 1.0 else 0.0
+        return torso_mesh(frame, seg.profile, thickness=thickness, cap_inset_m=inset)
     return geometry.lofted_segment(
         seg.start,
         seg.end,
@@ -497,6 +668,17 @@ def _loft(ctx: _Context, body: str, seg: _Segment, **extra: Any) -> geometry.Mes
         geometry.LoftOptions(
             aspect=seg.aspect,
             end_scale=seg.end_scale,
+            window=seg.window,
+            belly=seg.belly,
+            capsule_ends=seg.capsule_ends,
+            taper_end=seg.taper_end,
+            end_aspect=seg.end_aspect,
+            flatten_from=seg.flatten_from,
+            end_cap=seg.end_cap,
+            end_shift=seg.end_shift,
+            offset=seg.offset,
+            start_scale=seg.start_scale,
+            start_until=seg.start_until,
             rings=library.LOFT_RINGS,
             sides=library.LOFT_SIDES,
             width_hint=hint,
@@ -511,15 +693,22 @@ def _segment_meshes(
     base = library.material_name_for(ctx.doc, body)
     garment = library.garment_name_for(ctx.doc, body)
     out = []
+    drop = 0.0
     for i, seg in enumerate(segments):
-        out.append(BodyMesh(body, f"skin{i}", _loft(ctx, body, seg), base))
+        skin_seg = seg
+        if part == "upper_arm":  # no skin dome poking out of the sleeve's flat start
+            axis = (seg.end - seg.start) / np.linalg.norm(seg.end - seg.start)
+            tip = library.UPPER_ARM_SKIN_TIP_INSET * seg.radius * axis
+            skin_seg = dataclasses.replace(seg, start=seg.start + tip)
+        out.append(BodyMesh(body, f"skin{i}", _loft(ctx, body, skin_seg), base))
         if part in library.BLEND_PARTS:  # ball joint hides the segment seam
             size = seg.radius * library.blend_scale(garment is not None, part)
             across, down = (
                 library.DELTOID_HALF_SIZES if part == "upper_arm" else (1.0, 1.0)
             )
             along = (seg.end - seg.start) / np.linalg.norm(seg.end - seg.start)
-            drop = library.DELTOID_DROP * seg.radius if part == "upper_arm" else 0.0
+            if part == "upper_arm":
+                drop = library.deltoid_drop_m(seg.radius, ctx.neck_rise.get(body))
             ball = geometry.ellipsoid_mesh(
                 seg.start + drop * along,
                 size * np.array([down, across, across]),
@@ -530,8 +719,16 @@ def _segment_meshes(
             out.append(BodyMesh(body, f"blend{i}", ball, garment or base))
         if garment is not None:
             band = library.garment_coverage(ctx.doc.clothing, part)
+            start = drop / float(np.linalg.norm(seg.end - seg.start))
+            if band[0] < start < band[1]:  # a sleeve starts at the cap's widest ring
+                band = (start, band[1])
             mesh = _loft(
-                ctx, body, seg, coverage=band, thickness=library.GARMENT_THICKNESS
+                ctx,
+                body,
+                seg,
+                coverage=band,
+                thickness=library.GARMENT_THICKNESS,
+                drape=library.garment_drape(ctx.doc.clothing, part),
             )
             out.append(BodyMesh(body, f"garment{i}", mesh, garment))
     return out
@@ -550,6 +747,10 @@ def _foot_meshes(ctx: _Context, body: str) -> list[BodyMesh]:
     plan = (
         ("skin", "skin", base),
         ("garment", "garment", garment),
+        ("sole", "sole", library.SOLE_MATERIAL if garment else None),
+        ("saddle", "saddle", library.SADDLE_MATERIAL if garment else None),
+        ("lace", "lace", garment),
+        ("trim", "trim", garment),
         ("ankle", "ankle", shin or base),
     )
     out: list[BodyMesh] = []
@@ -570,6 +771,8 @@ def _meshes_for_body(
     if rule is not None and rule.mesh == "none":
         return []
     part = library.classify_body(body)
+    if part in ctx.skinned_parts:
+        return []  # drawn by the skinned body (an engine skin, not a mesh)
     if part == "head" and ctx.head_enabled:
         return []  # drawn by the shared head: skull, face, ears and neck
     if part == "hand" and ctx.club is not None and library.is_grip_hand_standoff(body):
@@ -584,19 +787,35 @@ def _meshes_for_body(
     elif part in TRUNK_PARTS:
         segments = [_trunk_segment(ctx, body, part, caps, scale)]
     else:
-        segments = _limb_segments(part, caps, scale)
+        window = ctx.windows.get(body, library.FULL_COVERAGE)
+        scale *= library.stature_scale(part, ctx.subject.get("stature_m"))
+        section = ctx.sections.get(body)
+        front = section.depth_axis if part in library.LEG_PARTS and section else None
+        segments = _limb_segments(
+            part,
+            caps,
+            scale,
+            window,
+            ctx.wrist_sections.get(body),
+            front,
+            ctx.neck_rise.get(body),
+        )
     return _segment_meshes(ctx, body, part, segments)
 
 
 def _club_parts(
-    spec: Mapping[str, Any], doc: AppearanceDocument, club: ClubAssembly | None
+    spec: Mapping[str, Any],
+    doc: AppearanceDocument,
+    club: ClubAssembly | None,
+    body_skin: bool,
 ) -> dict[str, list[ClubPart]]:
-    """Club parts per body, in the club body's finish (empty without a club)."""
+    """Club parts per body, in the club body's finish (empty without a club);
+    with ``body_skin`` the hands end under the skinned forearms."""
     body = club_body_name(spec)
     if club is None or body is None:
         return {}
     finish = library.material_name_for(doc, body)
-    return club_meshes_by_body(spec, club, finish, doc)
+    return club_meshes_by_body(spec, club, finish, doc, body_skin=body_skin)
 
 
 def _parents_of(spec: Mapping[str, Any], part: str) -> frozenset[str]:
@@ -622,6 +841,8 @@ def body_meshes(
     spec: Mapping[str, Any],
     doc: AppearanceDocument,
     club: ClubAssembly | None = None,
+    *,
+    body_skin: bool = False,
 ) -> list[BodyMesh]:
     """Skin, garment, blend, shoe (and, with ``club``, club) meshes per body.
 
@@ -630,13 +851,17 @@ def body_meshes(
     ``cross_section.body_sections`` needs. Postconditions: deterministic;
     every mesh in :data:`SPEC_BODY_FRAME`; every material resolvable; bodies
     in visual-skeleton order. The head body is omitted while the parametric
-    head is enabled.
+    head is enabled. With ``body_skin`` (an emitter that draws the skinned body,
+    ``body_skin_export``) the parts that skin covers get no mesh.
     """
     library.check_references(doc)
     skeleton = derive_visual_skeleton(spec)
     shapes: dict[str, list[Shape]] = {}
     for shape in skeleton.shapes:
         shapes.setdefault(shape.body, []).append(shape)
+    by_body: dict[str, list[Capsule]] = {}
+    for cap in skeleton.capsules:
+        by_body.setdefault(cap.body, []).append(cap)
     sections = body_sections(spec)
     ctx = _Context(
         doc,
@@ -647,13 +872,14 @@ def body_meshes(
         spec.get("subject", {}),
         doc.head.enabled,
         foot.foot_parts(spec, sections, model=doc.foot.model),
-        _club_parts(spec, doc, club),
+        _club_parts(spec, doc, club, body_skin),
+        _limb_windows(spec, by_body),
+        _skinned_wrist_sections(spec, club),
         _parents_of(spec, "shoulder"),
         _torso_parents(spec),
+        _neck_rises(spec, by_body),
+        _skinned_parts() if body_skin else frozenset(),
     )
-    by_body: dict[str, list[Capsule]] = {}
-    for cap in skeleton.capsules:
-        by_body.setdefault(cap.body, []).append(cap)
     out = [
         m for body, caps in by_body.items() for m in _meshes_for_body(ctx, body, caps)
     ]
@@ -669,9 +895,11 @@ def resolve_appearance(
     doc: AppearanceDocument,
     club: ClubAssembly | None = None,
     head_mesh: MeshReference | None = None,
+    *,
+    body_skin: bool = False,
 ) -> ResolvedAppearance:
     """The engine-neutral resolution an emitter translates (see module doc)."""
-    meshes = tuple(body_meshes(spec, doc, club))
+    meshes = tuple(body_meshes(spec, doc, club, body_skin=body_skin))
     known = library.library_materials(doc)
     materials = {m.material_name: known[m.material_name] for m in meshes}
     if head_mesh is None and doc.head.enabled and doc.head.model == "cc0_mesh":

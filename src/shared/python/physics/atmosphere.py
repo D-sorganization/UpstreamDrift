@@ -30,6 +30,11 @@ from __future__ import annotations
 
 import math
 
+from src.shared.python.core.physics_constants import (
+    GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT,
+    GOLF_BALL_SPIN_DRAG_SLOPE,
+)
+
 # ---------------------------------------------------------------------------
 # ISA standard atmosphere constants
 # ---------------------------------------------------------------------------
@@ -219,16 +224,26 @@ MIN_VALID_REYNOLDS: float = 1.0e3
 #: Maximum supported Reynolds number for the dimpled-sphere correlation.
 MAX_VALID_REYNOLDS: float = 1.0e7
 
-# Anchor points (Re, Cd) for the smoothed drag-crisis model. Values are
-# representative of dimpled golf-ball measurements compiled by Bearman &
-# Harvey (1976) and reviewed in Mehta (1985); they are not meant to be a
-# manufacturer-specific calibration.
-_CD_PRECRITICAL: float = 0.50  # subcritical / pre-crisis Cd for dimpled sphere
-_RE_MIN_CD: float = 7.0e4  # log-Re centre of the drag-crisis transition
-_CD_HIGH: float = 0.30  # high-Re asymptote Cd
-
-# Width parameter for the tanh transition (in log10(Re) units).
-_TRANSITION_WIDTH: float = 0.16
+# Smoothed drag-crisis model.  The crisis centre, crisis width, recovery
+# centre and (via ``GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT``) the floor are a
+# least-squares fit to the non-spinning dimpled sphere of Choi, Jeon & Choi
+# (2006), Phys. Fluids 18, 041702, Fig. 1 (rms 0.008 in Cd, #15443 F1).  The
+# fit is re-derived from ``tests/unit/physics/wind_tunnel_drag_15443.json``
+# in ``tests/unit/physics/test_drag_crisis_fit_15443.py``.  Mirrored in
+# ``rust_core/upstream-physics/src/aerodynamics.rs``.
+#: Subcritical Cd (Bearman & Harvey 1976; Lyu et al. 2018: Cd near 0.5 at
+#: Re 5e4).  Held fixed in the fit.
+_CD_PRECRITICAL: float = 0.50
+#: log-Re centre of the drag crisis (Choi 2006 fit: 7.59e4).
+_RE_MIN_CD: float = 7.59e4
+#: High-Re asymptote Cd (Bearman & Harvey 1976, Mehta 1985).  Held fixed.
+_CD_HIGH: float = 0.30
+#: Crisis width in log10(Re) decades (Choi 2006 fit: 0.065).
+_TRANSITION_WIDTH: float = 0.065
+#: log-Re centre of the slow post-crisis recovery (Choi 2006 fit: 2.81e5).
+_DRAG_CRISIS_RECOVERY_RE: float = 2.81e5
+#: Recovery width in log10(Re) decades (Mehta 1985 shape).  Held fixed.
+_RECOVERY_WIDTH: float = 0.45
 
 
 def _smoothstep_tanh(x: float, x0: float, width: float) -> float:
@@ -317,19 +332,43 @@ def cd_dimpled_sphere(reynolds: float, base_cd: float = 0.21) -> float:
 
     log_re = math.log10(reynolds)
     log_re_crisis = math.log10(_RE_MIN_CD)
-    log_re_recovery = math.log10(7.0e5)
+    log_re_recovery = math.log10(_DRAG_CRISIS_RECOVERY_RE)
 
-    # Crisis transition: high-drag plateau -> minimum Cd, centred near 7e4.
+    # Crisis transition: high-drag plateau -> minimum Cd, centred near 7.6e4.
     crisis_blend = _smoothstep_tanh(log_re, log_re_crisis, _TRANSITION_WIDTH)
     cd_crisis = _CD_PRECRITICAL + (cd_floor - _CD_PRECRITICAL) * crisis_blend
 
     # Slow recovery: minimum Cd -> high-Re asymptote.
-    recovery_blend = _smoothstep_tanh(log_re, log_re_recovery, 0.45)
+    recovery_blend = _smoothstep_tanh(log_re, log_re_recovery, _RECOVERY_WIDTH)
     cd = cd_crisis + (_CD_HIGH - cd_floor) * recovery_blend
 
     # Defensive clamp: keep the return value strictly inside the documented
     # envelope so downstream integrators never see an unphysical value.
     return max(0.15, min(0.55, cd))
+
+
+def cd_spinning_ball(
+    reynolds: float,
+    spin_ratio: float,
+    base_cd: float = float(GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT),
+) -> float:
+    """Return the drag coefficient of a spinning golf ball (#15443).
+
+    ``Cd = cd_dimpled_sphere(reynolds, base_cd) + k * spin_ratio`` with
+    ``k = GOLF_BALL_SPIN_DRAG_SLOPE`` (see its ``source``). Mirrors
+    ``cd_spinning_ball`` in ``rust_core/upstream-physics/src/aerodynamics.rs``.
+    Preconditions: ``spin_ratio`` (``r * omega_transverse / v``) a finite real
+    ``>= 0`` (else TypeError/ValueError), ``reynolds`` as for
+    :func:`cd_dimpled_sphere`. Postcondition: ``0`` when ``base_cd == 0``.
+    """
+    if not isinstance(spin_ratio, (int, float)) or isinstance(spin_ratio, bool):
+        raise TypeError("spin_ratio must be a real number")
+    if not math.isfinite(spin_ratio) or spin_ratio < 0:
+        raise ValueError("spin_ratio must be a finite non-negative number")
+    cd_reynolds = cd_dimpled_sphere(reynolds, base_cd)
+    if cd_reynolds == 0.0:
+        return 0.0
+    return cd_reynolds + float(GOLF_BALL_SPIN_DRAG_SLOPE) * float(spin_ratio)
 
 
 __all__ = [
@@ -348,6 +387,7 @@ __all__ = [
     "WATER_VAPOR_R_SPECIFIC_J_KG_K",
     "air_density",
     "cd_dimpled_sphere",
+    "cd_spinning_ball",
     "humid_air_density",
     "saturation_vapor_pressure_pa",
 ]

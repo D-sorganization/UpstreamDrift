@@ -29,25 +29,27 @@ Implements Issue #5337 (foundation).
 
 from __future__ import annotations
 
-import math
 import logging
+import math
 from dataclasses import dataclass, field, replace
 from typing import Any, Protocol, runtime_checkable
 
 import numpy as np
 
 from src.shared.python.contracts import ensure, require
+from src.shared.python.physics.ball_flight_validity import (
+    FlightValidityVerdict,
+    assess_trajectory_validity,
+    clamp_launch_spin_rate,
+    launch_spin_envelope,
+)
 from src.shared.python.physics.ball_launch_conditions import (
     EnvironmentalConditions,
     LaunchConditions,
     TrajectoryPoint,
 )
-from src.shared.python.physics.ball_flight_validity import (
-    FlightValidityVerdict,
-    assess_trajectory_validity,
-    clamp_launch_spin_rate,
-)
 from src.shared.python.physics.ball_properties import BallProperties
+from src.shared.python.physics.divot_model import DivotResult, SwingArc, compute_divot
 from src.shared.python.physics.impact_model import (
     ImpactModelType,
     ImpactParameters,
@@ -55,6 +57,7 @@ from src.shared.python.physics.impact_model import (
     PostImpactState,
     PreImpactState,
 )
+from src.shared.python.physics.terrain.materials import SurfaceMaterial
 
 logger = logging.getLogger(__name__)
 
@@ -154,6 +157,7 @@ class PipelineResult:
         default_factory=EnvironmentalConditions
     )
     metadata: dict[str, Any] = field(default_factory=dict)
+    divot: DivotResult | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -350,7 +354,15 @@ class SwingBallFlightPipeline:
     # Public interface
     # ------------------------------------------------------------------
 
-    def run(self, swing: SwingState, *, spin_factor: float = 1.0) -> PipelineResult:
+    def run(
+        self,
+        swing: SwingState,
+        *,
+        spin_factor: float = 1.0,
+        club: str | None = None,
+        divot_arc: SwingArc | None = None,
+        turf_material: SurfaceMaterial | None = None,
+    ) -> PipelineResult:
         """Execute the full swing → flight pipeline.
 
         Preconditions:
@@ -369,6 +381,14 @@ class SwingBallFlightPipeline:
             spin_factor: Multiplier on the derived launch spin rate, e.g. the
                 lie spin cut from ``perturb_impact_rows`` (#14569). The
                 default 1.0 leaves the launch untouched.
+            club: Club name; its class sets the launch-spin validity envelope
+                (#15443). ``None`` or an unknown name uses the driver cap.
+            divot_arc: Optional sole path relative to ball/turf [m]. Supply
+                together with turf_material. Swing velocity then means velocity
+                before turf entry, not an already ground-adjusted impact state.
+            turf_material: Surface for the heuristic divot model (#15523).
+                Speed loss precedes impact; spin retention multiplies spin_factor.
+                A club stopped by turf raises ValueError before impact or flight.
 
         Returns:
             ``PipelineResult`` with trajectory, carry, height, and impact data.
@@ -384,8 +404,13 @@ class SwingBallFlightPipeline:
             spin_factor,
         )
 
-        # Step 1: Build pre-impact state from swing
-        pre = self._build_pre_impact_state(swing)
+        impact_swing, divot, spin_retention = self._apply_divot(
+            swing, divot_arc, turf_material
+        )
+        spin_factor *= spin_retention
+
+        # Step 1: Build pre-impact state from the ground-adjusted swing.
+        pre = self._build_pre_impact_state(impact_swing)
 
         # Step 2: Solve impact
         post = self._solve_impact(pre)
@@ -396,7 +421,7 @@ class SwingBallFlightPipeline:
         if spin_factor != 1.0:
             launch = replace(launch, spin_rate=launch.spin_rate * spin_factor)
         pre_clamp_launch = launch
-        launch, spin_clamped = self._maybe_clamp_launch_spin(launch)
+        launch, spin_clamped = self._maybe_clamp_launch_spin(launch, club)
 
         # Step 4: Run ball flight simulation
         trajectory = self._run_flight_simulation(launch)
@@ -410,6 +435,7 @@ class SwingBallFlightPipeline:
             spin_clamped=spin_clamped,
             pre_clamp_launch=pre_clamp_launch if spin_clamped else None,
         )
+        result.divot = divot
         self._validate_result_sanity(result)
 
         ensure(
@@ -427,6 +453,41 @@ class SwingBallFlightPipeline:
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _apply_divot(
+        swing: SwingState,
+        divot_arc: SwingArc | None,
+        turf_material: SurfaceMaterial | None,
+    ) -> tuple[SwingState, DivotResult | None, float]:
+        """Return the ground-adjusted swing, divot, and launch spin retention.
+
+        Paired ground inputs are required; a stopped club raises before impact.
+        The original swing and its velocity array remain unchanged.
+        """
+        if (divot_arc is None) != (turf_material is None):
+            raise ValueError("divot_arc and turf_material must be supplied together")
+        divot = None
+        spin_retention = 1.0
+        impact_swing = swing
+        if divot_arc is not None and turf_material is not None:
+            divot = compute_divot(
+                divot_arc,
+                float(np.linalg.norm(swing.clubhead_velocity)),
+                turf_material,
+                effective_mass_kg=swing.clubhead_mass,
+            )
+            if divot.speed_retention == 0.0:
+                raise ValueError("club stopped by turf before ball impact")
+            impact_swing = replace(
+                swing,
+                clubhead_velocity=(
+                    np.asarray(swing.clubhead_velocity) * divot.speed_retention
+                ),
+            )
+            spin_retention = divot.spin_retention
+
+        return impact_swing, divot, spin_retention
 
     def _build_pre_impact_state(self, swing: SwingState) -> PreImpactState:
         """Convert ``SwingState`` to ``PreImpactState`` (LOD boundary)."""
@@ -477,11 +538,11 @@ class SwingBallFlightPipeline:
         return BallFlightSimulator(ball=self._ball, env=self._environment)
 
     def _maybe_clamp_launch_spin(
-        self, launch: LaunchConditions
+        self, launch: LaunchConditions, club: str | None = None
     ) -> tuple[LaunchConditions, bool]:
         if not self._clamp_launch_spin:
             return launch, False
-        return clamp_launch_spin_rate(launch)
+        return clamp_launch_spin_rate(launch, launch_spin_envelope(club).max_rpm)
 
     def _build_result(
         self,

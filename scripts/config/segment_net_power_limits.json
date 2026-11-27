@@ -1,0 +1,26 @@
+{
+  "symmetric_limit_w": 1044.873172992382,
+  "source": "tests/fixtures/club_face/swing_q_driver.npz",
+  "sample_count": 19776,
+  "raw_peak_w": 10439.585866933781,
+  "percentile": 98.0,
+  "max_physical_w": 25000.0,
+  "fixture": "tests/fixtures/club_face/swing_q_driver.npz",
+  "exclude_frame_ranges": [
+    [
+      636,
+      689
+    ]
+  ],
+  "impact_core_frames": [
+    [
+      661,
+      664
+    ]
+  ],
+  "impact_margin_frames": 25,
+  "impact_note": "Frames 661\u2013664 are the recorded ball-impact window (t\u22481.322\u20131.328 s); \u00b1margin frames are dropped before filtering.",
+  "frames_used": 878,
+  "filter_hz": 12.0,
+  "trim_frames": 15
+}

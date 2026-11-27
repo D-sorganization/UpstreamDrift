@@ -15,6 +15,9 @@ from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
 from src.shared.python.motion_matching.club_face_target import merge_axis_targets
 from src.shared.python.motion_matching.pipeline.address_feet import planted_stance
+from src.shared.python.motion_matching.pipeline.marker_selection import (
+    base_leg_seeds,
+)
 from src.shared.python.motion_matching.pipeline.turn_split import (
     lane_axis_targets,
     lane_split_weights,
@@ -27,7 +30,6 @@ from src.shared.python.motion_matching.pipeline.constants import (
     CALIBRATION_PRIOR_FRAMES,
     CALIBRATION_STRIDE,
     CONSISTENCY_PRIOR,
-    LEG_SEEDS,
     LOWER_LIMB_RANGES_DEG,
     RATE_HZ,
     REFERENCE_CUTOFF_HZ,
@@ -315,6 +317,7 @@ def consistency_resolve(
         prior_weight=prior_weight,
         iterations=iterations,
         **planted_stance(lane),
+        **getattr(lane, "stance_anchor", {}),  # soft anchor (#15296); default {}
         prior_trajectory=q_smooth,
         bounds=lane.bounds,
         axis_targets_per_frame=merge_axis_targets(
@@ -440,7 +443,7 @@ def _build_calibration_stage_report(
         "stride": CALIBRATION_STRIDE,
         "frames": len(lane.calibration_frames),
         "prior_frames": CALIBRATION_PRIOR_FRAMES,
-        "prior_offsets_m": {k: list(v[1]) for k, v in LEG_SEEDS.items()},
+        "prior_offsets_m": {k: list(v[1]) for k, v in base_leg_seeds(lane).items()},
         "rms_per_iteration_m": list(inputs.calibration.rms_per_iteration_m),
         "rms_per_iteration_after_scaling_m": list(cal2.rms_per_iteration_m),
         "per_marker_rms_m": cal2.per_marker_rms_m,

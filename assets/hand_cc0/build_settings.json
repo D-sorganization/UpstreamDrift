@@ -1,0 +1,53 @@
+{
+  "source_repository": "https://github.com/makehumancommunity/makehuman",
+  "source_commit": "a8bc2d54ff0ac92e78ff71431b1023eda42bf482",
+  "source_files": [
+    "makehuman/data/3dobjs/base.obj",
+    "makehuman/data/rigs/default.mhskel",
+    "makehuman/data/rigs/default_weights.mhw"
+  ],
+  "makehuman_unit_m": 0.1,
+  "forearm_stub_length_m": 0.055,
+  "forearm_cap": {
+    "rings": 4,
+    "depth_fraction": 0.6
+  },
+  "hand_weight_threshold": 0.5,
+  "max_influences": 4,
+  "min_plane_fit_ratio": 0.03,
+  "thumb_web_smoothing": {
+    "thumb_bones": [
+      "thumb_meta",
+      "thumb_prox"
+    ],
+    "palm_bone": "meta_index",
+    "min_weight": 0.05,
+    "rings": 3,
+    "iterations": 10,
+    "blend": 0.5
+  },
+  "finger_crease_smoothing": {
+    "seams": [
+      [
+        "index_prox",
+        "index_mid"
+      ],
+      [
+        "middle_prox",
+        "middle_mid"
+      ],
+      [
+        "ring_prox",
+        "ring_mid"
+      ],
+      [
+        "little_prox",
+        "little_mid"
+      ]
+    ],
+    "min_weight": 0.05,
+    "rings": 1,
+    "iterations": 2,
+    "blend": 0.5
+  }
+}

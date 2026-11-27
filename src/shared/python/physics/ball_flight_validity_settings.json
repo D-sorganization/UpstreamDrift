@@ -1,0 +1,58 @@
+{
+  "fallback_club_class": "driver",
+  "report_margin_rpm": 1.0,
+  "classes": {
+    "driver": {
+      "label": "driver",
+      "max_launch_spin_rpm": 3500.0,
+      "sources": "Unchanged from the original driver-only envelope of issue 14621: tour-labelled driver launch spin for face-to-path 10-15 degrees stays under about 3500 rpm. TrackMan tour averages put the driver near 2,500 rpm, so the cap sits well above a normal strike and only trips on an impact-solver artefact."
+    },
+    "wood": {
+      "label": "wood",
+      "max_launch_spin_rpm": 3500.0,
+      "sources": "Fairway woods share the driver envelope by decision of issue 15443 (driver and wood behaviour unchanged). The TrackMan tour average 3-wood launch spin is about 3,700 rpm, so this cap is conservative for woods and refuses rather than shows a doubtful flight."
+    },
+    "hybrid": {
+      "label": "hybrid",
+      "max_launch_spin_rpm": 5500.0,
+      "sources": "TrackMan tour average hybrid launch spin is about 4,400 rpm; the cap adds a margin of about 25 percent (4,400 x 1.25 = 5,500). It lies between the wood and the iron envelope, as the club does."
+    },
+    "iron": {
+      "label": "iron",
+      "max_launch_spin_rpm": 10000.0,
+      "sources": "TrackMan tour averages: 7-iron 7,097 rpm, 9-iron 8,647 rpm. The cap is the 9-iron average plus a margin of about 15 percent (8,647 x 1.15 = 9,944, rounded to 10,000), so a 7-iron near 7,500 rpm is valid and the shortest iron is still inside. Long irons (3-iron near 4,600 rpm) share this one cap; it is permissive for them by design, since the class is decided by the club name and the model has no per-number envelope."
+    },
+    "wedge": {
+      "label": "wedge",
+      "max_launch_spin_rpm": 12500.0,
+      "sources": "TrackMan tour average pitching wedge launch spin is about 9,300 rpm; wedges spin more as loft rises (sand and lob wedges reach roughly 10,000 to 11,000 rpm on tour). The cap is the pitching wedge average plus a margin of about 35 percent (9,300 x 1.35 = 12,555, rounded down to 12,500)."
+    }
+  },
+  "club_name_patterns": [
+    {
+      "club_class": "wedge",
+      "pattern": "wedge|(?<![a-z0-9])(pw|gw|aw|sw|lw)(?![a-z])",
+      "sources": "Wedge names and the usual two-letter abbreviations, matched on a lowercase club name."
+    },
+    {
+      "club_class": "hybrid",
+      "pattern": "hybrid|rescue|(?<![a-z0-9])\\d+h(?![a-z])|(?<![a-z0-9])h\\d+(?![a-z])",
+      "sources": "Hybrid names and numbered forms such as 4h or h4."
+    },
+    {
+      "club_class": "iron",
+      "pattern": "iron|(?<![a-z0-9])i\\d+(?![a-z])|(?<![a-z0-9])\\d+i(?![a-z])",
+      "sources": "Iron names and numbered forms such as iron7, i7 or 7i."
+    },
+    {
+      "club_class": "driver",
+      "pattern": "driver|(?<![a-z0-9])1w(?![a-z])",
+      "sources": "Driver names and the one-wood abbreviation."
+    },
+    {
+      "club_class": "wood",
+      "pattern": "wood|(?<![a-z0-9])\\d+w(?![a-z])|(?<![a-z0-9])w\\d+(?![a-z])",
+      "sources": "Fairway wood names and numbered forms such as 3w or w3."
+    }
+  ]
+}

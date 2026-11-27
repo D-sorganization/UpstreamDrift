@@ -1,0 +1,101 @@
+"""Mesh steps of the CC0 body skin layers (#15299)."""
+
+from __future__ import annotations
+
+import numpy as np
+import pytest
+
+from src.shared.python.model_appearance import body_skin_mesh as mesh
+
+pytestmark = pytest.mark.unit
+
+
+def test_clip_mesh_cuts_on_the_level_set() -> None:
+    points = np.array([[0.0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]])
+    faces = np.array([[0, 1, 2], [1, 3, 2]])
+    kept, cut = mesh.clip_mesh(points, faces, 0.25 - points[:, 0])
+    assert np.isclose(kept[:, 0].max(), 0.25) and len(cut) == 3
+    area = np.cross(
+        kept[cut[:, 1]] - kept[cut[:, 0]], kept[cut[:, 2]] - kept[cut[:, 0]]
+    )
+    assert np.isclose(0.5 * area[:, 2].sum(), 0.25) and (area[:, 2] > 0).all()
+    with pytest.raises(ValueError):
+        mesh.clip_mesh(points, faces, -np.ones(4))
+    with pytest.raises(ValueError):
+        mesh.clip_mesh(points, faces, np.ones(3))
+
+
+def test_split_mesh_keeps_the_whole_mesh_and_makes_the_level_set_edges() -> None:
+    points = np.array([[0.0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]])
+    faces = np.array([[0, 1, 2], [1, 3, 2]])
+    level = 0.25 - points[:, 0]
+    whole, split = mesh.split_mesh(points, faces, level)
+    area = np.cross(
+        whole[split[:, 1]] - whole[split[:, 0]], whole[split[:, 2]] - whole[split[:, 0]]
+    )
+    assert np.isclose(0.5 * area[:, 2].sum(), 1.0) and (area[:, 2] > 0).all()
+    assert len(whole) == 7 and len(mesh.boundary_edges(split)) == 6  # one sheet
+    on_line = np.isclose(whole[:, 0], 0.25)
+    assert on_line.sum() == 3
+    crossing = (whole[split][:, :, 0].min(axis=1) < 0.25 - 1e-9) & (
+        whole[split][:, :, 0].max(axis=1) > 0.25 + 1e-9
+    )
+    assert not crossing.any()  # no face lies across the line
+    kept, _ = mesh.clip_mesh(points, faces, level)
+    line = kept[np.isclose(kept[:, 0], 0.25)]
+    assert all((whole == row).all(axis=1).any() for row in line)  # the same rows
+    with pytest.raises(ValueError):
+        mesh.split_mesh(points, faces, np.ones(4))
+
+
+def test_open_edges_normals_and_relaxation_of_a_fan() -> None:
+    rim = np.array([[1.0, 0, 0], [0, 1, 0], [-1, 0, 0], [0, -1, 0]])
+    points = np.vstack([[[0.3, 0.2, 0.0]], rim])
+    faces = np.array([[0, 1, 2], [0, 2, 3], [0, 3, 4], [0, 4, 1]])
+    edges = mesh.boundary_edges(faces)
+    assert sorted(map(tuple, edges.tolist())) == [(1, 2), (2, 3), (3, 4), (4, 1)]
+    assert np.allclose(mesh.vertex_normals(points, faces), [0.0, 0.0, 1.0])
+    fixed = np.zeros(5, dtype=bool)
+    fixed[edges] = True
+    moved = mesh.relax(points, faces, fixed, 1.0)
+    assert np.allclose(moved[0], 0.0) and np.array_equal(moved[1:], rim)
+    assert np.array_equal(mesh.relax(points, faces, ~fixed | fixed, 1.0), points)
+
+
+def test_folded_and_stretched_faces_of_a_posed_sheet() -> None:
+    points = np.array([[0.0, 0, 0], [1, 0, 0], [2, 0, 0], [0, 1, 0], [1, 1, 0]])
+    points = np.vstack([points, [[2.0, 1, 0]]])
+    faces = np.array([[0, 1, 3], [1, 4, 3], [1, 2, 4], [2, 5, 4]])
+    assert not mesh.folded_faces(points, faces).any()
+    assert np.allclose(mesh.area_ratio(points, points, faces), 1.0)
+    posed = points.copy()
+    posed[5] = [0.9, 0.2, 0.0]  # the corner pulled back across its own face
+    assert mesh.folded_faces(posed, faces).tolist() == [False, False, False, True]
+    wide = points * [3.0, 1.0, 1.0]
+    assert np.allclose(mesh.area_ratio(points, wide, faces), 3.0)
+    assert not mesh.folded_faces(wide[:, [1, 0, 2]], faces[:, ::-1]).any()
+    with pytest.raises(ValueError):
+        mesh.area_ratio(points, points[:4], faces)
+
+
+def test_inward_thickness_is_the_depth_of_a_tube() -> None:
+    turn = np.linspace(0.0, 2.0 * np.pi, 24, endpoint=False)
+    ring = np.column_stack([0.03 * np.cos(turn), 0.03 * np.sin(turn)])
+    rows = [np.column_stack([ring, np.full(24, z)]) for z in (0.0, 0.02, 0.04)]
+    quads = [
+        (r * 24 + i, r * 24 + (i + 1) % 24, r * 24 + 24 + (i + 1) % 24, r * 24 + 24 + i)
+        for r in range(2)
+        for i in range(24)
+    ]
+    faces = np.array([t for a, b, c, d in quads for t in ((a, b, c), (a, c, d))])
+    tube, middle = np.vstack(rows), np.arange(24, 48)
+    depth = mesh.inward_thickness(tube, faces, middle)
+    assert depth == pytest.approx(0.06, rel=0.02)
+    flat = tube * [1.0, 0.5, 1.0]  # pressed to half its depth one way
+    pressed = mesh.inward_thickness(flat, faces, middle)
+    assert pressed.max() == pytest.approx(0.06, rel=0.02)
+    assert pressed.min() == pytest.approx(0.03, rel=0.1)  # normals of the facets
+    far = mesh.inward_thickness(tube, faces[:1], np.array([40]))
+    assert np.isinf(far).all()
+    with pytest.raises(ValueError, match="ids"):
+        mesh.inward_thickness(tube, faces, np.array([72]))

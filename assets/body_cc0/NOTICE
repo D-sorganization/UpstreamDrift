@@ -1,0 +1,35 @@
+Section tables of a CC0 human body for the procedural lofts (epic #15150, #15299).
+
+`body_sections.json` is derived, by `build_body_sections.py` with
+`section_settings.json`, from MakeHuman files that are all CC0 1.0
+(public-domain dedication). It holds measurements only (widths, depths, girths
+and fitted exponents of cross-sections); no mesh, skeleton or weight data is
+stored. The licence text and MakeHuman's own statement are the ones the hand
+asset carries: `../hand_cc0/LICENSE.CC0.txt` and
+`../hand_cc0/SOURCE_LICENSE_STATEMENT.txt`.
+
+Source repository: https://github.com/makehumancommunity/makehuman
+Source commit: a8bc2d54ff0ac92e78ff71431b1023eda42bf482
+
+| File | Role | Licence marker |
+| --- | --- | --- |
+| makehuman/data/3dobjs/base.obj | hm08 base mesh; the skin that is sliced | "This asset was explicitly released as CC0 in september 2020." (file header) |
+| makehuman/data/rigs/default.mhskel | joints that give each segment its axis | `"license": "CC0"` in the file |
+| makehuman/data/rigs/default_weights.mhw | skin weights that decide which skin belongs to a segment | `"license": "CC0"` in the file |
+| makehuman/data/targets/macrodetails/\*.target | macro morph targets of the male athletic mix | "This asset was explicitly released as CC0 in september 2020." (file header; the reader refuses a target without it) |
+
+MakeHuman LICENSE.md, section C: "The base mesh and proxies ... These assets
+have been released under CC0 1.0 Universal." The SHA-256 of every file read,
+and the weight of every target, is recorded in `body_sections.json`.
+
+Caveat, as recorded in `../head_cc0/PROVENANCE.json`: the community-assets-wip
+README says the base mesh "as imported by makeclothes or maketarget remains
+AGPL"; this predates and is superseded by LICENSE.md section C and the explicit
+2020-09 CC0 header in the files used here. Owner may wish to confirm.
+
+Changes made: none to the source. The mesh is morphed by the listed targets,
+scaled uniformly to the stature of the settings and measured.
+
+Rebuild or verify (the checkout is not part of this repository):
+
+    python3 assets/body_cc0/build_body_sections.py PATH/TO/makehuman-checkout [--check]

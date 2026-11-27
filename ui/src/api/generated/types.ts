@@ -813,6 +813,16 @@ export interface BunkerDesignV1 {
 }
 
 /**
+ * Existing adapter trace in metres, x forward, y left, z up.
+ */
+export interface BunkerFlightV1 {
+  flight_m: [number, number, number][];
+  rollout_m: [number, number, number][];
+  carry_m: number;
+  assumption: string;
+}
+
+/**
  * A completed job's record, naming the job and the request it answers.
  */
 export interface BunkerJobResultV1 {
@@ -981,6 +991,7 @@ export interface BunkerWorkbenchEvaluationV1 {
   shot: BunkerShotMetricsV1;
   delivered: BunkerDeliveredV1;
   carry: BunkerCarryV1 | null;
+  flight?: BunkerFlightV1 | null;
   unavailable: string[];
   sources: BunkerSourcesV1;
   objective: BunkerObjectiveReportV1 | null;

@@ -319,12 +319,12 @@ fields:
   # ---- counterfactual analysis (web Analysis page; desktop dashboard combo)
   - id: counterfactual.kind
     label: Counterfactual kind
-    short_help: Which counterfactual or induced-acceleration analysis to run.
+    short_help: ZVCF is the applied-torque control component.
     long_help: |
       - `ztcf`: zero-torque counterfactual — joint accelerations with applied
         torques removed (velocity-dependent + gravity effects remain).
-      - `zvcf`: zero-velocity counterfactual — accelerations with joint
-        velocities zeroed (gravity/configuration effects).
+      - `zvcf`: zero-velocity counterfactual — acceleration attributable to
+        applied torques with velocity and gravity removed (control component).
       - `gravity` / `drift`: passive drift component of the acceleration.
       - `control`: acceleration attributable to the applied torques.
       - `total`: drift + control superposition.

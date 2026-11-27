@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from functools import lru_cache
 
 import numpy as np
 import pytest
@@ -33,9 +34,11 @@ pytestmark = pytest.mark.unit
 GROUND = SlopeAwareGround()
 
 
-def _landing(carry: float = 120.0, speed: float = 35.0, drop: float = 25.0):
-    """One landing row: x, y (yd), vx, vy, vz (m/s); vz < 0 is descending."""
-    return np.array([[carry, 2.0, speed, 0.0, -drop]])
+def _landing(
+    carry: float = 120.0, speed: float = 35.0, drop: float = 25.0, spin: float = 400.0
+):
+    """One landing row: x, y (yd), vx, vy, vz (m/s), backspin (rad/s); vz < 0 descends."""
+    return np.array([[carry, 2.0, speed, 0.0, -drop, spin]])
 
 
 def _rest(
@@ -62,10 +65,12 @@ def test_ball_above_or_below_feet_bins_do_not_change_runout() -> None:
 
 
 def test_rest_is_never_behind_carry_and_roll_follows_the_landing_direction() -> None:
-    land = np.array([[100.0, 0.0, 0.0, 30.0, -20.0]])  # landing sideways (+y)
+    land = np.array([[100.0, 0.0, 0.0, 30.0, -20.0, 400.0]])  # landing sideways (+y)
     rest = GROUND(land, "fairway", "flat", "mid_iron")
     assert rest[0, 0] == pytest.approx(100.0) and rest[0, 1] > 0.0
-    assert _rest("up_5", speed=1.0)[0, 0] >= 120.0
+    assert _rest("up_5", speed=1.0, spin=0.0)[0, 0] >= 120.0
+    # Penner Sec. 3.2: enough backspin on a steep landing bounces the ball back
+    assert _rest("up_5", speed=1.0, spin=900.0)[0, 0] < 120.0
 
 
 def test_steeper_descent_and_rougher_lie_shorten_the_roll() -> None:
@@ -89,13 +94,84 @@ def test_missing_landing_inputs_and_unknown_names_fail_closed() -> None:
         GROUND(_landing(), "fairway", "flat", "putter")
 
 
-def test_every_coefficient_is_a_labelled_assumption() -> None:
+def test_every_coefficient_is_cited_or_a_labelled_assumption() -> None:
     assert GROUND.model_id == GROUND_MODEL_ID
     assert gr.GROUND_PARAMETERS
-    assert all(
-        p.basis == "assumption" and p.source for p in gr.GROUND_PARAMETERS.values()
-    )
+    for name, p in gr.GROUND_PARAMETERS.items():
+        assert p.source and p.basis == ("cited" if "bounce." in name else "assumption")
     assert LANDING_COLUMNS[:2] == ("x_yd", "y_yd")
+    assert LANDING_COLUMNS[-1] == "spin_rads"
+
+
+def test_bounce_parameters_come_from_the_cited_settings_file() -> None:
+    raw = gr.load_bounce_settings()
+    assert raw["source"]["doi"] == "10.1139/p02-035"
+    for name, rec in raw["parameters"].items():
+        record = gr.GROUND_PARAMETERS[f"bounce.{name}"]
+        assert record.value == rec["value"] and "Penner" in record.source
+        assert "eq" in record.rationale or "Section" in record.rationale
+
+
+def test_penner_rebound_reproduces_his_haake_green_check() -> None:
+    """Penner 2002 Sec. 2: 18.6 m/s at 44.4 deg from vertical, 484 rad/s backspin.
+
+    eq. (8) gives his fitted theta_c = 15.4 deg there, and mu_c and e match the
+    0.29 and 0.14 he quotes. His quoted rebound (4.34 m/s at 34.1 deg, 154 rad/s
+    topspin) is NOT reproduced by eqs. (3), (6), (7) as printed: they give
+    4.16 m/s at 41.7 deg and 163 rad/s, pinned here so a change is seen.
+    """
+    v, phi = 18.6, np.radians(44.4)
+    out = gr.penner_rebound(v * np.sin(phi), v * np.cos(phi), 484.0)
+    assert out.mu_c == pytest.approx(0.29, abs=0.01)
+    assert out.e == pytest.approx(0.14, abs=0.005)
+    assert out.rolling
+    assert np.hypot(out.vx, out.vz) == pytest.approx(4.16, abs=0.01)
+    assert np.degrees(np.arctan2(out.vx, out.vz)) == pytest.approx(41.7, abs=0.1)
+
+
+#: Penner 2002, Sec. 3: landing speed (m/s), angle from vertical (deg) and
+#: backspin (rad/s) of his drives and 9-iron, with the mu_c and first-bounce
+#: height (m, None where he quotes none) he reports for them
+PENNER_QUOTED = [
+    pytest.param(26.8, 68.0, 224.0, 0.23, 2.82, id="drive_35_m_s_club"),
+    pytest.param(26.2, 46.2, 315.0, 0.18, 1.17, id="drive_55_m_s_club"),
+    pytest.param(23.8, 34.0, 809.0, 0.28, None, id="nine_iron_809"),
+    pytest.param(23.8, 34.0, 1000.0, 0.33, None, id="nine_iron_1000"),
+    pytest.param(23.8, 34.0, 1200.0, 0.38, None, id="nine_iron_1200"),
+]
+
+
+@pytest.mark.parametrize(("v", "phi_deg", "spin", "mu_c", "height_m"), PENNER_QUOTED)
+def test_penner_rebound_reproduces_his_quoted_drive_and_iron_bounces(
+    v: float, phi_deg: float, spin: float, mu_c: float, height_m: float | None
+) -> None:
+    """The primary validation: the printed equations reproduce the mu_c and
+    first-bounce height Penner quotes for his drives and 9-iron (to the
+    precision he quotes), which the Haake case above cannot."""
+    phi = np.radians(phi_deg)
+    out = gr.penner_rebound(v * np.sin(phi), v * np.cos(phi), spin)
+    assert out.mu_c == pytest.approx(mu_c, abs=0.005)
+    if height_m is not None:
+        assert out.vz**2 / (2.0 * 9.81) == pytest.approx(height_m, abs=0.01)
+
+
+def test_more_backspin_bounces_shorter_until_the_ball_slides() -> None:
+    """Rolling bounce (eq. 3a) loses 2/7 r w; once mu < mu_c (eq. 2) spin is moot."""
+    spins = np.linspace(0.0, 2000.0, 41)
+    hop = gr.first_hop_m(np.full(41, 11.9), np.full(41, 14.5), spins)
+    assert np.all(np.diff(hop) <= 1e-12)
+    rolling = gr.penner_rebound(11.9, 14.5, spins).rolling
+    assert rolling[0] and not rolling[-1]
+    assert np.all(np.diff(hop[rolling]) < 0.0)
+    np.testing.assert_allclose(hop[~rolling], hop[-1])
+
+
+def test_landing_backspin_decays_with_the_flight_kernel_rate() -> None:
+    w0 = 6000.0 * 2.0 * np.pi / 60.0
+    assert gr.landing_backspin_rads(6000.0, 0.0) == pytest.approx(w0)
+    assert gr.landing_backspin_rads(6000.0, 6.0, 0.5) == pytest.approx(
+        0.5 * w0 * np.exp(-0.05 * 6.0)
+    )
 
 
 def _stub_sim(impacts, skill, wind):
@@ -103,7 +179,11 @@ def _stub_sim(impacts, skill, wind):
     n = len(impacts)
     carry = impacts[:, 0] * 2.0
     return np.column_stack(
-        [carry, np.zeros(n), np.full(n, 30.0), np.zeros(n), np.full(n, -20.0)]
+        [
+            carry,
+            *(np.zeros(n), np.full(n, 30.0), np.zeros(n), np.full(n, -20.0)),
+            np.full(n, 400.0),
+        ]
     )
 
 
@@ -167,28 +247,44 @@ def test_changing_a_coefficient_changes_the_table_hash(monkeypatch) -> None:
     assert "landing surface" in prov["ground_lie_source"]
 
 
-def test_roll_fraction_of_carry_falls_from_driver_to_wedge_on_the_real_pipeline() -> (
-    None
-):
+_FULL_SWING_SKILLS = (
+    "driver",
+    "fairway_wood",
+    "long_iron",
+    "mid_iron",
+    "short_iron",
+    "wedge",
+)
+
+
+@lru_cache(maxsize=1)
+def _pipeline_run_fractions() -> dict[str, float]:
+    """Mean (rest - carry) / carry per full-swing skill on the real pipeline."""
     from src.shared.python.physics.rust_kernel import is_rust_available
 
     if not is_rust_available():
         pytest.skip("upstream-physics Rust kernel required for flight pipeline")
     family, sim = get_skill_family("tour"), PipelineLandingSimulator(landing_state=True)
     z = standard_normals(0, 12)
-    frac = []
-    for skill in (
-        "driver",
-        "fairway_wood",
-        "long_iron",
-        "mid_iron",
-        "short_iron",
-        "wedge",
-    ):
+    frac = {}
+    for skill in _FULL_SWING_SKILLS:
         land = sim(_impacts(family.skills[skill].distribution, z), skill, (0.0, 0.0))
         rest = GROUND(land, "fairway", "flat", skill)
-        frac.append(float((rest[:, 0] - land[:, 0]).mean() / land[:, 0].mean()))
-    assert all(a >= b for a, b in zip(frac, frac[1:], strict=False)), frac
+        frac[skill] = float((rest[:, 0] - land[:, 0]).mean() / land[:, 0].mean())
+    return frac
+
+
+def test_roll_fraction_falls_from_driver_to_short_iron_on_the_pipeline() -> None:
+    frac = _pipeline_run_fractions()
+    chain = [frac[s] for s in _FULL_SWING_SKILLS[:-1]]
+    assert all(a >= b for a, b in zip(chain, chain[1:], strict=False)), frac
+
+
+def test_roll_fraction_falls_from_short_iron_to_wedge_on_the_pipeline() -> None:
+    """#15443: with each skill's own club spin cap the wedge lands with more
+    backspin than the short iron, so it checks up and runs a smaller fraction."""
+    frac = _pipeline_run_fractions()
+    assert frac["short_iron"] >= frac["wedge"], frac
 
 
 def test_green_side_skills_keep_carry_and_the_list_is_hashed() -> None:

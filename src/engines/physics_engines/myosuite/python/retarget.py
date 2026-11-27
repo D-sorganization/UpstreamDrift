@@ -15,6 +15,7 @@ from src.engines.physics_engines.myosuite.python.hip_retarget import (
     calibrated_hip_targets,
 )
 from src.shared.python.contracts import postcondition, precondition
+from src.shared.python.motion_matching.knee_axial_rotation import require_hinge_knee
 
 Array: TypeAlias = NDArray[np.float64]
 
@@ -192,7 +193,12 @@ def retarget_trajectory(
 def source_coordinate_index(
     coordinate_order: Sequence[str], rmap: RetargetMap
 ) -> Array:
-    """Build gather indices aligning a candidate vector to the map source order."""
+    """Build gather indices aligning a candidate vector to the map source order.
+
+    Raises ``ValueError`` for a candidate with the opt-in knee axial rotation:
+    the map has no target for it and would drop it.
+    """
+    require_hinge_knee(coordinate_order, "MyoSuite retarget map")
     lookup = {name: idx for idx, name in enumerate(coordinate_order)}
     missing = [name for name in rmap.source_names if name not in lookup]
     if missing:

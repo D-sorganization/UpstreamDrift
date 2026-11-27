@@ -32,6 +32,31 @@ def test_apps_package_relative_imports_reach_src() -> None:
 
 
 @pytest.mark.unit
+def test_cached_package_registers_again_after_registry_reset(monkeypatch) -> None:
+    """A cached apps package must not leave the tool unregistered (#15333).
+
+    Another test in the same worker may snapshot and clear the registry while
+    the apps package is first imported; restoring that snapshot then drops the
+    viewer while ``sys.modules`` still holds the package.
+    """
+    from src.launchers.adapters.simscape_embed import (
+        TOOL_ID,
+        load_simscape_apps_package,
+    )
+    from src.shared.python.launcher_embed import (
+        EMBEDDABLE_TOOL_REGISTRY,
+        get_embeddable_tool,
+    )
+
+    load_simscape_apps_package()
+    monkeypatch.delitem(EMBEDDABLE_TOOL_REGISTRY, TOOL_ID, raising=False)
+
+    load_simscape_apps_package()
+
+    assert get_embeddable_tool(TOOL_ID) is not None
+
+
+@pytest.mark.unit
 def test_embedded_c3d_viewer_creates_widget(qapp_or_skip, monkeypatch) -> None:
     """``create_main_widget`` returns a QWidget instead of raising ImportError."""
     import sys

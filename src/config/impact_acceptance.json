@@ -8,9 +8,9 @@
     "recorded_on": "2026-09-04"
   },
   "reconciled_against": {
-    "upstreamdrift": "e97e6c98519c5b9933c5a38324c3ba0c01785b5f",
-    "tools": "a47d83d644b39eb6168fb6f657c7705b89f8deaa",
-    "reconciled_on": "2026-10-29"
+    "upstreamdrift": "31dee3780bc70a05988ef7b6a9732fdb5a88e86f",
+    "tools": "f468d80f3e0a78e611051edaf95fea43bdf75973",
+    "reconciled_on": "2026-11-23"
   },
   "release_claim": "code_verified_only",
   "predictive_accuracy_claim": false,
@@ -57,13 +57,13 @@
         "id": "spring_damper",
         "module": "src/shared/python/physics/impact_model/models.py",
         "contact": "finite_duration_integrated",
-        "tangential_spin": "unavailable",
+        "tangential_spin": "supported",
         "gear_effect": "empirical_overlay_via_solver_api",
-        "inertia_tensor": "ignored",
+        "inertia_tensor": "scalar_moi_effective_mass",
         "velocity_dependent_cor": "unavailable_constant_cor",
         "shaft_grip": "not_modelled_free_clubhead",
-        "numerical_limits": "Semi-implicit Euler, dt default 1e-7 s, contact capped at 5 ms and 1e5 N; ball velocity converges to rtol 1e-4 between dt 1e-7 and 5e-8. Default stiffness 1e6 N/m and damping 1e3 N*s/m are uncalibrated: a 45 m/s driver strike yields ~1.26 ms contact and smash factor ~0.82, so defaults are for code verification only.",
-        "user_facing_statement": "Kelvin-Voigt compliant contact along the face normal only. Tangential spin: unavailable (normal-only) - the returned ball spin is the pre-impact spin, not a prediction. Impact offset and clubhead MOI are ignored by the model; COR parameter is unused."
+        "numerical_limits": "Semi-implicit Euler, dt default 1e-7 s, contact capped at 5 ms and 1e5 N; ball velocity converges to rtol 1e-4 between dt 1e-7 and 5e-8. Damping is derived from params.cor (Kelvin-Voigt zeta from COR; params.contact_damping is unused), so a 45 m/s driver strike gives ~0.61 ms contact and smash ~1.47, within 1 percent of rigid_body. Stiffness 1e6 N/m is uncalibrated. Before #15443 F5 the fixed 1e3 N*s/m damping was over-damped (zeta ~2.6) and gave smash ~0.82 with no spin.",
+        "user_facing_statement": "Kelvin-Voigt compliant contact along the face normal with damping derived from the COR parameter, plus one Coulomb friction impulse (no-slip capped, shared with rigid_body) so friction spin about the (t x n) axis is supported. The tangent plane is not time-resolved. Scalar clubhead MOI enters only the tangential cap; the normal contact ignores impact offset."
       },
       {
         "id": "finite_time",

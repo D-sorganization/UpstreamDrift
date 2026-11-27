@@ -169,17 +169,17 @@
     {
       "path": "evidence/devlog_reconciliation_11935_20261011/FORMAT_PRESERVATION_MAP_20261011.json",
       "bytes": 5704,
-      "sha256": "c8ec816c4cd7edd044eb7a4bd186303cad0152bca0334cec83713ee7b38065f2"
+      "sha256": "d12468cc445906ca10cfcb1497d0f6f8c2abc25f9eb8ed61968b9a095bff4200"
     },
     {
       "path": "evidence/devlog_reconciliation_11935_20261011/GITHUB_METADATA_11175_10799_11285_20261011.json",
-      "bytes": 22465,
-      "sha256": "aae6da997619068af2c1998b3bb40b8f458c34897ed25a9d4a9b5fb53d54caa4"
+      "bytes": 21925,
+      "sha256": "6cfbc84b1ef02babd0419a2419c9965356f0dd3a8ba60794f6a141c18036e37f"
     },
     {
       "path": "evidence/devlog_reconciliation_11935_20261011/GITHUB_METADATA_11175_10799_11285_20261011.json.raw.snapshot",
-      "bytes": 17764,
-      "sha256": "733201266d9800ea6b057dd401f03c782964862448c705836554bed614886ced"
+      "bytes": 17224,
+      "sha256": "d4b7e6520202a5c7ca08f1a03eb3155f580fe87427f68376b4d2c20243afff96"
     },
     {
       "path": "evidence/devlog_reconciliation_11935_20261011/RECOVERY_SHADOW_DEVELOPMENT_LOG_RECONCILIATION_AUDIT_20261011.json",
@@ -218,13 +218,13 @@
     },
     {
       "path": "evidence/devlog_reconciliation_11935_20261011/dl-metadata-root-response-20261011.json",
-      "bytes": 22465,
-      "sha256": "aae6da997619068af2c1998b3bb40b8f458c34897ed25a9d4a9b5fb53d54caa4"
+      "bytes": 21925,
+      "sha256": "6cfbc84b1ef02babd0419a2419c9965356f0dd3a8ba60794f6a141c18036e37f"
     },
     {
       "path": "evidence/devlog_reconciliation_11935_20261011/dl-metadata-root-response-20261011.json.raw.snapshot",
-      "bytes": 17764,
-      "sha256": "733201266d9800ea6b057dd401f03c782964862448c705836554bed614886ced"
+      "bytes": 17224,
+      "sha256": "d4b7e6520202a5c7ca08f1a03eb3155f580fe87427f68376b4d2c20243afff96"
     }
   ],
   "generated_utc": "2026-10-11",

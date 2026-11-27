@@ -766,23 +766,38 @@ class TestSpinDecay:
         assert abs(carry_with_decay - carry_no_decay) > 1.0
 
     def test_higher_decay_rate_less_carry(self) -> None:
-        """Higher spin decay rate should produce shorter carry."""
-        launch = LaunchConditions(
-            velocity=53.0,
-            launch_angle=math.radians(16.0),
-            spin_rate=7000.0,
+        """Higher spin decay rate shortens a lift-limited, low-spin driver."""
+        # Spin also adds drag since #15443, so the claim holds only where lift
+        # dominates; the old 53 m/s / 7000 rpm launch now gains carry (below).
+        carry_slow, carry_fast = self._carries_for_decay(73.0, 10.0, 2200.0)
+
+        assert carry_fast < carry_slow  # measured 214.8 m < 228.7 m
+
+    @pytest.mark.unit
+    def test_higher_decay_rate_more_carry_for_high_spin(self) -> None:
+        """High-spin launch: faster decay sheds spin drag and carries farther."""
+        carry_slow, carry_fast = self._carries_for_decay(53.0, 16.0, 7000.0)
+
+        assert carry_fast > carry_slow, (
+            f"#15443 measured 155.6 m > 150.4 m; got {carry_fast} vs {carry_slow}"
         )
 
-        slow_decay = BallFlightSimulator(ball=BallProperties(spin_decay_rate=0.02))
-        fast_decay = BallFlightSimulator(ball=BallProperties(spin_decay_rate=0.2))
-
-        traj_slow = slow_decay.simulate_trajectory(launch, max_time=8.0)
-        traj_fast = fast_decay.simulate_trajectory(launch, max_time=8.0)
-
-        carry_slow = slow_decay.calculate_carry_distance(traj_slow)
-        carry_fast = fast_decay.calculate_carry_distance(traj_fast)
-
-        assert carry_fast < carry_slow
+    @staticmethod
+    def _carries_for_decay(
+        velocity: float, launch_deg: float, spin_rpm: float
+    ) -> tuple[float, float]:
+        """Return carries [m] at spin decay rates 0.02 and 0.2."""
+        launch = LaunchConditions(
+            velocity=velocity,
+            launch_angle=math.radians(launch_deg),
+            spin_rate=spin_rpm,
+        )
+        carries = []
+        for rate in (0.02, 0.2):
+            sim = BallFlightSimulator(ball=BallProperties(spin_decay_rate=rate))
+            traj = sim.simulate_trajectory(launch, max_time=8.0)
+            carries.append(sim.calculate_carry_distance(traj))
+        return carries[0], carries[1]
 
     def test_no_spin_no_decay_effect(self) -> None:
         """With zero initial spin, decay rate should not affect trajectory."""

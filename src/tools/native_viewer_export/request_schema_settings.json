@@ -1,0 +1,56 @@
+{
+  "schema_id": "ud-native-export-request/v1",
+  "maturity_order": ["deprecated", "experimental", "prototype", "beta", "stable"],
+  "groups": [
+    {"name": "Shaft", "maturity": "experimental", "dest_prefixes": ["shaft_"],
+     "sources": "Chain flexible shaft is a research model (#12686, #12691); flex and stiffness flags arrive with #15150 Track C1. Shaft options are set when the bundle is built."},
+    {"name": "Inputs", "maturity": "beta", "dests": ["bundle", "out", "swing", "club", "engines"], "dest_prefixes": ["receipt_"],
+     "sources": "Same-input bundle and receipt inputs used by every published clip set (NV-5, #11678)."},
+    {"name": "Clip", "maturity": "beta", "dests": ["views", "stride", "fps", "speeds", "impact_window", "impact_speed", "impact_time", "preset", "size", "no_grid", "contact_hold_frames", "camera_lookat", "camera_height", "camera_distance"],
+     "sources": "Time-based clips and speed variants (GCV-14, #11720)."},
+    {"name": "HUD", "maturity": "beta", "dests": ["no_hud", "event_captions"],
+     "sources": "HUD and event captions (HRG-E4, #13175)."},
+    {"name": "Force Overlay", "maturity": "prototype", "dests": ["no_overlay", "force_vectors", "torque_vectors", "palm_thumb_force", "grip", "axial_impact_blackout"],
+     "limitations": "Forces on a kinematic replay (all-zero efforts) are not available: vectors are hidden, and palm-thumb, grip JSON and strips are not yet gated (#15150 G1).",
+     "sources": "Torques are the bundle's recorded tracking efforts, ground forces come from the contact model and grip forces are solved, none measured (#15150 parity review)."},
+    {"name": "Ellipsoids", "maturity": "experimental", "dests": ["interface_ellipsoid", "drift_arrow", "max_mobility_points"], "dest_prefixes": ["ellipsoid_", "hand_mobility", "mobility_"],
+     "limitations": "Capacity ellipsoids fall back to mobility radii without torque limits (#15150 G2); the drift arrow is not drawn (G3).",
+     "sources": "CAP-6 (#14038, #14046) and HCM-3 (#14004)."},
+    {"name": "Segment Shading", "maturity": "prototype", "argparse_groups": ["segment shading"],
+     "sources": "Inverse-dynamics axial load with unfiltered accelerations; OpenSim is unshaded (#15150 parity review)."},
+    {"name": "Impact Factors", "maturity": "prototype", "dest_prefixes": ["impact_factors"],
+     "sources": "Kinematic impact conditions from club forward kinematics (#15150)."},
+    {"name": "Ball Flight", "maturity": "experimental", "dest_prefixes": ["ball_flight"],
+     "sources": "Flight in the video is a model prediction; experimental while #15443 is open."},
+    {"name": "Ball and Shot Setup", "maturity": "prototype", "dests": ["no_ball", "club_roll_in_hands", "ball_position_shift"],
+     "sources": "Shot setup controls (#15150)."},
+    {"name": "Lighting", "maturity": "beta", "dest_prefixes": ["lighting"],
+     "sources": "Scene lighting presets (#15150)."},
+    {"name": "Appearance", "maturity": "beta", "argparse_groups": ["appearance"],
+     "sources": "Appearance document and overrides (HRG-B2 #13167, HRG-G1 #13186)."},
+    {"name": "Grip", "maturity": "beta", "argparse_groups": ["grip"],
+     "limitations": "Picture-only picks are accepted; physical grip flags are refused by the exporter and belong to spec_builder (HRG-GS-G1, #13346).",
+     "sources": "One grip resolver (HRG-GR4 #13205, HRG-A2 #13166)."}
+  ],
+  "fallback_group": {"name": "Other", "maturity": "experimental",
+    "sources": "A flag no group rule matches yet; it is exposed but hidden by min_maturity beta until it is classified."},
+  "remote_exclusions": {
+    "stride": "Deprecated alias for time-based playback; use speeds and fps."
+  },
+  "output_options": ["out"],
+  "stages": {
+    "bundle_build": {
+      "parser": "src.shared.python.motion_matching.execution.spec_builder:build_parser",
+      "groups": ["Shaft"],
+      "sources": "Options the exporter cannot change because they are fixed when the bundle is built; listed so later surfaces can offer a rebuild."
+    }
+  },
+  "roots": {
+    "input_roots_env": "UD_NATIVE_EXPORT_INPUT_ROOTS",
+    "output_root_env": "UD_NATIVE_EXPORT_OUTPUT_ROOT",
+    "default_input_roots": ["output", "sim_results"],
+    "default_output_root": "output/native_export_requests",
+    "sources": "Remote requests may read only below the input roots and write only below the output root; defaults are relative to the repository root and the environment variables override them (os.pathsep-separated for inputs)."
+  },
+  "command_prefix": ["python3", "-m", "src.tools.native_viewer_export"]
+}

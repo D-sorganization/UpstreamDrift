@@ -11,6 +11,8 @@ from src.launchers.launcher_constants import (
     logger,
 )
 from src.launchers.ui_components import StartupResults
+from src.shared.python.config.maturity_scale import filter_models_by_maturity
+from src.shared.python.config.typed_settings import get_settings
 
 
 class LauncherOrchestrator:
@@ -90,7 +92,9 @@ class LauncherOrchestrator:
             logger.warning("No registry available - no models will be loaded")
             return
 
-        all_models = self.registry.get_all_models()
+        all_models = filter_models_by_maturity(
+            self.registry.get_all_models(), get_settings().min_maturity
+        )
         logger.info("Registry returned %s models", len(all_models))
 
         for model in all_models:
