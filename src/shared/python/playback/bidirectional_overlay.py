@@ -37,6 +37,7 @@ class BidirectionalOverlayConfig:
     split_orientation: Literal["vertical", "horizontal"] = "vertical"
 
     def __post_init__(self) -> None:
+        """Reject opacities or a split ratio outside [0, 1], and an unknown split axis."""
         for val, name in (
             (self.model_opacity, "model_opacity"),
             (self.video_opacity, "video_opacity"),

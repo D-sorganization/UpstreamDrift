@@ -16,6 +16,7 @@ _TOL = 1e-8
 
 
 def _vec(v: Sequence[float] | np.ndarray, name: str) -> np.ndarray:
+    """Return ``name`` as a length-3 finite vector."""
     arr = np.asarray(v, dtype=float).ravel()
     if arr.size != 3 or not np.all(np.isfinite(arr)):
         raise ValueError(f"{name} must contain 3 finite numbers")
@@ -23,6 +24,7 @@ def _vec(v: Sequence[float] | np.ndarray, name: str) -> np.ndarray:
 
 
 def _unit(v: np.ndarray, name: str) -> np.ndarray:
+    """Return the unit vector of ``name``, rejecting a near-zero magnitude."""
     norm = float(np.linalg.norm(v))
     if norm < _TOL:
         raise ValueError(f"{name} must have non-zero magnitude")
@@ -45,6 +47,7 @@ class CameraViewParameters:
     projection_matrix: np.ndarray
 
     def __post_init__(self) -> None:
+        """Reject field of view, clip, aspect, or matrix values that cannot form a view."""
         if not (
             0.0 < self.fov_horizontal_deg < 180.0
             and 0.0 < self.fov_vertical_deg < 180.0

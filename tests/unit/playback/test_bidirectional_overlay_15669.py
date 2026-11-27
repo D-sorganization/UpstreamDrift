@@ -46,6 +46,7 @@ def sample_projection() -> CameraProjection:
 
 
 def test_match_perspective_from_projection(sample_projection: CameraProjection) -> None:
+    """Matched view recovers position, aspect, field of view, and look-at depth."""
     v = match_perspective_from_projection(sample_projection, (640, 480), 2.0, 0.1, 50.0)
     assert isinstance(v, CameraViewParameters)
     np.testing.assert_allclose(v.position_m, [0.0, -2.0, 1.0], atol=1e-6)
@@ -56,6 +57,7 @@ def test_match_perspective_from_projection(sample_projection: CameraProjection) 
 
 
 def test_perspective_matching_round_trip(sample_projection: CameraProjection) -> None:
+    """Viewer parameters rebuilt from a projection recover the original camera."""
     v = match_perspective_from_projection(sample_projection, (640, 480), 2.5)
     rec = projection_from_viewer_perspective(
         v.position_m, v.target_m, v.up_vector, (640, 480), v.fov_vertical_deg
@@ -68,6 +70,7 @@ def test_perspective_matching_round_trip(sample_projection: CameraProjection) ->
 
 
 def test_unproject_pixel_to_ray_and_plane(sample_projection: CameraProjection) -> None:
+    """A principal-point ray projects back, and a hit behind the camera is rejected."""
     orig, ray = unproject_pixel_to_ray(sample_projection, (320.0, 240.0))
     np.testing.assert_allclose(orig, [0.0, -2.0, 1.0], atol=1e-6)
     np.testing.assert_allclose(
@@ -91,6 +94,7 @@ def test_unproject_pixel_to_ray_and_plane(sample_projection: CameraProjection) -
 
 
 def test_frustum_quad_world_m(sample_projection: CameraProjection) -> None:
+    """Frame corners at a fixed depth project back onto the image rectangle."""
     quad = frustum_quad_world_m(sample_projection, (640, 480), 2.0)
     assert quad.shape == (4, 3)
     np.testing.assert_allclose(
@@ -101,6 +105,7 @@ def test_frustum_quad_world_m(sample_projection: CameraProjection) -> None:
 
 
 def test_composite_model_on_video() -> None:
+    """Model-on-video compositing honors zero, full, and half model opacity."""
     vid = np.full((50, 50, 3), 100, dtype=np.uint8)
     mod = np.zeros((50, 50, 4), dtype=np.uint8)
     mod[:25, :25, 0], mod[:25, :25, 3] = 200, 255
@@ -120,6 +125,7 @@ def test_composite_model_on_video() -> None:
 
 
 def test_composite_video_on_model_and_split() -> None:
+    """Video-on-model blends by opacity, and a vertical split keeps each side."""
     vid = np.full((40, 60, 3), 200, dtype=np.uint8)
     mod = np.full((40, 60, 3), 50, dtype=np.uint8)
 
@@ -141,6 +147,7 @@ def test_composite_video_on_model_and_split() -> None:
 
 
 def test_shape_overlay_options_interop() -> None:
+    """Shape overlay opacity becomes a model-on-video config at the same opacity."""
     cfg = BidirectionalOverlayConfig.from_shape_options(ShapeOverlayOptions(0.75))
     assert (
         cfg.mode == OverlayMode.MODEL_ON_VIDEO
