@@ -70,7 +70,9 @@ def test_overlay_changes_native_pixels(engine: str, swing: SwingInput) -> None:
         pytest.skip(reason)
     # the smoke bundle has zero efforts (a kinematic replay): ask for the vectors
     feed, lookat = build_overlay_feed(
-        swing, engine, options=OverlayOptions(forces_requested=True)
+        swing,
+        engine,
+        options=OverlayOptions(force_requested=True, torque_requested=True),
     )
     settings = ExportSettings(
         views=("face_on",),

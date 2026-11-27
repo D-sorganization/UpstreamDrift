@@ -840,6 +840,17 @@ def _card_panel_flag(args: argparse.Namespace) -> bool:
     return default_card_panel() if flag is None else bool(flag)
 
 
+def vector_option_fields(settings: ExportSettings) -> dict[str, bool]:
+    """The OverlayOptions vector fields for ``settings``: the shown vectors and
+    which of them an explicit flag requested (kinematic replays use the latter)."""
+    return {
+        "show_force": settings.force_vectors,
+        "show_torque": settings.torque_vectors,
+        "force_requested": settings.force_requested,
+        "torque_requested": settings.torque_requested,
+    }
+
+
 def build_settings(args: argparse.Namespace) -> ExportSettings:
     """``ExportSettings`` from parsed arguments (raises ``ValueError``)."""
     base = ExportSettings.preview() if args.preset == "preview" else ExportSettings()
@@ -883,7 +894,8 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         shading=build_shading(args),
         force_vectors=args.force_vectors is not False,
         torque_vectors=args.torque_vectors is not False,
-        vectors_requested=args.force_vectors is True or args.torque_vectors is True,
+        force_requested=args.force_vectors is True,
+        torque_requested=args.torque_vectors is True,
         palm_thumb_force=args.palm_thumb_force,
         interface_ellipsoids=tuple(ellipsoids),
         ellipsoid_scale=ellipsoid_scale,
@@ -954,9 +966,7 @@ def main(
                 grip=settings.grip,
                 axial=settings.shading_enabled,
                 options=OverlayOptions(
-                    forces_requested=settings.vectors_requested,
-                    show_force=settings.force_vectors,
-                    show_torque=settings.torque_vectors,
+                    **vector_option_fields(settings),
                     palm_thumb=settings.palm_thumb_force,
                     interface_ellipsoids=settings.interface_ellipsoids,
                     ellipsoid_scale=settings.ellipsoid_scale,

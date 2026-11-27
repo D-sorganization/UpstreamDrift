@@ -60,12 +60,13 @@ def is_kinematic_replay(bundle: Any) -> bool:
 
 def vector_visibility(bundle: Any, options: Any) -> VectorVisibility:
     """Force and torque visibility of ``bundle`` under ``options`` (an
-    ``OverlayOptions``): its flags stand, except that a kinematic replay hides
-    both unless ``forces_requested``. Logs one warning when it hides them.
+    ``OverlayOptions``): its flags stand, except that a kinematic replay draws
+    each vector only when that vector was explicitly requested. Logs one
+    warning when no vector was requested and both are hidden.
     ``replay`` is true on a kinematic replay whatever the flags: it alone
     decides the withholding of every other effort-derived visual."""
     replay = is_kinematic_replay(bundle)
-    hidden = replay and not options.forces_requested
+    hidden = replay and not (options.force_requested or options.torque_requested)
     if hidden:
         logger.warning(
             "%s: the bundle has zero efforts (a kinematic replay), so force and "
@@ -73,9 +74,6 @@ def vector_visibility(bundle: Any, options: Any) -> VectorVisibility:
             "--force-vectors or --torque-vectors to draw them",
             NOTE,
         )
-    return VectorVisibility(
-        options.show_force and not hidden,
-        options.show_torque and not hidden,
-        hidden,
-        replay,
-    )
+    show_force = options.show_force and (not replay or options.force_requested)
+    show_torque = options.show_torque and (not replay or options.torque_requested)
+    return VectorVisibility(show_force, show_torque, hidden, replay)

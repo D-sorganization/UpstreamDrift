@@ -199,8 +199,9 @@ class ExportSettings:
     ellipsoid_color_by: str = "point"
     ellipsoid_panel: Any = None  # ``PanelSettings``; ``None``: packaged file
     lighting: Any = None  # MuJoCo scene ``LightingSettings``; ``None``: studio
-    #: a vector flag was passed: a kinematic replay draws the vectors named (only)
-    vectors_requested: bool = False
+    #: an explicit flag named each vector: a kinematic replay draws those (only)
+    force_requested: bool = False
+    torque_requested: bool = False
     #: video frames the frame on the contact instant is repeated (#15150);
     #: ``None``: the ``contact_frame_settings.json`` default of the clip kind
     contact_hold_frames: int | None = None

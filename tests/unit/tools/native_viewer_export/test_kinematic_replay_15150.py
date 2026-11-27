@@ -46,7 +46,7 @@ def test_vectors_are_hidden_on_a_replay_unless_requested(caplog) -> None:
     with caplog.at_level(logging.WARNING):
         assert kr.vector_visibility(kin, OverlayOptions()) == (False, False, True, True)
     assert sum("kinematic replay" in r.getMessage() for r in caplog.records) == 1
-    asked = OverlayOptions(show_torque=False, forces_requested=True)
+    asked = OverlayOptions(show_torque=False, force_requested=True)
     assert kr.vector_visibility(kin, asked) == (True, False, False, True)
     assert kr.vector_visibility(dyn, OverlayOptions(show_force=False)) == (
         False,
@@ -66,13 +66,43 @@ def _settings(*flags: str):
 
 
 def test_only_an_explicit_vector_flag_requests_vectors_on_a_replay() -> None:
-    assert not _settings().vectors_requested
-    assert _settings("--force-vectors").vectors_requested
-    assert _settings("--torque-vectors").vectors_requested
-    assert not _settings("--no-force-vectors").vectors_requested
+    assert not _settings().force_requested and not _settings().torque_requested
+    assert _settings("--force-vectors").force_requested
+    assert _settings("--torque-vectors").torque_requested
+    assert not _settings("--no-force-vectors").force_requested
     assert (
         _settings().force_vectors and not _settings("--no-force-vectors").force_vectors
     )
+
+
+def _replay_visibility(bundle, *flags: str):
+    """Argument-to-visibility path: the CLI's own OverlayOptions fields."""
+    options = OverlayOptions(**cli.vector_option_fields(_settings(*flags)))
+    return kr.vector_visibility(bundle, options)
+
+
+@pytest.mark.parametrize(
+    ("flags", "expected"),
+    [
+        ((), (False, False, True, True)),
+        (("--force-vectors",), (True, False, False, True)),
+        (("--torque-vectors",), (False, True, False, True)),
+        (("--force-vectors", "--torque-vectors"), (True, True, False, True)),
+        (("--force-vectors", "--no-torque-vectors"), (True, False, False, True)),
+        (("--no-force-vectors", "--torque-vectors"), (False, True, False, True)),
+        (("--no-force-vectors",), (False, False, True, True)),
+    ],
+)
+def test_each_explicit_flag_draws_only_its_own_vector_on_a_replay(
+    flags, expected
+) -> None:
+    kin = _bundle(np.zeros((3, 2)))
+    assert _replay_visibility(kin, *flags) == expected
+
+
+def test_efforts_bundle_keeps_the_default_vectors_with_no_flags() -> None:
+    dyn = _bundle(np.ones((3, 2)))
+    assert _replay_visibility(dyn) == (True, True, False, False)
 
 
 UPPER = (
@@ -122,7 +152,9 @@ def test_a_kinematic_bundle_draws_no_force_or_torque_glyphs(zero_effort_swing) -
     assert all(_drawn(feed, k) == 0 for k in range(STATES))
     assert feed.hud_lines_at(0) == (kr.NOTE,)
     asked, _ = build_overlay_feed(
-        zero_effort_swing, "mujoco", options=OverlayOptions(forces_requested=True)
+        zero_effort_swing,
+        "mujoco",
+        options=OverlayOptions(force_requested=True, torque_requested=True),
     )
     assert asked.hud_lines_at(0) == (kr.NOTE_DRAWN,)
     assert any(_drawn(asked, k) > 0 for k in range(STATES))  # the control

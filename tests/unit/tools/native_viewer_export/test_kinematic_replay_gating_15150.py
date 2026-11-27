@@ -101,7 +101,12 @@ VECTOR_FLAGS = [(True, False), (False, True), (True, True)]
 def test_vector_request_draws_vectors_but_withholds_the_rest(
     kinematic, force, torque, caplog
 ) -> None:
-    opts = OverlayOptions(show_force=force, show_torque=torque, forces_requested=True)
+    opts = OverlayOptions(
+        show_force=force,
+        show_torque=torque,
+        force_requested=True,
+        torque_requested=True,
+    )
     with caplog.at_level(logging.WARNING):
         feed = _feed(kinematic, options=opts)
     assert (feed.show_force, feed.show_torque) == (force, torque)
@@ -115,7 +120,12 @@ def test_vector_request_draws_vectors_but_withholds_the_rest(
 
 @pytest.mark.parametrize(("force", "torque"), VECTOR_FLAGS)
 def test_vector_request_on_efforts_draws_everything(dynamic, force, torque) -> None:
-    opts = OverlayOptions(show_force=force, show_torque=torque, forces_requested=True)
+    opts = OverlayOptions(
+        show_force=force,
+        show_torque=torque,
+        force_requested=True,
+        torque_requested=True,
+    )
     feed = _feed(dynamic, options=opts)
     assert (feed.show_force, feed.show_torque) == (force, torque)
     assert feed.grip_analyses is not None and feed.show_palm_thumb
@@ -269,14 +279,16 @@ def test_runner_withholds_grip_json_strip_and_legend_on_a_replay(tmp_path) -> No
 
 
 def test_runner_withholds_the_same_when_vectors_are_requested(tmp_path) -> None:
-    result, backend = _run(tmp_path, 0.0, vectors_requested=True)
+    result, backend = _run(tmp_path, 0.0, force_requested=True, torque_requested=True)
     assert not backend.settings.shading_enabled
     assert result.inset_strip == f"inset strip unavailable: {REASON}"
     doc = json.loads(Path(result.grip_json).read_text(encoding="utf-8"))
     assert doc == {"unavailable": REASON}
 
 
-@pytest.mark.parametrize("flags", [{}, {"vectors_requested": True}])
+@pytest.mark.parametrize(
+    "flags", [{}, {"force_requested": True, "torque_requested": True}]
+)
 def test_runner_is_unchanged_for_a_bundle_with_efforts(tmp_path, flags) -> None:
     result, backend = _run(tmp_path, 1.0, **flags)
     assert backend.settings.shading_enabled and result.grip_json is None

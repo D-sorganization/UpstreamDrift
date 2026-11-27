@@ -61,8 +61,9 @@ class OverlayOptions:
     visibility: VisibilitySettings | None = None
     #: blank axial loads around ball impact (skin_load_settings.json default)
     axial_impact_blackout: bool = True
-    #: a vector flag was passed: a kinematic replay draws those vectors only
-    forces_requested: bool = False
+    #: an explicit flag named each vector: a kinematic replay draws those only
+    force_requested: bool = False
+    torque_requested: bool = False
     #: tip-to-tail ZTCF drift + ZVCF control hand-on-club force (#15685)
     ztcf_zvcf_hand_force: bool = False
     #: length gain for the tip-to-tail hand-force arrows only (#15685)
