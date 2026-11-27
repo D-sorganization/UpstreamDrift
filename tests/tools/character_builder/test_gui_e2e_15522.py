@@ -14,6 +14,7 @@ pytestmark = pytest.mark.unit
 
 @pytest.fixture
 def builder():
+    """Show the production Character Builder and dispose it on teardown."""
     try:
         from PyQt6.QtCore import QCoreApplication, QEvent
         from PyQt6.QtWidgets import QApplication
@@ -40,6 +41,7 @@ def builder():
 
 
 def _choose(combo, index: int) -> None:
+    """Move a combo to an index with keyboard events."""
     from PyQt6.QtCore import Qt
     from PyQt6.QtTest import QTest
 
@@ -102,6 +104,7 @@ def test_edit_and_export_from_real_buttons(builder, monkeypatch, tmp_path, fmt) 
 
 
 def test_cancel_export_does_not_write_or_report_success(builder, monkeypatch, tmp_path):
+    """A cancelled folder picker writes nothing and reports no success."""
     from PyQt6.QtCore import Qt
     from PyQt6.QtTest import QTest
     from PyQt6.QtWidgets import QFileDialog
