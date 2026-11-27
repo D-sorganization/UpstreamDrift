@@ -582,8 +582,11 @@ def draw_text_panel(
     for i, (label, value, unavailable) in enumerate(lines, start=1):
         y = pad + i * line_h
         colour = _CARD_GREY if unavailable else _WHITE
-        colour = next(iter(label_colours[i - 1 : i]), None) or colour
-        swatch = next(iter(swatches[i - 1 : i]), None)
+        colour_window = label_colours[i - 1 : i]
+        if colour_window and colour_window[0] is not None:
+            colour = colour_window[0]
+        swatch_window = swatches[i - 1 : i]
+        swatch = swatch_window[0] if swatch_window else None
         if swatch is not None:
             draw.rectangle((pad, y + 3, pad + size - 2, y + size), fill=tuple(swatch))
         draw.text((pad, y), label, font=font, fill=colour)

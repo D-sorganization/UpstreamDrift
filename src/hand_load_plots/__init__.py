@@ -230,7 +230,7 @@ def _shaped(values: object, shape: tuple[int, ...], name: str) -> np.ndarray:
 def _channels(values: object, n: int, *, force: bool) -> Mapping[str, np.ndarray]:
     if not isinstance(values, Mapping):
         raise TypeError("midhands channels must be a mapping")
-    allowed = {(n, 3)} if force else {(n,), (n, 3)}
+    allowed: set[tuple[int, ...]] = {(n, 3)} if force else {(n,), (n, 3)}
     copied: dict[str, np.ndarray] = {}
     for part in COMPONENTS:
         if part not in values:

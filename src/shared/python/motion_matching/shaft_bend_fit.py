@@ -25,7 +25,7 @@ import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -164,7 +164,9 @@ def club_frame_targets(
         raise ValueError("need (k, m, 3) markers and at least 3 reference markers")
     ref = np.broadcast_to(reference_offsets, captured.shape)
     out = np.full_like(captured, np.nan)
-    for k, (points, local) in enumerate(zip(captured, ref, strict=True)):
+    for k in range(int(captured.shape[0])):
+        points = cast(np.ndarray, np.asarray(captured[k], dtype=np.float64))
+        local = cast(np.ndarray, np.asarray(ref[k], dtype=np.float64))
         if not np.all(np.isfinite(points[idx])):
             continue
         a, b = local[idx], points[idx]
