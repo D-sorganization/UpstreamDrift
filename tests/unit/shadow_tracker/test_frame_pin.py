@@ -8,6 +8,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_repeats_map_to_first_consecutive_source_frame() -> None:
+    """Consecutive identical digests share one output index."""
     rows = map_frames([(0, 0, "a"), (1, 1001, "a"), (2, 2002, "b"), (3, 3003, "a")])
     assert [row["output_index"] for row in rows] == [0, 0, 1, 2]
     assert [row["source_index"] for row in rows] == [0, 1, 2, 3]
@@ -16,11 +17,13 @@ def test_repeats_map_to_first_consecutive_source_frame() -> None:
 
 
 def test_rejects_nonmonotonic_source_identity() -> None:
+    """Non-increasing PTS is rejected."""
     with pytest.raises(ValueError):
         map_frames([(0, 0, "a"), (1, 0, "b")])
 
 
 def test_source_pin_maps_decoded_frames_and_preserves_timebase(tmp_path) -> None:
+    """A decoded source maps frames, keeps its timebase and writes unique PNGs."""
     av = pytest.importorskip("av")
     np = pytest.importorskip("numpy")
     pytest.importorskip("cv2")
