@@ -18,6 +18,7 @@ import numpy as np
 
 from src.motion_capture.capture_registry import capture_info
 from src.shared.python.contracts import ensure, require
+from src.shared.python.core.constants import GRAVITY_FLOAT
 from src.shared.python.swing_comparison.motion import CAPTURE_A_MARKER_LABELS
 
 FIXTURE_RELATIVE = "src/config/opensim_catchup/a1_reference_fixture.json"
@@ -25,7 +26,7 @@ FIXTURE_SCHEMA = "opensim-catchup-a1/v1"
 CAPTURE_ID = "capture-A"
 BUNDLE_SCHEMA = "same-input-bundle/v1"
 BEST_MATCH_ENV = "UD_DEFAULT_MATCH_BUNDLE"
-GRAVITY_M_S2 = (0.0, 0.0, -9.80665)
+GRAVITY_M_S2 = (0.0, 0.0, -GRAVITY_FLOAT)
 
 
 class A1FixtureError(ValueError):
@@ -75,6 +76,7 @@ def sha256_file(path: Path) -> str:
 
 
 def _close(left: float, right: float, message: str, tol: float = 1e-12) -> None:
+    """Pin two floats to within ``tol``; raise A1FixtureError with ``message`` otherwise."""
     _pin(abs(left - right) <= tol, message)
 
 

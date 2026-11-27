@@ -20,6 +20,7 @@ pytestmark = pytest.mark.unit
 
 
 def _bundle(path: Path, *, schema: str, dt_s: float, spec_sha: str = "ab" * 32) -> None:
+    """Write a same-input bundle with the given manifest fields to ``path``."""
     manifest = {
         "schema": schema,
         "spec_sha256": spec_sha,
@@ -34,6 +35,7 @@ def _bundle(path: Path, *, schema: str, dt_s: float, spec_sha: str = "ab" * 32) 
 
 
 def test_public_pins_match_capture_a_and_canonical_v2() -> None:
+    """The committed fixture pins capture-A, the marker schema, and canonical-v2."""
     fixture = verify_public_pins()
     assert fixture["schema"] == "opensim-catchup-a1/v1"
     assert fixture["capture"]["id"] == "capture-A"
@@ -49,6 +51,7 @@ def test_public_pins_match_capture_a_and_canonical_v2() -> None:
 
 
 def test_best_match_bundle_on_capture_timebase(tmp_path: Path) -> None:
+    """A bundle on the capture timebase is accepted and its receipt is typed."""
     path = tmp_path / "best.npz"
     _bundle(path, schema=BUNDLE_SCHEMA, dt_s=1.0 / 360.0)
     receipt = verify_best_match_bundle(path)
@@ -58,6 +61,7 @@ def test_best_match_bundle_on_capture_timebase(tmp_path: Path) -> None:
 
 
 def test_best_match_bundle_rejects_other_schema(tmp_path: Path) -> None:
+    """A bundle with a foreign schema is rejected."""
     path = tmp_path / "other.npz"
     _bundle(path, schema="same-input-bundle/v0", dt_s=1.0 / 360.0)
     with pytest.raises((A1FixtureError, PreconditionError)):
@@ -65,6 +69,7 @@ def test_best_match_bundle_rejects_other_schema(tmp_path: Path) -> None:
 
 
 def test_best_match_bundle_rejects_other_timebase(tmp_path: Path) -> None:
+    """A bundle on a different timebase is rejected."""
     path = tmp_path / "slow.npz"
     _bundle(path, schema=BUNDLE_SCHEMA, dt_s=1.0 / 240.0)
     with pytest.raises((A1FixtureError, PreconditionError)):
