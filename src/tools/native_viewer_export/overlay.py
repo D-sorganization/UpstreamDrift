@@ -182,6 +182,7 @@ def _extract_physical_radii(hm: Any, kind: str) -> tuple[np.ndarray, tuple[float
 
 
 def _lookup_point_mobility(m: dict[str, Any], pt: Any) -> Any:
+    """Mobility sample for a named point, or the lead/trail hand when the point is a hand."""
     return m.get(pt.name) or (
         m.get("lead" if "lead" in pt.name else "trail") if pt.group == "hands" else None
     )
@@ -194,11 +195,13 @@ def _build_hand_hud_lines_fn(
     scales: dict[str, Any],
     mobility_condition_cutoff: float | None = None,
 ) -> Callable[[int], tuple[str, ...]]:
+    """Build the per-frame hand HUD, including an unavailable reason when a radius cannot be drawn."""
     from src.shared.python.force_overlay.ellipsoid_display import format_hud_capability
 
     is_hands = len(resolved_pts) == 2 and {p.group for p in resolved_pts} == {"hands"}
 
     def hand_hud_lines_fn(index: int) -> tuple[str, ...]:
+        """HUD lines for one frame index."""
         hm_map, lines = get_hm(index), []
         for kind in active_ellipsoids:
             scale, parts = scales[kind], []
@@ -284,6 +287,7 @@ def _ellipsoid_feed_factory(
     """Feed builder for any re-sampling of ``swing``, on ``swing``'s scale."""
 
     def ellipsoids_for(shown: SwingInput) -> tuple[Any, Any, Any]:
+        """Ellipsoid feed for a resampled copy of the same swing."""
         return _build_hand_ellipsoid_feed(
             shown,
             active,
@@ -339,6 +343,7 @@ def _build_hand_ellipsoid_feed(
     _hm_cache: dict[tuple[bool, int], Any] = {}
 
     def _get_hm(idx: int, of: SwingInput = swing) -> dict[str, Any]:
+        """Cached segment or hand mobility at one state index."""
         key = (of is swing, idx)
         if key not in _hm_cache:
             if hasattr(of, "segment_mobility_at"):
@@ -406,6 +411,7 @@ def _build_glyph_fn(
     }
 
     def glyphs_at(index: int) -> tuple[EllipsoidGlyph, ...]:
+        """Styled ellipsoid glyphs for one frame, skipping any radius that cannot be drawn."""
         hm_map, out = get_hm(index), []
         for kind in kinds:
             for pt in points:
@@ -442,6 +448,7 @@ def _build_panel_rows_fn(
     """Side-panel rows per frame: largest radii and condition of each point."""
 
     def rows_fn(index: int) -> tuple[PanelRow, ...]:
+        """Side-panel rows for one frame."""
         hm_map, rows = get_hm(index), []
         for pt in points:
             hm = _lookup_point_mobility(hm_map, pt)

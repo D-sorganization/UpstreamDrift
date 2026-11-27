@@ -521,6 +521,7 @@ def _add_clip_overlay_arguments(p: argparse.ArgumentParser) -> None:
 
 
 def _add_camera_arguments(p: argparse.ArgumentParser) -> None:
+    """Add camera look-at, height, and distance flags."""
     p.add_argument(
         "--camera-lookat",
         default=None,
@@ -544,6 +545,7 @@ def _add_camera_arguments(p: argparse.ArgumentParser) -> None:
 
 
 def _add_grip_and_ball_arguments(p: argparse.ArgumentParser) -> None:
+    """Add the grip-overlay flag and the flag that hides the decorative ball."""
     p.add_argument(
         "--grip",
         action="store_true",
@@ -559,6 +561,7 @@ def _add_grip_and_ball_arguments(p: argparse.ArgumentParser) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the native-viewer export argument parser."""
     p = argparse.ArgumentParser(
         prog="python -m src.tools.native_viewer_export",
         description=(
@@ -750,6 +753,7 @@ def build_appearance(args: argparse.Namespace) -> dict[str, Any] | None:
 
 
 def parse_size(text: str) -> tuple[int, int]:
+    """Parse a WIDTHxHEIGHT frame size such as 640x544."""
     try:
         w, h = (int(part) for part in text.lower().split("x"))
     except ValueError:
@@ -758,6 +762,7 @@ def parse_size(text: str) -> tuple[int, int]:
 
 
 def parse_speeds(text: str) -> tuple[float, ...]:
+    """Parse a comma-separated list of playback speeds."""
     try:
         return tuple(float(part) for part in text.split(",") if part.strip())
     except ValueError:

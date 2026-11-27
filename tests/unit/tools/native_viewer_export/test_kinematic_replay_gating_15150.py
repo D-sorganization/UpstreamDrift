@@ -34,6 +34,7 @@ REASON = "kinematic replay: bundle carries no efforts"
 
 
 def _swing(efforts_scale: float):
+    """A two-coordinate swing of ``steps`` states."""
     pytest.importorskip("mujoco")
     from src.shared.python.motion_matching.full_body_spec import load_full_body_spec
     from src.tools.native_viewer_export.core import SwingInput
@@ -60,15 +61,18 @@ def _swing(efforts_scale: float):
 
 @pytest.fixture(scope="module")
 def kinematic():
+    """A zero-effort swing."""
     return _swing(0.0)
 
 
 @pytest.fixture(scope="module")
 def dynamic():
+    """A swing that carries non-zero efforts."""
     return _swing(1.0)
 
 
 def _feed(swing, **kw):
+    """Overlay feed for ``swing`` with the requested vector flags."""
     opts = kw.pop("options", None)
     return overlay.build_overlay_feed(
         swing, "mujoco", grip=True, axial=True, palm_thumb=True, options=opts, **kw
@@ -78,6 +82,7 @@ def _feed(swing, **kw):
 def test_a_kinematic_replay_withholds_shading_grip_and_palm_thumb(
     kinematic, caplog
 ) -> None:
+    """A kinematic replay withholds shading, grip, and the palm-thumb marker."""
     with caplog.at_level(logging.WARNING):
         feed = _feed(kinematic)
     assert all(feed.axial_at(k) is None for k in range(STATES))
@@ -90,6 +95,7 @@ def test_a_kinematic_replay_withholds_shading_grip_and_palm_thumb(
 
 
 def test_a_replay_names_only_what_was_requested(kinematic) -> None:
+    """A replay HUD names only the vectors that were requested."""
     feed = overlay.build_overlay_feed(kinematic, "mujoco")[0]
     assert feed.hud_lines_at(0) == (kr.NOTE,)
 
@@ -101,6 +107,7 @@ VECTOR_FLAGS = [(True, False), (False, True), (True, True)]
 def test_vector_request_draws_vectors_but_withholds_the_rest(
     kinematic, force, torque, caplog
 ) -> None:
+    """A vector request draws those vectors and still withholds the effort-only visuals."""
     opts = OverlayOptions(
         show_force=force,
         show_torque=torque,
@@ -120,6 +127,7 @@ def test_vector_request_draws_vectors_but_withholds_the_rest(
 
 @pytest.mark.parametrize(("force", "torque"), VECTOR_FLAGS)
 def test_vector_request_on_efforts_draws_everything(dynamic, force, torque) -> None:
+    """On a bundle with efforts, a vector request draws the full overlay."""
     opts = OverlayOptions(
         show_force=force,
         show_torque=torque,
@@ -134,6 +142,7 @@ def test_vector_request_on_efforts_draws_everything(dynamic, force, torque) -> N
 
 
 def test_a_bundle_with_efforts_is_unchanged(dynamic) -> None:
+    """A bundle with efforts is unchanged when no vector flag is passed."""
     feed = _feed(dynamic)
     assert feed.grip_analyses is not None and feed.show_palm_thumb
     assert feed.axial_at(0) is not None
@@ -141,11 +150,13 @@ def test_a_bundle_with_efforts_is_unchanged(dynamic) -> None:
 
 
 def test_rollout_velocity_reaches_the_provider(dynamic, monkeypatch) -> None:
+    """Rollout velocity is what the overlay provider receives."""
     seen = {}
     real = overlay.BundleOverlayProvider
 
     class Spy(real):
         def __init__(self, *a, **kw):
+            """Remember the velocity argument passed to the provider."""
             seen["v"] = kw.get("v")
             super().__init__(*a, **kw)
 
@@ -161,6 +172,7 @@ def test_rollout_velocity_reaches_the_provider(dynamic, monkeypatch) -> None:
 
 
 def _hm(**kw):
+    """A hand-mobility stand-in with no torque limits."""
     base = {
         "mobility_axes": np.eye(3),
         "mobility_eigenvalues": np.array([4.0, 1.0, 0.25]),
@@ -174,11 +186,13 @@ def _hm(**kw):
 
 @pytest.mark.parametrize("kind", ["force-capacity", "acceleration-capacity"])
 def test_capacity_without_limits_is_unavailable_with_a_reason(kind) -> None:
+    """Force capacity without torque limits is reported unavailable."""
     with pytest.raises(overlay.EllipsoidUnavailable, match="torque limits"):
         overlay._extract_physical_radii(_hm(), kind)
 
 
 def test_capacity_with_limits_is_unchanged() -> None:
+    """Force capacity with limits is left unchanged."""
     cap = SimpleNamespace(axes=np.eye(3) * 2, radii=np.array([3.0, 2.0, 1.0]))
     axes, radii = overlay._extract_physical_radii(
         _hm(force_capacity=cap, acceleration_capacity=cap), "force-capacity"
@@ -188,6 +202,7 @@ def test_capacity_with_limits_is_unchanged() -> None:
 
 
 def test_hud_says_unavailable_instead_of_drawing_a_mislabelled_ellipsoid() -> None:
+    """The HUD says unavailable instead of drawing a mislabelled ellipsoid."""
     pt = SimpleNamespace(name="lead_hand", group="hands")
     hm = _hm()
     scale = SimpleNamespace(unit="N")
@@ -205,12 +220,14 @@ class _Backend:
     engine = "mujoco"
 
     def __init__(self):
+        """Remember the settings the backend was asked to render."""
         self.settings = None
 
     def unavailable_reason(self):
-        return None
+        """This test backend is always available."""
 
     def render(self, swing, settings, indices, ov):
+        """Yield one black frame per view for each requested index."""
         self.settings = settings
         for _ in indices:
             yield {
@@ -221,16 +238,20 @@ class _Backend:
 
 class _Writer:
     def __init__(self, path: Path, fps: int) -> None:
+        """Remember the path this test writer was opened with."""
         self.path = path
 
     def append_data(self, frame) -> None:
-        pass
+        """Record the latest frame and do not write a clip."""
+        self.last = frame
 
     def close(self) -> None:
+        """Mark the clip path as written."""
         self.path.write_bytes(b"x")
 
 
 def _bundle(efforts: float, steps: int = 20) -> InputBundle:
+    """A bundle with constant efforts of ``efforts``."""
     q = np.zeros((steps + 1, 2))
     return InputBundle(
         spec_bytes=json.dumps({"coordinate_order": ["A", "B"]}).encode(),
@@ -246,6 +267,7 @@ def _bundle(efforts: float, steps: int = 20) -> InputBundle:
 
 
 def _run(tmp_path: Path, efforts: float, **flags):
+    """Run one export into a temporary directory."""
     bpath = tmp_path / "b.npz"
     _bundle(efforts).save(bpath)
     backend = _Backend()
@@ -271,6 +293,7 @@ def _run(tmp_path: Path, efforts: float, **flags):
 
 
 def test_runner_withholds_grip_json_strip_and_legend_on_a_replay(tmp_path) -> None:
+    """The runner withholds the grip JSON, strip, and legend on a replay."""
     result, backend = _run(tmp_path, 0.0)
     assert not backend.settings.shading_enabled
     assert result.inset_strip == f"inset strip unavailable: {REASON}"
@@ -279,6 +302,7 @@ def test_runner_withholds_grip_json_strip_and_legend_on_a_replay(tmp_path) -> No
 
 
 def test_runner_withholds_the_same_when_vectors_are_requested(tmp_path) -> None:
+    """Requesting vectors does not bring the withheld replay visuals back."""
     result, backend = _run(tmp_path, 0.0, force_requested=True, torque_requested=True)
     assert not backend.settings.shading_enabled
     assert result.inset_strip == f"inset strip unavailable: {REASON}"
@@ -290,6 +314,7 @@ def test_runner_withholds_the_same_when_vectors_are_requested(tmp_path) -> None:
     "flags", [{}, {"force_requested": True, "torque_requested": True}]
 )
 def test_runner_is_unchanged_for_a_bundle_with_efforts(tmp_path, flags) -> None:
+    """The runner keeps every visual for a bundle that has efforts."""
     result, backend = _run(tmp_path, 1.0, **flags)
     assert backend.settings.shading_enabled and result.grip_json is None
     assert REASON not in str(result.inset_strip)

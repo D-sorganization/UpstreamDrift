@@ -231,6 +231,7 @@ class ExportSettings:
         return cls(**{**base, **overrides})
 
     def _validate_clips(self) -> None:
+        """Reject empty, duplicate, or out-of-range clip speeds and windows."""
         if not self.speeds and self.impact_window_s is None:
             raise ValueError("speeds must not be empty (or set impact_window_s)")
         for speed in (*self.speeds, self.impact_speed):
@@ -250,6 +251,7 @@ class ExportSettings:
             contact_frame.hold_count(self.contact_hold_frames, windowed=False)
 
     def __post_init__(self) -> None:
+        """Reject empty or duplicate views and non-positive frame settings."""
         if not self.views:
             raise ValueError("views must not be empty")
         for name in self.views:
@@ -416,6 +418,7 @@ class SwingInput:
         return tuple(reference.shape)
 
     def __post_init__(self) -> None:
+        """Reject a rollout whose q or v does not match the reference shape."""
         expected = self.reference_shape
         if self.q.shape != expected:
             raise ValueError(f"rollout q has shape {self.q.shape}, expected {expected}")
@@ -489,9 +492,11 @@ class SwingInput:
 
     @property
     def n_states(self) -> int:
+        """Number of rollout states."""
         return int(self.q.shape[0])
 
     def time_s(self, index: int) -> float:
+        """Swing time in seconds of state ``index``."""
         if self.sample_times_s is not None:
             return float(self.sample_times_s[index])
         return float(index * self.bundle.dt_s)
@@ -520,10 +525,12 @@ class SwingInput:
         return (float(point[0]), float(point[1]), float(point[2]))
 
     def _source_steps(self) -> int:
+        """Number of states in the original, unresampled rollout."""
         reference = self.bundle.reference_q
         return int(reference.shape[0])
 
     def _provenance_value(self, key: str) -> Any:
+        """Return one provenance field, or None when the bundle did not record it."""
         provenance = self.bundle.provenance
         return provenance.get(key)
 
@@ -601,6 +608,7 @@ def frame_indices(n_states: int, stride: int) -> list[int]:
 
 @functools.lru_cache(maxsize=4)
 def _club_pose_model(spec_bytes: bytes) -> Any:
+    """Build and cache the club-pose model for a specification."""
     from src.tools.native_viewer_export.club_pose import ClubPoseModel
 
     return ClubPoseModel(spec_bytes)
@@ -642,7 +650,6 @@ class NativeBackend(Protocol):
 
     def unavailable_reason(self) -> str | None:
         """``None`` when ready, else why this backend cannot run here."""
-        ...
 
     def render(
         self,
@@ -652,12 +659,14 @@ class NativeBackend(Protocol):
         overlay: OverlayFeed | None,
     ) -> Iterator[dict[str, Image8]]:
         """Yield ``{view name: RGB frame}`` for every state index in order."""
-        ...
 
 
 class ClipWriter(Protocol):
-    def append_data(self, frame: Image8) -> None: ...
-    def close(self) -> None: ...
+    def append_data(self, frame: Image8) -> None:
+        """Append one RGB frame to the clip."""
+
+    def close(self) -> None:
+        """Finish the clip and release the writer."""
 
 
 WriterFactory = Callable[[Path, int], ClipWriter]
@@ -708,10 +717,12 @@ class ExportResult:
 
     @property
     def skipped(self) -> bool:
+        """True when this export was skipped and recorded a reason."""
         return self.skipped_reason is not None
 
 
 def clip_name(swing: SwingInput, engine: str, view: str, suffix: str = "") -> str:
+    """File name of one view's mp4."""
     return f"{swing.swing}_{engine}_{view}{suffix}.mp4"
 
 
@@ -910,6 +921,7 @@ def _export_clip(
     writer_factory: WriterFactory,
     overlays: ClipOverlays | None = None,
 ) -> tuple[dict[str, Path], int, list[int]]:
+    """Render one clip plan and return the written paths, frame count, and indices."""
     card = overlays.card if overlays is not None else None
     strip = overlays.strip if overlays is not None else None
     factors = overlays.factors if overlays is not None else None

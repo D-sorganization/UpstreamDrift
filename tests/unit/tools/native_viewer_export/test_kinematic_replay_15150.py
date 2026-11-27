@@ -19,10 +19,12 @@ ROOT = Path(__file__).resolve().parents[4]
 
 
 def _bundle(efforts: np.ndarray, holds: np.ndarray | None = None) -> SimpleNamespace:
+    """A tiny bundle whose efforts are constant ``value``."""
     return SimpleNamespace(efforts=efforts, hold_efforts=holds)
 
 
 def test_only_all_zero_efforts_make_a_kinematic_replay() -> None:
+    """Only an all-zero effort trace is a kinematic replay."""
     assert kr.is_kinematic_replay(_bundle(np.zeros((5, 3))))
     efforts = np.zeros((5, 3))
     efforts[4, 2] = 1e-9
@@ -36,12 +38,14 @@ def test_only_all_zero_efforts_make_a_kinematic_replay() -> None:
 
 
 def test_a_provenance_label_does_not_decide() -> None:
+    """A provenance label does not by itself make the swing a kinematic replay."""
     labelled = _bundle(np.ones((2, 3)))
     labelled.provenance = {"kinematic": True}
     assert not kr.is_kinematic_replay(labelled)
 
 
 def test_vectors_are_hidden_on_a_replay_unless_requested(caplog) -> None:
+    """Force and torque glyphs stay hidden on a replay unless that vector was requested."""
     kin, dyn = _bundle(np.zeros((3, 2))), _bundle(np.ones((3, 2)))
     with caplog.at_level(logging.WARNING):
         assert kr.vector_visibility(kin, OverlayOptions()) == (False, False, True, True)
@@ -58,6 +62,7 @@ def test_vectors_are_hidden_on_a_replay_unless_requested(caplog) -> None:
 
 
 def _settings(*flags: str):
+    """Export settings with the given vector flags."""
     return cli.build_settings(
         cli.build_parser().parse_args(
             ["--bundle", "x", "--out", "o", "--swing", "s", *flags]
@@ -66,6 +71,7 @@ def _settings(*flags: str):
 
 
 def test_only_an_explicit_vector_flag_requests_vectors_on_a_replay() -> None:
+    """On a replay, only an explicit vector flag requests vectors."""
     assert not _settings().force_requested and not _settings().torque_requested
     assert _settings("--force-vectors").force_requested
     assert _settings("--torque-vectors").torque_requested
@@ -96,11 +102,13 @@ def _replay_visibility(bundle, *flags: str):
 def test_each_explicit_flag_draws_only_its_own_vector_on_a_replay(
     flags, expected
 ) -> None:
+    """Each explicit flag draws only its own vector on a replay."""
     kin = _bundle(np.zeros((3, 2)))
     assert _replay_visibility(kin, *flags) == expected
 
 
 def test_efforts_bundle_keeps_the_default_vectors_with_no_flags() -> None:
+    """A bundle with efforts keeps the default vectors when no flag is passed."""
     dyn = _bundle(np.ones((3, 2)))
     assert _replay_visibility(dyn) == (True, True, False, False)
 
@@ -115,6 +123,7 @@ STATES = 9
 
 @pytest.fixture(scope="module")
 def zero_effort_swing():
+    """A zero-effort swing input for the glyph tests."""
     pytest.importorskip("mujoco")
     from src.shared.python.motion_matching.full_body_spec import load_full_body_spec
     from src.shared.python.motion_matching.same_input import InputBundle
@@ -141,11 +150,13 @@ def zero_effort_swing():
 
 
 def _drawn(feed, index: int) -> int:
+    """Names of the glyphs drawn at frame 0."""
     glyphs = feed.glyphs_at(index)
     return len(glyphs.arrows) + len(glyphs.torque_arcs)
 
 
 def test_a_kinematic_bundle_draws_no_force_or_torque_glyphs(zero_effort_swing) -> None:
+    """A kinematic bundle draws neither force nor torque glyphs."""
     from src.tools.native_viewer_export.overlay import build_overlay_feed
 
     feed, _ = build_overlay_feed(zero_effort_swing, "mujoco")
@@ -161,6 +172,7 @@ def test_a_kinematic_bundle_draws_no_force_or_torque_glyphs(zero_effort_swing) -
 
 
 def test_ellipsoids_stay_on_a_kinematic_replay(zero_effort_swing) -> None:
+    """Hand ellipsoids stay available on a kinematic replay."""
     from src.tools.native_viewer_export.overlay import build_overlay_feed
 
     opts = OverlayOptions(hand_mobility="both")

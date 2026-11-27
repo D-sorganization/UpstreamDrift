@@ -39,6 +39,7 @@ UPPER = (
 
 @pytest.fixture(scope="module")
 def swing() -> SwingInput:
+    """A short zeroed full-body swing for the native-viewer smoke test."""
     pytest.importorskip("mujoco")
     spec = load_full_body_spec(FULL, json.loads(UPPER.read_text(encoding="utf-8")))
     names = tuple(spec["coordinate_order"])
@@ -59,6 +60,7 @@ def swing() -> SwingInput:
 
 @pytest.mark.parametrize("engine", ENGINES)
 def test_overlay_changes_native_pixels(engine: str, swing: SwingInput) -> None:
+    """An overlay changes at least one pixel of a native frame."""
     from src.tools.native_viewer_export.overlay import (
         OverlayOptions,
         build_overlay_feed,
