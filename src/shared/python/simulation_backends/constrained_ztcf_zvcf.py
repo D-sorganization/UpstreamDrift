@@ -238,13 +238,18 @@ def constrained_counterfactual_report(
     _require_constrained(provider)
     q_arr = _state("q", q)
     v_arr = _state("v", v)
-    n = np.asarray(provider.mass_matrix(q_arr)).shape[0]
+    mass = np.asarray(provider.mass_matrix(q_arr), dtype=np.float64)
+    n = mass.shape[0]
     tau_arr = _state("tau", tau, n)
     zeros = np.zeros(n)
     ztcf, lam0 = constrained_acceleration_at(provider, q_arr, v_arr, zeros)
-    zvcf, lam00 = constrained_acceleration_at(provider, q_arr, zeros, zeros)
+    zvcf, _ = constrained_acceleration_at(provider, q_arr, zeros, zeros)
     full, _ = constrained_acceleration_at(provider, q_arr, v_arr, tau_arr)
     control_total = full - ztcf
+    jacobian = np.asarray(provider.closure_jacobian(q_arr), dtype=np.float64)
+    _, lam_control = constrained_acceleration(
+        mass, zeros, tau_arr, jacobian, np.zeros(jacobian.shape[0])
+    )
     columns = [
         constrained_acceleration_at(provider, q_arr, v_arr, tau_arr[i] * np.eye(n)[i])[
             0
@@ -265,7 +270,7 @@ def constrained_counterfactual_report(
         control_total=control_total,
         per_actuator=np.stack(columns, axis=1),
         reaction_ztcf=lam0,
-        reaction_zvcf=lam00,
+        reaction_zvcf=lam_control,
         dependence=dependence,
         hypotheses={
             "per_actuator": (_PER_ACTUATOR_HYPOTHESIS,),
