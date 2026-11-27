@@ -164,10 +164,12 @@ def club_frame_targets(
         raise ValueError("need (k, m, 3) markers and at least 3 reference markers")
     ref = np.broadcast_to(reference_offsets, captured.shape)
     out = np.full_like(captured, np.nan)
+    # NDArray rows index as float64 scalars under the pinned numpy 2.2 stubs;
+    # correct on the numpy 2.3 stubs CI runners use (pyproject exclude note).
     for k, (points, local) in enumerate(zip(captured, ref, strict=True)):
-        if not np.all(np.isfinite(points[idx])):
+        if not np.all(np.isfinite(points[idx])):  # type: ignore[index]
             continue
-        a, b = local[idx], points[idx]
+        a, b = local[idx], points[idx]  # type: ignore[index]
         rot = kabsch_rotation(a - a.mean(0), b - b.mean(0))
         out[k] = (points - b.mean(0)) @ rot + a.mean(0)
     return out

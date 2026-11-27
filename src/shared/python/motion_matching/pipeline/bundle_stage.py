@@ -154,8 +154,10 @@ class BodyKinematics:
 
     def __init__(self, plant: Any, bodies: Sequence[str]) -> None:
         self.bodies = tuple(bodies)
-        probes = {
-            f"{body}#{i}": (body, tuple(point))
+        # _PROBES rows are ndarray views, typed as float64 by the pinned
+        # numpy 2.2 stubs; they iterate as sequences on 2.3 stubs.
+        probes: dict[str, tuple[str, tuple[Any, ...]]] = {
+            f"{body}#{i}": (body, tuple(point))  # type: ignore[arg-type]
             for body in self.bodies
             for i, point in enumerate(_PROBES)
         }
