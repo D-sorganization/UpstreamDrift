@@ -414,8 +414,6 @@ class SimulationPanel(QWidget):
         self._show_progress(False)
         self.controls.btn_run.setEnabled(True)
         self.controls.btn_reset.setEnabled(True)
-        self.sim_finished.emit()
-
         self._result = res
         self._anim_idx = 0
 
@@ -442,6 +440,9 @@ class SimulationPanel(QWidget):
 
         # Auto-play
         self.controls.btn_play.setChecked(True)
+
+        # Completion listeners read the result and frame range synchronously.
+        self.sim_finished.emit()
 
     def _on_sim_error(self, msg: str) -> None:
         """Called on the main thread when simulation fails."""

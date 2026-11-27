@@ -63,6 +63,10 @@ class InputBundle:
     hold_efforts: Array | None = None
     effort_hold_dt_s: float | None = None
     substeps: int = int(POLICY["substeps"])
+    # Original input clock (not rebased) and target, never rollout states.
+    # Absent together in legacy bundles; no target is inferred from replay.
+    target_time_s: Array | None = None
+    target_q: Array | None = None
 
     def __post_init__(self) -> None:
         nv = len(self.coordinate_order)
@@ -90,6 +94,46 @@ class InputBundle:
             raise TypeError("substeps must be an int")
         self._reconcile_effort_holds()
         self._check_hold_efforts()
+        self._check_target()
+
+    def _check_target(self) -> None:
+        """Keep an optional finite, ordered target pair in spec coordinates."""
+        times, q = self.target_time_s, self.target_q
+        if times is None and q is None:
+            return
+        if times is None or q is None:
+            raise ValueError("target_time_s and target_q must be present together")
+        times = np.array(times, dtype=np.float64, copy=True)
+        q = np.array(q, dtype=np.float64, copy=True)
+        if (
+            times.ndim != 1
+            or times.size < 2
+            or q.shape != (times.size, len(self.coordinate_order))
+            or not np.isfinite(times).all()
+            or not np.isfinite(q).all()
+            or np.any(np.diff(times) <= 0)
+        ):
+            raise ValueError("target must have finite coordinates and increasing times")
+        times.flags.writeable = False
+        q.flags.writeable = False
+        object.__setattr__(self, "target_time_s", times)
+        object.__setattr__(self, "target_q", q)
+
+    @property
+    def target_sha256(self) -> str | None:
+        """Hash the exact spec and original target clock/q as little-endian f64.
+
+        This identifies target evidence, not a run or physical acceptance.
+        The original clock origin is retained even for a lead-in bundle.
+        """
+        if self.target_time_s is None or self.target_q is None:
+            return None
+        digest = hashlib.sha256(b"same-input-target/v1\0")
+        digest.update(self.spec_sha256.encode("ascii"))
+        digest.update(np.asarray(self.target_q.shape, dtype="<i8").tobytes())
+        digest.update(np.asarray(self.target_time_s, dtype="<f8").tobytes())
+        digest.update(np.asarray(self.target_q, dtype="<f8").tobytes())
+        return digest.hexdigest()
 
     def _reconcile_effort_holds(self) -> None:
         """Sync effort_hold_dt_s and effort_holds (#12279)."""
@@ -206,6 +250,11 @@ class InputBundle:
             },
             "reference_engine": self.reference_engine,
             "provenance": self.provenance,
+            **(
+                {"target_sha256": self.target_sha256}
+                if self.target_q is not None
+                else {}
+            ),
         }
 
     def ball_impact(self) -> Any:
@@ -234,6 +283,9 @@ class InputBundle:
         }
         if self.hold_efforts is not None:
             arrays["hold_efforts"] = self.hold_efforts
+        if self.target_q is not None:
+            arrays["target_q"] = self.target_q
+            arrays["target_time_s"] = self.target_time_s
         np.savez_compressed(path, **arrays)
 
     @classmethod
@@ -267,9 +319,13 @@ class InputBundle:
                 substeps=int(
                     manifest.get("policy", {}).get("substeps", POLICY["substeps"])
                 ),
+                target_time_s=data.get("target_time_s"),
+                target_q=data.get("target_q"),
             )
         if bundle.spec_sha256 != manifest["spec_sha256"]:
             raise ValueError("bundle spec hash does not match its manifest")
+        if bundle.target_sha256 != manifest.get("target_sha256"):
+            raise ValueError("bundle target hash does not match its manifest")
         return bundle
 
 

@@ -1,0 +1,33 @@
+\documentclass{article}
+\usepackage{amsmath}
+\title{Sampled Iron Ground Contact}
+\author{UpstreamDrift}
+\date{}
+\begin{document}
+\maketitle
+\section{Scope and Coordinates}
+Supplementary editable calculation note for issue 15523, separate from the
+engineering design manual. Inputs are paired times $t_i$ in seconds and sole
+heights $z_i$ in metres relative to local turf, positive upward. Ball time $t_b$
+uses the same clock. Geometry, terrain sampling and ball detection are supplied
+by the caller. This diagnostic applies no force, energy or spin correction.
+\section{Method}
+For $t\in[t_i,t_{i+1}]$, height is linearly interpolated. A crossing occurs at
+$t_c=(1-f)t_i+ft_{i+1}$, where
+$f=|z_i|/(|z_i|+|z_{i+1}|)$, evaluated with rescaled heights.
+Let $[a_j,b_j]$ be the penetrating intervals. Then
+\[
+ D_{\rm pre}=\sum_j\max(0,\min(b_j,t_b)-a_j),\qquad
+ d_{\max}=\max(0,-\min_i z_i).
+\]
+The first contact is $a_1$, or absent if no interval penetrates. The strike is
+fat iff $D_{\rm pre}>0$. Tangency alone is excluded. Maximum depth includes the
+whole observed record, including after the ball.
+\section{Validity and Evidence}
+Require finite paired samples, increasing times with finite span, at least two
+points, initial height nonnegative and ball time inside the record. An ending
+below turf reports only observed duration. Unobserved earlier contact and
+excursions between samples cannot be inferred. No calibration coefficients or
+measured physical acceptance are claimed. Analytical regression cases and exact
+reproduction commands are in \texttt{IRON\_GROUND\_CONTACT.md}.
+\end{document}

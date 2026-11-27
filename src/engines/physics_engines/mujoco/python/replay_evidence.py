@@ -100,7 +100,7 @@ def _prepare(files: ReplayFiles, settings: ReplaySettings, diagnostic: bool) -> 
     return source, document, arrays, capture, attachments, failures
 
 
-def _metrics(capture: TourCapture, markers: np.ndarray) -> dict[str, float]:
+def _metrics(capture: TourCapture, markers: np.ndarray) -> dict[str, float | None]:
     count = len(markers)
     prefix = TourCapture(
         capture.time_s[:count],

@@ -30,7 +30,7 @@
       "tiles": [
         "simulation_backends"
       ],
-      "notes": "#7450 (closed by #7495): the analysis routes expose ZTCF/ZVCF and induced-acceleration counterfactuals, and the web CounterfactualPanel is mounted on the Analysis Tools page.",
+      "notes": "#7450 (closed by #7495): the analysis routes expose ZTCF/ZVCF and induced-acceleration counterfactuals, and the web CounterfactualPanel is mounted on the Analysis Tools page. ZVCF is the applied-control acceleration with velocity and gravity off; at each recorded state ZTCF + ZVCF = total (#15711).",
       "id": "analysis.counterfactuals"
     },
     {
@@ -533,6 +533,20 @@
       "id": "mocap.breadth"
     },
     {
+      "feature_id": "motion_matching.kinetic_match",
+      "title": "Kinetic match: forces and torques for a kinematic best match (CLI, REST, MCP)",
+      "status": "gap",
+      "pyqt": "src/shared/python/motion_matching/kinetic_match.py",
+      "api": "src/api/routes/agent_sim_run.py",
+      "web": null,
+      "issue": 15150,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "One function, run_kinetic_match (#15685, #15695), behind the command line (python3 -m src.shared.python.motion_matching.kinetic_match), REST POST /tools/agent-sim-run/kinetic-match and the MCP tool kinetic_match (#15150 D10): a saved kinematic bundle in, the bundle with efforts and a receipt (verdict, reasons, peaks) out. The result is one minimum-effort solution in the null space of the closed arm loop, never a unique or measured answer. No PyQt6 control (the Model Explorer is the remaining D10 surface) and no browser page run it yet.",
+      "id": "motion_matching.kinetic_match"
+    },
+    {
       "feature_id": "mujoco.force_overlays",
       "title": "MuJoCo GUI force/torque overlays drawn through the shared glyph renderers (native viewer and MeshCat)",
       "status": "parity",
@@ -832,7 +846,7 @@
       "tiles": [
         "bunkershot3d"
       ],
-      "notes": "Moved out of engines.load_and_simulate by #8618: the tile is a club-design workbench, not an engine load/simulate surface, and the two launcher tiles (bunkershot3d -> a notebook script, bunker_shot -> the GUI) were reconciled into this one entry point. The computation lives in src/tools/bunker_shot_gui/model.py, which imports no GUI toolkit and is the layer a React port would consume; the v1 API route (#9545) serves a bounded nominal solve, the A/B comparison with the model's carry-objective standing (no predictive winner on an unqualified objective, #9239) and digest verification of saved records from it. The web page (/tools/bunker-workbench, #9545 slice 3) runs the evaluate and compare solves through the job routes (slice 5): two designs (loft, marketed bounce, sole width; blank keeps the grind preset), an exploratory carry objective, and per result the tier, verdict, in-frame stamp, sand-property sources and digest; the comparison shows the objective standing and names a winner only on a predictive standing, otherwise an exploratory leader (#9239). The same two solves also run as bounded, cancellable jobs (/v1/jobs/evaluate, /v1/jobs/compare, then poll /v1/jobs/{job_id} for per-shot progress or POST .../cancel; slice 4) on the shared API TaskManager: at most two workers, a cancelled job stops before its next shot and never gains a result, and a completed result names its job id and input digest so a stale answer is recognisable. The page (slice 5) submits each solve as a job, polls its status on a bounded backed-off schedule (250 ms doubling to 2 s, giving up after three failed reads in a row) that stops on a terminal state, a cancel or unmount, shows a labelled progress bar of the per-shot progress with a keyboard-reachable Cancel button, shows failed and cancelled jobs as such, and discards as stale any result whose job id, kind or input digest does not match the current submission. Workbench figures export through src/tools/bunker_shot_gui/export.py (slice 8): a PNG whose iTXt header carries the view, verdict status, tier, in-frame stamp words, sources and an optional v1 record digest, sealed by a SHA-256 over the header and the decoded pixels; export_figure refuses a figure that does not draw the stamp it claims, and read_export refuses an unstamped, edited, unknown-schema or predictive-claiming file. The PyQt window has no Export action yet. It stays a gap: no sand/swing inputs, no /v1/verify save-and-reload, no visualizations, and no rendered acceptance evidence. Under Tauri the tile still opens the PyQt window; the page is the browser fallback. The visualization suite (epic #8699) keeps that split: shot3d.py and traces.py compute, render3d.py and render_traces.py draw headlessly through matplotlib, and viewport_widgets.py only wires them to a canvas. A React port would consume shot3d.viewport_payload, which is the backend-neutral ADR-0027 ViewportOverlayPayload and carries the envelope status and fidelity tier in its metadata so any renderer can stamp its own frames. The F1 sand cut (#8710, #8711) keeps the same split and adds one constraint a port must honour: the field carries its fidelity tier and validity status as data covered by a SHA-256 over the provenance and the arrays together, so any client that renders a field must read the standing out of the file rather than out of its filename, and must refuse a field whose digest does not match.",
+      "notes": "Moved out of engines.load_and_simulate by #8618: the tile is a club-design workbench, not an engine load/simulate surface, and the two launcher tiles (bunkershot3d -> a notebook script, bunker_shot -> the GUI) were reconciled into this one entry point. The computation lives in src/tools/bunker_shot_gui/model.py, which imports no GUI toolkit and is the layer a React port would consume; the v1 API route (#9545) serves a bounded nominal solve, the A/B comparison with the model's carry-objective standing (no predictive winner on an unqualified objective, #9239) and digest verification of saved records from it. The web page (/tools/bunker-workbench, #9545 slice 3) runs the evaluate and compare solves through the job routes (slice 5): two designs (loft, marketed bounce, sole width; blank keeps the grind preset), an exploratory carry objective, and per result the tier, verdict, in-frame stamp, sand-property sources and digest; the comparison shows the objective standing and names a winner only on a predictive standing, otherwise an exploratory leader (#9239). The same two solves also run as bounded, cancellable jobs (/v1/jobs/evaluate, /v1/jobs/compare, then poll /v1/jobs/{job_id} for per-shot progress or POST .../cancel; slice 4) on the shared API TaskManager: at most two workers, a cancelled job stops before its next shot and never gains a result, and a completed result names its job id and input digest so a stale answer is recognisable. The page (slice 5) submits each solve as a job, polls its status on a bounded backed-off schedule (250 ms doubling to 2 s, giving up after three failed reads in a row) that stops on a terminal state, a cancel or unmount, shows a labelled progress bar of the per-shot progress with a keyboard-reachable Cancel button, shows failed and cancelled jobs as such, and discards as stale any result whose job id, kind or input digest does not match the current submission. Workbench figures export through src/tools/bunker_shot_gui/export.py (slice 8): a PNG whose iTXt header carries the view, verdict status, tier, in-frame stamp words, sources and an optional v1 record digest, sealed by a SHA-256 over the header and the decoded pixels; export_figure refuses a figure that does not draw the stamp it claims, and read_export refuses an unstamped, edited, unknown-schema or predictive-claiming file. The PyQt window has no Export action yet. It stays a gap: no sand/swing inputs, no /v1/verify save-and-reload, no visualizations, and no rendered acceptance evidence. Under Tauri the tile still opens the PyQt window; the page is the browser fallback. The visualization suite (epic #8699) keeps that split: shot3d.py and traces.py compute, render3d.py and render_traces.py draw headlessly through matplotlib, and viewport_widgets.py only wires them to a canvas. A React port would consume shot3d.viewport_payload, which is the backend-neutral ADR-0027 ViewportOverlayPayload and carries the envelope status and fidelity tier in its metadata so any renderer can stamp its own frames. The F1 sand cut (#8710, #8711) keeps the same split and adds one constraint a port must honour: the field carries its fidelity tier and validity status as data covered by a SHA-256 over the provenance and the arrays together, so any client that renders a field must read the standing out of the file rather than out of its filename, and must refuse a field whose digest does not match. The PyQt window also has a \"Ball flight and green\" tab (#15497, desktop slice) that draws the BunkerFlight carried on the shot outcome: a side view and an overhead view with landing and rest markers, a metres/yards switch, and the uncalibrated-launch and flat 10 ft stimp assumption stamped inside the plot. A refused shot, an input error and a freshly loaded saved record (which stores no trajectory) show a banner and no trajectory line, so no stale flight stays beside another shot's verdict (ADR-0032). The web page has no flight plot yet: that gap is tracked by #15497 and depends on the workbench API flight payload (#15555).",
       "id": "tools.bunkershot3d_workbench"
     },
     {
@@ -1040,6 +1054,20 @@
       "id": "tools.model_explorer.frankenstein_assembly"
     },
     {
+      "feature_id": "tools.model_explorer.playback_shot_card",
+      "title": "Model Explorer Shot card: impact factors and ball flight beside the playback",
+      "status": "gap",
+      "pyqt": "src/tools/model_explorer/playback_flight_panel.py",
+      "api": null,
+      "web": null,
+      "issue": 12878,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "A Shot dock beside the Results Playback of a same-input bundle shows the native exporter's numbers for that bundle, never recomputed: impact factors (club speed, face to path, attack angle), launch (ball speed, launch angle, spin rate, spin axis) and flight (carry, total, apex, side) with yd/m and mph/m/s selectors from the export dialog. No contact reads 'no contact: no flight'; without the upstream_physics flight wheel the factors stay and the flight row states why (#15150 G5b). No web equivalent yet; tracked under epic #12878.",
+      "id": "tools.model_explorer.playback_shot_card"
+    },
+    {
       "feature_id": "tools.model_explorer.results_playback",
       "title": "Model Explorer results playback on the shared-appearance golfer",
       "status": "gap",
@@ -1068,6 +1096,20 @@
       "id": "tools.model_explorer.results_playback_ball"
     },
     {
+      "feature_id": "tools.model_explorer.run_simulation_dock",
+      "title": "Model Explorer Run Simulation dock",
+      "status": "gap",
+      "pyqt": "src/tools/model_explorer/run_dock.py",
+      "api": null,
+      "web": null,
+      "issue": 15150,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "Tools > Run Simulation... opens a dock that runs a pinned sim_run case in a background QThread through the same service the MCP tools call (engines_for_describe, run_agent_capability), shows a bounded summary, and hands a playable result archive to the Results Playback loader. No web equivalent yet; tracked under #15150.",
+      "id": "tools.model_explorer.run_simulation_dock"
+    },
+    {
       "feature_id": "tools.motion_matching",
       "title": "Motion Matching tour-average and club-only Excel matching",
       "status": "parity",
@@ -1094,7 +1136,7 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL) and writes mp4 files (epic #11673); the CLI has no tile of its own, but the PyQt6 Model Explorer opens an Export Clips dialog (Tools menu; engines, speed variants, impact clip, output folder, plus one collapsed group per request-schema group so every remotely settable option has a control, pre-filled with the loaded run bundle and swing name; submits to the same export job queue and polls its status without blocking, #15150 G11, G6). Web status: agents describe, validate and queue exports over REST and MCP (/tools/agent-sim-run/native-export/{describe,validate,run,status}; #15467, #15476, reusing the CLI request schema); a run returns a job id and its status carries the clip manifest. No browser page renders, plays or downloads a clip yet. Appearance flags (--appearance, --skin-tone, --hair, --clothing, --top-color, --bottom-color, --glove; HRG-B2, #13167, HRG-G1, #13186) resolve CLI over document over contract defaults and travel to every worker; --visual-grip-strength, --lead-roll-offset, --trail-roll-offset and --grip-thumb-offset-deg (HRG-GR4, #13205, HRG-A2, #13166) are picture-only and go in the appearance sidecar's grip block, while a physical grip flag (--grip-preset, --grip-style, --lead-shaft-rotation, ...; HRG-GS-G1, #13346) is refused with a message pointing to spec_builder, which writes the new model revision; the matching interactive controls are tracked under tools.character_builder; whole-system interface capability and mobility ellipsoids (--interface-ellipsoid {mobility,effective-mass,acceleration-capacity,force-capacity}, --ellipsoid-scale {auto,fixed:<m>}, --drift-arrow; CAP-6, #14038, #14046), with --hand-mobility supported as an alias and --hand-mobility-mode {constrained,unconstrained} (HCM-3, #14004).",
+      "notes": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL) and writes mp4 files (epic #11673); the CLI has no tile of its own, but the PyQt6 Model Explorer opens an Export Clips dialog (Tools menu; engines, speed variants, impact clip, output folder, plus one collapsed group per request-schema group so every remotely settable option has a control, pre-filled with the loaded run bundle and swing name; submits to the same export job queue and polls its status without blocking, #15150 G11, G6). Web status: agents describe, validate and queue exports over REST and MCP (/tools/agent-sim-run/native-export/{describe,validate,run,status}; #15467, #15476, reusing the CLI request schema); a run returns a job id and its status carries the clip manifest. No browser page renders, plays or downloads a clip yet. Appearance flags (--appearance, --skin-tone, --hair, --clothing, --top-color, --bottom-color, --glove; HRG-B2, #13167, HRG-G1, #13186) resolve CLI over document over contract defaults and travel to every worker; --visual-grip-strength, --lead-roll-offset, --trail-roll-offset and --grip-thumb-offset-deg (HRG-GR4, #13205, HRG-A2, #13166) are picture-only and go in the appearance sidecar's grip block, while a physical grip flag (--grip-preset, --grip-style, --lead-shaft-rotation, ...; HRG-GS-G1, #13346) is refused with a message pointing to spec_builder, which writes the new model revision; the matching interactive controls are tracked under tools.character_builder; whole-system interface capability and mobility ellipsoids (--interface-ellipsoid {mobility,effective-mass,acceleration-capacity,force-capacity}, --ellipsoid-scale {auto,fixed:<m>}, --drift-arrow; CAP-6, #14038, #14046), with --hand-mobility supported as an alias and --hand-mobility-mode {constrained,unconstrained} (HCM-3, #14004). --model-card-panel draws the manifest model card (each field with its measured, fitted, assumed or unknown tag) in the clip; off by default, CLI only, not yet in the request schema (#15150 E2). --shaft-loads {bending,shear} with --shaft-loads-part {total,ztcf,zvcf} draws the chain shaft's internal bending moment or shear at each shaft joint; off by default, CLI only, not yet in the request schema (#15150 Z9c).",
       "id": "tools.native_viewer_export"
     },
     {
@@ -1237,6 +1279,22 @@
       ],
       "notes": "SPN-15c (#12815): GET /api/tools/spine-viewer/study opens a receipt under the allowed study root, verifies the loads artifact SHA-256 server-side through study_aggregation.load_verified_run and returns the src/tools/spine_viewer/core.py view model (view_to_dict). The web heatmap and status banner always show scientific_status and distribution_source; anything but the exact status qualified reads UNQUALIFIED. Angle-stack plots are not part of the web view.",
       "id": "tools.spine_viewer"
+    },
+    {
+      "feature_id": "tools.swing_report_package",
+      "title": "Swing report package: choose, preview and render a swing's videos, grids and phase sheets",
+      "status": "gap",
+      "pyqt": "src/tools/swing_report_package/gui.py",
+      "api": null,
+      "web": null,
+      "issue": 15725,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "swing_report_package"
+      ],
+      "notes": "The swing_report_package launcher tile (src/tools/swing_report_package/gui.py, #15724) picks a bundle and an output folder, a package (default, midhands, full) and the catalog items to add or drop, previews the plan with the catalog planner and runs python3 -m src.tools.swing_report_package in a QProcess, streaming its output. The command line (cli.py) plans from package_catalog.json, runs each native_viewer_export render in its own temporary folder behind a free-disk guard, composes the case grids and key-phase sheets and writes manifest.json; reruns resume. No browser page selects, runs or downloads a package yet (epic #15725).",
+      "id": "tools.swing_report_package"
     },
     {
       "feature_id": "tools.terrain_engine",
@@ -1861,6 +1919,16 @@
         "joint_reaction",
         "study_receipt"
       ]
+    },
+    {
+      "id": "swing_report_package",
+      "title": "Swing Report Package",
+      "description": "Choose a swing bundle, a report package and its items, preview the plan, then render the videos, grids and key-phase sheets in the background",
+      "path": "src/tools/swing_report_package/gui.py",
+      "launch_target": "src/tools/swing_report_package/gui.py",
+      "category": "tool",
+      "status": "beta",
+      "capabilities": []
     },
     {
       "id": "necromatcher",
@@ -3579,9 +3647,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "89b2c78be5ec8c7093af2a9687366ae2b7a6fd1e58bf2a87a43b10df9295ff99",
+    "src/config/models.yaml": "c5c3fa8bf58ceed736ae7b11e9096bc8860c2a07c7d79ca5710a20a21e00789c",
     "src/config/launcher_manifest.json": "5239723058a1257cd5ba1da9bb1c346b0e6655764c58ccd2d0c904d17d8d19cf",
-    "src/config/feature_parity.json": "91d51c648811d586219faec8c8dae0e63a20a06e09a3326f09d01ae1bb6bb144",
+    "src/config/feature_parity.json": "5a3cd5f2b2183184c7e90aa8f2e3683dc34abafec6efda29685eec566d9cf471",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

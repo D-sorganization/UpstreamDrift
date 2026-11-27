@@ -18,7 +18,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, replace
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -195,7 +195,7 @@ class BallOverlay:
                 self._straight = float((record or {})["straight_roll_deg"])
             except (ValueError, KeyError) as exc:
                 self._straight = f"no shot shape: {exc}"
-        return self._straight
+        return cast(float | str, self._straight)
 
     def _layout(self, shape: str, flown: bool) -> ShotLayout:
         from src.tools.native_viewer_export import flight_tracer
@@ -247,6 +247,7 @@ class BallOverlay:
         flight: bool,
         aim: bool,
         depth_m: NDArray[np.float64] | None = None,
+        lookat_m: tuple[float, float, float] = DEFAULT_LOOKAT_M,
     ) -> NDArray[np.uint8]:
         """``rgb`` with the aim line (whole run) and the flight (after impact)."""
         play = None if layout is None else layout.flight
@@ -257,14 +258,12 @@ class BallOverlay:
 
             fov = math.radians(play.settings.fov_y_deg)
             size = (int(rgb.shape[1]), int(rgb.shape[0]))
-            camera = pinhole_for_view(view, DEFAULT_LOOKAT_M, None, fov, size)
+            camera = pinhole_for_view(view, lookat_m, None, fov, size)
             rgb = np.asarray(play.paint_aim(rgb, camera, depth_m))
         if flight:
             depth = None if depth_m is None else {view: depth_m}
             bare = replace(play, aim_yaw_rad=None)  # the aim line is drawn above
-            tiles = bare.draw(
-                {view: rgb}, time_s - self._t0, DEFAULT_LOOKAT_M, None, depth
-            )
+            tiles = bare.draw({view: rgb}, time_s - self._t0, lookat_m, None, depth)
             rgb = np.asarray(tiles[view])
         return rgb
 

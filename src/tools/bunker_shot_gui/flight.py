@@ -21,7 +21,12 @@ from src.shared.python.putting_dynamics import (
 
 @dataclass(frozen=True)
 class BunkerFlight:
-    """SI coordinates, x forward, y left, z up; rollout is an assumed model."""
+    """Coherent SI traces, x forward, y left, z up; rollout is an assumed model.
+
+    Invalid traces raise ``ValueError`` even with optional contracts disabled.
+    Landing, rollout start and carry must describe the same point. A rollout
+    may bounce above the green, but its rest point must be on the green.
+    """
 
     flight_m: tuple[tuple[float, float, float], ...]
     rollout_m: tuple[tuple[float, float, float], ...]
@@ -30,13 +35,51 @@ class BunkerFlight:
         "Uncalibrated launch; flat 10 ft stimp green, simplified bounce and spin"
     )
 
+    def __post_init__(self) -> None:
+        """Reject incomplete/non-finite paths before a display can consume them."""
+        for name, path, minimum in (
+            ("flight_m", self.flight_m, 2),
+            ("rollout_m", self.rollout_m, 1),
+        ):
+            if len(path) < minimum:
+                raise ValueError(f"{name} must contain at least {minimum} points")
+            if any(
+                len(point) != 3
+                or not all(math.isfinite(v) for v in point)
+                or point[2] < 0.0
+                for point in path
+            ):
+                raise ValueError(f"{name} must contain finite xyz points with z >= 0")
+        landing = self.flight_m[-1]
+        if (
+            not math.isfinite(self.carry_m)
+            or self.carry_m < 0.0
+            or not math.isclose(
+                self.carry_m, math.hypot(*landing[:2]), rel_tol=1e-9, abs_tol=1e-9
+            )
+        ):
+            raise ValueError("carry_m must be finite and match the landing distance")
+        if not math.isclose(landing[2], 0.0, abs_tol=1e-9):
+            raise ValueError("flight landing must be on the green")
+        if math.dist(landing, self.rollout_m[0]) > 1e-9:
+            raise ValueError("rollout_m must start at the flight landing")
+        if not math.isclose(self.rollout_m[-1][2], 0.0, abs_tol=1e-9):
+            raise ValueError("rollout rest point must be on the green")
+
 
 def bunker_flight(
     launch: BallLaunchResult, *, refused: bool, dt: float = 0.01
 ) -> BunkerFlight | None:
-    """Fly a valid release and use the existing green solver; fail closed on invalid data."""
+    """Fly a valid release and use the existing green solver.
+
+    Refused shots return ``None`` without simulation. Otherwise ``dt`` must be
+    finite and strictly positive, even when optional contracts are disabled.
+    Invalid launch data or incomplete trajectories produce no flight trace.
+    """
     if refused:
         return None
+    if not math.isfinite(dt) or dt <= 0.0:
+        raise ValueError("dt must be finite and strictly positive")
     values = (
         launch.ball_speed_m_s,
         launch.launch_angle_rad,

@@ -62,7 +62,8 @@
   },
   "findings": [
     "MuJoCo chain reference diverges at t = 1.335 s, 10 ms after impact (closure projection SVD fails); a 1.40 s export fails, so the bundle stops at 1.330 s.",
-    "Clubhead deflection reaches 0.19 m 60-80 ms before impact (shaft joint angles to 0.13 rad), beyond the chain's small-deflection assumption."
+    "Clubhead deflection reaches 0.19 m 60-80 ms before impact (shaft joint angles to 0.13 rad), beyond the chain's small-deflection assumption.",
+    "Load check before quoting the peak (#15150 C18, local re-export of the same command, MuJoCo 3.8.0: peak 0.215 m at -56 ms). The rise from 21 to 76 mm in the last 10 ms is the bend vector turning through zero (norm minimum 22 mm at -7 ms) as the lag unloads into forward kick, not a load spike. Newton check at the butt hinge: the moment of the shaft and head inertial forces about it (finite differences of forward-kinematics positions) matches the hinge spring and damper torque within 0.33 of 43 N m up to contact, and that butt moment is smooth through the last 10 ms. Ball contact starts 0.33 ms after the split, and the run with and without the ball force is identical before it. The bend vector moves at 13.2 m/s at contact, 2.3 times what one 258 cpm mode can reach at that peak (bend_rate_check), because the club turns at 48-50 rad/s, faster than the shaft's 27 rad/s first mode, so centrifugal stiffening sets the rate. The peak is a model output under real loads; it still exceeds the small-deflection assumption."
   ],
   "refusal": "simscape: still refused with ShaftChainUnsupportedError (no chain port; the GS3DX 'Rigid Shaft' claim is unreconciled in R2025b). Every engine in CHAIN_ENGINES is covered by impact_window.engines.",
   "previous_run": {

@@ -6,11 +6,13 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      # Same list and order as classify_event_tier.DOCS_ONLY_PATTERNS.
+      # `.github/**` is not ignored: a workflow-only push to main must still
+      # run this workflow (#15765).
       - "docs/**"
       - "**.md"
       - "LICENSE"
       - ".gitignore"
-      - ".github/**"
   # NO `paths-ignore` here, deliberately. `quality-gate` (below) is a required
   # status check, and GitHub blocks a PR forever on a required context that
   # never reports. When this workflow was skipped by path filter, docs-only PRs
@@ -658,10 +660,22 @@ jobs:
           )
           run_with_heartbeat "pip-audit waiver-enforced scan" "$audit_python" -m pip_audit --timeout 60 -r requirements-dev.lock "${pip_audit_waiver_flags[@]}"
 
-      # Code Quality Check (Issue #781) - checks for placeholders, magic numbers, etc.
+      # Code Quality Check (Issue #781 / #15765). The checker status is the
+      # gate. Review events check changed Python files; schedule and manual
+      # runs audit the tree and do not mask a non-zero status.
       - name: Code Quality Check
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE_SHA: ${{ github.event.before }}
+          MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
         run: |
-          PYTHONPATH=. python src/tools/code_quality_check.py || echo "::warning::Code quality issues found - see output above"
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "$BASE_REF"
+          fi
+          python3 scripts/ci/run_code_quality_check.py
 
       - name: MATLAB Quality Check
         continue-on-error: true

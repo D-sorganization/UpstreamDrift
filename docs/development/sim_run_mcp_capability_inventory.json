@@ -35,6 +35,12 @@
       "id": "native_export_status",
       "kind": "agent_capability",
       "runtime_status": "available"
+    },
+    {
+      "description": "Agent API capability `kinetic_match` via sim_run",
+      "id": "kinetic_match",
+      "kind": "agent_capability",
+      "runtime_status": "available"
     }
   ],
   "engines": [

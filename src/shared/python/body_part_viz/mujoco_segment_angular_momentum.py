@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -16,6 +17,11 @@ from .segment_angular_momentum import (
 
 if TYPE_CHECKING:
     import mujoco
+
+_ROOT_BODY_ID_DEPRECATION = (
+    "root_body_id is deprecated and ignored; whole-body H uses the "
+    "mass-weighted COM reference (ball excluded)"
+)
 
 
 def default_root_body_id(model: mujoco.MjModel) -> int:
@@ -35,10 +41,11 @@ def whole_body_com_kinematics(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Mass-weighted COM position and velocity of all massive bodies (ball excluded).
 
-    ``root_body_id`` is ignored (kept for call-site compatibility); multi-tree golf
-    models must not use a single kinematic subtree as the whole-body reference.
+    ``root_body_id`` is deprecated and ignored; multi-tree golf models must not use
+    a single kinematic subtree as the whole-body reference.
     """
-    del root_body_id
+    if root_body_id is not None:
+        warnings.warn(_ROOT_BODY_ID_DEPRECATION, DeprecationWarning, stacklevel=2)
     import mujoco
 
     from .mujoco_segment_group_catalog import is_excluded_body_name
@@ -120,19 +127,23 @@ class MujocoSegmentAngularMomentumProvider:
         if root_body_id is not None:
             if root_body_id < 1 or root_body_id >= model.nbody:
                 raise ValueError("root_body_id must name a non-world body")
-            self.root_body_id = int(root_body_id)
-        else:
-            self.root_body_id = default_root_body_id(model)
+            warnings.warn(_ROOT_BODY_ID_DEPRECATION, DeprecationWarning, stacklevel=2)
 
     def get_segment_angular_momentum(self) -> SegmentAngularMomentumFrame | None:
         contributions: dict[str, np.ndarray | None] = {}
         spin_only: dict[str, np.ndarray | None] = {}
         qvel = np.asarray(self.data.qvel, dtype=float)
         ref_com, ref_vel = whole_body_com_kinematics(self.model, self.data, qvel)
+        from .mujoco_segment_group_catalog import is_excluded_body_name
+
         qualified = False
         for body_id in range(1, self.model.nbody):
             name = self.model.body(body_id).name
             if not name:
+                continue
+            if is_excluded_body_name(name):
+                contributions[name] = None
+                spin_only[name] = None
                 continue
             com_pos, com_vel, ang_vel, inertia, mass, rot = _body_spin_and_motion(
                 self.model, self.data, body_id, qvel

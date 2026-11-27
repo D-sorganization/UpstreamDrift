@@ -26,8 +26,9 @@ TRACK, TEXT = track.TRACK, track.TEXT
 FACE_ON, DOWN = "face_on", "down_the_line_flight"
 
 # Pinned digest of landing tiles (inset on down-the-line flight + face-on) after address→landing.
+# Re-pinned when min_ball_radius_px rose from 2 to 5 px (#15150 review: legible ball).
 PINNED_LANDING_DIGEST = (
-    "4f72744ceacc6bca3f8057161efe5e8878d31c8d8a251b935688fb2df465b6be"
+    "006f25e670143ac73aec8929b1f82e88ba99e713b3f6a034edc7b08f5f2c685f"
 )
 
 

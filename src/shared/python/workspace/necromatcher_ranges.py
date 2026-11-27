@@ -20,6 +20,7 @@ _SOURCE: Literal["bound_native_definition.coordinate_ranges_deg"] = (
 
 
 def _pair(value: Any) -> tuple[float, float]:
+    """Validate a finite, ordered pair of authored endpoints."""
     if not isinstance(value, (list, tuple)) or len(value) != 2:
         raise ValueError("Authored ranges require lower/upper pairs")
     if any(isinstance(item, bool) or not isinstance(item, Real) for item in value):
@@ -31,6 +32,7 @@ def _pair(value: Any) -> tuple[float, float]:
 
 
 def _radian_pair(value: Any) -> tuple[float, float]:
+    """Convert a validated degree pair to radians."""
     lower, upper = _pair(value)
     return math.radians(lower), math.radians(upper)
 
@@ -47,6 +49,7 @@ class AuthoredCoordinateBounds:
     compiled_limits_enforced: Literal[False] = False
 
     def __post_init__(self) -> None:
+        """Freeze valid bounds and check the captured identities."""
         if not isinstance(self.named_bounds, Mapping) or not isinstance(
             self.unbounded_names, tuple
         ):
@@ -88,6 +91,7 @@ class AuthoredCoordinateBounds:
 
 
 def _xml_coordinates(xml: str, order: tuple[str, ...], units: tuple[str, ...]) -> None:
+    """Check exported joints against the compiled scalar units."""
     joints = ElementTree.fromstring(xml).findall("worldbody//joint")
     inventory = {joint.get("name"): joint for joint in joints}
     if len(inventory) != len(joints) or set(inventory) != set(order):
@@ -103,6 +107,27 @@ def _xml_coordinates(xml: str, order: tuple[str, ...], units: tuple[str, ...]) -
             raise ValueError("Authored range boundary requires XML limited=false")
 
 
+def export_bound_native_xml(definition_bytes: bytes) -> str:
+    """Rebuild exact MJCF from a definition with optional explicit appearance.
+
+    Appearance is opt-in in the definition itself; absent means the legacy
+    physics-only export. No sidecars are read and malformed appearances fail.
+    """
+    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
+        export_full_body_mjcf,
+    )
+
+    definition = json.loads(definition_bytes)
+    if not isinstance(definition, dict):
+        raise ValueError("Native definition must be an object")
+    if "appearance" not in definition:
+        return export_full_body_mjcf(definition_bytes)[0]
+    from src.shared.python.model_appearance import document_from_dict
+
+    appearance = document_from_dict(definition["appearance"])
+    return export_full_body_mjcf(definition_bytes, appearance=appearance)[0]
+
+
 def extract_authored_bounds(
     definition_bytes: bytes,
     model_hash: str,
@@ -110,10 +135,6 @@ def extract_authored_bounds(
     coordinate_units: tuple[str, ...],
 ) -> AuthoredCoordinateBounds:
     """Validate the captured definition against exact exported XML and native units."""
-    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
-        export_full_body_mjcf,
-    )
-
     if not isinstance(definition_bytes, bytes) or not definition_bytes:
         raise ValueError(
             "Authored ranges require captured bound native definition bytes"
@@ -128,7 +149,7 @@ def extract_authored_bounds(
         )
     if not coordinate_order or len(set(coordinate_order)) != len(coordinate_order):
         raise ValueError("Native scalar coordinate order must be nonempty and unique")
-    xml, _ = export_full_body_mjcf(definition_bytes)
+    xml = export_bound_native_xml(definition_bytes)
     xml_hash = "sha256:" + hashlib.sha256(xml.encode("utf-8")).hexdigest()
     if xml_hash != model_hash:
         raise ValueError("Authored definition does not reproduce bound native XML")

@@ -91,6 +91,7 @@ from .report import comparison_report, evaluation_report
 from .shot3d import ShotScene
 from .slices import CursorMap
 from .viewport_widgets import (
+    BallFlightWidget,
     CrossTierWidget,
     SandSliceWidget,
     ShotViewportWidget,
@@ -382,6 +383,11 @@ class BunkerShotWidget(QWidget):
         self._field_a.link(self._scene_a)
         self._field_a.link(self._traces_a)
 
+        flight_page = QWidget()
+        flight_layout = QHBoxLayout(flight_page)
+        self._flight_a = BallFlightWidget("A: ball flight, landing and green rollout")
+        flight_layout.addWidget(self._flight_a)
+
         cross_tier_page = QWidget()
         cross_tier = QHBoxLayout(cross_tier_page)
         self._cross_tier = CrossTierWidget("A: F0 against F1, on the shared cursor")
@@ -410,6 +416,7 @@ class BunkerShotWidget(QWidget):
         self._views.addTab(maps_page, "Summed maps")
         self._views.addTab(fields_page, "Sole load field (per element, per sample)")
         self._views.addTab(shot_page, "Shot in 3-D and traces")
+        self._views.addTab(flight_page, "Ball flight and green")
         self._views.addTab(cross_tier_page, "Cross-tier check (F0 vs F1)")
         self._views.addTab(slice_page, "Sand cut (F1 field)")
         column.addWidget(self._views, stretch=3)
@@ -849,6 +856,14 @@ class BunkerShotWidget(QWidget):
             self._traces_a.clear()
         else:
             self._traces_a.set_shot(traces)
+        self._flight_a.set_flight(
+            shot.flight,
+            reason=(
+                "refused: no ball flight is drawn for an out-of-envelope shot"
+                if shot.refused
+                else "no valid ball flight for this release"
+            ),
+        )
 
     def _paint_maps(
         self,
@@ -892,8 +907,11 @@ class BunkerShotWidget(QWidget):
             )
 
     def _show_input_error(self, error: WorkbenchInputError) -> None:
-        """Report an unusable input without pretending it is a verdict."""
+        """Report an unusable input with no stale result to view or export."""
         logger.info("bunker workbench input rejected: %s", error)
+        self._last_evaluation = None
+        self._last_comparison = None
+        self._loaded_record = None
         self._banner.show_error(str(error))
         self._results.setPlainText(
             "The inputs do not describe a shot that can be solved.\n\n"
@@ -908,8 +926,17 @@ class BunkerShotWidget(QWidget):
             self._window_map_b,
             self._field_a,
             self._field_b,
+            self._scene_a,
+            self._traces_a,
+            self._cross_tier,
         ):
             widget.clear()
+        self._flight_a.set_flight(
+            None, reason="input error: no ball flight was computed for these inputs"
+        )
+        self._clear_sand_field()
+        self.update_control_states()
+        self.evaluation_changed.emit()
 
     def cleanup(self) -> None:
         """Cancel and join any running action (#8880)."""
@@ -1028,6 +1055,11 @@ class BunkerShotWidget(QWidget):
         self._loaded_record = record
         self._last_evaluation = None
         self._last_comparison = None
+        # A saved record stores no trajectory: drop any other shot's flight.
+        self._flight_a.set_flight(
+            None,
+            reason="loaded record: no ball flight is stored; re-run to draw one",
+        )
         apply_loaded_evaluation_to_widget(self, record, path)
         return record
 
