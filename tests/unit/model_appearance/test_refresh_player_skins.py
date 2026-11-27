@@ -21,6 +21,9 @@ pytestmark = pytest.mark.unit
         ("type", ValueError),
         ("pose", ValueError),
         ("override", ValueError),
+        ("override_style", ValueError),
+        ("override_material", ValueError),
+        ("override_brim", ValueError),
     ],
 )
 def test_refresh_preserves_physics_and_rejects_bad_inputs(
@@ -68,8 +71,17 @@ def test_refresh_preserves_physics_and_rejects_bad_inputs(
     elif case == "pose":
         pose["target_model_xml_sha256"] = "0" * 64
         (folder / "review_pose.json").write_text(json.dumps(pose))
-    elif case == "override":
-        receipt.write_text(json.dumps({"appearance_override": {"head.unknown": 1}}))
+    elif case.startswith("override"):
+        invalid = {
+            "override": {"head.unknown": 1},
+            "override_style": {**cap_override, "head.cap_style": "invalid"},
+            "override_material": {
+                **cap_override,
+                "head.cap_material": "not_a_material",
+            },
+            "override_brim": {**cap_override, "head.cap_brim": 999},
+        }
+        receipt.write_text(json.dumps({"appearance_override": invalid[case]}))
     before = {p.name: p.read_bytes() for p in folder.iterdir()}
     if case in {"valid", "cap"}:
         refresh.refresh_player(folder)
@@ -90,15 +102,10 @@ def test_refresh_preserves_physics_and_rejects_bad_inputs(
         )
         if case == "cap":
             assert receipt_data["appearance_override"] == cap_override
-        updated = json.loads((folder / "review_pose.json").read_text())
-        assert (updated["q"], updated["coordinate_order"]) == (
-            pose["q"],
-            pose["coordinate_order"],
-        )
-        assert (
-            updated["target_model_xml_sha256"]
-            == hashlib.sha256((folder / "model.xml").read_bytes()).hexdigest()
-        )
+        pose["target_model_xml_sha256"] = hashlib.sha256(
+            (folder / "model.xml").read_bytes()
+        ).hexdigest()
+        assert json.loads((folder / "review_pose.json").read_text()) == pose
     else:
         with pytest.raises(error):
             refresh.refresh_player(folder)

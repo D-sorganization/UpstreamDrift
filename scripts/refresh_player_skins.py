@@ -21,6 +21,7 @@ from src.shared.python.model_appearance.player_models import (
     player_profile,
 )
 from src.shared.python.model_appearance.schema import (
+    document_from_dict,
     document_to_dict,
     physics_spec_sha256,
     save_appearance,
@@ -58,12 +59,14 @@ def refresh_player(folder: Path) -> Path:
             **{key.removeprefix("head."): value for key, value in override.items()},
         )
         doc = replace(doc, head=head)
+    appearance = document_to_dict(doc)
+    doc = document_from_dict(appearance)
     xml, metadata = export_full_body_mjcf(raw, appearance=doc)
     target = folder / "model.xml"
     target.write_text(xml, encoding="utf-8")
     save_appearance(doc, folder / "model.appearance.json")
     (folder / "model.visual.json").write_text(
-        json.dumps({**spec, "appearance": document_to_dict(doc)}, indent=2) + "\n"
+        json.dumps({**spec, "appearance": appearance}, indent=2) + "\n"
     )
     receipt.update(
         profile=player_profile(folder.name),
