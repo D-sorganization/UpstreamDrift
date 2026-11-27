@@ -177,11 +177,12 @@ def verify_best_match_bundle(
     )
     spec_sha = str(manifest["spec_sha256"])
     _pin(len(spec_sha) == 64, "bundle spec_sha256 must be a sha256 hex digest")
-    result = {
+    steps = int(reference_q.shape[0])
+    result: dict[str, str | float | int] = {
         "schema": str(manifest["schema"]),
         "spec_sha256": spec_sha,
         "dt_s": float(manifest["dt_s"]),
-        "reference_steps": int(reference_q.shape[0]),
+        "reference_steps": steps,
     }
-    ensure(result["reference_steps"] >= 2, "bundle trajectory confirmed")
+    ensure(steps >= 2, "bundle trajectory confirmed")
     return result
