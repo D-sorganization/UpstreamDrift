@@ -14,11 +14,11 @@ or panel means, read [What Am I Looking At](../help/native_viewer_export.md).
 A bundle can hold three kinds of motion. The exporter treats them the same way
 when it draws the body, but the force pictures mean different things.
 
-| Kind | What it is | What the exporter shows |
-| --- | --- | --- |
-| Kinematic replay | The fitted joint angles played back, with no forces applied. | Every recorded effort is zero. By default the clips carry the note "Kinematic Replay: Forces Not Shown" and leave out the force and torque arrows; `--force-vectors` or `--torque-vectors` draws them anyway, which does not make them measured or applied forces. |
-| Feedback-tracked dynamics | A controller's torques drove the model to follow the fit. | Efforts are non-zero. The torques are what the tracking controller applied. |
-| Open-loop dynamics | The torques are replayed with no feedback, so the model moves on its own. | Efforts are non-zero. Not accepted for a full swing yet: treat such clips as experiments. |
+| Kind                      | What it is                                                                | What the exporter shows                                                                                                                                                                                                                                            |
+| ------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Kinematic replay          | The fitted joint angles played back, with no forces applied.              | Every recorded effort is zero. By default the clips carry the note "Kinematic Replay: Forces Not Shown" and leave out the force and torque arrows; `--force-vectors` or `--torque-vectors` draws them anyway, which does not make them measured or applied forces. |
+| Feedback-tracked dynamics | A controller's torques drove the model to follow the fit.                 | Efforts are non-zero. The torques are what the tracking controller applied.                                                                                                                                                                                        |
+| Open-loop dynamics        | The torques are replayed with no feedback, so the model moves on its own. | Efforts are non-zero. Not accepted for a full swing yet: treat such clips as experiments.                                                                                                                                                                          |
 
 The exporter only checks whether the step and hold effort tables are all zero.
 This is a display rule, not proof of how the motion was produced: it does not
@@ -112,7 +112,13 @@ Limit: appearance never changes the motion or any computed number.
 `--club-roll-in-hands DEG` turns the club about its shaft relative to the
 hands (positive opens the face), which changes the face angle and loft seen at
 impact. `--ball-position-shift M` moves the ball along the target line
-(positive toward the target). Limits: the same body motion is replayed, the
+(positive toward the target). The shift is applied only when the ball is
+placed at the address position (`SOURCE_ADDRESS`); a ball already on the swing
+or taken from the bundle's recorded ball (`bundle:ball_impact`) is not moved,
+so the option has no effect there. To confirm it was applied, open the ball
+record in the output: it contains `ball_position_shift_m` only when the shift
+was applied. If that key is missing, the requested position was not rendered.
+Limits: the same body motion is replayed, the
 shaft is treated as rigid, and forward of the captured ball position only
 about the first few centimetres are valid because the real ball slowed the
 measured club. Both are bounded by `shot_setup_settings.json`.

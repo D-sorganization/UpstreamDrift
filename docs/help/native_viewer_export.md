@@ -125,7 +125,10 @@ that does not make them measured or applied forces.
   on the ground.
 - **Needs:** Any bundle.
 - **What it is not:** Not part of the dynamics model, and not the captured
-  ball. Moving it with `--ball-position-shift` is a display choice.
+  ball. Moving it with `--ball-position-shift` is a display choice that applies
+  only when the ball is placed at the address position; a ball already on the
+  swing or recorded by the bundle is not moved. Check the ball record for
+  `ball_position_shift_m` to confirm the shift was applied.
 
 ## Claims Not to Make
 
