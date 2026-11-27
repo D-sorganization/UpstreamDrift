@@ -137,7 +137,14 @@ class BallSettings:
 HEAD_AXES = ("+x", "-x", "+y", "-y", "+z", "-z")
 HEADWEAR = ("none", "hair", "cap")
 HEAD_MODELS = ("parametric", "cc0_mesh")
-HAIR_STYLES = ("short_crop", "dome")
+HAIR_STYLES = (
+    "short_crop",
+    "dome",
+    "side_swept",
+    "swept_back",
+    "slick_part",
+    "receding_crop",
+)
 HAIR_PARTS = ("left", "right", "none")
 EYE_COLORS = ("blue_grey", "hazel", "brown")
 CAP_STYLES = ("none", "baseball_cap", "flat_cap", "straw_hat")

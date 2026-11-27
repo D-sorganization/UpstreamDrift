@@ -46,6 +46,7 @@ class HairCrop:
         (2.85, 0.32),
         (math.pi, 0.31),
     )
+    hairline_asymmetry: float = 0.0  # signed front sweep in head lengths
     centre_x: float = 0.10  # azimuth origin on the head's x axis
     off_skin: float = 0.0020  # inner surface clearance from the skin
     side_thickness: float = 0.008  # tapered fade at the sides and back
@@ -146,6 +147,7 @@ def _clip_above(
     new_n: list[Array] = []
 
     def cut(inside: int, outside: int) -> int:
+        """Share the intersection point of each cut edge."""
         key = (min(inside, outside), max(inside, outside))
         if key not in cuts:
             t = s[inside] / (s[inside] - s[outside])
@@ -183,6 +185,8 @@ def _scalp(
     skin: Mesh, cfg: HairCrop, part: str
 ) -> tuple[Array, Array, NDArray[np.int64]]:
     """Scalp above the hairline: vertices, normals and faces, cut on the line."""
+    if not math.isfinite(cfg.hairline_asymmetry) or abs(cfg.hairline_asymmetry) > 0.15:
+        raise ValueError("hairline asymmetry must be finite and within -0.15..0.15")
     if min(cfg.cut_steps, cfg.refine_splits, cfg.lining_splits) < 0:
         raise ValueError(
             "hair cut_steps, refine_splits and lining_splits must not be negative"
@@ -198,6 +202,7 @@ def _scalp(
         _, line = _thickness(cfg, v, part)
 
     def above(p: Array) -> float:
+        """Return signed height above the chosen hairline."""
         azimuth = np.arctan2(p[1], p[0] - cfg.centre_x)
         return float(p[2] - hairline_height(cfg, azimuth))
 
@@ -209,6 +214,7 @@ def _scalp(
 
 
 def _vertex_normals(mesh: Mesh) -> Array:
+    """Average adjacent face normals at each mesh vertex."""
     tri = mesh.vertices[mesh.faces]
     face_n = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
     out = np.zeros_like(mesh.vertices)
@@ -218,12 +224,14 @@ def _vertex_normals(mesh: Mesh) -> Array:
 
 
 def _smooth(x: NDArray[np.float64]) -> NDArray[np.float64]:
+    """Apply a clamped smoothstep blend."""
     t = np.clip(x, 0.0, 1.0)
     return t * t * (3.0 - 2.0 * t)
 
 
 @lru_cache(maxsize=8)
 def _hairline(points: tuple[tuple[float, float], ...]) -> tuple[Any, Array]:
+    """Cache the monotone hairline interpolator and its angular domain."""
     pts = np.asarray(points, dtype=float)
     return PchipInterpolator(pts[:, 0], pts[:, 1]), pts[[0, -1], 0]
 
@@ -243,7 +251,11 @@ def hairline_height(crop: HairCrop, azimuth: NDArray[np.float64]) -> Array:
     without overshoot and has no corner there (#15299).
     """
     line, (first, last) = _hairline(tuple(map(tuple, crop.hairline)))
-    return line(np.clip(np.abs(azimuth), first, last))
+    angle = np.asarray(azimuth)
+    front = np.clip(1.0 - np.abs(angle) / 1.4, 0.0, 1.0)
+    return line(np.clip(np.abs(angle), first, last)) + (
+        crop.hairline_asymmetry * np.sin(angle) * front
+    )
 
 
 def hairline_turns_deg(
@@ -311,6 +323,7 @@ def comb_ridge_vertices(skin: Mesh, part: str, crop: HairCrop | None = None) -> 
 
 
 def _thickness(crop: HairCrop, v: Array, part: str) -> tuple[Array, Array]:
+    """Evaluate shell thickness and line height at scalp vertices."""
     x, y, z = v[:, 0], v[:, 1], v[:, 2]
     line = hairline_height(crop, np.arctan2(y, x - crop.centre_x))
     top = _smooth((z - crop.fade_from_z) / (crop.fade_to_z - crop.fade_from_z))
