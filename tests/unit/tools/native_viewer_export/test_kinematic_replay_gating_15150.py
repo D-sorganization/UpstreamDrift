@@ -17,7 +17,11 @@ from src.shared.python.body_part_viz.force_colors import ForceColorScale
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.tools.native_viewer_export import kinematic_replay as kr
 from src.tools.native_viewer_export import overlay
-from src.tools.native_viewer_export.cli import build_parser, build_settings, vector_option_fields
+from src.tools.native_viewer_export.cli import (
+    build_parser,
+    build_settings,
+    vector_option_fields,
+)
 from src.tools.native_viewer_export.core import ExportSettings
 from src.tools.native_viewer_export.overlay import OverlayOptions
 from src.tools.native_viewer_export.runner import ExportJob, run_export
