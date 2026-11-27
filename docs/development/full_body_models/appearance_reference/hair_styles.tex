@@ -1,0 +1,30 @@
+% Standalone editable calculation note for issue 15848.
+\section{Named Visual Hair Silhouettes}
+The four period-inspired styles use the existing CC0 scalp shell, not measured
+person-specific geometry.  In the head frame, $x$ points forward, $z$ upward,
+and all lengths below are fractions of head length.  A monotone cubic
+hairline $z=h(|\theta|)+a\sin(\theta)\max(1-|\theta|/1.4,0)$, with
+$\theta=\operatorname{atan2}(y,x-x_c)$ and $|a|\leq 0.15$, cuts
+the scalp. The sign of $a$ follows the selected part; zero preserves the
+legacy symmetric line. The closed
+shell offsets the skin along its normals with the existing crown, fringe,
+part and fade thickness fields.  The style presets change the hairline and
+these fields; the back hairline ranges from 0.24 to 0.34 head lengths.
+The \texttt{side\_swept} and \texttt{swept\_back} styles have fuller crowns
+and lower napes; \texttt{slick\_part} and \texttt{receding\_crop} are closer
+crops with higher frontal hairlines.  These are visual approximations of
+observed grooming, not evidence of likeness or biometric reconstruction.
+
+When any cap is selected, its existing qualified under-hair crop is used
+unchanged so crown clearance remains as before. Existing \texttt{short\_crop}
+and \texttt{dome} paths remain unchanged. Hair is a non-colliding visual
+mesh; the physical spec, body masses, joints and inertias are not changed.
+Acceptance requires closed outward finite meshes, distinct silhouettes,
+legacy and cap geometry equality, and matching native MuJoCo dynamics at
+representative states. Reproduce with
+\begin{verbatim}
+PYTHONPATH=.:vendor/ud-tools/src MUJOCO_GL=egl \
+  python -m pytest tests/unit/model_appearance/test_hair_styles.py
+PYTHONPATH=.:vendor/ud-tools/src MUJOCO_GL=egl \
+  python scripts/render_hair_styles.py --out /tmp/hair-styles
+\end{verbatim}
