@@ -1,0 +1,17 @@
+{
+  "shifts_m": [
+    -0.06,
+    -0.04,
+    -0.02,
+    0.0,
+    0.02,
+    0.04
+  ],
+  "forward_valid_m": 0.03,
+  "bracket_halvings": 2,
+  "sources": {
+    "shifts_m": "Ball moves along the target line (metres, positive toward the target) swept for the ball position study: 2 cm steps, about half a ball diameter, from 6 cm back to 4 cm forward of the computed address ball. Every value is inside shot_setup_settings.json max_abs_ball_shift_m.",
+    "forward_valid_m": "Forward of the captured ball the measured club was already slowed by the real ball (native viewer export README, ball position shift), so only the first few centimetres forward are valid; positions beyond 3 cm are flagged in the record, not refused.",
+    "bracket_halvings": "Times a straight-roll bracket (shot_setup_settings.json solve_span_deg about the neighbouring position's straight roll) is halved when one of its ends has no landing: on the matched driver the open end of a back position's bracket exceeds the flight model's impact-spin envelope. Two halvings (6, 3, 1.5 deg) keep the solve inside the step budget; a position still unsolved keeps its factors and a reason."
+  }
+}

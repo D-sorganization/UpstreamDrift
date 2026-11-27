@@ -218,3 +218,26 @@ def test_newton_euler_keywords_hand_calculation() -> None:
 def test_interface_labels_are_the_documented_strings() -> None:
     assert INTERFACE_BARE_CLUB == "hand_on_bare_club"
     assert INTERFACE_LEGACY_COMPOSITE == "wrist_on_hands_plus_club"
+
+
+@pytest.mark.parametrize("name", ["driver", "iron7"])
+def test_a_flexible_shaft_club_counts_its_links_in_the_mass_check(name: str) -> None:
+    """#15150 Z2: the chain shaft moves shaft and head mass onto link bodies.
+
+    The club body keeps the shaft root and grip; the mass check adds the
+    link bodies hanging from it, and the welded hands are unchanged.
+    """
+    from src.shared.python.motion_matching.execution.spec_builder import (
+        with_shaft_model,
+    )
+
+    rigid = json.loads((MODELS / f"full_body_spec_anthro_{name}.json").read_text())
+    chain = with_shaft_model(copy.deepcopy(rigid), name, "chain")
+    bare, hands = club_solids_partition(chain)
+    _, rigid_hands = club_solids_partition(rigid)
+    assert 0.0 < bare.mass_kg < chain["club"]["total_mass_kg"]
+    assert set(hands) == set(rigid_hands)
+    broken = copy.deepcopy(chain)
+    broken["club"]["total_mass_kg"] += 0.01
+    with pytest.raises(ValueError, match="link"):
+        club_solids_partition(broken)

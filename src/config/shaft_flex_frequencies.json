@@ -1,0 +1,20 @@
+{
+  "schema": "shaft-flex-frequencies/v1",
+  "issue": 15150,
+  "reference_club_length_in": 45.0,
+  "clamp": "Assembled club, butt end clamped, head plucked; the cpm calibration uses a 5 in (0.127 m) butt clamp.",
+  "length_slope_cpm_per_in": 9.3,
+  "length_slope_range_cpm_per_in": [8.6, 10.0],
+  "flex_cpm": {
+    "Ladies": 220,
+    "Senior": 230,
+    "Regular": 244,
+    "Stiff": 258,
+    "X-Stiff": 272
+  },
+  "sources": {
+    "flex_cpm": "Mid-range of two independent driver tables at 44-45.5 in. Hireko Golf, Modern Guide to Shaft Fitting ch. 4 and Dynamic Shaft Fitting Index (graphite driver means A 234, R 246, S 258, X 271 cpm; A-X at 45 in, D-1 swingweight, butt-clamped assembled club; https://www.hirekogolf.com/pub/media/Modern_Guide_to_Shaft_Fitting_chapter4.pdf and https://www.slideshare.net/raltomonte/the-hireko-golf-dynamic-shaft-fitting-index). Steadfast Golf, replacement driver shaft chart at 45.5 in (A 227, R 241, S 258, X 273 cpm; clamp not stated; https://steadfastgolf.com/blogs/shaft-insights/best-replacement-golf-shafts-for-drivers-and-fairway-woods). Ladies is the Hireko L mean (229 cpm at ladies length 44 in, C-6) moved to 45 in with the length slope: 229 - 9.3 = 219.7, rounded to 220.",
+    "length_slope_cpm_per_in": "About 8.6 cpm per inch (4.3 cpm per half inch; Braly, iron shafts, 7 in clamp, 261 g head, https://www.golfshaftreviews.info/understand-golf-shaft-stiffness-ratings/) to about 10 cpm per inch (same head weight and tip trim; https://www.tutelman.com/golf/shafts/frequency.php). The 9.3 cpm per inch value is the midpoint. A longer club reads softer.",
+    "reference_club_length_in": "Hireko tested A-X at 45 in; Steadfast tabulates its driver column at 45.5 in, within the slope's half-inch (about 5 cpm) and inside the 10 cpm test tolerance."
+  }
+}

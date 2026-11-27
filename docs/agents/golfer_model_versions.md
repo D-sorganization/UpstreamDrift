@@ -6,17 +6,34 @@ parts it deprecates. Read it through
 (`current_golfer_model()`, `deprecated_parts(spec)`), never by memory or by
 copying an older spec.
 
-## Current Model: `full_body_skinned_v1`
+## Current Model: `full_body_skinned_flex_v2`
 
 | Part | Spec Field | Current | Deprecated |
 |---|---|---|---|
 | Hands | `subject.hand_visual_backend` | `skinned_human` | `capsule` |
 | Body | `subject.body_visual_backend` | `skinned_cc0` | `loft` |
+| Shaft | `club.shaft.model` (`club.shaft.flex`) | `chain` (`Stiff`) | `rigid` (ballpark fallback only) |
 
 The skinned hands carry the owner-approved grip: trail palm over the lead
 thumb, ring finger beside the lead forefinger and a 30° trail trigger spread.
 
+Golf shafts bend, so the current model carries the flexible chain shaft
+(`club_shaft_chain.build_shaft_chain`, Stiff by default, #15684). A rigid
+club is only a ballpark fallback: pass `shaft_model="rigid"` (or
+`--shaft-model rigid`) to get a quick first match when the flexible model
+will not solve, then reintroduce the flexible shaft. The fallback logs a
+warning, and `require_canonical_golfer` refuses a rigid spec.
+
 ## Putting a Spec on the Current Model
+
+`build_anthropometric_spec` does steps 1, 2 and 4 for every spec it writes
+(`motion_matching/execution/spec_revisions.py`, `with_current_golfer_model`).
+Do them by hand only for an older spec. A left-handed golfer
+(`handedness="left"`, or `--handedness left`) is composed right-handed, put on
+the current model, then mirrored through the sagittal plane
+(`motion_matching/mirrored_spec.py`), so the left-handed spec is the exact
+reflection of the right-handed one. A spec labelled left-handed but not
+mirrored is refused.
 
 1. Apply `apply_skinned_hand_wrists(spec)`
    (`motion_matching/execution/skinned_hand_wrists.py`). It moves the wrist
@@ -26,6 +43,8 @@ thumb, ring finger beside the lead forefinger and a 30° trail trigger spread.
 3. Refit any pose fitted before the revision with `refit_arms_to_club`
    (`engines/physics_engines/mujoco/python/skinned_arm_refit.py`). It holds the
    club where the old pose had it and closes the trail hand on the grip.
+4. Give the club the current shaft with `with_current_shaft(spec)`
+   (`motion_matching/execution/spec_revisions.py`); a chain spec is kept.
 
 Drawing an unrevised spec with skinned hands misplaces them. That is why a spec
 without the selectors still falls back to the deprecated capsule hands and loft
@@ -34,14 +53,33 @@ naming the registry.
 
 ## What Is Still Migrating (#15648)
 
-- **Builders:** the spec builder, character builder and API still emit
-  unrevised specs. They are next to move to the current model by default.
-- **Committed specs:** every committed full-body spec, including
+- **Left-handed hands:** done. The builder writes a left-handed spec as the
+  mirror of the right-handed current-model spec (#15652).
+- **Physical grip picks:** done. The skinned pair is posed from
+  `subject.grip_config` (#15654), so the builder moves grip-picked specs to
+  the current model and keeps their picks.
+- **Builders:** the spec builder writes right- and left-handed specs on the
+  current model. The character builder and API still emit unrevised specs.
+- **Committed specs:** every committed full-body spec file, including
   `full_body_spec_anthro_driver.json` and `full_body_spec_anthro_iron7.json`,
-  is legacy. Current-model reference specs will be committed beside them, under
-  versioned names, and listed here.
+  is legacy. The current-model driver and 7-iron reference specs are
+  `reference_spec("driver")` and `reference_spec("iron7")` in
+  `src/shared/python/motion_matching/execution/golfer_reference_specs.py`;
+  `write_reference_spec(club, path)` writes one for tools that take a path.
+  They are a hash-pinned overlay on the legacy files
+  (`src/config/golfer_reference_specs.json`, the registry's
+  `reference_specs`); regenerate with
+  `python3 scripts/generate_golfer_reference_specs.py`. Moving consumers off
+  the legacy files is what shrinks the ratchet baseline.
 - **Model Explorer demo:** the demo bundle is legacy and is being replaced.
 
 Until a part has migrated, prefer a current-model source, such as a matched
 swing on the skinned model, for renders and screenshots. When only legacy
 sources exist, say so in the PR.
+
+## Ratchet
+
+`src/config/golfer_model_legacy_assets.json` lists every committed spec and
+bundle still on a deprecated part. `tests/config/golfer_model_ratchet` fails
+when a new spec or bundle uses a deprecated part, and when a listed file was
+migrated or removed without deleting its entry. The list only shrinks.

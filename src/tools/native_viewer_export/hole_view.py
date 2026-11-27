@@ -74,6 +74,38 @@ def load_hole_view_settings(
     return HoleViewSettings(**raw)
 
 
+def _aimed_local(path_m: Any, flight: Any) -> tuple[Any, float]:
+    """``path_m`` in ``flight``'s target frame, turned onto its aim line; the yaw."""
+    local = flight_coordinates(path_m, flight.axes_m)
+    yaw = getattr(flight, "aim_yaw_rad", None) or 0.0
+    if yaw:
+        local = aim_line.rotate_plan(local, yaw)  # finish aim: tee-to-finish on line
+    return local, yaw
+
+
+def sample_paths(flight: Any, hole: Any) -> list[Any]:
+    """Hole-frame paths of ``flight``'s dispersion samples (``[]`` without any).
+
+    Each sample takes the single shot's projection: ``flight``'s target axes
+    and aim line, then ``shots_on_hole``, so every path starts on the tee of
+    ``hole``. Raises ``ValueError`` when ``flight`` has samples but no axes.
+    """
+    from src.tools.golf_environment.shots import TargetFlight, shots_on_hole
+
+    overlay = getattr(flight, "dispersion", None)
+    if overlay is None:
+        return []
+    if flight.axes_m is None:
+        raise ValueError("dispersion samples need the nominal flight's axes")
+    flights = []
+    for sample in overlay.samples:
+        local, _ = _aimed_local(sample.path_m, flight)
+        flights.append(TargetFlight(local, float(local[-1, 0]), -float(local[-1, 1])))
+    colours = [overlay.settings.hole_sample_style().colour] * len(flights)
+    placed = shots_on_hole(flights, hole, [""] * len(flights), colours)
+    return [shot.path_m for shot in placed]
+
+
 def hole_shot(flight: Any, cfg: HoleViewSettings) -> HoleShot:
     """The flight as a ``HoleShot`` on the tee of ``cfg``'s hole.
 
@@ -91,12 +123,8 @@ def hole_shot(flight: Any, cfg: HoleViewSettings) -> HoleShot:
 
     if flight.path_m is None or flight.axes_m is None:
         raise ValueError(f"no drawable flight: {flight.status}")
-    local = flight_coordinates(flight.path_m, flight.axes_m)
-    yaw = getattr(flight, "aim_yaw_rad", None) or 0.0
-    side_m = float(flight.lateral_m)
-    if yaw:
-        local = aim_line.rotate_plan(local, yaw)  # finish aim: tee-to-finish on line
-        side_m = float(flight.aim_lateral_m)
+    local, yaw = _aimed_local(flight.path_m, flight)
+    side_m = float(flight.aim_lateral_m if yaw else flight.lateral_m)
     target = TargetFlight(local, float(flight.carry_m), side_m)
     hole = hole_from_settings(load_shots_settings(), cfg.preset)
     shot = shots_on_hole([target], hole, [cfg.label], [cfg.colour_rgba])[0]
@@ -131,16 +159,42 @@ def write_still(
     cfg = None if flight is None else flight.settings.hole_view
     if cfg is None or flight is None or flight.path_m is None:
         return {}
-    from src.tools.golf_environment.hole_figure import write_hole_figure
+    from matplotlib import pyplot as plt
+
+    png = Path(out_dir) / f"{swing}_{engine}_hole_view.png"
+    png.parent.mkdir(parents=True, exist_ok=True)
+    fig, _, _ = build_still(flight)
+    fig.savefig(png)
+    plt.close(fig)
+    return {"hole_view": png}
+
+
+def build_still(flight: Any) -> tuple[Any, Any, Any]:
+    """The hole figure of ``flight`` and its (plan, profile) axes; caller closes it.
+
+    Preconditions: ``flight.settings.hole_view`` is set and the flight is
+    drawable (``ValueError``). Postcondition: the dispersion samples of
+    ``flight``, if any, are drawn thin beneath the shot.
+    """
+    cfg = flight.settings.hole_view
+    if cfg is None:
+        raise ValueError("the flight has no hole_view settings")
+    from src.tools.golf_environment.hole_figure import build_hole_figure
     from src.tools.golf_environment.shots import hole_from_settings, load_shots_settings
 
     settings = load_shots_settings()
     settings["figure"] = {**settings["figure"], **cfg.figure}
     hole = hole_from_settings(settings, cfg.preset)
-    png = Path(out_dir) / f"{swing}_{engine}_hole_view.png"
-    shot = hole_shot(flight, cfg)
     units = flight.settings.display_units
-    write_hole_figure(
-        [shot], hole, png, settings, units, cfg.label_at_landing, aim_note(flight)
+    fig, plan, side = build_hole_figure(
+        [hole_shot(flight, cfg)],
+        hole,
+        settings,
+        units,
+        cfg.label_at_landing,
+        aim_note(flight),
     )
-    return {"hole_view": png}
+    if flight.dispersion is not None:
+        paths = sample_paths(flight, hole)
+        flight.dispersion.paint_hole((plan, side), paths, hole, units.distance_scale)
+    return fig, plan, side

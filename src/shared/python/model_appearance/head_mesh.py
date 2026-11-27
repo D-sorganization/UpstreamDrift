@@ -66,6 +66,7 @@ def _closed(faces: NDArray[np.int64]) -> bool:
 
 
 def _check_mesh(name: str, mesh: Mesh) -> None:
+    """Reject malformed, open, inward-facing, or oversized head parts."""
     v, f = mesh.vertices, mesh.faces
     if v.ndim != 2 or v.shape[1] != 3 or not np.isfinite(v).all() or len(f) == 0:
         raise ValueError(f"head mesh {name!r}: bad vertex or face arrays")
@@ -88,6 +89,7 @@ def _check_mesh(name: str, mesh: Mesh) -> None:
 
 
 def _load(asset: Path, provenance: Path) -> HeadAsset:
+    """Load a hash-pinned CC0 asset and validate each mesh part."""
     if not provenance.is_file():
         raise ValueError(f"head provenance record missing: {provenance}")
     record = json.loads(provenance.read_text(encoding="utf-8"))
@@ -118,6 +120,7 @@ def load_head_asset(
 
 @lru_cache(maxsize=1)
 def _default_asset() -> HeadAsset:
+    """Return the validated repository head asset from the cache."""
     return _load(ASSET_PATH, PROVENANCE_PATH)
 
 
@@ -199,22 +202,63 @@ def build_mesh_parts(
             (name, Mesh(m.vertices * length_m, m.faces), role)
             for name, m, role in head_features.face_parts(asset.skin)
         ]
-    capped = settings is not None and settings.cap_style == "baseball_cap"
+    straw = settings is not None and settings.cap_style == "straw_hat"
+    flat_capped = settings is not None and settings.cap_style == "flat_cap"
+    capped = (
+        straw
+        or flat_capped
+        or (settings is not None and settings.cap_style == "baseball_cap")
+    )
+    cap_crop = (
+        head_cap.straw_hat_crop()
+        if straw
+        else head_cap.flat_cap_crop()
+        if flat_capped
+        else head_cap.CapCrop()
+    )
     if headwear == "hair":
         crop = settings is not None and settings.hair_style == "short_crop"
         unit = asset.hair
         if settings is not None and (crop or capped):
             # Under a cap the hair is cut flatter than the crown stands off.
-            under = head_cap.CapCrop().hair_under if capped else None
+            under = cap_crop.hair_under if capped else None
             unit = head_hair.build_short_crop(asset.skin, settings.hair_part, under)
         out.append(
             ("hair_mesh", Mesh(unit.vertices * length_m, unit.faces), "headwear")
         )
-    if settings is not None and capped:
+    if settings is not None and straw:
+        out += [
+            (
+                name,
+                Mesh(m.vertices * length_m, m.faces),
+                "hat_band_dark" if name == "straw_band" else "cap",
+            )
+            for name, m in head_cap.build_straw_hat(asset.skin)
+        ]
+    elif settings is not None and capped:
         out += [
             (name, Mesh(m.vertices * length_m, m.faces), "cap")
-            for name, m in head_cap.build_cap(asset.skin, settings.cap_brim)
+            for name, m in head_cap.build_cap(asset.skin, settings.cap_brim, cap_crop)
         ]
+    if settings is not None:
+        from src.shared.python.model_appearance.head_morph import (
+            HeadMorph,
+            warp_vertices,
+        )
+
+        if settings.morph != HeadMorph():
+            out = [
+                (
+                    name,
+                    Mesh(
+                        warp_vertices(mesh.vertices / length_m, settings.morph)
+                        * length_m,
+                        mesh.faces,
+                    ),
+                    role,
+                )
+                for name, mesh, role in out
+            ]
     return out
 
 

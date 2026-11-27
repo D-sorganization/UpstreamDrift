@@ -145,6 +145,11 @@ def sample_setups(settings: DispersionSettings) -> list[ShotSetup]:
     return [ShotSetup(float(r), float(s)) for r, s in zip(rolls, shifts, strict=True)]
 
 
+def nominal_setup(settings: DispersionSettings) -> ShotSetup:
+    """The base setup the samples vary around (the nominal shot of a run)."""
+    return ShotSetup(settings.base_club_roll_deg, settings.base_ball_shift_m)
+
+
 def _row_values(card: Any) -> dict[str, float | None]:
     if isinstance(card, str) or not getattr(card, "available", False):
         return {}
