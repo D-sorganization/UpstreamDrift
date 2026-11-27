@@ -17,6 +17,7 @@ pytestmark = pytest.mark.unit
 
 
 def _audit(**overrides: Any) -> dict[str, Any]:
+    """Run the audit with the synthetic two-wrist path unless overridden."""
     args: dict[str, Any] = {
         "times_s": [0.0, 0.5, 2.0],
         "q_rad": [[0.0, 0.0], [0.5, -0.25], [0.2, 0.5]],
@@ -45,6 +46,7 @@ def _audit(**overrides: Any) -> dict[str, Any]:
 
 
 def test_rom_and_segment_speed_margins_match_hand_calculation() -> None:
+    """ROM and segment-speed margins match the hand calculation."""
     r = _audit()
     assert r["declared_limits_satisfied"] is True
     assert r["rom"]["minimum_margin"] == pytest.approx([0.5, 0.25])
@@ -65,6 +67,7 @@ def test_rom_and_segment_speed_margins_match_hand_calculation() -> None:
 
 
 def test_rom_violation_is_reported_without_clipping_or_mutation() -> None:
+    """A ROM breach is reported and the caller array is left unchanged."""
     q = np.array([[0.0, 0.0], [1.25, -0.75], [0.2, 0.5]])
     before = q.copy()
     r = _audit(q_rad=q)
@@ -77,6 +80,7 @@ def test_rom_violation_is_reported_without_clipping_or_mutation() -> None:
 
 
 def test_speed_detects_fast_segment_despite_admissible_positions() -> None:
+    """A short segment can exceed its speed bound while positions stay in ROM."""
     r = _audit(times_s=[0.0, 0.1, 2.0])
     assert r["rom"]["violations"] == []
     assert r["speed"]["violations"] == [
@@ -87,6 +91,7 @@ def test_speed_detects_fast_segment_despite_admissible_positions() -> None:
 
 
 def test_coupling_rejects_pose_inside_every_independent_rom_limit() -> None:
+    """A coupled wrist limit can fail a pose that passes each joint ROM."""
     r = _audit(coupled_matrix=[[1.0, 1.0]], coupled_upper_rad=[0.5])
     assert r["rom"]["violations"] == []
     assert r["coupled_posture"]["minimum_margin"] == pytest.approx([-0.2 / np.sqrt(2)])
@@ -95,6 +100,7 @@ def test_coupling_rejects_pose_inside_every_independent_rom_limit() -> None:
 
 
 def test_declared_interior_margin_rejects_a_boundary_pose() -> None:
+    """A boundary pose passes at zero margin and fails once margin is applied."""
     assert _audit(q_rad=[[0, 0], [1, 0], [0, 0]])["declared_limits_satisfied"]
     r = _audit(q_rad=[[0, 0], [1, 0], [0, 0]], safety_margin_rad=0.1)
     assert r["rom"]["minimum_margin"][0] == pytest.approx(-0.1)
@@ -102,6 +108,7 @@ def test_declared_interior_margin_rejects_a_boundary_pose() -> None:
 
 
 def test_coupled_margin_is_normalized_and_row_scale_independent() -> None:
+    """Positive rescaling of a coupled row does not change its margin."""
     a = _audit(coupled_matrix=[[1, 1]], coupled_upper_rad=[1], safety_margin_rad=0.1)
     b = _audit(coupled_matrix=[[7, 7]], coupled_upper_rad=[7], safety_margin_rad=0.1)
     assert a["coupled_posture"]["minimum_margin"] == pytest.approx(
@@ -151,5 +158,6 @@ def test_coupled_margin_is_normalized_and_row_scale_independent() -> None:
 def test_invalid_or_incomplete_declarations_fail_closed(
     overrides: dict[str, Any],
 ) -> None:
+    """Invalid or incomplete declarations raise ValueError."""
     with pytest.raises(ValueError):
         _audit(**overrides)
