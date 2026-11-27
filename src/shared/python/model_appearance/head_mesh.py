@@ -31,6 +31,7 @@ from numpy.typing import NDArray
 
 from src.shared.python.model_appearance import head_cap, head_features, head_hair
 from src.shared.python.model_appearance.geometry import Mesh
+from src.shared.python.model_appearance.head_morph import HeadMorph
 from src.shared.python.model_appearance.schema import HeadSettings
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -172,6 +173,24 @@ def head_proportions(
     return out
 
 
+def _warp_parts(
+    parts: list[tuple[str, Mesh, str]], length_m: float, morph: HeadMorph
+) -> list[tuple[str, Mesh, str]]:
+    """Apply one shared unit-head deformation while preserving part order."""
+    from src.shared.python.model_appearance.head_morph import warp_vertices
+
+    if morph == HeadMorph():
+        return parts
+    return [
+        (
+            name,
+            Mesh(warp_vertices(mesh.vertices / length_m, morph) * length_m, mesh.faces),
+            role,
+        )
+        for name, mesh, role in parts
+    ]
+
+
 def build_mesh_parts(
     length_m: float, headwear: str, settings: HeadSettings | None = None
 ) -> list[tuple[str, Mesh, str]]:
@@ -272,24 +291,7 @@ def build_mesh_parts(
                 (name, Mesh(m.vertices * length_m, m.faces), role)
                 for name, m, role in head_features.moustache_parts(asset.skin)
             ]
-        from src.shared.python.model_appearance.head_morph import (
-            HeadMorph,
-            warp_vertices,
-        )
-
-        if settings.morph != HeadMorph():
-            out = [
-                (
-                    name,
-                    Mesh(
-                        warp_vertices(mesh.vertices / length_m, settings.morph)
-                        * length_m,
-                        mesh.faces,
-                    ),
-                    role,
-                )
-                for name, mesh, role in out
-            ]
+        out = _warp_parts(out, length_m, settings.morph)
     return out
 
 

@@ -33,6 +33,9 @@ For old and revised native models, acceptance requires exact equality of
 body/joint/collision arrays, mass and inertia, and at each of three fixed
 states, $M(q)$, bias forces, accelerations, and body transforms. Semantic
 coordinates are mapped by name because native traversal order can differ.
+Compiled visual-height comparison allows $10^{-7}$ m for float32 mesh
+recentering; the initial $10^{-9}$ m check failed by $3.4239\times10^{-9}$ m
+for Seve. This does not relax exact physical or dynamics comparisons.
 The Necromatcher XML and appearance bindings must use the refreshed hashes.
 \section{Reproduction and Limitations}
 Extract the previous delivery, initialize the pinned Tools submodule, and run:
