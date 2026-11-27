@@ -44,12 +44,14 @@ TOLERANCE_NM = 1e-6
 
 @pytest.fixture(scope="module")
 def spec_bytes() -> bytes:
+    """Serialized full-body specification used by the closure-wrench fixtures."""
     spec = load_full_body_spec(FULL, json.loads(UPPER.read_text(encoding="utf-8")))
     return json.dumps(spec).encode("utf-8")
 
 
 @pytest.fixture
 def case(spec_bytes: bytes):
+    """A random pose, velocity, and effort, plus the acceleration they produce."""
     source = MujocoOverlaySource(spec_bytes)
     source._torsion_patch_m = 0.06  # exercise the ground free moment
     rng = np.random.default_rng(13179)
@@ -85,6 +87,7 @@ def _site_centre_wrenches(source, q, v, bodies):
 
 
 def test_source_offers_the_closure_accessor(case) -> None:
+    """The MuJoCo source exposes a closure-wrench accessor."""
     source, q, v, e, _, _ = case
     assert isinstance(source, ClosureAxialLoadSource)
     closure = source.closure_wrench(q, v, e)
@@ -95,6 +98,7 @@ def test_source_offers_the_closure_accessor(case) -> None:
 
 
 def test_missing_or_incomplete_efforts_make_the_closure_unavailable(case) -> None:
+    """Missing or incomplete efforts make the closure wrench unavailable."""
     source, q, v, e, _, _ = case
     none = source.closure_wrench(q, v, None)
     assert not none.available and none.multiplier_world is None and none.reason
@@ -103,6 +107,7 @@ def test_missing_or_incomplete_efforts_make_the_closure_unavailable(case) -> Non
 
 
 def test_inverse_with_closure_and_free_moment_returns_the_efforts(case) -> None:
+    """The inverse, with closure and free moment, returns the applied efforts."""
     source, q, v, e, accel, bodies = case
     ground = _site_centre_wrenches(source, q, v, bodies)
     assert ground and any(np.abs(w.torque_nm).max() > 0 for w in ground)
@@ -121,6 +126,7 @@ def test_inverse_with_closure_and_free_moment_returns_the_efforts(case) -> None:
 
 
 def test_free_moment_is_not_dropped_from_the_ground_wrench(case) -> None:
+    """The ground wrench keeps the free moment."""
     source, q, v, _, _, bodies = case
     samples = source.evaluate_contact_samples(q, v)
     moments = source.contact_free_moments(q, v)
@@ -132,6 +138,7 @@ def test_free_moment_is_not_dropped_from_the_ground_wrench(case) -> None:
 
 
 def test_no_torsion_patch_gives_no_free_moment(spec_bytes: bytes) -> None:
+    """Without a torsion patch there is no free moment."""
     source = MujocoOverlaySource(spec_bytes)
     source._torsion_patch_m = 0.0
     q = dict.fromkeys(source.coordinate_order, 0.0)
@@ -139,6 +146,7 @@ def test_no_torsion_patch_gives_no_free_moment(spec_bytes: bytes) -> None:
 
 
 def test_frame_source_marks_closure_status_on_real_spec(case) -> None:
+    """The frame source records closure status for a real specification."""
     source, q, v, e, accel, bodies = case
     frame = source.axial_load_frame(
         q,
@@ -158,6 +166,7 @@ def test_frame_source_marks_closure_status_on_real_spec(case) -> None:
 def test_overlay_feed_blanks_axial_loads_at_ball_impact(
     spec_bytes: bytes, blackout: bool
 ) -> None:
+    """The overlay feed blanks axial loads at ball impact."""
     from src.shared.python.motion_matching.same_input import InputBundle
     from src.tools.native_viewer_export.core import SwingInput
     from src.tools.native_viewer_export.overlay import (

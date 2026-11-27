@@ -33,6 +33,7 @@ PINNED_LANDING_DIGEST = (
 
 
 def _style():
+    """Flight style with a solid landing track and a loud inset."""
     marker = replace(base.DEFAULTS.landing_marker, **track.SOLID)
     inset_cfg = replace(inset.LOUD, enabled=True)
     return replace(
@@ -51,6 +52,7 @@ def _draw(
     size: tuple[int, int] = SIZE,
     depth: float | None = None,
 ) -> np.ndarray:
+    """Draw one flight frame for ``view`` at time ``t``."""
     flight = base._playback(_style())
     tile = np.full((size[1], size[0], 3), 40, np.uint8)
     depth_m = (
@@ -62,6 +64,7 @@ def _draw(
 
 
 def _count(img: np.ndarray, colour: tuple[int, ...]) -> int:
+    """Number of pixels in ``img`` whose RGB equals ``colour``."""
     return int((img == np.array(colour, np.uint8)).all(axis=2).sum())
 
 
@@ -99,6 +102,7 @@ def test_verification_clip_face_on_and_down_the_line_address_through_landing() -
 def test_verification_clip_kinematic_replay_hides_force_arrows(
     zero_effort_swing: SwingInput,
 ) -> None:
+    """A zero-effort replay does not request force or torque arrows."""
     from src.tools.native_viewer_export.overlay import build_overlay_feed
 
     feed, _ = build_overlay_feed(zero_effort_swing, "mujoco")

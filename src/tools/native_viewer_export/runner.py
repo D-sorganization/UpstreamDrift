@@ -95,6 +95,7 @@ class ExportJob:
 
 
 def _swing_for(job: ExportJob, bundle: InputBundle, engine: str) -> SwingInput:
+    """Swing input for one engine, using that engine's receipt when the job has one."""
     receipt = (job.receipts or {}).get(engine)
     if receipt is None:
         return SwingInput(
