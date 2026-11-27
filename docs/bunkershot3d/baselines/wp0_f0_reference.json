@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "status": "blocked_missing_render_capture",
+  "source_issue": 15805,
+  "source_revision": "ffa19cf8ccc36b3ae1b492ef32b123ecf14e557a",
+  "preset": "acushnet_example_1",
+  "sand_preset": "default_sand",
+  "swing_speed_m_s": 25.0,
+  "solver": {
+    "package": "upstream-physics",
+    "version": "2.1.3",
+    "revision": 3
+  },
+  "reported_summary": {
+    "verdict_status": "beyond_validation",
+    "fidelity_tier": "F0",
+    "refused": false,
+    "peak_force_n": 300.19,
+    "impulse_n_s": 2.22,
+    "animation_frames": 60,
+    "carry_m": 0.578,
+    "apex_m": 0.255,
+    "total_distance_m": 2.645
+  },
+  "summary_evidence": "issue_report_only",
+  "camera": null,
+  "video": null,
+  "local_replay": {
+    "python_version": "3.14.3",
+    "installed_solver_version": "2.1.3",
+    "installed_solver_revision": 0,
+    "status": "rejected_wrong_solver_revision",
+    "reported_by_runtime": {
+      "peak_force_n": 289.41713464673734,
+      "impulse_n_s": 1.7644172666440627,
+      "animation_frames": 60,
+      "carry_m": null
+    }
+  },
+  "blockers": [
+    "original camera extrinsics and bounds are unavailable",
+    "original MP4 bytes and container metadata are unavailable",
+    "a revision-3 upstream-physics runtime is required to replay the summary"
+  ]
+}
