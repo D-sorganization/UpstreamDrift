@@ -20,6 +20,7 @@ IMPACT_S = 0.8
 
 
 def _audit(wrench, causes=None, **kw):
+    """Run the audit on the shared time base with optional overrides."""
     return audit_root_wrench(
         times_s=T,
         root_wrench=wrench,
@@ -33,10 +34,12 @@ def _audit(wrench, causes=None, **kw):
 
 
 def test_components_are_six_force_then_moment() -> None:
+    """The residual is force then moment, in axis order."""
     assert COMPONENTS == ("fx", "fy", "fz", "mx", "my", "mz")
 
 
 def test_zero_residual_passes_all_components() -> None:
+    """A zero wrench is admitted with no refit."""
     report = _audit(np.zeros((N, 6)))
     assert report.admitted
     assert all(c.passes for c in report.components)
@@ -44,6 +47,7 @@ def test_zero_residual_passes_all_components() -> None:
 
 
 def test_force_gate_is_two_percent_body_weight_outside_impact() -> None:
+    """Force components fail above 2% body weight and pass below it."""
     w = np.zeros((N, 6))
     w[:, 2] = 0.03 * BW_N  # 3% BW vertical force: fails
     w[:, 0] = 0.01 * BW_N  # 1% BW: passes
@@ -55,6 +59,7 @@ def test_force_gate_is_two_percent_body_weight_outside_impact() -> None:
 
 
 def test_moment_gate_normalised_by_bw_times_height() -> None:
+    """Moment components are gated by 2% of body weight times height."""
     w = np.zeros((N, 6))
     w[:, 5] = 0.019 * BW_N * HEIGHT_M
     assert _audit(w).components[5].passes
@@ -63,6 +68,7 @@ def test_moment_gate_normalised_by_bw_times_height() -> None:
 
 
 def test_impact_window_excluded_from_gate_but_reported() -> None:
+    """Impact-window spikes are reported and excluded from the gate."""
     w = np.zeros((N, 6))
     w[np.abs(T - IMPACT_S) <= 0.05, 1] = 5.0 * BW_N  # huge spike at impact only
     report = _audit(w)
@@ -73,6 +79,7 @@ def test_impact_window_excluded_from_gate_but_reported() -> None:
 
 
 def test_dominant_cause_attributed_per_component() -> None:
+    """The cause that matches a failing component is the refit target."""
     slip = np.sin(np.linspace(0, 6 * np.pi, N))
     w = np.zeros((N, 6))
     w[:, 0] = 0.05 * BW_N * slip
@@ -88,6 +95,7 @@ def test_dominant_cause_attributed_per_component() -> None:
 
 
 def test_unattributed_when_no_cause_correlates() -> None:
+    """A failing component with no matching cause stays unattributed."""
     rng = np.random.default_rng(1)
     w = np.zeros((N, 6))
     w[:, 3] = 0.1 * BW_N * HEIGHT_M * rng.standard_normal(N)
@@ -97,6 +105,7 @@ def test_unattributed_when_no_cause_correlates() -> None:
 
 
 def test_constant_cause_has_zero_correlation_not_nan() -> None:
+    """A constant cause has correlation 0, not NaN."""
     w = np.zeros((N, 6))
     w[:, 0] = np.arange(N, dtype=float)
     report = _audit(w, causes={"foot_slip": np.ones(N)})
@@ -104,6 +113,7 @@ def test_constant_cause_has_zero_correlation_not_nan() -> None:
 
 
 def test_to_dict_is_json_serialisable_and_machine_readable() -> None:
+    """The report dict round-trips through JSON with the schema gates."""
     report = _audit(np.zeros((N, 6)), causes={"foot_slip": np.zeros(N)})
     payload = json.loads(json.dumps(report.to_dict()))
     assert payload["schema"] == "root_wrench_audit/v1"
@@ -124,6 +134,7 @@ def test_to_dict_is_json_serialisable_and_machine_readable() -> None:
     ],
 )
 def test_preconditions_rejected(kwargs, match) -> None:
+    """Malformed inputs raise ValueError before a verdict is produced."""
     base = {
         "times_s": T,
         "root_wrench": np.zeros((N, 6)),
@@ -139,6 +150,7 @@ def test_preconditions_rejected(kwargs, match) -> None:
 
 
 def test_all_frames_in_impact_window_is_rejected() -> None:
+    """An impact window that covers every frame is not auditable."""
     with pytest.raises(ValueError, match="no frames"):
         audit_root_wrench(
             times_s=T,

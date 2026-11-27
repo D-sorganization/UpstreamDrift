@@ -22,6 +22,8 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from src.shared.python.optimization._finite_array import finite_real_array
+
 SCHEMA = "root_wrench_audit/v1"
 COMPONENTS: tuple[str, ...] = ("fx", "fy", "fz", "mx", "my", "mz")
 FORCE_GATE_BW = 0.02
@@ -79,16 +81,12 @@ class RootWrenchAudit:
 
 
 def _finite(value: ArrayLike, name: str) -> NDArray[np.float64]:
-    array = np.asarray(value)
-    if array.dtype.kind not in "iuf":
-        raise ValueError(f"{name} must contain real numeric values")
-    array = np.asarray(array, dtype=np.float64)
-    if not np.all(np.isfinite(array)):
-        raise ValueError(f"{name} must contain finite values")
-    return array
+    """Return a finite real array, or raise ValueError naming ``name``."""
+    return finite_real_array(value, name)
 
 
 def _positive(value: float, name: str) -> float:
+    """Return ``value`` when it is finite and positive."""
     if not (np.isfinite(value) and value > 0.0):
         raise ValueError(f"{name} must be finite and positive, got {value!r}")
     return float(value)
