@@ -189,8 +189,11 @@ class View3D(QtWidgets.QWidget):
             try:
                 self._service.set_pose(pose) if pose else None
                 transforms = self._service.get_link_transforms()
-                self.update_from_service_transforms(transforms)
-                return
+                # An unloaded service may have no landmarks yet. Keep the
+                # canonical skeleton visible until a model is available.
+                if transforms:
+                    self.update_from_service_transforms(transforms)
+                    return
             except (NotImplementedError, RuntimeError, ValueError) as exc:
                 # Fall back to canonical forward kinematics if service fails.
                 logger.debug("Service render failed, using FK fallback: %s", exc)

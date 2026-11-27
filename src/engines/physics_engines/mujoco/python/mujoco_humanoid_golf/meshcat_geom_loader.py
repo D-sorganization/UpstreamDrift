@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 import mujoco
@@ -33,6 +34,26 @@ def _meshcat_shape(gtype: int, size: np.ndarray, rbound: float) -> Any | None:
     return g.Sphere(radius=0.1)
 
 
+def normalize_geom_rgba(rgba: Any) -> tuple[float, float, float, float]:
+    """Coerce MuJoCo ``geom_rgba`` rows (often ``ndarray``) to a validated RGBA tuple.
+
+    Precondition: ``rgba`` supports indexing for at least four components.
+    Postcondition: returns four finite floats in ``[0.0, 1.0]``.
+    """
+    try:
+        components = [float(rgba[i]) for i in range(4)]
+    except (TypeError, IndexError, ValueError) as exc:
+        raise TypeError(
+            f"geom rgba must provide four numeric components; got {type(rgba).__name__}"
+        ) from exc
+    for idx, val in enumerate(components):
+        if not math.isfinite(val):
+            raise ValueError(f"rgba component {idx} must be finite; got {val}")
+        if not 0.0 <= val <= 1.0:
+            raise ValueError(f"rgba component {idx} must be in [0.0, 1.0]; got {val}")
+    return components[0], components[1], components[2], components[3]
+
+
 def build_meshcat_color_bindings(
     vis: Any,
     model: mujoco.MjModel,
@@ -46,11 +67,11 @@ def build_meshcat_color_bindings(
     for i in range(model.ngeom):
         gtype = model.geom_type[i]
         size = model.geom_size[i]
-        rgba = model.geom_rgba[i]
+        rgba4 = normalize_geom_rgba(model.geom_rgba[i])
         shape = _meshcat_shape(gtype, size, float(model.geom_rbound[i]))
         if shape is None:
             continue
-        material = g.MeshPhongMaterial(color=rgba_to_int(rgba), opacity=rgba[3])
+        material = g.MeshPhongMaterial(color=rgba_to_int(rgba4), opacity=rgba4[3])
         name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, i) or f"geom_{i}"
         z_aligned = gtype in (
             mujoco.mjtGeom.mjGEOM_CYLINDER,
@@ -68,10 +89,10 @@ def build_meshcat_color_bindings(
             suffix = "/geometry" if z_aligned else ""
             path = f"visuals/{name}{suffix}/<object>"
             color_bindings.setdefault(body, {})[path] = [
-                *(int(c * 255) / 255 for c in rgba[:3]),
-                float(rgba[3]),
+                *(int(c * 255) / 255 for c in rgba4[:3]),
+                float(rgba4[3]),
             ]
     return color_bindings
 
 
-__all__ = ["build_meshcat_color_bindings"]
+__all__ = ["build_meshcat_color_bindings", "normalize_geom_rgba"]

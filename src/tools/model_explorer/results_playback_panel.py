@@ -11,6 +11,7 @@ Qt-free :class:`ResultsSession`; this widget only draws it.
 
 from __future__ import annotations
 
+import math
 import time
 from collections.abc import Callable
 from pathlib import Path
@@ -52,6 +53,7 @@ from src.tools.model_explorer.playback_ball_overlay import (
 )
 from src.tools.model_explorer.playback_clock import SPEEDS, PlaybackClock
 from src.tools.model_explorer.playback_view import (
+    load_club_speed_plot_settings,
     load_framing_settings,
     load_layout_settings,
 )
@@ -133,6 +135,8 @@ class ResultsPlaybackPanel(QWidget):
         self._fit_timer.setSingleShot(True)
         self._fit_timer.setInterval(self._framing.resize_debounce_ms)
         self._fit_timer.timeout.connect(self._fit_render_to_label)
+        self._speed_plot = load_club_speed_plot_settings()
+        self._impact_speed: tuple[float, float] | None = None  # (time s, mph)
         self._ball_settings = load_overlay_settings()
         self.ball_overlay = BallOverlay(
             pose, self._ball_settings, flight_unavailable_reason()
@@ -355,6 +359,23 @@ class ResultsPlaybackPanel(QWidget):
         """Show or hide the finish aim line; stays off without the flight."""
         self.aim_check.setChecked(bool(visible) and self.aim_check.isEnabled())
 
+    def show_shot(self, summary: Any) -> None:
+        """Title and mark the club-speed plot with the Shot card's impact speed.
+
+        ``summary`` is a ``ShotSummary``; without both a club speed and its
+        ``impact_time_s`` the plot keeps its peak title. ``ValueError`` when
+        either is not finite.
+        """
+        speed, when = summary.club_speed_mph, summary.impact_time_s
+        if speed is None or when is None:
+            self._impact_speed = None
+        else:
+            if not (math.isfinite(speed) and math.isfinite(when)):
+                raise ValueError(f"impact speed and time must be finite: {summary}")
+            self._impact_speed = (float(when), float(speed))
+        if self.channel_combo.currentText() == CLUB_HEAD_SPEED:
+            self._draw_plot(CLUB_HEAD_SPEED)
+
     def set_shot_shape(self, shape: str) -> None:
         """Choose the shot shape (``straight``, ``draw`` or ``fade``)."""
         if shape not in SHAPES:
@@ -449,17 +470,32 @@ class ResultsPlaybackPanel(QWidget):
         axes.set_xlabel("Time (s)")
         axes.set_ylabel(f"{series.name}\n({series.unit})", fontsize=9)
         if name == CLUB_HEAD_SPEED and series.values.size:
-            peak = int(np.argmax(series.values))
-            axes.set_title(
-                f"Peak {series.values[peak]:.1f} mph at "
-                f"t = {self._pose.time_s[peak]:.3f} s",
-                fontsize=9,
-            )
+            self._title_club_speed(series)
         axes.grid(True, alpha=0.3)
         self._cursor = axes.axvline(
             self.session.current_time_s, color="tab:red", linewidth=1.0
         )
         self.canvas.draw_idle()
+
+    def _title_club_speed(self, series: TimeSeries) -> None:
+        """The card's impact speed (marked) when known, else the curve's peak."""
+        cfg, axes = self._speed_plot, self._axes
+        if self._impact_speed is None:
+            peak = int(np.argmax(series.values))
+            when, speed = float(self._pose.time_s[peak]), float(series.values[peak])
+            axes.set_title(cfg.peak_title.format(speed=speed, time=when), fontsize=9)
+            return
+        when, speed = self._impact_speed
+        axes.plot(
+            [when],
+            [speed],
+            marker="o",
+            linestyle="none",
+            color=cfg.marker_color,
+            markersize=cfg.marker_size_pt,
+            gid="impact_speed",
+        )
+        axes.set_title(cfg.impact_title.format(speed=speed, time=when), fontsize=9)
 
     def select_channel(self, name: str) -> None:
         """Plot channel ``name``; ``ValueError`` when the run has no such channel."""

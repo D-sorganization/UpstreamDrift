@@ -214,3 +214,17 @@ def test_framing_settings_reject_bad_values(tmp_path, patch, match) -> None:
     path = _patched(tmp_path, "framing", lambda blk: {**blk, **patch})
     with pytest.raises(ValueError, match=match):
         pv.load_framing_settings(path)
+
+
+def test_club_speed_plot_titles_are_settings(tmp_path: Path) -> None:
+    cfg = pv.load_club_speed_plot_settings()
+    assert cfg.impact_title.format(speed=114.7, time=1.3203).startswith("Impact")
+    assert "114.7" in cfg.impact_title.format(speed=114.7, time=1.3203)
+    assert cfg.peak_title.format(speed=113.2, time=1.319).startswith("Peak")
+    raw = json.loads(pv.SETTINGS_PATH.read_text(encoding="utf-8"))
+    assert "club_speed_plot" in raw["sources"]
+    raw["club_speed_plot"]["impact_title"] = "Impact {mph}"  # unknown field
+    bad = tmp_path / "bad.json"
+    bad.write_text(json.dumps(raw), encoding="utf-8")
+    with pytest.raises(ValueError, match="impact_title"):
+        pv.load_club_speed_plot_settings(bad)

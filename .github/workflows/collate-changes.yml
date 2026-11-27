@@ -129,6 +129,9 @@ jobs:
           echo "COLLATED=$COLLATED" >> "$GITHUB_ENV"
           echo "FAILED=$FAILED" >> "$GITHUB_ENV"
 
+      - name: Archive development log with headroom
+        run: python3 scripts/ci/archive_devlog_with_headroom.py --repo-root .
+
       - name: Propose collation as a pull request
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}

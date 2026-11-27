@@ -130,8 +130,9 @@ class CandidateReplayReceipt(BaseModel):
     configuration: dict[str, Any]
     parity: dict[str, Any]
     integration: dict[str, Any]
-    shared_metrics: dict[str, float]
-    g1_metrics: dict[str, float]
+    # None = unavailable metric (strict-JSON null); NaN/inf stay rejected.
+    shared_metrics: dict[str, float | None]
+    g1_metrics: dict[str, float | None]
     acceptance: AcceptanceReceipt
     artifacts: dict[str, Any]
     elapsed_s: float

@@ -204,15 +204,20 @@ its parts are algebraic objects of the same regressor:
 \begin{align}
   \ba_{\mathrm{ZTCF}}(t) &= -\bM(\bq)^{-1}\,\bY(\bq,\bv,0)\,\bpi
     \;+\;\bM^{-1}\bJ_c^{\!\top}\blambda_0 , \label{eq:ztcf}\\
-  \ba_{\mathrm{ZVCF}}(t) &= -\bM(\bq)^{-1}\,\bY(\bq,0,0)\,\bpi
-    \;+\;\bM^{-1}\bJ_c^{\!\top}\blambda_{00}, \label{eq:zvcf}\\
-  \ba_{\mathrm{ZTCF}}-\ba_{\mathrm{ZVCF}} &= -\bM^{-1}\,[\bY(\bq,\bv,0)-\bY(\bq,0,0)]\,\bpi
-    \quad\text{(velocity-dependent drift)} .
+  \ba_{\mathrm{ZVCF}}(t) &= \bM(\bq)^{-1}\bigl(\bB\bu
+    \;+\;\bJ_c^{\!\top}\blambda_u\bigr), \label{eq:zvcf}\\
+  \ba_{\mathrm{ZTCF}}+\ba_{\mathrm{ZVCF}} &= \ba_{\mathrm{meas}}
+    \quad\text{(pointwise, gravity counted once, in the ZTCF)} .
 \end{align}
-Here $\blambda_0$ ($\blambda_{00}$) are the contact reactions recomputed under
-zero input (zero input and zero velocity) from the same constraint equations;
-in free flight they vanish.  The measured acceleration decomposes exactly as
-$\ba_{\mathrm{meas}}=\ba_{\mathrm{ZTCF}}+\bM^{-1}\bB\bu+\bM^{-1}\bJ_c^{\!\top}(\blambda-\blambda_0)$,
+Here $\blambda_0$ are the constraint reactions recomputed under zero input
+from the same constraint equations, and $\blambda_u$ are the reactions under
+the load $\bB\bu$ alone (no bias, no gravity, no closure drift): the KKT
+projection of the applied torques.  In free flight both vanish.  Because the
+KKT system is linear in the load at a fixed state,
+$\blambda=\blambda_0+\blambda_u$, so the measured acceleration decomposes
+exactly as
+$\ba_{\mathrm{meas}}=\ba_{\mathrm{ZTCF}}+\ba_{\mathrm{ZVCF}}
+=\ba_{\mathrm{ZTCF}}+\bM^{-1}\bB\bu+\bM^{-1}\bJ_c^{\!\top}(\blambda-\blambda_0)$,
 which is the AffineDrift pointwise decomposition $\dot\bx-f(\bx)=G(\bx)\bu$
 with contact made explicit.
 
@@ -224,10 +229,18 @@ repository, \S\ref{sec:dime_review}).}
     the integrated object $\bx(t_0)+\int f(\bx_{\mathrm{ZTCF}}(\tau))d\tau$ is a
     different curve (it follows its own flow, not the measured state) and must
     be called the ZTCF \emph{trajectory}.
-  \item \textbf{ZVCF}: $\bv=0$ \emph{and} $\bu=0$ at each instant
-    (configuration-only drift: gravity plus constraint reactions).  The variant
-    that keeps the control is \emph{zero-velocity, control-preserved
-    acceleration} and is never abbreviated ZVCF.
+  \item \textbf{ZVCF}: the applied torques alone at each instant: velocity
+    and gravity off, reactions recomputed under the torque-only load
+    \eqref{eq:zvcf}.  It is the \emph{control} part: what the player's torques
+    do.  Gravity is passive, so it belongs to the ZTCF (the \emph{drift} part:
+    gravity, momentum and passive interactions) and is counted once (owner
+    decision \#14497, restated 2026-11-24).  The configuration-only quantity
+    $\bv=0$, $\bu=0$ (gravity plus its reactions) is the \emph{zero-velocity,
+    zero-torque acceleration} and is never abbreviated ZVCF.
+  \item Every quantity linear in the load at a fixed state splits the same
+    way: constraint reactions, each hand's force and torque on the club, joint
+    reactions and the axial tension or compression of a member.  Magnitudes,
+    norms and colour saturation do not split.
   \item Passive impedance declared in the model (joint damping, ligament
     stiffness) is part of $f$; a feedback servo is part of $\bu$ and is removed
     by the ZTCF.
@@ -1270,6 +1283,9 @@ commit \texttt{21a2ed06}:
     $10^{-10}$ relative.  Reproduce with
     \texttt{python3 -m pytest tests/unit/motion\_matching/test\_zvcf\_single\_definition.py
     tests/unit/engine\_core/test\_counterfactual\_sign\_convention.py}.
+    \emph{Superseded (\#14497):} the single implementation now returns the
+    control part \eqref{eq:zvcf}, the applied torques alone, and the
+    gravity-only quantity is \texttt{zero\_velocity\_zero\_torque\_acceleration}.
     The duplicate \texttt{DynamicsProvider} protocols were renamed \texttt{DimeDynamicsProvider} and \texttt{EquationsOfMotionProvider} (\#11553).
   \item No inertial regressor existed anywhere in the estimation package.
 \end{itemize}

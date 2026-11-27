@@ -32,6 +32,7 @@ from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
     export_full_body_mjcf,
 )
 from src.shared.python.model_appearance.club_assembly import assembly_from_spec
+from src.shared.python.model_appearance.hand_spec import spec_grip_pose
 from src.shared.python.model_appearance.skinned_club_hands import forearm_reach_m
 
 Array = NDArray[np.float64]
@@ -173,6 +174,11 @@ def _checked(
     club = assembly_from_spec(spec_to)
     if club is None:
         raise ValueError("spec has no club to hold")
+    if club.handedness != "right":
+        raise ValueError(
+            "left-handed skinned arm refit is not implemented: the arm chain "
+            "is fitted for a right-handed golfer (#15652)"
+        )
     return start, club
 
 
@@ -256,7 +262,7 @@ def refit_arms_to_club(
     ``posture`` gives coordinates an angle (rad) to sit at (#15277): solved
     with the arms, pulled there by ``posture_weight`` in place of toward ``q``.
 
-    Preconditions: both specs share ``coordinate_order`` and hold a club;
+    Preconditions: both specs share ``coordinate_order``, hold a right-handed club;
     ``q`` has one finite value per coordinate; ``alignment_weight >= 0``;
     every ``also_free`` and ``posture`` name is a coordinate, posture targets
     are finite and ``posture_weight >= 0`` (``ValueError`` otherwise).
@@ -273,7 +279,7 @@ def refit_arms_to_club(
     club_rotation, club_origin = source.club_frame()
     cuffs = {
         side: club_rotation @ along
-        for side, (_, along) in forearm_reach_m(club).items()
+        for side, (_, along) in forearm_reach_m(club, spec_grip_pose(spec_to)).items()
     }
     arms, low, high, stay = _free_coordinates(spec_to, (*also_free, *posture))
     order = list(spec_to["coordinate_order"])

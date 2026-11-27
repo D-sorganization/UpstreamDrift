@@ -7,13 +7,14 @@ panel, so ``gui.py`` stays under the monolith line limit.
 from __future__ import annotations
 
 import contextlib
+import math
 import time
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 from PyQt6 import sip
-from PyQt6.QtCore import QCoreApplication, QEvent, QEventLoop
+from PyQt6.QtCore import QCoreApplication, QEvent, QEventLoop, QTimer
 from PyQt6.QtWidgets import (
     QDockWidget,
     QInputDialog,
@@ -111,17 +112,26 @@ class ResultsPlaybackHostMixin:
     def wait_for_results_load(self, timeout_s: float | None = None) -> bool:
         """Process events until the load ends (``timeout_s``, default from
         ``results_load_settings``, must be positive); True if a run is in."""
-        limit = timeout_s or self.results_load_settings.wait_timeout_s
+        limit = (
+            self.results_load_settings.wait_timeout_s
+            if timeout_s is None
+            else timeout_s
+        )
         if limit <= 0:
             raise ValueError(f"timeout_s must be positive, got {limit}")
-        # Poll the state, not ``finished``: it may already have been emitted,
-        # and a nested QEventLoop would then sit out the whole timeout.
+        # Poll state with a bounded nested event loop: finished may already
+        # have been emitted, while processEvents alone does not wait when idle.
         deadline = time.monotonic() + limit
-        while self.is_loading_results and time.monotonic() < deadline:
-            QCoreApplication.processEvents(
-                QEventLoop.ProcessEventsFlag.WaitForMoreEvents,
-                self.results_load_settings.poll_interval_ms,
+        while self.is_loading_results:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                break
+            wait_ms = min(
+                self.results_load_settings.poll_interval_ms, math.ceil(remaining * 1000)
             )
+            loop = QEventLoop()
+            QTimer.singleShot(wait_ms, loop.quit)
+            loop.exec()
         return self._results is not None and not self.is_loading_results
 
     def cancel_results_loads(self) -> None:
@@ -333,6 +343,7 @@ class ResultsPlaybackHostMixin:
         from .playback_flight_panel import attach_shot_dock
 
         self.shot_dock = attach_shot_dock(self._inner, self.shot_dock, summary)
+        panel.show_shot(summary)  # the plot titles the card's impact speed
 
     def _discard_results(self) -> None:
         """Drop the loaded run, its panel and its renderer; idempotent."""

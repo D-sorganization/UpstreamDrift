@@ -64,14 +64,26 @@ Sizes quoted from tests are the band a test asserts, not a published value.
 
 ### Iron COR Source
 
-- **Missing:** a sourced iron-face COR.
-- **Instead:** `cor_by_club` in
-  `src/shared/python/impact_parameters/club_impact_settings.json` holds 0.83 for
-  `iron7`, the driver value (`DRIVER_COR` in
-  `src/shared/python/core/physics_constants.py`, a USGA/R&A limit). The file
-  records that no source for a lower iron value was found.
-- **Effect:** unknown; it scales iron ball speed directly.
-- **Tracking:** #15443 ("Sourced iron COR and calibrated gear effect").
+- **Fixed (sourced law):** `cor_by_club` in
+  `src/shared/python/impact_parameters/club_impact_settings.json` now gives
+  `iron7` the ball-on-rigid-plate law e = 0.86 - 0.0029 v_n, with v_n the
+  normal approach speed in m/s (Penner, Am. J. Phys. 69, 563 (2001), Eq. (5),
+  a linear fit to Lieberman and Johnson's ball-barrier data, Science and Golf
+  II, 1994). `flight_for_impact` evaluates it per strike
+  (`ClubImpact.cor_at`). The previous value was the driver limit 0.83 with no
+  iron source. The driver stays at 0.83.
+- **Remaining limits:** the fit spans about 37 to 50 m/s, so iron and wedge
+  strikes (about 25 to 35 m/s normal speed) are extrapolated. It treats the
+  iron face as rigid and is for the balls tested in 1994, not a modern ball.
+  No measured COR of a specific iron head was found. Wedges and other irons
+  have no catalogue club (`club_models.CLUBS` holds only the driver and
+  `iron7`), so they still launch with the driver defaults. The source block
+  is `iron_cor_source` in the settings file.
+- **Effect:** a 40 m/s strike at 34 degrees loft (v_n about 33 m/s, e about
+  0.764) drops from 116.7 to 112.5 mph ball speed and from 155.4 to 149.5 yd
+  carry. The reference-shot rows feed the launch directly and are unchanged.
+- **Tracking:** #15443 ("Sourced iron COR and calibrated gear effect"); the
+  gear-effect calibration is still open.
 
 ### Shaft Bend in the Delivery
 
@@ -260,13 +272,50 @@ Sizes quoted from tests are the band a test asserts, not a published value.
   carry only: `FlightSummary.total_m` is never set (`TOTAL_UNAVAILABLE` in
   `src/shared/python/impact_parameters/flight_report.py`).
 - **Instead:** `SlopeAwareGround` in
-  `src/shared/python/sg_optimizer/shot_model/ground_runout.py` gives one hop
-  plus roll from fixed gains, a skill multiplier standing in for spin, a lie
-  multiplier and a stance-bin slope factor. It is used only by the dispersion
-  tables (`dispersion_table.py`). Its parameters are marked "assumption,
-  unmeasured turf, no primary citation". No undulation, firmness, green,
-  hazard, spin-dependent check or bounce from the actual landing spin.
-- **Effect:** unknown.
+  `src/shared/python/sg_optimizer/shot_model/ground_runout.py` (model
+  `sg_runout_v2`) gives one hop plus roll. It is used by the dispersion tables
+  (`dispersion_table.py`) and the native viewer roll
+  (`src/tools/native_viewer_export/rollout.py`).
+  - **Hop:** spin-aware since #15443. It is the first bounce of Penner, "The
+    run of a golf ball", Can. J. Phys. 80, 931-940 (2002), eqs. (2)-(8): the
+    turf acts as a rigid surface tilted by `theta_c`, and the ball either rolls
+    out (`vx' = 5/7 vx' - 2/7 r w`) or slides, by the critical friction of
+    eq. (4). The hop is the drag-free range of the rebound, so more landing
+    backspin gives a shorter hop, or a backward one. The landing backspin is
+    the launch spin decayed at the kernel rate.
+  - **Coefficients:** in `src/config/runout_bounce.json` with their equation
+    numbers. `theta_c` (eq. 8) was fitted to a single green impact (Haake),
+    `e` (eq. 5) was measured on soft turf, and `mu = 0.40` is Daish's
+    unmeasured green value. The same bounce applies to every lie.
+  - **Paper discrepancy:** at Penner's Haake check point, eqs. (3), (6) and
+    (7) as printed reproduce his `mu_c = 0.29` and `e = 0.14`. They do not
+    reproduce his quoted rebound of 4.34 m/s at 34.1 deg: they give 4.16 m/s
+    at 41.7 deg. His quote needs a normal rebound of 2.82 m/s, which eq. (5)
+    cannot give at any normal speed up to 20 m/s (maximum 2.42 m/s), so the
+    figure is inconsistent with his own equations; an independent re-derivation
+    found no reading that matches within 2 %. The equations do reproduce his
+    quoted drive and 9-iron `mu_c` and bounce heights, which
+    `test_ground_runout.py` uses as the primary validation; the Haake case is
+    pinned there as computed.
+  - **Roll:** still fixed gains, with a per-skill multiplier standing in for
+    spin, a lie multiplier and a stance-bin slope factor. These parameters are
+    marked "assumption, unmeasured turf, no primary citation".
+  - **Not modelled:** undulation, firmness, green, hazards, later bounces and
+    spin-dependent check in the roll.
+  - **Club per skill:** `PipelineLandingSimulator` passes each skill's
+    `REPRESENTATIVE_CLUB` to the pipeline (#15443), so the launch spin cap is
+    that club's class envelope (`ball_flight_validity_settings.json`), not the
+    3500 rpm driver one. On the tour family (12 draws, calm, fairway) the
+    long iron to wedge now launch at 5,300 to 8,100 rpm instead of 3,500, and
+    land with 391 to 702 rad/s of backspin instead of 261 to 303. Their carry
+    falls by 4 to 10 yd (wedge 65.6 to 61.4 yd) and run/carry falls from
+    driver to wedge (0.129, 0.069, 0.045, 0.043, 0.037, 0.032), which
+    `test_ground_runout.py` now asserts.
+- **Effect:** unknown in absolute terms. The short-game shots (pitch, chip,
+  bunker) have no bag club, match no club class and keep the driver fallback
+  envelope (logged as a warning); pitch and bunker launch spin is still
+  clamped at 3,500 rpm, so their carry and landing backspin are those of a
+  clamped launch (their modelled roll is zero either way).
 - **Tracking:** #15443 (child 6).
 
 ### Launch-Monitor Reference Coverage
@@ -278,8 +327,13 @@ Sizes quoted from tests are the band a test asserts, not a published value.
   URLs are in its `tour_table_source` block); it bands carry, apex and descent
   only. There are no woods, hybrids, long irons or lob
   wedges, no side or spin-axis data, no roll or total reference, and no
-  impact-model reference table (club delivery to ball data). The older bands in
-  `tests/unit/physics/test_trackman_benchmarks.py` are wide (driver 238 to 290
-  yd, 7-iron 148 to 182 yd).
+  impact-model reference table (club delivery to ball data). The older driver
+  benchmarks in `tests/unit/physics/test_trackman_benchmarks.py` and
+  `tests/unit/test_flight_models.py` now read the PGA driver row and its
+  carry and apex bands through `tests/unit/physics/reference_bands.py` (F7);
+  the 7-iron benchmark keeps its wide 148 to 182 yd band. Against the driver
+  band (261.3 to 288.8 yd) three alternative flight models overshoot and are
+  strict xfails with their measured numbers: Nathan 294.3 yd (apex 34.4 m),
+  Ballantyne 297.2 yd (apex 33.7 m) and Rospie DL 290.8 yd.
 - **Effect:** not applicable; this limits what can be detected.
 - **Tracking:** #15443 (children 2, 3, F7).

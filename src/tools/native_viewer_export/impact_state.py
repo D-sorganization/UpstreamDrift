@@ -87,12 +87,28 @@ def _contact_offset_s(gap: Any, limit_s: float) -> float | None:
     return high
 
 
+def _before_strike(
+    series: ClubheadSeries, last: int | None, strike_time_s: float | None
+) -> int | None:
+    """``last`` capped to the last sample before the recorded strike."""
+    strike = getattr(series, "strike_time_s", None)
+    strike = strike_time_s if strike_time_s is not None else strike
+    if strike is None or last is None:
+        return last
+    if not math.isfinite(float(strike)):
+        raise ValueError(f"strike_time_s must be finite, got {strike}")
+    earlier = np.nonzero(series.times_s < float(strike))[0]
+    return min(last, int(earlier[-1])) if earlier.size else None
+
+
 def series_at_contact(
     series: ClubheadSeries,
     ball_centre_m: object,
     radius_m: float,
     impact_time_s: float,
     settings: ImpactStateSettings | None = None,
+    *,
+    strike_time_s: float | None = None,
 ) -> tuple[ClubheadSeries, int] | None:
     """``series`` with the state at ball contact added, and that sample's index.
 
@@ -104,8 +120,14 @@ def series_at_contact(
     than 2 samples before contact, or when the fit does not reach the ball
     within ``max_extrapolation_steps``.
 
+    ``strike_time_s`` (default: the series' own ``strike_time_s``, if any) is
+    the recorded strike of a captured swing; that sample already carries the
+    strike, so the stencil ends at the last sample before it. ``None`` when
+    no sample precedes it.
+
     Preconditions: a ``ClubheadSeries`` (``TypeError``); a finite 3-vector
     ``ball_centre_m``, positive finite ``radius_m``, finite ``impact_time_s``
+    (``ValueError``), and a finite ``strike_time_s`` when one is given
     (``ValueError``). Postconditions: the samples before contact are
     unchanged and the added sample's face plane is one ball radius from the
     ball centre (to the fit residual when the fit starts past the ball).
@@ -123,6 +145,7 @@ def series_at_contact(
         return None
     window = chosen.search_window_s
     last = _last_before_contact(series, ball, radius, impact_time_s, window)
+    last = _before_strike(series, last, strike_time_s)
     first = max((last or 0) - chosen.stencil_samples + 1, 0)
     if last is None or last == first:
         return None

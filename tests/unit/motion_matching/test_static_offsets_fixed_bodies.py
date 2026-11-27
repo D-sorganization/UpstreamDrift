@@ -78,7 +78,9 @@ def test_cli_parses_fix_club_markers() -> None:
 def test_club_marker_body_is_the_fixed_club_body() -> None:
     from src.shared.python.motion_matching.execution.club_markers import (
         CLUB_MARKER_BODY,
+        SHAFT_MARKER_FRAME,
     )
 
-    assert address.club_fixed_bodies(True) == (CLUB_MARKER_BODY,)
+    # a chain shaft's shaft markers sit on SHAFT_MARKER_FRAME (#15150 C23)
+    assert address.club_fixed_bodies(True) == (CLUB_MARKER_BODY, SHAFT_MARKER_FRAME)
     assert address.club_fixed_bodies(False) == ()

@@ -511,10 +511,13 @@ def build_parity_report(
     attachments: Mapping[str, tuple[str, Sequence[float]]] | None = None,
     spec: bytes | Mapping[str, Any] | None = None,
 ) -> UnifiedParityReport:
-    """Construct unified parity report comparing candidate through all engines.
+    """Compare forward kinematics at supplied candidate poses across engines.
 
     ``candidate_sha256`` binds the candidate metadata and complete array
     evidence; ``candidate_id`` remains its human-readable model name.
+    A passing verdict qualifies only FK marker agreement at those poses.
+    Candidate velocities, controls and dynamic profile do not make this an
+    independently integrated replay or establish physical acceptance.
     """
     cand = _resolve_candidate(candidate)
     cand_sha = _candidate_fingerprint(cand)
@@ -584,6 +587,11 @@ def build_parity_report(
         is_parity_accepted=(overall_status == "PASSED"),
         status=overall_status,
         engine_rows=rows,
+        evaluation_operation="forward_kinematics",
+        note=(
+            "Verdicts qualify forward-kinematic marker agreement at supplied poses only. "
+            "No dynamic replay was evaluated; this report does not establish physical acceptance."
+        ),
     )
 
 

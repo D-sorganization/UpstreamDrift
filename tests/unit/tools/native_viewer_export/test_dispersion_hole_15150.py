@@ -43,14 +43,14 @@ def result() -> sd.DispersionResult:
 def test_real_settings_load_and_every_number_is_explained():
     cfg = dh.load_dispersion_hole_settings()
     raw = json.loads(dh.SETTINGS_PATH.read_text())
-    assert cfg.preset == "par4" and 0.0 < cfg.style["trace_alpha"] <= 1.0
+    assert cfg.preset == "par4" and 0.0 < cfg.style["ellipse_fill_alpha"] <= 1.0
     assert set(raw["sources"]) >= set(raw) - {"sources"}
 
 
 def test_bad_settings_raise():
     raw = json.loads(dh.SETTINGS_PATH.read_text())
-    raw["trace_alpha"] = 1.5
-    with pytest.raises(ValueError, match="trace_alpha"):
+    raw["ellipse_fill_alpha"] = 1.5
+    with pytest.raises(ValueError, match="ellipse_fill_alpha"):
         dh.DispersionHoleSettings(raw.pop("preset"), raw)
     with pytest.raises(ValueError, match="preset"):
         dh.load_dispersion_hole_settings(preset="par9")
@@ -135,3 +135,60 @@ def test_cli_flags():
     args = build_parser().parse_args([*base, "--hole", "--hole-preset", "par5"])
     assert args.hole and args.hole_preset == "par5"
     assert not build_parser().parse_args(base).hole
+
+
+def _nominal_lines(ax, gid="nominal_shot"):
+    return [ln for ln in ax.get_lines() if ln.get_gid() == gid]
+
+
+def test_nominal_shot_drawn_bold_on_top_of_thin_samples(result):
+    pytest.importorskip("matplotlib")
+    from matplotlib import pyplot as plt
+
+    from src.tools.golf_environment.shots import load_shots_settings
+    from src.tools.native_viewer_export.dispersion_traces import load_trace_settings
+    from src.tools.native_viewer_export.hole_view import load_hole_view_settings
+
+    traces, nominal = load_trace_settings(), _linear(ShotSetup(0.0, 0.0))
+    fig, plan, side = dh.build_dispersion_hole_figure(
+        result,
+        sd.load_dispersion_settings(),
+        dh.load_dispersion_hole_settings(),
+        METRES,
+        nominal,
+    )
+    sample = traces.hole_sample_style()
+    width = load_shots_settings()["figure"]["line_width"]
+    for ax in (plan, side):
+        (bold,) = _nominal_lines(ax)
+        assert bold.get_linewidth() == width > sample.width_pt
+        assert bold.get_color() == load_hole_view_settings().colour_rgba
+        assert bold.get_zorder() == traces.hole_nominal_zorder
+        thin = [ln for ln in ax.get_lines() if ln.get_color() == sample.colour]
+        assert len(thin) >= len(result.available)
+        assert all(ln.get_linewidth() == sample.width_pt for ln in thin)
+        assert all(ln.get_zorder() < bold.get_zorder() for ln in thin)
+    texts = [t.get_text() for t in plan.get_legend().get_texts()]
+    assert dh.load_dispersion_hole_settings().style["legend_format"]["nominal"] in texts
+    plt.close(fig)
+    fig, plan, _ = dh.build_dispersion_hole_figure(
+        result, sd.load_dispersion_settings(), dh.load_dispersion_hole_settings()
+    )
+    assert not _nominal_lines(plan)  # no nominal given: samples only
+    plt.close(fig)
+    with pytest.raises(ValueError, match="nominal"):
+        dh.build_dispersion_hole_figure(
+            result,
+            sd.load_dispersion_settings(),
+            dh.load_dispersion_hole_settings(),
+            METRES,
+            SampleOutcome(ShotSetup(0.0, 0.0), reason="no flight"),
+        )
+
+
+def test_nominal_setup_is_the_base_of_the_samples():
+    cfg = sd.load_dispersion_settings()
+    from dataclasses import replace
+
+    moved = replace(cfg, base_club_roll_deg=1.5, base_ball_shift_m=0.01)
+    assert sd.nominal_setup(moved) == ShotSetup(1.5, 0.01)

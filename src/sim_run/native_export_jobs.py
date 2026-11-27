@@ -40,7 +40,8 @@ def load_job_settings() -> dict[str, Any]:
 
 
 def manifest_of(results: Sequence[Any]) -> dict[str, Any]:
-    """JSON manifest of ``ExportResult`` rows: clips, frames, grip and flight."""
+    """JSON manifest of ``ExportResult`` rows: clips, frames, grip, flight, replay mode
+    and model card."""
     return {
         "engines": [
             {
@@ -50,6 +51,8 @@ def manifest_of(results: Sequence[Any]) -> dict[str, Any]:
                 "frames_by_suffix": dict(r.frames_by_suffix),
                 "grip_json": None if r.grip_json is None else str(r.grip_json),
                 "flight": r.flight,
+                "replay_mode": r.replay_mode,
+                "model_card": r.model_card,
             }
             for r in results
         ]
