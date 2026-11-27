@@ -22,7 +22,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import lru_cache
 from pathlib import Path
 
@@ -172,6 +172,29 @@ def head_proportions(
     return out
 
 
+def _feature_mesh_parts(
+    skin: Mesh, length_m: float, settings: HeadSettings
+) -> list[tuple[str, Mesh, str]]:
+    """Build face-feature meshes from the scaled skin and authored settings."""
+    marks = head_features.load_face_landmarks()
+    if settings.morph.brow:
+        amount = settings.morph.brow
+        marks = replace(
+            marks,
+            brow_tilt=marks.brow_tilt - 0.6 * amount,
+            brow_arch=marks.brow_arch - 0.3 * amount,
+            brow_half=(
+                marks.brow_half[0],
+                marks.brow_half[1] * (1 - 0.3 * amount),
+                marks.brow_half[2] * (1 + 0.5 * amount),
+            ),
+        )
+    return [
+        (name, Mesh(mesh.vertices * length_m, mesh.faces), role)
+        for name, mesh, role in head_features.face_parts(skin, marks)
+    ]
+
+
 def build_mesh_parts(
     length_m: float, headwear: str, settings: HeadSettings | None = None
 ) -> list[tuple[str, Mesh, str]]:
@@ -198,10 +221,7 @@ def build_mesh_parts(
         ("skin_mesh", Mesh(asset.skin.vertices * length_m, asset.skin.faces), "skin")
     ]
     if settings is not None:
-        out += [
-            (name, Mesh(m.vertices * length_m, m.faces), role)
-            for name, m, role in head_features.face_parts(asset.skin)
-        ]
+        out += _feature_mesh_parts(asset.skin, length_m, settings)
     straw = settings is not None and settings.cap_style == "straw_hat"
     flat_capped = settings is not None and settings.cap_style == "flat_cap"
     capped = (
@@ -223,6 +243,12 @@ def build_mesh_parts(
             # Under a cap the hair is cut flatter than the crown stands off.
             under = cap_crop.hair_under if capped else None
             unit = head_hair.build_short_crop(asset.skin, settings.hair_part, under)
+        elif settings is not None and settings.hair_style != "dome":
+            from src.shared.python.model_appearance.head_hair_styles import (
+                build_hair_style,
+            )
+
+            unit = build_hair_style(asset.skin, settings.hair_part, settings.hair_style)
         out.append(
             ("hair_mesh", Mesh(unit.vertices * length_m, unit.faces), "headwear")
         )
@@ -241,6 +267,11 @@ def build_mesh_parts(
             for name, m in head_cap.build_cap(asset.skin, settings.cap_brim, cap_crop)
         ]
     if settings is not None:
+        if settings.facial_hair == "moustache":
+            out += [
+                (name, Mesh(m.vertices * length_m, m.faces), role)
+                for name, m, role in head_features.moustache_parts(asset.skin)
+            ]
         from src.shared.python.model_appearance.head_morph import (
             HeadMorph,
             warp_vertices,

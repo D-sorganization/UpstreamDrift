@@ -7,7 +7,7 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Must-Read Pointers
 
-- #15834/#15854: Shared `straw_hat` style and [calculation reference](docs/development/full_body_models/appearance_reference/straw_hat.tex); schema-validated `--cap-style` overrides are appearance-only, with short flat/newsboy peaks and profile-aware receipts.
+- #15834/#15848/#15854: Shared `straw_hat` and named hair styles ([hat](docs/development/full_body_models/appearance_reference/straw_hat.tex), [hair](docs/development/full_body_models/appearance_reference/hair_styles.tex)); schema-validated `--cap-style` overrides are visual only, with short peaks and profile-aware receipts.
 
 - `AGENTS.md`, `CLAUDE.md`: binding policy, discovery workflow and the shared-infrastructure directory.
 - `docs/development/DEVELOPMENT_LOG.md`: one `DL-#<issue>` state row per feature. `docs/development/HANDOFF.md`: canonical fleet handoff.
@@ -57,7 +57,7 @@ detail of a finished slice to the archive instead of growing this file.
 - Simulation Backends GUI E2E #15703: `codex-ct-1/15703-gui-e2e` uses MuJoCo CPU-only mode on Windows and handles optional backend import runtime failures; the focused four-worker suite passes.
 - Output I/O #15189: `fix/async-save-io-errors` reports filesystem failures through async/background save callbacks and default logging; regression tests preserve the original future exception. Review through Barb's pipeline.
 - Reproducibility #15191: `fix/seed-validation-atomic` rejects non-integer seeds before modifying Python or NumPy RNG state; `validate=False` continues to bypass only the range check. Review through Barb's pipeline.
-- Player profiles #15816/#15832/#15833: `player_models.export_player` supports source-attributed Tiger/Hogan and five legend candidates; appearance is illustrative and motion remains unqualified.
+- Portrait sculpt #15847/#15849: bounded visual face controls and optional moustache preserve the neck/skull envelope and native physics; see `docs/development/portrait-sculpt.tex`. Likeness needs reference review.
 - Player delivery #15819: `scripts/export_player_models.py` and `assets/player_models/` provide native sized/reference-skin bundles, hash-bound review poses and desktop/phone previews; motion remains unqualified.
 - Historical player delivery #15836: five sized and five reference-physics skins, catalog-driven batch previews and native verification under epic #15832; historical motion remains unqualified.
 - Import Utilities #15193: `fix/dotted-module-imports` resolves dotted names to the requested module and reads its own version for dependency checks. Review through Barb's pipeline.

@@ -63,8 +63,9 @@
         "enabled": { "type": "boolean" },
         "headwear": { "enum": ["none", "hair", "cap"] },
         "model": { "enum": ["parametric", "cc0_mesh"] },
-        "hair_style": { "enum": ["short_crop", "dome"] },
+        "hair_style": { "enum": ["short_crop", "dome", "side_swept", "swept_back", "slick_part", "receding_crop"] },
         "hair_part": { "enum": ["left", "right", "none"] },
+        "facial_hair": { "enum": ["none", "moustache"] },
         "eye_color": { "enum": ["blue_grey", "hazel", "brown"] },
         "cap_style": { "enum": ["none", "baseball_cap", "flat_cap", "straw_hat"] },
         "cap_material": { "$ref": "#/$defs/name" },
@@ -78,7 +79,16 @@
             "jaw": { "type": "number", "minimum": -0.2, "maximum": 0.2 },
             "nose": { "type": "number", "minimum": -0.2, "maximum": 0.2 },
             "mouth": { "type": "number", "minimum": -0.2, "maximum": 0.2 },
-            "eyes": { "type": "number", "minimum": -0.2, "maximum": 0.2 }
+            "eyes": { "type": "number", "minimum": -0.2, "maximum": 0.2 },
+            "cheeks": { "type": "number", "minimum": -0.2, "maximum": 0.2 },
+            "chin": { "type": "number", "minimum": -0.2, "maximum": 0.2 },
+            "brow": { "type": "number", "minimum": -0.2, "maximum": 0.2 },
+            "nose_width": { "type": "number", "minimum": -0.2, "maximum": 0.2 },
+            "nose_bridge": { "type": "number", "minimum": -0.2, "maximum": 0.2 },
+            "nose_length": { "type": "number", "minimum": -0.2, "maximum": 0.2 },
+            "eye_opening": { "type": "number", "minimum": -0.2, "maximum": 0.2 },
+            "face_length": { "type": "number", "minimum": -0.2, "maximum": 0.2 },
+            "ears": { "type": "number", "minimum": -0.2, "maximum": 0.2 }
           }
         },
         "headwear_material": { "$ref": "#/$defs/name" },
