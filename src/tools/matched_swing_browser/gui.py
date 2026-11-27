@@ -64,6 +64,7 @@ class MatchedSwingBrowserWidget(QWidget):
         model: MatchedSwingBrowserModel | None = None,
         ledger_path: Path | str | None = None,
     ) -> None:
+        """Build the widget and its playback state."""
         super().__init__(parent)
         self._model = model or MatchedSwingBrowserModel()
         self._ledger_path = ledger_path
@@ -71,67 +72,83 @@ class MatchedSwingBrowserWidget(QWidget):
         self._current_filtered_rows: list[LedgerRow] = []
         self._selected_row: LedgerRow | None = None
         self._movie: QtGui.QMovie | None = None
+        self._movie_loop_token = 0
 
         self._init_ui()
         self.reload_ledger()
 
     @property
     def table(self) -> QTableWidget:
+        """Return the runs table."""
         return self._table
 
     @property
     def total_runs_count(self) -> int:
+        """Return how many ledger rows are loaded."""
         return len(self._all_rows)
 
     @property
     def engine_combo(self) -> QComboBox:
+        """Return the engine filter combo."""
         return self._engine_combo
 
     @property
     def search_input(self) -> QLineEdit:
+        """Return the search field."""
         return self._search_input
 
     @property
     def reset_button(self) -> QPushButton:
+        """Return the filter reset button."""
         return self._reset_btn
 
     @property
     def badge_label(self) -> QLabel:
+        """Return the acceptance badge label."""
         return self._badge_lbl
 
     @property
     def whole_rmse_val(self) -> QLabel:
+        """Return the whole-swing RMSE label."""
         return self._whole_rmse_lbl
 
     @property
     def output_status_labels(self) -> dict[str, QLabel]:
+        """Return the per-output status labels."""
         return self._output_status_lbls
 
     @property
     def movie(self) -> QtGui.QMovie | None:
+        """Return the GIF movie, if one is loaded."""
         return self._movie
 
     @property
     def open_viewer_btn(self) -> QPushButton:
+        """Return the tour-matching viewer button."""
         return self._open_tmv_btn
 
     @property
     def open_native_btn(self) -> QPushButton:
+        """Return the native viewer button."""
         return self._open_native_btn
 
     @property
     def open_parity_btn(self) -> QPushButton:
+        """Return the parity report button."""
         return self._open_parity_btn
 
     @property
     def export_video_button(self) -> QPushButton:
+        """Return the video export button."""
         return self._export_video_btn
 
     @property
     def export_report_button(self) -> QPushButton:
+        """Return the report export button."""
         return self._export_report_btn
 
     def _init_ui(self) -> None:
+        """Build the filter pane and the detail pane."""
         layout = QHBoxLayout(self)
         layout.setContentsMargins(6, 6, 6, 6)
 
@@ -147,6 +164,7 @@ class MatchedSwingBrowserWidget(QWidget):
         splitter.setStretchFactor(1, 4)
 
     def _create_left_panel(self) -> QWidget:
+        """Build the ledger table pane."""
         panel = QWidget(self)
         vbox = QVBoxLayout(panel)
         vbox.setContentsMargins(0, 0, 0, 0)
@@ -189,6 +207,7 @@ class MatchedSwingBrowserWidget(QWidget):
         return panel
 
     def _create_filter_group(self) -> QGroupBox:
+        """Build the engine and search filters."""
         group = QGroupBox("Filter Runs", self)
         grid = QtWidgets.QGridLayout(group)
         grid.setSpacing(4)
@@ -226,6 +245,7 @@ class MatchedSwingBrowserWidget(QWidget):
         return group
 
     def _create_right_panel(self) -> QWidget:
+        """Build the detail pane."""
         scroll = QScrollArea(self)
         scroll.setWidgetResizable(True)
         container = QWidget()
@@ -251,6 +271,7 @@ class MatchedSwingBrowserWidget(QWidget):
         return scroll
 
     def _create_header_card(self) -> QWidget:
+        """Build the selected-run header."""
         card = QGroupBox("Run Summary", self)
         vbox = QVBoxLayout(card)
         vbox.setSpacing(4)
@@ -279,6 +300,7 @@ class MatchedSwingBrowserWidget(QWidget):
         return card
 
     def _create_metrics_card(self) -> QGroupBox:
+        """Build the RMSE metrics card."""
         card = QGroupBox("Shared Standardized Metrics", self)
         grid = QtWidgets.QGridLayout(card)
         grid.setSpacing(4)
@@ -305,6 +327,7 @@ class MatchedSwingBrowserWidget(QWidget):
         return card
 
     def _create_output_policy_card(self) -> QGroupBox:
+        """Build the output-policy card."""
         card = QGroupBox("Golf Output Status (policy)", self)
         grid = QtWidgets.QGridLayout(card)
         grid.setSpacing(4)
@@ -326,6 +349,7 @@ class MatchedSwingBrowserWidget(QWidget):
                 label.setToolTip(row.tooltip)
 
     def _create_gates_card(self) -> QGroupBox:
+        """Build the acceptance-gates card."""
         card = QGroupBox("Physical Gates & Verdicts", self)
         vbox = QVBoxLayout(card)
         vbox.setSpacing(4)
@@ -343,6 +367,7 @@ class MatchedSwingBrowserWidget(QWidget):
         return card
 
     def _create_playback_card(self) -> QGroupBox:
+        """Build the GIF playback card."""
         card = QGroupBox("Visual Playback", self)
         vbox = QVBoxLayout(card)
         vbox.setSpacing(6)
@@ -371,6 +396,7 @@ class MatchedSwingBrowserWidget(QWidget):
         return card
 
     def _create_actions_card(self) -> QGroupBox:
+        """Build the viewer and export actions."""
         card = QGroupBox("Actions & Viewers", self)
         grid = QtWidgets.QGridLayout(card)
         grid.setSpacing(6)
@@ -504,6 +530,7 @@ class MatchedSwingBrowserWidget(QWidget):
             self._clear_details()
 
     def _on_selection_changed(self) -> None:
+        """Refresh the detail panes for the selected row."""
         selected_indexes = self._table.selectedIndexes()
         if not selected_indexes:
             self._clear_details()
@@ -579,9 +606,18 @@ class MatchedSwingBrowserWidget(QWidget):
         gif_path = self._model.resolve_artifact_path(row, "gif")
 
         if gif_path and gif_path.is_file():
-            self._movie = QtGui.QMovie(str(gif_path))
-            self._gif_lbl.setMovie(self._movie)
-            self._movie.start()
+            self._movie_loop_token += 1
+            token = self._movie_loop_token
+            movie = QtGui.QMovie(str(gif_path))
+            movie.setCacheMode(QtGui.QMovie.CacheMode.CacheAll)
+            self._movie = movie
+            self._gif_lbl.setMovie(movie)
+            movie.finished.connect(
+                lambda token=token, movie=movie: self._resume_finished_movie(
+                    token, movie
+                )
+            )
+            movie.start()
             self._set_playback_controls_enabled(True)
         else:
             self._gif_lbl.setText("No visual playback artifact available")
@@ -611,6 +647,7 @@ class MatchedSwingBrowserWidget(QWidget):
         self._export_report_btn.setEnabled(has_receipt)
 
     def _update_badge_style(self, verdict: str) -> None:
+        """Restyle the acceptance badge."""
         if verdict in ("PASSED", "ACCEPTED"):
             self._badge_lbl.setStyleSheet(
                 "background-color: #1b5e20; color: #a5d6a7; font-weight: bold; "
@@ -628,30 +665,48 @@ class MatchedSwingBrowserWidget(QWidget):
             )
 
     def _set_playback_controls_enabled(self, enabled: bool) -> None:
+        """Enable or disable the playback controls."""
         self._play_btn.setEnabled(enabled)
         self._pause_btn.setEnabled(enabled)
         self._restart_btn.setEnabled(enabled)
 
+    def _resume_finished_movie(self, token: int, movie: QtGui.QMovie) -> None:
+        """Keep playback Running after a finite or single-frame GIF ends."""
+        if token != self._movie_loop_token or self._movie is not movie:
+            return
+        if movie.state() == QtGui.QMovie.MovieState.Paused:
+            return
+        movie.start()
+
     def _on_play_gif(self) -> None:
-        if self._movie:
-            self._movie.setPaused(False)
+        """Start or resume GIF playback."""
+        if self._movie is None:
+            return
+        if self._movie.state() == QtGui.QMovie.MovieState.NotRunning:
+            self._movie.start()
+        self._movie.setPaused(False)
 
     def _on_pause_gif(self) -> None:
+        """Pause GIF playback."""
         if self._movie:
             self._movie.setPaused(True)
 
     def _on_restart_gif(self) -> None:
+        """Restart the GIF from the first frame."""
         if self._movie:
             self._movie.stop()
             self._movie.start()
 
     def _stop_movie(self) -> None:
+        """Stop playback and drop the movie."""
+        self._movie_loop_token += 1
         if self._movie:
             self._movie.stop()
             self._gif_lbl.clear()
             self._movie = None
 
     def _clear_details(self) -> None:
+        """Clear the detail panes."""
         self._selected_row = None
         self._receipt_path_lbl.setText("No run selected")
         self._badge_lbl.setText("—")
@@ -677,6 +732,7 @@ class MatchedSwingBrowserWidget(QWidget):
         self._view_json_btn.setEnabled(False)
 
     def _on_reset_filters(self) -> None:
+        """Reset the filters and show every row."""
         self._engine_combo.setCurrentIndex(0)
         self._capture_combo.setCurrentIndex(0)
         self._lane_combo.setCurrentIndex(0)
@@ -685,6 +741,7 @@ class MatchedSwingBrowserWidget(QWidget):
         self._apply_filters()
 
     def _get_selected_npz_path(self) -> Path | None:
+        """Return the selected NPZ path."""
         if not self._selected_row:
             return None
         npz_path = self._model.resolve_artifact_path(self._selected_row, "npz")
@@ -696,6 +753,7 @@ class MatchedSwingBrowserWidget(QWidget):
         return npz_path
 
     def _on_open_tour_matching_viewer(self) -> None:
+        """Open the selected run in the tour-matching viewer."""
         row = self._selected_row
         npz_path = self._get_selected_npz_path()
         if not npz_path or row is None:
@@ -728,6 +786,7 @@ class MatchedSwingBrowserWidget(QWidget):
             )
 
     def _on_open_native_viewer(self) -> None:
+        """Open the selected run in the native viewer."""
         npz_path = self._get_selected_npz_path()
         if not npz_path:
             return
@@ -762,6 +821,7 @@ class MatchedSwingBrowserWidget(QWidget):
             )
 
     def _on_open_parity_report(self) -> None:
+        """Open the parity report for the selected run."""
         if not self._selected_row:
             return
         parity_path = self._model.resolve_artifact_path(self._selected_row, "parity")
@@ -775,6 +835,7 @@ class MatchedSwingBrowserWidget(QWidget):
         self._show_text_dialog("Parity Report (vs MuJoCo)", text)
 
     def _on_view_receipt_json(self) -> None:
+        """Show the selected receipt JSON."""
         if not self._selected_row:
             return
         receipt_path = self._model.resolve_artifact_path(self._selected_row, "receipt")
@@ -784,6 +845,7 @@ class MatchedSwingBrowserWidget(QWidget):
         self._show_text_dialog(f"Receipt JSON: {receipt_path.name}", text)
 
     def _on_export_video(self) -> None:
+        """Export the selected playback video."""
         if not self._selected_row:
             return
         npz_path = self._model.resolve_artifact_path(self._selected_row, "npz")
@@ -819,6 +881,7 @@ class MatchedSwingBrowserWidget(QWidget):
             )
 
     def _on_export_report(self) -> None:
+        """Export the selected swing report."""
         if not self._selected_row:
             return
         receipt_path = self._model.resolve_artifact_path(self._selected_row, "receipt")
@@ -853,6 +916,7 @@ class MatchedSwingBrowserWidget(QWidget):
             )
 
     def _show_text_dialog(self, title: str, content: str) -> None:
+        """Show a modal text dialog."""
         dialog = QDialog(self)
         dialog.setWindowTitle(title)
         dialog.resize(680, 500)
@@ -880,6 +944,7 @@ class MatchedSwingBrowserWindow(QMainWindow):
         *,
         model: MatchedSwingBrowserModel | None = None,
     ) -> None:
+        """Host the browser widget."""
         super().__init__(parent)
         self.setWindowTitle("Matched Swing Results Browser")
         self.resize(1150, 750)
@@ -887,6 +952,7 @@ class MatchedSwingBrowserWindow(QMainWindow):
         self.setCentralWidget(self.widget)
 
     def closeEvent(self, event: QtGui.QCloseEvent | None) -> None:  # noqa: N802
+        """Stop playback when the window closes."""
         self.widget.cleanup()
         if event is not None:
             event.accept()
