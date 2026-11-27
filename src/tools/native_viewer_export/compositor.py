@@ -40,6 +40,7 @@ class HudLayout:
     panel_gap_px: int
 
     def __post_init__(self) -> None:
+        """Check field invariants after initialization."""
         values = [self.stroke_px, self.line_gap_px, self.edge_margin_px]
         values += [*self.label_origin_px, self.panel_gap_px]
         if not all(isinstance(v, int) and v >= 0 for v in values):
@@ -63,6 +64,7 @@ HUD_SEPARATOR = " | "
 
 
 def _font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    """Return the font used by the text panel."""
     font = _FONTS.get(size)
     if font is None:
         font = _FONTS.setdefault(size, ImageFont.load_default(size=size))
@@ -70,6 +72,7 @@ def _font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
 
 
 def _check_image(img: object) -> None:
+    """Check that an image has the expected shape."""
     if not isinstance(img, np.ndarray) or img.dtype != np.uint8:
         raise ValueError("image must be a uint8 numpy array")
     if img.ndim != 3 or img.shape[2] != 3:
@@ -87,10 +90,12 @@ class GridGeometry:
 
     @property
     def height(self) -> int:
+        """Return the height."""
         return self.rows * self.tile_h
 
     @property
     def width(self) -> int:
+        """Return the width."""
         return self.cols * self.tile_w
 
     def origin(self, index: int) -> tuple[int, int]:
@@ -180,6 +185,7 @@ def hud_line_boxes(
 
 
 def _fits(text: str, width_px: int, size: int) -> bool:
+    """Return whether text fits in the given pixel width."""
     margin = HUD_LAYOUT.edge_margin_px
     return text_box(text, (margin, 0), size)[2] <= width_px - margin
 
@@ -305,6 +311,7 @@ class HudInfo:
     extra_lines: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
+        """Check field invariants after initialization."""
         if not math.isfinite(self.time_s):
             raise ValueError("time_s must be finite")
         if self.speed is not None and not (
@@ -408,10 +415,12 @@ Cells = str | Sequence[str]
 
 
 def _cells(value: Cells) -> tuple[str, ...]:
+    """Return the text cells of a table row."""
     return (value,) if isinstance(value, str) else tuple(value)
 
 
 def _column_widths(font: Any, lines: Sequence[tuple[str, Cells, bool]]) -> list[float]:
+    """Return the pixel width of each table column."""
     rows = [_cells(v) for _, v, _ in lines]
     return [
         max(font.getlength(r[j]) for r in rows if len(r) > j)
@@ -512,6 +521,7 @@ def grid_text_panel_box(
 def _card_metrics(
     shape: tuple[int, ...], card: Any, position: str, grid: GridLayout | None = None
 ) -> tuple[tuple[int, int, int, int], int, list[tuple[str, str, bool]]]:
+    """Return the metrics drawn on a summary card."""
     lines = _card_lines(card)
     if grid is not None:
         return (*grid_text_panel_box(shape, _CARD_TITLE, lines, grid), lines)
@@ -582,8 +592,11 @@ def draw_text_panel(
     for i, (label, value, unavailable) in enumerate(lines, start=1):
         y = pad + i * line_h
         colour = _CARD_GREY if unavailable else _WHITE
-        colour = next(iter(label_colours[i - 1 : i]), None) or colour
-        swatch = next(iter(swatches[i - 1 : i]), None)
+        colour_window = label_colours[i - 1 : i]
+        if colour_window and colour_window[0] is not None:
+            colour = colour_window[0]
+        swatch_window = swatches[i - 1 : i]
+        swatch = swatch_window[0] if swatch_window else None
         if swatch is not None:
             draw.rectangle((pad, y + 3, pad + size - 2, y + size), fill=tuple(swatch))
         draw.text((pad, y), label, font=font, fill=colour)
@@ -606,6 +619,7 @@ KeyEntry = tuple[str, tuple[int, int, int]]
 
 
 def _key_lines(entries: Sequence[KeyEntry]) -> list[tuple[str, Cells, bool]]:
+    """Return the key lines drawn under a card."""
     for _, rgb in entries:
         if len(rgb) != 3 or not all(isinstance(c, int) and 0 <= c <= 255 for c in rgb):
             raise ValueError(f"key colour must be three 0-255 integers, got {rgb!r}")

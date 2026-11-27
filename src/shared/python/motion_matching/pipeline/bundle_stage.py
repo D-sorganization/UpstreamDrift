@@ -153,17 +153,22 @@ class BodyKinematics:
     """Body frames and twists of a plant, through probe-point markers only."""
 
     def __init__(self, plant: Any, bodies: Sequence[str]) -> None:
+        """Initialize the instance."""
         self.bodies = tuple(bodies)
-        probes = {
-            f"{body}#{i}": (body, tuple(point))
+        probe_rows: list[tuple[float, float, float]] = [
+            (float(x), float(y), float(z)) for x, y, z in np.asarray(_PROBES).tolist()
+        ]
+        probes: dict[str, tuple[str, tuple[float, float, float]]] = {
+            f"{body}#{i}": (body, point)
             for body in self.bodies
-            for i, point in enumerate(_PROBES)
+            for i, point in enumerate(probe_rows)
         }
         self.kin = plant.create_ik(probes)
         self._pose: Any = None
         self._linear: Any = None
 
     def _linearise(self, pose: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """Linearise the bundle stage about the current pose."""
         if self._pose is None or not np.array_equal(pose, self._pose):
             linear = self.kin.marker_linearization(pose)
             shape = (len(self.bodies), 4, 3)
@@ -222,6 +227,7 @@ def _constraint(
     )
 
     def slide(k: int, pose: np.ndarray) -> np.ndarray:
+        """Slide the contact sample."""
         here = bodies.kin.sphere_ground_points(pose, lane.ground)
         rows = np.zeros((len(home), 3))
         for i, name in enumerate(sorted(home)):
@@ -231,6 +237,7 @@ def _constraint(
         return rows.ravel()
 
     def residual(k: int, pose: np.ndarray) -> np.ndarray:
+        """Return the residual."""
         options = ConstraintOptions(
             ground=lane.ground,
             position_weight=1.0,

@@ -1,0 +1,48 @@
+{
+  "tag": "before",
+  "legacy_camera": true,
+  "stills": {
+    "before_lead_palm.png": {
+      "half_x_m": 0.09934022743169241,
+      "half_y_m": 0.09762500000000007,
+      "half_z_m": 0.10095381629029578,
+      "equal_aspect": false
+    },
+    "before_lead_back.png": {
+      "half_x_m": 0.09934022743169241,
+      "half_y_m": 0.09762500000000007,
+      "half_z_m": 0.10095381629029578,
+      "equal_aspect": false
+    },
+    "before_lead_side.png": {
+      "half_x_m": 0.09934022743169241,
+      "half_y_m": 0.09762500000000007,
+      "half_z_m": 0.10095381629029578,
+      "equal_aspect": false
+    },
+    "before_trail_palm.png": {
+      "half_x_m": 0.10283077106812943,
+      "half_y_m": 0.09912500000000002,
+      "half_z_m": 0.09912120927695758,
+      "equal_aspect": false
+    },
+    "before_trail_back.png": {
+      "half_x_m": 0.10283077106812943,
+      "half_y_m": 0.09912500000000002,
+      "half_z_m": 0.09912120927695758,
+      "equal_aspect": false
+    },
+    "before_trail_side.png": {
+      "half_x_m": 0.10283077106812943,
+      "half_y_m": 0.09912500000000002,
+      "half_z_m": 0.09912120927695758,
+      "equal_aspect": false
+    },
+    "before_grip_region.png": {
+      "half_x_m": 0.10295681628461748,
+      "half_y_m": 0.18500000000000005,
+      "half_z_m": 0.10105721636427327,
+      "equal_aspect": false
+    }
+  }
+}

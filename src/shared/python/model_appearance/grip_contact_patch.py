@@ -87,6 +87,7 @@ class ThumbPatch:
 
 
 def _vec3(x: Sequence[float] | Array) -> Vec3:
+    """Return a length-3 float vector."""
     return (float(x[0]), float(x[1]), float(x[2]))
 
 
@@ -97,6 +98,7 @@ def _check(
     handedness: object,
     params: object,
 ) -> Array:
+    """Check contact-patch preconditions and return the lead frame."""
     validate_handedness(handedness)
     frame = np.asarray(lead_frame, dtype=float)
     if frame.shape != (4, 4) or not np.isfinite(frame).all():
@@ -146,7 +148,8 @@ def _patch_in_shared_frame(
     axis_yz = offset * np.array([math.cos(azimuth), math.sin(azimuth)])
     palm_app = _palm_reference(grip_radius_m, pose, params)
     palm = appearance_to_shared_grip_frame(palm_app)
-    x_lo, x_hi = k * params.thumb_stations_m[0], k * params.thumb_stations_m[2]
+    stations = params.thumb_patch_axis_stations_m
+    x_lo, x_hi = k * stations[0], k * stations[2]
     station = float(np.clip(palm[0], x_lo, x_hi))
     axis_point = np.array([station, axis_yz[0], axis_yz[1]])
     toward = palm - axis_point

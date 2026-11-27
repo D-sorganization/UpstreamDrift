@@ -40,6 +40,7 @@ _BARY = _BARY[_BARY[:, 2] >= -1e-12]
 
 
 def _surface_points(mesh: Mesh) -> np.ndarray:
+    """Surface points."""
     tri = mesh.vertices[mesh.faces]  # (M, 3, 3)
     samples = np.einsum("kj,mjd->mkd", _BARY, tri).reshape(-1, 3)
     return np.vstack([mesh.vertices, samples])
@@ -52,6 +53,7 @@ def _clearance(mesh: Mesh, radius: float) -> float:
 
 
 def _is_watertight(mesh: Mesh) -> bool:
+    """Is watertight."""
     directed = Counter()
     for a, b, c in mesh.faces.tolist():
         directed.update([(a, b), (b, c), (c, a)])
@@ -61,6 +63,7 @@ def _is_watertight(mesh: Mesh) -> bool:
 
 
 def _build(hand: Hand, radius: float, style: GripStyle = GripStyle.OVERLAP):
+    """Build."""
     pose = GripPose(style=style)
     return build_grip_hand_mesh(hand, grip_radius_m=radius, pose=pose)
 
@@ -68,6 +71,7 @@ def _build(hand: Hand, radius: float, style: GripStyle = GripStyle.OVERLAP):
 @pytest.mark.parametrize("hand", list(Hand))
 @pytest.mark.parametrize("style", list(GripStyle))
 def test_mesh_is_watertight_with_outward_winding(hand: Hand, style: GripStyle):
+    """Verify mesh is watertight with outward winding."""
     result = _build(hand, 0.0140, style)
     assert isinstance(result, GripHandMesh)
     assert _is_watertight(result.mesh)
@@ -80,6 +84,7 @@ def test_mesh_is_watertight_with_outward_winding(hand: Hand, style: GripStyle):
 @pytest.mark.parametrize("hand", list(Hand))
 @pytest.mark.parametrize("radius", RADII_M)
 def test_no_surface_point_is_inside_the_grip(hand: Hand, radius: float):
+    """Verify no surface point is inside the grip."""
     result = _build(hand, radius)
     radial = np.hypot(result.mesh.vertices[:, 0], result.mesh.vertices[:, 1])
     assert radial.min() >= radius  # no vertex inside the grip cylinder
@@ -89,6 +94,7 @@ def test_no_surface_point_is_inside_the_grip(hand: Hand, radius: float):
 @pytest.mark.parametrize("hand", list(Hand))
 @pytest.mark.parametrize("radius", RADII_M)
 def test_every_finger_on_the_grip_rests_within_3_mm(hand: Hand, radius: float):
+    """Verify every finger on the grip rests within 3 mm."""
     result = _build(hand, radius, GripStyle.TEN_FINGER)
     on_grip = [p for p in result.components if p.on_grip]
     fingers = {p.finger for p in on_grip}
@@ -103,6 +109,7 @@ def test_every_finger_on_the_grip_rests_within_3_mm(hand: Hand, radius: float):
 
 
 def _stack(parts):
+    """Stack."""
     verts, faces, offset = [], [], 0
     for p in parts:
         verts.append(p.mesh.vertices)
@@ -112,6 +119,7 @@ def _stack(parts):
 
 
 def test_every_phalanx_is_present():
+    """Verify every phalanx is present."""
     result = _build(Hand.LEAD, 0.0140)
     names = {p.name for p in result.components}
     for finger in FINGER_NAMES:
@@ -122,6 +130,7 @@ def test_every_phalanx_is_present():
 
 def test_linked_fingers_leave_the_grip_per_style():
     # Overlap: trail little finger leaves the grip
+    """Verify linked fingers leave the grip per style."""
     trail_overlap = _build(Hand.TRAIL, 0.0140, GripStyle.OVERLAP)
     little_ov = [p for p in trail_overlap.components if p.finger == "little"]
     assert little_ov and not any(p.on_grip for p in little_ov)
@@ -137,19 +146,23 @@ def test_linked_fingers_leave_the_grip_per_style():
 
 
 def _azimuth_deg(points: np.ndarray) -> float:
+    """Azimuth deg."""
     c = points.mean(axis=0)
     return float(np.degrees(np.arctan2(c[1], c[0])))
 
 
 def _part(result: GripHandMesh, name: str):
+    """Part."""
     return next(p for p in result.components if p.name == name)
 
 
 def _wrap(angle: float) -> float:
+    """Wrap."""
     return (angle + 180.0) % 360.0 - 180.0
 
 
 def test_lead_and_trail_fingers_are_mirrored_about_their_v_azimuth():
+    """Verify lead and trail fingers are mirrored about their v azimuth."""
     pose = DEFAULT_GRIP_POSE
     lead = build_grip_hand_mesh(Hand.LEAD, grip_radius_m=0.014, pose=pose)
     trail = build_grip_hand_mesh(Hand.TRAIL, grip_radius_m=0.014, pose=pose)
@@ -169,15 +182,23 @@ def test_lead_and_trail_fingers_are_mirrored_about_their_v_azimuth():
 
 
 def test_thumb_sits_at_the_grip_pose_thumb_azimuth():
+    """Verify thumb sits at the grip pose thumb azimuth."""
     pose = DEFAULT_GRIP_POSE
     for hand in Hand:
         result = build_grip_hand_mesh(hand, grip_radius_m=0.014, pose=pose)
         expected = pose.placement(hand).thumb_offset_deg
-        thumb = _part(result, "thumb_distal").mesh.vertices
-        assert _azimuth_deg(thumb) == pytest.approx(expected, abs=1e-6)
+        thumb = _part(result, "thumb_proximal").mesh.vertices
+        assert _azimuth_deg(thumb) == pytest.approx(expected, abs=12.0)
+        distal = _part(result, "thumb_distal").mesh.vertices
+        rho = np.hypot(distal[:, 0], distal[:, 1])
+        pad = distal[rho.argmax()]
+        assert float(np.degrees(np.arctan2(pad[1], pad[0]))) == pytest.approx(
+            expected, abs=5.0
+        )
 
 
 def test_hands_are_ordered_along_the_shaft_like_grip_pose():
+    """Verify hands are ordered along the shaft like grip pose."""
     pose = DEFAULT_GRIP_POSE
     lead = build_grip_hand_mesh(Hand.LEAD, grip_radius_m=0.014, pose=pose)
     trail = build_grip_hand_mesh(Hand.TRAIL, grip_radius_m=0.014, pose=pose)
@@ -185,6 +206,7 @@ def test_hands_are_ordered_along_the_shaft_like_grip_pose():
     assert trail.distance_below_butt_m == pose.distance_below_butt_m(Hand.TRAIL)
 
     def finger_depth(result: GripHandMesh, finger: str) -> float:
+        """Finger depth."""
         z = _part(result, f"{finger}_proximal").mesh.vertices[:, 2].mean()
         return result.distance_below_butt_m + float(z)
 
@@ -201,6 +223,7 @@ def test_hands_are_ordered_along_the_shaft_like_grip_pose():
 
 
 def test_overlap_little_finger_lies_over_the_lead_index():
+    """Verify overlap little finger lies over the lead index."""
     from src.shared.python.grip_contact.contact_topology import contact_topology
     from src.shared.python.motion_matching.grip_contract import GripSpec
 
@@ -216,16 +239,19 @@ def test_overlap_little_finger_lies_over_the_lead_index():
 
 @pytest.mark.parametrize("radius", [0.0, -0.01, float("nan"), float("inf"), 0.05])
 def test_invalid_grip_radius_is_rejected(radius: float):
+    """Verify invalid grip radius is rejected."""
     with pytest.raises(ValueError, match="grip_radius_m"):
         build_grip_hand_mesh(Hand.LEAD, grip_radius_m=radius)
 
 
 def test_non_numeric_grip_radius_is_a_type_error():
+    """Verify non numeric grip radius is a type error."""
     with pytest.raises(TypeError, match="grip_radius_m"):
         build_grip_hand_mesh(Hand.LEAD, grip_radius_m="0.014")  # type: ignore[arg-type]
 
 
 def test_invalid_hand_pose_and_style_are_rejected():
+    """Verify invalid hand pose and style are rejected."""
     with pytest.raises(TypeError, match="hand"):
         build_grip_hand_mesh("lead", grip_radius_m=0.014)  # type: ignore[arg-type]
     with pytest.raises(TypeError, match="pose"):
@@ -237,6 +263,7 @@ def test_invalid_hand_pose_and_style_are_rejected():
 
 
 def test_style_override_takes_precedence_over_the_pose():
+    """Verify style override takes precedence over the pose."""
     result = build_grip_hand_mesh(
         Hand.TRAIL, grip_radius_m=0.014, style=GripStyle.TEN_FINGER
     )

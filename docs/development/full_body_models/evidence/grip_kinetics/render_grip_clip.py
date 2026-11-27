@@ -45,6 +45,9 @@ from src.shared.python.force_overlay.renderers.matplotlib_glyphs import (  # noq
 from src.shared.python.grip_contact.contact_run import ContactRun  # noqa: E402
 from src.shared.python.grip_contact.interface import GripInterface  # noqa: E402
 from src.shared.python.grip_contact.parity import GripKineticsSeries  # noqa: E402
+from src.shared.python.model_appearance.grip_preview_matplotlib import (  # noqa: E402
+    apply_equal_axis_limits,
+)
 
 MODELS = ROOT / "docs/development/full_body_models"
 OUT_DIR = Path.home() / "Videos/Parity Audit/golfer_realism/grip_kinetics"
@@ -55,6 +58,7 @@ COLOURS = {"L": "#1f77b4", "R": "#d62728"}
 
 
 def load(club: str, variant: str) -> tuple[GripKineticsSeries, str]:
+    """Load the recorded clip."""
     ev = HERE
     if variant == "contact":
         return ContactRun.load_npz(ev / f"contact/mujoco_{club}_series.npz").series, (
@@ -72,6 +76,7 @@ def load(club: str, variant: str) -> tuple[GripKineticsSeries, str]:
 
 
 def main() -> int:
+    """Run the command-line entry point."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--club", choices=("driver", "iron7"), required=True)
     ap.add_argument(
@@ -141,10 +146,14 @@ def main() -> int:
             ),
         )
         draw_glyphs_3d(ax, build_glyphs(frame, style))
-        half = 0.3
-        for setter, c in zip((ax.set_xlim, ax.set_ylim, ax.set_zlim), mid, strict=True):
-            setter(c - half, c + half)
-        ax.set_box_aspect((1, 1, 1))
+        crop_pts = np.vstack(
+            [
+                np.vstack([butt, head, mid]),
+                series.grip_point_m["L"][i],
+                series.grip_point_m["R"][i],
+            ]
+        )
+        apply_equal_axis_limits(ax, crop_pts, centre=mid)
         ax.view_init(elev=15, azim=-70)
         fl = float(np.linalg.norm(series.force_on_club_n["L"][i]))
         fr = float(np.linalg.norm(series.force_on_club_n["R"][i]))

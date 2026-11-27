@@ -27,8 +27,8 @@ midpoint, and each later tangent point is set so the joints coincide, which
 puts most of the flexion at the proximal interphalangeal joint. The lead
 fingers curl toward decreasing azimuth and the trail fingers toward
 increasing azimuth: the two hands are mirror images about their V azimuths.
-The thumb lies along the shaft (toward the head) at the :mod:`grip_pose`
-thumb azimuth.
+The thumb wraps on the opposite curl side from the fingers at the :mod:`grip_pose`
+thumb azimuth (tangential capsules, not a shaft-aligned rod through the index).
 
 Shells (#13997)
 ---------------
@@ -96,6 +96,9 @@ _SOLVER_MAX_ITERATIONS: int = 5
 _SOLVER_TOLERANCE_M: float = 1e-6
 #: Symmetric interior barrel ring stations in (0, 1) ensuring continuous azimuthal vertex coverage.
 _PHALANX_BARREL_STATIONS: tuple[float, ...] = (0.2, 0.4, 0.6, 0.8)
+#: End the rounded palm/dorsum before the MCP capsule root. Their rounded
+#: end caps otherwise bury the proximal capsules several millimetres deep.
+_KNUCKLE_SHELL_INSET_RAD: float = math.radians(10.0)
 
 
 @dataclass(frozen=True)
@@ -134,11 +137,18 @@ class HandMeshParams:
     dorsum_thickness_m: float = 0.014
     thumb_radius_m: float = 0.0095
     #: Thumb segment ends along the grip axis, relative to the hand centre.
-    thumb_stations_m: tuple[float, float, float] = (-0.012, 0.020, 0.046)
+    thumb_stations_m: tuple[float, float, float] = (-0.026, -0.004, 0.016)
+    #: Legacy shaft stations for the trail-palm-on-lead-thumb patch (HRG-H1, unchanged).
+    thumb_patch_axis_stations_m: tuple[float, float, float] = (-0.012, 0.020, 0.046)
+    #: Axial inset of the palm strip relative to the finger stack (metacarpals stay clear).
+    palm_axial_inset_fraction: float = 0.6
+    #: Extra tangent-circle radius for proximal phalanges only (clears palm shell).
+    proximal_radial_offset_m: float = 0.004
     scale: float = 1.0
     sides: int = 16
 
     def __post_init__(self) -> None:
+        """Check field invariants after initialization."""
         for name in ("finger_gap_m", "pad_clearance_m", "palm_clearance_m"):
             value = getattr(self, name)
             if not (math.isfinite(value) and 0.0 <= value <= MAX_PAD_CLEARANCE_M):
@@ -147,10 +157,25 @@ class HandMeshParams:
             raise ValueError(f"scale must be in [0.5, 1.5], got {self.scale!r}")
         if self.sides < 8:
             raise ValueError(f"sides must be >= 8, got {self.sides}")
+        if not (0.3 <= self.palm_axial_inset_fraction <= 1.0):
+            raise ValueError(
+                "palm_axial_inset_fraction must be in [0.3, 1.0], "
+                f"got {self.palm_axial_inset_fraction}"
+            )
+        if not (0.0 <= self.proximal_radial_offset_m <= 0.004):
+            raise ValueError(
+                "proximal_radial_offset_m must be in [0, 0.004] m, "
+                f"got {self.proximal_radial_offset_m}"
+            )
         if set(self.finger_radius_m) != set(FINGER_NAMES) or set(
             self.phalanx_lengths_m
         ) != set(FINGER_NAMES):
             raise ValueError(f"finger tables must cover exactly {FINGER_NAMES}")
+        z0, z1, z2 = self.thumb_patch_axis_stations_m
+        if not (z0 < z1 < z2):
+            raise ValueError(
+                f"thumb_patch_axis_stations_m must increase, got {self.thumb_patch_axis_stations_m}"
+            )
         for finger, lengths in self.phalanx_lengths_m.items():
             proximal, middle, distal = lengths
             # Joint coincidence needs the middle phalanx to reach past the
@@ -236,10 +261,12 @@ class GripHandMesh:
 
 
 def _radial(theta: float) -> Array:
+    """Return the radial offset of a grip sample."""
     return np.array([math.cos(theta), math.sin(theta), 0.0])
 
 
 def _tangential(theta: float) -> Array:
+    """Return the tangential offset of a grip sample."""
     return np.array([-math.sin(theta), math.cos(theta), 0.0])
 
 
@@ -304,7 +331,9 @@ def _rounded_block(
     sec_r = np.sign(c) * np.abs(c) ** 0.5  # superellipse, exponent 4
     sec_z = np.sign(s) * np.abs(s) ** 0.5
     lo, hi = min(theta), max(theta)
-    n_mid = max(8, math.ceil(math.degrees(hi - lo) / 4.0))
+    # Mirrored sweeps can straddle an exact integer by floating-point noise.
+    # Resolve the same angular sampling count for either winding direction.
+    n_mid = max(8, math.ceil(round(math.degrees(hi - lo) / 4.0, 12)))
     end_scale = (0.55, 0.85, 0.97)
     pad = 0.5 * h_r / r_c  # angular reach of the rounded ends
     sweep = [(lo - pad * (1.0 - f), f) for f in end_scale]
@@ -327,25 +356,29 @@ def _finger(
     lengths: tuple[float, float, float],
     radius: float,
     tangent_radius: float,
-    mcp_azimuth: float,
-    z: float,
+    root: tuple[float, float],
     curl: int,
     sides: int,
+    *,
+    proximal_only_offset_m: float = 0.0,
 ) -> list[tuple[str, Mesh]]:
     """Three phalanx capsules whose axes are tangent to ``tangent_radius``.
 
     Postcondition: each phalanx touches the circle at one tangent point, so
     its nearest approach to the grip axis is ``tangent_radius - radius``.
+    ``root`` is the MCP azimuth (rad) and the finger's axial height (m).
     """
+    mcp_azimuth, z = root
     d = tangent_radius
     before = lengths[0] / 2.0  # proximal tangent point at its midpoint
     theta = mcp_azimuth + curl * math.atan2(before, d)
     lift = np.array([0.0, 0.0, z])
     parts = []
     for bone, length in zip(PHALANX_NAMES, lengths, strict=True):
+        d_eff = d + proximal_only_offset_m if bone == "proximal" else d
         after = length - before
         e, t = _radial(theta), curl * _tangential(theta)
-        start, end = d * e - before * t + lift, d * e + after * t + lift
+        start, end = d_eff * e - before * t + lift, d_eff * e + after * t + lift
         mesh = capsule_mesh(
             start,
             end,
@@ -355,7 +388,7 @@ def _finger(
             sides=sides,
         )
         parts.append((f"{name}_{bone}", mesh))
-        theta += curl * 2.0 * math.atan2(after, d)
+        theta += curl * 2.0 * math.atan2(after, d_eff)
         before = after
     return parts
 
@@ -374,6 +407,7 @@ def _stack_z(params: HandMeshParams) -> dict[str, float]:
 def _check_inputs(
     hand: object, grip_radius_m: object, pose: object, style: object
 ) -> None:
+    """Check grip-mesh inputs before building."""
     if not isinstance(hand, Hand):
         raise TypeError(f"hand must be a Hand, got {hand!r}")
     if isinstance(grip_radius_m, bool) or not isinstance(grip_radius_m, (int, float)):
@@ -422,13 +456,15 @@ def build_grip_hand_mesh(
     k = params.scale
 
     parts = _finger_components(hand, pose, radius, curl, mcp, stack, params)
-    z_lo = min(stack.values()) - k * params.finger_radius_m["little"] * 0.6
-    z_hi = max(stack.values()) + k * params.finger_radius_m["index"] * 0.6
-    parts += _palm_strip("", radius, (v, mcp), (z_lo, z_hi), params, dorsum=True)
+    inset = params.palm_axial_inset_fraction
+    z_lo = min(stack.values()) - k * params.finger_radius_m["little"] * inset
+    z_hi = max(stack.values()) + k * params.finger_radius_m["index"] * inset
+    shell_end = mcp - curl * _KNUCKLE_SHELL_INSET_RAD
+    parts += _palm_strip("", radius, (v, shell_end), (z_lo, z_hi), params, dorsum=True)
     roll_deg = placement.v_azimuth_deg - NEUTRAL_V_AZIMUTH_DEG
     thumb_azimuth_deg = placement.thumb_offset_deg + roll_deg
     thumb_azimuth = math.radians(thumb_azimuth_deg)
-    parts += _thumb(radius, thumb_azimuth, params)
+    parts += _thumb(radius, thumb_azimuth, params, curl)
 
     on_grip_vertices = np.vstack([p.mesh.vertices for p in parts if p.on_grip])
     gap = float(np.min(np.hypot(on_grip_vertices[:, 0], on_grip_vertices[:, 1])))
@@ -488,6 +524,7 @@ def _finger_components(
                 radius,
                 curl,
                 params.sides,
+                params.proximal_radial_offset_m,
             )
         else:
             d = radius + clearance + r
@@ -495,8 +532,16 @@ def _finger_components(
             mcp_finger = mcp
             on_grip = True
 
+        prox_offset = params.proximal_radial_offset_m if on_grip else 0.0
         for name, mesh in _finger(
-            finger, lengths, r, d, mcp_finger, z, curl, params.sides
+            finger,
+            lengths,
+            r,
+            d,
+            (mcp_finger, z),
+            curl,
+            params.sides,
+            proximal_only_offset_m=prox_offset,
         ):
             parts.append(HandComponent(name, finger, mesh, on_grip))
     return parts
@@ -527,7 +572,7 @@ def _palm_strip(
     if not dorsum:
         return parts
     back = _rounded_block(
-        palm_inner + 0.75 * k * params.palm_thickness_m,
+        palm_inner + 0.82 * k * params.palm_thickness_m,
         k * params.dorsum_thickness_m,
         theta,
         z,
@@ -544,8 +589,13 @@ def _solve_topology_finger(
     grip_radius: float,
     curl: int,
     sides: int,
+    proximal_offset_m: float = 0.0,
 ) -> tuple[float, float, float, bool]:
-    """Solve (d, mcp_azimuth, z, on_grip) matching target_site.centre_m to <= 1 mm."""
+    """Solve (d, mcp_azimuth, z, on_grip) matching target_site.centre_m to <= 1 mm.
+
+    ``proximal_offset_m`` is applied to on-grip fingers exactly as the mesh
+    builder applies it, so the solved distal tip lands on the site.
+    """
     centre = target_site.centre_m
     target_z = centre[0] - distance_below_butt_m
     target_rho = float(np.hypot(centre[1], centre[2]))
@@ -553,6 +603,7 @@ def _solve_topology_finger(
 
     gap = site_grip_surface_gap_m(target_site, grip_radius)
     on_grip = abs(gap) <= 0.001
+    offset = proximal_offset_m if on_grip else 0.0
 
     d_min = (
         grip_radius + r + _SOLVER_ON_GRIP_RADIAL_MARGIN_M
@@ -563,7 +614,9 @@ def _solve_topology_finger(
     converged = False
     c_final: NDArray[np.float64] | None = None
     for _ in range(_SOLVER_MAX_ITERATIONS):
-        parts_tmp = _finger("tmp", lengths, r, d, 0.0, 0.0, curl, sides)
+        parts_tmp = _finger(
+            "tmp", lengths, r, d, (0.0, 0.0), curl, sides, proximal_only_offset_m=offset
+        )
         c = parts_tmp[_DISTAL_INDEX][1].vertices.mean(axis=0)
         err = float(np.hypot(c[0], c[1])) - target_rho
         if abs(err) < _SOLVER_TOLERANCE_M or (on_grip and d == d_min and err > 0):
@@ -574,7 +627,9 @@ def _solve_topology_finger(
 
     if not converged:
         # Check if the final updated d achieved convergence
-        parts_tmp = _finger("tmp", lengths, r, d, 0.0, 0.0, curl, sides)
+        parts_tmp = _finger(
+            "tmp", lengths, r, d, (0.0, 0.0), curl, sides, proximal_only_offset_m=offset
+        )
         c = parts_tmp[_DISTAL_INDEX][1].vertices.mean(axis=0)
         err = float(np.hypot(c[0], c[1])) - target_rho
         if abs(err) < _SOLVER_TOLERANCE_M or (on_grip and d == d_min and err > 0):
@@ -593,21 +648,45 @@ def _solve_topology_finger(
 
 
 def _thumb(
-    grip_radius: float, azimuth: float, params: HandMeshParams
+    grip_radius: float, azimuth: float, params: HandMeshParams, curl_sign: int
 ) -> list[HandComponent]:
-    """Two thumb capsules along the shaft (toward the head) at ``azimuth``."""
+    """Two thumb capsules tangential on the grip, wrapping opposite the fingers."""
     r = params.scale * params.thumb_radius_m
-    e = _radial(azimuth)
-    centre = (grip_radius + params.pad_clearance_m + r) * e
+    d = grip_radius + params.pad_clearance_m + r
+    thumb_curl = -curl_sign
     z0, z1, z2 = (params.scale * s for s in params.thumb_stations_m)
-    parts = []
-    for bone, (a, b) in (("proximal", (z0, z1)), ("distal", (z1, z2))):
-        mesh = capsule_mesh(
-            centre + np.array([0.0, 0.0, a]),
-            centre + np.array([0.0, 0.0, b]),
-            r,
-            inward=-e,
-            sides=params.sides,
-        )
-        parts.append(HandComponent(f"thumb_{bone}", "thumb", mesh, True))
+    prox_len = z1 - z0
+    dist_len = z2 - z1
+    if prox_len <= 0.0 or dist_len <= 0.0:
+        raise ValueError("thumb stations must increase along the grip axis")
+    parts: list[HandComponent] = []
+    theta = azimuth
+    lift = np.array([0.0, 0.0, 0.5 * (z0 + z1)])
+    e, t = _radial(theta), thumb_curl * _tangential(theta)
+    half = prox_len / 2.0
+    start = d * e - half * t + lift
+    end = d * e + half * t + lift
+    mesh = capsule_mesh(
+        start,
+        end,
+        r,
+        inward=-e,
+        stations=(0.5, *_PHALANX_BARREL_STATIONS),
+        sides=params.sides,
+    )
+    parts.append(HandComponent("thumb_proximal", "thumb", mesh, True))
+    # Distal thumb presses along the shaft toward the head at the thumb azimuth.
+    theta_distal = azimuth
+    e = _radial(theta_distal)
+    lift = np.array([0.0, 0.0, z1])
+    start = d * e + lift
+    end = d * e + lift + np.array([0.0, 0.0, dist_len])
+    mesh = capsule_mesh(
+        start,
+        end,
+        r,
+        inward=-e,
+        sides=params.sides,
+    )
+    parts.append(HandComponent("thumb_distal", "thumb", mesh, True))
     return parts

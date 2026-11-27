@@ -37,12 +37,14 @@ MIRROR_TOL = 1e-9
 
 
 def _club() -> ca.ClubAssembly:
+    """Club."""
     club = ca.assembly_from_spec(json.loads(SPEC.read_text(encoding="utf-8")))
     assert club is not None
     return club
 
 
 def _patch(handedness: str = "right", pose: GripPose = DEFAULT_GRIP_POSE):
+    """Patch."""
     club = _club()
     frame = grip_hand_frame(club, Hand.LEAD, pose)
     radius = grip_radius_at(club, pose.distance_below_butt_m(Hand.LEAD))
@@ -54,14 +56,16 @@ def _patch(handedness: str = "right", pose: GripPose = DEFAULT_GRIP_POSE):
 
 
 def _to_hand(frame: np.ndarray, point: np.ndarray) -> np.ndarray:
+    """To hand."""
     return frame[:3, :3].T @ (point - frame[:3, 3])
 
 
 def test_patch_lies_on_the_lead_thumb_surface() -> None:
+    """Verify patch lies on the lead thumb surface."""
     patch, frame, _ = _patch()
     p = _to_hand(frame, np.array(patch.point_club_m))
     params = DEFAULT_HAND_MESH_PARAMS
-    z0, _, z2 = params.thumb_stations_m
+    z0, _, z2 = params.thumb_patch_axis_stations_m
     centre = np.array(patch.thumb_axis_hand_m)
     z = np.clip(p[2], z0, z2)
     gap = (
@@ -71,6 +75,7 @@ def test_patch_lies_on_the_lead_thumb_surface() -> None:
 
 
 def test_patch_is_inside_the_trail_palm_block_by_the_margin() -> None:
+    """Verify patch is inside the trail palm block by the margin."""
     patch, frame, radius = _patch()
     pose = DEFAULT_GRIP_POSE
     trail = build_grip_hand_mesh(Hand.TRAIL, grip_radius_m=radius, pose=pose)
@@ -87,6 +92,7 @@ def test_patch_is_inside_the_trail_palm_block_by_the_margin() -> None:
 
 
 def test_normal_is_unit_and_points_from_the_thumb_to_the_palm() -> None:
+    """Verify normal is unit and points from the thumb to the palm."""
     patch, frame, _ = _patch()
     n = np.array(patch.normal_club)
     assert np.linalg.norm(n) == pytest.approx(1.0, abs=1e-12)
@@ -96,15 +102,18 @@ def test_normal_is_unit_and_points_from_the_thumb_to_the_palm() -> None:
 
 
 def test_left_handed_patch_is_the_reflection_of_the_right_handed_one() -> None:
+    """Verify left handed patch is the reflection of the right handed one."""
     right, frame, _ = _patch("right")
     left, _, _ = _patch("left")
     t_hat = frame[:3, 0]  # the plane of the shaft and the face normal has normal t
     origin = frame[:3, 3]
 
     def mirror_point(x: np.ndarray) -> np.ndarray:
+        """Mirror point."""
         return x - 2.0 * ((x - origin) @ t_hat) * t_hat
 
     def mirror_dir(x: np.ndarray) -> np.ndarray:
+        """Mirror dir."""
         return x - 2.0 * (x @ t_hat) * t_hat
 
     got = np.array(left.point_club_m)
@@ -121,6 +130,7 @@ def test_left_handed_patch_is_the_reflection_of_the_right_handed_one() -> None:
 
 
 def test_patch_follows_the_pose_not_a_constant() -> None:
+    """Verify patch follows the pose not a constant."""
     base, _, _ = _patch()
     wider = dataclasses.replace(DEFAULT_GRIP_POSE, hand_spacing_m=0.05)
     moved, _, _ = _patch(pose=wider)
@@ -131,6 +141,7 @@ def test_patch_follows_the_pose_not_a_constant() -> None:
 
 
 def test_patch_is_a_frozen_value() -> None:
+    """Verify patch is a frozen value."""
     patch, _, _ = _patch()
     assert isinstance(patch, ThumbPatch)
     with pytest.raises(dataclasses.FrozenInstanceError):
@@ -138,6 +149,7 @@ def test_patch_is_a_frozen_value() -> None:
 
 
 def test_preconditions_are_checked() -> None:
+    """Verify preconditions are checked."""
     _, frame, radius = _patch()
     with pytest.raises(ValueError, match="handedness"):
         thumb_palm_patch(frame, grip_radius_m=radius, handedness="ambi")

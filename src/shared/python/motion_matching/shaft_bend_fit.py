@@ -25,7 +25,7 @@ import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -53,6 +53,7 @@ class BendSettings:
     solver_tolerance: float
 
     def __post_init__(self) -> None:
+        """Check field invariants after initialization."""
         weights = (self.smoothness_weight_m_per_rad, self.ridge_weight_m_per_rad)
         if not (
             self.shapes_per_plane in range(1, MAX_SHAPES + 1)
@@ -79,6 +80,7 @@ class ChainGeometry:
     bend_stiffness: Array
 
     def __post_init__(self) -> None:
+        """Check field invariants after initialization."""
         points = self.joint_points_m
         if not (
             points.ndim == 2
@@ -97,6 +99,7 @@ class ChainGeometry:
 
     @property
     def n_joints(self) -> int:
+        """Return the joint count."""
         return len(self.joint_points_m)
 
 
@@ -164,7 +167,9 @@ def club_frame_targets(
         raise ValueError("need (k, m, 3) markers and at least 3 reference markers")
     ref = np.broadcast_to(reference_offsets, captured.shape)
     out = np.full_like(captured, np.nan)
-    for k, (points, local) in enumerate(zip(captured, ref, strict=True)):
+    for k in range(int(captured.shape[0])):
+        points = cast(np.ndarray, np.asarray(captured[k], dtype=np.float64))
+        local = cast(np.ndarray, np.asarray(ref[k], dtype=np.float64))
         if not np.all(np.isfinite(points[idx])):
             continue
         a, b = local[idx], points[idx]
@@ -272,11 +277,13 @@ def fit_shaft_bend(
         return np.stack([z[..., 1], z[..., 0] - z[..., 1]], axis=-1)
 
     def bend_of(x: Array) -> Array:
+        """Return the bend for a named segment."""
         return np.asarray(
             np.einsum("kps,sn->knp", amplitudes_of(x), basis), dtype=np.float64
         )
 
     def residuals(x: Array) -> Array:
+        """Return the residuals."""
         raw = amplitudes_of(x)
         amps = raw.reshape(frames, n_par)
         error = (_positions(geometry, bend_of(x), offsets) - goal) * valid[..., None]

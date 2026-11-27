@@ -42,6 +42,7 @@ from src.shared.python.biomechanics.grip_wrench import (  # noqa: E402
     allocate_min_norm,
     to_overlay_wrenches,
 )
+from src.shared.python.core.physics_constants import GRAVITY_M_S2  # noqa: E402
 from src.shared.python.force_overlay.contracts import ForceTorqueFrame  # noqa: E402
 from src.shared.python.force_overlay.glyphs import ForceGlyphStyle, build_glyphs  # noqa: E402
 from src.shared.python.force_overlay.renderers.matplotlib_glyphs import (  # noqa: E402
@@ -60,14 +61,15 @@ ROOT = Path(__file__).resolve().parents[5]
 MODELS = ROOT / "docs/development/full_body_models"
 HERE = Path(__file__).resolve().parent
 DEFAULT_OUT = Path.home() / "Videos/Parity Audit/golfer_realism/grip_kinetics"
-GRAVITY = 9.80665
 
 
 def _sha(path: Path) -> str:
+    """Return the SHA-256 hex digest of a file."""
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _speed_stats(v: np.ndarray) -> dict:
+    """Return peak and 95th-percentile speed."""
     return {"peak_m_s": float(v.max()), "p95_m_s": float(np.percentile(v, 95))}
 
 
@@ -160,6 +162,7 @@ def window(run: BushingRun, t_max: float) -> BushingRun:
     keep = run.time_s <= t_max
 
     def cut(value: object) -> object:
+        """Return the cut of the series."""
         if isinstance(value, dict):
             return {k: cut(v) for k, v in value.items()}
         if isinstance(value, ClubKinematics):
@@ -247,8 +250,8 @@ def static_hold(spec_path: Path) -> dict:
     )
     run = sim.run(accuracy=1e-6)
     total = run.force_on_club_n["L"][-1] + run.force_on_club_n["R"][-1]
-    weight = spec["club"]["total_mass_kg"] * GRAVITY
-    up = -np.asarray(spec["gravity_m_s2"]) / GRAVITY
+    weight = spec["club"]["total_mass_kg"] * GRAVITY_M_S2
+    up = -np.asarray(spec["gravity_m_s2"]) / GRAVITY_M_S2
     return {
         "club_weight_n": weight,
         "sum_hand_force_up_n": float(total @ up),
@@ -411,11 +414,18 @@ def render_clip(
                 ),
             )
             draw_glyphs_3d(ax, build_glyphs(frame, style))
-            half = 0.3
-            ax.set_xlim(mid[0] - half, mid[0] + half)
-            ax.set_ylim(mid[1] - half, mid[1] + half)
-            ax.set_zlim(mid[2] - half, mid[2] + half)
-            ax.set_box_aspect((1, 1, 1))
+            from src.shared.python.model_appearance.grip_preview_matplotlib import (
+                apply_equal_axis_limits,
+            )
+
+            crop_pts = np.vstack(
+                [
+                    np.vstack([butt, head, mid]),
+                    run.grip_point_m["L"][i],
+                    run.grip_point_m["R"][i],
+                ]
+            )
+            apply_equal_axis_limits(ax, crop_pts, centre=mid)
             ax.view_init(elev=15, azim=-70)
             ax.set_title(
                 f"{title}: t = {run.time_s[i]:.3f} s\n"
@@ -446,6 +456,7 @@ def render_clip(
 
 
 def main() -> int:
+    """Run the command-line entry point."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     ap.add_argument("--accuracy", type=float, default=1e-5)
