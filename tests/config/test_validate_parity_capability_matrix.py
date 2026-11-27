@@ -54,10 +54,12 @@ EPIC_MAXIMA = {
 
 
 def _changelog() -> dict:
+    """Return an approval-empty changelog document."""
     return {"schema_version": "2.0.0", "entries": []}
 
 
 def _tolerances() -> dict:
+    """Return tolerances built from the epic maxima."""
     regimes = {}
     for regime, bounds in EPIC_MAXIMA.items():
         regimes[regime] = {
@@ -67,6 +69,7 @@ def _tolerances() -> dict:
 
 
 def _matrix() -> dict:
+    """Return a claimed baseline matrix covering every engine."""
     cells = {engine: {"status": "claimed", "claimed_cycle": 1} for engine in ENGINES}
     return {
         "schema_version": "2.0.0",
@@ -81,6 +84,7 @@ def _matrix() -> dict:
 
 
 def _codes(findings: list[str]) -> set[str]:
+    """Extract the leading finding codes from a findings list."""
     return {item.split(":", 1)[0] for item in findings}
 
 

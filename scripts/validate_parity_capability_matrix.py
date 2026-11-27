@@ -37,24 +37,28 @@ STATUS_RANK = {"verified": 2, "claimed": 1, "unsupported": 0}
 
 
 def _finding(code: str, detail: str) -> str:
+    """Return a "code:detail" gate finding, rejecting blank parts."""
     if not code.strip() or not detail.strip():
         raise ValueError("findings need a code and a detail")
     return f"{code}:{detail}"
 
 
 def _as_mapping(value: Any, label: str) -> tuple[Mapping[str, Any] | None, list[str]]:
+    """Coerce a value to a mapping or return a schema finding."""
     if isinstance(value, dict):
         return value, []
     return None, [_finding("schema_version", f"{label} must be a mapping")]
 
 
 def _require_schema(document: Mapping[str, Any], label: str) -> list[str]:
+    """Return a finding unless the document declares schema 2.0.0."""
     if document.get("schema_version") != SCHEMA_VERSION:
         return [_finding("schema_version", f"{label} schema_version must be 2.0.0")]
     return []
 
 
 def _load_yaml(path: Path) -> tuple[Any, list[str]]:
+    """Load YAML from a path, returning an unreadable finding on failure."""
     try:
         return yaml.safe_load(path.read_text(encoding="utf-8")), []
     except (OSError, yaml.YAMLError) as exc:
@@ -62,6 +66,7 @@ def _load_yaml(path: Path) -> tuple[Any, list[str]]:
 
 
 def _load_json(path: Path) -> tuple[Any, list[str]]:
+    """Load JSON from a path, returning an unreadable finding on failure."""
     try:
         return json.loads(path.read_text(encoding="utf-8")), []
     except (OSError, json.JSONDecodeError) as exc:
@@ -69,6 +74,7 @@ def _load_json(path: Path) -> tuple[Any, list[str]]:
 
 
 def _approved(entries: Any, **need: object) -> bool:
+    """Return True when a changelog entry approves the requested keys."""
     if not isinstance(entries, list):
         return False
     for entry in entries:
@@ -80,6 +86,7 @@ def _approved(entries: Any, **need: object) -> bool:
 
 
 def _tolerance_ids(tolerances: Mapping[str, Any]) -> set[str]:
+    """Return the regime ids declared by the tolerances document."""
     regimes = tolerances.get("regimes")
     if not isinstance(regimes, dict):
         return set()
@@ -87,6 +94,7 @@ def _tolerance_ids(tolerances: Mapping[str, Any]) -> set[str]:
 
 
 def _bounds(tolerances: Mapping[str, Any]) -> dict[str, dict[str, float]]:
+    """Return regime bound maxima parsed from the tolerances document."""
     regimes = tolerances.get("regimes")
     parsed: dict[str, dict[str, float]] = {}
     if not isinstance(regimes, dict):
@@ -103,6 +111,7 @@ def _bounds(tolerances: Mapping[str, Any]) -> dict[str, dict[str, float]]:
 
 
 def _check_tolerances(tolerances: Mapping[str, Any]) -> list[str]:
+    """Validate the tolerances schema, regimes, and numeric bounds."""
     findings = _require_schema(tolerances, "tolerances")
     regimes = tolerances.get("regimes")
     if not isinstance(regimes, dict) or not regimes:
@@ -128,6 +137,7 @@ def _check_tolerances(tolerances: Mapping[str, Any]) -> list[str]:
 
 
 def _check_engines(matrix: Mapping[str, Any]) -> list[str]:
+    """Validate that the engines list is the six parity engines."""
     engines = matrix.get("engines")
     if not isinstance(engines, list) or any(
         not isinstance(item, str) for item in engines
@@ -150,6 +160,7 @@ def _check_cell(
     release_cycle: int,
     claim_expiry_cycles: int,
 ) -> list[str]:
+    """Validate one capability/engine cell and return its findings."""
     detail = f"{capability}.{engine}"
     if not isinstance(cell, dict):
         return [_finding("cell", f"{detail} must be a mapping")]
@@ -188,6 +199,7 @@ def _check_cell(
 def _check_capabilities(
     matrix: Mapping[str, Any], tolerances: Mapping[str, Any]
 ) -> list[str]:
+    """Validate every capability cell against the tolerance ids."""
     findings: list[str] = []
     release_cycle = matrix.get("release_cycle")
     expiry = matrix.get("claim_expiry_cycles")
@@ -243,6 +255,7 @@ def _check_drift(
     baseline_matrix: Mapping[str, Any],
     baseline_tolerances: Mapping[str, Any],
 ) -> list[str]:
+    """Flag status downgrades and tolerance loosening vs the baseline."""
     entries = changelog.get("entries")
     findings: list[str] = []
     current_caps = matrix.get("capabilities")
