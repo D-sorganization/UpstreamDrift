@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+from dataclasses import replace
 from pathlib import Path
 
 from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
@@ -45,6 +46,18 @@ def refresh_player(folder: Path) -> Path:
     if not isinstance(receipt, dict):
         raise ValueError("receipt must be a JSON object")
     doc = player_appearance(folder.name)
+    override = receipt.get("appearance_override")
+    if override is not None:
+        keys = {"head.cap_style", "head.cap_material", "head.cap_brim"}
+        if not isinstance(override, dict) or set(override) != keys:
+            raise ValueError(
+                "receipt appearance_override must define cap style, material and brim"
+            )
+        head = replace(
+            doc.head,
+            **{key.removeprefix("head."): value for key, value in override.items()},
+        )
+        doc = replace(doc, head=head)
     xml, metadata = export_full_body_mjcf(raw, appearance=doc)
     target = folder / "model.xml"
     target.write_text(xml, encoding="utf-8")
