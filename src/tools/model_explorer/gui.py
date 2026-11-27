@@ -113,7 +113,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         self.playback_bar.scrubbed.connect(self.scrub_results)
 
         explorer = self
-        self.destroyed.connect(lambda bound=explorer: bound.cleanup())
+        self.destroyed.connect(lambda *_args, bound=explorer: bound.cleanup())
 
         logger.info("Model Explorer MainWidget initialized")
 

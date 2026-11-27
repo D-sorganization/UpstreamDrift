@@ -53,10 +53,15 @@ def _loads_self(node: ast.AST) -> bool:
 
 
 def test_destroyed_callbacks_do_not_close_over_self() -> None:
-    """Each destroyed lambda binds the widget by value instead of loading self."""
+    """Each destroyed lambda binds the widget by value instead of loading self.
+
+    ``destroyed`` may emit the QObject being torn down. That payload must not
+    replace the bound widget, or cleanup runs on a bare ``QWidget``.
+    """
     for relative in DESTROYED_CALLBACKS:
         path = REPO / relative
         lambdas = _destroyed_lambdas(path)
         assert lambdas, relative
         for callback in lambdas:
             assert not _loads_self(callback.body), relative
+            assert callback.args.vararg is not None, relative
