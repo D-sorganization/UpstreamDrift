@@ -160,6 +160,7 @@ def _convex_hull_2d(points: list[tuple[float, float]]) -> list[tuple[float, floa
         return list(pts)
 
     def _cross(o: tuple[float, float], a: tuple[float, float], b: tuple[float, float]) -> float:
+        """Return the 2D cross product of vectors (a - o) and (b - o)."""
         return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
 
     lower: list[tuple[float, float]] = []
@@ -194,6 +195,7 @@ class ReplayHarness:
         ground_z: float = 0.0,
         initial_state: str = "stance",
     ) -> None:
+        """Configure foot hulls, hysteresis thresholds, dwell timing, and ground plane."""
         self.foot_hulls = dict(foot_hulls)
         self.engage_threshold_n = engage_threshold_n
         self.release_threshold_n = release_threshold_n
@@ -213,6 +215,7 @@ class ReplayHarness:
         source_ref: str,
         contacts: Sequence[ContactPointRecord],
     ) -> FrameReplayRecord:
+        """Record one replay frame, advancing state, gate alpha, and BoS excursion flags."""
         net_f, net_m, cop_w = compute_wrench_cop(
             contacts, origin=(0.0, 0.0, self.ground_z), ground_z=self.ground_z, min_fz=self.release_threshold_n
         )
@@ -287,6 +290,7 @@ class ReplayHarness:
         return rec
 
     def get_first_excursion(self) -> dict[str, Any] | None:
+        """Return the first recorded CoP excursion outside the base of support, or None."""
         for r in self.records:
             if r.is_excursion:
                 return {
@@ -313,6 +317,7 @@ class ReplayHarness:
         return None
 
     def get_first_chatter_window(self) -> dict[str, Any] | None:
+        """Return the first chatter window spanning recorded state transitions, or None."""
         if len(self._transitions) >= 2:
             return {
                 "start_frame": self._transitions[0][0],

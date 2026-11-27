@@ -28,6 +28,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_simulation_output_fields_and_no_zerofill():
+    """SimulationOutput round-trips new GRF/CoP/CoG fields without zero-filling gaps."""
     ch_avail = _channel((1.0, 2.0, 3.0), "N")
     ch_unavail = _missing("sensor offline", "m")
     
@@ -70,6 +71,7 @@ def test_simulation_output_fields_and_no_zerofill():
 
 
 def test_polygon_geometry_and_bos_margin():
+    """Point-in-polygon and signed-distance helpers classify inside and outside hull points."""
     hull = [(0.0, 0.0), (0.2, 0.0), (0.2, 0.1), (0.0, 0.1)]
     # inside
     assert point_in_polygon_2d((0.1, 0.05), hull) is True
@@ -117,6 +119,7 @@ def test_pressure_centroid_vs_wrench_cop_reproduces_excursion():
 
 
 def test_replay_harness_captures_first_excursion_and_chatter_window():
+    """Replay harness reports the first out-of-hull excursion and the committed chatter window."""
     harness = ReplayHarness(
         foot_hulls={
             "left": [(0.0, -0.05), (0.2, -0.05), (0.2, 0.05), (0.0, 0.05)],
