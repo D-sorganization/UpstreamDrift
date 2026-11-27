@@ -25,7 +25,8 @@ except ImportError:
     g = None  # type: ignore[assignment]
 
 try:
-    import pinocchio.visualize as viz
+    # ``pinocchio.visualize.Visualizer`` is an enum of backends, not a viewer.
+    import meshcat.visualizer as viz
 except (ImportError, AttributeError):
     viz = None  # type: ignore[assignment]
 

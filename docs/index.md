@@ -120,6 +120,7 @@ repository, which made them effectively unreachable.
 - [Golf ball flight and impact source map](physics/GOLF_BALL_FLIGHT_IMPACT_SOURCE_MAP.md)
   -- maps each published coefficient and equation to its literature source.
 - [Flight and impact shortcomings register](physics/FLIGHT_AND_IMPACT_SHORTCOMINGS_REGISTER.md)
+- [Showcase clip assumptions](physics/SHOWCASE_ASSUMPTIONS.md)
   -- what the impact, flight and rollout pipeline does not model.
 - [Putting kinematics and kinetics review](physics/PUTTING_KINEMATICS_KINETICS_REVIEW.md)
   -- the putting-stroke kinematics/kinetics derivation behind

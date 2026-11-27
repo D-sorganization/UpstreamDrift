@@ -14,6 +14,9 @@ on:
       - "src/shared/python/humanoid_character_builder/**"
       - "tests/integration/test_urdf_engine_loadability.py"
       - "tests/integration/test_urdf_cross_engine_fk.py"
+      - "tests/cross_engine/test_tree_equivalence_14756.py"
+      - "src/shared/python/model_generation/tree_equivalence.py"
+      - "**/*.urdf"
       - ".github/workflows/urdf-cross-engine-equivalence.yml"
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -21,6 +24,9 @@ on:
       - "src/shared/python/humanoid_character_builder/**"
       - "tests/integration/test_urdf_engine_loadability.py"
       - "tests/integration/test_urdf_cross_engine_fk.py"
+      - "tests/cross_engine/test_tree_equivalence_14756.py"
+      - "src/shared/python/model_generation/tree_equivalence.py"
+      - "**/*.urdf"
       - ".github/workflows/urdf-cross-engine-equivalence.yml"
   workflow_dispatch:
 
@@ -160,6 +166,7 @@ jobs:
           python3 -m pytest \
             tests/integration/test_urdf_engine_loadability.py \
             tests/integration/test_urdf_cross_engine_fk.py \
+            tests/cross_engine/test_tree_equivalence_14756.py \
             -v -rs --tb=short -p no:xvfb \
             --junitxml=test-results/urdf-cross-engine-equivalence-junit.xml
 
@@ -177,11 +184,13 @@ jobs:
         if: always()
         shell: bash
         run: |
-          echo "## URDF Cross-Engine Equivalence Summary" >> "$GITHUB_STEP_SUMMARY"
-          if [ -f "reports/urdf_cross_engine.json" ]; then
-            echo "\`\`\`json" >> "$GITHUB_STEP_SUMMARY"
-            cat "reports/urdf_cross_engine.json" >> "$GITHUB_STEP_SUMMARY"
-            echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "No equivalence report generated (test was skipped or crashed before emission)." >> "$GITHUB_STEP_SUMMARY"
-          fi
+          {
+            echo "## URDF Cross-Engine Equivalence Summary"
+            if [ -f "reports/urdf_cross_engine.json" ]; then
+              echo "\`\`\`json"
+              cat "reports/urdf_cross_engine.json"
+              echo "\`\`\`"
+            else
+              echo "No equivalence report generated (test was skipped or crashed before emission)."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

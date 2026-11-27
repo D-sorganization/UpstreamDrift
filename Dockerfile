@@ -39,22 +39,16 @@ ENV PATH="/opt/venv/bin:$PATH"
 ENV RUSTUP_HOME=/opt/rustup \
     CARGO_HOME=/opt/cargo \
     PATH="/opt/cargo/bin:/opt/venv/bin:$PATH"
-# Download-init (no pipe) so a transient curl/DNS failure cannot feed an empty
-# script to sh and surface as exit 127 on rustc. Fleet builds have seen
-# Could not resolve host: sh.rustup.rs under concurrent image lanes (#13761).
-RUN set -eu; \
-    for attempt in 1 2 3 4 5; do \
-      if curl --proto '=https' --tlsv1.2 -fsS --retry 3 --retry-delay 5 --retry-all-errors \
-          -o /tmp/rustup-init.sh https://sh.rustup.rs \
-          && sh /tmp/rustup-init.sh -y --profile minimal --default-toolchain 1.94.0 \
-          && rustc --version && cargo --version; then \
-        rm -f /tmp/rustup-init.sh; \
-        exit 0; \
-      fi; \
-      echo "rustup bootstrap attempt ${attempt} failed; retrying..." >&2; \
-      sleep $((attempt * 5)); \
-    done; \
-    exit 1
+# Install a pinned rustup-init binary and verify its SHA-256 before running it
+# (#15762) instead of executing the unverified https://sh.rustup.rs script.
+# Checksums are the official .sha256 files published next to each binary at
+# https://static.rust-lang.org/rustup/archive/<RUSTUP_VERSION>/<triple>/.
+# The download is a separate step (no pipe) with retries, so a transient
+# curl/DNS failure cannot feed an empty file to the installer (#13761).
+ARG RUSTUP_VERSION=1.29.3
+ARG RUSTUP_SHA256_X86_64=b1c8cb14e30889e7e2999e6b69e62d9e9b9ffc0f4df8180564d306d9680e6c55
+ARG RUSTUP_SHA256_AARCH64=9f608c142e0e38a78957d0661ba1dfaf0b6fb37184cfaa4b9a0aa57af6184282
+RUN set -eu;     case "$(dpkg --print-architecture)" in       amd64) triple=x86_64-unknown-linux-gnu; sha256="${RUSTUP_SHA256_X86_64}" ;;       arm64) triple=aarch64-unknown-linux-gnu; sha256="${RUSTUP_SHA256_AARCH64}" ;;       *) echo "unsupported architecture for rustup-init" >&2; exit 1 ;;     esac;     url="https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/${triple}/rustup-init";     for attempt in 1 2 3 4 5; do       if curl --proto '=https' --tlsv1.2 -fsS --retry 3 --retry-delay 5 --retry-all-errors           -o /tmp/rustup-init "${url}"           && echo "${sha256}  /tmp/rustup-init" | sha256sum -c -           && chmod +x /tmp/rustup-init           && /tmp/rustup-init -y --profile minimal --default-toolchain 1.94.0           && rustc --version && cargo --version; then         rm -f /tmp/rustup-init;         exit 0;       fi;       echo "rustup bootstrap attempt ${attempt} failed; retrying..." >&2;       sleep $((attempt * 5));     done;     exit 1
 
 RUN pip install --upgrade pip==26.2.1 && pip install maturin==1.13.3
 

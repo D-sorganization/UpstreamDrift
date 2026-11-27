@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**72 launcher tiles · 85 feature contracts.**
+**73 launcher tiles · 87 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -225,6 +225,7 @@ flowchart LR
 | Closed-loop null-space variability and consistency (NSX-100): kernel heatmap, variance budget, strategy Pareto and face dispersion from the plot model 2.0.0 sensitivity panels, with disturbance, mechanism, strategy, outcome-priority and engine controls | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/grip_wrench_plots/variability_tab.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/analysis_loop_nullspace.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/analysis/loopNullSpace/VariabilityView.tsx) |
 | Tour matching viewer | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/tour_matching_viewer/__main__.py) |
 | Motion-capture breadth (C3D upload/playback, OpenPose source) | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/freemocap_sidecar/run_freemocap.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/motion_capture.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/MotionCapture.tsx) |
+| Kinetic match: forces and torques for a kinematic best match (CLI, REST, MCP) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/motion_matching/kinetic_match.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/agent_sim_run.py) |
 | MuJoCo GUI force/torque overlays drawn through the shared glyph renderers (native viewer and MeshCat) | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/force_overlays.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/visualization/ForceOverlay.tsx) |
 | About/version info + onboarding | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/about_dialog.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/about.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/ui/AboutModal.tsx) |
 | OpenCap session import action and OpenSim engine handoff | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/opensim/python/opencap_import_action.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/opencap.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/opencap/OpenCapImportModal.tsx) |
@@ -273,6 +274,7 @@ flowchart LR
 | Shot Pattern Analysis Workbench | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/shot_pattern_analysis/gui.py) |
 | Segmental spine study execution and model asset selection | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/spine_viewer/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/spine_viewer.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/SpineViewer.tsx) |
 | Segmental spine viewer (per-level load heatmaps from study receipts) | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/spine_viewer/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/spine_viewer.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/SpineViewer.tsx) |
+| Swing report package: choose, preview and render a swing's videos, grids and phase sheets | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/swing_report_package/gui.py) |
 | Terrain and topography configuration | parity | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/terrain.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Terrain.tsx) |
 | Training controller tool | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/training_controller/__main__.py) |
 | Video Analyzer (pose tracking and force/torque overlay) | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/video_analyzer/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/video_overlays.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/VideoAnalyzer.tsx) |

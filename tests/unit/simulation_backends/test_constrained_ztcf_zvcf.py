@@ -43,10 +43,12 @@ TOL = 1e-9
 
 
 def _scaled(x: np.ndarray, scale: float) -> float:
+    """Return max-abs of x divided by max(1, scale) for tolerance checks."""
     return float(np.max(np.abs(x))) / max(1.0, scale)
 
 
 def _kkt(M, load, J, Jdot_v):
+    """Solve the augmented KKT system and return the acceleration and multiplier blocks."""
     n, m = M.shape[0], J.shape[0]
     kkt = np.block([[M, -J.T], [J, np.zeros((m, m))]])
     sol = np.linalg.solve(kkt, np.concatenate([load, -Jdot_v]))
@@ -55,21 +57,25 @@ def _kkt(M, load, J, Jdot_v):
 
 @pytest.fixture(scope="module")
 def planar():
+    """Return the planar golfer snapshot and its provider."""
     case = planar_golfer_snapshot()
     params = PlanarGolferParams.from_golden(load_golden("planar_two_arm_full"))
     return case.snapshot, PlanarGolferProvider(params)
 
 
 def test_protocol_membership(planar) -> None:
+    """The planar provider satisfies the constrained protocol; a plain provider does not."""
     _, provider = planar
     assert isinstance(provider, ConstrainedEquationsOfMotionProvider)
     assert isinstance(provider, EquationsOfMotionProvider)
 
     class Plain:
         def mass_matrix(self, q):
+            """Return an identity mass matrix."""
             return np.eye(2)
 
         def bias_forces(self, q, v):
+            """Return zero bias forces."""
             return np.zeros(2)
 
     assert isinstance(Plain(), EquationsOfMotionProvider)
@@ -77,6 +83,7 @@ def test_protocol_membership(planar) -> None:
 
 
 def test_ztcf_re_solves_the_reaction_against_the_kkt_oracle(planar) -> None:
+    """ZTCF matches the KKT oracle and satisfies the closure constraint."""
     s, provider = planar
     a = ztcf_acceleration(provider, s.q, s.v)
     ref, _ = _kkt(s.M, -s.h, s.J_c, s.Jdot_v)
@@ -87,6 +94,7 @@ def test_ztcf_re_solves_the_reaction_against_the_kkt_oracle(planar) -> None:
 
 
 def test_zero_velocity_zero_torque_on_the_loop(planar) -> None:
+    """Zero-velocity zero-torque acceleration matches the KKT oracle on the loop."""
     s, provider = planar
     a = zero_velocity_zero_torque_acceleration(provider, s.q)
     h0 = provider.bias_forces(s.q, np.zeros(5))
@@ -96,6 +104,7 @@ def test_zero_velocity_zero_torque_on_the_loop(planar) -> None:
 
 
 def test_control_split_and_control_preserved_variant(planar) -> None:
+    """Control split sums to the total and the control-preserved variant matches the KKT oracle."""
     s, provider = planar
     tau = s.S.T @ np.array([1.0, -2.0, 0.5, 0.3, 1.7])
     drift, control = drift_and_control_split(provider, s.q, s.v, tau)
@@ -139,6 +148,7 @@ def test_per_actuator_columns_use_measured_state_and_ztcf_baseline(planar) -> No
 
 
 def test_measured_acceleration_is_ztcf_plus_control_total(planar) -> None:
+    """Measured acceleration equals ZTCF plus the control total for minimum-metric torque."""
     case = planar_golfer_snapshot()
     s, golden = case.snapshot, case.golden
     tau_a = golden.array("min_metric_torque", "minv", "tau_actuated")
@@ -151,7 +161,23 @@ def test_measured_acceleration_is_ztcf_plus_control_total(planar) -> None:
     assert _scaled(report.ztcf + report.control_total - s.a, np.max(np.abs(s.a))) < 1e-8
 
 
+def test_constrained_zvcf_names_control_total(planar) -> None:
+    """The public ZVCF field is the applied-control component (#15711)."""
+    s, provider = planar
+    tau = s.S.T @ np.array([1.0, -2.0, 0.5, 0.3, 1.7])
+    report = constrained_counterfactual_report(provider, s.q, s.v, tau)
+
+    np.testing.assert_allclose(report.zvcf, report.control_total, atol=TOL, rtol=0)
+    np.testing.assert_allclose(
+        report.ztcf + report.zvcf,
+        constrained_acceleration_at(provider, s.q, s.v, tau)[0],
+        atol=TOL,
+        rtol=0,
+    )
+
+
 def test_dependence_labels_follow_nsx00(planar) -> None:
+    """Dependence labels follow NSX-00: totals invariant, per-actuator family-dependent."""
     s, provider = planar
     report = constrained_counterfactual_report(provider, s.q, s.v, s.S.T @ np.ones(5))
     dep = report.dependence
@@ -187,6 +213,7 @@ def test_total_is_invariant_and_per_actuator_is_family_dependent(planar) -> None
 
 
 def test_canonical_trajectory_dispatches_to_the_constrained_path(planar) -> None:
+    """Canonical trajectory evaluation uses the constrained ZTCF path."""
     s, provider = planar
     traj = CanonicalDynamicsTrajectory(
         t=np.array([0.0]),
@@ -203,11 +230,15 @@ def test_canonical_trajectory_dispatches_to_the_constrained_path(planar) -> None
 
 
 def test_unconstrained_provider_path_is_unchanged() -> None:
+    """An unconstrained provider keeps the mass-matrix ZTCF path."""
+
     class Plain:
         def mass_matrix(self, q):
+            """Return a fixed diagonal mass matrix."""
             return np.diag([2.0, 4.0])
 
         def bias_forces(self, q, v):
+            """Return fixed bias forces."""
             return np.array([2.0, 8.0])
 
     a = ztcf_acceleration(Plain(), np.zeros(2), np.zeros(2))
@@ -215,6 +246,7 @@ def test_unconstrained_provider_path_is_unchanged() -> None:
 
 
 def test_report_rejects_bad_inputs(planar) -> None:
+    """A bad tau shape or a non-constrained provider raises."""
     s, provider = planar
     with pytest.raises(ValueError, match="tau"):
         constrained_counterfactual_report(provider, s.q, s.v, np.zeros(4))
@@ -233,6 +265,7 @@ SPEC_PATH = EVIDENCE / "full_body_spec_hipcal_scaled.json"
 
 @pytest.fixture(scope="module")
 def pin_case():
+    """Build the Pinocchio adapter and closure-projected state for the anthro model."""
     pin = pytest.importorskip("pinocchio")
     from src.engines.physics_engines.pinocchio.python.force_adapter import (
         PinocchioForceAdapter,
@@ -255,6 +288,7 @@ def pin_case():
 
 
 def _pin_constraint_dynamics(pin, adapter, q, v, tau):
+    """Solve Pinocchio constraintDynamics on fresh data and return acceleration and lambda."""
     model, cons = adapter._plant.model, adapter._plant.constraints
     data = model.createData()
     cdata = [c.createData() for c in cons]
@@ -265,6 +299,7 @@ def _pin_constraint_dynamics(pin, adapter, q, v, tau):
 
 @pytest.mark.requires_pinocchio
 def test_pinocchio_ztcf_zvcf_match_constraint_dynamics(pin_case) -> None:
+    """Pinocchio ZTCF and ZVCF match raw constraintDynamics references."""
     from src.shared.python.loop_nullspace.provider import AdapterConstrainedProvider
 
     pin, adapter, q, v = pin_case
@@ -295,6 +330,7 @@ def test_pinocchio_ztcf_zvcf_match_constraint_dynamics(pin_case) -> None:
 
 @pytest.mark.requires_pinocchio
 def test_pinocchio_report_splits_invariant_from_family_dependent(pin_case) -> None:
+    """Pinocchio report splits the invariant control total from family-dependent shares."""
     from src.shared.python.loop_nullspace.provider import AdapterConstrainedProvider
 
     pin, adapter, q, v = pin_case

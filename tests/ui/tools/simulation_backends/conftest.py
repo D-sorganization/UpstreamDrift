@@ -16,6 +16,10 @@ import pytest
 # Headless rendering must be configured before PyQt6 / matplotlib import.
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("MPLBACKEND", "Agg")
+if os.name == "nt":
+    # MuJoCo's EGL and OSMesa backends are unavailable on Windows. These GUI
+    # tests need CPU capability probes, not a rendering context.
+    os.environ["MUJOCO_GL"] = "disable"
 
 # Skip the entire package cleanly when PyQt6 is not installed.
 PyQt6 = pytest.importorskip("PyQt6")

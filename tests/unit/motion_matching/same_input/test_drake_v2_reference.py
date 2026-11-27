@@ -23,7 +23,6 @@ EVIDENCE = ROOT / "docs/development/full_body_models/evidence"
 TRUNK = EVIDENCE / "trunk_visuals"
 RUN_DIR = EVIDENCE / "ground_support/anthro_driver_drake"
 RUN_SPEC = RUN_DIR / "full_body_spec_hipcal_scaled.json"
-V1_SOURCE = TRUNK / "full_body_v1_source_spec.json"
 V2_SPEC = TRUNK / "full_body_v2_anthro_driver.json"
 
 #: Club-face fixture face at impact (CANONICAL_RUN.md, #12221) and the
@@ -45,7 +44,7 @@ def reference():
         drake_v2_reference,
     )
 
-    return drake_v2_reference(RUN_DIR, V1_SOURCE.read_bytes(), V2_SPEC.read_bytes())
+    return drake_v2_reference(RUN_DIR, RUN_SPEC.read_bytes(), V2_SPEC.read_bytes())
 
 
 def _impact(spec_bytes: bytes, time_s, q, index: int):

@@ -12,16 +12,27 @@ import math
 from typing import Any
 
 from src.shared.python.force_overlay.conversions import restrict_frame
-from src.shared.python.force_overlay.glyphs import ForceGlyphStyle, GlyphSet
+from src.shared.python.force_overlay.glyphs import (
+    ForceGlyphStyle,
+    GlyphSet,
+    TorqueArcGlyph,
+)
 from src.shared.python.force_overlay.renderers.meshcat_glyphs import legend_text
 from src.shared.python.grip_contact.palm_thumb import PALM_THUMB_LABEL
+from src.tools.native_viewer_export.arrow_style import load_arrow_style
 
 
 STANDARD_GRAVITY_M_S2 = 9.80665
 BODY_WEIGHT_ARROW_M = 0.5
+#: HUD note on states whose section loads are blanked around ball contact
+CONTACT_BLACKOUT_NOTE = (
+    "Shading withheld at ball contact: the impact impulse is not modelled"
+)
 
 
-def default_glyph_style(body_mass_kg: float | None = None) -> ForceGlyphStyle:
+def default_glyph_style(
+    body_mass_kg: float | None = None, *, arrow_style: str | None = None
+) -> ForceGlyphStyle:
     """Golfer-scale glyph style.
 
     With ``body_mass_kg`` the force arrows use ``body_weight`` scaling so one
@@ -30,8 +41,13 @@ def default_glyph_style(body_mass_kg: float | None = None) -> ForceGlyphStyle:
     capped at 0.6 m length (0.30 m radius) to prevent oversized arcs near
     impact (NV-9, #11697). Without body mass the fixed 0.7 m per kN scale is kept.
 
-    Raises ``ValueError`` when ``body_mass_kg`` is not finite and positive.
+    ``arrow_style`` names a look in ``arrow_style_settings.json``
+    (default: its ``default_style``); the shaft radius comes from it.
+
+    Raises ``ValueError`` when ``body_mass_kg`` is not finite and positive or
+    the arrow style is unknown.
     """
+    shaft_radius_m = load_arrow_style(arrow_style).shaft_radius_m
     if body_mass_kg is None:
         return ForceGlyphStyle(
             force_scale_m_per_n=0.7 / 1000.0,
@@ -39,7 +55,7 @@ def default_glyph_style(body_mass_kg: float | None = None) -> ForceGlyphStyle:
             max_length_m=0.9,
             max_torque_length_m=0.6,
             min_length_m=0.04,
-            shaft_radius_m=0.015,
+            shaft_radius_m=shaft_radius_m,
             magnitude_floor_nm=8.0,
             magnitude_floor_n=20.0,
         )
@@ -55,7 +71,7 @@ def default_glyph_style(body_mass_kg: float | None = None) -> ForceGlyphStyle:
         max_length_m=3.0,
         max_torque_length_m=0.6,
         min_length_m=0.04,
-        shaft_radius_m=0.015,
+        shaft_radius_m=shaft_radius_m,
         magnitude_floor_nm=8.0,
         magnitude_floor_n=20.0,
     )
@@ -91,6 +107,14 @@ class OverlayFeed:
     ellipsoids_for: Callable[[Any], tuple[Any, Any, Any]] | None = None
     #: HUD note when force/torque vectors are withheld (``kinematic_replay``)
     forces_note: str = ""
+    #: HUD note naming the ZTCF/ZVCF part the segment shading shows (Z4b)
+    shading_note: str = ""
+    #: extra arrows (and torque arcs, #15720) by source state (ZTCF/ZVCF, #15685)
+    extra_arrows: Callable[[int], tuple[Any, ...]] | None = None
+    #: legend text appended when ``extra_arrows`` draws anything
+    extra_legend: str = ""
+    #: ``(text, RGB)`` naming each extra arrow colour (#15150 Track Z, Z3b)
+    colour_key: tuple[tuple[str, tuple[int, int, int]], ...] = ()
     _frames: dict[int, Any] = field(
         default_factory=dict, init=False, repr=False, compare=False
     )
@@ -108,8 +132,16 @@ class OverlayFeed:
         ``k``, so they sit on the body that frame shows. Raises ``ValueError``
         when the feed has ellipsoids it cannot evaluate at another swing.
         """
-        source = self.frame_at
-        feed = replace(self, frame_at=lambda i: source(source_index(int(i))))
+        source, arrows_at = self.frame_at, self.extra_arrows
+        feed = replace(
+            self,
+            frame_at=lambda i: source(source_index(int(i))),
+            extra_arrows=(
+                None
+                if arrows_at is None
+                else (lambda i: arrows_at(source_index(int(i))))
+            ),
+        )
         if self.hand_ellipsoids is None and self.hand_hud_lines is None:
             return feed
         if self.ellipsoids_for is None:
@@ -134,6 +166,7 @@ class OverlayFeed:
             hand_ellipsoids=clamp(self.hand_ellipsoids),
             hand_hud_lines=clamp(self.hand_hud_lines),
             hand_panel_rows=clamp(self.hand_panel_rows),
+            extra_arrows=clamp(self.extra_arrows),
         )
 
     def glyphs_at(self, index: int) -> GlyphSet:
@@ -160,6 +193,17 @@ class OverlayFeed:
         if allocated and self.show_palm_thumb:
             frame = replace(frame, wrenches=(*frame.wrenches, *allocated))
         gs = build(frame, self.style)
+        if self.extra_arrows is not None:
+            extra = self.extra_arrows(index)
+            arcs = tuple(g for g in extra if isinstance(g, TorqueArcGlyph))
+            gs = replace(
+                gs,
+                arrows=(
+                    *gs.arrows,
+                    *(g for g in extra if not isinstance(g, TorqueArcGlyph)),
+                ),
+                torque_arcs=(*gs.torque_arcs, *arcs),
+            )
         if self.hand_ellipsoids is not None:
             extra_e = self.hand_ellipsoids(index)
             if extra_e:
@@ -168,18 +212,34 @@ class OverlayFeed:
 
     def hud_lines_at(self, index: int) -> tuple[str, ...]:
         """HUD capability/mobility text lines at frame ``index`` (HCM-3, #14004),
-        then the forces note."""
+        then the forces and shading notes and, where the section loads are
+        blanked around ball contact, :data:`CONTACT_BLACKOUT_NOTE`."""
         lines = () if self.hand_hud_lines is None else self.hand_hud_lines(index)
-        return (*lines, self.forces_note) if self.forces_note else lines
+        notes = tuple(n for n in (self.forces_note, self.shading_note) if n)
+        axial = self.axial_at(index)
+        if axial is not None and all(v is None for v in axial.values_n.values()):
+            notes = (*notes, CONTACT_BLACKOUT_NOTE)
+        return (*lines, *notes)
 
     def axial_at(self, index: int) -> Any:
         """``AxialLoadFrame`` of state ``index``, or ``None`` when not computed."""
         return getattr(self._frame(index), "axial_loads", None)
 
+    def draw_key(self, img: Any) -> Any:
+        """``img`` with the colour key panel; ``img`` itself when there is none."""
+        if not self.colour_key:
+            return img
+        from src.tools.native_viewer_export.compositor import draw_colour_key
+
+        return draw_colour_key(img, self.colour_key)
+
     def legend_for(self, glyphs: GlyphSet | None) -> str:
         """The legend row; none on a replay that draws no vectors (#15150)."""
         drawn = glyphs is not None and (glyphs.arrows or glyphs.torque_arcs)
-        return "" if self.forces_note and not drawn else self.legend(glyphs)
+        text = "" if self.forces_note and not drawn else self.legend(glyphs)
+        if self.extra_legend and glyphs is not None and self.extra_arrows is not None:
+            text = f"{text} | {self.extra_legend}" if text else self.extra_legend
+        return text
 
     @staticmethod
     def legend(glyphs: GlyphSet | None) -> str:

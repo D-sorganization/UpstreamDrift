@@ -22,7 +22,7 @@ try:
 except ImportError:
     pin = None  # type: ignore[assignment]
     PINOCCHIO_AVAILABLE = False
-from PyQt6 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 from src.shared.python.data_io.common_utils import get_shared_urdf_path
 from src.shared.python.logging_pkg.logging_config import (
@@ -177,6 +177,12 @@ class PinocchioGUI(
         self.timer.timeout.connect(self._game_loop)
 
         self._load_default_model()
+
+    def closeEvent(self, event: QtGui.QCloseEvent | None) -> None:
+        """Stop the physics loop so a closed window stops integrating."""
+        self.timer.stop()
+        self.is_running = False
+        super().closeEvent(event)
 
     def _update_viewer(self) -> None:
         """Synchronize qualified colors through the active visualization mixin."""

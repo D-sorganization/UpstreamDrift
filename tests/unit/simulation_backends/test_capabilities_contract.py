@@ -2,12 +2,32 @@
 
 from __future__ import annotations
 
+import importlib
+
+import pytest
+
 from src.shared.python.engine_core.capabilities import Capability, CapabilityLevel
 from src.shared.python.simulation_backends.capabilities import (
+    _can_import,
     backend_capability_level,
     backend_to_engine_capabilities,
 )
 from src.shared.python.simulation_backends.protocol import BackendCapabilities
+
+pytestmark = pytest.mark.unit
+
+
+def test_optional_dependency_probe_handles_runtime_import_failure(
+    monkeypatch,
+) -> None:  # noqa: ANN001
+    monkeypatch.setattr(importlib.util, "find_spec", lambda _name: object())
+
+    def fail_import(_name: str) -> None:
+        raise RuntimeError("invalid value for environment variable MUJOCO_GL: egl")
+
+    monkeypatch.setattr(importlib, "import_module", fail_import)
+
+    assert _can_import("mujoco") is False
 
 
 def test_backend_capabilities_answer_canonical_queries() -> None:

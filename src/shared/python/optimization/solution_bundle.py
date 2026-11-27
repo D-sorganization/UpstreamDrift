@@ -26,11 +26,15 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.optimization.admission import validate_admission
+
 __all__ = [
     "SCHEMA_VERSION",
     "SUPPORTED_SCHEMA_VERSIONS",
     "SolutionBundle",
     "SolutionBundleError",
+    "MODEL_LOCK_FIELDS",
+    "validate_model_lock",
     "load_solution_bundle",
     "save_solution_bundle",
 ]
@@ -90,9 +94,43 @@ class SolutionBundle:
     assumptions: tuple[str, ...]
     arrays: dict[str, np.ndarray] = field(compare=False)
     schema_version: int = SCHEMA_VERSION
+    # Golfer model lock (#15659): which model, controller and solver produced
+    # the bundle. ``None`` marks a legacy bundle that may only be replayed.
+    model_lock: dict[str, str] | None = None
+    # #15808 WP-0c. ``None`` is a pre-admission recording.
+    admission: dict[str, Any] | None = None
+
+
+#: Fields a model lock must give as non-empty strings (#15659).
+MODEL_LOCK_FIELDS = (
+    "registry_version",
+    "hand_visual_backend",
+    "body_visual_backend",
+    "spec_revision",
+    "plant_hash",
+    "controller_hash",
+    "solver_hash",
+)
+
+
+def validate_model_lock(lock: object) -> None:
+    """Raise unless ``lock`` is ``None`` or exactly the lock fields as strings."""
+    if lock is None:
+        return
+    if not isinstance(lock, dict):
+        raise SolutionBundleError("model_lock must be an object or null")
+    bad = [
+        k for k in MODEL_LOCK_FIELDS if not isinstance(lock.get(k), str) or not lock[k]
+    ]
+    extra = sorted(set(lock) - set(MODEL_LOCK_FIELDS))
+    if bad or extra:
+        raise SolutionBundleError(
+            f"model_lock needs non-empty {bad} and no unknown keys {extra}"
+        )
 
 
 def _validate_arrays(bundle: SolutionBundle) -> None:
+    """Require the recorded arrays to share one finite time base."""
     arrays = bundle.arrays
     missing = sorted(set(_ARRAY_SHAPES) - set(arrays))
     if missing:
@@ -119,13 +157,20 @@ def _validate_arrays(bundle: SolutionBundle) -> None:
             raise SolutionBundleError(f"{name} contains non-finite values")
     # Compare neighbours directly: np.diff wraps for unsigned/extreme integers.
     time, knots = np.asarray(arrays["time"]), np.asarray(arrays["knots"])
+    if time.size < 2:
+        raise SolutionBundleError("time must contain at least two samples")
     if np.any(time[1:] <= time[:-1]):
         raise SolutionBundleError("time must be strictly increasing")
+    if not time[0] <= bundle.impact_event["t"] <= time[-1]:
+        raise SolutionBundleError(
+            "impact_event.t must lie within the recorded time interval"
+        )
     if np.any(knots[1:] < knots[:-1]):
         raise SolutionBundleError("knots must be nondecreasing")
 
 
 def _is_finite_number(value: object) -> bool:
+    """Return whether ``value`` is a finite int or float, excluding bool."""
     return (
         isinstance(value, (int, float))
         and not isinstance(value, bool)
@@ -146,6 +191,7 @@ def _require_finite(value: object, where: str) -> None:
 
 
 def _validate_metadata(bundle: SolutionBundle) -> None:
+    """Require identity, impact, and manifest fields to be finite and complete."""
     if bundle.schema_version not in SUPPORTED_SCHEMA_VERSIONS:
         raise SolutionBundleError(f"unsupported schema_version {bundle.schema_version}")
     names = bundle.joint_order
@@ -154,6 +200,7 @@ def _validate_metadata(bundle: SolutionBundle) -> None:
     for key in ("solution_id", "git_sha", "model_hash", "frame"):
         if not getattr(bundle, key):
             raise SolutionBundleError(f"{key} must be non-empty")
+    validate_model_lock(bundle.model_lock)
     event = bundle.impact_event
     if not _is_finite_number(event.get("t")):
         raise SolutionBundleError("impact_event.t must be a finite number")
@@ -176,6 +223,7 @@ def _reject_json_constant(name: str) -> object:
 
 
 def _manifest(bundle: SolutionBundle, digest: str) -> dict[str, Any]:
+    """Build the strict JSON manifest, using ``digest`` as the array hash."""
     return {
         "schema_version": bundle.schema_version,
         "solution_id": bundle.solution_id,
@@ -196,11 +244,27 @@ def _manifest(bundle: SolutionBundle, digest: str) -> dict[str, Any]:
         "feasibility_margins": bundle.feasibility_margins,
         "assumptions": list(bundle.assumptions),
         "arrays_sha256": digest,
+        "model_lock": bundle.model_lock,
+        "admission": bundle.admission,
     }
+
+
+def _validate_admission_block(bundle: SolutionBundle) -> None:
+    """Check the optional WP-0c admission block against the recorded arrays."""
+    validate_admission(
+        bundle.admission,
+        time=np.asarray(bundle.arrays["time"]),
+        n_joints=len(bundle.joint_order),
+        arrays=bundle.arrays,
+    )
 
 
 def save_solution_bundle(bundle: SolutionBundle, directory: str | Path) -> Path:
     """Validate ``bundle`` and write it to a new ``directory``.
+
+    The recorded timebase must span at least one interval and contain the
+    impact time, including endpoints. This establishes temporal support only;
+    it does not qualify a contact root or forward-dynamics replay.
 
     Raises:
         SolutionBundleError: invalid bundle, or ``directory`` already exists.
@@ -208,6 +272,7 @@ def save_solution_bundle(bundle: SolutionBundle, directory: str | Path) -> Path:
     target = Path(directory)
     _validate_metadata(bundle)
     _validate_arrays(bundle)
+    _validate_admission_block(bundle)
     if target.exists():
         raise SolutionBundleError(f"{target} already exists; bundles are immutable")
     # Serialise the manifest before touching disk so a bad value leaves nothing.
@@ -295,9 +360,12 @@ def load_solution_bundle(
             assumptions=tuple(manifest["assumptions"]),
             arrays=arrays,
             schema_version=version,
+            model_lock=manifest.get("model_lock"),
+            admission=manifest.get("admission"),
         )
     except KeyError as exc:
         raise SolutionBundleError(f"manifest is missing field {exc}") from exc
     _validate_metadata(bundle)
     _validate_arrays(bundle)
+    _validate_admission_block(bundle)
     return bundle

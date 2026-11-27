@@ -1,0 +1,11 @@
+{
+  "case_colours_hand": "lead",
+  "min_vertical_n": 1.0,
+  "arrow_label": "ground",
+  "key_ground": "Net ground reaction, both feet ({part})",
+  "sources": {
+    "case_colours_hand": "Hand whose ZTCF/ZVCF/total colours (src/config/ztcf_zvcf_hand_colours.json) the ground arrow wears, so a case reads in one colour on hands and feet; lead is the Okabe-Ito tip-to-tail default.",
+    "min_vertical_n": "Net vertical load (N) at or below which the centre of pressure is undefined (moment over a vanishing force): no ground arrow is drawn rather than a point at infinity or NaN.",
+    "key_ground": "Colour-key row of the case's ground arrow; arrow_label prefixes its glyph label."
+  }
+}

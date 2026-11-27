@@ -72,6 +72,7 @@ def test_summary_reads_the_exporter_panel_and_flight() -> None:
         path_m=np.zeros((2, 3)), status="model prediction", ball_speed_mph=170.0,
         launch_deg=10.0, spin_rpm=1800.0, spin_axis_deg=2.0, carry_m=220.0,
         apex_m=19.0, lateral_m=27.0, aim_lateral_m=None, rollout=NS(total_m=250.0),
+        impact_time_s=1.32,
     )  # fmt: skip
     summary = shot.summary_from_shot(panel, flight)
     assert summary.club_speed_mph == 114.7 and summary.attack_angle_deg is None
@@ -101,3 +102,19 @@ def test_a_non_bundle_run_says_the_card_needs_a_bundle(tmp_path: Path) -> None:
     np.savez(record, q=np.zeros((3, 2)), time_s=np.arange(3.0))
     summary = shot.summary_for_path(record)
     assert summary.club_speed_mph is None and summary.status == CFG.needs_bundle_text
+
+
+def test_summary_records_the_impact_instant_the_speed_is_read_at() -> None:
+    """The plot marks the card's club speed at the instant the card reads it."""
+    rows = (NS(key="clubhead_speed", value=114.7),)
+    panel = NS(status="at impact", card=NS(rows=rows), verdict=NS(contact=True))
+    flight = NS(
+        path_m=np.zeros((2, 3)), status="model prediction", ball_speed_mph=170.0,
+        launch_deg=10.0, spin_rpm=1800.0, spin_axis_deg=2.0, carry_m=220.0,
+        apex_m=19.0, lateral_m=27.0, aim_lateral_m=None, rollout=None,
+        impact_time_s=1.3203,
+    )  # fmt: skip
+    assert shot.summary_from_shot(panel, flight, 1.3222).impact_time_s == 1.3203
+    flight.path_m = None  # no flight: the export's impact time
+    assert shot.summary_from_shot(panel, flight, 1.3222).impact_time_s == 1.3222
+    assert shot.summary_from_shot(panel, None).impact_time_s is None

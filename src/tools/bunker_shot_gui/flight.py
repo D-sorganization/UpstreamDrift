@@ -70,9 +70,16 @@ class BunkerFlight:
 def bunker_flight(
     launch: BallLaunchResult, *, refused: bool, dt: float = 0.01
 ) -> BunkerFlight | None:
-    """Fly a valid release and use the existing green solver; fail closed on invalid data."""
+    """Fly a valid release and use the existing green solver.
+
+    Refused shots return ``None`` without simulation. Otherwise ``dt`` must be
+    finite and strictly positive, even when optional contracts are disabled.
+    Invalid launch data or incomplete trajectories produce no flight trace.
+    """
     if refused:
         return None
+    if not math.isfinite(dt) or dt <= 0.0:
+        raise ValueError("dt must be finite and strictly positive")
     values = (
         launch.ball_speed_m_s,
         launch.launch_angle_rad,

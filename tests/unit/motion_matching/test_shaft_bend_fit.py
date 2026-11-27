@@ -185,3 +185,32 @@ def test_opposing_amplitudes_with_small_sum_stay_allowed(
     np.testing.assert_allclose(slopes[:, 0], 15.0, atol=1e-6)
     np.testing.assert_allclose(amplitudes[:, 0], 25.0, atol=1e-3)
     np.testing.assert_allclose(amplitudes[:, 1], -10.0, atol=1e-3)
+
+
+def test_15464_codex_review_two_shape_same_sign_tip_slope_bound(
+    geometry: ChainGeometry,
+) -> None:
+    """#15464 FIX-NEEDED repro: 15° + 15° targets must not yield 30° tip slope."""
+    base = load_bend_settings()
+    settings = type(base)(
+        shapes_per_plane=2,
+        smoothness_weight_m_per_rad=0.0,
+        ridge_weight_m_per_rad=0.0,
+        max_tip_slope_deg=20.0,
+        rank_relative_tolerance=base.rank_relative_tolerance,
+        solver_max_nfev=1000,
+        solver_tolerance=1e-12,
+    )
+    basis = shape_basis(geometry, 2)
+    amps = np.radians((15.0, 15.0))
+    bend = np.zeros((geometry.n_joints, 2))
+    bend[:, 0] = amps[0] * basis[0] + amps[1] * basis[1]
+    markers = np.tile(marker_positions(geometry, bend, OFFSETS), (3, 1, 1))
+    fit = fit_shaft_bend(geometry, markers, OFFSETS, settings)
+    assert fit.success
+    slopes = np.degrees(fit.bend.sum(axis=1))
+    assert np.all(np.abs(slopes[:, 0]) <= 20.0 + 1e-9)
+    assert np.all(np.abs(slopes[:, 1]) <= 20.0 + 1e-9)
+    plane_x = fit.amplitudes.reshape(-1, 2, 2).sum(axis=-1)
+    assert np.all(np.abs(np.degrees(plane_x)) <= 20.0 + 1e-9)
+    np.testing.assert_allclose(slopes[:, 0], 20.0, atol=1e-6)
