@@ -1,4 +1,8 @@
-"""Trunk evidence must migrate the exact embedded model, not mutable defaults."""
+"""Trunk evidence must migrate the exact embedded model, not mutable defaults.
+
+The v2 trunk is derived from the committed uncalibrated base, and the embedded
+(calibrated) model's calibration is carried onto it (#15670).
+"""
 
 from dataclasses import replace
 import hashlib
@@ -10,6 +14,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.motion_matching import full_body_migration as migration
+from src.shared.python.motion_matching import full_body_v2_calibration as calibration
 from src.shared.python.motion_matching import full_body_v2_geometry as geometry
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.same_input import reference
@@ -50,12 +55,21 @@ def test_migration_uses_embedded_spec_and_records_lineage(
         # Same coordinates are insufficient: geometry differs.
         mutable.write_text(json.dumps({**embedded, "grip_offset_m": 0.9}))
     monkeypatch.setattr(evidence, "V1_SPEC", mutable, raising=False)
+    base = {"coordinate_order": ["q"], "grip_offset_m": 0.0}
+    base_path = tmp_path / "base.json"
+    base_path.write_text(json.dumps(base))
+    monkeypatch.setattr(evidence, "V1_BASE_SPEC", base_path)
     monkeypatch.setattr(evidence, "V2_SPEC", tmp_path / "v2.json")
     monkeypatch.setattr(evidence, "V2_BUNDLE", tmp_path / "v2.npz")
+    trunk = {**base, "topology": "synthetic-v2"}
     derived = {**embedded, "topology": "synthetic-v2"}
 
     def derive(doc: dict, **kwargs: object) -> dict:
-        assert doc == embedded
+        assert doc == base
+        return trunk
+
+    def carry(v2: dict, base_v1: dict, calibrated_v1: dict) -> dict:
+        assert (v2, base_v1, calibrated_v1) == (trunk, base, embedded)
         return derived
 
     class Migrator:
@@ -75,6 +89,7 @@ def test_migration_uses_embedded_spec_and_records_lineage(
         return replace(bundle, spec_bytes=spec, provenance=kwargs["provenance"])
 
     monkeypatch.setattr(geometry, "derive_landmark_v2_spec", derive)
+    monkeypatch.setattr(calibration, "carry_calibration", carry)
     monkeypatch.setattr(migration, "TrunkMigrator", Migrator)
     monkeypatch.setattr(reference, "generate_reference_bundle", generate)
     result_bytes, result_path = evidence._build_v2_bundle(source)

@@ -144,7 +144,11 @@ class EngineParityRow:
 
 @dataclass(frozen=True)
 class UnifiedParityReport:
-    """Unified cross-engine evaluation report covering all comparison classes."""
+    """Cross-engine report whose verdict qualifies only evaluation_operation.
+
+    Older reports retain an unspecified operation; passing status alone cannot
+    establish whether FK or dynamic replay was evaluated.
+    """
 
     schema_version: str = PARITY_REPORT_SCHEMA_VERSION
     candidate_id: str = "unknown"
@@ -157,6 +161,14 @@ class UnifiedParityReport:
     engine_rows: dict[str, EngineParityRow] = field(default_factory=dict)
     pairwise_comparisons: dict[str, Any] = field(default_factory=dict)
     note: str = ""
+    evaluation_operation: str = "unspecified"
+
+    def __post_init__(self) -> None:
+        if (
+            not isinstance(self.evaluation_operation, str)
+            or not self.evaluation_operation.strip()
+        ):
+            raise ValueError("evaluation_operation must be a non-empty string")
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -168,6 +180,7 @@ class UnifiedParityReport:
             "created_at": self.created_at,
             "is_parity_accepted": self.is_parity_accepted,
             "status": self.status,
+            "evaluation_operation": self.evaluation_operation,
             "engine_rows": {k: v.to_dict() for k, v in self.engine_rows.items()},
             "pairwise_comparisons": self.pairwise_comparisons,
         }
@@ -201,6 +214,7 @@ class UnifiedParityReport:
             engine_rows=rows,
             pairwise_comparisons=dict(data.get("pairwise_comparisons", {})),
             note=str(data.get("note", "")),
+            evaluation_operation=data.get("evaluation_operation", "unspecified"),
         )
 
     def render_markdown(self) -> str:
@@ -213,6 +227,9 @@ class UnifiedParityReport:
             f"- **Reference Engine:** `{self.reference_engine}`",
             f"- **Generated At:** `{self.created_at}`",
             f"- **Overall Verdict:** `{self.status}`",
+            f"- **Evaluation Operation:** `{self.evaluation_operation}`",
+            "",
+            self.note,
             "",
             "## 1. Same-Model Numerical Parity",
             "",

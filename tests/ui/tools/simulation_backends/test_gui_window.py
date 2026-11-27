@@ -24,6 +24,11 @@ pytest.importorskip("PyQt6")
 pytestmark = pytest.mark.unit
 
 
+def test_headless_mujoco_backend_setting_is_platform_appropriate() -> None:
+    if os.name == "nt":
+        assert os.environ["MUJOCO_GL"] == "disable"
+
+
 def test_window_has_file_and_help_menus(qapp) -> None:  # noqa: ANN001
     from src.tools.simulation_backends_launcher.gui import (
         MainWidget,

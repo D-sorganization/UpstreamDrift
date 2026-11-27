@@ -28,6 +28,7 @@ from src.shared.python.hand_size import (
     resolve_hand_length_m,
     validate_hand_length_m,
 )
+from src.shared.python.model_appearance.golfer_model_versions import warn_if_deprecated
 from src.shared.python.model_appearance.grip_pose import (
     DEFAULT_GRIP_POSE,
     GripPose,
@@ -76,6 +77,8 @@ def wrist_follower_dorsal_axis(
 
 #: Hands a spec can draw on the club (``subject.hand_visual_backend``): the
 #: capsule hands of ``grip_hand_mesh``, or the skinned human pair (#15251).
+#: The skinned pair is the current model; the capsule default is the
+#: deprecated fallback for unrevised specs (``golfer_model_versions``, #15648).
 HAND_VISUAL_BACKENDS = ("capsule", "skinned_human")
 DEFAULT_HAND_VISUAL_BACKEND = "capsule"
 
@@ -100,6 +103,9 @@ class ResolvedHandSpec:
     #: The emitter draws the skinned body: a skinned hand ends in a sleeve under
     #: the forearm's skin (``skinned_club_hands.WristSleeve``), with no wrist ball.
     forearm_skin: bool = False
+    #: ``pose`` comes from the spec's ``subject.grip_config`` (#15654), not the
+    #: default: the skinned pair is then posed from it, else from the owner grip.
+    grip_configured: bool = False
 
     def __post_init__(self) -> None:
         if not isinstance(self.pose, GripPose):
@@ -118,6 +124,24 @@ class ResolvedHandSpec:
         return self.grip_geometry.radius_at(distance_below_butt_m)
 
 
+def spec_grip_pose(spec_document: Mapping[str, Any]) -> GripPose | None:
+    """The visual :class:`GripPose` of the spec's ``subject.grip_config``.
+
+    ``None`` for a document without one. ``ValueError`` for a configuration
+    that is not a valid grip (an unknown style, an angle out of range).
+    """
+    if not isinstance(spec_document, Mapping):
+        raise TypeError("spec_document must be a mapping")
+    if spec_document.get("subject", {}).get("grip_config") is None:
+        return None
+    # Imported here: grip_rotation pulls the motion-matching package.
+    from src.shared.python.motion_matching.execution.grip_rotation import (
+        grip_spec_of,
+    )
+
+    return grip_spec_of(spec_document).pose()
+
+
 def resolved_hand_spec(spec_document: Mapping[str, Any]) -> ResolvedHandSpec:
     """The :class:`ResolvedHandSpec` a spec document describes.
 
@@ -125,15 +149,8 @@ def resolved_hand_spec(spec_document: Mapping[str, Any]) -> ResolvedHandSpec:
     ``hand_size`` range.
     """
     subject = spec_document.get("subject", {})
-    if subject.get("grip_config") is not None:
-        # Imported here: grip_rotation pulls the motion-matching package.
-        from src.shared.python.motion_matching.execution.grip_rotation import (
-            grip_spec_of,
-        )
-
-        pose = grip_spec_of(spec_document).pose()
-    else:
-        pose = DEFAULT_GRIP_POSE
+    configured = spec_grip_pose(spec_document)
+    pose = DEFAULT_GRIP_POSE if configured is None else configured
     override = subject.get("hand_length_m")
     stature = subject.get("stature_m")
     if override is None and stature is None:
@@ -147,6 +164,7 @@ def resolved_hand_spec(spec_document: Mapping[str, Any]) -> ResolvedHandSpec:
         axis = wrist_follower_dorsal_axis(spec_document, hand, pose)
         if axis is not None:
             dorsal_axes[hand] = (float(axis[0]), float(axis[1]), float(axis[2]))
+    warn_if_deprecated(spec_document, "hand_visual_backend")
     return ResolvedHandSpec(
         pose=pose,
         hand_length_m=length,
@@ -154,4 +172,5 @@ def resolved_hand_spec(spec_document: Mapping[str, Any]) -> ResolvedHandSpec:
         visual_backend=str(
             subject.get("hand_visual_backend", DEFAULT_HAND_VISUAL_BACKEND)
         ),
+        grip_configured=configured is not None,
     )

@@ -439,3 +439,43 @@ def test_apply_scene_overlays_draws_ellipsoids_from_glyph_set() -> None:
     )
     apply_scene_overlays(None, scene, 0, None, None, [gs])
     assert scene.ngeom == before + 1
+
+
+@pytest.mark.unit
+def test_a_head_span_draws_a_slim_shaft_and_a_fixed_size_head() -> None:
+    """Owner review (#15150): arrows look blocky. With a head length in shaft
+    radii the shaft is a capsule and the arrow geom only spans the last
+    ``radii * shaft_radius`` metres, so the head no longer grows with the
+    arrow."""
+    model = mujoco.MjModel.from_xml_string("<mujoco><worldbody/></mujoco>")
+    scene = mujoco.MjvScene(model, maxgeom=10)
+    arrow = _make_dummy_arrow(
+        tail_m=(0.0, 0.0, 0.0), tip_m=(0.0, 0.0, 1.0), shaft_radius_m=0.01
+    )
+    receipt = add_glyphs_to_scene(
+        scene, _make_glyph_set(arrows=(arrow,)), arrow_head_shaft_radii=20.0
+    )
+    assert receipt.added == 2 and scene.ngeom == 2
+    shaft, head = scene.geoms[0], scene.geoms[1]
+    assert shaft.type == int(mujoco.mjtGeom.mjGEOM_CAPSULE)
+    assert head.type == int(mujoco.mjtGeom.mjGEOM_ARROW)
+    np.testing.assert_allclose(head.pos, [0.0, 0.0, 0.8], atol=1e-9)
+    assert head.size[0] == pytest.approx(shaft.size[0])  # seamless joint
+
+
+@pytest.mark.unit
+def test_an_arrow_shorter_than_the_head_span_is_one_arrow() -> None:
+    model = mujoco.MjModel.from_xml_string("<mujoco><worldbody/></mujoco>")
+    scene = mujoco.MjvScene(model, maxgeom=10)
+    arrow = _make_dummy_arrow(
+        tail_m=(0.0, 0.0, 0.0), tip_m=(0.0, 0.0, 0.1), shaft_radius_m=0.01
+    )
+    add_glyphs_to_scene(
+        scene, _make_glyph_set(arrows=(arrow,)), arrow_head_shaft_radii=20.0
+    )
+    assert scene.ngeom == 1
+    assert scene.geoms[0].type == int(mujoco.mjtGeom.mjGEOM_ARROW)
+    with pytest.raises(ValueError, match="head"):
+        add_glyphs_to_scene(
+            scene, _make_glyph_set(arrows=(arrow,)), arrow_head_shaft_radii=0.0
+        )

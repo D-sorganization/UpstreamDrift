@@ -1,0 +1,212 @@
+{
+  "schema_version": "player-appearance-presets/1",
+  "players": {
+    "tiger_woods": {
+      "display_name": "Tiger Woods",
+      "stature_m": 1.8542,
+      "mass_kg": 83.91458845,
+      "sources": [
+        {
+          "url": "https://news.tigerwoods.com/about-tiger/",
+          "values": "6 ft 1 in; 185 lb",
+          "era": "Official biography page; capture-period applicability is unestablished."
+        },
+        {
+          "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/2005_pgatour.pdf",
+          "values": "Historical PGA Tour media-guide profile; 6 ft 2 in; 180 lb (alternate published values, not selected).",
+          "era": "2005 media guide; differs from the current official biography."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=bado2QdgD3c",
+          "values": "Official USGA 2000 U.S. Open final-round broadcast, including Tiger Woods range footage.",
+          "era": "2000 event; source catalog identifies the range clip. Reviewed frames show other outfits; the selected red polo is an illustrative palette."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=t_J6Vik3Tss",
+          "values": "Video titled/attributed as Tiger Woods 2000 footage.",
+          "era": "Uploader-claimed 2000; event lineage is unverified."
+        }
+      ],
+      "limitations": [
+        "Stature and mass use the official biography values (6 ft 1 in, 185 lb), converted exactly; the page is not evidence of measurements during the 2000 footage. The historical media guide reports different values.",
+        "The red polo, near-black trousers, black cap, and dark shoes are an illustrative source-inspired palette, not a verified outfit from a particular frame.",
+        "Skin and hair swatches are visual approximations; this preset does not encode a measured face, body morphology, or capture-specific clothing."
+      ],
+      "appearance": {
+        "schema_version": "appearance-v1",
+        "name": "tiger_woods_stylized",
+        "skin_tone": "skin_5",
+        "clothing": "golf_polo_trousers",
+        "club_finish": "satin_steel",
+        "materials": {
+          "polo_white": { "base_color": [0.70, 0.12, 0.14, 1.0], "roughness": 0.85, "metallic": 0.0, "texture": { "kind": "noise", "noise": 0.04 } },
+          "trousers_charcoal": { "base_color": [0.08, 0.08, 0.09, 1.0], "roughness": 0.9, "metallic": 0.0, "texture": { "kind": "noise", "noise": 0.05 } },
+          "shoe_leather": { "base_color": [0.06, 0.06, 0.07, 1.0], "roughness": 0.35, "metallic": 0.0 }
+        },
+        "segments": [],
+        "environment": { "ground_material": "turf", "sky_top": [0.3, 0.5, 0.78], "sky_bottom": [0.88, 0.92, 0.96], "lighting": "studio" },
+        "head": {
+          "enabled": true,
+          "headwear": "hair",
+          "headwear_material": "hair_black",
+          "model": "cc0_mesh",
+          "hair_style": "short_crop",
+          "hair_part": "none",
+          "eye_color": "brown",
+          "cap_style": "baseball_cap",
+          "cap_material": "cap_black",
+          "cap_brim": 0.3,
+          "sizing": "stature",
+          "height_over_stature": 0.132,
+          "morph": { "width": 0.08, "jaw": 0.14, "nose": 0.08, "mouth": 0.12, "eyes": -0.03 }
+        },
+        "body_model": "ellipsoid",
+        "ball": { "enabled": false, "source": "address_geometry" },
+        "glove": "none",
+        "handedness": "right",
+        "foot": { "model": "procedural" }
+      }
+    },
+    "ben_hogan": {
+      "display_name": "Ben Hogan",
+      "stature_m": 1.7272,
+      "mass_kg": 68.0388555,
+      "sources": [
+        {
+          "url": "https://www.pgatour.com/player/01528/ben-hogan/bio",
+          "values": "5 ft 8 in; 150 lb",
+          "era": "PGA Tour biography; date/context of the listed measurements is not specified."
+        },
+        {
+          "url": "https://www.pga.com/story/pga-professionals-remember-the-legendary-swing-of-ben-25-years",
+          "values": "5 ft 8 in; 145 lb",
+          "era": "Retrospective PGA.com article; gives a conflicting mass value."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=DJDYMjmvFwg",
+          "values": "Compilation titled '10 Minutes of Ben Hogan (Every Angle Ever Recorded)'.",
+          "era": "Individual archive recording dates are unverified; representative-frame inspection does not qualify every compiled clip."
+        }
+      ],
+      "limitations": [
+        "Stature and mass use the PGA Tour biography values (5 ft 8 in, 150 lb), converted exactly; PGA.com gives the same stature and a different mass of 145 lb.",
+        "The pale polo and flat cap, muted grey-brown trousers, dark brown side-parted hair, and leather shoes are an illustrative source-inspired palette, not a verified outfit from a particular frame.",
+        "Skin and hair swatches are visual approximations; this preset does not encode a measured face, body morphology, or capture-specific clothing."
+      ],
+      "appearance": {
+        "schema_version": "appearance-v1",
+        "name": "ben_hogan_stylized",
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "club_finish": "satin_steel",
+        "materials": {
+          "trousers_charcoal": { "base_color": [0.40, 0.38, 0.34, 1.0], "roughness": 0.9, "metallic": 0.0, "texture": { "kind": "noise", "noise": 0.05 } }
+        },
+        "segments": [],
+        "environment": { "ground_material": "turf", "sky_top": [0.3, 0.5, 0.78], "sky_bottom": [0.88, 0.92, 0.96], "lighting": "studio" },
+        "head": {
+          "enabled": true,
+          "headwear": "hair",
+          "headwear_material": "hair_dark_brown",
+          "model": "cc0_mesh",
+          "hair_style": "short_crop",
+          "hair_part": "left",
+          "eye_color": "brown",
+          "cap_style": "flat_cap",
+          "cap_material": "cap_white",
+          "cap_brim": 0.12,
+          "sizing": "stature",
+          "height_over_stature": 0.132,
+          "morph": { "width": -0.03, "jaw": 0.08, "nose": 0.16, "mouth": -0.04, "eyes": -0.03 }
+        },
+        "body_model": "ellipsoid",
+        "ball": { "enabled": false, "source": "address_geometry" },
+        "glove": "none",
+        "handedness": "right",
+        "foot": { "model": "procedural" }
+      }
+    },
+    "seve_ballesteros": {
+      "display_name": "Seve Ballesteros", "stature_m": 1.83, "mass_kg": 80.0,
+      "sources": [
+        {"url": "https://www.jgto.org/en/player/10161/profile", "values": "183 cm; 80 kg", "era": "Japan Golf Tour profile; measurement date is unspecified."},
+        {"url": "https://www.pgatour.com/player/01051/seve-ballesteros/bio", "values": "6 ft 0 in; 195 lb", "era": "PGA Tour profile; same rounded height but conflicting mass; date is unspecified."},
+        {"url": "https://www.youtube.com/watch?v=iKdLRJHqNSw", "values": "The R&A verified 'Five of the best Open shots'; reviewed swing and 121.5 s close-up.", "era": "Published 2016; the individual clip event date is not identified."},
+        {"url": "https://www.youtube.com/watch?v=JqpeeZkAzYc", "values": "The R&A official film of Ballesteros winning The Open", "era": "1979 Royal Lytham; period source, not a measured-outfit record."}
+      ],
+      "limitations": ["Selected JGTO values are 183 cm and 80 kg; the PGA Tour profile lists 6 ft 0 in and 195 lb, with no measurement date on either profile. They are not asserted as exact 1979 measurements.", "The reviewed R&A compilation close-up shows a mustache, which this head library cannot represent. Dark side-parted hair and a navy shirt with pale collar are source-inspired; the collar detail is not modeled, and skin, face morph and proportions are artistic approximations."],
+      "appearance": {
+        "schema_version": "appearance-v1", "name": "seve_ballesteros_stylized", "skin_tone": "skin_3", "clothing": "golf_polo_trousers", "club_finish": "satin_steel",
+        "materials": {"polo_white": {"base_color": [0.10, 0.16, 0.29, 1.0]}, "trousers_charcoal": {"base_color": [0.10, 0.19, 0.35, 1.0]}, "shoe_leather": {"base_color": [0.86, 0.86, 0.82, 1.0]}},
+        "segments": [], "environment": {"ground_material": "turf", "sky_top": [0.3, 0.5, 0.78], "sky_bottom": [0.88, 0.92, 0.96], "lighting": "studio"},
+        "head": {"enabled": true, "headwear": "hair", "headwear_material": "hair_dark_brown", "model": "cc0_mesh", "hair_style": "short_crop", "hair_part": "left", "eye_color": "brown", "cap_style": "none", "cap_material": "cap_white", "cap_brim": 0.3, "sizing": "stature", "height_over_stature": 0.132, "morph": {"width": 0.13, "jaw": 0.06, "nose": 0.17, "mouth": 0.08, "eyes": 0.04}},
+        "body_model": "ellipsoid", "ball": {"enabled": false, "source": "address_geometry"}, "glove": "none", "handedness": "right", "foot": {"model": "procedural"}
+      }
+    },
+    "jack_nicklaus": {
+      "display_name": "Jack Nicklaus", "stature_m": 1.778, "mass_kg": 83.91458845,
+      "sources": [
+        {"url": "https://www.pgatour.com/player/01869/jack-nicklaus/bio", "values": "5 ft 10 in; 185 lb", "era": "PGA Tour bio; date and career period of measurements are unspecified."},
+        {"url": "https://www.nicklausmuseum.org/", "values": "5 ft 11 in; 190 lb", "era": "Nicklaus Museum biography; conflicts with PGA Tour values."},
+        {"url": "https://www.youtube.com/watch?v=L-Oc2isGu4E", "values": "The Masters verified 'The Final Hole of Jack's Last Masters Victory'; full-body swing and light shirt reviewed.", "era": "1986 Masters footage; clip published 2025, source video is not a measured-outfit record."}
+      ],
+      "limitations": ["Selected PGA Tour dimensions are exact conversions of 5 ft 10 in and 185 lb; the Nicklaus Museum lists 5 ft 11 in and 190 lb, so published values conflict.", "The reviewed 1986 footage shows fair short hair and a pale shirt. The gold shirt, dark trousers and head morph are stylized rather than sampled from a frame; proportions are not measured."],
+      "appearance": {
+        "schema_version": "appearance-v1", "name": "jack_nicklaus_stylized", "skin_tone": "skin_2", "clothing": "golf_polo_trousers", "club_finish": "satin_steel",
+        "materials": {"polo_white": {"base_color": [0.78, 0.57, 0.16, 1.0]}, "trousers_charcoal": {"base_color": [0.11, 0.17, 0.23, 1.0]}, "shoe_leather": {"base_color": [0.88, 0.86, 0.78, 1.0]}},
+        "segments": [], "environment": {"ground_material": "turf", "sky_top": [0.3, 0.5, 0.78], "sky_bottom": [0.88, 0.92, 0.96], "lighting": "studio"},
+        "head": {"enabled": true, "headwear": "hair", "headwear_material": "hair_blond", "model": "cc0_mesh", "hair_style": "short_crop", "hair_part": "left", "eye_color": "blue_grey", "cap_style": "none", "cap_material": "cap_navy", "cap_brim": 0.3, "sizing": "stature", "height_over_stature": 0.132, "morph": {"width": 0.17, "jaw": 0.12, "nose": -0.04, "mouth": 0.10, "eyes": -0.05}},
+        "body_model": "ellipsoid", "ball": {"enabled": false, "source": "address_geometry"}, "glove": "none", "handedness": "right", "foot": {"model": "procedural"}
+      }
+    },
+    "bobby_jones": {
+      "display_name": "Bobby Jones", "stature_m": 1.7272, "mass_kg": 74.84274105,
+      "sources": [
+        {"url": "https://www.encyclopedia.com/people/sports-and-games/sports-biographies/bobby-jones", "values": "5 ft 8 in; about 165 lb at the height of his golfing career", "era": "Biographical encyclopedia; mass is expressly approximate."},
+        {"url": "https://www.youtube.com/watch?v=LJsJQ0nXAxw", "values": "USGA verified 'How I Play Golf by Bob Jones'; reviewed follow-through frame.", "era": "Published 2025; footage is from the 1931 instructional series."}
+      ],
+      "limitations": ["The stature and approximate mass come from a secondary encyclopedia rather than a located primary measurement record; 165 lb is converted as a nominal prior.", "The reviewed USGA 1931 black-and-white frame informs the short dark hair and broad lower-face morph; clothing color is not recoverable from it. Cream shirt and brown trousers are period-inspired, not a verified outfit."],
+      "appearance": {
+        "schema_version": "appearance-v1", "name": "bobby_jones_stylized", "skin_tone": "skin_2", "clothing": "golf_polo_trousers", "club_finish": "satin_steel",
+        "materials": {"polo_white": {"base_color": [0.78, 0.75, 0.65, 1.0]}, "trousers_charcoal": {"base_color": [0.27, 0.24, 0.20, 1.0]}, "shoe_leather": {"base_color": [0.45, 0.34, 0.23, 1.0]}},
+        "segments": [], "environment": {"ground_material": "turf", "sky_top": [0.3, 0.5, 0.78], "sky_bottom": [0.88, 0.92, 0.96], "lighting": "studio"},
+        "head": {"enabled": true, "headwear": "hair", "headwear_material": "hair_black", "model": "cc0_mesh", "hair_style": "short_crop", "hair_part": "right", "eye_color": "brown", "cap_style": "none", "cap_material": "cap_navy", "cap_brim": 0.3, "sizing": "stature", "height_over_stature": 0.132, "morph": {"width": 0.10, "jaw": 0.10, "nose": 0.03, "mouth": -0.12, "eyes": 0.11}},
+        "body_model": "ellipsoid", "ball": {"enabled": false, "source": "address_geometry"}, "glove": "none", "handedness": "right", "foot": {"model": "procedural"}
+      }
+    },
+    "sam_snead": {
+      "display_name": "Sam Snead", "stature_m": 1.8034, "mass_kg": 86.1825503,
+      "sources": [
+        {"url": "https://www.pgatour.com/player/02119/sam-snead/bio", "values": "5 ft 11 in; 190 lb", "era": "PGA Tour biography; measurement date is unspecified."},
+        {"url": "https://worldgolfhalloffame.org/members/sam-snead.html", "values": "5 ft 10 in; 185 lb", "era": "World Golf Hall of Fame profile; conflicts with PGA Tour values."},
+        {"url": "https://www.youtube.com/watch?v=sS39129T7P0", "values": "Vertical Golf 'Sam Snead's Golf Swing in slow motion'; reviewed source frame.", "era": "Published 2025; original footage date and event are not established; uploader is not verified."},
+        {"url": "https://www.youtube.com/watch?v=Hhrd0y-zhRI", "values": "British Pathé newsreel of Snead winning the PGA Championship", "era": "1949 final; film description notes unused footage and possible date/location uncertainty."}
+      ],
+      "limitations": ["Selected PGA Tour dimensions are exact conversions of 5 ft 11 in and 190 lb; the Hall of Fame profile lists 5 ft 10 in and 185 lb.", "The reviewed 1949 newsreel is monochrome and notes unused footage with date/location uncertainty; ivory shirt and brown trousers are illustrative. A straw hat provides a period-inspired silhouette, not exact frame reproduction; face proportions are not measured."],
+      "appearance": {
+        "schema_version": "appearance-v1", "name": "sam_snead_stylized", "skin_tone": "skin_2", "clothing": "golf_polo_trousers", "club_finish": "satin_steel",
+        "materials": {"polo_white": {"base_color": [0.86, 0.82, 0.69, 1.0]}, "trousers_charcoal": {"base_color": [0.32, 0.24, 0.17, 1.0]}, "shoe_leather": {"base_color": [0.38, 0.30, 0.22, 1.0]}},
+        "segments": [], "environment": {"ground_material": "turf", "sky_top": [0.3, 0.5, 0.78], "sky_bottom": [0.88, 0.92, 0.96], "lighting": "studio"},
+        "head": {"enabled": true, "headwear": "hair", "headwear_material": "hair_grey", "model": "cc0_mesh", "hair_style": "short_crop", "hair_part": "left", "eye_color": "blue_grey", "cap_style": "straw_hat", "cap_material": "hat_straw", "cap_brim": 0.3, "sizing": "stature", "height_over_stature": 0.132, "morph": {"width": 0.08, "jaw": 0.16, "nose": -0.11, "mouth": 0.03, "eyes": -0.10}},
+        "body_model": "ellipsoid", "ball": {"enabled": false, "source": "address_geometry"}, "glove": "none", "handedness": "right", "foot": {"model": "procedural"}
+      }
+    },
+    "byron_nelson": {
+      "display_name": "Byron Nelson", "stature_m": 1.8542, "mass_kg": 79.37866475,
+      "sources": [
+        {"url": "https://www.pgatour.com/player/01863/byron-nelson/bio", "values": "6 ft 1 in; 175 lb", "era": "PGA Tour biography; measurement date is unspecified."},
+        {"url": "https://www.latimes.com/archives/la-xpm-2006-sep-27-me-nelson27-story.html", "values": "6 ft 1 in; 170 lb", "era": "Retrospective reports a lean 170 lb during his 1945 competitive period."},
+        {"url": "https://www.youtube.com/watch?v=vxN7YIgibZY", "values": "RollYourRock 'Byron Nelson Golf Swing / Frame-by-Frame (1945)'; reviewed pale cap and light shirt.", "era": "Published 2014; title claims 1945 but event date is independently unverified; uploader is not verified."},
+        {"url": "https://www.youtube.com/watch?v=dx5OTrB86Tw", "values": "PGA Tour retrospective Byron Nelson - Golf's Gentleman", "era": "2011 retrospective; includes career footage, not a measured-outfit record."}
+      ],
+      "limitations": ["PGA Tour dimensions are exact conversions of 6 ft 1 in and 175 lb; a retrospective describes 170 lb in the 1945 competitive era.", "The reviewed archival clip is black-and-white; its uploader's 1945 attribution is not independently verified. Pale blue shirt and navy trousers are illustrative color choices; facial proportions are not measured."],
+      "appearance": {
+        "schema_version": "appearance-v1", "name": "byron_nelson_stylized", "skin_tone": "skin_2", "clothing": "golf_polo_trousers", "club_finish": "satin_steel",
+        "materials": {"polo_white": {"base_color": [0.43, 0.66, 0.73, 1.0]}, "trousers_charcoal": {"base_color": [0.12, 0.21, 0.31, 1.0]}, "shoe_leather": {"base_color": [0.62, 0.55, 0.43, 1.0]}},
+        "segments": [], "environment": {"ground_material": "turf", "sky_top": [0.3, 0.5, 0.78], "sky_bottom": [0.88, 0.92, 0.96], "lighting": "studio"},
+        "head": {"enabled": true, "headwear": "hair", "headwear_material": "hair_dark_brown", "model": "cc0_mesh", "hair_style": "short_crop", "hair_part": "right", "eye_color": "brown", "cap_style": "baseball_cap", "cap_material": "cap_white", "cap_brim": 0.3, "sizing": "stature", "height_over_stature": 0.132, "morph": {"width": -0.04, "jaw": 0.03, "nose": 0.11, "mouth": -0.08, "eyes": 0.08}},
+        "body_model": "ellipsoid", "ball": {"enabled": false, "source": "address_geometry"}, "glove": "none", "handedness": "right", "foot": {"model": "procedural"}
+      }
+    }
+  }
+}

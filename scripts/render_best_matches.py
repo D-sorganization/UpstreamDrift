@@ -144,6 +144,29 @@ def load_ledger_entry(ledger_path: Path, engine: str) -> dict[str, Any]:
     raise ValueError(f"ledger has no entry for engine {engine!r}")
 
 
+def bind_ledger_entry(
+    entry: dict[str, Any], target: RenderTarget, input_hashes: dict[str, str]
+) -> dict[str, Any]:
+    """Return ``entry`` only if it was recorded for exactly the verified inputs.
+
+    A ledger row found by engine name alone may describe a different run of the same
+    engine (#14756 P3). The row must carry ``input_sha256`` equal to the hashes
+    ``verify_inputs`` just confirmed; a missing or differing map raises ValueError.
+    """
+    recorded = entry.get("input_sha256")
+    if not isinstance(recorded, dict) or not recorded:
+        raise ValueError(
+            f"{target.model_id}: ledger entry {entry.get('engine')!r} has no "
+            "input_sha256 binding to the rendered run"
+        )
+    if recorded != input_hashes:
+        raise ValueError(
+            f"{target.model_id}: ledger entry {entry.get('engine')!r} describes a "
+            "different run (input_sha256 does not match the verified inputs)"
+        )
+    return entry
+
+
 def _metric(value: float | None, unit: str) -> str:
     return "not measured" if value is None else f"{value:.1f} {unit}"
 
@@ -191,6 +214,7 @@ def render_summary(
         f"- Verdict: {entry['verdict']}",
         f"- Limitations and blockers: {entry['blocker']}",
         f"- Inputs (SHA-256): {_hash_list(input_hashes)}",
+        "- Ledger binding: verified (ledger input_sha256 equals the inputs above)",
         f"- Outputs (SHA-256): {_hash_list(output_hashes)}",
         "",
         "## Reproduction",
@@ -236,7 +260,9 @@ def _render(target: RenderTarget, args: argparse.Namespace, commit: str) -> None
         for p in sorted(out_dir.iterdir())
         if p.suffix in VIDEO_SUFFIXES
     }
-    entry = load_ledger_entry(args.ledger, target.ledger_engine)
+    entry = bind_ledger_entry(
+        load_ledger_entry(args.ledger, target.ledger_engine), target, input_hashes
+    )
     summary = render_summary(target, entry, input_hashes, outputs, commit)
     (out_dir / "SUMMARY.md").write_text(summary, encoding="utf-8")
 

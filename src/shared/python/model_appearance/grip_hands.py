@@ -104,13 +104,20 @@ def grip_radius_at(club: ClubAssembly, distance_below_butt_m: float) -> float:
 
 def face_square_axes(club: ClubAssembly) -> tuple[Array, Array]:
     """(top of grip, trail side) unit axes, at right angles to the shaft and
-    squared to the clubface. ``ValueError`` if the face is parallel to the shaft."""
+    squared to the clubface. ``ValueError`` if the face is parallel to the shaft.
+
+    A left-handed club's face is mirrored in the swing plane, which holds the
+    top of the grip: the cross product with its face normal is turned back so
+    both clubs share the axes (the second is then the left-hander's lead side).
+    """
     normal = np.asarray(clubface_vector(club), dtype=float)
     normal = normal - float(normal @ _GRIP_AXIS) * _GRIP_AXIS
     size = float(np.linalg.norm(normal))
     if size < 1e-6:
         raise ValueError("the club face normal is parallel to the shaft")
     x = np.cross(_GRIP_AXIS, normal / size)  # +t: the top of the grip (chin side)
+    if club.handedness == "left":
+        x = -x
     return x, np.cross(_GRIP_AXIS, x)
 
 
@@ -234,7 +241,8 @@ def grip_hand_meshes(
     meshes in the club-body frame.
 
     With ``hands.visual_backend`` set to ``skinned_human`` the skinned human
-    pair of :mod:`skinned_club_hands` is drawn instead, squared to the clubface.
+    pair of :mod:`skinned_club_hands` is drawn instead, squared to the clubface,
+    posed from the spec's grip when ``hands.grip_configured`` (#15654).
     """
     _check_club(club)
     _check_pose(pose)
@@ -245,7 +253,12 @@ def grip_hand_meshes(
         )
 
         under_skin = hands.forearm_skin
-        return skinned_hand_meshes(club, with_ball=not under_skin, sleeve=under_skin)
+        return skinned_hand_meshes(
+            club,
+            with_ball=not under_skin,
+            sleeve=under_skin,
+            grip=hands.pose if hands.grip_configured else None,
+        )
     return {
         label: _placed_hand(club, hand, pose, hand_length_m=hand_length_m, hands=hands)
         for hand, label in HAND_PARTS.items()

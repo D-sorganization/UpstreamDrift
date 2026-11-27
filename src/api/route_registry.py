@@ -22,7 +22,7 @@ from __future__ import annotations
 import contextlib
 import importlib
 import pkgutil
-from collections.abc import AsyncGenerator, Callable
+from collections.abc import AsyncGenerator, Callable, Sequence
 from typing import TYPE_CHECKING, ContextManager
 
 from fastapi import Depends, Request
@@ -374,6 +374,7 @@ def register_routes(
     prefix: str = "",
     exclude: frozenset[str] | None = None,
     optional: frozenset[str] | None = None,
+    extra_dependencies: Sequence[object] | None = None,
 ) -> int:
     """Discover and register all route modules on the given FastAPI app.
 
@@ -385,17 +386,28 @@ def register_routes(
         exclude: Module names to skip.
         optional: Module names allowed to fail import and be skipped. Defaults
             to ``_OPTIONAL_MODULES``. Mandatory modules fail closed (#7128).
+        extra_dependencies: Already-built FastAPI dependencies appended to
+            every router mounted at ``prefix``. Used to advertise deprecation
+            of a non-canonical REST prefix without removing those routes.
 
     Returns:
         Number of routers registered.
+
+    Raises:
+        TypeError: ``extra_dependencies`` is not a sequence of dependencies.
     """
+    if isinstance(extra_dependencies, (str, bytes)) or (
+        extra_dependencies is not None and not isinstance(extra_dependencies, Sequence)
+    ):
+        raise TypeError("extra_dependencies must be a sequence of dependencies")
+    extras = list(extra_dependencies or ())
     routes = discover_routes(exclude=exclude, optional=optional)
     for module_name, router in routes:
         deps = _dependencies_for_route(module_name)
         app.include_router(
             router,
             prefix=prefix,
-            dependencies=[Depends(dependency) for dependency in deps],
+            dependencies=[Depends(dependency) for dependency in deps] + extras,
         )
         logger.debug("Registered router from %s with prefix '%s'", module_name, prefix)
     return len(routes)
