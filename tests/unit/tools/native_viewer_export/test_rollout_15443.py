@@ -36,14 +36,15 @@ def test_roll_is_the_existing_runout_model_on_the_landing_state() -> None:
     assert got is not None
     # synthetic parabola: lands at (160, -8) m; the last 0.1 s step moves
     # (40, -2, -19.5) m/s (landing velocity is the last finite difference)
-    state = np.array([[160.0 / YD, -8.0 / YD, 40.0, -2.0, -19.5]])
+    spin = ro.landing_backspin_rads(flight.spin_rpm, flight.flight_time_s)
+    state = np.array([[160.0 / YD, -8.0 / YD, 40.0, -2.0, -19.5, spin]])
     rest = SlopeAwareGround()(state, "fairway", "flat", "driver")[0]
     offset = (rest - state[0, :2]) * YD
     assert got.roll_m == pytest.approx(math.hypot(*offset), rel=1e-9)
     assert got.total_m == pytest.approx(flight.carry_m + got.roll_m)
     assert got.end_offset_m == pytest.approx(tuple(offset))
     assert got.roll_m > 0.0 and got.end_offset_m[0] > 0.0  # rolls on down-range
-    assert got.skill == "driver" and got.model_id == "sg_runout_v1"
+    assert got.skill == "driver" and got.model_id == "sg_runout_v2"
 
 
 def test_a_scoring_iron_rolls_less_than_the_driver_and_unknown_clubs_none() -> None:
@@ -81,7 +82,7 @@ def test_manifest_has_si_roll_total_and_the_model_source() -> None:
     assert record["roll_m"] == pytest.approx(play.rollout.roll_m)
     assert record["total_m"] == pytest.approx(160.0 + record["roll_m"])
     assert record["assumption"] == "rollout: flat-fairway model"
-    assert record["model"] == "sg_runout_v1" and record["skill"] == "driver"
+    assert record["model"] == "sg_runout_v2" and record["skill"] == "driver"
     assert record["lie"] == "fairway" and record["slope"] == "flat"
     assert "Assumed prior" in record["source"]
     _, bare = _playback(None, replace(SETTINGS, rollout=None))

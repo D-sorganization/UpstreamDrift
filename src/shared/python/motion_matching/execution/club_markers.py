@@ -22,6 +22,9 @@ import numpy as np
 SCHEMA = "club-markers/1"
 CLUB_MARKER_BODY = "Clubhead"
 HEAD_TRIAD = ("Marker_2:2:1", "Marker_2:2:2", "Marker_2:2:3")
+#: Frame of the shaft markers (the cluster outside :data:`HEAD_TRIAD`) on a
+#: chain shaft: link 0 with the ``Clubhead`` placement (#15150 C23).
+SHAFT_MARKER_FRAME = "ClubheadShaft"  # no space: OpenSim component paths
 DERIVATION_METHOD = (
     "static-seed calibration: ik.attachments_m of the --static-seeds run on the "
     "club's capture (the static trial places every marker, club cluster included)"

@@ -69,7 +69,7 @@ class FactorSettings:
     widest_value: str
     closest_approach_fallback: bool
     grid_anchor: str = "bottom_right"
-    grid_font_height_divisor: int = 90
+    grid_font_tile_fraction: float = 0.056
     grid_min_font_px: int = 16
 
     def __post_init__(self) -> None:
@@ -90,18 +90,22 @@ class FactorSettings:
             raise ValueError("font_height_divisor and min_font_px must be positive")
         if self.grid_anchor not in GRID_ANCHORS:
             raise ValueError(f"grid_anchor must be one of {GRID_ANCHORS}")
-        for name in ("grid_font_height_divisor", "grid_min_font_px"):
-            value = getattr(self, name)
-            if isinstance(value, bool) or not isinstance(value, int):
-                raise TypeError(f"{name} must be an integer")
-            if value < 1:
-                raise ValueError(f"{name} must be positive")
+        fraction = self.grid_font_tile_fraction
+        if isinstance(fraction, bool) or not isinstance(fraction, int | float):
+            raise TypeError("grid_font_tile_fraction must be a number")
+        if not (math.isfinite(fraction) and 0.0 < fraction <= 1.0):
+            raise ValueError("grid_font_tile_fraction must lie in (0, 1]")
+        value = self.grid_min_font_px
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise TypeError("grid_min_font_px must be an integer")
+        if value < 1:
+            raise ValueError("grid_min_font_px must be positive")
 
     @property
     def grid_layout(self) -> compositor.GridLayout:
         """The panel placement in a composed 2x2 grid frame."""
         return compositor.GridLayout(
-            self.grid_anchor, self.grid_font_height_divisor, self.grid_min_font_px
+            self.grid_anchor, self.grid_font_tile_fraction, self.grid_min_font_px
         )
 
     @property

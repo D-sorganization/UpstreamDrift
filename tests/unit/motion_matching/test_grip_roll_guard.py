@@ -165,6 +165,19 @@ LEGACY = re.compile(
 SCANNED = (".py", ".md")
 SKIP_PARTS = ("vendor", "evidence", "archive", "node_modules", ".git")
 HISTORY = {"DEVELOPMENT_LOG.md"}
+#: development log archives are history too: archiving moves log entries there
+HISTORY_ARCHIVE = re.compile(r"DEVELOPMENT_LOG_ARCHIVE_\d{4}\.md")
+
+
+def _is_history(path: Path) -> bool:
+    """A development log or one of its yearly archives (history, not current)."""
+    return path.name in HISTORY or HISTORY_ARCHIVE.fullmatch(path.name) is not None
+
+
+def test_development_log_archives_count_as_history() -> None:
+    assert _is_history(Path("docs/development/DEVELOPMENT_LOG_ARCHIVE_2026.md"))
+    assert _is_history(Path("docs/development/DEVELOPMENT_LOG.md"))
+    assert not _is_history(Path("docs/development/HANDOFF.md"))
 
 
 def test_the_old_zero_wording_is_gone_everywhere() -> None:
@@ -190,7 +203,7 @@ def test_the_old_zero_wording_is_gone_everywhere() -> None:
     for path in paths:
         if (
             path.resolve() == this
-            or path.name in HISTORY
+            or _is_history(path)
             or any(part in SKIP_PARTS for part in path.parts)
         ):
             continue

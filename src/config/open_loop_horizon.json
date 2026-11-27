@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "description": "Open-loop replay horizon search (#15150 D2): how far back from impact an open-loop replay of the recorded efforts may start and still deliver the club within tolerance. The answer bounds B3 variant (ii) and C2.",
+  "face_tolerance_deg": 1.0,
+  "path_tolerance_deg": 1.0,
+  "head_speed_tolerance_mps": 0.5,
+  "step_s": 0.005,
+  "max_horizon_s": 0.3,
+  "notes": "Tolerances are provisional delivery-agreement bounds, not scientific acceptance: about 1 deg of face or path and 0.5 m/s of head speed at impact are the resolution of a launch-monitor reading. Candidate starts are impact - k * step_s for k = 1 .. floor(max_horizon_s / step_s); max_horizon_s covers the 50-200 ms pre-impact window B3 (ii) proposes, with margin. An error equal to its tolerance passes."
+}

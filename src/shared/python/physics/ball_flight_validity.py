@@ -79,13 +79,27 @@ def launch_spin_envelope(club: str | None) -> LaunchSpinEnvelope:
     Raises:
         TypeError: ``club`` is neither a string nor ``None``.
     """
+    club_class = club_class_of(club)
+    if club_class is None:
+        club_class = str(_settings()["fallback_club_class"])
+    return _envelope_of(club_class)
+
+
+def club_class_of(club: str | None) -> str | None:
+    """Club class whose name pattern matches ``club``, or ``None`` if none does.
+
+    ``None`` means :func:`launch_spin_envelope` would use the fallback class.
+
+    Raises:
+        TypeError: ``club`` is neither a string nor ``None``.
+    """
     if club is not None and not isinstance(club, str):
         raise TypeError(f"club must be a string or None, got {type(club).__name__}")
     name = (club or "").strip().lower()
     for entry in _settings()["club_name_patterns"]:
         if re.search(entry["pattern"], name):
-            return _envelope_of(str(entry["club_class"]))
-    return _envelope_of(str(_settings()["fallback_club_class"]))
+            return str(entry["club_class"])
+    return None
 
 
 # Tour-labelled driver launch spin for face-to-path 10–15 deg (issue #14621);

@@ -104,13 +104,20 @@ def grip_radius_at(club: ClubAssembly, distance_below_butt_m: float) -> float:
 
 def face_square_axes(club: ClubAssembly) -> tuple[Array, Array]:
     """(top of grip, trail side) unit axes, at right angles to the shaft and
-    squared to the clubface. ``ValueError`` if the face is parallel to the shaft."""
+    squared to the clubface. ``ValueError`` if the face is parallel to the shaft.
+
+    A left-handed club's face is mirrored in the swing plane, which holds the
+    top of the grip: the cross product with its face normal is turned back so
+    both clubs share the axes (the second is then the left-hander's lead side).
+    """
     normal = np.asarray(clubface_vector(club), dtype=float)
     normal = normal - float(normal @ _GRIP_AXIS) * _GRIP_AXIS
     size = float(np.linalg.norm(normal))
     if size < 1e-6:
         raise ValueError("the club face normal is parallel to the shaft")
     x = np.cross(_GRIP_AXIS, normal / size)  # +t: the top of the grip (chin side)
+    if club.handedness == "left":
+        x = -x
     return x, np.cross(_GRIP_AXIS, x)
 
 

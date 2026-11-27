@@ -8,7 +8,7 @@
   "font_height_divisor": 45,
   "min_font_px": 11,
   "grid_anchor": "bottom_right",
-  "grid_font_height_divisor": 90,
+  "grid_font_tile_fraction": 0.056,
   "grid_min_font_px": 16,
   "widest_value": "+000.0 mph",
   "sources": {
@@ -21,8 +21,8 @@
     "font_height_divisor": "Font size is the frame height divided by this (45, as the impact card).",
     "min_font_px": "Smallest font size in pixels (11, as the impact card).",
     "grid_anchor": "Where the panel (this one, and the impact card a clip draws when this panel is off) sits in the composed 2x2 grid export; single-view exports use position. The corner of the grid: bottom_right, bottom_left, top_right or top_left, so the panel lies inside one tile's corner and never spans two. bottom_right is the oblique tile's lower right: in the 1280x720 four-view clip of the reviewed driver swing it was empty ground at impact and through the follow-through and finish, while the top corners hold the down-the-line golfer, whom a frame-sized panel covered completely.",
-    "grid_font_height_divisor": "Grid font size is the composed frame height divided by this: 90 gives the size a single view has at its own height (tile height over 45), i.e. the panel shrinks from the frame-sized 32 px to the HUD text size.",
-    "grid_min_font_px": "Smallest grid font size in pixels, and the size the panel falls back to when it does not fit its tile; 16 is the HUD text size (compositor.HUD_SIZE_PX), so the panel text is never smaller than the HUD text.",
+    "grid_font_tile_fraction": "Grid font size as a fraction of the tile height (the composed frame is 2x2, so a tile is half the frame height), at least grid_min_font_px. 0.056 gives 20 px in the 360 px tiles of the 1280x720 four-view clip and scales with larger tiles; the first-pass flight clip review (#15150) found the panel text small at the former size (frame height over 90, which sat on the 16 px floor at 720 px). At 20 px the eight-row panel is 258 px tall and fits the 328 px clear height of that tile.",
+    "grid_min_font_px": "Smallest grid font size in pixels, and the size the panel falls back to when it does not fit its tile; 16 is the HUD text size (compositor.HUD_SIZE_PX), so the panel text is never smaller than the HUD text in small tiles.",
     "widest_value": "Text the panel width is reserved for in every row, so live values cannot change the panel size."
   }
 }

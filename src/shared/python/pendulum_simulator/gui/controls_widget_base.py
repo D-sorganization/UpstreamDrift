@@ -472,19 +472,17 @@ class ControlsWidgetBase(QWidget):
         Works regardless of whether sidekick is installed.
         Subclasses should use this when parsing inputs that might be
         UnitAwareInput or plain LabeledInput widgets.
+
+        Dispatches on the ``value_si`` method rather than ``isinstance``: a
+        widget built before its module was purged and re-imported fails the
+        identity check, and its ``value`` is a method, not text.
         """
         assert widget is not None, "widget must be provided"
         from .controls_utils import parse_float
 
-        try:
-            from src.shared.python.sidekick.ui.widgets.unit_aware_input import (
-                UnitAwareInput as _UAI,
-            )
-
-            if isinstance(widget, _UAI):
-                return widget.value_si()
-        except ImportError:
-            pass
+        value_si = getattr(widget, "value_si", None)
+        if callable(value_si):
+            return float(value_si())
         return parse_float(widget, label)  # type: ignore[arg-type]
 
     def _update_torque_preview(self) -> None:

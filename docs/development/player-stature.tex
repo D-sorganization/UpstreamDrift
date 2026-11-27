@@ -1,0 +1,46 @@
+\documentclass{article}
+\usepackage{amsmath,hyperref}
+\title{Neutral Geometry Stature Calibration for Player Models}
+\author{UpstreamDrift}
+\date{26 November 2026}
+\begin{document}
+\maketitle
+\section{Scope and Convention}
+Issue 15821, parent 15814. This record is separate from the engineering
+manual. The selected published priors and conflicting reports are in
+\texttt{player-models.tex}. Neither golfer's segment anatomy was measured.
+We use an explicit construction convention: world-$z$ head-skin maximum
+minus the lowest procedural shoe-sole vertex at all-zero joint coordinates.
+Hair, cap and club are excluded. Shoes are included, so matching this span
+does not establish measured barefoot stature or a two-foot contact pose.
+\section{Bounded Construction}
+For target stature $h$ and body mass $m$, retain the de Leva thigh and shank
+lengths $L_i(h,m)$. Compose the existing anthropometric model with trunk
+scale $s$, exact subject-mass matching and those explicit leg lengths.
+Let $T_b(s)$ be each body's zero-pose transform and $V_b$ its relevant mesh.
+The shared-geometry measurement is
+\[
+ H(s)=\max_{v\in V_{\rm head}}[T_{\rm head}(s)v]_z
+      -\min_{b\in\rm soles,\ v\in V_b}[T_b(s)v]_z.
+\]
+Solve $H(s)-h=0$ with a bracketed Brent solve, $0.6\leq s\leq1.2$,
+parameter tolerance $10^{-7}$ and at most 32 iterations. Invalid inputs,
+unreachable brackets or a finalized residual above 0.1 mm fail explicitly.
+Bounds are modeling guardrails, not a statistical anatomical interval.
+Apply the current grip, wrist, body and flexible-shaft revisions; recalculate
+mass properties through the existing builder policy. No custom inertia
+scaling is introduced. The appearance-only export never invokes this build.
+\section{Evidence and Interpretation}
+Tiger's solution is $s=0.9039311964$, $H=1.8542$ m; Hogan's is
+$s=0.8945047692$, $H=1.7272$ m. Uncalibrated spans were 1.91593 m and
+1.79034 m respectively. Tests independently compile emitted native MJCF
+and transform actual head/sole mesh vertices: both pass within 1 mm.
+They also check subject mass and both legs' actual hip--knee and knee--ankle
+distances. The spec's \texttt{anthropometry.segments} remains its reference
+table; the calibration receipt records the selected resolved leg priors.
+These calculations change physical torso geometry and invalidate old motion
+fits. Preview poses must be regenerated. They do not establish anatomical
+fidelity, dynamics qualification, exact facial likeness or historical motion.
+Panel \texttt{th\_dc9214ce804e} unanimously supported bounded torso calibration
+with independent native verification and exact skin-only physics preservation.
+\end{document}

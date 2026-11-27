@@ -128,6 +128,8 @@ def test_pinocchio_adapter_protocol_structure() -> None:
     mock_plant.model.nq = 3
     mock_plant.model.nv = 3
     mock_plant.data = MagicMock()
+    # rigid club: no chain-shaft spring torque (#15150 Z6a)
+    mock_plant.shaft_spring_torque.return_value = np.zeros(3)
 
     mock_pin = MagicMock()
     mock_pin.crba.return_value = np.eye(3)

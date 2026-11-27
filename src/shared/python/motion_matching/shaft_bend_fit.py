@@ -13,6 +13,9 @@ is confounded with the face-roll calibration). The bend is therefore a sum of
 static beam shapes (:func:`shape_basis`) whose amplitudes are tip slopes,
 bounded and smoothed by ``shaft_bend_fit_settings.json``. The bound is on the
 combined tip slope of a plane (the sum of its amplitudes). Kinematic only.
+
+Narrow acceptance scope and reproduction commands:
+``docs/research/shaft_bend_kinematic_fit/shaft_bend_kinematic_fit.md``.
 """
 
 from __future__ import annotations

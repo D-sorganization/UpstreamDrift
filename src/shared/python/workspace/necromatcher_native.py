@@ -24,7 +24,11 @@ if TYPE_CHECKING:
     from .necromatcher import NecromatcherLibrary
 
 from .necromatcher_efforts import AuthoredEffortProfile, effort_units_for_coordinates
-from .necromatcher_ranges import AuthoredCoordinateBounds, extract_authored_bounds
+from .necromatcher_ranges import (
+    AuthoredCoordinateBounds,
+    export_bound_native_xml,
+    extract_authored_bounds,
+)
 
 
 @dataclass(frozen=True)
@@ -45,10 +49,6 @@ def load_native_model_binding(
     coordinate_units: tuple[str, ...],
 ) -> NativeModelBinding:
     """Verify stored XML, declared order and compiled scalar units before use."""
-    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
-        export_full_body_mjcf,
-    )
-
     model = library.load_asset(model_id)
     if model.kind != "native_model" or model.metadata["engine"] != "mujoco":
         raise ValueError("Native binding currently requires a MuJoCo full-body model")
@@ -61,7 +61,7 @@ def load_native_model_binding(
         raise ValueError("Native model definition requires coordinate order") from exc
     if order != tuple(model.metadata["dofs"]):
         raise ValueError("Native model coordinate order differs from registered model")
-    xml, _ = export_full_body_mjcf(definition_bytes)
+    xml = export_bound_native_xml(definition_bytes)
     model_hash = model.metadata["hash"]
     if "sha256:" + hashlib.sha256(xml.encode("utf-8")).hexdigest() != model_hash:
         raise ValueError("Definition does not reproduce the bound native model hash")
