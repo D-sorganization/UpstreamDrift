@@ -30,6 +30,7 @@ FIXTURES = Path(__file__).parents[3] / "fixtures" / "launch_monitor"
 
 @pytest.fixture
 def window(qtbot: Any) -> Iterator[LaunchMonitorAnalyticsWindow]:
+    """Show the real workbench and clean up its worker on teardown."""
     result = LaunchMonitorAnalyticsWindow()
     qtbot.addWidget(result)
     result.show()
@@ -39,6 +40,7 @@ def window(qtbot: Any) -> Iterator[LaunchMonitorAnalyticsWindow]:
 
 
 def _select_tab(window: LaunchMonitorAnalyticsWindow, label: str) -> None:
+    """Click the tab with this label."""
     tabs = window.main_widget.tabs
     bar = tabs.tabBar()
     index = next(i for i in range(tabs.count()) if tabs.tabText(i) == label)
@@ -47,6 +49,7 @@ def _select_tab(window: LaunchMonitorAnalyticsWindow, label: str) -> None:
 
 
 def test_relationship_click_through_and_reopen(window: Any, qtbot: Any) -> None:
+    """Import two vendors, run a relationship, and reopen the window."""
     panel = window.main_widget
     panel.import_file(FIXTURES / "trackman.csv")
     panel.import_file(FIXTURES / "garmin.csv")
@@ -78,6 +81,7 @@ def test_relationship_click_through_and_reopen(window: Any, qtbot: Any) -> None:
 def test_model_click_fits_real_held_out_shots(
     window: Any, qtbot: Any, tmp_path: Path
 ) -> None:
+    """A real click fits a held-out linear model on synthetic shots."""
     # Synthetic software-test data; no experimental accuracy claim.
     source = tmp_path / "shots.csv"
     header = (FIXTURES / "trackman.csv").read_text().splitlines()[0]
@@ -108,9 +112,11 @@ def test_model_click_fits_real_held_out_shots(
 
 
 def test_standalone_close_cancels_active_worker(window: Any, qtbot: Any) -> None:
+    """Closing the standalone window cancels an active analysis worker."""
     started, stopped = Event(), Event()
 
     def cooperative_job(ctx: WorkerContext) -> None:
+        """Block until the worker context is cancelled."""
         # Gate a real QThread deterministically; no wall-clock race with a fit.
         started.set()
         try:
