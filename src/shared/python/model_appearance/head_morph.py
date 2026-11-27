@@ -103,6 +103,7 @@ def _portrait_warp(
     def band(
         value: NDArray[np.float64], centre: float, radius: float
     ) -> NDArray[np.float64]:
+        """Return a compact smooth influence window around one facial landmark."""
         return np.maximum(1 - ((value - centre) / radius) ** 2, 0) ** 2
 
     bridge = band(y, 0, 0.10) * band(z, 0.51, 0.15) * face
