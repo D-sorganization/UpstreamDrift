@@ -86,13 +86,17 @@ from src.api.routes import (  # noqa: E402
 )
 from src.api.services.chat_service import ChatService  # noqa: E402
 from src.api.task_manager import TaskManager  # noqa: E402
+from src.api.utils.lazy_services import (  # noqa: E402
+    LazyServiceProxy as _LazyServiceProxy,
+    UnavailableEngineManager as _UnavailableEngineManager,
+)
 from src.api.utils.path_validation import (  # noqa: E402
     LOGO_SUFFIXES,
     resolve_file_within,
 )
 from src.api.services.chat_app_context import make_app_state_provider  # noqa: E402
 from src.shared.python.app_state import get_state_logger  # noqa: E402
-from src.shared.python.config.environment import is_production  # noqa: E402
+from src.shared.python.config.environment import get_golf_port, is_production  # noqa: E402
 from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
 
 logger = get_logger(__name__)
@@ -119,50 +123,15 @@ def _raise_if_diagnostics_disabled() -> None:
         raise HTTPException(status_code=404)
 
 
-class _LazyServiceProxy:
-    """Lazily instantiate heavy API services on first attribute access."""
-
-    def __init__(self, factory: Callable[[], Any]) -> None:
-        self._factory = factory
-        self._service: Any | None = None
-
-    def _resolve(self) -> Any:
-        if self._service is None:
-            self._service = self._factory()
-        return self._service
-
-    def __getattr__(self, name: str) -> Any:
-        return getattr(self._resolve(), name)
-
-
-class _UnavailableEngineManager:
-    """Engine manager fallback used when optional engine imports are unavailable."""
-
-    def __init__(self, reason: str) -> None:
-        self.reason = reason
-
-    def get_available_engines(self) -> list[Any]:
-        return []
-
-    def get_current_engine(self) -> None:
-        return None
-
-    def get_engine_status(self, _engine_type: Any) -> Any:
-        from src.shared.python.engine_core.engine_registry import EngineStatus
-
-        return EngineStatus.UNAVAILABLE
-
-    def get_active_physics_engine(self) -> None:
-        return None
-
-
 def _load_engine_manager_class() -> Any:
+    """load engine manager class."""
     from src.shared.python.engine_core.engine_manager import EngineManager
 
     return EngineManager
 
 
 def _create_engine_manager() -> Any:
+    """create engine manager."""
     try:
         manager_class = _load_engine_manager_class()
         return manager_class()
@@ -174,12 +143,14 @@ def _create_engine_manager() -> Any:
 
 
 def _create_simulation_service(engine_manager: Any) -> Any:
+    """create simulation service."""
     from src.api.services.simulation_service import SimulationService
 
     return SimulationService(engine_manager)
 
 
 def _create_analysis_service(engine_manager: Any) -> Any:
+    """create analysis service."""
     from src.api.services.analysis_service import AnalysisService
 
     return AnalysisService(engine_manager)
@@ -502,6 +473,7 @@ def _execute_tile_launch(
         """Minimal model object compatible with handler.launch()."""
 
         def __init__(self, data: dict[str, Any]) -> None:
+            """init."""
             for k, v in data.items():
                 setattr(self, k, v)
 
@@ -649,6 +621,7 @@ def _register_health_and_diagnostic_endpoints(
         return {
             "status": "healthy",
             "mode": "local",
+            "bind_port": get_golf_port(),
             "auth_required": False,
             "engines": [e.value for e in engine_manager.get_available_engines()],
             "ui_available": _startup_metrics.get("static_files_mounted", False),
@@ -1023,6 +996,7 @@ def create_local_app() -> FastAPI:
 
     @app.on_event("shutdown")
     async def shutdown_task_manager() -> None:
+        """shutdown task manager."""
         await task_manager.shutdown()
 
     # Desktop-specific overrides FIRST (issue #8010). FastAPI resolves
@@ -1146,6 +1120,7 @@ def _schedule_browser_open(host: str, port: int, delay: float = 1.5) -> threadin
     import webbrowser
 
     def open_browser() -> None:
+        """open browser."""
         from src.shared.python.config.environment import is_browser_suppressed
 
         if not is_browser_suppressed():
