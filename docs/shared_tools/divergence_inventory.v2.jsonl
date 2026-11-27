@@ -2669,6 +2669,7 @@
 {"path": "shadow_tracker/fitting.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/footage_workflows.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/forward_model.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
+{"path": "shadow_tracker/frame_pin.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/historical_capture.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/ingestion.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/initialization.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
