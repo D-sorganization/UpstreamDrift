@@ -57,7 +57,7 @@ def test_straw_crown_flattens_without_losing_hair_clearance():
     assert straw.vertices[:, 2].max() > 1.02
     assert straw.volume() > 0
     band = dict(head_cap.build_straw_hat(skin))["straw_band"]
-    assert band.vertices[:, 2].max() > 0.90
+    assert 0.075 < np.ptp(band.vertices[:, 2]) < 0.105
 
 
 def test_baseball_geometry_is_unchanged():
@@ -121,3 +121,25 @@ def test_period_hats_do_not_change_native_physics():
                 np.testing.assert_array_equal(
                     getattr(states[0], key), getattr(state, key)
                 )
+
+
+def test_short_peak_snap_is_at_the_front():
+    """On short period peaks, pull the crown down to a front snap."""
+    skin = head_mesh._default_asset().skin
+    for crop in (head_cap.flat_cap_crop(), head_cap.newsboy_cap_crop()):
+        parts = dict(head_cap.build_period_cap(skin, 0.12, crop))
+        brim, snap = parts["cap_brim"].vertices, parts["cap_snap"].vertices
+        assert snap[:, 0].mean() > brim[:, 0].max() - 0.02
+
+
+def test_crown_pull_preserves_triangle_winding():
+    """Keep the reshaped crown locally oriented throughout the brim range."""
+    skin = head_mesh._default_asset().skin
+    for crop in (head_cap.flat_cap_crop(), head_cap.newsboy_cap_crop()):
+        for length in (0.1, 0.12, 0.3, 0.8):
+            original = dict(head_cap.build_cap(skin, length, crop))["cap_crown"]
+            changed = dict(head_cap.build_period_cap(skin, length, crop))["cap_crown"]
+            a, b = original.vertices[original.faces], changed.vertices[changed.faces]
+            na = np.cross(a[:, 1] - a[:, 0], a[:, 2] - a[:, 0])
+            nb = np.cross(b[:, 1] - b[:, 0], b[:, 2] - b[:, 0])
+            assert (np.einsum("ij,ij->i", na, nb) > 0).all()
