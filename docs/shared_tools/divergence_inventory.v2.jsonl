@@ -2109,6 +2109,7 @@
 {"path": "notes/notes_dock_widget.py", "classification": "tools-only", "package": "notes", "spelling_only": false}
 {"path": "notes/storage.py", "classification": "tools-only", "package": "notes", "spelling_only": false}
 {"path": "optimization/__init__.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
+{"path": "optimization/_finite_array.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/_swing_constraints.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/_swing_kinematics.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/_swing_models.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
@@ -2136,6 +2137,7 @@
 {"path": "optimization/ocp/swing_ocp.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/ocp/symbolic_model.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/ocp/tracking_ocp.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
+{"path": "optimization/root_wrench_audit.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/smooth_costs.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/solution_bundle.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/swing_bridge.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
@@ -2669,6 +2671,7 @@
 {"path": "shadow_tracker/fitting.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/footage_workflows.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/forward_model.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
+{"path": "shadow_tracker/frame_pin.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/historical_capture.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/ingestion.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/initialization.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
