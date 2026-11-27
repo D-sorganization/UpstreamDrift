@@ -196,6 +196,26 @@ def test_playback_buttons_drive_the_gif_movie(window, app) -> None:
     movie = widget.movie
     assert movie is not None and movie.state() == QMovie.MovieState.Running
 
+
+def test_one_frame_gif_keeps_running_past_its_frame_delay(window, app) -> None:
+    """A still playback.gif must stay Running after its single frame delay."""
+    from PyQt6.QtCore import QElapsedTimer
+    from PyQt6.QtGui import QMovie
+
+    widget = window.widget
+    _click_row(widget, app, _driver_row(widget))
+    movie = widget.movie
+    assert movie is not None and movie.frameCount() == 1
+    delay_ms = max(int(movie.nextFrameDelay()), 0)
+    timer = QElapsedTimer()
+    timer.start()
+    while timer.elapsed() < delay_ms + 80:
+        app.processEvents()
+    assert movie.state() == QMovie.MovieState.Running
+    _click(_button(widget, "Pause"))
+    app.processEvents()
+    assert movie.state() == QMovie.MovieState.Paused
+
     _click(_button(widget, "Pause"))
     assert movie.state() == QMovie.MovieState.Paused
     _click(_button(widget, "Play"))

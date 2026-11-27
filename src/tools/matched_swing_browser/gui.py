@@ -71,6 +71,7 @@ class MatchedSwingBrowserWidget(QWidget):
         self._current_filtered_rows: list[LedgerRow] = []
         self._selected_row: LedgerRow | None = None
         self._movie: QtGui.QMovie | None = None
+        self._movie_loop_token = 0
 
         self._init_ui()
         self.reload_ledger()
@@ -579,9 +580,18 @@ class MatchedSwingBrowserWidget(QWidget):
         gif_path = self._model.resolve_artifact_path(row, "gif")
 
         if gif_path and gif_path.is_file():
-            self._movie = QtGui.QMovie(str(gif_path))
-            self._gif_lbl.setMovie(self._movie)
-            self._movie.start()
+            self._movie_loop_token += 1
+            token = self._movie_loop_token
+            movie = QtGui.QMovie(str(gif_path))
+            movie.setCacheMode(QtGui.QMovie.CacheMode.CacheAll)
+            self._movie = movie
+            self._gif_lbl.setMovie(movie)
+            movie.finished.connect(
+                lambda token=token, movie=movie: self._resume_finished_movie(
+                    token, movie
+                )
+            )
+            movie.start()
             self._set_playback_controls_enabled(True)
         else:
             self._gif_lbl.setText("No visual playback artifact available")
@@ -632,9 +642,20 @@ class MatchedSwingBrowserWidget(QWidget):
         self._pause_btn.setEnabled(enabled)
         self._restart_btn.setEnabled(enabled)
 
+    def _resume_finished_movie(self, token: int, movie: QtGui.QMovie) -> None:
+        """Keep playback Running after a finite or single-frame GIF ends."""
+        if token != self._movie_loop_token or self._movie is not movie:
+            return
+        if movie.state() == QtGui.QMovie.MovieState.Paused:
+            return
+        movie.start()
+
     def _on_play_gif(self) -> None:
-        if self._movie:
-            self._movie.setPaused(False)
+        if self._movie is None:
+            return
+        if self._movie.state() == QtGui.QMovie.MovieState.NotRunning:
+            self._movie.start()
+        self._movie.setPaused(False)
 
     def _on_pause_gif(self) -> None:
         if self._movie:
@@ -646,6 +667,7 @@ class MatchedSwingBrowserWidget(QWidget):
             self._movie.start()
 
     def _stop_movie(self) -> None:
+        self._movie_loop_token += 1
         if self._movie:
             self._movie.stop()
             self._gif_lbl.clear()

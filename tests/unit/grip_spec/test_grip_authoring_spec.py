@@ -32,12 +32,19 @@ from src.shared.python.model_appearance.grip_pose import (
 
 pytestmark = pytest.mark.unit
 
-_SHELLS_13997 = frozenset({"dorsum", "palm_index", "thumb_web"})
-_GOLDEN_MESH_DIGEST = "a197809270636c398441505e402274b6107ec032588d22f3563f173f2523393a"
+# Dorsum was already outside the pre-#13997 digest. palm_index (lead palm
+# strip) and thumb_web are hashed: skipping them hid the shells this PR adds.
+_EXCLUDED_FROM_MESH_DIGEST = frozenset({"dorsum"})
+_REQUIRED_SHELLS_13997 = {
+    "lead": frozenset({"palm_index", "thumb_web"}),
+    "trail": frozenset({"thumb_web"}),
+}
+# 14 mm overlap pose, including palm_index and both thumb_web shells.
+_GOLDEN_MESH_DIGEST = "1b061c73a1cd6b344d1f93f0aa9adba5ad301a963af44fcb521aa1b79b02a688"
 
 
-def _mesh_summary_digest(pose: GripPose | None = None) -> str:
-    """mesh summary digest."""
+def _mesh_summary(pose: GripPose | None = None) -> dict[str, object]:
+    """Vertex summary of every shell except the pre-existing dorsum exclusion."""
     pose = DEFAULT_GRIP_POSE if pose is None else pose
     radius = 0.014
     summary: dict[str, object] = {}
@@ -47,7 +54,7 @@ def _mesh_summary_digest(pose: GripPose | None = None) -> str:
             hand_key = hand.value
             summary.setdefault(style.value, {})[hand_key] = {}
             for comp in result.components:
-                if comp.name in _SHELLS_13997:
+                if comp.name in _EXCLUDED_FROM_MESH_DIGEST:
                     continue
                 vertices = comp.mesh.vertices
                 summary[style.value][hand_key][comp.name] = {
@@ -55,7 +62,12 @@ def _mesh_summary_digest(pose: GripPose | None = None) -> str:
                     "n_vertices": len(vertices),
                     "mean": np.round(vertices.mean(axis=0), 6).tolist(),
                 }
-    payload = json.dumps(summary, sort_keys=True, separators=(",", ":"))
+    return summary
+
+
+def _mesh_summary_digest(pose: GripPose | None = None) -> str:
+    """mesh summary digest."""
+    payload = json.dumps(_mesh_summary(pose), sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -123,6 +135,11 @@ def test_existing_grip_pose_and_grip_hand_mesh_outputs_unchanged() -> None:
     """test existing grip pose and grip hand mesh outputs unchanged."""
     legacy_pose = GripSpec.legacy().to_grip_pose()
     assert legacy_pose == DEFAULT_GRIP_POSE
+    summary = _mesh_summary(legacy_pose)
+    overlap = summary["overlap"]
+    for hand_name, required in _REQUIRED_SHELLS_13997.items():
+        present = set(overlap[hand_name])
+        assert required <= present, (hand_name, sorted(required - present))
     assert _mesh_summary_digest(legacy_pose) == _GOLDEN_MESH_DIGEST
     assert _mesh_summary_digest() == _GOLDEN_MESH_DIGEST
 
