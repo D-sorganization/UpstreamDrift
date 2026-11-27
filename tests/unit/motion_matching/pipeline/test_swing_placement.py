@@ -37,11 +37,13 @@ FRAMES = 24
 
 @pytest.fixture(scope="module")
 def spec() -> dict[str, Any]:
+    """The committed anthropometric driver spec."""
     return json.loads(SPEC.read_text(encoding="utf-8"))
 
 
 @pytest.fixture(scope="module")
 def truth(spec: dict[str, Any]) -> dict[str, tuple[str, tuple[float, float, float]]]:
+    """Marker attachments in that spec that have an offset."""
     return {
         label: (entry["body"], tuple(entry["offset_m"]))
         for label, entry in spec["marker_attachments"].items()
@@ -51,6 +53,7 @@ def truth(spec: dict[str, Any]) -> dict[str, tuple[str, tuple[float, float, floa
 
 @pytest.fixture(scope="module")
 def plant(spec: dict[str, Any]) -> Any:
+    """A MuJoCo plant built from the spec."""
     return get_plant("mujoco", spec)
 
 
@@ -65,6 +68,7 @@ def swing(plant: Any, truth: dict[str, Any]) -> tuple[np.ndarray, np.ndarray]:
 
 
 def _shifted(truth: dict[str, Any], by_m: float) -> dict[str, Any]:
+    """The true attachments, each offset moved by ``by_m``."""
     rng = np.random.default_rng(7)
     out = {}
     for label, (body, offset) in truth.items():
@@ -79,6 +83,7 @@ def _shifted(truth: dict[str, Any], by_m: float) -> dict[str, Any]:
 def test_segment_poses_carry_a_marker_to_where_the_model_has_it(
     plant, truth, swing
 ) -> None:
+    """Probe markers recover each segment's rotation and origin."""
     q, points = swing
     bodies = sorted({body for body, _ in truth.values()})
     rotations, origins = segment_poses(plant.create_ik, bodies, q)
@@ -96,6 +101,7 @@ def test_segment_poses_carry_a_marker_to_where_the_model_has_it(
 
 
 def test_misplaced_markers_return_to_their_segments(plant, truth, swing) -> None:
+    """A 20 mm shift is removed and the input attachments stay unchanged."""
     q, points = swing
     start = _shifted(truth, 0.02)
     before = json.dumps(start, sort_keys=True)
@@ -121,6 +127,7 @@ def test_misplaced_markers_return_to_their_segments(plant, truth, swing) -> None
 
 
 def test_markers_on_kept_segments_stay(plant, truth, swing) -> None:
+    """Clubhead markers stay put; markers on other segments move."""
     q, points = swing
     start = _shifted(truth, 0.02)
     placed, report = replaced_attachments(
@@ -143,6 +150,7 @@ def test_markers_on_kept_segments_stay(plant, truth, swing) -> None:
 
 
 def test_bad_poses_are_refused(plant, truth, swing) -> None:
+    """A pose array shorter than the marker frames is refused."""
     q, points = swing
     with pytest.raises(ValueError, match="frames"):
         replaced_attachments(
@@ -157,6 +165,7 @@ def test_bad_poses_are_refused(plant, truth, swing) -> None:
 
 
 def test_the_options_are_off_by_default_and_checked() -> None:
+    """Placement passes default to off and a negative count is refused."""
     parser = argparse.ArgumentParser()
     add_placement_arguments(parser)
     args = parser.parse_args([])

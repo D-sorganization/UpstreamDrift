@@ -46,6 +46,7 @@ _PROBES: tuple[tuple[str, Offset], ...] = (
 
 
 def _passes(value: str) -> int:
+    """Parse a placement-pass count that is zero or more."""
     number = int(value)
     if number < 0:
         raise argparse.ArgumentTypeError("must be zero or more")
@@ -53,6 +54,7 @@ def _passes(value: str) -> int:
 
 
 def _move(value: str) -> float:
+    """Parse a non-negative maximum marker move in metres."""
     number = float(value)
     if not number >= 0.0:
         raise argparse.ArgumentTypeError("must be non-negative")
@@ -173,6 +175,7 @@ def replaced_attachments(
     total = max(float(frames.sum()), 1.0)
 
     def pooled(values: list[float]) -> float:
+        """Frame-weighted root-mean-square of the per-marker values."""
         return float(np.sqrt(np.nansum(frames * np.square(values)) / total))
 
     for label, entry in placed.items():

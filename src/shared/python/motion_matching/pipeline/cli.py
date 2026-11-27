@@ -158,6 +158,7 @@ FOOT_SERIES_STRIDE = 6
 
 
 def _positive_int(value: str) -> int:
+    """Parse a positive integer for ``--mjx-iterations``."""
     try:
         val = int(value)
     except ValueError as e:
@@ -168,6 +169,7 @@ def _positive_int(value: str) -> int:
 
 
 def _nonnegative_float(value: str) -> float:
+    """Parse a non-negative finite weight."""
     try:
         val = float(value)
     except ValueError as e:
@@ -579,6 +581,7 @@ def _validate_scaled_spec(
     scaled_spec: dict[str, Any],
     upper_base: dict[str, Any],
 ) -> None:
+    """Validate a scaled spec unless the run is anthropometric or already unqualified."""
     if not args.anthropometric and "unqualified" not in str(
         base_spec.get("upper_body_qualification", "")
     ):
@@ -696,6 +699,7 @@ def _calibrate_and_scale(
 
 class _PinkFrameFit:
     def __init__(self, closure_error_m: float, marker_rms_m: float) -> None:
+        """Record one Pink frame's closure error and marker RMS."""
         self.closure_error_m = float(closure_error_m)
         self.marker_rms_m = float(marker_rms_m)
 
@@ -967,6 +971,7 @@ def _render_playbacks(
 
 
 def _write_receipt(out_dir: Path, receipt: dict[str, Any]) -> None:
+    """Write the pipeline receipt as JSON."""
     (out_dir / "receipt.json").write_text(
         json.dumps(receipt, indent=2, default=float) + "\n", encoding="utf-8"
     )
