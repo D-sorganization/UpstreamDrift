@@ -1473,10 +1473,13 @@
 {"path": "model_appearance/head_features.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/head_hair.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/head_mesh.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/head_morph.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/library.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/mesh_io.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/neck.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/pelvis_width.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/player_models.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/player_stature.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/schema.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/skinned_body.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/skinned_club_hands.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
@@ -2111,6 +2114,7 @@
 {"path": "optimization/_swing_models.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/_swing_objectives.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/_swing_reference.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
+{"path": "optimization/admission.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/applied_effort_audit.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/backend_registry.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}
 {"path": "optimization/batch_swing_optimizer.py", "classification": "ud-only", "package": "optimization", "spelling_only": false}

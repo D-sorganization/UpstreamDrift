@@ -108,6 +108,28 @@ def test_total_is_drift_plus_control(
     np.testing.assert_allclose(total, drift + control, rtol=1e-12, atol=1e-12)
 
 
+def test_zvcf_is_applied_control_and_closes_with_ztcf(
+    desktop_recorder: GenericPhysicsRecorder,
+    web_orchestrator: AnalysisOrchestrator,
+) -> None:
+    """Both dashboard surfaces expose the control part as ZVCF (#15711)."""
+    _, desktop_ztcf = desktop_recorder.get_counterfactual_series("ztcf")
+    _, desktop_zvcf = desktop_recorder.get_counterfactual_series("zvcf")
+    _, desktop_control = desktop_recorder.get_induced_acceleration_series("control")
+    _, desktop_total = desktop_recorder.get_induced_acceleration_series("total")
+
+    web_ztcf = np.asarray(web_orchestrator.compute_counterfactual("ztcf").values)
+    web_zvcf = np.asarray(web_orchestrator.compute_counterfactual("zvcf").values)
+    web_total = np.asarray(web_orchestrator.compute_counterfactual("total").values)
+
+    np.testing.assert_allclose(desktop_zvcf, desktop_control, rtol=1e-12, atol=1e-12)
+    np.testing.assert_allclose(
+        desktop_ztcf + desktop_zvcf, desktop_total, rtol=1e-12, atol=1e-12
+    )
+    np.testing.assert_allclose(web_zvcf, desktop_control, rtol=1e-12, atol=1e-12)
+    np.testing.assert_allclose(web_ztcf + web_zvcf, web_total, rtol=1e-12, atol=1e-12)
+
+
 def test_pendulum_engine_reports_all_kinds_supported() -> None:
     """Capability probe offers every kind for the full-surface pendulum."""
     engine = PendulumPhysicsEngine()
@@ -121,15 +143,16 @@ def test_capability_probe_is_conservative() -> None:
 
     class _Partial:
         def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
-            pass
+            """Accept the state without effect for this stub engine."""
 
         def set_control(self, u: np.ndarray) -> None:
-            pass
+            """Accept the control without effect for this stub engine."""
 
         def forward(self) -> None:
-            pass
+            """Advance nothing; this stub engine has no dynamics to run."""
 
         def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+            """Return a fixed two-element ZTCF vector."""
             return np.zeros(2)
 
         # compute_zvcf / drift / control intentionally missing

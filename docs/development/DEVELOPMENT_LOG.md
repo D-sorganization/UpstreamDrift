@@ -18,6 +18,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#15833 · Add Source-Attributed Legend Appearance Candidates
+
+- **State:** in_review
+- **Owner:** Codex
+- **Issue:** #15833
+- **Branch:** pr/15833-legends-profiles
+- **PR:** #15840
+- **Paths:** player appearance catalog, profile accessor and contract tests; morphology reference
+- **Started:** 2026-11-26
+- **Last verified:** 2026-11-26 (`48bfb067a5`; 9 focused tests, Ruff/code quality and LaTeX compile passed)
+- **Summary:** Add five source-attributed, stylized golfer profiles; preserve measurement conflicts and visual limits.
+- **Next step:** Merge the profile PR; final delivery #15836 adds Snead's straw_hat after #15838 lands.
+
 ### DL-#15115 · Local API App Applies the Shared Allowed-Host Policy
 
 - **State:** in_review
