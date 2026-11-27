@@ -86,6 +86,10 @@ from src.api.routes import (  # noqa: E402
 )
 from src.api.services.chat_service import ChatService  # noqa: E402
 from src.api.task_manager import TaskManager  # noqa: E402
+from src.api.utils.lazy_services import (  # noqa: E402
+    LazyServiceProxy as _LazyServiceProxy,
+    UnavailableEngineManager as _UnavailableEngineManager,
+)
 from src.api.utils.path_validation import (  # noqa: E402
     LOGO_SUFFIXES,
     resolve_file_within,
@@ -117,51 +121,6 @@ def _raise_if_diagnostics_disabled() -> None:
     """Hide development diagnostics from production deployments."""
     if is_production():
         raise HTTPException(status_code=404)
-
-
-class _LazyServiceProxy:
-    """Lazily instantiate heavy API services on first attribute access."""
-
-    def __init__(self, factory: Callable[[], Any]) -> None:
-        """init."""
-        self._factory = factory
-        self._service: Any | None = None
-
-    def _resolve(self) -> Any:
-        """resolve."""
-        if self._service is None:
-            self._service = self._factory()
-        return self._service
-
-    def __getattr__(self, name: str) -> Any:
-        """getattr."""
-        return getattr(self._resolve(), name)
-
-
-class _UnavailableEngineManager:
-    """Engine manager fallback used when optional engine imports are unavailable."""
-
-    def __init__(self, reason: str) -> None:
-        """init."""
-        self.reason = reason
-
-    def get_available_engines(self) -> list[Any]:
-        """get available engines."""
-        return []
-
-    def get_current_engine(self) -> None:
-        """get current engine."""
-        return None
-
-    def get_engine_status(self, _engine_type: Any) -> Any:
-        """get engine status."""
-        from src.shared.python.engine_core.engine_registry import EngineStatus
-
-        return EngineStatus.UNAVAILABLE
-
-    def get_active_physics_engine(self) -> None:
-        """get active physics engine."""
-        return None
 
 
 def _load_engine_manager_class() -> Any:
