@@ -172,6 +172,29 @@ def head_proportions(
     return out
 
 
+def _feature_mesh_parts(
+    skin: Mesh, length_m: float, settings: HeadSettings
+) -> list[tuple[str, Mesh, str]]:
+    """Build face-feature meshes from the scaled skin and authored settings."""
+    marks = head_features.load_face_landmarks()
+    if settings.morph.brow:
+        amount = settings.morph.brow
+        marks = replace(
+            marks,
+            brow_tilt=marks.brow_tilt - 0.6 * amount,
+            brow_arch=marks.brow_arch - 0.3 * amount,
+            brow_half=(
+                marks.brow_half[0],
+                marks.brow_half[1] * (1 - 0.3 * amount),
+                marks.brow_half[2] * (1 + 0.5 * amount),
+            ),
+        )
+    return [
+        (name, Mesh(mesh.vertices * length_m, mesh.faces), role)
+        for name, mesh, role in head_features.face_parts(skin, marks)
+    ]
+
+
 def build_mesh_parts(
     length_m: float, headwear: str, settings: HeadSettings | None = None
 ) -> list[tuple[str, Mesh, str]]:
@@ -198,23 +221,7 @@ def build_mesh_parts(
         ("skin_mesh", Mesh(asset.skin.vertices * length_m, asset.skin.faces), "skin")
     ]
     if settings is not None:
-        marks = head_features.load_face_landmarks()
-        if settings.morph.brow:
-            amount = settings.morph.brow
-            marks = replace(
-                marks,
-                brow_tilt=marks.brow_tilt - 0.6 * amount,
-                brow_arch=marks.brow_arch - 0.3 * amount,
-                brow_half=(
-                    marks.brow_half[0],
-                    marks.brow_half[1] * (1 - 0.3 * amount),
-                    marks.brow_half[2] * (1 + 0.5 * amount),
-                ),
-            )
-        out += [
-            (name, Mesh(m.vertices * length_m, m.faces), role)
-            for name, m, role in head_features.face_parts(asset.skin, marks)
-        ]
+        out += _feature_mesh_parts(asset.skin, length_m, settings)
     straw = settings is not None and settings.cap_style == "straw_hat"
     flat_capped = settings is not None and settings.cap_style == "flat_cap"
     capped = (

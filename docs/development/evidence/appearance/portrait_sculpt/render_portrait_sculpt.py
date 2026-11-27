@@ -41,7 +41,6 @@ def main() -> None:
         spec_bytes = archive.read(prefix + "model.json")
         source_appearance = json.loads(archive.read(prefix + "model.appearance.json"))
         source_xml = archive.read(prefix + "model.xml").decode("utf-8")
-
     out.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="portrait-sculpt-") as temporary:
         work = Path(temporary)
