@@ -242,7 +242,11 @@ def build_mesh_parts(
     if settings is not None:
         out += _feature_mesh_parts(asset.skin, length_m, settings)
     straw = settings is not None and settings.cap_style == "straw_hat"
-    flat_capped = settings is not None and settings.cap_style == "flat_cap"
+    flat_capped = settings is not None and settings.cap_style in (
+        "flat_cap",
+        "newsboy_cap",
+    )
+    newsboy = settings is not None and settings.cap_style == "newsboy_cap"
     capped = (
         straw
         or flat_capped
@@ -251,6 +255,8 @@ def build_mesh_parts(
     cap_crop = (
         head_cap.straw_hat_crop()
         if straw
+        else head_cap.newsboy_cap_crop()
+        if newsboy
         else head_cap.flat_cap_crop()
         if flat_capped
         else head_cap.CapCrop()
@@ -283,7 +289,11 @@ def build_mesh_parts(
     elif settings is not None and capped:
         out += [
             (name, Mesh(m.vertices * length_m, m.faces), "cap")
-            for name, m in head_cap.build_cap(asset.skin, settings.cap_brim, cap_crop)
+            for name, m in (
+                head_cap.build_period_cap(asset.skin, settings.cap_brim, cap_crop)
+                if flat_capped
+                else head_cap.build_cap(asset.skin, settings.cap_brim, cap_crop)
+            )
         ]
     if settings is not None:
         if settings.age_detail:
