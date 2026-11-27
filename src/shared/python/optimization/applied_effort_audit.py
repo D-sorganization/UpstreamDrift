@@ -27,6 +27,7 @@ class AppliedEffortAudit:
 
 
 def _real_array(value: ArrayLike, name: str) -> NDArray[np.float64]:
+    """Convert finite real numeric input to a float64 array with a named error."""
     array = np.asarray(value)
     if array.dtype.kind not in "iuf":
         raise ValueError(f"{name} must contain real numeric values")
