@@ -26,6 +26,7 @@ def _record() -> dict[str, Any]:
 
 
 def test_wp0_record_pins_the_issue_reported_baseline() -> None:
+    """Pin the exact field values from the issue-reported WP-0 baseline."""
     record = _record()
 
     assert record["source_issue"] == 15805
@@ -53,6 +54,7 @@ def test_wp0_record_pins_the_issue_reported_baseline() -> None:
 
 
 def test_missing_render_capture_keeps_wp0_blocked() -> None:
+    """Confirm that missing camera/video captures keep WP-0 status blocked."""
     record = _record()
 
     assert record["status"] == "blocked_missing_render_capture"
