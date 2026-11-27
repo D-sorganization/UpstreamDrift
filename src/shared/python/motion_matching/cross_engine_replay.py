@@ -15,7 +15,7 @@ import json
 import logging
 import math
 from pathlib import Path
-from typing import Any, TypeAlias
+from typing import Any, TypeAlias, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -291,7 +291,9 @@ class CrossEngineComparisonReport:
                     "qualified" if outcome.status.upper() == "PASSED" else "rejected"
                 ),
                 comparison_class=comp_class,
-                shared_metrics=metrics,
+                # as_dict() maps non-finite metrics to None (#14756 P7); the
+                # row forwards them unchanged, so only the annotation differs.
+                shared_metrics=cast("dict[str, float] | None", metrics),
                 pointwise_differences=pt_diffs,
                 assumptions={
                     "max_closure_residual_m": outcome.max_closure_residual_m,
@@ -391,7 +393,13 @@ def _compute_pairwise_diffs(
             dict_b = b.shared_metrics.as_dict()
             pair_diffs: dict[str, float] = {}
             for k in metric_keys:
-                diff_val = abs(dict_a[k] - dict_b[k])
+                val_a, val_b = dict_a[k], dict_b[k]
+                if val_a is None or val_b is None:
+                    raise ValueError(
+                        f"Metric {k!r} is unavailable for {pair_key}; "
+                        "cannot compute a pairwise difference"
+                    )
+                diff_val = abs(val_a - val_b)
                 pair_diffs[f"{k}_diff"] = diff_val
                 if "marker" in k:
                     max_diff = max(max_diff, diff_val)

@@ -420,7 +420,9 @@ forward-dynamics matching. Design reference:
   for the face normal and centre; adds `head_face` / `face_lines` parts that
   follow the head on a chain shaft. OpenSim STL assets keep three parts.
 - `grip_pose` — the one two-hand grip definition (`DEFAULT_GRIP_POSE`, lead above trail, positions mirroring the spec `GripInterface`, spacing, V angles, overlap/interlock/ten-finger, `HAND_GRIP_ANCHOR_IN_HAND_M`). Engines import it; never keep per-engine hand offsets. Residual series: `grip_contact.closure_series` (`GripClosureSeries`, unavailable is `None`, never zero); report: `python3 -m scripts.grip_closure_report`.
-- `grip_hand_mesh` / `grip_hands` — curled-finger hand meshes wrapped on the grip
+- `grip_hand_mesh` / `grip_hands` — **deprecated capsule hands** (#15648; the current
+  model is the skinned human pair, `skinned_club_hands`, see
+  [Golfer Model Versions](../golfer_model_versions.md)) — curled-finger hand meshes wrapped on the grip
   (`build_grip_hand_mesh`, hand-grip frame) and their placement on a `ClubAssembly`
   grip in the club-body frame (`grip_hand_frame`, `grip_hand_meshes`,
   `assembly_meshes_with_hands`). Draw the hands on the club body with the club;

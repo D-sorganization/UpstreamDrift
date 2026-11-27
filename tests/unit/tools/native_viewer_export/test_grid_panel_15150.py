@@ -53,11 +53,10 @@ def test_grid_box_lies_in_the_anchor_tile_and_clears_the_edges() -> None:
         assert x1 < w and y1 < h, anchor
 
 
-def test_grid_panel_is_smaller_than_the_full_frame_panel_but_readable() -> None:
+def test_grid_panel_fits_one_tile_and_is_readable() -> None:
     panel = _panel()
-    big, small = panel.bbox(GRID), panel.bbox(GRID, grid=True)
-    assert (small[2] - small[0]) < (big[2] - big[0])
-    assert (small[3] - small[1]) < (big[3] - big[1])
+    x0, y0, x1, y1 = panel.bbox(GRID, grid=True)
+    assert x1 - x0 < GRID[1] // 2 and y1 - y0 < GRID[0] // 2
     assert panel._box(GRID, grid=True)[1] >= compositor.HUD_SIZE_PX
 
 
@@ -89,14 +88,12 @@ def test_draw_all_changes_only_pixels_inside_each_boxes() -> None:
 def test_grid_settings_are_validated() -> None:
     with pytest.raises(ValueError, match="grid_anchor"):
         replace(ft.DEFAULTS, grid_anchor="middle")
-    with pytest.raises(ValueError, match="grid_font_height_divisor"):
-        replace(ft.DEFAULTS, grid_font_height_divisor=0)
-    with pytest.raises(TypeError, match="grid_font_height_divisor"):
-        replace(ft.DEFAULTS, grid_font_height_divisor=90.5)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="grid_font_tile_fraction"):
+        replace(ft.DEFAULTS, grid_font_tile_fraction=1.5)
     with pytest.raises(ValueError, match="grid_min_font_px"):
         replace(ft.DEFAULTS, grid_min_font_px=0)
     raw = json.loads(factors.SETTINGS_PATH.read_text(encoding="utf-8"))
-    for key in ("grid_anchor", "grid_font_height_divisor", "grid_min_font_px"):
+    for key in ("grid_anchor", "grid_font_tile_fraction", "grid_min_font_px"):
         assert key in raw and key in raw["sources"]
 
 

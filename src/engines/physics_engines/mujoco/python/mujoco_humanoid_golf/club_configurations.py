@@ -8,6 +8,7 @@ from __future__ import annotations
 import functools
 import json
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, cast  # noqa: ICN003
 
 
@@ -432,34 +433,84 @@ class ClubDatabase:
         return ClubSpecification(name=name, club_type=club_type, **defaults)
 
 
-# Shaft flexibility characteristics
+# Shaft flexibility characteristics. The cpm values and their sources live in
+# ``src/config/shaft_flex_frequencies.json`` (#15150 C19), never as literals.
+_SHAFT_FLEX_SETTINGS_PATH = (
+    Path(__file__).resolve().parents[5] / "config" / "shaft_flex_frequencies.json"
+)
+
+
+def load_shaft_flex_settings(path: Path = _SHAFT_FLEX_SETTINGS_PATH) -> dict[str, Any]:
+    """Load and validate the shaft flex frequency settings.
+
+    Raises:
+        ValueError: if a cpm value or the length slope is not positive, or the
+            flex ratings are not strictly increasing in cpm.
+    """
+    settings: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
+    cpm = settings["flex_cpm"]
+    if any(float(v) <= 0.0 for v in cpm.values()):
+        raise ValueError(f"flex_cpm must be positive, got {cpm}")
+    values = list(cpm.values())
+    if values != sorted(set(values)):
+        raise ValueError(f"flex_cpm must increase strictly with flex, got {cpm}")
+    if float(settings["length_slope_cpm_per_in"]) <= 0.0:
+        raise ValueError("length_slope_cpm_per_in must be positive")
+    if float(settings["reference_club_length_in"]) <= 0.0:
+        raise ValueError("reference_club_length_in must be positive")
+    return settings
+
+
+SHAFT_FLEX_SETTINGS: dict[str, Any] = load_shaft_flex_settings()
+_FLEX_CPM: dict[str, float] = SHAFT_FLEX_SETTINGS["flex_cpm"]
+
 SHAFT_FLEX_DATA: dict[str, dict[str, Any]] = {
     "Ladies": {
         "swing_speed_mph": (60, 70),
-        "stiffness_cpm": 220,
+        "stiffness_cpm": _FLEX_CPM["Ladies"],
         "description": "Most flexible, for slower swing speeds",
     },
     "Senior": {
         "swing_speed_mph": (70, 80),
-        "stiffness_cpm": 240,
+        "stiffness_cpm": _FLEX_CPM["Senior"],
         "description": "Flexible, for moderate swing speeds",
     },
     "Regular": {
         "swing_speed_mph": (80, 95),
-        "stiffness_cpm": 260,
+        "stiffness_cpm": _FLEX_CPM["Regular"],
         "description": "Standard flex for average swing speeds",
     },
     "Stiff": {
         "swing_speed_mph": (95, 105),
-        "stiffness_cpm": 280,
+        "stiffness_cpm": _FLEX_CPM["Stiff"],
         "description": "Stiff flex for fast swing speeds",
     },
     "X-Stiff": {
         "swing_speed_mph": (105, 125),
-        "stiffness_cpm": 300,
+        "stiffness_cpm": _FLEX_CPM["X-Stiff"],
         "description": "Extra stiff for very fast swing speeds",
     },
 }
+
+
+def flex_cpm_at_length(flex: str, length_in: float) -> float:
+    """Club frequency (cpm) of ``flex`` at ``length_in``, from the settings.
+
+    The table is for the reference driver length; a longer club reads softer by
+    ``length_slope_cpm_per_in`` per inch (cited in the settings file).
+
+    Raises:
+        ValueError: for an unknown flex or a non-positive length.
+    """
+    if flex not in SHAFT_FLEX_DATA:
+        raise ValueError(f"unknown flex {flex!r}; known {sorted(SHAFT_FLEX_DATA)}")
+    if length_in <= 0.0:
+        raise ValueError(f"length_in must be positive, got {length_in}")
+    slope = float(SHAFT_FLEX_SETTINGS["length_slope_cpm_per_in"])
+    reference = float(SHAFT_FLEX_SETTINGS["reference_club_length_in"])
+    return float(SHAFT_FLEX_DATA[flex]["stiffness_cpm"]) - slope * (
+        length_in - reference
+    )
 
 
 @functools.lru_cache(maxsize=256)

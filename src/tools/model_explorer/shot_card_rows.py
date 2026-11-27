@@ -106,6 +106,8 @@ class ShotSummary:
     apex_m: float | None = None
     side_m: float | None = None
     flight_reason: str | None = None
+    #: swing time (s) the club speed is read at: where the face meets the ball
+    impact_time_s: float | None = None
 
 
 @dataclass(frozen=True)
@@ -127,11 +129,14 @@ def club_label(spec_bytes: bytes, settings: ShotCardSettings) -> str:
     return str(settings.club_labels.get(name, name or settings.default_club))
 
 
-def summary_from_shot(panel: Any, flight: Any) -> ShotSummary:
+def summary_from_shot(
+    panel: Any, flight: Any, impact_time_s: float | None = None
+) -> ShotSummary:
     """Summary of an exporter factors ``panel`` and ``FlightPlayback``.
 
     Either may be ``None``; a flight without a path gives its status as the
-    ``flight_reason``. The card's club speed is normalized to mph before
+    ``flight_reason``. The summary's ``impact_time_s`` is the flight's launch
+    instant (where the face meets the ball), else the given ``impact_time_s``. The card's club speed is normalized to mph before
     building the summary, regardless of the exporter's display units.
     """
     none = "not computed"
@@ -145,6 +150,7 @@ def summary_from_shot(panel: Any, flight: Any) -> ShotSummary:
         none if panel is None else str(panel.status),
         verdict is None or bool(verdict.contact),
         **{name: rows.get(key) for name, key in _FACTOR_KEYS.items()},
+        impact_time_s=impact_time_s,
     )
     if flight is None or flight.path_m is None:
         return replace(base, flight_reason=none if flight is None else flight.status)
@@ -159,6 +165,7 @@ def summary_from_shot(panel: Any, flight: Any) -> ShotSummary:
         total_m=None if flight.rollout is None else flight.rollout.total_m,
         apex_m=flight.apex_m,
         side_m=flight.lateral_m if aimed is None else aimed,
+        impact_time_s=float(flight.impact_time_s),
     )
 
 
@@ -189,7 +196,10 @@ def evaluate_swing(swing: Any) -> ShotSummary:
     panel, export = factors.factors_for_export(swing, export)
     shown = core.ClipOverlays(factors=panel)
     shown = flight_tracer.attach_flight(shown, swing, export)
-    return summary_from_shot(shown.factors, shown.flight)
+    when = export.impact_time_s
+    if when is None:
+        when = swing.impact_time_s
+    return summary_from_shot(shown.factors, shown.flight, when)
 
 
 def summary_for_path(path: str | Path) -> ShotSummary:

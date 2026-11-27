@@ -179,24 +179,40 @@ def hud_line_boxes(
     return [text_box(t, xy, size) for t, xy in zip(lines, origins, strict=True)]
 
 
-def wrap_hud_line(text: str, width_px: int, size: int) -> list[str]:
-    """``text`` as rows that fit a frame ``width_px`` wide, split at ``HUD_SEPARATOR``.
-
-    Rows are filled in order and joined by the separator they were split at, so
-    joining the rows gives ``text`` back. An entry wider than the frame cannot
-    be split and keeps a row of its own.
-    """
+def _fits(text: str, width_px: int, size: int) -> bool:
     margin = HUD_LAYOUT.edge_margin_px
+    return text_box(text, (margin, 0), size)[2] <= width_px - margin
+
+
+def _fill(parts: list[str], sep: str, width_px: int, size: int) -> list[str]:
+    """Greedily join ``parts`` with ``sep`` into rows that fit ``width_px``."""
     rows: list[str] = []
     row = ""
-    for entry in text.split(HUD_SEPARATOR):
-        longer = entry if not row else row + HUD_SEPARATOR + entry
-        if row and text_box(longer, (margin, 0), size)[2] > width_px - margin:
+    for part in parts:
+        longer = part if not row else row + sep + part
+        if row and not _fits(longer, width_px, size):
             rows.append(row)
-            row = entry
+            row = part
         else:
             row = longer
     return [*rows, row]
+
+
+def wrap_hud_line(text: str, width_px: int, size: int) -> list[str]:
+    """``text`` as rows that fit a frame ``width_px`` wide, split at ``HUD_SEPARATOR``.
+
+    Rows are filled in order and joined by the separator they were split at.
+    An entry wider than the frame on its own is broken at spaces instead of
+    running off the edge; a single word wider than the frame keeps its own
+    row. Postcondition: the rows hold the words of ``text`` in order.
+    """
+    rows: list[str] = []
+    for row in _fill(text.split(HUD_SEPARATOR), HUD_SEPARATOR, width_px, size):
+        if _fits(row, width_px, size):
+            rows.append(row)
+        else:
+            rows.extend(_fill(row.split(" "), " ", width_px, size))
+    return rows
 
 
 def draw_label(
@@ -443,12 +459,27 @@ def text_panel_box(
 
 class GridLayout(NamedTuple):
     """Placement of a text panel in the composed 2x2 grid (see ``grid_anchor``,
-    ``grid_font_height_divisor`` and ``grid_min_font_px`` in
+    ``grid_font_tile_fraction`` and ``grid_min_font_px`` in
     ``impact_factors_settings.json``)."""
 
     anchor: str
-    font_height_divisor: int
+    font_tile_fraction: float
     min_font_px: int
+
+
+def grid_font_px(tile_h: int, fraction: float, floor_px: int) -> int:
+    """Font size of grid panel text: ``fraction`` of the tile height, at least
+    ``floor_px``.
+
+    Raises ``ValueError`` unless ``tile_h`` and ``floor_px`` are positive and
+    ``fraction`` lies in (0, 1]. Postcondition: the size grows with the tile
+    and is never below ``floor_px``.
+    """
+    if tile_h < 1 or floor_px < 1:
+        raise ValueError("tile_h and floor_px must be positive")
+    if not (math.isfinite(fraction) and 0.0 < fraction <= 1.0):
+        raise ValueError("fraction must lie in (0, 1]")
+    return max(int(floor_px), int(tile_h * fraction))
 
 
 def grid_text_panel_box(
@@ -459,13 +490,13 @@ def grid_text_panel_box(
 ) -> tuple[tuple[int, int, int, int], int]:
     """Pixel box and font size of a panel in the ``layout.anchor`` tile corner.
 
-    The font is the larger of ``layout.min_font_px`` and the frame height over
-    ``layout.font_height_divisor``; it shrinks to the minimum until the box
-    fits inside its tile, and the box is clipped to that tile.
+    The font is :func:`grid_font_px` of the tile height; it shrinks to
+    ``layout.min_font_px`` until the box fits inside its tile, and the box is
+    clipped to that tile.
     """
     height, width = int(shape[0]), int(shape[1])
     tile_w, tile_h = width // 2, height // 2
-    top = max(layout.min_font_px, height // layout.font_height_divisor)
+    top = grid_font_px(tile_h, layout.font_tile_fraction, layout.min_font_px)
     for size in range(top, layout.min_font_px - 1, -1):
         x0, y0, x1, y1 = text_panel_box(shape, title, lines, "right", size)[0]
         margin = width - x1
@@ -529,10 +560,13 @@ def draw_text_panel(
     lines: Sequence[tuple[str, Cells, bool]],
     alpha: float = _CARD_ALPHA,
     label_colours: Sequence[tuple[int, int, int] | None] = (),
+    swatches: Sequence[tuple[int, int, int]] = (),
 ) -> Image8:
     """Copy of ``img`` with a darkened panel in ``box``: ``title``, then one
     ``(label, value, dimmed)`` line each. Only pixels inside ``box`` change.
-    A value of cells is drawn as columns; ``label_colours`` colour the labels."""
+    A value of cells is drawn as columns; ``label_colours`` colour the labels;
+    ``swatches`` draw a solid block of that colour at the start of each line
+    (the label then needs :data:`SWATCH_INDENT` in front to clear it)."""
     _check_image(img)
     (x0, y0, x1, y1), out = box, img.copy()
     region = out[y0:y1, x0:x1].astype(np.float32) * (1.0 - alpha)
@@ -549,6 +583,9 @@ def draw_text_panel(
         y = pad + i * line_h
         colour = _CARD_GREY if unavailable else _WHITE
         colour = next(iter(label_colours[i - 1 : i]), None) or colour
+        swatch = next(iter(swatches[i - 1 : i]), None)
+        if swatch is not None:
+            draw.rectangle((pad, y + 3, pad + size - 2, y + size), fill=tuple(swatch))
         draw.text((pad, y), label, font=font, fill=colour)
         for cell, right in zip(reversed(_cells(value)), rights, strict=False):
             draw.text(
@@ -559,6 +596,46 @@ def draw_text_panel(
             )
     out[y0:y1, x0:x1] = np.asarray(pil)
     return out
+
+
+COLOUR_KEY_TITLE = "Colour Key"
+#: room in front of a key row for its colour swatch
+SWATCH_INDENT = "      "
+#: one colour key row: its text and the 8-bit RGB it is drawn in
+KeyEntry = tuple[str, tuple[int, int, int]]
+
+
+def _key_lines(entries: Sequence[KeyEntry]) -> list[tuple[str, Cells, bool]]:
+    for _, rgb in entries:
+        if len(rgb) != 3 or not all(isinstance(c, int) and 0 <= c <= 255 for c in rgb):
+            raise ValueError(f"key colour must be three 0-255 integers, got {rgb!r}")
+    return [(SWATCH_INDENT + text, "", False) for text, _ in entries]
+
+
+def colour_key_box(
+    shape: tuple[int, ...], entries: Sequence[KeyEntry]
+) -> tuple[int, int, int, int]:
+    """Pixel box of the colour key: top left, under the view label, clear of
+    the impact card on the right (#15150 Track Z, Z3)."""
+    return text_panel_box(shape, COLOUR_KEY_TITLE, _key_lines(entries), "left")[0]
+
+
+def draw_colour_key(img: Image8, entries: Sequence[KeyEntry]) -> Image8:
+    """Copy of ``img`` with a panel naming each arrow colour: a solid swatch
+    of the colour, then the name in white (dark colours stay readable).
+
+    An empty key draws nothing. Only pixels in :func:`colour_key_box` change.
+
+    Raises:
+        ValueError: a colour is not three integers in 0-255.
+    """
+    _check_image(img)
+    lines = _key_lines(entries)
+    if not lines:
+        return img.copy()
+    box, size = text_panel_box(img.shape, COLOUR_KEY_TITLE, lines, "left")
+    colours = [rgb for _, rgb in entries]
+    return draw_text_panel(img, box, size, COLOUR_KEY_TITLE, lines, swatches=colours)
 
 
 def draw_hud(img: Image8, hud: HudInfo, *, size: int = HUD_SIZE_PX) -> Image8:

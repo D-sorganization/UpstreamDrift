@@ -167,3 +167,22 @@ def _path(end_azimuth_deg: float, reverse: bool = False) -> np.ndarray:
 def test_invalid_reason_branches(path, expected):
     reason = _invalid_reason(path)
     assert (reason == "") if expected == "" else (expected in reason)
+
+
+def test_driver_heel_strike_gear_uses_the_rigid_contact_law():
+    """The shot card's gear tilt is the rigid-contact law's, about half the legacy one."""
+    from src.shared.python.physics.impact_model.types import ImpactParameters
+    from src.shared.python.physics.swing_ball_flight_pipeline import (
+        SwingBallFlightPipeline,
+    )
+
+    series = _series(speed=49.2, loft_deg=10.5)
+    heel = (-0.0034, 0.0014)
+    centred = flight_for_impact(series, 1, FRAME, "driver").spin_axis_deg
+    rigid = flight_for_impact(series, 1, FRAME, "driver", None, heel).spin_axis_deg
+    legacy_run = SwingBallFlightPipeline(impact_params=ImpactParameters()).run(
+        swing_state_from_series(series, 1, FRAME, None, heel), club="driver"
+    )
+    legacy = spin_axis_tilt_deg(legacy_run.launch_conditions.spin_axis)
+    assert rigid > centred  # heel strike tilts toward a fade
+    assert 0.3 < (rigid - centred) / (legacy - centred) < 0.7

@@ -14,17 +14,16 @@ from __future__ import annotations
 import argparse
 import importlib
 import json
-import os
 import shlex
 from functools import cache
 from pathlib import Path
 from typing import Any, NoReturn
 
 from src.config.capability_state import VALID_MATURITY_LEVELS
+from src.sim_run.remote_paths import contained_below, resolve_roots
 from src.tools.native_viewer_export.cli import build_parser, build_settings
 
 _SETTINGS_PATH = Path(__file__).with_name("request_schema_settings.json")
-_REPO_ROOT = Path(__file__).resolve().parents[3]
 EXPORT_STAGE = "export"
 
 
@@ -179,14 +178,7 @@ def describe(request: dict[str, Any] | None = None) -> dict[str, Any]:
 
 def allowed_roots() -> tuple[tuple[Path, ...], Path]:
     """Resolved input roots and output root (environment over settings)."""
-    roots = load_schema_settings()["roots"]
-    env_inputs = os.environ.get(roots["input_roots_env"], "")
-    inputs = (
-        env_inputs.split(os.pathsep) if env_inputs else roots["default_input_roots"]
-    )
-    output = os.environ.get(roots["output_root_env"]) or roots["default_output_root"]
-    resolve = lambda p: (_REPO_ROOT / p).resolve()  # noqa: E731 - absolute p wins
-    return tuple(resolve(p) for p in inputs if p), resolve(output)
+    return resolve_roots(load_schema_settings()["roots"])
 
 
 def contained_path(value: Any, *, output: bool) -> str:
@@ -196,15 +188,10 @@ def contained_path(value: Any, *, output: bool) -> str:
         TypeError: ``value`` is not a string.
         ValueError: the resolved path leaves every allowed root.
     """
-    if not isinstance(value, str) or not value:
-        raise TypeError("path options take a non-empty string")
     inputs, out_root = allowed_roots()
-    for base in (out_root,) if output else inputs:
-        resolved = (base / value).resolve()
-        if resolved.is_relative_to(base):
-            return str(resolved)
-    where = "output root" if output else "input roots"
-    raise ValueError(f"path {value!r} is outside the allowed {where}")
+    if output:
+        return str(contained_below(value, (out_root,), "output root"))
+    return str(contained_below(value, inputs, "input roots"))
 
 
 def _argv_for(action: argparse.Action, value: Any) -> list[str]:

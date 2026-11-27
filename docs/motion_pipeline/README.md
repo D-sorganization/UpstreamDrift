@@ -67,5 +67,6 @@ the response's `pipeline` field alongside the recording.
 - [Canonical Observations](canonical_observations.md) — Multi-camera markerless keypoints, calibration, and confidence schema
 - [Pose2Sim Ingestion](pose2sim.md) — Local multi-camera Pose2Sim outputs to canonical CIR observations
 - [Troubleshooting](troubleshooting.md) — Common failure modes and fixes
+- [Forces and Torques for a New Best Match](kinetic_match.md) — Kinetic match: joint torques, ground and hand-on-club forces for any kinematic best match
 - [Architecture ADR](../adr/0007-motion-pipeline-architecture.md) — Design decisions and alternatives
 - [Biomech Workspace Setup](../architecture/biomech_workspace.md) — Wire up the five sibling biomechanics repos as the source of truth for models (ADR-0014)

@@ -335,12 +335,12 @@ def test_torsion_matches_saint_venant() -> None:
     assert rel(twist, theory) < BANDS["torsion_rel_error_default_links"]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="isotropic GJ = E I / (1 + nu) gives 2.29 deg under 1 ft lbf over the "
-    "5 in clamp span (Stiff); band 2.5-7 deg (measured #15150)",
-)
 def test_torque_rating_is_in_the_published_driver_range() -> None:
+    """Isotropic GJ = E I / (1 + nu) gives 2.70 deg under 1 ft lbf (Stiff).
+
+    It was 2.29 deg (an xfail) at the former 280 cpm Stiff; the cited 258 cpm
+    Stiff (#15150 C19) lowers the calibrated modulus and lands inside the band.
+    """
     _, twist_rad = beam_tip_load(cpm_clamp_club(CLUB), "Stiff")
     low, high = BANDS["torque_rating_deg"]
     assert low <= np.degrees(twist_rad) <= high

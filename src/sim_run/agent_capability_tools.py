@@ -12,12 +12,14 @@ from .store import SimulationRunStore
 ToolHandler = Callable[[dict[str, Any]], dict[str, Any]]
 AuthCheck = Callable[[Any], None]
 
-#: MCP tool name -> capability id of the native viewer exporter (#15150 G8).
-NATIVE_EXPORT_TOOLS: dict[str, CapabilityId] = {
+#: MCP tool name -> capability id of the request tools: native export (#15150
+#: G8) and kinetic match (D10).
+REQUEST_CAPABILITY_TOOLS: dict[str, CapabilityId] = {
     "native_export_describe": "native_export_describe",
     "native_export_validate": "native_export_validate",
     "native_export_run": "native_export_run",
     "native_export_status": "native_export_status",
+    "kinetic_match": "kinetic_match",
 }
 
 
@@ -98,6 +100,12 @@ def agent_capability_tool_specs() -> list[dict[str, Any]]:
             "State of a native export job (request.job_id): queued, running, "
             "succeeded with the clip manifest, or failed with the error.",
         ),
+        _request_tool(
+            "kinetic_match",
+            "Forces and torques for a saved kinematic bundle (request.bundle, "
+            "request.out, optional request.shaft_source): writes the bundle with "
+            "efforts and returns the receipt's verdict, reasons and peaks.",
+        ),
     ]
 
 
@@ -135,6 +143,6 @@ def agent_capability_tool_handlers(
         "run_golf_simulator_golden_shot": _golf,
         **{
             name: _capability_handler(cap, check_auth, store)
-            for name, cap in NATIVE_EXPORT_TOOLS.items()
+            for name, cap in REQUEST_CAPABILITY_TOOLS.items()
         },
     }
